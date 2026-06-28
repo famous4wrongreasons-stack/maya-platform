@@ -1,0 +1,7 @@
+title = "maya-platform-gitleaks"
+
+[[allowlists]]
+description = "Client-side VAPID public key required for Web Push subscriptions"
+regexes = [
+  '''var __ME_VAPID = '[A-Za-z0-9_-]+';''',
+]
