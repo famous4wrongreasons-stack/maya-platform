@@ -20454,18 +20454,18 @@ function ATeamChat() {
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
   const bubbleTail = (mine, fill) => React.createElement('svg', {
     key: 'tail',
-    width: 15,
-    height: 13,
-    viewBox: '0 0 15 13',
+    width: 24,
+    height: 11,
+    viewBox: '0 0 24 11',
     style: Object.assign({
       position: 'absolute',
-      bottom: -3,
+      bottom: -2,
       pointerEvents: 'none',
       zIndex: 0,
       transform: mine ? 'none' : 'scaleX(-1)'
-    }, mine ? { right: -5 } : { left: -5 })
+    }, mine ? { right: -9 } : { left: -9 })
   }, React.createElement('path', {
-    d: 'M0.8 0.8C2.7 6 7.1 9.7 14.1 10.4C10.3 13 4.7 11.7 2.3 7.6C1.2 5.6 0.5 2.9 0.8 0.8Z',
+    d: 'M0.6 0.8C5.1 5.8 12.8 8.8 23.4 7.8C18.2 11.2 9.7 11.1 4.2 6.9C2.4 5.5 1.1 2.9 0.6 0.8Z',
     fill: fill
   }));
 
