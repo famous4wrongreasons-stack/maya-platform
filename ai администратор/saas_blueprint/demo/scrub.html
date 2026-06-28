@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aura — scroll demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#f4f1ea;font-family:'Manrope',-apple-system,sans-serif;overflow-x:hidden}
+.scrub{height:360vh;position:relative}
+.sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#000}
+#seq{position:absolute;inset:0;display:block}
+.ovl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:24px}
+.ovl h2{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(32px,6.5vw,78px);letter-spacing:-.03em;line-height:1.02;text-shadow:0 6px 40px rgba(0,0,0,.7)}
+.hint{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);color:#b9b4aa;font-size:12px;letter-spacing:.16em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:7px;animation:bob 2s ease-in-out infinite;z-index:5}
+@keyframes bob{50%{transform:translateX(-50%) translateY(7px)}}
+.after{min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;color:#8d8a82;font-size:16px}
+.loader{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#8d8a82;font-size:14px;letter-spacing:.1em;z-index:20;transition:opacity .6s}
+.bar{position:fixed;top:0;left:0;height:2px;background:#f4f1ea;width:0;z-index:10}
+</style>
+</head>
+<body>
+<div class="loader" id="loader">Загрузка кадров…</div>
+<div class="bar" id="bar"></div>
+
+<section class="scrub">
+  <div class="sticky">
+    <canvas id="seq"></canvas>
+    <div class="ovl"><h2 id="ovlh">Один шаг —<br>взрыв цвета</h2></div>
+  </div>
+</section>
+<div class="hint" id="hint">листай вниз<span style="font-size:16px">↓</span></div>
+
+<section class="after">
+  <div>Так делается «дорогой» герой сайта.<br>Прокрути вверх — кадры идут назад. Управляешь скоростью сам.</div>
+</section>
+
+<script>
+var N=121,cv=document.getElementById('seq'),ctx=cv.getContext('2d');
+var imgs=[],loaded=0,cur=-1,DPR=Math.min(devicePixelRatio||1,2);
+function pad(n){return String(n).padStart(3,'0');}
+function size(){cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';draw(cur<0?0:cur,true);}
+function draw(i,force){
+  var im=imgs[i];if(!im||!im.complete||!im.naturalWidth)return;
+  if(i===cur&&!force)return;cur=i;
+  var cw=cv.width,ch=cv.height,iw=im.naturalWidth,ih=im.naturalHeight;
+  var s=Math.max(cw/iw,ch/ih),w=iw*s,h=ih*s;
+  ctx.fillStyle='#000';ctx.fillRect(0,0,cw,ch);
+  ctx.drawImage(im,(cw-w)/2,(ch-h)/2,w,h);
+}
+for(var k=0;k<N;k++){(function(idx){var im=new Image();
+  im.onload=function(){loaded++;if(loaded===1)draw(0,true);
+    if(loaded>=N){var l=document.getElementById('loader');l.style.opacity=0;setTimeout(function(){l.style.display='none'},600);}};
+  im.src='frames/f_'+pad(idx+1)+'.jpg';imgs[idx]=im;})(k);}
+size();addEventListener('resize',size);
+var scrub=document.querySelector('.scrub');
+function onScroll(){
+  var total=scrub.offsetHeight-innerHeight;
+  var p=Math.max(0,Math.min(1,(-scrub.getBoundingClientRect().top)/total));
+  requestAnimationFrame(function(){draw(Math.round(p*(N-1)));});
+  document.getElementById('ovlh').style.opacity=String(Math.max(0,1-p*2.4));
+  document.getElementById('bar').style.width=(p*100)+'%';
+  document.getElementById('hint').style.opacity=String(Math.max(0,1-p*4));
+}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+</script>
+</body>
+</html>

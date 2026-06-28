@@ -1,0 +1,11 @@
+# robots.txt — мужскаяэстетика.рф (Мужская Эстетика, барбершоп Ставрополь)
+User-agent: *
+Allow: /
+# Закрываем установленное PWA-приложение и его ассеты от индексации —
+# для поиска нужен лендинг, а не интерфейс приложения.
+Disallow: /app/
+Disallow: /pwa-assets/
+Disallow: /launch/
+Disallow: /tips-qrs/
+
+Sitemap: https://xn--80aaocmjdk0cclbf8l3a.xn--p1ai/sitemap.xml

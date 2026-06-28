@@ -1,0 +1,85 @@
+# === MAYA / «Мужская Эстетика» — .gitignore (создан 2026-06-17 в ходе ревизии) ===
+# ВАЖНО: проект ранее НЕ был под git. Перед первым коммитом убедись, что
+# секреты ротированы (см. SECURITY_REMEDIATION.md), иначе они попадут в историю.
+
+# --- Секреты и ключи (НИКОГДА не коммитить) ---
+config.py
+**/config.py
+tg-config.php
+api-proxy.php
+debug-tg.php
+yclients-webhook.php
+secret_key.txt
+signing-key-info.txt
+*.pem
+*.keystore
+*.jks
+.sandbox_secret.key
+.env
+.env.*
+
+# --- База данных и ПД (152-ФЗ) ---
+*.db
+*.sqlite
+*.sqlite3
+barbershop*.db
+
+# --- Логи ---
+*.log
+
+# --- Локальные настройки инструментов ---
+.claude/
+.cursor/
+.vscode/
+
+# --- Бэкапы и временные снапшоты ---
+*.bak
+*.bak.*
+*.bak-*
+*.tgz
+*.tar
+*.gz
+*.beige-backup.*
+*.sesstoken
+*.yclientsms
+*~
+*.tmp
+beget_remote_snapshot_*/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# --- Сборка/деплой ---
+*.tar.gz
+*.zip
+*.aab
+*.apk
+dist/
+build/
+out/
+
+# --- Видео и тяжелые локальные медиа ---
+*.mp4
+*.mov
+*.webm
+team-videos-optimized/
+
+# --- Release artifacts ---
+МЭП - Google Play package/
+
+# --- ОС ---
+.DS_Store
+Thumbs.db
+
+# --- Архив ревизии (локальный, не в репозиторий) ---
+_archive/
+
+# --- Исключения: эти файлы-образцы коммитить МОЖНО ---
+!requirements.txt
+!config.example.py
+!.env.example

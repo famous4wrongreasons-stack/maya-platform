@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAYA — подключение салона</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0d; --ink:#f4f1ea; --mut:#8b887f; --line:rgba(255,255,255,.09);
+  --panel:#121317; --panel2:#181a1f; --accent:#e8dcc0; --accent-ink:#0a0b0d; --ok:#82c98e; --bad:#e08585;
+  --brand:#c9a86a; /* перекрашивается на шаге «Бренд» */
+}
+[data-theme="light"]{
+  --bg:#f2f1ec; --ink:#16161a; --mut:#6a6a72; --line:rgba(0,0,0,.10);
+  --panel:#ffffff; --panel2:#f5f3ee; --accent:#1a1a1f; --accent-ink:#fff; --ok:#3b8f4d; --bad:#b23b3b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Manrope',-apple-system,sans-serif;min-height:100vh;transition:background .3s,color .3s}
+h1,h2,h3{font-family:'Syne',sans-serif;letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+.muted{color:var(--mut)}
+.top{height:62px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.logo{font-family:'Syne';font-weight:800;font-size:19px;display:flex;align-items:center;gap:9px}
+.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent)}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:15px}
+
+.shell{max-width:1080px;margin:0 auto;padding:30px 24px 60px;display:grid;grid-template-columns:1.25fr .9fr;gap:36px;align-items:start}
+@media(max-width:880px){.shell{display:flex;flex-direction:column}.pvWrap{order:-1;position:static;top:auto}.pv-phone{width:208px;height:432px}}
+
+/* stepper */
+.stepper{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap}
+.st{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);padding:7px 12px;border:1px solid var(--line);border-radius:30px}
+.st .n{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px}
+.st.done{color:var(--ink)} .st.done .n{background:var(--ok);border-color:var(--ok);color:#06210c}
+.st.cur{color:var(--ink);border-color:var(--accent)} .st.cur .n{border-color:var(--accent);color:var(--accent)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px}
+.kick{color:var(--accent);font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.card h2{font-size:24px;margin-bottom:6px}
+.card .sub{color:var(--mut);font-size:14.5px;margin-bottom:22px}
+label{display:block;font-size:13px;color:var(--mut);margin:14px 0 6px}
+input[type=text],input[type=email],input[type=tel]{width:100%;height:44px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--ink);padding:0 14px;font-size:14.5px;font-family:'Manrope';outline:none}
+input:focus{border-color:var(--accent)}
+.helper{font-size:12.5px;color:var(--mut);margin-top:7px;display:flex;gap:7px;align-items:flex-start}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+
+.swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.sw{width:34px;height:34px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+.sw:hover{transform:scale(1.08)} .sw[aria-pressed="true"]{border-color:var(--ink)}
+.swc{width:34px;height:34px;border-radius:9px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.swc input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.btns{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:11px;padding:12px 20px;font-weight:600;font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-family:'Manrope'}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.primary:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:transparent}
+
+/* tariff mini */
+.plans{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.plan{border:1.5px solid var(--line);border-radius:14px;padding:14px;cursor:pointer}
+.plan[aria-selected="true"]{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.plan .pt{font-family:'Syne';font-weight:700}.plan .pp{font-family:'Syne';font-weight:800;font-size:22px;margin-top:6px}
+.plan .pp small{font-size:12px;color:var(--mut);font-family:'Manrope';font-weight:500}
+.adn{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.ad{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;font-size:13.5px}
+.ad[aria-pressed="true"]{border-color:var(--accent)}.ad.incl{opacity:.6;cursor:default}
+.ad .sw2{width:36px;height:21px;border-radius:20px;background:var(--line);position:relative;flex:none}
+.ad .sw2::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:var(--ink);transition:left .2s}
+.ad[aria-pressed="true"] .sw2{background:var(--accent)}.ad[aria-pressed="true"] .sw2::after{left:17px;background:var(--accent-ink)}
+.totLine{margin-top:16px;display:flex;justify-content:space-between;align-items:center}
+.totLine .t{font-family:'Syne';font-weight:800;font-size:24px}
+
+/* success */
+.ok-ring{width:64px;height:64px;border-radius:50%;background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:16px}
+.urlbox{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;font-size:14px;margin:14px 0}
+.urlbox b{color:var(--brand)}
+
+/* live phone preview */
+.pvWrap{position:sticky;top:90px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.pvLabel{font-size:12.5px;color:var(--mut)}
+.pv-phone{width:266px;height:552px;border-radius:42px;background:linear-gradient(150deg,#2a2c31,#0e0f12);padding:8px;box-shadow:0 30px 70px rgba(0,0,0,.45),0 0 0 1px var(--line)}
+.pv-screen{width:100%;height:100%;border-radius:35px;overflow:hidden;background:#0c0d10;display:flex;flex-direction:column}
+.pv-head{padding:30px 16px 16px;color:var(--brand-ink,#fff);text-align:center;position:relative}
+.pv-isl{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:84px;height:22px;background:#000;border-radius:14px}
+.pv-logo{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.9);color:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800;font-size:17px;margin:6px auto 10px}
+.pv-name{font-family:'Syne';font-weight:700;font-size:16px}
+.pv-city{font-size:11px;opacity:.85;margin-top:2px}
+.pv-body{flex:1;background:#0c0d10;padding:14px}
+.pv-book{width:100%;border:none;border-radius:12px;padding:13px;color:var(--brand-ink,#fff);font-weight:700;font-size:14px;background:var(--brand);margin-bottom:12px;font-family:'Manrope'}
+.pv-tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px}
+.pv-tile{background:#161820;border-radius:10px;padding:10px 6px;text-align:center;font-size:10px;color:#cfcdc6}
+.pv-tile i{color:var(--brand);font-size:15px;display:block;margin-bottom:4px}
+.pv-stats{background:#161820;border-radius:10px;padding:11px;display:flex;justify-content:space-between;text-align:center;margin-bottom:12px}
+.pv-stats div b{font-family:'Syne';font-size:15px;color:#fff;display:block}
+.pv-stats div span{font-size:9px;color:#86847d}
+.pv-tab{display:flex;justify-content:space-around;border-top:1px solid #1c1e26;padding:10px 0 4px}
+.pv-tab i{font-size:18px;color:#5c5b56}.pv-tab i.on{color:var(--brand)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a class="logo" href="saas-site.html"><span class="dot"></span>MAYA</a>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span class="muted" style="font-size:13px">Подключение салона</span>
+    <button class="iconbtn" id="themeBtn">☾</button>
+  </div>
+</div>
+
+<div class="shell">
+  <div>
+    <div class="stepper" id="stepper"></div>
+    <div class="card" id="card"></div>
+  </div>
+
+  <div class="pvWrap">
+    <div class="pvLabel">Превью вашего приложения</div>
+    <div class="pv-phone">
+      <div class="pv-screen">
+        <div class="pv-head" style="background:var(--brand)">
+          <div class="pv-isl"></div>
+          <div class="pv-logo" id="pvLogo">ВС</div>
+          <div class="pv-name" id="pvName">Ваш салон</div>
+          <div class="pv-city" id="pvCity">ваш город</div>
+        </div>
+        <div class="pv-body">
+          <button class="pv-book">Записаться</button>
+          <div class="pv-tiles">
+            <div class="pv-tile"><i class="ti ti-user"></i>Кабинет</div>
+            <div class="pv-tile"><i class="ti ti-gift"></i>Магазин</div>
+            <div class="pv-tile"><i class="ti ti-coin"></i>Баллы</div>
+          </div>
+          <div class="pv-stats">
+            <div><b>6+</b><span>лет</span></div><div><b>5</b><span>мастеров</span></div>
+            <div><b>5.0</b><span>рейтинг</span></div><div><b>98%</b><span>возврат</span></div>
+          </div>
+          <div class="pv-tab">
+            <i class="ti ti-home on"></i><i class="ti ti-scissors"></i><i class="ti ti-users"></i><i class="ti ti-message"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* каталог тарифов (из plan_catalog.py) */
+const PLANS=[{key:"start",t:"Запись",p:990,m:"до 5 мастеров"},{key:"pro",t:"Салон",p:2490,m:"без лимита мастеров"}];
+const PFEAT={start:["booking","branding"],pro:["booking","branding","analytics","shop","journal","staff_cabinet"]};
+// CutMatch и video_analytics временно скрыты (см. plan_catalog.DISABLED) — вернуть = добавить обратно
+const ADDONS=[{key:"ai_chatbot",t:"Умный чат-бот",p:1990,f:"ai_chatbot"}];
+const METER={ai_chatbot:'150 диалогов включено, далее 15 ₽'};
+const fmt=n=>n.toLocaleString("ru-RU");
+
+/* состояние */
+const S={step:0, email:"", phone:"", yc_id:"", yc_token:"", yc_ok:false, name:"Ваш салон", city:"ваш город", initials:"ВС", color:"#c9a86a", plan:"pro", addons:new Set()};
+// Подхватываем выбор из конструктора (onboarding.html?plan=pro&addons=ai_chatbot)
+(function(){var q=new URLSearchParams(location.search); var p=q.get('plan');
+  if(p&&PLANS.some(x=>x.key===p)) S.plan=p;
+  (q.get('addons')||'').split(',').filter(Boolean).forEach(function(k){ if(ADDONS.some(a=>a.key===k)) S.addons.add(k); });})();
+const PALETTE=["#c9a86a","#3563d6","#1f9d6b","#c0476d","#7a52c4","#d9772b","#2bb3b3","#111317"];
+const STEPS=[
+ {key:"reg",   kick:"Шаг 1", short:"Регистрация", title:"Создайте аккаунт MAYA", sub:"Минута на регистрацию — и приложение вашего салона начинает собираться. Почта и телефон — этого достаточно для старта.", cta:"Создать аккаунт"},
+ {key:"yc",    kick:"Шаг 2", short:"YClients",    title:"Подключите YClients", sub:"MAYA надевается поверх вашего YClients — расписание, мастера и услуги подтянутся сами. Команда работает как привыкла, переносить ничего не нужно.", cta:"Подключить"},
+ {key:"brand", kick:"Шаг 3", short:"Бренд",       title:"Сделайте приложение своим", sub:"Логотип, фирменный цвет и название — клиент откроет не сервис записи, а ваше приложение. Видно, как меняется вид, прямо во время настройки.", cta:"Применить бренд"},
+ {key:"plan",  kick:"Шаг 4", short:"Тариф",       title:"Соберите свой тариф", sub:"Запись или Салон — и модули поверх, например умный ИИ-администратор. Включаете только то, что приносит деньги именно вам.", cta:"Выбрать тариф"},
+ {key:"done",  kick:"Готово", short:"Готово",      title:"Всё готово к запуску", sub:""},
+];
+const SUCCESS={title:"Ваш салон теперь в кармане у клиента",text:"Приложение запущено — с вашим логотипом, ИИ-администратором 24/7 и аналитикой, которая считает деньги за вас. Данные хранятся в России по 152-ФЗ. Дальше — только клиенты и записи.",cta:"Перейти в кабинет"};
+
+function planFeat(k){return new Set(PFEAT[k]);}
+function redundant(a){return planFeat(S.plan).has(a.f);}
+function total(){let s=PLANS.find(p=>p.key===S.plan).p;for(const a of ADDONS)if(S.addons.has(a.key)&&!redundant(a))s+=a.p;return s;}
+
+function applyBrand(){
+  document.documentElement.style.setProperty("--brand",S.color);
+  var _c=(S.color||'#c9a86a').replace('#',''); if(_c.length===3)_c=_c.replace(/(.)/g,'$1$1');
+  var _lin=[0,2,4].map(function(i){var v=parseInt(_c.substr(i,2),16)/255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+  var _L=0.2126*_lin[0]+0.7152*_lin[1]+0.0722*_lin[2];
+  document.documentElement.style.setProperty("--brand-ink", _L>0.179?"#111":"#fff");
+  document.getElementById("pvName").textContent=S.name||"Ваш салон";
+  document.getElementById("pvCity").textContent=S.city||"ваш город";
+  document.getElementById("pvLogo").textContent=(S.initials||"ВС").slice(0,2).toUpperCase();
+}
+function initialsFrom(name){return (name.trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2)||"ВС").toUpperCase();}
+
+function renderStepper(){
+  document.getElementById("stepper").innerHTML=STEPS.map((s,i)=>{
+    const cls=i<S.step?"done":(i===S.step?"cur":"");
+    return `<div class="st ${cls}"><span class="n">${i<S.step?'✓':i+1}</span>${s.short||s.title}</div>`;
+  }).join('');
+}
+
+function renderCard(){
+  const st=STEPS[S.step]; let body="";
+  if(st.key==="reg"){
+    body=`<div class="row2">
+      <div><label>Email</label><input type="email" id="f_email" value="${S.email}" placeholder="owner@salon.ru"></div>
+      <div><label>Телефон</label><input type="tel" id="f_phone" value="${S.phone}" placeholder="+7 ___ ___-__-__"></div>
+    </div><div class="helper"><i class="ti ti-shield-lock"></i> Данные хранятся в РФ, по 152-ФЗ.</div>`;
+  }
+  if(st.key==="yc"){
+    body=`<div class="row2">
+      <div><label>ID компании YClients</label><input type="text" id="f_ycid" value="${S.yc_id}" placeholder="например 123456"></div>
+      <div><label>User-токен YClients</label><input type="text" id="f_yctok" value="${S.yc_token}" placeholder="вставьте токен"></div>
+    </div>
+    <div class="helper"><i class="ti ti-help-circle"></i> Где взять: YClients → Настройки → Интеграции/API.</div>
+    <button class="btn" id="ycCheck" style="width:auto;margin-top:14px"><i class="ti ti-plug"></i> Проверить подключение</button>
+    <span id="ycResult" style="margin-left:10px;font-size:13px"></span>`;
+  }
+  if(st.key==="brand"){
+    body=`<div class="row2">
+      <div><label>Название салона</label><input type="text" id="f_name" value="${S.name}"></div>
+      <div><label>Город</label><input type="text" id="f_city" value="${S.city}"></div>
+    </div>
+    <label>Инициалы логотипа</label><input type="text" id="f_init" value="${S.initials}" maxlength="2" style="width:90px;text-transform:uppercase">
+    <label>Фирменный цвет</label>
+    <div class="swatches" id="sw">
+      ${PALETTE.map(c=>`<div class="sw" data-c="${c}" aria-pressed="${c===S.color}" style="background:${c}"></div>`).join('')}
+      <div class="swc" title="Свой цвет"><i class="ti ti-plus"></i><input type="color" id="f_color" value="${S.color}"></div>
+    </div>
+    <div class="helper"><i class="ti ti-eye"></i> Меняйте — приложение справа перекрашивается мгновенно. Так же это работает потом в вашей панели.</div>`;
+  }
+  if(st.key==="plan"){
+    body=`<div class="plans" id="plans">${PLANS.map(p=>`<div class="plan" data-k="${p.key}" aria-selected="${p.key===S.plan}"><div class="pt">${p.t}</div><div class="muted" style="font-size:12px">${p.m}</div><div class="pp">${fmt(p.p)} <small>₽/мес</small></div></div>`).join('')}</div>
+      <div class="adn" id="adn">${ADDONS.map(a=>{const incl=redundant(a),on=incl||S.addons.has(a.key);return `<div class="ad ${incl?'incl':''}" data-k="${a.key}" aria-pressed="${on}" ${incl?'data-incl="1"':''}><div><div>${a.t} ${incl?'<span class=muted style="font-size:12px">· входит</span>':'<span class=muted style="font-size:12px">· +'+fmt(a.p)+' ₽</span>'}</div>${(!incl&&METER[a.key])?'<div class="muted" style="font-size:11px;margin-top:2px">'+METER[a.key]+'</div>':''}</div><span class="sw2"></span></div>`;}).join('')}</div>
+      <div class="totLine"><span class="muted">Итого</span><span class="t" id="tot">${fmt(total())} <small style="font-size:13px;color:var(--mut)">₽/мес</small></span></div>`;
+  }
+  if(st.key==="done"){
+    const slug=(S.name.toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-').replace(/^-|-$/g,'')||'salon');
+    document.getElementById("card").innerHTML=`
+      <div class="ok-ring"><i class="ti ti-check"></i></div>
+      <h2 style="margin-bottom:8px">${SUCCESS.title}</h2>
+      <p class="sub">${SUCCESS.text}</p>
+      <div class="urlbox"><span class="muted">Адрес приложения</span><b>${slug}.maya.app</b></div>
+      <div class="helper"><i class="ti ti-info-circle"></i> Тариф «${PLANS.find(p=>p.key===S.plan).t}» · ${fmt(total())} ₽/мес. Бренд и тариф меняются в панели в любой момент, без переустановки.</div>
+      <div class="btns"><a class="btn ghost" href="saas-site.html">На сайт</a><a class="btn primary" href="panel.html"><i class="ti ti-layout-dashboard"></i> ${SUCCESS.cta}</a></div>`;
+    return;
+  }
+  const showNav = st.key!=="done";
+  document.getElementById("card").innerHTML=`
+    <div class="kick">${st.kick}</div><h2>${st.title}</h2>${st.sub?`<p class="sub">${st.sub}</p>`:''}
+    ${body}
+    ${showNav?`<div class="btns">
+      <button class="btn ghost" id="back" ${S.step===0?'style="visibility:hidden"':''}><i class="ti ti-arrow-left"></i> Назад</button>
+      <button class="btn primary" id="next">${st.cta||'Далее'} <i class="ti ti-arrow-right"></i></button>
+    </div>`:''}`;
+  bindCard();
+}
+
+function stepValid(){
+  var k=STEPS[S.step].key;
+  if(k==="reg") return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((S.email||'').trim()) && (S.phone||'').replace(/\D/g,'').length>=10;
+  if(k==="yc")  return S.yc_ok===true;
+  return true; // brand/plan/done — безопасные дефолты
+}
+function refreshNext(){var nx=document.getElementById("next"); if(nx)nx.disabled=!stepValid();}
+
+function bindCard(){
+  const st=STEPS[S.step];
+  const set=(id,k)=>{const e=document.getElementById(id);if(e)e.oninput=()=>{S[k]=e.value;refreshNext();};};
+  if(st.key==="reg"){set("f_email","email");set("f_phone","phone");}
+  if(st.key==="yc"){
+    set("f_ycid","yc_id");set("f_yctok","yc_token");
+    ["f_ycid","f_yctok"].forEach(function(fid){var e=document.getElementById(fid); if(e){var prev=e.oninput;
+      e.oninput=function(){ if(prev)prev.call(e); S.yc_ok=false; var rr=document.getElementById("ycResult"); if(rr)rr.textContent=''; refreshNext(); };}});
+    var cb=document.getElementById("ycCheck"); if(cb)cb.onclick=function(){
+      var r=document.getElementById("ycResult");
+      if(!(S.yc_id||'').trim()||!(S.yc_token||'').trim()){r.style.color='var(--mut)';r.textContent='Заполните ID компании и токен';return;}
+      r.style.color='var(--mut)';r.textContent='Проверяем…';
+      setTimeout(function(){
+        var ok=/^\d{3,}$/.test((S.yc_id||'').trim()) && (S.yc_token||'').trim().length>=8;
+        if(ok){S.yc_ok=true;r.style.color='var(--ok)';r.innerHTML='<i class="ti ti-circle-check"></i> Подключение успешно (демо)';}
+        else {S.yc_ok=false;r.style.color='var(--bad)';r.innerHTML='<i class="ti ti-alert-circle"></i> Не удалось — ID только цифры, токен от 8 символов (раздел Интеграции/API)';}
+        refreshNext();
+      },650);
+    };
+  }
+  if(st.key==="brand"){
+    const n=document.getElementById("f_name"); n.oninput=()=>{S.name=n.value;S.initials=initialsFrom(n.value);const fi=document.getElementById("f_init");if(fi)fi.value=S.initials;applyBrand();};
+    const c=document.getElementById("f_city"); c.oninput=()=>{S.city=c.value;applyBrand();};
+    const fi=document.getElementById("f_init"); fi.oninput=()=>{S.initials=fi.value;applyBrand();};
+    document.querySelectorAll("#sw .sw").forEach(el=>el.onclick=()=>{S.color=el.dataset.c;document.querySelectorAll("#sw .sw").forEach(x=>x.setAttribute("aria-pressed",x.dataset.c===S.color));applyBrand();});
+    document.getElementById("f_color").oninput=function(){S.color=this.value;document.querySelectorAll("#sw .sw").forEach(x=>x.setAttribute("aria-pressed","false"));applyBrand();};
+  }
+  if(st.key==="plan"){
+    document.querySelectorAll("#plans .plan").forEach(el=>el.onclick=()=>{S.plan=el.dataset.k;renderCard();});
+    document.querySelectorAll("#adn .ad").forEach(el=>el.onclick=()=>{if(el.dataset.incl)return;const k=el.dataset.k;S.addons.has(k)?S.addons.delete(k):S.addons.add(k);renderCard();});
+  }
+  const nx=document.getElementById("next"); if(nx)nx.onclick=()=>{ if(!stepValid())return; S.step=Math.min(STEPS.length-1,S.step+1);render();};
+  const bk=document.getElementById("back"); if(bk)bk.onclick=()=>{S.step=Math.max(0,S.step-1);render();};
+  refreshNext();
+}
+
+function render(){renderStepper();renderCard();applyBrand();window.scrollTo(0,0);}
+document.getElementById("themeBtn").onclick=function(){const l=document.documentElement.getAttribute("data-theme")==="light";document.documentElement.setAttribute("data-theme",l?"dark":"light");this.textContent=l?"☾":"☀";};
+applyBrand();render();
+</script>
+</body>
+</html>

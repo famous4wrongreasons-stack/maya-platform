@@ -1,0 +1,9 @@
+# Запрещаем прямой доступ к конфигу через браузер
+<Files "tg-config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+<FilesMatch "\.(env|ini|log|conf|pem|sqlite|sqlite3|db)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

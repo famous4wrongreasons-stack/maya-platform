@@ -1,0 +1,138 @@
+# =============================================================================
+#  config.example.py — БЕЗОПАСНЫЙ ШАБЛОН (создан 2026-06-17 при санации секретов)
+# =============================================================================
+#  Секреты больше НЕ в коде — читаются из переменных окружения (файл .env).
+#  Этот файл МОЖНО коммитить (значений секретов в нём нет).
+#
+#  Как ввести в строй (после ротации ключей):
+#    1) cp .env.example .env   &&  chmod 600 .env
+#    2) впиши в .env НОВЫЕ (ротированные) ключи
+#    3) на VPS: в systemd-юните бота добавь  EnvironmentFile=/home/botadmin/barbershop-bot/.env
+#       (локально хватит python-dotenv — он подхватит .env автоматически, см. ниже)
+#    4) замени рабочий config.py этим файлом:  mv config.example.py config.py
+#    5) перезапусти сервисы и проверь, что бот/вебхук поднялись
+#  Бизнес-константы (ID касс, мастера, тарифы) — НЕ секреты, оставлены в коде.
+# =============================================================================
+
+import os
+from pathlib import Path
+
+# Локально подхватываем .env рядом с этим файлом. На VPS переменные обычно
+# приходят из systemd EnvironmentFile, поэтому dotenv не обязателен.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).with_name(".env"))
+except ImportError:
+    pass
+
+
+def _req(name: str) -> str:
+    """Обязательный секрет: падаем сразу, если не задан (лучше, чем тихо работать без ключа)."""
+    val = os.environ.get(name, "")
+    if not val:
+        raise RuntimeError(f"Не задана переменная окружения {name} — см. .env.example")
+    return val
+
+
+def _opt(name: str, default: str = "") -> str:
+    """Необязательный секрет (например, выключённый канал)."""
+    return os.environ.get(name, default)
+
+
+# ── Telegram ──────────────────────────────────────────────────────────────
+TELEGRAM_TOKEN = _req("TELEGRAM_TOKEN")
+
+# Прокси для Telegram и Claude (РФ их блокирует). "http://user:pass@host:port".
+# Пусто — напрямую. Может содержать логин/пароль, поэтому тоже из окружения.
+PROXY_URL = _opt("PROXY_URL", "")
+
+# ── Claude (Anthropic) ──────────────────────────────────────────────────────
+CLAUDE_API_KEY = _req("CLAUDE_API_KEY")
+CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
+
+# ── YClients ────────────────────────────────────────────────────────────────
+YCLIENTS_PARTNER_TOKEN = _req("YCLIENTS_PARTNER_TOKEN")
+YCLIENTS_USER_TOKEN = _req("YCLIENTS_USER_TOKEN")
+YCLIENTS_COMPANY_ID = 503759
+YCLIENTS_BASE_URL = "https://api.yclients.com/api/v1"
+
+# Активные мастера (ID из YClients) — не секрет
+ACTIVE_MASTER_IDS = [1461615, 1461621, 3278920, 1461618, 1460233]
+
+# ID касс YClients (GET /accounts/{company_id}) — не секрет
+YCLIENTS_CASH_ACCOUNT_ID = 1016537      # «Основная касса»
+YCLIENTS_CASHLESS_ACCOUNT_ID = 1016538  # «Расчётный счёт»
+
+# ── Барбершоп (публичные данные) ─────────────────────────────────────────────
+BARBERSHOP_NAME = "Мужская Эстетика"
+BARBERSHOP_CITY = "Ставрополь"
+BARBERSHOP_ADDRESS = "г. Ставрополь, ул. Лермонтова, 343"
+BARBERSHOP_2GIS = "https://2gis.ru/stavropol/geo/70000001038177627"
+BARBERSHOP_YANDEX = "https://yandex.com/maps/org/cuts_shaves/20695024342/"
+BARBERSHOP_PHONE = "8-962-447-67-47"
+BARBERSHOP_HOURS = "Пн–Вс: 10:00–21:00"
+
+# Сайт и приложение (Punycode-домен для Telegram-кнопок) — не секрет
+SITE_URL = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai"        # www.мужскаяэстетика.рф
+APP_URL  = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app"    # www.мужскаяэстетика.рф/app
+
+# ── VK ID (вход через ВКонтакте) ──────────────────────────────────────────────
+VK_APP_ID = 54619325                       # публичный id приложения — не секрет
+VK_SECURE_KEY = _opt("VK_SECURE_KEY", "")  # «Защищённый ключ» (client_secret) — СЕКРЕТ
+VK_REDIRECT_URI = "https://malesthetic.pro/app/"
+VK_LOGIN_ENABLED = False
+
+# ── Расход: серверы и fal.ai (для /ai_cost и панели) — не секрет ───
+SERVER_COSTS_RUB = {
+    "Yandex Cloud (бот)": 2737,
+    "Timeweb (прокси)":   1800,
+    "Beget (сайт)":       1360,
+}
+FAL_COST_PER_IMAGE_USD = 0.15
+
+# ── SMS.ru — вход по телефону (пусто = отключён) ──────────────────────────────
+SMSRU_API_ID = _opt("SMSRU_API_ID", "")
+
+# ── Админы и основатели (Telegram user_id) — не секрет ────────────────────────
+INITIAL_ADMIN_IDS = [948205934, 339683535]
+FOUNDER_IDS = [948205934]   # Стас
+
+# Дефолтные «оплаты к продлению» для GOD-режима
+GOD_DEFAULT_RENEWALS = [
+    {"key": "srv_yandex",  "label": "Yandex Cloud (бот)",  "amount": 2737, "due_date": ""},
+    {"key": "srv_timeweb", "label": "Timeweb (прокси)",    "amount": 1800, "due_date": ""},
+    {"key": "srv_beget",   "label": "Beget (сайт)",        "amount": 1360, "due_date": ""},
+    {"key": "domain",      "label": "Домен malesthetic.pro", "amount": 0,  "due_date": ""},
+    {"key": "yclients",    "label": "Лицензия YClients",   "amount": 0,    "due_date": ""},
+    {"key": "ai_topup",    "label": "Пополнение ИИ (Anthropic/OpenAI/fal)", "amount": 0, "due_date": ""},
+]
+GOD_RENEWAL_WARN_DAYS = 7
+GOD_AI_BUDGET_USD = 50.0
+
+# ── ЮKassa ────────────────────────────────────────────────────────────────────
+YUKASSA_PROVIDER_TOKEN = _opt("YUKASSA_PROVIDER_TOKEN", "")  # Telegram Payments (legacy) — СЕКРЕТ
+YUKASSA_SHOP_ID = "1365230"                                  # идентификатор магазина — не секрет
+YUKASSA_SECRET_KEY = _opt("YUKASSA_SECRET_KEY", "")          # 'live_...' из ЛК ЮKassa — СЕКРЕТ (деньги!)
+
+BOT_USERNAME = "malesthetic_bot"
+REMINDER_MINUTES_BEFORE = 120
+
+# ── Шифрование ПД (152-ФЗ, Fernet) ────────────────────────────────────────────
+# ВНИМАНИЕ: смена этого ключа делает уже зашифрованные ПД нечитаемыми.
+# Ротировать ТОЛЬКО с миграцией (перешифровать данные старым→новым ключом).
+PII_ENCRYPTION_KEY = _req("PII_ENCRYPTION_KEY")
+PII_RETENTION_MONTHS = 18
+
+# ── Webhook от YClients ───────────────────────────────────────────────────────
+WEBHOOK_SECRET = _req("WEBHOOK_SECRET")  # должен совпадать с PHP-прокси на Beget
+WEBHOOK_PORT = 8080
+# Адрес привязки HTTP-сервера. "0.0.0.0" — как сейчас; после HTTPS-реверс-прокси
+# (nginx) на VPS поставь WEBHOOK_BIND="127.0.0.1" в .env и закрой 8080 фаерволом.
+WEBHOOK_BIND = _opt("WEBHOOK_BIND", "0.0.0.0")
+
+# ── AI-советы мастерам ────────────────────────────────────────────────────────
+MASTERS_AI_PROVIDER = "claude"              # "claude" | "openai"
+MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # тот же CLAUDE_API_KEY (один аккаунт/биллинг)
+OPENAI_API_KEY = _opt("OPENAI_API_KEY", "")  # СЕКРЕТ (общий с smm_bot — заведи отдельный!)
+MASTERS_OPENAI_MODEL = "gpt-4o-mini"
+MASTERS_AI_TIMEOUT = 5.0

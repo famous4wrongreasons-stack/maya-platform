@@ -1,0 +1,24 @@
+# ═════════════════════════════════════════════════════════════════════════
+#  ⚠️  ВАЖНО: после заливки на Beget ПЕРЕИМЕНУЙ этот файл в  .htaccess
+#      (именно с точкой в начале и БЕЗ .txt).  В файловом менеджере Beget:
+#      загрузи → правый клик → «Переименовать» → впиши:  .htaccess
+#
+#  Если в корне сайта .htaccess УЖЕ ЕСТЬ — НЕ заменяй его!
+#  Просто открой существующий и допиши туда строки ниже (от AddType и дальше).
+# ═════════════════════════════════════════════════════════════════════════
+
+#  Мужская Эстетика — правила для скачивания APK
+#  Место: КОРЕНЬ сайта malesthetic.pro/ (рядом с index.html и malesthetic.apk)
+
+# Android распознаёт .apk как устанавливаемый пакет (а не «непонятный файл»)
+<IfModule mod_mime.c>
+  AddType application/vnd.android.package-archive .apk
+</IfModule>
+
+# Принудительно скачивать .apk + не кэшировать (чтобы новая сборка подхватывалась сразу)
+<IfModule mod_headers.c>
+  <FilesMatch "\.apk$">
+    Header set Content-Disposition "attachment; filename=malesthetic.apk"
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>

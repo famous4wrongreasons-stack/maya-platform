@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAYA — панель платформы</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0d; --ink:#f4f1ea; --mut:#8b887f; --line:rgba(255,255,255,.09);
+  --panel:#121317; --panel2:#181a1f; --hover:rgba(255,255,255,.04);
+  --accent:#e8dcc0; --accent-ink:#0a0b0d; --ok:#82c98e; --warn:#e6b860; --bad:#e08585;
+}
+[data-theme="light"]{
+  --bg:#f2f1ec; --ink:#16161a; --mut:#6a6a72; --line:rgba(0,0,0,.10);
+  --panel:#ffffff; --panel2:#f5f3ee; --hover:rgba(0,0,0,.03);
+  --accent:#1a1a1f; --accent-ink:#ffffff; --ok:#3b8f4d; --warn:#9a6b12; --bad:#b23b3b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Manrope',-apple-system,sans-serif;display:flex;min-height:100vh;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:'Syne',sans-serif;letter-spacing:-.02em}
+.muted{color:var(--mut)}
+
+/* sidebar */
+.side{width:236px;flex:none;border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:6px;
+  position:sticky;top:0;height:100vh;background:var(--bg)}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Syne';font-weight:800;font-size:19px;padding:6px 10px 16px}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent)}
+.brand small{font-family:'Manrope';font-weight:500;font-size:11px;color:var(--mut);display:block;margin-top:-2px}
+.nav-i{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:var(--mut);font-size:14px;cursor:pointer}
+.nav-i i{font-size:18px}
+.nav-i:hover{background:var(--hover);color:var(--ink)}
+.nav-i.on{background:var(--panel2);color:var(--ink)}
+.side .bottom{margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+
+/* main */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);z-index:5}
+.top h1{font-size:20px}
+.search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;color:var(--mut);font-size:13px;width:240px}
+.search input{border:none;background:transparent;color:var(--ink);outline:none;width:100%;font-family:'Manrope'}
+.topr{display:flex;align-items:center;gap:10px}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:15px}
+.av{width:36px;height:36px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Syne'}
+.content{padding:24px 26px 40px}
+
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.kpi .k{font-size:12.5px;color:var(--mut);display:flex;align-items:center;gap:7px}
+.kpi .v{font-family:'Syne';font-weight:800;font-size:30px;margin-top:8px}
+.kpi .v small{font-size:14px;color:var(--mut);font-weight:500;font-family:'Manrope'}
+.kpi .d{font-size:12px;color:var(--ok);margin-top:2px}
+
+.grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+@media(max-width:980px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.card .ch{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line)}
+.card .ch h3{font-size:16px}
+.card .ch .mini{font-size:12.5px;color:var(--mut)}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:12px;padding:11px 18px;border-bottom:1px solid var(--line)}
+td{padding:13px 18px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--hover)}
+.sname{display:flex;align-items:center;gap:10px;font-weight:600}
+.cdot{width:10px;height:10px;border-radius:3px;flex:none}
+.pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.pill.active{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.pill.trial{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent)}
+.pill.past_due{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
+.pill.suspended{background:color-mix(in srgb,var(--bad) 20%,transparent);color:var(--bad)}
+.mrr{font-family:'Syne';font-weight:700}
+
+/* revenue bars */
+.bars{display:flex;align-items:flex-end;gap:10px;height:150px;padding:18px}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
+.bars .b span{width:100%;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 40%,transparent));border-radius:6px 6px 0 0;transition:height .6s}
+.bars .b small{font-size:11px;color:var(--mut)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:380px;max-width:92vw;background:var(--panel);border-left:1px solid var(--line);
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:41;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dh{padding:20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.db{padding:20px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.row{display:flex;justify-content:space-between;font-size:14px;gap:10px}
+.row .lbl{color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:20px;background:var(--panel2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;padding:11px 16px;font-weight:600;font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-family:'Manrope';width:100%}
+.btn.warn{background:color-mix(in srgb,var(--bad) 16%,transparent);border-color:transparent;color:var(--bad)}
+.btn.ok{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.burger{display:none}
+#sideScrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55}
+.side.open ~ #sideScrim{display:block}
+@media(max-width:680px){html,body{overflow-x:hidden}.side{position:fixed;left:-240px;transition:left .2s;z-index:60}.side.open{left:0}.burger{display:inline-flex!important;align-items:center;justify-content:center}}
+</style>
+</head>
+<body>
+
+<aside class="side">
+  <div class="brand"><span class="dot"></span><div>MAYA<small>Панель платформы</small></div></div>
+  <div class="nav-i on" data-sec="overview"><i class="ti ti-layout-dashboard"></i> Обзор</div>
+  <div class="nav-i" data-sec="salons"><i class="ti ti-building-store"></i> Салоны</div>
+  <div class="nav-i" data-sec="billing"><i class="ti ti-receipt"></i> Биллинг</div>
+  <a class="nav-i" href="onboarding.html"><i class="ti ti-plug-connected"></i> Подключить салон</a>
+  <a class="nav-i" href="economics.html"><i class="ti ti-calculator"></i> Калькулятор</a>
+  <div class="nav-i" data-sec="settings"><i class="ti ti-settings"></i> Настройки</div>
+  <div class="bottom">
+    <a class="nav-i" href="saas-site.html"><i class="ti ti-arrow-left"></i> На сайт</a>
+  </div>
+</aside>
+<div id="sideScrim" onclick="document.querySelector('.side').classList.remove('open')"></div>
+
+<div class="main">
+  <div class="top">
+    <div style="display:flex;align-items:center;gap:12px"><button class="iconbtn burger" id="burger"><i class="ti ti-menu-2"></i></button><h1>Обзор</h1></div>
+    <div class="topr">
+      <div class="search"><i class="ti ti-search"></i><input placeholder="Поиск салона…"></div>
+      <button class="iconbtn" id="themeBtn">☾</button>
+      <div class="av">A</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="overviewSec">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="ch"><h3>Салоны</h3><span class="mini" id="cnt">—</span></div>
+        <div style="overflow-x:auto">
+        <table style="min-width:480px">
+          <thead><tr><th>Салон</th><th>Тариф</th><th>Статус</th><th>Мастера</th><th style="text-align:right">MRR</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><h3>Выручка платформы</h3><span class="mini">6 мес</span></div>
+        <div class="bars" id="bars"></div>
+        <div style="padding:0 18px 18px;font-size:12.5px;color:var(--mut)">Рекуррентные платежи салонов (демо-данные).</div>
+      </div>
+    </div>
+    </div>
+    <div id="stubSec" style="display:none"></div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><h3 id="dName">—</h3><button class="iconbtn" id="dClose">✕</button></div>
+  <div class="db" id="dBody"></div>
+</aside>
+
+<script>
+const PLAN_TITLE={start:"Запись",pro:"Салон",max:"Сеть"};
+const PLAN_PRICE={start:990,pro:2490,max:8990};
+const ADDON_TITLE={ai_chatbot:"Умный чат-бот"};
+const ADDON_PRICE={ai_chatbot:1990};
+const fmt=n=>n.toLocaleString("ru-RU");
+
+let SAL=[
+ {name:"Мужская Эстетика",city:"Ставрополь",color:"#c9a86a",plan:"pro",status:"active",masters:5,addons:["ai_chatbot"],owner:"Станислав",phone:"+7 962 447-67-47"},
+ {name:"Barber Loft",city:"Москва",color:"#3563d6",plan:"start",status:"trial",masters:2,addons:[],owner:"Денис",phone:"+7 905 100-22-33"},
+ {name:"Классика и Бритва",city:"Казань",color:"#1f9d6b",plan:"pro",status:"active",masters:4,addons:[],owner:"Рустам",phone:"+7 917 555-10-20"},
+ {name:"Студия 5",city:"Санкт-Петербург",color:"#c0476d",plan:"pro",status:"past_due",masters:6,addons:[],owner:"Марина",phone:"+7 921 333-44-55"},
+ {name:"Точка",city:"Краснодар",color:"#7a52c4",plan:"start",status:"active",masters:2,addons:["ai_chatbot"],owner:"Олег",phone:"+7 988 777-88-99"},
+];
+let SEARCH="";
+const STAT={active:"Активен",trial:"Триал",past_due:"Просрочка",suspended:"Заблокирован"};
+function mrr(s){let v=PLAN_PRICE[s.plan];for(const a of s.addons)v+=ADDON_PRICE[a];return v;}
+function billed(s){return s.status!=="suspended";}
+
+function renderKpis(){
+  const total=SAL.length, active=SAL.filter(s=>s.status==="active").length, trial=SAL.filter(s=>s.status==="trial").length;
+  const sumMrr=SAL.filter(billed).reduce((a,s)=>a+mrr(s),0);
+  document.getElementById("kpis").innerHTML=[
+    ["ti-building-store","Салонов всего",total,""],
+    ["ti-circle-check","Активных",active,"+1 за неделю"],
+    ["ti-clock","На триале",trial,""],
+    ["ti-coin","MRR",fmt(sumMrr)+" <small>₽/мес</small>",""],
+  ].map(k=>`<div class="kpi"><div class="k"><i class="ti ${k[0]}"></i> ${k[1]}</div><div class="v">${k[2]}</div>${k[3]?'<div class="d">'+k[3]+'</div>':''}</div>`).join('');
+}
+function renderRows(){
+  const q=(SEARCH||"").toLowerCase().trim();
+  const list=SAL.map((s,i)=>[s,i]).filter(([s])=>(s.name+" "+s.city).toLowerCase().includes(q));
+  document.getElementById("cnt").textContent=list.length+" салонов";
+  document.getElementById("rows").innerHTML=list.map(([s,i])=>`
+    <tr data-i="${i}">
+      <td><div class="sname"><span class="cdot" style="background:${s.color}"></span><div>${s.name}<div class="muted" style="font-size:12px;font-weight:400">${s.city}</div></div></div></td>
+      <td>${PLAN_TITLE[s.plan]}</td>
+      <td><span class="pill ${s.status}">${STAT[s.status]}</span></td>
+      <td>${s.masters}</td>
+      <td style="text-align:right"><span class="mrr">${billed(s)?fmt(mrr(s))+' ₽':'—'}</span></td>
+    </tr>`).join('');
+  document.querySelectorAll("#rows tr").forEach(tr=>tr.onclick=()=>openDrawer(+tr.dataset.i));
+}
+function renderBars(){
+  const data=[58,67,71,84,96,118]; // тыс ₽
+  const max=Math.max(...data);
+  const m=["Янв","Фев","Мар","Апр","Май","Июн"];
+  document.getElementById("bars").innerHTML=data.map((v,i)=>`<div class="b"><span style="height:${Math.round(v/max*100)}%"></span><small>${m[i]}</small></div>`).join('');
+}
+
+let cur=-1;
+function openDrawer(i){
+  cur=i; const s=SAL[i];
+  document.getElementById("dName").innerHTML=`<span class="cdot" style="display:inline-block;background:${s.color};vertical-align:middle;margin-right:8px"></span>${s.name}`;
+  const addons=s.addons.length?s.addons.map(a=>`<span class="chip">${ADDON_TITLE[a]} · ${fmt(ADDON_PRICE[a])} ₽</span>`).join(''):'<span class="muted" style="font-size:13px">нет</span>';
+  document.getElementById("dBody").innerHTML=`
+    <div class="row"><span class="lbl">Город</span><span>${s.city}</span></div>
+    <div class="row"><span class="lbl">Тариф</span><span>${PLAN_TITLE[s.plan]} · ${fmt(PLAN_PRICE[s.plan])} ₽</span></div>
+    <div class="row"><span class="lbl">Статус</span><span class="pill ${s.status}">${STAT[s.status]}</span></div>
+    <div class="row"><span class="lbl">Мастеров</span><span>${s.masters}</span></div>
+    <div class="row"><span class="lbl">Владелец</span><span>${s.owner}</span></div>
+    <div class="row"><span class="lbl">Телефон</span><span>${s.phone}</span></div>
+    <div><div class="lbl" style="font-size:13px;margin-bottom:7px">Подключённые модули</div><div class="chips">${addons}</div></div>
+    <div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="lbl">Итого MRR</span><span class="mrr" style="font-size:18px">${billed(s)?fmt(mrr(s))+' ₽/мес':'—'}</span></div>
+    <button class="btn ${s.status==='suspended'?'ok':'warn'}" id="toggleBtn">${s.status==='suspended'?'<i class="ti ti-plug-connected"></i> Активировать':'<i class="ti ti-ban"></i> Заблокировать'}</button>
+    <button class="btn">Открыть приложение салона</button>`;
+  document.getElementById("toggleBtn").onclick=()=>{s.status=(s.status==='suspended')?'active':'suspended';renderKpis();renderRows();openDrawer(i);};
+  document.getElementById("drawer").classList.add("on");document.getElementById("scrim").classList.add("on");
+}
+function closeDrawer(){document.getElementById("drawer").classList.remove("on");document.getElementById("scrim").classList.remove("on");}
+document.getElementById("dClose").onclick=closeDrawer;document.getElementById("scrim").onclick=closeDrawer;
+
+document.getElementById("themeBtn").onclick=function(){
+  const light=document.documentElement.getAttribute("data-theme")==="light";
+  document.documentElement.setAttribute("data-theme",light?"dark":"light");
+  this.textContent=light?"☾":"☀";
+};
+function closeSidebar(){document.querySelector('.side').classList.remove('open');}
+var _burger=document.getElementById('burger'); if(_burger)_burger.onclick=function(){document.querySelector('.side').classList.toggle('open');};
+const SEC_TITLES={overview:'Обзор',salons:'Салоны',billing:'Биллинг',settings:'Настройки'};
+const STUB={
+  billing:`<div class="card" style="padding:22px"><h3 style="margin-bottom:10px">Биллинг</h3><p class="muted" style="font-size:14px;line-height:1.6">Счета салонов, статусы оплат и рекуррентные списания (YooKassa): триал → active → past_due → suspended. За это отвечает <code>tenant_billing.py</code>. Демо-экран — подключим реальные счета при запуске биллинга.</p></div>`,
+  settings:`<div class="card" style="padding:22px"><h3 style="margin-bottom:10px">Настройки платформы</h3><p class="muted" style="font-size:14px;line-height:1.6">Партнёр-токен YClients, ключи YooKassa, домены салонов (*.maya.app), шаблоны уведомлений. Демо-экран.</p></div>`,
+};
+function showSec(sec){
+  document.querySelectorAll('.side .nav-i[data-sec]').forEach(n=>n.classList.toggle('on',n.dataset.sec===sec));
+  document.querySelector('.top h1').textContent=SEC_TITLES[sec]||'Обзор';
+  var ov=document.getElementById('overviewSec'), stub=document.getElementById('stubSec');
+  if(sec==='billing'||sec==='settings'){ov.style.display='none';stub.style.display='';stub.innerHTML=STUB[sec];}
+  else {ov.style.display='';stub.style.display='none';}
+}
+document.querySelectorAll('.side .nav-i[data-sec]').forEach(n=>n.onclick=function(){showSec(n.dataset.sec);closeSidebar();});
+var _si=document.querySelector('.search input'); if(_si) _si.oninput=function(){SEARCH=this.value;renderRows();};
+renderKpis();renderRows();renderBars();
+</script>
+</body>
+</html>

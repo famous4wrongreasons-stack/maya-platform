@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Демо SaaS — мультисалонная платформа</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --color-background-primary:#ffffff; --color-background-secondary:#f4f3ef; --color-background-tertiary:#edebe5;
+  --color-background-success:#eaf3de; --color-background-info:#e6f1fb; --color-background-danger:#fcebeb;
+  --color-text-primary:#1b1b20; --color-text-secondary:#6c6c74;
+  --color-text-success:#3b6d11; --color-text-info:#185fa5; --color-text-danger:#a32d2d;
+  --color-border-tertiary:rgba(0,0,0,.12); --color-border-secondary:rgba(0,0,0,.22); --color-border-info:#378add;
+  --border-radius-md:8px; --border-radius-lg:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-background-tertiary);color:var(--color-text-primary);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 48px}
+h1{font-size:22px;font-weight:500;margin:0 0 4px}
+.lead{color:var(--color-text-secondary);font-size:15px;margin:0 0 22px}
+input{height:36px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);
+  padding:0 10px;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg)}
+.sd-chip{border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:6px 12px;cursor:pointer;font-size:13px;color:var(--color-text-primary);display:inline-flex;align-items:center;gap:6px}
+.sd-chip[aria-pressed=true]{border:2px solid var(--color-border-info)}
+.sd-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:0.5px solid var(--color-border-tertiary)}
+.sd-pill{font-size:12px;padding:2px 9px;border-radius:var(--border-radius-md)}
+.sd-btn{border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:5px 10px;cursor:pointer;font-size:12px;color:var(--color-text-primary)}
+.hint{color:var(--color-text-secondary);font-size:13px;margin-top:22px;border-top:0.5px solid var(--color-border-tertiary);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Один сервис — много салонов</h1>
+  <p class="lead">Переключайте салоны — витрина перекрашивается под бренд каждого. Блокируйте/включайте подписку. Подключите свой салон формой снизу. Это демо: данные ненастоящие, всё работает локально в браузере.</p>
+
+  <div id="sd-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px"></div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;align-items:start">
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:18px;display:flex;justify-content:center">
+      <div id="sd-phone" style="width:240px"></div>
+    </div>
+    <div class="card" style="padding:16px 18px">
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:6px">Панель платформы</div>
+      <div id="sd-platform"></div>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);margin-top:14px;padding-top:12px">
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">Подключить новый салон</div>
+        <input id="sd-name" placeholder="Название салона" style="width:100%;margin-bottom:8px">
+        <div id="sd-colors" style="display:flex;gap:8px;margin-bottom:10px"></div>
+        <button id="sd-add" class="sd-btn" style="width:100%;padding:9px"><i class="ti ti-plug-connected"></i>&nbsp; Подключить YClients</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Что показывает демо: <b>white-label</b> (свой бренд у каждого салона), <b>биллинг</b> (статусы триал/активен/заблокирован — у заблокированного витрина закрыта), <b>онбординг</b> (подключение нового салона в пару кликов). Под капотом за это отвечают модули из <code>saas_blueprint/</code>, проверенные ~98 тестами.</p>
+</div>
+
+<script>
+(function(){
+  var palette=['#b8924f','#3563d6','#1f9d6b','#c0476d','#7a52c4'];
+  var salons=[
+    {name:'Мужская Эстетика',city:'Ставрополь',mono:'МЭ',accent:'#b8924f',status:'active',plan:'Про',masters:['Стас','Илья','Алексей'],services:[['Мужская стрижка',2000],['Окантовка бороды',800],['Камуфляж седины',1500]]},
+    {name:'Barber Loft',city:'Москва',mono:'BL',accent:'#3563d6',status:'trial',plan:'Старт',masters:['Денис','Артём'],services:[['Стрижка',1800],['Бритьё опасной',1400]]},
+    {name:'Классика и Бритва',city:'Казань',mono:'КБ',accent:'#1f9d6b',status:'suspended',plan:'Про',masters:['Рустам'],services:[['Стрижка',1500],['Уход за бородой',900]]}
+  ];
+  var sel=0, picked=palette[3];
+  var STAT={active:['Активен','--color-background-success','--color-text-success'],trial:['Триал','--color-background-info','--color-text-info'],suspended:['Заблокирован','--color-background-danger','--color-text-danger']};
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+  function phone(s){
+    var body = s.status==='suspended'
+      ? '<div style="padding:38px 16px;text-align:center;color:var(--color-text-secondary)"><i class="ti ti-lock" style="font-size:26px"></i><div style="margin-top:10px;font-size:13px">Подписка приостановлена</div></div>'
+      : '<button style="width:100%;border:none;border-radius:10px;padding:11px;color:#fff;font-size:14px;background:'+s.accent+';margin-bottom:14px;cursor:pointer"><i class="ti ti-calendar"></i>&nbsp; Записаться</button>'
+        +'<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Мастера</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'+s.masters.map(function(m){return '<span style="font-size:12px;border:0.5px solid var(--color-border-tertiary);border-radius:20px;padding:3px 9px">'+esc(m)+'</span>'}).join('')+'</div>'
+        +'<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">Услуги</div>'
+        +s.services.map(function(x){return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-top:0.5px solid var(--color-border-tertiary)"><span>'+esc(x[0])+'</span><span style="color:var(--color-text-secondary)">'+x[1].toLocaleString('ru')+' ₽</span></div>'}).join('');
+    return '<div style="border:1px solid var(--color-border-secondary);border-radius:24px;overflow:hidden;background:var(--color-background-primary)">'
+      +'<div style="background:'+s.accent+';padding:16px 14px;color:#fff;display:flex;align-items:center;gap:10px">'
+      +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px">'+esc(s.mono)+'</div>'
+      +'<div><div style="font-size:14px;font-weight:500">'+esc(s.name)+'</div><div style="font-size:11px;opacity:.88">'+esc(s.city)+' · '+esc(s.plan)+'</div></div></div>'
+      +'<div style="padding:16px">'+body+'</div></div>';
+  }
+  function render(){
+    document.getElementById('sd-phone').innerHTML=phone(salons[sel]);
+    document.getElementById('sd-chips').innerHTML=salons.map(function(s,i){return '<button class="sd-chip" aria-pressed="'+(i===sel)+'" data-i="'+i+'"><span style="width:10px;height:10px;border-radius:3px;background:'+s.accent+';display:inline-block"></span>'+esc(s.name)+'</button>'}).join('');
+    document.getElementById('sd-platform').innerHTML=salons.map(function(s,i){var st=STAT[s.status];return '<div class="sd-row"><span style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:8px;height:8px;border-radius:2px;background:'+s.accent+';display:inline-block"></span>'+esc(s.name)+'</span><span style="display:flex;align-items:center;gap:8px"><span class="sd-pill" style="background:var('+st[1]+');color:var('+st[2]+')">'+st[0]+'</span><button class="sd-btn" data-t="'+i+'">'+(s.status==='suspended'?'Включить':'Блок')+'</button></span></div>'}).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.sd-chip'),function(b){b.onclick=function(){sel=+b.dataset.i;render()}});
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t]'),function(b){b.onclick=function(){var i=+b.dataset.t;salons[i].status=(salons[i].status==='suspended'?'active':'suspended');render()}});
+  }
+  document.getElementById('sd-colors').innerHTML=palette.map(function(c,i){return '<button data-c="'+c+'" aria-label="Цвет бренда" style="width:26px;height:26px;border-radius:7px;border:'+(i===3?'2px solid var(--color-text-primary)':'0.5px solid var(--color-border-secondary)')+';background:'+c+';cursor:pointer"></button>'}).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('[data-c]'),function(b){b.onclick=function(){picked=b.dataset.c;Array.prototype.forEach.call(document.querySelectorAll('[data-c]'),function(x){x.style.border=(x.dataset.c===picked?'2px solid var(--color-text-primary)':'0.5px solid var(--color-border-secondary)')})}});
+  document.getElementById('sd-add').onclick=function(){
+    var nm=(document.getElementById('sd-name').value||'').trim()||'Новый салон';
+    var mono=(nm.replace(/[^A-Za-zА-Яа-яЁё]/g,'').slice(0,2)||'НС').toUpperCase();
+    salons.push({name:nm,city:'ваш город',mono:mono,accent:picked,status:'trial',plan:'Старт',masters:['Мастер 1','Мастер 2'],services:[['Стрижка',1800],['Борода',900]]});
+    sel=salons.length-1;document.getElementById('sd-name').value='';render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
