@@ -2,11 +2,13 @@
 
 This map was created after scanning `/Users/stanislavmosin/Desktop` and comparing key local files with the Beget snapshot in `beget_remote_snapshot_2026-06-28`.
 
-## Main website
+## Main website - мужскаяэстетика.рф
 
 Primary source:
 
 - `/Users/stanislavmosin/Desktop/maya-web`
+
+This is the source/project folder for the public website `мужскаяэстетика.рф`.
 
 Important paths:
 
@@ -21,6 +23,7 @@ Important paths:
 Evidence:
 
 - `maya-web/.next-export/index.html` matches Beget `muzhskayaestetika.rf/public_html/index.html` byte-for-byte.
+- Beget `muzhskayaestetika.rf/public_html/` is the deployed domain folder for `мужскаяэстетика.рф`.
 - Next build marker in both local export and Beget is `SoGeNLL_lOJXGDN7avgw4`.
 - `maya-web/package.json` defines `next dev -p 8770`, `next build`, and `next start -p 8770`.
 
