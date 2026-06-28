@@ -20568,6 +20568,10 @@ window.__meApplyRootBg = function () {
   try {
     document.documentElement.style.background = bg;
     if (document.body) document.body.style.background = bg;
+    var appBg = document.getElementById('me-bg');
+    if (appBg) appBg.style.background = bg;
+    var root = document.getElementById('root');
+    if (root) root.style.background = bg;
     var m = document.getElementById('me-theme-color');
     if (m) m.setAttribute('content', bg);
   } catch (e) {}
