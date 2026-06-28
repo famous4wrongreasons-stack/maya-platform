@@ -5347,8 +5347,7 @@ async def chat_handler(request: web.Request) -> web.Response:
                        "«ср»; «рублей», а не «₽»; «телефон», а не «тел.»). Если нужно перечислить много "
                        "(услуги, цены) — назови голосом главное и предложи прислать полный список текстом.]",
         }]
-    # Модель голоса: основателю — основная GPT-модель (живой разносторонний разговор),
-    # остальным — быстрая GPT-модель (короткая запись/справка).
+    # Модель голоса: для консультаций и записи клиентов используем максимальную GPT-модель.
     _vmodel = None
     if voice_mode:
         from claude_ai import _resolve_role
@@ -5576,14 +5575,14 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         history = history[-30:]
 
     # Голосовой режим (hands-free): фронт шлёт voice=true вместе с аудио. Тот же
-    # мозг/знания/инструменты, но модель быстрее и стиль под озвучку —
+    # мозг/знания/инструменты, максимальная модель и стиль под озвучку —
     # транзиентно (в историю НЕ пишем). Озвучку шлём только когда фича включена.
     voice_mode = bool(body.get("voice"))
     voice_model = None
     llm_history = history
     if voice_mode:
         from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role
-        # Основателю — основная GPT-модель (живой разговор), остальным — быстрая GPT-модель.
+        # Голосовой консультант/запись клиентов — максимальная GPT-модель.
         voice_model = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
         if history:
             llm_history = history[:-1] + [{"role": "user", "content": safe_message + _VOICE_STYLE_NUDGE}]

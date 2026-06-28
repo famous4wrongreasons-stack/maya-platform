@@ -17,9 +17,9 @@ OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
 # Backwards-compatible names: old callers still pass/import these symbols.
 CLAUDE_MODEL = OPENAI_CHAT_MODEL
-# Быстрая модель для голосового помощника (≈2.5× быстрее основной модели).
-# Точность держится на инструментах (реальные цены/слоты), а не на модели.
-VOICE_CLAUDE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", OPENAI_FAST_MODEL)
+# Голосовой консультант и запись клиентов требуют максимальной модели:
+# здесь важнее качество диалога и tool-use, чем экономия на коротком ходе.
+VOICE_CLAUDE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
 from memory import build_context
 from prompts import SYSTEM_PROMPT
 from yclients import YClientsAPI, get_schedule_from_file, get_day_hours

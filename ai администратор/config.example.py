@@ -51,7 +51,7 @@ OPENAI_API_KEY = _req("OPENAI_API_KEY")
 OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
-OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_FAST_MODEL)
+OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
 
 # ── Claude (Anthropic) — legacy/fallback, можно не задавать ──────────────────
 CLAUDE_API_KEY = _opt("CLAUDE_API_KEY", "")
@@ -140,5 +140,5 @@ WEBHOOK_BIND = _opt("WEBHOOK_BIND", "0.0.0.0")
 # ── AI-советы мастерам ────────────────────────────────────────────────────────
 MASTERS_AI_PROVIDER = "openai"              # "claude" | "openai"
 MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # legacy/fallback
-MASTERS_OPENAI_MODEL = OPENAI_FAST_MODEL
+MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", "gpt-5.4")
 MASTERS_AI_TIMEOUT = 5.0
