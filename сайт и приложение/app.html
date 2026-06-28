@@ -20454,30 +20454,20 @@ function ATeamChat() {
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
   const bubbleTail = (mine, fill) => React.createElement('svg', {
     key: 'tail',
-    width: 22,
-    height: 18,
-    viewBox: '0 0 22 18',
+    width: 15,
+    height: 13,
+    viewBox: '0 0 15 13',
     style: Object.assign({
       position: 'absolute',
-      bottom: -2,
+      bottom: -3,
       pointerEvents: 'none',
       zIndex: 0,
       transform: mine ? 'none' : 'scaleX(-1)'
-    }, mine ? { right: -7 } : { left: -7 })
+    }, mine ? { right: -5 } : { left: -5 })
   }, React.createElement('path', {
-    d: 'M1 1C4.2 8.3 10.6 13.5 21 14.8C15.2 18.3 6.5 16.7 2.8 9.8C1.4 7.2 0.7 3.8 1 1Z',
+    d: 'M0.8 0.8C2.7 6 7.1 9.7 14.1 10.4C10.3 13 4.7 11.7 2.3 7.6C1.2 5.6 0.5 2.9 0.8 0.8Z',
     fill: fill
   }));
-  const sentTicks = React.createElement('svg', {
-    width: 28,
-    height: 16,
-    viewBox: '0 0 28 16',
-    fill: 'none',
-    style: { flexShrink: 0, marginLeft: 1, transform: 'translateY(2px)' }
-  },
-    React.createElement('path', { d: 'M1.5 8.2 5.8 12.5 15.1 3.2', stroke: 'rgba(255,255,255,0.9)', strokeWidth: 2.2, strokeLinecap: 'round', strokeLinejoin: 'round' }),
-    React.createElement('path', { d: 'M10.6 8.2 14.9 12.5 24.2 3.2', stroke: 'rgba(255,255,255,0.9)', strokeWidth: 2.2, strokeLinecap: 'round', strokeLinejoin: 'round' })
-  );
 
   const onlineIds = new Set((online || []).map(o => o.chat_id));
   const bubbles = msgs.length ? msgs.map(m => {
@@ -20510,13 +20500,6 @@ function ATeamChat() {
     const bubbleFill = mine ? OWN_FILL : IN_FILL;
     const bubbleBg = mine ? 'linear-gradient(180deg,#3ee267 0%,#34c759 100%)' : IN_FILL;
     const textOnly = !!m.text && !mediaEl;
-    const mineTextBody = textOnly && mine ? React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', gap: 12, minWidth: 0 } },
-      React.createElement('div', { style: { minWidth: 0, fontFamily: BODY, fontSize: 16.5, lineHeight: 1.28, wordBreak: 'break-word', whiteSpace: 'pre-wrap' } }, m.text),
-      React.createElement('div', { style: { display: 'inline-flex', alignItems: 'center', flexShrink: 0, gap: 3, marginLeft: 2 } },
-        React.createElement('span', { style: { fontFamily: BODY, fontSize: 12.5, lineHeight: 1, color: 'rgba(255,255,255,0.55)' } }, hhmm(m.created_at)),
-        sentTicks
-      )
-    ) : null;
     return React.createElement('div', { key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', marginBottom: 12 } },
       !mine ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, margin: '0 4px 3px' } },
         onlineIds.has(m.sender_chat_id) ? React.createElement('span', { style: { width: 6, height: 6, borderRadius: 999, background: GREEN, flexShrink: 0, boxShadow: '0 0 5px ' + GREEN } }) : null,
@@ -20524,7 +20507,7 @@ function ATeamChat() {
       ) : null,
       React.createElement('div', { style: { position: 'relative', maxWidth: '80%', padding: tight ? 4 : '10px 18px 10px 20px', borderRadius: tight ? 14 : 28, background: bubbleBg, color: mine ? OWN_INK : IN_INK, boxShadow: mine && textOnly ? 'none' : BUBBLE_SHADOW, overflow: tight ? 'hidden' : 'visible', isolation: 'isolate' } },
         !tight ? bubbleTail(mine, bubbleFill) : null,
-        React.createElement('div', { style: { position: 'relative', zIndex: 1 } }, mineTextBody || (inner.length ? inner : (m.text || '')))),
+        React.createElement('div', { style: { position: 'relative', zIndex: 1 } }, inner.length ? inner : (m.text || ''))),
       mine && textOnly ? null : React.createElement('div', { style: { fontFamily: BODY, fontSize: 9, color: DIM, margin: '3px 4px 0' } }, hhmm(m.created_at))
     );
   }) : React.createElement('div', { style: { textAlign: 'center', color: DIM, fontFamily: BODY, fontSize: 13, marginTop: 60 } }, 'Чат команды пуст.\nНапишите первое сообщение 👇');
