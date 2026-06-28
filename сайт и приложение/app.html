@@ -20244,6 +20244,7 @@ function ATeamChat() {
   const OWN_INK = '#ffffff';
   const IN_INK = dark ? '#f3ede1' : '#1f1c16';
   const PAGE_BG = dark ? '#0c0c10' : '#f4f2ee';                         // фон чата (для маски хвостика iMessage)
+  const BUBBLE_SHADOW = dark ? '0 1px 2px rgba(0,0,0,0.35)' : '0 1px 2px rgba(31,28,22,0.10)';
   const [msgs, setMsgs] = React.useState([]);
   const [me, setMe] = React.useState(null);
   const [text, setText] = React.useState('');
@@ -20269,6 +20270,28 @@ function ATeamChat() {
   const roundBtn = (bg, col) => ({ flexShrink: 0, width: 44, height: 44, borderRadius: 999, border: 'none', cursor: 'pointer', background: bg, color: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19 });
   const dots3 = (sz, col) => React.createElement('div', { style: { display: 'flex', gap: 3, alignItems: 'flex-end', height: sz + 3 } },
     [0, 1, 2].map(i => React.createElement('span', { key: i, style: { width: sz, height: sz, borderRadius: 999, background: col, animation: 'tcType 1.2s infinite', animationDelay: (i * 0.18) + 's' } })));
+
+  React.useEffect(() => {
+    const syncKeyboardBg = () => {
+      try {
+        window.__meActiveRootBg = PAGE_BG;
+        if (window.__meApplyRootBg) window.__meApplyRootBg();
+      } catch (e) {}
+    };
+    const onFocus = ev => {
+      const el = ev && ev.target;
+      if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT')) syncKeyboardBg();
+    };
+    syncKeyboardBg();
+    document.addEventListener('focusin', onFocus, true);
+    return () => {
+      document.removeEventListener('focusin', onFocus, true);
+      try {
+        if (window.__meActiveRootBg === PAGE_BG) delete window.__meActiveRootBg;
+        if (window.__meApplyRootBg) window.__meApplyRootBg();
+      } catch (e) {}
+    };
+  }, [PAGE_BG]);
 
   const scrollBottom = () => { try { const el = scRef.current; if (el) el.scrollTop = el.scrollHeight; } catch (e) {} };
   const apply = (d, append) => {
@@ -20532,7 +20555,7 @@ function ATeamChat() {
   }
 
   return React.createElement('div', {
-    style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: dark ? '#0c0c10' : '#f4f2ee' }
+    style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: PAGE_BG }
   },
     React.createElement('div', {
       style: { flexShrink: 0, padding: 'calc(env(safe-area-inset-top, 0px) + 16px) 18px 12px', borderBottom: '1px solid ' + LINE, display: 'flex', alignItems: 'center', gap: 10 }
@@ -20564,7 +20587,7 @@ try {
 }
 // keep the document root background in sync with the theme so safe-area / edge gaps never flash dark in light mode
 window.__meApplyRootBg = function () {
-  var bg = window.__meDark ? '#070810' : '#e8e5de';
+  var bg = window.__meActiveRootBg || (window.__meDark ? '#070810' : '#e8e5de');
   var scheme = window.__meDark ? 'dark' : 'light';
   var capStyle = window.__meDark ? 'DARK' : 'LIGHT';
   try {
