@@ -1,6 +1,6 @@
 """
 AI-советы по апсейлу для мастеров — единый интерфейс с переключаемыми
-бэкендами (Claude Haiku 3.5 / OpenAI GPT-4o-mini).
+бэкендами (OpenAI по умолчанию, Claude как legacy/fallback).
 
 Зачем переключатель: разные модели по-разному формулируют рекомендации,
 и какая лучше «продаёт» доп-услуги — выясняется только на практике.
@@ -52,7 +52,7 @@ def get_current_provider() -> str:
     saved = database.get_setting("masters_ai_provider")
     if saved and saved.lower() in SUPPORTED_PROVIDERS:
         return saved.lower()
-    return (MASTERS_AI_PROVIDER or "claude").lower()
+    return (MASTERS_AI_PROVIDER or "openai").lower()
 
 
 def set_current_provider(provider: str) -> bool:
@@ -345,14 +345,13 @@ async def _call_claude(prompt: str) -> str:
     return ""
 
 
-# ── Backend: OpenAI GPT-4o-mini ───────────────────────────────────────
+# ── Backend: OpenAI ───────────────────────────────────────────────────
 
 async def _call_openai(prompt: str) -> str:
     """Возвращает текст совета от OpenAI. Используем raw HTTP — без openai-sdk."""
     body = {
         "model": MASTERS_OPENAI_MODEL,
-        "max_tokens": 200,
-        "temperature": 0.6,
+        "max_completion_tokens": 200,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},

@@ -6292,11 +6292,7 @@ def _parse_anton_expenses(text: str) -> list:
             "что явно названо как расход с суммой. Никакого текста кроме JSON.\n\nСообщение:\n"
             + text[:1500]
         )
-        resp = claude_ai.client.messages.create(
-            model=claude_ai.CLAUDE_MODEL, max_tokens=600,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw = "".join(getattr(b, "text", "") for b in resp.content).strip()
+        raw = claude_ai.complete_text(prompt, model=claude_ai.OPENAI_FAST_MODEL, max_tokens=600)
         m = re.search(r"\[.*\]", raw, re.S)
         if m:
             arr = _json.loads(m.group(0))

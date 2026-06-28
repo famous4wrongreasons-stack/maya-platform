@@ -51,10 +51,32 @@ MODEL_PRICES: dict[str, dict[str, float]] = {
         "cache_write": 1.25,
         "output": 10.00,
     },
+    "gpt-5.5": {
+        "input": 5.00,
+        "cache_read": 0.50,
+        "cache_write": 5.00,
+        "output": 30.00,
+    },
+    "gpt-5.4": {
+        "input": 2.50,
+        "cache_read": 0.25,
+        "cache_write": 2.50,
+        "output": 15.00,
+    },
+    "gpt-5.4-mini": {
+        "input": 0.75,
+        "cache_read": 0.075,
+        "cache_write": 0.75,
+        "output": 4.50,
+    },
     # ── Голос MAYA (realtime + STT + TTS). Ставки $/1M токенов ПРИБЛИЗИТЕЛЬНЫЕ —
     # точные числа сверь на platform.openai.com/pricing и поправь тут при необходимости.
     # Главное — реальные счётчики токенов берём из usage ответов (точные).
     "gpt-realtime": {
+        "input": 4.00, "cache_read": 0.40, "output": 16.00,
+        "audio_input": 32.00, "audio_output": 64.00,
+    },
+    "gpt-realtime-2": {
         "input": 4.00, "cache_read": 0.40, "output": 16.00,
         "audio_input": 32.00, "audio_output": 64.00,
     },
@@ -166,10 +188,14 @@ def log_openai_usage(feature: str, model: str, response_json: dict, user_id: int
     """То же самое для ответа OpenAI Chat Completions (JSON через httpx)."""
     try:
         u = response_json.get("usage") or {}
-        input_tokens = int(u.get("prompt_tokens", 0))
-        output_tokens = int(u.get("completion_tokens", 0))
+        input_tokens = int(u.get("prompt_tokens", u.get("input_tokens", 0)) or 0)
+        output_tokens = int(u.get("completion_tokens", u.get("output_tokens", 0)) or 0)
         # У GPT-4o-mini в новых ответах есть prompt_tokens_details.cached_tokens
-        cache_read = int((u.get("prompt_tokens_details") or {}).get("cached_tokens", 0))
+        cache_read = int(
+            (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+            or (u.get("input_token_details") or {}).get("cached_tokens", 0)
+            or 0
+        )
         cost = calculate_cost_usd(
             model, input_tokens - cache_read, output_tokens, cache_read, 0
         )

@@ -1,20 +1,25 @@
 import difflib
 import json
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 
-import anthropic
 import httpx
 
 import ai_billing
 import database
-from config import CLAUDE_API_KEY, CLAUDE_MODEL, PROXY_URL
-# Быстрая модель для голосового помощника (≈2.5× быстрее Sonnet через прокси).
+import config as _cfg
+
+PROXY_URL = getattr(_cfg, "PROXY_URL", "")
+OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "")
+OPENAI_BASE_URL = getattr(_cfg, "OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5")
+OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
+# Backwards-compatible names: old callers still pass/import these symbols.
+CLAUDE_MODEL = OPENAI_CHAT_MODEL
+# Быстрая модель для голосового помощника (≈2.5× быстрее основной модели).
 # Точность держится на инструментах (реальные цены/слоты), а не на модели.
-try:
-    from config import VOICE_CLAUDE_MODEL
-except ImportError:
-    VOICE_CLAUDE_MODEL = "claude-haiku-4-5"
+VOICE_CLAUDE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", OPENAI_FAST_MODEL)
 from memory import build_context
 from prompts import SYSTEM_PROMPT
 from yclients import YClientsAPI, get_schedule_from_file, get_day_hours
@@ -23,15 +28,16 @@ logger = logging.getLogger(__name__)
 
 yclients = YClientsAPI()
 
-# На сервере в РФ Claude API геоблокирует российские IP — ходим через прокси.
-# В модель уходят только обезличенные данные, поэтому гнать их через прокси безопасно.
-if PROXY_URL:
-    client = anthropic.Anthropic(
-        api_key=CLAUDE_API_KEY,
-        http_client=httpx.Client(proxy=PROXY_URL, timeout=60.0),
-    )
-else:
-    client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
+# OpenAI API тоже ходит через общий PROXY_URL, если он задан на VPS.
+# В модель уходит только обезличенный текст; инструменты и ПД остаются на сервере.
+_openai_client = httpx.Client(proxy=PROXY_URL or None, timeout=90.0)
+
+
+@dataclass
+class _ToolUse:
+    id: str
+    name: str
+    input: dict
 
 # ─── Инструменты (tools) для AI ─────────────────────────────────────────────
 #
@@ -1643,6 +1649,220 @@ def _msgs_with_cache(messages: list) -> list:
     return result
 
 
+def _strip_anthropic_meta(value):
+    """Remove Anthropic-only cache_control markers before sending data to OpenAI."""
+    if isinstance(value, dict):
+        return {
+            k: _strip_anthropic_meta(v)
+            for k, v in value.items()
+            if k != "cache_control"
+        }
+    if isinstance(value, list):
+        return [_strip_anthropic_meta(v) for v in value]
+    return value
+
+
+def _system_text(system_blocks: list) -> str:
+    parts = []
+    for block in system_blocks or []:
+        if isinstance(block, dict) and block.get("type") == "text":
+            parts.append(str(block.get("text") or ""))
+        elif isinstance(block, str):
+            parts.append(block)
+    return "\n\n".join(p for p in parts if p)
+
+
+def _content_text(content) -> str:
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, dict):
+                if block.get("type") == "text":
+                    parts.append(str(block.get("text") or ""))
+                elif block.get("type") == "tool_result":
+                    parts.append(str(block.get("content") or ""))
+            elif hasattr(block, "type") and getattr(block, "type", None) == "text":
+                parts.append(str(getattr(block, "text", "") or ""))
+        return "\n".join(p for p in parts if p)
+    return str(content)
+
+
+def _tools_for_openai(role: str) -> list[dict]:
+    tools = []
+    for t in _tools_for_role(role):
+        schema = _strip_anthropic_meta(t.get("input_schema") or {
+            "type": "object",
+            "properties": {},
+        })
+        tools.append({
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": t.get("description", ""),
+                "parameters": schema,
+            },
+        })
+    return tools
+
+
+def _to_openai_messages(messages: list, system_blocks: list) -> list[dict]:
+    out = [{"role": "system", "content": _system_text(system_blocks)}]
+    for msg in messages or []:
+        role = msg.get("role", "user")
+        content = msg.get("content")
+        if isinstance(content, str):
+            out.append({"role": role, "content": content})
+            continue
+
+        if isinstance(content, list):
+            tool_results = []
+            text_parts = []
+            tool_calls = []
+            for block in content:
+                btype = block.get("type") if isinstance(block, dict) else getattr(block, "type", None)
+                if btype == "tool_result":
+                    tool_results.append(block)
+                elif btype == "text":
+                    text_parts.append(block.get("text", "") if isinstance(block, dict) else getattr(block, "text", ""))
+                elif btype == "tool_use":
+                    tid = block.get("id") if isinstance(block, dict) else getattr(block, "id", "")
+                    name = block.get("name") if isinstance(block, dict) else getattr(block, "name", "")
+                    args = block.get("input") if isinstance(block, dict) else getattr(block, "input", {})
+                    tool_calls.append({
+                        "id": tid,
+                        "type": "function",
+                        "function": {
+                            "name": name,
+                            "arguments": json.dumps(args or {}, ensure_ascii=False),
+                        },
+                    })
+
+            if tool_results:
+                for tr in tool_results:
+                    tid = tr.get("tool_use_id") if isinstance(tr, dict) else getattr(tr, "tool_use_id", "")
+                    out.append({
+                        "role": "tool",
+                        "tool_call_id": tid,
+                        "content": _content_text(tr.get("content") if isinstance(tr, dict) else getattr(tr, "content", "")),
+                    })
+                continue
+
+            if tool_calls:
+                out.append({
+                    "role": "assistant",
+                    "content": "\n".join(p for p in text_parts if p) or None,
+                    "tool_calls": tool_calls,
+                })
+            else:
+                out.append({"role": role, "content": "\n".join(p for p in text_parts if p)})
+            continue
+
+        out.append({"role": role, "content": _content_text(content)})
+    return out
+
+
+def _openai_body(messages: list, user_id: int | None, role: str, model: str, max_tokens: int = 1024) -> dict:
+    return {
+        "model": model,
+        "messages": _to_openai_messages(messages, _build_system_prompt(user_id, role)),
+        "tools": _tools_for_openai(role),
+        "tool_choice": "auto",
+        "max_completion_tokens": max_tokens,
+    }
+
+
+def _openai_headers() -> dict:
+    if not OPENAI_API_KEY:
+        raise RuntimeError("OPENAI_API_KEY не задан")
+    return {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+
+def _error_text(response: httpx.Response) -> str:
+    try:
+        data = response.json()
+        err = data.get("error") or {}
+        if isinstance(err, dict):
+            return str(err.get("message") or err)
+        return str(err)
+    except Exception:
+        return response.text[:500]
+
+
+def _chat_completion(body: dict) -> dict:
+    r = _openai_client.post(
+        f"{OPENAI_BASE_URL}/chat/completions",
+        headers=_openai_headers(),
+        json=body,
+    )
+    if r.status_code >= 400:
+        raise RuntimeError(f"OpenAI API error {r.status_code}: {_error_text(r)}")
+    return r.json()
+
+
+def _stream_chat_completion(body: dict):
+    stream_body = {**body, "stream": True, "stream_options": {"include_usage": True}}
+    with _openai_client.stream(
+        "POST",
+        f"{OPENAI_BASE_URL}/chat/completions",
+        headers=_openai_headers(),
+        json=stream_body,
+    ) as r:
+        if r.status_code >= 400:
+            raise RuntimeError(f"OpenAI API error {r.status_code}: {_error_text(r)}")
+        for line in r.iter_lines():
+            if not line or not line.startswith("data:"):
+                continue
+            payload = line[5:].strip()
+            if payload == "[DONE]":
+                break
+            try:
+                yield json.loads(payload)
+            except Exception:
+                continue
+
+
+def _tool_uses_from_message(message: dict) -> list[_ToolUse]:
+    out = []
+    for tc in message.get("tool_calls") or []:
+        fn = tc.get("function") or {}
+        raw_args = fn.get("arguments") or "{}"
+        try:
+            args = json.loads(raw_args)
+        except Exception:
+            args = {}
+        if fn.get("name"):
+            out.append(_ToolUse(id=tc.get("id") or "", name=fn["name"], input=args))
+    return out
+
+
+def _assistant_blocks(text: str, tool_uses: list[_ToolUse]) -> list[dict]:
+    blocks = []
+    if text:
+        blocks.append({"type": "text", "text": text})
+    for tu in tool_uses:
+        blocks.append({"type": "tool_use", "id": tu.id, "name": tu.name, "input": tu.input})
+    return blocks
+
+
+def complete_text(prompt: str, model: str | None = None, max_tokens: int = 600) -> str:
+    """Small helper for one-off internal parsing tasks that used claude_ai.client."""
+    body = {
+        "model": model or OPENAI_FAST_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_completion_tokens": max_tokens,
+    }
+    data = _chat_completion(body)
+    ai_billing.log_openai_usage("anton_internal", body["model"], data)
+    return ((data.get("choices") or [{}])[0].get("message") or {}).get("content", "").strip()
+
+
 def _run_tool_uses(tool_uses: list, messages: list, user_id: int = None) -> tuple[list, dict | None, dict | None]:
     """Выполняет tool_use-блоки одного хода модели — ЕДИНЫЙ источник правды
     для обычного и стримингового путей (правило suggest_upsell→request_booking,
@@ -1745,7 +1965,7 @@ def get_ai_response(conversation_history: list[dict], user_id: int = None, model
     contact_request — сигнал начать сбор контактов для записи.
     gift_cert_action — сигнал запустить флоу покупки сертификата (показать кнопки).
     Оба заполняются, если AI вызвал соответствующий инструмент.
-    model — переопределение модели (голос → Haiku для скорости); по умолчанию Sonnet.
+    model — переопределение модели (голос → быстрая OpenAI-модель); по умолчанию gpt-5.5.
     """
     messages = conversation_history.copy()
     contact_request = None
@@ -1754,40 +1974,20 @@ def get_ai_response(conversation_history: list[dict], user_id: int = None, model
     role = _resolve_role(user_id)
 
     while True:
-        response = client.messages.create(
-            model=mdl,
-            max_tokens=1024,
-            system=_build_system_prompt(user_id, role),
-            tools=_tools_for_role(role),
-            messages=_msgs_with_cache(messages),
-        )
+        data = _chat_completion(_openai_body(messages, user_id, role, mdl))
+        ai_billing.log_openai_usage("anton_chat", mdl, data, user_id=user_id)
 
-        # Лог кеша — видно в journalctl, что экономия работает
-        u = response.usage
-        cw = getattr(u, "cache_creation_input_tokens", 0) or 0
-        cr = getattr(u, "cache_read_input_tokens", 0) or 0
-        if cw or cr:
-            logger.info(f"💾 кеш Claude: чтение {cr}, запись {cw}, обычный input {u.input_tokens}")
-
-        # Учёт расхода: каждый вызов Антона идёт в журнал — для /ai_cost
-        ai_billing.log_anthropic_usage("anton_chat", CLAUDE_MODEL, response, user_id=user_id)
-
-        # Собираем текст и tool_use блоки из ответа
-        text_parts = []
-        tool_uses = []
-
-        for block in response.content:
-            if block.type == "text":
-                text_parts.append(block.text)
-            elif block.type == "tool_use":
-                tool_uses.append(block)
+        choice = (data.get("choices") or [{}])[0]
+        message = choice.get("message") or {}
+        response_text = (message.get("content") or "").strip()
+        tool_uses = _tool_uses_from_message(message)
 
         # Если модель закончила — возвращаем ответ
-        if response.stop_reason == "end_turn" or not tool_uses:
-            return "\n".join(text_parts).strip(), contact_request, gift_cert_action
+        if not tool_uses:
+            return response_text, contact_request, gift_cert_action
 
         # Модель хочет вызвать инструменты — выполняем их (общий хелпер)
-        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "assistant", "content": _assistant_blocks(response_text, tool_uses)})
         tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
@@ -1798,7 +1998,7 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
     """
     Стриминговый вариант get_ai_response — ГЕНЕРАТОР событий-словарей.
     Тот же «мозг» и те же инструменты, но текст ответа отдаётся по мере генерации.
-    model — переопределение модели (голос → Haiku для скорости); по умолчанию Sonnet.
+    model — переопределение модели (голос → быстрая OpenAI-модель); по умолчанию gpt-5.5.
 
     yield-ит:
       {"type": "delta", "text": "..."}   — кусок текста ответа (по мере генерации)
@@ -1821,41 +2021,52 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
     mdl = model or CLAUDE_MODEL
 
     while True:
-        with client.messages.stream(
-            model=mdl,
-            max_tokens=1024,
-            system=_build_system_prompt(user_id, role),
-            tools=_tools_for_role(role),
-            messages=_msgs_with_cache(messages),
-        ) as stream:
-            for text in stream.text_stream:
-                if text:
-                    yield {"type": "delta", "text": text}
-            final = stream.get_final_message()
-
-        # Лог кеша + учёт расхода (как в не-стрим версии)
-        u = final.usage
-        cw = getattr(u, "cache_creation_input_tokens", 0) or 0
-        cr = getattr(u, "cache_read_input_tokens", 0) or 0
-        if cw or cr:
-            logger.info(f"💾 кеш Claude(stream): чтение {cr}, запись {cw}, обычный input {u.input_tokens}")
-        ai_billing.log_anthropic_usage("anton_chat", CLAUDE_MODEL, final, user_id=user_id)
-
         text_parts = []
+        tool_acc: dict[int, dict] = {}
+        usage = None
+        for chunk in _stream_chat_completion(_openai_body(messages, user_id, role, mdl)):
+            if chunk.get("usage"):
+                usage = chunk.get("usage")
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            delta = choices[0].get("delta") or {}
+            txt = delta.get("content")
+            if txt:
+                text_parts.append(txt)
+                yield {"type": "delta", "text": txt}
+            for tc in delta.get("tool_calls") or []:
+                idx = int(tc.get("index", 0) or 0)
+                acc = tool_acc.setdefault(idx, {"id": "", "name": "", "arguments": ""})
+                if tc.get("id"):
+                    acc["id"] = tc["id"]
+                fn = tc.get("function") or {}
+                if fn.get("name"):
+                    acc["name"] = fn["name"]
+                if fn.get("arguments"):
+                    acc["arguments"] += fn["arguments"]
+
+        ai_billing.log_openai_usage("anton_chat", mdl, {"usage": usage or {}}, user_id=user_id)
+
+        final_text = "".join(text_parts).strip()
         tool_uses = []
-        for block in final.content:
-            if block.type == "text":
-                text_parts.append(block.text)
-            elif block.type == "tool_use":
-                tool_uses.append(block)
+        for idx in sorted(tool_acc):
+            acc = tool_acc[idx]
+            if not acc.get("name"):
+                continue
+            try:
+                args = json.loads(acc.get("arguments") or "{}")
+            except Exception:
+                args = {}
+            tool_uses.append(_ToolUse(id=acc.get("id") or f"call_{idx}", name=acc["name"], input=args))
 
         # Финальный ход — отдаём сигналы и выходим
-        if final.stop_reason == "end_turn" or not tool_uses:
+        if not tool_uses:
             yield {
                 "type": "meta",
                 "contact_request": contact_request,
                 "gift_cert_action": gift_cert_action,
-                "text": "\n".join(text_parts).strip(),
+                "text": final_text,
             }
             return
 
@@ -1863,7 +2074,7 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
         # не ответ, просим клиента стереть её перед следующим ходом.
         yield {"type": "reset"}
 
-        messages.append({"role": "assistant", "content": final.content})
+        messages.append({"role": "assistant", "content": _assistant_blocks(final_text, tool_uses)})
         tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action

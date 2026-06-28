@@ -46,9 +46,16 @@ TELEGRAM_TOKEN = _req("TELEGRAM_TOKEN")
 # Пусто — напрямую. Может содержать логин/пароль, поэтому тоже из окружения.
 PROXY_URL = _opt("PROXY_URL", "")
 
-# ── Claude (Anthropic) ──────────────────────────────────────────────────────
-CLAUDE_API_KEY = _req("CLAUDE_API_KEY")
-CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
+# ── OpenAI — основной мозг MAYA/Telegram-бота ───────────────────────────────
+OPENAI_API_KEY = _req("OPENAI_API_KEY")
+OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
+OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
+OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_FAST_MODEL)
+
+# ── Claude (Anthropic) — legacy/fallback, можно не задавать ──────────────────
+CLAUDE_API_KEY = _opt("CLAUDE_API_KEY", "")
+CLAUDE_MODEL = _opt("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
 
 # ── YClients ────────────────────────────────────────────────────────────────
 YCLIENTS_PARTNER_TOKEN = _req("YCLIENTS_PARTNER_TOKEN")
@@ -131,8 +138,7 @@ WEBHOOK_PORT = 8080
 WEBHOOK_BIND = _opt("WEBHOOK_BIND", "0.0.0.0")
 
 # ── AI-советы мастерам ────────────────────────────────────────────────────────
-MASTERS_AI_PROVIDER = "claude"              # "claude" | "openai"
-MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # тот же CLAUDE_API_KEY (один аккаунт/биллинг)
-OPENAI_API_KEY = _opt("OPENAI_API_KEY", "")  # СЕКРЕТ (общий с smm_bot — заведи отдельный!)
-MASTERS_OPENAI_MODEL = "gpt-4o-mini"
+MASTERS_AI_PROVIDER = "openai"              # "claude" | "openai"
+MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # legacy/fallback
+MASTERS_OPENAI_MODEL = OPENAI_FAST_MODEL
 MASTERS_AI_TIMEOUT = 5.0

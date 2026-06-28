@@ -1,16 +1,16 @@
 """
 realtime_bridge.py — голосовой мост «как у ChatGPT» для MAYA.
 
-Архитектура (мозг = Claude, голос = OpenAI gpt-realtime):
+Архитектура (мозг = OpenAI tool-loop, голос = OpenAI realtime):
   Браузер(PWA) ──wss──> наш VPS ──proxy──> OpenAI realtime
   • realtime = уши (быстрый STT) + рот (живая потоковая озвучка без швов);
-  • Claude (claude_ai.get_ai_response) = мозг: инструменты, роли, память, 152-ФЗ.
+  • claude_ai.get_ai_response = совместимый OpenAI-backed мозг: инструменты, роли, память, 152-ФЗ.
 
 Поток одного хода:
   1. клиент шлёт PCM16-чанки микрофона (binary) → realtime input_audio_buffer;
   2. server-VAD ловит конец речи → транскрипт (conversation.item.input_audio_transcription.completed);
-  3. транскрипт → Claude (в потоке-executor, чтобы не блокировать сокет);
-  4. ответ Claude → realtime response.create «произнеси дословно» → output_audio.delta;
+  3. транскрипт → OpenAI tool-loop (в потоке-executor, чтобы не блокировать сокет);
+  4. ответ мозга → realtime response.create «произнеси дословно» → output_audio.delta;
   5. аудио-чанки (binary PCM16) летят клиенту, тот играет без швов.
 
 Barge-in: заговорил во время ответа → realtime шлёт speech_started → шлём response.cancel
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "") if _cfg else ""
 PROXY_URL = (getattr(_cfg, "PROXY_URL", "") if _cfg else "") or None
-RT_MODEL = getattr(_cfg, "REALTIME_MODEL", "gpt-realtime") if _cfg else "gpt-realtime"
+RT_MODEL = getattr(_cfg, "REALTIME_MODEL", "gpt-realtime-2") if _cfg else "gpt-realtime-2"
 RT_VOICE = getattr(_cfg, "REALTIME_VOICE", "marin") if _cfg else "marin"
 RT_STT_MODEL = getattr(_cfg, "REALTIME_STT_MODEL", "gpt-4o-transcribe") if _cfg else "gpt-4o-transcribe"
 # «low» = терпеливый: ждёт конец фразы по смыслу/интонации, не обрывает на паузах.
@@ -127,7 +127,7 @@ def is_enabled() -> bool:
 
 
 def _session_config() -> dict:
-    """GA-конфиг сессии: STT вкл, server-VAD без авто-ответа (отвечает Claude)."""
+    """GA-конфиг сессии: STT вкл, server-VAD без авто-ответа (отвечает tool-loop)."""
     return {"type": "session.update", "session": {
         "type": "realtime",
         "output_modalities": ["audio"],
@@ -146,7 +146,7 @@ def _session_config() -> dict:
                 "turn_detection": {
                     "type": "semantic_vad",
                     "eagerness": RT_VAD_EAGERNESS,
-                    "create_response": False,     # отвечает Claude, не realtime сам
+                    "create_response": False,     # отвечает tool-loop, не realtime сам
                     "interrupt_response": False,
                 },
             },
@@ -183,7 +183,7 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int) -> None:
                 await ws_oa.send_json(_session_config())
 
                 async def say(text: str) -> None:
-                    """Озвучить готовый текст Claude дословно.
+                    """Озвучить готовый текст OpenAI tool-loop дословно.
 
                     Анти-задвоение: общий send_lock + ожидание response_done (предыдущий
                     ответ доиграл/отменён) ПЕРЕД отправкой, и response_done.clear() прямо
@@ -213,7 +213,7 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int) -> None:
                             logger.error(f"RT answer send: {_e}")
 
                 async def think_and_reply(transcript: str) -> None:
-                    """Транскрипт → Claude (мозг) → озвучка ответа. В отдельной задаче."""
+                    """Транскрипт → OpenAI tool-loop (мозг) → озвучка ответа. В отдельной задаче."""
                     state["thinking"] = True
                     state["turn_speaking"] = False
                     try:
@@ -228,7 +228,7 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int) -> None:
                             "role": "user",
                             "content": history[-1]["content"] + _VOICE_NUDGE,
                         }]
-                        # Claude — синхронный, гоним в executor, чтобы не вешать сокет
+                        # Tool-loop синхронный, гоним в executor, чтобы не вешать сокет.
                         from claude_ai import get_ai_response
                         reply, *_ = await loop.run_in_executor(
                             None, get_ai_response, llm_history, chat_id, None)

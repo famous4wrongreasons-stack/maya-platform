@@ -3627,21 +3627,18 @@ def _god_health_checks() -> dict:
         add("yclients", "YClients · запись и лицензия", "fail", str(e)[:90])
 
     # 2) Ключи ИИ
-    ck = getattr(config, "CLAUDE_API_KEY", "") or ""
     ok_key = getattr(config, "OPENAI_API_KEY", "") or ""
     fk = getattr(config, "FAL_KEY", "") or os.environ.get("FAL_KEY", "")
     missing = []
-    if not (ck and ck.startswith("sk-ant")):
-        missing.append("Claude")
     if not (ok_key and ok_key.startswith("sk-")):
         missing.append("OpenAI")
     if not fk:
         missing.append("fal.ai")
     if missing:
-        add("ai_keys", "Ключи ИИ (Claude/OpenAI/fal)", "fail",
+        add("ai_keys", "Ключи ИИ (OpenAI/fal)", "fail",
             "Нет/некорректны: " + ", ".join(missing))
     else:
-        add("ai_keys", "Ключи ИИ (Claude/OpenAI/fal)", "ok", "Все ключи на месте")
+        add("ai_keys", "Ключи ИИ (OpenAI/fal)", "ok", "Все ключи на месте")
 
     # 3) База данных пишется
     try:
@@ -5220,7 +5217,7 @@ def _master_chat_shortcut(chat_id: int, message: str) -> str | None:
 async def chat_handler(request: web.Request) -> web.Response:
     """
     POST /api/chat — чат с ассистентом прямо в приложении.
-    Тот же «мозг», что у Telegram-бота (claude_ai.get_ai_response) и ТА ЖЕ
+    Тот же «мозг», что у Telegram-бота (OpenAI-backed claude_ai.get_ai_response) и ТА ЖЕ
     история переписки (memory по user_id) — диалог общий с ботом.
 
     Авторизация — как у кабинета: либо X-Telegram-InitData (Mini App),
@@ -5350,8 +5347,8 @@ async def chat_handler(request: web.Request) -> web.Response:
                        "«ср»; «рублей», а не «₽»; «телефон», а не «тел.»). Если нужно перечислить много "
                        "(услуги, цены) — назови голосом главное и предложи прислать полный список текстом.]",
         }]
-    # Модель голоса: основателю — умный Sonnet (живой разносторонний разговор),
-    # остальным — быстрый Haiku (короткая запись/справка). Текст — всегда Sonnet.
+    # Модель голоса: основателю — основная GPT-модель (живой разносторонний разговор),
+    # остальным — быстрая GPT-модель (короткая запись/справка).
     _vmodel = None
     if voice_mode:
         from claude_ai import _resolve_role
@@ -5579,14 +5576,14 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         history = history[-30:]
 
     # Голосовой режим (hands-free): фронт шлёт voice=true вместе с аудио. Тот же
-    # мозг/знания/инструменты, но модель быстрее (Haiku) и стиль под озвучку —
+    # мозг/знания/инструменты, но модель быстрее и стиль под озвучку —
     # транзиентно (в историю НЕ пишем). Озвучку шлём только когда фича включена.
     voice_mode = bool(body.get("voice"))
     voice_model = None
     llm_history = history
     if voice_mode:
         from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role
-        # Основателю — умный Sonnet (живой разговор), остальным — быстрый Haiku.
+        # Основателю — основная GPT-модель (живой разговор), остальным — быстрая GPT-модель.
         voice_model = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
         if history:
             llm_history = history[:-1] + [{"role": "user", "content": safe_message + _VOICE_STYLE_NUDGE}]
@@ -5610,7 +5607,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if transcript:
         await _send({"type": "transcript", "text": transcript})
 
-    # Генератор — синхронный и блокирующий (sync Anthropic-клиент + сетевые
+    # Генератор — синхронный и блокирующий (OpenAI API + сетевые
     # инструменты). Крутим его в потоке, события переливаем в очередь loop'а.
     loop = asyncio.get_event_loop()
     queue: asyncio.Queue = asyncio.Queue()
@@ -5797,7 +5794,7 @@ async def realtime_handler(request: web.Request) -> web.Response:
     GET /api/realtime — голосовой мост «как ChatGPT» (WebSocket).
     Авторизация первым сообщением {type:"auth", session_token|auth_data|init_data}
     (браузерный WS не умеет кастомные заголовки). Дальше — realtime_bridge.run_session.
-    Наружу открыт только этот путь (nginx), мост сам гоняет звук realtime↔Claude.
+    Наружу открыт только этот путь (nginx), мост сам гоняет звук realtime↔OpenAI tool-loop.
     """
     import realtime_bridge
     import aiohttp
