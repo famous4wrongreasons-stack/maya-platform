@@ -20454,9 +20454,9 @@ function ATeamChat() {
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
   const bubbleTail = (mine, fill) => React.createElement('svg', {
     key: 'tail',
-    width: 20,
-    height: 14,
-    viewBox: '0 0 20 14',
+    width: 18,
+    height: 16,
+    viewBox: '0 0 18 16',
     style: Object.assign({
       position: 'absolute',
       bottom: -2,
@@ -20465,7 +20465,7 @@ function ATeamChat() {
       transform: mine ? 'none' : 'scaleX(-1)'
     }, mine ? { right: -6 } : { left: -6 })
   }, React.createElement('path', {
-    d: 'M0.4 0.4C4.9 0.9 8.9 2.5 12.2 5.2C14.3 7 17 7.7 19.5 6.9C17.3 10.8 10.8 13.4 5.2 11.1C2.4 10 0.9 7.1 0.4 0.4Z',
+    d: 'M1 1C3.1 8.2 8.4 12.9 17 13.2C12.2 16.4 5.8 14.5 2.6 9.5C1.3 7.5 0.6 3.9 1 1Z',
     fill: fill
   }));
 
@@ -20496,7 +20496,7 @@ function ATeamChat() {
     }
     const inner = [];
     if (mediaEl) inner.push(React.createElement('div', { key: 'md', style: { borderRadius: tight ? 10 : 0, overflow: 'hidden' } }, mediaEl));
-    if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { fontFamily: BODY, fontSize: 16.5, lineHeight: 1.28, wordBreak: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0 } }, m.text));
+    if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { maxWidth: '100%', fontFamily: BODY, fontSize: 16.5, lineHeight: 1.28, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0 } }, m.text));
     const bubbleFill = mine ? OWN_FILL : IN_FILL;
     const bubbleBg = mine ? 'linear-gradient(180deg,#3ee267 0%,#34c759 100%)' : IN_FILL;
     const textOnly = !!m.text && !mediaEl;
@@ -20505,7 +20505,7 @@ function ATeamChat() {
         onlineIds.has(m.sender_chat_id) ? React.createElement('span', { style: { width: 6, height: 6, borderRadius: 999, background: GREEN, flexShrink: 0, boxShadow: '0 0 5px ' + GREEN } }) : null,
         React.createElement('span', { style: { fontFamily: BODY, fontSize: 10.5, color: DIM, fontWeight: 600 } }, m.sender_name || 'Сотрудник')
       ) : null,
-      React.createElement('div', { style: { position: 'relative', maxWidth: '80%', padding: tight ? 4 : '10px 18px 10px 20px', borderRadius: tight ? 14 : 28, background: bubbleBg, color: mine ? OWN_INK : IN_INK, boxShadow: mine && textOnly ? 'none' : BUBBLE_SHADOW, overflow: tight ? 'hidden' : 'visible', isolation: 'isolate' } },
+      React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: mine ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: tight ? 4 : '12px 28px', borderRadius: tight ? 14 : 32, background: bubbleBg, color: mine ? OWN_INK : IN_INK, boxShadow: mine && textOnly ? 'none' : BUBBLE_SHADOW, overflow: tight ? 'hidden' : 'visible', isolation: 'isolate' } },
         !tight ? bubbleTail(mine, bubbleFill) : null,
         React.createElement('div', { style: { position: 'relative', zIndex: 1 } }, inner.length ? inner : (m.text || ''))),
       mine && textOnly ? null : React.createElement('div', { style: { fontFamily: BODY, fontSize: 9, color: DIM, margin: '3px 4px 0' } }, hhmm(m.created_at))
