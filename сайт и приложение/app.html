@@ -20239,12 +20239,12 @@ function ATeamChat() {
   const SEND_INK = dark ? '#15140f' : '#f2f0ec';
   const GREEN = '#3f9e6a';                                              // «в сети» (как online-точка в приложении)
   // Пузыри в стиле iMessage: свои — зелёные, входящие — серые, с хвостиком, без обводки
-  const OWN_FILL = '#34c759';                                           // зелёный (свои)
-  const IN_FILL = dark ? '#2c2c31' : '#e9e9ea';                         // серый «пузырь» (входящие)
+  const OWN_FILL = dark ? '#30d158' : '#34c759';                        // iOS Messages green
+  const IN_FILL = dark ? '#2c2c2e' : '#e9e9eb';                         // iOS Messages gray
   const OWN_INK = '#ffffff';
   const IN_INK = dark ? '#f3ede1' : '#000000';
   const PAGE_BG = dark ? '#0c0c10' : '#ffffff';                         // фон чата (для маски хвостика iMessage)
-  const BUBBLE_SHADOW = dark ? '0 1px 2px rgba(0,0,0,0.35)' : '0 1px 2px rgba(31,28,22,0.10)';
+  const BUBBLE_SHADOW = 'none';
   const CHAT_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
   const [msgs, setMsgs] = React.useState([]);
   const [me, setMe] = React.useState(null);
@@ -20453,16 +20453,17 @@ function ATeamChat() {
     }).catch(() => flashErr('Нет доступа к микрофону'));
   };
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
-  const SVG_BUBBLE_PATH = 'M18 0H114C123.941 0 132 8.05887 132 18C132 27.9411 123.941 36 114 36H24.5C22.0147 36 19.6047 37.0041 17.8489 38.7612L14 40L15.2388 36.1511C15.7506 35.6389 16.004 34.9446 16.004 34.2225V34C6.98933 33.4016 0 25.7842 0 16.5C0 7.3873 7.3873 0 16.5 0H18Z';
+  const BUBBLE_TAIL_PATH = 'M0.6 0C2.8 7.8 9.2 13.2 21.4 14.5C15.1 18.8 6.3 18.3 2 11.4C0.3 8.5-0.3 3.7 0.6 0Z';
   const MessageBubble = ({ side, children, tight }) => {
     const right = side === 'right';
-    const fill = right ? '#DCF8C6' : '#E5E5E5';
+    const fill = right ? OWN_FILL : IN_FILL;
+    const ink = right ? OWN_INK : IN_INK;
     if (tight) {
-      return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '72%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: 4, borderRadius: 14, background: fill, color: IN_INK, boxShadow: BUBBLE_SHADOW, overflow: 'hidden' } }, children);
+      return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: 3, borderRadius: 17, background: fill, color: ink, boxShadow: BUBBLE_SHADOW, overflow: 'hidden' } }, children);
     }
-    return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '72%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', minHeight: 40, padding: right ? '9px 30px 10px 26px' : '9px 26px 10px 30px', color: IN_INK, overflow: 'visible', isolation: 'isolate' } },
-      React.createElement('svg', { key: 'bg', width: '100%', height: '100%', viewBox: '0 0 132 40', preserveAspectRatio: 'none', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', style: { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'visible' } },
-        React.createElement('path', { d: SVG_BUBBLE_PATH, fill: fill, transform: right ? 'translate(132 0) scale(-1 1)' : undefined })),
+    return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', minHeight: 35, padding: '7px 15px 8px', borderRadius: 18.5, background: fill, color: ink, boxShadow: BUBBLE_SHADOW, overflow: 'visible', isolation: 'isolate' } },
+      React.createElement('svg', { key: 'tail', width: 22, height: 18, viewBox: '0 0 22 18', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', style: Object.assign({ position: 'absolute', bottom: -1, zIndex: 0, pointerEvents: 'none', overflow: 'visible' }, right ? { right: -7 } : { left: -7 }) },
+        React.createElement('path', { d: BUBBLE_TAIL_PATH, fill: fill, transform: right ? undefined : 'translate(22 0) scale(-1 1)' })),
       React.createElement('div', { style: { position: 'relative', zIndex: 1, maxWidth: '100%' } }, children)
     );
   };

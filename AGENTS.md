@@ -70,24 +70,20 @@ Current component location:
 - `сайт и приложение/app.html` around `ATeamChat()`
 - `/Users/stanislavmosin/Desktop/maya-ios/www/index.html` around `ATeamChat()`
 
-Canonical path:
+Canonical tail path:
 
 ```js
-const SVG_BUBBLE_PATH = 'M18 0H114C123.941 0 132 8.05887 132 18C132 27.9411 123.941 36 114 36H24.5C22.0147 36 19.6047 37.0041 17.8489 38.7612L14 40L15.2388 36.1511C15.7506 35.6389 16.004 34.9446 16.004 34.2225V34C6.98933 33.4016 0 25.7842 0 16.5C0 7.3873 7.3873 0 16.5 0H18Z';
+const BUBBLE_TAIL_PATH = 'M0.6 0C2.8 7.8 9.2 13.2 21.4 14.5C15.1 18.8 6.3 18.3 2 11.4C0.3 8.5-0.3 3.7 0.6 0Z';
 ```
 
 Canonical behavior:
 - Use `MessageBubble({ side, children, tight })`.
-- Left/incoming fill: `#E5E5E5`.
-- Right/outgoing fill: `#DCF8C6`.
-- Right bubble mirrors the same path with `transform: 'translate(132 0) scale(-1 1)'`.
-- SVG background uses `viewBox: '0 0 132 40'`, `preserveAspectRatio: 'none'`.
-- Text is a separate layer above SVG (`zIndex: 1`).
-- Bubble width is content-based: `display: inline-block`, `width: fit-content`, `maxWidth: 72%`.
-- Compact production sizing: `minHeight: 40`.
-- Compact text padding:
-  - right: `9px 30px 10px 26px`
-  - left: `9px 26px 10px 30px`
+- Bubble body is a normal compact rounded rect; do not stretch a whole SVG background with `preserveAspectRatio: none`.
+- Left/incoming fill: `#e9e9eb` in light mode.
+- Right/outgoing fill: `#34c759` in light mode, text white.
+- The tail is a separate 22x18 SVG path attached at the lower corner and mirrored for incoming bubbles.
+- Bubble width is content-based: `display: inline-block`, `width: fit-content`, `maxWidth: 74%`.
+- Compact production sizing: `minHeight: 35`, `borderRadius: 18.5`, `padding: 7px 15px 8px`.
 - Message text: `fontSize: 17`, `lineHeight: 1.3`, `fontWeight: 400`, `whiteSpace: pre-wrap`, `overflowWrap: break-word`.
 - Text-only bubbles do not show time/checkmarks.
 - Media/voice/file bubbles can keep their separate compact/tight handling.
