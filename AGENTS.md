@@ -82,6 +82,7 @@ Canonical behavior:
 - Left/incoming fill: `#e9e9eb` in light mode.
 - Right/outgoing fill: `#2fcc59` in light mode, text white.
 - The tail is a separate SVG path from the Figma iMessage reference, viewBox `0 0 29.7195 29.2504`, attached at the lower corner and mirrored for outgoing bubbles.
+- Keep `fillRule: 'evenodd'` and `clipRule: 'evenodd'` on the tail path; removing them reintroduces visual artifacts near the tail.
 - Bubble width is content-based: `display: inline-block`, `width: fit-content`, `maxWidth: 74%`.
 - Compact production sizing: `minHeight: 35`, `borderRadius: 18.5`, `padding: 7px 15px 8px`.
 - Message text: `fontSize: 17`, `lineHeight: 1.3`, `fontWeight: 400`, `whiteSpace: pre-wrap`, `overflowWrap: break-word`.

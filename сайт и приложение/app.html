@@ -20463,7 +20463,7 @@ function ATeamChat() {
     }
     return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', minHeight: 35, padding: '7px 15px 8px', borderRadius: 18.5, background: fill, color: ink, boxShadow: BUBBLE_SHADOW, overflow: 'visible', isolation: 'isolate' } },
       React.createElement('svg', { key: 'tail', width: 20, height: 19.7, viewBox: '0 0 29.7195 29.2504', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', style: Object.assign({ position: 'absolute', bottom: -1.5, zIndex: 0, pointerEvents: 'none', overflow: 'visible' }, right ? { right: -6.5 } : { left: -6.5 }) },
-        React.createElement('path', { d: BUBBLE_TAIL_PATH, fill: fill, transform: right ? 'translate(29.7195 0) scale(-1 1)' : undefined })),
+        React.createElement('path', { d: BUBBLE_TAIL_PATH, fill: fill, fillRule: 'evenodd', clipRule: 'evenodd', transform: right ? 'translate(29.7195 0) scale(-1 1)' : undefined })),
       React.createElement('div', { style: { position: 'relative', zIndex: 1, maxWidth: '100%' } }, children)
     );
   };
