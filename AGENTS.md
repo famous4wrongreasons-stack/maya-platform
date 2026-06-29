@@ -73,15 +73,15 @@ Current component location:
 Canonical tail path:
 
 ```js
-const BUBBLE_TAIL_PATH = 'M0.6 0C2.8 7.8 9.2 13.2 21.4 14.5C15.1 18.8 6.3 18.3 2 11.4C0.3 8.5-0.3 3.7 0.6 0Z';
+const BUBBLE_TAIL_PATH = 'M10.0206 12.9416C9.78651 11.7287 9.66391 10.4761 9.66391 9.19488V0.402926H29.3165V28.8475C24.5575 28.8475 20.1936 27.1559 16.7932 24.3413C13.4008 26.6012 7.96114 28.7495 1.38911 27.5546C3.19922 26.7788 10.1811 22.1243 9.92249 12.8151C9.95387 12.8583 9.9866 12.9004 10.0206 12.9416Z';
 ```
 
 Canonical behavior:
 - Use `MessageBubble({ side, children, tight })`.
 - Bubble body is a normal compact rounded rect; do not stretch a whole SVG background with `preserveAspectRatio: none`.
 - Left/incoming fill: `#e9e9eb` in light mode.
-- Right/outgoing fill: `#34c759` in light mode, text white.
-- The tail is a separate 22x18 SVG path attached at the lower corner and mirrored for incoming bubbles.
+- Right/outgoing fill: `#2fcc59` in light mode, text white.
+- The tail is a separate SVG path from the Figma iMessage reference, viewBox `0 0 29.7195 29.2504`, attached at the lower corner and mirrored for outgoing bubbles.
 - Bubble width is content-based: `display: inline-block`, `width: fit-content`, `maxWidth: 74%`.
 - Compact production sizing: `minHeight: 35`, `borderRadius: 18.5`, `padding: 7px 15px 8px`.
 - Message text: `fontSize: 17`, `lineHeight: 1.3`, `fontWeight: 400`, `whiteSpace: pre-wrap`, `overflowWrap: break-word`.
