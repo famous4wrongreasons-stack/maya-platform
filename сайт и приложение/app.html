@@ -20453,22 +20453,19 @@ function ATeamChat() {
     }).catch(() => flashErr('Нет доступа к микрофону'));
   };
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
-  const bubbleTail = (mine, fill) => React.createElement('svg', {
-    key: 'tail',
-    width: 28,
-    height: 24,
-    viewBox: '0 0 28 24',
-    style: Object.assign({
-      position: 'absolute',
-      bottom: -6,
-      pointerEvents: 'none',
-      zIndex: 0,
-      transform: mine ? 'none' : 'scaleX(-1)'
-    }, mine ? { right: -8 } : { left: -8 })
-  }, React.createElement('path', {
-    d: 'M0 0 C2.5 8.1 9.7 14.2 25.6 16.4 C21.1 21.6 12.2 23.7 4.5 18.1 C1.4 15.8 0.2 13.4 0.2 11.6 C4.8 10.2 7.5 7.4 7.4 4.6 C7.3 2.4 4.5 0.7 0 0 Z',
-    fill: fill
-  }));
+  const SVG_BUBBLE_PATH = 'M18 0H114C123.941 0 132 8.05887 132 18C132 27.9411 123.941 36 114 36H24.5C22.0147 36 19.6047 37.0041 17.8489 38.7612L14 40L15.2388 36.1511C15.7506 35.6389 16.004 34.9446 16.004 34.2225V34C6.98933 33.4016 0 25.7842 0 16.5C0 7.3873 7.3873 0 16.5 0H18Z';
+  const MessageBubble = ({ side, children, tight }) => {
+    const right = side === 'right';
+    const fill = right ? '#DCF8C6' : '#E5E5E5';
+    if (tight) {
+      return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '72%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: 4, borderRadius: 14, background: fill, color: IN_INK, boxShadow: BUBBLE_SHADOW, overflow: 'hidden' } }, children);
+    }
+    return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '72%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', minHeight: 72, padding: '28px 42px', color: IN_INK, overflow: 'visible', isolation: 'isolate' } },
+      React.createElement('svg', { key: 'bg', width: '100%', height: '100%', viewBox: '0 0 132 40', preserveAspectRatio: 'none', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', style: { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'visible' } },
+        React.createElement('path', { d: SVG_BUBBLE_PATH, fill: fill, transform: right ? 'translate(132 0) scale(-1 1)' : undefined })),
+      React.createElement('div', { style: { position: 'relative', zIndex: 1, maxWidth: '100%' } }, children)
+    );
+  };
 
   const onlineIds = new Set((online || []).map(o => o.chat_id));
   const bubbles = msgs.length ? msgs.map(m => {
@@ -20500,16 +20497,13 @@ function ATeamChat() {
     const inner = [];
     if (mediaEl) inner.push(React.createElement('div', { key: 'md', style: { borderRadius: tight ? 10 : 0, overflow: 'hidden' } }, mediaEl));
     if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { maxWidth: '100%', fontFamily: CHAT_FONT, fontSize: 17, fontWeight: 400, lineHeight: 1.3, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0 } }, m.text));
-    const bubbleFill = mine ? '#66ca6b' : IN_FILL;
-    const bubbleBg = mine ? 'linear-gradient(180deg,#6bcb6a 0%,#64c967 100%)' : IN_FILL;
     return React.createElement('div', { key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', margin: '4px 12px' } },
       !mine ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, margin: '0 4px 3px' } },
         onlineIds.has(m.sender_chat_id) ? React.createElement('span', { style: { width: 6, height: 6, borderRadius: 999, background: GREEN, flexShrink: 0, boxShadow: '0 0 5px ' + GREEN } }) : null,
         React.createElement('span', { style: { fontFamily: BODY, fontSize: 10.5, color: DIM, fontWeight: 600 } }, m.sender_name || 'Сотрудник')
       ) : null,
-      React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '72%', alignSelf: mine ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: tight ? 4 : '10px 16px 10px', borderRadius: tight ? 14 : 22, background: bubbleBg, color: mine ? OWN_INK : IN_INK, boxShadow: textOnly ? 'none' : BUBBLE_SHADOW, overflow: tight ? 'hidden' : 'visible', isolation: 'isolate' } },
-        !tight ? bubbleTail(mine, bubbleFill) : null,
-        React.createElement('div', { style: { position: 'relative', zIndex: 1 } }, inner.length ? inner : (m.text || ''))),
+      React.createElement(MessageBubble, { side: mine ? 'right' : 'left', tight: tight },
+        inner.length ? inner : (m.text || '')),
       textOnly ? null : React.createElement('div', { style: { fontFamily: BODY, fontSize: 9, color: DIM, margin: '3px 4px 0' } }, hhmm(m.created_at))
     );
   }) : React.createElement('div', { style: { textAlign: 'center', color: DIM, fontFamily: BODY, fontSize: 13, marginTop: 60 } }, 'Чат команды пуст.\nНапишите первое сообщение 👇');
