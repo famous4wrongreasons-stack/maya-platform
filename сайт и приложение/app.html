@@ -20454,9 +20454,9 @@ function ATeamChat() {
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
   const bubbleTail = (mine, fill) => React.createElement('svg', {
     key: 'tail',
-    width: 16,
+    width: 26,
     height: 18,
-    viewBox: '0 0 16 18',
+    viewBox: '0 0 26 18',
     style: Object.assign({
       position: 'absolute',
       bottom: 0,
@@ -20465,7 +20465,7 @@ function ATeamChat() {
       transform: mine ? 'none' : 'scaleX(-1)'
     }, mine ? { right: -6 } : { left: -6 })
   }, React.createElement('path', {
-    d: 'M1 0 C3 8 8 14 16 15 C10 19 3 17 0 10 C-1 6 0 2 1 0 Z',
+    d: 'M0 0 C4 8 12 14 26 15 C18.5 19 7.2 17.5 1.2 10 C-0.5 7 -0.4 3.2 0 0 Z',
     fill: fill
   }));
 
