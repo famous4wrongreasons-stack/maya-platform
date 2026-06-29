@@ -14,7 +14,7 @@ This is a local meta-repository for MAYA / Мужская Эстетика proje
 - Platform guide: `/Users/stanislavmosin/Desktop/сайт и приложение/AGENTS.md`
 - iOS repo: `/Users/stanislavmosin/Desktop/maya-ios`
 - iOS guide: `/Users/stanislavmosin/Desktop/maya-ios/AGENTS.md`
-- This metarepo: `/Users/stanislavmosin/Desktop/MAYA_WORKSPACE`
+- This metarepo: `/Users/stanislavmosin/Desktop/сайт и приложение/MAYA_WORKSPACE`
 
 ## Desktop Cleanup Policy
 
@@ -27,4 +27,3 @@ This is a local meta-repository for MAYA / Мужская Эстетика proje
 - Brand typography and Aurora app conventions: platform `AGENTS.md`.
 - Staff chat bubble SVG reference and current implementation: platform `AGENTS.md`, iOS `AGENTS.md`.
 - Backend/AI/bot operational rules: platform `AGENTS.md`.
-
