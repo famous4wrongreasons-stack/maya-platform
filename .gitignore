@@ -1,0 +1,11 @@
+.DS_Store
+*.log
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+node_modules/
+build/
+DerivedData/
