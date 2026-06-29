@@ -20455,17 +20455,17 @@ function ATeamChat() {
   const bubbleTail = (mine, fill) => React.createElement('svg', {
     key: 'tail',
     width: 68,
-    height: 18,
-    viewBox: '0 0 68 18',
+    height: 24,
+    viewBox: '0 0 68 24',
     style: Object.assign({
       position: 'absolute',
-      bottom: 0,
+      bottom: -2,
       pointerEvents: 'none',
       zIndex: 0,
       transform: mine ? 'none' : 'scaleX(-1)'
     }, mine ? { right: -6 } : { left: -6 })
   }, React.createElement('path', {
-    d: 'M0 0 C12 8.5 34 14.4 68 15 C51.6 19 21.6 18 4 10 C-0.4 7.3 -0.4 3.1 0 0 Z',
+    d: 'M0 0 C12 9.5 33 17 68 21 C51.8 25.5 22 22.5 4 11 C-0.4 7.7 -0.4 3.2 0 0 Z',
     fill: fill
   }));
 
