@@ -13,7 +13,7 @@
 - iOS Capacitor repo: `/Users/stanislavmosin/Desktop/maya-ios`
 - iOS web source: `/Users/stanislavmosin/Desktop/maya-ios/www/index.html`
 - iOS project: `/Users/stanislavmosin/Desktop/maya-ios/ios/App/App.xcodeproj`
-- Local workspace index: `/Users/stanislavmosin/Desktop/MAYA_WORKSPACE`
+- Local workspace index: `/Users/stanislavmosin/Desktop/сайт и приложение/MAYA_WORKSPACE`
 
 ## Product And Brand
 
@@ -172,6 +172,5 @@ sudo systemctl restart barbershop-bot
 ## Desktop Organization
 
 - Do not move existing project folders without explicit confirmation. Current paths are used by Xcode, deploy commands, Git remotes, and local scripts.
-- Use `/Users/stanislavmosin/Desktop/MAYA_WORKSPACE` as the safe local index/metarepo for documentation, project map, and operating instructions.
+- Use `/Users/stanislavmosin/Desktop/сайт и приложение/MAYA_WORKSPACE` as the safe local index/metarepo for documentation, project map, and operating instructions.
 - If full Desktop cleanup is requested later, first create a migration plan and preserve path compatibility through symlinks or updated scripts.
-
