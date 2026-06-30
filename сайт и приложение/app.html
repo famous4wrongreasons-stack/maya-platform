@@ -20210,7 +20210,28 @@ function TCVoice(props) {
   var src = proxyUrl(url);
   var fail = function () {
     setPlaying(false);
-    if (onErr) onErr('Не удалось воспроизвести голосовое');
+    var a = aRef.current, mc = '';
+    try { if (a && a.error && a.error.code) mc = a.error.code; } catch (e) {}
+    // Диагностика: тянем первые байты файла, чтобы понять причину (404 / не тот формат / битый)
+    try {
+      fetch(src, { headers: { Range: 'bytes=0-31' }, cache: 'no-store' }).then(function (r) {
+        var ct = (r.headers.get('content-type') || '?').split(';')[0];
+        return r.arrayBuffer().then(function (buf) {
+          var u = new Uint8Array(buf), sig = '';
+          for (var i = 0; i < Math.min(u.length, 12); i++) { var c = u[i]; sig += (c >= 32 && c < 127) ? String.fromCharCode(c) : '·'; }
+          try { console.log('[TCVoice] fail', { mediaErr: mc, status: r.status, ct: ct, sig: sig, src: src }); } catch (e) {}
+          var msg = (r.status === 404) ? 'Голосовое не сохранилось на сервере — отправьте заново'
+            : (ct.indexOf('audio') !== 0 && ct.indexOf('video') !== 0) ? 'Сервер вернул не аудио (' + r.status + ')'
+            : 'Формат голосового не поддерживается на устройстве';
+          if (onErr) onErr(msg);
+        });
+      }).catch(function (e) {
+        try { console.log('[TCVoice] fail net', e); } catch (e2) {}
+        if (onErr) onErr('Не удалось воспроизвести голосовое (нет связи)');
+      });
+    } catch (e) {
+      if (onErr) onErr('Не удалось воспроизвести голосовое (код' + (mc || '?') + ')');
+    }
   };
   var toggle = function () {
     try { if (window.tactile) window.tactile(); } catch (e) {}

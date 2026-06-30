@@ -4689,6 +4689,64 @@ def _authed_chat_id(request: web.Request, body: dict | None = None) -> int | Non
     return None
 
 
+async def booking_prefill_handler(request: web.Request) -> web.Response:
+    """
+    POST /api/booking/prefill — имя и телефон для финального шага онлайн-записи.
+    Отдаём полный телефон только авторизованному клиенту с действующим согласием.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+
+    def _booking_response(data: dict, status: int = 200) -> web.Response:
+        resp = _cabinet_response(data, status=status)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
+    chat_id = _authed_chat_id(request, body)
+    if not chat_id:
+        return _booking_response({"success": False, "error": "unauthorized"}, status=401)
+
+    try:
+        client = database.get_client(int(chat_id))
+    except Exception as e:
+        logger.error(f"booking_prefill: get_client {chat_id}: {e}")
+        return _booking_response({"success": False, "error": "internal"}, status=500)
+
+    if not client:
+        return _booking_response({
+            "success": True,
+            "known": False,
+            "has_phone": False,
+            "name": "",
+            "phone": "",
+        })
+
+    if not database.has_valid_consent_by_chat_id(int(chat_id)):
+        return _booking_response({
+            "success": True,
+            "known": True,
+            "needs_consent": True,
+            "has_phone": False,
+            "name": client.get("name") or "",
+            "phone": "",
+        })
+
+    phone = (client.get("phone") or "").strip()
+    phone_digits = "".join(ch for ch in phone if ch.isdigit())
+    has_phone = len(phone_digits) >= 10
+    return _booking_response({
+        "success": True,
+        "known": True,
+        "has_phone": has_phone,
+        "name": client.get("name") or "",
+        "phone": phone if has_phone else "",
+    })
+
+
 async def consent_status_handler(request: web.Request) -> web.Response:
     """
     POST /api/consent/status — какие согласия нужны клиенту?
@@ -7054,10 +7112,18 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     msg_id = await asyncio.to_thread(
         database.add_staff_message, tg_id, sender_name, text,
         media_kind, media_url, media_name, media_mime, media_size, media_dur)
-    try:
-        await _push_team_message(request.app["bot_app"], tg_id, sender_name, text, media_kind)
-    except Exception as e:
-        logger.error(f"team_chat push: {e}")
+    # Пуши шлём в фоне (fire-and-forget). Telegram идёт через единый прокси и может
+    # тормозить × N получателей — нельзя держать ответ синхронно: Beget-прокси ждёт
+    # max 25с, по таймауту считает медиафайл «осиротевшим» и удаляет его (@unlink),
+    # хотя сообщение уже сохранено выше → потом голосовое отдаёт 404. Отвечаем сразу.
+    async def _push_bg():
+        try:
+            await _push_team_message(request.app["bot_app"], tg_id, sender_name, text, media_kind)
+        except Exception as e:
+            logger.error(f"team_chat push: {e}")
+    _pt = asyncio.create_task(_push_bg())
+    _panel_bg_tasks.add(_pt)
+    _pt.add_done_callback(_panel_bg_tasks.discard)
     return _cabinet_response({"ok": True, "id": msg_id})
 
 
@@ -7481,6 +7547,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/cabinet/me-via-session", cabinet_options_handler)
     web_app.router.add_post("/api/cabinet/link-phone", cabinet_link_phone_handler)
     web_app.router.add_options("/api/cabinet/link-phone", cabinet_options_handler)
+    web_app.router.add_post("/api/booking/prefill", booking_prefill_handler)
+    web_app.router.add_options("/api/booking/prefill", cabinet_options_handler)
     web_app.router.add_get("/api/auth/status", auth_status_handler)
     web_app.router.add_options("/api/auth/status", cabinet_options_handler)
     # /api/usage/fal (логирование расхода CutMatch/fal.ai) СНЯТ 2026-06-21 —
