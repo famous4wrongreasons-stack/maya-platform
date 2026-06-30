@@ -46,8 +46,9 @@ PROXY_URL = (getattr(_cfg, "PROXY_URL", "") if _cfg else "") or None
 RT_MODEL = getattr(_cfg, "REALTIME_MODEL", "gpt-realtime-2") if _cfg else "gpt-realtime-2"
 RT_VOICE = getattr(_cfg, "REALTIME_VOICE", "marin") if _cfg else "marin"
 RT_STT_MODEL = getattr(_cfg, "REALTIME_STT_MODEL", "gpt-4o-transcribe") if _cfg else "gpt-4o-transcribe"
-# «low» = терпеливый: ждёт конец фразы по смыслу/интонации, не обрывает на паузах.
-RT_VAD_EAGERNESS = getattr(_cfg, "REALTIME_VAD_EAGERNESS", "low") if _cfg else "low"
+# «medium» быстрее схватывает конец реплики и заметно уменьшает паузу перед ответом,
+# но ещё не режет естественные микропаузы так агрессивно, как high.
+RT_VAD_EAGERNESS = getattr(_cfg, "REALTIME_VAD_EAGERNESS", "medium") if _cfg else "medium"
 # near_field = телефон у лица: давит дальний фон (ТВ/разговоры), оставляет близкий голос.
 RT_NOISE_REDUCTION = getattr(_cfg, "REALTIME_NOISE_REDUCTION", "near_field") if _cfg else "near_field"
 
@@ -142,7 +143,8 @@ def _session_config() -> dict:
                                   "prompt": _stt_prompt()},
                 # semantic_vad: конец реплики определяется по СМЫСЛУ/ИНТОНАЦИИ (моделью),
                 # а не просто по тишине → не обрывает на паузах внутри фразы.
-                # eagerness=low — самый терпеливый (дослушивает до конца мысли).
+                # eagerness=medium — быстрее даёт ответ после конца фразы, сохраняя
+                # нормальную устойчивость к коротким паузам внутри мысли.
                 "turn_detection": {
                     "type": "semantic_vad",
                     "eagerness": RT_VAD_EAGERNESS,
@@ -229,15 +231,19 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int) -> None:
                             "content": history[-1]["content"] + _VOICE_NUDGE,
                         }]
                         # Tool-loop синхронный, гоним в executor, чтобы не вешать сокет.
-                        from claude_ai import get_ai_response
+                        from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role, get_ai_response
+                        voice_model = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
                         reply, *_ = await loop.run_in_executor(
-                            None, get_ai_response, llm_history, chat_id, None)
+                            None, get_ai_response, llm_history, chat_id, voice_model)
                         reply = (reply or "Секунду, повторите, пожалуйста.").strip()
                         history.append({"role": "assistant", "content": reply})
                         conversations[chat_id] = history
-                        await loop.run_in_executor(None, save_conversations, conversations)
                         await ws_client.send_json({"type": "reply_text", "text": reply})
-                        await say(reply)
+                        save_task = loop.run_in_executor(None, save_conversations, conversations)
+                        try:
+                            await say(reply)
+                        finally:
+                            await save_task
                     except Exception as e:
                         logger.error(f"realtime think_and_reply: {e}")
                         try:

@@ -52,6 +52,7 @@ OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
 OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
+REALTIME_VAD_EAGERNESS = _opt("REALTIME_VAD_EAGERNESS", "medium")
 
 # ── Claude (Anthropic) — legacy/fallback, можно не задавать ──────────────────
 CLAUDE_API_KEY = _opt("CLAUDE_API_KEY", "")
