@@ -20191,25 +20191,70 @@ function playSendSound() {
 
 // ===== Голосовое сообщение в ленте (плеер play/pause + длительность) =====
 function TCVoice(props) {
-  var url = props.url, mine = props.mine, dark = props.dark;
+  var url = props.url, mine = props.mine, dark = props.dark, onErr = props.onErr;
   var aRef = React.useRef(null);
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
   var q = React.useState(0), pos = q[0], setPos = q[1];
   var d = React.useState(props.dur || 0), dur = d[0], setDur = d[1];
-  var ink = mine ? '#ffffff' : (dark ? '#f3ede1' : '#1f1c16');
-  var dim = mine ? 'rgba(255,255,255,0.7)' : (dark ? 'rgba(243,237,225,0.55)' : 'rgba(31,28,22,0.5)');
-  var idle = mine ? 'rgba(255,255,255,0.4)' : (dark ? 'rgba(243,237,225,0.28)' : 'rgba(31,28,22,0.22)');
-  var ensure = function () {
-    if (!aRef.current) {
-      var a = new Audio(url); aRef.current = a;
-      a.onended = function () { setPlaying(false); setPos(0); };
-      a.ontimeupdate = function () { if (a.duration && isFinite(a.duration)) setPos(a.currentTime / a.duration); };
-      a.onloadedmetadata = function () { if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration); };
-    }
-    return aRef.current;
+  var ink = '#1f1c16';
+  var dim = 'rgba(31,28,22,0.55)';
+  var idle = mine ? 'rgba(31,28,22,0.28)' : 'rgba(31,28,22,0.22)';
+  var proxyUrl = function (raw) {
+    if (!raw) return '';
+    if (raw.indexOf('action=team_chat_media') !== -1) return raw;
+    var m = String(raw).match(/\/media\/team\/([^/?#]+)/);
+    return m ? ('https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file=' + encodeURIComponent(m[1])) : raw;
   };
-  var toggle = function () { try { if (window.tactile) window.tactile(); } catch (e) {} var a = ensure(); if (a.paused) { a.play(); setPlaying(true); } else { a.pause(); setPlaying(false); } };
-  React.useEffect(function () { return function () { try { if (aRef.current) aRef.current.pause(); } catch (e) {} }; }, []);
+  var src = proxyUrl(url);
+  var fail = function () {
+    setPlaying(false);
+    if (onErr) onErr('Не удалось воспроизвести голосовое');
+  };
+  var toggle = function () {
+    try { if (window.tactile) window.tactile(); } catch (e) {}
+    var a = aRef.current;
+    if (!a) return;
+    if (!a.paused) {
+      try { a.pause(); } catch (e) {}
+      setPlaying(false);
+      return;
+    }
+    try {
+      if (a.ended || (a.duration && isFinite(a.duration) && a.currentTime >= Math.max(0, a.duration - 0.05))) a.currentTime = 0;
+    } catch (e) {}
+    var pr = a.play && a.play();
+    if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
+    else setPlaying(true);
+  };
+  React.useEffect(function () {
+    var a = new Audio(src);
+    a.preload = 'metadata';
+    a.playsInline = true;
+    try { a.setAttribute('playsinline', ''); a.setAttribute('webkit-playsinline', ''); } catch (e) {}
+    aRef.current = a;
+    var onEnded = function () { setPlaying(false); setPos(0); };
+    var onTime = function () { if (a.duration && isFinite(a.duration)) setPos(a.currentTime / a.duration); };
+    var onMeta = function () { if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration); };
+    var onPause = function () { setPlaying(false); };
+    var onPlay = function () { setPlaying(true); };
+    a.addEventListener('ended', onEnded);
+    a.addEventListener('timeupdate', onTime);
+    a.addEventListener('loadedmetadata', onMeta);
+    a.addEventListener('pause', onPause);
+    a.addEventListener('play', onPlay);
+    a.addEventListener('error', fail);
+    return function () {
+      try { a.pause(); } catch (e) {}
+      a.removeEventListener('ended', onEnded);
+      a.removeEventListener('timeupdate', onTime);
+      a.removeEventListener('loadedmetadata', onMeta);
+      a.removeEventListener('pause', onPause);
+      a.removeEventListener('play', onPlay);
+      a.removeEventListener('error', fail);
+      try { a.src = ''; a.load(); } catch (e) {}
+      if (aRef.current === a) aRef.current = null;
+    };
+  }, [src, props.dur]);
   var mm = function (s) { s = Math.max(0, Math.round(s || 0)); var m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
   var bars = [];
   for (var i = 0; i < 24; i++) {
@@ -20218,7 +20263,7 @@ function TCVoice(props) {
     bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
   }
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
-    React.createElement('button', { onClick: toggle, style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: mine ? 'rgba(255,255,255,0.22)' : (dark ? 'rgba(243,237,225,0.14)' : 'rgba(31,28,22,0.1)'), color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 } }, playing ? '⏸' : '▶'),
+    React.createElement('button', { onClick: toggle, style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: mine ? 'rgba(31,28,22,0.08)' : 'rgba(31,28,22,0.1)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 } }, playing ? '⏸' : '▶'),
     React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 2, height: 20, flex: 1 } }, bars),
     React.createElement('div', { style: { flexShrink: 0, fontFamily: BODY, fontSize: 11, color: dim } }, mm(dur))
   );
@@ -20233,16 +20278,16 @@ function ATeamChat() {
   const DIM = dark ? 'rgba(243,237,225,0.5)' : 'rgba(31,28,22,0.5)';
   const FAINT = dark ? 'rgba(243,237,225,0.30)' : 'rgba(31,28,22,0.32)';
   const LINE = dark ? 'rgba(243,237,225,0.12)' : 'rgba(31,28,22,0.12)';
-  const OLIVE_INK = '#ffffff';                                          // белый текст на цветном пузыре
+  const OLIVE_INK = '#ffffff';                                          // белый текст/иконки на зелёном пузыре (iOS)
   const OTHER_BG = dark ? 'rgba(244,240,235,0.06)' : 'rgba(0,0,0,0.05)'; // стеклянный пузырь, как у MAYA
   const SEND_BG = dark ? '#f2f0ec' : '#15140f';
   const SEND_INK = dark ? '#15140f' : '#f2f0ec';
   const GREEN = '#3f9e6a';                                              // «в сети» (как online-точка в приложении)
-  // Пузыри в стиле iMessage: свои — зелёные, входящие — серые, с хвостиком, без обводки
-  const OWN_FILL = dark ? '#30d158' : '#2fcc59';                        // iMessage Figma green
-  const IN_FILL = dark ? '#2c2c2e' : '#e9e9eb';                         // iOS Messages gray
-  const OWN_INK = '#ffffff';
-  const IN_INK = dark ? '#f3ede1' : '#000000';
+  // Пузыри в стиле нативного iOS Messages: свои — зелёные с белым текстом, входящие — серые с тёмным
+  const OWN_FILL = '#2fcc59';                                           // насыщенно-зелёный (iOS SMS)
+  const IN_FILL = dark ? '#262629' : '#e9e9eb';                         // серый входящий (тёмный/светлый)
+  const OWN_INK = '#ffffff';                                            // белый текст на зелёном
+  const IN_INK = dark ? '#f3ede1' : '#1f1c16';                          // тёмный текст на сером
   const PAGE_BG = dark ? '#0c0c10' : '#ffffff';                         // фон чата (для маски хвостика iMessage)
   const BUBBLE_SHADOW = 'none';
   const CHAT_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
@@ -20459,12 +20504,15 @@ function ATeamChat() {
     const fill = right ? OWN_FILL : IN_FILL;
     const ink = right ? OWN_INK : IN_INK;
     if (tight) {
-      return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: 3, borderRadius: 17, background: fill, color: ink, boxShadow: BUBBLE_SHADOW, overflow: 'hidden' } }, children);
+      return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', padding: 3, borderRadius: 17, background: fill, color: ink, WebkitTextFillColor: ink, boxShadow: BUBBLE_SHADOW, overflow: 'hidden', opacity: 1 } }, children);
     }
-    return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', minHeight: 35, padding: '7px 15px 8px', borderRadius: 18.5, background: fill, color: ink, boxShadow: BUBBLE_SHADOW, overflow: 'visible', isolation: 'isolate' } },
-      React.createElement('svg', { key: 'tail', width: 21, height: 20.7, viewBox: '0 0 29.7195 29.2504', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', style: Object.assign({ position: 'absolute', bottom: -1.5, zIndex: 0, pointerEvents: 'none', overflow: 'visible' }, right ? { right: -6 } : { left: -6 }) },
-        React.createElement('path', { d: BUBBLE_TAIL_PATH, fill: fill, fillRule: 'evenodd', clipRule: 'evenodd', transform: right ? 'translate(29.7195 0) scale(-1 1)' : undefined })),
-      React.createElement('div', { style: { position: 'relative', zIndex: 1, maxWidth: '100%' } }, children)
+    // Хвост — отдельная фигурка из Figma (iMessage), НЕ растянутый фон. fillRule/clipRule:evenodd обязательны (иначе артефакты на стыке).
+    const tail = React.createElement('svg', { key: 'tail', width: 21, height: 20.7, viewBox: '0 0 29.7195 29.2504', fill: 'none', xmlns: 'http://www.w3.org/2000/svg',
+        style: { position: 'absolute', bottom: 0, [right ? 'right' : 'left']: -6, zIndex: 0, display: 'block', pointerEvents: 'none', transform: right ? 'scaleX(-1)' : undefined, transformOrigin: 'center' } },
+      React.createElement('path', { d: BUBBLE_TAIL_PATH, fill: fill, fillRule: 'evenodd', clipRule: 'evenodd' }));
+    return React.createElement('div', { style: { position: 'relative', display: 'inline-block', width: 'fit-content', maxWidth: '74%', alignSelf: right ? 'flex-end' : 'flex-start', flex: '0 0 auto', boxSizing: 'border-box', isolation: 'isolate', opacity: 1 } },
+      tail,
+      React.createElement('div', { style: { position: 'relative', zIndex: 1, minHeight: 35, borderRadius: 18.5, padding: '7px 15px 8px', background: fill, color: ink, WebkitTextFillColor: ink, boxSizing: 'border-box', boxShadow: BUBBLE_SHADOW } }, children)
     );
   };
 
@@ -20482,7 +20530,7 @@ function ATeamChat() {
       mediaEl = React.createElement('video', { src: url, controls: true, playsInline: true, preload: 'metadata',
         style: { maxWidth: 250, maxHeight: 320, width: '100%', borderRadius: 12, display: 'block', background: '#000' } });
     } else if (url && kind === 'voice') {
-      mediaEl = React.createElement(window.TCVoice, { url: url, dur: m.media_dur, mine: mine, dark: dark });
+      mediaEl = React.createElement(window.TCVoice, { url: url, dur: m.media_dur, mine: mine, dark: dark, onErr: flashErr });
     } else if (url && kind === 'file') {
       mediaEl = React.createElement('a', { href: url, target: '_blank', rel: 'noopener noreferrer', download: m.media_name || '',
           style: { display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: mine ? OLIVE_INK : INK, minWidth: 170 } },
@@ -20497,7 +20545,7 @@ function ATeamChat() {
     const textOnly = !!msgText && !mediaEl;
     const inner = [];
     if (mediaEl) inner.push(React.createElement('div', { key: 'md', style: { borderRadius: tight ? 10 : 0, overflow: 'hidden' } }, mediaEl));
-    if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { maxWidth: '100%', fontFamily: CHAT_FONT, fontSize: 17, fontWeight: 400, lineHeight: 1.3, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0 } }, m.text));
+    if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { position: 'relative', zIndex: 3, maxWidth: '100%', fontFamily: CHAT_FONT, fontSize: 17, fontWeight: 400, lineHeight: 1.3, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0, color: mine ? OWN_INK : IN_INK, WebkitTextFillColor: mine ? OWN_INK : IN_INK, opacity: 1, textShadow: 'none', transform: 'translateZ(0)' } }, m.text));
     return React.createElement('div', { key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', margin: '4px 12px' } },
       !mine ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, margin: '0 4px 3px' } },
         onlineIds.has(m.sender_chat_id) ? React.createElement('span', { style: { width: 6, height: 6, borderRadius: 999, background: GREEN, flexShrink: 0, boxShadow: '0 0 5px ' + GREEN } }) : null,
