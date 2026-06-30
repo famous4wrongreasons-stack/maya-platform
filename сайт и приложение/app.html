@@ -6727,13 +6727,17 @@ function ABookFlow() {
     }
   });
 
-  // prefill the name from the hydrated cabinet when reaching the confirm step
+  // prefill contact data from the hydrated cabinet when reaching the confirm step
   React.useEffect(() => {
-    if (step === 4 && !bname) {
-      const cn = window.APP_DATA && window.APP_DATA.cabinet && window.APP_DATA.cabinet.name || '';
-      if (cn) setBname(cn);
+    if (step !== 4) return;
+    const cab = window.APP_DATA && window.APP_DATA.cabinet || {};
+    const cn = cab.fullName || cab.name || '';
+    const cp = cab.bookingPhone || '';
+    if (cn && !bname) setBname(cn);
+    if (cp && digitsPhone(cp).length >= 11 && digitsPhone(bphone).length < 11) {
+      setBphone(fmtPhone(cp));
     }
-  }, [step]);
+  }, [step, bname, bphone]);
   // ITEM 6 — кнопка «Подтвердить» ведёт себя как нижнее меню (зеркально):
   // вверху — маленькая (свёрнута), при скролле вниз — большая (раскрыта).
   // Та же scroll-сигнатура, что у AuroraTab (capture-listener по контейнеру BookingShell),
@@ -20935,6 +20939,9 @@ function MEApp() {
         if (window.APP_DATA && window.APP_DATA.cabinet) {
           window.APP_DATA.cabinet.name = '';
           window.APP_DATA.cabinet.firstName = '';
+          window.APP_DATA.cabinet.fullName = '';
+          window.APP_DATA.cabinet.phone = '';
+          window.APP_DATA.cabinet.bookingPhone = '';
         }
       } catch (e) {}
       setLogoutOpen(false);
@@ -21557,6 +21564,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
 
     /* not recognized -> show honest guest/needphone empty-state, NEVER baked demo identity */
     if (body.known === false || body.known === undefined) {
+      c.name = '';
+      c.firstName = '';
+      c.fullName = '';
+      c.phone = '';
+      c.bookingPhone = '';
       window.__meCabinetState = (body.needs_phone) ? 'needphone' : 'guest';
       if (window.__meRefresh) window.__meRefresh();
       return;
@@ -21566,16 +21578,21 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
        демо-номер (телефон салона), а баллы/визиты были бы нулевыми, т.к. без
        номера мы не можем сопоставить карту лояльности и историю в YClients. */
     if (body.needs_phone || !body.phone_tail) {
+      c.phone = '';
+      c.bookingPhone = '';
       window.__meCabinetState = 'needphone';
       if (window.__meRefresh) window.__meRefresh();
       return;
     }
     window.__meCabinetState = 'full';
 
-    var name = body.name || (body.tg_user && body.tg_user.first_name);
+    var fullName = body.full_name || body.name || (body.tg_user && body.tg_user.first_name) || '';
+    var name = body.name || firstWord(fullName);
+    c.fullName = fullName;
     if (name) { c.name = name; c.firstName = firstWord(name); }
 
     c.phone = '+7 (•••) •••-' + body.phone_tail;
+    c.bookingPhone = body.booking_phone || '';
 
     if (body.loyalty && (body.loyalty.balance === 0 || body.loyalty.balance)) {
       var pts = fmtNum(body.loyalty.balance);
@@ -21957,6 +21974,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
       if (window.APP_DATA && window.APP_DATA.cabinet) {
         window.APP_DATA.cabinet.name = '';
         window.APP_DATA.cabinet.firstName = '';
+        window.APP_DATA.cabinet.fullName = '';
+        window.APP_DATA.cabinet.phone = '';
+        window.APP_DATA.cabinet.bookingPhone = '';
       }
     }catch(e){}
   }

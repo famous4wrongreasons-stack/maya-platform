@@ -1701,6 +1701,7 @@ async def cabinet_me_handler(request: web.Request) -> web.Response:
         "name": first_name,
         "full_name": full_name,
         "phone_tail": phone[-4:] if has_valid_phone else "",
+        "booking_phone": phone if has_valid_phone else "",
         "loyalty": {
             "balance": balance,
             "care_services": [
@@ -1998,6 +1999,7 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
         "name": first_name,
         "full_name": full_name,
         "phone_tail": phone[-4:] if has_valid_phone else "",
+        "booking_phone": phone if has_valid_phone else "",
         "loyalty": {
             "balance": balance,
             "care_services": [
