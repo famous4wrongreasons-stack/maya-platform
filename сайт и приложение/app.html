@@ -20198,6 +20198,7 @@ function TCVoice(props) {
   var url = props.url, mine = props.mine, dark = props.dark, onErr = props.onErr;
   var aRef = React.useRef(null);
   var playReqRef = React.useRef(false);   // true только когда юзер реально нажал play (не фоновая авто-загрузка)
+  var retryRef = React.useRef(false);
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
   var q = React.useState(0), pos = q[0], setPos = q[1];
   var d = React.useState(props.dur || 0), dur = d[0], setDur = d[1];
@@ -20206,14 +20207,33 @@ function TCVoice(props) {
   var ink = mine ? '#ffffff' : (dark ? '#f3ede1' : '#1f1c16');
   var dim = 'rgba(' + base + ',0.6)';
   var idle = 'rgba(' + base + ',0.3)';
-  var proxyUrl = function (raw) {
-    if (!raw) return '';
-    if (raw.indexOf('action=team_chat_media') !== -1) return raw;
-    var m = String(raw).match(/\/media\/team\/([^/?#]+)/);
-    return m ? ('https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file=' + encodeURIComponent(m[1])) : raw;
-  };
-  var src = proxyUrl(url);
+  var sourceList = React.useMemo(function () {
+    if (!url) return [];
+    var raw = String(url);
+    var direct = raw.indexOf('action=team_chat_media') === -1 ? raw : '';
+    var m = raw.match(/\/media\/team\/([^/?#]+)/);
+    var proxy = raw.indexOf('action=team_chat_media') !== -1 ? raw : (m ? ('https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file=' + encodeURIComponent(m[1])) : raw);
+    var extm = raw.split('?')[0].match(/\.([a-z0-9]+)$/i);
+    var ext = extm ? String(extm[1]).toLowerCase() : '';
+    // iPhone/WebKit стабильнее играет прямой nginx-URL для нормальных аудио-расширений,
+    // а legacy .weba/.webm оставляем через прокси, который чинит MIME по сигнатуре файла.
+    var preferDirect = /^(m4a|mp4|wav|mp3|aac)$/i.test(ext);
+    var ordered = preferDirect ? [direct, proxy] : [proxy, direct];
+    var out = [];
+    ordered.forEach(function (item) { if (item && out.indexOf(item) === -1) out.push(item); });
+    return out;
+  }, [url]);
+  var si = React.useState(0), srcIdx = si[0], setSrcIdx = si[1];
+  var src = sourceList[srcIdx] || '';
   var fail = function () {
+    if (srcIdx < sourceList.length - 1) {
+      retryRef.current = true;
+      setPlaying(false);
+      setPos(0);
+      setSrcIdx(function (v) { return v + 1; });
+      return;
+    }
+    retryRef.current = false;
     setPlaying(false);
     if (!playReqRef.current) return;   // пассивная авто-загрузка (старые битые файлы) — баннер НЕ показываем
     playReqRef.current = false;
@@ -20258,14 +20278,30 @@ function TCVoice(props) {
     else setPlaying(true);
   };
   React.useEffect(function () {
-    var a = new Audio(src);
-    a.preload = 'none';   // не лезем в сеть до явного play → старые битые файлы не плодят фоновых ошибок
+    setSrcIdx(0);
+    playReqRef.current = false;
+    retryRef.current = false;
+    setPlaying(false);
+    setPos(0);
+    setDur(props.dur || 0);
+  }, [url, props.dur]);
+  React.useEffect(function () {
+    var a = aRef.current;
+    if (!a || !src) return;
+    a.preload = 'metadata';
     a.playsInline = true;
     try { a.setAttribute('playsinline', ''); a.setAttribute('webkit-playsinline', ''); } catch (e) {}
-    aRef.current = a;
     var onEnded = function () { setPlaying(false); setPos(0); };
     var onTime = function () { if (a.duration && isFinite(a.duration)) setPos(a.currentTime / a.duration); };
-    var onMeta = function () { if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration); };
+    var onMeta = function () {
+      if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration);
+      if (retryRef.current) {
+        retryRef.current = false;
+        var pr = a.play && a.play();
+        if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
+        else setPlaying(true);
+      }
+    };
     var onPause = function () { setPlaying(false); };
     var onPlay = function () { setPlaying(true); };
     a.addEventListener('ended', onEnded);
@@ -20282,8 +20318,6 @@ function TCVoice(props) {
       a.removeEventListener('pause', onPause);
       a.removeEventListener('play', onPlay);
       a.removeEventListener('error', fail);
-      try { a.src = ''; a.load(); } catch (e) {}
-      if (aRef.current === a) aRef.current = null;
     };
   }, [src, props.dur]);
   var mm = function (s) { s = Math.max(0, Math.round(s || 0)); var m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
@@ -20294,6 +20328,7 @@ function TCVoice(props) {
     bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
   }
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
+    React.createElement('audio', { ref: aRef, src: src, preload: 'metadata', playsInline: true, style: { display: 'none' } }),
     React.createElement('button', { onClick: toggle, 'aria-label': playing ? 'Пауза' : 'Воспроизвести', style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: 'rgba(' + base + ',0.16)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 } },
       playing
         ? React.createElement('svg', { key: 'pause', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
