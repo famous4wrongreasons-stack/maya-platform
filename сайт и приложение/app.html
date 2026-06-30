@@ -20335,6 +20335,8 @@ function ATeamChat() {
   const [sending, setSending] = React.useState(false);
   const [recording, setRecording] = React.useState(false);
   const [recSecs, setRecSecs] = React.useState(0);
+  const [recLocked, setRecLocked] = React.useState(false);          // hands-free (свайп вверх)
+  const [recPreview, setRecPreview] = React.useState(null);         // {b64,mime,name,dur,url} — записано, ждёт отправки
   const [uploading, setUploading] = React.useState(false);
   const [attachErr, setAttachErr] = React.useState('');
   const [viewer, setViewer] = React.useState(null);
@@ -20344,6 +20346,13 @@ function ATeamChat() {
   const scRef = React.useRef(null);
   const recRef = React.useRef(null);
   const recTimerRef = React.useRef(null);
+  const recStartRef = React.useRef(null);      // {x,y} старт жеста
+  const armCancelRef = React.useRef(false);    // увели влево за порог → отмена при отпускании
+  const lockedRef = React.useRef(false);       // зафиксировано (hands-free)
+  const pendingActionRef = React.useRef(null); // действие, если отпустили до готовности записи
+  const micBtnRef = React.useRef(null);        // плавающая кнопка-микрофон (едет за пальцем)
+  const slideHintRef = React.useRef(null);     // подсказка «‹ Отмена»
+  const lockPillRef = React.useRef(null);      // плашка-замок над кнопкой
   const typingRef = React.useRef(0);
   const typingPingRef = React.useRef(0);
 
@@ -20483,57 +20492,118 @@ function ATeamChat() {
     };
     inp.click();
   };
+  const resetRecUI = () => {
+    lockedRef.current = false; armCancelRef.current = false; recStartRef.current = null; pendingActionRef.current = null;
+    setRecLocked(false);
+  };
   const endRec = () => {
     if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null; }
     const R = recRef.current; if (R && R.stream) { try { R.stream.getTracks().forEach(t => t.stop()); } catch (e) {} }
     recRef.current = null; setRecording(false); setRecSecs(0);
   };
-  const stopRecording = (sendIt) => {
+  // mode: 'send' (отправить сразу) | 'preview' (на прослушку) | 'cancel' (выбросить)
+  const finalizeRec = (mode) => {
     const R = recRef.current;
-    if (!R) { setRecording(false); return; }
-    const secs = Math.max(1, Math.round((Date.now() - R.t0) / 1000));
+    if (!R) { endRec(); resetRecUI(); return; }
+    const ms = Date.now() - R.t0;
+    const secs = Math.max(1, Math.round(ms / 1000));
     tactile();
+    if (mode !== 'cancel' && ms < 600) { mode = 'cancel'; flashErr('Удерживайте кнопку, чтобы записать'); }
+    if (mode === 'cancel') {
+      if (R.rec) { try { R.rec.onstop = () => {}; R.rec.stop(); } catch (e) {} }
+      else if (R.wav) { try { __tcWavStop(R.wav); } catch (e) {} }
+      endRec(); resetRecUI(); return;
+    }
+    const done = (b64, mime, name) => {
+      if (!b64) { endRec(); resetRecUI(); return; }
+      if (mode === 'send') { pushMedia('voice', b64, name, mime, secs); }
+      else { setRecPreview({ b64: b64, mime: mime, name: name, dur: secs, url: 'data:' + mime + ';base64,' + b64 }); }
+      endRec(); resetRecUI();
+    };
     if (R.wav) {
-      const url = __tcWavStop(R.wav); endRec();
-      if (sendIt && url) pushMedia('voice', url.split(',')[1], 'voice.wav', 'audio/wav', secs);
+      const durl = __tcWavStop(R.wav);
+      done(durl ? durl.split(',')[1] : '', 'audio/wav', 'voice.wav');
     } else if (R.rec) {
       const mr = R.rec, chunks = R.chunks, mime = R.mime;
       mr.onstop = () => {
-        const blob = new Blob(chunks, { type: mime }); endRec();
-        if (sendIt && blob.size > 0) {
-          const fr = new FileReader();
-          fr.onloadend = () => { const b64 = String(fr.result || '').split(',')[1]; if (b64) pushMedia('voice', b64, 'voice', (mime || 'audio/webm').split(';')[0], secs); };
-          fr.readAsDataURL(blob);
-        }
+        const blob = new Blob(chunks, { type: mime });
+        if (blob.size > 0) { const fr = new FileReader(); fr.onloadend = () => done(String(fr.result || '').split(',')[1], (mime || 'audio/webm').split(';')[0], 'voice'); fr.readAsDataURL(blob); }
+        else { endRec(); resetRecUI(); }
       };
-      try { mr.stop(); } catch (e) { endRec(); }
-    } else { endRec(); }
-  };
-  const cancelRecording = () => {
-    const R = recRef.current; tactile();
-    if (R) { if (R.rec) { try { R.rec.onstop = () => {}; R.rec.stop(); } catch (e) {} } else if (R.wav) { try { __tcWavStop(R.wav); } catch (e) {} } }
-    endRec();
+      try { mr.stop(); } catch (e) { endRec(); resetRecUI(); }
+    } else { endRec(); resetRecUI(); }
   };
   const startRecording = () => {
-    if (recording || uploading) return;
+    if (recording || uploading || recPreview) return;
     if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { flashErr('Микрофон недоступен'); return; }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       const R = { stream: stream, chunks: [], wav: null, rec: null, mime: 'audio/webm', t0: Date.now() };
       if (!window.MediaRecorder) {
         R.wav = __tcWavStart(stream);
-        R.wav.onCap = () => { try { stopRecording(true); } catch (e) {} };
+        R.wav.onCap = () => { try { finalizeRec(lockedRef.current ? 'preview' : 'send'); } catch (e) {} };
       } else {
         let mr;
         try { mr = new MediaRecorder(stream); } catch (er) { try { mr = new MediaRecorder(stream, { mimeType: 'audio/webm' }); } catch (e2) { mr = null; } }
-        if (!mr) { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} flashErr('Запись недоступна'); return; }
+        if (!mr) { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} flashErr('Запись недоступна'); resetRecUI(); return; }
         R.rec = mr; R.mime = mr.mimeType || 'audio/webm';
         mr.ondataavailable = ev => { if (ev.data && ev.data.size > 0) R.chunks.push(ev.data); };
         mr.start();
       }
       recRef.current = R;
       setRecording(true); setRecSecs(0); tactile();
-      recTimerRef.current = setInterval(() => { setRecSecs(s => { const n = s + 1; if (n >= 120) { try { stopRecording(true); } catch (e) {} } return n; }); }, 1000);
-    }).catch(() => flashErr('Нет доступа к микрофону'));
+      recTimerRef.current = setInterval(() => { setRecSecs(s => { const n = s + 1; if (n >= 120) { try { finalizeRec(lockedRef.current ? 'preview' : 'send'); } catch (e) {} } return n; }); }, 1000);
+      // отпустили/отменили ещё до того, как микрофон реально завёлся
+      if (pendingActionRef.current) { const act = pendingActionRef.current; pendingActionRef.current = null; finalizeRec(act); }
+    }).catch(() => { flashErr('Нет доступа к микрофону'); resetRecUI(); });
+  };
+  // ===== Жест записи (как в Telegram): зажать → запись; влево = отмена; вверх = lock =====
+  const CANCEL_DIST = 96, LOCK_DIST = 64, TG_BLUE = '#3a8df0';
+  const cleanupMicGesture = () => {
+    window.removeEventListener('pointermove', onMicMove);
+    window.removeEventListener('pointerup', onMicUp);
+    window.removeEventListener('pointercancel', onMicCancel);
+  };
+  const onMicMove = (e) => {
+    const st = recStartRef.current; if (!st || lockedRef.current) return;
+    try { e.preventDefault(); } catch (_) {}
+    const dx = e.clientX - st.x, dy = e.clientY - st.y;
+    const tx = Math.min(0, dx), ty = Math.max(-LOCK_DIST - 10, Math.min(0, dy));
+    if (micBtnRef.current) micBtnRef.current.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+    armCancelRef.current = dx <= -CANCEL_DIST;
+    if (slideHintRef.current) { slideHintRef.current.style.opacity = String(Math.max(0.12, 1 + dx / 90)); slideHintRef.current.style.color = armCancelRef.current ? '#e0564f' : DIM; }
+    if (lockPillRef.current) { const p = Math.min(1, -dy / LOCK_DIST); lockPillRef.current.style.opacity = String(0.45 + 0.55 * p); lockPillRef.current.style.transform = 'translateY(' + (-6 - 12 * p) + 'px)'; }
+    if (-dy >= LOCK_DIST) {
+      lockedRef.current = true; setRecLocked(true); tactile();
+      recStartRef.current = null;
+      if (micBtnRef.current) micBtnRef.current.style.transform = '';
+      cleanupMicGesture();
+    }
+  };
+  const onMicUp = () => {
+    cleanupMicGesture();
+    if (lockedRef.current) { recStartRef.current = null; return; }
+    const wasArmed = armCancelRef.current;
+    recStartRef.current = null;
+    if (micBtnRef.current) micBtnRef.current.style.transform = '';
+    if (!recRef.current) { pendingActionRef.current = wasArmed ? 'cancel' : 'send'; return; }
+    finalizeRec(wasArmed ? 'cancel' : 'send');
+  };
+  const onMicCancel = () => {
+    cleanupMicGesture();
+    if (lockedRef.current) { recStartRef.current = null; return; }
+    recStartRef.current = null;
+    if (micBtnRef.current) micBtnRef.current.style.transform = '';
+    if (recRef.current) finalizeRec('cancel'); else pendingActionRef.current = 'cancel';
+  };
+  const onMicDown = (e) => {
+    if (recording || uploading || recPreview) return;
+    try { e.preventDefault(); } catch (_) {}
+    recStartRef.current = { x: e.clientX, y: e.clientY };
+    armCancelRef.current = false; lockedRef.current = false; pendingActionRef.current = null;
+    window.addEventListener('pointermove', onMicMove, { passive: false });
+    window.addEventListener('pointerup', onMicUp);
+    window.addEventListener('pointercancel', onMicCancel);
+    startRecording();
   };
   const hhmm = (iso) => { try { return String(iso).slice(11, 16); } catch (e) { return ''; } };
   const BUBBLE_TAIL_PATH = 'M10.0206 12.9416C9.78651 11.7287 9.66391 10.4761 9.66391 9.19488V0.402926H29.3165V28.8475C24.5575 28.8475 20.1936 27.1559 16.7932 24.3413C13.4008 26.6012 7.96114 28.7495 1.38911 27.5546C3.19922 26.7788 10.1811 22.1243 9.92249 12.8151C9.95387 12.8583 9.9866 12.9004 10.0206 12.9416Z';
@@ -20623,16 +20693,47 @@ function ATeamChat() {
   ]);
 
   let inputRow;
-  if (recording) {
-    inputRow = React.createElement('div', { key: 'rec', style: rowStyle },
-      React.createElement('div', { key: 'status', style: Object.assign({}, pillBase, { alignItems: 'center', gap: 10, padding: '0 18px' }) },
-        React.createElement('span', { style: { width: 9, height: 9, borderRadius: 999, background: '#e0564f', animation: 'tcRecPulse 1.2s infinite', flexShrink: 0 } }),
-        React.createElement('span', { style: { fontFamily: DISPLAY, fontSize: 14, color: INK, fontVariantNumeric: 'tabular-nums' } }, 'Запись… ' + mmss(recSecs))
+  if (recPreview) {
+    // ── Превью записи: удалить · прослушать (волна+play) · отправить ──
+    inputRow = React.createElement('div', { key: 'prev', style: rowStyle },
+      React.createElement('div', { key: 'del', onClick: () => { tactile(); setRecPreview(null); }, title: 'Удалить', style: circleBtn({ width: 44, height: 44, margin: '0 0 4px', border: '1px solid ' + LINE }) },
+        React.createElement('svg', { width: 21, height: 21, viewBox: '0 0 24 24', fill: 'none', stroke: '#e0564f', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' },
+          React.createElement('path', { key: 'a', d: 'M3 6h18' }), React.createElement('path', { key: 'b', d: 'M8 6V4h8v2' }), React.createElement('path', { key: 'c', d: 'M6 6l1 14h10l1-14' }))),
+      React.createElement('div', { key: 'pl', style: Object.assign({}, pillBase, { alignItems: 'center', padding: '0 6px 0 14px' }) },
+        React.createElement(window.TCVoice, { url: recPreview.url, dur: recPreview.dur, mine: false, dark: dark, onErr: flashErr })),
+      React.createElement('div', { key: 'snd', onClick: () => { const pv = recPreview; setRecPreview(null); pushMedia('voice', pv.b64, pv.name, pv.mime, pv.dur); }, title: 'Отправить', style: circleBtn({ width: 48, height: 48, margin: 0, background: TG_BLUE, boxShadow: '0 4px 16px rgba(58,141,240,0.45)' }) },
+        React.createElement('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: '#fff' }, React.createElement('path', { d: 'M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.4 1.22L4.6 11l9.4 1-9.4 1-1.6 6.18a1 1 0 0 0 1.4 1.22z' })))
+    );
+  } else if (recording && recLocked) {
+    // ── Зафиксировано (hands-free): таймер · Отмена · стоп→превью ──
+    inputRow = React.createElement('div', { key: 'lock', style: rowStyle },
+      React.createElement('div', { key: 'st', style: Object.assign({}, pillBase, { alignItems: 'center', gap: 12, padding: '0 8px 0 18px' }) },
+        React.createElement('span', { key: 'dot', style: { width: 9, height: 9, borderRadius: 999, background: '#e0564f', animation: 'tcRecPulse 1.2s infinite', flexShrink: 0 } }),
+        React.createElement('span', { key: 't', style: { fontFamily: DISPLAY, fontSize: 15, color: INK, fontVariantNumeric: 'tabular-nums', letterSpacing: '0.3px' } }, mmss(recSecs)),
+        React.createElement('div', { key: 'c', onClick: () => finalizeRec('cancel'), style: { marginLeft: 'auto', fontFamily: BODY, fontSize: 14, fontWeight: 600, color: '#e0564f', cursor: 'pointer', padding: '8px 10px' } }, 'Отмена')
       ),
-      React.createElement('div', { key: 'cancel', onClick: cancelRecording, style: circleBtn({ width: 44, height: 44, margin: 0, border: '1px solid ' + LINE }) },
-        React.createElement('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: FAINT, strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: 'M18 6 6 18' }), React.createElement('path', { d: 'M6 6l12 12' }))),
-      React.createElement('div', { key: 'sendv', onClick: () => stopRecording(true), style: circleBtn({ width: 44, height: 44, margin: 0, background: SEND_BG }) },
-        React.createElement('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: SEND_INK, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: 'M5 12h14' }), React.createElement('path', { d: 'M13 6l6 6-6 6' })))
+      React.createElement('div', { key: 'stop', onClick: () => finalizeRec('preview'), title: 'Стоп', style: circleBtn({ width: 48, height: 48, margin: 0, background: TG_BLUE, boxShadow: '0 4px 16px rgba(58,141,240,0.45)' }) },
+        React.createElement('span', { style: { width: 15, height: 15, borderRadius: 4, background: '#fff', display: 'block' } }))
+    );
+  } else if (recording) {
+    // ── Запись (зажато): таймер · «‹ Отмена» · плашка-замок · плавающий микрофон ──
+    inputRow = React.createElement('div', { key: 'rec', style: Object.assign({}, rowStyle, { position: 'relative' }) },
+      React.createElement('div', { key: 'st', style: Object.assign({}, pillBase, { alignItems: 'center', gap: 10, padding: '0 18px' }) },
+        React.createElement('span', { key: 'dot', style: { width: 9, height: 9, borderRadius: 999, background: '#e0564f', animation: 'tcRecPulse 1.2s infinite', flexShrink: 0 } }),
+        React.createElement('span', { key: 't', style: { fontFamily: DISPLAY, fontSize: 15, color: INK, fontVariantNumeric: 'tabular-nums', flexShrink: 0 } }, mmss(recSecs)),
+        React.createElement('div', { key: 'h', ref: slideHintRef, style: { margin: '0 auto', display: 'flex', alignItems: 'center', gap: 4, fontFamily: BODY, fontSize: 13.5, color: DIM, transition: 'opacity .15s, color .15s', whiteSpace: 'nowrap' } },
+          React.createElement('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: 'M15 6l-6 6 6 6' })),
+          'Отмена')
+      ),
+      React.createElement('div', { key: 'lp', ref: lockPillRef, style: { position: 'absolute', right: 22, bottom: 66, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 6px', borderRadius: 16, background: dark ? 'rgba(38,38,44,0.94)' : 'rgba(255,255,255,0.96)', border: '1px solid ' + LINE, boxShadow: '0 6px 18px rgba(0,0,0,0.2)', opacity: 0.5, transform: 'translateY(-6px)', transition: 'opacity .12s, transform .12s', pointerEvents: 'none' } },
+        React.createElement('svg', { key: 'lk', width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: INK, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('rect', { x: 5, y: 11, width: 14, height: 10, rx: 2 }), React.createElement('path', { d: 'M8 11V7a4 4 0 0 1 8 0v4' })),
+        React.createElement('svg', { key: 'ar', width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: TG_BLUE, strokeWidth: 2.6, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: 'M12 19V6' }), React.createElement('path', { d: 'M6 12l6-6 6 6' }))
+      ),
+      React.createElement('div', { key: 'mb', ref: micBtnRef, style: circleBtn({ width: 48, height: 48, margin: 0, background: TG_BLUE, touchAction: 'none', transition: 'transform .1s ease-out', boxShadow: '0 4px 16px rgba(58,141,240,0.5)' }) },
+        React.createElement('svg', { width: 23, height: 23, viewBox: '0 0 24 24', fill: 'none', stroke: '#fff', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+          React.createElement('path', { key: 'a', d: 'M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z', fill: '#fff', stroke: 'none' }),
+          React.createElement('path', { key: 'b', d: 'M5 11a7 7 0 0 0 14 0' }),
+          React.createElement('path', { key: 'c', d: 'M12 18v3' })))
     );
   } else if (uploading) {
     inputRow = React.createElement('div', { key: 'up', style: rowStyle },
@@ -20651,7 +20752,7 @@ function ATeamChat() {
           style: { flex: 1, resize: 'none', maxHeight: 110, border: 'none', background: 'transparent', padding: '14px 4px', fontFamily: BODY, fontSize: 14, color: INK, outline: 'none', lineHeight: 1.4 } }),
         text.trim()
           ? React.createElement('div', { key: 'send', onClick: send, style: circleBtn({ background: SEND_BG, opacity: sending ? 0.5 : 1 }) }, React.createElement('span', { style: { color: SEND_INK, fontSize: 17, fontWeight: 600, transform: 'translateX(1px)' } }, '↑'))
-          : React.createElement('div', { key: 'mic', onClick: () => { tactile(); startRecording(); }, title: 'Голосовое', style: circleBtn() }, micIcon)
+          : React.createElement('div', { key: 'mic', ref: micBtnRef, onPointerDown: onMicDown, onContextMenu: (e) => { try { e.preventDefault(); } catch (_) {} }, title: 'Удерживайте для записи', style: circleBtn({ touchAction: 'none' }) }, micIcon)
       )
     );
   }
