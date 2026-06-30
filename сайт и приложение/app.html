@@ -20580,12 +20580,8 @@ function TCVoice(props) {
         if (handle && handle.then) handle.then(function (h) { if (h && h.remove) h.remove(); }).catch(function () {});
         else if (handle && handle.remove) handle.remove();
       } catch (e) {}
-      if (nativeActiveRef.current && nativeVoice.stop) {
-        try {
-          var sp = nativeVoice.stop({ id: nativeId });
-          if (sp && sp.catch) sp.catch(function () {});
-        } catch (e2) {}
-      }
+      // Chat polling can remount bubbles while audio is playing. Do not stop
+      // native playback here; only explicit pause/play replacement should.
       nativeActiveRef.current = false;
     };
   }, [nativeId]);
