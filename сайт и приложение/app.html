@@ -20214,6 +20214,7 @@ function __tcPickVoiceRecorder() {
 // ===== Звук «отправлено» (Web Audio, без файла) =====
 let _tcAudioCtx = null;
 let _tcVoiceAudioCtx = null;
+let _tcVoiceState = { id: '', status: 'stopped', position: 0, duration: 0 };
 function playSendSound() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -20554,8 +20555,16 @@ function TCVoice(props) {
     var nativeVoice = getNativeVoice();
     if (!nativeVoice || !nativeVoice.addListener) return function () {};
     var alive = true;
-    var handle = nativeVoice.addListener('state', function (ev) {
-      if (!alive || !ev || ev.id !== nativeId) return;
+    var applyNativeState = function (ev) {
+      if (!alive || !ev) return;
+      _tcVoiceState = Object.assign({}, _tcVoiceState, ev);
+      if (ev.id !== nativeId) {
+        if (ev.status === 'playing' || ev.status === 'progress') {
+          nativeActiveRef.current = false;
+          setPlaying(false);
+        }
+        return;
+      }
       if (isFinite(ev.duration) && ev.duration > 0) setDur(ev.duration);
       if (isFinite(ev.position)) setPos(Math.max(0, Math.min(1, ev.position)));
       if (ev.status === 'playing' || ev.status === 'progress') {
@@ -20573,7 +20582,16 @@ function TCVoice(props) {
         setPlaying(false);
         if (onErr) onErr('Не удалось воспроизвести голосовое');
       }
-    });
+    };
+    var handle = nativeVoice.addListener('state', applyNativeState);
+    try {
+      var sp = nativeVoice.getState && nativeVoice.getState({ id: nativeId });
+      if (sp && sp.then) sp.then(applyNativeState).catch(function () {});
+      else if (sp) applyNativeState(sp);
+      else applyNativeState(_tcVoiceState);
+    } catch (e) {
+      applyNativeState(_tcVoiceState);
+    }
     return function () {
       alive = false;
       try {
@@ -20690,6 +20708,8 @@ function ATeamChat() {
   const recTimerRef = React.useRef(null);
   const typingRef = React.useRef(0);
   const typingPingRef = React.useRef(0);
+  const fullRefreshRef = React.useRef(0);
+  const holdTimerRef = React.useRef(null);
 
   const tactile = () => { try { if (window.tactile) window.tactile(); } catch (e) {} };
   const flashErr = React.useCallback((msg) => { setAttachErr(msg); setTimeout(() => setAttachErr(''), 4500); }, []);
@@ -20728,9 +20748,17 @@ function ATeamChat() {
     if (d.online) setOnline(d.online);
     setTyping(d.typing || []);
     const list = d.messages || [];
-    if (!list.length) return;
-    lastIdRef.current = Math.max(lastIdRef.current, list[list.length - 1].id || 0);
-    setMsgs(prev => append ? prev.concat(list) : list);
+    if (!append) fullRefreshRef.current = Date.now();
+    if (!list.length) {
+      if (!append) {
+        lastIdRef.current = 0;
+        setMsgs([]);
+      }
+      return;
+    }
+    const maxId = Math.max.apply(null, list.map(x => x.id || 0));
+    lastIdRef.current = append ? Math.max(lastIdRef.current, maxId) : maxId;
+    setMsgs(prev => append ? prev.concat(list.filter(n => !prev.some(p => p.id === n.id))) : list);
     setTimeout(scrollBottom, 40);
   };
   const fetchMsgs = (since) => {
@@ -20749,20 +20777,75 @@ function ATeamChat() {
       document.head.appendChild(st);
     }
     fetchMsgs(0);
-    const iv = setInterval(() => { if (!document.hidden) fetchMsgs(lastIdRef.current); }, 3000);
-    const onVis = () => { if (!document.hidden) fetchMsgs(lastIdRef.current); };
+    const iv = setInterval(() => {
+      if (document.hidden) return;
+      fetchMsgs(Date.now() - fullRefreshRef.current > 30000 ? 0 : lastIdRef.current);
+    }, 3000);
+    const onVis = () => { if (!document.hidden) fetchMsgs(0); };
     document.addEventListener('visibilitychange', onVis);
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis); };
   }, []);
   React.useEffect(() => () => {
     try { const R = recRef.current; if (R && R.stream) R.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
     if (recTimerRef.current) clearInterval(recTimerRef.current);
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
   }, []);
 
   const postMsg = (extra) => {
     const rq = window.__meAuthReq ? window.__meAuthReq(extra) : null;
     if (!rq) return Promise.reject(new Error('noauth'));
     return fetch(TC_PROXY + '?action=team_chat_send', { method: 'POST', headers: rq.headers, body: rq.body }).then(r => r.json());
+  };
+  const stopDeletedVoice = (m) => {
+    if (!m || (m.media_kind || '') !== 'voice') return;
+    try {
+      const C = window.Capacitor, nativeVoice = C && C.Plugins && C.Plugins.TeamVoicePlayer;
+      if (nativeVoice && nativeVoice.stop) {
+        const id = 'team_voice_' + String(m.media_url || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(-96);
+        nativeVoice.stop({ id });
+      }
+    } catch (e) {}
+  };
+  const deleteMsg = (m) => {
+    if (!m || !m.id || me == null || m.sender_chat_id !== me) return;
+    if (!window.confirm('Удалить сообщение?')) return;
+    const rq = window.__meAuthReq ? window.__meAuthReq({ id: m.id }) : null;
+    if (!rq) return;
+    tactile();
+    fetch(TC_PROXY + '?action=team_chat_delete', { method: 'POST', headers: rq.headers, body: rq.body })
+      .then(r => r.json())
+      .then(d => {
+        if (d && d.ok) {
+          stopDeletedVoice(m);
+          setMsgs(prev => prev.filter(x => x.id !== m.id));
+          fetchMsgs(0);
+          return;
+        }
+        flashErr((d && d.message) || 'Не удалось удалить сообщение');
+      })
+      .catch(() => flashErr('Сеть недоступна — попробуйте ещё раз'));
+  };
+  const skipDeleteGesture = (ev) => {
+    const t = ev && ev.target;
+    return !!(t && t.closest && t.closest('button,a,input,textarea,video,audio'));
+  };
+  const clearHoldDelete = () => {
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
+  };
+  const armDelete = (m) => (ev) => {
+    if (!m || me == null || m.sender_chat_id !== me || skipDeleteGesture(ev)) return;
+    clearHoldDelete();
+    holdTimerRef.current = setTimeout(() => {
+      holdTimerRef.current = null;
+      deleteMsg(m);
+    }, 650);
+  };
+  const contextDelete = (m) => (ev) => {
+    if (!m || me == null || m.sender_chat_id !== me || skipDeleteGesture(ev)) return;
+    ev.preventDefault();
+    clearHoldDelete();
+    deleteMsg(m);
   };
   const send = () => {
     const tx = (text || '').trim();
@@ -20940,7 +21023,18 @@ function ATeamChat() {
     const inner = [];
     if (mediaEl) inner.push(React.createElement('div', { key: 'md', style: { borderRadius: tight ? 10 : 0, overflow: 'hidden' } }, mediaEl));
     if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { position: 'relative', zIndex: 3, maxWidth: '100%', fontFamily: CHAT_FONT, fontSize: 17, fontWeight: 400, lineHeight: 1.3, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0, color: mine ? OWN_INK : IN_INK, WebkitTextFillColor: mine ? OWN_INK : IN_INK, opacity: 1, textShadow: 'none', transform: 'translateZ(0)' } }, m.text));
-    return React.createElement('div', { key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', margin: '4px 12px' } },
+    const deleteHandlers = mine ? {
+      onContextMenu: contextDelete(m),
+      onTouchStart: armDelete(m),
+      onTouchEnd: clearHoldDelete,
+      onTouchCancel: clearHoldDelete,
+      onTouchMove: clearHoldDelete,
+      onMouseDown: armDelete(m),
+      onMouseUp: clearHoldDelete,
+      onMouseLeave: clearHoldDelete,
+      title: 'Удерживайте, чтобы удалить сообщение'
+    } : {};
+    return React.createElement('div', Object.assign({ key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', margin: '4px 12px' } }, deleteHandlers),
       !mine ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, margin: '0 4px 3px' } },
         onlineIds.has(m.sender_chat_id) ? React.createElement('span', { style: { width: 6, height: 6, borderRadius: 999, background: GREEN, flexShrink: 0, boxShadow: '0 0 5px ' + GREEN } }) : null,
         React.createElement('span', { style: { fontFamily: BODY, fontSize: 10.5, color: DIM, fontWeight: 600 } }, m.sender_name || 'Сотрудник')

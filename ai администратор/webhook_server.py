@@ -7213,6 +7213,40 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True, "id": msg_id})
 
 
+async def team_chat_delete_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/team_chat/delete — удалить своё сообщение из чата команды."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = int(tg_user["id"])
+    info = _panel_resolve_role(tg_id)
+    if not _is_staff_info(info):
+        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
+    try:
+        msg_id = int(body.get("id") or body.get("message_id") or 0)
+    except Exception:
+        msg_id = 0
+    if msg_id <= 0:
+        return _cabinet_response({"error": "bad_id", "message": "Не найдено сообщение."}, status=400)
+
+    result = await asyncio.to_thread(database.delete_staff_message, msg_id, tg_id)
+    if not result.get("ok"):
+        reason = result.get("reason")
+        if reason == "forbidden":
+            return _cabinet_response({"error": "forbidden", "message": "Можно удалить только своё сообщение."}, status=403)
+        return _cabinet_response({"error": "not_found", "message": "Сообщение уже удалено."}, status=404)
+    msg = result.get("message") or {}
+    return _cabinet_response({
+        "ok": True,
+        "id": msg_id,
+        "media_url": msg.get("media_url") or "",
+    })
+
+
 async def team_chat_fetch_handler(request: web.Request) -> web.Response:
     """POST /api/panel/team_chat/fetch — забрать сообщения. Тело: {since_id?}.
     since_id=0 → последние 50; >0 → новее since_id (поллинг открытого чата)."""
@@ -7748,6 +7782,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/journal_cancel", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/send", team_chat_send_handler)
     web_app.router.add_options("/api/panel/team_chat/send", panel_options_handler)
+    web_app.router.add_post("/api/panel/team_chat/delete", team_chat_delete_handler)
+    web_app.router.add_options("/api/panel/team_chat/delete", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/fetch", team_chat_fetch_handler)
     web_app.router.add_options("/api/panel/team_chat/fetch", panel_options_handler)
     web_app.router.add_post("/api/panel/journal_attendance", panel_journal_attendance_handler)
