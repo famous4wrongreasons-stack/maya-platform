@@ -20119,7 +20119,7 @@ window.ALivePanel = ALivePanel;
 
 // ─── Внутренний чат команды (вкладка «Команда») ─────────────────────────────
 // ===== Чат команды: WAV-фолбэк записи (iOS WKWebView без MediaRecorder) =====
-var __TC_SR = 16000, __TC_MAXMS = 122000;
+var __TC_SR = 24000, __TC_MAXMS = 122000;
 function __tcWavStart(stream) {
   var AC = window.AudioContext || window.webkitAudioContext;
   var ctx = new AC();
@@ -20865,7 +20865,8 @@ function ATeamChat() {
   const startRecording = () => {
     if (recording || uploading) return;
     if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { flashErr('Микрофон недоступен'); return; }
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    const voiceConstraints = { audio: { channelCount: { ideal: 1 }, sampleRate: { ideal: 48000 }, echoCancellation: { ideal: false }, noiseSuppression: { ideal: false }, autoGainControl: { ideal: false } } };
+    navigator.mediaDevices.getUserMedia(voiceConstraints).catch(() => navigator.mediaDevices.getUserMedia({ audio: true })).then(stream => {
       const pick = __tcPickVoiceRecorder();
       const R = { stream: stream, chunks: [], wav: null, rec: null, mime: pick ? pick.mime : 'audio/wav', name: pick ? pick.name : 'voice.wav', t0: Date.now() };
       if (!pick) {
@@ -20873,7 +20874,7 @@ function ATeamChat() {
         R.wav.onCap = () => { try { stopRecording(true); } catch (e) {} };
       } else {
         let mr;
-        const opts = pick.mime ? { mimeType: pick.mime, audioBitsPerSecond: 48000 } : { audioBitsPerSecond: 48000 };
+        const opts = pick.mime ? { mimeType: pick.mime, audioBitsPerSecond: 96000 } : { audioBitsPerSecond: 96000 };
         try { mr = new MediaRecorder(stream, opts); }
         catch (er) {
           try { mr = pick.mime ? new MediaRecorder(stream, { mimeType: pick.mime }) : new MediaRecorder(stream); }

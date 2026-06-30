@@ -7035,10 +7035,12 @@ def _normalize_team_voice_bytes(raw: bytes) -> tuple[bytes, float]:
             f.write(raw)
         cmd = [
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-fflags", "+genpts",
             "-i", src,
             "-vn", "-map", "0:a:0",
+            "-af", "aresample=async=1:first_pts=0",
             "-ac", "1", "-ar", "48000",
-            "-c:a", "aac", "-b:a", "48k",
+            "-c:a", "aac", "-b:a", "96k",
             "-movflags", "+faststart",
             dst,
         ]
