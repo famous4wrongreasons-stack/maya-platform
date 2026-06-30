@@ -20244,6 +20244,7 @@ function TCVoice(props) {
   var loadingRef = React.useRef(null);
   var nodeRef = React.useRef(null);
   var ctxRef = React.useRef(null);
+  var nativeActiveRef = React.useRef(false);
   var offsetRef = React.useRef(0);
   var startedAtRef = React.useRef(0);
   var rafRef = React.useRef(0);
@@ -20275,6 +20276,15 @@ function TCVoice(props) {
   }, [url]);
   var si = React.useState(0), srcIdx = si[0], setSrcIdx = si[1];
   var src = sourceList[srcIdx] || '';
+  var nativeId = React.useMemo(function () {
+    return 'team_voice_' + String(url || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(-96);
+  }, [url]);
+  var getNativeVoice = function () {
+    try {
+      var C = window.Capacitor;
+      return C && C.Plugins && C.Plugins.TeamVoicePlayer ? C.Plugins.TeamVoicePlayer : null;
+    } catch (e) { return null; }
+  };
   // WKWebView иногда роняет streaming playback даже на валидном M4A. Поэтому
   // voice сначала скачивается целиком в маленький локальный blob:, а уже его
   // отдаём нативному audio-элементу.
@@ -20453,6 +20463,36 @@ function TCVoice(props) {
   var toggle = function () {
     try { if (window.tactile) window.tactile(); } catch (e) {}
     try { getVoiceCtx(); } catch (e) {}
+    var nativeVoice = getNativeVoice();
+    if (nativeVoice && nativeVoice.play && sourceList.length) {
+      if (playing) {
+        nativeActiveRef.current = false;
+        try {
+          var pp = nativeVoice.pause({ id: nativeId });
+          if (pp && pp.catch) pp.catch(function () {});
+        } catch (e) {}
+        setPlaying(false);
+        return;
+      }
+      playReqRef.current = true;
+      nativeActiveRef.current = true;
+      var np = nativeVoice.play({ id: nativeId, url: sourceList[0] });
+      if (np && np.then) {
+        np.then(function (ev) {
+          if (ev && isFinite(ev.duration) && ev.duration > 0) setDur(ev.duration);
+          if (ev && isFinite(ev.position)) setPos(Math.max(0, Math.min(1, ev.position)));
+          setPlaying(true);
+        }).catch(function (e) {
+          try { console.log('[TCVoice] native fail', e); } catch (e2) {}
+          nativeActiveRef.current = false;
+          setPlaying(false);
+          if (onErr) onErr('Не удалось воспроизвести голосовое');
+        });
+      } else {
+        setPlaying(true);
+      }
+      return;
+    }
     if (canWebAudio) {
       if (nodeRef.current) {
         var ctx = ctxRef.current, buf = bufferRef.current;
@@ -20505,10 +20545,52 @@ function TCVoice(props) {
     setDur(props.dur || 0);
   }, [url, props.dur]);
   React.useEffect(function () {
+    var nativeVoice = getNativeVoice();
+    if (nativeVoice && nativeVoice.addListener) return function () {};
     if (!canWebAudio && sourceList.length) ensureLocalSrc().catch(function () {});
     return function () {};
   }, [url]);
   React.useEffect(function () {
+    var nativeVoice = getNativeVoice();
+    if (!nativeVoice || !nativeVoice.addListener) return function () {};
+    var alive = true;
+    var handle = nativeVoice.addListener('state', function (ev) {
+      if (!alive || !ev || ev.id !== nativeId) return;
+      if (isFinite(ev.duration) && ev.duration > 0) setDur(ev.duration);
+      if (isFinite(ev.position)) setPos(Math.max(0, Math.min(1, ev.position)));
+      if (ev.status === 'playing' || ev.status === 'progress') {
+        nativeActiveRef.current = true;
+        setPlaying(true);
+      } else if (ev.status === 'paused') {
+        nativeActiveRef.current = false;
+        setPlaying(false);
+      } else if (ev.status === 'ended' || ev.status === 'stopped') {
+        nativeActiveRef.current = false;
+        setPlaying(false);
+        setPos(0);
+      } else if (ev.status === 'error') {
+        nativeActiveRef.current = false;
+        setPlaying(false);
+        if (onErr) onErr('Не удалось воспроизвести голосовое');
+      }
+    });
+    return function () {
+      alive = false;
+      try {
+        if (handle && handle.then) handle.then(function (h) { if (h && h.remove) h.remove(); }).catch(function () {});
+        else if (handle && handle.remove) handle.remove();
+      } catch (e) {}
+      if (nativeActiveRef.current && nativeVoice.stop) {
+        try {
+          var sp = nativeVoice.stop({ id: nativeId });
+          if (sp && sp.catch) sp.catch(function () {});
+        } catch (e2) {}
+      }
+      nativeActiveRef.current = false;
+    };
+  }, [nativeId]);
+  React.useEffect(function () {
+    if (getNativeVoice()) return function () {};
     if (canWebAudio) return function () { stopBuffer(false); };
     var a = aRef.current;
     if (!a) return;
