@@ -20559,7 +20559,19 @@ function ATeamChat() {
     if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { flashErr('Микрофон недоступен'); return; }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       const R = { stream: stream, chunks: [], wav: null, rec: null, mime: 'audio/webm', t0: Date.now() };
-      if (!window.MediaRecorder) {
+      const isIOS = (() => {
+        try {
+          if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios') return true;
+        } catch (e) {}
+        try {
+          return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        } catch (e) {}
+        return false;
+      })();
+      // iPhone / WKWebView стабильно режет некоторые записи через MediaRecorder:
+      // на сервер прилетает валидный, но уже укороченный m4a. Для iOS принудительно
+      // пишем PCM/WAV через WebAudio — файл тяжелее, зато запись целиком и без обрывов.
+      if (isIOS || !window.MediaRecorder) {
         R.wav = __tcWavStart(stream);
         R.wav.onCap = () => { try { stopRecording(true); } catch (e) {} };
       } else {
@@ -20568,7 +20580,7 @@ function ATeamChat() {
         if (!mr) { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} flashErr('Запись недоступна'); return; }
         R.rec = mr; R.mime = mr.mimeType || 'audio/webm';
         mr.ondataavailable = ev => { if (ev.data && ev.data.size > 0) R.chunks.push(ev.data); };
-        mr.start();
+        mr.start(250);
       }
       recRef.current = R;
       setRecording(true); setRecSecs(0); tactile();
