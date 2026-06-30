@@ -20170,6 +20170,46 @@ function __tcWavEncode(pcm16, sr) {
   for (var j = 0; j < bytes.length; j++) bin += String.fromCharCode(bytes[j]);
   return 'data:audio/wav;base64,' + btoa(bin);
 }
+function __tcIsIOS() {
+  try {
+    if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios') return true;
+  } catch (e) {}
+  try {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  } catch (e) {}
+  return false;
+}
+function __tcVoicePublicMime(mime) {
+  var m = String(mime || '').split(';')[0].trim().toLowerCase();
+  return m || 'audio/webm';
+}
+function __tcVoiceNameFromMime(mime) {
+  var m = __tcVoicePublicMime(mime);
+  if (m === 'audio/mp4' || m === 'video/mp4') return 'voice.m4a';
+  if (m === 'audio/aac') return 'voice.aac';
+  if (m === 'audio/ogg' || m === 'application/ogg') return 'voice.ogg';
+  if (m === 'audio/wav' || m === 'audio/wave' || m === 'audio/x-wav') return 'voice.wav';
+  if (m === 'audio/webm' || m === 'video/webm') return 'voice.webm';
+  return 'voice.webm';
+}
+function __tcCanRecordMime(mime) {
+  if (!window.MediaRecorder) return false;
+  if (!mime) return true;
+  try {
+    return typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(mime);
+  } catch (e) { return false; }
+}
+function __tcPickVoiceRecorder() {
+  if (!window.MediaRecorder) return null;
+  var ios = __tcIsIOS();
+  var mimes = ios
+    ? ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/aac']
+    : ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm'];
+  for (var i = 0; i < mimes.length; i++) {
+    if (__tcCanRecordMime(mimes[i])) return { mime: mimes[i], name: __tcVoiceNameFromMime(mimes[i]) };
+  }
+  return __tcCanRecordMime('') ? { mime: '', name: 'voice.webm' } : null;
+}
 
 // ===== Звук «отправлено» (Web Audio, без файла) =====
 let _tcAudioCtx = null;
@@ -20231,7 +20271,8 @@ function TCVoice(props) {
   }, [url]);
   var si = React.useState(0), srcIdx = si[0], setSrcIdx = si[1];
   var src = sourceList[srcIdx] || '';
-  var canWebAudio = !!(window.AudioContext || window.webkitAudioContext);
+  // Нативный audio-элемент потоково читает сжатые voice-файлы и не декодирует весь файл в память.
+  var canWebAudio = false;
   var getVoiceCtx = function () {
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -20657,13 +20698,17 @@ function ATeamChat() {
       const url = __tcWavStop(R.wav); endRec();
       if (sendIt && url) pushMedia('voice', url.split(',')[1], 'voice.wav', 'audio/wav', secs);
     } else if (R.rec) {
-      const mr = R.rec, chunks = R.chunks, mime = R.mime;
+      const mr = R.rec, chunks = R.chunks, mime = R.mime, name = R.name || __tcVoiceNameFromMime(R.mime);
       mr.onstop = () => {
-        const blob = new Blob(chunks, { type: mime }); endRec();
+        const publicMime = __tcVoicePublicMime(mime || (mr && mr.mimeType) || '');
+        const blob = new Blob(chunks, { type: publicMime }); endRec();
         if (sendIt && blob.size > 0) {
           const fr = new FileReader();
-          fr.onloadend = () => { const b64 = String(fr.result || '').split(',')[1]; if (b64) pushMedia('voice', b64, 'voice', (mime || 'audio/webm').split(';')[0], secs); };
+          fr.onloadend = () => { const b64 = String(fr.result || '').split(',')[1]; if (b64) pushMedia('voice', b64, name, publicMime, secs); else flashErr('Не удалось прочитать голосовое'); };
+          fr.onerror = () => flashErr('Не удалось прочитать голосовое');
           fr.readAsDataURL(blob);
+        } else if (sendIt) {
+          flashErr('Голосовое не записалось — попробуйте ещё раз');
         }
       };
       try { mr.stop(); } catch (e) { endRec(); }
@@ -20678,29 +20723,24 @@ function ATeamChat() {
     if (recording || uploading) return;
     if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { flashErr('Микрофон недоступен'); return; }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      const R = { stream: stream, chunks: [], wav: null, rec: null, mime: 'audio/webm', t0: Date.now() };
-      const isIOS = (() => {
-        try {
-          if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios') return true;
-        } catch (e) {}
-        try {
-          return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        } catch (e) {}
-        return false;
-      })();
-      // iPhone / WKWebView стабильно режет некоторые записи через MediaRecorder:
-      // на сервер прилетает валидный, но уже укороченный m4a. Для iOS принудительно
-      // пишем PCM/WAV через WebAudio — файл тяжелее, зато запись целиком и без обрывов.
-      if (isIOS || !window.MediaRecorder) {
+      const pick = __tcPickVoiceRecorder();
+      const R = { stream: stream, chunks: [], wav: null, rec: null, mime: pick ? pick.mime : 'audio/wav', name: pick ? pick.name : 'voice.wav', t0: Date.now() };
+      if (!pick) {
         R.wav = __tcWavStart(stream);
         R.wav.onCap = () => { try { stopRecording(true); } catch (e) {} };
       } else {
         let mr;
-        try { mr = new MediaRecorder(stream); } catch (er) { try { mr = new MediaRecorder(stream, { mimeType: 'audio/webm' }); } catch (e2) { mr = null; } }
+        const opts = pick.mime ? { mimeType: pick.mime, audioBitsPerSecond: 48000 } : { audioBitsPerSecond: 48000 };
+        try { mr = new MediaRecorder(stream, opts); }
+        catch (er) {
+          try { mr = pick.mime ? new MediaRecorder(stream, { mimeType: pick.mime }) : new MediaRecorder(stream); }
+          catch (e2) { try { mr = new MediaRecorder(stream); } catch (e3) { mr = null; } }
+        }
         if (!mr) { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} flashErr('Запись недоступна'); return; }
-        R.rec = mr; R.mime = mr.mimeType || 'audio/webm';
+        R.rec = mr; R.mime = mr.mimeType || pick.mime || 'audio/webm'; R.name = __tcVoiceNameFromMime(R.mime);
         mr.ondataavailable = ev => { if (ev.data && ev.data.size > 0) R.chunks.push(ev.data); };
-        mr.start(250);
+        // Один цельный blob: для MP4/M4A это надёжнее, чем склейка коротких фрагментов.
+        mr.start();
       }
       recRef.current = R;
       setRecording(true); setRecSecs(0); tactile();
