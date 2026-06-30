@@ -20173,6 +20173,7 @@ function __tcWavEncode(pcm16, sr) {
 
 // ===== Звук «отправлено» (Web Audio, без файла) =====
 let _tcAudioCtx = null;
+let _tcVoiceAudioCtx = null;
 function playSendSound() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -20197,6 +20198,13 @@ function playSendSound() {
 function TCVoice(props) {
   var url = props.url, mine = props.mine, dark = props.dark, onErr = props.onErr;
   var aRef = React.useRef(null);
+  var bufferRef = React.useRef(null);
+  var loadingRef = React.useRef(null);
+  var nodeRef = React.useRef(null);
+  var ctxRef = React.useRef(null);
+  var offsetRef = React.useRef(0);
+  var startedAtRef = React.useRef(0);
+  var rafRef = React.useRef(0);
   var playReqRef = React.useRef(false);   // true только когда юзер реально нажал play (не фоновая авто-загрузка)
   var retryRef = React.useRef(false);
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
@@ -20223,6 +20231,99 @@ function TCVoice(props) {
   }, [url]);
   var si = React.useState(0), srcIdx = si[0], setSrcIdx = si[1];
   var src = sourceList[srcIdx] || '';
+  var canWebAudio = !!(window.AudioContext || window.webkitAudioContext);
+  var getVoiceCtx = function () {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!_tcVoiceAudioCtx) _tcVoiceAudioCtx = new AC();
+    try { if (_tcVoiceAudioCtx.state === 'suspended') _tcVoiceAudioCtx.resume(); } catch (e) {}
+    ctxRef.current = _tcVoiceAudioCtx;
+    return _tcVoiceAudioCtx;
+  };
+  var stopBuffer = function (reset) {
+    if (rafRef.current) { try { cancelAnimationFrame(rafRef.current); } catch (e) {} rafRef.current = 0; }
+    var n = nodeRef.current; nodeRef.current = null;
+    if (n) { try { n.onended = null; n.stop(0); } catch (e) {} }
+    if (reset) { offsetRef.current = 0; setPos(0); }
+    setPlaying(false);
+  };
+  var tickBuffer = function () {
+    var ctx = ctxRef.current, buf = bufferRef.current, n = nodeRef.current;
+    if (!ctx || !buf || !n) return;
+    var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
+    var total = buf.duration || dur || 0;
+    if (total > 0) setPos(Math.min(1, elapsed / total));
+    if (elapsed < total && nodeRef.current) rafRef.current = requestAnimationFrame(tickBuffer);
+  };
+  var decodeBuffer = function (ctx, arr) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var ok = function (buf) { if (!done) { done = true; resolve(buf); } };
+      var bad = function (err) { if (!done) { done = true; reject(err); } };
+      try {
+        var p = ctx.decodeAudioData(arr, ok, bad);
+        if (p && p.then) p.then(ok).catch(bad);
+      } catch (e) { bad(e); }
+    });
+  };
+  var loadBuffer = function () {
+    if (bufferRef.current) return Promise.resolve(bufferRef.current);
+    if (loadingRef.current) return loadingRef.current;
+    var ctx = getVoiceCtx();
+    if (!ctx || !sourceList.length) return Promise.reject(new Error('no_audio_context'));
+    var tryOne = function (i) {
+      if (i >= sourceList.length) return Promise.reject(new Error('decode_failed'));
+      return fetch(sourceList[i], { cache: 'force-cache' })
+        .then(function (r) { if (!r.ok) throw new Error('http_' + r.status); return r.arrayBuffer(); })
+        .then(function (arr) { return decodeBuffer(ctx, arr); })
+        .catch(function () { return tryOne(i + 1); });
+    };
+    loadingRef.current = tryOne(0).then(function (buf) {
+      bufferRef.current = buf;
+      loadingRef.current = null;
+      if ((!props.dur || props.dur <= 0) && isFinite(buf.duration)) setDur(buf.duration);
+      return buf;
+    }).catch(function (e) {
+      loadingRef.current = null;
+      throw e;
+    });
+    return loadingRef.current;
+  };
+  var playBuffer = function () {
+    playReqRef.current = true;
+    loadBuffer().then(function (buf) {
+      var ctx = getVoiceCtx();
+      if (!ctx) throw new Error('no_audio_context');
+      stopBuffer(false);
+      var startAt = Math.max(0, offsetRef.current || 0);
+      if (buf.duration && startAt >= buf.duration - 0.05) startAt = 0;
+      offsetRef.current = startAt;
+      var n = ctx.createBufferSource();
+      n.buffer = buf;
+      n.connect(ctx.destination);
+      nodeRef.current = n;
+      startedAtRef.current = ctx.currentTime - startAt;
+      n.onended = function () {
+        if (nodeRef.current !== n) return;
+        nodeRef.current = null;
+        var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
+        if (!buf.duration || elapsed >= buf.duration - 0.08) {
+          offsetRef.current = 0;
+          setPos(0);
+        } else {
+          offsetRef.current = elapsed;
+        }
+        setPlaying(false);
+      };
+      n.start(0, startAt);
+      setPlaying(true);
+      tickBuffer();
+    }).catch(function (e) {
+      try { console.log('[TCVoice] webaudio fail', e); } catch (e2) {}
+      stopBuffer(false);
+      if (onErr) onErr('Не удалось воспроизвести голосовое');
+    });
+  };
   var fail = function () {
     if (srcIdx < sourceList.length - 1) {
       retryRef.current = true;
@@ -20260,6 +20361,20 @@ function TCVoice(props) {
   };
   var toggle = function () {
     try { if (window.tactile) window.tactile(); } catch (e) {}
+    if (canWebAudio) {
+      if (nodeRef.current) {
+        var ctx = ctxRef.current, buf = bufferRef.current;
+        if (ctx) {
+          var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
+          offsetRef.current = buf && buf.duration ? Math.min(elapsed, Math.max(0, buf.duration - 0.05)) : elapsed;
+          if (buf && buf.duration && offsetRef.current >= buf.duration - 0.08) offsetRef.current = 0;
+        }
+        stopBuffer(false);
+        return;
+      }
+      playBuffer();
+      return;
+    }
     var a = aRef.current;
     if (!a) return;
     if (!a.paused) {
@@ -20276,6 +20391,10 @@ function TCVoice(props) {
     else setPlaying(true);
   };
   React.useEffect(function () {
+    stopBuffer(true);
+    bufferRef.current = null;
+    loadingRef.current = null;
+    ctxRef.current = null;
     setSrcIdx(0);
     playReqRef.current = false;
     retryRef.current = false;
@@ -20284,6 +20403,7 @@ function TCVoice(props) {
     setDur(props.dur || 0);
   }, [url, props.dur]);
   React.useEffect(function () {
+    if (canWebAudio) return function () { stopBuffer(false); };
     var a = aRef.current;
     if (!a || !src) return;
     a.preload = 'auto';
@@ -20331,7 +20451,7 @@ function TCVoice(props) {
     bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
   }
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
-    React.createElement('audio', { ref: aRef, src: src, preload: 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
+    React.createElement('audio', { ref: aRef, src: canWebAudio ? undefined : src, preload: canWebAudio ? 'none' : 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
     React.createElement('button', { onClick: toggle, 'aria-label': playing ? 'Пауза' : 'Воспроизвести', style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: 'rgba(' + base + ',0.16)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 } },
       playing
         ? React.createElement('svg', { key: 'pause', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
