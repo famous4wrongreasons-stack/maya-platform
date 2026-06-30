@@ -20238,6 +20238,8 @@ function playSendSound() {
 function TCVoice(props) {
   var url = props.url, mine = props.mine, dark = props.dark, onErr = props.onErr;
   var aRef = React.useRef(null);
+  var blobUrlRef = React.useRef('');
+  var blobLoadingRef = React.useRef(null);
   var bufferRef = React.useRef(null);
   var loadingRef = React.useRef(null);
   var nodeRef = React.useRef(null);
@@ -20247,9 +20249,11 @@ function TCVoice(props) {
   var rafRef = React.useRef(0);
   var playReqRef = React.useRef(false);   // true только когда юзер реально нажал play (не фоновая авто-загрузка)
   var retryRef = React.useRef(false);
+  var webFallbackRef = React.useRef(false);
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
   var q = React.useState(0), pos = q[0], setPos = q[1];
   var d = React.useState(props.dur || 0), dur = d[0], setDur = d[1];
+  var bs = React.useState(''), localSrc = bs[0], setLocalSrc = bs[1];
   // Цвет контента плеера подстраивается под фон пузыря: свой (зелёный) → белый; входящий → тёмный/светлый по теме.
   var base = mine ? '255,255,255' : (dark ? '243,237,225' : '31,28,22');
   var ink = mine ? '#ffffff' : (dark ? '#f3ede1' : '#1f1c16');
@@ -20271,8 +20275,47 @@ function TCVoice(props) {
   }, [url]);
   var si = React.useState(0), srcIdx = si[0], setSrcIdx = si[1];
   var src = sourceList[srcIdx] || '';
-  // Нативный audio-элемент потоково читает сжатые voice-файлы и не декодирует весь файл в память.
+  // WKWebView иногда роняет streaming playback даже на валидном M4A. Поэтому
+  // voice сначала скачивается целиком в маленький локальный blob:, а уже его
+  // отдаём нативному audio-элементу.
   var canWebAudio = false;
+  var revokeLocalSrc = function () {
+    if (blobUrlRef.current) {
+      try { URL.revokeObjectURL(blobUrlRef.current); } catch (e) {}
+    }
+    blobUrlRef.current = '';
+    blobLoadingRef.current = null;
+    setLocalSrc('');
+  };
+  var ensureLocalSrc = function () {
+    if (blobUrlRef.current) return Promise.resolve(blobUrlRef.current);
+    if (blobLoadingRef.current) return blobLoadingRef.current;
+    var tryOne = function (i) {
+      if (i >= sourceList.length) return Promise.reject(new Error('voice_fetch_failed'));
+      return fetch(sourceList[i], { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('http_' + r.status);
+          var ct = (r.headers.get('content-type') || 'audio/mp4').split(';')[0] || 'audio/mp4';
+          return r.arrayBuffer().then(function (arr) {
+            if (!arr || !arr.byteLength) throw new Error('empty_audio');
+            var blob = new Blob([arr], { type: ct });
+            var obj = URL.createObjectURL(blob);
+            blobUrlRef.current = obj;
+            setLocalSrc(obj);
+            return obj;
+          });
+        })
+        .catch(function () { return tryOne(i + 1); });
+    };
+    blobLoadingRef.current = tryOne(0).then(function (obj) {
+      blobLoadingRef.current = null;
+      return obj;
+    }).catch(function (e) {
+      blobLoadingRef.current = null;
+      throw e;
+    });
+    return blobLoadingRef.current;
+  };
   var getVoiceCtx = function () {
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -20366,6 +20409,13 @@ function TCVoice(props) {
     });
   };
   var fail = function () {
+    if (playReqRef.current && !webFallbackRef.current && (window.AudioContext || window.webkitAudioContext)) {
+      webFallbackRef.current = true;
+      try { var aa = aRef.current; if (aa) aa.pause(); } catch (e) {}
+      setPlaying(false);
+      playBuffer();
+      return;
+    }
     if (srcIdx < sourceList.length - 1) {
       retryRef.current = true;
       setPlaying(false);
@@ -20402,6 +20452,7 @@ function TCVoice(props) {
   };
   var toggle = function () {
     try { if (window.tactile) window.tactile(); } catch (e) {}
+    try { getVoiceCtx(); } catch (e) {}
     if (canWebAudio) {
       if (nodeRef.current) {
         var ctx = ctxRef.current, buf = bufferRef.current;
@@ -20423,34 +20474,48 @@ function TCVoice(props) {
       setPlaying(false);
       return;
     }
-    try {
-      if (a.ended || (a.duration && isFinite(a.duration) && a.currentTime >= Math.max(0, a.duration - 0.05))) a.currentTime = 0;
-    } catch (e) {}
     playReqRef.current = true;   // пользователь нажал play → теперь ошибки показываем
-    var pr = a.play && a.play();
-    if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
-    else setPlaying(true);
+    var playLocal = function (obj) {
+      try {
+        if (obj && a.src !== obj) { a.src = obj; a.load(); }
+        if (a.ended || (a.duration && isFinite(a.duration) && a.currentTime >= Math.max(0, a.duration - 0.05))) a.currentTime = 0;
+      } catch (e) {}
+      var pr = a.play && a.play();
+      if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
+      else setPlaying(true);
+    };
+    if (localSrc || blobUrlRef.current) {
+      playLocal(localSrc || blobUrlRef.current);
+    } else {
+      ensureLocalSrc().then(playLocal).catch(fail);
+    }
   };
   React.useEffect(function () {
     stopBuffer(true);
+    revokeLocalSrc();
     bufferRef.current = null;
     loadingRef.current = null;
     ctxRef.current = null;
     setSrcIdx(0);
     playReqRef.current = false;
     retryRef.current = false;
+    webFallbackRef.current = false;
     setPlaying(false);
     setPos(0);
     setDur(props.dur || 0);
   }, [url, props.dur]);
   React.useEffect(function () {
+    if (!canWebAudio && sourceList.length) ensureLocalSrc().catch(function () {});
+    return function () {};
+  }, [url]);
+  React.useEffect(function () {
     if (canWebAudio) return function () { stopBuffer(false); };
     var a = aRef.current;
-    if (!a || !src) return;
+    if (!a) return;
     a.preload = 'auto';
     a.playsInline = true;
     try { a.setAttribute('playsinline', ''); a.setAttribute('webkit-playsinline', ''); } catch (e) {}
-    try { a.load(); } catch (e) {}
+    if (localSrc) { try { a.load(); } catch (e) {} }
     var onEnded = function () { setPlaying(false); setPos(0); };
     var onTime = function () { if (a.duration && isFinite(a.duration)) setPos(a.currentTime / a.duration); };
     var onMeta = function () {
@@ -20483,7 +20548,7 @@ function TCVoice(props) {
       a.removeEventListener('play', onPlay);
       a.removeEventListener('error', fail);
     };
-  }, [src, props.dur]);
+  }, [localSrc, props.dur]);
   var mm = function (s) { s = Math.max(0, Math.round(s || 0)); var m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
   var bars = [];
   for (var i = 0; i < 24; i++) {
@@ -20492,7 +20557,7 @@ function TCVoice(props) {
     bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
   }
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
-    React.createElement('audio', { ref: aRef, src: canWebAudio ? undefined : src, preload: canWebAudio ? 'none' : 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
+    React.createElement('audio', { ref: aRef, src: canWebAudio ? undefined : (localSrc || undefined), preload: canWebAudio ? 'none' : 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
     React.createElement('button', { onClick: toggle, 'aria-label': playing ? 'Пауза' : 'Воспроизвести', style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: 'rgba(' + base + ',0.16)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 } },
       playing
         ? React.createElement('svg', { key: 'pause', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
