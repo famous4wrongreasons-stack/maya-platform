@@ -20213,12 +20213,10 @@ function TCVoice(props) {
     var direct = raw.indexOf('action=team_chat_media') === -1 ? raw : '';
     var m = raw.match(/\/media\/team\/([^/?#]+)/);
     var proxy = raw.indexOf('action=team_chat_media') !== -1 ? raw : (m ? ('https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file=' + encodeURIComponent(m[1])) : raw);
-    var extm = raw.split('?')[0].match(/\.([a-z0-9]+)$/i);
-    var ext = extm ? String(extm[1]).toLowerCase() : '';
-    // iPhone/WebKit стабильнее играет прямой nginx-URL для нормальных аудио-расширений,
-    // а legacy .weba/.webm оставляем через прокси, который чинит MIME по сигнатуре файла.
-    var preferDirect = /^(m4a|mp4|wav|mp3|aac)$/i.test(ext);
-    var ordered = preferDirect ? [direct, proxy] : [proxy, direct];
+    // Для voice всегда сначала идём через team_chat_media: там MIME приводится к
+    // реальному контейнеру файла (особенно важно для m4a/weba на iPhone), а direct
+    // static-URL оставляем только как запасной fallback.
+    var ordered = [proxy, direct];
     var out = [];
     ordered.forEach(function (item) { if (item && out.indexOf(item) === -1) out.push(item); });
     return out;
@@ -20288,13 +20286,16 @@ function TCVoice(props) {
   React.useEffect(function () {
     var a = aRef.current;
     if (!a || !src) return;
-    a.preload = 'metadata';
+    a.preload = 'auto';
     a.playsInline = true;
     try { a.setAttribute('playsinline', ''); a.setAttribute('webkit-playsinline', ''); } catch (e) {}
+    try { a.load(); } catch (e) {}
     var onEnded = function () { setPlaying(false); setPos(0); };
     var onTime = function () { if (a.duration && isFinite(a.duration)) setPos(a.currentTime / a.duration); };
     var onMeta = function () {
       if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration);
+    };
+    var onCanPlay = function () {
       if (retryRef.current) {
         retryRef.current = false;
         var pr = a.play && a.play();
@@ -20307,6 +20308,7 @@ function TCVoice(props) {
     a.addEventListener('ended', onEnded);
     a.addEventListener('timeupdate', onTime);
     a.addEventListener('loadedmetadata', onMeta);
+    a.addEventListener('canplay', onCanPlay);
     a.addEventListener('pause', onPause);
     a.addEventListener('play', onPlay);
     a.addEventListener('error', fail);
@@ -20315,6 +20317,7 @@ function TCVoice(props) {
       a.removeEventListener('ended', onEnded);
       a.removeEventListener('timeupdate', onTime);
       a.removeEventListener('loadedmetadata', onMeta);
+      a.removeEventListener('canplay', onCanPlay);
       a.removeEventListener('pause', onPause);
       a.removeEventListener('play', onPlay);
       a.removeEventListener('error', fail);
@@ -20328,7 +20331,7 @@ function TCVoice(props) {
     bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
   }
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
-    React.createElement('audio', { ref: aRef, src: src, preload: 'metadata', playsInline: true, style: { display: 'none' } }),
+    React.createElement('audio', { ref: aRef, src: src, preload: 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
     React.createElement('button', { onClick: toggle, 'aria-label': playing ? 'Пауза' : 'Воспроизвести', style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: 'rgba(' + base + ',0.16)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 } },
       playing
         ? React.createElement('svg', { key: 'pause', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
@@ -20341,7 +20344,9 @@ function TCVoice(props) {
     React.createElement('div', { style: { flexShrink: 0, fontFamily: BODY, fontSize: 11, color: dim } }, mm(dur))
   );
 }
-window.TCVoice = TCVoice;
+window.TCVoice = React.memo(TCVoice, function (prev, next) {
+  return prev.url === next.url && prev.dur === next.dur && prev.mine === next.mine && prev.dark === next.dark;
+});
 
 // ===== Экран чата команды (текст + голосовые + вложения) =====
 function ATeamChat() {
@@ -20383,7 +20388,7 @@ function ATeamChat() {
   const typingPingRef = React.useRef(0);
 
   const tactile = () => { try { if (window.tactile) window.tactile(); } catch (e) {} };
-  const flashErr = (msg) => { setAttachErr(msg); setTimeout(() => setAttachErr(''), 4500); };
+  const flashErr = React.useCallback((msg) => { setAttachErr(msg); setTimeout(() => setAttachErr(''), 4500); }, []);
   const fmtSize = (b) => { b = b || 0; if (b >= 1048576) return (b / 1048576).toFixed(1) + ' МБ'; if (b >= 1024) return Math.round(b / 1024) + ' КБ'; return b + ' Б'; };
   const mmss = (s) => { s = Math.max(0, Math.round(s || 0)); const m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
   const roundBtn = (bg, col) => ({ flexShrink: 0, width: 44, height: 44, borderRadius: 999, border: 'none', cursor: 'pointer', background: bg, color: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19 });
