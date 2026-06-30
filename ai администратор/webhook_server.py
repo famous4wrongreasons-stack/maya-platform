@@ -7019,6 +7019,90 @@ _TEAM_MEDIA_LABEL = {
 _TEAM_MEDIA_PREFIX = {"voice": "🎤 ", "image": "📷 ", "video": "🎬 ", "file": "📎 "}
 
 
+def _normalize_team_voice_bytes(raw: bytes) -> tuple[bytes, float]:
+    """Convert any supported voice container to a small progressive AAC/M4A file."""
+    import subprocess
+    import tempfile
+
+    if not raw:
+        raise ValueError("empty_voice")
+    if len(raw) > 8 * 1024 * 1024:
+        raise ValueError("voice_too_large")
+    with tempfile.TemporaryDirectory(prefix="team_voice_") as td:
+        src = os.path.join(td, "voice.in")
+        dst = os.path.join(td, "voice.m4a")
+        with open(src, "wb") as f:
+            f.write(raw)
+        cmd = [
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-fflags", "+genpts",
+            "-i", src,
+            "-vn", "-map", "0:a:0",
+            "-af", "aresample=async=1:first_pts=0",
+            "-ac", "1", "-ar", "48000",
+            "-c:a", "aac", "-b:a", "96k",
+            "-movflags", "+faststart",
+            dst,
+        ]
+        subprocess.run(cmd, check=True, timeout=30)
+        with open(dst, "rb") as f:
+            out = f.read()
+        if not out or len(out) < 256:
+            raise ValueError("normalize_empty")
+        dur = 0.0
+        try:
+            p = subprocess.run(
+                ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                 "-of", "default=noprint_wrappers=1:nokey=1", dst],
+                check=True, timeout=10, capture_output=True, text=True,
+            )
+            dur = float((p.stdout or "0").strip() or 0)
+        except Exception:
+            dur = 0.0
+        return out, dur
+
+
+async def team_chat_normalize_voice_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/team_chat/normalize_voice — prepare voice media for iOS-safe playback."""
+    import base64 as _b64
+
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if not _is_staff_info(info):
+        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
+    b64 = str(body.get("media_b64") or "")
+    if "," in b64 and b64[:64].lower().startswith("data:"):
+        b64 = b64.split(",", 1)[1]
+    if not b64:
+        return _cabinet_response({"error": "empty", "message": "Пустое голосовое."}, status=400)
+    if len(b64) > 11 * 1024 * 1024:
+        return _cabinet_response({"error": "too_large", "message": "Голосовое слишком большое."}, status=413)
+    try:
+        raw = _b64.b64decode(b64, validate=True)
+    except Exception:
+        return _cabinet_response({"error": "bad_base64", "message": "Не удалось прочитать голосовое."}, status=400)
+    try:
+        out, dur = await asyncio.to_thread(_normalize_team_voice_bytes, raw)
+    except Exception as e:
+        logger.warning("team voice normalize failed: %s", e)
+        return _cabinet_response({"error": "normalize_failed", "message": "Не удалось подготовить голосовое."}, status=422)
+    return _cabinet_response({
+        "ok": True,
+        "media_b64": _b64.b64encode(out).decode("ascii"),
+        "media_name": "voice.m4a",
+        "media_mime": "audio/mp4",
+        "media_ext": "m4a",
+        "media_size": len(out),
+        "media_dur": dur,
+    })
+
+
 async def _push_team_message(app, sender_chat_id: int, sender_name: str, text: str,
                              media_kind: str = "") -> None:
     """Новое сообщение команды → всем сотрудникам, кроме отправителя:
@@ -7127,6 +7211,40 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     _panel_bg_tasks.add(_pt)
     _pt.add_done_callback(_panel_bg_tasks.discard)
     return _cabinet_response({"ok": True, "id": msg_id})
+
+
+async def team_chat_delete_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/team_chat/delete — удалить своё сообщение из чата команды."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = int(tg_user["id"])
+    info = _panel_resolve_role(tg_id)
+    if not _is_staff_info(info):
+        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
+    try:
+        msg_id = int(body.get("id") or body.get("message_id") or 0)
+    except Exception:
+        msg_id = 0
+    if msg_id <= 0:
+        return _cabinet_response({"error": "bad_id", "message": "Не найдено сообщение."}, status=400)
+
+    result = await asyncio.to_thread(database.delete_staff_message, msg_id, tg_id)
+    if not result.get("ok"):
+        reason = result.get("reason")
+        if reason == "forbidden":
+            return _cabinet_response({"error": "forbidden", "message": "Можно удалить только своё сообщение."}, status=403)
+        return _cabinet_response({"error": "not_found", "message": "Сообщение уже удалено."}, status=404)
+    msg = result.get("message") or {}
+    return _cabinet_response({
+        "ok": True,
+        "id": msg_id,
+        "media_url": msg.get("media_url") or "",
+    })
 
 
 async def team_chat_fetch_handler(request: web.Request) -> web.Response:
@@ -7551,6 +7669,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/cabinet/link-phone", cabinet_options_handler)
     web_app.router.add_post("/api/booking/prefill", booking_prefill_handler)
     web_app.router.add_options("/api/booking/prefill", cabinet_options_handler)
+    web_app.router.add_post("/api/panel/team_chat/normalize_voice", team_chat_normalize_voice_handler)
+    web_app.router.add_options("/api/panel/team_chat/normalize_voice", cabinet_options_handler)
     web_app.router.add_get("/api/auth/status", auth_status_handler)
     web_app.router.add_options("/api/auth/status", cabinet_options_handler)
     # /api/usage/fal (логирование расхода CutMatch/fal.ai) СНЯТ 2026-06-21 —
@@ -7662,6 +7782,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/journal_cancel", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/send", team_chat_send_handler)
     web_app.router.add_options("/api/panel/team_chat/send", panel_options_handler)
+    web_app.router.add_post("/api/panel/team_chat/delete", team_chat_delete_handler)
+    web_app.router.add_options("/api/panel/team_chat/delete", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/fetch", team_chat_fetch_handler)
     web_app.router.add_options("/api/panel/team_chat/fetch", panel_options_handler)
     web_app.router.add_post("/api/panel/journal_attendance", panel_journal_attendance_handler)

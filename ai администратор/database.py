@@ -1885,6 +1885,26 @@ def get_staff_messages_recent(limit: int = 50) -> list[dict]:
         return list(reversed([dict(r) for r in rows]))
 
 
+def delete_staff_message(message_id: int, sender_chat_id: int) -> dict:
+    """Удаляет своё сообщение команды. Чужие сообщения не трогает."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        row = conn.execute(
+            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages WHERE id = ?",
+            (int(message_id or 0),),
+        ).fetchone()
+        if not row:
+            return {"ok": False, "reason": "not_found"}
+        msg = dict(row)
+        if int(msg.get("sender_chat_id") or 0) != int(sender_chat_id or 0):
+            return {"ok": False, "reason": "forbidden"}
+        conn.execute(
+            "DELETE FROM staff_messages WHERE id = ? AND sender_chat_id = ?",
+            (int(message_id), int(sender_chat_id)),
+        )
+        return {"ok": True, "message": msg}
+
+
 def mute_master(telegram_chat_id: int, hours: float) -> bool:
     """Заглушает уведомления для мастера на N часов. False если мастер не найден."""
     until = (datetime.now() + timedelta(hours=hours)).isoformat(timespec="seconds")

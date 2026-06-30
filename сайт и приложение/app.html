@@ -20119,7 +20119,7 @@ window.ALivePanel = ALivePanel;
 
 // ─── Внутренний чат команды (вкладка «Команда») ─────────────────────────────
 // ===== Чат команды: WAV-фолбэк записи (iOS WKWebView без MediaRecorder) =====
-var __TC_SR = 16000, __TC_MAXMS = 122000;
+var __TC_SR = 24000, __TC_MAXMS = 122000;
 function __tcWavStart(stream) {
   var AC = window.AudioContext || window.webkitAudioContext;
   var ctx = new AC();
@@ -20170,9 +20170,51 @@ function __tcWavEncode(pcm16, sr) {
   for (var j = 0; j < bytes.length; j++) bin += String.fromCharCode(bytes[j]);
   return 'data:audio/wav;base64,' + btoa(bin);
 }
+function __tcIsIOS() {
+  try {
+    if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios') return true;
+  } catch (e) {}
+  try {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  } catch (e) {}
+  return false;
+}
+function __tcVoicePublicMime(mime) {
+  var m = String(mime || '').split(';')[0].trim().toLowerCase();
+  return m || 'audio/webm';
+}
+function __tcVoiceNameFromMime(mime) {
+  var m = __tcVoicePublicMime(mime);
+  if (m === 'audio/mp4' || m === 'video/mp4') return 'voice.m4a';
+  if (m === 'audio/aac') return 'voice.aac';
+  if (m === 'audio/ogg' || m === 'application/ogg') return 'voice.ogg';
+  if (m === 'audio/wav' || m === 'audio/wave' || m === 'audio/x-wav') return 'voice.wav';
+  if (m === 'audio/webm' || m === 'video/webm') return 'voice.webm';
+  return 'voice.webm';
+}
+function __tcCanRecordMime(mime) {
+  if (!window.MediaRecorder) return false;
+  if (!mime) return true;
+  try {
+    return typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(mime);
+  } catch (e) { return false; }
+}
+function __tcPickVoiceRecorder() {
+  if (!window.MediaRecorder) return null;
+  var ios = __tcIsIOS();
+  var mimes = ios
+    ? ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/aac']
+    : ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm'];
+  for (var i = 0; i < mimes.length; i++) {
+    if (__tcCanRecordMime(mimes[i])) return { mime: mimes[i], name: __tcVoiceNameFromMime(mimes[i]) };
+  }
+  return __tcCanRecordMime('') ? { mime: '', name: 'voice.webm' } : null;
+}
 
 // ===== Звук «отправлено» (Web Audio, без файла) =====
 let _tcAudioCtx = null;
+let _tcVoiceAudioCtx = null;
+let _tcVoiceState = { id: '', status: 'stopped', position: 0, duration: 0 };
 function playSendSound() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -20197,23 +20239,236 @@ function playSendSound() {
 function TCVoice(props) {
   var url = props.url, mine = props.mine, dark = props.dark, onErr = props.onErr;
   var aRef = React.useRef(null);
+  var blobUrlRef = React.useRef('');
+  var blobLoadingRef = React.useRef(null);
+  var bufferRef = React.useRef(null);
+  var loadingRef = React.useRef(null);
+  var nodeRef = React.useRef(null);
+  var ctxRef = React.useRef(null);
+  var nativeActiveRef = React.useRef(false);
+  var offsetRef = React.useRef(0);
+  var startedAtRef = React.useRef(0);
+  var rafRef = React.useRef(0);
   var playReqRef = React.useRef(false);   // true только когда юзер реально нажал play (не фоновая авто-загрузка)
+  var retryRef = React.useRef(false);
+  var webFallbackRef = React.useRef(false);
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
-  var q = React.useState(0), pos = q[0], setPos = q[1];
+  var q = React.useState(0), pos = q[0], setPosState = q[1];
   var d = React.useState(props.dur || 0), dur = d[0], setDur = d[1];
+  var bs = React.useState(''), localSrc = bs[0], setLocalSrc = bs[1];
+  var smoothPosRef = React.useRef(0);
+  var smoothTargetRef = React.useRef(0);
+  var smoothRafRef = React.useRef(0);
+  var clampPos = function (v) {
+    v = Number(v);
+    return isFinite(v) ? Math.max(0, Math.min(1, v)) : 0;
+  };
+  var stopSmoothPos = function () {
+    if (smoothRafRef.current) {
+      try { cancelAnimationFrame(smoothRafRef.current); } catch (e) {}
+      smoothRafRef.current = 0;
+    }
+  };
+  var tickSmoothPos = function () {
+    var target = smoothTargetRef.current;
+    var current = smoothPosRef.current;
+    var next = current + (target - current) * 0.35;
+    if (Math.abs(target - next) < 0.0015) next = target;
+    smoothPosRef.current = next;
+    setPosState(next);
+    if (next !== target) smoothRafRef.current = requestAnimationFrame(tickSmoothPos);
+    else smoothRafRef.current = 0;
+  };
+  var setPos = function (value, immediate) {
+    var next = clampPos(value);
+    smoothTargetRef.current = next;
+    if (immediate || next <= 0 || Math.abs(next - smoothPosRef.current) > 0.25) {
+      stopSmoothPos();
+      smoothPosRef.current = next;
+      setPosState(next);
+      return;
+    }
+    if (!smoothRafRef.current) smoothRafRef.current = requestAnimationFrame(tickSmoothPos);
+  };
   // Цвет контента плеера подстраивается под фон пузыря: свой (зелёный) → белый; входящий → тёмный/светлый по теме.
   var base = mine ? '255,255,255' : (dark ? '243,237,225' : '31,28,22');
   var ink = mine ? '#ffffff' : (dark ? '#f3ede1' : '#1f1c16');
   var dim = 'rgba(' + base + ',0.6)';
   var idle = 'rgba(' + base + ',0.3)';
-  var proxyUrl = function (raw) {
-    if (!raw) return '';
-    if (raw.indexOf('action=team_chat_media') !== -1) return raw;
-    var m = String(raw).match(/\/media\/team\/([^/?#]+)/);
-    return m ? ('https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file=' + encodeURIComponent(m[1])) : raw;
+  var sourceList = React.useMemo(function () {
+    if (!url) return [];
+    var raw = String(url);
+    var direct = raw.indexOf('action=team_chat_media') === -1 ? raw : '';
+    var m = raw.match(/\/media\/team\/([^/?#]+)/);
+    var proxy = raw.indexOf('action=team_chat_media') !== -1 ? raw : (m ? ('https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file=' + encodeURIComponent(m[1])) : raw);
+    // Для voice всегда сначала идём через team_chat_media: там MIME приводится к
+    // реальному контейнеру файла (особенно важно для m4a/weba на iPhone), а direct
+    // static-URL оставляем только как запасной fallback.
+    var ordered = [proxy, direct];
+    var out = [];
+    ordered.forEach(function (item) { if (item && out.indexOf(item) === -1) out.push(item); });
+    return out;
+  }, [url]);
+  var si = React.useState(0), srcIdx = si[0], setSrcIdx = si[1];
+  var src = sourceList[srcIdx] || '';
+  var nativeId = React.useMemo(function () {
+    return 'team_voice_' + String(url || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(-96);
+  }, [url]);
+  var getNativeVoice = function () {
+    try {
+      var C = window.Capacitor;
+      return C && C.Plugins && C.Plugins.TeamVoicePlayer ? C.Plugins.TeamVoicePlayer : null;
+    } catch (e) { return null; }
   };
-  var src = proxyUrl(url);
+  // WKWebView иногда роняет streaming playback даже на валидном M4A. Поэтому
+  // voice сначала скачивается целиком в маленький локальный blob:, а уже его
+  // отдаём нативному audio-элементу.
+  var canWebAudio = false;
+  var revokeLocalSrc = function () {
+    if (blobUrlRef.current) {
+      try { URL.revokeObjectURL(blobUrlRef.current); } catch (e) {}
+    }
+    blobUrlRef.current = '';
+    blobLoadingRef.current = null;
+    setLocalSrc('');
+  };
+  var ensureLocalSrc = function () {
+    if (blobUrlRef.current) return Promise.resolve(blobUrlRef.current);
+    if (blobLoadingRef.current) return blobLoadingRef.current;
+    var tryOne = function (i) {
+      if (i >= sourceList.length) return Promise.reject(new Error('voice_fetch_failed'));
+      return fetch(sourceList[i], { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('http_' + r.status);
+          var ct = (r.headers.get('content-type') || 'audio/mp4').split(';')[0] || 'audio/mp4';
+          return r.arrayBuffer().then(function (arr) {
+            if (!arr || !arr.byteLength) throw new Error('empty_audio');
+            var blob = new Blob([arr], { type: ct });
+            var obj = URL.createObjectURL(blob);
+            blobUrlRef.current = obj;
+            setLocalSrc(obj);
+            return obj;
+          });
+        })
+        .catch(function () { return tryOne(i + 1); });
+    };
+    blobLoadingRef.current = tryOne(0).then(function (obj) {
+      blobLoadingRef.current = null;
+      return obj;
+    }).catch(function (e) {
+      blobLoadingRef.current = null;
+      throw e;
+    });
+    return blobLoadingRef.current;
+  };
+  var getVoiceCtx = function () {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!_tcVoiceAudioCtx) _tcVoiceAudioCtx = new AC();
+    try { if (_tcVoiceAudioCtx.state === 'suspended') _tcVoiceAudioCtx.resume(); } catch (e) {}
+    ctxRef.current = _tcVoiceAudioCtx;
+    return _tcVoiceAudioCtx;
+  };
+  var stopBuffer = function (reset) {
+    if (rafRef.current) { try { cancelAnimationFrame(rafRef.current); } catch (e) {} rafRef.current = 0; }
+    var n = nodeRef.current; nodeRef.current = null;
+    if (n) { try { n.onended = null; n.stop(0); } catch (e) {} }
+    if (reset) { offsetRef.current = 0; setPos(0); }
+    setPlaying(false);
+  };
+  var tickBuffer = function () {
+    var ctx = ctxRef.current, buf = bufferRef.current, n = nodeRef.current;
+    if (!ctx || !buf || !n) return;
+    var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
+    var total = buf.duration || dur || 0;
+    if (total > 0) setPos(Math.min(1, elapsed / total), true);
+    if (elapsed < total && nodeRef.current) rafRef.current = requestAnimationFrame(tickBuffer);
+  };
+  var decodeBuffer = function (ctx, arr) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var ok = function (buf) { if (!done) { done = true; resolve(buf); } };
+      var bad = function (err) { if (!done) { done = true; reject(err); } };
+      try {
+        var p = ctx.decodeAudioData(arr, ok, bad);
+        if (p && p.then) p.then(ok).catch(bad);
+      } catch (e) { bad(e); }
+    });
+  };
+  var loadBuffer = function () {
+    if (bufferRef.current) return Promise.resolve(bufferRef.current);
+    if (loadingRef.current) return loadingRef.current;
+    var ctx = getVoiceCtx();
+    if (!ctx || !sourceList.length) return Promise.reject(new Error('no_audio_context'));
+    var tryOne = function (i) {
+      if (i >= sourceList.length) return Promise.reject(new Error('decode_failed'));
+      return fetch(sourceList[i], { cache: 'force-cache' })
+        .then(function (r) { if (!r.ok) throw new Error('http_' + r.status); return r.arrayBuffer(); })
+        .then(function (arr) { return decodeBuffer(ctx, arr); })
+        .catch(function () { return tryOne(i + 1); });
+    };
+    loadingRef.current = tryOne(0).then(function (buf) {
+      bufferRef.current = buf;
+      loadingRef.current = null;
+      if ((!props.dur || props.dur <= 0) && isFinite(buf.duration)) setDur(buf.duration);
+      return buf;
+    }).catch(function (e) {
+      loadingRef.current = null;
+      throw e;
+    });
+    return loadingRef.current;
+  };
+  var playBuffer = function () {
+    playReqRef.current = true;
+    loadBuffer().then(function (buf) {
+      var ctx = getVoiceCtx();
+      if (!ctx) throw new Error('no_audio_context');
+      stopBuffer(false);
+      var startAt = Math.max(0, offsetRef.current || 0);
+      if (buf.duration && startAt >= buf.duration - 0.05) startAt = 0;
+      offsetRef.current = startAt;
+      var n = ctx.createBufferSource();
+      n.buffer = buf;
+      n.connect(ctx.destination);
+      nodeRef.current = n;
+      startedAtRef.current = ctx.currentTime - startAt;
+      n.onended = function () {
+        if (nodeRef.current !== n) return;
+        nodeRef.current = null;
+        var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
+        if (!buf.duration || elapsed >= buf.duration - 0.08) {
+          offsetRef.current = 0;
+          setPos(0);
+        } else {
+          offsetRef.current = elapsed;
+        }
+        setPlaying(false);
+      };
+      n.start(0, startAt);
+      setPlaying(true);
+      tickBuffer();
+    }).catch(function (e) {
+      try { console.log('[TCVoice] webaudio fail', e); } catch (e2) {}
+      stopBuffer(false);
+      if (onErr) onErr('Не удалось воспроизвести голосовое');
+    });
+  };
   var fail = function () {
+    if (playReqRef.current && !webFallbackRef.current && (window.AudioContext || window.webkitAudioContext)) {
+      webFallbackRef.current = true;
+      try { var aa = aRef.current; if (aa) aa.pause(); } catch (e) {}
+      setPlaying(false);
+      playBuffer();
+      return;
+    }
+    if (srcIdx < sourceList.length - 1) {
+      retryRef.current = true;
+      setPlaying(false);
+      setPos(0);
+      setSrcIdx(function (v) { return v + 1; });
+      return;
+    }
+    retryRef.current = false;
     setPlaying(false);
     if (!playReqRef.current) return;   // пассивная авто-загрузка (старые битые файлы) — баннер НЕ показываем
     playReqRef.current = false;
@@ -20242,6 +20497,51 @@ function TCVoice(props) {
   };
   var toggle = function () {
     try { if (window.tactile) window.tactile(); } catch (e) {}
+    try { getVoiceCtx(); } catch (e) {}
+    var nativeVoice = getNativeVoice();
+    if (nativeVoice && nativeVoice.play && sourceList.length) {
+      if (playing) {
+        nativeActiveRef.current = false;
+        try {
+          var pp = nativeVoice.pause({ id: nativeId });
+          if (pp && pp.catch) pp.catch(function () {});
+        } catch (e) {}
+        setPlaying(false);
+        return;
+      }
+      playReqRef.current = true;
+      nativeActiveRef.current = true;
+      var np = nativeVoice.play({ id: nativeId, url: sourceList[0] });
+      if (np && np.then) {
+        np.then(function (ev) {
+          if (ev && isFinite(ev.duration) && ev.duration > 0) setDur(ev.duration);
+          if (ev && isFinite(ev.position)) setPos(Math.max(0, Math.min(1, ev.position)));
+          setPlaying(true);
+        }).catch(function (e) {
+          try { console.log('[TCVoice] native fail', e); } catch (e2) {}
+          nativeActiveRef.current = false;
+          setPlaying(false);
+          if (onErr) onErr('Не удалось воспроизвести голосовое');
+        });
+      } else {
+        setPlaying(true);
+      }
+      return;
+    }
+    if (canWebAudio) {
+      if (nodeRef.current) {
+        var ctx = ctxRef.current, buf = bufferRef.current;
+        if (ctx) {
+          var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
+          offsetRef.current = buf && buf.duration ? Math.min(elapsed, Math.max(0, buf.duration - 0.05)) : elapsed;
+          if (buf && buf.duration && offsetRef.current >= buf.duration - 0.08) offsetRef.current = 0;
+        }
+        stopBuffer(false);
+        return;
+      }
+      playBuffer();
+      return;
+    }
     var a = aRef.current;
     if (!a) return;
     if (!a.paused) {
@@ -20249,28 +20549,125 @@ function TCVoice(props) {
       setPlaying(false);
       return;
     }
-    try {
-      if (a.ended || (a.duration && isFinite(a.duration) && a.currentTime >= Math.max(0, a.duration - 0.05))) a.currentTime = 0;
-    } catch (e) {}
     playReqRef.current = true;   // пользователь нажал play → теперь ошибки показываем
-    var pr = a.play && a.play();
-    if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
-    else setPlaying(true);
+    var playLocal = function (obj) {
+      try {
+        if (obj && a.src !== obj) { a.src = obj; a.load(); }
+        if (a.ended || (a.duration && isFinite(a.duration) && a.currentTime >= Math.max(0, a.duration - 0.05))) a.currentTime = 0;
+      } catch (e) {}
+      var pr = a.play && a.play();
+      if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
+      else setPlaying(true);
+    };
+    if (localSrc || blobUrlRef.current) {
+      playLocal(localSrc || blobUrlRef.current);
+    } else {
+      ensureLocalSrc().then(playLocal).catch(fail);
+    }
   };
   React.useEffect(function () {
-    var a = new Audio(src);
-    a.preload = 'none';   // не лезем в сеть до явного play → старые битые файлы не плодят фоновых ошибок
+    stopBuffer(true);
+    revokeLocalSrc();
+    bufferRef.current = null;
+    loadingRef.current = null;
+    ctxRef.current = null;
+    setSrcIdx(0);
+    playReqRef.current = false;
+    retryRef.current = false;
+    webFallbackRef.current = false;
+    setPlaying(false);
+    setPos(0);
+    setDur(props.dur || 0);
+  }, [url, props.dur]);
+  React.useEffect(function () {
+    return function () { stopSmoothPos(); };
+  }, []);
+  React.useEffect(function () {
+    var nativeVoice = getNativeVoice();
+    if (nativeVoice && nativeVoice.addListener) return function () {};
+    if (!canWebAudio && sourceList.length) ensureLocalSrc().catch(function () {});
+    return function () {};
+  }, [url]);
+  React.useEffect(function () {
+    var nativeVoice = getNativeVoice();
+    if (!nativeVoice || !nativeVoice.addListener) return function () {};
+    var alive = true;
+    var applyNativeState = function (ev) {
+      if (!alive || !ev) return;
+      _tcVoiceState = Object.assign({}, _tcVoiceState, ev);
+      if (ev.id !== nativeId) {
+        if (ev.status === 'playing' || ev.status === 'progress') {
+          nativeActiveRef.current = false;
+          setPlaying(false);
+        }
+        return;
+      }
+      if (isFinite(ev.duration) && ev.duration > 0) setDur(ev.duration);
+      if (isFinite(ev.position)) setPos(Math.max(0, Math.min(1, ev.position)));
+      if (ev.status === 'playing' || ev.status === 'progress') {
+        nativeActiveRef.current = true;
+        setPlaying(true);
+      } else if (ev.status === 'paused') {
+        nativeActiveRef.current = false;
+        setPlaying(false);
+      } else if (ev.status === 'ended' || ev.status === 'stopped') {
+        nativeActiveRef.current = false;
+        setPlaying(false);
+        setPos(0);
+      } else if (ev.status === 'error') {
+        nativeActiveRef.current = false;
+        setPlaying(false);
+        if (onErr) onErr('Не удалось воспроизвести голосовое');
+      }
+    };
+    var handle = nativeVoice.addListener('state', applyNativeState);
+    try {
+      var sp = nativeVoice.getState && nativeVoice.getState({ id: nativeId });
+      if (sp && sp.then) sp.then(applyNativeState).catch(function () {});
+      else if (sp) applyNativeState(sp);
+      else applyNativeState(_tcVoiceState);
+    } catch (e) {
+      applyNativeState(_tcVoiceState);
+    }
+    return function () {
+      alive = false;
+      try {
+        if (handle && handle.then) handle.then(function (h) { if (h && h.remove) h.remove(); }).catch(function () {});
+        else if (handle && handle.remove) handle.remove();
+      } catch (e) {}
+      // Chat polling can remount bubbles while audio is playing. Do not stop
+      // native playback here; only explicit pause/play replacement should.
+      nativeActiveRef.current = false;
+    };
+  }, [nativeId]);
+  React.useEffect(function () {
+    if (getNativeVoice()) return function () {};
+    if (canWebAudio) return function () { stopBuffer(false); };
+    var a = aRef.current;
+    if (!a) return;
+    a.preload = 'auto';
     a.playsInline = true;
     try { a.setAttribute('playsinline', ''); a.setAttribute('webkit-playsinline', ''); } catch (e) {}
-    aRef.current = a;
+    if (localSrc) { try { a.load(); } catch (e) {} }
     var onEnded = function () { setPlaying(false); setPos(0); };
     var onTime = function () { if (a.duration && isFinite(a.duration)) setPos(a.currentTime / a.duration); };
-    var onMeta = function () { if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration); };
+    var onMeta = function () {
+      if ((!props.dur || props.dur <= 0) && isFinite(a.duration)) setDur(a.duration);
+    };
+    var onCanPlay = function () {
+      if (retryRef.current) {
+        retryRef.current = false;
+        var pr = a.play && a.play();
+        if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
+        else setPlaying(true);
+      }
+    };
     var onPause = function () { setPlaying(false); };
     var onPlay = function () { setPlaying(true); };
     a.addEventListener('ended', onEnded);
     a.addEventListener('timeupdate', onTime);
     a.addEventListener('loadedmetadata', onMeta);
+    a.addEventListener('canplay', onCanPlay);
     a.addEventListener('pause', onPause);
     a.addEventListener('play', onPlay);
     a.addEventListener('error', fail);
@@ -20279,21 +20676,27 @@ function TCVoice(props) {
       a.removeEventListener('ended', onEnded);
       a.removeEventListener('timeupdate', onTime);
       a.removeEventListener('loadedmetadata', onMeta);
+      a.removeEventListener('canplay', onCanPlay);
       a.removeEventListener('pause', onPause);
       a.removeEventListener('play', onPlay);
       a.removeEventListener('error', fail);
-      try { a.src = ''; a.load(); } catch (e) {}
-      if (aRef.current === a) aRef.current = null;
     };
-  }, [src, props.dur]);
+  }, [localSrc, props.dur]);
   var mm = function (s) { s = Math.max(0, Math.round(s || 0)); var m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
-  var bars = [];
+  var waveWidth = 24 * 2.5 + 23 * 2;
+  var wavePos = clampPos(pos);
+  var idleBars = [], activeBars = [];
   for (var i = 0; i < 24; i++) {
     var h = 5 + ((i * 7 + 3) % 12);
-    var on = pos > 0 && (i / 24) <= pos;
-    bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
+    var barBase = { width: 2.5, height: h, borderRadius: 2, flexShrink: 0 };
+    idleBars.push(React.createElement('div', { key: 'i' + i, style: Object.assign({}, barBase, { background: idle }) }));
+    activeBars.push(React.createElement('div', { key: 'a' + i, style: Object.assign({}, barBase, { background: ink }) }));
   }
+  var waveRow = function (items) {
+    return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 2, height: 20, width: waveWidth } }, items);
+  };
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
+    React.createElement('audio', { ref: aRef, src: canWebAudio ? undefined : (localSrc || undefined), preload: canWebAudio ? 'none' : 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
     React.createElement('button', { onClick: toggle, 'aria-label': playing ? 'Пауза' : 'Воспроизвести', style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: 'rgba(' + base + ',0.16)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 } },
       playing
         ? React.createElement('svg', { key: 'pause', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
@@ -20302,11 +20705,17 @@ function TCVoice(props) {
         : React.createElement('svg', { key: 'play', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
             React.createElement('path', { d: 'M8.5 5L8.5 19L19 12Z' }))
     ),
-    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 2, height: 20, flex: 1 } }, bars),
+    React.createElement('div', { style: { position: 'relative', height: 20, width: waveWidth, flex: '0 0 ' + waveWidth + 'px', overflow: 'hidden' } },
+      waveRow(idleBars),
+      React.createElement('div', { style: { position: 'absolute', left: 0, top: 0, height: 20, width: wavePos * waveWidth, overflow: 'hidden', willChange: 'width' } },
+        waveRow(activeBars))
+    ),
     React.createElement('div', { style: { flexShrink: 0, fontFamily: BODY, fontSize: 11, color: dim } }, mm(dur))
   );
 }
-window.TCVoice = TCVoice;
+window.TCVoice = React.memo(TCVoice, function (prev, next) {
+  return prev.url === next.url && prev.dur === next.dur && prev.mine === next.mine && prev.dark === next.dark;
+});
 
 // ===== Экран чата команды (текст + голосовые + вложения) =====
 function ATeamChat() {
@@ -20355,9 +20764,11 @@ function ATeamChat() {
   const lockPillRef = React.useRef(null);      // плашка-замок над кнопкой
   const typingRef = React.useRef(0);
   const typingPingRef = React.useRef(0);
+  const fullRefreshRef = React.useRef(0);
+  const holdTimerRef = React.useRef(null);
 
   const tactile = () => { try { if (window.tactile) window.tactile(); } catch (e) {} };
-  const flashErr = (msg) => { setAttachErr(msg); setTimeout(() => setAttachErr(''), 4500); };
+  const flashErr = React.useCallback((msg) => { setAttachErr(msg); setTimeout(() => setAttachErr(''), 4500); }, []);
   const fmtSize = (b) => { b = b || 0; if (b >= 1048576) return (b / 1048576).toFixed(1) + ' МБ'; if (b >= 1024) return Math.round(b / 1024) + ' КБ'; return b + ' Б'; };
   const mmss = (s) => { s = Math.max(0, Math.round(s || 0)); const m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
   const roundBtn = (bg, col) => ({ flexShrink: 0, width: 44, height: 44, borderRadius: 999, border: 'none', cursor: 'pointer', background: bg, color: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19 });
@@ -20393,9 +20804,17 @@ function ATeamChat() {
     if (d.online) setOnline(d.online);
     setTyping(d.typing || []);
     const list = d.messages || [];
-    if (!list.length) return;
-    lastIdRef.current = Math.max(lastIdRef.current, list[list.length - 1].id || 0);
-    setMsgs(prev => append ? prev.concat(list) : list);
+    if (!append) fullRefreshRef.current = Date.now();
+    if (!list.length) {
+      if (!append) {
+        lastIdRef.current = 0;
+        setMsgs([]);
+      }
+      return;
+    }
+    const maxId = Math.max.apply(null, list.map(x => x.id || 0));
+    lastIdRef.current = append ? Math.max(lastIdRef.current, maxId) : maxId;
+    setMsgs(prev => append ? prev.concat(list.filter(n => !prev.some(p => p.id === n.id))) : list);
     setTimeout(scrollBottom, 40);
   };
   const fetchMsgs = (since) => {
@@ -20414,20 +20833,75 @@ function ATeamChat() {
       document.head.appendChild(st);
     }
     fetchMsgs(0);
-    const iv = setInterval(() => { if (!document.hidden) fetchMsgs(lastIdRef.current); }, 3000);
-    const onVis = () => { if (!document.hidden) fetchMsgs(lastIdRef.current); };
+    const iv = setInterval(() => {
+      if (document.hidden) return;
+      fetchMsgs(Date.now() - fullRefreshRef.current > 30000 ? 0 : lastIdRef.current);
+    }, 3000);
+    const onVis = () => { if (!document.hidden) fetchMsgs(0); };
     document.addEventListener('visibilitychange', onVis);
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis); };
   }, []);
   React.useEffect(() => () => {
     try { const R = recRef.current; if (R && R.stream) R.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
     if (recTimerRef.current) clearInterval(recTimerRef.current);
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
   }, []);
 
   const postMsg = (extra) => {
     const rq = window.__meAuthReq ? window.__meAuthReq(extra) : null;
     if (!rq) return Promise.reject(new Error('noauth'));
     return fetch(TC_PROXY + '?action=team_chat_send', { method: 'POST', headers: rq.headers, body: rq.body }).then(r => r.json());
+  };
+  const stopDeletedVoice = (m) => {
+    if (!m || (m.media_kind || '') !== 'voice') return;
+    try {
+      const C = window.Capacitor, nativeVoice = C && C.Plugins && C.Plugins.TeamVoicePlayer;
+      if (nativeVoice && nativeVoice.stop) {
+        const id = 'team_voice_' + String(m.media_url || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(-96);
+        nativeVoice.stop({ id });
+      }
+    } catch (e) {}
+  };
+  const deleteMsg = (m) => {
+    if (!m || !m.id || me == null || m.sender_chat_id !== me) return;
+    if (!window.confirm('Удалить сообщение?')) return;
+    const rq = window.__meAuthReq ? window.__meAuthReq({ id: m.id }) : null;
+    if (!rq) return;
+    tactile();
+    fetch(TC_PROXY + '?action=team_chat_delete', { method: 'POST', headers: rq.headers, body: rq.body })
+      .then(r => r.json())
+      .then(d => {
+        if (d && d.ok) {
+          stopDeletedVoice(m);
+          setMsgs(prev => prev.filter(x => x.id !== m.id));
+          fetchMsgs(0);
+          return;
+        }
+        flashErr((d && d.message) || 'Не удалось удалить сообщение');
+      })
+      .catch(() => flashErr('Сеть недоступна — попробуйте ещё раз'));
+  };
+  const skipDeleteGesture = (ev) => {
+    const t = ev && ev.target;
+    return !!(t && t.closest && t.closest('button,a,input,textarea,video,audio'));
+  };
+  const clearHoldDelete = () => {
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
+  };
+  const armDelete = (m) => (ev) => {
+    if (!m || me == null || m.sender_chat_id !== me || skipDeleteGesture(ev)) return;
+    clearHoldDelete();
+    holdTimerRef.current = setTimeout(() => {
+      holdTimerRef.current = null;
+      deleteMsg(m);
+    }, 650);
+  };
+  const contextDelete = (m) => (ev) => {
+    if (!m || me == null || m.sender_chat_id !== me || skipDeleteGesture(ev)) return;
+    ev.preventDefault();
+    clearHoldDelete();
+    deleteMsg(m);
   };
   const send = () => {
     const tx = (text || '').trim();
@@ -20524,11 +20998,12 @@ function ATeamChat() {
       const durl = __tcWavStop(R.wav);
       done(durl ? durl.split(',')[1] : '', 'audio/wav', 'voice.wav');
     } else if (R.rec) {
-      const mr = R.rec, chunks = R.chunks, mime = R.mime;
+      const mr = R.rec, chunks = R.chunks, mime = R.mime, name = R.name || __tcVoiceNameFromMime(R.mime);
       mr.onstop = () => {
-        const blob = new Blob(chunks, { type: mime });
-        if (blob.size > 0) { const fr = new FileReader(); fr.onloadend = () => done(String(fr.result || '').split(',')[1], (mime || 'audio/webm').split(';')[0], 'voice'); fr.readAsDataURL(blob); }
-        else { endRec(); resetRecUI(); }
+        const publicMime = __tcVoicePublicMime(mime || (mr && mr.mimeType) || '');
+        const blob = new Blob(chunks, { type: publicMime });
+        if (blob.size > 0) { const fr = new FileReader(); fr.onloadend = () => done(String(fr.result || '').split(',')[1], publicMime, name); fr.onerror = () => { flashErr('Не удалось прочитать голосовое'); endRec(); resetRecUI(); }; fr.readAsDataURL(blob); }
+        else { flashErr('Голосовое не записалось — попробуйте ещё раз'); endRec(); resetRecUI(); }
       };
       try { mr.stop(); } catch (e) { endRec(); resetRecUI(); }
     } else { endRec(); resetRecUI(); }
@@ -20536,17 +21011,25 @@ function ATeamChat() {
   const startRecording = () => {
     if (recording || uploading || recPreview) return;
     if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { flashErr('Микрофон недоступен'); return; }
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      const R = { stream: stream, chunks: [], wav: null, rec: null, mime: 'audio/webm', t0: Date.now() };
-      if (!window.MediaRecorder) {
+    const voiceConstraints = { audio: { channelCount: { ideal: 1 }, sampleRate: { ideal: 48000 }, echoCancellation: { ideal: false }, noiseSuppression: { ideal: false }, autoGainControl: { ideal: false } } };
+    navigator.mediaDevices.getUserMedia(voiceConstraints).catch(() => navigator.mediaDevices.getUserMedia({ audio: true })).then(stream => {
+      const pick = __tcPickVoiceRecorder();
+      const R = { stream: stream, chunks: [], wav: null, rec: null, mime: pick ? pick.mime : 'audio/wav', name: pick ? pick.name : 'voice.wav', t0: Date.now() };
+      if (!pick) {
         R.wav = __tcWavStart(stream);
         R.wav.onCap = () => { try { finalizeRec(lockedRef.current ? 'preview' : 'send'); } catch (e) {} };
       } else {
         let mr;
-        try { mr = new MediaRecorder(stream); } catch (er) { try { mr = new MediaRecorder(stream, { mimeType: 'audio/webm' }); } catch (e2) { mr = null; } }
+        const opts = pick.mime ? { mimeType: pick.mime, audioBitsPerSecond: 96000 } : { audioBitsPerSecond: 96000 };
+        try { mr = new MediaRecorder(stream, opts); }
+        catch (er) {
+          try { mr = pick.mime ? new MediaRecorder(stream, { mimeType: pick.mime }) : new MediaRecorder(stream); }
+          catch (e2) { try { mr = new MediaRecorder(stream); } catch (e3) { mr = null; } }
+        }
         if (!mr) { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} flashErr('Запись недоступна'); resetRecUI(); return; }
-        R.rec = mr; R.mime = mr.mimeType || 'audio/webm';
+        R.rec = mr; R.mime = mr.mimeType || pick.mime || 'audio/webm'; R.name = __tcVoiceNameFromMime(R.mime);
         mr.ondataavailable = ev => { if (ev.data && ev.data.size > 0) R.chunks.push(ev.data); };
+        // Один цельный blob: для MP4/M4A это надёжнее, чем склейка коротких фрагментов.
         mr.start();
       }
       recRef.current = R;
@@ -20654,7 +21137,18 @@ function ATeamChat() {
     const inner = [];
     if (mediaEl) inner.push(React.createElement('div', { key: 'md', style: { borderRadius: tight ? 10 : 0, overflow: 'hidden' } }, mediaEl));
     if (m.text) inner.push(React.createElement('div', { key: 'tx', style: { position: 'relative', zIndex: 3, maxWidth: '100%', fontFamily: CHAT_FONT, fontSize: 17, fontWeight: 400, lineHeight: 1.3, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', padding: tight ? '6px 2px 0' : 0, marginTop: mediaEl && !tight ? 6 : 0, color: mine ? OWN_INK : IN_INK, WebkitTextFillColor: mine ? OWN_INK : IN_INK, opacity: 1, textShadow: 'none', transform: 'translateZ(0)' } }, m.text));
-    return React.createElement('div', { key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', margin: '4px 12px' } },
+    const deleteHandlers = mine ? {
+      onContextMenu: contextDelete(m),
+      onTouchStart: armDelete(m),
+      onTouchEnd: clearHoldDelete,
+      onTouchCancel: clearHoldDelete,
+      onTouchMove: clearHoldDelete,
+      onMouseDown: armDelete(m),
+      onMouseUp: clearHoldDelete,
+      onMouseLeave: clearHoldDelete,
+      title: 'Удерживайте, чтобы удалить сообщение'
+    } : {};
+    return React.createElement('div', Object.assign({ key: m.id, style: { display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', margin: '4px 12px' } }, deleteHandlers),
       !mine ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, margin: '0 4px 3px' } },
         onlineIds.has(m.sender_chat_id) ? React.createElement('span', { style: { width: 6, height: 6, borderRadius: 999, background: GREEN, flexShrink: 0, boxShadow: '0 0 5px ' + GREEN } }) : null,
         React.createElement('span', { style: { fontFamily: BODY, fontSize: 10.5, color: DIM, fontWeight: 600 } }, m.sender_name || 'Сотрудник')
