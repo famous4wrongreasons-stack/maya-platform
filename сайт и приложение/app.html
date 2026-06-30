@@ -20193,6 +20193,7 @@ function playSendSound() {
 function TCVoice(props) {
   var url = props.url, mine = props.mine, dark = props.dark, onErr = props.onErr;
   var aRef = React.useRef(null);
+  var playReqRef = React.useRef(false);   // true только когда юзер реально нажал play (не фоновая авто-загрузка)
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
   var q = React.useState(0), pos = q[0], setPos = q[1];
   var d = React.useState(props.dur || 0), dur = d[0], setDur = d[1];
@@ -20210,9 +20211,11 @@ function TCVoice(props) {
   var src = proxyUrl(url);
   var fail = function () {
     setPlaying(false);
+    if (!playReqRef.current) return;   // пассивная авто-загрузка (старые битые файлы) — баннер НЕ показываем
+    playReqRef.current = false;
     var a = aRef.current, mc = '';
     try { if (a && a.error && a.error.code) mc = a.error.code; } catch (e) {}
-    // Диагностика: тянем первые байты файла, чтобы понять причину (404 / не тот формат / битый)
+    // Диагностика в консоль; пользователю — короткое понятное сообщение по реальной причине.
     try {
       fetch(src, { headers: { Range: 'bytes=0-31' }, cache: 'no-store' }).then(function (r) {
         var ct = (r.headers.get('content-type') || '?').split(';')[0];
@@ -20220,17 +20223,17 @@ function TCVoice(props) {
           var u = new Uint8Array(buf), sig = '';
           for (var i = 0; i < Math.min(u.length, 12); i++) { var c = u[i]; sig += (c >= 32 && c < 127) ? String.fromCharCode(c) : '·'; }
           try { console.log('[TCVoice] fail', { mediaErr: mc, status: r.status, ct: ct, sig: sig, src: src }); } catch (e) {}
-          var msg = (r.status === 404) ? 'Голосовое не сохранилось на сервере — отправьте заново'
-            : (ct.indexOf('audio') !== 0 && ct.indexOf('video') !== 0) ? 'Сервер вернул не аудио (' + r.status + ')'
+          var msg = (r.status === 404 || r.status === 410) ? 'Это голосовое больше недоступно'
+            : (ct.indexOf('audio') !== 0 && ct.indexOf('video') !== 0) ? 'Не удалось воспроизвести голосовое'
             : 'Формат голосового не поддерживается на устройстве';
           if (onErr) onErr(msg);
         });
       }).catch(function (e) {
         try { console.log('[TCVoice] fail net', e); } catch (e2) {}
-        if (onErr) onErr('Не удалось воспроизвести голосовое (нет связи)');
+        if (onErr) onErr('Не удалось воспроизвести голосовое');
       });
     } catch (e) {
-      if (onErr) onErr('Не удалось воспроизвести голосовое (код' + (mc || '?') + ')');
+      if (onErr) onErr('Не удалось воспроизвести голосовое');
     }
   };
   var toggle = function () {
@@ -20245,13 +20248,14 @@ function TCVoice(props) {
     try {
       if (a.ended || (a.duration && isFinite(a.duration) && a.currentTime >= Math.max(0, a.duration - 0.05))) a.currentTime = 0;
     } catch (e) {}
+    playReqRef.current = true;   // пользователь нажал play → теперь ошибки показываем
     var pr = a.play && a.play();
     if (pr && pr.then) pr.then(function () { setPlaying(true); }).catch(fail);
     else setPlaying(true);
   };
   React.useEffect(function () {
     var a = new Audio(src);
-    a.preload = 'metadata';
+    a.preload = 'none';   // не лезем в сеть до явного play → старые битые файлы не плодят фоновых ошибок
     a.playsInline = true;
     try { a.setAttribute('playsinline', ''); a.setAttribute('webkit-playsinline', ''); } catch (e) {}
     aRef.current = a;
