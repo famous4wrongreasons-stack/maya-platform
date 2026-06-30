@@ -20253,9 +20253,43 @@ function TCVoice(props) {
   var retryRef = React.useRef(false);
   var webFallbackRef = React.useRef(false);
   var p = React.useState(false), playing = p[0], setPlaying = p[1];
-  var q = React.useState(0), pos = q[0], setPos = q[1];
+  var q = React.useState(0), pos = q[0], setPosState = q[1];
   var d = React.useState(props.dur || 0), dur = d[0], setDur = d[1];
   var bs = React.useState(''), localSrc = bs[0], setLocalSrc = bs[1];
+  var smoothPosRef = React.useRef(0);
+  var smoothTargetRef = React.useRef(0);
+  var smoothRafRef = React.useRef(0);
+  var clampPos = function (v) {
+    v = Number(v);
+    return isFinite(v) ? Math.max(0, Math.min(1, v)) : 0;
+  };
+  var stopSmoothPos = function () {
+    if (smoothRafRef.current) {
+      try { cancelAnimationFrame(smoothRafRef.current); } catch (e) {}
+      smoothRafRef.current = 0;
+    }
+  };
+  var tickSmoothPos = function () {
+    var target = smoothTargetRef.current;
+    var current = smoothPosRef.current;
+    var next = current + (target - current) * 0.35;
+    if (Math.abs(target - next) < 0.0015) next = target;
+    smoothPosRef.current = next;
+    setPosState(next);
+    if (next !== target) smoothRafRef.current = requestAnimationFrame(tickSmoothPos);
+    else smoothRafRef.current = 0;
+  };
+  var setPos = function (value, immediate) {
+    var next = clampPos(value);
+    smoothTargetRef.current = next;
+    if (immediate || next <= 0 || Math.abs(next - smoothPosRef.current) > 0.25) {
+      stopSmoothPos();
+      smoothPosRef.current = next;
+      setPosState(next);
+      return;
+    }
+    if (!smoothRafRef.current) smoothRafRef.current = requestAnimationFrame(tickSmoothPos);
+  };
   // Цвет контента плеера подстраивается под фон пузыря: свой (зелёный) → белый; входящий → тёмный/светлый по теме.
   var base = mine ? '255,255,255' : (dark ? '243,237,225' : '31,28,22');
   var ink = mine ? '#ffffff' : (dark ? '#f3ede1' : '#1f1c16');
@@ -20347,7 +20381,7 @@ function TCVoice(props) {
     if (!ctx || !buf || !n) return;
     var elapsed = Math.max(0, ctx.currentTime - startedAtRef.current);
     var total = buf.duration || dur || 0;
-    if (total > 0) setPos(Math.min(1, elapsed / total));
+    if (total > 0) setPos(Math.min(1, elapsed / total), true);
     if (elapsed < total && nodeRef.current) rafRef.current = requestAnimationFrame(tickBuffer);
   };
   var decodeBuffer = function (ctx, arr) {
@@ -20546,6 +20580,9 @@ function TCVoice(props) {
     setDur(props.dur || 0);
   }, [url, props.dur]);
   React.useEffect(function () {
+    return function () { stopSmoothPos(); };
+  }, []);
+  React.useEffect(function () {
     var nativeVoice = getNativeVoice();
     if (nativeVoice && nativeVoice.addListener) return function () {};
     if (!canWebAudio && sourceList.length) ensureLocalSrc().catch(function () {});
@@ -20646,12 +20683,18 @@ function TCVoice(props) {
     };
   }, [localSrc, props.dur]);
   var mm = function (s) { s = Math.max(0, Math.round(s || 0)); var m = Math.floor(s / 60), ss = s % 60; return m + ':' + (ss < 10 ? '0' : '') + ss; };
-  var bars = [];
+  var waveWidth = 24 * 2.5 + 23 * 2;
+  var wavePos = clampPos(pos);
+  var idleBars = [], activeBars = [];
   for (var i = 0; i < 24; i++) {
     var h = 5 + ((i * 7 + 3) % 12);
-    var on = pos > 0 && (i / 24) <= pos;
-    bars.push(React.createElement('div', { key: i, style: { width: 2.5, height: h, borderRadius: 2, background: on ? ink : idle } }));
+    var barBase = { width: 2.5, height: h, borderRadius: 2, flexShrink: 0 };
+    idleBars.push(React.createElement('div', { key: 'i' + i, style: Object.assign({}, barBase, { background: idle }) }));
+    activeBars.push(React.createElement('div', { key: 'a' + i, style: Object.assign({}, barBase, { background: ink }) }));
   }
+  var waveRow = function (items) {
+    return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 2, height: 20, width: waveWidth } }, items);
+  };
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 9, minWidth: 168 } },
     React.createElement('audio', { ref: aRef, src: canWebAudio ? undefined : (localSrc || undefined), preload: canWebAudio ? 'none' : 'auto', playsInline: true, 'aria-hidden': true, style: { position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' } }),
     React.createElement('button', { onClick: toggle, 'aria-label': playing ? 'Пауза' : 'Воспроизвести', style: { flexShrink: 0, width: 34, height: 34, borderRadius: 999, border: 'none', cursor: 'pointer', background: 'rgba(' + base + ',0.16)', color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 } },
@@ -20662,7 +20705,11 @@ function TCVoice(props) {
         : React.createElement('svg', { key: 'play', width: 13, height: 13, viewBox: '0 0 24 24', fill: ink, xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': true, style: { display: 'block' } },
             React.createElement('path', { d: 'M8.5 5L8.5 19L19 12Z' }))
     ),
-    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 2, height: 20, flex: 1 } }, bars),
+    React.createElement('div', { style: { position: 'relative', height: 20, width: waveWidth, flex: '0 0 ' + waveWidth + 'px', overflow: 'hidden' } },
+      waveRow(idleBars),
+      React.createElement('div', { style: { position: 'absolute', left: 0, top: 0, height: 20, width: wavePos * waveWidth, overflow: 'hidden', willChange: 'width' } },
+        waveRow(activeBars))
+    ),
     React.createElement('div', { style: { flexShrink: 0, fontFamily: BODY, fontSize: 11, color: dim } }, mm(dur))
   );
 }
