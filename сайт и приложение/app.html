@@ -6741,6 +6741,12 @@ Object.assign(window, {
 function ABookFlow() {
   const BF_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   const BF_COMPANY = '503759';
+  const BF_LOCAL_BACKEND_KEY = 'me_booking_backend';
+  const BF_LOCAL_API_BASE_KEY = 'me_booking_api_base';
+  const BF_LOCAL_TENANT_KEY = 'me_booking_tenant_slug';
+  const BF_LOCAL_CLIENT_KEY = 'me_booking_saas_client';
+  const BF_LOCAL_DEFAULT_API_BASE = 'http://localhost:3000/api';
+  const BF_LOCAL_DEFAULT_TENANT = 'muzhskaya-estetika';
   const BF_MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
   const BF_MONTH = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
   const BF_WDS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -6753,6 +6759,43 @@ function ABookFlow() {
     const dt = new Date(+p[0], +p[1] - 1, +p[2]);
     return +p[2] + ' ' + BF_MON[+p[1] - 1] + ', ' + BF_WDS[dt.getDay()];
   };
+  const bookingQs = React.useMemo(function () {
+    try {
+      return new URLSearchParams(location.search || '');
+    } catch (e) {
+      return new URLSearchParams();
+    }
+  }, []);
+  const [localSaasMode] = React.useState(function () {
+    var mode = bookingQs.get('booking_backend');
+    try {
+      if (mode === 'saas-local') localStorage.setItem(BF_LOCAL_BACKEND_KEY, mode);else if (mode === 'legacy') localStorage.removeItem(BF_LOCAL_BACKEND_KEY);
+      mode = mode || localStorage.getItem(BF_LOCAL_BACKEND_KEY) || '';
+    } catch (e) {
+      mode = mode || '';
+    }
+    return mode === 'saas-local';
+  });
+  const [localSaasApiBase] = React.useState(function () {
+    var raw = bookingQs.get('booking_api_base');
+    try {
+      if (raw) localStorage.setItem(BF_LOCAL_API_BASE_KEY, raw);
+      raw = raw || localStorage.getItem(BF_LOCAL_API_BASE_KEY) || BF_LOCAL_DEFAULT_API_BASE;
+    } catch (e) {
+      raw = raw || BF_LOCAL_DEFAULT_API_BASE;
+    }
+    return String(raw || BF_LOCAL_DEFAULT_API_BASE).replace(/\/+$/, '');
+  });
+  const [localTenantSlug] = React.useState(function () {
+    var raw = bookingQs.get('booking_tenant');
+    try {
+      if (raw) localStorage.setItem(BF_LOCAL_TENANT_KEY, raw);
+      raw = raw || localStorage.getItem(BF_LOCAL_TENANT_KEY) || BF_LOCAL_DEFAULT_TENANT;
+    } catch (e) {
+      raw = raw || BF_LOCAL_DEFAULT_TENANT;
+    }
+    return String(raw || BF_LOCAL_DEFAULT_TENANT);
+  });
   const [step, setStep] = React.useState(0);
   const [master, setMaster] = React.useState(null);
   const [svcs, setSvcs] = React.useState([]); // выбранные услуги (мультивыбор)
@@ -6768,6 +6811,10 @@ function ABookFlow() {
   const [done, setDone] = React.useState(false);
   const [bname, setBname] = React.useState('');
   const [bphone, setBphone] = React.useState('');
+  const [localSession, setLocalSession] = React.useState(null);
+  const [localMasters, setLocalMasters] = React.useState(localSaasMode ? null : []);
+  const [localBranch, setLocalBranch] = React.useState(null);
+  const [doneMode, setDoneMode] = React.useState('created');
   // Настроение визита (🔴 'red' тишина / 🔵 'blue' общение) — пилюли «как в Матрице».
   // Пред-выбор по последнему выбору клиента (localStorage).
   const [mood, setMood] = React.useState(function () {
@@ -6834,13 +6881,158 @@ function ABookFlow() {
     if (x[0] !== '7') x = '7' + x;
     return x.slice(0, 11);
   }
+  function readErrorText(err, fallback) {
+    var msg = err && err.message ? String(err.message) : '';
+    return msg ? fallback + ': ' + msg : fallback;
+  }
+  function timeLabel(v) {
+    if (!v) return '';
+    return typeof v === 'string' ? v : v.label || '';
+  }
+  function slotKey(v) {
+    if (!v) return '';
+    return typeof v === 'string' ? v : v.start || v.label || '';
+  }
+  function fmtSlotTime(iso) {
+    try {
+      var dt = new Date(iso);
+      if (isNaN(dt.getTime())) return '';
+      return pad2(dt.getHours()) + ':' + pad2(dt.getMinutes());
+    } catch (e) {
+      return '';
+    }
+  }
+  function applyAutoTitles(list, autoTitles) {
+    if (!autoTitles || !autoTitles.length || !list || !list.length) return;
+    var nrm = function (x) { return String(x || '').trim().toLowerCase(); };
+    var picked = [];
+    autoTitles.forEach(function (ti) {
+      var hit = list.filter(function (s) { return nrm(s.title) === nrm(ti); })[0] || list.filter(function (s) { return nrm(s.title).indexOf(nrm(ti)) === 0; })[0];
+      if (hit && !picked.some(function (x) { return x.id === hit.id; })) picked.push(hit);
+    });
+    if (picked.length) setSvcs(picked);
+  }
+  async function localBookingFetch(path, init) {
+    var resp = await fetch(localSaasApiBase + path, init || {});
+    var text = await resp.text();
+    var body = null;
+    try {
+      body = text ? JSON.parse(text) : null;
+    } catch (e) {
+      body = text;
+    }
+    if (!resp.ok) {
+      var msg = body && typeof body === 'object' ? body.message || body.error : body;
+      throw new Error(msg || ('HTTP ' + resp.status));
+    }
+    return body;
+  }
+  function normalizeLocalServices(list) {
+    return (Array.isArray(list) ? list : []).map(function (s) {
+      var price = Number(s && s.price || 0);
+      var mins = Number(s && s.duration_minutes || 0);
+      return {
+        id: String(s && s.id || ''),
+        title: s && s.name || '',
+        cost: price,
+        price_min: price,
+        price_max: price,
+        duration: mins > 0 ? mins * 60 : 0,
+        duration_minutes: mins,
+        category: { title: 'Услуги' }
+      };
+    });
+  }
+  function normalizeLocalMasters(list) {
+    return (Array.isArray(list) ? list : []).map(function (m) {
+      return {
+        id: String(m && m.id || ''),
+        name: m && m.name || '',
+        rank: m && m.title || 'Мастер'
+      };
+    });
+  }
+  async function ensureLocalSession() {
+    var creds = null;
+    try {
+      creds = JSON.parse(localStorage.getItem(BF_LOCAL_CLIENT_KEY) || 'null');
+    } catch (e) {}
+    if (!creds || !creds.email || !creds.password) {
+      creds = {
+        email: 'booking-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '@maya.local',
+        password: 'ChangeMe123!'
+      };
+      try {
+        localStorage.setItem(BF_LOCAL_CLIENT_KEY, JSON.stringify(creds));
+      } catch (e) {}
+    }
+    var payload = JSON.stringify({
+      tenantSlug: localTenantSlug,
+      email: creds.email,
+      password: creds.password
+    });
+    try {
+      var logged = await localBookingFetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
+      });
+      return { token: logged.access_token, user: logged.user, email: creds.email };
+    } catch (loginErr) {
+      try {
+        await localBookingFetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        });
+      } catch (registerErr) {
+        var msg = registerErr && registerErr.message ? String(registerErr.message) : '';
+        if (msg.toLowerCase().indexOf('already exists') === -1) throw registerErr;
+      }
+      var relogged = await localBookingFetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
+      });
+      return { token: relogged.access_token, user: relogged.user, email: creds.email };
+    }
+  }
+  React.useEffect(function () {
+    if (!localSaasMode) return;
+    var cancelled = false;
+    setLoading(true);
+    setErr('');
+    ensureLocalSession().then(function (session) {
+      if (cancelled) return null;
+      setLocalSession(session);
+      return Promise.all([
+        localBookingFetch('/mobile/config/' + encodeURIComponent(localTenantSlug)),
+        localBookingFetch('/branches', { headers: { Authorization: 'Bearer ' + session.token } }),
+        localBookingFetch('/staff', { headers: { Authorization: 'Bearer ' + session.token } })
+      ]);
+    }).then(function (res) {
+      if (!res || cancelled) return;
+      var branches = Array.isArray(res[1]) ? res[1] : [];
+      var staff = Array.isArray(res[2]) ? res[2] : [];
+      setLocalBranch(branches[0] || null);
+      setLocalMasters(normalizeLocalMasters(staff));
+      setLoading(false);
+    }).catch(function (e) {
+      if (cancelled) return;
+      setLoading(false);
+      setErr(readErrorText(e, 'Локальный backend недоступен'));
+      setLocalMasters([]);
+    });
+    return function () { cancelled = true; };
+  }, [localSaasMode, localSaasApiBase, localTenantSlug]);
   const d = window.APP_DATA || {};
   const mdisp = [].concat(d.masters && d.masters.top || [], d.masters && d.masters.senior || []);
-  const mlist = (window.__meBookMasters || []).map((x, i) => ({
+  const legacyMasters = (window.__meBookMasters || []).map((x, i) => ({
     id: x.id,
     name: mdisp[i] && mdisp[i][0] || x.name,
     rank: mdisp[i] && mdisp[i][1] || 'Мастер'
   }));
+  const mlist = localSaasMode ? (localMasters || []) : legacyMasters;
   // «Мне как обычно» — привычный мастер клиента (из кабинета).
   // Сначала ищем его среди доступных к записи (красивые имя/ранг/фото),
   // но если его нет в статическом списке — всё равно показываем кнопку
@@ -6869,21 +7061,28 @@ function ABookFlow() {
     setLoading(true);
     setErr('');
     setServices(null);
+    if (localSaasMode) {
+      ensureLocalSession().then(function (session) {
+        if (!localSession || localSession.token !== session.token) setLocalSession(session);
+        return localBookingFetch('/services', {
+          headers: { Authorization: 'Bearer ' + session.token }
+        });
+      }).then(function (list) {
+        setLoading(false);
+        var normalized = normalizeLocalServices(list);
+        setServices(normalized);
+        applyAutoTitles(normalized, autoTitles);
+      }).catch(function (e) {
+        setLoading(false);
+        setErr(readErrorText(e, 'Не удалось загрузить услуги'));
+      });
+      return;
+    }
     fetch(BF_PROXY + '?action=get_services&company_id=' + BF_COMPANY + '&staff_id=' + m.id).then(r => { if (!r.ok) throw 0; return r.json(); }).then(j => {
       setLoading(false);
       var list = j && j.data && j.data.services || [];
       setServices(list);
-      // «Мне как обычно»: предотмечаем привычный НАБОР услуг (из прошлого визита),
-      // оставаясь на экране услуг — клиент видит свой список и жмёт «Далее».
-      if (autoTitles && autoTitles.length && list.length) {
-        var nrm = function (x) { return String(x || '').trim().toLowerCase(); };
-        var picked = [];
-        autoTitles.forEach(function (ti) {
-          var hit = list.filter(function (s) { return nrm(s.title) === nrm(ti); })[0] || list.filter(function (s) { return nrm(s.title).indexOf(nrm(ti)) === 0; })[0];
-          if (hit && !picked.some(function (x) { return x.id === hit.id; })) picked.push(hit);
-        });
-        if (picked.length) setSvcs(picked);
-      }
+      applyAutoTitles(list, autoTitles);
     }).catch(() => {
       setLoading(false);
       setErr('Не удалось загрузить услуги');
@@ -6896,6 +7095,29 @@ function ABookFlow() {
     const now = new Date();
     const from = isoOf(now);
     const to = isoOf(new Date(now.getTime() + 30 * 86400000));
+    if (localSaasMode) {
+      ensureLocalSession().then(function (session) {
+        if (!localSession || localSession.token !== session.token) setLocalSession(session);
+        var reqs = Array.from({ length: 30 }).map(function (_, idx) {
+          var day = new Date(now.getTime() + idx * 86400000);
+          var dayIso = isoOf(day);
+          var path = '/available-slots?date=' + encodeURIComponent(dayIso + 'T00:00:00.000Z') + '&staffId=' + encodeURIComponent(m.id) + '&serviceIds=' + encodeURIComponent(svcIds(arr));
+          return localBookingFetch(path, {
+            headers: { Authorization: 'Bearer ' + session.token }
+          }).then(function (slotList) {
+            return Array.isArray(slotList) && slotList.length ? dayIso : null;
+          });
+        });
+        return Promise.all(reqs);
+      }).then(function (days) {
+        setLoading(false);
+        setDates((days || []).filter(Boolean));
+      }).catch(function (e) {
+        setLoading(false);
+        setErr(readErrorText(e, 'Не удалось загрузить даты'));
+      });
+      return;
+    }
     fetch(BF_PROXY + '?action=get_dates&company_id=' + BF_COMPANY + '&staff_id=' + m.id + '&service_id=' + svcIds(arr) + '&date_from=' + from + '&date_to=' + to).then(r => { if (!r.ok) throw 0; return r.json(); }).then(j => {
       setLoading(false);
       setDates(j && j.data || []);
@@ -6908,6 +7130,36 @@ function ABookFlow() {
     setLoading(true);
     setErr('');
     setSlots(null);
+    if (localSaasMode) {
+      ensureLocalSession().then(function (session) {
+        if (!localSession || localSession.token !== session.token) setLocalSession(session);
+        var path = '/available-slots?date=' + encodeURIComponent(dt + 'T00:00:00.000Z') + '&staffId=' + encodeURIComponent(m.id) + '&serviceIds=' + encodeURIComponent(svcIds(arr));
+        return localBookingFetch(path, {
+          headers: { Authorization: 'Bearer ' + session.token }
+        });
+      }).then(function (slotList) {
+        setLoading(false);
+        var seen = {};
+        var mapped = [];
+        (Array.isArray(slotList) ? slotList : []).forEach(function (slot) {
+          var label = fmtSlotTime(slot && slot.start);
+          if (!label || seen[label]) return;
+          seen[label] = true;
+          mapped.push({
+            label: label,
+            start: slot && slot.start || '',
+            end: slot && slot.end || '',
+            branch_id: slot && slot.branch_id || localBranch && localBranch.id || null
+          });
+        });
+        mapped.sort(function (a, b) { return String(a.start).localeCompare(String(b.start)); });
+        setSlots(mapped);
+      }).catch(function (e) {
+        setLoading(false);
+        setErr(readErrorText(e, 'Не удалось загрузить время'));
+      });
+      return;
+    }
     fetch(BF_PROXY + '?action=get_times&company_id=' + BF_COMPANY + '&staff_id=' + m.id + '&service_id=' + svcIds(arr) + '&date=' + dt).then(r => { if (!r.ok) throw 0; return r.json(); }).then(j => {
       setLoading(false);
       setSlots(j && j.data || []);
@@ -6993,6 +7245,37 @@ function ABookFlow() {
     submittingRef.current = true;
     setSubmitting(true);
     setErr('');
+    if (localSaasMode) {
+      ensureLocalSession().then(function (session) {
+        if (!localSession || localSession.token !== session.token) setLocalSession(session);
+        return localBookingFetch('/appointments/preview', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + session.token
+          },
+          body: JSON.stringify({
+            clientName: nm,
+            clientPhone: ph,
+            branchId: localBranch && localBranch.id || undefined,
+            staffId: master.id,
+            serviceIds: svcs.map(function (x) { return String(x.id); }),
+            start: date + 'T' + timeLabel(time) + ':00',
+            notes: mood ? ('visit_mood:' + mood) : undefined
+          })
+        });
+      }).then(function () {
+        submittingRef.current = false;
+        setSubmitting(false);
+        setDoneMode('preview');
+        setDone(true);
+      }).catch(function (e) {
+        submittingRef.current = false;
+        setSubmitting(false);
+        setErr(readErrorText(e, 'Локальная проверка не прошла'));
+      });
+      return;
+    }
     // user_token='' → YClients guest online-booking path (book_record by phone+fullname);
     // our web_session_token is NOT a YClients user token, so it must not go here.
     fetch(BF_PROXY + '?action=create_record', {
@@ -7213,6 +7496,41 @@ function ABookFlow() {
       textAlign: 'center'
     }
   }, err) : null;
+  const LocalModeNote = t => localSaasMode ? React.createElement(ATile, {
+    t: t,
+    radius: 14,
+    noSheen: true
+  }, React.createElement('div', {
+    style: {
+      padding: '12px 14px'
+    }
+  }, React.createElement('div', {
+    style: {
+      fontFamily: DISPLAY,
+      fontWeight: 500,
+      fontSize: 8.5,
+      letterSpacing: '0.18em',
+      textTransform: 'uppercase',
+      color: t.accent
+    }
+  }, 'Локальный safe mode'), React.createElement('div', {
+    style: {
+      fontFamily: BODY,
+      fontSize: 12,
+      color: t.dim,
+      marginTop: 5,
+      lineHeight: 1.55
+    }
+  }, 'Новый backend подключен только к этой локальной копии приложения. Реальная запись отключена.'), React.createElement('div', {
+    style: {
+      fontFamily: DISPLAY,
+      fontSize: 8,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: t.faint,
+      marginTop: 7
+    }
+  }, localTenantSlug, ' · ', localSaasApiBase.replace(/^https?:\/\//, '')))) : null;
   const priceOf = s => {
     const v = s.price_min || s.cost || s.price_max || 0;
     return Number(v).toLocaleString('ru-RU') + ' ₽';
@@ -7237,7 +7555,7 @@ function ABookFlow() {
         color: t.ink,
         margin: '12px 0 18px'
       }
-    }, 'Выберите', React.createElement('br'), 'мастера'), usualMaster && React.createElement('div', {
+    }, 'Выберите', React.createElement('br'), 'мастера'), LocalModeNote(t), ErrLine(t), loading && localSaasMode && !mlist.length ? Loader(t, 'Подключаем локальный backend…') : null, usualMaster && !loading && React.createElement('div', {
       onClick: bookUsual,
       style: {
         display: 'flex',
@@ -7321,7 +7639,14 @@ function ABookFlow() {
         flexDirection: 'column',
         gap: 10
       }
-    }, mlist.map((m, i) => React.createElement(ATile, {
+    }, !loading && !mlist.length ? React.createElement('div', {
+      style: {
+        fontFamily: BODY,
+        fontSize: 13,
+        color: t.dim,
+        padding: '8px 2px'
+      }
+    }, localSaasMode ? 'Локальный backend не вернул мастеров.' : 'Нет доступных мастеров.') : mlist.map((m, i) => React.createElement(ATile, {
       key: i,
       t: t,
       radius: 16,
@@ -7613,9 +7938,9 @@ function ABookFlow() {
           gap: 9
         }
       }, list.map(s => {
-        const isSel = s === time;
+        const isSel = slotKey(s) === slotKey(time);
         return React.createElement('div', {
-          key: s,
+          key: slotKey(s),
           onClick: () => pickTime(s),
           style: {
             padding: '14px 0',
@@ -7630,7 +7955,7 @@ function ABookFlow() {
             background: isSel ? '#ffffff' : t.card,
             border: '1px solid ' + (isSel ? '#ffffff' : t.line)
           }
-        }, s);
+        }, timeLabel(s));
       })));
     });
   }
@@ -7670,7 +7995,7 @@ function ABookFlow() {
           color: t.ink,
           margin: '0 0 12px'
         }
-      }, 'Запись создана!'), React.createElement('p', {
+      }, doneMode === 'preview' ? 'Проверка пройдена' : 'Запись создана!'), React.createElement('p', {
         style: {
           fontFamily: BODY,
           fontWeight: 300,
@@ -7680,7 +8005,7 @@ function ABookFlow() {
           maxWidth: 270,
           margin: '0 0 26px'
         }
-      }, (master ? master.name : '') + ' · ' + (svcs.length ? svcsTitleStr() : ''), React.createElement('br'), humanDate(date) + ' · ' + (time || ''), React.createElement('br'), 'Напоминание придёт в Telegram.'), React.createElement('div', {
+      }, doneMode === 'preview' ? React.createElement(React.Fragment, null, (master ? master.name : '') + ' · ' + (svcs.length ? svcsTitleStr() : ''), React.createElement('br'), humanDate(date) + ' · ' + timeLabel(time), React.createElement('br'), 'Новый backend отдал мастеров, услуги и слоты. Реальная запись не создавалась.') : React.createElement(React.Fragment, null, (master ? master.name : '') + ' · ' + (svcs.length ? svcsTitleStr() : ''), React.createElement('br'), humanDate(date) + ' · ' + timeLabel(time), React.createElement('br'), 'Напоминание придёт в Telegram.')), React.createElement('div', {
         onClick: () => window.__meGo && window.__meGo('cabinet'),
         style: {
           minWidth: 230
@@ -7691,8 +8016,8 @@ function ABookFlow() {
       })));
     }
     const cab = window.APP_DATA && window.APP_DATA.cabinet || {};
-    const rows = [['Мастер', master ? master.name : ''], [svcs.length > 1 ? 'Услуги' : 'Услуга', svcs.length ? svcs.map(function (s) { return s.title; }).join(', ') : ''], ['Дата', humanDate(date)], ['Время', time || '']];
-    return React.createElement(React.Fragment, null, Head(t, 'Время', time || ''), React.createElement('div', {
+    const rows = [['Мастер', master ? master.name : ''], [svcs.length > 1 ? 'Услуги' : 'Услуга', svcs.length ? svcs.map(function (s) { return s.title; }).join(', ') : ''], ['Дата', humanDate(date)], ['Время', timeLabel(time)]];
+    return React.createElement(React.Fragment, null, Head(t, 'Время', timeLabel(time)), React.createElement('div', {
       style: {
         fontFamily: BODY,
         fontWeight: 500,
@@ -7700,7 +8025,7 @@ function ABookFlow() {
         color: t.ink,
         marginBottom: 16
       }
-    }, 'Подтверждение'), React.createElement(ATile, {
+      }, 'Подтверждение'), React.createElement(ATile, {
       t: t,
       radius: 18,
       noSheen: true
@@ -7835,7 +8160,7 @@ function ABookFlow() {
         margin: '10px 2px 0',
         lineHeight: 1.5
       }
-    }, 'Нажимая «Подтвердить», вы соглашаетесь на обработку персональных данных.'), ErrLine(t), React.createElement('div', {
+    }, localSaasMode ? 'Локальная проверка нового backend. На этом шаге реальная запись не создаётся.' : 'Нажимая «Подтвердить», вы соглашаетесь на обработку персональных данных.'), ErrLine(t), React.createElement('div', {
       onClick: submitting ? null : submit,
       style: {
         marginTop: 18,
@@ -7847,7 +8172,7 @@ function ABookFlow() {
       }
     }, React.createElement(PrimaryPill, {
       t: t,
-      label: submitting ? 'Создаём запись…' : 'Подтвердить запись',
+      label: submitting ? (localSaasMode ? 'Проверяем…' : 'Создаём запись…') : (localSaasMode ? 'Проверить локально' : 'Подтвердить запись'),
       icon: AIcon.check
     })));
   });
