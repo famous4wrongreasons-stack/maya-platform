@@ -1,8 +1,9 @@
 export enum TenantStatus {
   ACTIVE = 'active',
+  PAST_DUE = 'past_due',
   SUSPENDED = 'suspended',
   TRIAL = 'trial',
-  CANCELED = 'canceled',
+  CANCELLED = 'cancelled',
 }
 
 export enum UserRole {

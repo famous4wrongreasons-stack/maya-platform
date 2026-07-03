@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common';
 
 import { TenantStatus } from '../common/domain.enums';
+import {
+  featureKeysFromFlags,
+  normalizeFeatureFlags,
+} from '../common/feature-catalog';
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -208,6 +212,7 @@ export class TenantsService {
     const asString = (value: unknown) =>
       typeof value === 'string' && value.trim().length > 0 ? value : null;
     const activeStatuses = new Set(['trial', 'active', 'past_due']);
+    const availableFeatures = normalizeFeatureFlags(tenant.plan?.featuresJson);
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
@@ -246,7 +251,8 @@ export class TenantsService {
         tagline: brand.tagline,
         theme_json: theme,
       },
-      available_features: tenant.plan?.featuresJson ?? {},
+      available_features: availableFeatures,
+      available_feature_keys: featureKeysFromFlags(availableFeatures),
       crm: {
         provider: tenant.crmIntegration?.provider ?? null,
         status: tenant.crmIntegration?.status ?? null,
@@ -287,7 +293,7 @@ export class TenantsService {
             price_monthly: tenant.plan.priceMonthly,
             max_branches: tenant.plan.maxBranches,
             max_staff: tenant.plan.maxStaff,
-            features_json: tenant.plan.featuresJson ?? {},
+            features_json: normalizeFeatureFlags(tenant.plan.featuresJson),
             is_white_label_enabled: tenant.plan.isWhiteLabelEnabled,
           }
         : null,

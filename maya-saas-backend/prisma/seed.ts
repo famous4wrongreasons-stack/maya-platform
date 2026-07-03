@@ -5,6 +5,11 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createCipheriv, createHash, randomBytes } from 'crypto';
 
+import {
+  MAYA_PLAN_FEATURES,
+  buildFeatureFlags,
+} from '../src/common/feature-catalog';
+
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -120,31 +125,59 @@ async function main() {
   const passwordHash = await bcrypt.hash(platformOwnerPassword, 10);
   const tenantAdminPasswordHash = await bcrypt.hash(demoTenantAdminPassword, 10);
 
-  const demoPlan = await prisma.subscriptionPlan.upsert({
-    where: { name: 'Demo Plan' },
+  await prisma.subscriptionPlan.upsert({
+    where: { name: 'start' },
     update: {
-      priceMonthly: 9900,
-      maxBranches: 3,
-      maxStaff: 25,
-      featuresJson: {
-        online_booking: true,
-        available_slots: true,
-        staff_directory: true,
-        client_appointments: true,
-      } satisfies Prisma.InputJsonValue,
+      priceMonthly: 990,
+      maxBranches: 1,
+      maxStaff: 5,
+      featuresJson: buildFeatureFlags(MAYA_PLAN_FEATURES.start) satisfies Prisma.InputJsonValue,
       isWhiteLabelEnabled: true,
     },
     create: {
-      name: 'Demo Plan',
-      priceMonthly: 9900,
+      name: 'start',
+      priceMonthly: 990,
+      maxBranches: 1,
+      maxStaff: 5,
+      featuresJson: buildFeatureFlags(MAYA_PLAN_FEATURES.start) satisfies Prisma.InputJsonValue,
+      isWhiteLabelEnabled: true,
+    },
+  });
+
+  await prisma.subscriptionPlan.upsert({
+    where: { name: 'pro' },
+    update: {
+      priceMonthly: 2490,
       maxBranches: 3,
       maxStaff: 25,
-      featuresJson: {
-        online_booking: true,
-        available_slots: true,
-        staff_directory: true,
-        client_appointments: true,
-      } satisfies Prisma.InputJsonValue,
+      featuresJson: buildFeatureFlags(MAYA_PLAN_FEATURES.pro) satisfies Prisma.InputJsonValue,
+      isWhiteLabelEnabled: true,
+    },
+    create: {
+      name: 'pro',
+      priceMonthly: 2490,
+      maxBranches: 3,
+      maxStaff: 25,
+      featuresJson: buildFeatureFlags(MAYA_PLAN_FEATURES.pro) satisfies Prisma.InputJsonValue,
+      isWhiteLabelEnabled: true,
+    },
+  });
+
+  const demoPlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'max' },
+    update: {
+      priceMonthly: 8990,
+      maxBranches: 10,
+      maxStaff: 100,
+      featuresJson: buildFeatureFlags(MAYA_PLAN_FEATURES.max) satisfies Prisma.InputJsonValue,
+      isWhiteLabelEnabled: true,
+    },
+    create: {
+      name: 'max',
+      priceMonthly: 8990,
+      maxBranches: 10,
+      maxStaff: 100,
+      featuresJson: buildFeatureFlags(MAYA_PLAN_FEATURES.max) satisfies Prisma.InputJsonValue,
       isWhiteLabelEnabled: true,
     },
   });

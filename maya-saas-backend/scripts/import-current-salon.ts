@@ -8,6 +8,10 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 import {
+  MAYA_PLAN_FEATURES,
+  buildFeatureFlags,
+} from '../src/common/feature-catalog';
+import {
   CurrentSalonPythonConfig,
   buildCurrentSalonImportData,
 } from '../src/common/current-salon-import.utils';
@@ -275,13 +279,10 @@ async function upsertCurrentSalon(options: CliOptions) {
         priceMonthly: 19900,
         maxBranches: 5,
         maxStaff: 50,
-        featuresJson: {
-          online_booking: true,
-          available_slots: true,
-          staff_directory: true,
-          client_appointments: true,
-          imported_from_python_backend: true,
-        } satisfies Prisma.InputJsonValue,
+        featuresJson: buildFeatureFlags([
+          ...MAYA_PLAN_FEATURES.max,
+          'ai_chatbot',
+        ]) satisfies Prisma.InputJsonValue,
         isWhiteLabelEnabled: true,
       },
       create: {
@@ -289,13 +290,10 @@ async function upsertCurrentSalon(options: CliOptions) {
         priceMonthly: 19900,
         maxBranches: 5,
         maxStaff: 50,
-        featuresJson: {
-          online_booking: true,
-          available_slots: true,
-          staff_directory: true,
-          client_appointments: true,
-          imported_from_python_backend: true,
-        } satisfies Prisma.InputJsonValue,
+        featuresJson: buildFeatureFlags([
+          ...MAYA_PLAN_FEATURES.max,
+          'ai_chatbot',
+        ]) satisfies Prisma.InputJsonValue,
         isWhiteLabelEnabled: true,
       },
     });
