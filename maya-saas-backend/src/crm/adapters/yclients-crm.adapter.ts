@@ -20,6 +20,13 @@ interface YclientsStaffApiItem {
   id: number;
   name?: string;
   specialization?: string;
+  avatar?: string;
+  photo?: string;
+  rating?: number;
+}
+
+interface YclientsServiceCategoryApiItem {
+  title?: string;
 }
 
 interface YclientsServiceApiItem {
@@ -29,6 +36,7 @@ interface YclientsServiceApiItem {
   price_max?: number;
   duration?: number | null;
   seance_length?: number;
+  category?: YclientsServiceCategoryApiItem | null;
 }
 
 interface YclientsSlotApiItem {
@@ -80,6 +88,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         Math.round((service.duration || service.seance_length || 0) / 60) || 60,
       ),
       currency: this.settings.currency || 'RUB',
+      category: service.category?.title || undefined,
     }));
   }
 
@@ -98,6 +107,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
       id: String(staff.id),
       name: staff.name || '',
       title: staff.specialization || '',
+      specialization: staff.specialization || '',
+      avatar_url: staff.avatar || staff.photo || null,
+      rating:
+        typeof staff.rating === 'number' && Number.isFinite(staff.rating)
+          ? staff.rating
+          : null,
     }));
   }
 

@@ -16,6 +16,16 @@ import {
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 
+interface PreviewErrorPayload {
+  message: string;
+  error: {
+    code:
+      'slot_taken' | 'staff_unavailable' | 'service_not_found' | 'validation';
+    message: string;
+    field?: string;
+  };
+}
+
 @Injectable()
 export class AppointmentsService {
   constructor(
@@ -121,6 +131,7 @@ export class AppointmentsService {
       serviceIds: dto.serviceIds,
       branchId: dto.branchId,
     });
+    const services = await this.crmService.getServices(tenantId);
     const matchedSlot = findMatchingSlotByLocalStart(
       slots,
       requestedStart,
@@ -129,9 +140,29 @@ export class AppointmentsService {
 
     if (!matchedSlot) {
       throw new BadRequestException(
-        'Selected slot is no longer available. Refresh times and try again.',
+        this.buildPreviewError(
+          'slot_taken',
+          'Selected slot is no longer available. Refresh times and try again.',
+          'start',
+        ),
       );
     }
+
+    const selectedServices = services.filter((service) =>
+      dto.serviceIds.includes(service.id),
+    );
+    const totalPrice = selectedServices.reduce(
+      (sum, service) => sum + service.price,
+      0,
+    );
+    const durationMinutes = selectedServices.reduce(
+      (sum, service) => sum + service.duration_minutes,
+      0,
+    );
+    const primaryCurrency =
+      selectedServices[0]?.currency ??
+      services.find((service) => service.currency)?.currency ??
+      'RUB';
 
     await this.auditLogService.log({
       tenantId,
@@ -149,6 +180,7 @@ export class AppointmentsService {
 
     return {
       ok: true,
+      preview: true,
       mode: 'preview',
       branch_id: branch?.id ?? dto.branchId ?? null,
       branch_timezone: branch?.timezone ?? 'Europe/Moscow',
@@ -158,6 +190,15 @@ export class AppointmentsService {
       service_ids: dto.serviceIds,
       requested_start: requestedStart,
       matched_slot_start: matchedSlot.start,
+      slot: {
+        start: matchedSlot.start,
+        end: matchedSlot.end,
+        staff_id: matchedSlot.staff_id,
+        branch_id: matchedSlot.branch_id ?? branch?.id ?? dto.branchId ?? null,
+      },
+      total_price: totalPrice,
+      duration_minutes: durationMinutes,
+      currency: primaryCurrency,
       notes: dto.notes ?? null,
       warnings: [],
     };
@@ -252,6 +293,21 @@ export class AppointmentsService {
       provider_payload: appointment.providerPayload ?? {},
       created_at: appointment.createdAt,
       updated_at: appointment.updatedAt,
+    };
+  }
+
+  private buildPreviewError(
+    code: PreviewErrorPayload['error']['code'],
+    message: string,
+    field?: string,
+  ): PreviewErrorPayload {
+    return {
+      message,
+      error: {
+        code,
+        message,
+        ...(field ? { field } : {}),
+      },
     };
   }
 }

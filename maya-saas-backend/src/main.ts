@@ -1,4 +1,8 @@
-import { ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  ValidationError,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -17,6 +21,26 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors: ValidationError[]) => {
+        const details = errors.flatMap((error) =>
+          Object.values(error.constraints || {}).map((message) => ({
+            field: error.property,
+            message,
+          })),
+        );
+        const first = details[0];
+        const message = first?.message || 'Validation failed';
+
+        return new BadRequestException({
+          message,
+          error: {
+            code: 'validation',
+            message,
+            field: first?.field,
+            details,
+          },
+        });
+      },
     }),
   );
 

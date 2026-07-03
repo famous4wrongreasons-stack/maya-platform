@@ -21,8 +21,20 @@ describe('YclientsCRMAdapter', () => {
       json: () =>
         Promise.resolve({
           data: [
-            { id: 1, name: 'Anton', specialization: 'Senior Barber' },
-            { id: 2, name: 'Nikita', specialization: 'Top Master' },
+            {
+              id: 1,
+              name: 'Anton',
+              specialization: 'Senior Barber',
+              avatar: 'https://example.com/anton.png',
+              rating: 4.8,
+            },
+            {
+              id: 2,
+              name: 'Nikita',
+              specialization: 'Top Master',
+              photo: 'https://example.com/nikita.png',
+              rating: 4.9,
+            },
           ],
         }),
     }) as typeof fetch;
@@ -43,6 +55,50 @@ describe('YclientsCRMAdapter', () => {
         id: '2',
         name: 'Nikita',
         title: 'Top Master',
+        specialization: 'Top Master',
+        avatar_url: 'https://example.com/nikita.png',
+        rating: 4.9,
+      },
+    ]);
+  });
+
+  it('maps service category into normalized services', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          data: {
+            services: [
+              {
+                id: 7,
+                title: 'Haircut',
+                price_min: 2500,
+                seance_length: 3600,
+                category: { title: 'Haircuts' },
+              },
+            ],
+          },
+        }),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {
+        companyId: 123,
+      },
+    });
+
+    const services = await adapter.getServices('tenant-1');
+
+    expect(services).toEqual([
+      {
+        id: '7',
+        name: 'Haircut',
+        price: 2500,
+        duration_minutes: 60,
+        currency: 'RUB',
+        category: 'Haircuts',
       },
     ]);
   });

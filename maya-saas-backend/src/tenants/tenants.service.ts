@@ -183,6 +183,10 @@ export class TenantsService {
       where: { slug: slug.toLowerCase() },
       include: {
         brandingSettings: true,
+        branches: {
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
         plan: true,
         crmIntegration: {
           select: {
@@ -197,21 +201,50 @@ export class TenantsService {
       throw new NotFoundException('Tenant not found');
     }
 
+    const firstBranch = tenant.branches[0] ?? null;
+    const theme =
+      (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
+      {};
+    const asString = (value: unknown) =>
+      typeof value === 'string' && value.trim().length > 0 ? value : null;
+    const activeStatuses = new Set(['trial', 'active', 'past_due']);
+    const brand = {
+      name: tenant.brandingSettings?.appName ?? tenant.name,
+      logo_url: tenant.brandingSettings?.logoUrl ?? null,
+      accent_color: tenant.brandingSettings?.primaryColor ?? null,
+      secondary_color: tenant.brandingSettings?.secondaryColor ?? null,
+      background_image_url: tenant.brandingSettings?.backgroundImageUrl ?? null,
+      font_family: tenant.brandingSettings?.fontFamily ?? null,
+      city: asString(theme.city),
+      address: firstBranch?.address ?? asString(theme.address),
+      phone: firstBranch?.phone ?? asString(theme.phone),
+      hours: asString(theme.hours),
+      tagline: asString(theme.tagline),
+    };
+
     return {
+      slug: tenant.slug,
+      active: activeStatuses.has(tenant.status),
+      brand,
       tenant: {
         slug: tenant.slug,
         status: tenant.status,
       },
       branding: {
-        app_name: tenant.brandingSettings?.appName ?? tenant.name,
-        logo_url: tenant.brandingSettings?.logoUrl ?? null,
-        primary_color: tenant.brandingSettings?.primaryColor ?? null,
-        secondary_color: tenant.brandingSettings?.secondaryColor ?? null,
-        background_image_url:
-          tenant.brandingSettings?.backgroundImageUrl ?? null,
-        font_family: tenant.brandingSettings?.fontFamily ?? null,
+        app_name: brand.name,
+        logo_url: brand.logo_url,
+        primary_color: brand.accent_color,
+        accent_color: brand.accent_color,
+        secondary_color: brand.secondary_color,
+        background_image_url: brand.background_image_url,
+        font_family: brand.font_family,
         button_radius: tenant.brandingSettings?.buttonRadius ?? null,
-        theme_json: tenant.brandingSettings?.themeJson ?? {},
+        city: brand.city,
+        address: brand.address,
+        phone: brand.phone,
+        hours: brand.hours,
+        tagline: brand.tagline,
+        theme_json: theme,
       },
       available_features: tenant.plan?.featuresJson ?? {},
       crm: {

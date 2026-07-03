@@ -15,6 +15,7 @@ const MOCK_SERVICES: ServiceItem[] = [
     price: 2500,
     duration_minutes: 60,
     currency: 'RUB',
+    category: 'Haircuts',
   },
   {
     id: 'svc-beard',
@@ -22,6 +23,7 @@ const MOCK_SERVICES: ServiceItem[] = [
     price: 1400,
     duration_minutes: 30,
     currency: 'RUB',
+    category: 'Beard',
   },
   {
     id: 'svc-premium',
@@ -29,6 +31,7 @@ const MOCK_SERVICES: ServiceItem[] = [
     price: 4200,
     duration_minutes: 90,
     currency: 'RUB',
+    category: 'Premium',
   },
 ];
 
@@ -37,11 +40,17 @@ const MOCK_STAFF: StaffMember[] = [
     id: 'staff-anton',
     name: 'Anton Sokolov',
     title: 'Senior Barber',
+    specialization: 'Senior Barber',
+    avatar_url: null,
+    rating: 4.9,
   },
   {
     id: 'staff-nikita',
     name: 'Nikita Volkov',
     title: 'Top Master',
+    specialization: 'Top Master',
+    avatar_url: null,
+    rating: 4.8,
   },
 ];
 

@@ -13,12 +13,16 @@ export interface ServiceItem {
   price: number;
   duration_minutes: number;
   currency: string;
+  category?: string;
 }
 
 export interface StaffMember {
   id: string;
   name: string;
   title?: string;
+  specialization?: string;
+  avatar_url?: string | null;
+  rating?: number | null;
 }
 
 export interface AvailableSlot {
