@@ -21,7 +21,10 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
   - `GET /api/mobile/config/:tenantSlug`
   - `POST /api/auth/login`
   - `POST /api/auth/register`
+  - `POST /api/auth/phone/start`
+  - `POST /api/auth/phone/verify`
   - `GET /api/me`
+  - `PATCH /api/me`
   - `GET /api/branches`
   - `GET /api/services`
   - `GET /api/staff`
@@ -172,8 +175,6 @@ curl -X POST http://localhost:3000/api/appointments/preview \
   -H 'Authorization: Bearer <tenant-client-jwt>' \
   -H 'Content-Type: application/json' \
   -d '{
-    "clientName": "Станислав",
-    "clientPhone": "+79990000000",
     "staffId": "3278920",
     "serviceIds": ["7572285"],
     "start": "2026-07-04T10:15:00"
@@ -182,11 +183,55 @@ curl -X POST http://localhost:3000/api/appointments/preview \
 
 What preview does:
 
-- validates `clientName`, `clientPhone`, `staffId`, `serviceIds`, `start`
+- validates the booking identity from the request or the authenticated client profile
 - loads real availability from the tenant CRM adapter
 - confirms that the selected local wall-clock slot still exists
 - returns normalized payload details
 - does not create a live appointment in YClients
+
+If the authenticated client already has a saved profile name and phone, `clientName` and `clientPhone` can be omitted. If the profile is incomplete, backend returns a machine-readable error so the frontend can prompt the user to complete it first.
+
+## Phone-first client auth and profile
+
+Start phone auth in safe local debug mode:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/phone/start \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tenantSlug": "demo-salon",
+    "phone": "+79990000000"
+  }'
+```
+
+Verify the code and receive a tenant client JWT:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/phone/verify \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tenantSlug": "demo-salon",
+    "phone": "+79990000000",
+    "code": "123456"
+  }'
+```
+
+Update the current authenticated user profile name:
+
+```bash
+curl -X PATCH http://localhost:3000/api/me \
+  -H 'Authorization: Bearer <tenant-client-jwt>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Станислав"
+  }'
+```
+
+Notes:
+
+- In non-production/debug mode the backend returns `debug_code` until a real SMS provider is connected.
+- Client profile names are stored encrypted at rest.
+- `GET /api/me` now returns `name`, `profile_completed`, and `missing_profile_fields`.
 
 ## Connect YClients / Altegio
 

@@ -1,0 +1,217 @@
+import { BadRequestException } from '@nestjs/common';
+
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { TenantsService } from '../tenants/tenants.service';
+import { UsersService } from '../users/users.service';
+import { CrmService } from '../crm/crm.service';
+import { AppointmentsService } from './appointments.service';
+
+type BranchRecord = {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  timezone: string | null;
+};
+
+type UserRecord = {
+  id: string;
+  tenantId: string;
+  branchId: string | null;
+  email: string;
+  phone: string | null;
+  encryptedName: string | null;
+  passwordHash: string;
+  role: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tenant: null;
+  branch: null;
+};
+
+describe('AppointmentsService', () => {
+  const branch: BranchRecord = {
+    id: 'branch-1',
+    name: 'Main Branch',
+    address: 'Moscow',
+    phone: '+79990000000',
+    timezone: 'Europe/Moscow',
+  };
+
+  const createService = () => {
+    const branchFindFirstMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<BranchRecord | null>
+    > = jest.fn().mockResolvedValue(branch);
+    const appointmentFindManyMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<unknown[]>
+    > = jest.fn().mockResolvedValue([]);
+    const getAvailableSlotsMock: jest.MockedFunction<
+      (
+        tenantId: string,
+        query: Record<string, unknown>,
+      ) => Promise<
+        Array<{
+          start: string;
+          end: string;
+          staff_id: string;
+          branch_id: string | null;
+        }>
+      >
+    > = jest.fn().mockResolvedValue([
+      {
+        start: '2026-07-05T08:00:00.000Z',
+        end: '2026-07-05T09:00:00.000Z',
+        staff_id: 'staff-1',
+        branch_id: 'branch-1',
+      },
+    ]);
+    const getServicesMock: jest.MockedFunction<
+      (tenantId: string) => Promise<
+        Array<{
+          id: string;
+          name: string;
+          price: number;
+          duration_minutes: number;
+          currency: string;
+          category?: string;
+        }>
+      >
+    > = jest.fn().mockResolvedValue([
+      {
+        id: 'svc-1',
+        name: 'Haircut',
+        price: 2500,
+        duration_minutes: 60,
+        currency: 'RUB',
+        category: 'Haircuts',
+      },
+    ]);
+    const getUserOrThrowMock: jest.MockedFunction<
+      (userId: string) => Promise<UserRecord>
+    > = jest.fn().mockResolvedValue({
+      id: 'user-1',
+      tenantId: 'tenant-1',
+      branchId: null,
+      email: 'phone-79990000000@demo-salon.client.local',
+      phone: '+79990000000',
+      encryptedName: 'enc:Станислав',
+      passwordHash: 'hash',
+      role: 'client',
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tenant: null,
+      branch: null,
+    });
+    const serializeUserMock: jest.MockedFunction<
+      (user: UserRecord) => {
+        name: string | null;
+        phone: string | null;
+      }
+    > = jest.fn().mockReturnValue({
+      name: 'Станислав',
+      phone: '+79990000000',
+    });
+    const auditLogMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<void>
+    > = jest.fn().mockResolvedValue(undefined);
+
+    const prisma: Pick<PrismaService, 'appointment' | 'branch'> = {
+      appointment: {
+        findMany: appointmentFindManyMock,
+      } as PrismaService['appointment'],
+      branch: {
+        findFirst: branchFindFirstMock,
+      } as PrismaService['branch'],
+    };
+    const crmService: Pick<CrmService, 'getAvailableSlots' | 'getServices'> = {
+      getAvailableSlots: getAvailableSlotsMock,
+      getServices: getServicesMock,
+    };
+    const tenantsService: Pick<TenantsService, 'assertBranchBelongsToTenant'> =
+      {
+        assertBranchBelongsToTenant: jest
+          .fn()
+          .mockResolvedValue(
+            undefined,
+          ) as TenantsService['assertBranchBelongsToTenant'],
+      };
+    const usersService: Pick<UsersService, 'getUserOrThrow' | 'serializeUser'> =
+      {
+        getUserOrThrow: getUserOrThrowMock,
+        serializeUser: serializeUserMock,
+      };
+    const auditLogService: Pick<AuditLogService, 'log'> = {
+      log: auditLogMock,
+    };
+
+    return {
+      service: new AppointmentsService(
+        prisma as PrismaService,
+        crmService as CrmService,
+        tenantsService as TenantsService,
+        usersService as UsersService,
+        auditLogService as AuditLogService,
+      ),
+      mocks: {
+        auditLogMock,
+        getServicesMock,
+        getUserOrThrowMock,
+        serializeUserMock,
+      },
+    };
+  };
+
+  it('uses the stored client profile when preview payload omits name and phone', async () => {
+    const {
+      service,
+      mocks: { auditLogMock, getUserOrThrowMock, serializeUserMock },
+    } = createService();
+
+    const result = await service.previewForClient('tenant-1', 'user-1', {
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T11:00:00',
+    });
+
+    expect(getUserOrThrowMock).toHaveBeenCalledWith('user-1');
+    expect(serializeUserMock).toHaveBeenCalled();
+    expect(result).toMatchObject({
+      client_name: 'Станислав',
+      client_phone: '+79990000000',
+      total_price: 2500,
+      duration_minutes: 60,
+      currency: 'RUB',
+    });
+    expect(auditLogMock).toHaveBeenCalled();
+  });
+
+  it('returns a profile error when the client name is missing everywhere', async () => {
+    const {
+      service,
+      mocks: { serializeUserMock },
+    } = createService();
+
+    serializeUserMock.mockReturnValue({
+      name: null,
+      phone: '+79990000000',
+    });
+
+    await expect(
+      service.previewForClient('tenant-1', 'user-1', {
+        staffId: 'staff-1',
+        serviceIds: ['svc-1'],
+        start: '2026-07-05T11:00:00',
+      }),
+    ).rejects.toMatchObject<BadRequestException>({
+      response: {
+        error: {
+          code: 'client_name_required',
+          field: 'clientName',
+        },
+      },
+    });
+  });
+});

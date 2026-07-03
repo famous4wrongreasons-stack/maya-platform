@@ -32,11 +32,13 @@ export class PreviewAppointmentDto {
   @IsString()
   notes?: string;
 
-  @ApiProperty({ example: 'Станислав' })
+  @ApiPropertyOptional({ example: 'Станислав' })
+  @IsOptional()
   @IsString()
-  clientName!: string;
+  clientName?: string;
 
-  @ApiProperty({ example: '+79990000000' })
+  @ApiPropertyOptional({ example: '+79990000000' })
+  @IsOptional()
   @IsString()
-  clientPhone!: string;
+  clientPhone?: string;
 }

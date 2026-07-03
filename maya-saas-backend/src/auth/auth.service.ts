@@ -62,14 +62,24 @@ export class AuthService {
       );
     }
 
+    const normalizedPhone = dto.phone ? normalizeRussianPhone(dto.phone) : null;
+
     await this.usersService.ensureEmailIsAvailable(tenant.id, dto.email);
+
+    if (normalizedPhone) {
+      await this.usersService.ensurePhoneIsAvailable(
+        tenant.id,
+        normalizedPhone,
+      );
+    }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.createUser({
       tenantId: tenant.id,
       branchId: dto.branchId ?? null,
       email: dto.email,
-      phone: dto.phone ?? null,
+      phone: normalizedPhone,
+      name: dto.name ?? null,
       passwordHash,
       role: UserRole.CLIENT,
       status: UserStatus.ACTIVE,

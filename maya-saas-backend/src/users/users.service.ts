@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -6,12 +7,30 @@ import {
 import { User } from '@prisma/client';
 
 import { UserRole } from '../common/domain.enums';
-import { phoneDigits } from '../common/phone.util';
+import {
+  buildPhoneLoginEmail,
+  normalizeRussianPhone,
+} from '../common/phone.util';
+import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
+
+type UserWithRelations = User & {
+  tenant?: {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+  } | null;
+  branch?: { id: string; name: string } | null;
+};
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly encryptionService: EncryptionService,
+  ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
     return this.prisma.user.findFirst({
@@ -41,16 +60,40 @@ export class UsersService {
   }
 
   async findTenantUserByPhone(tenantId: string, phone: string) {
-    return this.prisma.user.findFirst({
+    const normalizedPhone = normalizeRussianPhone(phone);
+    const exact = await this.prisma.user.findFirst({
       where: {
         tenantId,
-        phone,
+        phone: normalizedPhone,
       },
       include: {
         tenant: true,
         branch: true,
       },
     });
+
+    if (exact) {
+      return exact;
+    }
+
+    const legacyUsers = await this.prisma.user.findMany({
+      where: {
+        tenantId,
+        phone: {
+          not: null,
+        },
+      },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+
+    return (
+      legacyUsers.find(
+        (user) => this.normalizeStoredPhone(user.phone) === normalizedPhone,
+      ) ?? null
+    );
   }
 
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
@@ -68,15 +111,37 @@ export class UsersService {
   }
 
   async ensurePhoneIsAvailable(tenantId: string | null, phone: string) {
-    const existing = await this.prisma.user.findFirst({
+    const normalizedPhone = normalizeRussianPhone(phone);
+    const exact = await this.prisma.user.findFirst({
       where: {
         tenantId,
-        phone,
+        phone: normalizedPhone,
       },
       select: { id: true },
     });
 
-    if (existing) {
+    if (exact) {
+      throw new ConflictException('A user with this phone already exists');
+    }
+
+    const legacyUsers = await this.prisma.user.findMany({
+      where: {
+        tenantId,
+        phone: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        phone: true,
+      },
+    });
+
+    if (
+      legacyUsers.some(
+        (user) => this.normalizeStoredPhone(user.phone) === normalizedPhone,
+      )
+    ) {
       throw new ConflictException('A user with this phone already exists');
     }
   }
@@ -86,16 +151,23 @@ export class UsersService {
     branchId?: string | null;
     email: string;
     phone?: string | null;
+    name?: string | null;
     passwordHash: string;
     role: string;
     status?: string;
   }) {
+    const normalizedPhone = this.normalizeOptionalPhone(data.phone);
+    const normalizedName = this.normalizeOptionalName(data.name);
+
     return this.prisma.user.create({
       data: {
         tenantId: data.tenantId,
         branchId: data.branchId ?? null,
         email: data.email.toLowerCase(),
-        phone: data.phone ?? null,
+        phone: normalizedPhone,
+        encryptedName: normalizedName
+          ? this.encryptionService.encrypt(normalizedName)
+          : null,
         passwordHash: data.passwordHash,
         role: data.role,
         status: data.status ?? 'active',
@@ -112,16 +184,21 @@ export class UsersService {
     tenantSlug: string;
     branchId?: string | null;
     phone: string;
+    name?: string | null;
     passwordHash: string;
   }) {
-    const normalizedPhone = phoneDigits(data.phone);
+    const normalizedPhone = normalizeRussianPhone(data.phone);
+    const normalizedName = this.normalizeOptionalName(data.name);
 
     return this.prisma.user.create({
       data: {
         tenantId: data.tenantId,
         branchId: data.branchId ?? null,
-        email: `phone-${normalizedPhone}@${data.tenantSlug.toLowerCase()}.client.local`,
-        phone: data.phone,
+        email: buildPhoneLoginEmail(data.tenantSlug, normalizedPhone),
+        phone: normalizedPhone,
+        encryptedName: normalizedName
+          ? this.encryptionService.encrypt(normalizedName)
+          : null,
         passwordHash: data.passwordHash,
         role: UserRole.CLIENT,
         status: 'active',
@@ -131,6 +208,33 @@ export class UsersService {
         branch: true,
       },
     });
+  }
+
+  async updateCurrentUserProfile(userId: string, dto: UpdateCurrentUserDto) {
+    if (dto.name === undefined) {
+      throw new BadRequestException(
+        'At least one supported profile field must be provided',
+      );
+    }
+
+    const normalizedName = this.normalizeOptionalName(dto.name);
+
+    if (!normalizedName) {
+      throw new BadRequestException('Profile name must not be empty');
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        encryptedName: this.encryptionService.encrypt(normalizedName),
+      },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+
+    return this.serializeUser(user);
   }
 
   async getUserOrThrow(userId: string) {
@@ -149,25 +253,32 @@ export class UsersService {
     return user;
   }
 
-  serializeUser(
-    user: User & {
-      tenant?: {
-        id: string;
-        name: string;
-        slug: string;
-        status: string;
-      } | null;
-      branch?: { id: string; name: string } | null;
-    },
-  ) {
+  getUserName(user: { encryptedName: string | null }): string | null {
+    if (!user.encryptedName) {
+      return null;
+    }
+
+    return this.encryptionService.decrypt(user.encryptedName);
+  }
+
+  serializeUser(user: UserWithRelations) {
+    const name = this.getUserName(user);
+    const missingProfileFields = [
+      ...(name ? [] : ['name']),
+      ...(user.phone ? [] : ['phone']),
+    ];
+
     return {
       id: user.id,
       tenant_id: user.tenantId,
       branch_id: user.branchId,
       email: user.email,
       phone: user.phone,
+      name,
       role: user.role,
       status: user.status,
+      profile_completed: missingProfileFields.length === 0,
+      missing_profile_fields: missingProfileFields,
       created_at: user.createdAt,
       updated_at: user.updatedAt,
       tenant: user.tenant
@@ -185,5 +296,35 @@ export class UsersService {
           }
         : null,
     };
+  }
+
+  private normalizeOptionalPhone(phone?: string | null): string | null {
+    if (!phone || phone.trim().length === 0) {
+      return null;
+    }
+
+    return normalizeRussianPhone(phone);
+  }
+
+  private normalizeOptionalName(name?: string | null): string | null {
+    if (!name) {
+      return null;
+    }
+
+    const trimmed = name.trim();
+
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  private normalizeStoredPhone(phone: string | null): string | null {
+    if (!phone) {
+      return null;
+    }
+
+    try {
+      return normalizeRussianPhone(phone);
+    } catch {
+      return null;
+    }
   }
 }

@@ -68,6 +68,7 @@ model User {
   branchId     String?
   email        String
   phone        String?
+  encryptedName String?
   passwordHash String
   role         String
   status       String        @default("active")

@@ -6,6 +6,11 @@ export class RegisterDto {
   @IsString()
   tenantSlug!: string;
 
+  @ApiPropertyOptional({ example: 'Станислав' })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
   @ApiProperty({ example: 'client@example.com' })
   @IsEmail()
   email!: string;

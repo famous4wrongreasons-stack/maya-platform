@@ -1,8 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { CurrentUser } from '../decorators/current-user.decorator';
+import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
@@ -16,5 +17,17 @@ export class UsersController {
   async getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
     const fullUser = await this.usersService.getUserOrThrow(user.userId);
     return this.usersService.serializeUser(fullUser);
+  }
+
+  @Patch()
+  @ApiOperation({
+    summary:
+      'Update the current authenticated user profile. Phone changes stay outside this endpoint.',
+  })
+  updateCurrentUser(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateCurrentUserDto,
+  ) {
+    return this.usersService.updateCurrentUserProfile(user.userId, dto);
   }
 }
