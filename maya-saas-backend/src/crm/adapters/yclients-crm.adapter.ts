@@ -26,6 +26,7 @@ interface YclientsStaffApiItem {
 }
 
 interface YclientsServiceCategoryApiItem {
+  id?: number;
   title?: string;
 }
 
@@ -36,6 +37,7 @@ interface YclientsServiceApiItem {
   price_max?: number;
   duration?: number | null;
   seance_length?: number;
+  category_id?: number | null;
   category?: YclientsServiceCategoryApiItem | null;
 }
 
@@ -78,7 +80,18 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async getServices(tenantId: string): Promise<ServiceItem[]> {
     void tenantId;
 
-    const services = await this.fetchServices();
+    const [services, categories] = await Promise.all([
+      this.fetchServices(),
+      this.fetchServiceCategories().catch(() => []),
+    ]);
+    const categoryTitlesById = new Map<number, string>();
+
+    for (const category of categories) {
+      if (typeof category.id === 'number') {
+        categoryTitlesById.set(category.id, category.title || '');
+      }
+    }
+
     return services.map((service) => ({
       id: String(service.id),
       name: service.title || '',
@@ -88,7 +101,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
         Math.round((service.duration || service.seance_length || 0) / 60) || 60,
       ),
       currency: this.settings.currency || 'RUB',
-      category: service.category?.title || undefined,
+      category:
+        service.category?.title ||
+        (typeof service.category_id === 'number'
+          ? categoryTitlesById.get(service.category_id) || undefined
+          : undefined),
     }));
   }
 
@@ -257,6 +274,16 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }>(`book_services/${this.getCompanyId()}`);
 
     return response.data?.services || [];
+  }
+
+  private async fetchServiceCategories(): Promise<
+    YclientsServiceCategoryApiItem[]
+  > {
+    const response = await this.request<YclientsServiceCategoryApiItem[]>(
+      `service_categories/${this.getCompanyId()}`,
+    );
+
+    return response.data || [];
   }
 
   private async request<TData>(

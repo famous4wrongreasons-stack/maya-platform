@@ -63,23 +63,37 @@ describe('YclientsCRMAdapter', () => {
   });
 
   it('maps service category into normalized services', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          data: {
-            services: [
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: {
+              services: [
+                {
+                  id: 7,
+                  title: 'Haircut',
+                  price_min: 2500,
+                  seance_length: 3600,
+                  category_id: 12,
+                },
+              ],
+            },
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: [
               {
-                id: 7,
-                title: 'Haircut',
-                price_min: 2500,
-                seance_length: 3600,
-                category: { title: 'Haircuts' },
+                id: 12,
+                title: 'Haircuts',
               },
             ],
-          },
-        }),
-    }) as typeof fetch;
+          }),
+      }) as typeof fetch;
 
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,

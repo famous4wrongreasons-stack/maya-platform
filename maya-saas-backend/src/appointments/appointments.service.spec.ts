@@ -157,6 +157,7 @@ describe('AppointmentsService', () => {
       ),
       mocks: {
         auditLogMock,
+        getAvailableSlotsMock,
         getServicesMock,
         getUserOrThrowMock,
         serializeUserMock,
@@ -213,5 +214,28 @@ describe('AppointmentsService', () => {
         },
       },
     });
+  });
+
+  it('returns service_not_found before asking CRM for slots', async () => {
+    const {
+      service,
+      mocks: { getAvailableSlotsMock },
+    } = createService();
+
+    await expect(
+      service.previewForClient('tenant-1', 'user-1', {
+        staffId: 'staff-1',
+        serviceIds: ['missing-service'],
+        start: '2026-07-05T11:00:00',
+      }),
+    ).rejects.toMatchObject<BadRequestException>({
+      response: {
+        error: {
+          code: 'service_not_found',
+          field: 'serviceIds',
+        },
+      },
+    });
+    expect(getAvailableSlotsMock).not.toHaveBeenCalled();
   });
 });

@@ -62,6 +62,8 @@ export class AppointmentsService {
     const client = await this.usersService.getUserOrThrow(clientId);
     const clientProfile = this.usersService.serializeUser(client);
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
+    const services = await this.crmService.getServices(tenantId);
+    this.assertRequestedServicesExist(dto.serviceIds, services);
     const bookingIdentity = this.resolveBookingIdentity(clientProfile, {
       clientName: dto.clientName,
       clientPhone: dto.clientPhone,
@@ -136,6 +138,8 @@ export class AppointmentsService {
     const client = await this.usersService.getUserOrThrow(clientId);
     const clientProfile = this.usersService.serializeUser(client);
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
+    const services = await this.crmService.getServices(tenantId);
+    this.assertRequestedServicesExist(dto.serviceIds, services);
     const requestedStart = normalizeRequestedStart(
       dto.start,
       branch?.timezone ?? 'Europe/Moscow',
@@ -150,7 +154,6 @@ export class AppointmentsService {
       serviceIds: dto.serviceIds,
       branchId: dto.branchId,
     });
-    const services = await this.crmService.getServices(tenantId);
     const matchedSlot = findMatchingSlotByLocalStart(
       slots,
       requestedStart,
@@ -440,6 +443,28 @@ export class AppointmentsService {
     }
 
     return null;
+  }
+
+  private assertRequestedServicesExist(
+    requestedServiceIds: string[],
+    services: ServiceItem[],
+  ): void {
+    const existingServiceIds = new Set(services.map((service) => service.id));
+    const missingServiceIds = requestedServiceIds.filter(
+      (serviceId) => !existingServiceIds.has(serviceId),
+    );
+
+    if (missingServiceIds.length === 0) {
+      return;
+    }
+
+    throw new BadRequestException(
+      this.buildAppointmentError(
+        'service_not_found',
+        'One or more selected services are no longer available.',
+        'serviceIds',
+      ),
+    );
   }
 
   private buildAppointmentError(
