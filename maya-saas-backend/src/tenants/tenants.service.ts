@@ -15,6 +15,92 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 
+type PublicContentPair = [string, string];
+
+type PublicMobileContent = {
+  hero_tag: string | null;
+  hero_title: string[];
+  stats: PublicContentPair[];
+  about: string[];
+  ratings: PublicContentPair[];
+  socials: string[];
+};
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function asNonEmptyString(value: unknown): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function asStringList(value: unknown, maxItems?: number): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const items = value
+    .map((item) => asNonEmptyString(item))
+    .filter((item): item is string => item !== null);
+
+  return typeof maxItems === 'number' ? items.slice(0, maxItems) : items;
+}
+
+function asPairList(value: unknown): PublicContentPair[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((item) => {
+    if (!Array.isArray(item) || item.length < 2) {
+      return [];
+    }
+
+    const left = asNonEmptyString(item[0]);
+    const right = asNonEmptyString(item[1]);
+
+    return left && right ? [[left, right] satisfies PublicContentPair] : [];
+  });
+}
+
+function extractPublicMobileContent(
+  theme: Record<string, unknown>,
+): PublicMobileContent | null {
+  const content = asRecord(theme.content);
+
+  if (!content) {
+    return null;
+  }
+
+  const normalized: PublicMobileContent = {
+    hero_tag: asNonEmptyString(content.hero_tag),
+    hero_title: asStringList(content.hero_title, 3),
+    stats: asPairList(content.stats),
+    about: asStringList(content.about),
+    ratings: asPairList(content.ratings),
+    socials: asStringList(content.socials),
+  };
+
+  const hasContent =
+    normalized.hero_tag !== null ||
+    normalized.hero_title.length > 0 ||
+    normalized.stats.length > 0 ||
+    normalized.about.length > 0 ||
+    normalized.ratings.length > 0 ||
+    normalized.socials.length > 0;
+
+  return hasContent ? normalized : null;
+}
+
 @Injectable()
 export class TenantsService {
   constructor(
@@ -209,8 +295,7 @@ export class TenantsService {
     const theme =
       (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
       {};
-    const asString = (value: unknown) =>
-      typeof value === 'string' && value.trim().length > 0 ? value : null;
+    const content = extractPublicMobileContent(theme);
     const activeStatuses = new Set(['trial', 'active', 'past_due']);
     const availableFeatures = normalizeFeatureFlags(tenant.plan?.featuresJson);
     const brand = {
@@ -220,17 +305,18 @@ export class TenantsService {
       secondary_color: tenant.brandingSettings?.secondaryColor ?? null,
       background_image_url: tenant.brandingSettings?.backgroundImageUrl ?? null,
       font_family: tenant.brandingSettings?.fontFamily ?? null,
-      city: asString(theme.city),
-      address: firstBranch?.address ?? asString(theme.address),
-      phone: firstBranch?.phone ?? asString(theme.phone),
-      hours: asString(theme.hours),
-      tagline: asString(theme.tagline),
+      city: asNonEmptyString(theme.city),
+      address: firstBranch?.address ?? asNonEmptyString(theme.address),
+      phone: firstBranch?.phone ?? asNonEmptyString(theme.phone),
+      hours: asNonEmptyString(theme.hours),
+      tagline: asNonEmptyString(theme.tagline),
     };
 
     return {
       slug: tenant.slug,
       active: activeStatuses.has(tenant.status),
       brand,
+      content,
       tenant: {
         slug: tenant.slug,
         status: tenant.status,

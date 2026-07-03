@@ -1,7 +1,7 @@
 # Codex Backend Handoff For Claude
 
 > Current backend status for Claude frontend work
-> Date: 2026-07-03
+> Date: 2026-07-04
 > Backend branch: `codex/safe-booking-backend-handoff`
 
 ## 1. Working Split
@@ -22,6 +22,7 @@ The main frontend blockers previously raised in
   - `slug`
   - `active`
   - `brand`
+  - `content`
 - It still preserves backward-compatible nested keys:
   - `tenant`
   - `branding`
@@ -87,6 +88,14 @@ Current useful top-level response shape:
     "hours": null,
     "tagline": null
   },
+  "content": {
+    "hero_tag": "Добро пожаловать в «Гриву»",
+    "hero_title": ["Грива.", "Стрижём так,", "что оборачиваются"],
+    "stats": [["3", "года"], ["4", "мастера"], ["4.9", "рейтинг"]],
+    "about": ["абзац 1", "абзац 2"],
+    "ratings": [["Яндекс", "4.9"], ["2ГИС", "4.8"]],
+    "socials": ["Telegram", "TikTok"]
+  },
   "available_features": {
     "booking": true
   },
@@ -105,10 +114,12 @@ Compatibility keys still returned:
 
 Frontend guidance:
 
-- prefer `slug`, `active`, `brand`, `available_features`,
+- prefer `slug`, `active`, `brand`, `content`, `available_features`,
   `available_feature_keys`
 - keep compatibility tolerance for older nested keys if you want a resilient
   adapter
+- `content` is normalized from `branding.theme_json.content`
+- `branding.theme_json.content` still remains for backward compatibility
 
 ### 4.2 Phone-first auth
 
