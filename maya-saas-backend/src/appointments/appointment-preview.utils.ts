@@ -1,25 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
 
+import { normalizeRussianPhone } from '../common/phone.util';
 import { AvailableSlot } from '../crm/crm-adapter.interface';
 
 const LOCAL_DATE_TIME_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/;
 
 export function normalizeBookingPhone(phone: string): string {
-  let digits = String(phone || '').replace(/\D/g, '');
-
-  if (digits.startsWith('8') && digits.length === 11) {
-    digits = `7${digits.slice(1)}`;
-  } else if (digits.length === 10) {
-    digits = `7${digits}`;
-  }
-
-  if (digits.length !== 11 || !digits.startsWith('7')) {
-    throw new BadRequestException(
-      'Client phone must be a valid Russian number',
-    );
-  }
-
-  return `+${digits}`;
+  return normalizeRussianPhone(phone);
 }
 
 export function normalizeClientName(name: string): string {

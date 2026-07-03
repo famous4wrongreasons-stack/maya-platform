@@ -27,6 +27,7 @@ model Tenant {
   crmIntegration        CrmIntegration?
   auditLogs             AuditLog[]
   appointments          Appointment[]
+  phoneAuthCodes        PhoneAuthCode[]
 }
 
 model BrandingSettings {
@@ -78,8 +79,25 @@ model User {
   appointments Appointment[] @relation("ClientAppointments")
 
   @@unique([tenantId, email])
+  @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+}
+
+model PhoneAuthCode {
+  id         String   @id @default(cuid())
+  tenantId   String
+  phone      String
+  codeHash   String
+  attempts   Int      @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, phone])
+  @@index([tenantId, expiresAt])
 }
 
 model CrmIntegration {

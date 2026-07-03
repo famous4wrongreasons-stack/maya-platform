@@ -1,21 +1,33 @@
 import {
+  BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 
+import { PrismaService } from '../prisma/prisma.service';
+import { normalizeRussianPhone } from '../common/phone.util';
 import { UserRole, UserStatus } from '../common/domain.enums';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
+import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
   ) {}
@@ -40,15 +52,8 @@ export class AuthService {
       dto.tenantSlug,
     );
 
-    if (!tenant.allowSelfRegistration) {
-      throw new ForbiddenException(
-        'Self registration is disabled for this tenant',
-      );
-    }
-
-    if (tenant.status !== 'active' && tenant.status !== 'trial') {
-      throw new ForbiddenException('Tenant is not accepting registrations');
-    }
+    this.assertTenantAllowsClientAccess(tenant.status, true);
+    this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
 
     if (dto.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(
@@ -76,10 +81,199 @@ export class AuthService {
     };
   }
 
+  async startPhoneAuth(dto: StartPhoneAuthDto) {
+    const tenant = await this.tenantsService.getTenantBySlugOrThrow(
+      dto.tenantSlug,
+    );
+    this.assertTenantAllowsClientAccess(tenant.status, true);
+
+    const phone = normalizeRussianPhone(dto.phone);
+    const existingUser = await this.usersService.findTenantUserByPhone(
+      tenant.id,
+      phone,
+    );
+
+    if (!existingUser) {
+      this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
+    }
+
+    const debugMode = this.isPhoneAuthDebugEnabled();
+
+    if (!debugMode) {
+      throw new ServiceUnavailableException(
+        this.buildPhoneAuthError(
+          'delivery_unavailable',
+          'Phone auth delivery is not configured yet for this environment.',
+        ),
+      );
+    }
+
+    const code = this.resolvePhoneAuthCode();
+    const expiresAt = new Date(
+      Date.now() + this.getPhoneAuthCodeTtlSeconds() * 1000,
+    );
+
+    await this.prisma.phoneAuthCode.upsert({
+      where: {
+        tenantId_phone: {
+          tenantId: tenant.id,
+          phone,
+        },
+      },
+      update: {
+        codeHash: this.hashPhoneAuthCode(tenant.id, phone, code),
+        attempts: 0,
+        expiresAt,
+        consumedAt: null,
+      },
+      create: {
+        tenantId: tenant.id,
+        phone,
+        codeHash: this.hashPhoneAuthCode(tenant.id, phone, code),
+        expiresAt,
+      },
+    });
+
+    return {
+      ok: true,
+      tenant_slug: tenant.slug,
+      phone,
+      delivery: 'debug',
+      expires_at: expiresAt,
+      user_exists: Boolean(existingUser),
+      next_step: 'verify_code',
+      debug_code: code,
+    };
+  }
+
+  async verifyPhoneAuth(dto: VerifyPhoneAuthDto) {
+    const tenant = await this.tenantsService.getTenantBySlugOrThrow(
+      dto.tenantSlug,
+    );
+    this.assertTenantAllowsClientAccess(tenant.status, true);
+
+    const phone = normalizeRussianPhone(dto.phone);
+    const challenge = await this.prisma.phoneAuthCode.findUnique({
+      where: {
+        tenantId_phone: {
+          tenantId: tenant.id,
+          phone,
+        },
+      },
+    });
+
+    if (!challenge || challenge.consumedAt) {
+      throw new BadRequestException(
+        this.buildPhoneAuthError(
+          'code_missing',
+          'Start phone auth again to request a new verification code.',
+          'code',
+        ),
+      );
+    }
+
+    if (challenge.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException(
+        this.buildPhoneAuthError(
+          'code_expired',
+          'Verification code expired. Request a new one and try again.',
+          'code',
+        ),
+      );
+    }
+
+    const maxAttempts = this.getPhoneAuthMaxAttempts();
+
+    if (challenge.attempts >= maxAttempts) {
+      throw new HttpException(
+        this.buildPhoneAuthRateLimitError(),
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const providedHash = this.hashPhoneAuthCode(tenant.id, phone, dto.code);
+    const isCodeValid = timingSafeEqual(
+      Buffer.from(providedHash),
+      Buffer.from(challenge.codeHash),
+    );
+
+    if (!isCodeValid) {
+      const nextAttempts = challenge.attempts + 1;
+
+      await this.prisma.phoneAuthCode.update({
+        where: { id: challenge.id },
+        data: { attempts: nextAttempts },
+      });
+
+      if (nextAttempts >= maxAttempts) {
+        throw new HttpException(
+          this.buildPhoneAuthRateLimitError(),
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
+      throw new BadRequestException(
+        this.buildPhoneAuthError(
+          'code_invalid',
+          'Invalid verification code.',
+          'code',
+          {
+            remaining_attempts: maxAttempts - nextAttempts,
+          },
+        ),
+      );
+    }
+
+    let user = await this.usersService.findTenantUserByPhone(tenant.id, phone);
+    let isNewUser = false;
+
+    if (!user) {
+      this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
+
+      if (dto.branchId) {
+        await this.tenantsService.assertBranchBelongsToTenant(
+          dto.branchId,
+          tenant.id,
+        );
+      }
+
+      const passwordHash = await bcrypt.hash(
+        randomBytes(24).toString('base64url'),
+        10,
+      );
+      user = await this.usersService.createPhoneFirstClientUser({
+        tenantId: tenant.id,
+        tenantSlug: tenant.slug,
+        branchId: dto.branchId ?? null,
+        phone,
+        passwordHash,
+      });
+      isNewUser = true;
+    }
+
+    if (user.status !== 'active') {
+      throw new ForbiddenException('User is not active');
+    }
+
+    await this.prisma.phoneAuthCode.update({
+      where: { id: challenge.id },
+      data: {
+        consumedAt: new Date(),
+      },
+    });
+
+    return {
+      access_token: await this.signToken(user),
+      user: this.usersService.serializeUser(user),
+      is_new_user: isNewUser,
+    };
+  }
+
   private async loginTenantUser(dto: LoginDto) {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug!,
     );
+    this.assertTenantAllowsClientAccess(tenant.status, false);
     const user = await this.usersService.findTenantUserByEmail(
       tenant.id,
       dto.email,
@@ -130,5 +324,107 @@ export class AuthService {
       tenant_id: user.tenantId,
       role: user.role,
     });
+  }
+
+  private assertTenantAllowsClientAccess(
+    status: string,
+    allowTrial: boolean,
+  ): void {
+    const allowed = new Set<string>(['active', 'past_due']);
+
+    if (allowTrial) {
+      allowed.add('trial');
+    }
+
+    if (!allowed.has(status)) {
+      throw new ForbiddenException('Tenant is not accepting client access');
+    }
+  }
+
+  private assertTenantAllowsSelfRegistration(
+    allowSelfRegistration: boolean,
+  ): void {
+    if (!allowSelfRegistration) {
+      throw new ForbiddenException(
+        'Self registration is disabled for this tenant',
+      );
+    }
+  }
+
+  private isPhoneAuthDebugEnabled(): boolean {
+    if (this.configService.get<string>('PHONE_AUTH_DEBUG') === 'true') {
+      return true;
+    }
+
+    return this.configService.get<string>('NODE_ENV') !== 'production';
+  }
+
+  private resolvePhoneAuthCode(): string {
+    const fixed = this.configService.get<string>('PHONE_AUTH_FIXED_CODE');
+
+    if (fixed && /^\d{4,8}$/.test(fixed)) {
+      return fixed;
+    }
+
+    return String(randomInt(100000, 1000000));
+  }
+
+  private getPhoneAuthCodeTtlSeconds(): number {
+    const raw = Number(this.configService.get<string>('PHONE_AUTH_CODE_TTL'));
+
+    return Number.isFinite(raw) && raw > 0 ? raw : 300;
+  }
+
+  private getPhoneAuthMaxAttempts(): number {
+    const raw = Number(
+      this.configService.get<string>('PHONE_AUTH_MAX_ATTEMPTS'),
+    );
+
+    return Number.isFinite(raw) && raw > 0 ? raw : 5;
+  }
+
+  private hashPhoneAuthCode(
+    tenantId: string,
+    phone: string,
+    code: string,
+  ): string {
+    const secret =
+      this.configService.get<string>('PHONE_AUTH_SECRET') ||
+      this.configService.get<string>('JWT_SECRET') ||
+      'dev-phone-auth-secret';
+
+    return createHash('sha256')
+      .update(`${secret}:${tenantId}:${phone}:${code}`)
+      .digest('hex');
+  }
+
+  private buildPhoneAuthError(
+    code:
+      | 'code_expired'
+      | 'code_invalid'
+      | 'code_missing'
+      | 'delivery_unavailable'
+      | 'too_many_attempts',
+    message: string,
+    field?: string,
+    extra?: Record<string, number | string | boolean>,
+  ) {
+    return {
+      message,
+      error: {
+        code,
+        message,
+        ...(field ? { field } : {}),
+        ...(extra ?? {}),
+      },
+    };
+  }
+
+  private buildPhoneAuthRateLimitError() {
+    return this.buildPhoneAuthError(
+      'too_many_attempts',
+      'Too many invalid code attempts. Start phone auth again.',
+      'code',
+    );
   }
 }

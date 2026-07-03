@@ -1,0 +1,311 @@
+import { createHash } from 'crypto';
+
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+
+import { PrismaService } from '../prisma/prisma.service';
+import { TenantsService } from '../tenants/tenants.service';
+import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
+
+type TenantRecord = {
+  id: string;
+  slug: string;
+  status: string;
+  allowSelfRegistration: boolean;
+};
+
+type BranchRecord = {
+  id: string;
+  name: string;
+};
+
+type UserRecord = {
+  id: string;
+  tenantId: string;
+  branchId: string | null;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tenant: TenantRecord;
+  branch: BranchRecord | null;
+};
+
+type PhoneAuthChallenge = {
+  id: string;
+  tenantId: string;
+  phone: string;
+  codeHash: string;
+  attempts: number;
+  expiresAt: Date;
+  consumedAt: Date | null;
+};
+
+type PhoneAuthUpsertArgs = {
+  where: {
+    tenantId_phone: {
+      tenantId: string;
+      phone: string;
+    };
+  };
+  update: {
+    codeHash: string;
+    attempts: number;
+    expiresAt: Date;
+    consumedAt: Date | null;
+  };
+  create: {
+    tenantId: string;
+    phone: string;
+    codeHash: string;
+    expiresAt: Date;
+  };
+};
+
+type PhoneAuthUpdateArgs = {
+  where: {
+    id: string;
+  };
+  data: {
+    attempts?: number;
+    consumedAt?: Date;
+  };
+};
+
+type CreatePhoneFirstClientUserArgs = {
+  tenantId: string;
+  tenantSlug: string;
+  branchId?: string | null;
+  phone: string;
+  passwordHash: string;
+};
+
+describe('AuthService phone auth', () => {
+  const tenant: TenantRecord = {
+    id: 'tenant-1',
+    slug: 'demo-salon',
+    status: 'active',
+    allowSelfRegistration: true,
+  };
+  const phone = '+79990000000';
+
+  const createService = () => {
+    const configMap: Record<string, string> = {
+      NODE_ENV: 'test',
+      PHONE_AUTH_FIXED_CODE: '123456',
+      JWT_SECRET: 'jwt-secret',
+    };
+
+    const configGetMock: jest.MockedFunction<
+      (key: string) => string | undefined
+    > = jest.fn((key: string) => configMap[key]);
+    const signAsyncMock: jest.MockedFunction<
+      (payload: Record<string, string | null>) => Promise<string>
+    > = jest.fn().mockResolvedValue('jwt-token');
+    const phoneAuthUpsertMock: jest.MockedFunction<
+      (args: PhoneAuthUpsertArgs) => Promise<unknown>
+    > = jest.fn().mockResolvedValue(undefined);
+    const phoneAuthFindUniqueMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<PhoneAuthChallenge | null>
+    > = jest.fn().mockResolvedValue(null);
+    const phoneAuthUpdateMock: jest.MockedFunction<
+      (args: PhoneAuthUpdateArgs) => Promise<unknown>
+    > = jest.fn().mockResolvedValue(undefined);
+    const findTenantUserByPhoneMock: jest.MockedFunction<
+      (tenantId: string, userPhone: string) => Promise<UserRecord | null>
+    > = jest.fn().mockResolvedValue(null);
+    const createPhoneFirstClientUserMock: jest.MockedFunction<
+      (args: CreatePhoneFirstClientUserArgs) => Promise<UserRecord>
+    > = jest.fn();
+    const serializeUserMock: jest.MockedFunction<
+      (user: UserRecord) => UserRecord
+    > = jest.fn((user: UserRecord) => user);
+    const getTenantBySlugOrThrowMock: jest.MockedFunction<
+      (slug: string) => Promise<TenantRecord>
+    > = jest.fn().mockResolvedValue(tenant);
+    const assertBranchBelongsToTenantMock: jest.MockedFunction<
+      (branchId: string, tenantId: string) => Promise<void>
+    > = jest.fn().mockResolvedValue(undefined);
+
+    const configService: Pick<ConfigService, 'get'> = {
+      get: configGetMock,
+    };
+    const jwtService: Pick<JwtService, 'signAsync'> = {
+      signAsync: signAsyncMock,
+    };
+    const prisma: Pick<PrismaService, 'phoneAuthCode'> = {
+      phoneAuthCode: {
+        upsert: phoneAuthUpsertMock,
+        findUnique: phoneAuthFindUniqueMock,
+        update: phoneAuthUpdateMock,
+      } as PrismaService['phoneAuthCode'],
+    };
+    const usersService: Pick<
+      UsersService,
+      'findTenantUserByPhone' | 'createPhoneFirstClientUser' | 'serializeUser'
+    > = {
+      findTenantUserByPhone: findTenantUserByPhoneMock,
+      createPhoneFirstClientUser: createPhoneFirstClientUserMock,
+      serializeUser: serializeUserMock,
+    };
+    const tenantsService: Pick<
+      TenantsService,
+      'getTenantBySlugOrThrow' | 'assertBranchBelongsToTenant'
+    > = {
+      getTenantBySlugOrThrow: getTenantBySlugOrThrowMock,
+      assertBranchBelongsToTenant: assertBranchBelongsToTenantMock,
+    };
+
+    return {
+      service: new AuthService(
+        configService as ConfigService,
+        jwtService as JwtService,
+        prisma as PrismaService,
+        usersService as UsersService,
+        tenantsService as TenantsService,
+      ),
+      mocks: {
+        assertBranchBelongsToTenantMock,
+        createPhoneFirstClientUserMock,
+        findTenantUserByPhoneMock,
+        getTenantBySlugOrThrowMock,
+        phoneAuthFindUniqueMock,
+        phoneAuthUpdateMock,
+        phoneAuthUpsertMock,
+        serializeUserMock,
+        signAsyncMock,
+      },
+    };
+  };
+
+  it('starts phone auth in debug mode and persists a challenge', async () => {
+    const {
+      service,
+      mocks: { findTenantUserByPhoneMock, phoneAuthUpsertMock },
+    } = createService();
+
+    findTenantUserByPhoneMock.mockResolvedValue(null);
+
+    const result = await service.startPhoneAuth({
+      tenantSlug: tenant.slug,
+      phone: '8 (999) 000-00-00',
+    });
+
+    const expectedCodeHash = createHash('sha256')
+      .update(`jwt-secret:${tenant.id}:${phone}:123456`)
+      .digest('hex');
+
+    expect(result).toMatchObject({
+      ok: true,
+      tenant_slug: tenant.slug,
+      phone,
+      delivery: 'debug',
+      user_exists: false,
+      next_step: 'verify_code',
+      debug_code: '123456',
+    });
+    const upsertArgs = phoneAuthUpsertMock.mock.calls[0]?.[0];
+
+    expect(upsertArgs).toBeDefined();
+    expect(upsertArgs?.where).toEqual({
+      tenantId_phone: {
+        tenantId: tenant.id,
+        phone,
+      },
+    });
+    expect(upsertArgs?.update.codeHash).toBe(expectedCodeHash);
+    expect(upsertArgs?.update.attempts).toBe(0);
+    expect(upsertArgs?.update.consumedAt).toBeNull();
+    expect(upsertArgs?.update.expiresAt).toBeInstanceOf(Date);
+    expect(upsertArgs?.create).toMatchObject({
+      tenantId: tenant.id,
+      phone,
+      codeHash: expectedCodeHash,
+    });
+    expect(upsertArgs?.create.expiresAt).toBeInstanceOf(Date);
+  });
+
+  it('verifies a correct phone code, creates a client user, and returns a JWT', async () => {
+    const {
+      service,
+      mocks: {
+        assertBranchBelongsToTenantMock,
+        createPhoneFirstClientUserMock,
+        findTenantUserByPhoneMock,
+        phoneAuthFindUniqueMock,
+        phoneAuthUpdateMock,
+        serializeUserMock,
+        signAsyncMock,
+      },
+    } = createService();
+
+    const codeHash = createHash('sha256')
+      .update(`jwt-secret:${tenant.id}:${phone}:123456`)
+      .digest('hex');
+    const createdUser: UserRecord = {
+      id: 'user-1',
+      tenantId: tenant.id,
+      branchId: 'branch-1',
+      email: 'phone-79990000000@demo-salon.client.local',
+      phone,
+      role: 'client',
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tenant,
+      branch: { id: 'branch-1', name: 'Main Branch' },
+    };
+
+    phoneAuthFindUniqueMock.mockResolvedValue({
+      id: 'challenge-1',
+      tenantId: tenant.id,
+      phone,
+      codeHash,
+      attempts: 0,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+    });
+    findTenantUserByPhoneMock.mockResolvedValue(null);
+    createPhoneFirstClientUserMock.mockResolvedValue(createdUser);
+
+    const result = await service.verifyPhoneAuth({
+      tenantSlug: tenant.slug,
+      phone,
+      code: '123456',
+      branchId: 'branch-1',
+    });
+
+    expect(assertBranchBelongsToTenantMock).toHaveBeenCalledWith(
+      'branch-1',
+      tenant.id,
+    );
+    const createUserArgs = createPhoneFirstClientUserMock.mock.calls[0]?.[0];
+    const updateArgs = phoneAuthUpdateMock.mock.calls[0]?.[0];
+
+    expect(createUserArgs).toBeDefined();
+    expect(createUserArgs).toMatchObject({
+      tenantId: tenant.id,
+      tenantSlug: tenant.slug,
+      branchId: 'branch-1',
+      phone,
+    });
+    expect(createUserArgs?.passwordHash).toEqual(expect.any(String));
+    expect(updateArgs).toBeDefined();
+    expect(updateArgs?.where).toEqual({ id: 'challenge-1' });
+    expect(updateArgs?.data.consumedAt).toBeInstanceOf(Date);
+    expect(signAsyncMock).toHaveBeenCalledWith({
+      user_id: createdUser.id,
+      tenant_id: createdUser.tenantId,
+      role: createdUser.role,
+    });
+    expect(serializeUserMock).toHaveBeenCalledWith(createdUser);
+    expect(result).toMatchObject({
+      access_token: 'jwt-token',
+      user: createdUser,
+      is_new_user: true,
+    });
+  });
+});

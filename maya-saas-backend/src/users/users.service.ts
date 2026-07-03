@@ -6,6 +6,7 @@ import {
 import { User } from '@prisma/client';
 
 import { UserRole } from '../common/domain.enums';
+import { phoneDigits } from '../common/phone.util';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -39,6 +40,19 @@ export class UsersService {
     });
   }
 
+  async findTenantUserByPhone(tenantId: string, phone: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        tenantId,
+        phone,
+      },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+  }
+
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
     const existing = await this.prisma.user.findFirst({
       where: {
@@ -50,6 +64,20 @@ export class UsersService {
 
     if (existing) {
       throw new ConflictException('A user with this email already exists');
+    }
+  }
+
+  async ensurePhoneIsAvailable(tenantId: string | null, phone: string) {
+    const existing = await this.prisma.user.findFirst({
+      where: {
+        tenantId,
+        phone,
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      throw new ConflictException('A user with this phone already exists');
     }
   }
 
@@ -71,6 +99,32 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: data.role,
         status: data.status ?? 'active',
+      },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+  }
+
+  async createPhoneFirstClientUser(data: {
+    tenantId: string;
+    tenantSlug: string;
+    branchId?: string | null;
+    phone: string;
+    passwordHash: string;
+  }) {
+    const normalizedPhone = phoneDigits(data.phone);
+
+    return this.prisma.user.create({
+      data: {
+        tenantId: data.tenantId,
+        branchId: data.branchId ?? null,
+        email: `phone-${normalizedPhone}@${data.tenantSlug.toLowerCase()}.client.local`,
+        phone: data.phone,
+        passwordHash: data.passwordHash,
+        role: UserRole.CLIENT,
+        status: 'active',
       },
       include: {
         tenant: true,
