@@ -1,3 +1,12 @@
+Superseded by:
+
+- `PROMPT_FOR_CLAUDE_FRONTEND_NEXT_PASS.md`
+- `CODEX_BACKEND_HANDOFF_FOR_CLAUDE.md`
+
+If you are giving Claude the current working prompt, use the newer files above.
+
+---
+
 Please switch to the new working split for the MAYA project.
 
 Read these two documents first:
