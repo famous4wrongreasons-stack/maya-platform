@@ -42,6 +42,10 @@ The main frontend blockers previously raised in
 - Phone-first auth now exists in safe/debug mode:
   - `POST /api/auth/phone/start`
   - `POST /api/auth/phone/verify`
+- Tenant-scoped email/password login now aligns with trial onboarding:
+  - `POST /api/auth/login` allows `trial` login for `tenant_admin`,
+    `branch_manager`, and `staff`
+  - tenant `client` email/password login remains blocked in `trial`
 - Client profile now exists:
   - `GET /api/me`
   - `PATCH /api/me`
@@ -164,6 +168,14 @@ Important note:
 - `retry_after_seconds` is now returned by backend and should be used for the
   resend timer instead of a frontend constant when present
 - real SMS delivery is not implemented yet
+
+Separate note for salon admin/staff UI:
+
+- `POST /auth/login` remains the tenant-scoped email/password entrypoint for
+  admin/staff users
+- `trial` tenants now allow login for internal roles:
+  `tenant_admin`, `branch_manager`, `staff`
+- `trial` tenant `client` email/password login is still intentionally blocked
 
 Verify request:
 
@@ -332,6 +344,21 @@ Current provisioning behavior:
 - allowed roles are `tenant_admin`, `branch_manager`, `staff`
 - if `password` is omitted, backend generates a temporary password and returns
   it once as `temporary_password`
+
+Current response shape:
+
+```json
+{
+  "user": {
+    "id": "user-id",
+    "tenant_id": "tenant-id",
+    "email": "admin@griva.ru",
+    "role": "tenant_admin",
+    "status": "active"
+  },
+  "temporary_password": "generated-once-or-null"
+}
+```
 
 `POST /admin/tenants/:id/crm` / `PATCH /admin/tenants/:id/crm` note:
 

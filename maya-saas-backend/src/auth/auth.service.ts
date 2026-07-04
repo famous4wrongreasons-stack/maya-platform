@@ -285,7 +285,6 @@ export class AuthService {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug!,
     );
-    this.assertTenantAllowsClientAccess(tenant.status, false);
     const user = await this.usersService.findTenantUserByEmail(
       tenant.id,
       dto.email,
@@ -294,6 +293,11 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
+
+    this.assertTenantAllowsClientAccess(
+      tenant.status,
+      this.shouldAllowTrialTenantLogin(user.role as UserRole),
+    );
 
     const isPasswordValid = await bcrypt.compare(
       dto.password,
@@ -351,6 +355,10 @@ export class AuthService {
     if (!allowed.has(status)) {
       throw new ForbiddenException('Tenant is not accepting client access');
     }
+  }
+
+  private shouldAllowTrialTenantLogin(role: UserRole): boolean {
+    return role !== UserRole.CLIENT;
   }
 
   private assertTenantAllowsSelfRegistration(

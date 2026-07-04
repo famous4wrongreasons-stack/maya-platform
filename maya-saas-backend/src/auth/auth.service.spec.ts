@@ -1,9 +1,11 @@
 import { createHash } from 'crypto';
+import * as bcrypt from 'bcrypt';
 
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { UserRole } from '../common/domain.enums';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -26,6 +28,7 @@ type UserRecord = {
   branchId: string | null;
   email: string;
   phone: string;
+  passwordHash: string;
   role: string;
   status: string;
   createdAt: Date;
@@ -117,6 +120,12 @@ describe('AuthService phone auth', () => {
     const findTenantUserByPhoneMock: jest.MockedFunction<
       (tenantId: string, userPhone: string) => Promise<UserRecord | null>
     > = jest.fn().mockResolvedValue(null);
+    const findTenantUserByEmailMock: jest.MockedFunction<
+      (tenantId: string, email: string) => Promise<UserRecord | null>
+    > = jest.fn().mockResolvedValue(null);
+    const findPlatformOwnerByEmailMock: jest.MockedFunction<
+      (email: string) => Promise<UserRecord | null>
+    > = jest.fn().mockResolvedValue(null);
     const createPhoneFirstClientUserMock: jest.MockedFunction<
       (args: CreatePhoneFirstClientUserArgs) => Promise<UserRecord>
     > = jest.fn();
@@ -145,9 +154,15 @@ describe('AuthService phone auth', () => {
     };
     const usersService: Pick<
       UsersService,
-      'findTenantUserByPhone' | 'createPhoneFirstClientUser' | 'serializeUser'
+      | 'findTenantUserByPhone'
+      | 'findTenantUserByEmail'
+      | 'findPlatformOwnerByEmail'
+      | 'createPhoneFirstClientUser'
+      | 'serializeUser'
     > = {
       findTenantUserByPhone: findTenantUserByPhoneMock,
+      findTenantUserByEmail: findTenantUserByEmailMock,
+      findPlatformOwnerByEmail: findPlatformOwnerByEmailMock,
       createPhoneFirstClientUser: createPhoneFirstClientUserMock,
       serializeUser: serializeUserMock,
     };
@@ -170,6 +185,8 @@ describe('AuthService phone auth', () => {
       mocks: {
         assertBranchBelongsToTenantMock,
         createPhoneFirstClientUserMock,
+        findPlatformOwnerByEmailMock,
+        findTenantUserByEmailMock,
         findTenantUserByPhoneMock,
         getTenantBySlugOrThrowMock,
         phoneAuthFindUniqueMock,
@@ -252,6 +269,7 @@ describe('AuthService phone auth', () => {
       branchId: 'branch-1',
       email: 'phone-79990000000@demo-salon.client.local',
       phone,
+      passwordHash: 'hash',
       role: 'client',
       status: 'active',
       createdAt: new Date(),
@@ -308,5 +326,97 @@ describe('AuthService phone auth', () => {
       user: createdUser,
       is_new_user: true,
     });
+  });
+
+  it('allows tenant admin login for a trial tenant', async () => {
+    const trialTenant: TenantRecord = {
+      ...tenant,
+      status: 'trial',
+    };
+    const password = 'StrongPass123';
+    const {
+      service,
+      mocks: {
+        findTenantUserByEmailMock,
+        getTenantBySlugOrThrowMock,
+        serializeUserMock,
+        signAsyncMock,
+      },
+    } = createService();
+    const adminUser: UserRecord = {
+      id: 'user-admin-1',
+      tenantId: trialTenant.id,
+      branchId: null,
+      email: 'owner@barhat.ru',
+      phone: '+79991111111',
+      passwordHash: await bcrypt.hash(password, 4),
+      role: UserRole.TENANT_ADMIN,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tenant: trialTenant,
+      branch: null,
+    };
+
+    getTenantBySlugOrThrowMock.mockResolvedValue(trialTenant);
+    findTenantUserByEmailMock.mockResolvedValue(adminUser);
+
+    const result = await service.login({
+      tenantSlug: trialTenant.slug,
+      email: adminUser.email,
+      password,
+    });
+
+    expect(findTenantUserByEmailMock).toHaveBeenCalledWith(
+      trialTenant.id,
+      adminUser.email,
+    );
+    expect(signAsyncMock).toHaveBeenCalledWith({
+      user_id: adminUser.id,
+      tenant_id: adminUser.tenantId,
+      role: adminUser.role,
+    });
+    expect(serializeUserMock).toHaveBeenCalledWith(adminUser);
+    expect(result).toMatchObject({
+      access_token: 'jwt-token',
+      user: adminUser,
+    });
+  });
+
+  it('still blocks client password login for a trial tenant', async () => {
+    const trialTenant: TenantRecord = {
+      ...tenant,
+      status: 'trial',
+    };
+    const password = 'StrongPass123';
+    const {
+      service,
+      mocks: { findTenantUserByEmailMock, getTenantBySlugOrThrowMock },
+    } = createService();
+    const clientUser: UserRecord = {
+      id: 'user-client-1',
+      tenantId: trialTenant.id,
+      branchId: null,
+      email: 'client@barhat.ru',
+      phone: '+79992222222',
+      passwordHash: await bcrypt.hash(password, 4),
+      role: UserRole.CLIENT,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tenant: trialTenant,
+      branch: null,
+    };
+
+    getTenantBySlugOrThrowMock.mockResolvedValue(trialTenant);
+    findTenantUserByEmailMock.mockResolvedValue(clientUser);
+
+    await expect(
+      service.login({
+        tenantSlug: trialTenant.slug,
+        email: clientUser.email,
+        password,
+      }),
+    ).rejects.toThrow('Tenant is not accepting client access');
   });
 });
