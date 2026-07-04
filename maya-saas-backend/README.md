@@ -67,7 +67,24 @@ PORT=3000
 NODE_ENV="development"
 YCLIENTS_BASE_URL="https://api.yclients.com/api/v1"
 YCLIENTS_PARTNER_TOKEN="change-me-in-production"
+PHONE_AUTH_PROVIDER="auto"
+PHONE_AUTH_DEBUG="false"
+PHONE_AUTH_CODE_TTL="300"
+PHONE_AUTH_RESEND_COOLDOWN_SECONDS="60"
+PHONE_AUTH_MAX_ATTEMPTS="5"
+PHONE_AUTH_SMS_TEMPLATE="MAYA: код входа {{code}}. Никому не сообщайте его."
+SMSRU_API_ID=""
+SMSRU_FROM=""
+SMSRU_TEST="false"
+SMSRU_TIMEOUT_MS="15000"
 ```
+
+Phone auth delivery modes:
+
+- `PHONE_AUTH_PROVIDER=auto`: local/test defaults to debug, production requires SMS creds
+- `PHONE_AUTH_PROVIDER=debug`: always returns `debug_code`
+- `PHONE_AUTH_PROVIDER=smsru`: always uses SMS.ru and fails if creds are missing
+- `PHONE_AUTH_DEBUG=true`: emergency override that forces debug delivery in any env
 
 ## Run locally
 
@@ -229,7 +246,10 @@ curl -X PATCH http://localhost:3000/api/me \
 
 Notes:
 
-- In non-production/debug mode the backend returns `debug_code` until a real SMS provider is connected.
+- In local/test mode with `PHONE_AUTH_PROVIDER=auto`, the backend returns `debug_code`.
+- In production with valid `SMSRU_API_ID`, `POST /api/auth/phone/start` returns `delivery: "sms"` and omits `debug_code`.
+- `SMSRU_FROM` is optional and requires a pre-approved sender name in SMS.ru.
+- The backend forwards the requesting client IP to SMS.ru when available, which helps SMS flood protection on auth-code flows.
 - Client profile names are stored encrypted at rest.
 - `GET /api/me` now returns `name`, `profile_completed`, and `missing_profile_fields`.
 

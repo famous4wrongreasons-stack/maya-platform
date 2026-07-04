@@ -18,6 +18,11 @@ import { UserRole, UserStatus } from '../common/domain.enums';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import {
+  PhoneAuthDeliveryFailedError,
+  PhoneAuthDeliveryService,
+  PhoneAuthDeliveryUnavailableError,
+} from './phone-auth-delivery.service';
 import { RegisterDto } from './dto/register.dto';
 import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
 import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
@@ -30,6 +35,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
+    private readonly phoneAuthDeliveryService: PhoneAuthDeliveryService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -100,7 +106,7 @@ export class AuthService {
     return this.signToken(user);
   }
 
-  async startPhoneAuth(dto: StartPhoneAuthDto) {
+  async startPhoneAuth(dto: StartPhoneAuthDto, clientIp?: string | null) {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
@@ -115,17 +121,6 @@ export class AuthService {
     if (!existingUser) {
       this.assertTenantAllowsClientRegistration(tenant.status);
       this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
-    }
-
-    const debugMode = this.isPhoneAuthDebugEnabled();
-
-    if (!debugMode) {
-      throw new ServiceUnavailableException(
-        this.buildPhoneAuthError(
-          'delivery_unavailable',
-          'Phone auth delivery is not configured yet for this environment.',
-        ),
-      );
     }
 
     const code = this.resolvePhoneAuthCode();
@@ -155,16 +150,42 @@ export class AuthService {
       },
     });
 
+    let deliveryResult;
+
+    try {
+      deliveryResult = await this.phoneAuthDeliveryService.deliverCode({
+        phone,
+        code,
+        clientIp,
+      });
+    } catch (error) {
+      if (error instanceof PhoneAuthDeliveryUnavailableError) {
+        throw new ServiceUnavailableException(
+          this.buildPhoneAuthError('delivery_unavailable', error.message),
+        );
+      }
+
+      if (error instanceof PhoneAuthDeliveryFailedError) {
+        throw new ServiceUnavailableException(
+          this.buildPhoneAuthError('delivery_failed', error.message),
+        );
+      }
+
+      throw error;
+    }
+
     return {
       ok: true,
       tenant_slug: tenant.slug,
       phone,
-      delivery: 'debug',
+      delivery: deliveryResult.delivery,
       expires_at: expiresAt,
       retry_after_seconds: retryAfterSeconds,
       user_exists: Boolean(existingUser),
       next_step: 'verify_code',
-      debug_code: code,
+      ...(deliveryResult.delivery === 'debug'
+        ? { debug_code: deliveryResult.debug_code }
+        : {}),
     };
   }
 
@@ -393,14 +414,6 @@ export class AuthService {
     }
   }
 
-  private isPhoneAuthDebugEnabled(): boolean {
-    if (this.configService.get<string>('PHONE_AUTH_DEBUG') === 'true') {
-      return true;
-    }
-
-    return this.configService.get<string>('NODE_ENV') !== 'production';
-  }
-
   private resolvePhoneAuthCode(): string {
     const fixed = this.configService.get<string>('PHONE_AUTH_FIXED_CODE');
 
@@ -454,6 +467,7 @@ export class AuthService {
       | 'code_expired'
       | 'code_invalid'
       | 'code_missing'
+      | 'delivery_failed'
       | 'delivery_unavailable'
       | 'too_many_attempts',
     message: string,

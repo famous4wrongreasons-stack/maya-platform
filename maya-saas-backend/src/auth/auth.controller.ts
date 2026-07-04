@@ -1,5 +1,6 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 
 import { Public } from '../decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -30,11 +31,10 @@ export class AuthController {
   @Public()
   @Post('phone/start')
   @ApiOperation({
-    summary:
-      'Start phone-first client auth. Uses debug delivery locally until SMS transport is configured.',
+    summary: 'Start phone-first client auth and send a verification code',
   })
-  startPhoneAuth(@Body() dto: StartPhoneAuthDto) {
-    return this.authService.startPhoneAuth(dto);
+  startPhoneAuth(@Body() dto: StartPhoneAuthDto, @Req() request: Request) {
+    return this.authService.startPhoneAuth(dto, this.resolveClientIp(request));
   }
 
   @Public()
@@ -44,5 +44,15 @@ export class AuthController {
   })
   verifyPhoneAuth(@Body() dto: VerifyPhoneAuthDto) {
     return this.authService.verifyPhoneAuth(dto);
+  }
+
+  private resolveClientIp(request: Request): string | null {
+    const forwarded = request.headers['x-forwarded-for'];
+    const forwardedIp = Array.isArray(forwarded)
+      ? forwarded[0]
+      : forwarded?.split(',')[0];
+    const ip = forwardedIp?.trim() || request.ip?.trim();
+
+    return ip || null;
   }
 }

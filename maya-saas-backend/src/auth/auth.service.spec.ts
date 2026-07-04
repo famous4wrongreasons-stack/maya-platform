@@ -10,6 +10,10 @@ import { UserRole } from '../common/domain.enums';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import {
+  PhoneAuthDeliveryResult,
+  PhoneAuthDeliveryService,
+} from './phone-auth-delivery.service';
 
 type TenantRecord = {
   id: string;
@@ -87,6 +91,12 @@ type CreatePhoneFirstClientUserArgs = {
   passwordHash: string;
 };
 
+type DeliverPhoneAuthCodeArgs = {
+  phone: string;
+  code: string;
+  clientIp?: string | null;
+};
+
 describe('AuthService phone auth', () => {
   const tenant: TenantRecord = {
     id: 'tenant-1',
@@ -148,6 +158,12 @@ describe('AuthService phone auth', () => {
     const assertBranchBelongsToTenantMock: jest.MockedFunction<
       (branchId: string, tenantId: string) => Promise<void>
     > = jest.fn().mockResolvedValue(undefined);
+    const deliverCodeMock: jest.MockedFunction<
+      (params: DeliverPhoneAuthCodeArgs) => Promise<PhoneAuthDeliveryResult>
+    > = jest.fn().mockResolvedValue({
+      delivery: 'debug',
+      debug_code: '123456',
+    });
 
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
@@ -189,6 +205,12 @@ describe('AuthService phone auth', () => {
       getTenantBySlugOrThrow: getTenantBySlugOrThrowMock,
       assertBranchBelongsToTenant: assertBranchBelongsToTenantMock,
     };
+    const phoneAuthDeliveryService: Pick<
+      PhoneAuthDeliveryService,
+      'deliverCode'
+    > = {
+      deliverCode: deliverCodeMock,
+    };
 
     return {
       service: new AuthService(
@@ -197,11 +219,13 @@ describe('AuthService phone auth', () => {
         prisma as PrismaService,
         usersService as UsersService,
         tenantsService as TenantsService,
+        phoneAuthDeliveryService as PhoneAuthDeliveryService,
       ),
       mocks: {
         assertBranchBelongsToTenantMock,
         createPhoneFirstClientUserMock,
         createUserMock,
+        deliverCodeMock,
         ensureEmailIsAvailableMock,
         ensurePhoneIsAvailableMock,
         findPlatformOwnerByEmailMock,
@@ -220,7 +244,11 @@ describe('AuthService phone auth', () => {
   it('starts phone auth in debug mode and persists a challenge', async () => {
     const {
       service,
-      mocks: { findTenantUserByPhoneMock, phoneAuthUpsertMock },
+      mocks: {
+        deliverCodeMock,
+        findTenantUserByPhoneMock,
+        phoneAuthUpsertMock,
+      },
     } = createService();
 
     findTenantUserByPhoneMock.mockResolvedValue(null);
@@ -263,6 +291,47 @@ describe('AuthService phone auth', () => {
       codeHash: expectedCodeHash,
     });
     expect(upsertArgs?.create.expiresAt).toBeInstanceOf(Date);
+    expect(deliverCodeMock).toHaveBeenCalledWith({
+      phone,
+      code: '123456',
+      clientIp: undefined,
+    });
+  });
+
+  it('starts phone auth with sms delivery and does not expose debug_code', async () => {
+    const {
+      service,
+      mocks: { deliverCodeMock, findTenantUserByPhoneMock },
+    } = createService();
+
+    deliverCodeMock.mockResolvedValue({
+      delivery: 'sms',
+    });
+    findTenantUserByPhoneMock.mockResolvedValue(null);
+
+    const result = await service.startPhoneAuth(
+      {
+        tenantSlug: tenant.slug,
+        phone: '+7 (999) 000-00-00',
+      },
+      '203.0.113.15',
+    );
+
+    expect(deliverCodeMock).toHaveBeenCalledWith({
+      phone,
+      code: '123456',
+      clientIp: '203.0.113.15',
+    });
+    expect(result).toMatchObject({
+      ok: true,
+      tenant_slug: tenant.slug,
+      phone,
+      delivery: 'sms',
+      retry_after_seconds: 60,
+      user_exists: false,
+      next_step: 'verify_code',
+    });
+    expect(result).not.toHaveProperty('debug_code');
   });
 
   it('verifies a correct phone code, creates a client user, and returns a JWT', async () => {
