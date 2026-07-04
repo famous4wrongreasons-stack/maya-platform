@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { TenantStatus } from '../common/domain.enums';
+import { CrmProvider, TenantStatus } from '../common/domain.enums';
 import {
   featureKeysFromFlags,
   normalizeFeatureFlags,
@@ -27,6 +27,13 @@ type PublicMobileContent = {
 };
 
 type PublicBookingMode = 'preview' | 'live';
+
+type BookingModeEvaluation = {
+  requestedMode: PublicBookingMode;
+  effectiveMode: PublicBookingMode;
+  liveEligible: boolean;
+  blockers: string[];
+};
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -115,6 +122,66 @@ function resolveRequestedBookingMode(
     asNonEmptyString(saas?.booking_mode);
 
   return rawMode === 'live' ? 'live' : 'preview';
+}
+
+function withBookingModeTheme(
+  theme: Record<string, unknown> | null,
+  bookingMode: PublicBookingMode,
+): Record<string, unknown> {
+  const nextTheme = { ...(theme ?? {}) };
+  const booking = asRecord(nextTheme.booking);
+
+  nextTheme.booking = {
+    ...(booking ?? {}),
+    mode: bookingMode,
+  };
+
+  return nextTheme;
+}
+
+function evaluateBookingMode(params: {
+  requestedMode: PublicBookingMode;
+  tenantStatus: string;
+  crmStatus?: string | null;
+  crmProvider?: string | null;
+  bookingFeatureEnabled: boolean;
+}): BookingModeEvaluation {
+  const blockers: string[] = [];
+  const tenantCanGoLive = new Set<string>([
+    TenantStatus.ACTIVE,
+    TenantStatus.PAST_DUE,
+  ]).has(params.tenantStatus);
+  const crmConnected = params.crmStatus === 'active';
+  const realCrmConnected =
+    crmConnected &&
+    params.crmProvider !== null &&
+    params.crmProvider !== CrmProvider.MOCK;
+
+  if (!tenantCanGoLive) {
+    blockers.push('tenant_not_active');
+  }
+
+  if (!params.bookingFeatureEnabled) {
+    blockers.push('booking_feature_disabled');
+  }
+
+  if (!crmConnected) {
+    blockers.push('crm_not_active');
+  } else if (!realCrmConnected) {
+    blockers.push('mock_crm_only');
+  }
+
+  const liveEligible =
+    tenantCanGoLive && params.bookingFeatureEnabled && realCrmConnected;
+  const effectiveMode: PublicBookingMode =
+    params.requestedMode === 'live' && liveEligible ? 'live' : 'preview';
+
+  return {
+    requestedMode: params.requestedMode,
+    effectiveMode,
+    liveEligible,
+    blockers,
+  };
 }
 
 @Injectable()
@@ -253,7 +320,12 @@ export class TenantsService {
   }
 
   async updateTenant(id: string, dto: UpdateTenantDto) {
-    await this.getTenantByIdOrThrow(id);
+    const existingTenant = await this.getTenantByIdOrThrow(id);
+    const existingThemeJson =
+      (existingTenant.brandingSettings?.themeJson as Record<
+        string,
+        unknown
+      > | null) ?? null;
 
     if (dto.planId) {
       await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);
@@ -273,15 +345,44 @@ export class TenantsService {
       }
     }
 
-    await this.prisma.tenant.update({
-      where: { id },
-      data: {
-        name: dto.name,
-        slug: dto.slug?.toLowerCase(),
-        status: dto.status,
-        planId: dto.planId,
-        allowSelfRegistration: dto.allowSelfRegistration,
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.tenant.update({
+        where: { id },
+        data: {
+          name: dto.name,
+          slug: dto.slug?.toLowerCase(),
+          status: dto.status,
+          planId: dto.planId,
+          allowSelfRegistration: dto.allowSelfRegistration,
+        },
+      });
+
+      if (dto.bookingMode) {
+        await tx.brandingSettings.upsert({
+          where: { tenantId: id },
+          create: {
+            tenantId: id,
+            appName:
+              existingTenant.brandingSettings?.appName ?? dto.name ?? null,
+            logoUrl: existingTenant.brandingSettings?.logoUrl ?? null,
+            primaryColor: existingTenant.brandingSettings?.primaryColor ?? null,
+            secondaryColor:
+              existingTenant.brandingSettings?.secondaryColor ?? null,
+            backgroundImageUrl:
+              existingTenant.brandingSettings?.backgroundImageUrl ?? null,
+            fontFamily: existingTenant.brandingSettings?.fontFamily ?? null,
+            buttonRadius: existingTenant.brandingSettings?.buttonRadius ?? null,
+            themeJson: asJson(
+              withBookingModeTheme(existingThemeJson, dto.bookingMode),
+            ),
+          },
+          update: {
+            themeJson: asJson(
+              withBookingModeTheme(existingThemeJson, dto.bookingMode),
+            ),
+          },
+        });
+      }
     });
 
     return this.serializeTenant(await this.getTenantByIdOrThrow(id));
@@ -335,16 +436,13 @@ export class TenantsService {
       new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
         tenant.status,
       );
-    const requestedBookingMode = resolveRequestedBookingMode(theme);
-    const bookingMode: PublicBookingMode =
-      requestedBookingMode === 'live' &&
-      bookingFeatureEnabled &&
-      new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
-        tenant.status,
-      ) &&
-      tenant.crmIntegration?.status === 'active'
-        ? 'live'
-        : 'preview';
+    const bookingEvaluation = evaluateBookingMode({
+      requestedMode: resolveRequestedBookingMode(theme),
+      tenantStatus: tenant.status,
+      crmStatus: tenant.crmIntegration?.status ?? null,
+      crmProvider: tenant.crmIntegration?.provider ?? null,
+      bookingFeatureEnabled,
+    });
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
@@ -365,8 +463,8 @@ export class TenantsService {
       tenant_status: tenant.status,
       allow_self_registration: tenant.allowSelfRegistration,
       client_registration_enabled: clientRegistrationEnabled,
-      booking_mode: bookingMode,
-      booking_live_enabled: bookingMode === 'live',
+      booking_mode: bookingEvaluation.effectiveMode,
+      booking_live_enabled: bookingEvaluation.effectiveMode === 'live',
       brand,
       content,
       tenant: {
@@ -416,6 +514,7 @@ export class TenantsService {
     tenant: Awaited<ReturnType<TenantsService['getTenantByIdOrThrow']>>,
   ) {
     return {
+      ...this.serializeTenantBookingState(tenant),
       id: tenant.id,
       name: tenant.name,
       slug: tenant.slug,
@@ -470,6 +569,33 @@ export class TenantsService {
         phone: branch.phone,
         timezone: branch.timezone,
       })),
+    };
+  }
+
+  private serializeTenantBookingState(
+    tenant: Awaited<ReturnType<TenantsService['getTenantByIdOrThrow']>>,
+  ) {
+    const theme =
+      (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
+      {};
+    const features = normalizeFeatureFlags(tenant.plan?.featuresJson);
+    const featureKeys = featureKeysFromFlags(features);
+    const bookingFeatureEnabled =
+      featureKeys.length === 0 || features.booking === true;
+    const evaluation = evaluateBookingMode({
+      requestedMode: resolveRequestedBookingMode(theme),
+      tenantStatus: tenant.status,
+      crmStatus: tenant.crmIntegration?.status ?? null,
+      crmProvider: tenant.crmIntegration?.provider ?? null,
+      bookingFeatureEnabled,
+    });
+
+    return {
+      booking_mode_requested: evaluation.requestedMode,
+      booking_mode_effective: evaluation.effectiveMode,
+      booking_live_enabled: evaluation.effectiveMode === 'live',
+      booking_live_eligible: evaluation.liveEligible,
+      booking_live_blockers: evaluation.blockers,
     };
   }
 }

@@ -85,7 +85,7 @@ describe('TenantsService', () => {
       },
     ],
     crmIntegration: {
-      provider: 'mock',
+      provider: 'yclients',
       status: 'active',
     },
   });
@@ -237,6 +237,36 @@ describe('TenantsService', () => {
     const result = await service.getPublicMobileConfig('demo-salon');
 
     expect(result.client_registration_enabled).toBe(false);
+    expect(result.booking_mode).toBe('preview');
+    expect(result.booking_live_enabled).toBe(false);
+  });
+
+  it('keeps requested live booking in preview while only mock CRM is connected', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      crmIntegration: {
+        provider: 'mock',
+        status: 'active',
+      },
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
     expect(result.booking_mode).toBe('preview');
     expect(result.booking_live_enabled).toBe(false);
   });
