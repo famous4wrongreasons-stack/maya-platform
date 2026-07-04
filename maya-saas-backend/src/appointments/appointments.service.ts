@@ -1,6 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { AppointmentStatus } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
@@ -24,6 +30,9 @@ interface AppointmentErrorPayload {
     code:
       | 'client_name_required'
       | 'client_phone_required'
+      | 'not_found'
+      | 'already_cancelled'
+      | 'too_late_to_cancel'
       | 'slot_taken'
       | 'staff_unavailable'
       | 'service_not_found'
@@ -246,6 +255,92 @@ export class AppointmentsService {
     return appointments.map((appointment) =>
       this.serializeAppointment(appointment, catalog),
     );
+  }
+
+  async cancelForClient(
+    tenantId: string,
+    clientId: string,
+    appointmentId: string,
+  ) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: {
+        id: appointmentId,
+        tenantId,
+        clientId,
+      },
+      include: {
+        branch: true,
+      },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(
+        this.buildAppointmentError(
+          'not_found',
+          'Appointment not found for the current client.',
+        ),
+      );
+    }
+
+    if (this.isCancelledStatus(appointment.status)) {
+      throw new ConflictException(
+        this.buildAppointmentError(
+          'already_cancelled',
+          'Appointment is already cancelled.',
+        ),
+      );
+    }
+
+    if (appointment.startAt.getTime() <= Date.now()) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'too_late_to_cancel',
+          'Appointment can no longer be cancelled because it has already started.',
+        ),
+      );
+    }
+
+    if (!appointment.crmExternalId) {
+      throw new NotFoundException(
+        this.buildAppointmentError(
+          'not_found',
+          'Appointment not found for the current client.',
+        ),
+      );
+    }
+
+    await this.crmService.cancelAppointment(
+      tenantId,
+      appointment.crmExternalId,
+    );
+
+    const updatedAppointment = await this.prisma.appointment.update({
+      where: { id: appointment.id },
+      data: {
+        status: AppointmentStatus.CANCELED,
+      },
+      include: {
+        branch: true,
+      },
+    });
+    const catalog = await this.loadAppointmentCatalog(tenantId);
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: clientId,
+      action: 'appointment.cancelled',
+      entityType: 'appointment',
+      entityId: appointment.id,
+      metadata: {
+        crm_external_id: appointment.crmExternalId,
+        cancelled_at: updatedAppointment.updatedAt.toISOString(),
+      },
+    });
+
+    return {
+      ok: true,
+      appointment: this.serializeAppointment(updatedAppointment, catalog),
+    };
   }
 
   getAvailableSlots(tenantId: string, query: AvailableSlotsQueryDto) {
@@ -485,6 +580,11 @@ export class AppointmentsService {
     return serviceIds.filter(
       (serviceId): serviceId is string => typeof serviceId === 'string',
     );
+  }
+
+  private isCancelledStatus(status: string): boolean {
+    const normalizedStatus = status.trim().toLowerCase();
+    return normalizedStatus === 'canceled' || normalizedStatus === 'cancelled';
   }
 
   private pickFirstNonEmptyString(

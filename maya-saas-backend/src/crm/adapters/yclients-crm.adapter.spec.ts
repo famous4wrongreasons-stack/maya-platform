@@ -162,4 +162,43 @@ describe('YclientsCRMAdapter', () => {
     expect(requestUrl).toContain('/book_times/123/15/2026-07-05');
     expect(requestUrl).toContain('service_ids%5B%5D=7');
   });
+
+  it('cancels an appointment when YClients returns 204 without JSON body', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      text: () => Promise.resolve(''),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {
+        companyId: 123,
+      },
+    });
+
+    const result = await adapter.cancelAppointment({
+      tenantId: 'tenant-1',
+      externalId: '456',
+    });
+
+    expect(result).toEqual({
+      external_id: '456',
+      status: 'canceled',
+      raw: {
+        provider: CrmProvider.YCLIENTS,
+        response: null,
+        success: true,
+      },
+    });
+
+    const fetchMock = global.fetch as jest.Mock;
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        method: 'DELETE',
+      }),
+    );
+  });
 });

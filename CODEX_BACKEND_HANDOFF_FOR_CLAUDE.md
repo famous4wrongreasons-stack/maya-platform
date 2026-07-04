@@ -42,6 +42,11 @@ The main frontend blockers previously raised in
 - Phone-first auth now exists in safe/debug mode:
   - `POST /api/auth/phone/start`
   - `POST /api/auth/phone/verify`
+- New client registration is now blocked for `trial` tenants across:
+  - `POST /api/auth/register`
+  - `POST /api/auth/phone/start` when the phone does not belong to an
+    existing tenant user
+  - `POST /api/auth/phone/verify` before creating a new client user
 - Tenant-scoped email/password login now aligns with trial onboarding:
   - `POST /api/auth/login` allows `trial` login for `tenant_admin`,
     `branch_manager`, and `staff`
@@ -50,6 +55,8 @@ The main frontend blockers previously raised in
   - `GET /api/me`
   - `PATCH /api/me`
 - `GET /api/appointments/my` is now richer for cabinet UI.
+- Cabinet mutation now exists:
+  - `POST /api/appointments/:id/cancel`
 - Calendar aggregation endpoint now exists:
   - `GET /api/available-days`
 - Platform onboarding admin API is now less blocked:
@@ -221,6 +228,17 @@ Current machine-readable verify/start errors include codes such as:
 - `code_expired`
 - `code_invalid`
 - `too_many_attempts`
+- `trial_client_registration_disabled`
+
+Important trial note:
+
+- `trial` tenants still allow internal email/password login for
+  `tenant_admin`, `branch_manager`, and `staff`
+- `trial` tenants do **not** allow creating a new `client` via
+  `POST /auth/register`
+- phone-first auth for an already existing tenant user still works in `trial`
+- phone-first auth that would create a new tenant client now returns
+  `trial_client_registration_disabled`
 
 ### 4.3 Current user profile
 
@@ -554,6 +572,41 @@ Frontend tolerance note:
 - frontend should not hard-crash if nested arrays are empty or staff only has
   `id`
 
+### 4.9 Appointment cancel for cabinet
+
+- `POST /appointments/:id/cancel`
+
+No request body is required.
+
+Current success shape:
+
+```json
+{
+  "ok": true,
+  "appointment": {
+    "id": "appointment-id",
+    "status": "canceled"
+  }
+}
+```
+
+Current behavior:
+
+- appointment ownership is checked against the current tenant client
+- only upcoming appointments can be cancelled
+- once the appointment start time is reached, backend returns
+  `too_late_to_cancel`
+- current stored appointment status after success is `canceled`
+  (single `l`)
+- machine-readable error code remains `already_cancelled`
+  (double `l`) for compatibility with the requested frontend mapping
+
+Current machine-readable error codes:
+
+- `not_found`
+- `already_cancelled`
+- `too_late_to_cancel`
+
 ## 5. Time Semantics
 
 For booking preview/create:
@@ -611,6 +664,16 @@ Claude can now implement cabinet UI against `GET /appointments/my` with:
 - service list
 - staff card
 - total price / duration display
+- cancel action for upcoming items through `POST /appointments/:id/cancel`
+
+Recommended cabinet behavior:
+
+- optimistic button disable while cancel request is in flight
+- on success, replace local item status with returned appointment status
+- map backend codes as:
+  - `not_found`
+  - `already_cancelled`
+  - `too_late_to_cancel`
 
 ## 7. What Claude Should Not Build
 
@@ -651,6 +714,7 @@ The most logical next frontend pass is:
 3. add profile completion gate via `GET /me` + `PATCH /me`
 4. wire booking preview to stored profile identity
 5. build cabinet UI from `GET /appointments/my`
-6. mirror the same changes into iOS web source
+6. wire `POST /appointments/:id/cancel` for upcoming bookings
+7. mirror the same changes into iOS web source
 
 That work can proceed now without waiting for more backend redesign.

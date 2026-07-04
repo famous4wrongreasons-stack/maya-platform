@@ -1,5 +1,6 @@
 import {
   AvailableSlot,
+  CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -41,6 +42,16 @@ export class WhitelinesCRMAdapter implements CRMAdapter {
   createAppointment(
     params: CreateAppointmentParams,
   ): Promise<CreatedAppointment> {
+    void params;
+    return Promise.reject(
+      new Error('Whitelines adapter is scaffolded but not implemented yet'),
+    );
+  }
+
+  cancelAppointment(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CancelledAppointment> {
     void params;
     return Promise.reject(
       new Error('Whitelines adapter is scaffolded but not implemented yet'),

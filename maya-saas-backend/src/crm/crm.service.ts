@@ -9,7 +9,11 @@ import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
-import { CRMAdapter, CreatedAppointment } from './crm-adapter.interface';
+import {
+  CancelledAppointment,
+  CRMAdapter,
+  CreatedAppointment,
+} from './crm-adapter.interface';
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
 
@@ -119,6 +123,17 @@ export class CrmService {
     return adapter.createAppointment({
       tenantId,
       ...params,
+    });
+  }
+
+  async cancelAppointment(
+    tenantId: string,
+    externalId: string,
+  ): Promise<CancelledAppointment> {
+    const adapter = await this.getAdapterForTenant(tenantId);
+    return adapter.cancelAppointment({
+      tenantId,
+      externalId,
     });
   }
 

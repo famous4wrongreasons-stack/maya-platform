@@ -1,5 +1,6 @@
 import {
   AvailableSlot,
+  CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -131,6 +132,22 @@ export class MockCRMAdapter implements CRMAdapter {
       raw: {
         provider: this.config.provider,
         client_name: params.clientName,
+      },
+    });
+  }
+
+  cancelAppointment(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CancelledAppointment> {
+    void params.tenantId;
+
+    return Promise.resolve({
+      external_id: params.externalId,
+      status: 'canceled',
+      raw: {
+        provider: this.config.provider,
+        cancelled: true,
       },
     });
   }

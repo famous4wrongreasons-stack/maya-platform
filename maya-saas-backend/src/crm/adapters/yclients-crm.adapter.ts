@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 
 import {
   AvailableSlot,
+  CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -252,6 +253,33 @@ export class YclientsCRMAdapter implements CRMAdapter {
     };
   }
 
+  async cancelAppointment(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CancelledAppointment> {
+    void params.tenantId;
+
+    const externalId = String(
+      this.toNumericId(params.externalId, 'externalId'),
+    );
+    const response = await this.request<Record<string, unknown>>(
+      `record/${this.getCompanyId()}/${externalId}`,
+      {
+        method: 'DELETE',
+      },
+    );
+
+    return {
+      external_id: externalId,
+      status: 'canceled',
+      raw: {
+        provider: this.config.provider,
+        response: response.data ?? null,
+        success: response.success ?? true,
+      },
+    };
+  }
+
   getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
     void clientId;
     return Promise.resolve([]);
@@ -289,7 +317,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   private async request<TData>(
     path: string,
     init?: {
-      method?: 'GET' | 'POST';
+      method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
       body?: string;
       query?: URLSearchParams;
     },
@@ -312,7 +340,19 @@ export class YclientsCRMAdapter implements CRMAdapter {
       body: init?.body,
     });
 
-    const payload = (await response.json()) as YclientsResponse<TData>;
+    let payload: YclientsResponse<TData> = {};
+
+    if (typeof response.text === 'function') {
+      const rawText = await response.text();
+
+      if (rawText.trim().length > 0) {
+        payload = JSON.parse(rawText) as YclientsResponse<TData>;
+      } else if (response.ok) {
+        payload = { success: true };
+      }
+    } else if (typeof response.json === 'function') {
+      payload = (await response.json()) as YclientsResponse<TData>;
+    }
 
     if (!response.ok) {
       throw new Error(

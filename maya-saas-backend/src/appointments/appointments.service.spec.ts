@@ -31,6 +31,23 @@ type UserRecord = {
   branch: null;
 };
 
+type AppointmentRecord = {
+  id: string;
+  tenantId: string;
+  clientId: string;
+  branchId: string | null;
+  crmExternalId: string | null;
+  staffExternalId: string;
+  serviceIds: string[];
+  startAt: Date;
+  status: string;
+  notes: string | null;
+  providerPayload: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  branch: BranchRecord | null;
+};
+
 describe('AppointmentsService', () => {
   const branch: BranchRecord = {
     id: 'branch-1',
@@ -41,12 +58,39 @@ describe('AppointmentsService', () => {
   };
 
   const createService = () => {
+    const now = new Date();
+    const appointmentRecord: AppointmentRecord = {
+      id: 'appt-1',
+      tenantId: 'tenant-1',
+      clientId: 'user-1',
+      branchId: 'branch-1',
+      crmExternalId: 'crm-1',
+      staffExternalId: 'staff-1',
+      serviceIds: ['svc-1'],
+      startAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      status: 'confirmed',
+      notes: null,
+      providerPayload: {},
+      createdAt: now,
+      updatedAt: now,
+      branch,
+    };
     const branchFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<BranchRecord | null>
     > = jest.fn().mockResolvedValue(branch);
+    const appointmentFindFirstMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<AppointmentRecord | null>
+    > = jest.fn().mockResolvedValue(appointmentRecord);
     const appointmentFindManyMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown[]>
     > = jest.fn().mockResolvedValue([]);
+    const appointmentUpdateMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<AppointmentRecord>
+    > = jest.fn().mockResolvedValue({
+      ...appointmentRecord,
+      status: 'canceled',
+      updatedAt: new Date(now.getTime() + 1000),
+    });
     const getAvailableSlotsMock: jest.MockedFunction<
       (
         tenantId: string,
@@ -88,6 +132,41 @@ describe('AppointmentsService', () => {
         category: 'Haircuts',
       },
     ]);
+    const getStaffMock: jest.MockedFunction<
+      (tenantId: string) => Promise<
+        Array<{
+          id: string;
+          name: string;
+          title?: string;
+          specialization?: string;
+          avatar_url?: string | null;
+          rating?: number | null;
+        }>
+      >
+    > = jest.fn().mockResolvedValue([
+      {
+        id: 'staff-1',
+        name: 'Anton',
+        title: 'Senior Barber',
+        specialization: 'Senior Barber',
+        avatar_url: null,
+        rating: 4.9,
+      },
+    ]);
+    const cancelAppointmentMock: jest.MockedFunction<
+      (
+        tenantId: string,
+        externalId: string,
+      ) => Promise<{
+        external_id: string;
+        status: string;
+        raw?: Record<string, unknown>;
+      }>
+    > = jest.fn().mockResolvedValue({
+      external_id: 'crm-1',
+      status: 'canceled',
+      raw: { cancelled: true },
+    });
     const getUserOrThrowMock: jest.MockedFunction<
       (userId: string) => Promise<UserRecord>
     > = jest.fn().mockResolvedValue({
@@ -120,15 +199,22 @@ describe('AppointmentsService', () => {
 
     const prisma: Pick<PrismaService, 'appointment' | 'branch'> = {
       appointment: {
+        findFirst: appointmentFindFirstMock,
         findMany: appointmentFindManyMock,
+        update: appointmentUpdateMock,
       } as PrismaService['appointment'],
       branch: {
         findFirst: branchFindFirstMock,
       } as PrismaService['branch'],
     };
-    const crmService: Pick<CrmService, 'getAvailableSlots' | 'getServices'> = {
+    const crmService: Pick<
+      CrmService,
+      'cancelAppointment' | 'getAvailableSlots' | 'getServices' | 'getStaff'
+    > = {
+      cancelAppointment: cancelAppointmentMock,
       getAvailableSlots: getAvailableSlotsMock,
       getServices: getServicesMock,
+      getStaff: getStaffMock,
     };
     const tenantsService: Pick<TenantsService, 'assertBranchBelongsToTenant'> =
       {
@@ -157,8 +243,12 @@ describe('AppointmentsService', () => {
       ),
       mocks: {
         auditLogMock,
+        appointmentFindFirstMock,
+        appointmentUpdateMock,
+        cancelAppointmentMock,
         getAvailableSlotsMock,
         getServicesMock,
+        getStaffMock,
         getUserOrThrowMock,
         serializeUserMock,
       },
@@ -300,5 +390,129 @@ describe('AppointmentsService', () => {
       },
     });
     expect(getAvailableSlotsMock).not.toHaveBeenCalled();
+  });
+
+  it('cancels an upcoming appointment for the current client', async () => {
+    const {
+      service,
+      mocks: { appointmentUpdateMock, auditLogMock, cancelAppointmentMock },
+    } = createService();
+
+    const result = await service.cancelForClient(
+      'tenant-1',
+      'user-1',
+      'appt-1',
+    );
+
+    expect(cancelAppointmentMock).toHaveBeenCalledWith('tenant-1', 'crm-1');
+    expect(appointmentUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'appt-1' },
+        data: { status: 'canceled' },
+      }),
+    );
+    expect(result).toMatchObject({
+      ok: true,
+      appointment: {
+        id: 'appt-1',
+        status: 'canceled',
+      },
+    });
+    expect(auditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'appointment.cancelled',
+        entityId: 'appt-1',
+      }),
+    );
+  });
+
+  it('returns not_found when the appointment does not belong to the client', async () => {
+    const {
+      service,
+      mocks: { appointmentFindFirstMock, cancelAppointmentMock },
+    } = createService();
+
+    appointmentFindFirstMock.mockResolvedValue(null);
+
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'missing-appt'),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'not_found',
+        },
+      },
+    });
+    expect(cancelAppointmentMock).not.toHaveBeenCalled();
+  });
+
+  it('returns already_cancelled for an appointment that is already canceled', async () => {
+    const {
+      service,
+      mocks: { appointmentFindFirstMock, cancelAppointmentMock },
+    } = createService();
+
+    appointmentFindFirstMock.mockResolvedValue({
+      id: 'appt-1',
+      tenantId: 'tenant-1',
+      clientId: 'user-1',
+      branchId: 'branch-1',
+      crmExternalId: 'crm-1',
+      staffExternalId: 'staff-1',
+      serviceIds: ['svc-1'],
+      startAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      status: 'canceled',
+      notes: null,
+      providerPayload: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      branch,
+    });
+
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'already_cancelled',
+        },
+      },
+    });
+    expect(cancelAppointmentMock).not.toHaveBeenCalled();
+  });
+
+  it('returns too_late_to_cancel when the appointment has already started', async () => {
+    const {
+      service,
+      mocks: { appointmentFindFirstMock, cancelAppointmentMock },
+    } = createService();
+
+    appointmentFindFirstMock.mockResolvedValue({
+      id: 'appt-1',
+      tenantId: 'tenant-1',
+      clientId: 'user-1',
+      branchId: 'branch-1',
+      crmExternalId: 'crm-1',
+      staffExternalId: 'staff-1',
+      serviceIds: ['svc-1'],
+      startAt: new Date(Date.now() - 60 * 1000),
+      status: 'confirmed',
+      notes: null,
+      providerPayload: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      branch,
+    });
+
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'too_late_to_cancel',
+        },
+      },
+    });
+    expect(cancelAppointmentMock).not.toHaveBeenCalled();
   });
 });
