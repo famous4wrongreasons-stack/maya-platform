@@ -238,4 +238,67 @@ describe('AppointmentsService', () => {
     });
     expect(getAvailableSlotsMock).not.toHaveBeenCalled();
   });
+
+  it('aggregates available days for a date range', async () => {
+    const {
+      service,
+      mocks: { getAvailableSlotsMock },
+    } = createService();
+
+    getAvailableSlotsMock.mockImplementation(
+      (_tenantId: string, query: Record<string, unknown>) => {
+        const date = String(query.date);
+
+        if (date === '2026-07-05' || date === '2026-07-07') {
+          return Promise.resolve([
+            {
+              start: `${date}T08:00:00.000Z`,
+              end: `${date}T09:00:00.000Z`,
+              staff_id: 'staff-1',
+              branch_id: 'branch-1',
+            },
+          ]);
+        }
+
+        return Promise.resolve([]);
+      },
+    );
+
+    const result = await service.getAvailableDays('tenant-1', {
+      from: '2026-07-05',
+      to: '2026-07-08',
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      branchId: 'branch-1',
+    });
+
+    expect(result).toEqual({
+      days: ['2026-07-05', '2026-07-07'],
+    });
+    expect(getAvailableSlotsMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('returns service_not_found before probing available days', async () => {
+    const {
+      service,
+      mocks: { getAvailableSlotsMock },
+    } = createService();
+
+    await expect(
+      service.getAvailableDays('tenant-1', {
+        from: '2026-07-05',
+        to: '2026-07-08',
+        staffId: 'staff-1',
+        serviceIds: ['missing-service'],
+      }),
+    ).rejects.toMatchObject<BadRequestException>({
+      response: {
+        error: {
+          code: 'service_not_found',
+          field: 'serviceIds',
+        },
+      },
+    });
+    expect(getAvailableSlotsMock).not.toHaveBeenCalled();
+  });
 });

@@ -50,6 +50,8 @@ The main frontend blockers previously raised in
   - `GET /api/me`
   - `PATCH /api/me`
 - `GET /api/appointments/my` is now richer for cabinet UI.
+- Calendar aggregation endpoint now exists:
+  - `GET /api/available-days`
 - Platform onboarding admin API is now less blocked:
   - `POST /api/admin/tenants` auto-creates a default branch
   - `POST /api/admin/tenants/:id/crm` accepts `provider=mock` without
@@ -374,6 +376,7 @@ Bearer JWT required:
 - `GET /staff`
 - `GET /services`
 - `GET /available-slots`
+- `GET /available-days`
 
 Useful normalized frontend fields now available:
 
@@ -392,7 +395,32 @@ Useful normalized frontend fields now available:
   - `avatar_url`
   - `rating`
 
-### 4.6 Booking preview
+### 4.6 Available-days aggregate
+
+- `GET /available-days`
+
+Current query shape:
+
+```text
+/available-days?from=2026-07-05&to=2026-08-04&staffId=3278920&serviceIds=7572285,7572286&branchId=optional-branch-id
+```
+
+Current behavior:
+
+- returns only days that have at least one slot
+- validates `branchId` against the tenant when provided
+- validates `serviceIds` against the CRM catalog when provided
+- current max range is `31` days inclusive
+
+Current response shape:
+
+```json
+{
+  "days": ["2026-07-05", "2026-07-06", "2026-07-09"]
+}
+```
+
+### 4.7 Booking preview
 
 - `POST /appointments/preview`
 
@@ -468,7 +496,7 @@ Current error codes:
 - `service_not_found`
 - `validation`
 
-### 4.7 Appointments list for cabinet
+### 4.8 Appointments list for cabinet
 
 - `GET /appointments/my`
 

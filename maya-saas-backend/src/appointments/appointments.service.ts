@@ -14,6 +14,7 @@ import {
   normalizeClientName,
   normalizeRequestedStart,
 } from './appointment-preview.utils';
+import { AvailableDaysQueryDto } from './dto/available-days-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 
@@ -36,6 +37,9 @@ interface AppointmentCatalog {
   servicesById: Map<string, ServiceItem>;
   staffById: Map<string, StaffMember>;
 }
+
+const AVAILABLE_DAYS_MAX_RANGE = 31;
+const AVAILABLE_DAYS_BATCH_SIZE = 4;
 
 @Injectable()
 export class AppointmentsService {
@@ -248,6 +252,56 @@ export class AppointmentsService {
     return this.crmService.getAvailableSlots(tenantId, query);
   }
 
+  async getAvailableDays(tenantId: string, query: AvailableDaysQueryDto) {
+    if (query.branchId) {
+      await this.tenantsService.assertBranchBelongsToTenant(
+        query.branchId,
+        tenantId,
+      );
+    }
+
+    const serviceIds =
+      query.serviceIds && query.serviceIds.length > 0
+        ? query.serviceIds
+        : undefined;
+
+    if (serviceIds) {
+      const services = await this.crmService.getServices(tenantId);
+      this.assertRequestedServicesExist(serviceIds, services);
+    }
+
+    const days = this.buildAvailableDaysRange(query.from, query.to);
+    const availableDays: string[] = [];
+
+    for (
+      let index = 0;
+      index < days.length;
+      index += AVAILABLE_DAYS_BATCH_SIZE
+    ) {
+      const batch = days.slice(index, index + AVAILABLE_DAYS_BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map(async (day) => {
+          const slots = await this.crmService.getAvailableSlots(tenantId, {
+            date: day,
+            staffId: query.staffId,
+            serviceIds,
+            branchId: query.branchId,
+          });
+
+          return slots.length > 0 ? day : null;
+        }),
+      );
+
+      availableDays.push(
+        ...results.filter((day): day is string => day !== null),
+      );
+    }
+
+    return {
+      days: availableDays,
+    };
+  }
+
   private async resolveBranchForBooking(
     tenantId: string,
     branchId?: string | null,
@@ -443,6 +497,52 @@ export class AppointmentsService {
     }
 
     return null;
+  }
+
+  private buildAvailableDaysRange(from: string, to: string): string[] {
+    const start = new Date(`${from}T00:00:00.000Z`);
+    const end = new Date(`${to}T00:00:00.000Z`);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'validation',
+          'Invalid available-days date range.',
+        ),
+      );
+    }
+
+    if (start.getTime() > end.getTime()) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'validation',
+          '`from` must be before or equal to `to`.',
+          'from',
+        ),
+      );
+    }
+
+    const days: string[] = [];
+
+    for (
+      let cursor = new Date(start);
+      cursor.getTime() <= end.getTime();
+      cursor.setUTCDate(cursor.getUTCDate() + 1)
+    ) {
+      days.push(cursor.toISOString().slice(0, 10));
+    }
+
+    if (days.length > AVAILABLE_DAYS_MAX_RANGE) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'validation',
+          `Available-days range must not exceed ${AVAILABLE_DAYS_MAX_RANGE} days.`,
+          'to',
+        ),
+      );
+    }
+
+    return days;
   }
 
   private assertRequestedServicesExist(
