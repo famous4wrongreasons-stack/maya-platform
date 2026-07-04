@@ -119,6 +119,7 @@ export class AuthService {
     }
 
     const code = this.resolvePhoneAuthCode();
+    const retryAfterSeconds = this.getPhoneAuthRetryAfterSeconds();
     const expiresAt = new Date(
       Date.now() + this.getPhoneAuthCodeTtlSeconds() * 1000,
     );
@@ -150,6 +151,7 @@ export class AuthService {
       phone,
       delivery: 'debug',
       expires_at: expiresAt,
+      retry_after_seconds: retryAfterSeconds,
       user_exists: Boolean(existingUser),
       next_step: 'verify_code',
       debug_code: code,
@@ -383,6 +385,15 @@ export class AuthService {
     const raw = Number(this.configService.get<string>('PHONE_AUTH_CODE_TTL'));
 
     return Number.isFinite(raw) && raw > 0 ? raw : 300;
+  }
+
+  private getPhoneAuthRetryAfterSeconds(): number {
+    const raw = Number(
+      this.configService.get<string>('PHONE_AUTH_RESEND_COOLDOWN_SECONDS'),
+    );
+    const normalized = Number.isFinite(raw) && raw > 0 ? raw : 60;
+
+    return Math.min(normalized, this.getPhoneAuthCodeTtlSeconds());
   }
 
   private getPhoneAuthMaxAttempts(): number {

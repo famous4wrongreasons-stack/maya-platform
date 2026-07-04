@@ -144,6 +144,7 @@ Current start success shape in local/debug-safe mode:
   "phone": "+79990000000",
   "delivery": "debug",
   "expires_at": "2026-07-03T12:00:00.000Z",
+  "retry_after_seconds": 60,
   "user_exists": false,
   "next_step": "verify_code",
   "debug_code": "123456"
@@ -153,6 +154,8 @@ Current start success shape in local/debug-safe mode:
 Important note:
 
 - `debug_code` exists for local safe mode only
+- `retry_after_seconds` is now returned by backend and should be used for the
+  resend timer instead of a frontend constant when present
 - real SMS delivery is not implemented yet
 
 Verify request:

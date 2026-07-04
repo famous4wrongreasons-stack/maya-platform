@@ -203,6 +203,7 @@ describe('AuthService phone auth', () => {
       tenant_slug: tenant.slug,
       phone,
       delivery: 'debug',
+      retry_after_seconds: 60,
       user_exists: false,
       next_step: 'verify_code',
       debug_code: '123456',
