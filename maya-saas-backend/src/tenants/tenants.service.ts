@@ -26,6 +26,8 @@ type PublicMobileContent = {
   socials: string[];
 };
 
+type PublicBookingMode = 'preview' | 'live';
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
@@ -99,6 +101,20 @@ function extractPublicMobileContent(
     normalized.socials.length > 0;
 
   return hasContent ? normalized : null;
+}
+
+function resolveRequestedBookingMode(
+  theme: Record<string, unknown>,
+): PublicBookingMode {
+  const booking = asRecord(theme.booking);
+  const saas = asRecord(theme.saas);
+  const saasBooking = saas ? asRecord(saas.booking) : null;
+  const rawMode =
+    asNonEmptyString(booking?.mode) ??
+    asNonEmptyString(saasBooking?.mode) ??
+    asNonEmptyString(saas?.booking_mode);
+
+  return rawMode === 'live' ? 'live' : 'preview';
 }
 
 @Injectable()
@@ -311,6 +327,24 @@ export class TenantsService {
     const content = extractPublicMobileContent(theme);
     const activeStatuses = new Set(['trial', 'active', 'past_due']);
     const availableFeatures = normalizeFeatureFlags(tenant.plan?.featuresJson);
+    const availableFeatureKeys = featureKeysFromFlags(availableFeatures);
+    const bookingFeatureEnabled =
+      availableFeatureKeys.length === 0 || availableFeatures.booking === true;
+    const clientRegistrationEnabled =
+      tenant.allowSelfRegistration &&
+      new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
+        tenant.status,
+      );
+    const requestedBookingMode = resolveRequestedBookingMode(theme);
+    const bookingMode: PublicBookingMode =
+      requestedBookingMode === 'live' &&
+      bookingFeatureEnabled &&
+      new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
+        tenant.status,
+      ) &&
+      tenant.crmIntegration?.status === 'active'
+        ? 'live'
+        : 'preview';
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
@@ -328,6 +362,11 @@ export class TenantsService {
     return {
       slug: tenant.slug,
       active: activeStatuses.has(tenant.status),
+      tenant_status: tenant.status,
+      allow_self_registration: tenant.allowSelfRegistration,
+      client_registration_enabled: clientRegistrationEnabled,
+      booking_mode: bookingMode,
+      booking_live_enabled: bookingMode === 'live',
       brand,
       content,
       tenant: {
@@ -351,7 +390,7 @@ export class TenantsService {
         theme_json: theme,
       },
       available_features: availableFeatures,
-      available_feature_keys: featureKeysFromFlags(availableFeatures),
+      available_feature_keys: availableFeatureKeys,
       crm: {
         provider: tenant.crmIntegration?.provider ?? null,
         status: tenant.crmIntegration?.status ?? null,

@@ -7,6 +7,7 @@ type PublicTenantRecord = {
   name: string;
   slug: string;
   status: string;
+  allowSelfRegistration: boolean;
   plan: {
     featuresJson: Record<string, unknown> | null;
   } | null;
@@ -36,6 +37,7 @@ describe('TenantsService', () => {
     name: 'Demo Salon',
     slug: 'demo-salon',
     status: 'active',
+    allowSelfRegistration: true,
     plan: {
       featuresJson: {
         booking: true,
@@ -129,6 +131,11 @@ describe('TenantsService', () => {
         address: 'Moscow, Tverskaya 1',
         phone: '+79990000000',
       },
+      tenant_status: 'active',
+      allow_self_registration: true,
+      client_registration_enabled: true,
+      booking_mode: 'preview',
+      booking_live_enabled: false,
       content: {
         hero_tag: 'Добро пожаловать в «Гриву»',
         hero_title: ['Грива.', 'Стрижём так,', 'что оборачиваются'],
@@ -178,5 +185,59 @@ describe('TenantsService', () => {
     const result = await service.getPublicMobileConfig('demo-salon');
 
     expect(result.content).toBeNull();
+  });
+
+  it('exposes live booking mode only when the tenant is fully eligible', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result.booking_mode).toBe('live');
+    expect(result.booking_live_enabled).toBe(true);
+  });
+
+  it('keeps client registration disabled for trial tenants even if self-registration is on', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      status: 'trial',
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result.client_registration_enabled).toBe(false);
+    expect(result.booking_mode).toBe('preview');
+    expect(result.booking_live_enabled).toBe(false);
   });
 });

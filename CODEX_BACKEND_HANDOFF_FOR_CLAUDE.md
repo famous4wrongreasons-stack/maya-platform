@@ -21,6 +21,11 @@ The main frontend blockers previously raised in
 - `GET /api/mobile/config/:tenantSlug` now returns top-level:
   - `slug`
   - `active`
+  - `tenant_status`
+  - `allow_self_registration`
+  - `client_registration_enabled`
+  - `booking_mode`
+  - `booking_live_enabled`
   - `brand`
   - `content`
 - It still preserves backward-compatible nested keys:
@@ -67,6 +72,13 @@ The main frontend blockers previously raised in
   - `GET /api/admin/plans` now exists
   - `POST /api/admin/tenants/:id/users` now exists for `tenant_admin` /
     staff provisioning
+- Public self-serve trial onboarding now exists:
+  - `POST /api/onboarding/trial`
+  - creates a `trial` tenant
+  - auto-connects `provider=mock`
+  - auto-creates a `tenant_admin`
+  - returns a JWT so frontend can auto-enter the owner flow without a second
+    login prompt
 
 ## 3. Safety Boundary
 
@@ -75,6 +87,8 @@ These backend changes do **not** mean production cutover.
 - No production deploy has been done by Codex here.
 - Real current Python production backend remains unchanged.
 - Real live app remains unchanged until explicit deployment.
+- `POST /api/onboarding/trial` is enabled by default only outside production.
+  In production it requires `SELF_SERVE_TRIAL_SIGNUP=true`.
 - SMS transport is **not** connected yet.
 - Phone auth is currently safe/debug-oriented for local integration.
 - Frontend should still treat booking preview as the safe integration target
@@ -96,6 +110,11 @@ Current useful top-level response shape:
 {
   "slug": "demo-salon",
   "active": true,
+  "tenant_status": "active",
+  "allow_self_registration": true,
+  "client_registration_enabled": true,
+  "booking_mode": "preview",
+  "booking_live_enabled": false,
   "brand": {
     "name": "Maya Demo Salon",
     "logo_url": null,
@@ -137,12 +156,78 @@ Frontend guidance:
 
 - prefer `slug`, `active`, `brand`, `content`, `available_features`,
   `available_feature_keys`
+- use `tenant_status`, `client_registration_enabled`, `booking_mode`,
+  `booking_live_enabled` directly instead of inferring salon state in UI
 - keep compatibility tolerance for older nested keys if you want a resilient
   adapter
 - `content` is normalized from `branding.theme_json.content`
 - `branding.theme_json.content` still remains for backward compatibility
+- booking rule for now:
+  - `booking_mode === 'preview'` -> keep `POST /appointments/preview`
+  - `booking_mode === 'live'` -> use `POST /appointments`
 
-### 4.2 Phone-first auth
+### 4.2 Public trial onboarding
+
+- `POST /onboarding/trial`
+
+Current purpose:
+
+- public self-serve owner onboarding from the MAYA showcase / landing
+- safe by default: tenant starts in `trial`
+- CRM starts in `mock`
+- frontend can auto-login owner immediately from returned JWT
+
+Current request shape:
+
+```json
+{
+  "name": "Barbershop Griva",
+  "slug": "griva",
+  "ownerEmail": "owner@griva.ru",
+  "ownerName": "Илья",
+  "ownerPhone": "+79990000000",
+  "password": "optional-password",
+  "branchName": "Main Branch",
+  "branchAddress": "Moscow, Tverskaya 1",
+  "branchPhone": "+79990000000",
+  "branchTimezone": "Europe/Moscow",
+  "planId": "optional-plan-id"
+}
+```
+
+Current success shape:
+
+```json
+{
+  "access_token": "<jwt>",
+  "user": {
+    "id": "user-id",
+    "tenant_id": "tenant-id",
+    "email": "owner@griva.ru",
+    "role": "tenant_admin"
+  },
+  "tenant": {
+    "id": "tenant-id",
+    "name": "Barbershop Griva",
+    "slug": "griva",
+    "status": "trial",
+    "allow_self_registration": true
+  },
+  "temporary_password": "one-time-password-or-null",
+  "booking_mode": "preview",
+  "next_step": "open_admin"
+}
+```
+
+Frontend guidance:
+
+- if you build a dedicated public trial form, call this route directly
+- store/use `access_token` immediately for the owner flow
+- if you do not auto-login, show `temporary_password` exactly once
+- assume the newly created salon stays preview-only until
+  `booking_mode === 'live'`
+
+### 4.3 Phone-first auth
 
 - `POST /auth/phone/start`
 - `POST /auth/phone/verify`
@@ -241,7 +326,7 @@ Important trial note:
 - phone-first auth that would create a new tenant client now returns
   `trial_client_registration_disabled`
 
-### 4.3 Current user profile
+### 4.4 Current user profile
 
 - `GET /me`
 - `PATCH /me`

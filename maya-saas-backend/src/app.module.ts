@@ -12,6 +12,7 @@ import { BranchesModule } from './branches/branches.module';
 import { BrandingModule } from './branding/branding.module';
 import { CrmModule } from './crm/crm.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
@@ -41,6 +42,7 @@ import { UsersModule } from './users/users.module';
     StaffModule,
     AppointmentsModule,
     AuditLogModule,
+    OnboardingModule,
     AdminModule,
   ],
   controllers: [AppController],

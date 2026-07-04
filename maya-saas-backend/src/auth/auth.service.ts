@@ -92,6 +92,14 @@ export class AuthService {
     };
   }
 
+  async issueAccessToken(user: {
+    id: string;
+    tenantId: string | null;
+    role: string;
+  }) {
+    return this.signToken(user);
+  }
+
   async startPhoneAuth(dto: StartPhoneAuthDto) {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
