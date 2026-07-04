@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import * as bcrypt from 'bcrypt';
 
+import { ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
@@ -129,6 +130,15 @@ describe('AuthService phone auth', () => {
     const createPhoneFirstClientUserMock: jest.MockedFunction<
       (args: CreatePhoneFirstClientUserArgs) => Promise<UserRecord>
     > = jest.fn();
+    const ensureEmailIsAvailableMock: jest.MockedFunction<
+      (tenantId: string | null, email: string) => Promise<void>
+    > = jest.fn().mockResolvedValue(undefined);
+    const ensurePhoneIsAvailableMock: jest.MockedFunction<
+      (tenantId: string | null, phone: string) => Promise<void>
+    > = jest.fn().mockResolvedValue(undefined);
+    const createUserMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<UserRecord>
+    > = jest.fn();
     const serializeUserMock: jest.MockedFunction<
       (user: UserRecord) => UserRecord
     > = jest.fn((user: UserRecord) => user);
@@ -157,12 +167,18 @@ describe('AuthService phone auth', () => {
       | 'findTenantUserByPhone'
       | 'findTenantUserByEmail'
       | 'findPlatformOwnerByEmail'
+      | 'ensureEmailIsAvailable'
+      | 'ensurePhoneIsAvailable'
+      | 'createUser'
       | 'createPhoneFirstClientUser'
       | 'serializeUser'
     > = {
       findTenantUserByPhone: findTenantUserByPhoneMock,
       findTenantUserByEmail: findTenantUserByEmailMock,
       findPlatformOwnerByEmail: findPlatformOwnerByEmailMock,
+      ensureEmailIsAvailable: ensureEmailIsAvailableMock,
+      ensurePhoneIsAvailable: ensurePhoneIsAvailableMock,
+      createUser: createUserMock,
       createPhoneFirstClientUser: createPhoneFirstClientUserMock,
       serializeUser: serializeUserMock,
     };
@@ -185,6 +201,9 @@ describe('AuthService phone auth', () => {
       mocks: {
         assertBranchBelongsToTenantMock,
         createPhoneFirstClientUserMock,
+        createUserMock,
+        ensureEmailIsAvailableMock,
+        ensurePhoneIsAvailableMock,
         findPlatformOwnerByEmailMock,
         findTenantUserByEmailMock,
         findTenantUserByPhoneMock,
@@ -418,5 +437,65 @@ describe('AuthService phone auth', () => {
         password,
       }),
     ).rejects.toThrow('Tenant is not accepting client access');
+  });
+
+  it('blocks client register for a trial tenant with a machine-readable code', async () => {
+    const trialTenant: TenantRecord = {
+      ...tenant,
+      status: 'trial',
+    };
+    const {
+      service,
+      mocks: { createUserMock, getTenantBySlugOrThrowMock },
+    } = createService();
+
+    getTenantBySlugOrThrowMock.mockResolvedValue(trialTenant);
+
+    await expect(
+      service.register({
+        tenantSlug: trialTenant.slug,
+        email: 'client@barhat.ru',
+        password: 'StrongPass123',
+      }),
+    ).rejects.toMatchObject<ForbiddenException>({
+      response: {
+        error: {
+          code: 'trial_client_registration_disabled',
+        },
+      },
+    });
+    expect(createUserMock).not.toHaveBeenCalled();
+  });
+
+  it('blocks new phone-first client registration for a trial tenant', async () => {
+    const trialTenant: TenantRecord = {
+      ...tenant,
+      status: 'trial',
+    };
+    const {
+      service,
+      mocks: {
+        findTenantUserByPhoneMock,
+        getTenantBySlugOrThrowMock,
+        phoneAuthUpsertMock,
+      },
+    } = createService();
+
+    getTenantBySlugOrThrowMock.mockResolvedValue(trialTenant);
+    findTenantUserByPhoneMock.mockResolvedValue(null);
+
+    await expect(
+      service.startPhoneAuth({
+        tenantSlug: trialTenant.slug,
+        phone: '+79990000000',
+      }),
+    ).rejects.toMatchObject<ForbiddenException>({
+      response: {
+        error: {
+          code: 'trial_client_registration_disabled',
+        },
+      },
+    });
+    expect(phoneAuthUpsertMock).not.toHaveBeenCalled();
   });
 });

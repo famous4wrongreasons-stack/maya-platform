@@ -53,6 +53,7 @@ export class AuthService {
     );
 
     this.assertTenantAllowsClientAccess(tenant.status, true);
+    this.assertTenantAllowsClientRegistration(tenant.status);
     this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
 
     if (dto.branchId) {
@@ -104,6 +105,7 @@ export class AuthService {
     );
 
     if (!existingUser) {
+      this.assertTenantAllowsClientRegistration(tenant.status);
       this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
     }
 
@@ -240,6 +242,7 @@ export class AuthService {
     let isNewUser = false;
 
     if (!user) {
+      this.assertTenantAllowsClientRegistration(tenant.status);
       this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
 
       if (dto.branchId) {
@@ -357,6 +360,17 @@ export class AuthService {
     }
   }
 
+  private assertTenantAllowsClientRegistration(status: string): void {
+    if (status === 'trial') {
+      throw new ForbiddenException(
+        this.buildClientRegistrationError(
+          'trial_client_registration_disabled',
+          'Client registration is disabled while this salon is still in trial.',
+        ),
+      );
+    }
+  }
+
   private shouldAllowTrialTenantLogin(role: UserRole): boolean {
     return role !== UserRole.CLIENT;
   }
@@ -455,5 +469,18 @@ export class AuthService {
       'Too many invalid code attempts. Start phone auth again.',
       'code',
     );
+  }
+
+  private buildClientRegistrationError(
+    code: 'trial_client_registration_disabled',
+    message: string,
+  ) {
+    return {
+      message,
+      error: {
+        code,
+        message,
+      },
+    };
   }
 }
