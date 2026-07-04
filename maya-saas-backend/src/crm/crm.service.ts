@@ -38,8 +38,13 @@ export class CrmService {
 
     this.validateProviderConfiguration(provider, settingsJson);
 
-    const encryptedApiToken = dto.apiToken
-      ? this.encryptionService.encrypt(dto.apiToken)
+    const resolvedApiToken =
+      dto.apiToken ??
+      (provider === CrmProvider.MOCK && !existing?.encryptedApiToken
+        ? 'mock'
+        : undefined);
+    const encryptedApiToken = resolvedApiToken
+      ? this.encryptionService.encrypt(resolvedApiToken)
       : existing?.encryptedApiToken;
 
     if (!encryptedApiToken) {

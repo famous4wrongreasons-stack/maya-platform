@@ -46,6 +46,13 @@ The main frontend blockers previously raised in
   - `GET /api/me`
   - `PATCH /api/me`
 - `GET /api/appointments/my` is now richer for cabinet UI.
+- Platform onboarding admin API is now less blocked:
+  - `POST /api/admin/tenants` auto-creates a default branch
+  - `POST /api/admin/tenants/:id/crm` accepts `provider=mock` without
+    requiring a real `apiToken`
+  - `GET /api/admin/plans` now exists
+  - `POST /api/admin/tenants/:id/users` now exists for `tenant_admin` /
+    staff provisioning
 
 ## 3. Safety Boundary
 
@@ -244,7 +251,95 @@ Important note:
 - phone change is **not** part of this profile endpoint
 - client name is stored encrypted at rest on the backend
 
-### 4.4 Protected catalog reads
+### 4.4 Platform onboarding admin API
+
+Bearer JWT required. Current intended caller:
+
+- platform owner admin wizard
+
+Routes now available:
+
+- `GET /admin/plans`
+- `POST /admin/tenants`
+- `POST /admin/tenants/:id/users`
+- `POST /admin/tenants/:id/crm`
+- `PATCH /admin/tenants/:id/crm`
+- `POST /admin/tenants/:id/test-crm`
+
+`GET /admin/plans` current response item shape:
+
+```json
+{
+  "id": "plan-id",
+  "name": "start",
+  "price_monthly": 4900,
+  "max_branches": 1,
+  "max_staff": 10,
+  "features_json": {
+    "booking": true,
+    "branding": true
+  },
+  "is_white_label_enabled": true
+}
+```
+
+`POST /admin/tenants` still accepts the previous minimal body:
+
+```json
+{
+  "name": "Барбершоп «Грива»",
+  "slug": "griva"
+}
+```
+
+It now also accepts optional branch bootstrap fields:
+
+```json
+{
+  "name": "Барбершоп «Грива»",
+  "slug": "griva",
+  "planId": "optional-plan-id",
+  "branchName": "Основной филиал",
+  "branchAddress": "Москва, Тверская 1",
+  "branchPhone": "+79990000000",
+  "branchTimezone": "Europe/Moscow"
+}
+```
+
+Important create-tenant behavior now:
+
+- a default branch is always created for a new tenant
+- if `branchName` is omitted, backend uses tenant `name`
+- if `branchTimezone` is omitted, backend currently defaults to
+  `Europe/Moscow`
+
+`POST /admin/tenants/:id/users` current request shape:
+
+```json
+{
+  "email": "admin@griva.ru",
+  "name": "Администратор",
+  "role": "tenant_admin",
+  "password": "optional-password",
+  "branchId": "optional-branch-id",
+  "phone": "+79990000000"
+}
+```
+
+Current provisioning behavior:
+
+- `role` defaults to `tenant_admin`
+- allowed roles are `tenant_admin`, `branch_manager`, `staff`
+- if `password` is omitted, backend generates a temporary password and returns
+  it once as `temporary_password`
+
+`POST /admin/tenants/:id/crm` / `PATCH /admin/tenants/:id/crm` note:
+
+- for `provider=mock`, `apiToken` can now be omitted
+- backend will persist a mock placeholder token automatically
+- real providers still require a valid token
+
+### 4.5 Protected catalog reads
 
 Bearer JWT required:
 
@@ -270,7 +365,7 @@ Useful normalized frontend fields now available:
   - `avatar_url`
   - `rating`
 
-### 4.5 Booking preview
+### 4.6 Booking preview
 
 - `POST /appointments/preview`
 
@@ -346,7 +441,7 @@ Current error codes:
 - `service_not_found`
 - `validation`
 
-### 4.6 Appointments list for cabinet
+### 4.7 Appointments list for cabinet
 
 - `GET /appointments/my`
 

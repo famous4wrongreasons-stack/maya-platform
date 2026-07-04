@@ -1,16 +1,21 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
-import { TenantStatus, UserRole } from '../common/domain.enums';
+import { TenantStatus, UserRole, UserStatus } from '../common/domain.enums';
 import { BrandingService } from '../branding/branding.service';
 import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CrmService } from '../crm/crm.service';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
+import { UsersService } from '../users/users.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
+import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 
 @Injectable()
 export class AdminService {
@@ -18,6 +23,8 @@ export class AdminService {
     private readonly tenantsService: TenantsService,
     private readonly brandingService: BrandingService,
     private readonly crmService: CrmService,
+    private readonly usersService: UsersService,
+    private readonly subscriptionsService: SubscriptionsService,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -40,6 +47,10 @@ export class AdminService {
 
   listTenants() {
     return this.tenantsService.listTenants();
+  }
+
+  listPlans() {
+    return this.subscriptionsService.listPlans();
   }
 
   async getTenant(id: string, actor: AuthenticatedUser) {
@@ -143,6 +154,55 @@ export class AdminService {
     return result;
   }
 
+  async createTenantUser(
+    id: string,
+    dto: CreateTenantUserDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    await this.tenantsService.getTenantByIdOrThrow(id);
+
+    if (dto.branchId) {
+      await this.tenantsService.assertBranchBelongsToTenant(dto.branchId, id);
+    }
+
+    await this.usersService.ensureEmailIsAvailable(id, dto.email);
+
+    if (dto.phone) {
+      await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
+    }
+
+    const temporaryPassword = dto.password?.trim() || this.generatePassword();
+    const user = await this.usersService.createUser({
+      tenantId: id,
+      branchId: dto.branchId ?? null,
+      email: dto.email,
+      phone: dto.phone ?? null,
+      name: dto.name ?? null,
+      passwordHash: await bcrypt.hash(temporaryPassword, 10),
+      role: dto.role ?? UserRole.TENANT_ADMIN,
+      status: UserStatus.ACTIVE,
+    });
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'tenant.user_created',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: {
+        role: user.role,
+        email: user.email,
+        branch_id: user.branchId,
+      },
+    });
+
+    return {
+      user: this.usersService.serializeUser(user),
+      temporary_password: dto.password ? null : temporaryPassword,
+    };
+  }
+
   async setTenantStatus(
     id: string,
     status: TenantStatus,
@@ -162,13 +222,19 @@ export class AdminService {
     return tenant;
   }
 
+  private generatePassword() {
+    return randomBytes(12).toString('base64url');
+  }
+
   private ensureTenantCanBeManaged(actor: AuthenticatedUser, tenantId: string) {
+    if (actor.role === UserRole.PLATFORM_OWNER) {
+      return;
+    }
+
     if (actor.role === UserRole.TENANT_ADMIN && actor.tenantId === tenantId) {
       return;
     }
 
-    if (actor.role !== UserRole.PLATFORM_OWNER) {
-      throw new ForbiddenException('You cannot manage this tenant');
-    }
+    throw new ForbiddenException('You cannot manage this tenant');
   }
 }

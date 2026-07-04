@@ -8,9 +8,14 @@ export class CreateCrmIntegrationDto {
   @IsEnum(CrmProvider)
   provider!: CrmProvider;
 
-  @ApiProperty({ example: 'crm-token-value' })
+  @ApiPropertyOptional({
+    example: 'crm-token-value',
+    description:
+      'Optional for provider=mock. Required for real CRM providers unless a token is already stored.',
+  })
+  @IsOptional()
   @IsString()
-  apiToken!: string;
+  apiToken?: string;
 
   @ApiPropertyOptional({ example: 'https://api.crm.example' })
   @IsOptional()

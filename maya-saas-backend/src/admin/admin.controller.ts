@@ -11,6 +11,7 @@ import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
+import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 import { AdminService } from './admin.service';
 
 @ApiTags('admin')
@@ -98,6 +99,18 @@ export class AdminController {
   @ApiOperation({ summary: 'Test the current CRM connection' })
   testCrm(@Param('id') id: string, @CurrentUser() actor: AuthenticatedUser) {
     return this.adminService.testCrm(id, actor);
+  }
+
+  @Post(':id/users')
+  @Roles(UserRole.PLATFORM_OWNER, UserRole.TENANT_ADMIN)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
+  @ApiOperation({ summary: 'Create a tenant-scoped admin/staff user' })
+  createTenantUser(
+    @Param('id') id: string,
+    @Body() dto: CreateTenantUserDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adminService.createTenantUser(id, dto, actor);
   }
 
   @Post(':id/suspend')

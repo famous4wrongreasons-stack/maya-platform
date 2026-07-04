@@ -199,6 +199,9 @@ export class TenantsService {
     }
 
     const tenant = await this.prisma.$transaction(async (tx) => {
+      const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
+      const normalizedBranchTimezone =
+        asNonEmptyString(dto.branchTimezone) ?? 'Europe/Moscow';
       const created = await tx.tenant.create({
         data: {
           name: dto.name,
@@ -214,6 +217,16 @@ export class TenantsService {
           tenantId: created.id,
           appName: dto.name,
           themeJson: asJson({}),
+        },
+      });
+
+      await tx.branch.create({
+        data: {
+          tenantId: created.id,
+          name: normalizedBranchName,
+          address: asNonEmptyString(dto.branchAddress),
+          phone: asNonEmptyString(dto.branchPhone),
+          timezone: normalizedBranchTimezone,
         },
       });
 

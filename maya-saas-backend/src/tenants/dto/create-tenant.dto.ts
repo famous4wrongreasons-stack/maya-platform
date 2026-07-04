@@ -33,4 +33,24 @@ export class CreateTenantDto {
   @IsOptional()
   @IsBoolean()
   allowSelfRegistration?: boolean;
+
+  @ApiPropertyOptional({ example: 'Main Branch' })
+  @IsOptional()
+  @IsString()
+  branchName?: string;
+
+  @ApiPropertyOptional({ example: 'Moscow, Tverskaya 1' })
+  @IsOptional()
+  @IsString()
+  branchAddress?: string;
+
+  @ApiPropertyOptional({ example: '+79990000000' })
+  @IsOptional()
+  @IsString()
+  branchPhone?: string;
+
+  @ApiPropertyOptional({ example: 'Europe/Moscow' })
+  @IsOptional()
+  @IsString()
+  branchTimezone?: string;
 }
