@@ -167,6 +167,32 @@ describe('AppointmentsService', () => {
       status: 'canceled',
       raw: { cancelled: true },
     });
+    const rescheduleAppointmentMock: jest.MockedFunction<
+      (
+        tenantId: string,
+        params: {
+          externalId: string;
+          start: string;
+          staffId?: string;
+          serviceIds?: string[];
+          notes?: string | null;
+        },
+      ) => Promise<{
+        external_id: string;
+        status: string;
+        start: string;
+        staff_id: string;
+        service_ids: string[];
+        raw?: Record<string, unknown>;
+      }>
+    > = jest.fn().mockResolvedValue({
+      external_id: 'crm-1',
+      status: 'confirmed',
+      start: '2026-07-05T11:00:00',
+      staff_id: 'staff-1',
+      service_ids: ['svc-1'],
+      raw: { rescheduled: true },
+    });
     const getUserOrThrowMock: jest.MockedFunction<
       (userId: string) => Promise<UserRecord>
     > = jest.fn().mockResolvedValue({
@@ -209,12 +235,17 @@ describe('AppointmentsService', () => {
     };
     const crmService: Pick<
       CrmService,
-      'cancelAppointment' | 'getAvailableSlots' | 'getServices' | 'getStaff'
+      | 'cancelAppointment'
+      | 'getAvailableSlots'
+      | 'getServices'
+      | 'getStaff'
+      | 'rescheduleAppointment'
     > = {
       cancelAppointment: cancelAppointmentMock,
       getAvailableSlots: getAvailableSlotsMock,
       getServices: getServicesMock,
       getStaff: getStaffMock,
+      rescheduleAppointment: rescheduleAppointmentMock,
     };
     const tenantsService: Pick<TenantsService, 'assertBranchBelongsToTenant'> =
       {
@@ -250,6 +281,7 @@ describe('AppointmentsService', () => {
         getServicesMock,
         getStaffMock,
         getUserOrThrowMock,
+        rescheduleAppointmentMock,
         serializeUserMock,
       },
     };
@@ -514,5 +546,136 @@ describe('AppointmentsService', () => {
       },
     });
     expect(cancelAppointmentMock).not.toHaveBeenCalled();
+  });
+
+  it('reschedules an upcoming appointment for the current client', async () => {
+    const {
+      service,
+      mocks: { appointmentUpdateMock, auditLogMock, rescheduleAppointmentMock },
+    } = createService();
+
+    appointmentUpdateMock.mockResolvedValue({
+      id: 'appt-1',
+      tenantId: 'tenant-1',
+      clientId: 'user-1',
+      branchId: 'branch-1',
+      crmExternalId: 'crm-1',
+      staffExternalId: 'staff-1',
+      serviceIds: ['svc-1'],
+      startAt: new Date('2026-07-05T08:00:00.000Z'),
+      status: 'confirmed',
+      notes: 'Move later',
+      providerPayload: { rescheduled: true },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      branch,
+    });
+
+    const result = await service.rescheduleForClient(
+      'tenant-1',
+      'user-1',
+      'appt-1',
+      {
+        start: '2026-07-05T11:00:00',
+        notes: 'Move later',
+      },
+    );
+
+    expect(rescheduleAppointmentMock).toHaveBeenCalledWith('tenant-1', {
+      externalId: 'crm-1',
+      start: '2026-07-05T11:00:00',
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      notes: 'Move later',
+    });
+    const updateArgs = appointmentUpdateMock.mock.calls[0]?.[0] as
+      | {
+          where: { id: string };
+          data: {
+            staffExternalId: string;
+            status: string;
+            notes: string | null;
+          };
+        }
+      | undefined;
+
+    expect(updateArgs).toBeDefined();
+    expect(updateArgs?.where).toEqual({ id: 'appt-1' });
+    expect(updateArgs?.data.staffExternalId).toBe('staff-1');
+    expect(updateArgs?.data.status).toBe('confirmed');
+    expect(updateArgs?.data.notes).toBe('Move later');
+    expect(result).toMatchObject({
+      ok: true,
+      appointment: {
+        id: 'appt-1',
+        status: 'confirmed',
+      },
+    });
+    expect(auditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'appointment.rescheduled',
+        entityId: 'appt-1',
+      }),
+    );
+  });
+
+  it('returns slot_taken when a new slot is unavailable during reschedule', async () => {
+    const {
+      service,
+      mocks: { getAvailableSlotsMock, rescheduleAppointmentMock },
+    } = createService();
+
+    getAvailableSlotsMock.mockResolvedValue([]);
+
+    await expect(
+      service.rescheduleForClient('tenant-1', 'user-1', 'appt-1', {
+        start: '2026-07-05T11:00:00',
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'slot_taken',
+          field: 'start',
+        },
+      },
+    });
+    expect(rescheduleAppointmentMock).not.toHaveBeenCalled();
+  });
+
+  it('returns too_late_to_reschedule when the appointment has already started', async () => {
+    const {
+      service,
+      mocks: { appointmentFindFirstMock, rescheduleAppointmentMock },
+    } = createService();
+
+    appointmentFindFirstMock.mockResolvedValue({
+      id: 'appt-1',
+      tenantId: 'tenant-1',
+      clientId: 'user-1',
+      branchId: 'branch-1',
+      crmExternalId: 'crm-1',
+      staffExternalId: 'staff-1',
+      serviceIds: ['svc-1'],
+      startAt: new Date(Date.now() - 60 * 1000),
+      status: 'confirmed',
+      notes: null,
+      providerPayload: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      branch,
+    });
+
+    await expect(
+      service.rescheduleForClient('tenant-1', 'user-1', 'appt-1', {
+        start: '2026-07-05T11:00:00',
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'too_late_to_reschedule',
+        },
+      },
+    });
+    expect(rescheduleAppointmentMock).not.toHaveBeenCalled();
   });
 });

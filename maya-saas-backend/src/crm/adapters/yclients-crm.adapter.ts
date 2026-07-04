@@ -7,6 +7,7 @@ import {
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
+  RescheduledAppointment,
   ServiceItem,
   StaffMember,
 } from '../crm-adapter.interface';
@@ -46,6 +47,31 @@ interface YclientsSlotApiItem {
   time?: string;
   datetime?: string;
   seance_length?: number;
+}
+
+interface YclientsRecordClientApiItem {
+  id?: number | string;
+  phone?: string;
+  name?: string;
+}
+
+interface YclientsRecordStaffApiItem {
+  id?: number | string;
+}
+
+interface YclientsRecordServiceApiItem {
+  id?: number | string;
+}
+
+interface YclientsRecordApiItem {
+  id?: number | string;
+  datetime?: string;
+  seance_length?: number;
+  attendance?: number;
+  comment?: string;
+  client?: YclientsRecordClientApiItem | null;
+  staff?: YclientsRecordStaffApiItem | null;
+  services?: YclientsRecordServiceApiItem[] | null;
 }
 
 interface YclientsResponse<TData> {
@@ -272,6 +298,104 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return {
       external_id: externalId,
       status: 'canceled',
+      raw: {
+        provider: this.config.provider,
+        response: response.data ?? null,
+        success: response.success ?? true,
+      },
+    };
+  }
+
+  async rescheduleAppointment(params: {
+    tenantId: string;
+    externalId: string;
+    start: string;
+    staffId?: string;
+    serviceIds?: string[];
+    notes?: string | null;
+  }): Promise<RescheduledAppointment> {
+    void params.tenantId;
+
+    const externalId = String(
+      this.toNumericId(params.externalId, 'externalId'),
+    );
+    const currentResponse = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${externalId}`,
+    );
+    const record = currentResponse.data;
+
+    if (!record) {
+      throw new Error('YClients record was not found');
+    }
+
+    const finalStaffId =
+      params.staffId ??
+      (record.staff?.id !== undefined ? String(record.staff.id) : undefined);
+    const finalServiceIds =
+      params.serviceIds && params.serviceIds.length > 0
+        ? params.serviceIds
+        : (record.services || [])
+            .map((service) =>
+              service.id !== undefined ? String(service.id) : null,
+            )
+            .filter((serviceId): serviceId is string => Boolean(serviceId));
+
+    if (!finalStaffId) {
+      throw new Error('YClients record does not have a staff member to retain');
+    }
+
+    if (finalServiceIds.length === 0) {
+      throw new Error('YClients record does not have services to retain');
+    }
+
+    const serviceCatalog = await this.fetchServices();
+    const selectedServices = serviceCatalog.filter((service) =>
+      finalServiceIds.includes(String(service.id)),
+    );
+    const seanceLengthSeconds =
+      selectedServices.reduce(
+        (total, service) =>
+          total + (service.seance_length || service.duration || 0),
+        0,
+      ) ||
+      record.seance_length ||
+      3600;
+    const client = record.client || {};
+    const payload = {
+      staff_id: this.toNumericId(finalStaffId, 'staffId'),
+      datetime: this.toYclientsDateTime(params.start),
+      seance_length: seanceLengthSeconds,
+      save_if_busy: false,
+      send_sms: false,
+      client: {
+        ...(client.id !== undefined
+          ? { id: this.toNumericId(client.id, 'client.id') }
+          : {}),
+        phone: client.phone ? this.normalizePhone(client.phone) : '',
+        name: client.name || client.phone || '',
+      },
+      services: finalServiceIds.map((serviceId) => ({
+        id: this.toNumericId(serviceId, 'serviceId'),
+        amount: 1,
+      })),
+      attendance: typeof record.attendance === 'number' ? record.attendance : 0,
+      comment: params.notes ?? record.comment ?? '',
+    };
+
+    const response = await this.request<Record<string, unknown>>(
+      `record/${this.getCompanyId()}/${externalId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      },
+    );
+
+    return {
+      external_id: externalId,
+      status: 'confirmed',
+      start: this.toYclientsDateTime(params.start),
+      staff_id: finalStaffId,
+      service_ids: finalServiceIds,
       raw: {
         provider: this.config.provider,
         response: response.data ?? null,

@@ -60,6 +60,15 @@ export interface CancelledAppointment {
   raw?: Record<string, unknown>;
 }
 
+export interface RescheduledAppointment {
+  external_id: string;
+  status: string;
+  start: string;
+  staff_id: string;
+  service_ids: string[];
+  raw?: Record<string, unknown>;
+}
+
 export interface CRMAdapter {
   getServices(tenantId: string): Promise<ServiceItem[]>;
   getStaff(tenantId: string): Promise<StaffMember[]>;
@@ -77,6 +86,14 @@ export interface CRMAdapter {
     tenantId: string;
     externalId: string;
   }): Promise<CancelledAppointment>;
+  rescheduleAppointment(params: {
+    tenantId: string;
+    externalId: string;
+    start: string;
+    staffId?: string;
+    serviceIds?: string[];
+    notes?: string | null;
+  }): Promise<RescheduledAppointment>;
   getClientAppointments(clientId: string): Promise<CreatedAppointment[]>;
   testConnection(tenantId: string): Promise<{
     ok: boolean;

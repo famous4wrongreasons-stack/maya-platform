@@ -5,6 +5,7 @@ import {
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
+  RescheduledAppointment,
   ServiceItem,
   StaffMember,
 } from '../crm-adapter.interface';
@@ -148,6 +149,33 @@ export class MockCRMAdapter implements CRMAdapter {
       raw: {
         provider: this.config.provider,
         cancelled: true,
+      },
+    });
+  }
+
+  rescheduleAppointment(params: {
+    tenantId: string;
+    externalId: string;
+    start: string;
+    staffId?: string;
+    serviceIds?: string[];
+    notes?: string | null;
+  }): Promise<RescheduledAppointment> {
+    void params.tenantId;
+    void params.notes;
+
+    return Promise.resolve({
+      external_id: params.externalId,
+      status: 'confirmed',
+      start: params.start,
+      staff_id: params.staffId ?? MOCK_STAFF[0]?.id ?? 'staff-anton',
+      service_ids:
+        params.serviceIds && params.serviceIds.length > 0
+          ? params.serviceIds
+          : [MOCK_SERVICES[0]?.id ?? 'svc-haircut'],
+      raw: {
+        provider: this.config.provider,
+        rescheduled: true,
       },
     });
   }

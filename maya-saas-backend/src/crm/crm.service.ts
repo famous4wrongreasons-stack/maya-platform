@@ -13,6 +13,7 @@ import {
   CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
+  RescheduledAppointment,
 } from './crm-adapter.interface';
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
@@ -134,6 +135,23 @@ export class CrmService {
     return adapter.cancelAppointment({
       tenantId,
       externalId,
+    });
+  }
+
+  async rescheduleAppointment(
+    tenantId: string,
+    params: {
+      externalId: string;
+      start: string;
+      staffId?: string;
+      serviceIds?: string[];
+      notes?: string | null;
+    },
+  ): Promise<RescheduledAppointment> {
+    const adapter = await this.getAdapterForTenant(tenantId);
+    return adapter.rescheduleAppointment({
+      tenantId,
+      ...params,
     });
   }
 

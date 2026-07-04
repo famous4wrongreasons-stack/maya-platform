@@ -5,6 +5,7 @@ import {
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
+  RescheduledAppointment,
   ServiceItem,
   StaffMember,
 } from '../crm-adapter.interface';
@@ -52,6 +53,20 @@ export class WhitelinesCRMAdapter implements CRMAdapter {
     tenantId: string;
     externalId: string;
   }): Promise<CancelledAppointment> {
+    void params;
+    return Promise.reject(
+      new Error('Whitelines adapter is scaffolded but not implemented yet'),
+    );
+  }
+
+  rescheduleAppointment(params: {
+    tenantId: string;
+    externalId: string;
+    start: string;
+    staffId?: string;
+    serviceIds?: string[];
+    notes?: string | null;
+  }): Promise<RescheduledAppointment> {
     void params;
     return Promise.reject(
       new Error('Whitelines adapter is scaffolded but not implemented yet'),

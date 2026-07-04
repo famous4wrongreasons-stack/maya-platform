@@ -7,6 +7,7 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
+import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 
 @ApiTags('appointments')
 @ApiBearerAuth()
@@ -65,6 +66,21 @@ export class AppointmentsController {
       user.tenantId!,
       user.userId,
       appointmentId,
+    );
+  }
+
+  @Post(':id/reschedule')
+  @ApiOperation({ summary: 'Reschedule a client appointment' })
+  rescheduleAppointment(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') appointmentId: string,
+    @Body() dto: RescheduleAppointmentDto,
+  ) {
+    return this.appointmentsService.rescheduleForClient(
+      user.tenantId!,
+      user.userId,
+      appointmentId,
+      dto,
     );
   }
 }

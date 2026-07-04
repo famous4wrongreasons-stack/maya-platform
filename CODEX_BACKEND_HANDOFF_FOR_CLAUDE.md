@@ -57,6 +57,7 @@ The main frontend blockers previously raised in
 - `GET /api/appointments/my` is now richer for cabinet UI.
 - Cabinet mutation now exists:
   - `POST /api/appointments/:id/cancel`
+  - `POST /api/appointments/:id/reschedule`
 - Calendar aggregation endpoint now exists:
   - `GET /api/available-days`
 - Platform onboarding admin API is now less blocked:
@@ -607,6 +608,54 @@ Current machine-readable error codes:
 - `already_cancelled`
 - `too_late_to_cancel`
 
+### 4.10 Appointment reschedule for cabinet
+
+- `POST /appointments/:id/reschedule`
+
+Current request shape:
+
+```json
+{
+  "start": "2026-07-06T13:00:00",
+  "staffId": "optional-staff-id",
+  "serviceIds": ["optional-service-id"],
+  "branchId": "optional-branch-id",
+  "notes": "optional note"
+}
+```
+
+Current behavior:
+
+- appointment ownership is checked against the current tenant client
+- only upcoming appointments can be rescheduled
+- if `staffId`, `serviceIds`, `branchId`, or `notes` are omitted, backend
+  retains the current appointment values
+- backend validates the requested slot before mutating the CRM record
+- current implementation uses a non-destructive CRM reschedule path
+  instead of cancel+create
+
+Current success shape:
+
+```json
+{
+  "ok": true,
+  "previous_start_at": "2026-07-05T08:00:00.000Z",
+  "appointment": {
+    "id": "appointment-id",
+    "status": "confirmed"
+  }
+}
+```
+
+Current machine-readable error codes:
+
+- `not_found`
+- `already_cancelled`
+- `too_late_to_reschedule`
+- `slot_taken`
+- `service_not_found`
+- `validation`
+
 ## 5. Time Semantics
 
 For booking preview/create:
@@ -665,6 +714,7 @@ Claude can now implement cabinet UI against `GET /appointments/my` with:
 - staff card
 - total price / duration display
 - cancel action for upcoming items through `POST /appointments/:id/cancel`
+- reschedule action for upcoming items through `POST /appointments/:id/reschedule`
 
 Recommended cabinet behavior:
 
@@ -674,6 +724,12 @@ Recommended cabinet behavior:
   - `not_found`
   - `already_cancelled`
   - `too_late_to_cancel`
+- for reschedule:
+  - route `slot_taken` back to slot selection with refresh
+  - route `too_late_to_reschedule` to a human message that the visit already
+    started
+  - if you omit mutable fields other than `start`, backend will retain the
+    current master/services/branch/notes
 
 ## 7. What Claude Should Not Build
 
@@ -715,6 +771,7 @@ The most logical next frontend pass is:
 4. wire booking preview to stored profile identity
 5. build cabinet UI from `GET /appointments/my`
 6. wire `POST /appointments/:id/cancel` for upcoming bookings
-7. mirror the same changes into iOS web source
+7. wire `POST /appointments/:id/reschedule` for upcoming bookings
+8. mirror the same changes into iOS web source
 
 That work can proceed now without waiting for more backend redesign.

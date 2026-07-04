@@ -23,6 +23,7 @@ import {
 import { AvailableDaysQueryDto } from './dto/available-days-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
+import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 
 interface AppointmentErrorPayload {
   message: string;
@@ -33,6 +34,7 @@ interface AppointmentErrorPayload {
       | 'not_found'
       | 'already_cancelled'
       | 'too_late_to_cancel'
+      | 'too_late_to_reschedule'
       | 'slot_taken'
       | 'staff_unavailable'
       | 'service_not_found'
@@ -339,6 +341,163 @@ export class AppointmentsService {
 
     return {
       ok: true,
+      appointment: this.serializeAppointment(updatedAppointment, catalog),
+    };
+  }
+
+  async rescheduleForClient(
+    tenantId: string,
+    clientId: string,
+    appointmentId: string,
+    dto: RescheduleAppointmentDto,
+  ) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: {
+        id: appointmentId,
+        tenantId,
+        clientId,
+      },
+      include: {
+        branch: true,
+      },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(
+        this.buildAppointmentError(
+          'not_found',
+          'Appointment not found for the current client.',
+        ),
+      );
+    }
+
+    if (this.isCancelledStatus(appointment.status)) {
+      throw new ConflictException(
+        this.buildAppointmentError(
+          'already_cancelled',
+          'Appointment is already cancelled.',
+        ),
+      );
+    }
+
+    if (appointment.startAt.getTime() <= Date.now()) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'too_late_to_reschedule',
+          'Appointment can no longer be rescheduled because it has already started.',
+        ),
+      );
+    }
+
+    if (!appointment.crmExternalId) {
+      throw new NotFoundException(
+        this.buildAppointmentError(
+          'not_found',
+          'Appointment not found for the current client.',
+        ),
+      );
+    }
+
+    const branchId = dto.branchId ?? appointment.branchId ?? undefined;
+
+    if (branchId) {
+      await this.tenantsService.assertBranchBelongsToTenant(branchId, tenantId);
+    }
+
+    const branch = branchId
+      ? await this.resolveBranchForBooking(tenantId, branchId)
+      : (appointment.branch ?? null);
+    const serviceIds =
+      dto.serviceIds && dto.serviceIds.length > 0
+        ? dto.serviceIds
+        : this.normalizeServiceIds(appointment.serviceIds);
+
+    if (serviceIds.length === 0) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'validation',
+          'Appointment must keep at least one service when rescheduling.',
+          'serviceIds',
+        ),
+      );
+    }
+
+    const services = await this.crmService.getServices(tenantId);
+    this.assertRequestedServicesExist(serviceIds, services);
+
+    const staffId = dto.staffId ?? appointment.staffExternalId;
+    const requestedStart = normalizeRequestedStart(
+      dto.start,
+      branch?.timezone ?? 'Europe/Moscow',
+    );
+    const slots = await this.crmService.getAvailableSlots(tenantId, {
+      date: requestedStart,
+      staffId,
+      serviceIds,
+      branchId,
+    });
+    const matchedSlot = findMatchingSlotByLocalStart(
+      slots,
+      requestedStart,
+      branch?.timezone ?? 'Europe/Moscow',
+    );
+
+    if (!matchedSlot) {
+      throw new BadRequestException(
+        this.buildAppointmentError(
+          'slot_taken',
+          'Selected slot is no longer available. Refresh times and try again.',
+          'start',
+        ),
+      );
+    }
+
+    const remoteAppointment = await this.crmService.rescheduleAppointment(
+      tenantId,
+      {
+        externalId: appointment.crmExternalId,
+        start: requestedStart,
+        staffId,
+        serviceIds,
+        notes: dto.notes ?? appointment.notes,
+      },
+    );
+    const updatedAppointment = await this.prisma.appointment.update({
+      where: { id: appointment.id },
+      data: {
+        branchId: branchId ?? null,
+        staffExternalId: remoteAppointment.staff_id,
+        serviceIds: asJson(remoteAppointment.service_ids),
+        startAt: new Date(matchedSlot.start),
+        status: remoteAppointment.status,
+        notes: dto.notes ?? appointment.notes,
+        providerPayload: remoteAppointment.raw
+          ? asJson(remoteAppointment.raw)
+          : undefined,
+      },
+      include: {
+        branch: true,
+      },
+    });
+    const catalog = await this.loadAppointmentCatalog(tenantId);
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: clientId,
+      action: 'appointment.rescheduled',
+      entityType: 'appointment',
+      entityId: appointment.id,
+      metadata: {
+        crm_external_id: appointment.crmExternalId,
+        previous_start_at: appointment.startAt.toISOString(),
+        requested_start: requestedStart,
+        matched_slot_start: matchedSlot.start,
+      },
+    });
+
+    return {
+      ok: true,
+      previous_start_at: appointment.startAt,
       appointment: this.serializeAppointment(updatedAppointment, catalog),
     };
   }
