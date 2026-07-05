@@ -22,7 +22,7 @@ export class UsersController {
   @Patch()
   @ApiOperation({
     summary:
-      'Update the current authenticated user profile. Phone changes stay outside this endpoint.',
+      'Update the current authenticated user profile, including initial phone completion for social logins.',
   })
   updateCurrentUser(
     @CurrentUser() user: AuthenticatedUser,

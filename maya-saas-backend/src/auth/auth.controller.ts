@@ -4,15 +4,21 @@ import type { Request } from 'express';
 
 import { Public } from '../decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
+import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
 import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
+import { SocialAuthService } from './social-auth.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly socialAuthService: SocialAuthService,
+  ) {}
 
   @Public()
   @Post('login')
@@ -44,6 +50,42 @@ export class AuthController {
   })
   verifyPhoneAuth(@Body() dto: VerifyPhoneAuthDto) {
     return this.authService.verifyPhoneAuth(dto);
+  }
+
+  @Public()
+  @Post('oauth/yandex/start')
+  @ApiOperation({
+    summary: 'Start Yandex ID login for a tenant-scoped user',
+  })
+  startYandexLogin(@Body() dto: StartOauthLoginDto) {
+    return this.socialAuthService.startYandexLogin(dto);
+  }
+
+  @Public()
+  @Post('oauth/yandex/complete')
+  @ApiOperation({
+    summary: 'Complete Yandex ID login and return a tenant-scoped JWT',
+  })
+  completeYandexLogin(@Body() dto: CompleteOauthLoginDto) {
+    return this.socialAuthService.completeYandexLogin(dto);
+  }
+
+  @Public()
+  @Post('oauth/telegram/start')
+  @ApiOperation({
+    summary: 'Start Telegram login for a tenant-scoped user',
+  })
+  startTelegramLogin(@Body() dto: StartOauthLoginDto) {
+    return this.socialAuthService.startTelegramLogin(dto);
+  }
+
+  @Public()
+  @Post('oauth/telegram/complete')
+  @ApiOperation({
+    summary: 'Complete Telegram login and return a tenant-scoped JWT',
+  })
+  completeTelegramLogin(@Body() dto: CompleteOauthLoginDto) {
+    return this.socialAuthService.completeTelegramLogin(dto);
   }
 
   private resolveClientIp(request: Request): string | null {

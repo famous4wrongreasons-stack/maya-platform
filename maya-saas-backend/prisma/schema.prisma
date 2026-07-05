@@ -28,6 +28,8 @@ model Tenant {
   auditLogs             AuditLog[]
   appointments          Appointment[]
   phoneAuthCodes        PhoneAuthCode[]
+  authIdentities        AuthIdentity[]
+  authFlowStates        AuthFlowState[]
 }
 
 model BrandingSettings {
@@ -63,26 +65,62 @@ model Branch {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  tenantId     String?
-  branchId     String?
-  email        String
-  phone        String?
-  encryptedName String?
-  passwordHash String
-  role         String
-  status       String        @default("active")
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  tenant       Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch       Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  auditLogs    AuditLog[]
-  appointments Appointment[] @relation("ClientAppointments")
+  id             String         @id @default(cuid())
+  tenantId       String?
+  branchId       String?
+  email          String
+  phone          String?
+  encryptedName  String?
+  passwordHash   String
+  role           String
+  status         String         @default("active")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  tenant         Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch         Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  auditLogs      AuditLog[]
+  appointments   Appointment[]  @relation("ClientAppointments")
+  authIdentities AuthIdentity[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+}
+
+model AuthIdentity {
+  id             String   @id @default(cuid())
+  tenantId       String
+  userId         String
+  provider       String
+  providerUserId String
+  email          String?
+  phone          String?
+  profileJson    Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider, providerUserId])
+  @@index([userId])
+  @@index([tenantId, provider])
+}
+
+model AuthFlowState {
+  id           String   @id @default(cuid())
+  tenantId     String
+  provider     String
+  state        String   @unique
+  redirectUri  String
+  codeVerifier String?
+  expiresAt    DateTime
+  consumedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, provider, expiresAt])
 }
 
 model PhoneAuthCode {

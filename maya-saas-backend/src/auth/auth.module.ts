@@ -10,6 +10,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
+import { SocialAuthService } from './social-auth.service';
 
 @Module({
   imports: [
@@ -28,7 +29,12 @@ import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PhoneAuthDeliveryService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    PhoneAuthDeliveryService,
+    SocialAuthService,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

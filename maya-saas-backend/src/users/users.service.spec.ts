@@ -51,6 +51,9 @@ describe('UsersService', () => {
     const userFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<UserRecord | null>
     > = jest.fn().mockResolvedValue(null);
+    const userFindUniqueMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<UserRecord | null>
+    > = jest.fn().mockResolvedValue(baseUser());
     const userFindManyMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<UserRecord[]>
     > = jest.fn().mockResolvedValue([]);
@@ -67,6 +70,7 @@ describe('UsersService', () => {
     const prisma: Pick<PrismaService, 'user'> = {
       user: {
         findFirst: userFindFirstMock,
+        findUnique: userFindUniqueMock,
         findMany: userFindManyMock,
         update: userUpdateMock,
       } as PrismaService['user'],
@@ -85,6 +89,7 @@ describe('UsersService', () => {
         decryptMock,
         encryptMock,
         userFindFirstMock,
+        userFindUniqueMock,
         userFindManyMock,
         userUpdateMock,
       },
@@ -132,6 +137,40 @@ describe('UsersService', () => {
       },
     });
     expect(result.name).toBe('Алексей');
+  });
+
+  it('allows completing the current user phone when it is still missing', async () => {
+    const {
+      service,
+      mocks: { userFindFirstMock, userFindUniqueMock, userUpdateMock },
+    } = createService();
+    const userWithoutPhone = {
+      ...baseUser(),
+      phone: null,
+    };
+
+    userFindUniqueMock.mockResolvedValue(userWithoutPhone);
+    userFindFirstMock.mockResolvedValueOnce(null);
+    userUpdateMock.mockResolvedValue({
+      ...userWithoutPhone,
+      phone: '+79991112233',
+    });
+
+    const result = await service.updateCurrentUserProfile('user-1', {
+      phone: '8 (999) 111-22-33',
+    });
+
+    expect(userUpdateMock).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: {
+        phone: '+79991112233',
+      },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+    expect(result.phone).toBe('+79991112233');
   });
 
   it('finds legacy users by phone after normalizing stored values', async () => {

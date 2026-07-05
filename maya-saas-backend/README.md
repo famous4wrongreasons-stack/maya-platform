@@ -23,6 +23,10 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
   - `POST /api/auth/register`
   - `POST /api/auth/phone/start`
   - `POST /api/auth/phone/verify`
+  - `POST /api/auth/oauth/yandex/start`
+  - `POST /api/auth/oauth/yandex/complete`
+  - `POST /api/auth/oauth/telegram/start`
+  - `POST /api/auth/oauth/telegram/complete`
   - `GET /api/me`
   - `PATCH /api/me`
   - `GET /api/branches`
@@ -77,6 +81,15 @@ SMSRU_API_ID=""
 SMSRU_FROM=""
 SMSRU_TEST="false"
 SMSRU_TIMEOUT_MS="15000"
+AUTH_FLOW_STATE_TTL_SECONDS="600"
+OAUTH_PROVIDER_TIMEOUT_MS="15000"
+YANDEX_LOGIN_ENABLED="false"
+YANDEX_CLIENT_ID=""
+YANDEX_CLIENT_SECRET=""
+TELEGRAM_LOGIN_ENABLED="false"
+TELEGRAM_CLIENT_ID=""
+TELEGRAM_CLIENT_SECRET=""
+TELEGRAM_JWKS_URL="https://oauth.telegram.org/.well-known/jwks.json"
 ```
 
 Phone auth delivery modes:
@@ -85,6 +98,13 @@ Phone auth delivery modes:
 - `PHONE_AUTH_PROVIDER=debug`: always returns `debug_code`
 - `PHONE_AUTH_PROVIDER=smsru`: always uses SMS.ru and fails if creds are missing
 - `PHONE_AUTH_DEBUG=true`: emergency override that forces debug delivery in any env
+
+Social login toggles:
+
+- `YANDEX_LOGIN_ENABLED=true`: enables `POST /api/auth/oauth/yandex/start` and `/complete`
+- `TELEGRAM_LOGIN_ENABLED=true`: enables `POST /api/auth/oauth/telegram/start` and `/complete`
+- `AUTH_FLOW_STATE_TTL_SECONDS`: lifetime for OAuth `state + PKCE` records in PostgreSQL
+- `OAUTH_PROVIDER_TIMEOUT_MS`: timeout for Yandex and Telegram token exchanges
 
 ## Run locally
 
@@ -244,14 +264,79 @@ curl -X PATCH http://localhost:3000/api/me \
   }'
 ```
 
+Update the current authenticated user profile phone after a social login that did not return one:
+
+```bash
+curl -X PATCH http://localhost:3000/api/me \
+  -H 'Authorization: Bearer <tenant-client-jwt>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "phone": "+79990000000"
+  }'
+```
+
 Notes:
 
 - In local/test mode with `PHONE_AUTH_PROVIDER=auto`, the backend returns `debug_code`.
 - In production with valid `SMSRU_API_ID`, `POST /api/auth/phone/start` returns `delivery: "sms"` and omits `debug_code`.
 - `SMSRU_FROM` is optional and requires a pre-approved sender name in SMS.ru.
 - The backend forwards the requesting client IP to SMS.ru when available, which helps SMS flood protection on auth-code flows.
+- Social login stores provider identities per tenant, so the same Yandex/Telegram account can belong to different salons without cross-tenant leakage.
 - Client profile names are stored encrypted at rest.
 - `GET /api/me` now returns `name`, `profile_completed`, and `missing_profile_fields`.
+
+## OAuth login via Yandex ID and Telegram
+
+Start a Yandex login:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/oauth/yandex/start \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tenantSlug": "demo-salon",
+    "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
+  }'
+```
+
+Complete the Yandex login after your callback page receives `code` and `state`:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/oauth/yandex/complete \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "state": "<state-from-start>",
+    "code": "<code-from-yandex>"
+  }'
+```
+
+Start a Telegram login:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/oauth/telegram/start \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tenantSlug": "demo-salon",
+    "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
+  }'
+```
+
+Complete the Telegram login after your callback page receives `code` and `state`:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/oauth/telegram/complete \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "state": "<state-from-start>",
+    "code": "<code-from-telegram>"
+  }'
+```
+
+Provider notes:
+
+- Yandex flow uses OAuth Authorization Code with PKCE against `https://oauth.yandex.com/authorize` and `https://oauth.yandex.com/token`, then loads profile data from `https://login.yandex.ru/info`.
+- Telegram flow uses OIDC Authorization Code with PKCE against `https://oauth.telegram.org/auth` and `https://oauth.telegram.org/token`.
+- Telegram ID tokens are verified against JWKS before the backend trusts the user identity.
+- If Yandex or Telegram do not return a Russian phone number, the login still succeeds, but the frontend should ask the user to complete their phone in `PATCH /api/me`.
 
 ## Connect YClients / Altegio
 

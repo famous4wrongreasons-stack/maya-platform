@@ -211,23 +211,50 @@ export class UsersService {
   }
 
   async updateCurrentUserProfile(userId: string, dto: UpdateCurrentUserDto) {
-    if (dto.name === undefined) {
+    if (dto.name === undefined && dto.phone === undefined) {
       throw new BadRequestException(
         'At least one supported profile field must be provided',
       );
     }
 
-    const normalizedName = this.normalizeOptionalName(dto.name);
+    const currentUser = await this.getUserOrThrow(userId);
+    const data: {
+      encryptedName?: string | null;
+      phone?: string | null;
+    } = {};
 
-    if (!normalizedName) {
-      throw new BadRequestException('Profile name must not be empty');
+    if (dto.name !== undefined) {
+      const normalizedName = this.normalizeOptionalName(dto.name);
+
+      if (!normalizedName) {
+        throw new BadRequestException('Profile name must not be empty');
+      }
+
+      data.encryptedName = this.encryptionService.encrypt(normalizedName);
+    }
+
+    if (dto.phone !== undefined) {
+      const normalizedPhone = normalizeRussianPhone(dto.phone);
+
+      if (currentUser.phone && currentUser.phone !== normalizedPhone) {
+        throw new ConflictException(
+          'Phone is already set for this user and cannot be changed here',
+        );
+      }
+
+      if (!currentUser.phone) {
+        await this.ensurePhoneIsAvailable(
+          currentUser.tenantId,
+          normalizedPhone,
+        );
+      }
+
+      data.phone = normalizedPhone;
     }
 
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: {
-        encryptedName: this.encryptionService.encrypt(normalizedName),
-      },
+      data,
       include: {
         tenant: true,
         branch: true,
