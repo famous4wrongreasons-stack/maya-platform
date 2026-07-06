@@ -88,3 +88,6 @@ _archive/
 # Сканы книги барбера — тяжело (десятки МБ) и уже лежат на Beget; в git не тащим
 ai администратор/barber_knowledge_images/
 **/barber_knowledge_images/
+
+# Playwright CLI artifacts (logs/screenshots)
+.playwright-cli/

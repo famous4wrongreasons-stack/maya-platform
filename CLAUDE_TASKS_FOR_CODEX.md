@@ -29,12 +29,14 @@
 ### ~~3b. Биллинг: реальная оплата~~ · ✅ BACKEND ЗАКРЫТ 2026-07-05
 (бэк Codex: YooKassa checkout, webhook, сохранение payment_method, recurring-charge endpoint, run-due/past_due; UI-пакет для Claude: `CLAUDE_YOOKASSA_BILLING_PACKET.md`)
 
-### ~~4. Upload логотипа файлом~~ · ✅ BACKEND ЗАКРЫТ 2026-07-06
-(бэк Codex: `POST /admin/tenants/:id/logo`, multipart `file`, локальная статика `/api/public/uploads/tenant-logos/...`; UI-пакет для Claude: `CLAUDE_LOGO_UPLOAD_PACKET.md`)
+### ~~4. Upload логотипа файлом~~ · ✅ ЗАКРЫТО 2026-07-06
+(бэк Codex + UI Claude: file-input в «Бренде», миниатюра, абсолютизация logo_url в клиент-boot; smoke зелёный)
 
 ### 5. Деплой NestJS-бэка + поддомены салонов · blocking для реальных клиентов
 - Current: всё на localhost:3000
 - Desired: план деплоя (сервер/домен/SSL) — согласуем со Стасом
+- Codex status: runbook подготовлен в `CODEX_PROD_DEPLOY_AND_OAUTH_RUNBOOK.md`;
+  дальше нужны решения/доступы Стаса, затем можно делать реальный deploy
 
 ### 6. OAuth-ключи провайдеров (Яндекс/Telegram) + redirect whitelist · blocking для соц-входа
 - Current: локальный env без ключей → `/auth/oauth/*/start` = `social_provider_unavailable`
@@ -42,3 +44,6 @@
   добавить `http://127.0.0.1:8787/oauth-callback.html` (локально) и
   `https://malesthetic.pro/app/oauth-callback.html` (прод)
 - Фронт соц-входа готов (кнопки + callback-страница), ждёт только ключи
+- Codex status: список env и whitelist включён в
+  `CODEX_PROD_DEPLOY_AND_OAUTH_RUNBOOK.md`; сами ключи создаёт владелец
+  кабинетов провайдеров

@@ -6,6 +6,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 
+import anthropic
 import httpx
 
 import ai_billing
@@ -19,15 +20,30 @@ OPENAI_BASE_URL = getattr(_cfg, "OPENAI_BASE_URL", "https://api.openai.com/v1").
 OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
 OPENAI_TELEGRAM_CHAT_MODEL = getattr(_cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.4")
-# Backwards-compatible names: old callers still pass/import these symbols.
-CLAUDE_MODEL = OPENAI_CHAT_MODEL
-# Голосовой мозг КЛИЕНТОВ: в живом голосе латентность важнее «максимальности».
-# Флагман (gpt-5.5) на задаче записи/консультации ощутимо «тупит» — 2-3 хода с
-# инструментами дают длинную паузу перед ответом. Быстрый средний тир (gpt-5.4)
-# держит качество tool-use и диалога, но заметно снижает паузу и цену. Владелец
-# в голосе всё равно идёт на флагман (маршрутизация в realtime_bridge по роли).
-# Переопределяется config.OPENAI_VOICE_CHAT_MODEL.
-VOICE_CLAUDE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", "") or "gpt-5.4"
+CLAUDE_API_KEY = getattr(_cfg, "CLAUDE_API_KEY", "")
+# ── Провайдер мозга MAYA (голос + чат думают ОДНИМ мозгом) ───────────────────
+#   AI_PROVIDER="openai" (по умолчанию) — текущий рабочий тир gpt-5.x.
+#   AI_PROVIDER="claude" — Anthropic Sonnet: живее и человечнее, точный tool-use,
+#       как было ДО миграции на OpenAI. НО требует АКТИВНОЙ Anthropic-организации
+#       на CLAUDE_API_KEY. Если организация отключена (billing/policy) — Claude
+#       вернёт 400 «This organization has been disabled» на КАЖДЫЙ вызов и мозг
+#       ляжет. Поэтому флаг переключать ТОЛЬКО после того, как ключ Anthropic
+#       снова отвечает. Возврат на Claude = одна строка в config на VPS:
+#           AI_PROVIDER = "claude"
+AI_PROVIDER = (getattr(_cfg, "AI_PROVIDER", "") or "openai").strip().lower()
+
+_CLAUDE_CHAT_MODEL = getattr(_cfg, "CLAUDE_MODEL", "") or "claude-sonnet-4-5-20250929"
+_CLAUDE_VOICE_MODEL = getattr(_cfg, "CLAUDE_VOICE_MODEL", "") or _CLAUDE_CHAT_MODEL
+_OPENAI_VOICE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", "") or "gpt-5.4"
+
+# Имена CLAUDE_MODEL / VOICE_CLAUDE_MODEL сохранены (их импортируют realtime_bridge
+# и др.) — теперь это «модель по умолчанию для мозга», зависящая от провайдера.
+if AI_PROVIDER == "claude":
+    CLAUDE_MODEL = _CLAUDE_CHAT_MODEL
+    VOICE_CLAUDE_MODEL = _CLAUDE_VOICE_MODEL
+else:
+    CLAUDE_MODEL = OPENAI_CHAT_MODEL
+    VOICE_CLAUDE_MODEL = _OPENAI_VOICE_MODEL
 from memory import build_context
 from prompts import SYSTEM_PROMPT
 from yclients import YClientsAPI, get_schedule_from_file, get_day_hours
@@ -2110,6 +2126,92 @@ def _stream_chat_completion(body: dict):
                 continue
 
 
+# ─── Anthropic (Claude) — боевой мозг MAYA ──────────────────────────────────
+# Внутренний формат сообщений/инструментов у нас УЖЕ Anthropic-нативный
+# (блоки text / tool_use / tool_result, input_schema, cache_control), поэтому
+# путь к Claude короче, чем к OpenAI: конвертация не нужна.
+_anthropic_client: "anthropic.Anthropic | None" = None
+
+
+def _get_anthropic_client() -> "anthropic.Anthropic":
+    global _anthropic_client
+    if _anthropic_client is None:
+        if not CLAUDE_API_KEY:
+            raise RuntimeError("CLAUDE_API_KEY не задан")
+        kwargs = {"api_key": CLAUDE_API_KEY}
+        # Тот же PROXY_URL, что и для остального (обход геоблока РФ, если задан).
+        if PROXY_URL:
+            kwargs["http_client"] = httpx.Client(proxy=PROXY_URL, timeout=90.0)
+        _anthropic_client = anthropic.Anthropic(**kwargs)
+    return _anthropic_client
+
+
+def _anthropic_tools(role: str, disabled_tools: set[str] | None = None) -> list[dict]:
+    """Инструменты роли в нативном Anthropic-формате (name/description/input_schema)."""
+    disabled = set(disabled_tools or ())
+    tools = []
+    for t in _tools_for_role(role):
+        if t.get("name") in disabled:
+            continue
+        tools.append({
+            "name": t["name"],
+            "description": t.get("description", ""),
+            # cache_control внутри схемы не нужен — чистим, чтобы схема была валидной.
+            "input_schema": _strip_anthropic_meta(
+                t.get("input_schema") or {"type": "object", "properties": {}}
+            ),
+        })
+    return tools
+
+
+def _claude_text(content) -> str:
+    """Склеивает текстовые блоки ответа Claude."""
+    return "".join(
+        getattr(b, "text", "") for b in (content or [])
+        if getattr(b, "type", None) == "text"
+    ).strip()
+
+
+def _claude_tool_uses(content) -> list[_ToolUse]:
+    """Достаёт tool_use-блоки из ответа Claude."""
+    out = []
+    for b in content or []:
+        if getattr(b, "type", None) == "tool_use":
+            out.append(_ToolUse(id=b.id, name=b.name, input=b.input or {}))
+    return out
+
+
+def _brain_turn(
+    messages: list,
+    user_id: int | None,
+    role: str,
+    mdl: str,
+    max_tokens: int,
+    disabled_tools: set[str] | None,
+    mode: str | None,
+) -> tuple[str, list[_ToolUse]]:
+    """Один ход мозга (не-стрим). Возвращает (текст, tool_uses).
+    Провайдер выбирается по AI_PROVIDER; формат tool-loop одинаковый."""
+    if AI_PROVIDER == "claude":
+        resp = _get_anthropic_client().messages.create(
+            model=mdl,
+            max_tokens=max_tokens,
+            system=_build_system_prompt(user_id, role, mode),
+            messages=messages,
+            tools=_anthropic_tools(role, disabled_tools),
+        )
+        ai_billing.log_anthropic_usage("anton_chat", mdl, resp, user_id=user_id)
+        return _claude_text(resp.content), _claude_tool_uses(resp.content)
+
+    data = _chat_completion(_openai_body(
+        messages, user_id, role, mdl,
+        max_tokens=max_tokens, disabled_tools=disabled_tools, mode=mode,
+    ))
+    ai_billing.log_openai_usage("anton_chat", mdl, data, user_id=user_id)
+    message = (data.get("choices") or [{}])[0].get("message") or {}
+    return (message.get("content") or "").strip(), _tool_uses_from_message(message)
+
+
 def _tool_uses_from_message(message: dict) -> list[_ToolUse]:
     out = []
     for tc in message.get("tool_calls") or []:
@@ -2334,21 +2436,9 @@ def get_ai_response(
 
     while True:
         rounds += 1
-        data = _chat_completion(_openai_body(
-            messages,
-            user_id,
-            role,
-            mdl,
-            max_tokens=max_tokens,
-            disabled_tools=disabled_tools,
-            mode=mode,
-        ))
-        ai_billing.log_openai_usage("anton_chat", mdl, data, user_id=user_id)
-
-        choice = (data.get("choices") or [{}])[0]
-        message = choice.get("message") or {}
-        response_text = (message.get("content") or "").strip()
-        tool_uses = _tool_uses_from_message(message)
+        response_text, tool_uses = _brain_turn(
+            messages, user_id, role, mdl, max_tokens, disabled_tools, mode,
+        )
         total_tool_calls += len(tool_uses)
 
         # Если модель закончила — возвращаем ответ
@@ -2408,51 +2498,69 @@ def get_ai_response_stream(
 
     while True:
         text_parts = []
-        tool_acc: dict[int, dict] = {}
-        usage = None
-        for chunk in _stream_chat_completion(_openai_body(
-            messages,
-            user_id,
-            role,
-            mdl,
-            disabled_tools=disabled_tools,
-            mode=mode,
-        )):
-            if chunk.get("usage"):
-                usage = chunk.get("usage")
-            choices = chunk.get("choices") or []
-            if not choices:
-                continue
-            delta = choices[0].get("delta") or {}
-            txt = delta.get("content")
-            if txt:
-                txt_plain = txt.replace("*", "")
-                text_parts.append(txt_plain)
-                yield {"type": "delta", "text": txt_plain}
-            for tc in delta.get("tool_calls") or []:
-                idx = int(tc.get("index", 0) or 0)
-                acc = tool_acc.setdefault(idx, {"id": "", "name": "", "arguments": ""})
-                if tc.get("id"):
-                    acc["id"] = tc["id"]
-                fn = tc.get("function") or {}
-                if fn.get("name"):
-                    acc["name"] = fn["name"]
-                if fn.get("arguments"):
-                    acc["arguments"] += fn["arguments"]
+        if AI_PROVIDER == "claude":
+            final = None
+            with _get_anthropic_client().messages.stream(
+                model=mdl,
+                max_tokens=1024,
+                system=_build_system_prompt(user_id, role, mode),
+                messages=messages,
+                tools=_anthropic_tools(role, disabled_tools),
+            ) as stream:
+                for txt in stream.text_stream:
+                    txt_plain = txt.replace("*", "")
+                    text_parts.append(txt_plain)
+                    yield {"type": "delta", "text": txt_plain}
+                final = stream.get_final_message()
+            ai_billing.log_anthropic_usage("anton_chat", mdl, final, user_id=user_id)
+            tool_uses = _claude_tool_uses(final.content) if final else []
+        else:
+            tool_acc: dict[int, dict] = {}
+            usage = None
+            for chunk in _stream_chat_completion(_openai_body(
+                messages,
+                user_id,
+                role,
+                mdl,
+                disabled_tools=disabled_tools,
+                mode=mode,
+            )):
+                if chunk.get("usage"):
+                    usage = chunk.get("usage")
+                choices = chunk.get("choices") or []
+                if not choices:
+                    continue
+                delta = choices[0].get("delta") or {}
+                txt = delta.get("content")
+                if txt:
+                    txt_plain = txt.replace("*", "")
+                    text_parts.append(txt_plain)
+                    yield {"type": "delta", "text": txt_plain}
+                for tc in delta.get("tool_calls") or []:
+                    idx = int(tc.get("index", 0) or 0)
+                    acc = tool_acc.setdefault(idx, {"id": "", "name": "", "arguments": ""})
+                    if tc.get("id"):
+                        acc["id"] = tc["id"]
+                    fn = tc.get("function") or {}
+                    if fn.get("name"):
+                        acc["name"] = fn["name"]
+                    if fn.get("arguments"):
+                        acc["arguments"] += fn["arguments"]
 
-        ai_billing.log_openai_usage("anton_chat", mdl, {"usage": usage or {}}, user_id=user_id)
+            ai_billing.log_openai_usage("anton_chat", mdl, {"usage": usage or {}}, user_id=user_id)
+
+            tool_uses = []
+            for idx in sorted(tool_acc):
+                acc = tool_acc[idx]
+                if not acc.get("name"):
+                    continue
+                try:
+                    args = json.loads(acc.get("arguments") or "{}")
+                except Exception:
+                    args = {}
+                tool_uses.append(_ToolUse(id=acc.get("id") or f"call_{idx}", name=acc["name"], input=args))
 
         final_text = _plain_chat_text("".join(text_parts).strip())
-        tool_uses = []
-        for idx in sorted(tool_acc):
-            acc = tool_acc[idx]
-            if not acc.get("name"):
-                continue
-            try:
-                args = json.loads(acc.get("arguments") or "{}")
-            except Exception:
-                args = {}
-            tool_uses.append(_ToolUse(id=acc.get("id") or f"call_{idx}", name=acc["name"], input=args))
 
         # Финальный ход — отдаём сигналы и выходим
         if not tool_uses:

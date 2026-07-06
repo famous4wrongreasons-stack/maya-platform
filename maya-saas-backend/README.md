@@ -76,6 +76,7 @@ JWT_SECRET="change-me-in-production"
 CRM_ENCRYPTION_KEY="change-me-in-production"
 PORT=3000
 NODE_ENV="development"
+SELF_SERVE_TRIAL_SIGNUP="false"
 YCLIENTS_BASE_URL="https://api.yclients.com/api/v1"
 YCLIENTS_PARTNER_TOKEN="change-me-in-production"
 PHONE_AUTH_PROVIDER="auto"
@@ -106,6 +107,8 @@ UPLOAD_ROOT="./uploads"
 ```
 
 Phone auth delivery modes:
+
+- `SELF_SERVE_TRIAL_SIGNUP=true`: enables public self-serve trial salon signup in production
 
 - `PHONE_AUTH_PROVIDER=auto`: local/test defaults to debug, production requires SMS creds
 - `PHONE_AUTH_PROVIDER=debug`: always returns `debug_code`

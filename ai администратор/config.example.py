@@ -78,9 +78,19 @@ YANDEX_SPEECHKIT_SPEED = float(_opt("YANDEX_SPEECHKIT_SPEED", "1.0") or "1.0")
 YANDEX_SPEECHKIT_PITCH_SHIFT = float(_opt("YANDEX_SPEECHKIT_PITCH_SHIFT", "0") or "0")
 YANDEX_SPEECHKIT_MAX_CHARS = int(float(_opt("YANDEX_SPEECHKIT_MAX_CHARS", "240") or "240"))
 
-# ── Claude (Anthropic) — legacy/fallback, можно не задавать ──────────────────
+# ── Claude (Anthropic) — альтернативный мозг MAYA (голос + чат) ──────────────
+# AI_PROVIDER выбирает мозг для get_ai_response / get_ai_response_stream:
+#   "openai" (по умолчанию) — тир gpt-5.x, текущий рабочий;
+#   "claude" — Anthropic Sonnet (живее/человечнее, точный tool-use, как было ДО
+#              миграции на OpenAI), НО требует АКТИВНОЙ Anthropic-организации на
+#              CLAUDE_API_KEY. При отключённой организации Claude отвечает 400
+#              «This organization has been disabled» на КАЖДЫЙ вызов — ставить
+#              "claude" только с рабочим ключом Anthropic.
+AI_PROVIDER = _opt("AI_PROVIDER", "openai")
 CLAUDE_API_KEY = _opt("CLAUDE_API_KEY", "")
 CLAUDE_MODEL = _opt("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
+# Модель Claude для голоса (пусто = та же, что CLAUDE_MODEL).
+CLAUDE_VOICE_MODEL = _opt("CLAUDE_VOICE_MODEL", "")
 
 # ── YClients ────────────────────────────────────────────────────────────────
 YCLIENTS_PARTNER_TOKEN = _req("YCLIENTS_PARTNER_TOKEN")

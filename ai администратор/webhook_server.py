@@ -935,6 +935,7 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
     # Догружаем полный профиль клиента, чтобы корректно показать «N-й визит»
     # и дать AI его историю предпочтений.
     advice, ai_provider = None, "fallback"
+    money_full, money_short = "", ""     # денежная мотивация мастеру (цифры)
     client = record.get("client") or {}
     client_id = client.get("id")
     if client_id:
@@ -958,6 +959,10 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
                 f"Webhook: AI ({ai_provider}) сгенерировал совет "
                 f"({len(advice) if advice else 0} символов) для записи {record_id}"
             )
+            try:
+                money_full, money_short = masters_ai.money_pitch(int(staff_id), history, record)
+            except Exception as e:
+                logger.error(f"Webhook: money_pitch для записи {record_id}: {e}")
         except Exception as e:
             logger.error(f"Webhook: ошибка получения совета AI: {e}")
 
@@ -983,6 +988,9 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
 
     # 7. Готовим текст уведомления (с советом, если AI вернул что-то)
     text = _build_notification_text(record, advice=advice)
+    # Денежная мотивация мастеру: конкретные цифры (обычно/можешь, в мес, в год).
+    if money_full:
+        text = f"{text}\n\n{money_full}"
 
     # Inline-кнопки оплаты: 💵 Наличные / 💳 Карта.
     # callback_data: pay_<method>_<record_id> — record_id даёт идемпотентность.
@@ -1014,6 +1022,8 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
             if len(_adv) > 220:
                 _adv = _adv[:219].rstrip() + "…"
             _push_body = f"{_push_body}\n💡 {_adv}"
+        if money_short:                       # короткая денежная строка в пуш
+            _push_body = f"{_push_body}\n{money_short}"
         await _send_master_push(
             master, title="Новая запись", body=_push_body,
             url="/app/?panel=schedule", tag=f"record-create-{record_id}",
@@ -3407,6 +3417,82 @@ async def panel_salary_handler(request: web.Request) -> web.Response:
     })
 
 
+def _service_cost(r: dict) -> float:
+    c = 0.0
+    for s in (r.get("services") or []):
+        if isinstance(s, dict):
+            try:
+                c += float(s.get("cost") or s.get("price_min") or 0)
+            except Exception:
+                pass
+    return c
+
+
+def _today_earn_from_records(recs: list, pct: float, today_iso: str) -> dict:
+    """Факт заработка за сегодня + ПОТЕНЦИАЛ MAYA из уже полученных записей мастера.
+    Потенциал = сегодняшние визиты × целевой чек (лучший из сегодняшнего/исторического
+    + 20% апселл-запас, который советует MAYA) × доля мастера. Красный/зелёный на плитке
+    считается фронтом из ratio earned/potential."""
+    visits_today, gross_today = 0, 0.0
+    hist = []
+    for r in recs:
+        if not isinstance(r, dict) or _is_gift_cert_record(r) or r.get("paid_full") != 1:
+            continue
+        d = (r.get("datetime") or r.get("date") or "")[:10]
+        cost = _service_cost(r)
+        if d == today_iso:
+            visits_today += 1
+            gross_today += cost
+        elif cost > 0:
+            hist.append(cost)
+    earned_today = round(gross_today * pct)
+    today_avg = (gross_today / visits_today) if visits_today else 0.0
+    # Цель = средний чек в ЛУЧШИЕ дни мастера (топ-40% исторических чеков за 60 дней) —
+    # то, что достижимо с апселлом/уходом по совету MAYA. Ориентир ФИКСИРОВАННЫЙ (не
+    # привязан к сегодняшнему), поэтому «продаёт себестоимость без допов» → чек низкий →
+    # ratio низкий → плитка красная; «делает как в лучшие дни» → ratio→1 → зелёная.
+    if hist:
+        hist.sort(reverse=True)
+        top = hist[:max(1, round(len(hist) * 0.4))]
+        target_check = sum(top) / len(top)
+    else:
+        target_check = today_avg * 1.3
+    target_check = max(target_check, today_avg)   # сегодня выше лучших → цель = сегодня (зелёный)
+    potential_today = round(visits_today * target_check * pct)
+    if potential_today < earned_today:
+        potential_today = earned_today
+    return {"earned_today": earned_today, "potential_today": potential_today,
+            "visits_today": visits_today}
+
+
+def _master_today_earn(staff_id: int, pct: float) -> dict:
+    """Отдельный расчёт факт/потенциал за сегодня (fetch 60 дней записей мастера)."""
+    today = date.today()
+    try:
+        recs = _yc.get_records_for_master(
+            staff_id, (today - timedelta(days=60)).isoformat(), today.isoformat()) or []
+    except Exception as e:
+        logger.error(f"today earn records staff={staff_id}: {e}")
+        recs = []
+    return _today_earn_from_records(recs, pct, today.isoformat())
+
+
+def _master_month_behind(staff_id: int, pct: float) -> bool:
+    """True, если личный доход за текущий месяц-к-дате отстаёт от прошлого месяца
+    на ту же дату (для окраски недельной плитки в красный)."""
+    today = date.today()
+    m_start, _ = _month_bounds(today, 0)
+    p_start, p_end = _month_bounds(today, 1)
+    p_cut = min(p_end, p_start + timedelta(days=(today - m_start).days))
+    try:
+        cur = _revenue_by_master(m_start.isoformat(), today.isoformat()).get(staff_id, 0.0)
+        prev = _revenue_by_master(p_start.isoformat(), p_cut.isoformat()).get(staff_id, 0.0)
+    except Exception as e:
+        logger.error(f"month behind staff={staff_id}: {e}")
+        return False
+    return round(cur * pct) < round(prev * pct)
+
+
 async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     """POST /api/panel/my_earnings — личный заработок мастера за ТЕКУЩУЮ расчётную
     неделю (Чт→Ср, до сегодня): валовая по услугам × его доля. Та же формула, что в
@@ -3436,21 +3522,21 @@ async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     gross = round(rev_week.get(sid, 0.0))
     is_owner = (sid == OWNER_STAFF_ID)
     pct = 1.0 if is_owner else MASTER_SALARY_PCT.get(sid, MASTER_SALARY_DEFAULT)
-    # личный доход за СЕГОДНЯ (валовая по услугам мастера сегодня × его доля)
-    today_iso = date.today().isoformat()
-    try:
-        rev_today = await asyncio.to_thread(_revenue_by_master, today_iso, today_iso)
-    except Exception as e:
-        logger.error(f"my_earnings today staff={sid}: {e}")
-        rev_today = {}
-    gross_today = round(rev_today.get(sid, 0.0))
+    # факт/потенциал за сегодня + отставание месяца (параллельно, чтобы не тормозить)
+    today_earn, behind = await asyncio.gather(
+        asyncio.to_thread(_master_today_earn, sid, pct),
+        asyncio.to_thread(_master_month_behind, sid, pct),
+    )
     return _cabinet_response({
         "pay_week": pw,
         "gross_week": gross,
         "percent": int(round(pct * 100)),
         "salary_week": round(gross * pct),
-        "gross_today": gross_today,
-        "salary_today": round(gross_today * pct),
+        "earned_today": today_earn["earned_today"],
+        "potential_today": today_earn["potential_today"],
+        "visits_today": today_earn["visits_today"],
+        "salary_today": today_earn["earned_today"],   # плитка теперь на той же (records) базе
+        "month_behind": bool(behind),
         "is_owner": is_owner,
     })
 
@@ -3549,6 +3635,8 @@ def _master_clients_month(staff_id: int) -> dict:
     personal = round(gross * pct)
     avg_check = round(gross / visits_now) if visits_now else 0
     top_services = sorted(svc_freq.items(), key=lambda kv: kv[1], reverse=True)[:3]
+    # факт/потенциал за сегодня — из тех же полученных записей (без лишнего запроса)
+    te = _today_earn_from_records(records, pct, today.isoformat())
 
     # список имён (БЕЗ телефонов), по убыванию визитов затем по алфавиту
     names = sorted(served_now.values(), key=lambda v: (-v["visits"], v["name"].lower()))
@@ -3556,6 +3644,9 @@ def _master_clients_month(staff_id: int) -> dict:
 
     return {
         "month": m_start.strftime("%Y-%m"),
+        "earned_today": te["earned_today"],
+        "potential_today": te["potential_today"],
+        "visits_today": te["visits_today"],
         "total": visits_now,          # headline «Обслужено» = визиты/приёмы (как в YClients)
         "unique": unique_now,         # уникальных людей за месяц
         "clients": clients,

@@ -507,3 +507,133 @@ async def generate_upsell_advice(
         advice = advice[:400].rsplit(" ", 1)[0] + "…"
 
     return advice, provider
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Денежная мотивация мастеру: КОНКРЕТНЫЕ цифры (обычно / можешь / в мес / в год).
+# Считаем ДЕТЕРМИНИРОВАННО (не доверяем арифметику LLM — с деньгами это опасно).
+# Идея (по ТЗ Стаса 2026-07-06): человек мотивируется цифрами и «жадностью» —
+# покажи, сколько он берёт обычно и сколько мог бы, + проекция на месяц и год.
+# ─────────────────────────────────────────────────────────────────────────
+
+_MP_ADDON_KW = ("бород", "тонирован", "окантов", "гладкое бритье", "spa", "спа",
+                "массаж", "патчи", "эпиляц", "скраб", "маск", "уход за кож")
+_MP_PRIO_KW = ("бород", "тонирован")
+_MP_MAIN_KW = ("стрижка", "фейд", "бритье головы", "детск")
+
+
+def _mp_visit_gross(visit: dict) -> int:
+    return sum(int(s.get("cost") or 0)
+               for s in (visit.get("services") or []) if isinstance(s, dict))
+
+
+def _mp_parse_date(s):
+    try:
+        return datetime.strptime(str(s)[:10], "%Y-%m-%d").date()
+    except Exception:
+        return None
+
+
+def _mp_pick_addon(current_titles: set[str]) -> tuple[str | None, int]:
+    """Самая уместная допуслуга с ценой (борода/тонирование в приоритете)."""
+    try:
+        from claude_ai import yclients as _yc
+    except Exception:
+        return None, 0
+    best = None
+    try:
+        for s in (_yc.get_services() or []):
+            if not isinstance(s, dict):
+                continue
+            title = (s.get("title") or "").strip()
+            key = title.lower()
+            if not title or key in current_titles:
+                continue
+            if any(k in key for k in _MP_MAIN_KW):
+                continue
+            if not any(k in key for k in _MP_ADDON_KW):
+                continue
+            try:
+                price = int(s.get("price_min") or s.get("cost") or s.get("price") or 0)
+            except Exception:
+                price = 0
+            if price <= 0:
+                continue
+            prio = 0 if any(k in key for k in _MP_PRIO_KW) else 1
+            cand = (prio, -price, title, price)
+            if best is None or cand < best:
+                best = cand
+    except Exception as e:
+        logger.error(f"money_pitch addon fetch: {e}")
+    return (best[2], best[3]) if best else (None, 0)
+
+
+def _mp_freq_word(vpm: float) -> str:
+    n = round(vpm)
+    if vpm < 0.85:
+        return "примерно раз в 5–6 недель"
+    if n <= 1:
+        return "примерно раз в месяц"
+    return f"~{n} раза в месяц"
+
+
+def money_pitch(staff_id: int, history: list[dict], current_record: dict) -> tuple[str, str]:
+    """Денежная мотивация мастеру по КОНКРЕТНОМУ клиенту.
+
+    Возвращает (full, short): full — 3 строки для Telegram, short — одна строка
+    для web-push. Пусто ("", ""), если посчитать не из чего или это владелец.
+    """
+    try:
+        from business_rules import salary_percent, OWNER_STAFF_ID
+        sid = int(staff_id)
+        if sid == OWNER_STAFF_ID:
+            return "", ""                       # владелец — без ЗП-мотивации
+        pct = float(salary_percent(sid) or 0.5)
+        if pct <= 0 or pct >= 1.0:
+            return "", ""
+    except Exception as e:
+        logger.error(f"money_pitch percent: {e}")
+        return "", ""
+
+    history = history or []
+    mine = [v for v in history if isinstance(v, dict) and v.get("master_id") == int(staff_id)]
+    grosses = [g for g in (_mp_visit_gross(v) for v in mine) if g > 0]
+    if grosses:
+        usual_gross = round(sum(grosses) / len(grosses))
+    else:
+        usual_gross = _mp_visit_gross(current_record) or 0
+    if usual_gross <= 0:
+        return "", ""
+
+    # Частота визитов у этого мастера → проекция на месяц/год.
+    dates = sorted([d for d in (_mp_parse_date(v.get("date")) for v in mine) if d])
+    vpm = 1.0
+    if len(dates) >= 2:
+        span = (dates[-1] - dates[0]).days
+        if span > 0:
+            cycle = span / (len(dates) - 1)
+            if 7 <= cycle <= 120:
+                vpm = 30.0 / cycle
+    vpm = max(0.5, min(vpm, 4.0))
+
+    current_titles = {(s.get("title") or "").lower()
+                      for s in (current_record.get("services") or []) if isinstance(s, dict)}
+    addon, addon_price = _mp_pick_addon(current_titles)
+    if not addon or addon_price <= 0:
+        return "", ""
+
+    usual_salary = round(usual_gross * pct)
+    addon_salary = round(addon_price * pct)
+    potential = usual_salary + addon_salary
+    month_delta = round(addon_salary * vpm)
+    year_delta = round(addon_salary * vpm * 12)
+
+    full = (
+        f"💰 Обычно ты берёшь с него ~{usual_gross} ₽ → твои ~{usual_salary} ₽.\n"
+        f"➕ Продашь «{addon}» ({addon_price} ₽) → станет ~{potential} ₽ тебе "
+        f"(+{addon_salary} ₽ за визит).\n"
+        f"📈 Он ходит {_mp_freq_word(vpm)}: это +{month_delta} ₽/мес и +{year_delta} ₽/год "
+        f"к твоему доходу — с одного клиента."
+    )
+    short = f"💰 +{addon_salary} ₽/визит и +{year_delta} ₽/год, если продашь «{addon}»."
+    return full, short
