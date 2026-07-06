@@ -1,7 +1,23 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import type { UploadedLogoFile } from '../branding/branding.service';
 import { TenantStatus, UserRole } from '../common/domain.enums';
 import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
@@ -67,6 +83,26 @@ export class AdminController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.adminService.updateBranding(id, dto, actor);
+  }
+
+  @Post(':id/logo')
+  @Roles(UserRole.PLATFORM_OWNER, UserRole.TENANT_ADMIN)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 2 * 1024 * 1024,
+      },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload a tenant logo file' })
+  uploadLogo(
+    @Param('id') id: string,
+    @UploadedFile() file: UploadedLogoFile,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adminService.uploadTenantLogo(id, file, actor);
   }
 
   @Post(':id/crm')

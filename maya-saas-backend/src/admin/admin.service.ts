@@ -5,7 +5,10 @@ import { randomBytes } from 'crypto';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { TenantStatus, UserRole, UserStatus } from '../common/domain.enums';
-import { BrandingService } from '../branding/branding.service';
+import {
+  BrandingService,
+  UploadedLogoFile,
+} from '../branding/branding.service';
 import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CrmService } from '../crm/crm.service';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
@@ -97,20 +100,30 @@ export class AdminService {
       metadata: dto as unknown as Record<string, unknown>,
     });
 
-    return {
-      id: branding.id,
-      tenant_id: branding.tenantId,
-      logo_url: branding.logoUrl,
-      app_name: branding.appName,
-      primary_color: branding.primaryColor,
-      secondary_color: branding.secondaryColor,
-      background_image_url: branding.backgroundImageUrl,
-      font_family: branding.fontFamily,
-      button_radius: branding.buttonRadius,
-      theme_json: branding.themeJson ?? {},
-      created_at: branding.createdAt,
-      updated_at: branding.updatedAt,
-    };
+    return this.serializeBranding(branding);
+  }
+
+  async uploadTenantLogo(
+    id: string,
+    file: UploadedLogoFile,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    await this.tenantsService.getTenantByIdOrThrow(id);
+    const branding = await this.brandingService.uploadTenantLogo(id, file);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'branding.logo_uploaded',
+      entityType: 'branding',
+      entityId: branding.id,
+      metadata: {
+        logo_url: branding.logoUrl,
+      },
+    });
+
+    return this.serializeBranding(branding);
   }
 
   async upsertCrm(
@@ -236,5 +249,24 @@ export class AdminService {
     }
 
     throw new ForbiddenException('You cannot manage this tenant');
+  }
+
+  private serializeBranding(
+    branding: Awaited<ReturnType<BrandingService['upsertBranding']>>,
+  ) {
+    return {
+      id: branding.id,
+      tenant_id: branding.tenantId,
+      logo_url: branding.logoUrl,
+      app_name: branding.appName,
+      primary_color: branding.primaryColor,
+      secondary_color: branding.secondaryColor,
+      background_image_url: branding.backgroundImageUrl,
+      font_family: branding.fontFamily,
+      button_radius: branding.buttonRadius,
+      theme_json: branding.themeJson ?? {},
+      created_at: branding.createdAt,
+      updated_at: branding.updatedAt,
+    };
   }
 }

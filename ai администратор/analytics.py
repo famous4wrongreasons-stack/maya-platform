@@ -78,6 +78,7 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
             rec_staff[r["id"]] = r["staff_id"]
 
     rev = {}                                  # staff_id -> валовая по услугам
+    staff_recs = {}                           # staff_id -> set(record_id) для числа визитов
     cash_sum = card_sum = 0.0
     cash_recs, card_recs = set(), set()
     for t in txs:
@@ -98,6 +99,9 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
             sid = rec_staff.get(t.get("record_id"))
         if sid is not None:
             rev[sid] = rev.get(sid, 0.0) + a
+            _rid = t.get("record_id")
+            if _rid is not None:
+                staff_recs.setdefault(sid, set()).add(_rid)
         # нал/карта — по счёту операции
         acc = t.get("account")
         is_cash = bool(acc.get("is_cash")) if isinstance(acc, dict) else False
@@ -123,12 +127,15 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         if round(g) <= 0:
             continue
         pct = salary_percent(sid)
+        _v = len(staff_recs.get(sid, ()))
         masters.append({
             "staff_id": sid,
             "name": names.get(sid) or f"Мастер #{sid}",
             "gross": round(g),
             "percent": int(round(pct * 100)),
             "salary": round(g * pct),
+            "visits": _v,                          # число оплаченных визитов у мастера
+            "avg_check": round(g / _v) if _v else 0,
             "is_owner": sid == OWNER_STAFF_ID,
         })
     masters.sort(key=lambda x: x["salary"], reverse=True)

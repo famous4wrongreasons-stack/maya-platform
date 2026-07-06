@@ -41,11 +41,18 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
   - `GET /api/admin/tenants/:id`
   - `PATCH /api/admin/tenants/:id`
   - `PATCH /api/admin/tenants/:id/branding`
+  - `POST /api/admin/tenants/:id/logo`
   - `POST /api/admin/tenants/:id/crm`
   - `PATCH /api/admin/tenants/:id/crm`
   - `POST /api/admin/tenants/:id/test-crm`
   - `POST /api/admin/tenants/:id/suspend`
   - `POST /api/admin/tenants/:id/activate`
+  - `POST /api/admin/tenants/:id/billing/checkout`
+  - `GET /api/admin/tenants/:id/billing/payments`
+  - `POST /api/admin/tenants/:id/billing/charge`
+  - `POST /api/admin/billing/run-due`
+- Billing webhook:
+  - `POST /api/billing/yookassa/webhook`
 - CRM adapter architecture with:
   - `MockCRMAdapter` working end-to-end
   - `YClients/Altegio adapter` for real catalog, staff, slots and appointment creation
@@ -90,6 +97,12 @@ TELEGRAM_LOGIN_ENABLED="false"
 TELEGRAM_CLIENT_ID=""
 TELEGRAM_CLIENT_SECRET=""
 TELEGRAM_JWKS_URL="https://oauth.telegram.org/.well-known/jwks.json"
+YOOKASSA_SHOP_ID=""
+YOOKASSA_SECRET_KEY=""
+YOOKASSA_RETURN_URL="http://127.0.0.1:8787/maya-admin.html"
+YOOKASSA_API_BASE_URL="https://api.yookassa.ru/v3"
+YOOKASSA_REQUEST_TIMEOUT_MS="15000"
+UPLOAD_ROOT="./uploads"
 ```
 
 Phone auth delivery modes:
@@ -337,6 +350,51 @@ Provider notes:
 - Telegram flow uses OIDC Authorization Code with PKCE against `https://oauth.telegram.org/auth` and `https://oauth.telegram.org/token`.
 - Telegram ID tokens are verified against JWKS before the backend trusts the user identity.
 - If Yandex or Telegram do not return a Russian phone number, the login still succeeds, but the frontend should ask the user to complete their phone in `PATCH /api/me`.
+
+## YooKassa billing
+
+Create a checkout for a tenant subscription:
+
+```bash
+curl -X POST http://localhost:3000/api/admin/tenants/<tenant-id>/billing/checkout \
+  -H 'Authorization: Bearer <platform-owner-or-tenant-admin-jwt>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "planId": "plan-salon",
+    "returnUrl": "http://127.0.0.1:8787/maya-admin.html"
+  }'
+```
+
+Handle YooKassa notifications at:
+
+```text
+POST /api/billing/yookassa/webhook
+```
+
+Billing notes:
+
+- Checkout payments are created with `save_payment_method=true`, so a successful YooKassa payment can attach `billingMethodId` to the tenant.
+- The webhook fetches the payment from YooKassa again before applying success/cancel state locally.
+- `POST /api/admin/billing/run-due` is the cron-friendly endpoint: it charges due tenants with a saved method and marks expired tenants without one as `past_due`.
+- Real YooKassa credentials and the HTTPS webhook URL must be configured outside the repository.
+
+## Upload tenant logo
+
+Upload a logo file from the admin:
+
+```bash
+curl -X POST http://localhost:3000/api/admin/tenants/<tenant-id>/logo \
+  -H 'Authorization: Bearer <platform-owner-or-tenant-admin-jwt>' \
+  -F 'file=@./logo.png'
+```
+
+Notes:
+
+- Accepted formats: PNG, JPEG, WEBP, GIF.
+- Max file size: 2 MB.
+- Uploaded files are stored under `UPLOAD_ROOT/tenant-logos`.
+- The response is the updated branding payload with `logo_url`.
+- The public logo URL is served by the backend, for example `/api/public/uploads/tenant-logos/<file>.png`.
 
 ## Connect YClients / Altegio
 

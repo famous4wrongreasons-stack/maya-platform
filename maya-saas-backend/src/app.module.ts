@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { AuthModule } from './auth/auth.module';
+import { BillingModule } from './billing/billing.module';
 import { BranchesModule } from './branches/branches.module';
 import { BrandingModule } from './branding/branding.module';
 import { CrmModule } from './crm/crm.module';
@@ -35,6 +36,7 @@ import { UsersModule } from './users/users.module';
     TenantsModule,
     UsersModule,
     AuthModule,
+    BillingModule,
     BrandingModule,
     BranchesModule,
     CrmModule,

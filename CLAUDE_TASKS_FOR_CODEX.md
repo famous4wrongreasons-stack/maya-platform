@@ -23,17 +23,22 @@
   в `delivery: 'debug'`
 - Фронт: ничего менять не нужно, текущая логика Claude уже совместима
 
-### 3. Биллинг подписок · blocking для денег
-- Current: тарифы есть, списаний/продления/`past_due`-переходов нет
-- Desired: минимум — ручной перевод тарифа/статуса + даты периода;
-  максимум — ЮKassa-автосписание (см. черновик
-  `maya-saas-blueprint/pg/tenant_billing.py`)
+### ~~3. Биллинг подписок (ручной минимум)~~ · ✅ ЗАКРЫТО 2026-07-05
+(бэк Codex: поля billing + пересчёт grace; панель «Подписка» в админке Claude)
 
-### 4. Upload логотипа файлом · non-blocking
-- Endpoint: нет (`POST /admin/tenants/:id/logo`?)
-- Current: в админке поле URL
-- Desired: multipart-загрузка + отдача статики; фронт добавит file-input
+### ~~3b. Биллинг: реальная оплата~~ · ✅ BACKEND ЗАКРЫТ 2026-07-05
+(бэк Codex: YooKassa checkout, webhook, сохранение payment_method, recurring-charge endpoint, run-due/past_due; UI-пакет для Claude: `CLAUDE_YOOKASSA_BILLING_PACKET.md`)
+
+### ~~4. Upload логотипа файлом~~ · ✅ BACKEND ЗАКРЫТ 2026-07-06
+(бэк Codex: `POST /admin/tenants/:id/logo`, multipart `file`, локальная статика `/api/public/uploads/tenant-logos/...`; UI-пакет для Claude: `CLAUDE_LOGO_UPLOAD_PACKET.md`)
 
 ### 5. Деплой NestJS-бэка + поддомены салонов · blocking для реальных клиентов
 - Current: всё на localhost:3000
 - Desired: план деплоя (сервер/домен/SSL) — согласуем со Стасом
+
+### 6. OAuth-ключи провайдеров (Яндекс/Telegram) + redirect whitelist · blocking для соц-входа
+- Current: локальный env без ключей → `/auth/oauth/*/start` = `social_provider_unavailable`
+- Desired: клиент-id/секреты Яндекс+Telegram в env; в whitelist redirect_uri
+  добавить `http://127.0.0.1:8787/oauth-callback.html` (локально) и
+  `https://malesthetic.pro/app/oauth-callback.html` (прод)
+- Фронт соц-входа готов (кнопки + callback-страница), ждёт только ключи

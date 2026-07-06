@@ -98,6 +98,9 @@ If a reference screenshot conflicts with generic chat conventions, follow the sc
 - Realtime endpoint: `wss://rt.malesthetic.pro/api/realtime`.
 - Backend bridge: `ai администратор/realtime_bridge.py`.
 - Realtime model config currently uses `REALTIME_MODEL`, default `gpt-realtime-2`.
+- Realtime uses OpenAI as fast STT/turn detector, but if `VOICE_TTS_PROVIDER=yandex`
+  and SpeechKit credentials are present, `realtime_bridge.py` voices final replies
+  through `voice.py`/Yandex SpeechKit and streams PCM16/24kHz back to the app.
 - Voice/chat model config currently uses `OPENAI_VOICE_CHAT_MODEL`, default aligned with `OPENAI_CHAT_MODEL`.
 - Main high-quality client brain: `gpt-5.5`.
 - Staff/master notification advice: `gpt-5.4`.

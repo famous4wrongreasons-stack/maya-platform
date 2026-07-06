@@ -4,6 +4,13 @@
 # --- Страница 404 ---
 ErrorDocument 404 /404.html
 
+# --- Переезд с IDN-домена на основной домен ---
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^(www\.)?xn--80aaocmjdk0cclbf8l3a\.xn--p1ai(:[0-9]+)?$ [NC]
+  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]
+</IfModule>
+
 # --- Сжатие текстовых ресурсов (gzip) ---
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml

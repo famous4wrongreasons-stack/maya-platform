@@ -253,6 +253,22 @@ def init_db():
                 updated_at  TEXT NOT NULL
             );
 
+            -- Минимальный реестр салонов-подписчиков MAYA (founder/GOD-режим).
+            -- Пока мульти-салонная SaaS не запущена — владелец ведёт его вручную;
+            -- когда появится авто-онбординг, он будет писать сюда же.
+            CREATE TABLE IF NOT EXISTS maya_tenants (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                name         TEXT    NOT NULL,
+                city         TEXT,
+                plan         TEXT,
+                status       TEXT    NOT NULL DEFAULT 'pending',  -- pending|active|suspended
+                owner_name   TEXT,
+                phone        TEXT,
+                mrr          INTEGER NOT NULL DEFAULT 0,
+                created_at   TEXT    NOT NULL,
+                activated_at TEXT
+            );
+
             -- Чаевые: каждый факт «Я перевёл» от клиента (служебный сигнал, не
             -- банковское подтверждение). Для аналитики по каждому мастеру отдельно.
             CREATE TABLE IF NOT EXISTS tips (
@@ -526,6 +542,10 @@ def init_db():
                 phone_hash   TEXT,
                 vk_user_id   INTEGER,
                 display_name TEXT,
+                tg_first_name TEXT,
+                tg_last_name  TEXT,
+                tg_username   TEXT,
+                tg_photo_url  TEXT,
                 created_at   TEXT NOT NULL,
                 expires_at   TEXT NOT NULL,
                 last_seen_at TEXT,
@@ -556,6 +576,17 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_salon_expenses_date
                 ON salon_expenses (date);
 
+            -- Касса со слов Антона: сколько всего налички в кассе и сколько получено
+            -- наличкой за конкретный день. Для сверки с расчётной наличкой YClients
+            -- в дневном отчёте владельца. Один день = одна запись (перезапись).
+            CREATE TABLE IF NOT EXISTS cash_log (
+                date        TEXT    PRIMARY KEY,   -- YYYY-MM-DD
+                total_till  INTEGER NOT NULL,      -- всего налички в кассе сейчас
+                day_cash    INTEGER NOT NULL,      -- наличкой получено за этот день
+                entered_by  INTEGER,
+                ts          TEXT    NOT NULL
+            );
+
             -- Лист ожидания на ЗАНЯТОЕ время. Клиент в чате спросил конкретный
             -- слот, а он занят → запоминаем. Если слот освободится — пишем ему
             -- ПЕРВЫМ (приоритет над скорингом по циклу в freed_slot).
@@ -570,6 +601,66 @@ def init_db():
             );
             CREATE INDEX IF NOT EXISTS idx_slot_waitlist_lookup
                 ON slot_waitlist (staff_id, slot_datetime, notified_at);
+
+            -- «Настроение визита» (пилюли как в Матрице): клиент при записи
+            -- выбирает, как он настроен на приём — 🔴 'red' (хочет помолчать,
+            -- тишина) или 🔵 'blue' (в хорошем настроении, готов общаться).
+            -- Ключ — record_id YClients (выбор привязан к КОНКРЕТНОМУ визиту).
+            -- Показывается барберу в журнале/пуше/комментарии записи.
+            CREATE TABLE IF NOT EXISTS visit_mood (
+                record_id   INTEGER PRIMARY KEY,   -- YClients record_id
+                mood        TEXT    NOT NULL,      -- 'red' | 'blue'
+                source      TEXT,                  -- 'bot' | 'app' | 'admin'
+                client_id   INTEGER,               -- для пер-клиентской памяти (не обязателен)
+                created_at  TEXT    NOT NULL,
+                updated_at  TEXT    NOT NULL
+            );
+            -- Профиль предпочтений клиента (Фаза 2 «наставник»). ОБЕЗЛИЧЕННО:
+            -- ключ — локальный clients.id, в prefs только привычки/предпочтения
+            -- («любит фейд», «не любит болтать», «кофе без сахара»), БЕЗ ПД.
+            -- Накапливается из диалога MAYA; показывается мастеру в досье и
+            -- подмешивается в клиентский контекст. Прогоняется через redact_pii.
+            CREATE TABLE IF NOT EXISTS client_preferences (
+                client_id   INTEGER PRIMARY KEY,   -- clients.id (локальный)
+                prefs       TEXT    NOT NULL,       -- по одному предпочтению на строку
+                updated_at  TEXT    NOT NULL
+            );
+        """)
+        # Аудит вызовов инструментов LLM (RBAC/risk-tiering): кто, что, разрешено ли.
+        # Дебаг + 152-ФЗ + питает GOD-режим «Здоровье». ПД не пишем (только имя инструмента).
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS tool_audit (
+                id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                ts       TEXT    NOT NULL,
+                user_id  INTEGER,
+                role     TEXT,
+                tool     TEXT    NOT NULL,
+                risk     TEXT,
+                allowed  INTEGER NOT NULL,    -- 1 разрешено, 0 отказано гейтом
+                reason   TEXT
+            );
+        """)
+        # Durable-идемпотентность оплаты визита: один record_id = одна оплата, даже
+        # после рестарта процесса или вытеснения in-memory локов (гонка двойного тапа).
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS payment_idempotency (
+                record_id INTEGER PRIMARY KEY,
+                method    TEXT    NOT NULL,
+                amount    INTEGER,
+                ts        TEXT    NOT NULL
+            );
+        """)
+        # Procedural-память: операционные правила салона, заданные владельцем словами
+        # («новым клиентам предлагай комплекс», «парковка бесплатная во дворе»). MAYA
+        # подхватывает их в системный промпт и соблюдает в работе. Без ПД и секретов.
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS salon_rules (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                rule_text  TEXT    NOT NULL,
+                created_by INTEGER,
+                created_at TEXT    NOT NULL,
+                active     INTEGER NOT NULL DEFAULT 1
+            );
         """)
         # Миграция: добавляем зашифрованные колонки в clients и gift_certificates
         _migrate_add_encrypted_columns(conn)
@@ -616,6 +707,16 @@ def _migrate_add_encrypted_columns(conn):
     # Используется в /sources_stats — оценка эффективности каналов привлечения.
     _add("clients", "first_source", "TEXT")
     _add("clients", "first_source_at", "TEXT")
+
+    # Последнее выбранное «настроение визита» клиента ('red'|'blue') — чтобы при
+    # следующей записи можно было предложить тот же выбор по умолчанию.
+    _add("clients", "default_visit_mood", "TEXT")
+    # Профиль Telegram в web-сессии: deep-link вход в приложении должен помнить
+    # имя, фамилию, username и аватар, а не только first_name.
+    _add("web_sessions", "tg_first_name", "TEXT")
+    _add("web_sessions", "tg_last_name", "TEXT")
+    _add("web_sessions", "tg_username", "TEXT")
+    _add("web_sessions", "tg_photo_url", "TEXT")
 
 
 def _backfill_encryption(conn):
@@ -833,6 +934,65 @@ def find_client_by_phone(phone: str) -> dict | None:
         return _client_row_to_dict(row) if row else None
 
 
+# ─── Профиль предпочтений клиента (Фаза 2 «наставник») ──────────────────
+# Обезличенно: ключ — локальный clients.id, в prefs только привычки.
+# ПД не хранятся (вызывающий код прогоняет текст через anonymizer.redact_pii).
+
+_PREF_MAX_LINES = 12
+_PREF_MAX_LEN = 800
+
+
+def add_client_preference(telegram_chat_id: int, pref: str) -> bool:
+    """Добавляет одно предпочтение клиента (по chat_id). Дедуп без учёта
+    регистра, копит до _PREF_MAX_LINES строк. Возвращает True, если записано."""
+    pref = (pref or "").strip().strip("•- ").strip()
+    if not pref or len(pref) > 200:
+        return False
+    client_id = get_or_create_client(int(telegram_chat_id))
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT prefs FROM client_preferences WHERE client_id = ?",
+            (client_id,),
+        ).fetchone()
+        lines = [l for l in (row["prefs"].split("\n") if row else []) if l.strip()]
+        if any(pref.lower() == l.lower() for l in lines):
+            return False                       # уже есть
+        lines.append(pref)
+        lines = lines[-_PREF_MAX_LINES:]       # держим последние N
+        text = "\n".join(lines)[:_PREF_MAX_LEN]
+        conn.execute(
+            "INSERT INTO client_preferences (client_id, prefs, updated_at) "
+            "VALUES (?, ?, ?) ON CONFLICT(client_id) DO UPDATE SET "
+            "prefs = excluded.prefs, updated_at = excluded.updated_at",
+            (client_id, text, _now()),
+        )
+    return True
+
+
+def get_client_preferences(telegram_chat_id: int) -> str:
+    """Предпочтения клиента по telegram chat_id (или '' если нет)."""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT p.prefs FROM client_preferences p "
+            "JOIN clients c ON c.id = p.client_id WHERE c.telegram_chat_id = ?",
+            (int(telegram_chat_id),),
+        ).fetchone()
+        return (row["prefs"] if row else "") or ""
+
+
+def get_client_preferences_by_phone(phone: str) -> str:
+    """Предпочтения клиента по телефону (для досье мастеру). '' если нет."""
+    cl = find_client_by_phone(phone)
+    if not cl or not cl.get("id"):
+        return ""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT prefs FROM client_preferences WHERE client_id = ?",
+            (cl["id"],),
+        ).fetchone()
+        return (row["prefs"] if row else "") or ""
+
+
 # ─── Веб-вход без Telegram (VK ID / телефон): коды и сессии ──────────────
 
 def save_web_login_code(phone_hash: str, code_hash: str, channel: str = "call",
@@ -889,6 +1049,8 @@ def verify_web_login_code(phone_hash: str, code_hash: str, max_attempts: int = 5
 def create_web_session(token: str, *, phone_hash: str | None = None,
                        chat_id: int | None = None, vk_user_id: int | None = None,
                        display_name: str = "", subject_kind: str = "client",
+                       tg_first_name: str = "", tg_last_name: str = "",
+                       tg_username: str = "", tg_photo_url: str = "",
                        ttl_days: int = 30):
     """Создаёт сессию веб-входа (токен в браузере вместо Telegram initData)."""
     now = datetime.now()
@@ -898,16 +1060,21 @@ def create_web_session(token: str, *, phone_hash: str | None = None,
         conn.execute(
             "INSERT INTO web_sessions "
             "(token, subject_kind, chat_id, phone_hash, vk_user_id, display_name, "
+            " tg_first_name, tg_last_name, tg_username, tg_photo_url, "
             " created_at, expires_at, last_seen_at, revoked) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0) "
             "ON CONFLICT (token) DO UPDATE SET "
             "  subject_kind=excluded.subject_kind, chat_id=excluded.chat_id, "
             "  phone_hash=excluded.phone_hash, vk_user_id=excluded.vk_user_id, "
-            "  display_name=excluded.display_name, created_at=excluded.created_at, "
+            "  display_name=excluded.display_name, "
+            "  tg_first_name=excluded.tg_first_name, tg_last_name=excluded.tg_last_name, "
+            "  tg_username=excluded.tg_username, tg_photo_url=excluded.tg_photo_url, "
+            "  created_at=excluded.created_at, "
             "  expires_at=excluded.expires_at, last_seen_at=excluded.last_seen_at, "
             "  revoked=excluded.revoked",
             (token, subject_kind, chat_id, phone_hash, vk_user_id,
-             display_name, now_s, exp_s, now_s),
+             display_name, tg_first_name, tg_last_name, tg_username, tg_photo_url,
+             now_s, exp_s, now_s),
         )
 
 
@@ -935,6 +1102,61 @@ def get_web_session(token: str) -> dict | None:
 def revoke_web_session(token: str):
     with _db() as conn:
         conn.execute("UPDATE web_sessions SET revoked = 1 WHERE token = ?", (token,))
+
+
+# ─── Нативный вход через Telegram (deep-link + опрос) ─────────────────────
+# Нативное приложение НЕ может использовать веб-виджет Telegram (origin WKWebView
+# не проходит проверку домена бота). Поэтому: приложение создаёт nonce → открывает
+# бота `?start=app_<nonce>` → бот подтверждает (привязывает chat_id+сессию) →
+# приложение опрашивает и забирает токен. Nonce живёт 10 минут, одноразовый.
+def _applogin_ensure(conn):
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS applogin_nonces ("
+        " nonce TEXT PRIMARY KEY, created_at TEXT, chat_id INTEGER,"
+        " token TEXT, consumed INTEGER DEFAULT 0)"
+    )
+
+
+def applogin_create(nonce: str):
+    with _db() as conn:
+        _applogin_ensure(conn)
+        conn.execute(
+            "INSERT INTO applogin_nonces "
+            "(nonce, created_at, chat_id, token, consumed) VALUES (?, ?, NULL, NULL, 0) "
+            "ON CONFLICT (nonce) DO UPDATE SET created_at=excluded.created_at, "
+            "  chat_id=NULL, token=NULL, consumed=0",
+            (nonce, datetime.now().isoformat(timespec="seconds")),
+        )
+
+
+def applogin_authorize(nonce: str, chat_id: int, token: str) -> bool:
+    """Бот подтвердил вход: привязывает chat_id+сессию к свежему неиспользованному nonce."""
+    fresh = (datetime.now() - timedelta(minutes=10)).isoformat(timespec="seconds")
+    with _db() as conn:
+        _applogin_ensure(conn)
+        cur = conn.execute(
+            "UPDATE applogin_nonces SET chat_id = ?, token = ? "
+            "WHERE nonce = ? AND consumed = 0 AND token IS NULL AND created_at >= ?",
+            (int(chat_id), token, nonce, fresh),
+        )
+        return cur.rowcount > 0
+
+
+def applogin_poll(nonce: str) -> dict:
+    """Опрос из приложения. status: pending | ready(+token,chat_id) | expired. ready — один раз."""
+    fresh = (datetime.now() - timedelta(minutes=10)).isoformat(timespec="seconds")
+    with _db() as conn:
+        _applogin_ensure(conn)
+        row = conn.execute(
+            "SELECT chat_id, token, consumed, created_at FROM applogin_nonces WHERE nonce = ?",
+            (nonce,),
+        ).fetchone()
+        if not row or row["created_at"] < fresh or row["consumed"]:
+            return {"status": "expired"}
+        if row["token"]:
+            conn.execute("UPDATE applogin_nonces SET consumed = 1 WHERE nonce = ?", (nonce,))
+            return {"status": "ready", "token": row["token"], "chat_id": row["chat_id"]}
+        return {"status": "pending"}
 
 
 # ─── Согласия на обработку ПД ───────────────────────────────────────────
@@ -993,6 +1215,169 @@ def has_marketing_consent_by_chat_id(telegram_chat_id: int) -> bool:
         if not row:
             return False
         return bool(row["marketing_consent_at"])
+
+
+# ─── Персональные настройки уведомлений клиента ──────────────────────────
+# Клиент сам регулирует, что и как часто получать. Дефолты = ТЕКУЩЕЕ поведение,
+# чтобы никого не «обрезать» молча: настройки применяются, только если клиент
+# их менял. marketing-категории дополнительно гейтятся marketing_consent
+# (юридическое согласие), эти настройки — тонкая регулировка ВНУТРИ согласия.
+import json as _json_np
+
+NOTIFY_PREFS_DEFAULTS = {
+    "record_changes": True,    # изменения по моей записи (создана/перенесена/отменена)
+    "reminder": True,          # напоминание перед визитом (наш Telegram + YClients SMS)
+    "reminder_hours": 3,       # за сколько часов до визита (0..48); рулит notify_by_sms YClients
+    "marketing": True,         # акции / промокоды
+    "marketing_freq": "week",  # week | 2weeks | month — минимальный интервал между акциями
+    "cycle": True,             # «давно не были» (возвращающие)
+    "birthday": True,          # промокод на день рождения
+    "freed_slot": True,        # «освободилось окно у мастера»
+    "quiet_from": None,        # тихие часы: час начала 0..23 или None
+    "quiet_to": None,          # тихие часы: час конца 0..23 или None
+}
+# Минимальный интервал маркетинга в днях
+MARKETING_FREQ_DAYS = {"week": 7, "2weeks": 14, "month": 30}
+
+
+def _notify_prefs_ensure(conn):
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS notify_prefs ("
+        " client_id INTEGER PRIMARY KEY, prefs TEXT, updated_at TEXT)")
+
+
+def get_notify_prefs(client_id: int) -> dict:
+    """Настройки уведомлений клиента, слитые с дефолтами (всегда полный набор ключей)."""
+    prefs = dict(NOTIFY_PREFS_DEFAULTS)
+    try:
+        with _db() as conn:
+            _notify_prefs_ensure(conn)
+            row = conn.execute(
+                "SELECT prefs FROM notify_prefs WHERE client_id = ?",
+                (int(client_id),)).fetchone()
+        if row and row["prefs"]:
+            saved = _json_np.loads(row["prefs"])
+            if isinstance(saved, dict):
+                for k in NOTIFY_PREFS_DEFAULTS:
+                    if k in saved:
+                        prefs[k] = saved[k]
+    except Exception:
+        pass
+    return prefs
+
+
+def get_notify_prefs_by_chat_id(telegram_chat_id: int) -> dict:
+    """Настройки по Telegram chat_id (для отправщиков уведомлений)."""
+    try:
+        with _db() as conn:
+            row = conn.execute(
+                "SELECT id FROM clients WHERE telegram_chat_id = ?",
+                (int(telegram_chat_id),)).fetchone()
+        if row:
+            return get_notify_prefs(row["id"])
+    except Exception:
+        pass
+    return dict(NOTIFY_PREFS_DEFAULTS)
+
+
+def set_notify_prefs(client_id: int, partial: dict) -> dict:
+    """Частичное обновление настроек (мержим с текущими). Возвращает итог."""
+    cur = get_notify_prefs(client_id)
+    for k, v in (partial or {}).items():
+        if k not in NOTIFY_PREFS_DEFAULTS:
+            continue
+        if k in ("reminder_hours",):
+            try:
+                v = max(0, min(48, int(v)))
+            except (TypeError, ValueError):
+                continue
+        elif k in ("quiet_from", "quiet_to"):
+            if v is None or v == "":
+                v = None
+            else:
+                try:
+                    v = max(0, min(23, int(v)))
+                except (TypeError, ValueError):
+                    continue
+        elif k == "marketing_freq":
+            if v not in MARKETING_FREQ_DAYS:
+                continue
+        else:
+            v = bool(v)
+        cur[k] = v
+    with _db() as conn:
+        _notify_prefs_ensure(conn)
+        conn.execute(
+            "INSERT INTO notify_prefs (client_id, prefs, updated_at) "
+            "VALUES (?, ?, ?) "
+            "ON CONFLICT (client_id) DO UPDATE SET "
+            "  prefs=excluded.prefs, updated_at=excluded.updated_at",
+            (int(client_id), _json_np.dumps(cur, ensure_ascii=False), _now()))
+    return cur
+
+
+def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
+    """True, если текущий час попадает в тихие часы клиента (не маркетинг/не срочное)."""
+    try:
+        qf, qt = prefs.get("quiet_from"), prefs.get("quiet_to")
+        if qf is None or qt is None:
+            return False
+        qf, qt, h = int(qf), int(qt), int(now_hour)
+        if qf == qt:
+            return False
+        if qf < qt:
+            return qf <= h < qt
+        return h >= qf or h < qt   # окно через полночь (напр. 22→9)
+    except Exception:
+        return False
+
+
+def has_saved_notify_prefs(client_id: int) -> bool:
+    """True, если клиент РЕАЛЬНО открывал «Настройки» и что-то сохранил (есть строка).
+    Нужно, чтобы частотный троттл маркетинга применялся ТОЛЬКО к тем, кто сам выбрал
+    частоту — иначе дефолтный 7-дневный кап молча резал бы рассылки всей базе."""
+    try:
+        with _db() as conn:
+            _notify_prefs_ensure(conn)
+            row = conn.execute(
+                "SELECT 1 FROM notify_prefs WHERE client_id = ? LIMIT 1",
+                (int(client_id),)).fetchone()
+        return bool(row)
+    except Exception:
+        return False
+
+
+# Троттлинг частоты маркетинга: запоминаем момент последней отправки клиенту,
+# чтобы уважать его marketing_freq (week|2weeks|month). Самомигрирующаяся таблица.
+def _marketing_last_ensure(conn):
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS client_marketing_last ("
+        " client_id INTEGER PRIMARY KEY, sent_at TEXT)")
+
+
+def set_marketing_last_sent(client_id: int):
+    """Запомнить момент успешной отправки маркетингового сообщения клиенту."""
+    with _db() as conn:
+        _marketing_last_ensure(conn)
+        conn.execute(
+            "INSERT INTO client_marketing_last (client_id, sent_at) "
+            "VALUES (?, ?) "
+            "ON CONFLICT (client_id) DO UPDATE SET sent_at=excluded.sent_at",
+            (int(client_id), _now()))
+
+
+def marketing_sent_within(client_id: int, days: int) -> bool:
+    """True, если маркетинг этому клиенту слали в последние N дней."""
+    if days <= 0:
+        return False
+    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
+    with _db() as conn:
+        _marketing_last_ensure(conn)
+        row = conn.execute(
+            "SELECT 1 FROM client_marketing_last "
+            "WHERE client_id = ? AND sent_at > ? LIMIT 1",
+            (int(client_id), cutoff)).fetchone()
+        return bool(row)
 
 
 def has_valid_consent(client_id: int, consent_version: str = CONSENT_VERSION) -> bool:
@@ -1527,6 +1912,108 @@ def list_masters() -> list[dict]:
         return [dict(r) for r in rows]
 
 
+# ─── Внутренний чат сотрудников (общий канал команды) ───────────────────────
+# Человек-человек, БЕЗ ИИ. Сообщения хранятся локально; на новое сообщение
+# бэкенд шлёт пуш (Telegram + Web Push) остальным сотрудникам.
+
+# Колонки сообщения (id + автор + текст + вложение). Один список — чтобы оба
+# SELECT'а и INSERT не разъезжались.
+_STAFF_MSG_SELECT = ("id, sender_chat_id, sender_name, text, created_at, "
+                     "media_kind, media_url, media_name, media_mime, media_size, media_dur")
+
+
+def _staff_messages_ensure(conn) -> None:
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS staff_messages ("
+        "  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  sender_chat_id INTEGER NOT NULL,"
+        "  sender_name TEXT,"
+        "  text        TEXT NOT NULL,"
+        "  created_at  TEXT NOT NULL,"
+        "  media_kind  TEXT,"      # '' | 'image' | 'video' | 'voice' | 'file'
+        "  media_url   TEXT,"      # публичная ссылка на файл (на Beget)
+        "  media_name  TEXT,"      # исходное имя файла
+        "  media_mime  TEXT,"
+        "  media_size  INTEGER,"   # размер файла в байтах
+        "  media_dur   REAL"       # длительность (сек) для голоса/видео
+        ")"
+    )
+    # Идемпотентная миграция: в проде таблица уже создана (старая 5-колоночная),
+    # а CREATE IF NOT EXISTS колонок не добавляет — дописываем по одной.
+    for _col, _typ in (("media_kind", "TEXT"), ("media_url", "TEXT"),
+                       ("media_name", "TEXT"), ("media_mime", "TEXT"),
+                       ("media_size", "INTEGER"), ("media_dur", "REAL")):
+        try:
+            conn.execute(f"ALTER TABLE staff_messages ADD COLUMN {_col} {_typ}")
+        except Exception:
+            pass  # колонка уже есть
+
+
+def add_staff_message(sender_chat_id: int, sender_name: str, text: str,
+                      media_kind: str = "", media_url: str = "", media_name: str = "",
+                      media_mime: str = "", media_size: int = 0,
+                      media_dur: float = 0) -> int:
+    """Сохраняет сообщение команды (текст и/или вложение), возвращает его id."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        cur = conn.execute(
+            "INSERT INTO staff_messages "
+            "(sender_chat_id, sender_name, text, created_at, "
+            " media_kind, media_url, media_name, media_mime, media_size, media_dur) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (int(sender_chat_id), str(sender_name or "")[:80], str(text or "")[:2000],
+             datetime.now().isoformat(timespec="seconds"),
+             str(media_kind or "")[:16], str(media_url or "")[:512],
+             str(media_name or "")[:200], str(media_mime or "")[:80],
+             int(media_size or 0), float(media_dur or 0)),
+        )
+        return int(cur.lastrowid)
+
+
+def get_staff_messages_since(since_id: int = 0, limit: int = 100) -> list[dict]:
+    """Сообщения новее since_id (для поллинга открытого чата)."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        rows = conn.execute(
+            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages "
+            "WHERE id > ? ORDER BY id ASC LIMIT ?",
+            (int(since_id or 0), int(limit)),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_staff_messages_recent(limit: int = 50) -> list[dict]:
+    """Последние N сообщений в хронологическом порядке (первая загрузка чата)."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        rows = conn.execute(
+            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages "
+            "ORDER BY id DESC LIMIT ?",
+            (int(limit),),
+        ).fetchall()
+        return list(reversed([dict(r) for r in rows]))
+
+
+def delete_staff_message(message_id: int, sender_chat_id: int) -> dict:
+    """Удаляет своё сообщение команды. Чужие сообщения не трогает."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        row = conn.execute(
+            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages WHERE id = ?",
+            (int(message_id or 0),),
+        ).fetchone()
+        if not row:
+            return {"ok": False, "reason": "not_found"}
+        msg = dict(row)
+        if int(msg.get("sender_chat_id") or 0) != int(sender_chat_id or 0):
+            return {"ok": False, "reason": "forbidden"}
+        conn.execute(
+            "DELETE FROM staff_messages WHERE id = ? AND sender_chat_id = ?",
+            (int(message_id), int(sender_chat_id)),
+        )
+        return {"ok": True, "message": msg}
+
+
 def mute_master(telegram_chat_id: int, hours: float) -> bool:
     """Заглушает уведомления для мастера на N часов. False если мастер не найден."""
     until = (datetime.now() + timedelta(hours=hours)).isoformat(timespec="seconds")
@@ -1561,6 +2048,74 @@ def is_master_muted(telegram_chat_id: int) -> bool:
             return datetime.fromisoformat(row["mute_until"]) > datetime.now()
         except Exception:
             return False
+
+
+# ─── Кто инициировал перенос записи (эфемерно, для webhook-уведомления мастеру) ──
+#
+# YClients в webhook НЕ сообщает, кто перенёс запись. Но когда перенос инициируем
+# МЫ (клиент через бота MAYA / владелец-мастер через панель), наш код знает актора.
+# Ставим короткоживущую метку record_id→actor, и обработчик record.update её читает,
+# чтобы написать мастеру «Клиент перенёс сам» vs «Перенесено администратором».
+import time as _time_resched
+
+_RESCHEDULE_ACTORS: dict = {}   # record_id -> (timestamp, "client"|"staff")
+
+
+def mark_reschedule_actor(record_id: int, actor: str) -> None:
+    """Запомнить, кто инициировал НАШ перенос записи. actor: 'client' | 'staff'."""
+    try:
+        now = _time_resched.time()
+        # лёгкая чистка протухших меток, чтобы словарь не рос бесконечно
+        if len(_RESCHEDULE_ACTORS) > 200:
+            for k in [k for k, (ts, _a) in list(_RESCHEDULE_ACTORS.items()) if now - ts > 600]:
+                _RESCHEDULE_ACTORS.pop(k, None)
+        _RESCHEDULE_ACTORS[int(record_id)] = (now, str(actor))
+    except Exception:
+        pass
+
+
+def pop_recent_reschedule_actor(record_id: int, max_age: float = 180.0):
+    """Вернуть актора недавнего НАШЕГО переноса и удалить метку. None если нет/протухло."""
+    try:
+        rec = _RESCHEDULE_ACTORS.pop(int(record_id), None)
+        if not rec:
+            return None
+        ts, actor = rec
+        return actor if (_time_resched.time() - ts) <= max_age else None
+    except Exception:
+        return None
+
+
+# ─── Кто отменил запись (эфемерно, для webhook-уведомления мастеру) ──────────
+# YClients в webhook record.delete НЕ сообщает, кто отменил. Когда отмену
+# инициирует КЛИЕНТ через нашего бота («Мои записи → Отменить» / запрос к MAYA),
+# ставим метку record_id→'client'; обработчик record.delete её читает и пишет
+# мастеру «Запись отменена клиентом» вместо обезличенного «Запись отменена».
+_CANCEL_ACTORS: dict = {}   # record_id -> (timestamp, "client"|"staff")
+
+
+def mark_cancel_actor(record_id: int, actor: str) -> None:
+    """Запомнить, кто инициировал НАШУ отмену записи. actor: 'client' | 'staff'."""
+    try:
+        now = _time_resched.time()
+        if len(_CANCEL_ACTORS) > 200:
+            for k in [k for k, (ts, _a) in list(_CANCEL_ACTORS.items()) if now - ts > 900]:
+                _CANCEL_ACTORS.pop(k, None)
+        _CANCEL_ACTORS[int(record_id)] = (now, str(actor))
+    except Exception:
+        pass
+
+
+def pop_recent_cancel_actor(record_id: int, max_age: float = 300.0):
+    """Вернуть актора недавней НАШЕЙ отмены и удалить метку. None если нет/протухло."""
+    try:
+        rec = _CANCEL_ACTORS.pop(int(record_id), None)
+        if not rec:
+            return None
+        ts, actor = rec
+        return actor if (_time_resched.time() - ts) <= max_age else None
+    except Exception:
+        return None
 
 
 # ─── Webhook-дедупликация ──────────────────────────────────────────────
@@ -1620,6 +2175,93 @@ def upsert_record_state(
 def delete_record_state(record_id: int):
     with _db() as conn:
         conn.execute("DELETE FROM record_state WHERE record_id = ?", (record_id,))
+
+
+# ─── Настроение визита (🔴 тишина / 🔵 общение) ─────────────────────────
+
+_VALID_MOODS = ("red", "blue")
+
+
+def set_visit_mood(record_id: int, mood: str, source: str = "bot",
+                   client_id: int | None = None) -> bool:
+    """Сохраняет выбор настроения для конкретной записи (idempotent upsert).
+    Также запоминает выбор как default клиента для будущих записей.
+    Возвращает True, если mood валиден и сохранён."""
+    mood = (mood or "").strip().lower()
+    if mood not in _VALID_MOODS:
+        return False
+    _ts = _now()
+    with _db() as conn:
+        conn.execute(
+            "INSERT INTO visit_mood "
+            "(record_id, mood, source, client_id, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(record_id) DO UPDATE SET "
+            "  mood = excluded.mood, "
+            "  source = excluded.source, "
+            "  client_id = COALESCE(excluded.client_id, visit_mood.client_id), "
+            "  updated_at = excluded.updated_at",
+            (record_id, mood, source, client_id, _ts, _ts),
+        )
+        if client_id:
+            try:
+                conn.execute(
+                    "UPDATE clients SET default_visit_mood = ? WHERE id = ?",
+                    (mood, client_id),
+                )
+            except psycopg2.OperationalError:
+                pass  # колонка ещё не мигрирована — не критично
+    return True
+
+
+def get_visit_mood(record_id: int) -> str | None:
+    """'red' | 'blue' | None для конкретной записи."""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT mood FROM visit_mood WHERE record_id = ?", (record_id,)
+        ).fetchone()
+        return row["mood"] if row else None
+
+
+def get_visit_moods(record_ids) -> dict:
+    """Батч-чтение настроений для списка record_id → {record_id: mood}.
+    Используется журналом, чтобы не делать N запросов на день расписания."""
+    ids = []
+    for r in record_ids:
+        if r is None:
+            continue
+        try:
+            ids.append(int(r))
+        except (TypeError, ValueError):
+            continue  # пропускаем один кривой id, не теряя настроения остальных
+    if not ids:
+        return {}
+    placeholders = ",".join("?" * len(ids))
+    with _db() as conn:
+        rows = conn.execute(
+            f"SELECT record_id, mood FROM visit_mood WHERE record_id IN ({placeholders})",
+            ids,
+        ).fetchall()
+        return {row["record_id"]: row["mood"] for row in rows}
+
+
+def get_default_visit_mood(client_id: int) -> str | None:
+    """Последний выбор клиента ('red'|'blue'|None) — для пред-выбора при записи."""
+    if not client_id:
+        return None
+    with _db() as conn:
+        try:
+            row = conn.execute(
+                "SELECT default_visit_mood FROM clients WHERE id = ?", (client_id,)
+            ).fetchone()
+        except psycopg2.OperationalError:
+            return None
+        return row["default_visit_mood"] if row and row["default_visit_mood"] else None
+
+
+def delete_visit_mood(record_id: int):
+    with _db() as conn:
+        conn.execute("DELETE FROM visit_mood WHERE record_id = ?", (record_id,))
 
 
 # ─── Кеш истории клиентов (24ч) ────────────────────────────────────────
@@ -1814,6 +2456,46 @@ def set_setting(key: str, value: str):
         )
 
 
+# ─── Реестр салонов-подписчиков MAYA (founder/GOD-режим) ──────────────────
+def list_maya_tenants() -> list[dict]:
+    """Все салоны-подписчики (новые первыми)."""
+    with _db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM maya_tenants ORDER BY id DESC"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def add_maya_tenant(name: str, city: str = "", plan: str = "", owner_name: str = "",
+                    phone: str = "", mrr: int = 0, status: str = "pending") -> int:
+    """Заводит салон-подписчик. Возвращает id."""
+    with _db() as conn:
+        cur = conn.execute(
+            "INSERT INTO maya_tenants (name, city, plan, status, owner_name, phone, "
+            "mrr, created_at, activated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (name, city, plan, status, owner_name, phone, int(mrr or 0), _now(),
+             _now() if status == "active" else None),
+        )
+        return cur.lastrowid
+
+
+def set_maya_tenant_status(tenant_id: int, status: str) -> bool:
+    """Меняет статус салона (active|suspended|pending). Активация ставит activated_at."""
+    with _db() as conn:
+        if status == "active":
+            conn.execute(
+                "UPDATE maya_tenants SET status = ?, "
+                "activated_at = COALESCE(activated_at, ?) WHERE id = ?",
+                (status, _now(), int(tenant_id)),
+            )
+        else:
+            conn.execute(
+                "UPDATE maya_tenants SET status = ? WHERE id = ?",
+                (status, int(tenant_id)),
+            )
+        return True
+
+
 # ─── Расходы по салону (от ассистента Антона) ─────────────────────────────
 
 def add_salon_expense(date: str, item: str, amount: int, source: str = "anton") -> int:
@@ -1852,6 +2534,37 @@ def clear_salon_expenses(date: str) -> int:
     with _db() as conn:
         cur = conn.execute("DELETE FROM salon_expenses WHERE date = ?", (date,))
         return cur.rowcount or 0
+
+
+# ─── Касса со слов Антона (для сверки в дневном отчёте) ──────────────────────
+
+def set_cash_log(date: str, total_till: int, day_cash: int, entered_by=None) -> None:
+    """Сохраняет/перезаписывает кассу за день: всего налички + наличка за день."""
+    try:
+        by = int(entered_by) if entered_by else None
+    except Exception:
+        by = None
+    with _db() as conn:
+        conn.execute(
+            "INSERT INTO cash_log (date, total_till, day_cash, entered_by, ts) "
+            "VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT(date) DO UPDATE SET total_till=excluded.total_till, "
+            "day_cash=excluded.day_cash, entered_by=excluded.entered_by, ts=excluded.ts",
+            (date, int(total_till), int(day_cash), by, _now()),
+        )
+
+
+def get_cash_log(date: str) -> dict | None:
+    """Касса со слов Антона за дату или None."""
+    try:
+        with _db() as conn:
+            row = conn.execute(
+                "SELECT date, total_till, day_cash, entered_by, ts FROM cash_log WHERE date = ?",
+                (date,),
+            ).fetchone()
+            return dict(row) if row else None
+    except Exception:
+        return None
 
 
 # ─── Лист ожидания на занятое время ───────────────────────────────────────
@@ -2598,6 +3311,21 @@ def mark_loyalty_code_used(code: str, admin_id: int):
         )
 
 
+def claim_loyalty_code(code: str, admin_id: int) -> bool:
+    """Атомарно «застолбить» код за погашением: помечает used_at ТОЛЬКО если код
+    ещё не погашен. Возвращает True, если именно этот вызов застолбил код.
+    UPDATE ... WHERE used_at IS NULL атомарен в SQLite, поэтому два параллельных
+    погашения (двойной тап кассира / два кассира) не спишут баллы дважды —
+    выиграет ровно один, второй получит False."""
+    with _db() as conn:
+        cur = conn.execute(
+            "UPDATE loyalty_redeem_codes SET used_at = ?, used_by_admin_id = ? "
+            "WHERE code = ? AND used_at IS NULL",
+            (_now(), admin_id, code),
+        )
+        return cur.rowcount > 0
+
+
 def dashboard_metrics(days: int = 30, from_iso: str = None, to_iso: str = None) -> dict:
     """
     Все ключевые цифры для /dashboard за выбранный период.
@@ -3247,3 +3975,110 @@ def cutmatch_incr_today(user_id: int) -> int:
             (int(user_id), day),
         ).fetchone()
         return int(row["count"]) if row else 1
+
+
+# ─── Аудит инструментов LLM (RBAC / risk-tiering) ────────────────────────────
+
+def log_tool_call(user_id, role: str, tool: str, risk: str,
+                  allowed: bool, reason: str = "") -> None:
+    """Пишет факт вызова инструмента (разрешён/отказан). Никогда не падает —
+    аудит не должен ломать основной поток. ПД сюда не попадают."""
+    try:
+        uid = int(user_id) if user_id else None
+    except Exception:
+        uid = None
+    try:
+        with _db() as conn:
+            conn.execute(
+                "INSERT INTO tool_audit (ts, user_id, role, tool, risk, allowed, reason) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (_now(), uid, role, tool, risk, 1 if allowed else 0, (reason or "")[:200]),
+            )
+    except Exception:
+        pass
+
+
+def recent_tool_audit(limit: int = 50, only_denied: bool = False) -> list:
+    """Последние записи аудита (для GOD-режима «Здоровье» / дебага)."""
+    try:
+        with _db() as conn:
+            sql = ("SELECT ts, user_id, role, tool, risk, allowed, reason FROM tool_audit "
+                   + ("WHERE allowed = 0 " if only_denied else "")
+                   + "ORDER BY id DESC LIMIT ?")
+            return [dict(r) for r in conn.execute(sql, (int(limit),)).fetchall()]
+    except Exception:
+        return []
+
+
+# ─── Durable-идемпотентность оплаты визита ───────────────────────────────────
+
+def payment_already_done(record_id) -> dict | None:
+    """Если оплату по этому record_id уже фиксировали — вернёт {method, amount, ts}."""
+    try:
+        with _db() as conn:
+            row = conn.execute(
+                "SELECT method, amount, ts FROM payment_idempotency WHERE record_id = ?",
+                (int(record_id),),
+            ).fetchone()
+            return dict(row) if row else None
+    except Exception:
+        return None
+
+
+def mark_payment_done(record_id, method: str, amount=None) -> None:
+    """Фиксирует оплату record_id. INSERT OR IGNORE — повтор не перезатирает первую."""
+    try:
+        amt = int(amount) if amount else None
+    except Exception:
+        amt = None
+    try:
+        with _db() as conn:
+            conn.execute(
+                "INSERT OR IGNORE INTO payment_idempotency (record_id, method, amount, ts) "
+                "VALUES (?, ?, ?, ?)",
+                (int(record_id), method, amt, _now()),
+            )
+    except Exception:
+        pass
+
+
+# ─── Procedural-память: операционные правила салона ──────────────────────────
+
+def add_salon_rule(rule_text: str, created_by=None) -> int:
+    """Сохраняет правило салона (заданное владельцем). Возвращает id."""
+    try:
+        uid = int(created_by) if created_by else None
+    except Exception:
+        uid = None
+    with _db() as conn:
+        cur = conn.execute(
+            "INSERT INTO salon_rules (rule_text, created_by, created_at, active) "
+            "VALUES (?, ?, ?, 1)",
+            ((rule_text or "").strip()[:500], uid, _now()),
+        )
+        return int(cur.lastrowid)
+
+
+def list_salon_rules(active_only: bool = True, limit: int = 40) -> list:
+    """Активные правила салона (для системного промпта MAYA / показа владельцу)."""
+    try:
+        with _db() as conn:
+            sql = ("SELECT id, rule_text, created_at FROM salon_rules "
+                   + ("WHERE active = 1 " if active_only else "")
+                   + "ORDER BY id ASC LIMIT ?")
+            return [dict(r) for r in conn.execute(sql, (int(limit),)).fetchall()]
+    except Exception:
+        return []
+
+
+def deactivate_salon_rule(rule_id) -> bool:
+    """Деактивирует (мягко удаляет) правило по id. True — если что-то изменилось."""
+    try:
+        with _db() as conn:
+            cur = conn.execute(
+                "UPDATE salon_rules SET active = 0 WHERE id = ? AND active = 1",
+                (int(rule_id),),
+            )
+            return cur.rowcount > 0
+    except Exception:
+        return False

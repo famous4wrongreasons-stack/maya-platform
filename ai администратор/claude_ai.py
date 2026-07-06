@@ -1,6 +1,8 @@
 import difflib
 import json
 import logging
+import re
+import time
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -9,17 +11,23 @@ import httpx
 import ai_billing
 import database
 import config as _cfg
+from identity_utils import resolve_ai_role
 
 PROXY_URL = getattr(_cfg, "PROXY_URL", "")
 OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "")
 OPENAI_BASE_URL = getattr(_cfg, "OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
+OPENAI_TELEGRAM_CHAT_MODEL = getattr(_cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.4")
 # Backwards-compatible names: old callers still pass/import these symbols.
 CLAUDE_MODEL = OPENAI_CHAT_MODEL
-# Голосовой консультант и запись клиентов требуют максимальной модели:
-# здесь важнее качество диалога и tool-use, чем экономия на коротком ходе.
-VOICE_CLAUDE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
+# Голосовой мозг КЛИЕНТОВ: в живом голосе латентность важнее «максимальности».
+# Флагман (gpt-5.5) на задаче записи/консультации ощутимо «тупит» — 2-3 хода с
+# инструментами дают длинную паузу перед ответом. Быстрый средний тир (gpt-5.4)
+# держит качество tool-use и диалога, но заметно снижает паузу и цену. Владелец
+# в голосе всё равно идёт на флагман (маршрутизация в realtime_bridge по роли).
+# Переопределяется config.OPENAI_VOICE_CHAT_MODEL.
+VOICE_CLAUDE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", "") or "gpt-5.4"
 from memory import build_context
 from prompts import SYSTEM_PROMPT
 from yclients import YClientsAPI, get_schedule_from_file, get_day_hours
@@ -264,6 +272,26 @@ TOOLS = [
         },
     },
     {
+        "name": "get_my_stats",
+        "description": (
+            "Личная аналитика самого мастера-сотрудника за период: его ВЫРУЧКА (валовая), "
+            "ЗАРПЛАТА по его проценту, число клиентов (визитов), средний чек и чаевые. "
+            "Вызывай ТОЛЬКО когда пишет сам мастер и спрашивает про СВОИ показатели "
+            "('сколько я заработал', 'моя выручка', 'моя зарплата', 'сколько у меня клиентов', "
+            "'мой средний чек', 'мои продажи за неделю/месяц'). Укажи period: "
+            "today/yesterday/week/last_week/month/last_30 (по умолчанию сегодня). "
+            "Это ТОЛЬКО его собственные цифры — не общая касса салона."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "period": {"type": "string", "description": "today/yesterday/week/last_week/month/last_30"},
+                "date_from": {"type": "string", "description": "YYYY-MM-DD (необязательно, вместо period)"},
+                "date_to": {"type": "string", "description": "YYYY-MM-DD (необязательно)"},
+            },
+        },
+    },
+    {
         "name": "start_gift_cert_purchase",
         "description": "Запустить покупку подарочного сертификата выбранного номинала. Вызывай, когда клиент в разговоре про сертификаты определился с суммой (2000, 3000 или 5000 ₽). Система сама покажет клиенту кнопки выбора способа покупки (физический в шопе / цифровой через оплату). Имя и телефон получателя НЕ спрашивай — это соберёт система отдельно. НЕ предлагай клиенту позвонить или приехать — кнопки сами всё это закроют.",
         "input_schema": {
@@ -298,19 +326,36 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}},
     },
     {
+        "name": "get_referral_link",
+        "description": (
+            "Дать клиенту его ПЕРСОНАЛЬНУЮ реферальную ссылку «пригласить друга». "
+            "Вызывай, когда клиент спрашивает «как пригласить друга», «дай мою "
+            "ссылку», «как привести друга и получить скидку», «реферальная ссылка». "
+            "Система вернёт готовую ссылку и условия. Озвучь коротко: друг "
+            "переходит по ссылке — и после его первого визита ОБА получают −15% "
+            "на 30 дней. Ссылку дай текстом как есть; в голосе предложи открыть "
+            "чат/приложение, чтобы её скопировать. Других условий не выдумывай."
+        ),
+        "input_schema": {"type": "object", "properties": {}},
+    },
+    {
         "name": "suggest_upsell",
         "description": (
-            "Получить рекомендации по апсейлу ПЕРЕД оформлением записи. Возвращает: "
+            "Получить рекомендации по мягкому необязательному апсейлу. Возвращает: "
             "(1) suggestions — допуслуги, которые клиент брал на прошлых визитах "
             "(персонально, «как в прошлый раз»); (2) menu_addons — подходящие допуслуги "
-            "из меню салона с ценами (оформление/тонирование бороды, укладка, тонирование "
-            "головы, уход, spa и т.п.) — их можно предлагать ЛЮБОМУ клиенту, даже новому. "
-            "Вызывай ПОСЛЕ того как клиент назвал услуги и ПЕРЕД request_booking. ВАЖНО: "
-            "прочитай поле instruction в ответе и следуй ему — мягко, одной короткой "
-            "дружелюбной фразой предложи 1–2 уместные допуслуги: сначала из suggestions "
-            "(если есть), иначе из menu_addons (обязательно с ценой). «Да» — добавь в заказ. "
-            "«Нет» — не настаивай. Только если И suggestions, И menu_addons пустые — ничего "
-            "не предлагай, продолжай оформление."
+            "из меню салона с ценами (оформление/тонирование бороды, тонирование головы, "
+            "уход, spa и т.п.). Апсейл НЕ обязателен и никогда не блокирует запись. "
+            "Вызывай не более одного раза и только если это не мешает быстрому оформлению. "
+            "Не вызывай, если клиент уже отказался, повторил базовую услугу или подтвердил "
+            "запись. Мужская стрижка уже включает укладку/стайлинг — не предлагай укладку "
+            "как допуслугу к стрижке. ВАЖНО: прочитай поле instruction в ответе и следуй "
+            "ему — мягко, одной короткой дружелюбной фразой предложи 1–2 уместные "
+            "допуслуги: сначала из suggestions (если есть), иначе из menu_addons "
+            "(с ценой). «Да» — добавь в заказ. "
+            "«Нет», «только стрижка», повтор базовой услуги или опечатка вроде «Стридка» — "
+            "это отказ от допуслуг: не настаивай и продолжай оформление. Только если И "
+            "suggestions, И menu_addons пустые — ничего не предлагай, продолжай оформление."
         ),
         "input_schema": {
             "type": "object",
@@ -443,8 +488,11 @@ TOOLS = [
             "владельца). Вызывай, когда сотрудник спрашивает КАК что-то стричь/делать: "
             "«как сделать фейд», «какая насадка», «как растушевать переход», «что идёт "
             "круглому лицу», «как смоделировать бороду», «частые ошибки». Отвечай ТОЛЬКО "
-            "по тому, что вернёт инструмент. Если found=false — честно скажи, что в базе "
-            "салона этого пока нет, и предложи уточнить у Стаса. НЕ выдумывай технику от себя."
+            "по тому, что вернёт инструмент. Если found=false — честно скажи, что точной "
+            "схемы пока нет в базе, и попроси уточнить название стрижки или техники. "
+            "НЕ отправляй к владельцу или другому человеку за уточнением. Если инструмент вернул images — скажи, что "
+            "прикрепляешь схему из базы; URL картинок не переписывай текстом. "
+            "НЕ выдумывай технику от себя."
         ),
         "input_schema": {
             "type": "object",
@@ -512,22 +560,41 @@ TOOLS_CACHED = TOOLS[:-1] + [{**TOOLS[-1], "cache_control": {"type": "ephemeral"
 # Основатель (Стас, GOD-режим): любая тема + полный доступ.
 FOUNDER_IDS = {948205934}
 
-# Инструменты роли мастера: свои записи/чаевые + досье клиента + база знаний.
-_MASTER_ONLY = {"get_my_work_records", "get_my_tips", "get_client_dossier", "barber_knowledge"}
-# Инструменты роли владельца: аналитика бизнеса + правила салона (procedural-память).
-_OWNER_ONLY = {"get_business_report", "remember_business_rule", "forget_business_rule"}
-_PRIVILEGED = _MASTER_ONLY | _OWNER_ONLY
+# Администратор без owner/GOD-статуса: читает аналитику, но не меняет правила салона.
+_MANAGER_ONLY = {"get_business_report"}
+# Инструменты роли мастера: свои записи/чаевые/аналитика + досье клиента.
+# База знаний по технике/схемам УБРАНА из мозга Майи (решение Стаса 2026-07-06).
+_MASTER_ONLY = {"get_my_work_records", "get_my_tips", "get_my_stats", "get_client_dossier"}
+# Инструменты роли владельца: procedural-память салона.
+_OWNER_ONLY = {"remember_business_rule", "forget_business_rule"}
+_PRIVILEGED = _MASTER_ONLY | _MANAGER_ONLY | _OWNER_ONLY
 
 _ALL_TOOL_NAMES = {t["name"] for t in TOOLS}
 _CLIENT_TOOLS = _ALL_TOOL_NAMES - _PRIVILEGED          # справка + запись на себя + лояльность
+_MANAGER_TOOLS = _CLIENT_TOOLS | _MANAGER_ONLY         # админская аналитика без owner-правил
 _MASTER_TOOLS = _CLIENT_TOOLS | _MASTER_ONLY           # + кабинет мастера
 _OWNER_TOOLS = set(_ALL_TOOL_NAMES)                    # владелец видит всё
 
 ROLE_TOOLS = {
     "client": _CLIENT_TOOLS,
+    "manager": _MANAGER_TOOLS,
     "master": _MASTER_TOOLS,
     "owner": _OWNER_TOOLS,
     "founder": _OWNER_TOOLS,  # отличие основателя — тема, а не инструменты
+}
+
+# 🔴 РАЗДЕЛЕНИЕ КАБИНЕТОВ (решение Стаса 2026-07-06): в кабинете СОТРУДНИКА
+# (mode='staff') Майя — рабочий помощник, а НЕ клиентский консьерж. Эти клиентские
+# функции там ОТКЛЮЧЕНЫ поверх роли: запись/перенос/отмена, продажи, лояльность,
+# реферал, лист ожидания, сбор контакта, «мои записи как клиента». Остаётся рабочее:
+# расписание, свои записи, чаевые, личная аналитика (get_my_stats), досье клиента,
+# аналитика салона (у админа/владельца), правила салона (у владельца).
+STAFF_DISABLED_TOOLS = {
+    "request_booking", "get_available_slots", "find_nearest_slots",
+    "reschedule_booking", "update_booking", "cancel_booking",
+    "get_my_bookings", "remember_wanted_slot", "request_client_contact",
+    "suggest_upsell", "start_gift_cert_purchase", "show_subscription_plans",
+    "check_birthday_promo", "get_referral_link", "check_loyalty_balance",
 }
 
 _ROLE_TOOLS_CACHED = {}
@@ -541,16 +608,14 @@ def _resolve_role(user_id) -> str:
         uid = int(user_id)
     except (TypeError, ValueError):
         return "client"
-    if uid in FOUNDER_IDS:
-        return "founder"
     try:
-        if database.is_admin(uid):
-            return "owner"
-        if database.get_master_by_chat_id(uid):
-            return "master"
+        return resolve_ai_role(
+            is_founder=uid in FOUNDER_IDS,
+            is_admin=bool(database.is_admin(uid)),
+            is_master=bool(database.get_master_by_chat_id(uid)),
+        )
     except Exception:
-        pass
-    return "client"
+        return "client"
 
 
 def _tools_for_role(role: str) -> list:
@@ -823,6 +888,57 @@ def _check_booking_fits(
         return None  # при любой ошибке не блокируем — пусть YClients решит сам
 
 
+def _recheck_requested_slot(
+    staff_id: int, staff_name: str, service_ids: list[int], datetime_str: str
+) -> dict | None:
+    """Перед финальным request_booking ещё раз жёстко сверяем точное время
+    с актуальными слотами YClients.
+
+    Это страховка от двух классов сбоев:
+    1. модель сказала «свободно» по старому списку слотов;
+    2. YClients book_times / records кратко разошлись, и слот успел заняться.
+    """
+    try:
+        dt = datetime.fromisoformat(str(datetime_str).replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+    date_str = dt.date().isoformat()
+    want_time = dt.strftime("%H:%M")
+    slots = yclients.get_available_slots(staff_id, date_str, service_ids or None)
+    if not isinstance(slots, list):
+        return {
+            "error": "slot_check_failed",
+            "message": "Не получилось перепроверить свободное время. Давайте я покажу актуальные окна ещё раз.",
+        }
+    if slots and isinstance(slots[0], dict) and slots[0].get("error"):
+        return {
+            "error": "slot_check_failed",
+            "message": "Не получилось перепроверить свободное время. Давайте я покажу актуальные окна ещё раз.",
+        }
+
+    available = [
+        str(s.get("time") or "")[:5]
+        for s in slots
+        if isinstance(s, dict) and s.get("time")
+    ]
+    if want_time in available:
+        return None
+
+    if available:
+        hint = ", ".join(available[:8])
+        msg = (
+            f"{want_time} у {staff_name} уже занято или стало недоступно. "
+            f"На эту дату сейчас свободно: {hint}."
+        )
+    else:
+        msg = (
+            f"{want_time} у {staff_name} уже занято или стало недоступно. "
+            "На эту дату сейчас свободных окон нет."
+        )
+    return {"error": "slot_taken", "message": msg}
+
+
 def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
     """Выполняет вызов инструмента и возвращает результат как строку."""
     logger.info(f"🔧 Вызов инструмента: {tool_name} | Параметры: {tool_input}")
@@ -911,6 +1027,19 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                 logger.info(f"⛔ Запись не помещается в график: {fit_error['message']}")
                 return json.dumps(
                     {"status": "error", "error": "не_помещается", "message": fit_error["message"]},
+                    ensure_ascii=False,
+                )
+            slot_error = _recheck_requested_slot(
+                staff_id, staff_name, service_ids, datetime_str
+            )
+            if slot_error:
+                logger.info(f"⛔ Слот недоступен на финальной проверке: {slot_error['message']}")
+                return json.dumps(
+                    {
+                        "status": "error",
+                        "error": slot_error["error"],
+                        "message": slot_error["message"],
+                    },
                     ensure_ascii=False,
                 )
             # pay_with_points: правило бизнеса — за один визит баллами можно
@@ -1053,6 +1182,36 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                     "тарифы словами и НЕ предлагай позвонить — система покажет всё сама."
                 ),
             }
+        elif tool_name == "get_referral_link":
+            if not user_id:
+                result = {"status": "need_login",
+                          "message": "Персональная ссылка доступна после входа в приложение."}
+            else:
+                try:
+                    import referral
+                    client_id = database.get_or_create_client(user_id)
+                    code = referral.get_or_create_ref_code(client_id)
+                    bot_username = getattr(_cfg, "BOT_USERNAME", "malesthetic_bot")
+                    link = referral.build_ref_link(code, bot_username)
+                    pct = referral.REFERRAL_DISCOUNT_PERCENT
+                    result = {
+                        "status": "ok",
+                        "referral_link": link,
+                        "discount_percent": pct,
+                        "how_it_works": (
+                            f"Друг переходит по ссылке и записывается. После его первого "
+                            f"визита оба получаете скидку {pct}% на 30 дней."
+                        ),
+                        "instruction": (
+                            "Дай ссылку клиенту как есть и коротко объясни условие "
+                            f"(−{pct}% обоим после первого визита друга). В голосе предложи "
+                            "открыть чат/приложение, чтобы скопировать ссылку."
+                        ),
+                    }
+                except Exception as e:
+                    logger.error(f"get_referral_link: {e}")
+                    result = {"status": "error",
+                              "message": "Не удалось сформировать ссылку, попробуйте позже."}
         elif tool_name == "request_client_contact":
             # Сигнал бэкенду показать защищённую кнопку «Поделиться контактом».
             # Сами ПД здесь не трогаем — их безопасно соберёт Telegram-кнопка,
@@ -1162,6 +1321,53 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                     "period": ("за всё время" if not (fd or td) else f"{fd or '…'} — {td or '…'}"),
                     "note": "Точные данные из YClients.",
                 }
+        elif tool_name == "get_my_stats":
+            master = database.get_master_by_chat_id(int(user_id)) if user_id else None
+            sid = (master or {}).get("yclients_staff_id")
+            if not sid:
+                result = {"error": "Вы не распознаны как мастер — личная аналитика доступна только сотруднику."}
+            else:
+                try:
+                    import analytics
+                    frm, to, label = analytics.resolve_period(
+                        tool_input.get("period"),
+                        tool_input.get("date_from"),
+                        tool_input.get("date_to"),
+                    )
+                    summary = analytics.business_summary(frm, to)
+                    mine = next((m for m in (summary.get("masters") or [])
+                                 if int(m.get("staff_id") or 0) == int(sid)), None)
+                    tips = {}
+                    try:
+                        tips = yclients.tips_for_master(int(sid), frm, to) or {}
+                    except Exception:
+                        tips = {}
+                    if not mine:
+                        result = {
+                            "period": label, "gross": 0, "salary": 0, "clients": 0,
+                            "avg_check": 0, "tips_total": int(tips.get("total") or 0),
+                            "note": f"За «{label}» проведённых оплат у тебя пока нет.",
+                        }
+                    else:
+                        result = {
+                            "period": label,
+                            "gross": mine.get("gross", 0),           # твоя валовая выручка
+                            "salary": mine.get("salary", 0),         # твоя ЗП по проценту
+                            "percent": mine.get("percent", 0),
+                            "clients": mine.get("visits", 0),        # число оплаченных визитов
+                            "avg_check": mine.get("avg_check", 0),
+                            "tips_count": int(tips.get("count") or 0),
+                            "tips_total": int(tips.get("total") or 0),
+                            "note": (
+                                "Это ТВОИ личные цифры за период (не касса салона). Назови коротко: "
+                                "выручка, ЗП, сколько клиентов, средний чек, чаевые. Затем ОДНИМ дружеским "
+                                "советом подскажи, как поднять ЗП через допуслуги (уход/борода/тонирование) — "
+                                "по-коллегиальному, без давления."
+                            ),
+                        }
+                except Exception as e:
+                    logger.error(f"get_my_stats: {e}")
+                    result = {"error": "Не удалось собрать аналитику, попробуй позже."}
         elif tool_name == "check_birthday_promo":
             promo = database.get_active_birthday_promo(user_id) if user_id else None
             if not promo:
@@ -1178,6 +1384,12 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                 (t or "").lower().strip()
                 for t in (tool_input.get("current_service_names") or [])
             )
+            has_haircut = any(("стриж" in t or "фейд" in t) for t in current_titles)
+
+            def _included_in_haircut(key: str) -> bool:
+                """Мужская стрижка уже включает укладку/стайлинг."""
+                return bool(has_haircut and ("уклад" in key or "стайлинг" in key))
+
             # ── 1. Персональные допуслуги из истории клиента (если есть) ──
             history_suggestions = []
             client_row = database.get_client(user_id) if user_id else None
@@ -1197,12 +1409,14 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                             past_services[key] = {"title": title, "last_date": dt[:10] if dt else ""}
                 hist_kw = (
                     "тонирование", "моделирование", "окантовк", "камуфляж", "воск",
-                    "бритье", "брить", "уход", "маск", "укладка", "spa", "спа",
+                    "бритье", "брить", "уход", "маск", "spa", "спа",
                     "массаж", "патчи", "скраб", "эпиляц", "бород",
                 )
                 cands = []
                 for key, info in past_services.items():
                     if key in current_titles:
+                        continue
+                    if _included_in_haircut(key):
                         continue
                     if any(k in key for k in hist_kw):
                         cands.append(info)
@@ -1216,10 +1430,10 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
             try:
                 main_kw = ("стрижка", "фейд", "бритье головы", "детск")
                 addon_kw = (
-                    "бород", "тонирование", "укладка", "окантовк", "гладкое бритье",
+                    "бород", "тонирование", "окантовк", "гладкое бритье",
                     "spa", "спа", "массаж", "патчи", "эпиляц", "скраб", "маск", "уход за кож",
                 )
-                prio_kw = ("бород", "укладка", "тонирование")  # лучше всего сочетаются со стрижкой
+                prio_kw = ("бород", "тонирование")  # лучше всего сочетаются со стрижкой
                 hist_keys = {hs["service"].lower() for hs in history_suggestions}
                 for s in (yclients.get_services() or []):
                     if not isinstance(s, dict):
@@ -1227,6 +1441,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                     title = (s.get("title") or "").strip()
                     key = title.lower()
                     if not title or key in current_titles or key in hist_keys:
+                        continue
+                    if _included_in_haircut(key):
                         continue
                     if any(k in key for k in main_kw):
                         continue
@@ -1260,7 +1476,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                     "instruction": (
                         "Персональной истории по допуслугам нет. Предложи мягко ОДНУ-ДВЕ "
                         "уместные допуслуги из menu_addons, которые дополняют выбранную услугу "
-                        "(к стрижке обычно подходят оформление бороды, укладка или тонирование). "
+                        "(к стрижке можно предлагать бороду или тонирование, но не укладку). "
                         "Короткой дружелюбной фразой С ЦЕНОЙ, например: «хотите ещё освежить "
                         "бороду? Моделирование — 1000 ₽». Без напора. «Да/давай» — добавь в "
                         "заказ. «Нет/не надо» — не настаивай, продолжай оформление."
@@ -1321,7 +1537,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
         elif tool_name == "get_business_report":
             # Read-only аналитика для владельца. Ворота: только админ/владелец.
             if not user_id or not database.is_admin(int(user_id)):
-                result = {"error": "Эта аналитика доступна только владельцу."}
+                result = {"error": "Эта аналитика доступна только администратору или владельцу."}
             else:
                 import analytics  # ленивый импорт: отсутствие файла не валит весь мозг
                 f_iso, t_iso, label = analytics.resolve_period(
@@ -1444,16 +1660,19 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
     return json.dumps(result, ensure_ascii=False)
 
 
-def _build_system_prompt(user_id: int = None, role: str = None) -> list:
+def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None) -> list:
     """
     Возвращает system как список блоков с кешированием статичной части
     (системный промпт + дата + список услуг). Anthropic кеширует помеченное
     блоком cache_control — повторные вызовы платят 10% от обычной цены input.
     Персональный контекст клиента вынесен в отдельный блок без кеша.
-    role — серверная роль (client/master/owner/founder); решает topic-scope.
+    role — серверная роль (client/manager/master/owner/founder); решает topic-scope.
+    mode — 'staff' (кабинет сотрудника: рабочий помощник, без записи/продаж) или
+           'client' (клиентский консьерж). None — по умолчанию как раньше.
     """
     if role is None:
         role = _resolve_role(user_id)
+    _staff_cabinet = (str(mode or "").lower() == "staff") and (role in ("master", "manager", "owner", "founder"))
     from datetime import datetime, timedelta
     _days_ru = ["понедельник", "вторник", "среда", "четверг", "пятница",
                 "суббота", "воскресенье"]
@@ -1481,6 +1700,22 @@ def _build_system_prompt(user_id: int = None, role: str = None) -> list:
             "Когда клиент называет услугу своими словами или неточно — подбери "
             "ТОЧНОЕ название из этого списка и в инструменты передавай именно его:\n"
             + "\n".join(f"• {t}" for t in titles)
+        )
+
+    # Рейтинг салона — факт из config (Стас заполняет актуальными цифрами).
+    _ry = str(getattr(_cfg, "SALON_RATING_YANDEX", "") or "").strip()
+    _r2 = str(getattr(_cfg, "SALON_RATING_2GIS", "") or "").strip()
+    if _ry or _r2:
+        _rparts = []
+        if _ry:
+            _rparts.append(f"Яндекс.Карты — {_ry}")
+        if _r2:
+            _rparts.append(f"2ГИС — {_r2}")
+        static_text += (
+            "\n\n## Рейтинг салона\n"
+            + "; ".join(_rparts) + ". "
+            "Называй эти оценки, если спрашивают про рейтинг/отзывы, и давай ссылки на карты. "
+            "Не выдумывай другие числа."
         )
 
     static_text += (
@@ -1528,12 +1763,23 @@ def _build_system_prompt(user_id: int = None, role: str = None) -> list:
                         f"Сейчас пишет сотрудник/мастер: {master_name}"
                         + (f" (staff_id {staff_id})." if staff_id else ".") +
                         "\nНе воспринимай его автоматически как клиента на запись. "
+                        "Но сотрудник тоже может писать как КЛИЕНТ про себя "
+                        "('к кому я обычно хожу', 'запиши меня как обычно', "
+                        "'мои записи как клиента'). Если в персональном контексте "
+                        "ниже есть его клиентская история — используй её для таких "
+                        "вопросов, не игнорируй только потому, что это мастер. "
                         "Он может спрашивать про СВОИ записи/клиентов/услуги на любой день "
                         "('сколько у меня записей на пятницу', 'во сколько какая запись', "
                         "'какие услуги в пятницу', 'кто ко мне сегодня придёт') — вызови "
                         "инструмент get_my_work_records с нужной датой и ответь ПОДРОБНО: "
                         "перечисли каждую запись (время, имя клиента, услуги, статус), "
                         "посчитай итог по числу записей и сумме. Если записей нет — так и скажи. "
+                        "ЗАРАБОТОК: если мастер спрашивает «сколько я заработал / сколько сделал / "
+                        "моя выручка / моя зарплата за день/неделю/месяц» — вызови get_my_work_records "
+                        "за нужный период и назови валовую сумму по его услугам (это его личная "
+                        "выработка). Поясни, что итоговая ЗП — его доля (процент) от этой валовой по "
+                        "договорённости с салоном; точный расчёт зарплаты — у владельца в отчёте. "
+                        "Не называй чужие цифры и проценты других мастеров. "
                         f"Про график работы (рабочие дни) — get_master_schedule с именем '{master_name}'. "
                         "Телефоны клиентов мастеру не показывай (защита базы) — только имя. "
                         "Если он спрашивает СКОЛЬКО у него чаевых / на какую сумму "
@@ -1548,20 +1794,45 @@ def _build_system_prompt(user_id: int = None, role: str = None) -> list:
                         "('что за клиент придёт в 15', 'расскажи про Андрея', 'что обычно "
                         "берёт', 'что ему предложить') — вызови get_client_dossier с именем "
                         "или телефоном и расскажи: сколько визитов, любимые услуги, как часто "
-                        "ходит, что запомнили о привычках. Телефон не называй. "
-                        "НАСТАВНИК ПО ТЕХНИКЕ: если мастер спрашивает КАК стричь/делать "
-                        "('как сделать фейд', 'какая насадка', 'что идёт круглому лицу', "
-                        "'как смоделировать бороду', 'частые ошибки') — вызови barber_knowledge "
-                        "и отвечай ТОЛЬКО по тому, что вернёт база салона. Если в базе нет — "
-                        "честно скажи и предложи уточнить у Стаса, НЕ выдумывай технику."
+                        "ходит, что запомнили о привычках. Телефон не называй."
+                    ),
+                })
+                blocks.append({
+                    "type": "text",
+                    "text": (
+                        "## Внутренние правила салона и сан-минимум (для сотрудника)\n"
+                        "Если сотрудник спрашивает про правила, дисциплину, распорядок, "
+                        "гигиену, санминимум, дезинфекцию, стерилизацию — отвечай по этим "
+                        "пунктам (это правила «Мужской Эстетики»; при конфликте с более "
+                        "свежими «Правилами салона» от владельца выше — приоритет у них):\n"
+                        "ПРАВИЛА: • приходить на рабочее место к 09:30 (за 30 мин до "
+                        "открытия в 10:00), не опаздывать; об опоздании/болезни "
+                        "предупреждать администратора заранее. • держать рабочее место в "
+                        "чистоте и порядке: после КАЖДОГО клиента убрать волосы с пола и "
+                        "кресла, продезинфицировать инструмент, протереть поверхности и "
+                        "зеркало. • опрятный внешний вид и чистая форма. • соблюдать тайминг, "
+                        "не задерживать следующего клиента. • уважать «настроение визита» "
+                        "клиента (🔴 тишина / 🔵 общение), без навязчивости и спорных тем; "
+                        "телефон не в руках при клиенте. • оплата и чаевые — только через "
+                        "кассу/СБП, ничего «мимо кассы».\n"
+                        "САН-МИНИМУМ (парикмахерские): • дезинфекция инструментов после "
+                        "каждого клиента (ножницы, машинки, расчёски — дезраствор/УФ; лезвия "
+                        "шаветки — одноразовые или стерилизация). • одноразовые воротнички/"
+                        "салфетки, чистая пелерина. • мытьё рук и антисептик до и после "
+                        "клиента. • уборка волос сразу после клиента, влажная уборка и "
+                        "проветривание помещения. • раздельное хранение чистого и "
+                        "использованного инструмента. • аптечка первой помощи; при порезе — "
+                        "антисептик и чистая салфетка. • личная гигиена мастера.\n"
+                        "Отвечай по делу и по-человечески, как напоминание коллеге. Если "
+                        "спрашивают то, чего тут нет — не выдумывай, скажи уточнить у владельца."
                     ),
                 })
             if is_admin:
                 blocks.append({
                     "type": "text",
                     "text": (
-                        "## Режим владельца — аналитика бизнеса\n"
-                        "Это владелец/админ. На вопросы о состоянии бизнеса — «как дела / "
+                        "## Режим администратора — аналитика бизнеса\n"
+                        "Это администратор или владелец. На вопросы о состоянии бизнеса — «как дела / "
                         "как прошла неделя / сколько заработали / какая касса / сколько "
                         "выплатить мастерам / кто сколько сделал / средний чек / выручка за "
                         "месяц» — вызывай инструмент get_business_report с нужным period "
@@ -1691,9 +1962,12 @@ def _content_text(content) -> str:
     return str(content)
 
 
-def _tools_for_openai(role: str) -> list[dict]:
+def _tools_for_openai(role: str, disabled_tools: set[str] | None = None) -> list[dict]:
+    disabled = set(disabled_tools or ())
     tools = []
     for t in _tools_for_role(role):
+        if t.get("name") in disabled:
+            continue
         schema = _strip_anthropic_meta(t.get("input_schema") or {
             "type": "object",
             "properties": {},
@@ -1765,11 +2039,19 @@ def _to_openai_messages(messages: list, system_blocks: list) -> list[dict]:
     return out
 
 
-def _openai_body(messages: list, user_id: int | None, role: str, model: str, max_tokens: int = 1024) -> dict:
+def _openai_body(
+    messages: list,
+    user_id: int | None,
+    role: str,
+    model: str,
+    max_tokens: int = 1024,
+    disabled_tools: set[str] | None = None,
+    mode: str | None = None,
+) -> dict:
     return {
         "model": model,
-        "messages": _to_openai_messages(messages, _build_system_prompt(user_id, role)),
-        "tools": _tools_for_openai(role),
+        "messages": _to_openai_messages(messages, _build_system_prompt(user_id, role, mode)),
+        "tools": _tools_for_openai(role, disabled_tools),
         "tool_choice": "auto",
         "max_completion_tokens": max_tokens,
     }
@@ -1851,6 +2133,56 @@ def _assistant_blocks(text: str, tool_uses: list[_ToolUse]) -> list[dict]:
     return blocks
 
 
+_UPSELL_DECLINE_RE = re.compile(
+    r"\b(нет|не\s+надо|не\s+нужно|без\s+доп|ничего|только|остав(ь|им)|"
+    r"стрижк[ауеи]?|стридк[ауеи]?|постричься)\b",
+    re.IGNORECASE,
+)
+_UPSELL_ADDON_RE = re.compile(
+    r"бород|уклад|тонир|модел|брить|spa|спа|массаж|патч|уход|маск|скраб|эпиляц|воск|камуфляж",
+    re.IGNORECASE,
+)
+
+
+def _message_text(msg: dict | None) -> str:
+    content = (msg or {}).get("content")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                parts.append(str(block.get("text") or ""))
+        return "\n".join(parts)
+    return ""
+
+
+def _last_user_text_before_current_assistant(messages: list[dict]) -> str:
+    for msg in reversed(messages[:-1]):
+        if msg.get("role") == "user":
+            return _message_text(msg)
+    return ""
+
+
+def _looks_like_upsell_decline(text: str) -> bool:
+    low = (text or "").strip().lower()
+    if not low:
+        return False
+    if _UPSELL_ADDON_RE.search(low):
+        return False
+    return bool(_UPSELL_DECLINE_RE.search(low))
+
+
+def _plain_chat_text(text: str) -> str:
+    """Убирает простую markdown-разметку из ответов клиентского чата."""
+    if not text:
+        return text
+    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
+    text = re.sub(r"__([^_]+)__", r"\1", text)
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    return text
+
+
 def complete_text(prompt: str, model: str | None = None, max_tokens: int = 600) -> str:
     """Small helper for one-off internal parsing tasks that used claude_ai.client."""
     body = {
@@ -1863,10 +2195,15 @@ def complete_text(prompt: str, model: str | None = None, max_tokens: int = 600) 
     return ((data.get("choices") or [{}])[0].get("message") or {}).get("content", "").strip()
 
 
-def _run_tool_uses(tool_uses: list, messages: list, user_id: int = None) -> tuple[list, dict | None, dict | None]:
+def _run_tool_uses(
+    tool_uses: list,
+    messages: list,
+    user_id: int = None,
+    disabled_tools: set[str] | None = None,
+) -> tuple[list, dict | None, dict | None]:
     """Выполняет tool_use-блоки одного хода модели — ЕДИНЫЙ источник правды
-    для обычного и стримингового путей (правило suggest_upsell→request_booking,
-    сигналы contact_request / gift_cert / subscription).
+    для обычного и стримингового путей (сигналы contact_request /
+    gift_cert / subscription).
 
     messages[-1] — это ответ ассистента с ЭТИМИ tool_uses; имена ранее вызванных
     инструментов считаем по messages[:-1].
@@ -1876,8 +2213,7 @@ def _run_tool_uses(tool_uses: list, messages: list, user_id: int = None) -> tupl
     gift_cert_action = None
 
     # Собираем имена инструментов, вызванных РАНЬШЕ в этой беседе.
-    # Нужно для жёсткого правила: request_booking блокируется, если
-    # перед ним не было suggest_upsell.
+    # Нужно только чтобы не повторять апсейл после отказа клиента.
     past_tool_names: set[str] = set()
     for msg in messages[:-1]:  # исключая текущий ответ ассистента
         content = msg.get("content")
@@ -1892,31 +2228,42 @@ def _run_tool_uses(tool_uses: list, messages: list, user_id: int = None) -> tupl
                     past_tool_names.add(name)
 
     tool_results = []
+    disabled = set(disabled_tools or ())
     for tool_use in tool_uses:
-        # ЖЁСТКОЕ ПРАВИЛО: перед request_booking должен быть вызван
-        # suggest_upsell в этой беседе. Если AI пропустил — отклоняем
-        # с понятной ошибкой и заставляем переходить.
+        if tool_use.name in disabled:
+            logger.warning("tool disabled for this surface: %s", tool_use.name)
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": json.dumps({
+                    "error": "Этот инструмент недоступен в этом разделе приложения.",
+                }, ensure_ascii=False),
+            })
+            continue
+
         if (
-            tool_use.name == "request_booking"
-            and "suggest_upsell" not in past_tool_names
+            tool_use.name == "suggest_upsell"
+            and "suggest_upsell" in past_tool_names
+            and _looks_like_upsell_decline(_last_user_text_before_current_assistant(messages))
         ):
-            logger.info(
-                f"⛔ request_booking заблокирован: AI забыл вызвать "
-                f"suggest_upsell. Заставляю переходить."
-            )
+            logger.info("suggest_upsell suppressed: client declined addons")
             tool_result_str = json.dumps({
-                "status": "error",
-                "error": "skip_upsell",
-                "message": (
-                    "Ты пропустил обязательный шаг. Сначала вызови "
-                    "`suggest_upsell` с теми же service_names — это "
-                    "обязательно. Обработай ответ (если есть suggestions "
-                    "— мягко предложи одну услугу; если history: empty — "
-                    "просто продолжай). Потом снова вызови request_booking."
+                "status": "declined",
+                "suggestions": [],
+                "menu_addons": [],
+                "instruction": (
+                    "Клиент уже отказался от допуслуг или повторил базовую услугу. "
+                    "НЕ предлагай апсейл снова. Продолжай оформление с текущими услугами."
                 ),
             }, ensure_ascii=False)
-        else:
-            tool_result_str = _execute_tool(tool_use.name, tool_use.input, user_id)
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_result_str,
+            })
+            continue
+
+        tool_result_str = _execute_tool(tool_use.name, tool_use.input, user_id)
 
         # request_booking готов — передаём backend'у сигнал собрать контакты
         if tool_use.name == "request_booking":
@@ -1957,7 +2304,14 @@ def _run_tool_uses(tool_uses: list, messages: list, user_id: int = None) -> tupl
     return tool_results, contact_request, gift_cert_action
 
 
-def get_ai_response(conversation_history: list[dict], user_id: int = None, model: str = None) -> tuple[str, dict | None, dict | None]:
+def get_ai_response(
+    conversation_history: list[dict],
+    user_id: int = None,
+    model: str = None,
+    max_tokens: int = 1024,
+    disabled_tools: set[str] | list[str] | tuple[str, ...] | None = None,
+    mode: str | None = None,
+) -> tuple[str, dict | None, dict | None]:
     """
     Отправляет историю переписки в модель и возвращает
     (текст_ответа, contact_request, gift_cert_action).
@@ -1965,36 +2319,67 @@ def get_ai_response(conversation_history: list[dict], user_id: int = None, model
     contact_request — сигнал начать сбор контактов для записи.
     gift_cert_action — сигнал запустить флоу покупки сертификата (показать кнопки).
     Оба заполняются, если AI вызвал соответствующий инструмент.
-    model — переопределение модели (голос → быстрая OpenAI-модель); по умолчанию gpt-5.5.
+    model — переопределение модели; max_tokens — верхняя граница длины ответа.
+    mode — 'staff' (кабинет сотрудника) / 'client' (клиентский) — решает промпт-режим.
     """
     messages = conversation_history.copy()
     contact_request = None
     gift_cert_action = None
     mdl = model or CLAUDE_MODEL
     role = _resolve_role(user_id)
+    disabled_tools = set(disabled_tools or ())
+    started_at = time.perf_counter()
+    rounds = 0
+    total_tool_calls = 0
 
     while True:
-        data = _chat_completion(_openai_body(messages, user_id, role, mdl))
+        rounds += 1
+        data = _chat_completion(_openai_body(
+            messages,
+            user_id,
+            role,
+            mdl,
+            max_tokens=max_tokens,
+            disabled_tools=disabled_tools,
+            mode=mode,
+        ))
         ai_billing.log_openai_usage("anton_chat", mdl, data, user_id=user_id)
 
         choice = (data.get("choices") or [{}])[0]
         message = choice.get("message") or {}
         response_text = (message.get("content") or "").strip()
         tool_uses = _tool_uses_from_message(message)
+        total_tool_calls += len(tool_uses)
 
         # Если модель закончила — возвращаем ответ
         if not tool_uses:
-            return response_text, contact_request, gift_cert_action
+            elapsed = time.perf_counter() - started_at
+            logger.info(
+                "🧠 AI done user=%s role=%s model=%s rounds=%s tool_calls=%s seconds=%.2f",
+                user_id,
+                role,
+                mdl,
+                rounds,
+                total_tool_calls,
+                elapsed,
+            )
+            return _plain_chat_text(response_text), contact_request, gift_cert_action
 
         # Модель хочет вызвать инструменты — выполняем их (общий хелпер)
         messages.append({"role": "assistant", "content": _assistant_blocks(response_text, tool_uses)})
-        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id)
+        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
         messages.append({"role": "user", "content": tool_results})
 
 
-def get_ai_response_stream(conversation_history: list[dict], user_id: int = None, model: str = None):
+def get_ai_response_stream(
+    conversation_history: list[dict],
+    user_id: int = None,
+    model: str = None,
+    disabled_tools: set[str] | list[str] | tuple[str, ...] | None = None,
+    mode: str | None = None,
+):
     """
     Стриминговый вариант get_ai_response — ГЕНЕРАТОР событий-словарей.
     Тот же «мозг» и те же инструменты, но текст ответа отдаётся по мере генерации.
@@ -2019,12 +2404,20 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
     gift_cert_action = None
     role = _resolve_role(user_id)
     mdl = model or CLAUDE_MODEL
+    disabled_tools = set(disabled_tools or ())
 
     while True:
         text_parts = []
         tool_acc: dict[int, dict] = {}
         usage = None
-        for chunk in _stream_chat_completion(_openai_body(messages, user_id, role, mdl)):
+        for chunk in _stream_chat_completion(_openai_body(
+            messages,
+            user_id,
+            role,
+            mdl,
+            disabled_tools=disabled_tools,
+            mode=mode,
+        )):
             if chunk.get("usage"):
                 usage = chunk.get("usage")
             choices = chunk.get("choices") or []
@@ -2033,8 +2426,9 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
             delta = choices[0].get("delta") or {}
             txt = delta.get("content")
             if txt:
-                text_parts.append(txt)
-                yield {"type": "delta", "text": txt}
+                txt_plain = txt.replace("*", "")
+                text_parts.append(txt_plain)
+                yield {"type": "delta", "text": txt_plain}
             for tc in delta.get("tool_calls") or []:
                 idx = int(tc.get("index", 0) or 0)
                 acc = tool_acc.setdefault(idx, {"id": "", "name": "", "arguments": ""})
@@ -2048,7 +2442,7 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
 
         ai_billing.log_openai_usage("anton_chat", mdl, {"usage": usage or {}}, user_id=user_id)
 
-        final_text = "".join(text_parts).strip()
+        final_text = _plain_chat_text("".join(text_parts).strip())
         tool_uses = []
         for idx in sorted(tool_acc):
             acc = tool_acc[idx]
@@ -2075,7 +2469,7 @@ def get_ai_response_stream(conversation_history: list[dict], user_id: int = None
         yield {"type": "reset"}
 
         messages.append({"role": "assistant", "content": _assistant_blocks(final_text, tool_uses)})
-        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id)
+        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
         messages.append({"role": "user", "content": tool_results})

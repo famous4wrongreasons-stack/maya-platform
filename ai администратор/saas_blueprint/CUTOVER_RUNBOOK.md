@@ -13,6 +13,92 @@
 
 ---
 
+## ФАЗА 0 — white-label вживую БЕЗ Postgres (добавлено 2026-07-03)
+
+Цель: доказать конвейер бренда (Шаги 1–4, все тесты зелёные) на проде для самой
+МЭ, не мигрируя данные и не меняя поведение. Всё обратимо за минуты, боевой
+`app/index.html` не трогается вообще.
+
+Зачем: обкатать в реальном PWA механику «бренд из /api/tenant-config» до
+большого катовера. МЭ увидит свой же бренд → изменений ноль, риск ноль.
+
+### 0.1. VPS — эндпоинт в mock-режиме (2 строки + файл + env)
+
+1. Залить на VPS (`/home/botadmin/barbershop-bot/`):
+   `saas_blueprint/pg/tenant_config_api.py` и создать `tenant_me.json`:
+   ```json
+   {"slug": "malesthetic",
+    "brand": {"name": "Мужская Эстетика", "city": "Ставрополь",
+              "address": "ул. Лермонтова, 343", "phone": "+7 (962) 447-67-47"},
+    "active": true}
+   ```
+2. В `webhook_server.py` сразу после `web_app = web.Application(...)` — 3 строки
+   (env через setdefault, systemd-юнит НЕ трогаем):
+   ```python
+   import os as _tc_os, tenant_config_api as _tc_api
+   _tc_os.environ.setdefault("MAYA_TENANT_CONFIG_MOCK", "/home/botadmin/barbershop-bot/tenant_me.json")
+   _tc_api.attach(web_app)
+   ```
+   ⚠ mock-режим НЕ импортирует tenant_config/psycopg2 — Postgres не нужен.
+3. `python3 -m py_compile webhook_server.py tenant_config_api.py` → restart.
+4. Проверка: `curl -s http://127.0.0.1:8080/api/tenant-config | head` → JSON с брендом.
+   Бэкап: `webhook_server.py.phase0.bak` лежит рядом.
+
+### 0.2. Beget — проброс ОТДЕЛЬНЫМ файлом (общий api-proxy.php НЕ трогаем)
+
+Фронт НЕ ходит на same-origin `/api/*` — только через PHP-прокси. Чтобы не
+касаться боевого `api-proxy.php` (ошибка в нём = падают все API живого PWA),
+кладём НОВЫЙ файл `.../public_html/app/tenant-config.php`:
+```php
+<?php
+// Фаза 0 white-label: публичный бренд-конфиг с VPS. Нет ПД, нет секретов.
+header('Content-Type: application/json; charset=utf-8');
+$qh = isset($_GET['host']) ? ('?host=' . rawurlencode($_GET['host'])) : '';
+$ch = curl_init('https://rt.malesthetic.pro/api/tenant-config' . $qh);
+// ⚠ прямой :8080 закрыт фаерволом; боевой путь Beget→VPS = https://rt.malesthetic.pro
+//   (nginx на VPS, извне отдаёт 403 — пускает только Beget). См. tg-config.php: bot_api_base.
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => ['Accept: application/json',
+                           'X-Forwarded-Host: ' . ($_SERVER['HTTP_HOST'] ?? '')],
+    CURLOPT_TIMEOUT => 8,
+    CURLOPT_CONNECTTIMEOUT => 4,
+]);
+$body = curl_exec($ch); $err = curl_error($ch); curl_close($ch);
+if ($err || !$body) { http_response_code(502); echo '{"error":"unavailable"}'; exit; }
+header('Cache-Control: public, max-age=300');
+echo $body;
+```
+Boot-скрипт фронта пробует цепочку: `/api/tenant-config` →
+`/app/tenant-config.php?host=` → `/app/api-proxy.php?action=tenant_config...`
+(последний вариант — на будущее, если в Фазе B решим слить в общий прокси).
+Бэкенд читает X-Forwarded-Host → ?host → Host.
+
+### 0.3. Beget — тестовый фронт ОТДЕЛЬНЫМ файлом
+
+1. Перегенерировать из свежего прода: 
+   `python3 saas_blueprint/pg/tenantize_frontend.py "<путь>/app.html"`
+2. Залить `app-tenant.html` как `.../public_html/app/tenant-test.html`
+   (боевой `app/index.html` НЕ трогать).
+3. Открыть `https://malesthetic.pro/app/tenant-test.html` — приложение выглядит
+   ровно как боевое (бренд тот же, это и есть тест), в DevTools видно
+   `me_tenant_cfg_v1` в localStorage.
+4. Смока-тест чужого бренда: подменить `tenant_me.json` на «Гриву» (из
+   `tenant_config_demo.json`) → перезагрузить страницу → шапка/заголовок/контакты
+   сменились. Вернуть `tenant_me.json` обратно.
+
+### 0.4. Откат Фазы 0
+- VPS: убрать 2 строки attach + env из юнита, restart. 
+- Beget: удалить `tenant-test.html` и `tenant-config.php` (оба — отдельные файлы).
+- Фронт-кэш: ключ `me_tenant_cfg_v1` сам перестанет обновляться; боевой
+  `index.html` его вообще не читает.
+
+Критерий выхода из Фазы 0: `tenant-test.html` неделю живёт без жалоб, смока
+«Грива» проходит. После этого — ФАЗА A (Postgres) по плану ниже, а гейтинг
+(`tenant_gate.attach` + middleware) включается только вместе с ФАЗОЙ B.
+
+---
+
 ## ФАЗА A — текущий салон на Postgres (single-tenant, поведение 1:1)
 
 Цель: тот же один салон работает как раньше, но на Postgres как `tenant_id=1`.
@@ -66,6 +152,14 @@ psql "$PG_DSN" -c "CREATE ROLE salon_app LOGIN PASSWORD '...' NOSUPERUSER;
 ---
 
 ## ФАЗА B — включить мультитенантность (продавать новым салонам)
+
+🔴 ЧЕКЛИСТ ПЕРЕД САЛОНОМ №2 (найдено при перегенерации схемы 2026-07-03):
+инлайновые natural-key PK не переведены на (tenant_id, col) — для одного салона
+корректно, для второго дадут коллизии client_id между салонами. Перевести PK
+на композитные минимум у: notify_prefs, client_marketing_last, masters_telegram,
+settings, record_state, processed_records (и пересмотреть остальные инлайн-PK
+в 01_schema_postgres.sql). applogin_nonces (nonce) и web_sessions (token) —
+случайные глобальные ключи, оставить как есть (по nonce/token ищут БЕЗ тенанта).
 
 Только после стабильной Фазы A.
 

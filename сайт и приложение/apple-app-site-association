@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "YCL5U4L56W.pro.malesthetic.app",
+        "paths": [
+          "/app",
+          "/app/",
+          "/app/*"
+        ]
+      }
+    ]
+  }
+}

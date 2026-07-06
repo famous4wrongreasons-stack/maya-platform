@@ -8,6 +8,10 @@ type SerializedTenantRecord = {
   slug: string;
   status: string;
   planId: string | null;
+  trialEndsAt: Date | null;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  billingMethodId: string | null;
   allowSelfRegistration: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -46,6 +50,10 @@ describe('TenantsService.createTenant', () => {
     slug: 'griva',
     status: 'trial',
     planId: null,
+    trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
+    currentPeriodStart: null,
+    currentPeriodEnd: null,
+    billingMethodId: null,
     allowSelfRegistration: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -84,7 +92,21 @@ describe('TenantsService.createTenant', () => {
       .fn()
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(serializedTenant());
-    const tenantCreateMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
+    const tenantCreateMock: jest.MockedFunction<
+      (args: {
+        data: {
+          name: string;
+          slug: string;
+          status: string;
+          planId?: string;
+          trialEndsAt: Date | null;
+          currentPeriodStart: Date | null;
+          currentPeriodEnd: Date | null;
+          billingMethodId?: string | null;
+          allowSelfRegistration: boolean;
+        };
+      }) => Promise<{ id: string }>
+    > = jest.fn().mockResolvedValue({ id: 'tenant-1' });
     const brandingCreateMock = jest.fn().mockResolvedValue(undefined);
     const branchCreateMock = jest.fn().mockResolvedValue(undefined);
     const transactionClient = {
@@ -127,6 +149,16 @@ describe('TenantsService.createTenant', () => {
     });
 
     expect(transactionMock).toHaveBeenCalled();
+    const [tenantCreateArgs] = tenantCreateMock.mock.calls[0] ?? [];
+
+    expect(tenantCreateArgs.data.name).toBe('Barbershop Griva');
+    expect(tenantCreateArgs.data.slug).toBe('griva');
+    expect(tenantCreateArgs.data.status).toBe('trial');
+    expect(tenantCreateArgs.data.planId).toBeUndefined();
+    expect(tenantCreateArgs.data.trialEndsAt).toEqual(expect.any(Date));
+    expect(tenantCreateArgs.data.currentPeriodStart).toBeNull();
+    expect(tenantCreateArgs.data.currentPeriodEnd).toBeNull();
+    expect(tenantCreateArgs.data.billingMethodId).toBeUndefined();
     expect(branchCreateMock).toHaveBeenCalledWith({
       data: {
         tenantId: 'tenant-1',
@@ -140,6 +172,12 @@ describe('TenantsService.createTenant', () => {
       id: 'tenant-1',
       slug: 'griva',
       branch_count: 1,
+      billing: {
+        trial_ends_at: serializedTenant().trialEndsAt,
+        current_period_start: null,
+        current_period_end: null,
+        billing_method_attached: false,
+      },
       branches: [
         {
           name: 'Barbershop Griva',

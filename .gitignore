@@ -84,3 +84,7 @@ _archive/
 !requirements.txt
 !config.example.py
 !.env.example
+
+# Сканы книги барбера — тяжело (десятки МБ) и уже лежат на Beget; в git не тащим
+ai администратор/barber_knowledge_images/
+**/barber_knowledge_images/

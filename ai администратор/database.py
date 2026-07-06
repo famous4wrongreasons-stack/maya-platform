@@ -460,7 +460,12 @@ def init_db():
                 chat_id      INTEGER,
                 phone_hash   TEXT,
                 vk_user_id   INTEGER,
+                yandex_user_id TEXT,
                 display_name TEXT,
+                tg_first_name TEXT,
+                tg_last_name  TEXT,
+                tg_username   TEXT,
+                tg_photo_url  TEXT,
                 created_at   TEXT NOT NULL,
                 expires_at   TEXT NOT NULL,
                 last_seen_at TEXT,
@@ -616,6 +621,10 @@ def _migrate_add_encrypted_columns(conn):
     _add("clients", "marketing_consent_at", "TEXT")
     _add("clients", "marketing_consent_revoked_at", "TEXT")
 
+    # Лист ожидания: момент, когда об этой записи оповестили администратора
+    # (Антона). NULL — ещё не оповещали. Ставится фоновым сканером.
+    _add("slot_waitlist", "admin_notified_at", "TEXT")
+
     # Атрибуция источника привлечения — фиксируется на ПЕРВОМ /start.
     # Формат: «direct», «ad:direct_jan2026», «qr:check», «ref:REF-XXXXXX»,
     # «site:gift_cert», «app:book», «migration», «other:<payload>».
@@ -626,6 +635,13 @@ def _migrate_add_encrypted_columns(conn):
     # Последнее выбранное «настроение визита» клиента ('red'|'blue') — чтобы при
     # следующей записи можно было предложить тот же выбор по умолчанию.
     _add("clients", "default_visit_mood", "TEXT")
+    # Профиль Telegram в web-сессии: deep-link вход в приложении должен помнить
+    # имя, фамилию, username и аватар, а не только first_name.
+    _add("web_sessions", "tg_first_name", "TEXT")
+    _add("web_sessions", "tg_last_name", "TEXT")
+    _add("web_sessions", "tg_username", "TEXT")
+    _add("web_sessions", "tg_photo_url", "TEXT")
+    _add("web_sessions", "yandex_user_id", "TEXT")
 
 
 def _backfill_encryption(conn):
@@ -957,7 +973,10 @@ def verify_web_login_code(phone_hash: str, code_hash: str, max_attempts: int = 5
 
 def create_web_session(token: str, *, phone_hash: str | None = None,
                        chat_id: int | None = None, vk_user_id: int | None = None,
+                       yandex_user_id: str | None = None,
                        display_name: str = "", subject_kind: str = "client",
+                       tg_first_name: str = "", tg_last_name: str = "",
+                       tg_username: str = "", tg_photo_url: str = "",
                        ttl_days: int = 30):
     """Создаёт сессию веб-входа (токен в браузере вместо Telegram initData)."""
     now = datetime.now()
@@ -966,11 +985,13 @@ def create_web_session(token: str, *, phone_hash: str | None = None,
     with _db() as conn:
         conn.execute(
             "INSERT OR REPLACE INTO web_sessions "
-            "(token, subject_kind, chat_id, phone_hash, vk_user_id, display_name, "
+            "(token, subject_kind, chat_id, phone_hash, vk_user_id, yandex_user_id, display_name, "
+            " tg_first_name, tg_last_name, tg_username, tg_photo_url, "
             " created_at, expires_at, last_seen_at, revoked) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
-            (token, subject_kind, chat_id, phone_hash, vk_user_id,
-             display_name, now_s, exp_s, now_s),
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
+            (token, subject_kind, chat_id, phone_hash, vk_user_id, yandex_user_id,
+             display_name, tg_first_name, tg_last_name, tg_username, tg_photo_url,
+             now_s, exp_s, now_s),
         )
 
 
@@ -1804,7 +1825,8 @@ def list_masters() -> list[dict]:
 
 
 # ─── Внутренний чат сотрудников (общий канал команды) ───────────────────────
-# Человек-человек, БЕЗ ИИ. Сообщения хранятся локально; на новое сообщение
+# Обычно человек-человек. Если сотрудник явно обращается к MAYA, бэкенд добавляет
+# ответ наставника из базы знаний. Сообщения хранятся локально; на новое сообщение
 # бэкенд шлёт пуш (Telegram + Web Push) остальным сотрудникам.
 
 # Колонки сообщения (id + автор + текст + вложение). Один список — чтобы оба
@@ -1883,6 +1905,14 @@ def get_staff_messages_recent(limit: int = 50) -> list[dict]:
             (int(limit),),
         ).fetchall()
         return list(reversed([dict(r) for r in rows]))
+
+
+def get_staff_latest_message_id() -> int:
+    """Последний id сообщения команды. Нужен для новой пустой сессии чата."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        row = conn.execute("SELECT COALESCE(MAX(id), 0) AS id FROM staff_messages").fetchone()
+        return int((row or {}).get("id") or 0)
 
 
 def delete_staff_message(message_id: int, sender_chat_id: int) -> dict:
@@ -2478,6 +2508,35 @@ def add_slot_interest(client_id: int, chat_id, staff_id: int, slot_iso: str) -> 
             (client_id, (int(chat_id) if chat_id else None), staff_id, slot_iso, _now()),
         )
         return True
+
+
+def get_waitlist_pending_admin_alert(limit: int = 20) -> list[dict]:
+    """Новые записи листа ожидания, о которых ещё НЕ сообщили админам (Антону).
+    Только будущие слоты и те, где клиент ещё не был оповещён об освобождении."""
+    from datetime import datetime as _dt
+    now_iso = _dt.now().isoformat(timespec="minutes")
+    with _db() as conn:
+        rows = conn.execute(
+            "SELECT id, client_id, chat_id, staff_id, slot_datetime, created_at "
+            "FROM slot_waitlist "
+            "WHERE admin_notified_at IS NULL AND notified_at IS NULL "
+            "AND slot_datetime >= ? "
+            "ORDER BY created_at ASC LIMIT ?",
+            (now_iso, int(limit)),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def mark_waitlist_admin_alerted(ids: list[int]) -> None:
+    """Помечаем записи листа ожидания как «админ оповещён» (Антону не дублируем)."""
+    ids = [int(i) for i in (ids or []) if i]
+    if not ids:
+        return
+    with _db() as conn:
+        conn.executemany(
+            "UPDATE slot_waitlist SET admin_notified_at=? WHERE id=?",
+            [(_now(), i) for i in ids],
+        )
 
 
 def get_slot_waitlist(staff_id: int, slot_iso: str, tolerance_min: int = 20) -> list[dict]:

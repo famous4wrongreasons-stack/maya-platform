@@ -17,6 +17,10 @@ model Tenant {
   slug                  String            @unique
   status                String            @default("trial")
   planId                String?
+  trialEndsAt           DateTime?
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  billingMethodId       String?
   allowSelfRegistration Boolean           @default(true)
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
@@ -30,6 +34,7 @@ model Tenant {
   phoneAuthCodes        PhoneAuthCode[]
   authIdentities        AuthIdentity[]
   authFlowStates        AuthFlowState[]
+  billingPayments       BillingPayment[]
 }
 
 model BrandingSettings {
@@ -108,32 +113,32 @@ model AuthIdentity {
 }
 
 model AuthFlowState {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   tenantId     String
   provider     String
-  state        String   @unique
+  state        String    @unique
   redirectUri  String
   codeVerifier String?
   expiresAt    DateTime
   consumedAt   DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, provider, expiresAt])
 }
 
 model PhoneAuthCode {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   tenantId   String
   phone      String
   codeHash   String
-  attempts   Int      @default(0)
+  attempts   Int       @default(0)
   expiresAt  DateTime
   consumedAt DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, phone])
   @@index([tenantId, expiresAt])
@@ -153,16 +158,43 @@ model CrmIntegration {
 }
 
 model SubscriptionPlan {
-  id                  String   @id @default(cuid())
-  name                String   @unique
+  id                  String           @id @default(cuid())
+  name                String           @unique
   priceMonthly        Int
   maxBranches         Int
   maxStaff            Int
   featuresJson        Json?
-  isWhiteLabelEnabled Boolean  @default(false)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  isWhiteLabelEnabled Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
   tenants             Tenant[]
+  billingPayments     BillingPayment[]
+}
+
+model BillingPayment {
+  id                String            @id @default(cuid())
+  tenantId          String
+  planId            String?
+  provider          String            @default("yookassa")
+  providerPaymentId String?           @unique
+  idempotenceKey    String            @unique
+  purpose           String
+  status            String            @default("pending")
+  amountKopecks     Int
+  currency          String            @default("RUB")
+  confirmationUrl   String?
+  returnUrl         String?
+  paidAt            DateTime?
+  canceledAt        DateTime?
+  providerPayload   Json?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan              SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status])
+  @@index([provider, providerPaymentId])
 }
 
 model AuditLog {

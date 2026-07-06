@@ -1,0 +1,25 @@
+{
+  "data": {
+    "hasOnMaya": true,
+    "tgScripts": [
+      {
+        "src": "https://telegram.org/js/telegram-widget.js?22",
+        "dataTelegramLogin": "malesthetic_bot",
+        "dataSize": "medium",
+        "dataOnauth": "onMayaTgAuth(user)"
+      }
+    ],
+    "iframes": [
+      {
+        "src": "https://oauth.telegram.org/embed/malesthetic_bot?origin=https%3A%2F%2Fmalesthetic.pro&return_to=https%3A%2F%2Fmalesthetic.pro%2F&size=medium&userpic=false&request_access=write&radius=16",
+        "title": "",
+        "width": "186",
+        "height": "28",
+        "html": "<iframe id=\"telegram-login-malesthetic_bot\" src=\"https://oauth.telegram.org/embed/malesthetic_bot?origin=https%3A%2F%2Fmalesthetic.pro&amp;return_to=https%3A%2F%2Fmalesthetic.pro%2F&amp;size=medium&amp;userpic=false&amp;request_access=write&amp;radius=16\" width=\"186\" height=\"28\" frameborder=\"0\" scro"
+      }
+    ],
+    "dialogHtml": "<div role=\"dialog\" aria-modal=\"true\" aria-label=\"Вход через Telegram\" class=\"relative w-full max-w-[440px] rounded-[1.75rem] border border-line bg-panel p-6 shadow-2xl sm:p-7\"><button type=\"button\" aria-label=\"Закрыть\" class=\"absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink/55 transition hover:text-ink\">×</button><p class=\"mb-5 pr-10 text-[12px] font-light uppercase tracking-wide2 text-ink/70\">Вход через Telegram</p><div class=\"space-y-3\"><div class=\"\"><label for=\"_r_3_\" class=\"flex cursor-pointer items-start gap-3 text-[12px] font-light leading-relaxed text-ink/55\"><input id=\"_r_3_\" class=\"mt-0.5 h-4 w-4 shrink-0 accent-gold\" type=\"checkbox\"><span>Я соглашаюсь на обработку персональных данных и принимаю <a target=\"_blank\" class=\"text-ink/80 underline underline-offset-2 transition hover:text-ink\" href=\"/personal-data-policy/\">Политику обработки персональных данных</a></span></label></div><div class=\"flex min-h-[40px] items-center justify-center\"><iframe id=\"telegram-login-malesthetic_bot\" src=\"https://oauth.telegram.org/embed/malesthetic_bot?origin=https%3A%2F%2Fmalesthetic.pro&amp;return_to=https%3A%2F%2Fmalesthetic.pro%2F&amp;size=medium&amp;userpic=false&amp;request_access=write&amp;radius=16\" width=\"186\" height=\"28\" frameborder=\"0\" scrolling=\"no\" style=\"overflow: hidden; background-color: transparent; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial;\"></iframe><script src=\"https://telegram.org/js/telegram-widget.js?22\" async=\"\" data-telegram-login=\"malesthetic_bot\" data-size=\"medium\" data-userpic=\"false\" data-radius=\"16\" data-request-access=\"write\" data-onauth=\"onMayaTgAuth(user)\"></script></div></div></div>"
+  },
+  "consoleLogs": [],
+  "pageErrors": []
+}

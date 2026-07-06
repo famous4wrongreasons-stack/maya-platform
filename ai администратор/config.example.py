@@ -51,7 +51,32 @@ OPENAI_API_KEY = _req("OPENAI_API_KEY")
 OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
-OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
+# Голос клиентов: быстрый средний тир (латентность важнее максимальности на
+# задаче записи). Владелец в голосе идёт на флагман (маршрутизация по роли).
+OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", "gpt-5.4")
+REALTIME_VAD_EAGERNESS = _opt("REALTIME_VAD_EAGERNESS", "medium")
+
+# ── Голос MAYA: OpenAI TTS по умолчанию, Yandex SpeechKit как внешний TTS ─────
+VOICE_REPLIES_ENABLED = _opt("VOICE_REPLIES_ENABLED", "False").lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_TTS_PROVIDER = _opt("VOICE_TTS_PROVIDER", "openai")  # "openai" | "yandex"
+VOICE_TTS_FALLBACK_OPENAI = _opt("VOICE_TTS_FALLBACK_OPENAI", "False").lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_TTS_MODEL = _opt("VOICE_TTS_MODEL", "gpt-4o-mini-tts")
+VOICE_TTS_VOICE = _opt("VOICE_TTS_VOICE", "marin")
+VOICE_TTS_SPEED = float(_opt("VOICE_TTS_SPEED", "1.0") or "1.0")
+VOICE_TTS_PITCH = float(_opt("VOICE_TTS_PITCH", "1.0") or "1.0")
+VOICE_TTS_INSTRUCTIONS = _opt(
+    "VOICE_TTS_INSTRUCTIONS",
+    "Говори по-русски естественно и спокойно, светлым женским голосом чуть выше среднего. "
+    "Без иностранного акцента, без театральности, темп средний, дикция чёткая."
+)
+YANDEX_SPEECHKIT_API_KEY = _opt("YANDEX_SPEECHKIT_API_KEY", "")
+YANDEX_SPEECHKIT_IAM_TOKEN = _opt("YANDEX_SPEECHKIT_IAM_TOKEN", "")
+YANDEX_CLOUD_FOLDER_ID = _opt("YANDEX_CLOUD_FOLDER_ID", "")
+YANDEX_SPEECHKIT_VOICE = _opt("YANDEX_SPEECHKIT_VOICE", "lera")
+YANDEX_SPEECHKIT_ROLE = _opt("YANDEX_SPEECHKIT_ROLE", "friendly")
+YANDEX_SPEECHKIT_SPEED = float(_opt("YANDEX_SPEECHKIT_SPEED", "1.0") or "1.0")
+YANDEX_SPEECHKIT_PITCH_SHIFT = float(_opt("YANDEX_SPEECHKIT_PITCH_SHIFT", "0") or "0")
+YANDEX_SPEECHKIT_MAX_CHARS = int(float(_opt("YANDEX_SPEECHKIT_MAX_CHARS", "240") or "240"))
 
 # ── Claude (Anthropic) — legacy/fallback, можно не задавать ──────────────────
 CLAUDE_API_KEY = _opt("CLAUDE_API_KEY", "")
@@ -84,10 +109,17 @@ SITE_URL = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai"        # www.мужс
 APP_URL  = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app"    # www.мужскаяэстетика.рф/app
 
 # ── VK ID (вход через ВКонтакте) ──────────────────────────────────────────────
-VK_APP_ID = 54619325                       # публичный id приложения — не секрет
+VK_APP_ID = 54620400                       # публичный id приложения — не секрет
 VK_SECURE_KEY = _opt("VK_SECURE_KEY", "")  # «Защищённый ключ» (client_secret) — СЕКРЕТ
 VK_REDIRECT_URI = "https://malesthetic.pro/app/"
 VK_LOGIN_ENABLED = False
+
+# ── Yandex ID (вход через Яндекс) ─────────────────────────────────────────────
+YANDEX_CLIENT_ID = _opt("YANDEX_CLIENT_ID", "")
+YANDEX_CLIENT_SECRET = _opt("YANDEX_CLIENT_SECRET", "")
+YANDEX_REDIRECT_URI = _opt("YANDEX_REDIRECT_URI", "https://malesthetic.pro/app/")
+YANDEX_LOGIN_ENABLED = _opt("YANDEX_LOGIN_ENABLED", "False").lower() in ("1", "true", "yes", "on")
+YANDEX_STAFF_CHAT_MAP = {}  # {"yandex_user_id": telegram_chat_id, "email@yandex.ru": telegram_chat_id}
 
 # ── Расход: серверы и fal.ai (для /ai_cost и панели) — не секрет ───
 SERVER_COSTS_RUB = {
@@ -123,6 +155,13 @@ YUKASSA_SECRET_KEY = _opt("YUKASSA_SECRET_KEY", "")          # 'live_...' из �
 
 BOT_USERNAME = "malesthetic_bot"
 REMINDER_MINUTES_BEFORE = 120
+
+# Рейтинг салона на картах — Майя называет эти цифры, если спрашивают про
+# рейтинг/отзывы. Оставь пустым, если не хочешь озвучивать конкретные числа
+# (тогда Майя просто скажет «высокие оценки» и даст ссылки). Формат — как удобно
+# произнести: "4.9 (более 300 отзывов)".
+SALON_RATING_YANDEX = _opt("SALON_RATING_YANDEX", "")
+SALON_RATING_2GIS = _opt("SALON_RATING_2GIS", "")
 
 # ── Шифрование ПД (152-ФЗ, Fernet) ────────────────────────────────────────────
 # ВНИМАНИЕ: смена этого ключа делает уже зашифрованные ПД нечитаемыми.

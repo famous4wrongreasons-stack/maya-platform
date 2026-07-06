@@ -8,6 +8,10 @@ type TenantRecord = {
   slug: string;
   status: string;
   planId: string | null;
+  trialEndsAt: Date | null;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  billingMethodId: string | null;
   allowSelfRegistration: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -75,6 +79,10 @@ describe('TenantsService.updateTenant', () => {
     slug: 'demo-salon',
     status: 'active',
     planId: 'plan-pro',
+    trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
+    currentPeriodStart: new Date('2026-07-01T00:00:00.000Z'),
+    currentPeriodEnd: new Date('2026-07-31T23:59:59.000Z'),
+    billingMethodId: null,
     allowSelfRegistration: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -206,6 +214,12 @@ describe('TenantsService.updateTenant', () => {
     expect(result.booking_live_enabled).toBe(true);
     expect(result.booking_live_eligible).toBe(true);
     expect(result.booking_live_blockers).toEqual([]);
+    expect(result.billing).toMatchObject({
+      trial_ends_at: baseTenant().trialEndsAt,
+      current_period_start: baseTenant().currentPeriodStart,
+      current_period_end: baseTenant().currentPeriodEnd,
+      billing_method_attached: false,
+    });
   });
 
   it('reports blockers when live is requested but only mock CRM is connected', () => {
@@ -240,5 +254,160 @@ describe('TenantsService.updateTenant', () => {
     expect(result.booking_live_enabled).toBe(false);
     expect(result.booking_live_eligible).toBe(false);
     expect(result.booking_live_blockers).toContain('mock_crm_only');
+  });
+
+  it('persists manual billing dates and billing method id through tenant update', async () => {
+    const updatedTenant = {
+      ...baseTenant(),
+      status: 'past_due',
+      trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
+      currentPeriodStart: new Date('2026-07-20T00:00:00.000Z'),
+      currentPeriodEnd: new Date('2026-08-19T23:59:59.000Z'),
+      billingMethodId: 'pm_yookassa_saved_card_123',
+    };
+    const tenantUpdateMock: jest.MockedFunction<
+      (args: {
+        where: { id: string };
+        data: {
+          status?: string;
+          currentPeriodStart?: Date | null;
+          currentPeriodEnd?: Date | null;
+          billingMethodId?: string | null;
+        };
+      }) => Promise<void>
+    > = jest.fn().mockResolvedValue(undefined);
+    const tenantFindFirstMock = jest.fn().mockResolvedValue(null);
+    const tenantFindUniqueMock = jest
+      .fn()
+      .mockResolvedValueOnce(baseTenant())
+      .mockResolvedValueOnce(updatedTenant);
+    const transactionMock = jest
+      .fn()
+      .mockImplementation((callback: (tx: unknown) => unknown) =>
+        Promise.resolve(
+          callback({
+            tenant: {
+              update: tenantUpdateMock,
+            },
+            brandingSettings: {
+              upsert: jest.fn(),
+            },
+          }),
+        ),
+      );
+    const prisma = {
+      tenant: {
+        findUnique: tenantFindUniqueMock,
+        findFirst: tenantFindFirstMock,
+      },
+      $transaction: transactionMock,
+    } as unknown as PrismaService;
+    const subscriptionsService = {
+      getPlanByIdOrThrow: jest.fn(),
+    } as unknown as SubscriptionsService;
+    const service = new TenantsService(prisma, subscriptionsService);
+
+    const result = await service.updateTenant('tenant-1', {
+      status: 'past_due' as TenantRecord['status'],
+      currentPeriodStart: '2026-07-20T00:00:00.000Z',
+      currentPeriodEnd: '2026-08-19T23:59:59.000Z',
+      billingMethodId: 'pm_yookassa_saved_card_123',
+    });
+
+    const [tenantUpdateArgs] = tenantUpdateMock.mock.calls[0] ?? [];
+
+    expect(tenantUpdateArgs.where).toEqual({ id: 'tenant-1' });
+    expect(tenantUpdateArgs.data.status).toBe('past_due');
+    expect(tenantUpdateArgs.data.currentPeriodStart).toEqual(
+      new Date('2026-07-20T00:00:00.000Z'),
+    );
+    expect(tenantUpdateArgs.data.currentPeriodEnd).toEqual(
+      new Date('2026-08-19T23:59:59.000Z'),
+    );
+    expect(tenantUpdateArgs.data.billingMethodId).toBe(
+      'pm_yookassa_saved_card_123',
+    );
+    expect(result.billing).toMatchObject({
+      current_period_start: new Date('2026-07-20T00:00:00.000Z'),
+      current_period_end: new Date('2026-08-19T23:59:59.000Z'),
+      billing_method_attached: true,
+      billing_method_id: 'pm_yookassa_saved_card_123',
+    });
+    expect(result.billing.grace_ends_at).toEqual(
+      new Date('2026-08-24T23:59:59.000Z'),
+    );
+  });
+
+  it('clears manual billing dates and billing method id when empty strings are supplied', async () => {
+    const clearedTenant = {
+      ...baseTenant(),
+      trialEndsAt: null,
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
+      billingMethodId: null,
+    };
+    const tenantUpdateMock: jest.MockedFunction<
+      (args: {
+        where: { id: string };
+        data: {
+          trialEndsAt?: Date | null;
+          currentPeriodStart?: Date | null;
+          currentPeriodEnd?: Date | null;
+          billingMethodId?: string | null;
+        };
+      }) => Promise<void>
+    > = jest.fn().mockResolvedValue(undefined);
+    const tenantFindFirstMock = jest.fn().mockResolvedValue(null);
+    const tenantFindUniqueMock = jest
+      .fn()
+      .mockResolvedValueOnce(baseTenant())
+      .mockResolvedValueOnce(clearedTenant);
+    const transactionMock = jest
+      .fn()
+      .mockImplementation((callback: (tx: unknown) => unknown) =>
+        Promise.resolve(
+          callback({
+            tenant: {
+              update: tenantUpdateMock,
+            },
+            brandingSettings: {
+              upsert: jest.fn(),
+            },
+          }),
+        ),
+      );
+    const prisma = {
+      tenant: {
+        findUnique: tenantFindUniqueMock,
+        findFirst: tenantFindFirstMock,
+      },
+      $transaction: transactionMock,
+    } as unknown as PrismaService;
+    const subscriptionsService = {
+      getPlanByIdOrThrow: jest.fn(),
+    } as unknown as SubscriptionsService;
+    const service = new TenantsService(prisma, subscriptionsService);
+
+    const result = await service.updateTenant('tenant-1', {
+      trialEndsAt: '',
+      currentPeriodStart: '',
+      currentPeriodEnd: '',
+      billingMethodId: '',
+    });
+
+    const [tenantUpdateArgs] = tenantUpdateMock.mock.calls[0] ?? [];
+
+    expect(tenantUpdateArgs.where).toEqual({ id: 'tenant-1' });
+    expect(tenantUpdateArgs.data.trialEndsAt).toBeNull();
+    expect(tenantUpdateArgs.data.currentPeriodStart).toBeNull();
+    expect(tenantUpdateArgs.data.currentPeriodEnd).toBeNull();
+    expect(tenantUpdateArgs.data.billingMethodId).toBeNull();
+    expect(result.billing).toMatchObject({
+      trial_ends_at: null,
+      current_period_start: null,
+      current_period_end: null,
+      billing_method_attached: false,
+      billing_method_id: null,
+    });
   });
 });

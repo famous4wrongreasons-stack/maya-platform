@@ -46,11 +46,15 @@ import anonymizer
 import config
 import cutmatch
 import database
+import lead_alerts
 import masters_ai
+import memory
 import subscriptions
 import web_auth
 import yukassa_api
+from identity_utils import normalize_tg_user, resolve_panel_role, session_tg_user
 from config import WEBHOOK_SECRET, WEBHOOK_PORT, TELEGRAM_TOKEN
+from voice_guard import CLARIFY_REPEAT_TEXT, should_clarify_transcript
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -68,6 +72,22 @@ if not WEBPUSH_VAPID_PRIVATE_KEY:
 
 # Один экземпляр клиента YClients на всё время жизни сервера
 _yc = YClientsAPI()
+_VOICE_MASTER_NAMES_CACHE = {"names": (), "ts": 0.0}
+
+
+def _voice_known_master_names() -> tuple[str, ...]:
+    now = time.time()
+    names = _VOICE_MASTER_NAMES_CACHE.get("names") or ()
+    if names and now - float(_VOICE_MASTER_NAMES_CACHE.get("ts") or 0) < 3600:
+        return tuple(names)
+    try:
+        masters = _yc.get_masters() or []
+        names = tuple(m.get("name", "") for m in masters if isinstance(m, dict) and m.get("name"))
+    except Exception as e:
+        logger.error(f"_voice_known_master_names: {e}")
+        names = ()
+    _VOICE_MASTER_NAMES_CACHE.update(names=names, ts=now)
+    return tuple(names)
 
 # Номиналы подарочных сертификатов, доступные к покупке в приложении
 _CERT_AMOUNTS = (2000, 3000, 5000)
@@ -508,8 +528,10 @@ async def _send_master_push(
             sent += 1
         except WebPushException as e:
             status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (404, 410):
+            if status in (403, 404, 410):
                 _delete_master_push_subscription_sqlite(endpoint)
+                logger.info(f"master push stale subscription removed status={status}")
+                continue
             logger.error(f"master push failed: {e}")
         except Exception as e:
             logger.error(f"master push failed: {e}")
@@ -556,8 +578,10 @@ async def _send_client_push(chat_id, title: str, body: str,
             sent += 1
         except WebPushException as e:
             status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (404, 410):
+            if status in (403, 404, 410):
                 _delete_master_push_subscription_sqlite(endpoint)
+                logger.info(f"client push stale subscription removed status={status}")
+                continue
             logger.error(f"client push failed: {e}")
         except Exception as e:
             logger.error(f"client push failed: {e}")
@@ -736,19 +760,11 @@ async def _fetch_client_history(client_id: int) -> list[dict]:
     """
     cached = database.get_client_history_cached(client_id)
     if cached is not None:
-        return cached
+        return memory.normalize_history(cached)
     history = await asyncio.to_thread(_yc.get_client_history, client_id)
-    # Сохраняем урезанную версию — только то, что нужно AI
-    minimal = []
-    for v in history[:20]:
-        minimal.append({
-            "date": v.get("date") or v.get("datetime"),
-            "services": [
-                {"title": s.get("title"), "cost": s.get("cost") or s.get("price") or 0}
-                for s in (v.get("services") or [])
-            ],
-            "staff": {"name": (v.get("staff") or {}).get("name")},
-        })
+    # Сохраняем урезанную версию — только то, что нужно AI, но в одном
+    # каноническом формате для всех потребителей.
+    minimal = memory.normalize_history(history[:20])
     database.set_client_history_cache(client_id, minimal)
     return minimal
 
@@ -806,6 +822,58 @@ def _save_record_state(record: dict, record_id: int):
         )
     except Exception as e:
         logger.error(f"_save_record_state({record_id}): {e}")
+
+
+def _close_local_booking_intent(record: dict, record_id: int):
+    """Закрывает зависший диалог, если запись пришла из внешнего YClients/PWA-пути."""
+    try:
+        client = record.get("client") or {}
+        phone = (
+            client.get("phone")
+            or client.get("phone_number")
+            or client.get("normalized_phone")
+            or ""
+        )
+        local_client = database.find_client_by_phone(str(phone)) if phone else None
+        if not local_client or not local_client.get("id"):
+            return
+        lead_alerts.on_booking_confirmed(int(local_client["id"]))
+        logger.info(
+            f"Webhook: record {record_id} closed local booking intent "
+            f"for client_id={local_client['id']}"
+        )
+    except Exception as e:
+        logger.error(f"Webhook: close local booking intent record {record_id}: {e}")
+
+
+def _booking_failure_reply(result: dict) -> str:
+    """Короткое понятное объяснение клиенту, почему запись не дошла до YClients."""
+    code = (result or {}).get("code") or ""
+    if code == "slot_taken":
+        return (
+            "Это время уже заняли или оно стало недоступно. "
+            "Давайте выберем другой ближайший слот."
+        )
+    if code == "bad_phone":
+        return (
+            "Не получилось записать из-за номера телефона. "
+            "Проверьте номер в профиле или напишите его заново."
+        )
+    if code == "bad_name":
+        return "Не получилось записать из-за имени. Напишите, пожалуйста, как вас записать."
+    if code == "bad_service":
+        return "Эта услуга сейчас недоступна для онлайн-записи. Давайте выберем услугу заново."
+    if code == "bad_staff":
+        return "Этот мастер сейчас недоступен для онлайн-записи. Давайте выберем другого мастера или время."
+    if code == "yclients_unavailable":
+        return (
+            "Сервер записи сейчас отвечает нестабильно, поэтому я не буду повторять заявку, "
+            "чтобы случайно не создать дубль. Проверьте «Мои записи» через минуту или напишите мне ещё раз."
+        )
+    return (
+        "Не получилось оформить запись автоматически. "
+        "Попробуйте выбрать другое время или напишите мне ещё раз."
+    )
 
 
 async def _process_record_create(app: Application, record_id: int) -> dict:
@@ -892,6 +960,8 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
             )
         except Exception as e:
             logger.error(f"Webhook: ошибка получения совета AI: {e}")
+
+    _close_local_booking_intent(record, record_id)
 
     # 6. Лог в БД — будет нужен для статистики «зашёл / не зашёл совет»
     try:
@@ -1319,10 +1389,20 @@ async def _process_record_delete(app: Application, record_id: int, payload: dict
     return freed_result
 
 
+def _webhook_secret_ok(request: web.Request) -> bool:
+    provided = (
+        request.headers.get("X-Webhook-Secret")
+        or request.query.get("secret")
+        or ""
+    )
+    return hmac.compare_digest(str(provided), str(WEBHOOK_SECRET))
+
+
 async def handle_yclients_webhook(request: web.Request) -> web.Response:
     """HTTP-обработчик /yclients-webhook"""
-    # Проверка секрета
-    if request.query.get("secret") != WEBHOOK_SECRET:
+    # Проверка секрета. Header используется внутренним PHP-прокси, чтобы секрет
+    # не попадал в access-log как query string; query оставлен для совместимости.
+    if not _webhook_secret_ok(request):
         logger.warning(f"Webhook: чужой запрос с {request.remote}")
         return web.json_response({"error": "forbidden"}, status=403)
 
@@ -1469,6 +1549,83 @@ def _usual_master(history: list) -> dict | None:
     return {"id": best, "name": names.get(best, "")}
 
 
+def _client_card_name(card: dict | None) -> str:
+    """Полное имя клиента из карточки YClients."""
+    data = card if isinstance(card, dict) else {}
+    full = " ".join(
+        str(data.get(key) or "").strip()
+        for key in ("name", "surname", "patronymic")
+        if str(data.get(key) or "").strip()
+    ).strip()
+    return full or str(data.get("display_name") or "").strip()
+
+
+def _client_card_view(card: dict | None, fallback_visits: int) -> dict | None:
+    """Сжатый безопасный вид карточки клиента для кабинета."""
+    data = card if isinstance(card, dict) else {}
+    if not data:
+        return None
+    return {
+        "id": data.get("id"),
+        "name": _client_card_name(data),
+        "comment": str(data.get("comment") or "").strip(),
+        "visits": data.get("visits") if data.get("visits") is not None else fallback_visits,
+        "spent": data.get("spent") if data.get("spent") is not None else data.get("paid"),
+        "balance": data.get("balance"),
+        "discount": data.get("discount"),
+        "categories": data.get("categories") or [],
+    }
+
+
+def _load_cabinet_yclients(phone: str) -> dict:
+    """Тянет карточку клиента и его записи из YClients синхронно (для to_thread)."""
+    phone_digits = "".join(ch for ch in (phone or "") if ch.isdigit())
+    if len(phone_digits) < 10:
+        return {"yc_client_id": None, "client_card": None, "bookings": []}
+
+    yc_client_id = None
+    try:
+        for row in _yc.search_clients(phone, limit=8) or []:
+            row_digits = "".join(ch for ch in (row.get("phone") or "") if ch.isdigit())
+            if row_digits and row_digits[-10:] == phone_digits[-10:]:
+                yc_client_id = row.get("id")
+                break
+    except Exception as e:
+        logger.error(f"cabinet yclients search {phone_digits[-4:]}: {e}")
+        return {"yc_client_id": None, "client_card": None, "bookings": []}
+
+    if not yc_client_id:
+        return {"yc_client_id": None, "client_card": None, "bookings": []}
+
+    client_card = None
+    bookings = []
+    try:
+        client_card = _yc.get_client(int(yc_client_id)) or None
+    except Exception as e:
+        logger.error(f"cabinet yclients client {yc_client_id}: {e}")
+
+    try:
+        params = {
+            "client_id": int(yc_client_id),
+            "count": 200,
+            "start_date": (datetime.now() - timedelta(days=1825)).strftime("%Y-%m-%d"),
+            "end_date": (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%d"),
+        }
+        data = _yc._get(f"records/{_yc.company_id}", params)
+        for row in (data.get("data") or []):
+            if isinstance(row, dict):
+                bookings.append(row)
+    except Exception as e:
+        logger.error(f"cabinet yclients records {yc_client_id}: {e}")
+        bookings = []
+
+    return {
+        "yc_client_id": int(yc_client_id),
+        "client_card": client_card,
+        "bookings": bookings,
+    }
+
+
 async def cabinet_me_handler(request: web.Request) -> web.Response:
     """
     GET /api/cabinet/me
@@ -1483,248 +1640,10 @@ async def cabinet_me_handler(request: web.Request) -> web.Response:
              "message": "Подпись Telegram WebApp невалидна или устарела."},
             status=401,
         )
-
     chat_id = tg_user.get("id")
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
-
-    client = database.get_client(int(chat_id))
-    if not client:
-        # Клиент ещё не взаимодействовал с ботом
-        return _cabinet_response({
-            "known": False,
-            "tg_user": {
-                "first_name": tg_user.get("first_name", ""),
-                "username": tg_user.get("username", ""),
-            },
-            "message": "Сначала запишись через бот — после первой записи мы будем знать тебя.",
-        })
-
-    # 152-ФЗ: без подписанного согласия личный кабинет недоступен.
-    # Гейт в боте уже это контролирует, но кабинет доступен и из приложения —
-    # дублируем защиту здесь.
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return _cabinet_response({
-            "known": False,
-            "needs_consent": True,
-            "message": (
-                "Чтобы открыть личный кабинет, подпишите согласие на обработку "
-                "персональных данных. Откройте бот @malesthetic_bot и нажмите /start."
-            ),
-        }, status=403)
-
-    client_id = client["id"]
-    phone = client.get("phone") or ""
-
-    # Если телефон известен — подтянем welcome-баллы за прошлые визиты
-    # (идемпотентно). Так клиент видит свои баллы в кабинете даже до записи
-    # через бота.
-    if phone:
-        try:
-            import loyalty as _loy
-            await asyncio.to_thread(_loy.lazy_backfill_for_client, client_id, phone)
-        except Exception as e:
-            logger.error(f"cabinet_me: lazy_backfill {client_id}: {e}")
-
-    # Баллы
-    balance = database.loyalty_balance(client_id)
-
-    # Визиты — тянем напрямую по yclients_client_id, без шумного фильтра по
-    # номеру в общем потоке записей салона.
-    # 1) ищем YClients-id клиента по телефону.
-    #
-    # ⚠️ КРИТИЧНО: телефон ДОЛЖЕН быть валидным. Пустой quick_search в YClients
-    # возвращает ПЕРВУЮ страницу ВСЕХ клиентов салона — и мы бы показали чужую
-    # историю визитов (утечка ПД по 152-ФЗ). Поэтому без телефона НЕ ищем.
-    bookings = []
-    phone_digits = "".join(ch for ch in phone if ch.isdigit())
-    has_valid_phone = len(phone_digits) >= 10
-    if not has_valid_phone:
-        logger.info(
-            f"cabinet_me: у client_id={client_id} нет телефона — "
-            f"визиты из YClients не запрашиваем (защита от утечки чужих данных)"
-        )
-    if has_valid_phone:
-      try:
-        import requests as _rq
-        from config import (
-            YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKEN, YCLIENTS_COMPANY_ID,
-        )
-        headers = {
-            "Accept": "application/vnd.api.v2+json",
-            "Content-Type": "application/json",
-            "Authorization": (
-                f"Bearer {YCLIENTS_PARTNER_TOKEN}, User {YCLIENTS_USER_TOKEN}"
-            ),
-        }
-        search_url = (
-            f"https://api.yclients.com/api/v1/company/"
-            f"{YCLIENTS_COMPANY_ID}/clients/search"
-        )
-        r = _rq.post(search_url, json={
-            "fields": ["id", "name", "phone", "sold_amount", "visits_count"],
-            "filters": [{"type": "quick_search", "state": {"value": phone}}],
-        }, headers=headers, timeout=15)
-        yc_client_id = None
-        if r.status_code == 200:
-            items = (r.json() or {}).get("data") or []
-            # Доп. защита: сверяем телефон найденного клиента с искомым —
-            # quick_search нечёткий, может вернуть «похожих». Берём только
-            # точное совпадение по цифрам номера.
-            for it in items:
-                it_digits = "".join(ch for ch in (it.get("phone") or "") if ch.isdigit())
-                if it_digits and it_digits[-10:] == phone_digits[-10:]:
-                    yc_client_id = it.get("id")
-                    break
-
-        # 2) если нашли — забираем ВСЕ записи именно этого клиента
-        if yc_client_id:
-            from datetime import datetime as _dt
-            params = {
-                "client_id": yc_client_id,
-                "count": 200,
-                # окно 5 лет назад + 3 месяца вперёд — закроет всю историю
-                "start_date": (_dt.now() - timedelta(days=1825)).strftime("%Y-%m-%d"),
-                "end_date":   (_dt.now() + timedelta(days=90)).strftime("%Y-%m-%d"),
-            }
-            r2 = _rq.get(
-                f"https://api.yclients.com/api/v1/records/{YCLIENTS_COMPANY_ID}",
-                params=params, headers=headers, timeout=20,
-            )
-            if r2.status_code == 200:
-                raw_records = (r2.json() or {}).get("data") or []
-                # Нормализуем структуру под существующий цикл ниже
-                for r_rec in raw_records:
-                    if not isinstance(r_rec, dict):
-                        continue
-                    bookings.append({
-                        "id": r_rec.get("id"),
-                        "record_id": r_rec.get("id"),
-                        "date": r_rec.get("date") or r_rec.get("datetime", ""),
-                        "datetime": r_rec.get("datetime", ""),
-                        "services": r_rec.get("services") or [],
-                        "service_titles": [
-                            (s.get("title") or "")
-                            for s in (r_rec.get("services") or [])
-                            if isinstance(s, dict)
-                        ],
-                        "staff": r_rec.get("staff") or {},
-                        "staff_id": r_rec.get("staff_id"),
-                        "master": (r_rec.get("staff") or {}).get("name", ""),
-                        "attendance": r_rec.get("attendance", 0),
-                        "visit_attendance": r_rec.get("visit_attendance", 0),
-                    })
-        # Если точного совпадения по телефону не нашли — НЕ берём чужого
-        # клиента. Просто оставляем bookings пустым.
-      except Exception as e:
-        logger.error(f"cabinet_me: yc bookings err: {e}")
-        bookings = []
-
-    today_str = date.today().isoformat()
-    upcoming = []
-    history = []
-    visits_total = 0
-    visits_last_year = 0
-    year_ago = (date.today() - timedelta(days=365)).isoformat()
-    last_visit = None
-
-    for b in bookings:
-        if not isinstance(b, dict):
-            continue
-        record_id = b.get("id") or b.get("record_id")
-        if not record_id:
-            continue
-        dt = (b.get("datetime") or b.get("date") or "")[:10]
-        attended = b.get("attendance") == 1 or b.get("visit_attendance") == 1
-        services = b.get("service_titles") or [
-            (s.get("title") if isinstance(s, dict) else str(s))
-            for s in (b.get("services") or [])
-        ]
-        master = b.get("master") or (b.get("staff") or {}).get("name") or ""
-
-        item = {
-            "record_id": int(record_id),
-            "date": b.get("date") or b.get("datetime", ""),
-            "services": [t for t in services if t],
-            "master": master,
-            "master_id": _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id")),
-        }
-
-        if not attended and dt >= today_str:
-            upcoming.append(item)
-        elif attended:
-            history.append(item)
-            visits_total += 1
-            if dt >= year_ago:
-                visits_last_year += 1
-            if last_visit is None or dt > last_visit.get("date_short", ""):
-                last_visit = {**item, "date_short": dt}
-
-    upcoming.sort(key=lambda x: x["date"])
-    history.sort(key=lambda x: x["date"], reverse=True)
-
-    # Активный абонемент
-    sub = database.get_active_subscription_for_client(client_id)
-    sub_info = None
-    if sub:
-        import subscriptions as _subs
-        plan = _subs.get_plan(sub["plan_code"])
-        if plan:
-            tier = (sub.get("tier") or "top").lower()
-            sub_info = {
-                "title": plan["title"],
-                "tier_label": _subs.TIER_LABELS.get(tier, ""),
-                "used": sub.get("visits_used", 0),
-                "total": sub["visits_included"],
-                "expires_at": sub["expires_at"][:10],
-                "services_included": plan["services_included"],
-            }
-
-    # Реферальная ссылка
-    import referral as _ref
-    try:
-        ref_code = _ref.get_or_create_ref_code(client_id)
-        ref_link = _ref.build_ref_link(ref_code, "malesthetic_bot")
-        ref_stats = database.referral_stats_for_client(client_id)
-    except Exception as e:
-        logger.error(f"cabinet_me: ref err: {e}")
-        ref_code, ref_link, ref_stats = None, None, {}
-
-    # Полное имя — расшифровано
-    full_name = client.get("name") or tg_user.get("first_name", "")
-    first_name = (full_name.split() or [""])[0]
-
-    return _cabinet_response({
-        "known": True,
-        "has_phone": has_valid_phone,
-        "needs_phone": not has_valid_phone,
-        "name": first_name,
-        "full_name": full_name,
-        "phone_tail": phone[-4:] if has_valid_phone else "",
-        "booking_phone": phone if has_valid_phone else "",
-        "loyalty": {
-            "balance": balance,
-            "care_services": [
-                {"title": c["title"], "price": c["price"], "emoji": c["emoji"]}
-                for c in __import__("loyalty").CARE_SERVICES
-            ],
-        },
-        "visits": {
-            "total": visits_total,
-            "last_year": visits_last_year,
-            "last_visit": last_visit,
-        },
-        "usual_master": _usual_master(history),
-        "upcoming": upcoming,
-        "history": history[:30],  # последние 30
-        "subscription": sub_info,
-        "referral": {
-            "code": ref_code,
-            "link": ref_link,
-            "invited": ref_stats.get("granted", 0),
-            "pending": ref_stats.get("pending", 0),
-        },
-    })
+    return await _build_full_cabinet(int(chat_id), tg_user)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1815,13 +1734,17 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
     Общая логика построения ответа ЛК — используется и cabinet_me_handler,
     и cabinet_me_via_login_handler. Возвращает ту же структуру что ждёт фронт.
     """
+    tg_profile = normalize_tg_user(tg_user)
     client = database.get_client(int(chat_id))
     if not client:
         return _cabinet_response({
             "known": False,
             "tg_user": {
-                "first_name": tg_user.get("first_name", ""),
-                "username": tg_user.get("username", ""),
+                "first_name": tg_profile.get("first_name", ""),
+                "last_name": tg_profile.get("last_name", ""),
+                "full_name": tg_profile.get("full_name", ""),
+                "username": tg_profile.get("username", ""),
+                "photo_url": tg_profile.get("photo_url", ""),
             },
             "message": "Сначала запишись через бот — после первой записи мы будем знать тебя.",
         })
@@ -1848,81 +1771,25 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             logger.error(f"_build_full_cabinet: lazy_backfill {client_id}: {e}")
     balance = database.loyalty_balance(client_id)
 
-    # ⚠️ Без валидного телефона НЕ ищем в YClients — пустой quick_search вернёт
-    # чужих клиентов (утечка ПД). См. cabinet_me_handler.
     bookings = []
+    yc_client_id = None
+    yc_client_card = None
     phone_digits = "".join(ch for ch in phone if ch.isdigit())
     has_valid_phone = len(phone_digits) >= 10
     if has_valid_phone:
-      try:
-        import requests as _rq
-        from config import (
-            YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKEN, YCLIENTS_COMPANY_ID,
-        )
-        headers = {
-            "Accept": "application/vnd.api.v2+json",
-            "Content-Type": "application/json",
-            "Authorization": (
-                f"Bearer {YCLIENTS_PARTNER_TOKEN}, User {YCLIENTS_USER_TOKEN}"
-            ),
-        }
-        search_url = (
-            f"https://api.yclients.com/api/v1/company/"
-            f"{YCLIENTS_COMPANY_ID}/clients/search"
-        )
-        r = _rq.post(search_url, json={
-            "fields": ["id", "name", "phone", "sold_amount", "visits_count"],
-            "filters": [{"type": "quick_search", "state": {"value": phone}}],
-        }, headers=headers, timeout=15)
-        yc_client_id = None
-        if r.status_code == 200:
-            items = (r.json() or {}).get("data") or []
-            for it in items:
-                it_digits = "".join(ch for ch in (it.get("phone") or "") if ch.isdigit())
-                if it_digits and it_digits[-10:] == phone_digits[-10:]:
-                    yc_client_id = it.get("id")
-                    break
-        if yc_client_id:
-            from datetime import datetime as _dt
-            params = {
-                "client_id": yc_client_id,
-                "count": 200,
-                "start_date": (_dt.now() - timedelta(days=1825)).strftime("%Y-%m-%d"),
-                "end_date":   (_dt.now() + timedelta(days=90)).strftime("%Y-%m-%d"),
-            }
-            r2 = _rq.get(
-                f"https://api.yclients.com/api/v1/records/{YCLIENTS_COMPANY_ID}",
-                params=params, headers=headers, timeout=20,
-            )
-            if r2.status_code == 200:
-                raw_records = (r2.json() or {}).get("data") or []
-                for r_rec in raw_records:
-                    if not isinstance(r_rec, dict):
-                        continue
-                    bookings.append({
-                        "id": r_rec.get("id"),
-                        "record_id": r_rec.get("id"),
-                        "date": r_rec.get("date") or r_rec.get("datetime", ""),
-                        "datetime": r_rec.get("datetime", ""),
-                        "services": r_rec.get("services") or [],
-                        "service_titles": [
-                            (s.get("title") or "")
-                            for s in (r_rec.get("services") or [])
-                            if isinstance(s, dict)
-                        ],
-                        "staff": r_rec.get("staff") or {},
-                        "staff_id": r_rec.get("staff_id"),
-                        "master": (r_rec.get("staff") or {}).get("name", ""),
-                        "attendance": r_rec.get("attendance", 0),
-                        "visit_attendance": r_rec.get("visit_attendance", 0),
-                    })
-      except Exception as e:
-        logger.error(f"cabinet_via_login: yc bookings err: {e}")
-        bookings = []
+        try:
+            yc_payload = await asyncio.to_thread(_load_cabinet_yclients, phone)
+            yc_client_id = yc_payload.get("yc_client_id")
+            yc_client_card = yc_payload.get("client_card")
+            bookings = yc_payload.get("bookings") or []
+        except Exception as e:
+            logger.error(f"cabinet_via_login: yc bookings err: {e}")
+            bookings = []
 
     today_str = date.today().isoformat()
     upcoming = []
     history = []
+    history_cache = []
     visits_total = 0
     visits_last_year = 0
     year_ago = (date.today() - timedelta(days=365)).isoformat()
@@ -1936,22 +1803,45 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             continue
         dt = (b.get("datetime") or b.get("date") or "")[:10]
         attended = b.get("attendance") == 1 or b.get("visit_attendance") == 1
-        services = b.get("service_titles") or [
-            (s.get("title") if isinstance(s, dict) else str(s))
-            for s in (b.get("services") or [])
-        ]
+        services = []
+        total_cost = 0
+        for svc in (b.get("services") or []):
+            if isinstance(svc, dict):
+                title = str(svc.get("title") or "").strip()
+                if not title:
+                    continue
+                cost = svc.get("cost")
+                if cost in (None, ""):
+                    cost = svc.get("price")
+                try:
+                    total_cost += int(float(cost or 0))
+                except (TypeError, ValueError):
+                    pass
+                services.append({"title": title, "cost": cost or 0})
+            elif str(svc or "").strip():
+                services.append({"title": str(svc).strip(), "cost": 0})
+        service_titles = [svc["title"] for svc in services if svc.get("title")]
         master = b.get("master") or (b.get("staff") or {}).get("name") or ""
+        master_id = _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id"))
         item = {
             "record_id": int(record_id),
             "date": b.get("date") or b.get("datetime", ""),
-            "services": [t for t in services if t],
+            "services": service_titles,
             "master": master,
-            "master_id": _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id")),
+            "master_id": master_id,
+            "cost": total_cost or None,
         }
         if not attended and dt >= today_str:
             upcoming.append(item)
         elif attended:
             history.append(item)
+            history_cache.append(memory.normalize_history_visit({
+                "date": b.get("date") or b.get("datetime", ""),
+                "services": services,
+                "staff": {"id": master_id, "name": master},
+                "master_id": master_id,
+                "master": master,
+            }))
             visits_total += 1
             if dt >= year_ago:
                 visits_last_year += 1
@@ -1960,6 +1850,13 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
 
     upcoming.sort(key=lambda x: x["date"])
     history.sort(key=lambda x: x["date"], reverse=True)
+    history_cache.sort(key=lambda x: str(x.get("date") or ""), reverse=True)
+
+    if has_valid_phone:
+        try:
+            database.set_client_history_cache(client_id, history_cache[:30])
+        except Exception as e:
+            logger.error(f"_build_full_cabinet: cache warm {client_id}: {e}")
 
     sub = database.get_active_subscription_for_client(client_id)
     sub_info = None
@@ -1989,8 +1886,16 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
     except Exception as e:
         logger.error(f"cabinet_via_login: ref err: {e}")
 
-    full_name = client.get("name") or tg_user.get("first_name", "")
-    first_name = (full_name.split() or [""])[0]
+    client_card = _client_card_view(yc_client_card, visits_total)
+    client_note = (client_card or {}).get("comment") or ""
+    client_card_name = (client_card or {}).get("name") or client.get("name") or ""
+    full_name = (
+        tg_profile.get("full_name")
+        or client_card_name
+        or tg_profile.get("first_name")
+        or ""
+    )
+    first_name = tg_profile.get("first_name") or (full_name.split() or [""])[0]
 
     return _cabinet_response({
         "known": True,
@@ -2012,6 +1917,9 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             "last_year": visits_last_year,
             "last_visit": last_visit,
         },
+        "yc_client_id": yc_client_id,
+        "client_card": client_card,
+        "client_note": client_note,
         "usual_master": _usual_master(history),
         "upcoming": upcoming,
         "history": history[:30],
@@ -2023,9 +1931,12 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             "pending": ref_stats.get("pending", 0),
         },
         "tg_user": {
-            "first_name": tg_user.get("first_name", ""),
-            "username": tg_user.get("username", ""),
-            "photo_url": tg_user.get("photo_url", ""),
+            "id": tg_profile.get("id"),
+            "first_name": tg_profile.get("first_name", ""),
+            "last_name": tg_profile.get("last_name", ""),
+            "full_name": tg_profile.get("full_name", ""),
+            "username": tg_profile.get("username", ""),
+            "photo_url": tg_profile.get("photo_url", ""),
         },
     })
 
@@ -2059,14 +1970,21 @@ def _panel_resolve_role(tg_id: int) -> dict:
     staff_id = master_row.get("yclients_staff_id") if master_row else None
     master_name = (master_row.get("full_name") if master_row else "") or ""
     is_cashier = bool(master_row.get("can_redeem")) if master_row else False
+    try:
+        from config import FOUNDER_IDS as _FIDS
+        founders = {int(x) for x in _FIDS}
+    except Exception:
+        founders = set()
+    is_founder = int(tg_id) in founders
+    is_admin = bool(database.is_admin(int(tg_id)))
 
-    role = None
-    if database.is_admin(int(tg_id)):
-        role = "owner"
-    elif tg_id in managers:
-        role = "manager"
-    elif is_master:
-        role = "master"
+    role = resolve_panel_role(
+        tg_id=int(tg_id),
+        is_founder=is_founder,
+        is_admin=is_admin,
+        is_master=is_master,
+        manager_ids=managers,
+    )
 
     PERMS = {
         "owner":   {"dashboard": True,  "analytics": True,  "marketing": True,  "jobs": True,
@@ -2085,15 +2003,9 @@ def _panel_resolve_role(tg_id: int) -> dict:
         perms["master_tools"] = True
         if is_cashier:
             perms["redeem"] = True
-    # Основатель MAYA — доступ к закрытому GOD-режиму (founder-кабинет)
-    try:
-        from config import FOUNDER_IDS as _FIDS
-        is_founder = int(tg_id) in set(_FIDS)
-    except Exception:
-        is_founder = False
     return {"role": role, "is_cashier": is_cashier, "is_master": is_master,
             "staff_id": staff_id, "master_name": master_name, "permissions": perms,
-            "is_founder": is_founder}
+            "is_founder": is_founder, "is_admin": is_admin}
 
 
 def _panel_auth(body: dict, init_data_header: str):
@@ -2113,10 +2025,7 @@ def _panel_auth(body: dict, init_data_header: str):
     tok = (body or {}).get("session_token")
     if tok:
         try:
-            sess = web_auth.resolve_session(tok)
-            cid = sess.get("chat_id") if sess else None
-            if cid:
-                return {"id": int(cid), "first_name": (sess.get("display_name") or "")}
+            return session_tg_user(web_auth.resolve_session(tok))
         except Exception:
             pass
     return None
@@ -2224,7 +2133,8 @@ async def panel_me_handler(request: web.Request) -> web.Response:
         )
     except Exception:
         pass
-    _panel_record_seen(int(tg_id), tg_user.get("first_name", ""))
+    tg_profile = normalize_tg_user(tg_user)
+    _panel_record_seen(int(tg_id), tg_profile.get("first_name", ""))
     # Собственные чаевые мастера (для его панели): сумма и количество
     my_tips = None
     if info.get("is_master"):
@@ -2244,7 +2154,8 @@ async def panel_me_handler(request: web.Request) -> web.Response:
         "master_name": info["master_name"],
         "permissions": info["permissions"],
         "is_founder": info.get("is_founder", False),  # доступ к GOD-режиму (только Стас)
-        "name": tg_user.get("first_name", ""),
+        "is_admin": info.get("is_admin", False),
+        "name": tg_profile.get("display_name", ""),
         "my_tips": my_tips,
     })
 
@@ -2611,7 +2522,7 @@ def _master_day_records(staff_id: int, date_q: str) -> dict:
         if d and d >= today_str:
             by_day.setdefault(d, []).append(r)
     days = sorted(by_day.keys())
-    target = date_q if (date_q and date_q in by_day) else (days[0] if days else None)
+    target = date_q if date_q else (days[0] if days else None)
     day_recs = (sorted(by_day.get(target, []), key=lambda r: (r.get("datetime") or ""))
                 if target else [])
     try:
@@ -2657,7 +2568,9 @@ def _assemble_day_client(r: dict, hist_raw: list, advice_row: dict | None,
     advice = (advice_row or {}).get("advice_text") if advice_row else None
     return {"record_id": r.get("id"), "time": (r.get("datetime") or "")[11:16],
             "client": cname, "services": services, "cost": round(cost),
-            "visits": len(items), "tag": tag, "history": items[:12], "advice": advice}
+            "visits": len(items), "tag": tag, "history": items[:12], "advice": advice,
+            # «визит проведён и оплачен»: paid_full — единственный надёжный признак оплаты
+            "paid": bool(r.get("paid_full")), "arrived": r.get("attendance") == 1}
 
 
 async def panel_master_day_handler(request: web.Request) -> web.Response:
@@ -3523,13 +3436,227 @@ async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     gross = round(rev_week.get(sid, 0.0))
     is_owner = (sid == OWNER_STAFF_ID)
     pct = 1.0 if is_owner else MASTER_SALARY_PCT.get(sid, MASTER_SALARY_DEFAULT)
+    # личный доход за СЕГОДНЯ (валовая по услугам мастера сегодня × его доля)
+    today_iso = date.today().isoformat()
+    try:
+        rev_today = await asyncio.to_thread(_revenue_by_master, today_iso, today_iso)
+    except Exception as e:
+        logger.error(f"my_earnings today staff={sid}: {e}")
+        rev_today = {}
+    gross_today = round(rev_today.get(sid, 0.0))
     return _cabinet_response({
         "pay_week": pw,
         "gross_week": gross,
         "percent": int(round(pct * 100)),
         "salary_week": round(gross * pct),
+        "gross_today": gross_today,
+        "salary_today": round(gross_today * pct),
         "is_owner": is_owner,
     })
+
+
+def _month_bounds(anchor: date, months_back: int = 0):
+    """(first_day, last_day) месяца, отстоящего на months_back от anchor."""
+    y, m = anchor.year, anchor.month - months_back
+    while m <= 0:
+        m += 12; y -= 1
+    start = date(y, m, 1)
+    nxt = date(y + 1, 1, 1) if m == 12 else date(y, m + 1, 1)
+    end = nxt - timedelta(days=1)
+    return start, end
+
+
+def _client_key(rec: dict):
+    """Устойчивый ключ клиента: id, иначе нормализованное имя (без ПД в LLM не уходит)."""
+    c = rec.get("client") or {}
+    cid = c.get("id")
+    if cid:
+        return ("id", int(cid)) if str(cid).isdigit() else ("id", cid)
+    nm = (c.get("name") or "").strip().lower()
+    return ("nm", nm) if nm else None
+
+
+def _master_clients_month(staff_id: int) -> dict:
+    """Агрегат по клиентской базе мастера за текущий месяц + сравнение темпа
+    с прошлым месяцем + анонимные метрики для совета MAYA. Телефоны НЕ включаются."""
+    today = date.today()
+    m_start, _ = _month_bounds(today, 0)
+    p_start, p_end_full = _month_bounds(today, 1)
+    # окно ретроспективы: 6 полных месяцев до текущего — для «новый/вернувшийся»
+    look_start, _ = _month_bounds(today, 6)
+    try:
+        records = _yc.get_records_for_master(staff_id, look_start.isoformat(), today.isoformat()) or []
+    except Exception as e:
+        logger.error(f"master clients records staff={staff_id}: {e}")
+        records = []
+
+    # темп прошлого месяца: тот же по счёту день (столько же прошло дней)
+    days_elapsed = (today - m_start).days
+    p_cutoff = min(p_end_full, p_start + timedelta(days=days_elapsed))
+
+    served_now = {}          # key -> {name, visits}
+    served_prev_pace = set()
+    served_prev_full = set()
+    seen_before_month = set()  # был у мастера в look_start..m_start (до этого месяца)
+    visits_now = 0
+    visits_prev_pace = [0]     # визиты прошлого месяца к той же дате (list — чтоб мутировать в цикле)
+    visits_prev_full = [0]     # визиты за весь прошлый месяц
+    svc_freq = {}
+
+    for r in records:
+        if not isinstance(r, dict) or _is_gift_cert_record(r):
+            continue
+        if r.get("paid_full") != 1:       # «обслужен» = визит оплачен (paid_full — надёжный признак)
+            continue
+        d = (r.get("datetime") or r.get("date") or "")[:10]
+        if not d:
+            continue
+        key = _client_key(r)
+        if key is None:
+            continue
+        if look_start.isoformat() <= d < m_start.isoformat():
+            seen_before_month.add(key)
+        if m_start.isoformat() <= d <= today.isoformat():
+            nm = ((r.get("client") or {}).get("name") or "Клиент").strip() or "Клиент"
+            slot = served_now.setdefault(key, {"name": nm, "visits": 0})
+            slot["visits"] += 1
+            visits_now += 1
+            for s in (r.get("services") or []):
+                if isinstance(s, dict) and s.get("title"):
+                    svc_freq[s["title"]] = svc_freq.get(s["title"], 0) + 1
+        if p_start.isoformat() <= d <= p_cutoff.isoformat():
+            served_prev_pace.add(key)
+            visits_prev_pace[0] += 1
+        if p_start.isoformat() <= d <= p_end_full.isoformat():
+            served_prev_full.add(key)
+            visits_prev_full[0] += 1
+
+    unique_now = len(served_now)
+    new_react = sum(1 for k in served_now if k not in seen_before_month)
+    returning = unique_now - new_react
+    # темп считаем по ВИЗИТАМ (приёмам) — это то, что мастер сверяет с YClients
+    delta_pace = visits_now - visits_prev_pace[0]
+
+    # выручка мастера за месяц + личная доля
+    try:
+        rev_map = _revenue_by_master(m_start.isoformat(), today.isoformat())
+        gross = round(rev_map.get(staff_id, 0.0))
+    except Exception as e:
+        logger.error(f"master clients revenue staff={staff_id}: {e}")
+        gross = 0
+    is_owner = (staff_id == OWNER_STAFF_ID)
+    pct = 1.0 if is_owner else MASTER_SALARY_PCT.get(staff_id, MASTER_SALARY_DEFAULT)
+    personal = round(gross * pct)
+    avg_check = round(gross / visits_now) if visits_now else 0
+    top_services = sorted(svc_freq.items(), key=lambda kv: kv[1], reverse=True)[:3]
+
+    # список имён (БЕЗ телефонов), по убыванию визитов затем по алфавиту
+    names = sorted(served_now.values(), key=lambda v: (-v["visits"], v["name"].lower()))
+    clients = [{"name": v["name"], "visits": v["visits"]} for v in names]
+
+    return {
+        "month": m_start.strftime("%Y-%m"),
+        "total": visits_now,          # headline «Обслужено» = визиты/приёмы (как в YClients)
+        "unique": unique_now,         # уникальных людей за месяц
+        "clients": clients,
+        "prev_pace": visits_prev_pace[0],   # визитов к этой дате прошлого месяца
+        "prev_full": visits_prev_full[0],   # визитов за весь прошлый месяц
+        "prev_pace_unique": len(served_prev_pace),
+        "prev_full_unique": len(served_prev_full),
+        "delta": delta_pace,          # по визитам
+        "new_clients": new_react,
+        "returning": returning,
+        "visits": visits_now,
+        "gross": gross,
+        "personal": personal,
+        "percent": int(round(pct * 100)),
+        "avg_check": avg_check,
+        "top_services": [{"title": t, "count": c} for t, c in top_services],
+        "days_elapsed": days_elapsed,
+    }
+
+
+def _master_clients_advice(agg: dict, staff_id: int) -> str | None:
+    """Совет MAYA по клиентской базе. На вход — ТОЛЬКО анонимные агрегаты (без
+    имён/телефонов). Кэш на сутки в settings (mcli_adv:{staff_id})."""
+    cache_key = f"mcli_adv:{staff_id}"
+    today_iso = date.today().isoformat()
+    try:
+        raw = database.get_setting(cache_key)
+        if raw:
+            cached = _json.loads(raw)
+            if cached.get("date") == today_iso and cached.get("month") == agg.get("month"):
+                return cached.get("advice")
+    except Exception:
+        pass
+    if agg.get("total", 0) == 0 and agg.get("prev_full", 0) == 0:
+        return None
+    tops = ", ".join(f'{s["title"]} ({s["count"]})' for s in agg.get("top_services", [])) or "—"
+    pace = ("опережает" if agg["delta"] > 0 else "отстаёт" if agg["delta"] < 0 else "идёт вровень")
+    prompt = (
+        "Ты MAYA — AI-директор мужского барбершопа. Дай мастеру короткий разбор его "
+        "клиентской базы за текущий месяц и что конкретно сделать, чтобы поднять и "
+        "ВАЛОВЫЙ доход салона, и свой ЛИЧНЫЙ (он получает "
+        f'{agg["percent"]}% с услуг). Пиши по-русски, на «ты», деловито и по делу, '
+        "без воды и без выдуманных цифр. Дай 3–4 конкретных действия списком.\n\n"
+        "Данные (обезличенные):\n"
+        f'- приёмов (визитов) в этом месяце: {agg["visits"]}, уникальных клиентов: {agg.get("unique", 0)}\n'
+        f'- из них новых/вернувшихся после паузы: {agg["new_clients"]}, постоянных: {agg["returning"]}\n'
+        f'- темп по визитам к той же дате прошлого месяца: {pace} на {abs(agg["delta"])} '
+        f'(было {agg["prev_pace"]}, весь прошлый месяц {agg["prev_full"]})\n'
+        f'- валовая по услугам: {agg["gross"]} ₽, личный доход ~{agg["personal"]} ₽, средний чек {agg["avg_check"]} ₽\n'
+        f'- топ услуги: {tops}\n\n'
+        "Формат ответа: 1–2 предложения оценки, затем маркированный список действий. "
+        "Максимум 90 слов."
+    )
+    try:
+        from claude_ai import complete_text
+        advice = complete_text(prompt, max_tokens=320)
+    except Exception as e:
+        logger.error(f"master clients advice staff={staff_id}: {e}")
+        return None
+    advice = (advice or "").strip() or None
+    if advice:
+        try:
+            database.set_setting(cache_key, _json.dumps(
+                {"date": today_iso, "month": agg.get("month"), "advice": advice}, ensure_ascii=False))
+        except Exception:
+            pass
+    return advice
+
+
+async def panel_master_clients_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/master/clients — клиентская база мастера за текущий месяц:
+    общее число обслуженных, список имён (БЕЗ телефонов), темп к прошлому месяцу и
+    совет MAYA. Только привязанный мастер (или владелец/управляющий по staff_id)."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {}
+    staff_id = info.get("staff_id")
+    if not info.get("is_master"):
+        if info.get("permissions", {}).get("dashboard") and body.get("staff_id"):
+            staff_id = body.get("staff_id")
+        else:
+            return _cabinet_response({"error": "not_master",
+                                      "message": "Раздел доступен мастерам."}, status=403)
+    if not staff_id:
+        return _cabinet_response({"error": "not_master",
+                                  "message": "Мастер не привязан."}, status=403)
+    try:
+        staff_id = int(staff_id)
+    except (TypeError, ValueError):
+        return _cabinet_response({"error": "bad_request", "message": "Некорректный staff_id."}, status=400)
+
+    agg = await asyncio.to_thread(_master_clients_month, staff_id)
+    advice = await asyncio.to_thread(_master_clients_advice, agg, staff_id)
+    agg["advice"] = advice
+    return _cabinet_response(agg)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -3696,6 +3823,80 @@ def _god_health_checks() -> dict:
             add("renewals", "Предстоящие оплаты", "ok", "В ближайшее время нет")
     except Exception:
         add("renewals", "Предстоящие оплаты", "ok", "")
+
+    # 8) Dual-role аккаунты (мастер + клиент): контекст не должен теряться.
+    try:
+        audit = memory.audit_dual_role_client_context(yc=_yc, repair=True, limit=20)
+        issues = audit.get("issues") or []
+        repaired = audit.get("repaired") or []
+        dual_role = int(audit.get("dual_role") or 0)
+        healthy = int(audit.get("healthy") or 0)
+        fails = [it for it in issues if it.get("severity") == "fail"]
+        warns = [it for it in issues if it.get("severity") != "fail"]
+        if fails:
+            first = fails[0]
+            add(
+                "dual_role",
+                "Dual-role аккаунты",
+                "fail",
+                f"{first.get('name')}: {first.get('detail') or first.get('reason') or 'ошибка'}",
+            )
+        elif warns or repaired:
+            parts = []
+            if repaired:
+                parts.append("автопочинка: %d" % len(repaired))
+            if warns:
+                parts.append("внимание: %s" % ", ".join(it.get("name") or "аккаунт" for it in warns[:2]))
+            if dual_role:
+                parts.append("в норме %d/%d" % (healthy, dual_role))
+            add("dual_role", "Dual-role аккаунты", "warn", " · ".join(parts))
+        else:
+            detail = "Dual-role аккаунтов не найдено" if dual_role == 0 else "В норме %d/%d" % (healthy, dual_role)
+            add("dual_role", "Dual-role аккаунты", "ok", detail)
+    except Exception as e:
+        add("dual_role", "Dual-role аккаунты", "warn", str(e)[:90])
+
+    # 9) Ролевая матрица: founder=owner, прочие админы=manager, мастера не теряются.
+    try:
+        role_issues = []
+        admin_ids = [int(x) for x in (database.list_admins() or [])]
+        master_rows = list(database.list_masters() or [])
+        founder_count = 0
+        manager_admins = 0
+        master_ok = 0
+        for aid in admin_ids:
+            info = _panel_resolve_role(aid)
+            if info.get("is_founder"):
+                founder_count += 1
+                if info.get("role") != "owner":
+                    role_issues.append(f"founder {aid} не owner")
+            else:
+                manager_admins += 1
+                if info.get("role") != "manager":
+                    role_issues.append(f"admin {aid} не manager")
+        for row in master_rows:
+            chat_id = row.get("telegram_chat_id")
+            if not chat_id:
+                continue
+            info = _panel_resolve_role(int(chat_id))
+            if not info.get("is_master"):
+                role_issues.append(f"master {chat_id} потерян")
+                continue
+            if info.get("role") in ("owner", "manager", "master"):
+                master_ok += 1
+            else:
+                role_issues.append(f"master {chat_id} без роли")
+        if role_issues:
+            add("role_matrix", "Ролевая матрица", "fail", "; ".join(role_issues[:3]))
+        else:
+            add(
+                "role_matrix",
+                "Ролевая матрица",
+                "ok",
+                f"owner/founder: {founder_count}, admin→manager: {manager_admins}, masters: {master_ok}",
+            )
+    except Exception as e:
+        add("role_matrix", "Ролевая матрица", "warn", str(e)[:90])
 
     summary = {"ok": sum(1 for c in checks if c["status"] == "ok"),
                "warn": sum(1 for c in checks if c["status"] == "warn"),
@@ -4541,8 +4742,8 @@ async def panel_salon_today_handler(request: web.Request) -> web.Response:
 
 
 async def health_handler(request: web.Request) -> web.Response:
-    """GET /yclients-webhook?secret=... — health check для дебага."""
-    if request.query.get("secret") != WEBHOOK_SECRET:
+    """GET /yclients-webhook — health check для дебага."""
+    if not _webhook_secret_ok(request):
         return web.json_response({"error": "forbidden"}, status=403)
     return web.json_response({
         "status": "ready",
@@ -5191,9 +5392,14 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
             notify_by_sms=_nbs,
         )
         if not result.get("success"):
-            logger.error(f"chat booking failed chat_id={chat_id}: {result.get('error')}")
-            return ("Не получилось оформить запись автоматически 😔 Попробуйте через "
-                    "@malesthetic_bot или позвоните: 8-962-447-67-47.")
+            logger.error(
+                "chat booking failed chat_id=%s code=%s status=%s error=%s",
+                chat_id,
+                result.get("code"),
+                result.get("http_status"),
+                result.get("error"),
+            )
+            return _booking_failure_reply(result)
         try:
             if client and client.get("id"):
                 database.save_booking(
@@ -5274,6 +5480,394 @@ def _master_chat_shortcut(chat_id: int, message: str) -> str | None:
     return None
 
 
+_UPSELL_OFFER_RE = re.compile(
+    r"(добавляем\s+что-то\s+или\s+только\s+стрижк|"
+    r"к\s+стрижк[еия]\s+можно\s+(?:еще|ещё)|"
+    r"можно\s+(?:еще|ещё)\s+добавить)",
+    re.IGNORECASE | re.DOTALL,
+)
+_UPSELL_ADDON_RE = re.compile(
+    r"(бород|моделирован|тонирован|уклад|камуфляж|усы|брить|комплекс|пакет)",
+    re.IGNORECASE,
+)
+_UPSELL_DECLINE_WORDS_RE = re.compile(
+    r"\b(нет|не\s+надо|без|только|остав|стри[дж]к[аеиуой]?)\b",
+    re.IGNORECASE,
+)
+
+
+def _history_text(item) -> str:
+    content = item.get("content") if isinstance(item, dict) else ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, dict) and isinstance(part.get("text"), str):
+                parts.append(part["text"])
+            elif isinstance(part, str):
+                parts.append(part)
+        return " ".join(parts)
+    return ""
+
+
+def _assistant_just_offered_upsell(history: list[dict]) -> bool:
+    for item in reversed(history[-8:]):
+        if not isinstance(item, dict) or item.get("role") != "assistant":
+            continue
+        return bool(_UPSELL_OFFER_RE.search(_history_text(item)))
+    return False
+
+
+def _looks_like_upsell_decline(message: str) -> bool:
+    text = (message or "").lower().replace("ё", "е").strip()
+    if not text:
+        return False
+    if re.search(r"\b(без|нет|не\s+надо|только)\b.*(бород|уклад|моделирован|тонирован|доп)", text):
+        return True
+    if _UPSELL_ADDON_RE.search(text):
+        return False
+    if re.fullmatch(r"[\s.,!?-]*(мужская\s+)?стри[дж]к[аеиуой]?[\s.,!?-]*", text):
+        return True
+    if _UPSELL_DECLINE_WORDS_RE.search(text) and len(text) <= 80:
+        return True
+    return False
+
+
+def _deterministic_upsell_reply(message: str, history: list[dict]) -> str | None:
+    """Do not interrupt the booking flow after an upsell decline.
+
+    The AI prompt and tool loop already suppress repeated upsells. Returning a
+    fixed reply here loses context such as the chosen master/time, so let the
+    model continue the current booking step.
+    """
+    return None
+
+
+_SHOP_SUBS_RE = re.compile(r"\b(абонемент\w*|подписк\w*)\b", re.IGNORECASE)
+_SHOP_CERT_RE = re.compile(r"\b(сертификат\w*|подарочн\w*)\b", re.IGNORECASE)
+_SHOP_BUY_INTENT_RE = re.compile(
+    r"\b(куп\w*|оформ\w*|хоч\w*|покаж\w*|откр\w*|выбер\w*|какие|цены|стоим\w*|тариф\w*)\b",
+    re.IGNORECASE,
+)
+_SHOP_STATUS_INTENT_RE = re.compile(
+    r"\b(мой|моя|мое|моё|у\s+меня|остат\w*|актив\w*|сколько|есть\s+ли|провер\w*)\b",
+    re.IGNORECASE,
+)
+
+
+def _direct_shop_action(message: str) -> tuple[str, dict] | None:
+    """Deterministic app navigation for obvious shop intents."""
+    text = (message or "").strip().lower().replace("ё", "е")
+    if not text:
+        return None
+    has_subs = bool(_SHOP_SUBS_RE.search(text))
+    has_cert = bool(_SHOP_CERT_RE.search(text))
+    if has_subs and _SHOP_STATUS_INTENT_RE.search(text) and not _SHOP_BUY_INTENT_RE.search(text):
+        return (
+            "Ваш активный абонемент и остаток услуг видны в личном кабинете.",
+            {"type": "open_cabinet", "label": "Открыть кабинет", "screen": "cabinet"},
+        )
+    if has_subs and (_SHOP_BUY_INTENT_RE.search(text) or len(text) <= 24):
+        return (
+            "Конечно. Открою раздел «Абонементы»: выберите тариф и уровень, оплатить можно картой прямо в приложении.",
+            {"type": "open_subs", "label": "Оформить абонемент"},
+        )
+    if has_cert and (_SHOP_BUY_INTENT_RE.search(text) or len(text) <= 28):
+        return (
+            "Конечно. Открою раздел «Сертификаты»: выберите номинал, для себя или в подарок, и оплатите картой.",
+            {"type": "open_certs", "label": "Оформить сертификат"},
+        )
+    return None
+
+
+CLIENT_CHAT_DISABLED_TOOLS = {"barber_knowledge"}
+CLIENT_CHAT_SURFACE_NUDGE = (
+    "\n\n[Это клиентский кабинет MAYA. Здесь нельзя использовать базу знаний по технике "
+    "стрижек, учебник барбера, схемы стрижек и картинки из книги. Отвечай только как "
+    "администратор салона: про запись, услуги, мастеров, уровни мастеров, свободное "
+    "время, скидки, абонементы, сертификаты, адрес, режим работы и клиентский сервис. "
+    "Если клиент спрашивает «как стричь/техника/схема» — мягко скажи, что в клиентском "
+    "чате помогаешь с записью и услугами салона.]"
+)
+
+SALON_FOUNDED_YEAR = "2019"
+_BOOKING_INTENT_RE = re.compile(
+    r"\b(хочу|надо|нужно|можно|давай|запиши|записаться|запис[а-я]*|оформ[а-я]*|"
+    r"постричься|подстричься)\b",
+    re.IGNORECASE,
+)
+_BOOKING_SERVICE_RE = re.compile(
+    r"\b(стриж|стрид|бород|брит|камуфляж|тонир|уход|услуг|мастер)\w*",
+    re.IGNORECASE,
+)
+_BOOKING_SPECIFIC_RE = re.compile(
+    r"\b(сегодня|завтра|послезавтра|понедельник|вторник|сред[ау]|четверг|пятниц[ау]|"
+    r"суббот[ау]|воскресень[ея]|стас|илья|илюх|саша|сан[ея]|александр|алексей|л[её]ш|"
+    r"макс|максим|киянск|дарм|третьяк|мосин|чурсинов|\d{1,2}[:.]\d{2}|\b\d{1,2}\s*(?:час|ч|:00))\b",
+    re.IGNORECASE,
+)
+_ADDRESS_INTENT_RE = re.compile(
+    r"\b(адрес|где\s+вы|где\s+находитесь|как\s+добраться|куда\s+ехать|карты|2gis|2гис|"
+    r"яндекс\.?карт|лермонтова)\b",
+    re.IGNORECASE,
+)
+_DISCOUNT_INTENT_RE = re.compile(
+    r"\b(скидк|акци|балл|бонус|лояльн|промокод|реферал|день\s+рожд|др)\w*",
+    re.IGNORECASE,
+)
+_MASTERS_INTENT_RE = re.compile(
+    r"\b(мастер\w*|барбер\w*|команд\w*|кто\s+стрижет|кто\s+стриж[её]т|к\s+кому|посоветуй|"
+    r"топ-мастер|старш(?:ий|ие)|кто\s+лучше)\b",
+    re.IGNORECASE,
+)
+_FOUNDED_INTENT_RE = re.compile(
+    r"\b(когда\s+основан|год\s+основан|основан|сколько\s+лет|истори[яи]\s+салона)\b",
+    re.IGNORECASE,
+)
+
+
+def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
+    """Fast deterministic answers for the client-facing MAYA cabinet."""
+    text = (message or "").strip()
+    low = text.lower().replace("ё", "е")
+    if not low:
+        return None
+
+    if _ADDRESS_INTENT_RE.search(low):
+        return (
+            "Мы находимся в Ставрополе: ул. Лермонтова, 343. Работаем каждый день с 10:00 до 21:00.",
+            None,
+        )
+
+    if _FOUNDED_INTENT_RE.search(low):
+        return (
+            f"«Мужская Эстетика» работает с {SALON_FOUNDED_YEAR} года. "
+            "Сейчас это премиальный барбершоп в Ставрополе с сильной командой мастеров.",
+            None,
+        )
+
+    if _DISCOUNT_INTENT_RE.search(low):
+        return (
+            "По скидкам: в кабинете видны ваши баллы и бонусы, есть реферальная программа, "
+            "подарочные сертификаты и абонементы для более выгодных регулярных визитов.",
+            {"type": "open_cabinet", "label": "Открыть кабинет", "screen": "cabinet"},
+        )
+
+    if _MASTERS_INTENT_RE.search(low):
+        return (
+            "Команда: топ-мастера — Стас Мосин и Илья Третьяков; старшие мастера — "
+            "Алексей Дарма, Максим Чурсинов и Александр Киянский. "
+            "Под задачу и удобное время могу подобрать мастера и сразу проверить свободные окна.",
+            {"type": "open_team", "label": "Посмотреть мастеров", "screen": "team"},
+        )
+
+    if (
+        _BOOKING_INTENT_RE.search(low)
+        and _BOOKING_SERVICE_RE.search(low)
+        and not _BOOKING_SPECIFIC_RE.search(low)
+        and len(low) <= 120
+    ):
+        return (
+            "Конечно. Запишу вас. Подскажите, к какому мастеру хотите и на какой день или время?",
+            {"type": "open_booking", "label": "Открыть запись", "screen": "book"},
+        )
+
+    return None
+
+
+def _client_llm_message(safe_message: str, voice_mode: bool = False) -> str:
+    content = (safe_message or "") + CLIENT_CHAT_SURFACE_NUDGE
+    if voice_mode:
+        content += _VOICE_STYLE_NUDGE
+    return content
+
+
+def _plain_maya_delta(text: str) -> str:
+    if not text:
+        return ""
+    return re.sub(r"[*_`]+", "", str(text))
+
+
+def _plain_maya_text(text: str) -> str:
+    text = _plain_maya_delta(text or "")
+    text = re.sub(
+        r"\n?\s*[^.\n!?]{0,160}\bуточн[^\n.!?]{0,120}\bу\s+Стаса[.!?]?",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\n?\s*Детальн[^\n.!?]{0,220}\bу\s+Стаса[.!?]?",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\b([01]?\d|2[0-3])\s+час(?:а|ов)?\s+([0-5]?\d)\s+минут(?:а|ы)?\b",
+        lambda m: f"{int(m.group(1))}:{int(m.group(2)):02d}",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def _chat_knowledge_images(chat_id: int, message: str, mode: str = "client", limit: int = 3) -> list[dict]:
+    """База знаний по технике/схемам УБРАНА из мозга Майи (решение Стаса 2026-07-06).
+    Схемы стрижек больше НИКОГДА не прикрепляются — ни клиенту, ни сотруднику."""
+    return []
+
+
+async def knowledge_image_handler(request: web.Request) -> web.Response:
+    """GET /api/knowledge/image/{name} — optimized book page for MAYA knowledge answers."""
+    name = os.path.basename(str(request.match_info.get("name") or ""))
+    if not re.fullmatch(r"IMG_\d{4,}\.(?:jpg|jpeg|png|webp)", name, re.IGNORECASE):
+        return web.Response(status=404, text="not found")
+    path = os.path.join(os.path.dirname(__file__), "barber_knowledge_images", name)
+    if not os.path.isfile(path):
+        return web.Response(status=404, text="not found")
+    return web.FileResponse(path, headers={
+        "Cache-Control": "public, max-age=86400",
+        "Access-Control-Allow-Origin": "*",
+    })
+
+
+def _resolve_chat_tg_user(request: web.Request, body: dict) -> dict | None:
+    """Resolve the app chat identity from Telegram initData, widget auth, or web session."""
+    init_data = request.headers.get("X-Telegram-InitData", "")
+    tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN) if init_data else None
+    if not tg_user and isinstance(body.get("auth_data"), dict):
+        tg_user = _verify_telegram_login_widget(body["auth_data"], TELEGRAM_TOKEN)
+    if not tg_user and body.get("session_token"):
+        try:
+            tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
+        except Exception:
+            pass
+    return tg_user
+
+
+def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
+    messages = []
+    for i, item in enumerate(history or []):
+        if not isinstance(item, dict):
+            continue
+        role = item.get("role")
+        text = _plain_maya_text(_history_text(item))
+        if not text:
+            continue
+        if role == "user":
+            messages.append({"id": offset + i, "role": "user", "text": text})
+        elif role == "assistant":
+            messages.append({"id": offset + i, "role": "bot", "text": text})
+    return messages
+
+
+async def chat_history_handler(request: web.Request) -> web.Response:
+    """POST /api/chat/history — return the saved MAYA chat history for the logged-in user."""
+    from memory import load_conversations
+
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    if not isinstance(body, dict):
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+
+    tg_user = _resolve_chat_tg_user(request, body)
+    if not tg_user:
+        return _cabinet_response(
+            {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
+            status=401,
+        )
+
+    chat_id = tg_user.get("id")
+    if not chat_id:
+        return _cabinet_response({"error": "no_user_id"}, status=400)
+    chat_id = int(chat_id)
+
+    if not database.has_valid_consent_by_chat_id(chat_id):
+        return _cabinet_response({
+            "error": "needs_consent",
+            "message": ("Чтобы общаться с ассистентом, подпишите согласие на обработку "
+                        "персональных данных: откройте @malesthetic_bot и нажмите /start."),
+        }, status=403)
+
+    full_history = load_conversations().get(chat_id) or []
+    offset = max(0, len(full_history) - 30)
+    messages = _chat_history_payload(full_history[-30:], offset=offset)
+
+    return _cabinet_response({"messages": messages})
+
+
+async def chat_delete_handler(request: web.Request) -> web.Response:
+    """POST /api/chat/delete — delete one MAYA message or clear the whole chat history."""
+    from memory import load_conversations, save_conversations
+
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    if not isinstance(body, dict):
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+
+    tg_user = _resolve_chat_tg_user(request, body)
+    if not tg_user:
+        return _cabinet_response(
+            {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
+            status=401,
+        )
+
+    chat_id = tg_user.get("id")
+    if not chat_id:
+        return _cabinet_response({"error": "no_user_id"}, status=400)
+    chat_id = int(chat_id)
+
+    conversations = load_conversations()
+    history = list(conversations.get(chat_id) or [])
+    mode = str(body.get("mode") or "").strip().lower()
+
+    if mode in ("all", "clear", "reset"):
+        conversations.pop(chat_id, None)
+        save_conversations(conversations)
+        return _cabinet_response({"ok": True, "deleted": "all", "messages": []})
+
+    deleted = False
+    raw_id = body.get("message_id", body.get("id"))
+    try:
+        msg_id = int(raw_id)
+    except Exception:
+        msg_id = None
+
+    if msg_id is not None and 0 <= msg_id < len(history):
+        del history[msg_id]
+        deleted = True
+
+    if not deleted:
+        want_role = str(body.get("role") or "").strip().lower()
+        if want_role == "bot":
+            want_role = "assistant"
+        want_text = _plain_maya_text(str(body.get("text") or ""))
+        if want_role in ("user", "assistant") and want_text:
+            for idx in range(len(history) - 1, -1, -1):
+                item = history[idx]
+                if not isinstance(item, dict) or item.get("role") != want_role:
+                    continue
+                if _plain_maya_text(_history_text(item)) == want_text:
+                    del history[idx]
+                    deleted = True
+                    break
+
+    if history:
+        conversations[chat_id] = history[-30:]
+    else:
+        conversations.pop(chat_id, None)
+    save_conversations(conversations)
+    messages = _chat_history_payload(conversations.get(chat_id) or [])
+    return _cabinet_response({"ok": True, "deleted": bool(deleted), "messages": messages})
+
+
 async def chat_handler(request: web.Request) -> web.Response:
     """
     POST /api/chat — чат с ассистентом прямо в приложении.
@@ -5305,10 +5899,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Вход через ВК / по номеру (веб-сессия без Telegram): токен → chat_id.
     if not tg_user and body.get("session_token"):
         try:
-            _sess = web_auth.resolve_session(body.get("session_token"))
-            _cid = _sess.get("chat_id") if _sess else None
-            if _cid:
-                tg_user = {"id": int(_cid), "first_name": (_sess.get("display_name") or "")}
+            tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
     if not tg_user:
@@ -5333,7 +5924,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Голосовой помощник (hands-free): фронт шлёт сентинел "__vg__" при входе в
     # голосовой режим → MAYA здоровается ГОЛОСОМ (TTS без LLM и без записи в историю).
     if message == "__vg__":
-        # Узнаём собеседника: имя из Telegram + роль (founder/owner/master/client).
+        # Узнаём собеседника: имя из Telegram + роль (founder/owner/manager/master/client).
         # Без этого приветствие безличное — читается как «она меня не узнаёт».
         _nm = (tg_user.get("first_name") or "").strip()
         try:
@@ -5344,7 +5935,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         _hi = f"Здравствуйте, {_nm}!" if _nm else "Здравствуйте!"
         if _role == "founder":
             greet = f"{_hi} Это MAYA, я на связи. Чем сегодня займёмся?"
-        elif _role in ("owner", "master"):
+        elif _role in ("owner", "manager", "master"):
             greet = f"{_hi} Это MAYA. Чем помочь по работе?"
         else:
             greet = f"{_hi} Я MAYA. Слушаю вас — чем могу помочь?"
@@ -5384,12 +5975,82 @@ async def chat_handler(request: web.Request) -> web.Response:
     if master_reply:
         return _cabinet_response({"reply": master_reply})
 
+    conversations = load_conversations()
+    history = conversations.get(chat_id) or []
+    if transcript and should_clarify_transcript(message, history, _voice_known_master_names()):
+        out = {
+            "reply": CLARIFY_REPEAT_TEXT,
+            "contact_request": False,
+            "transcript": "",
+        }
+        try:
+            import voice
+            import base64 as _b64
+            _audio = await voice.synthesize(CLARIFY_REPEAT_TEXT, fmt="mp3")
+            if _audio:
+                out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
+        except Exception as e:
+            logger.error(f"chat_handler unclear voice tts: {e}")
+        return _cabinet_response(out)
+
+    direct_shop = _direct_shop_action(message)
+    if direct_shop:
+        direct_text, direct_action = direct_shop
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append({"role": "assistant", "content": direct_text})
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": direct_text,
+            "action": direct_action,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    client_shortcut = _client_chat_shortcut(message)
+    if client_shortcut:
+        direct_text, direct_action = client_shortcut
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append({"role": "assistant", "content": direct_text})
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        out = {
+            "reply": direct_text,
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        if direct_action:
+            out["action"] = direct_action
+        if transcript:
+            try:
+                import voice
+                import base64 as _b64
+                _audio = await voice.synthesize(direct_text, fmt="mp3")
+                if _audio:
+                    out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
+            except Exception as e:
+                logger.error(f"chat_handler shortcut tts: {e}")
+        return _cabinet_response(out)
+
+    deterministic_reply = _deterministic_upsell_reply(message, history)
+    if deterministic_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append({"role": "assistant", "content": deterministic_reply})
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": deterministic_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     # Общая с Telegram история: те же ключи (user_id) и формат {role, content}
     # 152-ФЗ: обезличиваем сообщение клиента ДО отправки в LLM и ДО сохранения —
     # так же, как в Telegram-боте (bot.py: anonymizer.redact_pii). Веб-чат раньше слал сырьё.
     safe_message = anonymizer.redact_pii(message)
-    conversations = load_conversations()
-    history = conversations.get(chat_id) or []
     history.append({"role": "user", "content": safe_message})
     if len(history) > 30:
         history = history[-30:]
@@ -5397,16 +6058,10 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Голос: ТОТ ЖЕ мозг/знания/инструменты, что и текст, но подача — под ОЗВУЧКУ:
     # живая разговорная речь, словами вместо сокращений/markdown. Это НЕ урезание
     # знаний (как было с «1-2 фразами»), а стиль для голоса. Транзиентно — в историю не пишем.
-    llm_history = history
-    if voice_mode and history:
-        llm_history = history[:-1] + [{
-            "role": "user",
-            "content": safe_message + "\n\n[Это голосовой разговор. Отвечай живой естественной "
-                       "разговорной речью — полно и точно по сути, но по делу, без воды. НЕ используй "
-                       "markdown, списки и сокращения: проговаривай словами (например «среда», а не "
-                       "«ср»; «рублей», а не «₽»; «телефон», а не «тел.»). Если нужно перечислить много "
-                       "(услуги, цены) — назови голосом главное и предложи прислать полный список текстом.]",
-        }]
+    llm_history = history[:-1] + [{
+        "role": "user",
+        "content": _client_llm_message(safe_message, voice_mode=voice_mode),
+    }]
     # Модель голоса: для консультаций и записи клиентов используем максимальную GPT-модель.
     _vmodel = None
     if voice_mode:
@@ -5414,7 +6069,11 @@ async def chat_handler(request: web.Request) -> web.Response:
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
         response_text, contact_request, gift_cert_action = get_ai_response(
-            llm_history, user_id=chat_id, model=_vmodel)
+            llm_history,
+            user_id=chat_id,
+            model=_vmodel,
+            disabled_tools=CLIENT_CHAT_DISABLED_TOOLS,
+        )
     except Exception as e:
         logger.error(f"chat_handler: ошибка AI: {e}")
         return _cabinet_response({
@@ -5459,7 +6118,8 @@ async def chat_handler(request: web.Request) -> web.Response:
             if amt in (2000, 3000, 5000):
                 cert_action["amount"] = amt
 
-    response_text = response_text or "Секунду, не расслышал — повторите, пожалуйста."
+    response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
+    knowledge_images = _chat_knowledge_images(chat_id, message, (body.get("mode") or "").lower())
     history.append({"role": "assistant", "content": response_text})
     conversations[chat_id] = history
     save_conversations(conversations)
@@ -5492,6 +6152,8 @@ async def chat_handler(request: web.Request) -> web.Response:
         resp["link"] = reply_link
     if cert_action:
         resp["action"] = cert_action
+    if knowledge_images:
+        resp["images"] = knowledge_images
     if audio_reply_b64:
         resp["audio_reply"] = audio_reply_b64        # mp3 base64 — приложение проигрывает
     return _cabinet_response(resp)
@@ -5580,10 +6242,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         tg_user = _verify_telegram_login_widget(body["auth_data"], TELEGRAM_TOKEN)
     if not tg_user and body.get("session_token"):
         try:
-            _sess = web_auth.resolve_session(body.get("session_token"))
-            _cid = _sess.get("chat_id") if _sess else None
-            if _cid:
-                tg_user = {"id": int(_cid), "first_name": (_sess.get("display_name") or "")}
+            tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
     if not tg_user:
@@ -5627,6 +6286,60 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
+    direct_shop = _direct_shop_action(message)
+    if direct_shop:
+        direct_text, direct_action = direct_shop
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append({"role": "assistant", "content": direct_text})
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": direct_text,
+            "action": direct_action,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    client_shortcut = _client_chat_shortcut(message)
+    if client_shortcut:
+        direct_text, direct_action = client_shortcut
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append({"role": "assistant", "content": direct_text})
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        out = {
+            "reply": direct_text,
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        if direct_action:
+            out["action"] = direct_action
+        if transcript and body.get("voice"):
+            try:
+                import voice
+                import base64 as _b64
+                _audio = await voice.synthesize(direct_text, fmt="mp3")
+                if _audio:
+                    out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
+            except Exception as e:
+                logger.error(f"chat_stream shortcut tts: {e}")
+        return _cabinet_response(out)
+
+    deterministic_reply = _deterministic_upsell_reply(message, history)
+    if deterministic_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append({"role": "assistant", "content": deterministic_reply})
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": deterministic_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     # 152-ФЗ: обезличиваем сообщение и в СТРИМ-пути тоже — фронт шлёт чат сюда
     # ПЕРВЫМ (фолбэк на /api/chat). Тот же redact_pii, что в не-стрим chat_handler.
     safe_message = anonymizer.redact_pii(message)
@@ -5638,14 +6351,18 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     # мозг/знания/инструменты, максимальная модель и стиль под озвучку —
     # транзиентно (в историю НЕ пишем). Озвучку шлём только когда фича включена.
     voice_mode = bool(body.get("voice"))
+    voice_unclear = bool(transcript and should_clarify_transcript(
+        message, history, _voice_known_master_names()
+    ))
     voice_model = None
-    llm_history = history
+    llm_history = history[:-1] + [{
+        "role": "user",
+        "content": _client_llm_message(safe_message, voice_mode=voice_mode),
+    }]
     if voice_mode:
         from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role
         # Голосовой консультант/запись клиентов — максимальная GPT-модель.
         voice_model = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
-        if history:
-            llm_history = history[:-1] + [{"role": "user", "content": safe_message + _VOICE_STYLE_NUDGE}]
 
     # ── Открываем SSE-поток ──────────────────────────────────────────────
     resp = web.StreamResponse(status=200, headers={
@@ -5662,6 +6379,40 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     async def _send(obj: dict) -> None:
         await resp.write(b"data: " + _json.dumps(obj, ensure_ascii=False).encode("utf-8") + b"\n\n")
 
+    if voice_unclear:
+        await _send({"type": "delta", "text": CLARIFY_REPEAT_TEXT})
+        audio_sent = False
+        if voice_mode:
+            try:
+                import voice as _voicemod
+                import base64 as _b64
+                if _voicemod.is_enabled():
+                    au = await _voicemod.synthesize(CLARIFY_REPEAT_TEXT, fmt="mp3")
+                    if au:
+                        await _send({
+                            "type": "audio",
+                            "seq": 0,
+                            "b64": _b64.b64encode(au).decode("ascii"),
+                        })
+                        audio_sent = True
+            except Exception as e:
+                logger.error(f"chat_stream unclear voice tts: {e}")
+        done = {
+            "type": "done",
+            "reply": CLARIFY_REPEAT_TEXT,
+            "contact_request": False,
+            "transcript": "",
+        }
+        if audio_sent:
+            done["voice"] = True
+            done["audio_chunks"] = 1
+        await _send(done)
+        try:
+            await resp.write_eof()
+        except Exception:
+            pass
+        return resp
+
     # Голос: отдаём расшифровку сразу — пользователь видит свои слова, пока MAYA думает.
     if transcript:
         await _send({"type": "transcript", "text": transcript})
@@ -5674,7 +6425,12 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     def _producer() -> None:
         try:
-            for ev in get_ai_response_stream(llm_history, user_id=chat_id, model=voice_model):
+            for ev in get_ai_response_stream(
+                llm_history,
+                user_id=chat_id,
+                model=voice_model,
+                disabled_tools=CLIENT_CHAT_DISABLED_TOOLS,
+            ):
                 loop.call_soon_threadsafe(queue.put_nowait, ev)
         except Exception as e:
             logger.error(f"chat_stream: ошибка AI: {e}")
@@ -5742,7 +6498,9 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 break
             t = ev.get("type")
             if t == "delta":
-                txt = ev.get("text", "")
+                txt = _plain_maya_delta(ev.get("text", ""))
+                if not txt:
+                    continue
                 streamed_parts.append(txt)
                 await _send({"type": "delta", "text": txt})
                 if tts_on:
@@ -5823,7 +6581,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             if amt in (2000, 3000, 5000):
                 cert_action["amount"] = amt
 
-    response_text = response_text or "Секунду, не расслышал — повторите, пожалуйста."
+    response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
+    knowledge_images = _chat_knowledge_images(chat_id, message, (body.get("mode") or "").lower())
     history.append({"role": "assistant", "content": response_text})
     conversations[chat_id] = history
     save_conversations(conversations)
@@ -5837,6 +6596,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     }
     if cert_action:
         done["action"] = cert_action
+    if knowledge_images:
+        done["images"] = knowledge_images
     if tts_on:
         done["voice"] = True
         done["audio_chunks"] = _aud_seq    # сколько звуковых кусков прислали
@@ -5889,10 +6650,7 @@ async def realtime_handler(request: web.Request) -> web.Response:
         tg_user = _verify_telegram_login_widget(auth["auth_data"], TELEGRAM_TOKEN)
     if not tg_user and auth.get("session_token"):
         try:
-            _sess = web_auth.resolve_session(auth.get("session_token"))
-            _cid = _sess.get("chat_id") if _sess else None
-            if _cid:
-                tg_user = {"id": int(_cid)}
+            tg_user = session_tg_user(web_auth.resolve_session(auth.get("session_token")))
         except Exception:
             pass
     chat_id = int(tg_user["id"]) if (tg_user and tg_user.get("id")) else None
@@ -5905,9 +6663,13 @@ async def realtime_handler(request: web.Request) -> web.Response:
         await ws.close()
         return ws
 
+    # Режим страницы: 'staff' (рабочий кабинет сотрудника) или 'client' (по умолч.).
+    # Мост сам проверит серверную роль — клиент не получит staff-Майю.
+    mode = "staff" if str(auth.get("mode") or "").lower() == "staff" else "client"
+
     await ws.send_json({"type": "ready"})
     try:
-        await realtime_bridge.run_session(ws, chat_id)
+        await realtime_bridge.run_session(ws, chat_id, mode=mode)
     except Exception as e:
         logger.error(f"realtime_handler: {e}")
     if not ws.closed:
@@ -6085,6 +6847,45 @@ async def auth_vk_sdk_handler(request: web.Request) -> web.Response:
     return _cabinet_response(res, status=200 if res.get("ok") else 401)
 
 
+async def auth_yandex_start_handler(request: web.Request) -> web.Response:
+    """POST /api/auth/yandex/start Body: {state, redirect_uri?}
+    → готовая ссылка Yandex ID OAuth. Client secret на фронт не отдаём."""
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    body = body or {}
+    res = web_auth.build_yandex_auth_url(
+        str(body.get("state") or ""),
+        redirect_uri=body.get("redirect_uri"),
+    )
+    return _cabinet_response(res, status=200 if res.get("ok") else 403)
+
+
+async def auth_yandex_handler(request: web.Request) -> web.Response:
+    """POST /api/auth/yandex Body: {code, redirect_uri?}
+    → Yandex ID OAuth exchange → наша web-session."""
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    body = body or {}
+    ex = await web_auth.exchange_yandex_code(
+        body.get("code", ""),
+        redirect_uri=body.get("redirect_uri"),
+    )
+    if not ex.get("ok"):
+        return _cabinet_response(ex, status=401)
+    res = web_auth.issue_yandex_session(
+        ex["yandex_user_id"],
+        name=ex.get("name", ""),
+        phone=ex.get("phone"),
+        email=ex.get("email", ""),
+        avatar_url=ex.get("avatar_url", ""),
+    )
+    return _cabinet_response(res)
+
+
 async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
     """POST /api/cabinet/me-via-session  Header: X-Session-Token.
     Кабинет для входа без Telegram. Если телефон сматчился с Telegram-клиентом —
@@ -6092,15 +6893,16 @@ async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
     sess = web_auth.resolve_session(request.headers.get("X-Session-Token", ""))
     if not sess:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    chat_id = sess.get("chat_id")
+    tg_user = session_tg_user(sess)
+    chat_id = tg_user.get("id") if tg_user else None
     if chat_id:
-        tg_user = {"first_name": sess.get("display_name", ""), "username": ""}
         return await _build_full_cabinet(int(chat_id), tg_user)
+    sess_profile = normalize_tg_user({"full_name": sess.get("display_name")})
     return _cabinet_response({
         "known": False,
         "needs_booking": True,
         "has_phone": bool(sess.get("phone_hash")),
-        "name": sess.get("display_name", ""),
+        "name": sess_profile.get("display_name", ""),
         "message": "Запишись на первую стрижку — и здесь появятся твой кабинет, баллы и история.",
     })
 
@@ -6341,6 +7143,17 @@ async def master_shift_reminder_loop(app: Application):
         await asyncio.sleep(300)
 
 
+async def waitlist_admin_alert_loop(app: Application):
+    """Фоновый пинг админам (Антону) о новичках в листе ожидания (каждые ~2 мин)."""
+    import freed_slot
+    while True:
+        try:
+            await freed_slot.alert_admins_new_waitlist(app)
+        except Exception as e:
+            logger.error(f"waitlist admin alert loop: {e}")
+        await asyncio.sleep(120)
+
+
 async def usage_fal_handler(request: web.Request) -> web.Response:
     """POST /api/usage/fal — фиксирует одну успешную генерацию fal.ai (cutmatch)
     = 1 изображение по фикс. цене ($0.15). Зовётся PHP-прокси после успешной
@@ -6355,11 +7168,14 @@ async def usage_fal_handler(request: web.Request) -> web.Response:
 async def auth_status_handler(request: web.Request) -> web.Response:
     """GET /api/auth/status — какие способы входа сейчас живые.
     Фронт красит огоньки на кнопках: зелёный = работает, красный = нет.
-    Telegram всегда доступен; VK — по флагу VK_LOGIN_ENABLED; телефон — когда
+    Telegram всегда доступен; Яндекс/VK — по флагам; телефон — когда
     задан ключ SMS.ru. Поменяю конфиг на сервере → огонёк сам позеленеет."""
     return _cabinet_response({
         "telegram": True,
         "vk": bool(getattr(config, "VK_LOGIN_ENABLED", False)),
+        "yandex": bool(getattr(config, "YANDEX_LOGIN_ENABLED", False)
+                       and getattr(config, "YANDEX_CLIENT_ID", "")
+                       and getattr(config, "YANDEX_CLIENT_SECRET", "")),
         "phone": bool(getattr(config, "SMSRU_API_ID", "")),
     })
 
@@ -6423,43 +7239,76 @@ async def analyze_face_handler(request: web.Request) -> web.Response:
     return cutmatch._resp(result)
 
 
-# ── Telegram-аватар пользователя для пилюли имени (только сотрудники) ──
-_TG_PHOTO_CACHE = {}   # chat_id -> (YYYY-MM-DD, data_uri|None)
+# ── Telegram-аватар пользователя для пилюли имени ──
+_TG_PHOTO_CACHE = {}   # chat_id -> {"value": data_uri|None, "expires_at": float}
 
 
 def _fetch_tg_photo(chat_id: int):
     """Скачивает аватар пользователя Telegram через бота (по chat_id) → data-URI.
-    Кеш на день. None, если фото скрыто приватностью пользователя или ошибка."""
+    Успешный ответ кешируем надолго, а сетевой сбой — только кратко, чтобы
+    флапающий Telegram-прокси не прятал фото до конца дня."""
     import requests, base64
-    today = date.today().isoformat()
+    now_ts = time.time()
     c = _TG_PHOTO_CACHE.get(chat_id)
-    if c and c[0] == today:
-        return c[1]
+    if c and float(c.get("expires_at") or 0) > now_ts:
+        return c.get("value")
     proxy = getattr(config, "PROXY_URL", "") or ""
     pr = {"http": proxy, "https": proxy} if proxy else None
     data_uri = None
+    had_network_error = False
     try:
         base = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
-        r = requests.get(base + "/getUserProfilePhotos",
-                         params={"user_id": chat_id, "limit": 1}, proxies=pr, timeout=15).json()
-        photos = (r.get("result") or {}).get("photos") or []
-        if photos:
-            file_id = photos[0][-1]["file_id"]   # самый крупный размер последнего фото
-            f = requests.get(base + "/getFile", params={"file_id": file_id}, proxies=pr, timeout=15).json()
-            path = (f.get("result") or {}).get("file_path")
-            if path:
-                img = requests.get(f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{path}", proxies=pr, timeout=20)
-                if img.status_code == 200 and img.content:
-                    data_uri = "data:image/jpeg;base64," + base64.b64encode(img.content).decode()
+        for attempt in range(3):
+            try:
+                r = requests.get(
+                    base + "/getUserProfilePhotos",
+                    params={"user_id": chat_id, "limit": 1},
+                    proxies=pr,
+                    timeout=20,
+                )
+                r.raise_for_status()
+                photos = (r.json().get("result") or {}).get("photos") or []
+                if photos:
+                    file_id = photos[0][-1]["file_id"]   # самый крупный размер последнего фото
+                    f = requests.get(
+                        base + "/getFile",
+                        params={"file_id": file_id},
+                        proxies=pr,
+                        timeout=20,
+                    )
+                    f.raise_for_status()
+                    path = (f.json().get("result") or {}).get("file_path")
+                    if path:
+                        img = requests.get(
+                            f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{path}",
+                            proxies=pr,
+                            timeout=25,
+                        )
+                        img.raise_for_status()
+                        if img.content:
+                            data_uri = "data:image/jpeg;base64," + base64.b64encode(img.content).decode()
+                had_network_error = False
+                break
+            except requests.RequestException as e:
+                had_network_error = True
+                if attempt == 2:
+                    raise
+                time.sleep(1.0 + attempt * 0.5)
     except Exception as e:
         logger.error("tg photo fetch %s: %s", chat_id, e)
-    _TG_PHOTO_CACHE[chat_id] = (today, data_uri)
+    if data_uri:
+        _TG_PHOTO_CACHE[chat_id] = {"value": data_uri, "expires_at": now_ts + 24 * 3600}
+    elif had_network_error:
+        if c and c.get("value"):
+            return c.get("value")
+        _TG_PHOTO_CACHE.pop(chat_id, None)
+    else:
+        _TG_PHOTO_CACHE[chat_id] = {"value": None, "expires_at": now_ts + 3600}
     return data_uri
 
 
 async def me_photo_handler(request: web.Request) -> web.Response:
-    """POST /api/me/photo — Telegram-аватар вошедшего сотрудника (data-URI) для пилюли.
-    Только для сотрудников (владелец/админ/мастер); клиентские фото не тянем."""
+    """POST /api/me/photo — Telegram-аватар авторизованного пользователя для пилюли."""
     try:
         body = await request.json()
     except Exception:
@@ -6468,14 +7317,9 @@ async def me_photo_handler(request: web.Request) -> web.Response:
     if not tg_user or not tg_user.get("id"):
         return _cabinet_response({"photo": None})
     uid = int(tg_user["id"])
-    is_staff = False
-    try:
-        is_staff = bool(database.is_admin(uid)) or bool(_master_by_chat_id(uid))
-    except Exception:
-        is_staff = False
-    if not is_staff:
-        return _cabinet_response({"photo": None})
     photo = await asyncio.to_thread(_fetch_tg_photo, uid)
+    if not photo:
+        photo = normalize_tg_user(tg_user).get("photo_url") or None
     return _cabinet_response({"photo": photo})
 
 
@@ -6969,6 +7813,24 @@ async def panel_journal_cancel_handler(request: web.Request) -> web.Response:
 
 # Вложения чата команды лежат статикой на Beget; принимаем только такие ссылки.
 TEAM_MEDIA_URL_PREFIX = "https://malesthetic.pro/app/media/team/"
+TEAM_MEDIA_TTL_SECONDS = 2 * 24 * 60 * 60
+
+
+def _team_chat_mark_media_expiry(messages: list[dict]) -> list[dict]:
+    for msg in messages:
+        if not (msg.get("media_kind") and msg.get("media_url")):
+            continue
+        created_raw = str(msg.get("created_at") or "")
+        try:
+            created_at = datetime.fromisoformat(created_raw)
+        except Exception:
+            continue
+        now = datetime.now(created_at.tzinfo) if created_at.tzinfo else datetime.now()
+        expires_at = created_at + timedelta(seconds=TEAM_MEDIA_TTL_SECONDS)
+        msg["media_expires_at"] = expires_at.isoformat(timespec="seconds")
+        if (now - created_at).total_seconds() >= TEAM_MEDIA_TTL_SECONDS:
+            msg["media_expired"] = True
+    return messages
 
 # ── Присутствие в чате команды (эфемерно, в памяти процесса) ──────────────
 # Кто онлайн (держит чат открытым) и кто печатает. Обновляется на каждом
@@ -7198,6 +8060,51 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     msg_id = await asyncio.to_thread(
         database.add_staff_message, tg_id, sender_name, text,
         media_kind, media_url, media_name, media_mime, media_size, media_dur)
+    maya_query = ""
+    if text and not has_media:
+        try:
+            import barber_knowledge
+            maya_query = barber_knowledge.extract_team_query(text)
+        except Exception as e:
+            logger.error(f"team_chat maya extract: {e}")
+
+    async def _maya_bg(query: str):
+        try:
+            import barber_knowledge
+            payload = await asyncio.to_thread(barber_knowledge.answer_payload, query)
+            reply = (payload.get("text") or "").strip()
+            images = payload.get("images") or []
+            if reply:
+                await asyncio.to_thread(
+                    database.add_staff_message,
+                    0,
+                    "MAYA · наставник",
+                    reply,
+                    "", "", "", "", 0, 0,
+                )
+            for img in images[:2]:
+                url = (img.get("url") or "").strip()
+                if not url:
+                    continue
+                await asyncio.to_thread(
+                    database.add_staff_message,
+                    0,
+                    "MAYA · наставник",
+                    img.get("title") or "Схема из базы знаний",
+                    "image",
+                    url,
+                    img.get("name") or "",
+                    "image/jpeg",
+                    0,
+                    0,
+                )
+        except Exception as e:
+            logger.error(f"team_chat maya reply: {e}")
+
+    if maya_query:
+        _mt = asyncio.create_task(_maya_bg(maya_query))
+        _panel_bg_tasks.add(_mt)
+        _mt.add_done_callback(_panel_bg_tasks.discard)
     # Пуши шлём в фоне (fire-and-forget). Telegram идёт через единый прокси и может
     # тормозить × N получателей — нельзя держать ответ синхронно: Beget-прокси ждёт
     # max 25с, по таймауту считает медиафайл «осиротевшим» и удаляет его (@unlink),
@@ -7211,6 +8118,21 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     _panel_bg_tasks.add(_pt)
     _pt.add_done_callback(_panel_bg_tasks.discard)
     return _cabinet_response({"ok": True, "id": msg_id})
+
+
+async def team_chat_upload_auth_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/team_chat/upload_auth — lightweight staff auth before large media upload."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if not _is_staff_info(info):
+        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
+    return _cabinet_response({"ok": True})
 
 
 async def team_chat_delete_handler(request: web.Request) -> web.Response:
@@ -7249,7 +8171,8 @@ async def team_chat_delete_handler(request: web.Request) -> web.Response:
 
 async def team_chat_fetch_handler(request: web.Request) -> web.Response:
     """POST /api/panel/team_chat/fetch — забрать сообщения. Тело: {since_id?}.
-    since_id=0 → последние 50; >0 → новее since_id (поллинг открытого чата)."""
+    since_id=0 → последние 50, если не передан session_only=1.
+    session_only=1 → начать новую пустую сессию и читать только новые сообщения."""
     try:
         body = await request.json()
     except Exception:
@@ -7265,14 +8188,28 @@ async def team_chat_fetch_handler(request: web.Request) -> web.Response:
         since_id = int(body.get("since_id") or 0)
     except Exception:
         since_id = 0
+    session_only = bool(body.get("session_only"))
+    sender_name = (info.get("master_name") or info.get("name")
+                   or tg_user.get("first_name") or "Сотрудник")
+    if since_id <= 0 and session_only:
+        latest_id = await asyncio.to_thread(database.get_staff_latest_message_id)
+        _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
+        online, typing = _presence_snapshot(tg_id)
+        return _cabinet_response({
+            "messages": [],
+            "me": tg_id,
+            "online": online,
+            "typing": typing,
+            "latest_id": latest_id,
+            "session_only": True,
+        })
     if since_id > 0:
         msgs = await asyncio.to_thread(database.get_staff_messages_since, since_id, 100)
     else:
         msgs = await asyncio.to_thread(database.get_staff_messages_recent, 50)
+    msgs = _team_chat_mark_media_expiry(msgs)
     # присутствие: сам факт поллинга = «я онлайн»; флаг typing — что сейчас набираю
-    _presence_touch(tg_id, (info.get("master_name") or info.get("name")
-                            or tg_user.get("first_name") or "Сотрудник"),
-                    typing=bool(body.get("typing")))
+    _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
     online, typing = _presence_snapshot(tg_id)
     return _cabinet_response({"messages": msgs, "me": tg_id, "online": online, "typing": typing})
 
@@ -7636,6 +8573,9 @@ async def start_webhook_server(bot_app: Application):
     Запускает aiohttp-сервер на WEBHOOK_PORT в том же event loop, что и бот.
     Вызывается из post_init() бота.
     """
+    runner = globals().get("_WEBHOOK_RUNNER")
+    if runner is not None:
+        return
     # client_max_size: дефолт aiohttp = 1 МБ. Голосовое из приложения едет в JSON-теле
     # как base64-data-url; в нативном iOS-WKWebView (нет MediaRecorder) запись идёт
     # несжатым WAV (PCM) — крупнее webm/opus. Поднимаем лимит до 10 МБ, иначе запись
@@ -7654,7 +8594,7 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_post("/api/cabinet/me-via-login", cabinet_me_via_login_handler)
     web_app.router.add_options("/api/cabinet/me-via-login", cabinet_options_handler)
 
-    # Веб-вход БЕЗ Telegram (без VPN): VK ID + телефон по коду
+    # Веб-вход БЕЗ Telegram (без VPN): Yandex ID / VK ID + телефон по коду
     web_app.router.add_post("/api/auth/phone/start", auth_phone_start_handler)
     web_app.router.add_options("/api/auth/phone/start", cabinet_options_handler)
     web_app.router.add_post("/api/auth/phone/verify", auth_phone_verify_handler)
@@ -7663,6 +8603,10 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/auth/vk", cabinet_options_handler)
     web_app.router.add_post("/api/auth/vk-sdk", auth_vk_sdk_handler)
     web_app.router.add_options("/api/auth/vk-sdk", cabinet_options_handler)
+    web_app.router.add_post("/api/auth/yandex/start", auth_yandex_start_handler)
+    web_app.router.add_options("/api/auth/yandex/start", cabinet_options_handler)
+    web_app.router.add_post("/api/auth/yandex", auth_yandex_handler)
+    web_app.router.add_options("/api/auth/yandex", cabinet_options_handler)
     web_app.router.add_post("/api/cabinet/me-via-session", cabinet_me_via_session_handler)
     web_app.router.add_options("/api/cabinet/me-via-session", cabinet_options_handler)
     web_app.router.add_post("/api/cabinet/link-phone", cabinet_link_phone_handler)
@@ -7684,6 +8628,11 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/me/photo", cabinet_options_handler)
 
     # API чата с ассистентом в приложении (тот же мозг и история, что у бота)
+    web_app.router.add_get("/api/knowledge/image/{name}", knowledge_image_handler)
+    web_app.router.add_post("/api/chat/history", chat_history_handler)
+    web_app.router.add_options("/api/chat/history", chat_options_handler)
+    web_app.router.add_post("/api/chat/delete", chat_delete_handler)
+    web_app.router.add_options("/api/chat/delete", chat_options_handler)
     web_app.router.add_post("/api/chat", chat_handler)
     web_app.router.add_options("/api/chat", chat_options_handler)
     web_app.router.add_post("/api/chat/stream", chat_stream_handler)
@@ -7730,6 +8679,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)
     web_app.router.add_options("/api/panel/master/overview", panel_options_handler)
     web_app.router.add_post("/api/panel/master/day", panel_master_day_handler)
+
+    web_app.router.add_post("/api/panel/master/clients", panel_master_clients_handler)
     web_app.router.add_options("/api/panel/master/day", panel_options_handler)
     web_app.router.add_post("/api/panel/redeem", panel_redeem_handler)
     web_app.router.add_options("/api/panel/redeem", panel_options_handler)
@@ -7782,6 +8733,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/journal_cancel", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/send", team_chat_send_handler)
     web_app.router.add_options("/api/panel/team_chat/send", panel_options_handler)
+    web_app.router.add_post("/api/panel/team_chat/upload_auth", team_chat_upload_auth_handler)
+    web_app.router.add_options("/api/panel/team_chat/upload_auth", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/delete", team_chat_delete_handler)
     web_app.router.add_options("/api/panel/team_chat/delete", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/fetch", team_chat_fetch_handler)
@@ -7811,5 +8764,8 @@ async def start_webhook_server(bot_app: Application):
     bind_host = getattr(config, "WEBHOOK_BIND", None) or "0.0.0.0"
     site = web.TCPSite(runner, bind_host, WEBHOOK_PORT)
     await site.start()
+    globals()["_WEBHOOK_RUNNER"] = runner
+    globals()["_WEBHOOK_SITE"] = site
     asyncio.create_task(master_shift_reminder_loop(bot_app))
+    asyncio.create_task(waitlist_admin_alert_loop(bot_app))
     logger.info(f"📡 Webhook-сервер слушает {bind_host}:{WEBHOOK_PORT}")

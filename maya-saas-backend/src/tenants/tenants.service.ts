@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -34,6 +35,11 @@ type BookingModeEvaluation = {
   liveEligible: boolean;
   blockers: string[];
 };
+
+const DEFAULT_TRIAL_PERIOD_DAYS = 14;
+const PAST_DUE_GRACE_DAYS = 5;
+const TENANT_STATUS_TRIAL = 'trial';
+const TENANT_STATUS_PAST_DUE = 'past_due';
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -184,6 +190,38 @@ function evaluateBookingMode(params: {
   };
 }
 
+function normalizeOptionalDateString(value?: string): Date | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+
+  if (normalized.length === 0) {
+    return null;
+  }
+
+  return new Date(normalized);
+}
+
+function normalizeBillingMethodId(value?: string): string | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+
+  return normalized.length > 0 ? normalized : null;
+}
+
+function addDays(date: Date | null, days: number): Date | null {
+  if (!date) {
+    return null;
+  }
+
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
 @Injectable()
 export class TenantsService {
   constructor(
@@ -281,6 +319,14 @@ export class TenantsService {
       await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);
     }
 
+    const billingDates = this.resolveBillingDates({
+      status: dto.status ?? TenantStatus.TRIAL,
+      trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
+      currentPeriodStart: normalizeOptionalDateString(dto.currentPeriodStart),
+      currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
+    });
+    const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
+
     const tenant = await this.prisma.$transaction(async (tx) => {
       const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
       const normalizedBranchTimezone =
@@ -291,6 +337,10 @@ export class TenantsService {
           slug: dto.slug.toLowerCase(),
           status: dto.status ?? TenantStatus.TRIAL,
           planId: dto.planId,
+          trialEndsAt: billingDates.trialEndsAt,
+          currentPeriodStart: billingDates.currentPeriodStart,
+          currentPeriodEnd: billingDates.currentPeriodEnd,
+          billingMethodId,
           allowSelfRegistration: dto.allowSelfRegistration ?? true,
         },
       });
@@ -345,6 +395,17 @@ export class TenantsService {
       }
     }
 
+    const billingDates = this.resolveBillingDates({
+      status: dto.status ?? existingTenant.status,
+      trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
+      currentPeriodStart: normalizeOptionalDateString(dto.currentPeriodStart),
+      currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
+      existingTrialEndsAt: existingTenant.trialEndsAt,
+      existingCurrentPeriodStart: existingTenant.currentPeriodStart,
+      existingCurrentPeriodEnd: existingTenant.currentPeriodEnd,
+    });
+    const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
+
     await this.prisma.$transaction(async (tx) => {
       await tx.tenant.update({
         where: { id },
@@ -353,6 +414,10 @@ export class TenantsService {
           slug: dto.slug?.toLowerCase(),
           status: dto.status,
           planId: dto.planId,
+          trialEndsAt: billingDates.trialEndsAt,
+          currentPeriodStart: billingDates.currentPeriodStart,
+          currentPeriodEnd: billingDates.currentPeriodEnd,
+          billingMethodId,
           allowSelfRegistration: dto.allowSelfRegistration,
         },
       });
@@ -523,6 +588,7 @@ export class TenantsService {
       allow_self_registration: tenant.allowSelfRegistration,
       created_at: tenant.createdAt,
       updated_at: tenant.updatedAt,
+      billing: this.serializeTenantBillingState(tenant),
       plan: tenant.plan
         ? {
             id: tenant.plan.id,
@@ -596,6 +662,79 @@ export class TenantsService {
       booking_live_enabled: evaluation.effectiveMode === 'live',
       booking_live_eligible: evaluation.liveEligible,
       booking_live_blockers: evaluation.blockers,
+    };
+  }
+
+  private resolveBillingDates(params: {
+    status: string;
+    trialEndsAt?: Date | null;
+    currentPeriodStart?: Date | null;
+    currentPeriodEnd?: Date | null;
+    existingTrialEndsAt?: Date | null;
+    existingCurrentPeriodStart?: Date | null;
+    existingCurrentPeriodEnd?: Date | null;
+  }) {
+    const trialEndsAt =
+      params.trialEndsAt !== undefined
+        ? params.trialEndsAt
+        : String(params.status) === TENANT_STATUS_TRIAL
+          ? (params.existingTrialEndsAt ??
+            addDays(new Date(), DEFAULT_TRIAL_PERIOD_DAYS))
+          : (params.existingTrialEndsAt ?? null);
+    const currentPeriodStart =
+      params.currentPeriodStart !== undefined
+        ? params.currentPeriodStart
+        : (params.existingCurrentPeriodStart ?? null);
+    const currentPeriodEnd =
+      params.currentPeriodEnd !== undefined
+        ? params.currentPeriodEnd
+        : (params.existingCurrentPeriodEnd ?? null);
+
+    if (
+      currentPeriodStart &&
+      currentPeriodEnd &&
+      currentPeriodStart.getTime() > currentPeriodEnd.getTime()
+    ) {
+      throw new BadRequestException(
+        'Current billing period start must be before current billing period end',
+      );
+    }
+
+    if (
+      String(params.status) === TENANT_STATUS_PAST_DUE &&
+      !currentPeriodEnd &&
+      !trialEndsAt
+    ) {
+      throw new BadRequestException(
+        'Past-due tenants must keep either a trial end date or a paid period end date',
+      );
+    }
+
+    return {
+      trialEndsAt,
+      currentPeriodStart,
+      currentPeriodEnd,
+    };
+  }
+
+  private serializeTenantBillingState(
+    tenant: Awaited<ReturnType<TenantsService['getTenantByIdOrThrow']>>,
+  ) {
+    const accessWindowEndsAt =
+      tenant.currentPeriodEnd ?? tenant.trialEndsAt ?? null;
+    const graceEndsAt =
+      String(tenant.status) === TENANT_STATUS_PAST_DUE
+        ? addDays(accessWindowEndsAt, PAST_DUE_GRACE_DAYS)
+        : null;
+
+    return {
+      trial_ends_at: tenant.trialEndsAt,
+      current_period_start: tenant.currentPeriodStart,
+      current_period_end: tenant.currentPeriodEnd,
+      access_window_ends_at: accessWindowEndsAt,
+      grace_ends_at: graceEndsAt,
+      billing_method_attached: Boolean(tenant.billingMethodId),
+      billing_method_id: tenant.billingMethodId ?? null,
     };
   }
 }
