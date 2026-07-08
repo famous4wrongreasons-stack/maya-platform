@@ -5792,7 +5792,15 @@ _MASTERS_INTENT_RE = re.compile(
 _BUSINESS_MASTER_ANALYTICS_RE = re.compile(
     r"\b(прибыл\w*|выруч\w*|доход\w*|касс\w*|оборот\w*|деньг\w*|"
     r"заработ\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
-    r"зарплат\w*|марж\w*|средн\w*\s+чек|чек\w*|визит\w*|клиент\w*)\b",
+    r"зарплат\w*|марж\w*|прибыльн\w*|рентабельн\w*|"
+    r"средн\w*\s+чек|чек\w*|визит\w*|клиент\w*)\b",
+    re.IGNORECASE,
+)
+_BUSINESS_PERSON_ANALYTICS_RE = re.compile(
+    r"\b(кто|какой|какая|какие)\b.{0,80}\b("
+    r"прибыл\w*|выруч\w*|доход\w*|касс\w*|оборот\w*|деньг\w*|"
+    r"заработ\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
+    r"зарплат\w*|марж\w*|прибыльн\w*|рентабельн\w*)\b",
     re.IGNORECASE,
 )
 _FOUNDED_INTENT_RE = re.compile(
@@ -5804,6 +5812,19 @@ _FOUNDED_INTENT_RE = re.compile(
 def _chat_request_mode(body: dict | None) -> str:
     mode = str((body or {}).get("mode") or "").strip().lower()
     return "staff" if mode == "staff" else "client"
+
+
+def _chat_effective_mode(body: dict | None, chat_id: int) -> str:
+    """Resolve app surface mode after auth; staff mode is never trusted from payload alone."""
+    if _chat_request_mode(body) != "staff":
+        return "client"
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if info.get("is_master") or info.get("role") in ("owner", "manager", "master"):
+        return "staff"
+    return "client"
 
 
 def _chat_disabled_tools(mode: str) -> set[str]:
@@ -5823,7 +5844,20 @@ def _business_master_analytics_intent(message: str) -> bool:
     low = (message or "").strip().lower().replace("ё", "е")
     if not low:
         return False
-    return bool(_MASTERS_INTENT_RE.search(low) and _BUSINESS_MASTER_ANALYTICS_RE.search(low))
+    return bool(
+        (_MASTERS_INTENT_RE.search(low) and _BUSINESS_MASTER_ANALYTICS_RE.search(low))
+        or _BUSINESS_PERSON_ANALYTICS_RE.search(low)
+    )
+
+
+def _client_business_scope_reply(message: str) -> str | None:
+    if not _business_master_analytics_intent(message):
+        return None
+    return (
+        "Это внутренний вопрос салона. В клиентском кабинете я не показываю выручку, "
+        "прибыль, зарплаты и аналитику мастеров. Здесь помогу выбрать услугу, мастера "
+        "или удобное время записи."
+    )
 
 
 def _allow_client_chat_shortcuts(body: dict, chat_id: int, message: str) -> bool:
@@ -5857,8 +5891,10 @@ def _rub(value) -> str:
     return f"{n:,}".replace(",", " ") + " ₽"
 
 
-def _owner_master_profit_reply(chat_id: int, message: str) -> str | None:
+def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
     """Deterministic answer for owner/manager questions about master revenue/profit."""
+    if str(mode or "").strip().lower() != "staff":
+        return None
     if not _business_master_analytics_intent(message):
         return None
     try:
@@ -6207,6 +6243,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
+    chat_mode = _chat_effective_mode(body, chat_id)
 
     # 152-ФЗ: без согласия диалог с ассистентом недоступен (как и кабинет)
     if not database.has_valid_consent_by_chat_id(chat_id):
@@ -6228,9 +6265,9 @@ async def chat_handler(request: web.Request) -> web.Response:
         except Exception:
             _role = "client"
         _hi = f"Здравствуйте, {_nm}!" if _nm else "Здравствуйте!"
-        if _role == "founder":
+        if chat_mode == "staff" and _role == "founder":
             greet = f"{_hi} Это MAYA, я на связи. Чем сегодня займёмся?"
-        elif _role in ("owner", "manager", "master"):
+        elif chat_mode == "staff" and _role in ("owner", "manager", "master"):
             greet = f"{_hi} Это MAYA. Чем помочь по работе?"
         else:
             greet = f"{_hi} Я MAYA. Слушаю вас — чем могу помочь?"
@@ -6269,15 +6306,35 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Карточка-действие директора: владелец нажал кнопку подтверждения — фронт шлёт
     # детерминированную команду __runjob:<job>. Запускаем задачу БЕЗ LLM (только владелец).
     if message.startswith("__runjob:"):
+        if chat_mode != "staff":
+            return _cabinet_response({
+                "reply": _client_business_scope_reply(message) or "Это действие доступно только в рабочем кабинете.",
+                "contact_request": False,
+                "transcript": transcript or "",
+            })
         return await _run_owner_job_from_chat(request, chat_id, message.split(":", 1)[1].strip().lower())
 
-    master_reply = _master_chat_shortcut(chat_id, message)
+    master_reply = _master_chat_shortcut(chat_id, message) if chat_mode == "staff" else None
     if master_reply:
         return _cabinet_response({"reply": master_reply})
 
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
-    owner_profit_reply = _owner_master_profit_reply(chat_id, message)
+
+    client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
+    if client_business_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(client_business_reply))
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
     if owner_profit_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
@@ -6306,7 +6363,7 @@ async def chat_handler(request: web.Request) -> web.Response:
             logger.error(f"chat_handler unclear voice tts: {e}")
         return _cabinet_response(out)
 
-    direct_shop = _direct_shop_action(message)
+    direct_shop = _direct_shop_action(message) if chat_mode == "client" else None
     if direct_shop:
         direct_text, direct_action = direct_shop
         safe_message = anonymizer.redact_pii(message)
@@ -6583,6 +6640,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
+    chat_mode = _chat_effective_mode(body, chat_id)
 
     if not database.has_valid_consent_by_chat_id(chat_id):
         return _cabinet_response({
@@ -6607,14 +6665,37 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if len(message) > 2000:
         message = message[:2000]
 
+    if message.startswith("__runjob:"):
+        if chat_mode != "staff":
+            return _cabinet_response({
+                "reply": _client_business_scope_reply(message) or "Это действие доступно только в рабочем кабинете.",
+                "contact_request": False,
+                "transcript": transcript or "",
+            })
+        return await _run_owner_job_from_chat(request, chat_id, message.split(":", 1)[1].strip().lower())
+
     # Быстрый ответ мастеру — без стрима, обычным JSON
-    master_reply = _master_chat_shortcut(chat_id, message)
+    master_reply = _master_chat_shortcut(chat_id, message) if chat_mode == "staff" else None
     if master_reply:
         return _cabinet_response({"reply": master_reply, "transcript": transcript or ""})
 
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
-    owner_profit_reply = _owner_master_profit_reply(chat_id, message)
+
+    client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
+    if client_business_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(client_business_reply))
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
     if owner_profit_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
@@ -6627,7 +6708,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
-    direct_shop = _direct_shop_action(message)
+    direct_shop = _direct_shop_action(message) if chat_mode == "client" else None
     if direct_shop:
         direct_text, direct_action = direct_shop
         safe_message = anonymizer.redact_pii(message)

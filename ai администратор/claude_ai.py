@@ -1880,7 +1880,9 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
     """
     if role is None:
         role = _resolve_role(user_id)
-    _staff_cabinet = (str(mode or "").lower() == "staff") and (role in ("master", "manager", "owner", "founder"))
+    _mode = str(mode or "").lower()
+    _client_surface = _mode == "client"
+    _staff_cabinet = _mode == "staff" and role in ("master", "manager", "owner", "founder")
     from datetime import datetime, timedelta
     _days_ru = ["понедельник", "вторник", "среда", "четверг", "пятница",
                 "суббота", "воскресенье"]
@@ -1961,7 +1963,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         try:
             master = database.get_master_by_chat_id(int(user_id))
             is_admin = database.is_admin(int(user_id))
-            if master or is_admin:
+            if not _client_surface and (master or is_admin):
                 master_name = (master or {}).get("full_name") or "сотрудник"
                 staff_id = (master or {}).get("yclients_staff_id")
                 blocks.append({
@@ -2035,7 +2037,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                         "спрашивают то, чего тут нет — не выдумывай, скажи уточнить у владельца."
                     ),
                 })
-            if is_admin:
+            if not _client_surface and is_admin:
                 blocks.append({
                     "type": "text",
                     "text": (
@@ -2064,7 +2066,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         except Exception:
             pass
 
-        if role in ("owner", "founder"):
+        if not _client_surface and role in ("owner", "founder"):
             blocks.append({
                 "type": "text",
                 "text": (
@@ -2104,7 +2106,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
 
         # Topic-scope ≠ data-scope: основателю снимаем тематический ограничитель.
         # Доступ к данным/деньгам всё равно режется инструментами и _authorize().
-        if role == "founder":
+        if not _client_surface and role == "founder":
             blocks.append({
                 "type": "text",
                 "text": (

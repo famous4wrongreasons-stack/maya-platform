@@ -1,7 +1,11 @@
 import importlib
+import os
 import sys
 import types
 import unittest
+
+
+sys.path.insert(0, os.path.dirname(__file__))
 
 
 def _load_webhook_server():
@@ -80,9 +84,12 @@ class ChatRoutingTests(unittest.TestCase):
         ws = _load_webhook_server()
 
         question = "Кто из мастеров приносит больше всего прибыли?"
+        short_question = "Кто приносит больше всего прибыли?"
 
         self.assertTrue(ws._business_master_analytics_intent(question))
+        self.assertTrue(ws._business_master_analytics_intent(short_question))
         self.assertIsNone(ws._client_chat_shortcut(question))
+        self.assertIsNone(ws._client_chat_shortcut(short_question))
         self.assertFalse(ws._allow_client_chat_shortcuts({"mode": "staff"}, 948205934, question))
 
     def test_founder_master_profit_question_returns_numeric_analytics(self):
@@ -119,12 +126,29 @@ class ChatRoutingTests(unittest.TestCase):
         reply = ws._owner_master_profit_reply(
             948205934,
             "Кто из мастеров приносит больше всего прибыли?",
+            mode="staff",
         )
 
         self.assertIn("Илья Третьяков", reply)
         self.assertIn("240 000 ₽", reply)
         self.assertIn("марже", reply)
         self.assertNotIn("Команда:", reply)
+
+    def test_founder_client_surface_blocks_master_profit_question(self):
+        ws = _load_webhook_server()
+
+        question = "Кто приносит больше всего прибыли?"
+
+        self.assertIsNone(ws._owner_master_profit_reply(948205934, question, mode="client"))
+        reply = ws._client_business_scope_reply(question)
+        self.assertIn("клиентском кабинете", reply)
+        self.assertNotIn("Команда:", reply)
+
+    def test_staff_mode_payload_is_not_trusted_for_plain_client(self):
+        ws = _load_webhook_server()
+
+        self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 123456789), "client")
+        self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 948205934), "staff")
 
 
 if __name__ == "__main__":
