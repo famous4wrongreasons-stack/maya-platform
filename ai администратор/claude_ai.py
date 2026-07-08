@@ -20,6 +20,7 @@ OPENAI_BASE_URL = getattr(_cfg, "OPENAI_BASE_URL", "https://api.openai.com/v1").
 OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5-pro")
 OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
 OPENAI_TELEGRAM_CHAT_MODEL = getattr(_cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.5-pro")
+OPENAI_PWA_CHAT_MODEL = getattr(_cfg, "OPENAI_PWA_CHAT_MODEL", "") or OPENAI_FAST_MODEL
 CLAUDE_API_KEY = getattr(_cfg, "CLAUDE_API_KEY", "")
 # ── Провайдер мозга MAYA (голос + чат думают ОДНИМ мозгом) ───────────────────
 #   AI_PROVIDER="openai" (по умолчанию) — текущий рабочий тир gpt-5.x.

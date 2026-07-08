@@ -5751,6 +5751,10 @@ CLIENT_CHAT_SURFACE_NUDGE = (
     "Если клиент спрашивает «как стричь/техника/схема» — мягко скажи, что в клиентском "
     "чате помогаешь с записью и услугами салона.]"
 )
+CHAT_TEMPORARY_ERROR_REPLY = (
+    "Сейчас связь с мозгом MAYA подвисла. Я на месте, просто не успела получить ответ. "
+    "Повторите вопрос ещё раз через несколько секунд."
+)
 STAFF_CHAT_SURFACE_NUDGE = (
     "\n\n[Это рабочий кабинет MAYA для владельца/персонала. Не отвечай клиентской "
     "витриной и не подменяй бизнес-вопросы списком команды. Если спрашивают про "
@@ -6209,7 +6213,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     Тело: { "message": "...", "auth_data": {...}? }
     """
     # Ленивые импорты — чтобы не ловить циклические зависимости на загрузке модуля
-    from claude_ai import get_ai_response, VOICE_CLAUDE_MODEL
+    from claude_ai import get_ai_response, OPENAI_PWA_CHAT_MODEL, VOICE_CLAUDE_MODEL
     from memory import load_conversations, save_conversations
 
     try:
@@ -6433,8 +6437,8 @@ async def chat_handler(request: web.Request) -> web.Response:
         "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
     }]
     # Модель голоса: для консультаций и записи клиентов используем максимальную GPT-модель.
-    _vmodel = None
-    if voice_mode:
+    _vmodel = OPENAI_PWA_CHAT_MODEL if chat_mode == "client" else None
+    if voice_mode and chat_mode != "client":
         from claude_ai import _resolve_role
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
@@ -6447,6 +6451,15 @@ async def chat_handler(request: web.Request) -> web.Response:
         )
     except Exception as e:
         logger.error(f"chat_handler: ошибка AI: {e}")
+        if "timed out" in str(e).lower() or "timeout" in str(e).lower():
+            history.append(_assistant_history_item(CHAT_TEMPORARY_ERROR_REPLY))
+            conversations[chat_id] = history[-30:]
+            save_conversations(conversations)
+            return _cabinet_response({
+                "reply": CHAT_TEMPORARY_ERROR_REPLY,
+                "contact_request": False,
+                "transcript": transcript or "",
+            })
         return _cabinet_response({
             "error": "ai_error",
             "message": "Не получилось ответить. Попробуйте ещё раз или позвоните: 8-962-447-67-47.",
@@ -6607,7 +6620,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     Не-стрим случаи (быстрый ответ мастеру, ошибки авторизации/согласия) отдаются
     обычным JSON — фронт это распознаёт по Content-Type и рендерит как /api/chat.
     """
-    from claude_ai import get_ai_response_stream
+    from claude_ai import get_ai_response_stream, OPENAI_PWA_CHAT_MODEL
     from memory import load_conversations, save_conversations
 
     try:
@@ -6776,7 +6789,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     voice_unclear = bool(transcript and should_clarify_transcript(
         message, history, _voice_known_master_names()
     ))
-    voice_model = None
+    model_override = OPENAI_PWA_CHAT_MODEL if chat_mode == "client" else None
     llm_history = history[:-1] + [{
         "role": "user",
         "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
@@ -6784,7 +6797,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if voice_mode:
         from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role
         # Голосовой консультант/запись клиентов — максимальная GPT-модель.
-        voice_model = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
+        if chat_mode != "client":
+            model_override = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
 
     # ── Открываем SSE-поток ──────────────────────────────────────────────
     resp = web.StreamResponse(status=200, headers={
@@ -6850,14 +6864,17 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             for ev in get_ai_response_stream(
                 llm_history,
                 user_id=chat_id,
-                model=voice_model,
+                model=model_override,
                 disabled_tools=_chat_disabled_tools(chat_mode),
                 mode=chat_mode,
             ):
                 loop.call_soon_threadsafe(queue.put_nowait, ev)
         except Exception as e:
             logger.error(f"chat_stream: ошибка AI: {e}")
-            loop.call_soon_threadsafe(queue.put_nowait, {"type": "error"})
+            loop.call_soon_threadsafe(
+                queue.put_nowait,
+                {"type": "fallback", "text": CHAT_TEMPORARY_ERROR_REPLY},
+            )
         finally:
             loop.call_soon_threadsafe(queue.put_nowait, SENTINEL)
 
@@ -6940,6 +6957,15 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 contact_request = ev.get("contact_request")
                 gift_cert_action = ev.get("gift_cert_action")
                 meta_text = ev.get("text") or ""
+            elif t == "fallback":
+                txt = _plain_maya_text(ev.get("text") or CHAT_TEMPORARY_ERROR_REPLY)
+                streamed_parts.clear()
+                if tts_on:
+                    _tts_buf = ""
+                    _cancel_audio()
+                await _send({"type": "reset"})
+                streamed_parts.append(txt)
+                await _send({"type": "delta", "text": txt})
             elif t == "error":
                 had_error = True
                 await _send({"type": "error"})

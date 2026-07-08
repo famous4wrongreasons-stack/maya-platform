@@ -52,6 +52,7 @@ OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5-pro")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
 OPENAI_TELEGRAM_CHAT_MODEL = _opt("OPENAI_TELEGRAM_CHAT_MODEL", OPENAI_CHAT_MODEL)
+OPENAI_PWA_CHAT_MODEL = _opt("OPENAI_PWA_CHAT_MODEL", OPENAI_FAST_MODEL)
 # Голос временно может быть отключён, но при включении должен думать тем же
 # сильным мозгом, что и основной клиентский чат.
 OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
