@@ -481,6 +481,100 @@ def _dedup_actions(opps: list[dict]) -> list[dict]:
     return actions[:4]
 
 
+def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict],
+                   errors: list[dict], now_iso: str) -> list[dict]:
+    """Единая очередь управленческого контроля owner OS.
+
+    Это не отдельная task-БД, а стабильная read-only проекция: MAYA собирает
+    ближайшие контрольные пункты из рисков, предложенных действий, журнала и
+    системных ошибок. ПД не попадают: только агрегаты и названия задач.
+    """
+    out, seen = [], set()
+
+    def add(key: str, title: str, detail: str = "", *, status: str = "warn",
+            source: str = "maya", potential_rub=None, owner_next_step: str = "",
+            due_at: str | None = None, action_job: str | None = None) -> None:
+        key = (key or title or "control").strip()[:120]
+        if not key or key in seen:
+            return
+        seen.add(key)
+        out.append({
+            "key": key,
+            "title": title or "Контрольный пункт",
+            "detail": detail or "",
+            "status": status or "warn",
+            "source": source,
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+            "owner_next_step": owner_next_step or "",
+            "due_at": due_at,
+            "action_job": action_job,
+        })
+
+    for er in errors or []:
+        add(
+            "error:%s" % (er.get("key") or "system"),
+            "Проверить системный блок",
+            er.get("message") or er.get("key") or "Один из блоков Owner OS временно недоступен.",
+            status="high",
+            source="system",
+            owner_next_step="Обновить Owner OS. Если предупреждение повторяется — проверить backend-интеграцию.",
+        )
+
+    for it in journal or []:
+        status = str(it.get("status") or "")
+        if status == "failed":
+            add(
+                "journal_failed:%s" % (it.get("id") or it.get("job") or "task"),
+                "Разобрать сбой действия",
+                it.get("title") or it.get("job") or "Действие завершилось ошибкой.",
+                status="high",
+                source="journal",
+                owner_next_step="Открыть журнал AI-директора и повторить действие после проверки причины.",
+            )
+        due_at = it.get("result_due_at")
+        if status == "done" and not it.get("evaluated_at") and due_at and str(due_at) <= now_iso:
+            add(
+                "journal_due:%s" % (it.get("id") or it.get("job") or "task"),
+                "Проверить результат действия",
+                it.get("title") or it.get("job") or "По действию уже наступил срок контроля результата.",
+                status="medium",
+                source="journal",
+                due_at=due_at,
+                owner_next_step="Нажать «Проверить» в журнале и посмотреть наблюдаемый сдвиг.",
+            )
+
+    for r in risks or []:
+        add(
+            "risk:%s" % (r.get("type") or r.get("title") or "risk"),
+            r.get("title") or "Снять риск",
+            r.get("detail") or "",
+            status="high" if _severity_rank(r.get("severity")) >= 3 else "medium",
+            source="risk",
+            potential_rub=r.get("potential_rub"),
+            owner_next_step=r.get("action_hint") or "Проверить причину и назначить следующее действие.",
+        )
+
+    for a in actions or []:
+        job = a.get("job")
+        add(
+            "action:%s" % (job or a.get("title") or "action"),
+            a.get("title") or a.get("label") or "Запустить действие",
+            a.get("reason") or a.get("problem") or "",
+            status="medium" if a.get("priority") != "high" else "high",
+            source="action",
+            potential_rub=a.get("potential_rub"),
+            action_job=job,
+            owner_next_step="Подтвердить запуск в блоке «Следующие действия».",
+        )
+
+    out.sort(key=lambda item: (
+        -_severity_rank(item.get("status")),
+        item.get("potential_rub") is None,
+        -(item.get("potential_rub") or 0),
+    ))
+    return out[:8]
+
+
 def command_center() -> dict:
     """Owner Command Center v1: единый read-only контракт Maya OS.
 
@@ -564,6 +658,20 @@ def command_center() -> dict:
         and it.get("result_due_at") and str(it.get("result_due_at")) <= datetime.now().isoformat(timespec="seconds")
     ]
     journal_checked = [it for it in journal if it.get("evaluated_at")]
+    now_iso = datetime.now().isoformat(timespec="seconds")
+    control = _control_queue(
+        risks=risks,
+        actions=actions,
+        journal=journal,
+        errors=errors,
+        now_iso=now_iso,
+    )
+    control_urgent = [
+        it for it in control if _severity_rank(it.get("status")) >= 3
+    ]
+    control_due = [
+        it for it in control if it.get("source") == "journal" and it.get("due_at")
+    ]
     sections = [
         {
             "key": "today",
@@ -592,6 +700,18 @@ def command_center() -> dict:
             },
             "items": opps[:6],
             "note": "Возможности отсортированы по деньгам на кону; estimate=true — оценка, не факт.",
+        },
+        {
+            "key": "control",
+            "title": "Контроль",
+            "status": "risk" if control_urgent else ("warn" if control else "ok"),
+            "summary": {
+                "items_count": len(control),
+                "urgent_count": len(control_urgent),
+                "due_count": len(control_due),
+            },
+            "items": control,
+            "note": "Очередь контроля собирается из рисков, действий, журнала результата и системных предупреждений.",
         },
         {
             "key": "risks",
@@ -672,11 +792,13 @@ def command_center() -> dict:
             "top_priority": opps[0] if opps else None,
             "top_risk": top_risk,
             "next_action": actions[0] if actions else None,
+            "top_control": control[0] if control else None,
         },
         "sections": sections,
         "opportunities": opps,
         "risks": risks,
         "next_best_actions": actions,
+        "control_queue": control,
         "journal": journal,
         "errors": errors,
     }

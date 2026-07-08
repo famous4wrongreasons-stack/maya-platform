@@ -52,6 +52,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             "title": "Подогреть спрос",
             "status": "done",
             "created_at": "2026-07-07T10:00:00",
+            "result_due_at": "2020-01-01T10:00:00",
             "summary": {"sent": 3},
         }
     ][:limit]
@@ -131,10 +132,13 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "risks", "clients", "services", "actions", "journal"},
+            {"today", "money", "control", "risks", "clients", "services", "actions", "journal"},
             keys,
         )
         self.assertTrue(center["next_best_actions"])
+        self.assertTrue(center["control_queue"])
+        self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
+        self.assertIn("control", {section["key"] for section in center["sections"]})
         self.assertEqual(center["journal"][0]["job"], "cycle")
         self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
         self.assertNotIn("execute", center["next_best_actions"][0])
