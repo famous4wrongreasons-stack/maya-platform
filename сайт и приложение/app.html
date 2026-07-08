@@ -15081,6 +15081,7 @@ function AGodMode() {
   var sBusy = React.useState(false), busy = sBusy[0], setBusy = sBusy[1];
   var sModal = React.useState(null), modal = sModal[0], setModal = sModal[1];
   var sAct = React.useState({}), actionS = sAct[0], setActionS = sAct[1];
+  var sEval = React.useState({}), evalS = sEval[0], setEvalS = sEval[1];
 
   function gfetch(action, body) {
     var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
@@ -15132,6 +15133,21 @@ function AGodMode() {
       setTimeout(loadCommand, 1200);
     }).catch(function () {
       setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'done', ok: false, msg: 'Не удалось запустить' }; return n; });
+    });
+  }
+  function evaluateOwnerAction(it) {
+    if (!it || !it.id) return;
+    var id = it.id;
+    setEvalS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'running' }; return n; });
+    gfetch('panel_action_evaluate', { action_id: id, force: true }).then(function (j) {
+      setEvalS(function (s) {
+        var n = Object.assign({}, s);
+        n[id] = { phase: 'done', ok: !!(j && j.ok), msg: (j && j.ok) ? 'Проверено' : 'Не удалось проверить' };
+        return n;
+      });
+      loadCommand();
+    }).catch(function () {
+      setEvalS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось проверить' }; return n; });
     });
   }
   function statusText(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' ? 'Риск' : (s === 'warn' || s === 'medium' ? 'Внимание' : 'Норма'); }
@@ -15199,12 +15215,20 @@ function AGodMode() {
       if (sm.synced != null) bits.push('обновлено ' + sm.synced);
       if (sm.granted != null) bits.push('наград ' + sm.granted);
       if (sm.alerts != null) bits.push('алертов ' + sm.alerts);
+      var impact = it.impact || {}, deltas = impact.deltas || {}, deltaBits = [];
+      Object.keys(deltas).slice(0, 2).forEach(function (k) { deltaBits.push(k + ': ' + (deltas[k] > 0 ? '+' : '') + deltas[k]); });
       var detail = bits.join(' · ') || (it.error || it.source || '');
+      var ev = evalS[it.id] || {};
       return e('div', { key: it.id || i, style: { display: 'flex', gap: 10, padding: '9px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
         e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status === 'failed' ? 'risk' : (it.status === 'running' ? 'warn' : 'ok')), marginTop: 5, flexShrink: 0 } }),
         e('div', { style: { flex: 1, minWidth: 0 } },
           e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink, lineHeight: 1.25 } }, it.title || it.job || 'Действие'),
-          e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, [statusText(it.status), detail].filter(Boolean).join(' · '))));
+          e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, [statusText(it.status), detail].filter(Boolean).join(' · ')),
+          impact.message ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: impact.status === 'positive_signal' ? statusColor('ok') : t.faint, lineHeight: 1.35, marginTop: 5 } }, impact.message) : null,
+          deltaBits.length ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, deltaBits.join(' · ')) : null,
+          it.status === 'done' ? e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 } },
+            e('div', { style: { flex: 1 } }, btn(ev.phase === 'running' ? 'Проверяю…' : (it.evaluated_at ? 'Проверить ещё' : 'Проверить'), function () { evaluateOwnerAction(it); }, { busy: ev.phase === 'running' })),
+            ev.phase === 'done' ? e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 11.3, color: ev.ok ? statusColor('ok') : statusColor('risk') } }, ev.msg) : null) : null));
     });
   }
 

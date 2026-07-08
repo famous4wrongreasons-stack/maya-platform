@@ -521,6 +521,7 @@ def command_center() -> dict:
     journal = []
     try:
         import database
+        database.evaluate_due_owner_actions(limit=5)
         journal = database.list_owner_actions(limit=8)
     except Exception as e:
         logger.error("owner_ai command_center owner_journal: %s", e)
@@ -557,6 +558,12 @@ def command_center() -> dict:
         "warn" if errors else "ok",
     )
 
+    journal_due = [
+        it for it in journal
+        if it.get("status") == "done" and not it.get("evaluated_at")
+        and it.get("result_due_at") and str(it.get("result_due_at")) <= datetime.now().isoformat(timespec="seconds")
+    ]
+    journal_checked = [it for it in journal if it.get("evaluated_at")]
     sections = [
         {
             "key": "today",
@@ -640,7 +647,11 @@ def command_center() -> dict:
             "key": "journal",
             "title": "Журнал AI-директора",
             "status": "warn" if any((it.get("status") == "failed") for it in journal) else "ok",
-            "summary": {"items_count": len(journal)},
+            "summary": {
+                "items_count": len(journal),
+                "due_count": len(journal_due),
+                "checked_count": len(journal_checked),
+            },
             "items": journal,
             "note": "Последние действия владельца и результаты задач.",
         },

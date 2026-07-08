@@ -2372,6 +2372,42 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"role": info["role"], **payload})
 
 
+async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/action/evaluate — проверить результат owner action."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Проверка результата доступна только владельцу.",
+        }, status=403)
+    try:
+        action_id = int(body.get("action_id") or 0)
+    except Exception:
+        action_id = 0
+    if not action_id:
+        return _cabinet_response({"error": "bad_request", "message": "action_id обязателен."}, status=400)
+    try:
+        item = await asyncio.to_thread(
+            database.evaluate_owner_action,
+            action_id,
+            force=bool(body.get("force")),
+        )
+    except Exception as e:
+        logger.error(f"panel_action_evaluate error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось проверить результат."}, status=500)
+    if not item:
+        return _cabinet_response({"error": "not_found"}, status=404)
+    return _cabinet_response({"ok": True, "action": item})
+
+
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
     """Расписание (сегодня + ближайшие) и личная статистика мастера за период pp.
     Статистика (визиты/выручка/чаевые) — за окно периода ВКЛЮЧАЯ сегодня; расписание —
@@ -9322,6 +9358,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/dashboard", panel_options_handler)
     web_app.router.add_post("/api/panel/command_center", panel_command_center_handler)
     web_app.router.add_options("/api/panel/command_center", panel_options_handler)
+    web_app.router.add_post("/api/panel/action/evaluate", panel_action_evaluate_handler)
+    web_app.router.add_options("/api/panel/action/evaluate", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)
     web_app.router.add_options("/api/panel/master/overview", panel_options_handler)
     web_app.router.add_post("/api/panel/master/day", panel_master_day_handler)

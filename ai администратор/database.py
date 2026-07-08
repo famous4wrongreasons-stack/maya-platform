@@ -598,6 +598,11 @@ def init_db():
                 completed_at  TEXT,
                 payload_json  TEXT,
                 summary_json  TEXT,
+                baseline_json TEXT,
+                result_due_at TEXT,
+                evaluated_at  TEXT,
+                impact_status TEXT,
+                impact_json   TEXT,
                 error         TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
@@ -4031,6 +4036,11 @@ def _ensure_owner_action_journal(conn) -> None:
             completed_at  TEXT,
             payload_json  TEXT,
             summary_json  TEXT,
+            baseline_json TEXT,
+            result_due_at TEXT,
+            evaluated_at  TEXT,
+            impact_status TEXT,
+            impact_json   TEXT,
             error         TEXT
         );
     """)
@@ -4042,10 +4052,22 @@ def _ensure_owner_action_journal(conn) -> None:
         CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
             ON owner_action_journal (job, created_at);
     """)
+    for col in (
+        ("baseline_json", "TEXT"),
+        ("result_due_at", "TEXT"),
+        ("evaluated_at", "TEXT"),
+        ("impact_status", "TEXT"),
+        ("impact_json", "TEXT"),
+    ):
+        try:
+            conn.execute(f"ALTER TABLE owner_action_journal ADD COLUMN {col[0]} {col[1]}")
+        except sqlite3.OperationalError:
+            pass
 
 
 def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
-                        created_by=None, payload=None, status: str = "running") -> int:
+                        created_by=None, payload=None, status: str = "running",
+                        baseline=None, result_due_at: str | None = None) -> int:
     """Создаёт запись в журнале AI-директора. ПД не сохраняем."""
     try:
         uid = int(created_by) if created_by else None
@@ -4055,12 +4077,17 @@ def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
     title = (title or job or "Действие")[:180]
     status = (status or "running").strip().lower()[:40]
     now = _now()
+    if baseline is None:
+        baseline = _owner_action_baseline(job)
+    if result_due_at is None:
+        result_due_at = _owner_action_due_at(job, now)
     with _db() as conn:
         _ensure_owner_action_journal(conn)
         cur = conn.execute(
             "INSERT INTO owner_action_journal "
             "(source, job, title, status, created_by, created_at, started_at, "
-            "payload_json, summary_json, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "payload_json, summary_json, baseline_json, result_due_at, impact_status, "
+            "impact_json, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 (source or "owner_os")[:60],
                 job,
@@ -4070,6 +4097,10 @@ def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
                 now,
                 now if status in ("running", "done", "failed") else None,
                 _json_dumps_safe(payload),
+                "{}",
+                _json_dumps_safe(baseline),
+                result_due_at,
+                "pending",
                 "{}",
                 "",
             ),
@@ -4105,7 +4136,8 @@ def list_owner_actions(limit: int = 12) -> list[dict]:
             _ensure_owner_action_journal(conn)
             rows = conn.execute(
                 "SELECT id, source, job, title, status, created_by, created_at, "
-                "started_at, completed_at, payload_json, summary_json, error "
+                "started_at, completed_at, payload_json, summary_json, baseline_json, "
+                "result_due_at, evaluated_at, impact_status, impact_json, error "
                 "FROM owner_action_journal ORDER BY id DESC LIMIT ?",
                 (max(1, min(int(limit or 12), 50)),),
             ).fetchall()
@@ -4116,8 +4148,170 @@ def list_owner_actions(limit: int = 12) -> list[dict]:
         item = dict(row)
         item["payload"] = _json_loads_safe(item.pop("payload_json", None))
         item["summary"] = _json_loads_safe(item.pop("summary_json", None))
+        item["baseline"] = _json_loads_safe(item.pop("baseline_json", None))
+        item["impact"] = _json_loads_safe(item.pop("impact_json", None))
         out.append(item)
     return out
+
+
+def _owner_action_due_at(job: str, created_at: str | None = None) -> str:
+    base = datetime.fromisoformat((created_at or _now())[:19])
+    # Клиентским касаниям нужно время на запись/реакцию; системным задачам меньше.
+    days = {
+        "reactivation": 3,
+        "cycle": 3,
+        "birthday": 3,
+        "subscriptions": 3,
+        "reviews": 7,
+        "loyalty": 1,
+        "referral": 1,
+        "leads": 1,
+    }.get((job or "").strip().lower(), 2)
+    return (base + timedelta(days=days)).isoformat(timespec="seconds")
+
+
+def _owner_action_baseline(job: str) -> dict:
+    """Baseline для последующей оценки результата. Только агрегаты, без ПД."""
+    out = {"captured_at": _now(), "job": (job or "").strip().lower()}
+    try:
+        out["dashboard_1d"] = dashboard_metrics(days=1)
+        out["dashboard_7d"] = dashboard_metrics(days=7)
+    except Exception as e:
+        out["error"] = str(e)[:160]
+    return out
+
+
+def _metric_get(data: dict, path: tuple[str, ...], default=0):
+    cur = data or {}
+    for key in path:
+        if not isinstance(cur, dict):
+            return default
+        cur = cur.get(key)
+    return default if cur is None else cur
+
+
+def _metric_delta(base: dict, current: dict, path: tuple[str, ...]) -> int:
+    try:
+        return int(_metric_get(current, path, 0) or 0) - int(_metric_get(base, path, 0) or 0)
+    except Exception:
+        return 0
+
+
+def _owner_action_impact(job: str, summary: dict, baseline: dict) -> dict:
+    """Осторожная оценка: observed_delta — наблюдаемый сдвиг, не причинность."""
+    job = (job or "").strip().lower()
+    current = {}
+    try:
+        current = {"dashboard_1d": dashboard_metrics(days=1), "dashboard_7d": dashboard_metrics(days=7)}
+    except Exception as e:
+        return {
+            "status": "unknown",
+            "message": "Не удалось собрать текущие агрегаты для оценки.",
+            "error": str(e)[:160],
+        }
+
+    sent = int((summary or {}).get("sent") or 0)
+    synced = int((summary or {}).get("synced") or 0)
+    alerts = int((summary or {}).get("alerts") or 0)
+    if job in ("reactivation", "cycle", "birthday"):
+        paths = [("dashboard_7d", "bookings", "created"), ("dashboard_7d", "bookings", "with_record_id")]
+        label = "Наблюдаемый сдвиг по записям за 7 дней"
+    elif job == "reviews":
+        paths = [("dashboard_7d", "reviews", "responded"), ("dashboard_7d", "reviews", "avg_rating")]
+        label = "Наблюдаемый сдвиг по ответам на отзывы за 7 дней"
+    elif job == "subscriptions":
+        paths = [("dashboard_7d", "subscriptions", "new_in_period"), ("dashboard_7d", "subscriptions", "new_revenue_rub")]
+        label = "Наблюдаемый сдвиг по абонементам за 7 дней"
+    elif job == "leads":
+        paths = [("dashboard_7d", "lead_alerts", "rescued"), ("dashboard_7d", "lead_alerts", "alerts_sent")]
+        label = "Наблюдаемый сдвиг по спасённым заявкам за 7 дней"
+    else:
+        paths = [("dashboard_7d", "bookings", "created")]
+        label = "Наблюдаемый сдвиг за 7 дней"
+
+    deltas = {".".join(path[1:]): _metric_delta(baseline, current, path) for path in paths}
+    positive = any((v or 0) > 0 for v in deltas.values())
+    if sent == 0 and synced == 0 and alerts == 0 and job in ("reactivation", "cycle", "birthday", "reviews", "subscriptions", "leads"):
+        status = "no_reach"
+        message = "Задача не дала охвата в summary, поэтому эффект пока не оцениваем."
+    elif positive:
+        status = "positive_signal"
+        message = label + ": есть положительный сигнал. Это наблюдение, не 100% атрибуция."
+    else:
+        status = "no_signal_yet"
+        message = label + ": явного положительного сигнала пока не видно."
+    return {
+        "status": status,
+        "message": message,
+        "evaluated_at": _now(),
+        "deltas": deltas,
+        "summary": summary or {},
+    }
+
+
+def evaluate_owner_action(action_id, *, force: bool = False) -> dict | None:
+    """Оценивает результат owner action. Возвращает обновлённую запись."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    now_iso = _now()
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        due_at = item.get("result_due_at") or ""
+        if not force and due_at and due_at > now_iso:
+            return {
+                **item,
+                "payload": _json_loads_safe(item.get("payload_json")),
+                "summary": _json_loads_safe(item.get("summary_json")),
+                "baseline": _json_loads_safe(item.get("baseline_json")),
+                "impact": _json_loads_safe(item.get("impact_json")),
+                "not_due": True,
+            }
+        summary = _json_loads_safe(item.get("summary_json"))
+        baseline = _json_loads_safe(item.get("baseline_json"))
+        impact = _owner_action_impact(item.get("job") or "", summary, baseline)
+        conn.execute(
+            "UPDATE owner_action_journal SET evaluated_at = ?, impact_status = ?, "
+            "impact_json = ? WHERE id = ?",
+            (
+                impact.get("evaluated_at") or now_iso,
+                impact.get("status") or "unknown",
+                _json_dumps_safe(impact),
+                aid,
+            ),
+        )
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
+def evaluate_due_owner_actions(limit: int = 5) -> int:
+    """Автоматически оценивает просроченные проверки. Возвращает число оценок."""
+    now_iso = _now()
+    try:
+        with _db() as conn:
+            _ensure_owner_action_journal(conn)
+            rows = conn.execute(
+                "SELECT id FROM owner_action_journal "
+                "WHERE status = 'done' AND evaluated_at IS NULL "
+                "AND result_due_at IS NOT NULL AND result_due_at <= ? "
+                "ORDER BY result_due_at ASC LIMIT ?",
+                (now_iso, max(1, min(int(limit or 5), 20))),
+            ).fetchall()
+    except Exception:
+        return 0
+    done = 0
+    for row in rows:
+        if evaluate_owner_action(row["id"], force=True):
+            done += 1
+    return done
 
 
 # ─── Durable-идемпотентность оплаты визита ───────────────────────────────────

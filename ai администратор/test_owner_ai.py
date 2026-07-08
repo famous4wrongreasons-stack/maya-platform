@@ -55,6 +55,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             "summary": {"sent": 3},
         }
     ][:limit]
+    fake_database.evaluate_due_owner_actions = lambda limit=5: 0
 
     fake_yclients = types.ModuleType("yclients")
 
