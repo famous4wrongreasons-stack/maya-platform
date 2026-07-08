@@ -5854,6 +5854,12 @@ def _chat_effective_mode(body: dict | None, chat_id: int) -> str:
     return "client"
 
 
+def _chat_history_key(chat_id: int, mode: str) -> str:
+    """PWA chat memory is separated by app surface, not only by Telegram ID."""
+    surface = "staff" if mode == "staff" else "client"
+    return f"pwa:{surface}:{int(chat_id)}"
+
+
 def _chat_disabled_tools(mode: str) -> set[str]:
     # В рабочем кабинете база знаний/аналитика должны быть доступны по RBAC.
     return set() if mode == "staff" else set(CLIENT_CHAT_DISABLED_TOOLS)
@@ -6161,7 +6167,9 @@ async def chat_history_handler(request: web.Request) -> web.Response:
                         "персональных данных: откройте @malesthetic_bot и нажмите /start."),
         }, status=403)
 
-    full_history = load_conversations().get(chat_id) or []
+    chat_mode = _chat_effective_mode(body, chat_id)
+    history_key = _chat_history_key(chat_id, chat_mode)
+    full_history = load_conversations().get(history_key) or []
     offset = max(0, len(full_history) - 30)
     messages = _chat_history_payload(full_history[-30:], offset=offset)
 
@@ -6191,12 +6199,18 @@ async def chat_delete_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
 
+    chat_mode = _chat_effective_mode(body, chat_id)
+    history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    history = list(conversations.get(chat_id) or [])
-    mode = str(body.get("mode") or "").strip().lower()
+    history = list(conversations.get(history_key) or [])
+    delete_mode = str(body.get("delete_mode") or body.get("delete") or "").strip().lower()
+    if not delete_mode:
+        legacy_mode = str(body.get("mode") or "").strip().lower()
+        if legacy_mode in ("all", "clear", "reset", "one"):
+            delete_mode = legacy_mode
 
-    if mode in ("all", "clear", "reset"):
-        conversations.pop(chat_id, None)
+    if delete_mode in ("all", "clear", "reset"):
+        conversations.pop(history_key, None)
         save_conversations(conversations)
         return _cabinet_response({"ok": True, "deleted": "all", "messages": []})
 
@@ -6227,11 +6241,11 @@ async def chat_delete_handler(request: web.Request) -> web.Response:
                     break
 
     if history:
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
     else:
-        conversations.pop(chat_id, None)
+        conversations.pop(history_key, None)
     save_conversations(conversations)
-    messages = _chat_history_payload(conversations.get(chat_id) or [])
+    messages = _chat_history_payload(conversations.get(history_key) or [])
     return _cabinet_response({"ok": True, "deleted": bool(deleted), "messages": messages})
 
 
@@ -6355,15 +6369,16 @@ async def chat_handler(request: web.Request) -> web.Response:
     if master_reply:
         return _cabinet_response({"reply": master_reply})
 
+    history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    history = conversations.get(chat_id) or []
+    history = conversations.get(history_key) or []
 
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(staff_booking_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": staff_booking_reply,
@@ -6376,7 +6391,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(client_business_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": client_business_reply,
@@ -6389,7 +6404,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(owner_profit_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": owner_profit_reply,
@@ -6419,7 +6434,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(direct_text, action=direct_action))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": direct_text,
@@ -6434,7 +6449,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(direct_text, action=direct_action))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         out = {
             "reply": direct_text,
@@ -6459,7 +6474,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(deterministic_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": deterministic_reply,
@@ -6467,7 +6482,7 @@ async def chat_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
-    # Общая с Telegram история: те же ключи (user_id) и формат {role, content}
+    # PWA-история разделена по поверхности кабинета, формат тот же: {role, content}
     # 152-ФЗ: обезличиваем сообщение клиента ДО отправки в LLM и ДО сохранения —
     # так же, как в Telegram-боте (bot.py: anonymizer.redact_pii). Веб-чат раньше слал сырьё.
     safe_message = anonymizer.redact_pii(message)
@@ -6499,7 +6514,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         logger.error(f"chat_handler: ошибка AI: {e}")
         if "timed out" in str(e).lower() or "timeout" in str(e).lower():
             history.append(_assistant_history_item(CHAT_TEMPORARY_ERROR_REPLY))
-            conversations[chat_id] = history[-30:]
+            conversations[history_key] = history[-30:]
             save_conversations(conversations)
             return _cabinet_response({
                 "reply": CHAT_TEMPORARY_ERROR_REPLY,
@@ -6566,9 +6581,9 @@ async def chat_handler(request: web.Request) -> web.Response:
                 cert_action["amount"] = amt
 
     response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
-    knowledge_images = _chat_knowledge_images(chat_id, message, (body.get("mode") or "").lower())
+    knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
     history.append(_assistant_history_item(response_text, link=reply_link, action=cert_action, images=knowledge_images))
-    conversations[chat_id] = history
+    conversations[history_key] = history
     save_conversations(conversations)
 
     # Чтобы числа с пробелом-разделителем («2 000 ₽») не разрывались по строкам
@@ -6742,15 +6757,16 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if master_reply:
         return _cabinet_response({"reply": master_reply, "transcript": transcript or ""})
 
+    history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    history = conversations.get(chat_id) or []
+    history = conversations.get(history_key) or []
 
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(staff_booking_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": staff_booking_reply,
@@ -6763,7 +6779,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(client_business_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": client_business_reply,
@@ -6776,7 +6792,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(owner_profit_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": owner_profit_reply,
@@ -6790,7 +6806,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(direct_text, action=direct_action))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": direct_text,
@@ -6805,7 +6821,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(direct_text, action=direct_action))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         out = {
             "reply": direct_text,
@@ -6830,7 +6846,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
         history.append(_assistant_history_item(deterministic_reply))
-        conversations[chat_id] = history[-30:]
+        conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": deterministic_reply,
@@ -7111,9 +7127,9 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 cert_action["amount"] = amt
 
     response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
-    knowledge_images = _chat_knowledge_images(chat_id, message, (body.get("mode") or "").lower())
+    knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
     history.append(_assistant_history_item(response_text, action=cert_action, images=knowledge_images))
-    conversations[chat_id] = history
+    conversations[history_key] = history
     save_conversations(conversations)
 
     display_text = re.sub(r"(?<=\d)\s(?=[\d₽])", " ", response_text)

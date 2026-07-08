@@ -1,6 +1,9 @@
 import sys
 import types
 import unittest
+import json
+import os
+import tempfile
 from unittest.mock import patch
 
 fake_database = types.ModuleType("database")
@@ -32,6 +35,27 @@ import memory
 
 
 class MemoryRegressionTests(unittest.TestCase):
+    def test_load_conversations_preserves_numeric_and_pwa_surface_keys(self):
+        payload = {
+            "948205934": [{"role": "assistant", "content": "telegram"}],
+            "pwa:client:948205934": [{"role": "assistant", "content": "client"}],
+            "pwa:staff:948205934": [{"role": "assistant", "content": "staff"}],
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "conversations.json")
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False)
+            with patch.object(memory, "CONVERSATIONS_FILE", path):
+                loaded = memory.load_conversations()
+
+        self.assertIn(948205934, loaded)
+        self.assertIn("pwa:client:948205934", loaded)
+        self.assertIn("pwa:staff:948205934", loaded)
+        self.assertEqual(loaded[948205934][0]["content"], "telegram")
+        self.assertEqual(loaded["pwa:client:948205934"][0]["content"], "client")
+        self.assertEqual(loaded["pwa:staff:948205934"][0]["content"], "staff")
+
     def test_normalize_history_visit_supports_raw_yclients_shape(self):
         visit = {
             "datetime": "2026-07-01T12:00:00+03:00",

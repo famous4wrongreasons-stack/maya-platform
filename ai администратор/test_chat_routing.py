@@ -161,6 +161,16 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 123456789), "client")
         self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 948205934), "staff")
 
+    def test_pwa_chat_history_key_is_split_by_surface(self):
+        ws = _load_webhook_server()
+
+        self.assertEqual(ws._chat_history_key(948205934, "client"), "pwa:client:948205934")
+        self.assertEqual(ws._chat_history_key(948205934, "staff"), "pwa:staff:948205934")
+        self.assertNotEqual(
+            ws._chat_history_key(948205934, "client"),
+            ws._chat_history_key(948205934, "staff"),
+        )
+
     def test_staff_surface_blocks_client_booking_intent(self):
         ws = _load_webhook_server()
 

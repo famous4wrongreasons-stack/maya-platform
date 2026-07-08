@@ -8978,8 +8978,20 @@ window.ABookFlow = ABookFlow;
 function AChat() {
   const CHAT_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   const GREETING = 'Здравствуйте! Я MAYA — ассистент «Мужской Эстетики». Помогу записаться, подскажу по услугам, мастерам, ценам и абонементам. А ещё у нас есть полноценное приложение — личный кабинет, баллы и сертификаты: нажмите «Перейти в приложение» ниже. Что подсказать?';
+  const STAFF_GREETING = 'Здравствуйте! Я MAYA — рабочий ассистент «Мужской Эстетики». Помогу с аналитикой, выручкой, зарплатами, расписанием и задачами салона. Что смотрим?';
   const CHAT_HISTORY_CACHE = 'maya_chat_history_v1';
   const QUICKS = ['Записаться', 'Какие цены?', 'Абонемент', 'Сертификат'];
+  const STAFF_QUICKS = ['Выручка за месяц', 'Кто приносит больше прибыли?', 'Зарплаты мастеров', 'Записи сегодня'];
+  function chatSurface() {
+    try {
+      return window.__meCurMode === 'staff' || window.__meChatReturn === 'staff-home' ? 'staff' : 'client';
+    } catch (e) {
+      return 'client';
+    }
+  }
+  function chatHistoryCacheKey() {
+    return CHAT_HISTORY_CACHE + ':' + chatSurface();
+  }
   function uniqChips(list, limit) {
     var out = [];
     (list || []).forEach(function (x) {
@@ -9033,7 +9045,7 @@ function AChat() {
     var bot = String(text || '').toLowerCase();
     var user = lastText(history, 'user').toLowerCase();
     if (/https?:\/\/|записал вас|забронир|перейдите по ссыл|ссылк[ауе] (?:на|для) оплат|оплатить по ссыл/.test(bot)) return [];
-    if (!user) return QUICKS;
+    if (!user) return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
     if (/какую услугу|на какую услугу|услугу вас запис|услугу хотите|что выбираете|какой комплекс/.test(bot)) return serviceChips();
     if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой/.test(bot)) return masterChips();
     if (/какой день|на какую дату|когда удобно|какое время|во сколько|на какое время|время подходит|сегодня свободн|свободн.*(?:окн|слот|время)/.test(bot)) return ['Сегодня', 'Завтра', 'Ближайшее окно', 'После 18:00', 'На выходных'];
@@ -9045,7 +9057,7 @@ function AChat() {
     if (/сколько по времени|длительн|минут|час/.test(bot) || /сколько по времени|долго|минут/.test(user)) return ['Записаться', 'Мужская стрижка', 'Комплекс: стрижка + борода', 'Ближайшее окно'];
     if (/адрес|находим|лермонтов|как добра|на карт|как прое|как дое/.test(bot) || /где|адрес|как добраться/.test(user)) return ['Записаться', 'Построить маршрут', 'Позвонить', 'Какие цены?'];
     if (pickedService(user)) return masterChips();
-    return QUICKS;
+    return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
   };
   function quickActionTarget(label) {
     var s = String(label || '').toLowerCase();
@@ -9063,7 +9075,7 @@ function AChat() {
   const setDark = window.__meSetDark;
   const t = tokens('aurora', dark);
   function defaultChatMsgs() {
-    return [{ role: 'bot', text: GREETING }];
+    return [{ role: 'bot', text: chatSurface() === 'staff' ? STAFF_GREETING : GREETING }];
   }
   function normalizeChatMessages(list) {
     if (!Array.isArray(list)) return [];
@@ -9086,7 +9098,7 @@ function AChat() {
   }
   function readCachedChatMsgs() {
     try {
-      const saved = normalizeChatMessages(JSON.parse(localStorage.getItem(CHAT_HISTORY_CACHE) || '[]'));
+      const saved = normalizeChatMessages(JSON.parse(localStorage.getItem(chatHistoryCacheKey()) || '[]'));
       if (saved.length) return saved;
     } catch (e) {}
     return defaultChatMsgs();
@@ -9139,7 +9151,7 @@ function AChat() {
   React.useEffect(() => {
     try {
       const clean = normalizeChatMessages(msgs);
-      if (clean.length) localStorage.setItem(CHAT_HISTORY_CACHE, JSON.stringify(clean));
+      if (clean.length) localStorage.setItem(chatHistoryCacheKey(), JSON.stringify(clean));
     } catch (e) {}
   }, [msgs]);
   React.useEffect(() => {
@@ -9358,7 +9370,7 @@ function AChat() {
 	    });
 	    try {
 	      const ap = authPayload({
-	        mode: 'one',
+	        delete_mode: 'one',
 	        message_id: m.id,
 	        role: m.role,
 	        text: m.text || ''
@@ -9382,10 +9394,10 @@ function AChat() {
 	    setMsgs(defaultChatMsgs());
 	    userHasSentRef.current = false;
 	    try {
-	      localStorage.removeItem(CHAT_HISTORY_CACHE);
+	      localStorage.removeItem(chatHistoryCacheKey());
 	    } catch (e) {}
 		    try {
-		      const ap = authPayload({ mode: 'all' });
+		      const ap = authPayload({ delete_mode: 'all' });
 		      await fetch(CHAT_PROXY + '?action=chat_delete', {
 		        method: 'POST',
 		        headers: ap.headers,

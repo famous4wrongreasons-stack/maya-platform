@@ -438,12 +438,22 @@ def build_context(user_id: int) -> str:
 # ─── История переписки ──────────────────────────────────────────────────
 
 def load_conversations() -> dict:
-    """Загружает историю переписок с диска. Ключи — user_id (int)."""
+    """Загружает историю переписок с диска.
+
+    Старый Telegram-бот использует числовые user_id, а PWA хранит отдельные
+    контексты поверхностей строковыми ключами, например pwa:staff:<chat_id>.
+    """
     try:
         with open(CONVERSATIONS_FILE, "r", encoding="utf-8") as f:
             raw = json.load(f)
-        return {int(k): v for k, v in raw.items()}
-    except (FileNotFoundError, json.JSONDecodeError, ValueError):
+        conversations = {}
+        for k, v in raw.items():
+            try:
+                conversations[int(k)] = v
+            except (TypeError, ValueError):
+                conversations[str(k)] = v
+        return conversations
+    except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
 
