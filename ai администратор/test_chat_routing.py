@@ -85,11 +85,14 @@ class ChatRoutingTests(unittest.TestCase):
 
         question = "Кто из мастеров приносит больше всего прибыли?"
         short_question = "Кто приносит больше всего прибыли?"
+        screenshot_question = "Кто из мастеров зарабатывает больше всех"
 
         self.assertTrue(ws._business_master_analytics_intent(question))
         self.assertTrue(ws._business_master_analytics_intent(short_question))
+        self.assertTrue(ws._business_master_analytics_intent(screenshot_question))
         self.assertIsNone(ws._client_chat_shortcut(question))
         self.assertIsNone(ws._client_chat_shortcut(short_question))
+        self.assertIsNone(ws._client_chat_shortcut(screenshot_question))
         self.assertFalse(ws._allow_client_chat_shortcuts({"mode": "staff"}, 948205934, question))
 
     def test_founder_master_profit_question_returns_numeric_analytics(self):
