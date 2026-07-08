@@ -194,6 +194,19 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("get_daily_briefing", names)
         self.assertNotIn("salon_action", names)
 
+    def test_missing_surface_keeps_founder_role_tools_for_telegram(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        names = {
+            t["function"]["name"]
+            for t in claude_ai._tools_for_openai("founder", mode=None)
+        }
+
+        self.assertIn("request_booking", names)
+        self.assertIn("get_business_report", names)
+        self.assertIn("get_daily_briefing", names)
+        self.assertIn("salon_action", names)
+
     def test_staff_surface_removes_client_booking_tools_for_founder(self):
         claude_ai, _logs = _load_claude_ai()
 

@@ -2,6 +2,20 @@
 
 from __future__ import annotations
 
+from maya_roles import (
+    ROLE_CLIENT,
+    ROLE_FOUNDER,
+    ROLE_MANAGER,
+    ROLE_MASTER,
+    ROLE_OWNER,
+    ai_role_can_use_staff_surface,
+    normalize_surface,
+    panel_permissions,
+    panel_role_can_use_staff_surface,
+    resolve_ai_role,
+    resolve_panel_role,
+)
+
 
 def _clean(value) -> str:
     return str(value or "").strip()
@@ -65,28 +79,3 @@ def session_tg_user(session: dict | None) -> dict | None:
     })
     return norm
 
-
-def resolve_panel_role(*, tg_id: int | None, is_founder: bool,
-                       is_admin: bool, is_master: bool,
-                       manager_ids: set[int] | None = None) -> str | None:
-    """Роль панели: owner только для founder; остальные админы = manager."""
-    if is_founder:
-        return "owner"
-    if is_admin:
-        return "manager"
-    if tg_id is not None and int(tg_id) in (manager_ids or set()):
-        return "manager"
-    if is_master:
-        return "master"
-    return None
-
-
-def resolve_ai_role(*, is_founder: bool, is_admin: bool, is_master: bool) -> str:
-    """Роль ассистента для chat/voice-потоков."""
-    if is_founder:
-        return "founder"
-    if is_admin:
-        return "manager"
-    if is_master:
-        return "master"
-    return "client"

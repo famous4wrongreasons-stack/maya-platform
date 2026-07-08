@@ -13,6 +13,16 @@ import ai_billing
 import database
 import config as _cfg
 from identity_utils import resolve_ai_role
+from maya_roles import (
+    ROLE_CLIENT,
+    ROLE_FOUNDER,
+    ROLE_MANAGER,
+    ROLE_MASTER,
+    ROLE_OWNER,
+    SURFACE_CLIENT,
+    SURFACE_STAFF,
+    normalize_surface,
+)
 
 PROXY_URL = getattr(_cfg, "PROXY_URL", "")
 OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "")
@@ -704,11 +714,11 @@ _MASTER_TOOLS = _CLIENT_TOOLS | _MASTER_ONLY           # + кабинет мас
 _OWNER_TOOLS = set(_ALL_TOOL_NAMES)                    # владелец видит всё
 
 ROLE_TOOLS = {
-    "client": _CLIENT_TOOLS,
-    "manager": _MANAGER_TOOLS,
-    "master": _MASTER_TOOLS,
-    "owner": _OWNER_TOOLS,
-    "founder": _OWNER_TOOLS,  # отличие основателя — тема, а не инструменты
+    ROLE_CLIENT: _CLIENT_TOOLS,
+    ROLE_MANAGER: _MANAGER_TOOLS,
+    ROLE_MASTER: _MASTER_TOOLS,
+    ROLE_OWNER: _OWNER_TOOLS,
+    ROLE_FOUNDER: _OWNER_TOOLS,  # отличие основателя — тема, а не инструменты
 }
 
 # 🔴 РАЗДЕЛЕНИЕ КАБИНЕТОВ (решение Стаса 2026-07-06): в кабинете СОТРУДНИКА
@@ -731,7 +741,7 @@ _ROLE_MODE_TOOLS_CACHED = {}
 
 def _surface_disabled_tools(mode: str | None) -> set[str]:
     """Tools disabled by the app surface, regardless of user role."""
-    return set(STAFF_DISABLED_TOOLS) if str(mode or "").strip().lower() == "staff" else set()
+    return set(STAFF_DISABLED_TOOLS) if normalize_surface(mode) == SURFACE_STAFF else set()
 
 
 def _effective_disabled_tools(disabled_tools: set[str] | None, mode: str | None) -> set[str]:
@@ -741,7 +751,7 @@ def _effective_disabled_tools(disabled_tools: set[str] | None, mode: str | None)
 def _allowed_tool_names(role: str, mode: str | None = None) -> set[str]:
     # Client surface wins over identity: owner/master opening the client cabinet
     # gets the same assistant as a client, not the director/admin brain.
-    if str(mode or "").strip().lower() == "client":
+    if str(mode or "").strip() and normalize_surface(mode) == SURFACE_CLIENT:
         return set(_CLIENT_TOOLS)
     return set(ROLE_TOOLS.get(role, _CLIENT_TOOLS))
 
@@ -749,11 +759,11 @@ def _allowed_tool_names(role: str, mode: str | None = None) -> set[str]:
 def _resolve_role(user_id) -> str:
     """Серверная роль по user_id (из сессии, не из аргументов модели)."""
     if not user_id:
-        return "client"
+        return ROLE_CLIENT
     try:
         uid = int(user_id)
     except (TypeError, ValueError):
-        return "client"
+        return ROLE_CLIENT
     try:
         return resolve_ai_role(
             is_founder=uid in FOUNDER_IDS,
@@ -761,7 +771,7 @@ def _resolve_role(user_id) -> str:
             is_master=bool(database.get_master_by_chat_id(uid)),
         )
     except Exception:
-        return "client"
+        return ROLE_CLIENT
 
 
 def _tools_for_role(role: str) -> list:

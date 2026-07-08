@@ -33,6 +33,7 @@ from aiohttp import web
 
 import ai_billing
 import anonymizer
+from maya_roles import AI_STAFF_ROLES, SURFACE_STAFF, normalize_surface
 from memory import load_conversations, save_conversations
 from voice_guard import (
     CLARIFY_REPEAT_TEXT,
@@ -371,9 +372,6 @@ def _session_config() -> dict:
     }}
 
 
-_STAFF_ROLES = {"master", "manager", "owner", "founder"}
-
-
 async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                       mode: str = "client") -> None:
     """Главный цикл моста для одного авторизованного пользователя.
@@ -394,7 +392,7 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
     # только в кабинете сотрудника (mode='staff'); в клиентском кабинете — клиентская
     # Майя даже у сотрудника (клиент схем НЕ видит). Роль — серверная проверка сверху:
     # клиент staff-режим не получит, даже если фронт пришлёт mode='staff'.
-    staff_mode = (str(mode or "").lower() == "staff") and (_role in _STAFF_ROLES)
+    staff_mode = normalize_surface(mode) == SURFACE_STAFF and _role in AI_STAFF_ROLES
     logger.info(f"RT session chat={chat_id} role={_role} mode={mode} staff_mode={staff_mode}")
     headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
     # send_lock: сериализует отправку ответов — ровно один говорящий за раз (без гонок).

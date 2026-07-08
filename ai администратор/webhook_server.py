@@ -52,7 +52,7 @@ import memory
 import subscriptions
 import web_auth
 import yukassa_api
-from identity_utils import normalize_tg_user, resolve_panel_role, session_tg_user
+from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
 from config import WEBHOOK_SECRET, WEBHOOK_PORT, TELEGRAM_TOKEN
 from voice_guard import CLARIFY_REPEAT_TEXT, should_clarify_transcript
 from yclients import YClientsAPI
@@ -1996,23 +1996,7 @@ def _panel_resolve_role(tg_id: int) -> dict:
         manager_ids=managers,
     )
 
-    PERMS = {
-        "owner":   {"dashboard": True,  "analytics": True,  "marketing": True,  "jobs": True,
-                    "reviews": True,  "staff": True,  "roles": True,  "pii_export": True,
-                    "master_tools": True,  "redeem": True},
-        "manager": {"dashboard": True,  "analytics": True,  "marketing": True,  "jobs": True,
-                    "reviews": True,  "staff": False, "roles": False, "pii_export": False,
-                    "master_tools": False, "redeem": False},
-        "master":  {"dashboard": False, "analytics": False, "marketing": False, "jobs": False,
-                    "reviews": False, "staff": False, "roles": False, "pii_export": False,
-                    "master_tools": True,  "redeem": is_cashier},
-    }
-    perms = dict(PERMS.get(role, {}))
-    # Владелец/управляющий, который ещё и привязанный мастер → даём инструменты мастера
-    if is_master:
-        perms["master_tools"] = True
-        if is_cashier:
-            perms["redeem"] = True
+    perms = panel_permissions(role, is_master=is_master, is_cashier=is_cashier)
     return {"role": role, "is_cashier": is_cashier, "is_master": is_master,
             "staff_id": staff_id, "master_name": master_name, "permissions": perms,
             "is_founder": is_founder, "is_admin": is_admin}
