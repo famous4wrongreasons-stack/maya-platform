@@ -106,6 +106,40 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(brief["top_action"]["job"], "cycle")
         self.assertIn("оценка", brief["note"].lower())
 
+    def test_command_center_builds_stable_owner_os_contract(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        center = owner_ai.command_center()
+
+        self.assertEqual(center["version"], "owner_command_center_v1")
+        self.assertTrue(center["read_only"])
+        self.assertIn(center["status"], {"ok", "warn", "risk"})
+        self.assertGreater(center["summary"]["money_at_stake_rub"], 0)
+        self.assertEqual(center["summary"]["booked_today"], 2)
+        self.assertEqual(center["summary"]["free_capacity_today"], 14)
+        keys = {section["key"] for section in center["sections"]}
+        self.assertEqual(
+            {"today", "money", "risks", "clients", "services", "actions"},
+            keys,
+        )
+        self.assertTrue(center["next_best_actions"])
+        self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
+        self.assertNotIn("execute", center["next_best_actions"][0])
+
+    def test_command_center_survives_one_block_failure(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        def boom():
+            raise RuntimeError("assets unavailable")
+
+        owner_ai.expiring_assets = boom
+        center = owner_ai.command_center()
+
+        self.assertEqual(center["version"], "owner_command_center_v1")
+        self.assertTrue(center["errors"])
+        self.assertIn("clients", {section["key"] for section in center["sections"]})
+        self.assertIn(center["status"], {"warn", "risk"})
+
     def test_expiring_assets_counts_only_sold_certificates(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
 

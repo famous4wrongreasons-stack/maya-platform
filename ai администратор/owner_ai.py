@@ -12,7 +12,7 @@ claude_ai (_execute_tool проверяет database.is_admin).
 ОЦЕНКА «если сделать», помечена note-полями. Maya обязана подавать это как
 оценку, а не факт (см. промпт «Режим AI-директора»).
 """
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import logging
 import time
 
@@ -381,6 +381,274 @@ def _action_from_opportunity(opp: dict | None) -> dict | None:
         potential_rub=opp.get("potential_rub"),
         priority="high" if (opp.get("potential_rub") or 0) else None,
     )
+
+
+def _severity_rank(value: str | None) -> int:
+    return {"ok": 0, "low": 1, "medium": 2, "warn": 2, "high": 3, "risk": 3}.get(
+        str(value or "").lower(),
+        0,
+    )
+
+
+def _command_status(*values: str | None) -> str:
+    rank = max((_severity_rank(v) for v in values), default=0)
+    if rank >= 3:
+        return "risk"
+    if rank >= 2:
+        return "warn"
+    return "ok"
+
+
+def _fallback_snapshot() -> dict:
+    return {
+        "date": _today(),
+        "booked_today": 0,
+        "working_masters": 0,
+        "idle_masters": [],
+        "underused_masters": [],
+        "masters": [],
+        "avg_check_rub": 0,
+        "expected_revenue_rub": 0,
+        "free_capacity_today": 0,
+        "potential_fill_revenue_rub": 0,
+        "week_trend": None,
+        "note": "Операционная картина временно недоступна.",
+    }
+
+
+def _fallback_assets() -> dict:
+    return {
+        "subscriptions_expiring_7d": 0,
+        "subscriptions_active": 0,
+        "gift_certs_active_count": 0,
+        "gift_certs_active_value_rub": 0,
+        "note": "Активы временно недоступны.",
+    }
+
+
+def _fallback_return_candidates() -> dict:
+    return {
+        "count": None,
+        "avg_check_rub": 0,
+        "action": "reactivation",
+        "action_hint": "",
+        "note": "Кандидаты на возврат временно недоступны.",
+    }
+
+
+def _fallback_services() -> dict:
+    return {
+        "period": {},
+        "previous_period": {},
+        "popular_services": [],
+        "weak_services": [],
+        "note": "Услуги временно недоступны.",
+    }
+
+
+def _safe_owner_block(key: str, fn, fallback):
+    try:
+        return fn(), None
+    except Exception as e:
+        logger.error("owner_ai command_center %s: %s", key, e)
+        return fallback(), {
+            "key": key,
+            "status": "warn",
+            "message": "Не удалось собрать блок %s." % key,
+        }
+
+
+def _money_at_stake(opps: list[dict], risks: list[dict]) -> int:
+    vals = []
+    rows = list(opps or []) or list(risks or [])
+    for row in rows:
+        if isinstance(row, dict) and row.get("potential_rub") is not None:
+            vals.append(_rub(row.get("potential_rub")))
+    return sum(vals)
+
+
+def _dedup_actions(opps: list[dict]) -> list[dict]:
+    actions, seen = [], set()
+    for opp in opps or []:
+        action = _action_from_opportunity(opp)
+        if not action:
+            continue
+        key = action.get("job") or action.get("label") or action.get("title")
+        if key in seen:
+            continue
+        seen.add(key)
+        actions.append(action)
+    return actions[:4]
+
+
+def command_center() -> dict:
+    """Owner Command Center v1: единый read-only контракт Maya OS.
+
+    Собирает уже существующие директорские блоки в стабильную структуру для
+    founder/owner UI и будущего AI-директора. Блоки независимы: сбой одной
+    подсистемы не валит весь центр управления.
+    """
+    snap, snap_err = _safe_owner_block("business_snapshot", business_snapshot, _fallback_snapshot)
+    exp, exp_err = _safe_owner_block("expiring_assets", expiring_assets, _fallback_assets)
+    ret, ret_err = _safe_owner_block("return_candidates", return_candidates, _fallback_return_candidates)
+    svc, svc_err = _safe_owner_block("service_insights", service_insights, _fallback_services)
+
+    errors = [e for e in (snap_err, exp_err, ret_err, svc_err) if e]
+    try:
+        opps = money_opportunities(snap=snap, exp=exp, ret=ret)
+    except Exception as e:
+        logger.error("owner_ai command_center money_opportunities: %s", e)
+        opps = []
+        errors.append({
+            "key": "money_opportunities",
+            "status": "warn",
+            "message": "Не удалось собрать возможности по деньгам.",
+        })
+    try:
+        risk_payload = risk_signals(snap=snap, exp=exp, ret=ret, svc=svc)
+    except Exception as e:
+        logger.error("owner_ai command_center risk_signals: %s", e)
+        risk_payload = {"risks": [], "top_risk": None}
+        errors.append({
+            "key": "risk_signals",
+            "status": "warn",
+            "message": "Не удалось собрать риски.",
+        })
+    risks = risk_payload.get("risks") or []
+    top_risk = risk_payload.get("top_risk")
+    top_risk_status = (top_risk or {}).get("severity")
+    actions = _dedup_actions(opps)
+
+    today_status = _command_status(
+        "warn" if snap.get("free_capacity_today") else "ok",
+        "warn" if snap_err else "ok",
+    )
+    money_status = _command_status(
+        "warn" if opps else "ok",
+        "warn" if errors else "ok",
+    )
+    risk_status = _command_status(top_risk_status, "warn" if errors else "ok")
+    client_status = _command_status(
+        "warn" if ret.get("count") else "ok",
+        "warn" if exp.get("subscriptions_expiring_7d") else "ok",
+        "warn" if ret_err or exp_err else "ok",
+    )
+    service_status = _command_status(
+        "warn" if (svc.get("weak_services") or []) else "ok",
+        "warn" if svc_err else "ok",
+    )
+    overall = _command_status(
+        today_status,
+        money_status,
+        risk_status,
+        client_status,
+        service_status,
+        "warn" if errors else "ok",
+    )
+
+    sections = [
+        {
+            "key": "today",
+            "title": "Сегодня",
+            "status": today_status,
+            "summary": {
+                "booked": _rub(snap.get("booked_today")),
+                "working_masters": _rub(snap.get("working_masters")),
+                "free_capacity_today": _rub(snap.get("free_capacity_today")),
+                "expected_revenue_rub": _rub(snap.get("expected_revenue_rub")),
+                "potential_fill_revenue_rub": _rub(snap.get("potential_fill_revenue_rub")),
+                "idle_masters": snap.get("idle_masters") or [],
+                "underused_masters": snap.get("underused_masters") or [],
+            },
+            "items": snap.get("masters") or [],
+            "note": snap.get("note"),
+        },
+        {
+            "key": "money",
+            "title": "Деньги",
+            "status": money_status,
+            "summary": {
+                "avg_check_rub": _rub(snap.get("avg_check_rub")),
+                "money_at_stake_rub": _money_at_stake(opps, risks),
+                "opportunities_count": len(opps),
+            },
+            "items": opps[:6],
+            "note": "Возможности отсортированы по деньгам на кону; estimate=true — оценка, не факт.",
+        },
+        {
+            "key": "risks",
+            "title": "Риски",
+            "status": risk_status,
+            "summary": {
+                "top_risk": top_risk,
+                "risks_count": len(risks),
+            },
+            "items": risks[:6],
+            "note": risk_payload.get("note"),
+        },
+        {
+            "key": "clients",
+            "title": "Клиенты и активы",
+            "status": client_status,
+            "summary": {
+                "sleeping_clients": ret.get("count"),
+                "sleeping_potential_rub": ret.get("potential_return_revenue_rub"),
+                "subscriptions_expiring_7d": _rub(exp.get("subscriptions_expiring_7d")),
+                "subscriptions_active": _rub(exp.get("subscriptions_active")),
+                "gift_certs_active_count": _rub(exp.get("gift_certs_active_count")),
+                "gift_certs_active_value_rub": _rub(exp.get("gift_certs_active_value_rub")),
+            },
+            "items": [
+                {"key": "return_candidates", "data": ret},
+                {"key": "expiring_assets", "data": exp},
+            ],
+        },
+        {
+            "key": "services",
+            "title": "Услуги",
+            "status": service_status,
+            "summary": {
+                "popular_count": len(svc.get("popular_services") or []),
+                "weak_count": len(svc.get("weak_services") or []),
+            },
+            "items": {
+                "popular_services": svc.get("popular_services") or [],
+                "weak_services": svc.get("weak_services") or [],
+            },
+            "note": svc.get("note"),
+        },
+        {
+            "key": "actions",
+            "title": "Следующие действия",
+            "status": "warn" if actions else "ok",
+            "summary": {"actions_count": len(actions), "read_only": True},
+            "items": actions,
+            "note": "Action-card только предлагает действие. Запуск должен идти отдельным подтверждением владельца.",
+        },
+    ]
+
+    return {
+        "version": "owner_command_center_v1",
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "date": snap.get("date") or _today(),
+        "status": overall,
+        "read_only": True,
+        "summary": {
+            "booked_today": _rub(snap.get("booked_today")),
+            "expected_revenue_rub": _rub(snap.get("expected_revenue_rub")),
+            "avg_check_rub": _rub(snap.get("avg_check_rub")),
+            "free_capacity_today": _rub(snap.get("free_capacity_today")),
+            "money_at_stake_rub": _money_at_stake(opps, risks),
+            "top_priority": opps[0] if opps else None,
+            "top_risk": top_risk,
+            "next_action": actions[0] if actions else None,
+        },
+        "sections": sections,
+        "opportunities": opps,
+        "risks": risks,
+        "next_best_actions": actions,
+        "errors": errors,
+    }
 
 
 def risk_signals(snap: dict = None, exp: dict = None, ret: dict = None,

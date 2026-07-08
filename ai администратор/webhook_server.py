@@ -49,6 +49,7 @@ import database
 import lead_alerts
 import masters_ai
 import memory
+import owner_ai
 import subscriptions
 import web_auth
 import yukassa_api
@@ -2342,6 +2343,33 @@ async def panel_dashboard_handler(request: web.Request) -> web.Response:
                               "metrics": metrics, "timeseries": timeseries,
                               "spend": spend, "tips_by_master": tips_by_master,
                               "channels": channels})
+
+
+async def panel_command_center_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/command_center — Owner Command Center v1 (owner-only)."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Owner Command Center доступен только владельцу.",
+        }, status=403)
+    try:
+        payload = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_command_center error: {e}")
+        return _cabinet_response({
+            "error": "server_error",
+            "message": "Не удалось собрать Owner Command Center.",
+        }, status=500)
+    return _cabinet_response({"role": info["role"], **payload})
 
 
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
@@ -9230,6 +9258,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/me", panel_options_handler)
     web_app.router.add_post("/api/panel/dashboard", panel_dashboard_handler)
     web_app.router.add_options("/api/panel/dashboard", panel_options_handler)
+    web_app.router.add_post("/api/panel/command_center", panel_command_center_handler)
+    web_app.router.add_options("/api/panel/command_center", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)
     web_app.router.add_options("/api/panel/master/overview", panel_options_handler)
     web_app.router.add_post("/api/panel/master/day", panel_master_day_handler)
