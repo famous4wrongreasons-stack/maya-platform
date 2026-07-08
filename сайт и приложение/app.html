@@ -24620,10 +24620,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     window.__panelInfo = body;
     window.__meRole = body.role || null;
     var p = body.permissions || {};
+    var surfaces = Array.isArray(body.allowed_surfaces) ? body.allowed_surfaces : ['client'];
     var isStaffRole = !!(body.role === 'owner' || body.role === 'manager' || body.role === 'master' || body.is_master);
     window.__mePerms = p;
+    window.__meAllowedSurfaces = surfaces;
+    window.__meBrainProfile = body.brain_profile || null;
+    window.__meSurfaceBrainProfiles = body.surface_brain_profiles || {};
     window.__meIsMaster = !!body.is_master;
-    window.__meIsStaff = isStaffRole;
+    window.__meIsStaff = isStaffRole || surfaces.indexOf('staff') >= 0;
     window.__meCanPanel = !!p.dashboard;
     window.__meCanReport = (body.role === 'owner');
     window.__meCanSchedule = !!body.is_master;

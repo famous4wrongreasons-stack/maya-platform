@@ -35,6 +35,14 @@ SURFACES = {
     SURFACE_VOICE,
 }
 
+BRAIN_CLIENT = "client_concierge"
+BRAIN_MASTER = "master_operator"
+BRAIN_ADMIN = "admin_operator"
+BRAIN_OWNER = "owner_director"
+BRAIN_FOUNDER = "founder_director"
+BRAIN_TEAM = "team_operator"
+BRAIN_VOICE = "voice_dynamic"
+
 PANEL_PERMISSION_KEYS = {
     "dashboard",
     "analytics",
@@ -138,3 +146,85 @@ def ai_role_can_use_staff_surface(role: str | None) -> bool:
 def panel_role_can_use_staff_surface(role: str | None, *, is_master: bool = False) -> bool:
     return str(role or "").strip().lower() in PANEL_ROLES or bool(is_master)
 
+
+def allowed_surfaces_for_panel_role(role: str | None, *, is_founder: bool = False,
+                                    is_master: bool = False) -> list[str]:
+    """Stable list of app surfaces available to an authenticated user."""
+    role = str(role or "").strip().lower()
+    surfaces = [SURFACE_CLIENT, SURFACE_VOICE]
+    if panel_role_can_use_staff_surface(role, is_master=is_master):
+        surfaces.extend([SURFACE_STAFF, SURFACE_TEAM])
+    if is_founder or role == ROLE_OWNER:
+        surfaces.extend([SURFACE_OWNER, SURFACE_ADMIN])
+    elif role == ROLE_MANAGER:
+        surfaces.append(SURFACE_ADMIN)
+    if role == ROLE_MASTER or is_master:
+        surfaces.append(SURFACE_MASTER)
+
+    out = []
+    for surface in surfaces:
+        if surface not in out:
+            out.append(surface)
+    return out
+
+
+def brain_profile_for_surface(role: str | None, surface: str | None, *,
+                              is_founder: bool = False,
+                              is_master: bool = False) -> str:
+    """AI brain profile for a role + app surface."""
+    role = str(role or "").strip().lower()
+    surface = normalize_surface(surface)
+    if surface == SURFACE_CLIENT:
+        return BRAIN_CLIENT
+    if surface == SURFACE_VOICE:
+        return BRAIN_VOICE
+    if surface == SURFACE_TEAM:
+        return BRAIN_TEAM
+    if surface == SURFACE_MASTER:
+        return BRAIN_MASTER
+    if surface == SURFACE_ADMIN:
+        return BRAIN_ADMIN
+    if is_founder:
+        return BRAIN_FOUNDER
+    if role == ROLE_OWNER:
+        return BRAIN_OWNER
+    if role == ROLE_MANAGER:
+        return BRAIN_ADMIN
+    if role == ROLE_MASTER or is_master:
+        return BRAIN_MASTER
+    return BRAIN_CLIENT
+
+
+def default_brain_profile(role: str | None, *, is_founder: bool = False,
+                          is_master: bool = False) -> str:
+    """Default staff/client brain for the current identity."""
+    surfaces = allowed_surfaces_for_panel_role(
+        role,
+        is_founder=is_founder,
+        is_master=is_master,
+    )
+    surface = SURFACE_STAFF if SURFACE_STAFF in surfaces else SURFACE_CLIENT
+    return brain_profile_for_surface(
+        role,
+        surface,
+        is_founder=is_founder,
+        is_master=is_master,
+    )
+
+
+def surface_brain_profiles(role: str | None, *, is_founder: bool = False,
+                           is_master: bool = False) -> dict[str, str]:
+    """Brain profile per allowed app surface."""
+    return {
+        surface: brain_profile_for_surface(
+            role,
+            surface,
+            is_founder=is_founder,
+            is_master=is_master,
+        )
+        for surface in allowed_surfaces_for_panel_role(
+            role,
+            is_founder=is_founder,
+            is_master=is_master,
+        )
+    }

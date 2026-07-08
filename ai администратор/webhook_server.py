@@ -53,6 +53,11 @@ import subscriptions
 import web_auth
 import yukassa_api
 from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
+from maya_roles import (
+    allowed_surfaces_for_panel_role,
+    default_brain_profile,
+    surface_brain_profiles,
+)
 from config import WEBHOOK_SECRET, WEBHOOK_PORT, TELEGRAM_TOKEN
 from voice_guard import CLARIFY_REPEAT_TEXT, should_clarify_transcript
 from yclients import YClientsAPI
@@ -2150,6 +2155,21 @@ async def panel_me_handler(request: web.Request) -> web.Response:
         "is_founder": info.get("is_founder", False),  # доступ к GOD-режиму (только Стас)
         "is_admin": info.get("is_admin", False),
         "name": tg_profile.get("display_name", ""),
+        "allowed_surfaces": allowed_surfaces_for_panel_role(
+            info.get("role"),
+            is_founder=bool(info.get("is_founder")),
+            is_master=bool(info.get("is_master")),
+        ),
+        "brain_profile": default_brain_profile(
+            info.get("role"),
+            is_founder=bool(info.get("is_founder")),
+            is_master=bool(info.get("is_master")),
+        ),
+        "surface_brain_profiles": surface_brain_profiles(
+            info.get("role"),
+            is_founder=bool(info.get("is_founder")),
+            is_master=bool(info.get("is_master")),
+        ),
         "my_tips": my_tips,
     })
 
