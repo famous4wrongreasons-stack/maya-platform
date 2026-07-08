@@ -2808,20 +2808,51 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
         logger.error(f"panel job import {job}: {e}")
         return _cabinet_response({"ok": False, "reason": "Задача недоступна."}, status=500)
 
+    action_id = None
+    try:
+        action_id = database.create_owner_action(
+            job,
+            title=str(body.get("title") or label),
+            source=str(body.get("source") or "panel_jobs"),
+            created_by=int(tg_id) if tg_id else None,
+            payload={"label": label, "kind": kind},
+        )
+    except Exception as e:
+        logger.warning(f"panel job journal create {job}: {e}")
+
     app = request.app["bot_app"]
     task = asyncio.create_task(fn(app))
     _panel_bg_tasks.add(task)
     task.add_done_callback(_panel_bg_tasks.discard)
+
+    def _finish_journal(t: asyncio.Task) -> None:
+        if not action_id:
+            return
+        try:
+            summary = t.result()
+            database.finish_owner_action(
+                action_id,
+                "done",
+                summary=summary if isinstance(summary, dict) else {},
+            )
+        except Exception as e:
+            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
+
+    task.add_done_callback(_finish_journal)
+
     # Быстрые задачи вернут результат сразу; долгие (массовые отправки) продолжат в фоне.
     try:
         summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
         return _cabinet_response({"ok": True, "done": True, "job": job, "label": label,
+                                  "action_id": action_id,
                                   "summary": summary if isinstance(summary, dict) else {}})
     except asyncio.TimeoutError:
         return _cabinet_response({"ok": True, "started": True, "running": True,
-                                  "job": job, "label": label})
+                                  "job": job, "label": label, "action_id": action_id})
     except Exception as e:
         logger.error(f"panel job run {job}: {e}")
+        if action_id:
+            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
         return _cabinet_response({"ok": False, "job": job, "reason": "Ошибка при выполнении."}, status=500)
 
 
@@ -2863,13 +2894,39 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
         database.set_setting(dedupe_key, str(now))
     except Exception:
         pass
+    action_id = None
     try:
         mod = __import__(mod_name)
         fn = getattr(mod, fn_name)
         app = request.app["bot_app"]
+        try:
+            action_id = database.create_owner_action(
+                job,
+                title=label,
+                source="chat_action_card",
+                created_by=int(chat_id) if chat_id else None,
+                payload={"label": label},
+            )
+        except Exception as e:
+            logger.warning(f"chat run_job journal create {job}: {e}")
         task = asyncio.create_task(fn(app))
         _panel_bg_tasks.add(task)
         task.add_done_callback(_panel_bg_tasks.discard)
+
+        def _finish_chat_journal(t: asyncio.Task) -> None:
+            if not action_id:
+                return
+            try:
+                summary = t.result()
+                database.finish_owner_action(
+                    action_id,
+                    "done",
+                    summary=summary if isinstance(summary, dict) else {},
+                )
+            except Exception as exc:
+                database.finish_owner_action(action_id, "failed", error=str(exc)[:200])
+
+        task.add_done_callback(_finish_chat_journal)
         audit(True, "started")
         try:
             summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
@@ -2881,6 +2938,11 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
     except Exception as e:
         logger.error(f"chat run_job {job}: {e}")
         audit(False, "run_error")
+        try:
+            if action_id:
+                database.finish_owner_action(action_id, "failed", error=str(e)[:200])
+        except Exception:
+            pass
         reply = "Не получилось запустить задачу — попробуйте из Панели."
     # Ответ Майи — в историю чата приложения.
     try:

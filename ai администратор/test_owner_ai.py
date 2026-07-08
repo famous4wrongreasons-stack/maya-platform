@@ -44,6 +44,17 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
         if key == "reactivation_last" and reactivation_payload is not None
         else default
     )
+    fake_database.list_owner_actions = lambda limit=8: [
+        {
+            "id": 1,
+            "source": "owner_os",
+            "job": "cycle",
+            "title": "Подогреть спрос",
+            "status": "done",
+            "created_at": "2026-07-07T10:00:00",
+            "summary": {"sent": 3},
+        }
+    ][:limit]
 
     fake_yclients = types.ModuleType("yclients")
 
@@ -119,10 +130,11 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "risks", "clients", "services", "actions"},
+            {"today", "money", "risks", "clients", "services", "actions", "journal"},
             keys,
         )
         self.assertTrue(center["next_best_actions"])
+        self.assertEqual(center["journal"][0]["job"], "cycle")
         self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
         self.assertNotIn("execute", center["next_best_actions"][0])
 

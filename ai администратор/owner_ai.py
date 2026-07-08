@@ -518,6 +518,17 @@ def command_center() -> dict:
     top_risk = risk_payload.get("top_risk")
     top_risk_status = (top_risk or {}).get("severity")
     actions = _dedup_actions(opps)
+    journal = []
+    try:
+        import database
+        journal = database.list_owner_actions(limit=8)
+    except Exception as e:
+        logger.error("owner_ai command_center owner_journal: %s", e)
+        errors.append({
+            "key": "owner_journal",
+            "status": "warn",
+            "message": "Не удалось собрать журнал действий.",
+        })
 
     today_status = _command_status(
         "warn" if snap.get("free_capacity_today") else "ok",
@@ -625,6 +636,14 @@ def command_center() -> dict:
             "items": actions,
             "note": "Action-card только предлагает действие. Запуск должен идти отдельным подтверждением владельца.",
         },
+        {
+            "key": "journal",
+            "title": "Журнал AI-директора",
+            "status": "warn" if any((it.get("status") == "failed") for it in journal) else "ok",
+            "summary": {"items_count": len(journal)},
+            "items": journal,
+            "note": "Последние действия владельца и результаты задач.",
+        },
     ]
 
     return {
@@ -647,6 +666,7 @@ def command_center() -> dict:
         "opportunities": opps,
         "risks": risks,
         "next_best_actions": actions,
+        "journal": journal,
         "errors": errors,
     }
 

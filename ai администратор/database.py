@@ -13,6 +13,7 @@
 Бизнес-логика функций при этом не меняется.
 """
 import os
+import json as _json
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, date, timedelta
@@ -581,6 +582,28 @@ def init_db():
                 created_at TEXT    NOT NULL,
                 active     INTEGER NOT NULL DEFAULT 1
             );
+        """)
+        # Журнал действий AI-директора: что MAYA предложила владельцу и что было
+        # запущено вручную. Без ПД: только тип задачи, заголовок, статус и агрегаты.
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS owner_action_journal (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                source        TEXT    NOT NULL DEFAULT 'owner_os',
+                job           TEXT    NOT NULL,
+                title         TEXT,
+                status        TEXT    NOT NULL DEFAULT 'running',
+                created_by    INTEGER,
+                created_at    TEXT    NOT NULL,
+                started_at    TEXT,
+                completed_at  TEXT,
+                payload_json  TEXT,
+                summary_json  TEXT,
+                error         TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
+                ON owner_action_journal (created_at);
+            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
+                ON owner_action_journal (job, created_at);
         """)
         # Миграция: добавляем зашифрованные колонки в clients и gift_certificates
         _migrate_add_encrypted_columns(conn)
@@ -3976,6 +3999,125 @@ def recent_tool_audit(limit: int = 50, only_denied: bool = False) -> list:
             return [dict(r) for r in conn.execute(sql, (int(limit),)).fetchall()]
     except Exception:
         return []
+
+
+# ─── Журнал действий AI-директора / Owner Command Center ────────────────────
+
+def _json_dumps_safe(value) -> str:
+    try:
+        return _json.dumps(value if value is not None else {}, ensure_ascii=False)
+    except Exception:
+        return "{}"
+
+
+def _json_loads_safe(value: str | None):
+    try:
+        return _json.loads(value or "{}")
+    except Exception:
+        return {}
+
+
+def _ensure_owner_action_journal(conn) -> None:
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS owner_action_journal (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            source        TEXT    NOT NULL DEFAULT 'owner_os',
+            job           TEXT    NOT NULL,
+            title         TEXT,
+            status        TEXT    NOT NULL DEFAULT 'running',
+            created_by    INTEGER,
+            created_at    TEXT    NOT NULL,
+            started_at    TEXT,
+            completed_at  TEXT,
+            payload_json  TEXT,
+            summary_json  TEXT,
+            error         TEXT
+        );
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
+            ON owner_action_journal (created_at);
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
+            ON owner_action_journal (job, created_at);
+    """)
+
+
+def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
+                        created_by=None, payload=None, status: str = "running") -> int:
+    """Создаёт запись в журнале AI-директора. ПД не сохраняем."""
+    try:
+        uid = int(created_by) if created_by else None
+    except Exception:
+        uid = None
+    job = (job or "").strip().lower()[:80]
+    title = (title or job or "Действие")[:180]
+    status = (status or "running").strip().lower()[:40]
+    now = _now()
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        cur = conn.execute(
+            "INSERT INTO owner_action_journal "
+            "(source, job, title, status, created_by, created_at, started_at, "
+            "payload_json, summary_json, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                (source or "owner_os")[:60],
+                job,
+                title,
+                status,
+                uid,
+                now,
+                now if status in ("running", "done", "failed") else None,
+                _json_dumps_safe(payload),
+                "{}",
+                "",
+            ),
+        )
+        return int(cur.lastrowid)
+
+
+def finish_owner_action(action_id, status: str, *, summary=None, error: str = "") -> bool:
+    """Завершает запись журнала AI-директора статусом done/failed/running."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return False
+    status = (status or "").strip().lower()[:40] or "done"
+    completed_at = _now() if status in ("done", "failed") else None
+    try:
+        with _db() as conn:
+            _ensure_owner_action_journal(conn)
+            conn.execute(
+                "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
+                "summary_json = ?, error = ? WHERE id = ?",
+                (status, completed_at, _json_dumps_safe(summary), (error or "")[:240], aid),
+            )
+            return True
+    except Exception:
+        return False
+
+
+def list_owner_actions(limit: int = 12) -> list[dict]:
+    """Последние действия AI-директора, новые первыми."""
+    try:
+        with _db() as conn:
+            _ensure_owner_action_journal(conn)
+            rows = conn.execute(
+                "SELECT id, source, job, title, status, created_by, created_at, "
+                "started_at, completed_at, payload_json, summary_json, error "
+                "FROM owner_action_journal ORDER BY id DESC LIMIT ?",
+                (max(1, min(int(limit or 12), 50)),),
+            ).fetchall()
+    except Exception:
+        return []
+    out = []
+    for row in rows:
+        item = dict(row)
+        item["payload"] = _json_loads_safe(item.pop("payload_json", None))
+        item["summary"] = _json_loads_safe(item.pop("summary_json", None))
+        out.append(item)
+    return out
 
 
 # ─── Durable-идемпотентность оплаты визита ───────────────────────────────────

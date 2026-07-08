@@ -15080,6 +15080,7 @@ function AGodMode() {
   var sSu = React.useState(null), su = sSu[0], setSu = sSu[1];
   var sBusy = React.useState(false), busy = sBusy[0], setBusy = sBusy[1];
   var sModal = React.useState(null), modal = sModal[0], setModal = sModal[1];
+  var sAct = React.useState({}), actionS = sAct[0], setActionS = sAct[1];
 
   function gfetch(action, body) {
     var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
@@ -15110,6 +15111,29 @@ function AGodMode() {
   function btn(label, onClick, opts) { opts = opts || {}; return e('div', { onClick: onClick, style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 14px', borderRadius: 999, textAlign: 'center', cursor: 'pointer', border: '1px solid ' + (opts.primary ? 'transparent' : t.line), background: opts.primary ? t.accent : 'transparent', color: opts.primary ? (dark ? '#15140f' : '#fff') : t.dim, opacity: opts.busy ? 0.6 : 1 } }, label); }
   function loadingMsg() { return e('div', { style: { padding: '46px 0', textAlign: 'center', fontFamily: BODY, fontSize: 13, color: t.dim } }, busy ? 'Загружаем…' : 'Нет данных'); }
   function grid2(kids) { return e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 } }, kids); }
+  function runOwnerAction(a) {
+    var job = a && a.job;
+    if (!job) return;
+    setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'running' }; return n; });
+    gfetch('panel_job_run', { job: job, title: a.title || a.label || '', source: 'owner_os' }).then(function (j) {
+      var msg = 'Запущено';
+      if (j && j.done) {
+        var sm = j.summary || {}, bits = [];
+        if (sm.sent != null) bits.push('отправлено ' + sm.sent);
+        if (sm.synced != null) bits.push('обновлено ' + sm.synced);
+        if (sm.granted != null) bits.push('наград ' + sm.granted);
+        if (sm.alerts != null) bits.push('алертов ' + sm.alerts);
+        msg = 'Готово' + (bits.length ? ' · ' + bits.join(' · ') : '');
+      } else if (j && j.started) msg = 'Запущено · выполняется в фоне';
+      else if (j && j.error === 403) msg = 'Недостаточно прав';
+      else if (j && j.reason) msg = j.reason;
+      setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'done', ok: !(j && (j.error || j.ok === false)), msg: msg }; return n; });
+      loadCommand();
+      setTimeout(loadCommand, 1200);
+    }).catch(function () {
+      setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'done', ok: false, msg: 'Не удалось запустить' }; return n; });
+    });
+  }
   function statusText(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' ? 'Риск' : (s === 'warn' || s === 'medium' ? 'Внимание' : 'Норма'); }
   function statusColor(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' || s === 'fail' ? '#d9544e' : (s === 'warn' || s === 'medium' || s === 'soon' ? '#d9a441' : '#5aa86e'); }
   function sectionBy(key) {
@@ -15143,6 +15167,46 @@ function AGodMode() {
           r.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(r.potential_rub)) : null));
     });
   }
+  function renderActionCards(rows) {
+    rows = rows || [];
+    if (!rows.length) return e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.45 } }, 'Действий для подтверждения пока нет.');
+    return rows.slice(0, 4).map(function (a, i) {
+      var job = a.job || a.label || String(i);
+      var st = actionS[job] || {};
+      return e('div', { key: job, style: { padding: '11px 0', borderBottom: i < Math.min(rows.length, 4) - 1 ? '1px solid ' + t.line : 'none' } },
+        e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10 } },
+          e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(a.priority || 'warn'), marginTop: 6, flexShrink: 0 } }),
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, a.title || a.label || 'Действие'),
+            e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, a.reason || a.problem || ''),
+            a.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(a.potential_rub)) : null)),
+        st.phase === 'confirm' ? e('div', { style: { marginTop: 10, padding: '10px 12px', borderRadius: 12, background: dark ? 'rgba(255,255,255,0.045)' : 'rgba(0,0,0,0.035)', border: '1px solid ' + t.line } },
+          e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.35, marginBottom: 10 } }, 'Запустить «' + (a.label || a.title || job) + '»?'),
+          e('div', { style: { display: 'flex', gap: 8 } },
+            e('div', { style: { flex: 1 } }, btn('Запустить', function () { runOwnerAction(a); }, { primary: true })),
+            e('div', { style: { flex: 1 } }, btn('Отмена', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = {}; return n; }); }, {})))) :
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 9 } },
+            e('div', { style: { flex: 1 } }, btn(st.phase === 'running' ? 'Запускаю…' : 'В работу', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'confirm' }; return n; }); }, { busy: st.phase === 'running' })),
+            st.phase === 'done' ? e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 11.5, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.25 } }, st.msg) : null));
+    });
+  }
+  function renderJournal(rows) {
+    rows = rows || [];
+    if (!rows.length) return e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.45 } }, 'Запусков пока нет.');
+    return rows.slice(0, 5).map(function (it, i) {
+      var sm = it.summary || {}, bits = [];
+      if (sm.sent != null) bits.push('отправлено ' + sm.sent);
+      if (sm.synced != null) bits.push('обновлено ' + sm.synced);
+      if (sm.granted != null) bits.push('наград ' + sm.granted);
+      if (sm.alerts != null) bits.push('алертов ' + sm.alerts);
+      var detail = bits.join(' · ') || (it.error || it.source || '');
+      return e('div', { key: it.id || i, style: { display: 'flex', gap: 10, padding: '9px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
+        e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status === 'failed' ? 'risk' : (it.status === 'running' ? 'warn' : 'ok')), marginTop: 5, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink, lineHeight: 1.25 } }, it.title || it.job || 'Действие'),
+          e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, [statusText(it.status), detail].filter(Boolean).join(' · '))));
+    });
+  }
 
   function renderOS() {
     if (!cc) return loadingMsg();
@@ -15152,6 +15216,7 @@ function AGodMode() {
     var today = sectionBy('today') || {}, todaySm = today.summary || {};
     var clients = sectionBy('clients') || {}, clientsSm = clients.summary || {};
     var services = sectionBy('services') || {}, servicesSm = services.summary || {};
+    var journal = cc.journal || [];
     var actions = cc.next_best_actions || [];
     var risks = cc.risks || [];
     return e(React.Fragment, null,
@@ -15175,7 +15240,8 @@ function AGodMode() {
         tinyRow('Истекают абонементы', String(clientsSm.subscriptions_expiring_7d || 0), clientsSm.subscriptions_expiring_7d ? statusColor('warn') : null),
         tinyRow('Просевшие услуги', String(servicesSm.weak_count || 0), servicesSm.weak_count ? statusColor('warn') : null))),
       Card(e('div', null, eyebrow('Риски'), renderOSList(risks, 'Критичных рисков сейчас нет.'))),
-      Card(e('div', null, eyebrow('Следующие действия'), renderOSList(actions, 'Действий для подтверждения пока нет.'))),
+      Card(e('div', null, eyebrow('Следующие действия'), renderActionCards(actions))),
+      Card(e('div', null, eyebrow('Журнал AI-директора'), renderJournal(journal))),
       (cc.errors || []).length ? Card(e('div', null,
         eyebrow('Системные предупреждения'),
         (cc.errors || []).map(function (er, i) {
