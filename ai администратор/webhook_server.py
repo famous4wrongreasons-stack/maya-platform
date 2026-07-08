@@ -5751,6 +5751,13 @@ CLIENT_CHAT_SURFACE_NUDGE = (
     "Если клиент спрашивает «как стричь/техника/схема» — мягко скажи, что в клиентском "
     "чате помогаешь с записью и услугами салона.]"
 )
+STAFF_CHAT_SURFACE_NUDGE = (
+    "\n\n[Это рабочий кабинет MAYA для владельца/персонала. Не отвечай клиентской "
+    "витриной и не подменяй бизнес-вопросы списком команды. Если спрашивают про "
+    "выручку, прибыль, кассу, зарплаты, загрузку, клиентов, эффективность мастеров "
+    "или динамику бизнеса — используй доступные бизнес-инструменты и отвечай цифрами. "
+    "Не раскрывай телефоны/имена клиентов.]"
+)
 
 SALON_FOUNDED_YEAR = "2019"
 _BOOKING_INTENT_RE = re.compile(
@@ -5782,10 +5789,125 @@ _MASTERS_INTENT_RE = re.compile(
     r"топ-мастер|старш(?:ий|ие)|кто\s+лучше)\b",
     re.IGNORECASE,
 )
+_BUSINESS_MASTER_ANALYTICS_RE = re.compile(
+    r"\b(прибыл\w*|выруч\w*|доход\w*|касс\w*|оборот\w*|деньг\w*|"
+    r"заработ\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
+    r"зарплат\w*|марж\w*|средн\w*\s+чек|чек\w*|визит\w*|клиент\w*)\b",
+    re.IGNORECASE,
+)
 _FOUNDED_INTENT_RE = re.compile(
     r"\b(когда\s+основан|год\s+основан|основан|сколько\s+лет|истори[яи]\s+салона)\b",
     re.IGNORECASE,
 )
+
+
+def _chat_request_mode(body: dict | None) -> str:
+    mode = str((body or {}).get("mode") or "").strip().lower()
+    return "staff" if mode == "staff" else "client"
+
+
+def _chat_disabled_tools(mode: str) -> set[str]:
+    # В рабочем кабинете база знаний/аналитика должны быть доступны по RBAC.
+    return set() if mode == "staff" else set(CLIENT_CHAT_DISABLED_TOOLS)
+
+
+def _chat_llm_message(safe_message: str, *, mode: str, voice_mode: bool = False) -> str:
+    content = safe_message or ""
+    content += STAFF_CHAT_SURFACE_NUDGE if mode == "staff" else CLIENT_CHAT_SURFACE_NUDGE
+    if voice_mode:
+        content += _VOICE_STYLE_NUDGE
+    return content
+
+
+def _business_master_analytics_intent(message: str) -> bool:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return False
+    return bool(_MASTERS_INTENT_RE.search(low) and _BUSINESS_MASTER_ANALYTICS_RE.search(low))
+
+
+def _allow_client_chat_shortcuts(body: dict, chat_id: int, message: str) -> bool:
+    if _chat_request_mode(body) == "staff":
+        return False
+    if _business_master_analytics_intent(message):
+        return False
+    return True
+
+
+def _analytics_period_from_text(message: str) -> tuple[str, str | None, str | None]:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if "вчера" in low:
+        return "yesterday", None, None
+    if "прошл" in low and "недел" in low:
+        return "last_week", None, None
+    if "недел" in low:
+        return "week", None, None
+    if "месяц" in low or "июл" in low or "июн" in low or "январ" in low or "феврал" in low:
+        return "month", None, None
+    if "сегодня" in low:
+        return "today", None, None
+    return "last_30", None, None
+
+
+def _rub(value) -> str:
+    try:
+        n = int(round(float(value or 0)))
+    except Exception:
+        n = 0
+    return f"{n:,}".replace(",", " ") + " ₽"
+
+
+def _owner_master_profit_reply(chat_id: int, message: str) -> str | None:
+    """Deterministic answer for owner/manager questions about master revenue/profit."""
+    if not _business_master_analytics_intent(message):
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not (info.get("permissions") or {}).get("analytics"):
+        return None
+    try:
+        import analytics
+        period, date_from, date_to = _analytics_period_from_text(message)
+        frm, to, label = analytics.resolve_period(period, date_from, date_to)
+        summary = analytics.business_summary(frm, to)
+    except Exception as e:
+        logger.error(f"owner master profit shortcut: {e}")
+        return "Не смогла собрать аналитику по мастерам из YClients. Попробуйте ещё раз через минуту."
+
+    masters = [m for m in (summary.get("masters") or []) if isinstance(m, dict)]
+    masters = [m for m in masters if int(m.get("gross") or 0) > 0]
+    if not masters:
+        return f"За период «{label}» в YClients нет проведённых оплат по мастерам."
+
+    by_gross = sorted(masters, key=lambda m: int(m.get("gross") or 0), reverse=True)
+    employees = [m for m in masters if not m.get("is_owner")]
+    by_margin = sorted(
+        employees or masters,
+        key=lambda m: int(m.get("gross") or 0) - int(m.get("salary") or 0),
+        reverse=True,
+    )
+    leader = by_gross[0]
+    margin_leader = by_margin[0]
+
+    def row(m: dict) -> str:
+        margin = int(m.get("gross") or 0) - int(m.get("salary") or 0)
+        return (
+            f"{m.get('name') or 'Мастер'}: выручка {_rub(m.get('gross'))}, "
+            f"ЗП {_rub(m.get('salary'))}, маржа {_rub(margin)}, "
+            f"визитов {int(m.get('visits') or 0)}, средний чек {_rub(m.get('avg_check'))}"
+        )
+
+    top3 = "\n".join(f"{i}. {row(m)}" for i, m in enumerate(by_gross[:3], 1))
+    margin = int(margin_leader.get("gross") or 0) - int(margin_leader.get("salary") or 0)
+    return (
+        f"За период «{label}» лидер по выручке — {leader.get('name') or 'мастер'}.\n\n"
+        f"Топ по выручке:\n{top3}\n\n"
+        f"Если считать прибыль салона по мастеру как выручка минус расчётная ЗП, "
+        f"лидер по марже — {margin_leader.get('name') or 'мастер'}: {_rub(margin)}. "
+        f"Постоянные расходы салона здесь не разнесены по мастерам."
+    )
 
 
 def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
@@ -5815,7 +5937,7 @@ def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
             {"type": "open_cabinet", "label": "Открыть кабинет", "screen": "cabinet"},
         )
 
-    if _MASTERS_INTENT_RE.search(low):
+    if _MASTERS_INTENT_RE.search(low) and not _business_master_analytics_intent(low):
         return (
             "Команда: топ-мастера — Стас Мосин и Илья Третьяков; старшие мастера — "
             "Алексей Дарма, Максим Чурсинов и Александр Киянский. "
@@ -5835,13 +5957,6 @@ def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
         )
 
     return None
-
-
-def _client_llm_message(safe_message: str, voice_mode: bool = False) -> str:
-    content = (safe_message or "") + CLIENT_CHAT_SURFACE_NUDGE
-    if voice_mode:
-        content += _VOICE_STYLE_NUDGE
-    return content
 
 
 def _plain_maya_delta(text: str) -> str:
@@ -6069,6 +6184,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "invalid_json"}, status=400)
 
     message = (body.get("message") or "").strip()
+    chat_mode = _chat_request_mode(body)
 
     # Авторизация: сначала initData (Mini App), затем Login Widget (PWA)
     init_data = request.headers.get("X-Telegram-InitData", "")
@@ -6161,6 +6277,19 @@ async def chat_handler(request: web.Request) -> web.Response:
 
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
+    owner_profit_reply = _owner_master_profit_reply(chat_id, message)
+    if owner_profit_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_profit_reply))
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_profit_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     if transcript and should_clarify_transcript(message, history, _voice_known_master_names()):
         out = {
             "reply": CLARIFY_REPEAT_TEXT,
@@ -6192,7 +6321,7 @@ async def chat_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
-    client_shortcut = _client_chat_shortcut(message)
+    client_shortcut = _client_chat_shortcut(message) if _allow_client_chat_shortcuts(body, chat_id, message) else None
     if client_shortcut:
         direct_text, direct_action = client_shortcut
         safe_message = anonymizer.redact_pii(message)
@@ -6244,7 +6373,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     # знаний (как было с «1-2 фразами»), а стиль для голоса. Транзиентно — в историю не пишем.
     llm_history = history[:-1] + [{
         "role": "user",
-        "content": _client_llm_message(safe_message, voice_mode=voice_mode),
+        "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
     }]
     # Модель голоса: для консультаций и записи клиентов используем максимальную GPT-модель.
     _vmodel = None
@@ -6256,7 +6385,8 @@ async def chat_handler(request: web.Request) -> web.Response:
             llm_history,
             user_id=chat_id,
             model=_vmodel,
-            disabled_tools=CLIENT_CHAT_DISABLED_TOOLS,
+            disabled_tools=_chat_disabled_tools(chat_mode),
+            mode=chat_mode,
         )
     except Exception as e:
         logger.error(f"chat_handler: ошибка AI: {e}")
@@ -6431,6 +6561,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "invalid_json"}, status=400)
 
     message = (body.get("message") or "").strip()
+    chat_mode = _chat_request_mode(body)
 
     # Авторизация — идентична /api/chat
     init_data = request.headers.get("X-Telegram-InitData", "")
@@ -6483,6 +6614,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
+    owner_profit_reply = _owner_master_profit_reply(chat_id, message)
+    if owner_profit_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_profit_reply))
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_profit_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     direct_shop = _direct_shop_action(message)
     if direct_shop:
         direct_text, direct_action = direct_shop
@@ -6498,7 +6642,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
-    client_shortcut = _client_chat_shortcut(message)
+    client_shortcut = _client_chat_shortcut(message) if _allow_client_chat_shortcuts(body, chat_id, message) else None
     if client_shortcut:
         direct_text, direct_action = client_shortcut
         safe_message = anonymizer.redact_pii(message)
@@ -6554,7 +6698,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     voice_model = None
     llm_history = history[:-1] + [{
         "role": "user",
-        "content": _client_llm_message(safe_message, voice_mode=voice_mode),
+        "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
     }]
     if voice_mode:
         from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role
@@ -6626,7 +6770,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 llm_history,
                 user_id=chat_id,
                 model=voice_model,
-                disabled_tools=CLIENT_CHAT_DISABLED_TOOLS,
+                disabled_tools=_chat_disabled_tools(chat_mode),
+                mode=chat_mode,
             ):
                 loop.call_soon_threadsafe(queue.put_nowait, ev)
         except Exception as e:
