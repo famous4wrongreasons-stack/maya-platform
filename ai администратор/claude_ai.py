@@ -725,6 +725,24 @@ STAFF_DISABLED_TOOLS = {
 }
 
 _ROLE_TOOLS_CACHED = {}
+_ROLE_MODE_TOOLS_CACHED = {}
+
+
+def _surface_disabled_tools(mode: str | None) -> set[str]:
+    """Tools disabled by the app surface, regardless of user role."""
+    return set(STAFF_DISABLED_TOOLS) if str(mode or "").strip().lower() == "staff" else set()
+
+
+def _effective_disabled_tools(disabled_tools: set[str] | None, mode: str | None) -> set[str]:
+    return set(disabled_tools or ()) | _surface_disabled_tools(mode)
+
+
+def _allowed_tool_names(role: str, mode: str | None = None) -> set[str]:
+    # Client surface wins over identity: owner/master opening the client cabinet
+    # gets the same assistant as a client, not the director/admin brain.
+    if str(mode or "").strip().lower() == "client":
+        return set(_CLIENT_TOOLS)
+    return set(ROLE_TOOLS.get(role, _CLIENT_TOOLS))
 
 
 def _resolve_role(user_id) -> str:
@@ -758,9 +776,26 @@ def _tools_for_role(role: str) -> list:
     return _ROLE_TOOLS_CACHED[role]
 
 
-def _authorize(role: str, tool_name: str) -> bool:
+def _tools_for_context(role: str, mode: str | None = None) -> list:
+    m = str(mode or "").strip().lower()
+    if not m:
+        return _tools_for_role(role)
+    key = (role, m)
+    if key not in _ROLE_MODE_TOOLS_CACHED:
+        allowed = _allowed_tool_names(role, mode)
+        tools = [t for t in TOOLS if t["name"] in allowed]
+        _ROLE_MODE_TOOLS_CACHED[key] = (
+            tools[:-1] + [{**tools[-1], "cache_control": {"type": "ephemeral"}}]
+            if tools else TOOLS_CACHED
+        )
+    return _ROLE_MODE_TOOLS_CACHED[key]
+
+
+def _authorize(role: str, tool_name: str, mode: str | None = None) -> bool:
     """Второй рубеж: вправе ли роль вызвать инструмент. Детерминированно."""
-    return tool_name in ROLE_TOOLS.get(role, _CLIENT_TOOLS)
+    if tool_name in _surface_disabled_tools(mode):
+        return False
+    return tool_name in _allowed_tool_names(role, mode)
 
 
 # ─── Risk-tiering + human-in-the-loop (HITL) ─────────────────────────────────
@@ -1066,17 +1101,18 @@ def _recheck_requested_slot(
     return {"error": "slot_taken", "message": msg}
 
 
-def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
+def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: str | None = None) -> str:
     """Выполняет вызов инструмента и возвращает результат как строку."""
     logger.info(f"🔧 Вызов инструмента: {tool_name} | Параметры: {tool_input}")
     # RBAC, рубеж 2: даже если инструмент как-то просочился в запрос — режем по роли.
     _role = _resolve_role(user_id)
     _risk = _tool_risk(tool_name)
-    if not _authorize(_role, tool_name):
-        logger.warning(f"⛔ RBAC deny: роль '{_role}' (user {user_id}) → {tool_name}")
-        database.log_tool_call(user_id, _role, tool_name, _risk, False, "rbac")
+    if not _authorize(_role, tool_name, mode):
+        reason = "surface" if tool_name in _surface_disabled_tools(mode) else "rbac"
+        logger.warning(f"⛔ RBAC deny: роль '{_role}' mode='{mode}' (user {user_id}) → {tool_name}")
+        database.log_tool_call(user_id, _role, tool_name, _risk, False, reason)
         return json.dumps(
-            {"error": "Этот инструмент доступен только сотрудникам или владельцу."},
+            {"error": "Этот инструмент недоступен в этом разделе приложения."},
             ensure_ascii=False,
         )
     # HITL: денежные/разрушающие действия не исполняем автономно без подтверждения.
@@ -2172,10 +2208,14 @@ def _content_text(content) -> str:
     return str(content)
 
 
-def _tools_for_openai(role: str, disabled_tools: set[str] | None = None) -> list[dict]:
-    disabled = set(disabled_tools or ())
+def _tools_for_openai(
+    role: str,
+    disabled_tools: set[str] | None = None,
+    mode: str | None = None,
+) -> list[dict]:
+    disabled = _effective_disabled_tools(disabled_tools, mode)
     tools = []
-    for t in _tools_for_role(role):
+    for t in _tools_for_context(role, mode):
         if t.get("name") in disabled:
             continue
         schema = _strip_anthropic_meta(t.get("input_schema") or {
@@ -2193,10 +2233,14 @@ def _tools_for_openai(role: str, disabled_tools: set[str] | None = None) -> list
     return tools
 
 
-def _tools_for_responses(role: str, disabled_tools: set[str] | None = None) -> list[dict]:
-    disabled = set(disabled_tools or ())
+def _tools_for_responses(
+    role: str,
+    disabled_tools: set[str] | None = None,
+    mode: str | None = None,
+) -> list[dict]:
+    disabled = _effective_disabled_tools(disabled_tools, mode)
     tools = []
-    for t in _tools_for_role(role):
+    for t in _tools_for_context(role, mode):
         if t.get("name") in disabled:
             continue
         schema = _strip_anthropic_meta(t.get("input_schema") or {
@@ -2325,10 +2369,11 @@ def _openai_body(
     disabled_tools: set[str] | None = None,
     mode: str | None = None,
 ) -> dict:
+    effective_disabled = _effective_disabled_tools(disabled_tools, mode)
     return {
         "model": model,
         "messages": _to_openai_messages(messages, _build_system_prompt(user_id, role, mode)),
-        "tools": _tools_for_openai(role, disabled_tools),
+        "tools": _tools_for_openai(role, effective_disabled, mode=mode),
         "tool_choice": "auto",
         "max_completion_tokens": max_tokens,
     }
@@ -2343,10 +2388,11 @@ def _responses_body(
     disabled_tools: set[str] | None = None,
     mode: str | None = None,
 ) -> dict:
+    effective_disabled = _effective_disabled_tools(disabled_tools, mode)
     return {
         "model": model,
         "input": _to_responses_input(messages, _build_system_prompt(user_id, role, mode)),
-        "tools": _tools_for_responses(role, disabled_tools),
+        "tools": _tools_for_responses(role, effective_disabled, mode=mode),
         "tool_choice": "auto",
         "max_output_tokens": max(max_tokens, 2048) if _uses_responses_api(model) else max_tokens,
     }
@@ -2466,11 +2512,15 @@ def _get_anthropic_client() -> "anthropic.Anthropic":
     return _anthropic_client
 
 
-def _anthropic_tools(role: str, disabled_tools: set[str] | None = None) -> list[dict]:
+def _anthropic_tools(
+    role: str,
+    disabled_tools: set[str] | None = None,
+    mode: str | None = None,
+) -> list[dict]:
     """Инструменты роли в нативном Anthropic-формате (name/description/input_schema)."""
-    disabled = set(disabled_tools or ())
+    disabled = _effective_disabled_tools(disabled_tools, mode)
     tools = []
-    for t in _tools_for_role(role):
+    for t in _tools_for_context(role, mode):
         if t.get("name") in disabled:
             continue
         tools.append({
@@ -2513,12 +2563,13 @@ def _brain_turn(
     """Один ход мозга (не-стрим). Возвращает (текст, tool_uses).
     Провайдер выбирается по AI_PROVIDER; формат tool-loop одинаковый."""
     if AI_PROVIDER == "claude":
+        effective_disabled = _effective_disabled_tools(disabled_tools, mode)
         resp = _get_anthropic_client().messages.create(
             model=mdl,
             max_tokens=max_tokens,
             system=_build_system_prompt(user_id, role, mode),
             messages=messages,
-            tools=_anthropic_tools(role, disabled_tools),
+            tools=_anthropic_tools(role, effective_disabled, mode=mode),
         )
         ai_billing.log_anthropic_usage("anton_chat", mdl, resp, user_id=user_id)
         return _claude_text(resp.content), _claude_tool_uses(resp.content)
@@ -2630,6 +2681,7 @@ def _run_tool_uses(
     messages: list,
     user_id: int = None,
     disabled_tools: set[str] | None = None,
+    mode: str | None = None,
 ) -> tuple[list, dict | None, dict | None]:
     """Выполняет tool_use-блоки одного хода модели — ЕДИНЫЙ источник правды
     для обычного и стримингового путей (сигналы contact_request /
@@ -2658,7 +2710,7 @@ def _run_tool_uses(
                     past_tool_names.add(name)
 
     tool_results = []
-    disabled = set(disabled_tools or ())
+    disabled = _effective_disabled_tools(disabled_tools, mode)
     for tool_use in tool_uses:
         if tool_use.name in disabled:
             logger.warning("tool disabled for this surface: %s", tool_use.name)
@@ -2693,7 +2745,7 @@ def _run_tool_uses(
             })
             continue
 
-        tool_result_str = _execute_tool(tool_use.name, tool_use.input, user_id)
+        tool_result_str = _execute_tool(tool_use.name, tool_use.input, user_id, mode=mode)
 
         # request_booking готов — передаём backend'у сигнал собрать контакты
         if tool_use.name == "request_booking":
@@ -2792,7 +2844,7 @@ def get_ai_response(
 
         # Модель хочет вызвать инструменты — выполняем их (общий хелпер)
         messages.append({"role": "assistant", "content": _assistant_blocks(response_text, tool_uses)})
-        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools)
+        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools, mode=mode)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
         messages.append({"role": "user", "content": tool_results})
@@ -2835,12 +2887,13 @@ def get_ai_response_stream(
         text_parts = []
         if AI_PROVIDER == "claude":
             final = None
+            effective_disabled = _effective_disabled_tools(disabled_tools, mode)
             with _get_anthropic_client().messages.stream(
                 model=mdl,
                 max_tokens=1024,
                 system=_build_system_prompt(user_id, role, mode),
                 messages=messages,
-                tools=_anthropic_tools(role, disabled_tools),
+                tools=_anthropic_tools(role, effective_disabled, mode=mode),
             ) as stream:
                 for txt in stream.text_stream:
                     txt_plain = txt.replace("*", "")
@@ -2929,7 +2982,7 @@ def get_ai_response_stream(
         yield {"type": "reset"}
 
         messages.append({"role": "assistant", "content": _assistant_blocks(final_text, tool_uses)})
-        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools)
+        tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools, mode=mode)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
         messages.append({"role": "user", "content": tool_results})

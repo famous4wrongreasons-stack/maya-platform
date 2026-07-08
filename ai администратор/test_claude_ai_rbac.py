@@ -102,6 +102,7 @@ def _load_claude_ai():
     sys.modules.pop("claude_ai", None)
     mod = importlib.import_module("claude_ai")
     mod._ROLE_TOOLS_CACHED.clear()
+    mod._ROLE_MODE_TOOLS_CACHED.clear()
     return mod, logs
 
 
@@ -178,6 +179,60 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("input", seen["body"])
         self.assertNotIn("messages", seen["body"])
         self.assertGreaterEqual(seen["body"]["max_output_tokens"], 2048)
+
+    def test_client_surface_limits_founder_to_client_tools(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        names = {
+            t["function"]["name"]
+            for t in claude_ai._tools_for_openai("founder", mode="client")
+        }
+
+        self.assertIn("request_booking", names)
+        self.assertIn("get_my_bookings", names)
+        self.assertNotIn("get_business_report", names)
+        self.assertNotIn("get_daily_briefing", names)
+        self.assertNotIn("salon_action", names)
+
+    def test_staff_surface_removes_client_booking_tools_for_founder(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        names = {
+            t["function"]["name"]
+            for t in claude_ai._tools_for_openai("founder", mode="staff")
+        }
+
+        self.assertIn("get_business_report", names)
+        self.assertIn("get_daily_briefing", names)
+        self.assertIn("salon_action", names)
+        self.assertNotIn("request_booking", names)
+        self.assertNotIn("find_nearest_slots", names)
+        self.assertNotIn("get_my_bookings", names)
+        self.assertNotIn("start_gift_cert_purchase", names)
+        self.assertNotIn("show_subscription_plans", names)
+
+    def test_staff_surface_blocks_booking_tool_even_if_called_directly(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(
+            claude_ai._execute_tool(
+                "request_booking",
+                {
+                    "staff_name": "Стас Мосин",
+                    "service_names": ["Мужская стрижка"],
+                    "datetime_str": "2026-07-08T14:00:00",
+                },
+                user_id=948205934,
+                mode="staff",
+            )
+        )
+
+        self.assertIn("error", result)
+        self.assertTrue(logs)
+        self.assertEqual(logs[-1][1], "founder")
+        self.assertEqual(logs[-1][2], "request_booking")
+        self.assertFalse(logs[-1][4])
+        self.assertEqual(logs[-1][5], "surface")
 
 
 if __name__ == "__main__":
