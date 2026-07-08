@@ -17,9 +17,9 @@ from identity_utils import resolve_ai_role
 PROXY_URL = getattr(_cfg, "PROXY_URL", "")
 OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "")
 OPENAI_BASE_URL = getattr(_cfg, "OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5")
+OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5-pro")
 OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
-OPENAI_TELEGRAM_CHAT_MODEL = getattr(_cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.4")
+OPENAI_TELEGRAM_CHAT_MODEL = getattr(_cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.5-pro")
 CLAUDE_API_KEY = getattr(_cfg, "CLAUDE_API_KEY", "")
 # ── Провайдер мозга MAYA (голос + чат думают ОДНИМ мозгом) ───────────────────
 #   AI_PROVIDER="openai" (по умолчанию) — текущий рабочий тир gpt-5.x.
@@ -34,7 +34,7 @@ AI_PROVIDER = (getattr(_cfg, "AI_PROVIDER", "") or "openai").strip().lower()
 
 _CLAUDE_CHAT_MODEL = getattr(_cfg, "CLAUDE_MODEL", "") or "claude-sonnet-4-5-20250929"
 _CLAUDE_VOICE_MODEL = getattr(_cfg, "CLAUDE_VOICE_MODEL", "") or _CLAUDE_CHAT_MODEL
-_OPENAI_VOICE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", "") or "gpt-5.4"
+_OPENAI_VOICE_MODEL = getattr(_cfg, "OPENAI_VOICE_CHAT_MODEL", "") or "gpt-5.5-pro"
 
 # Имена CLAUDE_MODEL / VOICE_CLAUDE_MODEL сохранены (их импортируют realtime_bridge
 # и др.) — теперь это «модель по умолчанию для мозга», зависящая от провайдера.
@@ -552,6 +552,110 @@ TOOLS = [
             "required": ["rule_id"],
         },
     },
+    # ── AI-директор (owner-only): операционное ядро владельца ────────────────
+    {
+        "name": "get_daily_briefing",
+        "description": (
+            "ТОЛЬКО для владельца. Утренний брифинг директора: что сегодня с "
+            "бизнесом — сколько записей, ожидаемая выручка, кто из мастеров работает "
+            "и кто простаивает, свободная ёмкость дня, динамика недели, и ГЛАВНОЕ — "
+            "приоритетные возможности заработать/не потерять с суммами на кону. "
+            "Вызывай на «что сегодня / что по бизнесу / план на день / с чего начать / "
+            "что мне сделать сегодня / дай сводку». ТОЛЬКО ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_money_opportunities",
+        "description": (
+            "ТОЛЬКО для владельца. Приоритизированный ПО ДЕНЬГАМ список возможностей: "
+            "вернуть уснувших, заполнить пустые окна, погасить сертификаты на руках, "
+            "продлить истекающие абонементы — каждая с суммой на кону и рекомендованным "
+            "действием. Вызывай на «где теряем деньги / что сделать чтобы заработать "
+            "больше / какие приоритеты / что важнее всего». Суммы «потенциальные» — "
+            "оценка. ТОЛЬКО ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_return_candidates",
+        "description": (
+            "ТОЛЬКО для владельца. Сколько уснувших клиентов можно вернуть (28–56 дней "
+            "без визита, с согласием на маркетинг) и потенциал возврата в рублях. "
+            "Действие — существующая рассылка «соскучились» (/reactivation_now). "
+            "Вызывай на «кого вернуть / уснувшие клиенты / кто давно не был». ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_empty_windows",
+        "description": (
+            "ТОЛЬКО для владельца. Загрузка на сегодня: кто из мастеров простаивает "
+            "(0 записей) или недозагружен, сколько свободных окон и потенциальная "
+            "недополученная выручка. Вызывай на «какие окна заполнить / кто простаивает / "
+            "загрузка сегодня / где пусто». Оценка. ТОЛЬКО ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_expiring_assets",
+        "description": (
+            "ТОЛЬКО для владельца. Истекающие/активные активы: абонементы, которые "
+            "истекают в ближайшие 7 дней, и активные сертификаты на руках у клиентов "
+            "(оплаченные, не погашенные) с их суммой. Вызывай на «какие сертификаты/"
+            "абонементы истекают / что скоро сгорит / сколько денег в сертификатах». ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_service_insights",
+        "description": (
+            "ТОЛЬКО для владельца. Какие услуги сейчас тянут выручку, а какие ПРОСЕЛИ "
+            "за текущие 30 дней против предыдущих 30 дней. Вызывай на «какие услуги "
+            "просели / что продаётся лучше / что продвигать / слабые услуги». ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_risk_signals",
+        "description": (
+            "ТОЛЬКО для владельца. Риски бизнеса: падение выручки, простаивающие окна, "
+            "уснувшие клиенты, просевшие услуги, истекающие абонементы. Вызывай на "
+            "«какие риски / что тревожит / где слабое место / где можем потерять деньги». ЧТЕНИЕ."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "salon_action",
+        "description": (
+            "ТОЛЬКО для владельца. Показать owner action-card с подтверждаемым действием "
+            "в чате. Можно вызывать СРАЗУ, когда видишь одно явное следующее действие, "
+            "или когда владелец говорит «давай / запусти / сделай». Задачи: "
+            "reactivation (написать уснувшим «соскучились»), birthday (поздравить "
+            "именинников), cycle (напомнить «пора подстричься»), reviews (запросить отзывы), "
+            "subscriptions (обновить абонементы и отправить продление). Инструмент НЕ "
+            "запускает задачу сам — он только показывает карточку и кнопку подтверждения; "
+            "реальная рассылка/джоба уходит живым клиентам только после нажатия. НЕ вызывай ради проверки."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "task": {
+                    "type": "string",
+                    "enum": ["reactivation", "birthday", "cycle", "reviews", "subscriptions"],
+                    "description": "reactivation=уснувшие, birthday=именинники, cycle=пора подстричься, reviews=запрос отзывов, subscriptions=продление абонементов.",
+                },
+                "title": {"type": "string", "description": "Короткий заголовок карточки для владельца."},
+                "problem": {"type": "string", "description": "Какая проблема или возможность сейчас важна."},
+                "reason": {"type": "string", "description": "Почему это важно именно сейчас."},
+                "potential_rub": {"type": "number", "description": "Потенциал в рублях, если он есть. Это оценка, не факт."},
+                "client_message": {"type": "string", "description": "Пример короткого сообщения клиенту без имён/телефонов."},
+                "priority": {"type": "string", "enum": ["high", "medium", "low"], "description": "Срочность карточки."},
+                "label": {"type": "string", "description": "Текст кнопки подтверждения."},
+            },
+            "required": ["task"],
+        },
+    },
 ]
 
 # Маркер cache_control на последнем инструменте говорит Anthropic кешировать
@@ -582,7 +686,13 @@ _MANAGER_ONLY = {"get_business_report"}
 # База знаний по технике/схемам УБРАНА из мозга Майи (решение Стаса 2026-07-06).
 _MASTER_ONLY = {"get_my_work_records", "get_my_tips", "get_my_stats", "get_client_dossier"}
 # Инструменты роли владельца: procedural-память салона.
-_OWNER_ONLY = {"remember_business_rule", "forget_business_rule"}
+_OWNER_ONLY = {
+    "remember_business_rule", "forget_business_rule",
+    # AI-директор: операционное ядро только владельцу/основателю
+    "get_daily_briefing", "get_money_opportunities", "get_return_candidates",
+    "get_empty_windows", "get_expiring_assets", "get_service_insights",
+    "get_risk_signals", "salon_action",
+}
 _PRIVILEGED = _MASTER_ONLY | _MANAGER_ONLY | _OWNER_ONLY
 
 _ALL_TOOL_NAMES = {t["name"] for t in TOOLS}
@@ -1569,6 +1679,51 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None) -> str:
                 else:
                     result = analytics.business_summary(f_iso, t_iso, include_top=want_top)
                     result["period_label"] = label
+        elif tool_name in (
+            "get_daily_briefing", "get_money_opportunities", "get_return_candidates",
+            "get_empty_windows", "get_expiring_assets", "get_service_insights",
+            "get_risk_signals",
+        ):
+            # AI-директор: только чтение, только владелец/founder.
+            if _role not in ("owner", "founder"):
+                result = {"error": "Операционная сводка директора доступна только владельцу."}
+            else:
+                import owner_ai  # ленивый импорт: отсутствие файла не валит весь мозг
+                if tool_name == "get_daily_briefing":
+                    result = owner_ai.daily_briefing()
+                elif tool_name == "get_money_opportunities":
+                    result = {"opportunities": owner_ai.money_opportunities()}
+                elif tool_name == "get_return_candidates":
+                    result = owner_ai.return_candidates()
+                elif tool_name == "get_empty_windows":
+                    result = owner_ai.business_snapshot()
+                elif tool_name == "get_expiring_assets":
+                    result = owner_ai.expiring_assets()
+                elif tool_name == "get_service_insights":
+                    result = owner_ai.service_insights()
+                else:  # get_risk_signals
+                    result = owner_ai.risk_signals()
+        elif tool_name == "salon_action":
+            # Только ПРЕДЛОЖИТЬ (валидируем задачу) — рассылка НЕ запускается тут.
+            if _role not in ("owner", "founder"):
+                result = {"error": "Запуск салонных задач доступен только владельцу."}
+            else:
+                task = (tool_input.get("task") or "").strip().lower()
+                import owner_ai
+                if task in ("reactivation", "birthday", "cycle", "reviews", "subscriptions"):
+                    payload = owner_ai.owner_action_payload(
+                        task,
+                        title=tool_input.get("title"),
+                        problem=tool_input.get("problem"),
+                        reason=tool_input.get("reason"),
+                        potential_rub=tool_input.get("potential_rub"),
+                        client_message=tool_input.get("client_message"),
+                        priority=tool_input.get("priority"),
+                        label=tool_input.get("label"),
+                    ) or {}
+                    result = {"status": "ready", **payload}
+                else:
+                    result = {"error": "Неизвестная задача."}
         elif tool_name == "barber_knowledge":
             # База знаний по технике — только сотрудникам (мастер/владелец).
             is_staff = bool(user_id and (database.get_master_by_chat_id(int(user_id))
@@ -1872,6 +2027,44 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         except Exception:
             pass
 
+        if role in ("owner", "founder"):
+            blocks.append({
+                "type": "text",
+                "text": (
+                    "## Режим AI-директора — операционное ядро владельца\n"
+                    "Ты не просто отвечаешь на вопросы — ты действуешь как операционный "
+                    "директор салона: видишь бизнес, деньги и риски и предлагаешь "
+                    "КОНКРЕТНЫЕ действия. Когда владелец спрашивает про состояние дел, "
+                    "деньги, приоритеты дня, кого вернуть, где теряем деньги, какие окна "
+                    "заполнить, что скоро истекает — бери данные ИНСТРУМЕНТАМИ и отвечай "
+                    "конкретикой из них, а не общими словами:\n"
+                    "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
+                    "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
+                    "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
+                    "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
+                    "• «что скоро истекает / сертификаты / абонементы» → get_expiring_assets.\n"
+                    "• «какие услуги просели / что продвигать / слабые услуги» → get_service_insights.\n"
+                    "• «какие риски / что тревожит / где слабое место» → get_risk_signals.\n"
+                    "Если после аналитики видишь ОДНО явное следующее действие, можно сразу "
+                    "показать owner action-card через salon_action(task, title, problem, reason, "
+                    "potential_rub, client_message, priority, label) — даже без отдельного "
+                    "«давай», потому что реальный запуск всё равно произойдёт ТОЛЬКО после "
+                    "нажатия владельца. Если действие неочевидно — сначала спроси.\n"
+                    "Когда владелец явно готов действовать («да, давай», «запусти», "
+                    "«сделай», «погнали») — обязательно используй salon_action(...). "
+                    "Задачи: reactivation / birthday / cycle / reviews / subscriptions. "
+                    "Сам задачу не запускай и не говори, что уже отправил.\n"
+                    "Отвечай как директор, а не как отчёт: сначала ГЛАВНОЕ (1-2 приоритета "
+                    "с суммой на кону), затем коротко причина и рекомендованное действие, и "
+                    "предложи это действие запустить («запустить рассылку уснувшим?», "
+                    "«напомнить про сертификаты?»).\n"
+                    "🔴 Деньги честно: средний чек — реальный; всё «потенциальное» (возврат "
+                    "уснувших, продление, пустые окна) — это ОЦЕНКА «если сделать» — так и "
+                    "говори («потенциально ~X ₽», «оценка»), не выдавай за факт. Учитывай "
+                    "поле note из инструмента. Нет данных — скажи прямо, цифры не выдумывай."
+                ),
+            })
+
         # Topic-scope ≠ data-scope: основателю снимаем тематический ограничитель.
         # Доступ к данным/деньгам всё равно режется инструментами и _authorize().
         if role == "founder":
@@ -1999,6 +2192,25 @@ def _tools_for_openai(role: str, disabled_tools: set[str] | None = None) -> list
     return tools
 
 
+def _tools_for_responses(role: str, disabled_tools: set[str] | None = None) -> list[dict]:
+    disabled = set(disabled_tools or ())
+    tools = []
+    for t in _tools_for_role(role):
+        if t.get("name") in disabled:
+            continue
+        schema = _strip_anthropic_meta(t.get("input_schema") or {
+            "type": "object",
+            "properties": {},
+        })
+        tools.append({
+            "type": "function",
+            "name": t["name"],
+            "description": t.get("description", ""),
+            "parameters": schema,
+        })
+    return tools
+
+
 def _to_openai_messages(messages: list, system_blocks: list) -> list[dict]:
     out = [{"role": "system", "content": _system_text(system_blocks)}]
     for msg in messages or []:
@@ -2055,6 +2267,54 @@ def _to_openai_messages(messages: list, system_blocks: list) -> list[dict]:
     return out
 
 
+def _to_responses_input(messages: list, system_blocks: list) -> list[dict]:
+    out = [{"role": "system", "content": _system_text(system_blocks)}]
+    for msg in messages or []:
+        role = msg.get("role", "user")
+        content = msg.get("content")
+        if isinstance(content, str):
+            out.append({"role": role, "content": content})
+            continue
+
+        if isinstance(content, list):
+            text_parts = []
+            pending_items = []
+            for block in content:
+                btype = block.get("type") if isinstance(block, dict) else getattr(block, "type", None)
+                if btype == "text":
+                    text_parts.append(block.get("text", "") if isinstance(block, dict) else getattr(block, "text", ""))
+                elif btype == "tool_use":
+                    tid = block.get("id") if isinstance(block, dict) else getattr(block, "id", "")
+                    name = block.get("name") if isinstance(block, dict) else getattr(block, "name", "")
+                    args = block.get("input") if isinstance(block, dict) else getattr(block, "input", {})
+                    pending_items.append({
+                        "type": "function_call",
+                        "status": "completed",
+                        "call_id": tid or f"call_{len(pending_items)}",
+                        "name": name,
+                        "arguments": json.dumps(args or {}, ensure_ascii=False),
+                    })
+                elif btype == "tool_result":
+                    tid = block.get("tool_use_id") if isinstance(block, dict) else getattr(block, "tool_use_id", "")
+                    pending_items.append({
+                        "type": "function_call_output",
+                        "call_id": tid,
+                        "output": _content_text(block.get("content") if isinstance(block, dict) else getattr(block, "content", "")),
+                    })
+            text = "\n".join(p for p in text_parts if p)
+            if text:
+                out.append({"role": role, "content": text})
+            out.extend(pending_items)
+            continue
+
+        out.append({"role": role, "content": _content_text(content)})
+    return out
+
+
+def _uses_responses_api(model: str | None) -> bool:
+    return bool(model and "-pro" in model)
+
+
 def _openai_body(
     messages: list,
     user_id: int | None,
@@ -2070,6 +2330,24 @@ def _openai_body(
         "tools": _tools_for_openai(role, disabled_tools),
         "tool_choice": "auto",
         "max_completion_tokens": max_tokens,
+    }
+
+
+def _responses_body(
+    messages: list,
+    user_id: int | None,
+    role: str,
+    model: str,
+    max_tokens: int = 1024,
+    disabled_tools: set[str] | None = None,
+    mode: str | None = None,
+) -> dict:
+    return {
+        "model": model,
+        "input": _to_responses_input(messages, _build_system_prompt(user_id, role, mode)),
+        "tools": _tools_for_responses(role, disabled_tools),
+        "tool_choice": "auto",
+        "max_output_tokens": max(max_tokens, 2048) if _uses_responses_api(model) else max_tokens,
     }
 
 
@@ -2104,6 +2382,17 @@ def _chat_completion(body: dict) -> dict:
     return r.json()
 
 
+def _responses_completion(body: dict) -> dict:
+    r = _openai_client.post(
+        f"{OPENAI_BASE_URL}/responses",
+        headers=_openai_headers(),
+        json=body,
+    )
+    if r.status_code >= 400:
+        raise RuntimeError(f"OpenAI Responses API error {r.status_code}: {_error_text(r)}")
+    return r.json()
+
+
 def _stream_chat_completion(body: dict):
     stream_body = {**body, "stream": True, "stream_options": {"include_usage": True}}
     with _openai_client.stream(
@@ -2124,6 +2413,36 @@ def _stream_chat_completion(body: dict):
                 yield json.loads(payload)
             except Exception:
                 continue
+
+
+def _responses_text(data: dict) -> str:
+    parts = []
+    for item in data.get("output") or []:
+        if item.get("type") != "message":
+            continue
+        for block in item.get("content") or []:
+            if block.get("type") == "output_text":
+                parts.append(str(block.get("text") or ""))
+    return "".join(parts).strip()
+
+
+def _responses_tool_uses(data: dict) -> list[_ToolUse]:
+    out = []
+    for item in data.get("output") or []:
+        if item.get("type") != "function_call":
+            continue
+        raw_args = item.get("arguments") or "{}"
+        try:
+            args = json.loads(raw_args)
+        except Exception:
+            args = {}
+        if item.get("name"):
+            out.append(_ToolUse(
+                id=item.get("call_id") or item.get("id") or "",
+                name=item["name"],
+                input=args,
+            ))
+    return out
 
 
 # ─── Anthropic (Claude) — боевой мозг MAYA ──────────────────────────────────
@@ -2202,6 +2521,14 @@ def _brain_turn(
         )
         ai_billing.log_anthropic_usage("anton_chat", mdl, resp, user_id=user_id)
         return _claude_text(resp.content), _claude_tool_uses(resp.content)
+
+    if _uses_responses_api(mdl):
+        data = _responses_completion(_responses_body(
+            messages, user_id, role, mdl,
+            max_tokens=max_tokens, disabled_tools=disabled_tools, mode=mode,
+        ))
+        ai_billing.log_openai_usage("anton_chat", mdl, data, user_id=user_id)
+        return _responses_text(data), _responses_tool_uses(data)
 
     data = _chat_completion(_openai_body(
         messages, user_id, role, mdl,
@@ -2396,6 +2723,13 @@ def _run_tool_uses(
             data = json.loads(tool_result_str)
             if data.get("status") == "ready":
                 gift_cert_action = {"kind": "contact"}
+        # salon_action — владелец готов действовать: показываем карточку с кнопкой
+        # подтверждения (слот gift_cert_action, kind=run_job). Рассылка уходит живым
+        # клиентам ТОЛЬКО после нажатия (webhook получит команду __runjob:<job>).
+        if tool_use.name == "salon_action":
+            data = json.loads(tool_result_str)
+            if data.get("status") == "ready" and data.get("job"):
+                gift_cert_action = {**data, "kind": "run_job"}
 
         tool_results.append({
             "type": "tool_result",
@@ -2515,50 +2849,67 @@ def get_ai_response_stream(
             ai_billing.log_anthropic_usage("anton_chat", mdl, final, user_id=user_id)
             tool_uses = _claude_tool_uses(final.content) if final else []
         else:
-            tool_acc: dict[int, dict] = {}
-            usage = None
-            for chunk in _stream_chat_completion(_openai_body(
-                messages,
-                user_id,
-                role,
-                mdl,
-                disabled_tools=disabled_tools,
-                mode=mode,
-            )):
-                if chunk.get("usage"):
-                    usage = chunk.get("usage")
-                choices = chunk.get("choices") or []
-                if not choices:
-                    continue
-                delta = choices[0].get("delta") or {}
-                txt = delta.get("content")
+            if _uses_responses_api(mdl):
+                data = _responses_completion(_responses_body(
+                    messages,
+                    user_id,
+                    role,
+                    mdl,
+                    disabled_tools=disabled_tools,
+                    mode=mode,
+                ))
+                ai_billing.log_openai_usage("anton_chat", mdl, data, user_id=user_id)
+                txt = _responses_text(data)
                 if txt:
                     txt_plain = txt.replace("*", "")
                     text_parts.append(txt_plain)
                     yield {"type": "delta", "text": txt_plain}
-                for tc in delta.get("tool_calls") or []:
-                    idx = int(tc.get("index", 0) or 0)
-                    acc = tool_acc.setdefault(idx, {"id": "", "name": "", "arguments": ""})
-                    if tc.get("id"):
-                        acc["id"] = tc["id"]
-                    fn = tc.get("function") or {}
-                    if fn.get("name"):
-                        acc["name"] = fn["name"]
-                    if fn.get("arguments"):
-                        acc["arguments"] += fn["arguments"]
+                tool_uses = _responses_tool_uses(data)
+            else:
+                tool_acc: dict[int, dict] = {}
+                usage = None
+                for chunk in _stream_chat_completion(_openai_body(
+                    messages,
+                    user_id,
+                    role,
+                    mdl,
+                    disabled_tools=disabled_tools,
+                    mode=mode,
+                )):
+                    if chunk.get("usage"):
+                        usage = chunk.get("usage")
+                    choices = chunk.get("choices") or []
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    txt = delta.get("content")
+                    if txt:
+                        txt_plain = txt.replace("*", "")
+                        text_parts.append(txt_plain)
+                        yield {"type": "delta", "text": txt_plain}
+                    for tc in delta.get("tool_calls") or []:
+                        idx = int(tc.get("index", 0) or 0)
+                        acc = tool_acc.setdefault(idx, {"id": "", "name": "", "arguments": ""})
+                        if tc.get("id"):
+                            acc["id"] = tc["id"]
+                        fn = tc.get("function") or {}
+                        if fn.get("name"):
+                            acc["name"] = fn["name"]
+                        if fn.get("arguments"):
+                            acc["arguments"] += fn["arguments"]
 
-            ai_billing.log_openai_usage("anton_chat", mdl, {"usage": usage or {}}, user_id=user_id)
+                ai_billing.log_openai_usage("anton_chat", mdl, {"usage": usage or {}}, user_id=user_id)
 
-            tool_uses = []
-            for idx in sorted(tool_acc):
-                acc = tool_acc[idx]
-                if not acc.get("name"):
-                    continue
-                try:
-                    args = json.loads(acc.get("arguments") or "{}")
-                except Exception:
-                    args = {}
-                tool_uses.append(_ToolUse(id=acc.get("id") or f"call_{idx}", name=acc["name"], input=args))
+                tool_uses = []
+                for idx in sorted(tool_acc):
+                    acc = tool_acc[idx]
+                    if not acc.get("name"):
+                        continue
+                    try:
+                        args = json.loads(acc.get("arguments") or "{}")
+                    except Exception:
+                        args = {}
+                    tool_uses.append(_ToolUse(id=acc.get("id") or f"call_{idx}", name=acc["name"], input=args))
 
         final_text = _plain_chat_text("".join(text_parts).strip())
 

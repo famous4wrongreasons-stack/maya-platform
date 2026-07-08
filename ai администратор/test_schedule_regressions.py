@@ -33,6 +33,14 @@ def _load_yclients_module():
 
 
 def _load_claude_module():
+    fake_anthropic = types.ModuleType("anthropic")
+
+    class _DummyAnthropic:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    fake_anthropic.Anthropic = _DummyAnthropic
+
     fake_httpx = types.ModuleType("httpx")
 
     class _DummyClient:
@@ -81,6 +89,7 @@ def _load_claude_module():
     fake_yclients.get_schedule_from_file = lambda *args, **kwargs: []
     fake_yclients.get_day_hours = lambda *args, **kwargs: None
 
+    sys.modules["anthropic"] = fake_anthropic
     sys.modules["httpx"] = fake_httpx
     sys.modules["ai_billing"] = fake_ai_billing
     sys.modules["database"] = fake_database

@@ -3274,6 +3274,24 @@ def claim_loyalty_code(code: str, admin_id: int) -> bool:
         return cur.rowcount > 0
 
 
+def active_sold_gift_certs() -> dict:
+    """Активные ПРОДАННЫЕ сертификаты на руках у клиентов: оплачены, не погашены,
+    срок не вышел, И действительно куплены (есть покупатель или онлайн-оплата).
+    ИСКЛЮЧАЕТ пред-генерённый резерв «на продажу» (buyer_chat_id и yukassa_payment_id
+    оба пустые) — его нельзя считать деньгами на руках у клиентов.
+    Возвращает {count, value_rub}."""
+    now_iso = _now()
+    with _db() as conn:
+        r = conn.execute(
+            "SELECT COUNT(*) AS n, COALESCE(SUM(amount), 0) AS s "
+            "FROM gift_certificates "
+            "WHERE payment_status = 'paid' AND used_at IS NULL AND expires_at > ? "
+            "AND (buyer_chat_id IS NOT NULL OR yukassa_payment_id IS NOT NULL)",
+            (now_iso,),
+        ).fetchone()
+    return {"count": int(r["n"] or 0), "value_rub": int(r["s"] or 0)}
+
+
 def dashboard_metrics(days: int = 30, from_iso: str = None, to_iso: str = None) -> dict:
     """
     Все ключевые цифры для /dashboard за выбранный период.

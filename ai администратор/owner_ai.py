@@ -1,0 +1,552 @@
+"""owner_ai.py — «мозг AI-директора» салона.
+
+ТОЛЬКО ЧТЕНИЕ. Собирает уже существующие подсистемы (analytics,
+database.dashboard_metrics, reactivation, yclients) в операционный брифинг
+владельца и приоритизированный ПО ДЕНЬГАМ список возможностей.
+
+Ничего не меняет: не трогает кассу, записи, рассылки. Гейтится owner-only в
+claude_ai (_execute_tool проверяет database.is_admin).
+
+Денежные величины: средний чек (avg_check) — РЕАЛЬНЫЙ за 30 дней; всё
+«потенциальное» (возврат уснувших, продление абонементов, пустые окна) —
+ОЦЕНКА «если сделать», помечена note-полями. Maya обязана подавать это как
+оценку, а не факт (см. промпт «Режим AI-директора»).
+"""
+from datetime import date, timedelta
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
+# Консервативные допущения для оценки ПОТЕНЦИАЛА (не факт; помечаются в ответах).
+_RETURN_RATE = 0.25          # доля уснувших, что вернётся при персональном касании
+# Грубая ёмкость смены: сколько визитов помещается в рабочий день мастера —
+# для оценки недозагрузки. Реальная длительность услуг разная → это оценка.
+_VISITS_PER_SHIFT = 8
+
+# Кэш среднего чека (30д) на процесс: избегаем повторных тяжёлых выгрузок
+# внутри одного брифинга.
+_avg_cache = {"val": None, "ts": 0.0}
+_AVG_TTL = 600.0
+
+_ACTION_LIBRARY = {
+    "reactivation": {
+        "label": "Запустить рассылку уснувшим",
+        "title": "Вернуть уснувших клиентов",
+        "problem": "Часть клиентов давно не возвращалась и может уйти насовсем.",
+        "reason": "MAYA нашла уснувших клиентов с маркетинг-согласием и готовый повод для касания.",
+        "client_message": (
+            "Здравствуйте! Давно не виделись в «Мужской Эстетике». "
+            "Если хотите, подберу удобное окно и помогу вернуться в график."
+        ),
+        "priority": "high",
+    },
+    "cycle": {
+        "label": "Напомнить тем, кому пора подстричься",
+        "title": "Подогреть спрос на свободные окна",
+        "problem": "На расписании есть свободные окна, которые можно быстро монетизировать.",
+        "reason": "Есть клиенты с привычным циклом визитов, которым уместно напомнить про запись.",
+        "client_message": (
+            "Здравствуйте! Похоже, уже подходит время обновить стрижку. "
+            "Если удобно, подберу ближайшее окно в «Мужской Эстетике»."
+        ),
+        "priority": "medium",
+    },
+    "birthday": {
+        "label": "Запустить поздравления именинников",
+        "title": "Поздравить клиентов с днём рождения",
+        "problem": "Тёплый повод для контакта может пройти мимо и не превратиться в визит.",
+        "reason": "День рождения даёт высокий шанс на возврат без агрессивной продажи.",
+        "client_message": (
+            "С днём рождения! Команда «Мужской Эстетики» поздравляет вас и "
+            "приглашает воспользоваться приятным предложением к визиту."
+        ),
+        "priority": "medium",
+    },
+    "reviews": {
+        "label": "Запросить отзывы после визитов",
+        "title": "Собрать свежие отзывы",
+        "problem": "Свежие довольные клиенты не всегда доходят до отзыва сами.",
+        "reason": "После закрытых визитов уместно попросить короткую обратную связь и усилить рейтинг.",
+        "client_message": (
+            "Спасибо за визит! Если вам всё понравилось, буду благодарна за "
+            "короткий отзыв — это очень помогает «Мужской Эстетике»."
+        ),
+        "priority": "low",
+    },
+    "subscriptions": {
+        "label": "Обновить абонементы и отправить продление",
+        "title": "Подтолкнуть продление абонементов",
+        "problem": "Истекающие абонементы рискуют сгореть без продления и следующего визита.",
+        "reason": "В системе есть активные абонементы, которым уже пора напомнить о продлении.",
+        "client_message": (
+            "Здравствуйте! Напоминаю, что ваш абонемент скоро заканчивается. "
+            "Если хотите, помогу продлить его без паузы между визитами."
+        ),
+        "priority": "medium",
+    },
+}
+_OPPORTUNITY_TO_ACTION = {
+    "return_clients": "reactivation",
+    "empty_windows": "cycle",
+    "expiring_subscriptions": "subscriptions",
+}
+
+
+def _today() -> str:
+    return date.today().isoformat()
+
+
+def _rub(n) -> int:
+    try:
+        return int(round(float(n or 0)))
+    except Exception:
+        return 0
+
+
+def _m(n) -> str:
+    """665000 → «665 000» (разряды тонким пробелом) для человекочитаемых сумм."""
+    return f"{_rub(n):,}".replace(",", " ")
+
+
+def _avg_check_30d() -> int:
+    """Средний чек салона за 30 дней (реальный) — база денежных оценок."""
+    now = time.time()
+    if _avg_cache["val"] is not None and now - _avg_cache["ts"] < _AVG_TTL:
+        return _avg_cache["val"]
+    val = 0
+    try:
+        import analytics
+        f, t, _ = analytics.resolve_period("last_30", None, None)
+        val = _rub(analytics.business_summary(f, t).get("avg_check"))
+    except Exception as e:
+        logger.error(f"owner_ai avg_check: {e}")
+    _avg_cache["val"] = val
+    _avg_cache["ts"] = now
+    return val
+
+
+def _last_30_windows() -> tuple[str, str, str, str]:
+    """Текущее и предыдущее окно 30 дней: (cur_from, cur_to, prev_from, prev_to)."""
+    cur_to = date.today()
+    cur_from = cur_to - timedelta(days=29)
+    prev_to = cur_from - timedelta(days=1)
+    prev_from = prev_to - timedelta(days=29)
+    return (
+        cur_from.isoformat(),
+        cur_to.isoformat(),
+        prev_from.isoformat(),
+        prev_to.isoformat(),
+    )
+
+
+def _week_trend() -> dict | None:
+    """Динамика этой недели против прошлой (выручка/визиты/чек + health)."""
+    try:
+        import analytics
+        f, t, label = analytics.resolve_period("week", None, None)
+        p = analytics.business_pulse(f, t, "week", label)
+        return {
+            "health": p.get("health"),
+            "gross": p["metrics"]["gross"],
+            "visits": p["metrics"]["visits"],
+            "avg_check": p["metrics"]["avg_check"],
+            "anomaly": p.get("anomaly"),
+        }
+    except Exception as e:
+        logger.error(f"owner_ai week_trend: {e}")
+        return None
+
+
+def _today_load() -> dict:
+    """Загрузка на сегодня: кто работает, сколько записей у каждого, кто простаивает."""
+    today = _today()
+    working, recs = [], []
+    try:
+        from yclients import YClientsAPI
+        yc = YClientsAPI()
+        working = [m for m in (yc.get_working_masters(today) or [])
+                   if isinstance(m, dict) and m.get("is_working")]
+        recs = yc.get_company_records(today, today) or []
+    except Exception as e:
+        logger.error(f"owner_ai today_load: {e}")
+
+    by_staff = {}
+    for r in recs:
+        if isinstance(r, dict) and r.get("staff_id") is not None:
+            by_staff[r["staff_id"]] = by_staff.get(r["staff_id"], 0) + 1
+
+    masters, idle, underused = [], [], []
+    for m in working:
+        sid = m.get("id")
+        nm = m.get("name") or f"Мастер #{sid}"
+        cnt = by_staff.get(sid, 0)
+        free = max(0, _VISITS_PER_SHIFT - cnt)
+        masters.append({
+            "staff_id": sid, "name": nm, "records_today": cnt,
+            "free_slots_est": free,
+            "work_start": m.get("work_start", ""), "work_end": m.get("work_end", ""),
+        })
+        if cnt == 0:
+            idle.append(nm)
+        elif free >= 3:
+            underused.append(nm)
+
+    return {
+        "date": today,
+        "booked_today": len(recs),
+        "working_masters": len(working),
+        "idle_masters": idle,            # работают, но 0 записей
+        "underused_masters": underused,  # работают, но много свободных окон
+        "masters": masters,
+    }
+
+
+def business_snapshot() -> dict:
+    """Операционная картина «сегодня»: записи, ожидаемая выручка, загрузка, тренд."""
+    load = _today_load()
+    avg = _avg_check_30d()
+    free_capacity = sum(m["free_slots_est"] for m in load["masters"])
+    return {
+        **load,
+        "avg_check_rub": avg,
+        "expected_revenue_rub": _rub(load["booked_today"] * avg),
+        "free_capacity_today": free_capacity,
+        "potential_fill_revenue_rub": _rub(free_capacity * avg),
+        "week_trend": _week_trend(),
+        "note": ("expected_revenue = записи сегодня × средний чек 30д (оценка); "
+                 "free_slots/ёмкость — грубая оценка по ~%d визитов на смену."
+                 % _VISITS_PER_SHIFT),
+    }
+
+
+def expiring_assets() -> dict:
+    """Истекающие/активные активы: абонементы (7 дней) и сертификаты на руках."""
+    m, certs = {}, {}
+    try:
+        import database
+        m = database.dashboard_metrics(days=30) or {}
+        # Сертификаты — ТОЛЬКО реально проданные (резерв «на продажу» не считаем).
+        certs = database.active_sold_gift_certs() or {}
+    except Exception as e:
+        logger.error(f"owner_ai expiring_assets: {e}")
+    subs = m.get("subscriptions") or {}
+    return {
+        "subscriptions_expiring_7d": _rub(subs.get("expiring_soon")),
+        "subscriptions_active": _rub(subs.get("active")),
+        "gift_certs_active_count": _rub(certs.get("count")),
+        "gift_certs_active_value_rub": _rub(certs.get("value_rub")),
+        "note": ("Абонементы «истекают» — окно 7 дней. Сертификаты — только ПРОДАННЫЕ "
+                 "клиентам, активные на руках (оплачены, не погашены, срок не вышел). "
+                 "Пред-генерённый резерв на продажу сюда НЕ входит."),
+    }
+
+
+def return_candidates() -> dict:
+    """Уснувшие клиенты на возврат — из результата ежедневной реактивации (быстро, без
+    ре-скана базы). Действие — существующая рассылка /reactivation_now."""
+    import json as _json
+    count, at = None, None
+    try:
+        import database
+        raw = database.get_setting("reactivation_last")
+        if raw:
+            d = _json.loads(raw)
+            count = int(d.get("count"))
+            at = d.get("at")
+    except Exception as e:
+        logger.error(f"owner_ai return_candidates: {e}")
+    avg = _avg_check_30d()
+    out = {
+        "avg_check_rub": avg,
+        "action": "reactivation",
+        "action_hint": ("Запустить персональную рассылку «соскучились» уснувшим — "
+                        "команда /reactivation_now (владелец)."),
+    }
+    if count is None:
+        out["count"] = None
+        out["note"] = ("Ещё не считалось (реактивация ещё не запускалась). Ищет уснувших "
+                       "28–56 дней без визита, с согласием на маркетинг. Запусти "
+                       "/reactivation_now — покажу число и разошлю приглашения.")
+    else:
+        out["count"] = count
+        out["as_of"] = at
+        out["potential_return_revenue_rub"] = _rub(count * avg * _RETURN_RATE)
+        out["note"] = ("Уснувшие с маркетинг-согласием (28–56 дней без визита), данные на "
+                       "%s. Потенциал возврата — ОЦЕНКА ~%d%% при персональном касании, не факт."
+                       % (at or "?", int(_RETURN_RATE * 100)))
+    return out
+
+
+def service_insights() -> dict:
+    """Популярные и просевшие услуги за текущие 30 дней против предыдущих 30 дней."""
+    cur_from, cur_to, prev_from, prev_to = _last_30_windows()
+    cur_rows, prev_rows = [], []
+    try:
+        import analytics
+        cur_rows = analytics.top_services(cur_from, cur_to, limit=12) or []
+        prev_rows = analytics.top_services(prev_from, prev_to, limit=12) or []
+    except Exception as e:
+        logger.error(f"owner_ai service_insights: {e}")
+    cur_map = {str(r.get("title") or "").strip(): r for r in cur_rows if isinstance(r, dict)}
+    prev_map = {str(r.get("title") or "").strip(): r for r in prev_rows if isinstance(r, dict)}
+
+    popular = []
+    for row in cur_rows[:5]:
+        title = str(row.get("title") or "").strip()
+        if not title:
+            continue
+        popular.append({
+            "title": title,
+            "count": _rub(row.get("count")),
+            "sum_rub": _rub(row.get("sum")),
+        })
+
+    weak = []
+    titles = set(cur_map) | set(prev_map)
+    for title in titles:
+        if not title:
+            continue
+        cur = cur_map.get(title) or {}
+        prev = prev_map.get(title) or {}
+        cur_sum = _rub(cur.get("sum"))
+        prev_sum = _rub(prev.get("sum"))
+        cur_count = _rub(cur.get("count"))
+        prev_count = _rub(prev.get("count"))
+        if prev_sum <= 0 or cur_sum >= prev_sum:
+            continue
+        weak.append({
+            "title": title,
+            "current_count": cur_count,
+            "previous_count": prev_count,
+            "current_sum_rub": cur_sum,
+            "previous_sum_rub": prev_sum,
+            "delta_sum_rub": cur_sum - prev_sum,
+            "delta_count": cur_count - prev_count,
+        })
+    weak.sort(key=lambda x: x["delta_sum_rub"])
+
+    return {
+        "period": {"from": cur_from, "to": cur_to},
+        "previous_period": {"from": prev_from, "to": prev_to},
+        "popular_services": popular,
+        "weak_services": weak[:5],
+        "note": (
+            "Популярные/просевшие услуги считаются по реально пришедшим визитам "
+            "за 30 дней vs предыдущие 30 дней. Суммы по услугам могут слегка "
+            "расходиться с кассой из-за скидок."
+        ),
+    }
+
+
+def owner_action_payload(task: str, *,
+                         title: str | None = None,
+                         problem: str | None = None,
+                         reason: str | None = None,
+                         potential_rub: int | None = None,
+                         client_message: str | None = None,
+                         priority: str | None = None,
+                         label: str | None = None) -> dict | None:
+    """Пакет для action-card владельца: текст + кнопка подтверждения без автозапуска."""
+    task = (task or "").strip().lower()
+    base = _ACTION_LIBRARY.get(task)
+    if not base:
+        return None
+    out = {
+        "kind": "run_job",
+        "job": task,
+        "label": label or base["label"],
+        "title": title or base["title"],
+        "problem": problem or base["problem"],
+        "reason": reason or base["reason"],
+        "client_message": client_message or base["client_message"],
+        "priority": (priority or base["priority"]).lower(),
+    }
+    if potential_rub is not None:
+        out["potential_rub"] = _rub(potential_rub)
+    return out
+
+
+def _action_from_opportunity(opp: dict | None) -> dict | None:
+    if not isinstance(opp, dict):
+        return None
+    task = _OPPORTUNITY_TO_ACTION.get(str(opp.get("type") or ""))
+    if not task:
+        return None
+    return owner_action_payload(
+        task,
+        title=str(opp.get("title") or "").strip() or None,
+        problem=str(opp.get("title") or "").strip() or None,
+        reason=str(opp.get("detail") or "").strip() or None,
+        potential_rub=opp.get("potential_rub"),
+        priority="high" if (opp.get("potential_rub") or 0) else None,
+    )
+
+
+def risk_signals(snap: dict = None, exp: dict = None, ret: dict = None,
+                 svc: dict = None) -> dict:
+    """Риски бизнеса: падение выручки, пустые окна, уснувшие клиенты, просевшие услуги."""
+    snap = snap or business_snapshot()
+    exp = exp or expiring_assets()
+    ret = ret or return_candidates()
+    svc = svc or service_insights()
+    risks = []
+
+    trend = snap.get("week_trend") or {}
+    gross = trend.get("gross") or {}
+    dgross = gross.get("delta_pct")
+    if dgross is not None and dgross <= -10:
+        risks.append({
+            "type": "revenue_drop",
+            "severity": "high" if dgross <= -20 else "medium",
+            "title": "Выручка ниже прошлой недели",
+            "detail": "Текущая неделя к прошлой: %s%d%% по выручке." % ("+" if dgross >= 0 else "", dgross),
+            "potential_rub": abs(_rub(gross.get("delta"))),
+            "action_hint": "Проверь пустые окна и быстро верни клиентов с тёплым поводом.",
+        })
+
+    if snap.get("free_capacity_today"):
+        risks.append({
+            "type": "idle_capacity",
+            "severity": "high" if snap.get("idle_masters") else "medium",
+            "title": "Сегодня есть незаполненные окна",
+            "detail": "Свободная ёмкость дня ≈%d слотов." % _rub(snap.get("free_capacity_today")),
+            "potential_rub": _rub(snap.get("potential_fill_revenue_rub")),
+            "action_hint": "Подними тёплый спрос: уснувшие + цикл-напоминание + лист ожидания.",
+        })
+
+    if ret.get("count"):
+        risks.append({
+            "type": "sleeping_clients",
+            "severity": "medium",
+            "title": "Клиенты могут окончательно отвалиться",
+            "detail": "%d уснувших клиентов без визита 28–56 дней." % _rub(ret.get("count")),
+            "potential_rub": _rub(ret.get("potential_return_revenue_rub")),
+            "action_hint": ret.get("action_hint"),
+        })
+
+    weak = (svc.get("weak_services") or [])
+    if weak:
+        top = weak[0]
+        risks.append({
+            "type": "weak_service",
+            "severity": "medium",
+            "title": "Просела одна из услуг",
+            "detail": "%s: выручка ниже на ~%s ₽ против прошлых 30 дней." % (
+                top.get("title") or "Услуга",
+                _m(abs(top.get("delta_sum_rub") or 0)),
+            ),
+            "potential_rub": abs(_rub(top.get("delta_sum_rub"))),
+            "action_hint": "Перепроверь, кто обычно берёт эту услугу, и усили допродажу/напоминания.",
+        })
+
+    if exp.get("subscriptions_expiring_7d"):
+        risks.append({
+            "type": "expiring_subscriptions",
+            "severity": "low",
+            "title": "Скоро сгорят абонементы без продления",
+            "detail": "%d абонементов истекают в ближайшие 7 дней." % _rub(exp.get("subscriptions_expiring_7d")),
+            "potential_rub": None,
+            "action_hint": "Запусти обновление абонементов и напоминания о продлении.",
+        })
+
+    risks.sort(key=lambda r: (r.get("potential_rub") is None, -(r.get("potential_rub") or 0)))
+    return {
+        "risks": risks,
+        "top_risk": risks[0] if risks else None,
+        "note": "Риски приоритизированы по деньгам на кону, если оценка доступна.",
+    }
+
+
+def money_opportunities(snap: dict = None, exp: dict = None, ret: dict = None) -> list[dict]:
+    """Приоритизированный ПО ДЕНЬГАМ список возможностей (что сделать, чтобы заработать/
+    не потерять). Принимает предвычисленные snap/exp/ret, чтобы не дёргать API дважды."""
+    snap = snap or business_snapshot()
+    exp = exp or expiring_assets()
+    ret = ret or return_candidates()
+    opps = []
+
+    if ret.get("count"):
+        opps.append({
+            "type": "return_clients",
+            "title": "Вернуть уснувших клиентов",
+            "detail": "%d клиентов не были 28–56 дней (на %s)." % (ret["count"], ret.get("as_of") or "?"),
+            "potential_rub": ret.get("potential_return_revenue_rub", 0),
+            "estimate": True,
+            "action": "reactivation",
+            "action_hint": ret.get("action_hint"),
+        })
+
+    if snap.get("free_capacity_today"):
+        who = ", ".join((snap.get("idle_masters") or []) + (snap.get("underused_masters") or [])) or "мастера с окнами"
+        opps.append({
+            "type": "empty_windows",
+            "title": "Заполнить пустые окна сегодня",
+            "detail": "≈%d свободных слотов сегодня (%s)." % (snap["free_capacity_today"], who),
+            "potential_rub": snap.get("potential_fill_revenue_rub", 0),
+            "estimate": True,
+            "action": "fill_slots",
+            "action_hint": "Предложить запись клиентам из листа ожидания и уснувшим — на сегодня.",
+        })
+
+    if exp.get("gift_certs_active_value_rub"):
+        opps.append({
+            "type": "unredeemed_certs",
+            "title": "Пригласить погасить сертификаты",
+            "detail": "%d активных сертификатов на руках у клиентов, сумма ~%s ₽." % (
+                exp["gift_certs_active_count"], _m(exp["gift_certs_active_value_rub"])),
+            "potential_rub": exp["gift_certs_active_value_rub"],
+            "estimate": False,   # это уже оплаченные деньги (face value)
+            "action": "cert_nudge",
+            "action_hint": "Напомнить владельцам сертификатов записаться — оплаченные деньги, приведут людей в кресло.",
+        })
+
+    if exp.get("subscriptions_expiring_7d"):
+        opps.append({
+            "type": "expiring_subscriptions",
+            "title": "Продлить истекающие абонементы",
+            "detail": "%d абонементов истекают в ближайшие 7 дней." % exp["subscriptions_expiring_7d"],
+            "potential_rub": None,   # цена абонемента варьируется — не выдумываем сумму
+            "estimate": True,
+            "action": "renew_reminder",
+            "action_hint": "Истекающим уходит авто-напоминание о продлении; можно усилить личным сообщением.",
+        })
+
+    # Ранжируем по деньгам на кону (None → в конец).
+    opps.sort(key=lambda o: (o.get("potential_rub") is None, -(o.get("potential_rub") or 0)))
+    return opps
+
+
+def daily_briefing() -> dict:
+    """Утренний брифинг директора: что сегодня + приоритеты с суммами на кону.
+    Считает snap/exp/ret по одному разу и переиспользует."""
+    snap = business_snapshot()
+    exp = expiring_assets()
+    ret = return_candidates()
+    svc = service_insights()
+    opps = money_opportunities(snap=snap, exp=exp, ret=ret)
+    risks = risk_signals(snap=snap, exp=exp, ret=ret, svc=svc)
+    top_action = None
+    for opp in opps:
+        top_action = _action_from_opportunity(opp)
+        if top_action:
+            break
+    return {
+        "date": snap["date"],
+        "today": {
+            "booked": snap["booked_today"],
+            "expected_revenue_rub": snap["expected_revenue_rub"],
+            "avg_check_rub": snap["avg_check_rub"],
+            "working_masters": snap["working_masters"],
+            "idle_masters": snap["idle_masters"],
+            "underused_masters": snap["underused_masters"],
+            "free_capacity_today": snap["free_capacity_today"],
+        },
+        "week_trend": snap["week_trend"],
+        "opportunities": opps,
+        "top_priority": opps[0] if opps else None,
+        "risks": risks["risks"],
+        "top_risk": risks.get("top_risk"),
+        "top_action": top_action,
+        "note": snap["note"],
+    }

@@ -9,7 +9,7 @@
 календарном месяце он превышен — handle_photo откажет с понятным
 сообщением, а основная запись через MAYA при этом продолжает работать.
 
-Цены актуальны на 2026-05-27. Меняются — правим тут.
+Цены актуальны на 2026-07-08. Меняются — правим тут.
 """
 from __future__ import annotations
 
@@ -56,6 +56,14 @@ MODEL_PRICES: dict[str, dict[str, float]] = {
         "cache_read": 0.50,
         "cache_write": 5.00,
         "output": 30.00,
+    },
+    "gpt-5.5-pro": {
+        # OpenAI API pricing: Pro не даёт cached-input discount, поэтому cached
+        # tokens считаем как обычный input, если они когда-нибудь придут в usage.
+        "input": 30.00,
+        "cache_read": 30.00,
+        "cache_write": 30.00,
+        "output": 180.00,
     },
     "gpt-5.4": {
         "input": 2.50,

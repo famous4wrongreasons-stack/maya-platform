@@ -174,6 +174,16 @@ async def run_reactivation_job(app: Application) -> dict:
     sent, blocked, errors = 0, 0, 0
 
     logger.info(f"🔄 Реактивация: найдено {len(candidates)} уснувших клиентов")
+    # AI-директор (owner_ai.return_candidates) читает это число мгновенно, без ре-скана
+    # базы, чтобы показать владельцу в брифинге «кого вернуть» с потенциалом в рублях.
+    try:
+        import json as _json
+        database.set_setting("reactivation_last", _json.dumps({
+            "count": len(candidates),
+            "at": date.today().isoformat(),
+        }))
+    except Exception as _e:
+        logger.error(f"reactivation persist count: {_e}")
 
     for c in candidates:
         # Персональные настройки: «давно не были» относится к семейству 'cycle' —

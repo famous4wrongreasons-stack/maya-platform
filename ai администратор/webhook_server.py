@@ -2793,6 +2793,76 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"ok": False, "job": job, "reason": "Ошибка при выполнении."}, status=500)
 
 
+async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str) -> web.Response:
+    """Запуск салонной задачи по подтверждению из чата AI-директора (нажата кнопка
+    карточки → фронт прислал __runjob:<job>). Детерминированно, БЕЗ LLM. Только
+    владелец/founder; те же задачи и исполнитель, что в /api/panel/job/run."""
+    from memory import load_conversations, save_conversations
+    job = (job or "").strip().lower()
+    spec = _PANEL_JOBS.get(job)
+    info = _panel_resolve_role(int(chat_id)) if chat_id else {"permissions": {}}
+    role = info.get("role") or ""
+
+    def audit(allowed: bool, reason: str = "") -> None:
+        try:
+            database.log_tool_call(chat_id, role, f"run_job:{job or '?'}", "write", allowed, reason)
+        except Exception:
+            pass
+
+    if not spec:
+        audit(False, "unknown_job")
+        return _cabinet_response({"reply": "Не нашла такую задачу. Откройте Панель и запустите вручную."})
+    if role != "owner":
+        audit(False, "owner_only")
+        return _cabinet_response({"reply": "Эта задача доступна только владельцу."})
+    mod_name, fn_name, label, _kind = spec
+    # Защита от двойного тапа/повторной отправки action-card: тот же job не
+    # запускается повторно из чата чаще одного раза в минуту.
+    dedupe_key = f"owner_chat_job_last:{int(chat_id)}:{job}"
+    try:
+        last = float(database.get_setting(dedupe_key) or 0)
+    except Exception:
+        last = 0.0
+    now = time.time()
+    if last and now - last < 60:
+        audit(False, "duplicate_60s")
+        return _cabinet_response({"reply": f"«{label}» уже запущена. Дайте ей минуту, чтобы не отправить дубли."})
+    try:
+        database.set_setting(dedupe_key, str(now))
+    except Exception:
+        pass
+    try:
+        mod = __import__(mod_name)
+        fn = getattr(mod, fn_name)
+        app = request.app["bot_app"]
+        task = asyncio.create_task(fn(app))
+        _panel_bg_tasks.add(task)
+        task.add_done_callback(_panel_bg_tasks.discard)
+        audit(True, "started")
+        try:
+            summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
+            sent = summary.get("sent") if isinstance(summary, dict) else None
+            reply = (f"Готово — запустила «{label}»."
+                     + (f" Отправлено сообщений: {sent}." if sent is not None else " Выполняется."))
+        except asyncio.TimeoutError:
+            reply = f"Запустила «{label}» — рассылка идёт в фоне, дойдёт до всех за пару минут."
+    except Exception as e:
+        logger.error(f"chat run_job {job}: {e}")
+        audit(False, "run_error")
+        reply = "Не получилось запустить задачу — попробуйте из Панели."
+    # Ответ Майи — в историю чата приложения.
+    try:
+        convs = load_conversations()
+        h = list(convs.get(chat_id) or [])
+        h.append({"role": "user", "content": label})
+        h.append({"role": "assistant", "content": reply})
+        convs[chat_id] = h[-30:]
+        save_conversations(convs)
+    except Exception:
+        pass
+    return _cabinet_response({"reply": reply})
+
+
 async def panel_reviews_handler(request: web.Request) -> web.Response:
     """POST /api/panel/reviews — сводка + последние отзывы (owner/manager)."""
     try:
@@ -5851,8 +5921,26 @@ def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
         if role == "user":
             messages.append({"id": offset + i, "role": "user", "text": text})
         elif role == "assistant":
-            messages.append({"id": offset + i, "role": "bot", "text": text})
+            msg = {"id": offset + i, "role": "bot", "text": text}
+            if item.get("link"):
+                msg["link"] = item.get("link")
+            if isinstance(item.get("action"), dict):
+                msg["action"] = item.get("action")
+            if isinstance(item.get("images"), list):
+                msg["images"] = item.get("images")
+            messages.append(msg)
     return messages
+
+
+def _assistant_history_item(text: str, *, link=None, action=None, images=None) -> dict:
+    item = {"role": "assistant", "content": _plain_maya_text(text or "")}
+    if link:
+        item["link"] = link
+    if isinstance(action, dict):
+        item["action"] = action
+    if isinstance(images, list) and images:
+        item["images"] = images
+    return item
 
 
 async def chat_history_handler(request: web.Request) -> web.Response:
@@ -6062,6 +6150,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     if len(message) > 2000:
         message = message[:2000]
 
+    # Карточка-действие директора: владелец нажал кнопку подтверждения — фронт шлёт
+    # детерминированную команду __runjob:<job>. Запускаем задачу БЕЗ LLM (только владелец).
+    if message.startswith("__runjob:"):
+        return await _run_owner_job_from_chat(request, chat_id, message.split(":", 1)[1].strip().lower())
+
     master_reply = _master_chat_shortcut(chat_id, message)
     if master_reply:
         return _cabinet_response({"reply": master_reply})
@@ -6089,7 +6182,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = direct_shop
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append({"role": "assistant", "content": direct_text})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
         conversations[chat_id] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
@@ -6104,7 +6197,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = client_shortcut
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append({"role": "assistant", "content": direct_text})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
         conversations[chat_id] = history[-30:]
         save_conversations(conversations)
         out = {
@@ -6129,7 +6222,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     if deterministic_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append({"role": "assistant", "content": deterministic_reply})
+        history.append(_assistant_history_item(deterministic_reply))
         conversations[chat_id] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
@@ -6198,6 +6291,19 @@ async def chat_handler(request: web.Request) -> web.Response:
             # всякий случай НЕ превращаем сигнал в (ошибочное) действие с
             # сертификатом — оставляем текст Антона как есть.
             pass
+        elif gift_cert_action.get("kind") == "run_job":
+            # AI-директор предложил запустить рассылку — отдаём карточку с кнопкой.
+            # Нажатие пришлёт __runjob:<job>, и задача запустится (см. _run_owner_job_from_chat).
+            _job = gift_cert_action.get("job")
+            cert_action = {
+                "type": "run_job",
+                "job": _job,
+                "label": gift_cert_action.get("label") or "Запустить рассылку",
+                "confirm": "__runjob:" + str(_job),
+            }
+            for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
+                if gift_cert_action.get(key) is not None:
+                    cert_action[key] = gift_cert_action.get(key)
         else:
             amt = gift_cert_action.get("amount")
             response_text = (
@@ -6211,7 +6317,7 @@ async def chat_handler(request: web.Request) -> web.Response:
 
     response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
     knowledge_images = _chat_knowledge_images(chat_id, message, (body.get("mode") or "").lower())
-    history.append({"role": "assistant", "content": response_text})
+    history.append(_assistant_history_item(response_text, link=reply_link, action=cert_action, images=knowledge_images))
     conversations[chat_id] = history
     save_conversations(conversations)
 
@@ -6382,7 +6488,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = direct_shop
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append({"role": "assistant", "content": direct_text})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
         conversations[chat_id] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
@@ -6397,7 +6503,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = client_shortcut
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append({"role": "assistant", "content": direct_text})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
         conversations[chat_id] = history[-30:]
         save_conversations(conversations)
         out = {
@@ -6422,7 +6528,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if deterministic_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append({"role": "assistant", "content": deterministic_reply})
+        history.append(_assistant_history_item(deterministic_reply))
         conversations[chat_id] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
@@ -6661,6 +6767,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             # всякий случай НЕ превращаем сигнал в (ошибочное) действие с
             # сертификатом — оставляем текст Антона как есть.
             pass
+        elif gift_cert_action.get("kind") == "run_job":
+            # AI-директор предложил запустить рассылку — отдаём карточку с кнопкой.
+            # Нажатие пришлёт __runjob:<job>, и задача запустится (см. _run_owner_job_from_chat).
+            _job = gift_cert_action.get("job")
+            cert_action = {
+                "type": "run_job",
+                "job": _job,
+                "label": gift_cert_action.get("label") or "Запустить рассылку",
+                "confirm": "__runjob:" + str(_job),
+            }
+            for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
+                if gift_cert_action.get(key) is not None:
+                    cert_action[key] = gift_cert_action.get(key)
         else:
             amt = gift_cert_action.get("amount")
             response_text = (
@@ -6674,7 +6793,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
     knowledge_images = _chat_knowledge_images(chat_id, message, (body.get("mode") or "").lower())
-    history.append({"role": "assistant", "content": response_text})
+    history.append(_assistant_history_item(response_text, action=cert_action, images=knowledge_images))
     conversations[chat_id] = history
     save_conversations(conversations)
 
@@ -7278,6 +7397,11 @@ async def analyze_face_handler(request: web.Request) -> web.Response:
     """POST /api/analyze-face — ИИ-анализ лица (анфас+профиль) + подбор стрижек.
     Требует авторизации (как чат): initData / auth_data / session_token.
     Лимит CUTMATCH_DAILY_LIMIT консультаций в день на пользователя."""
+    if not cutmatch.is_enabled():
+        return cutmatch._resp(
+            {"error": "disabled", "message": "CutMatch временно отключён."},
+            status=404,
+        )
     try:
         body = await request.json()
     except Exception:

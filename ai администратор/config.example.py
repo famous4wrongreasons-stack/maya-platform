@@ -49,14 +49,24 @@ PROXY_URL = _opt("PROXY_URL", "")
 # ── OpenAI — основной мозг MAYA/Telegram-бота ───────────────────────────────
 OPENAI_API_KEY = _req("OPENAI_API_KEY")
 OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
-OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
+OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5-pro")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
-# Голос клиентов: быстрый средний тир (латентность важнее максимальности на
-# задаче записи). Владелец в голосе идёт на флагман (маршрутизация по роли).
-OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", "gpt-5.4")
+OPENAI_TELEGRAM_CHAT_MODEL = _opt("OPENAI_TELEGRAM_CHAT_MODEL", OPENAI_CHAT_MODEL)
+# Голос временно может быть отключён, но при включении должен думать тем же
+# сильным мозгом, что и основной клиентский чат.
+OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
 REALTIME_VAD_EAGERNESS = _opt("REALTIME_VAD_EAGERNESS", "medium")
 
+# ── AI-стилист / CutMatch ────────────────────────────────────────────────────
+# Fail-closed: без явного включения HTTP-handlers CutMatch отвечают disabled,
+# даже если route случайно вернули. Перед включением нужны consent/retention
+# policy и юридическая проверка обработки фото.
+CUTMATCH_ENABLED = _opt("CUTMATCH_ENABLED", "False").lower() in ("1", "true", "yes", "on", "y", "да")
+
 # ── Голос MAYA: OpenAI TTS по умолчанию, Yandex SpeechKit как внешний TTS ─────
+# Единый рубильник ОЗВУЧКИ ответов MAYA (голос) для ВСЕХ поверхностей: орб
+# (realtime), голосовые сообщения в чате и Telegram-бот. False → Майя отвечает
+# ТЕКСТОМ везде; запись голоса (STT-ввод) при этом продолжает работать.
 VOICE_REPLIES_ENABLED = _opt("VOICE_REPLIES_ENABLED", "False").lower() in ("1", "true", "yes", "on", "y", "да")
 VOICE_TTS_PROVIDER = _opt("VOICE_TTS_PROVIDER", "openai")  # "openai" | "yandex"
 VOICE_TTS_FALLBACK_OPENAI = _opt("VOICE_TTS_FALLBACK_OPENAI", "False").lower() in ("1", "true", "yes", "on", "y", "да")
@@ -189,5 +199,5 @@ WEBHOOK_BIND = _opt("WEBHOOK_BIND", "0.0.0.0")
 # ── AI-советы мастерам ────────────────────────────────────────────────────────
 MASTERS_AI_PROVIDER = "openai"              # "claude" | "openai"
 MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # legacy/fallback
-MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", "gpt-5.4")
+MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", OPENAI_CHAT_MODEL)
 MASTERS_AI_TIMEOUT = 5.0

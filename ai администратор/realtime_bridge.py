@@ -425,6 +425,15 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                     в момент отправки (а не по приходу response.created, который идёт с
                     сетевым round-trip’ом) — два response.create физически не уйдут в
                     OpenAI внахлёст, и голос не задвоится."""
+                    # Голосовые ответы MAYA выключены глобально
+                    # (config.VOICE_REPLIES_ENABLED=False) → орб НЕ озвучивает:
+                    # текст ответа уже ушёл клиенту через reply_text, орб остаётся
+                    # в «Слушаю…», запись голоса (STT-ввод) работает как обычно.
+                    # Это делает VOICE_REPLIES_ENABLED единым рубильником озвучки
+                    # для всех поверхностей (орб + чат-голосовые + Telegram-бот).
+                    import voice as _v
+                    if not _v.is_enabled():
+                        return
                     safe = (text or "").strip()
                     if not safe:
                         return

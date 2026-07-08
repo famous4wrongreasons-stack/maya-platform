@@ -57,7 +57,7 @@ from identity_utils import normalize_tg_user
 from config import (
     TELEGRAM_TOKEN, PROXY_URL, REMINDER_MINUTES_BEFORE, BARBERSHOP_NAME,
     SITE_URL, APP_URL, INITIAL_ADMIN_IDS, BOT_USERNAME,
-    PII_RETENTION_MONTHS,
+    PII_RETENTION_MONTHS, FOUNDER_IDS,
 )
 from claude_ai import get_ai_response
 from memory import (
@@ -1556,6 +1556,7 @@ ADMIN_JOBS_KB = InlineKeyboardMarkup([
     [InlineKeyboardButton("💤 Реактивация уснувших", callback_data="admin_run_react")],
     [InlineKeyboardButton("🎂 ДР-промокоды", callback_data="admin_run_birthday")],
     [InlineKeyboardButton("🔁 Цикл-напоминания", callback_data="admin_run_cycle")],
+    [InlineKeyboardButton("⭐ Запрос отзывов", callback_data="admin_run_reviews")],
     [InlineKeyboardButton("🎟 Sync абонементов", callback_data="admin_run_sub_now")],
     [InlineKeyboardButton("🪙 Начисление баллов", callback_data="admin_run_loy_now")],
     [InlineKeyboardButton("📨 Резолвер рефералов", callback_data="admin_run_ref_now")],
@@ -1668,6 +1669,7 @@ async def _admin_dispatch(context: ContextTypes.DEFAULT_TYPE, query, data: str):
         "admin_run_react":        cmd_reactivation_now,
         "admin_run_birthday":     cmd_birthday_now,
         "admin_run_cycle":        cmd_cycle_now,
+        "admin_run_reviews":      cmd_reviews_now,
         "admin_run_sub_now":      cmd_subscriptions_now,
         "admin_run_loy_now":      cmd_loyalty_now,
         "admin_run_ref_now":      cmd_referral_now,
@@ -3915,6 +3917,23 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
             # MAYA попросила узнать клиента — показываем защищённую кнопку
             # «Поделиться контактом» вместо отправки к администратору.
             await _request_contact_share(context, chat_id)
+        elif gift_cert_action.get("kind") == "run_job":
+            cb = _owner_job_callback(gift_cert_action.get("job"))
+            rows = []
+            if cb:
+                rows.append([InlineKeyboardButton(
+                    gift_cert_action.get("label") or "Запустить",
+                    callback_data=cb,
+                )])
+            rows.append([InlineKeyboardButton("📊 Открыть кабинет", url="https://malesthetic.pro/app/?panel=report")])
+            text = _owner_action_text(gift_cert_action) or (
+                "MAYA подготовила действие для владельца."
+            )
+            await context.bot.send_message(
+                chat_id,
+                text,
+                reply_markup=InlineKeyboardMarkup(rows),
+            )
         else:
             amount = gift_cert_action["amount"]
             gift_cert_flow[chat_id] = {"stage": "awaiting_method", "amount": amount}
@@ -6294,6 +6313,18 @@ async def post_init(app: Application):
         args=[app],
     )
 
+    # AI-директор: утренний брифинг владельцу (деньги-возможности + приоритет) —
+    # Майя сама пишет владельцу каждый день в 10:00 МСК + пуш в PWA.
+    scheduler.add_job(
+        _director_briefing_job,
+        trigger="cron",
+        hour=10,
+        minute=0,
+        id="director_briefing",
+        replace_existing=True,
+        args=[app],
+    )
+
     logger.info(
         f"Бот MAYA запущен 🚀 | БД готова | Админов: {len(database.list_admins())} "
         f"| Ротация ПД: каждый день 03:00 МСК (>{PII_RETENTION_MONTHS} мес)"
@@ -6536,6 +6567,194 @@ async def _anton_expense_reminder_job(app: Application):
         _anton_expense_awaiting.add(ANTON_CHAT_ID)
     except Exception as e:
         logger.error(f"anton expense reminder: {e}")
+
+
+# ── AI-директор: Майя сама пишет владельцу + пуш ────────────────────────────
+def _m(n) -> str:
+    """35037 → «35 037» (разряды тонким пробелом)."""
+    try:
+        return f"{int(round(float(n or 0))):,}".replace(",", " ")
+    except Exception:
+        return "0"
+
+
+def _owner_job_callback(job: str | None) -> str | None:
+    return {
+        "reactivation": "admin_run_react",
+        "birthday": "admin_run_birthday",
+        "cycle": "admin_run_cycle",
+        "reviews": "admin_run_reviews",
+        "subscriptions": "admin_run_sub_now",
+    }.get((job or "").strip().lower())
+
+
+def _owner_action_text(action: dict | None) -> str:
+    if not isinstance(action, dict):
+        return ""
+    lines = []
+    if action.get("title"):
+        lines.append(str(action.get("title")))
+    if action.get("problem"):
+        lines.append("Что важно: " + str(action.get("problem")))
+    if action.get("reason"):
+        lines.append("Почему сейчас: " + str(action.get("reason")))
+    if action.get("potential_rub"):
+        lines.append("Потенциал: ~" + _m(action.get("potential_rub")) + " ₽")
+    if action.get("client_message"):
+        lines.append("Сообщение клиенту:\n" + str(action.get("client_message")))
+    return "\n\n".join(lines).strip()
+
+
+def _owner_recipient_ids() -> list[int]:
+    """Получатели AI-директора: только owner/founder, не все админы."""
+    out: set[int] = set()
+    for value in FOUNDER_IDS or []:
+        try:
+            out.add(int(value))
+        except Exception:
+            pass
+    return sorted(out)
+
+
+async def notify_owner(app: Application, text: str, push_title: str = "MAYA",
+                       push_body: str = "", tag: str = "maya_owner",
+                       url: str = "/app/?panel=report",
+                       button_label: str = "📊 Открыть кабинет",
+                       button_url: str = "https://malesthetic.pro/app/?panel=report",
+                       chat_action: dict | None = None) -> int:
+    """Единая точка проактивных сообщений AI-директора владельцу: Telegram + Web Push
+    в PWA. Майя может писать владельцу сама (брифинг, риск, возможность). Возвращает
+    число адресатов, которым доставлено в Telegram."""
+    owner_ids = _owner_recipient_ids()
+    if not owner_ids:
+        logger.warning("notify_owner: нет настроенных owner/founder получателей")
+        return 0
+    # Майя пишет владельцу и В ЧАТ ПРИЛОЖЕНИЯ (не только Telegram): кладём сообщение
+    # в историю переписки владельца, чтобы он увидел его в PWA-чате и мог ответить
+    # там же. Синхронный блок (load→append→save без await) — без гонок.
+    try:
+        from memory import load_conversations, save_conversations
+        convs = load_conversations()
+        for owner_id in owner_ids:
+            hist = list(convs.get(owner_id) or [])
+            item = {"role": "assistant", "content": text}
+            if isinstance(chat_action, dict):
+                item["action"] = chat_action
+            hist.append(item)
+            convs[owner_id] = hist[-30:]
+        save_conversations(convs)
+    except Exception as e:
+        logger.error(f"notify_owner in-app chat: {e}")
+
+    import webhook_server
+    kb = None
+    try:
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        rows = []
+        _cb = _owner_job_callback(chat_action.get("job")) if isinstance(chat_action, dict) else None
+        _cb_label = (chat_action.get("label") or "Запустить") if isinstance(chat_action, dict) else None
+        if _cb:
+            rows.append([InlineKeyboardButton(_cb_label, callback_data=_cb)])
+        if button_label and button_url:
+            rows.append([InlineKeyboardButton(button_label, url=button_url)])
+        if rows:
+            kb = InlineKeyboardMarkup(rows)
+    except Exception:
+            kb = None
+    sent = 0
+    for owner_id in owner_ids:
+        try:
+            await app.bot.send_message(chat_id=owner_id, text=text, reply_markup=kb)
+            sent += 1
+        except Exception as e:
+            logger.error(f"notify_owner tg → {owner_id}: {e}")
+        try:
+            await webhook_server._send_client_push(
+                owner_id, push_title, push_body or text[:120],
+                url=url, tag=tag,
+            )
+        except Exception as e:
+            logger.error(f"notify_owner push → {owner_id}: {e}")
+    return sent
+
+
+def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
+    """(telegram_text, push_title, push_body) в голосе Майи-директора из
+    owner_ai.daily_briefing(). Детерминированно — не зависит от LLM-мозга."""
+    t = brief.get("today") or {}
+    booked = t.get("booked") or 0
+    exp = t.get("expected_revenue_rub") or 0
+    avg = t.get("avg_check_rub") or 0
+    lines = ["Доброе утро! Посмотрела салон на сегодня 👇", "",
+             f"📅 Сегодня: {booked} записей, ожидаемо ~{_m(exp)} ₽ (средний чек {_m(avg)} ₽)."]
+    who = ", ".join((t.get("idle_masters") or []) + (t.get("underused_masters") or []))
+    if who:
+        lines.append(f"🪑 Недозагружены: {who} — ≈{t.get('free_capacity_today') or 0} свободных окон.")
+
+    tr = brief.get("week_trend") or {}
+    parts = []
+    for key, lbl in (("visits", "визиты"), ("avg_check", "средний чек")):
+        d = (tr.get(key) or {}).get("delta_pct")
+        if d:
+            parts.append(f"{lbl} {'+' if d >= 0 else ''}{d}%")
+    if parts:
+        lines.append(f"📈 За неделю: {', '.join(parts)}.")
+
+    opps = brief.get("opportunities") or []
+    if opps:
+        lines += ["", "💰 Где деньги сегодня:"]
+        for i, o in enumerate(opps[:3], 1):
+            money = f" — ~{_m(o['potential_rub'])} ₽" if o.get("potential_rub") else ""
+            lines.append(f"{i}. {o.get('title')}{money}. {o.get('detail', '')}")
+        lines += ["", "Скажи — запущу рассылку (уснувшим / по сертификатам) или помогу заполнить окна."]
+    else:
+        lines += ["", "Пока всё ровно — держу руку на пульсе, замечу что-то важное — напишу."]
+
+    text = "\n".join(lines).strip()
+    top = brief.get("top_priority") or {}
+    if top:
+        money = f" (~{_m(top['potential_rub'])} ₽)" if top.get("potential_rub") else ""
+        push_body = f"{booked} записей сегодня. Приоритет: {top.get('title')}{money}."
+    else:
+        push_body = f"{booked} записей сегодня, ожидаемо ~{_m(exp)} ₽."
+    return text, "Брифинг директора 📊", push_body
+
+
+async def _director_briefing_job(app: Application):
+    """Утренний брифинг AI-директора владельцу: деньги-возможности + приоритет + пуш.
+    Майя сама пишет владельцу раз в день (проактивный директор)."""
+    try:
+        import owner_ai
+        brief = await asyncio.to_thread(owner_ai.daily_briefing)
+        text, push_title, push_body = _format_director_briefing(brief)
+        top_action = brief.get("top_action")
+    except Exception as e:
+        logger.error(f"director_briefing build: {e}")
+        return
+    if not text:
+        return
+    # Анти-дубль: один брифинг в день.
+    try:
+        import hashlib as _hl
+        from datetime import date as _d
+        sig = _d.today().isoformat() + ":" + _hl.md5(text.encode("utf-8")).hexdigest()[:10]
+        if database.get_setting("director_briefing_last") == sig:
+            logger.info("director_briefing: уже отправлен сегодня")
+            return
+        database.set_setting("director_briefing_last", sig)
+    except Exception:
+        pass
+    if isinstance(top_action, dict):
+        try:
+            pretty = _owner_action_text(top_action)
+            if pretty:
+                text = text + "\n\n" + pretty
+        except Exception:
+            pass
+    n = await notify_owner(app, text, push_title=push_title, push_body=push_body,
+                           tag="director_briefing", url="/app/?panel=report",
+                           chat_action=top_action if isinstance(top_action, dict) else None)
+    logger.info(f"📊 Брифинг AI-директора отправлен: {n} адресат(ов)")
 
 
 async def _daily_report_job(app: Application):
