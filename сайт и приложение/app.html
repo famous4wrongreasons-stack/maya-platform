@@ -9044,8 +9044,13 @@ function AChat() {
   const chatSuggest = function (text, history) {
     var bot = String(text || '').toLowerCase();
     var user = lastText(history, 'user').toLowerCase();
+    var staff = chatSurface() === 'staff';
     if (/https?:\/\/|записал вас|забронир|перейдите по ссыл|ссылк[ауе] (?:на|для) оплат|оплатить по ссыл/.test(bot)) return [];
-    if (!user) return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
+    if (staff) {
+      if (/рабочем чате|кабинет клиента|не записываю|не оформляю\s+клиент/.test(bot)) return [];
+      return STAFF_QUICKS;
+    }
+    if (!user) return QUICKS;
     if (/какую услугу|на какую услугу|услугу вас запис|услугу хотите|что выбираете|какой комплекс/.test(bot)) return serviceChips();
     if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой/.test(bot)) return masterChips();
     if (/какой день|на какую дату|когда удобно|какое время|во сколько|на какое время|время подходит|сегодня свободн|свободн.*(?:окн|слот|время)/.test(bot)) return ['Сегодня', 'Завтра', 'Ближайшее окно', 'После 18:00', 'На выходных'];
@@ -9057,7 +9062,7 @@ function AChat() {
     if (/сколько по времени|длительн|минут|час/.test(bot) || /сколько по времени|долго|минут/.test(user)) return ['Записаться', 'Мужская стрижка', 'Комплекс: стрижка + борода', 'Ближайшее окно'];
     if (/адрес|находим|лермонтов|как добра|на карт|как прое|как дое/.test(bot) || /где|адрес|как добраться/.test(user)) return ['Записаться', 'Построить маршрут', 'Позвонить', 'Какие цены?'];
     if (pickedService(user)) return masterChips();
-    return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
+    return QUICKS;
   };
   function quickActionTarget(label) {
     var s = String(label || '').toLowerCase();
