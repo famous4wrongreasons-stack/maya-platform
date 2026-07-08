@@ -144,11 +144,33 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("клиентском кабинете", reply)
         self.assertNotIn("Команда:", reply)
 
+    def test_client_surface_blocks_gross_profit_question(self):
+        ws = _load_webhook_server()
+
+        reply = ws._client_business_scope_reply("Дай валовую прибыль за месяц")
+
+        self.assertIn("клиентском кабинете", reply)
+        self.assertIn("не показываю", reply)
+
     def test_staff_mode_payload_is_not_trusted_for_plain_client(self):
         ws = _load_webhook_server()
 
         self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 123456789), "client")
         self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 948205934), "staff")
+
+    def test_staff_surface_blocks_client_booking_intent(self):
+        ws = _load_webhook_server()
+
+        reply = ws._staff_booking_scope_reply("Запиши меня на стрижку завтра к Илье")
+
+        self.assertIn("рабочем чате", reply)
+        self.assertIn("кабинет клиента", reply)
+
+    def test_staff_surface_does_not_block_work_records_question(self):
+        ws = _load_webhook_server()
+
+        self.assertIsNone(ws._staff_booking_scope_reply("Сколько у меня записей сегодня?"))
+        self.assertIsNone(ws._staff_booking_scope_reply("Кто ко мне придёт завтра?"))
 
 
 if __name__ == "__main__":

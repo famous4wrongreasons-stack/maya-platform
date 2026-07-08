@@ -5755,12 +5755,19 @@ CHAT_TEMPORARY_ERROR_REPLY = (
     "Сейчас связь с мозгом MAYA подвисла. Я на месте, просто не успела получить ответ. "
     "Повторите вопрос ещё раз через несколько секунд."
 )
+STAFF_BOOKING_SCOPE_REPLY = (
+    "В рабочем чате я не записываю вас как клиента и не оформляю клиентские записи. "
+    "Здесь я помогаю по работе: аналитика, выручка, зарплаты, расписание и задачи салона. "
+    "Для личной записи откройте кабинет клиента."
+)
 STAFF_CHAT_SURFACE_NUDGE = (
     "\n\n[Это рабочий кабинет MAYA для владельца/персонала. Не отвечай клиентской "
     "витриной и не подменяй бизнес-вопросы списком команды. Если спрашивают про "
     "выручку, прибыль, кассу, зарплаты, загрузку, клиентов, эффективность мастеров "
     "или динамику бизнеса — используй доступные бизнес-инструменты и отвечай цифрами. "
-    "Не раскрывай телефоны/имена клиентов.]"
+    "Если сотрудник просит записать его как клиента, оформить клиентскую запись, "
+    "перенести/отменить личную запись или открыть клиентский booking-flow — откажи "
+    "и скажи перейти в кабинет клиента. Не раскрывай телефоны/имена клиентов.]"
 )
 
 SALON_FOUNDED_YEAR = "2019"
@@ -5777,6 +5784,16 @@ _BOOKING_SPECIFIC_RE = re.compile(
     r"\b(сегодня|завтра|послезавтра|понедельник|вторник|сред[ау]|четверг|пятниц[ау]|"
     r"суббот[ау]|воскресень[ея]|стас|илья|илюх|саша|сан[ея]|александр|алексей|л[её]ш|"
     r"макс|максим|киянск|дарм|третьяк|мосин|чурсинов|\d{1,2}[:.]\d{2}|\b\d{1,2}\s*(?:час|ч|:00))\b",
+    re.IGNORECASE,
+)
+_STAFF_CLIENT_BOOKING_RE = re.compile(
+    r"\b("
+    r"запиши(?:те)?(?:\s+меня|\s+нас)?|записать\s+(?:меня|нас)|"
+    r"хочу\s+(?:записаться|постричься|подстричься|на\s+стриж)|"
+    r"(?:надо|нужно|можно)\s+(?:записаться|постричься|подстричься|на\s+стриж)|"
+    r"записаться|постричься|подстричься|"
+    r"(?:перенеси|перенести|отмени|отменить)\s+(?:мою|мне|меня)?\s*запис)"
+    r"\b",
     re.IGNORECASE,
 )
 _ADDRESS_INTENT_RE = re.compile(
@@ -5798,6 +5815,12 @@ _BUSINESS_MASTER_ANALYTICS_RE = re.compile(
     r"заработ\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
     r"зарплат\w*|марж\w*|прибыльн\w*|рентабельн\w*|"
     r"средн\w*\s+чек|чек\w*|визит\w*|клиент\w*)\b",
+    re.IGNORECASE,
+)
+_BUSINESS_ANALYTICS_RE = re.compile(
+    r"\b(аналитик\w*|отч[её]т\w*|валов\w*|прибыл\w*|выруч\w*|доход\w*|"
+    r"касс\w*|оборот\w*|марж\w*|зарплат\w*|заработ\w*|"
+    r"средн\w*\s+чек|чист\w*\s+прибыл\w*|сколько\s+заработ\w*)\b",
     re.IGNORECASE,
 )
 _BUSINESS_PERSON_ANALYTICS_RE = re.compile(
@@ -5855,13 +5878,23 @@ def _business_master_analytics_intent(message: str) -> bool:
 
 
 def _client_business_scope_reply(message: str) -> str | None:
-    if not _business_master_analytics_intent(message):
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not (_business_master_analytics_intent(low) or _BUSINESS_ANALYTICS_RE.search(low)):
         return None
     return (
         "Это внутренний вопрос салона. В клиентском кабинете я не показываю выручку, "
         "прибыль, зарплаты и аналитику мастеров. Здесь помогу выбрать услугу, мастера "
         "или удобное время записи."
     )
+
+
+def _staff_booking_scope_reply(message: str) -> str | None:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return None
+    if _STAFF_CLIENT_BOOKING_RE.search(low):
+        return STAFF_BOOKING_SCOPE_REPLY
+    return None
 
 
 def _allow_client_chat_shortcuts(body: dict, chat_id: int, message: str) -> bool:
@@ -6325,6 +6358,19 @@ async def chat_handler(request: web.Request) -> web.Response:
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
 
+    staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
+    if staff_booking_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(staff_booking_reply))
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": staff_booking_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
     if client_business_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -6468,9 +6514,13 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Если ИИ готов оформить запись (request_booking) — клиент авторизован,
     # оформляем сами (в Telegram это делает контакт-флоу бота, в приложении — мы).
     if contact_request:
-        booking_msg = _finalize_booking_for_chat(chat_id, contact_request)
-        if booking_msg:
-            response_text = booking_msg
+        if chat_mode == "staff":
+            response_text = STAFF_BOOKING_SCOPE_REPLY
+            contact_request = None
+        else:
+            booking_msg = _finalize_booking_for_chat(chat_id, contact_request)
+            if booking_msg:
+                response_text = booking_msg
 
     # Покупка из чата приложения — сертификат ИЛИ абонемент (общий слот gift_cert_action,
     # разделяем по kind). Вместо ссылки на бота отдаём in-app действие, которое
@@ -6694,6 +6744,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     conversations = load_conversations()
     history = conversations.get(chat_id) or []
+
+    staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
+    if staff_booking_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(staff_booking_reply))
+        conversations[chat_id] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": staff_booking_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
 
     client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
     if client_business_reply:
@@ -6995,14 +7058,18 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     response_text = ("".join(streamed_parts).strip()) or meta_text
 
     if contact_request:
-        try:
-            booking_msg = await loop.run_in_executor(
-                None, _finalize_booking_for_chat, chat_id, contact_request)
-        except Exception as e:
-            logger.error(f"chat_stream: booking finalize: {e}")
-            booking_msg = None
-        if booking_msg:
-            response_text = booking_msg
+        if chat_mode == "staff":
+            response_text = STAFF_BOOKING_SCOPE_REPLY
+            contact_request = None
+        else:
+            try:
+                booking_msg = await loop.run_in_executor(
+                    None, _finalize_booking_for_chat, chat_id, contact_request)
+            except Exception as e:
+                logger.error(f"chat_stream: booking finalize: {e}")
+                booking_msg = None
+            if booking_msg:
+                response_text = booking_msg
 
     cert_action = None
     if gift_cert_action:

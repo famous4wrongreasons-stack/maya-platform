@@ -9313,9 +9313,14 @@ function AChat() {
 	      'Content-Type': 'application/json'
     };
     const payload = Object.assign({}, base);
-    // Режим кабинета (клиент/сотрудник): бэкенд по нему решает, слать ли схемы из
-    // базы знаний — только в кабинете сотрудника. Клиентская версия — без схем.
-    try { if (payload.mode == null) payload.mode = (window.__meCurMode === 'staff') ? 'staff' : 'client'; } catch (e) {}
+    // Режим кабинета (клиент/сотрудник): рабочий чат не должен падать обратно
+    // в client-flow, даже если глобальный режим успел сбиться при навигации.
+    try {
+      if (payload.mode == null) {
+        var staffChat = window.__meCurMode === 'staff' || window.__meChatReturn === 'staff-home';
+        payload.mode = staffChat ? 'staff' : 'client';
+      }
+    } catch (e) {}
     try {
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) headers['X-Telegram-InitData'] = window.Telegram.WebApp.initData;else if (window.__tgAuthData) payload.auth_data = window.__tgAuthData;else {
         const tok = localStorage.getItem('web_session_token');
