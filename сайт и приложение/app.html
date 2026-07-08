@@ -1,5 +1,5 @@
 <!doctype html><html lang="ru"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"/>
 <meta name="theme-color" content="#070810" id="me-theme-color"/><meta name="color-scheme" content="dark" id="me-color-scheme"/><meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="screen-orientation" content="portrait"/><meta name="x5-orientation" content="portrait"/><meta name="full-screen" content="yes"/>
@@ -8979,7 +8979,86 @@ function AChat() {
   const CHAT_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   const GREETING = 'Здравствуйте! Я MAYA — ассистент «Мужской Эстетики». Помогу записаться, подскажу по услугам, мастерам, ценам и абонементам. А ещё у нас есть полноценное приложение — личный кабинет, баллы и сертификаты: нажмите «Перейти в приложение» ниже. Что подсказать?';
   const CHAT_HISTORY_CACHE = 'maya_chat_history_v1';
-  const QUICKS = ['Записаться', 'Какие цены?', 'Где вы находитесь?', 'Абонементы'];
+  const QUICKS = ['Записаться', 'Какие цены?', 'Абонемент', 'Сертификат'];
+  function uniqChips(list, limit) {
+    var out = [];
+    (list || []).forEach(function (x) {
+      var v = String(x || '').trim();
+      if (v && out.indexOf(v) < 0) out.push(v);
+    });
+    return out.slice(0, limit || 6);
+  }
+  function serviceNames() {
+    var d = window.APP_DATA || {}, sv = d.services || {}, out = [];
+    Object.keys(sv).forEach(function (cat) {
+      (sv[cat] || []).forEach(function (row) {
+        if (row && row[0]) out.push(String(row[0]));
+      });
+    });
+    return out;
+  }
+  function serviceChips() {
+    return uniqChips(['Мужская стрижка', 'Стрижка машинкой + фейд', 'Моделирование бороды', 'Комплекс: стрижка + борода', 'Детская стрижка'].concat(serviceNames()), 6);
+  }
+  function masterChips() {
+    var d = window.APP_DATA || {}, ms = d.masters || {};
+    var names = [].concat(ms.top || [], ms.senior || []).map(function (m) { return m && m[0]; }).filter(Boolean);
+    return uniqChips(names.concat(['Любой мастер']), 7);
+  }
+  function subChips() {
+    var d = window.APP_DATA || {};
+    var names = (d.subs || []).map(function (s) { return s && s[0] ? 'Абонемент ' + s[0] : ''; });
+    return uniqChips(names.concat(['Сравнить абонементы', 'Купить абонемент']), 6);
+  }
+  function certChips() {
+    var d = window.APP_DATA || {};
+    var amounts = (d.certs || [2000, 3000, 5000]).map(function (n) { return 'Сертификат ' + Number(n).toLocaleString('ru-RU') + ' ₽'; });
+    return uniqChips(amounts.concat(['Купить сертификат']), 5);
+  }
+  function lastText(history, role) {
+    for (var i = (history || []).length - 1; i >= 0; i--) {
+      if (!role || history[i].role === role) return String(history[i].text || '');
+    }
+    return '';
+  }
+  function pickedService(text) {
+    var s = String(text || '').toLowerCase();
+    return serviceNames().some(function (name) {
+      return name && s.indexOf(String(name).toLowerCase()) >= 0;
+    }) || /стрижк|бород|фейд|брить|уход|комплекс/.test(s);
+  }
+  // Контекстные быстрые ответы после ответа Майи: не общий набор кнопок, а
+  // следующий логичный шаг воронки записи/покупки.
+  const chatSuggest = function (text, history) {
+    var bot = String(text || '').toLowerCase();
+    var user = lastText(history, 'user').toLowerCase();
+    if (/https?:\/\/|записал вас|забронир|перейдите по ссыл|ссылк[ауе] (?:на|для) оплат|оплатить по ссыл/.test(bot)) return [];
+    if (!user) return QUICKS;
+    if (/какую услугу|на какую услугу|услугу вас запис|услугу хотите|что выбираете|какой комплекс/.test(bot)) return serviceChips();
+    if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой/.test(bot)) return masterChips();
+    if (/какой день|на какую дату|когда удобно|какое время|во сколько|на какое время|время подходит|сегодня свободн|свободн.*(?:окн|слот|время)/.test(bot)) return ['Сегодня', 'Завтра', 'Ближайшее окно', 'После 18:00', 'На выходных'];
+    if (/оформляем|подтверждаете|подтвердите|записываю|записать вас|всё верно|все верно/.test(bot)) return ['Да, оформляем', 'Изменить время', 'Другой мастер', 'Другая услуга'];
+    if (/добавляем|добавить|только .*стриж|только .*услуг|апсейл|дополнительно/.test(bot)) return ['Только выбранная услуга', 'Добавить бороду', 'Добавить уход', 'Показать цену'];
+    if (/абонемент/.test(bot) || /абонемент/.test(user)) return subChips();
+    if (/сертификат|подар/.test(bot) || /сертификат|подар/.test(user)) return certChips();
+    if (/₽|руб|стоит|стоимост|цен[ауеы]|прайс/.test(bot) || /цен|сколько стоит|прайс/.test(user)) return uniqChips(['Записаться'].concat(serviceChips().slice(0, 3), ['Абонемент выгоднее?', 'Сертификат в подарок']), 6);
+    if (/сколько по времени|длительн|минут|час/.test(bot) || /сколько по времени|долго|минут/.test(user)) return ['Записаться', 'Мужская стрижка', 'Комплекс: стрижка + борода', 'Ближайшее окно'];
+    if (/адрес|находим|лермонтов|как добра|на карт|как прое|как дое/.test(bot) || /где|адрес|как добраться/.test(user)) return ['Записаться', 'Построить маршрут', 'Позвонить', 'Какие цены?'];
+    if (pickedService(user)) return masterChips();
+    return QUICKS;
+  };
+  function quickActionTarget(label) {
+    var s = String(label || '').toLowerCase();
+    if (/купить абонемент|сравнить абонемент|^абонемент /.test(s)) return { kind: 'screen', screen: 'shop', shopTab: 'subs' };
+    if (/купить сертификат|^сертификат /.test(s)) return { kind: 'screen', screen: 'shop', shopTab: 'certs' };
+    if (/перейти к записи|открыть запись/.test(s)) return { kind: 'screen', screen: 'book' };
+    return null;
+  }
+  function quickTap(label) {
+    var target = quickActionTarget(label);
+    if (target) runChatAction(target);
+    else send(label);
+  }
   const dark = window.__meDark;
   const setDark = window.__meSetDark;
   const t = tokens('aurora', dark);
@@ -9037,7 +9116,23 @@ function AChat() {
 	  const longPressRef = React.useRef({ timer: null, x: 0, y: 0 });
 	  const userHasSentRef = React.useRef(false); // автоскролл вниз — только ПОСЛЕ первой реальной отправки пользователем
   const baseHeightRef = React.useRef(typeof window !== 'undefined' ? window.innerHeight : 0);
+  const footRef = React.useRef(null); // обёртка строки ввода — позицию над клавиатурой ставим ИМПЕРАТИВНО
   const e = React.createElement;
+  function scrollChatForKeyboard() {
+    try {
+      var sc = scRef.current;
+      if (!sc) return;
+      var go = function () {
+        if (!scRef.current) return;
+        scRef.current.scrollTop = scRef.current.scrollHeight;
+      };
+      go();
+      requestAnimationFrame(go);
+      [16, 34, 60, 96, 140, 220, 320, 480].forEach(function (ms) {
+        setTimeout(go, ms);
+      });
+    } catch (e2) {}
+  }
   React.useEffect(() => {
     if (msgs.some(m => m && m.role === 'user')) userHasSentRef.current = true;
   }, []);
@@ -9111,7 +9206,7 @@ function AChat() {
         until = Date.now() + 1600;
         clearTimeout(tmr);
         pump();
-        if (!userHasSentRef.current && scRef.current) scRef.current.scrollTop = 0;
+        scrollChatForKeyboard();
       }
     };
     const onBlur = () => {
@@ -9149,6 +9244,70 @@ function AChat() {
   }, [msgs, sending]);
 
   const chatHeight = vvBox.height;
+  const kbdUp = vvBox.keyboard > 0 || vvBox.height > 0 && vvBox.height < ((typeof window !== 'undefined' ? window.innerHeight : 9999) - 120);
+  // ── КЛАВИАТУРА: не считаем её дважды ─────────────────────────────────
+  // Глобальный viewport-script уже меняет --me-app-height на visibleViewport.height,
+  // когда клавиатура открыта. Footer является обычным нижним flex-блоком, поэтому
+  // он сам занимает место в раскладке и не перекрывает последние сообщения.
+  // Старый absolute-footer с bottom=keyboardHeight либо улетал вверх, либо ложился
+  // поверх bubbles/quick chips при открытой клавиатуре.
+  function applyKbd() {
+    try {
+      var vv = window.visualViewport;
+      var raw = vv ? Math.round((window.innerHeight || 0) - vv.height - (vv.offsetTop || 0)) : 0;
+      var kbd = raw > 100 ? raw : 0;
+      if (footRef.current) footRef.current.style.bottom = '0px';
+      if (scRef.current) scRef.current.style.paddingBottom = '18px';
+      if (window.pageYOffset || window.scrollY) window.scrollTo(0, 0);
+      if (kbd && userHasSentRef.current && scRef.current) scRef.current.scrollTop = scRef.current.scrollHeight;
+    } catch (e2) {}
+  }
+  React.useLayoutEffect(function () { applyKbd(); });
+  React.useEffect(function () {
+    var vv = window.visualViewport;
+    var tmr = null, until = 0;
+    var pump = function () { applyKbd(); if (Date.now() < until) tmr = setTimeout(pump, 60); };
+    var onFocus = function (ev) { var tg = ev.target; if (tg && (tg.tagName === 'TEXTAREA' || tg.tagName === 'INPUT')) { until = Date.now() + 1800; clearTimeout(tmr); pump(); scrollChatForKeyboard(); } };
+    var onBlur = function () { until = 0; clearTimeout(tmr); setTimeout(applyKbd, 60); };
+    var lockScroll = function () { if (window.pageYOffset || window.scrollY) window.scrollTo(0, 0); };
+    if (vv) { vv.addEventListener('resize', applyKbd); vv.addEventListener('scroll', applyKbd); }
+    document.addEventListener('focusin', onFocus);
+    document.addEventListener('focusout', onBlur);
+    window.addEventListener('scroll', lockScroll, { passive: true });
+    var slow = setInterval(applyKbd, 300);
+    return function () {
+      clearTimeout(tmr); clearInterval(slow);
+      if (vv) { vv.removeEventListener('resize', applyKbd); vv.removeEventListener('scroll', applyKbd); }
+      document.removeEventListener('focusin', onFocus);
+      document.removeEventListener('focusout', onBlur);
+      window.removeEventListener('scroll', lockScroll);
+    };
+  }, []);
+  React.useEffect(function () {
+    var C = window.Capacitor;
+    var K = C && C.Plugins && C.Plugins.Keyboard;
+    if (!K || !K.addListener) return;
+    var subs = [];
+    function keep(handle) {
+      if (!handle) return;
+      if (handle.then) handle.then(function (h) { if (h) subs.push(h); }).catch(function () {});
+      else subs.push(handle);
+    }
+    function onShow() {
+      applyKbd();
+      scrollChatForKeyboard();
+    }
+    try {
+      keep(K.addListener('keyboardWillShow', onShow));
+      keep(K.addListener('keyboardDidShow', onShow));
+      keep(K.addListener('keyboardDidHide', applyKbd));
+    } catch (e2) {}
+    return function () {
+      subs.forEach(function (h) {
+        try { if (h && h.remove) h.remove(); } catch (e3) {}
+      });
+    };
+  }, []);
 	  function authPayload(base) {
 	    const headers = {
 	      'Content-Type': 'application/json'
@@ -10225,6 +10384,139 @@ function AChat() {
     const label = action && action.label || action && action.text || 'Записаться';
     const target = chatActionTarget(action);
     if (!target) return null;
+    const fmtRub = function (n) {
+      try {
+        return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      } catch (e) {
+        return '0';
+      }
+    };
+    const rich = target.kind === 'run_job' && (action.title || action.problem || action.reason || action.client_message || action.potential_rub != null);
+    if (rich) {
+      const pr = String(action.priority || '').toLowerCase();
+      const prLabel = pr === 'high' ? 'Высокий приоритет' : pr === 'medium' ? 'Приоритет на сегодня' : pr === 'low' ? 'Можно в фоне' : 'Действие';
+      const prBg = pr === 'high' ? '#15140f' : pr === 'medium' ? 'rgba(21,20,15,0.78)' : 'rgba(21,20,15,0.58)';
+      return e('div', {
+        style: {
+          marginTop: 12,
+          borderRadius: 22,
+          border: '1px solid ' + t.line,
+          background: dark ? 'rgba(244,240,235,0.08)' : 'rgba(255,255,255,0.62)',
+          WebkitBackdropFilter: 'blur(22px) saturate(170%)',
+          backdropFilter: 'blur(22px) saturate(170%)',
+          boxShadow: dark ? '0 10px 28px rgba(0,0,0,0.26)' : '0 12px 26px rgba(60,60,67,0.14)',
+          padding: 13
+        }
+      }, e('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 10,
+          marginBottom: action.title ? 10 : 0
+        }
+      }, e('div', {
+        style: {
+          fontFamily: DISPLAY,
+          fontWeight: 500,
+          fontSize: 10.5,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: t.faint
+        }
+      }, 'Maya Action'), e('div', {
+        style: {
+          flexShrink: 0,
+          borderRadius: 999,
+          background: prBg,
+          color: '#f2f0ec',
+          fontFamily: BODY,
+          fontSize: 11,
+          fontWeight: 600,
+          padding: '6px 10px'
+        }
+      }, prLabel)), action.title ? e('div', {
+        style: {
+          fontFamily: DISPLAY,
+          fontSize: 14,
+          fontWeight: 500,
+          color: t.ink,
+          lineHeight: 1.35
+        }
+      }, action.title) : null, action.problem ? e('div', {
+        style: {
+          marginTop: 8,
+          fontFamily: BODY,
+          fontSize: 12.5,
+          lineHeight: 1.48,
+          color: t.ink
+        }
+      }, action.problem) : null, action.reason ? e('div', {
+        style: {
+          marginTop: 7,
+          fontFamily: BODY,
+          fontSize: 11.5,
+          lineHeight: 1.5,
+          color: t.faint
+        }
+      }, 'Почему сейчас: ' + action.reason) : null, action.potential_rub != null ? e('div', {
+        style: {
+          marginTop: 10,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          borderRadius: 999,
+          border: '1px solid ' + t.line,
+          padding: '7px 11px',
+          fontFamily: BODY,
+          fontSize: 11.5,
+          fontWeight: 600,
+          color: t.ink
+        }
+      }, 'Потенциал: ~' + fmtRub(action.potential_rub) + ' ₽') : null, action.client_message ? e('div', {
+        style: {
+          marginTop: 11,
+          borderRadius: 16,
+          background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+          border: '1px solid ' + t.line,
+          padding: '10px 11px'
+        }
+      }, e('div', {
+        style: {
+          fontFamily: DISPLAY,
+          fontWeight: 500,
+          fontSize: 10,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: t.faint,
+          marginBottom: 6
+        }
+      }, 'Сообщение клиенту'), e('div', {
+        style: {
+          fontFamily: BODY,
+          fontSize: 12,
+          lineHeight: 1.52,
+          color: t.ink,
+          whiteSpace: 'pre-wrap'
+        }
+      }, action.client_message)) : null, e('div', {
+        onClick: () => runChatAction(target),
+        style: {
+          display: 'inline-block',
+          marginTop: 12,
+          cursor: 'pointer',
+          fontFamily: DISPLAY,
+          fontWeight: 500,
+          fontSize: 10.5,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: dark ? '#15140f' : '#f2f0ec',
+          background: dark ? '#f2f0ec' : '#15140f',
+          borderRadius: 999,
+          padding: '11px 20px'
+        }
+      }, label));
+    }
     return e('div', {
       onClick: () => runChatAction(target),
       style: {
@@ -10266,6 +10558,9 @@ function AChat() {
     if (['shop', 'book', 'cabinet', 'invite', 'settings', 'services', 'team'].indexOf(screen) >= 0) {
       return { kind: 'screen', screen: screen, shopTab: action.shopTab === 'certs' ? 'certs' : action.shopTab === 'subs' ? 'subs' : null };
     }
+    if (type === 'run_job' && action.job) {
+      return { kind: 'run_job', job: action.job, label: action.label || 'Запустить рассылку', confirm: action.confirm || ('__runjob:' + action.job) };
+    }
     return null;
   }
   function runChatAction(target) {
@@ -10273,6 +10568,14 @@ function AChat() {
     try {
       if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(8);
     } catch (e) {}
+    if (target.kind === 'run_job') {
+      // Владелец подтвердил рассылку карточкой → отправляем детерминированную команду
+      // на бэкенд (он запустит проверенную задачу). Показываем подтверждение и ответ Майи.
+      setMsgs(m => m.concat([{ role: 'user', text: target.label }]));
+      const ap = authPayload({ message: target.confirm });
+      fetch(CHAT_PROXY + '?action=chat', { method: 'POST', headers: ap.headers, body: JSON.stringify(ap.payload) }).then(r => r.json()).then(data => setMsgs(m => m.concat([{ role: 'bot', text: data && data.reply || 'Готово.' }]))).catch(() => setMsgs(m => m.concat([{ role: 'bot', text: 'Не получилось запустить — попробуйте из Панели.' }])));
+      return;
+    }
     if (target.kind === 'url') {
       if (window.__meExt) window.__meExt(target.url);else window.open(target.url, '_blank', 'noopener');
       return;
@@ -10419,14 +10722,15 @@ function AChat() {
     dir: 'aurora'
   })), e('div', {
     style: {
-      // Высота = 100vh (полный экран). В iOS Safari standalone 100dvh/innerHeight/
-      // visualViewport занижены на верхний safe-area, и только 100vh/100lvh дают
-      // истинную высоту экрана → используем её, чтобы футер чата встал у физического низа.
+      // Клавиатура открыта → контейнер = ровно видимая область visualViewport (над
+      // клавиатурой), футер bottom:0 садится над ней. Иначе → 100vh (полный экран):
+      // в iOS standalone 100dvh/innerHeight занижены на верхний safe-area, а 100vh даёт
+      // истинную высоту, чтобы футер встал у физического низа.
       position: 'fixed',
       left: 0,
       right: 0,
       top: 0,
-      height: '100vh',
+      height: 'var(--me-app-height, 100dvh)',
       maxWidth: 520,
       margin: '0 auto',
       boxSizing: 'border-box',
@@ -10564,7 +10868,7 @@ function AChat() {
       overflow: 'auto',
       overscrollBehavior: 'contain',
       WebkitOverflowScrolling: 'touch',
-      padding: '18px 18px calc(' + (124 + (vvBox.keyboard || 0)) + 'px + env(safe-area-inset-bottom,0px))'
+      padding: '18px 18px 18px'
     }
   }, msgs.map(bubble),
   // quick chips (only before the first user message)
@@ -10577,7 +10881,7 @@ function AChat() {
     }
   }, QUICKS.map((q, i) => e('div', {
     key: i,
-    onClick: () => send(q),
+    onClick: () => quickTap(q),
     style: {
       cursor: 'pointer',
       fontFamily: BODY,
@@ -10602,12 +10906,25 @@ function AChat() {
       borderRadius: 999,
       padding: '9px 15px'
     }
-  }, 'Перейти в приложение')) : null),
-  // плавающий футер: орб + строка ввода ПОВЕРХ сообщений. Фон прозрачный —
-  // чат скроллится за пилюлей и просвечивает сквозь стекло. pointerEvents:none на
-  // обёртке, чтобы тапы вне пилюли уходили в сообщения; на самом баре — auto.
+  }, 'Перейти в приложение')) : null,
+  // контекстные быстрые ответы после КАЖДОГО ответа Майи — ведут к записи/покупке,
+  // пока Майя не даст ссылку на запись/оплату (тогда chatSuggest вернёт [] и они скроются)
+  (function () {
+    if (sending) return null;
+    if (msgs.filter(function (m) { return m.role === 'user'; }).length === 0) return null;
+    var last = msgs[msgs.length - 1];
+    if (!last || last.role !== 'bot' || last.typing || !last.text) return null;
+    var sug = chatSuggest(last.text, msgs);
+    if (!sug.length) return null;
+    return e('div', { key: 'sugg', style: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 } }, sug.map(function (q, i) {
+      return e('div', { key: i, onClick: function () { quickTap(q); }, style: { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, color: t.ink, border: '1px solid ' + t.line, borderRadius: 999, padding: '9px 15px' } }, q);
+    }));
+  })()),
+  // нижний футер: орб + строка ввода. Это обычный flex-блок, не overlay:
+  // при клавиатуре scroll-область физически ужимается и bubbles не уходят под input.
   e('div', {
-    style: { position: 'absolute', left: 0, right: 0, bottom: (vvBox.keyboard || 0), display: 'flex', flexDirection: 'column', pointerEvents: 'none', transition: 'bottom .18s ease' }
+    ref: footRef,
+    style: { position: 'relative', zIndex: 5, flexShrink: 0, display: 'flex', flexDirection: 'column', pointerEvents: 'none' }
   },
   // голосовой орб — МАЛЕНЬКИЙ, низко над баром (чат остаётся виден, как у GPT);
   // показывается в hands-free режиме ИЛИ при записи голосового; всплывает с анимацией.
@@ -10624,7 +10941,7 @@ function AChat() {
       display: 'flex',
       alignItems: 'flex-end',
       gap: 8,
-      padding: vvBox.keyboard ? '8px 14px 8px' : '8px 14px calc(12px + env(safe-area-inset-bottom,0px))',
+      padding: kbdUp ? '8px 14px 8px' : '8px 14px calc(12px + env(safe-area-inset-bottom,0px))',
       background: 'transparent',
       pointerEvents: 'auto'
     }
@@ -10642,12 +10959,17 @@ function AChat() {
     } else {
       kids.push(e('div', {
         key: 'pill',
-        style: { flex: 1, display: 'flex', alignItems: 'flex-end', gap: 2, minHeight: 52, borderRadius: 26, background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.5)', border: '1px solid ' + (dark ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.85)'), backdropFilter: 'blur(22px) saturate(170%)', WebkitBackdropFilter: 'blur(22px) saturate(170%)', boxShadow: dark ? '0 6px 22px rgba(0,0,0,0.38)' : '0 6px 22px rgba(60,60,67,0.14)', padding: '0 14px' }
-      }, e('textarea', {
-        key: 'ta', value: input, onChange: ev => setInput(ev.target.value),
-        onKeyDown: ev => { if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); send(); } },
-        rows: 1, placeholder: 'Введите текст или зажмите орб',
-        style: { flex: 1, resize: 'none', maxHeight: 110, border: 'none', background: 'transparent', padding: '14px 4px', fontFamily: BODY, fontSize: 14, color: t.ink, outline: 'none', lineHeight: 1.4 }
+        onPointerDown: scrollChatForKeyboard,
+        onTouchStart: scrollChatForKeyboard,
+        style: { flex: 1, display: 'flex', alignItems: 'center', gap: 2, minHeight: 52, borderRadius: 26, background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.5)', border: '1px solid ' + (dark ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.85)'), backdropFilter: 'blur(22px) saturate(170%)', WebkitBackdropFilter: 'blur(22px) saturate(170%)', boxShadow: dark ? '0 6px 22px rgba(0,0,0,0.38)' : '0 6px 22px rgba(60,60,67,0.14)', padding: '0 14px' }
+      }, e('input', {
+        key: 'ta', type: 'text', value: input, onChange: ev => setInput(ev.target.value),
+        onPointerDown: scrollChatForKeyboard,
+        onTouchStart: scrollChatForKeyboard,
+        onFocus: scrollChatForKeyboard,
+        onKeyDown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); send(); } },
+        placeholder: 'Введите текст или зажмите орб', autoComplete: 'off', enterKeyHint: 'send',
+        style: { flex: 1, minWidth: 0, width: '100%', height: 50, border: 'none', WebkitAppearance: 'none', appearance: 'none', background: 'transparent', padding: '0 4px', fontFamily: BODY, fontSize: 14, color: t.ink, outline: 'none', lineHeight: '20px' }
       })));
     }
     // ── отправка текста (есть текст и не идёт запись) ──
@@ -24362,7 +24684,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
       caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
     }
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/app/service-worker.js').catch(function(){});
+      __meRegisterPushWorker().catch(function(){});
     }
   } catch(e){}
 
@@ -24378,13 +24700,34 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
     return arr;
   }
+  function __mePushWorkerCandidates() {
+    var out = [];
+    try {
+      var path = String((location && location.pathname) || '/');
+      if (path === '/app' || path.indexOf('/app/') === 0) out.push('/app/service-worker.js');
+    } catch (e) {}
+    out.push('/service-worker.js');
+    out.push('/app/service-worker.js');
+    return out.filter(function (url, i, arr) { return url && arr.indexOf(url) === i; });
+  }
+  function __meRegisterPushWorker() {
+    if (!('serviceWorker' in navigator)) return Promise.reject(new Error('sw_unsupported'));
+    var urls = __mePushWorkerCandidates();
+    var i = 0;
+    function next() {
+      if (i >= urls.length) return Promise.reject(new Error('sw_register_failed'));
+      var url = urls[i++];
+      return navigator.serviceWorker.register(url).catch(function () { return next(); });
+    }
+    return next();
+  }
   window.__meSubscribePush = function () {
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') return;
       if (!window.__meAuthReq || !window.__meAuthReq({})) return;   // только залогиненным
       if (Notification.permission === 'denied') return;
       var doSub = function () {
-        navigator.serviceWorker.register('/app/service-worker.js').then(function () {
+        __meRegisterPushWorker().then(function () {
           return navigator.serviceWorker.ready;
         }).then(function (reg) {
           return reg.pushManager.getSubscription().then(function (sub) {
