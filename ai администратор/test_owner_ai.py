@@ -78,6 +78,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             "status": "done",
             "created_at": "2026-07-07T10:00:00",
             "result_due_at": "2020-01-01T10:00:00",
+            "evaluated_at": "2026-07-08T11:00:00",
             "summary": {"sent": 3},
             "impact_status": "positive_signal",
             "impact": {"status": "positive_signal", "message": "Есть положительный сигнал."},
@@ -241,6 +242,7 @@ class OwnerAITests(unittest.TestCase):
             if row.get("job") == "cycle"
         ][0]
         self.assertEqual(cycle_auto["last_action_id"], 1)
+        self.assertEqual(cycle_auto["last_evaluated_at"], "2026-07-08T11:00:00")
         self.assertEqual(cycle_auto["last_summary"]["sent"], 3)
         self.assertEqual(cycle_auto["last_impact_status"], "positive_signal")
         self.assertIn("положительный", cycle_auto["last_impact"]["message"])

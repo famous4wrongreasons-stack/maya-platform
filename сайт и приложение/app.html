@@ -15350,6 +15350,9 @@ function AGodMode() {
       rows.slice(0, 5).map(function (it, i) {
         var action = it.action_card || (it.recommended ? { job: it.job, title: it.title, label: it.label, priority: it.status } : null);
         var resultText = automationResultText(it), impact = it.last_impact || {};
+        var canEvaluate = !!(it.last_action_id && it.last_status === 'done');
+        var ev = canEvaluate ? (evalS[it.last_action_id] || {}) : {};
+        var cols = action && canEvaluate ? '1fr 1fr' : '1fr';
         return e('div', { key: it.job || i, style: { padding: '10px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
           e('div', { style: { display: 'flex', gap: 10, alignItems: 'flex-start' } },
             e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'ok'), marginTop: 6, flexShrink: 0 } }),
@@ -15360,7 +15363,10 @@ function AGodMode() {
               impact.message ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: impact.status === 'positive_signal' ? statusColor('ok') : t.faint, lineHeight: 1.35, marginTop: 4 } }, impact.message) : null,
               it.last_error ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: statusColor('risk'), lineHeight: 1.35, marginTop: 4 } }, it.last_error) : null,
               it.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.next_step) : null)),
-          action ? e('div', { style: { marginTop: 8 } }, btn('В работу', function () { runOwnerAction(action); }, { primary: it.status === 'high' })) : null);
+          action || canEvaluate ? e('div', { style: { display: 'grid', gridTemplateColumns: cols, gap: 6, marginTop: 8 } },
+            action ? btn('В работу', function () { runOwnerAction(action); }, { primary: it.status === 'high' }) : null,
+            canEvaluate ? btn(ev.phase === 'running' ? 'Проверяю...' : (it.last_evaluated_at ? 'Проверить ещё' : 'Проверить'), function () { evaluateOwnerAction({ id: it.last_action_id }); }, { busy: ev.phase === 'running' }) : null) : null,
+          canEvaluate && ev.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: ev.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 6 } }, ev.msg) : null);
       })));
   }
   function renderPlanFact(sm) {

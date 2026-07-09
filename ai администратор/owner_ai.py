@@ -1120,6 +1120,7 @@ def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str
             "last_status": last.get("status"),
             "last_action_id": last.get("id"),
             "last_run_at": last_at,
+            "last_evaluated_at": last.get("evaluated_at"),
             "last_summary": last_summary,
             "last_impact_status": last.get("impact_status") or last_impact.get("status"),
             "last_impact": last_impact,
