@@ -2512,6 +2512,9 @@ async def panel_control_create_handler(request: web.Request) -> web.Response:
             potential_rub=body.get("potential_rub"),
             owner_next_step=body.get("owner_next_step") or "",
             signal_key=body.get("signal_key") or "",
+            signal_kind=body.get("signal_kind") or "",
+            signal_source=body.get("signal_source") or "",
+            action_job=body.get("action_job") or "",
             created_by=tg_id,
         )
         if not created.get("ok"):

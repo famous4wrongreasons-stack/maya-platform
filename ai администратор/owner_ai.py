@@ -563,13 +563,18 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
         "owner_next_step": payload.get("owner_next_step") or "",
         "due_at": task.get("result_due_at") or payload.get("due_at"),
         "signal_key": payload.get("signal_key"),
+        "signal_kind": payload.get("signal_kind"),
+        "signal_source": payload.get("signal_source"),
+        "action_job": payload.get("action_job"),
     }
 
 
 def create_control_task(*, title: str, detail: str = "", priority: str = "medium",
                         due_at: str | None = None, due_in_days=None,
                         potential_rub=None, owner_next_step: str = "",
-                        signal_key: str = "", created_by=None) -> dict:
+                        signal_key: str = "", signal_kind: str = "",
+                        signal_source: str = "", action_job: str = "",
+                        created_by=None) -> dict:
     """Создаёт ручную контрольную задачу AI-директора без ПД и автодействий."""
     title = _safe_control_text(title, 140)
     if not title:
@@ -580,6 +585,9 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
     if priority not in ("low", "medium", "high"):
         priority = "medium"
     signal_key = _safe_control_text(signal_key, 180)
+    signal_kind = _safe_control_text(signal_kind, 80)
+    signal_source = _safe_control_text(signal_source, 80)
+    action_job = _safe_control_text(action_job, 80)
     try:
         potential = _rub(potential_rub) if potential_rub is not None else None
     except Exception:
@@ -592,6 +600,9 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "owner_next_step": owner_next_step,
         "due_at": normalized_due_at,
         "signal_key": signal_key,
+        "signal_kind": signal_kind,
+        "signal_source": signal_source,
+        "action_job": action_job,
     }
     try:
         import database
@@ -910,6 +921,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 potential_rub=payload.get("potential_rub"),
                 due_at=due_at,
                 due_state=due_state,
+                action_job=payload.get("action_job"),
                 action_id=it.get("id"),
                 signal_key=payload.get("signal_key"),
                 owner_next_step=owner_next_step,

@@ -271,6 +271,7 @@ class OwnerAITests(unittest.TestCase):
             due_in_days=1,
             potential_rub=15000,
             owner_next_step="Если разрыв сохранится — запустить тёплый спрос.",
+            action_job="cycle",
             created_by=948205934,
         )
         center = owner_ai.command_center()
@@ -284,6 +285,8 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(control)
         self.assertEqual(control[0]["title"], "Проверить план-факт вечером")
         self.assertEqual(control[0]["potential_rub"], 15000)
+        self.assertEqual(created["control_item"]["action_job"], "cycle")
+        self.assertEqual(control[0]["action_job"], "cycle")
         self.assertIn("тёплый спрос", control[0]["owner_next_step"])
 
     def test_control_task_from_same_signal_is_not_duplicated(self):
