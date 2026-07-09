@@ -100,6 +100,7 @@ _AUTOMATION_LIBRARY = {
     "reviews": {"cadence_days": 1, "title": "Отзывы после визитов"},
     "subscriptions": {"cadence_days": 3, "title": "Абонементы"},
 }
+_AUTOMATION_COOLDOWN_SECONDS = 60
 
 
 def _today() -> str:
@@ -1067,21 +1068,32 @@ def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str
         last_at = last.get("completed_at") or last.get("created_at")
         last_dt = _parse_iso(last_at)
         days_since = None
+        seconds_since = None
         if last_dt:
             try:
                 days_since = max(0, (now_dt.date() - last_dt.date()).days)
+                seconds_since = max(0, int((now_dt - last_dt).total_seconds()))
             except Exception:
                 days_since = None
+                seconds_since = None
         rec = recommended.get(job)
         cadence = int(meta.get("cadence_days") or 1)
-        if rec:
-            state = "recommended"
-            status = "warn" if rec.get("priority") != "high" else "high"
-            next_step = "Есть повод запустить через подтверждение владельца."
+        if last and last.get("status") == "running":
+            state = "running"
+            status = "warn"
+            next_step = "Уже выполняется. Дождитесь завершения в журнале AI-директора."
         elif last and last.get("status") == "failed":
             state = "failed"
             status = "high"
             next_step = "Разобрать ошибку в журнале и повторить после проверки."
+        elif seconds_since is not None and seconds_since < _AUTOMATION_COOLDOWN_SECONDS:
+            state = "recently_run"
+            status = "ok"
+            next_step = "Только что запускалось. Повторный запуск пока заблокирован, чтобы не отправить дубли."
+        elif rec:
+            state = "recommended"
+            status = "warn" if rec.get("priority") != "high" else "high"
+            next_step = "Есть повод запустить через подтверждение владельца."
         elif not last:
             state = "never_run"
             status = "warn"
@@ -1106,8 +1118,13 @@ def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str
             "last_status": last.get("status"),
             "last_run_at": last_at,
             "days_since_last": days_since,
+            "seconds_since_last": seconds_since,
+            "cooldown_seconds_left": (
+                max(0, _AUTOMATION_COOLDOWN_SECONDS - seconds_since)
+                if seconds_since is not None and seconds_since < _AUTOMATION_COOLDOWN_SECONDS else 0
+            ),
             "next_step": next_step,
-            "action_card": rec,
+            "action_card": rec if state == "recommended" else None,
         })
     out.sort(key=lambda item: (
         -_severity_rank(item.get("status")),

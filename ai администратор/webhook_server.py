@@ -2911,12 +2911,31 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
     if not spec:
         return _cabinet_response({"ok": False, "reason": "Неизвестная задача."}, status=400)
     mod_name, fn_name, label, kind = spec
+    dedupe_key = f"panel_job_last:{int(tg_id) if tg_id else 0}:{job}"
+    try:
+        last = float(database.get_setting(dedupe_key) or 0)
+    except Exception:
+        last = 0.0
+    now = time.time()
+    if last and now - last < 60:
+        return _cabinet_response({
+            "ok": False,
+            "duplicate": True,
+            "job": job,
+            "label": label,
+            "cooldown_seconds_left": int(max(1, 60 - (now - last))),
+            "reason": f"«{label}» уже запускалась меньше минуты назад. Подождите, чтобы не отправить дубли.",
+        })
     try:
         mod = __import__(mod_name)
         fn = getattr(mod, fn_name)
     except Exception as e:
         logger.error(f"panel job import {job}: {e}")
         return _cabinet_response({"ok": False, "reason": "Задача недоступна."}, status=500)
+    try:
+        database.set_setting(dedupe_key, str(now))
+    except Exception:
+        pass
 
     action_id = None
     try:

@@ -15315,7 +15315,7 @@ function AGodMode() {
   }
   function automationStateText(s) {
     s = String(s || '');
-    return s === 'recommended' ? 'Рекомендовано' : (s === 'failed' ? 'Ошибка' : (s === 'stale' ? 'Давно не запускалось' : (s === 'never_run' ? 'Ещё не запускалось' : 'Готово')));
+    return s === 'recommended' ? 'Рекомендовано' : (s === 'running' ? 'Выполняется' : (s === 'recently_run' ? 'Только что запускалось' : (s === 'failed' ? 'Ошибка' : (s === 'stale' ? 'Давно не запускалось' : (s === 'never_run' ? 'Ещё не запускалось' : 'Готово')))));
   }
   function renderAutomationStatus(rows) {
     rows = rows || [];
