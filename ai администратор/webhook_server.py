@@ -2440,6 +2440,102 @@ async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True, "action": item})
 
 
+def _owner_assignment_due_label(raw: str | None = "") -> str:
+    raw = str(raw or "").strip()
+    if not raw:
+        return ""
+    try:
+        dt = datetime.fromisoformat(raw[:19])
+        return dt.strftime("%d.%m %H:%M")
+    except Exception:
+        return raw[:16]
+
+
+def _owner_assignment_public_title(raw: str | None = "") -> str:
+    text = str(raw or "Новая задача").strip()
+    try:
+        text = anonymizer.redact_pii(text)
+    except Exception:
+        pass
+    text = re.sub(r"\b\d[\d\s.,]*(?:₽|руб(?:\.|лей|ля)?)", "сумма", text, flags=re.I)
+    return " ".join(text.split())[:140] or "Новая задача"
+
+
+def _owner_assignment_message(task: dict | None) -> str:
+    task = task or {}
+    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    summary = task.get("summary") if isinstance(task.get("summary"), dict) else {}
+    assigned_to = str(payload.get("assigned_to") or summary.get("assigned_to") or "team").lower()
+    role_label = {
+        "admin": "Админ",
+        "master": "Мастер",
+        "team": "Команда",
+    }.get(assigned_to, "Команда")
+    assignee_name = str(payload.get("assignee_name") or summary.get("assignee_name") or "").strip()
+    assigned_label = role_label + (f" · {assignee_name[:60]}" if assignee_name else "")
+    title = _owner_assignment_public_title(task.get("title") or "Новая задача")
+    due_label = _owner_assignment_due_label(task.get("result_due_at") or payload.get("due_at"))
+    lines = [
+        "Задача от владельца",
+        f"Исполнитель: {assigned_label}",
+        f"Задача: {title}",
+    ]
+    if due_label:
+        lines.append(f"Срок: {due_label}")
+    lines.append("Подробные финансовые показатели остаются в Owner OS.")
+    return "\n".join(lines)
+
+
+async def _deliver_owner_control_assignment(request: web.Request, task: dict | None) -> dict:
+    """Доставляет назначенную owner_control задачу в рабочий контур без лишней аналитики."""
+    if not isinstance(task, dict):
+        return {"ok": False, "skipped": True, "reason": "empty_task"}
+    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    assigned_to = str(payload.get("assigned_to") or "owner").strip().lower()
+    if assigned_to not in ("admin", "master", "team"):
+        return {"ok": True, "skipped": True, "reason": "internal_assignment"}
+    state = str(payload.get("assignment_delivery_state") or "").strip().lower()
+    if state == "delivered" and int(payload.get("assignment_delivery_message_id") or 0):
+        return {"ok": True, "skipped": True, "reason": "already_delivered"}
+    try:
+        action_id = int(task.get("id") or 0)
+    except Exception:
+        action_id = 0
+    if not action_id:
+        return {"ok": False, "skipped": True, "reason": "no_action_id"}
+    text = _owner_assignment_message(task)
+    try:
+        msg_id = await asyncio.to_thread(
+            database.add_staff_message,
+            0,
+            "MAYA · задачи",
+            text,
+            "", "", "", "", 0, 0,
+        )
+    except Exception as e:
+        logger.error(f"owner assignment team chat save: {e}")
+        marked = await asyncio.to_thread(
+            database.mark_owner_control_task_delivery,
+            action_id,
+            state="failed",
+            channel="team_chat",
+            error="team_chat_save_failed",
+        )
+        return {"ok": False, "state": "failed", "task": marked}
+    try:
+        await _push_team_message(request.app["bot_app"], 0, "MAYA · задачи", text, "")
+    except Exception as e:
+        logger.error(f"owner assignment team chat push: {e}")
+    marked = await asyncio.to_thread(
+        database.mark_owner_control_task_delivery,
+        action_id,
+        state="delivered",
+        channel="team_chat",
+        message_id=msg_id,
+    )
+    return {"ok": True, "state": "delivered", "message_id": msg_id, "task": marked}
+
+
 async def panel_control_update_handler(request: web.Request) -> web.Response:
     """POST /api/panel/control/update — lifecycle ручной контрольной задачи."""
     try:
@@ -2477,6 +2573,10 @@ async def panel_control_update_handler(request: web.Request) -> web.Response:
         if not updated.get("ok"):
             status = 404 if updated.get("error") == "not_found" else 400
             return _cabinet_response(updated, status=status)
+        delivery = await _deliver_owner_control_assignment(request, updated.get("task"))
+        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
+            updated["task"] = delivery["task"]
+        updated["assignment_delivery"] = delivery
         center = await asyncio.to_thread(owner_ai.command_center)
     except Exception as e:
         logger.error(f"panel_control_update error: {e}")
@@ -2523,6 +2623,10 @@ async def panel_control_create_handler(request: web.Request) -> web.Response:
         )
         if not created.get("ok"):
             return _cabinet_response(created, status=400)
+        delivery = await _deliver_owner_control_assignment(request, created.get("task"))
+        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
+            created["task"] = delivery["task"]
+        created["assignment_delivery"] = delivery
         center = await asyncio.to_thread(owner_ai.command_center)
     except Exception as e:
         logger.error(f"panel_control_create error: {e}")

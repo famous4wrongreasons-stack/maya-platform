@@ -130,11 +130,22 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             elif action in ("assign", "reassign"):
                 item["payload"]["assigned_to"] = kwargs.get("assigned_to") or item["payload"].get("assigned_to") or "owner"
                 item["payload"]["assignee_name"] = kwargs.get("assignee_name") or ""
+                if item["payload"]["assigned_to"] in ("admin", "master", "team"):
+                    item["payload"]["assignment_delivery_channel"] = "team_chat"
+                    item["payload"]["assignment_delivery_state"] = "queued"
+                elif item["payload"]["assigned_to"] == "maya":
+                    item["payload"]["assignment_delivery_channel"] = "maya_queue"
+                    item["payload"]["assignment_delivery_state"] = "internal"
+                else:
+                    item["payload"]["assignment_delivery_channel"] = "owner_control"
+                    item["payload"]["assignment_delivery_state"] = "owner_only"
                 item["summary"] = {
                     "manual": True,
                     "last_action": action,
                     "assigned_to": item["payload"]["assigned_to"],
                     "assignee_name": item["payload"]["assignee_name"],
+                    "assignment_delivery_channel": item["payload"]["assignment_delivery_channel"],
+                    "assignment_delivery_state": item["payload"]["assignment_delivery_state"],
                 }
             return json.loads(json.dumps(item, ensure_ascii=False))
         return None
@@ -492,9 +503,13 @@ class OwnerAITests(unittest.TestCase):
 
         self.assertTrue(created["ok"])
         self.assertEqual(task["assigned_to"], "admin")
+        self.assertEqual(task["assignment_delivery_channel"], "team_chat")
+        self.assertEqual(task["assignment_delivery_state"], "queued")
         self.assertIn("Админ", task["assigned_label"])
         self.assertTrue(updated["ok"])
         self.assertEqual(reassigned["assigned_to"], "master")
+        self.assertEqual(reassigned["assignment_delivery_channel"], "team_chat")
+        self.assertEqual(reassigned["assignment_delivery_state"], "queued")
         self.assertIn("Мастер", reassigned["assigned_label"])
         self.assertIn("старший", reassigned["assigned_label"])
 

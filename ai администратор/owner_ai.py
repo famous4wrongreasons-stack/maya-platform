@@ -569,6 +569,31 @@ def _assignee_label(assigned_to: str | None = None, assignee_name: str | None = 
     return "%s · %s" % (base, name) if name else base
 
 
+def _assignment_delivery(assigned_to: str | None = None) -> tuple[str, str]:
+    assigned_to = _normalize_assignee(assigned_to)
+    if assigned_to in ("admin", "master", "team"):
+        return "team_chat", "queued"
+    if assigned_to == "maya":
+        return "maya_queue", "internal"
+    return "owner_control", "owner_only"
+
+
+def _assignment_delivery_label(state: str | None = "", channel: str | None = "") -> str:
+    state = str(state or "").strip().lower()
+    channel = str(channel or "").strip().lower()
+    if state == "delivered" and channel == "team_chat":
+        return "Доставлено в чат команды"
+    if state == "queued" and channel == "team_chat":
+        return "Ожидает доставки в чат"
+    if state == "failed":
+        return "Не удалось доставить"
+    if state == "internal" and channel == "maya_queue":
+        return "В очереди MAYA"
+    if state == "owner_only":
+        return "На контроле владельца"
+    return ""
+
+
 def _normalize_control_due_at(due_at: str | None = None, due_in_days=None) -> str:
     raw = str(due_at or "").strip()
     if raw:
@@ -608,6 +633,14 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
         "assigned_to": payload.get("assigned_to") or "owner",
         "assignee_name": payload.get("assignee_name") or "",
         "assigned_label": _assignee_label(payload.get("assigned_to"), payload.get("assignee_name")),
+        "assignment_delivery_state": payload.get("assignment_delivery_state") or "",
+        "assignment_delivery_channel": payload.get("assignment_delivery_channel") or "",
+        "assignment_delivery_message_id": payload.get("assignment_delivery_message_id") or 0,
+        "assignment_delivery_updated_at": payload.get("assignment_delivery_updated_at") or payload.get("assignment_delivered_at") or "",
+        "assignment_delivery_label": _assignment_delivery_label(
+            payload.get("assignment_delivery_state"),
+            payload.get("assignment_delivery_channel"),
+        ),
         "linked_action_id": payload.get("linked_action_id") or summary.get("linked_action_id"),
         "linked_action_job": payload.get("linked_action_job") or summary.get("linked_action_job"),
         "linked_action_status": payload.get("linked_action_status") or summary.get("linked_action_status"),
@@ -643,6 +676,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
     except Exception:
         potential = None
     normalized_due_at = _normalize_control_due_at(due_at, due_in_days)
+    delivery_channel, delivery_state = _assignment_delivery(assigned_to)
     payload = {
         "detail": detail,
         "priority": priority,
@@ -656,6 +690,10 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "assigned_to": assigned_to,
         "assignee_name": assignee_name,
         "assigned_label": _assignee_label(assigned_to, assignee_name),
+        "assignment_delivery_channel": delivery_channel,
+        "assignment_delivery_state": delivery_state,
+        "assignment_delivery_message_id": 0,
+        "assignment_delivery_error": "",
     }
     try:
         import database
@@ -905,7 +943,11 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             linked_action_impact_status: str | None = None,
             linked_action_impact_message: str | None = None,
             assigned_to: str | None = None,
-            assignee_name: str | None = "") -> None:
+            assignee_name: str | None = "",
+            assignment_delivery_state: str | None = "",
+            assignment_delivery_channel: str | None = "",
+            assignment_delivery_message_id=0,
+            assignment_delivery_updated_at: str | None = "") -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -926,6 +968,14 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "assigned_to": _normalize_assignee(assigned_to),
             "assignee_name": _safe_control_text(assignee_name, 80),
             "assigned_label": _assignee_label(assigned_to, assignee_name),
+            "assignment_delivery_state": assignment_delivery_state or "",
+            "assignment_delivery_channel": assignment_delivery_channel or "",
+            "assignment_delivery_message_id": assignment_delivery_message_id or 0,
+            "assignment_delivery_updated_at": assignment_delivery_updated_at or "",
+            "assignment_delivery_label": _assignment_delivery_label(
+                assignment_delivery_state,
+                assignment_delivery_channel,
+            ),
             "linked_action_id": linked_action_id,
             "linked_action_job": linked_action_job,
             "linked_action_status": linked_action_status,
@@ -1043,6 +1093,10 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 signal_key=payload.get("signal_key"),
                 assigned_to=payload.get("assigned_to") or "owner",
                 assignee_name=payload.get("assignee_name") or "",
+                assignment_delivery_state=payload.get("assignment_delivery_state") or summary.get("assignment_delivery_state") or "",
+                assignment_delivery_channel=payload.get("assignment_delivery_channel") or summary.get("assignment_delivery_channel") or "",
+                assignment_delivery_message_id=payload.get("assignment_delivery_message_id") or summary.get("assignment_delivery_message_id") or 0,
+                assignment_delivery_updated_at=payload.get("assignment_delivery_updated_at") or summary.get("assignment_delivery_updated_at") or payload.get("assignment_delivered_at") or "",
                 owner_next_step=owner_next_step,
                 linked_action_id=linked_action_id,
                 linked_action_job=linked_action_job,
@@ -1234,7 +1288,11 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             focus_reason: str | None = None, focus_label: str | None = None,
             due_state: str | None = None,
             assigned_to: str | None = None,
-            assignee_name: str | None = "") -> None:
+            assignee_name: str | None = "",
+            assignment_delivery_state: str | None = "",
+            assignment_delivery_channel: str | None = "",
+            assignment_delivery_message_id=0,
+            assignment_delivery_updated_at: str | None = "") -> None:
         if not key or key in seen or len(steps) >= 3:
             return
         if action_job and ("job:%s" % action_job) in seen and source != "control_focus":
@@ -1272,6 +1330,14 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             "assigned_to": _normalize_assignee(assigned_to),
             "assignee_name": _safe_control_text(assignee_name, 80),
             "assigned_label": _assignee_label(assigned_to, assignee_name),
+            "assignment_delivery_state": assignment_delivery_state or "",
+            "assignment_delivery_channel": assignment_delivery_channel or "",
+            "assignment_delivery_message_id": assignment_delivery_message_id or 0,
+            "assignment_delivery_updated_at": assignment_delivery_updated_at or "",
+            "assignment_delivery_label": _assignment_delivery_label(
+                assignment_delivery_state,
+                assignment_delivery_channel,
+            ),
         })
 
     for item in (control_focus.get("items") or [])[:1]:
@@ -1307,6 +1373,10 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             due_state=item.get("due_state"),
             assigned_to=item.get("assigned_to") or "owner",
             assignee_name=item.get("assignee_name") or "",
+            assignment_delivery_state=item.get("assignment_delivery_state") or "",
+            assignment_delivery_channel=item.get("assignment_delivery_channel") or "",
+            assignment_delivery_message_id=item.get("assignment_delivery_message_id") or 0,
+            assignment_delivery_updated_at=item.get("assignment_delivery_updated_at") or "",
         )
 
     gap = _rub(plan.get("gap_rub"))
@@ -1487,6 +1557,10 @@ def _task_center(*, control: list[dict], journal: list[dict],
             linked_action_id=None, linked_action_status: str | None = None,
             linked_action_evaluated_at: str | None = None,
             assignee_name: str | None = "",
+            assignment_delivery_state: str | None = "",
+            assignment_delivery_channel: str | None = "",
+            assignment_delivery_message_id=0,
+            assignment_delivery_updated_at: str | None = "",
             pinned: bool = False) -> None:
         key = (key or title or "task").strip()[:140]
         if not key or key in seen:
@@ -1511,6 +1585,14 @@ def _task_center(*, control: list[dict], journal: list[dict],
             "assigned_to": _normalize_assignee(assigned_to),
             "assignee_name": _safe_control_text(assignee_name, 80),
             "assigned_label": _assignee_label(assigned_to, assignee_name),
+            "assignment_delivery_state": assignment_delivery_state or "",
+            "assignment_delivery_channel": assignment_delivery_channel or "",
+            "assignment_delivery_message_id": assignment_delivery_message_id or 0,
+            "assignment_delivery_updated_at": assignment_delivery_updated_at or "",
+            "assignment_delivery_label": _assignment_delivery_label(
+                assignment_delivery_state,
+                assignment_delivery_channel,
+            ),
             "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
             "owner_next_step": owner_next_step or "",
             "due_at": due_at,
@@ -1550,6 +1632,10 @@ def _task_center(*, control: list[dict], journal: list[dict],
             linked_action_evaluated_at=step.get("linked_action_evaluated_at"),
             assigned_to=step.get("assigned_to") or "owner",
             assignee_name=step.get("assignee_name") or "",
+            assignment_delivery_state=step.get("assignment_delivery_state") or "",
+            assignment_delivery_channel=step.get("assignment_delivery_channel") or "",
+            assignment_delivery_message_id=step.get("assignment_delivery_message_id") or 0,
+            assignment_delivery_updated_at=step.get("assignment_delivery_updated_at") or "",
             pinned=True,
         )
 
@@ -1581,6 +1667,10 @@ def _task_center(*, control: list[dict], journal: list[dict],
             linked_action_id=item.get("linked_action_id"),
             linked_action_status=item.get("linked_action_status"),
             linked_action_evaluated_at=item.get("linked_action_evaluated_at"),
+            assignment_delivery_state=item.get("assignment_delivery_state") or "",
+            assignment_delivery_channel=item.get("assignment_delivery_channel") or "",
+            assignment_delivery_message_id=item.get("assignment_delivery_message_id") or 0,
+            assignment_delivery_updated_at=item.get("assignment_delivery_updated_at") or "",
         )
 
     for item in journal or []:
@@ -1656,6 +1746,8 @@ def _task_center(*, control: list[dict], journal: list[dict],
         "running_count": len([it for it in rows if it.get("lane") == "running"]),
         "owner_count": len([it for it in rows if it.get("assigned_to") == "owner"]),
         "maya_count": len([it for it in rows if it.get("assigned_to") == "maya"]),
+        "delivery_queued_count": len([it for it in rows if it.get("assignment_delivery_state") == "queued"]),
+        "delivery_done_count": len([it for it in rows if it.get("assignment_delivery_state") == "delivered"]),
         "money_at_stake_rub": sum(_rub(it.get("potential_rub")) for it in rows if it.get("potential_rub") is not None),
     }
     if summary["overdue_count"]:

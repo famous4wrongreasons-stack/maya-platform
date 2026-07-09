@@ -4330,9 +4330,26 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
             name = (assignee_name or "")[:80]
             payload["assigned_to"] = assigned
             payload["assignee_name"] = name
+            if assigned in ("admin", "master", "team"):
+                delivery_channel = "team_chat"
+                delivery_state = "queued"
+            elif assigned == "maya":
+                delivery_channel = "maya_queue"
+                delivery_state = "internal"
+            else:
+                delivery_channel = "owner_control"
+                delivery_state = "owner_only"
+            payload["assignment_delivery_channel"] = delivery_channel
+            payload["assignment_delivery_state"] = delivery_state
+            payload["assignment_delivery_updated_at"] = now
+            payload["assignment_delivery_error"] = ""
+            payload["assignment_delivery_message_id"] = 0
+            payload["assignment_delivery_key"] = "%s:%s:%s:%s" % (aid, assigned, name, now)
             summary["assigned_to"] = assigned
             summary["assignee_name"] = name
             summary["assigned_at"] = now
+            summary["assignment_delivery_channel"] = delivery_channel
+            summary["assignment_delivery_state"] = delivery_state
         if next_status in ("done", "canceled"):
             completed_at = now
             summary["result"] = next_status
@@ -4356,6 +4373,59 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
             ),
         )
 
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
+def mark_owner_control_task_delivery(action_id, *, state: str = "delivered",
+                                     channel: str = "team_chat", message_id: int = 0,
+                                     error: str = "") -> dict | None:
+    """Фиксирует, что назначенная контрольная задача доставлена исполнителю."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    if not aid:
+        return None
+    state = (state or "delivered").strip().lower()[:40]
+    if state not in ("queued", "delivered", "failed", "internal", "owner_only"):
+        state = "delivered"
+    channel = (channel or "team_chat").strip().lower()[:40]
+    now = _now()
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        if item.get("source") != "owner_control" or item.get("job") != "control_task":
+            return None
+        payload = _json_loads_safe(item.get("payload_json"))
+        summary = _json_loads_safe(item.get("summary_json"))
+        payload["assignment_delivery_state"] = state
+        payload["assignment_delivery_channel"] = channel
+        payload["assignment_delivery_updated_at"] = now
+        payload["assignment_delivery_error"] = (error or "")[:240]
+        if message_id:
+            payload["assignment_delivery_message_id"] = int(message_id)
+            payload["assignment_delivered_at"] = now
+        elif state != "delivered":
+            payload["assignment_delivery_message_id"] = int(payload.get("assignment_delivery_message_id") or 0)
+        summary["assignment_delivery_state"] = state
+        summary["assignment_delivery_channel"] = channel
+        summary["assignment_delivery_updated_at"] = now
+        if message_id:
+            summary["assignment_delivery_message_id"] = int(message_id)
+        if error:
+            summary["assignment_delivery_error"] = (error or "")[:180]
+        conn.execute(
+            "UPDATE owner_action_journal SET payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (_json_dumps_safe(payload), _json_dumps_safe(summary), "", aid),
+        )
     actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
     return actions[0] if actions else None
 

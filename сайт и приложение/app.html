@@ -15241,6 +15241,18 @@ function AGodMode() {
     if (it.linked_action_id) bits.push('#' + it.linked_action_id);
     return bits.join(' · ');
   }
+  function assignmentDeliveryText(it) {
+    it = it || {};
+    if (it.assignment_delivery_label) return it.assignment_delivery_label;
+    var s = String(it.assignment_delivery_state || '');
+    var ch = String(it.assignment_delivery_channel || '');
+    if (s === 'delivered' && ch === 'team_chat') return 'Доставлено в чат команды';
+    if (s === 'queued' && ch === 'team_chat') return 'Ожидает доставки в чат';
+    if (s === 'failed') return 'Не удалось доставить';
+    if (s === 'internal' && ch === 'maya_queue') return 'В очереди MAYA';
+    if (s === 'owner_only') return 'На контроле владельца';
+    return '';
+  }
   function editPlanTarget(sm) {
     sm = sm || {};
     setModal({ title: 'Дневной план', fields: [{ key: 'target', label: 'План выручки, ₽ (0 = авто)', value: String(sm.target_source === 'manual_setting' ? (sm.daily_target_rub || 0) : 0) }], submit: function (v) {
@@ -15490,6 +15502,7 @@ function AGodMode() {
               e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, step.title || 'Шаг'),
               step.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(step.status || 'warn'), whiteSpace: 'nowrap' } }, step.focus_label) : null),
             step.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, step.assigned_label) : null,
+            assignmentDeliveryText(step) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: step.assignment_delivery_state === 'failed' ? statusColor('risk') : t.dim, marginTop: 3 } }, assignmentDeliveryText(step)) : null,
             step.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, step.detail) : null,
             step.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, step.owner_next_step) : null,
             step.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(step.potential_rub)) : null,
@@ -15564,6 +15577,7 @@ function AGodMode() {
               e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Задача'),
               it.lane_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, it.lane_label) : null),
             e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label || 'Владелец'),
+            assignmentDeliveryText(it) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.assignment_delivery_state === 'failed' ? statusColor('risk') : t.dim, marginTop: 3 } }, assignmentDeliveryText(it)) : null,
             it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
             it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null,
             dueLabel ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.due_state === 'overdue' ? statusColor('risk') : (it.due_state === 'today' ? statusColor('warn') : t.dim), marginTop: 5 } }, dueLabel) : null,
