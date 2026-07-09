@@ -586,13 +586,32 @@ TOOLS = [
         "description": (
             "ТОЛЬКО для владельца. Полный снимок Maya OS / Owner Command Center: "
             "execution_plan (1-3 шага владельца на день), control_focus (главный "
-            "фокус контроля), task_center (единый центр задач), план-факт, риски, очередь управленческих задач, "
-            "клиенты/активы, услуги, мастера, действия AI-директора и журнал. "
+            "фокус контроля), task_center (единый центр задач), autonomous_director "
+            "(Maya OS v2: KPI, финансовый прогноз, approval matrix, кандидаты автозадач), "
+            "план-факт, риски, очередь управленческих задач, клиенты/активы, услуги, мастера, действия AI-директора и журнал. "
             "Вызывай на «Maya OS / центр управления / что контролировать / план-факт / "
             "журнал AI-директора / статус OS / что делать дальше / что сейчас главное / какие задачи / что просрочено». "
             "ЧТЕНИЕ. Не выдумывай отсутствующие цифры — используй только поля инструмента."
         ),
         "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "run_autonomous_director_tick",
+        "description": (
+            "ТОЛЬКО для владельца. Запустить безопасный автопилот Maya OS v2: "
+            "создать внутренние контрольные задачи из autonomous_director.task_candidates. "
+            "Не отправляет рассылки, не меняет цены, записи, зарплаты или доступы. "
+            "Внешние/денежные действия остаются через подтверждение владельца. "
+            "Вызывай на «запусти автопилот / пусть Майя сама поставит задачи / "
+            "создай задачи по OS / включи автономного директора»."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Максимум задач создать за один запуск, по умолчанию 5."},
+            },
+            "required": [],
+        },
     },
     {
         "name": "create_owner_control_task",
@@ -789,7 +808,8 @@ _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
-    "update_owner_control_task", "get_money_opportunities", "get_return_candidates",
+    "update_owner_control_task", "run_autonomous_director_tick",
+    "get_money_opportunities", "get_return_candidates",
     "get_empty_windows", "get_expiring_assets", "get_service_insights",
     "get_master_performance", "get_risk_signals", "salon_action",
 }
@@ -910,6 +930,7 @@ _WRITE_TOOLS = {
     "remember_client_preference", "start_gift_cert_purchase",
     "remember_business_rule", "forget_business_rule",
     "create_owner_control_task", "update_owner_control_task",
+    "run_autonomous_director_tick",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1881,6 +1902,15 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     result = owner_ai.master_performance()
                 else:  # get_risk_signals
                     result = owner_ai.risk_signals()
+        elif tool_name == "run_autonomous_director_tick":
+            if _role not in ("owner", "founder"):
+                result = {"error": "Автопилот Maya OS доступен только владельцу."}
+            else:
+                import owner_ai
+                result = owner_ai.run_autonomous_director_tick(
+                    created_by=user_id,
+                    limit=tool_input.get("limit") or 5,
+                )
         elif tool_name == "create_owner_control_task":
             if _role not in ("owner", "founder"):
                 result = {"error": "Контрольные задачи доступны только владельцу."}
@@ -2253,6 +2283,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "конкретикой из них, а не общими словами:\n"
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше / какие задачи / что просрочено» → get_owner_command_center.\n"
+                    "• «запусти автопилот / пусть MAYA сама поставит задачи / включи автономного директора / создай задачи по OS» → run_autonomous_director_tick. Он создаёт только внутренние контрольные задачи; рассылки, деньги, цены, зарплаты и доступы не запускает без владельца.\n"
                     "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
                     "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни на доработку / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
@@ -2285,8 +2316,9 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "поле note из инструмента. Нет данных — скажи прямо, цифры не выдумывай."
                     " Для мастеров: «прибыль» из get_master_performance называй вкладом "
                     "после процента мастера, не полной чистой прибылью салона. Для "
-                    "get_owner_command_center отвечай от главного: execution_plan, "
-                    "task_center, control_focus, summary.top_control, plan_fact, control_queue и next_action; если блока или цифры нет — "
+                    "get_owner_command_center отвечай от главного: autonomous_director, "
+                    "kpi_scorecard, financial_director, execution_plan, task_center, "
+                    "control_focus, summary.top_control, plan_fact, control_queue и next_action; если блока или цифры нет — "
                     "не заменяй его догадкой. create_owner_control_task используй только "
                     "по явной просьбе владельца создать/зафиксировать контроль; после "
                     "создания коротко скажи, что задача добавлена в очередь контроля. "

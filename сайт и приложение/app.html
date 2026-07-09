@@ -15113,6 +15113,20 @@ function AGodMode() {
   function btn(label, onClick, opts) { opts = opts || {}; return e('div', { onClick: onClick, style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 14px', borderRadius: 999, textAlign: 'center', cursor: 'pointer', border: '1px solid ' + (opts.primary ? 'transparent' : t.line), background: opts.primary ? t.accent : 'transparent', color: opts.primary ? (dark ? '#15140f' : '#fff') : t.dim, opacity: opts.busy ? 0.6 : 1 } }, label); }
   function loadingMsg() { return e('div', { style: { padding: '46px 0', textAlign: 'center', fontFamily: BODY, fontSize: 13, color: t.dim } }, busy ? 'Загружаем…' : 'Нет данных'); }
   function grid2(kids) { return e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 } }, kids); }
+  function runAutonomyTick() {
+    setControlS(function (s) { return Object.assign({}, s, { autonomy: { phase: 'running' } }); });
+    gfetch('panel_autonomy_tick', { limit: 5 }).then(function (j) {
+      var ok = !!(j && !j.error && j.ok !== false);
+      var created = j && j.autopilot ? (j.autopilot.created_count || 0) : 0;
+      setControlS(function (s) {
+        return Object.assign({}, s, { autonomy: { phase: 'done', ok: ok, msg: ok ? ('Создано задач: ' + created) : 'Не удалось' } });
+      });
+      if (ok) setCc(j);
+      else loadCommand();
+    }).catch(function () {
+      setControlS(function (s) { return Object.assign({}, s, { autonomy: { phase: 'done', ok: false, msg: 'Не удалось' } }); });
+    });
+  }
   function runOwnerAction(a) {
     var job = a && a.job;
     if (!job) return;
@@ -15623,6 +15637,48 @@ function AGodMode() {
             it.linked_action_id && linkedEval.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: linkedEval.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, linkedEval.msg) : null));
       })));
   }
+  function renderAutonomousDirector(director, kpi, finance) {
+    director = director || {};
+    kpi = kpi || {};
+    finance = finance || {};
+    var sm = director.summary || {}, fsm = finance.summary || {};
+    var rows = director.task_candidates || [];
+    var st = controlS.autonomy || {};
+    var detail = [
+      sm.open_autocreate_count ? ('новых задач ' + sm.open_autocreate_count) : '',
+      sm.approval_required_count ? ('approval ' + sm.approval_required_count) : '',
+      fsm.money_at_stake_rub ? ('на кону ' + money(fsm.money_at_stake_rub)) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('AI-директор v2'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(director.status || 'ok'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, director.headline || 'Автономный директор'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      grid2([
+        kpiCell(kpi.score == null ? '—' : String(kpi.score), 'KPI score'),
+        kpiCell(money(fsm.projected_month_gross_rub || 0), 'Прогноз месяца'),
+        kpiCell(money(fsm.projected_month_contribution_after_salary_rub || 0), 'Вклад после ЗП'),
+        kpiCell(String(sm.open_autocreate_count || 0), 'Можно создать')
+      ]),
+      rows.slice(0, 4).map(function (it, i) {
+        return e('div', { key: it.signal_key || i, style: { padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.priority || 'warn'), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Автозадача'),
+                e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.in_control ? statusColor('ok') : statusColor(it.priority || 'warn'), whiteSpace: 'nowrap' } }, it.in_control ? 'В контроле' : (it.approval_required ? 'Approval' : 'Auto'))),
+              it.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.4, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label) : null,
+              it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
+              it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null)));
+      }),
+      e('div', { style: { display: 'grid', gridTemplateColumns: st.phase === 'done' ? '1fr 1fr' : '1fr', gap: 8, marginTop: 10 } },
+        btn(st.phase === 'running' ? 'Запускаю...' : 'Запустить автопилот', function () { if (st.phase !== 'running') runAutonomyTick(); }, { primary: (sm.open_autocreate_count || 0) > 0, busy: st.phase === 'running' }),
+        st.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, alignSelf: 'center' } }, st.msg) : null),
+      director.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, director.next_step) : null));
+  }
   function renderOwnerReview(review) {
     review = review || {};
     var rows = review.items || [], sm = review.summary || {};
@@ -15857,6 +15913,9 @@ function AGodMode() {
     var executionPlan = cc.execution_plan || {};
     var taskCenter = cc.task_center || {};
     var ownerReview = cc.owner_review || {};
+    var autonomousDirector = cc.autonomous_director || {};
+    var kpiScorecard = cc.kpi_scorecard || {};
+    var financialDirector = cc.financial_director || {};
     var attention = cc.attention_feed || [];
     var automations = cc.automation_status || [];
     var automationQueue = cc.automation_queue || {};
@@ -15871,6 +15930,7 @@ function AGodMode() {
         kpiCell(String(todaySm.free_capacity_today || 0), 'Свободная ёмкость'),
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
+      renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),
       renderExecutionPlan(executionPlan),
       renderOwnerReview(ownerReview),
       renderTaskCenter(taskCenter),

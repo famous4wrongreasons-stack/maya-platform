@@ -658,6 +658,7 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
         "signal_key": payload.get("signal_key"),
         "signal_kind": payload.get("signal_kind"),
         "signal_source": payload.get("signal_source"),
+        "safe_autocreate": bool(payload.get("safe_autocreate")),
         "action_job": payload.get("action_job"),
         "assigned_to": payload.get("assigned_to") or "owner",
         "assignee_name": payload.get("assignee_name") or "",
@@ -689,7 +690,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
                         signal_key: str = "", signal_kind: str = "",
                         signal_source: str = "", action_job: str = "",
                         assigned_to: str = "owner", assignee_name: str = "",
-                        created_by=None) -> dict:
+                        created_by=None, safe_autocreate: bool = False) -> dict:
     """Создаёт ручную контрольную задачу AI-директора без ПД и автодействий."""
     title = _safe_control_text(title, 140)
     if not title:
@@ -728,6 +729,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "assignment_delivery_state": delivery_state,
         "assignment_delivery_message_id": 0,
         "assignment_delivery_error": "",
+        "safe_autocreate": bool(safe_autocreate),
     }
     try:
         import database
@@ -1128,7 +1130,8 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             assignment_delivery_updated_at: str | None = "",
             assignment_work_state: str | None = "",
             assignment_work_updated_at: str | None = "",
-            assignment_work_actor_name: str | None = "") -> None:
+            assignment_work_actor_name: str | None = "",
+            safe_autocreate: bool = False) -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -1169,6 +1172,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "linked_action_evaluated_at": linked_action_evaluated_at,
             "linked_action_impact_status": linked_action_impact_status,
             "linked_action_impact_message": linked_action_impact_message,
+            "safe_autocreate": bool(safe_autocreate),
         })
 
     journal_by_id = {}
@@ -1308,6 +1312,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 linked_action_evaluated_at=linked_evaluated_at,
                 linked_action_impact_status=linked_impact_status,
                 linked_action_impact_message=linked_impact_message,
+                safe_autocreate=payload.get("safe_autocreate"),
             )
         if status == "failed":
             add(
@@ -1504,7 +1509,8 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             assignment_delivery_updated_at: str | None = "",
             assignment_work_state: str | None = "",
             assignment_work_updated_at: str | None = "",
-            assignment_work_actor_name: str | None = "") -> None:
+            assignment_work_actor_name: str | None = "",
+            safe_autocreate: bool = False) -> None:
         if not key or key in seen or len(steps) >= 3:
             return
         if action_job and ("job:%s" % action_job) in seen and source != "control_focus":
@@ -1554,6 +1560,7 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             "assignment_work_updated_at": assignment_work_updated_at or "",
             "assignment_work_actor_name": _safe_control_text(assignment_work_actor_name, 80),
             "assignment_work_label": _assignment_work_label(assignment_work_state),
+            "safe_autocreate": bool(safe_autocreate),
         })
 
     for item in (control_focus.get("items") or [])[:1]:
@@ -1596,6 +1603,7 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             assignment_work_state=item.get("assignment_work_state") or "",
             assignment_work_updated_at=item.get("assignment_work_updated_at") or "",
             assignment_work_actor_name=item.get("assignment_work_actor_name") or "",
+            safe_autocreate=item.get("safe_autocreate"),
         )
 
     gap = _rub(plan.get("gap_rub"))
@@ -1790,7 +1798,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             assignment_work_state: str | None = "",
             assignment_work_updated_at: str | None = "",
             assignment_work_actor_name: str | None = "",
-            pinned: bool = False) -> None:
+            pinned: bool = False, safe_autocreate: bool = False) -> None:
         key = (key or title or "task").strip()[:140]
         if not key or key in seen:
             return
@@ -1836,6 +1844,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             "linked_action_id": linked_action_id,
             "linked_action_status": linked_action_status,
             "linked_action_evaluated_at": linked_action_evaluated_at,
+            "safe_autocreate": bool(safe_autocreate),
             "pinned": bool(pinned),
         })
 
@@ -1873,6 +1882,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             assignment_work_state=step.get("assignment_work_state") or "",
             assignment_work_updated_at=step.get("assignment_work_updated_at") or "",
             assignment_work_actor_name=step.get("assignment_work_actor_name") or "",
+            safe_autocreate=step.get("safe_autocreate"),
             pinned=True,
         )
 
@@ -1912,6 +1922,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             assignment_work_state=item.get("assignment_work_state") or "",
             assignment_work_updated_at=item.get("assignment_work_updated_at") or "",
             assignment_work_actor_name=item.get("assignment_work_actor_name") or "",
+            safe_autocreate=item.get("safe_autocreate"),
         )
 
     for item in journal or []:
@@ -2444,6 +2455,411 @@ def _automation_queue(automations: list[dict]) -> dict:
     }
 
 
+def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
+                   exp: dict, svc: dict, control_focus: dict,
+                   owner_review: dict, automation_queue: dict) -> dict:
+    """Сводный KPI-пульт: не бухгалтерия, а быстрый health-score бизнеса."""
+    progress = plan.get("progress_pct")
+    free_capacity = _rub(snap.get("free_capacity_today"))
+    booked = _rub(snap.get("booked_today"))
+    capacity_total = booked + free_capacity
+    load_pct = int(round(booked * 100 / capacity_total)) if capacity_total else 100
+    sleeping = _rub(ret.get("count"))
+    weak_services = len(svc.get("weak_services") or [])
+    review_ready = _rub((owner_review.get("summary") or {}).get("ready_count"))
+    overdue = _rub((control_focus.get("summary") or {}).get("overdue_count"))
+    automation_actions = _rub((automation_queue.get("summary") or {}).get("actionable_count"))
+    score = 100
+    if progress is not None and progress < 100:
+        score -= min(24, int((100 - max(0, progress)) * 0.35))
+    if load_pct < 80:
+        score -= min(18, int((80 - load_pct) * 0.45))
+    if sleeping:
+        score -= min(14, max(3, sleeping // 2))
+    if weak_services:
+        score -= min(12, weak_services * 4)
+    if overdue:
+        score -= min(18, overdue * 6)
+    if review_ready:
+        score -= min(10, review_ready * 3)
+    if automation_actions:
+        score -= min(8, automation_actions * 2)
+    score = max(0, min(100, score))
+    if score < 55:
+        status = "risk"
+        headline = "Бизнес требует вмешательства"
+    elif score < 78:
+        status = "warn"
+        headline = "Есть управленческие просадки"
+    else:
+        status = "ok"
+        headline = "Операционный контур в норме"
+    items = [
+        {
+            "key": "revenue_plan",
+            "title": "План выручки",
+            "value": progress,
+            "unit": "%",
+            "status": "warn" if progress is not None and progress < 100 else "ok",
+            "detail": "Прогресс дневного плана." if progress is not None else "План пока считается автоматически.",
+        },
+        {
+            "key": "daily_load",
+            "title": "Загрузка дня",
+            "value": load_pct,
+            "unit": "%",
+            "status": "warn" if load_pct < 80 else "ok",
+            "detail": "Записи относительно доступной ёмкости дня.",
+        },
+        {
+            "key": "client_base",
+            "title": "Клиентская база",
+            "value": sleeping,
+            "unit": "уснувших",
+            "status": "warn" if sleeping else "ok",
+            "detail": "Клиенты без визита 28-56 дней.",
+        },
+        {
+            "key": "execution",
+            "title": "Исполнение",
+            "value": overdue + review_ready,
+            "unit": "контролей",
+            "status": "risk" if overdue else ("warn" if review_ready else "ok"),
+            "detail": "Просрочки и задачи, ожидающие решения владельца.",
+        },
+    ]
+    top_profit = masters.get("top_profit_master") or {}
+    if top_profit:
+        items.append({
+            "key": "master_profit_leader",
+            "title": "Лидер вклада",
+            "value": top_profit.get("name"),
+            "unit": "",
+            "status": "ok",
+            "detail": "Вклад после процента: %s ₽." % _m(top_profit.get("profit_after_salary_rub")),
+        })
+    return {
+        "status": status,
+        "headline": headline,
+        "score": score,
+        "summary": {
+            "score": score,
+            "plan_progress_pct": progress,
+            "daily_load_pct": load_pct,
+            "free_capacity_today": free_capacity,
+            "sleeping_clients": sleeping,
+            "weak_services_count": weak_services,
+            "owner_review_ready_count": review_ready,
+            "automation_actionable_count": automation_actions,
+        },
+        "items": items,
+        "note": "KPI-score — операционный индикатор, не бухгалтерский отчёт.",
+    }
+
+
+def _financial_director(*, snap: dict, plan: dict, masters: dict,
+                        opps: list[dict], risks: list[dict]) -> dict:
+    """Финансовый директор: прогноз по run-rate и управленческие деньги на кону."""
+    today = date.today()
+    first = today.replace(day=1)
+    next_month = (first.replace(year=first.year + 1, month=1) if first.month == 12
+                  else first.replace(month=first.month + 1))
+    days_in_month = max(1, (next_month - first).days)
+    gross_30 = _rub(masters.get("total_gross_rub"))
+    salary_30 = _rub(masters.get("salary_total_rub"))
+    contribution_30 = _rub(masters.get("profit_after_salary_total_rub"))
+    daily_gross_run_rate = _rub(gross_30 / 30) if gross_30 else _rub(snap.get("avg_check_rub")) * _rub(snap.get("booked_today"))
+    daily_contribution_run_rate = _rub(contribution_30 / 30) if contribution_30 else 0
+    projected_month_gross = daily_gross_run_rate * days_in_month
+    projected_month_contribution = daily_contribution_run_rate * days_in_month
+    money_at_stake = _money_at_stake(opps, risks)
+    plan_gap = _rub(plan.get("gap_rub"))
+    runway_status = "warn" if plan_gap < 0 or money_at_stake else "ok"
+    decisions = []
+    if plan_gap < 0:
+        decisions.append({
+            "key": "close_daily_gap",
+            "title": "Закрыть разрыв дня",
+            "detail": "Не хватает %s ₽ до дневного плана." % _m(abs(plan_gap)),
+            "status": "high" if plan.get("status") == "risk" else "medium",
+            "potential_rub": abs(plan_gap),
+        })
+    if money_at_stake:
+        decisions.append({
+            "key": "protect_money_at_stake",
+            "title": "Забрать деньги на кону",
+            "detail": "Возможности и риски дают до %s ₽ потенциального эффекта." % _m(money_at_stake),
+            "status": "medium",
+            "potential_rub": money_at_stake,
+        })
+    return {
+        "status": runway_status,
+        "headline": "Финансовый директор держит прогноз месяца",
+        "summary": {
+            "gross_30d_rub": gross_30,
+            "salary_30d_rub": salary_30,
+            "contribution_after_salary_30d_rub": contribution_30,
+            "daily_gross_run_rate_rub": daily_gross_run_rate,
+            "projected_month_gross_rub": projected_month_gross,
+            "projected_month_contribution_after_salary_rub": projected_month_contribution,
+            "money_at_stake_rub": money_at_stake,
+            "plan_gap_rub": plan_gap,
+            "days_in_month": days_in_month,
+        },
+        "decisions": decisions[:4],
+        "note": (
+            "Прогноз месяца считается по run-rate последних 30 дней. Общие расходы "
+            "салона пока не распределены: это вклад после выплат мастерам, не чистая прибыль."
+        ),
+    }
+
+
+def _approval_matrix() -> dict:
+    """Матрица автономии: что MAYA может делать сама, а где нужен владелец."""
+    rows = [
+        {
+            "key": "internal_control_tasks",
+            "title": "Внутренние задачи и контроль",
+            "autonomy": "auto",
+            "owner_approval": False,
+            "examples": ["создать задачу", "назначить контроль", "поставить дедлайн"],
+        },
+        {
+            "key": "staff_followup",
+            "title": "Напоминания сотрудникам",
+            "autonomy": "supervised",
+            "owner_approval": False,
+            "examples": ["попросить статус", "вернуть задачу в работу"],
+        },
+        {
+            "key": "marketing_broadcast",
+            "title": "Рассылки клиентам",
+            "autonomy": "approval_required",
+            "owner_approval": True,
+            "examples": ["реактивация", "цикл визита", "абонементы"],
+        },
+        {
+            "key": "money_prices_payroll",
+            "title": "Деньги, цены, зарплаты",
+            "autonomy": "approval_required",
+            "owner_approval": True,
+            "examples": ["изменить цену", "утвердить выплату", "скидка"],
+        },
+        {
+            "key": "access_and_sensitive_data",
+            "title": "Доступы и чувствительные данные",
+            "autonomy": "owner_only",
+            "owner_approval": True,
+            "examples": ["роль сотрудника", "зарплаты", "персональные данные"],
+        },
+    ]
+    return {
+        "version": "approval_matrix_v1",
+        "status": "ok",
+        "headline": "Автономия включена только в безопасном контуре",
+        "rows": rows,
+        "summary": {
+            "auto_count": len([r for r in rows if r.get("autonomy") == "auto"]),
+            "approval_required_count": len([r for r in rows if r.get("owner_approval")]),
+        },
+    }
+
+
+def _autonomous_task_candidates(*, plan: dict, top_risk: dict | None,
+                                automation_queue: dict, owner_review: dict,
+                                svc: dict, control: list[dict]) -> list[dict]:
+    """Что AI-директор может сам поставить в контроль как внутреннюю задачу."""
+    active_keys = {
+        item.get("signal_key")
+        for item in control or []
+        if item.get("source") == "owner_control" and item.get("signal_key")
+    }
+    out, seen = [], set()
+
+    def add(key: str, title: str, detail: str = "", *, priority: str = "medium",
+            potential_rub=None, assigned_to: str = "owner", assignee_name: str = "",
+            due_in_days: int = 1, action_job: str = "", approval_required: bool = False,
+            owner_next_step: str = "") -> None:
+        signal_key = "autonomy:%s" % (key or title or "task")
+        if signal_key in seen:
+            return
+        seen.add(signal_key)
+        in_control = signal_key in active_keys
+        out.append({
+            "key": key,
+            "signal_key": signal_key,
+            "title": title or "Автономная задача",
+            "detail": detail or "",
+            "priority": priority if priority in ("low", "medium", "high") else "medium",
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+            "assigned_to": _normalize_assignee(assigned_to),
+            "assignee_name": _safe_control_text(assignee_name, 80),
+            "assigned_label": _assignee_label(assigned_to, assignee_name),
+            "due_in_days": due_in_days,
+            "action_job": action_job or "",
+            "approval_required": bool(approval_required),
+            "safe_autocreate": True,
+            "in_control": in_control,
+            "owner_next_step": owner_next_step or "Довести задачу до результата и проверить эффект.",
+        })
+
+    gap = _rub(plan.get("gap_rub"))
+    if plan.get("status") in ("warn", "risk") and gap < 0:
+        add(
+            "plan_fact_gap",
+            "Автопилот: добрать план дня",
+            "Разрыв %s ₽; проверить свободные окна и подготовить тёплый спрос." % _m(abs(gap)),
+            priority="high" if plan.get("status") == "risk" else "medium",
+            potential_rub=abs(gap),
+            assigned_to="admin",
+            assignee_name="смена",
+            due_in_days=1,
+            action_job="cycle",
+            approval_required=True,
+            owner_next_step="Админу проверить окна; владельцу подтвердить рассылку, если нужен внешний контакт.",
+        )
+    if top_risk:
+        add(
+            "top_risk:%s" % (top_risk.get("type") or top_risk.get("title") or "risk"),
+            "Автопилот: снять главный риск",
+            top_risk.get("detail") or top_risk.get("title") or "",
+            priority="high" if _severity_rank(top_risk.get("severity")) >= 3 else "medium",
+            potential_rub=top_risk.get("potential_rub"),
+            assigned_to="owner",
+            due_in_days=1,
+            owner_next_step=top_risk.get("action_hint") or "Назначить ответственного и закрыть риск.",
+        )
+    for item in (automation_queue.get("items") or [])[:2]:
+        if item.get("next_action") not in ("run", "fix_or_retry") or not item.get("job"):
+            continue
+        add(
+            "automation:%s" % item.get("job"),
+            "Автопилот: подготовить сценарий «%s»" % (item.get("title") or item.get("job")),
+            item.get("next_step") or "Подготовить запуск и дождаться подтверждения владельца.",
+            priority="high" if item.get("status") == "high" else "medium",
+            assigned_to="maya",
+            due_in_days=1,
+            action_job=item.get("job") or "",
+            approval_required=True,
+            owner_next_step="MAYA готовит сценарий; внешний запуск только после подтверждения владельца.",
+        )
+    ready_review = (owner_review.get("summary") or {}).get("ready_count") or 0
+    if ready_review:
+        add(
+            "owner_review_ready",
+            "Автопилот: принять готовые поручения",
+            "Команда отметила готовыми %s задач(и). Нужно закрыть или вернуть на доработку." % _m(ready_review),
+            priority="medium",
+            assigned_to="owner",
+            due_in_days=1,
+            owner_next_step="Проверить результат исполнителя и принять решение.",
+        )
+    weak = svc.get("weak_services") or []
+    if weak:
+        first = weak[0] or {}
+        add(
+            "weak_service:%s" % (first.get("title") or first.get("service") or "service"),
+            "Автопилот: разобрать просевшую услугу",
+            "Просела услуга: %s. Проверить причину, подачу и предложение в чате." % (first.get("title") or first.get("service") or "услуга"),
+            priority="medium",
+            assigned_to="owner",
+            due_in_days=2,
+            owner_next_step="Решить: усилить продажу, пакет, скрипт админа или временно не продвигать.",
+        )
+    out.sort(key=lambda item: (
+        item.get("in_control"),
+        -_severity_rank(item.get("priority")),
+        item.get("potential_rub") is None,
+        -(item.get("potential_rub") or 0),
+        item.get("title") or "",
+    ))
+    return out[:6]
+
+
+def _autonomous_director(*, kpi: dict, finance: dict, approval: dict,
+                         task_candidates: list[dict]) -> dict:
+    open_candidates = [c for c in task_candidates if c.get("safe_autocreate") and not c.get("in_control")]
+    approval_needed = [c for c in task_candidates if c.get("approval_required")]
+    if open_candidates:
+        status = "warn"
+        headline = "Автопилот готов поставить внутренние задачи"
+    elif approval_needed:
+        status = "warn"
+        headline = "Есть действия, требующие подтверждения владельца"
+    else:
+        status = "ok"
+        headline = "Автономный контур под контролем"
+    return {
+        "version": "maya_os_v2_autonomous_director",
+        "status": status,
+        "headline": headline,
+        "mode": "supervised_autopilot",
+        "capabilities": [
+            "сам считает KPI и прогноз",
+            "сам формирует внутренние задачи",
+            "сам держит approval matrix",
+            "не запускает деньги и рассылки без владельца",
+        ],
+        "summary": {
+            "kpi_score": kpi.get("score"),
+            "task_candidates_count": len(task_candidates),
+            "open_autocreate_count": len(open_candidates),
+            "approval_required_count": len(approval_needed),
+            "projected_month_gross_rub": (finance.get("summary") or {}).get("projected_month_gross_rub"),
+            "money_at_stake_rub": (finance.get("summary") or {}).get("money_at_stake_rub"),
+        },
+        "task_candidates": task_candidates,
+        "approval_matrix": approval,
+        "next_step": (
+            "Запустить автопилот: MAYA создаст безопасные внутренние задачи и не тронет внешние действия без подтверждения."
+            if open_candidates else "Наблюдать и проверять эффект уже созданных задач."
+        ),
+    }
+
+
+def run_autonomous_director_tick(*, created_by=None, limit: int = 5) -> dict:
+    """Создаёт безопасные внутренние задачи из autonomous_director.task_candidates."""
+    center = command_center()
+    director = center.get("autonomous_director") or {}
+    candidates = [
+        c for c in (director.get("task_candidates") or [])
+        if c.get("safe_autocreate") and not c.get("in_control")
+    ][:max(1, min(10, int(limit or 5)))]
+    created, skipped = [], []
+    for cand in candidates:
+        result = create_control_task(
+            title=cand.get("title") or "Автономная задача",
+            detail=cand.get("detail") or "",
+            priority=cand.get("priority") or "medium",
+            due_in_days=cand.get("due_in_days") or 1,
+            potential_rub=cand.get("potential_rub"),
+            owner_next_step=cand.get("owner_next_step") or "",
+            signal_key=cand.get("signal_key") or "",
+            signal_kind="autonomy",
+            signal_source="maya_os_v2",
+            action_job=cand.get("action_job") or "",
+            assigned_to=cand.get("assigned_to") or "owner",
+            assignee_name=cand.get("assignee_name") or "",
+            created_by=created_by,
+            safe_autocreate=True,
+        )
+        if result.get("ok") and not result.get("existing"):
+            created.append({"candidate": cand, "task": result.get("task"), "task_id": result.get("task_id")})
+        else:
+            skipped.append({"candidate": cand, "result": result})
+    updated_center = command_center()
+    return {
+        "ok": True,
+        "mode": "supervised_autopilot",
+        "created_count": len(created),
+        "skipped_count": len(skipped),
+        "created": created,
+        "skipped": skipped,
+        "center": updated_center,
+        "note": "Созданы только внутренние контрольные задачи. Внешние действия требуют подтверждения владельца.",
+    }
+
+
 def command_center() -> dict:
     """Owner Command Center v1: единый read-only контракт Maya OS.
 
@@ -2599,10 +3015,45 @@ def command_center() -> dict:
         control=control,
         now_iso=now_iso,
     )
+    kpi_scorecard = _kpi_scorecard(
+        snap=snap,
+        plan=plan,
+        masters=masters,
+        ret=ret,
+        exp=exp,
+        svc=svc,
+        control_focus=control_focus,
+        owner_review=owner_review,
+        automation_queue=automation_queue,
+    )
+    financial_director = _financial_director(
+        snap=snap,
+        plan=plan,
+        masters=masters,
+        opps=opps,
+        risks=risks,
+    )
+    approval = _approval_matrix()
+    autonomous_candidates = _autonomous_task_candidates(
+        plan=plan,
+        top_risk=top_risk,
+        automation_queue=automation_queue,
+        owner_review=owner_review,
+        svc=svc,
+        control=control,
+    )
+    autonomous_director = _autonomous_director(
+        kpi=kpi_scorecard,
+        finance=financial_director,
+        approval=approval,
+        task_candidates=autonomous_candidates,
+    )
     overall = _command_status(
         overall,
         owner_review.get("status"),
         automation_queue.get("status"),
+        kpi_scorecard.get("status"),
+        autonomous_director.get("status"),
     )
     sections = [
         {
@@ -2632,6 +3083,30 @@ def command_center() -> dict:
             },
             "items": opps[:6],
             "note": "Возможности отсортированы по деньгам на кону; estimate=true — оценка, не факт.",
+        },
+        {
+            "key": "autonomous_director",
+            "title": "AI-директор v2",
+            "status": autonomous_director.get("status"),
+            "summary": autonomous_director.get("summary") or {},
+            "items": autonomous_director.get("task_candidates") or [],
+            "note": autonomous_director.get("next_step"),
+        },
+        {
+            "key": "kpi_scorecard",
+            "title": "KPI",
+            "status": kpi_scorecard.get("status"),
+            "summary": kpi_scorecard.get("summary") or {},
+            "items": kpi_scorecard.get("items") or [],
+            "note": kpi_scorecard.get("note"),
+        },
+        {
+            "key": "financial_director",
+            "title": "Финансовый директор",
+            "status": financial_director.get("status"),
+            "summary": financial_director.get("summary") or {},
+            "items": financial_director.get("decisions") or [],
+            "note": financial_director.get("note"),
         },
         {
             "key": "plan_fact",
@@ -2810,9 +3285,19 @@ def command_center() -> dict:
             "automation_attention_count": len(automations_need_attention),
             "automation_queue_count": (automation_queue.get("summary") or {}).get("items_count", 0),
             "automation_actionable_count": (automation_queue.get("summary") or {}).get("actionable_count", 0),
+            "kpi_score": kpi_scorecard.get("score"),
+            "autonomous_task_candidates_count": len(autonomous_candidates),
+            "autonomous_open_tasks_count": (autonomous_director.get("summary") or {}).get("open_autocreate_count", 0),
+            "approval_required_count": (autonomous_director.get("summary") or {}).get("approval_required_count", 0),
+            "projected_month_gross_rub": (financial_director.get("summary") or {}).get("projected_month_gross_rub", 0),
+            "projected_month_contribution_after_salary_rub": (financial_director.get("summary") or {}).get("projected_month_contribution_after_salary_rub", 0),
         },
         "sections": sections,
         "attention_feed": attention,
+        "autonomous_director": autonomous_director,
+        "kpi_scorecard": kpi_scorecard,
+        "financial_director": financial_director,
+        "approval_matrix": approval,
         "automation_status": automations,
         "automation_queue": automation_queue,
         "opportunities": opps,

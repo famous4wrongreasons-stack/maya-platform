@@ -291,7 +291,24 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "plan_fact", "control", "owner_review", "risks", "clients", "services", "masters", "actions", "automations", "automation_queue", "journal"},
+            {
+                "today",
+                "money",
+                "autonomous_director",
+                "kpi_scorecard",
+                "financial_director",
+                "plan_fact",
+                "control",
+                "owner_review",
+                "risks",
+                "clients",
+                "services",
+                "masters",
+                "actions",
+                "automations",
+                "automation_queue",
+                "journal",
+            },
             keys,
         )
         self.assertEqual(center["summary"]["daily_target_rub"], 2000)
@@ -316,6 +333,24 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("overdue_task_count", center["summary"])
         self.assertIn("owner_review_count", center["summary"])
         self.assertIn("automation_queue_count", center["summary"])
+        self.assertIn("kpi_score", center["summary"])
+        self.assertIn("autonomous_task_candidates_count", center["summary"])
+        self.assertIn("autonomous_open_tasks_count", center["summary"])
+        self.assertIn("approval_required_count", center["summary"])
+        self.assertIn("projected_month_gross_rub", center["summary"])
+        self.assertIn("projected_month_contribution_after_salary_rub", center["summary"])
+        self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
+        self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
+        self.assertIn(center["kpi_scorecard"]["status"], {"ok", "warn", "risk"})
+        self.assertGreaterEqual(center["kpi_scorecard"]["score"], 0)
+        self.assertLessEqual(center["kpi_scorecard"]["score"], 100)
+        self.assertIn("projected_month_gross_rub", center["financial_director"]["summary"])
+        self.assertEqual(center["approval_matrix"]["version"], "approval_matrix_v1")
+        self.assertTrue(center["approval_matrix"]["rows"])
+        self.assertEqual(
+            center["summary"]["autonomous_task_candidates_count"],
+            len(center["autonomous_director"]["task_candidates"]),
+        )
         self.assertTrue([
             task for task in center["task_center"]["tasks"]
             if task.get("assigned_to") in ("owner", "maya")
@@ -347,6 +382,39 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(cycle_auto["last_summary"]["sent"], 3)
         self.assertEqual(cycle_auto["last_impact_status"], "positive_signal")
         self.assertIn("положительный", cycle_auto["last_impact"]["message"])
+
+    def test_autonomous_director_tick_creates_only_internal_control_tasks(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+        before = owner_ai.command_center()
+        open_candidates = [
+            row for row in before["autonomous_director"]["task_candidates"]
+            if row.get("safe_autocreate") and not row.get("in_control")
+        ]
+
+        result = owner_ai.run_autonomous_director_tick(created_by=948205934, limit=10)
+        again = owner_ai.run_autonomous_director_tick(created_by=948205934, limit=10)
+
+        self.assertTrue(open_candidates)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "supervised_autopilot")
+        self.assertGreater(result["created_count"], 0)
+        self.assertLessEqual(result["created_count"], 10)
+        self.assertEqual(again["created_count"], 0)
+        self.assertGreaterEqual(again["skipped_count"], 0)
+        for row in result["created"]:
+            task = row["task"]
+            payload = task["payload"]
+            self.assertEqual(task["source"], "owner_control")
+            self.assertEqual(task["job"], "control_task")
+            self.assertEqual(task["status"], "pending")
+            self.assertEqual(payload["signal_kind"], "autonomy")
+            self.assertEqual(payload["signal_source"], "maya_os_v2")
+            self.assertTrue(payload["signal_key"].startswith("autonomy:"))
+            self.assertTrue(payload["safe_autocreate"])
+        self.assertTrue([
+            task for task in result["center"]["task_center"]["tasks"]
+            if task.get("safe_autocreate")
+        ])
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})

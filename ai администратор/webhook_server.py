@@ -2634,6 +2634,50 @@ async def panel_control_create_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True, "role": info["role"], "created": created, **center})
 
 
+async def panel_autonomy_tick_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/autonomy/tick — безопасный автопилот Maya OS v2."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Автопилот Maya OS доступен только владельцу.",
+        }, status=403)
+    try:
+        limit = int(body.get("limit") or 5)
+    except Exception:
+        limit = 5
+    try:
+        result = await asyncio.to_thread(
+            owner_ai.run_autonomous_director_tick,
+            created_by=tg_id,
+            limit=limit,
+        )
+        deliveries = []
+        for item in result.get("created") or []:
+            task = item.get("task")
+            if isinstance(task, dict):
+                deliveries.append(await _deliver_owner_control_assignment(request, task))
+        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_autonomy_tick error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось запустить автопилот."}, status=500)
+    return _cabinet_response({
+        "ok": True,
+        "role": info["role"],
+        "autopilot": result,
+        "deliveries": deliveries,
+        **center,
+    })
+
+
 async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
     """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
     try:
@@ -9706,6 +9750,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/action/evaluate", panel_options_handler)
     web_app.router.add_post("/api/panel/control/create", panel_control_create_handler)
     web_app.router.add_options("/api/panel/control/create", panel_options_handler)
+    web_app.router.add_post("/api/panel/autonomy/tick", panel_autonomy_tick_handler)
+    web_app.router.add_options("/api/panel/autonomy/tick", panel_options_handler)
     web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
     web_app.router.add_options("/api/panel/control/update", panel_options_handler)
     web_app.router.add_post("/api/panel/staff_tasks", panel_staff_tasks_handler)
