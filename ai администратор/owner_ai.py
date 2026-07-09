@@ -968,6 +968,12 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                     owner_next_step = "Действие запущено. После завершения проверить результат и срок контроля."
                 else:
                     owner_next_step = "Действие выполнено. Дождаться срока контроля результата и закрыть задачу по факту."
+            if linked_impact_status == "positive_signal":
+                owner_next_step = "Есть положительный сигнал. Можно закрыть контроль или оставить наблюдение до срока."
+            elif linked_impact_status == "no_signal_yet":
+                owner_next_step = "Эффект пока не виден. Отложить контроль и проверить позже."
+            elif linked_impact_status == "no_reach":
+                owner_next_step = "Охвата по действию не было. Проверить настройки автоматизации или повторить действие."
             add(
                 "owner_control:%s" % (it.get("id") or it.get("title") or "task"),
                 it.get("title") or "Контрольная задача",

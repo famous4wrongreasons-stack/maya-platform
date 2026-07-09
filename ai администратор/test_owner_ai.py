@@ -339,7 +339,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(item["linked_action_evaluated_at"], "2026-07-08T11:00:00")
         self.assertEqual(item["linked_action_impact_status"], "positive_signal")
         self.assertIn("положительный", item["linked_action_impact_message"])
-        self.assertIn("Действие выполнено", item["owner_next_step"])
+        self.assertIn("Можно закрыть контроль", item["owner_next_step"])
 
     def test_control_task_from_same_signal_is_not_duplicated(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
