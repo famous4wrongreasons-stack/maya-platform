@@ -1150,6 +1150,480 @@ def _control_focus(control: list[dict], *, now_iso: str) -> dict:
     }
 
 
+def _execution_plan(*, control_focus: dict | None, plan: dict | None,
+                    opps: list[dict], actions: list[dict],
+                    automations: list[dict] | None = None,
+                    top_risk: dict | None = None,
+                    now_iso: str | None = None) -> dict:
+    """1-3 шага владельца на сегодня: короткий слой исполнения поверх OS-сигналов."""
+    plan = plan or {}
+    control_focus = control_focus or {}
+    automations = automations or []
+    actions_by_job = {
+        item.get("job"): item
+        for item in (actions or [])
+        if item.get("job")
+    }
+    steps: list[dict] = []
+    seen: set[str] = set()
+    seen_jobs: set[str] = set()
+
+    def add(key: str, title: str, detail: str = "", *, status: str = "medium",
+            source: str = "maya", potential_rub=None, owner_next_step: str = "",
+            action_job: str | None = None, action_card: dict | None = None,
+            control_action_id=None, signal_key: str | None = None,
+            linked_action_id=None, linked_action_status: str | None = None,
+            linked_action_evaluated_at: str | None = None,
+            focus_reason: str | None = None, focus_label: str | None = None,
+            due_state: str | None = None) -> None:
+        if not key or key in seen or len(steps) >= 3:
+            return
+        if action_job and ("job:%s" % action_job) in seen and source != "control_focus":
+            return
+        seen.add(key)
+        if action_job:
+            seen.add("job:%s" % action_job)
+            seen_jobs.add(action_job)
+        if not action_card and action_job:
+            action_card = actions_by_job.get(action_job) or owner_action_payload(
+                action_job,
+                title=title,
+                reason=detail or owner_next_step,
+                potential_rub=potential_rub,
+                priority=status,
+            )
+        steps.append({
+            "key": key,
+            "title": title or "Шаг владельца",
+            "detail": detail or "",
+            "status": status or "medium",
+            "source": source,
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+            "owner_next_step": owner_next_step or "",
+            "action_job": action_job,
+            "action_card": action_card,
+            "control_action_id": control_action_id,
+            "signal_key": signal_key,
+            "linked_action_id": linked_action_id,
+            "linked_action_status": linked_action_status,
+            "linked_action_evaluated_at": linked_action_evaluated_at,
+            "focus_reason": focus_reason,
+            "focus_label": focus_label,
+            "due_state": due_state,
+        })
+
+    for item in (control_focus.get("items") or [])[:1]:
+        reason = item.get("focus_reason")
+        if reason == "effect_check":
+            title = "Проверить эффект действия"
+            next_step = "Оценить результат и закрыть или переназначить контроль."
+        elif reason == "ready_to_close":
+            title = "Закрыть сработавший контроль"
+            next_step = "Зафиксировать результат и закрыть контроль как выполненный."
+        elif item.get("due_state") == "overdue":
+            title = "Закрыть просроченный контроль"
+            next_step = item.get("owner_next_step") or "Принять решение по просроченному контролю сегодня."
+        else:
+            title = item.get("title") or "Разобрать главный контроль"
+            next_step = item.get("owner_next_step") or "Проверить контроль и назначить следующий шаг."
+        add(
+            "control:%s" % (item.get("action_id") or item.get("key") or item.get("title") or "focus"),
+            title,
+            item.get("title") or item.get("detail") or "",
+            status=item.get("status") or "medium",
+            source="control_focus",
+            potential_rub=item.get("potential_rub"),
+            owner_next_step=next_step,
+            action_job=item.get("action_job"),
+            control_action_id=item.get("action_id"),
+            signal_key=item.get("signal_key"),
+            linked_action_id=item.get("linked_action_id"),
+            linked_action_status=item.get("linked_action_status"),
+            linked_action_evaluated_at=item.get("linked_action_evaluated_at"),
+            focus_reason=reason,
+            focus_label=item.get("focus_label"),
+            due_state=item.get("due_state"),
+        )
+
+    gap = _rub(plan.get("gap_rub"))
+    if len(steps) < 3 and plan.get("status") in ("warn", "risk") and gap < 0:
+        action_job = "cycle" if "cycle" in actions_by_job else None
+        add(
+            "plan_fact:gap",
+            "Добрать план дня",
+            "Не хватает %s ₽; нужно примерно %s визит(а/ов)." % (
+                _m(abs(gap)),
+                _m(plan.get("needed_visits_to_target") or 0),
+            ),
+            status=plan.get("status") or "medium",
+            source="plan_fact",
+            potential_rub=abs(gap),
+            owner_next_step="Заполнить свободные окна тёплым спросом и пересмотреть прогноз вечером.",
+            action_job=action_job,
+            signal_key=_attention_signal_key(kind="plan_fact", source="plan_fact", title="День ниже плана"),
+        )
+
+    for action in actions or []:
+        if len(steps) >= 3:
+            break
+        job = action.get("job")
+        if job in seen_jobs:
+            continue
+        add(
+            "action:%s" % (job or action.get("title") or "next"),
+            action.get("title") or action.get("label") or "Запустить действие",
+            action.get("reason") or action.get("problem") or "",
+            status="high" if action.get("priority") == "high" else "medium",
+            source="action",
+            potential_rub=action.get("potential_rub"),
+            owner_next_step="Подтвердить запуск и проверить результат в журнале.",
+            action_job=job,
+            action_card=action,
+        )
+
+    for auto in automations:
+        if len(steps) >= 3:
+            break
+        if auto.get("state") != "recommended" or auto.get("job") in seen_jobs:
+            continue
+        action = auto.get("action_card") or actions_by_job.get(auto.get("job"))
+        add(
+            "automation:%s" % (auto.get("job") or auto.get("title") or "recommended"),
+            auto.get("title") or "Запустить автоматизацию",
+            auto.get("next_step") or auto.get("label") or "",
+            status=auto.get("status") or "medium",
+            source="automation",
+            potential_rub=auto.get("potential_rub"),
+            owner_next_step="Запустить вручную, если повод актуален.",
+            action_job=auto.get("job"),
+            action_card=action,
+        )
+
+    if len(steps) < 3 and top_risk:
+        add(
+            "risk:%s" % (top_risk.get("type") or top_risk.get("title") or "top"),
+            top_risk.get("title") or "Снять риск",
+            top_risk.get("detail") or "",
+            status="high" if _severity_rank(top_risk.get("severity")) >= 3 else "medium",
+            source="risk",
+            potential_rub=top_risk.get("potential_rub"),
+            owner_next_step=top_risk.get("action_hint") or "Проверить причину риска и назначить контроль.",
+        )
+
+    if not steps and opps:
+        top = opps[0] or {}
+        add(
+            "opportunity:%s" % (top.get("type") or top.get("title") or "top"),
+            top.get("title") or "Разобрать возможность",
+            top.get("detail") or "",
+            status="medium",
+            source="money",
+            potential_rub=top.get("potential_rub"),
+            owner_next_step=top.get("action_hint") or "Принять решение, стоит ли брать в работу.",
+            action_job=_OPPORTUNITY_TO_ACTION.get(top.get("type")),
+        )
+
+    actionable_count = len([
+        it for it in steps
+        if it.get("action_job") or it.get("linked_action_id") or it.get("control_action_id")
+    ])
+    money_at_stake = sum(_rub(it.get("potential_rub")) for it in steps if it.get("potential_rub") is not None)
+    high_count = len([it for it in steps if _severity_rank(it.get("status")) >= 3])
+    plan_gap = bool(plan.get("status") in ("warn", "risk") and gap < 0)
+    if not steps:
+        status = "ok"
+        headline = "Срочных шагов на сегодня нет"
+    elif high_count or any(it.get("due_state") == "overdue" for it in steps):
+        status = "risk"
+        headline = "Сегодня сначала закрыть критичный шаг"
+    else:
+        status = "warn"
+        headline = "План действий на сегодня"
+
+    return {
+        "status": status,
+        "headline": headline,
+        "generated_at": now_iso or datetime.now().isoformat(timespec="seconds"),
+        "summary": {
+            "steps_count": len(steps),
+            "actionable_count": actionable_count,
+            "money_at_stake_rub": money_at_stake,
+            "high_count": high_count,
+            "has_control": any(it.get("source") == "control_focus" for it in steps),
+            "has_plan_gap": plan_gap,
+            "has_action": any(it.get("action_job") for it in steps),
+        },
+        "steps": steps,
+    }
+
+
+def _task_center(*, control: list[dict], journal: list[dict],
+                 automations: list[dict] | None,
+                 execution_plan: dict | None,
+                 now_iso: str | None = None) -> dict:
+    """Единый центр задач owner OS: что открыто, кто держит, какой следующий шаг."""
+    now_iso = now_iso or datetime.now().isoformat(timespec="seconds")
+    automations = automations or []
+    execution_plan = execution_plan or {}
+    rows: list[dict] = []
+    seen: set[str] = set()
+    lane_label = {
+        "overdue": "Просрочено",
+        "today": "Сегодня",
+        "effect_check": "Проверить эффект",
+        "running": "Выполняется",
+        "owner_queue": "Ждёт владельца",
+        "recommended": "Рекомендовано",
+        "system": "Система",
+    }
+    lane_rank = {
+        "overdue": 0,
+        "effect_check": 1,
+        "today": 2,
+        "running": 3,
+        "owner_queue": 4,
+        "recommended": 5,
+        "system": 6,
+    }
+
+    def assigned_label(value: str) -> str:
+        return {
+            "owner": "Владелец",
+            "maya": "MAYA",
+            "system": "Система",
+        }.get(value or "", "Владелец")
+
+    def normalize_lane(*, due_state: str | None = None,
+                       linked_status: str | None = None,
+                       linked_evaluated_at: str | None = None,
+                       source: str | None = None,
+                       status: str | None = None,
+                       state: str | None = None) -> str:
+        if due_state == "overdue" or status == "failed" or state == "failed":
+            return "overdue"
+        if linked_status == "done" and not linked_evaluated_at:
+            return "effect_check"
+        if due_state == "today":
+            return "today"
+        if linked_status == "running" or status == "running" or state == "running":
+            return "running"
+        if source == "system":
+            return "system"
+        if state in ("recommended", "stale", "never_run"):
+            return "recommended"
+        return "owner_queue"
+
+    def task_key(prefix: str, item: dict) -> str:
+        if item.get("control_action_id") or item.get("action_id"):
+            return "control:%s" % (item.get("control_action_id") or item.get("action_id"))
+        if item.get("linked_action_id"):
+            return "linked:%s" % item.get("linked_action_id")
+        if item.get("action_job"):
+            return "action:%s" % item.get("action_job")
+        return "%s:%s" % (prefix, item.get("key") or item.get("title") or len(rows))
+
+    def add(key: str, title: str, detail: str = "", *, lane: str = "owner_queue",
+            status: str = "medium", source: str = "maya", assigned_to: str = "owner",
+            potential_rub=None, owner_next_step: str = "", due_at: str | None = None,
+            due_state: str | None = None, action_job: str | None = None,
+            action_card: dict | None = None, control_action_id=None,
+            linked_action_id=None, linked_action_status: str | None = None,
+            linked_action_evaluated_at: str | None = None,
+            pinned: bool = False) -> None:
+        key = (key or title or "task").strip()[:140]
+        if not key or key in seen:
+            return
+        seen.add(key)
+        if action_job and not action_card:
+            action_card = owner_action_payload(
+                action_job,
+                title=title,
+                reason=detail or owner_next_step,
+                potential_rub=potential_rub,
+                priority=status,
+            )
+        rows.append({
+            "key": key,
+            "title": title or "Задача",
+            "detail": detail or "",
+            "lane": lane,
+            "lane_label": lane_label.get(lane, "Задача"),
+            "status": status or "medium",
+            "source": source,
+            "assigned_to": assigned_to,
+            "assigned_label": assigned_label(assigned_to),
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+            "owner_next_step": owner_next_step or "",
+            "due_at": due_at,
+            "due_state": due_state,
+            "action_job": action_job,
+            "action_card": action_card,
+            "control_action_id": control_action_id,
+            "linked_action_id": linked_action_id,
+            "linked_action_status": linked_action_status,
+            "linked_action_evaluated_at": linked_action_evaluated_at,
+            "pinned": bool(pinned),
+        })
+
+    for step in (execution_plan.get("steps") or []):
+        lane = normalize_lane(
+            due_state=step.get("due_state"),
+            linked_status=step.get("linked_action_status"),
+            linked_evaluated_at=step.get("linked_action_evaluated_at"),
+            source=step.get("source"),
+            status=step.get("status"),
+        )
+        add(
+            task_key("execution", step),
+            step.get("title") or "Шаг плана",
+            step.get("detail") or "",
+            lane=lane,
+            status=step.get("status") or "medium",
+            source="execution_plan",
+            assigned_to="owner",
+            potential_rub=step.get("potential_rub"),
+            owner_next_step=step.get("owner_next_step") or "",
+            due_state=step.get("due_state"),
+            action_job=step.get("action_job"),
+            action_card=step.get("action_card"),
+            control_action_id=step.get("control_action_id"),
+            linked_action_id=step.get("linked_action_id"),
+            linked_action_status=step.get("linked_action_status"),
+            linked_action_evaluated_at=step.get("linked_action_evaluated_at"),
+            pinned=True,
+        )
+
+    for item in control or []:
+        lane = normalize_lane(
+            due_state=item.get("due_state"),
+            linked_status=item.get("linked_action_status"),
+            linked_evaluated_at=item.get("linked_action_evaluated_at"),
+            source=item.get("source"),
+            status=item.get("status"),
+        )
+        source = item.get("source") or "maya"
+        assignee = "system" if source == "system" else "owner"
+        add(
+            task_key("control", item),
+            item.get("title") or "Контроль",
+            item.get("detail") or "",
+            lane=lane,
+            status=item.get("status") or "medium",
+            source=source,
+            assigned_to=assignee,
+            potential_rub=item.get("potential_rub"),
+            owner_next_step=item.get("owner_next_step") or "",
+            due_at=item.get("due_at"),
+            due_state=item.get("due_state"),
+            action_job=item.get("action_job"),
+            control_action_id=item.get("action_id"),
+            linked_action_id=item.get("linked_action_id"),
+            linked_action_status=item.get("linked_action_status"),
+            linked_action_evaluated_at=item.get("linked_action_evaluated_at"),
+        )
+
+    for item in journal or []:
+        status = str(item.get("status") or "")
+        if status not in ("running", "failed", "done"):
+            continue
+        due_at = item.get("result_due_at")
+        if status == "done" and (item.get("evaluated_at") or not due_at or str(due_at) > now_iso):
+            continue
+        lane = normalize_lane(status=status, state=status)
+        if status == "done":
+            lane = "effect_check"
+        add(
+            "journal:%s" % (item.get("id") or item.get("job") or item.get("title")),
+            item.get("title") or item.get("job") or "Действие MAYA",
+            item.get("error") or "",
+            lane=lane,
+            status="high" if status == "failed" else ("medium" if status == "done" else "warn"),
+            source="journal",
+            assigned_to="maya" if status == "running" else "owner",
+            owner_next_step=(
+                "Дождаться завершения в журнале AI-директора."
+                if status == "running" else
+                "Проверить эффект действия и закрыть контроль результата."
+                if status == "done" else
+                "Разобрать ошибку и повторить действие после проверки причины."
+            ),
+            due_at=due_at,
+            linked_action_id=item.get("id"),
+            linked_action_status=status,
+            linked_action_evaluated_at=item.get("evaluated_at"),
+        )
+
+    for item in automations:
+        state = str(item.get("state") or "")
+        if item.get("status") == "ok" and state not in ("recommended", "stale", "never_run", "running", "failed"):
+            continue
+        lane = normalize_lane(state=state, status=item.get("status"))
+        action = item.get("action_card") or (
+            {"job": item.get("job"), "title": item.get("title"), "label": item.get("label"), "priority": item.get("status")}
+            if item.get("recommended") and item.get("job") else None
+        )
+        add(
+            "automation:%s" % (item.get("job") or item.get("title") or "task"),
+            item.get("title") or item.get("job") or "Автоматизация",
+            item.get("next_step") or "",
+            lane=lane,
+            status=item.get("status") or "medium",
+            source="automation",
+            assigned_to="maya" if state == "running" else "owner",
+            owner_next_step=item.get("next_step") or "",
+            action_job=item.get("job") if action else None,
+            action_card=action,
+            linked_action_id=item.get("last_action_id"),
+            linked_action_status=item.get("last_status"),
+            linked_action_evaluated_at=item.get("last_evaluated_at"),
+        )
+
+    rows.sort(key=lambda item: (
+        not item.get("pinned"),
+        lane_rank.get(item.get("lane"), 9),
+        -_severity_rank(item.get("status")),
+        item.get("potential_rub") is None,
+        -(item.get("potential_rub") or 0),
+        str(item.get("due_at") or "9999-99-99"),
+    ))
+    rows = rows[:12]
+    summary = {
+        "tasks_count": len(rows),
+        "overdue_count": len([it for it in rows if it.get("lane") == "overdue"]),
+        "today_count": len([it for it in rows if it.get("lane") == "today"]),
+        "effect_check_count": len([it for it in rows if it.get("lane") == "effect_check"]),
+        "running_count": len([it for it in rows if it.get("lane") == "running"]),
+        "owner_count": len([it for it in rows if it.get("assigned_to") == "owner"]),
+        "maya_count": len([it for it in rows if it.get("assigned_to") == "maya"]),
+        "money_at_stake_rub": sum(_rub(it.get("potential_rub")) for it in rows if it.get("potential_rub") is not None),
+    }
+    if summary["overdue_count"]:
+        status = "risk"
+        headline = "Есть просроченные задачи"
+    elif summary["effect_check_count"]:
+        status = "warn"
+        headline = "Нужно проверить эффект действий"
+    elif summary["today_count"]:
+        status = "warn"
+        headline = "Сегодня есть контрольные задачи"
+    elif summary["running_count"]:
+        status = "warn"
+        headline = "MAYA выполняет задачи"
+    elif rows:
+        status = "warn"
+        headline = "Задачи на контроле"
+    else:
+        status = "ok"
+        headline = "Открытых задач нет"
+    return {
+        "status": status,
+        "headline": headline,
+        "generated_at": now_iso,
+        "summary": summary,
+        "tasks": rows,
+    }
+
+
 def _attention_signal_key(*, kind: str, source: str, control_key: str | None = None,
                           action_job: str | None = None, title: str | None = None) -> str:
     return "attention:%s:%s:%s" % (
@@ -1515,6 +1989,22 @@ def command_center() -> dict:
     automations_need_attention = [
         it for it in automations if it.get("status") != "ok"
     ]
+    execution_plan = _execution_plan(
+        control_focus=control_focus,
+        plan=plan,
+        opps=opps,
+        actions=actions,
+        automations=automations,
+        top_risk=top_risk,
+        now_iso=now_iso,
+    )
+    task_center = _task_center(
+        control=control,
+        journal=journal,
+        automations=automations,
+        execution_plan=execution_plan,
+        now_iso=now_iso,
+    )
     sections = [
         {
             "key": "today",
@@ -1693,6 +2183,10 @@ def command_center() -> dict:
             "top_control": control[0] if control else None,
             "control_focus": control_focus.get("headline"),
             "control_focus_count": (control_focus.get("summary") or {}).get("focus_count", 0),
+            "execution_steps_count": (execution_plan.get("summary") or {}).get("steps_count", 0),
+            "task_count": (task_center.get("summary") or {}).get("tasks_count", 0),
+            "overdue_task_count": (task_center.get("summary") or {}).get("overdue_count", 0),
+            "effect_check_task_count": (task_center.get("summary") or {}).get("effect_check_count", 0),
             "attention_count": len(attention),
             "critical_attention_count": len(attention_critical),
             "automation_attention_count": len(automations_need_attention),
@@ -1705,6 +2199,8 @@ def command_center() -> dict:
         "master_performance": masters,
         "risks": risks,
         "next_best_actions": actions,
+        "execution_plan": execution_plan,
+        "task_center": task_center,
         "control_focus": control_focus,
         "control_queue": control,
         "journal": journal,
@@ -1890,6 +2386,22 @@ def daily_briefing() -> dict:
         now_iso=now_iso,
     )
     control_focus = _control_focus(control, now_iso=now_iso)
+    execution_plan = _execution_plan(
+        control_focus=control_focus,
+        plan=plan,
+        opps=opps,
+        actions=actions,
+        automations=[],
+        top_risk=risks.get("top_risk"),
+        now_iso=now_iso,
+    )
+    task_center = _task_center(
+        control=control,
+        journal=journal,
+        automations=[],
+        execution_plan=execution_plan,
+        now_iso=now_iso,
+    )
     return {
         "date": snap["date"],
         "today": {
@@ -1907,6 +2419,8 @@ def daily_briefing() -> dict:
         "risks": risks["risks"],
         "top_risk": risks.get("top_risk"),
         "next_best_actions": actions,
+        "execution_plan": execution_plan,
+        "task_center": task_center,
         "control_focus": control_focus,
         "control_queue": control,
         "top_action": top_action,

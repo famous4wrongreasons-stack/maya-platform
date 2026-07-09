@@ -196,6 +196,16 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(brief["top_action"]["kind"], "run_job")
         self.assertEqual(brief["top_action"]["job"], "cycle")
         self.assertTrue(brief["next_best_actions"])
+        self.assertTrue(brief["execution_plan"]["steps"])
+        self.assertEqual(
+            brief["execution_plan"]["summary"]["steps_count"],
+            len(brief["execution_plan"]["steps"]),
+        )
+        self.assertTrue(brief["task_center"]["tasks"])
+        self.assertEqual(
+            brief["task_center"]["summary"]["tasks_count"],
+            len(brief["task_center"]["tasks"]),
+        )
         self.assertTrue(brief["control_focus"]["items"])
         self.assertEqual(brief["control_focus"]["summary"]["focus_count"], len(brief["control_focus"]["items"]))
         self.assertTrue(brief["control_queue"])
@@ -227,6 +237,20 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(center["attention_feed"])
         self.assertEqual(center["summary"]["attention_count"], len(center["attention_feed"]))
         self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
+        self.assertTrue(center["execution_plan"]["steps"])
+        self.assertEqual(
+            center["summary"]["execution_steps_count"],
+            center["execution_plan"]["summary"]["steps_count"],
+        )
+        self.assertLessEqual(center["execution_plan"]["summary"]["steps_count"], 3)
+        self.assertTrue(center["execution_plan"]["summary"]["actionable_count"])
+        self.assertTrue(center["task_center"]["tasks"])
+        self.assertEqual(center["summary"]["task_count"], center["task_center"]["summary"]["tasks_count"])
+        self.assertIn("overdue_task_count", center["summary"])
+        self.assertTrue([
+            task for task in center["task_center"]["tasks"]
+            if task.get("assigned_to") in ("owner", "maya")
+        ])
         self.assertTrue(center["control_focus"]["items"])
         self.assertEqual(center["summary"]["control_focus_count"], center["control_focus"]["summary"]["focus_count"])
         self.assertIn("control", {section["key"] for section in center["sections"]})

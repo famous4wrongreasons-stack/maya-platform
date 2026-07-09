@@ -6700,9 +6700,30 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
     if parts:
         lines.append(f"📈 За неделю: {', '.join(parts)}.")
 
+    execution = brief.get("execution_plan") or {}
+    execution_steps = execution.get("steps") or []
+    if execution_steps:
+        lines += ["", f"🧭 План действий: {execution.get('headline') or 'что сделать сегодня'}"]
+        for i, step in enumerate(execution_steps[:3], 1):
+            money = f" — ~{_m(step['potential_rub'])} ₽" if step.get("potential_rub") else ""
+            next_step = step.get("owner_next_step") or step.get("detail") or ""
+            lines.append(f"{i}. {step.get('title')}{money}" + (f". {next_step}" if next_step else ""))
+
+    tasks = brief.get("task_center") or {}
+    task_sm = tasks.get("summary") or {}
+    if task_sm.get("overdue_count") or task_sm.get("effect_check_count") or task_sm.get("running_count"):
+        bits = []
+        if task_sm.get("overdue_count"):
+            bits.append(f"просрочено {task_sm.get('overdue_count')}")
+        if task_sm.get("effect_check_count"):
+            bits.append(f"проверить эффект {task_sm.get('effect_check_count')}")
+        if task_sm.get("running_count"):
+            bits.append(f"MAYA выполняет {task_sm.get('running_count')}")
+        lines.append(f"📌 Задачи: {', '.join(bits)}.")
+
     focus = brief.get("control_focus") or {}
     focus_items = focus.get("items") or []
-    if focus_items:
+    if focus_items and not execution_steps:
         lines += ["", f"🎯 Фокус контроля: {focus.get('headline') or 'что закрыть сегодня'}"]
         for i, item in enumerate(focus_items[:3], 1):
             label = item.get("focus_label") or item.get("status") or ""
@@ -6722,7 +6743,9 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
 
     text = "\n".join(lines).strip()
     top = brief.get("top_priority") or {}
-    if focus_items and focus.get("status") in ("risk", "warn"):
+    if execution_steps and execution.get("status") in ("risk", "warn"):
+        push_body = f"{booked} записей сегодня. План: {execution_steps[0].get('title') or execution.get('headline')}."
+    elif focus_items and focus.get("status") in ("risk", "warn"):
         push_body = f"{booked} записей сегодня. Фокус: {focus.get('headline') or focus_items[0].get('title')}."
     elif top:
         money = f" (~{_m(top['potential_rub'])} ₽)" if top.get("potential_rub") else ""

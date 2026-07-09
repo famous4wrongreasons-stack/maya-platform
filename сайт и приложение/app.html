@@ -15413,6 +15413,146 @@ function AGodMode() {
             isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, cs.msg) : null));
       })));
   }
+  function renderExecutionPlan(plan) {
+    plan = plan || {};
+    var rows = plan.steps || [], sm = plan.summary || {};
+    if (!rows.length) return null;
+    var detail = [
+      sm.steps_count ? ('шагов ' + sm.steps_count) : '',
+      sm.actionable_count ? ('можно выполнить ' + sm.actionable_count) : '',
+      sm.money_at_stake_rub ? ('на кону ' + money(sm.money_at_stake_rub)) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('План действий'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(plan.status || 'warn'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.4, color: t.ink, lineHeight: 1.25 } }, plan.headline || 'План действий на сегодня'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      rows.slice(0, 3).map(function (step, i) {
+        var job = step.action_job || (step.action_card && step.action_card.job);
+        var cid = step.control_action_id;
+        var cs = cid ? (controlS[cid] || {}) : {};
+        var ast = job ? (actionS[job] || {}) : {};
+        var linkedStatus = String(step.linked_action_status || '');
+        var linkedEval = step.linked_action_id ? (evalS[step.linked_action_id] || {}) : {};
+        var buttons = [];
+        function actionPayload() {
+          var payload = Object.assign({}, step.action_card || {
+            job: job,
+            title: step.title,
+            label: step.title,
+            priority: step.status
+          });
+          payload.job = payload.job || job;
+          payload.source = payload.source || 'owner_os';
+          if (cid) payload.source_control_id = cid;
+          if (step.signal_key) payload.source_signal_key = step.signal_key;
+          return payload;
+        }
+        if (linkedStatus === 'done' && step.linked_action_id) {
+          buttons.push(e('div', { key: 'eval' }, btn(linkedEval.phase === 'running' ? '...' : (step.linked_action_evaluated_at ? 'Проверить ещё' : 'Проверить'), function () { evaluateOwnerAction({ id: step.linked_action_id }); }, { busy: linkedEval.phase === 'running' })));
+        } else if (job) {
+          if (ast.phase === 'confirm') {
+            buttons.push(e('div', { key: 'run' }, btn('Подтвердить', function () { runOwnerAction(actionPayload()); }, { primary: true })));
+            buttons.push(e('div', { key: 'cancel-run' }, btn('Отмена', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = {}; return n; }); }, {})));
+          } else {
+            buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : 'В работу', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'confirm' }; return n; }); }, { primary: step.status === 'high' || step.status === 'risk', busy: ast.phase === 'running' })));
+          }
+        }
+        if (cid && buttons.length < 3) {
+          buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
+        }
+        if (cid && buttons.length < 3) {
+          buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask({ action_id: cid }, 'postpone'); }, { busy: cs.phase === 'postpone' })));
+        }
+        return e('div', { key: step.key || i, style: { display: 'flex', gap: 9, padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { width: 7, height: 7, borderRadius: 999, background: statusColor(step.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+              e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, step.title || 'Шаг'),
+              step.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(step.status || 'warn'), whiteSpace: 'nowrap' } }, step.focus_label) : null),
+            step.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, step.detail) : null,
+            step.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, step.owner_next_step) : null,
+            step.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(step.potential_rub)) : null,
+            buttons.length ? e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(' + Math.min(buttons.length, 3) + ', minmax(0, 1fr))', gap: 6, marginTop: 8 } }, buttons) : null,
+            cid && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, cs.msg) : null,
+            job && ast.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: ast.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, ast.msg) : null,
+            step.linked_action_id && linkedEval.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: linkedEval.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, linkedEval.msg) : null));
+      })));
+  }
+  function renderTaskCenter(center) {
+    center = center || {};
+    var rows = center.tasks || [], sm = center.summary || {};
+    if (!rows.length) return null;
+    var detail = [
+      sm.tasks_count ? ('задач ' + sm.tasks_count) : '',
+      sm.overdue_count ? ('просрочено ' + sm.overdue_count) : '',
+      sm.effect_check_count ? ('эффект ' + sm.effect_check_count) : '',
+      sm.running_count ? ('в работе ' + sm.running_count) : '',
+      sm.money_at_stake_rub ? ('на кону ' + money(sm.money_at_stake_rub)) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('Центр задач'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(center.status || 'warn'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.4, color: t.ink, lineHeight: 1.25 } }, center.headline || 'Задачи на контроле'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      rows.slice(0, 5).map(function (it, i) {
+        var cid = it.control_action_id;
+        var job = it.action_job || (it.action_card && it.action_card.job);
+        var cs = cid ? (controlS[cid] || {}) : {};
+        var ast = job ? (actionS[job] || {}) : {};
+        var linkedStatus = String(it.linked_action_status || '');
+        var linkedEval = it.linked_action_id ? (evalS[it.linked_action_id] || {}) : {};
+        var dueLabel = controlDueLabel({ due_at: it.due_at, due_state: it.due_state });
+        var buttons = [];
+        function actionPayload() {
+          var payload = Object.assign({}, it.action_card || {
+            job: job,
+            title: it.title,
+            label: it.title,
+            priority: it.status
+          });
+          payload.job = payload.job || job;
+          payload.source = payload.source || 'owner_os';
+          if (cid) payload.source_control_id = cid;
+          return payload;
+        }
+        if (linkedStatus === 'done' && it.linked_action_id) {
+          buttons.push(e('div', { key: 'eval' }, btn(linkedEval.phase === 'running' ? '...' : (it.linked_action_evaluated_at ? 'Проверить ещё' : 'Проверить'), function () { evaluateOwnerAction({ id: it.linked_action_id }); }, { busy: linkedEval.phase === 'running' })));
+        } else if (job) {
+          if (ast.phase === 'confirm') {
+            buttons.push(e('div', { key: 'run' }, btn('Подтвердить', function () { runOwnerAction(actionPayload()); }, { primary: true })));
+            buttons.push(e('div', { key: 'cancel-run' }, btn('Отмена', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = {}; return n; }); }, {})));
+          } else {
+            buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : 'В работу', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'confirm' }; return n; }); }, { primary: it.status === 'high' || it.lane === 'overdue', busy: ast.phase === 'running' })));
+          }
+        }
+        if (cid && buttons.length < 3) {
+          buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
+        }
+        if (cid && buttons.length < 3) {
+          buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask({ action_id: cid }, 'postpone'); }, { busy: cs.phase === 'postpone' })));
+        }
+        return e('div', { key: it.key || i, style: { display: 'flex', gap: 9, padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { width: 7, height: 7, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+              e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Задача'),
+              it.lane_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, it.lane_label) : null),
+            e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label || 'Владелец'),
+            it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
+            it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null,
+            dueLabel ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.due_state === 'overdue' ? statusColor('risk') : (it.due_state === 'today' ? statusColor('warn') : t.dim), marginTop: 5 } }, dueLabel) : null,
+            it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null,
+            buttons.length ? e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(' + Math.min(buttons.length, 3) + ', minmax(0, 1fr))', gap: 6, marginTop: 8 } }, buttons) : null,
+            cid && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, cs.msg) : null,
+            job && ast.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: ast.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, ast.msg) : null,
+            it.linked_action_id && linkedEval.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: linkedEval.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, linkedEval.msg) : null));
+      })));
+  }
   function renderAttentionFeed(rows) {
     rows = rows || [];
     if (!rows.length) return null;
@@ -15545,6 +15685,8 @@ function AGodMode() {
     var risks = cc.risks || [];
     var control = cc.control_queue || [];
     var controlFocus = cc.control_focus || {};
+    var executionPlan = cc.execution_plan || {};
+    var taskCenter = cc.task_center || {};
     var attention = cc.attention_feed || [];
     var automations = cc.automation_status || [];
     return e(React.Fragment, null,
@@ -15558,6 +15700,8 @@ function AGodMode() {
         kpiCell(String(todaySm.free_capacity_today || 0), 'Свободная ёмкость'),
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
+      renderExecutionPlan(executionPlan),
+      renderTaskCenter(taskCenter),
       renderAttentionFeed(attention),
       top.title ? signalCard(top.title, top.detail, top.potential_rub, 'warn') : null,
       risk.title ? signalCard(risk.title, risk.detail, risk.potential_rub, risk.severity || 'warn') : null,
