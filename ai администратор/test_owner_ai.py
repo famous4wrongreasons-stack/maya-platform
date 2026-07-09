@@ -207,7 +207,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "plan_fact", "control", "risks", "clients", "services", "masters", "actions", "journal"},
+            {"today", "money", "plan_fact", "control", "risks", "clients", "services", "masters", "actions", "automations", "journal"},
             keys,
         )
         self.assertEqual(center["summary"]["daily_target_rub"], 2000)
@@ -224,6 +224,16 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["journal"][0]["job"], "cycle")
         self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
         self.assertNotIn("execute", center["next_best_actions"][0])
+        self.assertTrue(center["automation_status"])
+        self.assertEqual(len(center["automation_status"]), 5)
+        self.assertIn(
+            "automation_attention_count",
+            center["summary"],
+        )
+        self.assertTrue([
+            row for row in center["automation_status"]
+            if row.get("job") == "cycle" and row.get("recommended")
+        ])
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})

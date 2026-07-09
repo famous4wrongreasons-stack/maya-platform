@@ -93,6 +93,13 @@ _OPPORTUNITY_TO_ACTION = {
     "empty_windows": "cycle",
     "expiring_subscriptions": "subscriptions",
 }
+_AUTOMATION_LIBRARY = {
+    "reactivation": {"cadence_days": 7, "title": "Реактивация уснувших"},
+    "cycle": {"cadence_days": 2, "title": "Цикл «пора подстричься»"},
+    "birthday": {"cadence_days": 1, "title": "Дни рождения"},
+    "reviews": {"cadence_days": 1, "title": "Отзывы после визитов"},
+    "subscriptions": {"cadence_days": 3, "title": "Абонементы"},
+}
 
 
 def _today() -> str:
@@ -1031,6 +1038,87 @@ def _attention_feed(*, control: list[dict], plan: dict | None, top_risk: dict | 
     return out[:6]
 
 
+def _parse_iso(value: str | None):
+    try:
+        return datetime.fromisoformat(str(value or "")[:19])
+    except Exception:
+        return None
+
+
+def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str) -> list[dict]:
+    """Read-only карта бизнес-автоматизаций: что есть, что запускалось, что пора."""
+    now_dt = _parse_iso(now_iso) or datetime.now()
+    recommended = {}
+    for action in actions or []:
+        job = action.get("job")
+        if job:
+            recommended[job] = action
+
+    last_by_job = {}
+    for item in journal or []:
+        job = item.get("job")
+        if job in _AUTOMATION_LIBRARY and job not in last_by_job:
+            last_by_job[job] = item
+
+    out = []
+    for job, meta in _AUTOMATION_LIBRARY.items():
+        base = _ACTION_LIBRARY.get(job) or {}
+        last = last_by_job.get(job) or {}
+        last_at = last.get("completed_at") or last.get("created_at")
+        last_dt = _parse_iso(last_at)
+        days_since = None
+        if last_dt:
+            try:
+                days_since = max(0, (now_dt.date() - last_dt.date()).days)
+            except Exception:
+                days_since = None
+        rec = recommended.get(job)
+        cadence = int(meta.get("cadence_days") or 1)
+        if rec:
+            state = "recommended"
+            status = "warn" if rec.get("priority") != "high" else "high"
+            next_step = "Есть повод запустить через подтверждение владельца."
+        elif last and last.get("status") == "failed":
+            state = "failed"
+            status = "high"
+            next_step = "Разобрать ошибку в журнале и повторить после проверки."
+        elif not last:
+            state = "never_run"
+            status = "warn"
+            next_step = "Проверить условия и запустить вручную, если сценарий актуален."
+        elif days_since is not None and days_since > cadence * 2:
+            state = "stale"
+            status = "warn"
+            next_step = "Давно не запускалось. Проверить, есть ли новый повод."
+        else:
+            state = "ready"
+            status = "ok"
+            next_step = "Работает в ручном контуре подтверждения."
+        out.append({
+            "job": job,
+            "title": meta.get("title") or base.get("title") or job,
+            "label": base.get("label") or meta.get("title") or job,
+            "mode": "manual_confirm",
+            "status": status,
+            "state": state,
+            "recommended": bool(rec),
+            "cadence_days": cadence,
+            "last_status": last.get("status"),
+            "last_run_at": last_at,
+            "days_since_last": days_since,
+            "next_step": next_step,
+            "action_card": rec,
+        })
+    out.sort(key=lambda item: (
+        -_severity_rank(item.get("status")),
+        not item.get("recommended"),
+        item.get("days_since_last") is None,
+        -(item.get("days_since_last") or 0),
+        item.get("title") or "",
+    ))
+    return out
+
+
 def command_center() -> dict:
     """Owner Command Center v1: единый read-only контракт Maya OS.
 
@@ -1074,7 +1162,7 @@ def command_center() -> dict:
     try:
         import database
         database.evaluate_due_owner_actions(limit=5)
-        journal = database.list_owner_actions(limit=8)
+        journal = database.list_owner_actions(limit=24)
     except Exception as e:
         logger.error("owner_ai command_center owner_journal: %s", e)
         errors.append({
@@ -1155,6 +1243,14 @@ def command_center() -> dict:
     )
     attention_critical = [
         it for it in attention if _severity_rank(it.get("severity")) >= 3
+    ]
+    automations = _automation_status(
+        journal=journal,
+        actions=actions,
+        now_iso=now_iso,
+    )
+    automations_need_attention = [
+        it for it in automations if it.get("status") != "ok"
     ]
     sections = [
         {
@@ -1282,6 +1378,18 @@ def command_center() -> dict:
             "note": "Action-card только предлагает действие. Запуск должен идти отдельным подтверждением владельца.",
         },
         {
+            "key": "automations",
+            "title": "Автоматизации",
+            "status": "warn" if automations_need_attention else "ok",
+            "summary": {
+                "items_count": len(automations),
+                "need_attention_count": len(automations_need_attention),
+                "manual_confirm": True,
+            },
+            "items": automations,
+            "note": "Сценарии не запускаются сами: владелец подтверждает действие вручную.",
+        },
+        {
             "key": "journal",
             "title": "Журнал AI-директора",
             "status": "warn" if any((it.get("status") == "failed") for it in journal) else "ok",
@@ -1319,9 +1427,11 @@ def command_center() -> dict:
             "top_control": control[0] if control else None,
             "attention_count": len(attention),
             "critical_attention_count": len(attention_critical),
+            "automation_attention_count": len(automations_need_attention),
         },
         "sections": sections,
         "attention_feed": attention,
+        "automation_status": automations,
         "opportunities": opps,
         "plan_fact": plan,
         "master_performance": masters,

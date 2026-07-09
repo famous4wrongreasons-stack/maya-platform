@@ -15313,6 +15313,27 @@ function AGodMode() {
             it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null));
       })));
   }
+  function automationStateText(s) {
+    s = String(s || '');
+    return s === 'recommended' ? 'Рекомендовано' : (s === 'failed' ? 'Ошибка' : (s === 'stale' ? 'Давно не запускалось' : (s === 'never_run' ? 'Ещё не запускалось' : 'Готово')));
+  }
+  function renderAutomationStatus(rows) {
+    rows = rows || [];
+    if (!rows.length) return null;
+    return Card(e('div', null,
+      eyebrow('Автоматизации'),
+      rows.slice(0, 5).map(function (it, i) {
+        var action = it.action_card || (it.recommended ? { job: it.job, title: it.title, label: it.label, priority: it.status } : null);
+        return e('div', { key: it.job || i, style: { padding: '10px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
+          e('div', { style: { display: 'flex', gap: 10, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'ok'), marginTop: 6, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || it.job),
+              e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, [automationStateText(it.state), it.days_since_last == null ? '' : ('последний запуск ' + it.days_since_last + ' дн. назад')].filter(Boolean).join(' · ')),
+              it.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.next_step) : null)),
+          action ? e('div', { style: { marginTop: 8 } }, btn('В работу', function () { runOwnerAction(action); }, { primary: it.status === 'high' })) : null);
+      })));
+  }
   function renderPlanFact(sm) {
     sm = sm || {};
     var pct = sm.progress_pct == null ? null : Math.max(0, Math.min(160, Number(sm.progress_pct) || 0));
@@ -15368,6 +15389,7 @@ function AGodMode() {
     var risks = cc.risks || [];
     var control = cc.control_queue || [];
     var attention = cc.attention_feed || [];
+    var automations = cc.automation_status || [];
     return e(React.Fragment, null,
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 } },
         e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(cc.status), flexShrink: 0 } }),
@@ -15393,6 +15415,7 @@ function AGodMode() {
         tinyRow('Просевшие услуги', String(servicesSm.weak_count || 0), servicesSm.weak_count ? statusColor('warn') : null))),
       Card(e('div', null, eyebrow('Контроль'), renderControlQueue(control))),
       Card(e('div', null, eyebrow('Риски'), renderOSList(risks, 'Критичных рисков сейчас нет.'))),
+      renderAutomationStatus(automations),
       Card(e('div', null, eyebrow('Следующие действия'), renderActionCards(actions))),
       Card(e('div', null, eyebrow('Журнал AI-директора'), renderJournal(journal))),
       (cc.errors || []).length ? Card(e('div', null,
