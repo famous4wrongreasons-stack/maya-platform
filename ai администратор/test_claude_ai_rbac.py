@@ -78,6 +78,11 @@ def _load_claude_ai():
 
     fake_owner_ai = types.ModuleType("owner_ai")
     fake_owner_ai.daily_briefing = lambda: {"date": "2026-07-08", "ok": True}
+    fake_owner_ai.master_performance = lambda: {
+        "top_profit_master": {"name": "Мастер 1", "profit_after_salary_rub": 26000},
+        "top_gross_master": {"name": "Мастер 1", "gross_rub": 40000},
+        "note": "Вклад после процента.",
+    }
     fake_owner_ai.owner_action_payload = lambda task, **kwargs: {
         "kind": "run_job",
         "job": task,
@@ -137,6 +142,20 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "salon_action")
         self.assertTrue(logs[-1][4])
 
+    def test_founder_can_read_master_performance(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(
+            claude_ai._execute_tool("get_master_performance", {}, user_id=948205934)
+        )
+
+        self.assertEqual(result["top_profit_master"]["name"], "Мастер 1")
+        self.assertEqual(result["top_profit_master"]["profit_after_salary_rub"], 26000)
+        self.assertTrue(logs)
+        self.assertEqual(logs[-1][1], "founder")
+        self.assertEqual(logs[-1][2], "get_master_performance")
+        self.assertTrue(logs[-1][4])
+
     def test_pro_model_uses_responses_api_route(self):
         claude_ai, _logs = _load_claude_ai()
         seen = {}
@@ -192,6 +211,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("get_my_bookings", names)
         self.assertNotIn("get_business_report", names)
         self.assertNotIn("get_daily_briefing", names)
+        self.assertNotIn("get_master_performance", names)
         self.assertNotIn("salon_action", names)
 
     def test_missing_surface_keeps_founder_role_tools_for_telegram(self):
@@ -205,6 +225,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("request_booking", names)
         self.assertIn("get_business_report", names)
         self.assertIn("get_daily_briefing", names)
+        self.assertIn("get_master_performance", names)
         self.assertIn("salon_action", names)
 
     def test_staff_surface_removes_client_booking_tools_for_founder(self):

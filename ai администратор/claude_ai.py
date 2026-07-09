@@ -629,6 +629,18 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "get_master_performance",
+        "description": (
+            "ТОЛЬКО для владельца. Аналитика мастеров за последние 30 дней: кто принёс "
+            "больше всего выручки, кто дал больший вклад после выплаты процента мастеру, "
+            "сколько визитов, средний чек, фонд выплат. Вызывай на «кто из мастеров "
+            "приносит больше прибыли / кто зарабатывает больше / кто лучший по выручке / "
+            "зарплаты мастеров / прибыль по мастерам». ЧТЕНИЕ. Важно: это не полная "
+            "чистая прибыль салона, а вклад после процента; общие расходы не распределяются."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
         "name": "get_risk_signals",
         "description": (
             "ТОЛЬКО для владельца. Риски бизнеса: падение выручки, простаивающие окна, "
@@ -703,7 +715,7 @@ _OWNER_ONLY = {
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_money_opportunities", "get_return_candidates",
     "get_empty_windows", "get_expiring_assets", "get_service_insights",
-    "get_risk_signals", "salon_action",
+    "get_master_performance", "get_risk_signals", "salon_action",
 }
 _PRIVILEGED = _MASTER_ONLY | _MANAGER_ONLY | _OWNER_ONLY
 
@@ -1730,7 +1742,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
         elif tool_name in (
             "get_daily_briefing", "get_money_opportunities", "get_return_candidates",
             "get_empty_windows", "get_expiring_assets", "get_service_insights",
-            "get_risk_signals",
+            "get_master_performance", "get_risk_signals",
         ):
             # AI-директор: только чтение, только владелец/founder.
             if _role not in ("owner", "founder"):
@@ -1749,6 +1761,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     result = owner_ai.expiring_assets()
                 elif tool_name == "get_service_insights":
                     result = owner_ai.service_insights()
+                elif tool_name == "get_master_performance":
+                    result = owner_ai.master_performance()
                 else:  # get_risk_signals
                     result = owner_ai.risk_signals()
         elif tool_name == "salon_action":
@@ -2094,6 +2108,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
                     "• «что скоро истекает / сертификаты / абонементы» → get_expiring_assets.\n"
                     "• «какие услуги просели / что продвигать / слабые услуги» → get_service_insights.\n"
+                    "• «кто из мастеров приносит больше прибыли / выручки / зарплаты мастеров» → get_master_performance.\n"
                     "• «какие риски / что тревожит / где слабое место» → get_risk_signals.\n"
                     "Если после аналитики видишь ОДНО явное следующее действие, можно сразу "
                     "показать owner action-card через salon_action(task, title, problem, reason, "
@@ -2112,6 +2127,8 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "уснувших, продление, пустые окна) — это ОЦЕНКА «если сделать» — так и "
                     "говори («потенциально ~X ₽», «оценка»), не выдавай за факт. Учитывай "
                     "поле note из инструмента. Нет данных — скажи прямо, цифры не выдумывай."
+                    " Для мастеров: «прибыль» из get_master_performance называй вкладом "
+                    "после процента мастера, не полной чистой прибылью салона."
                 ),
             })
 
