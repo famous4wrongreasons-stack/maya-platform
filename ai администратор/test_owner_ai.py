@@ -299,6 +299,7 @@ class OwnerAITests(unittest.TestCase):
                 "execution_loop",
                 "kpi_scorecard",
                 "financial_director",
+                "business_goals",
                 "plan_fact",
                 "control",
                 "owner_review",
@@ -348,6 +349,11 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("approval_required_count", center["summary"])
         self.assertIn("projected_month_gross_rub", center["summary"])
         self.assertIn("projected_month_contribution_after_salary_rub", center["summary"])
+        self.assertIn("business_goals_off_track_count", center["summary"])
+        self.assertIn("business_goals_risk_count", center["summary"])
+        self.assertIn("month_goal_progress_pct", center["summary"])
+        self.assertIn("month_goal_gap_rub", center["summary"])
+        self.assertIn("daily_load_pct", center["summary"])
         self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
         self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
         self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
@@ -361,6 +367,15 @@ class OwnerAITests(unittest.TestCase):
         self.assertGreaterEqual(center["kpi_scorecard"]["score"], 0)
         self.assertLessEqual(center["kpi_scorecard"]["score"], 100)
         self.assertIn("projected_month_gross_rub", center["financial_director"]["summary"])
+        self.assertEqual(center["business_goals"]["version"], "maya_os_v4_business_goals")
+        self.assertEqual(center["business_goals"]["mode"], "plan_fact_goals")
+        self.assertIn(center["business_goals"]["status"], {"ok", "warn", "risk"})
+        goal_keys = {row["key"] for row in center["business_goals"]["goals"]}
+        self.assertTrue({"daily_revenue", "month_gross", "daily_load", "avg_check"}.issubset(goal_keys))
+        self.assertEqual(
+            center["business_goals"]["summary"]["goals_count"],
+            len(center["business_goals"]["goals"]),
+        )
         self.assertEqual(center["approval_matrix"]["version"], "approval_matrix_v1")
         self.assertTrue(center["approval_matrix"]["rows"])
         self.assertEqual(

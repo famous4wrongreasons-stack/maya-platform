@@ -15788,6 +15788,57 @@ function AGodMode() {
         st.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, alignSelf: 'center' } }, st.msg) : null),
       loop.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, loop.next_step) : null));
   }
+  function renderBusinessGoals(goals) {
+    goals = goals || {};
+    var sm = goals.summary || {};
+    var rows = goals.goals || [];
+    if (!rows.length) return null;
+    function goalValue(it, v) {
+      if (v == null) return '—';
+      if (it.unit === 'rub') return money(v);
+      if (it.unit === 'pct') return String(Math.round(Number(v) || 0)) + '%';
+      return String(v || 0);
+    }
+    function goalGap(it) {
+      if (it.gap_value == null) return '';
+      var g = Number(it.gap_value || 0);
+      if (it.unit === 'rub') return g < 0 ? ('не хватает ' + money(Math.abs(g))) : ('запас ' + money(g));
+      if (it.unit === 'pct') return (g > 0 ? '+' : '') + Math.round(g) + ' п.п.';
+      if (it.unit === 'count') return g < 0 ? ('лишних ' + Math.abs(g)) : String(g);
+      return String(g);
+    }
+    var detail = [
+      sm.off_track_count ? ('отклонений ' + sm.off_track_count) : '',
+      sm.risk_count ? ('риск ' + sm.risk_count) : '',
+      sm.month_goal_gap_rub ? ('месяц ' + money(sm.month_goal_gap_rub)) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('Цели бизнеса'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(goals.status || 'ok'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, goals.headline || 'Цели бизнеса под контролем'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      grid2([
+        kpiCell(sm.month_goal_progress_pct == null ? '—' : String(sm.month_goal_progress_pct) + '%', 'Месяц'),
+        kpiCell(sm.daily_goal_progress_pct == null ? '—' : String(sm.daily_goal_progress_pct) + '%', 'День'),
+        kpiCell(sm.daily_load_pct == null ? '—' : String(sm.daily_load_pct) + '%', 'Загрузка'),
+        kpiCell(String(sm.off_track_count || 0), 'Отклонения')
+      ]),
+      rows.slice(0, 6).map(function (it, i) {
+        var gap = goalGap(it);
+        return e('div', { key: it.key || i, style: { padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'ok'), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Цель'),
+                e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'ok'), whiteSpace: 'nowrap' } }, it.progress_pct == null ? 'Цель' : (String(it.progress_pct) + '%'))),
+              e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, goalValue(it, it.actual_value) + ' из ' + goalValue(it, it.target_value) + (gap ? ' · ' + gap : '')),
+              it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null)));
+      }),
+      goals.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, goals.next_step) : null));
+  }
   function renderOwnerReview(review) {
     review = review || {};
     var rows = review.items || [], sm = review.summary || {};
@@ -16025,6 +16076,7 @@ function AGodMode() {
     var autonomousDirector = cc.autonomous_director || {};
     var autopilotSupervisor = cc.autopilot_supervisor || {};
     var executionLoop = cc.execution_loop || {};
+    var businessGoals = cc.business_goals || {};
     var kpiScorecard = cc.kpi_scorecard || {};
     var financialDirector = cc.financial_director || {};
     var attention = cc.attention_feed || [];
@@ -16041,6 +16093,7 @@ function AGodMode() {
         kpiCell(String(todaySm.free_capacity_today || 0), 'Свободная ёмкость'),
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
+      renderBusinessGoals(businessGoals),
       renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),
       renderAutopilotSupervisor(autopilotSupervisor),
       renderExecutionLoop(executionLoop),

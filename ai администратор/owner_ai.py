@@ -250,14 +250,31 @@ def business_snapshot() -> dict:
     }
 
 
-def _manual_daily_target_rub() -> int:
-    """Опциональная ручная цель владельца через settings.owner_daily_target_rub."""
+def _manual_setting_rub(key: str) -> int:
+    """Опциональная ручная денежная цель владельца из settings."""
     try:
         import database
-        val = database.get_setting("owner_daily_target_rub")
+        val = database.get_setting(key)
         return _rub(val)
     except Exception:
         return 0
+
+
+def _manual_daily_target_rub() -> int:
+    """Опциональная ручная цель владельца через settings.owner_daily_target_rub."""
+    return _manual_setting_rub("owner_daily_target_rub")
+
+
+def _manual_month_gross_target_rub() -> int:
+    return _manual_setting_rub("owner_month_gross_target_rub")
+
+
+def _manual_month_contribution_target_rub() -> int:
+    return _manual_setting_rub("owner_month_contribution_target_rub")
+
+
+def _manual_avg_check_target_rub() -> int:
+    return _manual_setting_rub("owner_avg_check_target_rub")
 
 
 def _today_revenue_summary() -> dict:
@@ -2628,6 +2645,263 @@ def _financial_director(*, snap: dict, plan: dict, masters: dict,
     }
 
 
+def _goal_status(progress_pct, *, warn_below: int = 95, risk_below: int = 75) -> str:
+    if progress_pct is None:
+        return "ok"
+    try:
+        progress = float(progress_pct)
+    except Exception:
+        return "ok"
+    if progress < risk_below:
+        return "risk"
+    if progress < warn_below:
+        return "warn"
+    return "ok"
+
+
+def _goal_progress(actual, target):
+    target = _rub(target)
+    if not target:
+        return None
+    return round((_rub(actual) / target) * 100)
+
+
+def _business_goals(*, snap: dict, plan: dict, masters: dict,
+                    ret: dict, finance: dict) -> dict:
+    """Слой целей бизнеса: план, факт, разрыв и следующий управленческий шаг."""
+    today = date.today()
+    first = today.replace(day=1)
+    next_month = (first.replace(year=first.year + 1, month=1) if first.month == 12
+                  else first.replace(month=first.month + 1))
+    days_in_month = max(1, (next_month - first).days)
+    finance_summary = finance.get("summary") if isinstance(finance.get("summary"), dict) else {}
+    goals = []
+
+    def add(key: str, title: str, *, actual_value=0, target_value=0,
+            gap_value=None, progress_pct=None, unit: str = "rub",
+            status: str | None = None, target_source: str = "",
+            period: str = "", detail: str = "", owner_next_step: str = "",
+            estimate: bool = True) -> None:
+        if progress_pct is None:
+            progress_pct = _goal_progress(actual_value, target_value)
+        if gap_value is None:
+            if unit == "count":
+                gap_value = _rub(target_value) - _rub(actual_value)
+            else:
+                gap_value = _rub(actual_value) - _rub(target_value)
+        if not status:
+            status = _goal_status(progress_pct)
+        goals.append({
+            "key": key,
+            "title": title,
+            "status": status,
+            "actual_value": _rub(actual_value) if actual_value is not None else None,
+            "target_value": _rub(target_value) if target_value is not None else None,
+            "gap_value": _rub(gap_value) if gap_value is not None else None,
+            "progress_pct": progress_pct,
+            "unit": unit,
+            "target_source": target_source,
+            "period": period,
+            "detail": detail,
+            "owner_next_step": owner_next_step,
+            "estimate": bool(estimate),
+        })
+
+    daily_target = _rub(plan.get("daily_target_rub"))
+    daily_actual = _rub(plan.get("projected_revenue_rub"))
+    daily_progress = plan.get("progress_pct")
+    daily_gap = _rub(plan.get("gap_rub"))
+    add(
+        "daily_revenue",
+        "Выручка дня",
+        actual_value=daily_actual,
+        target_value=daily_target,
+        gap_value=daily_gap,
+        progress_pct=daily_progress,
+        unit="rub",
+        status=plan.get("status") or _goal_status(daily_progress),
+        target_source=plan.get("target_source") or "last_30_actual_average",
+        period="day",
+        detail="Факт оплат + прогноз по текущим записям против дневной цели.",
+        owner_next_step=(
+            "Закрыть свободные окна и добрать примерно %s визит(а/ов)."
+            % _m(plan.get("needed_visits_to_target"))
+            if _rub(plan.get("needed_visits_to_target"))
+            else "Держать темп дня и проверить фактические оплаты."
+        ),
+    )
+
+    manual_month_target = _manual_month_gross_target_rub()
+    month_target = manual_month_target or (daily_target * days_in_month if daily_target else 0)
+    month_actual = _rub(finance_summary.get("projected_month_gross_rub"))
+    month_progress = _goal_progress(month_actual, month_target)
+    month_gap = month_actual - month_target if month_target else 0
+    add(
+        "month_gross",
+        "Выручка месяца",
+        actual_value=month_actual,
+        target_value=month_target,
+        gap_value=month_gap,
+        progress_pct=month_progress,
+        unit="rub",
+        status=_goal_status(month_progress, warn_below=98, risk_below=82),
+        target_source="manual_setting" if manual_month_target else "daily_target_x_days",
+        period="month",
+        detail="Прогноз месяца по run-rate против месячной цели.",
+        owner_next_step=(
+            "Есть разрыв месяца %s ₽: усилить загрузку, возврат и средний чек."
+            % _m(abs(month_gap))
+            if month_gap < 0 else "Месячная цель держится. Контролировать маржу и качество загрузки."
+        ),
+    )
+
+    booked = _rub(snap.get("booked_today"))
+    free_capacity = _rub(snap.get("free_capacity_today"))
+    capacity_total = booked + free_capacity
+    load_pct = int(round(booked * 100 / capacity_total)) if capacity_total else 100
+    load_target = 80
+    load_gap = load_pct - load_target
+    load_status = "risk" if load_pct < 60 else ("warn" if load_pct < load_target else "ok")
+    add(
+        "daily_load",
+        "Загрузка дня",
+        actual_value=load_pct,
+        target_value=load_target,
+        gap_value=load_gap,
+        progress_pct=round(load_pct * 100 / load_target) if load_target else None,
+        unit="pct",
+        status=load_status,
+        target_source="operational_threshold",
+        period="day",
+        detail="Записи относительно доступной ёмкости дня.",
+        owner_next_step=(
+            "Пустая ёмкость %s визит(а/ов): поручить админу заполнить ближайшие окна."
+            % _m(free_capacity)
+            if free_capacity else "Окна дня закрыты. Следить за переносами и отменами."
+        ),
+    )
+
+    avg_actual = _rub(plan.get("avg_check_rub") or snap.get("avg_check_rub"))
+    manual_avg_target = _manual_avg_check_target_rub()
+    avg_target = manual_avg_target or avg_actual
+    avg_check_progress = _goal_progress(avg_actual, avg_target)
+    add(
+        "avg_check",
+        "Средний чек",
+        actual_value=avg_actual,
+        target_value=avg_target,
+        gap_value=avg_actual - avg_target if avg_target else 0,
+        progress_pct=avg_check_progress,
+        unit="rub",
+        status=_goal_status(avg_check_progress, warn_below=98, risk_below=85),
+        target_source="manual_setting" if manual_avg_target else "current_30d_baseline",
+        period="30d",
+        detail="Средний чек за 30 дней против ручной цели или текущей базы.",
+        owner_next_step=(
+            "Проверить допродажи, абонементы и услуги с высоким чеком."
+            if manual_avg_target and avg_actual < avg_target else "Средний чек держится на текущей базе."
+        ),
+    )
+
+    sleeping = ret.get("count")
+    sleeping_known = sleeping is not None
+    sleeping_count = _rub(sleeping) if sleeping_known else None
+    sleeping_status = "ok"
+    if sleeping_known:
+        sleeping_status = "risk" if sleeping_count >= 10 else ("warn" if sleeping_count > 0 else "ok")
+    sleeping_progress = None if not sleeping_known else max(0, 100 - min(100, sleeping_count * 8))
+    add(
+        "sleeping_clients",
+        "Уснувшие клиенты",
+        actual_value=sleeping_count,
+        target_value=0 if sleeping_known else None,
+        gap_value=-(sleeping_count or 0) if sleeping_known else None,
+        progress_pct=sleeping_progress,
+        unit="count",
+        status=sleeping_status,
+        target_source="reactivation_threshold",
+        period="28-56d",
+        detail="Клиенты без визита 28-56 дней с готовым поводом для возврата.",
+        owner_next_step=(
+            "Запустить безопасный сценарий реактивации после подтверждения владельца."
+            if sleeping_count else "База возврата сейчас не требует вмешательства."
+        ) if sleeping_known else "Сначала пересчитать кандидатов на возврат.",
+    )
+
+    manual_contribution_target = _manual_month_contribution_target_rub()
+    contribution_actual = _rub(finance_summary.get("projected_month_contribution_after_salary_rub"))
+    gross_30 = _rub(finance_summary.get("gross_30d_rub") or masters.get("total_gross_rub"))
+    contribution_30 = _rub(
+        finance_summary.get("contribution_after_salary_30d_rub")
+        or masters.get("profit_after_salary_total_rub")
+    )
+    contribution_rate = (contribution_30 / gross_30) if gross_30 else 0
+    contribution_target = manual_contribution_target or _rub(month_target * contribution_rate)
+    contribution_progress = _goal_progress(contribution_actual, contribution_target)
+    contribution_gap = contribution_actual - contribution_target if contribution_target else 0
+    add(
+        "contribution_after_salary",
+        "Вклад после выплат",
+        actual_value=contribution_actual,
+        target_value=contribution_target,
+        gap_value=contribution_gap,
+        progress_pct=contribution_progress,
+        unit="rub",
+        status=_goal_status(contribution_progress, warn_below=98, risk_below=82),
+        target_source="manual_setting" if manual_contribution_target else "month_goal_x_current_margin",
+        period="month",
+        detail="Прогноз вклада после выплат мастерам. Это ещё не чистая прибыль.",
+        owner_next_step=(
+            "Проверить маржинальность мастеров и услуг, где вклад просел."
+            if contribution_gap < 0 else "Вклад после выплат идёт в цели месяца."
+        ),
+    )
+
+    off_track = [g for g in goals if g.get("status") != "ok"]
+    risk_count = len([g for g in goals if g.get("status") == "risk"])
+    avg_progresses = [
+        int(g.get("progress_pct"))
+        for g in goals
+        if g.get("progress_pct") is not None
+    ]
+    avg_progress = round(sum(avg_progresses) / len(avg_progresses)) if avg_progresses else None
+    status = "risk" if risk_count else ("warn" if off_track else "ok")
+    headline = (
+        "Цели требуют немедленных действий" if status == "risk"
+        else ("Есть отклонения от целей" if status == "warn" else "Цели бизнеса под контролем")
+    )
+    next_step = (
+        (off_track[0].get("owner_next_step") if off_track else "")
+        or "Держать текущий план и проверять отклонения каждый день."
+    )
+    return {
+        "version": "maya_os_v4_business_goals",
+        "mode": "plan_fact_goals",
+        "status": status,
+        "headline": headline,
+        "summary": {
+            "goals_count": len(goals),
+            "off_track_count": len(off_track),
+            "risk_count": risk_count,
+            "avg_progress_pct": avg_progress,
+            "daily_goal_progress_pct": daily_progress,
+            "daily_goal_gap_rub": daily_gap,
+            "month_goal_progress_pct": month_progress,
+            "month_goal_gap_rub": month_gap,
+            "daily_load_pct": load_pct,
+            "load_gap_pct": load_gap,
+            "avg_check_progress_pct": avg_check_progress,
+            "sleeping_clients_count": sleeping_count,
+            "contribution_goal_progress_pct": contribution_progress,
+            "contribution_goal_gap_rub": contribution_gap,
+            "days_in_month": days_in_month,
+        },
+        "goals": goals,
+        "next_step": next_step,
+        "note": "Цели используют факты YClients и оценочные прогнозы; внешние действия требуют отдельного подтверждения.",
+    }
+
+
 def _approval_matrix() -> dict:
     """Матрица автономии: что MAYA может делать сама, а где нужен владелец."""
     rows = [
@@ -3645,6 +3919,13 @@ def command_center() -> dict:
         opps=opps,
         risks=risks,
     )
+    business_goals = _business_goals(
+        snap=snap,
+        plan=plan,
+        masters=masters,
+        ret=ret,
+        finance=financial_director,
+    )
     approval = _approval_matrix()
     autonomous_candidates = _autonomous_task_candidates(
         plan=plan,
@@ -3667,6 +3948,7 @@ def command_center() -> dict:
         execution_loop.get("status"),
         automation_queue.get("status"),
         kpi_scorecard.get("status"),
+        business_goals.get("status"),
         autonomous_director.get("status"),
     )
     sections = [
@@ -3737,6 +4019,14 @@ def command_center() -> dict:
             "summary": financial_director.get("summary") or {},
             "items": financial_director.get("decisions") or [],
             "note": financial_director.get("note"),
+        },
+        {
+            "key": "business_goals",
+            "title": "Цели бизнеса",
+            "status": business_goals.get("status"),
+            "summary": business_goals.get("summary") or {},
+            "items": business_goals.get("goals") or [],
+            "note": business_goals.get("next_step"),
         },
         {
             "key": "plan_fact",
@@ -3928,6 +4218,11 @@ def command_center() -> dict:
             "approval_required_count": (autonomous_director.get("summary") or {}).get("approval_required_count", 0),
             "projected_month_gross_rub": (financial_director.get("summary") or {}).get("projected_month_gross_rub", 0),
             "projected_month_contribution_after_salary_rub": (financial_director.get("summary") or {}).get("projected_month_contribution_after_salary_rub", 0),
+            "business_goals_off_track_count": (business_goals.get("summary") or {}).get("off_track_count", 0),
+            "business_goals_risk_count": (business_goals.get("summary") or {}).get("risk_count", 0),
+            "month_goal_progress_pct": (business_goals.get("summary") or {}).get("month_goal_progress_pct"),
+            "month_goal_gap_rub": (business_goals.get("summary") or {}).get("month_goal_gap_rub", 0),
+            "daily_load_pct": (business_goals.get("summary") or {}).get("daily_load_pct", 0),
         },
         "sections": sections,
         "attention_feed": attention,
@@ -3936,6 +4231,7 @@ def command_center() -> dict:
         "execution_loop": execution_loop,
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
+        "business_goals": business_goals,
         "approval_matrix": approval,
         "automation_status": automations,
         "automation_queue": automation_queue,
