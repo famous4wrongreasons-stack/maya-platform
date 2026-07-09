@@ -794,7 +794,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
     def add(key: str, title: str, detail: str = "", *, status: str = "warn",
             source: str = "maya", potential_rub=None, owner_next_step: str = "",
             due_at: str | None = None, action_job: str | None = None,
-            action_id=None) -> None:
+            action_id=None, due_state: str | None = None) -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -808,6 +808,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
             "owner_next_step": owner_next_step or "",
             "due_at": due_at,
+            "due_state": due_state,
             "action_job": action_job,
             "action_id": action_id,
         })
@@ -847,16 +848,34 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
         status = str(it.get("status") or "")
         payload = it.get("payload") or {}
         if it.get("source") == "owner_control" and status in ("pending", "running"):
+            due_at = it.get("result_due_at") or payload.get("due_at")
+            due_state = None
+            if due_at:
+                due_s = str(due_at)
+                if due_s <= now_iso:
+                    due_state = "overdue"
+                elif due_s[:10] == now_iso[:10]:
+                    due_state = "today"
+                else:
+                    due_state = "scheduled"
+            priority = payload.get("priority") or "medium"
+            owner_next_step = payload.get("owner_next_step") or "Довести задачу до результата и проверить в журнале."
+            if due_state == "overdue":
+                priority = "high"
+                owner_next_step = "Срок контроля прошёл. Отметить результат, отложить или отменить задачу."
+            elif due_state == "today" and not payload.get("owner_next_step"):
+                owner_next_step = "Проверить сегодня и закрыть или отложить задачу."
             add(
                 "owner_control:%s" % (it.get("id") or it.get("title") or "task"),
                 it.get("title") or "Контрольная задача",
                 payload.get("detail") or "",
-                status=payload.get("priority") or "medium",
+                status=priority,
                 source="owner_control",
                 potential_rub=payload.get("potential_rub"),
-                due_at=it.get("result_due_at") or payload.get("due_at"),
+                due_at=due_at,
+                due_state=due_state,
                 action_id=it.get("id"),
-                owner_next_step=payload.get("owner_next_step") or "Довести задачу до результата и проверить в журнале.",
+                owner_next_step=owner_next_step,
             )
         if status == "failed":
             add(
@@ -1019,7 +1038,12 @@ def command_center() -> dict:
         it for it in control if _severity_rank(it.get("status")) >= 3
     ]
     control_due = [
-        it for it in control if it.get("source") == "journal" and it.get("due_at")
+        it for it in control
+        if it.get("due_state") in ("overdue", "today")
+        or (it.get("source") == "journal" and it.get("due_at"))
+    ]
+    control_overdue = [
+        it for it in control if it.get("due_state") == "overdue"
     ]
     sections = [
         {
@@ -1076,6 +1100,7 @@ def command_center() -> dict:
                 "items_count": len(control),
                 "urgent_count": len(control_urgent),
                 "due_count": len(control_due),
+                "overdue_count": len(control_overdue),
             },
             "items": control,
             "note": "Очередь контроля собирается из рисков, действий, журнала результата и системных предупреждений.",

@@ -296,6 +296,29 @@ class OwnerAITests(unittest.TestCase):
             if item.get("action_id") == created["task_id"]
         ])
 
+    def test_overdue_owner_control_task_is_urgent(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Просроченный контроль",
+            priority="low",
+            due_at="2020-01-01T10:00:00",
+        )
+        center = owner_ai.command_center()
+        item = [
+            row for row in center["control_queue"]
+            if row.get("action_id") == created["task_id"]
+        ][0]
+        control_section = [
+            section for section in center["sections"]
+            if section.get("key") == "control"
+        ][0]
+
+        self.assertEqual(item["status"], "high")
+        self.assertEqual(item["due_state"], "overdue")
+        self.assertIn("Срок контроля прошёл", item["owner_next_step"])
+        self.assertGreaterEqual(control_section["summary"]["overdue_count"], 1)
+
     def test_plan_fact_uses_manual_owner_target_when_set(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
         sys.modules["database"].get_setting = lambda key, default=None: (
