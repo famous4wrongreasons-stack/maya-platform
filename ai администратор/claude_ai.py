@@ -578,6 +578,18 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "get_owner_command_center",
+        "description": (
+            "ТОЛЬКО для владельца. Полный снимок Maya OS / Owner Command Center: "
+            "главный контроль, план-факт, риски, очередь управленческих задач, "
+            "клиенты/активы, услуги, мастера, действия AI-директора и журнал. "
+            "Вызывай на «Maya OS / центр управления / что контролировать / план-факт / "
+            "журнал AI-директора / статус OS / что делать дальше / что сейчас главное». "
+            "ЧТЕНИЕ. Не выдумывай отсутствующие цифры — используй только поля инструмента."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
         "name": "get_money_opportunities",
         "description": (
             "ТОЛЬКО для владельца. Приоритизированный ПО ДЕНЬГАМ список возможностей: "
@@ -713,9 +725,10 @@ _MASTER_ONLY = {"get_my_work_records", "get_my_tips", "get_my_stats", "get_clien
 _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
     # AI-директор: операционное ядро только владельцу/основателю
-    "get_daily_briefing", "get_money_opportunities", "get_return_candidates",
-    "get_empty_windows", "get_expiring_assets", "get_service_insights",
-    "get_master_performance", "get_risk_signals", "salon_action",
+    "get_daily_briefing", "get_owner_command_center", "get_money_opportunities",
+    "get_return_candidates", "get_empty_windows", "get_expiring_assets",
+    "get_service_insights", "get_master_performance", "get_risk_signals",
+    "salon_action",
 }
 _PRIVILEGED = _MASTER_ONLY | _MANAGER_ONLY | _OWNER_ONLY
 
@@ -1740,9 +1753,10 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     result = analytics.business_summary(f_iso, t_iso, include_top=want_top)
                     result["period_label"] = label
         elif tool_name in (
-            "get_daily_briefing", "get_money_opportunities", "get_return_candidates",
-            "get_empty_windows", "get_expiring_assets", "get_service_insights",
-            "get_master_performance", "get_risk_signals",
+            "get_daily_briefing", "get_owner_command_center",
+            "get_money_opportunities", "get_return_candidates", "get_empty_windows",
+            "get_expiring_assets", "get_service_insights", "get_master_performance",
+            "get_risk_signals",
         ):
             # AI-директор: только чтение, только владелец/founder.
             if _role not in ("owner", "founder"):
@@ -1751,6 +1765,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 import owner_ai  # ленивый импорт: отсутствие файла не валит весь мозг
                 if tool_name == "get_daily_briefing":
                     result = owner_ai.daily_briefing()
+                elif tool_name == "get_owner_command_center":
+                    result = owner_ai.command_center()
                 elif tool_name == "get_money_opportunities":
                     result = {"opportunities": owner_ai.money_opportunities()}
                 elif tool_name == "get_return_candidates":
@@ -2103,6 +2119,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "заполнить, что скоро истекает — бери данные ИНСТРУМЕНТАМИ и отвечай "
                     "конкретикой из них, а не общими словами:\n"
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
+                    "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше» → get_owner_command_center.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
                     "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
@@ -2128,7 +2145,10 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "говори («потенциально ~X ₽», «оценка»), не выдавай за факт. Учитывай "
                     "поле note из инструмента. Нет данных — скажи прямо, цифры не выдумывай."
                     " Для мастеров: «прибыль» из get_master_performance называй вкладом "
-                    "после процента мастера, не полной чистой прибылью салона."
+                    "после процента мастера, не полной чистой прибылью салона. Для "
+                    "get_owner_command_center отвечай от главного: summary.top_control, "
+                    "plan_fact, control_queue и next_action; если блока или цифры нет — "
+                    "не заменяй его догадкой."
                 ),
             })
 
