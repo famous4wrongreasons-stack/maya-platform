@@ -2372,6 +2372,38 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"role": info["role"], **payload})
 
 
+async def panel_plan_target_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/plan_target — ручной дневной план выручки owner OS."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Настройка плана доступна только владельцу.",
+        }, status=403)
+    raw = body.get("target_rub", body.get("daily_target_rub", 0))
+    try:
+        target = int(round(float(str(raw).replace(" ", "").replace(",", ".") or 0)))
+    except Exception:
+        return _cabinet_response({"error": "bad_request", "message": "target_rub должен быть числом."}, status=400)
+    if target < 0 or target > 5000000:
+        return _cabinet_response({"error": "bad_request", "message": "План должен быть от 0 до 5 000 000 ₽."}, status=400)
+    try:
+        database.set_setting("owner_daily_target_rub", str(target))
+        payload = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_plan_target error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось сохранить план."}, status=500)
+    return _cabinet_response({"ok": True, "role": info["role"], **payload})
+
+
 async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
     """POST /api/panel/action/evaluate — проверить результат owner action."""
     try:
@@ -9358,6 +9390,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/dashboard", panel_options_handler)
     web_app.router.add_post("/api/panel/command_center", panel_command_center_handler)
     web_app.router.add_options("/api/panel/command_center", panel_options_handler)
+    web_app.router.add_post("/api/panel/plan_target", panel_plan_target_handler)
+    web_app.router.add_options("/api/panel/plan_target", panel_options_handler)
     web_app.router.add_post("/api/panel/action/evaluate", panel_action_evaluate_handler)
     web_app.router.add_options("/api/panel/action/evaluate", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)

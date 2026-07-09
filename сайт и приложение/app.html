@@ -15150,6 +15150,17 @@ function AGodMode() {
       setEvalS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось проверить' }; return n; });
     });
   }
+  function editPlanTarget(sm) {
+    sm = sm || {};
+    setModal({ title: 'Дневной план', fields: [{ key: 'target', label: 'План выручки, ₽ (0 = авто)', value: String(sm.target_source === 'manual_setting' ? (sm.daily_target_rub || 0) : 0) }], submit: function (v) {
+      var target = parseInt(String(v.target || '0').replace(/\s/g, ''), 10) || 0;
+      setBusy(true);
+      gfetch('panel_plan_target', { target_rub: target }).then(function (j) {
+        setBusy(false);
+        if (j && !j.error) setCc(j);
+      });
+    } });
+  }
   function statusText(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' ? 'Риск' : (s === 'warn' || s === 'medium' ? 'Внимание' : 'Норма'); }
   function statusColor(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' || s === 'fail' ? '#d9544e' : (s === 'warn' || s === 'medium' || s === 'soon' ? '#d9a441' : '#5aa86e'); }
   function sectionBy(key) {
@@ -15250,6 +15261,7 @@ function AGodMode() {
     var pct = sm.progress_pct == null ? null : Math.max(0, Math.min(160, Number(sm.progress_pct) || 0));
     var gap = Number(sm.gap_rub || 0);
     var gapText = sm.daily_target_rub ? (gap < 0 ? ('не хватает ' + money(Math.abs(gap))) : ('выше плана на ' + money(gap))) : 'база собирается';
+    var sourceText = sm.target_source === 'manual_setting' ? 'ручной план' : 'авто: средняя 30 дней';
     return Card(e('div', null,
       eyebrow('План-факт'),
       e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 8 } },
@@ -15259,8 +15271,10 @@ function AGodMode() {
         e('div', { style: { width: (pct == null ? 0 : Math.min(100, pct)) + '%', height: '100%', borderRadius: 999, background: statusColor(gap < 0 ? 'warn' : 'ok') } })),
       tinyRow('Факт оплат', money(sm.actual_revenue_rub || 0)),
       tinyRow('Прогноз дня', money(sm.projected_revenue_rub || 0)),
-      tinyRow('План по базе', money(sm.daily_target_rub || 0)),
-      tinyRow('Нужно добрать визитов', String(sm.needed_visits_to_target || 0), sm.needed_visits_to_target ? statusColor('warn') : null)));
+      tinyRow('План дня', money(sm.daily_target_rub || 0)),
+      tinyRow('Источник', sourceText),
+      tinyRow('Нужно добрать визитов', String(sm.needed_visits_to_target || 0), sm.needed_visits_to_target ? statusColor('warn') : null),
+      e('div', { style: { marginTop: 10 } }, btn('Настроить план', function () { editPlanTarget(sm); }, {}))));
   }
 
   function renderOS() {

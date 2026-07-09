@@ -83,6 +83,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
     sys.modules.pop("owner_ai", None)
     mod = importlib.import_module("owner_ai")
     mod._avg_cache.update(val=None, ts=0.0)
+    mod._summary30_cache.update(val=None, ts=0.0)
     return mod
 
 
@@ -164,6 +165,23 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(center["errors"])
         self.assertIn("clients", {section["key"] for section in center["sections"]})
         self.assertIn(center["status"], {"warn", "risk"})
+
+    def test_plan_fact_uses_manual_owner_target_when_set(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        sys.modules["database"].get_setting = lambda key, default=None: (
+            "45000" if key == "owner_daily_target_rub" else default
+        )
+
+        plan = owner_ai.plan_fact(snap={
+            "date": "2026-07-08",
+            "booked_today": 2,
+            "expected_revenue_rub": 4000,
+            "avg_check_rub": 2000,
+        })
+
+        self.assertEqual(plan["target_source"], "manual_setting")
+        self.assertEqual(plan["daily_target_rub"], 45000)
+        self.assertEqual(plan["needed_visits_to_target"], 21)
 
     def test_expiring_assets_counts_only_sold_certificates(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
