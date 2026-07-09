@@ -6700,6 +6700,16 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
     if parts:
         lines.append(f"📈 За неделю: {', '.join(parts)}.")
 
+    focus = brief.get("control_focus") or {}
+    focus_items = focus.get("items") or []
+    if focus_items:
+        lines += ["", f"🎯 Фокус контроля: {focus.get('headline') or 'что закрыть сегодня'}"]
+        for i, item in enumerate(focus_items[:3], 1):
+            label = item.get("focus_label") or item.get("status") or ""
+            money = f" — ~{_m(item['potential_rub'])} ₽" if item.get("potential_rub") else ""
+            step = item.get("owner_next_step") or item.get("detail") or ""
+            lines.append(f"{i}. {item.get('title')}{money}" + (f" · {label}" if label else "") + (f". {step}" if step else ""))
+
     opps = brief.get("opportunities") or []
     if opps:
         lines += ["", "💰 Где деньги сегодня:"]
@@ -6712,7 +6722,9 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
 
     text = "\n".join(lines).strip()
     top = brief.get("top_priority") or {}
-    if top:
+    if focus_items and focus.get("status") in ("risk", "warn"):
+        push_body = f"{booked} записей сегодня. Фокус: {focus.get('headline') or focus_items[0].get('title')}."
+    elif top:
         money = f" (~{_m(top['potential_rub'])} ₽)" if top.get("potential_rub") else ""
         push_body = f"{booked} записей сегодня. Приоритет: {top.get('title')}{money}."
     else:

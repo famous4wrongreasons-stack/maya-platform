@@ -1855,11 +1855,41 @@ def daily_briefing() -> dict:
     svc = service_insights()
     opps = money_opportunities(snap=snap, exp=exp, ret=ret)
     risks = risk_signals(snap=snap, exp=exp, ret=ret, svc=svc)
-    top_action = None
-    for opp in opps:
-        top_action = _action_from_opportunity(opp)
-        if top_action:
-            break
+    actions = _dedup_actions(opps)
+    top_action = actions[0] if actions else None
+    now_iso = datetime.now().isoformat(timespec="seconds")
+    control_errors = []
+    try:
+        plan = plan_fact(snap=snap)
+    except Exception as e:
+        logger.error("owner_ai daily_briefing plan_fact: %s", e)
+        plan = _fallback_plan_fact()
+        control_errors.append({
+            "key": "plan_fact",
+            "status": "warn",
+            "message": "Не удалось собрать план-факт для брифинга.",
+        })
+    try:
+        import database
+        database.evaluate_due_owner_actions(limit=5)
+        journal = database.list_owner_actions(limit=24)
+    except Exception as e:
+        logger.error("owner_ai daily_briefing owner_journal: %s", e)
+        journal = []
+        control_errors.append({
+            "key": "owner_journal",
+            "status": "warn",
+            "message": "Не удалось собрать журнал действий для брифинга.",
+        })
+    control = _control_queue(
+        risks=risks.get("risks") or [],
+        actions=actions,
+        journal=journal,
+        errors=control_errors,
+        plan=plan,
+        now_iso=now_iso,
+    )
+    control_focus = _control_focus(control, now_iso=now_iso)
     return {
         "date": snap["date"],
         "today": {
@@ -1876,6 +1906,9 @@ def daily_briefing() -> dict:
         "top_priority": opps[0] if opps else None,
         "risks": risks["risks"],
         "top_risk": risks.get("top_risk"),
+        "next_best_actions": actions,
+        "control_focus": control_focus,
+        "control_queue": control,
         "top_action": top_action,
         "note": snap["note"],
     }

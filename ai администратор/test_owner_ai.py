@@ -195,6 +195,10 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(brief["top_priority"]["estimate"])
         self.assertEqual(brief["top_action"]["kind"], "run_job")
         self.assertEqual(brief["top_action"]["job"], "cycle")
+        self.assertTrue(brief["next_best_actions"])
+        self.assertTrue(brief["control_focus"]["items"])
+        self.assertEqual(brief["control_focus"]["summary"]["focus_count"], len(brief["control_focus"]["items"]))
+        self.assertTrue(brief["control_queue"])
         self.assertIn("оценка", brief["note"].lower())
 
     def test_command_center_builds_stable_owner_os_contract(self):
