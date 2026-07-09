@@ -299,13 +299,29 @@ class OwnerAITests(unittest.TestCase):
             due_in_days=2,
             action_job="cycle",
         )
+        linked_action_id = sys.modules["database"].create_owner_action(
+            "cycle",
+            "Подогреть спрос",
+            status="done",
+            payload={"source_control_id": created["task_id"]},
+        )
+        linked_action = [
+            row for row in sys.modules["database"].list_owner_actions(limit=20)
+            if row.get("id") == linked_action_id
+        ][0]
+        linked_action["evaluated_at"] = "2026-07-08T11:00:00"
+        linked_action["impact_status"] = "positive_signal"
+        linked_action["impact"] = {
+            "status": "positive_signal",
+            "message": "Есть положительный сигнал.",
+        }
         task = [
             row for row in sys.modules["database"].list_owner_actions(limit=20)
             if row.get("id") == created["task_id"]
         ][0]
         task["status"] = "running"
         task["payload"].update({
-            "linked_action_id": 77,
+            "linked_action_id": linked_action_id,
             "linked_action_job": "cycle",
             "linked_action_status": "done",
             "linked_action_due_at": "2026-07-10T10:00:00",
@@ -317,9 +333,12 @@ class OwnerAITests(unittest.TestCase):
             if row.get("action_id") == created["task_id"]
         ][0]
 
-        self.assertEqual(item["linked_action_id"], 77)
+        self.assertEqual(item["linked_action_id"], linked_action_id)
         self.assertEqual(item["linked_action_job"], "cycle")
         self.assertEqual(item["linked_action_status"], "done")
+        self.assertEqual(item["linked_action_evaluated_at"], "2026-07-08T11:00:00")
+        self.assertEqual(item["linked_action_impact_status"], "positive_signal")
+        self.assertIn("положительный", item["linked_action_impact_message"])
         self.assertIn("Действие выполнено", item["owner_next_step"])
 
     def test_control_task_from_same_signal_is_not_duplicated(self):

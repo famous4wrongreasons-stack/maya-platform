@@ -850,7 +850,10 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             linked_action_job: str | None = None,
             linked_action_status: str | None = None,
             linked_action_due_at: str | None = None,
-            linked_action_updated_at: str | None = None) -> None:
+            linked_action_updated_at: str | None = None,
+            linked_action_evaluated_at: str | None = None,
+            linked_action_impact_status: str | None = None,
+            linked_action_impact_message: str | None = None) -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -873,7 +876,17 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "linked_action_status": linked_action_status,
             "linked_action_due_at": linked_action_due_at,
             "linked_action_updated_at": linked_action_updated_at,
+            "linked_action_evaluated_at": linked_action_evaluated_at,
+            "linked_action_impact_status": linked_action_impact_status,
+            "linked_action_impact_message": linked_action_impact_message,
         })
+
+    journal_by_id = {}
+    for item in journal or []:
+        try:
+            journal_by_id[int(item.get("id") or 0)] = item
+        except Exception:
+            pass
 
     for er in errors or []:
         add(
@@ -928,6 +941,15 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             linked_action_status = payload.get("linked_action_status") or summary.get("linked_action_status")
             linked_action_due_at = payload.get("linked_action_due_at")
             linked_action_updated_at = payload.get("linked_action_updated_at") or summary.get("updated_at")
+            linked_action = None
+            try:
+                linked_action = journal_by_id.get(int(linked_action_id or 0))
+            except Exception:
+                linked_action = None
+            linked_impact = linked_action.get("impact") if isinstance((linked_action or {}).get("impact"), dict) else {}
+            linked_impact_status = (linked_action or {}).get("impact_status") or linked_impact.get("status")
+            linked_impact_message = linked_impact.get("message") if isinstance(linked_impact, dict) else None
+            linked_evaluated_at = (linked_action or {}).get("evaluated_at")
             if due_state == "overdue":
                 priority = "high"
                 owner_next_step = "Срок контроля прошёл. Отметить результат, отложить или отменить задачу."
@@ -964,6 +986,9 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 linked_action_status=linked_action_status,
                 linked_action_due_at=linked_action_due_at,
                 linked_action_updated_at=linked_action_updated_at,
+                linked_action_evaluated_at=linked_evaluated_at,
+                linked_action_impact_status=linked_impact_status,
+                linked_action_impact_message=linked_impact_message,
             )
         if status == "failed":
             add(

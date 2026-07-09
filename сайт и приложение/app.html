@@ -15332,6 +15332,7 @@ function AGodMode() {
       var linkedText = linkedActionText(it);
       var linkedStatus = String(it.linked_action_status || '');
       var hasLinkedAction = !!(it.linked_action_id && linkedStatus !== 'failed');
+      var linkedEval = it.linked_action_id ? (evalS[it.linked_action_id] || {}) : {};
       return e('div', { key: it.key || i, style: { display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
         e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
         e('div', { style: { flex: 1, minWidth: 0 } },
@@ -15341,7 +15342,11 @@ function AGodMode() {
           it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
           dueLabel ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.due_state === 'overdue' ? statusColor('risk') : (it.due_state === 'today' ? statusColor('warn') : t.dim), marginTop: 5 } }, dueLabel) : null,
           linkedText ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: linkedStatus === 'failed' ? statusColor('risk') : (linkedStatus === 'done' ? statusColor('ok') : statusColor('warn')), marginTop: 5 } }, linkedText) : null,
+          it.linked_action_impact_message ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: it.linked_action_impact_status === 'positive_signal' ? statusColor('ok') : t.faint, lineHeight: 1.35, marginTop: 5 } }, it.linked_action_impact_message) : null,
           it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 5 } }, it.owner_next_step) : null,
+          linkedStatus === 'done' && it.linked_action_id ? e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 9 } },
+            e('div', { style: { flex: 1 } }, btn(linkedEval.phase === 'running' ? 'Проверяю...' : (it.linked_action_evaluated_at ? 'Проверить ещё' : 'Проверить эффект'), function () { evaluateOwnerAction({ id: it.linked_action_id }); }, { busy: linkedEval.phase === 'running' })),
+            linkedEval.phase === 'done' ? e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 11.2, color: linkedEval.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.25 } }, linkedEval.msg) : null) : null,
           it.action_job && !hasLinkedAction ? (ast.phase === 'confirm' ? e('div', { style: { marginTop: 9, padding: '10px 12px', borderRadius: 12, background: dark ? 'rgba(255,255,255,0.045)' : 'rgba(0,0,0,0.035)', border: '1px solid ' + t.line } },
             e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.35, marginBottom: 10 } }, 'Запустить действие по контролю?'),
             e('div', { style: { display: 'flex', gap: 8 } },
