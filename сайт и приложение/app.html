@@ -15380,13 +15380,37 @@ function AGodMode() {
           e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.2, color: t.ink, lineHeight: 1.25 } }, focus.headline || 'Контроль в норме'),
           detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
       rows.slice(0, 3).map(function (it, i) {
+        var cid = controlTaskId(it);
+        var cs = cid ? (controlS[cid] || {}) : {};
+        var isOwnerControl = it.source === 'owner_control' && cid;
+        var linkedStatus = String(it.linked_action_status || '');
+        var linkedEval = it.linked_action_id ? (evalS[it.linked_action_id] || {}) : {};
+        var hasLinkedAction = !!(it.linked_action_id && linkedStatus !== 'failed');
+        var ast = it.action_job ? (actionS[it.action_job] || {}) : {};
+        var buttons = [];
+        if (linkedStatus === 'done' && it.linked_action_id) {
+          buttons.push(e('div', { key: 'eval' }, btn(linkedEval.phase === 'running' ? '...' : (it.linked_action_evaluated_at ? 'Проверить ещё' : 'Проверить'), function () { evaluateOwnerAction({ id: it.linked_action_id }); }, { busy: linkedEval.phase === 'running' })));
+        } else if (it.action_job && !hasLinkedAction) {
+          if (ast.phase === 'confirm') {
+            buttons.push(e('div', { key: 'run' }, btn('Подтвердить', function () { runOwnerAction({ job: it.action_job, title: it.title, label: it.title, priority: it.status, source: 'owner_os', source_control_id: cid, source_signal_key: it.signal_key }); }, { primary: true })));
+            buttons.push(e('div', { key: 'cancel-run' }, btn('Отмена', function () { setActionS(function (s) { var n = Object.assign({}, s); n[it.action_job] = {}; return n; }); }, {})));
+          } else {
+            buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : 'Запустить', function () { setActionS(function (s) { var n = Object.assign({}, s); n[it.action_job] = { phase: 'confirm' }; return n; }); }, { primary: !isOwnerControl, busy: ast.phase === 'running' })));
+          }
+        }
+        if (isOwnerControl) {
+          buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask(it, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
+          buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask(it, 'postpone'); }, { busy: cs.phase === 'postpone' })));
+        }
         return e('div', { key: it.key || i, style: { display: 'flex', gap: 9, padding: '8px 0', borderTop: '1px solid ' + t.line } },
           e('div', { style: { width: 7, height: 7, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
           e('div', { style: { flex: 1, minWidth: 0 } },
             e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
               e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 600, fontSize: 12.4, color: t.ink, lineHeight: 1.25 } }, it.title || 'Контроль'),
               it.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, it.focus_label) : null),
-            it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 3 } }, it.owner_next_step) : null));
+            it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 3 } }, it.owner_next_step) : null,
+            buttons.length ? e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(' + Math.min(buttons.length, 3) + ', minmax(0, 1fr))', gap: 6, marginTop: 7 } }, buttons) : null,
+            isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, cs.msg) : null));
       })));
   }
   function renderAttentionFeed(rows) {
