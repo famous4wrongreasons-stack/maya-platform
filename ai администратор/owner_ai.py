@@ -2902,6 +2902,211 @@ def _business_goals(*, snap: dict, plan: dict, masters: dict,
     }
 
 
+def _decision_memory(*, journal: list[dict], control: list[dict],
+                     business_goals: dict, now_iso: str) -> dict:
+    """Операционная память: решения, открытые петли и выводы по результатам."""
+    now_dt = _parse_iso(now_iso) or datetime.now()
+    rows = []
+    seen = set()
+
+    def age_days(value: str | None):
+        dt = _parse_iso(value)
+        if not dt:
+            return None
+        try:
+            return max(0, (now_dt.date() - dt.date()).days)
+        except Exception:
+            return None
+
+    def add(key: str, kind: str, title: str, *, status: str = "ok",
+            detail: str = "", source: str = "", happened_at: str | None = None,
+            potential_rub=None, impact_status: str = "", owner_next_step: str = "",
+            decision_state: str = "") -> None:
+        key = (key or title or kind or "memory").strip()[:140]
+        if not key or key in seen:
+            return
+        seen.add(key)
+        rows.append({
+            "key": key,
+            "kind": kind,
+            "title": title or "Память решения",
+            "status": status or "ok",
+            "detail": detail or "",
+            "source": source or "",
+            "happened_at": happened_at or "",
+            "age_days": age_days(happened_at),
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+            "impact_status": impact_status or "",
+            "owner_next_step": owner_next_step or "",
+            "decision_state": decision_state or "",
+        })
+
+    for item in control or []:
+        if item.get("source") != "owner_control" or not item.get("action_id"):
+            continue
+        work_state = str(item.get("assignment_work_state") or "")
+        due_state = str(item.get("due_state") or "")
+        if due_state == "overdue":
+            status = "risk"
+            state = "overdue"
+            step = "Закрыть, перенести или вернуть задачу в работу — она уже просрочена."
+        elif work_state == "done":
+            status = "warn"
+            state = "ready_review"
+            step = "Принять результат владельцем: закрыть или вернуть на доработку."
+        elif work_state == "blocked":
+            status = "risk"
+            state = "blocked"
+            step = "Разобрать блокировку и назначить следующий шаг."
+        else:
+            status = "warn"
+            state = work_state or "open"
+            step = item.get("owner_next_step") or "Довести решение до результата и проверки эффекта."
+        add(
+            "open_decision:%s" % item.get("action_id"),
+            "open_decision",
+            item.get("title") or "Открытое решение",
+            status=status,
+            detail=item.get("detail") or item.get("next_transition") or "",
+            source="owner_control",
+            happened_at=item.get("created_at") or item.get("due_at"),
+            potential_rub=item.get("potential_rub"),
+            owner_next_step=step,
+            decision_state=state,
+        )
+
+    for item in journal or []:
+        job = str(item.get("job") or "")
+        src = str(item.get("source") or "")
+        status_raw = str(item.get("status") or "")
+        title = item.get("title") or (_AUTOMATION_LIBRARY.get(job) or {}).get("title") or job or "Действие"
+        happened = item.get("completed_at") or item.get("evaluated_at") or item.get("created_at")
+        impact = item.get("impact") if isinstance(item.get("impact"), dict) else {}
+        impact_status = item.get("impact_status") or impact.get("status") or ""
+        impact_message = impact.get("message") or item.get("error") or ""
+        if status_raw == "failed":
+            add(
+                "failed:%s" % item.get("id"),
+                "lesson",
+                "Ошибка: %s" % title,
+                status="risk",
+                detail=impact_message or "Действие завершилось ошибкой.",
+                source=src or "journal",
+                happened_at=happened,
+                potential_rub=(item.get("payload") or {}).get("potential_rub"),
+                impact_status="failed",
+                owner_next_step="Разобрать причину ошибки и решить: повторить, отменить или заменить сценарий.",
+                decision_state="failed",
+            )
+            continue
+        if status_raw == "done" and not item.get("evaluated_at") and item.get("result_due_at"):
+            add(
+                "unverified:%s" % item.get("id"),
+                "unverified_result",
+                "Проверить эффект: %s" % title,
+                status="warn",
+                detail="Действие выполнено, но эффект ещё не оценён.",
+                source=src or "journal",
+                happened_at=happened,
+                potential_rub=(item.get("payload") or {}).get("potential_rub"),
+                owner_next_step="Оценить результат и записать вывод в журнал.",
+                decision_state="needs_effect_check",
+            )
+        if item.get("evaluated_at") or impact_status:
+            if impact_status == "positive_signal":
+                status = "ok"
+                step = "Повторять похожий сценарий, когда снова появится такой же повод."
+            elif impact_status in ("no_signal_yet", "no_reach"):
+                status = "warn"
+                step = "Не считать это доказанным успехом: проверить сегмент, оффер и канал."
+            else:
+                status = "warn"
+                step = "Оставить как наблюдение и проверить следующий запуск."
+            add(
+                "learning:%s" % item.get("id"),
+                "lesson",
+                title,
+                status=status,
+                detail=impact_message or "Результат оценён.",
+                source=src or "journal",
+                happened_at=item.get("evaluated_at") or happened,
+                potential_rub=(item.get("payload") or {}).get("potential_rub"),
+                impact_status=impact_status,
+                owner_next_step=step,
+                decision_state="evaluated",
+            )
+
+    for goal in (business_goals.get("goals") or [])[:6]:
+        if goal.get("status") == "ok":
+            continue
+        add(
+            "goal_memory:%s" % goal.get("key"),
+            "goal_gap",
+            goal.get("title") or "Отклонение цели",
+            status=goal.get("status") or "warn",
+            detail=goal.get("detail") or "",
+            source="business_goals",
+            happened_at=now_iso,
+            potential_rub=abs(_rub(goal.get("gap_value"))) if goal.get("unit") == "rub" else None,
+            owner_next_step=goal.get("owner_next_step") or "Принять управленческое решение по отклонению.",
+            decision_state="goal_off_track",
+        )
+
+    rows.sort(key=lambda item: (
+        -_severity_rank(item.get("status")),
+        {"open_decision": 0, "unverified_result": 1, "goal_gap": 2, "lesson": 3}.get(item.get("kind"), 9),
+        item.get("age_days") is None,
+        -(item.get("age_days") or 0),
+        -(item.get("potential_rub") or 0),
+    ))
+    open_decisions = [r for r in rows if r.get("kind") == "open_decision"]
+    unverified = [r for r in rows if r.get("kind") == "unverified_result"]
+    lessons = [r for r in rows if r.get("kind") == "lesson"]
+    positive = [r for r in lessons if r.get("impact_status") == "positive_signal"]
+    failed = [r for r in rows if r.get("status") == "risk"]
+    stale = [
+        r for r in open_decisions
+        if r.get("age_days") is not None and r.get("age_days") >= 2
+    ]
+    if failed or stale:
+        status = "risk"
+        headline = "Память решений показывает незакрытые разрывы"
+    elif open_decisions or unverified:
+        status = "warn"
+        headline = "Есть решения без финального вывода"
+    elif lessons:
+        status = "ok"
+        headline = "Выводы по решениям сохранены"
+    else:
+        status = "ok"
+        headline = "Память решений пока набирается"
+    next_step = (
+        (failed[0].get("owner_next_step") if failed else "")
+        or (stale[0].get("owner_next_step") if stale else "")
+        or (unverified[0].get("owner_next_step") if unverified else "")
+        or "После каждого действия проверять эффект и закрывать вывод в журнале."
+    )
+    return {
+        "version": "maya_os_v5_decision_memory",
+        "mode": "operating_memory",
+        "status": status,
+        "headline": headline,
+        "summary": {
+            "items_count": len(rows),
+            "open_decisions_count": len(open_decisions),
+            "unverified_results_count": len(unverified),
+            "lessons_count": len(lessons),
+            "positive_signals_count": len(positive),
+            "risk_memory_count": len(failed),
+            "stale_decisions_count": len(stale),
+            "goal_gaps_count": len([r for r in rows if r.get("kind") == "goal_gap"]),
+        },
+        "items": rows[:10],
+        "next_step": next_step,
+        "note": "Память строится по журналу действий и контрольным задачам без персональных данных.",
+    }
+
+
 def _approval_matrix() -> dict:
     """Матрица автономии: что MAYA может делать сама, а где нужен владелец."""
     rows = [
@@ -3926,6 +4131,12 @@ def command_center() -> dict:
         ret=ret,
         finance=financial_director,
     )
+    decision_memory = _decision_memory(
+        journal=journal,
+        control=control,
+        business_goals=business_goals,
+        now_iso=now_iso,
+    )
     approval = _approval_matrix()
     autonomous_candidates = _autonomous_task_candidates(
         plan=plan,
@@ -3949,6 +4160,7 @@ def command_center() -> dict:
         automation_queue.get("status"),
         kpi_scorecard.get("status"),
         business_goals.get("status"),
+        decision_memory.get("status"),
         autonomous_director.get("status"),
     )
     sections = [
@@ -4027,6 +4239,14 @@ def command_center() -> dict:
             "summary": business_goals.get("summary") or {},
             "items": business_goals.get("goals") or [],
             "note": business_goals.get("next_step"),
+        },
+        {
+            "key": "decision_memory",
+            "title": "Память решений",
+            "status": decision_memory.get("status"),
+            "summary": decision_memory.get("summary") or {},
+            "items": decision_memory.get("items") or [],
+            "note": decision_memory.get("next_step"),
         },
         {
             "key": "plan_fact",
@@ -4223,6 +4443,10 @@ def command_center() -> dict:
             "month_goal_progress_pct": (business_goals.get("summary") or {}).get("month_goal_progress_pct"),
             "month_goal_gap_rub": (business_goals.get("summary") or {}).get("month_goal_gap_rub", 0),
             "daily_load_pct": (business_goals.get("summary") or {}).get("daily_load_pct", 0),
+            "decision_memory_count": (decision_memory.get("summary") or {}).get("items_count", 0),
+            "open_decisions_count": (decision_memory.get("summary") or {}).get("open_decisions_count", 0),
+            "unverified_results_count": (decision_memory.get("summary") or {}).get("unverified_results_count", 0),
+            "positive_decision_signals_count": (decision_memory.get("summary") or {}).get("positive_signals_count", 0),
         },
         "sections": sections,
         "attention_feed": attention,
@@ -4232,6 +4456,7 @@ def command_center() -> dict:
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
         "business_goals": business_goals,
+        "decision_memory": decision_memory,
         "approval_matrix": approval,
         "automation_status": automations,
         "automation_queue": automation_queue,

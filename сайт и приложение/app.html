@@ -15839,6 +15839,41 @@ function AGodMode() {
       }),
       goals.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, goals.next_step) : null));
   }
+  function renderDecisionMemory(memory) {
+    memory = memory || {};
+    var sm = memory.summary || {};
+    var rows = memory.items || [];
+    if (!rows.length) return null;
+    function memoryKind(k) {
+      k = String(k || '');
+      return k === 'open_decision' ? 'Решение' : (k === 'unverified_result' ? 'Эффект' : (k === 'goal_gap' ? 'Цель' : 'Вывод'));
+    }
+    return Card(e('div', null,
+      eyebrow('Память решений'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(memory.status || 'ok'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, memory.headline || 'Память решений'),
+          memory.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, memory.next_step) : null)),
+      grid2([
+        kpiCell(String(sm.open_decisions_count || 0), 'Открыто'),
+        kpiCell(String(sm.unverified_results_count || 0), 'Проверить'),
+        kpiCell(String(sm.lessons_count || 0), 'Выводы'),
+        kpiCell(String(sm.positive_signals_count || 0), 'Сработало')
+      ]),
+      rows.slice(0, 5).map(function (it, i) {
+        return e('div', { key: it.key || i, style: { padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'ok'), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Решение'),
+                e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'ok'), whiteSpace: 'nowrap' } }, memoryKind(it.kind))),
+              it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
+              it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null,
+              it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null)));
+      })));
+  }
   function renderOwnerReview(review) {
     review = review || {};
     var rows = review.items || [], sm = review.summary || {};
@@ -16077,6 +16112,7 @@ function AGodMode() {
     var autopilotSupervisor = cc.autopilot_supervisor || {};
     var executionLoop = cc.execution_loop || {};
     var businessGoals = cc.business_goals || {};
+    var decisionMemory = cc.decision_memory || {};
     var kpiScorecard = cc.kpi_scorecard || {};
     var financialDirector = cc.financial_director || {};
     var attention = cc.attention_feed || [];
@@ -16094,6 +16130,7 @@ function AGodMode() {
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
       renderBusinessGoals(businessGoals),
+      renderDecisionMemory(decisionMemory),
       renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),
       renderAutopilotSupervisor(autopilotSupervisor),
       renderExecutionLoop(executionLoop),

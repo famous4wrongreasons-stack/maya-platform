@@ -300,6 +300,7 @@ class OwnerAITests(unittest.TestCase):
                 "kpi_scorecard",
                 "financial_director",
                 "business_goals",
+                "decision_memory",
                 "plan_fact",
                 "control",
                 "owner_review",
@@ -354,6 +355,10 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("month_goal_progress_pct", center["summary"])
         self.assertIn("month_goal_gap_rub", center["summary"])
         self.assertIn("daily_load_pct", center["summary"])
+        self.assertIn("decision_memory_count", center["summary"])
+        self.assertIn("open_decisions_count", center["summary"])
+        self.assertIn("unverified_results_count", center["summary"])
+        self.assertIn("positive_decision_signals_count", center["summary"])
         self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
         self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
         self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
@@ -376,6 +381,18 @@ class OwnerAITests(unittest.TestCase):
             center["business_goals"]["summary"]["goals_count"],
             len(center["business_goals"]["goals"]),
         )
+        self.assertEqual(center["decision_memory"]["version"], "maya_os_v5_decision_memory")
+        self.assertEqual(center["decision_memory"]["mode"], "operating_memory")
+        self.assertIn(center["decision_memory"]["status"], {"ok", "warn", "risk"})
+        self.assertGreaterEqual(
+            center["decision_memory"]["summary"]["items_count"],
+            len(center["decision_memory"]["items"]),
+        )
+        self.assertGreaterEqual(center["decision_memory"]["summary"]["positive_signals_count"], 1)
+        self.assertTrue([
+            row for row in center["decision_memory"]["items"]
+            if row.get("kind") == "lesson"
+        ])
         self.assertEqual(center["approval_matrix"]["version"], "approval_matrix_v1")
         self.assertTrue(center["approval_matrix"]["rows"])
         self.assertEqual(
