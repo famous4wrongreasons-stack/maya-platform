@@ -551,6 +551,7 @@ def _normalize_control_due_at(due_at: str | None = None, due_in_days=None) -> st
 def _control_item_from_owner_action(task: dict | None) -> dict:
     task = task or {}
     payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    summary = task.get("summary") if isinstance(task.get("summary"), dict) else {}
     action_id = task.get("id")
     return {
         "key": "owner_control:%s" % (action_id or task.get("title") or "task"),
@@ -566,6 +567,11 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
         "signal_kind": payload.get("signal_kind"),
         "signal_source": payload.get("signal_source"),
         "action_job": payload.get("action_job"),
+        "linked_action_id": payload.get("linked_action_id") or summary.get("linked_action_id"),
+        "linked_action_job": payload.get("linked_action_job") or summary.get("linked_action_job"),
+        "linked_action_status": payload.get("linked_action_status") or summary.get("linked_action_status"),
+        "linked_action_due_at": payload.get("linked_action_due_at"),
+        "linked_action_updated_at": payload.get("linked_action_updated_at") or summary.get("updated_at"),
     }
 
 
@@ -840,7 +846,11 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             source: str = "maya", potential_rub=None, owner_next_step: str = "",
             due_at: str | None = None, action_job: str | None = None,
             action_id=None, due_state: str | None = None,
-            signal_key: str | None = None) -> None:
+            signal_key: str | None = None, linked_action_id=None,
+            linked_action_job: str | None = None,
+            linked_action_status: str | None = None,
+            linked_action_due_at: str | None = None,
+            linked_action_updated_at: str | None = None) -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -858,6 +868,11 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "action_job": action_job,
             "action_id": action_id,
             "signal_key": signal_key,
+            "linked_action_id": linked_action_id,
+            "linked_action_job": linked_action_job,
+            "linked_action_status": linked_action_status,
+            "linked_action_due_at": linked_action_due_at,
+            "linked_action_updated_at": linked_action_updated_at,
         })
 
     for er in errors or []:
@@ -907,11 +922,30 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                     due_state = "scheduled"
             priority = payload.get("priority") or "medium"
             owner_next_step = payload.get("owner_next_step") or "Довести задачу до результата и проверить в журнале."
+            summary = it.get("summary") if isinstance(it.get("summary"), dict) else {}
+            linked_action_id = payload.get("linked_action_id") or summary.get("linked_action_id")
+            linked_action_job = payload.get("linked_action_job") or summary.get("linked_action_job")
+            linked_action_status = payload.get("linked_action_status") or summary.get("linked_action_status")
+            linked_action_due_at = payload.get("linked_action_due_at")
+            linked_action_updated_at = payload.get("linked_action_updated_at") or summary.get("updated_at")
             if due_state == "overdue":
                 priority = "high"
                 owner_next_step = "Срок контроля прошёл. Отметить результат, отложить или отменить задачу."
             elif due_state == "today" and not payload.get("owner_next_step"):
                 owner_next_step = "Проверить сегодня и закрыть или отложить задачу."
+            if linked_action_status == "failed":
+                priority = "high"
+                owner_next_step = "Связанное действие завершилось ошибкой. Проверить журнал и повторить или закрыть контроль."
+            elif linked_action_status in ("running", "done"):
+                if due_state == "overdue":
+                    priority = "high"
+                    owner_next_step = "Действие уже выполнено. Срок проверки прошёл — оценить эффект и закрыть или отложить контроль."
+                elif due_state == "today":
+                    owner_next_step = "Действие уже выполнено. Сегодня проверить эффект и закрыть или отложить контроль."
+                elif linked_action_status == "running":
+                    owner_next_step = "Действие запущено. После завершения проверить результат и срок контроля."
+                else:
+                    owner_next_step = "Действие выполнено. Дождаться срока контроля результата и закрыть задачу по факту."
             add(
                 "owner_control:%s" % (it.get("id") or it.get("title") or "task"),
                 it.get("title") or "Контрольная задача",
@@ -925,6 +959,11 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 action_id=it.get("id"),
                 signal_key=payload.get("signal_key"),
                 owner_next_step=owner_next_step,
+                linked_action_id=linked_action_id,
+                linked_action_job=linked_action_job,
+                linked_action_status=linked_action_status,
+                linked_action_due_at=linked_action_due_at,
+                linked_action_updated_at=linked_action_updated_at,
             )
         if status == "failed":
             add(

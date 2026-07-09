@@ -289,6 +289,39 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(control[0]["action_job"], "cycle")
         self.assertIn("тёплый спрос", control[0]["owner_next_step"])
 
+    def test_owner_control_task_surfaces_linked_action_status(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Запустить тёплый спрос",
+            detail="Добрать свободные окна.",
+            priority="medium",
+            due_in_days=2,
+            action_job="cycle",
+        )
+        task = [
+            row for row in sys.modules["database"].list_owner_actions(limit=20)
+            if row.get("id") == created["task_id"]
+        ][0]
+        task["status"] = "running"
+        task["payload"].update({
+            "linked_action_id": 77,
+            "linked_action_job": "cycle",
+            "linked_action_status": "done",
+            "linked_action_due_at": "2026-07-10T10:00:00",
+        })
+
+        center = owner_ai.command_center()
+        item = [
+            row for row in center["control_queue"]
+            if row.get("action_id") == created["task_id"]
+        ][0]
+
+        self.assertEqual(item["linked_action_id"], 77)
+        self.assertEqual(item["linked_action_job"], "cycle")
+        self.assertEqual(item["linked_action_status"], "done")
+        self.assertIn("Действие выполнено", item["owner_next_step"])
+
     def test_control_task_from_same_signal_is_not_duplicated(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
 

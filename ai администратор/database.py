@@ -4108,6 +4108,125 @@ def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
         return int(cur.lastrowid)
 
 
+def _compact_owner_action_summary(summary) -> dict:
+    if not isinstance(summary, dict):
+        return {}
+    out = {}
+    for key, value in list(summary.items())[:20]:
+        k = str(key or "")[:80]
+        if not k:
+            continue
+        if isinstance(value, (int, float, bool)) or value is None:
+            out[k] = value
+        elif isinstance(value, str):
+            out[k] = value[:180]
+    return out
+
+
+def link_owner_control_task_action(control_action_id, linked_action_id, linked_job: str = "",
+                                   *, action_status: str = "running", note: str = "",
+                                   summary=None, error: str = "") -> dict | None:
+    """Связывает контрольную задачу owner_control с запущенным действием.
+
+    Контроль не закрывается автоматически: MAYA фиксирует, что действие уже
+    запущено/выполнено, а владелец позже отмечает фактический результат.
+    """
+    try:
+        control_id = int(control_action_id)
+        action_id = int(linked_action_id)
+    except Exception:
+        return None
+    if not control_id or not action_id:
+        return None
+    action_status = (action_status or "running").strip().lower()[:40]
+    if action_status not in ("running", "done", "failed"):
+        action_status = "running"
+    now = _now()
+    linked_job = (linked_job or "").strip().lower()[:80]
+    note = (note or "")[:420]
+    error = (error or "")[:240]
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        control_row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (control_id,),
+        ).fetchone()
+        if not control_row:
+            return None
+        control = dict(control_row)
+        if control.get("source") != "owner_control" or control.get("job") != "control_task":
+            return None
+        action_row = conn.execute(
+            "SELECT job, result_due_at FROM owner_action_journal WHERE id = ?",
+            (action_id,),
+        ).fetchone()
+        if action_row:
+            linked_job = linked_job or str(action_row["job"] or "")[:80]
+
+        payload = _json_loads_safe(control.get("payload_json"))
+        control_summary = _json_loads_safe(control.get("summary_json"))
+        if not payload.get("linked_action_started_at"):
+            payload["linked_action_started_at"] = now
+        payload.update({
+            "linked_action_id": action_id,
+            "linked_action_job": linked_job,
+            "linked_action_status": action_status,
+            "linked_action_updated_at": now,
+        })
+        if action_status in ("done", "failed"):
+            payload["linked_action_completed_at"] = now
+        if action_row and action_row["result_due_at"]:
+            payload["linked_action_due_at"] = action_row["result_due_at"]
+            if not payload.get("due_at") and not control.get("result_due_at"):
+                payload["due_at"] = action_row["result_due_at"]
+
+        control_summary.update({
+            "manual": False,
+            "last_action": "linked_action_" + action_status,
+            "linked_action_id": action_id,
+            "linked_action_job": linked_job,
+            "linked_action_status": action_status,
+            "updated_at": now,
+        })
+        compact_summary = _compact_owner_action_summary(summary)
+        if compact_summary:
+            control_summary["linked_action_summary"] = compact_summary
+        if note:
+            control_summary["note"] = note
+        if error:
+            control_summary["linked_action_error"] = error
+
+        current_status = str(control.get("status") or "").lower()
+        if current_status in ("done", "canceled"):
+            next_status = current_status
+            completed_at = control.get("completed_at")
+        elif action_status == "failed":
+            next_status = "pending"
+            completed_at = None
+        else:
+            next_status = "running"
+            completed_at = None
+        result_due_at = control.get("result_due_at") or payload.get("due_at")
+
+        conn.execute(
+            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
+            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (
+                next_status,
+                completed_at,
+                result_due_at,
+                _json_dumps_safe(payload),
+                _json_dumps_safe(control_summary),
+                "",
+                control_id,
+            ),
+        )
+
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == control_id]
+    return actions[0] if actions else None
+
+
 def finish_owner_action(action_id, status: str, *, summary=None, error: str = "") -> bool:
     """Завершает запись журнала AI-директора статусом done/failed/running."""
     try:
@@ -4116,17 +4235,42 @@ def finish_owner_action(action_id, status: str, *, summary=None, error: str = ""
         return False
     status = (status or "").strip().lower()[:40] or "done"
     completed_at = _now() if status in ("done", "failed") else None
+    source_control_id = 0
+    linked_job = ""
     try:
         with _db() as conn:
             _ensure_owner_action_journal(conn)
+            row = conn.execute(
+                "SELECT job, payload_json FROM owner_action_journal WHERE id = ?",
+                (aid,),
+            ).fetchone()
+            if row:
+                linked_job = str(row["job"] or "")[:80]
+                payload = _json_loads_safe(row["payload_json"])
+                try:
+                    source_control_id = int(payload.get("source_control_id") or 0)
+                except Exception:
+                    source_control_id = 0
             conn.execute(
                 "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
                 "summary_json = ?, error = ? WHERE id = ?",
                 (status, completed_at, _json_dumps_safe(summary), (error or "")[:240], aid),
             )
-            return True
     except Exception:
         return False
+    if source_control_id:
+        try:
+            link_owner_control_task_action(
+                source_control_id,
+                aid,
+                linked_job,
+                action_status=status,
+                summary=summary,
+                error=error,
+            )
+        except Exception:
+            pass
+    return True
 
 
 def update_owner_control_task(action_id, action: str, *, note: str = "",

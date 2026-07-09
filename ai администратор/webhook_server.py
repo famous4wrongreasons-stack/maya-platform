@@ -2982,6 +2982,8 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
         pass
 
     action_id = None
+    source_control_id = 0
+    source_signal_key = ""
     try:
         journal_payload = {"label": label, "kind": kind}
         try:
@@ -3000,6 +3002,14 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
             created_by=int(tg_id) if tg_id else None,
             payload=journal_payload,
         )
+        if action_id and source_control_id:
+            database.link_owner_control_task_action(
+                source_control_id,
+                action_id,
+                job,
+                action_status="running",
+                note="Действие запущено из очереди контроля.",
+            )
     except Exception as e:
         logger.warning(f"panel job journal create {job}: {e}")
 
