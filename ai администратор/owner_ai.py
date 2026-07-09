@@ -930,6 +930,107 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
     return out[:8]
 
 
+def _attention_feed(*, control: list[dict], plan: dict | None, top_risk: dict | None,
+                    opps: list[dict], errors: list[dict]) -> list[dict]:
+    """Короткая лента того, что владельцу стоит увидеть первым."""
+    out, seen = [], set()
+
+    def add(kind: str, title: str, detail: str = "", *, severity: str = "medium",
+            source: str = "maya", potential_rub=None, action_job: str | None = None,
+            control_key: str | None = None, due_state: str | None = None) -> None:
+        key = "%s:%s:%s" % (kind or "notice", source or "maya", control_key or title or "")
+        if key in seen:
+            return
+        seen.add(key)
+        out.append({
+            "kind": kind or "notice",
+            "title": title or "Требует внимания",
+            "detail": detail or "",
+            "severity": severity or "medium",
+            "source": source,
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+            "action_job": action_job,
+            "control_key": control_key,
+            "due_state": due_state,
+        })
+
+    for er in errors or []:
+        add(
+            "system",
+            "Проверить системный блок",
+            er.get("message") or er.get("key") or "",
+            severity="high",
+            source="system",
+        )
+
+    for item in control or []:
+        if item.get("due_state") == "overdue":
+            add(
+                "control_overdue",
+                "Просрочен контроль",
+                item.get("title") or item.get("detail") or "",
+                severity="high",
+                source="owner_control",
+                potential_rub=item.get("potential_rub"),
+                control_key=item.get("key"),
+                due_state=item.get("due_state"),
+            )
+        elif item.get("due_state") == "today":
+            add(
+                "control_today",
+                "Контроль сегодня",
+                item.get("title") or item.get("detail") or "",
+                severity="medium",
+                source="owner_control",
+                potential_rub=item.get("potential_rub"),
+                control_key=item.get("key"),
+                due_state=item.get("due_state"),
+            )
+
+    plan = plan or {}
+    if plan.get("status") in ("warn", "risk"):
+        add(
+            "plan_fact",
+            "День ниже плана",
+            "Разрыв %s ₽, нужно добрать примерно %s визит(а/ов)." % (
+                _m(abs(plan.get("gap_rub") or 0)),
+                _m(plan.get("needed_visits_to_target") or 0),
+            ),
+            severity="high" if plan.get("status") == "risk" else "medium",
+            source="plan_fact",
+            potential_rub=abs(_rub(plan.get("gap_rub"))),
+        )
+
+    if top_risk:
+        add(
+            "risk",
+            top_risk.get("title") or "Риск бизнеса",
+            top_risk.get("detail") or "",
+            severity="high" if _severity_rank(top_risk.get("severity")) >= 3 else "medium",
+            source="risk",
+            potential_rub=top_risk.get("potential_rub"),
+        )
+
+    if opps:
+        top = opps[0] or {}
+        add(
+            "opportunity",
+            top.get("title") or "Деньги на кону",
+            top.get("detail") or "",
+            severity="medium",
+            source="money",
+            potential_rub=top.get("potential_rub"),
+            action_job=(top.get("action") or top.get("task")),
+        )
+
+    out.sort(key=lambda item: (
+        -_severity_rank(item.get("severity")),
+        item.get("potential_rub") is None,
+        -(item.get("potential_rub") or 0),
+    ))
+    return out[:6]
+
+
 def command_center() -> dict:
     """Owner Command Center v1: единый read-only контракт Maya OS.
 
@@ -1044,6 +1145,16 @@ def command_center() -> dict:
     ]
     control_overdue = [
         it for it in control if it.get("due_state") == "overdue"
+    ]
+    attention = _attention_feed(
+        control=control,
+        plan=plan,
+        top_risk=top_risk,
+        opps=opps,
+        errors=errors,
+    )
+    attention_critical = [
+        it for it in attention if _severity_rank(it.get("severity")) >= 3
     ]
     sections = [
         {
@@ -1206,8 +1317,11 @@ def command_center() -> dict:
             "top_risk": top_risk,
             "next_action": actions[0] if actions else None,
             "top_control": control[0] if control else None,
+            "attention_count": len(attention),
+            "critical_attention_count": len(attention_critical),
         },
         "sections": sections,
+        "attention_feed": attention,
         "opportunities": opps,
         "plan_fact": plan,
         "master_performance": masters,

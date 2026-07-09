@@ -217,6 +217,8 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["master_performance"]["top_profit_master"]["profit_after_salary_rub"], 26000)
         self.assertTrue(center["next_best_actions"])
         self.assertTrue(center["control_queue"])
+        self.assertTrue(center["attention_feed"])
+        self.assertEqual(center["summary"]["attention_count"], len(center["attention_feed"]))
         self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
         self.assertIn("control", {section["key"] for section in center["sections"]})
         self.assertEqual(center["journal"][0]["job"], "cycle")
@@ -318,6 +320,11 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(item["due_state"], "overdue")
         self.assertIn("Срок контроля прошёл", item["owner_next_step"])
         self.assertGreaterEqual(control_section["summary"]["overdue_count"], 1)
+        self.assertTrue([
+            row for row in center["attention_feed"]
+            if row.get("kind") == "control_overdue"
+            and row.get("control_key") == item.get("key")
+        ])
 
     def test_plan_fact_uses_manual_owner_target_when_set(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

@@ -15299,6 +15299,20 @@ function AGodMode() {
           isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 6 } }, cs.msg) : null));
     });
   }
+  function renderAttentionFeed(rows) {
+    rows = rows || [];
+    if (!rows.length) return null;
+    return Card(e('div', null,
+      eyebrow('Требует внимания'),
+      rows.slice(0, 4).map(function (it, i) {
+        return e('div', { key: it.kind + ':' + i, style: { display: 'flex', gap: 10, padding: '9px 0', borderBottom: i < Math.min(rows.length, 4) - 1 ? '1px solid ' + t.line : 'none' } },
+          e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.severity || 'warn'), marginTop: 5, flexShrink: 0 } }),
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || 'Сигнал'),
+            it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, it.detail) : null,
+            it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null));
+      })));
+  }
   function renderPlanFact(sm) {
     sm = sm || {};
     var pct = sm.progress_pct == null ? null : Math.max(0, Math.min(160, Number(sm.progress_pct) || 0));
@@ -15353,6 +15367,7 @@ function AGodMode() {
     var actions = cc.next_best_actions || [];
     var risks = cc.risks || [];
     var control = cc.control_queue || [];
+    var attention = cc.attention_feed || [];
     return e(React.Fragment, null,
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 } },
         e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(cc.status), flexShrink: 0 } }),
@@ -15364,6 +15379,7 @@ function AGodMode() {
         kpiCell(String(todaySm.free_capacity_today || 0), 'Свободная ёмкость'),
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
+      renderAttentionFeed(attention),
       top.title ? signalCard(top.title, top.detail, top.potential_rub, 'warn') : null,
       risk.title ? signalCard(risk.title, risk.detail, risk.potential_rub, risk.severity || 'warn') : null,
       renderPlanFact(planSm),
