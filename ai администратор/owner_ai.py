@@ -2776,6 +2776,206 @@ def _autonomous_task_candidates(*, plan: dict, top_risk: dict | None,
     return out[:6]
 
 
+def _hours_since(value: str | None, *, now_dt: datetime) -> int | None:
+    dt = _parse_iso(value)
+    if not dt:
+        return None
+    try:
+        return max(0, int((now_dt - dt).total_seconds() // 3600))
+    except Exception:
+        return None
+
+
+def _autopilot_supervisor(*, control: list[dict], owner_review: dict,
+                          now_iso: str) -> dict:
+    """Autopilot 2.1: ведёт внутренние задачи до результата без внешних действий."""
+    now_dt = _parse_iso(now_iso) or datetime.now()
+    active_keys = {
+        item.get("signal_key")
+        for item in control or []
+        if item.get("source") == "owner_control" and item.get("signal_key")
+    }
+    rows, seen = [], set()
+
+    def add(kind: str, item: dict, title: str, detail: str = "", *,
+            priority: str = "medium", safe_action: str = "",
+            owner_next_step: str = "", action_title: str = "",
+            action_detail: str = "") -> None:
+        control_id = item.get("action_id") or item.get("control_action_id") or item.get("key") or title
+        key = "%s:%s" % (kind, control_id)
+        if key in seen:
+            return
+        seen.add(key)
+        signal_key = "autopilot_supervision:%s:%s" % (kind, control_id)
+        in_control = signal_key in active_keys
+        rows.append({
+            "key": key,
+            "kind": kind,
+            "control_action_id": item.get("action_id") or item.get("control_action_id"),
+            "source_control_key": item.get("key"),
+            "source_signal_key": item.get("signal_key"),
+            "signal_key": signal_key,
+            "title": title or "Контроль исполнения",
+            "detail": detail or "",
+            "priority": priority if priority in ("low", "medium", "high") else "medium",
+            "assigned_to": item.get("assigned_to") or "owner",
+            "assigned_label": item.get("assigned_label") or _assignee_label(item.get("assigned_to"), item.get("assignee_name")),
+            "assignment_work_state": item.get("assignment_work_state") or "",
+            "assignment_delivery_state": item.get("assignment_delivery_state") or "",
+            "due_at": item.get("due_at"),
+            "due_state": item.get("due_state"),
+            "potential_rub": item.get("potential_rub"),
+            "safe_action": safe_action,
+            "safe_to_execute": bool(safe_action in ("start_internal", "create_escalation")),
+            "in_control": in_control,
+            "owner_next_step": owner_next_step or "Проверить задачу и довести до результата.",
+            "action_title": action_title or title,
+            "action_detail": action_detail or detail,
+        })
+
+    for item in control or []:
+        if item.get("source") != "owner_control" or not item.get("action_id"):
+            continue
+        if item.get("signal_kind") == "autopilot_supervision":
+            continue
+        status = str(item.get("status") or "").lower()
+        if status in ("done", "canceled"):
+            continue
+        assigned_to = _normalize_assignee(item.get("assigned_to"))
+        work_state = str(item.get("assignment_work_state") or "")
+        delivery_state = str(item.get("assignment_delivery_state") or "")
+        due_state = str(item.get("due_state") or "")
+        delivery_age = _hours_since(
+            item.get("assignment_delivery_updated_at") or item.get("due_at"),
+            now_dt=now_dt,
+        )
+        work_age = _hours_since(item.get("assignment_work_updated_at"), now_dt=now_dt)
+
+        if assigned_to == "maya" and not work_state:
+            add(
+                "start_maya_task",
+                item,
+                "MAYA должна взять задачу в работу",
+                item.get("title") or item.get("detail") or "",
+                priority="medium",
+                safe_action="start_internal",
+                owner_next_step="MAYA отметит внутреннюю задачу как взятую в работу.",
+            )
+
+        if due_state == "overdue" and work_state != "done":
+            add(
+                "overdue",
+                item,
+                "Эскалация просроченной задачи",
+                item.get("title") or item.get("detail") or "",
+                priority="high",
+                safe_action="create_escalation",
+                owner_next_step="Создать owner-эскалацию и решить: закрыть, переназначить или вернуть в работу.",
+                action_title="Эскалация: %s" % (item.get("title") or "просроченная задача"),
+                action_detail="Задача просрочена. Ответственный: %s. Следующий шаг: проверить статус и назначить решение." % (
+                    item.get("assigned_label") or _assignee_label(item.get("assigned_to"), item.get("assignee_name"))
+                ),
+            )
+
+        if assigned_to in ("admin", "master", "team") and not work_state and due_state != "overdue":
+            stale_delivery = (
+                due_state == "overdue"
+                or delivery_state in ("queued", "failed")
+                or (delivery_state == "delivered" and delivery_age is not None and delivery_age >= 18)
+            )
+            if stale_delivery:
+                add(
+                    "waiting_accept",
+                    item,
+                    "Исполнитель не взял задачу",
+                    item.get("title") or "",
+                    priority="high" if due_state == "overdue" or delivery_state == "failed" else "medium",
+                    safe_action="create_escalation",
+                    owner_next_step="Поднять задачу владельцу: исполнитель не подтвердил работу.",
+                    action_title="Проверить исполнителя: %s" % (item.get("title") or "задача без принятия"),
+                    action_detail="Задача назначена, но исполнитель не взял её в работу. Проверить в командном чате или переназначить.",
+                )
+
+        if work_state == "blocked":
+            add(
+                "blocked",
+                item,
+                "Исполнитель заблокирован",
+                item.get("title") or item.get("detail") or "",
+                priority="high",
+                safe_action="create_escalation",
+                owner_next_step="Разобрать блокировку и помочь исполнителю или переназначить.",
+                action_title="Разобрать блокировку: %s" % (item.get("title") or "задача"),
+                action_detail="Исполнитель отметил блокировку. Нужно решение владельца.",
+            )
+        elif work_state == "done":
+            add(
+                "ready_review",
+                item,
+                "Задача ждёт приёмки владельца",
+                item.get("title") or item.get("detail") or "",
+                priority="medium" if work_age is None or work_age < 24 else "high",
+                safe_action="",
+                owner_next_step="Проверить результат: закрыть контроль или вернуть на доработку.",
+            )
+
+    for item in (owner_review.get("items") or []):
+        if str(item.get("review_state") or "") != "ready":
+            continue
+        if (item.get("assignment_age_hours") or 0) < 24:
+            continue
+        add(
+            "stale_review",
+            item,
+            "Приёмка владельца висит больше суток",
+            item.get("title") or "",
+            priority="high",
+            safe_action="",
+            owner_next_step="Принять результат или вернуть задачу на доработку.",
+        )
+
+    rows.sort(key=lambda item: (
+        item.get("in_control"),
+        -_severity_rank(item.get("priority")),
+        0 if item.get("safe_to_execute") else 1,
+        item.get("title") or "",
+    ))
+    safe_open = [it for it in rows if it.get("safe_to_execute") and not it.get("in_control")]
+    if any(it.get("kind") in ("overdue", "blocked") and not it.get("in_control") for it in rows):
+        status = "risk"
+        headline = "Autopilot нашёл задачи, которые нужно эскалировать"
+    elif safe_open:
+        status = "warn"
+        headline = "Autopilot может безопасно продвинуть задачи"
+    elif rows:
+        status = "warn"
+        headline = "Есть задачи на контроле исполнения"
+    else:
+        status = "ok"
+        headline = "Исполнение задач под контролем"
+    return {
+        "version": "autopilot_supervisor_v1",
+        "status": status,
+        "headline": headline,
+        "mode": "internal_supervision",
+        "summary": {
+            "items_count": len(rows),
+            "safe_actions_count": len(safe_open),
+            "overdue_count": len([it for it in rows if it.get("kind") == "overdue"]),
+            "waiting_accept_count": len([it for it in rows if it.get("kind") == "waiting_accept"]),
+            "blocked_count": len([it for it in rows if it.get("kind") == "blocked"]),
+            "ready_review_count": len([it for it in rows if it.get("kind") in ("ready_review", "stale_review")]),
+            "maya_start_count": len([it for it in rows if it.get("kind") == "start_maya_task"]),
+            "in_control_count": len([it for it in rows if it.get("in_control")]),
+        },
+        "items": rows[:8],
+        "next_step": (
+            "Провести контроль: MAYA отметит свои задачи в работе и создаст owner-эскалации по просрочкам."
+            if safe_open else "Наблюдать: опасных автодействий нет, внешние действия требуют владельца."
+        ),
+    }
+
+
 def _autonomous_director(*, kpi: dict, finance: dict, approval: dict,
                          task_candidates: list[dict]) -> dict:
     open_candidates = [c for c in task_candidates if c.get("safe_autocreate") and not c.get("in_control")]
@@ -2857,6 +3057,82 @@ def run_autonomous_director_tick(*, created_by=None, limit: int = 5) -> dict:
         "skipped": skipped,
         "center": updated_center,
         "note": "Созданы только внутренние контрольные задачи. Внешние действия требуют подтверждения владельца.",
+    }
+
+
+def run_autopilot_supervision_tick(*, created_by=None, limit: int = 8) -> dict:
+    """Autopilot 2.1: безопасно продвигает внутренние задачи до следующего контроля."""
+    center = command_center()
+    supervisor = center.get("autopilot_supervisor") or {}
+    try:
+        max_items = max(1, min(12, int(limit or 8)))
+    except Exception:
+        max_items = 8
+    items = [
+        item for item in (supervisor.get("items") or [])
+        if item.get("safe_to_execute") and not item.get("in_control")
+    ][:max_items]
+    applied, created, updated, skipped = [], [], [], []
+    for item in items:
+        action = item.get("safe_action")
+        task_id = item.get("control_action_id")
+        if action == "start_internal" and task_id:
+            try:
+                import database
+                task = database.update_owner_assignment_work_state(
+                    task_id,
+                    "running",
+                    actor_role="maya",
+                    actor_name="MAYA Autopilot",
+                    actor_chat_id=0,
+                    note="Autopilot 2.1 взял внутреннюю задачу MAYA в работу.",
+                )
+            except Exception as e:
+                logger.error("owner_ai run_autopilot_supervision_tick start_internal: %s", e)
+                task = None
+            if task:
+                row = {"kind": action, "item": item, "task": task, "task_id": task_id}
+                applied.append(row)
+                updated.append(row)
+            else:
+                skipped.append({"item": item, "reason": "update_failed"})
+        elif action == "create_escalation":
+            result = create_control_task(
+                title=item.get("action_title") or item.get("title") or "Эскалация задачи",
+                detail=item.get("action_detail") or item.get("detail") or "",
+                priority=item.get("priority") or "high",
+                due_in_days=1,
+                potential_rub=item.get("potential_rub"),
+                owner_next_step=item.get("owner_next_step") or "",
+                signal_key=item.get("signal_key") or "",
+                signal_kind="autopilot_supervision",
+                signal_source="maya_os_2_1",
+                assigned_to="owner",
+                created_by=created_by,
+                safe_autocreate=True,
+            )
+            row = {"kind": action, "item": item, "result": result, "task_id": result.get("task_id")}
+            if result.get("ok") and not result.get("existing"):
+                applied.append(row)
+                created.append(row)
+            else:
+                skipped.append(row)
+        else:
+            skipped.append({"item": item, "reason": "not_safe_or_unknown"})
+    updated_center = command_center()
+    return {
+        "ok": True,
+        "mode": "internal_supervision",
+        "applied_count": len(applied),
+        "created_count": len(created),
+        "updated_count": len(updated),
+        "skipped_count": len(skipped),
+        "applied": applied,
+        "created": created,
+        "updated": updated,
+        "skipped": skipped,
+        "center": updated_center,
+        "note": "Autopilot 2.1 выполнил только внутренний контроль: статусы MAYA и owner-эскалации.",
     }
 
 
@@ -3015,6 +3291,11 @@ def command_center() -> dict:
         control=control,
         now_iso=now_iso,
     )
+    autopilot_supervisor = _autopilot_supervisor(
+        control=control,
+        owner_review=owner_review,
+        now_iso=now_iso,
+    )
     kpi_scorecard = _kpi_scorecard(
         snap=snap,
         plan=plan,
@@ -3051,6 +3332,7 @@ def command_center() -> dict:
     overall = _command_status(
         overall,
         owner_review.get("status"),
+        autopilot_supervisor.get("status"),
         automation_queue.get("status"),
         kpi_scorecard.get("status"),
         autonomous_director.get("status"),
@@ -3091,6 +3373,14 @@ def command_center() -> dict:
             "summary": autonomous_director.get("summary") or {},
             "items": autonomous_director.get("task_candidates") or [],
             "note": autonomous_director.get("next_step"),
+        },
+        {
+            "key": "autopilot_supervisor",
+            "title": "Контроль исполнения",
+            "status": autopilot_supervisor.get("status"),
+            "summary": autopilot_supervisor.get("summary") or {},
+            "items": autopilot_supervisor.get("items") or [],
+            "note": autopilot_supervisor.get("next_step"),
         },
         {
             "key": "kpi_scorecard",
@@ -3288,6 +3578,9 @@ def command_center() -> dict:
             "kpi_score": kpi_scorecard.get("score"),
             "autonomous_task_candidates_count": len(autonomous_candidates),
             "autonomous_open_tasks_count": (autonomous_director.get("summary") or {}).get("open_autocreate_count", 0),
+            "autopilot_supervision_count": (autopilot_supervisor.get("summary") or {}).get("items_count", 0),
+            "autopilot_safe_actions_count": (autopilot_supervisor.get("summary") or {}).get("safe_actions_count", 0),
+            "autopilot_overdue_count": (autopilot_supervisor.get("summary") or {}).get("overdue_count", 0),
             "approval_required_count": (autonomous_director.get("summary") or {}).get("approval_required_count", 0),
             "projected_month_gross_rub": (financial_director.get("summary") or {}).get("projected_month_gross_rub", 0),
             "projected_month_contribution_after_salary_rub": (financial_director.get("summary") or {}).get("projected_month_contribution_after_salary_rub", 0),
@@ -3295,6 +3588,7 @@ def command_center() -> dict:
         "sections": sections,
         "attention_feed": attention,
         "autonomous_director": autonomous_director,
+        "autopilot_supervisor": autopilot_supervisor,
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
         "approval_matrix": approval,

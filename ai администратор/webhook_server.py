@@ -2678,6 +2678,44 @@ async def panel_autonomy_tick_handler(request: web.Request) -> web.Response:
     })
 
 
+async def panel_autopilot_supervision_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/autopilot/supervise — контроль исполнения Autopilot 2.1."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Контроль исполнения Maya OS доступен только владельцу.",
+        }, status=403)
+    try:
+        limit = int(body.get("limit") or 8)
+    except Exception:
+        limit = 8
+    try:
+        result = await asyncio.to_thread(
+            owner_ai.run_autopilot_supervision_tick,
+            created_by=tg_id,
+            limit=limit,
+        )
+        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_autopilot_supervision error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось провести контроль исполнения."}, status=500)
+    return _cabinet_response({
+        "ok": True,
+        "role": info["role"],
+        "supervision": result,
+        **center,
+    })
+
+
 async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
     """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
     try:
@@ -9752,6 +9790,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/control/create", panel_options_handler)
     web_app.router.add_post("/api/panel/autonomy/tick", panel_autonomy_tick_handler)
     web_app.router.add_options("/api/panel/autonomy/tick", panel_options_handler)
+    web_app.router.add_post("/api/panel/autopilot/supervise", panel_autopilot_supervision_handler)
+    web_app.router.add_options("/api/panel/autopilot/supervise", panel_options_handler)
     web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
     web_app.router.add_options("/api/panel/control/update", panel_options_handler)
     web_app.router.add_post("/api/panel/staff_tasks", panel_staff_tasks_handler)

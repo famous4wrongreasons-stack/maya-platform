@@ -588,6 +588,7 @@ TOOLS = [
             "execution_plan (1-3 шага владельца на день), control_focus (главный "
             "фокус контроля), task_center (единый центр задач), autonomous_director "
             "(Maya OS v2: KPI, финансовый прогноз, approval matrix, кандидаты автозадач), "
+            "autopilot_supervisor (Autopilot 2.1: кто просрочил, кто молчит, что можно безопасно продвинуть), "
             "план-факт, риски, очередь управленческих задач, клиенты/активы, услуги, мастера, действия AI-директора и журнал. "
             "Вызывай на «Maya OS / центр управления / что контролировать / план-факт / "
             "журнал AI-директора / статус OS / что делать дальше / что сейчас главное / какие задачи / что просрочено». "
@@ -609,6 +610,24 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "limit": {"type": "integer", "description": "Максимум задач создать за один запуск, по умолчанию 5."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "run_autopilot_supervision_tick",
+        "description": (
+            "ТОЛЬКО для владельца. Провести безопасный контроль исполнения Autopilot 2.1: "
+            "MAYA отмечает свои внутренние задачи как взятые в работу и создаёт owner-эскалации "
+            "по просроченным, заблокированным или не принятым задачам. Не отправляет клиентские "
+            "рассылки, не меняет цены, записи, зарплаты или доступы. "
+            "Вызывай на «проведи контроль / доведи задачи / проверь исполнение / "
+            "кто просрочил / пусть Майя проконтролирует задачи»."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Максимум внутренних контрольных действий за один запуск, по умолчанию 8."},
             },
             "required": [],
         },
@@ -809,6 +828,7 @@ _OWNER_ONLY = {
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
     "update_owner_control_task", "run_autonomous_director_tick",
+    "run_autopilot_supervision_tick",
     "get_money_opportunities", "get_return_candidates",
     "get_empty_windows", "get_expiring_assets", "get_service_insights",
     "get_master_performance", "get_risk_signals", "salon_action",
@@ -930,7 +950,7 @@ _WRITE_TOOLS = {
     "remember_client_preference", "start_gift_cert_purchase",
     "remember_business_rule", "forget_business_rule",
     "create_owner_control_task", "update_owner_control_task",
-    "run_autonomous_director_tick",
+    "run_autonomous_director_tick", "run_autopilot_supervision_tick",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1911,6 +1931,15 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     created_by=user_id,
                     limit=tool_input.get("limit") or 5,
                 )
+        elif tool_name == "run_autopilot_supervision_tick":
+            if _role not in ("owner", "founder"):
+                result = {"error": "Контроль исполнения Maya OS доступен только владельцу."}
+            else:
+                import owner_ai
+                result = owner_ai.run_autopilot_supervision_tick(
+                    created_by=user_id,
+                    limit=tool_input.get("limit") or 8,
+                )
         elif tool_name == "create_owner_control_task":
             if _role not in ("owner", "founder"):
                 result = {"error": "Контрольные задачи доступны только владельцу."}
@@ -2284,6 +2313,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше / какие задачи / что просрочено» → get_owner_command_center.\n"
                     "• «запусти автопилот / пусть MAYA сама поставит задачи / включи автономного директора / создай задачи по OS» → run_autonomous_director_tick. Он создаёт только внутренние контрольные задачи; рассылки, деньги, цены, зарплаты и доступы не запускает без владельца.\n"
+                    "• «проведи контроль / доведи задачи / проконтролируй исполнение / кто просрочил / кто молчит / пусть MAYA ведёт задачи» → run_autopilot_supervision_tick. Он только двигает внутренние статусы MAYA и создаёт owner-эскалации; внешние действия не запускает.\n"
                     "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
                     "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни на доработку / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
@@ -2317,7 +2347,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     " Для мастеров: «прибыль» из get_master_performance называй вкладом "
                     "после процента мастера, не полной чистой прибылью салона. Для "
                     "get_owner_command_center отвечай от главного: autonomous_director, "
-                    "kpi_scorecard, financial_director, execution_plan, task_center, "
+                    "autopilot_supervisor, kpi_scorecard, financial_director, execution_plan, task_center, "
                     "control_focus, summary.top_control, plan_fact, control_queue и next_action; если блока или цифры нет — "
                     "не заменяй его догадкой. create_owner_control_task используй только "
                     "по явной просьбе владельца создать/зафиксировать контроль; после "

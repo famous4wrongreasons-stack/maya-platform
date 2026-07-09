@@ -295,6 +295,7 @@ class OwnerAITests(unittest.TestCase):
                 "today",
                 "money",
                 "autonomous_director",
+                "autopilot_supervisor",
                 "kpi_scorecard",
                 "financial_director",
                 "plan_fact",
@@ -336,11 +337,16 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("kpi_score", center["summary"])
         self.assertIn("autonomous_task_candidates_count", center["summary"])
         self.assertIn("autonomous_open_tasks_count", center["summary"])
+        self.assertIn("autopilot_supervision_count", center["summary"])
+        self.assertIn("autopilot_safe_actions_count", center["summary"])
+        self.assertIn("autopilot_overdue_count", center["summary"])
         self.assertIn("approval_required_count", center["summary"])
         self.assertIn("projected_month_gross_rub", center["summary"])
         self.assertIn("projected_month_contribution_after_salary_rub", center["summary"])
         self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
         self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
+        self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
+        self.assertEqual(center["autopilot_supervisor"]["mode"], "internal_supervision")
         self.assertIn(center["kpi_scorecard"]["status"], {"ok", "warn", "risk"})
         self.assertGreaterEqual(center["kpi_scorecard"]["score"], 0)
         self.assertLessEqual(center["kpi_scorecard"]["score"], 100)
@@ -415,6 +421,52 @@ class OwnerAITests(unittest.TestCase):
             task for task in result["center"]["task_center"]["tasks"]
             if task.get("safe_autocreate")
         ])
+
+    def test_autopilot_supervision_starts_maya_task_and_creates_escalation(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        maya_task = owner_ai.create_control_task(
+            title="MAYA подготовить сценарий",
+            priority="medium",
+            assigned_to="maya",
+            signal_key="autonomy:test_maya",
+            safe_autocreate=True,
+        )
+        overdue = owner_ai.create_control_task(
+            title="Админ просрочил контроль",
+            priority="high",
+            assigned_to="admin",
+            assignee_name="смена",
+            due_at="2020-01-01T10:00:00",
+            signal_key="autonomy:test_overdue",
+            safe_autocreate=True,
+        )
+        before = owner_ai.command_center()
+        kinds = {row["kind"] for row in before["autopilot_supervisor"]["items"]}
+
+        result = owner_ai.run_autopilot_supervision_tick(created_by=948205934, limit=10)
+        again = owner_ai.run_autopilot_supervision_tick(created_by=948205934, limit=10)
+        actions = sys.modules["database"].list_owner_actions(limit=50)
+        maya_row = [
+            row for row in actions
+            if row.get("id") == maya_task["task_id"]
+        ][0]
+        escalation_rows = [
+            row for row in actions
+            if (row.get("payload") or {}).get("signal_kind") == "autopilot_supervision"
+        ]
+
+        self.assertIn("start_maya_task", kinds)
+        self.assertIn("overdue", kinds)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "internal_supervision")
+        self.assertGreaterEqual(result["updated_count"], 1)
+        self.assertGreaterEqual(result["created_count"], 1)
+        self.assertEqual(maya_row["payload"]["assignment_work_state"], "running")
+        self.assertEqual(maya_row["payload"]["assignment_work_actor_role"], "maya")
+        self.assertTrue(escalation_rows)
+        self.assertTrue(escalation_rows[0]["payload"]["signal_key"].startswith("autopilot_supervision:overdue:"))
+        self.assertEqual(again["created_count"], 0)
+        self.assertEqual(overdue["control_item"]["assigned_to"], "admin")
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
