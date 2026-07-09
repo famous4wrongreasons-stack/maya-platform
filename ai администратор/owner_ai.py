@@ -1049,6 +1049,107 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
     return out[:8]
 
 
+def _control_focus(control: list[dict], *, now_iso: str) -> dict:
+    """Короткий дневной фокус по контролям: что владельцу закрыть первым."""
+    rows = list(control or [])
+
+    def item_reason(it: dict) -> tuple[str, str]:
+        due_state = str(it.get("due_state") or "")
+        linked_status = str(it.get("linked_action_status") or "")
+        impact = str(it.get("linked_action_impact_status") or "")
+        if due_state == "overdue":
+            return "overdue", "Просрочено"
+        if impact == "positive_signal":
+            return "ready_to_close", "Можно закрыть"
+        if linked_status == "done" and not it.get("linked_action_evaluated_at"):
+            return "effect_check", "Проверить эффект"
+        if due_state == "today":
+            return "today", "Сегодня"
+        if str(it.get("source") or "") == "journal" and it.get("due_at"):
+            return "effect_check", "Проверить эффект"
+        if _severity_rank(it.get("status")) >= 3:
+            return "urgent", "Высокий риск"
+        if it.get("potential_rub"):
+            return "money", "Деньги на кону"
+        return "watch", "Наблюдать"
+
+    rank = {
+        "overdue": 0,
+        "effect_check": 1,
+        "ready_to_close": 2,
+        "today": 3,
+        "urgent": 4,
+        "money": 5,
+        "watch": 6,
+    }
+    enriched = []
+    for it in rows:
+        reason_key, reason_label = item_reason(it)
+        enriched.append({
+            **it,
+            "focus_reason": reason_key,
+            "focus_label": reason_label,
+        })
+    enriched.sort(key=lambda it: (
+        rank.get(it.get("focus_reason"), 9),
+        -_severity_rank(it.get("status")),
+        -(it.get("potential_rub") or 0),
+        str(it.get("due_at") or "9999-99-99"),
+        it.get("title") or "",
+    ))
+
+    overdue = [it for it in enriched if it.get("due_state") == "overdue"]
+    due_today = [it for it in enriched if it.get("due_state") == "today"]
+    needs_effect = [
+        it for it in enriched
+        if it.get("focus_reason") == "effect_check"
+    ]
+    ready_to_close = [
+        it for it in enriched
+        if it.get("focus_reason") == "ready_to_close"
+    ]
+    urgent = [
+        it for it in enriched
+        if _severity_rank(it.get("status")) >= 3
+    ]
+    money_at_stake = sum(_rub(it.get("potential_rub")) for it in enriched if it.get("potential_rub") is not None)
+    top = enriched[:4]
+    if overdue:
+        headline = "Сначала закрыть просроченные контроли"
+        status = "risk"
+    elif needs_effect:
+        headline = "Проверить эффект запущенных действий"
+        status = "warn"
+    elif ready_to_close:
+        headline = "Есть контроли, готовые к закрытию"
+        status = "ok"
+    elif due_today:
+        headline = "Сегодня есть контрольные точки"
+        status = "warn"
+    elif urgent:
+        headline = "Есть срочные управленческие сигналы"
+        status = "risk"
+    else:
+        headline = "Критичных контролей сейчас нет"
+        status = "ok"
+    return {
+        "status": status,
+        "headline": headline,
+        "generated_at": now_iso,
+        "summary": {
+            "items_count": len(enriched),
+            "focus_count": len(top),
+            "urgent_count": len(urgent),
+            "overdue_count": len(overdue),
+            "due_today_count": len(due_today),
+            "needs_effect_check_count": len(needs_effect),
+            "ready_to_close_count": len(ready_to_close),
+            "money_at_stake_rub": money_at_stake,
+        },
+        "items": top,
+    }
+
+
 def _attention_signal_key(*, kind: str, source: str, control_key: str | None = None,
                           action_job: str | None = None, title: str | None = None) -> str:
     return "attention:%s:%s:%s" % (
@@ -1395,6 +1496,7 @@ def command_center() -> dict:
     control_overdue = [
         it for it in control if it.get("due_state") == "overdue"
     ]
+    control_focus = _control_focus(control, now_iso=now_iso)
     attention = _attention_feed(
         control=control,
         plan=plan,
@@ -1469,6 +1571,9 @@ def command_center() -> dict:
                 "urgent_count": len(control_urgent),
                 "due_count": len(control_due),
                 "overdue_count": len(control_overdue),
+                "focus_count": (control_focus.get("summary") or {}).get("focus_count", 0),
+                "needs_effect_check_count": (control_focus.get("summary") or {}).get("needs_effect_check_count", 0),
+                "ready_to_close_count": (control_focus.get("summary") or {}).get("ready_to_close_count", 0),
             },
             "items": control,
             "note": "Очередь контроля собирается из рисков, действий, журнала результата и системных предупреждений.",
@@ -1586,6 +1691,8 @@ def command_center() -> dict:
             "top_risk": top_risk,
             "next_action": actions[0] if actions else None,
             "top_control": control[0] if control else None,
+            "control_focus": control_focus.get("headline"),
+            "control_focus_count": (control_focus.get("summary") or {}).get("focus_count", 0),
             "attention_count": len(attention),
             "critical_attention_count": len(attention_critical),
             "automation_attention_count": len(automations_need_attention),
@@ -1598,6 +1705,7 @@ def command_center() -> dict:
         "master_performance": masters,
         "risks": risks,
         "next_best_actions": actions,
+        "control_focus": control_focus,
         "control_queue": control,
         "journal": journal,
         "errors": errors,

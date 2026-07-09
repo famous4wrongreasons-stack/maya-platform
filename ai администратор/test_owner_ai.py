@@ -223,6 +223,8 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(center["attention_feed"])
         self.assertEqual(center["summary"]["attention_count"], len(center["attention_feed"]))
         self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
+        self.assertTrue(center["control_focus"]["items"])
+        self.assertEqual(center["summary"]["control_focus_count"], center["control_focus"]["summary"]["focus_count"])
         self.assertIn("control", {section["key"] for section in center["sections"]})
         self.assertEqual(center["journal"][0]["job"], "cycle")
         self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
@@ -340,6 +342,9 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(item["linked_action_impact_status"], "positive_signal")
         self.assertIn("положительный", item["linked_action_impact_message"])
         self.assertIn("Можно закрыть контроль", item["owner_next_step"])
+        self.assertEqual(center["control_focus"]["items"][0]["action_id"], created["task_id"])
+        self.assertEqual(center["control_focus"]["items"][0]["focus_reason"], "ready_to_close")
+        self.assertGreaterEqual(center["control_focus"]["summary"]["ready_to_close_count"], 1)
 
     def test_control_task_from_same_signal_is_not_duplicated(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

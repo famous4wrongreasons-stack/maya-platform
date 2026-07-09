@@ -15362,6 +15362,33 @@ function AGodMode() {
           isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 6 } }, cs.msg) : null));
     });
   }
+  function renderControlFocus(focus) {
+    focus = focus || {};
+    var rows = focus.items || [], sm = focus.summary || {};
+    if (!rows.length) return null;
+    var detail = [
+      sm.overdue_count ? ('просрочено ' + sm.overdue_count) : '',
+      sm.needs_effect_check_count ? ('проверить эффект ' + sm.needs_effect_check_count) : '',
+      sm.ready_to_close_count ? ('к закрытию ' + sm.ready_to_close_count) : '',
+      sm.money_at_stake_rub ? ('на кону ' + money(sm.money_at_stake_rub)) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('Фокус контроля'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(focus.status || 'ok'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.2, color: t.ink, lineHeight: 1.25 } }, focus.headline || 'Контроль в норме'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      rows.slice(0, 3).map(function (it, i) {
+        return e('div', { key: it.key || i, style: { display: 'flex', gap: 9, padding: '8px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { width: 7, height: 7, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+              e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 600, fontSize: 12.4, color: t.ink, lineHeight: 1.25 } }, it.title || 'Контроль'),
+              it.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, it.focus_label) : null),
+            it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 3 } }, it.owner_next_step) : null));
+      })));
+  }
   function renderAttentionFeed(rows) {
     rows = rows || [];
     if (!rows.length) return null;
@@ -15493,6 +15520,7 @@ function AGodMode() {
     var actions = cc.next_best_actions || [];
     var risks = cc.risks || [];
     var control = cc.control_queue || [];
+    var controlFocus = cc.control_focus || {};
     var attention = cc.attention_feed || [];
     var automations = cc.automation_status || [];
     return e(React.Fragment, null,
@@ -15518,6 +15546,7 @@ function AGodMode() {
         tinyRow('Уснувшие клиенты', clientsSm.sleeping_clients == null ? 'не считалось' : String(clientsSm.sleeping_clients), clientsSm.sleeping_clients ? statusColor('warn') : null),
         tinyRow('Истекают абонементы', String(clientsSm.subscriptions_expiring_7d || 0), clientsSm.subscriptions_expiring_7d ? statusColor('warn') : null),
         tinyRow('Просевшие услуги', String(servicesSm.weak_count || 0), servicesSm.weak_count ? statusColor('warn') : null))),
+      renderControlFocus(controlFocus),
       Card(e('div', null, eyebrow('Контроль'), renderControlQueue(control))),
       Card(e('div', null, eyebrow('Риски'), renderOSList(risks, 'Критичных рисков сейчас нет.'))),
       renderAutomationStatus(automations),
