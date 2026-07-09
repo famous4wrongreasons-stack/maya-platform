@@ -4430,6 +4430,83 @@ def mark_owner_control_task_delivery(action_id, *, state: str = "delivered",
     return actions[0] if actions else None
 
 
+def update_owner_assignment_work_state(action_id, state: str, *, actor_role: str = "",
+                                       actor_name: str = "", actor_chat_id: int = 0,
+                                       note: str = "") -> dict | None:
+    """Фиксирует работу исполнителя по назначенной owner_control задаче.
+
+    Это не закрывает контроль владельца: исполнитель может отметить «готово»,
+    а владелец всё равно проверяет результат и закрывает задачу вручную.
+    """
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    if not aid:
+        return None
+    state = (state or "").strip().lower()[:40]
+    aliases = {
+        "accept": "accepted",
+        "accepted": "accepted",
+        "start": "running",
+        "run": "running",
+        "running": "running",
+        "done": "done",
+        "complete": "done",
+        "finish": "done",
+        "blocked": "blocked",
+    }
+    state = aliases.get(state)
+    if not state:
+        return None
+    now = _now()
+    actor_role = (actor_role or "")[:40]
+    actor_name = (actor_name or "")[:80]
+    note = (note or "")[:300]
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        if item.get("source") != "owner_control" or item.get("job") != "control_task":
+            return None
+        current_status = str(item.get("status") or "pending").lower()
+        if current_status in ("done", "canceled"):
+            return None
+        payload = _json_loads_safe(item.get("payload_json"))
+        summary = _json_loads_safe(item.get("summary_json"))
+        payload["assignment_work_state"] = state
+        payload["assignment_work_updated_at"] = now
+        payload["assignment_work_actor_role"] = actor_role
+        payload["assignment_work_actor_name"] = actor_name
+        payload["assignment_work_actor_chat_id"] = int(actor_chat_id or 0)
+        payload["assignment_work_note"] = note
+        summary["assignment_work_state"] = state
+        summary["assignment_work_updated_at"] = now
+        summary["assignment_work_actor_role"] = actor_role
+        summary["assignment_work_actor_name"] = actor_name
+        if note:
+            summary["assignment_work_note"] = note
+        next_status = "running" if current_status == "pending" else current_status
+        conn.execute(
+            "UPDATE owner_action_journal SET status = ?, payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (
+                next_status,
+                _json_dumps_safe(payload),
+                _json_dumps_safe(summary),
+                "",
+                aid,
+            ),
+        )
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
 def list_owner_actions(limit: int = 12) -> list[dict]:
     """Последние действия AI-директора, новые первыми."""
     try:

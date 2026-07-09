@@ -16441,6 +16441,9 @@ function AStaffHome() {
   const [dayOpen, setDayOpen] = React.useState(false);
   const [dayDate, setDayDate] = React.useState(null);
   const [isFounder, setIsFounder] = React.useState(!!window.__meIsFounder);
+  const [staffTasks, setStaffTasks] = React.useState([]);
+  const [staffTaskBusy, setStaffTaskBusy] = React.useState({});
+  const STAFF_TASK_PX = "https://malesthetic.pro/app/api-proxy.php";
   React.useEffect(function () {
     try {
       if (!window.__meAuthReq) return;
@@ -16569,6 +16572,42 @@ function AStaffHome() {
       });
     } catch (e) {}
   }, []);
+  function loadStaffTasks() {
+    try {
+      if (!window.__meAuthReq) return;
+      var rq = window.__meAuthReq({ limit: 8 });
+      if (!rq) return;
+      fetch(STAFF_TASK_PX + "?action=panel_staff_tasks", {
+        method: "POST",
+        headers: rq.headers,
+        body: rq.body
+      }).then(function (r) { return r.json(); }).then(function (b) {
+        if (b && !b.error && b.tasks) setStaffTasks(b.tasks || []);
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  React.useEffect(function () {
+    loadStaffTasks();
+  }, []);
+  function updateStaffTask(task, action) {
+    if (!task || !task.task_id || !action || staffTaskBusy[task.task_id]) return;
+    try {
+      var rq = window.__meAuthReq ? window.__meAuthReq({ task_id: task.task_id, action: action }) : null;
+      if (!rq) return;
+      setStaffTaskBusy(function (s) { var n = Object.assign({}, s); n[task.task_id] = action; return n; });
+      fetch(STAFF_TASK_PX + "?action=panel_staff_task_update", {
+        method: "POST",
+        headers: rq.headers,
+        body: rq.body
+      }).then(function (r) { return r.json(); }).then(function (b) {
+        setStaffTaskBusy(function (s) { var n = Object.assign({}, s); delete n[task.task_id]; return n; });
+        if (b && !b.error && b.inbox && b.inbox.tasks) setStaffTasks(b.inbox.tasks || []);
+        else loadStaffTasks();
+      }).catch(function () {
+        setStaffTaskBusy(function (s) { var n = Object.assign({}, s); delete n[task.task_id]; return n; });
+      });
+    } catch (e) {}
+  }
   function staffIsoDate(offsetDays) {
     var d = new Date(Date.now() + (Number(offsetDays) || 0) * 86400000);
     return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
@@ -16578,6 +16617,52 @@ function AStaffHome() {
       setDayDate(new Date().getHours() >= 21 ? staffIsoDate(1) : null);
       setDayOpen(true);
     } else window.__meGo && window.__meGo("schedule");
+  }
+  function staffTaskDueText(task) {
+    if (!task || !task.due_at) return "";
+    var s = String(task.due_at || "");
+    var day = s.length >= 10 ? (s.slice(8, 10) + "." + s.slice(5, 7)) : s;
+    var tm = s.length >= 16 ? s.slice(11, 16) : "";
+    var p = task.due_state === "overdue" ? "Просрочено" : (task.due_state === "today" ? "Сегодня" : "Срок");
+    return p + " · " + day + (tm ? " " + tm : "");
+  }
+  function staffTaskActionLabel(action) {
+    return action === "accept" ? "Принял" : (action === "start" ? "В работе" : (action === "done" ? "Готово" : "Обновить"));
+  }
+  function renderStaffTasks(t) {
+    var rows = (staffTasks || []).slice(0, 3);
+    if (!rows.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      style: { marginTop: compactHome ? 10 : 14, borderTop: "1px solid " + t.line, paddingTop: compactHome ? 10 : 12 }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: t.faint, marginBottom: 8 }
+    }, "Поручения"), rows.map(function (task) {
+      var busy = staffTaskBusy[task.task_id];
+      var actions = task.next_actions || [];
+      return /*#__PURE__*/React.createElement("div", {
+        key: task.task_id,
+        style: { padding: "10px 0", borderTop: "1px solid " + t.line }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", gap: 9, alignItems: "flex-start" }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: { width: 8, height: 8, borderRadius: 999, background: task.due_state === "overdue" ? "#d9544e" : (task.work_state === "done" ? "#5aa86e" : "#d9a441"), marginTop: 5, flexShrink: 0 }
+      }), /*#__PURE__*/React.createElement("div", {
+        style: { flex: 1, minWidth: 0 }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: { fontFamily: BODY, fontWeight: 650, fontSize: 12.8, color: t.ink, lineHeight: 1.25 }
+      }, task.title || "Задача"), /*#__PURE__*/React.createElement("div", {
+        style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: "0.08em", textTransform: "uppercase", color: t.dim, marginTop: 4 }
+      }, [task.work_label || "Ждёт исполнителя", staffTaskDueText(task)].filter(Boolean).join(" · ")), actions.length ? /*#__PURE__*/React.createElement("div", {
+        style: { display: "grid", gridTemplateColumns: "repeat(" + Math.min(actions.length, 3) + ", minmax(0, 1fr))", gap: 6, marginTop: 8 }
+      }, actions.map(function (action) {
+        return /*#__PURE__*/React.createElement("button", {
+          key: action,
+          onClick: function (ev) { ev.stopPropagation(); updateStaffTask(task, action); },
+          disabled: !!busy,
+          style: { border: "1px solid " + t.line, borderRadius: 999, background: action === "done" ? t.ink : "transparent", color: action === "done" ? t.bg : t.ink, fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", padding: "9px 8px", opacity: busy ? 0.55 : 1 }
+        }, busy === action ? "..." : staffTaskActionLabel(action));
+      })) : null)));
+    }));
   }
   const compactHome = typeof meCompactViewport === "function" && meCompactViewport();
   return /*#__PURE__*/React.createElement(AuroraShell, {
@@ -16654,7 +16739,7 @@ function AStaffHome() {
   }, /*#__PURE__*/React.createElement(AEarnTile, { t: t, amount: shEarn && shEarn.earned_today != null ? shEarn.earned_today : (shEarn && shEarn.salary_today != null ? shEarn.salary_today : null), potential: shEarn && shEarn.potential_today != null ? shEarn.potential_today : null })), /*#__PURE__*/React.createElement("div", {
     style: { gridColumn: "span 2" },
     dangerouslySetInnerHTML: { __html: window.__ME_REV_ICON(shEarn ? (shEarn.salary_week != null ? shEarn.salary_week.toLocaleString("ru-RU") : "…") : (shRev != null ? shRev.toLocaleString("ru-RU") : "…"), shEarn ? "Мой заработок · неделя" : "Выручка сегодня", !!(shEarn && shEarn.month_behind)) }
-  }))));
+  })), renderStaffTasks(t)));
 }
 function ActionTile({
   t,

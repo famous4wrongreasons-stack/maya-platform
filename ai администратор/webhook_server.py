@@ -2634,6 +2634,77 @@ async def panel_control_create_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True, "role": info["role"], "created": created, **center})
 
 
+async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = int(tg_user["id"])
+    info = _panel_resolve_role(tg_id)
+    if info.get("role") not in ("owner", "manager", "master"):
+        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
+    try:
+        payload = await asyncio.to_thread(
+            owner_ai.staff_task_inbox,
+            viewer_role=info.get("role") or "",
+            limit=int(body.get("limit") or 12),
+        )
+    except Exception as e:
+        logger.error(f"panel_staff_tasks error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось загрузить задачи."}, status=500)
+    return _cabinet_response({"ok": True, "role": info.get("role"), **payload})
+
+
+async def panel_staff_task_update_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/staff_task/update — исполнитель отмечает ход поручения."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = int(tg_user["id"])
+    info = _panel_resolve_role(tg_id)
+    if info.get("role") not in ("owner", "manager", "master"):
+        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
+    try:
+        task_id = int(body.get("task_id") or body.get("action_id") or 0)
+    except Exception:
+        task_id = 0
+    action = str(body.get("action") or "").strip().lower()
+    if not task_id or action not in ("accept", "accepted", "start", "run", "running", "done", "complete", "finish", "blocked"):
+        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
+    actor_name = (
+        info.get("master_name")
+        or tg_user.get("full_name")
+        or " ".join([str(tg_user.get("first_name") or ""), str(tg_user.get("last_name") or "")]).strip()
+        or tg_user.get("username")
+        or "Сотрудник"
+    )
+    try:
+        updated = await asyncio.to_thread(
+            owner_ai.update_staff_task,
+            task_id=task_id,
+            viewer_role=info.get("role") or "",
+            actor_name=actor_name,
+            actor_chat_id=tg_id,
+            action=action,
+            note=body.get("note") or "",
+        )
+    except Exception as e:
+        logger.error(f"panel_staff_task_update error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
+    if not updated.get("ok"):
+        status = 403 if updated.get("error") == "forbidden" else (404 if updated.get("error") == "not_found" else 400)
+        return _cabinet_response(updated, status=status)
+    return _cabinet_response({"ok": True, "role": info.get("role"), **updated})
+
+
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
     """Расписание (сегодня + ближайшие) и личная статистика мастера за период pp.
     Статистика (визиты/выручка/чаевые) — за окно периода ВКЛЮЧАЯ сегодня; расписание —
@@ -9631,6 +9702,10 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/control/create", panel_options_handler)
     web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
     web_app.router.add_options("/api/panel/control/update", panel_options_handler)
+    web_app.router.add_post("/api/panel/staff_tasks", panel_staff_tasks_handler)
+    web_app.router.add_options("/api/panel/staff_tasks", panel_options_handler)
+    web_app.router.add_post("/api/panel/staff_task/update", panel_staff_task_update_handler)
+    web_app.router.add_options("/api/panel/staff_task/update", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)
     web_app.router.add_options("/api/panel/master/overview", panel_options_handler)
     web_app.router.add_post("/api/panel/master/day", panel_master_day_handler)

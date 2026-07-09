@@ -15,6 +15,7 @@ database.dashboard_metrics, reactivation, yclients) в операционный 
 """
 from datetime import date, datetime, timedelta
 import logging
+import re
 import time
 
 logger = logging.getLogger(__name__)
@@ -594,6 +595,33 @@ def _assignment_delivery_label(state: str | None = "", channel: str | None = "")
     return ""
 
 
+def _assignment_work_label(state: str | None = "") -> str:
+    state = str(state or "").strip().lower()
+    return {
+        "accepted": "Исполнитель принял",
+        "running": "Исполнитель в работе",
+        "done": "Исполнитель отметил готово",
+        "blocked": "Исполнитель заблокирован",
+    }.get(state, "")
+
+
+def _public_assignment_title(raw: str | None = "") -> str:
+    text = _safe_control_text(raw or "Задача", 140)
+    text = re.sub(r"\b\d[\d\s.,]*(?:₽|руб(?:\.|лей|ля)?)", "сумма", text, flags=re.I)
+    return " ".join(text.split())[:140] or "Задача"
+
+
+def _assignment_role_for_panel(role: str | None = "") -> str:
+    role = str(role or "").strip().lower()
+    if role == "manager":
+        return "admin"
+    if role == "master":
+        return "master"
+    if role == "owner":
+        return "owner"
+    return ""
+
+
 def _normalize_control_due_at(due_at: str | None = None, due_in_days=None) -> str:
     raw = str(due_at or "").strip()
     if raw:
@@ -641,6 +669,11 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
             payload.get("assignment_delivery_state"),
             payload.get("assignment_delivery_channel"),
         ),
+        "assignment_work_state": payload.get("assignment_work_state") or summary.get("assignment_work_state") or "",
+        "assignment_work_updated_at": payload.get("assignment_work_updated_at") or summary.get("assignment_work_updated_at") or "",
+        "assignment_work_actor_role": payload.get("assignment_work_actor_role") or summary.get("assignment_work_actor_role") or "",
+        "assignment_work_actor_name": payload.get("assignment_work_actor_name") or summary.get("assignment_work_actor_name") or "",
+        "assignment_work_label": _assignment_work_label(payload.get("assignment_work_state") or summary.get("assignment_work_state")),
         "linked_action_id": payload.get("linked_action_id") or summary.get("linked_action_id"),
         "linked_action_job": payload.get("linked_action_job") or summary.get("linked_action_job"),
         "linked_action_status": payload.get("linked_action_status") or summary.get("linked_action_status"),
@@ -770,6 +803,148 @@ def update_control_task(*, task_id, action: str, note: str = "",
         "ok": True,
         "task": task,
         "note": "Контрольная задача обновлена.",
+    }
+
+
+def _staff_visible_assignment(assigned_to: str | None, viewer_role: str | None) -> bool:
+    viewer = _assignment_role_for_panel(viewer_role)
+    assigned = _normalize_assignee(assigned_to)
+    if viewer == "owner":
+        return assigned in ("owner", "maya", "admin", "master", "team")
+    if viewer == "admin":
+        return assigned in ("admin", "team")
+    if viewer == "master":
+        return assigned in ("master", "team")
+    return False
+
+
+def _staff_assignment_item(task: dict | None, *, viewer_role: str | None = "") -> dict | None:
+    task = task or {}
+    if task.get("source") != "owner_control" or task.get("job") != "control_task":
+        return None
+    if str(task.get("status") or "").lower() in ("done", "canceled"):
+        return None
+    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    summary = task.get("summary") if isinstance(task.get("summary"), dict) else {}
+    assigned_to = payload.get("assigned_to") or summary.get("assigned_to") or "owner"
+    if not _staff_visible_assignment(assigned_to, viewer_role):
+        return None
+    due_at = task.get("result_due_at") or payload.get("due_at")
+    now_iso = datetime.now().isoformat(timespec="seconds")
+    due_state = ""
+    if due_at:
+        due_s = str(due_at)
+        if due_s <= now_iso:
+            due_state = "overdue"
+        elif due_s[:10] == now_iso[:10]:
+            due_state = "today"
+        else:
+            due_state = "scheduled"
+    work_state = payload.get("assignment_work_state") or summary.get("assignment_work_state") or ""
+    if not work_state:
+        next_actions = ["accept"]
+    elif work_state == "accepted":
+        next_actions = ["start", "done"]
+    elif work_state == "running":
+        next_actions = ["done"]
+    elif work_state == "blocked":
+        next_actions = ["start", "done"]
+    else:
+        next_actions = []
+    return {
+        "task_id": task.get("id"),
+        "title": _public_assignment_title(task.get("title") or "Задача"),
+        "assigned_to": _normalize_assignee(assigned_to),
+        "assignee_name": _safe_control_text(payload.get("assignee_name") or summary.get("assignee_name"), 80),
+        "assigned_label": _assignee_label(assigned_to, payload.get("assignee_name") or summary.get("assignee_name")),
+        "due_at": due_at,
+        "due_state": due_state,
+        "priority": payload.get("priority") or "medium",
+        "delivery_state": payload.get("assignment_delivery_state") or summary.get("assignment_delivery_state") or "",
+        "delivery_label": _assignment_delivery_label(
+            payload.get("assignment_delivery_state") or summary.get("assignment_delivery_state"),
+            payload.get("assignment_delivery_channel") or summary.get("assignment_delivery_channel"),
+        ),
+        "work_state": work_state,
+        "work_label": _assignment_work_label(work_state) or "Ждёт исполнителя",
+        "work_updated_at": payload.get("assignment_work_updated_at") or summary.get("assignment_work_updated_at") or "",
+        "next_actions": next_actions,
+    }
+
+
+def staff_task_inbox(*, viewer_role: str, limit: int = 12) -> dict:
+    """Безопасная очередь поручений для рабочих кабинетов."""
+    try:
+        import database
+        rows = database.list_owner_actions(limit=50) or []
+    except Exception as e:
+        logger.error("owner_ai staff_task_inbox: %s", e)
+        rows = []
+    tasks = []
+    for row in rows:
+        item = _staff_assignment_item(row, viewer_role=viewer_role)
+        if item:
+            tasks.append(item)
+    rank = {"overdue": 0, "today": 1, "scheduled": 2, "": 3}
+    work_rank = {"": 0, "accepted": 1, "blocked": 1, "running": 2, "done": 4}
+    tasks.sort(key=lambda it: (
+        work_rank.get(it.get("work_state") or "", 3),
+        rank.get(it.get("due_state") or "", 9),
+        str(it.get("due_at") or "9999-99-99"),
+        int(it.get("task_id") or 0),
+    ))
+    tasks = tasks[:max(1, min(int(limit or 12), 20))]
+    return {
+        "ok": True,
+        "role": viewer_role,
+        "summary": {
+            "tasks_count": len(tasks),
+            "new_count": len([it for it in tasks if not it.get("work_state")]),
+            "running_count": len([it for it in tasks if it.get("work_state") in ("accepted", "running", "blocked")]),
+            "done_count": len([it for it in tasks if it.get("work_state") == "done"]),
+            "overdue_count": len([it for it in tasks if it.get("due_state") == "overdue"]),
+        },
+        "tasks": tasks,
+    }
+
+
+def update_staff_task(*, task_id, viewer_role: str, actor_name: str = "",
+                      actor_chat_id: int = 0, action: str = "", note: str = "") -> dict:
+    """Исполнитель отмечает ход работы по назначенной задаче."""
+    try:
+        action_id = int(task_id)
+    except Exception:
+        return {"ok": False, "error": "bad_task_id"}
+    action = str(action or "").strip().lower()
+    if action not in ("accept", "accepted", "start", "run", "running", "done", "complete", "finish", "blocked"):
+        return {"ok": False, "error": "bad_action"}
+    try:
+        import database
+        current = None
+        for row in database.list_owner_actions(limit=50) or []:
+            if int(row.get("id") or 0) == action_id:
+                current = row
+                break
+        if not _staff_assignment_item(current, viewer_role=viewer_role):
+            return {"ok": False, "error": "forbidden"}
+        updated = database.update_owner_assignment_work_state(
+            action_id,
+            action,
+            actor_role=_assignment_role_for_panel(viewer_role),
+            actor_name=_safe_control_text(actor_name, 80),
+            actor_chat_id=int(actor_chat_id or 0),
+            note=_safe_control_text(note, 300),
+        )
+    except Exception as e:
+        logger.error("owner_ai update_staff_task: %s", e)
+        return {"ok": False, "error": "update_failed"}
+    if not updated:
+        return {"ok": False, "error": "not_found"}
+    item = _staff_assignment_item(updated, viewer_role=viewer_role)
+    return {
+        "ok": True,
+        "task": item,
+        "inbox": staff_task_inbox(viewer_role=viewer_role),
     }
 
 
@@ -947,7 +1122,10 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             assignment_delivery_state: str | None = "",
             assignment_delivery_channel: str | None = "",
             assignment_delivery_message_id=0,
-            assignment_delivery_updated_at: str | None = "") -> None:
+            assignment_delivery_updated_at: str | None = "",
+            assignment_work_state: str | None = "",
+            assignment_work_updated_at: str | None = "",
+            assignment_work_actor_name: str | None = "") -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -976,6 +1154,10 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 assignment_delivery_state,
                 assignment_delivery_channel,
             ),
+            "assignment_work_state": assignment_work_state or "",
+            "assignment_work_updated_at": assignment_work_updated_at or "",
+            "assignment_work_actor_name": _safe_control_text(assignment_work_actor_name, 80),
+            "assignment_work_label": _assignment_work_label(assignment_work_state),
             "linked_action_id": linked_action_id,
             "linked_action_job": linked_action_job,
             "linked_action_status": linked_action_status,
@@ -1046,6 +1228,9 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             linked_action_status = payload.get("linked_action_status") or summary.get("linked_action_status")
             linked_action_due_at = payload.get("linked_action_due_at")
             linked_action_updated_at = payload.get("linked_action_updated_at") or summary.get("updated_at")
+            assignment_work_state = payload.get("assignment_work_state") or summary.get("assignment_work_state") or ""
+            assignment_work_actor_name = payload.get("assignment_work_actor_name") or summary.get("assignment_work_actor_name") or ""
+            assignment_work_updated_at = payload.get("assignment_work_updated_at") or summary.get("assignment_work_updated_at") or ""
             linked_action = None
             try:
                 linked_action = journal_by_id.get(int(linked_action_id or 0))
@@ -1079,6 +1264,15 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 owner_next_step = "Эффект пока не виден. Отложить контроль и проверить позже."
             elif linked_impact_status == "no_reach":
                 owner_next_step = "Охвата по действию не было. Проверить настройки автоматизации или повторить действие."
+            if assignment_work_state == "done":
+                owner_next_step = "Исполнитель отметил задачу как готовую. Проверить результат и закрыть контроль."
+            elif assignment_work_state == "running":
+                owner_next_step = "Исполнитель взял задачу в работу. Держать контроль результата до срока."
+            elif assignment_work_state == "accepted":
+                owner_next_step = "Исполнитель принял задачу. Проверить переход в работу и результат к сроку."
+            elif assignment_work_state == "blocked":
+                priority = "high"
+                owner_next_step = "Исполнитель отметил блокировку. Разобрать причину и переназначить или помочь."
             add(
                 "owner_control:%s" % (it.get("id") or it.get("title") or "task"),
                 it.get("title") or "Контрольная задача",
@@ -1097,6 +1291,9 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 assignment_delivery_channel=payload.get("assignment_delivery_channel") or summary.get("assignment_delivery_channel") or "",
                 assignment_delivery_message_id=payload.get("assignment_delivery_message_id") or summary.get("assignment_delivery_message_id") or 0,
                 assignment_delivery_updated_at=payload.get("assignment_delivery_updated_at") or summary.get("assignment_delivery_updated_at") or payload.get("assignment_delivered_at") or "",
+                assignment_work_state=assignment_work_state,
+                assignment_work_updated_at=assignment_work_updated_at,
+                assignment_work_actor_name=assignment_work_actor_name,
                 owner_next_step=owner_next_step,
                 linked_action_id=linked_action_id,
                 linked_action_job=linked_action_job,
@@ -1168,8 +1365,13 @@ def _control_focus(control: list[dict], *, now_iso: str) -> dict:
         due_state = str(it.get("due_state") or "")
         linked_status = str(it.get("linked_action_status") or "")
         impact = str(it.get("linked_action_impact_status") or "")
+        work_state = str(it.get("assignment_work_state") or "")
         if due_state == "overdue":
             return "overdue", "Просрочено"
+        if work_state == "blocked":
+            return "urgent", "Блокировка"
+        if work_state == "done":
+            return "ready_to_close", "Исполнитель готов"
         if impact == "positive_signal":
             return "ready_to_close", "Можно закрыть"
         if linked_status == "done" and not it.get("linked_action_evaluated_at"):
@@ -1292,7 +1494,10 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             assignment_delivery_state: str | None = "",
             assignment_delivery_channel: str | None = "",
             assignment_delivery_message_id=0,
-            assignment_delivery_updated_at: str | None = "") -> None:
+            assignment_delivery_updated_at: str | None = "",
+            assignment_work_state: str | None = "",
+            assignment_work_updated_at: str | None = "",
+            assignment_work_actor_name: str | None = "") -> None:
         if not key or key in seen or len(steps) >= 3:
             return
         if action_job and ("job:%s" % action_job) in seen and source != "control_focus":
@@ -1338,6 +1543,10 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
                 assignment_delivery_state,
                 assignment_delivery_channel,
             ),
+            "assignment_work_state": assignment_work_state or "",
+            "assignment_work_updated_at": assignment_work_updated_at or "",
+            "assignment_work_actor_name": _safe_control_text(assignment_work_actor_name, 80),
+            "assignment_work_label": _assignment_work_label(assignment_work_state),
         })
 
     for item in (control_focus.get("items") or [])[:1]:
@@ -1377,6 +1586,9 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             assignment_delivery_channel=item.get("assignment_delivery_channel") or "",
             assignment_delivery_message_id=item.get("assignment_delivery_message_id") or 0,
             assignment_delivery_updated_at=item.get("assignment_delivery_updated_at") or "",
+            assignment_work_state=item.get("assignment_work_state") or "",
+            assignment_work_updated_at=item.get("assignment_work_updated_at") or "",
+            assignment_work_actor_name=item.get("assignment_work_actor_name") or "",
         )
 
     gap = _rub(plan.get("gap_rub"))
@@ -1525,14 +1737,19 @@ def _task_center(*, control: list[dict], journal: list[dict],
                        linked_evaluated_at: str | None = None,
                        source: str | None = None,
                        status: str | None = None,
-                       state: str | None = None) -> str:
+                       state: str | None = None,
+                       assignment_work_state: str | None = None) -> str:
         if due_state == "overdue" or status == "failed" or state == "failed":
             return "overdue"
+        if assignment_work_state == "blocked":
+            return "overdue"
+        if assignment_work_state == "done":
+            return "effect_check"
         if linked_status == "done" and not linked_evaluated_at:
             return "effect_check"
         if due_state == "today":
             return "today"
-        if linked_status == "running" or status == "running" or state == "running":
+        if linked_status == "running" or status == "running" or state == "running" or assignment_work_state in ("accepted", "running"):
             return "running"
         if source == "system":
             return "system"
@@ -1561,6 +1778,9 @@ def _task_center(*, control: list[dict], journal: list[dict],
             assignment_delivery_channel: str | None = "",
             assignment_delivery_message_id=0,
             assignment_delivery_updated_at: str | None = "",
+            assignment_work_state: str | None = "",
+            assignment_work_updated_at: str | None = "",
+            assignment_work_actor_name: str | None = "",
             pinned: bool = False) -> None:
         key = (key or title or "task").strip()[:140]
         if not key or key in seen:
@@ -1593,6 +1813,10 @@ def _task_center(*, control: list[dict], journal: list[dict],
                 assignment_delivery_state,
                 assignment_delivery_channel,
             ),
+            "assignment_work_state": assignment_work_state or "",
+            "assignment_work_updated_at": assignment_work_updated_at or "",
+            "assignment_work_actor_name": _safe_control_text(assignment_work_actor_name, 80),
+            "assignment_work_label": _assignment_work_label(assignment_work_state),
             "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
             "owner_next_step": owner_next_step or "",
             "due_at": due_at,
@@ -1613,6 +1837,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             linked_evaluated_at=step.get("linked_action_evaluated_at"),
             source=step.get("source"),
             status=step.get("status"),
+            assignment_work_state=step.get("assignment_work_state"),
         )
         add(
             task_key("execution", step),
@@ -1636,6 +1861,9 @@ def _task_center(*, control: list[dict], journal: list[dict],
             assignment_delivery_channel=step.get("assignment_delivery_channel") or "",
             assignment_delivery_message_id=step.get("assignment_delivery_message_id") or 0,
             assignment_delivery_updated_at=step.get("assignment_delivery_updated_at") or "",
+            assignment_work_state=step.get("assignment_work_state") or "",
+            assignment_work_updated_at=step.get("assignment_work_updated_at") or "",
+            assignment_work_actor_name=step.get("assignment_work_actor_name") or "",
             pinned=True,
         )
 
@@ -1646,6 +1874,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             linked_evaluated_at=item.get("linked_action_evaluated_at"),
             source=item.get("source"),
             status=item.get("status"),
+            assignment_work_state=item.get("assignment_work_state"),
         )
         source = item.get("source") or "maya"
         assignee = item.get("assigned_to") or ("system" if source == "system" else "owner")
@@ -1671,6 +1900,9 @@ def _task_center(*, control: list[dict], journal: list[dict],
             assignment_delivery_channel=item.get("assignment_delivery_channel") or "",
             assignment_delivery_message_id=item.get("assignment_delivery_message_id") or 0,
             assignment_delivery_updated_at=item.get("assignment_delivery_updated_at") or "",
+            assignment_work_state=item.get("assignment_work_state") or "",
+            assignment_work_updated_at=item.get("assignment_work_updated_at") or "",
+            assignment_work_actor_name=item.get("assignment_work_actor_name") or "",
         )
 
     for item in journal or []:
@@ -1748,6 +1980,8 @@ def _task_center(*, control: list[dict], journal: list[dict],
         "maya_count": len([it for it in rows if it.get("assigned_to") == "maya"]),
         "delivery_queued_count": len([it for it in rows if it.get("assignment_delivery_state") == "queued"]),
         "delivery_done_count": len([it for it in rows if it.get("assignment_delivery_state") == "delivered"]),
+        "assignee_running_count": len([it for it in rows if it.get("assignment_work_state") in ("accepted", "running", "blocked")]),
+        "assignee_done_count": len([it for it in rows if it.get("assignment_work_state") == "done"]),
         "money_at_stake_rub": sum(_rub(it.get("potential_rub")) for it in rows if it.get("potential_rub") is not None),
     }
     if summary["overdue_count"]:

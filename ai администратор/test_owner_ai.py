@@ -150,8 +150,41 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             return json.loads(json.dumps(item, ensure_ascii=False))
         return None
 
+    def fake_update_owner_assignment_work_state(action_id, state, **kwargs):
+        state_map = {
+            "accept": "accepted",
+            "accepted": "accepted",
+            "start": "running",
+            "run": "running",
+            "running": "running",
+            "done": "done",
+            "complete": "done",
+            "finish": "done",
+            "blocked": "blocked",
+        }
+        normalized = state_map.get(state)
+        if not normalized:
+            return None
+        for item in owner_actions:
+            if int(item["id"]) != int(action_id):
+                continue
+            if item.get("source") != "owner_control":
+                return None
+            item["status"] = "running" if item.get("status") == "pending" else item.get("status")
+            item["payload"]["assignment_work_state"] = normalized
+            item["payload"]["assignment_work_actor_role"] = kwargs.get("actor_role") or ""
+            item["payload"]["assignment_work_actor_name"] = kwargs.get("actor_name") or ""
+            item["payload"]["assignment_work_updated_at"] = "2026-07-08T10:10:00"
+            item["summary"] = dict(item.get("summary") or {})
+            item["summary"]["assignment_work_state"] = normalized
+            item["summary"]["assignment_work_actor_role"] = kwargs.get("actor_role") or ""
+            item["summary"]["assignment_work_actor_name"] = kwargs.get("actor_name") or ""
+            return json.loads(json.dumps(item, ensure_ascii=False))
+        return None
+
     fake_database.create_owner_action = fake_create_owner_action
     fake_database.update_owner_control_task = fake_update_owner_control_task
+    fake_database.update_owner_assignment_work_state = fake_update_owner_assignment_work_state
     fake_database.list_owner_actions = lambda limit=8: owner_actions[:limit]
     fake_database.evaluate_due_owner_actions = lambda limit=5: 0
 
@@ -512,6 +545,39 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(reassigned["assignment_delivery_state"], "queued")
         self.assertIn("Мастер", reassigned["assigned_label"])
         self.assertIn("старший", reassigned["assigned_label"])
+
+    def test_staff_task_inbox_is_role_scoped_and_updates_work_state(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить окна администратора",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="смена",
+        )
+        manager_inbox = owner_ai.staff_task_inbox(viewer_role="manager")
+        master_inbox = owner_ai.staff_task_inbox(viewer_role="master")
+        accepted = owner_ai.update_staff_task(
+            task_id=created["task_id"],
+            viewer_role="manager",
+            actor_name="Админ",
+            actor_chat_id=1,
+            action="accept",
+        )
+        owner_center = owner_ai.command_center()
+        center_task = [
+            row for row in owner_center["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        self.assertEqual(len(manager_inbox["tasks"]), 1)
+        self.assertEqual(manager_inbox["tasks"][0]["assigned_to"], "admin")
+        self.assertEqual(master_inbox["tasks"], [])
+        self.assertTrue(accepted["ok"])
+        self.assertEqual(accepted["task"]["work_state"], "accepted")
+        self.assertEqual(center_task["assignment_work_state"], "accepted")
+        self.assertEqual(center_task["lane"], "running")
 
     def test_overdue_owner_control_task_is_urgent(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
