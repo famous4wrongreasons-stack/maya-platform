@@ -2457,7 +2457,8 @@ def _automation_queue(automations: list[dict]) -> dict:
 
 def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
                    exp: dict, svc: dict, control_focus: dict,
-                   owner_review: dict, automation_queue: dict) -> dict:
+                   owner_review: dict, automation_queue: dict,
+                   execution_loop: dict | None = None) -> dict:
     """Сводный KPI-пульт: не бухгалтерия, а быстрый health-score бизнеса."""
     progress = plan.get("progress_pct")
     free_capacity = _rub(snap.get("free_capacity_today"))
@@ -2469,6 +2470,7 @@ def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
     review_ready = _rub((owner_review.get("summary") or {}).get("ready_count"))
     overdue = _rub((control_focus.get("summary") or {}).get("overdue_count"))
     automation_actions = _rub((automation_queue.get("summary") or {}).get("actionable_count"))
+    broken_loops = _rub(((execution_loop or {}).get("summary") or {}).get("broken_count"))
     score = 100
     if progress is not None and progress < 100:
         score -= min(24, int((100 - max(0, progress)) * 0.35))
@@ -2484,6 +2486,8 @@ def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
         score -= min(10, review_ready * 3)
     if automation_actions:
         score -= min(8, automation_actions * 2)
+    if broken_loops:
+        score -= min(16, broken_loops * 4)
     score = max(0, min(100, score))
     if score < 55:
         status = "risk"
@@ -2528,6 +2532,15 @@ def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
             "detail": "Просрочки и задачи, ожидающие решения владельца.",
         },
     ]
+    if execution_loop:
+        items.append({
+            "key": "closed_loop",
+            "title": "Замкнутый цикл",
+            "value": ((execution_loop.get("summary") or {}).get("closed_loop_score")),
+            "unit": "%",
+            "status": "risk" if broken_loops >= 3 else ("warn" if broken_loops else "ok"),
+            "detail": "Сколько задач проходит путь от постановки до проверки результата.",
+        })
     top_profit = masters.get("top_profit_master") or {}
     if top_profit:
         items.append({
@@ -2551,6 +2564,7 @@ def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
             "weak_services_count": weak_services,
             "owner_review_ready_count": review_ready,
             "automation_actionable_count": automation_actions,
+            "broken_execution_loops": broken_loops,
         },
         "items": items,
         "note": "KPI-score — операционный индикатор, не бухгалтерский отчёт.",
@@ -2976,6 +2990,315 @@ def _autopilot_supervisor(*, control: list[dict], owner_review: dict,
     }
 
 
+def _execution_stage_label(stage: str | None = "") -> str:
+    return {
+        "owner_queue": "Ждёт владельца",
+        "maya_queue": "Ждёт MAYA",
+        "queued": "Ждёт доставки",
+        "delivered": "Доставлено",
+        "accepted": "Принято",
+        "running": "В работе",
+        "revision": "На доработке",
+        "blocked": "Заблокировано",
+        "ready_review": "Готово к приёмке",
+        "effect_check": "Проверить эффект",
+        "overdue": "Просрочено",
+    }.get(str(stage or ""), "В контроле")
+
+
+def _execution_loop(*, control: list[dict], journal: list[dict],
+                    owner_review: dict, autopilot_supervisor: dict,
+                    now_iso: str) -> dict:
+    """Maya OS v3: замкнутый цикл от постановки задачи до результата."""
+    now_dt = _parse_iso(now_iso) or datetime.now()
+    active_keys = {
+        item.get("signal_key")
+        for item in control or []
+        if item.get("source") == "owner_control" and item.get("signal_key")
+    }
+    rows, seen = [], set()
+
+    def add(item: dict, *, stage: str, break_kind: str = "", priority: str = "medium",
+            next_transition: str = "", owner_next_step: str = "",
+            safe_action: str = "", action_title: str = "",
+            action_detail: str = "") -> None:
+        control_id = item.get("action_id") or item.get("control_action_id") or item.get("key") or item.get("title")
+        key = "execution_loop:%s" % control_id
+        if key in seen:
+            return
+        seen.add(key)
+        signal_key = "closed_loop:%s:%s" % (break_kind or stage or "watch", control_id)
+        in_control = signal_key in active_keys
+        rows.append({
+            "key": key,
+            "control_action_id": item.get("action_id") or item.get("control_action_id"),
+            "source_control_key": item.get("key"),
+            "title": item.get("title") or "Задача",
+            "detail": item.get("detail") or "",
+            "stage": stage,
+            "stage_label": _execution_stage_label(stage),
+            "break_kind": break_kind,
+            "is_broken": bool(break_kind),
+            "priority": priority if priority in ("low", "medium", "high") else "medium",
+            "assigned_to": item.get("assigned_to") or "owner",
+            "assigned_label": item.get("assigned_label") or _assignee_label(item.get("assigned_to"), item.get("assignee_name")),
+            "assignment_delivery_state": item.get("assignment_delivery_state") or "",
+            "assignment_delivery_label": item.get("assignment_delivery_label") or "",
+            "assignment_work_state": item.get("assignment_work_state") or "",
+            "assignment_work_label": item.get("assignment_work_label") or "",
+            "assignment_work_updated_at": item.get("assignment_work_updated_at") or "",
+            "assignment_work_actor_name": item.get("assignment_work_actor_name") or "",
+            "linked_action_id": item.get("linked_action_id"),
+            "linked_action_status": item.get("linked_action_status"),
+            "linked_action_evaluated_at": item.get("linked_action_evaluated_at"),
+            "linked_action_impact_status": item.get("linked_action_impact_status"),
+            "due_at": item.get("due_at"),
+            "due_state": item.get("due_state"),
+            "potential_rub": item.get("potential_rub"),
+            "next_transition": next_transition or "Довести задачу до следующего статуса.",
+            "owner_next_step": owner_next_step or item.get("owner_next_step") or "Проверить задачу и закрыть следующий переход.",
+            "safe_action": safe_action,
+            "safe_to_execute": bool(safe_action == "create_owner_followup" and not in_control),
+            "signal_key": signal_key,
+            "in_control": in_control,
+            "action_title": action_title or ("Замкнуть цикл: %s" % (item.get("title") or "задача")),
+            "action_detail": action_detail or (owner_next_step or item.get("owner_next_step") or ""),
+        })
+
+    for item in control or []:
+        if item.get("source") != "owner_control" or not item.get("action_id"):
+            continue
+        if item.get("signal_kind") == "closed_loop":
+            continue
+        status = str(item.get("status") or "").lower()
+        if status in ("done", "canceled"):
+            continue
+        assigned_to = _normalize_assignee(item.get("assigned_to"))
+        delivery_state = str(item.get("assignment_delivery_state") or "")
+        work_state = str(item.get("assignment_work_state") or "")
+        due_state = str(item.get("due_state") or "")
+        linked_status = str(item.get("linked_action_status") or "")
+        work_age = _hours_since(item.get("assignment_work_updated_at"), now_dt=now_dt)
+        delivery_age = _hours_since(
+            item.get("assignment_delivery_updated_at") or item.get("due_at"),
+            now_dt=now_dt,
+        )
+
+        stage = "owner_queue"
+        break_kind = ""
+        priority = item.get("status") or "medium"
+        next_transition = ""
+        owner_next_step = item.get("owner_next_step") or ""
+        safe_action = ""
+
+        if work_state == "blocked":
+            stage = "blocked"
+            break_kind = "blocked"
+            priority = "high"
+            next_transition = "Владелец снимает блокировку или переназначает задачу."
+            owner_next_step = "Разобрать блокировку, помочь исполнителю или назначить другого ответственного."
+        elif work_state == "done":
+            stage = "ready_review"
+            stale = work_age is not None and work_age >= 24
+            break_kind = "owner_acceptance_stale" if stale else "owner_acceptance"
+            priority = "high" if stale else "medium"
+            next_transition = "Владелец принимает результат или возвращает задачу на доработку."
+            owner_next_step = "Проверить факт выполнения и закрыть контроль либо вернуть на доработку."
+            if stale:
+                safe_action = "create_owner_followup"
+        elif linked_status == "done" and not item.get("linked_action_evaluated_at"):
+            stage = "effect_check"
+            break_kind = "effect_check_due" if due_state in ("today", "overdue") else ""
+            priority = "high" if due_state == "overdue" else "medium"
+            next_transition = "Проверить эффект действия и закрыть контроль результата."
+            owner_next_step = "Оценить результат действия в журнале AI-директора и зафиксировать следующий шаг."
+            if break_kind:
+                safe_action = "create_owner_followup"
+        elif due_state == "overdue":
+            stage = "overdue"
+            break_kind = "overdue"
+            priority = "high"
+            next_transition = "Решить по просроченной задаче: закрыть, переназначить или отложить."
+            owner_next_step = "Срок прошёл. Нужен управленческий разбор и решение владельца."
+        elif work_state == "revision":
+            stage = "revision"
+            next_transition = "Исполнитель повторно берёт доработку в работу и отмечает готово."
+            owner_next_step = "Дождаться повторной готовности или помочь снять препятствие."
+            if work_age is not None and work_age >= 24:
+                break_kind = "revision_stale"
+                priority = "high"
+                safe_action = "create_owner_followup"
+        elif work_state == "running":
+            stage = "running"
+            next_transition = "Исполнитель завершает работу и отмечает готово."
+            owner_next_step = "Держать задачу на контроле до результата."
+            if work_age is not None and work_age >= 24:
+                break_kind = "running_stale"
+                priority = "high"
+                safe_action = "create_owner_followup"
+        elif work_state == "accepted":
+            stage = "accepted"
+            next_transition = "Исполнитель переводит задачу из принятой в работу."
+            owner_next_step = "Проверить, что принятая задача реально пошла в работу."
+            if work_age is not None and work_age >= 8:
+                break_kind = "accepted_stale"
+                priority = "medium"
+                safe_action = "create_owner_followup"
+        elif assigned_to in ("admin", "master", "team"):
+            if delivery_state == "delivered":
+                stage = "delivered"
+                next_transition = "Исполнитель принимает задачу в работу."
+                owner_next_step = "Дождаться принятия задачи исполнителем."
+                if delivery_age is not None and delivery_age >= 18:
+                    break_kind = "waiting_accept"
+                    priority = "medium"
+            elif delivery_state == "queued":
+                stage = "queued"
+                next_transition = "Задача должна быть доставлена в рабочий чат."
+                owner_next_step = "Проверить доставку поручения в командный чат."
+                break_kind = "delivery_waiting"
+            elif delivery_state == "failed":
+                stage = "queued"
+                break_kind = "delivery_failed"
+                priority = "high"
+                next_transition = "Повторить доставку или назначить задачу вручную."
+                owner_next_step = "Доставка не прошла. Нужно проверить командный чат и повторить."
+            else:
+                stage = "queued"
+                break_kind = "delivery_missing"
+                next_transition = "Доставить задачу исполнителю."
+                owner_next_step = "Поручение назначено, но доставка не зафиксирована."
+        elif assigned_to == "maya":
+            if work_state:
+                stage = "running"
+                next_transition = "MAYA завершает внутреннюю подготовку и отдаёт результат владельцу."
+                owner_next_step = "Дождаться результата MAYA."
+            else:
+                stage = "maya_queue"
+                break_kind = "maya_not_started"
+                next_transition = "MAYA должна взять внутреннюю задачу в работу."
+                owner_next_step = "Autopilot 2.1 может безопасно отметить задачу MAYA как взятую в работу."
+        else:
+            stage = "owner_queue"
+            next_transition = "Владелец принимает решение по задаче."
+            owner_next_step = item.get("owner_next_step") or "Принять решение: выполнить, назначить, отложить или закрыть."
+            if due_state in ("today", "overdue"):
+                break_kind = "owner_decision_due"
+                priority = "high" if due_state == "overdue" else "medium"
+                safe_action = "create_owner_followup"
+
+        add(
+            item,
+            stage=stage,
+            break_kind=break_kind,
+            priority=priority,
+            next_transition=next_transition,
+            owner_next_step=owner_next_step,
+            safe_action=safe_action,
+            action_title="Замкнуть цикл: %s" % (item.get("title") or "задача"),
+            action_detail="%s Следующий переход: %s" % (
+                owner_next_step or "Нужно довести задачу до результата.",
+                next_transition or "закрыть следующий статус",
+            ),
+        )
+
+    rows.sort(key=lambda item: (
+        not item.get("is_broken"),
+        item.get("in_control"),
+        -_severity_rank(item.get("priority")),
+        0 if item.get("safe_to_execute") else 1,
+        str(item.get("due_at") or "9999-99-99"),
+        item.get("title") or "",
+    ))
+    open_count = len(rows)
+    broken = [it for it in rows if it.get("is_broken")]
+    safe_open = [it for it in rows if it.get("safe_to_execute")]
+    ready_review = [it for it in rows if it.get("stage") == "ready_review"]
+    effect_check = [it for it in rows if it.get("stage") == "effect_check"]
+    closed_loop_score = 100 if not open_count else max(0, int(round((open_count - len(broken)) * 100 / open_count)))
+    supervisor_safe = _rub((autopilot_supervisor.get("summary") or {}).get("safe_actions_count"))
+    review_ready = _rub((owner_review.get("summary") or {}).get("ready_count"))
+    if any(_severity_rank(it.get("priority")) >= 3 for it in broken):
+        status = "risk"
+        headline = "Цикл исполнения разорван в критичных задачах"
+    elif broken or supervisor_safe or review_ready:
+        status = "warn"
+        headline = "Есть задачи, которые нужно довести до результата"
+    else:
+        status = "ok"
+        headline = "Задачи проходят полный цикл"
+    return {
+        "version": "maya_os_v3_closed_loop",
+        "status": status,
+        "headline": headline,
+        "mode": "closed_loop_control",
+        "generated_at": now_iso,
+        "summary": {
+            "open_count": open_count,
+            "broken_count": len(broken),
+            "safe_actions_count": len(safe_open),
+            "closed_loop_score": closed_loop_score,
+            "ready_review_count": len(ready_review),
+            "effect_check_count": len(effect_check),
+            "blocked_count": len([it for it in rows if it.get("stage") == "blocked"]),
+            "overdue_count": len([it for it in rows if it.get("stage") == "overdue"]),
+            "waiting_accept_count": len([it for it in rows if it.get("break_kind") == "waiting_accept"]),
+            "in_control_count": len([it for it in rows if it.get("in_control")]),
+        },
+        "items": rows[:10],
+        "next_step": (
+            "Замкнуть цикл: MAYA создаст owner-followup по безопасным разрывам исполнения."
+            if safe_open else "Наблюдать и принимать решения по задачам на проверке."
+        ),
+    }
+
+
+def run_execution_loop_tick(*, created_by=None, limit: int = 6) -> dict:
+    """Maya OS v3: создаёт owner-followup по разорванным циклам исполнения."""
+    center = command_center()
+    loop = center.get("execution_loop") or {}
+    try:
+        max_items = max(1, min(10, int(limit or 6)))
+    except Exception:
+        max_items = 6
+    items = [
+        item for item in (loop.get("items") or [])
+        if item.get("safe_to_execute") and not item.get("in_control")
+    ][:max_items]
+    created, skipped = [], []
+    for item in items:
+        result = create_control_task(
+            title=item.get("action_title") or item.get("title") or "Замкнуть цикл исполнения",
+            detail=item.get("action_detail") or item.get("owner_next_step") or "",
+            priority=item.get("priority") or "medium",
+            due_in_days=1,
+            potential_rub=item.get("potential_rub"),
+            owner_next_step=item.get("owner_next_step") or "",
+            signal_key=item.get("signal_key") or "",
+            signal_kind="closed_loop",
+            signal_source="maya_os_3_0",
+            assigned_to="owner",
+            created_by=created_by,
+            safe_autocreate=True,
+        )
+        row = {"kind": "create_owner_followup", "item": item, "result": result, "task_id": result.get("task_id")}
+        if result.get("ok") and not result.get("existing"):
+            created.append(row)
+        else:
+            skipped.append(row)
+    updated_center = command_center()
+    return {
+        "ok": True,
+        "mode": "closed_loop_control",
+        "created_count": len(created),
+        "skipped_count": len(skipped),
+        "created": created,
+        "skipped": skipped,
+        "center": updated_center,
+        "note": "Maya OS v3 создала только внутренние owner-followup задачи по разорванным циклам.",
+    }
+
+
 def _autonomous_director(*, kpi: dict, finance: dict, approval: dict,
                          task_candidates: list[dict]) -> dict:
     open_candidates = [c for c in task_candidates if c.get("safe_autocreate") and not c.get("in_control")]
@@ -3296,6 +3619,13 @@ def command_center() -> dict:
         owner_review=owner_review,
         now_iso=now_iso,
     )
+    execution_loop = _execution_loop(
+        control=control,
+        journal=journal,
+        owner_review=owner_review,
+        autopilot_supervisor=autopilot_supervisor,
+        now_iso=now_iso,
+    )
     kpi_scorecard = _kpi_scorecard(
         snap=snap,
         plan=plan,
@@ -3306,6 +3636,7 @@ def command_center() -> dict:
         control_focus=control_focus,
         owner_review=owner_review,
         automation_queue=automation_queue,
+        execution_loop=execution_loop,
     )
     financial_director = _financial_director(
         snap=snap,
@@ -3333,6 +3664,7 @@ def command_center() -> dict:
         overall,
         owner_review.get("status"),
         autopilot_supervisor.get("status"),
+        execution_loop.get("status"),
         automation_queue.get("status"),
         kpi_scorecard.get("status"),
         autonomous_director.get("status"),
@@ -3381,6 +3713,14 @@ def command_center() -> dict:
             "summary": autopilot_supervisor.get("summary") or {},
             "items": autopilot_supervisor.get("items") or [],
             "note": autopilot_supervisor.get("next_step"),
+        },
+        {
+            "key": "execution_loop",
+            "title": "Замкнутый цикл",
+            "status": execution_loop.get("status"),
+            "summary": execution_loop.get("summary") or {},
+            "items": execution_loop.get("items") or [],
+            "note": execution_loop.get("next_step"),
         },
         {
             "key": "kpi_scorecard",
@@ -3581,6 +3921,10 @@ def command_center() -> dict:
             "autopilot_supervision_count": (autopilot_supervisor.get("summary") or {}).get("items_count", 0),
             "autopilot_safe_actions_count": (autopilot_supervisor.get("summary") or {}).get("safe_actions_count", 0),
             "autopilot_overdue_count": (autopilot_supervisor.get("summary") or {}).get("overdue_count", 0),
+            "execution_loop_open_count": (execution_loop.get("summary") or {}).get("open_count", 0),
+            "execution_loop_broken_count": (execution_loop.get("summary") or {}).get("broken_count", 0),
+            "execution_loop_score": (execution_loop.get("summary") or {}).get("closed_loop_score", 100),
+            "execution_loop_safe_actions_count": (execution_loop.get("summary") or {}).get("safe_actions_count", 0),
             "approval_required_count": (autonomous_director.get("summary") or {}).get("approval_required_count", 0),
             "projected_month_gross_rub": (financial_director.get("summary") or {}).get("projected_month_gross_rub", 0),
             "projected_month_contribution_after_salary_rub": (financial_director.get("summary") or {}).get("projected_month_contribution_after_salary_rub", 0),
@@ -3589,6 +3933,7 @@ def command_center() -> dict:
         "attention_feed": attention,
         "autonomous_director": autonomous_director,
         "autopilot_supervisor": autopilot_supervisor,
+        "execution_loop": execution_loop,
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
         "approval_matrix": approval,

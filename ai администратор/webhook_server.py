@@ -2716,6 +2716,43 @@ async def panel_autopilot_supervision_handler(request: web.Request) -> web.Respo
     })
 
 
+async def panel_execution_loop_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/execution/loop — замкнутый цикл исполнения Maya OS v3."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Замкнутый цикл Maya OS доступен только владельцу.",
+        }, status=403)
+    try:
+        limit = int(body.get("limit") or 6)
+    except Exception:
+        limit = 6
+    try:
+        result = await asyncio.to_thread(
+            owner_ai.run_execution_loop_tick,
+            created_by=tg_id,
+            limit=limit,
+        )
+        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_execution_loop error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось замкнуть цикл исполнения."}, status=500)
+    return _cabinet_response({
+        "ok": True,
+        "role": info["role"],
+        "execution_loop_tick": result,
+        **center,
+    })
+
 async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
     """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
     try:
@@ -9792,6 +9829,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/autonomy/tick", panel_options_handler)
     web_app.router.add_post("/api/panel/autopilot/supervise", panel_autopilot_supervision_handler)
     web_app.router.add_options("/api/panel/autopilot/supervise", panel_options_handler)
+    web_app.router.add_post("/api/panel/execution/loop", panel_execution_loop_handler)
+    web_app.router.add_options("/api/panel/execution/loop", panel_options_handler)
     web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
     web_app.router.add_options("/api/panel/control/update", panel_options_handler)
     web_app.router.add_post("/api/panel/staff_tasks", panel_staff_tasks_handler)

@@ -296,6 +296,7 @@ class OwnerAITests(unittest.TestCase):
                 "money",
                 "autonomous_director",
                 "autopilot_supervisor",
+                "execution_loop",
                 "kpi_scorecard",
                 "financial_director",
                 "plan_fact",
@@ -340,6 +341,10 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("autopilot_supervision_count", center["summary"])
         self.assertIn("autopilot_safe_actions_count", center["summary"])
         self.assertIn("autopilot_overdue_count", center["summary"])
+        self.assertIn("execution_loop_open_count", center["summary"])
+        self.assertIn("execution_loop_broken_count", center["summary"])
+        self.assertIn("execution_loop_score", center["summary"])
+        self.assertIn("execution_loop_safe_actions_count", center["summary"])
         self.assertIn("approval_required_count", center["summary"])
         self.assertIn("projected_month_gross_rub", center["summary"])
         self.assertIn("projected_month_contribution_after_salary_rub", center["summary"])
@@ -347,6 +352,11 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
         self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
         self.assertEqual(center["autopilot_supervisor"]["mode"], "internal_supervision")
+        self.assertEqual(center["execution_loop"]["version"], "maya_os_v3_closed_loop")
+        self.assertEqual(center["execution_loop"]["mode"], "closed_loop_control")
+        self.assertIn(center["execution_loop"]["status"], {"ok", "warn", "risk"})
+        self.assertGreaterEqual(center["execution_loop"]["summary"]["closed_loop_score"], 0)
+        self.assertLessEqual(center["execution_loop"]["summary"]["closed_loop_score"], 100)
         self.assertIn(center["kpi_scorecard"]["status"], {"ok", "warn", "risk"})
         self.assertGreaterEqual(center["kpi_scorecard"]["score"], 0)
         self.assertLessEqual(center["kpi_scorecard"]["score"], 100)
@@ -467,6 +477,48 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(escalation_rows[0]["payload"]["signal_key"].startswith("autopilot_supervision:overdue:"))
         self.assertEqual(again["created_count"], 0)
         self.assertEqual(overdue["control_item"]["assigned_to"], "admin")
+
+    def test_execution_loop_tick_creates_owner_followup_without_duplicates(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        created = owner_ai.create_control_task(
+            title="Проверить карточки клиентов",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="админ",
+        )
+        done = owner_ai.update_staff_task(
+            task_id=created["task_id"],
+            viewer_role="manager",
+            actor_name="Админ",
+            actor_chat_id=1,
+            action="done",
+        )
+        before = owner_ai.command_center()
+        loop_item = [
+            row for row in before["execution_loop"]["items"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        result = owner_ai.run_execution_loop_tick(created_by=948205934, limit=10)
+        again = owner_ai.run_execution_loop_tick(created_by=948205934, limit=10)
+        actions = sys.modules["database"].list_owner_actions(limit=50)
+        closed_loop_rows = [
+            row for row in actions
+            if (row.get("payload") or {}).get("signal_kind") == "closed_loop"
+        ]
+
+        self.assertTrue(done["ok"])
+        self.assertEqual(loop_item["stage"], "ready_review")
+        self.assertEqual(loop_item["break_kind"], "owner_acceptance_stale")
+        self.assertTrue(loop_item["safe_to_execute"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "closed_loop_control")
+        self.assertEqual(result["created_count"], 1)
+        self.assertEqual(again["created_count"], 0)
+        self.assertTrue(closed_loop_rows)
+        self.assertTrue(closed_loop_rows[0]["payload"]["signal_key"].startswith("closed_loop:owner_acceptance_stale:"))
+        self.assertEqual(closed_loop_rows[0]["payload"]["signal_source"], "maya_os_3_0")
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})

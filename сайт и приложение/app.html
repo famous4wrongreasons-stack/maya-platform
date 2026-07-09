@@ -15141,6 +15141,20 @@ function AGodMode() {
       setControlS(function (s) { return Object.assign({}, s, { supervision: { phase: 'done', ok: false, msg: 'Не удалось' } }); });
     });
   }
+  function runExecutionLoopTick() {
+    setControlS(function (s) { return Object.assign({}, s, { executionLoop: { phase: 'running' } }); });
+    gfetch('panel_execution_loop', { limit: 6 }).then(function (j) {
+      var ok = !!(j && !j.error && j.ok !== false);
+      var created = j && j.execution_loop_tick ? (j.execution_loop_tick.created_count || 0) : 0;
+      setControlS(function (s) {
+        return Object.assign({}, s, { executionLoop: { phase: 'done', ok: ok, msg: ok ? ('Создано follow-up: ' + created) : 'Не удалось' } });
+      });
+      if (ok) setCc(j);
+      else loadCommand();
+    }).catch(function () {
+      setControlS(function (s) { return Object.assign({}, s, { executionLoop: { phase: 'done', ok: false, msg: 'Не удалось' } }); });
+    });
+  }
   function runOwnerAction(a) {
     var job = a && a.job;
     if (!job) return;
@@ -15733,6 +15747,47 @@ function AGodMode() {
         st.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, alignSelf: 'center' } }, st.msg) : null),
       supervisor.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, supervisor.next_step) : null));
   }
+  function renderExecutionLoop(loop) {
+    loop = loop || {};
+    var sm = loop.summary || {};
+    var rows = loop.items || [];
+    var st = controlS.executionLoop || {};
+    var detail = [
+      sm.broken_count ? ('разрывов ' + sm.broken_count) : '',
+      sm.safe_actions_count ? ('follow-up ' + sm.safe_actions_count) : '',
+      sm.ready_review_count ? ('приёмка ' + sm.ready_review_count) : '',
+      sm.effect_check_count ? ('эффект ' + sm.effect_check_count) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('Замкнутый цикл'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(loop.status || 'ok'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, loop.headline || 'Цикл задач под контролем'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      grid2([
+        kpiCell(String(sm.closed_loop_score == null ? '—' : sm.closed_loop_score) + (sm.closed_loop_score == null ? '' : '%'), 'Score'),
+        kpiCell(String(sm.open_count || 0), 'Открыто'),
+        kpiCell(String(sm.broken_count || 0), 'Разрывы'),
+        kpiCell(String(sm.safe_actions_count || 0), 'Можно замкнуть')
+      ]),
+      rows.slice(0, 4).map(function (it, i) {
+        return e('div', { key: it.key || i, style: { padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.priority || (it.is_broken ? 'warn' : 'ok')), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Задача'),
+                e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.in_control ? statusColor('ok') : (it.safe_to_execute ? statusColor(it.priority || 'warn') : t.dim), whiteSpace: 'nowrap' } }, it.in_control ? 'В контроле' : (it.safe_to_execute ? 'Auto' : (it.stage_label || 'Цикл')))),
+              it.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.4, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label) : null,
+              it.next_transition ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.next_transition) : null,
+              it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null)));
+      }),
+      e('div', { style: { display: 'grid', gridTemplateColumns: st.phase === 'done' ? '1fr 1fr' : '1fr', gap: 8, marginTop: 10 } },
+        btn(st.phase === 'running' ? 'Замыкаю...' : 'Замкнуть цикл', function () { if (st.phase !== 'running') runExecutionLoopTick(); }, { primary: (sm.safe_actions_count || 0) > 0, busy: st.phase === 'running' }),
+        st.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, alignSelf: 'center' } }, st.msg) : null),
+      loop.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, loop.next_step) : null));
+  }
   function renderOwnerReview(review) {
     review = review || {};
     var rows = review.items || [], sm = review.summary || {};
@@ -15969,6 +16024,7 @@ function AGodMode() {
     var ownerReview = cc.owner_review || {};
     var autonomousDirector = cc.autonomous_director || {};
     var autopilotSupervisor = cc.autopilot_supervisor || {};
+    var executionLoop = cc.execution_loop || {};
     var kpiScorecard = cc.kpi_scorecard || {};
     var financialDirector = cc.financial_director || {};
     var attention = cc.attention_feed || [];
@@ -15987,6 +16043,7 @@ function AGodMode() {
       ]),
       renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),
       renderAutopilotSupervisor(autopilotSupervisor),
+      renderExecutionLoop(executionLoop),
       renderExecutionPlan(executionPlan),
       renderOwnerReview(ownerReview),
       renderTaskCenter(taskCenter),
