@@ -562,6 +562,7 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
         "potential_rub": payload.get("potential_rub"),
         "owner_next_step": payload.get("owner_next_step") or "",
         "due_at": task.get("result_due_at") or payload.get("due_at"),
+        "signal_key": payload.get("signal_key"),
     }
 
 
@@ -827,7 +828,8 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
     def add(key: str, title: str, detail: str = "", *, status: str = "warn",
             source: str = "maya", potential_rub=None, owner_next_step: str = "",
             due_at: str | None = None, action_job: str | None = None,
-            action_id=None, due_state: str | None = None) -> None:
+            action_id=None, due_state: str | None = None,
+            signal_key: str | None = None) -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -844,6 +846,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "due_state": due_state,
             "action_job": action_job,
             "action_id": action_id,
+            "signal_key": signal_key,
         })
 
     for er in errors or []:
@@ -908,6 +911,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 due_at=due_at,
                 due_state=due_state,
                 action_id=it.get("id"),
+                signal_key=payload.get("signal_key"),
                 owner_next_step=owner_next_step,
             )
         if status == "failed":
@@ -963,10 +967,24 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
     return out[:8]
 
 
+def _attention_signal_key(*, kind: str, source: str, control_key: str | None = None,
+                          action_job: str | None = None, title: str | None = None) -> str:
+    return "attention:%s:%s:%s" % (
+        kind or "notice",
+        source or "maya",
+        control_key or action_job or title or "signal",
+    )
+
+
 def _attention_feed(*, control: list[dict], plan: dict | None, top_risk: dict | None,
                     opps: list[dict], errors: list[dict]) -> list[dict]:
     """Короткая лента того, что владельцу стоит увидеть первым."""
     out, seen = [], set()
+    active_signal_controls = {
+        item.get("signal_key"): item
+        for item in (control or [])
+        if item.get("source") == "owner_control" and item.get("signal_key")
+    }
 
     def add(kind: str, title: str, detail: str = "", *, severity: str = "medium",
             source: str = "maya", potential_rub=None, action_job: str | None = None,
@@ -975,6 +993,14 @@ def _attention_feed(*, control: list[dict], plan: dict | None, top_risk: dict | 
         if key in seen:
             return
         seen.add(key)
+        signal_key = _attention_signal_key(
+            kind=kind or "notice",
+            source=source or "maya",
+            control_key=control_key,
+            action_job=action_job,
+            title=title,
+        )
+        active_control = active_signal_controls.get(signal_key) or {}
         out.append({
             "kind": kind or "notice",
             "title": title or "Требует внимания",
@@ -985,6 +1011,9 @@ def _attention_feed(*, control: list[dict], plan: dict | None, top_risk: dict | 
             "action_job": action_job,
             "control_key": control_key,
             "due_state": due_state,
+            "signal_key": signal_key,
+            "in_control": bool(active_control),
+            "control_task_id": active_control.get("action_id"),
         })
 
     for er in errors or []:

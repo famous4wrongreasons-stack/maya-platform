@@ -15177,10 +15177,11 @@ function AGodMode() {
   }
   function attentionSignalKey(it) {
     it = it || {};
+    if (it.signal_key) return it.signal_key;
     return 'attention:' + [it.kind || 'notice', it.source || 'maya', it.control_key || it.action_job || it.title || 'signal'].join(':');
   }
   function createControlFromSignal(it) {
-    if (!it || it.source === 'owner_control') return;
+    if (!it || it.source === 'owner_control' || it.in_control) return;
     var sid = attentionSignalKey(it);
     setControlS(function (s) { var n = Object.assign({}, s); n[sid] = { phase: 'running' }; return n; });
     gfetch('panel_control_create', {
@@ -15334,7 +15335,8 @@ function AGodMode() {
     return Card(e('div', null,
       eyebrow('Требует внимания'),
       rows.slice(0, 4).map(function (it, i) {
-        var canCreate = it.source !== 'owner_control';
+        var canShowControl = it.source !== 'owner_control';
+        var canCreate = canShowControl && !it.in_control;
         var sid = attentionSignalKey(it);
         var st = controlS[sid] || {};
         return e('div', { key: it.kind + ':' + i, style: { display: 'flex', gap: 10, padding: '9px 0', borderBottom: i < Math.min(rows.length, 4) - 1 ? '1px solid ' + t.line : 'none' } },
@@ -15343,8 +15345,8 @@ function AGodMode() {
             e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || 'Сигнал'),
             it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, it.detail) : null,
             it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null,
-            canCreate ? e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 } },
-              e('div', { style: { flex: 1 } }, btn(st.phase === 'running' ? '...' : (st.phase === 'done' && st.ok ? 'В контроле' : 'В контроль'), function () { createControlFromSignal(it); }, { primary: it.severity === 'high', busy: st.phase === 'running' })),
+            canShowControl ? e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 } },
+              e('div', { style: { flex: 1 } }, btn(it.in_control ? 'В контроле' : (st.phase === 'running' ? '...' : (st.phase === 'done' && st.ok ? 'В контроле' : 'В контроль')), function () { if (canCreate) createControlFromSignal(it); }, { primary: it.severity === 'high' && !it.in_control, busy: st.phase === 'running' })),
               st.phase === 'done' ? e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 11.2, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.25 } }, st.msg) : null) : null));
       })));
   }

@@ -308,6 +308,30 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(second["task_id"], first["task_id"])
         self.assertEqual(second["control_item"]["title"], "День ниже плана")
 
+    def test_attention_signal_knows_when_it_is_in_control(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+        initial = owner_ai.command_center()
+        signal = [
+            row for row in initial["attention_feed"]
+            if row.get("source") != "owner_control" and row.get("signal_key")
+        ][0]
+
+        created = owner_ai.create_control_task(
+            title=signal["title"],
+            detail=signal.get("detail") or "",
+            priority="high",
+            signal_key=signal["signal_key"],
+        )
+        center = owner_ai.command_center()
+        updated = [
+            row for row in center["attention_feed"]
+            if row.get("signal_key") == signal["signal_key"]
+        ][0]
+
+        self.assertTrue(created["ok"])
+        self.assertTrue(updated["in_control"])
+        self.assertEqual(updated["control_task_id"], created["task_id"])
+
     def test_owner_control_task_lifecycle_updates_queue(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
 
