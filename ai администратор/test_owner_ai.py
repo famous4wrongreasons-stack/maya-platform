@@ -127,6 +127,20 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
                 item["payload"]["due_at"] = item["result_due_at"]
             elif action in ("reopen", "open"):
                 item["status"] = "pending"
+            elif action in ("revision", "return", "redo", "rework"):
+                item["status"] = "running"
+                item["payload"]["assignment_work_state"] = "revision"
+                item["payload"]["assignment_work_updated_at"] = "2026-07-08T10:20:00"
+                item["payload"]["assignment_work_actor_role"] = "owner"
+                item["payload"]["assignment_work_actor_name"] = "Владелец"
+                item["payload"]["assignment_work_note"] = kwargs.get("note") or ""
+                item["summary"] = dict(item.get("summary") or {})
+                item["summary"]["manual"] = True
+                item["summary"]["last_action"] = action
+                item["summary"]["assignment_work_state"] = "revision"
+                item["summary"]["assignment_work_actor_role"] = "owner"
+                item["summary"]["assignment_work_actor_name"] = "Владелец"
+                item["summary"]["owner_revision_note"] = kwargs.get("note") or ""
             elif action in ("assign", "reassign"):
                 item["payload"]["assigned_to"] = kwargs.get("assigned_to") or item["payload"].get("assigned_to") or "owner"
                 item["payload"]["assignee_name"] = kwargs.get("assignee_name") or ""
@@ -577,6 +591,44 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(accepted["ok"])
         self.assertEqual(accepted["task"]["work_state"], "accepted")
         self.assertEqual(center_task["assignment_work_state"], "accepted")
+        self.assertEqual(center_task["lane"], "running")
+
+    def test_owner_can_return_done_assignment_for_revision(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить карточки клиентов",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="админ",
+        )
+        done = owner_ai.update_staff_task(
+            task_id=created["task_id"],
+            viewer_role="manager",
+            actor_name="Админ",
+            actor_chat_id=1,
+            action="done",
+        )
+        returned = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="revision",
+            note="Нужно проверить ещё раз",
+        )
+        inbox = owner_ai.staff_task_inbox(viewer_role="manager")
+        center = owner_ai.command_center()
+        center_task = [
+            row for row in center["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        self.assertTrue(done["ok"])
+        self.assertEqual(done["task"]["work_state"], "done")
+        self.assertTrue(returned["ok"])
+        self.assertEqual(returned["task"]["payload"]["assignment_work_state"], "revision")
+        self.assertEqual(inbox["tasks"][0]["work_state"], "revision")
+        self.assertEqual(inbox["tasks"][0]["next_actions"], ["start", "done"])
+        self.assertEqual(center_task["assignment_work_state"], "revision")
         self.assertEqual(center_task["lane"], "running")
 
     def test_overdue_owner_control_task_is_urgent(self):

@@ -15253,6 +15253,24 @@ function AGodMode() {
     if (s === 'owner_only') return 'На контроле владельца';
     return '';
   }
+  function assignmentWorkText(it) {
+    it = it || {};
+    if (it.assignment_work_label) return it.assignment_work_label;
+    var s = String(it.assignment_work_state || '');
+    if (s === 'accepted') return 'Исполнитель принял';
+    if (s === 'running') return 'Исполнитель в работе';
+    if (s === 'done') return 'Исполнитель отметил готово';
+    if (s === 'revision') return 'Вернули на доработку';
+    if (s === 'blocked') return 'Исполнитель заблокирован';
+    return '';
+  }
+  function assignmentWorkColor(it) {
+    var s = String((it && it.assignment_work_state) || '');
+    if (s === 'done') return statusColor('ok');
+    if (s === 'blocked') return statusColor('risk');
+    if (s === 'revision') return statusColor('warn');
+    return t.dim;
+  }
   function editPlanTarget(sm) {
     sm = sm || {};
     setModal({ title: 'Дневной план', fields: [{ key: 'target', label: 'План выручки, ₽ (0 = авто)', value: String(sm.target_source === 'manual_setting' ? (sm.daily_target_rub || 0) : 0) }], submit: function (v) {
@@ -15367,6 +15385,9 @@ function AGodMode() {
           it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, whiteSpace: 'nowrap' } }, money(it.potential_rub)) : null),
           it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
           dueLabel ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.due_state === 'overdue' ? statusColor('risk') : (it.due_state === 'today' ? statusColor('warn') : t.dim), marginTop: 5 } }, dueLabel) : null,
+          it.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label) : null,
+          assignmentDeliveryText(it) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.assignment_delivery_state === 'failed' ? statusColor('risk') : t.dim, marginTop: 3 } }, assignmentDeliveryText(it)) : null,
+          assignmentWorkText(it) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: assignmentWorkColor(it), marginTop: 3 } }, assignmentWorkText(it)) : null,
           linkedText ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: linkedStatus === 'failed' ? statusColor('risk') : (linkedStatus === 'done' ? statusColor('ok') : statusColor('warn')), marginTop: 5 } }, linkedText) : null,
           it.linked_action_impact_message ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: it.linked_action_impact_status === 'positive_signal' ? statusColor('ok') : t.faint, lineHeight: 1.35, marginTop: 5 } }, it.linked_action_impact_message) : null,
           it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 5 } }, it.owner_next_step) : null,
@@ -15384,7 +15405,9 @@ function AGodMode() {
           isOwnerControl ? e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 9 } },
             btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask(it, 'complete'); }, { primary: true, busy: cs.phase === 'complete' }),
             btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask(it, 'postpone'); }, { busy: cs.phase === 'postpone' }),
-            btn(cs.phase === 'cancel' ? '...' : 'Отмена', function () { updateControlTask(it, 'cancel'); }, { busy: cs.phase === 'cancel' })) : null,
+            String(it.assignment_work_state || '') === 'done'
+              ? btn(cs.phase === 'revision' ? '...' : 'Вернуть', function () { updateControlTask(it, 'revision', { note: 'Вернуть исполнителю на доработку' }); }, { busy: cs.phase === 'revision' })
+              : btn(cs.phase === 'cancel' ? '...' : 'Отмена', function () { updateControlTask(it, 'cancel'); }, { busy: cs.phase === 'cancel' })) : null,
           isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 6 } }, cs.msg) : null));
     });
   }
@@ -15426,6 +15449,9 @@ function AGodMode() {
         }
         if (isOwnerControl) {
           buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask(it, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
+          if (String(it.assignment_work_state || '') === 'done') {
+            buttons.push(e('div', { key: 'revision' }, btn(cs.phase === 'revision' ? '...' : 'Вернуть', function () { updateControlTask(it, 'revision', { note: 'Вернуть исполнителю на доработку' }); }, { busy: cs.phase === 'revision' })));
+          }
           buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask(it, 'postpone'); }, { busy: cs.phase === 'postpone' })));
         }
         return e('div', { key: it.key || i, style: { display: 'flex', gap: 9, padding: '8px 0', borderTop: '1px solid ' + t.line } },
@@ -15434,6 +15460,7 @@ function AGodMode() {
             e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
               e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 600, fontSize: 12.4, color: t.ink, lineHeight: 1.25 } }, it.title || 'Контроль'),
               it.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, it.focus_label) : null),
+            assignmentWorkText(it) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: assignmentWorkColor(it), marginTop: 3 } }, assignmentWorkText(it)) : null,
             it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 3 } }, it.owner_next_step) : null,
             buttons.length ? e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(' + Math.min(buttons.length, 3) + ', minmax(0, 1fr))', gap: 6, marginTop: 7 } }, buttons) : null,
             isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, cs.msg) : null));
@@ -15486,11 +15513,14 @@ function AGodMode() {
             buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : 'В работу', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'confirm' }; return n; }); }, { primary: step.status === 'high' || step.status === 'risk', busy: ast.phase === 'running' })));
           }
         }
-        if (cid && buttons.length < 3) {
+        if (cid && String(step.assignment_work_state || '') !== 'done' && buttons.length < 3) {
           buttons.push(e('div', { key: 'assign' }, btn(cs.phase === 'assign' ? '...' : 'Кому', function () { assignControlTask(step); }, { busy: cs.phase === 'assign' })));
         }
         if (cid && buttons.length < 3) {
           buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
+        }
+        if (cid && String(step.assignment_work_state || '') === 'done' && buttons.length < 3) {
+          buttons.push(e('div', { key: 'revision' }, btn(cs.phase === 'revision' ? '...' : 'Вернуть', function () { updateControlTask({ action_id: cid }, 'revision', { note: 'Вернуть исполнителю на доработку' }); }, { busy: cs.phase === 'revision' })));
         }
         if (cid && buttons.length < 3) {
           buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask({ action_id: cid }, 'postpone'); }, { busy: cs.phase === 'postpone' })));
@@ -15503,6 +15533,7 @@ function AGodMode() {
               step.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(step.status || 'warn'), whiteSpace: 'nowrap' } }, step.focus_label) : null),
             step.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, step.assigned_label) : null,
             assignmentDeliveryText(step) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: step.assignment_delivery_state === 'failed' ? statusColor('risk') : t.dim, marginTop: 3 } }, assignmentDeliveryText(step)) : null,
+            assignmentWorkText(step) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: assignmentWorkColor(step), marginTop: 3 } }, assignmentWorkText(step)) : null,
             step.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, step.detail) : null,
             step.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, step.owner_next_step) : null,
             step.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(step.potential_rub)) : null,
@@ -15561,11 +15592,14 @@ function AGodMode() {
             buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : 'В работу', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'confirm' }; return n; }); }, { primary: it.status === 'high' || it.lane === 'overdue', busy: ast.phase === 'running' })));
           }
         }
-        if (cid && buttons.length < 3) {
+        if (cid && String(it.assignment_work_state || '') !== 'done' && buttons.length < 3) {
           buttons.push(e('div', { key: 'assign' }, btn(cs.phase === 'assign' ? '...' : 'Кому', function () { assignControlTask(it); }, { busy: cs.phase === 'assign' })));
         }
         if (cid && buttons.length < 3) {
           buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
+        }
+        if (cid && String(it.assignment_work_state || '') === 'done' && buttons.length < 3) {
+          buttons.push(e('div', { key: 'revision' }, btn(cs.phase === 'revision' ? '...' : 'Вернуть', function () { updateControlTask({ action_id: cid }, 'revision', { note: 'Вернуть исполнителю на доработку' }); }, { busy: cs.phase === 'revision' })));
         }
         if (cid && buttons.length < 3) {
           buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask({ action_id: cid }, 'postpone'); }, { busy: cs.phase === 'postpone' })));
@@ -15578,6 +15612,7 @@ function AGodMode() {
               it.lane_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, it.lane_label) : null),
             e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label || 'Владелец'),
             assignmentDeliveryText(it) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.assignment_delivery_state === 'failed' ? statusColor('risk') : t.dim, marginTop: 3 } }, assignmentDeliveryText(it)) : null,
+            assignmentWorkText(it) ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.2, letterSpacing: '0.08em', textTransform: 'uppercase', color: assignmentWorkColor(it), marginTop: 3 } }, assignmentWorkText(it)) : null,
             it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
             it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null,
             dueLabel ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: it.due_state === 'overdue' ? statusColor('risk') : (it.due_state === 'today' ? statusColor('warn') : t.dim), marginTop: 5 } }, dueLabel) : null,

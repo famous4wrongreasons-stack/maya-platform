@@ -601,6 +601,7 @@ def _assignment_work_label(state: str | None = "") -> str:
         "accepted": "Исполнитель принял",
         "running": "Исполнитель в работе",
         "done": "Исполнитель отметил готово",
+        "revision": "Владелец вернул на доработку",
         "blocked": "Исполнитель заблокирован",
     }.get(state, "")
 
@@ -778,7 +779,7 @@ def update_control_task(*, task_id, action: str, note: str = "",
     except Exception:
         return {"ok": False, "error": "bad_task_id"}
     action = str(action or "").strip().lower()
-    if action not in ("complete", "done", "finish", "cancel", "canceled", "cancelled", "postpone", "snooze", "delay", "reopen", "open", "assign", "reassign"):
+    if action not in ("complete", "done", "finish", "cancel", "canceled", "cancelled", "postpone", "snooze", "delay", "reopen", "open", "assign", "reassign", "revision", "return", "redo", "rework"):
         return {"ok": False, "error": "bad_action"}
     safe_note = _safe_control_text(note, 420)
     normalized_due_at = None
@@ -847,6 +848,8 @@ def _staff_assignment_item(task: dict | None, *, viewer_role: str | None = "") -
         next_actions = ["start", "done"]
     elif work_state == "running":
         next_actions = ["done"]
+    elif work_state == "revision":
+        next_actions = ["start", "done"]
     elif work_state == "blocked":
         next_actions = ["start", "done"]
     else:
@@ -886,7 +889,7 @@ def staff_task_inbox(*, viewer_role: str, limit: int = 12) -> dict:
         if item:
             tasks.append(item)
     rank = {"overdue": 0, "today": 1, "scheduled": 2, "": 3}
-    work_rank = {"": 0, "accepted": 1, "blocked": 1, "running": 2, "done": 4}
+    work_rank = {"": 0, "revision": 0, "accepted": 1, "blocked": 1, "running": 2, "done": 4}
     tasks.sort(key=lambda it: (
         work_rank.get(it.get("work_state") or "", 3),
         rank.get(it.get("due_state") or "", 9),
@@ -900,7 +903,7 @@ def staff_task_inbox(*, viewer_role: str, limit: int = 12) -> dict:
         "summary": {
             "tasks_count": len(tasks),
             "new_count": len([it for it in tasks if not it.get("work_state")]),
-            "running_count": len([it for it in tasks if it.get("work_state") in ("accepted", "running", "blocked")]),
+            "running_count": len([it for it in tasks if it.get("work_state") in ("accepted", "running", "blocked", "revision")]),
             "done_count": len([it for it in tasks if it.get("work_state") == "done"]),
             "overdue_count": len([it for it in tasks if it.get("due_state") == "overdue"]),
         },
@@ -1266,6 +1269,8 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 owner_next_step = "Охвата по действию не было. Проверить настройки автоматизации или повторить действие."
             if assignment_work_state == "done":
                 owner_next_step = "Исполнитель отметил задачу как готовую. Проверить результат и закрыть контроль."
+            elif assignment_work_state == "revision":
+                owner_next_step = "Задача возвращена на доработку. Дождаться повторной готовности от исполнителя."
             elif assignment_work_state == "running":
                 owner_next_step = "Исполнитель взял задачу в работу. Держать контроль результата до срока."
             elif assignment_work_state == "accepted":
@@ -1370,6 +1375,8 @@ def _control_focus(control: list[dict], *, now_iso: str) -> dict:
             return "overdue", "Просрочено"
         if work_state == "blocked":
             return "urgent", "Блокировка"
+        if work_state == "revision":
+            return "today", "На доработке"
         if work_state == "done":
             return "ready_to_close", "Исполнитель готов"
         if impact == "positive_signal":
@@ -1745,6 +1752,8 @@ def _task_center(*, control: list[dict], journal: list[dict],
             return "overdue"
         if assignment_work_state == "done":
             return "effect_check"
+        if assignment_work_state == "revision":
+            return "running"
         if linked_status == "done" and not linked_evaluated_at:
             return "effect_check"
         if due_state == "today":
@@ -1980,7 +1989,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
         "maya_count": len([it for it in rows if it.get("assigned_to") == "maya"]),
         "delivery_queued_count": len([it for it in rows if it.get("assignment_delivery_state") == "queued"]),
         "delivery_done_count": len([it for it in rows if it.get("assignment_delivery_state") == "delivered"]),
-        "assignee_running_count": len([it for it in rows if it.get("assignment_work_state") in ("accepted", "running", "blocked")]),
+        "assignee_running_count": len([it for it in rows if it.get("assignment_work_state") in ("accepted", "running", "blocked", "revision")]),
         "assignee_done_count": len([it for it in rows if it.get("assignment_work_state") == "done"]),
         "money_at_stake_rub": sum(_rub(it.get("potential_rub")) for it in rows if it.get("potential_rub") is not None),
     }

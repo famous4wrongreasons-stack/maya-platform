@@ -2557,7 +2557,7 @@ async def panel_control_update_handler(request: web.Request) -> web.Response:
     except Exception:
         task_id = 0
     action = str(body.get("action") or "").strip().lower()
-    if not task_id or action not in ("complete", "cancel", "postpone", "reopen", "assign"):
+    if not task_id or action not in ("complete", "cancel", "postpone", "reopen", "assign", "revision"):
         return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
     try:
         updated = await asyncio.to_thread(

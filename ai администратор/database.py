@@ -4291,6 +4291,8 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
         next_status = "pending"
     elif action in ("reopen", "open"):
         next_status = "pending"
+    elif action in ("revision", "return", "redo", "rework"):
+        next_status = "running"
     elif action in ("assign", "reassign"):
         next_status = None
     else:
@@ -4357,6 +4359,19 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
             result_due_at = str(due_at)[:19]
             payload["due_at"] = result_due_at
             summary["postponed_to"] = result_due_at
+        elif action in ("revision", "return", "redo", "rework"):
+            payload["assignment_work_state"] = "revision"
+            payload["assignment_work_updated_at"] = now
+            payload["assignment_work_actor_role"] = "owner"
+            payload["assignment_work_actor_name"] = "Владелец"
+            payload["assignment_work_note"] = note
+            summary["assignment_work_state"] = "revision"
+            summary["assignment_work_updated_at"] = now
+            summary["assignment_work_actor_role"] = "owner"
+            summary["assignment_work_actor_name"] = "Владелец"
+            summary["owner_revision_requested_at"] = now
+            if note:
+                summary["owner_revision_note"] = note
 
         conn.execute(
             "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
