@@ -79,6 +79,8 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             "created_at": "2026-07-07T10:00:00",
             "result_due_at": "2020-01-01T10:00:00",
             "summary": {"sent": 3},
+            "impact_status": "positive_signal",
+            "impact": {"status": "positive_signal", "message": "Есть положительный сигнал."},
             "payload": {},
         }
     ]
@@ -234,6 +236,14 @@ class OwnerAITests(unittest.TestCase):
             row for row in center["automation_status"]
             if row.get("job") == "cycle" and row.get("recommended")
         ])
+        cycle_auto = [
+            row for row in center["automation_status"]
+            if row.get("job") == "cycle"
+        ][0]
+        self.assertEqual(cycle_auto["last_action_id"], 1)
+        self.assertEqual(cycle_auto["last_summary"]["sent"], 3)
+        self.assertEqual(cycle_auto["last_impact_status"], "positive_signal")
+        self.assertIn("положительный", cycle_auto["last_impact"]["message"])
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})

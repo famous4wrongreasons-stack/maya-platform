@@ -15317,6 +15317,31 @@ function AGodMode() {
     s = String(s || '');
     return s === 'recommended' ? 'Рекомендовано' : (s === 'running' ? 'Выполняется' : (s === 'recently_run' ? 'Только что запускалось' : (s === 'failed' ? 'Ошибка' : (s === 'stale' ? 'Давно не запускалось' : (s === 'never_run' ? 'Ещё не запускалось' : 'Готово')))));
   }
+  function automationResultText(it) {
+    var sm = (it && it.last_summary) || {}, bits = [];
+    [
+      ['sent', 'отправлено'],
+      ['candidates', 'кандидатов'],
+      ['checked', 'проверено'],
+      ['synced', 'обновлено'],
+      ['granted', 'наград'],
+      ['alerts', 'алертов'],
+      ['alerted', 'алертов'],
+      ['renew_pushed', 'продлений'],
+      ['expired', 'истекло'],
+      ['responded', 'ответов'],
+      ['created', 'создано'],
+      ['rescued', 'спасено'],
+      ['blocked', 'заблокировали'],
+      ['skipped', 'пропущено'],
+      ['skipped_already_sent', 'пропущено'],
+      ['skipped_no_consent', 'без согласия'],
+      ['errors', 'ошибок']
+    ].forEach(function (pair) {
+      if (sm[pair[0]] != null && bits.length < 4) bits.push(pair[1] + ' ' + sm[pair[0]]);
+    });
+    return bits.join(' · ');
+  }
   function renderAutomationStatus(rows) {
     rows = rows || [];
     if (!rows.length) return null;
@@ -15324,12 +15349,16 @@ function AGodMode() {
       eyebrow('Автоматизации'),
       rows.slice(0, 5).map(function (it, i) {
         var action = it.action_card || (it.recommended ? { job: it.job, title: it.title, label: it.label, priority: it.status } : null);
+        var resultText = automationResultText(it), impact = it.last_impact || {};
         return e('div', { key: it.job || i, style: { padding: '10px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
           e('div', { style: { display: 'flex', gap: 10, alignItems: 'flex-start' } },
             e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'ok'), marginTop: 6, flexShrink: 0 } }),
             e('div', { style: { flex: 1, minWidth: 0 } },
               e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || it.job),
               e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, [automationStateText(it.state), it.days_since_last == null ? '' : ('последний запуск ' + it.days_since_last + ' дн. назад')].filter(Boolean).join(' · ')),
+              resultText ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, resultText) : null,
+              impact.message ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: impact.status === 'positive_signal' ? statusColor('ok') : t.faint, lineHeight: 1.35, marginTop: 4 } }, impact.message) : null,
+              it.last_error ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: statusColor('risk'), lineHeight: 1.35, marginTop: 4 } }, it.last_error) : null,
               it.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.next_step) : null)),
           action ? e('div', { style: { marginTop: 8 } }, btn('В работу', function () { runOwnerAction(action); }, { primary: it.status === 'high' })) : null);
       })));

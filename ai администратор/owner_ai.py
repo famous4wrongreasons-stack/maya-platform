@@ -1066,6 +1066,8 @@ def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str
         base = _ACTION_LIBRARY.get(job) or {}
         last = last_by_job.get(job) or {}
         last_at = last.get("completed_at") or last.get("created_at")
+        last_summary = last.get("summary") if isinstance(last.get("summary"), dict) else {}
+        last_impact = last.get("impact") if isinstance(last.get("impact"), dict) else {}
         last_dt = _parse_iso(last_at)
         days_since = None
         seconds_since = None
@@ -1116,7 +1118,12 @@ def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str
             "recommended": bool(rec),
             "cadence_days": cadence,
             "last_status": last.get("status"),
+            "last_action_id": last.get("id"),
             "last_run_at": last_at,
+            "last_summary": last_summary,
+            "last_impact_status": last.get("impact_status") or last_impact.get("status"),
+            "last_impact": last_impact,
+            "last_error": (last.get("error") or "")[:180],
             "days_since_last": days_since,
             "seconds_since_last": seconds_since,
             "cooldown_seconds_left": (
