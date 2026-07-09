@@ -15623,6 +15623,55 @@ function AGodMode() {
             it.linked_action_id && linkedEval.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: linkedEval.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, linkedEval.msg) : null));
       })));
   }
+  function renderOwnerReview(review) {
+    review = review || {};
+    var rows = review.items || [], sm = review.summary || {};
+    if (!rows.length) return null;
+    var detail = [
+      sm.ready_count ? ('на проверку ' + sm.ready_count) : '',
+      sm.blocked_count ? ('блокировки ' + sm.blocked_count) : '',
+      sm.revision_count ? ('доработка ' + sm.revision_count) : ''
+    ].filter(Boolean).join(' · ');
+    function reviewStateText(s) {
+      s = String(s || '');
+      return s === 'ready' ? 'Готово к приёмке' : (s === 'blocked' ? 'Блокировка' : (s === 'revision' ? 'На доработке' : 'Контроль'));
+    }
+    return Card(e('div', null,
+      eyebrow('Проверка владельца'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(review.status || 'warn'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.4, color: t.ink, lineHeight: 1.25 } }, review.headline || 'Проверить результат команды'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      rows.slice(0, 4).map(function (it, i) {
+        var cid = it.control_action_id;
+        var cs = cid ? (controlS[cid] || {}) : {};
+        var state = String(it.review_state || '');
+        var buttons = [];
+        if (state === 'ready') {
+          buttons.push(e('div', { key: 'complete' }, btn(cs.phase === 'complete' ? '...' : 'Закрыть', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: true, busy: cs.phase === 'complete' })));
+          buttons.push(e('div', { key: 'revision' }, btn(cs.phase === 'revision' ? '...' : 'Вернуть', function () { updateControlTask({ action_id: cid }, 'revision', { note: 'Вернуть исполнителю на доработку' }); }, { busy: cs.phase === 'revision' })));
+        } else if (state === 'blocked') {
+          buttons.push(e('div', { key: 'assign' }, btn(cs.phase === 'assign' ? '...' : 'Кому', function () { assignControlTask({ action_id: cid, assigned_to: it.assigned_to, assignee_name: it.assignee_name }); }, { busy: cs.phase === 'assign' })));
+          buttons.push(e('div', { key: 'revision' }, btn(cs.phase === 'revision' ? '...' : 'В работу', function () { updateControlTask({ action_id: cid }, 'revision', { note: 'Разобрать блокировку и вернуть в работу' }); }, { primary: true, busy: cs.phase === 'revision' })));
+        }
+        buttons.push(e('div', { key: 'postpone' }, btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask({ action_id: cid }, 'postpone'); }, { busy: cs.phase === 'postpone' })));
+        return e('div', { key: it.key || i, style: { padding: '10px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || 'Задача'),
+                e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, reviewStateText(state))),
+              it.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.4, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, it.assigned_label) : null,
+              it.assignment_work_actor_name ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, 'Отметил: ' + it.assignment_work_actor_name) : null,
+              it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
+              it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.owner_next_step) : null,
+              it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null,
+              buttons.length ? e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(' + Math.min(buttons.length, 3) + ', minmax(0, 1fr))', gap: 6, marginTop: 8 } }, buttons) : null,
+              cid && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, cs.msg) : null)));
+      })));
+  }
   function renderAttentionFeed(rows) {
     rows = rows || [];
     if (!rows.length) return null;
@@ -15700,6 +15749,56 @@ function AGodMode() {
           canEvaluate && ev.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: ev.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 6 } }, ev.msg) : null);
       })));
   }
+  function automationNextActionText(s) {
+    s = String(s || '');
+    return s === 'run' ? 'Запустить' : (s === 'fix_or_retry' ? 'Повторить после ошибки' : (s === 'evaluate' ? 'Проверить эффект' : (s === 'wait' ? 'Выполняется' : 'Наблюдать')));
+  }
+  function renderAutomationQueue(queue) {
+    queue = queue || {};
+    var rows = queue.items || [], sm = queue.summary || {};
+    if (!rows.length) return null;
+    var detail = [
+      sm.actionable_count ? ('к запуску ' + sm.actionable_count) : '',
+      sm.evaluable_count ? ('проверить ' + sm.evaluable_count) : '',
+      sm.failed_count ? ('ошибки ' + sm.failed_count) : ''
+    ].filter(Boolean).join(' · ');
+    return Card(e('div', null,
+      eyebrow('Очередь автоматизаций'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(queue.status || 'warn'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.4, color: t.ink, lineHeight: 1.25 } }, queue.headline || 'Бизнес-сценарии к контролю'),
+          detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, detail) : null)),
+      rows.slice(0, 4).map(function (it, i) {
+        var action = it.action_card || null;
+        var job = (action && action.job) || it.job;
+        var ast = job ? (actionS[job] || {}) : {};
+        var canEvaluate = !!(it.last_action_id && it.next_action === 'evaluate');
+        var ev = canEvaluate ? (evalS[it.last_action_id] || {}) : {};
+        var resultText = automationResultText(it);
+        var buttons = [];
+        if (action && (it.next_action === 'run' || it.next_action === 'fix_or_retry')) {
+          buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : (it.next_action === 'fix_or_retry' ? 'Повторить' : 'В работу'), function () { runOwnerAction(action); }, { primary: it.status === 'high' || it.next_action === 'run', busy: ast.phase === 'running' })));
+        }
+        if (canEvaluate) {
+          buttons.push(e('div', { key: 'eval' }, btn(ev.phase === 'running' ? '...' : (it.last_evaluated_at ? 'Проверить ещё' : 'Проверить'), function () { evaluateOwnerAction({ id: it.last_action_id }); }, { busy: ev.phase === 'running' })));
+        }
+        return e('div', { key: it.key || i, style: { padding: '10px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || it.job || 'Автоматизация'),
+                e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(it.status || 'warn'), whiteSpace: 'nowrap' } }, automationNextActionText(it.next_action))),
+              e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, [automationStateText(it.state), it.days_since_last == null ? '' : ('последний запуск ' + it.days_since_last + ' дн. назад')].filter(Boolean).join(' · ')),
+              resultText ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, resultText) : null,
+              it.last_error ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: statusColor('risk'), lineHeight: 1.35, marginTop: 4 } }, it.last_error) : null,
+              it.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, it.next_step) : null,
+              buttons.length ? e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(' + Math.min(buttons.length, 2) + ', minmax(0, 1fr))', gap: 6, marginTop: 8 } }, buttons) : null,
+              job && ast.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: ast.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, ast.msg) : null,
+              canEvaluate && ev.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: ev.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 5 } }, ev.msg) : null)));
+      })));
+  }
   function renderPlanFact(sm) {
     sm = sm || {};
     var pct = sm.progress_pct == null ? null : Math.max(0, Math.min(160, Number(sm.progress_pct) || 0));
@@ -15757,8 +15856,10 @@ function AGodMode() {
     var controlFocus = cc.control_focus || {};
     var executionPlan = cc.execution_plan || {};
     var taskCenter = cc.task_center || {};
+    var ownerReview = cc.owner_review || {};
     var attention = cc.attention_feed || [];
     var automations = cc.automation_status || [];
+    var automationQueue = cc.automation_queue || {};
     return e(React.Fragment, null,
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 } },
         e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(cc.status), flexShrink: 0 } }),
@@ -15771,6 +15872,7 @@ function AGodMode() {
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
       renderExecutionPlan(executionPlan),
+      renderOwnerReview(ownerReview),
       renderTaskCenter(taskCenter),
       renderAttentionFeed(attention),
       top.title ? signalCard(top.title, top.detail, top.potential_rub, 'warn') : null,
@@ -15787,6 +15889,7 @@ function AGodMode() {
       renderControlFocus(controlFocus),
       Card(e('div', null, eyebrow('Контроль'), renderControlQueue(control))),
       Card(e('div', null, eyebrow('Риски'), renderOSList(risks, 'Критичных рисков сейчас нет.'))),
+      renderAutomationQueue(automationQueue),
       renderAutomationStatus(automations),
       Card(e('div', null, eyebrow('Следующие действия'), renderActionCards(actions))),
       Card(e('div', null, eyebrow('Журнал AI-директора'), renderJournal(journal))),

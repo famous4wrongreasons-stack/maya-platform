@@ -137,6 +137,22 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("марже", reply)
         self.assertNotIn("Команда:", reply)
 
+    def test_manager_staff_surface_does_not_receive_master_profit_salary(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_setting = lambda key, default=None: (
+            "123456789" if key == "panel_manager_ids" else default
+        )
+
+        reply = ws._owner_master_profit_reply(
+            123456789,
+            "Кто из мастеров приносит больше всего прибыли?",
+            mode="staff",
+        )
+
+        self.assertIn("только владельцу", reply)
+        self.assertNotIn("Илья Третьяков", reply)
+        self.assertNotIn("240 000 ₽", reply)
+
     def test_founder_client_surface_blocks_master_profit_question(self):
         ws = _load_webhook_server()
 

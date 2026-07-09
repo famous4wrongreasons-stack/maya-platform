@@ -291,7 +291,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "plan_fact", "control", "risks", "clients", "services", "masters", "actions", "automations", "journal"},
+            {"today", "money", "plan_fact", "control", "owner_review", "risks", "clients", "services", "masters", "actions", "automations", "automation_queue", "journal"},
             keys,
         )
         self.assertEqual(center["summary"]["daily_target_rub"], 2000)
@@ -314,6 +314,8 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(center["task_center"]["tasks"])
         self.assertEqual(center["summary"]["task_count"], center["task_center"]["summary"]["tasks_count"])
         self.assertIn("overdue_task_count", center["summary"])
+        self.assertIn("owner_review_count", center["summary"])
+        self.assertIn("automation_queue_count", center["summary"])
         self.assertTrue([
             task for task in center["task_center"]["tasks"]
             if task.get("assigned_to") in ("owner", "maya")
@@ -325,6 +327,8 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
         self.assertNotIn("execute", center["next_best_actions"][0])
         self.assertTrue(center["automation_status"])
+        self.assertTrue(center["automation_queue"]["items"])
+        self.assertTrue(center["automation_queue"]["summary"]["items_count"])
         self.assertEqual(len(center["automation_status"]), 5)
         self.assertIn(
             "automation_attention_count",
@@ -610,6 +614,11 @@ class OwnerAITests(unittest.TestCase):
             actor_chat_id=1,
             action="done",
         )
+        center_ready = owner_ai.command_center()
+        review_ready = [
+            row for row in center_ready["owner_review"]["items"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
         returned = owner_ai.update_control_task(
             task_id=created["task_id"],
             action="revision",
@@ -621,15 +630,22 @@ class OwnerAITests(unittest.TestCase):
             row for row in center["task_center"]["tasks"]
             if row.get("control_action_id") == created["task_id"]
         ][0]
+        review_after_return = [
+            row for row in center["owner_review"]["items"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
 
         self.assertTrue(done["ok"])
         self.assertEqual(done["task"]["work_state"], "done")
+        self.assertEqual(review_ready["review_state"], "ready")
+        self.assertEqual(review_ready["next_actions"], ["complete", "revision", "postpone"])
         self.assertTrue(returned["ok"])
         self.assertEqual(returned["task"]["payload"]["assignment_work_state"], "revision")
         self.assertEqual(inbox["tasks"][0]["work_state"], "revision")
         self.assertEqual(inbox["tasks"][0]["next_actions"], ["start", "done"])
         self.assertEqual(center_task["assignment_work_state"], "revision")
         self.assertEqual(center_task["lane"], "running")
+        self.assertEqual(review_after_return["review_state"], "revision")
 
     def test_overdue_owner_control_task_is_urgent(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

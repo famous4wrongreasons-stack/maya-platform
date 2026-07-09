@@ -445,11 +445,12 @@ TOOLS = [
         "name": "get_business_report",
         "description": (
             "ТОЛЬКО для владельца/админа. Сводка по бизнесу за период: выручка "
-            "(наличные/карта/итого), число визитов, средний чек и зарплаты мастеров "
-            "(валовая × процент, владелец 100%). Вызывай, когда владелец спрашивает "
+            "(наличные/карта/итого), число визитов, средний чек и топ услуг. "
+            "Для админа ответ не содержит зарплаты, маржу и прибыль по мастерам. "
+            "Зарплаты/маржа мастеров — только владельцу через get_master_performance. "
+            "Вызывай, когда владелец или админ спрашивает "
             "«как дела / как неделя / сколько заработали / какая касса / сколько "
-            "выплатить мастерам / кто сколько сделал / кто из мастеров приносит "
-            "больше всего прибыли или выручки / средний чек за месяц». "
+            "заработали / средний чек за месяц / топ услуг / выручка». "
             "Для вопросов о ДИНАМИКЕ и самочувствии бизнеса («как чувствует себя "
             "бизнес / лучше или хуже / растём или падаем / динамика») ставь "
             "compare=true — добавится сравнение с предыдущим периодом и сигнал "
@@ -628,16 +629,16 @@ TOOLS = [
         "name": "update_owner_control_task",
         "description": (
             "ТОЛЬКО для владельца. Обновить ручную контрольную задачу Owner Command Center: "
-            "отметить выполненной, отменить, отложить, назначить исполнителя, вернуть в работу. Используй только "
+            "отметить выполненной, отменить, отложить, назначить исполнителя, вернуть на доработку/в работу. Используй только "
             "когда владелец явно ссылается на существующую задачу и просит «выполнено / "
-            "закрой / отмени / отложи / перенеси / верни в работу». Если непонятно, какую "
+            "закрой / отмени / отложи / перенеси / верни на доработку / верни в работу». Если непонятно, какую "
             "задачу менять, сначала уточни. Не используй для action-card рассылок."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
                 "task_id": {"type": "integer", "description": "ID задачи из журнала/Command Center."},
-                "action": {"type": "string", "enum": ["complete", "cancel", "postpone", "reopen", "assign"], "description": "Что сделать с задачей."},
+                "action": {"type": "string", "enum": ["complete", "cancel", "postpone", "reopen", "assign", "revision"], "description": "Что сделать с задачей."},
                 "note": {"type": "string", "description": "Короткая заметка владельца без персональных данных."},
                 "due_at": {"type": "string", "description": "Новый ISO-дедлайн при postpone, если есть конкретная дата."},
                 "due_in_days": {"type": "integer", "description": "На сколько дней отложить при postpone."},
@@ -924,6 +925,35 @@ def _tool_risk(tool_name: str) -> str:
     if tool_name in _WRITE_TOOLS:
         return "write"
     return "read"
+
+
+_MANAGER_REPORT_SENSITIVE_KEYS = {
+    "salary", "salary_total", "salary_rub", "salary_total_rub",
+    "profit", "net_profit", "profit_after_salary_rub",
+    "profit_after_salary_total_rub", "margin", "margin_rub",
+    "payroll", "wages", "percent", "salary_percent",
+}
+
+
+def _manager_business_report_view(payload):
+    """Manager report without salary/margin fields; owner/founder sees the full payload."""
+    if isinstance(payload, list):
+        return [_manager_business_report_view(x) for x in payload]
+    if not isinstance(payload, dict):
+        return payload
+    out = {}
+    for key, value in payload.items():
+        low = str(key or "").lower()
+        if (
+            low in _MANAGER_REPORT_SENSITIVE_KEYS
+            or "salary" in low
+            or "payroll" in low
+            or "profit" in low
+            or "margin" in low
+        ):
+            continue
+        out[key] = _manager_business_report_view(value)
+    return out
 
 
 def _resolve_staff_id(name: str) -> int | None:
@@ -1815,6 +1845,13 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 else:
                     result = analytics.business_summary(f_iso, t_iso, include_top=want_top)
                     result["period_label"] = label
+                if _role not in ("owner", "founder"):
+                    result = _manager_business_report_view(result)
+                    if isinstance(result, dict):
+                        result["access_note"] = (
+                            "Отчёт для администратора: выручка, визиты, средний чек и услуги. "
+                            "Зарплаты, маржа и прибыль по мастерам доступны только владельцу."
+                        )
         elif tool_name in (
             "get_daily_briefing", "get_owner_command_center",
             "get_money_opportunities", "get_return_candidates", "get_empty_windows",
@@ -2177,13 +2214,15 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "type": "text",
                     "text": (
                         "## Режим администратора — аналитика бизнеса\n"
-                        "Это администратор или владелец. На вопросы о состоянии бизнеса — «как дела / "
+                        "Это рабочая аналитика администратора. На вопросы о состоянии бизнеса — «как дела / "
                         "как прошла неделя / сколько заработали / какая касса / сколько "
-                        "выплатить мастерам / кто сколько сделал / средний чек / выручка за "
+                        "средний чек / выручка за "
                         "месяц» — вызывай инструмент get_business_report с нужным period "
                         "(today/yesterday/week/last_week/month/last_30) либо date_from/date_to. "
                         "Ответ давай кратко и по-деловому: итоговая выручка, разбивка наличные/"
-                        "карта, число визитов, средний чек, и по мастерам — валовая и зарплата. "
+                        "карта, число визитов, средний чек и топ услуг, если они есть. "
+                        "Зарплаты, маржу и прибыль по мастерам администратору не показывай; "
+                        "на такие вопросы отвечай, что это уровень владельца. "
                         "🔴 «Валовая / выручка за период» = поле total_gross из ответа инструмента "
                         "(это выручка ВСЕГО салона за услуги, ВКЛЮЧАЯ работу владельца). Называй "
                         "ИМЕННО total_gross дословно; НЕ складывай валовые по мастерам сам и НЕ "
@@ -2215,7 +2254,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше / какие задачи / что просрочено» → get_owner_command_center.\n"
                     "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
-                    "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
+                    "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни на доработку / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
                     "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"

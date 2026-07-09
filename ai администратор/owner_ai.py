@@ -2251,6 +2251,199 @@ def _automation_status(*, journal: list[dict], actions: list[dict], now_iso: str
     return out
 
 
+def _owner_review_layer(*, control: list[dict], now_iso: str) -> dict:
+    """Очередь решений владельца по задачам, которые команда вернула на проверку."""
+    now_dt = _parse_iso(now_iso) or datetime.now()
+    rows = []
+    for it in control or []:
+        if it.get("source") != "owner_control" or not it.get("action_id"):
+            continue
+        work_state = str(it.get("assignment_work_state") or "")
+        if work_state not in ("done", "blocked", "revision"):
+            continue
+        updated_at = it.get("assignment_work_updated_at") or it.get("due_at") or ""
+        updated_dt = _parse_iso(updated_at)
+        age_hours = None
+        if updated_dt:
+            try:
+                age_hours = max(0, int((now_dt - updated_dt).total_seconds() // 3600))
+            except Exception:
+                age_hours = None
+        if work_state == "done":
+            review_state = "ready"
+            status = "high" if age_hours is not None and age_hours >= 24 else "warn"
+            decision_label = "Закрыть или вернуть"
+            owner_next_step = "Проверить факт выполнения: закрыть контроль или вернуть исполнителю на доработку."
+            next_actions = ["complete", "revision", "postpone"]
+        elif work_state == "blocked":
+            review_state = "blocked"
+            status = "high"
+            decision_label = "Разобрать блокировку"
+            owner_next_step = "Исполнитель заблокирован. Помочь, переназначить или вернуть задачу в работу."
+            next_actions = ["assign", "revision", "postpone"]
+        else:
+            review_state = "revision"
+            status = "medium"
+            decision_label = "Ждём доработку"
+            owner_next_step = "Задача уже возвращена. Дождаться повторной готовности от исполнителя."
+            next_actions = ["postpone"]
+        rows.append({
+            "key": "owner_review:%s" % it.get("action_id"),
+            "control_action_id": it.get("action_id"),
+            "title": it.get("title") or "Контрольная задача",
+            "detail": it.get("detail") or "",
+            "status": status,
+            "review_state": review_state,
+            "decision_label": decision_label,
+            "assigned_to": it.get("assigned_to"),
+            "assignee_name": it.get("assignee_name") or "",
+            "assigned_label": it.get("assigned_label") or _assignee_label(it.get("assigned_to"), it.get("assignee_name")),
+            "assignment_work_state": work_state,
+            "assignment_work_label": it.get("assignment_work_label") or _assignment_work_label(work_state),
+            "assignment_work_actor_name": it.get("assignment_work_actor_name") or "",
+            "assignment_work_updated_at": updated_at,
+            "assignment_age_hours": age_hours,
+            "potential_rub": it.get("potential_rub"),
+            "due_at": it.get("due_at"),
+            "due_state": it.get("due_state"),
+            "owner_next_step": owner_next_step,
+            "next_actions": next_actions,
+        })
+    review_rank = {"blocked": 0, "ready": 1, "revision": 2}
+    rows.sort(key=lambda item: (
+        review_rank.get(item.get("review_state"), 9),
+        -_severity_rank(item.get("status")),
+        -(item.get("potential_rub") or 0),
+        item.get("assignment_work_updated_at") or "",
+    ))
+    ready = [it for it in rows if it.get("review_state") == "ready"]
+    blocked = [it for it in rows if it.get("review_state") == "blocked"]
+    revision = [it for it in rows if it.get("review_state") == "revision"]
+    if blocked:
+        status = "risk"
+        headline = "Есть задачи с блокировкой"
+    elif ready:
+        status = "warn"
+        headline = "Есть задачи на проверку владельца"
+    elif revision:
+        status = "warn"
+        headline = "Есть задачи на доработке"
+    else:
+        status = "ok"
+        headline = "Нечего принимать у команды"
+    return {
+        "status": status,
+        "headline": headline,
+        "generated_at": now_iso,
+        "summary": {
+            "items_count": len(rows),
+            "ready_count": len(ready),
+            "blocked_count": len(blocked),
+            "revision_count": len(revision),
+            "stale_ready_count": len([
+                it for it in ready
+                if it.get("assignment_age_hours") is not None and it.get("assignment_age_hours") >= 24
+            ]),
+        },
+        "items": rows[:8],
+    }
+
+
+def _automation_action_card(item: dict) -> dict | None:
+    job = str((item or {}).get("job") or "").strip().lower()
+    if job not in _AUTOMATION_LIBRARY:
+        return None
+    status = str((item or {}).get("status") or "").lower()
+    priority = status if status in ("low", "medium", "high") else ("high" if status == "risk" else "medium")
+    return owner_action_payload(
+        job,
+        title=(item or {}).get("title") or None,
+        priority=priority,
+    )
+
+
+def _automation_queue(automations: list[dict]) -> dict:
+    """Action-ready очередь бизнес-сценариев owner OS."""
+    rows = []
+    for it in automations or []:
+        state = str(it.get("state") or "")
+        status = str(it.get("status") or "ok")
+        action_card = it.get("action_card")
+        next_action = "watch"
+        if state == "running":
+            next_action = "wait"
+        elif state == "failed":
+            next_action = "fix_or_retry"
+            action_card = action_card or _automation_action_card(it)
+        elif state in ("recommended", "stale", "never_run"):
+            next_action = "run"
+            action_card = action_card or _automation_action_card(it)
+        elif it.get("last_action_id") and it.get("last_status") == "done" and not it.get("last_evaluated_at"):
+            next_action = "evaluate"
+        else:
+            continue
+        rows.append({
+            "key": "automation_queue:%s" % (it.get("job") or it.get("title") or len(rows)),
+            "job": it.get("job"),
+            "title": it.get("title") or it.get("job") or "Автоматизация",
+            "label": it.get("label") or it.get("title") or it.get("job"),
+            "status": "high" if status == "high" or state == "failed" else ("warn" if status != "ok" or next_action in ("run", "evaluate") else "ok"),
+            "state": state,
+            "mode": it.get("mode") or "manual_confirm",
+            "next_action": next_action,
+            "next_step": it.get("next_step") or "",
+            "recommended": bool(it.get("recommended")),
+            "action_card": action_card,
+            "last_action_id": it.get("last_action_id"),
+            "last_status": it.get("last_status"),
+            "last_evaluated_at": it.get("last_evaluated_at"),
+            "last_summary": it.get("last_summary") or {},
+            "last_impact_status": it.get("last_impact_status"),
+            "last_impact": it.get("last_impact") or {},
+            "last_error": it.get("last_error") or "",
+            "days_since_last": it.get("days_since_last"),
+            "cooldown_seconds_left": it.get("cooldown_seconds_left") or 0,
+        })
+    action_rank = {"fix_or_retry": 0, "run": 1, "evaluate": 2, "wait": 3, "watch": 4}
+    rows.sort(key=lambda item: (
+        action_rank.get(item.get("next_action"), 9),
+        -_severity_rank(item.get("status")),
+        item.get("days_since_last") is None,
+        -(item.get("days_since_last") or 0),
+        item.get("title") or "",
+    ))
+    actionable = [it for it in rows if it.get("next_action") in ("run", "fix_or_retry") and it.get("action_card")]
+    evaluable = [it for it in rows if it.get("next_action") == "evaluate"]
+    failed = [it for it in rows if it.get("state") == "failed"]
+    if failed:
+        status = "risk"
+        headline = "Есть ошибки автоматизаций"
+    elif actionable:
+        status = "warn"
+        headline = "Есть бизнес-сценарии к запуску"
+    elif evaluable:
+        status = "warn"
+        headline = "Нужно проверить эффект автоматизаций"
+    elif rows:
+        status = "warn"
+        headline = "Автоматизации требуют контроля"
+    else:
+        status = "ok"
+        headline = "Автоматизации под контролем"
+    return {
+        "status": status,
+        "headline": headline,
+        "summary": {
+            "items_count": len(rows),
+            "actionable_count": len(actionable),
+            "evaluable_count": len(evaluable),
+            "failed_count": len(failed),
+            "manual_confirm": True,
+        },
+        "items": rows[:8],
+    }
+
+
 def command_center() -> dict:
     """Owner Command Center v1: единый read-only контракт Maya OS.
 
@@ -2385,6 +2578,7 @@ def command_center() -> dict:
     automations_need_attention = [
         it for it in automations if it.get("status") != "ok"
     ]
+    automation_queue = _automation_queue(automations)
     execution_plan = _execution_plan(
         control_focus=control_focus,
         plan=plan,
@@ -2400,6 +2594,15 @@ def command_center() -> dict:
         automations=automations,
         execution_plan=execution_plan,
         now_iso=now_iso,
+    )
+    owner_review = _owner_review_layer(
+        control=control,
+        now_iso=now_iso,
+    )
+    overall = _command_status(
+        overall,
+        owner_review.get("status"),
+        automation_queue.get("status"),
     )
     sections = [
         {
@@ -2463,6 +2666,14 @@ def command_center() -> dict:
             },
             "items": control,
             "note": "Очередь контроля собирается из рисков, действий, журнала результата и системных предупреждений.",
+        },
+        {
+            "key": "owner_review",
+            "title": "Проверка владельца",
+            "status": owner_review.get("status"),
+            "summary": owner_review.get("summary") or {},
+            "items": owner_review.get("items") or [],
+            "note": "Сюда попадают поручения, которые команда отметила готовыми, заблокированными или вернула в доработку.",
         },
         {
             "key": "risks",
@@ -2542,6 +2753,14 @@ def command_center() -> dict:
             "note": "Сценарии не запускаются сами: владелец подтверждает действие вручную.",
         },
         {
+            "key": "automation_queue",
+            "title": "Очередь автоматизаций",
+            "status": automation_queue.get("status"),
+            "summary": automation_queue.get("summary") or {},
+            "items": automation_queue.get("items") or [],
+            "note": "Action-ready слой: что запустить, повторить или проверить по эффекту.",
+        },
+        {
             "key": "journal",
             "title": "Журнал AI-директора",
             "status": "warn" if any((it.get("status") == "failed") for it in journal) else "ok",
@@ -2583,13 +2802,19 @@ def command_center() -> dict:
             "task_count": (task_center.get("summary") or {}).get("tasks_count", 0),
             "overdue_task_count": (task_center.get("summary") or {}).get("overdue_count", 0),
             "effect_check_task_count": (task_center.get("summary") or {}).get("effect_check_count", 0),
+            "owner_review_count": (owner_review.get("summary") or {}).get("items_count", 0),
+            "owner_review_ready_count": (owner_review.get("summary") or {}).get("ready_count", 0),
+            "owner_review_blocked_count": (owner_review.get("summary") or {}).get("blocked_count", 0),
             "attention_count": len(attention),
             "critical_attention_count": len(attention_critical),
             "automation_attention_count": len(automations_need_attention),
+            "automation_queue_count": (automation_queue.get("summary") or {}).get("items_count", 0),
+            "automation_actionable_count": (automation_queue.get("summary") or {}).get("actionable_count", 0),
         },
         "sections": sections,
         "attention_feed": attention,
         "automation_status": automations,
+        "automation_queue": automation_queue,
         "opportunities": opps,
         "plan_fact": plan,
         "master_performance": masters,
@@ -2597,6 +2822,7 @@ def command_center() -> dict:
         "next_best_actions": actions,
         "execution_plan": execution_plan,
         "task_center": task_center,
+        "owner_review": owner_review,
         "control_focus": control_focus,
         "control_queue": control,
         "journal": journal,

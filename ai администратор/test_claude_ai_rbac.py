@@ -177,6 +177,31 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "get_master_performance")
         self.assertTrue(logs[-1][4])
 
+    def test_manager_business_report_view_redacts_salary_and_profit(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        result = claude_ai._manager_business_report_view({
+            "total_gross": 100000,
+            "salary_total": 35000,
+            "profit_after_salary_total_rub": 65000,
+            "masters": [
+                {
+                    "name": "Мастер 1",
+                    "gross": 60000,
+                    "salary": 21000,
+                    "percent": 35,
+                    "profit_after_salary_rub": 39000,
+                }
+            ],
+        })
+
+        self.assertEqual(result["total_gross"], 100000)
+        self.assertNotIn("salary_total", result)
+        self.assertNotIn("profit_after_salary_total_rub", result)
+        self.assertEqual(result["masters"][0]["gross"], 60000)
+        self.assertNotIn("salary", result["masters"][0])
+        self.assertNotIn("profit_after_salary_rub", result["masters"][0])
+
     def test_founder_can_read_owner_command_center(self):
         claude_ai, logs = _load_claude_ai()
 

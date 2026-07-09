@@ -6401,7 +6401,7 @@ def _rub(value) -> str:
 
 
 def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
-    """Deterministic answer for owner/manager questions about master revenue/profit."""
+    """Deterministic answer for owner/founder questions about master revenue/profit."""
     if str(mode or "").strip().lower() != "staff":
         return None
     if not _business_master_analytics_intent(message):
@@ -6412,6 +6412,12 @@ def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") 
         info = {}
     if not (info.get("permissions") or {}).get("analytics"):
         return None
+    if info.get("role") != "owner" and not info.get("is_founder"):
+        return (
+            "Это уровень владельца: прибыль по мастерам, маржу после ЗП и выплаты "
+            "я показываю только владельцу. В рабочем кабинете могу помочь с вашей "
+            "разрешённой аналитикой, расписанием и операционными задачами."
+        )
     try:
         import analytics
         period, date_from, date_to = _analytics_period_from_text(message)
@@ -6449,9 +6455,9 @@ def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") 
     return (
         f"За период «{label}» лидер по выручке — {leader.get('name') or 'мастер'}.\n\n"
         f"Топ по выручке:\n{top3}\n\n"
-        f"Если считать прибыль салона по мастеру как выручка минус расчётная ЗП, "
+        f"Если считать вклад мастера как выручка минус расчётная ЗП, "
         f"лидер по марже — {margin_leader.get('name') or 'мастер'}: {_rub(margin)}. "
-        f"Постоянные расходы салона здесь не разнесены по мастерам."
+        f"Это маржа после ЗП, не чистая прибыль салона: постоянные расходы здесь не разнесены по мастерам."
     )
 
 
