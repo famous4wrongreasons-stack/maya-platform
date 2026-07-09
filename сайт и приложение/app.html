@@ -15276,6 +15276,25 @@ function AGodMode() {
       tinyRow('Нужно добрать визитов', String(sm.needed_visits_to_target || 0), sm.needed_visits_to_target ? statusColor('warn') : null),
       e('div', { style: { marginTop: 10 } }, btn('Настроить план', function () { editPlanTarget(sm); }, {}))));
   }
+  function renderMastersBlock(sm, rows) {
+    sm = sm || {};
+    rows = rows || [];
+    var topProfit = sm.top_profit_master || {};
+    var topGross = sm.top_gross_master || {};
+    return Card(e('div', null,
+      eyebrow('Мастера'),
+      topProfit.name ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 13, color: t.ink, lineHeight: 1.25, marginBottom: 3 } }, 'Больше всего прибыли: ' + topProfit.name) : null,
+      topGross.name ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginBottom: 8 } }, 'Больше всего выручки: ' + topGross.name + ' · ' + money(topGross.gross_rub || 0)) : null,
+      tinyRow('Вклад после процентов', money(sm.profit_after_salary_total_rub || 0)),
+      tinyRow('Выплаты мастерам', money(sm.salary_total_rub || 0)),
+      rows.length ? rows.slice(0, 4).map(function (m, i) {
+        return e('div', { key: m.staff_id || i, style: { padding: '9px 0', borderBottom: i < Math.min(rows.length, 4) - 1 ? '1px solid ' + t.line : 'none' } },
+          e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+            e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink, lineHeight: 1.25 } }, m.name || 'Мастер'),
+            e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, whiteSpace: 'nowrap' } }, money(m.profit_after_salary_rub || 0))),
+          e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, 'Выручка ' + money(m.gross_rub || 0) + ' · визитов ' + (m.visits || 0) + ' · чек ' + money(m.avg_check_rub || 0)));
+      }) : e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.45 } }, 'За 30 дней нет закрытых визитов по мастерам.')));
+  }
 
   function renderOS() {
     if (!cc) return loadingMsg();
@@ -15284,6 +15303,7 @@ function AGodMode() {
     var risk = sm.top_risk || {};
     var today = sectionBy('today') || {}, todaySm = today.summary || {};
     var plan = sectionBy('plan_fact') || {}, planSm = plan.summary || {};
+    var mastersSec = sectionBy('masters') || {}, mastersSm = mastersSec.summary || {};
     var clients = sectionBy('clients') || {}, clientsSm = clients.summary || {};
     var services = sectionBy('services') || {}, servicesSm = services.summary || {};
     var journal = cc.journal || [];
@@ -15304,6 +15324,7 @@ function AGodMode() {
       top.title ? signalCard(top.title, top.detail, top.potential_rub, 'warn') : null,
       risk.title ? signalCard(risk.title, risk.detail, risk.potential_rub, risk.severity || 'warn') : null,
       renderPlanFact(planSm),
+      renderMastersBlock(mastersSm, mastersSec.items || []),
       Card(e('div', null,
         eyebrow('Операционная картина'),
         tinyRow('Работают мастера', String(todaySm.working_masters || 0)),

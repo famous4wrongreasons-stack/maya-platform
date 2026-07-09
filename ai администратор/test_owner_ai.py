@@ -14,7 +14,36 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
     )
     def fake_business_summary(date_from, date_to, *args, **kwargs):
         if date_from == "2026-06-09":
-            return {"total_gross": 60000, "visits": 30, "avg_check": 2000}
+            return {
+                "from": "2026-06-09",
+                "to": "2026-07-08",
+                "total_gross": 60000,
+                "visits": 30,
+                "avg_check": 2000,
+                "salary_total": 22000,
+                "masters": [
+                    {
+                        "staff_id": 1,
+                        "name": "Мастер 1",
+                        "gross": 40000,
+                        "salary": 14000,
+                        "visits": 20,
+                        "avg_check": 2000,
+                        "percent": 35,
+                        "is_owner": False,
+                    },
+                    {
+                        "staff_id": 2,
+                        "name": "Мастер 2",
+                        "gross": 20000,
+                        "salary": 8000,
+                        "visits": 10,
+                        "avg_check": 2000,
+                        "percent": 40,
+                        "is_owner": False,
+                    },
+                ],
+            }
         return {"total_gross": 1000, "visits": 1, "avg_check": 1000}
 
     fake_analytics.business_summary = fake_business_summary
@@ -138,12 +167,14 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "plan_fact", "control", "risks", "clients", "services", "actions", "journal"},
+            {"today", "money", "plan_fact", "control", "risks", "clients", "services", "masters", "actions", "journal"},
             keys,
         )
         self.assertEqual(center["summary"]["daily_target_rub"], 2000)
         self.assertIsNotNone(center["summary"]["plan_progress_pct"])
         self.assertEqual(center["plan_fact"]["daily_target_rub"], 2000)
+        self.assertEqual(center["summary"]["top_profit_master"]["name"], "Мастер 1")
+        self.assertEqual(center["master_performance"]["top_profit_master"]["profit_after_salary_rub"], 26000)
         self.assertTrue(center["next_best_actions"])
         self.assertTrue(center["control_queue"])
         self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
@@ -182,6 +213,16 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(plan["target_source"], "manual_setting")
         self.assertEqual(plan["daily_target_rub"], 45000)
         self.assertEqual(plan["needed_visits_to_target"], 21)
+
+    def test_master_performance_ranks_profit_after_salary(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        perf = owner_ai.master_performance()
+
+        self.assertEqual(perf["top_profit_master"]["name"], "Мастер 1")
+        self.assertEqual(perf["top_gross_master"]["name"], "Мастер 1")
+        self.assertEqual(perf["profit_after_salary_total_rub"], 38000)
+        self.assertIn("общие расходы", perf["note"])
 
     def test_expiring_assets_counts_only_sold_certificates(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

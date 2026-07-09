@@ -317,6 +317,53 @@ def plan_fact(snap: dict = None) -> dict:
     }
 
 
+def master_performance() -> dict:
+    """Мастера за 30 дней: выручка, выплаты и вклад после процента.
+
+    Это не полная управленческая прибыль салона: аренда, эквайринг, расходники и
+    прочие общие расходы здесь не распределяются по мастерам. Метрика нужна для
+    честного ответа владельцу: кто приносит больше выручки и вклад после выплаты
+    процента мастеру.
+    """
+    summary = _summary_30d() or {}
+    rows = []
+    for m in summary.get("masters") or []:
+        if not isinstance(m, dict):
+            continue
+        gross = _rub(m.get("gross"))
+        salary = 0 if m.get("is_owner") else _rub(m.get("salary"))
+        profit = gross - salary
+        visits = _rub(m.get("visits"))
+        rows.append({
+            "staff_id": m.get("staff_id"),
+            "name": m.get("name") or "Мастер",
+            "gross_rub": gross,
+            "salary_rub": salary,
+            "profit_after_salary_rub": profit,
+            "visits": visits,
+            "avg_check_rub": _rub(m.get("avg_check")),
+            "salary_percent": _rub(m.get("percent")),
+            "is_owner": bool(m.get("is_owner")),
+            "profit_per_visit_rub": _rub(profit / visits) if visits else 0,
+        })
+    rows.sort(key=lambda x: (-(x.get("profit_after_salary_rub") or 0), -(x.get("gross_rub") or 0)))
+    gross_leader = sorted(rows, key=lambda x: (-(x.get("gross_rub") or 0), x.get("name") or ""))[:1]
+    return {
+        "period": {"from": summary.get("from"), "to": summary.get("to")},
+        "total_gross_rub": _rub(summary.get("total_gross")),
+        "salary_total_rub": _rub(summary.get("salary_total")),
+        "profit_after_salary_total_rub": sum(_rub(r.get("profit_after_salary_rub")) for r in rows),
+        "top_profit_master": rows[0] if rows else None,
+        "top_gross_master": gross_leader[0] if gross_leader else None,
+        "masters": rows[:8],
+        "note": (
+            "Вклад после процента = выручка мастера минус выплата мастеру. "
+            "Для владельца-мастера выплата не вычитается; общие расходы салона "
+            "по мастерам не распределяются."
+        ),
+    }
+
+
 def expiring_assets() -> dict:
     """Истекающие/активные активы: абонементы (7 дней) и сертификаты на руках."""
     m, certs = {}, {}
@@ -563,6 +610,19 @@ def _fallback_plan_fact() -> dict:
     }
 
 
+def _fallback_master_performance() -> dict:
+    return {
+        "period": {},
+        "total_gross_rub": 0,
+        "salary_total_rub": 0,
+        "profit_after_salary_total_rub": 0,
+        "top_profit_master": None,
+        "top_gross_master": None,
+        "masters": [],
+        "note": "Аналитика мастеров временно недоступна.",
+    }
+
+
 def _safe_owner_block(key: str, fn, fallback):
     try:
         return fn(), None
@@ -725,8 +785,9 @@ def command_center() -> dict:
     ret, ret_err = _safe_owner_block("return_candidates", return_candidates, _fallback_return_candidates)
     svc, svc_err = _safe_owner_block("service_insights", service_insights, _fallback_services)
     plan, plan_err = _safe_owner_block("plan_fact", lambda: plan_fact(snap=snap), _fallback_plan_fact)
+    masters, masters_err = _safe_owner_block("master_performance", master_performance, _fallback_master_performance)
 
-    errors = [e for e in (snap_err, exp_err, ret_err, svc_err, plan_err) if e]
+    errors = [e for e in (snap_err, exp_err, ret_err, svc_err, plan_err, masters_err) if e]
     try:
         opps = money_opportunities(snap=snap, exp=exp, ret=ret)
     except Exception as e:
@@ -786,6 +847,10 @@ def command_center() -> dict:
         "warn" if (svc.get("weak_services") or []) else "ok",
         "warn" if svc_err else "ok",
     )
+    masters_status = _command_status(
+        "ok" if (masters.get("masters") or []) else "warn",
+        "warn" if masters_err else "ok",
+    )
     overall = _command_status(
         today_status,
         money_status,
@@ -793,6 +858,7 @@ def command_center() -> dict:
         risk_status,
         client_status,
         service_status,
+        masters_status,
         "warn" if errors else "ok",
     )
 
@@ -919,6 +985,21 @@ def command_center() -> dict:
             "note": svc.get("note"),
         },
         {
+            "key": "masters",
+            "title": "Мастера",
+            "status": masters_status,
+            "summary": {
+                "total_gross_rub": _rub(masters.get("total_gross_rub")),
+                "salary_total_rub": _rub(masters.get("salary_total_rub")),
+                "profit_after_salary_total_rub": _rub(masters.get("profit_after_salary_total_rub")),
+                "top_profit_master": masters.get("top_profit_master"),
+                "top_gross_master": masters.get("top_gross_master"),
+                "masters_count": len(masters.get("masters") or []),
+            },
+            "items": masters.get("masters") or [],
+            "note": masters.get("note"),
+        },
+        {
             "key": "actions",
             "title": "Следующие действия",
             "status": "warn" if actions else "ok",
@@ -954,6 +1035,9 @@ def command_center() -> dict:
             "daily_target_rub": _rub(plan.get("daily_target_rub")),
             "plan_progress_pct": plan.get("progress_pct"),
             "plan_gap_rub": _rub(plan.get("gap_rub")),
+            "salary_total_rub": _rub(masters.get("salary_total_rub")),
+            "top_profit_master": masters.get("top_profit_master"),
+            "top_gross_master": masters.get("top_gross_master"),
             "money_at_stake_rub": _money_at_stake(opps, risks),
             "top_priority": opps[0] if opps else None,
             "top_risk": top_risk,
@@ -963,6 +1047,7 @@ def command_center() -> dict:
         "sections": sections,
         "opportunities": opps,
         "plan_fact": plan,
+        "master_performance": masters,
         "risks": risks,
         "next_best_actions": actions,
         "control_queue": control,
