@@ -89,11 +89,17 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
         "subscriptions": {"expiring_soon": 2, "active": 9}
     }
     fake_database.active_sold_gift_certs = lambda: {"count": 1, "value_rub": 10000}
-    fake_database.get_setting = lambda key, default=None: (
-        json.dumps(reactivation_payload, ensure_ascii=False)
-        if key == "reactivation_last" and reactivation_payload is not None
-        else default
-    )
+    settings = {}
+    def fake_get_setting(key, default=None):
+        if key == "reactivation_last" and reactivation_payload is not None:
+            return json.dumps(reactivation_payload, ensure_ascii=False)
+        return settings.get(key, default)
+
+    def fake_set_setting(key, value):
+        settings[key] = value
+
+    fake_database.get_setting = fake_get_setting
+    fake_database.set_setting = fake_set_setting
     def fake_create_owner_action(job, title="", **kwargs):
         action_id = max((int(it.get("id") or 0) for it in owner_actions), default=0) + 1
         owner_actions.insert(0, {
@@ -301,6 +307,7 @@ class OwnerAITests(unittest.TestCase):
                 "financial_director",
                 "business_goals",
                 "decision_memory",
+                "operating_rhythm",
                 "plan_fact",
                 "control",
                 "owner_review",
@@ -359,6 +366,9 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("open_decisions_count", center["summary"])
         self.assertIn("unverified_results_count", center["summary"])
         self.assertIn("positive_decision_signals_count", center["summary"])
+        self.assertIn("operating_rhythm_last_run_at", center["summary"])
+        self.assertIn("operating_rhythm_last_created_count", center["summary"])
+        self.assertIn("operating_rhythm_last_updated_count", center["summary"])
         self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
         self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
         self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
@@ -393,6 +403,9 @@ class OwnerAITests(unittest.TestCase):
             row for row in center["decision_memory"]["items"]
             if row.get("kind") == "lesson"
         ])
+        self.assertEqual(center["operating_rhythm"]["version"], "maya_os_v6_operating_rhythm")
+        self.assertEqual(center["operating_rhythm"]["mode"], "safe_scheduler")
+        self.assertTrue(center["operating_rhythm"]["summary"]["safe_only"])
         self.assertEqual(center["approval_matrix"]["version"], "approval_matrix_v1")
         self.assertTrue(center["approval_matrix"]["rows"])
         self.assertEqual(
@@ -551,6 +564,27 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(closed_loop_rows)
         self.assertTrue(closed_loop_rows[0]["payload"]["signal_key"].startswith("closed_loop:owner_acceptance_stale:"))
         self.assertEqual(closed_loop_rows[0]["payload"]["signal_source"], "maya_os_3_0")
+
+    def test_operating_rhythm_tick_runs_safe_layers_and_respects_cooldown(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        result = owner_ai.run_operating_rhythm_tick(created_by="test_scheduler", force=True)
+        again = owner_ai.run_operating_rhythm_tick(created_by="test_scheduler", force=False)
+        center = result["center"]
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["skipped"])
+        self.assertEqual(result["version"], "maya_os_v6_operating_rhythm")
+        self.assertEqual(result["mode"], "safe_scheduler")
+        self.assertTrue(result["summary"]["safe_only"])
+        self.assertIn("autonomous_director", result["results"])
+        self.assertIn("autopilot_supervision", result["results"])
+        self.assertIn("execution_loop", result["results"])
+        self.assertTrue(again["ok"])
+        self.assertTrue(again["skipped"])
+        self.assertEqual(again["reason"], "cooldown")
+        self.assertEqual(center["operating_rhythm"]["version"], "maya_os_v6_operating_rhythm")
+        self.assertTrue(center["operating_rhythm"]["summary"]["last_run_at"])
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})

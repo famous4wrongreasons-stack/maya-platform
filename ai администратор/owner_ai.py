@@ -14,6 +14,7 @@ database.dashboard_metrics, reactivation, yclients) в операционный 
 оценку, а не факт (см. промпт «Режим AI-директора»).
 """
 from datetime import date, datetime, timedelta
+import json
 import logging
 import re
 import time
@@ -102,6 +103,7 @@ _AUTOMATION_LIBRARY = {
     "subscriptions": {"cadence_days": 3, "title": "Абонементы"},
 }
 _AUTOMATION_COOLDOWN_SECONDS = 60
+_OPERATING_RHYTHM_INTERVAL_SECONDS = 3600
 
 
 def _today() -> str:
@@ -3107,6 +3109,155 @@ def _decision_memory(*, journal: list[dict], control: list[dict],
     }
 
 
+def _operating_rhythm_status(now_iso: str | None = None) -> dict:
+    """Статус безопасного backend-ритма MAYA OS."""
+    now_iso = now_iso or datetime.now().isoformat(timespec="seconds")
+    now_dt = _parse_iso(now_iso) or datetime.now()
+    last_at = ""
+    last_summary = {}
+    try:
+        import database
+        last_at = database.get_setting("maya_os_rhythm_last_at") or ""
+        raw = database.get_setting("maya_os_rhythm_last_summary") or ""
+        if raw:
+            last_summary = json.loads(raw)
+    except Exception as e:
+        logger.error("owner_ai operating_rhythm_status: %s", e)
+        last_summary = {"error": "settings_unavailable"}
+    last_dt = _parse_iso(last_at)
+    age_seconds = None
+    if last_dt:
+        try:
+            age_seconds = max(0, int((now_dt - last_dt).total_seconds()))
+        except Exception:
+            age_seconds = None
+    interval = _OPERATING_RHYTHM_INTERVAL_SECONDS
+    if not last_at:
+        status = "warn"
+        headline = "Операционный ритм ещё не запускался"
+    elif age_seconds is not None and age_seconds > interval * 2:
+        status = "warn"
+        headline = "Операционный ритм пора обновить"
+    else:
+        status = "ok"
+        headline = "Операционный ритм активен"
+    next_run_after = ""
+    if last_dt:
+        try:
+            next_run_after = (last_dt + timedelta(seconds=interval)).isoformat(timespec="seconds")
+        except Exception:
+            next_run_after = ""
+    return {
+        "version": "maya_os_v6_operating_rhythm",
+        "mode": "safe_scheduler",
+        "status": status,
+        "headline": headline,
+        "summary": {
+            "enabled": True,
+            "safe_only": True,
+            "interval_seconds": interval,
+            "interval_minutes": int(interval // 60),
+            "last_run_at": last_at,
+            "last_age_seconds": age_seconds,
+            "next_run_after": next_run_after,
+            "last_created_count": _rub(last_summary.get("created_count")),
+            "last_updated_count": _rub(last_summary.get("updated_count")),
+            "last_skipped_count": _rub(last_summary.get("skipped_count")),
+        },
+        "last_summary": last_summary,
+        "next_step": (
+            "Scheduler сам выполнит безопасный тик; внешние действия останутся через подтверждение владельца."
+        ),
+        "note": "Ритм запускает только внутренние задачи, контроль исполнения и замыкание циклов.",
+    }
+
+
+def run_operating_rhythm_tick(*, created_by=None, force: bool = False) -> dict:
+    """Безопасный тик самоуправления: автозадачи, контроль, замыкание циклов."""
+    now_iso = datetime.now().isoformat(timespec="seconds")
+    last_at = ""
+    try:
+        import database
+        last_at = database.get_setting("maya_os_rhythm_last_at") or ""
+    except Exception as e:
+        logger.error("owner_ai rhythm read settings: %s", e)
+        database = None
+    last_dt = _parse_iso(last_at)
+    if not force and last_dt:
+        try:
+            age = (datetime.now() - last_dt).total_seconds()
+        except Exception:
+            age = _OPERATING_RHYTHM_INTERVAL_SECONDS
+        if age < _OPERATING_RHYTHM_INTERVAL_SECONDS:
+            return {
+                "ok": True,
+                "skipped": True,
+                "mode": "safe_scheduler",
+                "reason": "cooldown",
+                "next_run_after": (last_dt + timedelta(seconds=_OPERATING_RHYTHM_INTERVAL_SECONDS)).isoformat(timespec="seconds"),
+            }
+    created_by = created_by or "maya_os_scheduler"
+    results = {}
+    created_count = 0
+    updated_count = 0
+    skipped_count = 0
+
+    autonomy = run_autonomous_director_tick(created_by=created_by, limit=3)
+    results["autonomous_director"] = {
+        "ok": autonomy.get("ok"),
+        "created_count": _rub(autonomy.get("created_count")),
+        "skipped_count": _rub(autonomy.get("skipped_count")),
+    }
+    created_count += _rub(autonomy.get("created_count"))
+    skipped_count += _rub(autonomy.get("skipped_count"))
+
+    supervision = run_autopilot_supervision_tick(created_by=created_by, limit=5)
+    results["autopilot_supervision"] = {
+        "ok": supervision.get("ok"),
+        "applied_count": _rub(supervision.get("applied_count")),
+        "created_count": _rub(supervision.get("created_count")),
+        "updated_count": _rub(supervision.get("updated_count")),
+        "skipped_count": _rub(supervision.get("skipped_count")),
+    }
+    created_count += _rub(supervision.get("created_count"))
+    updated_count += _rub(supervision.get("updated_count") or supervision.get("applied_count"))
+    skipped_count += _rub(supervision.get("skipped_count"))
+
+    loop = run_execution_loop_tick(created_by=created_by, limit=4)
+    results["execution_loop"] = {
+        "ok": loop.get("ok"),
+        "created_count": _rub(loop.get("created_count")),
+        "skipped_count": _rub(loop.get("skipped_count")),
+    }
+    created_count += _rub(loop.get("created_count"))
+    skipped_count += _rub(loop.get("skipped_count"))
+
+    summary = {
+        "created_count": created_count,
+        "updated_count": updated_count,
+        "skipped_count": skipped_count,
+        "ran_at": now_iso,
+        "safe_only": True,
+    }
+    try:
+        import database
+        database.set_setting("maya_os_rhythm_last_at", now_iso)
+        database.set_setting("maya_os_rhythm_last_summary", json.dumps(summary, ensure_ascii=False))
+    except Exception as e:
+        logger.error("owner_ai rhythm write settings: %s", e)
+    return {
+        "ok": True,
+        "skipped": False,
+        "version": "maya_os_v6_operating_rhythm",
+        "mode": "safe_scheduler",
+        "ran_at": now_iso,
+        "summary": summary,
+        "results": results,
+        "center": command_center(),
+        "note": "Выполнены только безопасные внутренние действия MAYA OS.",
+    }
+
+
 def _approval_matrix() -> dict:
     """Матрица автономии: что MAYA может делать сама, а где нужен владелец."""
     rows = [
@@ -4137,6 +4288,7 @@ def command_center() -> dict:
         business_goals=business_goals,
         now_iso=now_iso,
     )
+    operating_rhythm = _operating_rhythm_status(now_iso=now_iso)
     approval = _approval_matrix()
     autonomous_candidates = _autonomous_task_candidates(
         plan=plan,
@@ -4161,6 +4313,7 @@ def command_center() -> dict:
         kpi_scorecard.get("status"),
         business_goals.get("status"),
         decision_memory.get("status"),
+        operating_rhythm.get("status"),
         autonomous_director.get("status"),
     )
     sections = [
@@ -4247,6 +4400,14 @@ def command_center() -> dict:
             "summary": decision_memory.get("summary") or {},
             "items": decision_memory.get("items") or [],
             "note": decision_memory.get("next_step"),
+        },
+        {
+            "key": "operating_rhythm",
+            "title": "Операционный ритм",
+            "status": operating_rhythm.get("status"),
+            "summary": operating_rhythm.get("summary") or {},
+            "items": operating_rhythm.get("last_summary") or {},
+            "note": operating_rhythm.get("next_step"),
         },
         {
             "key": "plan_fact",
@@ -4447,6 +4608,9 @@ def command_center() -> dict:
             "open_decisions_count": (decision_memory.get("summary") or {}).get("open_decisions_count", 0),
             "unverified_results_count": (decision_memory.get("summary") or {}).get("unverified_results_count", 0),
             "positive_decision_signals_count": (decision_memory.get("summary") or {}).get("positive_signals_count", 0),
+            "operating_rhythm_last_run_at": (operating_rhythm.get("summary") or {}).get("last_run_at", ""),
+            "operating_rhythm_last_created_count": (operating_rhythm.get("summary") or {}).get("last_created_count", 0),
+            "operating_rhythm_last_updated_count": (operating_rhythm.get("summary") or {}).get("last_updated_count", 0),
         },
         "sections": sections,
         "attention_feed": attention,
@@ -4457,6 +4621,7 @@ def command_center() -> dict:
         "financial_director": financial_director,
         "business_goals": business_goals,
         "decision_memory": decision_memory,
+        "operating_rhythm": operating_rhythm,
         "approval_matrix": approval,
         "automation_status": automations,
         "automation_queue": automation_queue,

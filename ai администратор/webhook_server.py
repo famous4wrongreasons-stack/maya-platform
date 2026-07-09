@@ -8290,6 +8290,29 @@ async def waitlist_admin_alert_loop(app: Application):
         await asyncio.sleep(120)
 
 
+async def maya_operating_rhythm_loop(app: Application):
+    """Безопасный rhythm-loop Maya OS: внутренние задачи, контроль и замыкание циклов."""
+    await asyncio.sleep(60)
+    while True:
+        try:
+            result = await asyncio.to_thread(
+                owner_ai.run_operating_rhythm_tick,
+                created_by="maya_os_scheduler",
+                force=False,
+            )
+            if result and not result.get("skipped"):
+                summary = result.get("summary") or {}
+                logger.info(
+                    "maya operating rhythm tick: created=%s updated=%s skipped=%s",
+                    summary.get("created_count"),
+                    summary.get("updated_count"),
+                    summary.get("skipped_count"),
+                )
+        except Exception as e:
+            logger.error(f"maya operating rhythm loop: {e}")
+        await asyncio.sleep(900)
+
+
 async def usage_fal_handler(request: web.Request) -> web.Response:
     """POST /api/usage/fal — фиксирует одну успешную генерацию fal.ai (cutmatch)
     = 1 изображение по фикс. цене ($0.15). Зовётся PHP-прокси после успешной
@@ -9929,4 +9952,5 @@ async def start_webhook_server(bot_app: Application):
     globals()["_WEBHOOK_SITE"] = site
     asyncio.create_task(master_shift_reminder_loop(bot_app))
     asyncio.create_task(waitlist_admin_alert_loop(bot_app))
+    asyncio.create_task(maya_operating_rhythm_loop(bot_app))
     logger.info(f"📡 Webhook-сервер слушает {bind_host}:{WEBHOOK_PORT}")

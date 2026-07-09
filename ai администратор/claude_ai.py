@@ -592,6 +592,7 @@ TOOLS = [
             "execution_loop (Maya OS v3: замкнутый цикл задач от постановки до проверки результата), "
             "business_goals (Maya OS v4: цели бизнеса, план-факт месяца/дня, загрузка, средний чек, вклад после выплат), "
             "decision_memory (Maya OS v5: память решений, выводы, незакрытые решения и непроверенный эффект), "
+            "operating_rhythm (Maya OS v6: безопасный scheduler-ритм самоуправления), "
             "план-факт, риски, очередь управленческих задач, клиенты/активы, услуги, мастера, действия AI-директора и журнал. "
             "Вызывай на «Maya OS / центр управления / что контролировать / план-факт / "
             "цели / план месяца / отклонения / память решений / что сработало / какие выводы / журнал AI-директора / статус OS / что делать дальше / что сейчас главное / какие задачи / что просрочено». "
@@ -649,6 +650,23 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "limit": {"type": "integer", "description": "Максимум owner-followup задач за один запуск, по умолчанию 6."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "run_operating_rhythm_tick",
+        "description": (
+            "ТОЛЬКО для владельца. Запустить безопасный операционный ритм Maya OS v6: "
+            "одним тиком создать внутренние автозадачи, провести контроль исполнения "
+            "и замкнуть разрывы циклов. Не отправляет клиентские рассылки, не меняет "
+            "цены, записи, зарплаты или доступы. Вызывай на «запусти ритм MAYA OS / "
+            "пусть MAYA сама пройдёт цикл / проведи полный безопасный тик / самоуправление сейчас»."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "force": {"type": "boolean", "description": "Игнорировать cooldown scheduler и выполнить тик сразу."},
             },
             "required": [],
         },
@@ -849,7 +867,7 @@ _OWNER_ONLY = {
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
     "update_owner_control_task", "run_autonomous_director_tick",
-    "run_autopilot_supervision_tick", "run_execution_loop_tick",
+    "run_autopilot_supervision_tick", "run_execution_loop_tick", "run_operating_rhythm_tick",
     "get_money_opportunities", "get_return_candidates",
     "get_empty_windows", "get_expiring_assets", "get_service_insights",
     "get_master_performance", "get_risk_signals", "salon_action",
@@ -972,7 +990,7 @@ _WRITE_TOOLS = {
     "remember_business_rule", "forget_business_rule",
     "create_owner_control_task", "update_owner_control_task",
     "run_autonomous_director_tick", "run_autopilot_supervision_tick",
-    "run_execution_loop_tick",
+    "run_execution_loop_tick", "run_operating_rhythm_tick",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1971,6 +1989,15 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     created_by=user_id,
                     limit=tool_input.get("limit") or 6,
                 )
+        elif tool_name == "run_operating_rhythm_tick":
+            if _role not in ("owner", "founder"):
+                result = {"error": "Операционный ритм Maya OS доступен только владельцу."}
+            else:
+                import owner_ai
+                result = owner_ai.run_operating_rhythm_tick(
+                    created_by=user_id,
+                    force=bool(tool_input.get("force")),
+                )
         elif tool_name == "create_owner_control_task":
             if _role not in ("owner", "founder"):
                 result = {"error": "Контрольные задачи доступны только владельцу."}
@@ -2346,6 +2373,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «запусти автопилот / пусть MAYA сама поставит задачи / включи автономного директора / создай задачи по OS» → run_autonomous_director_tick. Он создаёт только внутренние контрольные задачи; рассылки, деньги, цены, зарплаты и доступы не запускает без владельца.\n"
                     "• «проведи контроль / доведи задачи / проконтролируй исполнение / кто просрочил / кто молчит / пусть MAYA ведёт задачи» → run_autopilot_supervision_tick. Он только двигает внутренние статусы MAYA и создаёт owner-эскалации; внешние действия не запускает.\n"
                     "• «замкни цикл / доведи до результата / где застряло между задачей и результатом / пусть MAYA закроет разрывы» → run_execution_loop_tick. Он создаёт только owner-followup задачи по разорванным циклам; внешние действия не запускает.\n"
+                    "• «запусти ритм MAYA OS / полный безопасный тик / пусть MAYA сама пройдёт цикл» → run_operating_rhythm_tick. Он запускает только внутренний безопасный контур: автозадачи, контроль исполнения и замыкание циклов.\n"
                     "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
                     "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни на доработку / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
@@ -2378,7 +2406,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "поле note из инструмента. Нет данных — скажи прямо, цифры не выдумывай."
                     " Для мастеров: «прибыль» из get_master_performance называй вкладом "
                     "после процента мастера, не полной чистой прибылью салона. Для "
-                    "get_owner_command_center отвечай от главного: business_goals, decision_memory, autonomous_director, "
+                    "get_owner_command_center отвечай от главного: business_goals, decision_memory, operating_rhythm, autonomous_director, "
                     "autopilot_supervisor, kpi_scorecard, financial_director, execution_plan, task_center, "
                     "control_focus, summary.top_control, plan_fact, control_queue и next_action; если блока или цифры нет — "
                     "не заменяй его догадкой. create_owner_control_task используй только "

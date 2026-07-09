@@ -15874,6 +15874,25 @@ function AGodMode() {
               it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null)));
       })));
   }
+  function renderOperatingRhythm(rhythm) {
+    rhythm = rhythm || {};
+    var sm = rhythm.summary || {};
+    var last = sm.last_run_at ? String(sm.last_run_at).replace('T', ' ').slice(0, 16) : 'ещё нет';
+    return Card(e('div', null,
+      eyebrow('Операционный ритм'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(rhythm.status || 'ok'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, rhythm.headline || 'Операционный ритм'),
+          e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, 'Последний тик: ' + last + ' · интервал ' + (sm.interval_minutes || 60) + ' мин.'))),
+      grid2([
+        kpiCell(String(sm.last_created_count || 0), 'Создано'),
+        kpiCell(String(sm.last_updated_count || 0), 'Обновлено'),
+        kpiCell(String(sm.last_skipped_count || 0), 'Пропущено'),
+        kpiCell(sm.safe_only ? 'Да' : '—', 'Safe-only')
+      ]),
+      rhythm.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35 } }, rhythm.next_step) : null));
+  }
   function renderOwnerReview(review) {
     review = review || {};
     var rows = review.items || [], sm = review.summary || {};
@@ -16113,6 +16132,7 @@ function AGodMode() {
     var executionLoop = cc.execution_loop || {};
     var businessGoals = cc.business_goals || {};
     var decisionMemory = cc.decision_memory || {};
+    var operatingRhythm = cc.operating_rhythm || {};
     var kpiScorecard = cc.kpi_scorecard || {};
     var financialDirector = cc.financial_director || {};
     var attention = cc.attention_feed || [];
@@ -16131,6 +16151,7 @@ function AGodMode() {
       ]),
       renderBusinessGoals(businessGoals),
       renderDecisionMemory(decisionMemory),
+      renderOperatingRhythm(operatingRhythm),
       renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),
       renderAutopilotSupervisor(autopilotSupervisor),
       renderExecutionLoop(executionLoop),

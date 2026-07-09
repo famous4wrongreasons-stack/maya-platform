@@ -106,6 +106,13 @@ def _load_claude_ai():
         "skipped_count": 0,
         "note": "Замкнутый цикл проверен.",
     }
+    fake_owner_ai.run_operating_rhythm_tick = lambda **kwargs: {
+        "ok": True,
+        "mode": "safe_scheduler",
+        "skipped": False,
+        "summary": {"created_count": 1, "updated_count": 1, "safe_only": True},
+        "note": "Операционный ритм выполнен.",
+    }
     fake_owner_ai.create_control_task = lambda **kwargs: {
         "ok": True,
         "task_id": 7,
@@ -188,6 +195,14 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("error", result)
         self.assertEqual(logs[-1][1], "manager")
         self.assertEqual(logs[-1][2], "run_execution_loop_tick")
+        self.assertFalse(logs[-1][4])
+
+        result = json.loads(
+            claude_ai._execute_tool("run_operating_rhythm_tick", {"force": True}, user_id=339683535)
+        )
+        self.assertIn("error", result)
+        self.assertEqual(logs[-1][1], "manager")
+        self.assertEqual(logs[-1][2], "run_operating_rhythm_tick")
         self.assertFalse(logs[-1][4])
 
     def test_founder_can_prepare_salon_action_without_execution(self):
@@ -361,6 +376,25 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][3], "write")
         self.assertTrue(logs[-1][4])
 
+    def test_founder_can_run_operating_rhythm_tick(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(
+            claude_ai._execute_tool(
+                "run_operating_rhythm_tick",
+                {"force": True},
+                user_id=948205934,
+            )
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "safe_scheduler")
+        self.assertFalse(result["skipped"])
+        self.assertEqual(logs[-1][1], "founder")
+        self.assertEqual(logs[-1][2], "run_operating_rhythm_tick")
+        self.assertEqual(logs[-1][3], "write")
+        self.assertTrue(logs[-1][4])
+
     def test_pro_model_uses_responses_api_route(self):
         claude_ai, _logs = _load_claude_ai()
         seen = {}
@@ -422,6 +456,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("run_autonomous_director_tick", names)
         self.assertNotIn("run_autopilot_supervision_tick", names)
         self.assertNotIn("run_execution_loop_tick", names)
+        self.assertNotIn("run_operating_rhythm_tick", names)
         self.assertNotIn("get_master_performance", names)
         self.assertNotIn("salon_action", names)
 
@@ -442,6 +477,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("run_autonomous_director_tick", names)
         self.assertIn("run_autopilot_supervision_tick", names)
         self.assertIn("run_execution_loop_tick", names)
+        self.assertIn("run_operating_rhythm_tick", names)
         self.assertIn("get_master_performance", names)
         self.assertIn("salon_action", names)
 
@@ -461,6 +497,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("run_autonomous_director_tick", names)
         self.assertIn("run_autopilot_supervision_tick", names)
         self.assertIn("run_execution_loop_tick", names)
+        self.assertIn("run_operating_rhythm_tick", names)
         self.assertIn("salon_action", names)
         self.assertNotIn("request_booking", names)
         self.assertNotIn("find_nearest_slots", names)
