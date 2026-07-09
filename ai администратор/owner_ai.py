@@ -587,6 +587,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "task": task,
         "control_item": {
             "key": "owner_control:%s" % action_id,
+            "action_id": action_id,
             "title": title,
             "detail": detail,
             "status": priority,
@@ -596,6 +597,40 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
             "due_at": normalized_due_at,
         },
         "note": "Задача добавлена в Owner Command Center и появится в очереди контроля.",
+    }
+
+
+def update_control_task(*, task_id, action: str, note: str = "",
+                        due_at: str | None = None, due_in_days=None) -> dict:
+    """Обновляет ручную контрольную задачу: done/cancel/postpone/reopen."""
+    try:
+        action_id = int(task_id)
+    except Exception:
+        return {"ok": False, "error": "bad_task_id"}
+    action = str(action or "").strip().lower()
+    if action not in ("complete", "done", "finish", "cancel", "canceled", "cancelled", "postpone", "snooze", "delay", "reopen", "open"):
+        return {"ok": False, "error": "bad_action"}
+    safe_note = _safe_control_text(note, 420)
+    normalized_due_at = None
+    if action in ("postpone", "snooze", "delay"):
+        normalized_due_at = _normalize_control_due_at(due_at, due_in_days if due_in_days is not None else 1)
+    try:
+        import database
+        task = database.update_owner_control_task(
+            action_id,
+            action,
+            note=safe_note,
+            due_at=normalized_due_at,
+        )
+    except Exception as e:
+        logger.error("owner_ai update_control_task: %s", e)
+        return {"ok": False, "error": "update_failed"}
+    if not task:
+        return {"ok": False, "error": "not_found"}
+    return {
+        "ok": True,
+        "task": task,
+        "note": "Контрольная задача обновлена.",
     }
 
 
@@ -758,7 +793,8 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
 
     def add(key: str, title: str, detail: str = "", *, status: str = "warn",
             source: str = "maya", potential_rub=None, owner_next_step: str = "",
-            due_at: str | None = None, action_job: str | None = None) -> None:
+            due_at: str | None = None, action_job: str | None = None,
+            action_id=None) -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -773,6 +809,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "owner_next_step": owner_next_step or "",
             "due_at": due_at,
             "action_job": action_job,
+            "action_id": action_id,
         })
 
     for er in errors or []:
@@ -818,6 +855,7 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 source="owner_control",
                 potential_rub=payload.get("potential_rub"),
                 due_at=it.get("result_due_at") or payload.get("due_at"),
+                action_id=it.get("id"),
                 owner_next_step=payload.get("owner_next_step") or "Довести задачу до результата и проверить в журнале.",
             )
         if status == "failed":

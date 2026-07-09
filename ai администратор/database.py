@@ -4129,6 +4129,76 @@ def finish_owner_action(action_id, status: str, *, summary=None, error: str = ""
         return False
 
 
+def update_owner_control_task(action_id, action: str, *, note: str = "",
+                              due_at: str | None = None) -> dict | None:
+    """Меняет состояние ручной контрольной задачи owner_control."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    action = (action or "").strip().lower()
+    if action in ("complete", "done", "finish"):
+        next_status = "done"
+    elif action in ("cancel", "canceled", "cancelled"):
+        next_status = "canceled"
+    elif action in ("postpone", "snooze", "delay"):
+        next_status = "pending"
+    elif action in ("reopen", "open"):
+        next_status = "pending"
+    else:
+        return None
+
+    now = _now()
+    note = (note or "")[:420]
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        if item.get("source") != "owner_control" or item.get("job") != "control_task":
+            return None
+
+        payload = _json_loads_safe(item.get("payload_json"))
+        summary = _json_loads_safe(item.get("summary_json"))
+        summary.update({
+            "manual": True,
+            "last_action": action,
+            "note": note,
+            "updated_at": now,
+        })
+        completed_at = None
+        result_due_at = item.get("result_due_at")
+        if next_status in ("done", "canceled"):
+            completed_at = now
+            summary["result"] = next_status
+        elif action in ("postpone", "snooze", "delay") and due_at:
+            result_due_at = str(due_at)[:19]
+            payload["due_at"] = result_due_at
+            summary["postponed_to"] = result_due_at
+
+        conn.execute(
+            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
+            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (
+                next_status,
+                completed_at,
+                result_due_at,
+                _json_dumps_safe(payload),
+                _json_dumps_safe(summary),
+                "",
+                aid,
+            ),
+        )
+
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
 def list_owner_actions(limit: int = 12) -> list[dict]:
     """Последние действия AI-директора, новые первыми."""
     try:

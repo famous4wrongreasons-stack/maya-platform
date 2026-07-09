@@ -92,7 +92,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
         else default
     )
     def fake_create_owner_action(job, title="", **kwargs):
-        action_id = len(owner_actions) + 1
+        action_id = max((int(it.get("id") or 0) for it in owner_actions), default=0) + 1
         owner_actions.insert(0, {
             "id": action_id,
             "source": kwargs.get("source") or "owner_os",
@@ -106,7 +106,29 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
         })
         return action_id
 
+    def fake_update_owner_control_task(action_id, action, **kwargs):
+        for item in owner_actions:
+            if int(item["id"]) != int(action_id):
+                continue
+            if item.get("source") != "owner_control":
+                return None
+            if action in ("complete", "done", "finish"):
+                item["status"] = "done"
+                item["summary"] = {"manual": True, "last_action": action}
+            elif action in ("cancel", "canceled", "cancelled"):
+                item["status"] = "canceled"
+                item["summary"] = {"manual": True, "last_action": action}
+            elif action in ("postpone", "snooze", "delay"):
+                item["status"] = "pending"
+                item["result_due_at"] = kwargs.get("due_at") or item.get("result_due_at")
+                item["payload"]["due_at"] = item["result_due_at"]
+            elif action in ("reopen", "open"):
+                item["status"] = "pending"
+            return json.loads(json.dumps(item, ensure_ascii=False))
+        return None
+
     fake_database.create_owner_action = fake_create_owner_action
+    fake_database.update_owner_control_task = fake_update_owner_control_task
     fake_database.list_owner_actions = lambda limit=8: owner_actions[:limit]
     fake_database.evaluate_due_owner_actions = lambda limit=5: 0
 
@@ -239,6 +261,40 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(control[0]["title"], "Проверить план-факт вечером")
         self.assertEqual(control[0]["potential_rub"], 15000)
         self.assertIn("тёплый спрос", control[0]["owner_next_step"])
+
+    def test_owner_control_task_lifecycle_updates_queue(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить просадку",
+            priority="medium",
+            due_in_days=1,
+        )
+        postponed = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="postpone",
+            due_in_days=2,
+        )
+        center_after_postpone = owner_ai.command_center()
+        completed = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="complete",
+            note="Проверено",
+        )
+        center_after_complete = owner_ai.command_center()
+
+        self.assertTrue(postponed["ok"])
+        self.assertEqual(postponed["task"]["status"], "pending")
+        self.assertTrue([
+            item for item in center_after_postpone["control_queue"]
+            if item.get("action_id") == created["task_id"]
+        ])
+        self.assertTrue(completed["ok"])
+        self.assertEqual(completed["task"]["status"], "done")
+        self.assertFalse([
+            item for item in center_after_complete["control_queue"]
+            if item.get("action_id") == created["task_id"]
+        ])
 
     def test_plan_fact_uses_manual_owner_target_when_set(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

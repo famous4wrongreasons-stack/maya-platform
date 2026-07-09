@@ -2440,6 +2440,48 @@ async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True, "action": item})
 
 
+async def panel_control_update_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/control/update — lifecycle ручной контрольной задачи."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Контрольные задачи доступны только владельцу.",
+        }, status=403)
+    try:
+        task_id = int(body.get("task_id") or body.get("action_id") or 0)
+    except Exception:
+        task_id = 0
+    action = str(body.get("action") or "").strip().lower()
+    if not task_id or action not in ("complete", "cancel", "postpone", "reopen"):
+        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
+    try:
+        updated = await asyncio.to_thread(
+            owner_ai.update_control_task,
+            task_id=task_id,
+            action=action,
+            note=body.get("note") or "",
+            due_at=body.get("due_at"),
+            due_in_days=body.get("due_in_days"),
+        )
+        if not updated.get("ok"):
+            status = 404 if updated.get("error") == "not_found" else 400
+            return _cabinet_response(updated, status=status)
+        center = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_control_update error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
+    return _cabinet_response({"ok": True, "role": info["role"], "updated": updated.get("task"), **center})
+
+
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
     """Расписание (сегодня + ближайшие) и личная статистика мастера за период pp.
     Статистика (визиты/выручка/чаевые) — за окно периода ВКЛЮЧАЯ сегодня; расписание —
@@ -9394,6 +9436,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/plan_target", panel_options_handler)
     web_app.router.add_post("/api/panel/action/evaluate", panel_action_evaluate_handler)
     web_app.router.add_options("/api/panel/action/evaluate", panel_options_handler)
+    web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
+    web_app.router.add_options("/api/panel/control/update", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)
     web_app.router.add_options("/api/panel/master/overview", panel_options_handler)
     web_app.router.add_post("/api/panel/master/day", panel_master_day_handler)

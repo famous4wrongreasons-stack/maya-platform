@@ -615,6 +615,27 @@ TOOLS = [
         },
     },
     {
+        "name": "update_owner_control_task",
+        "description": (
+            "ТОЛЬКО для владельца. Обновить ручную контрольную задачу Owner Command Center: "
+            "отметить выполненной, отменить, отложить, вернуть в работу. Используй только "
+            "когда владелец явно ссылается на существующую задачу и просит «выполнено / "
+            "закрой / отмени / отложи / перенеси / верни в работу». Если непонятно, какую "
+            "задачу менять, сначала уточни. Не используй для action-card рассылок."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "task_id": {"type": "integer", "description": "ID задачи из журнала/Command Center."},
+                "action": {"type": "string", "enum": ["complete", "cancel", "postpone", "reopen"], "description": "Что сделать с задачей."},
+                "note": {"type": "string", "description": "Короткая заметка владельца без персональных данных."},
+                "due_at": {"type": "string", "description": "Новый ISO-дедлайн при postpone, если есть конкретная дата."},
+                "due_in_days": {"type": "integer", "description": "На сколько дней отложить при postpone."},
+            },
+            "required": ["task_id", "action"],
+        },
+    },
+    {
         "name": "get_money_opportunities",
         "description": (
             "ТОЛЬКО для владельца. Приоритизированный ПО ДЕНЬГАМ список возможностей: "
@@ -751,9 +772,9 @@ _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
-    "get_money_opportunities", "get_return_candidates", "get_empty_windows",
-    "get_expiring_assets", "get_service_insights", "get_master_performance",
-    "get_risk_signals", "salon_action",
+    "update_owner_control_task", "get_money_opportunities", "get_return_candidates",
+    "get_empty_windows", "get_expiring_assets", "get_service_insights",
+    "get_master_performance", "get_risk_signals", "salon_action",
 }
 _PRIVILEGED = _MASTER_ONLY | _MANAGER_ONLY | _OWNER_ONLY
 
@@ -871,7 +892,7 @@ _WRITE_TOOLS = {
     "reschedule_booking", "update_booking", "cancel_booking",
     "remember_client_preference", "start_gift_cert_purchase",
     "remember_business_rule", "forget_business_rule",
-    "create_owner_control_task",
+    "create_owner_control_task", "update_owner_control_task",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1822,6 +1843,18 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     owner_next_step=tool_input.get("owner_next_step") or "",
                     created_by=user_id,
                 )
+        elif tool_name == "update_owner_control_task":
+            if _role not in ("owner", "founder"):
+                result = {"error": "Контрольные задачи доступны только владельцу."}
+            else:
+                import owner_ai
+                result = owner_ai.update_control_task(
+                    task_id=tool_input.get("task_id"),
+                    action=tool_input.get("action") or "",
+                    note=tool_input.get("note") or "",
+                    due_at=tool_input.get("due_at"),
+                    due_in_days=tool_input.get("due_in_days"),
+                )
         elif tool_name == "salon_action":
             # Только ПРЕДЛОЖИТЬ (валидируем задачу) — рассылка НЕ запускается тут.
             if _role not in ("owner", "founder"):
@@ -2162,6 +2195,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше» → get_owner_command_center.\n"
                     "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать» → create_owner_control_task.\n"
+                    "• «выполнено / закрой задачу / отмени / отложи / перенеси / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
                     "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
@@ -2192,7 +2226,10 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "plan_fact, control_queue и next_action; если блока или цифры нет — "
                     "не заменяй его догадкой. create_owner_control_task используй только "
                     "по явной просьбе владельца создать/зафиксировать контроль; после "
-                    "создания коротко скажи, что задача добавлена в очередь контроля."
+                    "создания коротко скажи, что задача добавлена в очередь контроля. "
+                    "update_owner_control_task используй только если понятно, какую "
+                    "конкретную задачу менять; если ID/контекст неясен — спроси, какую "
+                    "задачу закрыть или отложить."
                 ),
             })
 

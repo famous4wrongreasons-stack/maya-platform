@@ -91,6 +91,13 @@ def _load_claude_ai():
             "status": kwargs.get("priority") or "medium",
         },
     }
+    fake_owner_ai.update_control_task = lambda **kwargs: {
+        "ok": True,
+        "task": {
+            "id": kwargs.get("task_id"),
+            "status": "done" if kwargs.get("action") == "complete" else "pending",
+        },
+    }
     fake_owner_ai.master_performance = lambda: {
         "top_profit_master": {"name": "Мастер 1", "profit_after_salary_rub": 26000},
         "top_gross_master": {"name": "Мастер 1", "gross_rub": 40000},
@@ -203,6 +210,25 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][3], "write")
         self.assertTrue(logs[-1][4])
 
+    def test_founder_can_update_owner_control_task(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(
+            claude_ai._execute_tool(
+                "update_owner_control_task",
+                {"task_id": 7, "action": "complete", "note": "Проверено"},
+                user_id=948205934,
+            )
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["task"]["id"], 7)
+        self.assertEqual(result["task"]["status"], "done")
+        self.assertEqual(logs[-1][1], "founder")
+        self.assertEqual(logs[-1][2], "update_owner_control_task")
+        self.assertEqual(logs[-1][3], "write")
+        self.assertTrue(logs[-1][4])
+
     def test_pro_model_uses_responses_api_route(self):
         claude_ai, _logs = _load_claude_ai()
         seen = {}
@@ -260,6 +286,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("get_daily_briefing", names)
         self.assertNotIn("get_owner_command_center", names)
         self.assertNotIn("create_owner_control_task", names)
+        self.assertNotIn("update_owner_control_task", names)
         self.assertNotIn("get_master_performance", names)
         self.assertNotIn("salon_action", names)
 
@@ -276,6 +303,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("get_daily_briefing", names)
         self.assertIn("get_owner_command_center", names)
         self.assertIn("create_owner_control_task", names)
+        self.assertIn("update_owner_control_task", names)
         self.assertIn("get_master_performance", names)
         self.assertIn("salon_action", names)
 
@@ -291,6 +319,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("get_daily_briefing", names)
         self.assertIn("get_owner_command_center", names)
         self.assertIn("create_owner_control_task", names)
+        self.assertIn("update_owner_control_task", names)
         self.assertIn("salon_action", names)
         self.assertNotIn("request_booking", names)
         self.assertNotIn("find_nearest_slots", names)

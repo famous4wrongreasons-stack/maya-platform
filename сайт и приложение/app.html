@@ -15082,6 +15082,7 @@ function AGodMode() {
   var sModal = React.useState(null), modal = sModal[0], setModal = sModal[1];
   var sAct = React.useState({}), actionS = sAct[0], setActionS = sAct[1];
   var sEval = React.useState({}), evalS = sEval[0], setEvalS = sEval[1];
+  var sControl = React.useState({}), controlS = sControl[0], setControlS = sControl[1];
 
   function gfetch(action, body) {
     var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
@@ -15148,6 +15149,30 @@ function AGodMode() {
       loadCommand();
     }).catch(function () {
       setEvalS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось проверить' }; return n; });
+    });
+  }
+  function controlTaskId(it) {
+    if (!it) return null;
+    if (it.action_id) return it.action_id;
+    var m = String(it.key || '').match(/^owner_control:(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+  function updateControlTask(it, action) {
+    var id = controlTaskId(it);
+    if (!id || !action) return;
+    setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: action }; return n; });
+    var payload = { task_id: id, action: action };
+    if (action === 'postpone') payload.due_in_days = 1;
+    gfetch('panel_control_update', payload).then(function (j) {
+      setControlS(function (s) {
+        var n = Object.assign({}, s);
+        n[id] = { phase: 'done', ok: !!(j && !j.error && j.ok !== false), msg: (j && !j.error && j.ok !== false) ? 'Сохранено' : 'Не удалось' };
+        return n;
+      });
+      if (j && !j.error && j.ok !== false) setCc(j);
+      else loadCommand();
+    }).catch(function () {
+      setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось' }; return n; });
     });
   }
   function editPlanTarget(sm) {
@@ -15246,14 +15271,22 @@ function AGodMode() {
     rows = rows || [];
     if (!rows.length) return e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.45 } }, 'Контрольных пунктов сейчас нет.');
     return rows.slice(0, 5).map(function (it, i) {
+      var cid = controlTaskId(it);
+      var cs = cid ? (controlS[cid] || {}) : {};
+      var isOwnerControl = it.source === 'owner_control' && cid;
       return e('div', { key: it.key || i, style: { display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < Math.min(rows.length, 5) - 1 ? '1px solid ' + t.line : 'none' } },
         e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
         e('div', { style: { flex: 1, minWidth: 0 } },
           e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
             e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || 'Контроль'),
-            it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, whiteSpace: 'nowrap' } }, money(it.potential_rub)) : null),
+          it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, whiteSpace: 'nowrap' } }, money(it.potential_rub)) : null),
           it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.detail) : null,
-          it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 5 } }, it.owner_next_step) : null));
+          it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 5 } }, it.owner_next_step) : null,
+          isOwnerControl ? e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 9 } },
+            btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask(it, 'complete'); }, { primary: true, busy: cs.phase === 'complete' }),
+            btn(cs.phase === 'postpone' ? '...' : 'Завтра', function () { updateControlTask(it, 'postpone'); }, { busy: cs.phase === 'postpone' }),
+            btn(cs.phase === 'cancel' ? '...' : 'Отмена', function () { updateControlTask(it, 'cancel'); }, { busy: cs.phase === 'cancel' })) : null,
+          isOwnerControl && cs.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: cs.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.35, marginTop: 6 } }, cs.msg) : null));
     });
   }
   function renderPlanFact(sm) {
