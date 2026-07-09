@@ -1,11 +1,12 @@
 """owner_ai.py — «мозг AI-директора» салона.
 
-ТОЛЬКО ЧТЕНИЕ. Собирает уже существующие подсистемы (analytics,
+В основном read-only. Собирает уже существующие подсистемы (analytics,
 database.dashboard_metrics, reactivation, yclients) в операционный брифинг
-владельца и приоритизированный ПО ДЕНЬГАМ список возможностей.
+владельца и приоритизированный ПО ДЕНЬГАМ список возможностей. Единственная
+нейтральная запись в этом модуле — ручная контрольная задача владельца.
 
-Ничего не меняет: не трогает кассу, записи, рассылки. Гейтится owner-only в
-claude_ai (_execute_tool проверяет database.is_admin).
+Не трогает кассу, записи и рассылки. Все write-возможности гейтятся owner-only
+в claude_ai (_execute_tool проверяет database.is_admin).
 
 Денежные величины: средний чек (avg_check) — РЕАЛЬНЫЙ за 30 дней; всё
 «потенциальное» (возврат уснувших, продление абонементов, пустые окна) —
@@ -511,6 +512,93 @@ def owner_action_payload(task: str, *,
     return out
 
 
+def _safe_control_text(value, limit: int = 240) -> str:
+    text = str(value or "").strip()
+    try:
+        import anonymizer
+        text = anonymizer.redact_pii(text)
+    except Exception:
+        pass
+    text = " ".join(text.split())
+    return text[:limit]
+
+
+def _normalize_control_due_at(due_at: str | None = None, due_in_days=None) -> str:
+    raw = str(due_at or "").strip()
+    if raw:
+        try:
+            if len(raw) == 10:
+                return datetime.fromisoformat(raw).replace(hour=18, minute=0, second=0).isoformat(timespec="seconds")
+            return datetime.fromisoformat(raw[:19]).isoformat(timespec="seconds")
+        except Exception:
+            pass
+    try:
+        days = int(due_in_days)
+    except Exception:
+        days = 2
+    days = max(0, min(days, 30))
+    return (datetime.now() + timedelta(days=days)).isoformat(timespec="seconds")
+
+
+def create_control_task(*, title: str, detail: str = "", priority: str = "medium",
+                        due_at: str | None = None, due_in_days=None,
+                        potential_rub=None, owner_next_step: str = "",
+                        created_by=None) -> dict:
+    """Создаёт ручную контрольную задачу AI-директора без ПД и автодействий."""
+    title = _safe_control_text(title, 140)
+    if not title:
+        return {"ok": False, "error": "empty_title"}
+    detail = _safe_control_text(detail, 420)
+    owner_next_step = _safe_control_text(owner_next_step, 300)
+    priority = str(priority or "medium").strip().lower()
+    if priority not in ("low", "medium", "high"):
+        priority = "medium"
+    try:
+        potential = _rub(potential_rub) if potential_rub is not None else None
+    except Exception:
+        potential = None
+    normalized_due_at = _normalize_control_due_at(due_at, due_in_days)
+    payload = {
+        "detail": detail,
+        "priority": priority,
+        "potential_rub": potential,
+        "owner_next_step": owner_next_step,
+        "due_at": normalized_due_at,
+    }
+    try:
+        import database
+        action_id = database.create_owner_action(
+            "control_task",
+            title,
+            source="owner_control",
+            created_by=created_by,
+            payload=payload,
+            status="pending",
+            baseline={},
+            result_due_at=normalized_due_at,
+        )
+        task = (database.list_owner_actions(limit=1) or [{}])[0]
+    except Exception as e:
+        logger.error("owner_ai create_control_task: %s", e)
+        return {"ok": False, "error": "create_failed"}
+    return {
+        "ok": True,
+        "task_id": action_id,
+        "task": task,
+        "control_item": {
+            "key": "owner_control:%s" % action_id,
+            "title": title,
+            "detail": detail,
+            "status": priority,
+            "source": "owner_control",
+            "potential_rub": potential,
+            "owner_next_step": owner_next_step,
+            "due_at": normalized_due_at,
+        },
+        "note": "Задача добавлена в Owner Command Center и появится в очереди контроля.",
+    }
+
+
 def _action_from_opportunity(opp: dict | None) -> dict | None:
     if not isinstance(opp, dict):
         return None
@@ -720,6 +808,18 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
 
     for it in journal or []:
         status = str(it.get("status") or "")
+        payload = it.get("payload") or {}
+        if it.get("source") == "owner_control" and status in ("pending", "running"):
+            add(
+                "owner_control:%s" % (it.get("id") or it.get("title") or "task"),
+                it.get("title") or "Контрольная задача",
+                payload.get("detail") or "",
+                status=payload.get("priority") or "medium",
+                source="owner_control",
+                potential_rub=payload.get("potential_rub"),
+                due_at=it.get("result_due_at") or payload.get("due_at"),
+                owner_next_step=payload.get("owner_next_step") or "Довести задачу до результата и проверить в журнале.",
+            )
         if status == "failed":
             add(
                 "journal_failed:%s" % (it.get("id") or it.get("job") or "task"),

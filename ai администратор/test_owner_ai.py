@@ -69,16 +69,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
     )
 
     fake_database = types.ModuleType("database")
-    fake_database.dashboard_metrics = lambda days=30: {
-        "subscriptions": {"expiring_soon": 2, "active": 9}
-    }
-    fake_database.active_sold_gift_certs = lambda: {"count": 1, "value_rub": 10000}
-    fake_database.get_setting = lambda key, default=None: (
-        json.dumps(reactivation_payload, ensure_ascii=False)
-        if key == "reactivation_last" and reactivation_payload is not None
-        else default
-    )
-    fake_database.list_owner_actions = lambda limit=8: [
+    owner_actions = [
         {
             "id": 1,
             "source": "owner_os",
@@ -88,8 +79,35 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
             "created_at": "2026-07-07T10:00:00",
             "result_due_at": "2020-01-01T10:00:00",
             "summary": {"sent": 3},
+            "payload": {},
         }
-    ][:limit]
+    ]
+    fake_database.dashboard_metrics = lambda days=30: {
+        "subscriptions": {"expiring_soon": 2, "active": 9}
+    }
+    fake_database.active_sold_gift_certs = lambda: {"count": 1, "value_rub": 10000}
+    fake_database.get_setting = lambda key, default=None: (
+        json.dumps(reactivation_payload, ensure_ascii=False)
+        if key == "reactivation_last" and reactivation_payload is not None
+        else default
+    )
+    def fake_create_owner_action(job, title="", **kwargs):
+        action_id = len(owner_actions) + 1
+        owner_actions.insert(0, {
+            "id": action_id,
+            "source": kwargs.get("source") or "owner_os",
+            "job": job,
+            "title": title,
+            "status": kwargs.get("status") or "running",
+            "created_at": "2026-07-08T10:00:00",
+            "result_due_at": kwargs.get("result_due_at"),
+            "summary": {},
+            "payload": kwargs.get("payload") or {},
+        })
+        return action_id
+
+    fake_database.create_owner_action = fake_create_owner_action
+    fake_database.list_owner_actions = lambda limit=8: owner_actions[:limit]
     fake_database.evaluate_due_owner_actions = lambda limit=5: 0
 
     fake_yclients = types.ModuleType("yclients")
@@ -196,6 +214,31 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(center["errors"])
         self.assertIn("clients", {section["key"] for section in center["sections"]})
         self.assertIn(center["status"], {"warn", "risk"})
+
+    def test_owner_control_task_appears_in_command_center_queue(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить план-факт вечером",
+            detail="Сравнить прогноз дня с ручным планом.",
+            priority="high",
+            due_in_days=1,
+            potential_rub=15000,
+            owner_next_step="Если разрыв сохранится — запустить тёплый спрос.",
+            created_by=948205934,
+        )
+        center = owner_ai.command_center()
+        control = [
+            item for item in center["control_queue"]
+            if item.get("source") == "owner_control"
+        ]
+
+        self.assertTrue(created["ok"])
+        self.assertEqual(created["control_item"]["status"], "high")
+        self.assertTrue(control)
+        self.assertEqual(control[0]["title"], "Проверить план-факт вечером")
+        self.assertEqual(control[0]["potential_rub"], 15000)
+        self.assertIn("тёплый спрос", control[0]["owner_next_step"])
 
     def test_plan_fact_uses_manual_owner_target_when_set(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

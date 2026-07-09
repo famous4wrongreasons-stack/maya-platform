@@ -590,6 +590,31 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "create_owner_control_task",
+        "description": (
+            "ТОЛЬКО для владельца. Создать ручную контрольную задачу AI-директора "
+            "в Owner Command Center: проверить риск, проконтролировать сотрудника, "
+            "вернуться к план-факту, разобрать просадку или зафиксировать следующее "
+            "управленческое действие. Используй только когда владелец явно просит "
+            "«поставь задачу / зафиксируй / добавь в контроль / проверь завтра / "
+            "напомни проконтролировать». Не используй для обычного вопроса. "
+            "Задача не запускает рассылки и не меняет записи — только добавляет пункт контроля."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "description": "Короткий заголовок контрольной задачи."},
+                "detail": {"type": "string", "description": "Что именно нужно проверить или довести до результата."},
+                "priority": {"type": "string", "enum": ["low", "medium", "high"], "description": "Срочность задачи."},
+                "due_at": {"type": "string", "description": "ISO-дата/время дедлайна, если владелец назвал конкретную дату."},
+                "due_in_days": {"type": "integer", "description": "Через сколько дней проверить, если дата относительная."},
+                "potential_rub": {"type": "number", "description": "Потенциал или сумма на кону в рублях, если есть."},
+                "owner_next_step": {"type": "string", "description": "Следующий управленческий шаг владельца."},
+            },
+            "required": ["title"],
+        },
+    },
+    {
         "name": "get_money_opportunities",
         "description": (
             "ТОЛЬКО для владельца. Приоритизированный ПО ДЕНЬГАМ список возможностей: "
@@ -725,10 +750,10 @@ _MASTER_ONLY = {"get_my_work_records", "get_my_tips", "get_my_stats", "get_clien
 _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
     # AI-директор: операционное ядро только владельцу/основателю
-    "get_daily_briefing", "get_owner_command_center", "get_money_opportunities",
-    "get_return_candidates", "get_empty_windows", "get_expiring_assets",
-    "get_service_insights", "get_master_performance", "get_risk_signals",
-    "salon_action",
+    "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
+    "get_money_opportunities", "get_return_candidates", "get_empty_windows",
+    "get_expiring_assets", "get_service_insights", "get_master_performance",
+    "get_risk_signals", "salon_action",
 }
 _PRIVILEGED = _MASTER_ONLY | _MANAGER_ONLY | _OWNER_ONLY
 
@@ -846,6 +871,7 @@ _WRITE_TOOLS = {
     "reschedule_booking", "update_booking", "cancel_booking",
     "remember_client_preference", "start_gift_cert_purchase",
     "remember_business_rule", "forget_business_rule",
+    "create_owner_control_task",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1781,6 +1807,21 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     result = owner_ai.master_performance()
                 else:  # get_risk_signals
                     result = owner_ai.risk_signals()
+        elif tool_name == "create_owner_control_task":
+            if _role not in ("owner", "founder"):
+                result = {"error": "Контрольные задачи доступны только владельцу."}
+            else:
+                import owner_ai
+                result = owner_ai.create_control_task(
+                    title=tool_input.get("title") or "",
+                    detail=tool_input.get("detail") or "",
+                    priority=tool_input.get("priority") or "medium",
+                    due_at=tool_input.get("due_at"),
+                    due_in_days=tool_input.get("due_in_days"),
+                    potential_rub=tool_input.get("potential_rub"),
+                    owner_next_step=tool_input.get("owner_next_step") or "",
+                    created_by=user_id,
+                )
         elif tool_name == "salon_action":
             # Только ПРЕДЛОЖИТЬ (валидируем задачу) — рассылка НЕ запускается тут.
             if _role not in ("owner", "founder"):
@@ -2120,6 +2161,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "конкретикой из них, а не общими словами:\n"
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше» → get_owner_command_center.\n"
+                    "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать» → create_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
                     "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
@@ -2148,7 +2190,9 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "после процента мастера, не полной чистой прибылью салона. Для "
                     "get_owner_command_center отвечай от главного: summary.top_control, "
                     "plan_fact, control_queue и next_action; если блока или цифры нет — "
-                    "не заменяй его догадкой."
+                    "не заменяй его догадкой. create_owner_control_task используй только "
+                    "по явной просьбе владельца создать/зафиксировать контроль; после "
+                    "создания коротко скажи, что задача добавлена в очередь контроля."
                 ),
             })
 
