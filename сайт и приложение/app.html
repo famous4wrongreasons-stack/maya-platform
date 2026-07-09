@@ -15245,6 +15245,23 @@ function AGodMode() {
           it.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 5 } }, it.owner_next_step) : null));
     });
   }
+  function renderPlanFact(sm) {
+    sm = sm || {};
+    var pct = sm.progress_pct == null ? null : Math.max(0, Math.min(160, Number(sm.progress_pct) || 0));
+    var gap = Number(sm.gap_rub || 0);
+    var gapText = sm.daily_target_rub ? (gap < 0 ? ('не хватает ' + money(Math.abs(gap))) : ('выше плана на ' + money(gap))) : 'база собирается';
+    return Card(e('div', null,
+      eyebrow('План-факт'),
+      e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 8 } },
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: 24, color: t.ink, lineHeight: 1 } }, pct == null ? '—' : String(Math.round(pct)) + '%'),
+        e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: gap < 0 ? statusColor('warn') : statusColor('ok') } }, gapText)),
+      e('div', { style: { height: 7, borderRadius: 999, background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)', overflow: 'hidden', marginBottom: 9 } },
+        e('div', { style: { width: (pct == null ? 0 : Math.min(100, pct)) + '%', height: '100%', borderRadius: 999, background: statusColor(gap < 0 ? 'warn' : 'ok') } })),
+      tinyRow('Факт оплат', money(sm.actual_revenue_rub || 0)),
+      tinyRow('Прогноз дня', money(sm.projected_revenue_rub || 0)),
+      tinyRow('План по базе', money(sm.daily_target_rub || 0)),
+      tinyRow('Нужно добрать визитов', String(sm.needed_visits_to_target || 0), sm.needed_visits_to_target ? statusColor('warn') : null)));
+  }
 
   function renderOS() {
     if (!cc) return loadingMsg();
@@ -15252,6 +15269,7 @@ function AGodMode() {
     var top = sm.top_priority || {};
     var risk = sm.top_risk || {};
     var today = sectionBy('today') || {}, todaySm = today.summary || {};
+    var plan = sectionBy('plan_fact') || {}, planSm = plan.summary || {};
     var clients = sectionBy('clients') || {}, clientsSm = clients.summary || {};
     var services = sectionBy('services') || {}, servicesSm = services.summary || {};
     var journal = cc.journal || [];
@@ -15271,6 +15289,7 @@ function AGodMode() {
       ]),
       top.title ? signalCard(top.title, top.detail, top.potential_rub, 'warn') : null,
       risk.title ? signalCard(risk.title, risk.detail, risk.potential_rub, risk.severity || 'warn') : null,
+      renderPlanFact(planSm),
       Card(e('div', null,
         eyebrow('Операционная картина'),
         tinyRow('Работают мастера', String(todaySm.working_masters || 0)),

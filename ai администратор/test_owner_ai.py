@@ -12,7 +12,12 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
         "2026-07-08",
         "last 30",
     )
-    fake_analytics.business_summary = lambda *args, **kwargs: {"avg_check": 2000}
+    def fake_business_summary(date_from, date_to, *args, **kwargs):
+        if date_from == "2026-06-09":
+            return {"total_gross": 60000, "visits": 30, "avg_check": 2000}
+        return {"total_gross": 1000, "visits": 1, "avg_check": 1000}
+
+    fake_analytics.business_summary = fake_business_summary
     fake_analytics.business_pulse = lambda *args, **kwargs: {
         "health": "ok",
         "metrics": {
@@ -132,9 +137,12 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["free_capacity_today"], 14)
         keys = {section["key"] for section in center["sections"]}
         self.assertEqual(
-            {"today", "money", "control", "risks", "clients", "services", "actions", "journal"},
+            {"today", "money", "plan_fact", "control", "risks", "clients", "services", "actions", "journal"},
             keys,
         )
+        self.assertEqual(center["summary"]["daily_target_rub"], 2000)
+        self.assertIsNotNone(center["summary"]["plan_progress_pct"])
+        self.assertEqual(center["plan_fact"]["daily_target_rub"], 2000)
         self.assertTrue(center["next_best_actions"])
         self.assertTrue(center["control_queue"])
         self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])

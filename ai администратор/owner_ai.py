@@ -28,6 +28,7 @@ _VISITS_PER_SHIFT = 8
 # внутри одного брифинга.
 _avg_cache = {"val": None, "ts": 0.0}
 _AVG_TTL = 600.0
+_summary30_cache = {"val": None, "ts": 0.0}
 
 _ACTION_LIBRARY = {
     "reactivation": {
@@ -111,6 +112,9 @@ def _m(n) -> str:
 
 def _avg_check_30d() -> int:
     """Средний чек салона за 30 дней (реальный) — база денежных оценок."""
+    summary = _summary_30d()
+    if summary and summary.get("avg_check") is not None:
+        return _rub(summary.get("avg_check"))
     now = time.time()
     if _avg_cache["val"] is not None and now - _avg_cache["ts"] < _AVG_TTL:
         return _avg_cache["val"]
@@ -124,6 +128,22 @@ def _avg_check_30d() -> int:
     _avg_cache["val"] = val
     _avg_cache["ts"] = now
     return val
+
+
+def _summary_30d() -> dict | None:
+    """Реальная сводка последних 30 дней, кешируется на процесс."""
+    now = time.time()
+    if _summary30_cache["val"] is not None and now - _summary30_cache["ts"] < _AVG_TTL:
+        return _summary30_cache["val"]
+    try:
+        import analytics
+        f, t, _ = analytics.resolve_period("last_30", None, None)
+        val = analytics.business_summary(f, t) or {}
+        _summary30_cache.update(val=val, ts=now)
+        return val
+    except Exception as e:
+        logger.error(f"owner_ai summary_30d: {e}")
+        return None
 
 
 def _last_30_windows() -> tuple[str, str, str, str]:
@@ -217,6 +237,83 @@ def business_snapshot() -> dict:
         "note": ("expected_revenue = записи сегодня × средний чек 30д (оценка); "
                  "free_slots/ёмкость — грубая оценка по ~%d визитов на смену."
                  % _VISITS_PER_SHIFT),
+    }
+
+
+def _manual_daily_target_rub() -> int:
+    """Опциональная ручная цель владельца через settings.owner_daily_target_rub."""
+    try:
+        import database
+        val = database.get_setting("owner_daily_target_rub")
+        return _rub(val)
+    except Exception:
+        return 0
+
+
+def _today_revenue_summary() -> dict:
+    try:
+        import analytics
+        day = _today()
+        return analytics.business_summary(day, day) or {}
+    except Exception as e:
+        logger.error(f"owner_ai today_revenue_summary: {e}")
+        return {}
+
+
+def plan_fact(snap: dict = None) -> dict:
+    """План-факт дня: факт оплат + прогноз по записям против дневной базы.
+
+    База не выдумывается: ручная цель из settings, если задана; иначе средняя
+    дневная выручка последних 30 дней. Прогноз дня — оценка по записям и среднему
+    чеку, поэтому помечается estimate=true.
+    """
+    snap = snap or business_snapshot()
+    base = _summary_30d() or {}
+    today = _today_revenue_summary()
+    manual_target = _manual_daily_target_rub()
+    avg_daily = _rub((base.get("total_gross") or 0) / 30) if base.get("total_gross") else 0
+    daily_target = manual_target or avg_daily
+    target_source = "manual_setting" if manual_target else "last_30_actual_average"
+
+    actual = _rub(today.get("total_gross"))
+    paid_visits = _rub(today.get("visits"))
+    expected = _rub(snap.get("expected_revenue_rub"))
+    projected = max(actual, expected)
+    avg_check = _rub(snap.get("avg_check_rub") or base.get("avg_check"))
+    gap = projected - daily_target if daily_target else 0
+    progress = round((projected / daily_target) * 100) if daily_target else None
+    needed = 0
+    if daily_target and gap < 0 and avg_check:
+        needed = int((abs(gap) + avg_check - 1) // avg_check)
+    if not daily_target:
+        status = "ok"
+    elif progress is not None and progress < 70:
+        status = "risk"
+    elif progress is not None and progress < 95:
+        status = "warn"
+    else:
+        status = "ok"
+
+    return {
+        "status": status,
+        "date": snap.get("date") or _today(),
+        "daily_target_rub": daily_target,
+        "target_source": target_source,
+        "actual_revenue_rub": actual,
+        "paid_visits": paid_visits,
+        "booked_today": _rub(snap.get("booked_today")),
+        "expected_revenue_rub": expected,
+        "projected_revenue_rub": projected,
+        "gap_rub": gap,
+        "progress_pct": progress,
+        "needed_visits_to_target": needed,
+        "avg_check_rub": avg_check,
+        "estimate": True,
+        "note": (
+            "План-факт: факт оплат сегодня + прогноз по текущим записям. "
+            "Дневной план — ручная цель owner_daily_target_rub или средняя "
+            "дневная выручка последних 30 дней."
+        ),
     }
 
 
@@ -446,6 +543,26 @@ def _fallback_services() -> dict:
     }
 
 
+def _fallback_plan_fact() -> dict:
+    return {
+        "status": "ok",
+        "date": _today(),
+        "daily_target_rub": 0,
+        "target_source": "unavailable",
+        "actual_revenue_rub": 0,
+        "paid_visits": 0,
+        "booked_today": 0,
+        "expected_revenue_rub": 0,
+        "projected_revenue_rub": 0,
+        "gap_rub": 0,
+        "progress_pct": None,
+        "needed_visits_to_target": 0,
+        "avg_check_rub": 0,
+        "estimate": True,
+        "note": "План-факт временно недоступен.",
+    }
+
+
 def _safe_owner_block(key: str, fn, fallback):
     try:
         return fn(), None
@@ -482,7 +599,7 @@ def _dedup_actions(opps: list[dict]) -> list[dict]:
 
 
 def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict],
-                   errors: list[dict], now_iso: str) -> list[dict]:
+                   errors: list[dict], plan: dict | None, now_iso: str) -> list[dict]:
     """Единая очередь управленческого контроля owner OS.
 
     Это не отдельная task-БД, а стабильная read-only проекция: MAYA собирает
@@ -518,6 +635,27 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             status="high",
             source="system",
             owner_next_step="Обновить Owner OS. Если предупреждение повторяется — проверить backend-интеграцию.",
+        )
+
+    plan = plan or {}
+    if plan.get("status") in ("warn", "risk"):
+        needed = _rub(plan.get("needed_visits_to_target"))
+        add(
+            "plan_fact:revenue_gap",
+            "День ниже плана",
+            "Прогноз %s ₽ из плана %s ₽; разрыв %s ₽." % (
+                _m(plan.get("projected_revenue_rub")),
+                _m(plan.get("daily_target_rub")),
+                _m(abs(plan.get("gap_rub") or 0)),
+            ),
+            status="high" if plan.get("status") == "risk" else "medium",
+            source="plan_fact",
+            potential_rub=abs(_rub(plan.get("gap_rub"))),
+            owner_next_step=(
+                "Нужно добрать примерно %d визит(а/ов): заполнить окна и запустить тёплый спрос."
+                % needed
+                if needed else "Проверить свободные окна и усилить продажи на сегодня."
+            ),
         )
 
     for it in journal or []:
@@ -586,8 +724,9 @@ def command_center() -> dict:
     exp, exp_err = _safe_owner_block("expiring_assets", expiring_assets, _fallback_assets)
     ret, ret_err = _safe_owner_block("return_candidates", return_candidates, _fallback_return_candidates)
     svc, svc_err = _safe_owner_block("service_insights", service_insights, _fallback_services)
+    plan, plan_err = _safe_owner_block("plan_fact", lambda: plan_fact(snap=snap), _fallback_plan_fact)
 
-    errors = [e for e in (snap_err, exp_err, ret_err, svc_err) if e]
+    errors = [e for e in (snap_err, exp_err, ret_err, svc_err, plan_err) if e]
     try:
         opps = money_opportunities(snap=snap, exp=exp, ret=ret)
     except Exception as e:
@@ -633,6 +772,10 @@ def command_center() -> dict:
         "warn" if opps else "ok",
         "warn" if errors else "ok",
     )
+    plan_status = _command_status(
+        plan.get("status"),
+        "warn" if plan_err else "ok",
+    )
     risk_status = _command_status(top_risk_status, "warn" if errors else "ok")
     client_status = _command_status(
         "warn" if ret.get("count") else "ok",
@@ -646,6 +789,7 @@ def command_center() -> dict:
     overall = _command_status(
         today_status,
         money_status,
+        plan_status,
         risk_status,
         client_status,
         service_status,
@@ -664,6 +808,7 @@ def command_center() -> dict:
         actions=actions,
         journal=journal,
         errors=errors,
+        plan=plan,
         now_iso=now_iso,
     )
     control_urgent = [
@@ -700,6 +845,24 @@ def command_center() -> dict:
             },
             "items": opps[:6],
             "note": "Возможности отсортированы по деньгам на кону; estimate=true — оценка, не факт.",
+        },
+        {
+            "key": "plan_fact",
+            "title": "План-факт",
+            "status": plan_status,
+            "summary": {
+                "daily_target_rub": _rub(plan.get("daily_target_rub")),
+                "actual_revenue_rub": _rub(plan.get("actual_revenue_rub")),
+                "projected_revenue_rub": _rub(plan.get("projected_revenue_rub")),
+                "gap_rub": _rub(plan.get("gap_rub")),
+                "progress_pct": plan.get("progress_pct"),
+                "needed_visits_to_target": _rub(plan.get("needed_visits_to_target")),
+                "paid_visits": _rub(plan.get("paid_visits")),
+                "booked_today": _rub(plan.get("booked_today")),
+                "target_source": plan.get("target_source"),
+            },
+            "items": [],
+            "note": plan.get("note"),
         },
         {
             "key": "control",
@@ -788,6 +951,9 @@ def command_center() -> dict:
             "expected_revenue_rub": _rub(snap.get("expected_revenue_rub")),
             "avg_check_rub": _rub(snap.get("avg_check_rub")),
             "free_capacity_today": _rub(snap.get("free_capacity_today")),
+            "daily_target_rub": _rub(plan.get("daily_target_rub")),
+            "plan_progress_pct": plan.get("progress_pct"),
+            "plan_gap_rub": _rub(plan.get("gap_rub")),
             "money_at_stake_rub": _money_at_stake(opps, risks),
             "top_priority": opps[0] if opps else None,
             "top_risk": top_risk,
@@ -796,6 +962,7 @@ def command_center() -> dict:
         },
         "sections": sections,
         "opportunities": opps,
+        "plan_fact": plan,
         "risks": risks,
         "next_best_actions": actions,
         "control_queue": control,
