@@ -2482,6 +2482,47 @@ async def panel_control_update_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True, "role": info["role"], "updated": updated.get("task"), **center})
 
 
+async def panel_control_create_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/control/create — создать ручной контроль из owner-сигнала."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Контрольные задачи доступны только владельцу.",
+        }, status=403)
+    title = str(body.get("title") or "").strip()
+    if not title:
+        return _cabinet_response({"error": "bad_request", "message": "title обязателен."}, status=400)
+    try:
+        created = await asyncio.to_thread(
+            owner_ai.create_control_task,
+            title=title,
+            detail=body.get("detail") or "",
+            priority=body.get("priority") or "medium",
+            due_at=body.get("due_at"),
+            due_in_days=body.get("due_in_days"),
+            potential_rub=body.get("potential_rub"),
+            owner_next_step=body.get("owner_next_step") or "",
+            signal_key=body.get("signal_key") or "",
+            created_by=tg_id,
+        )
+        if not created.get("ok"):
+            return _cabinet_response(created, status=400)
+        center = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_control_create error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось создать задачу."}, status=500)
+    return _cabinet_response({"ok": True, "role": info["role"], "created": created, **center})
+
+
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
     """Расписание (сегодня + ближайшие) и личная статистика мастера за период pp.
     Статистика (визиты/выручка/чаевые) — за окно периода ВКЛЮЧАЯ сегодня; расписание —
@@ -9455,6 +9496,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/plan_target", panel_options_handler)
     web_app.router.add_post("/api/panel/action/evaluate", panel_action_evaluate_handler)
     web_app.router.add_options("/api/panel/action/evaluate", panel_options_handler)
+    web_app.router.add_post("/api/panel/control/create", panel_control_create_handler)
+    web_app.router.add_options("/api/panel/control/create", panel_options_handler)
     web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
     web_app.router.add_options("/api/panel/control/update", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)

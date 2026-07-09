@@ -548,10 +548,27 @@ def _normalize_control_due_at(due_at: str | None = None, due_in_days=None) -> st
     return (datetime.now() + timedelta(days=days)).isoformat(timespec="seconds")
 
 
+def _control_item_from_owner_action(task: dict | None) -> dict:
+    task = task or {}
+    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    action_id = task.get("id")
+    return {
+        "key": "owner_control:%s" % (action_id or task.get("title") or "task"),
+        "action_id": action_id,
+        "title": task.get("title") or "Контрольная задача",
+        "detail": payload.get("detail") or "",
+        "status": payload.get("priority") or "medium",
+        "source": "owner_control",
+        "potential_rub": payload.get("potential_rub"),
+        "owner_next_step": payload.get("owner_next_step") or "",
+        "due_at": task.get("result_due_at") or payload.get("due_at"),
+    }
+
+
 def create_control_task(*, title: str, detail: str = "", priority: str = "medium",
                         due_at: str | None = None, due_in_days=None,
                         potential_rub=None, owner_next_step: str = "",
-                        created_by=None) -> dict:
+                        signal_key: str = "", created_by=None) -> dict:
     """Создаёт ручную контрольную задачу AI-директора без ПД и автодействий."""
     title = _safe_control_text(title, 140)
     if not title:
@@ -561,6 +578,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
     priority = str(priority or "medium").strip().lower()
     if priority not in ("low", "medium", "high"):
         priority = "medium"
+    signal_key = _safe_control_text(signal_key, 180)
     try:
         potential = _rub(potential_rub) if potential_rub is not None else None
     except Exception:
@@ -572,9 +590,26 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "potential_rub": potential,
         "owner_next_step": owner_next_step,
         "due_at": normalized_due_at,
+        "signal_key": signal_key,
     }
     try:
         import database
+        if signal_key:
+            for existing in database.list_owner_actions(limit=50) or []:
+                existing_payload = existing.get("payload") if isinstance(existing.get("payload"), dict) else {}
+                if (
+                    existing.get("source") == "owner_control"
+                    and existing.get("status") in ("pending", "running")
+                    and existing_payload.get("signal_key") == signal_key
+                ):
+                    return {
+                        "ok": True,
+                        "existing": True,
+                        "task_id": existing.get("id"),
+                        "task": existing,
+                        "control_item": _control_item_from_owner_action(existing),
+                        "note": "Такая задача уже есть в очереди контроля.",
+                    }
         action_id = database.create_owner_action(
             "control_task",
             title,
@@ -593,17 +628,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "ok": True,
         "task_id": action_id,
         "task": task,
-        "control_item": {
-            "key": "owner_control:%s" % action_id,
-            "action_id": action_id,
-            "title": title,
-            "detail": detail,
-            "status": priority,
-            "source": "owner_control",
-            "potential_rub": potential,
-            "owner_next_step": owner_next_step,
-            "due_at": normalized_due_at,
-        },
+        "control_item": _control_item_from_owner_action(task),
         "note": "Задача добавлена в Owner Command Center и появится в очереди контроля.",
     }
 

@@ -286,6 +286,28 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(control[0]["potential_rub"], 15000)
         self.assertIn("тёплый спрос", control[0]["owner_next_step"])
 
+    def test_control_task_from_same_signal_is_not_duplicated(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        first = owner_ai.create_control_task(
+            title="День ниже плана",
+            detail="Проверить свободные окна.",
+            priority="high",
+            signal_key="attention:plan_fact",
+        )
+        second = owner_ai.create_control_task(
+            title="День ниже плана",
+            detail="Повторный сигнал.",
+            priority="high",
+            signal_key="attention:plan_fact",
+        )
+
+        self.assertTrue(first["ok"])
+        self.assertTrue(second["ok"])
+        self.assertTrue(second["existing"])
+        self.assertEqual(second["task_id"], first["task_id"])
+        self.assertEqual(second["control_item"]["title"], "День ниже плана")
+
     def test_owner_control_task_lifecycle_updates_queue(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
 

@@ -15175,6 +15175,35 @@ function AGodMode() {
       setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось' }; return n; });
     });
   }
+  function attentionSignalKey(it) {
+    it = it || {};
+    return 'attention:' + [it.kind || 'notice', it.source || 'maya', it.control_key || it.action_job || it.title || 'signal'].join(':');
+  }
+  function createControlFromSignal(it) {
+    if (!it || it.source === 'owner_control') return;
+    var sid = attentionSignalKey(it);
+    setControlS(function (s) { var n = Object.assign({}, s); n[sid] = { phase: 'running' }; return n; });
+    gfetch('panel_control_create', {
+      title: it.title || 'Сигнал Owner OS',
+      detail: it.detail || '',
+      priority: it.severity === 'high' ? 'high' : 'medium',
+      due_in_days: it.severity === 'high' ? 1 : 2,
+      potential_rub: it.potential_rub,
+      owner_next_step: it.action_job ? 'Подтвердить или отклонить действие и закрыть контроль.' : 'Проверить сигнал, назначить действие и закрыть контроль.',
+      signal_key: sid
+    }).then(function (j) {
+      var ok = !!(j && !j.error && j.ok !== false);
+      setControlS(function (s) {
+        var n = Object.assign({}, s);
+        n[sid] = { phase: 'done', ok: ok, msg: ok ? ((j.created && j.created.existing) ? 'Уже в контроле' : 'Добавлено') : 'Не удалось' };
+        return n;
+      });
+      if (ok) setCc(j);
+      else loadCommand();
+    }).catch(function () {
+      setControlS(function (s) { var n = Object.assign({}, s); n[sid] = { phase: 'done', ok: false, msg: 'Не удалось' }; return n; });
+    });
+  }
   function controlDueLabel(it) {
     if (!it || !it.due_at) return '';
     var s = String(it.due_at || '');
@@ -15305,12 +15334,18 @@ function AGodMode() {
     return Card(e('div', null,
       eyebrow('Требует внимания'),
       rows.slice(0, 4).map(function (it, i) {
+        var canCreate = it.source !== 'owner_control';
+        var sid = attentionSignalKey(it);
+        var st = controlS[sid] || {};
         return e('div', { key: it.kind + ':' + i, style: { display: 'flex', gap: 10, padding: '9px 0', borderBottom: i < Math.min(rows.length, 4) - 1 ? '1px solid ' + t.line : 'none' } },
           e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.severity || 'warn'), marginTop: 5, flexShrink: 0 } }),
           e('div', { style: { flex: 1, minWidth: 0 } },
             e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.8, color: t.ink, lineHeight: 1.25 } }, it.title || 'Сигнал'),
             it.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.35, marginTop: 2 } }, it.detail) : null,
-            it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null));
+            it.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(it.potential_rub)) : null,
+            canCreate ? e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 } },
+              e('div', { style: { flex: 1 } }, btn(st.phase === 'running' ? '...' : (st.phase === 'done' && st.ok ? 'В контроле' : 'В контроль'), function () { createControlFromSignal(it); }, { primary: it.severity === 'high', busy: st.phase === 'running' })),
+              st.phase === 'done' ? e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 11.2, color: st.ok ? statusColor('ok') : statusColor('risk'), lineHeight: 1.25 } }, st.msg) : null) : null));
       })));
   }
   function automationStateText(s) {
