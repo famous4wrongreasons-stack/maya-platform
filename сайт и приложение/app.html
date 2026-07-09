@@ -15117,7 +15117,10 @@ function AGodMode() {
     var job = a && a.job;
     if (!job) return;
     setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'running' }; return n; });
-    gfetch('panel_job_run', { job: job, title: a.title || a.label || '', source: 'owner_os' }).then(function (j) {
+    var payload = { job: job, title: a.title || a.label || '', source: a.source || 'owner_os' };
+    if (a.source_control_id) payload.source_control_id = a.source_control_id;
+    if (a.source_signal_key) payload.source_signal_key = a.source_signal_key;
+    gfetch('panel_job_run', payload).then(function (j) {
       var msg = 'Запущено';
       if (j && j.done) {
         var sm = j.summary || {}, bits = [];
@@ -15292,6 +15295,7 @@ function AGodMode() {
       if (sm.synced != null) bits.push('обновлено ' + sm.synced);
       if (sm.granted != null) bits.push('наград ' + sm.granted);
       if (sm.alerts != null) bits.push('алертов ' + sm.alerts);
+      if (it.payload && it.payload.source_control_id) bits.push('контроль #' + it.payload.source_control_id);
       var impact = it.impact || {}, deltas = impact.deltas || {}, deltaBits = [];
       Object.keys(deltas).slice(0, 2).forEach(function (k) { deltaBits.push(k + ': ' + (deltas[k] > 0 ? '+' : '') + deltas[k]); });
       var detail = bits.join(' · ') || (it.error || it.source || '');
@@ -15329,7 +15333,7 @@ function AGodMode() {
           it.action_job ? (ast.phase === 'confirm' ? e('div', { style: { marginTop: 9, padding: '10px 12px', borderRadius: 12, background: dark ? 'rgba(255,255,255,0.045)' : 'rgba(0,0,0,0.035)', border: '1px solid ' + t.line } },
             e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.35, marginBottom: 10 } }, 'Запустить действие по контролю?'),
             e('div', { style: { display: 'flex', gap: 8 } },
-              e('div', { style: { flex: 1 } }, btn('Запустить', function () { runOwnerAction({ job: it.action_job, title: it.title, label: it.title, priority: it.status }); }, { primary: true })),
+              e('div', { style: { flex: 1 } }, btn('Запустить', function () { runOwnerAction({ job: it.action_job, title: it.title, label: it.title, priority: it.status, source: 'owner_os', source_control_id: cid, source_signal_key: it.signal_key }); }, { primary: true })),
               e('div', { style: { flex: 1 } }, btn('Отмена', function () { setActionS(function (s) { var n = Object.assign({}, s); n[it.action_job] = {}; return n; }); }, {})))) :
             e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 9 } },
               e('div', { style: { flex: 1 } }, btn(ast.phase === 'running' ? '...' : 'Запустить действие', function () { setActionS(function (s) { var n = Object.assign({}, s); n[it.action_job] = { phase: 'confirm' }; return n; }); }, { primary: !isOwnerControl, busy: ast.phase === 'running' })),

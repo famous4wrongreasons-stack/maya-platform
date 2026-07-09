@@ -2983,12 +2983,22 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
 
     action_id = None
     try:
+        journal_payload = {"label": label, "kind": kind}
+        try:
+            source_control_id = int(body.get("source_control_id") or 0)
+        except Exception:
+            source_control_id = 0
+        if source_control_id:
+            journal_payload["source_control_id"] = source_control_id
+        source_signal_key = str(body.get("source_signal_key") or "").strip()[:180]
+        if source_signal_key:
+            journal_payload["source_signal_key"] = source_signal_key
         action_id = database.create_owner_action(
             job,
             title=str(body.get("title") or label),
             source=str(body.get("source") or "panel_jobs"),
             created_by=int(tg_id) if tg_id else None,
-            payload={"label": label, "kind": kind},
+            payload=journal_payload,
         )
     except Exception as e:
         logger.warning(f"panel job journal create {job}: {e}")
