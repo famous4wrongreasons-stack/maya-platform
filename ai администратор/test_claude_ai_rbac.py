@@ -80,6 +80,7 @@ def _load_claude_ai():
     fake_owner_ai.daily_briefing = lambda: {"date": "2026-07-08", "ok": True}
     fake_owner_ai.command_center = lambda: {
         "version": "owner_command_center_v1",
+        "control_focus": {"headline": "Фокус контроля", "items": [{"title": "Контроль"}]},
         "summary": {"top_control": {"title": "Контроль"}},
         "control_queue": [{"title": "Контроль"}],
     }
@@ -184,6 +185,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         )
 
         self.assertEqual(result["version"], "owner_command_center_v1")
+        self.assertEqual(result["control_focus"]["headline"], "Фокус контроля")
         self.assertEqual(result["summary"]["top_control"]["title"], "Контроль")
         self.assertEqual(result["control_queue"][0]["title"], "Контроль")
         self.assertTrue(logs)
