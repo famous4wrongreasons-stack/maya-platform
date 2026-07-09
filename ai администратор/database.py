@@ -4274,7 +4274,9 @@ def finish_owner_action(action_id, status: str, *, summary=None, error: str = ""
 
 
 def update_owner_control_task(action_id, action: str, *, note: str = "",
-                              due_at: str | None = None) -> dict | None:
+                              due_at: str | None = None,
+                              assigned_to: str | None = None,
+                              assignee_name: str = "") -> dict | None:
     """Меняет состояние ручной контрольной задачи owner_control."""
     try:
         aid = int(action_id)
@@ -4289,6 +4291,8 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
         next_status = "pending"
     elif action in ("reopen", "open"):
         next_status = "pending"
+    elif action in ("assign", "reassign"):
+        next_status = None
     else:
         return None
 
@@ -4308,6 +4312,8 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
 
         payload = _json_loads_safe(item.get("payload_json"))
         summary = _json_loads_safe(item.get("summary_json"))
+        if next_status is None:
+            next_status = str(item.get("status") or "pending")
         summary.update({
             "manual": True,
             "last_action": action,
@@ -4316,6 +4322,17 @@ def update_owner_control_task(action_id, action: str, *, note: str = "",
         })
         completed_at = None
         result_due_at = item.get("result_due_at")
+        if action in ("assign", "reassign"):
+            raw_assigned = (assigned_to or payload.get("assigned_to") or "owner")
+            assigned = str(raw_assigned or "owner").strip().lower()[:40]
+            if assigned not in ("owner", "maya", "admin", "master", "team"):
+                assigned = "owner"
+            name = (assignee_name or "")[:80]
+            payload["assigned_to"] = assigned
+            payload["assignee_name"] = name
+            summary["assigned_to"] = assigned
+            summary["assignee_name"] = name
+            summary["assigned_at"] = now
         if next_status in ("done", "canceled"):
             completed_at = now
             summary["result"] = next_status

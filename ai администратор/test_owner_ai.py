@@ -127,6 +127,15 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
                 item["payload"]["due_at"] = item["result_due_at"]
             elif action in ("reopen", "open"):
                 item["status"] = "pending"
+            elif action in ("assign", "reassign"):
+                item["payload"]["assigned_to"] = kwargs.get("assigned_to") or item["payload"].get("assigned_to") or "owner"
+                item["payload"]["assignee_name"] = kwargs.get("assignee_name") or ""
+                item["summary"] = {
+                    "manual": True,
+                    "last_action": action,
+                    "assigned_to": item["payload"]["assigned_to"],
+                    "assignee_name": item["payload"]["assignee_name"],
+                }
             return json.loads(json.dumps(item, ensure_ascii=False))
         return None
 
@@ -453,6 +462,41 @@ class OwnerAITests(unittest.TestCase):
             item for item in center_after_complete["control_queue"]
             if item.get("action_id") == created["task_id"]
         ])
+
+    def test_owner_control_task_can_be_assigned(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить пустые окна",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="смена",
+        )
+        center = owner_ai.command_center()
+        task = [
+            row for row in center["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+        updated = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="assign",
+            assigned_to="master",
+            assignee_name="старший",
+        )
+        center_after_assign = owner_ai.command_center()
+        reassigned = [
+            row for row in center_after_assign["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        self.assertTrue(created["ok"])
+        self.assertEqual(task["assigned_to"], "admin")
+        self.assertIn("Админ", task["assigned_label"])
+        self.assertTrue(updated["ok"])
+        self.assertEqual(reassigned["assigned_to"], "master")
+        self.assertIn("Мастер", reassigned["assigned_label"])
+        self.assertIn("старший", reassigned["assigned_label"])
 
     def test_overdue_owner_control_task_is_urgent(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

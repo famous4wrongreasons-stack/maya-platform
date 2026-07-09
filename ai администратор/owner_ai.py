@@ -531,6 +531,44 @@ def _safe_control_text(value, limit: int = 240) -> str:
     return text[:limit]
 
 
+def _normalize_assignee(value: str | None = None) -> str:
+    raw = str(value or "").strip().lower()
+    aliases = {
+        "owner": "owner",
+        "владелец": "owner",
+        "стас": "owner",
+        "maya": "maya",
+        "майя": "maya",
+        "system": "maya",
+        "система": "maya",
+        "admin": "admin",
+        "administrator": "admin",
+        "админ": "admin",
+        "администратор": "admin",
+        "manager": "admin",
+        "мастер": "master",
+        "master": "master",
+        "barber": "master",
+        "team": "team",
+        "команда": "team",
+        "персонал": "team",
+    }
+    return aliases.get(raw, "owner")
+
+
+def _assignee_label(assigned_to: str | None = None, assignee_name: str | None = "") -> str:
+    assigned_to = _normalize_assignee(assigned_to)
+    name = _safe_control_text(assignee_name, 80)
+    base = {
+        "owner": "Владелец",
+        "maya": "MAYA",
+        "admin": "Админ",
+        "master": "Мастер",
+        "team": "Команда",
+    }.get(assigned_to, "Владелец")
+    return "%s · %s" % (base, name) if name else base
+
+
 def _normalize_control_due_at(due_at: str | None = None, due_in_days=None) -> str:
     raw = str(due_at or "").strip()
     if raw:
@@ -567,6 +605,9 @@ def _control_item_from_owner_action(task: dict | None) -> dict:
         "signal_kind": payload.get("signal_kind"),
         "signal_source": payload.get("signal_source"),
         "action_job": payload.get("action_job"),
+        "assigned_to": payload.get("assigned_to") or "owner",
+        "assignee_name": payload.get("assignee_name") or "",
+        "assigned_label": _assignee_label(payload.get("assigned_to"), payload.get("assignee_name")),
         "linked_action_id": payload.get("linked_action_id") or summary.get("linked_action_id"),
         "linked_action_job": payload.get("linked_action_job") or summary.get("linked_action_job"),
         "linked_action_status": payload.get("linked_action_status") or summary.get("linked_action_status"),
@@ -580,6 +621,7 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
                         potential_rub=None, owner_next_step: str = "",
                         signal_key: str = "", signal_kind: str = "",
                         signal_source: str = "", action_job: str = "",
+                        assigned_to: str = "owner", assignee_name: str = "",
                         created_by=None) -> dict:
     """Создаёт ручную контрольную задачу AI-директора без ПД и автодействий."""
     title = _safe_control_text(title, 140)
@@ -594,6 +636,8 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
     signal_kind = _safe_control_text(signal_kind, 80)
     signal_source = _safe_control_text(signal_source, 80)
     action_job = _safe_control_text(action_job, 80)
+    assigned_to = _normalize_assignee(assigned_to)
+    assignee_name = _safe_control_text(assignee_name, 80)
     try:
         potential = _rub(potential_rub) if potential_rub is not None else None
     except Exception:
@@ -609,6 +653,9 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
         "signal_kind": signal_kind,
         "signal_source": signal_source,
         "action_job": action_job,
+        "assigned_to": assigned_to,
+        "assignee_name": assignee_name,
+        "assigned_label": _assignee_label(assigned_to, assignee_name),
     }
     try:
         import database
@@ -652,14 +699,15 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
 
 
 def update_control_task(*, task_id, action: str, note: str = "",
-                        due_at: str | None = None, due_in_days=None) -> dict:
+                        due_at: str | None = None, due_in_days=None,
+                        assigned_to: str = "", assignee_name: str = "") -> dict:
     """Обновляет ручную контрольную задачу: done/cancel/postpone/reopen."""
     try:
         action_id = int(task_id)
     except Exception:
         return {"ok": False, "error": "bad_task_id"}
     action = str(action or "").strip().lower()
-    if action not in ("complete", "done", "finish", "cancel", "canceled", "cancelled", "postpone", "snooze", "delay", "reopen", "open"):
+    if action not in ("complete", "done", "finish", "cancel", "canceled", "cancelled", "postpone", "snooze", "delay", "reopen", "open", "assign", "reassign"):
         return {"ok": False, "error": "bad_action"}
     safe_note = _safe_control_text(note, 420)
     normalized_due_at = None
@@ -672,6 +720,8 @@ def update_control_task(*, task_id, action: str, note: str = "",
             action,
             note=safe_note,
             due_at=normalized_due_at,
+            assigned_to=_normalize_assignee(assigned_to) if assigned_to else None,
+            assignee_name=_safe_control_text(assignee_name, 80),
         )
     except Exception as e:
         logger.error("owner_ai update_control_task: %s", e)
@@ -853,7 +903,9 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             linked_action_updated_at: str | None = None,
             linked_action_evaluated_at: str | None = None,
             linked_action_impact_status: str | None = None,
-            linked_action_impact_message: str | None = None) -> None:
+            linked_action_impact_message: str | None = None,
+            assigned_to: str | None = None,
+            assignee_name: str | None = "") -> None:
         key = (key or title or "control").strip()[:120]
         if not key or key in seen:
             return
@@ -871,6 +923,9 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
             "action_job": action_job,
             "action_id": action_id,
             "signal_key": signal_key,
+            "assigned_to": _normalize_assignee(assigned_to),
+            "assignee_name": _safe_control_text(assignee_name, 80),
+            "assigned_label": _assignee_label(assigned_to, assignee_name),
             "linked_action_id": linked_action_id,
             "linked_action_job": linked_action_job,
             "linked_action_status": linked_action_status,
@@ -986,6 +1041,8 @@ def _control_queue(*, risks: list[dict], actions: list[dict], journal: list[dict
                 action_job=payload.get("action_job"),
                 action_id=it.get("id"),
                 signal_key=payload.get("signal_key"),
+                assigned_to=payload.get("assigned_to") or "owner",
+                assignee_name=payload.get("assignee_name") or "",
                 owner_next_step=owner_next_step,
                 linked_action_id=linked_action_id,
                 linked_action_job=linked_action_job,
@@ -1175,7 +1232,9 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             linked_action_id=None, linked_action_status: str | None = None,
             linked_action_evaluated_at: str | None = None,
             focus_reason: str | None = None, focus_label: str | None = None,
-            due_state: str | None = None) -> None:
+            due_state: str | None = None,
+            assigned_to: str | None = None,
+            assignee_name: str | None = "") -> None:
         if not key or key in seen or len(steps) >= 3:
             return
         if action_job and ("job:%s" % action_job) in seen and source != "control_focus":
@@ -1210,6 +1269,9 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             "focus_reason": focus_reason,
             "focus_label": focus_label,
             "due_state": due_state,
+            "assigned_to": _normalize_assignee(assigned_to),
+            "assignee_name": _safe_control_text(assignee_name, 80),
+            "assigned_label": _assignee_label(assigned_to, assignee_name),
         })
 
     for item in (control_focus.get("items") or [])[:1]:
@@ -1243,6 +1305,8 @@ def _execution_plan(*, control_focus: dict | None, plan: dict | None,
             focus_reason=reason,
             focus_label=item.get("focus_label"),
             due_state=item.get("due_state"),
+            assigned_to=item.get("assigned_to") or "owner",
+            assignee_name=item.get("assignee_name") or "",
         )
 
     gap = _rub(plan.get("gap_rub"))
@@ -1386,13 +1450,6 @@ def _task_center(*, control: list[dict], journal: list[dict],
         "system": 6,
     }
 
-    def assigned_label(value: str) -> str:
-        return {
-            "owner": "Владелец",
-            "maya": "MAYA",
-            "system": "Система",
-        }.get(value or "", "Владелец")
-
     def normalize_lane(*, due_state: str | None = None,
                        linked_status: str | None = None,
                        linked_evaluated_at: str | None = None,
@@ -1429,6 +1486,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             action_card: dict | None = None, control_action_id=None,
             linked_action_id=None, linked_action_status: str | None = None,
             linked_action_evaluated_at: str | None = None,
+            assignee_name: str | None = "",
             pinned: bool = False) -> None:
         key = (key or title or "task").strip()[:140]
         if not key or key in seen:
@@ -1450,8 +1508,9 @@ def _task_center(*, control: list[dict], journal: list[dict],
             "lane_label": lane_label.get(lane, "Задача"),
             "status": status or "medium",
             "source": source,
-            "assigned_to": assigned_to,
-            "assigned_label": assigned_label(assigned_to),
+            "assigned_to": _normalize_assignee(assigned_to),
+            "assignee_name": _safe_control_text(assignee_name, 80),
+            "assigned_label": _assignee_label(assigned_to, assignee_name),
             "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
             "owner_next_step": owner_next_step or "",
             "due_at": due_at,
@@ -1480,7 +1539,6 @@ def _task_center(*, control: list[dict], journal: list[dict],
             lane=lane,
             status=step.get("status") or "medium",
             source="execution_plan",
-            assigned_to="owner",
             potential_rub=step.get("potential_rub"),
             owner_next_step=step.get("owner_next_step") or "",
             due_state=step.get("due_state"),
@@ -1490,6 +1548,8 @@ def _task_center(*, control: list[dict], journal: list[dict],
             linked_action_id=step.get("linked_action_id"),
             linked_action_status=step.get("linked_action_status"),
             linked_action_evaluated_at=step.get("linked_action_evaluated_at"),
+            assigned_to=step.get("assigned_to") or "owner",
+            assignee_name=step.get("assignee_name") or "",
             pinned=True,
         )
 
@@ -1502,7 +1562,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             status=item.get("status"),
         )
         source = item.get("source") or "maya"
-        assignee = "system" if source == "system" else "owner"
+        assignee = item.get("assigned_to") or ("system" if source == "system" else "owner")
         add(
             task_key("control", item),
             item.get("title") or "Контроль",
@@ -1511,6 +1571,7 @@ def _task_center(*, control: list[dict], journal: list[dict],
             status=item.get("status") or "medium",
             source=source,
             assigned_to=assignee,
+            assignee_name=item.get("assignee_name") or "",
             potential_rub=item.get("potential_rub"),
             owner_next_step=item.get("owner_next_step") or "",
             due_at=item.get("due_at"),

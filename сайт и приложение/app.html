@@ -15160,12 +15160,13 @@ function AGodMode() {
     var m = String(it.key || '').match(/^owner_control:(\d+)/);
     return m ? parseInt(m[1], 10) : null;
   }
-  function updateControlTask(it, action) {
+  function updateControlTask(it, action, extra) {
     var id = controlTaskId(it);
     if (!id || !action) return;
     setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: action }; return n; });
     var payload = { task_id: id, action: action };
     if (action === 'postpone') payload.due_in_days = 1;
+    if (extra) payload = Object.assign(payload, extra);
     gfetch('panel_control_update', payload).then(function (j) {
       setControlS(function (s) {
         var n = Object.assign({}, s);
@@ -15177,6 +15178,19 @@ function AGodMode() {
     }).catch(function () {
       setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось' }; return n; });
     });
+  }
+  function assignControlTask(it) {
+    var id = controlTaskId(it);
+    if (!id) return;
+    setModal({ title: 'Назначить задачу', fields: [
+      { key: 'assigned_to', label: 'Кому: owner / maya / admin / master / team', value: it.assigned_to || 'admin' },
+      { key: 'assignee_name', label: 'Уточнение: имя или роль', value: it.assignee_name || '' }
+    ], submit: function (v) {
+      updateControlTask({ action_id: id }, 'assign', {
+        assigned_to: String(v.assigned_to || 'owner').trim().toLowerCase(),
+        assignee_name: String(v.assignee_name || '').trim()
+      });
+    } });
   }
   function attentionSignalKey(it) {
     it = it || {};
@@ -15461,6 +15475,9 @@ function AGodMode() {
           }
         }
         if (cid && buttons.length < 3) {
+          buttons.push(e('div', { key: 'assign' }, btn(cs.phase === 'assign' ? '...' : 'Кому', function () { assignControlTask(step); }, { busy: cs.phase === 'assign' })));
+        }
+        if (cid && buttons.length < 3) {
           buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));
         }
         if (cid && buttons.length < 3) {
@@ -15472,6 +15489,7 @@ function AGodMode() {
             e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
               e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, step.title || 'Шаг'),
               step.focus_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.3, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor(step.status || 'warn'), whiteSpace: 'nowrap' } }, step.focus_label) : null),
+            step.assigned_label ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: t.dim, marginTop: 4 } }, step.assigned_label) : null,
             step.detail ? e('div', { style: { fontFamily: BODY, fontSize: 11.4, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, step.detail) : null,
             step.owner_next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.1, color: t.dim, lineHeight: 1.35, marginTop: 4 } }, step.owner_next_step) : null,
             step.potential_rub != null ? e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: t.accent, marginTop: 4 } }, money(step.potential_rub)) : null,
@@ -15529,6 +15547,9 @@ function AGodMode() {
           } else {
             buttons.push(e('div', { key: 'run' }, btn(ast.phase === 'running' ? '...' : 'В работу', function () { setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'confirm' }; return n; }); }, { primary: it.status === 'high' || it.lane === 'overdue', busy: ast.phase === 'running' })));
           }
+        }
+        if (cid && buttons.length < 3) {
+          buttons.push(e('div', { key: 'assign' }, btn(cs.phase === 'assign' ? '...' : 'Кому', function () { assignControlTask(it); }, { busy: cs.phase === 'assign' })));
         }
         if (cid && buttons.length < 3) {
           buttons.push(e('div', { key: 'done' }, btn(cs.phase === 'complete' ? '...' : 'Готово', function () { updateControlTask({ action_id: cid }, 'complete'); }, { primary: buttons.length === 0, busy: cs.phase === 'complete' })));

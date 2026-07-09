@@ -2461,7 +2461,7 @@ async def panel_control_update_handler(request: web.Request) -> web.Response:
     except Exception:
         task_id = 0
     action = str(body.get("action") or "").strip().lower()
-    if not task_id or action not in ("complete", "cancel", "postpone", "reopen"):
+    if not task_id or action not in ("complete", "cancel", "postpone", "reopen", "assign"):
         return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
     try:
         updated = await asyncio.to_thread(
@@ -2471,6 +2471,8 @@ async def panel_control_update_handler(request: web.Request) -> web.Response:
             note=body.get("note") or "",
             due_at=body.get("due_at"),
             due_in_days=body.get("due_in_days"),
+            assigned_to=body.get("assigned_to") or "",
+            assignee_name=body.get("assignee_name") or "",
         )
         if not updated.get("ok"):
             status = 404 if updated.get("error") == "not_found" else 400
@@ -2515,6 +2517,8 @@ async def panel_control_create_handler(request: web.Request) -> web.Response:
             signal_kind=body.get("signal_kind") or "",
             signal_source=body.get("signal_source") or "",
             action_job=body.get("action_job") or "",
+            assigned_to=body.get("assigned_to") or "owner",
+            assignee_name=body.get("assignee_name") or "",
             created_by=tg_id,
         )
         if not created.get("ok"):

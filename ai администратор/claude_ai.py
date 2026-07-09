@@ -614,6 +614,12 @@ TOOLS = [
                 "due_in_days": {"type": "integer", "description": "Через сколько дней проверить, если дата относительная."},
                 "potential_rub": {"type": "number", "description": "Потенциал или сумма на кону в рублях, если есть."},
                 "owner_next_step": {"type": "string", "description": "Следующий управленческий шаг владельца."},
+                "assigned_to": {
+                    "type": "string",
+                    "enum": ["owner", "maya", "admin", "master", "team"],
+                    "description": "Кому назначить задачу: владелец, MAYA, админ, мастер или команда.",
+                },
+                "assignee_name": {"type": "string", "description": "Уточнение исполнителя без персональных данных, если владелец назвал роль/имя."},
             },
             "required": ["title"],
         },
@@ -622,7 +628,7 @@ TOOLS = [
         "name": "update_owner_control_task",
         "description": (
             "ТОЛЬКО для владельца. Обновить ручную контрольную задачу Owner Command Center: "
-            "отметить выполненной, отменить, отложить, вернуть в работу. Используй только "
+            "отметить выполненной, отменить, отложить, назначить исполнителя, вернуть в работу. Используй только "
             "когда владелец явно ссылается на существующую задачу и просит «выполнено / "
             "закрой / отмени / отложи / перенеси / верни в работу». Если непонятно, какую "
             "задачу менять, сначала уточни. Не используй для action-card рассылок."
@@ -631,10 +637,16 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "task_id": {"type": "integer", "description": "ID задачи из журнала/Command Center."},
-                "action": {"type": "string", "enum": ["complete", "cancel", "postpone", "reopen"], "description": "Что сделать с задачей."},
+                "action": {"type": "string", "enum": ["complete", "cancel", "postpone", "reopen", "assign"], "description": "Что сделать с задачей."},
                 "note": {"type": "string", "description": "Короткая заметка владельца без персональных данных."},
                 "due_at": {"type": "string", "description": "Новый ISO-дедлайн при postpone, если есть конкретная дата."},
                 "due_in_days": {"type": "integer", "description": "На сколько дней отложить при postpone."},
+                "assigned_to": {
+                    "type": "string",
+                    "enum": ["owner", "maya", "admin", "master", "team"],
+                    "description": "Новый исполнитель при assign.",
+                },
+                "assignee_name": {"type": "string", "description": "Уточнение исполнителя при assign."},
             },
             "required": ["task_id", "action"],
         },
@@ -1845,6 +1857,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     due_in_days=tool_input.get("due_in_days"),
                     potential_rub=tool_input.get("potential_rub"),
                     owner_next_step=tool_input.get("owner_next_step") or "",
+                    assigned_to=tool_input.get("assigned_to") or "owner",
+                    assignee_name=tool_input.get("assignee_name") or "",
                     created_by=user_id,
                 )
         elif tool_name == "update_owner_control_task":
@@ -1858,6 +1872,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     note=tool_input.get("note") or "",
                     due_at=tool_input.get("due_at"),
                     due_in_days=tool_input.get("due_in_days"),
+                    assigned_to=tool_input.get("assigned_to") or "",
+                    assignee_name=tool_input.get("assignee_name") or "",
                 )
         elif tool_name == "salon_action":
             # Только ПРЕДЛОЖИТЬ (валидируем задачу) — рассылка НЕ запускается тут.
@@ -2198,8 +2214,8 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "конкретикой из них, а не общими словами:\n"
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / журнал AI-директора / статус OS / что делать дальше / какие задачи / что просрочено» → get_owner_command_center.\n"
-                    "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать» → create_owner_control_task.\n"
-                    "• «выполнено / закрой задачу / отмени / отложи / перенеси / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
+                    "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
+                    "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
                     "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
