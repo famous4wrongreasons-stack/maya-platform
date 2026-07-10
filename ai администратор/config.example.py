@@ -183,6 +183,10 @@ REMINDER_MINUTES_BEFORE = 120
 # произнести: "4.9 (более 300 отзывов)".
 SALON_RATING_YANDEX = _opt("SALON_RATING_YANDEX", "")
 SALON_RATING_2GIS = _opt("SALON_RATING_2GIS", "")
+# 2ГИС Places API: официальная автоматическая синхронизация рейтинга и количества.
+# API не отдаёт тексты отзывов; они импортируются отдельно из разрешённого источника.
+TWOGIS_API_KEY = _opt("TWOGIS_API_KEY", "")
+TWOGIS_BRANCH_ID = _opt("TWOGIS_BRANCH_ID", "70000001038177627")
 
 # ── Шифрование ПД (152-ФЗ, Fernet) ────────────────────────────────────────────
 # ВНИМАНИЕ: смена этого ключа делает уже зашифрованные ПД нечитаемыми.
@@ -202,3 +206,7 @@ MASTERS_AI_PROVIDER = "openai"              # "claude" | "openai"
 MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # legacy/fallback
 MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", OPENAI_CHAT_MODEL)
 MASTERS_AI_TIMEOUT = 5.0
+
+# Персональный план мастера отправляется в это вечернее окно на следующий день.
+# Scheduler работает каждые 10 минут и не повторяет уже доставленный план.
+MASTER_DAY_BRIEF_SEND_HOUR = int(float(_opt("MASTER_DAY_BRIEF_SEND_HOUR", "19") or "19"))

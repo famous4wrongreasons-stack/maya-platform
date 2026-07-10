@@ -417,6 +417,22 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_review_requests_client
                 ON review_requests (client_id);
 
+            -- Публичные отзывы с внешних площадок. Имена авторов не сохраняем;
+            -- текст перед записью обезличивает reputation.py.
+            CREATE TABLE IF NOT EXISTS external_reviews (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                source          TEXT    NOT NULL,
+                external_id     TEXT    NOT NULL,
+                rating          REAL,
+                review_text     TEXT,
+                published_at    TEXT,
+                imported_at     TEXT    NOT NULL,
+                response_state  TEXT    NOT NULL DEFAULT '',
+                UNIQUE (source, external_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
+                ON external_reviews (source, published_at);
+
             -- Состояние «текущего открытого диалога» клиента с ботом.
             -- Нужно для алерта о зависшей заявке: если клиент писал,
             -- Антон отвечал, а 30 мин спустя нет ни записи, ни явного отказа —
@@ -2902,6 +2918,78 @@ def list_recent_reviews(limit: int = 40, days: int = 180) -> list[dict]:
             (cutoff, int(limit)),
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+def _external_reviews_ensure(conn):
+    """Ленивая миграция для production-БД, созданной до reputation v1."""
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS external_reviews (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            source          TEXT    NOT NULL,
+            external_id     TEXT    NOT NULL,
+            rating          REAL,
+            review_text     TEXT,
+            published_at    TEXT,
+            imported_at     TEXT    NOT NULL,
+            response_state  TEXT    NOT NULL DEFAULT '',
+            UNIQUE (source, external_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
+            ON external_reviews (source, published_at);
+    """)
+
+
+def upsert_external_review(
+    *,
+    source: str,
+    external_id: str,
+    rating: float | None,
+    review_text: str,
+    published_at: str = "",
+    response_state: str = "",
+) -> dict:
+    """Идемпотентно сохраняет обезличенный публичный отзыв без автора."""
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        conn.execute(
+            "INSERT INTO external_reviews "
+            "(source, external_id, rating, review_text, published_at, imported_at, response_state) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(source, external_id) DO UPDATE SET "
+            "rating=excluded.rating, review_text=excluded.review_text, "
+            "published_at=excluded.published_at, imported_at=excluded.imported_at, "
+            "response_state=excluded.response_state",
+            (
+                str(source or "")[:24],
+                str(external_id or "")[:160],
+                rating,
+                str(review_text or "")[:4000],
+                str(published_at or "")[:32],
+                _now(),
+                str(response_state or "")[:32],
+            ),
+        )
+        row = conn.execute(
+            "SELECT * FROM external_reviews WHERE source = ? AND external_id = ?",
+            (str(source or "")[:24], str(external_id or "")[:160]),
+        ).fetchone()
+        return dict(row) if row else {}
+
+
+def list_external_reviews(days: int = 365, limit: int = 300) -> list[dict]:
+    cutoff = (datetime.now() - timedelta(days=max(1, int(days or 365)))).isoformat(
+        timespec="seconds"
+    )
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        rows = conn.execute(
+            "SELECT source, external_id, rating, review_text, published_at, imported_at, response_state "
+            "FROM external_reviews "
+            "WHERE COALESCE(NULLIF(published_at, ''), imported_at) >= ? "
+            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) DESC LIMIT ?",
+            (cutoff, max(1, min(int(limit or 300), 1000))),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
 
 # ─── Алерт админу о зависшей заявке ──────────────────────────────

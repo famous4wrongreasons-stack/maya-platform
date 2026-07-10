@@ -47,9 +47,11 @@ import config
 import cutmatch
 import database
 import lead_alerts
+import master_briefing
 import masters_ai
 import memory
 import owner_ai
+import reputation
 import subscriptions
 import web_auth
 import yukassa_api
@@ -3488,7 +3490,75 @@ async def panel_reviews_handler(request: web.Request) -> web.Response:
             "date": (it.get("responded_at") or it.get("visit_closed_at") or "")[:10],
             "master": names.get(it.get("staff_id"), ""),
         })
-    return _cabinet_response({"days": days, "summary": summary, "items": out})
+    try:
+        external = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=False)
+    except Exception as e:
+        logger.error(f"panel external reputation: {e}")
+        external = {"status": "warn", "summary": {}, "sources": [], "text_analysis": {}}
+    return _cabinet_response({
+        "days": days,
+        "summary": summary,
+        "items": out,
+        "external_reputation": external,
+    })
+
+
+async def panel_external_reviews_import_handler(request: web.Request) -> web.Response:
+    """Owner-only разрешённый импорт отзывов/снимка рейтинга с карт."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Импорт внешних отзывов доступен только владельцу.",
+        }, status=403)
+    source = str(body.get("source") or "").strip().lower()
+    imported = await asyncio.to_thread(
+        reputation.import_reviews,
+        source,
+        body.get("reviews") or [],
+    )
+    if not imported.get("ok"):
+        return _cabinet_response(imported, status=400)
+    source_snapshot = None
+    if body.get("rating") is not None or body.get("reviews_count") is not None:
+        source_snapshot = await asyncio.to_thread(
+            reputation.save_source_snapshot,
+            source,
+            rating=body.get("rating"),
+            reviews_count=body.get("reviews_count"),
+            observed_at=body.get("observed_at") or "",
+            origin="owner_authorized_import",
+        )
+    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=False)
+    return _cabinet_response({
+        "ok": True,
+        "import": imported,
+        "source_snapshot": source_snapshot,
+        "reputation": snapshot,
+    })
+
+
+async def panel_reputation_refresh_handler(request: web.Request) -> web.Response:
+    """Owner-only обновление официальной статистики подключённых площадок."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") != "owner":
+        return _cabinet_response({"error": "forbidden"}, status=403)
+    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=True)
+    return _cabinet_response({"ok": True, "reputation": snapshot})
 
 
 async def broadcast_send_to_base(bot, text: str) -> dict:
@@ -8199,6 +8269,296 @@ _SHIFT_REMINDER_OFFSETS = (60, 30)
 _SHIFT_REMINDERS_SENT: set[tuple[int, str, int]] = set()
 
 
+def _master_day_brief_send_hour() -> int:
+    raw = os.environ.get(
+        "MASTER_DAY_BRIEF_SEND_HOUR",
+        str(getattr(config, "MASTER_DAY_BRIEF_SEND_HOUR", 19)),
+    )
+    try:
+        return max(0, min(23, int(raw)))
+    except (TypeError, ValueError):
+        return 19
+
+
+async def _collect_master_day_forecasts(
+    target_date: str,
+    *,
+    only_staff_id: int | None = None,
+) -> list[dict]:
+    """Собирает персональные планы без отправки сообщений."""
+    try:
+        parsed_date = date.fromisoformat(str(target_date)[:10]).isoformat()
+    except Exception:
+        return []
+    try:
+        masters = list(database.list_masters())
+    except Exception as e:
+        logger.error(f"master day brief: list_masters failed: {e}")
+        return []
+    try:
+        from business_rules import OWNER_STAFF_ID, salary_percent
+    except Exception:
+        OWNER_STAFF_ID = 0
+
+        def salary_percent(_staff_id):
+            return 0.5
+
+    forecasts = []
+    for master in masters:
+        staff_id = _master_staff_id(master)
+        if not staff_id or int(staff_id) == int(OWNER_STAFF_ID or 0):
+            continue
+        if only_staff_id and int(staff_id) != int(only_staff_id):
+            continue
+        try:
+            records = await asyncio.to_thread(
+                _yc.get_records_for_master,
+                int(staff_id),
+                parsed_date,
+                parsed_date,
+            )
+        except Exception as e:
+            logger.error(f"master day brief: records staff={staff_id}: {e}")
+            continue
+        client_ids = set()
+        for record in records or []:
+            client = record.get("client") if isinstance(record, dict) else {}
+            try:
+                client_id = int((client or {}).get("id") or 0)
+            except (TypeError, ValueError):
+                client_id = 0
+            if client_id:
+                client_ids.add(client_id)
+        history_sem = asyncio.Semaphore(4)
+
+        async def _load_history(client_id: int) -> tuple[int, list[dict]]:
+            try:
+                async with history_sem:
+                    return client_id, await _fetch_client_history(client_id)
+            except Exception as e:
+                logger.info(f"master day brief: history client={client_id}: {e}")
+                return client_id, []
+
+        history_rows = await asyncio.gather(*(
+            _load_history(client_id) for client_id in sorted(client_ids)
+        ))
+        histories = dict(history_rows)
+        try:
+            catalog = await asyncio.to_thread(_yc.get_services, int(staff_id))
+        except Exception as e:
+            logger.info(f"master day brief: catalog staff={staff_id}: {e}")
+            catalog = []
+        forecast = master_briefing.build_day_forecast(
+            staff_id=int(staff_id),
+            master_name=(
+                master.get("full_name")
+                or master.get("name")
+                or f"Мастер #{staff_id}"
+            ),
+            target_date=parsed_date,
+            records=records or [],
+            histories_by_client=histories,
+            salary_percent=salary_percent(int(staff_id)),
+            service_catalog=catalog or [],
+        )
+        forecast["delivery_master"] = master
+        forecasts.append(forecast)
+    return forecasts
+
+
+async def _send_master_day_briefs_once(
+    app: Application,
+    *,
+    now: datetime | None = None,
+    target_date: str | None = None,
+    only_staff_id: int | None = None,
+    force: bool = False,
+) -> dict:
+    """Отправляет каждому мастеру один персональный план на следующий день."""
+    now = now or datetime.now()
+    date_s = target_date or master_briefing.scheduled_brief_date(
+        now,
+        send_hour=_master_day_brief_send_hour(),
+    )
+    if not date_s:
+        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
+    forecasts = await _collect_master_day_forecasts(
+        date_s,
+        only_staff_id=only_staff_id,
+    )
+    sent = 0
+    skipped = 0
+    deliveries = []
+    for forecast in forecasts:
+        staff_id = int(forecast.get("staff_id") or 0)
+        master = forecast.pop("delivery_master", {})
+        if not forecast.get("records_count"):
+            skipped += 1
+            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "no_records"})
+            continue
+        delivery_key = f"master_day_brief_delivery:{date_s}:{staff_id}"
+        try:
+            delivery_state = _json.loads(database.get_setting(delivery_key) or "{}")
+            if not isinstance(delivery_state, dict):
+                delivery_state = {}
+        except Exception:
+            delivery_state = {}
+        chat_id = master.get("telegram_chat_id")
+        has_telegram = bool(
+            chat_id and not database.is_master_muted(int(chat_id))
+        )
+        try:
+            has_push = bool(
+                WEBPUSH_VAPID_PRIVATE_KEY
+                and _push_subscriptions_for_master(master)
+            )
+        except Exception as e:
+            logger.error(f"master day brief push lookup staff={staff_id}: {e}")
+            has_push = False
+        telegram_done = bool(delivery_state.get("telegram"))
+        push_done = bool(delivery_state.get("push"))
+        delivery_complete = master_briefing.delivery_is_complete(
+            delivery_state,
+            has_telegram=has_telegram,
+            has_push=has_push,
+        )
+        if not force and delivery_complete:
+            skipped += 1
+            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_sent"})
+            continue
+        message = master_briefing.render_master_day_message(forecast)
+        push_body = master_briefing.render_master_day_push(forecast)
+        telegram_sent = False
+        if has_telegram and (force or not telegram_done):
+            try:
+                await app.bot.send_message(chat_id=int(chat_id), text=message)
+                telegram_sent = True
+            except Exception as e:
+                logger.error(f"master day brief Telegram staff={staff_id}: {e}")
+        push_sent = 0
+        if has_push and (force or not push_done):
+            try:
+                push_sent = await _send_master_push(
+                    master,
+                    title="MAYA · план на завтра",
+                    body=push_body,
+                    url="/app/?panel=schedule",
+                    tag=f"master-day-plan-{staff_id}-{date_s}",
+                    data={
+                        "event": "master.day_plan",
+                        "date": date_s,
+                        "staff_id": staff_id,
+                    },
+                )
+            except Exception as e:
+                logger.error(f"master day brief push staff={staff_id}: {e}")
+        telegram_done = telegram_done or telegram_sent
+        push_done = push_done or bool(push_sent)
+        delivery_complete = master_briefing.delivery_is_complete(
+            {"telegram": telegram_done, "push": push_done},
+            has_telegram=has_telegram,
+            has_push=has_push,
+        )
+        if telegram_done or push_done:
+            database.set_setting(
+                delivery_key,
+                _json.dumps({
+                    "telegram": telegram_done,
+                    "push": push_done,
+                    "updated_at": now.isoformat(timespec="seconds"),
+                }, ensure_ascii=False),
+            )
+        if telegram_sent or push_sent:
+            sent += 1
+            if delivery_complete:
+                database.set_setting(
+                    f"master_day_brief_sent:{date_s}:{staff_id}",
+                    now.isoformat(timespec="seconds"),
+                )
+            database.set_setting(
+                f"master_day_brief_last:{staff_id}",
+                _json.dumps({
+                    "date": date_s,
+                    "sent_at": now.isoformat(timespec="seconds"),
+                    "records_count": forecast.get("records_count"),
+                    "booked_revenue_rub": forecast.get("booked_revenue_rub"),
+                    "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
+                    "opportunities_count": forecast.get("opportunities_count"),
+                }, ensure_ascii=False),
+            )
+            deliveries.append({
+                "staff_id": staff_id,
+                "state": "sent" if delivery_complete else "partial",
+                "telegram": telegram_done,
+                "push": push_done,
+                "new_telegram": telegram_sent,
+                "new_push": int(push_sent or 0),
+            })
+        elif telegram_done or push_done:
+            deliveries.append({
+                "staff_id": staff_id,
+                "state": "partial",
+                "telegram": telegram_done,
+                "push": push_done,
+            })
+        else:
+            deliveries.append({"staff_id": staff_id, "state": "failed", "reason": "no_delivery_channel"})
+    return {
+        "ok": True,
+        "date": date_s,
+        "sent": sent,
+        "skipped_count": skipped,
+        "forecast_count": len(forecasts),
+        "deliveries": deliveries,
+    }
+
+
+async def panel_master_day_brief_handler(request: web.Request) -> web.Response:
+    """Owner-only preview/send персонального плана мастера."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Планы мастеров доступны только владельцу.",
+        }, status=403)
+    target_date = str(
+        body.get("date")
+        or (date.today() + timedelta(days=1)).isoformat()
+    )[:10]
+    try:
+        date.fromisoformat(target_date)
+    except Exception:
+        return _cabinet_response({"error": "bad_date"}, status=400)
+    try:
+        staff_id = int(body.get("staff_id") or 0) or None
+    except (TypeError, ValueError):
+        return _cabinet_response({"error": "bad_staff_id"}, status=400)
+    if body.get("send"):
+        result = await _send_master_day_briefs_once(
+            request.app["bot_app"],
+            target_date=target_date,
+            only_staff_id=staff_id,
+            force=bool(body.get("force")),
+        )
+        return _cabinet_response(result)
+    forecasts = await _collect_master_day_forecasts(target_date, only_staff_id=staff_id)
+    for forecast in forecasts:
+        forecast.pop("delivery_master", None)
+    return _cabinet_response({
+        "ok": True,
+        "mode": "preview",
+        "date": target_date,
+        "forecasts": forecasts,
+    })
+
+
 def _parse_work_start(value: Any, day: date) -> datetime | None:
     if not value:
         return None
@@ -8313,6 +8673,42 @@ async def master_shift_reminder_loop(app: Application):
         except Exception as e:
             logger.error(f"shift reminder loop: {e}")
         await asyncio.sleep(300)
+
+
+async def master_day_brief_loop(app: Application):
+    """Вечером готовит и лично доставляет планы мастерам на следующий день."""
+    await asyncio.sleep(75)
+    while True:
+        try:
+            result = await _send_master_day_briefs_once(app)
+            if result and not result.get("skipped"):
+                logger.info(
+                    "master day brief: date=%s sent=%s skipped=%s",
+                    result.get("date"),
+                    result.get("sent"),
+                    result.get("skipped_count"),
+                )
+        except Exception as e:
+            logger.error(f"master day brief loop: {e}")
+        await asyncio.sleep(600)
+
+
+async def client_retention_refresh_loop(app: Application):
+    """Обновляет тяжёлый когортный снимок отдельно от запросов Command Center."""
+    await asyncio.sleep(120)
+    while True:
+        try:
+            result = await asyncio.to_thread(owner_ai.client_retention, force=True)
+            summary = (result or {}).get("summary") or {}
+            logger.info(
+                "client retention refreshed: cohort=%s returned=%s forward=%s%%",
+                summary.get("previous_cohort_clients"),
+                summary.get("returned_clients"),
+                summary.get("forward_booking_pct"),
+            )
+        except Exception as e:
+            logger.error(f"client retention refresh loop: {e}")
+        await asyncio.sleep(21600)
 
 
 async def waitlist_admin_alert_loop(app: Application):
@@ -9908,6 +10304,12 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/job/run", panel_options_handler)
     web_app.router.add_post("/api/panel/reviews", panel_reviews_handler)
     web_app.router.add_options("/api/panel/reviews", panel_options_handler)
+    web_app.router.add_post("/api/panel/external_reviews/import", panel_external_reviews_import_handler)
+    web_app.router.add_options("/api/panel/external_reviews/import", panel_options_handler)
+    web_app.router.add_post("/api/panel/reputation/refresh", panel_reputation_refresh_handler)
+    web_app.router.add_options("/api/panel/reputation/refresh", panel_options_handler)
+    web_app.router.add_post("/api/panel/master_day_brief", panel_master_day_brief_handler)
+    web_app.router.add_options("/api/panel/master_day_brief", panel_options_handler)
     web_app.router.add_post("/api/panel/broadcast", panel_broadcast_handler)
     web_app.router.add_options("/api/panel/broadcast", panel_options_handler)
     web_app.router.add_post("/api/panel/team", panel_team_handler)
@@ -9986,6 +10388,8 @@ async def start_webhook_server(bot_app: Application):
     await site.start()
     globals()["_WEBHOOK_RUNNER"] = runner
     globals()["_WEBHOOK_SITE"] = site
+    asyncio.create_task(master_day_brief_loop(bot_app))
+    asyncio.create_task(client_retention_refresh_loop(bot_app))
     asyncio.create_task(master_shift_reminder_loop(bot_app))
     asyncio.create_task(waitlist_admin_alert_loop(bot_app))
     asyncio.create_task(maya_operating_rhythm_loop(bot_app))

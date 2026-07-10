@@ -3,6 +3,7 @@ import json
 import sys
 import types
 import unittest
+from datetime import date, timedelta
 
 
 def _load_owner_ai(*, reactivation_payload: dict | None):
@@ -282,6 +283,8 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(brief["control_focus"]["items"])
         self.assertEqual(brief["control_focus"]["summary"]["focus_count"], len(brief["control_focus"]["items"]))
         self.assertTrue(brief["control_queue"])
+        self.assertEqual(brief["owner_advisor"]["version"], "maya_owner_advisor_v1")
+        self.assertEqual(len(brief["owner_advisor"]["dimensions"]), 6)
         self.assertIn("оценка", brief["note"].lower())
 
     def test_command_center_builds_stable_owner_os_contract(self):
@@ -306,6 +309,8 @@ class OwnerAITests(unittest.TestCase):
                 "kpi_scorecard",
                 "financial_director",
                 "business_goals",
+                "owner_advisor",
+                "reputation",
                 "decision_memory",
                 "operating_rhythm",
                 "plan_fact",
@@ -362,6 +367,10 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("month_goal_progress_pct", center["summary"])
         self.assertIn("month_goal_gap_rub", center["summary"])
         self.assertIn("daily_load_pct", center["summary"])
+        self.assertIn("owner_advisor_score", center["summary"])
+        self.assertIn("owner_advisor_attention_count", center["summary"])
+        self.assertIn("maps_sources_connected", center["summary"])
+        self.assertIn("retention_90d_pct", center["summary"])
         self.assertIn("decision_memory_count", center["summary"])
         self.assertIn("open_decisions_count", center["summary"])
         self.assertIn("unverified_results_count", center["summary"])
@@ -391,6 +400,15 @@ class OwnerAITests(unittest.TestCase):
             center["business_goals"]["summary"]["goals_count"],
             len(center["business_goals"]["goals"]),
         )
+        self.assertEqual(center["owner_advisor"]["version"], "maya_owner_advisor_v1")
+        self.assertEqual(center["owner_advisor"]["mode"], "evidence_based_advice")
+        advisor_keys = {row["key"] for row in center["owner_advisor"]["dimensions"]}
+        self.assertEqual(
+            {"revenue", "load", "avg_check", "bookings", "retention", "quality"},
+            advisor_keys,
+        )
+        self.assertEqual(center["reputation"]["version"], "maya_reputation_v1")
+        self.assertEqual(center["client_retention"]["version"], "maya_client_retention_v1")
         self.assertEqual(center["decision_memory"]["version"], "maya_os_v5_decision_memory")
         self.assertEqual(center["decision_memory"]["mode"], "operating_memory")
         self.assertIn(center["decision_memory"]["status"], {"ok", "warn", "risk"})
@@ -939,6 +957,48 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(perf["top_gross_master"]["name"], "Мастер 1")
         self.assertEqual(perf["profit_after_salary_total_rub"], 38000)
         self.assertIn("общие расходы", perf["note"])
+
+    def test_client_retention_uses_previous_cohort_and_future_booking(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        today = date.today()
+        rows = [
+            {
+                "client": {"id": 1},
+                "datetime": (today - timedelta(days=120)).isoformat(),
+                "attendance": 1,
+            },
+            {
+                "client": {"id": 2},
+                "datetime": (today - timedelta(days=110)).isoformat(),
+                "attendance": 1,
+            },
+            {
+                "client": {"id": 1},
+                "datetime": (today - timedelta(days=20)).isoformat(),
+                "attendance": 1,
+            },
+            {
+                "client": {"id": 1},
+                "datetime": (today + timedelta(days=10)).isoformat(),
+                "attendance": 0,
+            },
+        ]
+        owner_ai._retention_cache.update(val=None, ts=0.0)
+        fake_yclients = sys.modules["yclients"]
+        fake_yclients.YClientsAPI.get_company_records = lambda self, start, end: rows
+
+        result = owner_ai.client_retention(force=True)
+
+        self.assertEqual(result["summary"]["previous_cohort_clients"], 2)
+        self.assertEqual(result["summary"]["returned_clients"], 1)
+        self.assertEqual(result["summary"]["retention_90d_pct"], 50)
+        self.assertEqual(result["summary"]["forward_booking_pct"], 100)
+        self.assertEqual(result["snapshot_state"], "fresh")
+        self.assertEqual(result["data_source"], "yclients_records")
+
+        owner_ai._retention_cache.update(val=None, ts=0.0)
+        cached = owner_ai.client_retention()
+        self.assertEqual(cached["summary"], result["summary"])
 
     def test_expiring_assets_counts_only_sold_certificates(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

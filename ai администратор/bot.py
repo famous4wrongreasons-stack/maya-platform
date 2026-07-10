@@ -6700,6 +6700,18 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
     if parts:
         lines.append(f"📈 За неделю: {', '.join(parts)}.")
 
+    advisor = brief.get("owner_advisor") or {}
+    advisor_items = advisor.get("top_advice") or []
+    if advisor_items:
+        lines += ["", "Совет владельцу по цифрам:"]
+        for i, item in enumerate(advisor_items[:3], 1):
+            evidence = str(item.get("evidence") or "").strip()
+            recommendation = str(item.get("recommendation") or "").strip()
+            money = f" Потенциал: ~{_m(item['potential_rub'])} ₽." if item.get("potential_rub") else ""
+            lines.append(
+                f"{i}. {item.get('title')}: {evidence} {recommendation}{money}".strip()
+            )
+
     execution = brief.get("execution_plan") or {}
     execution_steps = execution.get("steps") or []
     if execution_steps:
@@ -6743,7 +6755,12 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
 
     text = "\n".join(lines).strip()
     top = brief.get("top_priority") or {}
-    if execution_steps and execution.get("status") in ("risk", "warn"):
+    if advisor_items and advisor.get("status") in ("risk", "warn"):
+        first = advisor_items[0]
+        push_body = f"{booked} записей сегодня. Совет: {first.get('title')} — {first.get('recommendation')}"
+        if len(push_body) > 180:
+            push_body = push_body[:179].rstrip() + "…"
+    elif execution_steps and execution.get("status") in ("risk", "warn"):
         push_body = f"{booked} записей сегодня. План: {execution_steps[0].get('title') or execution.get('headline')}."
     elif focus_items and focus.get("status") in ("risk", "warn"):
         push_body = f"{booked} записей сегодня. Фокус: {focus.get('headline') or focus_items[0].get('title')}."

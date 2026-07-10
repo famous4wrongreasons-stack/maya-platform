@@ -32,6 +32,8 @@ _VISITS_PER_SHIFT = 8
 _avg_cache = {"val": None, "ts": 0.0}
 _AVG_TTL = 600.0
 _summary30_cache = {"val": None, "ts": 0.0}
+_retention_cache = {"val": None, "ts": 0.0}
+_RETENTION_SETTING = "owner_client_retention_snapshot_v1"
 
 _ACTION_LIBRARY = {
     "reactivation": {
@@ -449,6 +451,173 @@ def return_candidates() -> dict:
                        "%s. Потенциал возврата — ОЦЕНКА ~%d%% при персональном касании, не факт."
                        % (at or "?", int(_RETURN_RATE * 100)))
     return out
+
+
+def _stored_client_retention() -> dict | None:
+    """Последний обезличенный снимок удержания для быстрого Command Center."""
+    try:
+        import database
+        raw = database.get_setting(_RETENTION_SETTING)
+        payload = json.loads(raw) if raw else None
+        if isinstance(payload, dict) and payload.get("version") == "maya_client_retention_v1":
+            return payload
+    except Exception as e:
+        logger.error("owner_ai stored client_retention: %s", e)
+    return None
+
+
+def client_retention(*, force: bool = False) -> dict:
+    """Когортное удержание и будущая запись без клиентских ПД.
+
+    Обычный вызов мгновенно возвращает сохранённый снимок. Полная выгрузка
+    YClients запускается только фоновым циклом или явным ``force=True``.
+    """
+    now = time.time()
+    if not force and _retention_cache["val"] is not None and now - _retention_cache["ts"] < 900:
+        return _retention_cache["val"]
+    stored = _stored_client_retention()
+    if not force:
+        if stored is not None:
+            _retention_cache.update(val=stored, ts=now)
+            return stored
+        pending = _fallback_client_retention()
+        pending.update(
+            snapshot_state="pending",
+            next_step="MAYA уже готовит первый когортный снимок удержания из YClients.",
+            note="Первичный расчёт выполняется в фоне и не блокирует Command Center.",
+        )
+        _retention_cache.update(val=pending, ts=now)
+        return pending
+    today = date.today()
+    previous_from = today - timedelta(days=179)
+    previous_to = today - timedelta(days=90)
+    current_from = today - timedelta(days=89)
+    recent_from = today - timedelta(days=59)
+    future_to = today + timedelta(days=60)
+    try:
+        from yclients import YClientsAPI
+        records = YClientsAPI().get_company_records(
+            previous_from.isoformat(),
+            future_to.isoformat(),
+        ) or []
+    except Exception as e:
+        logger.error("owner_ai client_retention: %s", e)
+        records = []
+    if not records and stored is not None:
+        preserved = dict(stored)
+        preserved["snapshot_state"] = "stale"
+        preserved["refresh_error"] = "YClients временно не вернул данные; сохранён последний успешный снимок."
+        _retention_cache.update(val=preserved, ts=now)
+        return preserved
+
+    previous_clients = set()
+    current_clients = set()
+    recent_clients = set()
+    future_clients = set()
+    current_visits = {}
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        client = record.get("client") or {}
+        try:
+            client_id = int(client.get("id") or record.get("client_id") or 0)
+        except (TypeError, ValueError):
+            client_id = 0
+        if not client_id:
+            continue
+        raw_date = str(record.get("datetime") or record.get("date") or "")[:10]
+        try:
+            visit_date = date.fromisoformat(raw_date)
+        except Exception:
+            continue
+        attendance = record.get("attendance")
+        if attendance == 1:
+            if previous_from <= visit_date <= previous_to:
+                previous_clients.add(client_id)
+            if current_from <= visit_date <= today:
+                current_clients.add(client_id)
+                current_visits[client_id] = current_visits.get(client_id, 0) + 1
+            if recent_from <= visit_date <= today:
+                recent_clients.add(client_id)
+        elif visit_date > today and attendance != -1 and not record.get("deleted") and not record.get("is_deleted"):
+            future_clients.add(client_id)
+
+    returned = previous_clients & current_clients
+    retained_pct = round(len(returned) * 100 / len(previous_clients)) if previous_clients else None
+    repeat_clients = {client_id for client_id, visits in current_visits.items() if visits >= 2}
+    repeat_share = round(len(repeat_clients) * 100 / len(current_clients)) if current_clients else None
+    forward_booked = recent_clients & future_clients
+    forward_booking_pct = round(len(forward_booked) * 100 / len(recent_clients)) if recent_clients else None
+    churn_candidates = previous_clients - current_clients
+    status = "warn"
+    if retained_pct is not None:
+        status = "risk" if retained_pct < 40 else ("warn" if retained_pct < 60 else "ok")
+    if forward_booking_pct is not None and forward_booking_pct < 25:
+        status = _command_status(status, "warn")
+    result = {
+        "version": "maya_client_retention_v1",
+        "status": status,
+        "period": {
+            "previous_from": previous_from.isoformat(),
+            "previous_to": previous_to.isoformat(),
+            "current_from": current_from.isoformat(),
+            "current_to": today.isoformat(),
+            "future_to": future_to.isoformat(),
+        },
+        "summary": {
+            "previous_cohort_clients": len(previous_clients),
+            "returned_clients": len(returned),
+            "retention_90d_pct": retained_pct,
+            "current_clients": len(current_clients),
+            "repeat_clients": len(repeat_clients),
+            "repeat_client_share_pct": repeat_share,
+            "recent_clients_60d": len(recent_clients),
+            "future_booked_clients": len(forward_booked),
+            "forward_booking_pct": forward_booking_pct,
+            "churn_candidates": len(churn_candidates),
+            "data_complete": bool(previous_clients or current_clients),
+        },
+        "next_step": (
+            "Поднять долю следующей записи до ухода клиента и вернуть когорту без повторного визита."
+            if status != "ok" else "Удержание в рабочем диапазоне; контролировать следующую запись и качество."
+        ),
+        "note": (
+            "Retention 90d = доля клиентов предыдущего 90-дневного окна, вернувшихся "
+            "в текущем окне. Forward booking = доля недавних клиентов с будущей записью."
+        ),
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "snapshot_state": "fresh",
+        "data_source": "yclients_records",
+    }
+    try:
+        import database
+        database.set_setting(_RETENTION_SETTING, json.dumps(result, ensure_ascii=False))
+    except Exception as e:
+        logger.error("owner_ai save client_retention: %s", e)
+    _retention_cache.update(val=result, ts=now)
+    return result
+
+
+def _fallback_client_retention() -> dict:
+    return {
+        "version": "maya_client_retention_v1",
+        "status": "warn",
+        "summary": {
+            "previous_cohort_clients": 0,
+            "returned_clients": 0,
+            "retention_90d_pct": None,
+            "current_clients": 0,
+            "repeat_clients": 0,
+            "repeat_client_share_pct": None,
+            "recent_clients_60d": 0,
+            "future_booked_clients": 0,
+            "forward_booking_pct": None,
+            "churn_candidates": 0,
+            "data_complete": False,
+        },
+        "next_step": "Повторить расчёт удержания после восстановления данных YClients.",
+        "note": "Когортный расчёт временно недоступен.",
+    }
 
 
 def service_insights() -> dict:
@@ -2904,6 +3073,249 @@ def _business_goals(*, snap: dict, plan: dict, masters: dict,
     }
 
 
+def _owner_business_advisor(
+    *,
+    snap: dict,
+    plan: dict,
+    business_goals: dict,
+    ret: dict,
+    retention: dict,
+    reputation_payload: dict,
+    internal_reviews: dict,
+) -> dict:
+    """Шесть доказательных советов владельцу без свободной арифметики LLM."""
+    goals = {
+        row.get("key"): row
+        for row in (business_goals.get("goals") or [])
+        if isinstance(row, dict) and row.get("key")
+    }
+    dimensions = []
+
+    def add(
+        key: str,
+        title: str,
+        status: str,
+        *,
+        metrics: dict,
+        evidence: str,
+        recommendation: str,
+        potential_rub=None,
+    ) -> None:
+        dimensions.append({
+            "key": key,
+            "title": title,
+            "status": status if status in ("ok", "warn", "risk") else "warn",
+            "metrics": metrics,
+            "evidence": evidence,
+            "recommendation": recommendation,
+            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+        })
+
+    daily = goals.get("daily_revenue") or {}
+    month = goals.get("month_gross") or {}
+    revenue_status = _command_status(daily.get("status"), month.get("status"))
+    revenue_gap = min(0, int(daily.get("gap_value") or 0))
+    month_gap = min(0, int(month.get("gap_value") or 0))
+    add(
+        "revenue",
+        "Выручка",
+        revenue_status,
+        metrics={
+            "daily_actual_rub": _rub(daily.get("actual_value")),
+            "daily_target_rub": _rub(daily.get("target_value")),
+            "daily_gap_rub": int(daily.get("gap_value") or 0),
+            "month_projected_rub": _rub(month.get("actual_value")),
+            "month_target_rub": _rub(month.get("target_value")),
+            "month_gap_rub": int(month.get("gap_value") or 0),
+        },
+        evidence=(
+            "План дня выполнен на %s%%; прогноз месяца — %s%%."
+            % (daily.get("progress_pct") or 0, month.get("progress_pct") or 0)
+        ),
+        recommendation=(
+            daily.get("owner_next_step")
+            or month.get("owner_next_step")
+            or "Держать текущий темп и сверить фактические оплаты."
+        ),
+        potential_rub=abs(revenue_gap) + abs(month_gap),
+    )
+
+    load = goals.get("daily_load") or {}
+    free_capacity = _rub(snap.get("free_capacity_today"))
+    add(
+        "load",
+        "Загрузка",
+        load.get("status") or "warn",
+        metrics={
+            "load_pct": _rub(load.get("actual_value")),
+            "target_pct": _rub(load.get("target_value")),
+            "free_capacity_visits": free_capacity,
+            "working_masters": _rub(snap.get("working_masters")),
+        },
+        evidence=(
+            "Занято %s%% доступной ёмкости; свободно около %s визит(а/ов)."
+            % (_m(load.get("actual_value")), _m(free_capacity))
+        ),
+        recommendation=(
+            load.get("owner_next_step")
+            or "Поручить админу закрыть ближайшие свободные окна."
+        ),
+        potential_rub=free_capacity * _rub(snap.get("avg_check_rub")),
+    )
+
+    avg_check = goals.get("avg_check") or {}
+    avg_gap = int(avg_check.get("actual_value") or 0) - int(avg_check.get("target_value") or 0)
+    add(
+        "avg_check",
+        "Средний чек",
+        avg_check.get("status") or "ok",
+        metrics={
+            "actual_rub": _rub(avg_check.get("actual_value")),
+            "target_rub": _rub(avg_check.get("target_value")),
+            "gap_rub": avg_gap,
+        },
+        evidence=(
+            "Средний чек %s ₽ против цели %s ₽."
+            % (_m(avg_check.get("actual_value")), _m(avg_check.get("target_value")))
+        ),
+        recommendation=(
+            avg_check.get("owner_next_step")
+            or "Проверить исторические допродажи и долю комплексных услуг."
+        ),
+        potential_rub=(abs(avg_gap) * _rub(snap.get("booked_today")) if avg_gap < 0 else 0),
+    )
+
+    booked = _rub(snap.get("booked_today"))
+    booking_status = "risk" if not booked and _rub(snap.get("working_masters")) else (
+        "warn" if free_capacity else "ok"
+    )
+    trend = snap.get("week_trend") if isinstance(snap.get("week_trend"), dict) else {}
+    gross_trend = (trend.get("metrics") or {}).get("gross") if isinstance(trend.get("metrics"), dict) else {}
+    if not gross_trend and isinstance(trend.get("gross"), dict):
+        gross_trend = trend.get("gross")
+    add(
+        "bookings",
+        "Записи",
+        booking_status,
+        metrics={
+            "booked_today": booked,
+            "free_capacity_visits": free_capacity,
+            "week_revenue_delta_pct": (gross_trend or {}).get("delta_pct"),
+        },
+        evidence=(
+            "На сегодня %s записей; незаполненная ёмкость — %s."
+            % (_m(booked), _m(free_capacity))
+        ),
+        recommendation=(
+            "Сначала заполнить самые близкие окна тёплой базой и листом ожидания."
+            if free_capacity else "Контролировать переносы, отмены и подтверждение визитов."
+        ),
+        potential_rub=free_capacity * _rub(snap.get("avg_check_rub")),
+    )
+
+    sleeping = ret.get("count")
+    sleeping_known = sleeping is not None
+    sleeping_count = _rub(sleeping) if sleeping_known else None
+    retention_summary = retention.get("summary") or {}
+    retention_status = retention.get("status") or "warn"
+    add(
+        "retention",
+        "Удержание клиентов",
+        retention_status,
+        metrics={
+            "retention_90d_pct": retention_summary.get("retention_90d_pct"),
+            "repeat_client_share_pct": retention_summary.get("repeat_client_share_pct"),
+            "forward_booking_pct": retention_summary.get("forward_booking_pct"),
+            "churn_candidates": _rub(retention_summary.get("churn_candidates")),
+            "sleeping_clients_28_56d": sleeping_count,
+            "return_potential_rub": ret.get("potential_return_revenue_rub"),
+        },
+        evidence=(
+            "Retention 90 дней: %s; будущая запись: %s; к возврату: %s."
+            % (
+                (str(retention_summary.get("retention_90d_pct")) + "%")
+                if retention_summary.get("retention_90d_pct") is not None else "нет базы",
+                (str(retention_summary.get("forward_booking_pct")) + "%")
+                if retention_summary.get("forward_booking_pct") is not None else "нет базы",
+                _m(sleeping_count) if sleeping_known else "ещё не пересчитано",
+            )
+        ),
+        recommendation=(
+            retention.get("next_step")
+            or "Поднять долю следующей записи и вернуть клиентов без повторного визита."
+        ),
+        potential_rub=ret.get("potential_return_revenue_rub"),
+    )
+
+    internal_avg = internal_reviews.get("avg_rating")
+    internal_count = _rub(internal_reviews.get("total_rated"))
+    reputation_summary = reputation_payload.get("summary") or {}
+    external_avg = reputation_summary.get("overall_rating")
+    external_negative = _rub(reputation_summary.get("negative_reviews_count"))
+    quality_status = reputation_payload.get("status") or "warn"
+    if internal_avg is not None:
+        if float(internal_avg) < 4.2:
+            quality_status = "risk"
+        elif float(internal_avg) < 4.7 and quality_status == "ok":
+            quality_status = "warn"
+    quality_recommendation = (reputation_payload.get("recommendations") or [
+        "Собрать больше оценок и разобрать причины низких отзывов."
+    ])[0]
+    add(
+        "quality",
+        "Качество и отзывы",
+        quality_status,
+        metrics={
+            "internal_rating_90d": round(float(internal_avg), 2) if internal_avg is not None else None,
+            "internal_reviews_90d": internal_count,
+            "maps_rating": external_avg,
+            "maps_negative_reviews": external_negative,
+            "maps_sources_connected": _rub(reputation_summary.get("rated_sources_count")),
+            "text_analysis_status": reputation_summary.get("text_analysis_status"),
+        },
+        evidence=(
+            "Внутренний рейтинг: %s (%s оценок); карты: %s."
+            % (
+                round(float(internal_avg), 2) if internal_avg is not None else "нет данных",
+                _m(internal_count),
+                external_avg if external_avg is not None else "источник ещё не подключён",
+            )
+        ),
+        recommendation=quality_recommendation,
+    )
+
+    dimensions.sort(key=lambda item: (
+        -_severity_rank(item.get("status")),
+        item.get("potential_rub") is None,
+        -_rub(item.get("potential_rub")),
+        item.get("title") or "",
+    ))
+    attention = [item for item in dimensions if item.get("status") != "ok"]
+    risk_count = len([item for item in dimensions if item.get("status") == "risk"])
+    score = max(0, 100 - risk_count * 18 - (len(attention) - risk_count) * 8)
+    status = "risk" if risk_count else ("warn" if attention else "ok")
+    return {
+        "version": "maya_owner_advisor_v1",
+        "mode": "evidence_based_advice",
+        "status": status,
+        "headline": (
+            "Есть управленческие разрывы" if status == "risk"
+            else ("Есть точки роста" if status == "warn" else "Ключевые показатели под контролем")
+        ),
+        "summary": {
+            "score": score,
+            "dimensions_count": len(dimensions),
+            "attention_count": len(attention),
+            "risk_count": risk_count,
+            "top_priority_key": dimensions[0].get("key") if dimensions else None,
+            "money_opportunity_rub": sum(_rub(item.get("potential_rub")) for item in attention),
+        },
+        "dimensions": dimensions,
+        "top_advice": dimensions[:3],
+        "note": "Каждый совет содержит метрику, доказательство и конкретный следующий шаг.",
+    }
+
+
 def _decision_memory(*, journal: list[dict], control: list[dict],
                      business_goals: dict, now_iso: str) -> dict:
     """Операционная память: решения, открытые петли и выводы по результатам."""
@@ -4099,11 +4511,18 @@ def command_center() -> dict:
     snap, snap_err = _safe_owner_block("business_snapshot", business_snapshot, _fallback_snapshot)
     exp, exp_err = _safe_owner_block("expiring_assets", expiring_assets, _fallback_assets)
     ret, ret_err = _safe_owner_block("return_candidates", return_candidates, _fallback_return_candidates)
+    retention, retention_err = _safe_owner_block(
+        "client_retention", client_retention, _fallback_client_retention
+    )
     svc, svc_err = _safe_owner_block("service_insights", service_insights, _fallback_services)
     plan, plan_err = _safe_owner_block("plan_fact", lambda: plan_fact(snap=snap), _fallback_plan_fact)
     masters, masters_err = _safe_owner_block("master_performance", master_performance, _fallback_master_performance)
 
-    errors = [e for e in (snap_err, exp_err, ret_err, svc_err, plan_err, masters_err) if e]
+    errors = [
+        e for e in (
+            snap_err, exp_err, ret_err, retention_err, svc_err, plan_err, masters_err
+        ) if e
+    ]
     try:
         opps = money_opportunities(snap=snap, exp=exp, ret=ret)
     except Exception as e:
@@ -4157,7 +4576,8 @@ def command_center() -> dict:
     client_status = _command_status(
         "warn" if ret.get("count") else "ok",
         "warn" if exp.get("subscriptions_expiring_7d") else "ok",
-        "warn" if ret_err or exp_err else "ok",
+        retention.get("status"),
+        "warn" if ret_err or retention_err or exp_err else "ok",
     )
     service_status = _command_status(
         "warn" if (svc.get("weak_services") or []) else "ok",
@@ -4282,6 +4702,39 @@ def command_center() -> dict:
         ret=ret,
         finance=financial_director,
     )
+    try:
+        import reputation
+        reputation_payload = reputation.reputation_snapshot(force_refresh=False)
+    except Exception as e:
+        logger.error("owner_ai command_center reputation: %s", e)
+        reputation_payload = {
+            "version": "maya_reputation_v1",
+            "status": "warn",
+            "headline": "Репутационный источник временно недоступен",
+            "summary": {
+                "overall_rating": None,
+                "rated_sources_count": 0,
+                "text_reviews_count": 0,
+                "negative_reviews_count": 0,
+                "text_analysis_status": "unavailable",
+            },
+            "sources": [],
+            "recommendations": ["Проверить подключение источников отзывов."],
+        }
+    try:
+        import database
+        internal_reviews = database.review_stats(days=90)
+    except Exception:
+        internal_reviews = {"avg_rating": None, "total_rated": 0}
+    owner_advisor = _owner_business_advisor(
+        snap=snap,
+        plan=plan,
+        business_goals=business_goals,
+        ret=ret,
+        retention=retention,
+        reputation_payload=reputation_payload,
+        internal_reviews=internal_reviews,
+    )
     decision_memory = _decision_memory(
         journal=journal,
         control=control,
@@ -4312,6 +4765,7 @@ def command_center() -> dict:
         automation_queue.get("status"),
         kpi_scorecard.get("status"),
         business_goals.get("status"),
+        owner_advisor.get("status"),
         decision_memory.get("status"),
         operating_rhythm.get("status"),
         autonomous_director.get("status"),
@@ -4394,6 +4848,22 @@ def command_center() -> dict:
             "note": business_goals.get("next_step"),
         },
         {
+            "key": "owner_advisor",
+            "title": "Советник владельца",
+            "status": owner_advisor.get("status"),
+            "summary": owner_advisor.get("summary") or {},
+            "items": owner_advisor.get("dimensions") or [],
+            "note": owner_advisor.get("note"),
+        },
+        {
+            "key": "reputation",
+            "title": "Репутация",
+            "status": reputation_payload.get("status"),
+            "summary": reputation_payload.get("summary") or {},
+            "items": reputation_payload.get("sources") or [],
+            "note": reputation_payload.get("headline"),
+        },
+        {
             "key": "decision_memory",
             "title": "Память решений",
             "status": decision_memory.get("status"),
@@ -4469,6 +4939,10 @@ def command_center() -> dict:
             "summary": {
                 "sleeping_clients": ret.get("count"),
                 "sleeping_potential_rub": ret.get("potential_return_revenue_rub"),
+                "retention_90d_pct": (retention.get("summary") or {}).get("retention_90d_pct"),
+                "repeat_client_share_pct": (retention.get("summary") or {}).get("repeat_client_share_pct"),
+                "forward_booking_pct": (retention.get("summary") or {}).get("forward_booking_pct"),
+                "churn_candidates": (retention.get("summary") or {}).get("churn_candidates", 0),
                 "subscriptions_expiring_7d": _rub(exp.get("subscriptions_expiring_7d")),
                 "subscriptions_active": _rub(exp.get("subscriptions_active")),
                 "gift_certs_active_count": _rub(exp.get("gift_certs_active_count")),
@@ -4476,6 +4950,7 @@ def command_center() -> dict:
             },
             "items": [
                 {"key": "return_candidates", "data": ret},
+                {"key": "client_retention", "data": retention},
                 {"key": "expiring_assets", "data": exp},
             ],
         },
@@ -4604,6 +5079,14 @@ def command_center() -> dict:
             "month_goal_progress_pct": (business_goals.get("summary") or {}).get("month_goal_progress_pct"),
             "month_goal_gap_rub": (business_goals.get("summary") or {}).get("month_goal_gap_rub", 0),
             "daily_load_pct": (business_goals.get("summary") or {}).get("daily_load_pct", 0),
+            "owner_advisor_score": (owner_advisor.get("summary") or {}).get("score", 0),
+            "owner_advisor_attention_count": (owner_advisor.get("summary") or {}).get("attention_count", 0),
+            "owner_advisor_top_priority": (owner_advisor.get("summary") or {}).get("top_priority_key"),
+            "maps_rating": (reputation_payload.get("summary") or {}).get("overall_rating"),
+            "maps_sources_connected": (reputation_payload.get("summary") or {}).get("rated_sources_count", 0),
+            "external_reviews_analyzed": (reputation_payload.get("summary") or {}).get("text_reviews_count", 0),
+            "retention_90d_pct": (retention.get("summary") or {}).get("retention_90d_pct"),
+            "forward_booking_pct": (retention.get("summary") or {}).get("forward_booking_pct"),
             "decision_memory_count": (decision_memory.get("summary") or {}).get("items_count", 0),
             "open_decisions_count": (decision_memory.get("summary") or {}).get("open_decisions_count", 0),
             "unverified_results_count": (decision_memory.get("summary") or {}).get("unverified_results_count", 0),
@@ -4620,6 +5103,8 @@ def command_center() -> dict:
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
         "business_goals": business_goals,
+        "owner_advisor": owner_advisor,
+        "reputation": reputation_payload,
         "decision_memory": decision_memory,
         "operating_rhythm": operating_rhythm,
         "approval_matrix": approval,
@@ -4628,6 +5113,7 @@ def command_center() -> dict:
         "opportunities": opps,
         "plan_fact": plan,
         "master_performance": masters,
+        "client_retention": retention,
         "risks": risks,
         "next_best_actions": actions,
         "execution_plan": execution_plan,
@@ -4834,6 +5320,14 @@ def daily_briefing() -> dict:
         execution_plan=execution_plan,
         now_iso=now_iso,
     )
+    try:
+        center = command_center()
+        owner_advisor = center.get("owner_advisor") or {}
+        reputation_payload = center.get("reputation") or {}
+    except Exception as e:
+        logger.error("owner_ai daily_briefing advisor: %s", e)
+        owner_advisor = {}
+        reputation_payload = {}
     return {
         "date": snap["date"],
         "today": {
@@ -4856,5 +5350,7 @@ def daily_briefing() -> dict:
         "control_focus": control_focus,
         "control_queue": control,
         "top_action": top_action,
+        "owner_advisor": owner_advisor,
+        "reputation": reputation_payload,
         "note": snap["note"],
     }

@@ -15489,6 +15489,68 @@ function AGodMode(props) {
       }),
       goals.next_step ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.35, marginTop: 8 } }, goals.next_step) : null));
   }
+  function renderOwnerAdvisor(advisor) {
+    advisor = advisor || {};
+    var sm = advisor.summary || {};
+    var rows = advisor.dimensions || [];
+    if (!rows.length) return null;
+    return Card(e('div', null,
+      eyebrow('Советник владельца'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(advisor.status || 'warn'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, advisor.headline || 'Рекомендации по цифрам'),
+          e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, 'Метрика · причина · следующий шаг'))),
+      grid2([
+        kpiCell(String(sm.score == null ? '—' : sm.score), 'Score'),
+        kpiCell(String(sm.attention_count || 0), 'Точки роста'),
+        kpiCell(String(sm.risk_count || 0), 'Риски'),
+        kpiCell(money(sm.money_opportunity_rub || 0), 'Потенциал')
+      ]),
+      rows.slice(0, 6).map(function (it, i) {
+        return e('div', { key: it.key || i, style: { padding: '10px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 9, alignItems: 'flex-start' } },
+            e('div', { style: { width: 8, height: 8, borderRadius: 999, background: statusColor(it.status || 'warn'), marginTop: 5, flexShrink: 0 } }),
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink, lineHeight: 1.25 } }, it.title || 'Показатель'),
+                it.potential_rub ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, color: t.accent, whiteSpace: 'nowrap' } }, money(it.potential_rub)) : null),
+              it.evidence ? e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, it.evidence) : null,
+              it.recommendation ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.4, marginTop: 4 } }, it.recommendation) : null)));
+      })));
+  }
+  function renderReputation(rep) {
+    rep = rep || {};
+    var sm = rep.summary || {};
+    var rows = rep.sources || [];
+    return Card(e('div', null,
+      eyebrow('Репутация'),
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 } },
+        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(rep.status || 'warn'), marginTop: 4, flexShrink: 0 } }),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13.5, color: t.ink, lineHeight: 1.25 } }, rep.headline || 'Репутационный контур'),
+          e('div', { style: { fontFamily: BODY, fontSize: 11.3, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, sm.text_analysis_status === 'ready' ? 'Тексты отзывов анализируются' : 'Ожидается разрешённый поток текстов'))),
+      grid2([
+        kpiCell(sm.overall_rating == null ? '—' : Number(sm.overall_rating).toFixed(2), 'Рейтинг карт'),
+        kpiCell(String(sm.rated_sources_count || 0), 'Источники'),
+        kpiCell(String(sm.text_reviews_count || 0), 'Проанализировано'),
+        kpiCell(String(sm.negative_reviews_count || 0), 'Негатив')
+      ]),
+      rows.map(function (it, i) {
+        var conn = it.connection === 'official_api' ? 'API' : (it.connection === 'not_configured' ? 'не подключён' : (it.connection || 'снимок'));
+        return e('div', { key: it.key || i, style: { padding: '9px 0', borderTop: '1px solid ' + t.line } },
+          e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+            e('div', { style: { flex: 1, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink } }, it.title || it.key),
+            e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, color: it.rating == null ? t.faint : t.accent } }, it.rating == null ? '—' : Number(it.rating).toFixed(2))),
+          e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.faint, lineHeight: 1.35, marginTop: 3 } }, [
+            it.reviews_count == null ? '' : ('отзывов ' + it.reviews_count),
+            'тексты ' + (it.text_reviews_imported || 0),
+            conn
+          ].filter(Boolean).join(' · ')));
+      }),
+      (rep.recommendations || []).length ? e('div', { style: { fontFamily: BODY, fontSize: 11.2, color: t.dim, lineHeight: 1.4, marginTop: 8 } }, rep.recommendations[0]) : null));
+  }
+
   function renderDecisionMemory(memory) {
     memory = memory || {};
     var sm = memory.summary || {};
@@ -15781,6 +15843,8 @@ function AGodMode(props) {
     var autopilotSupervisor = cc.autopilot_supervisor || {};
     var executionLoop = cc.execution_loop || {};
     var businessGoals = cc.business_goals || {};
+    var ownerAdvisor = cc.owner_advisor || {};
+    var reputation = cc.reputation || {};
     var decisionMemory = cc.decision_memory || {};
     var operatingRhythm = cc.operating_rhythm || {};
     var kpiScorecard = cc.kpi_scorecard || {};
@@ -15800,6 +15864,8 @@ function AGodMode(props) {
         kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
       ]),
       renderBusinessGoals(businessGoals),
+      renderOwnerAdvisor(ownerAdvisor),
+      renderReputation(reputation),
       renderDecisionMemory(decisionMemory),
       renderOperatingRhythm(operatingRhythm),
       renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),

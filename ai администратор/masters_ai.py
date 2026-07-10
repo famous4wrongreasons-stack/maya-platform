@@ -517,7 +517,8 @@ async def generate_upsell_advice(
 # ─────────────────────────────────────────────────────────────────────────
 
 _MP_ADDON_KW = ("бород", "тонирован", "окантов", "гладкое бритье", "spa", "спа",
-                "массаж", "патчи", "эпиляц", "скраб", "маск", "уход за кож")
+                "массаж", "патчи", "эпиляц", "скраб", "маск", "уход за кож",
+                "камуфляж", "воск", "восков")
 _MP_PRIO_KW = ("бород", "тонирован")
 _MP_MAIN_KW = ("стрижка", "фейд", "бритье головы", "детск")
 
@@ -534,38 +535,139 @@ def _mp_parse_date(s):
         return None
 
 
-def _mp_pick_addon(current_titles: set[str]) -> tuple[str | None, int]:
-    """Самая уместная допуслуга с ценой (борода/тонирование в приоритете)."""
+def _mp_service_key(title: str) -> str:
+    return " ".join(str(title or "").strip().lower().replace("ё", "е").split())
+
+
+def _mp_service_price(service: dict) -> int:
+    for key in ("price_min", "cost", "price", "price_max", "first_cost"):
+        try:
+            value = round(float(service.get(key) or 0))
+        except (TypeError, ValueError):
+            value = 0
+        if value > 0:
+            return value
+    return 0
+
+
+def _mp_current_blocks_addon(addon_title: str, current_titles: set[str]) -> bool:
+    """True, если услуга уже заказана или неявно входит в текущую услугу."""
+    addon_key = _mp_service_key(addon_title)
+    today = " ".join(sorted(_mp_service_key(title) for title in current_titles if title))
+    if not addon_key:
+        return True
+    if addon_key in current_titles:
+        return True
+    if any(addon_key == title or addon_key in title or title in addon_key
+           for title in current_titles if len(title) >= 5):
+        return True
+
+    # Одинаковая каноническая услуга с чуть разным названием.
+    for _canonical, patterns in _SERVICE_KEYWORDS:
+        if any(_re.search(pattern, addon_key, _re.IGNORECASE) for pattern in patterns):
+            if any(_re.search(pattern, today, _re.IGNORECASE) for pattern in patterns):
+                return True
+
+    # Например, окантовка уже входит в заказанную стрижку.
+    for parent_key, implied_patterns in _IMPLIED_BY_SERVICE.items():
+        if not _re.search(parent_key, today, _re.IGNORECASE):
+            continue
+        if any(_re.search(pattern, addon_key, _re.IGNORECASE)
+               for pattern in implied_patterns):
+            return True
+    return False
+
+
+def historical_addon_opportunity(
+    history: list[dict],
+    current_record: dict,
+    service_catalog: list[dict] | None = None,
+) -> dict | None:
+    """Лучшая допуслуга, которую этот клиент действительно покупал раньше.
+
+    Каталог используется только для актуализации цены уже найденной исторической
+    услуги. Выбрать из каталога услугу, которой нет в истории клиента, нельзя.
+    """
+    current_titles = {
+        _mp_service_key(service.get("title"))
+        for service in (current_record.get("services") or [])
+        if isinstance(service, dict) and service.get("title")
+    }
+    catalog_prices = {}
+    catalog_titles = {}
+    for service in (service_catalog or []):
+        if not isinstance(service, dict):
+            continue
+        title = str(service.get("title") or "").strip()
+        key = _mp_service_key(title)
+        if not key:
+            continue
+        price = _mp_service_price(service)
+        if price > 0:
+            catalog_prices[key] = price
+        catalog_titles[key] = title
+
+    grouped: dict[str, dict] = {}
+    for visit in (history or []):
+        if not isinstance(visit, dict):
+            continue
+        visit_date = str(visit.get("date") or visit.get("datetime") or "")[:10]
+        for service in (visit.get("services") or []):
+            if not isinstance(service, dict):
+                continue
+            title = str(service.get("title") or "").strip()
+            key = _mp_service_key(title)
+            if not key or any(main in key for main in _MP_MAIN_KW):
+                continue
+            if not any(addon in key for addon in _MP_ADDON_KW):
+                continue
+            if _mp_current_blocks_addon(key, current_titles):
+                continue
+            row = grouped.setdefault(key, {
+                "key": key,
+                "title": title,
+                "times_bought": 0,
+                "last_date": "",
+                "last_price_rub": 0,
+            })
+            row["times_bought"] += 1
+            if visit_date >= row["last_date"]:
+                row["last_date"] = visit_date
+                row["title"] = title
+                row["last_price_rub"] = _mp_service_price(service)
+
+    candidates = []
+    for key, row in grouped.items():
+        price = catalog_prices.get(key) or row.get("last_price_rub") or 0
+        if price <= 0:
+            continue
+        candidates.append({
+            **row,
+            "title": catalog_titles.get(key) or row.get("title") or "Дополнительная услуга",
+            "price_rub": price,
+            "historical_only": True,
+        })
+    if not candidates:
+        return None
+    candidates.sort(
+        key=lambda row: (
+            int(row.get("times_bought") or 0),
+            str(row.get("last_date") or ""),
+            1 if any(key in _mp_service_key(row.get("title")) for key in _MP_PRIO_KW) else 0,
+            int(row.get("price_rub") or 0),
+        ),
+        reverse=True,
+    )
+    return candidates[0]
+
+
+def _mp_service_catalog(staff_id: int) -> list[dict]:
     try:
         from claude_ai import yclients as _yc
-    except Exception:
-        return None, 0
-    best = None
-    try:
-        for s in (_yc.get_services() or []):
-            if not isinstance(s, dict):
-                continue
-            title = (s.get("title") or "").strip()
-            key = title.lower()
-            if not title or key in current_titles:
-                continue
-            if any(k in key for k in _MP_MAIN_KW):
-                continue
-            if not any(k in key for k in _MP_ADDON_KW):
-                continue
-            try:
-                price = int(s.get("price_min") or s.get("cost") or s.get("price") or 0)
-            except Exception:
-                price = 0
-            if price <= 0:
-                continue
-            prio = 0 if any(k in key for k in _MP_PRIO_KW) else 1
-            cand = (prio, -price, title, price)
-            if best is None or cand < best:
-                best = cand
+        return _yc.get_services(staff_id) or _yc.get_services() or []
     except Exception as e:
-        logger.error(f"money_pitch addon fetch: {e}")
-    return (best[2], best[3]) if best else (None, 0)
+        logger.error(f"money_pitch catalog fetch: {e}")
+        return []
 
 
 def _mp_freq_word(vpm: float) -> str:
@@ -616,11 +718,15 @@ def money_pitch(staff_id: int, history: list[dict], current_record: dict) -> tup
                 vpm = 30.0 / cycle
     vpm = max(0.5, min(vpm, 4.0))
 
-    current_titles = {(s.get("title") or "").lower()
-                      for s in (current_record.get("services") or []) if isinstance(s, dict)}
-    addon, addon_price = _mp_pick_addon(current_titles)
-    if not addon or addon_price <= 0:
+    opportunity = historical_addon_opportunity(
+        history,
+        current_record,
+        service_catalog=_mp_service_catalog(int(staff_id)),
+    )
+    if not opportunity:
         return "", ""
+    addon = opportunity["title"]
+    addon_price = int(opportunity["price_rub"])
 
     usual_salary = round(usual_gross * pct)
     addon_salary = round(addon_price * pct)
@@ -630,7 +736,8 @@ def money_pitch(staff_id: int, history: list[dict], current_record: dict) -> tup
 
     full = (
         f"💰 Обычно ты берёшь с него ~{usual_gross} ₽ → твои ~{usual_salary} ₽.\n"
-        f"➕ Продашь «{addon}» ({addon_price} ₽) → станет ~{potential} ₽ тебе "
+        f"➕ Раньше он уже брал «{addon}» ({addon_price} ₽). Если снова выберет — "
+        f"станет ~{potential} ₽ тебе "
         f"(+{addon_salary} ₽ за визит).\n"
         f"📈 Он ходит {_mp_freq_word(vpm)}: это +{month_delta} ₽/мес и +{year_delta} ₽/год "
         f"к твоему доходу — с одного клиента."
