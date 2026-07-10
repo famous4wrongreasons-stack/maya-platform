@@ -20854,6 +20854,20 @@ function ALivePanel() {
   const [rRes, setRRes] = React.useState(null);
   const [rBusy, setRBusy] = React.useState(false);
   const [rScan, setRScan] = React.useState(false);
+  // Уход с экрана панели (свайп-назад/вкладка) без «Стоп» оставлял камеру
+  // включённой (зелёный индикатор iOS). Глушим стрим на размонтировании.
+  React.useEffect(function () {
+    return function () {
+      try {
+        var r = rScanRef.current || {};
+        r.stopped = true;
+        if (r.raf) cancelAnimationFrame(r.raf);
+        if (r.stream) r.stream.getTracks().forEach(function (tr) { tr.stop(); });
+        r.stream = null;
+      } catch (e) {}
+      window.__meScanFS = false;
+    };
+  }, []);
   const rScanRef = React.useRef({});
   const [jobS, setJobS] = React.useState({});
   const money = n => Math.round(Number(n) || 0).toLocaleString('ru-RU') + ' ₽';
@@ -21520,6 +21534,8 @@ function ALivePanel() {
     r.stream = null;
     r.raf = null;
     setRScan(false);
+    window.__meScanFS = false;
+    try { window.__meRefresh && window.__meRefresh(); } catch (eR) {}
   }
   function _scanLoop() {
     var r = rScanRef.current;
@@ -21551,6 +21567,8 @@ function ALivePanel() {
     setRRes(null);
     rScanRef.current = {};
     setRScan(true);
+    window.__meScanFS = true; // прячем глобальный таббар на время сканера
+    try { window.__meRefresh && window.__meRefresh(); } catch (eR) {}
     _loadJsQR(function () {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Камера в этом режиме недоступна. Откройте сайт в Safari или введите код вручную.');
@@ -25010,7 +25028,7 @@ function MEApp() {
   const gStaffActive = {
     'team-chat': 3
   };
-  const gTab = noOwnTab.indexOf(screen) >= 0 && typeof AuroraTab !== 'undefined' && typeof CLIENT_TABS !== 'undefined' ? React.createElement('div', {
+  const gTab = !window.__meScanFS && noOwnTab.indexOf(screen) >= 0 && typeof AuroraTab !== 'undefined' && typeof CLIENT_TABS !== 'undefined' ? React.createElement('div', {
     style: {
       position: 'fixed',
       left: 0,
