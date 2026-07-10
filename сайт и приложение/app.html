@@ -15537,7 +15537,7 @@ function AGodMode(props) {
         kpiCell(String(sm.negative_reviews_count || 0), 'Негатив')
       ]),
       rows.map(function (it, i) {
-        var conn = it.connection === 'official_api' ? 'API' : (it.connection === 'not_configured' ? 'не подключён' : (it.connection || 'снимок'));
+        var conn = it.connection === 'official_api' ? 'API' : (it.connection === 'public_page' ? 'публичная карточка' : (it.connection === 'public_page_error' ? 'ошибка карточки' : (it.connection === 'not_configured' ? 'не подключён' : (it.connection || 'снимок'))));
         return e('div', { key: it.key || i, style: { padding: '9px 0', borderTop: '1px solid ' + t.line } },
           e('div', { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
             e('div', { style: { flex: 1, fontFamily: BODY, fontWeight: 650, fontSize: 12.7, color: t.ink } }, it.title || it.key),

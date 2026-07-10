@@ -3557,8 +3557,23 @@ async def panel_reputation_refresh_handler(request: web.Request) -> web.Response
     info = _panel_resolve_role(int(tg_user["id"]))
     if info.get("role") != "owner":
         return _cabinet_response({"error": "forbidden"}, status=403)
+    public_refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
+    pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
+    notification = {"delivered": False, "count": 0}
+    if pending:
+        notification = await _notify_owner_reputation(request.app["bot_app"], pending)
+        if notification.get("delivered"):
+            await asyncio.to_thread(
+                database.mark_external_reviews_alerted,
+                [row.get("id") for row in pending if row.get("id")],
+            )
     snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=True)
-    return _cabinet_response({"ok": True, "reputation": snapshot})
+    return _cabinet_response({
+        "ok": True,
+        "public_refresh": public_refresh,
+        "notification": notification,
+        "reputation": snapshot,
+    })
 
 
 async def broadcast_send_to_base(bot, text: str) -> dict:
@@ -8711,6 +8726,95 @@ async def client_retention_refresh_loop(app: Application):
         await asyncio.sleep(21600)
 
 
+def _owner_reputation_ids() -> list[int]:
+    owner_ids = set()
+    for value in getattr(config, "FOUNDER_IDS", []) or []:
+        try:
+            owner_ids.add(int(value))
+        except (TypeError, ValueError):
+            continue
+    return sorted(owner_ids)
+
+
+async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
+    alert = reputation.build_owner_review_alert(rows)
+    if not alert.get("text"):
+        return {"delivered": False, "count": 0, "owners": 0}
+    owner_ids = _owner_reputation_ids()
+    if not owner_ids:
+        return {"delivered": False, "count": alert.get("count", 0), "owners": 0}
+
+    delivered = False
+    try:
+        conversations = memory.load_conversations()
+        for owner_id in owner_ids:
+            history = list(conversations.get(owner_id) or [])
+            history.append({"role": "assistant", "content": alert["text"]})
+            conversations[owner_id] = history[-30:]
+        memory.save_conversations(conversations)
+        delivered = True
+    except Exception as e:
+        logger.error(f"reputation owner in-app delivery: {e}")
+
+    telegram_sent = 0
+    push_sent = 0
+    for owner_id in owner_ids:
+        try:
+            await app.bot.send_message(chat_id=owner_id, text=alert["text"])
+            telegram_sent += 1
+            delivered = True
+        except Exception as e:
+            logger.error(f"reputation owner Telegram delivery: {e}")
+        try:
+            push_sent += await _send_client_push(
+                owner_id,
+                alert["push_title"],
+                alert["push_body"],
+                url="/app/?god=1",
+                tag="maya-reputation-new",
+                data={"event": "reputation.new_review"},
+            )
+            if push_sent:
+                delivered = True
+        except Exception as e:
+            logger.error(f"reputation owner push delivery: {e}")
+    return {
+        "delivered": delivered,
+        "count": alert.get("count", 0),
+        "positive": alert.get("positive", 0),
+        "negative": alert.get("negative", 0),
+        "owners": len(owner_ids),
+        "telegram": telegram_sent,
+        "push": push_sent,
+    }
+
+
+async def reputation_monitor_loop(app: Application):
+    """Раз в час проверяет публичные карточки и сообщает только о новых отзывах."""
+    await asyncio.sleep(150)
+    while True:
+        try:
+            refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
+            pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
+            notification = {"delivered": False, "count": 0}
+            if pending:
+                notification = await _notify_owner_reputation(app, pending)
+                if notification.get("delivered"):
+                    await asyncio.to_thread(
+                        database.mark_external_reviews_alerted,
+                        [row.get("id") for row in pending if row.get("id")],
+                    )
+            logger.info(
+                "reputation monitor: sources=%s new=%s notified=%s",
+                refresh.get("sources_ready"),
+                refresh.get("new"),
+                notification.get("count"),
+            )
+        except Exception as e:
+            logger.error(f"reputation monitor loop: {e}")
+        await asyncio.sleep(3600)
+
+
 async def waitlist_admin_alert_loop(app: Application):
     """Фоновый пинг админам (Антону) о новичках в листе ожидания (каждые ~2 мин)."""
     import freed_slot
@@ -10390,6 +10494,7 @@ async def start_webhook_server(bot_app: Application):
     globals()["_WEBHOOK_SITE"] = site
     asyncio.create_task(master_day_brief_loop(bot_app))
     asyncio.create_task(client_retention_refresh_loop(bot_app))
+    asyncio.create_task(reputation_monitor_loop(bot_app))
     asyncio.create_task(master_shift_reminder_loop(bot_app))
     asyncio.create_task(waitlist_admin_alert_loop(bot_app))
     asyncio.create_task(maya_operating_rhythm_loop(bot_app))

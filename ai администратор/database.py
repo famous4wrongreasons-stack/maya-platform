@@ -428,6 +428,7 @@ def init_db():
                 published_at    TEXT,
                 imported_at     TEXT    NOT NULL,
                 response_state  TEXT    NOT NULL DEFAULT '',
+                alerted_at      TEXT,
                 UNIQUE (source, external_id)
             );
             CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
@@ -2932,11 +2933,18 @@ def _external_reviews_ensure(conn):
             published_at    TEXT,
             imported_at     TEXT    NOT NULL,
             response_state  TEXT    NOT NULL DEFAULT '',
+            alerted_at      TEXT,
             UNIQUE (source, external_id)
         );
         CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
             ON external_reviews (source, published_at);
     """)
+    columns = {
+        str(row[1])
+        for row in conn.execute("PRAGMA table_info(external_reviews)").fetchall()
+    }
+    if "alerted_at" not in columns:
+        conn.execute("ALTER TABLE external_reviews ADD COLUMN alerted_at TEXT")
 
 
 def upsert_external_review(
@@ -2951,6 +2959,10 @@ def upsert_external_review(
     """Идемпотентно сохраняет обезличенный публичный отзыв без автора."""
     with _db() as conn:
         _external_reviews_ensure(conn)
+        existing = conn.execute(
+            "SELECT id FROM external_reviews WHERE source = ? AND external_id = ?",
+            (str(source or "")[:24], str(external_id or "")[:160]),
+        ).fetchone()
         conn.execute(
             "INSERT INTO external_reviews "
             "(source, external_id, rating, review_text, published_at, imported_at, response_state) "
@@ -2973,7 +2985,9 @@ def upsert_external_review(
             "SELECT * FROM external_reviews WHERE source = ? AND external_id = ?",
             (str(source or "")[:24], str(external_id or "")[:160]),
         ).fetchone()
-        return dict(row) if row else {}
+        result = dict(row) if row else {}
+        result["created"] = existing is None and bool(row)
+        return result
 
 
 def list_external_reviews(days: int = 365, limit: int = 300) -> list[dict]:
@@ -2990,6 +3004,54 @@ def list_external_reviews(days: int = 365, limit: int = 300) -> list[dict]:
             (cutoff, max(1, min(int(limit or 300), 1000))),
         ).fetchall()
         return [dict(row) for row in rows]
+
+
+def list_unalerted_external_reviews(limit: int = 20) -> list[dict]:
+    """Новые отзывы, которые ещё не были показаны владельцу."""
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        rows = conn.execute(
+            "SELECT id, source, external_id, rating, review_text, published_at, imported_at "
+            "FROM external_reviews WHERE alerted_at IS NULL "
+            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) ASC LIMIT ?",
+            (max(1, min(int(limit or 20), 100)),),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def mark_external_reviews_alerted(review_ids: list[int]) -> int:
+    ids = set()
+    for value in review_ids or []:
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            continue
+        if parsed > 0:
+            ids.add(parsed)
+    ids = sorted(ids)
+    if not ids:
+        return 0
+    placeholders = ",".join("?" for _ in ids)
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        cur = conn.execute(
+            f"UPDATE external_reviews SET alerted_at = ? "
+            f"WHERE id IN ({placeholders}) AND alerted_at IS NULL",
+            (_now(), *ids),
+        )
+        return cur.rowcount
+
+
+def mark_external_reviews_alerted_for_source(source: str) -> int:
+    """Первичный снимок становится базой и не рассылается как новый."""
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        cur = conn.execute(
+            "UPDATE external_reviews SET alerted_at = ? "
+            "WHERE source = ? AND alerted_at IS NULL",
+            (_now(), str(source or "")[:24]),
+        )
+        return cur.rowcount
 
 
 # ─── Алерт админу о зависшей заявке ──────────────────────────────
