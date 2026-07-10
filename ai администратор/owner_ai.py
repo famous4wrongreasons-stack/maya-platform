@@ -3668,6 +3668,7 @@ def _growth_engine(
     market_summary = market_payload.get("summary") or {}
     market_recommendation = (market_payload.get("recommendations") or [{}])[0]
     if market_summary.get("competitors_scanned"):
+        has_yandex_market = bool(market_summary.get("yandex_competitor_position"))
         add(
             "market_position",
             "market",
@@ -3681,15 +3682,23 @@ def _growth_engine(
                 market_recommendation.get("action")
                 or "Исправить самый большой измеримый разрыв и проверить изменение позиции через неделю."
             ),
-            metric="market_visibility_proxy_score",
+            metric=("yandex_discovery_share_pct" if has_yandex_market else "market_visibility_proxy_score"),
             effect_min=5,
             effect_max=12,
             unit="points",
             confidence=market_recommendation.get("confidence") or "medium",
             effort="medium",
-            kpi="Индекс видимости, место по отзывам, цена и динамика поисковой позиции.",
+            kpi=(
+                "Доля дискавери-переходов Яндекса, записи из Яндекса и выручка этих визитов."
+                if has_yandex_market else
+                "Индекс видимости, место по отзывам, цена и динамика поисковой позиции."
+            ),
             review_after_hours=168,
-            guardrail="Не называть косвенный индекс реальным трафиком или долей рынка.",
+            guardrail=(
+                "Не называть долю переходов Яндекса долей выручки всего рынка."
+                if has_yandex_market else
+                "Не называть косвенный индекс реальным трафиком или долей рынка."
+            ),
         )
 
     try:
@@ -3971,17 +3980,40 @@ def _owner_briefing(
     market_price = market_summary.get("market_median_haircut_price_rub")
     own_price = market_summary.get("own_haircut_price_rub")
     if market_scanned:
+        yandex_rank = market_summary.get("yandex_competitor_position")
+        yandex_set_size = market_summary.get("yandex_competitor_set_size")
+        yandex_share = market_summary.get("yandex_discovery_share_pct")
         review_rank = market_summary.get("review_volume_rank")
         tracked_count = market_summary.get("tracked_businesses_count") or market_scanned
         price_index = market_summary.get("price_index_pct")
         visibility_score = market_summary.get("visibility_proxy_score")
-        market_value = ("№%s из %s" % (_m(review_rank), _m(tracked_count))) if review_rank else "—"
-        market_second = (str(price_index) + "%") if price_index is not None else "—"
-        market_analysis = (
-            "Сравнено %s брендов: цена, отзывы, акции, публичная позиция и наполнение карточки. "
-            "Индекс видимости %s/100 является косвенной оценкой, не реальным трафиком."
-            % (_m(market_scanned), _m(visibility_score))
-        )
+        if yandex_rank and yandex_set_size:
+            market_value = "№%s из %s" % (_m(yandex_rank), _m(yandex_set_size))
+            market_value_label = "место по переходам в Яндексе"
+            market_second = (str(yandex_share) + "%") if yandex_share is not None else "—"
+            market_second_label = "доля дискавери-переходов"
+            price_index_text = (str(price_index) + "%") if price_index is not None else "нет данных"
+            market_analysis = (
+                "Яндекс за неделю: %s переходов из %s, запросов по категории — %s, "
+                "похожих компаний в радиусе 5 км — %s. Индекс цены по 2ГИС — %s."
+                % (
+                    _m(market_summary.get("yandex_own_discovery_visits_week")),
+                    _m(market_summary.get("yandex_total_discovery_visits_week")),
+                    _m(market_summary.get("yandex_category_queries_week")),
+                    _m(market_summary.get("yandex_similar_companies_5km")),
+                    price_index_text,
+                )
+            )
+        else:
+            market_value = ("№%s из %s" % (_m(review_rank), _m(tracked_count))) if review_rank else "—"
+            market_value_label = "место по объёму отзывов"
+            market_second = (str(price_index) + "%") if price_index is not None else "—"
+            market_second_label = "индекс цены к медиане"
+            market_analysis = (
+                "Сравнено %s брендов: цена, отзывы, акции, публичная позиция и наполнение карточки. "
+                "Индекс видимости %s/100 является косвенной оценкой, не реальным трафиком."
+                % (_m(market_scanned), _m(visibility_score))
+            )
         market_action = growth_action(
             "market",
             ((market_payload.get("recommendations") or [{}])[0].get("action")
@@ -3991,7 +4023,9 @@ def _owner_briefing(
         )
     else:
         market_value = "—"
+        market_value_label = "место по рынку"
         market_second = "—"
+        market_second_label = "доля переходов"
         market_analysis = "MAYA готовит первый снимок рынка Ставрополя."
         market_action = "После первого сбора появится сравнение цены, рейтинга, рекламы и отзывов."
     add_card(
@@ -3999,9 +4033,9 @@ def _owner_briefing(
         "Рынок",
         "Позиция среди барбершопов Ставрополя",
         market_value,
-        "место по объёму отзывов",
+        market_value_label,
         market_second,
-        "индекс цены к медиане",
+        market_second_label,
         market_analysis,
         market_action,
         "neutral",

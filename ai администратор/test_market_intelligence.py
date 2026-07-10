@@ -148,6 +148,97 @@ class MarketIntelligenceTests(unittest.TestCase):
         self.assertEqual(changes["fastest_review_growth"][0]["delta"], 12)
         self.assertEqual(changes["public_rank_changes"][0]["delta"], 2)
 
+    def test_yandex_snapshot_keeps_only_business_aggregates(self):
+        clean = market_intelligence._sanitise_yandex_business_snapshot({
+            "organization_id": "20695024342",
+            "organization_name": "Мужская Эстетика",
+            "market": {
+                "competitor_position": 8,
+                "discovery_share_pct": 4,
+                "private_note": "drop me",
+            },
+            "profile": {"profile_views": 1883, "calls": 33},
+            "competitors": [{
+                "name": "Гарлем",
+                "position": 1,
+                "discovery_share_pct": 48,
+                "visitor_id": "drop me",
+            }],
+            "query_themes": [{
+                "key": "category_generic", "label": "барбершоп", "visits_count": 15,
+            }],
+            "visits": [{"time": "23:52", "query": "raw visit must not persist"}],
+        })
+
+        self.assertEqual(clean["market"]["competitor_position"], 8)
+        self.assertEqual(clean["profile"]["profile_views"], 1883)
+        self.assertNotIn("private_note", clean["market"])
+        self.assertNotIn("visitor_id", clean["competitors"][0])
+        self.assertNotIn("visits", clean)
+        self.assertEqual(clean["privacy"], "business_aggregates_only")
+
+    def test_yandex_snapshot_replaces_proxy_position_with_real_traffic(self):
+        base = {
+            "version": "maya_market_intelligence_v1",
+            "headline": "Позиция на рынке понятна",
+            "source": "2gis_public_pages",
+            "summary": {
+                "competitors_scanned": 30,
+                "review_volume_rank": 3,
+                "visibility_proxy_score": 74,
+            },
+            "recommendations": [{"key": "review_visibility", "action": "Собирать отзывы"}],
+            "insights": ["Снимок 2ГИС собран."],
+            "source_coverage": {
+                "yandex_business": {"status": "owner_authorization_required"},
+            },
+            "limitations": [
+                "Данные доли трафика Яндекс появятся только после разрешённого подключения кабинета владельца.",
+            ],
+        }
+        yandex = market_intelligence._sanitise_yandex_business_snapshot({
+            "observed_at": market_intelligence.datetime.now().isoformat(timespec="seconds"),
+            "market": {
+                "competitor_position": 8,
+                "competitor_set_size": 9,
+                "discovery_share_pct": 4,
+                "category_queries": 29495,
+                "similar_companies": 78,
+                "total_discovery_visits": 5254,
+                "leader_discovery_visits": 657,
+                "own_discovery_visits": 57,
+                "own_vs_leader_pct": 9,
+            },
+            "profile": {
+                "profile_views": 1883,
+                "routes": 35,
+                "calls": 33,
+                "website_visits": 28,
+            },
+            "competitors": [{
+                "name": "Гарлем", "position": 1, "photo_count": 132,
+                "services_count": 22, "discovery_share_pct": 48,
+            }, {
+                "name": "Мужская Эстетика", "position": 8, "is_own": True,
+                "photo_count": 61, "services_count": 12, "discovery_share_pct": 4,
+            }],
+            "query_themes": [{
+                "key": "category_generic", "label": "барбершоп", "visits_count": 15,
+            }, {
+                "key": "brand", "label": "бренд", "visits_count": 9,
+            }],
+        })
+
+        result = market_intelligence._merge_yandex_business(base, yandex)
+
+        self.assertEqual(result["summary"]["yandex_competitor_position"], 8)
+        self.assertEqual(result["summary"]["yandex_discovery_share_pct"], 4)
+        self.assertEqual(result["summary"]["yandex_profile_actions_30d"], 96)
+        self.assertEqual(result["summary"]["yandex_profile_action_rate_pct"], 5.1)
+        self.assertEqual(result["source_coverage"]["yandex_business"]["status"], "active")
+        self.assertEqual(result["recommendations"][0]["key"], "yandex_discovery_gap")
+        self.assertNotIn("owner_authorization_required", json.dumps(result, ensure_ascii=False))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,11 @@
-"""Public market intelligence for MAYA's owner briefing.
+"""Market intelligence for MAYA's owner briefing.
 
 The collector reads low-frequency, public 2GIS pages for Stavropol. It stores
 only business-level aggregates: company name, public rating, review volume,
 advertised haircut price, promotion text and anonymised review themes. Review
-authors and profile data are never persisted.
+authors and profile data are never persisted. Owner-authorised Yandex Business
+snapshots are reduced to an allow-list of aggregate market, profile and campaign
+metrics before storage; visit-level rows are deliberately discarded.
 """
 from __future__ import annotations
 
@@ -25,7 +27,9 @@ import reputation
 _SNAPSHOT_KEY = "maya_market_intelligence_snapshot_v1"
 _STATUS_KEY = "maya_market_intelligence_status_v1"
 _HISTORY_KEY = "maya_market_intelligence_history_v2"
+_YANDEX_BUSINESS_KEY = "maya_yandex_business_snapshot_v1"
 _CACHE_HOURS = 20
+_YANDEX_MAX_AGE_DAYS = 45
 _CITY_ALIAS = "stavropol"
 _CITY_NAME = "Ставрополь"
 _BARBERSHOP_RUBRIC = "110998"
@@ -59,6 +63,163 @@ def _money(value) -> str:
 
 def _normalise_text(value: str) -> str:
     return re.sub(r"\s+", " ", str(value or "").replace("\xa0", " ")).strip()
+
+
+def _optional_integer(value) -> int | None:
+    if value is None or str(value).strip() == "":
+        return None
+    try:
+        return int(round(float(value)))
+    except (TypeError, ValueError):
+        return None
+
+
+def _optional_number(value) -> float | None:
+    if value is None or str(value).strip() == "":
+        return None
+    try:
+        return round(float(str(value).replace(",", ".")), 2)
+    except (TypeError, ValueError):
+        return None
+
+
+def _limited_text(value, limit: int = 120) -> str:
+    return _normalise_text(value)[:limit]
+
+
+def _sanitise_numeric_section(payload, *, integer_fields=(), number_fields=()) -> dict:
+    payload = payload if isinstance(payload, dict) else {}
+    result = {}
+    for key in integer_fields:
+        value = _optional_integer(payload.get(key))
+        if value is not None:
+            result[key] = value
+    for key in number_fields:
+        value = _optional_number(payload.get(key))
+        if value is not None:
+            result[key] = value
+    return result
+
+
+def _sanitise_yandex_business_snapshot(payload: dict) -> dict:
+    """Keeps only owner-authorised, business-level aggregate metrics."""
+    if not isinstance(payload, dict):
+        raise ValueError("Yandex Business snapshot must be an object")
+
+    periods = {}
+    period_payload = payload.get("periods") if isinstance(payload.get("periods"), dict) else {}
+    for key in ("competitors", "profile", "advertising", "search_visits"):
+        source = period_payload.get(key)
+        if not isinstance(source, dict):
+            continue
+        period = {
+            field: _limited_text(source.get(field), 40)
+            for field in ("start", "end", "label", "data_through")
+            if source.get(field)
+        }
+        if period:
+            periods[key] = period
+
+    market = _sanitise_numeric_section(
+        payload.get("market"),
+        integer_fields=(
+            "competitor_position", "competitor_set_size", "category_queries",
+            "similar_companies", "total_discovery_visits", "leader_discovery_visits",
+            "own_discovery_visits",
+        ),
+        number_fields=("discovery_share_pct", "own_share_of_all_pct", "own_vs_leader_pct"),
+    )
+    profile = _sanitise_numeric_section(
+        payload.get("profile"),
+        integer_fields=(
+            "profile_views", "routes", "calls", "website_visits",
+            "search_views", "maps_views", "navigator_views",
+        ),
+    )
+    advertising = _sanitise_numeric_section(
+        payload.get("advertising"),
+        integer_fields=(
+            "views", "clicks", "target_clients", "target_actions", "spend_rub",
+            "bonus_rub", "cost_per_click_rub", "cost_per_client_rub",
+            "cost_per_action_rub", "action_button_clicks", "routes", "phone_clicks",
+            "website_clicks", "social_shares", "panorama_views", "bookmarks",
+        ),
+        number_fields=("click_rate_pct", "client_rate_pct"),
+    )
+    if isinstance(payload.get("advertising"), dict) and payload["advertising"].get("campaign_id"):
+        advertising["campaign_id"] = _limited_text(payload["advertising"].get("campaign_id"), 40)
+
+    competitors = []
+    competitor_rows = payload.get("competitors") if isinstance(payload.get("competitors"), list) else []
+    for row in competitor_rows[:30]:
+        if not isinstance(row, dict) or not row.get("name"):
+            continue
+        clean = {
+            "name": _limited_text(row.get("name"), 120),
+            "category": _limited_text(row.get("category"), 80),
+            "is_own": bool(row.get("is_own")),
+            "advertising_active": bool(row.get("advertising_active")),
+            "profile_current": bool(row.get("profile_current")),
+        }
+        clean.update(_sanitise_numeric_section(
+            row,
+            integer_fields=(
+                "position", "ratings_count", "reviews_count", "promotions_count",
+                "photo_count", "services_count",
+            ),
+            number_fields=("discovery_share_pct", "rating"),
+        ))
+        competitors.append(clean)
+
+    query_themes = []
+    query_rows = payload.get("query_themes") if isinstance(payload.get("query_themes"), list) else []
+    for row in query_rows[:20]:
+        if not isinstance(row, dict) or not row.get("label"):
+            continue
+        count = _optional_integer(row.get("visits_count"))
+        if count is None:
+            continue
+        query_themes.append({
+            "key": _limited_text(row.get("key"), 60),
+            "label": _limited_text(row.get("label"), 100),
+            "visits_count": count,
+        })
+
+    if not any((market, profile, advertising, competitors, query_themes)):
+        raise ValueError("Yandex Business snapshot has no aggregate metrics")
+
+    return {
+        "version": "maya_yandex_business_snapshot_v1",
+        "source": "yandex_business_owner_authorized",
+        "organization_id": _limited_text(payload.get("organization_id"), 40),
+        "organization_name": _limited_text(payload.get("organization_name"), 120),
+        "observed_at": _limited_text(
+            payload.get("observed_at") or datetime.now().isoformat(timespec="seconds"),
+            40,
+        ),
+        "periods": periods,
+        "market": market,
+        "profile": profile,
+        "advertising": advertising,
+        "competitors": competitors,
+        "query_themes": query_themes,
+        "privacy": "business_aggregates_only",
+    }
+
+
+def save_yandex_business_snapshot(payload: dict) -> dict:
+    snapshot = _sanitise_yandex_business_snapshot(payload)
+    database.set_setting(_YANDEX_BUSINESS_KEY, json.dumps(snapshot, ensure_ascii=False))
+    return snapshot
+
+
+def _load_yandex_business_snapshot() -> dict:
+    try:
+        raw = database.get_setting(_YANDEX_BUSINESS_KEY)
+        payload = json.loads(raw) if raw else {}
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
 
 
 class _FirmTextCollector(HTMLParser):
@@ -683,6 +844,204 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
     }
 
 
+def _merge_yandex_business(snapshot: dict, yandex_snapshot: dict | None = None) -> dict:
+    result = dict(snapshot or {})
+    yandex = yandex_snapshot if yandex_snapshot is not None else _load_yandex_business_snapshot()
+    if not isinstance(yandex, dict) or not yandex.get("observed_at"):
+        return result
+
+    try:
+        observed = datetime.fromisoformat(str(yandex.get("observed_at") or "")[:19])
+        source_status = (
+            "active" if datetime.now() - observed <= timedelta(days=_YANDEX_MAX_AGE_DAYS)
+            else "stale"
+        )
+    except (TypeError, ValueError):
+        source_status = "warn"
+
+    market = yandex.get("market") if isinstance(yandex.get("market"), dict) else {}
+    profile = yandex.get("profile") if isinstance(yandex.get("profile"), dict) else {}
+    advertising = yandex.get("advertising") if isinstance(yandex.get("advertising"), dict) else {}
+    summary = dict(result.get("summary") or {})
+    market_fields = {
+        "competitor_position": "yandex_competitor_position",
+        "competitor_set_size": "yandex_competitor_set_size",
+        "discovery_share_pct": "yandex_discovery_share_pct",
+        "category_queries": "yandex_category_queries_week",
+        "similar_companies": "yandex_similar_companies_5km",
+        "total_discovery_visits": "yandex_total_discovery_visits_week",
+        "leader_discovery_visits": "yandex_leader_discovery_visits_week",
+        "own_discovery_visits": "yandex_own_discovery_visits_week",
+        "own_share_of_all_pct": "yandex_own_share_of_all_pct",
+        "own_vs_leader_pct": "yandex_own_vs_leader_pct",
+    }
+    profile_fields = {
+        "profile_views": "yandex_profile_views_30d",
+        "routes": "yandex_routes_30d",
+        "calls": "yandex_calls_30d",
+        "website_visits": "yandex_website_visits_30d",
+        "search_views": "yandex_search_views_30d",
+        "maps_views": "yandex_maps_views_30d",
+        "navigator_views": "yandex_navigator_views_30d",
+    }
+    advertising_fields = {
+        "views": "yandex_ad_views",
+        "clicks": "yandex_ad_clicks",
+        "target_clients": "yandex_ad_target_clients",
+        "target_actions": "yandex_ad_target_actions",
+        "spend_rub": "yandex_ad_spend_rub",
+        "cost_per_client_rub": "yandex_ad_cost_per_client_rub",
+    }
+    for source, destination in (
+        *market_fields.items(), *profile_fields.items(), *advertising_fields.items()
+    ):
+        source_payload = (
+            market if source in market_fields else
+            profile if source in profile_fields else
+            advertising
+        )
+        if source_payload.get(source) is not None:
+            summary[destination] = source_payload.get(source)
+
+    profile_actions = sum(
+        _integer(profile.get(key)) for key in ("routes", "calls", "website_visits")
+    )
+    profile_views = _integer(profile.get("profile_views"))
+    if profile_actions:
+        summary["yandex_profile_actions_30d"] = profile_actions
+    if profile_views and profile_actions:
+        summary["yandex_profile_action_rate_pct"] = round(profile_actions * 100 / profile_views, 1)
+    if market.get("competitor_position") is not None:
+        summary["market_position_basis"] = "yandex_discovery_traffic"
+    result["summary"] = summary
+    result["source"] = "2gis_public_pages+yandex_business_owner_authorized"
+    if market.get("competitor_position") is not None:
+        result["headline"] = "Фактическая позиция в Яндексе и рынок Ставрополя понятны"
+    result["yandex_business"] = yandex
+
+    coverage = dict(result.get("source_coverage") or {})
+    coverage["yandex_business"] = {
+        "status": source_status,
+        "observed_at": yandex.get("observed_at"),
+        "privacy": "business_aggregates_only",
+        "metrics": [
+            "discovery_share", "category_demand", "competitor_position", "profile_actions",
+            "traffic_sources", "advertising_performance", "aggregate_search_themes",
+        ],
+    }
+    result["source_coverage"] = coverage
+
+    position = _integer(market.get("competitor_position"))
+    set_size = _integer(market.get("competitor_set_size"))
+    share = market.get("discovery_share_pct")
+    own_visits = _integer(market.get("own_discovery_visits"))
+    leader_visits = _integer(market.get("leader_discovery_visits"))
+    total_visits = _integer(market.get("total_discovery_visits"))
+    category_queries = _integer(market.get("category_queries"))
+    yandex_insights = []
+    if position and set_size:
+        yandex_insights.append(
+            f"Яндекс ставит бизнес на место {position} из {set_size} в выбранной группе конкурентов; "
+            f"доля дискавери-переходов — {share if share is not None else '—'}%."
+        )
+    if own_visits and total_visits:
+        yandex_insights.append(
+            f"За неделю получено {own_visits} из {_money(total_visits).replace(' ₽', '')} переходов "
+            f"в похожие компании; лидер получил {_money(leader_visits).replace(' ₽', '')}."
+        )
+    if category_queries:
+        yandex_insights.append(
+            f"За неделю в радиусе 5 км было {_money(category_queries).replace(' ₽', '')} "
+            "запросов по категориям бизнеса."
+        )
+    if profile_views:
+        yandex_insights.append(
+            f"За 30 дней профиль открыли {_money(profile_views).replace(' ₽', '')} раз; "
+            f"маршрут, звонок или переход на сайт совершили {profile_actions} раз "
+            f"({summary.get('yandex_profile_action_rate_pct', 0)}%)."
+        )
+    existing_insights = [str(row) for row in (result.get("insights") or []) if row]
+    result["insights"] = (
+        yandex_insights + [row for row in existing_insights if row not in yandex_insights]
+    )[:8]
+
+    competitors = [row for row in (yandex.get("competitors") or []) if isinstance(row, dict)]
+    own_row = next((row for row in competitors if row.get("is_own")), {})
+    leader = next((row for row in competitors if _integer(row.get("position")) == 1), {})
+    profile_gap = []
+    if own_row and leader:
+        if _integer(leader.get("photo_count")) > _integer(own_row.get("photo_count")):
+            profile_gap.append(
+                f"фото {own_row.get('photo_count', 0)} против {leader.get('photo_count', 0)} у лидера"
+            )
+        if _integer(leader.get("services_count")) > _integer(own_row.get("services_count")):
+            profile_gap.append(
+                f"услуг {own_row.get('services_count', 0)} против {leader.get('services_count', 0)}"
+            )
+    gap_detail = ("; " + ", ".join(profile_gap)) if profile_gap else ""
+    yandex_recommendations = []
+    if own_visits and leader_visits:
+        yandex_recommendations.append({
+            "key": "yandex_discovery_gap",
+            "fact": (
+                f"Яндекс: {own_visits} дискавери-переходов против {leader_visits} у лидера; "
+                f"текущая доля {share if share is not None else '—'}%{gap_detail}."
+            ),
+            "action": (
+                "Сначала закрыть измеримые разрывы карточки, затем провести четырёхнедельный тест "
+                "продвижения только на незаполненные часы и считать записи и выручку, а не клики."
+            ),
+            "confidence": "high",
+        })
+    if profile_views and profile_actions:
+        yandex_recommendations.append({
+            "key": "yandex_profile_conversion",
+            "fact": (
+                f"Из {profile_views} открытий профиля получено {profile_actions} измеримых действий "
+                f"({summary.get('yandex_profile_action_rate_pct')}%)."
+            ),
+            "action": (
+                "Связать переходы Яндекса с источником записи в YClients и ежемесячно считать "
+                "конверсию в состоявшийся визит, выручку и возврат клиента."
+            ),
+            "confidence": "high",
+        })
+    query_themes = [row for row in (yandex.get("query_themes") or []) if isinstance(row, dict)]
+    generic_theme = next((row for row in query_themes if row.get("key") == "category_generic"), {})
+    branded_theme = next((row for row in query_themes if row.get("key") == "brand"), {})
+    if generic_theme:
+        yandex_recommendations.append({
+            "key": "yandex_generic_demand",
+            "fact": (
+                f"Среди последних обработанных визитов запросы категории дали "
+                f"{generic_theme.get('visits_count')} входов, брендовые — {branded_theme.get('visits_count', 0)}."
+            ),
+            "action": (
+                "Усилить карточку под намерение «барбершоп в Ставрополе»: актуальные услуги и цены, "
+                "регулярные результаты работ и предложение с прямым переходом к записи."
+            ),
+            "confidence": "medium",
+        })
+    existing_recommendations = [
+        row for row in (result.get("recommendations") or [])
+        if isinstance(row, dict) and not str(row.get("key") or "").startswith("yandex_")
+    ]
+    result["recommendations"] = (yandex_recommendations + existing_recommendations)[:8]
+
+    limitations = [
+        str(row) for row in (result.get("limitations") or [])
+        if "Данные доли трафика Яндекс" not in str(row)
+    ]
+    yandex_limitation = (
+        "Позиция и доля переходов Яндекса обновляются раз в неделю и относятся к выбранной "
+        "группе похожих компаний, а не к доле выручки всего рынка."
+    )
+    if yandex_limitation not in limitations:
+        limitations.append(yandex_limitation)
+    result["limitations"] = limitations
+    return result
+
+
 def _load_cached() -> dict:
     try:
         raw = database.get_setting(_SNAPSHOT_KEY)
@@ -799,7 +1158,7 @@ def market_snapshot(*, force_refresh: bool = False) -> dict:
         return refresh_market_snapshot(force=True)
     cached = _load_cached()
     if cached:
-        return cached
+        return _merge_yandex_business(cached)
     return {
         "version": "maya_market_intelligence_v1",
         "status": "warn",
@@ -823,7 +1182,7 @@ def refresh_market_snapshot(*, force: bool = False, pages: int = 3, review_compe
         try:
             observed = datetime.fromisoformat(str(cached.get("observed_at") or "")[:19])
             if datetime.now() - observed < timedelta(hours=_CACHE_HOURS):
-                return {**cached, "cached": True}
+                return {**_merge_yandex_business(cached), "cached": True}
         except Exception:
             pass
 
@@ -892,7 +1251,7 @@ def refresh_market_snapshot(*, force: bool = False, pages: int = 3, review_compe
             "checked_at": checked_at,
             "competitors": (snapshot.get("summary") or {}).get("competitors_scanned", 0),
         }, ensure_ascii=False))
-        return {**snapshot, "cached": False}
+        return {**_merge_yandex_business(snapshot), "cached": False}
     except Exception as error:
         database.set_setting(_STATUS_KEY, json.dumps({
             "ok": False,
@@ -900,7 +1259,12 @@ def refresh_market_snapshot(*, force: bool = False, pages: int = 3, review_compe
             "error": type(error).__name__,
         }, ensure_ascii=False))
         if cached:
-            return {**cached, "status": "warn", "stale": True, "refresh_error": type(error).__name__}
+            return {
+                **_merge_yandex_business(cached),
+                "status": "warn",
+                "stale": True,
+                "refresh_error": type(error).__name__,
+            }
         return {
             "version": "maya_market_intelligence_v1",
             "status": "warn",
