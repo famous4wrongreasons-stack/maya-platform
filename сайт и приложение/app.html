@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <meta name="apple-mobile-web-app-title" content="Malesthetic"/>
 <link rel="stylesheet" href="./fonts.css">
-<style>html,body{margin:0;padding:0;background:#000000;color-scheme:dark;height:100%;height:100vh;width:100%;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none;}body{position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;}#me-bg{position:fixed;left:0;right:0;top:0;height:100vh;background:#000000;z-index:0;pointer-events:none;}*{box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}#root{position:fixed;top:0;left:0;right:0;height:100vh;z-index:1;width:100%;overflow:hidden;opacity:0;transition:opacity .28s ease;animation:meBootReveal .2s ease 1000ms forwards;}input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important;}@keyframes mePulse{0%,100%{opacity:1}50%{opacity:.25}}@keyframes meWiggle{0%,100%{transform:rotate(-0.5deg)}50%{transform:rotate(0.5deg)}}@keyframes meBootReveal{to{opacity:1}}@keyframes meScreenIn{from{opacity:.6;transform:scale(.98)}to{opacity:1;transform:none}}@keyframes meSpring{0%{transform:scale(1)}30%{transform:scale(1.34)}55%{transform:scale(.9)}78%{transform:scale(1.08)}100%{transform:scale(1)}}@keyframes meScissorA{0%,100%{transform:rotate(0)}45%{transform:rotate(-12deg)}72%{transform:rotate(2deg)}}@keyframes meScissorB{0%,100%{transform:rotate(0)}45%{transform:rotate(12deg)}72%{transform:rotate(-2deg)}}@keyframes mePop{0%,100%{transform:scale(1)}45%{transform:scale(1.42)}}@keyframes meSpin{0%{transform:rotate(0)}60%{transform:rotate(200deg)}100%{transform:rotate(180deg)}}textarea,input{font-family:inherit;color-scheme:inherit;}#rotate-lock{display:none;}@media screen and (orientation:landscape) and (max-height:600px){#root{visibility:hidden!important;}#rotate-lock{display:flex!important;position:fixed;inset:0;z-index:2147483647;align-items:center;justify-content:center;background:#0a0a0b;color:#f4f0eb;text-align:center;font-family:Montserrat,sans-serif;padding:32px;}#rotate-lock .rl-in{display:flex;flex-direction:column;align-items:center;gap:14px;}#rotate-lock .rl-ic{font-size:42px;opacity:.92;animation:mePulse 1.8s ease-in-out infinite;}#rotate-lock .rl-t{font-size:13px;letter-spacing:.3em;text-transform:uppercase;font-weight:500;}#rotate-lock .rl-s{font-size:10px;line-height:1.6;opacity:.78;letter-spacing:.12em;max-width:240px;}}
+<style>html,body{margin:0;padding:0;background:#000000;color-scheme:dark;height:100%;height:100vh;width:100%;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none;}body{position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;}#me-bg{position:fixed;left:0;right:0;top:0;height:100vh;background:#000000;z-index:0;pointer-events:none;}*{box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}#root{position:fixed;top:0;left:0;right:0;height:100vh;z-index:1;width:100%;overflow:hidden;opacity:0;transition:opacity .28s ease;animation:meBootReveal .2s ease 1000ms forwards;}input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important;}@keyframes mePulse{0%,100%{opacity:1}50%{opacity:.25}}@keyframes meOnline{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}@keyframes meWiggle{0%,100%{transform:rotate(-0.5deg)}50%{transform:rotate(0.5deg)}}@keyframes meBootReveal{to{opacity:1}}@keyframes meScreenIn{from{opacity:.6;transform:scale(.98)}to{opacity:1;transform:none}}@keyframes meSpring{0%{transform:scale(1)}30%{transform:scale(1.34)}55%{transform:scale(.9)}78%{transform:scale(1.08)}100%{transform:scale(1)}}@keyframes meScissorA{0%,100%{transform:rotate(0)}45%{transform:rotate(-12deg)}72%{transform:rotate(2deg)}}@keyframes meScissorB{0%,100%{transform:rotate(0)}45%{transform:rotate(12deg)}72%{transform:rotate(-2deg)}}@keyframes mePop{0%,100%{transform:scale(1)}45%{transform:scale(1.42)}}@keyframes meSpin{0%{transform:rotate(0)}60%{transform:rotate(200deg)}100%{transform:rotate(180deg)}}textarea,input{font-family:inherit;color-scheme:inherit;}#rotate-lock{display:none;}@media screen and (orientation:landscape) and (max-height:600px){#root{visibility:hidden!important;}#rotate-lock{display:flex!important;position:fixed;inset:0;z-index:2147483647;align-items:center;justify-content:center;background:#0a0a0b;color:#f4f0eb;text-align:center;font-family:Montserrat,sans-serif;padding:32px;}#rotate-lock .rl-in{display:flex;flex-direction:column;align-items:center;gap:14px;}#rotate-lock .rl-ic{font-size:42px;opacity:.92;animation:mePulse 1.8s ease-in-out infinite;}#rotate-lock .rl-t{font-size:13px;letter-spacing:.3em;text-transform:uppercase;font-weight:500;}#rotate-lock .rl-s{font-size:10px;line-height:1.6;opacity:.78;letter-spacing:.12em;max-width:240px;}}
 @keyframes meOrbA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8%,6%) scale(1.12)}}
 @keyframes meOrbB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-9%,-7%) scale(1.15)}}
 @keyframes meOrbC{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6%,-8%) scale(1.1)}}
@@ -8705,6 +8705,25 @@ function AChat() {
 	  const scRef = React.useRef(null);
 	  const longPressRef = React.useRef({ timer: null, x: 0, y: 0 });
 	  const userHasSentRef = React.useRef(false); // автоскролл вниз — только ПОСЛЕ первой реальной отправки пользователем
+  // сжатие нижнего меню чата при скролле (как в остальном приложении)
+  const [chatNavShrunk, setChatNavShrunk] = React.useState(false);
+  React.useEffect(function () {
+    var last = 0, ticking = false;
+    function onSc() {
+      var el = scRef.current; if (!el) return;
+      var y = el.scrollTop, dy = y - last; last = y;
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        if (y <= 24) { setChatNavShrunk(false); return; }
+        if (dy > 4) setChatNavShrunk(true);
+        else if (dy < -4) setChatNavShrunk(false);
+      });
+    }
+    var el = scRef.current;
+    if (el) el.addEventListener('scroll', onSc, { passive: true });
+    return function () { if (el) el.removeEventListener('scroll', onSc); };
+  }, []);
   const baseHeightRef = React.useRef(typeof window !== 'undefined' ? window.innerHeight : 0);
   const footRef = React.useRef(null); // обёртка строки ввода — позицию над клавиатурой ставим ИМПЕРАТИВНО
   const e = React.createElement;
@@ -10322,19 +10341,30 @@ function AChat() {
       maxWidth: 520,
       margin: '0 auto',
       boxSizing: 'border-box',
-      paddingTop: 54,
+      background: t.bg,
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
     }
   },
-  // header (Maya OS 3D: hairline снизу)
+  // header (Maya OS 3D: плавающая прозрачная шапка — контент уходит под неё)
   e('div', {
     style: {
+      position: 'absolute',
+      top: 0, left: 0, right: 0,
+      zIndex: 6,
       display: 'flex',
       alignItems: 'center',
       gap: 12,
-      padding: 'calc(env(safe-area-inset-top, 0px) + 8px) 18px 12px'
+      padding: 'calc(env(safe-area-inset-top, 0px) + 10px) 18px 16px',
+      background: dark
+        ? 'linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 62%, rgba(0,0,0,0) 100%)'
+        : 'linear-gradient(180deg, rgba(244,240,235,0.86) 0%, rgba(244,240,235,0.45) 62%, rgba(244,240,235,0) 100%)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 55%, rgba(0,0,0,0) 100%)',
+      maskImage: 'linear-gradient(180deg, #000 0%, #000 55%, rgba(0,0,0,0) 100%)',
+      pointerEvents: 'auto'
     }
   }, e('div', {
     // Maya OS 3D: знак «Семя жизни» в шапке чата
@@ -10369,16 +10399,17 @@ function AChat() {
     }
 	  }, e('span', {
     style: {
-      width: 6,
-      height: 6,
+      width: 7,
+      height: 7,
       borderRadius: 999,
-      background: '#878582'
+      background: t.ink,
+      animation: 'meOnline 1.6s ease-in-out infinite'
     }
   }), e('span', {
     style: {
       fontFamily: BODY,
-      fontSize: 10.5,
-      color: t.faint
+      fontSize: 11,
+      color: t.dim
     }
 	  }, 'Администратор · онлайн'))), canClearChat && deleteMode ? e('button', {
 	    type: 'button',
@@ -10430,7 +10461,7 @@ function AChat() {
       overflow: 'auto',
       overscrollBehavior: 'contain',
       WebkitOverflowScrolling: 'touch',
-      padding: '18px 18px 170px'
+      padding: 'calc(env(safe-area-inset-top, 0px) + 72px) 18px 170px'
     }
   }, (function () {
     // Maya OS 1E: пустой чат = командная строка (знак, MAYA, подсказки-команды)
@@ -10594,6 +10625,7 @@ function AChat() {
       var items = (chatSurface() === 'staff' ? (window.STAFF_TABS || []) : (window.CLIENT_TABS || []));
       var loggedIn = !!(window.__meHasSession && window.__meHasSession());
       var vis = items.filter(function (it) { return !it.auth || loggedIn || it.guestLabel || it.guestTap; });
+      var EASE = 'cubic-bezier(.32,.72,0,1)';
       nav = e('div', {
         key: 'nav',
         style: {
@@ -10601,7 +10633,11 @@ function AChat() {
           background: dark ? 'rgba(8,8,10,0.5)' : 'rgba(24,22,15,0.10)',
           border: '1px solid ' + (dark ? 'rgba(244,240,235,0.16)' : 'rgba(24,22,15,0.10)'),
           boxShadow: '0 12px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06)',
-          backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)'
+          backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)',
+          transform: chatNavShrunk ? 'scale(0.82) translateY(8px)' : 'scale(1) translateY(0)',
+          transformOrigin: 'center bottom',
+          opacity: chatNavShrunk ? 0.92 : 1,
+          transition: 'transform .4s ' + EASE + ', opacity .4s ' + EASE
         }
       }, vis.map(function (it, i2) {
         var on = i2 === 1; // «Чат» активен в обоих наборах
@@ -10613,9 +10649,9 @@ function AChat() {
         return e('div', {
           key: i2,
           onClick: function () { try { if (window.tactile) window.tactile(); } catch (e2) {} tap ? tap() : (window.__meTab && window.__meTab(i2)); },
-          style: { position: 'relative', zIndex: 1, flex: 1, height: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, cursor: 'pointer', color: c2 }
+          style: { position: 'relative', zIndex: 1, flex: 1, height: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: chatNavShrunk ? 0 : 3, cursor: 'pointer', color: c2 }
         }, icfn(c2, 20, on, t, false), e('span', {
-          style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: c2 }
+          style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: c2, overflow: 'hidden', maxHeight: chatNavShrunk ? 0 : 12, opacity: chatNavShrunk ? 0 : 1, transition: 'max-height .4s ' + EASE + ', opacity .28s ' + EASE }
         }, label));
       }));
     }
@@ -16511,7 +16547,8 @@ function AStaffHome() {
           if (b && (b.cash || b.card)) setShRev((b.cash && b.cash.sum || 0) + (b.card && b.card.sum || 0));
         }).catch(function () {});
       }
-      function loadEarn() {
+      function loadEarn(attempt) {
+        attempt = attempt || 0;
         fetch(PX + "?action=panel_my_earnings", {
           method: "POST",
           headers: rq.headers,
@@ -16520,6 +16557,11 @@ function AStaffHome() {
           return r.json();
         }).then(function (b) {
           if (b && !b.error) setShEarn(b);
+          // Валовая за месяц считается на сервере с прогревом кэша (тяжёлый YClients-запрос):
+          // первый ответ может прийти с gross_month=null — тихо перезапрашиваем, пока не подтянется.
+          if (b && !b.error && (b.gross_month == null) && attempt < 4) {
+            setTimeout(function () { loadEarn(attempt + 1); }, 6000);
+          }
         }).catch(function () {});
       }
       function loadJ(sid) {

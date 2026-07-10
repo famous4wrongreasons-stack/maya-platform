@@ -42,6 +42,11 @@ logger = logging.getLogger(__name__)
 _yc = YClientsAPI()
 
 CASHBACK_PCT = 5
+# Welcome-бонус из истории трат (LTV backfill) ОТКЛЮЧЁН (решение Стаса 10.07):
+# новым клиентам баллы копятся только с НОВЫХ визитов вперёд. Флаг оставлен для
+# явности и на случай возврата. WELCOME_CAP — потолок, применён и ретроактивно.
+BACKFILL_ENABLED = False
+WELCOME_CAP = 1000
 EXPIRY_MONTHS_NO_VISITS = 12
 REDEEM_CODE_TTL_DAYS = 14
 
@@ -428,9 +433,15 @@ def lazy_backfill_for_client(client_id: int, phone: str) -> dict | None:
 
     Идемпотентно: повторные вызовы не дают второй порции.
     """
+    if not BACKFILL_ENABLED:
+        return None  # welcome из истории отключён — только новые визиты
     if not phone:
         return None
     if database.client_has_loyalty_backfill(client_id):
+        return None
+    # тот же человек под другим client_id (второй способ входа) — не дублируем
+    if database.loyalty_backfill_exists_for_phone(phone):
+        logger.info(f"🪙 Lazy backfill пропущен: по номеру *{phone[-4:]} welcome уже выдан (другой client_id={client_id})")
         return None
     # Фиксируем launch_date если ещё не зафиксирована
     get_launch_date()
@@ -461,6 +472,9 @@ async def run_backfill_job() -> dict:
 
     Также фиксирует дату запуска программы (если ещё не зафиксирована).
     """
+    if not BACKFILL_ENABLED:
+        logger.info("run_backfill_job пропущен: BACKFILL_ENABLED=False")
+        return {"skipped": True, "reason": "backfill_disabled"}
     # Зафиксируем launch_date — после backfill clock «сгорания» начнёт идти
     get_launch_date()
 

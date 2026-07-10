@@ -3207,6 +3207,35 @@ def client_has_loyalty_backfill(client_id: int) -> bool:
         return bool(row)
 
 
+def loyalty_backfill_exists_for_phone(phone: str) -> bool:
+    """True, если welcome-бонус уже выдавали ЛЮБОМУ client_id с этим номером.
+    Один человек может существовать под несколькими client_id (Telegram и
+    Яндекс-вход) — без этой проверки каждый аккаунт получал 5% от одного LTV."""
+    digits = "".join(ch for ch in (phone or "") if ch.isdigit())
+    if len(digits) < 10:
+        return False
+    tail10 = digits[-10:]
+    with _db() as conn:
+        rows = conn.execute(
+            "SELECT id, phone FROM clients WHERE phone LIKE ?",
+            ("%" + tail10[-4:],),
+        ).fetchall()
+        ids = []
+        for r in rows:
+            got = "".join(ch for ch in (r["phone"] or "") if ch.isdigit())
+            if got and got[-10:] == tail10:
+                ids.append(int(r["id"]))
+        if not ids:
+            return False
+        q = ",".join("?" * len(ids))
+        row = conn.execute(
+            f"SELECT 1 FROM loyalty_transactions WHERE client_id IN ({q}) "
+            "AND type = 'backfill' LIMIT 1",
+            ids,
+        ).fetchone()
+        return bool(row)
+
+
 def loyalty_redemption_exists(client_id: int, visit_record_id: int,
                                 service_title: str) -> bool:
     """True если уже списали баллы за этот record + услугу (защита от дубля)."""
