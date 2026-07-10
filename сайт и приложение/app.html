@@ -14983,7 +14983,7 @@ function AGodMode(props) {
   }
   function editPlanTarget(sm) {
     sm = sm || {};
-    setModal({ title: 'Дневной план', fields: [{ key: 'target', label: 'План выручки, ₽ (0 = авто)', value: String(sm.target_source === 'manual_setting' ? (sm.daily_target_rub || 0) : 0) }], submit: function (v) {
+    setModal({ title: 'План на сегодня', fields: [{ key: 'target', label: 'Цель по выручке, ₽ (0 — средняя за 30 дней)', value: String(sm.target_source === 'manual_setting' ? (sm.daily_target_rub || 0) : 0) }], submit: function (v) {
       var target = parseInt(String(v.target || '0').replace(/\s/g, ''), 10) || 0;
       setBusy(true);
       gfetch('panel_plan_target', { target_rub: target }).then(function (j) {
@@ -15862,8 +15862,8 @@ function AGodMode(props) {
         action: 'Сначала закрыть ближайшие свободные окна.', tone: 'attention'
       }],
       simple_goal: {
-        title: 'План на месяц', actual_rub: sm.projected_month_gross_rub || 0,
-        target_rub: 0, progress_pct: sm.month_goal_progress_pct,
+        title: 'План на сегодня', actual_rub: expected,
+        target_rub: sm.daily_target_rub || 0, progress_pct: sm.plan_progress_pct,
         plain_status: 'MAYA уточняет цель', next_step: 'Проверить темп выручки и загрузку.'
       },
       quick_stats: [
@@ -15936,9 +15936,10 @@ function AGodMode(props) {
     var pct = goal.progress_pct == null ? null : Math.max(0, Math.min(100, Number(goal.progress_pct) || 0));
     return e('section', { style: { padding: '18px 0 20px', borderTop: '1px solid ' + t.line, borderBottom: '1px solid ' + t.line, marginBottom: 22 } },
       e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint, marginBottom: 9 } }, 'Цель бизнеса'),
-      e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 12 } },
-        e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 19, lineHeight: 1.2, color: t.ink } }, goal.title || 'План на месяц'),
-        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink, whiteSpace: 'nowrap' } }, pct == null ? '—' : Math.round(pct) + '%')),
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+        e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 19, lineHeight: 1.2, color: t.ink } }, goal.title || 'План на сегодня'),
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink, whiteSpace: 'nowrap' } }, pct == null ? '—' : Math.round(pct) + '%'),
+        e('button', { type: 'button', onClick: function () { editPlanTarget(cc.plan_fact || {}); }, style: { border: '1px solid ' + t.line, background: 'transparent', color: t.dim, borderRadius: 8, padding: '6px 8px', fontFamily: BODY, fontWeight: 650, fontSize: 10.5, cursor: 'pointer', flexShrink: 0 } }, 'Изменить')),
       e('div', { style: { height: 6, background: t.line, borderRadius: 999, overflow: 'hidden', margin: '14px 0 11px' } },
         e('div', { style: { width: (pct == null ? 0 : pct) + '%', height: '100%', background: t.ink, borderRadius: 999, transition: 'width .35s ease' } })),
       e('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 14, fontFamily: BODY, fontSize: 12.5, lineHeight: 1.35, color: t.dim } },

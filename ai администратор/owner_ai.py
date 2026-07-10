@@ -3512,26 +3512,28 @@ def _owner_briefing(
         "neutral",
     )
 
-    month_target = _rub(month.get("target_value"))
-    month_actual = _rub(month.get("actual_value"))
-    month_gap = month_actual - month_target if month_target else 0
+    daily = goals.get("daily_revenue") or {}
+    daily_target = _rub(daily.get("target_value"))
+    daily_actual = _rub(daily.get("actual_value"))
+    daily_gap = daily_actual - daily_target if daily_target else 0
     simple_goal = {
-        "title": "План на месяц",
-        "actual_rub": month_actual,
-        "target_rub": month_target,
-        "progress_pct": _integer(month.get("progress_pct")) if month.get("progress_pct") is not None else None,
-        "gap_rub": month_gap,
-        "status": month.get("status") or "warn",
+        "title": "План на сегодня",
+        "actual_rub": daily_actual,
+        "target_rub": daily_target,
+        "progress_pct": _integer(daily.get("progress_pct")) if daily.get("progress_pct") is not None else None,
+        "gap_rub": daily_gap,
+        "status": daily.get("status") or "warn",
+        "target_source": daily.get("target_source") or plan.get("target_source"),
         "plain_status": (
-            "Не хватает %s до цели" % _money(abs(month_gap))
-            if month_target and month_gap < 0 else (
-                "Выше цели на %s" % _money(month_gap)
-                if month_target and month_gap > 0 else "Идём по плану"
+            "Не хватает %s до плана" % _money(abs(daily_gap))
+            if daily_target and daily_gap < 0 else (
+                "Выше плана на %s" % _money(daily_gap)
+                if daily_target and daily_gap > 0 else "Идём по плану"
             )
         ),
         "next_step": (
             "Главный рычаг сейчас — загрузка, повторная запись и средний чек."
-            if month_gap < 0 else "Сохранять темп и не терять маржинальность."
+            if daily_gap < 0 else "План дня выполнен; свободные окна можно заполнять без скидки на уже занятые часы."
         ),
     }
     top_master = masters.get("top_profit_master") or {}

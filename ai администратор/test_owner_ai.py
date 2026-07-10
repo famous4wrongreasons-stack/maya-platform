@@ -414,6 +414,7 @@ class OwnerAITests(unittest.TestCase):
             {"pulse", "revenue", "load", "clients", "quality", "market"},
         )
         self.assertIn("simple_goal", center["briefing"])
+        self.assertEqual(center["briefing"]["simple_goal"]["title"], "План на сегодня")
         self.assertNotIn("money_at_stake_rub", center["briefing"])
         self.assertEqual(
             center["market_intelligence"]["version"],
