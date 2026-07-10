@@ -22,8 +22,13 @@ def _profile(branch_id, name, *, rating=5, reviews=100, price=800, promoted=Fals
                 "attributes": [{
                     "tag": "barbershop_male_haircut_price",
                     "name": f"Муж.стрижка от {price} ₽",
+                }, {
+                    "tag": "barbershop_details_child_haircut",
+                    "name": "Детская стрижка",
                 }],
             }],
+            "schedule": {"Mon": {"working_hours": [{"from": "10:00", "to": "21:00"}]}},
+            "external_content": [{"type": "photo_album", "count": 30}],
             "is_promoted": promoted,
         },
     }
@@ -64,6 +69,11 @@ class MarketIntelligenceTests(unittest.TestCase):
         self.assertEqual(first["haircut_price_from_rub"], 900)
         self.assertTrue(first["promoted"])
         self.assertEqual(first["promotion"], "Скидка 20% на первое посещение")
+        self.assertEqual(first["search_position"], 1)
+        self.assertIn("first_visit", first["promotion_kinds"])
+        self.assertIn("discount", first["promotion_kinds"])
+        self.assertEqual(first["photo_count"], 30)
+        self.assertGreater(first["profile_completeness_score"], 0)
         self.assertNotIn("user", first)
         self.assertNotIn("author", first)
 
@@ -102,8 +112,41 @@ class MarketIntelligenceTests(unittest.TestCase):
         self.assertEqual(summary["price_position"], "middle")
         self.assertEqual(summary["reviews_analyzed"], 2)
         self.assertEqual(summary["negative_reviews_count"], 1)
+        self.assertEqual(summary["review_volume_rank"], 1)
+        self.assertEqual(summary["price_index_pct"], 100)
+        self.assertIn("visibility_proxy_score", summary)
         self.assertTrue(result["review_themes"])
         self.assertTrue(result["insights"])
+        self.assertTrue(result["recommendations"])
+        self.assertEqual(result["source_coverage"]["2gis"]["status"], "active")
+        self.assertEqual(
+            result["source_coverage"]["yandex_business"]["status"],
+            "owner_authorization_required",
+        )
+
+    def test_market_changes_track_price_promotions_reviews_and_rank(self):
+        previous = {
+            "competitors": [{
+                "organization_id": "one", "name": "Первый",
+                "reviews_count": 100, "haircut_price_from_rub": 800,
+                "promotion": "", "search_rank": 5,
+            }],
+        }
+        current = {
+            "competitors": [{
+                "organization_id": "one", "name": "Первый",
+                "reviews_count": 112, "haircut_price_from_rub": 900,
+                "promotion": "Скидка новичку", "search_rank": 3,
+            }],
+        }
+
+        changes = market_intelligence._market_changes(previous, current)
+
+        self.assertTrue(changes["has_baseline"])
+        self.assertEqual(changes["price_changes"][0]["delta_rub"], 100)
+        self.assertEqual(changes["promotion_changes"][0]["state"], "started")
+        self.assertEqual(changes["fastest_review_growth"][0]["delta"], 12)
+        self.assertEqual(changes["public_rank_changes"][0]["delta"], 2)
 
 
 if __name__ == "__main__":

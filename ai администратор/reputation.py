@@ -25,6 +25,7 @@ import database
 
 
 _SOURCES = {"yandex": "Яндекс Карты", "2gis": "2ГИС"}
+_HISTORY_PREFIX = "external_reputation_history_v2:"
 _PUBLIC_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) "
@@ -326,6 +327,66 @@ def _setting_snapshot(source: str) -> dict:
         return {}
 
 
+def _source_history(source: str) -> list[dict]:
+    try:
+        raw = database.get_setting(_HISTORY_PREFIX + str(source or ""))
+        rows = json.loads(raw) if raw else []
+        return [row for row in rows if isinstance(row, dict)] if isinstance(rows, list) else []
+    except Exception:
+        return []
+
+
+def _append_source_history(source: str, payload: dict) -> None:
+    rows = _source_history(source)
+    point = {
+        "date": str(payload.get("observed_at") or datetime.now().isoformat(timespec="seconds"))[:10],
+        "observed_at": str(payload.get("observed_at") or "")[:32],
+        "rating": _float(payload.get("rating")),
+        "reviews_count": _int(payload.get("reviews_count")),
+    }
+    if rows and rows[-1].get("date") == point["date"]:
+        rows[-1] = point
+    else:
+        rows.append(point)
+    database.set_setting(
+        _HISTORY_PREFIX + str(source or ""),
+        json.dumps(rows[-180:], ensure_ascii=False),
+    )
+
+
+def _source_trend(source: str, current: dict) -> dict:
+    rows = _source_history(source)
+    now_day = datetime.now().date()
+
+    def previous(days: int) -> dict | None:
+        cutoff = now_day - timedelta(days=days)
+        eligible = []
+        for row in rows:
+            try:
+                point_day = datetime.fromisoformat(str(row.get("date") or "")[:10]).date()
+            except ValueError:
+                continue
+            if point_day <= cutoff:
+                eligible.append((point_day, row))
+        return max(eligible, key=lambda item: item[0])[1] if eligible else None
+
+    def delta(days: int, field: str):
+        old = previous(days)
+        current_value = current.get(field)
+        old_value = old.get(field) if old else None
+        if current_value is None or old_value is None:
+            return None
+        value = float(current_value) - float(old_value)
+        return round(value, 2) if field == "rating" else int(round(value))
+
+    return {
+        "reviews_delta_7d": delta(7, "reviews_count"),
+        "reviews_delta_30d": delta(30, "reviews_count"),
+        "rating_delta_30d": delta(30, "rating"),
+        "history_days": len({row.get("date") for row in rows if row.get("date")}),
+    }
+
+
 def _public_monitor_status(source: str) -> dict:
     try:
         raw = database.get_setting(f"reputation_public_monitor_status:{source}")
@@ -357,6 +418,7 @@ def save_source_snapshot(
         f"external_reputation_snapshot:{source}",
         json.dumps(payload, ensure_ascii=False),
     )
+    _append_source_history(source, payload)
     return {"ok": True, **payload}
 
 
@@ -640,8 +702,19 @@ def analyze_reviews(rows: list[dict]) -> dict:
     }
     ratings = []
     negative_excerpts = []
-    by_source = {key: {"count": 0, "avg_rating": None} for key in _SOURCES}
+    by_source = {
+        key: {
+            "count": 0,
+            "avg_rating": None,
+            "new_7d": 0,
+            "new_30d": 0,
+            "negative_30d": 0,
+        }
+        for key in _SOURCES
+    }
     source_ratings = {key: [] for key in _SOURCES}
+    new_7d = new_30d = negative_30d = 0
+    today = datetime.now().date()
     for row in (rows or []):
         source = str(row.get("source") or "").lower()
         rating = _float(row.get("rating"))
@@ -653,6 +726,24 @@ def analyze_reviews(rows: list[dict]) -> dict:
                 source_ratings[source].append(rating)
         if source in by_source:
             by_source[source]["count"] += 1
+        raw_day = str(row.get("published_at") or row.get("imported_at") or "")[:10]
+        age_days = None
+        try:
+            age_days = max(0, (today - datetime.fromisoformat(raw_day).date()).days)
+        except ValueError:
+            pass
+        if age_days is not None and age_days <= 7:
+            new_7d += 1
+            if source in by_source:
+                by_source[source]["new_7d"] += 1
+        if age_days is not None and age_days <= 30:
+            new_30d += 1
+            if source in by_source:
+                by_source[source]["new_30d"] += 1
+            if rating is not None and rating <= 3:
+                negative_30d += 1
+                if source in by_source:
+                    by_source[source]["negative_30d"] += 1
         for theme, needles in _THEMES.items():
             if not any(needle in low for needle in needles):
                 continue
@@ -682,6 +773,11 @@ def analyze_reviews(rows: list[dict]) -> dict:
         "avg_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
         "negative_count": len([rating for rating in ratings if rating <= 3]),
         "positive_count": len([rating for rating in ratings if rating >= 4]),
+        "periods": {
+            "new_7d": new_7d,
+            "new_30d": new_30d,
+            "negative_30d": negative_30d,
+        },
         "by_source": by_source,
         "themes": themes,
         "negative_excerpts": negative_excerpts,
@@ -710,6 +806,8 @@ def reputation_snapshot(*, force_refresh: bool = False) -> dict:
             ))
         )
         public_monitoring = bool(database.get_setting(f"reputation_public_bootstrap:{key}"))
+        trend = _source_trend(key, snapshot or {})
+        source_text = (text_analysis.get("by_source") or {}).get(key, {})
         sources.append({
             "key": key,
             "title": _SOURCES[key],
@@ -717,7 +815,11 @@ def reputation_snapshot(*, force_refresh: bool = False) -> dict:
             "reviews_count": count,
             "connection": connection,
             "observed_at": (snapshot or {}).get("observed_at") or "",
-            "text_reviews_imported": (text_analysis.get("by_source") or {}).get(key, {}).get("count", 0),
+            "text_reviews_imported": source_text.get("count", 0),
+            "text_reviews_new_7d": source_text.get("new_7d", 0),
+            "text_reviews_new_30d": source_text.get("new_30d", 0),
+            "negative_reviews_30d": source_text.get("negative_30d", 0),
+            **trend,
             "text_api_available": False,
             "public_page_monitoring": public_monitoring,
             "last_public_check_at": monitor_status.get("checked_at") or "",
@@ -757,9 +859,13 @@ def reputation_snapshot(*, force_refresh: bool = False) -> dict:
         ),
         "summary": {
             "overall_rating": overall,
+            "overall_method": "review_count_weighted",
             "rated_sources_count": len(rated),
             "text_reviews_count": text_analysis.get("reviews_count", 0),
             "negative_reviews_count": negative_count,
+            "new_reviews_7d": (text_analysis.get("periods") or {}).get("new_7d", 0),
+            "new_reviews_30d": (text_analysis.get("periods") or {}).get("new_30d", 0),
+            "negative_reviews_30d": (text_analysis.get("periods") or {}).get("negative_30d", 0),
             "text_analysis_status": "ready" if rows else "awaiting_authorized_feed",
         },
         "sources": sources,

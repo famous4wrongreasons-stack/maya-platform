@@ -17,6 +17,7 @@ from datetime import date, datetime, timedelta
 import json
 import logging
 import re
+from statistics import median
 import time
 
 logger = logging.getLogger(__name__)
@@ -214,9 +215,36 @@ def _today_load() -> dict:
         logger.error(f"owner_ai today_load: {e}")
 
     by_staff = {}
+    active_records = []
+    booked_service_revenue = 0
+    priced_records = 0
+    unpriced_records = 0
+    single_service_records = 0
+    scheduled_service_items = 0
     for r in recs:
-        if isinstance(r, dict) and r.get("staff_id") is not None:
+        if not isinstance(r, dict) or r.get("deleted") or r.get("is_deleted"):
+            continue
+        if r.get("attendance") == -1:
+            continue
+        services = [row for row in (r.get("services") or []) if isinstance(row, dict)]
+        client = r.get("client") if isinstance(r.get("client"), dict) else {}
+        if ("client" in r or "services" in r) and not client.get("id") and not services:
+            # YClients technical breaks live in the records feed too.
+            continue
+        active_records.append(r)
+        if r.get("staff_id") is not None:
             by_staff[r["staff_id"]] = by_staff.get(r["staff_id"], 0) + 1
+        scheduled_service_items += len(services)
+        if len(services) == 1:
+            single_service_records += 1
+        service_total = 0
+        for service in services:
+            service_total += _rub(service.get("cost"))
+        if service_total:
+            booked_service_revenue += service_total
+            priced_records += 1
+        else:
+            unpriced_records += 1
 
     masters, idle, underused = [], [], []
     for m in working:
@@ -236,7 +264,12 @@ def _today_load() -> dict:
 
     return {
         "date": today,
-        "booked_today": len(recs),
+        "booked_today": len(active_records),
+        "booked_service_revenue_rub": booked_service_revenue,
+        "priced_records": priced_records,
+        "unpriced_records": unpriced_records,
+        "single_service_records": single_service_records,
+        "scheduled_service_items": scheduled_service_items,
         "working_masters": len(working),
         "idle_masters": idle,            # работают, но 0 записей
         "underused_masters": underused,  # работают, но много свободных окон
@@ -248,17 +281,50 @@ def business_snapshot() -> dict:
     """Операционная картина «сегодня»: записи, ожидаемая выручка, загрузка, тренд."""
     load = _today_load()
     avg = _avg_check_30d()
+    base = _summary_30d() or {}
     free_capacity = sum(m["free_slots_est"] for m in load["masters"])
+    priced_revenue = _rub(load.get("booked_service_revenue_rub"))
+    unpriced = _rub(load.get("unpriced_records"))
+    expected = priced_revenue + unpriced * avg
+    if not expected:
+        expected = _rub(load["booked_today"] * avg)
+    attendance = base.get("attendance") if isinstance(base.get("attendance"), dict) else {}
+    show_rate = attendance.get("show_rate_pct")
+    show_factor = max(0.75, min(1.0, float(show_rate or 100) / 100))
+    service_mix = base.get("service_mix") if isinstance(base.get("service_mix"), dict) else {}
+    attach_rate = max(0, min(100, _rub(service_mix.get("attach_rate_pct"))))
+    avg_addon = _rub(service_mix.get("avg_addon_rub"))
+    upsell_potential = _rub(
+        _rub(load.get("single_service_records")) * (attach_rate / 100) * avg_addon
+    )
+    fill_potential = _rub(free_capacity * avg)
+    forecast_low = _rub(expected * show_factor)
+    capacity_revenue = _rub((load["booked_today"] + free_capacity) * avg)
     return {
         **load,
         "avg_check_rub": avg,
-        "expected_revenue_rub": _rub(load["booked_today"] * avg),
+        "expected_revenue_rub": expected,
+        "forecast_low_rub": forecast_low,
+        "forecast_high_rub": _rub(expected + upsell_potential),
         "free_capacity_today": free_capacity,
-        "potential_fill_revenue_rub": _rub(free_capacity * avg),
+        "potential_fill_revenue_rub": fill_potential,
+        "upsell_potential_rub": upsell_potential,
+        "potential_revenue_rub": _rub(expected + upsell_potential + fill_potential),
+        "capacity_revenue_rub": capacity_revenue,
+        "historical_show_rate_pct": show_rate,
+        "historical_addon_attach_rate_pct": attach_rate or None,
+        "historical_avg_addon_rub": avg_addon,
+        "forecast_price_coverage_pct": (
+            round(_rub(load.get("priced_records")) * 100 / load["booked_today"])
+            if load["booked_today"] else None
+        ),
         "week_trend": _week_trend(),
-        "note": ("expected_revenue = записи сегодня × средний чек 30д (оценка); "
-                 "free_slots/ёмкость — грубая оценка по ~%d визитов на смену."
-                 % _VISITS_PER_SHIFT),
+        "note": (
+            "Прогноз использует цены услуг в сегодняшней записи; только записи без цены "
+            "оцениваются по среднему чеку. Потенциал включает исторические допродажи и "
+            "свободную ёмкость, поэтому не является гарантией. Ёмкость — оценка по ~%d "
+            "визитов на смену." % _VISITS_PER_SHIFT
+        ),
     }
 
 
@@ -299,25 +365,125 @@ def _today_revenue_summary() -> dict:
         return {}
 
 
-def plan_fact(snap: dict = None) -> dict:
-    """План-факт дня: факт оплат + прогноз по записям против дневной базы.
+def _smart_daily_baseline(base: dict, target_day: date) -> dict:
+    rows = [row for row in (base.get("daily") or []) if isinstance(row, dict)]
+    values = [_rub(row.get("gross_rub")) for row in rows]
+    weekday_values = []
+    for row in rows:
+        try:
+            row_day = date.fromisoformat(str(row.get("date") or "")[:10])
+        except ValueError:
+            continue
+        if row_day.weekday() == target_day.weekday():
+            weekday_values.append(_rub(row.get("gross_rub")))
+    calendar_avg = _rub(sum(values) / len(values)) if values else _rub(
+        (base.get("total_gross") or 0) / 30
+    )
+    weekday_median = _rub(median(weekday_values)) if weekday_values else calendar_avg
+    recent = values[-7:]
+    previous = values[-14:-7]
+    recent_avg = _rub(sum(recent) / len(recent)) if recent else calendar_avg
+    previous_avg = _rub(sum(previous) / len(previous)) if previous else calendar_avg
+    trend_factor = 1.0
+    if previous_avg:
+        trend_factor = max(0.85, min(1.15, recent_avg / previous_avg))
+    seasonal = _rub(weekday_median * 0.75 + calendar_avg * 0.25)
+    baseline = _rub(seasonal * trend_factor) or calendar_avg
+    return {
+        "baseline_rub": baseline,
+        "weekday_median_rub": weekday_median,
+        "calendar_daily_average_rub": calendar_avg,
+        "recent_7d_average_rub": recent_avg,
+        "trend_factor": round(trend_factor, 3),
+        "weekday_samples": len(weekday_values),
+        "confidence": "high" if len(weekday_values) >= 4 else (
+            "medium" if len(weekday_values) >= 2 else "low"
+        ),
+    }
 
-    База не выдумывается: ручная цель из settings, если задана; иначе средняя
-    дневная выручка последних 30 дней. Прогноз дня — оценка по записям и среднему
-    чеку, поэтому помечается estimate=true.
-    """
+
+def _weighted_month_target(month_target: int, base: dict, target_day: date) -> dict:
+    if not month_target:
+        return {"daily_target_rub": 0, "remaining_month_target_rub": 0}
+    daily_rows = [row for row in (base.get("daily") or []) if isinstance(row, dict)]
+    weekday_values = {index: [] for index in range(7)}
+    month_to_date_before_today = 0
+    for row in daily_rows:
+        try:
+            row_day = date.fromisoformat(str(row.get("date") or "")[:10])
+        except ValueError:
+            continue
+        gross = _rub(row.get("gross_rub"))
+        weekday_values[row_day.weekday()].append(gross)
+        if row_day.replace(day=1) == target_day.replace(day=1) and row_day < target_day:
+            month_to_date_before_today += gross
+    fallback = _rub((base.get("total_gross") or 0) / max(1, len(daily_rows) or 30)) or 1
+    weights = {
+        index: (_rub(median(values)) if values else fallback)
+        for index, values in weekday_values.items()
+    }
+    first = target_day.replace(day=1)
+    next_month = (
+        first.replace(year=first.year + 1, month=1)
+        if first.month == 12 else first.replace(month=first.month + 1)
+    )
+    remaining_days = []
+    cursor = target_day
+    while cursor < next_month:
+        remaining_days.append(cursor)
+        cursor += timedelta(days=1)
+    weight_sum = sum(max(1, weights.get(day.weekday(), fallback)) for day in remaining_days)
+    remaining_target = max(0, _rub(month_target) - month_to_date_before_today)
+    today_weight = max(1, weights.get(target_day.weekday(), fallback))
+    daily_target = _rub(remaining_target * today_weight / weight_sum) if weight_sum else 0
+    return {
+        "daily_target_rub": daily_target,
+        "month_target_rub": _rub(month_target),
+        "month_actual_before_today_rub": month_to_date_before_today,
+        "remaining_month_target_rub": remaining_target,
+        "remaining_days": len(remaining_days),
+    }
+
+
+def plan_fact(snap: dict = None) -> dict:
+    """Smart plan: strategic target, booked forecast and reachable potential."""
     snap = snap or business_snapshot()
     base = _summary_30d() or {}
     today = _today_revenue_summary()
+    try:
+        target_day = date.fromisoformat(str(snap.get("date") or _today())[:10])
+    except ValueError:
+        target_day = date.today()
+    baseline = _smart_daily_baseline(base, target_day)
     manual_target = _manual_daily_target_rub()
-    avg_daily = _rub((base.get("total_gross") or 0) / 30) if base.get("total_gross") else 0
-    daily_target = manual_target or avg_daily
-    target_source = "manual_setting" if manual_target else "last_30_actual_average"
+    month_target = _manual_month_gross_target_rub()
+    month_allocation = _weighted_month_target(month_target, base, target_day)
+    if manual_target:
+        daily_target = manual_target
+        target_source = "manual_setting"
+        target_explanation = "Ручная дневная цель владельца."
+    elif month_target and month_allocation.get("daily_target_rub"):
+        daily_target = _rub(month_allocation.get("daily_target_rub"))
+        target_source = "monthly_goal_weighted"
+        target_explanation = (
+            "Остаток месячной цели распределён по оставшимся дням с учётом "
+            "исторической силы этого дня недели."
+        )
+    else:
+        daily_target = _rub(baseline.get("baseline_rub"))
+        target_source = "weekday_history_baseline"
+        target_explanation = (
+            "Ориентир рассчитан по похожим дням недели, средней выручке и тренду "
+            "последних семи дней. Это рабочая база, пока владелец не задал цель."
+        )
 
     actual = _rub(today.get("total_gross"))
     paid_visits = _rub(today.get("visits"))
     expected = _rub(snap.get("expected_revenue_rub"))
     projected = max(actual, expected)
+    forecast_low = max(actual, _rub(snap.get("forecast_low_rub")))
+    forecast_high = max(projected, _rub(snap.get("forecast_high_rub")))
+    potential = max(forecast_high, _rub(snap.get("potential_revenue_rub")))
     avg_check = _rub(snap.get("avg_check_rub") or base.get("avg_check"))
     gap = projected - daily_target if daily_target else 0
     progress = round((projected / daily_target) * 100) if daily_target else None
@@ -338,20 +504,34 @@ def plan_fact(snap: dict = None) -> dict:
         "date": snap.get("date") or _today(),
         "daily_target_rub": daily_target,
         "target_source": target_source,
+        "target_explanation": target_explanation,
+        "baseline_rub": _rub(baseline.get("baseline_rub")),
+        "baseline": baseline,
+        "month_allocation": month_allocation,
         "actual_revenue_rub": actual,
         "paid_visits": paid_visits,
         "booked_today": _rub(snap.get("booked_today")),
         "expected_revenue_rub": expected,
         "projected_revenue_rub": projected,
+        "forecast_low_rub": forecast_low,
+        "forecast_high_rub": forecast_high,
+        "potential_revenue_rub": potential,
+        "upsell_potential_rub": _rub(snap.get("upsell_potential_rub")),
+        "fill_potential_rub": _rub(snap.get("potential_fill_revenue_rub")),
+        "capacity_revenue_rub": _rub(snap.get("capacity_revenue_rub")),
+        "forecast_price_coverage_pct": snap.get("forecast_price_coverage_pct"),
+        "historical_show_rate_pct": snap.get("historical_show_rate_pct"),
         "gap_rub": gap,
         "progress_pct": progress,
         "needed_visits_to_target": needed,
         "avg_check_rub": avg_check,
         "estimate": True,
+        "methodology_version": "maya_smart_plan_v2",
+        "confidence": baseline.get("confidence") or "low",
         "note": (
-            "План-факт: факт оплат сегодня + прогноз по текущим записям. "
-            "Дневной план — ручная цель owner_daily_target_rub или средняя "
-            "дневная выручка последних 30 дней."
+            "Цель, прогноз и потенциал разделены. Прогноз использует цены услуг "
+            "в записи, потенциал добавляет исторические допродажи и свободные окна. "
+            "Потенциал является оценкой, а не гарантированной выручкой."
         ),
     }
 
@@ -3324,6 +3504,246 @@ def _owner_business_advisor(
     }
 
 
+def _growth_engine(
+    *,
+    snap: dict,
+    plan: dict,
+    ret: dict,
+    retention: dict,
+    reputation_payload: dict,
+    market_payload: dict,
+) -> dict:
+    """Evidence-first growth decisions with measurable effect and guardrails."""
+    decisions = []
+    avg_check = _rub(plan.get("avg_check_rub") or snap.get("avg_check_rub"))
+
+    def add(
+        key: str,
+        domain: str,
+        title: str,
+        *,
+        evidence: str,
+        reasoning: str,
+        action: str,
+        metric: str,
+        effect_min=0,
+        effect_max=0,
+        unit: str = "rub",
+        confidence: str = "medium",
+        effort: str = "low",
+        kpi: str,
+        review_after_hours: int = 72,
+        guardrail: str = "Не запускать без проверки данных и допустимого контакта.",
+    ) -> None:
+        confidence_weight = {"high": 0.9, "medium": 0.65, "low": 0.4}.get(confidence, 0.5)
+        effort_weight = {"low": 1.0, "medium": 0.75, "high": 0.5}.get(effort, 0.75)
+        money_midpoint = (_rub(effect_min) + _rub(effect_max)) / 2 if unit == "rub" else 0
+        priority_score = round(money_midpoint * confidence_weight * effort_weight)
+        decisions.append({
+            "key": key,
+            "domain": domain,
+            "title": title,
+            "evidence": evidence,
+            "reasoning": reasoning,
+            "action": action,
+            "expected_effect": {
+                "metric": metric,
+                "min": _rub(effect_min) if unit == "rub" else effect_min,
+                "max": _rub(effect_max) if unit == "rub" else effect_max,
+                "unit": unit,
+                "basis": "scenario_estimate" if unit == "rub" else "operational_target",
+            },
+            "confidence": confidence,
+            "effort": effort,
+            "priority_score": priority_score,
+            "kpi": kpi,
+            "review_after_hours": max(24, _rub(review_after_hours)),
+            "guardrail": guardrail,
+            "requires_owner_approval": True,
+        })
+
+    free_capacity = _rub(snap.get("free_capacity_today"))
+    if free_capacity and avg_check:
+        min_visits = max(1, min(free_capacity, round(free_capacity * 0.15)))
+        max_visits = max(min_visits, min(free_capacity, round(free_capacity * 0.35)))
+        add(
+            "fill_nearest_windows",
+            "acquisition",
+            "Заполнить ближайшие свободные окна тёплым спросом",
+            evidence=f"Сегодня свободно около {free_capacity} визит(а/ов); средний чек {avg_check} ₽.",
+            reasoning="Ближайший денежный резерв находится в уже доступной ёмкости, а не в массовой скидке.",
+            action="Выбрать клиентов, которым уже подходит привычный срок визита, и предложить конкретные ближайшие окна.",
+            metric="incremental_revenue_rub",
+            effect_min=min_visits * avg_check,
+            effect_max=max_visits * avg_check,
+            confidence="medium",
+            kpi="Новые подтверждённые записи в свободные часы и фактическая выручка.",
+            guardrail="Только клиенты с допустимым контактом; не давать скидку на уже заполненные часы.",
+        )
+
+    upsell = _rub(plan.get("upsell_potential_rub"))
+    if upsell:
+        add(
+            "historical_addons",
+            "average_check",
+            "Вернуть уместные дополнительные услуги",
+            evidence=(
+                f"История комплексных визитов даёт до {upsell} ₽ дополнительного потенциала "
+                "в сегодняшней записи."
+            ),
+            reasoning="Предложение основано на фактическом поведении клиентов, а не на случайной допродаже.",
+            action="До визита показать мастеру только релевантные услуги, которые клиент уже выбирал или регулярно сочетает.",
+            metric="additional_service_revenue_rub",
+            effect_min=round(upsell * 0.3),
+            effect_max=round(upsell * 0.7),
+            confidence="medium",
+            kpi="Доля визитов с дополнительной услугой и прирост среднего чека.",
+            guardrail="Не навязывать услугу и не раскрывать мастеру лишние клиентские данные.",
+        )
+
+    retention_summary = retention.get("summary") or {}
+    churn_candidates = _rub(retention_summary.get("churn_candidates"))
+    forward_pct = retention_summary.get("forward_booking_pct")
+    if churn_candidates and (forward_pct is None or _rub(forward_pct) < 35):
+        min_returns = max(1, round(churn_candidates * 0.03))
+        max_returns = max(min_returns, round(churn_candidates * 0.08))
+        add(
+            "personal_return_cycle",
+            "retention",
+            "Возвращать клиентов по их личному циклу",
+            evidence=(
+                f"Без повторного визита {churn_candidates} клиент(а/ов); будущая запись "
+                f"{forward_pct if forward_pct is not None else 'ещё не рассчитана'}%."
+            ),
+            reasoning="Отклонение от привычного интервала визита является более точным сигналом ухода, чем единый срок для всей базы.",
+            action="Ранжировать клиентов по отклонению от личного цикла и начинать с тех, кому уже пора вернуться.",
+            metric="returned_revenue_rub",
+            effect_min=min_returns * avg_check,
+            effect_max=max_returns * avg_check,
+            confidence="medium",
+            kpi="Возвраты за 14 дней, фактическая выручка и повторный визит после возврата.",
+            review_after_hours=336,
+            guardrail="Маркетинговое согласие, ограничение частоты сообщений и контрольная группа.",
+        )
+
+    reputation_summary = reputation_payload.get("summary") or {}
+    negative_30d = _rub(
+        reputation_summary.get("negative_reviews_30d")
+        or reputation_summary.get("negative_reviews_count")
+    )
+    if negative_30d:
+        add(
+            "reputation_recovery",
+            "reputation",
+            "Разобрать свежий негатив по первопричине",
+            evidence=f"За анализируемый период найдено негативных отзывов: {negative_30d}.",
+            reasoning="Один повторяющийся дефект сервиса влияет и на удержание, и на выбор новых клиентов.",
+            action=(reputation_payload.get("recommendations") or [
+                "Классифицировать причину, исправить процесс и подготовить спокойный предметный ответ."
+            ])[0],
+            metric="negative_review_resolution_pct",
+            effect_min=80,
+            effect_max=100,
+            unit="pct",
+            confidence="high",
+            kpi="Доля разобранных негативных отзывов и повторяемость темы за 30 дней.",
+            review_after_hours=168,
+            guardrail="Не публиковать персональные данные и не спорить с клиентом в ответе.",
+        )
+
+    market_summary = market_payload.get("summary") or {}
+    market_recommendation = (market_payload.get("recommendations") or [{}])[0]
+    if market_summary.get("competitors_scanned"):
+        add(
+            "market_position",
+            "market",
+            "Усилить позицию по доказанному рыночному разрыву",
+            evidence=(
+                market_recommendation.get("fact")
+                or f"Сравнено {market_summary.get('competitors_scanned')} конкурентов в публичной выдаче."
+            ),
+            reasoning="Рынок оценивается по цене, отзывам, видимости, наполнению профиля и предложениям, а не по одной медиане.",
+            action=(
+                market_recommendation.get("action")
+                or "Исправить самый большой измеримый разрыв и проверить изменение позиции через неделю."
+            ),
+            metric="market_visibility_proxy_score",
+            effect_min=5,
+            effect_max=12,
+            unit="points",
+            confidence=market_recommendation.get("confidence") or "medium",
+            effort="medium",
+            kpi="Индекс видимости, место по отзывам, цена и динамика поисковой позиции.",
+            review_after_hours=168,
+            guardrail="Не называть косвенный индекс реальным трафиком или долей рынка.",
+        )
+
+    try:
+        import database
+        source_stats = database.sources_stats(days=30) or {}
+    except Exception:
+        source_stats = {}
+    by_source = source_stats.get("by_source") if isinstance(source_stats.get("by_source"), dict) else {}
+    weak_sources = [
+        {"source": key, **value}
+        for key, value in by_source.items()
+        if isinstance(value, dict) and _rub(value.get("clients")) >= 3 and float(value.get("conversion") or 0) < 30
+    ]
+    if weak_sources:
+        weak_sources.sort(key=lambda row: float(row.get("conversion") or 0))
+        weak = weak_sources[0]
+        add(
+            "source_conversion",
+            "acquisition",
+            "Исправить слабую конверсию источника",
+            evidence=(
+                f"Источник {weak.get('source')} привёл {weak.get('clients')} клиент(а/ов), "
+                f"в запись перешло {weak.get('conversion')}%."
+            ),
+            reasoning="Рост трафика невыгоден, пока текущий источник плохо превращается в запись.",
+            action="Проверить обещание, путь до записи и причину отказа до увеличения бюджета.",
+            metric="source_booking_conversion_pct",
+            effect_min=5,
+            effect_max=15,
+            unit="pct",
+            confidence="medium",
+            effort="medium",
+            kpi="Конверсия источника в запись и стоимость фактически пришедшего клиента.",
+            review_after_hours=336,
+            guardrail="Не увеличивать бюджет без сквозной атрибуции до состоявшегося визита.",
+        )
+
+    decisions.sort(key=lambda row: (-_rub(row.get("priority_score")), row.get("domain") or ""))
+    status = "warn" if decisions else "ok"
+    return {
+        "version": "maya_growth_engine_v1",
+        "mode": "evidence_to_action",
+        "status": status,
+        "headline": (
+            decisions[0].get("title") if decisions else "Критичных возможностей роста сейчас не найдено"
+        ),
+        "summary": {
+            "decisions_count": len(decisions),
+            "money_opportunity_min_rub": sum(
+                _rub((row.get("expected_effect") or {}).get("min"))
+                for row in decisions if (row.get("expected_effect") or {}).get("unit") == "rub"
+            ),
+            "money_opportunity_max_rub": sum(
+                _rub((row.get("expected_effect") or {}).get("max"))
+                for row in decisions if (row.get("expected_effect") or {}).get("unit") == "rub"
+            ),
+            "domains": sorted({row.get("domain") for row in decisions if row.get("domain")}),
+            "attribution_sources_count": len(by_source),
+        },
+        "decisions": decisions[:6],
+        "source_attribution": source_stats,
+        "note": (
+            "MAYA отделяет факт от гипотезы. Денежный эффект указан диапазоном и "
+            "должен проверяться по KPI после выполнения."
+        ),
+    }
+
+
 def _owner_briefing(
     *,
     snap: dict,
@@ -3334,6 +3754,7 @@ def _owner_briefing(
     reputation_payload: dict,
     market_payload: dict,
     masters: dict,
+    growth_engine: dict,
 ) -> dict:
     """One plain-language owner surface instead of a stack of subsystem cards."""
     goals = {
@@ -3349,6 +3770,17 @@ def _owner_briefing(
     reputation_summary = reputation_payload.get("summary") or {}
     market_summary = market_payload.get("summary") or {}
     retention_summary = retention.get("summary") or {}
+    growth_decisions = [
+        row for row in (growth_engine.get("decisions") or []) if isinstance(row, dict)
+    ]
+    growth_by_domain = {}
+    for row in growth_decisions:
+        growth_by_domain.setdefault(row.get("domain"), row)
+    top_growth = growth_decisions[0] if growth_decisions else {}
+
+    def growth_action(domain: str, fallback: str) -> str:
+        return str((growth_by_domain.get(domain) or {}).get("action") or fallback)
+
     plan_target = _rub(plan.get("daily_target_rub"))
     plan_expected = _rub(plan.get("projected_revenue_rub") or snap.get("expected_revenue_rub"))
     plan_gap = plan_expected - plan_target if plan_target else 0
@@ -3378,8 +3810,8 @@ def _owner_briefing(
 
     cards = []
 
-    def add_card(key, label, title, value, value_label, second_value, second_label, analysis, action, tone="neutral"):
-        cards.append({
+    def add_card(key, label, title, value, value_label, second_value, second_label, analysis, action, tone="neutral", decision=None):
+        card = {
             "key": key,
             "label": label,
             "title": title,
@@ -3390,7 +3822,10 @@ def _owner_briefing(
             "analysis": analysis,
             "action": action,
             "tone": tone if tone in ("positive", "attention", "neutral") else "neutral",
-        })
+        }
+        if isinstance(decision, dict) and decision:
+            card["decision"] = decision
+        cards.append(card)
 
     add_card(
         "pulse",
@@ -3401,11 +3836,12 @@ def _owner_briefing(
         str(booked),
         "записей",
         summary_text,
-        (
+        top_growth.get("action") or (
             "Сначала закрыть ближайшие свободные окна клиентами с привычным циклом визитов."
             if free_capacity else "Сохранить темп и проверить фактические оплаты в конце дня."
         ),
         "attention" if status != "ok" else "positive",
+        top_growth,
     )
 
     revenue_advice = advice.get("revenue") or {}
@@ -3422,8 +3858,13 @@ def _owner_briefing(
             "План дня %s; прогноз месяца выполнен на %s%%."
             % (_money(plan_target), _integer(month.get("progress_pct")))
         ),
-        revenue_advice.get("recommendation") or "Удерживать загрузку и средний чек без скидки на уже заполненные часы.",
+        growth_action(
+            "average_check",
+            revenue_advice.get("recommendation")
+            or "Удерживать загрузку и средний чек без скидки на уже заполненные часы.",
+        ),
         "attention" if (revenue_advice.get("status") or "ok") != "ok" else "positive",
+        growth_by_domain.get("average_check"),
     )
 
     load = goals.get("daily_load") or {}
@@ -3439,11 +3880,13 @@ def _owner_briefing(
         "Сегодня работают %s мастер(а/ов), записей — %s." % (
             _m(snap.get("working_masters")), _m(booked)
         ),
-        (
+        growth_action(
+            "acquisition",
             "Сфокусировать возврат клиентов на ближайших свободных часах."
-            if free_capacity else "Следить за отменами и сразу отдавать окна листу ожидания."
+            if free_capacity else "Следить за отменами и сразу отдавать окна листу ожидания.",
         ),
         "attention" if free_capacity else "positive",
+        growth_by_domain.get("acquisition"),
     )
 
     retention_pct = retention_summary.get("retention_90d_pct")
@@ -3460,40 +3903,78 @@ def _owner_briefing(
             "К возврату сейчас %s клиент(а/ов)."
             % _m(retention_summary.get("churn_candidates"))
         ),
-        "Повышать долю следующей записи сразу после визита и возвращать клиентов до полного оттока.",
+        growth_action(
+            "retention",
+            "Повышать долю следующей записи сразу после визита и возвращать клиентов до полного оттока.",
+        ),
         "attention" if (retention.get("status") or "warn") != "ok" else "positive",
+        growth_by_domain.get("retention"),
     )
 
     maps_rating = reputation_summary.get("overall_rating")
     negative_reviews = _rub(reputation_summary.get("negative_reviews_count"))
+    reputation_sources = {
+        row.get("key"): row
+        for row in (reputation_payload.get("sources") or [])
+        if isinstance(row, dict) and row.get("key")
+    }
+    yandex = reputation_sources.get("yandex") or {}
+    two_gis = reputation_sources.get("2gis") or {}
+
+    def rating_value(source: dict) -> str:
+        return ("%.1f" % float(source.get("rating"))) if source.get("rating") is not None else "—"
+
+    review_periods = reputation_payload.get("text_analysis") or {}
+    period_summary = review_periods.get("periods") or {}
     add_card(
         "quality",
         "Качество",
-        "Что говорят клиенты",
-        ("%.1f" % float(maps_rating)) if maps_rating is not None else "—",
-        "рейтинг на картах",
-        str(negative_reviews),
-        "негативных отзывов",
-        (reputation_payload.get("headline") or "MAYA следит за отзывами на картах."),
-        ((reputation_payload.get("recommendations") or [
-            "Поддерживать поток свежих отзывов и быстро разбирать конкретные причины негатива."
-        ])[0]),
+        "Репутация на двух площадках",
+        rating_value(yandex),
+        "Яндекс · %s отзывов" % _m(yandex.get("reviews_count")),
+        rating_value(two_gis),
+        "2ГИС · %s отзывов" % _m(two_gis.get("reviews_count")),
+        (
+            "Общий взвешенный рейтинг %s. Проанализировано %s текстов; новых за 30 дней %s, негативных %s."
+            % (
+                ("%.2f" % float(maps_rating)) if maps_rating is not None else "—",
+                _m(reputation_summary.get("text_reviews_count")),
+                _m(period_summary.get("new_30d")),
+                _m(period_summary.get("negative_30d") or negative_reviews),
+            )
+        ),
+        growth_action(
+            "reputation",
+            ((reputation_payload.get("recommendations") or [
+                "Поддерживать поток свежих отзывов и быстро разбирать конкретные причины негатива."
+            ])[0]),
+        ),
         "attention" if negative_reviews else "positive",
+        growth_by_domain.get("reputation"),
     )
 
     market_scanned = _rub(market_summary.get("competitors_scanned"))
     market_price = market_summary.get("market_median_haircut_price_rub")
     own_price = market_summary.get("own_haircut_price_rub")
     if market_scanned:
-        market_value = _money(own_price) if own_price else "—"
-        market_second = _money(market_price) if market_price else "—"
+        review_rank = market_summary.get("review_volume_rank")
+        tracked_count = market_summary.get("tracked_businesses_count") or market_scanned
+        price_index = market_summary.get("price_index_pct")
+        visibility_score = market_summary.get("visibility_proxy_score")
+        market_value = ("№%s из %s" % (_m(review_rank), _m(tracked_count))) if review_rank else "—"
+        market_second = (str(price_index) + "%") if price_index is not None else "—"
         market_analysis = (
-            "MAYA сравнила %s брендов и %s отзывов в открытой выдаче."
-            % (_m(market_scanned), _m(market_summary.get("reviews_analyzed")))
+            "Сравнено %s брендов: цена, отзывы, акции, публичная позиция и наполнение карточки. "
+            "Индекс видимости %s/100 является косвенной оценкой, не реальным трафиком."
+            % (_m(market_scanned), _m(visibility_score))
         )
-        market_action = (market_payload.get("insights") or [
-            "Следить за ценой, рекламными обещаниями и сильными темами конкурентов."
-        ])[0]
+        market_action = growth_action(
+            "market",
+            ((market_payload.get("recommendations") or [{}])[0].get("action")
+             or (market_payload.get("insights") or [
+                 "Следить за ценой, рекламными обещаниями и сильными темами конкурентов."
+             ])[0]),
+        )
     else:
         market_value = "—"
         market_second = "—"
@@ -3504,12 +3985,13 @@ def _owner_briefing(
         "Рынок",
         "Позиция среди барбершопов Ставрополя",
         market_value,
-        "ваша цена от",
+        "место по объёму отзывов",
         market_second,
-        "медиана рынка",
+        "индекс цены к медиане",
         market_analysis,
         market_action,
         "neutral",
+        growth_by_domain.get("market"),
     )
 
     daily = goals.get("daily_revenue") or {}
@@ -3519,11 +4001,20 @@ def _owner_briefing(
     simple_goal = {
         "title": "План на сегодня",
         "actual_rub": daily_actual,
+        "forecast_rub": _rub(plan.get("projected_revenue_rub")),
+        "forecast_low_rub": _rub(plan.get("forecast_low_rub")),
+        "forecast_high_rub": _rub(plan.get("forecast_high_rub")),
+        "potential_rub": _rub(plan.get("potential_revenue_rub")),
+        "baseline_rub": _rub(plan.get("baseline_rub")),
+        "upsell_potential_rub": _rub(plan.get("upsell_potential_rub")),
+        "fill_potential_rub": _rub(plan.get("fill_potential_rub")),
         "target_rub": daily_target,
         "progress_pct": _integer(daily.get("progress_pct")) if daily.get("progress_pct") is not None else None,
         "gap_rub": daily_gap,
         "status": daily.get("status") or "warn",
         "target_source": daily.get("target_source") or plan.get("target_source"),
+        "target_explanation": plan.get("target_explanation") or "",
+        "confidence": plan.get("confidence") or "low",
         "plain_status": (
             "Не хватает %s до плана" % _money(abs(daily_gap))
             if daily_target and daily_gap < 0 else (
@@ -3531,7 +4022,7 @@ def _owner_briefing(
                 if daily_target and daily_gap > 0 else "Идём по плану"
             )
         ),
-        "next_step": (
+        "next_step": top_growth.get("action") or (
             "Главный рычаг сейчас — загрузка, повторная запись и средний чек."
             if daily_gap < 0 else "План дня выполнен; свободные окна можно заполнять без скидки на уже занятые часы."
         ),
@@ -3555,6 +4046,7 @@ def _owner_briefing(
         "cards": cards,
         "simple_goal": simple_goal,
         "quick_stats": quick_stats,
+        "decisions": growth_decisions,
         "updated_at": datetime.now().isoformat(timespec="seconds"),
         "note": "Один управленческий вход: факт, смысл и следующий шаг без подтверждений и технических очередей.",
     }
@@ -4995,6 +5487,14 @@ def command_center() -> dict:
         reputation_payload=reputation_payload,
         internal_reviews=internal_reviews,
     )
+    growth_engine = _growth_engine(
+        snap=snap,
+        plan=plan,
+        ret=ret,
+        retention=retention,
+        reputation_payload=reputation_payload,
+        market_payload=market_payload,
+    )
     briefing = _owner_briefing(
         snap=snap,
         plan=plan,
@@ -5004,6 +5504,7 @@ def command_center() -> dict:
         reputation_payload=reputation_payload,
         market_payload=market_payload,
         masters=masters,
+        growth_engine=growth_engine,
     )
     decision_memory = _decision_memory(
         journal=journal,
@@ -5036,6 +5537,7 @@ def command_center() -> dict:
         kpi_scorecard.get("status"),
         business_goals.get("status"),
         owner_advisor.get("status"),
+        growth_engine.get("status"),
         market_payload.get("status"),
         decision_memory.get("status"),
         operating_rhythm.get("status"),
@@ -5310,6 +5812,9 @@ def command_center() -> dict:
             "daily_target_rub": _rub(plan.get("daily_target_rub")),
             "plan_progress_pct": plan.get("progress_pct"),
             "plan_gap_rub": _rub(plan.get("gap_rub")),
+            "plan_baseline_rub": _rub(plan.get("baseline_rub")),
+            "plan_potential_rub": _rub(plan.get("potential_revenue_rub")),
+            "plan_target_source": plan.get("target_source"),
             "salary_total_rub": _rub(masters.get("salary_total_rub")),
             "top_profit_master": masters.get("top_profit_master"),
             "top_gross_master": masters.get("top_gross_master"),
@@ -5353,6 +5858,9 @@ def command_center() -> dict:
             "owner_advisor_score": (owner_advisor.get("summary") or {}).get("score", 0),
             "owner_advisor_attention_count": (owner_advisor.get("summary") or {}).get("attention_count", 0),
             "owner_advisor_top_priority": (owner_advisor.get("summary") or {}).get("top_priority_key"),
+            "growth_decisions_count": (growth_engine.get("summary") or {}).get("decisions_count", 0),
+            "growth_opportunity_min_rub": (growth_engine.get("summary") or {}).get("money_opportunity_min_rub", 0),
+            "growth_opportunity_max_rub": (growth_engine.get("summary") or {}).get("money_opportunity_max_rub", 0),
             "maps_rating": (reputation_payload.get("summary") or {}).get("overall_rating"),
             "maps_sources_connected": (reputation_payload.get("summary") or {}).get("rated_sources_count", 0),
             "external_reviews_analyzed": (reputation_payload.get("summary") or {}).get("text_reviews_count", 0),
@@ -5378,6 +5886,7 @@ def command_center() -> dict:
         "financial_director": financial_director,
         "business_goals": business_goals,
         "owner_advisor": owner_advisor,
+        "growth_engine": growth_engine,
         "briefing": briefing,
         "reputation": reputation_payload,
         "market_intelligence": market_payload,

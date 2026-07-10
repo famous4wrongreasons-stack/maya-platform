@@ -24,6 +24,7 @@ import reputation
 
 _SNAPSHOT_KEY = "maya_market_intelligence_snapshot_v1"
 _STATUS_KEY = "maya_market_intelligence_status_v1"
+_HISTORY_KEY = "maya_market_intelligence_history_v2"
 _CACHE_HOURS = 20
 _CITY_ALIAS = "stavropol"
 _CITY_NAME = "Ставрополь"
@@ -118,6 +119,83 @@ def _haircut_price(attribute_groups) -> int | None:
     return min(values) if values else None
 
 
+def _flatten_attributes(attribute_groups) -> list[dict]:
+    rows = []
+    for group in attribute_groups or []:
+        if not isinstance(group, dict):
+            continue
+        for attribute in group.get("attributes") or []:
+            if isinstance(attribute, dict):
+                rows.append(attribute)
+    return rows
+
+
+def _public_profile_signals(data: dict, tokens: list[str]) -> dict:
+    attributes = _flatten_attributes(data.get("attribute_groups"))
+    tags = {str(row.get("tag") or "") for row in attributes}
+    awards = [
+        _normalise_text(row.get("name"))[:100]
+        for row in attributes
+        if str(row.get("tag") or "").startswith("awards_") and row.get("name")
+    ]
+    photos = sum(
+        _integer(row.get("count"))
+        for row in (data.get("external_content") or [])
+        if isinstance(row, dict) and row.get("type") == "photo_album"
+    )
+    contacts = [
+        contact
+        for group in (data.get("contact_groups") or [])
+        if isinstance(group, dict)
+        for contact in (group.get("contacts") or [])
+        if isinstance(contact, dict)
+    ]
+    contact_types = {str(row.get("type") or "").lower() for row in contacts}
+    social_types = {"vkontakte", "telegram", "instagram", "youtube", "tiktok"}
+    has_website = "website" in contact_types
+    social_channels = len(contact_types & social_types)
+    has_online_booking = any("записаться онлайн" in token.lower() for token in tokens)
+    promotion = _promotion_from_tokens(tokens)
+    promotion_kinds = []
+    low = promotion.lower()
+    if any(word in low for word in ("перв", "welcome", "нович")):
+        promotion_kinds.append("first_visit")
+    if "%" in low or "скид" in low or re.search(r"-\s*\d+\s*р", low):
+        promotion_kinds.append("discount")
+    if any(word in low for word in ("подар", "бонус", "бесплат")):
+        promotion_kinds.append("gift")
+    if any(word in low for word in ("комплекс", "комбо", "абонем")):
+        promotion_kinds.append("bundle")
+    meaningful_attributes = [
+        row for row in attributes
+        if not str(row.get("tag") or "").startswith("general_payment_type_")
+    ]
+    components = [
+        bool(data.get("schedule")),
+        bool(data.get("reviews")),
+        bool(_haircut_price(data.get("attribute_groups"))),
+        photos >= 10,
+        has_website,
+        social_channels > 0,
+        has_online_booking,
+        len(meaningful_attributes) >= 3,
+        bool(awards),
+        bool(promotion),
+    ]
+    return {
+        "photo_count": photos,
+        "has_website": has_website,
+        "social_channels_count": social_channels,
+        "has_online_booking": has_online_booking,
+        "profile_features_count": len(meaningful_attributes),
+        "profile_completeness_score": sum(bool(value) for value in components) * 10,
+        "awards": awards[:4],
+        "has_child_haircut": "barbershop_details_child_haircut" in tags,
+        "has_home_service": "covid_services_home" in tags,
+        "promotion_kinds": promotion_kinds,
+    }
+
+
 def _promotion_from_tokens(tokens: list[str]) -> str:
     if "Реклама" not in tokens:
         return ""
@@ -171,6 +249,7 @@ def _company_from_profile(branch_id: str, wrapper: dict, tokens: list[str] | Non
     )
     tokens = tokens or []
     promoted = bool(data.get("is_promoted") or "Реклама" in tokens)
+    signals = _public_profile_signals(data, tokens)
     return {
         "branch_id": str(data.get("id") or branch_id),
         "organization_id": str(org.get("id") or data.get("id") or branch_id),
@@ -183,6 +262,7 @@ def _company_from_profile(branch_id: str, wrapper: dict, tokens: list[str] | Non
         "haircut_price_from_rub": _haircut_price(data.get("attribute_groups")),
         "promoted": promoted,
         "promotion": _promotion_from_tokens(tokens) if promoted else "",
+        **signals,
         "url": f"https://2gis.ru/{_CITY_ALIAS}/firm/{branch_id}",
     }
 
@@ -198,9 +278,11 @@ def parse_2gis_search_page(html: str) -> dict:
     entity_profiles = ((data.get("entity") or {}).get("profile") or {})
     tokens = _public_card_tokens(html)
     companies = []
-    for branch_id, wrapper in entity_profiles.items():
+    for position, (branch_id, wrapper) in enumerate(entity_profiles.items(), start=1):
         company = _company_from_profile(str(branch_id), wrapper, tokens.get(str(branch_id)) or [])
         if company:
+            company["search_page"] = _integer(search_data.get("currentPage"), 1)
+            company["search_position"] = position
             companies.append(company)
     return {
         "query": _normalise_text(search_data.get("query") or _SEARCH_QUERY),
@@ -262,6 +344,10 @@ def _merge_brands(companies: list[dict]) -> list[dict]:
                 keep.get("haircut_price_from_rub"), current.get("haircut_price_from_rub")
             ) if p]
             keep["haircut_price_from_rub"] = min(prices) if prices else None
+            ranks = [value for value in (
+                keep.get("search_rank"), current.get("search_rank")
+            ) if value]
+            keep["search_rank"] = min(ranks) if ranks else None
             brands[key] = keep
         else:
             current["promoted"] = bool(current.get("promoted") or company.get("promoted"))
@@ -270,7 +356,42 @@ def _merge_brands(companies: list[dict]) -> list[dict]:
                 current.get("haircut_price_from_rub"), company.get("haircut_price_from_rub")
             ) if p]
             current["haircut_price_from_rub"] = min(prices) if prices else None
+            ranks = [value for value in (
+                current.get("search_rank"), company.get("search_rank")
+            ) if value]
+            current["search_rank"] = min(ranks) if ranks else None
     return list(brands.values())
+
+
+def _merge_profile_details(company: dict, detailed: dict | None) -> dict:
+    if not detailed:
+        return dict(company)
+    merged = dict(company)
+    for key in (
+        "photo_count", "has_website", "social_channels_count",
+        "profile_features_count", "profile_completeness_score", "awards",
+        "has_child_haircut", "has_home_service",
+    ):
+        if detailed.get(key) not in (None, "", [], 0, False):
+            merged[key] = detailed.get(key)
+    merged["has_online_booking"] = bool(
+        company.get("has_online_booking") or detailed.get("has_online_booking")
+    )
+    return merged
+
+
+def _enrich_public_profile(company: dict) -> dict:
+    branch_id = str(company.get("branch_id") or "")
+    if not branch_id:
+        return dict(company)
+    try:
+        detailed = parse_2gis_profile_page(
+            _get(f"https://2gis.ru/{_CITY_ALIAS}/firm/{branch_id}"),
+            branch_id,
+        )
+        return _merge_profile_details(company, detailed)
+    except Exception:
+        return dict(company)
 
 
 def _review_summary(company: dict) -> dict:
@@ -324,11 +445,74 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
     market_reviews = _integer(median(volumes)) if volumes else None
     review_analysis = reputation.analyze_reviews(review_rows)
     promoted = [row for row in competitors if row.get("promoted")]
-    leaders = competitors[:6]
+    online_booking = [row for row in competitors if row.get("has_online_booking")]
+    photo_counts = [_integer(row.get("photo_count")) for row in competitors if row.get("photo_count")]
+    profile_scores = [
+        _integer(row.get("profile_completeness_score"))
+        for row in competitors if row.get("profile_completeness_score") is not None
+    ]
+    market_photos = _integer(median(photo_counts)) if photo_counts else None
+    market_profile_score = _integer(median(profile_scores)) if profile_scores else None
     own_price = own.get("haircut_price_from_rub")
     own_rating = own.get("rating")
     price_position = _position(own_price, market_price, 100)
     rating_position = _position(own_rating, market_rating, 0.05)
+    price_index_pct = (
+        round(float(own_price) * 100 / float(market_price))
+        if own_price and market_price else None
+    )
+
+    tracked = ([own] if own else []) + competitors
+    by_reviews = sorted(tracked, key=lambda row: (-_integer(row.get("reviews_count")), row.get("name") or ""))
+    by_rating = sorted(tracked, key=lambda row: (-_num(row.get("rating")), -_integer(row.get("reviews_count"))))
+
+    def business_rank(rows: list[dict], branch_id: str) -> int | None:
+        for index, row in enumerate(rows, start=1):
+            if str(row.get("branch_id") or "") == str(branch_id or ""):
+                return index
+        return None
+
+    own_review_rank = business_rank(by_reviews, own_id) if own else None
+    own_rating_rank = business_rank(by_rating, own_id) if own else None
+    own_search_rank = _integer(own.get("search_rank")) or None
+    tracked_count = len(tracked)
+
+    def percentile_from_rank(rank: int | None) -> float:
+        if not rank or tracked_count <= 1:
+            return 50.0
+        return max(0.0, min(100.0, (tracked_count - rank) * 100 / (tracked_count - 1)))
+
+    search_score = (
+        max(0.0, min(100.0, (31 - own_search_rank) * 100 / 30))
+        if own_search_rank else 50.0
+    )
+    own_profile_score = _integer(own.get("profile_completeness_score"))
+    visibility_proxy_score = round(
+        percentile_from_rank(own_review_rank) * 0.35
+        + percentile_from_rank(own_rating_rank) * 0.20
+        + own_profile_score * 0.25
+        + search_score * 0.20
+    ) if own else None
+    total_tracked_reviews = sum(_integer(row.get("reviews_count")) for row in tracked)
+    own_review_share_pct = (
+        round(_integer(own.get("reviews_count")) * 100 / total_tracked_reviews, 1)
+        if own and total_tracked_reviews else None
+    )
+    promotion_patterns = {}
+    for row in promoted:
+        kinds = row.get("promotion_kinds") or ["other"]
+        for kind in kinds:
+            promotion_patterns[str(kind)] = promotion_patterns.get(str(kind), 0) + 1
+
+    recommendations = []
+
+    def recommend(key: str, fact: str, action: str, confidence: str = "medium") -> None:
+        recommendations.append({
+            "key": key,
+            "fact": fact,
+            "action": action,
+            "confidence": confidence,
+        })
 
     insights = []
     if own_price and market_price:
@@ -346,6 +530,19 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
             insights.append(
                 f"Стрижка от {_money(own_price)} находится около рыночной медианы {_money(market_price)}."
             )
+        recommend(
+            "price_position",
+            f"Индекс цены {price_index_pct}% к медиане отслеживаемого рынка.",
+            (
+                "Тестировать повышение цены только на части услуг и сравнить запись, чек и повторный визит."
+                if price_position == "below" else (
+                    "Подкреплять цену отзывами, результатом и сервисом, а не массовой скидкой."
+                    if price_position == "above" else
+                    "Сохранять базовую цену и искать рост в комплексах, допродажах и загрузке."
+                )
+            ),
+            "high",
+        )
     if own_rating is not None and market_rating is not None:
         if rating_position == "below":
             insights.append(
@@ -355,11 +552,51 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
             insights.append(
                 f"Рейтинг {own_rating:.1f} не ниже рыночной медианы {market_rating:.1f}; это сильная сторона позиционирования."
             )
+    if own_review_rank:
+        insights.append(
+            f"По объёму отзывов бизнес занимает место {own_review_rank} из {tracked_count} отслеживаемых брендов; "
+            f"доля отзывов в выборке — {own_review_share_pct or 0}%."
+        )
+        recommend(
+            "review_visibility",
+            f"Место по объёму отзывов: {own_review_rank} из {tracked_count}.",
+            "Увеличивать скорость появления свежих отзывов после подтверждённо успешных визитов.",
+            "high",
+        )
+    if market_profile_score is not None:
+        if own_profile_score < market_profile_score:
+            insights.append(
+                f"Наполнение карточки {own_profile_score}/100 ниже медианы рынка {market_profile_score}/100."
+            )
+            recommend(
+                "profile_completeness",
+                f"Карточка заполнена на {own_profile_score}/100 против медианы {market_profile_score}/100.",
+                "Добавить недостающие услуги, фотографии, способы связи и актуальное предложение.",
+                "medium",
+            )
+        else:
+            insights.append(
+                f"Наполнение карточки {own_profile_score}/100 не ниже медианы рынка {market_profile_score}/100."
+            )
     if promoted:
         examples = [row.get("promotion") for row in promoted if row.get("promotion")][:2]
         detail = (" Например: " + "; ".join(examples) + ".") if examples else ""
         insights.append(
             f"В верхней части открытой выдачи продвигаются {len(promoted)} из {len(competitors)} просмотренных брендов.{detail}"
+        )
+        leading_pattern = max(promotion_patterns, key=promotion_patterns.get) if promotion_patterns else "other"
+        pattern_labels = {
+            "first_visit": "предложение на первый визит",
+            "discount": "прямая скидка",
+            "gift": "подарок или бонус",
+            "bundle": "комплекс или абонемент",
+            "other": "имиджевое обещание",
+        }
+        recommend(
+            "promotion_landscape",
+            f"Продвигаются {len(promoted)} брендов; частый формат — {pattern_labels.get(leading_pattern, leading_pattern)}.",
+            "Не копировать рынок автоматически: проверить узкое предложение на свободные часы без скидки на заполненное время.",
+            "medium",
         )
     themes = review_analysis.get("themes") or []
     if themes:
@@ -370,9 +607,19 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
     if not insights:
         insights.append("Первый рыночный снимок собран; MAYA продолжит накапливать динамику цен, рейтингов и рекламы.")
 
+    leaders = sorted(
+        competitors,
+        key=lambda row: (
+            -_integer(row.get("reviews_count")),
+            -_integer(row.get("profile_completeness_score")),
+            _integer(row.get("search_rank"), 999),
+        ),
+    )[:6]
+
     status = "ok" if len(competitors) >= 8 else "warn"
     return {
         "version": "maya_market_intelligence_v1",
+        "methodology_version": "maya_market_intelligence_v2",
         "status": status,
         "headline": (
             "Позиция на рынке Ставрополя понятна"
@@ -387,7 +634,10 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
             "market_median_rating": market_rating,
             "market_median_reviews_count": market_reviews,
             "market_median_haircut_price_rub": market_price,
+            "market_median_photo_count": market_photos,
+            "market_median_profile_score": market_profile_score,
             "promoted_competitors_count": len(promoted),
+            "online_booking_competitors_count": len(online_booking),
             "reviews_analyzed": review_analysis.get("reviews_count", 0),
             "negative_reviews_count": review_analysis.get("negative_count", 0),
             "own_rating": own_rating,
@@ -395,14 +645,40 @@ def _build_snapshot(companies: list[dict], own: dict | None, review_rows: list[d
             "own_haircut_price_rub": own_price,
             "price_position": price_position,
             "rating_position": rating_position,
+            "price_index_pct": price_index_pct,
+            "review_volume_rank": own_review_rank,
+            "rating_rank": own_rating_rank,
+            "public_search_rank": own_search_rank,
+            "tracked_businesses_count": tracked_count,
+            "own_review_share_pct": own_review_share_pct,
+            "own_profile_score": own_profile_score,
+            "visibility_proxy_score": visibility_proxy_score,
         },
         "own_business": own,
         "leaders": leaders,
+        "competitors": competitors,
         "review_themes": themes[:6],
-        "insights": insights[:4],
+        "promotion_patterns": promotion_patterns,
+        "recommendations": recommendations[:6],
+        "insights": insights[:6],
+        "source_coverage": {
+            "2gis": {
+                "status": "active",
+                "metrics": [
+                    "price_from", "rating", "review_volume", "public_search_rank",
+                    "promotion", "photos", "profile_completeness", "public_review_themes",
+                ],
+            },
+            "yandex_business": {
+                "status": "owner_authorization_required",
+                "metrics": ["discovery_share", "category_demand", "competitor_position", "profile_actions"],
+            },
+        },
         "limitations": [
             "Рыночный снимок использует общедоступную выдачу и карточки 2ГИС.",
-            "Цены с пометкой «от» и рекламные предложения могут меняться между проверками.",
+            "Индекс видимости — прозрачная косвенная оценка, а не реальный трафик или доля рынка.",
+            "Публично доступна цена мужской стрижки «от»; полная корзина услуг требует дополнительного источника.",
+            "Данные доли трафика Яндекс появятся только после разрешённого подключения кабинета владельца.",
         ],
     }
 
@@ -414,6 +690,107 @@ def _load_cached() -> dict:
         return payload if isinstance(payload, dict) else {}
     except Exception:
         return {}
+
+
+def _load_history() -> list[dict]:
+    try:
+        raw = database.get_setting(_HISTORY_KEY)
+        rows = json.loads(raw) if raw else []
+        return [row for row in rows if isinstance(row, dict)] if isinstance(rows, list) else []
+    except Exception:
+        return []
+
+
+def _compact_history_point(snapshot: dict) -> dict:
+    return {
+        "observed_at": snapshot.get("observed_at") or "",
+        "summary": snapshot.get("summary") or {},
+        "competitors": [
+            {
+                "organization_id": row.get("organization_id"),
+                "branch_id": row.get("branch_id"),
+                "name": row.get("name"),
+                "rating": row.get("rating"),
+                "reviews_count": row.get("reviews_count"),
+                "haircut_price_from_rub": row.get("haircut_price_from_rub"),
+                "promotion": row.get("promotion") or "",
+                "promoted": bool(row.get("promoted")),
+                "search_rank": row.get("search_rank"),
+                "profile_completeness_score": row.get("profile_completeness_score"),
+            }
+            for row in (snapshot.get("competitors") or [])
+            if isinstance(row, dict)
+        ],
+    }
+
+
+def _market_changes(previous: dict | None, current: dict) -> dict:
+    previous = previous or {}
+    old_rows = {
+        str(row.get("organization_id") or row.get("branch_id") or row.get("name") or ""): row
+        for row in (previous.get("competitors") or []) if isinstance(row, dict)
+    }
+    new_rows = {
+        str(row.get("organization_id") or row.get("branch_id") or row.get("name") or ""): row
+        for row in (current.get("competitors") or []) if isinstance(row, dict)
+    }
+    price_changes = []
+    promotion_changes = []
+    fastest_review_growth = []
+    rank_changes = []
+    for key, row in new_rows.items():
+        old = old_rows.get(key)
+        if not old:
+            continue
+        old_price = _integer(old.get("haircut_price_from_rub"))
+        new_price = _integer(row.get("haircut_price_from_rub"))
+        if old_price and new_price and old_price != new_price:
+            price_changes.append({
+                "name": row.get("name"), "from_rub": old_price, "to_rub": new_price,
+                "delta_rub": new_price - old_price,
+            })
+        old_promotion = str(old.get("promotion") or "")
+        new_promotion = str(row.get("promotion") or "")
+        if old_promotion != new_promotion:
+            promotion_changes.append({
+                "name": row.get("name"),
+                "state": "started" if new_promotion and not old_promotion else (
+                    "ended" if old_promotion and not new_promotion else "changed"
+                ),
+                "promotion": new_promotion[:240],
+            })
+        review_delta = _integer(row.get("reviews_count")) - _integer(old.get("reviews_count"))
+        if review_delta:
+            fastest_review_growth.append({"name": row.get("name"), "delta": review_delta})
+        old_rank = _integer(old.get("search_rank"))
+        new_rank = _integer(row.get("search_rank"))
+        if old_rank and new_rank and old_rank != new_rank:
+            rank_changes.append({
+                "name": row.get("name"), "from": old_rank, "to": new_rank,
+                "delta": old_rank - new_rank,
+            })
+    fastest_review_growth.sort(key=lambda row: -row["delta"])
+    rank_changes.sort(key=lambda row: -abs(row["delta"]))
+    return {
+        "has_baseline": bool(old_rows),
+        "new_competitors": [new_rows[key].get("name") for key in new_rows.keys() - old_rows.keys()][:10],
+        "missing_competitors": [old_rows[key].get("name") for key in old_rows.keys() - new_rows.keys()][:10],
+        "price_changes": price_changes[:10],
+        "promotion_changes": promotion_changes[:10],
+        "fastest_review_growth": fastest_review_growth[:10],
+        "public_rank_changes": rank_changes[:10],
+    }
+
+
+def _append_history(snapshot: dict) -> None:
+    rows = _load_history()
+    point = _compact_history_point(snapshot)
+    day = str(point.get("observed_at") or "")[:10]
+    if rows and str(rows[-1].get("observed_at") or "")[:10] == day:
+        rows[-1] = point
+    else:
+        rows.append(point)
+    database.set_setting(_HISTORY_KEY, json.dumps(rows[-90:], ensure_ascii=False))
 
 
 def market_snapshot(*, force_refresh: bool = False) -> dict:
@@ -457,20 +834,40 @@ def refresh_market_snapshot(*, force: bool = False, pages: int = 3, review_compe
         for page in range(1, page_count + 1):
             parsed_pages.append(parse_2gis_search_page(_get(_search_url(page))))
         total_found = max([row.get("total") or 0 for row in parsed_pages] or [0])
-        companies = _merge_brands([
-            company
-            for page in parsed_pages
-            for company in (page.get("companies") or [])
-        ])
+        flat_companies = []
+        global_rank = 0
+        for page in parsed_pages:
+            for company in (page.get("companies") or []):
+                global_rank += 1
+                company = dict(company)
+                company["search_rank"] = global_rank
+                flat_companies.append(company)
+        companies = _merge_brands(flat_companies)
+
+        enrich_targets = sorted(
+            companies,
+            key=lambda row: -_integer(row.get("reviews_count")),
+        )[:12]
+        if enrich_targets:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                enriched = list(executor.map(_enrich_public_profile, enrich_targets))
+            enriched_by_id = {
+                str(row.get("branch_id") or ""): row for row in enriched if row.get("branch_id")
+            }
+            companies = [
+                enriched_by_id.get(str(row.get("branch_id") or ""), row)
+                for row in companies
+            ]
 
         own_id = _own_branch_id()
         own = next((row for row in companies if str(row.get("branch_id")) == own_id), None)
         if own_id:
             try:
-                own = parse_2gis_profile_page(
+                detailed_own = parse_2gis_profile_page(
                     _get(f"https://2gis.ru/{_CITY_ALIAS}/firm/{own_id}"),
                     own_id,
                 )
+                own = _merge_profile_details(own or detailed_own, detailed_own)
             except Exception:
                 pass
 
@@ -484,7 +881,12 @@ def refresh_market_snapshot(*, force: bool = False, pages: int = 3, review_compe
                     review_rows.extend(result.get("reviews") or [])
 
         snapshot = _build_snapshot(companies, own, review_rows, total_found=total_found)
+        previous = _compact_history_point(cached) if cached else (
+            _load_history()[-1] if _load_history() else {}
+        )
+        snapshot["changes"] = _market_changes(previous, snapshot)
         database.set_setting(_SNAPSHOT_KEY, json.dumps(snapshot, ensure_ascii=False))
+        _append_history(snapshot)
         database.set_setting(_STATUS_KEY, json.dumps({
             "ok": True,
             "checked_at": checked_at,

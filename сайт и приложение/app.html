@@ -8634,10 +8634,10 @@ function AChat() {
       var timeOpts = extract([[/утр/, 'Утром'], [/дн[её]м|в обед/, 'Днём'], [/вечер/, 'Вечером'], [/сегодня/, 'Сегодня'], [/завтра/, 'Завтра'], [/выходн/, 'На выходных']]);
       if (timeOpts.length >= 2) return uniqChips(timeOpts, 5);
     }
-    if (/какую услугу|на какую услугу|на что (?:вас |тебя )?запис|что именно|какая услуга|услугу вас запис|услугу хотите|что выбираете|какой комплекс|что будем делать/.test(bot)) return serviceChips();
-    if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой|предпочтени[яе] по мастеру|есть любимый мастер/.test(bot)) return masterChips();
     var exactSlots = uniqChips((bot.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g) || []), 8);
     if (exactSlots.length && /свобод|доступ|окн|слот|подойд|выбирайте|выберите/.test(bot)) return exactSlots.concat(['Другой день']);
+    if (/какую услугу|на какую услугу|на что (?:вас |тебя )?запис|что именно|какая услуга|услугу вас запис|услугу хотите|что выбираете|какой комплекс|что будем делать/.test(bot)) return serviceChips();
+    if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой|предпочтени[яе] по мастеру|есть любимый мастер/.test(bot)) return masterChips();
     if (/какой день|на какую дату|когда удобно|когда вам удобно|на когда|какое время|во сколько|на какое время|время подходит|сегодня свободн|свободн.*(?:окн|слот|время)/.test(bot)) return ['Сегодня', 'Завтра', 'Ближайшее окно', 'После 18:00', 'На выходных'];
     if (/оформляем|подтверждаете|подтвердите|записываю|записать вас|всё верно|все верно/.test(bot)) return ['Да, оформляем', 'Изменить время', 'Другой мастер', 'Другая услуга'];
     if (/добавляем|добавить|что-то ещё|что-то еще|только .*стриж|только .*услуг|апсейл|дополнительно/.test(bot)) return ['Только выбранная услуга', 'Добавить бороду', 'Добавить уход', 'Показать цену'];
@@ -8661,7 +8661,9 @@ function AChat() {
     if (target) runChatAction(target);
     else if (/^мой постоянный мастер/i.test(String(label || ''))) {
       var usual = usualMasterData();
-      send('Запиши меня к моему постоянному мастеру' + (usual && usual.name ? ' ' + usual.name : ''));
+      var recent = lastText(msgs, 'user');
+      var service = pickedService(recent) ? recent : '';
+      send('Запиши меня к моему постоянному мастеру' + (usual && usual.name ? ' ' + usual.name : '') + (service ? ' на ' + service : ''));
     } else send(label);
   }
   const dark = window.__meDark;
@@ -14751,6 +14753,7 @@ function AGodMode(props) {
   var sEval = React.useState({}), evalS = sEval[0], setEvalS = sEval[1];
   var sControl = React.useState({}), controlS = sControl[0], setControlS = sControl[1];
   var sBrief = React.useState(0), briefIndex = sBrief[0], setBriefIndex = sBrief[1];
+  var briefScrollRef = React.useRef(null);
 
   function gfetch(action, body) {
     var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
@@ -15875,15 +15878,32 @@ function AGodMode(props) {
     };
   }
   function renderBriefCarousel(brief) {
+    // Дизайн «всплывающих окон Maya» (handoff popups): карточка ИНВЕРТИРОВАНА к теме
+    // (dark-тема → светлая карточка/чёрный текст; light → тёмная/светлый текст),
+    // radius 28, шапка со знаком Maya, hairline от цвета текста карточки,
+    // точки-пилюли + круглые стрелки. Механика прежняя: scroll-snap + briefIndex.
     var cards = brief.cards || [];
     if (!cards.length) return null;
-    var panelBg = dark ? '#f4f0eb' : '#090909';
-    var panelInk = dark ? '#11110f' : '#ffffff';
-    var panelDim = dark ? 'rgba(17,17,15,0.64)' : 'rgba(255,255,255,0.66)';
-    var panelLine = dark ? 'rgba(17,17,15,0.16)' : 'rgba(255,255,255,0.18)';
+    var panelBg = dark ? '#f4f0eb' : '#18160f';
+    var panelInk = dark ? '#000000' : '#f7f3ec';
+    var panelDim = dark ? 'rgba(0,0,0,0.55)' : 'rgba(247,243,236,0.55)';
+    var panelLine = dark ? 'rgba(0,0,0,0.16)' : 'rgba(247,243,236,0.16)';
+    function toneDot(tone) {
+      // цвет состояния — только индикатор, данные не подменяет
+      return tone === 'attention' ? panelInk : tone === 'positive' ? panelDim : panelLine;
+    }
     function metricSize(value) {
       var len = String(value == null ? '' : value).length;
       return len > 12 ? 19 : (len > 9 ? 22 : 27);
+    }
+    function effectLabel(decision) {
+      var effect = decision && decision.expected_effect || {};
+      if (effect.min == null || effect.max == null) return '';
+      var value = effect.unit === 'rub'
+        ? money(effect.min) + '–' + money(effect.max)
+        : String(effect.min) + '–' + String(effect.max) + ' ' + (effect.unit === 'pct' ? '%' : effect.unit === 'points' ? 'п.' : effect.unit || '');
+      var confidence = { high: 'высокая', medium: 'средняя', low: 'низкая' }[decision.confidence] || decision.confidence || 'уточняется';
+      return value + ' · уверенность ' + confidence;
     }
     function onScroll(ev) {
       var el = ev.currentTarget;
@@ -15891,8 +15911,37 @@ function AGodMode(props) {
       var next = Math.max(0, Math.min(cards.length - 1, Math.round(el.scrollLeft / step)));
       if (next !== briefIndex) setBriefIndex(next);
     }
+    function goTo(idx) {
+      var el = briefScrollRef.current;
+      if (!el) return;
+      var clamped = Math.max(0, Math.min(cards.length - 1, idx));
+      var step = Math.max(1, el.clientWidth - 6);
+      try { el.scrollTo({ left: clamped * step, behavior: 'smooth' }); } catch (e2) { el.scrollLeft = clamped * step; }
+    }
+    function arrowBtn(dirn) {
+      var nextIdx = briefIndex + dirn;
+      var disabled = nextIdx < 0 || nextIdx > cards.length - 1;
+      var forward = dirn > 0;
+      return e('button', {
+        type: 'button',
+        'aria-label': forward ? 'Следующая карточка' : 'Предыдущая карточка',
+        onClick: function () { if (!disabled) goTo(nextIdx); },
+        style: {
+          width: 34, height: 34, borderRadius: 999, flexShrink: 0,
+          border: forward && !disabled ? '0' : '1px solid ' + t.line,
+          background: forward && !disabled ? t.ink : 'transparent',
+          color: forward && !disabled ? (dark ? '#0b0b0c' : '#f4f0eb') : t.ink,
+          fontFamily: DISPLAY, fontSize: 15, lineHeight: 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: disabled ? 'default' : 'pointer',
+          opacity: disabled ? 0.28 : 1,
+          transition: 'opacity .25s ease, background .25s ease'
+        }
+      }, forward ? '›' : '‹');
+    }
     return e(React.Fragment, null,
       e('div', {
+        ref: briefScrollRef,
         onScroll: onScroll,
         style: {
           display: 'flex', gap: 12, overflowX: 'auto', scrollSnapType: 'x mandatory',
@@ -15904,47 +15953,80 @@ function AGodMode(props) {
           key: card.key || i,
           'aria-label': (i + 1) + ' из ' + cards.length + ': ' + (card.label || card.title || ''),
           style: {
-            flex: '0 0 calc(100% - 18px)', minWidth: 0, minHeight: 350,
+            flex: '0 0 calc(100% - 18px)', minWidth: 0, minHeight: 390,
             boxSizing: 'border-box', scrollSnapAlign: 'start', scrollSnapStop: 'always',
-            borderRadius: 8, padding: '20px 18px 18px', background: panelBg, color: panelInk,
+            borderRadius: 28, padding: '20px 20px 18px',
+            background: panelBg, color: panelInk,
             display: 'flex', flexDirection: 'column',
-            boxShadow: dark ? '0 10px 32px rgba(0,0,0,0.28)' : '0 12px 32px rgba(0,0,0,0.16)'
+            boxShadow: '0 18px 50px rgba(0,0,0,0.35)'
           }
         },
-          e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 } },
-            e('div', { style: { width: 7, height: 7, borderRadius: 999, background: panelInk, opacity: card.tone === 'attention' ? 0.62 : 0.34, flexShrink: 0 } }),
-            e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: panelDim } }, card.label || 'MAYA')),
-          e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 22, lineHeight: 1.18, color: panelInk, maxWidth: 330, textWrap: 'balance' } }, card.title || 'Главное по бизнесу'),
-          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '18px 0 16px', marginTop: 18, borderTop: '1px solid ' + panelLine, borderBottom: '1px solid ' + panelLine } },
+          // шапка: знак Maya + «Maya · категория» + tone-точка
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 } },
+            e('div', { style: { color: panelInk, flexShrink: 0, display: 'flex' } }, e(SeedLogo, { size: 24, sw: 1.6 })),
+            e('div', { style: { flex: 1, minWidth: 0, fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: panelDim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, 'Maya · ' + (card.label || 'сводка')),
+            e('div', { style: { width: 7, height: 7, borderRadius: 999, background: toneDot(card.tone), flexShrink: 0 } })),
+          // главный вывод
+          e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 17, lineHeight: 1.3, color: panelInk, textWrap: 'balance' } }, card.title || 'Главное по бизнесу'),
+          // метрики
+          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '16px 0 14px', marginTop: 16, borderTop: '1px solid ' + panelLine, borderBottom: '1px solid ' + panelLine } },
             e('div', { style: { minWidth: 0 } },
-              e('div', { style: { fontFamily: DISPLAY, fontWeight: 400, fontSize: metricSize(card.value), lineHeight: 1.05, color: panelInk, whiteSpace: 'nowrap' } }, card.value == null ? '—' : card.value),
+              e('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: metricSize(card.value), lineHeight: 1.05, color: panelInk, whiteSpace: 'nowrap' } }, card.value == null ? '—' : card.value),
               e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.35, color: panelDim, marginTop: 6 } }, card.value_label || '')),
             e('div', { style: { minWidth: 0, paddingLeft: 12, borderLeft: '1px solid ' + panelLine } },
-              e('div', { style: { fontFamily: DISPLAY, fontWeight: 400, fontSize: metricSize(card.second_value), lineHeight: 1.05, color: panelInk, whiteSpace: 'nowrap' } }, card.second_value == null ? '—' : card.second_value),
+              e('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: metricSize(card.second_value), lineHeight: 1.05, color: panelInk, whiteSpace: 'nowrap' } }, card.second_value == null ? '—' : card.second_value),
               e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.35, color: panelDim, marginTop: 6 } }, card.second_label || ''))),
-          e('div', { style: { fontFamily: BODY, fontSize: 14, lineHeight: 1.45, color: panelInk, marginTop: 16, textWrap: 'pretty' } }, card.analysis || ''),
-          e('div', { style: { marginTop: 'auto', paddingTop: 16 } },
-            e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: panelDim, marginBottom: 7 } }, 'Фокус MAYA'),
-            e('div', { style: { fontFamily: BODY, fontSize: 13.2, lineHeight: 1.45, color: panelInk, textWrap: 'pretty' } }, card.action || '')));
+          // объяснение
+          e('div', { style: { fontFamily: BODY, fontSize: 13.5, lineHeight: 1.5, color: panelInk, marginTop: 14, textWrap: 'pretty' } }, card.analysis || ''),
+          // рекомендация MAYA
+          e('div', { style: { marginTop: 'auto', paddingTop: 14 } },
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: panelDim, marginBottom: 7 } }, 'Рекомендация'),
+            e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.45, color: panelInk, textWrap: 'pretty' } }, card.action || ''),
+            card.decision ? e('div', { style: { marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + panelLine } },
+              effectLabel(card.decision) ? e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 11.5, lineHeight: 1.35, color: panelInk } }, 'Эффект: ' + effectLabel(card.decision)) : null,
+              card.decision.kpi ? e('div', { style: { fontFamily: BODY, fontSize: 10.8, lineHeight: 1.4, color: panelDim, marginTop: 4 } }, 'Проверка: ' + card.decision.kpi) : null) : null));
       })),
-      e('div', { style: { display: 'flex', justifyContent: 'center', gap: 6, padding: '12px 0 20px' }, 'aria-hidden': true }, cards.map(function (card, i) {
-        return e('div', { key: card.key || i, style: { width: i === briefIndex ? 18 : 6, height: 6, borderRadius: 999, background: i === briefIndex ? t.ink : t.line, transition: 'width .2s ease, background .2s ease' } });
-      })));
+      // футер пагинации: точки слева, стрелки справа (как в попап-хендоффе)
+      e('div', { style: { display: 'flex', alignItems: 'center', padding: '14px 0 20px' } },
+        e('div', { style: { display: 'flex', gap: 6, flex: 1 }, 'aria-hidden': true }, cards.map(function (card, i) {
+          return e('div', {
+            key: card.key || i,
+            onClick: function () { goTo(i); },
+            style: { width: i === briefIndex ? 18 : 6, height: 6, borderRadius: 999, cursor: 'pointer', background: i === briefIndex ? t.ink : t.line, transition: 'width .3s ease, background .3s ease' }
+          });
+        })),
+        e('div', { style: { display: 'flex', gap: 8 } }, arrowBtn(-1), arrowBtn(1))));
   }
   function renderSimpleGoal(goal) {
     goal = goal || {};
-    var pct = goal.progress_pct == null ? null : Math.max(0, Math.min(100, Number(goal.progress_pct) || 0));
+    var rawPct = goal.progress_pct == null ? null : Math.max(0, Number(goal.progress_pct) || 0);
+    var pct = rawPct == null ? null : Math.min(100, rawPct);
+    var sourceLabel = {
+      manual_daily_goal: 'цель задана владельцем',
+      manual_setting: 'цель задана владельцем',
+      monthly_goal_weighted: 'из месячной цели с учётом дня недели',
+      weekday_history_baseline: 'по похожим дням недели и текущему тренду',
+      last_30_actual_average: 'по средней выручке последних 30 дней'
+    }[goal.target_source] || 'методика уточняется';
     return e('section', { style: { padding: '18px 0 20px', borderTop: '1px solid ' + t.line, borderBottom: '1px solid ' + t.line, marginBottom: 22 } },
-      e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint, marginBottom: 9 } }, 'Цель бизнеса'),
+      e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint, marginBottom: 9 } }, 'Сегодня'),
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
         e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 19, lineHeight: 1.2, color: t.ink } }, goal.title || 'План на сегодня'),
-        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink, whiteSpace: 'nowrap' } }, pct == null ? '—' : Math.round(pct) + '%'),
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink, whiteSpace: 'nowrap' } }, rawPct == null ? '—' : Math.round(rawPct) + '%'),
         e('button', { type: 'button', onClick: function () { editPlanTarget(cc.plan_fact || {}); }, style: { border: '1px solid ' + t.line, background: 'transparent', color: t.dim, borderRadius: 8, padding: '6px 8px', fontFamily: BODY, fontWeight: 650, fontSize: 10.5, cursor: 'pointer', flexShrink: 0 } }, 'Изменить')),
       e('div', { style: { height: 6, background: t.line, borderRadius: 999, overflow: 'hidden', margin: '14px 0 11px' } },
         e('div', { style: { width: (pct == null ? 0 : pct) + '%', height: '100%', background: t.ink, borderRadius: 999, transition: 'width .35s ease' } })),
-      e('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 14, fontFamily: BODY, fontSize: 12.5, lineHeight: 1.35, color: t.dim } },
-        e('span', null, 'Прогноз ' + money(goal.actual_rub || 0)),
-        e('span', { style: { textAlign: 'right' } }, goal.target_rub ? ('Цель ' + money(goal.target_rub)) : 'Цель уточняется')),
+      e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', borderTop: '1px solid ' + t.line, borderBottom: '1px solid ' + t.line } },
+        [
+          { label: 'Цель', value: goal.target_rub ? money(goal.target_rub) : '—' },
+          { label: 'Прогноз', value: money(goal.forecast_rub || goal.actual_rub || 0) },
+          { label: 'Потенциал', value: money(goal.potential_rub || goal.forecast_rub || goal.actual_rub || 0) }
+        ].map(function (item, i) {
+          return e('div', { key: item.label, style: { minWidth: 0, padding: '11px ' + (i === 1 ? '9px' : '0'), borderLeft: i ? '1px solid ' + t.line : 'none', textAlign: i === 0 ? 'left' : (i === 2 ? 'right' : 'center') } },
+            e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginBottom: 4 } }, item.label),
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: String(item.value).length > 11 ? 12 : 14, lineHeight: 1.2, color: t.ink, whiteSpace: 'nowrap' } }, item.value));
+        })),
+      e('div', { style: { fontFamily: BODY, fontSize: 11.2, lineHeight: 1.4, color: t.faint, marginTop: 9 } }, 'Источник цели: ' + sourceLabel + '.'),
       e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 14, lineHeight: 1.35, color: t.ink, marginTop: 14 } }, goal.plain_status || 'Идём по плану'),
       e('div', { style: { fontFamily: BODY, fontSize: 12.8, lineHeight: 1.45, color: t.dim, marginTop: 5 } }, goal.next_step || 'Сохранять темп и следить за загрузкой.'));
   }
@@ -25438,8 +25520,162 @@ function MEApp() {
     setProfileMenuOpen(false);
     window.__meAskLogout && window.__meAskLogout();
   }, true) : null)) : null;
-  return React.createElement(React.Fragment, null, screenEl, fab, gTab, switchBtn, profileMenuEl, logoutEl, window.APromoBanner ? React.createElement(window.APromoBanner, {}) : null, window.AOnboarding ? React.createElement(window.AOnboarding, { screen: screen }) : null, window.AConsentGate ? React.createElement(window.AConsentGate, {}) : null, window.AMayaIntro ? React.createElement(window.AMayaIntro, {}) : null);
+  return React.createElement(React.Fragment, null, screenEl, fab, gTab, switchBtn, profileMenuEl, logoutEl, window.APromoBanner ? React.createElement(window.APromoBanner, {}) : null, window.AOnboarding ? React.createElement(window.AOnboarding, { screen: screen }) : null, window.AConsentGate ? React.createElement(window.AConsentGate, {}) : null, window.AMayaIntro ? React.createElement(window.AMayaIntro, {}) : null, window.AOwnerMorningBrief ? React.createElement(window.AOwnerMorningBrief, { screen: screen }) : null);
 }
+// ── Maya OS: утренний брифинг-попап владельца (хендофф popups) ──
+// Первый заход за день на главную владельца → поверх экрана карточка Maya
+// (scrim + popIn + многостраничный трек). Смахивание вниз / крестик / тап по
+// фону — закрыть (показ раз в день). Полная версия живёт в Центре владельца.
+function AOwnerMorningBrief(props) {
+  var e = React.createElement;
+  var screen = props && props.screen;
+  var st = React.useState(null), brief = st[0], setBrief = st[1];
+  var vs = React.useState(false), visible = vs[0], setVisible = vs[1];
+  var pg = React.useState(0), page = pg[0], setPage = pg[1];
+  var dragSt = React.useState(0), dragY = dragSt[0], setDragY = dragSt[1];
+  var dragRef = React.useRef({ y: 0, active: false });
+  var todayKey = new Date().toISOString().slice(0, 10);
+  function seen() {
+    try { return localStorage.getItem('me_owner_brief_seen') === todayKey; } catch (x) { return true; }
+  }
+  function dismiss() {
+    try { localStorage.setItem('me_owner_brief_seen', todayKey); } catch (x) {}
+    setVisible(false);
+  }
+  React.useEffect(function () {
+    if (screen !== 'staff-home') return;
+    if (!window.__meIsFounder) return;
+    if (!(window.__meHasSession && window.__meHasSession())) return;
+    if (seen() || brief) return;
+    var rq = window.__meAuthReq ? window.__meAuthReq({}) : null;
+    if (!rq) return;
+    fetch('https://malesthetic.pro/app/api-proxy.php?action=panel_command_center', {
+      method: 'POST', headers: rq.headers, body: rq.body
+    }).then(function (r) { return r.json(); }).then(function (cc) {
+      var b = cc && cc.briefing;
+      if (b && (b.cards || []).length) { setBrief(b); setPage(0); setVisible(true); }
+    }).catch(function () {});
+  }, [screen]);
+  if (!visible || !brief || screen !== 'staff-home') return null;
+
+  var dark = window.__meDark;
+  var t = tokens('aurora', dark);
+  var cardBg = dark ? '#f4f0eb' : '#18160f';
+  var cardInk = dark ? '#000000' : '#f7f3ec';
+  var cardDim = dark ? 'rgba(0,0,0,0.55)' : 'rgba(247,243,236,0.55)';
+  var cardLine = dark ? 'rgba(0,0,0,0.16)' : 'rgba(247,243,236,0.16)';
+  var cards = brief.cards || [];
+  var last = page >= cards.length - 1;
+
+  if (typeof document !== 'undefined' && !document.getElementById('me-popup-kf')) {
+    var stl = document.createElement('style');
+    stl.id = 'me-popup-kf';
+    stl.textContent = '@keyframes mePopIn{from{opacity:0;transform:translateY(16px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes meScrimIn{from{opacity:0}to{opacity:1}}';
+    document.head.appendChild(stl);
+  }
+  function onTS(ev) { var p = ev.touches && ev.touches[0]; if (!p) return; dragRef.current = { y: p.clientY, active: true }; }
+  function onTM(ev) {
+    if (!dragRef.current.active) return;
+    var p = ev.touches && ev.touches[0]; if (!p) return;
+    var dy = p.clientY - dragRef.current.y;
+    if (dy > 0) setDragY(dy);
+  }
+  function onTE() {
+    if (!dragRef.current.active) return;
+    dragRef.current.active = false;
+    if (dragY > 110) dismiss();
+    setDragY(0);
+  }
+  function arrow(dirn) {
+    var nextIdx = page + dirn;
+    var disabled = nextIdx < 0 || nextIdx > cards.length - 1;
+    var forward = dirn > 0;
+    return e('button', {
+      type: 'button',
+      onClick: function () { if (!disabled) setPage(nextIdx); },
+      style: {
+        width: 34, height: 34, borderRadius: 999, flexShrink: 0,
+        border: forward && !disabled ? '0' : '1px solid ' + cardLine,
+        background: forward && !disabled ? cardInk : 'transparent',
+        color: forward && !disabled ? cardBg : cardInk,
+        fontFamily: DISPLAY, fontSize: 15, lineHeight: 1,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.28 : 1,
+        transition: 'opacity .25s ease'
+      }
+    }, forward ? '›' : '‹');
+  }
+  return e('div', { style: { position: 'fixed', inset: 0, zIndex: 9996, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px' } },
+    e('div', {
+      onClick: dismiss,
+      style: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', animation: 'meScrimIn .4s ease both' }
+    }),
+    e('div', {
+      onTouchStart: onTS, onTouchMove: onTM, onTouchEnd: onTE,
+      style: {
+        position: 'relative', width: '100%', maxWidth: 322,
+        borderRadius: 28, background: cardBg, color: cardInk,
+        boxShadow: '0 30px 70px rgba(0,0,0,0.5)',
+        padding: '20px 20px 16px', boxSizing: 'border-box',
+        animation: dragY ? 'none' : 'mePopIn .55s cubic-bezier(.22,.61,.36,1) both',
+        transform: dragY ? 'translateY(' + dragY + 'px)' : undefined,
+        transition: dragY ? 'none' : 'transform .25s ease',
+        touchAction: 'pan-y'
+      }
+    },
+      // шапка: анимированный знак + тип + крестик
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 } },
+        e('div', { style: { color: cardInk, flexShrink: 0, display: 'flex' } }, e(SeedLogoAnimated, { size: 28, color: cardInk })),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: cardDim } }, 'Maya · Брифинг'),
+          e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 15, lineHeight: 1.25, color: cardInk, marginTop: 3 } }, brief.headline || 'Главное по бизнесу')),
+        e('div', {
+          onClick: dismiss,
+          style: { width: 30, height: 30, borderRadius: 999, border: '1px solid ' + cardLine, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cardDim, fontSize: 13, cursor: 'pointer', flexShrink: 0 }
+        }, '✕')),
+      // трек страниц
+      e('div', { style: { overflow: 'hidden', borderRadius: 12 } },
+        e('div', { style: { display: 'flex', transform: 'translateX(-' + (page * 100) + '%)', transition: 'transform .45s cubic-bezier(.22,.61,.36,1)' } },
+          cards.map(function (card, i) {
+            return e('div', { key: card.key || i, style: { flex: '0 0 100%', minWidth: 0, boxSizing: 'border-box' } },
+              e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: cardDim, margin: '6px 0 8px' } }, card.label || ''),
+              e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 15.5, lineHeight: 1.3, color: cardInk } }, card.title || ''),
+              e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '12px 0 11px', margin: '12px 0', borderTop: '1px solid ' + cardLine, borderBottom: '1px solid ' + cardLine } },
+                e('div', { style: { minWidth: 0 } },
+                  e('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: String(card.value || '').length > 9 ? 19 : 24, whiteSpace: 'nowrap', color: cardInk } }, card.value == null ? '—' : card.value),
+                  e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: cardDim, marginTop: 4 } }, card.value_label || '')),
+                e('div', { style: { minWidth: 0, paddingLeft: 10, borderLeft: '1px solid ' + cardLine } },
+                  e('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: String(card.second_value || '').length > 9 ? 19 : 24, whiteSpace: 'nowrap', color: cardInk } }, card.second_value == null ? '—' : card.second_value),
+                  e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: cardDim, marginTop: 4 } }, card.second_label || ''))),
+              e('div', { style: { fontFamily: BODY, fontSize: 12.5, lineHeight: 1.5, color: cardInk, minHeight: 54 } }, card.analysis || ''),
+              e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: cardDim, margin: '10px 0 5px' } }, 'Рекомендация'),
+              e('div', { style: { fontFamily: BODY, fontSize: 12, lineHeight: 1.45, color: cardInk } }, card.action || ''));
+          }))),
+      // футер: точки + стрелки
+      e('div', { style: { display: 'flex', alignItems: 'center', margin: '14px 0 12px' } },
+        e('div', { style: { display: 'flex', gap: 6, flex: 1 } }, cards.map(function (c, i) {
+          return e('div', {
+            key: c.key || i, onClick: function () { setPage(i); },
+            style: { width: i === page ? 18 : 6, height: 6, borderRadius: 999, cursor: 'pointer', background: i === page ? cardInk : (dark ? 'rgba(0,0,0,0.28)' : 'rgba(247,243,236,0.28)'), transition: 'width .3s, background .3s' }
+          });
+        })),
+        e('div', { style: { display: 'flex', gap: 8 } }, arrow(-1), arrow(1))),
+      // CTA: на последней странице — открыть полный брифинг; иначе «Позже»
+      e('div', { style: { display: 'flex', gap: 8 } },
+        e('div', {
+          onClick: function () { dismiss(); if (last) { try { window.__meGo && window.__meGo('god'); } catch (x) {} } },
+          style: {
+            flex: 1, height: 44, borderRadius: 999,
+            background: last ? t.bg : 'transparent',
+            color: last ? t.ink : cardInk,
+            border: last ? '0' : '1px solid ' + cardLine,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: 'pointer'
+          }
+        }, last ? 'Открыть в MAYA' : 'Позже'))));
+}
+window.AOwnerMorningBrief = AOwnerMorningBrief;
+
 // ── Maya OS: интро-инструкция при первом запуске (3 свайп-слайда, показ 1 раз) ──
 function AMayaIntro() {
   var e = React.createElement;

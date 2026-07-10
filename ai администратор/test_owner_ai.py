@@ -408,6 +408,8 @@ class OwnerAITests(unittest.TestCase):
             advisor_keys,
         )
         self.assertEqual(center["briefing"]["version"], "maya_owner_brief_v1")
+        self.assertEqual(center["growth_engine"]["version"], "maya_growth_engine_v1")
+        self.assertEqual(center["growth_engine"]["mode"], "evidence_to_action")
         self.assertEqual(len(center["briefing"]["cards"]), 6)
         self.assertEqual(
             {row["key"] for row in center["briefing"]["cards"]},
@@ -960,6 +962,68 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(plan["target_source"], "manual_setting")
         self.assertEqual(plan["daily_target_rub"], 45000)
         self.assertEqual(plan["needed_visits_to_target"], 21)
+        self.assertEqual(plan["methodology_version"], "maya_smart_plan_v2")
+        self.assertIn("potential_revenue_rub", plan)
+
+    def test_smart_plan_uses_weekday_history_and_separates_forecast(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        target = date.today()
+        rows = []
+        for offset in range(29, -1, -1):
+            day = target - timedelta(days=offset)
+            rows.append({
+                "date": day.isoformat(),
+                "weekday": day.weekday(),
+                "gross_rub": 5000 if day.weekday() == target.weekday() else 1000,
+                "paid_visits": 2,
+            })
+        owner_ai._summary30_cache.update(val={
+            "total_gross": sum(row["gross_rub"] for row in rows),
+            "avg_check": 2000,
+            "daily": rows,
+        }, ts=owner_ai.time.time())
+
+        plan = owner_ai.plan_fact(snap={
+            "date": target.isoformat(),
+            "booked_today": 3,
+            "expected_revenue_rub": 6000,
+            "forecast_low_rub": 5200,
+            "forecast_high_rub": 6800,
+            "potential_revenue_rub": 12000,
+            "upsell_potential_rub": 800,
+            "potential_fill_revenue_rub": 5200,
+            "avg_check_rub": 2000,
+        })
+
+        self.assertEqual(plan["target_source"], "weekday_history_baseline")
+        self.assertGreater(plan["daily_target_rub"], plan["baseline"]["calendar_daily_average_rub"])
+        self.assertEqual(plan["projected_revenue_rub"], 6000)
+        self.assertEqual(plan["potential_revenue_rub"], 12000)
+        self.assertIn(plan["confidence"], {"medium", "high"})
+
+    def test_growth_engine_returns_auditable_decisions(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        engine = owner_ai._growth_engine(
+            snap={"free_capacity_today": 4, "avg_check_rub": 2000},
+            plan={"avg_check_rub": 2000, "upsell_potential_rub": 3000},
+            ret={},
+            retention={"summary": {"churn_candidates": 20, "forward_booking_pct": 10}},
+            reputation_payload={"summary": {"negative_reviews_30d": 1}, "recommendations": ["Разобрать ожидание."]},
+            market_payload={
+                "summary": {"competitors_scanned": 12},
+                "recommendations": [{"fact": "Цена около медианы.", "action": "Усилить комплекс.", "confidence": "high"}],
+            },
+        )
+
+        self.assertEqual(engine["mode"], "evidence_to_action")
+        self.assertTrue(engine["decisions"])
+        first = engine["decisions"][0]
+        self.assertTrue(first["evidence"])
+        self.assertTrue(first["action"])
+        self.assertTrue(first["kpi"])
+        self.assertIn("expected_effect", first)
+        self.assertTrue(first["requires_owner_approval"])
 
     def test_master_performance_ranks_profit_after_salary(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 from unittest import mock
+from datetime import datetime, timedelta
 
 import reputation
 
@@ -45,14 +46,52 @@ class ReputationTests(unittest.TestCase):
 
     def test_review_theme_analysis(self):
         result = reputation.analyze_reviews([
-            {"source": "yandex", "rating": 2, "review_text": "Долго ждал, запись перенесли"},
-            {"source": "2gis", "rating": 5, "review_text": "Отличная стрижка и мастер"},
+            {
+                "source": "yandex", "rating": 2,
+                "review_text": "Долго ждал, запись перенесли",
+                "published_at": datetime.now().isoformat(timespec="seconds"),
+            },
+            {
+                "source": "2gis", "rating": 5,
+                "review_text": "Отличная стрижка и мастер",
+                "published_at": datetime.now().isoformat(timespec="seconds"),
+            },
         ])
         self.assertEqual(result["negative_count"], 1)
         self.assertEqual(result["positive_count"], 1)
         themes = {row["theme"]: row for row in result["themes"]}
         self.assertEqual(themes["ожидание"]["negative"], 1)
         self.assertEqual(themes["качество работы"]["positive"], 1)
+        self.assertEqual(result["periods"]["new_7d"], 2)
+        self.assertEqual(result["by_source"]["yandex"]["negative_30d"], 1)
+
+    def test_source_trend_keeps_platforms_separate(self):
+        settings = {}
+        old_day = (datetime.now() - timedelta(days=31)).isoformat(timespec="seconds")
+        settings[reputation._HISTORY_PREFIX + "yandex"] = json.dumps([{
+            "date": old_day[:10],
+            "observed_at": old_day,
+            "rating": 4.8,
+            "reviews_count": 100,
+        }])
+
+        with mock.patch.object(
+            reputation.database, "get_setting",
+            side_effect=lambda key, default=None: settings.get(key, default),
+        ), mock.patch.object(
+            reputation.database, "set_setting",
+            side_effect=lambda key, value: settings.__setitem__(key, value),
+        ):
+            saved = reputation.save_source_snapshot(
+                "yandex", rating=4.9, reviews_count=112,
+                observed_at=datetime.now().isoformat(timespec="seconds"),
+                origin="test",
+            )
+            trend = reputation._source_trend("yandex", saved)
+
+        self.assertEqual(trend["reviews_delta_30d"], 12)
+        self.assertEqual(trend["rating_delta_30d"], 0.1)
+        self.assertGreaterEqual(trend["history_days"], 2)
 
     @mock.patch("reputation.database.upsert_external_review")
     def test_import_redacts_personal_data_and_is_idempotent_ready(self, save):

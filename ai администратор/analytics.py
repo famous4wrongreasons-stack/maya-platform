@@ -26,6 +26,15 @@ logger = logging.getLogger(__name__)
 _yc = YClientsAPI()
 
 
+def _date_key(value) -> str:
+    """Returns a safe YYYY-MM-DD prefix from YClients date fields."""
+    raw = str(value or "")[:10]
+    try:
+        return date.fromisoformat(raw).isoformat()
+    except (TypeError, ValueError):
+        return ""
+
+
 def resolve_period(period: str | None,
                    date_from: str | None = None,
                    date_to: str | None = None) -> tuple[str, str, str]:
@@ -81,6 +90,8 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
     staff_recs = {}                           # staff_id -> set(record_id) для числа визитов
     cash_sum = card_sum = 0.0
     cash_recs, card_recs = set(), set()
+    daily_gross: dict[str, float] = {}
+    daily_recs: dict[str, set] = {}
     for t in txs:
         if not isinstance(t, dict) or t.get("sold_item_type") != "service":
             continue
@@ -90,6 +101,11 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
             a = 0.0
         if a <= 0:
             continue
+        day_key = _date_key(t.get("date") or t.get("last_change_date"))
+        if day_key:
+            daily_gross[day_key] = daily_gross.get(day_key, 0.0) + a
+            if t.get("record_id") is not None:
+                daily_recs.setdefault(day_key, set()).add(t.get("record_id"))
         # мастер для зарплаты
         sid = None
         m = t.get("master")
@@ -145,6 +161,66 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
     visits = len(cash_recs | card_recs)       # уникальные оплаченные записи
     avg_check = round(total_gross / visits) if visits else 0
 
+    # The same YClients payload can also provide a seasonality baseline,
+    # attendance confidence and historical add-on behaviour without PII.
+    daily = []
+    try:
+        cursor = date.fromisoformat(from_iso[:10])
+        end_day = date.fromisoformat(to_iso[:10])
+        while cursor <= end_day and len(daily) < 370:
+            key = cursor.isoformat()
+            daily.append({
+                "date": key,
+                "weekday": cursor.weekday(),
+                "gross_rub": round(daily_gross.get(key, 0.0)),
+                "paid_visits": len(daily_recs.get(key, ())),
+            })
+            cursor += timedelta(days=1)
+    except (TypeError, ValueError):
+        daily = []
+
+    attended = missed = service_visits = multi_service_visits = 0
+    addon_total = 0.0
+    today = date.today()
+    for record in recs:
+        if not isinstance(record, dict) or record.get("deleted") or record.get("is_deleted"):
+            continue
+        services = [row for row in (record.get("services") or []) if isinstance(row, dict)]
+        client_id = (record.get("client") or {}).get("id") if isinstance(record.get("client"), dict) else None
+        if not client_id and not services:
+            continue
+        record_day_raw = _date_key(record.get("datetime") or record.get("date"))
+        try:
+            record_day = date.fromisoformat(record_day_raw) if record_day_raw else None
+        except ValueError:
+            record_day = None
+        attendance = record.get("attendance")
+        if attendance == 1:
+            attended += 1
+        elif attendance == -1 and (record_day is None or record_day <= today):
+            missed += 1
+        if attendance != 1:
+            continue
+        costs = []
+        for service in services:
+            try:
+                cost = float(service.get("cost") or 0)
+            except (TypeError, ValueError):
+                cost = 0.0
+            if cost > 0:
+                costs.append(cost)
+        if not costs:
+            continue
+        service_visits += 1
+        if len(costs) >= 2:
+            multi_service_visits += 1
+            addon_total += max(0.0, sum(costs) - max(costs))
+
+    attendance_base = attended + missed
+    show_rate_pct = round(attended * 100 / attendance_base) if attendance_base else None
+    attach_rate_pct = round(multi_service_visits * 100 / service_visits) if service_visits else None
+    avg_addon_rub = round(addon_total / multi_service_visits) if multi_service_visits else 0
+
     result = {
         "from": from_iso,
         "to": to_iso,
@@ -153,6 +229,18 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         "card": {"count": len(card_recs), "sum": round(card_sum)},
         "visits": visits,
         "avg_check": avg_check,
+        "daily": daily,
+        "attendance": {
+            "attended": attended,
+            "missed": missed,
+            "show_rate_pct": show_rate_pct,
+        },
+        "service_mix": {
+            "visits_with_priced_services": service_visits,
+            "multi_service_visits": multi_service_visits,
+            "attach_rate_pct": attach_rate_pct,
+            "avg_addon_rub": avg_addon_rub,
+        },
         "masters": masters,
         "salary_total": salary_total,         # сумма к выплате мастерам (без владельца)
         "note": "" if txs else "За период нет проведённых оплат в YClients.",
