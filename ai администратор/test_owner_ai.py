@@ -407,6 +407,18 @@ class OwnerAITests(unittest.TestCase):
             {"revenue", "load", "avg_check", "bookings", "retention", "quality"},
             advisor_keys,
         )
+        self.assertEqual(center["briefing"]["version"], "maya_owner_brief_v1")
+        self.assertEqual(len(center["briefing"]["cards"]), 6)
+        self.assertEqual(
+            {row["key"] for row in center["briefing"]["cards"]},
+            {"pulse", "revenue", "load", "clients", "quality", "market"},
+        )
+        self.assertIn("simple_goal", center["briefing"])
+        self.assertNotIn("money_at_stake_rub", center["briefing"])
+        self.assertEqual(
+            center["market_intelligence"]["version"],
+            "maya_market_intelligence_v1",
+        )
         self.assertEqual(center["reputation"]["version"], "maya_reputation_v1")
         self.assertEqual(center["client_retention"]["version"], "maya_client_retention_v1")
         self.assertEqual(center["decision_memory"]["version"], "maya_os_v5_decision_memory")

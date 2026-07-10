@@ -8567,10 +8567,20 @@ function AChat() {
   function serviceChips() {
     return uniqChips(['Мужская стрижка', 'Стрижка машинкой + фейд', 'Моделирование бороды', 'Комплекс: стрижка + борода', 'Детская стрижка'].concat(serviceNames()), 6);
   }
+  function usualMasterData() {
+    var current = window.__meUsualMaster;
+    if (current && current.name) return current;
+    try { return JSON.parse(localStorage.getItem('me_usual_master') || 'null'); } catch (e) { return null; }
+  }
+  function usualMasterChip() {
+    var usual = usualMasterData();
+    return usual && usual.name ? 'Мой постоянный мастер · ' + usual.name : '';
+  }
   function masterChips() {
     var d = window.APP_DATA || {}, ms = d.masters || {};
     var names = [].concat(ms.top || [], ms.senior || []).map(function (m) { return m && m[0]; }).filter(Boolean);
-    return uniqChips(names.concat(['Любой мастер']), 7);
+    var usual = usualMasterChip();
+    return uniqChips((usual ? [usual] : []).concat(names, ['Любой мастер']), 7);
   }
   function subChips() {
     var d = window.APP_DATA || {};
@@ -8626,9 +8636,11 @@ function AChat() {
     }
     if (/какую услугу|на какую услугу|на что (?:вас |тебя )?запис|что именно|какая услуга|услугу вас запис|услугу хотите|что выбираете|какой комплекс|что будем делать/.test(bot)) return serviceChips();
     if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой|предпочтени[яе] по мастеру|есть любимый мастер/.test(bot)) return masterChips();
+    var exactSlots = uniqChips((bot.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g) || []), 8);
+    if (exactSlots.length && /свобод|доступ|окн|слот|подойд|выбирайте|выберите/.test(bot)) return exactSlots.concat(['Другой день']);
     if (/какой день|на какую дату|когда удобно|когда вам удобно|на когда|какое время|во сколько|на какое время|время подходит|сегодня свободн|свободн.*(?:окн|слот|время)/.test(bot)) return ['Сегодня', 'Завтра', 'Ближайшее окно', 'После 18:00', 'На выходных'];
     if (/оформляем|подтверждаете|подтвердите|записываю|записать вас|всё верно|все верно/.test(bot)) return ['Да, оформляем', 'Изменить время', 'Другой мастер', 'Другая услуга'];
-    if (/добавляем|добавить|только .*стриж|только .*услуг|апсейл|дополнительно/.test(bot)) return ['Только выбранная услуга', 'Добавить бороду', 'Добавить уход', 'Показать цену'];
+    if (/добавляем|добавить|что-то ещё|что-то еще|только .*стриж|только .*услуг|апсейл|дополнительно/.test(bot)) return ['Только выбранная услуга', 'Добавить бороду', 'Добавить уход', 'Показать цену'];
     if (/абонемент/.test(bot) || /абонемент/.test(user)) return subChips();
     if (/сертификат|подар/.test(bot) || /сертификат|подар/.test(user)) return certChips();
     if (/₽|руб|стоит|стоимост|цен[ауеы]|прайс/.test(bot) || /цен|сколько стоит|прайс/.test(user)) return uniqChips(['Записаться'].concat(serviceChips().slice(0, 3), ['Абонемент выгоднее?', 'Сертификат в подарок']), 6);
@@ -8647,7 +8659,10 @@ function AChat() {
   function quickTap(label) {
     var target = quickActionTarget(label);
     if (target) runChatAction(target);
-    else send(label);
+    else if (/^мой постоянный мастер/i.test(String(label || ''))) {
+      var usual = usualMasterData();
+      send('Запиши меня к моему постоянному мастеру' + (usual && usual.name ? ' ' + usual.name : ''));
+    } else send(label);
   }
   const dark = window.__meDark;
   const setDark = window.__meSetDark;
@@ -14711,9 +14726,19 @@ function AGodMode(props) {
   props = props || {};
   var e = React.createElement;
   var dark = window.__meDark;
-  var t = tokens('aurora', dark);
+  var baseT = tokens('aurora', dark);
+  var t = dark ? Object.assign({}, baseT, {
+    dim: 'rgba(244,240,235,0.72)',
+    faint: 'rgba(244,240,235,0.55)',
+    line: 'rgba(244,240,235,0.18)'
+  }) : Object.assign({}, baseT, {
+    dim: '#4d4a43',
+    faint: '#69655d',
+    line: 'rgba(24,22,15,0.18)',
+    card: 'rgba(24,22,15,0.06)'
+  });
   var PX = 'https://malesthetic.pro/app/api-proxy.php';
-  var TABS = [{ k: 'os', label: 'OS' }, { k: 'overview', label: 'Обзор' }, { k: 'health', label: 'Здоровье' }, { k: 'money', label: 'Деньги' }, { k: 'subs', label: 'Подписчики' }];
+  var TABS = [{ k: 'os', label: 'MAYA' }, { k: 'overview', label: 'Платформа' }, { k: 'health', label: 'Система' }, { k: 'money', label: 'Расходы' }, { k: 'subs', label: 'Салоны' }];
   var sTab = React.useState('os'), tab = sTab[0], setTab = sTab[1];
   var sCc = React.useState(null), cc = sCc[0], setCc = sCc[1];
   var sOv = React.useState(null), ov = sOv[0], setOv = sOv[1];
@@ -14725,6 +14750,7 @@ function AGodMode(props) {
   var sAct = React.useState({}), actionS = sAct[0], setActionS = sAct[1];
   var sEval = React.useState({}), evalS = sEval[0], setEvalS = sEval[1];
   var sControl = React.useState({}), controlS = sControl[0], setControlS = sControl[1];
+  var sBrief = React.useState(0), briefIndex = sBrief[0], setBriefIndex = sBrief[1];
 
   function gfetch(action, body) {
     var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
@@ -15103,7 +15129,7 @@ function AGodMode(props) {
       sm.overdue_count ? ('просрочено ' + sm.overdue_count) : '',
       sm.needs_effect_check_count ? ('проверить эффект ' + sm.needs_effect_check_count) : '',
       sm.ready_to_close_count ? ('к закрытию ' + sm.ready_to_close_count) : '',
-      sm.money_at_stake_rub ? ('на кону ' + money(sm.money_at_stake_rub)) : ''
+      sm.money_at_stake_rub ? ('возможный эффект ' + money(sm.money_at_stake_rub)) : ''
     ].filter(Boolean).join(' · ');
     return Card(e('div', null,
       eyebrow('Фокус контроля'),
@@ -15157,7 +15183,7 @@ function AGodMode(props) {
     var detail = [
       sm.steps_count ? ('шагов ' + sm.steps_count) : '',
       sm.actionable_count ? ('можно выполнить ' + sm.actionable_count) : '',
-      sm.money_at_stake_rub ? ('на кону ' + money(sm.money_at_stake_rub)) : ''
+      sm.money_at_stake_rub ? ('возможный эффект ' + money(sm.money_at_stake_rub)) : ''
     ].filter(Boolean).join(' · ');
     return Card(e('div', null,
       eyebrow('План действий'),
@@ -15230,7 +15256,7 @@ function AGodMode(props) {
   function renderTaskCenter(center) {
     center = center || {};
     var rows = center.tasks || [], sm = center.summary || {};
-    // дедуп дублей с бэка: одинаковый заголовок + сумма «на кону» = одна задача
+    // дедуп дублей с бэка: одинаковый заголовок + ожидаемый эффект = одна задача
     var seenT = {};
     rows = rows.filter(function (r) {
       var k = (r && r.title || '') + '|' + (r && r.potential_rub || '');
@@ -15244,7 +15270,7 @@ function AGodMode(props) {
       sm.overdue_count ? ('просрочено ' + sm.overdue_count) : '',
       sm.effect_check_count ? ('эффект ' + sm.effect_check_count) : '',
       sm.running_count ? ('в работе ' + sm.running_count) : '',
-      sm.money_at_stake_rub ? ('на кону ' + money(sm.money_at_stake_rub)) : ''
+      sm.money_at_stake_rub ? ('возможный эффект ' + money(sm.money_at_stake_rub)) : ''
     ].filter(Boolean).join(' · ');
     return Card(e('div', null,
       eyebrow('Центр задач'),
@@ -15325,7 +15351,7 @@ function AGodMode(props) {
     var detail = [
       sm.open_autocreate_count ? ('новых задач ' + sm.open_autocreate_count) : '',
       sm.approval_required_count ? ('approval ' + sm.approval_required_count) : '',
-      fsm.money_at_stake_rub ? ('на кону ' + money(fsm.money_at_stake_rub)) : ''
+      fsm.money_at_stake_rub ? ('возможный эффект ' + money(fsm.money_at_stake_rub)) : ''
     ].filter(Boolean).join(' · ');
     return Card(e('div', null,
       eyebrow('AI-директор v2'),
@@ -15821,83 +15847,137 @@ function AGodMode(props) {
       }) : e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.45 } }, 'За 30 дней нет закрытых визитов по мастерам.')));
   }
 
+  function fallbackBrief() {
+    var sm = cc.summary || {};
+    var plan = cc.plan_fact || {};
+    var expected = plan.projected_revenue_rub || sm.expected_revenue_rub || 0;
+    return {
+      headline: 'Вот главное по бизнесу',
+      summary: 'MAYA собрала текущие показатели в один короткий обзор.',
+      cards: [{
+        key: 'pulse', label: 'Главное', title: 'План и запись на сегодня',
+        value: money(expected), value_label: 'ожидаем сегодня',
+        second_value: String(sm.booked_today || 0), second_label: 'записей',
+        analysis: 'Свободно примерно ' + String(sm.free_capacity_today || 0) + ' визит(а/ов).',
+        action: 'Сначала закрыть ближайшие свободные окна.', tone: 'attention'
+      }],
+      simple_goal: {
+        title: 'План на месяц', actual_rub: sm.projected_month_gross_rub || 0,
+        target_rub: 0, progress_pct: sm.month_goal_progress_pct,
+        plain_status: 'MAYA уточняет цель', next_step: 'Проверить темп выручки и загрузку.'
+      },
+      quick_stats: [
+        { key: 'today', label: 'Сегодня', value: money(expected) },
+        { key: 'avg', label: 'Средний чек', value: money(sm.avg_check_rub || 0) },
+        { key: 'load', label: 'Загрузка', value: String(sm.daily_load_pct || 0) + '%' },
+        { key: 'rating', label: 'Рейтинг', value: sm.maps_rating == null ? '—' : String(sm.maps_rating) }
+      ]
+    };
+  }
+  function renderBriefCarousel(brief) {
+    var cards = brief.cards || [];
+    if (!cards.length) return null;
+    var panelBg = dark ? '#f4f0eb' : '#090909';
+    var panelInk = dark ? '#11110f' : '#ffffff';
+    var panelDim = dark ? 'rgba(17,17,15,0.64)' : 'rgba(255,255,255,0.66)';
+    var panelLine = dark ? 'rgba(17,17,15,0.16)' : 'rgba(255,255,255,0.18)';
+    function metricSize(value) {
+      var len = String(value == null ? '' : value).length;
+      return len > 12 ? 19 : (len > 9 ? 22 : 27);
+    }
+    function onScroll(ev) {
+      var el = ev.currentTarget;
+      var step = Math.max(1, el.clientWidth - 6);
+      var next = Math.max(0, Math.min(cards.length - 1, Math.round(el.scrollLeft / step)));
+      if (next !== briefIndex) setBriefIndex(next);
+    }
+    return e(React.Fragment, null,
+      e('div', {
+        onScroll: onScroll,
+        style: {
+          display: 'flex', gap: 12, overflowX: 'auto', scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '0 18px 2px 0',
+          marginRight: -16, overscrollBehaviorX: 'contain'
+        }
+      }, cards.map(function (card, i) {
+        return e('section', {
+          key: card.key || i,
+          'aria-label': (i + 1) + ' из ' + cards.length + ': ' + (card.label || card.title || ''),
+          style: {
+            flex: '0 0 calc(100% - 18px)', minWidth: 0, minHeight: 350,
+            boxSizing: 'border-box', scrollSnapAlign: 'start', scrollSnapStop: 'always',
+            borderRadius: 8, padding: '20px 18px 18px', background: panelBg, color: panelInk,
+            display: 'flex', flexDirection: 'column',
+            boxShadow: dark ? '0 10px 32px rgba(0,0,0,0.28)' : '0 12px 32px rgba(0,0,0,0.16)'
+          }
+        },
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 } },
+            e('div', { style: { width: 7, height: 7, borderRadius: 999, background: panelInk, opacity: card.tone === 'attention' ? 0.62 : 0.34, flexShrink: 0 } }),
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: panelDim } }, card.label || 'MAYA')),
+          e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 22, lineHeight: 1.18, color: panelInk, maxWidth: 330, textWrap: 'balance' } }, card.title || 'Главное по бизнесу'),
+          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '18px 0 16px', marginTop: 18, borderTop: '1px solid ' + panelLine, borderBottom: '1px solid ' + panelLine } },
+            e('div', { style: { minWidth: 0 } },
+              e('div', { style: { fontFamily: DISPLAY, fontWeight: 400, fontSize: metricSize(card.value), lineHeight: 1.05, color: panelInk, whiteSpace: 'nowrap' } }, card.value == null ? '—' : card.value),
+              e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.35, color: panelDim, marginTop: 6 } }, card.value_label || '')),
+            e('div', { style: { minWidth: 0, paddingLeft: 12, borderLeft: '1px solid ' + panelLine } },
+              e('div', { style: { fontFamily: DISPLAY, fontWeight: 400, fontSize: metricSize(card.second_value), lineHeight: 1.05, color: panelInk, whiteSpace: 'nowrap' } }, card.second_value == null ? '—' : card.second_value),
+              e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.35, color: panelDim, marginTop: 6 } }, card.second_label || ''))),
+          e('div', { style: { fontFamily: BODY, fontSize: 14, lineHeight: 1.45, color: panelInk, marginTop: 16, textWrap: 'pretty' } }, card.analysis || ''),
+          e('div', { style: { marginTop: 'auto', paddingTop: 16 } },
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: panelDim, marginBottom: 7 } }, 'Фокус MAYA'),
+            e('div', { style: { fontFamily: BODY, fontSize: 13.2, lineHeight: 1.45, color: panelInk, textWrap: 'pretty' } }, card.action || '')));
+      })),
+      e('div', { style: { display: 'flex', justifyContent: 'center', gap: 6, padding: '12px 0 20px' }, 'aria-hidden': true }, cards.map(function (card, i) {
+        return e('div', { key: card.key || i, style: { width: i === briefIndex ? 18 : 6, height: 6, borderRadius: 999, background: i === briefIndex ? t.ink : t.line, transition: 'width .2s ease, background .2s ease' } });
+      })));
+  }
+  function renderSimpleGoal(goal) {
+    goal = goal || {};
+    var pct = goal.progress_pct == null ? null : Math.max(0, Math.min(100, Number(goal.progress_pct) || 0));
+    return e('section', { style: { padding: '18px 0 20px', borderTop: '1px solid ' + t.line, borderBottom: '1px solid ' + t.line, marginBottom: 22 } },
+      e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint, marginBottom: 9 } }, 'Цель бизнеса'),
+      e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 12 } },
+        e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 19, lineHeight: 1.2, color: t.ink } }, goal.title || 'План на месяц'),
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink, whiteSpace: 'nowrap' } }, pct == null ? '—' : Math.round(pct) + '%')),
+      e('div', { style: { height: 6, background: t.line, borderRadius: 999, overflow: 'hidden', margin: '14px 0 11px' } },
+        e('div', { style: { width: (pct == null ? 0 : pct) + '%', height: '100%', background: t.ink, borderRadius: 999, transition: 'width .35s ease' } })),
+      e('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 14, fontFamily: BODY, fontSize: 12.5, lineHeight: 1.35, color: t.dim } },
+        e('span', null, 'Прогноз ' + money(goal.actual_rub || 0)),
+        e('span', { style: { textAlign: 'right' } }, goal.target_rub ? ('Цель ' + money(goal.target_rub)) : 'Цель уточняется')),
+      e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 14, lineHeight: 1.35, color: t.ink, marginTop: 14 } }, goal.plain_status || 'Идём по плану'),
+      e('div', { style: { fontFamily: BODY, fontSize: 12.8, lineHeight: 1.45, color: t.dim, marginTop: 5 } }, goal.next_step || 'Сохранять темп и следить за загрузкой.'));
+  }
+  function renderQuickStats(rows) {
+    rows = rows || [];
+    if (!rows.length) return null;
+    return e('section', { style: { marginBottom: 18 } },
+      e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint, marginBottom: 4 } }, 'Опорные показатели'),
+      e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } }, rows.slice(0, 4).map(function (row, i) {
+        return e('div', { key: row.key || i, style: { minWidth: 0, padding: i % 2 ? '14px 0 14px 14px' : '14px 14px 14px 0', borderTop: '1px solid ' + t.line, borderLeft: i % 2 ? '1px solid ' + t.line : 'none' } },
+          e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, lineHeight: 1.3, marginBottom: 5 } }, row.label || ''),
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 17, lineHeight: 1.18, color: t.ink, overflowWrap: 'anywhere' } }, row.value == null ? '—' : row.value));
+      })));
+  }
   function renderOS() {
     if (!cc) return loadingMsg();
-    var sm = cc.summary || {};
-    var top = sm.top_priority || {};
-    var risk = sm.top_risk || {};
-    var today = sectionBy('today') || {}, todaySm = today.summary || {};
-    var plan = sectionBy('plan_fact') || {}, planSm = plan.summary || {};
-    var mastersSec = sectionBy('masters') || {}, mastersSm = mastersSec.summary || {};
-    var clients = sectionBy('clients') || {}, clientsSm = clients.summary || {};
-    var services = sectionBy('services') || {}, servicesSm = services.summary || {};
-    var journal = cc.journal || [];
-    var actions = cc.next_best_actions || [];
-    var risks = cc.risks || [];
-    var control = cc.control_queue || [];
-    var controlFocus = cc.control_focus || {};
-    var executionPlan = cc.execution_plan || {};
-    var taskCenter = cc.task_center || {};
-    var ownerReview = cc.owner_review || {};
-    var autonomousDirector = cc.autonomous_director || {};
-    var autopilotSupervisor = cc.autopilot_supervisor || {};
-    var executionLoop = cc.execution_loop || {};
-    var businessGoals = cc.business_goals || {};
-    var ownerAdvisor = cc.owner_advisor || {};
-    var reputation = cc.reputation || {};
-    var decisionMemory = cc.decision_memory || {};
-    var operatingRhythm = cc.operating_rhythm || {};
-    var kpiScorecard = cc.kpi_scorecard || {};
-    var financialDirector = cc.financial_director || {};
-    var attention = cc.attention_feed || [];
-    var automations = cc.automation_status || [];
-    var automationQueue = cc.automation_queue || {};
+    var brief = cc.briefing && (cc.briefing.cards || []).length ? cc.briefing : fallbackBrief();
+    var updated = String(brief.updated_at || cc.generated_at || '').replace('T', ' ').slice(0, 16);
     return e(React.Fragment, null,
-      e('div', { style: { display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 } },
-        e('div', { style: { width: 10, height: 10, borderRadius: 999, background: statusColor(cc.status), flexShrink: 0 } }),
-        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint } }, 'MAYA OS · ' + statusText(cc.status)),
-        e('div', { style: { marginLeft: 'auto' } }, btn('Обновить', function () { loadCommand(); }, { busy: busy }))),
-      grid2([
-        kpiCell(money(sm.expected_revenue_rub), 'План дня'),
-        kpiCell(money(sm.money_at_stake_rub), 'Деньги на кону'),
-        kpiCell(String(todaySm.free_capacity_today || 0), 'Свободная ёмкость'),
-        kpiCell(String(todaySm.booked || 0), 'Записей сегодня')
-      ]),
-      renderBusinessGoals(businessGoals),
-      renderOwnerAdvisor(ownerAdvisor),
-      renderReputation(reputation),
-      renderDecisionMemory(decisionMemory),
-      renderOperatingRhythm(operatingRhythm),
-      renderAutonomousDirector(autonomousDirector, kpiScorecard, financialDirector),
-      renderAutopilotSupervisor(autopilotSupervisor),
-      renderExecutionLoop(executionLoop),
-      renderExecutionPlan(executionPlan),
-      renderOwnerReview(ownerReview),
-      renderTaskCenter(taskCenter),
-      renderAttentionFeed(attention),
-      top.title ? signalCard(top.title, top.detail, top.potential_rub, 'warn') : null,
-      risk.title ? signalCard(risk.title, risk.detail, risk.potential_rub, risk.severity || 'warn') : null,
-      renderPlanFact(planSm),
-      renderMastersBlock(mastersSm, mastersSec.items || []),
-      Card(e('div', null,
-        eyebrow('Операционная картина'),
-        tinyRow('Работают мастера', String(todaySm.working_masters || 0)),
-        tinyRow('Средний чек 30 дней', money(sm.avg_check_rub)),
-        tinyRow('Уснувшие клиенты', clientsSm.sleeping_clients == null ? 'не считалось' : String(clientsSm.sleeping_clients), clientsSm.sleeping_clients ? statusColor('warn') : null),
-        tinyRow('Истекают абонементы', String(clientsSm.subscriptions_expiring_7d || 0), clientsSm.subscriptions_expiring_7d ? statusColor('warn') : null),
-        tinyRow('Просевшие услуги', String(servicesSm.weak_count || 0), servicesSm.weak_count ? statusColor('warn') : null))),
-      renderControlFocus(controlFocus),
-      Card(e('div', null, eyebrow('Контроль'), renderControlQueue(control))),
-      Card(e('div', null, eyebrow('Риски'), renderOSList(risks, 'Критичных рисков сейчас нет.'))),
-      renderAutomationQueue(automationQueue),
-      renderAutomationStatus(automations),
-      Card(e('div', null, eyebrow('Следующие действия'), renderActionCards(actions))),
-      Card(e('div', null, eyebrow('Журнал AI-директора'), renderJournal(journal))),
-      (cc.errors || []).length ? Card(e('div', null,
-        eyebrow('Системные предупреждения'),
-        (cc.errors || []).map(function (er, i) {
-          return e('div', { key: i, style: { fontFamily: BODY, fontSize: 12, color: t.faint, lineHeight: 1.35, marginTop: i ? 6 : 0 } }, er.message || er.key || 'Блок временно недоступен');
-        }))) : null);
+      e('header', { style: { display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 } },
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint, marginBottom: 6 } }, 'MAYA · Бизнес'),
+          e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 23, lineHeight: 1.16, color: t.ink, textWrap: 'balance' } }, brief.headline || 'Вот главное по бизнесу'),
+          e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.45, color: t.dim, marginTop: 7, textWrap: 'pretty' } }, brief.summary || '')),
+        e('button', {
+          type: 'button', onClick: function () { loadCommand(); }, disabled: busy,
+          style: { border: '1px solid ' + t.line, background: 'transparent', color: t.ink, borderRadius: 8, padding: '9px 11px', fontFamily: BODY, fontWeight: 650, fontSize: 12, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.55 : 1, flexShrink: 0 }
+        }, busy ? '…' : 'Обновить')),
+      renderBriefCarousel(brief),
+      renderSimpleGoal(brief.simple_goal),
+      renderQuickStats(brief.quick_stats),
+      e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.faint, padding: '2px 0 8px' } },
+        'Данные: YClients, отзывы на картах и публичный рынок Ставрополя' + (updated ? ' · ' + updated : '')),
+      (cc.errors || []).length ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.dim, borderTop: '1px solid ' + t.line, paddingTop: 12, marginTop: 8 } }, 'Часть данных временно обновляется. MAYA сохранит последний доступный снимок.') : null);
   }
 
   function renderOverview() {
@@ -15978,17 +16058,14 @@ function AGodMode(props) {
 
   var bodyEl = tab === 'os' ? renderOS() : tab === 'overview' ? renderOverview() : tab === 'health' ? renderHealth() : tab === 'money' ? renderMoney() : renderSubs();
   if (props.embedded) {
-    // Встроенный режим (вкладка OS в аналитике): без шапки/фикс-обёртки GOD-центра
-    return e('div', null, renderModal(), e('div', { style: { display: 'flex', gap: 6, padding: '0 0 10px', overflowX: 'auto' } }, TABS.map(function (tb) {
-      var on = tab === tb.k;
-      return e('div', { key: tb.k, onClick: function () { setTab(tb.k); }, style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 13px', borderRadius: 999, whiteSpace: 'nowrap', cursor: 'pointer', border: '1px solid ' + (on ? 'transparent' : t.line), background: on ? t.accent : 'transparent', color: on ? (dark ? '#15140f' : '#fff') : t.dim } }, tb.label);
-    })), bodyEl);
+    // В кабинете сотрудников MAYA — один управленческий вход без вложенных вкладок.
+    return e('div', null, renderModal(), renderOS());
   }
   return e('div', { style: { position: 'fixed', inset: 0, zIndex: 9990, background: t.bg || (dark ? '#0b0c12' : '#eef0f6'), display: 'flex', flexDirection: 'column' } },
     renderModal(),
     e('div', { style: { padding: 'calc(env(safe-area-inset-top, 0px) + 16px) 16px 12px', borderBottom: '1px solid ' + t.line, display: 'flex', alignItems: 'center', gap: 12 } },
       e('div', { onClick: function () { window.__meGo && window.__meGo('staff-home'); }, style: { width: 36, height: 36, borderRadius: 999, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.ink, fontSize: 17, cursor: 'pointer', flexShrink: 0 } }, '←'),
-      e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 400, fontSize: 8.5, letterSpacing: '0.22em', textTransform: 'uppercase', color: t.accent } }, 'MAYA · GOD'), e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 15, color: t.ink, marginTop: 2 } }, 'Центр управления'))),
+      e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.accent } }, 'MAYA · Бизнес'), e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 15, color: t.ink, marginTop: 2 } }, 'Центр владельца'))),
     e('div', { style: { display: 'flex', gap: 6, padding: '12px 16px 4px', overflowX: 'auto' } }, TABS.map(function (tb) {
       var on = tab === tb.k;
       return e('div', { key: tb.k, onClick: function () { setTab(tb.k); }, style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 13px', borderRadius: 999, whiteSpace: 'nowrap', cursor: 'pointer', border: '1px solid ' + (on ? 'transparent' : t.line), background: on ? t.accent : 'transparent', color: on ? (dark ? '#15140f' : '#fff') : t.dim } }, tb.label);
@@ -20644,7 +20721,7 @@ function ALivePanel() {
   const RAMP = ['#afaca8', '#a3a09d', '#aca9a6', '#7f7d7a', '#7f7d7b', '#a8a5a2'];
   const ALL_TABS = [{
     key: 'os',
-    label: 'OS',
+    label: 'MAYA',
     show: (p, i) => !!window.__meIsFounder
   }, {
     key: 'analytics',
@@ -20725,11 +20802,28 @@ function ALivePanel() {
     client: false
   }];
   const dark = window.__meDark;
-  const t = tokens('aurora', dark);
+  const panelBaseT = tokens('aurora', dark);
+  const t = dark ? Object.assign({}, panelBaseT, {
+    dim: 'rgba(244,240,235,0.72)',
+    faint: 'rgba(244,240,235,0.55)',
+    line: 'rgba(244,240,235,0.18)'
+  }) : Object.assign({}, panelBaseT, {
+    dim: '#4d4a43',
+    faint: '#69655d',
+    line: 'rgba(24,22,15,0.18)',
+    card: 'rgba(24,22,15,0.06)'
+  });
   const e = React.createElement;
-  const [tabKey, setTabKey] = React.useState('analytics');
+  const [tabKey, setTabKey] = React.useState(window.__meIsFounder ? 'os' : 'analytics');
   const [compactHdr, setCompactHdr] = React.useState(false);
   const [me, setMe] = React.useState(null);
+  const ownerEntryRef = React.useRef(false);
+  React.useEffect(function () {
+    var founder = !!window.__meIsFounder || !!(me && me.is_founder);
+    if (!founder || ownerEntryRef.current) return;
+    ownerEntryRef.current = true;
+    setTabKey('os');
+  }, [me]);
   // analytics + report
   const [period, setPeriod] = React.useState('month');
   const [dash, setDash] = React.useState(null);
@@ -22858,9 +22952,9 @@ function ALivePanel() {
     const r = info.role || window.__meRole;
     return r === 'owner' ? 'Владелец' : r === 'manager' ? 'Управляющий' : r === 'master' ? 'Мастер' : 'Панель';
   }();
-  const panelHdrInk = '#f4f0eb';
-  const panelHdrDim = 'rgba(244,240,235,0.68)';
-  const panelHdrLine = 'rgba(255,255,255,0.14)';
+  const panelHdrInk = dark ? '#f4f0eb' : '#18160f';
+  const panelHdrDim = dark ? 'rgba(244,240,235,0.68)' : 'rgba(24,22,15,0.68)';
+  const panelHdrLine = dark ? 'rgba(255,255,255,0.14)' : 'rgba(24,22,15,0.16)';
   const panelHdrBg = compactHdr ? dark ? 'linear-gradient(180deg, rgba(7,8,16,0.34) 0%, rgba(7,8,16,0.24) 58%, rgba(7,8,16,0.08) 78%, rgba(7,8,16,0) 100%)' : 'linear-gradient(180deg, rgba(246,247,250,0.62) 0%, rgba(246,247,250,0.46) 50%, rgba(246,247,250,0.18) 76%, rgba(246,247,250,0) 100%)' : 'transparent';
   const panelHdrBlur = compactHdr ? dark ? 'blur(16px) saturate(165%)' : 'blur(34px) saturate(185%)' : 'none';
   const panelHdrMask = compactHdr ? dark ? 'linear-gradient(to bottom, #000 0%, #000 calc(100% - 38px), rgba(0,0,0,0) 100%)' : 'linear-gradient(to bottom, #000 0%, #000 calc(100% - 72px), rgba(0,0,0,0.34) calc(100% - 34px), rgba(0,0,0,0) 100%)' : 'none';

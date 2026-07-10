@@ -503,7 +503,7 @@ def import_reviews(source: str, reviews: list[dict]) -> dict:
 
 
 def refresh_public_reviews() -> dict:
-    """Обновляет обе публичные карточки и формирует надёжную очередь алертов."""
+    """Обновляет публичные отзывы и суточный рыночный снимок карт."""
     checked_at = datetime.now().isoformat(timespec="seconds")
     source_results = []
     for source in _SOURCES:
@@ -551,6 +551,15 @@ def refresh_public_reviews() -> dict:
                 "error": type(error).__name__,
                 "connection": "public_page_error",
             })
+    try:
+        import market_intelligence
+        market = market_intelligence.refresh_market_snapshot(force=False)
+    except Exception as error:
+        market = {
+            "status": "warn",
+            "refresh_error": type(error).__name__,
+            "summary": {"competitors_scanned": 0, "reviews_analyzed": 0},
+        }
     ready = [row for row in source_results if row.get("ok")]
     return {
         "ok": bool(ready),
@@ -558,6 +567,13 @@ def refresh_public_reviews() -> dict:
         "sources": source_results,
         "sources_ready": len(ready),
         "new": sum(int(row.get("new") or 0) for row in source_results),
+        "market": {
+            "status": market.get("status"),
+            "cached": bool(market.get("cached")),
+            "competitors_scanned": (market.get("summary") or {}).get("competitors_scanned", 0),
+            "reviews_analyzed": (market.get("summary") or {}).get("reviews_analyzed", 0),
+            "refresh_error": market.get("refresh_error"),
+        },
     }
 
 

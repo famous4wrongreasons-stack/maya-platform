@@ -124,6 +124,14 @@ def _m(n) -> str:
     return f"{_rub(n):,}".replace(",", " ")
 
 
+def _money(n) -> str:
+    return _m(n) + " ₽"
+
+
+def _integer(n) -> int:
+    return _rub(n)
+
+
 def _avg_check_30d() -> int:
     """Средний чек салона за 30 дней (реальный) — база денежных оценок."""
     summary = _summary_30d()
@@ -1583,7 +1591,7 @@ def _control_focus(control: list[dict], *, now_iso: str) -> dict:
         if _severity_rank(it.get("status")) >= 3:
             return "urgent", "Высокий риск"
         if it.get("potential_rub"):
-            return "money", "Деньги на кону"
+            return "money", "Потенциальный эффект"
         return "watch", "Наблюдать"
 
     rank = {
@@ -2329,7 +2337,7 @@ def _attention_feed(*, control: list[dict], plan: dict | None, top_risk: dict | 
         top = opps[0] or {}
         add(
             "opportunity",
-            top.get("title") or "Деньги на кону",
+            top.get("title") or "Возможность роста",
             top.get("detail") or "",
             severity="medium",
             source="money",
@@ -2761,7 +2769,7 @@ def _kpi_scorecard(*, snap: dict, plan: dict, masters: dict, ret: dict,
 
 def _financial_director(*, snap: dict, plan: dict, masters: dict,
                         opps: list[dict], risks: list[dict]) -> dict:
-    """Финансовый директор: прогноз по run-rate и управленческие деньги на кону."""
+    """Финансовый директор: прогноз по run-rate и оценка возможностей роста."""
     today = date.today()
     first = today.replace(day=1)
     next_month = (first.replace(year=first.year + 1, month=1) if first.month == 12
@@ -2789,7 +2797,7 @@ def _financial_director(*, snap: dict, plan: dict, masters: dict,
     if money_at_stake:
         decisions.append({
             "key": "protect_money_at_stake",
-            "title": "Забрать деньги на кону",
+            "title": "Использовать возможность роста",
             "detail": "Возможности и риски дают до %s ₽ потенциального эффекта." % _m(money_at_stake),
             "status": "medium",
             "potential_rub": money_at_stake,
@@ -3313,6 +3321,240 @@ def _owner_business_advisor(
         "dimensions": dimensions,
         "top_advice": dimensions[:3],
         "note": "Каждый совет содержит метрику, доказательство и конкретный следующий шаг.",
+    }
+
+
+def _owner_briefing(
+    *,
+    snap: dict,
+    plan: dict,
+    business_goals: dict,
+    owner_advisor: dict,
+    retention: dict,
+    reputation_payload: dict,
+    market_payload: dict,
+    masters: dict,
+) -> dict:
+    """One plain-language owner surface instead of a stack of subsystem cards."""
+    goals = {
+        row.get("key"): row
+        for row in (business_goals.get("goals") or [])
+        if isinstance(row, dict) and row.get("key")
+    }
+    advice = {
+        row.get("key"): row
+        for row in (owner_advisor.get("dimensions") or [])
+        if isinstance(row, dict) and row.get("key")
+    }
+    reputation_summary = reputation_payload.get("summary") or {}
+    market_summary = market_payload.get("summary") or {}
+    retention_summary = retention.get("summary") or {}
+    plan_target = _rub(plan.get("daily_target_rub"))
+    plan_expected = _rub(plan.get("projected_revenue_rub") or snap.get("expected_revenue_rub"))
+    plan_gap = plan_expected - plan_target if plan_target else 0
+    plan_progress = plan.get("progress_pct")
+    free_capacity = _rub(snap.get("free_capacity_today"))
+    booked = _rub(snap.get("booked_today"))
+    avg_check = _rub(snap.get("avg_check_rub"))
+
+    if plan_target and plan_gap < 0:
+        headline = "Сегодня до плана не хватает %s" % (_m(abs(plan_gap)) + " ₽")
+        status = "risk" if plan_progress is not None and plan_progress < 70 else "warn"
+        summary_text = (
+            "Ожидаем %s при плане %s. Свободно примерно %s визит(а/ов)."
+            % (_money(plan_expected), _money(plan_target), _m(free_capacity))
+        )
+    elif free_capacity:
+        headline = "План достижим, но часть дня ещё свободна"
+        status = "warn"
+        summary_text = (
+            "Ожидаем %s; свободно примерно %s визит(а/ов)."
+            % (_money(plan_expected), _m(free_capacity))
+        )
+    else:
+        headline = "Сегодня бизнес идёт по плану"
+        status = "ok"
+        summary_text = "Запись заполнена; ожидаемая выручка — %s." % _money(plan_expected)
+
+    cards = []
+
+    def add_card(key, label, title, value, value_label, second_value, second_label, analysis, action, tone="neutral"):
+        cards.append({
+            "key": key,
+            "label": label,
+            "title": title,
+            "value": value,
+            "value_label": value_label,
+            "second_value": second_value,
+            "second_label": second_label,
+            "analysis": analysis,
+            "action": action,
+            "tone": tone if tone in ("positive", "attention", "neutral") else "neutral",
+        })
+
+    add_card(
+        "pulse",
+        "Главное",
+        headline,
+        _money(plan_expected),
+        "ожидаем сегодня",
+        str(booked),
+        "записей",
+        summary_text,
+        (
+            "Сначала закрыть ближайшие свободные окна клиентами с привычным циклом визитов."
+            if free_capacity else "Сохранить темп и проверить фактические оплаты в конце дня."
+        ),
+        "attention" if status != "ok" else "positive",
+    )
+
+    revenue_advice = advice.get("revenue") or {}
+    month = goals.get("month_gross") or {}
+    add_card(
+        "revenue",
+        "Выручка",
+        "План дня и прогноз месяца",
+        _money(plan_expected),
+        "сегодня",
+        _money(month.get("actual_value")),
+        "прогноз месяца",
+        (
+            "План дня %s; прогноз месяца выполнен на %s%%."
+            % (_money(plan_target), _integer(month.get("progress_pct")))
+        ),
+        revenue_advice.get("recommendation") or "Удерживать загрузку и средний чек без скидки на уже заполненные часы.",
+        "attention" if (revenue_advice.get("status") or "ok") != "ok" else "positive",
+    )
+
+    load = goals.get("daily_load") or {}
+    load_pct = _integer(load.get("actual_value"))
+    add_card(
+        "load",
+        "Загрузка",
+        "Насколько заполнен рабочий день",
+        str(load_pct) + "%",
+        "занято",
+        str(free_capacity),
+        "мест свободно",
+        "Сегодня работают %s мастер(а/ов), записей — %s." % (
+            _m(snap.get("working_masters")), _m(booked)
+        ),
+        (
+            "Сфокусировать возврат клиентов на ближайших свободных часах."
+            if free_capacity else "Следить за отменами и сразу отдавать окна листу ожидания."
+        ),
+        "attention" if free_capacity else "positive",
+    )
+
+    retention_pct = retention_summary.get("retention_90d_pct")
+    forward_pct = retention_summary.get("forward_booking_pct")
+    add_card(
+        "clients",
+        "Клиенты",
+        "Возвращаются ли гости",
+        (str(retention_pct) + "%") if retention_pct is not None else "—",
+        "вернулись за 90 дней",
+        (str(forward_pct) + "%") if forward_pct is not None else "—",
+        "уже записаны снова",
+        (
+            "К возврату сейчас %s клиент(а/ов)."
+            % _m(retention_summary.get("churn_candidates"))
+        ),
+        "Повышать долю следующей записи сразу после визита и возвращать клиентов до полного оттока.",
+        "attention" if (retention.get("status") or "warn") != "ok" else "positive",
+    )
+
+    maps_rating = reputation_summary.get("overall_rating")
+    negative_reviews = _rub(reputation_summary.get("negative_reviews_count"))
+    add_card(
+        "quality",
+        "Качество",
+        "Что говорят клиенты",
+        ("%.1f" % float(maps_rating)) if maps_rating is not None else "—",
+        "рейтинг на картах",
+        str(negative_reviews),
+        "негативных отзывов",
+        (reputation_payload.get("headline") or "MAYA следит за отзывами на картах."),
+        ((reputation_payload.get("recommendations") or [
+            "Поддерживать поток свежих отзывов и быстро разбирать конкретные причины негатива."
+        ])[0]),
+        "attention" if negative_reviews else "positive",
+    )
+
+    market_scanned = _rub(market_summary.get("competitors_scanned"))
+    market_price = market_summary.get("market_median_haircut_price_rub")
+    own_price = market_summary.get("own_haircut_price_rub")
+    if market_scanned:
+        market_value = _money(own_price) if own_price else "—"
+        market_second = _money(market_price) if market_price else "—"
+        market_analysis = (
+            "MAYA сравнила %s брендов и %s отзывов в открытой выдаче."
+            % (_m(market_scanned), _m(market_summary.get("reviews_analyzed")))
+        )
+        market_action = (market_payload.get("insights") or [
+            "Следить за ценой, рекламными обещаниями и сильными темами конкурентов."
+        ])[0]
+    else:
+        market_value = "—"
+        market_second = "—"
+        market_analysis = "MAYA готовит первый снимок рынка Ставрополя."
+        market_action = "После первого сбора появится сравнение цены, рейтинга, рекламы и отзывов."
+    add_card(
+        "market",
+        "Рынок",
+        "Позиция среди барбершопов Ставрополя",
+        market_value,
+        "ваша цена от",
+        market_second,
+        "медиана рынка",
+        market_analysis,
+        market_action,
+        "neutral",
+    )
+
+    month_target = _rub(month.get("target_value"))
+    month_actual = _rub(month.get("actual_value"))
+    month_gap = month_actual - month_target if month_target else 0
+    simple_goal = {
+        "title": "План на месяц",
+        "actual_rub": month_actual,
+        "target_rub": month_target,
+        "progress_pct": _integer(month.get("progress_pct")) if month.get("progress_pct") is not None else None,
+        "gap_rub": month_gap,
+        "status": month.get("status") or "warn",
+        "plain_status": (
+            "Не хватает %s до цели" % _money(abs(month_gap))
+            if month_target and month_gap < 0 else (
+                "Выше цели на %s" % _money(month_gap)
+                if month_target and month_gap > 0 else "Идём по плану"
+            )
+        ),
+        "next_step": (
+            "Главный рычаг сейчас — загрузка, повторная запись и средний чек."
+            if month_gap < 0 else "Сохранять темп и не терять маржинальность."
+        ),
+    }
+    top_master = masters.get("top_profit_master") or {}
+    quick_stats = [
+        {"key": "today", "label": "Сегодня", "value": _money(plan_expected)},
+        {"key": "avg_check", "label": "Средний чек", "value": _money(avg_check)},
+        {"key": "load", "label": "Загрузка", "value": str(load_pct) + "%"},
+        {
+            "key": "top_master",
+            "label": "Лучший вклад",
+            "value": str(top_master.get("name") or "—"),
+        },
+    ]
+    return {
+        "version": "maya_owner_brief_v1",
+        "status": status,
+        "headline": headline,
+        "summary": summary_text,
+        "cards": cards,
+        "simple_goal": simple_goal,
+        "quick_stats": quick_stats,
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+        "note": "Один управленческий вход: факт, смысл и следующий шаг без подтверждений и технических очередей.",
     }
 
 
@@ -4722,6 +4964,22 @@ def command_center() -> dict:
             "recommendations": ["Проверить подключение источников отзывов."],
         }
     try:
+        import market_intelligence
+        market_payload = market_intelligence.market_snapshot(force_refresh=False)
+    except Exception as e:
+        logger.error("owner_ai command_center market_intelligence: %s", e)
+        market_payload = {
+            "version": "maya_market_intelligence_v1",
+            "status": "warn",
+            "headline": "MAYA готовит первый снимок рынка Ставрополя",
+            "source": "2gis_public_pages",
+            "observed_at": "",
+            "summary": {"city": "Ставрополь", "competitors_scanned": 0, "reviews_analyzed": 0},
+            "leaders": [],
+            "review_themes": [],
+            "insights": ["Первый рыночный анализ появится после фонового обновления."],
+        }
+    try:
         import database
         internal_reviews = database.review_stats(days=90)
     except Exception:
@@ -4734,6 +4992,16 @@ def command_center() -> dict:
         retention=retention,
         reputation_payload=reputation_payload,
         internal_reviews=internal_reviews,
+    )
+    briefing = _owner_briefing(
+        snap=snap,
+        plan=plan,
+        business_goals=business_goals,
+        owner_advisor=owner_advisor,
+        retention=retention,
+        reputation_payload=reputation_payload,
+        market_payload=market_payload,
+        masters=masters,
     )
     decision_memory = _decision_memory(
         journal=journal,
@@ -4766,6 +5034,7 @@ def command_center() -> dict:
         kpi_scorecard.get("status"),
         business_goals.get("status"),
         owner_advisor.get("status"),
+        market_payload.get("status"),
         decision_memory.get("status"),
         operating_rhythm.get("status"),
         autonomous_director.get("status"),
@@ -4797,7 +5066,7 @@ def command_center() -> dict:
                 "opportunities_count": len(opps),
             },
             "items": opps[:6],
-            "note": "Возможности отсортированы по деньгам на кону; estimate=true — оценка, не факт.",
+            "note": "Возможности отсортированы по ожидаемому эффекту; estimate=true — оценка, не факт.",
         },
         {
             "key": "autonomous_director",
@@ -5085,6 +5354,9 @@ def command_center() -> dict:
             "maps_rating": (reputation_payload.get("summary") or {}).get("overall_rating"),
             "maps_sources_connected": (reputation_payload.get("summary") or {}).get("rated_sources_count", 0),
             "external_reviews_analyzed": (reputation_payload.get("summary") or {}).get("text_reviews_count", 0),
+            "market_competitors_scanned": (market_payload.get("summary") or {}).get("competitors_scanned", 0),
+            "market_median_haircut_price_rub": (market_payload.get("summary") or {}).get("market_median_haircut_price_rub"),
+            "market_reviews_analyzed": (market_payload.get("summary") or {}).get("reviews_analyzed", 0),
             "retention_90d_pct": (retention.get("summary") or {}).get("retention_90d_pct"),
             "forward_booking_pct": (retention.get("summary") or {}).get("forward_booking_pct"),
             "decision_memory_count": (decision_memory.get("summary") or {}).get("items_count", 0),
@@ -5104,7 +5376,9 @@ def command_center() -> dict:
         "financial_director": financial_director,
         "business_goals": business_goals,
         "owner_advisor": owner_advisor,
+        "briefing": briefing,
         "reputation": reputation_payload,
+        "market_intelligence": market_payload,
         "decision_memory": decision_memory,
         "operating_rhythm": operating_rhythm,
         "approval_matrix": approval,
@@ -5197,7 +5471,7 @@ def risk_signals(snap: dict = None, exp: dict = None, ret: dict = None,
     return {
         "risks": risks,
         "top_risk": risks[0] if risks else None,
-        "note": "Риски приоритизированы по деньгам на кону, если оценка доступна.",
+        "note": "Риски приоритизированы по ожидаемому эффекту, если оценка доступна.",
     }
 
 
@@ -5255,13 +5529,13 @@ def money_opportunities(snap: dict = None, exp: dict = None, ret: dict = None) -
             "action_hint": "Истекающим уходит авто-напоминание о продлении; можно усилить личным сообщением.",
         })
 
-    # Ранжируем по деньгам на кону (None → в конец).
+    # Ранжируем по ожидаемому эффекту (None → в конец).
     opps.sort(key=lambda o: (o.get("potential_rub") is None, -(o.get("potential_rub") or 0)))
     return opps
 
 
 def daily_briefing() -> dict:
-    """Утренний брифинг директора: что сегодня + приоритеты с суммами на кону.
+    """Утренний брифинг директора: что сегодня + приоритеты с оценкой эффекта.
     Считает snap/exp/ret по одному разу и переиспользует."""
     snap = business_snapshot()
     exp = expiring_assets()
