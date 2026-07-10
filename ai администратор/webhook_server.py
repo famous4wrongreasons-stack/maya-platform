@@ -2753,6 +2753,7 @@ async def panel_execution_loop_handler(request: web.Request) -> web.Response:
         **center,
     })
 
+
 async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
     """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
     try:
@@ -4148,6 +4149,37 @@ def _master_month_behind(staff_id: int, pct: float) -> bool:
     return round(cur * pct) < round(prev * pct)
 
 
+_GROSS_MONTH_CACHE: dict = {}  # sid -> (expires_ts, value)
+
+
+async def _gross_month_for(sid: int):
+    """Валовая мастера за текущий месяц. Двойной YClients-проход по месяцу дорогой,
+    поэтому кэш 15 мин; при холодном кэше ждём максимум 8с, дальше считаем в фоне
+    (эндпоинт не упирается в 25с-таймаут beget-прокси, фронт покажет «…» и добьёт
+    значение следующим заходом)."""
+    import time as _t
+    hit = _GROSS_MONTH_CACHE.get(sid)
+    if hit and hit[0] > _t.time():
+        return hit[1]
+    m_start, _m_end = _month_bounds(date.today())
+
+    async def _calc():
+        rev = await asyncio.to_thread(
+            _revenue_by_master, m_start.isoformat(), date.today().isoformat())
+        val = round(rev.get(sid, 0.0)) if isinstance(rev, dict) else 0
+        _GROSS_MONTH_CACHE[sid] = (_t.time() + 900, val)
+        return val
+
+    task = asyncio.create_task(_calc())
+    try:
+        return await asyncio.wait_for(asyncio.shield(task), timeout=8)
+    except asyncio.TimeoutError:
+        return None
+    except Exception as e:
+        logger.error(f"gross_month sid={sid}: {e}")
+        return None
+
+
 async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     """POST /api/panel/my_earnings — личный заработок мастера за ТЕКУЩУЮ расчётную
     неделю (Чт→Ср, до сегодня): валовая по услугам × его доля. Та же формула, что в
@@ -4177,16 +4209,20 @@ async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     gross = round(rev_week.get(sid, 0.0))
     is_owner = (sid == OWNER_STAFF_ID)
     pct = 1.0 if is_owner else MASTER_SALARY_PCT.get(sid, MASTER_SALARY_DEFAULT)
-    # факт/потенциал за сегодня + отставание месяца (параллельно, чтобы не тормозить)
+    # факт/потенциал за сегодня + отставание месяца (параллельно)
     today_earn, behind = await asyncio.gather(
         asyncio.to_thread(_master_today_earn, sid, pct),
         asyncio.to_thread(_master_month_behind, sid, pct),
     )
+    # валовая за месяц — кэш 15 мин + мягкий таймаут (см. _gross_month_for)
+    gross_month = await _gross_month_for(sid)
     return _cabinet_response({
         "pay_week": pw,
         "gross_week": gross,
         "percent": int(round(pct * 100)),
         "salary_week": round(gross * pct),
+        "gross_month": gross_month,
+        "salary_month": (round(gross_month * pct) if gross_month is not None else None),
         "earned_today": today_earn["earned_today"],
         "potential_today": today_earn["potential_today"],
         "visits_today": today_earn["visits_today"],
