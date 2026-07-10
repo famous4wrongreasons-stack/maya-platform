@@ -133,6 +133,20 @@ def _integer(n) -> int:
     return _rub(n)
 
 
+def _ru_count(n, one: str, few: str, many: str) -> str:
+    value = abs(_rub(n))
+    tail = value % 100
+    if 11 <= tail <= 14:
+        form = many
+    elif value % 10 == 1:
+        form = one
+    elif 2 <= value % 10 <= 4:
+        form = few
+    else:
+        form = many
+    return f"{_m(n)} {form}"
+
+
 def _avg_check_30d() -> int:
     """Средний чек салона за 30 дней (реальный) — база денежных оценок."""
     summary = _summary_30d()
@@ -3931,14 +3945,14 @@ def _owner_briefing(
         "Качество",
         "Репутация на двух площадках",
         rating_value(yandex),
-        "Яндекс · %s отзывов" % _m(yandex.get("reviews_count")),
+        "Яндекс · %s" % _ru_count(yandex.get("reviews_count"), "отзыв", "отзыва", "отзывов"),
         rating_value(two_gis),
-        "2ГИС · %s отзывов" % _m(two_gis.get("reviews_count")),
+        "2ГИС · %s" % _ru_count(two_gis.get("reviews_count"), "отзыв", "отзыва", "отзывов"),
         (
-            "Общий взвешенный рейтинг %s. Проанализировано %s текстов; новых за 30 дней %s, негативных %s."
+            "Общий взвешенный рейтинг %s. Проанализировано %s. За 30 дней: новых отзывов — %s, негативных — %s."
             % (
                 ("%.2f" % float(maps_rating)) if maps_rating is not None else "—",
-                _m(reputation_summary.get("text_reviews_count")),
+                _ru_count(reputation_summary.get("text_reviews_count"), "текст", "текста", "текстов"),
                 _m(period_summary.get("new_30d")),
                 _m(period_summary.get("negative_30d") or negative_reviews),
             )
