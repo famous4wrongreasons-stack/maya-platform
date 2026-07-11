@@ -634,6 +634,22 @@ def _call_url(phone: str) -> str:
     return ("tel:+" + digits) if digits else ""
 
 
+def _cycle_owner_alert(payload: dict | None) -> dict:
+    raw = (payload or {}).get("owner_alert") or {}
+    if not isinstance(raw, dict):
+        raw = {}
+    return {
+        "version": str(raw.get("version") or "maya_cycle_owner_alert_v1")[:40],
+        "event_id": str(raw.get("event_id") or "")[:100],
+        "active": bool(raw.get("active")),
+        "state": str(raw.get("state") or "empty")[:24],
+        "candidate_count": _rub(raw.get("candidate_count")),
+        "new_count": _rub(raw.get("new_count")),
+        "created_at": str(raw.get("created_at") or "")[:32],
+        "notified_at": str(raw.get("notified_at") or "")[:32],
+    }
+
+
 def _cycle_candidate_queue(*, include_personal_data: bool = False) -> dict:
     """Loads the PII-free cycle snapshot and expands contacts only for owner UI."""
     try:
@@ -649,6 +665,7 @@ def _cycle_candidate_queue(*, include_personal_data: bool = False) -> dict:
             "generated_at": "",
             "summary": {"candidates": None, "pending": None, "overdue": 0, "due": 0, "due_soon": 0},
             "candidates": [],
+            "owner_alert": _cycle_owner_alert({}),
         }
 
     summary = dict(payload.get("summary") or {})
@@ -697,6 +714,7 @@ def _cycle_candidate_queue(*, include_personal_data: bool = False) -> dict:
         "mode": str(payload.get("mode") or "scan")[:20],
         "summary": summary,
         "candidates": owner_rows,
+        "owner_alert": _cycle_owner_alert(payload),
     }
 
 
@@ -774,6 +792,7 @@ def return_candidates(*, include_personal_data: bool = False) -> dict:
         "cycle_sent_count": _rub(cycle_summary.get("sent")),
         "cycle_snapshot_at": cycle.get("generated_at"),
         "cycle_snapshot_state": cycle.get("state"),
+        "owner_alert": cycle.get("owner_alert") or _cycle_owner_alert({}),
         "owner_question": "Что сделать с клиентами, которым уже пора вернуться?",
         "decision_options": _return_decision_options(cycle_count),
     }
@@ -1564,6 +1583,7 @@ def _fallback_return_candidates() -> dict:
         "cycle_due_now_count": 0,
         "cycle_due_soon_count": 0,
         "cycle_snapshot_state": "unavailable",
+        "owner_alert": _cycle_owner_alert({}),
         "owner_question": "Что сделать с клиентами, которым уже пора вернуться?",
         "decision_options": _return_decision_options(None),
         "candidates": [],
@@ -4137,6 +4157,7 @@ def _owner_briefing(
             "owner_question": return_candidates.get("owner_question"),
             "decision_options": return_candidates.get("decision_options") or [],
             "cycle_snapshot_state": return_candidates.get("cycle_snapshot_state"),
+            "owner_alert": return_candidates.get("owner_alert") or _cycle_owner_alert({}),
         },
     )
 
@@ -6147,6 +6168,7 @@ def command_center(*, include_personal_data: bool = False) -> dict:
         "owner_advisor": owner_advisor,
         "growth_engine": growth_engine,
         "briefing": briefing,
+        "owner_alert": ret.get("owner_alert") or _cycle_owner_alert({}),
         "reputation": reputation_payload,
         "market_intelligence": market_payload,
         "decision_memory": decision_memory,

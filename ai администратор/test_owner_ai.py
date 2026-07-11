@@ -270,6 +270,16 @@ class OwnerAITests(unittest.TestCase):
                 "candidates": 2, "pending": 2, "overdue": 1,
                 "due": 1, "due_soon": 0, "sent": 0,
             },
+            "owner_alert": {
+                "version": "maya_cycle_owner_alert_v1",
+                "event_id": "cycle-20260711T090000-test",
+                "active": True,
+                "state": "new",
+                "candidate_count": 2,
+                "new_count": 2,
+                "created_at": date.today().isoformat() + "T09:00:00",
+                "notify_required": False,
+            },
             "candidates": [{
                 "client_id": 11,
                 "cycle_days": 28,
@@ -309,15 +319,18 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(owner_view["candidates"][0]["name"], "Иван Петров")
         self.assertTrue(owner_view["candidates"][0]["call_url"].startswith("tel:+"))
         self.assertEqual(owner_view["decision_options"][0]["job"], "cycle")
+        self.assertEqual(owner_view["owner_alert"]["event_id"], "cycle-20260711T090000-test")
 
         safe_center = owner_ai.command_center()
         owner_center = owner_ai.command_center(include_personal_data=True)
         self.assertNotIn("Иван", json.dumps(safe_center, ensure_ascii=False))
+        self.assertTrue(owner_center["owner_alert"]["active"])
         clients_card = next(
             card for card in owner_center["briefing"]["cards"] if card["key"] == "clients"
         )
         self.assertEqual(clients_card["candidate_count"], 2)
         self.assertEqual(clients_card["candidate_queue"][0]["name"], "Иван Петров")
+        self.assertEqual(clients_card["owner_alert"]["new_count"], 2)
         self.assertIn("MAYA уже отобрала 2", clients_card["analysis"])
 
     def test_daily_briefing_ranks_money_and_prepares_action_card(self):

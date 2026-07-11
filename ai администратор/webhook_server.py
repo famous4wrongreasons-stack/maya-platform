@@ -45,6 +45,7 @@ import ai_billing
 import anonymizer
 import config
 import cutmatch
+import cycle_reminder
 import database
 import lead_alerts
 import master_briefing
@@ -8734,6 +8735,33 @@ def _owner_reputation_ids() -> list[int]:
         except (TypeError, ValueError):
             continue
     return sorted(owner_ids)
+
+
+async def notify_owner_cycle_candidates(snapshot: dict) -> dict:
+    """Sends one PII-free Web Push for a newly changed return queue."""
+    payload = cycle_reminder.owner_alert_push_payload(snapshot)
+    if not payload:
+        return {"attempted": False, "owners": 0, "push": 0}
+    owner_ids = _owner_reputation_ids()
+    push_sent = 0
+    for owner_id in owner_ids:
+        try:
+            push_sent += await _send_client_push(
+                owner_id,
+                payload["title"],
+                payload["body"],
+                url=payload["url"],
+                tag=payload["tag"],
+                data=payload["data"],
+            )
+        except Exception as exc:
+            logger.error("cycle owner push delivery: %s", exc)
+    return {
+        "attempted": True,
+        "owners": len(owner_ids),
+        "push": push_sent,
+        "event_id": payload["data"]["event_id"],
+    }
 
 
 async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:

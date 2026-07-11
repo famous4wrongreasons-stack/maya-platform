@@ -6364,7 +6364,20 @@ async def _birthday_job(app: Application):
 async def _cycle_reminder_job(app: Application):
     """Ежедневно формирует очередь; ничего клиентам сам не отправляет."""
     try:
-        await asyncio.to_thread(cycle_reminder.scan_cycle_candidates)
+        snapshot = await asyncio.to_thread(cycle_reminder.scan_cycle_candidates)
+        alert = (snapshot or {}).get("owner_alert") or {}
+        if alert.get("notify_required"):
+            delivery = await webhook_server.notify_owner_cycle_candidates(snapshot)
+            await asyncio.to_thread(
+                cycle_reminder.mark_owner_alert_notified,
+                str(alert.get("event_id") or ""),
+                delivery,
+            )
+            logger.info(
+                "Цикл-сигнал владельцу: candidates=%s push=%s",
+                alert.get("candidate_count"),
+                delivery.get("push"),
+            )
     except Exception as e:
         logger.error(f"Ошибка анализа личного цикла: {e}")
 

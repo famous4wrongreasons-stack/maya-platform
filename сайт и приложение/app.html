@@ -25633,28 +25633,77 @@ function AOwnerMorningBrief(props) {
   var vs = React.useState(false), visible = vs[0], setVisible = vs[1];
   var pg = React.useState(0), page = pg[0], setPage = pg[1];
   var dragSt = React.useState(0), dragY = dragSt[0], setDragY = dragSt[1];
+  var callSt = React.useState(false), callsOpen = callSt[0], setCallsOpen = callSt[1];
+  var actionSt = React.useState({ phase: 'idle' }), cycleAction = actionSt[0], setCycleAction = actionSt[1];
   var dragRef = React.useRef({ y: 0, active: false });
+  var requestRef = React.useRef(false);
   var todayKey = new Date().toISOString().slice(0, 10);
-  function seen() {
+  function dailySeen() {
     try { return localStorage.getItem('me_owner_brief_seen') === todayKey; } catch (x) { return true; }
   }
+  function alertSeen(eventId) {
+    if (!eventId) return true;
+    try { return localStorage.getItem('me_owner_cycle_alert_seen') === eventId; } catch (x) { return true; }
+  }
   function dismiss() {
-    try { localStorage.setItem('me_owner_brief_seen', todayKey); } catch (x) {}
+    var alert = brief && brief.owner_alert || {};
+    try {
+      if (brief && brief.alert_mode === 'cycle' && alert.event_id) {
+        localStorage.setItem('me_owner_cycle_alert_seen', alert.event_id);
+      } else {
+        localStorage.setItem('me_owner_brief_seen', todayKey);
+      }
+    } catch (x) {}
     setVisible(false);
+    setBrief(null);
+    setCallsOpen(false);
+    setCycleAction({ phase: 'idle' });
   }
   React.useEffect(function () {
-    if (screen !== 'staff-home') return;
-    if (!window.__meIsFounder) return;
-    if (!(window.__meHasSession && window.__meHasSession())) return;
-    if (seen() || brief) return;
-    var rq = window.__meAuthReq ? window.__meAuthReq({}) : null;
-    if (!rq) return;
-    fetch('https://malesthetic.pro/app/api-proxy.php?action=panel_command_center', {
-      method: 'POST', headers: rq.headers, body: rq.body
-    }).then(function (r) { return r.json(); }).then(function (cc) {
-      var b = cc && cc.briefing;
-      if (b && (b.cards || []).length) { setBrief(b); setPage(0); setVisible(true); }
-    }).catch(function () {});
+    var cancelled = false;
+    var retryTimer = null;
+    if (screen !== 'staff-home') { requestRef.current = false; return function () {}; }
+    function loadBrief() {
+      if (cancelled || brief || requestRef.current) return;
+      if (!window.__meIsFounder || !(window.__meHasSession && window.__meHasSession())) {
+        retryTimer = setTimeout(loadBrief, 500);
+        return;
+      }
+      var rq = window.__meAuthReq ? window.__meAuthReq({}) : null;
+      if (!rq) { retryTimer = setTimeout(loadBrief, 500); return; }
+      requestRef.current = true;
+      fetch('https://malesthetic.pro/app/api-proxy.php?action=panel_command_center', {
+        method: 'POST', headers: rq.headers, body: rq.body
+      }).then(function (r) { return r.json(); }).then(function (cc) {
+        if (cancelled) return;
+        var b = cc && cc.briefing;
+        var alert = cc && cc.owner_alert || {};
+        var eventId = String(alert.event_id || '');
+        var clientCard = b && (b.cards || []).find(function (card) { return card && card.key === 'clients'; });
+        if (alert.active && eventId && !alertSeen(eventId) && clientCard) {
+          setBrief(Object.assign({}, b, {
+            headline: 'Клиенты готовы к возврату',
+            cards: [clientCard],
+            owner_alert: alert,
+            alert_mode: 'cycle'
+          }));
+          setPage(0);
+          setVisible(true);
+          return;
+        }
+        if (!dailySeen() && b && (b.cards || []).length) {
+          setBrief(b); setPage(0); setVisible(true);
+        }
+      }).catch(function () {
+        requestRef.current = false;
+        if (!cancelled) retryTimer = setTimeout(loadBrief, 1500);
+      });
+    }
+    loadBrief();
+    return function () {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, [screen]);
   if (!visible || !brief || screen !== 'staff-home') return null;
 
@@ -25666,6 +25715,90 @@ function AOwnerMorningBrief(props) {
   var cardLine = dark ? 'rgba(0,0,0,0.16)' : 'rgba(247,243,236,0.16)';
   var cards = brief.cards || [];
   var last = page >= cards.length - 1;
+  var isCycleAlert = brief.alert_mode === 'cycle';
+
+  function openAlertCall(row) {
+    var url = String(row && row.call_url || '');
+    if (!/^tel:\+\d+$/.test(url)) return;
+    try { window.location.href = url; } catch (x) {}
+  }
+  function runCycleSend(card) {
+    var rq = window.__meAuthReq ? window.__meAuthReq({
+      job: 'cycle',
+      title: card.title || 'Вернуть клиентов',
+      source: 'owner_cycle_popup'
+    }) : null;
+    if (!rq) { setCycleAction({ phase: 'done', ok: false, message: 'Нужно войти заново' }); return; }
+    setCycleAction({ phase: 'running' });
+    fetch('https://malesthetic.pro/app/api-proxy.php?action=panel_job_run', {
+      method: 'POST', headers: rq.headers, body: rq.body
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      var message = 'Запущено · MAYA отправляет напоминания';
+      if (j && j.done) {
+        var sent = j.summary && j.summary.sent;
+        message = 'Готово' + (sent != null ? ' · отправлено ' + sent : '');
+      } else if (j && (j.error || j.ok === false)) {
+        message = j.reason || j.message || 'Не удалось запустить';
+      }
+      setCycleAction({ phase: 'done', ok: !(j && (j.error || j.ok === false)), message: message });
+    }).catch(function () {
+      setCycleAction({ phase: 'done', ok: false, message: 'Не удалось запустить' });
+    });
+  }
+  function alertButton(label, onClick, primary, disabled) {
+    return e('button', {
+      type: 'button', onClick: onClick, disabled: !!disabled,
+      style: {
+        minHeight: 38, borderRadius: 999, padding: '0 13px',
+        border: primary ? '0' : '1px solid ' + cardLine,
+        background: primary ? cardInk : 'transparent',
+        color: primary ? cardBg : cardInk,
+        fontFamily: BODY, fontWeight: 650, fontSize: 11,
+        cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.55 : 1
+      }
+    }, label);
+  }
+  function renderAlertCandidates(card) {
+    if (!isCycleAlert) return null;
+    var rows = (card && card.candidate_queue) || [];
+    if (!rows.length) return null;
+    var visibleRows = rows.slice(0, callsOpen ? 5 : 3);
+    return e('div', { style: { marginTop: 11, borderTop: '1px solid ' + cardLine } },
+      visibleRows.map(function (row, idx) {
+        return e('div', {
+          key: row.client_id || idx,
+          style: { display: 'flex', alignItems: 'center', gap: 9, padding: '8px 0', borderBottom: idx < visibleRows.length - 1 ? '1px solid ' + cardLine : 'none' }
+        },
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 12, color: cardInk, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, row.name || 'Клиент'),
+            e('div', { style: { fontFamily: BODY, fontSize: 10.3, lineHeight: 1.35, color: cardDim, marginTop: 2 } }, row.reason || ''),
+            callsOpen ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, color: cardDim, marginTop: 3 } }, row.phone_masked || '') : null),
+          callsOpen && row.call_url ? e('button', {
+            type: 'button',
+            title: 'Позвонить ' + (row.name || 'клиенту'),
+            'aria-label': 'Позвонить ' + (row.name || 'клиенту'),
+            onClick: function () { openAlertCall(row); },
+            style: { width: 34, height: 34, borderRadius: 999, flexShrink: 0, border: '1px solid ' + cardLine, background: 'transparent', color: cardInk, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, cursor: 'pointer' }
+          }, AIcon.phone(cardInk, 15)) : null);
+      }));
+  }
+  function renderAlertActions(card) {
+    if (!isCycleAlert || !Number(card && card.candidate_count || 0)) return null;
+    if (cycleAction.phase === 'confirm') {
+      return e('div', { style: { marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + cardLine } },
+        e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 11.3, lineHeight: 1.4, color: cardInk, marginBottom: 8 } }, 'Отправить напоминания ' + card.candidate_count + ' клиентам без скидки?'),
+        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 } },
+          alertButton('Подтвердить', function () { runCycleSend(card); }, true, false),
+          alertButton('Отмена', function () { setCycleAction({ phase: 'idle' }); }, false, false)));
+    }
+    if (cycleAction.phase === 'running' || cycleAction.phase === 'done') {
+      return e('div', { style: { marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + cardLine, fontFamily: BODY, fontSize: 11.3, lineHeight: 1.4, color: cycleAction.ok === false ? cardDim : cardInk } },
+        cycleAction.phase === 'running' ? 'MAYA запускает сценарий…' : cycleAction.message);
+    }
+    return e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + cardLine } },
+      alertButton('Написать', function () { setCycleAction({ phase: 'confirm' }); }, true, false),
+      alertButton(callsOpen ? 'Скрыть номера' : 'Позвонить', function () { setCallsOpen(function (v) { return !v; }); }, false, false));
+  }
 
   if (typeof document !== 'undefined' && !document.getElementById('me-popup-kf')) {
     var stl = document.createElement('style');
@@ -25717,6 +25850,7 @@ function AOwnerMorningBrief(props) {
         borderRadius: 28, background: cardBg, color: cardInk,
         boxShadow: '0 30px 70px rgba(0,0,0,0.5)',
         padding: '20px 20px 16px', boxSizing: 'border-box',
+        maxHeight: 'calc(100dvh - 40px)', overflowY: 'auto', overscrollBehavior: 'contain',
         animation: dragY ? 'none' : 'mePopIn .55s cubic-bezier(.22,.61,.36,1) both',
         transform: dragY ? 'translateY(' + dragY + 'px)' : undefined,
         transition: dragY ? 'none' : 'transform .25s ease',
@@ -25727,7 +25861,7 @@ function AOwnerMorningBrief(props) {
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 } },
         e('div', { style: { color: cardInk, flexShrink: 0, display: 'flex' } }, e(SeedLogoAnimated, { size: 28, color: cardInk })),
         e('div', { style: { flex: 1, minWidth: 0 } },
-          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: cardDim } }, 'Maya · Брифинг'),
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: cardDim } }, isCycleAlert ? 'Maya · Возврат клиентов' : 'Maya · Брифинг'),
           e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 15, lineHeight: 1.25, color: cardInk, marginTop: 3 } }, brief.headline || 'Главное по бизнесу')),
         e('div', {
           onClick: dismiss,
@@ -25748,11 +25882,13 @@ function AOwnerMorningBrief(props) {
                   e('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: String(card.second_value || '').length > 9 ? 19 : 24, whiteSpace: 'nowrap', color: cardInk } }, card.second_value == null ? '—' : card.second_value),
                   e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: cardDim, marginTop: 4 } }, card.second_label || ''))),
               e('div', { style: { fontFamily: BODY, fontSize: 12.5, lineHeight: 1.5, color: cardInk, minHeight: 54 } }, card.analysis || ''),
+              renderAlertCandidates(card),
               e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: cardDim, margin: '10px 0 5px' } }, 'Рекомендация'),
-              e('div', { style: { fontFamily: BODY, fontSize: 12, lineHeight: 1.45, color: cardInk } }, card.action || ''));
+              e('div', { style: { fontFamily: BODY, fontSize: 12, lineHeight: 1.45, color: cardInk } }, card.action || ''),
+              renderAlertActions(card));
           }))),
       // футер: точки + стрелки
-      e('div', { style: { display: 'flex', alignItems: 'center', margin: '14px 0 12px' } },
+      isCycleAlert ? null : e('div', { style: { display: 'flex', alignItems: 'center', margin: '14px 0 12px' } },
         e('div', { style: { display: 'flex', gap: 6, flex: 1 } }, cards.map(function (c, i) {
           return e('div', {
             key: c.key || i, onClick: function () { setPage(i); },
@@ -25762,17 +25898,21 @@ function AOwnerMorningBrief(props) {
         e('div', { style: { display: 'flex', gap: 8 } }, arrow(-1), arrow(1))),
       // CTA: на последней странице — открыть полный брифинг; иначе «Позже»
       e('div', { style: { display: 'flex', gap: 8 } },
+        isCycleAlert ? e('button', {
+          type: 'button', onClick: dismiss,
+          style: { flex: 1, height: 44, borderRadius: 999, background: 'transparent', color: cardInk, border: '1px solid ' + cardLine, fontFamily: BODY, fontWeight: 650, fontSize: 11, cursor: 'pointer' }
+        }, 'Позже') : null,
         e('div', {
-          onClick: function () { dismiss(); if (last) { try { window.__meGo && window.__meGo('god'); } catch (x) {} } },
+          onClick: function () { dismiss(); if (last || isCycleAlert) { try { window.__meGo && window.__meGo('god'); } catch (x) {} } },
           style: {
             flex: 1, height: 44, borderRadius: 999,
-            background: last ? t.bg : 'transparent',
-            color: last ? t.ink : cardInk,
-            border: last ? '0' : '1px solid ' + cardLine,
+            background: last || isCycleAlert ? t.bg : 'transparent',
+            color: last || isCycleAlert ? t.ink : cardInk,
+            border: last || isCycleAlert ? '0' : '1px solid ' + cardLine,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: DISPLAY, fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: 'pointer'
           }
-        }, last ? 'Открыть в MAYA' : 'Позже'))));
+        }, last || isCycleAlert ? 'Открыть в MAYA' : 'Позже'))));
 }
 window.AOwnerMorningBrief = AOwnerMorningBrief;
 

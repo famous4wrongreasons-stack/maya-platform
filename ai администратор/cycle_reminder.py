@@ -24,6 +24,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import json
 from datetime import date, datetime, timedelta
@@ -43,6 +44,7 @@ MAX_CYCLE_DAYS = 60            # > 2 месяцев — это уже не «ц�
 WINDOW_DAYS = 3                # пинг если сегодня ± этого от предсказания
 MAX_OVERDUE_DAYS = 21          # дальше клиент переходит в сценарий реактивации
 CANDIDATE_SNAPSHOT_KEY = "cycle_candidates_snapshot_v1"
+OWNER_ALERT_VERSION = "maya_cycle_owner_alert_v1"
 
 _yc = YClientsAPI()
 
@@ -220,11 +222,96 @@ def _snapshot_row(candidate: dict, contact_status: str = "pending") -> dict:
     }
 
 
+def _pending_client_ids(payload: dict | None) -> set[int]:
+    rows = (payload or {}).get("candidates") or []
+    pending_statuses = {"pending", "quiet_hours", "error"}
+    result = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        try:
+            client_id = int(row.get("client_id") or 0)
+        except (TypeError, ValueError):
+            continue
+        if client_id and str(row.get("contact_status") or "pending") in pending_statuses:
+            result.add(client_id)
+    return result
+
+
+def _owner_alert_for_snapshot(
+    previous: dict | None,
+    rows: list[dict],
+    *,
+    generated_at: str,
+    mode: str,
+) -> dict:
+    """Builds a stable, PII-free event for push and the owner popup."""
+    previous = previous if isinstance(previous, dict) else {}
+    previous_alert = previous.get("owner_alert") or {}
+    if not isinstance(previous_alert, dict):
+        previous_alert = {}
+    current_payload = {"candidates": rows}
+    current_ids = _pending_client_ids(current_payload)
+    previous_ids = _pending_client_ids(previous)
+
+    if mode != "scan":
+        alert = dict(previous_alert)
+        alert.update({
+            "version": OWNER_ALERT_VERSION,
+            "active": bool(current_ids),
+            "candidate_count": len(current_ids),
+            "notify_required": False,
+            "state": "attention" if current_ids else "handled",
+        })
+        return alert
+
+    new_ids = current_ids - previous_ids
+    is_new_event = bool(current_ids) and (
+        bool(new_ids) or not previous_alert.get("event_id")
+    )
+    if is_new_event:
+        digest_source = ",".join(str(client_id) for client_id in sorted(current_ids))
+        digest = hashlib.sha256(digest_source.encode("utf-8")).hexdigest()[:12]
+        stamp = generated_at.replace("-", "").replace(":", "")[:15]
+        return {
+            "version": OWNER_ALERT_VERSION,
+            "event_id": f"cycle-{stamp}-{digest}",
+            "active": True,
+            "state": "new",
+            "candidate_count": len(current_ids),
+            "new_count": len(new_ids) if previous_alert.get("event_id") else len(current_ids),
+            "created_at": generated_at,
+            "notify_required": True,
+        }
+
+    if not current_ids:
+        alert = dict(previous_alert)
+        alert.update({
+            "version": OWNER_ALERT_VERSION,
+            "active": False,
+            "state": "empty",
+            "candidate_count": 0,
+            "notify_required": False,
+        })
+        return alert
+
+    alert = dict(previous_alert)
+    alert.update({
+        "version": OWNER_ALERT_VERSION,
+        "active": True,
+        "state": "pending",
+        "candidate_count": len(current_ids),
+        "notify_required": bool(previous_alert.get("notify_required")),
+    })
+    return alert
+
+
 def _persist_candidate_snapshot(
     candidates: list[dict],
     *,
     contact_statuses: dict[int, str] | None = None,
     mode: str = "scan",
+    previous_snapshot: dict | None = None,
 ) -> dict:
     statuses = contact_statuses or {}
     rows = [
@@ -243,14 +330,23 @@ def _persist_candidate_snapshot(
         "blocked": sum(1 for row in rows if row.get("contact_status") == "blocked"),
         "errors": sum(1 for row in rows if row.get("contact_status") == "error"),
     }
+    generated_at = datetime.now().isoformat(timespec="seconds")
+    if previous_snapshot is None:
+        previous_snapshot = load_candidate_snapshot()
     snapshot = {
         "version": "maya_cycle_candidates_v1",
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "generated_at": generated_at,
         "mode": str(mode or "scan")[:20],
         "summary": summary,
         "candidates": rows[:50],
         "privacy": "pseudonymous_snapshot_no_names_or_contacts",
     }
+    snapshot["owner_alert"] = _owner_alert_for_snapshot(
+        previous_snapshot,
+        snapshot["candidates"],
+        generated_at=generated_at,
+        mode=snapshot["mode"],
+    )
     database.set_setting(CANDIDATE_SNAPSHOT_KEY, json.dumps(snapshot, ensure_ascii=False))
     return snapshot
 
@@ -269,16 +365,78 @@ def load_candidate_snapshot() -> dict:
         "mode": "pending_first_scan",
         "summary": {"candidates": None, "pending": None, "overdue": 0, "due": 0, "due_soon": 0},
         "candidates": [],
+        "owner_alert": {
+            "version": OWNER_ALERT_VERSION,
+            "active": False,
+            "state": "pending_first_scan",
+            "candidate_count": 0,
+            "notify_required": False,
+        },
         "privacy": "pseudonymous_snapshot_no_names_or_contacts",
     }
 
 
 def scan_cycle_candidates() -> dict:
     """Daily read-only scan. Sending remains a separate owner-confirmed action."""
+    previous = load_candidate_snapshot()
     candidates = find_due_clients()
-    snapshot = _persist_candidate_snapshot(candidates, mode="scan")
+    snapshot = _persist_candidate_snapshot(
+        candidates,
+        mode="scan",
+        previous_snapshot=previous,
+    )
     logger.info("Цикл-скан: найдено %s кандидатов, отправка ждёт владельца", len(candidates))
     return snapshot
+
+
+def owner_alert_push_payload(snapshot: dict | None) -> dict:
+    """Returns a PII-free Web Push payload for one active owner event."""
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    alert = snapshot.get("owner_alert") or {}
+    summary = snapshot.get("summary") or {}
+    event_id = str(alert.get("event_id") or "")[:100]
+    count = max(0, int(alert.get("candidate_count") or 0))
+    if not alert.get("active") or not alert.get("notify_required") or not event_id or not count:
+        return {}
+    new_count = max(0, int(alert.get("new_count") or count))
+    overdue = max(0, int(summary.get("overdue") or 0))
+    body_parts = [f"В очереди: {count}", f"новых: {new_count}"]
+    if overdue:
+        body_parts.append(f"просрочили срок: {overdue}")
+    return {
+        "title": "MAYA: клиенты готовы к возврату",
+        "body": " · ".join(body_parts) + ". Выберите: написать, позвонить или отложить.",
+        "url": f"/app/?god=1&owner_alert={event_id}",
+        "tag": f"maya-cycle-{event_id}",
+        "data": {
+            "event": "owner.cycle_candidates",
+            "event_id": event_id,
+            "candidate_count": count,
+            "new_count": new_count,
+        },
+    }
+
+
+def mark_owner_alert_notified(event_id: str, delivery: dict | None = None) -> bool:
+    """Marks one push attempt without exposing or persisting client contacts."""
+    snapshot = load_candidate_snapshot()
+    alert = snapshot.get("owner_alert") or {}
+    if not event_id or str(alert.get("event_id") or "") != str(event_id):
+        return False
+    delivery = delivery if isinstance(delivery, dict) else {}
+    alert = dict(alert)
+    alert.update({
+        "notify_required": False,
+        "notified_at": datetime.now().isoformat(timespec="seconds"),
+        "delivery": {
+            "owners": int(delivery.get("owners") or 0),
+            "push": int(delivery.get("push") or 0),
+            "attempted": bool(delivery.get("attempted", True)),
+        },
+    })
+    snapshot["owner_alert"] = alert
+    database.set_setting(CANDIDATE_SNAPSHOT_KEY, json.dumps(snapshot, ensure_ascii=False))
+    return True
 
 
 def _build_message(c: dict) -> tuple[str, InlineKeyboardMarkup]:
@@ -309,7 +467,12 @@ async def run_cycle_reminder_job(app: Application) -> dict:
     candidates = find_due_clients()
     sent, blocked, errors, skipped = 0, 0, 0, 0
     contact_statuses: dict[int, str] = {}
-    _persist_candidate_snapshot(candidates, mode="owner_confirmed_send")
+    previous = load_candidate_snapshot()
+    sending_snapshot = _persist_candidate_snapshot(
+        candidates,
+        mode="owner_confirmed_send",
+        previous_snapshot=previous,
+    )
 
     logger.info(f"🔁 Цикл-напоминание: найдено {len(candidates)} «по расписанию»")
 
@@ -363,6 +526,7 @@ async def run_cycle_reminder_job(app: Application) -> dict:
         candidates,
         contact_statuses=contact_statuses,
         mode="owner_confirmed_send",
+        previous_snapshot=sending_snapshot,
     )
     summary = {
         "candidates": len(candidates),
