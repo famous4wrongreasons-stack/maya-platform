@@ -64,7 +64,8 @@ npm test -- --runInBand \
 
 ## Remaining isolation work
 
-- Move tenant management mutations and auth state/identity writes behind explicit tenant or platform repositories.
+- Auth state, identity and public login isolation continue in `tenant-auth-isolation-runbook.md`.
+- Move remaining tenant management mutations behind explicit platform repositories.
 - Add idempotent webhook event receipts and replay retention.
 - Add transaction-local tenant context before enabling PostgreSQL RLS.
 - Add production scheduler locking and observability before automatic recurring billing.
