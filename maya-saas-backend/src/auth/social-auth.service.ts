@@ -19,6 +19,10 @@ import {
 import { UserRole, UserStatus } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { normalizeRussianPhone } from '../common/phone.util';
+import {
+  resolveAllowedOauthRedirectUri,
+  resolveNodeEnvironment,
+} from '../config/security-config';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
@@ -925,18 +929,20 @@ export class SocialAuthService {
   }
 
   private normalizeRedirectUri(redirectUri: string): string {
-    const normalized = String(redirectUri || '').trim();
-
-    if (!normalized) {
+    try {
+      return resolveAllowedOauthRedirectUri(
+        redirectUri,
+        this.configService.get<string>('OAUTH_ALLOWED_REDIRECT_URIS'),
+        resolveNodeEnvironment(this.configService.get<string>('NODE_ENV')),
+      );
+    } catch {
       throw new BadRequestException(
         this.buildSocialAuthError(
           'social_redirect_invalid',
-          'A redirect URI is required for social login.',
+          'The social login redirect URI is not allowed.',
         ),
       );
     }
-
-    return normalized;
   }
 
   private normalizeEmail(value: string | null): string | null {
