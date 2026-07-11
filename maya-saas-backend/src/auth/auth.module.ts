@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantsModule } from '../tenants/tenants.module';
@@ -9,6 +10,9 @@ import { UsersModule } from '../users/users.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { AuthController } from './auth.controller';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthRateLimitExceptionFilter } from './auth-rate-limit.filter';
+import { AuthRateLimitRepository } from './auth-rate-limit.repository';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionRepository } from './auth-session.repository';
 import { AuthSessionService } from './auth-session.service';
 import { AuthSessionSystemGateway } from './auth-session-system.gateway';
@@ -47,6 +51,12 @@ import { TenantAuthRepository } from './tenant-auth.repository';
   ],
   controllers: [AuthController],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AuthRateLimitExceptionFilter,
+    },
+    AuthRateLimitRepository,
+    AuthRateLimitService,
     AuthService,
     AuthFlowSystemGateway,
     AuthSessionRepository,
@@ -57,6 +67,6 @@ import { TenantAuthRepository } from './tenant-auth.repository';
     SocialAuthService,
     TenantAuthRepository,
   ],
-  exports: [AuthService],
+  exports: [AuthRateLimitService, AuthService],
 })
 export class AuthModule {}

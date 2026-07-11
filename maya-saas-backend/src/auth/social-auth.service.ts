@@ -24,6 +24,7 @@ import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthClientMetadata } from './auth-client-metadata';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionService } from './auth-session.service';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
@@ -106,11 +107,18 @@ export class SocialAuthService {
     private readonly tenantContext: TenantContextService,
     private readonly authRepository: TenantAuthRepository,
     private readonly flowSystemGateway: AuthFlowSystemGateway,
+    private readonly rateLimitService: AuthRateLimitService,
     private readonly sessionService: AuthSessionService,
   ) {}
 
-  async startYandexLogin(dto: StartOauthLoginDto) {
+  async startYandexLogin(
+    dto: StartOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('yandex');
+    await this.rateLimitService.assertPreflight('oauth_start', {
+      clientIp: metadata.clientIp,
+    });
 
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
@@ -122,11 +130,18 @@ export class SocialAuthService {
       'Yandex ID login is not configured.',
     );
     const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
-    const flow = await this.tenantContext.runAsPublicTenant(tenant.id, () =>
-      this.createAuthFlowState({
-        provider: 'yandex',
-        redirectUri,
-      }),
+    const flow = await this.tenantContext.runAsPublicTenant(
+      tenant.id,
+      async () => {
+        await this.rateLimitService.assertTenant('oauth_start', {
+          tenantId: tenant.id,
+        });
+
+        return this.createAuthFlowState({
+          provider: 'yandex',
+          redirectUri,
+        });
+      },
     );
     const authUrl = new URL('https://oauth.yandex.com/authorize');
 
@@ -154,9 +169,17 @@ export class SocialAuthService {
     metadata: Partial<AuthClientMetadata> = {},
   ) {
     this.assertProviderEnabled('yandex');
+    await this.rateLimitService.assertPreflight('oauth_complete', {
+      clientIp: metadata.clientIp,
+      identity: dto.state,
+    });
 
     const flow = await this.getValidAuthFlowState(dto.state, 'yandex');
     return this.tenantContext.runAsPublicTenant(flow.tenant.id, async () => {
+      await this.rateLimitService.assertTenant('oauth_complete', {
+        tenantId: flow.tenant.id,
+        identity: dto.state,
+      });
       await this.claimAuthFlowStateOrThrow(flow.id, 'yandex');
       const profile = await this.exchangeYandexCode(flow, dto.code);
       const result = await this.resolveOrCreateUser({
@@ -174,8 +197,14 @@ export class SocialAuthService {
     });
   }
 
-  async startTelegramLogin(dto: StartOauthLoginDto) {
+  async startTelegramLogin(
+    dto: StartOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('telegram');
+    await this.rateLimitService.assertPreflight('oauth_start', {
+      clientIp: metadata.clientIp,
+    });
 
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
@@ -187,11 +216,18 @@ export class SocialAuthService {
       'Telegram login is not configured.',
     );
     const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
-    const flow = await this.tenantContext.runAsPublicTenant(tenant.id, () =>
-      this.createAuthFlowState({
-        provider: 'telegram',
-        redirectUri,
-      }),
+    const flow = await this.tenantContext.runAsPublicTenant(
+      tenant.id,
+      async () => {
+        await this.rateLimitService.assertTenant('oauth_start', {
+          tenantId: tenant.id,
+        });
+
+        return this.createAuthFlowState({
+          provider: 'telegram',
+          redirectUri,
+        });
+      },
     );
     const authUrl = new URL('https://oauth.telegram.org/auth');
 
@@ -218,9 +254,17 @@ export class SocialAuthService {
     metadata: Partial<AuthClientMetadata> = {},
   ) {
     this.assertProviderEnabled('telegram');
+    await this.rateLimitService.assertPreflight('oauth_complete', {
+      clientIp: metadata.clientIp,
+      identity: dto.state,
+    });
 
     const flow = await this.getValidAuthFlowState(dto.state, 'telegram');
     return this.tenantContext.runAsPublicTenant(flow.tenant.id, async () => {
+      await this.rateLimitService.assertTenant('oauth_complete', {
+        tenantId: flow.tenant.id,
+        identity: dto.state,
+      });
       await this.claimAuthFlowStateOrThrow(flow.id, 'telegram');
       const profile = await this.exchangeTelegramCode(flow, dto.code);
       const result = await this.resolveOrCreateUser({

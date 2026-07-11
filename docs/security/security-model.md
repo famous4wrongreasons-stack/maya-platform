@@ -35,7 +35,7 @@ Protected assets include tenant business data, customer PII, integration credent
 
 - TLS only in production; strict CORS allowlist replaces wildcard.
 - DTO/schema validation rejects unknown fields.
-- Rate limits are identity, IP and tenant aware.
+- Public auth rate limits are shared through PostgreSQL, identity/IP/tenant aware and persist only HMAC subjects.
 - Mutating public endpoints use CSRF protection when cookie authentication is introduced.
 - Webhooks verify signature/secret, enforce replay windows and idempotency.
 - A webhook identifier may use only a dedicated system gateway; provider state is re-fetched and matched before entering tenant context.
@@ -76,5 +76,6 @@ PostgreSQL RLS is a planned defence-in-depth control. Application isolation rema
 - Trusted-domain and public-auth tenant conflicts.
 - Cross-tenant social identity/user relations.
 - Refresh-token replay races, revoked access JWTs and cross-tenant session ownership.
+- Distributed auth-limit concurrency, trusted-proxy spoof resistance and HMAC-only bucket storage.
 - Secret/PII leakage in errors and logs.
 - AI tool escalation and confirmation bypass.

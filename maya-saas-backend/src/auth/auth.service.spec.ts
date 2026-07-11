@@ -8,6 +8,7 @@ import { UserRole } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthService } from './auth.service';
 import { AuthSessionService } from './auth-session.service';
 import {
@@ -94,6 +95,8 @@ describe('AuthService phone auth', () => {
       refresh_expires_at: new Date('2026-08-10T12:00:00.000Z'),
       session: { id: 'session-1' },
     });
+    const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
+    const rateLimitTenantMock = jest.fn().mockResolvedValue(undefined);
     const phoneAuthUpsertMock: jest.MockedFunction<
       (args: {
         phone: string;
@@ -210,6 +213,10 @@ describe('AuthService phone auth', () => {
         phoneAuthDeliveryService as PhoneAuthDeliveryService,
         tenantContext,
         authRepository as TenantAuthRepository,
+        {
+          assertPreflight: rateLimitPreflightMock,
+          assertTenant: rateLimitTenantMock,
+        } as unknown as AuthRateLimitService,
         { issueSession: issueSessionMock } as unknown as AuthSessionService,
       ),
       tenantContext,
@@ -228,6 +235,8 @@ describe('AuthService phone auth', () => {
         phoneAuthClaimMock,
         phoneAuthInvalidAttemptMock,
         phoneAuthUpsertMock,
+        rateLimitPreflightMock,
+        rateLimitTenantMock,
         serializeUserMock,
         issueSessionMock,
       },
@@ -242,6 +251,8 @@ describe('AuthService phone auth', () => {
         deliverCodeMock,
         findTenantUserByPhoneMock,
         phoneAuthUpsertMock,
+        rateLimitPreflightMock,
+        rateLimitTenantMock,
       },
     } = createService();
 
@@ -282,6 +293,14 @@ describe('AuthService phone auth', () => {
       phone,
       code: '123456',
       clientIp: undefined,
+    });
+    expect(rateLimitPreflightMock).toHaveBeenCalledWith('phone_start', {
+      clientIp: undefined,
+      identity: JSON.stringify([tenant.slug, phone]),
+    });
+    expect(rateLimitTenantMock).toHaveBeenCalledWith('phone_start', {
+      tenantId: tenant.id,
+      identity: phone,
     });
     expect(tenantContext.get()).toBeUndefined();
   });
@@ -520,6 +539,8 @@ describe('AuthService phone auth', () => {
       mocks: {
         findTenantUserByEmailMock,
         getTenantBySlugOrThrowMock,
+        rateLimitPreflightMock,
+        rateLimitTenantMock,
         serializeUserMock,
         issueSessionMock,
       },
@@ -553,6 +574,14 @@ describe('AuthService phone auth', () => {
       adminUser.email,
     );
     expect(issueSessionMock).toHaveBeenCalledWith(adminUser, {});
+    expect(rateLimitPreflightMock).toHaveBeenCalledWith('password_login', {
+      clientIp: undefined,
+      identity: JSON.stringify([trialTenant.slug, adminUser.email]),
+    });
+    expect(rateLimitTenantMock).toHaveBeenCalledWith('password_login', {
+      tenantId: trialTenant.id,
+      identity: adminUser.email,
+    });
     expect(serializeUserMock).toHaveBeenCalledWith(adminUser);
     expect(result).toMatchObject({
       access_token: 'jwt-token',

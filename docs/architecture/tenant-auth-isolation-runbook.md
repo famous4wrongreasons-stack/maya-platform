@@ -80,7 +80,7 @@ Migration verification must cover a fresh database and an upgrade database conta
 
 - Session rotation, revocation and device inventory continue in `session-security-runbook.md`.
 - Add redirect URI allowlists per deployed OAuth client before enabling live providers.
-- Add tenant/IP-aware distributed rate limiting for login, phone and OAuth start endpoints.
+- Distributed tenant/IP/identity limits continue in `auth-abuse-protection-runbook.md`.
 - Minimize and encrypt retained provider profile PII instead of keeping a raw OAuth profile payload.
 - Add retention cleanup for consumed/expired phone and OAuth state rows.
 - Move remaining tenant-management writes behind explicit platform repositories.

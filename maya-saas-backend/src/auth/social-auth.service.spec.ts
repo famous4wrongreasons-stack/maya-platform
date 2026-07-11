@@ -7,6 +7,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionService } from './auth-session.service';
 import { SocialAuthService } from './social-auth.service';
 import { TenantAuthRepository } from './tenant-auth.repository';
@@ -158,6 +159,8 @@ describe('SocialAuthService', () => {
       refresh_expires_at: new Date('2026-08-10T12:00:00.000Z'),
       session: { id: 'session-1' },
     });
+    const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
+    const rateLimitTenantMock = jest.fn().mockResolvedValue(undefined);
 
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
@@ -200,6 +203,10 @@ describe('SocialAuthService', () => {
         tenantContext,
         authRepository,
         flowSystemGateway,
+        {
+          assertPreflight: rateLimitPreflightMock,
+          assertTenant: rateLimitTenantMock,
+        } as unknown as AuthRateLimitService,
         { issueSession: issueSessionMock } as unknown as AuthSessionService,
       ),
       tenantContext,
@@ -215,6 +222,8 @@ describe('SocialAuthService', () => {
         findTenantUserByEmailMock,
         findTenantUserByPhoneMock,
         getTenantBySlugOrThrowMock,
+        rateLimitPreflightMock,
+        rateLimitTenantMock,
         serializeUserMock,
         issueSessionMock,
       },
@@ -230,7 +239,11 @@ describe('SocialAuthService', () => {
     const {
       service,
       tenantContext,
-      mocks: { authFlowStateCreateMock },
+      mocks: {
+        authFlowStateCreateMock,
+        rateLimitPreflightMock,
+        rateLimitTenantMock,
+      },
     } = createService();
     authFlowStateCreateMock.mockImplementation(() => {
       expect(tenantContext.requireTenantId()).toBe(tenant.id);
@@ -260,6 +273,12 @@ describe('SocialAuthService', () => {
     expect(createArgs.state).toEqual(expect.stringMatching(/^ya_/));
     expect(createArgs.codeVerifier).toEqual(expect.any(String));
     expect(createArgs.expiresAt).toBeInstanceOf(Date);
+    expect(rateLimitPreflightMock).toHaveBeenCalledWith('oauth_start', {
+      clientIp: undefined,
+    });
+    expect(rateLimitTenantMock).toHaveBeenCalledWith('oauth_start', {
+      tenantId: tenant.id,
+    });
     expect(tenantContext.get()).toBeUndefined();
   });
 
@@ -272,6 +291,8 @@ describe('SocialAuthService', () => {
         authFlowStateUpdateMock,
         authIdentityCreateMock,
         createUserMock,
+        rateLimitPreflightMock,
+        rateLimitTenantMock,
         serializeUserMock,
         issueSessionMock,
       },
@@ -344,6 +365,14 @@ describe('SocialAuthService', () => {
     expect(authFlowUpdateArgs?.[1]).toBe('yandex');
     expect(authFlowUpdateArgs?.[2]).toBeInstanceOf(Date);
     expect(issueSessionMock).toHaveBeenCalledWith(createdUser, {});
+    expect(rateLimitPreflightMock).toHaveBeenCalledWith('oauth_complete', {
+      clientIp: undefined,
+      identity: 'ya_state_1',
+    });
+    expect(rateLimitTenantMock).toHaveBeenCalledWith('oauth_complete', {
+      tenantId: tenant.id,
+      identity: 'ya_state_1',
+    });
     expect(serializeUserMock).toHaveBeenCalledWith(createdUser);
     expect(result).toMatchObject({
       access_token: 'jwt-token',
