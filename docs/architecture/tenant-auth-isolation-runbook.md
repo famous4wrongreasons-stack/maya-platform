@@ -82,7 +82,7 @@ Migration verification must cover a fresh database and an upgrade database conta
 - Add redirect URI allowlists per deployed OAuth client before enabling live providers.
 - Distributed tenant/IP/identity limits continue in `auth-abuse-protection-runbook.md`.
 - Minimize and encrypt retained provider profile PII instead of keeping a raw OAuth profile payload.
-- Add retention cleanup for consumed/expired phone and OAuth state rows.
+- Bounded phone/OAuth state retention continues in [auth-retention-maintenance-runbook.md](auth-retention-maintenance-runbook.md); production scheduling remains separate.
 - Move remaining tenant-management writes behind explicit platform repositories.
 - Add transaction-local tenant context before enabling PostgreSQL RLS.
 

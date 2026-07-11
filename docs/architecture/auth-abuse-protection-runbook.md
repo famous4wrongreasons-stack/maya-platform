@@ -100,7 +100,7 @@ HTTP verification must cover:
 
 ## Remaining work
 
-- Add scheduled retention cleanup for expired buckets and auth-session history.
+- Bounded auth retention cleanup continues in [auth-retention-maintenance-runbook.md](auth-retention-maintenance-runbook.md); production scheduling remains a separate cutover step.
 - Export privacy-safe blocked-action metrics and alert on sustained attack patterns.
 - Move policy thresholds to a validated operations configuration only if production traffic requires per-environment tuning.
 - Consider edge rate limits as an additional layer; they do not replace application identity and tenant limits.

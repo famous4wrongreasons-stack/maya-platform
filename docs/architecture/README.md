@@ -205,3 +205,10 @@ classDiagram
 3. Build Event Bus and Data Platform before deep BI/forecasting.
 4. Do not onboard external tenants until secrets, tenant isolation and billing gates
    are verified.
+
+## Operational Runbooks
+
+- [Tenant authentication isolation](tenant-auth-isolation-runbook.md)
+- [Session security](session-security-runbook.md)
+- [Authentication abuse protection](auth-abuse-protection-runbook.md)
+- [Authentication retention maintenance](auth-retention-maintenance-runbook.md)

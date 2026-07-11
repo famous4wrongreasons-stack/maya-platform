@@ -64,6 +64,9 @@ PostgreSQL RLS is a planned defence-in-depth control. Application isolation rema
 - Export and deletion requests have scoped, asynchronous workflows.
 - Legal retention can produce a tombstone/anonymized record rather than unsafe hard deletion.
 - Tenant closure includes export, credential revocation, retention window and eventual purge.
+- Authentication maintenance removes only bounded sets of stale sessions, challenges, OAuth states and rate-limit windows after explicit retention cutoffs.
+- Refresh-token history is never purged independently; consumed tokens remain available for replay detection until the inactive parent session is eligible for deletion.
+- Cross-tenant maintenance accepts no tenant selector and emits aggregate counts without authentication record values.
 
 ## Threat-driven tests
 
@@ -77,5 +80,6 @@ PostgreSQL RLS is a planned defence-in-depth control. Application isolation rema
 - Cross-tenant social identity/user relations.
 - Refresh-token replay races, revoked access JWTs and cross-tenant session ownership.
 - Distributed auth-limit concurrency, trusted-proxy spoof resistance and HMAC-only bucket storage.
+- Auth-retention dry-run safety, advisory locking, bounded batches, replay-history preservation and multi-tenant cleanup behavior.
 - Secret/PII leakage in errors and logs.
 - AI tool escalation and confirmation bypass.
