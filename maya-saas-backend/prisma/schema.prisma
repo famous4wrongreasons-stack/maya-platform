@@ -286,6 +286,7 @@ model BillingPayment {
   tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan              SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
 
+  @@unique([id, tenantId])
   @@index([tenantId, createdAt])
   @@index([tenantId, status])
   @@index([provider, providerPaymentId])
