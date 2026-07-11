@@ -35,6 +35,7 @@ No test may reuse the same fixture IDs/data for both tenants because shared fixt
 - Database rejection of a social identity linked to a user from another tenant.
 - One-time refresh rotation, concurrent replay family revocation and immediate access-token revocation.
 - Session inventory/revoke ownership and database rejection of cross-tenant session principals.
+- Distributed auth-limit concurrency, trusted-proxy spoof resistance and HMAC-only bucket storage.
 - Membership activation/suspension.
 - Tenant-scoped Appointment repository read/update isolation.
 - Feature registry validation and entitlement precedence.

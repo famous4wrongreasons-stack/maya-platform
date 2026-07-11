@@ -91,7 +91,7 @@ Migration checks must include fresh and upgrade PostgreSQL databases, Prisma sch
 
 ## Remaining work
 
-- Add distributed tenant/IP/identity rate limiting before public production exposure.
+- Distributed auth limits continue in `auth-abuse-protection-runbook.md`.
 - Add scheduled retention cleanup for expired sessions and consumed refresh-token history.
 - Evaluate an HttpOnly same-site cookie transport when web deployment topology is final.
 - Add security alert delivery for refresh-token reuse after notification infrastructure exists.
