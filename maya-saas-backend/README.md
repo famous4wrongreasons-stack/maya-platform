@@ -79,9 +79,14 @@ Required variables:
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/maya_saas?schema=public"
 JWT_SECRET="change-me-in-production"
+AUTH_REFRESH_TOKEN_SECRET="change-me-to-an-independent-random-secret"
+AUTH_SESSION_METADATA_SECRET="change-me-to-another-independent-random-secret"
+AUTH_RATE_LIMIT_SECRET="change-me-to-a-third-independent-random-secret"
 CRM_ENCRYPTION_KEY="change-me-in-production"
 PORT=3000
 NODE_ENV="development"
+CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://localhost"
+SWAGGER_ENABLED="true"
 SELF_SERVE_TRIAL_SIGNUP="false"
 TENANT_BASE_DOMAIN="malesthetic.pro"
 SEED_DEFAULT_TENANT_SLUG="malesthetic"
@@ -92,6 +97,7 @@ YCLIENTS_BASE_URL="https://api.yclients.com/api/v1"
 YCLIENTS_PARTNER_TOKEN="change-me-in-production"
 PHONE_AUTH_PROVIDER="auto"
 PHONE_AUTH_DEBUG="false"
+PHONE_AUTH_SECRET="change-me-to-a-fourth-independent-random-secret"
 PHONE_AUTH_CODE_TTL="300"
 PHONE_AUTH_RESEND_COOLDOWN_SECONDS="60"
 PHONE_AUTH_MAX_ATTEMPTS="5"
@@ -102,6 +108,7 @@ SMSRU_TEST="false"
 SMSRU_TIMEOUT_MS="15000"
 AUTH_FLOW_STATE_TTL_SECONDS="600"
 OAUTH_PROVIDER_TIMEOUT_MS="15000"
+OAUTH_ALLOWED_REDIRECT_URIS="http://127.0.0.1:8787/oauth-callback.html,http://localhost:8787/oauth-callback.html"
 YANDEX_LOGIN_ENABLED="false"
 YANDEX_CLIENT_ID=""
 YANDEX_CLIENT_SECRET=""
@@ -116,6 +123,8 @@ YOOKASSA_API_BASE_URL="https://api.yookassa.ru/v3"
 YOOKASSA_REQUEST_TIMEOUT_MS="15000"
 UPLOAD_ROOT="./uploads"
 ```
+
+Development keeps a narrow localhost/Capacitor CORS fallback. Production is fail-closed: it requires independent secrets, exact CORS origins, real SMS transport and complete settings for every enabled social provider. See [the production bootstrap hardening runbook](../docs/architecture/production-bootstrap-hardening-runbook.md) before any deployment.
 
 Phone auth delivery modes:
 
@@ -132,6 +141,7 @@ Social login toggles:
 - `TELEGRAM_LOGIN_ENABLED=true`: enables `POST /api/auth/oauth/telegram/start` and `/complete`
 - `AUTH_FLOW_STATE_TTL_SECONDS`: lifetime for OAuth `state + PKCE` records in PostgreSQL
 - `OAUTH_PROVIDER_TIMEOUT_MS`: timeout for Yandex and Telegram token exchanges
+- `OAUTH_ALLOWED_REDIRECT_URIS`: exact comma-separated callback allowlist; production callbacks must use HTTPS
 
 ## Run locally
 
@@ -225,6 +235,8 @@ Swagger docs:
 ```bash
 open http://localhost:3000/api/docs
 ```
+
+Swagger is enabled by default only outside production. Set `SWAGGER_ENABLED=true` explicitly only behind a reviewed private boundary.
 
 ## Safe appointment preview
 

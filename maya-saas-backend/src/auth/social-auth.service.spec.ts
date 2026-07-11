@@ -98,6 +98,8 @@ describe('SocialAuthService', () => {
       JWT_SECRET: 'jwt-secret',
       AUTH_FLOW_STATE_TTL_SECONDS: '600',
       OAUTH_PROVIDER_TIMEOUT_MS: '15000',
+      OAUTH_ALLOWED_REDIRECT_URIS:
+        'https://malesthetic.pro/app/oauth-callback.html',
       YANDEX_LOGIN_ENABLED: 'true',
       YANDEX_CLIENT_ID: 'yandex-client-id',
       YANDEX_CLIENT_SECRET: 'yandex-client-secret',
@@ -280,6 +282,52 @@ describe('SocialAuthService', () => {
       tenantId: tenant.id,
     });
     expect(tenantContext.get()).toBeUndefined();
+  });
+
+  it('rejects an unlisted OAuth redirect before persisting flow state', async () => {
+    const { service, mocks } = createService({
+      config: {
+        OAUTH_ALLOWED_REDIRECT_URIS:
+          'https://malesthetic.pro/app/oauth-callback.html',
+      },
+    });
+
+    await expect(
+      service.startYandexLogin({
+        tenantSlug: tenant.slug,
+        redirectUri: 'https://attacker.example/oauth-callback.html',
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'social_redirect_invalid' },
+      },
+    });
+    expect(mocks.authFlowStateCreateMock).not.toHaveBeenCalled();
+    expect(mocks.rateLimitTenantMock).not.toHaveBeenCalled();
+  });
+
+  it('allows an unlisted loopback redirect only in development', async () => {
+    const { service, mocks } = createService({
+      config: {
+        NODE_ENV: 'development',
+        OAUTH_ALLOWED_REDIRECT_URIS: '',
+      },
+    });
+
+    await expect(
+      service.startYandexLogin({
+        tenantSlug: tenant.slug,
+        redirectUri: 'http://127.0.0.1:8787/oauth-callback.html',
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      provider: 'yandex',
+    });
+    expect(mocks.authFlowStateCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        redirectUri: 'http://127.0.0.1:8787/oauth-callback.html',
+      }),
+    );
   });
 
   it('completes Yandex login, creates a new tenant user, and links the identity', async () => {
