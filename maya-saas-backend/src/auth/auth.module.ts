@@ -9,6 +9,9 @@ import { UsersModule } from '../users/users.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { AuthController } from './auth.controller';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthSessionRepository } from './auth-session.repository';
+import { AuthSessionService } from './auth-session.service';
+import { AuthSessionSystemGateway } from './auth-session-system.gateway';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
@@ -26,16 +29,29 @@ import { TenantAuthRepository } from './tenant-auth.repository';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '7d' },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const configured = Number(
+          configService.get<string>('JWT_ACCESS_TTL_SECONDS'),
+        );
+        const expiresIn =
+          Number.isFinite(configured) && configured >= 300 && configured <= 3600
+            ? configured
+            : 900;
+
+        return {
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: { expiresIn },
+        };
+      },
     }),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     AuthFlowSystemGateway,
+    AuthSessionRepository,
+    AuthSessionService,
+    AuthSessionSystemGateway,
     JwtStrategy,
     PhoneAuthDeliveryService,
     SocialAuthService,

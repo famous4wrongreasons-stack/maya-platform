@@ -1,11 +1,25 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
+import { resolveAuthClientMetadata } from './auth-client-metadata';
+import { AuthSessionService } from './auth-session.service';
 import { AuthService } from './auth.service';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshSessionDto } from './dto/refresh-session.dto';
 import { RegisterDto } from './dto/register.dto';
 import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
@@ -18,20 +32,21 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly socialAuthService: SocialAuthService,
+    private readonly sessionService: AuthSessionService,
   ) {}
 
   @Public()
   @Post('login')
   @ApiOperation({ summary: 'Authenticate a user and return a JWT' })
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(@Body() dto: LoginDto, @Req() request: Request) {
+    return this.authService.login(dto, resolveAuthClientMetadata(request));
   }
 
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a tenant-scoped client user' })
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  register(@Body() dto: RegisterDto, @Req() request: Request) {
+    return this.authService.register(dto, resolveAuthClientMetadata(request));
   }
 
   @Public()
@@ -40,7 +55,10 @@ export class AuthController {
     summary: 'Start phone-first client auth and send a verification code',
   })
   startPhoneAuth(@Body() dto: StartPhoneAuthDto, @Req() request: Request) {
-    return this.authService.startPhoneAuth(dto, this.resolveClientIp(request));
+    return this.authService.startPhoneAuth(
+      dto,
+      resolveAuthClientMetadata(request).clientIp,
+    );
   }
 
   @Public()
@@ -48,8 +66,11 @@ export class AuthController {
   @ApiOperation({
     summary: 'Verify a phone auth code and return a tenant-scoped JWT',
   })
-  verifyPhoneAuth(@Body() dto: VerifyPhoneAuthDto) {
-    return this.authService.verifyPhoneAuth(dto);
+  verifyPhoneAuth(@Body() dto: VerifyPhoneAuthDto, @Req() request: Request) {
+    return this.authService.verifyPhoneAuth(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 
   @Public()
@@ -66,8 +87,14 @@ export class AuthController {
   @ApiOperation({
     summary: 'Complete Yandex ID login and return a tenant-scoped JWT',
   })
-  completeYandexLogin(@Body() dto: CompleteOauthLoginDto) {
-    return this.socialAuthService.completeYandexLogin(dto);
+  completeYandexLogin(
+    @Body() dto: CompleteOauthLoginDto,
+    @Req() request: Request,
+  ) {
+    return this.socialAuthService.completeYandexLogin(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 
   @Public()
@@ -84,17 +111,51 @@ export class AuthController {
   @ApiOperation({
     summary: 'Complete Telegram login and return a tenant-scoped JWT',
   })
-  completeTelegramLogin(@Body() dto: CompleteOauthLoginDto) {
-    return this.socialAuthService.completeTelegramLogin(dto);
+  completeTelegramLogin(
+    @Body() dto: CompleteOauthLoginDto,
+    @Req() request: Request,
+  ) {
+    return this.socialAuthService.completeTelegramLogin(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 
-  private resolveClientIp(request: Request): string | null {
-    const forwarded = request.headers['x-forwarded-for'];
-    const forwardedIp = Array.isArray(forwarded)
-      ? forwarded[0]
-      : forwarded?.split(',')[0];
-    const ip = forwardedIp?.trim() || request.ip?.trim();
+  @Public()
+  @Post('refresh')
+  @ApiOperation({ summary: 'Rotate a one-time refresh token' })
+  refresh(@Body() dto: RefreshSessionDto) {
+    return this.sessionService.refresh(dto.refreshToken);
+  }
 
-    return ip || null;
+  @Post('logout')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke the current authenticated session' })
+  logout(@CurrentUser() user: AuthenticatedUser) {
+    return this.sessionService.logout(user);
+  }
+
+  @Get('sessions')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List sessions for the current user' })
+  listSessions(@CurrentUser() user: AuthenticatedUser) {
+    return this.sessionService.listSessions(user);
+  }
+
+  @Delete('sessions')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke all sessions for the current user' })
+  revokeAllSessions(@CurrentUser() user: AuthenticatedUser) {
+    return this.sessionService.revokeAllSessions(user);
+  }
+
+  @Delete('sessions/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke one session owned by the current user' })
+  revokeSession(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) sessionId: string,
+  ) {
+    return this.sessionService.revokeSession(user, sessionId);
   }
 }

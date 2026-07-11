@@ -1,6 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 
+import { resolveAuthClientMetadata } from '../auth/auth-client-metadata';
 import { Public } from '../decorators/public.decorator';
 import { CreateTrialSignupDto } from './dto/create-trial-signup.dto';
 import { OnboardingService } from './onboarding.service';
@@ -16,7 +18,13 @@ export class OnboardingController {
     summary:
       'Create a self-serve trial tenant with mock CRM and a tenant admin session',
   })
-  createTrialSignup(@Body() dto: CreateTrialSignupDto) {
-    return this.onboardingService.createTrialSignup(dto);
+  createTrialSignup(
+    @Body() dto: CreateTrialSignupDto,
+    @Req() request: Request,
+  ) {
+    return this.onboardingService.createTrialSignup(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 }

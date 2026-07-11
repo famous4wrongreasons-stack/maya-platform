@@ -1,13 +1,13 @@
 import { createSign, generateKeyPairSync } from 'crypto';
 
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 
 import { UserRole } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthSessionService } from './auth-session.service';
 import { SocialAuthService } from './social-auth.service';
 import { TenantAuthRepository } from './tenant-auth.repository';
 
@@ -150,9 +150,14 @@ describe('SocialAuthService', () => {
       phone: user.phone,
       role: user.role,
     }));
-    const signAsyncMock: jest.MockedFunction<
-      (payload: Record<string, string | null>) => Promise<string>
-    > = jest.fn().mockResolvedValue('jwt-token');
+    const issueSessionMock = jest.fn().mockResolvedValue({
+      access_token: 'jwt-token',
+      refresh_token: 'refresh-token',
+      token_type: 'Bearer',
+      expires_in: 900,
+      refresh_expires_at: new Date('2026-08-10T12:00:00.000Z'),
+      session: { id: 'session-1' },
+    });
 
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
@@ -187,19 +192,15 @@ describe('SocialAuthService', () => {
       findTenantUserByPhone: findTenantUserByPhoneMock,
       serializeUser: serializeUserMock,
     };
-    const jwtService: Pick<JwtService, 'signAsync'> = {
-      signAsync: signAsyncMock,
-    };
-
     return {
       service: new SocialAuthService(
         configService as ConfigService,
         tenantsService as TenantsService,
         usersService as UsersService,
-        jwtService as JwtService,
         tenantContext,
         authRepository,
         flowSystemGateway,
+        { issueSession: issueSessionMock } as unknown as AuthSessionService,
       ),
       tenantContext,
       mocks: {
@@ -215,7 +216,7 @@ describe('SocialAuthService', () => {
         findTenantUserByPhoneMock,
         getTenantBySlugOrThrowMock,
         serializeUserMock,
-        signAsyncMock,
+        issueSessionMock,
       },
     };
   };
@@ -272,7 +273,7 @@ describe('SocialAuthService', () => {
         authIdentityCreateMock,
         createUserMock,
         serializeUserMock,
-        signAsyncMock,
+        issueSessionMock,
       },
     } = createService();
     const createdUser = {
@@ -342,11 +343,7 @@ describe('SocialAuthService', () => {
     expect(authFlowUpdateArgs?.[0]).toBe('flow-1');
     expect(authFlowUpdateArgs?.[1]).toBe('yandex');
     expect(authFlowUpdateArgs?.[2]).toBeInstanceOf(Date);
-    expect(signAsyncMock).toHaveBeenCalledWith({
-      user_id: createdUser.id,
-      tenant_id: createdUser.tenantId,
-      role: createdUser.role,
-    });
+    expect(issueSessionMock).toHaveBeenCalledWith(createdUser, {});
     expect(serializeUserMock).toHaveBeenCalledWith(createdUser);
     expect(result).toMatchObject({
       access_token: 'jwt-token',

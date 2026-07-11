@@ -7,7 +7,6 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import {
   createHash,
@@ -23,7 +22,9 @@ import { normalizeRussianPhone } from '../common/phone.util';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AuthClientMetadata } from './auth-client-metadata';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthSessionService } from './auth-session.service';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
 import { TenantAuthRepository } from './tenant-auth.repository';
@@ -102,10 +103,10 @@ export class SocialAuthService {
     private readonly configService: ConfigService,
     private readonly tenantsService: TenantsService,
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
     private readonly tenantContext: TenantContextService,
     private readonly authRepository: TenantAuthRepository,
     private readonly flowSystemGateway: AuthFlowSystemGateway,
+    private readonly sessionService: AuthSessionService,
   ) {}
 
   async startYandexLogin(dto: StartOauthLoginDto) {
@@ -148,7 +149,10 @@ export class SocialAuthService {
     };
   }
 
-  async completeYandexLogin(dto: CompleteOauthLoginDto) {
+  async completeYandexLogin(
+    dto: CompleteOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('yandex');
 
     const flow = await this.getValidAuthFlowState(dto.state, 'yandex');
@@ -162,7 +166,7 @@ export class SocialAuthService {
       });
 
       return {
-        access_token: await this.signToken(result.user),
+        ...(await this.sessionService.issueSession(result.user, metadata)),
         user: this.usersService.serializeUser(result.user),
         is_new_user: result.isNewUser,
         provider: 'yandex',
@@ -209,7 +213,10 @@ export class SocialAuthService {
     };
   }
 
-  async completeTelegramLogin(dto: CompleteOauthLoginDto) {
+  async completeTelegramLogin(
+    dto: CompleteOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('telegram');
 
     const flow = await this.getValidAuthFlowState(dto.state, 'telegram');
@@ -223,7 +230,7 @@ export class SocialAuthService {
       });
 
       return {
-        access_token: await this.signToken(result.user),
+        ...(await this.sessionService.issueSession(result.user, metadata)),
         user: this.usersService.serializeUser(result.user),
         is_new_user: result.isNewUser,
         provider: 'telegram',
@@ -779,18 +786,6 @@ export class SocialAuthService {
         ),
       );
     }
-  }
-
-  private async signToken(user: {
-    id: string;
-    tenantId: string | null;
-    role: string;
-  }) {
-    return this.jwtService.signAsync({
-      user_id: user.id,
-      tenant_id: user.tenantId,
-      role: user.role,
-    });
   }
 
   private assertUserCanLogin(user: {

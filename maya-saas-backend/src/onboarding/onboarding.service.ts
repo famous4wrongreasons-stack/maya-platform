@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthService } from '../auth/auth.service';
+import { AuthClientMetadata } from '../auth/auth-client-metadata';
 import { BrandingService } from '../branding/branding.service';
 import {
   CrmProvider,
@@ -31,7 +32,10 @@ export class OnboardingService {
     private readonly tenantContext: TenantContextService,
   ) {}
 
-  async createTrialSignup(dto: CreateTrialSignupDto) {
+  async createTrialSignup(
+    dto: CreateTrialSignupDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertSelfServeTrialSignupEnabled();
 
     const temporaryPassword = dto.password?.trim() || this.generatePassword();
@@ -92,7 +96,7 @@ export class OnboardingService {
       });
 
       return {
-        access_token: await this.authService.issueAccessToken(user),
+        ...(await this.authService.issueSession(user, metadata)),
         user: this.usersService.serializeUser(user),
         tenant: {
           id: tenant.id,
