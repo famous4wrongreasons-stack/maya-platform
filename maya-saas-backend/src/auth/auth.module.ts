@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
+import { TenancyModule } from '../tenancy/tenancy.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
@@ -19,6 +20,7 @@ import { SocialAuthService } from './social-auth.service';
     PrismaModule,
     UsersModule,
     TenantsModule,
+    TenancyModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

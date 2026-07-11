@@ -11,6 +11,7 @@ import {
   normalizeFeatureFlags,
 } from '../common/feature-catalog';
 import { asJson } from '../common/json.util';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -227,6 +228,7 @@ export class TenantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly entitlementsService?: EntitlementsService,
   ) {}
 
   async getTenantBySlugOrThrow(slug: string) {
@@ -252,6 +254,7 @@ export class TenantsService {
           select: {
             users: true,
             branches: true,
+            memberships: true,
           },
         },
         crmIntegration: {
@@ -297,6 +300,7 @@ export class TenantsService {
           select: {
             users: true,
             branches: true,
+            memberships: true,
           },
         },
       },
@@ -337,6 +341,12 @@ export class TenantsService {
           slug: dto.slug.toLowerCase(),
           status: dto.status ?? TenantStatus.TRIAL,
           planId: dto.planId,
+          industryPresetId: dto.industryPresetId,
+          defaultCurrency: dto.defaultCurrency ?? 'RUB',
+          defaultTimezone: dto.defaultTimezone ?? normalizedBranchTimezone,
+          defaultLocale: dto.defaultLocale ?? 'ru-RU',
+          customDomain: dto.customDomain?.toLowerCase(),
+          subdomain: (dto.subdomain ?? dto.slug).toLowerCase(),
           trialEndsAt: billingDates.trialEndsAt,
           currentPeriodStart: billingDates.currentPeriodStart,
           currentPeriodEnd: billingDates.currentPeriodEnd,
@@ -414,6 +424,12 @@ export class TenantsService {
           slug: dto.slug?.toLowerCase(),
           status: dto.status,
           planId: dto.planId,
+          industryPresetId: dto.industryPresetId,
+          defaultCurrency: dto.defaultCurrency,
+          defaultTimezone: dto.defaultTimezone,
+          defaultLocale: dto.defaultLocale,
+          customDomain: dto.customDomain?.toLowerCase(),
+          subdomain: dto.subdomain?.toLowerCase(),
           trialEndsAt: billingDates.trialEndsAt,
           currentPeriodStart: billingDates.currentPeriodStart,
           currentPeriodEnd: billingDates.currentPeriodEnd,
@@ -492,8 +508,15 @@ export class TenantsService {
       {};
     const content = extractPublicMobileContent(theme);
     const activeStatuses = new Set(['trial', 'active', 'past_due']);
-    const availableFeatures = normalizeFeatureFlags(tenant.plan?.featuresJson);
-    const availableFeatureKeys = featureKeysFromFlags(availableFeatures);
+    const resolvedEntitlements = this.entitlementsService
+      ? await this.entitlementsService.getEffectiveEntitlements(tenant.id)
+      : null;
+    const availableFeatures = resolvedEntitlements?.features
+      ? resolvedEntitlements.features
+      : normalizeFeatureFlags(tenant.plan?.featuresJson);
+    const availableFeatureKeys = resolvedEntitlements?.featureKeys
+      ? resolvedEntitlements.featureKeys
+      : featureKeysFromFlags(availableFeatures);
     const bookingFeatureEnabled =
       availableFeatureKeys.length === 0 || availableFeatures.booking === true;
     const clientRegistrationEnabled =
@@ -511,10 +534,21 @@ export class TenantsService {
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
-      accent_color: tenant.brandingSettings?.primaryColor ?? null,
+      icon_url: tenant.brandingSettings?.iconUrl ?? null,
+      favicon_url: tenant.brandingSettings?.faviconUrl ?? null,
+      accent_color:
+        tenant.brandingSettings?.accentColor ??
+        tenant.brandingSettings?.primaryColor ??
+        null,
+      primary_color: tenant.brandingSettings?.primaryColor ?? null,
       secondary_color: tenant.brandingSettings?.secondaryColor ?? null,
+      background_color: tenant.brandingSettings?.backgroundColor ?? null,
+      surface_color: tenant.brandingSettings?.surfaceColor ?? null,
+      text_primary_color: tenant.brandingSettings?.textPrimaryColor ?? null,
+      text_secondary_color: tenant.brandingSettings?.textSecondaryColor ?? null,
       background_image_url: tenant.brandingSettings?.backgroundImageUrl ?? null,
       font_family: tenant.brandingSettings?.fontFamily ?? null,
+      heading_font_family: tenant.brandingSettings?.headingFontFamily ?? null,
       city: asNonEmptyString(theme.city),
       address: firstBranch?.address ?? asNonEmptyString(theme.address),
       phone: firstBranch?.phone ?? asNonEmptyString(theme.phone),
@@ -535,16 +569,39 @@ export class TenantsService {
       tenant: {
         slug: tenant.slug,
         status: tenant.status,
+        industry_preset_id: tenant.industryPresetId,
+        default_currency: tenant.defaultCurrency,
+        default_timezone: tenant.defaultTimezone,
+        default_locale: tenant.defaultLocale,
       },
       branding: {
         app_name: brand.name,
         logo_url: brand.logo_url,
-        primary_color: brand.accent_color,
+        icon_url: brand.icon_url,
+        favicon_url: brand.favicon_url,
+        primary_color: brand.primary_color,
         accent_color: brand.accent_color,
         secondary_color: brand.secondary_color,
+        background_color: brand.background_color,
+        surface_color: brand.surface_color,
+        text_primary_color: brand.text_primary_color,
+        text_secondary_color: brand.text_secondary_color,
         background_image_url: brand.background_image_url,
         font_family: brand.font_family,
+        heading_font_family: brand.heading_font_family,
         button_radius: tenant.brandingSettings?.buttonRadius ?? null,
+        button_style: tenant.brandingSettings?.buttonStyle ?? null,
+        theme_mode: tenant.brandingSettings?.themeMode ?? 'system',
+        border_radius: tenant.brandingSettings?.borderRadiusJson ?? {},
+        contact_details: tenant.brandingSettings?.contactDetailsJson ?? {},
+        social_links: tenant.brandingSettings?.socialLinksJson ?? {},
+        map_links: tenant.brandingSettings?.mapLinksJson ?? {},
+        legal_links: tenant.brandingSettings?.legalLinksJson ?? {},
+        splash_screen: tenant.brandingSettings?.splashScreenJson ?? {},
+        onboarding_content: tenant.brandingSettings?.onboardingJson ?? {},
+        store_listing_content: tenant.brandingSettings?.storeListingJson ?? {},
+        email_branding: tenant.brandingSettings?.emailBrandingJson ?? {},
+        telegram_branding: tenant.brandingSettings?.telegramBrandingJson ?? {},
         city: brand.city,
         address: brand.address,
         phone: brand.phone,
@@ -585,6 +642,12 @@ export class TenantsService {
       slug: tenant.slug,
       status: tenant.status,
       plan_id: tenant.planId,
+      industry_preset_id: tenant.industryPresetId,
+      default_currency: tenant.defaultCurrency,
+      default_timezone: tenant.defaultTimezone,
+      default_locale: tenant.defaultLocale,
+      custom_domain: tenant.customDomain,
+      subdomain: tenant.subdomain,
       allow_self_registration: tenant.allowSelfRegistration,
       created_at: tenant.createdAt,
       updated_at: tenant.updatedAt,
@@ -604,12 +667,35 @@ export class TenantsService {
         ? {
             id: tenant.brandingSettings.id,
             logo_url: tenant.brandingSettings.logoUrl,
+            icon_url: tenant.brandingSettings.iconUrl,
+            favicon_url: tenant.brandingSettings.faviconUrl,
             app_name: tenant.brandingSettings.appName,
             primary_color: tenant.brandingSettings.primaryColor,
             secondary_color: tenant.brandingSettings.secondaryColor,
+            accent_color: tenant.brandingSettings.accentColor,
+            background_color: tenant.brandingSettings.backgroundColor,
+            surface_color: tenant.brandingSettings.surfaceColor,
+            text_primary_color: tenant.brandingSettings.textPrimaryColor,
+            text_secondary_color: tenant.brandingSettings.textSecondaryColor,
             background_image_url: tenant.brandingSettings.backgroundImageUrl,
             font_family: tenant.brandingSettings.fontFamily,
+            heading_font_family: tenant.brandingSettings.headingFontFamily,
             button_radius: tenant.brandingSettings.buttonRadius,
+            button_style: tenant.brandingSettings.buttonStyle,
+            theme_mode: tenant.brandingSettings.themeMode,
+            border_radius_json: tenant.brandingSettings.borderRadiusJson ?? {},
+            contact_details_json:
+              tenant.brandingSettings.contactDetailsJson ?? {},
+            social_links_json: tenant.brandingSettings.socialLinksJson ?? {},
+            map_links_json: tenant.brandingSettings.mapLinksJson ?? {},
+            legal_links_json: tenant.brandingSettings.legalLinksJson ?? {},
+            splash_screen_json: tenant.brandingSettings.splashScreenJson ?? {},
+            onboarding_json: tenant.brandingSettings.onboardingJson ?? {},
+            store_listing_json: tenant.brandingSettings.storeListingJson ?? {},
+            email_branding_json:
+              tenant.brandingSettings.emailBrandingJson ?? {},
+            telegram_branding_json:
+              tenant.brandingSettings.telegramBrandingJson ?? {},
             theme_json: tenant.brandingSettings.themeJson ?? {},
             created_at: tenant.brandingSettings.createdAt,
             updated_at: tenant.brandingSettings.updatedAt,
@@ -628,6 +714,7 @@ export class TenantsService {
         : null,
       branch_count: tenant._count.branches,
       user_count: tenant._count.users,
+      membership_count: tenant._count.memberships,
       branches: tenant.branches.map((branch) => ({
         id: branch.id,
         name: branch.name,

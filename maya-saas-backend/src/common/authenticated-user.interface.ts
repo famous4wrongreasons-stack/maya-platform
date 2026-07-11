@@ -6,4 +6,6 @@ export interface AuthenticatedUser {
   role: UserRole;
   email: string;
   branchId: string | null;
+  membershipId: string | null;
+  membershipStatus: string | null;
 }

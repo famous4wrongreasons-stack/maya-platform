@@ -10,6 +10,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { UsersService } from '../users/users.service';
+import { MembershipsService } from '../tenancy/memberships.service';
 
 interface JwtPayload {
   user_id: string;
@@ -22,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
     private readonly usersService: UsersService,
+    private readonly membershipsService: MembershipsService,
   ) {
     const jwtSecret = configService.get<string>('JWT_SECRET');
 
@@ -43,12 +45,37 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User is not active');
     }
 
+    if (user.role === 'platform_owner' && !payload.tenant_id) {
+      return {
+        userId: user.id,
+        tenantId: null,
+        role: UserRole.PLATFORM_OWNER,
+        email: user.email,
+        branchId: null,
+        membershipId: null,
+        membershipStatus: null,
+      };
+    }
+
+    const tenantId = payload.tenant_id ?? user.tenantId;
+
+    if (!tenantId) {
+      throw new UnauthorizedException('Tenant membership is required');
+    }
+
+    const membership = await this.membershipsService.getActiveMembership(
+      user.id,
+      tenantId,
+    );
+
     return {
       userId: user.id,
-      tenantId: user.tenantId,
-      role: user.role as UserRole,
+      tenantId: membership.tenantId,
+      role: membership.role as UserRole,
       email: user.email,
       branchId: user.branchId,
+      membershipId: membership.id,
+      membershipStatus: membership.status,
     };
   }
 }

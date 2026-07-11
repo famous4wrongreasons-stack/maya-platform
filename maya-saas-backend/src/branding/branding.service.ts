@@ -41,22 +41,98 @@ export class BrandingService {
       create: {
         tenantId,
         logoUrl: dto.logoUrl,
+        iconUrl: dto.iconUrl,
+        faviconUrl: dto.faviconUrl,
         appName: dto.appName,
         primaryColor: dto.primaryColor,
         secondaryColor: dto.secondaryColor,
+        accentColor: dto.accentColor,
+        backgroundColor: dto.backgroundColor,
+        surfaceColor: dto.surfaceColor,
+        textPrimaryColor: dto.textPrimaryColor,
+        textSecondaryColor: dto.textSecondaryColor,
         backgroundImageUrl: dto.backgroundImageUrl,
         fontFamily: dto.fontFamily,
+        headingFontFamily: dto.headingFontFamily,
         buttonRadius: dto.buttonRadius,
+        buttonStyle: dto.buttonStyle,
+        themeMode: dto.themeMode,
+        borderRadiusJson: dto.borderRadiusJson
+          ? asJson(dto.borderRadiusJson)
+          : undefined,
+        contactDetailsJson: dto.contactDetailsJson
+          ? asJson(dto.contactDetailsJson)
+          : undefined,
+        socialLinksJson: dto.socialLinksJson
+          ? asJson(dto.socialLinksJson)
+          : undefined,
+        mapLinksJson: dto.mapLinksJson ? asJson(dto.mapLinksJson) : undefined,
+        legalLinksJson: dto.legalLinksJson
+          ? asJson(dto.legalLinksJson)
+          : undefined,
+        splashScreenJson: dto.splashScreenJson
+          ? asJson(dto.splashScreenJson)
+          : undefined,
+        onboardingJson: dto.onboardingJson
+          ? asJson(dto.onboardingJson)
+          : undefined,
+        storeListingJson: dto.storeListingJson
+          ? asJson(dto.storeListingJson)
+          : undefined,
+        emailBrandingJson: dto.emailBrandingJson
+          ? asJson(dto.emailBrandingJson)
+          : undefined,
+        telegramBrandingJson: dto.telegramBrandingJson
+          ? asJson(dto.telegramBrandingJson)
+          : undefined,
         themeJson: dto.themeJson ? asJson(dto.themeJson) : undefined,
       },
       update: {
         logoUrl: dto.logoUrl,
+        iconUrl: dto.iconUrl,
+        faviconUrl: dto.faviconUrl,
         appName: dto.appName,
         primaryColor: dto.primaryColor,
         secondaryColor: dto.secondaryColor,
+        accentColor: dto.accentColor,
+        backgroundColor: dto.backgroundColor,
+        surfaceColor: dto.surfaceColor,
+        textPrimaryColor: dto.textPrimaryColor,
+        textSecondaryColor: dto.textSecondaryColor,
         backgroundImageUrl: dto.backgroundImageUrl,
         fontFamily: dto.fontFamily,
+        headingFontFamily: dto.headingFontFamily,
         buttonRadius: dto.buttonRadius,
+        buttonStyle: dto.buttonStyle,
+        themeMode: dto.themeMode,
+        borderRadiusJson: dto.borderRadiusJson
+          ? asJson(dto.borderRadiusJson)
+          : undefined,
+        contactDetailsJson: dto.contactDetailsJson
+          ? asJson(dto.contactDetailsJson)
+          : undefined,
+        socialLinksJson: dto.socialLinksJson
+          ? asJson(dto.socialLinksJson)
+          : undefined,
+        mapLinksJson: dto.mapLinksJson ? asJson(dto.mapLinksJson) : undefined,
+        legalLinksJson: dto.legalLinksJson
+          ? asJson(dto.legalLinksJson)
+          : undefined,
+        splashScreenJson: dto.splashScreenJson
+          ? asJson(dto.splashScreenJson)
+          : undefined,
+        onboardingJson: dto.onboardingJson
+          ? asJson(dto.onboardingJson)
+          : undefined,
+        storeListingJson: dto.storeListingJson
+          ? asJson(dto.storeListingJson)
+          : undefined,
+        emailBrandingJson: dto.emailBrandingJson
+          ? asJson(dto.emailBrandingJson)
+          : undefined,
+        telegramBrandingJson: dto.telegramBrandingJson
+          ? asJson(dto.telegramBrandingJson)
+          : undefined,
         themeJson: dto.themeJson ? asJson(dto.themeJson) : undefined,
       },
     });

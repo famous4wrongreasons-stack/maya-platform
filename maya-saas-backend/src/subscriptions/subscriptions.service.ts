@@ -22,6 +22,12 @@ export class SubscriptionsService {
   async listPlans() {
     const plans = await this.prisma.subscriptionPlan.findMany({
       orderBy: [{ priceMonthly: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        entitlements: {
+          where: { enabled: true },
+          orderBy: { featureKey: 'asc' },
+        },
+      },
     });
 
     return plans.map((plan) => ({
@@ -31,6 +37,11 @@ export class SubscriptionsService {
       max_branches: plan.maxBranches,
       max_staff: plan.maxStaff,
       features_json: normalizeFeatureFlags(plan.featuresJson),
+      entitlements: plan.entitlements.map((entitlement) => ({
+        feature_key: entitlement.featureKey,
+        enabled: entitlement.enabled,
+        config_json: entitlement.configJson ?? {},
+      })),
       is_white_label_enabled: plan.isWhiteLabelEnabled,
       created_at: plan.createdAt,
       updated_at: plan.updatedAt,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 
@@ -13,6 +13,8 @@ import { BranchesModule } from './branches/branches.module';
 import { BrandingModule } from './branding/branding.module';
 import { CrmModule } from './crm/crm.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { EntitlementsModule } from './entitlements/entitlements.module';
+import { FeatureGuard } from './entitlements/feature.guard';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -23,6 +25,8 @@ import { StaffModule } from './staff/staff.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { UsersModule } from './users/users.module';
+import { TenancyModule } from './tenancy/tenancy.module';
+import { TenantResolutionMiddleware } from './tenancy/tenant-resolution.middleware';
 
 @Module({
   imports: [
@@ -31,6 +35,8 @@ import { UsersModule } from './users/users.module';
       envFilePath: ['.env'],
     }),
     PrismaModule,
+    TenancyModule,
+    EntitlementsModule,
     EncryptionModule,
     SubscriptionsModule,
     TenantsModule,
@@ -62,6 +68,14 @@ import { UsersModule } from './users/users.module';
       provide: APP_GUARD,
       useClass: TenantAccessGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: FeatureGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(TenantResolutionMiddleware).forRoutes('*path');
+  }
+}

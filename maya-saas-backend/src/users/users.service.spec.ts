@@ -197,6 +197,12 @@ describe('UsersService', () => {
       where: {
         tenantId: 'tenant-1',
         phone: '+79990000000',
+        memberships: {
+          some: {
+            tenantId: 'tenant-1',
+            status: 'active',
+          },
+        },
       },
       include: {
         tenant: true,

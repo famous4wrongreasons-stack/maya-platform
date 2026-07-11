@@ -37,6 +37,12 @@ export class UsersService {
       where: {
         tenantId,
         email: email.toLowerCase(),
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
+        },
       },
       include: {
         tenant: true,
@@ -65,6 +71,12 @@ export class UsersService {
       where: {
         tenantId,
         phone: normalizedPhone,
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
+        },
       },
       include: {
         tenant: true,
@@ -81,6 +93,12 @@ export class UsersService {
         tenantId,
         phone: {
           not: null,
+        },
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
         },
       },
       include: {
@@ -171,6 +189,20 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: data.role,
         status: data.status ?? 'active',
+        memberships: data.tenantId
+          ? {
+              create: {
+                tenantId: data.tenantId,
+                role: data.role,
+                status: data.status ?? 'active',
+                joinedAt:
+                  (data.status ?? 'active') === 'active'
+                    ? new Date()
+                    : undefined,
+                invitedAt: data.status === 'invited' ? new Date() : undefined,
+              },
+            }
+          : undefined,
       },
       include: {
         tenant: true,
@@ -202,6 +234,14 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: UserRole.CLIENT,
         status: 'active',
+        memberships: {
+          create: {
+            tenantId: data.tenantId,
+            role: UserRole.CLIENT,
+            status: 'active',
+            joinedAt: new Date(),
+          },
+        },
       },
       include: {
         tenant: true,

@@ -36,6 +36,39 @@ export class UpdateTenantDto {
   @IsString()
   planId?: string;
 
+  @ApiPropertyOptional({ example: 'barbershop' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:_[a-z0-9]+)*$/)
+  industryPresetId?: string;
+
+  @ApiPropertyOptional({ example: 'RUB' })
+  @IsOptional()
+  @Matches(/^[A-Z]{3}$/)
+  defaultCurrency?: string;
+
+  @ApiPropertyOptional({ example: 'Europe/Moscow' })
+  @IsOptional()
+  @IsString()
+  defaultTimezone?: string;
+
+  @ApiPropertyOptional({ example: 'ru-RU' })
+  @IsOptional()
+  @IsString()
+  defaultLocale?: string;
+
+  @ApiPropertyOptional({ example: 'booking.example.com' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9.-]+$/)
+  customDomain?: string;
+
+  @ApiPropertyOptional({ example: 'demo-salon' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  subdomain?: string;
+
   @ApiPropertyOptional({
     example: '2026-07-19T12:00:00.000Z',
     description:
