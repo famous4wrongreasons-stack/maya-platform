@@ -67,3 +67,7 @@ RLS is recommended as defence-in-depth after request and job transactions reliab
 - Branch lists cannot select a foreign tenant and fail closed without context.
 - Current-user reads and updates require both the current tenant and active Membership.
 - A known foreign user ID cannot be read or mutated through tenant profile or booking paths.
+- Branding and audit writes reject a foreign or missing tenant context before persistence.
+- Billing payment mutations use a tenant-qualified key.
+- Webhooks and due-billing jobs enter a separate system context for each database-selected tenant.
+- Provider payment identity, metadata and amount are checked before webhook mutation.

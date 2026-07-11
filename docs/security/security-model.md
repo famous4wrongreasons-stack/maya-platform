@@ -34,6 +34,7 @@ Protected assets include tenant business data, customer PII, integration credent
 - Rate limits are identity, IP and tenant aware.
 - Mutating public endpoints use CSRF protection when cookie authentication is introduced.
 - Webhooks verify signature/secret, enforce replay windows and idempotency.
+- A webhook identifier may use only a dedicated system gateway; provider state is re-fetched and matched before entering tenant context.
 - File uploads validate bytes, type, size, path and serving headers.
 
 ## AI security

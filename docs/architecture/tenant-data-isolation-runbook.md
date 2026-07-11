@@ -45,9 +45,9 @@ npm test -- --runInBand \
 
 ## Remaining isolation work
 
-- Move branding writes, billing persistence and audit persistence behind context-aware tenant repositories while preserving dedicated platform and webhook entry points.
+- Branding, billing and audit isolation continue in `tenant-operations-isolation-runbook.md`.
 - Separate global Identity from tenant-specific Customer/Provider records in the universal domain model.
-- Add explicit system-context partitioning for background sync jobs and provider webhooks.
+- Add explicit system-context partitioning for remaining CRM sync and notification jobs.
 - Add PostgreSQL RLS only after all request, webhook and job transactions reliably set transaction-local tenant context.
 
 Production remains on the existing runtime until a separately reviewed migration and cutover is approved.
