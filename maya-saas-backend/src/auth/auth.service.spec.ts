@@ -3,13 +3,13 @@ import * as bcrypt from 'bcrypt';
 
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 
 import { UserRole } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { AuthSessionService } from './auth-session.service';
 import {
   PhoneAuthDeliveryResult,
   PhoneAuthDeliveryService,
@@ -86,9 +86,14 @@ describe('AuthService phone auth', () => {
     const configGetMock: jest.MockedFunction<
       (key: string) => string | undefined
     > = jest.fn((key: string) => configMap[key]);
-    const signAsyncMock: jest.MockedFunction<
-      (payload: Record<string, string | null>) => Promise<string>
-    > = jest.fn().mockResolvedValue('jwt-token');
+    const issueSessionMock = jest.fn().mockResolvedValue({
+      access_token: 'jwt-token',
+      refresh_token: 'refresh-token',
+      token_type: 'Bearer',
+      expires_in: 900,
+      refresh_expires_at: new Date('2026-08-10T12:00:00.000Z'),
+      session: { id: 'session-1' },
+    });
     const phoneAuthUpsertMock: jest.MockedFunction<
       (args: {
         phone: string;
@@ -150,9 +155,6 @@ describe('AuthService phone auth', () => {
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
     };
-    const jwtService: Pick<JwtService, 'signAsync'> = {
-      signAsync: signAsyncMock,
-    };
     const tenantContext = new TenantContextService();
     const authRepository: Pick<
       TenantAuthRepository,
@@ -203,12 +205,12 @@ describe('AuthService phone auth', () => {
     return {
       service: new AuthService(
         configService as ConfigService,
-        jwtService as JwtService,
         usersService as UsersService,
         tenantsService as TenantsService,
         phoneAuthDeliveryService as PhoneAuthDeliveryService,
         tenantContext,
         authRepository as TenantAuthRepository,
+        { issueSession: issueSessionMock } as unknown as AuthSessionService,
       ),
       tenantContext,
       mocks: {
@@ -227,7 +229,7 @@ describe('AuthService phone auth', () => {
         phoneAuthInvalidAttemptMock,
         phoneAuthUpsertMock,
         serializeUserMock,
-        signAsyncMock,
+        issueSessionMock,
       },
     };
   };
@@ -356,7 +358,7 @@ describe('AuthService phone auth', () => {
         phoneAuthClaimMock,
         phoneAuthFindUniqueMock,
         serializeUserMock,
-        signAsyncMock,
+        issueSessionMock,
       },
     } = createService();
 
@@ -415,11 +417,7 @@ describe('AuthService phone auth', () => {
     expect(claimArgs?.[0]).toBe('challenge-1');
     expect(claimArgs?.[1]).toBe(codeHash);
     expect(claimArgs?.[2]).toBeInstanceOf(Date);
-    expect(signAsyncMock).toHaveBeenCalledWith({
-      user_id: createdUser.id,
-      tenant_id: createdUser.tenantId,
-      role: createdUser.role,
-    });
+    expect(issueSessionMock).toHaveBeenCalledWith(createdUser, {});
     expect(serializeUserMock).toHaveBeenCalledWith(createdUser);
     expect(result).toMatchObject({
       access_token: 'jwt-token',
@@ -481,7 +479,7 @@ describe('AuthService phone auth', () => {
         createPhoneFirstClientUserMock,
         phoneAuthClaimMock,
         phoneAuthFindUniqueMock,
-        signAsyncMock,
+        issueSessionMock,
       },
     } = createService();
     const codeHash = createHash('sha256')
@@ -508,7 +506,7 @@ describe('AuthService phone auth', () => {
       'Start phone auth again to request a new verification code.',
     );
     expect(createPhoneFirstClientUserMock).not.toHaveBeenCalled();
-    expect(signAsyncMock).not.toHaveBeenCalled();
+    expect(issueSessionMock).not.toHaveBeenCalled();
   });
 
   it('allows tenant admin login for a trial tenant', async () => {
@@ -523,7 +521,7 @@ describe('AuthService phone auth', () => {
         findTenantUserByEmailMock,
         getTenantBySlugOrThrowMock,
         serializeUserMock,
-        signAsyncMock,
+        issueSessionMock,
       },
     } = createService();
     const adminUser: UserRecord = {
@@ -554,11 +552,7 @@ describe('AuthService phone auth', () => {
       trialTenant.id,
       adminUser.email,
     );
-    expect(signAsyncMock).toHaveBeenCalledWith({
-      user_id: adminUser.id,
-      tenant_id: adminUser.tenantId,
-      role: adminUser.role,
-    });
+    expect(issueSessionMock).toHaveBeenCalledWith(adminUser, {});
     expect(serializeUserMock).toHaveBeenCalledWith(adminUser);
     expect(result).toMatchObject({
       access_token: 'jwt-token',

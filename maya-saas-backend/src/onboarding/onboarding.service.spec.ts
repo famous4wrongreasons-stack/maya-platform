@@ -83,9 +83,14 @@ describe('OnboardingService', () => {
       role: value.role,
       status: value.status,
     }));
-    const issueAccessTokenMock: jest.MockedFunction<
-      (value: CreatedUser) => Promise<string>
-    > = jest.fn().mockResolvedValue('jwt-token');
+    const issueSessionMock = jest.fn().mockResolvedValue({
+      access_token: 'jwt-token',
+      refresh_token: 'refresh-token',
+      token_type: 'Bearer',
+      expires_in: 900,
+      refresh_expires_at: new Date('2026-08-10T12:00:00.000Z'),
+      session: { id: 'session-1' },
+    });
     const auditLogMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
@@ -118,7 +123,7 @@ describe('OnboardingService', () => {
         serializeUser: serializeUserMock,
       } as unknown as UsersService,
       {
-        issueAccessToken: issueAccessTokenMock,
+        issueSession: issueSessionMock,
       } as unknown as AuthService,
       { log: auditLogMock } as unknown as AuditLogService,
       tenantContext,
@@ -133,7 +138,7 @@ describe('OnboardingService', () => {
         createOrUpdateIntegrationMock,
         createUserMock,
         serializeUserMock,
-        issueAccessTokenMock,
+        issueSessionMock,
         auditLogMock,
       },
     };
@@ -185,7 +190,10 @@ describe('OnboardingService', () => {
         status: UserStatus.ACTIVE,
       }),
     );
-    expect(mocks.issueAccessTokenMock).toHaveBeenCalled();
+    expect(mocks.issueSessionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'user-1', tenantId: 'tenant-1' }),
+      {},
+    );
     expect(result).toMatchObject({
       access_token: 'jwt-token',
       booking_mode: 'preview',

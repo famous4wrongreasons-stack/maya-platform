@@ -8,7 +8,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 
@@ -17,6 +16,8 @@ import { UserRole, UserStatus } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AuthClientMetadata } from './auth-client-metadata';
+import { AuthSessionService } from './auth-session.service';
 import { LoginDto } from './dto/login.dto';
 import {
   PhoneAuthDeliveryFailedError,
@@ -32,15 +33,15 @@ import { TenantAuthRepository } from './tenant-auth.repository';
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
     private readonly phoneAuthDeliveryService: PhoneAuthDeliveryService,
     private readonly tenantContext: TenantContextService,
     private readonly authRepository: TenantAuthRepository,
+    private readonly sessionService: AuthSessionService,
   ) {}
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, metadata: Partial<AuthClientMetadata> = {}) {
     const user = dto.tenantSlug
       ? await this.loginTenantUser(dto)
       : await this.loginPlatformOwner(dto);
@@ -50,12 +51,12 @@ export class AuthService {
     }
 
     return {
-      access_token: await this.signToken(user),
+      ...(await this.sessionService.issueSession(user, metadata)),
       user: this.usersService.serializeUser(user),
     };
   }
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, metadata: Partial<AuthClientMetadata> = {}) {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
@@ -98,18 +99,22 @@ export class AuthService {
       });
 
       return {
-        access_token: await this.signToken(user),
+        ...(await this.sessionService.issueSession(user, metadata)),
         user: this.usersService.serializeUser(user),
       };
     });
   }
 
-  async issueAccessToken(user: {
-    id: string;
-    tenantId: string | null;
-    role: string;
-  }) {
-    return this.signToken(user);
+  async issueSession(
+    user: {
+      id: string;
+      tenantId: string | null;
+      role: string;
+      status: string;
+    },
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    return this.sessionService.issueSession(user, metadata);
   }
 
   async startPhoneAuth(dto: StartPhoneAuthDto, clientIp?: string | null) {
@@ -188,7 +193,10 @@ export class AuthService {
     });
   }
 
-  async verifyPhoneAuth(dto: VerifyPhoneAuthDto) {
+  async verifyPhoneAuth(
+    dto: VerifyPhoneAuthDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
@@ -321,7 +329,7 @@ export class AuthService {
       }
 
       return {
-        access_token: await this.signToken(user),
+        ...(await this.sessionService.issueSession(user, metadata)),
         user: this.usersService.serializeUser(user),
         is_new_user: isNewUser,
       };
@@ -378,18 +386,6 @@ export class AuthService {
     }
 
     return user;
-  }
-
-  private async signToken(user: {
-    id: string;
-    tenantId: string | null;
-    role: string;
-  }) {
-    return this.jwtService.signAsync({
-      user_id: user.id,
-      tenant_id: user.tenantId,
-      role: user.role,
-    });
   }
 
   private assertTenantAllowsClientAccess(
