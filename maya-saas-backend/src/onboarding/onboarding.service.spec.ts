@@ -90,8 +90,19 @@ describe('OnboardingService', () => {
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
     const tenantContext = new TenantContextService();
-    createOrUpdateIntegrationMock.mockImplementation(() => {
+    const expectCreatedTenantContext = () => {
       expect(tenantContext.requireTenantId()).toBe(tenant.id);
+    };
+    upsertBrandingMock.mockImplementation(() => {
+      expectCreatedTenantContext();
+      return Promise.resolve();
+    });
+    createOrUpdateIntegrationMock.mockImplementation(() => {
+      expectCreatedTenantContext();
+      return Promise.resolve();
+    });
+    auditLogMock.mockImplementation(() => {
+      expectCreatedTenantContext();
       return Promise.resolve();
     });
 

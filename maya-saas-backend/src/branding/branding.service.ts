@@ -10,6 +10,7 @@ import { join, resolve } from 'path';
 
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateBrandingDto } from './dto/update-branding.dto';
 
 const TENANT_LOGO_ROUTE_PREFIX = '/api/public/uploads/tenant-logos';
@@ -33,13 +34,16 @@ export class BrandingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async upsertBranding(tenantId: string, dto: UpdateBrandingDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
     return this.prisma.brandingSettings.upsert({
-      where: { tenantId },
+      where: { tenantId: scopedTenantId },
       create: {
-        tenantId,
+        tenantId: scopedTenantId,
         logoUrl: dto.logoUrl,
         iconUrl: dto.iconUrl,
         faviconUrl: dto.faviconUrl,
@@ -139,10 +143,11 @@ export class BrandingService {
   }
 
   async uploadTenantLogo(tenantId: string, file: UploadedLogoFile) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     this.validateLogoFile(file);
 
     const existingBranding = await this.prisma.brandingSettings.findUnique({
-      where: { tenantId },
+      where: { tenantId: scopedTenantId },
       select: {
         logoUrl: true,
       },
@@ -159,7 +164,7 @@ export class BrandingService {
       );
     }
 
-    const filename = `${tenantId}-${randomUUID()}.${extension}`;
+    const filename = `${scopedTenantId}-${randomUUID()}.${extension}`;
     const uploadDir = this.getTenantLogoUploadDir();
     const absolutePath = join(uploadDir, filename);
     const logoUrl = `${TENANT_LOGO_ROUTE_PREFIX}/${filename}`;
@@ -168,9 +173,9 @@ export class BrandingService {
     await writeFile(absolutePath, file.buffer, { flag: 'wx' });
 
     const branding = await this.prisma.brandingSettings.upsert({
-      where: { tenantId },
+      where: { tenantId: scopedTenantId },
       create: {
-        tenantId,
+        tenantId: scopedTenantId,
         logoUrl,
       },
       update: {

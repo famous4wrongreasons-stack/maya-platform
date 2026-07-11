@@ -1,9 +1,12 @@
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { TenantStatus } from '../common/domain.enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { BillingService } from './billing.service';
+import { BillingSystemGateway } from './billing-system.gateway';
 import {
   YooKassaClientService,
   YooKassaPayment,
@@ -140,6 +143,13 @@ describe('BillingService', () => {
           : undefined,
       ),
     } as unknown as ConfigService;
+    const tenantContext = new TenantContextService();
+    const findPaymentByProviderPaymentIdMock = jest.fn();
+    const listBillingCandidatesMock = jest.fn().mockResolvedValue([]);
+    const systemGateway = {
+      findPaymentByProviderPaymentId: findPaymentByProviderPaymentIdMock,
+      listBillingCandidates: listBillingCandidatesMock,
+    } as unknown as BillingSystemGateway;
 
     return {
       service: new BillingService(
@@ -147,10 +157,15 @@ describe('BillingService', () => {
         subscriptionsService,
         yooKassaClient,
         configService,
+        tenantContext,
+        systemGateway,
       ),
+      tenantContext,
       subscriptionsService,
       createPaymentMock,
       getPaymentMock,
+      findPaymentByProviderPaymentIdMock,
+      listBillingCandidatesMock,
     };
   };
 
@@ -185,13 +200,15 @@ describe('BillingService', () => {
         update: billingPaymentUpdateMock,
       },
     } as unknown as PrismaService;
-    const { service, createPaymentMock } = createService(prisma);
+    const { service, tenantContext, createPaymentMock } = createService(prisma);
 
     createPaymentMock.mockResolvedValue(providerPayment);
 
-    const result = await service.createCheckout('tenant-1', {
-      returnUrl: 'http://127.0.0.1:8787/maya-admin.html',
-    });
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.createCheckout('tenant-1', {
+        returnUrl: 'http://127.0.0.1:8787/maya-admin.html',
+      }),
+    );
 
     const [billingPaymentCreateArgs] =
       billingPaymentCreateMock.mock.calls[0] ?? [];
@@ -209,6 +226,16 @@ describe('BillingService', () => {
         save_payment_method: true,
       }),
       'idem-1',
+    );
+    expect(billingPaymentUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id_tenantId: {
+            id: 'billing-payment-1',
+            tenantId: 'tenant-1',
+          },
+        },
+      }),
     );
     expect(result.confirmation_url).toBe(
       'https://yookassa.ru/checkout/payments/yk-payment-1',
@@ -259,14 +286,20 @@ describe('BillingService', () => {
         ),
       );
     const prisma = {
-      billingPayment: {
-        findUnique: jest.fn().mockResolvedValue(payment),
-      },
       $transaction: transactionMock,
     } as unknown as PrismaService;
-    const { service, getPaymentMock } = createService(prisma);
+    const {
+      service,
+      tenantContext,
+      getPaymentMock,
+      findPaymentByProviderPaymentIdMock,
+    } = createService(prisma);
 
-    getPaymentMock.mockResolvedValue(succeededProviderPayment());
+    findPaymentByProviderPaymentIdMock.mockResolvedValue(payment);
+    getPaymentMock.mockImplementation(() => {
+      expect(tenantContext.requireTenantId()).toBe('tenant-1');
+      return Promise.resolve(succeededProviderPayment());
+    });
 
     const result = await service.handleYooKassaWebhook({
       type: 'notification',
@@ -288,6 +321,16 @@ describe('BillingService', () => {
       new Date('2026-08-05T12:05:00.000Z'),
     );
     expect(tenantUpdateArgs.data.billingMethodId).toBe('pm_saved_1');
+    expect(billingPaymentUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id_tenantId: {
+            id: 'billing-payment-1',
+            tenantId: 'tenant-1',
+          },
+        },
+      }),
+    );
     expect(result).toMatchObject({
       ok: true,
       event: 'payment.succeeded',
@@ -312,14 +355,19 @@ describe('BillingService', () => {
     const tenantUpdateMock = jest.fn().mockResolvedValue(undefined);
     const prisma = {
       tenant: {
-        findMany: jest.fn().mockResolvedValue([tenant]),
         update: tenantUpdateMock,
       },
       billingPayment: {
         findFirst: jest.fn().mockResolvedValue(null),
       },
     } as unknown as PrismaService;
-    const { service } = createService(prisma);
+    const { service, tenantContext, listBillingCandidatesMock } =
+      createService(prisma);
+    tenantUpdateMock.mockImplementation(() => {
+      expect(tenantContext.requireTenantId()).toBe('tenant-1');
+      return Promise.resolve(undefined);
+    });
+    listBillingCandidatesMock.mockResolvedValue([tenant]);
 
     const result = await service.runDueBilling(
       new Date('2026-07-05T12:00:00.000Z'),
@@ -334,5 +382,81 @@ describe('BillingService', () => {
       marked_past_due: 1,
       charged: 0,
     });
+  });
+
+  it('rejects a foreign billing tenant before database access', async () => {
+    const tenantFindUniqueMock = jest.fn();
+    const billingPaymentFindManyMock = jest.fn();
+    const prisma = {
+      tenant: {
+        findUnique: tenantFindUniqueMock,
+      },
+      billingPayment: {
+        findMany: billingPaymentFindManyMock,
+      },
+    } as unknown as PrismaService;
+    const { service, tenantContext } = createService(prisma);
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.listTenantPayments('tenant-b'),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(tenantFindUniqueMock).not.toHaveBeenCalled();
+    expect(billingPaymentFindManyMock).not.toHaveBeenCalled();
+  });
+
+  it('fails closed before billing access without tenant context', async () => {
+    const tenantFindUniqueMock = jest.fn();
+    const prisma = {
+      tenant: {
+        findUnique: tenantFindUniqueMock,
+      },
+    } as unknown as PrismaService;
+    const { service } = createService(prisma);
+
+    await expect(
+      service.createCheckout('tenant-1', {
+        returnUrl: 'http://127.0.0.1:8787/maya-admin.html',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(tenantFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects verified provider metadata for a different tenant', async () => {
+    const payment = {
+      ...basePayment(),
+      providerPaymentId: 'yk-payment-1',
+    };
+    const transactionMock = jest.fn();
+    const prisma = {
+      $transaction: transactionMock,
+    } as unknown as PrismaService;
+    const {
+      service,
+      tenantContext,
+      getPaymentMock,
+      findPaymentByProviderPaymentIdMock,
+    } = createService(prisma);
+    findPaymentByProviderPaymentIdMock.mockResolvedValue(payment);
+    getPaymentMock.mockResolvedValue({
+      ...succeededProviderPayment(),
+      metadata: {
+        tenant_id: 'tenant-b',
+        billing_payment_id: payment.id,
+      },
+    });
+
+    await expect(
+      service.handleYooKassaWebhook({
+        type: 'notification',
+        event: 'payment.succeeded',
+        object: {
+          id: 'yk-payment-1',
+        },
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(transactionMock).not.toHaveBeenCalled();
+    expect(tenantContext.get()).toBeUndefined();
   });
 });

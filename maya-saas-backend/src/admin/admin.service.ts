@@ -15,6 +15,7 @@ import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
 import { UsersService } from '../users/users.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
@@ -29,20 +30,23 @@ export class AdminService {
     private readonly usersService: UsersService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly auditLogService: AuditLogService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
     return this.tenantsService.createTenant(dto).then(async (tenant) => {
-      await this.auditLogService.log({
-        tenantId: tenant.id,
-        userId: actor.userId,
-        action: 'tenant.created',
-        entityType: 'tenant',
-        entityId: tenant.id,
-        metadata: {
-          slug: tenant.slug,
-        },
-      });
+      await this.tenantContext.runAsSystemTenant(tenant.id, () =>
+        this.auditLogService.log({
+          tenantId: tenant.id,
+          userId: actor.userId,
+          action: 'tenant.created',
+          entityType: 'tenant',
+          entityId: tenant.id,
+          metadata: {
+            slug: tenant.slug,
+          },
+        }),
+      );
 
       return tenant;
     });
@@ -223,14 +227,16 @@ export class AdminService {
   ) {
     const tenant = await this.tenantsService.setTenantStatus(id, status);
 
-    await this.auditLogService.log({
-      tenantId: id,
-      userId: actor.userId,
-      action: `tenant.${status}`,
-      entityType: 'tenant',
-      entityId: id,
-      metadata: { status },
-    });
+    await this.tenantContext.runAsSystemTenant(id, () =>
+      this.auditLogService.log({
+        tenantId: id,
+        userId: actor.userId,
+        action: `tenant.${status}`,
+        entityType: 'tenant',
+        entityId: id,
+        metadata: { status },
+      }),
+    );
 
     return tenant;
   }

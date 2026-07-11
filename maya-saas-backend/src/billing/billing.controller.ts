@@ -37,6 +37,7 @@ export class BillingController {
   @Post('admin/tenants/:id/billing/charge')
   @ApiBearerAuth()
   @Roles(UserRole.PLATFORM_OWNER)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Charge tenant using a saved YooKassa method' })
   chargeTenant(@Param('id') tenantId: string) {
     return this.billingService.chargeTenant(tenantId);

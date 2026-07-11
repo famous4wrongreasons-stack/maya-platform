@@ -46,66 +46,66 @@ export class OnboardingService {
       branchTimezone: dto.branchTimezone,
     });
 
-    await this.brandingService.upsertBranding(tenant.id, {
-      appName: dto.name,
-      themeJson: {
-        booking: {
-          mode: 'preview',
+    return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
+      await this.brandingService.upsertBranding(tenant.id, {
+        appName: dto.name,
+        themeJson: {
+          booking: {
+            mode: 'preview',
+          },
         },
-      },
-    });
+      });
 
-    await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-      this.crmService.createOrUpdateIntegration(tenant.id, {
+      await this.crmService.createOrUpdateIntegration(tenant.id, {
         provider: CrmProvider.MOCK,
-      }),
-    );
+      });
 
-    const user = await this.usersService.createUser({
-      tenantId: tenant.id,
-      email: dto.ownerEmail,
-      phone: dto.ownerPhone ?? null,
-      name: dto.ownerName ?? null,
-      passwordHash: await bcrypt.hash(temporaryPassword, 10),
-      role: UserRole.TENANT_ADMIN,
-      status: UserStatus.ACTIVE,
-    });
+      const user = await this.usersService.createUser({
+        tenantId: tenant.id,
+        email: dto.ownerEmail,
+        phone: dto.ownerPhone ?? null,
+        name: dto.ownerName ?? null,
+        passwordHash: await bcrypt.hash(temporaryPassword, 10),
+        role: UserRole.TENANT_ADMIN,
+        status: UserStatus.ACTIVE,
+      });
 
-    await this.auditLogService.log({
-      tenantId: tenant.id,
-      action: 'tenant.self_serve_created',
-      entityType: 'tenant',
-      entityId: tenant.id,
-      metadata: {
-        slug: tenant.slug,
-      },
-    });
-    await this.auditLogService.log({
-      tenantId: tenant.id,
-      userId: user.id,
-      action: 'tenant.self_serve_owner_created',
-      entityType: 'user',
-      entityId: user.id,
-      metadata: {
-        email: user.email,
-        role: user.role,
-      },
-    });
+      await this.auditLogService.log({
+        tenantId: tenant.id,
+        action: 'tenant.self_serve_created',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        metadata: {
+          slug: tenant.slug,
+        },
+      });
+      await this.auditLogService.log({
+        tenantId: tenant.id,
+        userId: user.id,
+        action: 'tenant.self_serve_owner_created',
+        entityType: 'user',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+          role: user.role,
+        },
+      });
 
-    return {
-      access_token: await this.authService.issueAccessToken(user),
-      user: this.usersService.serializeUser(user),
-      tenant: {
-        id: tenant.id,
-        name: tenant.name,
-        slug: tenant.slug,
-        status: tenant.status,
-        allow_self_registration: tenant.allow_self_registration,
-      },
-      temporary_password: dto.password ? null : temporaryPassword,
-      booking_mode: 'preview',
-      next_step: 'open_admin',
-    };
+      return {
+        access_token: await this.authService.issueAccessToken(user),
+        user: this.usersService.serializeUser(user),
+        tenant: {
+          id: tenant.id,
+          name: tenant.name,
+          slug: tenant.slug,
+          status: tenant.status,
+          allow_self_registration: tenant.allow_self_registration,
+        },
+        temporary_password: dto.password ? null : temporaryPassword,
+        booking_mode: 'preview',
+        next_step: 'open_admin',
+      };
+    });
   }
 
   private assertSelfServeTrialSignupEnabled() {
