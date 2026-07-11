@@ -11,6 +11,7 @@ import {
   UserStatus,
 } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { OnboardingService } from './onboarding.service';
@@ -88,6 +89,11 @@ describe('OnboardingService', () => {
     const auditLogMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
+    const tenantContext = new TenantContextService();
+    createOrUpdateIntegrationMock.mockImplementation(() => {
+      expect(tenantContext.requireTenantId()).toBe(tenant.id);
+      return Promise.resolve();
+    });
 
     const service = new OnboardingService(
       { get: configGetMock } as ConfigService,
@@ -104,10 +110,12 @@ describe('OnboardingService', () => {
         issueAccessToken: issueAccessTokenMock,
       } as unknown as AuthService,
       { log: auditLogMock } as unknown as AuditLogService,
+      tenantContext,
     );
 
     return {
       service,
+      tenantContext,
       mocks: {
         createTenantMock,
         upsertBrandingMock,

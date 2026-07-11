@@ -8,6 +8,7 @@ import { CrmIntegrationStatus, CrmProvider } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
 import {
   CancelledAppointment,
@@ -24,14 +25,16 @@ export class CrmService {
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
     private readonly adapterFactory: CrmAdapterFactory,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async createOrUpdateIntegration(
     tenantId: string,
     dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
   ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const existing = await this.prisma.crmIntegration.findUnique({
-      where: { tenantId },
+      where: { tenantId: scopedTenantId },
     });
     const provider = (dto.provider ??
       existing?.provider ??
@@ -58,7 +61,7 @@ export class CrmService {
 
     const integration = existing
       ? await this.prisma.crmIntegration.update({
-          where: { tenantId },
+          where: { tenantId: scopedTenantId },
           data: {
             provider,
             encryptedApiToken,
@@ -69,7 +72,7 @@ export class CrmService {
         })
       : await this.prisma.crmIntegration.create({
           data: {
-            tenantId,
+            tenantId: scopedTenantId,
             provider,
             encryptedApiToken,
             baseUrl: dto.baseUrl,
@@ -82,13 +85,15 @@ export class CrmService {
   }
 
   async getServices(tenantId: string) {
-    const adapter = await this.getAdapterForTenant(tenantId);
-    return adapter.getServices(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    return adapter.getServices(scopedTenantId);
   }
 
   async getStaff(tenantId: string) {
-    const adapter = await this.getAdapterForTenant(tenantId);
-    return adapter.getStaff(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    return adapter.getStaff(scopedTenantId);
   }
 
   async getAvailableSlots(
@@ -100,9 +105,10 @@ export class CrmService {
       branchId?: string;
     },
   ) {
-    const adapter = await this.getAdapterForTenant(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getAvailableSlots({
-      tenantId,
+      tenantId: scopedTenantId,
       ...query,
     });
   }
@@ -120,9 +126,10 @@ export class CrmService {
       notes?: string | null;
     },
   ): Promise<CreatedAppointment> {
-    const adapter = await this.getAdapterForTenant(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.createAppointment({
-      tenantId,
+      tenantId: scopedTenantId,
       ...params,
     });
   }
@@ -131,9 +138,10 @@ export class CrmService {
     tenantId: string,
     externalId: string,
   ): Promise<CancelledAppointment> {
-    const adapter = await this.getAdapterForTenant(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.cancelAppointment({
-      tenantId,
+      tenantId: scopedTenantId,
       externalId,
     });
   }
@@ -148,26 +156,30 @@ export class CrmService {
       notes?: string | null;
     },
   ): Promise<RescheduledAppointment> {
-    const adapter = await this.getAdapterForTenant(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.rescheduleAppointment({
-      tenantId,
+      tenantId: scopedTenantId,
       ...params,
     });
   }
 
   async getClientAppointments(tenantId: string, clientId: string) {
-    const adapter = await this.getAdapterForTenant(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getClientAppointments(clientId);
   }
 
   async testConnection(tenantId: string) {
-    const adapter = await this.getAdapterForTenant(tenantId);
-    return adapter.testConnection(tenantId);
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    return adapter.testConnection(scopedTenantId);
   }
 
   private async getAdapterForTenant(tenantId: string): Promise<CRMAdapter> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const integration = await this.prisma.crmIntegration.findUnique({
-      where: { tenantId },
+      where: { tenantId: scopedTenantId },
     });
 
     if (!integration) {

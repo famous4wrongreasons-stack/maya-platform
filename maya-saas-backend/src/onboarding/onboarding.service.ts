@@ -13,6 +13,7 @@ import {
   UserStatus,
 } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { CreateTrialSignupDto } from './dto/create-trial-signup.dto';
@@ -27,6 +28,7 @@ export class OnboardingService {
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
     private readonly auditLogService: AuditLogService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async createTrialSignup(dto: CreateTrialSignupDto) {
@@ -53,9 +55,11 @@ export class OnboardingService {
       },
     });
 
-    await this.crmService.createOrUpdateIntegration(tenant.id, {
-      provider: CrmProvider.MOCK,
-    });
+    await this.tenantContext.runAsSystemTenant(tenant.id, () =>
+      this.crmService.createOrUpdateIntegration(tenant.id, {
+        provider: CrmProvider.MOCK,
+      }),
+    );
 
     const user = await this.usersService.createUser({
       tenantId: tenant.id,

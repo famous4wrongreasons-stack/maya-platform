@@ -13,6 +13,7 @@ import {
 } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
 
 type UserWithRelations = User & {
@@ -30,6 +31,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
@@ -250,14 +252,23 @@ export class UsersService {
     });
   }
 
-  async updateCurrentUserProfile(userId: string, dto: UpdateCurrentUserDto) {
+  async updateCurrentUserProfile(
+    userId: string,
+    dto: UpdateCurrentUserDto,
+    expectedTenantId?: string | null,
+  ) {
     if (dto.name === undefined && dto.phone === undefined) {
       throw new BadRequestException(
         'At least one supported profile field must be provided',
       );
     }
 
-    const currentUser = await this.getUserOrThrow(userId);
+    const scopedTenantId = expectedTenantId
+      ? this.tenantContext.assertTenantId(expectedTenantId)
+      : null;
+    const currentUser = scopedTenantId
+      ? await this.getTenantUserOrThrow(userId, scopedTenantId)
+      : await this.getUserOrThrow(userId);
     const data: {
       encryptedName?: string | null;
       phone?: string | null;
@@ -284,12 +295,36 @@ export class UsersService {
 
       if (!currentUser.phone) {
         await this.ensurePhoneIsAvailable(
-          currentUser.tenantId,
+          scopedTenantId ?? currentUser.tenantId,
           normalizedPhone,
         );
       }
 
       data.phone = normalizedPhone;
+    }
+
+    if (scopedTenantId) {
+      const update = await this.prisma.user.updateMany({
+        where: {
+          id: userId,
+          tenantId: scopedTenantId,
+          memberships: {
+            some: {
+              tenantId: scopedTenantId,
+              status: 'active',
+            },
+          },
+        },
+        data,
+      });
+
+      if (update.count !== 1) {
+        throw new NotFoundException('User not found');
+      }
+
+      return this.serializeUser(
+        await this.getTenantUserOrThrow(userId, scopedTenantId),
+      );
     }
 
     const user = await this.prisma.user.update({
@@ -307,6 +342,32 @@ export class UsersService {
   async getUserOrThrow(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async getTenantUserOrThrow(userId: string, expectedTenantId: string) {
+    const tenantId = this.tenantContext.assertTenantId(expectedTenantId);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        tenantId,
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
+        },
+      },
       include: {
         tenant: true,
         branch: true,

@@ -80,7 +80,10 @@ export class AppointmentsService {
       );
     }
 
-    const client = await this.usersService.getUserOrThrow(clientId);
+    const client = await this.usersService.getTenantUserOrThrow(
+      clientId,
+      tenantId,
+    );
     const clientProfile = this.usersService.serializeUser(client);
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
     const services = await this.crmService.getServices(tenantId);
@@ -152,7 +155,10 @@ export class AppointmentsService {
       );
     }
 
-    const client = await this.usersService.getUserOrThrow(clientId);
+    const client = await this.usersService.getTenantUserOrThrow(
+      clientId,
+      tenantId,
+    );
     const clientProfile = this.usersService.serializeUser(client);
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
     const services = await this.crmService.getServices(tenantId);

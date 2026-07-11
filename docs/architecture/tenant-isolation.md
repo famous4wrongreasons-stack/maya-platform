@@ -24,7 +24,9 @@ flowchart TD
 
 ## TenantContext contract
 
-The context contains `tenantId`, `membershipId`, `userId`, role, resolution source and request ID. It is stored with AsyncLocalStorage for the request lifetime. Platform-wide jobs must opt into an explicit system context per tenant; absence of context fails closed for tenant repositories.
+The context contains `tenantId`, `membershipId`, `userId`, role, resolution source and request ID. It is stored with AsyncLocalStorage for the request lifetime. Platform-wide jobs and trusted bootstrap work must opt into an explicit system context per tenant; absence of context fails closed for tenant repositories.
+
+System context may only receive a tenant ID selected by trusted backend code, such as the ID returned by tenant creation or a job partition loaded from the database. It must never turn a request body, query parameter or arbitrary header into authorization.
 
 ## Resolver precedence
 
@@ -61,3 +63,7 @@ RLS is recommended as defence-in-depth after request and job transactions reliab
 - A JWT tenant claim without membership is rejected.
 - A conflicting domain and signed membership is rejected where both are authoritative.
 - Repository methods throw when TenantContext is absent.
+- CRM credentials are not loaded when the requested tenant conflicts with context.
+- Branch lists cannot select a foreign tenant and fail closed without context.
+- Current-user reads and updates require both the current tenant and active Membership.
+- A known foreign user ID cannot be read or mutated through tenant profile or booking paths.

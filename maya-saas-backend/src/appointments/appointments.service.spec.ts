@@ -195,8 +195,8 @@ describe('AppointmentsService', () => {
       service_ids: ['svc-1'],
       raw: { rescheduled: true },
     });
-    const getUserOrThrowMock: jest.MockedFunction<
-      (userId: string) => Promise<UserRecord>
+    const getTenantUserOrThrowMock: jest.MockedFunction<
+      (userId: string, tenantId: string) => Promise<UserRecord>
     > = jest.fn().mockResolvedValue({
       id: 'user-1',
       tenantId: 'tenant-1',
@@ -257,11 +257,13 @@ describe('AppointmentsService', () => {
             undefined,
           ) as TenantsService['assertBranchBelongsToTenant'],
       };
-    const usersService: Pick<UsersService, 'getUserOrThrow' | 'serializeUser'> =
-      {
-        getUserOrThrow: getUserOrThrowMock,
-        serializeUser: serializeUserMock,
-      };
+    const usersService: Pick<
+      UsersService,
+      'getTenantUserOrThrow' | 'serializeUser'
+    > = {
+      getTenantUserOrThrow: getTenantUserOrThrowMock,
+      serializeUser: serializeUserMock,
+    };
     const auditLogService: Pick<AuditLogService, 'log'> = {
       log: auditLogMock,
     };
@@ -295,7 +297,7 @@ describe('AppointmentsService', () => {
         getAvailableSlotsMock,
         getServicesMock,
         getStaffMock,
-        getUserOrThrowMock,
+        getTenantUserOrThrowMock,
         rescheduleAppointmentMock,
         serializeUserMock,
       },
@@ -305,7 +307,7 @@ describe('AppointmentsService', () => {
   it('uses the stored client profile when preview payload omits name and phone', async () => {
     const {
       service,
-      mocks: { auditLogMock, getUserOrThrowMock, serializeUserMock },
+      mocks: { auditLogMock, getTenantUserOrThrowMock, serializeUserMock },
     } = createService();
 
     const result = await service.previewForClient('tenant-1', 'user-1', {
@@ -314,7 +316,7 @@ describe('AppointmentsService', () => {
       start: '2026-07-05T11:00:00',
     });
 
-    expect(getUserOrThrowMock).toHaveBeenCalledWith('user-1');
+    expect(getTenantUserOrThrowMock).toHaveBeenCalledWith('user-1', 'tenant-1');
     expect(serializeUserMock).toHaveBeenCalled();
     expect(result).toMatchObject({
       client_name: 'Станислав',
