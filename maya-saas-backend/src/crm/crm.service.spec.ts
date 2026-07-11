@@ -1,6 +1,9 @@
+import { ForbiddenException } from '@nestjs/common';
+
 import { CrmIntegrationStatus, CrmProvider } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
 import { CrmService } from './crm.service';
 
@@ -31,11 +34,19 @@ describe('CrmService', () => {
       decrypt: jest.fn(),
     } as unknown as EncryptionService;
     const adapterFactory = {} as CrmAdapterFactory;
+    const tenantContext = new TenantContextService();
 
-    const service = new CrmService(prisma, encryptionService, adapterFactory);
-    const result = await service.createOrUpdateIntegration('tenant-1', {
-      provider: CrmProvider.MOCK,
-    });
+    const service = new CrmService(
+      prisma,
+      encryptionService,
+      adapterFactory,
+      tenantContext,
+    );
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.createOrUpdateIntegration('tenant-1', {
+        provider: CrmProvider.MOCK,
+      }),
+    );
 
     expect(encryptMock).toHaveBeenCalledWith('mock');
     expect(crmCreateMock).toHaveBeenCalledWith({
@@ -53,5 +64,48 @@ describe('CrmService', () => {
       provider: CrmProvider.MOCK,
       status: CrmIntegrationStatus.ACTIVE,
     });
+  });
+
+  it('rejects a CRM tenant argument that conflicts with request context', async () => {
+    const crmFindUniqueMock = jest.fn();
+    const prisma = {
+      crmIntegration: {
+        findUnique: crmFindUniqueMock,
+      },
+    } as unknown as PrismaService;
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      prisma,
+      {} as EncryptionService,
+      {} as CrmAdapterFactory,
+      tenantContext,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.getServices('tenant-b'),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(crmFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  it('fails closed before loading CRM credentials without tenant context', async () => {
+    const crmFindUniqueMock = jest.fn();
+    const prisma = {
+      crmIntegration: {
+        findUnique: crmFindUniqueMock,
+      },
+    } as unknown as PrismaService;
+    const service = new CrmService(
+      prisma,
+      {} as EncryptionService,
+      {} as CrmAdapterFactory,
+      new TenantContextService(),
+    );
+
+    await expect(service.getServices('tenant-a')).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(crmFindUniqueMock).not.toHaveBeenCalled();
   });
 });

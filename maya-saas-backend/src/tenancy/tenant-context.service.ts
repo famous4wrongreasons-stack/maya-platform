@@ -2,7 +2,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { AsyncLocalStorage } from 'async_hooks';
 
 export type TenantResolutionSource =
-  'membership' | 'custom_domain' | 'subdomain' | 'route_slug' | 'platform';
+  | 'membership'
+  | 'custom_domain'
+  | 'subdomain'
+  | 'route_slug'
+  | 'platform'
+  | 'system';
 
 export interface TenantRequestContext {
   requestId: string;
@@ -28,6 +33,22 @@ export class TenantContextService {
         membershipId: null,
         role: null,
         source: null,
+      },
+      callback,
+    );
+  }
+
+  runAsSystemTenant<T>(tenantId: string, callback: () => T): T {
+    const currentRequestId = this.storage.getStore()?.requestId;
+
+    return this.storage.run(
+      {
+        requestId: currentRequestId ?? `system:${tenantId}`,
+        tenantId,
+        userId: null,
+        membershipId: null,
+        role: null,
+        source: 'system',
       },
       callback,
     );

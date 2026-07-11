@@ -43,4 +43,31 @@ describe('TenantContextService', () => {
     const service = new TenantContextService();
     expect(() => service.requireTenantId()).toThrow(ForbiddenException);
   });
+
+  it('runs trusted bootstrap work in an isolated system tenant context', async () => {
+    const service = new TenantContextService();
+
+    await service.run('request-onboarding', async () => {
+      const result = await service.runAsSystemTenant(
+        'tenant-created',
+        async () => {
+          await Promise.resolve();
+          return service.get();
+        },
+      );
+
+      expect(result).toMatchObject({
+        requestId: 'request-onboarding',
+        tenantId: 'tenant-created',
+        userId: null,
+        membershipId: null,
+        source: 'system',
+      });
+      expect(service.get()).toMatchObject({
+        requestId: 'request-onboarding',
+        tenantId: null,
+        source: null,
+      });
+    });
+  });
 });
