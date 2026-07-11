@@ -78,3 +78,5 @@ RLS is recommended as defence-in-depth after request and job transactions reliab
 - OAuth state is resolved only by its opaque value, then atomically claimed inside the resolved tenant context before provider exchange.
 - Replayed OAuth callbacks stop before provider I/O and identity persistence.
 - Social identity updates use tenant-qualified keys, and the database rejects an identity linked to a user from another tenant.
+- Session creation rejects a user/tenant mismatch, and refresh or revoke operations remain bound to the credential principal.
+- A revoked or expired server session invalidates its signed access JWT before user or Membership lookup.

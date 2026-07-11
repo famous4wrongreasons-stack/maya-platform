@@ -78,7 +78,7 @@ Migration verification must cover a fresh database and an upgrade database conta
 
 ## Remaining work
 
-- Add refresh-token rotation, session revocation and device/session inventory.
+- Session rotation, revocation and device inventory continue in `session-security-runbook.md`.
 - Add redirect URI allowlists per deployed OAuth client before enabling live providers.
 - Add tenant/IP-aware distributed rate limiting for login, phone and OAuth start endpoints.
 - Minimize and encrypt retained provider profile PII instead of keeping a raw OAuth profile payload.

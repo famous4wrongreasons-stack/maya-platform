@@ -7,13 +7,14 @@ Protected assets include tenant business data, customer PII, integration credent
 ## Identity and session security
 
 - Passwords use a modern adaptive hash; provider identities are linked explicitly.
-- Access tokens are short-lived and validated against current user and membership state.
-- Refresh token rotation/session revocation is required before broad production rollout.
+- Access tokens are short-lived, carry a signed session ID and are validated against current session, user and Membership state.
+- Opaque refresh tokens rotate once; reuse revokes the whole session family. Only token HMACs are persisted.
 - Active tenant is a signed session choice backed by membership, not a raw header.
 - Platform roles do not implicitly bypass tenant repositories.
 - Public login slugs are resolved to database tenants before entering a tenant context; raw request values never become repository authority.
 - OAuth callbacks use high-entropy one-time state. The only global read accepts that opaque state, while claims and identity writes are tenant-scoped.
 - Social identity ownership is enforced by a composite database relation between identity user and tenant.
+- Session device metadata is minimized to a coarse label and HMAC client IP; raw refresh tokens and raw IP addresses are not persisted.
 
 ## Authorization
 
@@ -74,5 +75,6 @@ PostgreSQL RLS is a planned defence-in-depth control. Application isolation rema
 - Phone-code and OAuth-state replay, including concurrent requests.
 - Trusted-domain and public-auth tenant conflicts.
 - Cross-tenant social identity/user relations.
+- Refresh-token replay races, revoked access JWTs and cross-tenant session ownership.
 - Secret/PII leakage in errors and logs.
 - AI tool escalation and confirmation bypass.
