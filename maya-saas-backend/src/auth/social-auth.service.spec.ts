@@ -4,10 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserRole } from '../common/domain.enums';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
 import { SocialAuthService } from './social-auth.service';
+import { TenantAuthRepository } from './tenant-auth.repository';
 
 type TenantRecord = {
   id: string;
@@ -114,8 +116,8 @@ describe('SocialAuthService', () => {
       (args: Record<string, unknown>) => Promise<AuthFlowStateRecord | null>
     > = jest.fn().mockResolvedValue(null);
     const authFlowStateUpdateMock: jest.MockedFunction<
-      (args: Record<string, unknown>) => Promise<unknown>
-    > = jest.fn().mockResolvedValue(undefined);
+      (id: string, provider: string, consumedAt: Date) => Promise<boolean>
+    > = jest.fn().mockResolvedValue(true);
     const authIdentityFindUniqueMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(null);
@@ -155,18 +157,17 @@ describe('SocialAuthService', () => {
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
     };
-    const prisma: Pick<PrismaService, 'authFlowState' | 'authIdentity'> = {
-      authFlowState: {
-        create: authFlowStateCreateMock,
-        findUnique: authFlowStateFindUniqueMock,
-        update: authFlowStateUpdateMock,
-      } as PrismaService['authFlowState'],
-      authIdentity: {
-        create: authIdentityCreateMock,
-        findUnique: authIdentityFindUniqueMock,
-        update: authIdentityUpdateMock,
-      } as PrismaService['authIdentity'],
-    };
+    const tenantContext = new TenantContextService();
+    const authRepository = {
+      createFlowState: authFlowStateCreateMock,
+      claimFlowState: authFlowStateUpdateMock,
+      createIdentity: authIdentityCreateMock,
+      findIdentity: authIdentityFindUniqueMock,
+      updateIdentity: authIdentityUpdateMock,
+    } as unknown as TenantAuthRepository;
+    const flowSystemGateway = {
+      findByState: authFlowStateFindUniqueMock,
+    } as unknown as AuthFlowSystemGateway;
     const tenantsService: Pick<
       TenantsService,
       'assertBranchBelongsToTenant' | 'getTenantBySlugOrThrow'
@@ -193,11 +194,14 @@ describe('SocialAuthService', () => {
     return {
       service: new SocialAuthService(
         configService as ConfigService,
-        prisma as PrismaService,
         tenantsService as TenantsService,
         usersService as UsersService,
         jwtService as JwtService,
+        tenantContext,
+        authRepository,
+        flowSystemGateway,
       ),
+      tenantContext,
       mocks: {
         assertBranchBelongsToTenantMock,
         authFlowStateCreateMock,
@@ -224,8 +228,13 @@ describe('SocialAuthService', () => {
   it('starts Yandex login and returns an OAuth URL with PKCE', async () => {
     const {
       service,
+      tenantContext,
       mocks: { authFlowStateCreateMock },
     } = createService();
+    authFlowStateCreateMock.mockImplementation(() => {
+      expect(tenantContext.requireTenantId()).toBe(tenant.id);
+      return Promise.resolve();
+    });
 
     const result = await service.startYandexLogin({
       tenantSlug: tenant.slug,
@@ -241,23 +250,22 @@ describe('SocialAuthService', () => {
     expect(result.auth_url).toContain('client_id=yandex-client-id');
     expect(result.auth_url).toContain('code_challenge_method=S256');
     expect(result.auth_url).toContain('optional_scope=login%3Adefault_phone');
-    const createArgs = authFlowStateCreateMock.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-    };
+    const createArgs = authFlowStateCreateMock.mock.calls[0]?.[0];
 
-    expect(createArgs.data.tenantId).toBe(tenant.id);
-    expect(createArgs.data.provider).toBe('yandex');
-    expect(createArgs.data.redirectUri).toBe(
+    expect(createArgs.provider).toBe('yandex');
+    expect(createArgs.redirectUri).toBe(
       'https://malesthetic.pro/app/oauth-callback.html',
     );
-    expect(createArgs.data.state).toEqual(expect.stringMatching(/^ya_/));
-    expect(createArgs.data.codeVerifier).toEqual(expect.any(String));
-    expect(createArgs.data.expiresAt).toBeInstanceOf(Date);
+    expect(createArgs.state).toEqual(expect.stringMatching(/^ya_/));
+    expect(createArgs.codeVerifier).toEqual(expect.any(String));
+    expect(createArgs.expiresAt).toBeInstanceOf(Date);
+    expect(tenantContext.get()).toBeUndefined();
   });
 
   it('completes Yandex login, creates a new tenant user, and links the identity', async () => {
     const {
       service,
+      tenantContext,
       mocks: {
         authFlowStateFindUniqueMock,
         authFlowStateUpdateMock,
@@ -283,6 +291,10 @@ describe('SocialAuthService', () => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       consumedAt: null,
       tenant,
+    });
+    authIdentityCreateMock.mockImplementation(() => {
+      expect(tenantContext.requireTenantId()).toBe(tenant.id);
+      return Promise.resolve();
     });
     createUserMock.mockResolvedValue(createdUser);
     global.fetch = jest
@@ -310,13 +322,8 @@ describe('SocialAuthService', () => {
     });
 
     const createUserArgs = createUserMock.mock.calls[0]?.[0];
-    const authIdentityArgs = authIdentityCreateMock.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-    };
-    const authFlowUpdateArgs = authFlowStateUpdateMock.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-      where: Record<string, unknown>;
-    };
+    const authIdentityArgs = authIdentityCreateMock.mock.calls[0]?.[0];
+    const authFlowUpdateArgs = authFlowStateUpdateMock.mock.calls[0];
 
     expect(createUserArgs.tenantId).toBe(tenant.id);
     expect(createUserArgs.branchId).toBeNull();
@@ -326,15 +333,15 @@ describe('SocialAuthService', () => {
     expect(createUserArgs.passwordHash).toEqual(expect.any(String));
     expect(createUserArgs.role).toBe(UserRole.CLIENT);
     expect(createUserArgs.status).toBe('active');
-    expect(authIdentityArgs.data.tenantId).toBe(tenant.id);
-    expect(authIdentityArgs.data.userId).toBe(createdUser.id);
-    expect(authIdentityArgs.data.provider).toBe('yandex');
-    expect(authIdentityArgs.data.providerUserId).toBe('yandex-user-1');
-    expect(authIdentityArgs.data.email).toBe('ya-client@example.com');
-    expect(authIdentityArgs.data.phone).toBe('+79990000000');
-    expect(authIdentityArgs.data.profileJson).toEqual(expect.any(Object));
-    expect(authFlowUpdateArgs.where).toEqual({ id: 'flow-1' });
-    expect(authFlowUpdateArgs.data.consumedAt).toEqual(expect.any(Date));
+    expect(authIdentityArgs.userId).toBe(createdUser.id);
+    expect(authIdentityArgs.provider).toBe('yandex');
+    expect(authIdentityArgs.providerUserId).toBe('yandex-user-1');
+    expect(authIdentityArgs.email).toBe('ya-client@example.com');
+    expect(authIdentityArgs.phone).toBe('+79990000000');
+    expect(authIdentityArgs.profileJson).toEqual(expect.any(Object));
+    expect(authFlowUpdateArgs?.[0]).toBe('flow-1');
+    expect(authFlowUpdateArgs?.[1]).toBe('yandex');
+    expect(authFlowUpdateArgs?.[2]).toBeInstanceOf(Date);
     expect(signAsyncMock).toHaveBeenCalledWith({
       user_id: createdUser.id,
       tenant_id: createdUser.tenantId,
@@ -394,18 +401,85 @@ describe('SocialAuthService', () => {
     });
 
     expect(createUserMock).not.toHaveBeenCalled();
-    const authIdentityArgs = authIdentityCreateMock.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-    };
+    const authIdentityArgs = authIdentityCreateMock.mock.calls[0]?.[0];
 
-    expect(authIdentityArgs.data.tenantId).toBe(tenant.id);
-    expect(authIdentityArgs.data.userId).toBe('user-1');
-    expect(authIdentityArgs.data.provider).toBe('yandex');
-    expect(authIdentityArgs.data.providerUserId).toBe('yandex-user-1');
-    expect(authIdentityArgs.data.email).toBeNull();
-    expect(authIdentityArgs.data.phone).toBe('+79990000000');
-    expect(authIdentityArgs.data.profileJson).toEqual(expect.any(Object));
+    expect(authIdentityArgs.userId).toBe('user-1');
+    expect(authIdentityArgs.provider).toBe('yandex');
+    expect(authIdentityArgs.providerUserId).toBe('yandex-user-1');
+    expect(authIdentityArgs.email).toBeNull();
+    expect(authIdentityArgs.phone).toBe('+79990000000');
+    expect(authIdentityArgs.profileJson).toEqual(expect.any(Object));
     expect(result.is_new_user).toBe(false);
+  });
+
+  it('rejects a replayed OAuth state before provider exchange', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authFlowStateUpdateMock,
+        authIdentityCreateMock,
+      },
+    } = createService();
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-replayed',
+      state: 'ya_replayed',
+      provider: 'yandex',
+      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      codeVerifier: 'code-verifier-replayed',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    authFlowStateUpdateMock.mockResolvedValue(false);
+    global.fetch = jest.fn();
+
+    await expect(
+      service.completeYandexLogin({
+        state: 'ya_replayed',
+        code: 'oauth-code-replayed',
+      }),
+    ).rejects.toThrow('This social login request is no longer valid');
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(authIdentityCreateMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects an OAuth state for a tenant conflicting with the domain', async () => {
+    const {
+      service,
+      tenantContext,
+      mocks: { authFlowStateFindUniqueMock, authFlowStateUpdateMock },
+    } = createService();
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-foreign-domain',
+      state: 'ya_foreign_domain',
+      provider: 'yandex',
+      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      codeVerifier: 'code-verifier-domain',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    global.fetch = jest.fn();
+
+    await expect(
+      tenantContext.run('request-domain', async () => {
+        tenantContext.setResolvedTenant({
+          tenantId: 'tenant-domain',
+          userId: null,
+          membershipId: null,
+          role: null,
+          source: 'custom_domain',
+        });
+
+        return service.completeYandexLogin({
+          state: 'ya_foreign_domain',
+          code: 'oauth-code-domain',
+        });
+      }),
+    ).rejects.toThrow('Conflicting tenant resolution signals');
+    expect(authFlowStateUpdateMock).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('completes Telegram login after validating the signed ID token', async () => {
@@ -482,17 +556,14 @@ describe('SocialAuthService', () => {
       code: 'telegram-code-1',
     });
 
-    const authIdentityArgs = authIdentityCreateMock.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-    };
+    const authIdentityArgs = authIdentityCreateMock.mock.calls[0]?.[0];
 
-    expect(authIdentityArgs.data.tenantId).toBe(tenant.id);
-    expect(authIdentityArgs.data.userId).toBe(createdUser.id);
-    expect(authIdentityArgs.data.provider).toBe('telegram');
-    expect(authIdentityArgs.data.providerUserId).toBe('987654321');
-    expect(authIdentityArgs.data.email).toBeNull();
-    expect(authIdentityArgs.data.phone).toBe('+79995554433');
-    expect(authIdentityArgs.data.profileJson).toEqual(expect.any(Object));
+    expect(authIdentityArgs.userId).toBe(createdUser.id);
+    expect(authIdentityArgs.provider).toBe('telegram');
+    expect(authIdentityArgs.providerUserId).toBe('987654321');
+    expect(authIdentityArgs.email).toBeNull();
+    expect(authIdentityArgs.phone).toBe('+79995554433');
+    expect(authIdentityArgs.profileJson).toEqual(expect.any(Object));
     expect(result).toMatchObject({
       access_token: 'jwt-token',
       is_new_user: true,

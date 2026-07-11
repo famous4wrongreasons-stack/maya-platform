@@ -35,13 +35,15 @@ export class UsersService {
   ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
     return this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         email: email.toLowerCase(),
         memberships: {
           some: {
-            tenantId,
+            tenantId: scopedTenantId,
             status: 'active',
           },
         },
@@ -68,14 +70,15 @@ export class UsersService {
   }
 
   async findTenantUserByPhone(tenantId: string, phone: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: normalizedPhone,
         memberships: {
           some: {
-            tenantId,
+            tenantId: scopedTenantId,
             status: 'active',
           },
         },
@@ -92,13 +95,13 @@ export class UsersService {
 
     const legacyUsers = await this.prisma.user.findMany({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: {
           not: null,
         },
         memberships: {
           some: {
-            tenantId,
+            tenantId: scopedTenantId,
             status: 'active',
           },
         },
@@ -117,9 +120,12 @@ export class UsersService {
   }
 
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
+    const scopedTenantId = tenantId
+      ? this.tenantContext.assertTenantId(tenantId)
+      : null;
     const existing = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         email: email.toLowerCase(),
       },
       select: { id: true },
@@ -131,10 +137,13 @@ export class UsersService {
   }
 
   async ensurePhoneIsAvailable(tenantId: string | null, phone: string) {
+    const scopedTenantId = tenantId
+      ? this.tenantContext.assertTenantId(tenantId)
+      : null;
     const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: normalizedPhone,
       },
       select: { id: true },
@@ -146,7 +155,7 @@ export class UsersService {
 
     const legacyUsers = await this.prisma.user.findMany({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: {
           not: null,
         },
@@ -176,12 +185,15 @@ export class UsersService {
     role: string;
     status?: string;
   }) {
+    const tenantId = data.tenantId
+      ? this.tenantContext.assertTenantId(data.tenantId)
+      : null;
     const normalizedPhone = this.normalizeOptionalPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
 
     return this.prisma.user.create({
       data: {
-        tenantId: data.tenantId,
+        tenantId,
         branchId: data.branchId ?? null,
         email: data.email.toLowerCase(),
         phone: normalizedPhone,
@@ -191,10 +203,10 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: data.role,
         status: data.status ?? 'active',
-        memberships: data.tenantId
+        memberships: tenantId
           ? {
               create: {
-                tenantId: data.tenantId,
+                tenantId,
                 role: data.role,
                 status: data.status ?? 'active',
                 joinedAt:
@@ -221,12 +233,13 @@ export class UsersService {
     name?: string | null;
     passwordHash: string;
   }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
     const normalizedPhone = normalizeRussianPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
 
     return this.prisma.user.create({
       data: {
-        tenantId: data.tenantId,
+        tenantId,
         branchId: data.branchId ?? null,
         email: buildPhoneLoginEmail(data.tenantSlug, normalizedPhone),
         phone: normalizedPhone,
@@ -238,7 +251,7 @@ export class UsersService {
         status: 'active',
         memberships: {
           create: {
-            tenantId: data.tenantId,
+            tenantId,
             role: UserRole.CLIENT,
             status: 'active',
             joinedAt: new Date(),
