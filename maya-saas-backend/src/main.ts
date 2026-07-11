@@ -5,15 +5,21 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { resolveAuthTrustedProxies } from './auth/auth-client-metadata';
 import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
+  app.set(
+    'trust proxy',
+    resolveAuthTrustedProxies(configService.get<string>('AUTH_TRUST_PROXY')),
+  );
   app.setGlobalPrefix('api');
   app.enableCors();
   app.useGlobalPipes(

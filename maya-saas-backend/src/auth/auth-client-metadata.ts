@@ -8,12 +8,19 @@ export interface AuthClientMetadata {
 export function resolveAuthClientMetadata(
   request: Request,
 ): AuthClientMetadata {
-  const forwarded = request.headers['x-forwarded-for'];
-  const forwardedIp = Array.isArray(forwarded)
-    ? forwarded[0]
-    : forwarded?.split(',')[0];
-  const clientIp = forwardedIp?.trim() || request.ip?.trim() || null;
+  const clientIp = request.ip?.trim() || null;
   const userAgent = request.header('user-agent')?.trim() || null;
 
   return { clientIp, userAgent };
+}
+
+export function resolveAuthTrustedProxies(
+  rawValue?: string | null,
+): false | string[] {
+  const proxies = String(rawValue || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  return proxies.length > 0 ? proxies : false;
 }

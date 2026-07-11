@@ -41,6 +41,7 @@ model Tenant {
   authIdentities        AuthIdentity[]
   authFlowStates        AuthFlowState[]
   authSessions          AuthSession[]
+  authRateLimitBuckets  AuthRateLimitBucket[]
   billingPayments       BillingPayment[]
   memberships           Membership[]
   entitlements          TenantEntitlement[]
@@ -232,6 +233,25 @@ model AuthRefreshToken {
 
   @@index([sessionId, createdAt])
   @@index([expiresAt])
+}
+
+model AuthRateLimitBucket {
+  id              String   @id @default(cuid())
+  tenantId        String?
+  policyKey       String
+  action          String
+  scope           String
+  subjectHash     String
+  attempts        Int      @default(0)
+  windowStartedAt DateTime
+  windowEndsAt    DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([policyKey, subjectHash])
+  @@index([tenantId, action])
+  @@index([windowEndsAt])
 }
 
 model CrmIntegration {
