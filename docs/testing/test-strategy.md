@@ -31,6 +31,8 @@ No test may reuse the same fixture IDs/data for both tenants because shared fixt
 ## Required suites
 
 - TenantContext lifecycle and fail-closed behavior.
+- Public-auth tenant conflict, one-time phone challenge and OAuth state replay behavior.
+- Database rejection of a social identity linked to a user from another tenant.
 - Membership activation/suspension.
 - Tenant-scoped Appointment repository read/update isolation.
 - Feature registry validation and entitlement precedence.

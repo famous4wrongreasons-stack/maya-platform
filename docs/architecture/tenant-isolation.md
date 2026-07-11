@@ -28,6 +28,8 @@ The context contains `tenantId`, `membershipId`, `userId`, role, resolution sour
 
 System context may only receive a tenant ID selected by trusted backend code, such as the ID returned by tenant creation or a job partition loaded from the database. It must never turn a request body, query parameter or arbitrary header into authorization.
 
+Public authentication context follows the same rule. A request slug is first resolved to a database tenant; only the returned tenant ID may enter `runAsPublicTenant`. An OAuth callback may discover its tenant through a dedicated opaque-state gateway, but all subsequent reads and writes run in that tenant context.
+
 ## Resolver precedence
 
 1. Platform operation explicitly marked and audited.
@@ -71,3 +73,8 @@ RLS is recommended as defence-in-depth after request and job transactions reliab
 - Billing payment mutations use a tenant-qualified key.
 - Webhooks and due-billing jobs enter a separate system context for each database-selected tenant.
 - Provider payment identity, metadata and amount are checked before webhook mutation.
+- A public-auth slug or OAuth state cannot override a different tenant already resolved from a trusted domain.
+- Phone challenges are tenant-qualified, invalid attempts increment atomically and a valid code can be claimed only once.
+- OAuth state is resolved only by its opaque value, then atomically claimed inside the resolved tenant context before provider exchange.
+- Replayed OAuth callbacks stop before provider I/O and identity persistence.
+- Social identity updates use tenant-qualified keys, and the database rejects an identity linked to a user from another tenant.

@@ -20,11 +20,13 @@ import {
 import { UserRole, UserStatus } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { normalizeRussianPhone } from '../common/phone.util';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
+import { TenantAuthRepository } from './tenant-auth.repository';
 
 type SocialProvider = 'telegram' | 'yandex';
 
@@ -98,10 +100,12 @@ export class SocialAuthService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
     private readonly tenantsService: TenantsService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly tenantContext: TenantContextService,
+    private readonly authRepository: TenantAuthRepository,
+    private readonly flowSystemGateway: AuthFlowSystemGateway,
   ) {}
 
   async startYandexLogin(dto: StartOauthLoginDto) {
@@ -117,11 +121,12 @@ export class SocialAuthService {
       'Yandex ID login is not configured.',
     );
     const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
-    const flow = await this.createAuthFlowState({
-      provider: 'yandex',
-      redirectUri,
-      tenantId: tenant.id,
-    });
+    const flow = await this.tenantContext.runAsPublicTenant(tenant.id, () =>
+      this.createAuthFlowState({
+        provider: 'yandex',
+        redirectUri,
+      }),
+    );
     const authUrl = new URL('https://oauth.yandex.com/authorize');
 
     authUrl.searchParams.set('response_type', 'code');
@@ -147,21 +152,22 @@ export class SocialAuthService {
     this.assertProviderEnabled('yandex');
 
     const flow = await this.getValidAuthFlowState(dto.state, 'yandex');
-    const profile = await this.exchangeYandexCode(flow, dto.code);
-    const result = await this.resolveOrCreateUser({
-      branchId: dto.branchId,
-      profile,
-      tenant: flow.tenant,
+    return this.tenantContext.runAsPublicTenant(flow.tenant.id, async () => {
+      await this.claimAuthFlowStateOrThrow(flow.id, 'yandex');
+      const profile = await this.exchangeYandexCode(flow, dto.code);
+      const result = await this.resolveOrCreateUser({
+        branchId: dto.branchId,
+        profile,
+        tenant: flow.tenant,
+      });
+
+      return {
+        access_token: await this.signToken(result.user),
+        user: this.usersService.serializeUser(result.user),
+        is_new_user: result.isNewUser,
+        provider: 'yandex',
+      };
     });
-
-    await this.markAuthFlowStateConsumed(flow.id);
-
-    return {
-      access_token: await this.signToken(result.user),
-      user: this.usersService.serializeUser(result.user),
-      is_new_user: result.isNewUser,
-      provider: 'yandex',
-    };
   }
 
   async startTelegramLogin(dto: StartOauthLoginDto) {
@@ -177,11 +183,12 @@ export class SocialAuthService {
       'Telegram login is not configured.',
     );
     const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
-    const flow = await this.createAuthFlowState({
-      provider: 'telegram',
-      redirectUri,
-      tenantId: tenant.id,
-    });
+    const flow = await this.tenantContext.runAsPublicTenant(tenant.id, () =>
+      this.createAuthFlowState({
+        provider: 'telegram',
+        redirectUri,
+      }),
+    );
     const authUrl = new URL('https://oauth.telegram.org/auth');
 
     authUrl.searchParams.set('client_id', clientId);
@@ -206,21 +213,22 @@ export class SocialAuthService {
     this.assertProviderEnabled('telegram');
 
     const flow = await this.getValidAuthFlowState(dto.state, 'telegram');
-    const profile = await this.exchangeTelegramCode(flow, dto.code);
-    const result = await this.resolveOrCreateUser({
-      branchId: dto.branchId,
-      profile,
-      tenant: flow.tenant,
+    return this.tenantContext.runAsPublicTenant(flow.tenant.id, async () => {
+      await this.claimAuthFlowStateOrThrow(flow.id, 'telegram');
+      const profile = await this.exchangeTelegramCode(flow, dto.code);
+      const result = await this.resolveOrCreateUser({
+        branchId: dto.branchId,
+        profile,
+        tenant: flow.tenant,
+      });
+
+      return {
+        access_token: await this.signToken(result.user),
+        user: this.usersService.serializeUser(result.user),
+        is_new_user: result.isNewUser,
+        provider: 'telegram',
+      };
     });
-
-    await this.markAuthFlowStateConsumed(flow.id);
-
-    return {
-      access_token: await this.signToken(result.user),
-      user: this.usersService.serializeUser(result.user),
-      is_new_user: result.isNewUser,
-      provider: 'telegram',
-    };
   }
 
   private async resolveOrCreateUser(params: {
@@ -228,23 +236,11 @@ export class SocialAuthService {
     profile: SocialProfile;
     tenant: TenantAuthContext;
   }) {
-    const existingIdentity = await this.prisma.authIdentity.findUnique({
-      where: {
-        tenantId_provider_providerUserId: {
-          tenantId: params.tenant.id,
-          provider: params.profile.provider,
-          providerUserId: params.profile.providerUserId,
-        },
-      },
-      include: {
-        user: {
-          include: {
-            branch: true,
-            tenant: true,
-          },
-        },
-      },
-    });
+    this.tenantContext.assertTenantId(params.tenant.id);
+    const existingIdentity = await this.authRepository.findIdentity(
+      params.profile.provider,
+      params.profile.providerUserId,
+    );
 
     if (existingIdentity) {
       this.assertUserCanLogin(existingIdentity.user);
@@ -283,16 +279,13 @@ export class SocialAuthService {
     if (matchedUser) {
       this.assertUserCanLogin(matchedUser);
 
-      await this.prisma.authIdentity.create({
-        data: {
-          tenantId: params.tenant.id,
-          userId: matchedUser.id,
-          provider: params.profile.provider,
-          providerUserId: params.profile.providerUserId,
-          email: params.profile.email,
-          phone: params.profile.phone,
-          profileJson: asJson(params.profile.raw),
-        },
+      await this.authRepository.createIdentity({
+        userId: matchedUser.id,
+        provider: params.profile.provider,
+        providerUserId: params.profile.providerUserId,
+        email: params.profile.email,
+        phone: params.profile.phone,
+        profileJson: asJson(params.profile.raw),
       });
 
       return {
@@ -334,16 +327,13 @@ export class SocialAuthService {
       status: UserStatus.ACTIVE,
     });
 
-    await this.prisma.authIdentity.create({
-      data: {
-        tenantId: params.tenant.id,
-        userId: createdUser.id,
-        provider: params.profile.provider,
-        providerUserId: params.profile.providerUserId,
-        email: params.profile.email,
-        phone: params.profile.phone,
-        profileJson: asJson(params.profile.raw),
-      },
+    await this.authRepository.createIdentity({
+      userId: createdUser.id,
+      provider: params.profile.provider,
+      providerUserId: params.profile.providerUserId,
+      email: params.profile.email,
+      phone: params.profile.phone,
+      profileJson: asJson(params.profile.raw),
     });
 
     return {
@@ -700,7 +690,6 @@ export class SocialAuthService {
   private async createAuthFlowState(params: {
     provider: SocialProvider;
     redirectUri: string;
-    tenantId: string;
   }) {
     const codeVerifier = this.generateCodeVerifier();
     const expiresAt = new Date(
@@ -710,15 +699,12 @@ export class SocialAuthService {
       'base64url',
     )}`;
 
-    await this.prisma.authFlowState.create({
-      data: {
-        tenantId: params.tenantId,
-        provider: params.provider,
-        state,
-        redirectUri: params.redirectUri,
-        codeVerifier,
-        expiresAt,
-      },
+    await this.authRepository.createFlowState({
+      provider: params.provider,
+      state,
+      redirectUri: params.redirectUri,
+      codeVerifier,
+      expiresAt,
     });
 
     return {
@@ -737,19 +723,7 @@ export class SocialAuthService {
     redirectUri: string;
     tenant: TenantAuthContext;
   }> {
-    const flow = await this.prisma.authFlowState.findUnique({
-      where: { state },
-      include: {
-        tenant: {
-          select: {
-            id: true,
-            slug: true,
-            status: true,
-            allowSelfRegistration: true,
-          },
-        },
-      },
-    });
+    const flow = await this.flowSystemGateway.findByState(state);
 
     if (!flow || flow.provider !== provider || flow.consumedAt) {
       throw new BadRequestException(
@@ -780,23 +754,31 @@ export class SocialAuthService {
   }
 
   private async updateIdentityRecord(id: string, profile: SocialProfile) {
-    await this.prisma.authIdentity.update({
-      where: { id },
-      data: {
-        email: profile.email,
-        phone: profile.phone,
-        profileJson: asJson(profile.raw),
-      },
+    await this.authRepository.updateIdentity(id, {
+      email: profile.email,
+      phone: profile.phone,
+      profileJson: asJson(profile.raw),
     });
   }
 
-  private async markAuthFlowStateConsumed(id: string) {
-    await this.prisma.authFlowState.update({
-      where: { id },
-      data: {
-        consumedAt: new Date(),
-      },
-    });
+  private async claimAuthFlowStateOrThrow(
+    id: string,
+    provider: SocialProvider,
+  ) {
+    const claimed = await this.authRepository.claimFlowState(
+      id,
+      provider,
+      new Date(),
+    );
+
+    if (!claimed) {
+      throw new BadRequestException(
+        this.buildSocialAuthError(
+          'social_state_invalid',
+          'This social login request is no longer valid. Start again.',
+        ),
+      );
+    }
   }
 
   private async signToken(user: {

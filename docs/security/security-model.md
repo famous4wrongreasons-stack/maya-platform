@@ -11,6 +11,9 @@ Protected assets include tenant business data, customer PII, integration credent
 - Refresh token rotation/session revocation is required before broad production rollout.
 - Active tenant is a signed session choice backed by membership, not a raw header.
 - Platform roles do not implicitly bypass tenant repositories.
+- Public login slugs are resolved to database tenants before entering a tenant context; raw request values never become repository authority.
+- OAuth callbacks use high-entropy one-time state. The only global read accepts that opaque state, while claims and identity writes are tenant-scoped.
+- Social identity ownership is enforced by a composite database relation between identity user and tenant.
 
 ## Authorization
 
@@ -35,6 +38,8 @@ Protected assets include tenant business data, customer PII, integration credent
 - Mutating public endpoints use CSRF protection when cookie authentication is introduced.
 - Webhooks verify signature/secret, enforce replay windows and idempotency.
 - A webhook identifier may use only a dedicated system gateway; provider state is re-fetched and matched before entering tenant context.
+- OAuth provider redirects require a deployment-specific allowlist before live social login is enabled.
+- Phone codes and OAuth states are atomically consumed; retries after a downstream failure start a new flow.
 - File uploads validate bytes, type, size, path and serving headers.
 
 ## AI security
@@ -66,5 +71,8 @@ PostgreSQL RLS is a planned defence-in-depth control. Application isolation rema
 - Stale JWT after membership suspension.
 - Cross-tenant relation writes.
 - Webhook replay/signature bypass.
+- Phone-code and OAuth-state replay, including concurrent requests.
+- Trusted-domain and public-auth tenant conflicts.
+- Cross-tenant social identity/user relations.
 - Secret/PII leakage in errors and logs.
 - AI tool escalation and confirmation bypass.

@@ -153,6 +153,7 @@ describe('UsersService', () => {
   it('allows completing the current user phone when it is still missing', async () => {
     const {
       service,
+      tenantContext,
       mocks: { userFindFirstMock, userFindUniqueMock, userUpdateMock },
     } = createService();
     const userWithoutPhone = {
@@ -167,9 +168,11 @@ describe('UsersService', () => {
       phone: '+79991112233',
     });
 
-    const result = await service.updateCurrentUserProfile('user-1', {
-      phone: '8 (999) 111-22-33',
-    });
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.updateCurrentUserProfile('user-1', {
+        phone: '8 (999) 111-22-33',
+      }),
+    );
 
     expect(userUpdateMock).toHaveBeenCalledWith({
       where: { id: 'user-1' },
@@ -303,6 +306,7 @@ describe('UsersService', () => {
   it('finds legacy users by phone after normalizing stored values', async () => {
     const {
       service,
+      tenantContext,
       mocks: { userFindFirstMock, userFindManyMock },
     } = createService();
 
@@ -314,9 +318,8 @@ describe('UsersService', () => {
     userFindFirstMock.mockResolvedValue(null);
     userFindManyMock.mockResolvedValue([legacyUser]);
 
-    const result = await service.findTenantUserByPhone(
-      'tenant-1',
-      '+79990000000',
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.findTenantUserByPhone('tenant-1', '+79990000000'),
     );
 
     expect(result?.id).toBe('user-1');

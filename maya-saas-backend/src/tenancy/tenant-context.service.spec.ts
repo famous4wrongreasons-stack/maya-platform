@@ -70,4 +70,43 @@ describe('TenantContextService', () => {
       });
     });
   });
+
+  it('runs server-resolved public auth inside its tenant and restores context', async () => {
+    const service = new TenantContextService();
+
+    await service.run('request-public-auth', async () => {
+      const context = await service.runAsPublicTenant('tenant-a', async () => {
+        await Promise.resolve();
+        return service.get();
+      });
+
+      expect(context).toMatchObject({
+        requestId: 'request-public-auth',
+        tenantId: 'tenant-a',
+        source: 'public_auth',
+      });
+      expect(service.get()).toMatchObject({
+        requestId: 'request-public-auth',
+        tenantId: null,
+      });
+    });
+  });
+
+  it('rejects public auth when a trusted domain resolved another tenant', () => {
+    const service = new TenantContextService();
+
+    expect(() =>
+      service.run('request-domain', () => {
+        service.setResolvedTenant({
+          tenantId: 'tenant-domain',
+          userId: null,
+          membershipId: null,
+          role: null,
+          source: 'custom_domain',
+        });
+
+        return service.runAsPublicTenant('tenant-body', () => true);
+      }),
+    ).toThrow(ForbiddenException);
+  });
 });
