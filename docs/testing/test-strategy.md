@@ -37,6 +37,7 @@ No test may reuse the same fixture IDs/data for both tenants because shared fixt
 - Session inventory/revoke ownership and database rejection of cross-tenant session principals.
 - Distributed auth-limit concurrency, trusted-proxy spoof resistance and HMAC-only bucket storage.
 - Auth-retention dry-run, advisory-lock exclusion, bounded/idempotent cleanup and active-session replay-history preservation.
+- Production config validation, exact CORS origins, Swagger default-off and OAuth redirect allowlisting.
 - Membership activation/suspension.
 - Tenant-scoped Appointment repository read/update isolation.
 - Feature registry validation and entitlement precedence.

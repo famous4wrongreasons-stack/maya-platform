@@ -79,7 +79,7 @@ Migration verification must cover a fresh database and an upgrade database conta
 ## Remaining work
 
 - Session rotation, revocation and device inventory continue in `session-security-runbook.md`.
-- Add redirect URI allowlists per deployed OAuth client before enabling live providers.
+- Production callback/CORS/startup policies continue in [production-bootstrap-hardening-runbook.md](production-bootstrap-hardening-runbook.md); provider dashboard registration remains a deployment step.
 - Distributed tenant/IP/identity limits continue in `auth-abuse-protection-runbook.md`.
 - Minimize and encrypt retained provider profile PII instead of keeping a raw OAuth profile payload.
 - Bounded phone/OAuth state retention continues in [auth-retention-maintenance-runbook.md](auth-retention-maintenance-runbook.md); production scheduling remains separate.

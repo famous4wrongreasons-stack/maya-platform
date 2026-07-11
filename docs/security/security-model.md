@@ -33,13 +33,14 @@ Protected assets include tenant business data, customer PII, integration credent
 
 ## API and transport
 
-- TLS only in production; strict CORS allowlist replaces wildcard.
+- TLS only in production; an exact HTTPS/native CORS allowlist replaces wildcard, exposes only required browser headers and suppresses the Express fingerprint.
+- Production startup rejects missing, placeholder or shared security secrets, debug phone delivery and unsafe blanket proxy trust before opening a port.
 - DTO/schema validation rejects unknown fields.
 - Public auth rate limits are shared through PostgreSQL, identity/IP/tenant aware and persist only HMAC subjects.
 - Mutating public endpoints use CSRF protection when cookie authentication is introduced.
 - Webhooks verify signature/secret, enforce replay windows and idempotency.
 - A webhook identifier may use only a dedicated system gateway; provider state is re-fetched and matched before entering tenant context.
-- OAuth provider redirects require a deployment-specific allowlist before live social login is enabled.
+- OAuth provider redirects require an exact deployment-specific HTTPS allowlist before flow-state persistence or live social login.
 - Phone codes and OAuth states are atomically consumed; retries after a downstream failure start a new flow.
 - File uploads validate bytes, type, size, path and serving headers.
 
@@ -81,5 +82,6 @@ PostgreSQL RLS is a planned defence-in-depth control. Application isolation rema
 - Refresh-token replay races, revoked access JWTs and cross-tenant session ownership.
 - Distributed auth-limit concurrency, trusted-proxy spoof resistance and HMAC-only bucket storage.
 - Auth-retention dry-run safety, advisory locking, bounded batches, replay-history preservation and multi-tenant cleanup behavior.
+- Production config fail-closed behavior, CORS origin isolation, Swagger default-off and OAuth redirect allowlisting.
 - Secret/PII leakage in errors and logs.
 - AI tool escalation and confirmation bypass.

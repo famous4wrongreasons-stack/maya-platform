@@ -212,3 +212,4 @@ classDiagram
 - [Session security](session-security-runbook.md)
 - [Authentication abuse protection](auth-abuse-protection-runbook.md)
 - [Authentication retention maintenance](auth-retention-maintenance-runbook.md)
+- [Production bootstrap hardening](production-bootstrap-hardening-runbook.md)
