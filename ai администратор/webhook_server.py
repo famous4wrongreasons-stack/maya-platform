@@ -47,6 +47,7 @@ import config
 import cutmatch
 import cycle_reminder
 import database
+import growth_planner
 import lead_alerts
 import master_briefing
 import masters_ai
@@ -2341,11 +2342,19 @@ async def panel_dashboard_handler(request: web.Request) -> web.Response:
         channels = await asyncio.to_thread(_yc_channels_breakdown, pp["start"], pp["end"])
     except Exception as e:
         logger.warning(f"panel_dashboard channels: {e}")
+    growth_plan = None
+    try:
+        growth_plan = await asyncio.to_thread(
+            growth_planner.get_growth_plan,
+            role="owner" if info.get("role") == "owner" else "manager",
+        )
+    except Exception as e:
+        logger.warning(f"panel_dashboard growth plan: {e}")
     return _cabinet_response({"role": info["role"], "period": pp["period"],
                               "period_label": pp["label"], "from": pp["start"], "to": pp["end"],
                               "metrics": metrics, "timeseries": timeseries,
                               "spend": spend, "tips_by_master": tips_by_master,
-                              "channels": channels})
+                              "channels": channels, "growth_plan": growth_plan})
 
 
 async def panel_command_center_handler(request: web.Request) -> web.Response:
@@ -2376,7 +2385,7 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
 
 
 async def panel_plan_target_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/plan_target — ручной дневной план выручки owner OS."""
+    """POST /api/panel/plan_target — daily target or strategic growth goal."""
     try:
         body = await request.json()
     except Exception:
@@ -2391,6 +2400,34 @@ async def panel_plan_target_handler(request: web.Request) -> web.Response:
             "error": "forbidden",
             "message": "Настройка плана доступна только владельцу.",
         }, status=403)
+    if body.get("mode") == "growth" or body.get("growth_target_rub") is not None:
+        raw_growth = body.get("growth_target_rub", body.get("target_rub"))
+        try:
+            growth_target = int(round(float(str(raw_growth).replace(" ", "").replace(",", ".") or 0)))
+            workstations = body.get("workstations_count")
+            workstations = int(workstations) if workstations not in (None, "") else None
+        except Exception:
+            return _cabinet_response({
+                "error": "bad_request",
+                "message": "Цель и количество рабочих мест должны быть числами.",
+            }, status=400)
+        try:
+            result = await asyncio.to_thread(
+                growth_planner.set_growth_goal,
+                target_rub=growth_target,
+                deadline=body.get("deadline"),
+                workstations_count=workstations,
+                created_by=tg_id,
+            )
+        except Exception as e:
+            logger.error(f"panel growth target error: {e}")
+            return _cabinet_response({
+                "error": "server_error",
+                "message": "Не удалось рассчитать план роста.",
+            }, status=500)
+        if not result.get("ok"):
+            return _cabinet_response(result, status=400)
+        return _cabinet_response({"role": info["role"], **result})
     raw = body.get("target_rub", body.get("daily_target_rub", 0))
     try:
         target = int(round(float(str(raw).replace(" ", "").replace(",", ".") or 0)))
@@ -3020,7 +3057,7 @@ def _master_day_records(staff_id: int, date_q: str) -> dict:
         if d and d >= today_str:
             by_day.setdefault(d, []).append(r)
     days = sorted(by_day.keys())
-    target = date_q if date_q else (days[0] if days else None)
+    target = date_q if date_q else today_str
     day_recs = (sorted(by_day.get(target, []), key=lambda r: (r.get("datetime") or ""))
                 if target else [])
     try:
@@ -3103,9 +3140,6 @@ async def panel_master_day_handler(request: web.Request) -> web.Response:
                                   "message": "Некорректный staff_id."}, status=400)
     date_q = str(body.get("date") or "").strip()
     prep = await asyncio.to_thread(_master_day_records, staff_id, date_q)
-    if not prep["target"]:
-        return _cabinet_response({"date": None, "clients": [], "days": [],
-                                  "master_name": master_name})
     mnames = prep["mnames"]
 
     async def _enrich(r):
@@ -3133,8 +3167,20 @@ async def panel_master_day_handler(request: web.Request) -> web.Response:
     for c in enriched:
         if isinstance(c, Exception):
             logger.error(f"master day enrich failed: {c}")
+    day_plan = None
+    try:
+        forecasts = await _collect_master_day_forecasts(
+            prep["target"],
+            only_staff_id=staff_id,
+        )
+        if forecasts:
+            day_plan = forecasts[0]
+            day_plan.pop("delivery_master", None)
+    except Exception as e:
+        logger.error(f"master day plan staff={staff_id}: {e}")
     return _cabinet_response({"date": prep["target"], "clients": clients,
-                              "days": prep["days"], "master_name": master_name})
+                              "days": prep["days"], "master_name": master_name,
+                              "plan": day_plan})
 
 
 async def panel_redeem_handler(request: web.Request) -> web.Response:
@@ -8288,12 +8334,99 @@ _SHIFT_REMINDERS_SENT: set[tuple[int, str, int]] = set()
 def _master_day_brief_send_hour() -> int:
     raw = os.environ.get(
         "MASTER_DAY_BRIEF_SEND_HOUR",
-        str(getattr(config, "MASTER_DAY_BRIEF_SEND_HOUR", 19)),
+        str(getattr(config, "MASTER_DAY_BRIEF_SEND_HOUR", 8)),
     )
     try:
         return max(0, min(23, int(raw)))
     except (TypeError, ValueError):
-        return 19
+        return 8
+
+
+def _growth_role_recipients() -> dict[str, set[int]]:
+    """Resolve owner and manager recipients from server-side role sources."""
+    try:
+        founders = {int(value) for value in (getattr(config, "FOUNDER_IDS", []) or [])}
+    except Exception:
+        founders = set()
+    try:
+        admins = {int(value) for value in (database.list_admins() or [])}
+    except Exception:
+        admins = set()
+    managers = set(admins) - founders
+    try:
+        raw = database.get_setting("panel_manager_ids") or ""
+        managers.update(
+            int(value) for value in raw.replace(" ", "").split(",")
+            if value.strip().lstrip("-").isdigit()
+        )
+    except Exception:
+        pass
+    managers.difference_update(founders)
+    return {"owner": founders, "manager": managers}
+
+
+async def _send_growth_role_briefs_once(
+    app: Application,
+    *,
+    now: datetime | None = None,
+    target_date: str | None = None,
+    force: bool = False,
+) -> dict:
+    """Deliver one aggregate morning brief to owner and manager roles."""
+    now = now or datetime.now()
+    date_s = target_date or master_briefing.scheduled_brief_date(
+        now,
+        send_hour=_master_day_brief_send_hour(),
+    )
+    if not date_s:
+        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
+    owner_plan = await asyncio.to_thread(growth_planner.get_growth_plan, role="owner")
+    manager_plan = growth_planner.manager_view(owner_plan)
+    payloads = {
+        "owner": {
+            "message": growth_planner.render_owner_morning_message(owner_plan),
+            "url": "https://malesthetic.pro/app/?panel=os",
+            "button": "Открыть план MAYA",
+        },
+        "manager": {
+            "message": growth_planner.render_manager_morning_message(manager_plan),
+            "url": "https://malesthetic.pro/app/?panel=analytics",
+            "button": "Открыть план мастеров",
+        },
+    }
+    sent = 0
+    skipped = 0
+    deliveries = []
+    for role, chat_ids in _growth_role_recipients().items():
+        payload = payloads[role]
+        for chat_id in sorted(chat_ids):
+            delivery_key = f"growth_role_brief_sent:{date_s}:{role}:{chat_id}"
+            if not force and database.get_setting(delivery_key):
+                skipped += 1
+                deliveries.append({"role": role, "state": "skipped", "reason": "already_sent"})
+                continue
+            try:
+                markup = InlineKeyboardMarkup([[
+                    InlineKeyboardButton(payload["button"], url=payload["url"]),
+                ]])
+                await app.bot.send_message(
+                    chat_id=int(chat_id),
+                    text=payload["message"],
+                    reply_markup=markup,
+                )
+                database.set_setting(delivery_key, now.isoformat(timespec="seconds"))
+                sent += 1
+                deliveries.append({"role": role, "state": "sent"})
+            except Exception as e:
+                logger.error(f"growth role brief {role}: {e}")
+                deliveries.append({"role": role, "state": "failed"})
+    return {
+        "ok": True,
+        "date": date_s,
+        "sent": sent,
+        "skipped_count": skipped,
+        "deliveries": deliveries,
+    }
 
 
 async def _collect_master_day_forecasts(
@@ -8319,6 +8452,17 @@ async def _collect_master_day_forecasts(
         def salary_percent(_staff_id):
             return 0.5
 
+    try:
+        growth = await asyncio.to_thread(growth_planner.get_growth_plan, role="owner")
+        growth_by_staff = {
+            int(row.get("staff_id") or 0): row
+            for row in (growth.get("masters") or [])
+            if isinstance(row, dict) and row.get("staff_id")
+        }
+    except Exception as e:
+        logger.error(f"master day brief: growth plan failed: {e}")
+        growth_by_staff = {}
+
     forecasts = []
     for master in masters:
         staff_id = _master_staff_id(master)
@@ -8335,6 +8479,36 @@ async def _collect_master_day_forecasts(
             )
         except Exception as e:
             logger.error(f"master day brief: records staff={staff_id}: {e}")
+            continue
+        schedule_known = False
+        is_working = bool(records)
+        shift_hours = ""
+        try:
+            schedule_rows = await asyncio.to_thread(
+                _yc.get_staff_schedule,
+                int(staff_id),
+                parsed_date,
+                parsed_date,
+            )
+            valid_schedule_rows = [
+                row for row in (schedule_rows or [])
+                if isinstance(row, dict) and not row.get("error")
+            ]
+            schedule_row = next((
+                row for row in valid_schedule_rows
+                if str(row.get("date") or "")[:10] == parsed_date
+            ), valid_schedule_rows[0] if len(valid_schedule_rows) == 1 else None)
+            if schedule_row is not None:
+                schedule_known = True
+                is_working = bool(schedule_row.get("is_working") and schedule_row.get("slots"))
+                shift_hours = ", ".join(
+                    f"{slot.get('from', '')}-{slot.get('to', '')}"
+                    for slot in (schedule_row.get("slots") or [])
+                    if isinstance(slot, dict)
+                )
+        except Exception as e:
+            logger.info(f"master day brief: schedule staff={staff_id}: {e}")
+        if schedule_known and not is_working and not records:
             continue
         client_ids = set()
         for record in records or []:
@@ -8364,6 +8538,27 @@ async def _collect_master_day_forecasts(
         except Exception as e:
             logger.info(f"master day brief: catalog staff={staff_id}: {e}")
             catalog = []
+        growth_row = growth_by_staff.get(int(staff_id), {})
+        previous_result = None
+        try:
+            previous_date = (date.fromisoformat(parsed_date) - timedelta(days=1)).isoformat()
+            previous_raw = database.get_setting(
+                f"master_growth_day_plan:{previous_date}:{int(staff_id)}"
+            )
+            previous_forecast = _json.loads(previous_raw or "{}")
+            if isinstance(previous_forecast, dict) and previous_forecast.get("date"):
+                previous_records = await asyncio.to_thread(
+                    _yc.get_records_for_master,
+                    int(staff_id),
+                    previous_date,
+                    previous_date,
+                )
+                previous_result = master_briefing.evaluate_day_result(
+                    previous_forecast,
+                    previous_records or [],
+                )
+        except Exception as e:
+            logger.info(f"master day brief: previous result staff={staff_id}: {e}")
         forecast = master_briefing.build_day_forecast(
             staff_id=int(staff_id),
             master_name=(
@@ -8376,7 +8571,13 @@ async def _collect_master_day_forecasts(
             histories_by_client=histories,
             salary_percent=salary_percent(int(staff_id)),
             service_catalog=catalog or [],
+            previous_month_daily_target_rub=growth_row.get("previous_month_daily_rub") or 0,
+            growth_daily_target_rub=growth_row.get("daily_target_remaining_rub") or 0,
+            previous_day_result=previous_result,
         )
+        forecast["is_working"] = is_working or bool(records)
+        forecast["schedule_known"] = schedule_known
+        forecast["shift_hours"] = shift_hours
         forecast["delivery_master"] = master
         forecasts.append(forecast)
     return forecasts
@@ -8390,7 +8591,7 @@ async def _send_master_day_briefs_once(
     only_staff_id: int | None = None,
     force: bool = False,
 ) -> dict:
-    """Отправляет каждому мастеру один персональный план на следующий день."""
+    """Send each scheduled master one role-safe plan for the target workday."""
     now = now or datetime.now()
     date_s = target_date or master_briefing.scheduled_brief_date(
         now,
@@ -8408,10 +8609,18 @@ async def _send_master_day_briefs_once(
     for forecast in forecasts:
         staff_id = int(forecast.get("staff_id") or 0)
         master = forecast.pop("delivery_master", {})
-        if not forecast.get("records_count"):
+        if forecast.get("schedule_known") and not forecast.get("is_working"):
             skipped += 1
-            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "no_records"})
+            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "day_off"})
             continue
+        compact_forecast = master_briefing.compact_forecast_snapshot(forecast)
+        try:
+            database.set_setting(
+                f"master_growth_day_plan:{date_s}:{staff_id}",
+                _json.dumps(compact_forecast, ensure_ascii=False),
+            )
+        except Exception as e:
+            logger.error(f"master day brief snapshot staff={staff_id}: {e}")
         delivery_key = f"master_day_brief_delivery:{date_s}:{staff_id}"
         try:
             delivery_state = _json.loads(database.get_setting(delivery_key) or "{}")
@@ -8454,9 +8663,10 @@ async def _send_master_day_briefs_once(
         push_sent = 0
         if has_push and (force or not push_done):
             try:
+                target_label = "сегодня" if date_s == now.date().isoformat() else "завтра"
                 push_sent = await _send_master_push(
                     master,
-                    title="MAYA · план на завтра",
+                    title=f"MAYA · план на {target_label}",
                     body=push_body,
                     url="/app/?panel=schedule",
                     tag=f"master-day-plan-{staff_id}-{date_s}",
@@ -8499,6 +8709,9 @@ async def _send_master_day_briefs_once(
                     "records_count": forecast.get("records_count"),
                     "booked_revenue_rub": forecast.get("booked_revenue_rub"),
                     "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
+                    "primary_daily_target_rub": forecast.get("primary_daily_target_rub"),
+                    "primary_target_progress_pct": forecast.get("primary_target_progress_pct"),
+                    "potential_target_progress_pct": forecast.get("potential_target_progress_pct"),
                     "opportunities_count": forecast.get("opportunities_count"),
                 }, ensure_ascii=False),
             )
@@ -8546,7 +8759,7 @@ async def panel_master_day_brief_handler(request: web.Request) -> web.Response:
         }, status=403)
     target_date = str(
         body.get("date")
-        or (date.today() + timedelta(days=1)).isoformat()
+        or date.today().isoformat()
     )[:10]
     try:
         date.fromisoformat(target_date)
@@ -8692,7 +8905,7 @@ async def master_shift_reminder_loop(app: Application):
 
 
 async def master_day_brief_loop(app: Application):
-    """Вечером готовит и лично доставляет планы мастерам на следующий день."""
+    """Утром готовит и лично доставляет планы мастерам на текущий рабочий день."""
     await asyncio.sleep(75)
     while True:
         try:
@@ -8706,6 +8919,17 @@ async def master_day_brief_loop(app: Application):
                 )
         except Exception as e:
             logger.error(f"master day brief loop: {e}")
+        try:
+            role_result = await _send_growth_role_briefs_once(app)
+            if role_result and not role_result.get("skipped"):
+                logger.info(
+                    "growth role brief: date=%s sent=%s skipped=%s",
+                    role_result.get("date"),
+                    role_result.get("sent"),
+                    role_result.get("skipped_count"),
+                )
+        except Exception as e:
+            logger.error(f"growth role brief loop: {e}")
         await asyncio.sleep(600)
 
 

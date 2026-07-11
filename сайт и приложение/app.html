@@ -14996,6 +14996,28 @@ function AGodMode(props) {
       });
     } });
   }
+  function editGrowthTarget(plan) {
+    plan = plan || {};
+    var goal = plan.goal || {}, capacity = plan.capacity || {}, period = plan.period || {};
+    setModal({ title: 'Цель роста MAYA', fields: [
+      { key: 'target', label: 'Цель валовой выручки, ₽', value: String(goal.requested_target_rub || goal.committed_target_rub || '') },
+      { key: 'deadline', label: 'Достичь к дате (ГГГГ-ММ-ДД)', value: String(period.to || goal.deadline || '') },
+      { key: 'workstations', label: 'Количество рабочих мест', value: String(capacity.workstations_count || '') }
+    ], submit: function (v) {
+      var target = parseInt(String(v.target || '').replace(/\s/g, ''), 10) || 0;
+      var workstations = parseInt(String(v.workstations || '').replace(/\s/g, ''), 10) || 0;
+      if (!target || !workstations) return;
+      setBusy(true);
+      gfetch('panel_plan_target', {
+        mode: 'growth', growth_target_rub: target,
+        deadline: String(v.deadline || '').trim(),
+        workstations_count: workstations
+      }).then(function (j) {
+        if (!j || j.error) { setBusy(false); return; }
+        loadCommand();
+      }).catch(function () { setBusy(false); });
+    } });
+  }
   function statusText(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' ? 'Риск' : (s === 'warn' || s === 'medium' ? 'Внимание' : 'Норма'); }
   function statusColor(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' || s === 'fail' ? '#72706e' : (s === 'warn' || s === 'medium' || s === 'soon' ? '#a6a4a0' : '#93918e'); }
   function sectionBy(key) {
@@ -16097,8 +16119,11 @@ function AGodMode(props) {
         })),
         e('div', { style: { display: 'flex', gap: 8 } }, arrowBtn(-1), arrowBtn(1))));
   }
-  function renderSimpleGoal(goal) {
+  function renderSimpleGoal(goal, growth) {
     goal = goal || {};
+    growth = growth || {};
+    var growthGoal = growth.goal || {}, growthFact = growth.plan_fact || {}, growthCapacity = growth.capacity || {}, growthSegments = growth.client_segments || {};
+    var growthRawPct = Math.max(0, Number(growthFact.progress_pct) || 0), growthPct = Math.min(100, growthRawPct);
     var rawPct = goal.progress_pct == null ? null : Math.max(0, Number(goal.progress_pct) || 0);
     var pct = rawPct == null ? null : Math.min(100, rawPct);
     var sourceLabel = {
@@ -16128,7 +16153,27 @@ function AGodMode(props) {
         })),
       e('div', { style: { fontFamily: BODY, fontSize: 11.2, lineHeight: 1.4, color: t.faint, marginTop: 9 } }, 'Источник цели: ' + sourceLabel + '.'),
       e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 14, lineHeight: 1.35, color: t.ink, marginTop: 14 } }, goal.plain_status || 'Идём по плану'),
-      e('div', { style: { fontFamily: BODY, fontSize: 12.8, lineHeight: 1.45, color: t.dim, marginTop: 5 } }, goal.next_step || 'Сохранять темп и следить за загрузкой.'));
+      e('div', { style: { fontFamily: BODY, fontSize: 12.8, lineHeight: 1.45, color: t.dim, marginTop: 5 } }, goal.next_step || 'Сохранять темп и следить за загрузкой.'),
+      e('div', { style: { marginTop: 20, paddingTop: 18, borderTop: '1px solid ' + t.line } },
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+          e('div', { style: { flex: 1, minWidth: 0 } },
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint } }, 'Цель роста'),
+            e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 16, color: t.ink, marginTop: 5 } }, growthGoal.committed_target_rub ? money(growthGoal.committed_target_rub) + ' к ' + String((growth.period || {}).to || '').split('-').reverse().join('.') : 'Задайте результат MAYA')),
+          e('button', { type: 'button', onClick: function () { editGrowthTarget(growth); }, style: { border: '1px solid ' + t.line, background: 'transparent', color: t.dim, borderRadius: 8, padding: '7px 9px', fontFamily: BODY, fontWeight: 650, fontSize: 10.5, cursor: 'pointer', flexShrink: 0 } }, growthGoal.committed_target_rub ? 'Изменить' : 'Задать')),
+        e('div', { style: { height: 6, background: t.line, borderRadius: 999, overflow: 'hidden', margin: '13px 0 11px' } },
+          e('div', { style: { width: growthPct + '%', height: '100%', background: t.ink, borderRadius: 999 } })),
+        e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', borderTop: '1px solid ' + t.line, borderBottom: '1px solid ' + t.line } }, [
+          { label: 'Факт', value: money(growthFact.actual_rub || 0) },
+          { label: 'Реально', value: money(growthCapacity.realistic_95_ceiling_rub || 0) },
+          { label: 'Физ. максимум', value: money(growthCapacity.theoretical_max_gross_rub || 0) }
+        ].map(function (item, i) {
+          return e('div', { key: item.label, style: { minWidth: 0, padding: '11px 5px', borderLeft: i ? '1px solid ' + t.line : 'none', textAlign: i === 0 ? 'left' : (i === 2 ? 'right' : 'center') } },
+            e('div', { style: { fontFamily: BODY, fontSize: 10, color: t.faint, marginBottom: 4 } }, item.label),
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: String(item.value).length > 12 ? 10.5 : 12, color: t.ink, whiteSpace: 'nowrap' } }, item.value));
+        })),
+        growthGoal.committed_target_rub ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.dim, marginTop: 9 } },
+          Math.round(growthRawPct) + '% выполнено · ' + (growthSegments.active_clients || 0) + ' активных · ' + (growthSegments.recoverable_clients || 0) + ' можно вернуть · точность плана ' + (growthGoal.planning_confidence_pct || '—') + '%') :
+          e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.dim, marginTop: 9 } }, 'MAYA рассчитает цель по графику, рабочим местам, истории выручки и всей клиентской базе YClients.')));
   }
   function renderQuickStats(rows) {
     rows = rows || [];
@@ -16156,7 +16201,7 @@ function AGodMode(props) {
           style: { border: '1px solid ' + t.line, background: 'transparent', color: t.ink, borderRadius: 8, padding: '9px 11px', fontFamily: BODY, fontWeight: 650, fontSize: 12, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.55 : 1, flexShrink: 0 }
         }, busy ? '…' : 'Обновить')),
       renderBriefCarousel(brief),
-      renderSimpleGoal(brief.simple_goal),
+      renderSimpleGoal(brief.simple_goal, cc.growth_plan),
       renderQuickStats(brief.quick_stats),
       e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.faint, padding: '2px 0 8px' } },
         'Данные: YClients, отзывы на картах и публичный рынок Ставрополя' + (updated ? ' · ' + updated : '')),
@@ -16346,8 +16391,38 @@ function AStaffDayView({
       }
     }, txt);
   }
+  function renderDayPlan(plan) {
+    if (!plan) return null;
+    var target = Number(plan.primary_daily_target_rub) || 0;
+    var booked = Number(plan.booked_revenue_rub) || 0;
+    var potential = Number(plan.potential_total_revenue_rub) || booked;
+    var pct = target ? Math.min(100, Math.max(0, Math.round(booked * 100 / target))) : 0;
+    var prev = plan.previous_day_result || {};
+    return e('section', { style: { padding: '3px 0 18px', marginBottom: 16, borderBottom: '1px solid ' + t.line } },
+      e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 10 } },
+        e('div', { style: { flex: 1, fontFamily: DISPLAY, fontWeight: 500, fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint } }, 'План дня MAYA'),
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 13, color: t.ink } }, target ? pct + '%' : '—')),
+      e('div', { style: { height: 5, background: t.line, borderRadius: 999, overflow: 'hidden', margin: '11px 0 12px' } },
+        e('div', { style: { width: pct + '%', height: '100%', background: t.ink, borderRadius: 999 } })),
+      e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' } }, [
+        { label: 'По записи', value: money(booked) },
+        { label: 'План', value: target ? money(target) : '—' },
+        { label: 'С MAYA', value: money(potential) }
+      ].map(function (item, i) {
+        return e('div', { key: item.label, style: { minWidth: 0, paddingLeft: i ? 10 : 0, borderLeft: i ? '1px solid ' + t.line : 'none' } },
+          e('div', { style: { fontFamily: BODY, fontSize: 10, color: t.faint } }, item.label),
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: String(item.value).length > 11 ? 11 : 13, color: t.ink, marginTop: 4, whiteSpace: 'nowrap' } }, item.value));
+      })),
+      e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.dim, marginTop: 11 } },
+        'До уровня прошлого месяца: ' + money(plan.needed_to_match_previous_month_rub || 0) +
+        ' · потенциал без новых клиентов: +' + money(plan.growth_without_new_clients_rub || 0)),
+      prev.date ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.ink, marginTop: 6 } },
+        'Вчера: факт ' + money(prev.actual_revenue_rub || 0) + ' · потенциал MAYA ' + money(prev.maya_potential_revenue_rub || 0) +
+        ' · не реализовано ' + money(prev.missed_maya_potential_rub || 0)) : null);
+  }
   var body;
-  if (state === 'loading') body = msg('Загружаем клиентов…');else if (state === 'notmaster') body = msg('Раздел доступен мастерам.');else if (state === 'err') body = msg('Не удалось загрузить. Попробуйте позже.');else if (!data || !(data.clients || []).length) body = msg('На ближайший день записей нет.');else body = data.clients.map(function (c, i) {
+  if (state === 'loading') body = msg('Загружаем клиентов…');else if (state === 'notmaster') body = msg('Раздел доступен мастерам.');else if (state === 'err') body = msg('Не удалось загрузить. Попробуйте позже.');else {
+    var clientsBody = !data || !(data.clients || []).length ? msg('На этот день записей нет.') : data.clients.map(function (c, i) {
     var open = !!exp[c.record_id];
     var ts = tagStyle(c.tag && c.tag.kind);
     return e('div', {
@@ -16533,7 +16608,9 @@ function AStaffDayView({
         paddingBottom: 6
       }
     }, 'Первый визит — истории ещё нет.')) : null);
-  });
+    });
+    body = e(React.Fragment, null, renderDayPlan(data && data.plan), clientsBody);
+  }
   var overlay = e('div', {
     style: {
       position: 'fixed',
@@ -22060,6 +22137,30 @@ function ALivePanel() {
       }
     }, money(m.salary))))));
   }
+  function growthExecutionSection(plan) {
+    if (!plan || !(plan.masters || []).length) return null;
+    const rows = plan.masters || [];
+    const team = plan.team_plan || {};
+    const fact = plan.plan_fact || {};
+    const goal = plan.goal || {};
+    const teamTarget = team.target_rub || goal.committed_target_rub || 0;
+    const teamActual = team.actual_rub || fact.actual_rub || 0;
+    return Section('Исполнение плана мастерами', Card(e('div', null,
+      e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 10, paddingBottom: 11, borderBottom: '1px solid ' + t.line } },
+        e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 11.5, color: t.dim } }, 'Команда · факт / цель'),
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 13, color: t.ink, whiteSpace: 'nowrap' } }, money(teamActual) + ' / ' + money(teamTarget))),
+      rows.map(function (row, i) {
+        var pct = Math.max(0, Number(row.progress_pct) || 0);
+        return e('div', { key: row.staff_id || i, style: { padding: '12px 0', borderBottom: i < rows.length - 1 ? '1px solid ' + t.line : 'none' } },
+          e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 9 } },
+            e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink } }, row.name || 'Мастер'),
+            e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 11.5, color: t.ink } }, Math.round(pct) + '%')),
+          e('div', { style: { height: 4, background: t.line, borderRadius: 999, overflow: 'hidden', margin: '7px 0 6px' } },
+            e('div', { style: { width: Math.min(100, pct) + '%', height: '100%', background: t.ink, borderRadius: 999 } })),
+          e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, lineHeight: 1.4 } },
+            'Прогноз ' + money(row.projected_month_gross_rub || 0) + ' · цель ' + money(row.month_target_rub || 0) + ' · на рабочий день ' + money(row.daily_target_remaining_rub || 0)));
+      }))));
+  }
 
   // ==== TAB RENDERERS ====
   function analytics() {
@@ -22084,6 +22185,7 @@ function ALivePanel() {
       }
     }
     const salon = e('div', null, kassaSection(pmoney, pLabel, monthCompare), salarySection(pmoney, pLabel));
+    const growthExec = growthExecutionSection(dash && dash.growth_plan);
     const sh = c => c == null ? '…' : c === 0 ? 'нет сессии' : c === 200 ? 'OK' : 'код ' + c;
     const bad = repStatus != null && repStatus !== 200 || dashStatus != null && dashStatus !== 200;
     const hint = repStatus === 0 || dashStatus === 0 ? ' Сессия не найдена — зайдите в приложение заново.' : repStatus >= 500 || dashStatus >= 500 ? ' Возможно, истекла лицензия YClients.' : repStatus === 403 || dashStatus === 403 ? ' Сервер вернул «нет прав» для вашей сессии.' : '';
@@ -22108,7 +22210,7 @@ function ALivePanel() {
       marginBottom: 18,
       borderColor: bad ? 'rgba(108,106,104,0.3)' : t.line
     }) : null;
-    if (!dash || !dash.metrics) return e('div', null, salon, diagBar);
+    if (!dash || !dash.metrics) return e('div', null, salon, growthExec, diagBar);
     const m = dash.metrics,
       subs = m.subscriptions || {},
       certs = m.gift_certs || {},
@@ -22122,7 +22224,7 @@ function ALivePanel() {
       v: (acq.by_source || {})[k]
     })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
     const empty = appRev + (acq.total_new || 0) + (bk.created || 0) + (subs.active || 0) + (certs.active_count || 0) === 0;
-    return e('div', null, salon, dash.timeseries && (dash.timeseries.labels || []).length ? Section('Динамика по дням · ' + (dash.period_label || ''), Card(e(PanelTimeChart, {
+    return e('div', null, salon, growthExec, dash.timeseries && (dash.timeseries.labels || []).length ? Section('Динамика по дням · ' + (dash.period_label || ''), Card(e(PanelTimeChart, {
       ts: dash.timeseries,
       t: t,
       dark: dark

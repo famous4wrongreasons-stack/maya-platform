@@ -72,6 +72,8 @@ class MasterDayForecastTests(unittest.TestCase):
             histories_by_client=histories,
             salary_percent=0.5,
             service_catalog=[{"title": "Тонирование", "price_min": 2000}],
+            previous_month_daily_target_rub=3500,
+            growth_daily_target_rub=5000,
         )
         self.assertEqual(forecast["records_count"], 1)
         self.assertEqual(forecast["booked_revenue_rub"], 2200)
@@ -79,7 +81,30 @@ class MasterDayForecastTests(unittest.TestCase):
         self.assertEqual(forecast["upsell_potential_revenue_rub"], 2000)
         self.assertEqual(forecast["potential_total_master_income_rub"], 2100)
         self.assertEqual(forecast["opportunities"][0]["client_label"], "Алексей")
+        self.assertEqual(forecast["needed_to_match_previous_month_rub"], 1300)
+        self.assertEqual(forecast["needed_to_growth_target_rub"], 2800)
+        self.assertEqual(forecast["potential_target_progress_pct"], 84)
         self.assertIn("Исторический потенциал: +1 000 ₽ тебе", master_briefing.render_master_day_push(forecast))
+
+    def test_result_compares_fact_with_plan_and_maya_potential(self):
+        forecast = {
+            "date": "2026-07-11",
+            "staff_id": 1,
+            "booked_revenue_rub": 2200,
+            "potential_total_revenue_rub": 4200,
+            "primary_daily_target_rub": 5000,
+        }
+        result = master_briefing.evaluate_day_result(forecast, [{
+            "paid_full": True,
+            "attendance": 1,
+            "services": [
+                {"title": "Стрижка", "cost": 2200},
+                {"title": "Тонирование", "cost": 1800},
+            ],
+        }])
+        self.assertEqual(result["actual_revenue_rub"], 4000)
+        self.assertEqual(result["actual_vs_plan_pct"], 80)
+        self.assertEqual(result["missed_maya_potential_rub"], 200)
 
     def test_canceled_records_are_ignored(self):
         forecast = master_briefing.build_day_forecast(
@@ -96,12 +121,20 @@ class MasterDayForecastTests(unittest.TestCase):
         self.assertEqual(forecast["records_count"], 0)
         self.assertEqual(forecast["booked_revenue_rub"], 0)
 
-    def test_schedule_window_targets_tomorrow(self):
+    def test_morning_schedule_window_targets_today(self):
         self.assertEqual(
-            master_briefing.scheduled_brief_date(datetime(2026, 7, 10, 19, 5)),
-            "2026-07-11",
+            master_briefing.scheduled_brief_date(datetime(2026, 7, 10, 8, 5)),
+            "2026-07-10",
         )
         self.assertIsNone(master_briefing.scheduled_brief_date(datetime(2026, 7, 10, 12, 0)))
+
+    def test_legacy_evening_window_still_targets_tomorrow(self):
+        self.assertEqual(
+            master_briefing.scheduled_brief_date(
+                datetime(2026, 7, 10, 19, 5), send_hour=19
+            ),
+            "2026-07-11",
+        )
 
 
 if __name__ == "__main__":

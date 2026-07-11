@@ -139,6 +139,16 @@ def _load_claude_ai():
         "label": "Запустить",
         "title": kwargs.get("title") or "Тест",
     }
+    fake_growth_planner = types.ModuleType("growth_planner")
+    fake_growth_planner.get_growth_plan = lambda **kwargs: {
+        "version": "maya_growth_plan_v1",
+        "role": kwargs.get("role"),
+        "masters": [],
+    }
+    fake_growth_planner.set_growth_goal = lambda **kwargs: {
+        "ok": True,
+        "goal": {"target_rub": kwargs.get("target_rub")},
+    }
 
     for name, module in {
         "anthropic": fake_anthropic,
@@ -151,6 +161,7 @@ def _load_claude_ai():
         "prompts": fake_prompts,
         "yclients": fake_yclients,
         "owner_ai": fake_owner_ai,
+        "growth_planner": fake_growth_planner,
     }.items():
         sys.modules[name] = module
 
@@ -162,6 +173,23 @@ def _load_claude_ai():
 
 
 class ClaudeAIRBACTests(unittest.TestCase):
+    def test_manager_gets_only_role_aware_growth_plan(self):
+        claude_ai, _ = _load_claude_ai()
+        result = json.loads(claude_ai._execute_tool("get_growth_plan", {}, user_id=339683535))
+        self.assertEqual(result["role"], "manager")
+        self.assertTrue(claude_ai._authorize("manager", "get_growth_plan"))
+        self.assertFalse(claude_ai._authorize("client", "get_growth_plan"))
+
+    def test_founder_can_set_growth_goal(self):
+        claude_ai, _ = _load_claude_ai()
+        result = json.loads(claude_ai._execute_tool(
+            "set_growth_goal",
+            {"target_rub": 1500000, "workstations_count": 5},
+            user_id=948205934,
+        ))
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["goal"]["target_rub"], 1500000)
+
     def test_manager_admin_cannot_call_owner_director_tools(self):
         claude_ai, logs = _load_claude_ai()
 

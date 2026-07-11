@@ -229,9 +229,26 @@ def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | N
 
     fake_yclients.YClientsAPI = _FakeYClientsAPI
 
+    fake_growth_planner = types.ModuleType("growth_planner")
+    fake_growth_planner.get_growth_plan = lambda **kwargs: {
+        "version": "maya_growth_plan_v1",
+        "as_of": "2026-07-08",
+        "status": "ok",
+        "goal": {
+            "requested_target_rub": 100000,
+            "committed_target_rub": 100000,
+            "planning_confidence_pct": 95,
+        },
+        "plan_fact": {"actual_rub": 40000, "projected_rub": 70000, "progress_pct": 40},
+        "capacity": {"theoretical_max_gross_rub": 150000, "realistic_95_ceiling_rub": 120000},
+        "client_segments": {"active_clients": 30, "recoverable_clients": 10},
+        "masters": [],
+        "actions": [],
+    }
     sys.modules["analytics"] = fake_analytics
     sys.modules["database"] = fake_database
     sys.modules["yclients"] = fake_yclients
+    sys.modules["growth_planner"] = fake_growth_planner
     sys.modules.pop("owner_ai", None)
     mod = importlib.import_module("owner_ai")
     mod._avg_cache.update(val=None, ts=0.0)
@@ -387,6 +404,7 @@ class OwnerAITests(unittest.TestCase):
                 "kpi_scorecard",
                 "financial_director",
                 "business_goals",
+                "growth_plan",
                 "owner_advisor",
                 "reputation",
                 "decision_memory",
@@ -408,6 +426,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["daily_target_rub"], 2000)
         self.assertIsNotNone(center["summary"]["plan_progress_pct"])
         self.assertEqual(center["plan_fact"]["daily_target_rub"], 2000)
+        self.assertEqual(center["growth_plan"]["version"], "maya_growth_plan_v1")
         self.assertEqual(center["summary"]["top_profit_master"]["name"], "Мастер 1")
         self.assertEqual(center["master_performance"]["top_profit_master"]["profit_after_salary_rub"], 26000)
         self.assertTrue(center["next_best_actions"])

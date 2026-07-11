@@ -1634,6 +1634,21 @@ def _fallback_master_performance() -> dict:
     }
 
 
+def _fallback_growth_plan() -> dict:
+    return {
+        "version": "maya_growth_plan_v1",
+        "as_of": _today(),
+        "status": "warn",
+        "goal": {},
+        "plan_fact": {},
+        "capacity": {},
+        "client_segments": {},
+        "masters": [],
+        "actions": [],
+        "message": "Стратегический план роста временно недоступен.",
+    }
+
+
 def _safe_owner_block(key: str, fn, fallback):
     try:
         return fn(), None
@@ -5532,10 +5547,16 @@ def command_center(*, include_personal_data: bool = False) -> dict:
     svc, svc_err = _safe_owner_block("service_insights", service_insights, _fallback_services)
     plan, plan_err = _safe_owner_block("plan_fact", lambda: plan_fact(snap=snap), _fallback_plan_fact)
     masters, masters_err = _safe_owner_block("master_performance", master_performance, _fallback_master_performance)
+    growth_plan, growth_plan_err = _safe_owner_block(
+        "growth_plan",
+        lambda: __import__("growth_planner").get_growth_plan(role="owner"),
+        _fallback_growth_plan,
+    )
 
     errors = [
         e for e in (
-            snap_err, exp_err, ret_err, retention_err, svc_err, plan_err, masters_err
+            snap_err, exp_err, ret_err, retention_err, svc_err, plan_err,
+            masters_err, growth_plan_err,
         ) if e
     ]
     try:
@@ -5602,6 +5623,10 @@ def command_center(*, include_personal_data: bool = False) -> dict:
         "ok" if (masters.get("masters") or []) else "warn",
         "warn" if masters_err else "ok",
     )
+    growth_plan_status = _command_status(
+        growth_plan.get("status"),
+        "warn" if growth_plan_err else "ok",
+    )
     overall = _command_status(
         today_status,
         money_status,
@@ -5610,6 +5635,7 @@ def command_center(*, include_personal_data: bool = False) -> dict:
         client_status,
         service_status,
         masters_status,
+        growth_plan_status,
         "warn" if errors else "ok",
     )
 
@@ -5901,6 +5927,26 @@ def command_center(*, include_personal_data: bool = False) -> dict:
             "note": business_goals.get("next_step"),
         },
         {
+            "key": "growth_plan",
+            "title": "План роста",
+            "status": growth_plan_status,
+            "summary": {
+                "requested_target_rub": (growth_plan.get("goal") or {}).get("requested_target_rub"),
+                "committed_target_rub": (growth_plan.get("goal") or {}).get("committed_target_rub"),
+                "planning_confidence_pct": (growth_plan.get("goal") or {}).get("planning_confidence_pct"),
+                "actual_rub": (growth_plan.get("plan_fact") or {}).get("actual_rub"),
+                "projected_rub": (growth_plan.get("plan_fact") or {}).get("projected_rub"),
+                "progress_pct": (growth_plan.get("plan_fact") or {}).get("progress_pct"),
+                "theoretical_max_gross_rub": (growth_plan.get("capacity") or {}).get("theoretical_max_gross_rub"),
+                "realistic_95_ceiling_rub": (growth_plan.get("capacity") or {}).get("realistic_95_ceiling_rub"),
+                "realistic_95_contribution_after_master_payroll_rub": (growth_plan.get("capacity") or {}).get("realistic_95_contribution_after_master_payroll_rub"),
+                "active_clients": (growth_plan.get("client_segments") or {}).get("active_clients"),
+                "recoverable_clients": (growth_plan.get("client_segments") or {}).get("recoverable_clients"),
+            },
+            "items": growth_plan.get("actions") or [],
+            "note": (growth_plan.get("goal") or {}).get("confidence_note"),
+        },
+        {
             "key": "owner_advisor",
             "title": "Советник владельца",
             "status": owner_advisor.get("status"),
@@ -6156,6 +6202,10 @@ def command_center(*, include_personal_data: bool = False) -> dict:
             "operating_rhythm_last_run_at": (operating_rhythm.get("summary") or {}).get("last_run_at", ""),
             "operating_rhythm_last_created_count": (operating_rhythm.get("summary") or {}).get("last_created_count", 0),
             "operating_rhythm_last_updated_count": (operating_rhythm.get("summary") or {}).get("last_updated_count", 0),
+            "growth_target_rub": (growth_plan.get("goal") or {}).get("committed_target_rub", 0),
+            "growth_plan_progress_pct": (growth_plan.get("plan_fact") or {}).get("progress_pct"),
+            "growth_realistic_ceiling_rub": (growth_plan.get("capacity") or {}).get("realistic_95_ceiling_rub", 0),
+            "growth_recoverable_clients": (growth_plan.get("client_segments") or {}).get("recoverable_clients", 0),
         },
         "sections": sections,
         "attention_feed": attention,
@@ -6165,6 +6215,7 @@ def command_center(*, include_personal_data: bool = False) -> dict:
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
         "business_goals": business_goals,
+        "growth_plan": growth_plan,
         "owner_advisor": owner_advisor,
         "growth_engine": growth_engine,
         "briefing": briefing,

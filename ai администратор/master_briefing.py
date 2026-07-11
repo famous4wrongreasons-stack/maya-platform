@@ -67,6 +67,9 @@ def build_day_forecast(
     histories_by_client: dict[int, list[dict]],
     salary_percent: float,
     service_catalog: list[dict] | None = None,
+    previous_month_daily_target_rub: int = 0,
+    growth_daily_target_rub: int = 0,
+    previous_day_result: dict | None = None,
 ) -> dict:
     """Считает записанную и теоретически достижимую выручку мастера."""
     try:
@@ -117,8 +120,11 @@ def build_day_forecast(
     upsell_revenue = sum(item["price_rub"] for item in opportunities)
     booked_income = _rub(booked_revenue * pct)
     upsell_income = _rub(upsell_revenue * pct)
+    previous_target = _rub(previous_month_daily_target_rub)
+    growth_target = _rub(growth_daily_target_rub)
+    primary_target = growth_target or previous_target
     return {
-        "version": "maya_master_day_plan_v1",
+        "version": "maya_master_day_plan_v2",
         "staff_id": int(staff_id),
         "master_name": str(master_name or "Мастер").strip() or "Мастер",
         "date": target_date,
@@ -129,6 +135,20 @@ def build_day_forecast(
         "upsell_potential_master_income_rub": upsell_income,
         "potential_total_revenue_rub": booked_revenue + upsell_revenue,
         "potential_total_master_income_rub": booked_income + upsell_income,
+        "match_previous_month_target_rub": previous_target,
+        "needed_to_match_previous_month_rub": max(0, previous_target - booked_revenue),
+        "growth_daily_target_rub": growth_target,
+        "needed_to_growth_target_rub": max(0, growth_target - booked_revenue),
+        "primary_daily_target_rub": primary_target,
+        "primary_target_progress_pct": (
+            round(booked_revenue * 100 / primary_target) if primary_target else None
+        ),
+        "potential_target_progress_pct": (
+            round((booked_revenue + upsell_revenue) * 100 / primary_target)
+            if primary_target else None
+        ),
+        "growth_without_new_clients_rub": upsell_revenue,
+        "previous_day_result": previous_day_result if isinstance(previous_day_result, dict) else None,
         "salary_percent": round(pct * 100),
         "opportunities_count": len(opportunities),
         "opportunities": opportunities,
@@ -136,6 +156,57 @@ def build_day_forecast(
             "Потенциал не гарантирован: учитываются только допуслуги из истории "
             "конкретного клиента, которых нет в текущей записи."
         ),
+    }
+
+
+def _record_is_completed(record: dict) -> bool:
+    return bool(
+        _record_is_active(record)
+        and (record.get("paid_full") or record.get("attendance") == 1)
+    )
+
+
+def evaluate_day_result(forecast: dict, actual_records: list[dict]) -> dict:
+    """Compare closed YClients records with the plan and MAYA's prior potential."""
+    completed = [record for record in (actual_records or []) if _record_is_completed(record)]
+    actual = sum(_record_gross(record) for record in completed)
+    plan = _rub(forecast.get("primary_daily_target_rub"))
+    potential = _rub(forecast.get("potential_total_revenue_rub"))
+    booked = _rub(forecast.get("booked_revenue_rub"))
+    return {
+        "version": "maya_master_day_result_v1",
+        "date": forecast.get("date"),
+        "staff_id": forecast.get("staff_id"),
+        "completed_visits": len(completed),
+        "actual_revenue_rub": actual,
+        "booked_revenue_rub": booked,
+        "maya_potential_revenue_rub": potential,
+        "primary_daily_target_rub": plan,
+        "actual_vs_plan_pct": round(actual * 100 / plan) if plan else None,
+        "actual_vs_maya_potential_pct": round(actual * 100 / potential) if potential else None,
+        "realized_above_booking_rub": max(0, actual - booked),
+        "missed_maya_potential_rub": max(0, potential - actual),
+        "target_gap_rub": max(0, plan - actual),
+        "note": "MAYA potential is a counterfactual estimate from services already present in client history.",
+    }
+
+
+def compact_forecast_snapshot(forecast: dict) -> dict:
+    """Persist only plan aggregates; client identifiers and labels are excluded."""
+    keys = (
+        "version", "staff_id", "master_name", "date", "records_count",
+        "booked_revenue_rub", "booked_master_income_rub",
+        "upsell_potential_revenue_rub", "upsell_potential_master_income_rub",
+        "potential_total_revenue_rub", "potential_total_master_income_rub",
+        "match_previous_month_target_rub", "needed_to_match_previous_month_rub",
+        "growth_daily_target_rub", "needed_to_growth_target_rub",
+        "primary_daily_target_rub", "primary_target_progress_pct",
+        "potential_target_progress_pct", "growth_without_new_clients_rub",
+        "salary_percent", "opportunities_count", "is_working", "shift_hours",
+    )
+    return {
+        **{key: forecast.get(key) for key in keys if key in forecast},
+        "contains_client_personal_data": False,
     }
 
 
@@ -162,6 +233,33 @@ def render_master_day_message(forecast: dict, max_opportunities: int = 6) -> str
             f"твой расчётный доход — {_money(forecast.get('booked_master_income_rub'))} ₽."
         ),
     ]
+    previous_target = _rub(forecast.get("match_previous_month_target_rub"))
+    growth_target = _rub(forecast.get("growth_daily_target_rub"))
+    if previous_target:
+        lines.append(
+            f"Чтобы соответствовать среднему рабочему дню прошлого месяца: "
+            f"{_money(previous_target)} ₽; по текущей записи не хватает "
+            f"{_money(forecast.get('needed_to_match_previous_month_rub'))} ₽."
+        )
+    if growth_target:
+        lines.append(
+            f"Твой план роста на день: {_money(growth_target)} ₽; по текущей записи "
+            f"не хватает {_money(forecast.get('needed_to_growth_target_rub'))} ₽."
+        )
+    previous_result = forecast.get("previous_day_result") or {}
+    if previous_result:
+        lines.extend([
+            "",
+            (
+                f"Предыдущий рабочий день: факт {_money(previous_result.get('actual_revenue_rub'))} ₽ "
+                f"из {_money(previous_result.get('primary_daily_target_rub'))} ₽ плана."
+            ),
+            (
+                f"Если бы реализовался рассчитанный MAYA потенциал: "
+                f"{_money(previous_result.get('maya_potential_revenue_rub'))} ₽; "
+                f"нереализованный потенциал — {_money(previous_result.get('missed_maya_potential_rub'))} ₽."
+            ),
+        ])
     upside = _rub(forecast.get("upsell_potential_revenue_rub"))
     if upside:
         lines.extend([
@@ -203,22 +301,25 @@ def render_master_day_push(forecast: dict) -> str:
         f"{_money(forecast.get('booked_master_income_rub'))} ₽ тебе"
     )
     upside = _rub(forecast.get("upsell_potential_master_income_rub"))
+    target = _rub(forecast.get("primary_daily_target_rub"))
+    target_part = f" · план {_money(target)} ₽" if target else ""
     if upside:
-        return f"{base}. Исторический потенциал: +{_money(upside)} ₽ тебе."
-    return f"{base}. Фокус — качество и следующая запись."
+        return f"{base}{target_part}. Исторический потенциал: +{_money(upside)} ₽ тебе."
+    return f"{base}{target_part}. Фокус — качество и следующая запись."
 
 
 def scheduled_brief_date(
     now: datetime,
     *,
-    send_hour: int = 19,
+    send_hour: int = 8,
     window_hours: int = 3,
 ) -> str | None:
-    """Вечернее окно отправки плана на следующий рабочий день."""
+    """Morning sends today's plan; a legacy evening setting targets tomorrow."""
     start = max(0, min(int(send_hour), 23))
     width = max(1, min(int(window_hours), 6))
     if start <= now.hour < min(24, start + width):
-        return (now.date() + timedelta(days=1)).isoformat()
+        target = now.date() if start < 12 else now.date() + timedelta(days=1)
+        return target.isoformat()
     return None
 
 
