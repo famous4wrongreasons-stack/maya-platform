@@ -181,6 +181,8 @@ model AuthFlowState {
 
   @@unique([id, tenantId])
   @@index([tenantId, provider, expiresAt])
+  @@index([expiresAt])
+  @@index([consumedAt])
 }
 
 model PhoneAuthCode {
@@ -198,6 +200,8 @@ model PhoneAuthCode {
   @@unique([id, tenantId])
   @@unique([tenantId, phone])
   @@index([tenantId, expiresAt])
+  @@index([expiresAt])
+  @@index([consumedAt])
 }
 
 model AuthSession {
@@ -219,6 +223,7 @@ model AuthSession {
   @@index([tenantId, userId, revokedAt])
   @@index([userId, revokedAt])
   @@index([expiresAt])
+  @@index([revokedAt])
 }
 
 model AuthRefreshToken {
