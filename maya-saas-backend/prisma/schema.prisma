@@ -12,19 +12,25 @@ datasource db {
 }
 
 model Tenant {
-  id                    String            @id @default(cuid())
+  id                    String              @id @default(cuid())
   name                  String
-  slug                  String            @unique
-  status                String            @default("trial")
+  slug                  String              @unique
+  status                String              @default("trial")
   planId                String?
+  industryPresetId      String?
+  defaultCurrency       String              @default("RUB")
+  defaultTimezone       String              @default("Europe/Moscow")
+  defaultLocale         String              @default("ru-RU")
+  customDomain          String?             @unique
+  subdomain             String?             @unique
   trialEndsAt           DateTime?
   currentPeriodStart    DateTime?
   currentPeriodEnd      DateTime?
   billingMethodId       String?
-  allowSelfRegistration Boolean           @default(true)
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  plan                  SubscriptionPlan? @relation(fields: [planId], references: [id])
+  allowSelfRegistration Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  plan                  SubscriptionPlan?   @relation(fields: [planId], references: [id])
   brandingSettings      BrandingSettings?
   branches              Branch[]
   users                 User[]
@@ -35,22 +41,46 @@ model Tenant {
   authIdentities        AuthIdentity[]
   authFlowStates        AuthFlowState[]
   billingPayments       BillingPayment[]
+  memberships           Membership[]
+  entitlements          TenantEntitlement[]
 }
 
+/// Persisted white-label BrandingConfig. The database model name is retained
+/// during the compatibility phase so existing Prisma calls keep working.
 model BrandingSettings {
-  id                 String   @id @default(cuid())
-  tenantId           String   @unique
-  logoUrl            String?
-  appName            String?
-  primaryColor       String?
-  secondaryColor     String?
-  backgroundImageUrl String?
-  fontFamily         String?
-  buttonRadius       Int?
-  themeJson          Json?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  tenantId             String   @unique
+  logoUrl              String?
+  iconUrl              String?
+  faviconUrl           String?
+  appName              String?
+  primaryColor         String?
+  secondaryColor       String?
+  accentColor          String?
+  backgroundColor      String?
+  surfaceColor         String?
+  textPrimaryColor     String?
+  textSecondaryColor   String?
+  backgroundImageUrl   String?
+  fontFamily           String?
+  headingFontFamily    String?
+  buttonRadius         Int?
+  buttonStyle          String?
+  themeMode            String   @default("system")
+  borderRadiusJson     Json?
+  contactDetailsJson   Json?
+  socialLinksJson      Json?
+  mapLinksJson         Json?
+  legalLinksJson       Json?
+  splashScreenJson     Json?
+  onboardingJson       Json?
+  storeListingJson     Json?
+  emailBrandingJson    Json?
+  telegramBrandingJson Json?
+  themeJson            Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model Branch {
@@ -86,11 +116,30 @@ model User {
   auditLogs      AuditLog[]
   appointments   Appointment[]  @relation("ClientAppointments")
   authIdentities AuthIdentity[]
+  memberships    Membership[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+}
+
+model Membership {
+  id        String    @id @default(cuid())
+  tenantId  String
+  userId    String
+  role      String
+  status    String    @default("active")
+  invitedAt DateTime?
+  joinedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([tenantId, status])
+  @@index([userId, status])
 }
 
 model AuthIdentity {
@@ -158,17 +207,62 @@ model CrmIntegration {
 }
 
 model SubscriptionPlan {
-  id                  String           @id @default(cuid())
-  name                String           @unique
+  id                  String            @id @default(cuid())
+  name                String            @unique
   priceMonthly        Int
   maxBranches         Int
   maxStaff            Int
   featuresJson        Json?
-  isWhiteLabelEnabled Boolean          @default(false)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  isWhiteLabelEnabled Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   tenants             Tenant[]
   billingPayments     BillingPayment[]
+  entitlements        PlanEntitlement[]
+}
+
+model Feature {
+  key                String              @id
+  name               String
+  description        String?
+  module             String
+  status             String              @default("active")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  planEntitlements   PlanEntitlement[]
+  tenantEntitlements TenantEntitlement[]
+}
+
+model PlanEntitlement {
+  id         String           @id @default(cuid())
+  planId     String
+  featureKey String
+  enabled    Boolean          @default(true)
+  configJson Json?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  plan       SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature    Feature          @relation(fields: [featureKey], references: [key], onDelete: Cascade)
+
+  @@unique([planId, featureKey])
+  @@index([featureKey, enabled])
+}
+
+model TenantEntitlement {
+  id         String    @id @default(cuid())
+  tenantId   String
+  featureKey String
+  enabled    Boolean
+  configJson Json?
+  reason     String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  feature    Feature   @relation(fields: [featureKey], references: [key], onDelete: Cascade)
+
+  @@unique([tenantId, featureKey])
+  @@index([tenantId, enabled, expiresAt])
 }
 
 model BillingPayment {
@@ -231,6 +325,7 @@ model Appointment {
   client          User     @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
   branch          Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
+  @@unique([id, tenantId, clientId])
   @@index([tenantId])
   @@index([clientId])
   @@index([branchId])
