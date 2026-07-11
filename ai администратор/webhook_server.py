@@ -2364,7 +2364,7 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
             "message": "Owner Command Center доступен только владельцу.",
         }, status=403)
     try:
-        payload = await asyncio.to_thread(owner_ai.command_center)
+        payload = await asyncio.to_thread(owner_ai.command_center, include_personal_data=True)
     except Exception as e:
         logger.error(f"panel_command_center error: {e}")
         return _cabinet_response({

@@ -14753,6 +14753,7 @@ function AGodMode(props) {
   var sEval = React.useState({}), evalS = sEval[0], setEvalS = sEval[1];
   var sControl = React.useState({}), controlS = sControl[0], setControlS = sControl[1];
   var sBrief = React.useState(0), briefIndex = sBrief[0], setBriefIndex = sBrief[1];
+  var sReturnCalls = React.useState(false), returnCallsOpen = sReturnCalls[0], setReturnCallsOpen = sReturnCalls[1];
   var briefScrollRef = React.useRef(null);
 
   function gfetch(action, body) {
@@ -15905,6 +15906,102 @@ function AGodMode(props) {
       var confidence = { high: 'высокая', medium: 'средняя', low: 'низкая' }[decision.confidence] || decision.confidence || 'уточняется';
       return value + ' · уверенность ' + confidence;
     }
+    function openCandidateCall(row) {
+      var url = String(row && row.call_url || '');
+      if (!/^tel:\+\d+$/.test(url)) return;
+      try { window.location.href = url; } catch (x) {}
+    }
+    function returnDecision(card, option) {
+      if (!option || option.disabled) return;
+      if (option.kind === 'run_job' && option.job) {
+        setActionS(function (s) {
+          var n = Object.assign({}, s);
+          n[option.job] = { phase: 'confirm', option: option };
+          return n;
+        });
+        return;
+      }
+      if (option.kind === 'show_call_list') {
+        setReturnCallsOpen(function (v) { return !v; });
+        return;
+      }
+      if (option.kind === 'dismiss') {
+        goTo(Math.min(cards.length - 1, briefIndex + 1));
+      }
+    }
+    function renderCandidateQueue(card) {
+      var rows = (card && card.candidate_queue) || [];
+      if (!rows.length) return null;
+      var visibleRows = rows.slice(0, returnCallsOpen ? 8 : 3);
+      return e('div', { style: { marginTop: 12, borderTop: '1px solid ' + panelLine } },
+        visibleRows.map(function (row, idx) {
+          return e('div', {
+            key: row.client_id || idx,
+            style: {
+              display: 'flex', alignItems: 'center', gap: 9, minWidth: 0,
+              padding: '9px 0', borderBottom: idx < visibleRows.length - 1 ? '1px solid ' + panelLine : 'none'
+            }
+          },
+            e('div', { style: { flex: 1, minWidth: 0 } },
+              e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 12.5, lineHeight: 1.25, color: panelInk, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, row.name || 'Клиент'),
+              e('div', { style: { fontFamily: BODY, fontSize: 10.5, lineHeight: 1.35, color: panelDim, marginTop: 2, overflowWrap: 'anywhere' } }, row.reason || ''),
+              returnCallsOpen ? e('div', { style: { fontFamily: DISPLAY, fontSize: 9.5, color: panelDim, marginTop: 3 } }, row.phone_masked || '') : null),
+            returnCallsOpen && row.call_url ? e('button', {
+              type: 'button',
+              title: 'Позвонить ' + (row.name || 'клиенту'),
+              'aria-label': 'Позвонить ' + (row.name || 'клиенту'),
+              onClick: function () { openCandidateCall(row); },
+              style: {
+                width: 34, height: 34, borderRadius: 999, flexShrink: 0,
+                border: '1px solid ' + panelLine, background: 'transparent', color: panelInk,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
+              }
+            }, AIcon.phone(panelInk, 15)) : null);
+        }),
+        rows.length > visibleRows.length ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: panelDim, paddingTop: 6 } }, 'Ещё ' + (rows.length - visibleRows.length) + ' в полном списке') : null);
+    }
+    function renderReturnDecisions(card) {
+      var options = ((card && card.decision_options) || []).filter(function (option) {
+        return option && ['run_job', 'show_call_list', 'dismiss'].indexOf(option.kind) >= 0;
+      });
+      if (!options.length) return null;
+      var sendOption = options.find(function (option) { return option.kind === 'run_job' && option.job; });
+      var job = sendOption && sendOption.job;
+      var state = job ? (actionS[job] || {}) : {};
+      if (state.phase === 'confirm' && sendOption) {
+        return e('div', { style: { marginTop: 12, paddingTop: 11, borderTop: '1px solid ' + panelLine } },
+          e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 11.5, lineHeight: 1.4, color: panelInk, marginBottom: 9 } }, 'Отправить персональные напоминания ' + String(card.candidate_count || '') + ' клиентам без скидки?'),
+          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 } },
+            e('button', {
+              type: 'button', onClick: function () { runOwnerAction({ job: sendOption.job, label: sendOption.label, title: card.title, source: 'owner_cycle_queue' }); },
+              style: { minHeight: 38, border: 0, borderRadius: 999, background: panelInk, color: panelBg, fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }
+            }, 'Подтвердить'),
+            e('button', {
+              type: 'button', onClick: function () { setActionS(function (s) { var n = Object.assign({}, s); n[sendOption.job] = {}; return n; }); },
+              style: { minHeight: 38, border: '1px solid ' + panelLine, borderRadius: 999, background: 'transparent', color: panelInk, fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }
+            }, 'Отмена')));
+      }
+      return e('div', { style: { marginTop: 12, paddingTop: 11, borderTop: '1px solid ' + panelLine } },
+        card.owner_question ? e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 11.5, lineHeight: 1.35, color: panelInk, marginBottom: 9 } }, card.owner_question) : null,
+        e('div', { style: { display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' } }, options.map(function (option) {
+          var active = option.kind === 'show_call_list' && returnCallsOpen;
+          return e('button', {
+            key: option.key,
+            type: 'button', disabled: !!option.disabled,
+            onClick: function () { returnDecision(card, option); },
+            style: {
+              minHeight: 36, flex: '0 0 auto', borderRadius: 999,
+              border: '1px solid ' + (active || option.recommended ? panelInk : panelLine),
+              background: active || option.recommended ? panelInk : 'transparent',
+              color: active || option.recommended ? panelBg : panelInk,
+              padding: '0 13px', fontFamily: BODY, fontWeight: 650, fontSize: 10.5,
+              cursor: option.disabled ? 'default' : 'pointer', opacity: option.disabled ? 0.5 : 1
+            }
+          }, option.label || 'Выбрать');
+        })),
+        state.phase === 'running' ? e('div', { style: { fontFamily: BODY, fontSize: 10.8, color: panelDim, marginTop: 8 } }, 'MAYA отправляет сообщения…') : null,
+        state.phase === 'done' ? e('div', { style: { fontFamily: BODY, fontSize: 10.8, color: panelInk, marginTop: 8 } }, state.msg || 'Готово') : null);
+    }
     function onScroll(ev) {
       var el = ev.currentTarget;
       var step = Math.max(1, el.clientWidth - 6);
@@ -15953,7 +16050,8 @@ function AGodMode(props) {
           key: card.key || i,
           'aria-label': (i + 1) + ' из ' + cards.length + ': ' + (card.label || card.title || ''),
           style: {
-            flex: '0 0 calc(100% - 18px)', minWidth: 0, minHeight: 390,
+            flex: '0 0 calc(100% - 18px)', minWidth: 0,
+            minHeight: (card.candidate_queue || []).length ? 560 : 390,
             boxSizing: 'border-box', scrollSnapAlign: 'start', scrollSnapStop: 'always',
             borderRadius: 28, padding: '20px 20px 18px',
             background: panelBg, color: panelInk,
@@ -15978,13 +16076,15 @@ function AGodMode(props) {
               e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.35, color: panelDim, marginTop: 6 } }, card.second_label || ''))),
           // объяснение
           e('div', { style: { fontFamily: BODY, fontSize: 13.5, lineHeight: 1.5, color: panelInk, marginTop: 14, textWrap: 'pretty' } }, card.analysis || ''),
+          renderCandidateQueue(card),
           // рекомендация MAYA
           e('div', { style: { marginTop: 'auto', paddingTop: 14 } },
             e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 8.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: panelDim, marginBottom: 7 } }, 'Рекомендация'),
             e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.45, color: panelInk, textWrap: 'pretty' } }, card.action || ''),
             card.decision ? e('div', { style: { marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + panelLine } },
               effectLabel(card.decision) ? e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 11.5, lineHeight: 1.35, color: panelInk } }, 'Эффект: ' + effectLabel(card.decision)) : null,
-              card.decision.kpi ? e('div', { style: { fontFamily: BODY, fontSize: 10.8, lineHeight: 1.4, color: panelDim, marginTop: 4 } }, 'Проверка: ' + card.decision.kpi) : null) : null));
+              card.decision.kpi ? e('div', { style: { fontFamily: BODY, fontSize: 10.8, lineHeight: 1.4, color: panelDim, marginTop: 4 } }, 'Проверка: ' + card.decision.kpi) : null) : null,
+            renderReturnDecisions(card)));
       })),
       // футер пагинации: точки слева, стрелки справа (как в попап-хендоффе)
       e('div', { style: { display: 'flex', alignItems: 'center', padding: '14px 0 20px' } },

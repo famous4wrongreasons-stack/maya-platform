@@ -6197,7 +6197,8 @@ async def post_init(app: Application):
         args=[app],
     )
 
-    # Напоминание по индивидуальному циклу в 11:00 МСК — клиенту, чьё
+    # Анализ индивидуального цикла в 11:00 МСК. Он формирует owner-очередь;
+    # отправка клиентам запускается отдельно после подтверждения владельца.
     # «обычное время постричься» подходит сегодня ± 3 дня.
     scheduler.add_job(
         _cycle_reminder_job,
@@ -6361,11 +6362,11 @@ async def _birthday_job(app: Application):
 
 
 async def _cycle_reminder_job(app: Application):
-    """Ежедневное напоминание клиентам, чей средний цикл подошёл."""
+    """Ежедневно формирует очередь; ничего клиентам сам не отправляет."""
     try:
-        await cycle_reminder.run_cycle_reminder_job(app)
+        await asyncio.to_thread(cycle_reminder.scan_cycle_candidates)
     except Exception as e:
-        logger.error(f"Ошибка цикл-напоминания: {e}")
+        logger.error(f"Ошибка анализа личного цикла: {e}")
 
 
 async def _referral_resolver_job(app: Application):
