@@ -78,8 +78,11 @@ export class AuthController {
   @ApiOperation({
     summary: 'Start Yandex ID login for a tenant-scoped user',
   })
-  startYandexLogin(@Body() dto: StartOauthLoginDto) {
-    return this.socialAuthService.startYandexLogin(dto);
+  startYandexLogin(@Body() dto: StartOauthLoginDto, @Req() request: Request) {
+    return this.socialAuthService.startYandexLogin(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 
   @Public()
@@ -102,8 +105,11 @@ export class AuthController {
   @ApiOperation({
     summary: 'Start Telegram login for a tenant-scoped user',
   })
-  startTelegramLogin(@Body() dto: StartOauthLoginDto) {
-    return this.socialAuthService.startTelegramLogin(dto);
+  startTelegramLogin(@Body() dto: StartOauthLoginDto, @Req() request: Request) {
+    return this.socialAuthService.startTelegramLogin(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 
   @Public()
@@ -124,8 +130,11 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @ApiOperation({ summary: 'Rotate a one-time refresh token' })
-  refresh(@Body() dto: RefreshSessionDto) {
-    return this.sessionService.refresh(dto.refreshToken);
+  refresh(@Body() dto: RefreshSessionDto, @Req() request: Request) {
+    return this.sessionService.refresh(
+      dto.refreshToken,
+      resolveAuthClientMetadata(request),
+    );
   }
 
   @Post('logout')

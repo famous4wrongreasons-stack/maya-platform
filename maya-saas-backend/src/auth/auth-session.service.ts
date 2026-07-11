@@ -12,6 +12,7 @@ import { UserRole } from '../common/domain.enums';
 import { MembershipsService } from '../tenancy/memberships.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthClientMetadata } from './auth-client-metadata';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionRepository } from './auth-session.repository';
 import { AuthSessionSystemGateway } from './auth-session-system.gateway';
 
@@ -41,6 +42,7 @@ export class AuthSessionService {
     private readonly jwtService: JwtService,
     private readonly membershipsService: MembershipsService,
     private readonly tenantContext: TenantContextService,
+    private readonly rateLimitService: AuthRateLimitService,
     private readonly repository: AuthSessionRepository,
     private readonly systemGateway: AuthSessionSystemGateway,
   ) {}
@@ -75,7 +77,14 @@ export class AuthSessionService {
     );
   }
 
-  async refresh(refreshToken: string) {
+  async refresh(
+    refreshToken: string,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    await this.rateLimitService.assertPreflight('refresh', {
+      clientIp: metadata.clientIp,
+      identity: refreshToken,
+    });
     const parsed = this.parseRefreshToken(refreshToken);
 
     if (!parsed) {
@@ -123,14 +132,23 @@ export class AuthSessionService {
 
     const principal = await this.resolveCurrentPrincipal(session.user);
     const next = this.createRefreshCredential(session.expiresAt);
-    const outcome = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.rotateRefreshToken(principal, {
-        currentTokenId: credential.id,
-        currentTokenHash: tokenHash,
-        nextCredential: next.credential,
-        now,
-        sessionId: session.id,
-      }),
+    const outcome = await this.tenantContext.runAsAuthPrincipal(
+      principal,
+      async () => {
+        await this.rateLimitService.assertSession('refresh', {
+          tenantId: principal.tenantId,
+          userId: principal.userId,
+          identity: session.id,
+        });
+
+        return this.repository.rotateRefreshToken(principal, {
+          currentTokenId: credential.id,
+          currentTokenHash: tokenHash,
+          nextCredential: next.credential,
+          now,
+          sessionId: session.id,
+        });
+      },
     );
 
     if (outcome === 'reused') {

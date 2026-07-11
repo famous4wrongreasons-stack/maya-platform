@@ -17,6 +17,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthClientMetadata } from './auth-client-metadata';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionService } from './auth-session.service';
 import { LoginDto } from './dto/login.dto';
 import {
@@ -38,12 +39,21 @@ export class AuthService {
     private readonly phoneAuthDeliveryService: PhoneAuthDeliveryService,
     private readonly tenantContext: TenantContextService,
     private readonly authRepository: TenantAuthRepository,
+    private readonly rateLimitService: AuthRateLimitService,
     private readonly sessionService: AuthSessionService,
   ) {}
 
   async login(dto: LoginDto, metadata: Partial<AuthClientMetadata> = {}) {
+    const normalizedEmail = this.normalizeEmail(dto.email);
+    await this.rateLimitService.assertPreflight('password_login', {
+      clientIp: metadata.clientIp,
+      identity: this.buildTenantIdentityHint(
+        dto.tenantSlug ?? 'platform',
+        normalizedEmail,
+      ),
+    });
     const user = dto.tenantSlug
-      ? await this.loginTenantUser(dto)
+      ? await this.loginTenantUser(dto, normalizedEmail)
       : await this.loginPlatformOwner(dto);
 
     if (user.status !== 'active') {
@@ -57,11 +67,20 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto, metadata: Partial<AuthClientMetadata> = {}) {
+    const normalizedEmail = this.normalizeEmail(dto.email);
+    await this.rateLimitService.assertPreflight('registration', {
+      clientIp: metadata.clientIp,
+      identity: this.buildTenantIdentityHint(dto.tenantSlug, normalizedEmail),
+    });
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
 
     return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
+      await this.rateLimitService.assertTenant('registration', {
+        tenantId: tenant.id,
+        identity: normalizedEmail,
+      });
       this.assertTenantAllowsClientAccess(tenant.status, true);
       this.assertTenantAllowsClientRegistration(tenant.status);
       this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
@@ -118,14 +137,22 @@ export class AuthService {
   }
 
   async startPhoneAuth(dto: StartPhoneAuthDto, clientIp?: string | null) {
+    const phone = normalizeRussianPhone(dto.phone);
+    await this.rateLimitService.assertPreflight('phone_start', {
+      clientIp,
+      identity: this.buildTenantIdentityHint(dto.tenantSlug, phone),
+    });
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
 
     return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
+      await this.rateLimitService.assertTenant('phone_start', {
+        tenantId: tenant.id,
+        identity: phone,
+      });
       this.assertTenantAllowsClientAccess(tenant.status, true);
 
-      const phone = normalizeRussianPhone(dto.phone);
       const existingUser = await this.usersService.findTenantUserByPhone(
         tenant.id,
         phone,
@@ -197,14 +224,22 @@ export class AuthService {
     dto: VerifyPhoneAuthDto,
     metadata: Partial<AuthClientMetadata> = {},
   ) {
+    const phone = normalizeRussianPhone(dto.phone);
+    await this.rateLimitService.assertPreflight('phone_verify', {
+      clientIp: metadata.clientIp,
+      identity: this.buildTenantIdentityHint(dto.tenantSlug, phone),
+    });
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
 
     return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
+      await this.rateLimitService.assertTenant('phone_verify', {
+        tenantId: tenant.id,
+        identity: phone,
+      });
       this.assertTenantAllowsClientAccess(tenant.status, true);
 
-      const phone = normalizeRussianPhone(dto.phone);
       const challenge = await this.authRepository.findPhoneChallenge(phone);
 
       if (!challenge || challenge.consumedAt) {
@@ -336,12 +371,16 @@ export class AuthService {
     });
   }
 
-  private async loginTenantUser(dto: LoginDto) {
+  private async loginTenantUser(dto: LoginDto, normalizedEmail: string) {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug!,
     );
 
     return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
+      await this.rateLimitService.assertTenant('password_login', {
+        tenantId: tenant.id,
+        identity: normalizedEmail,
+      });
       const user = await this.usersService.findTenantUserByEmail(
         tenant.id,
         dto.email,
@@ -518,5 +557,16 @@ export class AuthService {
         message,
       },
     };
+  }
+
+  private normalizeEmail(value: string): string {
+    return value.trim().toLowerCase();
+  }
+
+  private buildTenantIdentityHint(
+    tenantSlug: string,
+    identity: string,
+  ): string {
+    return JSON.stringify([tenantSlug.trim().toLowerCase(), identity.trim()]);
   }
 }

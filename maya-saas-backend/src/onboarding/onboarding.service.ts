@@ -6,6 +6,7 @@ import { randomBytes } from 'crypto';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthService } from '../auth/auth.service';
 import { AuthClientMetadata } from '../auth/auth-client-metadata';
+import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import { BrandingService } from '../branding/branding.service';
 import {
   CrmProvider,
@@ -28,6 +29,7 @@ export class OnboardingService {
     private readonly crmService: CrmService,
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly rateLimitService: AuthRateLimitService,
     private readonly auditLogService: AuditLogService,
     private readonly tenantContext: TenantContextService,
   ) {}
@@ -37,6 +39,10 @@ export class OnboardingService {
     metadata: Partial<AuthClientMetadata> = {},
   ) {
     this.assertSelfServeTrialSignupEnabled();
+    await this.rateLimitService.assertPreflight('trial_signup', {
+      clientIp: metadata.clientIp,
+      identity: dto.ownerEmail.trim().toLowerCase(),
+    });
 
     const temporaryPassword = dto.password?.trim() || this.generatePassword();
     const tenant = await this.tenantsService.createTenant({

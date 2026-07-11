@@ -6,6 +6,7 @@ import { createHmac } from 'crypto';
 import { UserRole } from '../common/domain.enums';
 import { MembershipsService } from '../tenancy/memberships.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionRepository } from './auth-session.repository';
 import { AuthSessionService } from './auth-session.service';
 import { AuthSessionSystemGateway } from './auth-session-system.gateway';
@@ -90,6 +91,8 @@ describe('AuthSessionService', () => {
     const revokeAllSessionsMock = jest.fn().mockResolvedValue(2);
     const findRefreshCredentialMock = jest.fn().mockResolvedValue(null);
     const findAccessSessionMock = jest.fn().mockResolvedValue(null);
+    const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
+    const rateLimitSessionMock = jest.fn().mockResolvedValue(undefined);
     const tenantContext = new TenantContextService();
     const service = new AuthSessionService(
       {
@@ -100,6 +103,10 @@ describe('AuthSessionService', () => {
         getActiveMembership: getActiveMembershipMock,
       } as unknown as MembershipsService,
       tenantContext,
+      {
+        assertPreflight: rateLimitPreflightMock,
+        assertSession: rateLimitSessionMock,
+      } as unknown as AuthRateLimitService,
       {
         createSession: createSessionMock,
         rotateRefreshToken: rotateRefreshTokenMock,
@@ -122,6 +129,8 @@ describe('AuthSessionService', () => {
         findRefreshCredentialMock,
         getActiveMembershipMock,
         listSessionsMock,
+        rateLimitPreflightMock,
+        rateLimitSessionMock,
         revokeAllSessionsMock,
         revokeSessionMock,
         rotateRefreshTokenMock,
@@ -219,6 +228,15 @@ describe('AuthSessionService', () => {
         sessionId: 'session-a',
       }),
     );
+    expect(mocks.rateLimitPreflightMock).toHaveBeenCalledWith('refresh', {
+      clientIp: undefined,
+      identity: fixture.token,
+    });
+    expect(mocks.rateLimitSessionMock).toHaveBeenCalledWith('refresh', {
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      identity: 'session-a',
+    });
     expect(result.session).toMatchObject({
       id: 'session-a',
       is_current: true,

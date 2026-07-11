@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthService } from '../auth/auth.service';
+import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import { BrandingService } from '../branding/branding.service';
 import {
   CrmProvider,
@@ -94,6 +95,7 @@ describe('OnboardingService', () => {
     const auditLogMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
+    const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
     const tenantContext = new TenantContextService();
     const expectCreatedTenantContext = () => {
       expect(tenantContext.requireTenantId()).toBe(tenant.id);
@@ -125,6 +127,9 @@ describe('OnboardingService', () => {
       {
         issueSession: issueSessionMock,
       } as unknown as AuthService,
+      {
+        assertPreflight: rateLimitPreflightMock,
+      } as unknown as AuthRateLimitService,
       { log: auditLogMock } as unknown as AuditLogService,
       tenantContext,
     );
@@ -139,6 +144,7 @@ describe('OnboardingService', () => {
         createUserMock,
         serializeUserMock,
         issueSessionMock,
+        rateLimitPreflightMock,
         auditLogMock,
       },
     };
@@ -165,6 +171,10 @@ describe('OnboardingService', () => {
       branchAddress: 'Moscow, Tverskaya 1',
       branchPhone: undefined,
       branchTimezone: undefined,
+    });
+    expect(mocks.rateLimitPreflightMock).toHaveBeenCalledWith('trial_signup', {
+      clientIp: undefined,
+      identity: 'owner@demo-salon.ru',
     });
     expect(mocks.upsertBrandingMock).toHaveBeenCalledWith('tenant-1', {
       appName: 'Demo Salon',
