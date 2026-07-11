@@ -12,6 +12,7 @@ import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
 import { AvailableSlotsQueryDto } from '../crm/dto/available-slots-query.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import {
@@ -24,6 +25,7 @@ import { AvailableDaysQueryDto } from './dto/available-days-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
+import { TenantAppointmentRepository } from './tenant-appointment.repository';
 
 interface AppointmentErrorPayload {
   message: string;
@@ -56,6 +58,8 @@ const AVAILABLE_DAYS_BATCH_SIZE = 4;
 export class AppointmentsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContextService,
+    private readonly appointmentRepository: TenantAppointmentRepository,
     private readonly crmService: CrmService,
     private readonly tenantsService: TenantsService,
     private readonly usersService: UsersService,
@@ -67,6 +71,8 @@ export class AppointmentsService {
     clientId: string,
     dto: CreateAppointmentDto,
   ) {
+    this.tenantContext.assertTenantId(tenantId);
+
     if (dto.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(
         dto.branchId,
@@ -100,24 +106,18 @@ export class AppointmentsService {
       },
     );
 
-    const appointment = await this.prisma.appointment.create({
-      data: {
-        tenantId,
-        clientId,
-        branchId: dto.branchId ?? null,
-        crmExternalId: remoteAppointment.external_id,
-        staffExternalId: dto.staffId,
-        serviceIds: asJson(dto.serviceIds),
-        startAt: new Date(dto.start),
-        status: remoteAppointment.status,
-        notes: dto.notes ?? null,
-        providerPayload: remoteAppointment.raw
-          ? asJson(remoteAppointment.raw)
-          : undefined,
-      },
-      include: {
-        branch: true,
-      },
+    const appointment = await this.appointmentRepository.createForClient({
+      clientId,
+      branchId: dto.branchId ?? null,
+      crmExternalId: remoteAppointment.external_id,
+      staffExternalId: dto.staffId,
+      serviceIds: asJson(dto.serviceIds),
+      startAt: new Date(dto.start),
+      status: remoteAppointment.status,
+      notes: dto.notes ?? null,
+      providerPayload: remoteAppointment.raw
+        ? asJson(remoteAppointment.raw)
+        : undefined,
     });
 
     await this.auditLogService.log({
@@ -143,6 +143,8 @@ export class AppointmentsService {
     clientId: string,
     dto: PreviewAppointmentDto,
   ) {
+    this.tenantContext.assertTenantId(tenantId);
+
     if (dto.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(
         dto.branchId,
@@ -242,16 +244,9 @@ export class AppointmentsService {
   }
 
   async listClientAppointments(tenantId: string, clientId: string) {
-    const appointments = await this.prisma.appointment.findMany({
-      where: {
-        tenantId,
-        clientId,
-      },
-      orderBy: { startAt: 'asc' },
-      include: {
-        branch: true,
-      },
-    });
+    this.tenantContext.assertTenantId(tenantId);
+    const appointments =
+      await this.appointmentRepository.listForClient(clientId);
     const catalog = await this.loadAppointmentCatalog(tenantId);
 
     return appointments.map((appointment) =>
@@ -264,16 +259,11 @@ export class AppointmentsService {
     clientId: string,
     appointmentId: string,
   ) {
-    const appointment = await this.prisma.appointment.findFirst({
-      where: {
-        id: appointmentId,
-        tenantId,
-        clientId,
-      },
-      include: {
-        branch: true,
-      },
-    });
+    this.tenantContext.assertTenantId(tenantId);
+    const appointment = await this.appointmentRepository.findForClient(
+      appointmentId,
+      clientId,
+    );
 
     if (!appointment) {
       throw new NotFoundException(
@@ -316,15 +306,13 @@ export class AppointmentsService {
       appointment.crmExternalId,
     );
 
-    const updatedAppointment = await this.prisma.appointment.update({
-      where: { id: appointment.id },
-      data: {
+    const updatedAppointment = await this.appointmentRepository.updateForClient(
+      appointment.id,
+      clientId,
+      {
         status: AppointmentStatus.CANCELED,
       },
-      include: {
-        branch: true,
-      },
-    });
+    );
     const catalog = await this.loadAppointmentCatalog(tenantId);
 
     await this.auditLogService.log({
@@ -351,16 +339,11 @@ export class AppointmentsService {
     appointmentId: string,
     dto: RescheduleAppointmentDto,
   ) {
-    const appointment = await this.prisma.appointment.findFirst({
-      where: {
-        id: appointmentId,
-        tenantId,
-        clientId,
-      },
-      include: {
-        branch: true,
-      },
-    });
+    this.tenantContext.assertTenantId(tenantId);
+    const appointment = await this.appointmentRepository.findForClient(
+      appointmentId,
+      clientId,
+    );
 
     if (!appointment) {
       throw new NotFoundException(
@@ -462,9 +445,10 @@ export class AppointmentsService {
         notes: dto.notes ?? appointment.notes,
       },
     );
-    const updatedAppointment = await this.prisma.appointment.update({
-      where: { id: appointment.id },
-      data: {
+    const updatedAppointment = await this.appointmentRepository.updateForClient(
+      appointment.id,
+      clientId,
+      {
         branchId: branchId ?? null,
         staffExternalId: remoteAppointment.staff_id,
         serviceIds: asJson(remoteAppointment.service_ids),
@@ -475,10 +459,7 @@ export class AppointmentsService {
           ? asJson(remoteAppointment.raw)
           : undefined,
       },
-      include: {
-        branch: true,
-      },
-    });
+    );
     const catalog = await this.loadAppointmentCatalog(tenantId);
 
     await this.auditLogService.log({
@@ -503,10 +484,12 @@ export class AppointmentsService {
   }
 
   getAvailableSlots(tenantId: string, query: AvailableSlotsQueryDto) {
+    this.tenantContext.assertTenantId(tenantId);
     return this.crmService.getAvailableSlots(tenantId, query);
   }
 
   async getAvailableDays(tenantId: string, query: AvailableDaysQueryDto) {
+    this.tenantContext.assertTenantId(tenantId);
     if (query.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(
         query.branchId,

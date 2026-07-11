@@ -2,10 +2,12 @@ import { BadRequestException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { CrmService } from '../crm/crm.service';
 import { AppointmentsService } from './appointments.service';
+import { TenantAppointmentRepository } from './tenant-appointment.repository';
 
 type BranchRecord = {
   id: string;
@@ -263,10 +265,23 @@ describe('AppointmentsService', () => {
     const auditLogService: Pick<AuditLogService, 'log'> = {
       log: auditLogMock,
     };
+    const tenantContext: Pick<
+      TenantContextService,
+      'assertTenantId' | 'requireTenantId'
+    > = {
+      assertTenantId: jest.fn((tenantId: string) => tenantId),
+      requireTenantId: jest.fn(() => 'tenant-1'),
+    };
+    const appointmentRepository = new TenantAppointmentRepository(
+      prisma as PrismaService,
+      tenantContext as TenantContextService,
+    );
 
     return {
       service: new AppointmentsService(
         prisma as PrismaService,
+        tenantContext as TenantContextService,
+        appointmentRepository,
         crmService as CrmService,
         tenantsService as TenantsService,
         usersService as UsersService,
@@ -439,7 +454,13 @@ describe('AppointmentsService', () => {
     expect(cancelAppointmentMock).toHaveBeenCalledWith('tenant-1', 'crm-1');
     expect(appointmentUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'appt-1' },
+        where: {
+          id_tenantId_clientId: {
+            id: 'appt-1',
+            tenantId: 'tenant-1',
+            clientId: 'user-1',
+          },
+        },
         data: { status: 'canceled' },
       }),
     );
@@ -590,7 +611,13 @@ describe('AppointmentsService', () => {
     });
     const updateArgs = appointmentUpdateMock.mock.calls[0]?.[0] as
       | {
-          where: { id: string };
+          where: {
+            id_tenantId_clientId: {
+              id: string;
+              tenantId: string;
+              clientId: string;
+            };
+          };
           data: {
             staffExternalId: string;
             status: string;
@@ -600,7 +627,13 @@ describe('AppointmentsService', () => {
       | undefined;
 
     expect(updateArgs).toBeDefined();
-    expect(updateArgs?.where).toEqual({ id: 'appt-1' });
+    expect(updateArgs?.where).toEqual({
+      id_tenantId_clientId: {
+        id: 'appt-1',
+        tenantId: 'tenant-1',
+        clientId: 'user-1',
+      },
+    });
     expect(updateArgs?.data.staffExternalId).toBe('staff-1');
     expect(updateArgs?.data.status).toBe('confirmed');
     expect(updateArgs?.data.notes).toBe('Move later');
