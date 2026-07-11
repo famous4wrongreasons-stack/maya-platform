@@ -40,6 +40,7 @@ model Tenant {
   phoneAuthCodes        PhoneAuthCode[]
   authIdentities        AuthIdentity[]
   authFlowStates        AuthFlowState[]
+  authSessions          AuthSession[]
   billingPayments       BillingPayment[]
   memberships           Membership[]
   entitlements          TenantEntitlement[]
@@ -116,6 +117,7 @@ model User {
   auditLogs      AuditLog[]
   appointments   Appointment[]  @relation("ClientAppointments")
   authIdentities AuthIdentity[]
+  authSessions   AuthSession[]
   memberships    Membership[]
 
   @@unique([id, tenantId])
@@ -195,6 +197,41 @@ model PhoneAuthCode {
   @@unique([id, tenantId])
   @@unique([tenantId, phone])
   @@index([tenantId, expiresAt])
+}
+
+model AuthSession {
+  id            String             @id @default(cuid())
+  tenantId      String?
+  userId        String
+  deviceLabel   String
+  ipHash        String?
+  expiresAt     DateTime
+  lastUsedAt    DateTime           @default(now())
+  revokedAt     DateTime?
+  revokeReason  String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  tenant        Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens AuthRefreshToken[]
+
+  @@index([tenantId, userId, revokedAt])
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model AuthRefreshToken {
+  id         String      @id
+  sessionId  String
+  tokenHash  String      @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime    @default(now())
+  session    AuthSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([expiresAt])
 }
 
 model CrmIntegration {

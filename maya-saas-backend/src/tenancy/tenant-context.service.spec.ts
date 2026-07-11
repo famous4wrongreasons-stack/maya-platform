@@ -109,4 +109,57 @@ describe('TenantContextService', () => {
       }),
     ).toThrow(ForbiddenException);
   });
+
+  it('binds and restores an authenticated session principal', () => {
+    const service = new TenantContextService();
+
+    service.run('request-session', () => {
+      const context = service.runAsAuthPrincipal(
+        {
+          tenantId: 'tenant-a',
+          userId: 'user-a',
+          role: 'client',
+        },
+        () => service.get(),
+      );
+
+      expect(context).toEqual({
+        requestId: 'request-session',
+        tenantId: 'tenant-a',
+        userId: 'user-a',
+        membershipId: null,
+        role: 'client',
+        source: 'auth_session',
+      });
+      expect(service.get()).toEqual({
+        requestId: 'request-session',
+        tenantId: null,
+        userId: null,
+        membershipId: null,
+        role: null,
+        source: null,
+      });
+    });
+  });
+
+  it('rejects an auth-session principal conflicting with the trusted tenant', () => {
+    const service = new TenantContextService();
+
+    expect(() =>
+      service.run('request-domain-session', () => {
+        service.setResolvedTenant({
+          tenantId: 'tenant-domain',
+          userId: null,
+          membershipId: null,
+          role: null,
+          source: 'custom_domain',
+        });
+
+        return service.runAsAuthPrincipal(
+          { tenantId: 'tenant-token', userId: 'user-a', role: 'client' },
+          () => true,
+        );
+      }),
+    ).toThrow('Conflicting tenant resolution signals');
+  });
 });

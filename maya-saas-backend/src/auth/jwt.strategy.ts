@@ -11,11 +11,13 @@ import { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { UsersService } from '../users/users.service';
 import { MembershipsService } from '../tenancy/memberships.service';
+import { AuthSessionService } from './auth-session.service';
 
 interface JwtPayload {
   user_id: string;
   tenant_id: string | null;
   role: UserRole;
+  session_id: string;
 }
 
 @Injectable()
@@ -24,6 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     configService: ConfigService,
     private readonly usersService: UsersService,
     private readonly membershipsService: MembershipsService,
+    private readonly sessionService: AuthSessionService,
   ) {
     const jwtSecret = configService.get<string>('JWT_SECRET');
 
@@ -39,6 +42,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
+    if (!payload.session_id) {
+      throw new UnauthorizedException('Session is required');
+    }
+
+    await this.sessionService.assertAccessSession(
+      payload.session_id,
+      payload.user_id,
+      payload.tenant_id,
+    );
     const user = await this.usersService.getUserOrThrow(payload.user_id);
 
     if (user.status !== 'active') {
@@ -48,6 +60,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (user.role === 'platform_owner' && !payload.tenant_id) {
       return {
         userId: user.id,
+        sessionId: payload.session_id,
         tenantId: null,
         role: UserRole.PLATFORM_OWNER,
         email: user.email,
@@ -70,6 +83,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     return {
       userId: user.id,
+      sessionId: payload.session_id,
       tenantId: membership.tenantId,
       role: membership.role as UserRole,
       email: user.email,

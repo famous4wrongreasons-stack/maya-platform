@@ -8,7 +8,8 @@ export type TenantResolutionSource =
   | 'route_slug'
   | 'platform'
   | 'system'
-  | 'public_auth';
+  | 'public_auth'
+  | 'auth_session';
 
 export interface TenantRequestContext {
   requestId: string;
@@ -73,6 +74,45 @@ export class TenantContextService {
       },
       callback,
     );
+  }
+
+  runAsAuthPrincipal<T>(
+    principal: { tenantId: string | null; userId: string; role: string },
+    callback: () => T,
+  ): T {
+    const current = this.storage.getStore();
+
+    if (current?.tenantId && current.tenantId !== principal.tenantId) {
+      throw new ForbiddenException('Conflicting tenant resolution signals');
+    }
+
+    if (current?.userId && current.userId !== principal.userId) {
+      throw new ForbiddenException('Conflicting authenticated principals');
+    }
+
+    return this.storage.run(
+      {
+        requestId: current?.requestId ?? `auth-session:${principal.userId}`,
+        tenantId: principal.tenantId,
+        userId: principal.userId,
+        membershipId: null,
+        role: principal.role,
+        source: 'auth_session',
+      },
+      callback,
+    );
+  }
+
+  assertAuthPrincipal(userId: string, tenantId: string | null): void {
+    const current = this.storage.getStore();
+
+    if (
+      current?.source !== 'auth_session' ||
+      current.userId !== userId ||
+      current.tenantId !== tenantId
+    ) {
+      throw new ForbiddenException('Auth session principal is required');
+    }
   }
 
   get(): TenantRequestContext | undefined {
