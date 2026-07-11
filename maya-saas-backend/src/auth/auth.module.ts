@@ -8,10 +8,12 @@ import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { AuthController } from './auth.controller';
+import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
 import { SocialAuthService } from './social-auth.service';
+import { TenantAuthRepository } from './tenant-auth.repository';
 
 @Module({
   imports: [
@@ -33,9 +35,11 @@ import { SocialAuthService } from './social-auth.service';
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthFlowSystemGateway,
     JwtStrategy,
     PhoneAuthDeliveryService,
     SocialAuthService,
+    TenantAuthRepository,
   ],
   exports: [AuthService],
 })

@@ -7,7 +7,8 @@ export type TenantResolutionSource =
   | 'subdomain'
   | 'route_slug'
   | 'platform'
-  | 'system';
+  | 'system'
+  | 'public_auth';
 
 export interface TenantRequestContext {
   requestId: string;
@@ -49,6 +50,26 @@ export class TenantContextService {
         membershipId: null,
         role: null,
         source: 'system',
+      },
+      callback,
+    );
+  }
+
+  runAsPublicTenant<T>(tenantId: string, callback: () => T): T {
+    const current = this.storage.getStore();
+
+    if (current?.tenantId && current.tenantId !== tenantId) {
+      throw new ForbiddenException('Conflicting tenant resolution signals');
+    }
+
+    return this.storage.run(
+      {
+        requestId: current?.requestId ?? `public-auth:${tenantId}`,
+        tenantId,
+        userId: null,
+        membershipId: null,
+        role: null,
+        source: 'public_auth',
       },
       callback,
     );

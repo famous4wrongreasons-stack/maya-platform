@@ -118,6 +118,7 @@ model User {
   authIdentities AuthIdentity[]
   memberships    Membership[]
 
+  @@unique([id, tenantId])
   @@unique([tenantId, email])
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -154,8 +155,9 @@ model AuthIdentity {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
 
+  @@unique([id, tenantId])
   @@unique([tenantId, provider, providerUserId])
   @@index([userId])
   @@index([tenantId, provider])
@@ -174,6 +176,7 @@ model AuthFlowState {
   updatedAt    DateTime  @updatedAt
   tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([id, tenantId])
   @@index([tenantId, provider, expiresAt])
 }
 
@@ -189,6 +192,7 @@ model PhoneAuthCode {
   updatedAt  DateTime  @updatedAt
   tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([id, tenantId])
   @@unique([tenantId, phone])
   @@index([tenantId, expiresAt])
 }
