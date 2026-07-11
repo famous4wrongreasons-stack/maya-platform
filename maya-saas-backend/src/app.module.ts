@@ -27,12 +27,14 @@ import { TenantsModule } from './tenants/tenants.module';
 import { UsersModule } from './users/users.module';
 import { TenancyModule } from './tenancy/tenancy.module';
 import { TenantResolutionMiddleware } from './tenancy/tenant-resolution.middleware';
+import { validateRuntimeConfig } from './config/runtime-config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
+      validate: validateRuntimeConfig,
     }),
     PrismaModule,
     TenancyModule,
