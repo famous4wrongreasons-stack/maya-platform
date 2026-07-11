@@ -19,8 +19,8 @@ service, rental, repair, pet services и других сервисных ком�
 
 ## Структура
 
-- [Product](Product/README.md) - миссия, роли, сценарии, продуктовые границы.
-- [Architecture](Architecture/README.md) - компоненты ядра, multi-tenant модель,
+- [Product](product/README.md) - миссия, роли, сценарии, продуктовые границы.
+- [Architecture](architecture/README.md) - компоненты ядра, multi-tenant модель,
   данные, безопасность, интеграции.
 - [AI](AI/README.md) - агенты, память, tools, planner, approval gates, prompts.
 - [Engineering](Engineering/README.md) - API-first правила разработки, качество,

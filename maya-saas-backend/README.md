@@ -1,6 +1,6 @@
 # Maya SaaS Backend
 
-Multi-tenant white-label backend for Maya App. This service is a standalone `NestJS + Prisma + PostgreSQL` backend that lets one API and one mobile app serve many salons with isolated tenant data, branding, CRM integrations, branches, users, and plans.
+Multi-tenant white-label strangler-backend inside the existing Maya repository. It uses `NestJS + Prisma + PostgreSQL` to migrate selected capabilities safely while the working Python/PWA product remains compatible. One API and one client application can serve many service businesses with isolated data and configuration.
 
 ## Stack
 
@@ -14,7 +14,11 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
 
 ## What is included in v1
 
-- Tenant model and white-label branding settings
+- Tenant, Membership and server-side TenantContext
+- Domain/subdomain/session tenant resolution without trusting client tenant headers
+- Tenant-scoped Appointment repository and cross-tenant isolation tests
+- Feature Registry plus plan and tenant entitlement resolution
+- Tenant model and white-label BrandingConfig-compatible settings
 - Branches, users, CRM integrations, subscription plans, audit logs
 - Auth with `JWT` containing `user_id`, `tenant_id`, `role`
 - Public/mobile API:
@@ -35,6 +39,8 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
   - `GET /api/available-slots`
   - `POST /api/appointments`
   - `GET /api/appointments/my`
+  - `GET /api/features/registry`
+  - `GET /api/features/effective`
 - Admin API:
   - `POST /api/admin/tenants`
   - `GET /api/admin/tenants`
@@ -77,6 +83,11 @@ CRM_ENCRYPTION_KEY="change-me-in-production"
 PORT=3000
 NODE_ENV="development"
 SELF_SERVE_TRIAL_SIGNUP="false"
+TENANT_BASE_DOMAIN="malesthetic.pro"
+SEED_DEFAULT_TENANT_SLUG="malesthetic"
+SEED_DEFAULT_TENANT_NAME="Мужская Эстетика"
+SEED_PLATFORM_OWNER_PASSWORD="replace-me-before-seeding"
+SEED_DEMO_TENANT_ADMIN_PASSWORD="replace-me-before-seeding"
 YCLIENTS_BASE_URL="https://api.yclients.com/api/v1"
 YCLIENTS_PARTNER_TOKEN="change-me-in-production"
 PHONE_AUTH_PROVIDER="auto"
@@ -168,6 +179,7 @@ npm run prisma:seed
 Seed creates:
 
 - Platform owner user
+- Default existing Maya tenant `malesthetic` with Aurora branding tokens
 - Demo tenant `demo-salon`
 - Demo branding
 - Demo branch
@@ -175,12 +187,7 @@ Seed creates:
 - Demo subscription plan
 - Demo tenant admin user
 
-Default seed credentials:
-
-- Platform owner: `owner@maya.local` / `ChangeMe123!`
-- Demo tenant admin: `admin@demo-salon.local` / `ChangeMe123!`
-
-Optional seed overrides:
+Set local seed credentials explicitly before running seed. Never use local defaults in production:
 
 ```env
 SEED_PLATFORM_OWNER_EMAIL=
@@ -474,22 +481,29 @@ What the import does:
 
 - CRM API tokens are stored only in encrypted form.
 - The mobile app never receives CRM secrets.
-- Tenant-scoped endpoints use JWT tenant context plus guards and service filters.
+- JWT validation reloads the active Membership from PostgreSQL.
+- Tenant resolution middleware creates AsyncLocalStorage TenantContext per request.
+- Tenant-scoped Appointment reads and writes inject `tenantId` from context and use tenant/client predicates.
+- Route, body and arbitrary tenant headers cannot grant tenant access.
 - `platform_owner` can manage all tenants.
 - `tenant_admin` can manage only its own tenant on allowed admin endpoints.
-- v1 keeps tenant isolation enforced in app logic; the initial SQL migration notes the future RLS hardening path for per-request PostgreSQL session settings.
+- Application-layer isolation is mandatory; PostgreSQL RLS remains a documented defence-in-depth hardening step.
+
+Detailed local, migration and verification instructions are in [the tenancy foundation runbook](../docs/architecture/tenancy-foundation-runbook.md).
 
 ## Adding a new CRM adapter
 
-1. Create a new adapter in [src/crm/adapters](/Users/stanislavmosin/Desktop/сайт и приложение/maya-saas-backend/src/crm/adapters).
-2. Implement the `CRMAdapter` contract in [src/crm/crm-adapter.interface.ts](/Users/stanislavmosin/Desktop/сайт и приложение/maya-saas-backend/src/crm/crm-adapter.interface.ts).
-3. Register the provider in [src/crm/crm-adapter.factory.ts](/Users/stanislavmosin/Desktop/сайт и приложение/maya-saas-backend/src/crm/crm-adapter.factory.ts).
+1. Create a new adapter in `src/crm/adapters`.
+2. Implement the contract in `src/crm/crm-adapter.interface.ts`.
+3. Register the provider in `src/crm/crm-adapter.factory.ts`.
 4. Keep all provider-specific business logic inside the adapter, not in controllers.
 
 ## Useful commands
 
 ```bash
 npm run build
+npm run typecheck
+npm run lint
 npm run test
 npm run prisma:generate
 npm run prisma:migrate:deploy
