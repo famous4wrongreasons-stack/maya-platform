@@ -16,6 +16,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
+import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { ReplaceWeeklyAvailabilityDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
@@ -92,6 +93,15 @@ export class InternalCalendarController {
       providerId,
       dto,
     );
+  }
+
+  @Post('providers')
+  @ApiOperation({ summary: 'Create a Maya-managed provider without a login' })
+  createProvider(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateInternalProviderDto,
+  ) {
+    return this.internalCalendarService.createProvider(user.tenantId!, dto);
   }
 
   @Get('providers/:providerId/schedule')
