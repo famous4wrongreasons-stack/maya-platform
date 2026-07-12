@@ -6,7 +6,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { CrmProvider, TenantStatus } from '../common/domain.enums';
+import {
+  CalendarSource,
+  CrmProvider,
+  TenantStatus,
+} from '../common/domain.enums';
 import {
   featureKeysFromFlags,
   normalizeFeatureFlags,
@@ -42,10 +46,22 @@ type BookingModeEvaluation = {
   blockers: string[];
 };
 
+type InternalCalendarCounts = {
+  internalServices?: number;
+  internalProviders?: number;
+  availabilityRules?: number;
+};
+
 const DEFAULT_TRIAL_PERIOD_DAYS = 14;
 const PAST_DUE_GRACE_DAYS = 5;
 const TENANT_STATUS_TRIAL = 'trial';
 const TENANT_STATUS_PAST_DUE = 'past_due';
+
+function isInternalCalendarReady(
+  counts: InternalCalendarCounts | null | undefined,
+): boolean {
+  return (counts?.internalProviders ?? 0) > 0;
+}
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -154,6 +170,8 @@ function withBookingModeTheme(
 function evaluateBookingMode(params: {
   requestedMode: PublicBookingMode;
   tenantStatus: string;
+  calendarSource: string;
+  internalCalendarReady: boolean;
   crmStatus?: string | null;
   crmProvider?: string | null;
   bookingFeatureEnabled: boolean;
@@ -177,14 +195,22 @@ function evaluateBookingMode(params: {
     blockers.push('booking_feature_disabled');
   }
 
-  if (!crmConnected) {
+  if (params.calendarSource === 'internal') {
+    if (!params.internalCalendarReady) {
+      blockers.push('internal_calendar_not_ready');
+    }
+  } else if (!crmConnected) {
     blockers.push('crm_not_active');
   } else if (!realCrmConnected) {
     blockers.push('mock_crm_only');
   }
 
+  const calendarReady =
+    params.calendarSource === 'internal'
+      ? params.internalCalendarReady
+      : realCrmConnected;
   const liveEligible =
-    tenantCanGoLive && params.bookingFeatureEnabled && realCrmConnected;
+    tenantCanGoLive && params.bookingFeatureEnabled && calendarReady;
   const effectiveMode: PublicBookingMode =
     params.requestedMode === 'live' && liveEligible ? 'live' : 'preview';
 
@@ -260,6 +286,17 @@ export class TenantsService {
             users: true,
             branches: true,
             memberships: true,
+            internalServices: { where: { active: true } },
+            internalProviders: {
+              where: {
+                active: true,
+                availabilityRules: { some: { active: true } },
+                services: {
+                  some: { active: true, service: { active: true } },
+                },
+              },
+            },
+            availabilityRules: { where: { active: true } },
           },
         },
         crmIntegration: {
@@ -306,6 +343,17 @@ export class TenantsService {
             users: true,
             branches: true,
             memberships: true,
+            internalServices: { where: { active: true } },
+            internalProviders: {
+              where: {
+                active: true,
+                availabilityRules: { some: { active: true } },
+                services: {
+                  some: { active: true, service: { active: true } },
+                },
+              },
+            },
+            availabilityRules: { where: { active: true } },
           },
         },
       },
@@ -347,6 +395,7 @@ export class TenantsService {
           status: dto.status ?? TenantStatus.TRIAL,
           planId: dto.planId,
           industryPresetId: dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID,
+          calendarSource: dto.calendarSource ?? CalendarSource.EXTERNAL,
           defaultCurrency: dto.defaultCurrency ?? 'RUB',
           defaultTimezone: dto.defaultTimezone ?? normalizedBranchTimezone,
           defaultLocale: dto.defaultLocale ?? 'ru-RU',
@@ -430,6 +479,7 @@ export class TenantsService {
           status: dto.status,
           planId: dto.planId,
           industryPresetId: dto.industryPresetId,
+          calendarSource: dto.calendarSource,
           defaultCurrency: dto.defaultCurrency,
           defaultTimezone: dto.defaultTimezone,
           defaultLocale: dto.defaultLocale,
@@ -489,6 +539,7 @@ export class TenantsService {
       where: { id },
       select: {
         status: true,
+        calendarSource: true,
         plan: {
           select: {
             featuresJson: true,
@@ -503,6 +554,21 @@ export class TenantsService {
           select: {
             provider: true,
             status: true,
+          },
+        },
+        _count: {
+          select: {
+            internalServices: { where: { active: true } },
+            internalProviders: {
+              where: {
+                active: true,
+                availabilityRules: { some: { active: true } },
+                services: {
+                  some: { active: true, service: { active: true } },
+                },
+              },
+            },
+            availabilityRules: { where: { active: true } },
           },
         },
       },
@@ -527,6 +593,8 @@ export class TenantsService {
     const evaluation = evaluateBookingMode({
       requestedMode: resolveRequestedBookingMode(theme),
       tenantStatus: tenant.status,
+      calendarSource: tenant.calendarSource ?? CalendarSource.EXTERNAL,
+      internalCalendarReady: isInternalCalendarReady(tenant._count),
       crmStatus: tenant.crmIntegration?.status ?? null,
       crmProvider: tenant.crmIntegration?.provider ?? null,
       bookingFeatureEnabled:
@@ -563,6 +631,21 @@ export class TenantsService {
             status: true,
           },
         },
+        _count: {
+          select: {
+            internalServices: { where: { active: true } },
+            internalProviders: {
+              where: {
+                active: true,
+                availabilityRules: { some: { active: true } },
+                services: {
+                  some: { active: true, service: { active: true } },
+                },
+              },
+            },
+            availabilityRules: { where: { active: true } },
+          },
+        },
       },
     });
 
@@ -596,6 +679,8 @@ export class TenantsService {
     const bookingEvaluation = evaluateBookingMode({
       requestedMode: resolveRequestedBookingMode(theme),
       tenantStatus: tenant.status,
+      calendarSource: tenant.calendarSource ?? CalendarSource.EXTERNAL,
+      internalCalendarReady: isInternalCalendarReady(tenant._count),
       crmStatus: tenant.crmIntegration?.status ?? null,
       crmProvider: tenant.crmIntegration?.provider ?? null,
       bookingFeatureEnabled,
@@ -633,6 +718,7 @@ export class TenantsService {
       client_registration_enabled: clientRegistrationEnabled,
       booking_mode: bookingEvaluation.effectiveMode,
       booking_live_enabled: bookingEvaluation.effectiveMode === 'live',
+      calendar_source: tenant.calendarSource ?? CalendarSource.EXTERNAL,
       industry_preset: industryPreset,
       brand,
       content,
@@ -640,6 +726,7 @@ export class TenantsService {
         slug: tenant.slug,
         status: tenant.status,
         industry_preset_id: industryPreset.id,
+        calendar_source: tenant.calendarSource ?? CalendarSource.EXTERNAL,
         default_currency: tenant.defaultCurrency,
         default_timezone: tenant.defaultTimezone,
         default_locale: tenant.defaultLocale,
@@ -716,6 +803,7 @@ export class TenantsService {
       plan_id: tenant.planId,
       industry_preset_id: industryPreset.id,
       industry_preset: industryPreset,
+      calendar_source: tenant.calendarSource ?? CalendarSource.EXTERNAL,
       default_currency: tenant.defaultCurrency,
       default_timezone: tenant.defaultTimezone,
       default_locale: tenant.defaultLocale,
@@ -811,6 +899,8 @@ export class TenantsService {
     const evaluation = evaluateBookingMode({
       requestedMode: resolveRequestedBookingMode(theme),
       tenantStatus: tenant.status,
+      calendarSource: tenant.calendarSource ?? CalendarSource.EXTERNAL,
+      internalCalendarReady: isInternalCalendarReady(tenant._count),
       crmStatus: tenant.crmIntegration?.status ?? null,
       crmProvider: tenant.crmIntegration?.provider ?? null,
       bookingFeatureEnabled,

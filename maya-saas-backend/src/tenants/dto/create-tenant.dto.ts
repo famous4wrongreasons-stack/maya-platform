@@ -10,7 +10,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-import { TenantStatus } from '../../common/domain.enums';
+import { CalendarSource, TenantStatus } from '../../common/domain.enums';
 import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 export class CreateTenantDto {
@@ -41,6 +41,14 @@ export class CreateTenantDto {
   @IsOptional()
   @IsIn(INDUSTRY_PRESET_IDS)
   industryPresetId?: string;
+
+  @ApiPropertyOptional({
+    enum: CalendarSource,
+    default: CalendarSource.EXTERNAL,
+  })
+  @IsOptional()
+  @IsEnum(CalendarSource)
+  calendarSource?: CalendarSource;
 
   @ApiPropertyOptional({ example: 'RUB', default: 'RUB' })
   @IsOptional()

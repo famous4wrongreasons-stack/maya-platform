@@ -20,7 +20,7 @@ export class AppointmentsController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create an appointment through the tenant CRM adapter',
+    summary: 'Create an appointment through the configured calendar source',
   })
   createAppointment(
     @CurrentUser() user: AuthenticatedUser,
@@ -35,8 +35,7 @@ export class AppointmentsController {
 
   @Post('preview')
   @ApiOperation({
-    summary:
-      'Validate an appointment request against the tenant CRM without creating a live booking',
+    summary: 'Validate an appointment request without creating a live booking',
   })
   previewAppointment(
     @CurrentUser() user: AuthenticatedUser,

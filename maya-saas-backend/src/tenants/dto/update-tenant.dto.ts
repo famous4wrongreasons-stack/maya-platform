@@ -10,7 +10,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-import { TenantStatus } from '../../common/domain.enums';
+import { CalendarSource, TenantStatus } from '../../common/domain.enums';
 import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 const BOOKING_MODE_VALUES = ['preview', 'live'] as const;
@@ -44,6 +44,11 @@ export class UpdateTenantDto {
   @IsOptional()
   @IsIn(INDUSTRY_PRESET_IDS)
   industryPresetId?: string;
+
+  @ApiPropertyOptional({ enum: CalendarSource })
+  @IsOptional()
+  @IsEnum(CalendarSource)
+  calendarSource?: CalendarSource;
 
   @ApiPropertyOptional({ example: 'RUB' })
   @IsOptional()
@@ -119,7 +124,7 @@ export class UpdateTenantDto {
   @ApiPropertyOptional({
     enum: BOOKING_MODE_VALUES,
     description:
-      'Requested booking mode for the client app. Effective live mode still requires an active tenant and a real active CRM integration.',
+      'Requested booking mode for the client app. Effective live mode still requires an active tenant and a ready configured calendar source.',
   })
   @IsOptional()
   @IsIn(BOOKING_MODE_VALUES)

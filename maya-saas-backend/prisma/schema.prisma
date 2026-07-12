@@ -12,39 +12,44 @@ datasource db {
 }
 
 model Tenant {
-  id                    String              @id @default(cuid())
-  name                  String
-  slug                  String              @unique
-  status                String              @default("trial")
-  planId                String?
-  industryPresetId      String?
-  defaultCurrency       String              @default("RUB")
-  defaultTimezone       String              @default("Europe/Moscow")
-  defaultLocale         String              @default("ru-RU")
-  customDomain          String?             @unique
-  subdomain             String?             @unique
-  trialEndsAt           DateTime?
-  currentPeriodStart    DateTime?
-  currentPeriodEnd      DateTime?
-  billingMethodId       String?
-  allowSelfRegistration Boolean             @default(true)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  plan                  SubscriptionPlan?   @relation(fields: [planId], references: [id])
-  brandingSettings      BrandingSettings?
-  branches              Branch[]
-  users                 User[]
-  crmIntegration        CrmIntegration?
-  auditLogs             AuditLog[]
-  appointments          Appointment[]
-  phoneAuthCodes        PhoneAuthCode[]
-  authIdentities        AuthIdentity[]
-  authFlowStates        AuthFlowState[]
-  authSessions          AuthSession[]
-  authRateLimitBuckets  AuthRateLimitBucket[]
-  billingPayments       BillingPayment[]
-  memberships           Membership[]
-  entitlements          TenantEntitlement[]
+  id                     String                          @id @default(cuid())
+  name                   String
+  slug                   String                          @unique
+  status                 String                          @default("trial")
+  planId                 String?
+  industryPresetId       String?
+  calendarSource         String                          @default("external")
+  defaultCurrency        String                          @default("RUB")
+  defaultTimezone        String                          @default("Europe/Moscow")
+  defaultLocale          String                          @default("ru-RU")
+  customDomain           String?                         @unique
+  subdomain              String?                         @unique
+  trialEndsAt            DateTime?
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  billingMethodId        String?
+  allowSelfRegistration  Boolean                         @default(true)
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+  plan                   SubscriptionPlan?               @relation(fields: [planId], references: [id])
+  brandingSettings       BrandingSettings?
+  branches               Branch[]
+  users                  User[]
+  crmIntegration         CrmIntegration?
+  auditLogs              AuditLog[]
+  appointments           Appointment[]
+  phoneAuthCodes         PhoneAuthCode[]
+  authIdentities         AuthIdentity[]
+  authFlowStates         AuthFlowState[]
+  authSessions           AuthSession[]
+  authRateLimitBuckets   AuthRateLimitBucket[]
+  billingPayments        BillingPayment[]
+  memberships            Membership[]
+  entitlements           TenantEntitlement[]
+  internalServices       InternalService[]
+  internalProviders      InternalProvider[]
+  availabilityRules      InternalAvailabilityRule[]
+  availabilityExceptions InternalAvailabilityException[]
 }
 
 /// Persisted white-label BrandingConfig. The database model name is retained
@@ -86,40 +91,42 @@ model BrandingSettings {
 }
 
 model Branch {
-  id           String        @id @default(cuid())
-  tenantId     String
-  name         String
-  address      String?
-  phone        String?
-  timezone     String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  users        User[]
-  appointments Appointment[]
+  id                String             @id @default(cuid())
+  tenantId          String
+  name              String
+  address           String?
+  phone             String?
+  timezone          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users             User[]
+  appointments      Appointment[]
+  internalProviders InternalProvider[]
 
   @@index([tenantId])
 }
 
 model User {
-  id             String         @id @default(cuid())
-  tenantId       String?
-  branchId       String?
-  email          String
-  phone          String?
-  encryptedName  String?
-  passwordHash   String
-  role           String
-  status         String         @default("active")
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  tenant         Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch         Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  auditLogs      AuditLog[]
-  appointments   Appointment[]  @relation("ClientAppointments")
-  authIdentities AuthIdentity[]
-  authSessions   AuthSession[]
-  memberships    Membership[]
+  id                String             @id @default(cuid())
+  tenantId          String?
+  branchId          String?
+  email             String
+  phone             String?
+  encryptedName     String?
+  passwordHash      String
+  role              String
+  status            String             @default("active")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch            Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  auditLogs         AuditLog[]
+  appointments      Appointment[]      @relation("ClientAppointments")
+  authIdentities    AuthIdentity[]
+  authSessions      AuthSession[]
+  memberships       Membership[]
+  internalProviders InternalProvider[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -272,6 +279,100 @@ model CrmIntegration {
   tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
+model InternalService {
+  id                  String                    @id @default(cuid())
+  tenantId            String
+  name                String
+  description         String?
+  price               Int
+  currency            String                    @default("RUB")
+  durationMinutes     Int
+  bufferBeforeMinutes Int                       @default(0)
+  bufferAfterMinutes  Int                       @default(0)
+  active              Boolean                   @default(true)
+  sortOrder           Int                       @default(0)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  tenant              Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  providers           InternalProviderService[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, active, sortOrder])
+}
+
+model InternalProvider {
+  id                  String                          @id @default(cuid())
+  tenantId            String
+  userId              String
+  branchId            String?
+  displayName         String
+  title               String?
+  specialization      String?
+  avatarUrl           String?
+  active              Boolean                         @default(true)
+  slotIntervalMinutes Int                             @default(30)
+  createdAt           DateTime                        @default(now())
+  updatedAt           DateTime                        @updatedAt
+  tenant              Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                User                            @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  branch              Branch?                         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  services            InternalProviderService[]
+  availabilityRules   InternalAvailabilityRule[]
+  exceptions          InternalAvailabilityException[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, active])
+  @@index([branchId])
+}
+
+model InternalProviderService {
+  tenantId   String
+  providerId String
+  serviceId  String
+  active     Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  provider   InternalProvider @relation(fields: [providerId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  service    InternalService  @relation(fields: [serviceId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@id([tenantId, providerId, serviceId])
+  @@index([tenantId, serviceId, active])
+}
+
+model InternalAvailabilityRule {
+  id          String           @id @default(cuid())
+  tenantId    String
+  providerId  String
+  weekday     Int
+  startMinute Int
+  endMinute   Int
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider    InternalProvider @relation(fields: [providerId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, providerId, weekday, startMinute, endMinute])
+  @@index([tenantId, providerId, weekday, active])
+}
+
+model InternalAvailabilityException {
+  id         String           @id @default(cuid())
+  tenantId   String
+  providerId String
+  startAt    DateTime
+  endAt      DateTime
+  kind       String           @default("unavailable")
+  note       String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider   InternalProvider @relation(fields: [providerId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@index([tenantId, providerId, startAt, endAt])
+}
+
 model SubscriptionPlan {
   id                  String            @id @default(cuid())
   name                String            @unique
@@ -380,9 +481,13 @@ model Appointment {
   clientId        String
   branchId        String?
   crmExternalId   String?
+  source          String   @default("external")
   staffExternalId String
   serviceIds      Json
   startAt         DateTime
+  endAt           DateTime
+  blockedStartAt  DateTime
+  blockedEndAt    DateTime
   status          String   @default("confirmed")
   notes           String?
   providerPayload Json?
@@ -396,4 +501,5 @@ model Appointment {
   @@index([tenantId])
   @@index([clientId])
   @@index([branchId])
+  @@index([tenantId, staffExternalId, startAt])
 }

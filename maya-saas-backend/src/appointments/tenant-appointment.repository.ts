@@ -8,9 +8,13 @@ interface CreateTenantAppointmentData {
   clientId: string;
   branchId: string | null;
   crmExternalId: string | null;
+  source: string;
   staffExternalId: string;
   serviceIds: Prisma.InputJsonValue;
   startAt: Date;
+  endAt: Date;
+  blockedStartAt: Date;
+  blockedEndAt: Date;
   status: string;
   notes: string | null;
   providerPayload?: Prisma.InputJsonValue;
@@ -18,7 +22,11 @@ interface CreateTenantAppointmentData {
 
 interface UpdateTenantAppointmentData {
   status?: string;
+  source?: string;
   startAt?: Date;
+  endAt?: Date;
+  blockedStartAt?: Date;
+  blockedEndAt?: Date;
   branchId?: string | null;
   staffExternalId?: string;
   serviceIds?: Prisma.InputJsonValue;

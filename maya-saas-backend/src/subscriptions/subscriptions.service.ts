@@ -19,6 +19,18 @@ export class SubscriptionsService {
     return plan;
   }
 
+  async getPlanByNameOrThrow(name: string) {
+    const plan = await this.prisma.subscriptionPlan.findUnique({
+      where: { name },
+    });
+
+    if (!plan) {
+      throw new NotFoundException('Subscription plan not found');
+    }
+
+    return plan;
+  }
+
   async listPlans() {
     const plans = await this.prisma.subscriptionPlan.findMany({
       orderBy: [{ priceMonthly: 'asc' }, { createdAt: 'asc' }],

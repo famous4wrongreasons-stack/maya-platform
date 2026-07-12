@@ -273,7 +273,17 @@ export const LEGACY_FEATURE_ALIASES: Partial<
 };
 
 export const MAYA_PLAN_FEATURES: Record<string, MayaFeatureKey[]> = {
-  start: ['booking', 'branding', 'client_app', 'loyalty', 'tg_basic'],
+  start: [
+    'booking',
+    'branding',
+    'client_app',
+    'loyalty',
+    'tg_basic',
+    'calendar.internal',
+    'customers.core',
+    'expenses.core',
+    'analytics.solo',
+  ],
   pro: [
     'booking',
     'branding',

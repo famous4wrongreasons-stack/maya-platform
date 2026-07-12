@@ -342,6 +342,240 @@ async function runSmoke() {
     'trial_client_registration_disabled',
   );
 
+  const soloSlug = `solo-${Date.now()}`;
+  const soloSignup = asRecord(
+    await expectStatus('/onboarding/trial', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Smoke Solo Specialist',
+        slug: soloSlug,
+        ownerEmail: `${soloSlug}@example.test`,
+        ownerName: 'Smoke Specialist',
+        ownerPhone: `+7998${String(Date.now() % 10_000_000).padStart(7, '0')}`,
+        industryPresetId: 'solo_specialist',
+        calendarSource: 'internal',
+        password: 'StrongPass123!',
+        branchName: 'Private Studio',
+        branchTimezone: 'Europe/Moscow',
+      }),
+    }),
+  );
+  const soloToken = stringField(soloSignup, 'access_token');
+  const soloTenant = asRecord(soloSignup.tenant);
+  const soloTenantId = stringField(soloTenant, 'id');
+  assert.equal(soloSignup.calendar_source, 'internal');
+  assert.equal(soloTenant.calendar_source, 'internal');
+
+  const initialSoloSetup = asRecord(
+    await expectStatus('/internal-calendar/setup', 200, {
+      headers: authHeaders(soloToken),
+    }),
+  );
+  const soloProviders = asArray(initialSoloSetup.providers);
+  assert.equal(soloProviders.length, 1);
+  assert.equal(initialSoloSetup.ready, false);
+  const soloProviderId = stringField(asRecord(soloProviders[0]), 'id');
+
+  const soloService = asRecord(
+    await expectStatus('/internal-calendar/services', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'Individual Consultation',
+        price: 3000,
+        durationMinutes: 60,
+        bufferAfterMinutes: 15,
+      }),
+    }),
+  );
+  const soloServiceId = stringField(soloService, 'id');
+  await expectStatus(
+    `/internal-calendar/providers/${soloProviderId}/schedule`,
+    200,
+    {
+      method: 'PUT',
+      headers: {
+        ...authHeaders(soloToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        rules: Array.from({ length: 7 }, (_, weekday) => ({
+          weekday,
+          startTime: '09:00',
+          endTime: '18:00',
+        })),
+      }),
+    },
+  );
+  const readySoloSetup = asRecord(
+    await expectStatus('/internal-calendar/setup', 200, {
+      headers: authHeaders(soloToken),
+    }),
+  );
+  assert.equal(readySoloSetup.ready, true);
+
+  await expectStatus(`/admin/tenants/${soloTenantId}`, 200, {
+    method: 'PATCH',
+    headers: {
+      ...authHeaders(ownerToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      status: 'active',
+      bookingMode: 'live',
+      allowSelfRegistration: true,
+    }),
+  });
+  const soloConfig = asRecord(
+    await expectStatus(`/mobile/config/${soloSlug}`, 200),
+  );
+  assert.equal(soloConfig.calendar_source, 'internal');
+  assert.equal(soloConfig.booking_live_enabled, true);
+  assert.equal(soloConfig.client_registration_enabled, true);
+
+  const soloClientPhone = `+7997${String(Date.now() % 10_000_000).padStart(7, '0')}`;
+  await expectStatus('/auth/phone/start', 201, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ tenantSlug: soloSlug, phone: soloClientPhone }),
+  });
+  const soloClientLogin = asRecord(
+    await expectStatus('/auth/phone/verify', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        tenantSlug: soloSlug,
+        phone: soloClientPhone,
+        code: fixedPhoneCode,
+      }),
+    }),
+  );
+  const soloClientToken = stringField(soloClientLogin, 'access_token');
+  await expectStatus('/me', 200, {
+    method: 'PATCH',
+    headers: {
+      ...authHeaders(soloClientToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ name: 'Solo Smoke Client' }),
+  });
+
+  const soloServices = asArray(
+    await expectStatus('/services', 200, {
+      headers: authHeaders(soloClientToken),
+    }),
+  );
+  const soloStaff = asArray(
+    await expectStatus('/staff', 200, {
+      headers: authHeaders(soloClientToken),
+    }),
+  );
+  assert.equal(stringField(asRecord(soloServices[0]), 'id'), soloServiceId);
+  assert.equal(stringField(asRecord(soloStaff[0]), 'id'), soloProviderId);
+
+  const soloBookingDay = new Date(Date.now() + 8 * 24 * 60 * 60 * 1_000)
+    .toISOString()
+    .slice(0, 10);
+  const soloSlots = asArray(
+    await expectStatus(
+      `/available-slots?date=${soloBookingDay}T00%3A00%3A00.000Z&staffId=${soloProviderId}&serviceIds=${soloServiceId}`,
+      200,
+      { headers: authHeaders(soloClientToken) },
+    ),
+  );
+  assert(soloSlots.length > 1);
+  const soloFirstStart = stringField(asRecord(soloSlots[0]), 'start');
+  const soloAppointmentPayload = {
+    staffId: soloProviderId,
+    serviceIds: [soloServiceId],
+    start: soloFirstStart,
+  };
+  const soloAppointment = asRecord(
+    await expectStatus('/appointments', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloClientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(soloAppointmentPayload),
+    }),
+  );
+  assert.equal(soloAppointment.source, 'internal');
+  assert.equal(soloAppointment.crm_external_id, null);
+  const soloAppointmentId = stringField(soloAppointment, 'id');
+  await expectStatus('/appointments', 400, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(soloClientToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(soloAppointmentPayload),
+  });
+
+  const soloRemainingSlots = asArray(
+    await expectStatus(
+      `/available-slots?date=${soloBookingDay}T00%3A00%3A00.000Z&staffId=${soloProviderId}&serviceIds=${soloServiceId}`,
+      200,
+      { headers: authHeaders(soloClientToken) },
+    ),
+  );
+  const soloNextStart = stringField(asRecord(soloRemainingSlots[0]), 'start');
+  const soloNextEnd = stringField(asRecord(soloRemainingSlots[0]), 'end');
+  const rescheduledSolo = asRecord(
+    await expectStatus(`/appointments/${soloAppointmentId}/reschedule`, 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloClientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ start: soloNextStart }),
+    }),
+  );
+  assert.equal(asRecord(rescheduledSolo.appointment).source, 'internal');
+  await expectStatus(`/appointments/${soloAppointmentId}/cancel`, 201, {
+    method: 'POST',
+    headers: authHeaders(soloClientToken),
+  });
+  await expectStatus(`/appointments/${soloAppointmentId}/cancel`, 409, {
+    method: 'POST',
+    headers: authHeaders(soloClientToken),
+  });
+  await expectStatus(
+    `/internal-calendar/providers/${soloProviderId}/time-off`,
+    201,
+    {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        startAt: soloNextStart,
+        endAt: soloNextEnd,
+        note: 'Smoke time off',
+      }),
+    },
+  );
+  const slotsAfterTimeOff = asArray(
+    await expectStatus(
+      `/available-slots?date=${soloBookingDay}T00%3A00%3A00.000Z&staffId=${soloProviderId}&serviceIds=${soloServiceId}`,
+      200,
+      { headers: authHeaders(soloClientToken) },
+    ),
+  );
+  assert(
+    !slotsAfterTimeOff.some(
+      (slot) => stringField(asRecord(slot), 'start') === soloNextStart,
+    ),
+  );
+  await expectStatus('/internal-calendar/setup', 409, {
+    headers: authHeaders(demoToken),
+  });
+
   await expectStatus('/auth/refresh', 201, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -354,7 +588,7 @@ async function runSmoke() {
   });
 
   console.log(
-    'HTTP smoke passed: tenant fence, auth rotation, preview booking and trial safety',
+    'HTTP smoke passed: tenant fence, auth rotation, CRM preview and internal calendar booking',
   );
 }
 

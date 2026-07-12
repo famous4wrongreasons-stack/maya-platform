@@ -1,6 +1,8 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { CalendarSource } from '../common/domain.enums';
+import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -39,9 +41,13 @@ type AppointmentRecord = {
   clientId: string;
   branchId: string | null;
   crmExternalId: string | null;
+  source: string;
   staffExternalId: string;
   serviceIds: string[];
   startAt: Date;
+  endAt: Date;
+  blockedStartAt: Date;
+  blockedEndAt: Date;
   status: string;
   notes: string | null;
   providerPayload: unknown;
@@ -67,9 +73,13 @@ describe('AppointmentsService', () => {
       clientId: 'user-1',
       branchId: 'branch-1',
       crmExternalId: 'crm-1',
+      source: CalendarSource.EXTERNAL,
       staffExternalId: 'staff-1',
       serviceIds: ['svc-1'],
       startAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      endAt: new Date(now.getTime() + 25 * 60 * 60 * 1000),
+      blockedStartAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      blockedEndAt: new Date(now.getTime() + 25 * 60 * 60 * 1000),
       status: 'confirmed',
       notes: null,
       providerPayload: {},
@@ -169,6 +179,20 @@ describe('AppointmentsService', () => {
       status: 'canceled',
       raw: { cancelled: true },
     });
+    const createAppointmentMock: jest.MockedFunction<
+      CrmService['createAppointment']
+    > = jest.fn().mockResolvedValue({
+      external_id: 'crm-created-1',
+      status: 'confirmed',
+      start: '2026-07-05T11:00:00',
+      staff_id: 'staff-1',
+      service_ids: ['svc-1'],
+      branch_id: 'branch-1',
+      raw: { created: true },
+    });
+    const getCalendarSourceMock: jest.MockedFunction<
+      CrmService['getCalendarSource']
+    > = jest.fn().mockResolvedValue(CalendarSource.EXTERNAL);
     const rescheduleAppointmentMock: jest.MockedFunction<
       (
         tenantId: string,
@@ -238,12 +262,16 @@ describe('AppointmentsService', () => {
     const crmService: Pick<
       CrmService,
       | 'cancelAppointment'
+      | 'createAppointment'
+      | 'getCalendarSource'
       | 'getAvailableSlots'
       | 'getServices'
       | 'getStaff'
       | 'rescheduleAppointment'
     > = {
       cancelAppointment: cancelAppointmentMock,
+      createAppointment: createAppointmentMock,
+      getCalendarSource: getCalendarSourceMock,
       getAvailableSlots: getAvailableSlotsMock,
       getServices: getServicesMock,
       getStaff: getStaffMock,
@@ -274,6 +302,16 @@ describe('AppointmentsService', () => {
     const auditLogService: Pick<AuditLogService, 'log'> = {
       log: auditLogMock,
     };
+    const internalCalendarService: Pick<
+      InternalCalendarService,
+      'getServiceTiming'
+    > = {
+      getServiceTiming: jest.fn().mockResolvedValue({
+        durationMinutes: 60,
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+      }),
+    };
     const tenantContext: Pick<
       TenantContextService,
       'assertTenantId' | 'requireTenantId'
@@ -292,6 +330,7 @@ describe('AppointmentsService', () => {
         tenantContext as TenantContextService,
         appointmentRepository,
         crmService as CrmService,
+        internalCalendarService as InternalCalendarService,
         tenantsService as TenantsService,
         usersService as UsersService,
         auditLogService as AuditLogService,
@@ -302,6 +341,8 @@ describe('AppointmentsService', () => {
         appointmentFindFirstMock,
         appointmentUpdateMock,
         cancelAppointmentMock,
+        createAppointmentMock,
+        getCalendarSourceMock,
         getAvailableSlotsMock,
         getServicesMock,
         getStaffMock,

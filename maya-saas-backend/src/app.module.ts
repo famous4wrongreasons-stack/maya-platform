@@ -15,6 +15,7 @@ import { CrmModule } from './crm/crm.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { EntitlementsModule } from './entitlements/entitlements.module';
 import { FeatureGuard } from './entitlements/feature.guard';
+import { InternalCalendarModule } from './internal-calendar/internal-calendar.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -48,6 +49,7 @@ import { validateRuntimeConfig } from './config/runtime-config';
     BrandingModule,
     BranchesModule,
     CrmModule,
+    InternalCalendarModule,
     ServicesModule,
     StaffModule,
     AppointmentsModule,

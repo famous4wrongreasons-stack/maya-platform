@@ -104,6 +104,11 @@ journey
     Maya reports ROI: 5: Owner
 ```
 
+## Связанные Контракты
+
+- [Внутренний календарь Maya](internal-calendar.md) - единый booking API для
+  индивидуальных специалистов без CRM и компаний с внешней CRM.
+
 ## Требования
 
 - Каждая роль имеет явную permission matrix.

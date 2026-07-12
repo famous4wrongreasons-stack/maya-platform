@@ -73,6 +73,7 @@ export class AdminService {
     actor: AuthenticatedUser,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
+    this.assertTenantUpdateFieldsAllowed(dto, actor);
     const tenant = await this.tenantsService.updateTenant(id, dto);
 
     await this.auditLogService.log({
@@ -294,5 +295,33 @@ export class AdminService {
       created_at: branding.createdAt,
       updated_at: branding.updatedAt,
     };
+  }
+
+  private assertTenantUpdateFieldsAllowed(
+    dto: UpdateTenantDto,
+    actor: AuthenticatedUser,
+  ): void {
+    if (actor.role === UserRole.PLATFORM_OWNER) {
+      return;
+    }
+
+    const protectedFields: Array<keyof UpdateTenantDto> = [
+      'status',
+      'planId',
+      'calendarSource',
+      'trialEndsAt',
+      'currentPeriodStart',
+      'currentPeriodEnd',
+      'billingMethodId',
+    ];
+    const attemptedField = protectedFields.find(
+      (field) => dto[field] !== undefined,
+    );
+
+    if (attemptedField) {
+      throw new ForbiddenException(
+        `Only the platform billing flow can update ${attemptedField}`,
+      );
+    }
   }
 }
