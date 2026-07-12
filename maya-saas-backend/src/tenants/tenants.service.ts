@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -477,6 +478,69 @@ export class TenantsService {
     });
 
     return this.serializeTenant(await this.getTenantByIdOrThrow(id));
+  }
+
+  async assertLiveBookingEnabled(id: string) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id },
+      select: {
+        status: true,
+        plan: {
+          select: {
+            featuresJson: true,
+          },
+        },
+        brandingSettings: {
+          select: {
+            themeJson: true,
+          },
+        },
+        crmIntegration: {
+          select: {
+            provider: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    const theme =
+      (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
+      {};
+    const resolvedEntitlements = this.entitlementsService
+      ? await this.entitlementsService.getEffectiveEntitlements(id)
+      : null;
+    const features = resolvedEntitlements?.features
+      ? resolvedEntitlements.features
+      : normalizeFeatureFlags(tenant.plan?.featuresJson);
+    const featureKeys = resolvedEntitlements?.featureKeys
+      ? resolvedEntitlements.featureKeys
+      : featureKeysFromFlags(features);
+    const evaluation = evaluateBookingMode({
+      requestedMode: resolveRequestedBookingMode(theme),
+      tenantStatus: tenant.status,
+      crmStatus: tenant.crmIntegration?.status ?? null,
+      crmProvider: tenant.crmIntegration?.provider ?? null,
+      bookingFeatureEnabled:
+        featureKeys.length === 0 || features.booking === true,
+    });
+
+    if (evaluation.effectiveMode !== 'live') {
+      throw new ForbiddenException({
+        message: 'Live booking is not enabled for this tenant.',
+        error: {
+          code: 'live_booking_disabled',
+          message: 'Live booking is not enabled for this tenant.',
+          mode: evaluation.effectiveMode,
+        },
+      });
+    }
+
+    return evaluation;
   }
 
   async getPublicMobileConfig(slug: string) {

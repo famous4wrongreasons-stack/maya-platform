@@ -72,6 +72,7 @@ export class AppointmentsService {
     dto: CreateAppointmentDto,
   ) {
     this.tenantContext.assertTenantId(tenantId);
+    await this.tenantsService.assertLiveBookingEnabled(tenantId);
 
     if (dto.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(

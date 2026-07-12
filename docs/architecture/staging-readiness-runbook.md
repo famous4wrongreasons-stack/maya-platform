@@ -27,6 +27,8 @@ The integration pull request must be green before staging work begins:
 4. Browser bundles parse without conflict markers or invalid inline JavaScript.
 5. The iOS mirror builds from its own reviewed pull request.
 6. Dependency audit has no high or critical production dependency finding.
+7. The compiled-backend HTTP smoke confirms tenant fencing, session rotation,
+   preview booking and a fail-closed live-write boundary.
 
 Do not bypass a failed gate by weakening CI, tenant checks, CORS, OAuth callback
 validation or production configuration validation.

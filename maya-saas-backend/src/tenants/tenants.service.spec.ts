@@ -1,3 +1,5 @@
+import { ForbiddenException } from '@nestjs/common';
+
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantsService } from './tenants.service';
@@ -269,5 +271,72 @@ describe('TenantsService', () => {
 
     expect(result.booking_mode).toBe('preview');
     expect(result.booking_live_enabled).toBe(false);
+  });
+
+  it('allows server-side live booking only for an eligible tenant', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    await expect(
+      service.assertLiveBookingEnabled('tenant-1'),
+    ).resolves.toMatchObject({
+      effectiveMode: 'live',
+      liveEligible: true,
+    });
+  });
+
+  it('rejects direct live booking while the effective mode is preview', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      crmIntegration: {
+        provider: 'mock',
+        status: 'active',
+      },
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    await expect(
+      service.assertLiveBookingEnabled('tenant-1'),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'live_booking_disabled',
+          mode: 'preview',
+        },
+      },
+    });
+    await expect(
+      service.assertLiveBookingEnabled('tenant-1'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

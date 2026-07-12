@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -249,14 +249,21 @@ describe('AppointmentsService', () => {
       getStaff: getStaffMock,
       rescheduleAppointment: rescheduleAppointmentMock,
     };
-    const tenantsService: Pick<TenantsService, 'assertBranchBelongsToTenant'> =
-      {
-        assertBranchBelongsToTenant: jest
-          .fn()
-          .mockResolvedValue(
-            undefined,
-          ) as TenantsService['assertBranchBelongsToTenant'],
-      };
+    const assertLiveBookingEnabledMock: jest.MockedFunction<
+      (tenantId: string) => Promise<unknown>
+    > = jest.fn().mockResolvedValue({ effectiveMode: 'live' });
+    const tenantsService: Pick<
+      TenantsService,
+      'assertBranchBelongsToTenant' | 'assertLiveBookingEnabled'
+    > = {
+      assertBranchBelongsToTenant: jest
+        .fn()
+        .mockResolvedValue(
+          undefined,
+        ) as TenantsService['assertBranchBelongsToTenant'],
+      assertLiveBookingEnabled:
+        assertLiveBookingEnabledMock as TenantsService['assertLiveBookingEnabled'],
+    };
     const usersService: Pick<
       UsersService,
       'getTenantUserOrThrow' | 'serializeUser'
@@ -290,6 +297,7 @@ describe('AppointmentsService', () => {
         auditLogService as AuditLogService,
       ),
       mocks: {
+        assertLiveBookingEnabledMock,
         auditLogMock,
         appointmentFindFirstMock,
         appointmentUpdateMock,
@@ -303,6 +311,33 @@ describe('AppointmentsService', () => {
       },
     };
   };
+
+  it('fails closed before contacting CRM when live booking is disabled', async () => {
+    const {
+      service,
+      mocks: { assertLiveBookingEnabledMock, getTenantUserOrThrowMock },
+    } = createService();
+
+    assertLiveBookingEnabledMock.mockRejectedValue(
+      new ForbiddenException({
+        message: 'Live booking is not enabled for this tenant.',
+        error: {
+          code: 'live_booking_disabled',
+          mode: 'preview',
+        },
+      }),
+    );
+
+    await expect(
+      service.createForClient('tenant-1', 'user-1', {
+        staffId: 'staff-1',
+        serviceIds: ['svc-1'],
+        start: '2026-07-05T11:00:00',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(assertLiveBookingEnabledMock).toHaveBeenCalledWith('tenant-1');
+    expect(getTenantUserOrThrowMock).not.toHaveBeenCalled();
+  });
 
   it('uses the stored client profile when preview payload omits name and phone', async () => {
     const {

@@ -261,7 +261,24 @@ What preview does:
 - returns normalized payload details
 - does not create a live appointment in YClients
 
+`POST /api/appointments` is fail-closed on the backend. It returns
+`403 live_booking_disabled` unless the tenant's effective booking mode is
+`live`. Effective live mode requires an active eligible tenant, the booking
+feature, an active non-mock CRM integration and an explicit owner request for
+live mode. The frontend flag is never the only live-write boundary.
+
 If the authenticated client already has a saved profile name and phone, `clientName` and `clientPhone` can be omitted. If the profile is incomplete, backend returns a machine-readable error so the frontend can prompt the user to complete it first.
+
+The CI HTTP smoke can also be run against a migrated and seeded test database:
+
+```bash
+npm run build
+npm run test:http
+```
+
+It starts the compiled backend on an isolated local port and verifies tenant
+fencing, phone auth, refresh rotation, preview booking, the live-write gate and
+trial registration safety.
 
 ## Phone-first client auth and profile
 

@@ -23,6 +23,7 @@
     "lint": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\" --fix",
     "test": "jest",
+    "test:http": "ts-node --project tsconfig.scripts.json --transpile-only scripts/http-smoke.ts",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",

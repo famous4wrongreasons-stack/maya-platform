@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - main
-      - "codex/**"
-      - "feature/**"
 
 permissions:
   contents: read
@@ -46,6 +44,10 @@ jobs:
       JWT_SECRET: test-jwt-signing-secret-for-ci-only
       NODE_ENV: test
       PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
+      SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-salon.local
+      SEED_DEMO_TENANT_ADMIN_PASSWORD: test-demo-tenant-password-for-ci
+      SEED_PLATFORM_OWNER_EMAIL: owner@maya.local
+      SEED_PLATFORM_OWNER_PASSWORD: test-platform-owner-password-for-ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -58,12 +60,14 @@ jobs:
       - run: npm run prisma:generate
       - run: npx prisma validate
       - run: npx prisma migrate deploy
+      - run: npm run prisma:seed
       - run: npm run typecheck
       - run: npm run typecheck:scripts
       - run: npm run lint
       - run: npm test -- --runInBand
       - run: npm run test:e2e -- --runInBand
       - run: npm run build
+      - run: npm run test:http
 
   legacy-python:
     name: Legacy Python
