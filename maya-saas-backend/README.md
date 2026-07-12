@@ -40,8 +40,20 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `GET /api/available-slots`
   - `POST /api/appointments`
   - `GET /api/appointments/my`
+  - `POST /api/appointments/:id/cancel`
+  - `POST /api/appointments/:id/reschedule`
   - `GET /api/features/registry`
   - `GET /api/features/effective`
+- Maya-managed calendar API for specialists who do not use a CRM:
+  - `GET /api/internal-calendar/setup`
+  - `POST /api/internal-calendar/services`
+  - `PATCH /api/internal-calendar/services/:serviceId`
+  - `DELETE /api/internal-calendar/services/:serviceId`
+  - `PATCH /api/internal-calendar/providers/:providerId`
+  - `GET /api/internal-calendar/providers/:providerId/schedule`
+  - `PUT /api/internal-calendar/providers/:providerId/schedule`
+  - `POST /api/internal-calendar/providers/:providerId/time-off`
+  - `DELETE /api/internal-calendar/providers/:providerId/time-off/:exceptionId`
 - Admin API:
   - `POST /api/admin/tenants`
   - `GET /api/admin/tenants`
@@ -211,6 +223,12 @@ explicit `industryPresetId`, for example `solo_specialist`, `dental_clinic`,
 preset and its provider/customer/booking/service/location terminology. Industry
 presets change configuration and labels; they never fork backend or frontend
 business logic.
+
+Scheduling works the same way. `Tenant.calendarSource=internal` uses Maya's own
+services, providers and availability; `external` uses the configured CRM
+adapter. Client applications continue to call the same services, staff, slots
+and appointment endpoints. See
+[the Maya-managed calendar contract](../docs/product/internal-calendar.md).
 
 Set local seed credentials explicitly before running seed. Never use local defaults in production:
 

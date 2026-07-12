@@ -15,8 +15,7 @@ export class OnboardingController {
   @Public()
   @Post('trial')
   @ApiOperation({
-    summary:
-      'Create a self-serve trial tenant with mock CRM and a tenant admin session',
+    summary: 'Create a self-serve trial tenant and owner session',
   })
   createTrialSignup(
     @Body() dto: CreateTrialSignupDto,

@@ -19,7 +19,7 @@ export class AvailabilityController {
 
   @Get('available-slots')
   @ApiOperation({
-    summary: 'List available booking slots from the tenant CRM adapter',
+    summary: 'List available booking slots from the configured calendar source',
   })
   getAvailableSlots(
     @CurrentUser() user: AuthenticatedUser,

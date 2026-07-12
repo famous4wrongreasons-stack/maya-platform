@@ -1,12 +1,18 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 
-import { CrmIntegrationStatus, CrmProvider } from '../common/domain.enums';
+import {
+  CalendarSource,
+  CrmIntegrationStatus,
+  CrmProvider,
+} from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
+import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
@@ -26,6 +32,7 @@ export class CrmService {
     private readonly encryptionService: EncryptionService,
     private readonly adapterFactory: CrmAdapterFactory,
     private readonly tenantContext: TenantContextService,
+    private readonly internalCalendarService: InternalCalendarService,
   ) {}
 
   async createOrUpdateIntegration(
@@ -86,12 +93,26 @@ export class CrmService {
 
   async getServices(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return this.internalCalendarService.listServices(scopedTenantId);
+    }
+
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getServices(scopedTenantId);
   }
 
   async getStaff(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return this.internalCalendarService.listStaff(scopedTenantId);
+    }
+
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getStaff(scopedTenantId);
   }
@@ -106,6 +127,16 @@ export class CrmService {
     },
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return this.internalCalendarService.getAvailableSlots({
+        tenantId: scopedTenantId,
+        ...query,
+      });
+    }
+
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getAvailableSlots({
       tenantId: scopedTenantId,
@@ -127,6 +158,7 @@ export class CrmService {
     },
   ): Promise<CreatedAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.createAppointment({
       tenantId: scopedTenantId,
@@ -139,6 +171,7 @@ export class CrmService {
     externalId: string,
   ): Promise<CancelledAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.cancelAppointment({
       tenantId: scopedTenantId,
@@ -157,6 +190,7 @@ export class CrmService {
     },
   ): Promise<RescheduledAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.rescheduleAppointment({
       tenantId: scopedTenantId,
@@ -166,12 +200,33 @@ export class CrmService {
 
   async getClientAppointments(tenantId: string, clientId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return [];
+    }
+
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getClientAppointments(clientId);
   }
 
   async testConnection(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      const ready = await this.internalCalendarService.isReady(scopedTenantId);
+      return {
+        ok: ready,
+        provider: CalendarSource.INTERNAL,
+        message: ready
+          ? 'Maya internal calendar is ready'
+          : 'Maya internal calendar requires a service and weekly availability',
+      };
+    }
+
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.testConnection(scopedTenantId);
   }
@@ -196,6 +251,32 @@ export class CrmService {
         (integration.settingsJson as Record<string, unknown> | null) ??
         undefined,
     });
+  }
+
+  async getCalendarSource(tenantId: string): Promise<CalendarSource> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { calendarSource: true },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    return tenant.calendarSource === 'internal'
+      ? CalendarSource.INTERNAL
+      : CalendarSource.EXTERNAL;
+  }
+
+  private async assertExternalSource(tenantId: string): Promise<void> {
+    if ((await this.getCalendarSource(tenantId)) === CalendarSource.EXTERNAL) {
+      return;
+    }
+
+    throw new ConflictException(
+      'External CRM operations are disabled for an internal Maya calendar',
+    );
   }
 
   private serializeIntegration(integration: {

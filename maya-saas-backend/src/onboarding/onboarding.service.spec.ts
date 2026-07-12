@@ -6,12 +6,15 @@ import { AuthService } from '../auth/auth.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import { BrandingService } from '../branding/branding.service';
 import {
+  CalendarSource,
   CrmProvider,
   TenantStatus,
   UserRole,
   UserStatus,
 } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
+import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
@@ -71,6 +74,15 @@ describe('OnboardingService', () => {
     const createOrUpdateIntegrationMock: jest.MockedFunction<
       (tenantId: string, args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
+    const ensureProviderForUserMock = jest.fn().mockResolvedValue({
+      id: 'provider-1',
+    });
+    const getPlanByIdOrThrowMock = jest.fn().mockResolvedValue({
+      id: 'plan-explicit',
+    });
+    const getPlanByNameOrThrowMock = jest.fn((name: string) =>
+      Promise.resolve({ id: name === 'start' ? 'plan-start' : 'plan-pro' }),
+    );
     const createUserMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<CreatedUser>
     > = jest.fn().mockResolvedValue(user);
@@ -121,6 +133,13 @@ describe('OnboardingService', () => {
         createOrUpdateIntegration: createOrUpdateIntegrationMock,
       } as unknown as CrmService,
       {
+        ensureProviderForUser: ensureProviderForUserMock,
+      } as unknown as InternalCalendarService,
+      {
+        getPlanByIdOrThrow: getPlanByIdOrThrowMock,
+        getPlanByNameOrThrow: getPlanByNameOrThrowMock,
+      } as unknown as SubscriptionsService,
+      {
         createUser: createUserMock,
         serializeUser: serializeUserMock,
       } as unknown as UsersService,
@@ -141,6 +160,9 @@ describe('OnboardingService', () => {
         createTenantMock,
         upsertBrandingMock,
         createOrUpdateIntegrationMock,
+        ensureProviderForUserMock,
+        getPlanByIdOrThrowMock,
+        getPlanByNameOrThrowMock,
         createUserMock,
         serializeUserMock,
         issueSessionMock,
@@ -160,6 +182,7 @@ describe('OnboardingService', () => {
       ownerName: 'Илья',
       ownerPhone: '+79990000000',
       industryPresetId: 'education',
+      calendarSource: CalendarSource.EXTERNAL,
       branchAddress: 'Moscow, Tverskaya 1',
     });
 
@@ -167,8 +190,9 @@ describe('OnboardingService', () => {
       name: 'Studio Vector',
       slug: 'studio-vector',
       status: TenantStatus.TRIAL,
-      planId: undefined,
+      planId: 'plan-pro',
       industryPresetId: 'education',
+      calendarSource: CalendarSource.EXTERNAL,
       branchName: 'Studio Vector',
       branchAddress: 'Moscow, Tverskaya 1',
       branchPhone: undefined,
@@ -182,6 +206,7 @@ describe('OnboardingService', () => {
       appName: 'Studio Vector',
       themeJson: {
         industryPresetId: 'education',
+        calendarSource: CalendarSource.EXTERNAL,
         booking: {
           mode: 'preview',
         },
@@ -223,6 +248,8 @@ describe('OnboardingService', () => {
         industry_preset: {
           id: 'education',
         },
+        calendar_source: CalendarSource.EXTERNAL,
+        plan_id: 'plan-pro',
       },
       user: {
         id: 'user-1',
@@ -230,6 +257,38 @@ describe('OnboardingService', () => {
       },
     });
     expect(typeof result.temporary_password).toBe('string');
+  });
+
+  it('bootstraps a solo specialist without creating a mock CRM', async () => {
+    const { service, mocks } = createService();
+
+    const result = await service.createTrialSignup({
+      name: 'Илья Консалтинг',
+      slug: 'ilya-consulting',
+      ownerEmail: 'owner@studio-vector.ru',
+      ownerName: 'Илья',
+      industryPresetId: 'solo_specialist',
+    });
+
+    expect(mocks.createTenantMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        industryPresetId: 'solo_specialist',
+        calendarSource: CalendarSource.INTERNAL,
+        planId: 'plan-start',
+      }),
+    );
+    expect(mocks.createOrUpdateIntegrationMock).not.toHaveBeenCalled();
+    expect(mocks.ensureProviderForUserMock).toHaveBeenCalledWith(
+      'tenant-1',
+      'user-1',
+      { displayName: 'Илья' },
+    );
+    expect(result).toMatchObject({
+      calendar_source: CalendarSource.INTERNAL,
+      tenant: {
+        calendar_source: CalendarSource.INTERNAL,
+      },
+    });
   });
 
   it('blocks self-serve trial signup in production until explicitly enabled', async () => {

@@ -545,7 +545,8 @@ window.APP_DATA = {
         status: cfg.tenant_status || null,
         booking_mode: cfg.booking_mode || 'preview',
         booking_live: cfg.booking_live_enabled === true,
-        client_registration: cfg.client_registration_enabled !== false
+        client_registration: cfg.client_registration_enabled !== false,
+        calendar_source: cfg.calendar_source || 'external'
       };
       var keys = cfg.available_feature_keys;
       if (!keys && cfg.available_features && typeof cfg.available_features === 'object') {
@@ -4247,11 +4248,145 @@ function ALogin() {
   // Maya OS 0A: вход по email (поле-пилюля + стрелка)
   const [lgEmail, setLgEmail] = React.useState('');
   const [lgNote, setLgNote] = React.useState('');
+  // ── «Создать свою MAYA»: self-serve онбординг прямо в приложении ──
+  const [lgCreate, setLgCreate] = React.useState(false);
+  const [lgCr, setLgCr] = React.useState({ name: '', oname: '', email: '', phone: '', pass: '', cal: 'internal' });
+  const [lgCrBusy, setLgCrBusy] = React.useState(false);
+  const [lgCrErr, setLgCrErr] = React.useState('');
+  const lgCrRef = React.useRef(false);
+  // после онбординга страница перезагружается в контекст нового бизнеса —
+  // сразу открываем рабочий экран, без сайта/отдельной админки
+  React.useEffect(() => {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('onboarded') === '1') {
+        var openCalendar = q.get('calendar_setup') === '1';
+        q.delete('onboarded');
+        history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString() : ''));
+        // роутер (__meMode/__meGo) может подняться позже этого эффекта — ждём его
+        var tries = 0;
+        (function goHome() {
+          if (window.__meMode && window.__meGo) { window.__meMode('client'); window.__meGo(openCalendar ? 'book' : 'home'); return; }
+          if (tries++ < 30) setTimeout(goHome, 150);
+        })();
+      }
+    } catch (e) {}
+  }, []);
+  const lgCrTranslit = (s) => {
+    var map = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya' };
+    return String(s || '').toLowerCase().split('').map(ch => map[ch] != null ? map[ch] : ch).join('')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  };
+  const lgCrGo = async () => {
+    if (lgCrRef.current) return; // same-frame guard
+    var nm = String(lgCr.name || '').trim();
+    var em = String(lgCr.email || '').trim();
+    var phoneDigits = String(lgCr.phone || '').replace(/\D/g, '');
+    if (!nm) { setLgCrErr('Укажите название проекта или бренда.'); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setLgCrErr('Укажите корректный e-mail.'); return; }
+    if (phoneDigits.length < 11) { setLgCrErr('Укажите телефон — он нужен для повторного входа в MAYA.'); return; }
+    lgCrRef.current = true; setLgCrBusy(true); setLgCrErr('');
+    var api = (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)
+      || (function () { try { return localStorage.getItem('me_booking_api_base'); } catch (e) { return null; } })()
+      || 'http://localhost:3000/api';
+    api = String(api).replace(/\/+$/, '');
+    var slugBase = lgCrTranslit(nm) || ('maya-' + Date.now().toString(36));
+    try {
+      var res = null, lastErr = null, slug = slugBase, attempt = 0;
+      while (attempt < 2) {
+        var body = { name: nm, slug: slug, ownerEmail: em, branchName: nm, branchTimezone: 'Europe/Moscow', calendarSource: lgCr.cal };
+        if (lgCr.cal === 'internal') body.industryPresetId = 'solo_specialist'; // специалист без CRM: API-токен не нужен
+        var onm = String(lgCr.oname || '').trim();
+        if (onm) body.ownerName = onm;
+        body.ownerPhone = '+' + (phoneDigits[0] === '8' ? '7' + phoneDigits.slice(1) : phoneDigits);
+        if (lgCr.pass) body.password = lgCr.pass;
+        var r = await fetch(api + '/onboarding/trial', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        var text = await r.text();
+        var data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (e) {}
+        if (r.ok) { res = data; break; }
+        var eo = data && typeof data === 'object' ? data.error : null;
+        lastErr = (eo && eo.message) || (data && data.message) || ('HTTP ' + r.status);
+        if (r.status === 409) { slug = slugBase + '-' + Math.random().toString(36).slice(2, 6); attempt++; continue; } // адрес занят — берём свободный
+        break;
+      }
+      if (!res) throw new Error(Array.isArray(lastErr) ? lastErr.join('; ') : (lastErr || 'Не получилось — попробуйте ещё раз.'));
+      if (!res.access_token || !res.refresh_token) throw new Error('Неполный ответ сервера — попробуйте ещё раз.');
+      var tSlug = String((res.tenant && res.tenant.slug) || slug).toLowerCase();
+      // tenant-scoped namespace: формула = boot-скрипт/oauth-callback, менять синхронно
+      var aNorm = api.toLowerCase();
+      var str = aNorm + '|' + tSlug, hh = 5381;
+      for (var i = 0; i < str.length; i++) hh = (hh * 33 + str.charCodeAt(i)) | 0;
+      var ns = (hh >>> 0).toString(36) + '_' + tSlug.replace(/[^a-z0-9-]/g, '').slice(0, 24);
+      var bundle = {
+        token: res.access_token, refresh_token: res.refresh_token,
+        access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null,
+        refresh_expires_at: res.refresh_expires_at || null,
+        session: res.session || null, user: res.user || null,
+        tenant_slug: tSlug, api_base: aNorm
+      };
+      try { localStorage.setItem('me_saas_auth_v2:' + ns, JSON.stringify(bundle)); } catch (e) {}
+      var back = null;
+      try { back = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ns) || 'null'); } catch (e) {}
+      if (!back || back.token !== bundle.token || back.refresh_token !== bundle.refresh_token) throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
+      // переключаемся в namespace нового бизнеса и открываем рабочий экран владельца
+      location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(tSlug) + '&onboarded=1&calendar_setup=1');
+    } catch (e) {
+      lgCrRef.current = false;
+      setLgCrBusy(false);
+      setLgCrErr(e && e.message || 'Не получилось — попробуйте ещё раз.');
+    }
+  };
   const lgEmailGo = () => {
     var v = (lgEmail || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { setLgNote('Проверьте адрес — например, name@mail.ru'); return; }
     setLgNote('Вход по email скоро появится. Пока войдите через Telegram или Яндекс.');
   };
+  if (lgCreate) {
+    var crInp = { width: "100%", boxSizing: "border-box", border: "1px solid " + t.line, borderRadius: 14, background: "transparent", outline: "none", fontFamily: BODY, fontSize: 14, color: t.ink, padding: "13px 14px" };
+    var crField = (label, key, opts) => /*#__PURE__*/React.createElement("div", { style: { marginBottom: 10 } },
+      /*#__PURE__*/React.createElement("div", { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: t.faint, margin: "0 2px 6px" } }, label),
+      /*#__PURE__*/React.createElement("input", Object.assign({
+        value: lgCr[key],
+        onChange: ev => { var v = ev.target.value; setLgCr(prev => { var n = Object.assign({}, prev); n[key] = v; return n; }); if (lgCrErr) setLgCrErr(''); },
+        style: crInp
+      }, opts || {})));
+    var crCal = (val, title, sub) => /*#__PURE__*/React.createElement("div", {
+      onClick: () => setLgCr(prev => Object.assign({}, prev, { cal: val })),
+      style: { border: "1px solid " + (lgCr.cal === val ? t.ink : t.line), borderRadius: 14, padding: "12px 14px", marginBottom: 8, cursor: "pointer", opacity: lgCr.cal === val ? 1 : 0.72 }
+    }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontWeight: 700, fontSize: 13, color: t.ink } }, title),
+      /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 3, lineHeight: 1.45 } }, sub));
+    return /*#__PURE__*/React.createElement("div", {
+      style: { minHeight: "100vh", background: t.bg || (dark ? "#0b0b0c" : "#f4f0eb"), padding: "54px 22px 46px", boxSizing: "border-box", overflowY: "auto" }
+    }, /*#__PURE__*/React.createElement("div", { style: { maxWidth: 380, margin: "0 auto" } },
+      /*#__PURE__*/React.createElement("div", {
+        style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 24, textTransform: "uppercase", color: t.ink, lineHeight: 1.15, marginBottom: 8 }
+      }, "Создать", /*#__PURE__*/React.createElement("br"), "свою MAYA"),
+      /*#__PURE__*/React.createElement("div", {
+        style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.55, marginBottom: 20 }
+      }, "Свой бизнес в MAYA: специалисты, услуги и записи клиентов — в одном приложении. 14 дней бесплатно."),
+      crField("Название проекта / бренда", "name", { placeholder: "Например: Студия Анны" }),
+      crField("Ваше имя", "oname", { placeholder: "Имя", autoComplete: "name" }),
+      crField("E-mail", "email", { placeholder: "you@mail.ru", type: "email", inputMode: "email", autoComplete: "email" }),
+      crField("Телефон — обязателен для входа", "phone", { placeholder: "+7 (___) ___-__-__", inputMode: "tel", autoComplete: "tel" }),
+      crField("Пароль — по желанию", "pass", { placeholder: "пусто — сгенерируем", type: "password", autoComplete: "new-password" }),
+      /*#__PURE__*/React.createElement("div", {
+        style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: t.faint, margin: "14px 2px 8px" }
+      }, "Как вести расписание?"),
+      crCal("internal", "Вести расписание в MAYA", "Я специалист: услуги, график и записи клиентов — прямо здесь, без внешних систем."),
+      crCal("external", "Подключить CRM", "Расписание останется во внешней системе — подключим её позже."),
+      lgCrErr ? /*#__PURE__*/React.createElement("div", {
+        style: { fontFamily: BODY, fontSize: 12, color: "#e0564f", textAlign: "center", margin: "10px 0 0", lineHeight: 1.5 }
+      }, lgCrErr) : null,
+      /*#__PURE__*/React.createElement("div", {
+        onClick: lgCrBusy ? null : lgCrGo,
+        style: { marginTop: 16, minHeight: 52, borderRadius: 16, background: t.ink, color: dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", opacity: lgCrBusy ? 0.6 : 1 }
+      }, lgCrBusy ? "Создаём…" : "Создать свою MAYA"),
+      /*#__PURE__*/React.createElement("div", {
+        onClick: lgCrBusy ? null : () => setLgCreate(false),
+        style: { textAlign: "center", marginTop: 16, fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: "pointer" }
+      }, "← У меня уже есть вход")));
+  }
   const YandexBadge = /*#__PURE__*/React.createElement("div", {
     // Maya OS 0A: значок «Я» — инверсия текущей темы
     style: {
@@ -4436,6 +4571,11 @@ function ALogin() {
       color: t.ink
     }
   }, "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438")))), /*#__PURE__*/React.createElement("div", {
+    onClick: () => { setLgCrErr(''); setLgCreate(true); },
+    style: { textAlign: "center", marginTop: 14, cursor: "pointer" }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase", color: t.ink, borderBottom: "1px solid " + t.line, paddingBottom: 3 }
+  }, "Создать свою MAYA")), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       marginTop: 6
@@ -6744,6 +6884,16 @@ function ABookFlow() {
   const [mySessBusy, setMySessBusy] = React.useState(false);
   const [mySessErr, setMySessErr] = React.useState('');
   const mySessReqRef = React.useRef(false); // same-frame guard: два тапа = один DELETE/logout
+  // ── внутренний календарь MAYA (calendar_source === 'internal') ──
+  const [myCal, setMyCal] = React.useState(null); // null = не загружали; {} = ошибка/пусто
+  const [myCalErr, setMyCalErr] = React.useState('');
+  const [myCalBusy, setMyCalBusy] = React.useState(false);
+  const [myCalSvcDraft, setMyCalSvcDraft] = React.useState({ name: '', price: '', duration: '' });
+  const [myCalProvDraft, setMyCalProvDraft] = React.useState(null); // {id,name,title,interval}
+  const [myCalRules, setMyCalRules] = React.useState({}); // {weekday:{on,start,end}} — черновик графика
+  const [myCalOffDraft, setMyCalOffDraft] = React.useState({ start: '', end: '', note: '' });
+  const [myCalSvcEdit, setMyCalSvcEdit] = React.useState(null); // {id,name,price,duration}
+  const myCalReqRef = React.useRef(false);
   const [myAppts, setMyAppts] = React.useState(null);
   const [myErr, setMyErr] = React.useState('');
   const [myLoading, setMyLoading] = React.useState(false);
@@ -6752,6 +6902,17 @@ function ABookFlow() {
   const myCancelT = React.useRef(null);
   const [reschedId, setReschedId] = React.useState(null); // перенос записи из кабинета
   const [reschedInfo, setReschedInfo] = React.useState(null);
+  React.useEffect(() => {
+    if (!localSaasMode || bookingQs.get('calendar_setup') !== '1') return;
+    setMyView(true);
+    loadMyAppts();
+    loadMyCal();
+    try {
+      var nextQs = new URLSearchParams(location.search || '');
+      nextQs.delete('calendar_setup');
+      history.replaceState(null, '', location.pathname + (nextQs.toString() ? '?' + nextQs.toString() : ''));
+    } catch (e) {}
+  }, []);
   // Настроение визита (🔴 'red' тишина / 🔵 'blue' общение) — пилюли «как в Матрице».
   // Пред-выбор по последнему выбору клиента (localStorage).
   const [mood, setMood] = React.useState(function () {
@@ -7452,6 +7613,141 @@ function ABookFlow() {
       setAuthBusy(false);
       authRateLimit('social', e);
       setAuthErr(authCodeText(e, 'Не удалось начать вход'));
+    });
+  }
+  // ── внутренний календарь: владелец настраивает услуги/график прямо в MAYA ──
+  function saasCalInternal() {
+    return !!(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source === 'internal');
+  }
+  function saasIsCalManager() {
+    var r = saasUser && saasUser.role;
+    return r === 'tenant_admin' || r === 'tenant_owner' || r === 'business_owner' || r === 'administrator';
+  }
+  function loadMyCal() {
+    setMyCalErr('');
+    ensureLocalSession().then(function (s) {
+      return localBookingFetch('/internal-calendar/setup', { headers: { Authorization: 'Bearer ' + s.token } });
+    }).then(function (d) {
+      d = d || {};
+      setMyCal(d);
+      var p = (d.providers || [])[0] || null;
+      if (p) setMyCalProvDraft({ id: p.id, name: p.name || '', title: p.title || '', interval: String(p.slot_interval_minutes || 30) });
+      var rules = {};
+      (d.weekly_rules || []).forEach(function (r) {
+        if (!p || r.provider_id !== p.id) return;
+        (rules[r.weekday] = rules[r.weekday] || []).push({ start: r.start_time, end: r.end_time });
+      });
+      setMyCalRules(rules); // lossless: храним ВСЕ интервалы дня, а не первый
+    }).catch(function (e) {
+      setMyCal({});
+      setMyCalErr(readErrorText(e, 'Не удалось загрузить календарь'));
+    });
+  }
+  // общий guard мутаций: серверные ошибки показываем как есть, свою «валидацию
+  // готовности» не изобретаем — источник истины backend
+  function calMut(fn, after) {
+    if (myCalBusy || myCalReqRef.current) return;
+    myCalReqRef.current = true;
+    setMyCalBusy(true); setMyCalErr('');
+    ensureLocalSession().then(fn).then(function () {
+      myCalReqRef.current = false;
+      setMyCalBusy(false);
+      if (after) after();
+      loadMyCal();
+    }).catch(function (e) {
+      myCalReqRef.current = false;
+      setMyCalBusy(false);
+      setMyCalErr(readErrorText(e, 'Не получилось — попробуйте ещё раз'));
+    });
+  }
+  function calAddService() {
+    var nm = String(myCalSvcDraft.name || '').trim();
+    var pr = parseInt(myCalSvcDraft.price, 10);
+    var du = parseInt(myCalSvcDraft.duration, 10);
+    if (!nm || isNaN(pr) || pr < 0 || isNaN(du)) { setMyCalErr('Заполните услугу: название, цена и длительность в минутах.'); return; }
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/services', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify({ name: nm, price: pr, durationMinutes: du })
+      });
+    }, function () { setMyCalSvcDraft({ name: '', price: '', duration: '' }); });
+  }
+  function calSaveServiceEdit() {
+    var d = myCalSvcEdit;
+    if (!d || !d.id) return;
+    var nm = String(d.name || '').trim();
+    var pr = parseInt(d.price, 10);
+    var du = parseInt(d.duration, 10);
+    if (!nm || isNaN(pr) || pr < 0 || isNaN(du)) { setMyCalErr('Заполните название, цену и длительность.'); return; }
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/services/' + encodeURIComponent(d.id), {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify({ name: nm, price: pr, durationMinutes: du })
+      });
+    }, function () { setMyCalSvcEdit(null); });
+  }
+  function calToggleService(sv) {
+    calMut(function (s) {
+      if (sv.active === false) {
+        return localBookingFetch('/internal-calendar/services/' + encodeURIComponent(sv.id), {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+          body: JSON.stringify({ active: true })
+        });
+      }
+      return localBookingFetch('/internal-calendar/services/' + encodeURIComponent(sv.id), {
+        method: 'DELETE', headers: { Authorization: 'Bearer ' + s.token }
+      });
+    });
+  }
+  function calSaveProvider() {
+    var d = myCalProvDraft;
+    if (!d || !d.id) return;
+    var iv = parseInt(d.interval, 10);
+    calMut(function (s) {
+      var body = { displayName: String(d.name || '').trim() || undefined, title: String(d.title || '').trim() || undefined };
+      if (!isNaN(iv)) body.slotIntervalMinutes = iv;
+      return localBookingFetch('/internal-calendar/providers/' + encodeURIComponent(d.id), {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify(body)
+      });
+    });
+  }
+  function calSaveSchedule() {
+    var d = myCalProvDraft;
+    if (!d || !d.id) return;
+    var rules = [];
+    [0, 1, 2, 3, 4, 5, 6].forEach(function (wd) {
+      (myCalRules[wd] || []).forEach(function (iv) {
+        rules.push({ weekday: wd, startTime: iv.start || '09:00', endTime: iv.end || '18:00' });
+      });
+    });
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/providers/' + encodeURIComponent(d.id) + '/schedule', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify({ rules: rules })
+      });
+    });
+  }
+  function calAddOff() {
+    var d = myCalProvDraft;
+    if (!d || !d.id) return;
+    var st = myCalOffDraft.start ? new Date(myCalOffDraft.start) : null;
+    var en = myCalOffDraft.end ? new Date(myCalOffDraft.end) : null;
+    if (!st || !en || isNaN(+st) || isNaN(+en)) { setMyCalErr('Укажите начало и конец перерыва.'); return; }
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/providers/' + encodeURIComponent(d.id) + '/time-off', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify({ startAt: st.toISOString(), endAt: en.toISOString(), note: String(myCalOffDraft.note || '').trim() || undefined })
+      });
+    }, function () { setMyCalOffDraft({ start: '', end: '', note: '' }); });
+  }
+  function calDelOff(off) {
+    var d = myCalProvDraft;
+    if (!d || !d.id || !off || !off.id) return;
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/providers/' + encodeURIComponent(d.id) + '/time-off/' + encodeURIComponent(off.id), {
+        method: 'DELETE', headers: { Authorization: 'Bearer ' + s.token }
+      });
     });
   }
   // ── session-security: logout + устройства/сессии ──
@@ -8496,6 +8792,174 @@ function ABookFlow() {
         onClick: myLoading ? null : loadMyAppts,
         style: { marginTop: 9, display: 'inline-block', padding: '7px 18px', borderRadius: 999, border: '1px solid rgba(174,171,168,0.5)', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
       }, 'Повторить')) : null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past)), (function () {
+        // «Календарь MAYA» — специалист настраивает услуги и график без внешней CRM
+        if (!(saasCalInternal() && saasIsCalManager())) return null;
+        var head = React.createElement('div', {
+          style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '22px 2px 9px' }
+        }, 'Календарь MAYA');
+        if (myCal === null) return React.createElement(React.Fragment, null, head, React.createElement('div', {
+          onClick: loadMyCal,
+          style: { padding: '11px 14px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, textAlign: 'center', cursor: 'pointer' }
+        }, 'Настроить услуги и график'));
+        var prov = (myCal.providers || [])[0] || null;
+        var ready = myCal.ready === true;
+        var lbl = { fontFamily: DISPLAY, fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint, marginBottom: 4 };
+        var inp = { width: '100%', border: '1px solid ' + t.line, outline: 'none', background: 'transparent', borderRadius: 10, fontFamily: BODY, fontWeight: 600, fontSize: 13, color: t.ink, padding: '8px 10px' };
+        var btn = function (label, onClick, accent) {
+          return React.createElement('div', {
+            onClick: myCalBusy ? null : onClick,
+            style: { textAlign: 'center', padding: '9px 0', borderRadius: 11, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent ? t.accent : t.faint, cursor: 'pointer', opacity: myCalBusy ? 0.5 : 1, marginTop: 8 }
+          }, myCalBusy ? 'Секунду…' : label);
+        };
+        var card = { padding: '12px 14px', borderRadius: 12, border: '1px solid ' + t.line, marginBottom: 8 };
+        // готовность приходит с сервера (ready) — свою логику не изобретаем
+        var readiness = React.createElement('div', {
+          style: Object.assign({}, card, { display: 'flex', alignItems: 'center', gap: 8 })
+        }, React.createElement('span', {
+          style: { width: 7, height: 7, borderRadius: 999, background: ready ? '#39d98a' : t.faint, flexShrink: 0 }
+        }), React.createElement('span', {
+          style: { fontFamily: BODY, fontSize: 12.5, color: ready ? t.ink : t.dim }
+        }, ready ? 'Календарь готов — клиенты могут записываться' : 'Добавьте услугу и график — запись откроется автоматически'));
+        var provCard = prov && myCalProvDraft ? React.createElement('div', { style: card },
+          React.createElement('div', { style: lbl }, 'Специалист'),
+          React.createElement('div', { style: { display: 'flex', gap: 8 } },
+            React.createElement('input', { style: Object.assign({}, inp, { flex: 2 }), value: myCalProvDraft.name, placeholder: 'Имя', onChange: function (e) { setMyCalProvDraft(Object.assign({}, myCalProvDraft, { name: e.target.value })); } }),
+            React.createElement('input', { style: Object.assign({}, inp, { flex: 2 }), value: myCalProvDraft.title, placeholder: 'Роль', onChange: function (e) { setMyCalProvDraft(Object.assign({}, myCalProvDraft, { title: e.target.value })); } }),
+            React.createElement('input', { style: Object.assign({}, inp, { flex: 1 }), value: myCalProvDraft.interval, inputMode: 'numeric', placeholder: 'Шаг', onChange: function (e) { setMyCalProvDraft(Object.assign({}, myCalProvDraft, { interval: e.target.value.replace(/\D/g, '') })); } })),
+          React.createElement('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, 'Шаг — интервал слотов записи в минутах'),
+          btn('Сохранить специалиста', calSaveProvider)) : null;
+        var svcRows = (myCal.services || []).map(function (sv, i) {
+          if (myCalSvcEdit && myCalSvcEdit.id === sv.id) {
+            // компактное редактирование: имя/цена/длительность → PATCH
+            var ed = myCalSvcEdit;
+            var setEd = function (patch) { setMyCalSvcEdit(Object.assign({}, ed, patch)); };
+            return React.createElement('div', {
+              key: sv.id || i,
+              style: { padding: '8px 0', borderTop: i ? '1px solid ' + t.line : 'none' }
+            }, React.createElement('div', { style: { display: 'flex', gap: 8 } },
+              React.createElement('input', { style: Object.assign({}, inp, { flex: 2 }), value: ed.name, placeholder: 'Название', onChange: function (e) { setEd({ name: e.target.value }); } }),
+              React.createElement('input', { style: Object.assign({}, inp, { flex: 1 }), value: ed.price, inputMode: 'numeric', placeholder: '₽', onChange: function (e) { setEd({ price: e.target.value.replace(/\D/g, '') }); } }),
+              React.createElement('input', { style: Object.assign({}, inp, { flex: 1 }), value: ed.duration, inputMode: 'numeric', placeholder: 'мин', onChange: function (e) { setEd({ duration: e.target.value.replace(/\D/g, '') }); } })),
+              React.createElement('div', { style: { display: 'flex', gap: 8 } },
+                React.createElement('div', {
+                  onClick: myCalBusy ? null : calSaveServiceEdit,
+                  style: { flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 10, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.accent, cursor: 'pointer', marginTop: 8, opacity: myCalBusy ? 0.5 : 1 }
+                }, myCalBusy ? 'Секунду…' : 'Сохранить'),
+                React.createElement('div', {
+                  onClick: myCalBusy ? null : function () { setMyCalSvcEdit(null); },
+                  style: { flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 10, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.faint, cursor: 'pointer', marginTop: 8 }
+                }, 'Отмена')));
+          }
+          return React.createElement('div', {
+            key: sv.id || i,
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 0', borderTop: i ? '1px solid ' + t.line : 'none', opacity: sv.active === false ? 0.5 : 1 }
+          }, React.createElement('div', null, React.createElement('div', {
+            style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink }
+          }, sv.name), React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 11, color: t.faint }
+          }, (sv.duration_minutes || 0) + ' мин · ' + (sv.price || 0) + ' ₽' + (sv.active === false ? ' · выключена' : ''))), React.createElement('div', {
+            style: { display: 'flex', gap: 12, flexShrink: 0 }
+          }, React.createElement('div', {
+            onClick: myCalBusy ? null : function () { setMyCalSvcEdit({ id: sv.id, name: sv.name || '', price: String(sv.price || 0), duration: String(sv.duration_minutes || 30) }); },
+            style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.accent, cursor: 'pointer' }
+          }, 'Изменить'), React.createElement('div', {
+            onClick: myCalBusy ? null : function () { calToggleService(sv); },
+            style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.faint, cursor: 'pointer' }
+          }, sv.active === false ? 'Включить' : 'Выключить')));
+        });
+        var svcCard = React.createElement('div', { style: card },
+          React.createElement('div', { style: lbl }, 'Услуги'),
+          svcRows.length ? React.createElement('div', null, svcRows) : React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 12, color: t.faint, padding: '4px 0' }
+          }, 'Пока нет услуг'),
+          React.createElement('div', { style: { display: 'flex', gap: 8, marginTop: 8 } },
+            React.createElement('input', { style: Object.assign({}, inp, { flex: 2 }), value: myCalSvcDraft.name, placeholder: 'Название', onChange: function (e) { setMyCalSvcDraft(Object.assign({}, myCalSvcDraft, { name: e.target.value })); } }),
+            React.createElement('input', { style: Object.assign({}, inp, { flex: 1 }), value: myCalSvcDraft.price, inputMode: 'numeric', placeholder: '₽', onChange: function (e) { setMyCalSvcDraft(Object.assign({}, myCalSvcDraft, { price: e.target.value.replace(/\D/g, '') })); } }),
+            React.createElement('input', { style: Object.assign({}, inp, { flex: 1 }), value: myCalSvcDraft.duration, inputMode: 'numeric', placeholder: 'мин', onChange: function (e) { setMyCalSvcDraft(Object.assign({}, myCalSvcDraft, { duration: e.target.value.replace(/\D/g, '') })); } })),
+          btn('Добавить услугу', calAddService, true));
+        var WD = [1, 2, 3, 4, 5, 6, 0];
+        var WDL = { 0: 'Вс', 1: 'Пн', 2: 'Вт', 3: 'Ср', 4: 'Чт', 5: 'Пт', 6: 'Сб' };
+        var schedRows = WD.map(function (wd) {
+          var ivs = myCalRules[wd] || []; // lossless: все интервалы дня
+          var setDay = function (arr) {
+            var next = Object.assign({}, myCalRules);
+            next[wd] = arr;
+            setMyCalRules(next);
+          };
+          var head = React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, minHeight: 24 } },
+            React.createElement('div', {
+              onClick: function () { setDay(ivs.length ? [] : [{ start: '09:00', end: '18:00' }]); },
+              style: { width: 42, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: ivs.length ? t.accent : t.faint, cursor: 'pointer', flexShrink: 0 }
+            }, WDL[wd]),
+            ivs.length ? React.createElement('div', {
+              onClick: function () {
+                var last = ivs[ivs.length - 1];
+                setDay(ivs.concat([{ start: last ? last.end : '09:00', end: '18:00' }]));
+              },
+              style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.faint, cursor: 'pointer' }
+            }, '+ интервал') : React.createElement('div', {
+              style: { fontFamily: BODY, fontSize: 11.5, color: t.faint }
+            }, 'выходной'));
+          var rows = ivs.map(function (iv, ii) {
+            var setIv = function (patch) {
+              var arr = ivs.slice();
+              arr[ii] = Object.assign({}, iv, patch);
+              setDay(arr);
+            };
+            return React.createElement('div', {
+              key: ii, style: { display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0 3px 52px' }
+            }, React.createElement('input', {
+              type: 'time', value: iv.start,
+              style: Object.assign({}, inp, { flex: 1, padding: '6px 8px' }),
+              onChange: function (e) { setIv({ start: e.target.value }); }
+            }), React.createElement('span', { style: { color: t.faint } }, '—'), React.createElement('input', {
+              type: 'time', value: iv.end,
+              style: Object.assign({}, inp, { flex: 1, padding: '6px 8px' }),
+              onChange: function (e) { setIv({ end: e.target.value }); }
+            }), React.createElement('div', {
+              onClick: function () { setDay(ivs.filter(function (_, x) { return x !== ii; })); },
+              style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, color: t.faint, cursor: 'pointer', padding: '0 4px', flexShrink: 0 }
+            }, '×'));
+          });
+          return React.createElement('div', { key: wd, style: { padding: '3px 0' } }, head, rows.length ? React.createElement('div', null, rows) : null);
+        });
+        var schedCard = prov ? React.createElement('div', { style: card },
+          React.createElement('div', { style: lbl }, 'График недели'),
+          React.createElement('div', null, schedRows),
+          btn('Сохранить график', calSaveSchedule, true)) : null;
+        var offRows = (myCal.time_off || []).map(function (o, i) {
+          var f = function (x) {
+            try { return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(x)); } catch (e) { return String(x); }
+          };
+          return React.createElement('div', {
+            key: o.id || i,
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '7px 0', borderTop: i ? '1px solid ' + t.line : 'none' }
+          }, React.createElement('div', null, React.createElement('div', {
+            style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink }
+          }, f(o.start_at) + ' → ' + f(o.end_at)), o.note ? React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 11, color: t.faint }
+          }, o.note) : null), React.createElement('div', {
+            onClick: myCalBusy ? null : function () { calDelOff(o); },
+            style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.faint, cursor: 'pointer', flexShrink: 0 }
+          }, 'Убрать'));
+        });
+        var offCard = prov ? React.createElement('div', { style: card },
+          React.createElement('div', { style: lbl }, 'Перерывы и отпуска'),
+          offRows.length ? React.createElement('div', null, offRows) : React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 12, color: t.faint, padding: '4px 0' }
+          }, 'Нет закрытых интервалов'),
+          React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 } },
+            React.createElement('input', { type: 'datetime-local', value: myCalOffDraft.start, style: inp, onChange: function (e) { setMyCalOffDraft(Object.assign({}, myCalOffDraft, { start: e.target.value })); } }),
+            React.createElement('input', { type: 'datetime-local', value: myCalOffDraft.end, style: inp, onChange: function (e) { setMyCalOffDraft(Object.assign({}, myCalOffDraft, { end: e.target.value })); } }),
+            React.createElement('input', { placeholder: 'Заметка (необязательно)', value: myCalOffDraft.note, style: inp, onChange: function (e) { setMyCalOffDraft(Object.assign({}, myCalOffDraft, { note: e.target.value })); } })),
+          btn('Закрыть время', calAddOff)) : null;
+        return React.createElement(React.Fragment, null, head, myCalErr ? React.createElement('div', {
+          style: { margin: '6px 0', fontFamily: BODY, fontSize: 12, color: '#aeaba8', textAlign: 'center' }
+        }, myCalErr) : null, readiness, provCard, svcCard, schedCard, offCard, React.createElement('div', {
+          onClick: myCalBusy ? null : loadMyCal,
+          style: { textAlign: 'center', marginTop: 2, fontFamily: BODY, fontSize: 11.5, color: t.faint, cursor: 'pointer' }
+        }, 'Обновить'));
+      })(), (function () {
         // «Устройства» — компактный блок активных сессий
         var sess = Array.isArray(mySessions) ? mySessions : [];
         var head = React.createElement('div', {

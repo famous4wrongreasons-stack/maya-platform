@@ -14,7 +14,9 @@ export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List staff from the tenant CRM adapter' })
+  @ApiOperation({
+    summary: 'List providers from the configured calendar source',
+  })
   listStaff(@CurrentUser() user: AuthenticatedUser) {
     return this.staffService.listStaff(user.tenantId!);
   }

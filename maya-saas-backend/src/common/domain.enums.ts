@@ -52,6 +52,11 @@ export enum CrmIntegrationStatus {
   ERROR = 'error',
 }
 
+export enum CalendarSource {
+  INTERNAL = 'internal',
+  EXTERNAL = 'external',
+}
+
 export enum AppointmentStatus {
   CONFIRMED = 'confirmed',
   CANCELED = 'canceled',

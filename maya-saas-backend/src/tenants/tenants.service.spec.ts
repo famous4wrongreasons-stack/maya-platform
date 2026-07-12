@@ -9,6 +9,7 @@ type PublicTenantRecord = {
   name: string;
   slug: string;
   status: string;
+  calendarSource: string;
   industryPresetId: string | null;
   allowSelfRegistration: boolean;
   plan: {
@@ -32,6 +33,11 @@ type PublicTenantRecord = {
     provider: string | null;
     status: string | null;
   } | null;
+  _count: {
+    internalServices: number;
+    internalProviders: number;
+    availabilityRules: number;
+  };
 };
 
 describe('TenantsService', () => {
@@ -40,6 +46,7 @@ describe('TenantsService', () => {
     name: 'Demo Salon',
     slug: 'demo-salon',
     status: 'active',
+    calendarSource: 'external',
     industryPresetId: 'beauty_salon',
     allowSelfRegistration: true,
     plan: {
@@ -91,6 +98,11 @@ describe('TenantsService', () => {
     crmIntegration: {
       provider: 'yclients',
       status: 'active',
+    },
+    _count: {
+      internalServices: 0,
+      internalProviders: 0,
+      availabilityRules: 0,
     },
   });
 
@@ -222,6 +234,73 @@ describe('TenantsService', () => {
 
     expect(result.booking_mode).toBe('live');
     expect(result.booking_live_enabled).toBe(true);
+  });
+
+  it('exposes live booking for a ready internal calendar without a CRM', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      calendarSource: 'internal',
+      crmIntegration: null,
+      _count: {
+        internalServices: 1,
+        internalProviders: 1,
+        availabilityRules: 5,
+      },
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result.calendar_source).toBe('internal');
+    expect(result.booking_mode).toBe('live');
+    expect(result.booking_live_enabled).toBe(true);
+  });
+
+  it('keeps an incomplete internal calendar in preview mode', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      calendarSource: 'internal',
+      crmIntegration: null,
+      _count: {
+        internalServices: 1,
+        internalProviders: 0,
+        availabilityRules: 1,
+      },
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: {
+            mode: 'live',
+          },
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result.booking_mode).toBe('preview');
+    expect(result.booking_live_enabled).toBe(false);
   });
 
   it('keeps client registration disabled for trial tenants even if self-registration is on', async () => {
