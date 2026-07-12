@@ -11,6 +11,10 @@ import {
   featureKeysFromFlags,
   normalizeFeatureFlags,
 } from '../common/feature-catalog';
+import {
+  DEFAULT_INDUSTRY_PRESET_ID,
+  getIndustryPreset,
+} from '../common/industry-presets';
 import { asJson } from '../common/json.util';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -342,7 +346,7 @@ export class TenantsService {
           slug: dto.slug.toLowerCase(),
           status: dto.status ?? TenantStatus.TRIAL,
           planId: dto.planId,
-          industryPresetId: dto.industryPresetId,
+          industryPresetId: dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID,
           defaultCurrency: dto.defaultCurrency ?? 'RUB',
           defaultTimezone: dto.defaultTimezone ?? normalizedBranchTimezone,
           defaultLocale: dto.defaultLocale ?? 'ru-RU',
@@ -571,6 +575,7 @@ export class TenantsService {
       (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
       {};
     const content = extractPublicMobileContent(theme);
+    const industryPreset = getIndustryPreset(tenant.industryPresetId);
     const activeStatuses = new Set(['trial', 'active', 'past_due']);
     const resolvedEntitlements = this.entitlementsService
       ? await this.entitlementsService.getEffectiveEntitlements(tenant.id)
@@ -628,12 +633,13 @@ export class TenantsService {
       client_registration_enabled: clientRegistrationEnabled,
       booking_mode: bookingEvaluation.effectiveMode,
       booking_live_enabled: bookingEvaluation.effectiveMode === 'live',
+      industry_preset: industryPreset,
       brand,
       content,
       tenant: {
         slug: tenant.slug,
         status: tenant.status,
-        industry_preset_id: tenant.industryPresetId,
+        industry_preset_id: industryPreset.id,
         default_currency: tenant.defaultCurrency,
         default_timezone: tenant.defaultTimezone,
         default_locale: tenant.defaultLocale,
@@ -699,6 +705,8 @@ export class TenantsService {
   serializeTenant(
     tenant: Awaited<ReturnType<TenantsService['getTenantByIdOrThrow']>>,
   ) {
+    const industryPreset = getIndustryPreset(tenant.industryPresetId);
+
     return {
       ...this.serializeTenantBookingState(tenant),
       id: tenant.id,
@@ -706,7 +714,8 @@ export class TenantsService {
       slug: tenant.slug,
       status: tenant.status,
       plan_id: tenant.planId,
-      industry_preset_id: tenant.industryPresetId,
+      industry_preset_id: industryPreset.id,
+      industry_preset: industryPreset,
       default_currency: tenant.defaultCurrency,
       default_timezone: tenant.defaultTimezone,
       default_locale: tenant.defaultLocale,

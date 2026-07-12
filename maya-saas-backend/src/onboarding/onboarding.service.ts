@@ -14,6 +14,10 @@ import {
   UserRole,
   UserStatus,
 } from '../common/domain.enums';
+import {
+  DEFAULT_INDUSTRY_PRESET_ID,
+  getIndustryPreset,
+} from '../common/industry-presets';
 import { CrmService } from '../crm/crm.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -45,11 +49,13 @@ export class OnboardingService {
     });
 
     const temporaryPassword = dto.password?.trim() || this.generatePassword();
+    const industryPresetId = dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID;
     const tenant = await this.tenantsService.createTenant({
       name: dto.name,
       slug: dto.slug,
       status: TenantStatus.TRIAL,
       planId: dto.planId,
+      industryPresetId,
       branchName: dto.branchName ?? dto.name,
       branchAddress: dto.branchAddress,
       branchPhone: dto.branchPhone,
@@ -60,6 +66,7 @@ export class OnboardingService {
       await this.brandingService.upsertBranding(tenant.id, {
         appName: dto.name,
         themeJson: {
+          industryPresetId,
           booking: {
             mode: 'preview',
           },
@@ -68,6 +75,9 @@ export class OnboardingService {
 
       await this.crmService.createOrUpdateIntegration(tenant.id, {
         provider: CrmProvider.MOCK,
+        settingsJson: {
+          industryPresetId,
+        },
       });
 
       const user = await this.usersService.createUser({
@@ -110,6 +120,8 @@ export class OnboardingService {
           slug: tenant.slug,
           status: tenant.status,
           allow_self_registration: tenant.allow_self_registration,
+          industry_preset_id: industryPresetId,
+          industry_preset: getIndustryPreset(industryPresetId),
         },
         temporary_password: dto.password ? null : temporaryPassword,
         booking_mode: 'preview',

@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 
 import { TenantStatus } from '../../common/domain.enums';
+import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 const BOOKING_MODE_VALUES = ['preview', 'live'] as const;
 
@@ -36,10 +37,12 @@ export class UpdateTenantDto {
   @IsString()
   planId?: string;
 
-  @ApiPropertyOptional({ example: 'barbershop' })
+  @ApiPropertyOptional({
+    enum: INDUSTRY_PRESET_IDS,
+    example: 'general_service',
+  })
   @IsOptional()
-  @IsString()
-  @Matches(/^[a-z0-9]+(?:_[a-z0-9]+)*$/)
+  @IsIn(INDUSTRY_PRESET_IDS)
   industryPresetId?: string;
 
   @ApiPropertyOptional({ example: 'RUB' })
@@ -63,7 +66,7 @@ export class UpdateTenantDto {
   @Matches(/^[a-z0-9.-]+$/)
   customDomain?: string;
 
-  @ApiPropertyOptional({ example: 'demo-salon' })
+  @ApiPropertyOptional({ example: 'studio-vector' })
   @IsOptional()
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)

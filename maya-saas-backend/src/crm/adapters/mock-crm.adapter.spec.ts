@@ -17,4 +17,20 @@ describe('MockCRMAdapter', () => {
     expect(slots[0]?.start).toBe('2026-07-05T09:00:00.000Z');
     expect(slots[0]?.end).toBe('2026-07-05T10:00:00.000Z');
   });
+
+  it('uses industry-specific mock terminology without forking the adapter', async () => {
+    const adapter = new MockCRMAdapter({
+      provider: CrmProvider.MOCK,
+      apiToken: 'mock-token',
+      settings: { industryPresetId: 'education' },
+    });
+
+    const [services, staff] = await Promise.all([
+      adapter.getServices('tenant-education'),
+      adapter.getStaff('tenant-education'),
+    ]);
+
+    expect(services[0]?.name).toBe('Пробное занятие');
+    expect(staff[0]?.title).toBe('Преподаватель');
+  });
 });

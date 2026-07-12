@@ -38,15 +38,15 @@ describe('OnboardingService', () => {
   const createService = (configMap?: Record<string, string>) => {
     const tenant: CreatedTenant = {
       id: 'tenant-1',
-      name: 'Demo Salon',
-      slug: 'demo-salon',
+      name: 'Studio Vector',
+      slug: 'studio-vector',
       status: TenantStatus.TRIAL,
       allow_self_registration: true,
     };
     const user: CreatedUser = {
       id: 'user-1',
       tenantId: tenant.id,
-      email: 'owner@demo-salon.ru',
+      email: 'owner@studio-vector.ru',
       phone: '+79990000000',
       role: UserRole.TENANT_ADMIN,
       status: UserStatus.ACTIVE,
@@ -154,31 +154,34 @@ describe('OnboardingService', () => {
     const { service, mocks } = createService();
 
     const result = await service.createTrialSignup({
-      name: 'Demo Salon',
-      slug: 'demo-salon',
-      ownerEmail: 'owner@demo-salon.ru',
+      name: 'Studio Vector',
+      slug: 'studio-vector',
+      ownerEmail: 'owner@studio-vector.ru',
       ownerName: 'Илья',
       ownerPhone: '+79990000000',
+      industryPresetId: 'education',
       branchAddress: 'Moscow, Tverskaya 1',
     });
 
     expect(mocks.createTenantMock).toHaveBeenCalledWith({
-      name: 'Demo Salon',
-      slug: 'demo-salon',
+      name: 'Studio Vector',
+      slug: 'studio-vector',
       status: TenantStatus.TRIAL,
       planId: undefined,
-      branchName: 'Demo Salon',
+      industryPresetId: 'education',
+      branchName: 'Studio Vector',
       branchAddress: 'Moscow, Tverskaya 1',
       branchPhone: undefined,
       branchTimezone: undefined,
     });
     expect(mocks.rateLimitPreflightMock).toHaveBeenCalledWith('trial_signup', {
       clientIp: undefined,
-      identity: 'owner@demo-salon.ru',
+      identity: 'owner@studio-vector.ru',
     });
     expect(mocks.upsertBrandingMock).toHaveBeenCalledWith('tenant-1', {
-      appName: 'Demo Salon',
+      appName: 'Studio Vector',
       themeJson: {
+        industryPresetId: 'education',
         booking: {
           mode: 'preview',
         },
@@ -188,12 +191,15 @@ describe('OnboardingService', () => {
       'tenant-1',
       {
         provider: CrmProvider.MOCK,
+        settingsJson: {
+          industryPresetId: 'education',
+        },
       },
     );
     expect(mocks.createUserMock).toHaveBeenCalledWith(
       expect.objectContaining({
         tenantId: 'tenant-1',
-        email: 'owner@demo-salon.ru',
+        email: 'owner@studio-vector.ru',
         phone: '+79990000000',
         name: 'Илья',
         role: UserRole.TENANT_ADMIN,
@@ -210,9 +216,13 @@ describe('OnboardingService', () => {
       next_step: 'open_admin',
       tenant: {
         id: 'tenant-1',
-        slug: 'demo-salon',
+        slug: 'studio-vector',
         status: TenantStatus.TRIAL,
         allow_self_registration: true,
+        industry_preset_id: 'education',
+        industry_preset: {
+          id: 'education',
+        },
       },
       user: {
         id: 'user-1',

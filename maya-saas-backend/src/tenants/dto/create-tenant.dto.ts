@@ -3,6 +3,7 @@ import {
   IsDateString,
   IsBoolean,
   IsEnum,
+  IsIn,
   IsOptional,
   IsString,
   Matches,
@@ -10,13 +11,14 @@ import {
 } from 'class-validator';
 
 import { TenantStatus } from '../../common/domain.enums';
+import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 export class CreateTenantDto {
-  @ApiProperty({ example: 'Demo Salon' })
+  @ApiProperty({ example: 'Studio Vector' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'demo-salon' })
+  @ApiProperty({ example: 'studio-vector' })
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
   slug!: string;
@@ -31,10 +33,13 @@ export class CreateTenantDto {
   @IsString()
   planId?: string;
 
-  @ApiPropertyOptional({ example: 'barbershop' })
+  @ApiPropertyOptional({
+    enum: INDUSTRY_PRESET_IDS,
+    example: 'general_service',
+    default: 'general_service',
+  })
   @IsOptional()
-  @IsString()
-  @Matches(/^[a-z0-9]+(?:_[a-z0-9]+)*$/)
+  @IsIn(INDUSTRY_PRESET_IDS)
   industryPresetId?: string;
 
   @ApiPropertyOptional({ example: 'RUB', default: 'RUB' })
@@ -58,7 +63,7 @@ export class CreateTenantDto {
   @Matches(/^[a-z0-9.-]+$/)
   customDomain?: string;
 
-  @ApiPropertyOptional({ example: 'demo-salon' })
+  @ApiPropertyOptional({ example: 'studio-vector' })
   @IsOptional()
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)

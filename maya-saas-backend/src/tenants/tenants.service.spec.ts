@@ -9,6 +9,7 @@ type PublicTenantRecord = {
   name: string;
   slug: string;
   status: string;
+  industryPresetId: string | null;
   allowSelfRegistration: boolean;
   plan: {
     featuresJson: Record<string, unknown> | null;
@@ -39,6 +40,7 @@ describe('TenantsService', () => {
     name: 'Demo Salon',
     slug: 'demo-salon',
     status: 'active',
+    industryPresetId: 'beauty_salon',
     allowSelfRegistration: true,
     plan: {
       featuresJson: {
@@ -138,6 +140,13 @@ describe('TenantsService', () => {
       client_registration_enabled: true,
       booking_mode: 'preview',
       booking_live_enabled: false,
+      industry_preset: {
+        id: 'beauty_salon',
+        terminology: {
+          providerSingular: 'Мастер',
+          locationSingular: 'Салон',
+        },
+      },
       content: {
         hero_tag: 'Добро пожаловать в «Гриву»',
         hero_title: ['Грива.', 'Стрижём так,', 'что оборачиваются'],

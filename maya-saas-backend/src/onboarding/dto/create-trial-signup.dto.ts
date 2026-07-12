@@ -1,25 +1,37 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsIn,
   IsOptional,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
 
+import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
+
 export class CreateTrialSignupDto {
-  @ApiProperty({ example: 'Barbershop Griva' })
+  @ApiProperty({ example: 'Studio Vector' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'griva' })
+  @ApiProperty({ example: 'studio-vector' })
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
   slug!: string;
 
-  @ApiProperty({ example: 'owner@griva.ru' })
+  @ApiProperty({ example: 'owner@studio-vector.ru' })
   @IsEmail()
   ownerEmail!: string;
+
+  @ApiPropertyOptional({
+    enum: INDUSTRY_PRESET_IDS,
+    example: 'general_service',
+    default: 'general_service',
+  })
+  @IsOptional()
+  @IsIn(INDUSTRY_PRESET_IDS)
+  industryPresetId?: string;
 
   @ApiPropertyOptional({ example: 'Илья' })
   @IsOptional()
@@ -42,7 +54,7 @@ export class CreateTrialSignupDto {
   @MinLength(8)
   password?: string;
 
-  @ApiPropertyOptional({ example: 'Main Branch' })
+  @ApiPropertyOptional({ example: 'Main Location' })
   @IsOptional()
   @IsString()
   branchName?: string;
