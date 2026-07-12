@@ -509,6 +509,25 @@ window.APP_DATA = {
     slug = slug || localStorage.getItem('me_booking_tenant_slug');
   } catch (e) {}
   slug = slug || 'muzhskaya-estetika';
+  /* tenant-scoped namespace: state разных салонов не пересекается на одном origin.
+     Формула ns (djb2 из normalized apiBase|slug) продублирована в компоненте и
+     oauth-callback.html — менять только синхронно. Секретов в ns нет. */
+  var _ns = (function () {
+    var a = String(apiBase).toLowerCase().replace(/\/+$/, '');
+    var sl = String(slug).toLowerCase();
+    var str = a + '|' + sl, h = 5381;
+    for (var i = 0; i < str.length; i++) h = (h * 33 + str.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36) + '_' + sl.replace(/[^a-z0-9-]/g, '').slice(0, 24);
+  })();
+  window.__ME_SAAS_CTX = { api: apiBase, slug: slug, ns: _ns };
+  /* миграция: глобальные (до-tenant) ключи удаляются; старый bundle без
+     tenant-метаданных молча НЕ привязывается — безопасный спокойный вход заново */
+  try {
+    localStorage.removeItem('me_saas_auth_v1');
+    localStorage.removeItem('me_saas_refresh_lock');
+    localStorage.removeItem('me_saas_cfg_v1');
+    localStorage.removeItem('me_oauth_pending');
+  } catch (e) {}
   /* id виджета/плитки главной → feature-ключ тарифа (канон plan_catalog.py) */
   window.__ME_SAAS_WIDGET_FEATURE = {
     shop: 'shop', tcert: 'shop', cert: 'shop',
@@ -575,13 +594,25 @@ window.APP_DATA = {
       });
     } catch (e) {}
   }
-  try { var c = localStorage.getItem('me_saas_cfg_v1'); if (c) apply(JSON.parse(c)); } catch (e) {}
+  // кэш конфига ns-scoped + slug-проверка: бренд салона A не применяется к B даже временно
+  var cfgApplied = false;
+  try {
+    var c = localStorage.getItem('me_saas_cfg_v2:' + _ns);
+    if (c) { var cc = JSON.parse(c); if (cc && String(cc.slug || '') === String(slug)) { apply(cc); cfgApplied = true; } }
+  } catch (e) {}
+  // safe-mode чужого салона без кэша: нейтральный placeholder ДО прихода config —
+  // бренд/контент default tenant не мелькает; сам default tenant вне safe-mode не меняется
+  if (!cfgApplied && String(slug) !== 'muzhskaya-estetika') {
+    apply({ slug: slug, brand: { name: 'Ваш салон' } });
+  }
   try {
     fetch(apiBase + '/mobile/config/' + encodeURIComponent(slug))
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (cfg) {
         if (!cfg || !(cfg.brand || cfg.branding)) return;
-        try { localStorage.setItem('me_saas_cfg_v1', JSON.stringify(cfg)); } catch (e) {}
+        if (!cfg.slug) cfg.slug = slug;
+        if (String(cfg.slug) !== String(slug)) return; // чужой конфиг не применяем и не кэшируем
+        try { localStorage.setItem('me_saas_cfg_v2:' + _ns, JSON.stringify(cfg)); } catch (e) {}
         apply(cfg);
       }).catch(function () {});
   } catch (e) {}
@@ -1392,7 +1423,7 @@ function Backdrop({
       style: {
         position: "absolute",
         inset: "-20%",
-        background: t.dark ? "radial-gradient(48% 36% at 20% 12%, rgba(255,255,255,0.04), transparent 60%), radial-gradient(52% 40% at 88% 30%, rgba(150,148,142,0.12), transparent 62%), radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.03), transparent 60%)" : "radial-gradient(48% 36% at 18% 10%, rgba(255,255,255,0.22), transparent 60%), radial-gradient(52% 42% at 90% 28%, rgba(150,148,142,0.10), transparent 62%), radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.14), transparent 60%)",
+        background: t.dark ? "none" : "radial-gradient(48% 36% at 18% 10%, rgba(255,255,255,0.22), transparent 60%), radial-gradient(52% 42% at 90% 28%, rgba(150,148,142,0.10), transparent 62%), radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.14), transparent 60%)",
         filter: "blur(10px)"
       }
     }), /*#__PURE__*/React.createElement(PaperGrain, {
@@ -1546,6 +1577,34 @@ function SeedLogo({
     strokeWidth: sw,
     style: Object.assign({ display: "block", flex: "none" }, style || {})
   }, [c(20, 20), c(20, 11), c(27.79, 15.5), c(27.79, 24.5), c(20, 29), c(12.21, 24.5), c(12.21, 15.5)]);
+}
+function MayaLoadingLogo({
+  size = 18,
+  color = "currentColor"
+}) {
+  if (typeof document !== "undefined" && !document.getElementById("me-maya-loading-kf")) {
+    const st = document.createElement("style");
+    st.id = "me-maya-loading-kf";
+    st.textContent = "@keyframes meMayaLogoSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.me-maya-loading-spin{animation:none!important}}";
+    document.head.appendChild(st);
+  }
+  return /*#__PURE__*/React.createElement("span", {
+    className: "me-maya-loading-spin",
+    style: {
+      width: size,
+      height: size,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: color,
+      animation: "meMayaLogoSpin 1.15s linear infinite",
+      transformOrigin: "center",
+      willChange: "transform"
+    }
+  }, /*#__PURE__*/React.createElement(SeedLogo, {
+    size: size,
+    sw: 1.55
+  }));
 }
 // Анимированный знак для входа: кольца слетаются из углов (lgBloom), затем оборот (lgSpin).
 function SeedLogoAnimated({
@@ -6654,7 +6713,15 @@ function ABookFlow() {
   const [bootRetry, setBootRetry] = React.useState(0);
   const retryRef = React.useRef(null);
   // P3: phone-first онбординг (safe-mode): checking|anon|authed|off
-  const SAAS_AUTH_KEY = 'me_saas_auth_v1';
+  // ── tenant-scoped namespace (формула = boot-скрипт/oauth-callback, менять синхронно) ──
+  const SAAS_NORM_API = String(localSaasApiBase || '').toLowerCase().replace(/\/+$/, '');
+  const SAAS_NORM_SLUG = String(localTenantSlug || '').toLowerCase();
+  const SAAS_NS = React.useMemo(function () {
+    var str = SAAS_NORM_API + '|' + SAAS_NORM_SLUG, h = 5381;
+    for (var i = 0; i < str.length; i++) h = (h * 33 + str.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36) + '_' + SAAS_NORM_SLUG.replace(/[^a-z0-9-]/g, '').slice(0, 24);
+  }, [SAAS_NORM_API, SAAS_NORM_SLUG]);
+  const SAAS_AUTH_KEY = 'me_saas_auth_v2:' + SAAS_NS;
   const [saasAuth, setSaasAuth] = React.useState(localSaasMode ? 'checking' : 'off');
   const [saasUser, setSaasUser] = React.useState(null);
   const [authStage, setAuthStage] = React.useState('phone');
@@ -6665,9 +6732,18 @@ function ABookFlow() {
   const [authBusy, setAuthBusy] = React.useState(false);
   const [authHint, setAuthHint] = React.useState(null);
   const [authResendAt, setAuthResendAt] = React.useState(0); // P3: кулдаун повторной отправки
+  const [authLocks, setAuthLocks] = React.useState({}); // 429 auth_rate_limited: {verify|social: untilTs}
+  const authReqRef = React.useRef(false); // same-frame guard: двойной тап/Enter = один запрос
+  const [restoreTick, setRestoreTick] = React.useState(0); // ручной повтор restore (без цикла)
+  const [restoreErr, setRestoreErr] = React.useState('');
+  const [restoreWaitAt, setRestoreWaitAt] = React.useState(0); // restore-429: серверный countdown
   const [, setAuthTick] = React.useState(0);
   const [previewInfo, setPreviewInfo] = React.useState(null); // P5: ответ /appointments/preview
   const [myView, setMyView] = React.useState(false); // P6: экран «Мои записи»
+  const [mySessions, setMySessions] = React.useState(null); // устройства/сессии (null = не загружали)
+  const [mySessBusy, setMySessBusy] = React.useState(false);
+  const [mySessErr, setMySessErr] = React.useState('');
+  const mySessReqRef = React.useRef(false); // same-frame guard: два тапа = один DELETE/logout
   const [myAppts, setMyAppts] = React.useState(null);
   const [myErr, setMyErr] = React.useState('');
   const [myLoading, setMyLoading] = React.useState(false);
@@ -6788,8 +6864,50 @@ function ABookFlow() {
     var picked = list.filter(function (s) { return set[String(s.id)]; });
     if (picked.length) setSvcs(picked);
   }
+  // публичные auth-маршруты (без refresh-обвязки): login/phone/social и сам /auth/refresh.
+  // Защищённые /auth/logout и /auth/sessions* идут через обычный refresh-aware путь.
+  function saasIsPublicAuthPath(path) {
+    var p = String(path);
+    return p === '/auth/refresh'
+      || p.indexOf('/auth/login') === 0
+      || p.indexOf('/auth/phone/') === 0
+      || p.indexOf('/auth/oauth/') === 0;
+  }
   async function localBookingFetch(path, init) {
-    var resp = await fetch(localSaasApiBase + path, init || {});
+    init = init || {};
+    var isAuthPath = saasIsPublicAuthPath(path);
+    var hasAuth = !!(init.headers && init.headers.Authorization);
+    // проактивная rotation: access истекает (<30с) — обновляем ДО запроса
+    if (hasAuth && !isAuthPath) {
+      var s0 = saasReadSession();
+      if (s0 && s0.refresh_token && s0.access_expires_at && s0.access_expires_at - Date.now() < 30000) {
+        try {
+          var sF = await saasDoRefresh();
+          if (sF && sF.token) init = Object.assign({}, init, { headers: Object.assign({}, init.headers, { Authorization: 'Bearer ' + sF.token }) });
+        } catch (eP) {
+          if (eP && (eP.code === 'auth_rate_limited' || SAAS_RT_TERMINAL[eP.code])) throw eP;
+        }
+      }
+    }
+    var resp = await fetch(localSaasApiBase + path, init);
+    // первый обычный 401 → одна rotation → повтор исходного запроса ровно один раз
+    if (resp.status === 401 && hasAuth && !isAuthPath && !init.__retried) {
+      var usedTok = String(init.headers.Authorization || '').replace(/^Bearer\s+/, '');
+      var sB = saasReadSession();
+      if (sB && sB.token && usedTok && sB.token !== usedTok) {
+        // пара уже свежее (обновила другая вкладка/запрос) — повтор с текущим access, без refresh
+        resp = await fetch(localSaasApiBase + path, Object.assign({}, init, { __retried: true, headers: Object.assign({}, init.headers, { Authorization: 'Bearer ' + sB.token }) }));
+      } else if (sB && sB.refresh_token) {
+        // повтор ТОЛЬКО после успешной rotation; ошибка refresh уходит наружу как есть
+        var sN = await saasDoRefresh();
+        if (sN && sN.token) {
+          resp = await fetch(localSaasApiBase + path, Object.assign({}, init, { __retried: true, headers: Object.assign({}, init.headers, { Authorization: 'Bearer ' + sN.token }) }));
+        }
+      } else if (sB && sB.token) {
+        // legacy-запись без refresh: первый 401 = предложить вход заново
+        saasForceLogout('legacy_401');
+      }
+    }
     var text = await resp.text();
     var body = null;
     try {
@@ -6811,6 +6929,11 @@ function ABookFlow() {
         errx.code = eobj.code || null;
         errx.field = eobj.field || null;
       }
+      // 429 auth_rate_limited: серверное «когда можно снова» для локального countdown
+      var raBody = eobj && typeof eobj === 'object' ? eobj.retry_after_seconds : null;
+      var raHdr = resp.headers && resp.headers.get ? resp.headers.get('Retry-After') : null;
+      var ra = Number(raBody != null ? raBody : raHdr);
+      if (isFinite(ra) && ra > 0) errx.retryAfterSeconds = Math.ceil(ra);
       throw errx;
     }
     return body;
@@ -6843,15 +6966,319 @@ function ABookFlow() {
   // ── P3: phone-first сессия (заменила тихую random-email регистрацию) ──
   // JWT + user хранятся в localStorage; рестор валидируется через GET /me.
   function saasReadSession() {
-    try { return JSON.parse(localStorage.getItem(SAAS_AUTH_KEY) || 'null'); } catch (e) { return null; }
+    if (RT.tomb) return null; // storage не очистился при logout — bundle не используем
+    try {
+      var s = JSON.parse(localStorage.getItem(SAAS_AUTH_KEY) || 'null');
+      if (!s || !s.token) return null;
+      // каждое чтение проверяет tenant-контекст: чужой/легаси bundle не используется
+      if (s.tenant_slug !== SAAS_NORM_SLUG || s.api_base !== SAAS_NORM_API) return null;
+      return s;
+    } catch (e) { return null; }
   }
-  function saasSaveSession(token, user) {
-    var s = { token: token, user: user || null };
+  function saasWriteSession(s) {
     try { localStorage.setItem(SAAS_AUTH_KEY, JSON.stringify(s)); } catch (e) {}
     return s;
   }
+  // весь ответ auth-эндпоинта одним присваиванием: новый access ТОЛЬКО со своим же
+  // refresh; принимается ТОЛЬКО полная пара; запись верифицируется чтением обратно
+  function saasSaveBundle(res, fallbackUser) {
+    if (!res || !res.access_token || !res.refresh_token) return null; // половину пары не принимаем
+    var s = {
+      token: res.access_token,
+      refresh_token: res.refresh_token,
+      access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null,
+      refresh_expires_at: res.refresh_expires_at || null,
+      session: res.session || null,
+      user: res.user || fallbackUser || null,
+      tenant_slug: SAAS_NORM_SLUG, // контекст пары: проверяется при каждом чтении
+      api_base: SAAS_NORM_API
+    };
+    saasWriteSession(s);
+    var back = saasReadSession();
+    if (!back || back.token !== s.token || back.refresh_token !== s.refresh_token) return null;
+    return s;
+  }
+  // обновление только профиля: пара токенов не трогается
+  function saasUpdateUser(user) {
+    var s = saasReadSession();
+    if (!s || !s.token) return null;
+    s.user = user || s.user;
+    return saasWriteSession(s);
+  }
   function saasClearSession() {
     try { localStorage.removeItem(SAAS_AUTH_KEY); } catch (e) {}
+    var back = null;
+    try { back = localStorage.getItem(SAAS_AUTH_KEY); } catch (e) {}
+    if (back) { RT.tomb = true; return false; } // не очистилось → tombstone: пара мертва для рантайма
+    return true;
+  }
+  // ── refresh-pipeline: single-flight на вкладку + lock между вкладками ──
+  var __rtMap = window.__meSaasRtMap = window.__meSaasRtMap || {};
+  var RT = __rtMap[SAAS_NS] || (__rtMap[SAAS_NS] = { p: null, bc: null, tomb: false });
+  var SAAS_RT_LOCK = 'me_saas_refresh_lock:' + SAAS_NS;
+  var SAAS_RT_TERMINAL = { refresh_token_invalid: 1, refresh_token_reused: 1, session_expired: 1, session_revoked: 1 };
+  function saasBc() {
+    if (RT.bc !== null || typeof BroadcastChannel === 'undefined') return RT.bc;
+    try { RT.bc = new BroadcastChannel('me_saas_auth:' + SAAS_NS); } catch (e) { RT.bc = null; }
+    return RT.bc;
+  }
+  function saasBroadcast(type) {
+    var ch = saasBc();
+    if (ch) { try { ch.postMessage({ type: type }); } catch (e) {} }
+  }
+  function saasForceLogout(reason) {
+    saasClearSession();
+    saasBroadcast('logout');
+    try { window.dispatchEvent(new CustomEvent('me-saas-logout', { detail: { reason: reason || null } })); } catch (e) {}
+  }
+  // сырой вызов rotation (мимо localBookingFetch — иначе рекурсия);
+  // ограниченный timeout (30с) согласован с lease: heartbeat держит lease живой дольше
+  function saasRawRefresh(refreshToken) {
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var tm = ctl ? setTimeout(function () { try { ctl.abort(); } catch (e) {} }, 30000) : null;
+    return fetch(localSaasApiBase + '/auth/refresh', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refreshToken }),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (resp) {
+      return resp.text().then(function (text) {
+        var body = null;
+        try { body = text ? JSON.parse(text) : null; } catch (e) { body = text; }
+        return { resp: resp, body: body };
+      });
+    }).catch(function (e) {
+      if (e && e.resp) throw e;
+      var eT = new Error('Не удалось обновить сессию — проверьте связь.');
+      eT.code = e && e.name === 'AbortError' ? 'refresh_timeout' : 'refresh_network';
+      throw eT;
+    }).finally(function () { if (tm) clearTimeout(tm); });
+  }
+  // ждём исход у вкладки-владельца: rotated | logged_out | timeout
+  function saasWaitForRotation(oldToken, maxMs) {
+    return new Promise(function (resolve) {
+      var done = false, iv, tm, ch = saasBc();
+      function finish(state, session) {
+        if (done) return; done = true;
+        window.removeEventListener('storage', check);
+        window.removeEventListener('me-saas-logout', onLogout);
+        if (ch) { try { ch.removeEventListener('message', onMsg); } catch (e) {} }
+        clearInterval(iv); clearTimeout(tm);
+        resolve({ state: state, session: session || null });
+      }
+      function onLogout() { finish('logged_out'); }
+      function onMsg(ev) {
+        var ty = ev && ev.data && ev.data.type;
+        if (ty === 'logout') finish('logged_out'); else check();
+      }
+      function check() {
+        if (done) return;
+        var s = saasReadSession();
+        if (!s || !s.token) { finish('logged_out'); return; } // bundle удалён владельцем
+        if (s.token !== oldToken) finish('rotated', s);
+      }
+      window.addEventListener('storage', check);
+      window.addEventListener('me-saas-logout', onLogout);
+      if (ch) { try { ch.addEventListener('message', onMsg); } catch (e) {} }
+      iv = setInterval(check, 250);
+      tm = setTimeout(function () { finish('timeout'); }, Math.max(500, maxMs || 5000));
+      check();
+    });
+  }
+  // одна фактическая rotation; вызывается ТОЛЬКО владельцем межвкладочного эксклюзива.
+  // Токен для каждого запроса берётся из ТЕКУЩЕГО bundle — захваченные копии не используются.
+  async function saasPerformRefresh(checkOwn, baseToken) {
+    var s = saasReadSession();
+    if (!s || !s.token) { var eL = new Error('Сессия завершена'); eL.code = 'logged_out'; throw eL; }
+    if (baseToken && s.token !== baseToken) return s; // пару уже ротировали, пока ждали lock
+    if (!s.refresh_token) { var e0 = new Error('Требуется вход'); e0.code = 'refresh_unavailable'; throw e0; }
+    function ownOrThrow() {
+      if (checkOwn && !checkOwn()) { // потеря ownership: refresh НЕ отправляем (fail-closed)
+        var eO = new Error('Не удалось обновить сессию — попробуйте ещё раз.');
+        eO.code = 'refresh_lock_busy';
+        throw eO;
+      }
+    }
+    ownOrThrow();
+    function saveRotated(body, sentRt) {
+      // post-response fence СНАЧАЛА: пока ждали сеть, bundle могли удалить (logout)
+      // или заменить новым login, а ownership — потерять. Поздний ответ (даже
+      // malformed) не имеет права трогать чужую/новую сессию и публиковать rotated.
+      function revokeOrphan() {
+        // best-effort отзыв осиротевшей server-session, локально ничего не пишем
+        if (!body || !body.access_token) return;
+        try { fetch(localSaasApiBase + '/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + body.access_token } }).catch(function () {}); } catch (e) {}
+      }
+      if (checkOwn && !checkOwn()) {
+        revokeOrphan();
+        var eO3 = new Error('Не удалось обновить сессию — попробуйте ещё раз.');
+        eO3.code = 'refresh_lock_busy';
+        throw eO3;
+      }
+      var curB = saasReadSession();
+      if (!curB || !curB.token) {
+        revokeOrphan();
+        var eF = new Error('Сессия завершена');
+        eF.code = 'logged_out';
+        throw eF;
+      }
+      if (sentRt && curB.refresh_token !== sentRt) {
+        // пока летел ответ, появился новый login — используем его, наш ответ не пишем
+        revokeOrphan();
+        return curB;
+      }
+      // bundle всё ещё исходная пара → только теперь оцениваем полноту ответа
+      if (!body || !body.access_token || !body.refresh_token) {
+        // rotation прошла на сервере, но пара неполная: старый refresh уже потреблён —
+        // переотправлять его нельзя → controlled logout ИСХОДНОЙ пары
+        saasForceLogout('refresh_incomplete');
+        var eH = new Error('Сессия завершена — войдите снова.');
+        eH.code = 'refresh_incomplete';
+        throw eH;
+      }
+      var saved = saasSaveBundle(body, s.user);
+      if (!saved) {
+        // rotation прошла на сервере, но пара не записалась: старый refresh уже
+        // одноразово использован — оставлять его доступным нельзя
+        saasForceLogout('bundle_write_failed');
+        var eW = new Error('Сессия завершена — войдите снова.');
+        eW.code = 'session_write_failed';
+        throw eW;
+      }
+      saasBroadcast('rotated');
+      return saved;
+    }
+    function realErr(resp, body, fallbackMsg) {
+      var eobj = body && typeof body === 'object' ? body.error : null;
+      var eX = new Error((eobj && typeof eobj === 'object' && eobj.message) || fallbackMsg);
+      eX.code = (eobj && eobj.code) || null;
+      eX.status = resp.status;
+      return eX;
+    }
+    var r = await saasRawRefresh(s.refresh_token);
+    if (r.resp.ok) return saveRotated(r.body, s.refresh_token);
+    var eobj = r.body && typeof r.body === 'object' ? r.body.error : null;
+    var code = eobj && eobj.code;
+    if (SAAS_RT_TERMINAL[code]) { saasForceLogout(code); var eT2 = new Error('Сессия завершена'); eT2.code = code; throw eT2; }
+    if (!(r.resp.status === 429 && code === 'auth_rate_limited')) throw realErr(r.resp, r.body, 'refresh HTTP ' + r.resp.status);
+    // 429: пара НЕ трогается; ровно один отложенный повтор по серверному времени
+    var raB = eobj && eobj.retry_after_seconds;
+    var raH = r.resp.headers && r.resp.headers.get ? r.resp.headers.get('Retry-After') : null;
+    var ra = Number(raB != null ? raB : raH);
+    var w = isFinite(ra) && ra > 0 ? Math.ceil(ra) : 60;
+    await new Promise(function (r2) { setTimeout(r2, w * 1000); });
+    // после ожидания: перечитываем bundle, старых захваченных токенов не используем
+    var s2 = saasReadSession();
+    if (!s2 || !s2.token) { var eL2 = new Error('Сессия завершена'); eL2.code = 'logged_out'; throw eL2; }
+    if (s2.token !== s.token) return s2; // пару уже сменили за время ожидания
+    if (!s2.refresh_token) { var e02 = new Error('Требуется вход'); e02.code = 'refresh_unavailable'; throw e02; }
+    ownOrThrow(); // и перед отложенным повтором: bundle + ownership актуальны
+    var rr = await saasRawRefresh(s2.refresh_token);
+    if (rr.resp.ok) return saveRotated(rr.body, s2.refresh_token);
+    var eobj2 = rr.body && typeof rr.body === 'object' ? rr.body.error : null;
+    var code2 = eobj2 && eobj2.code;
+    if (SAAS_RT_TERMINAL[code2]) { saasForceLogout(code2); var eT3 = new Error('Сессия завершена'); eT3.code = code2; throw eT3; }
+    if (rr.resp.status === 429 && code2 === 'auth_rate_limited') {
+      var eR = new Error('Слишком много попыток');
+      eR.code = 'auth_rate_limited'; eR.status = 429;
+      var ra2 = Number(eobj2 && eobj2.retry_after_seconds);
+      eR.retryAfterSeconds = isFinite(ra2) && ra2 > 0 ? Math.ceil(ra2) : w;
+      throw eR;
+    }
+    // вторую ошибку НЕ маскируем под rate limit — наружу реальный status/code; третьего повтора нет
+    throw realErr(rr.resp, rr.body, 'refresh HTTP ' + rr.resp.status);
+  }
+  function saasDoRefresh() {
+    if (RT.p) return RT.p; // single-flight в этой вкладке
+    RT.p = (async function () {
+      var s = saasReadSession();
+      if (!s || !s.token) { var eL = new Error('Сессия завершена'); eL.code = 'logged_out'; throw eL; }
+      if (!s.refresh_token) { var e0 = new Error('Требуется вход'); e0.code = 'refresh_unavailable'; throw e0; }
+      // предпочитаем Web Locks API: нативный межвкладочный эксклюзив, авто-освобождение
+      if (typeof navigator !== 'undefined' && navigator.locks && navigator.locks.request) {
+        return navigator.locks.request('me_saas_auth_refresh:' + SAAS_NS, { mode: 'exclusive' }, async function () {
+          // проверки существования/смены пары централизованы в saasPerformRefresh
+          return saasPerformRefresh(null, s.token);
+        });
+      }
+      // fallback: localStorage-lease с ownership-fencing. Heartbeat продлевает ТОЛЬКО
+      // свою lease; потеря ownership = fail-closed: refresh не шлём, чужой lock не трогаем
+      var myId = Math.random().toString(36).slice(2);
+      var lost = false;
+      function readLock() {
+        try { return JSON.parse(localStorage.getItem(SAAS_RT_LOCK) || 'null'); } catch (e) { return null; }
+      }
+      var sawForeign = false, deadLock = false;
+      var guard = 0;
+      while (guard++ < 40) {
+        var lock = readLock();
+        if (!lock || !lock.owner) break; // lease свободна (или чисто освобождена)
+        if (lock.exp <= Date.now()) { deadLock = true; break; } // владелец умер молча
+        sawForeign = true;
+        var res = await saasWaitForRotation(s.token, (lock.exp - Date.now()) + 500);
+        if (res.state === 'rotated') return res.session;
+        if (res.state === 'logged_out') { var eL3 = new Error('Сессия завершена'); eL3.code = 'logged_out'; throw eL3; }
+        // timeout: lease могла продлиться heartbeat'ом — перечитываем и ждём дальше
+      }
+      if (guard > 40) { // исчерпали ожидание — действующий lock НЕ крадём
+        var eG = new Error('Не удалось обновить сессию — попробуйте ещё раз.');
+        eG.code = 'refresh_lock_busy';
+        throw eG;
+      }
+      if (deadLock || sawForeign) {
+        // чужая операция стартовала; пара не сменилась. Одноразовый token мог уже
+        // уйти на сервер — автоматически переотправлять его нельзя.
+        var sChk = saasReadSession();
+        if (sChk && sChk.token && sChk.token !== s.token) return sChk;
+        if (!sChk || !sChk.token) { var eL6 = new Error('Сессия завершена'); eL6.code = 'logged_out'; throw eL6; }
+        if (deadLock) {
+          // умерший владелец: без Web Locks безопаснее fail-closed с повторным входом,
+          // чем риск refresh_token_reused (отзыв всей сессии)
+          saasForceLogout('refresh_lock_stale');
+          var eSt = new Error('Сессия завершена — войдите снова.');
+          eSt.code = 'refresh_lock_stale';
+          throw eSt;
+        }
+        // владелец завершился без rotation (например, финальный 429): пара цела,
+        // но авто-повтора не делаем — транзиентная ошибка, повтор по действию пользователя
+        var eBz = new Error('Не удалось обновить сессию — попробуйте ещё раз.');
+        eBz.code = 'refresh_lock_busy';
+        throw eBz;
+      }
+      function ownLock() {
+        if (lost) return false;
+        var cur = readLock();
+        return !!(cur && cur.owner === myId && cur.exp > Date.now());
+      }
+      function renew() {
+        if (lost) return;
+        var cur = readLock();
+        if (cur && cur.owner && cur.owner !== myId) { lost = true; return; } // чужой lock не переписываем
+        try { localStorage.setItem(SAAS_RT_LOCK, JSON.stringify({ owner: myId, exp: Date.now() + 15000 })); } catch (e) {}
+      }
+      renew();
+      await new Promise(function (r) { setTimeout(r, 25 + Math.floor(Math.random() * 50)); }); // джиттер захвата
+      var lock2 = readLock();
+      if (lock2 && lock2.owner && lock2.owner !== myId && lock2.exp > Date.now()) {
+        lost = true; // проиграли гонку — дальше только ждём, ничего не шлём
+        var res2 = await saasWaitForRotation(s.token, (lock2.exp - Date.now()) + 500);
+        if (res2.state === 'rotated') return res2.session;
+        if (res2.state === 'logged_out') { var eL4 = new Error('Сессия завершена'); eL4.code = 'logged_out'; throw eL4; }
+        var eBusy = new Error('Не удалось обновить сессию — попробуйте ещё раз.');
+        eBusy.code = 'refresh_lock_busy';
+        throw eBusy;
+      }
+      var hb = setInterval(renew, 5000);
+      try {
+        return await saasPerformRefresh(ownLock, s.token);
+      } finally {
+        clearInterval(hb);
+        try {
+          var curL = readLock();
+          if (curL && curL.owner === myId) localStorage.removeItem(SAAS_RT_LOCK); // только свой
+        } catch (e) {}
+      }
+    })().finally(function () { RT.p = null; });
+    return RT.p;
   }
   async function ensureLocalSession() {
     var s = saasReadSession();
@@ -6860,6 +7287,10 @@ function ABookFlow() {
   }
   function authCodeText(e, fallback) {
     var code = e && e.code;
+    if (code === 'auth_rate_limited') {
+      var w = e && e.retryAfterSeconds ? Math.ceil(Number(e.retryAfterSeconds)) : 60;
+      return 'Слишком много попыток. Подождите ' + w + ' с и попробуйте снова.';
+    }
     if (code === 'code_invalid') return 'Неверный код. Проверьте и попробуйте ещё раз.';
     if (code === 'code_expired') return 'Код устарел — отправьте новый.';
     if (code === 'too_many_attempts') return 'Слишком много попыток. Подождите минуту.';
@@ -6873,21 +7304,45 @@ function ABookFlow() {
     if (code === 'self_registration_disabled') return 'Регистрация в этом салоне сейчас закрыта.';
     return readErrorText(e, fallback);
   }
+  // ── 429 auth_rate_limited: локальный countdown на конкретное действие ──
+  function authLockLeft(action) {
+    var until = (authLocks && authLocks[action]) || 0;
+    return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+  }
+  function authRateLimit(action, e) {
+    if (!e || e.status !== 429 || e.code !== 'auth_rate_limited') return false;
+    var w = e.retryAfterSeconds && isFinite(e.retryAfterSeconds) ? Math.ceil(Number(e.retryAfterSeconds)) : 60;
+    setAuthLocks(function (l) {
+      var n = Object.assign({}, l);
+      n[action] = Date.now() + w * 1000;
+      return n;
+    });
+    return true;
+  }
   function authStart() {
     var ph = digitsPhone(authPhone);
     if (ph.length < 11) { setAuthErr('Введите корректный номер телефона'); return; }
+    if (authReqRef.current) return;
+    authReqRef.current = true;
     setAuthBusy(true); setAuthErr('');
     localBookingFetch('/auth/phone/start', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tenantSlug: localTenantSlug, phone: '+' + ph })
     }).then(function (res) {
+      authReqRef.current = false;
       setAuthBusy(false);
       setAuthHint(res || null);
       setAuthResendAt(Date.now() + 1000 * (res && res.retry_after_seconds ? Number(res.retry_after_seconds) : 60));
       setAuthCode('');
       setAuthStage('code');
     }).catch(function (e) {
+      authReqRef.current = false;
       setAuthBusy(false);
+      // backend реально отклоняет повтор до разрешённого времени — синхронизируем таймер
+      if (e && e.status === 429 && e.code === 'auth_rate_limited') {
+        var w = e.retryAfterSeconds && isFinite(e.retryAfterSeconds) ? Math.ceil(Number(e.retryAfterSeconds)) : 60;
+        setAuthResendAt(Date.now() + 1000 * w);
+      }
       setAuthErr(authCodeText(e, 'Не удалось отправить код'));
     });
   }
@@ -6895,18 +7350,23 @@ function ABookFlow() {
     var ph = digitsPhone(authPhone);
     var code = String(authCode || '').trim();
     if (!code) { setAuthErr('Введите код из сообщения'); return; }
+    if (authReqRef.current) return;
+    authReqRef.current = true;
     setAuthBusy(true); setAuthErr('');
     localBookingFetch('/auth/phone/verify', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tenantSlug: localTenantSlug, phone: '+' + ph, code: code })
     }).then(function (res) {
-      if (!res || !res.access_token) throw new Error('Пустой ответ авторизации');
-      saasSaveSession(res.access_token, res.user || null);
+      if (!res || !res.access_token || !res.refresh_token) throw new Error('Пустой ответ авторизации');
+      if (!saasSaveBundle(res, null)) throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
       setSaasUser(res.user || null);
+      authReqRef.current = false;
       setAuthBusy(false);
       authRouteProfile(res.user || null);
     }).catch(function (e) {
+      authReqRef.current = false;
       setAuthBusy(false);
+      authRateLimit('verify', e);
       setAuthErr(authCodeText(e, 'Не удалось подтвердить код'));
     });
   }
@@ -6922,7 +7382,7 @@ function ABookFlow() {
       body: JSON.stringify({ name: nm })
     }).then(function (me) {
       setAuthBusy(false);
-      saasSaveSession(s.token, me || Object.assign({}, s.user || {}, { name: nm, profile_completed: true }));
+      saasUpdateUser(me || Object.assign({}, s.user || {}, { name: nm, profile_completed: true }));
       setSaasUser(me || null);
       setSaasAuth('authed');
     }).catch(function (e) {
@@ -6955,7 +7415,7 @@ function ABookFlow() {
     }).then(function (me) {
       setAuthBusy(false);
       var merged = me || Object.assign({}, s.user || {}, { phone: '+' + ph });
-      saasSaveSession(s.token, merged);
+      saasUpdateUser(merged);
       setSaasUser(merged);
       if (merged && merged.profile_completed === false && !merged.name) { setAuthName(''); setAuthStage('name'); }
       else { setSaasAuth('authed'); }
@@ -6965,19 +7425,126 @@ function ABookFlow() {
     });
   }
   function authSocial(provider) {
+    if (authReqRef.current) return;
+    authReqRef.current = true;
     setAuthBusy(true); setAuthErr('');
     localBookingFetch('/auth/oauth/' + provider + '/start', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tenantSlug: localTenantSlug, redirectUri: location.origin + '/oauth-callback.html' })
     }).then(function (res) {
       if (!res || !res.auth_url) throw new Error('Сервис входа недоступен');
-      try { localStorage.setItem('me_oauth_pending', JSON.stringify({ apiBase: localSaasApiBase, tenant: localTenantSlug, ret: location.href })); } catch (e) {}
+      // pending-контекст привязан к OAuth state: параллельные входы разных салонов не пересекаются.
+      // Канонический state — из ответа; сверяем со state внутри auth_url
+      var urlState = null;
+      try { urlState = new URL(res.auth_url).searchParams.get('state'); } catch (e) {}
+      var oState = res.state || null;
+      if (!oState || !urlState || String(oState) !== String(urlState)) throw new Error('Сервис входа недоступен');
+      var pKey = 'me_oauth_pending:' + oState;
+      var pVal = JSON.stringify({ apiBase: SAAS_NORM_API, tenant: SAAS_NORM_SLUG, ret: location.href, ts: Date.now() });
+      try { localStorage.setItem(pKey, pVal); } catch (e) {}
+      var pBack = null;
+      try { pBack = localStorage.getItem(pKey); } catch (e) {}
+      if (pBack !== pVal) throw new Error('Не удалось начать вход — попробуйте ещё раз.'); // без pending к провайдеру не уходим
+      authReqRef.current = false;
       location.href = res.auth_url;
     }).catch(function (e) {
+      authReqRef.current = false;
       setAuthBusy(false);
+      authRateLimit('social', e);
       setAuthErr(authCodeText(e, 'Не удалось начать вход'));
     });
   }
+  // ── session-security: logout + устройства/сессии ──
+  function saasLogout() {
+    if (mySessReqRef.current) return;
+    mySessReqRef.current = true;
+    var s = saasReadSession();
+    var finish = function () {
+      mySessReqRef.current = false;
+      saasForceLogout('logout');
+      setSaasUser(null); setMySessions(null); setMyView(false);
+      setAuthStage('phone'); setSaasAuth('anon');
+    };
+    if (!s || !s.token) { finish(); return; }
+    // сначала серверный logout с текущим Bearer, локальная пара чистится в любом случае
+    localBookingFetch('/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + s.token } })
+      .catch(function () {})
+      .then(finish);
+  }
+  function loadMySessions() {
+    setMySessErr('');
+    ensureLocalSession().then(function (s) {
+      return localBookingFetch('/auth/sessions', { headers: { Authorization: 'Bearer ' + s.token } });
+    }).then(function (r) {
+      setMySessions(Array.isArray(r) ? r : (r && r.sessions) || []);
+    }).catch(function (e) {
+      setMySessions([]);
+      setMySessErr(readErrorText(e, 'Не удалось загрузить устройства'));
+    });
+  }
+  function revokeMySession(id, isCurrent) {
+    if (mySessBusy || mySessReqRef.current || !id) return;
+    mySessReqRef.current = true;
+    setMySessBusy(true); setMySessErr('');
+    ensureLocalSession().then(function (s) {
+      return localBookingFetch('/auth/sessions/' + encodeURIComponent(id), {
+        method: 'DELETE', headers: { Authorization: 'Bearer ' + s.token }
+      });
+    }).then(function () {
+      mySessReqRef.current = false;
+      setMySessBusy(false);
+      if (isCurrent) { saasLogout(); return; } // отозвали текущую → немедленный выход
+      loadMySessions();
+    }).catch(function (e) {
+      mySessReqRef.current = false;
+      setMySessBusy(false);
+      setMySessErr(readErrorText(e, 'Не удалось отозвать сессию'));
+    });
+  }
+  function revokeAllMySessions() {
+    if (mySessBusy || mySessReqRef.current) return;
+    mySessReqRef.current = true;
+    setMySessBusy(true); setMySessErr('');
+    ensureLocalSession().then(function (s) {
+      return localBookingFetch('/auth/sessions', {
+        method: 'DELETE', headers: { Authorization: 'Bearer ' + s.token }
+      });
+    }).then(function () {
+      mySessReqRef.current = false;
+      setMySessBusy(false);
+      saasLogout(); // отозваны все, включая текущую
+    }).catch(function (e) {
+      mySessReqRef.current = false;
+      setMySessBusy(false);
+      setMySessErr(readErrorText(e, 'Не удалось отозвать сессии'));
+    });
+  }
+  // logout/rotation из других вкладок → мгновенно закрыть защищённый UI
+  React.useEffect(function () {
+    if (!localSaasMode) return;
+    function toAnon() {
+      setSaasUser(null); setMySessions(null); setMyView(false);
+      setAuthStage('phone'); setSaasAuth('anon');
+    }
+    function onLogoutEvt() { toAnon(); }
+    function onMsg(ev) {
+      var ty = ev && ev.data && ev.data.type;
+      if (ty === 'logout') { saasClearSession(); toAnon(); }
+      else if (ty === 'rotated') { var s = saasReadSession(); if (s && s.user) setSaasUser(s.user); }
+    }
+    function onStorage(ev) {
+      if (ev && ev.key === SAAS_AUTH_KEY && !ev.newValue) toAnon(); // пара исчезла в другой вкладке
+    }
+    window.addEventListener('me-saas-logout', onLogoutEvt);
+    window.addEventListener('storage', onStorage);
+    var ch = saasBc();
+    if (ch) { try { ch.addEventListener('message', onMsg); } catch (e) {} }
+    return function () {
+      window.removeEventListener('me-saas-logout', onLogoutEvt);
+      window.removeEventListener('storage', onStorage);
+      if (ch) { try { ch.removeEventListener('message', onMsg); } catch (e) {} }
+    };
+  }, [localSaasMode]);
   // ── P6: мини-кабинет «Мои записи» (GET /appointments/my) ──
   function fmtMyDate(iso, tz) {
     try {
@@ -7038,10 +7605,17 @@ function ABookFlow() {
     });
   }
   React.useEffect(function () {
-    if (!(localSaasMode && authStage === 'code')) return;
-    var id = setInterval(function () { setAuthTick(function (x) { return x + 1; }); }, 1000);
+    if (!localSaasMode) return;
+    // interval живёт ТОЛЬКО пока какой-то timestamp в будущем;
+    // последний тик отрисовывает разблокировку и останавливает сам себя
+    var maxEnd = Math.max(authResendAt, authLocks.verify || 0, authLocks.social || 0, restoreWaitAt);
+    if (maxEnd <= Date.now()) return;
+    var id = setInterval(function () {
+      setAuthTick(function (x) { return x + 1; });
+      if (maxEnd <= Date.now()) clearInterval(id);
+    }, 1000);
     return function () { clearInterval(id); };
-  }, [localSaasMode, authStage]);
+  }, [localSaasMode, authResendAt, authLocks, restoreWaitAt]);
   // «Записаться снова»: прошлая/отменённая запись → тот же мастер и услуги
   function rebook(a) {
     var sid = String(a && (a.staff_external_id || (a.staff && a.staff.id)) || '');
@@ -7130,18 +7704,42 @@ function ABookFlow() {
     var cancelled = false;
     var s = saasReadSession();
     if (!s || !s.token) { setSaasAuth('anon'); return; }
+    setSaasAuth('checking');
+    // одна проверка /me; истёкший access обновит refresh-pipeline внутри localBookingFetch
     localBookingFetch('/me', { headers: { Authorization: 'Bearer ' + s.token } }).then(function (me) {
       if (cancelled) return;
-      saasSaveSession(s.token, me || s.user);
+      setRestoreErr('');
+      saasUpdateUser(me || s.user);
       setSaasUser(me || s.user || null);
       authRouteProfile(me);
-    }).catch(function () {
+    }).catch(function (err) {
       if (cancelled) return;
+      var code = err && err.code;
+      // 429: пара сохранена + серверный countdown; повтор — по действию пользователя
+      if (code === 'auth_rate_limited') {
+        var rw = err.retryAfterSeconds && isFinite(err.retryAfterSeconds) ? Math.ceil(Number(err.retryAfterSeconds)) : 60;
+        setRestoreWaitAt(Date.now() + rw * 1000);
+        setRestoreErr(authCodeText(err, 'Слишком много попыток.'));
+        setSaasAuth('retry');
+        return;
+      }
+      // терминальные/фатальные: пара уже стёрта pipeline'ом → спокойный вход
+      if (code && SAAS_RT_TERMINAL[code]) { setSaasAuth('anon'); return; }
+      if (code === 'session_write_failed' || code === 'logged_out' || code === 'refresh_lock_stale' || code === 'refresh_incomplete') { setSaasAuth('anon'); return; }
+      // пара без refresh (неполный v2 bundle) — это не сеть: спокойный новый вход
+      if (code === 'refresh_unavailable') { saasClearSession(); setSaasAuth('anon'); return; }
+      // подтверждённый 401 после единственного повтора (или legacy без refresh) → завершение сессии
+      if (err && err.status === 401) { saasClearSession(); setSaasAuth('anon'); return; }
+      // временные (сеть/timeout/занятый lock/5xx): пара СОХРАНЯЕТСЯ — компактное
+      // «Нет связи» + ручной «Повторить», без формы входа и без авто-цикла
+      var transient = code === 'refresh_network' || code === 'refresh_timeout' || code === 'refresh_lock_busy'
+        || (err && err.status >= 500) || (err && err.status == null && !code);
+      if (transient) { setRestoreErr('Нет связи с сервером — вход сохранён.'); setSaasAuth('retry'); return; }
       saasClearSession();
       setSaasAuth('anon');
     });
     return function () { cancelled = true; };
-  }, [localSaasMode, localSaasApiBase, localTenantSlug]);
+  }, [localSaasMode, localSaasApiBase, localTenantSlug, restoreTick]);
   React.useEffect(function () {
     if (!localSaasMode) return;
     var cancelled = false;
@@ -7759,6 +8357,18 @@ function ABookFlow() {
       var box = { padding: '13px 15px', borderRadius: 16, border: '1px solid ' + t.line, background: t.card, marginTop: 16 };
       var h2s = { fontFamily: DISPLAY, fontWeight: 200, fontSize: 24, textTransform: 'uppercase', color: t.ink, margin: '12px 0 10px' };
       var aErr = authErr ? React.createElement('div', { style: { margin: '14px 0 0', padding: '11px 14px', borderRadius: 12, background: 'rgba(108,106,104,0.14)', border: '1px solid rgba(108,106,104,0.3)', fontFamily: BODY, fontSize: 12.5, color: '#aeaba8', textAlign: 'center' } }, authErr) : null;
+      if (saasAuth === 'retry') return (function () {
+        var rl = Math.max(0, Math.ceil((restoreWaitAt - Date.now()) / 1000));
+        var rWait = rl > 0; // до серверного времени кнопка заблокирована, авто-повтора нет
+        return React.createElement(React.Fragment, null, React.createElement(Eyebrow, {
+          t: t
+        }, rWait ? 'Подождите' : 'Нет связи'), React.createElement('h2', { style: h2s }, rWait ? 'Слишком много' : 'Не удалось', React.createElement('br'), rWait ? 'попыток' : 'подключиться'), React.createElement('div', {
+          style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.55 }
+        }, restoreErr || 'Проверьте интернет и попробуйте ещё раз — вход сохранён.'), React.createElement('div', {
+          onClick: rWait ? null : function () { setRestoreErr(''); setSaasAuth('checking'); setRestoreTick(function (x) { return x + 1; }); },
+          style: { marginTop: 18, opacity: rWait ? 0.6 : 1 }
+        }, React.createElement(PrimaryPill, { t: t, label: rWait ? 'Повторить · ' + rl + ' с' : 'Повторить' })));
+      })();
       if (saasAuth === 'checking') return React.createElement(React.Fragment, null, LocalModeNote(t), Loader(t, 'Проверяем сессию…'));
       if (authStage === 'code') return React.createElement(React.Fragment, null, React.createElement(Eyebrow, {
         t: t
@@ -7770,10 +8380,14 @@ function ABookFlow() {
         value: authCode,
         onChange: function (e) { setAuthCode(String(e.target.value || '').replace(/\D/g, '').slice(0, 6)); },
         inputMode: 'numeric', placeholder: '••••••', autoFocus: true, style: input
-      })), aErr, React.createElement('div', {
-        onClick: authBusy ? null : authVerify,
-        style: { marginTop: 18, opacity: authBusy ? 0.6 : 1 }
-      }, React.createElement(PrimaryPill, { t: t, label: authBusy ? 'Секунду…' : 'Войти' })), React.createElement('div', {
+      })), aErr, (function () {
+        var vLeft = authLockLeft('verify');
+        var vWait = vLeft > 0;
+        return React.createElement('div', {
+          onClick: authBusy || vWait ? null : authVerify,
+          style: { marginTop: 18, opacity: authBusy || vWait ? 0.6 : 1 }
+        }, React.createElement(PrimaryPill, { t: t, label: authBusy ? 'Секунду…' : (vWait ? 'Подождите · ' + vLeft + ' с' : 'Войти') }));
+      })(), React.createElement('div', {
         onClick: authBusy ? null : function () { setAuthErr(''); setAuthStage('phone'); },
         style: { textAlign: 'center', marginTop: 14, fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: 'pointer' }
       }, 'Изменить номер'), (function () {
@@ -7803,10 +8417,14 @@ function ABookFlow() {
         value: authPhone,
         onChange: function (e) { setAuthPhone(fmtPhone(e.target.value)); },
         inputMode: 'tel', placeholder: '+7 (___) ___-__-__', autoFocus: true, style: input
-      })), aErr, React.createElement('div', {
-        onClick: authBusy ? null : authStart,
-        style: { marginTop: 18, opacity: authBusy ? 0.6 : 1 }
-      }, React.createElement(PrimaryPill, { t: t, label: authBusy ? 'Секунду…' : 'Получить код' })), React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 4px' } }, React.createElement('div', { style: { flex: 1, height: 1, background: t.line } }), React.createElement('span', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'или'), React.createElement('div', { style: { flex: 1, height: 1, background: t.line } })), React.createElement('div', { onClick: authBusy ? null : function () { authSocial('yandex'); }, style: { height: 46, borderRadius: 12, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: 12, cursor: 'pointer' } }, React.createElement('span', { style: { color: '#686664', fontWeight: 800 } }, 'Я'), 'Войти через Яндекс'), React.createElement('div', { onClick: authBusy ? null : function () { authSocial('telegram'); }, style: { height: 46, borderRadius: 12, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: 10, cursor: 'pointer' } }, React.createElement('span', { style: { color: '#94928f', fontWeight: 800 } }, '\u2708'), 'Войти через Telegram'), React.createElement('div', {
+      })), aErr, (function () {
+        var sLeft = Math.max(0, Math.ceil((authResendAt - Date.now()) / 1000));
+        var sWait = sLeft > 0;
+        return React.createElement('div', {
+          onClick: authBusy || sWait ? null : authStart,
+          style: { marginTop: 18, opacity: authBusy || sWait ? 0.6 : 1 }
+        }, React.createElement(PrimaryPill, { t: t, label: authBusy ? 'Секунду…' : (sWait ? 'Новый код · ' + sLeft + ' с' : 'Получить код') }));
+      })(), React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 4px' } }, React.createElement('div', { style: { flex: 1, height: 1, background: t.line } }), React.createElement('span', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'или'), React.createElement('div', { style: { flex: 1, height: 1, background: t.line } })), (function () { var soL = authLockLeft('social'); var soW = soL > 0; return React.createElement('div', { onClick: authBusy || soW ? null : function () { authSocial('yandex'); }, style: { height: 46, borderRadius: 12, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: 12, cursor: soW ? 'default' : 'pointer', opacity: soW ? 0.55 : 1 } }, React.createElement('span', { style: { color: '#686664', fontWeight: 800 } }, 'Я'), soW ? 'Яндекс · ' + soL + ' с' : 'Войти через Яндекс'); })(), (function () { var soL = authLockLeft('social'); var soW = soL > 0; return React.createElement('div', { onClick: authBusy || soW ? null : function () { authSocial('telegram'); }, style: { height: 46, borderRadius: 12, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: 10, cursor: soW ? 'default' : 'pointer', opacity: soW ? 0.55 : 1 } }, React.createElement('span', { style: { color: '#94928f', fontWeight: 800 } }, '\u2708'), soW ? 'Telegram · ' + soL + ' с' : 'Войти через Telegram'); })(), React.createElement('div', {
         style: { fontFamily: BODY, fontSize: 11, color: t.faint, marginTop: 12, lineHeight: 1.5 }
       }, 'Локальный режим: SMS не отправляется, debug-код показывается на экране.'));
     });
@@ -7877,7 +8495,42 @@ function ABookFlow() {
       }, myErr, React.createElement('div', {
         onClick: myLoading ? null : loadMyAppts,
         style: { marginTop: 9, display: 'inline-block', padding: '7px 18px', borderRadius: 999, border: '1px solid rgba(174,171,168,0.5)', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
-      }, 'Повторить')) : null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past)), React.createElement('div', {
+      }, 'Повторить')) : null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past)), (function () {
+        // «Устройства» — компактный блок активных сессий
+        var sess = Array.isArray(mySessions) ? mySessions : [];
+        var head = React.createElement('div', {
+          style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '22px 2px 9px' }
+        }, 'Устройства');
+        var rows = sess.map(function (ss, i) {
+          var cur = !!(ss && ss.is_current);
+          return React.createElement('div', {
+            key: (ss && ss.id) || i,
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '11px 14px', borderRadius: 12, border: '1px solid ' + t.line }
+          }, React.createElement('div', null, React.createElement('div', {
+            style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink }
+          }, (ss && ss.device_name) || 'Устройство', cur ? React.createElement('span', {
+            style: { marginLeft: 8, fontFamily: DISPLAY, fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.accent }
+          }, 'это устройство') : null), ss && ss.status && ss.status !== 'active' ? React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 11, color: t.faint, marginTop: 2 }
+          }, String(ss.status)) : null), React.createElement('div', {
+            onClick: mySessBusy ? null : function () { revokeMySession(ss && ss.id, cur); },
+            style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.faint, cursor: 'pointer', opacity: mySessBusy ? 0.5 : 1 }
+          }, cur ? 'Выйти' : 'Отозвать'));
+        });
+        return React.createElement(React.Fragment, null, head, mySessErr ? React.createElement('div', {
+          style: { margin: '6px 0', fontFamily: BODY, fontSize: 12, color: '#aeaba8', textAlign: 'center' }
+        }, mySessErr) : null, mySessions === null ? React.createElement('div', {
+          onClick: loadMySessions,
+          style: { padding: '11px 14px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, textAlign: 'center', cursor: 'pointer' }
+        }, 'Показать активные сессии') : React.createElement('div', {
+          style: { display: 'flex', flexDirection: 'column', gap: 8 }
+        }, rows.length ? rows : React.createElement('div', {
+          style: { fontFamily: BODY, fontSize: 12.5, color: t.faint, textAlign: 'center' }
+        }, 'Нет данных'), sess.length > 1 ? React.createElement('div', {
+          onClick: mySessBusy ? null : revokeAllMySessions,
+          style: { textAlign: 'center', padding: '9px 0', borderRadius: 11, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer', opacity: mySessBusy ? 0.5 : 1 }
+        }, 'Выйти на всех устройствах') : null));
+      })(), React.createElement('div', {
         onClick: function () { setMyView(false); },
         style: { marginTop: 22 }
       }, React.createElement(PrimaryPill, {
@@ -8604,6 +9257,35 @@ function AChat() {
       return name && s.indexOf(String(name).toLowerCase()) >= 0;
     }) || /стрижк|бород|фейд|брить|уход|комплекс/.test(s);
   }
+  function staffChoiceChips(text) {
+    var raw = String(text || '').replace(/\r/g, '');
+    var low = raw.toLowerCase();
+    var choices = [];
+    var numbered = /(?:^|\n)\s*\d{1,2}[.)]\s*([^\n]+)/g;
+    var match;
+    while ((match = numbered.exec(raw)) && choices.length < 6) {
+      var label = String(match[1] || '').split(/\s+[\u2014\u2013]\s+|\s+-\s+/)[0]
+        .replace(/[*_`]/g, '').replace(/[.:;!?]+$/g, '').trim();
+      var norm = label.toLowerCase();
+      if (/(?:написать|отправить).*(?:напомин|сообщен)/.test(norm) || (norm === 'написать' && /напомин|вернут|цикл|реактив/.test(low))) label = 'Отправить напоминание';
+      else if (/подготовить.*предлож/.test(norm)) label = 'Подготовить предложение';
+      else if (/открыть.*список/.test(norm)) label = 'Открыть список для звонка';
+      else if (/отлож/.test(norm)) label = 'Отложить';
+      if (label && label.length <= 42) choices.push(label);
+    }
+    choices = uniqChips(choices, 6);
+    if (choices.length >= 2) return choices;
+    if (/(?:запускаем|запустить|начинаем)[^?]{0,80}\?/.test(low)) return ['Запустить', 'Не сейчас'];
+    if (/(?:что|какой вариант) выбираешь/.test(low)) {
+      var explicit = [];
+      if (/написать.*без скидк|отправить.*напомин/.test(low)) explicit.push('Отправить напоминание');
+      if (/подготовить.*предлож/.test(low)) explicit.push('Подготовить предложение');
+      if (/открыть.*список/.test(low)) explicit.push('Открыть список для звонка');
+      if (/отлож/.test(low)) explicit.push('Отложить');
+      if (explicit.length >= 2) return uniqChips(explicit, 6);
+    }
+    return [];
+  }
   // Контекстные быстрые ответы после ответа Майи: не общий набор кнопок, а
   // следующий логичный шаг воронки записи/покупки.
   const chatSuggest = function (text, history) {
@@ -8613,6 +9295,8 @@ function AChat() {
     if (/https?:\/\/|записал вас|забронир|перейдите по ссыл|ссылк[ауе] (?:на|для) оплат|оплатить по ссыл/.test(bot)) return [];
     if (staff) {
       if (/рабочем чате|кабинет клиента|не записываю|не оформляю\s+клиент/.test(bot)) return [];
+      var staffChoices = staffChoiceChips(text);
+      if (staffChoices.length) return staffChoices;
       return STAFF_QUICKS;
     }
     if (!user) return QUICKS;
@@ -8768,31 +9452,48 @@ function AChat() {
       if (clean.length) localStorage.setItem(chatHistoryCacheKey(), JSON.stringify(clean));
     } catch (e) {}
   }, [msgs]);
+  const syncChatHistoryRef = React.useRef(async function () {});
+  syncChatHistoryRef.current = async function (opts) {
+    opts = opts || {};
+    try {
+      const ap = authPayload({});
+      const resp = await fetch(CHAT_PROXY + '?action=chat_history', {
+        method: 'POST',
+        headers: ap.headers,
+        body: JSON.stringify(ap.payload)
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const loaded = normalizeChatMessages(data && data.messages);
+      if ((opts.cancelled && opts.cancelled()) || !loaded.length) return;
+      setMsgs(function (current) {
+        const currentClean = normalizeChatMessages(current);
+        if (!opts.force && currentClean.length > loaded.length) return current;
+        if (JSON.stringify(currentClean) === JSON.stringify(loaded)) return current;
+        userHasSentRef.current = loaded.some(function (m) { return m && m.role === 'user'; });
+        return loaded;
+      });
+    } catch (e) {}
+  };
   React.useEffect(() => {
     let cancelled = false;
-    const initialCount = normalizeChatMessages(msgs).length;
-    (async () => {
-      try {
-        const ap = authPayload({});
-        const resp = await fetch(CHAT_PROXY + '?action=chat_history', {
-          method: 'POST',
-          headers: ap.headers,
-          body: JSON.stringify(ap.payload)
-        });
-        if (!resp.ok) return;
-        const data = await resp.json();
-        const loaded = normalizeChatMessages(data && data.messages);
-        if (cancelled || !loaded.length) return;
-        setMsgs(current => {
-          const currentClean = normalizeChatMessages(current);
-          if (currentClean.length !== initialCount) return current;
-          userHasSentRef.current = loaded.some(m => m && m.role === 'user');
-          return loaded;
-        });
-      } catch (e) {}
-    })();
+    syncChatHistoryRef.current({ cancelled: function () { return cancelled; } });
     return () => {
       cancelled = true;
+    };
+  }, []);
+  React.useEffect(() => {
+    function refreshOnReturn() {
+      if (document.visibilityState && document.visibilityState !== 'visible') return;
+      if (syncChatHistoryRef.current) syncChatHistoryRef.current({ force: true });
+    }
+    window.addEventListener('focus', refreshOnReturn);
+    document.addEventListener('visibilitychange', refreshOnReturn);
+    window.addEventListener('pageshow', refreshOnReturn);
+    return function () {
+      window.removeEventListener('focus', refreshOnReturn);
+      document.removeEventListener('visibilitychange', refreshOnReturn);
+      window.removeEventListener('pageshow', refreshOnReturn);
     };
   }, []);
   // Весь экран чата живёт ВНУТРИ visualViewport: при клавиатуре ужимается высота всего чата (input bar — обычный нижний flex-блок, сам встаёт над клавиатурой).
@@ -14749,12 +15450,46 @@ function AGodMode(props) {
   var sSu = React.useState(null), su = sSu[0], setSu = sSu[1];
   var sBusy = React.useState(false), busy = sBusy[0], setBusy = sBusy[1];
   var sModal = React.useState(null), modal = sModal[0], setModal = sModal[1];
+  // Открытый модал панели (план/деньги/подписчики) — глобальный таббар перекрывал
+  // его кнопки «Отмена/Сохранить». Прячем меню на время модала.
+  React.useEffect(function () {
+    window.__meModalFS = !!modal;
+    try { window.__meRefresh && window.__meRefresh(); } catch (e) {}
+    return function () {
+      window.__meModalFS = false;
+      try { window.__meRefresh && window.__meRefresh(); } catch (e) {}
+    };
+  }, [modal]);
   var sAct = React.useState({}), actionS = sAct[0], setActionS = sAct[1];
   var sEval = React.useState({}), evalS = sEval[0], setEvalS = sEval[1];
   var sControl = React.useState({}), controlS = sControl[0], setControlS = sControl[1];
   var sBrief = React.useState(0), briefIndex = sBrief[0], setBriefIndex = sBrief[1];
   var sReturnCalls = React.useState(false), returnCallsOpen = sReturnCalls[0], setReturnCallsOpen = sReturnCalls[1];
   var briefScrollRef = React.useRef(null);
+
+  React.useEffect(function () {
+    try {
+      if (!document.getElementById('me-owner-modal-nav-style')) {
+        var navStyle = document.createElement('style');
+        navStyle.id = 'me-owner-modal-nav-style';
+        navStyle.textContent = '.me-owner-modal-open #me-global-bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}';
+        document.head.appendChild(navStyle);
+      }
+      document.documentElement.classList.toggle('me-owner-modal-open', !!modal);
+      window.dispatchEvent(new CustomEvent('me:bottom-nav-visibility', {
+        detail: { hidden: !!modal, source: 'maya-owner-modal' }
+      }));
+    } catch (e) {}
+    return function () {
+      if (!modal) return;
+      try {
+        document.documentElement.classList.remove('me-owner-modal-open');
+        window.dispatchEvent(new CustomEvent('me:bottom-nav-visibility', {
+          detail: { hidden: false, source: 'maya-owner-modal' }
+        }));
+      } catch (e) {}
+    };
+  }, [!!modal]);
 
   function gfetch(action, body) {
     var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
@@ -16078,7 +16813,7 @@ function AGodMode(props) {
             borderRadius: 28, padding: '20px 20px 18px',
             background: panelBg, color: panelInk,
             display: 'flex', flexDirection: 'column',
-            boxShadow: '0 18px 50px rgba(0,0,0,0.35)'
+            boxShadow: 'none'
           }
         },
           // шапка: знак Maya + «Maya · категория» + tone-точка
@@ -16198,8 +16933,10 @@ function AGodMode(props) {
           e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.45, color: t.dim, marginTop: 7, textWrap: 'pretty' } }, brief.summary || '')),
         e('button', {
           type: 'button', onClick: function () { loadCommand(); }, disabled: busy,
-          style: { border: '1px solid ' + t.line, background: 'transparent', color: t.ink, borderRadius: 8, padding: '9px 11px', fontFamily: BODY, fontWeight: 650, fontSize: 12, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.55 : 1, flexShrink: 0 }
-        }, busy ? '…' : 'Обновить')),
+          'aria-label': busy ? 'Обновление данных MAYA' : 'Обновить данные MAYA',
+          'aria-busy': busy,
+          style: { minWidth: 88, minHeight: 38, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', WebkitAppearance: 'none', appearance: 'none', outline: 'none', boxShadow: 'none', border: '1px solid ' + (busy ? 'transparent' : t.line), background: 'transparent', color: t.ink, borderRadius: 8, padding: '9px 11px', fontFamily: BODY, fontWeight: 650, fontSize: 12, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.9 : 1, flexShrink: 0 }
+        }, busy ? e(MayaLoadingLogo, { size: 18 }) : 'Обновить')),
       renderBriefCarousel(brief),
       renderSimpleGoal(brief.simple_goal, cc.growth_plan),
       renderQuickStats(brief.quick_stats),
@@ -25068,6 +25805,16 @@ function MEApp() {
   const [logoutOpen, setLogoutOpen] = React.useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
   const [floatDockHidden, setFloatDockHidden] = React.useState(false);
+  const [bottomNavHidden, setBottomNavHidden] = React.useState(false);
+  React.useEffect(function () {
+    function onBottomNavVisibility(ev) {
+      setBottomNavHidden(!!(ev && ev.detail && ev.detail.hidden));
+    }
+    window.addEventListener('me:bottom-nav-visibility', onBottomNavVisibility);
+    return function () {
+      window.removeEventListener('me:bottom-nav-visibility', onBottomNavVisibility);
+    };
+  }, []);
   // ── Свайп-назад из любой страницы (жест от левого края) ──────────────────
   // Мини-история экранов: следим за сменой screen, поэтому ловим ЛЮБОЙ переход
   // (через __meGo / setScreen / табы). Таб-экраны (главные) в историю не пишем —
@@ -25407,7 +26154,8 @@ function MEApp() {
   const gStaffActive = {
     'team-chat': 3
   };
-  const gTab = !window.__meScanFS && noOwnTab.indexOf(screen) >= 0 && typeof AuroraTab !== 'undefined' && typeof CLIENT_TABS !== 'undefined' ? React.createElement('div', {
+  const gTab = !bottomNavHidden && !window.__meScanFS && !window.__meModalFS && noOwnTab.indexOf(screen) >= 0 && typeof AuroraTab !== 'undefined' && typeof CLIENT_TABS !== 'undefined' ? React.createElement('div', {
+    id: 'me-global-bottom-nav',
     style: {
       position: 'fixed',
       left: 0,
