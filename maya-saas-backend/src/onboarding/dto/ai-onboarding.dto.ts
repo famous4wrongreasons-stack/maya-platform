@@ -110,11 +110,14 @@ export class ConfirmAiOnboardingDraftDto {
   @MaxLength(120)
   ownerName?: string;
 
-  @ApiPropertyOptional({ example: '+79990000000' })
-  @IsOptional()
+  @ApiProperty({
+    example: '+79990000000',
+    description:
+      'Required recovery/login channel until social identity binding is part of onboarding.',
+  })
   @IsString()
-  @Matches(/^[+\d\s().-]+$/)
-  ownerPhone?: string;
+  @Matches(/^(?=(?:\D*\d){10,15}\D*$)\+?[\d\s().-]+$/)
+  ownerPhone!: string;
 
   @ApiPropertyOptional()
   @IsOptional()

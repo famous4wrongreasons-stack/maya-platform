@@ -51,4 +51,15 @@ describe('SafeOnboardingInterpreter', () => {
 
     expect(result.blueprint.calendarSource).toBe(CalendarSource.EXTERNAL);
   });
+
+  it('understands a naturally phrased service without the services keyword', () => {
+    const result = interpreter.interpret(
+      'Студия называется Тихая сила. Я работаю одна. Массаж спины стоит 3000 рублей и длится 60 минут.',
+    );
+
+    expect(result.missingFields).toEqual([]);
+    expect(result.blueprint.services).toEqual([
+      { name: 'Массаж спины', price: 3000, durationMinutes: 60 },
+    ]);
+  });
 });

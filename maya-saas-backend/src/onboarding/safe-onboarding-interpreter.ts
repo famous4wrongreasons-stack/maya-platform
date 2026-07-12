@@ -181,14 +181,15 @@ export class SafeOnboardingInterpreter {
     previous: AiOnboardingServiceItem[],
   ): AiOnboardingServiceItem[] {
     const section = message.match(
-      /(?:услуги|делаем|предлагаем|работы)\s*[:-]?\s*([^\n.!?]+)/iu,
+      /(?:услуги|делаем|предлагаем|оказываем|работы)\s*[:-]?\s*([^\n.!?]+)/iu,
     )?.[1];
-    if (!section) {
-      return previous;
-    }
+    const candidates = section
+      ? section.split(/[,;]+/u)
+      : message
+          .split(/[.!?;\n]+/u)
+          .filter((item) => this.hasServiceFacts(item));
 
-    const parsed = section
-      .split(/[,;]+|\s+и\s+(?=[а-яё])/iu)
+    const parsed = candidates
       .map((item) => this.parseService(item))
       .filter((item): item is AiOnboardingServiceItem => item !== null)
       .slice(0, 30);
@@ -198,20 +199,29 @@ export class SafeOnboardingInterpreter {
 
   private parseService(value: string): AiOnboardingServiceItem | null {
     const cleaned = value.trim();
+    if (!this.hasServiceFacts(cleaned)) {
+      return null;
+    }
     const name = cleaned
-      .replace(/\d[\d\s]*(?:₽|руб(?:лей|ля|ль)?|р\.)(?=\s|$)/giu, '')
-      .replace(/\d{1,3}\s*(?:мин(?:ут[ыа]?)?|час(?:а|ов)?)(?=\s|$)/giu, '')
+      .replace(/\d[\d\s]*(?:₽|руб(?:лей|ля|ль)?\.?|р\.)(?=\s|$)/giu, '')
+      .replace(/\d{1,3}\s*(?:мин(?:ут[ыа]?)?\.?|час(?:а|ов)?)(?=\s|$)/giu, '')
+      .replace(
+        /(?:^|\s)(?:стоит|цена|ценой|длится|продолжительность|около|примерно|и)(?=\s|$)/giu,
+        ' ',
+      )
+      .replace(/^(?:я\s+)?(?:делаю|предлагаю|оказываю)\s+/iu, '')
       .replace(/[()\-–—]+$/u, '')
+      .replace(/\s+/g, ' ')
       .trim();
     if (name.length < 2) {
       return null;
     }
 
     const priceMatch = cleaned.match(
-      /(\d[\d\s]*)\s*(?:₽|руб(?:лей|ля|ль)?|р\.)(?=\s|$)/iu,
+      /(\d[\d\s]*)\s*(?:₽|руб(?:лей|ля|ль)?\.?|р\.)(?=\s|$)/iu,
     );
     const durationMatch = cleaned.match(
-      /(\d{1,3})\s*(мин(?:ут[ыа]?)?|час(?:а|ов)?)(?=\s|$)/iu,
+      /(\d{1,3})\s*(мин(?:ут[ыа]?)?\.?|час(?:а|ов)?)(?=\s|$)/iu,
     );
     const durationValue = durationMatch?.[1] ? Number(durationMatch[1]) : 60;
     const durationMinutes = durationMatch?.[2]?.toLowerCase().startsWith('час')
@@ -225,6 +235,13 @@ export class SafeOnboardingInterpreter {
         : 0,
       durationMinutes: Math.max(5, Math.min(durationMinutes, 1440)),
     };
+  }
+
+  private hasServiceFacts(value: string): boolean {
+    return (
+      /\d[\d\s]*\s*(?:₽|руб(?:лей|ля|ль)?\.?|р\.)(?=\s|$)/iu.test(value) ||
+      /\d{1,3}\s*(?:мин(?:ут[ыа]?)?\.?|час(?:а|ов)?)(?=\s|$)/iu.test(value)
+    );
   }
 
   private extractSchedule(message: string): AiOnboardingWeeklyRule[] | null {

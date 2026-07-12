@@ -79,7 +79,10 @@ local storage.
 ## Confirmation
 
 `POST /api/onboarding/ai/drafts/:draftId/confirm` accepts the draft token,
-owner contact data and optional edits from the confirmation card:
+required owner phone, owner contact data and optional edits from the
+confirmation card. Phone is required until social identity binding is included
+in onboarding, so the owner cannot accidentally create an account with no
+working return path:
 
 ```json
 {

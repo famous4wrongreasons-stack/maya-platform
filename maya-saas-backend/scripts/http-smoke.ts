@@ -185,6 +185,15 @@ async function runSmoke() {
   );
   assert.deepEqual(completedAiDraft.missing_fields, []);
 
+  await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      draftToken: aiDraftToken,
+      ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+    }),
+  });
+
   const confirmedAiSignup = asRecord(
     await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 201, {
       method: 'POST',
@@ -193,6 +202,7 @@ async function runSmoke() {
         draftToken: aiDraftToken,
         ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
         ownerName: 'AI Smoke Owner',
+        ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
       }),
     }),
   );
