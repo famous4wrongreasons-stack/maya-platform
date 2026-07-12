@@ -28,7 +28,7 @@ const platformOwnerEmail =
 const platformOwnerPassword =
   process.env.SEED_PLATFORM_OWNER_PASSWORD ?? 'ChangeMe123!';
 const demoTenantAdminEmail =
-  process.env.SEED_DEMO_TENANT_ADMIN_EMAIL ?? 'admin@demo-salon.local';
+  process.env.SEED_DEMO_TENANT_ADMIN_EMAIL ?? 'admin@demo-business.local';
 const demoTenantAdminPassword =
   process.env.SEED_DEMO_TENANT_ADMIN_PASSWORD ?? 'ChangeMe123!';
 const defaultTenantSlug = process.env.SEED_DEFAULT_TENANT_SLUG ?? 'malesthetic';
@@ -238,7 +238,7 @@ async function main() {
   const proPlan = await prisma.subscriptionPlan.upsert({
     where: { name: 'pro' },
     update: {
-      priceMonthly: 2490,
+      priceMonthly: 1990,
       maxBranches: 3,
       maxStaff: 25,
       featuresJson: buildFeatureFlags(
@@ -248,7 +248,7 @@ async function main() {
     },
     create: {
       name: 'pro',
-      priceMonthly: 2490,
+      priceMonthly: 1990,
       maxBranches: 3,
       maxStaff: 25,
       featuresJson: buildFeatureFlags(
@@ -261,7 +261,7 @@ async function main() {
   const demoPlan = await prisma.subscriptionPlan.upsert({
     where: { name: 'max' },
     update: {
-      priceMonthly: 8990,
+      priceMonthly: 2990,
       maxBranches: 10,
       maxStaff: 100,
       featuresJson: buildFeatureFlags(
@@ -271,7 +271,7 @@ async function main() {
     },
     create: {
       name: 'max',
-      priceMonthly: 8990,
+      priceMonthly: 2990,
       maxBranches: 10,
       maxStaff: 100,
       featuresJson: buildFeatureFlags(
@@ -385,28 +385,28 @@ async function main() {
   }
 
   const demoTenant = await prisma.tenant.upsert({
-    where: { slug: 'demo-salon' },
+    where: { slug: 'demo-business' },
     update: {
-      name: 'Demo Salon',
+      name: 'Maya Service Demo',
       status: 'active',
       planId: demoPlan.id,
       industryPresetId: 'general_service',
       defaultCurrency: 'RUB',
       defaultTimezone: 'Europe/Moscow',
       defaultLocale: 'ru-RU',
-      subdomain: 'demo-salon',
+      subdomain: 'demo-business',
       allowSelfRegistration: true,
     },
     create: {
-      name: 'Demo Salon',
-      slug: 'demo-salon',
+      name: 'Maya Service Demo',
+      slug: 'demo-business',
       status: 'active',
       planId: demoPlan.id,
       industryPresetId: 'general_service',
       defaultCurrency: 'RUB',
       defaultTimezone: 'Europe/Moscow',
       defaultLocale: 'ru-RU',
-      subdomain: 'demo-salon',
+      subdomain: 'demo-business',
       allowSelfRegistration: true,
     },
   });
@@ -414,8 +414,8 @@ async function main() {
   await prisma.brandingSettings.upsert({
     where: { tenantId: demoTenant.id },
     update: {
-      appName: 'Maya Demo Salon',
-      logoUrl: 'https://example.com/logo-demo-salon.png',
+      appName: 'Maya Service Demo',
+      logoUrl: null,
       primaryColor: '#111111',
       secondaryColor: '#C6A86A',
       accentColor: '#C6A86A',
@@ -423,7 +423,7 @@ async function main() {
       surfaceColor: '#fffdf9',
       textPrimaryColor: '#18160f',
       textSecondaryColor: 'rgba(24,22,15,0.55)',
-      backgroundImageUrl: 'https://example.com/bg-demo-salon.jpg',
+      backgroundImageUrl: null,
       fontFamily: 'Manrope',
       headingFontFamily: 'Montserrat',
       buttonRadius: 18,
@@ -432,12 +432,13 @@ async function main() {
       themeJson: {
         appearance: 'premium-light',
         accent_glow: false,
+        industryPresetId: 'general_service',
       } satisfies Prisma.InputJsonValue,
     },
     create: {
       tenantId: demoTenant.id,
-      appName: 'Maya Demo Salon',
-      logoUrl: 'https://example.com/logo-demo-salon.png',
+      appName: 'Maya Service Demo',
+      logoUrl: null,
       primaryColor: '#111111',
       secondaryColor: '#C6A86A',
       accentColor: '#C6A86A',
@@ -445,7 +446,7 @@ async function main() {
       surfaceColor: '#fffdf9',
       textPrimaryColor: '#18160f',
       textSecondaryColor: 'rgba(24,22,15,0.55)',
-      backgroundImageUrl: 'https://example.com/bg-demo-salon.jpg',
+      backgroundImageUrl: null,
       fontFamily: 'Manrope',
       headingFontFamily: 'Montserrat',
       buttonRadius: 18,
@@ -454,6 +455,7 @@ async function main() {
       themeJson: {
         appearance: 'premium-light',
         accent_glow: false,
+        industryPresetId: 'general_service',
       } satisfies Prisma.InputJsonValue,
     },
   });
@@ -461,7 +463,7 @@ async function main() {
   const demoBranchExisting = await prisma.branch.findFirst({
     where: {
       tenantId: demoTenant.id,
-      name: 'Demo Main Branch',
+      name: 'Demo Location',
     },
   });
 
@@ -469,7 +471,7 @@ async function main() {
     ? await prisma.branch.update({
         where: { id: demoBranchExisting.id },
         data: {
-          address: 'Moscow, Tverskaya 1',
+          address: 'Moscow, Demo street 1',
           phone: '+79990000000',
           timezone: 'Europe/Moscow',
         },
@@ -477,8 +479,8 @@ async function main() {
     : await prisma.branch.create({
         data: {
           tenantId: demoTenant.id,
-          name: 'Demo Main Branch',
-          address: 'Moscow, Tverskaya 1',
+          name: 'Demo Location',
+          address: 'Moscow, Demo street 1',
           phone: '+79990000000',
           timezone: 'Europe/Moscow',
         },
@@ -492,7 +494,8 @@ async function main() {
       baseUrl: 'https://mock-crm.local',
       status: 'active',
       settingsJson: {
-        dataset: 'demo-salon',
+        dataset: 'general-service',
+        industryPresetId: 'general_service',
       } satisfies Prisma.InputJsonValue,
     },
     create: {
@@ -502,7 +505,8 @@ async function main() {
       baseUrl: 'https://mock-crm.local',
       status: 'active',
       settingsJson: {
-        dataset: 'demo-salon',
+        dataset: 'general-service',
+        industryPresetId: 'general_service',
       } satisfies Prisma.InputJsonValue,
     },
   });

@@ -44,7 +44,7 @@ jobs:
       JWT_SECRET: test-jwt-signing-secret-for-ci-only
       NODE_ENV: test
       PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
-      SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-salon.local
+      SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-business.local
       SEED_DEMO_TENANT_ADMIN_PASSWORD: test-demo-tenant-password-for-ci
       SEED_PLATFORM_OWNER_EMAIL: owner@maya.local
       SEED_PLATFORM_OWNER_PASSWORD: test-platform-owner-password-for-ci

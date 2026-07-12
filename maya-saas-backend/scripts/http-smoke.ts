@@ -14,10 +14,11 @@ const ownerEmail = process.env.SEED_PLATFORM_OWNER_EMAIL ?? 'owner@maya.local';
 const ownerPassword =
   process.env.SEED_PLATFORM_OWNER_PASSWORD ?? 'ChangeMe123!';
 const demoEmail =
-  process.env.SEED_DEMO_TENANT_ADMIN_EMAIL ?? 'admin@demo-salon.local';
+  process.env.SEED_DEMO_TENANT_ADMIN_EMAIL ?? 'admin@demo-business.local';
 const demoPassword =
   process.env.SEED_DEMO_TENANT_ADMIN_PASSWORD ?? 'ChangeMe123!';
 const fixedPhoneCode = '123456';
+const demoTenantSlug = 'demo-business';
 
 function asRecord(value: unknown): Record<string, unknown> {
   assert(value && typeof value === 'object' && !Array.isArray(value));
@@ -134,13 +135,22 @@ function startServer() {
 }
 
 async function runSmoke() {
+  const presetCatalog = asRecord(await expectStatus('/industry-presets', 200));
+  const presetIds = asArray(presetCatalog.items).map((preset) =>
+    stringField(preset, 'id'),
+  );
+  assert(presetIds.includes('general_service'));
+  assert(presetIds.includes('dental_clinic'));
+  assert(presetIds.includes('education'));
+
   const demoConfig = asRecord(
-    await expectStatus('/mobile/config/demo-salon', 200),
+    await expectStatus(`/mobile/config/${demoTenantSlug}`, 200),
   );
   const mayaConfig = asRecord(
     await expectStatus('/mobile/config/malesthetic', 200),
   );
-  assert.equal(demoConfig.slug, 'demo-salon');
+  assert.equal(demoConfig.slug, demoTenantSlug);
+  assert.equal(asRecord(demoConfig.industry_preset).id, 'general_service');
   assert.equal(mayaConfig.slug, 'malesthetic');
   assert.notEqual(demoConfig.slug, mayaConfig.slug);
 
@@ -149,7 +159,7 @@ async function runSmoke() {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        tenantSlug: 'demo-salon',
+        tenantSlug: demoTenantSlug,
         email: demoEmail,
         password: demoPassword,
       }),
@@ -216,7 +226,7 @@ async function runSmoke() {
     await expectStatus('/auth/phone/start', 201, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tenantSlug: 'demo-salon', phone }),
+      body: JSON.stringify({ tenantSlug: demoTenantSlug, phone }),
     }),
   );
   assert.equal(phoneStart.delivery, 'debug');
@@ -225,7 +235,7 @@ async function runSmoke() {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        tenantSlug: 'demo-salon',
+        tenantSlug: demoTenantSlug,
         phone,
         code: fixedPhoneCode,
       }),
@@ -301,6 +311,7 @@ async function runSmoke() {
         slug: trialSlug,
         ownerEmail: `${trialSlug}@example.test`,
         ownerName: 'Smoke Owner',
+        industryPresetId: 'education',
         password: 'StrongPass123!',
         branchName: 'Smoke Branch',
         branchTimezone: 'Europe/Moscow',
@@ -313,6 +324,7 @@ async function runSmoke() {
     await expectStatus(`/mobile/config/${trialSlug}`, 200),
   );
   assert.equal(trialConfig.client_registration_enabled, false);
+  assert.equal(asRecord(trialConfig.industry_preset).id, 'education');
   const blockedRegistration = asRecord(
     await expectStatus('/auth/register', 403, {
       method: 'POST',

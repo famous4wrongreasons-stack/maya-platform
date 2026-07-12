@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MaxLength } from 'class-validator';
 
 export class StartOauthLoginDto {
-  @ApiProperty({ example: 'demo-salon' })
+  @ApiProperty({ example: 'demo-business' })
   @IsString()
   tenantSlug!: string;
 

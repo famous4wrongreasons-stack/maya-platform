@@ -447,7 +447,7 @@ export class AuthService {
       throw new ForbiddenException(
         this.buildClientRegistrationError(
           'trial_client_registration_disabled',
-          'Client registration is disabled while this salon is still in trial.',
+          'Client registration is disabled while this business is still in trial.',
         ),
       );
     }

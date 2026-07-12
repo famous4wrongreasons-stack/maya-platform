@@ -47,7 +47,7 @@ Expected database invariants:
 
 ```sql
 SELECT slug, status, "defaultTimezone" FROM "Tenant"
-WHERE slug IN ('malesthetic', 'demo-salon');
+WHERE slug IN ('malesthetic', 'demo-business');
 
 SELECT "tenantId", "userId", role, status FROM "Membership";
 
@@ -59,7 +59,8 @@ Public configuration and registry:
 
 ```bash
 curl http://localhost:3000/api/mobile/config/malesthetic
-curl http://localhost:3000/api/mobile/config/demo-salon
+curl http://localhost:3000/api/mobile/config/demo-business
+curl http://localhost:3000/api/industry-presets
 curl http://localhost:3000/api/features/registry
 ```
 

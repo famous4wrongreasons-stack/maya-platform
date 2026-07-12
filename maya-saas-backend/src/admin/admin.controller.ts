@@ -38,7 +38,7 @@ export class AdminController {
 
   @Post()
   @Roles(UserRole.PLATFORM_OWNER)
-  @ApiOperation({ summary: 'Create a new tenant/salon' })
+  @ApiOperation({ summary: 'Create a new service-business tenant' })
   createTenant(
     @Body() dto: CreateTenantDto,
     @CurrentUser() actor: AuthenticatedUser,

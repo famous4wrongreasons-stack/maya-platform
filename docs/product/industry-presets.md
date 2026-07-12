@@ -29,7 +29,8 @@ type IndustryPreset = {
 
 | Preset | Provider | Customer | Location |
 |---|---|---|---|
-| general_service | Специалист | Клиент | Филиал |
+| general_service | Специалист | Клиент | Локация |
+| solo_specialist | Специалист | Клиент | Рабочее место |
 | beauty_salon | Мастер | Клиент | Салон |
 | barbershop | Барбер | Клиент | Барбершоп |
 | dental_clinic | Врач | Пациент | Клиника |
@@ -39,6 +40,9 @@ type IndustryPreset = {
 ## Application rules
 
 - Core APIs and tables use neutral names.
+- The runtime catalog is exposed through `GET /api/industry-presets`.
+- `GET /api/mobile/config/:tenantSlug` returns the tenant's resolved preset and
+  terminology; unknown legacy values fall back to `general_service`.
 - Preset values seed tenant configuration once; later tenant edits do not mutate the global preset.
 - A preset may recommend modules but entitlement still comes from the plan/override engine.
 - Reports retain canonical metric IDs while labels can change.

@@ -22,6 +22,7 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - Branches, users, CRM integrations, subscription plans, audit logs
 - Auth with `JWT` containing `user_id`, `tenant_id`, `role`
 - Public/mobile API:
+  - `GET /api/industry-presets`
   - `GET /api/mobile/config/:tenantSlug`
   - `POST /api/auth/login`
   - `POST /api/auth/register`
@@ -129,7 +130,7 @@ Development keeps a narrow localhost/Capacitor CORS fallback. Production is fail
 
 Phone auth delivery modes:
 
-- `SELF_SERVE_TRIAL_SIGNUP=true`: enables public self-serve trial salon signup in production
+- `SELF_SERVE_TRIAL_SIGNUP=true`: enables public self-serve service-business signup in production
 
 - `PHONE_AUTH_PROVIDER=auto`: local/test defaults to debug, production requires SMS creds
 - `PHONE_AUTH_PROVIDER=debug`: always returns `debug_code`
@@ -191,12 +192,25 @@ Seed creates:
 
 - Platform owner user
 - Default existing Maya tenant `malesthetic` with Aurora branding tokens
-- Demo tenant `demo-salon`
+- Industry-neutral demo tenant `demo-business`
 - Demo branding
 - Demo branch
 - Mock CRM integration
 - Demo subscription plan
 - Demo tenant admin user
+
+Runtime industry presets are available without authentication:
+
+```bash
+curl http://localhost:3000/api/industry-presets
+```
+
+New tenants default to `general_service`. Self-serve onboarding can send an
+explicit `industryPresetId`, for example `solo_specialist`, `dental_clinic`,
+`auto_detailing` or `education`. The public tenant config returns the resolved
+preset and its provider/customer/booking/service/location terminology. Industry
+presets change configuration and labels; they never fork backend or frontend
+business logic.
 
 Set local seed credentials explicitly before running seed. Never use local defaults in production:
 
@@ -212,7 +226,7 @@ SEED_DEMO_TENANT_ADMIN_PASSWORD=
 Public config:
 
 ```bash
-curl http://localhost:3000/api/mobile/config/demo-salon
+curl http://localhost:3000/api/mobile/config/demo-business
 ```
 
 Login as platform owner:
@@ -228,7 +242,7 @@ Login as demo tenant admin:
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"tenantSlug":"demo-salon","email":"admin@demo-salon.local","password":"ChangeMe123!"}'
+  -d '{"tenantSlug":"demo-business","email":"admin@demo-business.local","password":"ChangeMe123!"}'
 ```
 
 Swagger docs:
@@ -289,7 +303,7 @@ Start phone auth in safe local debug mode:
 curl -X POST http://localhost:3000/api/auth/phone/start \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "phone": "+79990000000"
   }'
 ```
@@ -300,7 +314,7 @@ Verify the code and receive a tenant client JWT:
 curl -X POST http://localhost:3000/api/auth/phone/verify \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "phone": "+79990000000",
     "code": "123456"
   }'
@@ -346,7 +360,7 @@ Start a Yandex login:
 curl -X POST http://localhost:3000/api/auth/oauth/yandex/start \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
   }'
 ```
@@ -368,7 +382,7 @@ Start a Telegram login:
 curl -X POST http://localhost:3000/api/auth/oauth/telegram/start \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
   }'
 ```
@@ -464,7 +478,7 @@ curl -X POST http://localhost:3000/api/admin/tenants/<tenant-id>/crm \
 
 Notes:
 
-- `apiToken` is the tenant salon user token and is stored encrypted.
+- `apiToken` is the tenant CRM user token and is stored encrypted.
 - `YCLIENTS_PARTNER_TOKEN` stays platform-side only and is never returned by API.
 - `settingsJson.companyId` is required for `yclients` and `altegio`.
 - `activeMasterIds` is optional; if present, staff and aggregated slots are filtered to those masters.
