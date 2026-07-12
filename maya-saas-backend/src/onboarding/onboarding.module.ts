@@ -9,7 +9,9 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
 import { OnboardingController } from './onboarding.controller';
+import { AiOnboardingService } from './ai-onboarding.service';
 import { OnboardingService } from './onboarding.service';
+import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
 
 @Module({
   imports: [
@@ -23,6 +25,10 @@ import { OnboardingService } from './onboarding.service';
     AuditLogModule,
   ],
   controllers: [OnboardingController],
-  providers: [OnboardingService],
+  providers: [
+    OnboardingService,
+    AiOnboardingService,
+    SafeOnboardingInterpreter,
+  ],
 })
 export class OnboardingModule {}
