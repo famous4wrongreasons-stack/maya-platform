@@ -35,6 +35,7 @@ _AVG_TTL = 600.0
 _summary30_cache = {"val": None, "ts": 0.0}
 _retention_cache = {"val": None, "ts": 0.0}
 _RETENTION_SETTING = "owner_client_retention_snapshot_v1"
+_CYCLE_CANDIDATES_SETTING = "cycle_candidates_snapshot_v1"
 
 _ACTION_LIBRARY = {
     "reactivation": {
@@ -49,10 +50,10 @@ _ACTION_LIBRARY = {
         "priority": "high",
     },
     "cycle": {
-        "label": "Напомнить тем, кому пора подстричься",
-        "title": "Подогреть спрос на свободные окна",
-        "problem": "На расписании есть свободные окна, которые можно быстро монетизировать.",
-        "reason": "Есть клиенты с привычным циклом визитов, которым уместно напомнить про запись.",
+        "label": "Написать клиентам из очереди",
+        "title": "Вернуть клиентов по личному циклу",
+        "problem": "У части клиентов уже наступил привычный срок следующего визита.",
+        "reason": "MAYA заранее рассчитала личный цикл, исключила будущие записи и проверила допустимость контакта.",
         "client_message": (
             "Здравствуйте! Похоже, уже подходит время обновить стрижку. "
             "Если удобно, подберу ближайшее окно в «Мужской Эстетике»."
@@ -619,9 +620,150 @@ def expiring_assets() -> dict:
     }
 
 
-def return_candidates() -> dict:
-    """Уснувшие клиенты на возврат — из результата ежедневной реактивации (быстро, без
-    ре-скана базы). Действие — существующая рассылка /reactivation_now."""
+def _masked_phone(phone: str) -> str:
+    digits = re.sub(r"\D", "", str(phone or ""))
+    if len(digits) < 4:
+        return "номер доступен"
+    return "+7 *** ***-%s-%s" % (digits[-4:-2], digits[-2:])
+
+
+def _call_url(phone: str) -> str:
+    digits = re.sub(r"\D", "", str(phone or ""))
+    if len(digits) == 11 and digits.startswith("8"):
+        digits = "7" + digits[1:]
+    return ("tel:+" + digits) if digits else ""
+
+
+def _cycle_owner_alert(payload: dict | None) -> dict:
+    raw = (payload or {}).get("owner_alert") or {}
+    if not isinstance(raw, dict):
+        raw = {}
+    return {
+        "version": str(raw.get("version") or "maya_cycle_owner_alert_v1")[:40],
+        "event_id": str(raw.get("event_id") or "")[:100],
+        "active": bool(raw.get("active")),
+        "state": str(raw.get("state") or "empty")[:24],
+        "candidate_count": _rub(raw.get("candidate_count")),
+        "new_count": _rub(raw.get("new_count")),
+        "created_at": str(raw.get("created_at") or "")[:32],
+        "notified_at": str(raw.get("notified_at") or "")[:32],
+    }
+
+
+def _cycle_candidate_queue(*, include_personal_data: bool = False) -> dict:
+    """Loads the PII-free cycle snapshot and expands contacts only for owner UI."""
+    try:
+        import database
+        raw = database.get_setting(_CYCLE_CANDIDATES_SETTING)
+        payload = json.loads(raw) if raw else {}
+    except Exception as exc:
+        logger.error("owner_ai cycle queue: %s", exc)
+        payload = {}
+    if not isinstance(payload, dict) or payload.get("version") != "maya_cycle_candidates_v1":
+        return {
+            "state": "pending_first_scan",
+            "generated_at": "",
+            "summary": {"candidates": None, "pending": None, "overdue": 0, "due": 0, "due_soon": 0},
+            "candidates": [],
+            "owner_alert": _cycle_owner_alert({}),
+        }
+
+    summary = dict(payload.get("summary") or {})
+    rows = [row for row in (payload.get("candidates") or []) if isinstance(row, dict)]
+    state = "fresh"
+    try:
+        generated = datetime.fromisoformat(str(payload.get("generated_at") or "")[:19])
+        if datetime.now() - generated > timedelta(hours=36):
+            state = "stale"
+    except Exception:
+        state = "stale"
+
+    owner_rows = []
+    if include_personal_data:
+        try:
+            import database
+            getter = getattr(database, "get_client_by_id", None)
+            for row in rows[:20]:
+                client = getter(int(row.get("client_id") or 0)) if getter else None
+                if not isinstance(client, dict):
+                    continue
+                name = " ".join(str(client.get("name") or "Клиент").split())[:100]
+                phone = str(client.get("phone") or "")
+                owner_rows.append({
+                    "client_id": int(row.get("client_id") or 0),
+                    "name": name or "Клиент",
+                    "phone_masked": _masked_phone(phone),
+                    "call_url": _call_url(phone),
+                    "cycle_days": _rub(row.get("cycle_days")),
+                    "last_visit": str(row.get("last_visit") or "")[:10],
+                    "predicted_visit": str(row.get("predicted_visit") or "")[:10],
+                    "days_from_due": int(row.get("days_from_due") or 0),
+                    "urgency": str(row.get("urgency") or "due")[:20],
+                    "reason": str(row.get("reason") or "")[:160],
+                    "last_master": str(row.get("last_master") or "")[:100],
+                    "contact_status": str(row.get("contact_status") or "pending")[:24],
+                    "contact_methods": list(row.get("eligible_channels") or [])[:3],
+                })
+        except Exception as exc:
+            logger.error("owner_ai expand cycle contacts: %s", exc)
+            owner_rows = []
+
+    return {
+        "state": state,
+        "generated_at": str(payload.get("generated_at") or "")[:32],
+        "mode": str(payload.get("mode") or "scan")[:20],
+        "summary": summary,
+        "candidates": owner_rows,
+        "owner_alert": _cycle_owner_alert(payload),
+    }
+
+
+def _return_decision_options(cycle_count) -> list[dict]:
+    if cycle_count is None:
+        return [{
+            "key": "scan_pending",
+            "label": "MAYA анализирует",
+            "kind": "dismiss",
+            "disabled": True,
+            "requires_owner_confirmation": False,
+        }]
+    if not _rub(cycle_count):
+        return [{
+            "key": "later",
+            "label": "Проверить завтра",
+            "kind": "dismiss",
+            "requires_owner_confirmation": False,
+        }]
+    return [{
+        "key": "message_without_discount",
+        "label": "Написать без скидки",
+        "kind": "run_job",
+        "job": "cycle",
+        "recommended": True,
+        "requires_owner_confirmation": True,
+        "description": "Персональное напоминание и помощь с записью.",
+    }, {
+        "key": "call_queue",
+        "label": "Позвонить",
+        "kind": "show_call_list",
+        "requires_owner_confirmation": False,
+        "description": "Открыть owner-only список и номера для звонка.",
+    }, {
+        "key": "prepare_offer",
+        "label": "Подготовить акцию",
+        "kind": "ask_maya",
+        "requires_owner_confirmation": True,
+        "description": "Сначала определить условия и не давать скидку на заполненные часы.",
+    }, {
+        "key": "later",
+        "label": "Позже",
+        "kind": "dismiss",
+        "requires_owner_confirmation": False,
+    }]
+
+
+def return_candidates(*, include_personal_data: bool = False) -> dict:
+    """Combines dormant clients with the ranked personal-cycle owner queue."""
     import json as _json
     count, at = None, None
     try:
@@ -634,12 +776,39 @@ def return_candidates() -> dict:
     except Exception as e:
         logger.error(f"owner_ai return_candidates: {e}")
     avg = _avg_check_30d()
+    cycle = _cycle_candidate_queue(include_personal_data=include_personal_data)
+    cycle_summary = cycle.get("summary") or {}
+    cycle_count = cycle_summary.get("pending")
     out = {
         "avg_check_rub": avg,
         "action": "reactivation",
+        "recommended_action": "cycle",
         "action_hint": ("Запустить персональную рассылку «соскучились» уснувшим — "
                         "команда /reactivation_now (владелец)."),
+        "cycle_due_count": cycle_count,
+        "cycle_overdue_count": _rub(cycle_summary.get("overdue")),
+        "cycle_due_now_count": _rub(cycle_summary.get("due")),
+        "cycle_due_soon_count": _rub(cycle_summary.get("due_soon")),
+        "cycle_sent_count": _rub(cycle_summary.get("sent")),
+        "cycle_snapshot_at": cycle.get("generated_at"),
+        "cycle_snapshot_state": cycle.get("state"),
+        "owner_alert": cycle.get("owner_alert") or _cycle_owner_alert({}),
+        "owner_question": "Что сделать с клиентами, которым уже пора вернуться?",
+        "decision_options": _return_decision_options(cycle_count),
     }
+    if cycle_count is not None:
+        out["action_hint"] = (
+            "MAYA уже сформировала очередь по личному циклу. После выбора владельца можно "
+            "написать без скидки, открыть список для звонка или подготовить отдельное предложение."
+        )
+        out["cycle_potential_return_revenue_rub"] = _rub(_rub(cycle_count) * avg * _RETURN_RATE)
+        out["cycle_note"] = (
+            "MAYA ранжирует очередь по отклонению от личного цикла. Потенциал — сценарная "
+            "оценка при возврате около %d%%, не гарантированная выручка." % int(_RETURN_RATE * 100)
+        )
+    if include_personal_data:
+        out["candidates"] = cycle.get("candidates") or []
+        out["privacy"] = "owner_ui_only_not_for_llm"
     if count is None:
         out["count"] = None
         out["note"] = ("Ещё не считалось (реактивация ещё не запускалась). Ищет уснувших "
@@ -1407,7 +1576,17 @@ def _fallback_return_candidates() -> dict:
         "count": None,
         "avg_check_rub": 0,
         "action": "reactivation",
+        "recommended_action": "cycle",
         "action_hint": "",
+        "cycle_due_count": None,
+        "cycle_overdue_count": 0,
+        "cycle_due_now_count": 0,
+        "cycle_due_soon_count": 0,
+        "cycle_snapshot_state": "unavailable",
+        "owner_alert": _cycle_owner_alert({}),
+        "owner_question": "Что сделать с клиентами, которым уже пора вернуться?",
+        "decision_options": _return_decision_options(None),
+        "candidates": [],
         "note": "Кандидаты на возврат временно недоступны.",
     }
 
@@ -1452,6 +1631,21 @@ def _fallback_master_performance() -> dict:
         "top_gross_master": None,
         "masters": [],
         "note": "Аналитика мастеров временно недоступна.",
+    }
+
+
+def _fallback_growth_plan() -> dict:
+    return {
+        "version": "maya_growth_plan_v1",
+        "as_of": _today(),
+        "status": "warn",
+        "goal": {},
+        "plan_fact": {},
+        "capacity": {},
+        "client_segments": {},
+        "masters": [],
+        "actions": [],
+        "message": "Стратегический план роста временно недоступен.",
     }
 
 
@@ -3617,24 +3811,36 @@ def _growth_engine(
 
     retention_summary = retention.get("summary") or {}
     churn_candidates = _rub(retention_summary.get("churn_candidates"))
+    cycle_candidates = _rub(ret.get("cycle_due_count"))
     forward_pct = retention_summary.get("forward_booking_pct")
-    if churn_candidates and (forward_pct is None or _rub(forward_pct) < 35):
-        min_returns = max(1, round(churn_candidates * 0.03))
-        max_returns = max(min_returns, round(churn_candidates * 0.08))
+    if cycle_candidates or (churn_candidates and (forward_pct is None or _rub(forward_pct) < 35)):
+        ranked_count = cycle_candidates or churn_candidates
+        targeted = bool(cycle_candidates)
+        min_returns = max(1, round(ranked_count * (0.15 if targeted else 0.03)))
+        max_returns = max(min_returns, round(ranked_count * (0.35 if targeted else 0.08)))
         add(
             "personal_return_cycle",
             "retention",
             "Возвращать клиентов по их личному циклу",
             evidence=(
-                f"Без повторного визита {churn_candidates} клиент(а/ов); будущая запись "
-                f"{forward_pct if forward_pct is not None else 'ещё не рассчитана'}%."
+                (
+                    f"MAYA уже нашла {cycle_candidates} клиент(а/ов) по личному циклу; "
+                    f"просрочили привычный срок — {_rub(ret.get('cycle_overdue_count'))}."
+                ) if targeted else (
+                    f"Без повторного визита {churn_candidates} клиент(а/ов); будущая запись "
+                    f"{forward_pct if forward_pct is not None else 'ещё не рассчитана'}%."
+                )
             ),
             reasoning="Отклонение от привычного интервала визита является более точным сигналом ухода, чем единый срок для всей базы.",
-            action="Ранжировать клиентов по отклонению от личного цикла и начинать с тех, кому уже пора вернуться.",
+            action=(
+                "Открыть готовый список MAYA и выбрать: написать без скидки, позвонить или подготовить предложение."
+                if targeted else
+                "Дождаться ближайшего сканирования личного цикла и работать уже с готовой очередью, а не со всей когортой."
+            ),
             metric="returned_revenue_rub",
             effect_min=min_returns * avg_check,
             effect_max=max_returns * avg_check,
-            confidence="medium",
+            confidence="high" if targeted else "medium",
             kpi="Возвраты за 14 дней, фактическая выручка и повторный визит после возврата.",
             review_after_hours=336,
             guardrail="Маркетинговое согласие, ограничение частоты сообщений и контрольная группа.",
@@ -3773,6 +3979,7 @@ def _owner_briefing(
     plan: dict,
     business_goals: dict,
     owner_advisor: dict,
+    return_candidates: dict,
     retention: dict,
     reputation_payload: dict,
     market_payload: dict,
@@ -3833,7 +4040,10 @@ def _owner_briefing(
 
     cards = []
 
-    def add_card(key, label, title, value, value_label, second_value, second_label, analysis, action, tone="neutral", decision=None):
+    def add_card(
+        key, label, title, value, value_label, second_value, second_label,
+        analysis, action, tone="neutral", decision=None, extra=None,
+    ):
         card = {
             "key": key,
             "label": label,
@@ -3848,6 +4058,8 @@ def _owner_briefing(
         }
         if isinstance(decision, dict) and decision:
             card["decision"] = decision
+        if isinstance(extra, dict):
+            card.update(extra)
         cards.append(card)
 
     add_card(
@@ -3914,6 +4126,34 @@ def _owner_briefing(
 
     retention_pct = retention_summary.get("retention_90d_pct")
     forward_pct = retention_summary.get("forward_booking_pct")
+    cycle_count = return_candidates.get("cycle_due_count")
+    cycle_rows = [
+        row for row in (return_candidates.get("candidates") or [])
+        if isinstance(row, dict)
+    ]
+    if cycle_count is None:
+        client_analysis = (
+            "К возврату сейчас %s клиент(а/ов). MAYA готовит персональную очередь по циклам."
+            % _m(retention_summary.get("churn_candidates"))
+        )
+        client_action = "Обновить данные и дождаться первого расчёта личного цикла."
+    elif _rub(cycle_count):
+        preview = "; ".join(
+            "%s — %s" % (row.get("name") or "Клиент", row.get("reason") or "срок наступил")
+            for row in cycle_rows[:3]
+        )
+        client_analysis = (
+            "MAYA уже отобрала %s клиент(а/ов), из них просрочили привычный срок — %s.%s"
+            % (
+                _m(cycle_count),
+                _m(return_candidates.get("cycle_overdue_count")),
+                (" " + preview + ".") if preview else "",
+            )
+        )
+        client_action = "Выберите действие ниже. Рекомендация MAYA — сначала написать без скидки."
+    else:
+        client_analysis = "По личному циклу сейчас нет клиентов, которым уже пора напомнить о визите."
+        client_action = "Проверить очередь завтра; массовую скидку сейчас не запускать."
     add_card(
         "clients",
         "Клиенты",
@@ -3922,16 +4162,18 @@ def _owner_briefing(
         "вернулись за 90 дней",
         (str(forward_pct) + "%") if forward_pct is not None else "—",
         "уже записаны снова",
-        (
-            "К возврату сейчас %s клиент(а/ов)."
-            % _m(retention_summary.get("churn_candidates"))
-        ),
-        growth_action(
-            "retention",
-            "Повышать долю следующей записи сразу после визита и возвращать клиентов до полного оттока.",
-        ),
+        client_analysis,
+        client_action,
         "attention" if (retention.get("status") or "warn") != "ok" else "positive",
         growth_by_domain.get("retention"),
+        {
+            "candidate_queue": cycle_rows[:8],
+            "candidate_count": cycle_count,
+            "owner_question": return_candidates.get("owner_question"),
+            "decision_options": return_candidates.get("decision_options") or [],
+            "cycle_snapshot_state": return_candidates.get("cycle_snapshot_state"),
+            "owner_alert": return_candidates.get("owner_alert") or _cycle_owner_alert({}),
+        },
     )
 
     maps_rating = reputation_summary.get("overall_rating")
@@ -5285,7 +5527,7 @@ def run_autopilot_supervision_tick(*, created_by=None, limit: int = 8) -> dict:
     }
 
 
-def command_center() -> dict:
+def command_center(*, include_personal_data: bool = False) -> dict:
     """Owner Command Center v1: единый read-only контракт Maya OS.
 
     Собирает уже существующие директорские блоки в стабильную структуру для
@@ -5294,17 +5536,27 @@ def command_center() -> dict:
     """
     snap, snap_err = _safe_owner_block("business_snapshot", business_snapshot, _fallback_snapshot)
     exp, exp_err = _safe_owner_block("expiring_assets", expiring_assets, _fallback_assets)
-    ret, ret_err = _safe_owner_block("return_candidates", return_candidates, _fallback_return_candidates)
+    ret, ret_err = _safe_owner_block(
+        "return_candidates",
+        lambda: return_candidates(include_personal_data=include_personal_data),
+        _fallback_return_candidates,
+    )
     retention, retention_err = _safe_owner_block(
         "client_retention", client_retention, _fallback_client_retention
     )
     svc, svc_err = _safe_owner_block("service_insights", service_insights, _fallback_services)
     plan, plan_err = _safe_owner_block("plan_fact", lambda: plan_fact(snap=snap), _fallback_plan_fact)
     masters, masters_err = _safe_owner_block("master_performance", master_performance, _fallback_master_performance)
+    growth_plan, growth_plan_err = _safe_owner_block(
+        "growth_plan",
+        lambda: __import__("growth_planner").get_growth_plan(role="owner"),
+        _fallback_growth_plan,
+    )
 
     errors = [
         e for e in (
-            snap_err, exp_err, ret_err, retention_err, svc_err, plan_err, masters_err
+            snap_err, exp_err, ret_err, retention_err, svc_err, plan_err,
+            masters_err, growth_plan_err,
         ) if e
     ]
     try:
@@ -5371,6 +5623,10 @@ def command_center() -> dict:
         "ok" if (masters.get("masters") or []) else "warn",
         "warn" if masters_err else "ok",
     )
+    growth_plan_status = _command_status(
+        growth_plan.get("status"),
+        "warn" if growth_plan_err else "ok",
+    )
     overall = _command_status(
         today_status,
         money_status,
@@ -5379,6 +5635,7 @@ def command_center() -> dict:
         client_status,
         service_status,
         masters_status,
+        growth_plan_status,
         "warn" if errors else "ok",
     )
 
@@ -5548,6 +5805,7 @@ def command_center() -> dict:
         plan=plan,
         business_goals=business_goals,
         owner_advisor=owner_advisor,
+        return_candidates=ret,
         retention=retention,
         reputation_payload=reputation_payload,
         market_payload=market_payload,
@@ -5667,6 +5925,26 @@ def command_center() -> dict:
             "summary": business_goals.get("summary") or {},
             "items": business_goals.get("goals") or [],
             "note": business_goals.get("next_step"),
+        },
+        {
+            "key": "growth_plan",
+            "title": "План роста",
+            "status": growth_plan_status,
+            "summary": {
+                "requested_target_rub": (growth_plan.get("goal") or {}).get("requested_target_rub"),
+                "committed_target_rub": (growth_plan.get("goal") or {}).get("committed_target_rub"),
+                "planning_confidence_pct": (growth_plan.get("goal") or {}).get("planning_confidence_pct"),
+                "actual_rub": (growth_plan.get("plan_fact") or {}).get("actual_rub"),
+                "projected_rub": (growth_plan.get("plan_fact") or {}).get("projected_rub"),
+                "progress_pct": (growth_plan.get("plan_fact") or {}).get("progress_pct"),
+                "theoretical_max_gross_rub": (growth_plan.get("capacity") or {}).get("theoretical_max_gross_rub"),
+                "realistic_95_ceiling_rub": (growth_plan.get("capacity") or {}).get("realistic_95_ceiling_rub"),
+                "realistic_95_contribution_after_master_payroll_rub": (growth_plan.get("capacity") or {}).get("realistic_95_contribution_after_master_payroll_rub"),
+                "active_clients": (growth_plan.get("client_segments") or {}).get("active_clients"),
+                "recoverable_clients": (growth_plan.get("client_segments") or {}).get("recoverable_clients"),
+            },
+            "items": growth_plan.get("actions") or [],
+            "note": (growth_plan.get("goal") or {}).get("confidence_note"),
         },
         {
             "key": "owner_advisor",
@@ -5924,6 +6202,10 @@ def command_center() -> dict:
             "operating_rhythm_last_run_at": (operating_rhythm.get("summary") or {}).get("last_run_at", ""),
             "operating_rhythm_last_created_count": (operating_rhythm.get("summary") or {}).get("last_created_count", 0),
             "operating_rhythm_last_updated_count": (operating_rhythm.get("summary") or {}).get("last_updated_count", 0),
+            "growth_target_rub": (growth_plan.get("goal") or {}).get("committed_target_rub", 0),
+            "growth_plan_progress_pct": (growth_plan.get("plan_fact") or {}).get("progress_pct"),
+            "growth_realistic_ceiling_rub": (growth_plan.get("capacity") or {}).get("realistic_95_ceiling_rub", 0),
+            "growth_recoverable_clients": (growth_plan.get("client_segments") or {}).get("recoverable_clients", 0),
         },
         "sections": sections,
         "attention_feed": attention,
@@ -5933,9 +6215,11 @@ def command_center() -> dict:
         "kpi_scorecard": kpi_scorecard,
         "financial_director": financial_director,
         "business_goals": business_goals,
+        "growth_plan": growth_plan,
         "owner_advisor": owner_advisor,
         "growth_engine": growth_engine,
         "briefing": briefing,
+        "owner_alert": ret.get("owner_alert") or _cycle_owner_alert({}),
         "reputation": reputation_payload,
         "market_intelligence": market_payload,
         "decision_memory": decision_memory,

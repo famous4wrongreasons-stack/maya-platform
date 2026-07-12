@@ -6,7 +6,7 @@ import unittest
 from datetime import date, timedelta
 
 
-def _load_owner_ai(*, reactivation_payload: dict | None):
+def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | None = None):
     fake_analytics = types.ModuleType("analytics")
     fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
         "2026-06-09",
@@ -94,6 +94,8 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
     def fake_get_setting(key, default=None):
         if key == "reactivation_last" and reactivation_payload is not None:
             return json.dumps(reactivation_payload, ensure_ascii=False)
+        if key == "cycle_candidates_snapshot_v1" and cycle_payload is not None:
+            return json.dumps(cycle_payload, ensure_ascii=False)
         return settings.get(key, default)
 
     def fake_set_setting(key, value):
@@ -101,6 +103,10 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
 
     fake_database.get_setting = fake_get_setting
     fake_database.set_setting = fake_set_setting
+    fake_database.get_client_by_id = lambda client_id: {
+        11: {"id": 11, "name": "Иван Петров", "phone": "+7 999 111-22-33"},
+        12: {"id": 12, "name": "Максим Сидоров", "phone": "+7 999 444-55-66"},
+    }.get(int(client_id))
     def fake_create_owner_action(job, title="", **kwargs):
         action_id = max((int(it.get("id") or 0) for it in owner_actions), default=0) + 1
         owner_actions.insert(0, {
@@ -223,9 +229,26 @@ def _load_owner_ai(*, reactivation_payload: dict | None):
 
     fake_yclients.YClientsAPI = _FakeYClientsAPI
 
+    fake_growth_planner = types.ModuleType("growth_planner")
+    fake_growth_planner.get_growth_plan = lambda **kwargs: {
+        "version": "maya_growth_plan_v1",
+        "as_of": "2026-07-08",
+        "status": "ok",
+        "goal": {
+            "requested_target_rub": 100000,
+            "committed_target_rub": 100000,
+            "planning_confidence_pct": 95,
+        },
+        "plan_fact": {"actual_rub": 40000, "projected_rub": 70000, "progress_pct": 40},
+        "capacity": {"theoretical_max_gross_rub": 150000, "realistic_95_ceiling_rub": 120000},
+        "client_segments": {"active_clients": 30, "recoverable_clients": 10},
+        "masters": [],
+        "actions": [],
+    }
     sys.modules["analytics"] = fake_analytics
     sys.modules["database"] = fake_database
     sys.modules["yclients"] = fake_yclients
+    sys.modules["growth_planner"] = fake_growth_planner
     sys.modules.pop("owner_ai", None)
     mod = importlib.import_module("owner_ai")
     mod._avg_cache.update(val=None, ts=0.0)
@@ -254,6 +277,78 @@ class OwnerAITests(unittest.TestCase):
         self.assertNotIn("potential_return_revenue_rub", result)
         self.assertEqual(result["action"], "reactivation")
         self.assertIn("Ещё не считалось", result["note"])
+
+    def test_personal_cycle_queue_exposes_contacts_only_to_owner_ui(self):
+        cycle_payload = {
+            "version": "maya_cycle_candidates_v1",
+            "generated_at": date.today().isoformat() + "T09:00:00",
+            "mode": "scan",
+            "summary": {
+                "candidates": 2, "pending": 2, "overdue": 1,
+                "due": 1, "due_soon": 0, "sent": 0,
+            },
+            "owner_alert": {
+                "version": "maya_cycle_owner_alert_v1",
+                "event_id": "cycle-20260711T090000-test",
+                "active": True,
+                "state": "new",
+                "candidate_count": 2,
+                "new_count": 2,
+                "created_at": date.today().isoformat() + "T09:00:00",
+                "notify_required": False,
+            },
+            "candidates": [{
+                "client_id": 11,
+                "cycle_days": 28,
+                "last_visit": "2026-06-08",
+                "predicted_visit": "2026-07-06",
+                "days_from_due": 2,
+                "urgency": "due",
+                "reason": "привычный срок прошёл 2 дн. назад · цикл 28 дн.",
+                "last_master": "Мастер 1",
+                "eligible_channels": ["telegram", "phone"],
+                "contact_status": "pending",
+            }, {
+                "client_id": 12,
+                "cycle_days": 21,
+                "last_visit": "2026-06-10",
+                "predicted_visit": "2026-07-01",
+                "days_from_due": 7,
+                "urgency": "overdue",
+                "reason": "привычный срок прошёл 7 дн. назад · цикл 21 дн.",
+                "last_master": "Мастер 2",
+                "eligible_channels": ["telegram", "phone"],
+                "contact_status": "pending",
+            }],
+        }
+        owner_ai = _load_owner_ai(
+            reactivation_payload={"count": 5, "at": date.today().isoformat()},
+            cycle_payload=cycle_payload,
+        )
+
+        llm_view = owner_ai.return_candidates()
+        owner_view = owner_ai.return_candidates(include_personal_data=True)
+
+        self.assertEqual(llm_view["cycle_due_count"], 2)
+        self.assertEqual(llm_view["cycle_overdue_count"], 1)
+        self.assertNotIn("candidates", llm_view)
+        self.assertNotIn("Иван", json.dumps(llm_view, ensure_ascii=False))
+        self.assertEqual(owner_view["candidates"][0]["name"], "Иван Петров")
+        self.assertTrue(owner_view["candidates"][0]["call_url"].startswith("tel:+"))
+        self.assertEqual(owner_view["decision_options"][0]["job"], "cycle")
+        self.assertEqual(owner_view["owner_alert"]["event_id"], "cycle-20260711T090000-test")
+
+        safe_center = owner_ai.command_center()
+        owner_center = owner_ai.command_center(include_personal_data=True)
+        self.assertNotIn("Иван", json.dumps(safe_center, ensure_ascii=False))
+        self.assertTrue(owner_center["owner_alert"]["active"])
+        clients_card = next(
+            card for card in owner_center["briefing"]["cards"] if card["key"] == "clients"
+        )
+        self.assertEqual(clients_card["candidate_count"], 2)
+        self.assertEqual(clients_card["candidate_queue"][0]["name"], "Иван Петров")
+        self.assertEqual(clients_card["owner_alert"]["new_count"], 2)
+        self.assertIn("MAYA уже отобрала 2", clients_card["analysis"])
 
     def test_daily_briefing_ranks_money_and_prepares_action_card(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
@@ -309,6 +404,7 @@ class OwnerAITests(unittest.TestCase):
                 "kpi_scorecard",
                 "financial_director",
                 "business_goals",
+                "growth_plan",
                 "owner_advisor",
                 "reputation",
                 "decision_memory",
@@ -330,6 +426,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(center["summary"]["daily_target_rub"], 2000)
         self.assertIsNotNone(center["summary"]["plan_progress_pct"])
         self.assertEqual(center["plan_fact"]["daily_target_rub"], 2000)
+        self.assertEqual(center["growth_plan"]["version"], "maya_growth_plan_v1")
         self.assertEqual(center["summary"]["top_profit_master"]["name"], "Мастер 1")
         self.assertEqual(center["master_performance"]["top_profit_master"]["profit_after_salary_rub"], 26000)
         self.assertTrue(center["next_best_actions"])

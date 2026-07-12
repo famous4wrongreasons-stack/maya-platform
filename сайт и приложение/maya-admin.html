@@ -411,7 +411,98 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
   var APP = qs.get('app') || localStorage.getItem('maya_admin_app') || (location.origin + '/app.html');
   try { localStorage.setItem('maya_admin_api', API); localStorage.setItem('maya_admin_app', APP); } catch (e) {}
 
-  var S = { token: null, user: null, tenant: null, themeJson: {} };
+  var S = { token: null, refresh_token: null, access_expires_at: null, refresh_expires_at: null, session: null, user: null, tenant: null, themeJson: {} };
+
+  /* ── session-security: bundle + single-flight refresh ── */
+  var RT_TERMINAL = { refresh_token_invalid: 1, refresh_token_reused: 1, session_expired: 1, session_revoked: 1 };
+  var REFRESH_P = null;
+  function adminSetBundle(res) {
+    // пара всегда меняется целиком: новый access только со своим же refresh;
+    // половину пары не принимаем — прежний bundle не трогается
+    if (!res || !res.access_token || !res.refresh_token) return false;
+    S.token = res.access_token;
+    S.refresh_token = res.refresh_token;
+    S.access_expires_at = res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null;
+    S.refresh_expires_at = res.refresh_expires_at || null;
+    S.session = res.session || null;
+    if (res.user) S.user = res.user;
+    return true;
+  }
+  function adminSessionEnded(msg) {
+    S.token = null; S.refresh_token = null; S.access_expires_at = null; S.session = null;
+    $('app').style.display = 'none';
+    $('login').style.display = '';
+    var err = $('l-err');
+    err.textContent = msg || 'Сессия завершена — войдите снова.';
+    err.style.display = 'block';
+  }
+  function rawRefresh(rt) {
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var tm = ctl ? setTimeout(function () { try { ctl.abort(); } catch (e) {} }, 30000) : null;
+    return fetch(API + '/auth/refresh', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: rt }),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {}
+        return { r: r, d: d };
+      });
+    }).catch(function (e) {
+      if (e && e.r) throw e;
+      var eT = new Error('Не удалось обновить сессию — проверьте связь.');
+      eT.code = e && e.name === 'AbortError' ? 'refresh_timeout' : 'refresh_network';
+      throw eT;
+    }).finally(function () { if (tm) clearTimeout(tm); });
+  }
+  function doRefresh() {
+    if (REFRESH_P) return REFRESH_P; // single-flight: параллельные 401 делят один promise
+    REFRESH_P = (async function () {
+      if (!S.refresh_token) { var e0 = new Error('Сессия истекла — войдите снова.'); e0.code = 'refresh_unavailable'; throw e0; }
+      function acceptRotation(d) {
+        // успех = только полная пара; неполный ответ прежний bundle не перезаписывает
+        if (!d || !d.access_token || !d.refresh_token) {
+          var eH = new Error('Не удалось обновить сессию — попробуйте войти заново.');
+          eH.code = 'refresh_incomplete';
+          throw eH;
+        }
+        adminSetBundle(d);
+        return S.token;
+      }
+      function realErr(r, d, fb) {
+        var eo0 = d && typeof d === 'object' ? d.error : null;
+        var eX0 = new Error((eo0 && eo0.message) || fb);
+        eX0.code = (eo0 && eo0.code) || null; eX0.status = r.status;
+        return eX0;
+      }
+      var x = await rawRefresh(S.refresh_token);
+      if (x.r.ok) return acceptRotation(x.d);
+      var eo = x.d && typeof x.d === 'object' ? x.d.error : null;
+      var code = eo && eo.code;
+      if (RT_TERMINAL[code]) { adminSessionEnded(); var eT2 = new Error('Сессия завершена — войдите снова.'); eT2.code = code; throw eT2; }
+      if (!(x.r.status === 429 && code === 'auth_rate_limited')) throw realErr(x.r, x.d, 'refresh HTTP ' + x.r.status);
+      // 429: пара НЕ трогается; ровно один отложенный повтор
+      var ra = Number((eo && eo.retry_after_seconds) != null ? eo.retry_after_seconds : x.r.headers.get('Retry-After'));
+      var w = isFinite(ra) && ra > 0 ? Math.ceil(ra) : 60;
+      await new Promise(function (res) { setTimeout(res, w * 1000); });
+      if (!S.refresh_token) { var eL = new Error('Сессия завершена — войдите снова.'); eL.code = 'logged_out'; throw eL; }
+      var y = await rawRefresh(S.refresh_token);
+      if (y.r.ok) return acceptRotation(y.d);
+      var eo2 = y.d && typeof y.d === 'object' ? y.d.error : null;
+      var c2 = eo2 && eo2.code;
+      if (RT_TERMINAL[c2]) { adminSessionEnded(); var eT = new Error('Сессия завершена — войдите снова.'); eT.code = c2; throw eT; }
+      if (y.r.status === 429 && c2 === 'auth_rate_limited') {
+        var eR = new Error('Слишком много попыток — подождите и повторите.');
+        eR.code = 'auth_rate_limited'; eR.status = 429;
+        var ra2 = Number(eo2 && eo2.retry_after_seconds);
+        eR.retryAfterSeconds = isFinite(ra2) && ra2 > 0 ? Math.ceil(ra2) : w;
+        throw eR; // credentials сохранены
+      }
+      // вторую ошибку НЕ маскируем под rate limit; третьего повтора нет
+      throw realErr(y.r, y.d, 'refresh HTTP ' + y.r.status);
+    })().finally(function () { REFRESH_P = null; });
+    return REFRESH_P;
+  }
   var $ = function (id) { return document.getElementById(id); };
 
   function toast(msg, kind) {
@@ -422,21 +513,47 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
     t._h = setTimeout(function () { t.className = ''; }, 3200);
   }
 
+  // публичные auth-маршруты (без refresh-обвязки): login и сам /auth/refresh.
+  // Защищённые /auth/logout и /auth/sessions* идут через refresh-aware путь.
+  function isPublicAuthPath(path) {
+    var p = String(path);
+    return p === '/auth/refresh' || p.indexOf('/auth/login') === 0;
+  }
   async function api(method, path, body) {
-    var r = await fetch(API + path, {
-      method: method,
-      headers: Object.assign({ 'Content-Type': 'application/json' },
-        S.token ? { Authorization: 'Bearer ' + S.token } : {}),
-      body: body != null ? JSON.stringify(body) : undefined
-    });
-    var text = await r.text();
-    var data = null;
-    try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+    var isAuth = isPublicAuthPath(path);
+    // проактивная rotation: access истекает (<30с) — обновляем ДО запроса
+    if (!isAuth && S.token && S.refresh_token && S.access_expires_at && S.access_expires_at - Date.now() < 30000) {
+      try { await doRefresh(); } catch (e) { if (e && (e.code === 'auth_rate_limited' || RT_TERMINAL[e.code])) throw e; }
+    }
+    var attempt = async function () {
+      var r = await fetch(API + path, {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' },
+          S.token ? { Authorization: 'Bearer ' + S.token } : {}),
+        body: body != null ? JSON.stringify(body) : undefined
+      });
+      var text = await r.text();
+      var data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+      return { r: r, data: data };
+    };
+    var x = await attempt();
+    // первый 401 → одна rotation → повтор ТОЛЬКО после её успеха;
+    // network/timeout/5xx ошибка refresh уходит наружу как есть, без повтора со старым Bearer
+    if (x.r.status === 401 && !isAuth && S.refresh_token) {
+      await doRefresh();
+      x = await attempt();
+    }
+    var r = x.r, data = x.data;
     if (!r.ok) {
       var eobj = data && typeof data === 'object' ? data.error : null;
       var msg = (eobj && eobj.message) || (data && data.message) || ('HTTP ' + r.status);
       var err = new Error(Array.isArray(msg) ? msg.join('; ') : msg);
       err.status = r.status;
+      err.code = (eobj && eobj.code) || null;
+      // 429 auth_rate_limited: серверное «когда можно снова» для countdown
+      var ra = Number((eobj && eobj.retry_after_seconds) != null ? eobj.retry_after_seconds : r.headers.get('Retry-After'));
+      if (isFinite(ra) && ra > 0) err.retryAfterSeconds = Math.ceil(ra);
       throw err;
     }
     return data;
@@ -453,16 +570,30 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
   ['l-slug', 'l-email', 'l-pass'].forEach(function (id) {
     $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
   });
+  // 429 auth_rate_limited: локальный countdown на кнопке входа
+  var LOGIN_LOCK = 0;
+  function loginCooldown() {
+    var b = $('l-btn');
+    var left = Math.ceil((LOGIN_LOCK - Date.now()) / 1000);
+    if (left <= 0) { b.disabled = false; b.textContent = 'Войти'; return; }
+    b.disabled = true;
+    b.textContent = 'Подождите · ' + left + ' с';
+    setTimeout(loginCooldown, 1000);
+  }
+  var LOGIN_BUSY = false; // sync-guard: два Enter в одном кадре = один запрос
   async function doLogin() {
+    if (LOGIN_BUSY) return;
+    if (LOGIN_LOCK > Date.now()) return; // Enter в поле во время countdown
     var err = $('l-err'); err.style.display = 'none';
     var body = { email: $('l-email').value.trim(), password: $('l-pass').value };
     var slug = $('l-slug').value.trim();
     if (slug) body.tenantSlug = slug;
     if (!body.email || !body.password) { err.textContent = 'Заполните e-mail и пароль.'; err.style.display = 'block'; return; }
+    LOGIN_BUSY = true;
     busy($('l-btn'), true, 'Входим…');
     try {
       var res = await api('POST', '/auth/login', body);
-      S.token = res.access_token;
+      if (!adminSetBundle(res)) throw new Error('Неполный ответ входа — попробуйте ещё раз.');
       S.user = res.user || {};
       var tid = S.user.tenant_id || S.user.tenantId || null;
       if (!tid && S.user.role === 'platform_owner') {
@@ -474,9 +605,22 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
       if (!tid) throw new Error('Не удалось определить салон для этого пользователя');
       await enter(tid);
     } catch (e) {
-      err.textContent = e.message || 'Не удалось войти';
+      // ошибка на этапе входа/первичной загрузки — возвращаем форму, чтобы сообщение было видно
+      $('login').style.display = '';
+      $('app').style.display = 'none';
+      if (e && e.status === 429 && e.code === 'auth_rate_limited') {
+        var w = e.retryAfterSeconds && isFinite(e.retryAfterSeconds) ? Math.ceil(e.retryAfterSeconds) : 60;
+        LOGIN_LOCK = Date.now() + w * 1000;
+        err.textContent = 'Слишком много попыток входа — подождите ' + w + ' с и попробуйте снова.';
+      } else {
+        err.textContent = e.message || 'Не удалось войти';
+      }
       err.style.display = 'block';
-    } finally { busy($('l-btn'), false); }
+    } finally {
+      LOGIN_BUSY = false;
+      busy($('l-btn'), false);
+      if (LOGIN_LOCK > Date.now()) loginCooldown();
+    }
   }
 
   async function enter(tid) {
@@ -489,7 +633,13 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
     reloadPreview();
   }
 
-  $('s-logout').addEventListener('click', function () { location.reload(); });
+  $('s-logout').addEventListener('click', function () {
+    // серверный logout через refresh-aware pipeline (истёкший access сначала ротируется);
+    // локальная очистка (reload) — в finally-семантике в любом случае
+    var fin = function () { location.reload(); };
+    if (!S.token) { fin(); return; }
+    api('POST', '/auth/logout').catch(function () {}).then(fin);
+  });
 
   /* ── данные тенанта ── */
   var _billPlans = false;
@@ -1026,12 +1176,38 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
 
   renderStats([]);
 
-  /* self-serve handoff: /maya-start.html кладёт сюда JWT нового владельца */
+  /* self-serve handoff: /maya-start.html кладёт bundle под одноразовым nonce (#handoff=…) */
   try {
-    var hoff = JSON.parse(localStorage.getItem('maya_admin_handoff') || 'null');
-    if (hoff && hoff.token) {
-      localStorage.removeItem('maya_admin_handoff');
+    localStorage.removeItem('maya_admin_handoff'); // legacy-глобальный ключ игнорируем и чистим
+    var hoffNonce = (location.hash.match(/[#&]handoff=([a-z0-9]+)/i) || [])[1] || null;
+    var hoff = hoffNonce ? JSON.parse(localStorage.getItem('maya_admin_handoff:' + hoffNonce) || 'null') : null;
+    // одноразовость: ключ уничтожается сразу, nonce из URL стирается
+    if (hoffNonce) {
+      localStorage.removeItem('maya_admin_handoff:' + hoffNonce);
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    }
+    // ts обязателен, конечен и в окне [-10мин; +60с]: отсутствующий/будущий/протухший — отклоняем
+    var tsOk = hoff && typeof hoff.ts === 'number' && isFinite(hoff.ts)
+      && Date.now() - hoff.ts <= 10 * 60 * 1000 && hoff.ts <= Date.now() + 60 * 1000;
+    if (!tsOk) hoff = null;
+    // уборка: протухшие maya_admin_handoff:* не должны хранить refresh навсегда
+    try {
+      for (var hi = localStorage.length - 1; hi >= 0; hi--) {
+        var hk = localStorage.key(hi);
+        if (hk && hk.indexOf('maya_admin_handoff:') === 0) {
+          var hv = null; try { hv = JSON.parse(localStorage.getItem(hk) || 'null'); } catch (e) {}
+          var hOk = hv && typeof hv.ts === 'number' && isFinite(hv.ts)
+            && Date.now() - hv.ts <= 10 * 60 * 1000 && hv.ts <= Date.now() + 60 * 1000;
+          if (!hOk) localStorage.removeItem(hk);
+        }
+      }
+    } catch (e) {}
+    if (hoff && hoff.token && hoff.refresh_token) {
       S.token = hoff.token;
+      S.refresh_token = hoff.refresh_token;
+      S.access_expires_at = hoff.access_expires_at || null;
+      S.refresh_expires_at = hoff.refresh_expires_at || null;
+      S.session = hoff.session || null;
       S.user = hoff.user || {};
       var htid = S.user.tenant_id || S.user.tenantId || null;
       if (htid) enter(htid);

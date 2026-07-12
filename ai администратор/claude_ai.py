@@ -603,6 +603,36 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "get_growth_plan",
+        "description": (
+            "Ролевой план роста MAYA по данным YClients. Владелец видит цель, "
+            "физическую мощность, реалистичный потолок, сегменты клиентской базы и "
+            "планы мастеров; администратор — только исполнение мастерами; мастер — "
+            "только собственный план-факт. Вызывай на «план роста», «как идём к цели», "
+            "«мой план», «кто отстаёт от плана». Клиентскому режиму недоступен."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "set_growth_goal",
+        "description": (
+            "ТОЛЬКО для владельца. Поставить MAYA измеримую цель валовой выручки. "
+            "MAYA рассчитает физический максимум по рабочим местам, сотрудникам и "
+            "графику, построит реалистичный план с резервом и распределит его по "
+            "мастерам. Вызывай только после явной команды владельца: «поставь цель», "
+            "«хочу выручку N к дате». Рабочие места желательно передать точно."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "target_rub": {"type": "integer", "description": "Целевая валовая выручка в рублях."},
+                "deadline": {"type": "string", "description": "Дата достижения YYYY-MM-DD; по умолчанию конец текущего месяца."},
+                "workstations_count": {"type": "integer", "description": "Фактическое количество одновременно работающих мест/кресел."},
+            },
+            "required": ["target_rub"],
+        },
+    },
+    {
         "name": "run_autonomous_director_tick",
         "description": (
             "ТОЛЬКО для владельца. Запустить безопасный автопилот Maya OS v2: "
@@ -746,10 +776,11 @@ TOOLS = [
     {
         "name": "get_return_candidates",
         "description": (
-            "ТОЛЬКО для владельца. Сколько уснувших клиентов можно вернуть (28–56 дней "
-            "без визита, с согласием на маркетинг) и потенциал возврата в рублях. "
-            "Действие — существующая рассылка «соскучились» (/reactivation_now). "
-            "Вызывай на «кого вернуть / уснувшие клиенты / кто давно не был». ЧТЕНИЕ."
+            "ТОЛЬКО для владельца. Готовая очередь возврата по личному циклу: сколько "
+            "клиентов уже пора вернуть, сколько просрочили привычный срок, оценка эффекта "
+            "и варианты решения владельца. Имена и телефоны намеренно не передаются модели; "
+            "они доступны только в owner-only интерфейсе. Вызывай на «кого вернуть / кому "
+            "написать или позвонить / уснувшие клиенты / кто давно не был». ЧТЕНИЕ."
         ),
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
@@ -859,15 +890,19 @@ TOOLS_CACHED = TOOLS[:-1] + [{**TOOLS[-1], "cache_control": {"type": "ephemeral"
 FOUNDER_IDS = {948205934}
 
 # Администратор без owner/GOD-статуса: читает аналитику, но не меняет правила салона.
-_MANAGER_ONLY = {"get_business_report"}
+_MANAGER_ONLY = {"get_business_report", "get_growth_plan"}
 # Инструменты роли мастера: свои записи/чаевые/аналитика + досье клиента.
 # База знаний по технике/схемам УБРАНА из мозга Майи (решение Стаса 2026-07-06).
-_MASTER_ONLY = {"get_my_work_records", "get_my_tips", "get_my_stats", "get_client_dossier"}
+_MASTER_ONLY = {
+    "get_my_work_records", "get_my_tips", "get_my_stats", "get_client_dossier",
+    "get_growth_plan",
+}
 # Инструменты роли владельца: procedural-память салона.
 _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
+    "set_growth_goal",
     "update_owner_control_task", "run_autonomous_director_tick",
     "run_autopilot_supervision_tick", "run_execution_loop_tick", "run_operating_rhythm_tick",
     "get_money_opportunities", "get_return_candidates",
@@ -993,6 +1028,7 @@ _WRITE_TOOLS = {
     "create_owner_control_task", "update_owner_control_task",
     "run_autonomous_director_tick", "run_autopilot_supervision_tick",
     "run_execution_loop_tick", "run_operating_rhythm_tick",
+    "set_growth_goal",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1935,6 +1971,27 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                             "Отчёт для администратора: выручка, визиты, средний чек и услуги. "
                             "Зарплаты, маржа и прибыль по мастерам доступны только владельцу."
                         )
+        elif tool_name == "get_growth_plan":
+            if _role not in ("master", "manager", "owner", "founder"):
+                result = {"error": "План роста недоступен в клиентском режиме."}
+            else:
+                import growth_planner
+                staff_id = None
+                if _role == "master":
+                    master = database.get_master_by_chat_id(int(user_id)) if user_id else None
+                    staff_id = (master or {}).get("yclients_staff_id")
+                result = growth_planner.get_growth_plan(role=_role, staff_id=staff_id)
+        elif tool_name == "set_growth_goal":
+            if _role not in ("owner", "founder"):
+                result = {"error": "Поставить общую цель может только владелец."}
+            else:
+                import growth_planner
+                result = growth_planner.set_growth_goal(
+                    target_rub=tool_input.get("target_rub"),
+                    deadline=tool_input.get("deadline"),
+                    workstations_count=tool_input.get("workstations_count"),
+                    created_by=user_id,
+                )
         elif tool_name in (
             "get_daily_briefing", "get_owner_command_center",
             "get_money_opportunities", "get_return_candidates", "get_empty_windows",
@@ -2353,7 +2410,9 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                         "прямо отметь резкое отклонение. Для «что лучше продаётся / топ услуг» — "
                         "top_services=true. Все суммы в рублях. Это ТОЛЬКО аналитика (чтение): "
                         "записи, перенос и кассу этим инструментом не трогаешь. Если данных за "
-                        "период нет — скажи прямо."
+                        "период нет — скажи прямо. "
+                        "На «кто выполняет план / кто отстаёт / план мастеров» вызывай get_growth_plan: "
+                        "показывай только исполнение мастеров из доступного администратору представления."
                     ),
                 })
         except Exception:
@@ -2372,6 +2431,8 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "конкретикой из них, а не общими словами:\n"
                     "• «что сегодня / план на день / с чего начать / что мне сделать» → get_daily_briefing.\n"
                     "• «Maya OS / центр управления / что контролировать / план-факт / цели / план месяца / отклонения / память решений / что сработало / какие выводы / журнал AI-директора / статус OS / что делать дальше / какие задачи / что просрочено» → get_owner_command_center.\n"
+                    "• «план роста / как идём к цели / физический максимум / активные и потерянные клиенты / кто отстаёт от плана» → get_growth_plan.\n"
+                    "• «поставь цель N рублей / хочу выручку N к дате» → set_growth_goal. Передай фактическое число рабочих мест, если владелец его назвал; не выдумывай. После расчёта прямо скажи, достижима ли цель с 5% резервом, и отдели реалистичный потолок от физического максимума.\n"
                     "• «запусти автопилот / пусть MAYA сама поставит задачи / включи автономного директора / создай задачи по OS» → run_autonomous_director_tick. Он создаёт только внутренние контрольные задачи; рассылки, деньги, цены, зарплаты и доступы не запускает без владельца.\n"
                     "• «проведи контроль / доведи задачи / проконтролируй исполнение / кто просрочил / кто молчит / пусть MAYA ведёт задачи» → run_autopilot_supervision_tick. Он только двигает внутренние статусы MAYA и создаёт owner-эскалации; внешние действия не запускает.\n"
                     "• «замкни цикл / доведи до результата / где застряло между задачей и результатом / пусть MAYA закроет разрывы» → run_execution_loop_tick. Он создаёт только owner-followup задачи по разорванным циклам; внешние действия не запускает.\n"
@@ -2379,7 +2440,11 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
                     "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни на доработку / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
-                    "• «кого вернуть / уснувшие клиенты» → get_return_candidates.\n"
+                    "• «кого вернуть / кому написать или позвонить / уснувшие клиенты» → get_return_candidates. "
+                    "Используй готовые cycle_due_count, cycle_overdue_count и decision_options: "
+                    "не советуй владельцу самому ранжировать базу. Коротко спроси, что выбрать: "
+                    "написать без скидки, открыть список для звонка, подготовить предложение или отложить. "
+                    "Имена и телефоны не выдумывай — они показываются только в owner-only карточке.\n"
                     "• «какие окна заполнить / кто простаивает / загрузка» → get_empty_windows.\n"
                     "• «что скоро истекает / сертификаты / абонементы» → get_expiring_assets.\n"
                     "• «какие услуги просели / что продвигать / слабые услуги» → get_service_insights.\n"

@@ -207,6 +207,6 @@ MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # legacy/fallback
 MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", OPENAI_CHAT_MODEL)
 MASTERS_AI_TIMEOUT = 5.0
 
-# Персональный план мастера отправляется в это вечернее окно на следующий день.
+# Персональный план мастера отправляется утром на текущий рабочий день.
 # Scheduler работает каждые 10 минут и не повторяет уже доставленный план.
-MASTER_DAY_BRIEF_SEND_HOUR = int(float(_opt("MASTER_DAY_BRIEF_SEND_HOUR", "19") or "19"))
+MASTER_DAY_BRIEF_SEND_HOUR = int(float(_opt("MASTER_DAY_BRIEF_SEND_HOUR", "8") or "8"))
