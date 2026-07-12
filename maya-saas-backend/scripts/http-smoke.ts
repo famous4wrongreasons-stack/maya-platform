@@ -120,6 +120,7 @@ function startServer() {
     cwd: process.cwd(),
     env: {
       ...process.env,
+      HOST: '127.0.0.1',
       NODE_ENV: 'test',
       PHONE_AUTH_DEBUG: 'true',
       PHONE_AUTH_FIXED_CODE: fixedPhoneCode,

@@ -84,6 +84,7 @@ AUTH_SESSION_METADATA_SECRET="change-me-to-another-independent-random-secret"
 AUTH_RATE_LIMIT_SECRET="change-me-to-a-third-independent-random-secret"
 CRM_ENCRYPTION_KEY="change-me-in-production"
 PORT=3000
+HOST="0.0.0.0"
 NODE_ENV="development"
 CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://localhost"
 SWAGGER_ENABLED="true"

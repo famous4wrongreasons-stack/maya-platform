@@ -93,6 +93,13 @@ async function bootstrap() {
   }
 
   app.get(PrismaService).enableShutdownHooks(app);
-  await app.listen(configService.get<number>('PORT') ?? 3000);
+  const port = configService.get<number>('PORT') ?? 3000;
+  const host = configService.get<string>('HOST')?.trim();
+
+  if (host) {
+    await app.listen(port, host);
+  } else {
+    await app.listen(port);
+  }
 }
 void bootstrap();
