@@ -148,6 +148,61 @@ describe('SafeOnboardingInterpreter', () => {
     ]);
   });
 
+  it('recognizes a hairdresser and fills the complete barbershop catalog automatically', () => {
+    const first = interpreter.interpret(
+      'Барбершоп называется Север. Я парикмахер и работаю один без CRM.',
+    );
+    const completed = interpreter.interpret(
+      'поставь автоматически',
+      first.blueprint,
+    );
+
+    expect(first.blueprint.templateId).toBe('barbershop');
+    expect(completed.missingFields).toEqual([]);
+    expect(completed.blueprint.services).toHaveLength(17);
+    expect(completed.blueprint.services.map((service) => service.name)).toEqual(
+      expect.arrayContaining([
+        'Мужская стрижка',
+        'Стрижка машинкой + фейд',
+        'Моделирование бороды',
+        'Бритьё головы',
+        'Восковая эпиляция (нос + уши)',
+      ]),
+    );
+    expect(completed.blueprint.services).not.toContainEqual(
+      expect.objectContaining({ name: 'Консультация' }),
+    );
+  });
+
+  it.each([
+    'заполни сама',
+    'как обычно',
+    'автоматом',
+    'выбери стандартные услуги',
+  ])('understands the contextual auto-services reply "%s"', (message) => {
+    const first = interpreter.interpret(
+      'Барбершоп называется Север. Я парикмахер, работаю один.',
+    );
+
+    expect(
+      interpreter.interpret(message, first.blueprint).blueprint.services,
+    ).toHaveLength(17);
+  });
+
+  it('does not overwrite custom services with a vague auto reply', () => {
+    const first = interpreter.interpret(
+      'Барбершоп называется Север. Я парикмахер, работаю один. Услуги: авторская стрижка 3500 руб 90 минут.',
+    );
+    const result = interpreter.interpret(
+      'поставь автоматически',
+      first.blueprint,
+    );
+
+    expect(result.blueprint.services).toEqual([
+      { name: 'авторская стрижка', price: 3500, durationMinutes: 90 },
+    ]);
+  });
+
   it('does not invent facts from an ambiguous one-word reply', () => {
     const first = interpreter.interpret(
       'Я частный специалист, работаю один без CRM.',

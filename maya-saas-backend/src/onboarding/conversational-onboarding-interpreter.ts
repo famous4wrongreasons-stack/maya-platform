@@ -82,6 +82,11 @@ export class ConversationalOnboardingInterpreter {
       previous,
       preferredTemplateId,
     );
+    // Template selection is a deterministic product action. Do not let a
+    // probabilistic model drop it and ask the same services question again.
+    if (this.didApplyTemplateServices(safe, previous)) {
+      return safe;
+    }
     if (!this.isOpenAiEnabled()) {
       return safe;
     }
@@ -348,6 +353,26 @@ export class ConversationalOnboardingInterpreter {
     );
   }
 
+  private didApplyTemplateServices(
+    safe: AiOnboardingInterpretation,
+    previous?: AiOnboardingBlueprint,
+  ): boolean {
+    if ((previous?.services.length ?? 0) > 0) return false;
+    const suggested = getBusinessTemplate(
+      safe.blueprint.templateId,
+    ).suggestedServices;
+    if (safe.blueprint.services.length !== suggested.length) return false;
+
+    return suggested.every((service, index) => {
+      const actual = safe.blueprint.services[index];
+      return (
+        actual?.name === service.name &&
+        actual.price === service.price &&
+        actual.durationMinutes === service.durationMinutes
+      );
+    });
+  }
+
   private resolveTimeoutMs(): number {
     const configured = Number(
       this.configService.get<string>('OPENAI_AI_ONBOARDING_TIMEOUT_MS'),
@@ -452,6 +477,8 @@ const MODEL_INSTRUCTIONS = `
 Критическое правило уверенности: если короткий ответ можно понять несколькими способами, не додумывай. Установи needs_clarification=true, confidence ниже 0.72, не добавляй спорное поле в accepted_fields, задай один уточняющий вопрос и предложи 2-4 быстрых ответа. Каждый quick reply содержит короткую label и самостоятельную message, которую frontend отправит следующим сообщением.
 
 В accepted_fields включай только факты, явно сообщенные пользователем и понятые с высокой уверенностью. Пустое поле patch означает отсутствие изменения, а не удаление. Цены указывай в рублях целым числом, длительность в минутах. Если цена или длительность не названы, используй 0 и 60. Никогда не проси и не повторяй телефон, email, ФИО, токены CRM или иные персональные/секретные данные. Если встречается маркер [ИМЯ], [EMAIL], [ТЕЛЕФОН], [АККАУНТ], [ССЫЛКА], [СЕКРЕТ] или [НАЗВАНИЕ СКРЫТО], игнорируй его.
+
+Если пользователь просит поставить услуги автоматически, взять стандартный набор, выбрать услуги за него или говорит «как обычно», используй use_template_services=true и добавь use_template_services в accepted_fields. Не своди отраслевой набор к одной консультации.
 
 assistant_message должен звучать по-человечески, без канцелярита, без упоминания JSON, схемы, confidence или внутренних полей. Не утверждай, что бизнес уже создан: пока идет только сбор основы.`.trim();
 

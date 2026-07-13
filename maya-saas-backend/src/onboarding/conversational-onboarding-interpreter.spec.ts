@@ -216,6 +216,49 @@ describe('ConversationalOnboardingInterpreter', () => {
     expect(result.quickReplies).toHaveLength(2);
   });
 
+  it('keeps deterministic template services when the model would miss an auto reply', async () => {
+    const requests = mockModelTurn({
+      intent: 'unclear',
+      confidence: 0.4,
+      needs_clarification: true,
+      assistant_message: 'Перечислите услуги.',
+      clarification_question: 'Какие услуги вы оказываете?',
+      accepted_fields: [],
+      quick_replies: [],
+      patch: {
+        template_id: null,
+        business_name: null,
+        calendar_source: null,
+        provider_count: null,
+        use_template_services: false,
+        services: [],
+        weekly_rules: [],
+      },
+    });
+    const previous: AiOnboardingBlueprint = {
+      templateId: 'barbershop',
+      businessName: 'Север',
+      summary: 'Барберы, услуги и расписание точки',
+      industryPresetId: 'barbershop',
+      calendarSource: CalendarSource.INTERNAL,
+      providerCount: 1,
+      providerTitle: 'Барбер',
+      services: [],
+      weeklyRules: [{ weekday: 1, startTime: '10:00', endTime: '20:00' }],
+      scheduleAssumed: true,
+    };
+
+    const result = await createInterpreter().interpret(
+      'поставь автоматически',
+      previous,
+    );
+
+    expect(requests).toHaveLength(0);
+    expect(result.blueprint.services).toHaveLength(17);
+    expect(result.missingFields).toEqual([]);
+    expect(result.assistantMessage).toContain('Я собрала основу');
+  });
+
   it('falls back safely when the model transport is unavailable', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('network'));
 

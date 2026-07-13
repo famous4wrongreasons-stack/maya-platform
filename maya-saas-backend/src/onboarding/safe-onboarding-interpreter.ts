@@ -15,7 +15,7 @@ import {
 } from './business-templates';
 
 const TEMPLATE_SIGNALS: readonly [BusinessTemplateId, RegExp][] = [
-  ['barbershop', /(барбершоп|барбер|мужск(?:ая|ие) стрижк|бород)/iu],
+  ['barbershop', /(барбершоп|барбер|парикмах|мужск(?:ая|ие) стрижк|бород)/iu],
   [
     'beauty_and_care',
     /(салон красоты|маникюр|ногт|бров|ресниц|косметолог|визаж|мейкап)/iu,
@@ -94,7 +94,7 @@ export class SafeOnboardingInterpreter {
         previous?.providerCount ??
         (template.id === 'solo_specialist' ? 1 : null),
       providerTitle: template.providerTitle,
-      services: this.shouldUseTemplateServices(normalized)
+      services: this.shouldUseTemplateServices(normalized, expectsServices)
         ? template.suggestedServices.map((service) => ({ ...service }))
         : this.extractServices(normalized, previousServices, {
             allowLoose:
@@ -397,9 +397,42 @@ export class SafeOnboardingInterpreter {
     );
   }
 
-  private shouldUseTemplateServices(value: string): boolean {
-    return /(?:возьми|взять|используй|подставь|добавь).{0,25}(?:услуг).{0,20}(?:шаблон|готов)/iu.test(
-      value,
+  private shouldUseTemplateServices(
+    value: string,
+    expectsServices: boolean,
+  ): boolean {
+    const explicitlyRequestsTemplate =
+      /(?:возьми|взять|используй|подставь|добавь|замени|выбери|подбери|поставь|заполни|сделай).{0,30}(?:услуг|прайс|набор).{0,30}(?:шаблон|готов|типов|стандарт|обычн)/iu.test(
+        value,
+      ) ||
+      /(?:возьми|взять|используй|подставь|добавь|замени|выбери|подбери|поставь|заполни|сделай).{0,30}(?:готов|типов|стандарт|обычн).{0,20}(?:услуг|прайс|набор)/iu.test(
+        value,
+      ) ||
+      /(?:готов|типов|стандарт|обычн).{0,30}(?:услуг|прайс|набор).{0,30}(?:шаблон|возьми|добавь|используй|выбери|подбери)/iu.test(
+        value,
+      );
+    if (explicitlyRequestsTemplate) return true;
+    if (!expectsServices) return false;
+
+    const normalized = value
+      .toLocaleLowerCase('ru-RU')
+      .replace(/[.,!?;:]+/gu, ' ')
+      .replace(/\s+/gu, ' ')
+      .trim();
+    return (
+      /^(?:давай\s+|можешь\s+|просто\s+)?(?:поставь|заполни|добавь|подбери|выбери|возьми|проставь|сделай)(?:\s+(?:всё|все|их|сама|сам|самостоятельно))*\s+(?:автоматически|автоматом|по\s+умолчанию|как\s+обычно)$/u.test(
+        normalized,
+      ) ||
+      /^(?:давай\s+|можешь\s+|просто\s+)?(?:поставь|заполни|добавь|подбери|выбери|возьми|проставь|сделай)\s+(?:сама|сам)$/u.test(
+        normalized,
+      ) ||
+      /^(?:автоматически|автоматом|по\s+умолчанию|как\s+обычно|всё\s+стандартное|все\s+стандартные|стандартный\s+набор|типовой\s+набор)$/u.test(
+        normalized,
+      ) ||
+      /^(?:сама|сам)\s+(?:подбери|выбери|реши|заполни|поставь|добавь)(?:\s+(?:услуги|прайс|всё|все))?$/u.test(
+        normalized,
+      ) ||
+      /^(?:на\s+тво[её]\s+усмотрение|выбери\s+за\s+меня)$/u.test(normalized)
     );
   }
 
