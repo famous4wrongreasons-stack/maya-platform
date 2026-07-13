@@ -13,6 +13,15 @@ import { CalendarSource } from '../../common/domain.enums';
 import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 export class CreateTrialSignupDto {
+  @ApiPropertyOptional({
+    description:
+      'Secret returned after the user completes the trial activation swipe.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(32)
+  trialActivationToken?: string;
+
   @ApiProperty({ example: 'Studio Vector' })
   @IsString()
   name!: string;

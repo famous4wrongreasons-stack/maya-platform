@@ -3,6 +3,7 @@ import {
   GoneException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
@@ -12,8 +13,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { AiOnboardingBlueprint } from './ai-onboarding.types';
 import { AiOnboardingService } from './ai-onboarding.service';
+import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
 import { OnboardingService } from './onboarding.service';
 import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
+import { TrialActivationService } from './trial-activation.service';
 
 describe('AiOnboardingService', () => {
   type DraftCreateMock = jest.MockedFunction<
@@ -68,13 +71,22 @@ describe('AiOnboardingService', () => {
     const rateLimit = { assertPreflight: jest.fn() };
     const onboarding = { createTrialSignup: jest.fn() };
     const internalCalendar = {};
+    const safeInterpreter = new SafeOnboardingInterpreter();
+    const interpreter = new ConversationalOnboardingInterpreter(
+      { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService,
+      safeInterpreter,
+    );
     const service = new AiOnboardingService(
       prisma as unknown as PrismaService,
-      new SafeOnboardingInterpreter(),
+      interpreter,
       onboarding as unknown as OnboardingService,
       internalCalendar as InternalCalendarService,
       rateLimit as unknown as AuthRateLimitService,
       new TenantContextService(),
+      {
+        authorizePendingToken: jest.fn(),
+        releaseCompletedTenant: jest.fn(),
+      } as unknown as TrialActivationService,
     );
 
     return { service, prisma, rateLimit, onboarding, createDraft };

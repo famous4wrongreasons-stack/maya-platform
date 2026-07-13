@@ -16,6 +16,11 @@ export interface AiOnboardingWeeklyRule {
   endTime: string;
 }
 
+export interface AiOnboardingQuickReply {
+  label: string;
+  message: string;
+}
+
 export interface AiOnboardingBlueprint {
   templateId: string;
   businessName: string | null;
@@ -32,5 +37,9 @@ export interface AiOnboardingBlueprint {
 export interface AiOnboardingInterpretation {
   assistantMessage: string;
   blueprint: AiOnboardingBlueprint;
+  confidence: number;
   missingFields: AiOnboardingMissingField[];
+  needsClarification: boolean;
+  quickReplies: AiOnboardingQuickReply[];
+  source: 'openai' | 'safe_fallback';
 }

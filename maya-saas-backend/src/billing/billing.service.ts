@@ -556,6 +556,7 @@ export class BillingService {
       where: { id: scopedTenantId },
       data: {
         status: TenantStatus.PAST_DUE,
+        trialFullAccess: false,
       },
     });
   }

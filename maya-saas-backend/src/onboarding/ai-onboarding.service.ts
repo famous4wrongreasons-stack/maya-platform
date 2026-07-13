@@ -17,6 +17,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import type {
   AiOnboardingBlueprint,
+  AiOnboardingInterpretation,
   AiOnboardingMissingField,
 } from './ai-onboarding.types';
 import {
@@ -29,7 +30,8 @@ import {
   CreateAiOnboardingDraftDto,
 } from './dto/ai-onboarding.dto';
 import { OnboardingService } from './onboarding.service';
-import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
+import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
+import { TrialActivationService } from './trial-activation.service';
 
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -37,11 +39,12 @@ const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 export class AiOnboardingService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly interpreter: SafeOnboardingInterpreter,
+    private readonly interpreter: ConversationalOnboardingInterpreter,
     private readonly onboardingService: OnboardingService,
     private readonly internalCalendarService: InternalCalendarService,
     private readonly rateLimitService: AuthRateLimitService,
     private readonly tenantContext: TenantContextService,
+    private readonly trialActivationService: TrialActivationService,
   ) {}
 
   listTemplates() {
@@ -67,7 +70,18 @@ export class AiOnboardingService {
     await this.rateLimitService.assertPreflight('ai_onboarding', {
       clientIp: metadata.clientIp,
     });
-    const interpretation = this.interpreter.interpret(
+    const activation = dto.trialActivationToken
+      ? await this.trialActivationService.authorizePendingToken(
+          dto.trialActivationToken,
+        )
+      : null;
+    if (activation?.draft) {
+      throw new ConflictException({
+        message: 'Trial activation already has an onboarding draft',
+        error: { code: 'trial_activation_draft_exists' },
+      });
+    }
+    const interpretation = await this.interpreter.interpret(
       dto.message,
       undefined,
       dto.templateId,
@@ -80,11 +94,17 @@ export class AiOnboardingService {
         blueprintJson: this.asJson(interpretation.blueprint),
         missingFieldsJson: interpretation.missingFields,
         inputDigest: this.digestInput(dto.message),
+        lastAssistantMessage: interpretation.assistantMessage,
+        quickRepliesJson: this.asJson(interpretation.quickReplies),
+        lastConfidence: interpretation.confidence,
+        needsClarification: interpretation.needsClarification,
+        interpreterSource: interpretation.source,
+        trialActivationId: activation?.id,
         expiresAt: new Date(Date.now() + DRAFT_TTL_MS),
       },
     });
 
-    return this.serializeDraft(draft, token, interpretation.assistantMessage);
+    return this.serializeDraft(draft, token, interpretation);
   }
 
   async continueDraft(
@@ -98,7 +118,7 @@ export class AiOnboardingService {
     });
     const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
     this.assertEditable(draft);
-    const interpretation = this.interpreter.interpret(
+    const interpretation = await this.interpreter.interpret(
       dto.message,
       this.readBlueprint(draft.blueprintJson),
     );
@@ -109,14 +129,16 @@ export class AiOnboardingService {
         blueprintJson: this.asJson(interpretation.blueprint),
         missingFieldsJson: interpretation.missingFields,
         inputDigest: this.digestInput(dto.message),
+        lastAssistantMessage: interpretation.assistantMessage,
+        quickRepliesJson: this.asJson(interpretation.quickReplies),
+        lastConfidence: interpretation.confidence,
+        needsClarification: interpretation.needsClarification,
+        interpreterSource: interpretation.source,
+        turnCount: { increment: 1 },
       },
     });
 
-    return this.serializeDraft(
-      updated,
-      undefined,
-      interpretation.assistantMessage,
-    );
+    return this.serializeDraft(updated, undefined, interpretation);
   }
 
   async readDraft(draftId: string, draftToken: string) {
@@ -179,11 +201,13 @@ export class AiOnboardingService {
           ownerName: dto.ownerName,
           ownerPhone: dto.ownerPhone,
           password: dto.password,
+          trialActivationToken: dto.trialActivationToken,
           industryPresetId: blueprint.industryPresetId,
           calendarSource: blueprint.calendarSource,
           branchName: businessName,
         },
         metadata,
+        { expectedActivationId: draft.trialActivationId },
       );
       createdTenantId = signup.tenant.id;
 
@@ -217,6 +241,9 @@ export class AiOnboardingService {
       };
     } catch (error) {
       if (createdTenantId) {
+        await this.trialActivationService.releaseCompletedTenant(
+          createdTenantId,
+        );
         await this.prisma.tenant.delete({
           where: { id: createdTenantId },
         });
@@ -387,19 +414,37 @@ export class AiOnboardingService {
       missingFieldsJson: unknown;
       expiresAt: Date;
       confirmedTenantId: string | null;
+      trialActivationId?: string | null;
+      lastAssistantMessage?: string | null;
+      lastConfidence?: number | null;
+      needsClarification?: boolean;
+      quickRepliesJson?: unknown;
+      interpreterSource?: string;
+      turnCount?: number;
     },
     draftToken?: string,
-    assistantMessage?: string,
+    interpretation?: AiOnboardingInterpretation,
   ) {
     return {
       draft_id: draft.id,
       draft_token: draftToken,
       status: draft.status,
-      assistant_message: assistantMessage,
+      assistant_message:
+        interpretation?.assistantMessage ?? draft.lastAssistantMessage ?? null,
+      confidence: interpretation?.confidence ?? draft.lastConfidence ?? null,
+      needs_clarification:
+        interpretation?.needsClarification ?? draft.needsClarification ?? false,
+      quick_replies:
+        interpretation?.quickReplies ??
+        this.readQuickReplies(draft.quickRepliesJson),
+      interpreter_source:
+        interpretation?.source ?? draft.interpreterSource ?? 'safe_fallback',
+      turn_count: draft.turnCount ?? 1,
       blueprint: this.readBlueprint(draft.blueprintJson),
       missing_fields: draft.missingFieldsJson,
       expires_at: draft.expiresAt,
       confirmed_tenant_id: draft.confirmedTenantId,
+      trial_activation_id: draft.trialActivationId ?? null,
     };
   }
 
@@ -409,6 +454,10 @@ export class AiOnboardingService {
 
   private digestInput(value: string): string {
     return createHash('sha256').update(value.trim()).digest('hex');
+  }
+
+  private readQuickReplies(value: unknown): unknown[] {
+    return Array.isArray(value) ? value : [];
   }
 }
 

@@ -13,6 +13,7 @@ import type { Request } from 'express';
 import { resolveAuthClientMetadata } from '../auth/auth-client-metadata';
 import { Public } from '../decorators/public.decorator';
 import { CreateTrialSignupDto } from './dto/create-trial-signup.dto';
+import { CreateTrialActivationDto } from './dto/create-trial-activation.dto';
 import {
   ConfirmAiOnboardingDraftDto,
   ContinueAiOnboardingDraftDto,
@@ -21,6 +22,7 @@ import {
 } from './dto/ai-onboarding.dto';
 import { AiOnboardingService } from './ai-onboarding.service';
 import { OnboardingService } from './onboarding.service';
+import { TrialActivationService } from './trial-activation.service';
 
 @ApiTags('onboarding')
 @Controller('onboarding')
@@ -28,7 +30,23 @@ export class OnboardingController {
   constructor(
     private readonly onboardingService: OnboardingService,
     private readonly aiOnboardingService: AiOnboardingService,
+    private readonly trialActivationService: TrialActivationService,
   ) {}
+
+  @Public()
+  @Post('trial-activations')
+  @ApiOperation({
+    summary: 'Create an activation after the MAYA OS trial swipe',
+  })
+  createTrialActivation(
+    @Body() dto: CreateTrialActivationDto,
+    @Req() request: Request,
+  ) {
+    return this.trialActivationService.createActivation(
+      dto.source,
+      resolveAuthClientMetadata(request),
+    );
+  }
 
   @Public()
   @Get('templates')

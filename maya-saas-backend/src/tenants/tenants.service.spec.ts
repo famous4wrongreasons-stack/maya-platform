@@ -9,6 +9,9 @@ type PublicTenantRecord = {
   name: string;
   slug: string;
   status: string;
+  trialEndsAt: Date | null;
+  trialFullAccess: boolean;
+  currentPeriodEnd: Date | null;
   calendarSource: string;
   industryPresetId: string | null;
   allowSelfRegistration: boolean;
@@ -46,6 +49,9 @@ describe('TenantsService', () => {
     name: 'Demo Salon',
     slug: 'demo-salon',
     status: 'active',
+    trialEndsAt: null,
+    trialFullAccess: false,
+    currentPeriodEnd: null,
     calendarSource: 'external',
     industryPresetId: 'beauty_salon',
     allowSelfRegistration: true,
@@ -114,6 +120,7 @@ describe('TenantsService', () => {
     const prisma: Pick<PrismaService, 'tenant'> = {
       tenant: {
         findUnique: tenantFindUniqueMock,
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       } as PrismaService['tenant'],
     };
     const subscriptionsService: Pick<
@@ -329,6 +336,71 @@ describe('TenantsService', () => {
     expect(result.client_registration_enabled).toBe(false);
     expect(result.booking_mode).toBe('preview');
     expect(result.booking_live_enabled).toBe(false);
+  });
+
+  it('opens client registration and internal live booking for a verified trial', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      calendarSource: 'internal',
+      crmIntegration: null,
+      _count: {
+        internalServices: 1,
+        internalProviders: 1,
+        availabilityRules: 5,
+      },
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          booking: { mode: 'live' },
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result.access_state).toBe('trial_active');
+    expect(result.client_registration_enabled).toBe(true);
+    expect(result.booking_mode).toBe('live');
+    expect(result.trial_full_access).toBe(true);
+  });
+
+  it('returns a subscription CTA and disables public features after trial expiry', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() - 60_000),
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result).toMatchObject({
+      active: false,
+      tenant_status: 'past_due',
+      access_state: 'subscription_required',
+      subscription_required: true,
+      client_registration_enabled: false,
+      booking_mode: 'preview',
+      subscription_cta: {
+        plans_path: '/api/billing/plans',
+      },
+    });
   });
 
   it('keeps requested live booking in preview while only mock CRM is connected', async () => {

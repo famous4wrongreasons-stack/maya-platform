@@ -112,6 +112,15 @@ export class CreateTenantDto {
   @IsString()
   billingMethodId?: string;
 
+  @ApiPropertyOptional({
+    default: false,
+    description:
+      'Enables client-facing features during a verified self-serve trial.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  trialFullAccess?: boolean;
+
   @ApiPropertyOptional({ default: true })
   @IsOptional()
   @IsBoolean()

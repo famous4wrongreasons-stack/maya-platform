@@ -36,6 +36,12 @@ function stringField(value: unknown, key: string): string {
   return field;
 }
 
+function numberField(value: unknown, key: string): number {
+  const field = asRecord(value)[key];
+  assert(typeof field === 'number', `Expected number field ${key}`);
+  return field;
+}
+
 function authHeaders(token: string) {
   return { authorization: `Bearer ${token}` };
 }
@@ -154,6 +160,50 @@ async function runSmoke() {
   assert(templateIds.includes('barbershop'));
   assert(templateIds.includes('pet_services'));
 
+  const ownerLogin = asRecord(
+    await expectStatus('/auth/login', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: ownerEmail,
+        password: ownerPassword,
+      }),
+    }),
+  );
+  const ownerToken = stringField(ownerLogin, 'access_token');
+  const analyticsBefore = asRecord(
+    await expectStatus('/admin/analytics/trials', 200, {
+      headers: authHeaders(ownerToken),
+    }),
+  );
+  const totalsBefore = asRecord(analyticsBefore.totals);
+
+  const trialActivation = asRecord(
+    await expectStatus('/onboarding/trial-activations', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ source: 'maya_os' }),
+    }),
+  );
+  const trialActivationToken = stringField(trialActivation, 'activation_token');
+  assert.equal(trialActivation.trial_days, 10);
+  assert.equal(trialActivation.counted_as_connected_business, false);
+
+  const analyticsAfterSwipe = asRecord(
+    await expectStatus('/admin/analytics/trials', 200, {
+      headers: authHeaders(ownerToken),
+    }),
+  );
+  const totalsAfterSwipe = asRecord(analyticsAfterSwipe.totals);
+  assert.equal(
+    numberField(totalsAfterSwipe, 'trial_swipes'),
+    numberField(totalsBefore, 'trial_swipes') + 1,
+  );
+  assert.equal(
+    numberField(totalsAfterSwipe, 'connected_businesses'),
+    numberField(totalsBefore, 'connected_businesses'),
+  );
+
   const aiSuffix = Date.now();
   const aiDraft = asRecord(
     await expectStatus('/onboarding/ai/drafts', 201, {
@@ -161,12 +211,15 @@ async function runSmoke() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         message: `Я частный массажист, работаю один. Название AI Smoke ${aiSuffix}.`,
+        trialActivationToken,
       }),
     }),
   );
   const aiDraftId = stringField(aiDraft, 'draft_id');
   const aiDraftToken = stringField(aiDraft, 'draft_token');
   assert(asArray(aiDraft.missing_fields).includes('services'));
+  assert(Array.isArray(aiDraft.quick_replies));
+  assert.equal(aiDraft.interpreter_source, 'safe_fallback');
   await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 401, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -205,8 +258,8 @@ async function runSmoke() {
     }),
   });
 
-  const confirmedAiSignup = asRecord(
-    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 201, {
+  const missingTrialActivation = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -217,8 +270,67 @@ async function runSmoke() {
       }),
     }),
   );
+  assert.equal(
+    asRecord(missingTrialActivation.error).code,
+    'trial_activation_token_required',
+  );
+
+  const confirmedAiSignup = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        draftToken: aiDraftToken,
+        trialActivationToken,
+        ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+        ownerName: 'AI Smoke Owner',
+        ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+      }),
+    }),
+  );
   assert.equal(confirmedAiSignup.branding_mode, 'logo_only');
   assert.equal(confirmedAiSignup.next_step, 'upload_logo_or_open_app');
+  assert.equal(asRecord(confirmedAiSignup.trial).days, 10);
+  assert.equal(asRecord(confirmedAiSignup.trial).full_access, true);
+  assert.equal(
+    asRecord(confirmedAiSignup.trial_activation).counted_as_connected_business,
+    true,
+  );
+  const aiTenant = asRecord(confirmedAiSignup.tenant);
+  const aiTenantId = stringField(aiTenant, 'id');
+  const aiTenantSlug = stringField(aiTenant, 'slug');
+
+  const analyticsAfterRegistration = asRecord(
+    await expectStatus('/admin/analytics/trials', 200, {
+      headers: authHeaders(ownerToken),
+    }),
+  );
+  const totalsAfterRegistration = asRecord(analyticsAfterRegistration.totals);
+  assert.equal(
+    numberField(totalsAfterRegistration, 'connected_businesses'),
+    numberField(totalsBefore, 'connected_businesses') + 1,
+  );
+  await expectStatus('/onboarding/trial-activations', 201, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ source: 'maya_os' }),
+  });
+  const analyticsWithAbandonedSwipe = asRecord(
+    await expectStatus('/admin/analytics/trials', 200, {
+      headers: authHeaders(ownerToken),
+    }),
+  );
+  const totalsWithAbandonedSwipe = asRecord(analyticsWithAbandonedSwipe.totals);
+  assert.equal(
+    numberField(totalsWithAbandonedSwipe, 'trial_swipes'),
+    numberField(totalsBefore, 'trial_swipes') + 2,
+  );
+  assert.equal(
+    numberField(totalsWithAbandonedSwipe, 'connected_businesses'),
+    numberField(totalsBefore, 'connected_businesses') + 1,
+  );
+  assert(numberField(totalsWithAbandonedSwipe, 'pending_registrations') >= 1);
+
   const aiSignupToken = stringField(confirmedAiSignup, 'access_token');
   const aiCalendarSetup = asRecord(
     await expectStatus('/internal-calendar/setup', 200, {
@@ -236,6 +348,33 @@ async function runSmoke() {
     }),
   );
   assert.equal(confirmedDraft.status, 'confirmed');
+
+  await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
+    method: 'PATCH',
+    headers: {
+      ...authHeaders(ownerToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      trialEndsAt: new Date(Date.now() - 60_000).toISOString(),
+    }),
+  });
+  const expiredAiConfig = asRecord(
+    await expectStatus(`/mobile/config/${aiTenantSlug}`, 200),
+  );
+  assert.equal(expiredAiConfig.access_state, 'subscription_required');
+  assert.equal(expiredAiConfig.subscription_required, true);
+  assert.equal(expiredAiConfig.active, false);
+  const blockedAfterTrial = asRecord(
+    await expectStatus('/internal-calendar/setup', 402, {
+      headers: authHeaders(aiSignupToken),
+    }),
+  );
+  assert.equal(asRecord(blockedAfterTrial.error).code, 'subscription_required');
+  assert(asArray(await expectStatus('/billing/plans', 200)).length > 0);
+  await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
+    headers: authHeaders(aiSignupToken),
+  });
 
   const demoConfig = asRecord(
     await expectStatus(`/mobile/config/${demoTenantSlug}`, 200),
@@ -259,19 +398,8 @@ async function runSmoke() {
       }),
     }),
   );
-  const ownerLogin = asRecord(
-    await expectStatus('/auth/login', 201, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        email: ownerEmail,
-        password: ownerPassword,
-      }),
-    }),
-  );
   const demoToken = stringField(demoLogin, 'access_token');
   const demoRefreshToken = stringField(demoLogin, 'refresh_token');
-  const ownerToken = stringField(ownerLogin, 'access_token');
   const demoUser = asRecord(demoLogin.user);
   const demoTenantId = stringField(demoUser, 'tenant_id');
 
@@ -682,7 +810,7 @@ async function runSmoke() {
   });
 
   console.log(
-    'HTTP smoke passed: AI onboarding, tenant fence, auth rotation, CRM preview and internal calendar booking',
+    'HTTP smoke passed: verified trial funnel, AI onboarding, tenant fence, auth rotation, CRM preview and internal calendar booking',
   );
 }
 

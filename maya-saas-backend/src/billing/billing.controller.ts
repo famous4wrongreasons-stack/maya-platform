@@ -2,16 +2,29 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { UserRole } from '../common/domain.enums';
+import { AllowSubscriptionRequired } from '../decorators/allow-subscription-required.decorator';
 import { Public } from '../decorators/public.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { BillingService } from './billing.service';
 import { CreateBillingCheckoutDto } from './dto/create-billing-checkout.dto';
 
 @ApiTags('billing')
 @Controller()
+@AllowSubscriptionRequired()
 export class BillingController {
-  constructor(private readonly billingService: BillingService) {}
+  constructor(
+    private readonly billingService: BillingService,
+    private readonly subscriptionsService: SubscriptionsService,
+  ) {}
+
+  @Public()
+  @Get('billing/plans')
+  @ApiOperation({ summary: 'List plans available after a trial ends' })
+  listPlans() {
+    return this.subscriptionsService.listPlans();
+  }
 
   @Post('admin/tenants/:id/billing/checkout')
   @ApiBearerAuth()

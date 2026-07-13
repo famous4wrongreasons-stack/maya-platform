@@ -30,6 +30,13 @@ import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
 import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
 import { TenantAuthRepository } from './tenant-auth.repository';
 
+type ClientAccessTenant = {
+  currentPeriodEnd?: Date | null;
+  status: string;
+  trialEndsAt?: Date | null;
+  trialFullAccess?: boolean;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -81,8 +88,8 @@ export class AuthService {
         tenantId: tenant.id,
         identity: normalizedEmail,
       });
-      this.assertTenantAllowsClientAccess(tenant.status, true);
-      this.assertTenantAllowsClientRegistration(tenant.status);
+      this.assertTenantAllowsClientAccess(tenant, true);
+      this.assertTenantAllowsClientRegistration(tenant);
       this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
 
       if (dto.branchId) {
@@ -151,7 +158,7 @@ export class AuthService {
         tenantId: tenant.id,
         identity: phone,
       });
-      this.assertTenantAllowsClientAccess(tenant.status, true);
+      this.assertTenantAllowsClientAccess(tenant, true);
 
       const existingUser = await this.usersService.findTenantUserByPhone(
         tenant.id,
@@ -160,11 +167,11 @@ export class AuthService {
 
       if (existingUser) {
         this.assertTenantAllowsClientAccess(
-          tenant.status,
+          tenant,
           this.shouldAllowTrialTenantLogin(existingUser.role as UserRole),
         );
       } else {
-        this.assertTenantAllowsClientRegistration(tenant.status);
+        this.assertTenantAllowsClientRegistration(tenant);
         this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
       }
 
@@ -238,7 +245,7 @@ export class AuthService {
         tenantId: tenant.id,
         identity: phone,
       });
-      this.assertTenantAllowsClientAccess(tenant.status, true);
+      this.assertTenantAllowsClientAccess(tenant, true);
 
       const challenge = await this.authRepository.findPhoneChallenge(phone);
 
@@ -311,7 +318,7 @@ export class AuthService {
 
       if (user) {
         this.assertTenantAllowsClientAccess(
-          tenant.status,
+          tenant,
           this.shouldAllowTrialTenantLogin(user.role as UserRole),
         );
 
@@ -319,7 +326,7 @@ export class AuthService {
           throw new ForbiddenException('User is not active');
         }
       } else {
-        this.assertTenantAllowsClientRegistration(tenant.status);
+        this.assertTenantAllowsClientRegistration(tenant);
         this.assertTenantAllowsSelfRegistration(tenant.allowSelfRegistration);
 
         if (dto.branchId) {
@@ -391,7 +398,7 @@ export class AuthService {
       }
 
       this.assertTenantAllowsClientAccess(
-        tenant.status,
+        tenant,
         this.shouldAllowTrialTenantLogin(user.role as UserRole),
       );
 
@@ -428,29 +435,61 @@ export class AuthService {
   }
 
   private assertTenantAllowsClientAccess(
-    status: string,
+    tenant: ClientAccessTenant,
     allowTrial: boolean,
   ): void {
+    if (this.isUnpaidExpiredTrial(tenant) && !allowTrial) {
+      throw new ForbiddenException('Tenant is not accepting client access');
+    }
+
     const allowed = new Set<string>(['active', 'past_due']);
 
-    if (allowTrial) {
+    if (allowTrial || this.isFullTrialActive(tenant)) {
       allowed.add('trial');
     }
 
-    if (!allowed.has(status)) {
+    if (!allowed.has(tenant.status)) {
       throw new ForbiddenException('Tenant is not accepting client access');
     }
   }
 
-  private assertTenantAllowsClientRegistration(status: string): void {
-    if (status === 'trial') {
+  private assertTenantAllowsClientRegistration(
+    tenant: ClientAccessTenant,
+  ): void {
+    const expired = this.isUnpaidExpiredTrial(tenant);
+    if (
+      expired ||
+      (tenant.status === 'trial' && !this.isFullTrialActive(tenant))
+    ) {
       throw new ForbiddenException(
         this.buildClientRegistrationError(
-          'trial_client_registration_disabled',
-          'Client registration is disabled while this business is still in trial.',
+          expired
+            ? 'subscription_required'
+            : 'trial_client_registration_disabled',
+          expired
+            ? 'The trial has ended. A subscription is required.'
+            : 'Client registration is disabled while this business is still in trial.',
         ),
       );
     }
+  }
+
+  private isUnpaidExpiredTrial(tenant: ClientAccessTenant): boolean {
+    return (
+      new Set(['trial', 'past_due']).has(tenant.status) &&
+      Boolean(tenant.trialEndsAt) &&
+      tenant.trialEndsAt!.getTime() <= Date.now() &&
+      !tenant.currentPeriodEnd
+    );
+  }
+
+  private isFullTrialActive(tenant: ClientAccessTenant): boolean {
+    return (
+      tenant.status === 'trial' &&
+      tenant.trialFullAccess === true &&
+      Boolean(tenant.trialEndsAt) &&
+      tenant.trialEndsAt!.getTime() > Date.now()
+    );
   }
 
   private shouldAllowTrialTenantLogin(role: UserRole): boolean {
@@ -547,7 +586,7 @@ export class AuthService {
   }
 
   private buildClientRegistrationError(
-    code: 'trial_client_registration_disabled',
+    code: 'subscription_required' | 'trial_client_registration_disabled',
     message: string,
   ) {
     return {

@@ -129,4 +129,35 @@ describe('SafeOnboardingInterpreter', () => {
     expect(named.blueprint.services).toEqual([]);
     expect(named.missingFields).toEqual(['services']);
   });
+
+  it('understands common slang and collective number words without AI', () => {
+    const result = interpreter.interpret(
+      'У нас движ с тачками, делаем детейлинг без срм. Бизнес называется Блеск. Нас трое. Услуги: мойка/полировка/химчистка.',
+    );
+
+    expect(result.blueprint).toMatchObject({
+      templateId: 'auto_service',
+      businessName: 'Блеск',
+      calendarSource: CalendarSource.INTERNAL,
+      providerCount: 3,
+    });
+    expect(result.blueprint.services.map((service) => service.name)).toEqual([
+      'мойка',
+      'полировка',
+      'химчистка',
+    ]);
+  });
+
+  it('does not invent facts from an ambiguous one-word reply', () => {
+    const first = interpreter.interpret(
+      'Я частный специалист, работаю один без CRM.',
+    );
+    const ambiguous = interpreter.interpret('ага', first.blueprint);
+
+    expect(ambiguous.blueprint).toEqual(first.blueprint);
+    expect(ambiguous.needsClarification).toBe(true);
+    expect(ambiguous.confidence).toBeLessThan(0.72);
+    expect(ambiguous.quickReplies.length).toBeGreaterThan(0);
+    expect(ambiguous.assistantMessage).toContain('Не хочу додумывать');
+  });
 });

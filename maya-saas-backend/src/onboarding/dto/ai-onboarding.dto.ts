@@ -33,6 +33,15 @@ export class CreateAiOnboardingDraftDto {
   @IsOptional()
   @IsIn(BUSINESS_TEMPLATE_IDS)
   templateId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Secret returned after the user completes the trial activation swipe.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(32)
+  trialActivationToken?: string;
 }
 
 export class ContinueAiOnboardingDraftDto {
@@ -99,6 +108,15 @@ export class ConfirmAiOnboardingDraftDto {
   @IsString()
   @MinLength(32)
   draftToken!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Required when the draft was started from a trial activation swipe.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(32)
+  trialActivationToken?: string;
 
   @ApiProperty({ example: 'owner@example.ru' })
   @IsEmail()

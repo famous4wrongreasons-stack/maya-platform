@@ -24,6 +24,13 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - Public/mobile API:
   - `GET /api/industry-presets`
   - `GET /api/mobile/config/:tenantSlug`
+  - `GET /api/onboarding/templates`
+  - `POST /api/onboarding/trial-activations`
+  - `POST /api/onboarding/ai/drafts`
+  - `POST /api/onboarding/ai/drafts/:draftId/messages`
+  - `POST /api/onboarding/ai/drafts/:draftId/read`
+  - `POST /api/onboarding/ai/drafts/:draftId/confirm`
+  - `GET /api/billing/plans`
   - `POST /api/auth/login`
   - `POST /api/auth/register`
   - `POST /api/auth/phone/start`
@@ -70,6 +77,7 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `GET /api/admin/tenants/:id/billing/payments`
   - `POST /api/admin/tenants/:id/billing/charge`
   - `POST /api/admin/billing/run-due`
+  - `GET /api/admin/analytics/trials`
 - Billing webhook:
   - `POST /api/billing/yookassa/webhook`
 - CRM adapter architecture with:
@@ -102,6 +110,10 @@ NODE_ENV="development"
 CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://localhost"
 SWAGGER_ENABLED="true"
 SELF_SERVE_TRIAL_SIGNUP="false"
+AI_ONBOARDING_PROVIDER="auto"
+OPENAI_API_KEY=""
+OPENAI_AI_ONBOARDING_MODEL="gpt-5.4-mini"
+OPENAI_AI_ONBOARDING_TIMEOUT_MS="12000"
 TENANT_BASE_DOMAIN="malesthetic.pro"
 SEED_DEFAULT_TENANT_SLUG="malesthetic"
 SEED_DEFAULT_TENANT_NAME="Мужская Эстетика"
@@ -156,6 +168,16 @@ Social login toggles:
 - `AUTH_FLOW_STATE_TTL_SECONDS`: lifetime for OAuth `state + PKCE` records in PostgreSQL
 - `OAUTH_PROVIDER_TIMEOUT_MS`: timeout for Yandex and Telegram token exchanges
 - `OAUTH_ALLOWED_REDIRECT_URIS`: exact comma-separated callback allowlist; production callbacks must use HTTPS
+
+Conversational onboarding:
+
+- `AI_ONBOARDING_PROVIDER=auto`: use strict model output when an OpenAI key is configured and fall back safely when unavailable
+- `AI_ONBOARDING_PROVIDER=safe`: force the deterministic, offline Russian parser
+- `OPENAI_AI_ONBOARDING_MODEL`: model used only for privacy-redacted semantic interpretation
+- Trial activation tokens are created only after the MAYA OS swipe and grant 10 days of full access only after tenant registration completes
+- `GET /api/admin/analytics/trials` counts a connected business only after that successful registration; abandoned swipes are reported separately
+
+See [the conversational onboarding and verified-trial contract](../docs/product/ai-onboarding.md).
 
 ## Run locally
 
