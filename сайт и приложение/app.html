@@ -10555,6 +10555,13 @@ function AChat() {
   const setDark = window.__meSetDark;
   const t = tokens('aurora', dark);
   const universal = !!window.__ME_SAAS_CTX;
+  const onbTone = dark ? {
+    surface: '#0a0a0a', soft: '#141414', ink: '#ffffff', inverse: '#000000',
+    dim: 'rgba(255,255,255,0.62)', faint: 'rgba(255,255,255,0.38)', line: 'rgba(255,255,255,0.16)'
+  } : {
+    surface: '#ffffff', soft: '#f5f5f5', ink: '#000000', inverse: '#ffffff',
+    dim: 'rgba(0,0,0,0.62)', faint: 'rgba(0,0,0,0.38)', line: 'rgba(0,0,0,0.14)'
+  };
   function defaultChatMsgs() {
     return [{ role: 'bot', text: chatSurface() === 'staff' ? STAFF_GREETING : GREETING }];
   }
@@ -10602,6 +10609,7 @@ function AChat() {
 	  const [onbQuick, setOnbQuick] = React.useState([]); // backend quick_replies: [{label,message}]
 	  const [onbBusy, setOnbBusy] = React.useState(false);
 	  const [onbErr, setOnbErr] = React.useState('');
+	  const [onbFieldErrors, setOnbFieldErrors] = React.useState({});
 	  const [onbDead, setOnbDead] = React.useState(false); // активация умерла → возврат на вход
 	  const onbReq = React.useRef(false);
 	  const [onbConfirm, setOnbConfirm] = React.useState(null); // редактируемая карточка
@@ -10645,10 +10653,50 @@ function AChat() {
 	      trial_activation_not_pending: 'Пробная версия уже активирована.',
 	      trial_activation_draft_exists: 'Черновик настройки уже существует, но доступ к нему потерян.',
 	      trial_activation_draft_mismatch: 'Черновик не совпал с активацией. Начнём настройку заново.',
-	      trial_activation_token_required: 'Нужна активная пробная версия. Вернитесь и активируйте её.'
+	      trial_activation_token_required: 'Нужна активная пробная версия. Вернитесь и активируйте её.',
+	      validation: 'Проверьте заполненные данные.'
 	    };
 	    return m[code] || fallback || 'Не получилось — попробуйте ещё раз.';
 	  };
+	  function onbClearFieldError(field) {
+	    setOnbErr('');
+	    setOnbFieldErrors(function (current) {
+	      if (!current[field]) return current;
+	      var next = Object.assign({}, current); delete next[field]; return next;
+	    });
+	  }
+	  function onbFriendlyValidation(field) {
+	    var service = String(field || '').match(/^services\.(\d+)\.(name|price|durationMinutes|duration)$/);
+	    if (service) {
+	      var number = Number(service[1]) + 1;
+	      if (service[2] === 'name') return 'Услуга ' + number + ': укажите понятное название минимум из 2 символов.';
+	      if (service[2] === 'price') return 'Услуга ' + number + ': укажите цену целым числом, для бесплатной услуги — 0.';
+	      return 'Услуга ' + number + ': длительность должна быть от 5 минут до 24 часов.';
+	    }
+	    if (/^weekly(?:Rules)?\./.test(field)) return 'Проверьте время начала и окончания рабочего дня.';
+	    var messages = {
+	      ownerEmail: 'Укажите корректный e-mail.',
+	      ownerName: 'Укажите ваше имя — минимум 2 символа.',
+	      ownerPhone: 'Укажите телефон с кодом страны — это ваш вход в MAYA.',
+	      businessName: 'Укажите название бизнеса — минимум 2 символа.',
+	      providerCount: 'Количество специалистов должно быть от 1 до 100.',
+	      services: 'Добавьте хотя бы одну услугу.'
+	    };
+	    return messages[field] || 'Проверьте заполненные данные.';
+	  }
+	  function onbApiFieldErrors(details, body) {
+	    var result = {};
+	    (Array.isArray(details) ? details : []).forEach(function (detail) {
+	      var field = String(detail && detail.field || '');
+	      var localField = field.replace(/\.durationMinutes$/, '.duration');
+	      var weekly = field.match(/^weeklyRules\.(\d+)\.(startTime|endTime)$/);
+	      if (weekly && body && body.weeklyRules && body.weeklyRules[Number(weekly[1])]) {
+	        localField = 'weekly.' + body.weeklyRules[Number(weekly[1])].weekday + '.' + (weekly[2] === 'startTime' ? 'start' : 'end');
+	      }
+	      if (localField) result[localField] = onbFriendlyValidation(field);
+	    });
+	    return result;
+	  }
 	  function onbHardReset(note) {
 	    // Trial activation is bound to exactly one draft on the server. Dropping
 	    // only the local draft token would make the flow unrecoverable.
@@ -10656,7 +10704,7 @@ function AChat() {
 	  }
 	  function onbActivationDead(note) {
 	    onbClearAllSS(); try { window.__meOnb = null; } catch (e) {}
-	    onbDraft.current = { id: null, token: null }; setOnbConfirm(null); setOnbStage('chat'); setOnbDead(true); setOnbErr('');
+	    onbDraft.current = { id: null, token: null }; setOnbConfirm(null); setOnbStage('chat'); setOnbDead(true); setOnbErr(''); setOnbFieldErrors({});
 	    setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: note || 'Пробную версию нужно активировать заново.' }]); });
 	  }
 	  function onbExitToLogin() { onbClearAllSS(); try { window.__meOnb = null; } catch (e) {} if (window.__meGo) window.__meGo('login'); }
@@ -10724,7 +10772,7 @@ function AChat() {
 	      scheduleAssumed: !!b.scheduleAssumed,
 	      templateId: b.templateId
 	    });
-	    setOnbErr(''); setOnbStage('confirm');
+	    setOnbErr(''); setOnbFieldErrors({}); setOnbStage('confirm');
 	  }
 	  function onbSaveBundle(res, api) {
 	    if (!res || !res.access_token || !res.refresh_token) throw new Error('Неполный ответ сервера — попробуйте ещё раз.');
@@ -10743,36 +10791,106 @@ function AChat() {
 	  function onbOpenApp(api, slug, cal) {
 	    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(slug) + '&onboarded=1' + (cal ? '&calendar_setup=1' : ''));
 	  }
+	  function onbValidateConfirmation(c, ct) {
+	    var errors = {};
+	    var businessName = String(c.businessName || '').trim();
+	    if (businessName.length < 2 || businessName.length > 120) errors.businessName = onbFriendlyValidation('businessName');
+
+	    var providerCountText = String(c.providerCount == null ? '' : c.providerCount).trim();
+	    var providerCount = Number(providerCountText);
+	    if (!/^\d+$/.test(providerCountText) || !Number.isInteger(providerCount) || providerCount < 1 || providerCount > 100) errors.providerCount = onbFriendlyValidation('providerCount');
+
+	    var services = [];
+	    var serviceRows = Array.isArray(c.services) ? c.services : [];
+	    if (!serviceRows.length) errors.services = onbFriendlyValidation('services');
+	    if (serviceRows.length > 30) errors.services = 'Можно добавить не больше 30 услуг.';
+	    serviceRows.forEach(function (service, index) {
+	      var nameField = 'services.' + index + '.name';
+	      var priceField = 'services.' + index + '.price';
+	      var durationField = 'services.' + index + '.duration';
+	      var name = String(service.name || '').trim();
+	      var priceText = String(service.price == null ? '' : service.price).replace(/\s/g, '');
+	      var durationText = String(service.duration == null ? '' : service.duration).replace(/\s/g, '');
+	      var price = Number(priceText);
+	      var duration = Number(durationText);
+	      if (name.length < 2 || name.length > 120) errors[nameField] = onbFriendlyValidation(nameField);
+	      if (!/^\d+$/.test(priceText) || !Number.isInteger(price) || price < 0 || price > 10000000) errors[priceField] = onbFriendlyValidation(priceField);
+	      if (!/^\d+$/.test(durationText) || !Number.isInteger(duration) || duration < 5 || duration > 1440) errors[durationField] = onbFriendlyValidation(durationField);
+	      services.push({ name: name, price: price, durationMinutes: duration });
+	    });
+
+	    var weeklyRules = [];
+	    Object.keys(c.weekly || {}).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (weekdayKey) {
+	      var rule = c.weekly[weekdayKey]; if (!rule || !rule.on) return;
+	      var startField = 'weekly.' + weekdayKey + '.start';
+	      var endField = 'weekly.' + weekdayKey + '.end';
+	      var start = String(rule.start || '').trim();
+	      var end = String(rule.end || '').trim();
+	      var validStart = /^([01]\d|2[0-3]):[0-5]\d$/.test(start);
+	      var validEnd = /^([01]\d|2[0-3]):[0-5]\d$/.test(end);
+	      if (!validStart) errors[startField] = 'Укажите начало дня в формате 09:00.';
+	      if (!validEnd) errors[endField] = 'Укажите окончание дня в формате 18:00.';
+	      if (validStart && validEnd && start >= end) {
+	        errors[startField] = 'Начало рабочего дня должно быть раньше окончания.';
+	        errors[endField] = errors[startField];
+	      }
+	      var weekday = Number(weekdayKey); if (weekday === 7) weekday = 0;
+	      weeklyRules.push({ weekday: weekday, startTime: start, endTime: end });
+	    });
+	    if (!weeklyRules.length) errors.weekly = 'Включите хотя бы один рабочий день.';
+
+	    var ownerEmail = String(ct.email || '').trim();
+	    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail)) errors.ownerEmail = onbFriendlyValidation('ownerEmail');
+	    var ownerName = String(ct.name || '').trim();
+	    if (ownerName.length < 2 || ownerName.length > 120) errors.ownerName = onbFriendlyValidation('ownerName');
+	    var phoneDigits = String(ct.phone || '').replace(/\D/g, '');
+	    if (phoneDigits.length === 10) phoneDigits = '7' + phoneDigits;
+	    if (phoneDigits[0] === '8' && phoneDigits.length === 11) phoneDigits = '7' + phoneDigits.slice(1);
+	    if (phoneDigits.length < 10 || phoneDigits.length > 15) errors.ownerPhone = onbFriendlyValidation('ownerPhone');
+
+	    return {
+	      errors: errors,
+	      businessName: businessName,
+	      providerCount: providerCount,
+	      services: services,
+	      weeklyRules: weeklyRules,
+	      ownerEmail: ownerEmail,
+	      ownerName: ownerName,
+	      ownerPhone: '+' + phoneDigits
+	    };
+	  }
 	  async function onbConfirmGo() {
 	    var c = onbConfirm; if (!c || onbReq.current) return;
 	    var ct = onbContact;
-	    var em = String(ct.email || '').trim();
-	    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setOnbErr('Укажите корректный e-mail.'); return; }
-	    var onm = String(ct.name || '').trim();
-	    if (onm.length < 2) { setOnbErr('Укажите ваше имя — минимум 2 символа.'); return; }
-	    var phoneDigits = String(ct.phone || '').replace(/\D/g, '');
-	    if (phoneDigits.length < 10 || phoneDigits.length > 15) { setOnbErr('Укажите телефон — это ваш вход в MAYA и восстановление доступа.'); return; }
-	    if (phoneDigits.length === 10) phoneDigits = '7' + phoneDigits;
-	    if (phoneDigits[0] === '8' && phoneDigits.length === 11) phoneDigits = '7' + phoneDigits.slice(1);
+	    var normalized = onbValidateConfirmation(c, ct);
+	    setOnbFieldErrors(normalized.errors);
+	    var firstField = Object.keys(normalized.errors)[0];
+	    if (firstField) { setOnbErr(normalized.errors[firstField]); return; }
+	    setOnbContact(Object.assign({}, ct, { phone: normalized.ownerPhone }));
 	    onbReq.current = true; setOnbBusy(true); setOnbErr('');
 	    var api = onbApiBase();
 	    try {
 	      var body = {
 	        draftToken: onbDraft.current.token,
 	        trialActivationToken: onbTokenNow(),
-	        ownerEmail: em,
-	        ownerName: onm,
-	        ownerPhone: '+' + phoneDigits,
-	        businessName: String(c.businessName || '').trim(),
+	        ownerEmail: normalized.ownerEmail,
+	        ownerName: normalized.ownerName,
+	        ownerPhone: normalized.ownerPhone,
+	        businessName: normalized.businessName,
 	        calendarSource: c.calendarSource,
-	        providerCount: parseInt(c.providerCount, 10) || 1,
-	        services: (c.services || []).filter(function (s) { return String(s.name || '').trim(); }).map(function (s) { return { name: String(s.name).trim(), price: parseInt(s.price, 10) || 0, durationMinutes: parseInt(s.duration, 10) || 30 }; }),
-	        weeklyRules: (function () { var out = []; Object.keys(c.weekly || {}).forEach(function (wd) { var r = c.weekly[wd]; if (r && r.on) out.push({ weekday: parseInt(wd, 10), startTime: r.start || '10:00', endTime: r.end || '20:00' }); }); return out; })()
+	        providerCount: normalized.providerCount,
+	        services: normalized.services,
+	        weeklyRules: normalized.weeklyRules
 	      };
 	      if (c.templateId) body.templateId = c.templateId;
 	      var r = await fetch(api + '/onboarding/ai/drafts/' + encodeURIComponent(onbDraft.current.id) + '/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 	      var data = await r.json();
-	      if (!r.ok) throw Object.assign(new Error('confirm'), { code: data && data.error && data.error.code, emsg: data && data.error && data.error.message });
+	      if (!r.ok) {
+	        var apiError = data && data.error || {};
+	        var apiFields = apiError.code === 'validation' ? onbApiFieldErrors(apiError.details, body) : {};
+	        var apiFirst = Object.keys(apiFields)[0];
+	        throw Object.assign(new Error('confirm'), { code: apiError.code, emsg: apiFirst ? apiFields[apiFirst] : apiError.message, fieldErrors: apiFields });
+	      }
 	      var saved = onbSaveBundle(data, api);
 	      var trial = data.trial || (data.trial_activation && data.trial_activation.trial) || null;
 	      var nextStep = data.next_step || (c.calendarSource === 'external' ? 'connect_crm' : 'upload_logo_or_open_app');
@@ -10785,6 +10903,7 @@ function AChat() {
 	      setOnbConfirm(null);
 	      setOnbStage((nextStep === 'connect_crm' || c.calendarSource === 'external') ? 'crm' : 'logo');
 	    } catch (e) {
+	      if (e.fieldErrors && Object.keys(e.fieldErrors).length) setOnbFieldErrors(e.fieldErrors);
 	      if (e.code === 'invalid_trial_activation_token' || e.code === 'trial_activation_expired' || e.code === 'trial_activation_token_required' || e.code === 'trial_activation_not_pending' || e.code === 'trial_activation_draft_mismatch') onbActivationDead(onbErrText(e.code));
 	      else if (e.code === 'invalid_ai_onboarding_token' || e.code === 'ai_onboarding_expired') onbHardReset(onbErrText(e.code) + ' Вернитесь на вход и активируйте пробную версию заново.');
 	      else setOnbErr(onbErrText(e.code, e.emsg));
@@ -10840,77 +10959,93 @@ function AChat() {
 	  // чипы под последним ответом MAYA: quick_replies бэка + переход к подтверждению + восстановление
 	  function onbChips() {
 	    if (!onbOnRef.current) return null;
-	    var chip = { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, color: t.ink, border: '1px solid ' + t.line, borderRadius: 999, padding: '9px 15px' };
-	    var chipSel = { borderColor: t.ink, background: dark ? 'rgba(244,240,235,0.06)' : 'rgba(24,22,15,0.05)' };
-	    var chipStrong = { cursor: 'pointer', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11.5, letterSpacing: '0.04em', color: dark ? '#0b0b0c' : '#f4f0eb', background: t.ink, borderRadius: 999, padding: '10px 16px' };
+	    var chip = { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, color: onbTone.ink, border: '1px solid ' + onbTone.line, borderRadius: 999, padding: '9px 15px' };
+	    var chipSel = { borderColor: onbTone.ink, background: onbTone.soft };
+	    var chipStrong = { cursor: 'pointer', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11.5, letterSpacing: '0.04em', color: onbTone.inverse, background: onbTone.ink, borderRadius: 999, padding: '10px 16px' };
 	    var rowWrap = { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 };
 	    var kids = [];
 	    if (onbDead) { kids.push(e('div', { key: 'back', onClick: onbExitToLogin, style: chipStrong }, 'Вернуться на вход и активировать заново')); return e('div', { style: rowWrap }, kids); }
 	    if (onbStage !== 'chat') return null;
 	    if (!onbDraft.current.id && onbTemplates && onbTemplates.length && msgs.filter(function (m) { return m.role === 'user'; }).length === 0) {
-	      kids.push(e('div', { key: 'tpl-h', style: { width: '100%', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, marginBottom: 2 } }, 'С чего начать · по желанию'));
+	      kids.push(e('div', { key: 'tpl-h', style: { width: '100%', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: onbTone.faint, marginBottom: 2 } }, 'С чего начать · по желанию'));
 	      onbTemplates.slice(0, 8).forEach(function (tp) { kids.push(e('div', { key: 'tpl-' + tp.id, onClick: function () { setOnbTpl(onbTpl === tp.id ? null : tp.id); }, style: Object.assign({}, chip, onbTpl === tp.id ? chipSel : {}) }, tp.name)); });
 	    }
 	    (onbQuick || []).forEach(function (q, i) { kids.push(e('div', { key: 'q-' + i, onClick: onbBusy ? undefined : function () { onbSend(q.message); }, style: Object.assign({}, chip, onbBusy ? { opacity: 0.5, cursor: 'default' } : {}) }, q.label || q.message)); });
 	    var canConfirm = onbBlueprint && Array.isArray(onbMissing) && onbMissing.length === 0 && !onbNeedsClar;
 	    if (canConfirm) kids.push(e('div', { key: 'toconf', onClick: onbToConfirm, style: chipStrong }, 'К подтверждению →'));
-	    if (onbDraft.current.id || onbMissing !== null) kids.push(e('div', { key: 'restart', onClick: function () { onbHardReset(); }, style: Object.assign({}, chip, { color: t.faint }) }, 'Начать заново'));
-	    if (onbErr) kids.push(e('div', { key: 'err', style: { width: '100%', fontFamily: BODY, fontSize: 12, color: '#e0564f', marginTop: 4, lineHeight: 1.5 } }, onbErr));
+	    if (onbDraft.current.id || onbMissing !== null) kids.push(e('div', { key: 'restart', onClick: function () { onbHardReset(); }, style: Object.assign({}, chip, { color: onbTone.faint }) }, 'Начать заново'));
+	    if (onbErr) kids.push(e('div', { key: 'err', style: { width: '100%', fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, marginTop: 4, lineHeight: 1.5 } }, onbErr));
 	    if (!kids.length) return null;
 	    return e('div', { style: rowWrap }, kids);
 	  }
 	  // инлайн-карточка в той же ленте: подтверждение / логотип / CRM
 	  function onbInlineCard() {
 	    if (!onbOnRef.current) return null;
-	    var card = { background: dark ? 'rgba(244,240,235,0.04)' : 'rgba(255,255,255,0.6)', border: '1px solid ' + t.line, borderRadius: 16, padding: 14, marginTop: 10 };
-	    var lbl = { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint, marginBottom: 8 };
-	    var inp = { width: '100%', boxSizing: 'border-box', border: '1px solid ' + t.line, borderRadius: 10, padding: '10px 12px', fontFamily: BODY, fontSize: 13, color: t.ink, background: 'transparent', outline: 'none' };
+	    var card = { background: onbTone.surface, border: '1px solid ' + onbTone.line, borderRadius: 16, padding: 14, marginTop: 10 };
+	    var lbl = { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: onbTone.faint, marginBottom: 8 };
+	    var inp = { width: '100%', boxSizing: 'border-box', border: '1px solid ' + onbTone.line, borderRadius: 10, padding: '10px 12px', fontFamily: BODY, fontSize: 13, color: onbTone.ink, background: onbTone.surface, outline: 'none' };
+	    var onbInput = function (field, extra) { return Object.assign({}, inp, extra || {}, onbFieldErrors[field] ? { border: '2px solid ' + onbTone.ink } : {}); };
+	    var onbHint = function (fields) {
+	      var list = Array.isArray(fields) ? fields : [fields];
+	      var key = list.filter(function (field) { return !!onbFieldErrors[field]; })[0];
+	      return key ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, fontWeight: 600, color: onbTone.ink, margin: '5px 2px 2px', lineHeight: 1.4 } }, onbFieldErrors[key]) : null;
+	    };
 	    if (onbStage === 'confirm' && onbConfirm) {
 	      var c = onbConfirm; var setC = function (p) { setOnbConfirm(Object.assign({}, c, p)); };
 	      var ct = onbContact; var setCt = function (p) { setOnbContact(Object.assign({}, ct, p)); };
 	      var WDMAP = { 0: 'Вс', 1: 'Пн', 2: 'Вт', 3: 'Ср', 4: 'Чт', 5: 'Пт', 6: 'Сб', 7: 'Вс' };
 	      var rows = [];
-	      rows.push(e('div', { key: 'bn', style: card }, e('div', { style: lbl }, 'Название бизнеса'), e('input', { style: inp, value: c.businessName, onChange: function (ev) { setC({ businessName: ev.target.value }); } })));
-	      if (onbTemplates && onbTemplates.length) rows.push(e('div', { key: 'ty', style: card }, e('div', { style: lbl }, 'Тип бизнеса'), e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7 } }, onbTemplates.map(function (tp) { return e('div', { key: tp.id, onClick: function () { setC({ templateId: tp.id }); }, style: { fontFamily: BODY, fontSize: 12, padding: '6px 11px', borderRadius: 999, border: '1px solid ' + (c.templateId === tp.id ? t.ink : t.line), color: c.templateId === tp.id ? t.ink : t.dim, cursor: 'pointer' } }, tp.name); }))));
-	      rows.push(e('div', { key: 'cs', style: card }, e('div', { style: lbl }, 'Расписание'), e('div', { style: { display: 'flex', gap: 8 } }, ['internal', 'external'].map(function (v) { return e('div', { key: v, onClick: function () { setC({ calendarSource: v }); }, style: { flex: 1, textAlign: 'center', padding: '9px 6px', borderRadius: 10, border: '1px solid ' + (c.calendarSource === v ? t.ink : t.line), fontFamily: BODY, fontSize: 12, fontWeight: 600, color: c.calendarSource === v ? t.ink : t.dim, cursor: 'pointer' } }, v === 'internal' ? 'В MAYA' : 'Через CRM'); }))));
-	      rows.push(e('div', { key: 'pc', style: card }, e('div', { style: lbl }, 'Специалистов'), e('input', { style: inp, type: 'number', inputMode: 'numeric', value: c.providerCount, onChange: function (ev) { setC({ providerCount: ev.target.value }); } })));
+	      rows.push(e('div', { key: 'bn', style: card }, e('div', { style: lbl }, 'Название бизнеса'), e('input', { style: onbInput('businessName'), value: c.businessName, onChange: function (ev) { onbClearFieldError('businessName'); setC({ businessName: ev.target.value }); } }), onbHint('businessName')));
+	      if (onbTemplates && onbTemplates.length) rows.push(e('div', { key: 'ty', style: card }, e('div', { style: lbl }, 'Тип бизнеса'), e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7 } }, onbTemplates.map(function (tp) { return e('div', { key: tp.id, onClick: function () { setC({ templateId: tp.id }); }, style: { fontFamily: BODY, fontSize: 12, padding: '6px 11px', borderRadius: 999, border: '1px solid ' + (c.templateId === tp.id ? onbTone.ink : onbTone.line), color: c.templateId === tp.id ? onbTone.ink : onbTone.dim, cursor: 'pointer' } }, tp.name); }))));
+	      rows.push(e('div', { key: 'cs', style: card }, e('div', { style: lbl }, 'Расписание'), e('div', { style: { display: 'flex', gap: 8 } }, ['internal', 'external'].map(function (v) { return e('div', { key: v, onClick: function () { setC({ calendarSource: v }); }, style: { flex: 1, textAlign: 'center', padding: '9px 6px', borderRadius: 10, border: '1px solid ' + (c.calendarSource === v ? onbTone.ink : onbTone.line), fontFamily: BODY, fontSize: 12, fontWeight: 600, color: c.calendarSource === v ? onbTone.ink : onbTone.dim, cursor: 'pointer' } }, v === 'internal' ? 'В MAYA' : 'Через CRM'); }))));
+	      rows.push(e('div', { key: 'pc', style: card }, e('div', { style: lbl }, 'Специалистов'), e('input', { style: onbInput('providerCount'), type: 'number', inputMode: 'numeric', min: 1, max: 100, value: c.providerCount, onChange: function (ev) { onbClearFieldError('providerCount'); setC({ providerCount: ev.target.value }); } }), onbHint('providerCount')));
 	      rows.push(e('div', { key: 'sv', style: card }, e('div', { style: lbl }, 'Услуги'),
 	        e('div', null, (c.services || []).map(function (s, i) { var setS = function (p) { var arr = c.services.slice(); arr[i] = Object.assign({}, s, p); setC({ services: arr }); };
-	          return e('div', { key: i, style: { display: 'flex', gap: 6, marginBottom: 6 } },
-	            e('input', { style: Object.assign({}, inp, { flex: 2, minWidth: 0 }), placeholder: 'Услуга', value: s.name, onChange: function (ev) { setS({ name: ev.target.value }); } }),
-	            e('input', { style: Object.assign({}, inp, { flex: 1, minWidth: 0 }), placeholder: '₽', inputMode: 'numeric', value: s.price, onChange: function (ev) { setS({ price: ev.target.value }); } }),
-	            e('input', { style: Object.assign({}, inp, { width: 56, minWidth: 0 }), placeholder: 'мин', inputMode: 'numeric', value: s.duration, onChange: function (ev) { setS({ duration: ev.target.value }); } }),
-	            e('div', { onClick: function () { setC({ services: c.services.filter(function (_, x) { return x !== i; }) }); }, style: { width: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.faint, cursor: 'pointer', fontSize: 16 } }, '×'));
+	          var nameField = 'services.' + i + '.name'; var priceField = 'services.' + i + '.price'; var durationField = 'services.' + i + '.duration';
+	          return e('div', { key: i, style: { marginBottom: 8 } },
+	            e('div', { style: { display: 'flex', gap: 6 } },
+	              e('input', { style: onbInput(nameField, { flex: 2, minWidth: 0 }), placeholder: 'Услуга', value: s.name, onChange: function (ev) { onbClearFieldError(nameField); onbClearFieldError('services'); setS({ name: ev.target.value }); } }),
+	              e('input', { style: onbInput(priceField, { flex: 1, minWidth: 0 }), placeholder: '₽', inputMode: 'numeric', value: s.price, onChange: function (ev) { onbClearFieldError(priceField); setS({ price: ev.target.value }); } }),
+	              e('input', { style: onbInput(durationField, { width: 56, minWidth: 0 }), placeholder: 'мин', inputMode: 'numeric', value: s.duration, onChange: function (ev) { onbClearFieldError(durationField); setS({ duration: ev.target.value }); } }),
+	              e('div', { onClick: function () { setC({ services: c.services.filter(function (_, x) { return x !== i; }) }); setOnbFieldErrors({}); setOnbErr(''); }, style: { width: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: onbTone.faint, cursor: 'pointer', fontSize: 16 } }, '×')),
+	            onbHint([nameField, priceField, durationField]));
 	        })),
-	        e('div', { onClick: function () { setC({ services: (c.services || []).concat([{ name: '', price: '', duration: '30' }]) }); }, style: { fontFamily: BODY, fontSize: 12, color: t.accent || t.ink, cursor: 'pointer', marginTop: 2 } }, '+ услуга')));
+	        onbHint('services'),
+	        e('div', { onClick: function () { onbClearFieldError('services'); setC({ services: (c.services || []).concat([{ name: '', price: '', duration: '30' }]) }); }, style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, cursor: 'pointer', marginTop: 2 } }, '+ услуга')));
 	      var wdKeys = Object.keys(c.weekly || {}).sort(function (a, b) { return a - b; });
 	      if (wdKeys.length) rows.push(e('div', { key: 'wk', style: card }, e('div', { style: lbl }, c.scheduleAssumed ? 'График · предположительно — проверьте' : 'График'),
 	        wdKeys.map(function (wd) { var r = c.weekly[wd]; var setR = function (p) { var w = Object.assign({}, c.weekly); w[wd] = Object.assign({}, r, p); setC({ weekly: w }); };
-	          return e('div', { key: wd, style: { display: 'flex', alignItems: 'center', gap: 6, padding: '2px 0' } },
-	            e('div', { onClick: function () { setR({ on: !r.on }); }, style: { width: 34, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: r.on ? (t.accent || t.ink) : t.faint, cursor: 'pointer' } }, WDMAP[wd] || wd),
-	            e('input', { style: Object.assign({}, inp, { width: 64, minWidth: 0, opacity: r.on ? 1 : 0.4 }), value: r.start || '', onChange: function (ev) { setR({ start: ev.target.value }); } }),
-	            e('span', { style: { color: t.faint } }, '–'),
-	            e('input', { style: Object.assign({}, inp, { width: 64, minWidth: 0, opacity: r.on ? 1 : 0.4 }), value: r.end || '', onChange: function (ev) { setR({ end: ev.target.value }); } }));
-	        })));
+	          var startField = 'weekly.' + wd + '.start'; var endField = 'weekly.' + wd + '.end';
+	          return e('div', { key: wd, style: { padding: '2px 0' } },
+	            e('div', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
+	              e('div', { onClick: function () { onbClearFieldError(startField); onbClearFieldError(endField); setR({ on: !r.on }); }, style: { width: 34, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: r.on ? onbTone.ink : onbTone.faint, cursor: 'pointer' } }, WDMAP[wd] || wd),
+	              e('input', { style: onbInput(startField, { width: 64, minWidth: 0, opacity: r.on ? 1 : 0.4 }), value: r.start || '', onChange: function (ev) { onbClearFieldError(startField); setR({ start: ev.target.value }); } }),
+	              e('span', { style: { color: onbTone.faint } }, '–'),
+	              e('input', { style: onbInput(endField, { width: 64, minWidth: 0, opacity: r.on ? 1 : 0.4 }), value: r.end || '', onChange: function (ev) { onbClearFieldError(endField); setR({ end: ev.target.value }); } })),
+	            onbHint([startField, endField]));
+	        })), onbHint('weekly'));
 	      rows.push(e('div', { key: 'ct', style: card }, e('div', { style: lbl }, 'Контакты владельца'),
-	        e('input', { style: Object.assign({}, inp, { marginBottom: 7 }), placeholder: 'E-mail', type: 'email', inputMode: 'email', value: ct.email, onChange: function (ev) { setCt({ email: ev.target.value }); } }),
-	        e('input', { style: Object.assign({}, inp, { marginBottom: 7 }), placeholder: 'Ваше имя', value: ct.name, onChange: function (ev) { setCt({ name: ev.target.value }); } }),
-	        e('input', { style: inp, placeholder: 'Телефон', inputMode: 'tel', value: ct.phone, onChange: function (ev) { setCt({ phone: ev.target.value }); } }),
-	        e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 6, lineHeight: 1.4 } }, 'Телефон — ваш вход в MAYA и восстановление доступа.')));
-	      if (onbErr) rows.push(e('div', { key: 'e', style: { fontFamily: BODY, fontSize: 12, color: '#e0564f', margin: '6px 2px 0', lineHeight: 1.5 } }, onbErr));
-	      rows.push(e('div', { key: 'go', onClick: onbBusy ? undefined : onbConfirmGo, style: { marginTop: 12, textAlign: 'center', padding: '14px', borderRadius: 14, background: t.ink, color: dark ? '#0b0b0c' : '#f4f0eb', fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Создаём…' : 'Создать бизнес'));
-	      rows.push(e('div', { key: 'bk', onClick: function () { setOnbStage('chat'); setOnbErr(''); }, style: { marginTop: 10, textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: t.faint, cursor: 'pointer' } }, '← Вернуться к диалогу'));
-	      return e('div', { style: { marginTop: 6 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: t.ink, margin: '4px 2px 2px' } }, 'Проверьте и подтвердите'), e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, margin: '0 2px 8px', lineHeight: 1.5 } }, 'Всё можно поправить прямо здесь.'), rows);
+	        e('input', { style: onbInput('ownerEmail', { marginBottom: 7 }), placeholder: 'E-mail', type: 'email', inputMode: 'email', value: ct.email, onChange: function (ev) { onbClearFieldError('ownerEmail'); setCt({ email: ev.target.value }); } }),
+	        onbHint('ownerEmail'),
+	        e('input', { style: onbInput('ownerName', { marginTop: 7, marginBottom: 7 }), placeholder: 'Ваше имя', value: ct.name, onChange: function (ev) { onbClearFieldError('ownerName'); setCt({ name: ev.target.value }); } }),
+	        onbHint('ownerName'),
+	        e('input', { style: onbInput('ownerPhone', { marginTop: 7 }), placeholder: '+7 999 000-00-00', inputMode: 'tel', value: ct.phone, onChange: function (ev) { onbClearFieldError('ownerPhone'); setCt({ phone: ev.target.value }); } }),
+	        onbHint('ownerPhone'),
+	        e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, 'Можно ввести 8 999… — MAYA сама приведёт номер к формату +7.')));
+	      if (onbErr) rows.push(e('div', { key: 'e', style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, margin: '6px 2px 0', lineHeight: 1.5 } }, onbErr));
+	      rows.push(e('div', { key: 'go', onClick: onbBusy ? undefined : onbConfirmGo, style: { marginTop: 12, textAlign: 'center', padding: '14px', borderRadius: 14, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Создаём…' : 'Создать бизнес'));
+	      rows.push(e('div', { key: 'bk', onClick: function () { setOnbStage('chat'); setOnbErr(''); setOnbFieldErrors({}); }, style: { marginTop: 10, textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: onbTone.faint, cursor: 'pointer' } }, '← Вернуться к диалогу'));
+	      return e('div', { style: { marginTop: 6 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink, margin: '4px 2px 2px' } }, 'Проверьте и подтвердите'), e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, margin: '0 2px 8px', lineHeight: 1.5 } }, 'Всё можно поправить прямо здесь.'), rows);
 	    }
 	    if (onbStage === 'logo') {
 	      return e('div', { style: card },
-	        e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: t.ink } }, 'Добавьте логотип'),
-	        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, margin: '8px 0 14px', lineHeight: 1.5 } }, 'Логотип появится внутри приложения. По желанию — можно пропустить.'),
-	        onbErr ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: '#e0564f', marginBottom: 10 } }, onbErr) : null,
+	        e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink } }, 'Добавьте логотип'),
+	        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: onbTone.dim, margin: '8px 0 14px', lineHeight: 1.5 } }, 'Логотип появится внутри приложения. По желанию — можно пропустить.'),
+	        onbErr ? e('div', { style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, marginBottom: 10 } }, onbErr) : null,
 	        e('input', { ref: onbFileRef, type: 'file', accept: 'image/*', style: { display: 'none' }, onChange: function (ev) { var f = ev.target.files && ev.target.files[0]; if (f) { setOnbLogoName(f.name); onbLogoUpload(f); } } }),
 	        e('div', { style: { display: 'flex', gap: 8 } },
-	          e('div', { onClick: onbBusy ? undefined : function () { try { onbFileRef.current && onbFileRef.current.click(); } catch (e2) {} }, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: t.ink, cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Загружаем…' : 'Выбрать логотип'),
-	          e('div', { onClick: onbBusy ? undefined : onbSkipLogo, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, background: t.ink, color: dark ? '#0b0b0c' : '#f4f0eb', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, 'Пропустить')));
+	          e('div', { onClick: onbBusy ? undefined : function () { try { onbFileRef.current && onbFileRef.current.click(); } catch (e2) {} }, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, border: '1px solid ' + onbTone.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: onbTone.ink, cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Загружаем…' : 'Выбрать логотип'),
+	          e('div', { onClick: onbBusy ? undefined : onbSkipLogo, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, 'Пропустить')));
 	    }
 	    if (onbStage === 'crm') {
 	      var cat = onbProviders; var cm = onbCrmMsg;
@@ -10918,12 +11053,12 @@ function AChat() {
 	      var selConnectable = onbProvOk(cat, onbCrm.provider);
 	      var visible = (cat || []).filter(function (p) { return p.provider !== 'mock'; }); // mock — превью, не внешняя CRM
 	      var chips = e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 } },
-	        cat === null ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.faint } }, 'Загружаем список CRM…')
+	        cat === null ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.faint } }, 'Загружаем список CRM…')
 	          : visible.map(function (p) {
 	            var real = p.connectable && p.provider !== 'mock'; // planned → недоступен
 	            var sel = onbCrm.provider === p.provider && real;
 	            return e('div', { key: p.provider, onClick: real ? function () { setOnbCrm(function (x) { return Object.assign({}, x, { provider: p.provider }); }); setOnbCrmMsg(null); } : undefined,
-	              style: { fontFamily: BODY, fontSize: 12, padding: '7px 12px', borderRadius: 999, border: '1px solid ' + (sel ? t.ink : t.line), color: real ? (sel ? t.ink : t.dim) : t.faint, cursor: real ? 'pointer' : 'default', opacity: real ? 1 : 0.5 } },
+	              style: { fontFamily: BODY, fontSize: 12, padding: '7px 12px', borderRadius: 999, border: '1px solid ' + (sel ? onbTone.ink : onbTone.line), color: real ? (sel ? onbTone.ink : onbTone.dim) : onbTone.faint, cursor: real ? 'pointer' : 'default', opacity: real ? 1 : 0.5 } },
 	              p.name + (real ? '' : ' · Скоро'));
 	          }));
 	      var form;
@@ -10931,17 +11066,17 @@ function AChat() {
 	      else if (selConnectable) form = e(React.Fragment, null,
 	        e('input', { style: Object.assign({}, inp, { marginBottom: 8 }), type: 'password', autoComplete: 'off', placeholder: 'API-токен CRM', value: onbCrm.token, onChange: function (ev) { setOnbCrm(function (x) { return Object.assign({}, x, { token: ev.target.value }); }); } }),
 	        e('input', { style: inp, inputMode: 'numeric', placeholder: 'ID компании в CRM', value: onbCrm.company, onChange: function (ev) { setOnbCrm(function (x) { return Object.assign({}, x, { company: ev.target.value }); }); } }),
-	        (selCap && selCap.limitations && selCap.limitations.length) ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 7, lineHeight: 1.4 } }, selCap.limitations[0]) : null);
-	      else form = e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.5, padding: '4px 0' } }, (selCap ? (selCap.name + ' пока недоступна. ') : '') + 'Выберите YClients или Altegio — или ведите запись во Внутреннем календаре MAYA без CRM («Подключить позже»).');
+	        (selCap && selCap.limitations && selCap.limitations.length) ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 7, lineHeight: 1.4 } }, selCap.limitations[0]) : null);
+	      else form = e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, lineHeight: 1.5, padding: '4px 0' } }, (selCap ? (selCap.name + ' пока недоступна. ') : '') + 'Выберите YClients или Altegio — или ведите запись во Внутреннем календаре MAYA без CRM («Подключить позже»).');
 	      return e('div', { style: card },
-	        e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: t.ink } }, 'Подключите CRM'),
-	        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, margin: '8px 0 14px', lineHeight: 1.5 } }, 'Система записи вашего бизнеса. Ключи хранятся зашифрованно и не попадают в диалог. Без CRM можно вести запись во Внутреннем календаре MAYA.'),
+	        e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink } }, 'Подключите CRM'),
+	        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: onbTone.dim, margin: '8px 0 14px', lineHeight: 1.5 } }, 'Система записи вашего бизнеса. Ключи хранятся зашифрованно и не попадают в диалог. Без CRM можно вести запись во Внутреннем календаре MAYA.'),
 	        chips,
 	        form,
-	        cm ? e('div', { style: { fontFamily: BODY, fontSize: 12, marginTop: 10, lineHeight: 1.5, color: cm.kind === 'ok' ? (t.accent || t.ink) : (cm.kind === 'err' ? '#e0564f' : t.dim) } }, cm.text) : null,
+	        cm ? e('div', { style: { fontFamily: BODY, fontSize: 12, fontWeight: cm.kind === 'err' ? 600 : 400, marginTop: 10, lineHeight: 1.5, color: cm.kind === 'info' ? onbTone.dim : onbTone.ink } }, cm.text) : null,
 	        e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
-	          selConnectable ? e('div', { onClick: onbCrmBusy ? undefined : onbCrmSaveTest, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, background: t.ink, color: dark ? '#0b0b0c' : '#f4f0eb', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: onbCrmBusy ? 'default' : 'pointer', opacity: onbCrmBusy ? 0.6 : 1 } }, onbCrmBusy ? 'Проверяем…' : 'Сохранить и проверить') : null,
-	          e('div', { onClick: onbCrmBusy ? undefined : onbCrmLater, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: t.ink, cursor: onbCrmBusy ? 'default' : 'pointer' } }, 'Подключить позже')));
+	          selConnectable ? e('div', { onClick: onbCrmBusy ? undefined : onbCrmSaveTest, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: onbCrmBusy ? 'default' : 'pointer', opacity: onbCrmBusy ? 0.6 : 1 } }, onbCrmBusy ? 'Проверяем…' : 'Сохранить и проверить') : null,
+	          e('div', { onClick: onbCrmBusy ? undefined : onbCrmLater, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, border: '1px solid ' + onbTone.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: onbTone.ink, cursor: onbCrmBusy ? 'default' : 'pointer' } }, 'Подключить позже')));
 	    }
 	    return null;
 	  }
