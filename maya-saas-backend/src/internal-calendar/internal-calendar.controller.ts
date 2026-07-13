@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -18,6 +19,7 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
+import { ListCalendarJournalDto } from './dto/list-calendar-journal.dto';
 import { ReplaceWeeklyAvailabilityDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
 import { UpdateInternalServiceDto } from './dto/update-internal-service.dto';
@@ -44,6 +46,17 @@ export class InternalCalendarController {
   @ApiOperation({ summary: 'Read the Maya-managed calendar setup' })
   getSetup(@CurrentUser() user: AuthenticatedUser) {
     return this.internalCalendarService.getSetup(user.tenantId!);
+  }
+
+  @Get('journal')
+  @ApiOperation({
+    summary: 'Read the tenant-scoped operational appointment journal',
+  })
+  getJournal(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListCalendarJournalDto,
+  ) {
+    return this.internalCalendarService.getJournal(user.tenantId!, query);
   }
 
   @Post('services')
