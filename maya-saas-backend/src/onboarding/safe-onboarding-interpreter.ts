@@ -55,6 +55,13 @@ const NUMBER_WORDS: Record<string, number> = {
 const AMBIGUOUS_SHORT_REPLY =
   /^(?:ага|да|нет|неа|ок|окей|понял[а]?|ясно|хз|незнаю|не\s+знаю|может|наверное|дальше|готово|го|погнали)$/iu;
 
+const NO_FORMAL_BUSINESS_NAME_PATTERN =
+  /(?:никак\s+(?:не\s+)?называ(?:ется|юсь|емся)?|(?:отдельн(?:ого|ое)\s+)?названи(?:я|е)\s+(?:нет|не\s+нужно)|нет\s+(?:отдельного\s+)?названия|без\s+(?:отдельного\s+)?названия|работаю\s+(?:просто\s+)?под\s+(?:своим\s+)?именем|(?:клиент[а-яё]*|гости|все)\s+(?:меня\s+)?знают(?:\s+меня)?\s+как)/iu;
+
+export function hasNoFormalBusinessNameSignal(value: string): boolean {
+  return NO_FORMAL_BUSINESS_NAME_PATTERN.test(value);
+}
+
 @Injectable()
 export class SafeOnboardingInterpreter {
   interpret(
@@ -75,6 +82,10 @@ export class SafeOnboardingInterpreter {
         !this.hasServiceFacts(normalized) &&
         !this.looksLikeServiceList(normalized),
     );
+    const needsPersonalDisplayName =
+      expectsBusinessName &&
+      hasNoFormalBusinessNameSignal(normalized) &&
+      !extractedBusinessName;
     const templateId = preferredTemplateId
       ? getBusinessTemplate(preferredTemplateId).id
       : this.detectTemplate(normalized, previous?.templateId);
@@ -112,7 +123,8 @@ export class SafeOnboardingInterpreter {
     const missingFields = this.getMissingFields(blueprint);
     const madeProgress = this.hasProgress(previous, blueprint);
     const needsClarification =
-      AMBIGUOUS_SHORT_REPLY.test(normalized) && !madeProgress;
+      needsPersonalDisplayName ||
+      (AMBIGUOUS_SHORT_REPLY.test(normalized) && !madeProgress);
     const confidence = needsClarification
       ? 0.3
       : madeProgress
@@ -128,10 +140,15 @@ export class SafeOnboardingInterpreter {
         blueprint,
         missingFields,
         needsClarification,
+        needsPersonalDisplayName,
       ),
       confidence,
       needsClarification,
-      quickReplies: this.buildQuickReplies(blueprint, missingFields),
+      quickReplies: this.buildQuickReplies(
+        blueprint,
+        missingFields,
+        needsPersonalDisplayName,
+      ),
       source: 'safe_fallback',
     };
   }
@@ -204,6 +221,14 @@ export class SafeOnboardingInterpreter {
       }
     }
 
+    if (hasNoFormalBusinessNameSignal(message)) {
+      const personalName = this.extractPersonalBrandName(message);
+      if (personalName) {
+        return personalName;
+      }
+      return null;
+    }
+
     if (allowStandalone) {
       const candidate = message.split(/[,.!?;\n]+/u)[0]?.trim() ?? '';
       if (
@@ -217,6 +242,24 @@ export class SafeOnboardingInterpreter {
         !AMBIGUOUS_SHORT_REPLY.test(candidate)
       ) {
         return this.cleanBusinessName(candidate);
+      }
+    }
+
+    return null;
+  }
+
+  private extractPersonalBrandName(message: string): string | null {
+    const patterns = [
+      /(?:меня\s+зовут|зовут\s+меня)\s+[«"']?([A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё'-]{1,39})/iu,
+      /(?:клиент[а-яё]*|гости|все)\s+(?:меня\s+)?знают(?:\s+меня)?\s+как\s+[«"']?([A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё'-]{1,39})/iu,
+      /(?:работаю|принимаю)\s+под\s+(?:своим\s+)?именем\s+[«"']?([A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё'-]{1,39})/iu,
+    ];
+
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match?.[1]) {
+        const cleaned = this.cleanBusinessName(match[1]);
+        return `${cleaned.charAt(0).toLocaleUpperCase('ru-RU')}${cleaned.slice(1)}`;
       }
     }
 
@@ -253,7 +296,7 @@ export class SafeOnboardingInterpreter {
     }
 
     if (
-      /(работаю один|работаю одна|я один|я одна|без сотрудников|сам(?:а)? на себя|я соло|работаю соло|в одного|один справляюсь)/iu.test(
+      /(работаю один|работаю одна|я один|я одна|без сотрудников|сам(?:а)? на себя|я соло|работаю соло|в одного|один справляюсь|снимаю\s+(?:одно\s+)?кресло|арендую\s+(?:одно\s+)?кресло|работаю\s+на\s+арендованном\s+кресле)/iu.test(
         message,
       )
     ) {
@@ -368,8 +411,12 @@ export class SafeOnboardingInterpreter {
         name,
       ) ||
       AMBIGUOUS_SHORT_REPLY.test(name) ||
+      hasNoFormalBusinessNameSignal(name) ||
+      /^(?:меня\s+зовут|зовут\s+меня|(?:клиент[а-яё]*|гости|все)\s+(?:меня\s+)?знают)/iu.test(
+        name,
+      ) ||
       (!hasFacts &&
-        /^(?:я|мы|у\s+меня|у\s+нас|работаю|работаем|занимаюсь|занимаемся)\b/iu.test(
+        /^(?:я|мы|у\s+меня|у\s+нас|работаю|работаем|занимаюсь|занимаемся)(?=\s|$)/iu.test(
           name,
         ))
     ) {
@@ -498,6 +545,7 @@ export class SafeOnboardingInterpreter {
     blueprint: AiOnboardingBlueprint,
     missing: AiOnboardingMissingField[],
     needsClarification = false,
+    needsPersonalDisplayName = false,
   ): string {
     if (missing.length === 0) {
       return `Я собрала основу для «${blueprint.businessName}». Проверьте услуги, команду и расписание на итоговой карточке.`;
@@ -505,7 +553,7 @@ export class SafeOnboardingInterpreter {
 
     const questions: Record<AiOnboardingMissingField, string> = {
       business_name:
-        'Как называется ваш бизнес? Можно ответить просто названием.',
+        'Как вас или ваш бизнес знают клиенты? Можно написать имя или название.',
       provider_count: 'Сколько человек будет принимать клиентов, включая вас?',
       services:
         'Какие услуги вы оказываете? Можно написать как говорите, цены и время необязательны.',
@@ -524,13 +572,19 @@ export class SafeOnboardingInterpreter {
       : saved.length > 0
         ? `Сохранила ${saved.join(', ')}.`
         : 'Поняла основу.';
+    if (needsPersonalDisplayName) {
+      return 'Поняла, отдельного названия нет. Как вас называют клиенты? Можно просто написать имя.';
+    }
     return `${prefix} ${questions[missing[0]]}`;
   }
 
   private buildQuickReplies(
     blueprint: AiOnboardingBlueprint,
     missing: AiOnboardingMissingField[],
+    needsPersonalDisplayName = false,
   ): AiOnboardingQuickReply[] {
+    if (needsPersonalDisplayName) return [];
+
     const next = missing[0];
     if (next === 'provider_count') {
       return [
@@ -553,7 +607,10 @@ export class SafeOnboardingInterpreter {
     }
     if (next === 'business_name') {
       return [
-        { label: 'Напишу название', message: 'Сейчас напишу название бизнеса' },
+        {
+          label: 'Нет отдельного названия',
+          message: 'У меня нет отдельного названия',
+        },
         {
           label: 'Сначала услуги',
           message: 'Сначала расскажу об услугах',

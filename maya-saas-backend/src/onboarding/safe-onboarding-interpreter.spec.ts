@@ -174,6 +174,58 @@ describe('SafeOnboardingInterpreter', () => {
     );
   });
 
+  it('understands a chair-renting hairdresser who works under their own name', () => {
+    const first = interpreter.interpret(
+      'я работаю парикмахером! снимаю кресло!',
+    );
+
+    expect(first.blueprint).toMatchObject({
+      templateId: 'barbershop',
+      providerCount: 1,
+      businessName: null,
+    });
+    expect(first.missingFields).toEqual(['business_name', 'services']);
+    expect(first.assistantMessage).toContain('Как вас или ваш бизнес знают');
+
+    const named = interpreter.interpret(
+      'да никак не называется меня зовут Артем и мои клиенты знают меня как Артема',
+      first.blueprint,
+    );
+
+    expect(named.blueprint).toMatchObject({
+      templateId: 'barbershop',
+      providerCount: 1,
+      businessName: 'Артем',
+    });
+    expect(named.missingFields).toEqual(['services']);
+    expect(named.assistantMessage).not.toContain('Как называется ваш бизнес');
+    expect(named.quickReplies).toContainEqual({
+      label: 'Взять из шаблона',
+      message: 'Используй готовые услуги из шаблона',
+    });
+  });
+
+  it('asks for a client-facing name after a no-name reply without looping', () => {
+    const first = interpreter.interpret(
+      'Я парикмахер, снимаю кресло и работаю без CRM.',
+    );
+    const noName = interpreter.interpret(
+      'У меня нет отдельного названия',
+      first.blueprint,
+    );
+
+    expect(noName.blueprint.businessName).toBeNull();
+    expect(noName.needsClarification).toBe(true);
+    expect(noName.assistantMessage).toBe(
+      'Поняла, отдельного названия нет. Как вас называют клиенты? Можно просто написать имя.',
+    );
+    expect(noName.quickReplies).toEqual([]);
+
+    const named = interpreter.interpret('артем', noName.blueprint);
+    expect(named.blueprint.businessName).toBe('артем');
+    expect(named.missingFields).toEqual(['services']);
+  });
+
   it.each([
     'заполни сама',
     'как обычно',

@@ -15,7 +15,10 @@ import {
   getBusinessTemplate,
   listBusinessTemplates,
 } from './business-templates';
-import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
+import {
+  hasNoFormalBusinessNameSignal,
+  SafeOnboardingInterpreter,
+} from './safe-onboarding-interpreter';
 
 const CONFIDENCE_THRESHOLD = 0.72;
 const DEFAULT_TIMEOUT_MS = 12_000;
@@ -85,6 +88,11 @@ export class ConversationalOnboardingInterpreter {
     // Template selection is a deterministic product action. Do not let a
     // probabilistic model drop it and ask the same services question again.
     if (this.didApplyTemplateServices(safe, previous)) {
+      return safe;
+    }
+    // A personal name is deliberately parsed locally. It may be used as the
+    // public business label, but it must not be sent to the language model.
+    if (this.didResolvePersonalBrandName(message, safe, previous)) {
       return safe;
     }
     if (!this.isOpenAiEnabled()) {
@@ -371,6 +379,18 @@ export class ConversationalOnboardingInterpreter {
         actual.durationMinutes === service.durationMinutes
       );
     });
+  }
+
+  private didResolvePersonalBrandName(
+    message: string,
+    safe: AiOnboardingInterpretation,
+    previous?: AiOnboardingBlueprint,
+  ): boolean {
+    return (
+      hasNoFormalBusinessNameSignal(message) &&
+      Boolean(safe.blueprint.businessName) &&
+      safe.blueprint.businessName !== previous?.businessName
+    );
   }
 
   private resolveTimeoutMs(): number {
