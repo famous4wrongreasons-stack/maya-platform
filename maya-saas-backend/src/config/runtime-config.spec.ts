@@ -18,6 +18,8 @@ describe('runtime config validation', () => {
     PHONE_AUTH_FIXED_CODE: '',
     SMSRU_API_ID: 'smsru-api-id',
     SMSRU_TEST: 'false',
+    EMAIL_LOGIN_ENABLED: 'false',
+    EMAIL_AUTH_DEBUG: 'false',
     YANDEX_LOGIN_ENABLED: 'false',
     TELEGRAM_LOGIN_ENABLED: 'false',
   });
@@ -102,6 +104,45 @@ describe('runtime config validation', () => {
     );
   });
 
+  it('requires independent secrets and SMTP when email login is enabled', () => {
+    const config = productionConfig();
+    config.EMAIL_LOGIN_ENABLED = 'true';
+    config.EMAIL_AUTH_PROVIDER = 'smtp';
+    config.EMAIL_AUTH_SECRET = secret('email');
+    config.EMAIL_AUTH_DEBUG = 'false';
+    config.EMAIL_AUTH_FIXED_CODE = '';
+    config.EMAIL_AUTH_FROM = 'MAYA <no-reply@example.test>';
+    config.SMTP_HOST = 'smtp.example.test';
+    config.SMTP_PORT = '587';
+    config.SMTP_SECURE = 'false';
+    config.SMTP_USER = 'smtp-user';
+    config.SMTP_PASSWORD = secret('smtp-password');
+
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      EMAIL_LOGIN_ENABLED: 'true',
+      EMAIL_AUTH_PROVIDER: 'smtp',
+    });
+
+    config.EMAIL_AUTH_PROVIDER = 'debug';
+    config.EMAIL_AUTH_DEBUG = 'true';
+    config.EMAIL_AUTH_FIXED_CODE = '123456';
+    delete config.SMTP_PASSWORD;
+    const message = validationMessage(config);
+
+    expect(message).toContain(
+      'EMAIL_AUTH_PROVIDER must be auto or smtp in production',
+    );
+    expect(message).toContain(
+      'EMAIL_AUTH_DEBUG cannot be enabled in production',
+    );
+    expect(message).toContain(
+      'EMAIL_AUTH_FIXED_CODE must be empty in production',
+    );
+    expect(message).toContain(
+      'SMTP_PASSWORD is required when its provider is enabled',
+    );
+  });
+
   it('rejects unsafe proxy, CORS and numeric settings', () => {
     const config = productionConfig();
     config.AUTH_TRUST_PROXY = '*';
@@ -109,6 +150,8 @@ describe('runtime config validation', () => {
     config.JWT_ACCESS_TTL_SECONDS = '30';
     config.PHONE_AUTH_CODE_TTL = '300';
     config.PHONE_AUTH_RESEND_COOLDOWN_SECONDS = '600';
+    config.EMAIL_AUTH_CODE_TTL = '300';
+    config.EMAIL_AUTH_RESEND_COOLDOWN_SECONDS = '600';
     const message = validationMessage(config);
 
     expect(message).toContain('CORS origins must be explicit');
@@ -118,6 +161,9 @@ describe('runtime config validation', () => {
     );
     expect(message).toContain(
       'PHONE_AUTH_RESEND_COOLDOWN_SECONDS cannot exceed PHONE_AUTH_CODE_TTL',
+    );
+    expect(message).toContain(
+      'EMAIL_AUTH_RESEND_COOLDOWN_SECONDS cannot exceed EMAIL_AUTH_CODE_TTL',
     );
   });
 });

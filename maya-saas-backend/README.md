@@ -176,6 +176,14 @@ Phone auth delivery modes:
 - `PHONE_AUTH_PROVIDER=smsru`: always uses SMS.ru and fails if creds are missing
 - `PHONE_AUTH_DEBUG=true`: emergency override that forces debug delivery in any env
 
+Email code login for existing tenant users:
+
+- `EMAIL_LOGIN_ENABLED=true`: enables `POST /api/auth/email/start` and `/verify`
+- `EMAIL_AUTH_PROVIDER=auto`: local/test uses debug unless SMTP is configured; production requires SMTP
+- `EMAIL_AUTH_PROVIDER=smtp`: sends the one-time code through `SMTP_HOST`/`SMTP_PORT`
+- `EMAIL_AUTH_DEBUG=true`: returns `debug_code` for local testing and is rejected in production
+- Email verification never creates a user; it only opens a session for an existing tenant account
+
 Social login toggles:
 
 - `YANDEX_LOGIN_ENABLED=true`: enables `POST /api/auth/oauth/yandex/start` and `/complete`

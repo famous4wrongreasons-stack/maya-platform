@@ -15,7 +15,10 @@ const PRODUCTION_SECRET_NAMES = [
 ] as const;
 
 const BOOLEAN_NAMES = [
+  'EMAIL_LOGIN_ENABLED',
+  'EMAIL_AUTH_DEBUG',
   'PHONE_AUTH_DEBUG',
+  'SMTP_SECURE',
   'SMSRU_TEST',
   'SELF_SERVE_TRIAL_SIGNUP',
   'SWAGGER_ENABLED',
@@ -30,6 +33,11 @@ const INTEGER_RULES = [
   ['PHONE_AUTH_CODE_TTL', 60, 900],
   ['PHONE_AUTH_RESEND_COOLDOWN_SECONDS', 1, 900],
   ['PHONE_AUTH_MAX_ATTEMPTS', 1, 10],
+  ['EMAIL_AUTH_CODE_TTL', 60, 900],
+  ['EMAIL_AUTH_RESEND_COOLDOWN_SECONDS', 1, 900],
+  ['EMAIL_AUTH_MAX_ATTEMPTS', 1, 10],
+  ['SMTP_PORT', 1, 65_535],
+  ['SMTP_TIMEOUT_MS', 1_000, 60_000],
   ['AUTH_FLOW_STATE_TTL_SECONDS', 60, 1_800],
   ['OAUTH_PROVIDER_TIMEOUT_MS', 1_000, 60_000],
   ['SMSRU_TIMEOUT_MS', 1_000, 60_000],
@@ -55,6 +63,7 @@ export function validateRuntimeConfig(
   }
 
   validatePhoneAuthTiming(config, issues);
+  validateEmailAuthTiming(config, issues);
 
   validateConfiguredPolicies(config, environment, issues);
 
@@ -100,7 +109,8 @@ function validateProductionConfig(
   issues: string[],
 ): void {
   validateDatabaseUrl(config.DATABASE_URL, issues);
-  validateProductionSecrets(config, issues);
+  const emailLoginEnabled = booleanValue(config.EMAIL_LOGIN_ENABLED);
+  validateProductionSecrets(config, issues, emailLoginEnabled);
 
   if (!stringValue(config.CORS_ALLOWED_ORIGINS)) {
     issues.push('CORS_ALLOWED_ORIGINS is required in production');
@@ -126,6 +136,23 @@ function validateProductionConfig(
 
   if (smsRuTest) {
     issues.push('SMSRU_TEST cannot be enabled in production');
+  }
+
+  if (emailLoginEnabled) {
+    const emailProvider = stringValue(config.EMAIL_AUTH_PROVIDER).toLowerCase();
+    if (!['auto', 'smtp'].includes(emailProvider)) {
+      issues.push('EMAIL_AUTH_PROVIDER must be auto or smtp in production');
+    }
+    if (booleanValue(config.EMAIL_AUTH_DEBUG)) {
+      issues.push('EMAIL_AUTH_DEBUG cannot be enabled in production');
+    }
+    if (stringValue(config.EMAIL_AUTH_FIXED_CODE)) {
+      issues.push('EMAIL_AUTH_FIXED_CODE must be empty in production');
+    }
+    requireSetting(config, 'SMTP_HOST', issues);
+    requireSetting(config, 'SMTP_USER', issues);
+    requireSetting(config, 'SMTP_PASSWORD', issues);
+    requireSetting(config, 'EMAIL_AUTH_FROM', issues);
   }
 
   const smsRuApiId = stringValue(config.SMSRU_API_ID);
@@ -182,10 +209,14 @@ function validateDatabaseUrl(value: unknown, issues: string[]): void {
 function validateProductionSecrets(
   config: Record<string, unknown>,
   issues: string[],
+  emailLoginEnabled: boolean,
 ): void {
   const seen = new Map<string, string>();
+  const names: readonly string[] = emailLoginEnabled
+    ? [...PRODUCTION_SECRET_NAMES, 'EMAIL_AUTH_SECRET']
+    : PRODUCTION_SECRET_NAMES;
 
-  for (const name of PRODUCTION_SECRET_NAMES) {
+  for (const name of names) {
     const value = stringValue(config[name]);
 
     if (!value) {
@@ -250,6 +281,23 @@ function validatePhoneAuthTiming(
   if (codeTtl !== null && cooldown !== null && cooldown > codeTtl) {
     issues.push(
       'PHONE_AUTH_RESEND_COOLDOWN_SECONDS cannot exceed PHONE_AUTH_CODE_TTL',
+    );
+  }
+}
+
+function validateEmailAuthTiming(
+  config: Record<string, unknown>,
+  issues: string[],
+): void {
+  const codeTtl = configuredInteger(config.EMAIL_AUTH_CODE_TTL, 300);
+  const cooldown = configuredInteger(
+    config.EMAIL_AUTH_RESEND_COOLDOWN_SECONDS,
+    60,
+  );
+
+  if (codeTtl !== null && cooldown !== null && cooldown > codeTtl) {
+    issues.push(
+      'EMAIL_AUTH_RESEND_COOLDOWN_SECONDS cannot exceed EMAIL_AUTH_CODE_TTL',
     );
   }
 }

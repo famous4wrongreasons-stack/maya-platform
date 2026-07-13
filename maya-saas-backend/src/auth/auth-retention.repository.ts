@@ -10,6 +10,7 @@ export interface AuthRetentionCutoffs {
 }
 
 export interface AuthRetentionCounts {
+  emailChallenges: number;
   oauthStates: number;
   phoneChallenges: number;
   rateLimitBuckets: number;
@@ -39,6 +40,7 @@ type IdRow = { id: string };
 type LockRow = { acquired: boolean };
 
 const EMPTY_COUNTS: AuthRetentionCounts = {
+  emailChallenges: 0,
   oauthStates: 0,
   phoneChallenges: 0,
   rateLimitBuckets: 0,
@@ -111,6 +113,9 @@ export class AuthRetentionRepository {
     const phoneChallenges = await transaction.phoneAuthCode.count({
       where: this.phoneChallengeEligibility(cutoffs.authChallengeBefore),
     });
+    const emailChallenges = await transaction.emailAuthCode.count({
+      where: this.emailChallengeEligibility(cutoffs.authChallengeBefore),
+    });
     const oauthStates = await transaction.authFlowState.count({
       where: this.oauthStateEligibility(cutoffs.authChallengeBefore),
     });
@@ -122,6 +127,7 @@ export class AuthRetentionRepository {
       sessions,
       refreshTokens,
       phoneChallenges,
+      emailChallenges,
       oauthStates,
       rateLimitBuckets,
     };
@@ -149,6 +155,11 @@ export class AuthRetentionRepository {
       cutoffs.authChallengeBefore,
       batchSize,
     );
+    const emailChallenges = await this.deleteEmailChallenges(
+      transaction,
+      cutoffs.authChallengeBefore,
+      batchSize,
+    );
     const oauthStates = await this.deleteOauthStates(
       transaction,
       cutoffs.authChallengeBefore,
@@ -164,6 +175,7 @@ export class AuthRetentionRepository {
       sessions,
       refreshTokens,
       phoneChallenges,
+      emailChallenges,
       oauthStates,
       rateLimitBuckets,
     };
@@ -257,6 +269,31 @@ export class AuthRetentionRepository {
     return result.count;
   }
 
+  private async deleteEmailChallenges(
+    transaction: Prisma.TransactionClient,
+    cutoff: Date,
+    batchSize: number,
+  ): Promise<number> {
+    const ids = await transaction.$queryRaw<IdRow[]>(Prisma.sql`
+      SELECT "id"
+      FROM "EmailAuthCode"
+      WHERE
+        "expiresAt" < ${cutoff}
+        OR ("consumedAt" IS NOT NULL AND "consumedAt" < ${cutoff})
+      ORDER BY "expiresAt", "id"
+      FOR UPDATE SKIP LOCKED
+      LIMIT ${batchSize}
+    `);
+
+    if (ids.length === 0) return 0;
+
+    const result = await transaction.emailAuthCode.deleteMany({
+      where: { id: { in: ids.map((row) => row.id) } },
+    });
+
+    return result.count;
+  }
+
   private async deleteRateLimitBuckets(
     transaction: Prisma.TransactionClient,
     cutoff: Date,
@@ -296,6 +333,14 @@ export class AuthRetentionRepository {
     };
   }
 
+  private emailChallengeEligibility(
+    cutoff: Date,
+  ): Prisma.EmailAuthCodeWhereInput {
+    return {
+      OR: [{ expiresAt: { lt: cutoff } }, { consumedAt: { lt: cutoff } }],
+    };
+  }
+
   private oauthStateEligibility(cutoff: Date): Prisma.AuthFlowStateWhereInput {
     return {
       OR: [{ expiresAt: { lt: cutoff } }, { consumedAt: { lt: cutoff } }],
@@ -328,6 +373,7 @@ export class AuthRetentionRepository {
     return (
       eligible.sessions > batchSize ||
       eligible.phoneChallenges > batchSize ||
+      eligible.emailChallenges > batchSize ||
       eligible.oauthStates > batchSize ||
       eligible.rateLimitBuckets > batchSize
     );
@@ -340,6 +386,7 @@ export class AuthRetentionRepository {
     return (
       eligible.sessions > deleted.sessions ||
       eligible.phoneChallenges > deleted.phoneChallenges ||
+      eligible.emailChallenges > deleted.emailChallenges ||
       eligible.oauthStates > deleted.oauthStates ||
       eligible.rateLimitBuckets > deleted.rateLimitBuckets
     );

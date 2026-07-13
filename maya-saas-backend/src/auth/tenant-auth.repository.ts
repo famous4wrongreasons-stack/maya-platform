@@ -110,6 +110,101 @@ export class TenantAuthRepository {
     return result.count === 1;
   }
 
+  upsertEmailChallenge(params: {
+    email: string;
+    codeHash: string;
+    expiresAt: Date;
+  }) {
+    const tenantId = this.tenantContext.requireTenantId();
+
+    return this.prisma.emailAuthCode.upsert({
+      where: {
+        tenantId_email: {
+          tenantId,
+          email: params.email,
+        },
+      },
+      update: {
+        codeHash: params.codeHash,
+        attempts: 0,
+        expiresAt: params.expiresAt,
+        consumedAt: null,
+      },
+      create: {
+        tenantId,
+        email: params.email,
+        codeHash: params.codeHash,
+        expiresAt: params.expiresAt,
+      },
+    });
+  }
+
+  findEmailChallenge(email: string) {
+    const tenantId = this.tenantContext.requireTenantId();
+
+    return this.prisma.emailAuthCode.findUnique({
+      where: {
+        tenantId_email: {
+          tenantId,
+          email,
+        },
+      },
+    });
+  }
+
+  async recordInvalidEmailAttempt(
+    id: string,
+    codeHash: string,
+    attemptedAt: Date,
+    maxAttempts: number,
+  ) {
+    const tenantId = this.tenantContext.requireTenantId();
+
+    return this.prisma.$transaction(async (transaction) => {
+      const result = await transaction.emailAuthCode.updateMany({
+        where: {
+          id,
+          tenantId,
+          codeHash,
+          consumedAt: null,
+          expiresAt: { gt: attemptedAt },
+          attempts: { lt: maxAttempts },
+        },
+        data: { attempts: { increment: 1 } },
+      });
+
+      if (result.count !== 1) return null;
+
+      const challenge = await transaction.emailAuthCode.findUnique({
+        where: {
+          id_tenantId: {
+            id,
+            tenantId,
+          },
+        },
+        select: { attempts: true },
+      });
+
+      return challenge?.attempts ?? null;
+    });
+  }
+
+  async claimEmailChallenge(id: string, codeHash: string, consumedAt: Date) {
+    const tenantId = this.tenantContext.requireTenantId();
+    const result = await this.prisma.emailAuthCode.updateMany({
+      where: {
+        id,
+        tenantId,
+        codeHash,
+        consumedAt: null,
+        expiresAt: { gt: consumedAt },
+      },
+      data: { consumedAt },
+    });
+
+    return result.count === 1;
+  }
+
   createFlowState(params: {
     provider: string;
     state: string;

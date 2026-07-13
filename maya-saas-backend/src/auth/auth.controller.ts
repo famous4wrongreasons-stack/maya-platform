@@ -21,9 +21,12 @@ import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshSessionDto } from './dto/refresh-session.dto';
 import { RegisterDto } from './dto/register.dto';
+import { StartEmailAuthDto } from './dto/start-email-auth.dto';
 import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
+import { VerifyEmailAuthDto } from './dto/verify-email-auth.dto';
 import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
+import { EmailAuthService } from './email-auth.service';
 import { SocialAuthService } from './social-auth.service';
 
 @ApiTags('auth')
@@ -31,6 +34,7 @@ import { SocialAuthService } from './social-auth.service';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly emailAuthService: EmailAuthService,
     private readonly socialAuthService: SocialAuthService,
     private readonly sessionService: AuthSessionService,
   ) {}
@@ -68,6 +72,27 @@ export class AuthController {
   })
   verifyPhoneAuth(@Body() dto: VerifyPhoneAuthDto, @Req() request: Request) {
     return this.authService.verifyPhoneAuth(
+      dto,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Public()
+  @Post('email/start')
+  @ApiOperation({
+    summary: 'Send a one-time email code to an existing tenant user',
+  })
+  startEmailAuth(@Body() dto: StartEmailAuthDto, @Req() request: Request) {
+    return this.emailAuthService.start(dto, resolveAuthClientMetadata(request));
+  }
+
+  @Public()
+  @Post('email/verify')
+  @ApiOperation({
+    summary: 'Verify an email code and return a tenant-scoped JWT',
+  })
+  verifyEmailAuth(@Body() dto: VerifyEmailAuthDto, @Req() request: Request) {
+    return this.emailAuthService.verify(
       dto,
       resolveAuthClientMetadata(request),
     );

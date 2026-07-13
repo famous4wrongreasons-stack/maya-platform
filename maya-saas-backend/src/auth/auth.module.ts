@@ -17,6 +17,8 @@ import { AuthSessionRepository } from './auth-session.repository';
 import { AuthSessionService } from './auth-session.service';
 import { AuthSessionSystemGateway } from './auth-session-system.gateway';
 import { AuthService } from './auth.service';
+import { EmailAuthDeliveryService } from './email-auth-delivery.service';
+import { EmailAuthService } from './email-auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
 import { SocialAuthService } from './social-auth.service';
@@ -58,6 +60,8 @@ import { TenantAuthRepository } from './tenant-auth.repository';
     AuthRateLimitRepository,
     AuthRateLimitService,
     AuthService,
+    EmailAuthDeliveryService,
+    EmailAuthService,
     AuthFlowSystemGateway,
     AuthSessionRepository,
     AuthSessionService,

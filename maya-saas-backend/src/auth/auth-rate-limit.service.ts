@@ -11,6 +11,8 @@ import {
 } from './auth-rate-limit.repository';
 
 export type AuthRateLimitAction =
+  | 'email_start'
+  | 'email_verify'
   | 'oauth_complete'
   | 'oauth_start'
   | 'password_login'
@@ -54,6 +56,15 @@ const POLICIES: AuthRateLimitPolicy[] = [
   policy('phone_verify', 'preflight', 'identity', '10m', 15, 600),
   policy('phone_verify', 'tenant', 'tenant', '10m', 1000, 600),
   policy('phone_verify', 'tenant', 'identity', '10m', 10, 600),
+  policy('email_start', 'preflight', 'ip', '10m', 20, 600),
+  policy('email_start', 'preflight', 'identity', '10m', 5, 600),
+  policy('email_start', 'tenant', 'tenant', '10m', 200, 600),
+  policy('email_start', 'tenant', 'identity', '60s', 1, 60),
+  policy('email_start', 'tenant', 'identity', '10m', 5, 600),
+  policy('email_verify', 'preflight', 'ip', '10m', 60, 600),
+  policy('email_verify', 'preflight', 'identity', '10m', 15, 600),
+  policy('email_verify', 'tenant', 'tenant', '10m', 1000, 600),
+  policy('email_verify', 'tenant', 'identity', '10m', 10, 600),
   policy('oauth_start', 'preflight', 'ip', '10m', 30, 600),
   policy('oauth_start', 'tenant', 'tenant', '10m', 500, 600),
   policy('oauth_complete', 'preflight', 'ip', '10m', 60, 600),
