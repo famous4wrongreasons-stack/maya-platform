@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 import { CrmIntegrationStatus, CrmProvider } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -87,6 +87,47 @@ describe('CrmService', () => {
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(crmFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  it('requires a fresh token when switching from mock to a real provider', async () => {
+    const crmUpdateMock = jest.fn();
+    const prisma = {
+      crmIntegration: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'crm-1',
+          tenantId: 'tenant-1',
+          provider: CrmProvider.MOCK,
+          encryptedApiToken: 'enc:mock',
+          baseUrl: null,
+          status: CrmIntegrationStatus.ACTIVE,
+          settingsJson: {},
+        }),
+        update: crmUpdateMock,
+      },
+    } as unknown as PrismaService;
+    const encryptMock = jest.fn();
+    const encryptionService = {
+      encrypt: encryptMock,
+      decrypt: jest.fn(),
+    } as unknown as EncryptionService;
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      prisma,
+      encryptionService,
+      {} as CrmAdapterFactory,
+      tenantContext,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.createOrUpdateIntegration('tenant-1', {
+          provider: CrmProvider.YCLIENTS,
+          settingsJson: { companyId: 42 },
+        }),
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(encryptMock).not.toHaveBeenCalled();
+    expect(crmUpdateMock).not.toHaveBeenCalled();
   });
 
   it('fails closed before loading CRM credentials without tenant context', async () => {

@@ -46,6 +46,9 @@ export class CrmService {
     const provider = (dto.provider ??
       existing?.provider ??
       CrmProvider.MOCK) as CrmProvider;
+    const providerChanged = Boolean(
+      existing && String(existing.provider) !== String(provider),
+    );
     const settingsJson =
       dto.settingsJson ??
       (existing?.settingsJson as Record<string, unknown> | null) ??
@@ -55,12 +58,14 @@ export class CrmService {
 
     const resolvedApiToken =
       dto.apiToken ??
-      (provider === CrmProvider.MOCK && !existing?.encryptedApiToken
+      (provider === CrmProvider.MOCK && (!existing || providerChanged)
         ? 'mock'
         : undefined);
     const encryptedApiToken = resolvedApiToken
       ? this.encryptionService.encrypt(resolvedApiToken)
-      : existing?.encryptedApiToken;
+      : providerChanged
+        ? undefined
+        : existing?.encryptedApiToken;
 
     if (!encryptedApiToken) {
       throw new NotFoundException('CRM API token is required');

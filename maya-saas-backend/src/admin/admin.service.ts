@@ -137,6 +137,7 @@ export class AdminService {
     actor: AuthenticatedUser,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
+    this.assertCrmUpdateFieldsAllowed(dto, actor);
     const integration = await this.crmService.createOrUpdateIntegration(
       id,
       dto,
@@ -321,6 +322,17 @@ export class AdminService {
     if (attemptedField) {
       throw new ForbiddenException(
         `Only the platform billing flow can update ${attemptedField}`,
+      );
+    }
+  }
+
+  private assertCrmUpdateFieldsAllowed(
+    dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
+    actor: AuthenticatedUser,
+  ): void {
+    if (actor.role !== UserRole.PLATFORM_OWNER && dto.baseUrl !== undefined) {
+      throw new ForbiddenException(
+        'Only the platform owner can override the CRM base URL',
       );
     }
   }

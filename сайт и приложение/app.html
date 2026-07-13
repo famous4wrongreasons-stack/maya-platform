@@ -4254,6 +4254,32 @@ function ALogin() {
   const [lgCrBusy, setLgCrBusy] = React.useState(false);
   const [lgCrErr, setLgCrErr] = React.useState('');
   const lgCrRef = React.useRef(false);
+  // ── «Настроить с Майей»: разговорный AI-онбординг ──
+  // draft_token не попадает в URL/логи/shared localStorage; sessionStorage нужен только для восстановления этой вкладки
+  const [lgManual, setLgManual] = React.useState(false); // ручная форма как fallback
+  const [lgAiStage, setLgAiStage] = React.useState('chat'); // chat|confirm|logo|crm
+  const lgAiDraft = React.useRef({ id: null, token: null }); // токен вне рендера
+  const [lgAiMsgs, setLgAiMsgs] = React.useState([]); // {role,text}
+  const [lgAiInput, setLgAiInput] = React.useState('');
+  const [lgAiBlueprint, setLgAiBlueprint] = React.useState(null);
+  const [lgAiMissing, setLgAiMissing] = React.useState(null); // null=ещё не начинали
+  const [lgAiTemplates, setLgAiTemplates] = React.useState(null);
+  const [lgAiTpl, setLgAiTpl] = React.useState(null); // выбранный стартовый шаблон
+  const [lgAiBusy, setLgAiBusy] = React.useState(false);
+  const [lgAiErr, setLgAiErr] = React.useState('');
+  const [lgAiVoiceBusy, setLgAiVoiceBusy] = React.useState(false);
+  const [lgAiConfirmData, setLgAiConfirmData] = React.useState(null); // редактируемая карточка
+  const [lgAiContact, setLgAiContact] = React.useState({ email: '', name: '', phone: '', pass: '' });
+  const [lgAiResult, setLgAiResult] = React.useState(null); // {api, tenantSlug, tenantId, token, nextStep}
+  const [lgAiLogoName, setLgAiLogoName] = React.useState('');
+  const lgAiReqRef = React.useRef(false);
+  const lgAiFileRef = React.useRef(null);
+  // in-app CRM-коннектор (external): токен ТОЛЬКО в памяти, не в storage/URL/логах
+  const [lgCrm, setLgCrm] = React.useState({ provider: 'yclients', token: '', company: '' });
+  const [lgCrmBusy, setLgCrmBusy] = React.useState(false);
+  const [lgCrmMsg, setLgCrmMsg] = React.useState(null); // {kind:'ok'|'err'|'info', text}
+  const [lgCrmLoaded, setLgCrmLoaded] = React.useState(false);
+  const lgCrmReqRef = React.useRef(false);
   // после онбординга страница перезагружается в контекст нового бизнеса —
   // сразу открываем рабочий экран, без сайта/отдельной админки
   React.useEffect(() => {
@@ -4272,6 +4298,44 @@ function ALogin() {
       }
     } catch (e) {}
   }, []);
+  React.useEffect(() => {
+    if (!lgCreate || lgManual) return;
+    if (lgAiTemplates === null) lgAiLoadTemplates();
+    if (lgAiMsgs.length > 0 || lgAiDraft.current.id) return;
+    var s = lgAiReadDraftSession();
+    var sApi = s && s.apiBase ? String(s.apiBase).replace(/\/+$/, '') : '';
+    if (s && s.draftId && s.draftToken && /^https?:\/\//.test(sApi)) {
+      var api = sApi; // восстановление строго через сохранённый apiBase (не текущий lgApiBase)
+      // восстановление той же сессии: /read вернёт blueprint+missing (контакты/сообщения НЕ восстанавливаем)
+      fetch(api + '/onboarding/ai/drafts/' + encodeURIComponent(s.draftId) + '/read', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ draftToken: s.draftToken })
+      }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (res) {
+        if (!res.ok) { lgAiClearDraftSession(); setLgAiMsgs([{ role: 'bot', text: lgAiGreeting }]); return; } // invalid/expired — не залипаем
+        lgAiDraft.current = { id: s.draftId, token: s.draftToken };
+        if (res.d.blueprint) setLgAiBlueprint(res.d.blueprint);
+        if (res.d.missing_fields) setLgAiMissing(res.d.missing_fields);
+        setLgAiMsgs([{ role: 'bot', text: 'С возвращением — я сохранила ваш черновик. Продолжим или можно «Начать заново».' }]);
+      }).catch(function () { setLgAiMsgs([{ role: 'bot', text: lgAiGreeting }]); }); // сеть: текст работает
+    } else {
+      if (s) lgAiClearDraftSession(); // apiBase отсутствует/невалиден — начинаем заново
+      setLgAiMsgs([{ role: 'bot', text: lgAiGreeting }]);
+    }
+  }, [lgCreate, lgManual]);
+  // при входе в стадию CRM — best-effort подтянуть текущего провайдера (без токена)
+  React.useEffect(() => {
+    if (!(lgCreate && !lgManual && lgAiStage === 'crm')) return;
+    if (lgCrmLoaded || !lgAiResult || !lgAiResult.tenantId) return;
+    fetch(lgAiResult.api + '/admin/tenants/' + encodeURIComponent(lgAiResult.tenantId), { headers: { Authorization: 'Bearer ' + lgAiResult.token } })
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        setLgCrmLoaded(true);
+        var crm = d && (d.crm || d.crm_integration) || null;
+        var prov = (crm && crm.provider) || (d && (d.crm_provider || d.crmProvider)) || null;
+        if (prov && prov !== 'mock') {
+          var sj = (crm && (crm.settings_json || crm.settingsJson)) || {};
+          setLgCrm(function (p) { return Object.assign({}, p, { provider: prov, company: sj.companyId != null ? String(sj.companyId) : p.company }); });
+        }
+      }).catch(function () { setLgCrmLoaded(true); });
+  }, [lgCreate, lgManual, lgAiStage]);
   const lgCrTranslit = (s) => {
     var map = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya' };
     return String(s || '').toLowerCase().split('').map(ch => map[ch] != null ? map[ch] : ch).join('')
@@ -4337,12 +4401,445 @@ function ALogin() {
       setLgCrErr(e && e.message || 'Не получилось — попробуйте ещё раз.');
     }
   };
+  // API-base текущего контекста (тот же, что boot-скрипт/followup)
+  const lgApiBase = () => {
+    var api = (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)
+      || (function () { try { return localStorage.getItem('me_booking_api_base'); } catch (e) { return null; } })()
+      || 'http://localhost:3000/api';
+    return String(api).replace(/\/+$/, '');
+  };
+  // сохранить owner-сессию в namespace нового tenant (как self-serve signup); redirect отдельно
+  const lgSaveBundle = (res, api) => {
+    if (!res || !res.access_token || !res.refresh_token) throw new Error('Неполный ответ сервера — попробуйте ещё раз.');
+    var tSlug = String((res.tenant && res.tenant.slug) || '').toLowerCase();
+    var tId = (res.tenant && res.tenant.id) || (res.user && (res.user.tenant_id || res.user.tenantId)) || null;
+    var aNorm = String(api).toLowerCase();
+    var str = aNorm + '|' + tSlug, hh = 5381; // формула ns = boot-скрипт/oauth-callback
+    for (var i = 0; i < str.length; i++) hh = (hh * 33 + str.charCodeAt(i)) | 0;
+    var ns = (hh >>> 0).toString(36) + '_' + tSlug.replace(/[^a-z0-9-]/g, '').slice(0, 24);
+    var bundle = {
+      token: res.access_token, refresh_token: res.refresh_token,
+      access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null,
+      refresh_expires_at: res.refresh_expires_at || null,
+      session: res.session || null, user: res.user || null,
+      tenant_slug: tSlug, api_base: aNorm
+    };
+    try { localStorage.setItem('me_saas_auth_v2:' + ns, JSON.stringify(bundle)); } catch (e) {}
+    var back = null;
+    try { back = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ns) || 'null'); } catch (e) {}
+    if (!back || back.token !== bundle.token || back.refresh_token !== bundle.refresh_token) throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
+    return { tenantSlug: tSlug, tenantId: tId, token: res.access_token };
+  };
+  const lgOpenApp = (api, tSlug) => {
+    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(tSlug) + '&onboarded=1');
+  };
+  // internal: открыть in-app поверхность календаря/настроек владельца (calendar_setup=1)
+  const lgOpenAppCal = (api, tSlug) => {
+    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(tSlug) + '&onboarded=1&calendar_setup=1');
+  };
+  // external: ЗАЩИЩЁННЫЙ in-app CRM-коннектор (внутри app.html, без maya-admin).
+  // Токен из памяти текущего flow (lgAiResult.token); в localStorage bundle не лезем.
+  const lgCrmSaveTest = async () => {
+    var res = lgAiResult; if (!res || !res.tenantId || lgCrmReqRef.current) return;
+    var tok = String(lgCrm.token || '').trim();
+    var comp = String(lgCrm.company || '').trim();
+    if (!tok) { setLgCrmMsg({ kind: 'err', text: 'Вставьте API-токен вашей CRM.' }); return; }
+    if (!comp) { setLgCrmMsg({ kind: 'err', text: 'Укажите ID компании в CRM.' }); return; }
+    lgCrmReqRef.current = true; setLgCrmBusy(true); setLgCrmMsg({ kind: 'info', text: 'Сохраняем и проверяем связь…' });
+    try {
+      var sj = { companyId: isNaN(Number(comp)) ? comp : Number(comp) };
+      var body = { provider: lgCrm.provider, apiToken: tok, settingsJson: sj }; // status не шлём → live НЕ включаем
+      var doReq = function (method) {
+        return fetch(res.api + '/admin/tenants/' + encodeURIComponent(res.tenantId) + '/crm', {
+          method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + res.token }, body: JSON.stringify(body)
+        });
+      };
+      var r = await doReq('PATCH');
+      if (r.status === 404) r = await doReq('POST'); // интеграции ещё нет — создаём
+      if (!r.ok) { var e = null; try { e = await r.json(); } catch (x) {} throw new Error((e && e.error && e.error.message) || 'Не удалось сохранить подключение.'); }
+      var tr = await fetch(res.api + '/admin/tenants/' + encodeURIComponent(res.tenantId) + '/test-crm', { method: 'POST', headers: { Authorization: 'Bearer ' + res.token } });
+      var td = null; try { td = await tr.json(); } catch (x) {}
+      setLgCrm(function (p) { return Object.assign({}, p, { token: '' }); }); // после успешного сохранения поле токена очищаем
+      if (tr.ok && !(td && td.ok === false)) {
+        setLgCrmMsg({ kind: 'ok', text: 'CRM подключена. Открываем приложение…' });
+        try { sessionStorage.removeItem(LG_AI_SS); } catch (x) {}
+        setTimeout(function () { lgOpenApp(res.api, res.tenantSlug); }, 900); // preview нового tenant
+      } else {
+        setLgCrmMsg({ kind: 'err', text: (td && (td.message || (td.error && td.error.message))) || 'Сохранили, но связь не подтвердилась. Проверьте токен и ID компании.' });
+      }
+    } catch (e) {
+      setLgCrmMsg({ kind: 'err', text: e && e.message || 'Не получилось — попробуйте ещё раз.' }); // введённые данные (кроме токена при успехе) сохраняются
+    } finally {
+      lgCrmReqRef.current = false; setLgCrmBusy(false);
+    }
+  };
+  const lgCrmLater = () => { var res = lgAiResult; try { sessionStorage.removeItem(LG_AI_SS); } catch (e) {} if (res) lgOpenApp(res.api, res.tenantSlug); };
+  // спокойные сообщения по кодам бэка (свою бизнес-логику не дублируем)
+  const lgAiErrText = (code, fallback) => {
+    var m = {
+      invalid_ai_onboarding_token: 'Сессия настройки не найдена — начните заново.',
+      ai_onboarding_expired: 'Черновик настройки устарел (24 часа). Начните заново.',
+      ai_onboarding_incomplete: 'Ещё не всё готово — ответьте на вопросы Майи.',
+      ai_onboarding_confirmation_in_progress: 'Уже создаём ваш бизнес — секунду.',
+      ai_onboarding_not_editable: 'Этот черновик уже подтверждён.'
+    };
+    return m[code] || fallback || 'Не получилось — попробуйте ещё раз.';
+  };
+  const lgAiApply = (data) => {
+    if (data && data.assistant_message) setLgAiMsgs(prev => prev.concat([{ role: 'bot', text: data.assistant_message }]));
+    if (data && data.blueprint) setLgAiBlueprint(data.blueprint);
+    if (data && data.missing_fields) setLgAiMissing(data.missing_fields);
+  };
+  // черновик в sessionStorage: ТОЛЬКО {draftId,draftToken,apiBase}; без сообщений/контактов/blueprint
+  const LG_AI_SS = 'me_ai_onboarding_draft';
+  const lgAiSaveDraftSession = (id, token, api) => { try { sessionStorage.setItem(LG_AI_SS, JSON.stringify({ draftId: id, draftToken: token, apiBase: api })); } catch (e) {} };
+  const lgAiReadDraftSession = () => { try { return JSON.parse(sessionStorage.getItem(LG_AI_SS) || 'null'); } catch (e) { return null; } };
+  const lgAiClearDraftSession = () => { try { sessionStorage.removeItem(LG_AI_SS); } catch (e) {} };
+  const lgAiGreeting = 'Здравствуйте! Расскажите о вашем деле: чем занимаетесь, какие услуги, цены и длительность. Можно текстом или голосом — я соберу всё сама.';
+  // «Начать заново» / выход из тупика invalid|expired: чистим сессию и черновик
+  const lgAiHardReset = (note) => {
+    lgAiClearDraftSession();
+    lgAiDraft.current = { id: null, token: null };
+    setLgAiBlueprint(null); setLgAiMissing(null); setLgAiConfirmData(null); setLgAiInput(''); setLgAiTpl(null);
+    setLgAiMsgs([{ role: 'bot', text: note || lgAiGreeting }]);
+    setLgAiStage('chat');
+  };
+  const lgAiLoadTemplates = () => {
+    fetch(lgApiBase() + '/onboarding/templates').then(r => r.json()).then(d => {
+      setLgAiTemplates((d && d.templates) || []);
+    }).catch(() => setLgAiTemplates([]));
+  };
+  // первое сообщение → создаём черновик; далее → /messages. Email/телефон/имя в диалоге НЕ спрашиваем.
+  const lgAiSend = async (text) => {
+    var msg = String(text != null ? text : lgAiInput).trim();
+    if (!msg || lgAiReqRef.current) return;
+    lgAiReqRef.current = true; setLgAiBusy(true); setLgAiErr('');
+    setLgAiMsgs(prev => prev.concat([{ role: 'user', text: msg }]));
+    setLgAiInput('');
+    var api = lgApiBase();
+    try {
+      var r, data;
+      if (!lgAiDraft.current.id) {
+        var body = { message: msg };
+        if (lgAiTpl) body.templateId = lgAiTpl;
+        r = await fetch(api + '/onboarding/ai/drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        data = await r.json();
+        if (!r.ok) throw Object.assign(new Error('start'), { code: data && data.error && data.error.code, msg: data && data.error && data.error.message });
+        lgAiDraft.current = { id: data.draft_id, token: data.draft_token }; // токен только в ref
+        lgAiSaveDraftSession(data.draft_id, data.draft_token, api); // для восстановления в этой сессии
+      } else {
+        r = await fetch(api + '/onboarding/ai/drafts/' + encodeURIComponent(lgAiDraft.current.id) + '/messages', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ draftToken: lgAiDraft.current.token, message: msg })
+        });
+        data = await r.json();
+        if (!r.ok) throw Object.assign(new Error('msg'), { code: data && data.error && data.error.code, msg: data && data.error && data.error.message });
+      }
+      lgAiApply(data);
+    } catch (e) {
+      // протухший/битый черновик — не залипаем на плохом ref, начинаем заново
+      if (e.code === 'invalid_ai_onboarding_token' || e.code === 'ai_onboarding_expired') {
+        lgAiHardReset(lgAiErrText(e.code) + ' Опишите бизнес ещё раз — я соберу заново.');
+      } else {
+        setLgAiErr(lgAiErrText(e.code, e.msg));
+      }
+    } finally {
+      lgAiReqRef.current = false; setLgAiBusy(false);
+    }
+  };
+  // голос: переиспользуем существующий STT-проксик приложения (см. window.__meVoiceToText).
+  // Если запись/транскрипция недоступны — кнопка гаснет, текст остаётся полностью рабочим.
+  const lgAiVoiceHas = (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof window.__meVoiceToText === 'function');
+  const lgAiMic = () => {
+    if (!lgAiVoiceHas) return;
+    if (lgAiVoiceBusy) { window.__meVoiceToText('stop'); return; } // второй тап — остановить и распознать
+    setLgAiVoiceBusy(true); setLgAiErr('');
+    window.__meVoiceToText('start', function (transcript) {
+      setLgAiVoiceBusy(false);
+      if (transcript) setLgAiInput(prev => (prev ? prev + ' ' : '') + transcript); // владелец видит и правит текст перед отправкой
+      else setLgAiErr('Не расслышала — попробуйте ещё раз или введите текстом.');
+    }, function () {
+      setLgAiVoiceBusy(false);
+      setLgAiErr('Голос сейчас недоступен — введите текстом.');
+    });
+  };
+  // перейти к подтверждению: снимок blueprint в редактируемую карточку
+  const lgAiToConfirm = () => {
+    var b = lgAiBlueprint || {};
+    setLgAiConfirmData({
+      businessName: b.businessName || '',
+      calendarSource: b.calendarSource || 'internal',
+      providerCount: String(b.providerCount || 1),
+      services: (b.services || []).map(s => ({ name: s.name, price: String(s.price), duration: String(s.durationMinutes) })),
+      weekly: (function () {
+        var by = {};
+        (b.weeklyRules || []).forEach(function (r) { if (!by[r.weekday]) by[r.weekday] = { on: true, start: r.startTime, end: r.endTime }; });
+        return by;
+      })(),
+      scheduleAssumed: !!b.scheduleAssumed,
+      templateId: b.templateId
+    });
+    setLgAiErr('');
+    setLgAiStage('confirm');
+  };
+  // подтверждение: имя/телефон/e-mail собираем ТОЛЬКО здесь; редактируемые правки уходят в /confirm
+  const lgAiConfirm = async () => {
+    if (lgAiReqRef.current) return;
+    var c = lgAiConfirmData || {};
+    var ct = lgAiContact;
+    var em = String(ct.email || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setLgAiErr('Укажите корректный e-mail.'); return; }
+    var onm = String(ct.name || '').trim();
+    if (onm.length < 2) { setLgAiErr('Укажите ваше имя — минимум 2 символа.'); return; }
+    var phd = String(ct.phone || '').replace(/\D/g, '');
+    if (phd.length < 11) { setLgAiErr('Укажите телефон — это ваш способ входа в MAYA и восстановления доступа.'); return; }
+    lgAiReqRef.current = true; setLgAiBusy(true); setLgAiErr('');
+    var api = lgApiBase();
+    try {
+      var body = {
+        draftToken: lgAiDraft.current.token,
+        ownerEmail: em,
+        businessName: String(c.businessName || '').trim() || undefined,
+        calendarSource: c.calendarSource,
+        providerCount: parseInt(c.providerCount, 10) || undefined,
+        services: (c.services || []).filter(function (s) { return String(s.name || '').trim(); }).map(function (s) {
+          return { name: String(s.name).trim(), price: parseInt(s.price, 10) || 0, durationMinutes: parseInt(s.duration, 10) || 30 };
+        }),
+        weeklyRules: (function () {
+          var out = [];
+          [0, 1, 2, 3, 4, 5, 6].forEach(function (wd) { var r = (c.weekly || {})[wd]; if (r && r.on) out.push({ weekday: wd, startTime: r.start || '09:00', endTime: r.end || '18:00' }); });
+          return out;
+        })()
+      };
+      body.ownerName = onm;
+      body.ownerPhone = '+' + (phd[0] === '8' ? '7' + phd.slice(1) : phd); // телефон обязателен: канал входа/восстановления
+      if (c.templateId) body.templateId = c.templateId; // тип бизнеса из каталога (редактируемый), не выдумываем ID
+      if (ct.pass) body.password = ct.pass; // пароль опционален — вернуться можно по телефону
+      var r = await fetch(api + '/onboarding/ai/drafts/' + encodeURIComponent(lgAiDraft.current.id) + '/confirm', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      var data = await r.json();
+      if (!r.ok) throw Object.assign(new Error('confirm'), { code: data && data.error && data.error.code, msg: data && data.error && data.error.message });
+      var saved = lgSaveBundle(data, api);
+      lgAiDraft.current = { id: null, token: null }; // сырой транскрипт/токен больше не держим
+      lgAiClearDraftSession(); // черновик подтверждён — чистим сессию
+      // temporary_password НЕ показываем/не логируем/не храним
+      setLgAiResult({ api: api, tenantSlug: saved.tenantSlug, tenantId: saved.tenantId, token: saved.token, nextStep: data.next_step });
+      setLgAiStage(data.next_step === 'connect_crm' ? 'crm' : 'logo');
+    } catch (e) {
+      if (e.code === 'invalid_ai_onboarding_token' || e.code === 'ai_onboarding_expired') {
+        setLgAiStage('chat');
+        lgAiHardReset(lgAiErrText(e.code) + ' Опишите бизнес ещё раз — я соберу заново.');
+      } else {
+        setLgAiErr(lgAiErrText(e.code, e.msg));
+      }
+    } finally {
+      lgAiReqRef.current = false; setLgAiBusy(false);
+    }
+  };
+  // необязательная загрузка логотипа через существующий authenticated-эндпоинт
+  const lgAiUploadLogo = async (file) => {
+    var res = lgAiResult;
+    if (!file || !res || !res.tenantId || lgAiReqRef.current) { if (res) lgOpenAppCal(res.api, res.tenantSlug); return; }
+    lgAiReqRef.current = true; setLgAiBusy(true); setLgAiErr('');
+    try {
+      var fd = new FormData();
+      fd.append('file', file);
+      var r = await fetch(res.api + '/admin/tenants/' + encodeURIComponent(res.tenantId) + '/logo', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + res.token }, body: fd
+      });
+      if (!r.ok) { var d = null; try { d = await r.json(); } catch (e) {} throw new Error((d && d.error && d.error.message) || 'Не удалось загрузить логотип.'); }
+      lgOpenAppCal(res.api, res.tenantSlug);
+    } catch (e) {
+      lgAiReqRef.current = false; setLgAiBusy(false);
+      setLgAiErr(e && e.message || 'Не удалось загрузить логотип. Можно пропустить.');
+    }
+  };
   const lgEmailGo = () => {
     var v = (lgEmail || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { setLgNote('Проверьте адрес — например, name@mail.ru'); return; }
     setLgNote('Вход по email скоро появится. Пока войдите через Telegram или Яндекс.');
   };
-  if (lgCreate) {
+  if (lgCreate && !lgManual) {
+    var aiWrap = (kids) => /*#__PURE__*/React.createElement("div", {
+      style: { minHeight: "100vh", background: t.bg || (dark ? "#0b0b0c" : "#f4f0eb"), padding: "48px 20px 40px", boxSizing: "border-box", overflowY: "auto" }
+    }, /*#__PURE__*/React.createElement("div", { style: { maxWidth: 400, margin: "0 auto" } }, kids));
+    var aiHead = /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 16 } },
+      /*#__PURE__*/React.createElement("div", { style: { width: 34, height: 34, borderRadius: 999, background: t.ink, color: dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DISPLAY, fontWeight: 600, fontSize: 15 } }, "M"),
+      /*#__PURE__*/React.createElement("div", null,
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, letterSpacing: "0.06em", color: t.ink } }, "Настроить с Майей"),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, "Ваш бизнес в MAYA за пару минут")));
+    var aiInp = { width: "100%", boxSizing: "border-box", border: "1px solid " + t.line, borderRadius: 12, background: "transparent", outline: "none", fontFamily: BODY, fontSize: 14, color: t.ink, padding: "11px 12px" };
+    var aiErr = lgAiErr ? /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 12, color: "#e0564f", textAlign: "center", margin: "10px 0 0", lineHeight: 1.5 } }, lgAiErr) : null;
+    var aiPrimary = (label, onClick, busy) => /*#__PURE__*/React.createElement("div", {
+      onClick: busy ? null : onClick,
+      style: { marginTop: 14, minHeight: 50, borderRadius: 15, background: t.ink, color: dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1 }
+    }, busy ? "Секунду…" : label);
+
+    // ── стадия: чат ──
+    if (lgAiStage === 'chat') {
+      var ready = Array.isArray(lgAiMissing) && lgAiMissing.length === 0;
+      var chips = (lgAiTemplates && lgAiTemplates.length && !lgAiDraft.current.id) ? /*#__PURE__*/React.createElement("div", { style: { marginBottom: 12 } },
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: t.faint, marginBottom: 7 } }, "С чего начать · по желанию"),
+        /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } }, lgAiTemplates.map(function (tp) {
+          return /*#__PURE__*/React.createElement("div", {
+            key: tp.id,
+            onClick: function () { setLgAiTpl(lgAiTpl === tp.id ? null : tp.id); },
+            style: { fontFamily: BODY, fontSize: 12, padding: "7px 12px", borderRadius: 999, border: "1px solid " + (lgAiTpl === tp.id ? t.ink : t.line), color: lgAiTpl === tp.id ? t.ink : t.dim, cursor: "pointer" }
+          }, tp.name);
+        }))) : null;
+      var bubbles = /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 9, margin: "4px 0 12px" } },
+        lgAiMsgs.map(function (m, i) {
+          var mine = m.role === 'user';
+          return /*#__PURE__*/React.createElement("div", {
+            key: i,
+            style: { alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "86%", padding: "9px 13px", borderRadius: 15, borderTopRightRadius: mine ? 4 : 15, borderTopLeftRadius: mine ? 15 : 4, background: mine ? t.ink : (dark ? "rgba(244,240,235,0.06)" : "rgba(24,22,15,0.05)"), color: mine ? (dark ? "#0b0b0c" : "#f4f0eb") : t.ink, fontFamily: BODY, fontSize: 13.5, lineHeight: 1.5 }
+          }, m.text);
+        }),
+        lgAiBusy ? /*#__PURE__*/React.createElement("div", { style: { alignSelf: "flex-start", fontFamily: BODY, fontSize: 12.5, color: t.faint, padding: "4px 4px" } }, "Майя печатает…") : null);
+      var composer = /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "flex-end", gap: 8 } },
+        /*#__PURE__*/React.createElement("textarea", {
+          value: lgAiInput, rows: 2,
+          onChange: function (e) { setLgAiInput(e.target.value); if (lgAiErr) setLgAiErr(''); },
+          onKeyDown: function (e) { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); lgAiSend(); } },
+          placeholder: "Опишите ваш бизнес…",
+          style: Object.assign({}, aiInp, { resize: "none", flex: 1, lineHeight: 1.4 })
+        }),
+        lgAiVoiceHas ? /*#__PURE__*/React.createElement("div", {
+          onClick: lgAiMic,
+          title: "Голосом",
+          style: { width: 44, height: 44, flex: "none", borderRadius: 12, border: "1px solid " + t.line, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: lgAiVoiceBusy ? t.accent : t.dim }
+        }, /*#__PURE__*/React.createElement("svg", { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round", strokeLinejoin: "round" }, /*#__PURE__*/React.createElement("rect", { x: 9, y: 3, width: 6, height: 11, rx: 3 }), /*#__PURE__*/React.createElement("path", { d: "M5 11a7 7 0 0 0 14 0M12 18v3" }))) : null,
+        /*#__PURE__*/React.createElement("div", {
+          onClick: (lgAiBusy || !lgAiInput.trim()) ? null : function () { lgAiSend(); },
+          style: { width: 44, height: 44, flex: "none", borderRadius: 12, background: t.ink, color: dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", cursor: (lgAiBusy || !lgAiInput.trim()) ? "default" : "pointer", opacity: (lgAiBusy || !lgAiInput.trim()) ? 0.5 : 1 }
+        }, Icon.arrow(dark ? "#0b0b0c" : "#f4f0eb", 16)));
+      return aiWrap([
+        aiHead,
+        chips,
+        bubbles,
+        aiErr,
+        /*#__PURE__*/React.createElement("div", { key: "cmp", style: { marginTop: 10 } }, composer),
+        ready ? aiPrimary("К подтверждению →", lgAiToConfirm, false) : null,
+        /*#__PURE__*/React.createElement("div", { key: "alt", style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, gap: 10 } },
+          /*#__PURE__*/React.createElement("div", { onClick: function () { setLgCreate(false); }, style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: "pointer" } }, "← Уже есть вход"),
+          /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 14 } },
+            (lgAiDraft.current.id || lgAiMissing !== null) ? /*#__PURE__*/React.createElement("div", { onClick: function () { lgAiHardReset(); }, style: { fontFamily: BODY, fontSize: 12.5, color: t.faint, cursor: "pointer" } }, "Начать заново") : null,
+            /*#__PURE__*/React.createElement("div", { onClick: function () { setLgManual(true); }, style: { fontFamily: BODY, fontSize: 12.5, color: t.faint, cursor: "pointer" } }, "Вручную")))
+      ]);
+    }
+
+    // ── стадия: подтверждение (редактируемая карточка + контакты) ──
+    if (lgAiStage === 'confirm') {
+      var c = lgAiConfirmData || {};
+      var setC = function (patch) { setLgAiConfirmData(Object.assign({}, c, patch)); };
+      var lbl = { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: "0.16em", textTransform: "uppercase", color: t.faint, margin: "0 2px 6px" };
+      var card = { border: "1px solid " + t.line, borderRadius: 14, padding: "12px 14px", marginBottom: 10 };
+      var svcRows = (c.services || []).map(function (s, i) {
+        var setS = function (patch) { var arr = c.services.slice(); arr[i] = Object.assign({}, s, patch); setC({ services: arr }); };
+        return /*#__PURE__*/React.createElement("div", { key: i, style: { display: "flex", gap: 6, marginBottom: 6 } },
+          /*#__PURE__*/React.createElement("input", { style: Object.assign({}, aiInp, { flex: 2, padding: "8px 10px" }), value: s.name, placeholder: "Услуга", onChange: function (e) { setS({ name: e.target.value }); } }),
+          /*#__PURE__*/React.createElement("input", { style: Object.assign({}, aiInp, { flex: 1, padding: "8px 10px" }), value: s.price, inputMode: "numeric", placeholder: "₽", onChange: function (e) { setS({ price: e.target.value.replace(/\D/g, '') }); } }),
+          /*#__PURE__*/React.createElement("input", { style: Object.assign({}, aiInp, { flex: 1, padding: "8px 10px" }), value: s.duration, inputMode: "numeric", placeholder: "мин", onChange: function (e) { setS({ duration: e.target.value.replace(/\D/g, '') }); } }),
+          /*#__PURE__*/React.createElement("div", { onClick: function () { setC({ services: c.services.filter(function (_, x) { return x !== i; }) }); }, style: { width: 30, display: "flex", alignItems: "center", justifyContent: "center", color: t.faint, cursor: "pointer", fontSize: 16 } }, "×"));
+      });
+      var WD = [1, 2, 3, 4, 5, 6, 0], WDL = { 0: "Вс", 1: "Пн", 2: "Вт", 3: "Ср", 4: "Чт", 5: "Пт", 6: "Сб" };
+      var schedRows = WD.map(function (wd) {
+        var r = (c.weekly || {})[wd] || { on: false, start: "09:00", end: "18:00" };
+        var setR = function (patch) { var w = Object.assign({}, c.weekly); w[wd] = Object.assign({}, r, patch); setC({ weekly: w }); };
+        return /*#__PURE__*/React.createElement("div", { key: wd, style: { display: "flex", alignItems: "center", gap: 6, padding: "2px 0" } },
+          /*#__PURE__*/React.createElement("div", { onClick: function () { setR({ on: !r.on }); }, style: { width: 38, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: r.on ? t.accent : t.faint, cursor: "pointer" } }, WDL[wd]),
+          /*#__PURE__*/React.createElement("input", { type: "time", disabled: !r.on, value: r.start, style: Object.assign({}, aiInp, { flex: 1, padding: "6px 8px", opacity: r.on ? 1 : 0.35 }), onChange: function (e) { setR({ start: e.target.value }); } }),
+          /*#__PURE__*/React.createElement("span", { style: { color: t.faint } }, "—"),
+          /*#__PURE__*/React.createElement("input", { type: "time", disabled: !r.on, value: r.end, style: Object.assign({}, aiInp, { flex: 1, padding: "6px 8px", opacity: r.on ? 1 : 0.35 }), onChange: function (e) { setR({ end: e.target.value }); } }));
+      });
+      var setCt = function (patch) { setLgAiContact(Object.assign({}, lgAiContact, patch)); if (lgAiErr) setLgAiErr(''); };
+      return aiWrap([
+        aiHead,
+        /*#__PURE__*/React.createElement("div", { key: "h", style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 21, textTransform: "uppercase", color: t.ink, marginBottom: 4 } }, "Проверьте и подтвердите"),
+        /*#__PURE__*/React.createElement("div", { key: "s", style: { fontFamily: BODY, fontSize: 12, color: t.dim, marginBottom: 16, lineHeight: 1.5 } }, "Всё можно поправить прямо здесь."),
+        /*#__PURE__*/React.createElement("div", { key: "biz", style: card },
+          /*#__PURE__*/React.createElement("div", { style: lbl }, "Название бизнеса"),
+          /*#__PURE__*/React.createElement("input", { style: aiInp, value: c.businessName, onChange: function (e) { setC({ businessName: e.target.value }); } })),
+        (lgAiTemplates && lgAiTemplates.length) ? /*#__PURE__*/React.createElement("div", { key: "type", style: card },
+          /*#__PURE__*/React.createElement("div", { style: lbl }, "Тип бизнеса"),
+          /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } }, lgAiTemplates.map(function (tp) {
+            return /*#__PURE__*/React.createElement("div", { key: tp.id, onClick: function () { setC({ templateId: tp.id }); }, style: { fontFamily: BODY, fontSize: 12, padding: "6px 11px", borderRadius: 999, border: "1px solid " + (c.templateId === tp.id ? t.ink : t.line), color: c.templateId === tp.id ? t.ink : t.dim, cursor: "pointer" } }, tp.name);
+          }))) : null,
+        /*#__PURE__*/React.createElement("div", { key: "cal", style: card },
+          /*#__PURE__*/React.createElement("div", { style: lbl }, "Расписание"),
+          /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 8 } },
+            ["internal", "external"].map(function (v) {
+              return /*#__PURE__*/React.createElement("div", { key: v, onClick: function () { setC({ calendarSource: v }); }, style: { flex: 1, textAlign: "center", padding: "9px 6px", borderRadius: 10, border: "1px solid " + (c.calendarSource === v ? t.ink : t.line), fontFamily: BODY, fontSize: 12, fontWeight: 600, color: c.calendarSource === v ? t.ink : t.dim, cursor: "pointer" } }, v === "internal" ? "В MAYA" : "Через CRM");
+            }))),
+        /*#__PURE__*/React.createElement("div", { key: "prov", style: card },
+          /*#__PURE__*/React.createElement("div", { style: lbl }, "Специалистов"),
+          /*#__PURE__*/React.createElement("input", { style: aiInp, value: c.providerCount, inputMode: "numeric", onChange: function (e) { setC({ providerCount: e.target.value.replace(/\D/g, '') }); } })),
+        /*#__PURE__*/React.createElement("div", { key: "svc", style: card },
+          /*#__PURE__*/React.createElement("div", { style: lbl }, "Услуги · цена · минуты"),
+          svcRows.length ? /*#__PURE__*/React.createElement("div", null, svcRows) : /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 12, color: t.faint, marginBottom: 6 } }, "Пока пусто"),
+          /*#__PURE__*/React.createElement("div", { onClick: function () { setC({ services: (c.services || []).concat([{ name: "", price: "", duration: "" }]) }); }, style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", color: t.accent, cursor: "pointer", marginTop: 4 } }, "+ услуга")),
+        /*#__PURE__*/React.createElement("div", { key: "sch", style: card },
+          /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 } },
+            /*#__PURE__*/React.createElement("div", { style: lbl }, "График недели"),
+            c.scheduleAssumed ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: BODY, fontSize: 10, color: t.accent, background: dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)", borderRadius: 999, padding: "2px 8px" } }, "предположительно — проверьте") : null),
+          /*#__PURE__*/React.createElement("div", null, schedRows)),
+        /*#__PURE__*/React.createElement("div", { key: "ct", style: Object.assign({}, card, { borderColor: t.line }) },
+          /*#__PURE__*/React.createElement("div", { style: lbl }, "Контакты владельца"),
+          /*#__PURE__*/React.createElement("input", { style: Object.assign({}, aiInp, { marginBottom: 7 }), value: lgAiContact.email, placeholder: "E-mail", type: "email", inputMode: "email", onChange: function (e) { setCt({ email: e.target.value }); } }),
+          /*#__PURE__*/React.createElement("input", { style: Object.assign({}, aiInp, { marginBottom: 7 }), value: lgAiContact.name, placeholder: "Ваше имя — обязательно", onChange: function (e) { setCt({ name: e.target.value }); } }),
+          /*#__PURE__*/React.createElement("input", { style: Object.assign({}, aiInp, { marginBottom: 4 }), value: lgAiContact.phone, placeholder: "Телефон — обязателен", inputMode: "tel", onChange: function (e) { setCt({ phone: e.target.value }); } }),
+          /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, margin: "0 2px 7px", lineHeight: 1.4 } }, "По номеру вы входите в MAYA и восстанавливаете доступ. Пароль можно не задавать."),
+          /*#__PURE__*/React.createElement("input", { style: aiInp, value: lgAiContact.pass, placeholder: "Пароль — по желанию", type: "password", onChange: function (e) { setCt({ pass: e.target.value }); } })),
+        aiErr,
+        aiPrimary("Создать бизнес", lgAiConfirm, lgAiBusy),
+        /*#__PURE__*/React.createElement("div", { key: "back", onClick: lgAiBusy ? null : function () { setLgAiStage('chat'); }, style: { textAlign: "center", marginTop: 14, fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: "pointer" } }, "← Вернуться к диалогу")
+      ]);
+    }
+
+    // ── стадия: логотип (необязательно) ──
+    if (lgAiStage === 'logo') {
+      return aiWrap([
+        aiHead,
+        /*#__PURE__*/React.createElement("div", { key: "h", style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 21, textTransform: "uppercase", color: t.ink, marginBottom: 6 } }, "Готово!", /*#__PURE__*/React.createElement("br"), "Добавьте логотип"),
+        /*#__PURE__*/React.createElement("div", { key: "s", style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, marginBottom: 18, lineHeight: 1.55 } }, "Логотип появится внутри приложения. Иконку на экране телефона мы настроим отдельным шагом. Можно пропустить."),
+        /*#__PURE__*/React.createElement("input", { key: "f", ref: lgAiFileRef, type: "file", accept: "image/*", style: { display: "none" }, onChange: function (e) { var f = e.target.files && e.target.files[0]; if (f) { setLgAiLogoName(f.name); lgAiUploadLogo(f); } } }),
+        lgAiLogoName ? /*#__PURE__*/React.createElement("div", { key: "n", style: { fontFamily: BODY, fontSize: 12, color: t.dim, textAlign: "center", marginBottom: 8 } }, lgAiLogoName) : null,
+        aiErr,
+        aiPrimary(lgAiBusy ? "Загружаем…" : "Выбрать логотип", function () { if (lgAiFileRef.current) lgAiFileRef.current.click(); }, lgAiBusy),
+        /*#__PURE__*/React.createElement("div", { key: "skip", onClick: lgAiBusy ? null : function () { if (lgAiResult) lgOpenAppCal(lgAiResult.api, lgAiResult.tenantSlug); }, style: { textAlign: "center", marginTop: 14, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: t.dim, cursor: "pointer" } }, "Пропустить")
+      ]);
+    }
+
+    // ── стадия: ЗАЩИЩЁННЫЙ in-app CRM-коннектор (external) ──
+    if (lgAiStage === 'crm') {
+      var crmLbl = { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: "0.16em", textTransform: "uppercase", color: t.faint, margin: "0 2px 6px" };
+      var CRM_PROVIDERS = [["yclients", "YClients", true], ["altegio", "Altegio", true], ["dikidi", "DIKIDI", false], ["salon_online", "Salon Online", false], ["whitelines", "Whitelines", false]];
+      var setCrm = function (patch) { setLgCrm(Object.assign({}, lgCrm, patch)); if (lgCrmMsg) setLgCrmMsg(null); };
+      var msgColor = lgCrmMsg && lgCrmMsg.kind === 'ok' ? "#39d98a" : (lgCrmMsg && lgCrmMsg.kind === 'err' ? "#e0564f" : t.dim);
+      return aiWrap([
+        aiHead,
+        /*#__PURE__*/React.createElement("div", { key: "h", style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 21, textTransform: "uppercase", color: t.ink, marginBottom: 6 } }, "Подключите CRM"),
+        /*#__PURE__*/React.createElement("div", { key: "s", style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, marginBottom: 18, lineHeight: 1.55 } }, "Откуда приложение берёт мастеров, услуги и слоты. Токен хранится в зашифрованном виде на сервере."),
+        /*#__PURE__*/React.createElement("div", { key: "prov", style: { marginBottom: 12 } },
+          /*#__PURE__*/React.createElement("div", { style: crmLbl }, "Система записи"),
+          /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } }, CRM_PROVIDERS.map(function (pv) {
+            return /*#__PURE__*/React.createElement("div", { key: pv[0], onClick: pv[2] ? function () { setCrm({ provider: pv[0] }); } : null, style: { fontFamily: BODY, fontSize: 12, padding: "7px 12px", borderRadius: 999, border: "1px solid " + (lgCrm.provider === pv[0] ? t.ink : t.line), color: lgCrm.provider === pv[0] ? t.ink : t.dim, cursor: pv[2] ? "pointer" : "default", opacity: pv[2] ? 1 : 0.48 } }, pv[1] + (pv[2] ? "" : " · скоро"));
+          }))),
+        /*#__PURE__*/React.createElement("div", { key: "tok", style: { marginBottom: 12 } },
+          /*#__PURE__*/React.createElement("div", { style: crmLbl }, "API-токен"),
+          /*#__PURE__*/React.createElement("input", { style: aiInp, value: lgCrm.token, type: "password", autoComplete: "off", placeholder: "вставьте токен из кабинета CRM", onChange: function (e) { setCrm({ token: e.target.value }); } }),
+          /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5, lineHeight: 1.4 } }, "Токен нигде не сохраняется в приложении — уходит только на ваш сервер по защищённому каналу.")),
+        /*#__PURE__*/React.createElement("div", { key: "comp", style: { marginBottom: 12 } },
+          /*#__PURE__*/React.createElement("div", { style: crmLbl }, "ID компании"),
+          /*#__PURE__*/React.createElement("input", { style: aiInp, value: lgCrm.company, inputMode: "numeric", placeholder: "например 503759", onChange: function (e) { setCrm({ company: e.target.value }); } })),
+        lgCrmMsg ? /*#__PURE__*/React.createElement("div", { key: "msg", style: { fontFamily: BODY, fontSize: 12, color: msgColor, textAlign: "center", margin: "10px 0 0", lineHeight: 1.5 } }, lgCrmMsg.text) : null,
+        aiPrimary(lgCrmBusy ? "Проверяем…" : "Сохранить и проверить", lgCrmSaveTest, lgCrmBusy),
+        /*#__PURE__*/React.createElement("div", { key: "later", onClick: lgCrmBusy ? null : lgCrmLater, style: { textAlign: "center", marginTop: 14, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: t.dim, cursor: "pointer" } }, "Подключить позже")
+      ]);
+    }
+  }
+  if (lgCreate && lgManual) {
     var crInp = { width: "100%", boxSizing: "border-box", border: "1px solid " + t.line, borderRadius: 14, background: "transparent", outline: "none", fontFamily: BODY, fontSize: 14, color: t.ink, padding: "13px 14px" };
     var crField = (label, key, opts) => /*#__PURE__*/React.createElement("div", { style: { marginBottom: 10 } },
       /*#__PURE__*/React.createElement("div", { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: t.faint, margin: "0 2px 6px" } }, label),
@@ -4382,10 +4879,9 @@ function ALogin() {
         onClick: lgCrBusy ? null : lgCrGo,
         style: { marginTop: 16, minHeight: 52, borderRadius: 16, background: t.ink, color: dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", opacity: lgCrBusy ? 0.6 : 1 }
       }, lgCrBusy ? "Создаём…" : "Создать свою MAYA"),
-      /*#__PURE__*/React.createElement("div", {
-        onClick: lgCrBusy ? null : () => setLgCreate(false),
-        style: { textAlign: "center", marginTop: 16, fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: "pointer" }
-      }, "← У меня уже есть вход")));
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginTop: 16 } },
+        /*#__PURE__*/React.createElement("div", { onClick: lgCrBusy ? null : () => setLgManual(false), style: { fontFamily: BODY, fontSize: 12.5, color: t.faint, cursor: "pointer" } }, "← К Майе"),
+        /*#__PURE__*/React.createElement("div", { onClick: lgCrBusy ? null : () => setLgCreate(false), style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: "pointer" } }, "Уже есть вход"))));
   }
   const YandexBadge = /*#__PURE__*/React.createElement("div", {
     // Maya OS 0A: значок «Я» — инверсия текущей темы
@@ -4571,11 +5067,11 @@ function ALogin() {
       color: t.ink
     }
   }, "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438")))), /*#__PURE__*/React.createElement("div", {
-    onClick: () => { setLgCrErr(''); setLgCreate(true); },
+    onClick: () => { setLgCrErr(''); setLgAiErr(''); setLgManual(false); setLgAiStage('chat'); setLgCreate(true); },
     style: { textAlign: "center", marginTop: 14, cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("span", {
     style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase", color: t.ink, borderBottom: "1px solid " + t.line, paddingBottom: 3 }
-  }, "Создать свою MAYA")), /*#__PURE__*/React.createElement("div", {
+  }, "Настроить с Майей")), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       marginTop: 6
@@ -28313,4 +28809,64 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
 <script>(function(){var L=function(){try{if(window.screen&&screen.orientation&&screen.orientation.lock){var p=screen.orientation.lock("portrait");if(p&&p.catch)p.catch(function(){});}}catch(e){}};L();window.addEventListener("load",L);window.addEventListener("orientationchange",L);document.addEventListener("visibilitychange",function(){if(!document.hidden)L();});})();</script>
 <script>(function(){var root=document.getElementById("root");if(!root)return;var done=false,lastH=window.innerHeight,t0=Date.now(),stableSince=t0;function reveal(){if(done)return;done=true;root.style.opacity="1";}function tick(){if(done)return;var h=window.innerHeight,n=Date.now();if(h!==lastH){lastH=h;stableSince=n;}var el=n-t0,sf=n-stableSince;if((el>=260&&sf>=120)||el>=750){reveal();return;}requestAnimationFrame(tick);}requestAnimationFrame(tick);})();</script>
 <script>(function(){document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});document.addEventListener("gesturechange",function(e){e.preventDefault();},{passive:false});var lt=0;document.addEventListener("touchend",function(e){var n=Date.now();if(n-lt<=350){var tg=e.target;var ed=tg&&(tg.tagName==="INPUT"||tg.tagName==="TEXTAREA");if(!ed)e.preventDefault();}lt=n;},{passive:false});})();</script>
+<script>
+/* Голосовой мост онбординга: переиспользует STT-эндпоинт приложения (api-proxy chat).
+   Toggle-запись; при недоступности записи/распознавания — onErr, текст остаётся рабочим. */
+(function () {
+  var CHAT_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
+  var rec = null;
+  function stopStream(s) { try { s.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+  function transcribe(dataUrl, onText, onErr) {
+    fetch(CHAT_PROXY + '?action=chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio: dataUrl, transcribe_only: true }) })
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (d) { var tr = d && (d.transcript || d.text); if (tr) onText && onText(String(tr)); else onErr && onErr(); })
+      .catch(function () { onErr && onErr(); });
+  }
+  function encodeWav(samples, sampleRate) {
+    var buffer = new ArrayBuffer(44 + samples.length * 2), view = new DataView(buffer);
+    function ws(o, s) { for (var i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); }
+    ws(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+    view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true); ws(36, 'data'); view.setUint32(40, samples.length * 2, true);
+    var o = 44; for (var i = 0; i < samples.length; i++, o += 2) { var s = Math.max(-1, Math.min(1, samples[i])); view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true); }
+    return view;
+  }
+  window.__meVoiceToText = function (cmd, onText, onErr) {
+    if (cmd === 'stop') {
+      if (rec && rec.mr && rec.mr.state !== 'inactive') { try { rec.mr.stop(); } catch (e) {} }
+      else if (rec && rec.stopWav) { rec.stopWav(); }
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { onErr && onErr(); return; }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      if (window.MediaRecorder) {
+        var chunks = [], mr;
+        try { mr = new MediaRecorder(stream); } catch (e) { try { mr = new MediaRecorder(stream, { mimeType: 'audio/webm' }); } catch (e2) { stopStream(stream); onErr && onErr(); return; } }
+        mr.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mr.onstop = function () {
+          stopStream(stream);
+          var blob = new Blob(chunks, { type: (chunks[0] && chunks[0].type) || 'audio/webm' });
+          var fr = new FileReader(); fr.onloadend = function () { transcribe(fr.result, onText, onErr); }; fr.readAsDataURL(blob);
+        };
+        rec = { mr: mr }; mr.start();
+      } else {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) { stopStream(stream); onErr && onErr(); return; }
+        var ctx = new AC(), srcNode = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), buf = [], sr = ctx.sampleRate;
+        proc.onaudioprocess = function (e) { buf.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+        srcNode.connect(proc); proc.connect(ctx.destination);
+        rec = { stopWav: function () {
+          try { proc.disconnect(); srcNode.disconnect(); } catch (e) {}
+          stopStream(stream); try { ctx.close(); } catch (e) {}
+          var len = buf.reduce(function (a, b) { return a + b.length; }, 0), flat = new Float32Array(len), off = 0;
+          buf.forEach(function (b) { flat.set(b, off); off += b.length; });
+          var wav = encodeWav(flat, sr), fr = new FileReader();
+          fr.onloadend = function () { transcribe(fr.result, onText, onErr); }; fr.readAsDataURL(new Blob([wav], { type: 'audio/wav' }));
+        } };
+      }
+    }).catch(function () { onErr && onErr(); });
+  };
+})();
+</script>
 </body></html>

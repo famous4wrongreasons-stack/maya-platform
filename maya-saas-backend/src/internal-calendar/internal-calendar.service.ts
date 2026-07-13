@@ -16,6 +16,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
+import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import type { WeeklyAvailabilityRuleDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
@@ -266,6 +267,67 @@ export class InternalCalendarService {
     });
 
     return providers.map((provider) => this.serializeProvider(provider));
+  }
+
+  async createProvider(tenantId: string, dto: CreateInternalProviderDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertInternalSource(scopedTenantId);
+    const branchId =
+      dto.branchId ?? (await this.findFirstBranchId(scopedTenantId));
+
+    if (branchId) {
+      const branch = await this.prisma.branch.findFirst({
+        where: { id: branchId, tenantId: scopedTenantId },
+        select: { id: true },
+      });
+
+      if (!branch) {
+        throw new NotFoundException('Branch not found for this tenant');
+      }
+    }
+
+    const services = await this.prisma.internalService.findMany({
+      where: { tenantId: scopedTenantId, active: true },
+      select: { id: true },
+    });
+    const provider = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.internalProvider.create({
+        data: {
+          tenantId: scopedTenantId,
+          userId: null,
+          branchId,
+          displayName: dto.displayName.trim(),
+          title: dto.title?.trim() || 'Специалист',
+          specialization: dto.specialization?.trim() || null,
+          avatarUrl: dto.avatarUrl,
+          slotIntervalMinutes: dto.slotIntervalMinutes ?? 30,
+        },
+      });
+
+      await tx.internalAvailabilityRule.createMany({
+        data: DEFAULT_WEEKLY_RULES.map((rule) => ({
+          tenantId: scopedTenantId,
+          providerId: created.id,
+          weekday: rule.weekday,
+          startMinute: parseTimeToMinute(rule.startTime),
+          endMinute: parseTimeToMinute(rule.endTime),
+        })),
+      });
+
+      if (services.length > 0) {
+        await tx.internalProviderService.createMany({
+          data: services.map((service) => ({
+            tenantId: scopedTenantId,
+            providerId: created.id,
+            serviceId: service.id,
+          })),
+        });
+      }
+
+      return created;
+    });
+
+    return this.getProvider(scopedTenantId, provider.id);
   }
 
   async updateProvider(
@@ -762,7 +824,7 @@ export class InternalCalendarService {
 
   private serializeProvider(provider: {
     id: string;
-    userId: string;
+    userId: string | null;
     branchId: string | null;
     displayName: string;
     title: string | null;

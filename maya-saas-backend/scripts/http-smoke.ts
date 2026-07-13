@@ -74,7 +74,7 @@ async function waitForHealth(child: ChildProcess | null) {
   const deadline = Date.now() + 15_000;
 
   while (Date.now() < deadline) {
-    if (child?.exitCode !== null) {
+    if (child && child.exitCode !== null) {
       throw new Error(
         `Backend exited before health check (${child?.exitCode})`,
       );
@@ -142,6 +142,100 @@ async function runSmoke() {
   assert(presetIds.includes('general_service'));
   assert(presetIds.includes('dental_clinic'));
   assert(presetIds.includes('education'));
+
+  const onboardingTemplates = asRecord(
+    await expectStatus('/onboarding/templates', 200),
+  );
+  assert.equal(onboardingTemplates.branding_mode, 'logo_only');
+  const templateIds = asArray(onboardingTemplates.templates).map((template) =>
+    stringField(template, 'id'),
+  );
+  assert(templateIds.includes('solo_specialist'));
+  assert(templateIds.includes('barbershop'));
+  assert(templateIds.includes('pet_services'));
+
+  const aiSuffix = Date.now();
+  const aiDraft = asRecord(
+    await expectStatus('/onboarding/ai/drafts', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        message: `Я частный массажист, работаю один. Название AI Smoke ${aiSuffix}.`,
+      }),
+    }),
+  );
+  const aiDraftId = stringField(aiDraft, 'draft_id');
+  const aiDraftToken = stringField(aiDraft, 'draft_token');
+  assert(asArray(aiDraft.missing_fields).includes('services'));
+  await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 401, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ draftToken: 'x'.repeat(43) }),
+  });
+
+  const completedAiDraft = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/messages`, 200, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        draftToken: aiDraftToken,
+        message: 'Услуги: массаж 3000 руб 60 минут',
+      }),
+    }),
+  );
+  assert.deepEqual(completedAiDraft.missing_fields, []);
+
+  await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      draftToken: aiDraftToken,
+      ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+      ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+    }),
+  });
+
+  await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      draftToken: aiDraftToken,
+      ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+      ownerName: 'AI Smoke Owner',
+    }),
+  });
+
+  const confirmedAiSignup = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        draftToken: aiDraftToken,
+        ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+        ownerName: 'AI Smoke Owner',
+        ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+      }),
+    }),
+  );
+  assert.equal(confirmedAiSignup.branding_mode, 'logo_only');
+  assert.equal(confirmedAiSignup.next_step, 'upload_logo_or_open_app');
+  const aiSignupToken = stringField(confirmedAiSignup, 'access_token');
+  const aiCalendarSetup = asRecord(
+    await expectStatus('/internal-calendar/setup', 200, {
+      headers: authHeaders(aiSignupToken),
+    }),
+  );
+  assert.equal(aiCalendarSetup.ready, true);
+  assert.equal(asArray(aiCalendarSetup.providers).length, 1);
+  assert.equal(asArray(aiCalendarSetup.services).length, 1);
+  const confirmedDraft = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 200, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ draftToken: aiDraftToken }),
+    }),
+  );
+  assert.equal(confirmedDraft.status, 'confirmed');
 
   const demoConfig = asRecord(
     await expectStatus(`/mobile/config/${demoTenantSlug}`, 200),
@@ -588,7 +682,7 @@ async function runSmoke() {
   });
 
   console.log(
-    'HTTP smoke passed: tenant fence, auth rotation, CRM preview and internal calendar booking',
+    'HTTP smoke passed: AI onboarding, tenant fence, auth rotation, CRM preview and internal calendar booking',
   );
 }
 
