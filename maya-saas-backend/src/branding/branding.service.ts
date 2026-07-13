@@ -142,7 +142,7 @@ export class BrandingService {
     });
   }
 
-  async uploadTenantLogo(tenantId: string, file: UploadedLogoFile) {
+  async uploadTenantLogo(tenantId: string, file: UploadedLogoFile | undefined) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     this.validateLogoFile(file);
 
@@ -210,7 +210,9 @@ export class BrandingService {
     }
   }
 
-  private validateLogoFile(file: UploadedLogoFile) {
+  private validateLogoFile(
+    file: UploadedLogoFile | undefined,
+  ): asserts file is UploadedLogoFile {
     if (!file?.buffer?.length) {
       throw new BadRequestException(
         this.buildLogoUploadError(

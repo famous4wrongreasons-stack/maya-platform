@@ -110,7 +110,7 @@ export class AdminService {
 
   async uploadTenantLogo(
     id: string,
-    file: UploadedLogoFile,
+    file: UploadedLogoFile | undefined,
     actor: AuthenticatedUser,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
