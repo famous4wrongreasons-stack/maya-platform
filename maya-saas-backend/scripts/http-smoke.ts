@@ -74,7 +74,7 @@ async function waitForHealth(child: ChildProcess | null) {
   const deadline = Date.now() + 15_000;
 
   while (Date.now() < deadline) {
-    if (child?.exitCode !== null) {
+    if (child && child.exitCode !== null) {
       throw new Error(
         `Backend exited before health check (${child?.exitCode})`,
       );
@@ -191,6 +191,17 @@ async function runSmoke() {
     body: JSON.stringify({
       draftToken: aiDraftToken,
       ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+      ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+    }),
+  });
+
+  await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      draftToken: aiDraftToken,
+      ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+      ownerName: 'AI Smoke Owner',
     }),
   });
 

@@ -104,11 +104,11 @@ export class ConfirmAiOnboardingDraftDto {
   @IsEmail()
   ownerEmail!: string;
 
-  @ApiPropertyOptional({ example: 'Алексей' })
-  @IsOptional()
+  @ApiProperty({ example: 'Алексей' })
   @IsString()
+  @MinLength(2)
   @MaxLength(120)
-  ownerName?: string;
+  ownerName!: string;
 
   @ApiProperty({
     example: '+79990000000',

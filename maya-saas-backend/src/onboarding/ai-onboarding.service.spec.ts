@@ -157,6 +157,7 @@ describe('AiOnboardingService', () => {
       service.confirmDraft('draft-1', {
         draftToken: token,
         ownerEmail: 'owner@example.ru',
+        ownerName: 'Владелец',
         ownerPhone: '+79990000000',
       }),
     ).rejects.toBeInstanceOf(ConflictException);

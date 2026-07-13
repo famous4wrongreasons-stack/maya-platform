@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 
-import { TenantStatus, UserRole } from '../common/domain.enums';
+import { CrmProvider, TenantStatus, UserRole } from '../common/domain.enums';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { BrandingService } from '../branding/branding.service';
@@ -25,18 +25,19 @@ describe('AdminService tenant update boundaries', () => {
 
   const createService = () => {
     const updateTenantMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
+    const upsertCrmMock = jest.fn().mockResolvedValue({ id: 'crm-1' });
     const auditLogMock = jest.fn().mockResolvedValue(undefined);
     const service = new AdminService(
       { updateTenant: updateTenantMock } as unknown as TenantsService,
       {} as BrandingService,
-      {} as CrmService,
+      { createOrUpdateIntegration: upsertCrmMock } as unknown as CrmService,
       {} as UsersService,
       {} as SubscriptionsService,
       { log: auditLogMock } as unknown as AuditLogService,
       {} as TenantContextService,
     );
 
-    return { service, updateTenantMock, auditLogMock };
+    return { service, updateTenantMock, upsertCrmMock, auditLogMock };
   };
 
   it('prevents a tenant admin from activating their own trial', async () => {
@@ -65,5 +66,36 @@ describe('AdminService tenant update boundaries', () => {
       bookingMode: 'preview',
     });
     expect(auditLogMock).toHaveBeenCalled();
+  });
+
+  it('prevents a tenant admin from overriding the CRM base URL', async () => {
+    const { service, upsertCrmMock } = createService();
+
+    await expect(
+      service.upsertCrm(
+        'tenant-1',
+        {
+          provider: CrmProvider.YCLIENTS,
+          apiToken: 'tenant-token',
+          baseUrl: 'http://127.0.0.1:8080',
+          settingsJson: { companyId: 42 },
+        },
+        tenantAdmin,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(upsertCrmMock).not.toHaveBeenCalled();
+  });
+
+  it('allows a tenant admin to configure a CRM without a base URL override', async () => {
+    const { service, upsertCrmMock } = createService();
+    const dto = {
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'tenant-token',
+      settingsJson: { companyId: 42 },
+    };
+
+    await service.upsertCrm('tenant-1', dto, tenantAdmin);
+
+    expect(upsertCrmMock).toHaveBeenCalledWith('tenant-1', dto);
   });
 });
