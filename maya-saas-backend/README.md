@@ -121,6 +121,11 @@ CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://lo
 SWAGGER_ENABLED="true"
 SELF_SERVE_TRIAL_SIGNUP="false"
 AI_ONBOARDING_PROVIDER="auto"
+DEEPSEEK_API_KEY=""
+DEEPSEEK_BASE_URL="https://api.deepseek.com"
+DEEPSEEK_AI_ONBOARDING_MODEL="deepseek-v4-flash"
+DEEPSEEK_AI_ONBOARDING_TIMEOUT_MS="12000"
+DEEPSEEK_THINKING="disabled"
 OPENAI_API_KEY=""
 OPENAI_AI_ONBOARDING_MODEL="gpt-5.4-mini"
 OPENAI_AI_ONBOARDING_TIMEOUT_MS="12000"
@@ -181,8 +186,12 @@ Social login toggles:
 
 Conversational onboarding:
 
-- `AI_ONBOARDING_PROVIDER=auto`: use strict model output when an OpenAI key is configured and fall back safely when unavailable
+- `AI_ONBOARDING_PROVIDER=auto`: select DeepSeek when its key is configured, otherwise OpenAI when its key is configured, otherwise the safe deterministic parser; a runtime model failure always falls back locally
+- `AI_ONBOARDING_PROVIDER=deepseek`: use only the DeepSeek JSON Output path; a missing or unavailable key falls back safely without silently switching providers
+- `AI_ONBOARDING_PROVIDER=openai`: use only OpenAI strict Structured Outputs
 - `AI_ONBOARDING_PROVIDER=safe`: force the deterministic, offline Russian parser
+- `DEEPSEEK_AI_ONBOARDING_MODEL`: privacy-redacted semantic interpreter; defaults to `deepseek-v4-flash`
+- `DEEPSEEK_THINKING=disabled`: keeps the short structured onboarding path fast and avoids persisting reasoning content
 - `OPENAI_AI_ONBOARDING_MODEL`: model used only for privacy-redacted semantic interpretation
 - Trial activation tokens are created only after the MAYA OS swipe and grant 10 days of full access only after tenant registration completes
 - `GET /api/admin/analytics/trials` counts a connected business only after that successful registration; abandoned swipes are reported separately

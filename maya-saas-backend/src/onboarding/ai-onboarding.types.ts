@@ -41,5 +41,5 @@ export interface AiOnboardingInterpretation {
   missingFields: AiOnboardingMissingField[];
   needsClarification: boolean;
   quickReplies: AiOnboardingQuickReply[];
-  source: 'openai' | 'safe_fallback';
+  source: 'deepseek' | 'openai' | 'safe_fallback';
 }

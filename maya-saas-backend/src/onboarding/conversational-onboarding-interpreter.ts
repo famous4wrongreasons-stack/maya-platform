@@ -22,6 +22,8 @@ import {
 
 const CONFIDENCE_THRESHOLD = 0.72;
 const DEFAULT_TIMEOUT_MS = 12_000;
+const DEFAULT_DEEPSEEK_BASE_URL = 'https://api.deepseek.com';
+const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-flash';
 
 const ACCEPTED_FIELDS = [
   'template',
@@ -32,15 +34,23 @@ const ACCEPTED_FIELDS = [
   'weekly_rules',
   'use_template_services',
 ] as const;
+const MODEL_INTENTS = [
+  'provide_details',
+  'correction',
+  'smalltalk',
+  'unclear',
+] as const;
 
 type AcceptedField = (typeof ACCEPTED_FIELDS)[number];
+type ModelProvider = 'deepseek' | 'openai';
+type ModelIntent = (typeof MODEL_INTENTS)[number];
 
 type ModelTurn = {
   accepted_fields: AcceptedField[];
   assistant_message: string;
   clarification_question: string | null;
   confidence: number;
-  intent: 'provide_details' | 'correction' | 'smalltalk' | 'unclear';
+  intent: ModelIntent;
   needs_clarification: boolean;
   patch: {
     business_name: string | null;
@@ -61,6 +71,15 @@ type OpenAiResponse = {
       type?: string;
     }>;
     type?: string;
+  }>;
+};
+
+type DeepSeekResponse = {
+  choices?: Array<{
+    finish_reason?: string | null;
+    message?: {
+      content?: string | null;
+    };
   }>;
 };
 
@@ -95,7 +114,8 @@ export class ConversationalOnboardingInterpreter {
     if (this.didResolvePersonalBrandName(message, safe, previous)) {
       return safe;
     }
-    if (!this.isOpenAiEnabled()) {
+    const provider = this.resolveModelProvider();
+    if (!provider) {
       return safe;
     }
 
@@ -106,12 +126,13 @@ export class ConversationalOnboardingInterpreter {
 
     try {
       const turn = await this.requestStructuredTurn(
+        provider,
         sanitizedMessage,
         previous,
         safe.missingFields,
         preferredTemplateId,
       );
-      return this.mergeModelTurn(turn, safe, previous);
+      return this.mergeModelTurn(turn, safe, provider, previous);
     } catch (error) {
       this.logger.warn(
         `AI onboarding fallback activated: ${this.safeErrorName(error)}`,
@@ -121,6 +142,30 @@ export class ConversationalOnboardingInterpreter {
   }
 
   private async requestStructuredTurn(
+    provider: ModelProvider,
+    sanitizedMessage: string,
+    previous: AiOnboardingBlueprint | undefined,
+    missingFields: AiOnboardingMissingField[],
+    preferredTemplateId?: string,
+  ): Promise<ModelTurn> {
+    if (provider === 'deepseek') {
+      return this.requestDeepSeekStructuredTurn(
+        sanitizedMessage,
+        previous,
+        missingFields,
+        preferredTemplateId,
+      );
+    }
+
+    return this.requestOpenAiStructuredTurn(
+      sanitizedMessage,
+      previous,
+      missingFields,
+      preferredTemplateId,
+    );
+  }
+
+  private async requestOpenAiStructuredTurn(
     sanitizedMessage: string,
     previous: AiOnboardingBlueprint | undefined,
     missingFields: AiOnboardingMissingField[],
@@ -145,18 +190,14 @@ export class ConversationalOnboardingInterpreter {
         store: false,
         max_output_tokens: 1_200,
         instructions: MODEL_INSTRUCTIONS,
-        input: JSON.stringify({
-          user_message: sanitizedMessage,
-          preferred_template_id: preferredTemplateId ?? null,
-          current_state: this.buildPrivacySafeState(previous),
-          missing_fields: missingFields,
-          templates: listBusinessTemplates().map((template) => ({
-            id: template.id,
-            name: template.name,
-            description: template.description,
-            provider_title: template.providerTitle,
-          })),
-        }),
+        input: JSON.stringify(
+          this.buildModelInput(
+            sanitizedMessage,
+            previous,
+            missingFields,
+            preferredTemplateId,
+          ),
+        ),
         text: {
           format: {
             type: 'json_schema',
@@ -166,7 +207,7 @@ export class ConversationalOnboardingInterpreter {
           },
         },
       }),
-      signal: AbortSignal.timeout(this.resolveTimeoutMs()),
+      signal: AbortSignal.timeout(this.resolveTimeoutMs('openai')),
     });
 
     if (!response.ok) {
@@ -181,12 +222,110 @@ export class ConversationalOnboardingInterpreter {
       throw new Error('openai_output_missing');
     }
 
-    return this.validateModelTurn(JSON.parse(outputText) as unknown);
+    return this.validateModelTurn(JSON.parse(outputText) as unknown, 'openai');
+  }
+
+  private async requestDeepSeekStructuredTurn(
+    sanitizedMessage: string,
+    previous: AiOnboardingBlueprint | undefined,
+    missingFields: AiOnboardingMissingField[],
+    preferredTemplateId?: string,
+  ): Promise<ModelTurn> {
+    const apiKey = this.configService.get<string>('DEEPSEEK_API_KEY')?.trim();
+    if (!apiKey) {
+      throw new Error('deepseek_api_key_missing');
+    }
+
+    const response = await fetch(this.resolveDeepSeekEndpoint(), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model:
+          this.configService
+            .get<string>('DEEPSEEK_AI_ONBOARDING_MODEL')
+            ?.trim() || DEFAULT_DEEPSEEK_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: this.buildDeepSeekInstructions(),
+          },
+          {
+            role: 'user',
+            content: JSON.stringify(
+              this.buildModelInput(
+                sanitizedMessage,
+                previous,
+                missingFields,
+                preferredTemplateId,
+              ),
+            ),
+          },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 1_200,
+        temperature: 0.2,
+        thinking: { type: this.resolveDeepSeekThinking() },
+        stream: false,
+      }),
+      signal: AbortSignal.timeout(this.resolveTimeoutMs('deepseek')),
+    });
+
+    if (!response.ok) {
+      throw new Error(`deepseek_http_${response.status}`);
+    }
+
+    const payload = (await response.json()) as DeepSeekResponse;
+    const choice = payload.choices?.[0];
+    if (choice?.finish_reason && choice.finish_reason !== 'stop') {
+      throw new Error(`deepseek_finish_${choice.finish_reason.slice(0, 32)}`);
+    }
+    const outputText = choice?.message?.content?.trim();
+    if (!outputText) {
+      throw new Error('deepseek_output_missing');
+    }
+
+    return this.validateModelTurn(
+      JSON.parse(outputText) as unknown,
+      'deepseek',
+    );
+  }
+
+  private buildModelInput(
+    sanitizedMessage: string,
+    previous: AiOnboardingBlueprint | undefined,
+    missingFields: AiOnboardingMissingField[],
+    preferredTemplateId?: string,
+  ) {
+    return {
+      user_message: sanitizedMessage,
+      preferred_template_id: preferredTemplateId ?? null,
+      current_state: this.buildPrivacySafeState(previous),
+      missing_fields: missingFields,
+      templates: listBusinessTemplates().map((template) => ({
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        provider_title: template.providerTitle,
+      })),
+    };
+  }
+
+  private buildDeepSeekInstructions(): string {
+    return [
+      MODEL_INSTRUCTIONS,
+      'Верни только один валидный JSON-объект без Markdown и пояснений.',
+      `JSON Schema: ${JSON.stringify(MODEL_TURN_SCHEMA)}`,
+      `Пример JSON: ${JSON.stringify(MODEL_TURN_EXAMPLE)}`,
+    ].join('\n\n');
   }
 
   private mergeModelTurn(
     turn: ModelTurn,
     safe: AiOnboardingInterpretation,
+    provider: ModelProvider,
     previous?: AiOnboardingBlueprint,
   ): AiOnboardingInterpretation {
     const accepted = new Set(turn.accepted_fields);
@@ -260,27 +399,79 @@ export class ConversationalOnboardingInterpreter {
       needsClarification: uncertain,
       quickReplies:
         quickReplies.length > 0 ? quickReplies : fallbackTurn.quickReplies,
-      source: 'openai',
+      source: provider,
     };
   }
 
-  private validateModelTurn(value: unknown): ModelTurn {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      throw new Error('openai_output_invalid');
+  private validateModelTurn(
+    value: unknown,
+    provider: ModelProvider,
+  ): ModelTurn {
+    if (!this.isRecord(value)) {
+      throw new Error(`${provider}_output_invalid`);
     }
     const turn = value as Partial<ModelTurn>;
+    const patch = turn.patch;
     if (
+      !MODEL_INTENTS.includes((turn.intent ?? 'invalid') as ModelIntent) ||
       typeof turn.assistant_message !== 'string' ||
-      typeof turn.confidence !== 'number' ||
+      !this.isNullableString(turn.clarification_question) ||
+      !this.isNumberInRange(turn.confidence, 0, 1) ||
       typeof turn.needs_clarification !== 'boolean' ||
-      !turn.patch ||
+      !this.isRecord(patch) ||
       !Array.isArray(turn.accepted_fields) ||
-      !Array.isArray(turn.quick_replies)
+      !turn.accepted_fields.every(
+        (field) => typeof field === 'string' && ACCEPTED_FIELDS.includes(field),
+      ) ||
+      !Array.isArray(turn.quick_replies) ||
+      !turn.quick_replies.every(
+        (reply) =>
+          this.isRecord(reply) &&
+          typeof reply.label === 'string' &&
+          typeof reply.message === 'string',
+      ) ||
+      !this.isValidModelPatch(patch)
     ) {
-      throw new Error('openai_output_invalid');
+      throw new Error(`${provider}_output_invalid`);
     }
 
     return turn as ModelTurn;
+  }
+
+  private isValidModelPatch(patch: Record<string, unknown>): boolean {
+    return (
+      (patch.template_id === null ||
+        (typeof patch.template_id === 'string' &&
+          BUSINESS_TEMPLATE_IDS.includes(
+            patch.template_id as (typeof BUSINESS_TEMPLATE_IDS)[number],
+          ))) &&
+      this.isNullableString(patch.business_name) &&
+      (patch.calendar_source === null ||
+        patch.calendar_source === CalendarSource.INTERNAL ||
+        patch.calendar_source === CalendarSource.EXTERNAL) &&
+      (patch.provider_count === null ||
+        this.isIntegerInRange(patch.provider_count, 1, 100)) &&
+      typeof patch.use_template_services === 'boolean' &&
+      Array.isArray(patch.services) &&
+      patch.services.every(
+        (service) =>
+          this.isRecord(service) &&
+          typeof service.name === 'string' &&
+          this.isIntegerInRange(service.price, 0, 10_000_000) &&
+          this.isIntegerInRange(service.durationMinutes, 5, 1_440),
+      ) &&
+      Array.isArray(patch.weekly_rules) &&
+      patch.weekly_rules.every(
+        (rule) =>
+          this.isRecord(rule) &&
+          this.isIntegerInRange(rule.weekday, 0, 6) &&
+          typeof rule.startTime === 'string' &&
+          typeof rule.endTime === 'string' &&
+          /^([01]\d|2[0-3]):[0-5]\d$/u.test(rule.startTime) &&
+          /^([01]\d|2[0-3]):[0-5]\d$/u.test(rule.endTime) &&
+          rule.startTime < rule.endTime,
+      )
+    );
   }
 
   private buildPrivacySafeState(previous?: AiOnboardingBlueprint) {
@@ -349,16 +540,25 @@ export class ConversationalOnboardingInterpreter {
     return !likelyPersonalNameReply;
   }
 
-  private isOpenAiEnabled(): boolean {
+  private resolveModelProvider(): ModelProvider | null {
     const provider =
       this.configService
         .get<string>('AI_ONBOARDING_PROVIDER')
         ?.trim()
         .toLowerCase() ?? 'auto';
-    return (
-      provider !== 'safe' &&
-      Boolean(this.configService.get<string>('OPENAI_API_KEY')?.trim())
+    const hasDeepSeek = Boolean(
+      this.configService.get<string>('DEEPSEEK_API_KEY')?.trim(),
     );
+    const hasOpenAi = Boolean(
+      this.configService.get<string>('OPENAI_API_KEY')?.trim(),
+    );
+
+    if (provider === 'deepseek') return hasDeepSeek ? 'deepseek' : null;
+    if (provider === 'openai') return hasOpenAi ? 'openai' : null;
+    if (provider !== 'auto') return null;
+    if (hasDeepSeek) return 'deepseek';
+    if (hasOpenAi) return 'openai';
+    return null;
   }
 
   private didApplyTemplateServices(
@@ -393,13 +593,77 @@ export class ConversationalOnboardingInterpreter {
     );
   }
 
-  private resolveTimeoutMs(): number {
-    const configured = Number(
-      this.configService.get<string>('OPENAI_AI_ONBOARDING_TIMEOUT_MS'),
-    );
+  private resolveTimeoutMs(provider: ModelProvider): number {
+    const key =
+      provider === 'deepseek'
+        ? 'DEEPSEEK_AI_ONBOARDING_TIMEOUT_MS'
+        : 'OPENAI_AI_ONBOARDING_TIMEOUT_MS';
+    const configured = Number(this.configService.get<string>(key));
     return Number.isInteger(configured) && configured >= 1_000
       ? Math.min(configured, 30_000)
       : DEFAULT_TIMEOUT_MS;
+  }
+
+  private resolveDeepSeekEndpoint(): string {
+    const configured =
+      this.configService.get<string>('DEEPSEEK_BASE_URL')?.trim() ||
+      DEFAULT_DEEPSEEK_BASE_URL;
+    let url: URL;
+    try {
+      url = new URL(configured);
+    } catch {
+      throw new Error('deepseek_base_url_invalid');
+    }
+    if (url.protocol !== 'https:' || url.username || url.password) {
+      throw new Error('deepseek_base_url_invalid');
+    }
+    url.search = '';
+    url.hash = '';
+    const basePath = url.pathname.replace(/\/+$/u, '');
+    url.pathname = basePath.endsWith('/chat/completions')
+      ? basePath
+      : `${basePath}/chat/completions`;
+    return url.toString();
+  }
+
+  private resolveDeepSeekThinking(): 'disabled' | 'enabled' {
+    return this.configService
+      .get<string>('DEEPSEEK_THINKING')
+      ?.trim()
+      .toLowerCase() === 'enabled'
+      ? 'enabled'
+      : 'disabled';
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  private isNullableString(value: unknown): value is string | null {
+    return value === null || typeof value === 'string';
+  }
+
+  private isNumberInRange(
+    value: unknown,
+    minimum: number,
+    maximum: number,
+  ): value is number {
+    return (
+      typeof value === 'number' &&
+      Number.isFinite(value) &&
+      value >= minimum &&
+      value <= maximum
+    );
+  }
+
+  private isIntegerInRange(
+    value: unknown,
+    minimum: number,
+    maximum: number,
+  ): value is number {
+    return (
+      this.isNumberInRange(value, minimum, maximum) && Number.isInteger(value)
+    );
   }
 
   private getMissingFields(
@@ -595,3 +859,25 @@ const MODEL_TURN_SCHEMA = {
     'patch',
   ],
 } as const;
+
+const MODEL_TURN_EXAMPLE = {
+  intent: 'unclear',
+  confidence: 0.4,
+  needs_clarification: true,
+  assistant_message: 'Хочу уточнить ваш ответ.',
+  clarification_question: 'Вы работаете один или у вас есть команда?',
+  accepted_fields: [],
+  quick_replies: [
+    { label: 'Работаю один', message: 'Я работаю один' },
+    { label: 'Есть команда', message: 'У меня есть команда' },
+  ],
+  patch: {
+    template_id: null,
+    business_name: null,
+    calendar_source: null,
+    provider_count: null,
+    use_template_services: false,
+    services: [],
+    weekly_rules: [],
+  },
+} satisfies ModelTurn;
