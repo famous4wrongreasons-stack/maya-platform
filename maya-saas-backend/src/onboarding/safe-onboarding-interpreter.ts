@@ -86,9 +86,15 @@ export class SafeOnboardingInterpreter {
       expectsBusinessName &&
       hasNoFormalBusinessNameSignal(normalized) &&
       !extractedBusinessName;
-    const templateId = preferredTemplateId
-      ? getBusinessTemplate(preferredTemplateId).id
-      : this.detectTemplate(normalized, previous?.templateId);
+    const preferredTemplate = preferredTemplateId
+      ? getBusinessTemplate(preferredTemplateId)
+      : null;
+    // Generic chips describe the business shape, not its profession. A user
+    // who chose "solo specialist" can still be a barber, dentist or tutor.
+    const templateId =
+      this.detectIndustryTemplate(normalized) ??
+      preferredTemplate?.id ??
+      this.detectTemplate(normalized, previous?.templateId);
     const template = getBusinessTemplate(templateId);
     const detectedSchedule = this.extractSchedule(normalized);
     const blueprint: AiOnboardingBlueprint = {
@@ -103,7 +109,10 @@ export class SafeOnboardingInterpreter {
       providerCount:
         this.extractProviderCount(normalized) ??
         previous?.providerCount ??
-        (template.id === 'solo_specialist' ? 1 : null),
+        (template.id === 'solo_specialist' ||
+        preferredTemplate?.id === 'solo_specialist'
+          ? 1
+          : null),
       providerTitle: template.providerTitle,
       services: this.shouldUseTemplateServices(normalized, expectsServices)
         ? template.suggestedServices.map((service) => ({ ...service }))
@@ -157,10 +166,8 @@ export class SafeOnboardingInterpreter {
     message: string,
     previousTemplateId?: string,
   ): BusinessTemplateId {
-    const match = TEMPLATE_SIGNALS.find(([, pattern]) => pattern.test(message));
-    if (match) {
-      return match[0];
-    }
+    const industryTemplate = this.detectIndustryTemplate(message);
+    if (industryTemplate) return industryTemplate;
 
     if (previousTemplateId) {
       return getBusinessTemplate(previousTemplateId).id;
@@ -179,6 +186,12 @@ export class SafeOnboardingInterpreter {
     }
 
     return 'general_service';
+  }
+
+  private detectIndustryTemplate(message: string): BusinessTemplateId | null {
+    return (
+      TEMPLATE_SIGNALS.find(([, pattern]) => pattern.test(message))?.[0] ?? null
+    );
   }
 
   private detectCalendarSource(

@@ -130,7 +130,7 @@ export class ConversationalOnboardingInterpreter {
         sanitizedMessage,
         previous,
         safe.missingFields,
-        preferredTemplateId,
+        safe.blueprint.templateId,
       );
       return this.mergeModelTurn(turn, safe, provider, previous);
     } catch (error) {

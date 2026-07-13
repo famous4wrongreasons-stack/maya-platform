@@ -191,6 +191,24 @@ describe('SafeOnboardingInterpreter', () => {
     expect(result.missingFields).toEqual([]);
   });
 
+  it('treats solo specialist as business shape and keeps profession services', () => {
+    const result = interpreter.interpret(
+      'Я парикмахер, работаю один. Услуги поставь автоматически.',
+      undefined,
+      'solo_specialist',
+    );
+
+    expect(result.blueprint).toMatchObject({
+      templateId: 'barbershop',
+      industryPresetId: 'barbershop',
+      providerCount: 1,
+    });
+    expect(result.blueprint.services).toHaveLength(17);
+    expect(result.blueprint.services).not.toContainEqual(
+      expect.objectContaining({ name: 'Консультация' }),
+    );
+  });
+
   it('understands a chair-renting hairdresser who works under their own name', () => {
     const first = interpreter.interpret(
       'я работаю парикмахером! снимаю кресло!',
