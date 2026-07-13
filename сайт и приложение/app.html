@@ -1044,7 +1044,7 @@ function IOSDevice({
       borderRadius: 0,
       overflow: 'hidden',
       position: 'relative',
-      background: dark ? '#000000' : '#f4f0eb',
+      background: dark ? '#000000' : window.__ME_SAAS_CTX ? '#ffffff' : '#f4f0eb',
       boxShadow: 'none',
       fontFamily: '-apple-system, system-ui, sans-serif',
       WebkitFontSmoothing: 'antialiased'
@@ -1305,6 +1305,47 @@ const BRASS_DEEP = "#7d7970";
 // Tokens — color system per direction + theme
 // ---------------------------------------------------------------------
 function tokens(dir, dark) {
+  // Universal MAYA OS has one recognizable system palette. Tenant branding is
+  // logo-only here: uploaded colors never recolor controls or app surfaces.
+  if (window.__ME_SAAS_CTX) {
+    return dark ? {
+      name: "maya-os",
+      dark: true,
+      accent: "#ffffff",
+      accentHi: "#e6e6e6",
+      accentDeep: "#ffffff",
+      bg: "#000000",
+      bg2: "#0a0a0a",
+      ink: "#ffffff",
+      dim: "rgba(255,255,255,0.58)",
+      faint: "rgba(255,255,255,0.32)",
+      card: "rgba(255,255,255,0.06)",
+      cardSolid: "#101010",
+      line: "rgba(255,255,255,0.14)",
+      glassTint: "rgba(255,255,255,0.06)",
+      glassBorder: "rgba(255,255,255,0.16)",
+      glassHi: "rgba(255,255,255,0.24)",
+      cool: "#8a8a8a"
+    } : {
+      name: "maya-os",
+      dark: false,
+      accent: "#000000",
+      accentHi: "#242424",
+      accentDeep: "#000000",
+      bg: "#ffffff",
+      bg2: "#f2f2f2",
+      ink: "#000000",
+      dim: "rgba(0,0,0,0.58)",
+      faint: "rgba(0,0,0,0.34)",
+      card: "rgba(0,0,0,0.045)",
+      cardSolid: "#ffffff",
+      line: "rgba(0,0,0,0.12)",
+      glassTint: "rgba(255,255,255,0.72)",
+      glassBorder: "rgba(0,0,0,0.11)",
+      glassHi: "rgba(255,255,255,0.96)",
+      cool: "#707070"
+    };
+  }
   // P2 white-label (safe-mode): акцент бренда тенанта поверх дефолта
   const __sb = (window.__SAAS_BRAND && window.__SAAS_BRAND.accent_color) ? window.__SAAS_BRAND : null;
   const brass = {
@@ -1460,7 +1501,7 @@ function Backdrop({
       style: {
         position: "absolute",
         inset: "-20%",
-        background: t.dark ? "none" : "radial-gradient(48% 36% at 18% 10%, rgba(255,255,255,0.22), transparent 60%), radial-gradient(52% 42% at 90% 28%, rgba(150,148,142,0.10), transparent 62%), radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.14), transparent 60%)",
+        background: t.dark ? "none" : t.name === "maya-os" ? "radial-gradient(48% 36% at 18% 10%, rgba(255,255,255,0.32), transparent 60%), radial-gradient(52% 42% at 90% 28%, rgba(128,128,128,0.10), transparent 62%), radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.18), transparent 60%)" : "radial-gradient(48% 36% at 18% 10%, rgba(255,255,255,0.22), transparent 60%), radial-gradient(52% 42% at 90% 28%, rgba(150,148,142,0.10), transparent 62%), radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.14), transparent 60%)",
         filter: "blur(10px)"
       }
     }), /*#__PURE__*/React.createElement(PaperGrain, {
@@ -4985,7 +5026,7 @@ function ALogin() {
       height: 22,
       borderRadius: 999,
       background: t.ink,
-      color: t.dark ? "#0b0b0c" : "#f4f0eb",
+      color: t.bg,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -5011,9 +5052,9 @@ function ALogin() {
       width: "100%",
       padding: "13px 16px",
       borderRadius: 16,
-      border: strong ? "0" : `1px solid ${t.dark ? "rgba(244,240,235,0.22)" : "rgba(24,22,15,0.18)"}`,
-      background: strong ? t.ink : (t.dark ? "rgba(244,240,235,0.05)" : "rgba(24,22,15,0.045)"),
-      color: strong ? (t.dark ? "#0b0b0c" : "#f4f0eb") : t.ink,
+      border: strong ? "0" : `1px solid ${t.line}`,
+      background: strong ? t.ink : t.card,
+      color: strong ? t.bg : t.ink,
       cursor: "pointer",
       boxSizing: "border-box"
     }
@@ -5101,8 +5142,8 @@ function ALogin() {
     style: {
       display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
       minHeight: 54, borderRadius: 16, cursor: "pointer", boxSizing: "border-box",
-      background: t.ink, color: t.dark ? "#0b0b0c" : "#f4f0eb",
-      boxShadow: t.dark ? "none" : "0 12px 30px rgba(24,22,15,0.18)"
+      background: t.ink, color: t.bg,
+      boxShadow: t.dark ? "none" : t.name === "maya-os" ? "0 12px 30px rgba(0,0,0,0.18)" : "0 12px 30px rgba(24,22,15,0.18)"
     }
   }, /*#__PURE__*/React.createElement(SeedLogo, { size: 18, sw: 1.7 }), /*#__PURE__*/React.createElement("span", {
     style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase" }
@@ -10513,6 +10554,7 @@ function AChat() {
   const dark = window.__meDark;
   const setDark = window.__meSetDark;
   const t = tokens('aurora', dark);
+  const universal = !!window.__ME_SAAS_CTX;
   function defaultChatMsgs() {
     return [{ role: 'bot', text: chatSurface() === 'staff' ? STAFF_GREETING : GREETING }];
   }
@@ -10632,6 +10674,7 @@ function AChat() {
 	    setOnbQuick([]);
 	    setInput('');
 	    userHasSentRef.current = true;
+	    forceChatBottomRef.current = true;
 	    setMsgs(function (m) { return m.concat([{ role: 'user', text: msg }, { role: 'bot', text: '', typing: true }]); });
 	    var api = onbApiBase();
 	    try {
@@ -10948,6 +10991,8 @@ function AChat() {
 	  const scRef = React.useRef(null);
 	  const longPressRef = React.useRef({ timer: null, x: 0, y: 0 });
 	  const userHasSentRef = React.useRef(false); // автоскролл вниз — только ПОСЛЕ первой реальной отправки пользователем
+  const chatStickRef = React.useRef(true); // остаёмся у конца, пока пользователь сам не прокрутил вверх
+  const forceChatBottomRef = React.useRef(false); // одноразово после фактической отправки сообщения
   // сжатие нижнего меню чата при скролле (как в остальном приложении)
   const [chatNavShrunk, setChatNavShrunk] = React.useState(false);
   React.useEffect(function () {
@@ -10955,6 +11000,7 @@ function AChat() {
     function onSc() {
       var el = scRef.current; if (!el) return;
       var y = el.scrollTop, dy = y - last; last = y;
+      chatStickRef.current = el.scrollHeight - el.clientHeight - y < 96;
       if (ticking) return; ticking = true;
       requestAnimationFrame(function () {
         ticking = false;
@@ -10970,21 +11016,6 @@ function AChat() {
   const baseHeightRef = React.useRef(typeof window !== 'undefined' ? window.innerHeight : 0);
   const footRef = React.useRef(null); // обёртка строки ввода — позицию над клавиатурой ставим ИМПЕРАТИВНО
   const e = React.createElement;
-  function scrollChatForKeyboard() {
-    try {
-      var sc = scRef.current;
-      if (!sc) return;
-      var go = function () {
-        if (!scRef.current) return;
-        scRef.current.scrollTop = scRef.current.scrollHeight;
-      };
-      go();
-      requestAnimationFrame(go);
-      [16, 34, 60, 96, 140, 220, 320, 480].forEach(function (ms) {
-        setTimeout(go, ms);
-      });
-    } catch (e2) {}
-  }
   React.useEffect(() => {
     if (msgs.some(m => m && m.role === 'user')) userHasSentRef.current = true;
   }, []);
@@ -11077,7 +11108,6 @@ function AChat() {
         until = Date.now() + 1600;
         clearTimeout(tmr);
         pump();
-        scrollChatForKeyboard();
       }
     };
     const onBlur = () => {
@@ -11100,28 +11130,36 @@ function AChat() {
     };
   }, []);
 
-  // автоскролл вниз — ТОЛЬКО после первой реальной отправки пользователем; до неё чат держится у верха (шапка+приветствие)
+  // Новое сообщение прилипает к низу, только если пользователь уже был там.
+  // Открытие клавиатуры и ручное чтение старых сообщений позицию не меняют.
   React.useEffect(() => {
     if (!scRef.current) return;
     if (!userHasSentRef.current) {
       requestAnimationFrame(() => {
-        if (scRef.current) scRef.current.scrollTop = 0;
+        if (scRef.current) {
+          scRef.current.scrollTop = 0;
+          chatStickRef.current = true;
+        }
       });
       return;
     }
+    var shouldScroll = forceChatBottomRef.current || chatStickRef.current;
+    forceChatBottomRef.current = false;
+    if (!shouldScroll) return;
     requestAnimationFrame(() => {
-      if (scRef.current) scRef.current.scrollTop = scRef.current.scrollHeight;
+      if (scRef.current) {
+        scRef.current.scrollTop = scRef.current.scrollHeight;
+        chatStickRef.current = true;
+      }
     });
   }, [msgs, sending]);
 
   const chatHeight = vvBox.height;
   const kbdUp = vvBox.keyboard > 0 || vvBox.height > 0 && vvBox.height < ((typeof window !== 'undefined' ? window.innerHeight : 9999) - 120);
   // ── КЛАВИАТУРА: не считаем её дважды ─────────────────────────────────
-  // Глобальный viewport-script уже меняет --me-app-height на visibleViewport.height,
-  // когда клавиатура открыта. Footer является обычным нижним flex-блоком, поэтому
-  // он сам занимает место в раскладке и не перекрывает последние сообщения.
-  // Старый absolute-footer с bottom=keyboardHeight либо улетал вверх, либо ложился
-  // поверх bubbles/quick chips при открытой клавиатуре.
+  // Глобальный viewport-script меняет --me-app-height на visibleViewport.height.
+  // Плавающий composer остаётся bottom:0, а padding ленты не даёт ему перекрыть
+  // сообщения. Саму scroll-позицию при изменениях клавиатуры не трогаем.
   function applyKbd() {
     try {
       var vv = window.visualViewport;
@@ -11131,7 +11169,6 @@ function AChat() {
       // клиренс ленты = высота плавающего футера (пилюля+чипы+нав); при клавиатуре нав скрыт
       if (scRef.current) scRef.current.style.paddingBottom = kbd ? '150px' : 'calc(env(safe-area-inset-bottom, 0px) + 200px)';
       if (window.pageYOffset || window.scrollY) window.scrollTo(0, 0);
-      if (kbd && userHasSentRef.current && scRef.current) scRef.current.scrollTop = scRef.current.scrollHeight;
     } catch (e2) {}
   }
   React.useLayoutEffect(function () { applyKbd(); });
@@ -11139,7 +11176,7 @@ function AChat() {
     var vv = window.visualViewport;
     var tmr = null, until = 0;
     var pump = function () { applyKbd(); if (Date.now() < until) tmr = setTimeout(pump, 60); };
-    var onFocus = function (ev) { var tg = ev.target; if (tg && (tg.tagName === 'TEXTAREA' || tg.tagName === 'INPUT')) { until = Date.now() + 1800; clearTimeout(tmr); pump(); scrollChatForKeyboard(); } };
+    var onFocus = function (ev) { var tg = ev.target; if (tg && (tg.tagName === 'TEXTAREA' || tg.tagName === 'INPUT')) { until = Date.now() + 1800; clearTimeout(tmr); pump(); } };
     var onBlur = function () { until = 0; clearTimeout(tmr); setTimeout(applyKbd, 60); };
     var lockScroll = function () { if (window.pageYOffset || window.scrollY) window.scrollTo(0, 0); };
     if (vv) { vv.addEventListener('resize', applyKbd); vv.addEventListener('scroll', applyKbd); }
@@ -11167,7 +11204,6 @@ function AChat() {
     }
     function onShow() {
       applyKbd();
-      scrollChatForKeyboard();
     }
     try {
       keep(K.addListener('keyboardWillShow', onShow));
@@ -11328,6 +11364,7 @@ function AChat() {
     const text = String(textArg != null ? textArg : input).trim();
     if (!text) return;
     userHasSentRef.current = true;
+    forceChatBottomRef.current = true;
     setInput('');
     setMsgs(m => m.concat([{
       role: 'user',
@@ -12025,6 +12062,7 @@ function AChat() {
     if (onbOnRef.current) { onbSendAudio(dataUrl); return; } // онбординг: транскрипт → onbSend
     if (sending || !dataUrl) return;
     userHasSentRef.current = true;
+    forceChatBottomRef.current = true;
     setMsgs(m => m.concat([{
       role: 'user',
       text: '🎤 Голосовое…',
@@ -12553,7 +12591,7 @@ function AChat() {
 	        boxSizing: 'border-box',
 	        borderRadius: '20px 20px 6px 20px',
 	        padding: '12px 15px',
-	        background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.06)'
+	        background: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'
 	      } : {
 	        maxWidth: '92%',
 	        minWidth: 0,
@@ -12622,7 +12660,7 @@ function AChat() {
       alignItems: 'center',
       gap: 12,
       padding: 'calc(env(safe-area-inset-top, 0px) + 10px) 18px 16px',
-      background: dark ? 'rgba(0,0,0,0.42)' : 'rgba(244,240,235,0.5)',
+      background: dark ? 'rgba(0,0,0,0.56)' : universal ? 'rgba(255,255,255,0.72)' : 'rgba(244,240,235,0.5)',
       backdropFilter: 'blur(26px) saturate(140%)',
       WebkitBackdropFilter: 'blur(26px) saturate(140%)',
       WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 78%, rgba(0,0,0,0) 100%)',
@@ -12744,7 +12782,7 @@ function AChat() {
       e('div', { style: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28, alignItems: 'center' } }, chips.map(function (c, ci) {
         return e('div', {
           key: ci, onClick: c[1],
-          style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: BODY, fontSize: 12.5, color: t.ink, border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.18)'), borderRadius: 999, padding: '11px 18px', cursor: 'pointer', background: t.card } }, c[0]);
+          style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: BODY, fontSize: 12.5, color: t.ink, border: '1px solid ' + t.line, borderRadius: 999, padding: '11px 18px', cursor: 'pointer', background: t.card } }, c[0]);
       })));
     }
     return onbOnRef.current ? [msgs.map(bubble), e('div', { key: 'onbcard' }, onbInlineCard())] : msgs.map(bubble);
@@ -12834,8 +12872,8 @@ function AChat() {
     }
   }, (function () {
     var rec = recState === 'recording';
-    var invBg = dark ? '#f4f0eb' : '#18160f';
-    var invFg = dark ? '#0b0b0c' : '#f4f0eb';
+    var invBg = t.ink;
+    var invFg = t.bg;
     // Maya OS 3D: одна пилюля — «+», ввод (или статус записи), справа inv-кнопка mic/отправить
     var midEl;
     if (rec) {
@@ -12845,9 +12883,6 @@ function AChat() {
     } else {
       midEl = e('input', {
         key: 'ta', type: 'text', value: input, onChange: ev => setInput(ev.target.value),
-        onPointerDown: scrollChatForKeyboard,
-        onTouchStart: scrollChatForKeyboard,
-        onFocus: scrollChatForKeyboard,
         onKeyDown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); send(); } },
         placeholder: chatSurface() === 'staff' ? 'Спросите или дайте команду…' : 'Сообщение Maya…', autoComplete: 'off', enterKeyHint: 'send',
         style: { flex: 1, minWidth: 0, width: '100%', height: 50, border: 'none', WebkitAppearance: 'none', appearance: 'none', background: 'transparent', padding: '0 4px', fontFamily: BODY, fontSize: 13, color: t.ink, outline: 'none', lineHeight: '20px' }
@@ -12867,7 +12902,7 @@ function AChat() {
       onClick: micToggle,
       onContextMenu: function (ev) { try { ev.preventDefault(); } catch (e2) {} },
       title: 'Нажмите — запись, ещё раз — отправить',
-      style: { width: 36, height: 36, borderRadius: 999, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.18)'), background: rec ? invBg : 'transparent', color: rec ? invFg : t.ink, cursor: 'pointer', touchAction: 'none', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', transform: rec ? 'scale(1.1)' : 'scale(1)', transition: 'transform .16s ease, background .16s ease' }
+      style: { width: 36, height: 36, borderRadius: 999, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + t.line, background: rec ? invBg : 'transparent', color: rec ? invFg : t.ink, cursor: 'pointer', touchAction: 'none', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', transform: rec ? 'scale(1.1)' : 'scale(1)', transition: 'transform .16s ease, background .16s ease' }
     }, e('svg', {
       width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none',
       stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round'
@@ -12879,9 +12914,7 @@ function AChat() {
     var rightBtn = [micBtn, upBtn];
     var pill = e('div', {
       key: 'pill',
-      onPointerDown: rec ? undefined : scrollChatForKeyboard,
-      onTouchStart: rec ? undefined : scrollChatForKeyboard,
-      style: { display: 'flex', alignItems: 'center', gap: 6, minHeight: 52, borderRadius: 26, background: dark ? 'rgba(244,240,235,0.05)' : 'rgba(255,255,255,0.62)', border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.18)'), backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)', padding: '0 8px 0 17px' }
+      style: { display: 'flex', alignItems: 'center', gap: 6, minHeight: 52, borderRadius: 26, background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.72)', border: '1px solid ' + t.line, backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)', padding: '0 8px 0 17px' }
     }, midEl, rightBtn);
     // Maya OS 3D: стеклянный нав-бар под инпутом (прячем при клавиатуре и в онбординге — владелец остаётся в потоке)
     var nav = null;
@@ -12894,8 +12927,8 @@ function AChat() {
         key: 'nav',
         style: {
           display: 'flex', justifyContent: 'space-between', padding: 5, borderRadius: 22,
-          background: dark ? 'rgba(8,8,10,0.5)' : 'rgba(24,22,15,0.10)',
-          border: '1px solid ' + (dark ? 'rgba(244,240,235,0.16)' : 'rgba(24,22,15,0.10)'),
+          background: dark ? 'rgba(8,8,8,0.5)' : universal ? 'rgba(0,0,0,0.08)' : 'rgba(24,22,15,0.10)',
+          border: '1px solid ' + t.line,
           boxShadow: '0 12px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06)',
           backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)',
           transform: chatNavShrunk ? 'scale(0.82) translateY(8px)' : 'scale(1) translateY(0)',
@@ -27330,7 +27363,7 @@ try {
 } catch (e) {}
 // keep the document root background in sync with the theme so safe-area / edge gaps never flash dark in light mode
 window.__meApplyRootBg = function () {
-  var bg = window.__meActiveRootBg || (window.__meDark ? '#000000' : '#f4f0eb');
+  var bg = window.__meActiveRootBg || (window.__meDark ? '#000000' : window.__ME_SAAS_CTX ? '#ffffff' : '#f4f0eb');
   var scheme = window.__meDark ? 'dark' : 'light';
   var capStyle = window.__meDark ? 'DARK' : 'LIGHT';
   try {
