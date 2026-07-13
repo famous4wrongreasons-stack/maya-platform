@@ -10737,9 +10737,10 @@ function AChat() {
 	    setOnbNeedsClar(!!(data && data.needs_clarification));
 	    setOnbQuick((data && data.quick_replies) || []);
 	  }
-	  async function onbSend(textArg) {
+	  async function onbSend(textArg, templateIdArg) {
 	    var msg = String(textArg != null ? textArg : input).trim();
 	    if (!msg || onbReq.current) return;
+	    var requestedTemplateId = templateIdArg != null ? String(templateIdArg).trim() : onbTpl;
 	    onbReq.current = true; setOnbBusy(true); setSending(true); setOnbErr(''); setOnbDead(false);
 	    setOnbQuick([]);
 	    setInput('');
@@ -10751,7 +10752,7 @@ function AChat() {
 	      var r, data;
 	      if (!onbDraft.current.id) {
 	        var body = { message: msg, trialActivationToken: onbTokenNow() };
-	        if (onbTpl) body.templateId = onbTpl;
+	        if (requestedTemplateId) body.templateId = requestedTemplateId;
 	        r = await fetch(api + '/onboarding/ai/drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 	        data = await r.json();
 	        if (!r.ok) throw Object.assign(new Error('start'), { code: data && data.error && data.error.code, emsg: data && data.error && data.error.message });
@@ -10981,21 +10982,38 @@ function AChat() {
 	  // чипы под последним ответом MAYA: quick_replies бэка + переход к подтверждению + восстановление
 	  function onbChips() {
 	    if (!onbOnRef.current) return null;
-	    var chip = { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, color: onbTone.ink, border: '1px solid ' + onbTone.line, borderRadius: 999, padding: '9px 15px' };
+	    var chip = { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, lineHeight: 1.25, color: onbTone.ink, background: 'transparent', border: '1px solid ' + onbTone.line, borderRadius: 999, padding: '9px 15px', margin: 0, appearance: 'none', WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none', touchAction: 'manipulation', textAlign: 'left' };
 	    var chipSel = { borderColor: onbTone.ink, background: onbTone.soft };
-	    var chipStrong = { cursor: 'pointer', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11.5, letterSpacing: '0.04em', color: onbTone.inverse, background: onbTone.ink, borderRadius: 999, padding: '10px 16px' };
+	    var chipStrong = { cursor: 'pointer', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11.5, lineHeight: 1.25, letterSpacing: '0.04em', color: onbTone.inverse, background: onbTone.ink, border: '1px solid ' + onbTone.ink, borderRadius: 999, padding: '10px 16px', margin: 0, appearance: 'none', WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none', touchAction: 'manipulation', textAlign: 'left' };
 	    var rowWrap = { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 };
 	    var kids = [];
-	    if (onbDead) { kids.push(e('div', { key: 'back', onClick: onbExitToLogin, style: chipStrong }, 'Вернуться на вход и активировать заново')); return e('div', { style: rowWrap }, kids); }
+	    if (onbDead) { kids.push(e('button', { key: 'back', type: 'button', onClick: onbExitToLogin, style: chipStrong }, 'Вернуться на вход и активировать заново')); return e('div', { style: rowWrap }, kids); }
 	    if (onbStage !== 'chat') return null;
 	    if (!onbDraft.current.id && onbTemplates && onbTemplates.length && msgs.filter(function (m) { return m.role === 'user'; }).length === 0) {
 	      kids.push(e('div', { key: 'tpl-h', style: { width: '100%', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: onbTone.faint, marginBottom: 2 } }, 'С чего начать · по желанию'));
-	      onbTemplates.slice(0, 8).forEach(function (tp) { kids.push(e('div', { key: 'tpl-' + tp.id, onClick: function () { setOnbTpl(onbTpl === tp.id ? null : tp.id); }, style: Object.assign({}, chip, onbTpl === tp.id ? chipSel : {}) }, tp.name)); });
+	      onbTemplates.slice(0, 8).forEach(function (tp) {
+	        kids.push(e('button', {
+	          key: 'tpl-' + tp.id,
+	          type: 'button',
+	          disabled: onbBusy,
+	          'data-onboarding-template': tp.id,
+	          onClick: onbBusy ? undefined : function () {
+	            setOnbTpl(tp.id);
+	            onbSend('Используй готовые услуги из шаблона «' + tp.name + '»', tp.id);
+	          },
+	          style: Object.assign({}, chip, onbTpl === tp.id ? chipSel : {}, onbBusy ? { opacity: 0.5, cursor: 'default' } : {})
+	        }, tp.name));
+	      });
 	    }
-	    (onbQuick || []).forEach(function (q, i) { kids.push(e('div', { key: 'q-' + i, onClick: onbBusy ? undefined : function () { onbSend(q.message); }, style: Object.assign({}, chip, onbBusy ? { opacity: 0.5, cursor: 'default' } : {}) }, q.label || q.message)); });
+	    (onbQuick || []).forEach(function (q, i) {
+	      var qText = typeof q === 'string' ? q : String(q && (q.message || q.value || q.label) || '').trim();
+	      var qLabel = typeof q === 'string' ? q : String(q && (q.label || q.message || q.value) || '').trim();
+	      if (!qText || !qLabel) return;
+	      kids.push(e('button', { key: 'q-' + i, type: 'button', disabled: onbBusy, 'data-onboarding-action': 'quick-reply', onClick: onbBusy ? undefined : function () { onbSend(qText); }, style: Object.assign({}, chip, onbBusy ? { opacity: 0.5, cursor: 'default' } : {}) }, qLabel));
+	    });
 	    var canConfirm = onbBlueprint && Array.isArray(onbMissing) && onbMissing.length === 0 && !onbNeedsClar;
-	    if (canConfirm) kids.push(e('div', { key: 'toconf', onClick: onbToConfirm, style: chipStrong }, 'К подтверждению →'));
-	    if (onbDraft.current.id || onbMissing !== null) kids.push(e('div', { key: 'restart', onClick: function () { onbHardReset(); }, style: Object.assign({}, chip, { color: onbTone.faint }) }, 'Начать заново'));
+	    if (canConfirm) kids.push(e('button', { key: 'toconf', type: 'button', onClick: onbToConfirm, style: chipStrong }, 'К подтверждению →'));
+	    if (onbDraft.current.id || onbMissing !== null) kids.push(e('button', { key: 'restart', type: 'button', onClick: function () { onbHardReset(); }, style: Object.assign({}, chip, { color: onbTone.faint }) }, 'Начать заново'));
 	    if (onbErr) kids.push(e('div', { key: 'err', style: { width: '100%', fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, marginTop: 4, lineHeight: 1.5 } }, onbErr));
 	    if (!kids.length) return null;
 	    return e('div', { style: rowWrap }, kids);
@@ -12937,9 +12955,9 @@ function AChat() {
       e('div', { style: { fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.5em', paddingLeft: '0.5em', textTransform: 'uppercase', fontWeight: 300, color: t.ink, marginTop: 24 } }, 'MAYA'),
       e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.6, color: t.dim, maxWidth: 260, marginTop: 12 } }, staffCh ? 'Операционная система вашего бизнеса. Задайте вопрос или дайте команду.' : 'Ваш ИИ-администратор. Спросите или запишитесь в пару сообщений.'),
       e('div', { style: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28, alignItems: 'center' } }, chips.map(function (c, ci) {
-        return e('div', {
-          key: ci, onClick: c[1],
-          style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: BODY, fontSize: 12.5, color: t.ink, border: '1px solid ' + t.line, borderRadius: 999, padding: '11px 18px', cursor: 'pointer', background: t.card } }, c[0]);
+        return e('button', {
+          key: ci, type: 'button', 'data-chat-quick-command': c[0], onClick: c[1],
+          style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: BODY, fontSize: 12.5, lineHeight: 1.25, color: t.ink, border: '1px solid ' + t.line, borderRadius: 999, padding: '11px 18px', margin: 0, cursor: 'pointer', background: t.card, appearance: 'none', WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none', touchAction: 'manipulation' } }, c[0]);
       })));
     }
     return onbOnRef.current ? [msgs.map(bubble), e('div', { key: 'onbcard' }, onbInlineCard())] : msgs.map(bubble);
@@ -12991,7 +13009,7 @@ function AChat() {
     var sug = chatSuggest(last.text, msgs);
     if (!sug.length) return null;
     return e('div', { key: 'sugg', style: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 } }, sug.map(function (q, i) {
-      return e('div', { key: i, onClick: function () { quickTap(q); }, style: { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, color: t.ink, border: '1px solid ' + t.line, borderRadius: 999, padding: '9px 15px' } }, q);
+      return e('button', { key: i, type: 'button', 'data-chat-quick-command': q, onClick: function () { quickTap(q); }, style: { cursor: 'pointer', fontFamily: BODY, fontWeight: 500, fontSize: 12.5, lineHeight: 1.25, color: t.ink, background: 'transparent', border: '1px solid ' + t.line, borderRadius: 999, padding: '9px 15px', margin: 0, appearance: 'none', WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none', touchAction: 'manipulation', textAlign: 'left' } }, q);
     }));
   })()),
   // нижний футер: орб + строка ввода. Это обычный flex-блок, не overlay:
