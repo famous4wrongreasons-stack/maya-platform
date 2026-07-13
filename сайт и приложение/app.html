@@ -4370,6 +4370,15 @@ function ALogin() {
   const lgCrmReqRef = React.useRef(false);
   // ── MAYA OS: вход по email спрятан за строкой (как Telegram/Яндекс) ──
   const [lgEmailOpen, setLgEmailOpen] = React.useState(false);
+  // ── MAYA OS: двухшаговый вход по одноразовому email-коду ──
+  const [lgEmailStep, setLgEmailStep] = React.useState('email'); // email | code
+  const [lgEmailCode, setLgEmailCode] = React.useState('');
+  const [lgEmailBusy, setLgEmailBusy] = React.useState(false);
+  const [lgEmailErr, setLgEmailErr] = React.useState('');
+  const [lgEmailResend, setLgEmailResend] = React.useState(0); // секунды до повторной отправки
+  const [lgEmailDebug, setLgEmailDebug] = React.useState(''); // debug_code ТОЛЬКО в памяти (локальный режим), не логируем/не храним
+  const lgEmailReqRef = React.useRef(false);
+  React.useEffect(function () { if (lgEmailResend <= 0) return; var id = setTimeout(function () { setLgEmailResend(function (s) { return s > 0 ? s - 1 : 0; }); }, 1000); return function () { clearTimeout(id); }; }, [lgEmailResend]);
   // ── MAYA OS: нижний лист пробной активации (свайп → POST trial-activations) ──
   const [lgTrialOpen, setLgTrialOpen] = React.useState(false);
   const [lgTrialShown, setLgTrialShown] = React.useState(false); // управление transform-анимацией листа
@@ -4517,7 +4526,7 @@ function ALogin() {
       var res = null, lastErr = null, slug = slugBase, attempt = 0;
       while (attempt < 2) {
         var body = { name: nm, slug: slug, ownerEmail: em, branchName: nm, branchTimezone: 'Europe/Moscow', calendarSource: lgCr.cal };
-        if (lgCr.cal === 'internal') body.industryPresetId = 'solo_specialist'; // специалист без CRM: API-токен не нужен
+        if (lgCr.cal === 'internal' && lgCr.tpl) body.industryPresetId = lgCr.tpl; // не форсим solo_specialist: профессию/шаблон не выдумываем, backend решит если не задан
         var onm = String(lgCr.oname || '').trim();
         if (onm) body.ownerName = onm;
         body.ownerPhone = '+' + (phoneDigits[0] === '8' ? '7' + phoneDigits.slice(1) : phoneDigits);
@@ -4813,10 +4822,80 @@ function ALogin() {
       setLgAiErr(e && e.message || 'Не удалось загрузить логотип. Можно пропустить.');
     }
   };
-  const lgEmailGo = () => {
+  // текущий tenant строго из контекста бизнеса; email в одиночку НЕ ищет по всем тенантам
+  const lgEmailTenant = () => { try { return (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.slug) || ''; } catch (e) { return ''; } };
+  const lgEmailErrText = (code, fallback) => {
+    var m = {
+      email_code_invalid: 'Неверный код. Проверьте и введите ещё раз.',
+      email_code_expired: 'Код истёк. Запросите новый.',
+      email_code_missing: 'Код не найден. Запросите новый.',
+      email_too_many_attempts: 'Слишком много попыток. Запросите новый код чуть позже.',
+      email_login_invalid: 'Не удалось войти. Проверьте адрес.',
+      email_login_unavailable: 'Вход по email пока недоступен.',
+      email_delivery_unavailable: 'Отправка кода недоступна. Попробуйте позже.',
+      email_delivery_failed: 'Не удалось отправить код. Попробуйте ещё раз.',
+      auth_rate_limited: 'Слишком часто. Немного подождите.'
+    };
+    return m[code] || fallback || 'Не получилось — попробуйте ещё раз.';
+  };
+  // шаг 1: отправить одноразовый код на email существующего пользователя тенанта
+  const lgEmailGo = async () => {
     var v = (lgEmail || '').trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { setLgNote('Проверьте адрес — например, name@mail.ru'); return; }
-    setLgNote('Вход по email скоро появится. Пока войдите через Telegram или Яндекс.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { setLgEmailErr('Проверьте адрес — например, name@mail.ru'); return; }
+    var tenant = lgEmailTenant();
+    if (!tenant) { setLgEmailErr('Откройте ссылку вашего бизнеса, чтобы войти по email.'); return; }
+    if (lgEmailReqRef.current) return;
+    lgEmailReqRef.current = true; setLgEmailBusy(true); setLgEmailErr(''); setLgNote('');
+    try {
+      var r = await fetch(lgApiBase() + '/auth/email/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantSlug: tenant, email: v }) });
+      var d = null; try { d = await r.json(); } catch (e) {}
+      if (!r.ok) {
+        var eo = d && d.error;
+        var ra = eo && (eo.retry_after_seconds != null ? eo.retry_after_seconds : eo.retryAfterSeconds);
+        if (ra) setLgEmailResend(Math.ceil(ra));
+        throw Object.assign(new Error('start'), { code: eo && eo.code, emsg: eo && eo.message });
+      }
+      setLgEmailStep('code'); setLgEmailCode('');
+      setLgNote('Если адрес привязан к этому бизнесу, код отправлен.');
+      setLgEmailResend(Math.ceil(Number(d && d.retry_after_seconds) || 60));
+      setLgEmailDebug(d && d.debug_code ? String(d.debug_code) : ''); // локальный debug — только память
+    } catch (e) {
+      setLgEmailErr(lgEmailErrText(e.code, e.emsg));
+    } finally {
+      lgEmailReqRef.current = false; setLgEmailBusy(false);
+    }
+  };
+  // шаг 2: проверить код → session bundle в тот же контракт me_saas_auth_v2:<ns>
+  const lgEmailVerify = async () => {
+    var v = (lgEmail || '').trim();
+    var code = String(lgEmailCode || '').replace(/\D/g, '');
+    var tenant = lgEmailTenant();
+    if (!/^\d{4,8}$/.test(code)) { setLgEmailErr('Введите код из письма.'); return; }
+    if (!tenant) { setLgEmailErr('Откройте ссылку вашего бизнеса.'); return; }
+    if (lgEmailReqRef.current) return;
+    lgEmailReqRef.current = true; setLgEmailBusy(true); setLgEmailErr('');
+    try {
+      var r = await fetch(lgApiBase() + '/auth/email/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantSlug: tenant, email: v, code: code }) });
+      var d = null; try { d = await r.json(); } catch (e) {}
+      if (!r.ok) {
+        var eo = d && d.error;
+        var ra = eo && (eo.retry_after_seconds != null ? eo.retry_after_seconds : eo.retryAfterSeconds);
+        if (ra) setLgEmailResend(Math.ceil(ra));
+        var rem = eo && (eo.attempts_remaining != null ? eo.attempts_remaining : (eo.remaining_attempts != null ? eo.remaining_attempts : null));
+        throw Object.assign(new Error('verify'), { code: eo && eo.code, emsg: eo && eo.message, rem: rem });
+      }
+      var api = lgApiBase();
+      // slug из контекста (в ответе verify его нет) → тот же ns, что onboarding/Яндекс/Telegram
+      var saved = lgSaveBundle(Object.assign({}, d, { tenant: { slug: tenant, id: d.user && (d.user.tenant_id || d.user.tenantId) } }), api);
+      setLgEmailDebug('');
+      lgOpenApp(api, saved.tenantSlug); // owner-опыт того же бизнеса
+    } catch (e) {
+      var msg = lgEmailErrText(e.code, e.emsg);
+      if (e.rem != null) msg += ' Осталось попыток: ' + e.rem + '.';
+      setLgEmailErr(msg);
+    } finally {
+      lgEmailReqRef.current = false; setLgEmailBusy(false);
+    }
   };
   if (lgCreate && !lgManual) {
     var aiWrap = (kids) => /*#__PURE__*/React.createElement("div", {
@@ -5193,31 +5272,33 @@ function ALogin() {
     onClick: () => { setLgEmailOpen(function (v) { return !v; }); if (lgNote) setLgNote(''); }
   }), lgEmailOpen ? /*#__PURE__*/React.createElement("div", {
     style: { display: "flex", flexDirection: "column", gap: 8 }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex", alignItems: "center", gap: 10,
-      border: "1px solid " + (t.dark ? "rgba(244,240,235,0.22)" : "rgba(24,22,15,0.18)"),
-      borderRadius: 16, padding: "0 6px 0 16px", minHeight: 52,
-      background: t.dark ? "rgba(244,240,235,0.05)" : "rgba(24,22,15,0.045)",
-      boxSizing: "border-box"
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "email", inputMode: "email", autoComplete: "email", autoFocus: true,
-    value: lgEmail,
-    onChange: ev => { setLgEmail(ev.target.value); if (lgNote) setLgNote(''); },
-    onKeyDown: ev => { if (ev.key === 'Enter') lgEmailGo(); },
-    placeholder: "\u0412\u0430\u0448 email",
-    style: { flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontFamily: BODY, fontSize: 13, color: t.ink, height: 40 }
-  }), /*#__PURE__*/React.createElement("div", {
-    onClick: lgEmailGo,
-    style: {
-      width: 38, height: 38, borderRadius: 999, flex: "none",
-      background: t.ink, color: t.dark ? "#0b0b0c" : "#f4f0eb",
-      display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer"
-    }
-  }, Icon.arrow(t.dark ? "#0b0b0c" : "#f4f0eb", 16))), lgNote ? /*#__PURE__*/React.createElement("div", {
-    style: { fontFamily: BODY, fontSize: 11, color: t.dim, textAlign: "center", lineHeight: 1.5 }
-  }, lgNote) : null) : null, /*#__PURE__*/React.createElement("div", {
+  }, lgEmailStep === 'code' ? /*#__PURE__*/React.createElement(React.Fragment, null,
+    /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 4px" } },
+      /*#__PURE__*/React.createElement("span", { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, lgEmail),
+      /*#__PURE__*/React.createElement("span", { onClick: function () { setLgEmailStep('email'); setLgEmailErr(''); setLgEmailCode(''); setLgEmailDebug(''); }, style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, cursor: "pointer", flex: "none", marginLeft: 10 } }, "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c")),
+    /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, border: "1px solid " + (t.dark ? "rgba(244,240,235,0.22)" : "rgba(24,22,15,0.18)"), borderRadius: 16, padding: "0 6px 0 16px", minHeight: 52, background: t.dark ? "rgba(244,240,235,0.05)" : "rgba(24,22,15,0.045)", boxSizing: "border-box" } },
+      /*#__PURE__*/React.createElement("input", {
+        type: "text", inputMode: "numeric", autoComplete: "one-time-code", autoFocus: true, maxLength: 6,
+        value: lgEmailCode,
+        onChange: ev => { setLgEmailCode(String(ev.target.value || '').replace(/\D/g, '').slice(0, 6)); if (lgEmailErr) setLgEmailErr(''); },
+        onKeyDown: ev => { if (ev.key === 'Enter') lgEmailVerify(); },
+        placeholder: "\u041a\u043e\u0434 \u0438\u0437 \u043f\u0438\u0441\u044c\u043c\u0430",
+        style: { flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontFamily: DISPLAY, fontSize: 18, letterSpacing: "0.3em", color: t.ink, height: 40 }
+      }),
+      /*#__PURE__*/React.createElement("div", { onClick: lgEmailBusy ? null : lgEmailVerify, style: { width: 38, height: 38, borderRadius: 999, flex: "none", background: t.ink, color: t.dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", cursor: lgEmailBusy ? "default" : "pointer", opacity: lgEmailBusy ? 0.6 : 1 } }, lgEmailBusy ? /*#__PURE__*/React.createElement("span", { style: { width: 8, height: 8, borderRadius: 999, background: t.dark ? "#0b0b0c" : "#f4f0eb", animation: "mePulse 1.1s ease-in-out infinite" } }) : Icon.arrow(t.dark ? "#0b0b0c" : "#f4f0eb", 16))),
+    /*#__PURE__*/React.createElement("div", { style: { textAlign: "center", fontFamily: BODY, fontSize: 11.5, color: t.faint, marginTop: 2 } }, lgEmailResend > 0 ? ("\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u043a\u043e\u0434 \u0441\u043d\u043e\u0432\u0430 \u0447\u0435\u0440\u0435\u0437 " + lgEmailResend + " \u0441") : /*#__PURE__*/React.createElement("span", { onClick: lgEmailBusy ? null : lgEmailGo, style: { color: t.dim, cursor: "pointer", borderBottom: "1px solid " + t.line } }, "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u043a\u043e\u0434 \u0441\u043d\u043e\u0432\u0430")),
+    lgEmailDebug ? /*#__PURE__*/React.createElement("div", { onClick: function () { setLgEmailCode(lgEmailDebug); }, style: { textAlign: "center", fontFamily: BODY, fontSize: 10.5, color: t.faint, cursor: "pointer", opacity: 0.7 } }, "debug-\u043a\u043e\u0434: " + lgEmailDebug) : null
+  ) : /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, border: "1px solid " + (t.dark ? "rgba(244,240,235,0.22)" : "rgba(24,22,15,0.18)"), borderRadius: 16, padding: "0 6px 0 16px", minHeight: 52, background: t.dark ? "rgba(244,240,235,0.05)" : "rgba(24,22,15,0.045)", boxSizing: "border-box" } },
+    /*#__PURE__*/React.createElement("input", {
+      type: "email", inputMode: "email", autoComplete: "email", autoFocus: true,
+      value: lgEmail,
+      onChange: ev => { setLgEmail(ev.target.value); if (lgEmailErr) setLgEmailErr(''); if (lgNote) setLgNote(''); },
+      onKeyDown: ev => { if (ev.key === 'Enter') lgEmailGo(); },
+      placeholder: "\u0412\u0430\u0448 email",
+      style: { flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontFamily: BODY, fontSize: 13, color: t.ink, height: 40 }
+    }),
+    /*#__PURE__*/React.createElement("div", { onClick: lgEmailBusy ? null : lgEmailGo, style: { width: 38, height: 38, borderRadius: 999, flex: "none", background: t.ink, color: t.dark ? "#0b0b0c" : "#f4f0eb", display: "flex", alignItems: "center", justifyContent: "center", cursor: lgEmailBusy ? "default" : "pointer", opacity: lgEmailBusy ? 0.6 : 1 } }, lgEmailBusy ? /*#__PURE__*/React.createElement("span", { style: { width: 8, height: 8, borderRadius: 999, background: t.dark ? "#0b0b0c" : "#f4f0eb", animation: "mePulse 1.1s ease-in-out infinite" } }) : Icon.arrow(t.dark ? "#0b0b0c" : "#f4f0eb", 16))),
+  lgEmailErr ? /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 11.5, color: "#e0564f", textAlign: "center", lineHeight: 1.5 } }, lgEmailErr) : (lgNote ? /*#__PURE__*/React.createElement("div", { style: { fontFamily: BODY, fontSize: 11, color: t.dim, textAlign: "center", lineHeight: 1.5 } }, lgNote) : null)) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14
     }
@@ -7598,6 +7679,7 @@ function ABookFlow() {
   const [, setAuthTick] = React.useState(0);
   const [previewInfo, setPreviewInfo] = React.useState(null); // P5: ответ /appointments/preview
   const [myView, setMyView] = React.useState(false); // P6: экран «Мои записи»
+  const [myTab, setMyTab] = React.useState('appts'); // IA: appts | calendar | services | schedule | profile
   const [mySessions, setMySessions] = React.useState(null); // устройства/сессии (null = не загружали)
   const [mySessBusy, setMySessBusy] = React.useState(false);
   const [mySessErr, setMySessErr] = React.useState('');
@@ -9508,14 +9590,30 @@ function ABookFlow() {
         t: t
       }, 'Кабинет · локальный тест'), React.createElement('h2', {
         style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 24, textTransform: 'uppercase', color: t.ink, margin: '12px 0 14px' }
-      }, 'Мои', React.createElement('br'), 'записи'), myErr ? React.createElement('div', {
+      }, 'Мои', React.createElement('br'), 'записи'), React.createElement('div', {
+        // IA: разделы кабинета — записи отдельно от услуг/графика/устройств
+        style: { display: 'flex', gap: 6, overflowX: 'auto', margin: '2px 0 16px', paddingBottom: 2, WebkitOverflowScrolling: 'touch' }
+      }, (function () {
+        var tabs = [['appts', 'Записи'], ['calendar', 'Календарь']];
+        if (saasCalInternal() && saasIsCalManager()) { tabs.push(['services', 'Услуги']); tabs.push(['schedule', 'Расписание']); }
+        tabs.push(['profile', 'Профиль']);
+        return tabs.map(function (tb) {
+          var on = myTab === tb[0];
+          return React.createElement('div', {
+            key: tb[0],
+            onClick: function () { setMyTab(tb[0]); if (tb[0] === 'profile' && mySessions === null) loadMySessions(); if ((tb[0] === 'services' || tb[0] === 'schedule') && myCal === null) loadMyCal(); },
+            style: { flex: 'none', padding: '8px 14px', borderRadius: 999, border: '1px solid ' + (on ? t.ink : t.line), background: on ? t.ink : 'transparent', color: on ? (t.dark ? '#0b0b0c' : '#f4f0eb') : t.dim, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }
+          }, tb[1]);
+        });
+      })()), myErr ? React.createElement('div', {
         style: { margin: '10px 0', padding: '11px 14px', borderRadius: 12, background: 'rgba(108,106,104,0.14)', border: '1px solid rgba(108,106,104,0.3)', fontFamily: BODY, fontSize: 12.5, color: '#aeaba8', textAlign: 'center' }
       }, myErr, React.createElement('div', {
         onClick: myLoading ? null : loadMyAppts,
         style: { marginTop: 9, display: 'inline-block', padding: '7px 18px', borderRadius: 999, border: '1px solid rgba(174,171,168,0.5)', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
-      }, 'Повторить')) : null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past)), (function () {
+      }, 'Повторить')) : null, (myTab === 'appts' || myTab === 'calendar') ? React.createElement(React.Fragment, null, (myTab === 'calendar' && window.__meGo) ? React.createElement('div', { onClick: function () { window.__meGo('schedule'); }, style: { textAlign: 'center', padding: '9px 0', marginBottom: 10, borderRadius: 11, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.accent, cursor: 'pointer' } }, 'Открыть журнал расписания') : null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past))) : null, (function () {
         // «Календарь MAYA» — специалист настраивает услуги и график без внешней CRM
         if (!(saasCalInternal() && saasIsCalManager())) return null;
+        if (myTab !== 'services' && myTab !== 'schedule') return null; // IA: услуги/график только в своих разделах
         var head = React.createElement('div', {
           style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '22px 2px 9px' }
         }, 'Календарь MAYA');
@@ -9677,12 +9775,13 @@ function ABookFlow() {
           btn('Закрыть время', calAddOff)) : null;
         return React.createElement(React.Fragment, null, head, myCalErr ? React.createElement('div', {
           style: { margin: '6px 0', fontFamily: BODY, fontSize: 12, color: '#aeaba8', textAlign: 'center' }
-        }, myCalErr) : null, readiness, provCard, svcCard, schedCard, offCard, React.createElement('div', {
+        }, myCalErr) : null, myTab === 'schedule' ? readiness : null, myTab === 'schedule' ? provCard : null, myTab === 'services' ? svcCard : null, myTab === 'schedule' ? schedCard : null, myTab === 'schedule' ? offCard : null, React.createElement('div', {
           onClick: myCalBusy ? null : loadMyCal,
           style: { textAlign: 'center', marginTop: 2, fontFamily: BODY, fontSize: 11.5, color: t.faint, cursor: 'pointer' }
         }, 'Обновить'));
       })(), (function () {
-        // «Устройства» — компактный блок активных сессий
+        // «Устройства» — компактный блок активных сессий (раздел Профиль / Безопасность)
+        if (myTab !== 'profile') return null;
         var sess = Array.isArray(mySessions) ? mySessions : [];
         var head = React.createElement('div', {
           style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '22px 2px 9px' }
@@ -9716,7 +9815,10 @@ function ABookFlow() {
           onClick: mySessBusy ? null : revokeAllMySessions,
           style: { textAlign: 'center', padding: '9px 0', borderRadius: 11, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer', opacity: mySessBusy ? 0.5 : 1 }
         }, 'Выйти на всех устройствах') : null));
-      })(), React.createElement('div', {
+      })(), myTab === 'profile' ? React.createElement('div', {
+        onClick: saasLogout,
+        style: { textAlign: 'center', padding: '11px 0', marginTop: 14, borderRadius: 12, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
+      }, 'Выйти из аккаунта') : null, React.createElement('div', {
         onClick: function () { setMyView(false); },
         style: { marginTop: 22 }
       }, React.createElement(PrimaryPill, {
@@ -10696,6 +10798,8 @@ function AChat() {
 	  function onbApply(data) {
 	    setMsgs(function (m) { var b = m.filter(function (x) { return !x.typing; }); if (data && data.assistant_message) b = b.concat([{ role: 'bot', text: data.assistant_message }]); return b; });
 	    if (data && data.blueprint) setOnbBlueprint(data.blueprint);
+	    // источник истины по типу бизнеса — серверный blueprint; устаревший выбранный шаблон не перекрывает профессию
+	    if (data && data.blueprint && data.blueprint.templateId) setOnbTpl(data.blueprint.templateId);
 	    if (data && data.missing_fields) setOnbMissing(data.missing_fields);
 	    setOnbNeedsClar(!!(data && data.needs_clarification));
 	    setOnbQuick((data && data.quick_replies) || []);
@@ -10703,7 +10807,7 @@ function AChat() {
 	  async function onbSend(textArg, templateIdArg) {
 	    var msg = String(textArg != null ? textArg : input).trim();
 	    if (!msg || onbReq.current) return;
-	    var requestedTemplateId = templateIdArg != null ? String(templateIdArg).trim() : onbTpl;
+	    var requestedTemplateId = templateIdArg != null ? String(templateIdArg).trim() : (onbDraft.current.id ? null : onbTpl); // onbTpl только при создании черновика; далее тип берём из серверного blueprint
 	    onbReq.current = true; setOnbBusy(true); setSending(true); setOnbErr(''); setOnbDead(false);
 	    setOnbQuick([]);
 	    setInput('');
@@ -10999,9 +11103,9 @@ function AChat() {
 	      var WDMAP = { 0: 'Вс', 1: 'Пн', 2: 'Вт', 3: 'Ср', 4: 'Чт', 5: 'Пт', 6: 'Сб', 7: 'Вс' };
 	      var rows = [];
 	      rows.push(e('div', { key: 'bn', style: card }, e('div', { style: lbl }, 'Название бизнеса'), e('input', { style: onbInput('businessName'), value: c.businessName, onChange: function (ev) { onbClearFieldError('businessName'); setC({ businessName: ev.target.value }); } }), onbHint('businessName')));
-	      if (onbTemplates && onbTemplates.length) rows.push(e('div', { key: 'ty', style: card }, e('div', { style: lbl }, 'Тип бизнеса'), e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7 } }, onbTemplates.map(function (tp) { return e('div', { key: tp.id, onClick: function () { setC({ templateId: tp.id }); }, style: { fontFamily: BODY, fontSize: 12, padding: '6px 11px', borderRadius: 999, border: '1px solid ' + (c.templateId === tp.id ? onbTone.ink : onbTone.line), color: c.templateId === tp.id ? onbTone.ink : onbTone.dim, cursor: 'pointer' } }, tp.name); }))));
+	      if (onbTemplates && onbTemplates.length) rows.push(e('div', { key: 'ty', style: card }, e('div', { style: lbl }, 'Сфера / профессия'), e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7 } }, onbTemplates.map(function (tp) { return e('div', { key: tp.id, onClick: function () { setC({ templateId: tp.id }); }, style: { fontFamily: BODY, fontSize: 12, padding: '6px 11px', borderRadius: 999, border: '1px solid ' + (c.templateId === tp.id ? onbTone.ink : onbTone.line), color: c.templateId === tp.id ? onbTone.ink : onbTone.dim, cursor: 'pointer' } }, tp.name); }))));
 	      rows.push(e('div', { key: 'cs', style: card }, e('div', { style: lbl }, 'Расписание'), e('div', { style: { display: 'flex', gap: 8 } }, ['internal', 'external'].map(function (v) { return e('div', { key: v, onClick: function () { setC({ calendarSource: v }); }, style: { flex: 1, textAlign: 'center', padding: '9px 6px', borderRadius: 10, border: '1px solid ' + (c.calendarSource === v ? onbTone.ink : onbTone.line), fontFamily: BODY, fontSize: 12, fontWeight: 600, color: c.calendarSource === v ? onbTone.ink : onbTone.dim, cursor: 'pointer' } }, v === 'internal' ? 'В MAYA' : 'Через CRM'); }))));
-	      rows.push(e('div', { key: 'pc', style: card }, e('div', { style: lbl }, 'Специалистов'), e('input', { style: onbInput('providerCount'), type: 'number', inputMode: 'numeric', min: 1, max: 100, value: c.providerCount, onChange: function (ev) { onbClearFieldError('providerCount'); setC({ providerCount: ev.target.value }); } }), onbHint('providerCount')));
+	      rows.push(e('div', { key: 'pc', style: card }, e('div', { style: lbl }, 'Формат работы · специалистов'), e('input', { style: onbInput('providerCount'), type: 'number', inputMode: 'numeric', min: 1, max: 100, value: c.providerCount, onChange: function (ev) { onbClearFieldError('providerCount'); setC({ providerCount: ev.target.value }); } }), (String(c.providerCount) === '1' ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 4 } }, 'Работаю один — это формат работы, не сфера') : null), onbHint('providerCount')));
 	      rows.push(e('div', { key: 'sv', style: card }, e('div', { style: lbl }, 'Услуги'),
 	        e('div', null, (c.services || []).map(function (s, i) { var setS = function (p) { var arr = c.services.slice(); arr[i] = Object.assign({}, s, p); setC({ services: arr }); };
 	          var nameField = 'services.' + i + '.name'; var priceField = 'services.' + i + '.price'; var durationField = 'services.' + i + '.duration';
