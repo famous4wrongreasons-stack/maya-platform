@@ -553,8 +553,11 @@ window.APP_DATA = {
         subscription_required: cfg.subscription_required === true,
         subscription_cta: cfg.subscription_cta || null,
         trial_days_remaining: (_tr.days_remaining != null ? _tr.days_remaining : null),
-        trial_full_access: (_tr.full_access != null ? _tr.full_access === true : null)
+        trial_full_access: (_tr.full_access != null ? _tr.full_access === true : null),
+        guest_access_ready: cfg.guest_access_ready === true,
+        guest_access_blockers: Array.isArray(cfg.guest_access_blockers) ? cfg.guest_access_blockers.slice(0, 8) : []
       };
+      try { window.dispatchEvent(new CustomEvent('me-saas-config-ready', { detail: window.__SAAS_TENANT })); } catch (e) {}
       // конфиг говорит «нужна подписка» → показать лист подписки (не generic-ошибку)
       try { if (cfg.subscription_required === true && window.__meSubOpen) window.__meSubOpen({ plans_path: (cfg.subscription_cta && cfg.subscription_cta.plans_path) || '/api/billing/plans', checkout_path: (cfg.subscription_cta && cfg.subscription_cta.checkout_path) || null }); } catch (e) {}
       var keys = cfg.available_feature_keys;
@@ -4373,8 +4376,26 @@ function ALogin() {
   const [lgTrialLocked, setLgTrialLocked] = React.useState(false); // после успеха — свайп заблокирован
   const [lgTrialErr, setLgTrialErr] = React.useState('');
   const [lgKnob, setLgKnob] = React.useState(0); // позиция ручки свайпа, px
+  // В универсальном MAYA OS гостевой вход закрыт до серверного подтверждения,
+  // что услуги/специалисты/расписание или реальная CRM полностью настроены.
+  const [lgGuestReady, setLgGuestReady] = React.useState(function () {
+    if (!window.__ME_SAAS_CTX) return true; // существующее production-приложение не меняем
+    return !!(window.__SAAS_TENANT && window.__SAAS_TENANT.guest_access_ready === true);
+  });
   const lgTrialDrag = React.useRef(false);
   const lgTrialReq = React.useRef(false); // trial-activation вызывается РОВНО один раз
+  React.useEffect(function () {
+    var ctx = window.__ME_SAAS_CTX;
+    if (!ctx) { setLgGuestReady(true); return undefined; }
+    var onConfig = function (ev) {
+      var detail = ev && ev.detail;
+      if (!detail || String(detail.slug || '') !== String(ctx.slug || '')) return;
+      setLgGuestReady(detail.guest_access_ready === true);
+    };
+    window.addEventListener('me-saas-config-ready', onConfig);
+    if (window.__SAAS_TENANT) onConfig({ detail: window.__SAAS_TENANT });
+    return function () { window.removeEventListener('me-saas-config-ready', onConfig); };
+  }, []);
   // активация: свайп — намеренный жест, но НЕ подключённый бизнес и НЕ старт аналитики.
   // activation_token хранится только в памяти (window.__meOnb) + session-scoped storage;
   // никогда в URL/console/analytics/error/localStorage.
@@ -5202,12 +5223,13 @@ function ALogin() {
   }, /*#__PURE__*/React.createElement(ATile, {
     t: t,
     radius: 16,
-    onClick: () => { window.__meMode && window.__meMode('client'); window.__meGo && window.__meGo('home'); }
+    onClick: lgGuestReady ? () => { window.__meMode && window.__meMode('client'); window.__meGo && window.__meGo('home'); } : undefined,
+    style: { opacity: lgGuestReady ? 1 : 0.48 }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "15px 0",
       textAlign: "center",
-      cursor: "pointer"
+      cursor: lgGuestReady ? "pointer" : "not-allowed"
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -5216,9 +5238,9 @@ function ALogin() {
       fontSize: 10.5,
       letterSpacing: "0.22em",
       textTransform: "uppercase",
-      color: t.ink
+      color: lgGuestReady ? t.ink : t.faint
     }
-  }, "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438")))), /*#__PURE__*/React.createElement("div", {
+  }, lgGuestReady ? "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438" : "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u043E \u043F\u043E\u0441\u043B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 MAYA")))), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       marginTop: 6

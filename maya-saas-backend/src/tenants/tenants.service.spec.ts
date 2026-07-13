@@ -157,6 +157,8 @@ describe('TenantsService', () => {
       tenant_status: 'active',
       allow_self_registration: true,
       client_registration_enabled: true,
+      guest_access_ready: true,
+      guest_access_blockers: [],
       booking_mode: 'preview',
       booking_live_enabled: false,
       industry_preset: {
@@ -308,6 +310,10 @@ describe('TenantsService', () => {
 
     expect(result.booking_mode).toBe('preview');
     expect(result.booking_live_enabled).toBe(false);
+    expect(result.guest_access_ready).toBe(false);
+    expect(result.guest_access_blockers).toContain(
+      'internal_calendar_not_ready',
+    );
   });
 
   it('keeps client registration disabled for trial tenants even if self-registration is on', async () => {
@@ -334,6 +340,7 @@ describe('TenantsService', () => {
     const result = await service.getPublicMobileConfig('demo-salon');
 
     expect(result.client_registration_enabled).toBe(false);
+    expect(result.guest_access_ready).toBe(false);
     expect(result.booking_mode).toBe('preview');
     expect(result.booking_live_enabled).toBe(false);
   });
@@ -370,6 +377,7 @@ describe('TenantsService', () => {
 
     expect(result.access_state).toBe('trial_active');
     expect(result.client_registration_enabled).toBe(true);
+    expect(result.guest_access_ready).toBe(true);
     expect(result.booking_mode).toBe('live');
     expect(result.trial_full_access).toBe(true);
   });
@@ -396,6 +404,7 @@ describe('TenantsService', () => {
       access_state: 'subscription_required',
       subscription_required: true,
       client_registration_enabled: false,
+      guest_access_ready: false,
       booking_mode: 'preview',
       subscription_cta: {
         plans_path: '/api/billing/plans',
@@ -431,6 +440,8 @@ describe('TenantsService', () => {
 
     expect(result.booking_mode).toBe('preview');
     expect(result.booking_live_enabled).toBe(false);
+    expect(result.guest_access_ready).toBe(false);
+    expect(result.guest_access_blockers).toContain('mock_crm_only');
   });
 
   it('allows server-side live booking only for an eligible tenant', async () => {
