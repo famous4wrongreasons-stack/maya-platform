@@ -22,6 +22,10 @@ import {
   CreatedAppointment,
   RescheduledAppointment,
 } from './crm-adapter.interface';
+import {
+  getCrmProviderCapability,
+  listConnectableCrmProviders,
+} from './crm-provider-catalog';
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
 
@@ -46,6 +50,7 @@ export class CrmService {
     const provider = (dto.provider ??
       existing?.provider ??
       CrmProvider.MOCK) as CrmProvider;
+    this.assertProviderConnectable(provider);
     const providerChanged = Boolean(
       existing && String(existing.provider) !== String(provider),
     );
@@ -248,6 +253,8 @@ export class CrmService {
       );
     }
 
+    this.assertProviderConnectable(integration.provider as CrmProvider);
+
     return this.adapterFactory.create(integration.provider as CrmProvider, {
       provider: integration.provider as CrmProvider,
       apiToken: this.encryptionService.decrypt(integration.encryptedApiToken),
@@ -321,5 +328,25 @@ export class CrmService {
         'YClients/Altegio integration requires settingsJson.companyId',
       );
     }
+  }
+
+  private assertProviderConnectable(provider: CrmProvider): void {
+    const capability = getCrmProviderCapability(provider);
+
+    if (capability?.connectable) {
+      return;
+    }
+
+    throw new BadRequestException({
+      message: capability
+        ? `${capability.name} integration is not available yet`
+        : 'Unknown CRM provider',
+      error: {
+        code: 'crm_provider_not_available',
+        provider,
+        implementation_status: capability?.implementationStatus ?? 'unknown',
+        selectable_provider_keys: listConnectableCrmProviders(),
+      },
+    });
   }
 }

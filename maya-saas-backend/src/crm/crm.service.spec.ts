@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { CrmIntegrationStatus, CrmProvider } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -148,5 +152,90 @@ describe('CrmService', () => {
       ForbiddenException,
     );
     expect(crmFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a scaffolded provider before storing its credentials', async () => {
+    const crmCreateMock = jest.fn();
+    const encryptMock = jest.fn();
+    const prisma = {
+      crmIntegration: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: crmCreateMock,
+      },
+    } as unknown as PrismaService;
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      prisma,
+      {
+        encrypt: encryptMock,
+        decrypt: jest.fn(),
+      } as unknown as EncryptionService,
+      {} as CrmAdapterFactory,
+      tenantContext,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.createOrUpdateIntegration('tenant-1', {
+          provider: CrmProvider.DIKIDI,
+          apiToken: 'must-not-be-stored',
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'crm_provider_not_available',
+          provider: CrmProvider.DIKIDI,
+          implementation_status: 'planned',
+          selectable_provider_keys: [
+            CrmProvider.YCLIENTS,
+            CrmProvider.ALTEGIO,
+            CrmProvider.MOCK,
+          ],
+        },
+      },
+    });
+    expect(encryptMock).not.toHaveBeenCalled();
+    expect(crmCreateMock).not.toHaveBeenCalled();
+  });
+
+  it('fails closed for a previously stored scaffold before decrypting it', async () => {
+    const decryptMock = jest.fn();
+    const adapterCreateMock = jest.fn();
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          calendarSource: 'external',
+        }),
+      },
+      crmIntegration: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'crm-planned',
+          tenantId: 'tenant-1',
+          provider: CrmProvider.WHITELINES,
+          encryptedApiToken: 'encrypted-secret',
+          baseUrl: null,
+          settingsJson: {},
+        }),
+      },
+    } as unknown as PrismaService;
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      prisma,
+      {
+        encrypt: jest.fn(),
+        decrypt: decryptMock,
+      } as unknown as EncryptionService,
+      { create: adapterCreateMock },
+      tenantContext,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.getServices('tenant-1'),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(decryptMock).not.toHaveBeenCalled();
+    expect(adapterCreateMock).not.toHaveBeenCalled();
   });
 });

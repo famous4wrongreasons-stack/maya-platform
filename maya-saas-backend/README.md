@@ -23,6 +23,7 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - Auth with `JWT` containing `user_id`, `tenant_id`, `role`
 - Public/mobile API:
   - `GET /api/industry-presets`
+  - `GET /api/crm/providers`
   - `GET /api/mobile/config/:tenantSlug`
   - `GET /api/onboarding/templates`
   - `POST /api/onboarding/trial-activations`
@@ -83,9 +84,18 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - CRM adapter architecture with:
   - `MockCRMAdapter` working end-to-end
   - `YClients/Altegio adapter` for real catalog, staff, slots and appointment creation
-  - `DikidiCRMAdapter` scaffold
-  - `WhitelinesCRMAdapter` scaffold
-  - `SalonOnlineCRMAdapter` scaffold
+  - `DikidiCRMAdapter`, `WhitelinesCRMAdapter` and `SalonOnlineCRMAdapter`
+    retained as non-connectable scaffolds until real API operations and contract
+    tests exist
+
+`GET /api/features/registry` separates commercial entitlement from actual
+implementation maturity. Every feature includes `implementationStatus`,
+`availableIn` and optional `limitations`. A plan or tenant entitlement does not
+prove that a universal platform module is shipped.
+
+`GET /api/crm/providers` is the source of truth for CRM choices. Only providers
+with `connectable=true` may be stored. The backend rejects planned scaffolds with
+`error.code=crm_provider_not_available` before encrypting or persisting a token.
 
 ## Environment
 

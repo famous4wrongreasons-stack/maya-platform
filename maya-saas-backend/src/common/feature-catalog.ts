@@ -54,6 +54,30 @@ export interface MayaFeatureDefinition {
   dependencies?: readonly MayaFeatureKey[];
 }
 
+export const MAYA_FEATURE_RUNTIMES = [
+  'current_maya',
+  'platform_backend',
+  'platform_frontend',
+] as const;
+
+export type MayaFeatureRuntime = (typeof MAYA_FEATURE_RUNTIMES)[number];
+
+export const MAYA_FEATURE_IMPLEMENTATION_STATUSES = [
+  'platform_ready',
+  'current_runtime_only',
+  'partial',
+  'planned',
+] as const;
+
+export type MayaFeatureImplementationStatus =
+  (typeof MAYA_FEATURE_IMPLEMENTATION_STATUSES)[number];
+
+export interface MayaFeatureReadiness {
+  implementationStatus: MayaFeatureImplementationStatus;
+  availableIn: readonly MayaFeatureRuntime[];
+  limitations?: readonly string[];
+}
+
 const defineFeature = (
   name: string,
   module: string,
@@ -250,6 +274,124 @@ export const MAYA_FEATURE_REGISTRY: Record<
     'branding',
     'Verified custom tenant domain.',
     ['branding.custom'],
+  ),
+};
+
+const defineReadiness = (
+  implementationStatus: MayaFeatureImplementationStatus,
+  availableIn: readonly MayaFeatureRuntime[],
+  limitations?: readonly string[],
+): MayaFeatureReadiness => ({
+  implementationStatus,
+  availableIn,
+  ...(limitations?.length ? { limitations } : {}),
+});
+
+const CURRENT_MAYA = ['current_maya'] as const;
+const PLATFORM = ['platform_backend', 'platform_frontend'] as const;
+const CURRENT_AND_PLATFORM = [
+  'current_maya',
+  'platform_backend',
+  'platform_frontend',
+] as const;
+
+// Entitlements describe commercial access. This map separately describes
+// implementation maturity so a paid flag cannot be mistaken for shipped code.
+export const MAYA_FEATURE_READINESS: Record<
+  MayaFeatureKey,
+  MayaFeatureReadiness
+> = {
+  booking: defineReadiness('platform_ready', CURRENT_AND_PLATFORM),
+  branding: defineReadiness('platform_ready', CURRENT_AND_PLATFORM),
+  client_app: defineReadiness('partial', CURRENT_AND_PLATFORM, [
+    'The universal role-aware app and final trial experience are still being unified in the platform frontend.',
+  ]),
+  loyalty: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  shop: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  tg_basic: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  tg_marketing: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  journal: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  staff_cabinet: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  analytics: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  video_analytics: defineReadiness(
+    'planned',
+    [],
+    ['Registry key only; no universal runtime module is implemented.'],
+  ),
+  cutmatch: defineReadiness('partial', CURRENT_MAYA, [
+    'Founder-only in the current application.',
+    'Not available in the universal platform backend.',
+  ]),
+  ai_chatbot: defineReadiness('current_runtime_only', CURRENT_MAYA, [
+    'The platform backend currently implements AI onboarding, not the full role-aware assistant runtime.',
+  ]),
+  priority_support: defineReadiness(
+    'planned',
+    [],
+    ['No support-queue module is implemented.'],
+  ),
+  'calendar.internal': defineReadiness('platform_ready', PLATFORM),
+  'calendar.external': defineReadiness(
+    'partial',
+    ['current_maya', 'platform_backend', 'platform_frontend'],
+    ['The platform backend currently supports YClients and Altegio only.'],
+  ),
+  'booking.public': defineReadiness('partial', CURRENT_AND_PLATFORM, [
+    'The platform API currently requires an authenticated customer session for booking mutations.',
+  ]),
+  'booking.customer_app': defineReadiness(
+    'platform_ready',
+    CURRENT_AND_PLATFORM,
+  ),
+  'customers.core': defineReadiness('partial', CURRENT_AND_PLATFORM, [
+    'The platform backend has customer identity and profile primitives but not the complete universal customer module.',
+  ]),
+  'expenses.core': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'analytics.solo': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'analytics.employee': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'analytics.location': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'analytics.business': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'crm.integration': defineReadiness(
+    'partial',
+    ['current_maya', 'platform_backend', 'platform_frontend'],
+    [
+      'YClients and Altegio are implemented; DIKIDI, Whitelines and Salon Online are planned.',
+    ],
+  ),
+  'commerce.store': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'commerce.certificates': defineReadiness(
+    'current_runtime_only',
+    CURRENT_MAYA,
+  ),
+  'commerce.memberships': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'commerce.redemption': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  referrals: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'team.chat': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'notifications.core': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'customer.portal': defineReadiness('partial', CURRENT_AND_PLATFORM, [
+    'Core appointment history and actions are available, but the final universal customer experience is still being unified.',
+  ]),
+  'ai.owner': defineReadiness('current_runtime_only', CURRENT_MAYA, [
+    'The role-aware owner tool runtime has not yet been tenantized in the platform backend.',
+  ]),
+  'ai.admin': defineReadiness('current_runtime_only', CURRENT_MAYA, [
+    'The role-aware administrator tool runtime has not yet been tenantized in the platform backend.',
+  ]),
+  'ai.consultant': defineReadiness('current_runtime_only', CURRENT_MAYA, [
+    'The role-aware customer tool runtime has not yet been tenantized in the platform backend.',
+  ]),
+  'telegram.owner': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'telegram.admin': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'telegram.consultant': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'branding.custom': defineReadiness('platform_ready', CURRENT_AND_PLATFORM, [
+    'Conversational owner onboarding intentionally exposes logo-only branding.',
+  ]),
+  'domain.custom': defineReadiness(
+    'planned',
+    [],
+    [
+      'Domain ownership verification and automated routing are not implemented.',
+    ],
   ),
 };
 

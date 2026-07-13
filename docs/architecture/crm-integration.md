@@ -8,6 +8,22 @@ CRM providers are infrastructure adapters. UI, booking policy and analytics cons
 
 The existing `CRMAdapter` is preserved and expanded incrementally toward customer, employee, service, availability and booking synchronization. Each call receives trusted tenant context; credentials are loaded by tenant inside infrastructure.
 
+`GET /api/crm/providers` is the public implementation-readiness contract. It
+lists every known provider, but only entries with `connectable=true` may be
+selected or persisted. This prevents an enum value or adapter scaffold from
+being mistaken for a working integration.
+
+Current implementation state:
+
+| Provider | State | Connectable | Production use |
+|---|---|---:|---|
+| YClients | ready | yes | real connection after tenant acceptance |
+| Altegio | ready | yes | compatible adapter, requires tenant acceptance |
+| MAYA mock | development_only | yes | local/test/trial preview only |
+| DIKIDI | planned | no | adapter scaffold only |
+| Whitelines | planned | no | adapter scaffold only |
+| Salon Online | planned | no | adapter scaffold only |
+
 ## Source of truth
 
 Each tenant configures ownership separately:
@@ -52,6 +68,8 @@ sequenceDiagram
 - Backoff distinguishes rate limit, transient network and permanent validation errors.
 - External IDs are unique per `(tenant, provider, entity_type, external_id)`.
 - Booking reschedule remains non-destructive; no delete-and-recreate fallback.
+- Planned providers fail with `crm_provider_not_available` before credentials
+  are encrypted, persisted or passed to an adapter.
 
 ## Adding a connector
 
@@ -60,7 +78,11 @@ sequenceDiagram
 3. Add fixture-based adapter tests and contract tests.
 4. Define ownership and conflict behavior.
 5. Add webhook verification/idempotency if available.
-6. Register the adapter in the factory; no UI component imports it.
+6. Add it to the provider catalog as non-connectable and verify the public
+   contract.
+7. Register the adapter in the factory; no UI component imports it.
+8. Mark it connectable only after all required operations and negative-path
+   tests pass.
 
 ## Mock connector
 

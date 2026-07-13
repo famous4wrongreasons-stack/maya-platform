@@ -4,7 +4,11 @@ import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
 import { CrmIntegrationStatus, CrmProvider } from '../../common/domain.enums';
 
 export class CreateCrmIntegrationDto {
-  @ApiProperty({ enum: CrmProvider })
+  @ApiProperty({
+    enum: CrmProvider,
+    description:
+      'Check GET /api/crm/providers before selection. Planned providers are rejected until their adapter is implemented.',
+  })
   @IsEnum(CrmProvider)
   provider!: CrmProvider;
 
