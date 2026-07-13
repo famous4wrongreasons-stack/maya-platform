@@ -174,6 +174,23 @@ describe('SafeOnboardingInterpreter', () => {
     );
   });
 
+  it('applies automatic barbershop services inside a complete natural-language answer', () => {
+    const result = interpreter.interpret(
+      'Я работаю парикмахером, снимаю кресло. Да никак не называется, меня зовут Артем и мои клиенты знают меня как Артема. Услуги поставь автоматически.',
+    );
+
+    expect(result.blueprint).toMatchObject({
+      templateId: 'barbershop',
+      businessName: 'Артем',
+      providerCount: 1,
+    });
+    expect(result.blueprint.services).toHaveLength(17);
+    expect(result.blueprint.services).not.toContainEqual(
+      expect.objectContaining({ name: 'поставь автоматически' }),
+    );
+    expect(result.missingFields).toEqual([]);
+  });
+
   it('understands a chair-renting hairdresser who works under their own name', () => {
     const first = interpreter.interpret(
       'я работаю парикмахером! снимаю кресло!',
