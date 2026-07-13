@@ -19,6 +19,7 @@ export type AuthRateLimitAction =
   | 'refresh'
   | 'registration'
   | 'ai_onboarding'
+  | 'trial_activation'
   | 'trial_signup';
 
 type AuthRateLimitStage = 'preflight' | 'session' | 'tenant';
@@ -65,6 +66,7 @@ const POLICIES: AuthRateLimitPolicy[] = [
   policy('refresh', 'session', 'identity', '15m', 20, 900),
   policy('trial_signup', 'preflight', 'ip', '24h', 10, 86400),
   policy('trial_signup', 'preflight', 'identity', '24h', 3, 86400),
+  policy('trial_activation', 'preflight', 'ip', '24h', 20, 86400),
 ];
 
 @Injectable()

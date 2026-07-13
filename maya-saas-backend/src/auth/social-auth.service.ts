@@ -36,10 +36,16 @@ import { TenantAuthRepository } from './tenant-auth.repository';
 
 type SocialProvider = 'telegram' | 'yandex';
 
-type TenantAuthContext = {
+type ClientAccessTenant = {
+  currentPeriodEnd?: Date | null;
+  status: string;
+  trialEndsAt?: Date | null;
+  trialFullAccess?: boolean;
+};
+
+type TenantAuthContext = ClientAccessTenant & {
   id: string;
   slug: string;
-  status: string;
   allowSelfRegistration: boolean;
 };
 
@@ -127,7 +133,7 @@ export class SocialAuthService {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
-    this.assertTenantAllowsClientAccess(tenant.status, true);
+    this.assertTenantAllowsClientAccess(tenant, true);
 
     const clientId = this.getRequiredConfig(
       'YANDEX_CLIENT_ID',
@@ -213,7 +219,7 @@ export class SocialAuthService {
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
-    this.assertTenantAllowsClientAccess(tenant.status, true);
+    this.assertTenantAllowsClientAccess(tenant, true);
 
     const clientId = this.getRequiredConfig(
       'TELEGRAM_CLIENT_ID',
@@ -349,7 +355,7 @@ export class SocialAuthService {
       };
     }
 
-    this.assertTenantAllowsClientRegistration(params.tenant.status);
+    this.assertTenantAllowsClientRegistration(params.tenant);
     this.assertTenantAllowsSelfRegistration(
       params.tenant.allowSelfRegistration,
     );
@@ -798,7 +804,7 @@ export class SocialAuthService {
       );
     }
 
-    this.assertTenantAllowsClientAccess(flow.tenant.status, true);
+    this.assertTenantAllowsClientAccess(flow.tenant, true);
 
     return {
       id: flow.id,
@@ -839,42 +845,74 @@ export class SocialAuthService {
   private assertUserCanLogin(user: {
     role: string;
     status: string;
-    tenant?: { status: string } | null;
+    tenant?: ClientAccessTenant | null;
   }) {
     if (user.status !== 'active') {
       throw new ForbiddenException('User is not active');
     }
 
     this.assertTenantAllowsClientAccess(
-      user.tenant?.status ?? 'active',
+      user.tenant ?? { status: 'active' },
       this.shouldAllowTrialTenantLogin(user.role as UserRole),
     );
   }
 
   private assertTenantAllowsClientAccess(
-    status: string,
+    tenant: ClientAccessTenant,
     allowTrial: boolean,
   ): void {
+    if (this.isUnpaidExpiredTrial(tenant) && !allowTrial) {
+      throw new ForbiddenException('Tenant is not accepting client access');
+    }
+
     const allowed = new Set<string>(['active', 'past_due']);
 
-    if (allowTrial) {
+    if (allowTrial || this.isFullTrialActive(tenant)) {
       allowed.add('trial');
     }
 
-    if (!allowed.has(status)) {
+    if (!allowed.has(tenant.status)) {
       throw new ForbiddenException('Tenant is not accepting client access');
     }
   }
 
-  private assertTenantAllowsClientRegistration(status: string): void {
-    if (status === 'trial') {
+  private assertTenantAllowsClientRegistration(
+    tenant: ClientAccessTenant,
+  ): void {
+    const expired = this.isUnpaidExpiredTrial(tenant);
+    if (
+      expired ||
+      (tenant.status === 'trial' && !this.isFullTrialActive(tenant))
+    ) {
       throw new ForbiddenException(
         this.buildSocialAuthError(
-          'trial_client_registration_disabled',
-          'Client registration is disabled while this business is still in trial.',
+          expired
+            ? 'subscription_required'
+            : 'trial_client_registration_disabled',
+          expired
+            ? 'The trial has ended. A subscription is required.'
+            : 'Client registration is disabled while this business is still in trial.',
         ),
       );
     }
+  }
+
+  private isUnpaidExpiredTrial(tenant: ClientAccessTenant): boolean {
+    return (
+      new Set(['trial', 'past_due']).has(tenant.status) &&
+      Boolean(tenant.trialEndsAt) &&
+      tenant.trialEndsAt!.getTime() <= Date.now() &&
+      !tenant.currentPeriodEnd
+    );
+  }
+
+  private isFullTrialActive(tenant: ClientAccessTenant): boolean {
+    return (
+      tenant.status === 'trial' &&
+      tenant.trialFullAccess === true &&
+      Boolean(tenant.trialEndsAt) &&
+      tenant.trialEndsAt!.getTime() > Date.now()
+    );
   }
 
   private assertTenantAllowsSelfRegistration(
@@ -1045,6 +1083,7 @@ export class SocialAuthService {
       | 'social_redirect_invalid'
       | 'social_state_invalid'
       | 'social_token_invalid'
+      | 'subscription_required'
       | 'trial_client_registration_disabled',
     message: string,
   ) {

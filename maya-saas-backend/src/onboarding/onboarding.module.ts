@@ -10,8 +10,10 @@ import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
 import { OnboardingController } from './onboarding.controller';
 import { AiOnboardingService } from './ai-onboarding.service';
+import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
 import { OnboardingService } from './onboarding.service';
 import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
+import { TrialActivationService } from './trial-activation.service';
 
 @Module({
   imports: [
@@ -29,6 +31,9 @@ import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
     OnboardingService,
     AiOnboardingService,
     SafeOnboardingInterpreter,
+    ConversationalOnboardingInterpreter,
+    TrialActivationService,
   ],
+  exports: [TrialActivationService],
 })
 export class OnboardingModule {}

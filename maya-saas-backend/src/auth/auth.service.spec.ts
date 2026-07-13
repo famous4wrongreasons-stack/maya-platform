@@ -18,10 +18,13 @@ import {
 import { TenantAuthRepository } from './tenant-auth.repository';
 
 type TenantRecord = {
+  currentPeriodEnd?: Date | null;
   id: string;
   slug: string;
   status: string;
   allowSelfRegistration: boolean;
+  trialEndsAt?: Date | null;
+  trialFullAccess?: boolean;
 };
 
 type BranchRecord = {
@@ -626,6 +629,50 @@ describe('AuthService phone auth', () => {
     ).rejects.toThrow('Tenant is not accepting client access');
   });
 
+  it('allows client login during a verified full-access trial', async () => {
+    const trialTenant: TenantRecord = {
+      ...tenant,
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+    };
+    const password = 'StrongPass123';
+    const {
+      service,
+      mocks: {
+        findTenantUserByEmailMock,
+        getTenantBySlugOrThrowMock,
+        issueSessionMock,
+      },
+    } = createService();
+    const clientUser: UserRecord = {
+      id: 'user-client-full-trial',
+      tenantId: trialTenant.id,
+      branchId: null,
+      email: 'client@barhat.ru',
+      phone: '+79992222222',
+      passwordHash: await bcrypt.hash(password, 4),
+      role: UserRole.CLIENT,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tenant: trialTenant,
+      branch: null,
+    };
+
+    getTenantBySlugOrThrowMock.mockResolvedValue(trialTenant);
+    findTenantUserByEmailMock.mockResolvedValue(clientUser);
+
+    const result = await service.login({
+      tenantSlug: trialTenant.slug,
+      email: clientUser.email,
+      password,
+    });
+
+    expect(issueSessionMock).toHaveBeenCalledWith(clientUser, {});
+    expect(result).toMatchObject({ access_token: 'jwt-token' });
+  });
+
   it('blocks client register for a trial tenant with a machine-readable code', async () => {
     const trialTenant: TenantRecord = {
       ...tenant,
@@ -648,6 +695,37 @@ describe('AuthService phone auth', () => {
       response: {
         error: {
           code: 'trial_client_registration_disabled',
+        },
+      },
+    });
+    expect(createUserMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps an expired unpaid trial blocked after it becomes past due', async () => {
+    const expiredTrialTenant: TenantRecord = {
+      ...tenant,
+      status: 'past_due',
+      currentPeriodEnd: null,
+      trialEndsAt: new Date(Date.now() - 60_000),
+      trialFullAccess: false,
+    };
+    const {
+      service,
+      mocks: { createUserMock, getTenantBySlugOrThrowMock },
+    } = createService();
+
+    getTenantBySlugOrThrowMock.mockResolvedValue(expiredTrialTenant);
+
+    await expect(
+      service.register({
+        tenantSlug: expiredTrialTenant.slug,
+        email: 'new-client@barhat.ru',
+        password: 'StrongPass123',
+      }),
+    ).rejects.toMatchObject<ForbiddenException>({
+      response: {
+        error: {
+          code: 'subscription_required',
         },
       },
     });

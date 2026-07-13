@@ -28,6 +28,7 @@ model Tenant {
   currentPeriodStart     DateTime?
   currentPeriodEnd       DateTime?
   billingMethodId        String?
+  trialFullAccess        Boolean                         @default(false)
   allowSelfRegistration  Boolean                         @default(true)
   createdAt              DateTime                        @default(now())
   updatedAt              DateTime                        @updatedAt
@@ -51,6 +52,7 @@ model Tenant {
   availabilityRules      InternalAvailabilityRule[]
   availabilityExceptions InternalAvailabilityException[]
   aiOnboardingDrafts     AiOnboardingDraft[]             @relation("AiOnboardingConfirmedTenant")
+  trialActivation        TrialActivation?
 }
 
 /// Persisted white-label BrandingConfig. The database model name is retained
@@ -328,21 +330,46 @@ model InternalProvider {
 }
 
 model AiOnboardingDraft {
-  id                String   @id @default(cuid())
-  draftTokenHash    String   @unique
-  status            String   @default("draft")
-  templateId        String
-  blueprintJson     Json
-  missingFieldsJson Json
-  inputDigest       String?
-  expiresAt         DateTime
-  confirmedTenantId String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  confirmedTenant   Tenant?  @relation("AiOnboardingConfirmedTenant", fields: [confirmedTenantId], references: [id], onDelete: SetNull)
+  id                   String           @id @default(cuid())
+  draftTokenHash       String           @unique
+  status               String           @default("draft")
+  templateId           String
+  blueprintJson        Json
+  missingFieldsJson    Json
+  inputDigest          String?
+  lastAssistantMessage String?
+  quickRepliesJson     Json             @default("[]")
+  lastConfidence       Float?
+  needsClarification   Boolean          @default(false)
+  interpreterSource    String           @default("safe_fallback")
+  turnCount            Int              @default(1)
+  expiresAt            DateTime
+  confirmedTenantId    String?
+  trialActivationId    String?          @unique
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  confirmedTenant      Tenant?          @relation("AiOnboardingConfirmedTenant", fields: [confirmedTenantId], references: [id], onDelete: SetNull)
+  trialActivation      TrialActivation? @relation(fields: [trialActivationId], references: [id], onDelete: SetNull)
 
   @@index([status, expiresAt])
   @@index([confirmedTenantId])
+}
+
+model TrialActivation {
+  id                  String             @id @default(cuid())
+  activationTokenHash String             @unique
+  status              String             @default("pending")
+  source              String             @default("maya_os")
+  expiresAt           DateTime
+  completedAt         DateTime?
+  tenantId            String?            @unique
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  tenant              Tenant?            @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  draft               AiOnboardingDraft?
+
+  @@index([status, expiresAt])
+  @@index([completedAt])
 }
 
 model InternalProviderService {

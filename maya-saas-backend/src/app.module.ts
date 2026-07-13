@@ -20,6 +20,7 @@ import { OnboardingModule } from './onboarding/onboarding.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
+import { SubscriptionAccessGuard } from './guards/subscription-access.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { ServicesModule } from './services/services.module';
 import { StaffModule } from './staff/staff.module';
@@ -71,6 +72,10 @@ import { validateRuntimeConfig } from './config/runtime-config';
     {
       provide: APP_GUARD,
       useClass: TenantAccessGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SubscriptionAccessGuard,
     },
     {
       provide: APP_GUARD,

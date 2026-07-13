@@ -19,6 +19,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { OnboardingService } from './onboarding.service';
+import { TrialActivationService } from './trial-activation.service';
 
 type CreatedTenant = {
   id: string;
@@ -68,6 +69,9 @@ describe('OnboardingService', () => {
     const createTenantMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<CreatedTenant>
     > = jest.fn().mockResolvedValue(tenant);
+    const deleteFailedTrialTenantMock = jest.fn().mockResolvedValue({
+      count: 1,
+    });
     const upsertBrandingMock: jest.MockedFunction<
       (tenantId: string, args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
@@ -108,6 +112,11 @@ describe('OnboardingService', () => {
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
     const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
+    const claimActivationMock = jest.fn().mockResolvedValue({
+      id: 'activation-1',
+    });
+    const completeActivationMock = jest.fn().mockResolvedValue(undefined);
+    const releaseActivationMock = jest.fn().mockResolvedValue(undefined);
     const tenantContext = new TenantContextService();
     const expectCreatedTenantContext = () => {
       expect(tenantContext.requireTenantId()).toBe(tenant.id);
@@ -127,7 +136,10 @@ describe('OnboardingService', () => {
 
     const service = new OnboardingService(
       { get: configGetMock } as ConfigService,
-      { createTenant: createTenantMock } as unknown as TenantsService,
+      {
+        createTenant: createTenantMock,
+        deleteFailedTrialTenant: deleteFailedTrialTenantMock,
+      } as unknown as TenantsService,
       { upsertBranding: upsertBrandingMock } as unknown as BrandingService,
       {
         createOrUpdateIntegration: createOrUpdateIntegrationMock,
@@ -151,6 +163,11 @@ describe('OnboardingService', () => {
       } as unknown as AuthRateLimitService,
       { log: auditLogMock } as unknown as AuditLogService,
       tenantContext,
+      {
+        claim: claimActivationMock,
+        complete: completeActivationMock,
+        release: releaseActivationMock,
+      } as unknown as TrialActivationService,
     );
 
     return {
@@ -158,6 +175,7 @@ describe('OnboardingService', () => {
       tenantContext,
       mocks: {
         createTenantMock,
+        deleteFailedTrialTenantMock,
         upsertBrandingMock,
         createOrUpdateIntegrationMock,
         ensureProviderForUserMock,
@@ -168,6 +186,9 @@ describe('OnboardingService', () => {
         issueSessionMock,
         rateLimitPreflightMock,
         auditLogMock,
+        claimActivationMock,
+        completeActivationMock,
+        releaseActivationMock,
       },
     };
   };
@@ -186,18 +207,24 @@ describe('OnboardingService', () => {
       branchAddress: 'Moscow, Tverskaya 1',
     });
 
-    expect(mocks.createTenantMock).toHaveBeenCalledWith({
-      name: 'Studio Vector',
-      slug: 'studio-vector',
-      status: TenantStatus.TRIAL,
-      planId: 'plan-pro',
-      industryPresetId: 'education',
-      calendarSource: CalendarSource.EXTERNAL,
-      branchName: 'Studio Vector',
-      branchAddress: 'Moscow, Tverskaya 1',
-      branchPhone: undefined,
-      branchTimezone: undefined,
-    });
+    expect(mocks.createTenantMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Studio Vector',
+        slug: 'studio-vector',
+        status: TenantStatus.TRIAL,
+        planId: 'plan-pro',
+        industryPresetId: 'education',
+        calendarSource: CalendarSource.EXTERNAL,
+        trialFullAccess: false,
+        branchName: 'Studio Vector',
+        branchAddress: 'Moscow, Tverskaya 1',
+        branchPhone: undefined,
+        branchTimezone: undefined,
+      }),
+    );
+    expect(typeof mocks.createTenantMock.mock.calls[0]?.[0].trialEndsAt).toBe(
+      'string',
+    );
     expect(mocks.rateLimitPreflightMock).toHaveBeenCalledWith('trial_signup', {
       clientIp: undefined,
       identity: 'owner@studio-vector.ru',
@@ -250,6 +277,11 @@ describe('OnboardingService', () => {
         },
         calendar_source: CalendarSource.EXTERNAL,
         plan_id: 'plan-pro',
+        trial_full_access: false,
+      },
+      trial: {
+        days: 10,
+        full_access: false,
       },
       user: {
         id: 'user-1',
@@ -287,6 +319,49 @@ describe('OnboardingService', () => {
       calendar_source: CalendarSource.INTERNAL,
       tenant: {
         calendar_source: CalendarSource.INTERNAL,
+      },
+    });
+  });
+
+  it('starts a verified ten-day full-access trial only after registration completes', async () => {
+    const { service, mocks } = createService();
+
+    const result = await service.createTrialSignup({
+      trialActivationToken: 'a'.repeat(43),
+      name: 'Илья Консалтинг',
+      slug: 'ilya-consulting',
+      ownerEmail: 'owner@studio-vector.ru',
+      ownerName: 'Илья',
+      industryPresetId: 'solo_specialist',
+      calendarSource: CalendarSource.INTERNAL,
+    });
+
+    expect(mocks.claimActivationMock).toHaveBeenCalledWith(
+      'a'.repeat(43),
+      undefined,
+    );
+    expect(mocks.createTenantMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trialFullAccess: true,
+      }),
+    );
+    expect(typeof mocks.createTenantMock.mock.calls[0]?.[0].trialEndsAt).toBe(
+      'string',
+    );
+    expect(mocks.completeActivationMock).toHaveBeenCalledWith(
+      'activation-1',
+      'tenant-1',
+    );
+    expect(result).toMatchObject({
+      booking_mode: 'live',
+      trial: {
+        days: 10,
+        full_access: true,
+      },
+      trial_activation: {
+        activation_id: 'activation-1',
+        status: 'completed',
+        counted_as_connected_business: true,
       },
     });
   });

@@ -23,6 +23,7 @@ import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
 import { CurrentUser } from '../decorators/current-user.decorator';
+import { AllowSubscriptionRequired } from '../decorators/allow-subscription-required.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
@@ -56,6 +57,7 @@ export class AdminController {
   @Get(':id')
   @Roles(UserRole.PLATFORM_OWNER, UserRole.TENANT_ADMIN)
   @TenantScoped({ paramKey: 'id', requireTenant: false })
+  @AllowSubscriptionRequired()
   @ApiOperation({ summary: 'Get a tenant by id' })
   getTenant(@Param('id') id: string, @CurrentUser() actor: AuthenticatedUser) {
     return this.adminService.getTenant(id, actor);

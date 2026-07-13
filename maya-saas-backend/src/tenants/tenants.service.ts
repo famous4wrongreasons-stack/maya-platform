@@ -25,6 +25,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { evaluateTenantAccessState } from './tenant-access-state';
 
 type PublicContentPair = [string, string];
 
@@ -175,19 +176,25 @@ function evaluateBookingMode(params: {
   crmStatus?: string | null;
   crmProvider?: string | null;
   bookingFeatureEnabled: boolean;
+  subscriptionRequired?: boolean;
+  trialFullAccess?: boolean;
 }): BookingModeEvaluation {
   const blockers: string[] = [];
-  const tenantCanGoLive = new Set<string>([
-    TenantStatus.ACTIVE,
-    TenantStatus.PAST_DUE,
-  ]).has(params.tenantStatus);
+  const tenantCanGoLive =
+    !params.subscriptionRequired &&
+    (new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
+      params.tenantStatus,
+    ) ||
+      (params.tenantStatus === 'trial' && params.trialFullAccess === true));
   const crmConnected = params.crmStatus === 'active';
   const realCrmConnected =
     crmConnected &&
     params.crmProvider !== null &&
     params.crmProvider !== CrmProvider.MOCK;
 
-  if (!tenantCanGoLive) {
+  if (params.subscriptionRequired) {
+    blockers.push('subscription_required');
+  } else if (!tenantCanGoLive) {
     blockers.push('tenant_not_active');
   }
 
@@ -405,6 +412,7 @@ export class TenantsService {
           currentPeriodStart: billingDates.currentPeriodStart,
           currentPeriodEnd: billingDates.currentPeriodEnd,
           billingMethodId,
+          trialFullAccess: dto.trialFullAccess ?? false,
           allowSelfRegistration: dto.allowSelfRegistration ?? true,
         },
       });
@@ -431,6 +439,16 @@ export class TenantsService {
     });
 
     return this.serializeTenant(await this.getTenantByIdOrThrow(tenant.id));
+  }
+
+  async deleteFailedTrialTenant(id: string) {
+    return this.prisma.tenant.deleteMany({
+      where: {
+        id,
+        status: TenantStatus.TRIAL,
+        currentPeriodStart: null,
+      },
+    });
   }
 
   async updateTenant(id: string, dto: UpdateTenantDto) {
@@ -539,6 +557,9 @@ export class TenantsService {
       where: { id },
       select: {
         status: true,
+        trialEndsAt: true,
+        trialFullAccess: true,
+        currentPeriodEnd: true,
         calendarSource: true,
         plan: {
           select: {
@@ -590,15 +611,18 @@ export class TenantsService {
     const featureKeys = resolvedEntitlements?.featureKeys
       ? resolvedEntitlements.featureKeys
       : featureKeysFromFlags(features);
+    const access = evaluateTenantAccessState(tenant);
     const evaluation = evaluateBookingMode({
       requestedMode: resolveRequestedBookingMode(theme),
-      tenantStatus: tenant.status,
+      tenantStatus: access.tenantStatus,
       calendarSource: tenant.calendarSource ?? CalendarSource.EXTERNAL,
       internalCalendarReady: isInternalCalendarReady(tenant._count),
       crmStatus: tenant.crmIntegration?.status ?? null,
       crmProvider: tenant.crmIntegration?.provider ?? null,
       bookingFeatureEnabled:
         featureKeys.length === 0 || features.booking === true,
+      subscriptionRequired: access.subscriptionRequired,
+      trialFullAccess: access.trialFullAccess,
     });
 
     if (evaluation.effectiveMode !== 'live') {
@@ -653,13 +677,27 @@ export class TenantsService {
       throw new NotFoundException('Tenant not found');
     }
 
+    const access = evaluateTenantAccessState(tenant);
+    if (access.shouldMarkPastDue) {
+      await this.prisma.tenant.updateMany({
+        where: {
+          id: tenant.id,
+          status: TenantStatus.TRIAL,
+          trialEndsAt: { lte: new Date() },
+        },
+        data: {
+          status: TenantStatus.PAST_DUE,
+          trialFullAccess: false,
+        },
+      });
+    }
+
     const firstBranch = tenant.branches[0] ?? null;
     const theme =
       (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
       {};
     const content = extractPublicMobileContent(theme);
     const industryPreset = getIndustryPreset(tenant.industryPresetId);
-    const activeStatuses = new Set(['trial', 'active', 'past_due']);
     const resolvedEntitlements = this.entitlementsService
       ? await this.entitlementsService.getEffectiveEntitlements(tenant.id)
       : null;
@@ -673,17 +711,21 @@ export class TenantsService {
       availableFeatureKeys.length === 0 || availableFeatures.booking === true;
     const clientRegistrationEnabled =
       tenant.allowSelfRegistration &&
-      new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
-        tenant.status,
-      );
+      !access.subscriptionRequired &&
+      (new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
+        access.tenantStatus,
+      ) ||
+        (access.tenantStatus === 'trial' && access.trialFullAccess));
     const bookingEvaluation = evaluateBookingMode({
       requestedMode: resolveRequestedBookingMode(theme),
-      tenantStatus: tenant.status,
+      tenantStatus: access.tenantStatus,
       calendarSource: tenant.calendarSource ?? CalendarSource.EXTERNAL,
       internalCalendarReady: isInternalCalendarReady(tenant._count),
       crmStatus: tenant.crmIntegration?.status ?? null,
       crmProvider: tenant.crmIntegration?.provider ?? null,
       bookingFeatureEnabled,
+      subscriptionRequired: access.subscriptionRequired,
+      trialFullAccess: access.trialFullAccess,
     });
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
@@ -712,8 +754,26 @@ export class TenantsService {
 
     return {
       slug: tenant.slug,
-      active: activeStatuses.has(tenant.status),
-      tenant_status: tenant.status,
+      active: !new Set(['subscription_required', 'disabled']).has(
+        access.accessState,
+      ),
+      tenant_status: access.tenantStatus,
+      access_state: access.accessState,
+      subscription_required: access.subscriptionRequired,
+      trial_full_access: access.trialFullAccess,
+      trial: {
+        ends_at: access.trialEndsAt,
+        days_remaining: access.daysRemaining,
+        full_access: access.trialFullAccess,
+      },
+      subscription_cta: access.subscriptionRequired
+        ? {
+            title: 'Пробный период завершен',
+            message: 'Выберите подписку, чтобы снова открыть функции MAYA OS.',
+            plans_path: '/api/billing/plans',
+            checkout_path: `/api/admin/tenants/${tenant.id}/billing/checkout`,
+          }
+        : null,
       allow_self_registration: tenant.allowSelfRegistration,
       client_registration_enabled: clientRegistrationEnabled,
       booking_mode: bookingEvaluation.effectiveMode,
@@ -724,7 +784,7 @@ export class TenantsService {
       content,
       tenant: {
         slug: tenant.slug,
-        status: tenant.status,
+        status: access.tenantStatus,
         industry_preset_id: industryPreset.id,
         calendar_source: tenant.calendarSource ?? CalendarSource.EXTERNAL,
         default_currency: tenant.defaultCurrency,
@@ -793,13 +853,17 @@ export class TenantsService {
     tenant: Awaited<ReturnType<TenantsService['getTenantByIdOrThrow']>>,
   ) {
     const industryPreset = getIndustryPreset(tenant.industryPresetId);
+    const access = evaluateTenantAccessState(tenant);
 
     return {
       ...this.serializeTenantBookingState(tenant),
       id: tenant.id,
       name: tenant.name,
       slug: tenant.slug,
-      status: tenant.status,
+      status: access.tenantStatus,
+      access_state: access.accessState,
+      subscription_required: access.subscriptionRequired,
+      trial_full_access: access.trialFullAccess,
       plan_id: tenant.planId,
       industry_preset_id: industryPreset.id,
       industry_preset: industryPreset,
@@ -896,14 +960,17 @@ export class TenantsService {
     const featureKeys = featureKeysFromFlags(features);
     const bookingFeatureEnabled =
       featureKeys.length === 0 || features.booking === true;
+    const access = evaluateTenantAccessState(tenant);
     const evaluation = evaluateBookingMode({
       requestedMode: resolveRequestedBookingMode(theme),
-      tenantStatus: tenant.status,
+      tenantStatus: access.tenantStatus,
       calendarSource: tenant.calendarSource ?? CalendarSource.EXTERNAL,
       internalCalendarReady: isInternalCalendarReady(tenant._count),
       crmStatus: tenant.crmIntegration?.status ?? null,
       crmProvider: tenant.crmIntegration?.provider ?? null,
       bookingFeatureEnabled,
+      subscriptionRequired: access.subscriptionRequired,
+      trialFullAccess: access.trialFullAccess,
     });
 
     return {
@@ -970,6 +1037,7 @@ export class TenantsService {
   private serializeTenantBillingState(
     tenant: Awaited<ReturnType<TenantsService['getTenantByIdOrThrow']>>,
   ) {
+    const access = evaluateTenantAccessState(tenant);
     const accessWindowEndsAt =
       tenant.currentPeriodEnd ?? tenant.trialEndsAt ?? null;
     const graceEndsAt =
@@ -979,6 +1047,10 @@ export class TenantsService {
 
     return {
       trial_ends_at: tenant.trialEndsAt,
+      trial_days_remaining: access.daysRemaining,
+      trial_full_access: access.trialFullAccess,
+      access_state: access.accessState,
+      subscription_required: access.subscriptionRequired,
       current_period_start: tenant.currentPeriodStart,
       current_period_end: tenant.currentPeriodEnd,
       access_window_ends_at: accessWindowEndsAt,

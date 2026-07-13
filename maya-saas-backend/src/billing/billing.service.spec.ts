@@ -375,7 +375,10 @@ describe('BillingService', () => {
 
     expect(tenantUpdateMock).toHaveBeenCalledWith({
       where: { id: 'tenant-1' },
-      data: { status: TenantStatus.PAST_DUE },
+      data: {
+        status: TenantStatus.PAST_DUE,
+        trialFullAccess: false,
+      },
     });
     expect(result).toMatchObject({
       checked: 1,
