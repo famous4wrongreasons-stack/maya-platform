@@ -62,4 +62,71 @@ describe('SafeOnboardingInterpreter', () => {
       { name: 'Массаж спины', price: 3000, durationMinutes: 60 },
     ]);
   });
+
+  it('accepts a short business name and a plain service list in separate replies', () => {
+    const first = interpreter.interpret(
+      'Я частный мастер и работаю одна без CRM.',
+    );
+    expect(first.missingFields).toEqual(['business_name', 'services']);
+
+    const named = interpreter.interpret('Мужская эстетика', first.blueprint);
+    expect(named.blueprint.businessName).toBe('Мужская эстетика');
+    expect(named.missingFields).toEqual(['services']);
+
+    const completed = interpreter.interpret(
+      'Мужская стрижка, оформление бороды, камуфляж седины',
+      named.blueprint,
+    );
+    expect(completed.missingFields).toEqual([]);
+    expect(completed.blueprint.services).toEqual([
+      { name: 'Мужская стрижка', price: 0, durationMinutes: 60 },
+      { name: 'оформление бороды', price: 0, durationMinutes: 60 },
+      { name: 'камуфляж седины', price: 0, durationMinutes: 60 },
+    ]);
+  });
+
+  it('keeps an unlabeled service list while continuing to ask for the name', () => {
+    const first = interpreter.interpret('Я частный специалист и работаю один.');
+    const services = interpreter.interpret(
+      'Диагностика, консультация, сопровождение',
+      first.blueprint,
+    );
+
+    expect(services.blueprint.businessName).toBeNull();
+    expect(services.blueprint.services).toEqual([
+      { name: 'Диагностика', price: 0, durationMinutes: 60 },
+      { name: 'консультация', price: 0, durationMinutes: 60 },
+      { name: 'сопровождение', price: 0, durationMinutes: 60 },
+    ]);
+    expect(services.missingFields).toEqual(['business_name']);
+  });
+
+  it('understands a combined follow-up with a natural name label and bare prices', () => {
+    const first = interpreter.interpret(
+      'Я работаю одна и веду расписание в MAYA.',
+    );
+    const result = interpreter.interpret(
+      'Название бизнеса — Линия. Услуги: консультация 2500 45 минут; сопровождение 5000 90 минут.',
+      first.blueprint,
+    );
+
+    expect(result.missingFields).toEqual([]);
+    expect(result.blueprint.businessName).toBe('Линия');
+    expect(result.blueprint.services).toEqual([
+      { name: 'консультация', price: 2500, durationMinutes: 45 },
+      { name: 'сопровождение', price: 5000, durationMinutes: 90 },
+    ]);
+  });
+
+  it('does not mistake an explicit business-name reply for a service', () => {
+    const first = interpreter.interpret('Я частный специалист и работаю один.');
+    const named = interpreter.interpret(
+      'Название бизнеса — Север',
+      first.blueprint,
+    );
+
+    expect(named.blueprint.businessName).toBe('Север');
+    expect(named.blueprint.services).toEqual([]);
+    expect(named.missingFields).toEqual(['services']);
+  });
 });

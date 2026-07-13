@@ -18,6 +18,7 @@
 - `ownerName` обязателен и в интерфейсе, и в backend DTO. Создать бизнес без имени нельзя.
 - Поле произвольного CRM Base URL удалено из tenant UI. Tenant admin получает `403`, если пытается передать `baseUrl`; менять системный endpoint может только platform owner.
 - При смене CRM-провайдера обязателен новый API-токен. Зашифрованный токен предыдущего провайдера не переиспользуется.
+- Естественные follow-up ответы больше не зацикливают онбординг: короткое название принимается отдельным сообщением, услуги можно перечислить простым списком без цен и длительности, а новые услуги накапливаются в черновике.
 - CRM API-токен остается только в памяти формы, передается на локально настроенный backend и хранится сервером в зашифрованном виде.
 - CRM-подключение не включает live-запись: новый tenant остается в `booking_mode=preview`.
 - Исправлен external-server guard HTTP smoke runner, чтобы он мог проверять уже поднятый изолированный backend.
@@ -25,7 +26,7 @@
 ## Проверено
 
 - `npm run lint`.
-- `npm test -- --runInBand`: 46 suites, 200 tests.
+- `npm test -- --runInBand`: 46 suites, 204 tests.
 - `npm run build`, `npm run typecheck`, `npm run typecheck:scripts`.
 - `npm run test:http`: AI onboarding, tenant isolation, auth rotation, CRM preview и internal calendar booking.
 - 67 inline-скриптов PWA/admin/iOS разобраны через `new Function(...)`.

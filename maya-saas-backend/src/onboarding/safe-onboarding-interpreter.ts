@@ -49,6 +49,18 @@ export class SafeOnboardingInterpreter {
     preferredTemplateId?: string,
   ): AiOnboardingInterpretation {
     const normalized = message.trim();
+    const previousServices = previous?.services ?? [];
+    const expectsBusinessName = !previous?.businessName?.trim();
+    const expectsServices = previousServices.length === 0;
+    const hasServiceIntro = this.hasServiceIntro(normalized);
+    const extractedBusinessName = this.extractBusinessName(
+      normalized,
+      Boolean(previous) &&
+        expectsBusinessName &&
+        !hasServiceIntro &&
+        !this.hasServiceFacts(normalized) &&
+        !this.looksLikeServiceList(normalized),
+    );
     const templateId = preferredTemplateId
       ? getBusinessTemplate(preferredTemplateId).id
       : this.detectTemplate(normalized, previous?.templateId);
@@ -56,8 +68,7 @@ export class SafeOnboardingInterpreter {
     const detectedSchedule = this.extractSchedule(normalized);
     const blueprint: AiOnboardingBlueprint = {
       templateId: template.id,
-      businessName:
-        this.extractBusinessName(normalized) ?? previous?.businessName ?? null,
+      businessName: extractedBusinessName ?? previous?.businessName ?? null,
       summary: previous?.summary ?? template.description,
       industryPresetId: template.industryPresetId,
       calendarSource: this.detectCalendarSource(
@@ -69,7 +80,10 @@ export class SafeOnboardingInterpreter {
         previous?.providerCount ??
         (template.id === 'solo_specialist' ? 1 : null),
       providerTitle: template.providerTitle,
-      services: this.extractServices(normalized, previous?.services ?? []),
+      services: this.extractServices(normalized, previousServices, {
+        allowLoose: expectsServices && (Boolean(previous) || hasServiceIntro),
+        businessName: extractedBusinessName,
+      }),
       weeklyRules:
         detectedSchedule ??
         previous?.weeklyRules ??
@@ -134,20 +148,46 @@ export class SafeOnboardingInterpreter {
     return fallback;
   }
 
-  private extractBusinessName(message: string): string | null {
+  private extractBusinessName(
+    message: string,
+    allowStandalone = false,
+  ): string | null {
     const patterns = [
-      /(?:бизнес|компания|студия|салон|барбершоп|проект)\s+(?:называется|называем)\s+[«"']?([^»"'.,;\n]{2,80})/iu,
-      /(?:название|назовем|назовём)\s*[:-]?\s*[«"']?([^»"'.,;\n]{2,80})/iu,
+      /(?:бизнес|компания|студия|салон|барбершоп|проект|бренд)\s+(?:называется|называем|будет называться)\s+[«"']?([^»"'.,;\n]{2,80})/iu,
+      /название\s*(?:(?:моего|нашего)\s+)?(?:(?:бизнеса|компании|студии|салона|барбершопа|проекта|бренда)\s*)?(?::|[-–—]|это)?\s*[«"']?([^»"'.,;\n]{2,80})/iu,
+      /(?:^|[.!?]\s*)(?:называется|назовем|назовём|назову|будет называться)\s+[«"']?([^»"'.,;\n]{2,80})/iu,
     ];
 
     for (const pattern of patterns) {
       const match = message.match(pattern);
       if (match?.[1]) {
-        return match[1].trim();
+        return this.cleanBusinessName(match[1]);
+      }
+    }
+
+    if (allowStandalone) {
+      const candidate = message.split(/[,.!?;\n]+/u)[0]?.trim() ?? '';
+      if (
+        candidate.length >= 2 &&
+        candidate.length <= 80 &&
+        candidate.split(/\s+/u).length <= 8 &&
+        !/\d/u.test(candidate) &&
+        !/^(?:я|мы|у\s+меня|у\s+нас|работаю|работаем|занимаюсь|занимаемся|делаю|делаем|оказываю|оказываем)\b/iu.test(
+          candidate,
+        )
+      ) {
+        return this.cleanBusinessName(candidate);
       }
     }
 
     return null;
+  }
+
+  private cleanBusinessName(value: string): string {
+    return value
+      .replace(/^[«"']+|[»"']+$/gu, '')
+      .replace(/\s+/gu, ' ')
+      .trim();
   }
 
   private extractProviderCount(message: string): number | null {
@@ -179,32 +219,78 @@ export class SafeOnboardingInterpreter {
   private extractServices(
     message: string,
     previous: AiOnboardingServiceItem[],
+    context: { allowLoose: boolean; businessName: string | null },
   ): AiOnboardingServiceItem[] {
     const section = message.match(
-      /(?:услуги|делаем|предлагаем|оказываем|работы)\s*[:-]?\s*([^\n.!?]+)/iu,
+      /(?:услуг(?:а|и)?|делаю|делаем|предлагаю|предлагаем|оказываю|оказываем|работы)(?:\s+(?:это|такие|включают|включают\s+в\s+себя))?\s*[:\-–—]?\s*([^\n.!?]+)/iu,
     )?.[1];
     const candidates = section
-      ? section.split(/[,;]+/u)
-      : message
-          .split(/[.!?;\n]+/u)
-          .filter((item) => this.hasServiceFacts(item));
+      ? section.split(/[,;\n]+/u)
+      : context.allowLoose
+        ? message.split(/[,;.!?\n]+/u)
+        : message
+            .split(/[.!?;\n]+/u)
+            .filter((item) => this.hasServiceFacts(item));
 
     const parsed = candidates
-      .map((item) => this.parseService(item))
+      .map((item) => item.trim())
+      .filter(
+        (item) =>
+          item.length > 0 &&
+          !this.extractBusinessName(item) &&
+          this.cleanBusinessName(item).toLocaleLowerCase('ru-RU') !==
+            context.businessName?.toLocaleLowerCase('ru-RU'),
+      )
+      .map((item) => this.parseService(item, context.allowLoose || !!section))
       .filter((item): item is AiOnboardingServiceItem => item !== null)
       .slice(0, 30);
 
-    return parsed.length > 0 ? parsed : previous;
+    if (parsed.length === 0) return previous;
+    if (previous.length === 0) return parsed;
+
+    const merged = new Map(
+      previous.map((service) => [
+        service.name.toLocaleLowerCase('ru-RU'),
+        service,
+      ]),
+    );
+    for (const service of parsed) {
+      merged.set(service.name.toLocaleLowerCase('ru-RU'), service);
+    }
+    return [...merged.values()].slice(0, 30);
   }
 
-  private parseService(value: string): AiOnboardingServiceItem | null {
-    const cleaned = value.trim();
-    if (!this.hasServiceFacts(cleaned)) {
+  private parseService(
+    value: string,
+    allowLoose: boolean,
+  ): AiOnboardingServiceItem | null {
+    const cleaned = value
+      .trim()
+      .replace(/^(?:и\s+)?(?:это|такие\s+как)\s+/iu, '')
+      .replace(/^(?:мои|наши)\s+услуг(?:а|и)?\s*[:\-–—]?\s*/iu, '');
+    const hasFacts = this.hasServiceFacts(cleaned);
+    if (!hasFacts && !allowLoose) {
       return null;
     }
-    const name = cleaned
-      .replace(/\d[\d\s]*(?:₽|руб(?:лей|ля|ль)?\.?|р\.)(?=\s|$)/giu, '')
-      .replace(/\d{1,3}\s*(?:мин(?:ут[ыа]?)?\.?|час(?:а|ов)?)(?=\s|$)/giu, '')
+
+    const durationMatch = cleaned.match(
+      /(\d{1,3})\s*(мин(?:ут[ыа]?)?\.?|час(?:а|ов)?)(?=\s|$)/iu,
+    );
+    const currencyPriceMatch = cleaned.match(
+      /(\d[\d\s]*)\s*(?:₽|руб(?:лей|ля|ль)?\.?|р\.)(?=\s|$)/iu,
+    );
+    const withoutDuration = durationMatch
+      ? cleaned.replace(durationMatch[0], ' ')
+      : cleaned;
+    const barePriceMatch = currencyPriceMatch
+      ? null
+      : withoutDuration.match(/\b(\d{2,8})\b/u);
+
+    let name = cleaned;
+    if (currencyPriceMatch) name = name.replace(currencyPriceMatch[0], ' ');
+    if (barePriceMatch) name = name.replace(barePriceMatch[0], ' ');
+    if (durationMatch) name = name.replace(durationMatch[0], ' ');
+    name = name
       .replace(
         /(?:^|\s)(?:стоит|цена|ценой|длится|продолжительность|около|примерно|и)(?=\s|$)/giu,
         ' ',
@@ -213,28 +299,48 @@ export class SafeOnboardingInterpreter {
       .replace(/[()\-–—]+$/u, '')
       .replace(/\s+/g, ' ')
       .trim();
-    if (name.length < 2) {
+    if (
+      name.length < 2 ||
+      (!hasFacts && name.split(/\s+/u).length > 10) ||
+      /^(?:услуг(?:а|и)?|нет|не\s+знаю|пока\s+не\s+знаю|неважно)$/iu.test(
+        name,
+      ) ||
+      (!hasFacts &&
+        /^(?:я|мы|у\s+меня|у\s+нас|работаю|работаем|занимаюсь|занимаемся)\b/iu.test(
+          name,
+        ))
+    ) {
       return null;
     }
 
-    const priceMatch = cleaned.match(
-      /(\d[\d\s]*)\s*(?:₽|руб(?:лей|ля|ль)?\.?|р\.)(?=\s|$)/iu,
-    );
-    const durationMatch = cleaned.match(
-      /(\d{1,3})\s*(мин(?:ут[ыа]?)?\.?|час(?:а|ов)?)(?=\s|$)/iu,
-    );
     const durationValue = durationMatch?.[1] ? Number(durationMatch[1]) : 60;
     const durationMinutes = durationMatch?.[2]?.toLowerCase().startsWith('час')
       ? durationValue * 60
       : durationValue;
+    const priceValue = currencyPriceMatch?.[1] ?? barePriceMatch?.[1];
 
     return {
       name: name.slice(0, 120),
-      price: priceMatch?.[1]
-        ? Math.min(Number(priceMatch[1].replace(/\s/g, '')), 10_000_000)
+      price: priceValue
+        ? Math.min(Number(priceValue.replace(/\s/g, '')), 10_000_000)
         : 0,
       durationMinutes: Math.max(5, Math.min(durationMinutes, 1440)),
     };
+  }
+
+  private hasServiceIntro(value: string): boolean {
+    return /(?:услуг(?:а|и)?|делаю|делаем|предлагаю|предлагаем|оказываю|оказываем|работы)\b/iu.test(
+      value,
+    );
+  }
+
+  private looksLikeServiceList(value: string): boolean {
+    return (
+      value
+        .split(/[,;\n]+/u)
+        .map((item) => item.trim())
+        .filter(Boolean).length > 1
+    );
   }
 
   private hasServiceFacts(value: string): boolean {
@@ -295,11 +401,26 @@ export class SafeOnboardingInterpreter {
     }
 
     const questions: Record<AiOnboardingMissingField, string> = {
-      business_name: 'Как называется ваш бизнес?',
+      business_name:
+        'Напишите только название бизнеса, например: «Тихая сила».',
       provider_count: 'Сколько специалистов будет принимать клиентов?',
-      services: 'Перечислите основные услуги, цену и длительность.',
+      services:
+        'Перечислите услуги обычным списком. Цены и длительность можно добавить сейчас или поправить на следующем экране.',
     };
-    return `Основу я поняла. ${missing.map((field) => questions[field]).join(' ')}`;
+    const saved: string[] = [];
+    if (blueprint.businessName)
+      saved.push(`название «${blueprint.businessName}»`);
+    if (blueprint.services.length > 0) {
+      saved.push(`услуг: ${blueprint.services.length}`);
+    }
+    if (blueprint.providerCount) {
+      saved.push(`специалистов: ${blueprint.providerCount}`);
+    }
+    const prefix =
+      saved.length > 0
+        ? `Сохранила ${saved.join(', ')}.`
+        : 'Продолжим настройку.';
+    return `${prefix} ${missing.map((field) => questions[field]).join(' ')}`;
   }
 
   private clampProviderCount(value: number): number | null {
