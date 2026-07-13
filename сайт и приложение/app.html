@@ -5192,24 +5192,32 @@ function ALogin() {
       color: t.faint
     }
   }, "Данные защищены · 152-ФЗ")))), lgTrialOpen ? /*#__PURE__*/React.createElement("div", {
-    // MAYA OS: нижний лист активации пробной версии (не отдельная страница, не полноэкранное промо)
+    // MAYA OS: полноэкранная активация пробной версии поверх входа
     onClick: function () { lgTrialClose(); },
-    style: { position: "fixed", inset: 0, zIndex: 9200, display: "flex", flexDirection: "column", justifyContent: "flex-end", background: "rgba(0,0,0," + (lgTrialShown ? "0.5" : "0") + ")", transition: "background .3s ease" }
+    style: { position: "fixed", inset: 0, zIndex: 9200, display: "flex", flexDirection: "column", background: t.dark ? "#131315" : "#ffffff", opacity: lgTrialShown ? 1 : 0, transition: "opacity .24s ease" }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: function (ev) { ev.stopPropagation(); },
     style: {
       background: t.dark ? "#131315" : "#ffffff",
-      borderTopLeftRadius: 26, borderTopRightRadius: 26,
-      padding: "10px 22px calc(env(safe-area-inset-bottom,0px) + 24px)",
-      maxHeight: "94vh", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch",
+      width: "100%", height: "100%", boxSizing: "border-box",
+      padding: "calc(env(safe-area-inset-top,0px) + 14px) 22px calc(env(safe-area-inset-bottom,0px) + 18px)",
+      display: "flex", flexDirection: "column", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch",
       transform: lgTrialShown ? "translateY(0)" : "translateY(102%)",
-      transition: "transform .34s cubic-bezier(.32,.72,0,1)",
-      boxShadow: "0 -18px 50px rgba(0,0,0,0.32)"
+      transition: "transform .38s cubic-bezier(.32,.72,0,1)"
     }
-  }, /*#__PURE__*/React.createElement("div", { style: { width: 40, height: 4, borderRadius: 999, background: t.line, margin: "0 auto 16px" } }),
+  }, /*#__PURE__*/React.createElement("div", {
+       style: { display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 38, marginBottom: 14, flex: "none" }
+     }, /*#__PURE__*/React.createElement("div", {
+       style: { display: "flex", alignItems: "center", gap: 9, fontFamily: DISPLAY, fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: t.ink }
+     }, /*#__PURE__*/React.createElement(SeedLogo, { size: 18, sw: 1.6 }), /*#__PURE__*/React.createElement("span", null, "MAYA OS")), /*#__PURE__*/React.createElement("button", {
+       type: "button", "aria-label": "Закрыть",
+       onClick: function () { lgTrialClose(); },
+       disabled: lgTrialBusy || lgTrialLocked,
+       style: { width: 38, height: 38, borderRadius: 999, border: "1px solid " + t.line, background: t.dark ? "rgba(244,240,235,0.05)" : "rgba(24,22,15,0.04)", color: t.ink, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: BODY, fontSize: 24, fontWeight: 300, lineHeight: 1, padding: 0, cursor: (lgTrialBusy || lgTrialLocked) ? "default" : "pointer", opacity: (lgTrialBusy || lgTrialLocked) ? 0.4 : 1 }
+     }, "×")),
      /*#__PURE__*/React.createElement("div", {
        style: {
-         position: "relative", height: "clamp(220px, 34vh, 280px)", borderRadius: 20,
+         position: "relative", height: "clamp(250px, 42vh, 380px)", borderRadius: 22, flex: "none",
          overflow: "hidden", marginBottom: 18, background: t.dark ? "#0b0b0d" : "#ece8e1",
          border: "1px solid " + t.line, boxShadow: t.dark ? "none" : "0 14px 34px rgba(24,22,15,0.12)"
        }
@@ -5241,7 +5249,7 @@ function ALogin() {
        })),
      /*#__PURE__*/React.createElement("div", {
        id: "me-trial-track",
-       style: { position: "relative", height: 60, borderRadius: 16, background: t.dark ? "rgba(244,240,235,0.06)" : "rgba(24,22,15,0.05)", border: "1px solid " + t.line, overflow: "hidden", touchAction: "none", userSelect: "none", WebkitUserSelect: "none" }
+       style: { position: "relative", height: 60, minHeight: 60, marginTop: "auto", borderRadius: 16, background: t.dark ? "rgba(244,240,235,0.06)" : "rgba(24,22,15,0.05)", border: "1px solid " + t.line, overflow: "hidden", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", flex: "none" }
      }, /*#__PURE__*/React.createElement("div", {
        style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DISPLAY, fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: t.faint, pointerEvents: "none", paddingLeft: 40 }
      }, (lgTrialLocked || lgTrialBusy) ? "Активируем…" : "Проведите вправо, чтобы начать"),
