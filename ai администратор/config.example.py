@@ -49,14 +49,27 @@ PROXY_URL = _opt("PROXY_URL", "")
 # ── OpenAI — основной мозг MAYA/Telegram-бота ───────────────────────────────
 OPENAI_API_KEY = _req("OPENAI_API_KEY")
 OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
-OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5-pro")
+OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
-OPENAI_TELEGRAM_CHAT_MODEL = _opt("OPENAI_TELEGRAM_CHAT_MODEL", OPENAI_CHAT_MODEL)
-OPENAI_PWA_CHAT_MODEL = _opt("OPENAI_PWA_CHAT_MODEL", OPENAI_FAST_MODEL)
+OPENAI_TELEGRAM_CHAT_MODEL = _opt("OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.5-pro")
+OPENAI_PWA_CHAT_MODEL = _opt("OPENAI_PWA_CHAT_MODEL", "gpt-5.5-pro")
+OPENAI_CLIENT_REASONING_EFFORT = _opt("OPENAI_CLIENT_REASONING_EFFORT", "medium")
 # Голос временно может быть отключён, но при включении должен думать тем же
 # сильным мозгом, что и основной клиентский чат.
-OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
+OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", "gpt-5.5-pro")
 REALTIME_VAD_EAGERNESS = _opt("REALTIME_VAD_EAGERNESS", "medium")
+
+# ── DeepSeek V4 — прямой OpenAI-compatible API ────────────────────────
+# Ключ хранить только в .env на VPS. Для перевода текстовых чатов:
+#   OPENAI_PWA_CHAT_MODEL=deepseek-v4-pro
+#   OPENAI_TELEGRAM_CHAT_MODEL=deepseek-v4-pro
+#   OPENAI_CHAT_MODEL=deepseek-v4-flash
+#   OPENAI_FAST_MODEL=deepseek-v4-flash
+DEEPSEEK_API_KEY = _opt("DEEPSEEK_API_KEY", "")
+DEEPSEEK_BASE_URL = _opt("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+DEEPSEEK_PROXY_URL = _opt("DEEPSEEK_PROXY_URL", "")
+# disabled: быстрее и не требует хранить reasoning_content между tool-calls.
+DEEPSEEK_THINKING = _opt("DEEPSEEK_THINKING", "disabled")
 
 # ── AI-стилист / CutMatch ────────────────────────────────────────────────────
 # Fail-closed: без явного включения HTTP-handlers CutMatch отвечают disabled,

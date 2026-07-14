@@ -1,6 +1,7 @@
 import difflib
 import json
 import logging
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -27,10 +28,43 @@ from maya_roles import (
 PROXY_URL = getattr(_cfg, "PROXY_URL", "")
 OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "")
 OPENAI_BASE_URL = getattr(_cfg, "OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-OPENAI_CHAT_MODEL = getattr(_cfg, "OPENAI_CHAT_MODEL", "gpt-5.5-pro")
-OPENAI_FAST_MODEL = getattr(_cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini")
-OPENAI_TELEGRAM_CHAT_MODEL = getattr(_cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.5-pro")
-OPENAI_PWA_CHAT_MODEL = getattr(_cfg, "OPENAI_PWA_CHAT_MODEL", "") or OPENAI_CHAT_MODEL
+OPENAI_CHAT_MODEL = os.environ.get("OPENAI_CHAT_MODEL", "") or getattr(
+    _cfg, "OPENAI_CHAT_MODEL", "gpt-5.5"
+)
+OPENAI_FAST_MODEL = os.environ.get("OPENAI_FAST_MODEL", "") or getattr(
+    _cfg, "OPENAI_FAST_MODEL", "gpt-5.4-mini"
+)
+OPENAI_TELEGRAM_CHAT_MODEL = os.environ.get("OPENAI_TELEGRAM_CHAT_MODEL", "") or getattr(
+    _cfg, "OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.5-pro"
+)
+OPENAI_PWA_CHAT_MODEL = (
+    os.environ.get("OPENAI_PWA_CHAT_MODEL", "")
+    or getattr(_cfg, "OPENAI_PWA_CHAT_MODEL", "")
+    or "gpt-5.5-pro"
+)
+OPENAI_CLIENT_REASONING_EFFORT = (
+    getattr(_cfg, "OPENAI_CLIENT_REASONING_EFFORT", "") or "medium"
+).strip().lower()
+if OPENAI_CLIENT_REASONING_EFFORT not in {"medium", "high", "xhigh"}:
+    OPENAI_CLIENT_REASONING_EFFORT = "medium"
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "") or getattr(
+    _cfg, "DEEPSEEK_API_KEY", ""
+)
+DEEPSEEK_BASE_URL = (
+    os.environ.get("DEEPSEEK_BASE_URL", "")
+    or getattr(_cfg, "DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    or "https://api.deepseek.com"
+).rstrip("/")
+DEEPSEEK_PROXY_URL = os.environ.get("DEEPSEEK_PROXY_URL", "") or getattr(
+    _cfg, "DEEPSEEK_PROXY_URL", ""
+) or ""
+DEEPSEEK_THINKING = (
+    os.environ.get("DEEPSEEK_THINKING", "")
+    or getattr(_cfg, "DEEPSEEK_THINKING", "")
+    or "disabled"
+).strip().lower()
+if DEEPSEEK_THINKING not in {"enabled", "disabled"}:
+    DEEPSEEK_THINKING = "disabled"
 CLAUDE_API_KEY = getattr(_cfg, "CLAUDE_API_KEY", "")
 # ── Провайдер мозга MAYA (голос + чат думают ОДНИМ мозгом) ───────────────────
 #   AI_PROVIDER="openai" (по умолчанию) — текущий рабочий тир gpt-5.x.
@@ -66,6 +100,10 @@ yclients = YClientsAPI()
 # OpenAI API тоже ходит через общий PROXY_URL, если он задан на VPS.
 # В модель уходит только обезличенный текст; инструменты и ПД остаются на сервере.
 _openai_client = httpx.Client(proxy=PROXY_URL or None, timeout=90.0)
+# DeepSeek is normally reachable directly from the production VPS. Keep its
+# network route independent from the OpenAI proxy so one provider cannot take
+# the other down. A dedicated proxy can still be set explicitly if required.
+_deepseek_client = httpx.Client(proxy=DEEPSEEK_PROXY_URL or None, timeout=90.0)
 
 
 @dataclass
@@ -473,6 +511,19 @@ TOOLS = [
             },
             "required": [],
         },
+    },
+    {
+        "name": "get_maya_audience_stats",
+        "description": (
+            "ТОЛЬКО для владельца/админа. Точная агрегированная аудитория MAYA "
+            "без персональных данных: сколько аккаунтов подключено к Telegram-боту, "
+            "сколько из них связано с клиентами, дали согласие на уведомления и доступны "
+            "для реактивации. Вызывай ВСЕГДА на вопросы «сколько людей/клиентов подписано "
+            "на MAYA / подключено к боту / получает уведомления / какой охват рассылки / скольким "
+            "можно отправить реактивацию». Не путай всех подключённых с фактически доставляемой аудиторией. "
+            "Это инструмент только для чтения."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
         "name": "get_client_dossier",
@@ -890,7 +941,7 @@ TOOLS_CACHED = TOOLS[:-1] + [{**TOOLS[-1], "cache_control": {"type": "ephemeral"
 FOUNDER_IDS = {948205934}
 
 # Администратор без owner/GOD-статуса: читает аналитику, но не меняет правила салона.
-_MANAGER_ONLY = {"get_business_report", "get_growth_plan"}
+_MANAGER_ONLY = {"get_business_report", "get_maya_audience_stats", "get_growth_plan"}
 # Инструменты роли мастера: свои записи/чаевые/аналитика + досье клиента.
 # База знаний по технике/схемам УБРАНА из мозга Майи (решение Стаса 2026-07-06).
 _MASTER_ONLY = {
@@ -925,6 +976,103 @@ ROLE_TOOLS = {
     ROLE_FOUNDER: _OWNER_TOOLS,  # отличие основателя — тема, а не инструменты
 }
 
+# GPT-5.5 Pro медленнее всего работает, когда на каждом ходе получает
+# весь каталог tools. Для клиента даём только те группы, которые могут
+# понадобиться в текущем контексте. Серверная RBAC-проверка остаётся вторым
+# рубежом и не зависит от этой оптимизации.
+_CLIENT_BOOKING_TOOLS = {
+    "get_services", "get_masters", "get_master_schedule", "who_works",
+    "get_available_slots", "find_nearest_slots", "request_booking",
+    "remember_wanted_slot", "suggest_upsell", "check_loyalty_balance",
+    "request_client_contact",
+}
+_CLIENT_BOOKING_MANAGEMENT_TOOLS = {
+    "get_my_bookings", "request_client_contact", "reschedule_booking",
+    "update_booking", "cancel_booking",
+}
+_CLIENT_SALES_TOOLS = {"start_gift_cert_purchase", "show_subscription_plans"}
+_CLIENT_REFERRAL_TOOLS = {"get_referral_link"}
+_CLIENT_PREFERENCE_TOOLS = {"remember_client_preference"}
+
+_CLIENT_BOOKING_CONTEXT_RE = re.compile(
+    r"\b(запис|стриж|стрид|бород|брит|услуг|мастер|барбер|слот|свободн|\bокн|"
+    r"врем|сегодня|завтра|послезавтра|ближайш|цен|стоим|прайс|длительн|сколько\s+по\s+времени)\w*",
+    re.IGNORECASE,
+)
+_CLIENT_MANAGE_CONTEXT_RE = re.compile(
+    r"\b(мои\s+запис|когда\s+я\s+записан|перенес|перенос|отмен|измен|добав\w*\s+к\s+запис)\w*",
+    re.IGNORECASE,
+)
+_CLIENT_LOYALTY_CONTEXT_RE = re.compile(
+    r"\b(балл|бонус|лояльн|скидк|промокод|день\s+рожд)\w*",
+    re.IGNORECASE,
+)
+_CLIENT_SALES_CONTEXT_RE = re.compile(
+    r"\b(абонемент|подписк|сертификат|подарочн)\w*",
+    re.IGNORECASE,
+)
+_CLIENT_REFERRAL_CONTEXT_RE = re.compile(
+    r"\b(реферал|приглас\w*\s+друг|ссылк\w*\s+для\s+друг)\w*",
+    re.IGNORECASE,
+)
+_CLIENT_PREFERENCE_CONTEXT_RE = re.compile(
+    r"\b(я\s+люблю|я\s+не\s+люблю|предпочита|чувствительн\w*\s+кож|кофе\s+без)\b",
+    re.IGNORECASE,
+)
+
+
+def _is_client_ai_context(role: str | None, mode: str | None) -> bool:
+    """Client PWA is explicit; Telegram clients arrive without a surface mode."""
+    surface = str(mode or "").strip().lower()
+    return surface == SURFACE_CLIENT or (not surface and role == ROLE_CLIENT)
+
+
+def _client_context_text(messages: list | None) -> str:
+    parts = []
+    for msg in (messages or [])[-12:]:
+        content = msg.get("content") if isinstance(msg, dict) else ""
+        if isinstance(content, str):
+            parts.append(content)
+            continue
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict):
+                if block.get("type") == "text":
+                    parts.append(str(block.get("text") or ""))
+                elif block.get("type") == "tool_result":
+                    parts.append(str(block.get("content") or ""))
+    return "\n".join(parts).lower().replace("ё", "е")
+
+
+def _client_relevant_tool_names(messages: list | None) -> set[str]:
+    """Keep the client tool schema small while preserving the current flow."""
+    text = _client_context_text(messages)
+    names: set[str] = set()
+
+    if _CLIENT_BOOKING_CONTEXT_RE.search(text):
+        names.update(_CLIENT_BOOKING_TOOLS)
+    if _CLIENT_MANAGE_CONTEXT_RE.search(text):
+        # A reschedule needs the same live slot checks as a new booking.
+        names.update(_CLIENT_BOOKING_TOOLS)
+        names.update(_CLIENT_BOOKING_MANAGEMENT_TOOLS)
+    if _CLIENT_LOYALTY_CONTEXT_RE.search(text):
+        names.update({"check_loyalty_balance", "request_client_contact"})
+    if _CLIENT_SALES_CONTEXT_RE.search(text):
+        names.update(_CLIENT_SALES_TOOLS)
+    if _CLIENT_REFERRAL_CONTEXT_RE.search(text):
+        names.update(_CLIENT_REFERRAL_TOOLS)
+    if _CLIENT_PREFERENCE_CONTEXT_RE.search(text):
+        names.update(_CLIENT_PREFERENCE_TOOLS)
+
+    # Unknown/free-form questions can still ask what the salon offers or who
+    # works here. These two schemas are compact and keep that path reliable.
+    if not names:
+        names.update({"get_services", "get_masters"})
+    return names
+
 # 🔴 РАЗДЕЛЕНИЕ КАБИНЕТОВ (решение Стаса 2026-07-06): в кабинете СОТРУДНИКА
 # (mode='staff') Майя — рабочий помощник, а НЕ клиентский консьерж. Эти клиентские
 # функции там ОТКЛЮЧЕНЫ поверх роли: запись/перенос/отмена, продажи, лояльность,
@@ -956,7 +1104,9 @@ def _allowed_tool_names(role: str, mode: str | None = None) -> set[str]:
     # Client surface wins over identity: owner/master opening the client cabinet
     # gets the same assistant as a client, not the director/admin brain.
     if str(mode or "").strip() and normalize_surface(mode) == SURFACE_CLIENT:
-        return set(_CLIENT_TOOLS)
+        return set(_CLIENT_TOOLS) - {"check_birthday_promo"}
+    if not str(mode or "").strip() and role == ROLE_CLIENT:
+        return set(_CLIENT_TOOLS) - {"check_birthday_promo"}
     return set(ROLE_TOOLS.get(role, _CLIENT_TOOLS))
 
 
@@ -1971,6 +2121,12 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                             "Отчёт для администратора: выручка, визиты, средний чек и услуги. "
                             "Зарплаты, маржа и прибыль по мастерам доступны только владельцу."
                         )
+        elif tool_name == "get_maya_audience_stats":
+            # Агрегаты без ПД: админ/владелец видит размер аудитории, но не список людей.
+            if _role not in ("manager", "owner", "founder"):
+                result = {"error": "Статистика аудитории MAYA доступна только администратору или владельцу."}
+            else:
+                result = database.get_maya_audience_stats()
         elif tool_name == "get_growth_plan":
             if _role not in ("master", "manager", "owner", "founder"):
                 result = {"error": "План роста недоступен в клиентском режиме."}
@@ -2230,6 +2386,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         role = _resolve_role(user_id)
     _mode = str(mode or "").lower()
     _client_surface = _mode == "client"
+    _client_ai_context = _is_client_ai_context(role, mode)
     _staff_cabinet = _mode == "staff" and role in ("master", "manager", "owner", "founder")
     from datetime import datetime, timedelta
     _days_ru = ["понедельник", "вторник", "среда", "четверг", "пятница",
@@ -2286,7 +2443,41 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         "получит готовое досье, а клиент почувствует, что его помнят."
     )
 
+    if _client_ai_context:
+        static_text += (
+            "\n\n## Быстрый клиентский контур\n"
+            "Статус ДР-промокода уже проверен сервером и указан в отдельном "
+            "блоке ниже. Не вызывай check_birthday_promo. Не вызывай инструменты «на всякий "
+            "случай»: запрашивай только те данные, которые нужны для текущего ответа. Если нужно "
+            "несколько независимых проверок, вызови их в одном ходе."
+        )
+
     blocks = [{"type": "text", "text": static_text, "cache_control": {"type": "ephemeral"}}]
+
+    if _client_ai_context:
+        promo = None
+        try:
+            promo_getter = getattr(database, "get_active_birthday_promo", None)
+            promo = promo_getter(user_id) if (promo_getter and user_id) else None
+        except Exception:
+            promo = None
+        if promo:
+            blocks.append({
+                "type": "text",
+                "text": (
+                    "## ДР-промокод клиента — серверная проверка\n"
+                    f"Активен промокод {promo.get('code')} на -{promo.get('percent')}% "
+                    f"до {str(promo.get('expires_at') or '')[:10]}. Упомяни его один раз при подтверждении записи."
+                ),
+            })
+        else:
+            blocks.append({
+                "type": "text",
+                "text": (
+                    "## ДР-промокод клиента — серверная проверка\n"
+                    "Активного ДР-промокода нет. Не упоминай его и не проверяй повторно."
+                ),
+            })
 
     # Procedural-память: действующие правила салона (заданы владельцем словами).
     # Отдельный блок БЕЗ кеша — новое правило применяется сразу, со следующего хода.
@@ -2410,7 +2601,11 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                         "прямо отметь резкое отклонение. Для «что лучше продаётся / топ услуг» — "
                         "top_services=true. Все суммы в рублях. Это ТОЛЬКО аналитика (чтение): "
                         "записи, перенос и кассу этим инструментом не трогаешь. Если данных за "
-                        "период нет — скажи прямо. "
+                        "период нет — скажи прямо.\n"
+                        "На вопросы «сколько людей подписано на MAYA / подключено к боту / "
+                        "получает уведомления / какой охват рассылки» ВСЕГДА вызывай get_maya_audience_stats. "
+                        "В ответе чётко разделяй общее число подключённых и тех, кому можно законно отправить "
+                        "реактивацию. Не говори «нет инструмента» и не предлагай запускать рассылку ради подсчёта. "
                         "На «кто выполняет план / кто отстаёт / план мастеров» вызывай get_growth_plan: "
                         "показывай только исполнение мастеров из доступного администратору представления."
                     ),
@@ -2740,8 +2935,15 @@ def _to_responses_input(messages: list, system_blocks: list) -> list[dict]:
     return out
 
 
+def _is_deepseek_model(model: str | None) -> bool:
+    return bool(model and str(model).lower().startswith("deepseek-"))
+
+
 def _uses_responses_api(model: str | None) -> bool:
-    return bool(model and "-pro" in model)
+    # DeepSeek V4 Pro uses its OpenAI-compatible Chat Completions endpoint.
+    # Only OpenAI's own Pro models use Responses API in this backend.
+    normalized = str(model or "").lower()
+    return normalized.startswith("gpt-") and "-pro" in normalized
 
 
 def _openai_body(
@@ -2754,13 +2956,22 @@ def _openai_body(
     mode: str | None = None,
 ) -> dict:
     effective_disabled = _effective_disabled_tools(disabled_tools, mode)
-    return {
+    if _is_deepseek_model(model) and _is_client_ai_context(role, mode):
+        relevant = _client_relevant_tool_names(messages)
+        effective_disabled |= (_CLIENT_TOOLS - relevant)
+
+    body = {
         "model": model,
         "messages": _to_openai_messages(messages, _build_system_prompt(user_id, role, mode)),
         "tools": _tools_for_openai(role, effective_disabled, mode=mode),
         "tool_choice": "auto",
-        "max_completion_tokens": max_tokens,
     }
+    if _is_deepseek_model(model):
+        body["max_tokens"] = max_tokens
+        body["thinking"] = {"type": DEEPSEEK_THINKING}
+    else:
+        body["max_completion_tokens"] = max_tokens
+    return body
 
 
 def _responses_body(
@@ -2773,13 +2984,24 @@ def _responses_body(
     mode: str | None = None,
 ) -> dict:
     effective_disabled = _effective_disabled_tools(disabled_tools, mode)
-    return {
+    client_context = _is_client_ai_context(role, mode)
+    if client_context:
+        relevant = _client_relevant_tool_names(messages)
+        effective_disabled |= (_CLIENT_TOOLS - relevant)
+
+    body = {
         "model": model,
         "input": _to_responses_input(messages, _build_system_prompt(user_id, role, mode)),
         "tools": _tools_for_responses(role, effective_disabled, mode=mode),
         "tool_choice": "auto",
+        "parallel_tool_calls": True,
         "max_output_tokens": max(max_tokens, 2048) if _uses_responses_api(model) else max_tokens,
     }
+    if _uses_responses_api(model) and client_context:
+        # Same GPT-5.5 Pro model, but without the unnecessary default high
+        # reasoning budget for a tightly constrained booking/FAQ workflow.
+        body["reasoning"] = {"effort": OPENAI_CLIENT_REASONING_EFFORT}
+    return body
 
 
 def _openai_headers() -> dict:
@@ -2789,6 +3011,21 @@ def _openai_headers() -> dict:
         "Authorization": f"Bearer {OPENAI_API_KEY}",
         "Content-Type": "application/json",
     }
+
+
+def _deepseek_headers() -> dict:
+    if not DEEPSEEK_API_KEY:
+        raise RuntimeError("DEEPSEEK_API_KEY не задан")
+    return {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+
+def _chat_api_target(model: str | None) -> tuple[httpx.Client, str, dict, str]:
+    if _is_deepseek_model(model):
+        return _deepseek_client, DEEPSEEK_BASE_URL, _deepseek_headers(), "DeepSeek"
+    return _openai_client, OPENAI_BASE_URL, _openai_headers(), "OpenAI"
 
 
 def _error_text(response: httpx.Response) -> str:
@@ -2803,13 +3040,14 @@ def _error_text(response: httpx.Response) -> str:
 
 
 def _chat_completion(body: dict) -> dict:
-    r = _openai_client.post(
-        f"{OPENAI_BASE_URL}/chat/completions",
-        headers=_openai_headers(),
+    client, base_url, headers, provider = _chat_api_target(body.get("model"))
+    r = client.post(
+        f"{base_url}/chat/completions",
+        headers=headers,
         json=body,
     )
     if r.status_code >= 400:
-        raise RuntimeError(f"OpenAI API error {r.status_code}: {_error_text(r)}")
+        raise RuntimeError(f"{provider} API error {r.status_code}: {_error_text(r)}")
     return r.json()
 
 
@@ -2826,14 +3064,15 @@ def _responses_completion(body: dict) -> dict:
 
 def _stream_chat_completion(body: dict):
     stream_body = {**body, "stream": True, "stream_options": {"include_usage": True}}
-    with _openai_client.stream(
+    client, base_url, headers, provider = _chat_api_target(body.get("model"))
+    with client.stream(
         "POST",
-        f"{OPENAI_BASE_URL}/chat/completions",
-        headers=_openai_headers(),
+        f"{base_url}/chat/completions",
+        headers=headers,
         json=stream_body,
     ) as r:
         if r.status_code >= 400:
-            raise RuntimeError(f"OpenAI API error {r.status_code}: {_error_text(r)}")
+            raise RuntimeError(f"{provider} API error {r.status_code}: {_error_text(r)}")
         for line in r.iter_lines():
             if not line or not line.startswith("data:"):
                 continue
@@ -3048,6 +3287,33 @@ def _plain_chat_text(text: str) -> str:
     return text
 
 
+def _client_terminal_action_text(
+    role: str,
+    mode: str | None,
+    contact_request: dict | None,
+    gift_cert_action: dict | None,
+) -> str | None:
+    """Stop the Pro tool loop when backend owns the final action/result.
+
+    PWA/Telegram replace these placeholders with the authoritative booking or
+    purchase UI. A second Pro request would only paraphrase the tool result.
+    """
+    if not _is_client_ai_context(role, mode):
+        return None
+    if contact_request:
+        return "Передаю запись на оформление."
+    if not gift_cert_action:
+        return None
+    kind = gift_cert_action.get("kind")
+    if kind == "subscription":
+        return "Показываю доступные абонементы."
+    if kind == "contact":
+        return "Нажмите «Поделиться контактом» ниже — вводить номер текстом не нужно."
+    if gift_cert_action.get("amount"):
+        return f"Показываю оформление сертификата на {gift_cert_action['amount']} ₽."
+    return None
+
+
 def complete_text(prompt: str, model: str | None = None, max_tokens: int = 600) -> str:
     """Small helper for one-off internal parsing tasks that used claude_ai.client."""
     body = {
@@ -3231,6 +3497,21 @@ def get_ai_response(
         tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools, mode=mode)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
+        terminal_text = _client_terminal_action_text(
+            role, mode, contact_request, gift_cert_action,
+        )
+        if terminal_text:
+            elapsed = time.perf_counter() - started_at
+            logger.info(
+                "🧠 AI terminal action user=%s role=%s model=%s rounds=%s tool_calls=%s seconds=%.2f",
+                user_id,
+                role,
+                mdl,
+                rounds,
+                total_tool_calls,
+                elapsed,
+            )
+            return terminal_text, contact_request, gift_cert_action
         messages.append({"role": "user", "content": tool_results})
 
 
@@ -3369,4 +3650,15 @@ def get_ai_response_stream(
         tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools, mode=mode)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
+        terminal_text = _client_terminal_action_text(
+            role, mode, contact_request, gift_cert_action,
+        )
+        if terminal_text:
+            yield {
+                "type": "meta",
+                "contact_request": contact_request,
+                "gift_cert_action": gift_cert_action,
+                "text": terminal_text,
+            }
+            return
         messages.append({"role": "user", "content": tool_results})

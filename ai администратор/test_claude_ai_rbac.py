@@ -34,6 +34,12 @@ def _load_claude_ai():
     fake_database.log_tool_call = lambda *args, **kwargs: logs.append(args)
     fake_database.is_admin = lambda user_id: int(user_id) in admin_ids
     fake_database.get_master_by_chat_id = lambda user_id: None
+    fake_database.get_maya_audience_stats = lambda: {
+        "telegram_connected": 22,
+        "identified_clients": 13,
+        "marketing_consented": 14,
+        "reactivation_reachable": 7,
+    }
 
     fake_config = types.ModuleType("config")
     fake_config.PROXY_URL = ""
@@ -42,7 +48,13 @@ def _load_claude_ai():
     fake_config.OPENAI_CHAT_MODEL = "gpt-test"
     fake_config.OPENAI_FAST_MODEL = "gpt-test-fast"
     fake_config.OPENAI_TELEGRAM_CHAT_MODEL = "gpt-test-telegram"
+    fake_config.OPENAI_PWA_CHAT_MODEL = "gpt-5.5-pro"
+    fake_config.OPENAI_CLIENT_REASONING_EFFORT = "medium"
     fake_config.OPENAI_VOICE_CHAT_MODEL = "gpt-test-voice"
+    fake_config.DEEPSEEK_API_KEY = "deepseek-test-key"
+    fake_config.DEEPSEEK_BASE_URL = "https://deepseek.example.test"
+    fake_config.DEEPSEEK_PROXY_URL = ""
+    fake_config.DEEPSEEK_THINKING = "disabled"
 
     fake_identity_utils = types.ModuleType("identity_utils")
 
@@ -189,6 +201,33 @@ class ClaudeAIRBACTests(unittest.TestCase):
         ))
         self.assertTrue(result["ok"])
         self.assertEqual(result["goal"]["target_rub"], 1500000)
+
+    def test_manager_can_read_maya_audience_stats(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(
+            claude_ai._execute_tool("get_maya_audience_stats", {}, user_id=339683535)
+        )
+
+        self.assertEqual(result["telegram_connected"], 22)
+        self.assertEqual(result["reactivation_reachable"], 7)
+        self.assertEqual(logs[-1][1], "manager")
+        self.assertEqual(logs[-1][2], "get_maya_audience_stats")
+        self.assertEqual(logs[-1][3], "read")
+        self.assertTrue(logs[-1][4])
+
+    def test_client_cannot_read_maya_audience_stats(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(
+            claude_ai._execute_tool("get_maya_audience_stats", {}, user_id=123456)
+        )
+
+        self.assertIn("error", result)
+        self.assertEqual(logs[-1][1], "client")
+        self.assertEqual(logs[-1][2], "get_maya_audience_stats")
+        self.assertEqual(logs[-1][3], "read")
+        self.assertFalse(logs[-1][4])
 
     def test_manager_admin_cannot_call_owner_director_tools(self):
         claude_ai, logs = _load_claude_ai()
@@ -466,6 +505,186 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("messages", seen["body"])
         self.assertGreaterEqual(seen["body"]["max_output_tokens"], 2048)
 
+    def test_client_pro_keeps_model_and_uses_medium_reasoning(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        body = claude_ai._responses_body(
+            [{"role": "user", "content": "Хочу записаться на стрижку"}],
+            user_id=123,
+            role="client",
+            model="gpt-5.5-pro",
+            mode="client",
+        )
+
+        self.assertEqual(body["model"], "gpt-5.5-pro")
+        self.assertEqual(body["reasoning"], {"effort": "medium"})
+        self.assertTrue(body["parallel_tool_calls"])
+
+    def test_staff_pro_does_not_get_client_reasoning_override(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        body = claude_ai._responses_body(
+            [{"role": "user", "content": "Покажи отчёт"}],
+            user_id=948205934,
+            role="founder",
+            model="gpt-5.5-pro",
+            mode="staff",
+        )
+
+        self.assertNotIn("reasoning", body)
+
+    def test_deepseek_pro_uses_chat_completions_without_thinking(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        body = claude_ai._openai_body(
+            [{"role": "user", "content": "Хочу записаться на стрижку"}],
+            user_id=123,
+            role="client",
+            model="deepseek-v4-pro",
+            mode="client",
+        )
+
+        self.assertFalse(claude_ai._uses_responses_api(body["model"]))
+        self.assertIn("messages", body)
+        self.assertNotIn("input", body)
+        self.assertEqual(body["thinking"], {"type": "disabled"})
+        self.assertEqual(body["max_tokens"], 1024)
+
+    def test_deepseek_request_uses_direct_endpoint_and_separate_client(self):
+        claude_ai, _logs = _load_claude_ai()
+        seen = {}
+
+        class _Response:
+            status_code = 200
+
+            @staticmethod
+            def json():
+                return {"choices": [{"message": {"content": "Готово."}}]}
+
+        class _Client:
+            @staticmethod
+            def post(url, headers, json):
+                seen.update(url=url, headers=headers, body=json)
+                return _Response()
+
+        claude_ai._deepseek_client = _Client()
+        claude_ai._openai_client = object()
+        data = claude_ai._chat_completion({
+            "model": "deepseek-v4-flash",
+            "messages": [{"role": "user", "content": "Привет"}],
+        })
+
+        self.assertEqual(data["choices"][0]["message"]["content"], "Готово.")
+        self.assertEqual(seen["url"], "https://deepseek.example.test/chat/completions")
+        self.assertEqual(seen["headers"]["Authorization"], "Bearer deepseek-test-key")
+
+    def test_deepseek_tool_call_uses_existing_server_tool_loop(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._responses_completion = lambda _body: self.fail(
+            "DeepSeek V4 Pro must not use OpenAI Responses API"
+        )
+        claude_ai._chat_completion = lambda _body: {
+            "choices": [{
+                "message": {
+                    "content": "",
+                    "tool_calls": [{
+                        "id": "call_ds_1",
+                        "type": "function",
+                        "function": {
+                            "name": "get_services",
+                            "arguments": "{}",
+                        },
+                    }],
+                }
+            }],
+            "usage": {},
+        }
+
+        text, tool_uses = claude_ai._brain_turn(
+            [{"role": "user", "content": "Сколько стоит стрижка?"}],
+            user_id=123,
+            role="client",
+            mdl="deepseek-v4-pro",
+            max_tokens=1024,
+            disabled_tools=set(),
+            mode="client",
+        )
+
+        self.assertEqual(text, "")
+        self.assertEqual(len(tool_uses), 1)
+        self.assertEqual(tool_uses[0].name, "get_services")
+        self.assertEqual(tool_uses[0].input, {})
+
+    def test_generic_client_request_sends_only_small_tool_subset(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        body = claude_ai._responses_body(
+            [{"role": "user", "content": "Привет, как дела?"}],
+            user_id=123,
+            role="client",
+            model="gpt-5.5-pro",
+            mode="client",
+        )
+        names = {tool["name"] for tool in body["tools"]}
+
+        self.assertEqual(names, {"get_services", "get_masters"})
+        self.assertNotIn("check_birthday_promo", names)
+
+    def test_booking_client_request_keeps_booking_tools(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        body = claude_ai._responses_body(
+            [{"role": "user", "content": "Запиши меня завтра на стрижку"}],
+            user_id=123,
+            role="client",
+            model="gpt-5.5-pro",
+            mode="client",
+        )
+        names = {tool["name"] for tool in body["tools"]}
+
+        self.assertIn("get_available_slots", names)
+        self.assertIn("find_nearest_slots", names)
+        self.assertIn("request_booking", names)
+        self.assertNotIn("show_subscription_plans", names)
+        self.assertNotIn("check_birthday_promo", names)
+
+    def test_client_terminal_booking_action_avoids_second_pro_round(self):
+        claude_ai, _logs = _load_claude_ai()
+        calls = []
+
+        def _brain_turn(*args, **kwargs):
+            calls.append("brain")
+            return "", [claude_ai._ToolUse(
+                id="call_booking",
+                name="request_booking",
+                input={},
+            )]
+
+        claude_ai._brain_turn = _brain_turn
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [],
+            {
+                "staff_id": 1,
+                "staff_name": "Стас Мосин",
+                "service_ids": [1],
+                "service_names": ["Мужская стрижка"],
+                "datetime_str": "2026-07-11T10:00:00",
+            },
+            None,
+        )
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Оформляй"}],
+            user_id=123,
+            model="gpt-5.5-pro",
+            mode="client",
+        )
+
+        self.assertEqual(calls, ["brain"])
+        self.assertIn("оформление", text)
+        self.assertIsNotNone(contact_request)
+        self.assertIsNone(action)
+
     def test_client_surface_limits_founder_to_client_tools(self):
         claude_ai, _logs = _load_claude_ai()
 
@@ -476,6 +695,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
 
         self.assertIn("request_booking", names)
         self.assertIn("get_my_bookings", names)
+        self.assertNotIn("check_birthday_promo", names)
         self.assertNotIn("get_business_report", names)
         self.assertNotIn("get_daily_briefing", names)
         self.assertNotIn("get_owner_command_center", names)

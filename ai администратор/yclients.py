@@ -1180,6 +1180,14 @@ class YClientsAPI:
                 return row
         return None
 
+    def get_client_loyalty_cards(self, client_id: int) -> list[dict]:
+        """Возвращает карты лояльности клиента с актуальными балансами."""
+        data = self._get(f"loyalty/client_cards/{int(client_id)}")
+        cards = data.get("data") if isinstance(data, dict) else None
+        if isinstance(cards, dict):
+            cards = [cards]
+        return [card for card in (cards or []) if isinstance(card, dict)]
+
     def get_records_for_master(
         self, staff_id: int, start_date: str, end_date: str, max_pages: int = 25
     ) -> list[dict]:

@@ -45,6 +45,29 @@ class AIBillingTests(unittest.TestCase):
 
         self.assertEqual(cost, 60.0)
 
+    def test_deepseek_v4_prices_and_cache_counters(self):
+        ai_billing = _load_ai_billing()
+        logged = {}
+        ai_billing.database.log_ai_usage = lambda **kwargs: logged.update(kwargs)
+
+        ai_billing.log_openai_usage(
+            "anton_chat",
+            "deepseek-v4-pro",
+            {
+                "usage": {
+                    "prompt_tokens": 1_000_000,
+                    "prompt_cache_hit_tokens": 800_000,
+                    "prompt_cache_miss_tokens": 200_000,
+                    "completion_tokens": 10_000,
+                }
+            },
+        )
+
+        expected = round(0.2 * 0.435 + 0.8 * 0.003625 + 0.01 * 0.87, 6)
+        self.assertEqual(logged["input_tokens"], 200_000)
+        self.assertEqual(logged["cache_read_tokens"], 800_000)
+        self.assertEqual(logged["output_tokens"], 10_000)
+        self.assertEqual(logged["cost_usd"], expected)
 
 if __name__ == "__main__":
     unittest.main()

@@ -259,6 +259,15 @@ def init_db():
             CREATE UNIQUE INDEX IF NOT EXISTS idx_loyalty_tx_earn_unique
                 ON loyalty_transactions (client_id, visit_record_id, type)
                 WHERE type = 'earn' AND visit_record_id IS NOT NULL;
+            -- Welcome-бонус можно выдать локальной карточке только один раз.
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_loyalty_tx_backfill_unique
+                ON loyalty_transactions (client_id, type)
+                WHERE type = 'backfill';
+            -- Фактический остаток карты YClients импортируется в локальный ledger
+            -- только один раз; дальнейшие начисления и списания идут транзакциями.
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_loyalty_tx_yc_import_unique
+                ON loyalty_transactions (client_id, type)
+                WHERE type = 'yc_import';
 
             -- Одноразовые коды для списания баллов на услугу-уход.
             CREATE TABLE IF NOT EXISTS loyalty_redeem_codes (
@@ -1272,6 +1281,89 @@ def set_notify_prefs(client_id: int, partial: dict) -> dict:
             "VALUES (?, ?, ?)",
             (int(client_id), _json_np.dumps(cur, ensure_ascii=False), _now()))
     return cur
+
+
+def get_maya_audience_stats() -> dict:
+    """Aggregated MAYA/Telegram audience counts without personal data.
+
+    The counters deliberately separate all connected accounts from the smaller
+    audience that has the required consents and notification settings for a
+    reactivation message. Telegram does not expose block/delivery status before
+    an actual send, so this function never labels the whole base as "active".
+    """
+    with _db() as conn:
+        _notify_prefs_ensure(conn)
+        rows = conn.execute(
+            "SELECT c.id, c.phone_enc, c.marketing_consent_at, np.prefs, "
+            "COALESCE(("
+            "  SELECT consent_given FROM consents "
+            "  WHERE client_id = c.id AND consent_version = ? "
+            "  ORDER BY id DESC LIMIT 1"
+            "), 0) AS pd_consent "
+            "FROM clients c "
+            "LEFT JOIN notify_prefs np ON np.client_id = c.id "
+            "WHERE c.telegram_chat_id IS NOT NULL",
+            (CONSENT_VERSION,),
+        ).fetchall()
+
+    stats = {
+        "telegram_connected": 0,
+        "identified_clients": 0,
+        "pd_consented": 0,
+        "marketing_consented": 0,
+        "marketing_enabled": 0,
+        "cycle_enabled": 0,
+        "reactivation_reachable": 0,
+    }
+    for row in rows:
+        prefs = dict(NOTIFY_PREFS_DEFAULTS)
+        try:
+            saved = _json_np.loads(row["prefs"] or "{}")
+            if isinstance(saved, dict):
+                for key in NOTIFY_PREFS_DEFAULTS:
+                    if key in saved:
+                        prefs[key] = saved[key]
+        except (TypeError, ValueError, _json_np.JSONDecodeError):
+            pass
+
+        identified = bool(row["phone_enc"])
+        pd_consented = bool(row["pd_consent"])
+        marketing_consented = bool(row["marketing_consent_at"])
+        marketing_enabled = marketing_consented and bool(prefs.get("marketing", True))
+        cycle_enabled = marketing_consented and bool(prefs.get("cycle", True))
+        reachable = (
+            identified
+            and pd_consented
+            and marketing_enabled
+            and cycle_enabled
+        )
+
+        stats["telegram_connected"] += 1
+        stats["identified_clients"] += int(identified)
+        stats["pd_consented"] += int(pd_consented)
+        stats["marketing_consented"] += int(marketing_consented)
+        stats["marketing_enabled"] += int(marketing_enabled)
+        stats["cycle_enabled"] += int(cycle_enabled)
+        stats["reactivation_reachable"] += int(reachable)
+
+    return {
+        "as_of": _now(),
+        **stats,
+        "definitions": {
+            "telegram_connected": "Все аккаунты, которые когда-либо подключились к Telegram-боту MAYA.",
+            "identified_clients": "Подключённые аккаунты, связанные с карточкой клиента.",
+            "marketing_consented": "Клиенты с действующим согласием на маркетинговые уведомления.",
+            "reactivation_reachable": "Идентифицированные клиенты с нужными согласиями и включёнными маркетинговыми и cycle-уведомлениями.",
+        },
+        "delivery_status_note": (
+            "Это аудитория по базе, согласиям и настройкам. Telegram не сообщает "
+            "заранее, кто заблокировал бота; фактическая доставка известна только после отправки."
+        ),
+        "instruction": (
+            "В ответе различай: подключены к MAYA, дали согласие на маркетинг и "
+            "доступны для реактивации. Не называй всех подключённых «активными подписчиками»."
+        ),
+    }
 
 
 def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
@@ -3357,31 +3449,30 @@ def client_has_loyalty_backfill(client_id: int) -> bool:
         return bool(row)
 
 
+def client_has_loyalty_yclients_import(client_id: int) -> bool:
+    """True, если фактический баланс карты YClients уже импортирован."""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM loyalty_transactions WHERE client_id = ? "
+            "AND type = 'yc_import' LIMIT 1",
+            (client_id,),
+        ).fetchone()
+        return bool(row)
+
+
 def loyalty_backfill_exists_for_phone(phone: str) -> bool:
     """True, если welcome-бонус уже выдавали ЛЮБОМУ client_id с этим номером.
     Один человек может существовать под несколькими client_id (Telegram и
     Яндекс-вход) — без этой проверки каждый аккаунт получал 5% от одного LTV."""
-    digits = "".join(ch for ch in (phone or "") if ch.isdigit())
-    if len(digits) < 10:
+    phone_hash = pii_crypto.hash_phone(phone)
+    if not phone_hash:
         return False
-    tail10 = digits[-10:]
     with _db() as conn:
-        rows = conn.execute(
-            "SELECT id, phone FROM clients WHERE phone LIKE ?",
-            ("%" + tail10[-4:],),
-        ).fetchall()
-        ids = []
-        for r in rows:
-            got = "".join(ch for ch in (r["phone"] or "") if ch.isdigit())
-            if got and got[-10:] == tail10:
-                ids.append(int(r["id"]))
-        if not ids:
-            return False
-        q = ",".join("?" * len(ids))
         row = conn.execute(
-            f"SELECT 1 FROM loyalty_transactions WHERE client_id IN ({q}) "
-            "AND type = 'backfill' LIMIT 1",
-            ids,
+            "SELECT 1 FROM loyalty_transactions lt "
+            "JOIN clients c ON c.id = lt.client_id "
+            "WHERE c.phone_hash = ? AND lt.type = 'backfill' LIMIT 1",
+            (phone_hash,),
         ).fetchone()
         return bool(row)
 

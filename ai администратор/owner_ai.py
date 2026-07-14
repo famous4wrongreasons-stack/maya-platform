@@ -33,6 +33,8 @@ _VISITS_PER_SHIFT = 8
 _avg_cache = {"val": None, "ts": 0.0}
 _AVG_TTL = 600.0
 _summary30_cache = {"val": None, "ts": 0.0}
+_today_master_cache = {"date": None, "val": None, "ts": 0.0}
+_TODAY_MASTER_TTL = 60.0
 _retention_cache = {"val": None, "ts": 0.0}
 _RETENTION_SETTING = "owner_client_retention_snapshot_v1"
 _CYCLE_CANDIDATES_SETTING = "cycle_candidates_snapshot_v1"
@@ -315,6 +317,7 @@ def business_snapshot() -> dict:
     fill_potential = _rub(free_capacity * avg)
     forecast_low = _rub(expected * show_factor)
     capacity_revenue = _rub((load["booked_today"] + free_capacity) * avg)
+    today_masters = today_master_revenue()
     return {
         **load,
         "avg_check_rub": avg,
@@ -329,6 +332,10 @@ def business_snapshot() -> dict:
         "historical_show_rate_pct": show_rate,
         "historical_addon_attach_rate_pct": attach_rate or None,
         "historical_avg_addon_rub": avg_addon,
+        "today_paid_revenue_rub": _rub(today_masters.get("total_gross_rub")),
+        "today_paid_visits": _rub(today_masters.get("paid_visits")),
+        "top_today_master": today_masters.get("top_gross_master"),
+        "today_master_revenue": today_masters.get("masters") or [],
         "forecast_price_coverage_pct": (
             round(_rub(load.get("priced_records")) * 100 / load["booked_today"])
             if load["booked_today"] else None
@@ -596,6 +603,56 @@ def master_performance() -> dict:
             "по мастерам не распределяются."
         ),
     }
+
+
+def today_master_revenue() -> dict:
+    """Today's paid service revenue by master from YClients transactions."""
+    day = _today()
+    now = time.time()
+    if (
+        _today_master_cache["date"] == day
+        and _today_master_cache["val"] is not None
+        and now - _today_master_cache["ts"] < _TODAY_MASTER_TTL
+    ):
+        return _today_master_cache["val"]
+    try:
+        import analytics
+        summary = analytics.business_summary(day, day) or {}
+        rows = []
+        for master in summary.get("masters") or []:
+            if not isinstance(master, dict):
+                continue
+            gross = _rub(master.get("gross"))
+            if gross <= 0:
+                continue
+            rows.append({
+                "staff_id": master.get("staff_id"),
+                "name": master.get("name") or "Мастер",
+                "gross_rub": gross,
+                "visits": _rub(master.get("visits")),
+                "is_owner": bool(master.get("is_owner")),
+            })
+        rows.sort(key=lambda row: (-(row.get("gross_rub") or 0), row.get("name") or ""))
+        result = {
+            "date": day,
+            "total_gross_rub": _rub(summary.get("total_gross")),
+            "paid_visits": _rub(summary.get("visits")),
+            "top_gross_master": rows[0] if rows else None,
+            "masters": rows,
+            "note": "Только оплаченная выручка за услуги сегодня по финансовым операциям YClients.",
+        }
+        _today_master_cache.update(date=day, val=result, ts=now)
+        return result
+    except Exception as exc:
+        logger.error("owner_ai today_master_revenue: %s", exc)
+        return {
+            "date": day,
+            "total_gross_rub": 0,
+            "paid_visits": 0,
+            "top_gross_master": None,
+            "masters": [],
+            "note": "Оплаченная выручка по мастерам временно недоступна.",
+        }
 
 
 def expiring_assets() -> dict:
@@ -1556,6 +1613,10 @@ def _fallback_snapshot() -> dict:
         "expected_revenue_rub": 0,
         "free_capacity_today": 0,
         "potential_fill_revenue_rub": 0,
+        "today_paid_revenue_rub": 0,
+        "today_paid_visits": 0,
+        "top_today_master": None,
+        "today_master_revenue": [],
         "week_trend": None,
         "note": "Операционная картина временно недоступна.",
     }
@@ -4317,15 +4378,18 @@ def _owner_briefing(
             if daily_gap < 0 else "План дня выполнен; свободные окна можно заполнять без скидки на уже занятые часы."
         ),
     }
-    top_master = masters.get("top_profit_master") or {}
+    top_master = snap.get("top_today_master") or {}
+    top_master_value = str(top_master.get("name") or "—")
+    if top_master.get("name") and _rub(top_master.get("gross_rub")):
+        top_master_value += " · " + _money(top_master.get("gross_rub"))
     quick_stats = [
         {"key": "today", "label": "Сегодня", "value": _money(plan_expected)},
         {"key": "avg_check", "label": "Средний чек", "value": _money(avg_check)},
         {"key": "load", "label": "Загрузка", "value": str(load_pct) + "%"},
         {
-            "key": "top_master",
-            "label": "Лучший вклад",
-            "value": str(top_master.get("name") or "—"),
+            "key": "top_master_today",
+            "label": "Лидер сегодня",
+            "value": top_master_value,
         },
     ]
     return {
@@ -6144,6 +6208,8 @@ def command_center(*, include_personal_data: bool = False) -> dict:
             "salary_total_rub": _rub(masters.get("salary_total_rub")),
             "top_profit_master": masters.get("top_profit_master"),
             "top_gross_master": masters.get("top_gross_master"),
+            "top_today_gross_master": snap.get("top_today_master"),
+            "today_paid_revenue_rub": _rub(snap.get("today_paid_revenue_rub")),
             "money_at_stake_rub": _money_at_stake(opps, risks),
             "top_priority": opps[0] if opps else None,
             "top_risk": top_risk,
