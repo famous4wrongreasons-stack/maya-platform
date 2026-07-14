@@ -111,6 +111,16 @@ input::placeholder{color:var(--faint)}
     e.style.display = 'block';
   }
 
+  // 429 auth_rate_limited: локальный countdown на кнопке (серверное значение)
+  var TRIAL_LOCK = 0;
+  function trialCooldown(btn) {
+    var left = Math.ceil((TRIAL_LOCK - Date.now()) / 1000);
+    if (left <= 0) { btn.disabled = false; btn.textContent = 'Создать салон бесплатно'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Подождите · ' + left + ' с';
+    setTimeout(function () { trialCooldown(btn); }, 1000);
+  }
+
   $('f-btn').addEventListener('click', async function () {
     $('f-err').style.display = 'none';
     var name = $('f-name').value.trim();
@@ -140,6 +150,12 @@ input::placeholder{color:var(--faint)}
         var eo = data && typeof data === 'object' ? data.error : null;
         var msg = (eo && eo.message) || (data && data.message) || ('HTTP ' + r.status);
         if (r.status === 409) msg = 'Такой адрес (slug) уже занят — попробуйте другой.';
+        if (r.status === 429 && eo && eo.code === 'auth_rate_limited') {
+          var ra = Number(eo.retry_after_seconds != null ? eo.retry_after_seconds : r.headers.get('Retry-After'));
+          var w = isFinite(ra) && ra > 0 ? Math.ceil(ra) : 60;
+          TRIAL_LOCK = Date.now() + w * 1000;
+          msg = 'Слишком много попыток — подождите ' + w + ' с и попробуйте снова.';
+        }
         throw new Error(Array.isArray(msg) ? msg.join('; ') : msg);
       }
       RES = data;
@@ -147,8 +163,8 @@ input::placeholder{color:var(--faint)}
     } catch (e) {
       fail(e.message || 'Не получилось — попробуйте ещё раз.');
     } finally {
-      this.disabled = false;
-      this.textContent = 'Создать салон бесплатно';
+      if (TRIAL_LOCK > Date.now()) trialCooldown(this);
+      else { this.disabled = false; this.textContent = 'Создать салон бесплатно'; }
     }
   });
 
@@ -171,12 +187,32 @@ input::placeholder{color:var(--faint)}
   }
 
   $('d-admin').addEventListener('click', function () {
-    if (RES && RES.access_token) {
+    var handoffUrl = '/maya-admin.html';
+    if (RES && RES.access_token && RES.refresh_token) {
       try {
-        localStorage.setItem('maya_admin_handoff', JSON.stringify({ token: RES.access_token, user: RES.user || null }));
+        // handoff одноразовый и привязан к nonce+tenant: две вкладки регистрации
+        // не обменяются bundle; половину пары не передаём
+        var nonce = '';
+        try {
+          var nb = new Uint8Array(16);
+          crypto.getRandomValues(nb);
+          for (var nbi = 0; nbi < nb.length; nbi++) nonce += ('0' + nb[nbi].toString(16)).slice(-2);
+        } catch (e) { nonce = Math.random().toString(36).slice(2) + Date.now().toString(36); } // только для сред без WebCrypto
+        localStorage.setItem('maya_admin_handoff:' + nonce, JSON.stringify({
+          token: RES.access_token,
+          refresh_token: RES.refresh_token,
+          access_expires_at: RES.expires_in ? Date.now() + Number(RES.expires_in) * 1000 : null,
+          refresh_expires_at: RES.refresh_expires_at || null,
+          session: RES.session || null,
+          user: RES.user || null,
+          tenant_slug: String((RES.tenant && RES.tenant.slug) || '').toLowerCase(),
+          ts: Date.now()
+        }));
+        localStorage.removeItem('maya_admin_handoff'); // legacy-глобальный ключ не используется
+        handoffUrl = '/maya-admin.html#handoff=' + nonce;
       } catch (e) {}
     }
-    location.href = '/maya-admin.html';
+    location.href = handoffUrl;
   });
 })();
 </script>
