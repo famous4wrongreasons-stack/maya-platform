@@ -145,7 +145,7 @@ describe('ConversationalOnboardingInterpreter', () => {
       DEEPSEEK_THINKING: 'disabled',
     });
     const message =
-      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас барбершоп, трое мастеров, стрижем и ровняем бороду.';
+      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас движ «квант», в тиме три человека, всё нестандартно.';
 
     const result = await interpreter.interpret(message);
 
@@ -277,7 +277,7 @@ describe('ConversationalOnboardingInterpreter', () => {
     });
     const interpreter = createInterpreter();
     const message =
-      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. Барбершоп называется Север, нас трое, стрижем и ровняем бороду без CRM.';
+      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас движ «квант», в тиме три человека, всё по-своему.';
 
     const result = await interpreter.interpret(message);
 
@@ -394,7 +394,7 @@ describe('ConversationalOnboardingInterpreter', () => {
 
     const result = await createInterpreter().interpret('ага', previous);
 
-    expect(result.blueprint).toEqual(previous);
+    expect(result.blueprint).toMatchObject(previous);
     expect(result.needsClarification).toBe(true);
     expect(result.assistantMessage).toBe(
       'Вы про количество специалистов или услуги?',
@@ -423,10 +423,13 @@ describe('ConversationalOnboardingInterpreter', () => {
     });
     const previous: AiOnboardingBlueprint = {
       templateId: 'barbershop',
+      workMode: 'business',
+      categoryId: 'business_barbershop',
       businessName: 'Север',
       summary: 'Барберы, услуги и расписание точки',
       industryPresetId: 'barbershop',
       calendarSource: CalendarSource.INTERNAL,
+      calendarSourceConfirmed: true,
       providerCount: 1,
       providerTitle: 'Барбер',
       services: [],
@@ -440,9 +443,9 @@ describe('ConversationalOnboardingInterpreter', () => {
     );
 
     expect(requests).toHaveLength(0);
-    expect(result.blueprint.services).toHaveLength(17);
+    expect(result.blueprint.services).toHaveLength(6);
     expect(result.missingFields).toEqual([]);
-    expect(result.assistantMessage).toContain('Я собрала основу');
+    expect(result.assistantMessage).toContain('Основа готова');
   });
 
   it('keeps a locally resolved personal brand name away from the model', async () => {
@@ -466,10 +469,13 @@ describe('ConversationalOnboardingInterpreter', () => {
     });
     const previous: AiOnboardingBlueprint = {
       templateId: 'barbershop',
+      workMode: 'solo',
+      categoryId: 'solo_barber',
       businessName: null,
       summary: 'Барберы, услуги и расписание точки',
       industryPresetId: 'barbershop',
       calendarSource: CalendarSource.INTERNAL,
+      calendarSourceConfirmed: true,
       providerCount: 1,
       providerTitle: 'Барбер',
       services: [],
@@ -486,6 +492,39 @@ describe('ConversationalOnboardingInterpreter', () => {
     expect(result.source).toBe('safe_fallback');
     expect(result.blueprint.businessName).toBe('Артем');
     expect(result.missingFields).toEqual(['services']);
+  });
+
+  it('never lets the model reopen a deliberately skipped business name', async () => {
+    const requests = mockModelTurn({
+      ...noChangeTurn(),
+      assistant_message: 'Как называется ваш бизнес?',
+    });
+    const previous: AiOnboardingBlueprint = {
+      templateId: 'barbershop',
+      workMode: 'solo',
+      categoryId: 'solo_barber',
+      businessName: null,
+      businessNameDeferred: true,
+      summary: 'Барбер',
+      industryPresetId: 'barbershop',
+      calendarSource: CalendarSource.INTERNAL,
+      calendarSourceConfirmed: true,
+      providerCount: 1,
+      providerTitle: 'Барбер',
+      services: [{ name: 'Мужская стрижка', price: 0, durationMinutes: 60 }],
+      weeklyRules: [{ weekday: 1, startTime: '10:00', endTime: '20:00' }],
+      scheduleAssumed: true,
+    };
+
+    const result = await createInterpreter().interpret('Всё верно', previous);
+
+    expect(requests).toHaveLength(1);
+    expect(result.missingFields).toEqual([]);
+    expect(result.assistantMessage).not.toContain('назван');
+    expect(result.quickReplies.map((reply) => reply.action)).toEqual([
+      'confirm',
+      'edit',
+    ]);
   });
 
   it('falls back safely when the model transport is unavailable', async () => {

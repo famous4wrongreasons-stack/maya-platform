@@ -1,8 +1,17 @@
 import type { CalendarSource } from '../common/domain.enums';
 import type { IndustryPresetId } from '../common/industry-presets';
+import type {
+  AiOnboardingCategoryId,
+  AiOnboardingWorkMode,
+} from './onboarding-categories';
 
 export type AiOnboardingMissingField =
-  'business_name' | 'provider_count' | 'services';
+  | 'work_mode'
+  | 'category'
+  | 'business_name'
+  | 'provider_count'
+  | 'services'
+  | 'calendar_source';
 
 export interface AiOnboardingServiceItem {
   name: string;
@@ -19,17 +28,25 @@ export interface AiOnboardingWeeklyRule {
 export interface AiOnboardingQuickReply {
   label: string;
   message: string;
+  action?: 'confirm' | 'edit' | 'focus';
+  templateId?: string;
 }
 
 export interface AiOnboardingBlueprint {
   templateId: string;
+  workMode?: AiOnboardingWorkMode | null;
+  categoryId?: AiOnboardingCategoryId | null;
   businessName: string | null;
+  businessNameDeferred?: boolean;
+  businessNameGenerated?: boolean;
   summary: string;
   industryPresetId: IndustryPresetId;
   calendarSource: CalendarSource;
+  calendarSourceConfirmed?: boolean;
   providerCount: number | null;
   providerTitle: string;
   services: AiOnboardingServiceItem[];
+  servicesDeferred?: boolean;
   weeklyRules: AiOnboardingWeeklyRule[];
   scheduleAssumed: boolean;
 }

@@ -25,6 +25,10 @@ import {
   listBusinessTemplates,
 } from './business-templates';
 import {
+  getOnboardingCategory,
+  listOnboardingCategories,
+} from './onboarding-categories';
+import {
   ConfirmAiOnboardingDraftDto,
   ContinueAiOnboardingDraftDto,
   CreateAiOnboardingDraftDto,
@@ -50,6 +54,23 @@ export class AiOnboardingService {
   listTemplates() {
     return {
       branding_mode: 'logo_only',
+      onboarding_flow: {
+        first_question: 'work_mode',
+        work_modes: [
+          { id: 'solo', label: 'Работаю на себя' },
+          { id: 'business', label: 'У меня бизнес' },
+        ],
+      },
+      categories: listOnboardingCategories().map((category) => ({
+        id: category.id,
+        work_mode: category.workMode,
+        label: category.label,
+        selection_message: category.selectionMessage,
+        template_id: category.templateId,
+        industry_preset_id: category.industryPresetId,
+        provider_title: category.providerTitle,
+        suggested_services: category.suggestedServices,
+      })),
       templates: listBusinessTemplates().map((template) => ({
         id: template.id,
         name: template.name,
@@ -154,10 +175,11 @@ export class AiOnboardingService {
   ) {
     const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
     this.assertEditable(draft);
-    const blueprint = this.applyConfirmationOverrides(
+    let blueprint = this.applyConfirmationOverrides(
       this.readBlueprint(draft.blueprintJson),
       dto,
     );
+    blueprint = this.materializeDeferredBusinessName(blueprint, dto.ownerName);
     const missingFields = this.getMissingFields(blueprint);
     if (missingFields.length > 0) {
       throw new BadRequestException({
@@ -305,19 +327,58 @@ export class AiOnboardingService {
     dto: ConfirmAiOnboardingDraftDto,
   ): AiOnboardingBlueprint {
     const template = getBusinessTemplate(dto.templateId ?? current.templateId);
+    const category = getOnboardingCategory(current.categoryId);
+    const businessName = dto.businessName?.trim() || current.businessName;
+    const services =
+      dto.services?.map((service) => ({ ...service })) ?? current.services;
     return {
       ...current,
       templateId: template.id,
-      industryPresetId: template.industryPresetId,
-      providerTitle: template.providerTitle,
-      businessName: dto.businessName?.trim() || current.businessName,
+      industryPresetId: category?.industryPresetId ?? template.industryPresetId,
+      providerTitle: category?.providerTitle ?? template.providerTitle,
+      businessName,
+      businessNameDeferred: businessName
+        ? false
+        : (current.businessNameDeferred ?? false),
+      businessNameGenerated: businessName
+        ? false
+        : (current.businessNameGenerated ?? false),
       calendarSource: dto.calendarSource ?? current.calendarSource,
+      calendarSourceConfirmed: dto.calendarSource
+        ? true
+        : (current.calendarSourceConfirmed ?? false),
       providerCount: dto.providerCount ?? current.providerCount,
-      services:
-        dto.services?.map((service) => ({ ...service })) ?? current.services,
+      services,
+      servicesDeferred:
+        services.length > 0
+          ? false
+          : dto.services
+            ? true
+            : (current.servicesDeferred ?? false),
       weeklyRules:
         dto.weeklyRules?.map((rule) => ({ ...rule })) ?? current.weeklyRules,
       scheduleAssumed: dto.weeklyRules ? false : current.scheduleAssumed,
+    };
+  }
+
+  private materializeDeferredBusinessName(
+    blueprint: AiOnboardingBlueprint,
+    ownerName: string,
+  ): AiOnboardingBlueprint {
+    if (blueprint.businessName?.trim() || !blueprint.businessNameDeferred) {
+      return blueprint;
+    }
+
+    const category = getOnboardingCategory(blueprint.categoryId);
+    const fallbackName =
+      blueprint.workMode === 'solo'
+        ? ownerName.trim()
+        : (category?.label ?? 'Мой бизнес');
+
+    return {
+      ...blueprint,
+      businessName: fallbackName,
+      businessNameGenerated: true,
     };
   }
 
@@ -325,9 +386,16 @@ export class AiOnboardingService {
     blueprint: AiOnboardingBlueprint,
   ): AiOnboardingMissingField[] {
     const missing: AiOnboardingMissingField[] = [];
-    if (!blueprint.businessName?.trim()) missing.push('business_name');
+    if (!blueprint.workMode) missing.push('work_mode');
+    if (!blueprint.categoryId) missing.push('category');
+    if (!blueprint.businessName?.trim() && !blueprint.businessNameDeferred) {
+      missing.push('business_name');
+    }
     if (!blueprint.providerCount) missing.push('provider_count');
-    if (blueprint.services.length === 0) missing.push('services');
+    if (blueprint.services.length === 0 && !blueprint.servicesDeferred) {
+      missing.push('services');
+    }
+    if (!blueprint.calendarSourceConfirmed) missing.push('calendar_source');
     return missing;
   }
 

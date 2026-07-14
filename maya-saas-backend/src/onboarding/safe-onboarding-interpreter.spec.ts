@@ -4,6 +4,93 @@ import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
 describe('SafeOnboardingInterpreter', () => {
   const interpreter = new SafeOnboardingInterpreter();
 
+  it('runs the short solo guided flow without reopening skipped fields', () => {
+    const workMode = interpreter.interpret('Я работаю на себя');
+
+    expect(workMode.blueprint).toMatchObject({
+      workMode: 'solo',
+      providerCount: 1,
+    });
+    expect(workMode.assistantMessage).toBe('Чем вы занимаетесь?');
+    expect(workMode.quickReplies.map((reply) => reply.label)).toEqual(
+      expect.arrayContaining([
+        'Барбер',
+        'Парикмахер',
+        'Стоматолог',
+        'Тренер',
+        'Юрист / адвокат',
+        'Другая профессия',
+      ]),
+    );
+
+    const category = interpreter.interpret(
+      'Я работаю барбером',
+      workMode.blueprint,
+    );
+    expect(category.blueprint).toMatchObject({
+      categoryId: 'solo_barber',
+      templateId: 'barbershop',
+      industryPresetId: 'barbershop',
+      providerCount: 1,
+    });
+    expect(category.blueprint.services).toHaveLength(6);
+    expect(category.missingFields).toEqual([
+      'business_name',
+      'calendar_source',
+    ]);
+
+    const noName = interpreter.interpret(
+      'Название пока не придумал',
+      category.blueprint,
+    );
+    expect(noName.blueprint.businessNameDeferred).toBe(true);
+    expect(noName.missingFields).toEqual(['calendar_source']);
+    expect(noName.assistantMessage).toContain('У вас есть CRM');
+
+    const ready = interpreter.interpret(
+      'Будем вести записи во внутреннем календаре MAYA',
+      noName.blueprint,
+    );
+    expect(ready.missingFields).toEqual([]);
+    expect(ready.quickReplies).toEqual([
+      expect.objectContaining({ label: 'Можем начинать', action: 'confirm' }),
+      expect.objectContaining({
+        label: 'Отредактировать данные',
+        action: 'edit',
+      }),
+    ]);
+  });
+
+  it('uses business-specific choices and asks team size only for a business', () => {
+    const workMode = interpreter.interpret('У меня бизнес');
+
+    expect(workMode.blueprint.workMode).toBe('business');
+    expect(workMode.assistantMessage).toBe('Какой у вас бизнес?');
+    expect(workMode.quickReplies.map((reply) => reply.label)).toEqual(
+      expect.arrayContaining([
+        'Барбершоп',
+        'Салон красоты',
+        'Стоматология',
+        'Косметология',
+        'Фитнес',
+        'Автосервис',
+        'Детейлинг',
+        'Другой бизнес',
+      ]),
+    );
+
+    const category = interpreter.interpret(
+      'У меня барбершоп',
+      workMode.blueprint,
+    );
+    expect(category.blueprint.categoryId).toBe('business_barbershop');
+    expect(category.missingFields).toEqual([
+      'business_name',
+      'provider_count',
+      'calendar_source',
+    ]);
+  });
+
   it('builds a complete barbershop blueprint from a natural-language story', () => {
     const result = interpreter.interpret(
       'Барбершоп называется Север. У нас 3 барбера. Услуги: мужская стрижка 2000 руб 60 минут, борода 1200 руб 30 минут. Работаем пн-сб с 10:00 до 20:00 без CRM.',
@@ -30,18 +117,22 @@ describe('SafeOnboardingInterpreter', () => {
     const first = interpreter.interpret(
       'Я частный массажист, работаю одна. Название Мягкая сила.',
     );
-    expect(first.missingFields).toEqual(['services']);
+    expect(first.missingFields).toEqual(['calendar_source']);
+    expect(first.blueprint.services.map((service) => service.name)).toEqual([
+      'Классический массаж',
+      'Массаж спины',
+      'Спортивный массаж',
+      'Лимфодренажный массаж',
+    ]);
 
     const second = interpreter.interpret(
-      'Услуги: массаж 3000 руб 60 минут',
+      'Буду вести записи во внутреннем календаре MAYA',
       first.blueprint,
     );
     expect(second.missingFields).toEqual([]);
     expect(second.blueprint.businessName).toBe('Мягкая сила');
     expect(second.blueprint.providerCount).toBe(1);
-    expect(second.blueprint.services).toEqual([
-      { name: 'массаж', price: 3000, durationMinutes: 60 },
-    ]);
+    expect(second.blueprint.calendarSourceConfirmed).toBe(true);
   });
 
   it('marks a CRM-based business for external calendar connection', () => {
@@ -54,7 +145,7 @@ describe('SafeOnboardingInterpreter', () => {
 
   it('understands a naturally phrased service without the services keyword', () => {
     const result = interpreter.interpret(
-      'Студия называется Тихая сила. Я работаю одна. Массаж спины стоит 3000 рублей и длится 60 минут.',
+      'Студия называется Тихая сила. Я работаю одна. Массаж спины стоит 3000 рублей и длится 60 минут. Запись веду в календаре MAYA.',
     );
 
     expect(result.missingFields).toEqual([]);
@@ -65,7 +156,7 @@ describe('SafeOnboardingInterpreter', () => {
 
   it('accepts a short business name and a plain service list in separate replies', () => {
     const first = interpreter.interpret(
-      'Я частный мастер и работаю одна без CRM.',
+      'Я частный мастер, у меня другая профессия, работаю одна без CRM.',
     );
     expect(first.missingFields).toEqual(['business_name', 'services']);
 
@@ -86,7 +177,9 @@ describe('SafeOnboardingInterpreter', () => {
   });
 
   it('keeps an unlabeled service list while continuing to ask for the name', () => {
-    const first = interpreter.interpret('Я частный специалист и работаю один.');
+    const first = interpreter.interpret(
+      'Я частный специалист, у меня другая профессия, работаю один в календаре MAYA.',
+    );
     const services = interpreter.interpret(
       'Диагностика, консультация, сопровождение',
       first.blueprint,
@@ -103,7 +196,7 @@ describe('SafeOnboardingInterpreter', () => {
 
   it('understands a combined follow-up with a natural name label and bare prices', () => {
     const first = interpreter.interpret(
-      'Я работаю одна и веду расписание в MAYA.',
+      'Я работаю одна, у меня другая профессия и веду расписание в MAYA.',
     );
     const result = interpreter.interpret(
       'Название бизнеса — Линия. Услуги: консультация 2500 45 минут; сопровождение 5000 90 минут.',
@@ -119,7 +212,9 @@ describe('SafeOnboardingInterpreter', () => {
   });
 
   it('does not mistake an explicit business-name reply for a service', () => {
-    const first = interpreter.interpret('Я частный специалист и работаю один.');
+    const first = interpreter.interpret(
+      'Я частный специалист, у меня другая профессия, работаю один в календаре MAYA.',
+    );
     const named = interpreter.interpret(
       'Название бизнеса — Север',
       first.blueprint,
@@ -159,14 +254,14 @@ describe('SafeOnboardingInterpreter', () => {
 
     expect(first.blueprint.templateId).toBe('barbershop');
     expect(completed.missingFields).toEqual([]);
-    expect(completed.blueprint.services).toHaveLength(17);
+    expect(completed.blueprint.services).toHaveLength(6);
     expect(completed.blueprint.services.map((service) => service.name)).toEqual(
       expect.arrayContaining([
         'Мужская стрижка',
-        'Стрижка машинкой + фейд',
-        'Моделирование бороды',
+        'Стрижка машинкой',
+        'Коррекция бороды и усов',
         'Бритьё головы',
-        'Восковая эпиляция (нос + уши)',
+        'Укладка',
       ]),
     );
     expect(completed.blueprint.services).not.toContainEqual(
@@ -176,7 +271,7 @@ describe('SafeOnboardingInterpreter', () => {
 
   it('applies automatic barbershop services inside a complete natural-language answer', () => {
     const result = interpreter.interpret(
-      'Я работаю парикмахером, снимаю кресло. Да никак не называется, меня зовут Артем и мои клиенты знают меня как Артема. Услуги поставь автоматически.',
+      'Я работаю барбером, снимаю кресло и веду запись без CRM. Да никак не называется, меня зовут Артем и мои клиенты знают меня как Артема. Услуги поставь автоматически.',
     );
 
     expect(result.blueprint).toMatchObject({
@@ -184,7 +279,7 @@ describe('SafeOnboardingInterpreter', () => {
       businessName: 'Артем',
       providerCount: 1,
     });
-    expect(result.blueprint.services).toHaveLength(17);
+    expect(result.blueprint.services).toHaveLength(6);
     expect(result.blueprint.services).not.toContainEqual(
       expect.objectContaining({ name: 'поставь автоматически' }),
     );
@@ -193,7 +288,7 @@ describe('SafeOnboardingInterpreter', () => {
 
   it('treats solo specialist as business shape and keeps profession services', () => {
     const result = interpreter.interpret(
-      'Я парикмахер, работаю один. Услуги поставь автоматически.',
+      'Я барбер, работаю один без CRM. Услуги поставь автоматически.',
       undefined,
       'solo_specialist',
     );
@@ -203,7 +298,7 @@ describe('SafeOnboardingInterpreter', () => {
       industryPresetId: 'barbershop',
       providerCount: 1,
     });
-    expect(result.blueprint.services).toHaveLength(17);
+    expect(result.blueprint.services).toHaveLength(6);
     expect(result.blueprint.services).not.toContainEqual(
       expect.objectContaining({ name: 'Консультация' }),
     );
@@ -215,12 +310,13 @@ describe('SafeOnboardingInterpreter', () => {
     );
 
     expect(first.blueprint).toMatchObject({
-      templateId: 'barbershop',
+      templateId: 'beauty_and_care',
+      industryPresetId: 'beauty_salon',
       providerCount: 1,
       businessName: null,
     });
-    expect(first.missingFields).toEqual(['business_name', 'services']);
-    expect(first.assistantMessage).toContain('Как вас или ваш бизнес знают');
+    expect(first.missingFields).toEqual(['business_name', 'calendar_source']);
+    expect(first.assistantMessage).toContain('Как вас знают клиенты');
 
     const named = interpreter.interpret(
       'да никак не называется меня зовут Артем и мои клиенты знают меня как Артема',
@@ -228,16 +324,13 @@ describe('SafeOnboardingInterpreter', () => {
     );
 
     expect(named.blueprint).toMatchObject({
-      templateId: 'barbershop',
+      templateId: 'beauty_and_care',
       providerCount: 1,
       businessName: 'Артем',
     });
-    expect(named.missingFields).toEqual(['services']);
+    expect(named.missingFields).toEqual(['calendar_source']);
     expect(named.assistantMessage).not.toContain('Как называется ваш бизнес');
-    expect(named.quickReplies).toContainEqual({
-      label: 'Взять из шаблона',
-      message: 'Используй готовые услуги из шаблона',
-    });
+    expect(named.assistantMessage).toContain('CRM');
   });
 
   it('asks for a client-facing name after a no-name reply without looping', () => {
@@ -250,15 +343,16 @@ describe('SafeOnboardingInterpreter', () => {
     );
 
     expect(noName.blueprint.businessName).toBeNull();
-    expect(noName.needsClarification).toBe(true);
+    expect(noName.blueprint.businessNameDeferred).toBe(true);
+    expect(noName.needsClarification).toBe(false);
+    expect(noName.missingFields).toEqual([]);
     expect(noName.assistantMessage).toBe(
-      'Поняла, отдельного названия нет. Как вас называют клиенты? Можно просто написать имя.',
+      'Основа готова. Проверьте данные перед созданием бизнеса. Всё остальное можно добавить позже.',
     );
-    expect(noName.quickReplies).toEqual([]);
-
-    const named = interpreter.interpret('артем', noName.blueprint);
-    expect(named.blueprint.businessName).toBe('артем');
-    expect(named.missingFields).toEqual(['services']);
+    expect(noName.quickReplies.map((reply) => reply.action)).toEqual([
+      'confirm',
+      'edit',
+    ]);
   });
 
   it.each([
@@ -273,7 +367,7 @@ describe('SafeOnboardingInterpreter', () => {
 
     expect(
       interpreter.interpret(message, first.blueprint).blueprint.services,
-    ).toHaveLength(17);
+    ).toHaveLength(6);
   });
 
   it('does not overwrite custom services with a vague auto reply', () => {

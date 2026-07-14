@@ -16,6 +16,10 @@ import {
   listBusinessTemplates,
 } from './business-templates';
 import {
+  getOnboardingCategory,
+  listOnboardingCategories,
+} from './onboarding-categories';
+import {
   hasNoFormalBusinessNameSignal,
   SafeOnboardingInterpreter,
 } from './safe-onboarding-interpreter';
@@ -104,9 +108,10 @@ export class ConversationalOnboardingInterpreter {
       previous,
       preferredTemplateId,
     );
-    // Template selection is a deterministic product action. Do not let a
-    // probabilistic model drop it and ask the same services question again.
-    if (this.didApplyTemplateServices(safe, previous)) {
+    // Product choices are deterministic state transitions. The language model
+    // may understand free-form replies, but it must never reopen a completed
+    // step or replace a curated category with a generic answer.
+    if (this.didResolveGuidedStep(safe, previous)) {
       return safe;
     }
     // A personal name is deliberately parsed locally. It may be used as the
@@ -128,11 +133,11 @@ export class ConversationalOnboardingInterpreter {
       const turn = await this.requestStructuredTurn(
         provider,
         sanitizedMessage,
-        previous,
+        safe.blueprint,
         safe.missingFields,
         safe.blueprint.templateId,
       );
-      return this.mergeModelTurn(turn, safe, provider, previous);
+      return this.mergeModelTurn(turn, safe, provider);
     } catch (error) {
       this.logger.warn(
         `AI onboarding fallback activated: ${this.safeErrorName(error)}`,
@@ -326,66 +331,91 @@ export class ConversationalOnboardingInterpreter {
     turn: ModelTurn,
     safe: AiOnboardingInterpretation,
     provider: ModelProvider,
-    previous?: AiOnboardingBlueprint,
   ): AiOnboardingInterpretation {
     const accepted = new Set(turn.accepted_fields);
     const uncertain =
       turn.needs_clarification || turn.confidence < CONFIDENCE_THRESHOLD;
     const templateId =
-      accepted.has('template') && turn.patch.template_id
+      accepted.has('template') &&
+      turn.patch.template_id &&
+      !safe.blueprint.categoryId
         ? getBusinessTemplate(turn.patch.template_id).id
-        : (previous?.templateId ?? safe.blueprint.templateId);
+        : safe.blueprint.templateId;
     const template = getBusinessTemplate(templateId);
-    const base: AiOnboardingBlueprint = previous
-      ? this.cloneBlueprint(previous)
-      : {
-          templateId: template.id,
-          businessName: null,
-          summary: template.description,
-          industryPresetId: template.industryPresetId,
-          calendarSource: template.calendarSource,
-          providerCount: template.id === 'solo_specialist' ? 1 : null,
-          providerTitle: template.providerTitle,
-          services: [],
-          weeklyRules: template.defaultWeeklyRules.map((rule) => ({ ...rule })),
-          scheduleAssumed: true,
-        };
+    const base = this.cloneBlueprint(safe.blueprint);
+    let category = getOnboardingCategory(base.categoryId);
 
     base.templateId = template.id;
-    base.summary = template.description;
-    base.industryPresetId = template.industryPresetId;
-    base.providerTitle = template.providerTitle;
+    base.summary = category?.label ?? template.description;
+    base.industryPresetId =
+      category?.industryPresetId ?? template.industryPresetId;
+    base.providerTitle = category?.providerTitle ?? template.providerTitle;
+
+    if (!base.workMode) {
+      if (base.providerCount === 1 || template.id === 'solo_specialist') {
+        base.workMode = 'solo';
+      } else if (base.providerCount && base.providerCount > 1) {
+        base.workMode = 'business';
+      }
+    }
 
     if (accepted.has('business_name') && turn.patch.business_name) {
       base.businessName = this.cleanText(turn.patch.business_name, 80);
+      base.businessNameDeferred = false;
     }
     if (accepted.has('calendar_source') && turn.patch.calendar_source) {
       base.calendarSource = turn.patch.calendar_source;
+      base.calendarSourceConfirmed = true;
     }
     if (accepted.has('provider_count') && turn.patch.provider_count) {
       base.providerCount = this.clampInteger(turn.patch.provider_count, 1, 100);
+    }
+    if (!base.workMode) {
+      if (base.providerCount === 1 || template.id === 'solo_specialist') {
+        base.workMode = 'solo';
+      } else if (base.providerCount && base.providerCount > 1) {
+        base.workMode = 'business';
+      }
+    }
+    if (
+      !category &&
+      accepted.has('template') &&
+      base.workMode &&
+      turn.patch.template_id
+    ) {
+      const matchingCategories = listOnboardingCategories(base.workMode).filter(
+        (item) => item.templateId === template.id,
+      );
+      if (matchingCategories.length === 1) {
+        category = matchingCategories[0];
+        base.categoryId = category.id;
+        base.summary = category.label;
+        base.industryPresetId = category.industryPresetId;
+        base.providerTitle = category.providerTitle;
+      }
     }
     if (
       accepted.has('use_template_services') &&
       turn.patch.use_template_services
     ) {
-      base.services = template.suggestedServices.map((service) => ({
-        ...service,
-      }));
+      const suggestedServices =
+        category?.suggestedServices ?? template.suggestedServices;
+      base.services = suggestedServices.map((service) => ({ ...service }));
+      base.servicesDeferred = false;
     } else if (accepted.has('services') && turn.patch.services.length > 0) {
       base.services = this.normalizeServices(turn.patch.services);
+      base.servicesDeferred = false;
     }
     if (accepted.has('weekly_rules') && turn.patch.weekly_rules.length > 0) {
       base.weeklyRules = this.normalizeWeeklyRules(turn.patch.weekly_rules);
       base.scheduleAssumed = false;
     }
 
-    const missingFields = this.getMissingFields(base);
     const fallbackTurn = this.safeInterpreter.interpret('', base);
     const assistantMessage = this.cleanText(
       uncertain && turn.clarification_question
         ? turn.clarification_question
-        : turn.assistant_message,
+        : fallbackTurn.assistantMessage,
       500,
     );
 
@@ -393,12 +423,14 @@ export class ConversationalOnboardingInterpreter {
 
     return {
       assistantMessage: assistantMessage || fallbackTurn.assistantMessage,
-      blueprint: base,
+      blueprint: fallbackTurn.blueprint,
       confidence: this.clampNumber(turn.confidence, 0, 1),
-      missingFields,
+      missingFields: fallbackTurn.missingFields,
       needsClarification: uncertain,
       quickReplies:
-        quickReplies.length > 0 ? quickReplies : fallbackTurn.quickReplies,
+        uncertain && quickReplies.length > 0
+          ? quickReplies
+          : fallbackTurn.quickReplies,
       source: provider,
     };
   }
@@ -481,8 +513,12 @@ export class ConversationalOnboardingInterpreter {
 
     return {
       template_id: previous.templateId,
+      work_mode: previous.workMode ?? null,
+      category_id: previous.categoryId ?? null,
       business_name_present: Boolean(previous.businessName),
+      business_name_deferred: previous.businessNameDeferred ?? false,
       calendar_source: previous.calendarSource,
+      calendar_source_confirmed: previous.calendarSourceConfirmed ?? false,
       provider_count: previous.providerCount,
       services: previous.services.map((service) => ({
         ...service,
@@ -490,6 +526,7 @@ export class ConversationalOnboardingInterpreter {
       })),
       weekly_rules: previous.weeklyRules,
       schedule_assumed: previous.scheduleAssumed,
+      services_deferred: previous.servicesDeferred ?? false,
     };
   }
 
@@ -561,24 +598,32 @@ export class ConversationalOnboardingInterpreter {
     return null;
   }
 
-  private didApplyTemplateServices(
+  private didResolveGuidedStep(
     safe: AiOnboardingInterpretation,
     previous?: AiOnboardingBlueprint,
   ): boolean {
-    if ((previous?.services.length ?? 0) > 0) return false;
-    const suggested = getBusinessTemplate(
-      safe.blueprint.templateId,
-    ).suggestedServices;
-    if (safe.blueprint.services.length !== suggested.length) return false;
-
-    return suggested.every((service, index) => {
-      const actual = safe.blueprint.services[index];
-      return (
-        actual?.name === service.name &&
-        actual.price === service.price &&
-        actual.durationMinutes === service.durationMinutes
-      );
-    });
+    const blueprint = safe.blueprint;
+    if (blueprint.workMode !== (previous?.workMode ?? null)) return true;
+    if (blueprint.categoryId !== (previous?.categoryId ?? null)) return true;
+    if (
+      blueprint.businessNameDeferred === true &&
+      previous?.businessNameDeferred !== true
+    ) {
+      return true;
+    }
+    if (
+      blueprint.calendarSourceConfirmed === true &&
+      previous?.calendarSourceConfirmed !== true
+    ) {
+      return true;
+    }
+    if (
+      blueprint.servicesDeferred === true &&
+      previous?.servicesDeferred !== true
+    ) {
+      return true;
+    }
+    return blueprint.services.length > (previous?.services.length ?? 0);
   }
 
   private didResolvePersonalBrandName(
@@ -666,16 +711,6 @@ export class ConversationalOnboardingInterpreter {
     );
   }
 
-  private getMissingFields(
-    blueprint: AiOnboardingBlueprint,
-  ): AiOnboardingMissingField[] {
-    const missing: AiOnboardingMissingField[] = [];
-    if (!blueprint.businessName?.trim()) missing.push('business_name');
-    if (!blueprint.providerCount) missing.push('provider_count');
-    if (blueprint.services.length === 0) missing.push('services');
-    return missing;
-  }
-
   private normalizeServices(
     services: AiOnboardingServiceItem[],
   ): AiOnboardingServiceItem[] {
@@ -756,13 +791,15 @@ export class ConversationalOnboardingInterpreter {
 const MODEL_INSTRUCTIONS = `
 Ты MAYA, спокойный и живой AI-помощник, который настраивает бизнес в MAYA OS через обычный разговор на русском языке.
 
-Понимай разговорную речь, опечатки, сленг и короткие ответы в контексте уже собранных данных. Не требуй анкетного стиля. Задавай только один короткий вопрос за ход.
+Понимай разговорную речь, опечатки, сленг и короткие ответы в контексте уже собранных данных. Не требуй анкетного стиля. Задавай только один короткий вопрос за ход. MAYA говорит о себе только в женском роде: «поняла», «сохранила», «добавила».
+
+Онбординг должен быть коротким. Порядок продукта: формат «работаю на себя / у меня бизнес», профессия или тип бизнеса, необязательное имя/название, количество специалистов только для бизнеса, CRM или внутренний календарь MAYA, подтверждение. Ориентируйся на missing_fields и current_state. Никогда не возвращайся к уже заполненному полю. Если business_name_deferred=true, название намеренно пропущено: не спрашивай его снова и не утверждай, что без него нельзя начать. Если services_deferred=true, услуги тоже можно добавить позже.
 
 Критическое правило уверенности: если короткий ответ можно понять несколькими способами, не додумывай. Установи needs_clarification=true, confidence ниже 0.72, не добавляй спорное поле в accepted_fields, задай один уточняющий вопрос и предложи 2-4 быстрых ответа. Каждый quick reply содержит короткую label и самостоятельную message, которую frontend отправит следующим сообщением.
 
 В accepted_fields включай только факты, явно сообщенные пользователем и понятые с высокой уверенностью. Пустое поле patch означает отсутствие изменения, а не удаление. Цены указывай в рублях целым числом, длительность в минутах. Если цена или длительность не названы, используй 0 и 60. Никогда не проси и не повторяй телефон, email, ФИО, токены CRM или иные персональные/секретные данные. Если встречается маркер [ИМЯ], [EMAIL], [ТЕЛЕФОН], [АККАУНТ], [ССЫЛКА], [СЕКРЕТ] или [НАЗВАНИЕ СКРЫТО], игнорируй его.
 
-Если пользователь просит поставить услуги автоматически, взять стандартный набор, выбрать услуги за него или говорит «как обычно», используй use_template_services=true и добавь use_template_services в accepted_fields. Не своди отраслевой набор к одной консультации.
+Если пользователь просит поставить услуги автоматически, взять стандартный набор, выбрать услуги за него или говорит «как обычно», используй use_template_services=true и добавь use_template_services в accepted_fields. Не своди отраслевой набор к одной консультации. Не выдумывай цены: если пользователь цену не назвал, ставь 0, что означает «указать позже».
 
 assistant_message должен звучать по-человечески, без канцелярита, без упоминания JSON, схемы, confidence или внутренних полей. Не утверждай, что бизнес уже создан: пока идет только сбор основы.`.trim();
 

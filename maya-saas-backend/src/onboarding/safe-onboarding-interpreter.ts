@@ -13,6 +13,12 @@ import {
   getBusinessTemplate,
   type BusinessTemplateId,
 } from './business-templates';
+import {
+  detectOnboardingCategory,
+  getOnboardingCategory,
+  listOnboardingCategories,
+  type AiOnboardingWorkMode,
+} from './onboarding-categories';
 
 const TEMPLATE_SIGNALS: readonly [BusinessTemplateId, RegExp][] = [
   ['barbershop', /(барбершоп|барбер|парикмах|мужск(?:ая|ие) стрижк|бород)/iu],
@@ -56,7 +62,7 @@ const AMBIGUOUS_SHORT_REPLY =
   /^(?:ага|да|нет|неа|ок|окей|понял[а]?|ясно|хз|незнаю|не\s+знаю|может|наверное|дальше|готово|го|погнали)$/iu;
 
 const NO_FORMAL_BUSINESS_NAME_PATTERN =
-  /(?:никак\s+(?:не\s+)?называ(?:ется|юсь|емся)?|(?:отдельн(?:ого|ое)\s+)?названи(?:я|е)\s+(?:нет|не\s+нужно)|нет\s+(?:отдельного\s+)?названия|без\s+(?:отдельного\s+)?названия|работаю\s+(?:просто\s+)?под\s+(?:своим\s+)?именем|(?:клиент[а-яё]*|гости|все)\s+(?:меня\s+)?знают(?:\s+меня)?\s+как)/iu;
+  /(?:никак\s+(?:не\s+)?называ(?:ется|юсь|емся)?|(?:отдельн(?:ого|ое)\s+)?названи(?:я|е)\s+(?:нет|не\s+нужно)|нет\s+(?:отдельного\s+)?названия|без\s+(?:отдельного\s+)?названия|(?:пока\s+)?не\s+придумал[аи]?\s+названи[ея]|название\s+(?:(?:ещ[её]|пока)\s+)?не\s+придумал[аи]?|работаю\s+(?:просто\s+)?под\s+(?:своим\s+)?именем|(?:клиент[а-яё]*|гости|все)\s+(?:меня\s+)?знают(?:\s+меня)?\s+как)/iu;
 
 export function hasNoFormalBusinessNameSignal(value: string): boolean {
   return NO_FORMAL_BUSINESS_NAME_PATTERN.test(value);
@@ -71,8 +77,8 @@ export class SafeOnboardingInterpreter {
   ): AiOnboardingInterpretation {
     const normalized = message.trim();
     const previousServices = previous?.services ?? [];
-    const expectsBusinessName = !previous?.businessName?.trim();
-    const expectsServices = previousServices.length === 0;
+    const expectsBusinessName =
+      !previous?.businessName?.trim() && !previous?.businessNameDeferred;
     const hasServiceIntro = this.hasServiceIntro(normalized);
     const extractedBusinessName = this.extractBusinessName(
       normalized,
@@ -82,45 +88,104 @@ export class SafeOnboardingInterpreter {
         !this.hasServiceFacts(normalized) &&
         !this.looksLikeServiceList(normalized),
     );
-    const needsPersonalDisplayName =
-      expectsBusinessName &&
-      hasNoFormalBusinessNameSignal(normalized) &&
-      !extractedBusinessName;
+    const explicitWorkMode = this.detectWorkMode(normalized);
+    const workMode =
+      explicitWorkMode ??
+      previous?.workMode ??
+      this.inferWorkMode(normalized, previous);
+    const workModeChanged =
+      Boolean(previous?.workMode) && previous?.workMode !== workMode;
+    const retainedServices = workModeChanged ? [] : previousServices;
+    const expectsServices = retainedServices.length === 0;
+    const detectedCategory = workMode
+      ? detectOnboardingCategory(normalized, workMode)
+      : null;
+    const previousCategory = getOnboardingCategory(previous?.categoryId);
+    const compatiblePreviousCategory =
+      previousCategory?.workMode === workMode ? previousCategory : null;
+    const selectedCategory = detectedCategory ?? compatiblePreviousCategory;
     const preferredTemplate = preferredTemplateId
       ? getBusinessTemplate(preferredTemplateId)
       : null;
     // Generic chips describe the business shape, not its profession. A user
     // who chose "solo specialist" can still be a barber, dentist or tutor.
     const templateId =
+      selectedCategory?.templateId ??
       this.detectIndustryTemplate(normalized) ??
       preferredTemplate?.id ??
-      this.detectTemplate(normalized, previous?.templateId);
+      this.detectTemplate(
+        normalized,
+        workModeChanged ? undefined : previous?.templateId,
+      );
     const template = getBusinessTemplate(templateId);
     const detectedSchedule = this.extractSchedule(normalized);
+    const calendarDecision = this.detectCalendarSourceDecision(normalized);
+    const parsedServices = this.extractServices(normalized, retainedServices, {
+      allowLoose: expectsServices && (Boolean(previous) || hasServiceIntro),
+      businessName: extractedBusinessName,
+    });
+    const hasExplicitServices =
+      parsedServices.length > retainedServices.length ||
+      (retainedServices.length === 0 && parsedServices.length > 0);
+    const useAutomaticServices = this.shouldUseTemplateServices(
+      normalized,
+      expectsServices,
+    );
+    const categoryChanged =
+      Boolean(selectedCategory) &&
+      selectedCategory?.id !== previous?.categoryId;
+    const servicesDeferred =
+      parsedServices.length > 0
+        ? false
+        : this.shouldDeferServices(normalized) ||
+          previous?.servicesDeferred === true;
+    const businessNameDeferred = extractedBusinessName
+      ? false
+      : hasNoFormalBusinessNameSignal(normalized)
+        ? true
+        : (previous?.businessNameDeferred ?? false);
+    const categoryServices = selectedCategory?.suggestedServices ?? [];
+    const services = hasExplicitServices
+      ? parsedServices
+      : retainedServices.length > 0
+        ? retainedServices
+        : categoryServices.length > 0 &&
+            (categoryChanged || useAutomaticServices)
+          ? categoryServices.map((service) => ({ ...service }))
+          : useAutomaticServices
+            ? template.suggestedServices.map((service) => ({ ...service }))
+            : parsedServices;
     const blueprint: AiOnboardingBlueprint = {
       templateId: template.id,
+      workMode,
+      categoryId: selectedCategory?.id ?? previous?.categoryId ?? null,
       businessName: extractedBusinessName ?? previous?.businessName ?? null,
-      summary: previous?.summary ?? template.description,
-      industryPresetId: template.industryPresetId,
-      calendarSource: this.detectCalendarSource(
-        normalized,
-        previous?.calendarSource ?? template.calendarSource,
-      ),
+      businessNameDeferred,
+      summary:
+        selectedCategory?.label ?? previous?.summary ?? template.description,
+      industryPresetId:
+        selectedCategory?.industryPresetId ?? template.industryPresetId,
+      calendarSource:
+        calendarDecision?.source ??
+        previous?.calendarSource ??
+        template.calendarSource,
+      calendarSourceConfirmed:
+        Boolean(calendarDecision) ||
+        (previous?.calendarSourceConfirmed ?? false),
       providerCount:
         this.extractProviderCount(normalized) ??
-        previous?.providerCount ??
-        (template.id === 'solo_specialist' ||
+        (workModeChanged ? null : previous?.providerCount) ??
+        (workMode === 'solo' ||
+        template.id === 'solo_specialist' ||
         preferredTemplate?.id === 'solo_specialist'
           ? 1
           : null),
-      providerTitle: template.providerTitle,
-      services: this.shouldUseTemplateServices(normalized, expectsServices)
-        ? template.suggestedServices.map((service) => ({ ...service }))
-        : this.extractServices(normalized, previousServices, {
-            allowLoose:
-              expectsServices && (Boolean(previous) || hasServiceIntro),
-            businessName: extractedBusinessName,
-          }),
+      providerTitle:
+        selectedCategory?.providerTitle ??
+        (workModeChanged ? null : previous?.providerTitle) ??
+        template.providerTitle,
+      services,
+      servicesDeferred,
       weeklyRules:
         detectedSchedule ??
         previous?.weeklyRules ??
@@ -132,8 +197,7 @@ export class SafeOnboardingInterpreter {
     const missingFields = this.getMissingFields(blueprint);
     const madeProgress = this.hasProgress(previous, blueprint);
     const needsClarification =
-      needsPersonalDisplayName ||
-      (AMBIGUOUS_SHORT_REPLY.test(normalized) && !madeProgress);
+      AMBIGUOUS_SHORT_REPLY.test(normalized) && !madeProgress;
     const confidence = needsClarification
       ? 0.3
       : madeProgress
@@ -149,15 +213,10 @@ export class SafeOnboardingInterpreter {
         blueprint,
         missingFields,
         needsClarification,
-        needsPersonalDisplayName,
       ),
       confidence,
       needsClarification,
-      quickReplies: this.buildQuickReplies(
-        blueprint,
-        missingFields,
-        needsPersonalDisplayName,
-      ),
+      quickReplies: this.buildQuickReplies(blueprint, missingFields),
       source: 'safe_fallback',
     };
   }
@@ -194,33 +253,83 @@ export class SafeOnboardingInterpreter {
     );
   }
 
-  private detectCalendarSource(
+  private detectCalendarSourceDecision(
     message: string,
-    fallback: CalendarSource,
-  ): CalendarSource {
+  ): { source: CalendarSource } | null {
     if (
-      /(без crm|без срм|без црм|сво[её]й crm нет|календарь maya|внутри maya|внутри майи)/iu.test(
+      /(без crm|без срм|без црм|сво[её]й crm нет|календар(?:ь|е) maya|внутри maya|внутри майи|внутренн(?:ий|ем) календар|(?:веду|вести|будем\s+вести)\s+(?:запись|записи|расписание)\s+(?:в|через)\s+(?:maya|май[ея]))/iu.test(
         message,
       )
     ) {
-      return CalendarSource.INTERNAL;
+      return { source: CalendarSource.INTERNAL };
     }
 
     if (
-      /(yclients|y clients|ю?клиентс|уклиентс|ал(ь)?тегио|dikidi|ди(ки|ги)ди|crm|срм|црм)/iu.test(
+      /(есть\s+(?:своя\s+)?(?:crm|срм|црм)|подключ(?:ить|им|у)\s+(?:crm|срм|црм)|yclients|y clients|ю?клиентс|уклиентс|ал(ь)?тегио|dikidi|ди(ки|ги)ди|crm|срм|црм)/iu.test(
         message,
       )
     ) {
-      return CalendarSource.EXTERNAL;
+      return { source: CalendarSource.EXTERNAL };
     }
 
-    return fallback;
+    return null;
+  }
+
+  private detectWorkMode(message: string): AiOnboardingWorkMode | null {
+    if (
+      /(работаю\s+на\s+себя|частн(?:ый|ая)\s+специалист|самозанят|работаю\s+(?:один|одна|соло)|я\s+(?:один|одна)|без\s+сотрудников|снимаю\s+(?:одно\s+)?кресло)/iu.test(
+        message,
+      )
+    ) {
+      return 'solo';
+    }
+
+    if (
+      /(у\s+меня\s+(?:свой\s+)?бизнес|у\s+нас\s+(?:бизнес|команда|несколько\s+(?:человек|мастеров|специалистов|сотрудников))|владею\s+(?:бизнесом|салоном|студией|клиникой|сервисом)|есть\s+(?:команда|сотрудники|мастера)|работаем\s+(?:вместе|вдво[её]м|втро[её]м|командой)|(?:работа|движ|дело)\s+командой|(?:^|\s)командой(?:\s|$|[,!.]))/iu.test(
+        message,
+      )
+    ) {
+      return 'business';
+    }
+
+    return null;
+  }
+
+  private inferWorkMode(
+    message: string,
+    previous?: AiOnboardingBlueprint,
+  ): AiOnboardingWorkMode | null {
+    const count = this.extractProviderCount(message);
+    if (count === 1) return 'solo';
+    if (count && count > 1) return 'business';
+
+    if (
+      /(?:^|\s)(?:барбершоп|салон\s+красоты|стоматолог(?:ия|ическая\s+клиника)|фитнес[-\s]?(?:клуб|студия)|автосервис|детейлинг[-\s]?студия|учебный\s+центр)(?:\s|$|[,.!?])/iu.test(
+        message,
+      )
+    ) {
+      return 'business';
+    }
+
+    if (
+      /(?:^|\s)я\s+(?:барбер|парикмахер|косметолог|массажист|тренер|стоматолог|юрист|адвокат|психолог|репетитор|фотограф|грумер)(?:\s|$|[,.!?])/iu.test(
+        message,
+      )
+    ) {
+      return 'solo';
+    }
+
+    return previous?.workMode ?? null;
   }
 
   private extractBusinessName(
     message: string,
     allowStandalone = false,
   ): string | null {
+    if (hasNoFormalBusinessNameSignal(message)) {
+      return this.extractPersonalBrandName(message);
+    }
+
     const patterns = [
       /(?:бизнес|компания|студия|салон|барбершоп|проект|бренд)\s+(?:называется|называем|будет называться)\s+[«"']?([^»"'.,;\n]{2,80})/iu,
       /название\s*(?:(?:моего|нашего)\s+)?(?:(?:бизнеса|компании|студии|салона|барбершопа|проекта|бренда)\s*)?(?::|[-–—]|это)?\s*[«"']?([^»"'.,;\n]{2,80})/iu,
@@ -234,14 +343,6 @@ export class SafeOnboardingInterpreter {
       }
     }
 
-    if (hasNoFormalBusinessNameSignal(message)) {
-      const personalName = this.extractPersonalBrandName(message);
-      if (personalName) {
-        return personalName;
-      }
-      return null;
-    }
-
     if (allowStandalone) {
       const candidate = message.split(/[,.!?;\n]+/u)[0]?.trim() ?? '';
       if (
@@ -249,7 +350,7 @@ export class SafeOnboardingInterpreter {
         candidate.length <= 80 &&
         candidate.split(/\s+/u).length <= 8 &&
         !/\d/u.test(candidate) &&
-        !/^(?:я|мы|у\s+меня|у\s+нас|работаю|работаем|занимаюсь|занимаемся|делаю|делаем|оказываю|оказываем)\b/iu.test(
+        !/^(?:я|мы|у\s+меня|у\s+нас|работаю|работаем|занимаюсь|занимаемся|делаю|делаем|оказываю|оказываем)(?:\s|$)/iu.test(
           candidate,
         ) &&
         !AMBIGUOUS_SHORT_REPLY.test(candidate)
@@ -505,6 +606,12 @@ export class SafeOnboardingInterpreter {
     );
   }
 
+  private shouldDeferServices(value: string): boolean {
+    return /(?:услуг(?:и|у)?\s+добавлю\s+позже|добавим\s+услуги\s+позже|пока\s+без\s+услуг|пропуст(?:и|им)\s+услуги|с\s+услугами\s+потом|не\s+знаю\s+услуг)/iu.test(
+      value,
+    );
+  }
+
   private looksLikeServiceList(value: string): boolean {
     return (
       value
@@ -557,9 +664,16 @@ export class SafeOnboardingInterpreter {
     blueprint: AiOnboardingBlueprint,
   ): AiOnboardingMissingField[] {
     const missing: AiOnboardingMissingField[] = [];
-    if (!blueprint.businessName) missing.push('business_name');
+    if (!blueprint.workMode) missing.push('work_mode');
+    if (!blueprint.categoryId) missing.push('category');
+    if (!blueprint.businessName && !blueprint.businessNameDeferred) {
+      missing.push('business_name');
+    }
     if (!blueprint.providerCount) missing.push('provider_count');
-    if (blueprint.services.length === 0) missing.push('services');
+    if (blueprint.services.length === 0 && !blueprint.servicesDeferred) {
+      missing.push('services');
+    }
+    if (!blueprint.calendarSourceConfirmed) missing.push('calendar_source');
     return missing;
   }
 
@@ -567,75 +681,104 @@ export class SafeOnboardingInterpreter {
     blueprint: AiOnboardingBlueprint,
     missing: AiOnboardingMissingField[],
     needsClarification = false,
-    needsPersonalDisplayName = false,
   ): string {
     if (missing.length === 0) {
-      return `Я собрала основу для «${blueprint.businessName}». Проверьте услуги, команду и расписание на итоговой карточке.`;
+      return 'Основа готова. Проверьте данные перед созданием бизнеса. Всё остальное можно добавить позже.';
     }
 
     const questions: Record<AiOnboardingMissingField, string> = {
+      work_mode: 'Вы работаете на себя или у вас бизнес?',
+      category:
+        blueprint.workMode === 'solo'
+          ? 'Чем вы занимаетесь?'
+          : 'Какой у вас бизнес?',
       business_name:
-        'Как вас или ваш бизнес знают клиенты? Можно написать имя или название.',
-      provider_count: 'Сколько человек будет принимать клиентов, включая вас?',
+        blueprint.workMode === 'solo'
+          ? 'Как вас знают клиенты? Можно написать имя или название. Если названия нет, пропустим этот шаг.'
+          : 'Как называется ваш бизнес? Если названия пока нет, его можно добавить позже.',
+      provider_count: 'Сколько специалистов принимают клиентов, включая вас?',
       services:
-        'Какие услуги вы оказываете? Можно написать как говорите, цены и время необязательны.',
+        'Напишите 1–3 основные услуги. Цены и длительность можно добавить позже.',
+      calendar_source:
+        'У вас есть CRM или будем вести записи во внутреннем календаре MAYA?',
     };
-    const saved: string[] = [];
-    if (blueprint.businessName)
-      saved.push(`название «${blueprint.businessName}»`);
-    if (blueprint.services.length > 0) {
-      saved.push(`услуг: ${blueprint.services.length}`);
-    }
-    if (blueprint.providerCount) {
-      saved.push(`специалистов: ${blueprint.providerCount}`);
-    }
+    const next = missing[0];
     const prefix = needsClarification
-      ? 'Не хочу додумывать за вас.'
-      : saved.length > 0
-        ? `Сохранила ${saved.join(', ')}.`
-        : 'Поняла основу.';
-    if (needsPersonalDisplayName) {
-      return 'Поняла, отдельного названия нет. Как вас называют клиенты? Можно просто написать имя.';
-    }
-    return `${prefix} ${questions[missing[0]]}`;
+      ? 'Не хочу додумывать за вас. '
+      : next === 'business_name' && blueprint.services.length > 0
+        ? `Добавила базовые услуги: ${blueprint.services.length}. `
+        : '';
+    return `${prefix}${questions[next]}`;
   }
 
   private buildQuickReplies(
     blueprint: AiOnboardingBlueprint,
     missing: AiOnboardingMissingField[],
-    needsPersonalDisplayName = false,
   ): AiOnboardingQuickReply[] {
-    if (needsPersonalDisplayName) return [];
-
     const next = missing[0];
+    if (!next) {
+      return [
+        {
+          label: 'Можем начинать',
+          message: 'Можем начинать',
+          action: 'confirm',
+        },
+        {
+          label: 'Отредактировать данные',
+          message: 'Хочу отредактировать данные',
+          action: 'edit',
+        },
+      ];
+    }
+    if (next === 'work_mode') {
+      return [
+        { label: 'Работаю на себя', message: 'Я работаю на себя' },
+        { label: 'У меня бизнес', message: 'У меня бизнес' },
+      ];
+    }
+    if (next === 'category' && blueprint.workMode) {
+      return listOnboardingCategories(blueprint.workMode).map((category) => ({
+        label: category.label,
+        message: category.selectionMessage,
+        templateId: category.templateId,
+      }));
+    }
+    if (next === 'business_name') {
+      return [
+        {
+          label: 'Напишу имя или название',
+          message: '',
+          action: 'focus',
+        },
+        {
+          label: 'Без названия',
+          message: 'У меня нет отдельного названия',
+        },
+      ];
+    }
     if (next === 'provider_count') {
       return [
         { label: 'Работаю один', message: 'Я работаю один' },
         { label: 'Нас двое', message: 'Нас двое специалистов' },
         { label: 'Нас трое', message: 'Нас трое специалистов' },
+        { label: 'Укажу число', message: '', action: 'focus' },
       ];
     }
     if (next === 'services') {
-      const replies: AiOnboardingQuickReply[] = [
-        { label: 'Перечислю сам', message: 'Сейчас перечислю услуги' },
+      return [
+        { label: 'Перечислю услуги', message: '', action: 'focus' },
+        { label: 'Добавлю позже', message: 'Услуги добавлю позже' },
       ];
-      if (getBusinessTemplate(blueprint.templateId).suggestedServices.length) {
-        replies.unshift({
-          label: 'Взять из шаблона',
-          message: 'Используй готовые услуги из шаблона',
-        });
-      }
-      return replies;
     }
-    if (next === 'business_name') {
+    if (next === 'calendar_source') {
       return [
         {
-          label: 'Нет отдельного названия',
-          message: 'У меня нет отдельного названия',
+          label: 'Есть CRM',
+          message: 'У меня есть CRM, подключим её',
         },
         {
-          label: 'Сначала услуги',
-          message: 'Сначала расскажу об услугах',
+          label: 'Календарь MAYA',
+          message: 'Будем вести записи во внутреннем календаре MAYA',
         },
       ];
     }
@@ -648,18 +791,27 @@ export class SafeOnboardingInterpreter {
   ): boolean {
     if (!previous) {
       return Boolean(
+        current.workMode ||
+        current.categoryId ||
         current.businessName ||
+        current.businessNameDeferred ||
         current.providerCount ||
-        current.services.length,
+        current.services.length ||
+        current.calendarSourceConfirmed,
       );
     }
 
     return (
+      previous.workMode !== current.workMode ||
+      previous.categoryId !== current.categoryId ||
       previous.businessName !== current.businessName ||
+      previous.businessNameDeferred !== current.businessNameDeferred ||
       previous.providerCount !== current.providerCount ||
       previous.templateId !== current.templateId ||
       previous.calendarSource !== current.calendarSource ||
+      previous.calendarSourceConfirmed !== current.calendarSourceConfirmed ||
       previous.services.length !== current.services.length ||
+      previous.servicesDeferred !== current.servicesDeferred ||
       previous.scheduleAssumed !== current.scheduleAssumed
     );
   }
