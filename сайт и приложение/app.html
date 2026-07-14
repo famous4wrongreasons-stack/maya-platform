@@ -4075,7 +4075,7 @@ const CLIENT_TABS = [{
   auth: true,
   guestLabel: "Записи",
   guestTap: () => window.__meGo && window.__meGo("login"),
-  onTap: () => window.__meGo && window.__meGo("cabinet")
+  onTap: () => window.__meSaasCabinet ? window.__meSaasCabinet() : (window.__meGo && window.__meGo("cabinet"))
 }, {
   ic: TabIcUser,
   label: "Профиль",
@@ -4888,7 +4888,10 @@ function ALogin() {
       // slug из контекста (в ответе verify его нет) → тот же ns, что onboarding/Яндекс/Telegram
       var saved = lgSaveBundle(Object.assign({}, d, { tenant: { slug: tenant, id: d.user && (d.user.tenant_id || d.user.tenantId) } }), api);
       setLgEmailDebug('');
-      lgOpenApp(api, saved.tenantSlug); // owner-опыт того же бизнеса
+      // роль строго из ответа сервера (email не выдумывает роль); владельца ведём в кабинет, клиента — на клиентский путь
+      var role = d.user && d.user.role;
+      var owner = ['tenant_admin', 'tenant_owner', 'business_owner', 'administrator'].indexOf(role) >= 0;
+      if (owner) lgOpenAppCal(api, saved.tenantSlug); else lgOpenApp(api, saved.tenantSlug);
     } catch (e) {
       var msg = lgEmailErrText(e.code, e.emsg);
       if (e.rem != null) msg += ' Осталось попыток: ' + e.rem + '.';
@@ -7694,6 +7697,12 @@ function ABookFlow() {
   const [myCalOffDraft, setMyCalOffDraft] = React.useState({ start: '', end: '', note: '' });
   const [myCalSvcEdit, setMyCalSvcEdit] = React.useState(null); // {id,name,price,duration}
   const myCalReqRef = React.useRef(false);
+  // ── операционный журнал внутреннего календаря (GET /internal-calendar/journal) ──
+  const [myJournal, setMyJournal] = React.useState(null); // null = не загружали; {days,...} = ответ; {_err} = ошибка
+  const [myJournalBusy, setMyJournalBusy] = React.useState(false);
+  const [myJournalErr, setMyJournalErr] = React.useState('');
+  const [myJournalFrom, setMyJournalFrom] = React.useState(null); // Date — начало 7-дневного окна (локальная полночь)
+  const myJournalReqRef = React.useRef(false);
   const [myAppts, setMyAppts] = React.useState(null);
   const [myErr, setMyErr] = React.useState('');
   const [myLoading, setMyLoading] = React.useState(false);
@@ -7711,6 +7720,26 @@ function ABookFlow() {
       var nextQs = new URLSearchParams(location.search || '');
       nextQs.delete('calendar_setup');
       history.replaceState(null, '', location.pathname + (nextQs.toString() ? '?' + nextQs.toString() : ''));
+    } catch (e) {}
+  }, []);
+  // Мост «открыть кабинет MAYA OS» для шелла: пока ABookFlow смонтирован, шелл
+  // может открыть myView без перезагрузки; если ещё не смонтирован — флаг __meSaasWantCabinet
+  // прочитается здесь на монтировании. Источник истины сессии остаётся за /me.
+  React.useEffect(() => {
+    if (!localSaasMode) return;
+    window.__meOpenSaasCabinet = function () { setMyView(true); loadMyAppts(); };
+    if (window.__meSaasWantCabinet) { window.__meSaasWantCabinet = false; window.__meOpenSaasCabinet(); }
+    return function () { if (window.__meOpenSaasCabinet) window.__meOpenSaasCabinet = null; };
+  }, []);
+  // Fail-closed на старте: под ключом текущего tenant лежит «сырой» bundle, но
+  // saasReadSession его НЕ принимает (чужой tenant / битый контекст / подделка) —
+  // это несостоявшийся restore. Чистим именно эту пару и возвращаем оболочку к гостю,
+  // чтобы мёртвый бандл не показывал залогиненный шелл и не «завешивал» кабинет.
+  React.useEffect(() => {
+    if (!localSaasMode) return;
+    try {
+      var raw = null; try { raw = localStorage.getItem(SAAS_AUTH_KEY); } catch (e0) {}
+      if (raw && !saasReadSession()) saasForceLogout('restore_rejected');
     } catch (e) {}
   }, []);
   // Настроение визита (🔴 'red' тишина / 🔵 'blue' общение) — пилюли «как в Матрице».
@@ -7859,8 +7888,18 @@ function ABookFlow() {
         // пара уже свежее (обновила другая вкладка/запрос) — повтор с текущим access, без refresh
         resp = await fetch(localSaasApiBase + path, Object.assign({}, init, { __retried: true, headers: Object.assign({}, init.headers, { Authorization: 'Bearer ' + sB.token }) }));
       } else if (sB && sB.refresh_token) {
-        // повтор ТОЛЬКО после успешной rotation; ошибка refresh уходит наружу как есть
-        var sN = await saasDoRefresh();
+        // повтор ТОЛЬКО после успешной rotation. Терминальный refresh уже разлогинивает
+        // внутри saasDoRefresh; но невосстановимый (не транзиентный) сбой — например
+        // подделанная/битая пара, которую бэкенд отвергает как невалидную/400 — тоже
+        // fail-closed: чистим пару и уходим на вход, а не «зависаем» с мёртвым бандлом.
+        var sN;
+        try { sN = await saasDoRefresh(); }
+        catch (eR) {
+          var rc = eR && eR.code;
+          var retryable = rc === 'refresh_network' || rc === 'refresh_timeout' || rc === 'refresh_lock_busy' || rc === 'refresh_lock_stale' || rc === 'refresh_incomplete';
+          if (!retryable) saasForceLogout(rc || 'refresh_failed'); // подделка/протухшая пара → вход
+          throw eR;
+        }
         if (sN && sN.token) {
           resp = await fetch(localSaasApiBase + path, Object.assign({}, init, { __retried: true, headers: Object.assign({}, init.headers, { Authorization: 'Bearer ' + sN.token }) }));
         }
@@ -8447,6 +8486,30 @@ function ABookFlow() {
       setMyCalErr(readErrorText(e, 'Не удалось загрузить календарь'));
     });
   }
+  // ── операционный журнал: 7-дневное окно, источник истины backend ──
+  function journalWindowStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; } // локальная полночь сегодня
+  function loadMyJournal(fromDate) {
+    var from = fromDate || myJournalFrom || journalWindowStart();
+    setMyJournalFrom(from);
+    if (myJournalReqRef.current) return;
+    myJournalReqRef.current = true;
+    setMyJournalBusy(true); setMyJournalErr('');
+    var to = new Date(from.getTime() + 7 * 86400000); // 7 дней < лимита 31; inclusive from / exclusive to
+    var qs = 'from=' + encodeURIComponent(from.toISOString()) + '&to=' + encodeURIComponent(to.toISOString());
+    ensureLocalSession().then(function (s) {
+      return localBookingFetch('/internal-calendar/journal?' + qs, { headers: { Authorization: 'Bearer ' + s.token } });
+    }).then(function (d) {
+      myJournalReqRef.current = false;
+      setMyJournalBusy(false);
+      setMyJournal(d || { appointments: [] });
+    }).catch(function (e) {
+      myJournalReqRef.current = false;
+      setMyJournalBusy(false);
+      setMyJournal({ _err: true, _code: (e && e.message) ? String(e.message) : '' });
+      setMyJournalErr(readErrorText(e, 'Не удалось загрузить журнал'));
+    });
+  }
+  function shiftJournal(days) { loadMyJournal(new Date((myJournalFrom || journalWindowStart()).getTime() + days * 86400000)); }
   // общий guard мутаций: серверные ошибки показываем как есть, свою «валидацию
   // готовности» не изобретаем — источник истины backend
   function calMut(fn, after) {
@@ -9590,18 +9653,19 @@ function ABookFlow() {
         t: t
       }, 'Кабинет · локальный тест'), React.createElement('h2', {
         style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 24, textTransform: 'uppercase', color: t.ink, margin: '12px 0 14px' }
-      }, 'Мои', React.createElement('br'), 'записи'), React.createElement('div', {
+      }, ({ appts: 'Мои записи', calendar: 'Календарь', services: 'Услуги', schedule: 'Расписание', profile: 'Профиль и безопасность' })[myTab] || 'Мои записи'), React.createElement('div', {
         // IA: разделы кабинета — записи отдельно от услуг/графика/устройств
         style: { display: 'flex', gap: 6, overflowX: 'auto', margin: '2px 0 16px', paddingBottom: 2, WebkitOverflowScrolling: 'touch' }
       }, (function () {
-        var tabs = [['appts', 'Записи'], ['calendar', 'Календарь']];
+        var tabs = [['appts', 'Записи']];
+        if (saasIsCalManager()) tabs.push(['calendar', 'Календарь']); // операционный журнал — только владелец/админ
         if (saasCalInternal() && saasIsCalManager()) { tabs.push(['services', 'Услуги']); tabs.push(['schedule', 'Расписание']); }
         tabs.push(['profile', 'Профиль']);
         return tabs.map(function (tb) {
           var on = myTab === tb[0];
           return React.createElement('div', {
             key: tb[0],
-            onClick: function () { setMyTab(tb[0]); if (tb[0] === 'profile' && mySessions === null) loadMySessions(); if ((tb[0] === 'services' || tb[0] === 'schedule') && myCal === null) loadMyCal(); },
+            onClick: function () { setMyTab(tb[0]); if (tb[0] === 'profile' && mySessions === null) loadMySessions(); if ((tb[0] === 'services' || tb[0] === 'schedule') && myCal === null) loadMyCal(); if (tb[0] === 'calendar' && !(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source && window.__SAAS_TENANT.calendar_source !== 'internal')) loadMyJournal(myJournalFrom); },
             style: { flex: 'none', padding: '8px 14px', borderRadius: 999, border: '1px solid ' + (on ? t.ink : t.line), background: on ? t.ink : 'transparent', color: on ? (t.dark ? '#0b0b0c' : '#f4f0eb') : t.dim, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }
           }, tb[1]);
         });
@@ -9610,7 +9674,82 @@ function ABookFlow() {
       }, myErr, React.createElement('div', {
         onClick: myLoading ? null : loadMyAppts,
         style: { marginTop: 9, display: 'inline-block', padding: '7px 18px', borderRadius: 999, border: '1px solid rgba(174,171,168,0.5)', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
-      }, 'Повторить')) : null, (myTab === 'appts' || myTab === 'calendar') ? React.createElement(React.Fragment, null, (myTab === 'calendar' && window.__meGo) ? React.createElement('div', { onClick: function () { window.__meGo('schedule'); }, style: { textAlign: 'center', padding: '9px 0', marginBottom: 10, borderRadius: 11, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: t.accent, cursor: 'pointer' } }, 'Открыть журнал расписания') : null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past))) : null, (function () {
+      }, 'Повторить')) : null, (myTab === 'appts') ? React.createElement(React.Fragment, null, myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past))) : null, (function () {
+        // === Календарь: реальный операционный журнал внутреннего календаря (GET /internal-calendar/journal) ===
+        if (myTab !== 'calendar') return null;
+        var tnt = window.__SAAS_TENANT;
+        var isExternal = !!(tnt && tnt.calendar_source && tnt.calendar_source !== 'internal');
+        var j = myJournal;
+        var extState = React.createElement('div', {
+          style: { margin: '6px 0', padding: '16px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.55, textAlign: 'center' }
+        }, 'Календарь ведётся в вашей внешней CRM. Операционный журнал появится здесь, когда backend добавит адаптер этой CRM — записи и статусы сейчас живут в CRM.');
+        if (isExternal || (j && j._err && j._code === 'internal_calendar_disabled')) return extState;
+        var tz = (j && j.timezone) || (tnt && tnt.timezone) || undefined;
+        var win = myJournalFrom || journalWindowStart();
+        var winEnd = new Date(win.getTime() + 6 * 86400000);
+        var fmtDM = function (d) { try { return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' }).format(d); } catch (e) { return ''; } };
+        var navBtn = function (label, onTap, dis) {
+          return React.createElement('div', {
+            onClick: dis ? null : onTap,
+            style: { flex: 'none', minWidth: 34, textAlign: 'center', padding: '7px 12px', borderRadius: 999, border: '1px solid ' + t.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.06em', textTransform: 'uppercase', color: dis ? t.faint : t.ink, cursor: dis ? 'default' : 'pointer', opacity: dis ? 0.5 : 1, whiteSpace: 'nowrap' }
+          }, label);
+        };
+        var nav = React.createElement('div', {
+          style: { display: 'flex', alignItems: 'center', gap: 7, margin: '2px 0 14px' }
+        }, navBtn('‹', function () { shiftJournal(-7); }, myJournalBusy), React.createElement('div', {
+          style: { flex: 1, textAlign: 'center', fontFamily: DISPLAY, fontWeight: 500, fontSize: 12.5, color: t.ink }
+        }, fmtDM(win) + ' – ' + fmtDM(winEnd)), navBtn('›', function () { shiftJournal(7); }, myJournalBusy), navBtn('Сегодня', function () { loadMyJournal(journalWindowStart()); }, myJournalBusy));
+        if (j && j._err) return React.createElement(React.Fragment, null, nav, React.createElement('div', {
+          style: { margin: '6px 0', padding: '12px 14px', borderRadius: 12, background: 'rgba(108,106,104,0.14)', border: '1px solid rgba(108,106,104,0.3)', fontFamily: BODY, fontSize: 12.5, color: '#aeaba8', textAlign: 'center' }
+        }, myJournalErr || 'Не удалось загрузить журнал', React.createElement('div', {
+          onClick: myJournalBusy ? null : function () { loadMyJournal(myJournalFrom); },
+          style: { marginTop: 9, display: 'inline-block', padding: '7px 18px', borderRadius: 999, border: '1px solid rgba(174,171,168,0.5)', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
+        }, 'Повторить')));
+        if (j === null || (myJournalBusy && !(j && Array.isArray(j.appointments)))) return React.createElement(React.Fragment, null, nav, Loader(t, 'Загружаем журнал…'));
+        var appts = (j && Array.isArray(j.appointments)) ? j.appointments : [];
+        if (!appts.length) return React.createElement(React.Fragment, null, nav, Loader(t, 'На эти дни записей нет'));
+        var dayKey = function (iso) { try { return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); } catch (e) { return String(iso).slice(0, 10); } };
+        var dayLabel = function (iso) { try { return new Intl.DateTimeFormat('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(new Date(iso)); } catch (e) { return ''; } };
+        var hhmm = function (iso) { try { return new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: tz }).format(new Date(iso)); } catch (e) { return ''; } };
+        var statusRu = { confirmed: 'Подтверждена', pending: 'Ожидает', booked: 'Записан', completed: 'Завершена', cancelled: 'Отменена', canceled: 'Отменена', no_show: 'Не пришёл' };
+        var byDay = {}, order = [];
+        appts.slice().sort(function (a, b) { return String(a.start_at).localeCompare(String(b.start_at)); }).forEach(function (a) {
+          var k = dayKey(a.start_at); if (!byDay[k]) { byDay[k] = []; order.push(k); } byDay[k].push(a);
+        });
+        var row = function (a) {
+          var cancelled = a.status === 'cancelled' || a.status === 'canceled';
+          var svc = Array.isArray(a.services) && a.services.length ? a.services.map(function (s) { return s && s.name; }).filter(Boolean).join(', ') : '';
+          var prov = a.provider && (a.provider.name || a.provider.title) ? ((a.provider.name || '') + (a.provider.title ? ' · ' + a.provider.title : '')) : '';
+          var price = a.total_price != null ? Number(a.total_price).toLocaleString('ru-RU') + ' ' + (a.currency === 'RUB' || !a.currency ? '₽' : a.currency) : '';
+          var st = statusRu[a.status] || a.status || '';
+          return React.createElement(ATile, { t: t, radius: 14, noSheen: true, key: a.id }, React.createElement('div', {
+            style: { padding: '11px 14px', opacity: cancelled ? 0.55 : 1 }
+          }, React.createElement('div', {
+            style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }
+          }, React.createElement('span', {
+            style: { fontFamily: DISPLAY, fontWeight: 600, fontSize: 14, color: t.ink }
+          }, hhmm(a.start_at) + (a.end_at ? '–' + hhmm(a.end_at) : '')), st ? React.createElement('span', {
+            style: { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.faint }
+          }, st) : null), React.createElement('div', {
+            style: { fontFamily: BODY, fontWeight: 600, fontSize: 13.5, color: t.ink, marginTop: 6 }
+          }, (a.client && a.client.name) || 'Клиент'), svc ? React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 12, color: t.dim, marginTop: 3 }
+          }, svc) : null, React.createElement('div', {
+            style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 7, gap: 10 }
+          }, React.createElement('span', {
+            style: { fontFamily: BODY, fontSize: 11.5, color: t.faint }
+          }, prov), price ? React.createElement('span', {
+            style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.dim }
+          }, price) : null)));
+        };
+        return React.createElement(React.Fragment, null, nav, order.map(function (k) {
+          return React.createElement(React.Fragment, { key: k }, React.createElement('div', {
+            style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '16px 2px 9px' }
+          }, dayLabel(byDay[k][0].start_at)), React.createElement('div', {
+            style: { display: 'flex', flexDirection: 'column', gap: 8 }
+          }, byDay[k].map(row)));
+        }));
+      })(), (function () {
         // «Календарь MAYA» — специалист настраивает услуги и график без внешней CRM
         if (!(saasCalInternal() && saasIsCalManager())) return null;
         if (myTab !== 'services' && myTab !== 'schedule') return null; // IA: услуги/график только в своих разделах
@@ -27750,6 +27889,27 @@ function MEApp() {
       window.removeEventListener('me:bottom-nav-visibility', onBottomNavVisibility);
     };
   }, []);
+  // MAYA OS: выход/протухший refresh/logout из другой вкладки → шелл мгновенно
+  // в гостевое состояние (nav снова «Войти»), а с защищённых экранов — на вход.
+  React.useEffect(function () {
+    function toGuest() {
+      force(); // перерисовать шелл → nav пересчитает loggedIn (bundle уже удалён)
+      try { if (['book', 'cabinet', 'chat', 'settings'].indexOf(screen) >= 0 && window.__meGo) window.__meGo('login'); } catch (e) {}
+    }
+    function onSaasLogout() { toGuest(); }
+    function onStorage(ev) {
+      try {
+        var ns = window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.ns;
+        if (ns && ev && ev.key === 'me_saas_auth_v2:' + ns && !ev.newValue) toGuest();
+      } catch (e) {}
+    }
+    window.addEventListener('me-saas-logout', onSaasLogout);
+    window.addEventListener('storage', onStorage);
+    return function () {
+      window.removeEventListener('me-saas-logout', onSaasLogout);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [screen]);
   // ── Свайп-назад из любой страницы (жест от левого края) ──────────────────
   // Мини-история экранов: следим за сменой screen, поэтому ловим ЛЮБОЙ переход
   // (через __meGo / setScreen / табы). Таб-экраны (главные) в историю не пишем —
@@ -27867,6 +28027,14 @@ function MEApp() {
       }
     }
     window.__meGo = go;
+    // MAYA OS: «Личный кабинет»/профиль ведёт во внутренний кабинет ABookFlow (myView),
+    // а не в легаси-кабинет салона. В обычном (не saas) приложении поведение прежнее.
+    window.__meSaasCabinet = function () {
+      if (!window.__ME_SAAS_CTX) { if (window.__meGo) window.__meGo('cabinet'); return; }
+      window.__meSaasWantCabinet = true;         // ABookFlow при монтировании прочитает флаг
+      if (window.__meGo) window.__meGo('book');   // на экран бронирования (там живёт кабинет)
+      if (window.__meOpenSaasCabinet) { window.__meSaasWantCabinet = false; window.__meOpenSaasCabinet(); }
+    };
     window.__meAskLogout = function () {
       setLogoutOpen(true);
     };
@@ -28350,7 +28518,9 @@ function MEApp() {
     }
   }, _pmSub))), _pmRow(_pmAuthed ? 'Личный кабинет' : 'Войти', function () {
     setProfileMenuOpen(false);
-    window.__meGo && window.__meGo(_pmAuthed ? 'cabinet' : 'login');
+    if (!_pmAuthed) { window.__meGo && window.__meGo('login'); return; }
+    if (window.__meSaasCabinet && window.__ME_SAAS_CTX) { window.__meSaasCabinet(); return; }
+    window.__meGo && window.__meGo('cabinet');
   }), _pmAuthed ? _pmRow('Настройки', function () {
     setProfileMenuOpen(false);
     window.__meGo && window.__meGo('settings');
@@ -29654,6 +29824,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   // ── 3. Сессия есть? — пускаем дальше, минуя экран логина ──
   function hasSession(){
     if(getTok()) return true;
+    // MAYA OS: bundle текущего tenant — ТОЛЬКО для отображения/навигации оболочки (не бэкенд-право).
+    // Читаем строго ns текущего бизнеса, чужие namespace не сканируем. Сервер всё равно проверяет /me.
+    try{ var _ns=window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.ns; if(_ns){ var _sb=localStorage.getItem('me_saas_auth_v2:'+_ns); if(_sb){ var _b=JSON.parse(_sb); if(_b && _b.token){ var _cs=String((window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.slug)||'').trim().toLowerCase(); var _bs=String(_b.tenant_slug||'').trim().toLowerCase(); if(!_bs || !_cs || _bs===_cs) return true; } } } }catch(e0){}
     try{ var raw=localStorage.getItem('tg_auth_data'); if(raw){ var pj=JSON.parse(raw); if(pj&&pj.id&&pj.hash&&pj.auth_date&&(Date.now()/1000 - pj.auth_date)<30*24*3600){ window.__tgAuthData=pj; try{window.__meAvatar=pj.photo_url||window.__meAvatar;}catch(e2){} return true; } } }catch(e){}
     return false;
   }
