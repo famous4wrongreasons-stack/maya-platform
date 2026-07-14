@@ -23,10 +23,12 @@ describe('AuthRetentionRepository', () => {
     const authSessionCountMock = jest.fn().mockResolvedValue(2);
     const refreshTokenCountMock = jest.fn().mockResolvedValue(3);
     const phoneCountMock = jest.fn().mockResolvedValue(2);
+    const emailCountMock = jest.fn().mockResolvedValue(2);
     const flowCountMock = jest.fn().mockResolvedValue(1);
     const bucketCountMock = jest.fn().mockResolvedValue(1);
     const authSessionDeleteMock = jest.fn().mockResolvedValue({ count: 1 });
     const phoneDeleteMock = jest.fn().mockResolvedValue({ count: 1 });
+    const emailDeleteMock = jest.fn().mockResolvedValue({ count: 1 });
     const flowDeleteMock = jest.fn().mockResolvedValue({ count: 1 });
     const bucketDeleteMock = jest.fn().mockResolvedValue({ count: 1 });
     const transaction = {
@@ -41,6 +43,10 @@ describe('AuthRetentionRepository', () => {
       phoneAuthCode: {
         count: phoneCountMock,
         deleteMany: phoneDeleteMock,
+      },
+      emailAuthCode: {
+        count: emailCountMock,
+        deleteMany: emailDeleteMock,
       },
       authFlowState: {
         count: flowCountMock,
@@ -66,6 +72,8 @@ describe('AuthRetentionRepository', () => {
         authSessionDeleteMock,
         bucketCountMock,
         bucketDeleteMock,
+        emailCountMock,
+        emailDeleteMock,
         flowCountMock,
         flowDeleteMock,
         phoneCountMock,
@@ -89,6 +97,7 @@ describe('AuthRetentionRepository', () => {
         sessions: 2,
         refreshTokens: 3,
         phoneChallenges: 2,
+        emailChallenges: 2,
         oauthStates: 1,
         rateLimitBuckets: 1,
       },
@@ -96,6 +105,7 @@ describe('AuthRetentionRepository', () => {
         sessions: 0,
         refreshTokens: 0,
         phoneChallenges: 0,
+        emailChallenges: 0,
         oauthStates: 0,
         rateLimitBuckets: 0,
       },
@@ -121,6 +131,7 @@ describe('AuthRetentionRepository', () => {
     });
     expect(mocks.authSessionDeleteMock).not.toHaveBeenCalled();
     expect(mocks.phoneDeleteMock).not.toHaveBeenCalled();
+    expect(mocks.emailDeleteMock).not.toHaveBeenCalled();
     expect(mocks.flowDeleteMock).not.toHaveBeenCalled();
     expect(mocks.bucketDeleteMock).not.toHaveBeenCalled();
   });
@@ -144,6 +155,7 @@ describe('AuthRetentionRepository', () => {
     mocks.queryRawMock
       .mockResolvedValueOnce([{ id: 'old-session' }])
       .mockResolvedValueOnce([{ id: 'old-phone' }])
+      .mockResolvedValueOnce([{ id: 'old-email' }])
       .mockResolvedValueOnce([{ id: 'old-flow' }])
       .mockResolvedValueOnce([{ id: 'old-bucket' }]);
     mocks.refreshTokenCountMock
@@ -161,6 +173,7 @@ describe('AuthRetentionRepository', () => {
         sessions: 1,
         refreshTokens: 2,
         phoneChallenges: 1,
+        emailChallenges: 1,
         oauthStates: 1,
         rateLimitBuckets: 1,
       },
@@ -169,9 +182,12 @@ describe('AuthRetentionRepository', () => {
     expect(mocks.authSessionDeleteMock).toHaveBeenCalledWith({
       where: { id: { in: ['old-session'] } },
     });
+    expect(mocks.emailDeleteMock).toHaveBeenCalledWith({
+      where: { id: { in: ['old-email'] } },
+    });
     expect(mocks.refreshTokenCountMock).toHaveBeenLastCalledWith({
       where: { sessionId: { in: ['old-session'] } },
     });
-    expect(mocks.queryRawMock).toHaveBeenCalledTimes(5);
+    expect(mocks.queryRawMock).toHaveBeenCalledTimes(6);
   });
 });

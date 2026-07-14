@@ -25,17 +25,37 @@ describe('AiOnboardingService', () => {
     }) => Promise<Record<string, unknown>>
   >;
   const completeBlueprint: AiOnboardingBlueprint = {
-    templateId: 'solo_specialist',
+    templateId: 'wellness',
+    workMode: 'solo',
+    categoryId: 'solo_massage_therapist',
     businessName: 'Мягкая сила',
     summary: 'Один специалист со своим расписанием и услугами',
-    industryPresetId: 'solo_specialist',
+    industryPresetId: 'general_service',
     calendarSource: CalendarSource.INTERNAL,
+    calendarSourceConfirmed: true,
     providerCount: 1,
-    providerTitle: 'Специалист',
+    providerTitle: 'Массажист',
     services: [{ name: 'Массаж', price: 3000, durationMinutes: 60 }],
     weeklyRules: [{ weekday: 1, startTime: '09:00', endTime: '18:00' }],
     scheduleAssumed: true,
   };
+
+  it('exposes separate solo and business category catalogs', () => {
+    const { service } = createService();
+
+    const catalog = service.listTemplates();
+
+    expect(catalog.onboarding_flow.first_question).toBe('work_mode');
+    expect(catalog.categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'solo_barber', work_mode: 'solo' }),
+        expect.objectContaining({
+          id: 'business_barbershop',
+          work_mode: 'business',
+        }),
+      ]),
+    );
+  });
 
   function createService(
     overrides: {
@@ -174,5 +194,49 @@ describe('AiOnboardingService', () => {
       }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+  });
+
+  it('uses the owner name internally when a solo specialist skipped a brand name', async () => {
+    const token = 'a'.repeat(43);
+    const deferredBlueprint: AiOnboardingBlueprint = {
+      ...completeBlueprint,
+      businessName: null,
+      businessNameDeferred: true,
+    };
+    const claimDraft = jest.fn().mockResolvedValue({ count: 0 });
+    const { service } = createService({
+      findDraft: jest.fn().mockResolvedValue({
+        id: 'draft-1',
+        status: 'draft',
+        draftTokenHash: createHash('sha256').update(token).digest('hex'),
+        blueprintJson: deferredBlueprint,
+        missingFieldsJson: [],
+        expiresAt: new Date(Date.now() + 60_000),
+        confirmedTenantId: null,
+      }),
+      claimDraft,
+    });
+
+    await expect(
+      service.confirmDraft('draft-1', {
+        draftToken: token,
+        ownerEmail: 'owner@example.ru',
+        ownerName: 'Артем',
+        ownerPhone: '+79990000000',
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
+
+    expect(claimDraft).toHaveBeenCalled();
+    const typedClaimDraft = claimDraft as jest.MockedFunction<
+      (args: {
+        data?: { blueprintJson?: AiOnboardingBlueprint };
+      }) => Promise<{ count: number }>
+    >;
+    const claim = typedClaimDraft.mock.calls[0]?.[0];
+    expect(claim.data?.blueprintJson).toMatchObject({
+      businessName: 'Артем',
+      businessNameDeferred: true,
+      businessNameGenerated: true,
+    });
   });
 });

@@ -16,7 +16,22 @@ Legacy `start`, `pro`, `max` names remain aliases during migration; their JSON f
 
 ## Registry
 
-Every feature entry has stable key, description, module owner, lifecycle state and optional dependencies. Examples:
+Every feature entry has stable key, description, module owner, lifecycle state,
+implementation maturity, runtime availability and optional dependencies.
+
+Commercial entitlement and implementation readiness are different facts:
+
+- entitlement answers whether a tenant purchased or received access to a key;
+- `implementationStatus=platform_ready` means the universal platform code is
+  implemented;
+- `current_runtime_only` means the capability still lives only in the current
+  single-business MAYA runtime;
+- `partial` means only a documented subset is implemented;
+- `planned` means the key is reserved and must not be advertised as available.
+
+The public registry also returns `availableIn` and optional `limitations`.
+Frontend navigation, plan pages and AI tool policy must not infer delivery from
+the mere presence of a key. Examples:
 
 - calendar.internal
 - calendar.external
@@ -55,6 +70,10 @@ Resolution order is explicit tenant deny, explicit tenant allow, plan entitlemen
 - Integration activation and sync.
 
 Frontend flags optimize UX but do not grant access.
+
+Frontend visibility also requires a compatible implementation status. A tenant
+may retain a planned or current-runtime-only entitlement during migration, but
+the universal client must not render it as a working platform module.
 
 ## Adding a plan
 

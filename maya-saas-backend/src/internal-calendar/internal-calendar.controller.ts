@@ -7,9 +7,22 @@ import {
   Patch,
   Post,
   Put,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
+import {
+  BrandingService,
+  type UploadedLogoFile,
+} from '../branding/branding.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -18,6 +31,7 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
+import { ListCalendarJournalDto } from './dto/list-calendar-journal.dto';
 import { ReplaceWeeklyAvailabilityDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
 import { UpdateInternalServiceDto } from './dto/update-internal-service.dto';
@@ -30,6 +44,11 @@ const INTERNAL_CALENDAR_MANAGER_ROLES = [
   UserRole.ADMINISTRATOR,
 ] as const;
 
+type ProviderAvatarUploadFields = {
+  avatar?: UploadedLogoFile[];
+  file?: UploadedLogoFile[];
+};
+
 @ApiTags('internal-calendar')
 @ApiBearerAuth()
 @TenantScoped()
@@ -38,12 +57,24 @@ const INTERNAL_CALENDAR_MANAGER_ROLES = [
 export class InternalCalendarController {
   constructor(
     private readonly internalCalendarService: InternalCalendarService,
+    private readonly brandingService: BrandingService,
   ) {}
 
   @Get('setup')
   @ApiOperation({ summary: 'Read the Maya-managed calendar setup' })
   getSetup(@CurrentUser() user: AuthenticatedUser) {
     return this.internalCalendarService.getSetup(user.tenantId!);
+  }
+
+  @Get('journal')
+  @ApiOperation({
+    summary: 'Read the tenant-scoped operational appointment journal',
+  })
+  getJournal(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListCalendarJournalDto,
+  ) {
+    return this.internalCalendarService.getJournal(user.tenantId!, query);
   }
 
   @Post('services')
@@ -92,6 +123,31 @@ export class InternalCalendarController {
       user.tenantId!,
       providerId,
       dto,
+    );
+  }
+
+  @Post('providers/:providerId/avatar')
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'file', maxCount: 1 },
+        { name: 'avatar', maxCount: 1 },
+      ],
+      { limits: { fileSize: 2 * 1024 * 1024 } },
+    ),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload a Maya-managed provider profile image' })
+  uploadProviderAvatar(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('providerId') providerId: string,
+    @UploadedFiles() files: ProviderAvatarUploadFields,
+  ) {
+    const file = files?.avatar?.[0] ?? files?.file?.[0];
+    return this.brandingService.uploadProviderAvatar(
+      user.tenantId!,
+      providerId,
+      file,
     );
   }
 

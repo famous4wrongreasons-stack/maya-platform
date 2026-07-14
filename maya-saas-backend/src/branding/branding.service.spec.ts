@@ -168,6 +168,46 @@ describe('BrandingService logo upload', () => {
     expect(result.buffer).toEqual(fileBuffer);
   });
 
+  it('stores a tenant-scoped provider photo and returns its public URL', async () => {
+    const updateProviderMock = jest.fn().mockResolvedValue({ count: 1 });
+    const prisma = {
+      internalProvider: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'provider-1',
+          avatarUrl: null,
+        }),
+        updateMany: updateProviderMock,
+      },
+    } as unknown as PrismaService;
+    const { service, tenantContext } = createService(prisma);
+    const fileBuffer = Buffer.from([0xff, 0xd8, 0xff]);
+
+    const uploaded = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.uploadProviderAvatar('tenant-1', 'provider-1', {
+        buffer: fileBuffer,
+        mimetype: 'image/jpeg',
+        originalname: 'master.jpg',
+        size: fileBuffer.length,
+      }),
+    );
+
+    expect(uploaded.avatar_url).toMatch(
+      /^\/api\/public\/uploads\/provider-avatars\/tenant-1-provider-1-[a-f0-9-]+\.jpg$/,
+    );
+    expect(updateProviderMock).toHaveBeenCalledWith({
+      where: { id: 'provider-1', tenantId: 'tenant-1' },
+      data: { avatarUrl: uploaded.avatar_url },
+    });
+
+    const avatar = await service.readProviderAvatar(
+      uploaded.avatar_url.split('/').at(-1) ?? '',
+    );
+    expect(avatar).toEqual({
+      buffer: fileBuffer,
+      contentType: 'image/jpeg',
+    });
+  });
+
   it('rejects a foreign tenant before reading or writing branding', async () => {
     const findUniqueMock = jest.fn();
     const upsertMock = jest.fn();

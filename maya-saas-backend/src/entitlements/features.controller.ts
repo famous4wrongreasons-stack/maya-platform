@@ -18,9 +18,14 @@ export class FeaturesController {
 
   @Public()
   @Get('registry')
-  @ApiOperation({ summary: 'List the platform feature registry' })
+  @ApiOperation({
+    summary: 'List feature entitlements and implementation readiness',
+  })
   listRegistry() {
-    return { features: this.registry.list() };
+    return {
+      schema_version: 2,
+      features: this.registry.list(),
+    };
   }
 
   @Get('effective')

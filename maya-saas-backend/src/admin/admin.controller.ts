@@ -5,7 +5,7 @@ import {
   Param,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -14,7 +14,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import type { UploadedLogoFile } from '../branding/branding.service';
@@ -30,6 +30,11 @@ import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 import { AdminService } from './admin.service';
+
+type LogoUploadFields = {
+  file?: UploadedLogoFile[];
+  logo?: UploadedLogoFile[];
+};
 
 @ApiTags('admin')
 @ApiBearerAuth()
@@ -91,19 +96,26 @@ export class AdminController {
   @Roles(UserRole.PLATFORM_OWNER, UserRole.TENANT_ADMIN)
   @TenantScoped({ paramKey: 'id', requireTenant: false })
   @UseInterceptors(
-    FileInterceptor('file', {
-      limits: {
-        fileSize: 2 * 1024 * 1024,
+    FileFieldsInterceptor(
+      [
+        { name: 'file', maxCount: 1 },
+        { name: 'logo', maxCount: 1 },
+      ],
+      {
+        limits: {
+          fileSize: 2 * 1024 * 1024,
+        },
       },
-    }),
+    ),
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload a tenant logo file' })
   uploadLogo(
     @Param('id') id: string,
-    @UploadedFile() file: UploadedLogoFile,
+    @UploadedFiles() files: LogoUploadFields,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
+    const file = files?.file?.[0] ?? files?.logo?.[0];
     return this.adminService.uploadTenantLogo(id, file, actor);
   }
 

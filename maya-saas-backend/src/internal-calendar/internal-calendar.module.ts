@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 
+import { BrandingModule } from '../branding/branding.module';
 import { UsersModule } from '../users/users.module';
 import { InternalCalendarController } from './internal-calendar.controller';
 import { InternalCalendarService } from './internal-calendar.service';
 
 @Module({
-  imports: [UsersModule],
+  imports: [BrandingModule, UsersModule],
   controllers: [InternalCalendarController],
   providers: [InternalCalendarService],
   exports: [InternalCalendarService],

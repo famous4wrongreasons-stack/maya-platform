@@ -23,6 +23,7 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - Auth with `JWT` containing `user_id`, `tenant_id`, `role`
 - Public/mobile API:
   - `GET /api/industry-presets`
+  - `GET /api/crm/providers`
   - `GET /api/mobile/config/:tenantSlug`
   - `GET /api/onboarding/templates`
   - `POST /api/onboarding/trial-activations`
@@ -83,9 +84,18 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - CRM adapter architecture with:
   - `MockCRMAdapter` working end-to-end
   - `YClients/Altegio adapter` for real catalog, staff, slots and appointment creation
-  - `DikidiCRMAdapter` scaffold
-  - `WhitelinesCRMAdapter` scaffold
-  - `SalonOnlineCRMAdapter` scaffold
+  - `DikidiCRMAdapter`, `WhitelinesCRMAdapter` and `SalonOnlineCRMAdapter`
+    retained as non-connectable scaffolds until real API operations and contract
+    tests exist
+
+`GET /api/features/registry` separates commercial entitlement from actual
+implementation maturity. Every feature includes `implementationStatus`,
+`availableIn` and optional `limitations`. A plan or tenant entitlement does not
+prove that a universal platform module is shipped.
+
+`GET /api/crm/providers` is the source of truth for CRM choices. Only providers
+with `connectable=true` may be stored. The backend rejects planned scaffolds with
+`error.code=crm_provider_not_available` before encrypting or persisting a token.
 
 ## Environment
 
@@ -111,6 +121,11 @@ CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://lo
 SWAGGER_ENABLED="true"
 SELF_SERVE_TRIAL_SIGNUP="false"
 AI_ONBOARDING_PROVIDER="auto"
+DEEPSEEK_API_KEY=""
+DEEPSEEK_BASE_URL="https://api.deepseek.com"
+DEEPSEEK_AI_ONBOARDING_MODEL="deepseek-v4-flash"
+DEEPSEEK_AI_ONBOARDING_TIMEOUT_MS="12000"
+DEEPSEEK_THINKING="disabled"
 OPENAI_API_KEY=""
 OPENAI_AI_ONBOARDING_MODEL="gpt-5.4-mini"
 OPENAI_AI_ONBOARDING_TIMEOUT_MS="12000"
@@ -161,6 +176,14 @@ Phone auth delivery modes:
 - `PHONE_AUTH_PROVIDER=smsru`: always uses SMS.ru and fails if creds are missing
 - `PHONE_AUTH_DEBUG=true`: emergency override that forces debug delivery in any env
 
+Email code login for existing tenant users:
+
+- `EMAIL_LOGIN_ENABLED=true`: enables `POST /api/auth/email/start` and `/verify`
+- `EMAIL_AUTH_PROVIDER=auto`: local/test uses debug unless SMTP is configured; production requires SMTP
+- `EMAIL_AUTH_PROVIDER=smtp`: sends the one-time code through `SMTP_HOST`/`SMTP_PORT`
+- `EMAIL_AUTH_DEBUG=true`: returns `debug_code` for local testing and is rejected in production
+- Email verification never creates a user; it only opens a session for an existing tenant account
+
 Social login toggles:
 
 - `YANDEX_LOGIN_ENABLED=true`: enables `POST /api/auth/oauth/yandex/start` and `/complete`
@@ -171,8 +194,12 @@ Social login toggles:
 
 Conversational onboarding:
 
-- `AI_ONBOARDING_PROVIDER=auto`: use strict model output when an OpenAI key is configured and fall back safely when unavailable
+- `AI_ONBOARDING_PROVIDER=auto`: select DeepSeek when its key is configured, otherwise OpenAI when its key is configured, otherwise the safe deterministic parser; a runtime model failure always falls back locally
+- `AI_ONBOARDING_PROVIDER=deepseek`: use only the DeepSeek JSON Output path; a missing or unavailable key falls back safely without silently switching providers
+- `AI_ONBOARDING_PROVIDER=openai`: use only OpenAI strict Structured Outputs
 - `AI_ONBOARDING_PROVIDER=safe`: force the deterministic, offline Russian parser
+- `DEEPSEEK_AI_ONBOARDING_MODEL`: privacy-redacted semantic interpreter; defaults to `deepseek-v4-flash`
+- `DEEPSEEK_THINKING=disabled`: keeps the short structured onboarding path fast and avoids persisting reasoning content
 - `OPENAI_AI_ONBOARDING_MODEL`: model used only for privacy-redacted semantic interpretation
 - Trial activation tokens are created only after the MAYA OS swipe and grant 10 days of full access only after tenant registration completes
 - `GET /api/admin/analytics/trials` counts a connected business only after that successful registration; abandoned swipes are reported separately

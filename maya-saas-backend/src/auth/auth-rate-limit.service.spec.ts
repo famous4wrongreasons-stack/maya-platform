@@ -111,6 +111,29 @@ describe('AuthRateLimitService', () => {
     ]);
   });
 
+  it('applies the same resend fence to tenant-scoped email codes', async () => {
+    const { consumeMock, service, tenantContext } = createService();
+
+    await tenantContext.runAsPublicTenant('tenant-a', () =>
+      service.assertTenant('email_start', {
+        tenantId: 'tenant-a',
+        identity: 'owner@example.test',
+      }),
+    );
+
+    const rules = consumeMock.mock.calls[0]?.[0] ?? [];
+    expect(rules).toHaveLength(3);
+    expect(
+      rules
+        .filter((rule) => rule.scope === 'identity')
+        .map((rule) => [rule.maxAttempts, rule.windowSeconds])
+        .sort((left, right) => left[1] - right[1]),
+    ).toEqual([
+      [1, 60],
+      [5, 600],
+    ]);
+  });
+
   it('binds refresh session budgets to the authenticated principal', async () => {
     const { consumeMock, service, tenantContext } = createService();
 

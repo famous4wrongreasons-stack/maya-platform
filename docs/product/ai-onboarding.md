@@ -11,6 +11,8 @@ editable confirmation step.
 
 The interpreter is hybrid:
 
+- `deepseek` uses the OpenAI-compatible DeepSeek Chat Completions endpoint with
+  JSON Output;
 - `openai` uses the Responses API with strict Structured Outputs when
   `OPENAI_API_KEY` is configured;
 - `safe_fallback` is a deterministic Russian parser used when the model is
@@ -27,7 +29,9 @@ The interpreter is hybrid:
 - Email, phone, personal names, links, account handles and API/CRM tokens are
   redacted before model input. The previous business name is not sent to the
   model, and collected service names are redacted again before reuse.
-- Model responses use a strict schema and `store: false`.
+- Model responses are validated against the complete server-side contract.
+  OpenAI additionally uses strict Structured Outputs and `store: false`;
+  DeepSeek uses JSON Output and fails closed when required fields are absent.
 - Owner contacts are accepted only by the final deterministic confirmation
   call. CRM secrets belong only in the encrypted CRM connector after signup.
 - Draft and activation secrets are stored only as SHA-256 hashes.
@@ -135,7 +139,7 @@ Every draft response includes:
     { "label": "Работаю один", "message": "Я работаю один" },
     { "label": "У нас команда", "message": "У нас несколько специалистов" }
   ],
-  "interpreter_source": "openai",
+  "interpreter_source": "deepseek",
   "turn_count": 2,
   "blueprint": {},
   "missing_fields": ["provider_count"]
@@ -199,14 +203,29 @@ rates. The frontend must display these values, not count local gestures.
 ## Configuration
 
 ```env
-AI_ONBOARDING_PROVIDER="auto" # auto/openai or safe
+AI_ONBOARDING_PROVIDER="auto" # auto/deepseek/openai/safe
+DEEPSEEK_API_KEY=""
+DEEPSEEK_BASE_URL="https://api.deepseek.com"
+DEEPSEEK_AI_ONBOARDING_MODEL="deepseek-v4-flash"
+DEEPSEEK_AI_ONBOARDING_TIMEOUT_MS="12000"
+DEEPSEEK_THINKING="disabled"
 OPENAI_API_KEY=""
 OPENAI_AI_ONBOARDING_MODEL="gpt-5.4-mini"
 OPENAI_AI_ONBOARDING_TIMEOUT_MS="12000"
 ```
 
-No API key is required for the deterministic fallback. Broad semantic and slang
-coverage requires the model-backed path.
+`auto` selects DeepSeek when `DEEPSEEK_API_KEY` is present, otherwise OpenAI
+when its key is present, otherwise the deterministic fallback. If the selected
+model later fails or times out, the turn falls back locally instead of sending
+the same content to a second external provider. An explicit `deepseek` or
+`openai` selection also never silently switches providers. No API key is
+required for the fallback. Broad semantic and slang coverage requires a
+model-backed path.
+
+Keep the DeepSeek key only in the backend runtime environment. Never place it
+in `app.html`, Capacitor assets, Git, API responses or onboarding draft data.
+The endpoint must use HTTPS; invalid configuration fails back to the local
+interpreter.
 
 ## Current limits
 

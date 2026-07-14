@@ -9,6 +9,11 @@ type PhoneUpsertCall = {
   create: { tenantId: string };
 };
 
+type EmailUpsertCall = {
+  where: { tenantId_email: { tenantId: string; email: string } };
+  create: { tenantId: string };
+};
+
 type IdentityCreateCall = {
   data: { tenantId: string; userId: string };
 };
@@ -20,6 +25,11 @@ describe('TenantAuthRepository', () => {
     > = jest.fn().mockResolvedValue({ id: 'challenge-1' });
     const phoneFindUniqueMock = jest.fn().mockResolvedValue(null);
     const phoneUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
+    const emailUpsertMock: jest.MockedFunction<
+      (args: EmailUpsertCall) => Promise<{ id: string }>
+    > = jest.fn().mockResolvedValue({ id: 'email-challenge-1' });
+    const emailFindUniqueMock = jest.fn().mockResolvedValue(null);
+    const emailUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
     const flowCreateMock = jest.fn().mockResolvedValue({ id: 'flow-1' });
     const flowUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
     const identityFindUniqueMock = jest.fn().mockResolvedValue(null);
@@ -34,6 +44,11 @@ describe('TenantAuthRepository', () => {
         upsert: phoneUpsertMock,
         findUnique: phoneFindUniqueMock,
         updateMany: phoneUpdateManyMock,
+      },
+      emailAuthCode: {
+        upsert: emailUpsertMock,
+        findUnique: emailFindUniqueMock,
+        updateMany: emailUpdateManyMock,
       },
       authFlowState: {
         create: flowCreateMock,
@@ -64,6 +79,9 @@ describe('TenantAuthRepository', () => {
         identityCreateMock,
         identityFindUniqueMock,
         identityUpdateMock,
+        emailFindUniqueMock,
+        emailUpdateManyMock,
+        emailUpsertMock,
         phoneFindUniqueMock,
         phoneUpdateManyMock,
         phoneUpsertMock,
@@ -156,6 +174,52 @@ describe('TenantAuthRepository', () => {
         },
       },
       select: { attempts: true },
+    });
+  });
+
+  it('injects context tenant into email challenge reads and writes', async () => {
+    const { repository, tenantContext, mocks } = createRepository();
+    const expiresAt = new Date('2026-07-14T00:05:00.000Z');
+
+    await tenantContext.runAsPublicTenant('tenant-a', async () => {
+      await repository.upsertEmailChallenge({
+        email: 'owner@example.test',
+        codeHash: 'hash',
+        expiresAt,
+      });
+      await repository.findEmailChallenge('owner@example.test');
+      await repository.claimEmailChallenge(
+        'email-challenge-1',
+        'hash',
+        new Date('2026-07-14T00:00:00.000Z'),
+      );
+    });
+
+    const emailUpsertCall = mocks.emailUpsertMock.mock.calls[0]?.[0];
+    expect(emailUpsertCall?.where).toEqual({
+      tenantId_email: {
+        tenantId: 'tenant-a',
+        email: 'owner@example.test',
+      },
+    });
+    expect(emailUpsertCall?.create.tenantId).toBe('tenant-a');
+    expect(mocks.emailFindUniqueMock).toHaveBeenCalledWith({
+      where: {
+        tenantId_email: {
+          tenantId: 'tenant-a',
+          email: 'owner@example.test',
+        },
+      },
+    });
+    expect(mocks.emailUpdateManyMock).toHaveBeenCalledWith({
+      where: {
+        id: 'email-challenge-1',
+        tenantId: 'tenant-a',
+        codeHash: 'hash',
+        consumedAt: null,
+        expiresAt: { gt: new Date('2026-07-14T00:00:00.000Z') },
+      },
+      data: { consumedAt: new Date('2026-07-14T00:00:00.000Z') },
     });
   });
 
@@ -258,6 +322,9 @@ describe('TenantAuthRepository', () => {
     const { repository, mocks } = createRepository();
 
     expect(() => repository.findPhoneChallenge('+79990000000')).toThrow(
+      ForbiddenException,
+    );
+    expect(() => repository.findEmailChallenge('owner@example.test')).toThrow(
       ForbiddenException,
     );
     expect(mocks.phoneFindUniqueMock).not.toHaveBeenCalled();

@@ -149,6 +149,35 @@ async function runSmoke() {
   assert(presetIds.includes('dental_clinic'));
   assert(presetIds.includes('education'));
 
+  const featureCatalog = asRecord(
+    await expectStatus('/features/registry', 200),
+  );
+  assert.equal(featureCatalog.schema_version, 2);
+  const registeredFeatures = asArray(featureCatalog.features).map(asRecord);
+  const videoAnalytics = registeredFeatures.find(
+    (feature) => feature.key === 'video_analytics',
+  );
+  const internalCalendar = registeredFeatures.find(
+    (feature) => feature.key === 'calendar.internal',
+  );
+  assert.equal(videoAnalytics?.implementationStatus, 'planned');
+  assert.equal(internalCalendar?.implementationStatus, 'platform_ready');
+
+  const crmProviderCatalog = asRecord(
+    await expectStatus('/crm/providers', 200),
+  );
+  assert.deepEqual(crmProviderCatalog.selectable_provider_keys, [
+    'yclients',
+    'altegio',
+    'mock',
+  ]);
+  const crmProviders = asArray(crmProviderCatalog.providers).map(asRecord);
+  const dikidi = crmProviders.find(
+    (provider) => provider.provider === 'dikidi',
+  );
+  assert.equal(dikidi?.connectable, false);
+  assert.equal(dikidi?.implementationStatus, 'planned');
+
   const onboardingTemplates = asRecord(
     await expectStatus('/onboarding/templates', 200),
   );

@@ -18,6 +18,7 @@ import { UsersService } from '../users/users.service';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
+import type { ListCalendarJournalDto } from './dto/list-calendar-journal.dto';
 import type { WeeklyAvailabilityRuleDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
 import { UpdateInternalServiceDto } from './dto/update-internal-service.dto';
@@ -33,6 +34,7 @@ const DEFAULT_WEEKLY_RULES: WeeklyAvailabilityRuleDto[] = [1, 2, 3, 4, 5].map(
   (weekday) => ({ weekday, startTime: '09:00', endTime: '18:00' }),
 );
 const CANCELLED_STATUSES = ['canceled', 'cancelled'];
+const JOURNAL_MAX_RANGE_DAYS = 31;
 
 interface InternalServiceTiming {
   durationMinutes: number;
@@ -168,6 +170,127 @@ export class InternalCalendarService {
         end_at: exception.endAt,
         note: exception.note,
       })),
+    };
+  }
+
+  async getJournal(tenantId: string, query: ListCalendarJournalDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'Calendar range is invalid.',
+        error: { code: 'calendar_range_invalid' },
+      });
+    }
+
+    if (
+      to.getTime() - from.getTime() >
+      JOURNAL_MAX_RANGE_DAYS * 24 * 60 * 60 * 1000
+    ) {
+      throw new BadRequestException({
+        message: `Calendar range must not exceed ${JOURNAL_MAX_RANGE_DAYS} days.`,
+        error: { code: 'calendar_range_too_large' },
+      });
+    }
+
+    await this.assertInternalSource(scopedTenantId);
+    const [tenant, appointments, services, providers] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.prisma.appointment.findMany({
+        where: {
+          tenantId: scopedTenantId,
+          source: CalendarSource.INTERNAL,
+          startAt: { lt: to },
+          endAt: { gt: from },
+          ...(query.providerId ? { staffExternalId: query.providerId } : {}),
+        },
+        orderBy: { startAt: 'asc' },
+        include: {
+          branch: true,
+          client: {
+            select: { id: true, encryptedName: true },
+          },
+        },
+      }),
+      this.prisma.internalService.findMany({
+        where: { tenantId: scopedTenantId },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      }),
+      this.prisma.internalProvider.findMany({
+        where: { tenantId: scopedTenantId },
+        include: { branch: true },
+      }),
+    ]);
+
+    const servicesById = new Map(
+      services.map((service) => [service.id, this.serializeService(service)]),
+    );
+    const providersById = new Map(
+      providers.map((provider) => [
+        provider.id,
+        this.serializeProvider(provider),
+      ]),
+    );
+    const items = appointments.map((appointment) => {
+      const serviceIds = Array.isArray(appointment.serviceIds)
+        ? appointment.serviceIds.filter(
+            (serviceId): serviceId is string => typeof serviceId === 'string',
+          )
+        : [];
+      const appointmentServices = serviceIds.flatMap((serviceId) => {
+        const service = servicesById.get(serviceId);
+        return service ? [service] : [];
+      });
+
+      return {
+        id: appointment.id,
+        client: {
+          id: appointment.client.id,
+          name: this.usersService.getUserName(appointment.client) ?? 'Клиент',
+        },
+        provider:
+          providersById.get(appointment.staffExternalId) ??
+          ({ id: appointment.staffExternalId } as const),
+        branch: appointment.branch
+          ? {
+              id: appointment.branch.id,
+              name: appointment.branch.name,
+              timezone: appointment.branch.timezone,
+            }
+          : null,
+        service_ids: serviceIds,
+        services: appointmentServices,
+        start_at: appointment.startAt,
+        end_at: appointment.endAt,
+        status: appointment.status,
+        notes: appointment.notes,
+        total_price:
+          appointmentServices.length > 0
+            ? appointmentServices.reduce(
+                (total, service) => total + service.price,
+                0,
+              )
+            : null,
+        currency: appointmentServices[0]?.currency ?? null,
+      };
+    });
+
+    return {
+      calendar_source: CalendarSource.INTERNAL,
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      range: { from: from.toISOString(), to: to.toISOString() },
+      provider_id: query.providerId ?? null,
+      count: items.length,
+      appointments: items,
     };
   }
 

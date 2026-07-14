@@ -1,15 +1,13 @@
-import {
-  BadRequestException,
-  ValidationError,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import type { ValidationError } from 'class-validator';
 
 import { AppModule } from './app.module';
 import { resolveAuthTrustedProxies } from './auth/auth-client-metadata';
+import { flattenValidationErrors } from './common/validation-errors';
 import {
   isCorsOriginAllowed,
   isSwaggerEnabled,
@@ -57,12 +55,7 @@ async function bootstrap() {
       transform: true,
       forbidNonWhitelisted: true,
       exceptionFactory: (errors: ValidationError[]) => {
-        const details = errors.flatMap((error) =>
-          Object.values(error.constraints || {}).map((message) => ({
-            field: error.property,
-            message,
-          })),
-        );
+        const details = flattenValidationErrors(errors);
         const first = details[0];
         const message = first?.message || 'Validation failed';
 

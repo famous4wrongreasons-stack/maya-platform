@@ -727,6 +727,12 @@ export class TenantsService {
       subscriptionRequired: access.subscriptionRequired,
       trialFullAccess: access.trialFullAccess,
     });
+    const guestAccessReady =
+      clientRegistrationEnabled && bookingEvaluation.liveEligible;
+    const guestAccessBlockers = [
+      ...bookingEvaluation.blockers,
+      ...(clientRegistrationEnabled ? [] : ['client_registration_disabled']),
+    ].filter((blocker, index, blockers) => blockers.indexOf(blocker) === index);
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
@@ -776,6 +782,8 @@ export class TenantsService {
         : null,
       allow_self_registration: tenant.allowSelfRegistration,
       client_registration_enabled: clientRegistrationEnabled,
+      guest_access_ready: guestAccessReady,
+      guest_access_blockers: guestAccessBlockers,
       booking_mode: bookingEvaluation.effectiveMode,
       booking_live_enabled: bookingEvaluation.effectiveMode === 'live',
       calendar_source: tenant.calendarSource ?? CalendarSource.EXTERNAL,
