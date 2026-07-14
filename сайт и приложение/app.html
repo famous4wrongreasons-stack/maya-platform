@@ -11066,7 +11066,8 @@ function AChat() {
 	      providerCount: String(b.providerCount || 1),
 	      services: (b.services || []).map(function (s) { return { name: s.name, price: String(s.price), duration: String(s.durationMinutes) }; }),
 	      servicesDeferred: !!b.servicesDeferred,
-	      weekly: (function () { var by = {}; (b.weeklyRules || []).forEach(function (r) { if (!by[r.weekday]) by[r.weekday] = { on: true, start: r.startTime, end: r.endTime }; }); return by; })(),
+	      // полная неделя: правила бэка + отсутствующие дни как выходные (не исчезают из UI); воскресенье = 0
+	      weekly: (function () { var by = {}; (b.weeklyRules || []).forEach(function (r) { var wd = Number(r.weekday); if (wd === 7) wd = 0; if (!by[wd]) by[wd] = { on: true, start: r.startTime, end: r.endTime }; }); [1, 2, 3, 4, 5, 6, 0].forEach(function (wd) { if (!by[wd]) by[wd] = { on: false, start: '', end: '' }; }); return by; })(),
 	      scheduleAssumed: !!b.scheduleAssumed,
 	      workMode: b.workMode || (Number(b.providerCount || 1) > 1 ? 'business' : 'solo'),
 	      categoryId: b.categoryId || null,
@@ -11362,17 +11363,27 @@ function AChat() {
 	        })),
 	        onbHint('services'),
 	        e('div', { onClick: function () { onbClearFieldError('services'); setC({ services: (c.services || []).concat([{ name: '', price: '', duration: '30' }]) }); }, style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, cursor: 'pointer', marginTop: 2 } }, '+ услуга')));
-	      var wdKeys = Object.keys(c.weekly || {}).sort(function (a, b) { return a - b; });
-	      if (wdKeys.length) rows.push(e('div', { key: 'wk', style: card }, e('div', { style: lbl }, c.scheduleAssumed ? 'График · предположительно — проверьте' : 'График'),
-	        wdKeys.map(function (wd) { var r = c.weekly[wd]; var setR = function (p) { var w = Object.assign({}, c.weekly); w[wd] = Object.assign({}, r, p); setC({ weekly: w }); };
+	      // 7-дневный график в фиксированном порядке Пн..Вс (воскресенье = 0 в модели и запросе).
+	      var WK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+	      // дефолт при включении выходного: черновик дня, иначе ближайший активный график, иначе 09:00–18:00
+	      var onbDayDefault = function () { var src = null; WK_ORDER.forEach(function (k) { var q = (c.weekly || {})[k]; if (!src && q && q.on && q.start && q.end) src = q; }); return src ? { start: src.start, end: src.end } : { start: '09:00', end: '18:00' }; };
+	      var onbEnableDay = function (wd) { var r0 = (c.weekly || {})[wd] || {}; var patch = { on: true }; if (!r0.start || !r0.end) { var d = onbDayDefault(); patch.start = r0.start || d.start; patch.end = r0.end || d.end; } var w = Object.assign({}, c.weekly); w[wd] = Object.assign({}, r0, patch); return w; };
+	      rows.push(e('div', { key: 'wk', style: card },
+	        e('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 } },
+	          e('div', { style: lbl }, c.scheduleAssumed ? 'График · предположительно — проверьте' : 'График'),
+	          e('div', { onClick: function () { onbClearFieldError('weekly'); var w = Object.assign({}, c.weekly); WK_ORDER.forEach(function (wd) { if (!w[wd] || !w[wd].on) { var r0 = w[wd] || {}; var d = null; WK_ORDER.forEach(function (k) { var q = w[k]; if (!d && q && q.on && q.start && q.end) d = q; }); d = d || { start: '09:00', end: '18:00' }; w[wd] = Object.assign({}, r0, { on: true, start: r0.start || d.start, end: r0.end || d.end }); } }); setC({ weekly: w }); }, style: { flex: 'none', fontFamily: DISPLAY, fontWeight: 600, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: onbTone.dim, border: '1px solid ' + onbTone.line, borderRadius: 999, padding: '5px 10px', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' } }, 'Без выходных')),
+	        WK_ORDER.map(function (wd) { var r = c.weekly[wd] || { on: false, start: '', end: '' }; var setR = function (p) { var w = Object.assign({}, c.weekly); w[wd] = Object.assign({}, r, p); setC({ weekly: w }); };
 	          var startField = 'weekly.' + wd + '.start'; var endField = 'weekly.' + wd + '.end';
+	          var toggle = function () { onbClearFieldError(startField); onbClearFieldError(endField); onbClearFieldError('weekly'); if (r.on) setR({ on: false }); /* черновик времени сохраняем */ else setC({ weekly: onbEnableDay(wd) }); };
 	          return e('div', { key: wd, style: { padding: '2px 0' } },
 	            e('div', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
-	              e('div', { onClick: function () { onbClearFieldError(startField); onbClearFieldError(endField); setR({ on: !r.on }); }, style: { width: 34, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: r.on ? onbTone.ink : onbTone.faint, cursor: 'pointer' } }, WDMAP[wd] || wd),
-	              e('input', { style: onbInput(startField, { width: 64, minWidth: 0, opacity: r.on ? 1 : 0.4 }), value: r.start || '', onChange: function (ev) { onbClearFieldError(startField); setR({ start: ev.target.value }); } }),
-	              e('span', { style: { color: onbTone.faint } }, '–'),
-	              e('input', { style: onbInput(endField, { width: 64, minWidth: 0, opacity: r.on ? 1 : 0.4 }), value: r.end || '', onChange: function (ev) { onbClearFieldError(endField); setR({ end: ev.target.value }); } })),
-	            onbHint([startField, endField]));
+	              e('div', { onClick: toggle, style: { width: 34, flex: 'none', fontFamily: DISPLAY, fontWeight: 600, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: r.on ? onbTone.ink : onbTone.faint, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' } }, WDMAP[wd] || wd),
+	              r.on ? e(React.Fragment, null,
+	                e('input', { style: onbInput(startField, { width: 64, minWidth: 0 }), value: r.start || '', placeholder: '09:00', inputMode: 'numeric', onChange: function (ev) { onbClearFieldError(startField); setR({ start: ev.target.value }); } }),
+	                e('span', { style: { color: onbTone.faint } }, '–'),
+	                e('input', { style: onbInput(endField, { width: 64, minWidth: 0 }), value: r.end || '', placeholder: '18:00', inputMode: 'numeric', onChange: function (ev) { onbClearFieldError(endField); setR({ end: ev.target.value }); } }))
+	              : e('div', { onClick: toggle, style: { flex: 1, padding: '10px 12px', borderRadius: 10, border: '1px dashed ' + onbTone.line, fontFamily: BODY, fontSize: 12, color: onbTone.faint, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' } }, 'Выходной')),
+	            r.on ? onbHint([startField, endField]) : null);
 	        })), onbHint('weekly'));
 	      rows.push(e('div', { key: 'ct', style: card }, e('div', { style: lbl }, 'Контакты владельца'),
 	        e('input', { style: onbInput('ownerEmail', { marginBottom: 7 }), placeholder: 'E-mail', type: 'email', inputMode: 'email', value: ct.email, onChange: function (ev) { onbClearFieldError('ownerEmail'); setCt({ email: ev.target.value }); } }),
