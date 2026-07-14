@@ -29796,9 +29796,45 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   // web-сессию аккаунта → опрашиваем applogin_poll → получаем web_session_token.
   var __meAppLoginTimer=null, __meAppLoginNonce=null;
   var __meAppLoginStoreKey='__me_applogin_pending_v1';
+  function __meTelegramNativeUrl(link){
+    try{
+      var parsed=new URL(String(link||''),location.href);
+      var host=String(parsed.hostname||'').toLowerCase();
+      if(host!=='t.me' && host!=='telegram.me') return '';
+      var domain=String(parsed.pathname||'').replace(/^\/+/, '').split('/')[0];
+      if(!domain) return '';
+      var nativeLink='tg://resolve?domain='+encodeURIComponent(domain);
+      var start=parsed.searchParams.get('start');
+      if(start) nativeLink+='&start='+encodeURIComponent(start);
+      return nativeLink;
+    }catch(e){ return ''; }
+  }
+  function __meOpenTgWeb(link){
+    try{
+      var tg=window.Telegram && window.Telegram.WebApp;
+      if(tg && typeof tg.openTelegramLink==='function'){
+        tg.openTelegramLink(link);
+        return;
+      }
+    }catch(e){}
+    try{ window.__meExt ? window.__meExt(link) : window.open(link,'_blank'); }
+    catch(e2){ try{ window.location.href=link; }catch(e3){} }
+  }
   function __meOpenTg(link){
-    try{ window.open(link,'_system'); }
-    catch(e){ try{ window.__meExt ? window.__meExt(link) : (window.location.href=link); }catch(e2){} }
+    var nativeLink=__meTelegramNativeUrl(link);
+    try{
+      var launcher=window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppLauncher;
+      if(__meIsNative() && nativeLink && launcher && typeof launcher.canOpenUrl==='function' && typeof launcher.openUrl==='function'){
+        launcher.canOpenUrl({url:nativeLink}).then(function(result){
+          if(!result || !result.value){ __meOpenTgWeb(link); return; }
+          launcher.openUrl({url:nativeLink}).then(function(opened){
+            if(!opened || !opened.completed) __meOpenTgWeb(link);
+          }).catch(function(){ __meOpenTgWeb(link); });
+        }).catch(function(){ __meOpenTgWeb(link); });
+        return;
+      }
+    }catch(e){}
+    __meOpenTgWeb(link);
   }
   function __meSaveAppLoginNonce(nonce){
     __meAppLoginNonce = nonce || null;
