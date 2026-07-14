@@ -45,7 +45,29 @@ def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | N
                     },
                 ],
             }
-        return {"total_gross": 1000, "visits": 1, "avg_check": 1000}
+        return {
+            "total_gross": 4000,
+            "visits": 3,
+            "avg_check": 1333,
+            "masters": [
+                {
+                    "staff_id": 2,
+                    "name": "Мастер 2",
+                    "gross": 3000,
+                    "salary": 1200,
+                    "visits": 2,
+                    "is_owner": False,
+                },
+                {
+                    "staff_id": 1,
+                    "name": "Мастер 1",
+                    "gross": 1000,
+                    "salary": 0,
+                    "visits": 1,
+                    "is_owner": True,
+                },
+            ],
+        }
 
     fake_analytics.business_summary = fake_business_summary
     fake_analytics.business_pulse = lambda *args, **kwargs: {
@@ -253,6 +275,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | N
     mod = importlib.import_module("owner_ai")
     mod._avg_cache.update(val=None, ts=0.0)
     mod._summary30_cache.update(val=None, ts=0.0)
+    mod._today_master_cache.update(date=None, val=None, ts=0.0)
     return mod
 
 
@@ -514,6 +537,12 @@ class OwnerAITests(unittest.TestCase):
         )
         self.assertIn("simple_goal", center["briefing"])
         self.assertEqual(center["briefing"]["simple_goal"]["title"], "План на сегодня")
+        leader = next(
+            row for row in center["briefing"]["quick_stats"]
+            if row["key"] == "top_master_today"
+        )
+        self.assertEqual(leader["label"], "Лидер сегодня")
+        self.assertEqual(leader["value"], "Мастер 2 · 3 000 ₽")
         self.assertNotIn("money_at_stake_rub", center["briefing"])
         self.assertEqual(
             center["market_intelligence"]["version"],

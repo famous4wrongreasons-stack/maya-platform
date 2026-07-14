@@ -131,6 +131,31 @@ class MemoryRegressionTests(unittest.TestCase):
         self.assertIn("Тонирование головы, Моделирование бороды, Стрижка машинкой + фейд", text)
         self.assertIn("Персональные данные не упоминай.", text)
 
+    def test_get_usual_booking_returns_master_and_recent_services(self):
+        history = [
+            {
+                "datetime": "2026-07-01T12:00:00+03:00",
+                "services": [{"title": "Мужская стрижка"}, {"title": "Борода"}],
+                "staff": {"id": 3278920, "name": "Александр Киянский"},
+            },
+            {
+                "datetime": "2026-06-01T12:00:00+03:00",
+                "services": [{"title": "Мужская стрижка"}],
+                "staff": {"id": 3278920, "name": "Александр Киянский"},
+            },
+        ]
+        fake_config = types.SimpleNamespace(ACTIVE_MASTER_IDS=[3278920])
+
+        with patch.dict(sys.modules, {"config": fake_config}):
+            with patch.object(memory.database, "get_client", return_value={"id": 1, "phone": ""}):
+                with patch.object(memory.database, "get_client_history_cached", return_value=history):
+                    with patch.object(memory.database, "get_last_booking", return_value=None):
+                        got = memory.get_usual_booking(948205934)
+
+        self.assertEqual(got["master_id"], 3278920)
+        self.assertEqual(got["master_name"], "Александр Киянский")
+        self.assertEqual(got["service_text"], "Мужская стрижка, Борода")
+
     def test_audit_dual_role_repairs_missing_cache(self):
         state = {"cache": None}
         history = [

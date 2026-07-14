@@ -9,7 +9,7 @@
 календарном месяце он превышен — handle_photo откажет с понятным
 сообщением, а основная запись через MAYA при этом продолжает работать.
 
-Цены актуальны на 2026-07-08. Меняются — правим тут.
+Цены актуальны на 2026-07-11. Меняются — правим тут.
 """
 from __future__ import annotations
 
@@ -76,6 +76,18 @@ MODEL_PRICES: dict[str, dict[str, float]] = {
         "cache_read": 0.075,
         "cache_write": 0.75,
         "output": 4.50,
+    },
+    "deepseek-v4-flash": {
+        "input": 0.14,
+        "cache_read": 0.0028,
+        "cache_write": 0.14,
+        "output": 0.28,
+    },
+    "deepseek-v4-pro": {
+        "input": 0.435,
+        "cache_read": 0.003625,
+        "cache_write": 0.435,
+        "output": 0.87,
     },
     # ── Голос MAYA (realtime + STT + TTS). Ставки $/1M токенов ПРИБЛИЗИТЕЛЬНЫЕ —
     # точные числа сверь на platform.openai.com/pricing и поправь тут при необходимости.
@@ -193,23 +205,27 @@ def log_anthropic_usage(feature: str, model: str, response, user_id: int | None 
 
 
 def log_openai_usage(feature: str, model: str, response_json: dict, user_id: int | None = None):
-    """То же самое для ответа OpenAI Chat Completions (JSON через httpx)."""
+    """Учёт OpenAI-compatible Chat Completions (OpenAI/DeepSeek)."""
     try:
         u = response_json.get("usage") or {}
-        input_tokens = int(u.get("prompt_tokens", u.get("input_tokens", 0)) or 0)
+        input_total = int(u.get("prompt_tokens", u.get("input_tokens", 0)) or 0)
         output_tokens = int(u.get("completion_tokens", u.get("output_tokens", 0)) or 0)
-        # У GPT-4o-mini в новых ответах есть prompt_tokens_details.cached_tokens
+        # OpenAI reports cached tokens in details; DeepSeek exposes explicit
+        # cache-hit/cache-miss counters at usage root.
         cache_read = int(
-            (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+            u.get("prompt_cache_hit_tokens", 0)
+            or (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
             or (u.get("input_token_details") or {}).get("cached_tokens", 0)
             or 0
         )
+        input_miss = u.get("prompt_cache_miss_tokens")
+        input_tokens = int(input_miss) if input_miss is not None else max(input_total - cache_read, 0)
         cost = calculate_cost_usd(
-            model, input_tokens - cache_read, output_tokens, cache_read, 0
+            model, input_tokens, output_tokens, cache_read, 0
         )
         database.log_ai_usage(
             feature=feature, model=model,
-            input_tokens=input_tokens - cache_read, output_tokens=output_tokens,
+            input_tokens=input_tokens, output_tokens=output_tokens,
             cache_read_tokens=cache_read, cache_write_tokens=0,
             cost_usd=cost, user_id=user_id,
         )

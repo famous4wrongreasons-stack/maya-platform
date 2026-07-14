@@ -323,6 +323,60 @@ def _usual_master_from_history(history) -> dict | None:
     return {"id": ids.get(best), "name": names.get(best, "")}
 
 
+def get_usual_booking(user_id: int, *, warm: bool = False) -> dict | None:
+    """Return the client's usual active master and services without exposing PII.
+
+    The normal chat context only reads the 24-hour YClients cache.  Explicit
+    requests such as "к моему постоянному мастеру" may arrive before the cabinet
+    has warmed that cache, so callers can opt into a one-off server-side refresh.
+    """
+    client = database.get_client(int(user_id))
+    client_id = client.get("id") if client else None
+    history = normalize_history(
+        database.get_client_history_cached(client_id) if client_id else None
+    )
+
+    if not history and warm and client_id and client.get("phone"):
+        warmed = warm_client_history_cache_for_phone(
+            client_id,
+            client.get("phone") or "",
+            force=False,
+        )
+        history = normalize_history(warmed.get("history") or [])
+
+    usual = _usual_master_from_history(history)
+    if usual and usual.get("name"):
+        usual_id = usual.get("id")
+        service_text = ""
+        for visit in history:
+            same_master = (
+                usual_id is not None and visit.get("master_id") == usual_id
+            ) or (
+                usual_id is None
+                and _history_master_name(visit).lower() == usual["name"].lower()
+            )
+            if same_master:
+                service_text = _history_service_text(visit)
+                if service_text:
+                    break
+        return {
+            "master_id": usual_id,
+            "master_name": usual["name"],
+            "service_text": service_text,
+            "source": "yclients_history",
+        }
+
+    last = database.get_last_booking(int(user_id))
+    if last and (last.get("master") or "").strip():
+        return {
+            "master_id": last.get("staff_id"),
+            "master_name": (last.get("master") or "").strip(),
+            "service_text": (last.get("service") or "").strip(),
+            "source": "local_booking",
+        }
+    return None
+
+
 def build_context(user_id: int) -> str:
     """
     Обезличенный контекст о клиенте для AI.
@@ -389,7 +443,8 @@ def build_context(user_id: int) -> str:
                 lines.append(
                     f"Как клиент он обычно ходит к {usual['name']}"
                     + (f" на «{usual_services}»" if usual_services else "")
-                    + ". Если он спрашивает «к кому обычно хожу», "
+                    + ". Если он спрашивает «к кому обычно хожу», «кто мой "
+                    "постоянный мастер», «запиши к моему мастеру», "
                     "«запиши меня как обычно» или про свои личные предпочтения — "
                     "опирайся на этот факт."
                 )
@@ -409,7 +464,8 @@ def build_context(user_id: int) -> str:
                     f"Его «как обычно»: мастер {usual['name']}"
                     + (f", услуги «{usual_services}»" if usual_services else "")
                     + f". Когда клиент захочет записаться — СРАЗУ предложи одной фразой: «{offer}» "
-                    + "(мастер и услуги уже известны). НЕ переспрашивай мастера/услуги, если он сам не "
+                    + "(фразы «мой постоянный мастер», «мой мастер», «как обычно» означают именно "
+                    + f"{usual['name']}; мастер и услуги уже известны). НЕ переспрашивай мастера/услуги, если он сам не "
                     + "попросит другое, и НЕ проси контакт — клиент уже известен. Если согласится «как "
                     + "обычно» — нужны только дата и время."
                 )

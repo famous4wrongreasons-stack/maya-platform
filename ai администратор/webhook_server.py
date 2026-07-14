@@ -182,6 +182,13 @@ def _truncate_name(name: str | None, max_len: int = 30) -> str:
     return name[:max_len - 1] + "…"
 
 
+def _push_preview_body(text: str, max_len: int = 180) -> str:
+    plain = re.sub(r"\s+", " ", _plain_maya_text(text or "")).strip()
+    if len(plain) <= max_len:
+        return plain
+    return plain[: max_len - 1].rstrip() + "…"
+
+
 def _format_datetime(dt_str: str | None) -> str:
     """'2026-05-26T14:00:00+03:00' → '14:00 (сегодня)' / '14:00 (28.05)'."""
     if not dt_str:
@@ -550,9 +557,30 @@ async def _send_master_push(
 
 async def _send_client_push(chat_id, title: str, body: str,
                             url: str = "/app/", tag: str = "",
-                            data: dict | None = None) -> int:
+                            data: dict | None = None,
+                            persist_in_chat: bool = False,
+                            chat_text: str = "",
+                            chat_action: dict | None = None,
+                            chat_link=None,
+                            chat_mode: str = "client",
+                            chat_dedupe_key: str = "") -> int:
     """Push конкретному КЛИЕНТУ (по telegram_chat_id) — напр. предложение оставить чай
     после визита. Подписки клиента лежат в той же таблице (staff_id NULL)."""
+    if persist_in_chat and chat_id:
+        try:
+            text_for_chat = (chat_text or "").strip()
+            if not text_for_chat:
+                text_for_chat = (f"{title}\n\n{body}" if body else title).strip()
+            _store_assistant_message_in_chat(
+                int(chat_id),
+                text_for_chat,
+                mode=chat_mode,
+                action=chat_action,
+                link=chat_link,
+                dedupe_key=chat_dedupe_key or tag or "",
+            )
+        except Exception as e:
+            logger.error(f"client push chat mirror {chat_id}: {e}")
     if not chat_id or not WEBPUSH_VAPID_PRIVATE_KEY:
         return 0
     try:
@@ -616,9 +644,20 @@ async def _offer_tip_to_client(record: dict, record_id: int) -> None:
             title="Спасибо за визит! 💈",
             body=(f"Понравилось у мастера {master_name}? " if master_name else "")
                  + "Можно оставить чаевые 💸",
-            url=f"/app/#tips={staff_id}",
+            url=f"/app/?tips={staff_id}",
             tag=f"tip-offer-{record_id}",
             data={"master": str(staff_id)},
+            persist_in_chat=True,
+            chat_text=(
+                "Спасибо за визит! 💈\n\n"
+                + ((f"Если понравилось у мастера {master_name}, " if master_name else "")
+                   + "можно оставить чаевые в приложении.")
+            ),
+            chat_link={
+                "label": "Оставить чаевые",
+                "url": f"https://malesthetic.pro/app/?tips={staff_id}",
+            },
+            chat_dedupe_key=f"tip-offer:{record_id}",
         )
         if n:
             logger.info(f"tip-offer push клиенту chat={cc} (мастер {staff_id}): отправлено {n}")
@@ -662,7 +701,16 @@ async def _notify_client_record(record: dict, record_id: int, kind: str) -> None
         n = await _send_client_push(
             int(cc), title=title, body=body,
             url="/app/", tag=f"client-rec-{kind}-{record_id}",
-            data={"record_id": record_id, "event": kind})
+            data={"record_id": record_id, "event": kind},
+            persist_in_chat=True,
+            chat_text=f"{title}\n\n{body}",
+            chat_action={
+                "type": "open_cabinet",
+                "label": "Мои записи",
+                "screen": "cabinet",
+            },
+            chat_dedupe_key=f"client-record:{kind}:{record_id}",
+        )
         if n:
             logger.info(f"client push ({kind}) chat={cc} record={record_id}: отправлено {n}")
     except Exception as e:
@@ -1601,7 +1649,12 @@ def _load_cabinet_yclients(phone: str) -> dict:
     """Тянет карточку клиента и его записи из YClients синхронно (для to_thread)."""
     phone_digits = "".join(ch for ch in (phone or "") if ch.isdigit())
     if len(phone_digits) < 10:
-        return {"yc_client_id": None, "client_card": None, "bookings": []}
+        return {
+            "yc_client_id": None,
+            "client_card": None,
+            "loyalty_card": None,
+            "bookings": [],
+        }
 
     yc_client_id = None
     try:
@@ -1612,17 +1665,36 @@ def _load_cabinet_yclients(phone: str) -> dict:
                 break
     except Exception as e:
         logger.error(f"cabinet yclients search {phone_digits[-4:]}: {e}")
-        return {"yc_client_id": None, "client_card": None, "bookings": []}
+        return {
+            "yc_client_id": None,
+            "client_card": None,
+            "loyalty_card": None,
+            "bookings": [],
+        }
 
     if not yc_client_id:
-        return {"yc_client_id": None, "client_card": None, "bookings": []}
+        return {
+            "yc_client_id": None,
+            "client_card": None,
+            "loyalty_card": None,
+            "bookings": [],
+        }
 
     client_card = None
+    loyalty_card = None
     bookings = []
     try:
         client_card = _yc.get_client(int(yc_client_id)) or None
     except Exception as e:
         logger.error(f"cabinet yclients client {yc_client_id}: {e}")
+
+    try:
+        import loyalty as _loy
+        loyalty_card = _loy.select_yclients_cashback_card(
+            _yc.get_client_loyalty_cards(int(yc_client_id))
+        )
+    except Exception as e:
+        logger.error(f"cabinet yclients loyalty {yc_client_id}: {e}")
 
     try:
         params = {
@@ -1642,6 +1714,7 @@ def _load_cabinet_yclients(phone: str) -> dict:
     return {
         "yc_client_id": int(yc_client_id),
         "client_card": client_card,
+        "loyalty_card": loyalty_card,
         "bookings": bookings,
     }
 
@@ -1790,6 +1863,7 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
         except Exception as e:
             logger.error(f"_build_full_cabinet: lazy_backfill {client_id}: {e}")
     balance = database.loyalty_balance(client_id)
+    loyalty_source = "maya_ledger"
 
     bookings = []
     yc_client_id = None
@@ -1801,7 +1875,11 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             yc_payload = await asyncio.to_thread(_load_cabinet_yclients, phone)
             yc_client_id = yc_payload.get("yc_client_id")
             yc_client_card = yc_payload.get("client_card")
+            yc_loyalty_card = yc_payload.get("loyalty_card")
             bookings = yc_payload.get("bookings") or []
+            if isinstance(yc_loyalty_card, dict) and yc_loyalty_card.get("balance") is not None:
+                balance = max(0, int(round(float(yc_loyalty_card.get("balance") or 0))))
+                loyalty_source = "yclients"
         except Exception as e:
             logger.error(f"cabinet_via_login: yc bookings err: {e}")
             bookings = []
@@ -1927,6 +2005,7 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
         "booking_phone": phone if has_valid_phone else "",
         "loyalty": {
             "balance": balance,
+            "source": loyalty_source,
             "care_services": [
                 {"title": c["title"], "price": c["price"], "emoji": c["emoji"]}
                 for c in __import__("loyalty").CARE_SERVICES
@@ -2066,7 +2145,21 @@ async def _promo_gift_notify(app, chat_id: int, code: str, pct: int, until_str: 
     try:
         await _send_client_push(chat_id, title=f"Ваш промокод −{pct}% 🎁",
                                 body=f"{code} — скидка {pct}% на первое посещение.", url="/app/",
-                                tag="promo-gift")
+                                tag="promo-gift",
+                                persist_in_chat=True,
+                                chat_text=(
+                                    "🎁 Для вас готов промокод на первое посещение.\n\n"
+                                    f"{code} — скидка {pct}%.\n"
+                                    + (f"Действует до {until_str[:10]}.\n" if until_str else "")
+                                    + "Когда будете готовы, откройте запись в приложении."
+                                ),
+                                chat_action={
+                                    "type": "open_booking",
+                                    "label": "Записаться",
+                                    "screen": "book",
+                                },
+                                chat_dedupe_key=f"promo-gift:{code}",
+                                )
     except Exception:
         pass
 
@@ -3651,6 +3744,7 @@ async def broadcast_send_to_base(bot, text: str) -> dict:
                 skipped_too_soon += 1
                 continue
         personalized = _bt.render(text, client_name=c.get("name")) if has_placeholder else text
+        push_body = _push_preview_body(personalized) or "Откройте MAYA — внутри новое сообщение."
         try:
             await bot.send_message(chat_id, personalized, parse_mode="Markdown")
             sent += 1
@@ -3669,6 +3763,19 @@ async def broadcast_send_to_base(bot, text: str) -> dict:
         except Exception as e:
             errors += 1
             logger.error(f"broadcast → {chat_id}: {e}")
+        try:
+            await _send_client_push(
+                int(chat_id),
+                title="Сообщение от MAYA",
+                body=push_body,
+                url="/app/",
+                tag="marketing-broadcast",
+                data={"event": "marketing.broadcast"},
+                persist_in_chat=True,
+                chat_text=personalized,
+            )
+        except Exception as e:
+            logger.error(f"broadcast push/chat → {chat_id}: {e}")
     return {"sent": sent, "blocked": blocked, "errors": errors,
             "skipped_no_consent": skipped_no_consent,
             "skipped_opt_out": skipped_opt_out, "skipped_too_soon": skipped_too_soon}
@@ -6505,9 +6612,23 @@ CLIENT_CHAT_SURFACE_NUDGE = (
     "чате помогаешь с записью и услугами салона.]"
 )
 CHAT_TEMPORARY_ERROR_REPLY = (
-    "Сейчас связь с мозгом MAYA подвисла. Я на месте, просто не успела получить ответ. "
-    "Повторите вопрос ещё раз через несколько секунд."
+    "MAYA временно недоступна. Записаться можно через кнопку ниже — "
+    "форма записи и свободные окна работают."
 )
+STAFF_CHAT_TEMPORARY_ERROR_REPLY = (
+    "MAYA временно недоступна. Рабочие данные в кабинете остаются доступны; "
+    "чат вернётся после восстановления AI-сервиса."
+)
+
+
+def _chat_temporary_error(mode: str) -> tuple[str, dict | None]:
+    if str(mode or "").strip().lower() == "staff":
+        return STAFF_CHAT_TEMPORARY_ERROR_REPLY, None
+    return CHAT_TEMPORARY_ERROR_REPLY, {
+        "type": "open_booking",
+        "label": "Записаться",
+        "screen": "book",
+    }
 STAFF_BOOKING_SCOPE_REPLY = (
     "В рабочем чате я не записываю вас как клиента и не оформляю клиентские записи. "
     "Здесь я помогаю по работе: аналитика, выручка, зарплаты, расписание и задачи салона. "
@@ -6537,6 +6658,18 @@ _BOOKING_SPECIFIC_RE = re.compile(
     r"\b(сегодня|завтра|послезавтра|понедельник|вторник|сред[ау]|четверг|пятниц[ау]|"
     r"суббот[ау]|воскресень[ея]|стас|илья|илюх|саша|сан[ея]|александр|алексей|л[её]ш|"
     r"макс|максим|киянск|дарм|третьяк|мосин|чурсинов|\d{1,2}[:.]\d{2}|\b\d{1,2}\s*(?:час|ч|:00))\b",
+    re.IGNORECASE,
+)
+_BOOKING_START_ONLY_RE = re.compile(
+    r"^\s*(?:хочу\s+)?(?:записаться|запиши(?:те)?\s+меня|запись)\s*[.!?]*\s*$",
+    re.IGNORECASE,
+)
+_USUAL_MASTER_INTENT_RE = re.compile(
+    r"(?:\b(?:мой|моему|моего|свой|своему|своего)\s+"
+    r"(?:(?:постоянн|обычн|любим)\w*\s+)?(?:мастер|барбер)\w*\b|"
+    r"\b(?:постоянн|обычн|любим)\w*\s+(?:мастер|барбер)\w*\b|"
+    r"\bк\s+тому\s+же\s+(?:мастер|барбер)\w*\b|"
+    r"\bкак\s+обычно\b)",
     re.IGNORECASE,
 )
 _STAFF_CLIENT_BOOKING_RE = re.compile(
@@ -6755,6 +6888,12 @@ def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
     if not low:
         return None
 
+    if _BOOKING_START_ONLY_RE.fullmatch(low):
+        return (
+            "Конечно. На какую услугу вас записать?",
+            None,
+        )
+
     if _ADDRESS_INTENT_RE.search(low):
         return (
             "Мы находимся в Ставрополе: ул. Лермонтова, 343. Работаем каждый день с 10:00 до 21:00.",
@@ -6795,6 +6934,60 @@ def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
         )
 
     return None
+
+
+def _client_usual_booking_shortcut(
+    chat_id: int,
+    message: str,
+) -> tuple[str, dict | None] | None:
+    """Resolve "my regular master" deterministically from the client's visits."""
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low or not _USUAL_MASTER_INTENT_RE.search(low):
+        return None
+    try:
+        usual = memory.get_usual_booking(int(chat_id), warm=True)
+    except Exception as exc:
+        logger.error("usual booking shortcut: %s", exc)
+        usual = None
+    if not usual or not usual.get("master_name"):
+        return (
+            "Пока не вижу в истории постоянного мастера. Назовите мастера или выберите любого — я продолжу запись.",
+            None,
+        )
+
+    master_name = str(usual["master_name"]).strip()
+    service_text = str(usual.get("service_text") or "").strip()
+    asks_to_book = bool(_BOOKING_INTENT_RE.search(low) or "как обычно" in low)
+    if not asks_to_book:
+        return (
+            f"Ваш постоянный мастер по истории визитов — {master_name}. Записать вас к нему?",
+            None,
+        )
+
+    # If the client named a service in this message, it remains in chat history
+    # and wins over the historical set. Otherwise we can continue "as usual".
+    has_service_now = bool(re.search(
+        r"\b(?:стриж|стрид|бород|брит|камуфляж|тонир|уход|комплекс)\w*",
+        low,
+        re.IGNORECASE,
+    ))
+    use_usual_services = "как обычно" in low
+    if service_text and use_usual_services and not has_service_now:
+        return (
+            f"Выбрала вашего постоянного мастера — {master_name}. Обычно у вас: {service_text}. "
+            "На какой день и время записать? Можно сказать «ближайшее окно».",
+            None,
+        )
+    if has_service_now:
+        return (
+            f"Выбрала вашего постоянного мастера — {master_name}. "
+            "На какой день и время записать? Можно сказать «ближайшее окно».",
+            None,
+        )
+    return (
+        f"Выбрала вашего постоянного мастера — {master_name}. На какую услугу вас записать?",
+        None,
+    )
 
 
 def _plain_maya_delta(text: str) -> str:
@@ -6894,6 +7087,49 @@ def _assistant_history_item(text: str, *, link=None, action=None, images=None) -
     if isinstance(images, list) and images:
         item["images"] = images
     return item
+
+
+def _store_assistant_message_in_chat(
+    chat_id: int,
+    text: str,
+    *,
+    mode: str = "client",
+    action: dict | None = None,
+    link=None,
+    images: list | None = None,
+    dedupe_key: str = "",
+) -> bool:
+    """Кладёт сервисное сообщение MAYA в историю чата приложения.
+
+    Нужен для мостика push → переписка: уведомление не только всплывает, но и
+    остаётся в чате, чтобы клиент мог открыть приложение позже и перечитать его.
+    """
+    try:
+        cid = int(chat_id)
+    except (TypeError, ValueError):
+        return False
+    clean = _plain_maya_text(text or "")
+    if not clean:
+        return False
+    try:
+        conversations = memory.load_conversations()
+        history_key = _chat_history_key(cid, mode)
+        history = list(conversations.get(history_key) or [])
+        want_key = str(dedupe_key or "").strip()[:160]
+        if want_key:
+            for item in reversed(history[-8:]):
+                if isinstance(item, dict) and item.get("role") == "assistant" and item.get("dedupe_key") == want_key:
+                    return False
+        item = _assistant_history_item(clean, link=link, action=action, images=images)
+        if want_key:
+            item["dedupe_key"] = want_key
+        history.append(item)
+        conversations[history_key] = history[-30:]
+        memory.save_conversations(conversations)
+        return True
+    except Exception as e:
+        logger.error(f"store assistant message in chat {cid}: {e}")
+        return False
 
 
 async def chat_history_handler(request: web.Request) -> web.Response:
@@ -7202,7 +7438,12 @@ async def chat_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
-    client_shortcut = _client_chat_shortcut(message) if _allow_client_chat_shortcuts(body, chat_id, message) else None
+    client_shortcut = None
+    if _allow_client_chat_shortcuts(body, chat_id, message):
+        client_shortcut = (
+            _client_usual_booking_shortcut(chat_id, message)
+            or _client_chat_shortcut(message)
+        )
     if client_shortcut:
         direct_text, direct_action = client_shortcut
         safe_message = anonymizer.redact_pii(message)
@@ -7271,19 +7512,18 @@ async def chat_handler(request: web.Request) -> web.Response:
         )
     except Exception as e:
         logger.error(f"chat_handler: ошибка AI: {e}")
-        if "timed out" in str(e).lower() or "timeout" in str(e).lower():
-            history.append(_assistant_history_item(CHAT_TEMPORARY_ERROR_REPLY))
-            conversations[history_key] = history[-30:]
-            save_conversations(conversations)
-            return _cabinet_response({
-                "reply": CHAT_TEMPORARY_ERROR_REPLY,
-                "contact_request": False,
-                "transcript": transcript or "",
-            })
-        return _cabinet_response({
-            "error": "ai_error",
-            "message": "Не получилось ответить. Попробуйте ещё раз или позвоните: 8-962-447-67-47.",
-        }, status=502)
+        fallback_text, fallback_action = _chat_temporary_error(chat_mode)
+        history.append(_assistant_history_item(fallback_text, action=fallback_action))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        payload = {
+            "reply": fallback_text,
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        if fallback_action:
+            payload["action"] = fallback_action
+        return _cabinet_response(payload)
 
     # Если ИИ готов оформить запись (request_booking) — клиент авторизован,
     # оформляем сами (в Telegram это делает контакт-флоу бота, в приложении — мы).
@@ -7574,7 +7814,12 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
-    client_shortcut = _client_chat_shortcut(message) if _allow_client_chat_shortcuts(body, chat_id, message) else None
+    client_shortcut = None
+    if _allow_client_chat_shortcuts(body, chat_id, message):
+        client_shortcut = (
+            _client_usual_booking_shortcut(chat_id, message)
+            or _client_chat_shortcut(message)
+        )
     if client_shortcut:
         direct_text, direct_action = client_shortcut
         safe_message = anonymizer.redact_pii(message)
@@ -7709,9 +7954,14 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 loop.call_soon_threadsafe(queue.put_nowait, ev)
         except Exception as e:
             logger.error(f"chat_stream: ошибка AI: {e}")
+            fallback_text, fallback_action = _chat_temporary_error(chat_mode)
             loop.call_soon_threadsafe(
                 queue.put_nowait,
-                {"type": "fallback", "text": CHAT_TEMPORARY_ERROR_REPLY},
+                {
+                    "type": "fallback",
+                    "text": fallback_text,
+                    "action": fallback_action,
+                },
             )
         finally:
             loop.call_soon_threadsafe(queue.put_nowait, SENTINEL)
@@ -7722,6 +7972,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     contact_request = None
     gift_cert_action = None
     meta_text = ""
+    fallback_action = None
     had_error = False
 
     # ── Озвучка по предложениям (sentence-boundary chunking) ─────────────────
@@ -7797,6 +8048,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 meta_text = ev.get("text") or ""
             elif t == "fallback":
                 txt = _plain_maya_text(ev.get("text") or CHAT_TEMPORARY_ERROR_REPLY)
+                fallback_action = ev.get("action")
                 streamed_parts.clear()
                 if tts_on:
                     _tts_buf = ""
@@ -7846,7 +8098,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             if booking_msg:
                 response_text = booking_msg
 
-    cert_action = None
+    cert_action = fallback_action
     if gift_cert_action:
         if gift_cert_action.get("kind") == "subscription":
             response_text = (

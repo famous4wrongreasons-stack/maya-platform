@@ -1,4 +1,5 @@
 import importlib
+import asyncio
 import os
 import sys
 import types
@@ -20,6 +21,9 @@ def _load_webhook_server():
     fake_telegram = types.ModuleType("telegram")
     fake_telegram.InlineKeyboardButton = type("InlineKeyboardButton", (), {})
     fake_telegram.InlineKeyboardMarkup = type("InlineKeyboardMarkup", (), {})
+    fake_telegram_error = types.ModuleType("telegram.error")
+    fake_telegram_error.Forbidden = type("Forbidden", (Exception,), {})
+    fake_telegram_error.BadRequest = type("BadRequest", (Exception,), {})
     fake_telegram_ext = types.ModuleType("telegram.ext")
     fake_telegram_ext.Application = type("Application", (), {})
 
@@ -33,6 +37,7 @@ def _load_webhook_server():
     fake_database.get_setting = lambda key, default=None: default
     fake_database.get_master_by_chat_id = lambda _tg_id: None
     fake_database.is_admin = lambda tg_id: int(tg_id) == 948205934
+    fake_database.has_valid_consent_by_chat_id = lambda _chat_id: True
 
     fake_yclients = types.ModuleType("yclients")
 
@@ -52,10 +57,25 @@ def _load_webhook_server():
     sys.modules.pop("identity_utils", None)
     fake_identity_utils = importlib.import_module("identity_utils")
 
+    fake_memory = types.ModuleType("memory")
+    _conversations_store = {}
+    fake_memory.get_usual_booking = lambda _chat_id, warm=False: None
+    fake_memory.load_conversations = lambda: {
+        k: [dict(item) if isinstance(item, dict) else item for item in v]
+        for k, v in _conversations_store.items()
+    }
+    def _save_conversations(data):
+        _conversations_store.clear()
+        for k, v in (data or {}).items():
+            _conversations_store[k] = [dict(item) if isinstance(item, dict) else item for item in (v or [])]
+    fake_memory.save_conversations = _save_conversations
+    fake_memory._store = _conversations_store
+
     stubs = {
         "aiohttp": fake_aiohttp,
         "aiohttp.web": fake_web,
         "telegram": fake_telegram,
+        "telegram.error": fake_telegram_error,
         "telegram.ext": fake_telegram_ext,
         "ai_billing": types.ModuleType("ai_billing"),
         "anonymizer": types.ModuleType("anonymizer"),
@@ -63,8 +83,11 @@ def _load_webhook_server():
         "cutmatch": types.ModuleType("cutmatch"),
         "database": fake_database,
         "lead_alerts": types.ModuleType("lead_alerts"),
+        "master_briefing": types.ModuleType("master_briefing"),
         "masters_ai": types.ModuleType("masters_ai"),
-        "memory": types.ModuleType("memory"),
+        "memory": fake_memory,
+        "owner_ai": types.ModuleType("owner_ai"),
+        "reputation": types.ModuleType("reputation"),
         "subscriptions": types.ModuleType("subscriptions"),
         "web_auth": types.ModuleType("web_auth"),
         "yukassa_api": types.ModuleType("yukassa_api"),
@@ -80,6 +103,16 @@ def _load_webhook_server():
 
 
 class ChatRoutingTests(unittest.TestCase):
+    def setUp(self):
+        # _load_webhook_server подменяет реальные модули заглушками в sys.modules;
+        # без отката заглушки утекают в следующие тест-модули (test_reputation
+        # падал на mock.patch("reputation.database...") при общем прогоне).
+        self._saved_modules = sys.modules.copy()
+
+    def tearDown(self):
+        sys.modules.clear()
+        sys.modules.update(self._saved_modules)
+
     def test_master_profit_question_is_not_client_team_shortcut(self):
         ws = _load_webhook_server()
 
@@ -187,6 +220,68 @@ class ChatRoutingTests(unittest.TestCase):
             ws._chat_history_key(948205934, "staff"),
         )
 
+    def test_client_push_can_be_mirrored_into_pwa_chat_history(self):
+        ws = _load_webhook_server()
+        mem = sys.modules["memory"]
+
+        stored = ws._store_assistant_message_in_chat(
+            948205934,
+            "Запись подтверждена ✅",
+            mode="client",
+            action={"type": "open_cabinet", "label": "Мои записи"},
+            dedupe_key="record:create:1",
+        )
+
+        self.assertTrue(stored)
+        history = mem.load_conversations().get("pwa:client:948205934") or []
+        self.assertEqual(len(history), 1)
+        self.assertEqual(history[0]["role"], "assistant")
+        self.assertEqual(history[0]["action"]["type"], "open_cabinet")
+        self.assertEqual(history[0]["dedupe_key"], "record:create:1")
+
+        stored_again = ws._store_assistant_message_in_chat(
+            948205934,
+            "Запись подтверждена ✅",
+            mode="client",
+            action={"type": "open_cabinet", "label": "Мои записи"},
+            dedupe_key="record:create:1",
+        )
+
+        self.assertFalse(stored_again)
+        history = mem.load_conversations().get("pwa:client:948205934") or []
+        self.assertEqual(len(history), 1)
+
+    def test_marketing_broadcast_is_mirrored_into_client_chat(self):
+        ws = _load_webhook_server()
+        mem = sys.modules["memory"]
+        db = sys.modules["database"]
+        db.list_telegram_clients = lambda: [
+            {"id": 1, "name": "Стас", "telegram_chat_id": 948205934},
+        ]
+        db.has_marketing_consent = lambda _cid: True
+        db.get_notify_prefs = lambda _cid: {}
+        db.has_saved_notify_prefs = lambda _cid: False
+        db.marketing_sent_within = lambda _cid, _days: False
+        db.set_marketing_last_sent = lambda _cid: None
+
+        sent = []
+
+        class _FakeBot:
+            async def send_message(self, chat_id, text, parse_mode=None):
+                sent.append((chat_id, text, parse_mode))
+
+        ws.WEBPUSH_VAPID_PRIVATE_KEY = ""
+        result = asyncio.run(ws.broadcast_send_to_base(_FakeBot(), "Привет, {name}! Новая акция."))
+
+        self.assertEqual(result["sent"], 1)
+        self.assertEqual(sent[0][0], 948205934)
+        self.assertIn("Стас", sent[0][1])
+
+        history = mem.load_conversations().get("pwa:client:948205934") or []
+        self.assertEqual(len(history), 1)
+        self.assertEqual(history[0]["role"], "assistant")
+        self.assertIn("Привет, Стас! Новая акция.", history[0]["content"])
+
     def test_staff_surface_blocks_client_booking_intent(self):
         ws = _load_webhook_server()
 
@@ -200,6 +295,86 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIsNone(ws._staff_booking_scope_reply("Сколько у меня записей сегодня?"))
         self.assertIsNone(ws._staff_booking_scope_reply("Кто ко мне придёт завтра?"))
+
+    def test_booking_start_always_asks_for_service_first(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._client_chat_shortcut("Записаться")
+
+        self.assertEqual(reply, "Конечно. На какую услугу вас записать?")
+        self.assertIsNone(action)
+
+    def test_client_ai_error_keeps_booking_available(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._chat_temporary_error("client")
+
+        self.assertIn("временно недоступна", reply)
+        self.assertNotIn("мозг", reply.lower())
+        self.assertEqual(action["type"], "open_booking")
+        self.assertEqual(action["screen"], "book")
+
+    def test_staff_ai_error_does_not_open_client_booking(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._chat_temporary_error("staff")
+
+        self.assertIn("временно недоступна", reply)
+        self.assertIsNone(action)
+
+    def test_regular_master_phrase_resolves_from_server_history(self):
+        ws = _load_webhook_server()
+        sys.modules["memory"].get_usual_booking = lambda _chat_id, warm=False: {
+            "master_id": 3278920,
+            "master_name": "Александр Киянский",
+            "service_text": "Мужская стрижка",
+        }
+
+        reply, action = ws._client_usual_booking_shortcut(
+            948205934,
+            "Запиши меня к моему постоянному мастеру на мужскую стрижку",
+        )
+
+        self.assertIn("Александр Киянский", reply)
+        self.assertIn("На какой день и время", reply)
+        self.assertIsNone(action)
+
+    def test_regular_master_without_service_asks_for_service(self):
+        ws = _load_webhook_server()
+        sys.modules["memory"].get_usual_booking = lambda _chat_id, warm=False: {
+            "master_id": 3278920,
+            "master_name": "Александр Киянский",
+            "service_text": "Мужская стрижка, Борода",
+        }
+
+        reply, _ = ws._client_usual_booking_shortcut(
+            948205934,
+            "Запиши меня к моему постоянному мастеру",
+        )
+
+        self.assertIn("Александр Киянский", reply)
+        self.assertIn("На какую услугу", reply)
+
+    def test_regular_master_question_does_not_invent_a_master(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._client_usual_booking_shortcut(
+            948205934,
+            "Кто мой постоянный мастер?",
+        )
+
+        self.assertIn("не вижу", reply)
+        self.assertIsNone(action)
+
+    def test_regular_master_intent_supports_natural_variants(self):
+        ws = _load_webhook_server()
+        for phrase in (
+            "запиши к моему мастеру",
+            "хочу к своему барберу",
+            "давай как обычно",
+            "запиши к тому же мастеру",
+        ):
+            self.assertRegex(phrase, ws._USUAL_MASTER_INTENT_RE)
 
 
 if __name__ == "__main__":
