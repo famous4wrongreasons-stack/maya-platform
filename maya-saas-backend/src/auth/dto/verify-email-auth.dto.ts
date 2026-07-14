@@ -1,6 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -8,9 +9,14 @@ import {
 } from 'class-validator';
 
 export class VerifyEmailAuthDto {
-  @ApiProperty({ example: 'demo-business' })
+  @ApiPropertyOptional({
+    description:
+      'Optional business slug. Omit it for automatic business discovery.',
+    example: 'demo-business',
+  })
+  @IsOptional()
   @IsString()
-  tenantSlug!: string;
+  tenantSlug?: string;
 
   @ApiProperty({ example: 'owner@example.ru' })
   @IsEmail()

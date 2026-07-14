@@ -25,6 +25,7 @@ describe('EmailAuthService', () => {
 
   const tenant = {
     id: 'tenant-1',
+    name: 'Artem studio',
     slug: 'artem-studio',
     status: 'trial',
     trialFullAccess: true,
@@ -37,6 +38,7 @@ describe('EmailAuthService', () => {
     role: UserRole.TENANT_ADMIN,
     status: 'active',
   };
+  const ownerCandidate = { ...owner, tenant };
   const emailCodeHash = () =>
     createHmac('sha256', 'email-secret')
       .update([tenant.id, owner.email, '123456'].join('\0'))
@@ -60,6 +62,9 @@ describe('EmailAuthService', () => {
     const recordInvalidEmailAttempt = jest.fn().mockResolvedValue(1);
     const claimEmailChallenge = jest.fn().mockResolvedValue(true);
     const findTenantUserByEmail = jest.fn().mockResolvedValue(owner);
+    const findEmailLoginCandidates = jest
+      .fn()
+      .mockResolvedValue([ownerCandidate]);
     const serializeUser = jest.fn((user: unknown) => user);
     const issueSession = jest.fn().mockResolvedValue({
       access_token: 'jwt-token',
@@ -78,6 +83,7 @@ describe('EmailAuthService', () => {
         get: jest.fn((key: string) => config[key]),
       } as unknown as ConfigService,
       {
+        findEmailLoginCandidates,
         findTenantUserByEmail,
         serializeUser,
       } as unknown as UsersService,
@@ -104,6 +110,7 @@ describe('EmailAuthService', () => {
         claimEmailChallenge,
         deliverCode,
         findEmailChallenge,
+        findEmailLoginCandidates,
         findTenantUserByEmail,
         getTenantBySlugOrThrow,
         getDeliveryType,
@@ -156,6 +163,37 @@ describe('EmailAuthService', () => {
     expect(tenantContext.get()).toBeUndefined();
   });
 
+  it('starts a shared-app challenge without exposing the resolved tenant', async () => {
+    const { service, tenantContext, mocks } = createService();
+
+    const result = await service.start(
+      { email: ' Owner@Example.Test ' },
+      { clientIp: '203.0.113.11' },
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      email: owner.email,
+      delivery: 'debug',
+      debug_code: '123456',
+      next_step: 'verify_email_code',
+    });
+    expect(result).not.toHaveProperty('tenant_slug');
+    expect(result).not.toHaveProperty('businesses');
+    expect(mocks.findEmailLoginCandidates).toHaveBeenCalledWith(owner.email);
+    expect(mocks.upsertEmailChallenge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: owner.email,
+        codeHash: emailCodeHash(),
+      }),
+    );
+    expect(mocks.assertPreflight).toHaveBeenCalledWith('email_start', {
+      clientIp: '203.0.113.11',
+      identity: JSON.stringify(['*', owner.email]),
+    });
+    expect(tenantContext.get()).toBeUndefined();
+  });
+
   it('verifies an owner code in trial and issues a normal session', async () => {
     const { service, mocks } = createService();
     const codeHash = emailCodeHash();
@@ -183,6 +221,134 @@ describe('EmailAuthService', () => {
     expect(mocks.issueSession).toHaveBeenCalledWith(owner, {});
     expect(mocks.serializeUser).toHaveBeenCalledWith(owner);
     expect(result).toMatchObject({ access_token: 'jwt-token', user: owner });
+  });
+
+  it('automatically resolves one business after a valid shared-app code', async () => {
+    const { service, mocks } = createService();
+    const codeHash = emailCodeHash();
+    mocks.findEmailChallenge.mockResolvedValue({
+      id: 'email-challenge-1',
+      tenantId: tenant.id,
+      email: owner.email,
+      codeHash,
+      attempts: 0,
+      expiresAt: new Date(Date.now() + 300_000),
+      consumedAt: null,
+    });
+
+    const result = await service.verify({
+      email: owner.email,
+      code: '123456',
+    });
+
+    expect(mocks.claimEmailChallenge).toHaveBeenCalledWith(
+      'email-challenge-1',
+      codeHash,
+      expect.any(Date),
+    );
+    expect(mocks.issueSession).toHaveBeenCalledWith(ownerCandidate, {});
+    expect(result).toMatchObject({
+      access_token: 'jwt-token',
+      tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug },
+      user: ownerCandidate,
+    });
+  });
+
+  it('reveals business choices only after a valid code for multiple tenants', async () => {
+    const { service, tenantContext, mocks } = createService();
+    const secondTenant = {
+      ...tenant,
+      id: 'tenant-2',
+      name: 'Second studio',
+      slug: 'second-studio',
+    };
+    const secondOwner = {
+      ...ownerCandidate,
+      id: 'user-2',
+      tenantId: secondTenant.id,
+      tenant: secondTenant,
+    };
+    mocks.findEmailLoginCandidates.mockResolvedValue([
+      ownerCandidate,
+      secondOwner,
+    ]);
+    mocks.findEmailChallenge.mockImplementation(() => {
+      const tenantId = tenantContext.requireTenantId();
+      const codeHash = createHmac('sha256', 'email-secret')
+        .update([tenantId, owner.email, '123456'].join('\0'))
+        .digest('hex');
+
+      return {
+        id: `challenge-${tenantId}`,
+        tenantId,
+        email: owner.email,
+        codeHash,
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 300_000),
+        consumedAt: null,
+      };
+    });
+
+    const result = await service.verify({
+      email: owner.email,
+      code: '123456',
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      next_step: 'select_business',
+      businesses: [
+        {
+          name: tenant.name,
+          role: owner.role,
+          slug: tenant.slug,
+        },
+        {
+          name: secondTenant.name,
+          role: secondOwner.role,
+          slug: secondTenant.slug,
+        },
+      ],
+    });
+    expect(mocks.claimEmailChallenge).not.toHaveBeenCalled();
+    expect(mocks.issueSession).not.toHaveBeenCalled();
+    expect(tenantContext.get()).toBeUndefined();
+  });
+
+  it('does not reveal a business or issue a session for an invalid shared-app code', async () => {
+    const { service, tenantContext, mocks } = createService();
+    const codeHash = emailCodeHash();
+    mocks.findEmailChallenge.mockResolvedValue({
+      id: 'email-challenge-1',
+      tenantId: tenant.id,
+      email: owner.email,
+      codeHash,
+      attempts: 0,
+      expiresAt: new Date(Date.now() + 300_000),
+      consumedAt: null,
+    });
+    mocks.recordInvalidEmailAttempt.mockResolvedValue(1);
+
+    await expect(
+      service.verify({ email: owner.email, code: '000000' }),
+    ).rejects.toMatchObject<BadRequestException>({
+      response: {
+        error: {
+          code: 'email_code_invalid',
+          remaining_attempts: 4,
+        },
+      },
+    });
+
+    expect(mocks.recordInvalidEmailAttempt).toHaveBeenCalledWith(
+      'email-challenge-1',
+      codeHash,
+      expect.any(Date),
+      5,
+    );
+    expect(mocks.claimEmailChallenge).not.toHaveBeenCalled();
+    expect(mocks.issueSession).not.toHaveBeenCalled();
+    expect(tenantContext.get()).toBeUndefined();
   });
 
   it('atomically counts an invalid code and never issues a session', async () => {

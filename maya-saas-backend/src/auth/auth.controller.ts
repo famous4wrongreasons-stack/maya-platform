@@ -80,7 +80,8 @@ export class AuthController {
   @Public()
   @Post('email/start')
   @ApiOperation({
-    summary: 'Send a one-time email code to an existing tenant user',
+    summary:
+      'Send a one-time email code, optionally discovering the tenant after verification',
   })
   startEmailAuth(@Body() dto: StartEmailAuthDto, @Req() request: Request) {
     return this.emailAuthService.start(dto, resolveAuthClientMetadata(request));
@@ -89,7 +90,8 @@ export class AuthController {
   @Public()
   @Post('email/verify')
   @ApiOperation({
-    summary: 'Verify an email code and return a tenant-scoped JWT',
+    summary:
+      'Verify an email code, resolve the business and return a tenant-scoped JWT',
   })
   verifyEmailAuth(@Body() dto: VerifyEmailAuthDto, @Req() request: Request) {
     return this.emailAuthService.verify(

@@ -19,6 +19,7 @@ import { AuthSessionService } from './auth-session.service';
 import { StartEmailAuthDto } from './dto/start-email-auth.dto';
 import { VerifyEmailAuthDto } from './dto/verify-email-auth.dto';
 import {
+  EmailAuthDeliveryResult,
   EmailAuthDeliveryFailedError,
   EmailAuthDeliveryService,
   EmailAuthDeliveryUnavailableError,
@@ -28,6 +29,7 @@ import { TenantAuthRepository } from './tenant-auth.repository';
 type EmailLoginTenant = {
   currentPeriodEnd?: Date | null;
   id: string;
+  name: string;
   slug: string;
   status: string;
   trialEndsAt?: Date | null;
@@ -35,8 +37,12 @@ type EmailLoginTenant = {
 };
 
 type EmailLoginUser = {
+  email: string;
+  id: string;
   role: string;
   status: string;
+  tenant?: EmailLoginTenant | null;
+  tenantId: string | null;
 };
 
 @Injectable()
@@ -58,13 +64,17 @@ export class EmailAuthService {
   ) {
     this.assertEnabled();
     const email = this.normalizeEmail(dto.email);
+    const tenantSlug = dto.tenantSlug?.trim();
+
+    if (!tenantSlug) {
+      return this.startAcrossTenants(email, metadata);
+    }
+
     await this.rateLimitService.assertPreflight('email_start', {
       clientIp: metadata.clientIp,
-      identity: this.buildTenantIdentityHint(dto.tenantSlug, email),
+      identity: this.buildTenantIdentityHint(tenantSlug, email),
     });
-    const tenant = await this.tenantsService.getTenantBySlugOrThrow(
-      dto.tenantSlug,
-    );
+    const tenant = await this.tenantsService.getTenantBySlugOrThrow(tenantSlug);
 
     return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
       await this.rateLimitService.assertTenant('email_start', {
@@ -139,13 +149,17 @@ export class EmailAuthService {
   ) {
     this.assertEnabled();
     const email = this.normalizeEmail(dto.email);
+    const tenantSlug = dto.tenantSlug?.trim();
+
+    if (!tenantSlug) {
+      return this.verifyAcrossTenants(email, dto.code, metadata);
+    }
+
     await this.rateLimitService.assertPreflight('email_verify', {
       clientIp: metadata.clientIp,
-      identity: this.buildTenantIdentityHint(dto.tenantSlug, email),
+      identity: this.buildTenantIdentityHint(tenantSlug, email),
     });
-    const tenant = await this.tenantsService.getTenantBySlugOrThrow(
-      dto.tenantSlug,
-    );
+    const tenant = await this.tenantsService.getTenantBySlugOrThrow(tenantSlug);
 
     return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
       await this.rateLimitService.assertTenant('email_verify', {
@@ -249,9 +263,258 @@ export class EmailAuthService {
 
       return {
         ...(await this.sessionService.issueSession(user, metadata)),
+        tenant: this.serializeLoginTenant(tenant),
         user: this.usersService.serializeUser(user),
       };
     });
+  }
+
+  private async startAcrossTenants(
+    email: string,
+    metadata: Partial<AuthClientMetadata>,
+  ) {
+    await this.rateLimitService.assertPreflight('email_start', {
+      clientIp: metadata.clientIp,
+      identity: this.buildTenantIdentityHint('*', email),
+    });
+
+    const candidates = await this.findEligibleEmailCandidates(email);
+    const code = this.resolveCode();
+    const ttlSeconds = this.getCodeTtlSeconds();
+    const expiresAt = new Date(Date.now() + ttlSeconds * 1_000);
+
+    for (const candidate of candidates) {
+      const tenant = candidate.tenant!;
+      await this.tenantContext.runAsPublicTenant(tenant.id, async () => {
+        await this.rateLimitService.assertTenant('email_start', {
+          tenantId: tenant.id,
+          identity: email,
+        });
+        await this.authRepository.upsertEmailChallenge({
+          email,
+          codeHash: this.hashCode(tenant.id, email, code),
+          expiresAt,
+        });
+      });
+    }
+
+    let deliveryResult: EmailAuthDeliveryResult = { delivery: 'email' };
+    try {
+      const deliveryType = this.deliveryService.getDeliveryType();
+      if (deliveryType === 'debug' || candidates.length > 0) {
+        deliveryResult = await this.deliveryService.deliverCode({
+          email,
+          code,
+          expiresInMinutes: Math.ceil(ttlSeconds / 60),
+        });
+      }
+    } catch (error) {
+      if (error instanceof EmailAuthDeliveryUnavailableError) {
+        throw new ServiceUnavailableException(
+          this.buildError('email_delivery_unavailable', error.message),
+        );
+      }
+      if (error instanceof EmailAuthDeliveryFailedError) {
+        throw new ServiceUnavailableException(
+          this.buildError('email_delivery_failed', error.message),
+        );
+      }
+      throw error;
+    }
+
+    return {
+      ok: true,
+      email,
+      delivery: deliveryResult.delivery,
+      expires_at: expiresAt,
+      retry_after_seconds: this.getRetryAfterSeconds(),
+      next_step: 'verify_email_code',
+      ...(deliveryResult.delivery === 'debug'
+        ? { debug_code: deliveryResult.debug_code }
+        : {}),
+    };
+  }
+
+  private async verifyAcrossTenants(
+    email: string,
+    code: string,
+    metadata: Partial<AuthClientMetadata>,
+  ) {
+    await this.rateLimitService.assertPreflight('email_verify', {
+      clientIp: metadata.clientIp,
+      identity: this.buildTenantIdentityHint('*', email),
+    });
+
+    const candidates = await this.findEligibleEmailCandidates(email);
+    if (!candidates.length) {
+      throw new BadRequestException(
+        this.buildError(
+          'email_code_invalid',
+          'Invalid email verification code.',
+          'code',
+        ),
+      );
+    }
+
+    const maxAttempts = this.getMaxAttempts();
+    const inspected = [];
+
+    for (const candidate of candidates) {
+      const tenant = candidate.tenant!;
+      const result = await this.tenantContext.runAsPublicTenant(
+        tenant.id,
+        async () => {
+          await this.rateLimitService.assertTenant('email_verify', {
+            tenantId: tenant.id,
+            identity: email,
+          });
+          const challenge = await this.authRepository.findEmailChallenge(email);
+
+          if (!challenge || challenge.consumedAt) {
+            return { status: 'missing' as const };
+          }
+          if (challenge.expiresAt.getTime() < Date.now()) {
+            return { status: 'expired' as const };
+          }
+          if (challenge.attempts >= maxAttempts) {
+            return { status: 'too_many' as const };
+          }
+
+          const providedHash = this.hashCode(tenant.id, email, code);
+          const providedBuffer = Buffer.from(providedHash);
+          const expectedBuffer = Buffer.from(challenge.codeHash);
+          const codeValid =
+            providedBuffer.length === expectedBuffer.length &&
+            timingSafeEqual(providedBuffer, expectedBuffer);
+
+          if (!codeValid) {
+            const attempts =
+              await this.authRepository.recordInvalidEmailAttempt(
+                challenge.id,
+                challenge.codeHash,
+                new Date(),
+                maxAttempts,
+              );
+
+            return attempts === null || attempts >= maxAttempts
+              ? { status: 'too_many' as const }
+              : {
+                  status: 'invalid' as const,
+                  remainingAttempts: maxAttempts - attempts,
+                };
+          }
+
+          return {
+            status: 'valid' as const,
+            candidate,
+            challenge,
+          };
+        },
+      );
+      inspected.push(result);
+    }
+
+    const valid = inspected.filter((result) => result.status === 'valid');
+    if (!valid.length) {
+      if (inspected.some((result) => result.status === 'too_many')) {
+        throw new HttpException(
+          this.buildTooManyAttemptsError(),
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      const invalid = inspected.filter((result) => result.status === 'invalid');
+      if (invalid.length) {
+        const remainingAttempts = Math.min(
+          ...invalid.map((result) => result.remainingAttempts),
+        );
+        throw new BadRequestException(
+          this.buildError(
+            'email_code_invalid',
+            'Invalid email verification code.',
+            'code',
+            { remaining_attempts: remainingAttempts },
+          ),
+        );
+      }
+      if (inspected.some((result) => result.status === 'expired')) {
+        throw new BadRequestException(
+          this.buildError(
+            'email_code_expired',
+            'The email verification code has expired.',
+            'code',
+          ),
+        );
+      }
+      throw new BadRequestException(
+        this.buildError(
+          'email_code_missing',
+          'Request a new email verification code and try again.',
+          'code',
+        ),
+      );
+    }
+
+    if (valid.length > 1) {
+      return {
+        ok: true,
+        next_step: 'select_business',
+        businesses: valid.map(({ candidate }) => ({
+          name: candidate.tenant!.name,
+          role: candidate.role,
+          slug: candidate.tenant!.slug,
+        })),
+      };
+    }
+
+    const selected = valid[0];
+    const candidate = selected.candidate;
+    const challenge = selected.challenge;
+    const tenant = candidate.tenant!;
+
+    return this.tenantContext.runAsPublicTenant(tenant.id, async () => {
+      const challengeClaimed = await this.authRepository.claimEmailChallenge(
+        challenge.id,
+        challenge.codeHash,
+        new Date(),
+      );
+      if (!challengeClaimed) {
+        throw new BadRequestException(
+          this.buildError(
+            'email_code_missing',
+            'Request a new email verification code and try again.',
+            'code',
+          ),
+        );
+      }
+
+      return {
+        ...(await this.sessionService.issueSession(candidate, metadata)),
+        tenant: this.serializeLoginTenant(tenant),
+        user: this.usersService.serializeUser(candidate),
+      };
+    });
+  }
+
+  private async findEligibleEmailCandidates(email: string) {
+    const candidates = await this.usersService.findEmailLoginCandidates(email);
+    const unique = new Map<string, (typeof candidates)[number]>();
+
+    for (const candidate of candidates) {
+      const tenant = candidate.tenant;
+      if (!candidate.tenantId || !tenant || unique.has(tenant.id)) continue;
+      if (!this.canUserLogIn(tenant, candidate)) continue;
+      unique.set(tenant.id, candidate);
+    }
+
+    return [...unique.values()];
+  }
+
+  private serializeLoginTenant(tenant: EmailLoginTenant) {
+    return {
+      id: tenant.id,
+      name: tenant.name,
+      slug: tenant.slug,
+    };
   }
 
   private assertEnabled(): void {

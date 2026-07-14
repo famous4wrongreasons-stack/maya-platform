@@ -55,6 +55,36 @@ export class UsersService {
     });
   }
 
+  async findEmailLoginCandidates(email: string) {
+    // Deliberately narrow cross-tenant lookup for the shared-app auth entry.
+    // Callers must not expose these records until the email code is verified.
+    const users = await this.prisma.user.findMany({
+      where: {
+        tenantId: { not: null },
+        email: email.toLowerCase(),
+        status: 'active',
+      },
+      include: {
+        tenant: true,
+        branch: true,
+        memberships: {
+          where: { status: 'active' },
+          select: { tenantId: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 25,
+    });
+
+    return users.filter(
+      (user) =>
+        Boolean(user.tenantId && user.tenant) &&
+        user.memberships.some(
+          (membership) => membership.tenantId === user.tenantId,
+        ),
+    );
+  }
+
   async findPlatformOwnerByEmail(email: string) {
     return this.prisma.user.findFirst({
       where: {
