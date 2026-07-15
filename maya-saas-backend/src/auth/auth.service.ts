@@ -144,6 +144,7 @@ export class AuthService {
   }
 
   async startPhoneAuth(dto: StartPhoneAuthDto, clientIp?: string | null) {
+    this.assertPhoneLoginEnabled();
     const phone = normalizeRussianPhone(dto.phone);
     await this.rateLimitService.assertPreflight('phone_start', {
       clientIp,
@@ -231,6 +232,7 @@ export class AuthService {
     dto: VerifyPhoneAuthDto,
     metadata: Partial<AuthClientMetadata> = {},
   ) {
+    this.assertPhoneLoginEnabled();
     const phone = normalizeRussianPhone(dto.phone);
     await this.rateLimitService.assertPreflight('phone_verify', {
       clientIp: metadata.clientIp,
@@ -376,6 +378,22 @@ export class AuthService {
         is_new_user: isNewUser,
       };
     });
+  }
+
+  private assertPhoneLoginEnabled(): void {
+    if (
+      this.configService
+        .get<string>('PHONE_LOGIN_ENABLED')
+        ?.trim()
+        .toLowerCase() === 'false'
+    ) {
+      throw new ServiceUnavailableException(
+        this.buildPhoneAuthError(
+          'phone_login_disabled',
+          'Phone login is not enabled in this environment.',
+        ),
+      );
+    }
   }
 
   private async loginTenantUser(dto: LoginDto, normalizedEmail: string) {
@@ -561,6 +579,7 @@ export class AuthService {
       | 'code_missing'
       | 'delivery_failed'
       | 'delivery_unavailable'
+      | 'phone_login_disabled'
       | 'too_many_attempts',
     message: string,
     field?: string,

@@ -17,10 +17,12 @@ const PRODUCTION_SECRET_NAMES = [
 const BOOLEAN_NAMES = [
   'EMAIL_LOGIN_ENABLED',
   'EMAIL_AUTH_DEBUG',
+  'PHONE_LOGIN_ENABLED',
   'PHONE_AUTH_DEBUG',
   'SMTP_SECURE',
   'SMSRU_TEST',
   'SELF_SERVE_TRIAL_SIGNUP',
+  'PWA_TENANT_INSTALL_ENABLED',
   'SWAGGER_ENABLED',
   'YANDEX_LOGIN_ENABLED',
   'TELEGRAM_LOGIN_ENABLED',
@@ -110,6 +112,10 @@ function validateProductionConfig(
 ): void {
   validateDatabaseUrl(config.DATABASE_URL, issues);
   const emailLoginEnabled = booleanValue(config.EMAIL_LOGIN_ENABLED);
+  const phoneLoginEnabled = booleanValueWithDefault(
+    config.PHONE_LOGIN_ENABLED,
+    true,
+  );
   validateProductionSecrets(config, issues, emailLoginEnabled);
 
   if (!stringValue(config.CORS_ALLOWED_ORIGINS)) {
@@ -122,20 +128,22 @@ function validateProductionConfig(
   const phoneDebug = booleanValue(config.PHONE_AUTH_DEBUG);
   const smsRuTest = booleanValue(config.SMSRU_TEST);
 
-  if (!['auto', 'smsru'].includes(phoneProvider)) {
-    issues.push('PHONE_AUTH_PROVIDER must be auto or smsru in production');
-  }
+  if (phoneLoginEnabled) {
+    if (!['auto', 'smsru'].includes(phoneProvider)) {
+      issues.push('PHONE_AUTH_PROVIDER must be auto or smsru in production');
+    }
 
-  if (phoneDebug) {
-    issues.push('PHONE_AUTH_DEBUG cannot be enabled in production');
-  }
+    if (phoneDebug) {
+      issues.push('PHONE_AUTH_DEBUG cannot be enabled in production');
+    }
 
-  if (stringValue(config.PHONE_AUTH_FIXED_CODE)) {
-    issues.push('PHONE_AUTH_FIXED_CODE must be empty in production');
-  }
+    if (stringValue(config.PHONE_AUTH_FIXED_CODE)) {
+      issues.push('PHONE_AUTH_FIXED_CODE must be empty in production');
+    }
 
-  if (smsRuTest) {
-    issues.push('SMSRU_TEST cannot be enabled in production');
+    if (smsRuTest) {
+      issues.push('SMSRU_TEST cannot be enabled in production');
+    }
   }
 
   if (emailLoginEnabled) {
@@ -157,14 +165,21 @@ function validateProductionConfig(
 
   const smsRuApiId = stringValue(config.SMSRU_API_ID);
 
-  if (!smsRuApiId) {
-    issues.push('SMSRU_API_ID is required for production phone auth');
-  } else if (containsPlaceholder(smsRuApiId)) {
-    issues.push('SMSRU_API_ID contains a known placeholder');
+  if (phoneLoginEnabled) {
+    if (!smsRuApiId) {
+      issues.push('SMSRU_API_ID is required for production phone auth');
+    } else if (containsPlaceholder(smsRuApiId)) {
+      issues.push('SMSRU_API_ID contains a known placeholder');
+    }
   }
 
   const yandexEnabled = booleanValue(config.YANDEX_LOGIN_ENABLED);
   const telegramEnabled = booleanValue(config.TELEGRAM_LOGIN_ENABLED);
+  const tenantPwaEnabled = booleanValue(config.PWA_TENANT_INSTALL_ENABLED);
+
+  if (tenantPwaEnabled) {
+    validateSameOriginPwaUrls(config, issues);
+  }
 
   if (yandexEnabled) {
     requireSetting(config, 'YANDEX_CLIENT_ID', issues);
@@ -184,6 +199,47 @@ function validateProductionConfig(
     issues.push(
       'OAUTH_ALLOWED_REDIRECT_URIS is required when social login is enabled',
     );
+  }
+}
+
+function validateSameOriginPwaUrls(
+  config: Record<string, unknown>,
+  issues: string[],
+): void {
+  const appUrl = parseHttpsUrl(
+    config.PWA_PUBLIC_APP_URL,
+    'PWA_PUBLIC_APP_URL',
+    issues,
+  );
+  const apiUrl = parseHttpsUrl(
+    config.PWA_PUBLIC_API_URL,
+    'PWA_PUBLIC_API_URL',
+    issues,
+  );
+
+  if (appUrl && apiUrl && appUrl.origin !== apiUrl.origin) {
+    issues.push(
+      'PWA_PUBLIC_APP_URL and PWA_PUBLIC_API_URL must share one origin for an installable tenant PWA',
+    );
+  }
+}
+
+function parseHttpsUrl(
+  value: unknown,
+  name: string,
+  issues: string[],
+): URL | null {
+  const raw = stringValue(value);
+  try {
+    const parsed = new URL(raw);
+    if (!raw || parsed.protocol !== 'https:') {
+      issues.push(`${name} must be an HTTPS URL`);
+      return null;
+    }
+    return parsed;
+  } catch {
+    issues.push(`${name} must be an HTTPS URL`);
+    return null;
   }
 }
 
@@ -354,6 +410,11 @@ function validateHttpsUrl(
 
 function booleanValue(value: unknown): boolean {
   return stringValue(value).toLowerCase() === 'true';
+}
+
+function booleanValueWithDefault(value: unknown, fallback: boolean): boolean {
+  const raw = stringValue(value).toLowerCase();
+  return raw ? raw === 'true' : fallback;
 }
 
 function configuredInteger(value: unknown, fallback: number): number | null {

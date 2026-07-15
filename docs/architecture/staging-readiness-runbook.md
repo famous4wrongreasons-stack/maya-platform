@@ -47,6 +47,24 @@ Prepare an environment that is not connected to existing production traffic:
 7. Confirm that production DNS and the current Python/SQLite runtime are
    unchanged.
 
+The repository-owned staging path is now:
+
+```bash
+cd maya-saas-backend
+./scripts/bootstrap-staging-env.sh staging.example.com
+./scripts/staging-up.sh
+```
+
+`compose.staging.yml` creates an isolated PostgreSQL volume, uploads volume,
+backend and Caddy gateway. The gateway serves the PWA and `/api` on the same
+HTTPS origin, which is required for tenant-specific PWA manifests and start
+URLs. The bootstrap script generates independent secrets without printing
+their values. It intentionally leaves all external providers disabled.
+
+Before every live-provider canary, create a dump with
+`./scripts/staging-backup.sh`. A restore requires the explicit
+`RESTORE-STAGING` argument and stops the backend during replacement.
+
 ## Gate 2: Synthetic tenant verification
 
 Use only synthetic records at this gate:

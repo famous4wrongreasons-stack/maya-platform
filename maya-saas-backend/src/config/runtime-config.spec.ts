@@ -53,6 +53,27 @@ describe('runtime config validation', () => {
     });
   });
 
+  it('accepts tenant PWA URLs only on one HTTPS origin', () => {
+    const config = productionConfig();
+    config.PWA_TENANT_INSTALL_ENABLED = 'true';
+    config.PWA_PUBLIC_APP_URL = 'https://staging.example.test/app.html';
+    config.PWA_PUBLIC_API_URL = 'https://staging.example.test/api';
+
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      PWA_TENANT_INSTALL_ENABLED: 'true',
+    });
+
+    config.PWA_PUBLIC_API_URL = 'https://api.example.test/api';
+    expect(validationMessage(config)).toContain(
+      'PWA_PUBLIC_APP_URL and PWA_PUBLIC_API_URL must share one origin',
+    );
+
+    config.PWA_PUBLIC_APP_URL = 'http://staging.example.test/app.html';
+    expect(validationMessage(config)).toContain(
+      'PWA_PUBLIC_APP_URL must be an HTTPS URL',
+    );
+  });
+
   it('rejects missing, placeholder and shared production secrets', () => {
     const config = productionConfig();
     config.JWT_SECRET = 'change-me-in-production';
@@ -85,6 +106,17 @@ describe('runtime config validation', () => {
     expect(message).toContain(
       'SMSRU_API_ID is required for production phone auth',
     );
+  });
+
+  it('allows production-like staging to disable phone login before SMS approval', () => {
+    const config = productionConfig();
+    config.PHONE_LOGIN_ENABLED = 'false';
+    config.PHONE_AUTH_PROVIDER = 'debug';
+    delete config.SMSRU_API_ID;
+
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      PHONE_LOGIN_ENABLED: 'false',
+    });
   });
 
   it('requires complete provider config and redirect allowlist', () => {

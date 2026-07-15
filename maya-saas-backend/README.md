@@ -25,6 +25,9 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `GET /api/industry-presets`
   - `GET /api/crm/providers`
   - `GET /api/mobile/config/:tenantSlug`
+  - `GET /api/mobile/pwa/:tenantSlug/install`
+  - `GET /api/mobile/pwa/:tenantSlug/manifest.webmanifest`
+  - `GET /api/mobile/pwa/:tenantSlug/icon/:size.png`
   - `GET /api/onboarding/templates`
   - `POST /api/onboarding/trial-activations`
   - `POST /api/onboarding/ai/drafts`
@@ -120,6 +123,9 @@ NODE_ENV="development"
 CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://localhost"
 SWAGGER_ENABLED="true"
 SELF_SERVE_TRIAL_SIGNUP="false"
+PWA_TENANT_INSTALL_ENABLED="false"
+PWA_PUBLIC_APP_URL="http://127.0.0.1:8787/app.html"
+PWA_PUBLIC_API_URL="http://127.0.0.1:3000/api"
 AI_ONBOARDING_PROVIDER="auto"
 DEEPSEEK_API_KEY=""
 DEEPSEEK_BASE_URL="https://api.deepseek.com"
@@ -136,6 +142,7 @@ SEED_PLATFORM_OWNER_PASSWORD="replace-me-before-seeding"
 SEED_DEMO_TENANT_ADMIN_PASSWORD="replace-me-before-seeding"
 YCLIENTS_BASE_URL="https://api.yclients.com/api/v1"
 YCLIENTS_PARTNER_TOKEN="change-me-in-production"
+PHONE_LOGIN_ENABLED="true"
 PHONE_AUTH_PROVIDER="auto"
 PHONE_AUTH_DEBUG="false"
 PHONE_AUTH_SECRET="change-me-to-a-fourth-independent-random-secret"
@@ -169,6 +176,7 @@ Development keeps a narrow localhost/Capacitor CORS fallback. Production is fail
 
 Phone auth delivery modes:
 
+- `PHONE_LOGIN_ENABLED=false`: keeps phone endpoints fail-closed so a production-like staging environment can start before SMS credentials are approved
 - `SELF_SERVE_TRIAL_SIGNUP=true`: enables public self-serve service-business signup in production
 
 - `PHONE_AUTH_PROVIDER=auto`: local/test defaults to debug, production requires SMS creds
@@ -206,6 +214,13 @@ Conversational onboarding:
 
 See [the conversational onboarding and verified-trial contract](../docs/product/ai-onboarding.md).
 
+Tenant PWA installation:
+
+- `PWA_TENANT_INSTALL_ENABLED=true` exposes a manifest and normalized 180/192/512 PNG icons for each tenant.
+- Uploaded logos are fitted into a square white canvas; maskable variants use a larger safe area.
+- Production requires `PWA_PUBLIC_APP_URL` and `PWA_PUBLIC_API_URL` to be HTTPS URLs on the same origin. Route `/api` through the same public app host so browser PWA identity, scope and start URL remain valid.
+- The universal App Store application keeps the MAYA icon. Tenant logos belong to the tenant PWA; a separate native binary is required for a tenant-specific App Store icon.
+
 ## Run locally
 
 Install dependencies:
@@ -226,6 +241,31 @@ Or run PostgreSQL separately and start the app directly:
 npm run prisma:migrate:deploy
 npm run start:dev
 ```
+
+## Isolated HTTPS staging
+
+The repository contains a production-mode staging stack that does not share a
+database, uploads or traffic with the current salon application:
+
+```bash
+./scripts/bootstrap-staging-env.sh staging.example.com
+./scripts/staging-up.sh
+```
+
+The stack serves the PWA and `/api` from one HTTPS origin through Caddy, keeps
+PostgreSQL private, persists uploads, applies migrations and seeds synthetic
+tenants. SMS, email, OAuth, AI providers, CRM writes and YooKassa stay disabled
+until their individual credentials and acceptance gates are approved.
+
+Create and restore a database backup with:
+
+```bash
+./scripts/staging-backup.sh
+./scripts/staging-restore.sh /absolute/path/to.dump RESTORE-STAGING
+```
+
+See [the staging readiness runbook](../docs/architecture/staging-readiness-runbook.md)
+before enabling any live provider.
 
 ## Migrations
 
