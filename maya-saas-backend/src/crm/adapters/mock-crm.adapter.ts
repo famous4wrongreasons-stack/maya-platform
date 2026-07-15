@@ -6,6 +6,7 @@ import {
 import {
   AvailableSlot,
   CancelledAppointment,
+  ClientLoyaltySnapshot,
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -268,6 +269,24 @@ export class MockCRMAdapter implements CRMAdapter {
   getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
     void clientId;
     return Promise.resolve([]);
+  }
+
+  getClientLoyalty(params: {
+    tenantId: string;
+    phone: string;
+  }): Promise<ClientLoyaltySnapshot | null> {
+    void params.tenantId;
+    const configured = Number(this.config.settings?.loyaltyBalance ?? 0);
+    return Promise.resolve({
+      provider: this.config.provider,
+      external_client_id: `mock-${params.phone.replace(/\D/g, '').slice(-4)}`,
+      external_card_id: 'mock-card',
+      balance: Number.isFinite(configured)
+        ? Math.max(0, Math.round(configured))
+        : 0,
+      sold_amount: null,
+      currency: 'RUB',
+    });
   }
 
   testConnection(tenantId: string) {

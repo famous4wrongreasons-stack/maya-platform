@@ -201,4 +201,73 @@ describe('YclientsCRMAdapter', () => {
       }),
     );
   });
+
+  it('returns the exact client cashback balance instead of a local approximation', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: [
+              { id: 77, name: 'Other', phone: '+7 999 111-22-33' },
+              { id: 88, name: 'Exact', phone: '+7 918 417-20-35' },
+            ],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: [
+              {
+                id: 1,
+                balance: 9000,
+                type: { title: 'Скидочная карта' },
+              },
+              {
+                id: 2,
+                balance: 2133,
+                sold_amount: 62150,
+                type: { title: 'Кэшбек карта' },
+              },
+            ],
+          }),
+      }) as typeof fetch;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getClientLoyalty({
+        tenantId: 'tenant-1',
+        phone: '8 (918) 417-20-35',
+      }),
+    ).resolves.toEqual({
+      provider: CrmProvider.YCLIENTS,
+      external_client_id: '88',
+      external_card_id: '2',
+      balance: 2133,
+      sold_amount: 62150,
+      currency: 'RUB',
+    });
+
+    const fetchMock = global.fetch as jest.MockedFunction<typeof fetch>;
+    const calls = fetchMock.mock.calls;
+    const requestBody = calls[0]?.[1]?.body;
+    const searchBody = JSON.parse(
+      typeof requestBody === 'string' ? requestBody : '{}',
+    ) as Record<string, unknown>;
+    expect(searchBody).toMatchObject({ page: 1, page_size: 8 });
+    const loyaltyRequest = calls[1]?.[0];
+    const loyaltyUrl =
+      typeof loyaltyRequest === 'string'
+        ? loyaltyRequest
+        : loyaltyRequest instanceof URL
+          ? loyaltyRequest.href
+          : loyaltyRequest?.url || '';
+    expect(loyaltyUrl).toContain('/loyalty/client_cards/88');
+  });
 });

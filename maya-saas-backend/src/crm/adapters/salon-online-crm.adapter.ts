@@ -1,6 +1,7 @@
 import {
   AvailableSlot,
   CancelledAppointment,
+  ClientLoyaltySnapshot,
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -76,6 +77,16 @@ export class SalonOnlineCRMAdapter implements CRMAdapter {
   getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
     void clientId;
     return Promise.resolve([]);
+  }
+
+  getClientLoyalty(params: {
+    tenantId: string;
+    phone: string;
+  }): Promise<ClientLoyaltySnapshot | null> {
+    void params;
+    return Promise.reject(
+      new Error('Salon Online adapter is scaffolded but not implemented yet'),
+    );
   }
 
   testConnection(tenantId: string) {

@@ -289,6 +289,10 @@ const defineReadiness = (
 
 const CURRENT_MAYA = ['current_maya'] as const;
 const PLATFORM = ['platform_backend', 'platform_frontend'] as const;
+const CURRENT_AND_PLATFORM_BACKEND = [
+  'current_maya',
+  'platform_backend',
+] as const;
 const CURRENT_AND_PLATFORM = [
   'current_maya',
   'platform_backend',
@@ -306,13 +310,17 @@ export const MAYA_FEATURE_READINESS: Record<
   client_app: defineReadiness('partial', CURRENT_AND_PLATFORM, [
     'The universal role-aware app and final trial experience are still being unified in the platform frontend.',
   ]),
-  loyalty: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  loyalty: defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'The platform backend reads external CRM loyalty as source of truth; the universal frontend still needs the final cabinet binding.',
+  ]),
   shop: defineReadiness('current_runtime_only', CURRENT_MAYA),
   tg_basic: defineReadiness('current_runtime_only', CURRENT_MAYA),
   tg_marketing: defineReadiness('current_runtime_only', CURRENT_MAYA),
   journal: defineReadiness('current_runtime_only', CURRENT_MAYA),
   staff_cabinet: defineReadiness('current_runtime_only', CURRENT_MAYA),
-  analytics: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  analytics: defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'Tenant-scoped operational analytics are available in the platform backend; final frontend dashboards remain pending.',
+  ]),
   video_analytics: defineReadiness(
     'planned',
     [],
@@ -343,14 +351,36 @@ export const MAYA_FEATURE_READINESS: Record<
     'platform_ready',
     CURRENT_AND_PLATFORM,
   ),
-  'customers.core': defineReadiness('partial', CURRENT_AND_PLATFORM, [
-    'The platform backend has customer identity and profile primitives but not the complete universal customer module.',
+  'customers.core': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'Tenant-scoped customer profiles and encrypted internal notes are available in the platform backend; final frontend screens remain pending.',
   ]),
-  'expenses.core': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  'analytics.solo': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  'analytics.employee': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  'analytics.location': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  'analytics.business': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'expenses.core': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'Tenant-scoped expenses and encrypted notes are available in the platform backend; final frontend screens remain pending.',
+  ]),
+  'analytics.solo': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'The backend endpoint is ready; final frontend visualization remains pending.',
+  ]),
+  'analytics.employee': defineReadiness(
+    'partial',
+    CURRENT_AND_PLATFORM_BACKEND,
+    [
+      'The backend endpoint is ready; final frontend visualization remains pending.',
+    ],
+  ),
+  'analytics.location': defineReadiness(
+    'partial',
+    CURRENT_AND_PLATFORM_BACKEND,
+    [
+      'Branch-filtered backend analytics are ready; final frontend visualization remains pending.',
+    ],
+  ),
+  'analytics.business': defineReadiness(
+    'partial',
+    CURRENT_AND_PLATFORM_BACKEND,
+    [
+      'The backend endpoint is ready; final frontend visualization remains pending.',
+    ],
+  ),
   'crm.integration': defineReadiness(
     'partial',
     ['current_maya', 'platform_backend', 'platform_frontend'],
@@ -368,8 +398,8 @@ export const MAYA_FEATURE_READINESS: Record<
   referrals: defineReadiness('current_runtime_only', CURRENT_MAYA),
   'team.chat': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'notifications.core': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  'customer.portal': defineReadiness('partial', CURRENT_AND_PLATFORM, [
-    'Core appointment history and actions are available, but the final universal customer experience is still being unified.',
+  'customer.portal': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'The resilient customer overview API is available; the final universal customer experience is still being unified in the frontend.',
   ]),
   'ai.owner': defineReadiness('current_runtime_only', CURRENT_MAYA, [
     'The role-aware owner tool runtime has not yet been tenantized in the platform backend.',
@@ -414,45 +444,32 @@ export const LEGACY_FEATURE_ALIASES: Partial<
   ai_chatbot: ['ai.admin', 'ai.consultant'],
 };
 
+const START_PLAN_FEATURES: MayaFeatureKey[] = [
+  'booking',
+  'branding',
+  'client_app',
+  'loyalty',
+  'tg_basic',
+  'calendar.internal',
+  'customers.core',
+  'expenses.core',
+  'analytics.solo',
+];
+
+const PRO_PLAN_FEATURES: MayaFeatureKey[] = [
+  ...START_PLAN_FEATURES,
+  'shop',
+  'tg_marketing',
+  'journal',
+  'staff_cabinet',
+  'analytics',
+  'priority_support',
+];
+
 export const MAYA_PLAN_FEATURES: Record<string, MayaFeatureKey[]> = {
-  start: [
-    'booking',
-    'branding',
-    'client_app',
-    'loyalty',
-    'tg_basic',
-    'calendar.internal',
-    'customers.core',
-    'expenses.core',
-    'analytics.solo',
-  ],
-  pro: [
-    'booking',
-    'branding',
-    'client_app',
-    'loyalty',
-    'shop',
-    'tg_basic',
-    'tg_marketing',
-    'journal',
-    'staff_cabinet',
-    'analytics',
-    'priority_support',
-  ],
-  max: [
-    'booking',
-    'branding',
-    'client_app',
-    'loyalty',
-    'shop',
-    'tg_basic',
-    'tg_marketing',
-    'journal',
-    'staff_cabinet',
-    'analytics',
-    'video_analytics',
-    'priority_support',
-  ],
+  start: START_PLAN_FEATURES,
+  pro: PRO_PLAN_FEATURES,
+  max: [...PRO_PLAN_FEATURES, 'video_analytics'],
 };
 
 const FEATURE_KEY_SET = new Set<string>(MAYA_FEATURE_KEYS);

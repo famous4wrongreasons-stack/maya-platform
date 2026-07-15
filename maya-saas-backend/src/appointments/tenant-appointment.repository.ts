@@ -17,6 +17,8 @@ interface CreateTenantAppointmentData {
   blockedEndAt: Date;
   status: string;
   notes: string | null;
+  totalPriceKopecks: number | null;
+  currency: string;
   providerPayload?: Prisma.InputJsonValue;
 }
 
@@ -31,6 +33,8 @@ interface UpdateTenantAppointmentData {
   staffExternalId?: string;
   serviceIds?: Prisma.InputJsonValue;
   notes?: string | null;
+  totalPriceKopecks?: number | null;
+  currency?: string;
   providerPayload?: Prisma.InputJsonValue;
 }
 

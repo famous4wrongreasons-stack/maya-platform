@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 
 import { AdminModule } from './admin/admin.module';
+import { OperationsAnalyticsModule } from './analytics/operations-analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppointmentsModule } from './appointments/appointments.module';
@@ -12,10 +13,14 @@ import { BillingModule } from './billing/billing.module';
 import { BranchesModule } from './branches/branches.module';
 import { BrandingModule } from './branding/branding.module';
 import { CrmModule } from './crm/crm.module';
+import { CustomersModule } from './customers/customers.module';
+import { CustomerPortalModule } from './customer-portal/customer-portal.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { EntitlementsModule } from './entitlements/entitlements.module';
+import { ExpensesModule } from './expenses/expenses.module';
 import { FeatureGuard } from './entitlements/feature.guard';
 import { InternalCalendarModule } from './internal-calendar/internal-calendar.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -41,6 +46,7 @@ import { validateRuntimeConfig } from './config/runtime-config';
     PrismaModule,
     TenancyModule,
     EntitlementsModule,
+    ExpensesModule,
     EncryptionModule,
     SubscriptionsModule,
     TenantsModule,
@@ -50,13 +56,17 @@ import { validateRuntimeConfig } from './config/runtime-config';
     BrandingModule,
     BranchesModule,
     CrmModule,
+    CustomersModule,
+    CustomerPortalModule,
     InternalCalendarModule,
+    LoyaltyModule,
     ServicesModule,
     StaffModule,
     AppointmentsModule,
     AuditLogModule,
     OnboardingModule,
     AdminModule,
+    OperationsAnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -53,6 +53,11 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `GET /api/appointments/my`
   - `POST /api/appointments/:id/cancel`
   - `POST /api/appointments/:id/reschedule`
+  - `GET /api/customer-portal`
+  - `GET /api/customers/me/profile`
+  - `PATCH /api/customers/me/profile`
+  - `GET /api/loyalty/me`
+  - `GET /api/loyalty/me/transactions`
   - `GET /api/features/registry`
   - `GET /api/features/effective`
 - Maya-managed calendar API for specialists who do not use a CRM:
@@ -82,6 +87,16 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `POST /api/admin/tenants/:id/billing/charge`
   - `POST /api/admin/billing/run-due`
   - `GET /api/admin/analytics/trials`
+  - `GET /api/customers`
+  - `GET /api/customers/:userId`
+  - `PATCH /api/customers/:userId/notes`
+  - `GET /api/admin/loyalty/:userId`
+  - `POST /api/admin/loyalty/:userId/adjust`
+  - `GET /api/expenses`
+  - `POST /api/expenses`
+  - `DELETE /api/expenses/:id`
+  - `GET /api/analytics/business`
+  - `GET /api/analytics/me`
 - Billing webhook:
   - `POST /api/billing/yookassa/webhook`
 - CRM adapter architecture with:
@@ -99,6 +114,18 @@ prove that a universal platform module is shipped.
 `GET /api/crm/providers` is the source of truth for CRM choices. Only providers
 with `connectable=true` may be stored. The backend rejects planned scaffolds with
 `error.code=crm_provider_not_available` before encrypting or persisting a token.
+
+External CRM loyalty is read-only in Maya and remains authoritative. YClients
+balances are resolved by exact normalized phone and cashback/bonus card; Maya
+never creates a local welcome balance for an external-calendar tenant. A cached
+balance is returned with `stale=true` during a temporary provider failure rather
+than being replaced with a false zero. Internal-calendar tenants use Maya's
+idempotent loyalty ledger instead.
+
+Appointments created after migration `20260715190000_operational_core` store an
+immutable price snapshot in kopecks. Operational analytics excludes cancelled
+appointments, reports legacy rows without snapshots through `data_quality`, and
+keeps every currency in a separate total.
 
 ## Environment
 

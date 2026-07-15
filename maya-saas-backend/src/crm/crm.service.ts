@@ -221,6 +221,22 @@ export class CrmService {
     return adapter.getClientAppointments(clientId);
   }
 
+  async getClientLoyalty(tenantId: string, phone: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return null;
+    }
+
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    return adapter.getClientLoyalty({
+      tenantId: scopedTenantId,
+      phone,
+    });
+  }
+
   async testConnection(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 

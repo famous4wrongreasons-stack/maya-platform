@@ -92,6 +92,14 @@ export class AppointmentsService {
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
     const services = await this.crmService.getServices(tenantId);
     this.assertRequestedServicesExist(dto.serviceIds, services);
+    const selectedServices = services.filter((service) =>
+      dto.serviceIds.includes(service.id),
+    );
+    const totalPrice = selectedServices.reduce(
+      (sum, service) => sum + service.price,
+      0,
+    );
+    const currency = selectedServices[0]?.currency ?? 'RUB';
     const requestedStart = normalizeRequestedStart(
       dto.start,
       branch?.timezone ?? 'Europe/Moscow',
@@ -173,6 +181,8 @@ export class AppointmentsService {
         blockedEndAt,
         status: remoteAppointment?.status ?? AppointmentStatus.CONFIRMED,
         notes: dto.notes ?? null,
+        totalPriceKopecks: totalPrice * 100,
+        currency,
         providerPayload: asJson(
           remoteAppointment?.raw ?? { provider: CalendarSource.INTERNAL },
         ),
@@ -501,6 +511,14 @@ export class AppointmentsService {
 
     const services = await this.crmService.getServices(tenantId);
     this.assertRequestedServicesExist(serviceIds, services);
+    const selectedServices = services.filter((service) =>
+      serviceIds.includes(service.id),
+    );
+    const totalPrice = selectedServices.reduce(
+      (sum, service) => sum + service.price,
+      0,
+    );
+    const currency = selectedServices[0]?.currency ?? appointment.currency;
 
     const staffId = dto.staffId ?? appointment.staffExternalId;
     const requestedStart = normalizeRequestedStart(
@@ -577,6 +595,8 @@ export class AppointmentsService {
           blockedEndAt,
           status: remoteAppointment?.status ?? AppointmentStatus.CONFIRMED,
           notes: dto.notes ?? appointment.notes,
+          totalPriceKopecks: totalPrice * 100,
+          currency,
           providerPayload: asJson(
             remoteAppointment?.raw ?? { provider: CalendarSource.INTERNAL },
           ),
@@ -782,6 +802,8 @@ export class AppointmentsService {
       blockedEndAt?: Date;
       status: string;
       notes: string | null;
+      totalPriceKopecks?: number | null;
+      currency?: string;
       providerPayload: unknown;
       createdAt: Date;
       updatedAt: Date;
@@ -801,14 +823,18 @@ export class AppointmentsService {
       .filter((service): service is ServiceItem => Boolean(service));
     const staff = catalog.staffById.get(appointment.staffExternalId) ?? null;
     const totalPrice =
-      services.length > 0
+      (appointment.totalPriceKopecks === undefined ||
+      appointment.totalPriceKopecks === null
+        ? null
+        : appointment.totalPriceKopecks / 100) ??
+      (services.length > 0
         ? services.reduce((sum, service) => sum + service.price, 0)
-        : null;
+        : null);
     const durationMinutes =
       services.length > 0
         ? services.reduce((sum, service) => sum + service.duration_minutes, 0)
         : null;
-    const currency = services[0]?.currency ?? null;
+    const currency = appointment.currency ?? services[0]?.currency ?? null;
     const isUpcoming = appointment.startAt.getTime() >= Date.now();
 
     return {

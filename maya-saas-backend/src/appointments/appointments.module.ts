@@ -20,6 +20,6 @@ import { TenantAppointmentRepository } from './tenant-appointment.repository';
   ],
   controllers: [AppointmentsController, AvailabilityController],
   providers: [AppointmentsService, TenantAppointmentRepository],
-  exports: [TenantAppointmentRepository],
+  exports: [AppointmentsService, TenantAppointmentRepository],
 })
 export class AppointmentsModule {}

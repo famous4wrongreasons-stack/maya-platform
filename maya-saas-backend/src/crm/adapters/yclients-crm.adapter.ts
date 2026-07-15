@@ -3,6 +3,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   AvailableSlot,
   CancelledAppointment,
+  ClientLoyaltySnapshot,
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -80,6 +81,22 @@ interface YclientsResponse<TData> {
   meta?: {
     message?: string;
   };
+}
+
+interface YclientsClientSearchItem {
+  id?: number | string;
+  name?: string;
+  phone?: string;
+}
+
+interface YclientsLoyaltyCard {
+  id?: number | string;
+  balance?: number | string;
+  sold_amount?: number | string;
+  type?: { title?: string } | null;
+  programs?: Array<{
+    loyalty_type?: { is_cashback?: boolean } | null;
+  }>;
 }
 
 export class YclientsCRMAdapter implements CRMAdapter {
@@ -409,6 +426,68 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return Promise.resolve([]);
   }
 
+  async getClientLoyalty(params: {
+    tenantId: string;
+    phone: string;
+  }): Promise<ClientLoyaltySnapshot | null> {
+    void params.tenantId;
+    const normalizedPhone = this.normalizePhone(params.phone);
+    const wantedDigits = normalizedPhone.replace(/\D/g, '').slice(-10);
+    if (wantedDigits.length !== 10) {
+      return null;
+    }
+
+    const search = await this.request<YclientsClientSearchItem[]>(
+      `company/${this.getCompanyId()}/clients/search`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          fields: ['id', 'name', 'phone'],
+          filters: [
+            { type: 'quick_search', state: { value: normalizedPhone } },
+          ],
+          page: 1,
+          page_size: 8,
+        }),
+      },
+    );
+    const client = (search.data || []).find((candidate) => {
+      const candidateDigits = String(candidate.phone || '')
+        .replace(/\D/g, '')
+        .slice(-10);
+      return candidateDigits === wantedDigits;
+    });
+    if (client?.id === undefined) {
+      return null;
+    }
+
+    const cardsResponse = await this.request<
+      YclientsLoyaltyCard[] | YclientsLoyaltyCard
+    >(`loyalty/client_cards/${this.toNumericId(client.id, 'client.id')}`);
+    const cards = Array.isArray(cardsResponse.data)
+      ? cardsResponse.data
+      : cardsResponse.data
+        ? [cardsResponse.data]
+        : [];
+    const card = this.selectCashbackCard(cards);
+    if (!card) {
+      return null;
+    }
+
+    return {
+      provider: this.config.provider,
+      external_client_id: String(client.id),
+      external_card_id:
+        card.id === undefined || card.id === null ? null : String(card.id),
+      balance: Math.max(0, this.toRoundedAmount(card.balance)),
+      sold_amount:
+        card.sold_amount === undefined || card.sold_amount === null
+          ? null
+          : Math.max(0, this.toRoundedAmount(card.sold_amount)),
+      currency: this.settings.currency || 'RUB',
+    };
+  }
+
   async testConnection(tenantId: string) {
     void tenantId;
 
@@ -500,6 +579,39 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return this.settings.activeMasterIds.map((id) =>
       this.toNumericId(id, 'settings.activeMasterIds[]'),
     );
+  }
+
+  private selectCashbackCard(
+    cards: YclientsLoyaltyCard[],
+  ): YclientsLoyaltyCard | null {
+    const cashback = cards.filter((card) => {
+      const title = String(card.type?.title || '')
+        .toLowerCase()
+        .replace(/ё/g, 'е');
+      return (
+        /к[еэ]шб[еэ]к|cash\s?back|бонус/.test(title) ||
+        (card.programs || []).some(
+          (program) => program.loyalty_type?.is_cashback === true,
+        )
+      );
+    });
+    const positive = cards.filter(
+      (card) => this.toRoundedAmount(card.balance) > 0,
+    );
+    const candidates = cashback.length > 0 ? cashback : positive;
+
+    return (
+      candidates.sort(
+        (left, right) =>
+          this.toRoundedAmount(right.balance) -
+          this.toRoundedAmount(left.balance),
+      )[0] ?? null
+    );
+  }
+
+  private toRoundedAmount(value: number | string | undefined): number {
+    const parsed = Number(value ?? 0);
+    return Number.isFinite(parsed) ? Math.round(parsed) : 0;
   }
 
   private toNumericId(

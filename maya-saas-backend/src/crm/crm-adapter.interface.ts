@@ -69,6 +69,15 @@ export interface RescheduledAppointment {
   raw?: Record<string, unknown>;
 }
 
+export interface ClientLoyaltySnapshot {
+  provider: string;
+  external_client_id: string;
+  external_card_id: string | null;
+  balance: number;
+  sold_amount: number | null;
+  currency: string;
+}
+
 export interface CRMAdapter {
   getServices(tenantId: string): Promise<ServiceItem[]>;
   getStaff(tenantId: string): Promise<StaffMember[]>;
@@ -95,6 +104,10 @@ export interface CRMAdapter {
     notes?: string | null;
   }): Promise<RescheduledAppointment>;
   getClientAppointments(clientId: string): Promise<CreatedAppointment[]>;
+  getClientLoyalty(params: {
+    tenantId: string;
+    phone: string;
+  }): Promise<ClientLoyaltySnapshot | null>;
   testConnection(tenantId: string): Promise<{
     ok: boolean;
     provider: string;
