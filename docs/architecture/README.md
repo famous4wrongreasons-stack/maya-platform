@@ -215,3 +215,4 @@ classDiagram
 - [Production bootstrap hardening](production-bootstrap-hardening-runbook.md)
 - [AI tool runtime and approvals](ai-tool-runtime-runbook.md)
 - [Isolated staging readiness](staging-readiness-runbook.md)
+- [Pre-publication readiness, 2026-07-15](prepublication-readiness-2026-07-15.md)
