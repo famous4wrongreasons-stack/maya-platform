@@ -11034,8 +11034,12 @@ function AChat() {
   }
   // approve/reject: блок повторного тапа; 409 = истекло/обработано/изменилось; 429 с retry_after;
   // reject никогда не исполняет; повторный approve (replayed) не даёт второго визуального результата.
+  const aiDecideBusyRef = React.useRef({}); // синхронный гард: два тапа в одном кадре = один POST
   async function saasAiDecide(idx, approval, kind) {
     if (!approval || approval.uiBusy) return;
+    var busyKey = String(approval.id || idx);
+    if (aiDecideBusyRef.current[busyKey]) return;
+    aiDecideBusyRef.current[busyKey] = true;
     saasAiPatchMsg(idx, { aiApproval: Object.assign({}, approval, { uiBusy: true, uiNote: '' }) });
     try {
       var d = await saasAiFetch('/ai/approvals/' + encodeURIComponent(approval.id) + '/' + kind, {
@@ -11044,20 +11048,23 @@ function AChat() {
       });
       if (kind === 'reject') {
         saasAiPatchMsg(idx, { aiApproval: Object.assign({}, approval, { uiBusy: false, uiPhase: 'rejected', uiNote: 'Отклонено — ничего не изменилось.' }) });
+        delete aiDecideBusyRef.current[busyKey];
         return;
       }
       var rst = d && d.result && d.result.status;
       var note = rst === 'canceled' ? 'Запись отменена.' : rst === 'confirmed' ? 'Запись подтверждена.' : 'Действие выполнено.';
       // replayed=true — то же самое выполнение: визуальный результат один и тот же
       saasAiPatchMsg(idx, { aiApproval: Object.assign({}, approval, { uiBusy: false, uiPhase: 'approved', uiNote: note }) });
+      delete aiDecideBusyRef.current[busyKey];
       try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'appointments' } })); } catch (e) {}
     } catch (e) {
       var msg;
-      if (e && e.status === 409) { msg = 'Действие истекло или уже обработано.'; saasAiPatchMsg(idx, { aiApproval: Object.assign({}, approval, { uiBusy: false, uiPhase: 'stale', uiNote: msg }) }); return; }
+      if (e && e.status === 409) { msg = 'Действие истекло или уже обработано.'; saasAiPatchMsg(idx, { aiApproval: Object.assign({}, approval, { uiBusy: false, uiPhase: 'stale', uiNote: msg }) }); delete aiDecideBusyRef.current[busyKey]; return; }
       if (e && e.status === 429) msg = 'Слишком много запросов' + (e.retryAfterSeconds ? ' — подождите ' + Math.ceil(e.retryAfterSeconds) + ' с' : '') + '.';
       else if (e && e.status === 401) msg = 'Сессия устарела — войдите снова.';
       else msg = (e && e.message) || 'Не получилось — попробуйте ещё раз.';
       saasAiPatchMsg(idx, { aiApproval: Object.assign({}, approval, { uiBusy: false, uiNote: msg }) });
+      delete aiDecideBusyRef.current[busyKey];
     }
   }
   function saasAiApprovalCard(m, idx) {
@@ -30612,6 +30619,22 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     // Свежий вход (только что залогинились) → клиента ведём сразу в «Личный кабинет»,
     // а не на главную. Флаг ставит success-ветка applogin-поллинга; потребляем один раз.
     var freshLogin=false; try{ freshLogin=!!window.__meFreshLogin; window.__meFreshLogin=false; }catch(e){}
+    // P0-3: SaaS tenant-сессия (bundle без легаси-токена) → роутинг по СЕРВЕРНОЙ роли bundle;
+    // легаси panel_me тут ни при чём (это чужой бэкенд) и не должен уводить владельца на home.
+    try{
+      var _sctx = window.__ME_SAAS_CTX;
+      if (_sctx && _sctx.ns && !getTok()) {
+        var _sb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + _sctx.ns) || 'null');
+        var _sslug = String(_sctx.slug || '').toLowerCase();
+        if (_sb && _sb.token && (!_sb.tenant_slug || String(_sb.tenant_slug).toLowerCase() === _sslug)) {
+          var _srole = String((_sb.user && _sb.user.role) || '').toLowerCase();
+          if (window.__meMode) window.__meMode('client');
+          if (['tenant_owner','business_owner','tenant_admin','administrator','manager','provider','employee','staff'].indexOf(_srole) >= 0) { window.__meSaasWantCabinet = true; window.__meGo('book'); }
+          else window.__meGo('home');
+          return true;
+        }
+      }
+    }catch(eSaasRoute){}
     // Роль-гейт: экран «Я клиент / Я сотрудник» — ТОЛЬКО сотрудникам (admin/manager/master по panel_me).
     // Клиента после логина ведём сразу в клиентскую версию. Кэш роли -> мгновенный роутинг без мелькания логина.
     var cached=null; try{ cached=localStorage.getItem('me_is_staff'); }catch(e){}
