@@ -399,16 +399,16 @@ export const MAYA_FEATURE_READINESS: Record<
   'team.chat': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'notifications.core': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'customer.portal': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'The resilient customer overview API is available; the final universal customer experience is still being unified in the frontend.',
+    'The unified web and iOS cabinet consumes the resilient customer overview API; external CRM detail and final role-specific polish remain partial.',
   ]),
   'ai.owner': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'The shared privacy-safe AI Core and approval-gated owner tools are available in the platform backend; final channel UI binding remains pending.',
+    'The unified web and iOS owner chat is bound to the privacy-safe AI Core; tenant-safe voice input and production provider configuration remain pending.',
   ]),
   'ai.admin': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'The shared privacy-safe AI Core and tenant-scoped administrator tools are available in the platform backend; final channel UI binding remains pending.',
+    'The unified web and iOS administrator chat is bound to tenant-scoped tools; tenant-safe voice input and the intentionally limited production tool catalog remain pending.',
   ]),
   'ai.consultant': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'The shared privacy-safe AI Core supports catalog, availability and approval-gated customer booking tools; final channel UI binding remains pending.',
+    'The unified web and iOS customer chat supports catalog, availability and approval-gated booking tools; tenant-safe voice input and production provider configuration remain pending.',
   ]),
   'telegram.owner': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'telegram.admin': defineReadiness('current_runtime_only', CURRENT_MAYA),

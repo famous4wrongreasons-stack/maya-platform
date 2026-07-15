@@ -485,20 +485,25 @@ window.APP_DATA = {
 
 </script>
 <script>
-/* ═══ SaaS safe-mode (P2): white-label boot из нового бэкенда ═══
-   Активен ТОЛЬКО при ?booking_backend=saas-local (или ранее сохранённом флаге).
-   Без флага не делает НИЧЕГО — прод-поведение не меняется ни на байт. */
+/* ═══ MAYA OS multi-tenant boot из платформенного backend ═══
+   В dev включается явным saas-local; на public host — только server boot
+   или canonical tenant start_url. API на public host всегда trusted/same-origin. */
 (function () {
   var qs = null;
   try { qs = new URLSearchParams(location.search); } catch (e) {}
-  /* P0-4: тестовые overrides (booking_backend/booking_api_base/booking_tenant из query
-     и localStorage) действуют ТОЛЬКО когда сама страница открыта на localhost/127.0.0.1
-     (нативный Capacitor-шелл тоже localhost). На публичном домене: API строго
-     same-origin `${origin}/api` (или подписанный серверный boot-конфиг), tenant — из
-     доверенного серверного конфига/meta; сохранённые localhost-значения чистятся;
-     приложение fail-closed и никогда не зовёт localhost. */
-  var isLocalDev = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-  function isLocalUrl(u) { try { var h = new URL(String(u)).hostname; return h === 'localhost' || h === '127.0.0.1'; } catch (e) { return true; } }
+  /* P0-4: API override разрешён только на loopback/private-LAN dev host, чтобы
+     реальный iPhone мог открыть локальную сборку. На публичном host API всегда
+     same-origin (или подписанный server boot); из canonical PWA start_url читается
+     только безопасный public tenant slug, но никогда API URL. Tenant slug не является
+     границей авторизации: JWT + TenantContext всё равно проверяются сервером. */
+  function isPrivateHost(h) {
+    h = String(h || '').toLowerCase();
+    if (h === 'localhost' || h === '::1' || h === '127.0.0.1' || /\.local$/.test(h)) return true;
+    if (/^10\./.test(h) || /^192\.168\./.test(h)) return true;
+    var m = h.match(/^172\.(\d{1,2})\./); return !!(m && Number(m[1]) >= 16 && Number(m[1]) <= 31);
+  }
+  var isLocalDev = isPrivateHost(location.hostname) && location.protocol !== 'https:';
+  function isLocalUrl(u) { try { return isPrivateHost(new URL(String(u)).hostname); } catch (e) { return true; } }
   // доверенный серверный boot-конфиг: инжектится платформой в отдаваемый bundle
   var srvBoot = (typeof window.__ME_TENANT_BOOT === 'object' && window.__ME_TENANT_BOOT) || null;
   var metaTenant = null;
@@ -523,20 +528,22 @@ window.APP_DATA = {
       if (slug) localStorage.setItem('me_booking_tenant_slug', slug);
       slug = slug || localStorage.getItem('me_booking_tenant_slug');
     } catch (e) {}
-    slug = slug || 'muzhskaya-estetika';
+    slug = String(slug || 'muzhskaya-estetika').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64) || 'muzhskaya-estetika';
   } else {
-    // публичный домен: query-параметры НЕ читаем вообще; сохранённые localhost-значения чистим
+    // публичный домен: API/mode query-параметры не читаем; сохранённые private API чистим
     try {
       var stA = localStorage.getItem('me_booking_api_base');
       if (stA && isLocalUrl(stA)) localStorage.removeItem('me_booking_api_base');
     } catch (e) {}
+    var publicSlug = qs && qs.get('booking_tenant');
+    publicSlug = /^[a-z0-9][a-z0-9-]{0,63}$/.test(String(publicSlug || '').toLowerCase()) ? String(publicSlug).toLowerCase() : null;
     mode = null;
     try { mode = localStorage.getItem('me_booking_backend'); } catch (e) {}
-    if (srvBoot && srvBoot.enabled === true) mode = 'saas-local';
+    if ((srvBoot && srvBoot.enabled === true) || publicSlug) mode = 'saas-local';
     if (mode !== 'saas-local') return;
     apiBase = location.origin + '/api'; // same-origin по умолчанию — никогда не localhost
     if (srvBoot && typeof srvBoot.api === 'string' && /^https:\/\//.test(srvBoot.api) && !isLocalUrl(srvBoot.api)) apiBase = String(srvBoot.api).replace(/\/+$/, '');
-    slug = (srvBoot && srvBoot.slug) || metaTenant || 'muzhskaya-estetika';
+    slug = (srvBoot && srvBoot.slug) || metaTenant || publicSlug || 'muzhskaya-estetika';
     slug = String(slug).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64) || 'muzhskaya-estetika';
     if (isLocalUrl(apiBase)) return; // fail closed: локальный API на публичном хосте невозможен
   }
@@ -551,6 +558,9 @@ window.APP_DATA = {
     return (h >>> 0).toString(36) + '_' + sl.replace(/[^a-z0-9-]/g, '').slice(0, 24);
   })();
   window.__ME_SAAS_CTX = { api: apiBase, slug: slug, ns: _ns };
+  // До подтверждённого /features/effective универсальный UI закрыт fail-closed.
+  window.__SAAS_FEATURES = [];
+  window.__SAAS_FEATURES_EFFECTIVE = false;
   /* миграция: глобальные (до-tenant) ключи удаляются; старый bundle без
      tenant-метаданных молча НЕ привязывается — безопасный спокойный вход заново */
   try {
@@ -595,9 +605,9 @@ window.APP_DATA = {
       if (!keys && cfg.available_features && typeof cfg.available_features === 'object') {
         keys = Object.keys(cfg.available_features).filter(function (k) { return cfg.available_features[k]; });
       }
-      // пустой список = ненастроенный сид тарифа, а не «нет фич» — не гейтим,
-      // чтобы не спрятать весь UI у тенанта без featuresJson
-      if (Array.isArray(keys) && keys.length) window.__SAAS_FEATURES = keys;
+      // Mobile config полезен для первого paint, но только authenticated
+      // /features/effective делает список окончательным.
+      if (Array.isArray(keys) && window.__SAAS_FEATURES_EFFECTIVE !== true) window.__SAAS_FEATURES = keys;
       var d = window.APP_DATA = window.APP_DATA || {};
       var br = d.brand = d.brand || {};
       ['name', 'city', 'address', 'phone', 'hours', 'tagline'].forEach(function (k) {
@@ -714,12 +724,15 @@ window.APP_DATA = {
       var ctx = window.__ME_SAAS_CTX; if (!ctx || !ctx.ns) return;
       var b = null; try { b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null'); } catch (e) {}
       if (!b || !b.token) return;
-      fetch(String(ctx.api).replace(/\/+$/, '') + '/features/effective', { headers: { Authorization: 'Bearer ' + b.token } })
-        .then(function (r) { return r.ok ? r.json() : null; })
+      var request = window.__meSaasAuthedFetch
+        ? window.__meSaasAuthedFetch('/features/effective', {})
+        : fetch(String(ctx.api).replace(/\/+$/, '') + '/features/effective', { headers: { Authorization: 'Bearer ' + b.token } })
+            .then(function (r) { return r.ok ? r.json() : null; });
+      Promise.resolve(request)
         .then(function (d) {
           if (!d) return;
           var keys = Array.isArray(d.featureKeys) ? d.featureKeys : (d.features && typeof d.features === 'object' ? Object.keys(d.features).filter(function (k) { return d.features[k]; }) : null);
-          if (Array.isArray(keys) && keys.length) { window.__SAAS_FEATURES = keys; window.__SAAS_FEATURES_EFFECTIVE = true; }
+          if (Array.isArray(keys)) { window.__SAAS_FEATURES = keys; window.__SAAS_FEATURES_EFFECTIVE = true; }
           try { if (window.__meRefresh) window.__meRefresh(); } catch (e) {}
         }).catch(function () {});
     } catch (e) {}
@@ -2390,6 +2403,17 @@ function AuroraHeader({
     }
   }));
 }
+function meTabFeatureAllowed(it) {
+  if (!it) return false;
+  const universal = !!window.__ME_SAAS_CTX;
+  if (universal && Array.isArray(it.featureKeys) && it.featureKeys.length) {
+    const entitlements = Array.isArray(window.__SAAS_FEATURES) ? window.__SAAS_FEATURES : [];
+    if (window.__SAAS_FEATURES_EFFECTIVE !== true) return false;
+    return it.featureKeys.some(key => entitlements.indexOf(key) >= 0 && (!window.__meFeatureReady || window.__meFeatureReady(key, { universal: true })));
+  }
+  if (it.featureKey && window.__meFeatureReady && !window.__meFeatureReady(it.featureKey, { universal })) return false;
+  return true;
+}
 function AuroraTab({
   t,
   items,
@@ -2433,7 +2457,7 @@ function AuroraTab({
   // Пункты с флагом auth показываем только залогиненным, кроме явного гостевого действия.
   const loggedIn = !!(window.__meHasSession && window.__meHasSession());
   const visItems = items.filter(it => {
-    if (it.featureKey && window.__meFeatureReady && !window.__meFeatureReady(it.featureKey, { universal: !!window.__ME_SAAS_CTX })) return false;
+    if (!meTabFeatureAllowed(it)) return false;
     return !it.auth || loggedIn || it.guestLabel || it.guestTap;
   });
   // Пружинистый «отскок» иконки таба при тапе (как в Telegram).
@@ -4149,6 +4173,7 @@ const CLIENT_TABS = [{
   ic: TabIcChat,
   label: "Чат",
   featureKey: "ai_chatbot",
+  featureKeys: ["ai.owner", "ai.admin", "ai.consultant"],
   auth: true,
   guestLabel: "Чат",
   guestTap: () => window.__meGo && window.__meGo("login"),
@@ -4179,7 +4204,7 @@ const CLIENT_TABS = [{
 function clientTabItems() {
   return CLIENT_TABS.filter(function (it) {
     if (!window.__meIsFounder && it.label === 'CUTMATCH') return false;
-    if (it.featureKey && window.__meFeatureReady && !window.__meFeatureReady(it.featureKey, { universal: !!window.__ME_SAAS_CTX })) return false;
+    if (!meTabFeatureAllowed(it)) return false;
     return true;
   });
 }
@@ -7897,6 +7922,17 @@ function ABookFlow() {
     if (window.__meSaasWantCabinet) { window.__meSaasWantCabinet = false; window.__meOpenSaasCabinet(); }
     return function () { if (window.__meOpenSaasCabinet) window.__meOpenSaasCabinet = null; };
   }, []);
+  React.useEffect(() => {
+    if (!localSaasMode) return;
+    function refreshAfterAiAction() {
+      loadMyAppts();
+      if (saasIsCustomerRole() && saasFeatureOn('loyalty')) loadMyLoyalty();
+      if (saasIsCalManager() && saasFeatureOn('analytics.business')) loadMyBiz();
+      if (saasIsStaffRole() && saasFeatureOn('analytics.employee')) loadMyStat();
+    }
+    window.addEventListener('me-saas-data-changed', refreshAfterAiAction);
+    return function () { window.removeEventListener('me-saas-data-changed', refreshAfterAiAction); };
+  }, []);
   // P0-1: постоянный мост authed-fetch для AI-чата (и других поверхностей вне ABookFlow).
   // localBookingFetch/ensureLocalSession — чистые замыкания над window/localStorage (без setState),
   // поэтому мост НЕ снимается на unmount: общий refresh-pipeline (single-flight, межвкладочный lock,
@@ -7909,6 +7945,7 @@ function ABookFlow() {
         return localBookingFetch(path, Object.assign({}, ini, { headers: Object.assign({}, ini.headers, { Authorization: 'Bearer ' + s.token }) }));
       });
     };
+    try { if (window.__meLoadEffectiveFeatures) window.__meLoadEffectiveFeatures(); } catch (e) {}
   }, []);
   // Fail-closed на старте: под ключом текущего tenant лежит «сырой» bundle, но
   // saasReadSession его НЕ принимает (чужой tenant / битый контекст / подделка) —
@@ -8179,6 +8216,7 @@ function ABookFlow() {
     saasWriteSession(s);
     var back = saasReadSession();
     if (!back || back.token !== s.token || back.refresh_token !== s.refresh_token) return null;
+    setTimeout(function () { try { if (window.__meLoadEffectiveFeatures) window.__meLoadEffectiveFeatures(); } catch (e) {} }, 0);
     return s;
   }
   // обновление только профиля: пара токенов не трогается
@@ -8211,6 +8249,9 @@ function ABookFlow() {
   }
   function saasForceLogout(reason) {
     saasClearSession();
+    window.__SAAS_FEATURES = [];
+    window.__SAAS_FEATURES_EFFECTIVE = false;
+    try { if (window.__meRefresh) window.__meRefresh(); } catch (e) {}
     saasBroadcast('logout');
     try { window.dispatchEvent(new CustomEvent('me-saas-logout', { detail: { reason: reason || null } })); } catch (e) {}
   }
@@ -8656,10 +8697,10 @@ function ABookFlow() {
     var r = saasRole();
     return !r || r === 'client' || r === 'customer';
   }
-  // блок доступен, если entitlement (features/effective) его содержит; до загрузки списка — решает сервер (403)
+  // Блок доступен только после подтверждённого authenticated /features/effective.
   function saasFeatureOn(key) {
     var f = window.__SAAS_FEATURES;
-    return !Array.isArray(f) || f.indexOf(key) >= 0;
+    return window.__SAAS_FEATURES_EFFECTIVE === true && Array.isArray(f) && f.indexOf(key) >= 0;
   }
   // P0-5: данные по правильным экранам — суммы/статистика строго из backend, ничего не пересчитываем
   function meRange30() {
@@ -8668,7 +8709,13 @@ function ABookFlow() {
   }
   function moneyList(arr) {
     if (!Array.isArray(arr) || !arr.length) return '0';
-    return arr.map(function (x) { var amt = Number(x && (x.amount != null ? x.amount : x.total)) || 0; var cur = (x && x.currency) === 'RUB' || !(x && x.currency) ? '₽' : x.currency; return amt.toLocaleString('ru-RU') + ' ' + cur; }).join(' · ');
+    return arr.map(function (x) {
+      var hasKopecks = x && (x.amount_kopecks != null || x.amountKopecks != null);
+      var raw = x && (x.amount_kopecks != null ? x.amount_kopecks : (x.amountKopecks != null ? x.amountKopecks : (x.amount != null ? x.amount : x.total)));
+      var amt = (Number(raw) || 0) / (hasKopecks ? 100 : 1);
+      var cur = (x && x.currency) === 'RUB' || !(x && x.currency) ? '₽' : x.currency;
+      return amt.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ' + cur;
+    }).join(' · ');
   }
   function loadMyBiz() {
     if (myBizBusy) return;
@@ -8980,12 +9027,27 @@ function ABookFlow() {
     setMyLoading(true);
     setMyErr('');
     ensureLocalSession().then(function (s) {
-      return localBookingFetch('/appointments/my', {
-        headers: { Authorization: 'Bearer ' + s.token }
-      });
-    }).then(function (list) {
+      var h = { headers: { Authorization: 'Bearer ' + s.token } };
+      if (saasIsCustomerRole() && saasFeatureOn('customer.portal')) {
+        return Promise.all([
+          localBookingFetch('/customer-portal', h),
+          saasFeatureOn('loyalty') ? localBookingFetch('/loyalty/me/transactions?limit=5', h).catch(function () { return []; }) : Promise.resolve([])
+        ]).then(function (r) {
+          var portal = r[0] || {};
+          return {
+            items: portal.appointments && Array.isArray(portal.appointments.items) ? portal.appointments.items : [],
+            appointments_sync_status: portal.appointments && portal.appointments.sync_status,
+            loyalty: portal.loyalty || null,
+            transactions: Array.isArray(r[1]) ? r[1] : []
+          };
+        });
+      }
+      return localBookingFetch('/appointments/my', h).then(function (items) { return { items: Array.isArray(items) ? items : [] }; });
+    }).then(function (result) {
       setMyLoading(false);
-      setMyAppts(Array.isArray(list) ? list : []);
+      setMyAppts(result.items || []);
+      if (result.loyalty) setMyLoyal({ acc: result.loyalty, tx: result.transactions || [] });
+      if (result.appointments_sync_status === 'unavailable') setMyErr('Записи временно не загрузились из CRM. Попробуйте ещё раз.');
     }).catch(function (e) {
       setMyLoading(false);
       setMyErr(readErrorText(e, 'Не удалось загрузить записи'));
@@ -9941,7 +10003,6 @@ function ABookFlow() {
         // P0-5: клиентские баллы — источник истины backend/CRM; фронт ничего не начисляет
         if (!saasIsCustomerRole() || !myLoyal || !myLoyal.acc) return null;
         var L = myLoyal.acc;
-        var cur = (L.currency === 'RUB' || !L.currency) ? '₽' : L.currency;
         return React.createElement('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '12px 14px', marginBottom: 12 } },
           React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 } },
             React.createElement('span', { style: { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint } }, 'Баллы'),
@@ -9949,8 +10010,8 @@ function ABookFlow() {
           React.createElement('div', { style: { fontFamily: DISPLAY, fontWeight: 300, fontSize: 22, color: t.ink, marginTop: 5 } }, (Number(L.balance) || 0).toLocaleString('ru-RU')),
           (myLoyal.tx && myLoyal.tx.length) ? React.createElement('div', { style: { marginTop: 8 } }, myLoyal.tx.map(function (x, i) {
             return React.createElement('div', { key: x.id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 8, fontFamily: BODY, fontSize: 11, color: t.dim, padding: '3px 0' } },
-              React.createElement('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, String(x.reason || x.type || 'Операция')),
-              React.createElement('span', { style: { flex: 'none', fontWeight: 600 } }, (Number(x.amount) > 0 ? '+' : '') + (Number(x.amount) || 0).toLocaleString('ru-RU')));
+              React.createElement('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, String(x.reason || x.kind || x.type || 'Операция')),
+              React.createElement('span', { style: { flex: 'none', fontWeight: 600 } }, (Number(x.delta != null ? x.delta : x.amount) > 0 ? '+' : '') + (Number(x.delta != null ? x.delta : x.amount) || 0).toLocaleString('ru-RU')));
           })) : null);
       })(), myLoading ? Loader(t, 'Загружаем…') : !list.length && !myErr ? Loader(t, 'Записей пока нет') : React.createElement(React.Fragment, null, section('Предстоящие', upc), section('Прошедшие', past))) : null, (function () {
         // === Обзор бизнеса (владелец/менеджер): /analytics/business + /customers + /expenses ===
@@ -9980,7 +10041,7 @@ function ABookFlow() {
               React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } }, expItems.map(function (x, i) {
                 return React.createElement('div', { key: x.id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 10, border: '1px solid ' + t.line, borderRadius: 12, padding: '10px 13px' } },
                   React.createElement('span', { style: { fontFamily: BODY, fontSize: 12.5, color: t.ink, minWidth: 0, overflowWrap: 'anywhere' } }, String(x.category || x.title || 'Расход')),
-                  React.createElement('span', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.dim, flex: 'none' } }, (Number(x.amount) || 0).toLocaleString('ru-RU') + ' ' + ((x.currency === 'RUB' || !x.currency) ? '₽' : x.currency)));
+                  React.createElement('span', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.dim, flex: 'none' } }, ((Number(x.amount_kopecks != null ? x.amount_kopecks : x.amount) || 0) / (x.amount_kopecks != null ? 100 : 1)).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ' + ((x.currency === 'RUB' || !x.currency) ? '₽' : x.currency)));
               }))) : null);
         }
         return null;
@@ -11029,6 +11090,23 @@ function AChat() {
     }
   }
   var AI_TOOL_RU = { 'appointments.own.cancel': 'Отмена записи', 'appointments.own.create': 'Новая запись', 'appointments.own.reschedule': 'Перенос записи', 'loyalty.internal.adjust': 'Корректировка баллов' };
+  var AI_SUMMARY_RU = {
+    'appointments.own.cancel': 'Отменить выбранную запись.',
+    'appointments.own.create': 'Создать выбранную запись.',
+    'appointments.own.reschedule': 'Перенести выбранную запись на новое время.',
+    'loyalty.internal.adjust': 'Изменить внутренний баланс лояльности выбранного клиента.'
+  };
+  var AI_PAYLOAD_RU = { appointment_id: 'Запись', staff_id: 'Специалист', service_ids: 'Услуги', start: 'Новое время', branch_id: 'Филиал', target_user_id: 'Клиент', delta: 'Изменение баланса', reason: 'Причина' };
+  function saasAiPreviewValue(key, value) {
+    if (value == null || value === '') return 'не указано';
+    if (key === 'service_ids' && Array.isArray(value)) return value.length + ' ' + (value.length === 1 ? 'услуга' : value.length < 5 ? 'услуги' : 'услуг');
+    if (key === 'start') {
+      try { return new Date(value).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) {}
+    }
+    if (key === 'delta') { var n = Number(value); return Number.isFinite(n) && n > 0 ? '+' + n : String(value); }
+    if (/_id$/.test(key)) { var id = String(value); return id.length > 10 ? '…' + id.slice(-8) : id; }
+    return String(value);
+  }
   function saasAiPatchMsg(idx, patch) {
     setMsgs(function (m) { var a = m.slice(); if (a[idx]) a[idx] = Object.assign({}, a[idx], patch); return a; });
   }
@@ -11074,10 +11152,11 @@ function AChat() {
     var kids = [];
     kids.push(e('div', { key: 'h', style: lbl }, 'Требуется подтверждение'));
     kids.push(e('div', { key: 't', style: { fontFamily: BODY, fontWeight: 600, fontSize: 13.5, color: t.ink, marginTop: 6 } }, AI_TOOL_RU[a.tool_name] || a.tool_name || 'Действие'));
-    if (a.summary) kids.push(e('div', { key: 's', style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, marginTop: 4, lineHeight: 1.5 } }, String(a.summary)));
-    var pv = a.payload_preview && typeof a.payload_preview === 'object' ? Object.keys(a.payload_preview).slice(0, 6) : [];
+    var summary = AI_SUMMARY_RU[a.tool_name] || a.summary;
+    if (summary) kids.push(e('div', { key: 's', style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, marginTop: 4, lineHeight: 1.5 } }, String(summary)));
+    var pv = a.payload_preview && typeof a.payload_preview === 'object' ? Object.keys(a.payload_preview).filter(function (k) { return k !== 'action'; }).slice(0, 6) : [];
     if (pv.length) kids.push(e('div', { key: 'p', style: { marginTop: 7 } }, pv.map(function (k) {
-      return e('div', { key: k, style: { fontFamily: BODY, fontSize: 11, color: t.faint, lineHeight: 1.5 } }, k + ': ' + String(a.payload_preview[k]));
+      return e('div', { key: k, style: { fontFamily: BODY, fontSize: 11, color: t.faint, lineHeight: 1.5 } }, (AI_PAYLOAD_RU[k] || k) + ': ' + saasAiPreviewValue(k, a.payload_preview[k]));
     })));
     if (a.expires_at && !a.uiPhase) { var exp = ''; try { exp = new Date(a.expires_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); } catch (e2) {} if (exp) kids.push(e('div', { key: 'x', style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, 'Действует до ' + exp)); }
     if (a.uiPhase) {
@@ -11136,7 +11215,22 @@ function AChat() {
   const CHAT_HISTORY_CACHE = 'maya_chat_history_v1';
   const QUICKS = ['Записаться', 'Какие цены?', 'Абонемент', 'Сертификат'];
   const STAFF_QUICKS = ['Выручка за месяц', 'Кто приносит больше прибыли?', 'Зарплаты мастеров', 'Записи сегодня'];
+  function saasChatBundle() {
+    var ctx = window.__ME_SAAS_CTX; if (!ctx || !ctx.ns) return null;
+    var b = null; try { b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null'); } catch (e) {}
+    if (!b || !b.token) return null;
+    var slug = String(ctx.slug || '').toLowerCase();
+    if (b.tenant_slug && slug && String(b.tenant_slug).toLowerCase() !== slug) return null;
+    return b;
+  }
+  function saasChatRole() {
+    var b = saasChatBundle();
+    return String(b && b.user && b.user.role || '').toLowerCase();
+  }
   function chatSurface() {
+    var sr = saasChatRole();
+    if (['tenant_owner', 'business_owner', 'tenant_admin', 'administrator', 'manager'].indexOf(sr) >= 0) return 'owner';
+    if (['provider', 'employee', 'staff'].indexOf(sr) >= 0) return 'staff';
     try {
       return window.__meCurMode === 'staff' || window.__meChatReturn === 'staff-home' ? 'staff' : 'client';
     } catch (e) {
@@ -11144,7 +11238,24 @@ function AChat() {
     }
   }
   function chatHistoryCacheKey() {
-    return CHAT_HISTORY_CACHE + ':' + chatSurface();
+    var ctx = window.__ME_SAAS_CTX;
+    if (ctx && ctx.ns) {
+      var b = saasChatBundle();
+      var u = b && b.user;
+      var uid = String(u && (u.id || u.user_id) || 'anonymous').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80) || 'anonymous';
+      return CHAT_HISTORY_CACHE + ':saas:' + ctx.ns + ':' + uid + ':' + chatSurface();
+    }
+    return CHAT_HISTORY_CACHE + ':' + chatSurface(); // legacy key unchanged
+  }
+  function chatHistoryStorage() {
+    // SaaS-диалоги не покидают вкладку и не смешиваются с legacy/local users.
+    return window.__ME_SAAS_CTX ? sessionStorage : localStorage;
+  }
+  function defaultQuickReplies() {
+    if (!window.__ME_SAAS_CTX) return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
+    if (chatSurface() === 'owner') return ['Что сегодня по бизнесу?', 'Покажи аналитику', 'Записи сегодня', 'Что требует внимания?'];
+    if (chatSurface() === 'staff') return ['Записи сегодня', 'Моя статистика', 'Моё расписание', 'Помоги с задачей'];
+    return ['Записаться', 'Показать услуги', 'Мои записи', 'Мои баллы'];
   }
   function uniqChips(list, limit) {
     var out = [];
@@ -11164,11 +11275,16 @@ function AChat() {
     return out;
   }
   function serviceChips() {
+    if (window.__ME_SAAS_CTX) {
+      var tenantServices = uniqChips(serviceNames(), 6);
+      return tenantServices.length ? tenantServices : ['Показать услуги', 'Помоги выбрать услугу'];
+    }
     return uniqChips(['Мужская стрижка', 'Стрижка машинкой + фейд', 'Моделирование бороды', 'Комплекс: стрижка + борода', 'Детская стрижка'].concat(serviceNames()), 6);
   }
   function usualMasterData() {
     var current = window.__meUsualMaster;
     if (current && current.name) return current;
+    if (window.__ME_SAAS_CTX) return null;
     try { return JSON.parse(localStorage.getItem('me_usual_master') || 'null'); } catch (e) { return null; }
   }
   function usualMasterChip() {
@@ -11179,7 +11295,7 @@ function AChat() {
     var d = window.APP_DATA || {}, ms = d.masters || {};
     var names = [].concat(ms.top || [], ms.senior || []).map(function (m) { return m && m[0]; }).filter(Boolean);
     var usual = usualMasterChip();
-    return uniqChips((usual ? [usual] : []).concat(names, ['Любой мастер']), 7);
+    return uniqChips((usual ? [usual] : []).concat(names, [window.__ME_SAAS_CTX ? 'Любой специалист' : 'Любой мастер']), 7);
   }
   function subChips() {
     var d = window.APP_DATA || {};
@@ -11237,15 +11353,18 @@ function AChat() {
   const chatSuggest = function (text, history) {
     var bot = String(text || '').toLowerCase();
     var user = lastText(history, 'user').toLowerCase();
-    var staff = chatSurface() === 'staff';
+    var surface = chatSurface();
+    var staff = surface === 'staff';
+    var owner = surface === 'owner';
     if (/https?:\/\/|записал вас|забронир|перейдите по ссыл|ссылк[ауе] (?:на|для) оплат|оплатить по ссыл/.test(bot)) return [];
+    if (owner) return defaultQuickReplies();
     if (staff) {
       if (/рабочем чате|кабинет клиента|не записываю|не оформляю\s+клиент/.test(bot)) return [];
       var staffChoices = staffChoiceChips(text);
       if (staffChoices.length) return staffChoices;
-      return STAFF_QUICKS;
+      return defaultQuickReplies();
     }
-    if (!user) return QUICKS;
+    if (!user) return defaultQuickReplies();
     // Если Майя задаёт вопрос с ПЕРЕЧИСЛЕНИЕМ вариантов — чипы прямо из её вопроса.
     if (bot.indexOf('?') >= 0) {
       var extract = function (dict) {
@@ -11259,7 +11378,7 @@ function AChat() {
       };
       var svcOpts = extract([[/комплекс|стрижк[ау] (?:и|\+|с) бород/, 'Комплекс: стрижка + борода'], [/стрижк/, 'Стрижка'], [/бород/, 'Борода'], [/уход/, 'Уход'], [/камуфляж|седин/, 'Камуфляж седины'], [/детск/, 'Детская стрижка'], [/бритьё|бритье/, 'Бритьё']]);
       if (svcOpts.length >= 2) return uniqChips(svcOpts, 6);
-      var masterOpts = extract([[/стас/, 'Стас'], [/иль[яе]/, 'Илья'], [/алексе/, 'Алексей'], [/максим/, 'Максим'], [/александр/, 'Александр']]);
+      var masterOpts = window.__ME_SAAS_CTX ? [] : extract([[/стас/, 'Стас'], [/иль[яе]/, 'Илья'], [/алексе/, 'Алексей'], [/максим/, 'Максим'], [/александр/, 'Александр']]);
       if (masterOpts.length >= 2) return uniqChips(masterOpts.concat(['Любой мастер']), 6);
       var timeOpts = extract([[/утр/, 'Утром'], [/дн[её]м|в обед/, 'Днём'], [/вечер/, 'Вечером'], [/сегодня/, 'Сегодня'], [/завтра/, 'Завтра'], [/выходн/, 'На выходных']]);
       if (timeOpts.length >= 2) return uniqChips(timeOpts, 5);
@@ -11277,7 +11396,7 @@ function AChat() {
     if (/сколько по времени|длительн|минут|час/.test(bot) || /сколько по времени|долго|минут/.test(user)) return ['Записаться', 'Мужская стрижка', 'Комплекс: стрижка + борода', 'Ближайшее окно'];
     if (/адрес|находим|лермонтов|как добра|на карт|как прое|как дое/.test(bot) || /где|адрес|как добраться/.test(user)) return ['Записаться', 'Построить маршрут', 'Позвонить', 'Какие цены?'];
     if (pickedService(user)) return masterChips();
-    return QUICKS;
+    return defaultQuickReplies();
   };
   function quickActionTarget(label) {
     var s = String(label || '').toLowerCase();
@@ -11308,6 +11427,15 @@ function AChat() {
     dim: 'rgba(0,0,0,0.62)', faint: 'rgba(0,0,0,0.38)', line: 'rgba(0,0,0,0.14)'
   };
   function defaultChatMsgs() {
+    if (window.__ME_SAAS_CTX) {
+      var brand = String(window.APP_DATA && window.APP_DATA.brand && window.APP_DATA.brand.name || 'вашего бизнеса');
+      var intro = chatSurface() === 'owner'
+        ? 'Здравствуйте! Я MAYA — ваш AI-администратор. Помогу управлять «' + brand + '», покажу состояние бизнеса и подготовлю безопасные действия к подтверждению.'
+        : chatSurface() === 'staff'
+          ? 'Здравствуйте! Я MAYA — ваш рабочий ассистент. Помогу с записями, расписанием и вашей статистикой в «' + brand + '».'
+          : 'Здравствуйте! Я MAYA — ассистент «' + brand + '». Помогу выбрать услугу, найти время, записаться и проверить ваши записи.';
+      return [{ role: 'bot', text: intro }];
+    }
     return [{ role: 'bot', text: chatSurface() === 'staff' ? STAFF_GREETING : GREETING }];
   }
   function normalizeChatMessages(list) {
@@ -11331,7 +11459,7 @@ function AChat() {
   }
   function readCachedChatMsgs() {
     try {
-      const saved = normalizeChatMessages(JSON.parse(localStorage.getItem(chatHistoryCacheKey()) || '[]'));
+      const saved = normalizeChatMessages(JSON.parse(chatHistoryStorage().getItem(chatHistoryCacheKey()) || '[]'));
       if (saved.length) return saved;
     } catch (e) {}
     return defaultChatMsgs();
@@ -11983,13 +12111,40 @@ function AChat() {
   React.useEffect(() => {
     if (onbOnRef.current) return; // онбординг не пишется в кэш клиентского чата
     try {
-      const clean = normalizeChatMessages(msgs);
-      if (clean.length) localStorage.setItem(chatHistoryCacheKey(), JSON.stringify(clean));
+      // Approval-карточки восстанавливаются с сервера: не храним
+      // их payload в browser storage и не показываем stale-действие после reload.
+      const clean = normalizeChatMessages(msgs.filter(function (m) {
+        return !(m && (m.aiApproval || String(m.id || '').indexOf('ai-approval-') === 0));
+      }));
+      if (clean.length) chatHistoryStorage().setItem(chatHistoryCacheKey(), JSON.stringify(clean));
     } catch (e) {}
   }, [msgs]);
+  React.useEffect(function () {
+    if (onbOnRef.current || !saasChatBundle()) return;
+    var cancelled = false;
+    var surface = (function () { try { var C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() ? 'native' : 'web'; } catch (e) { return 'web'; } })();
+    saasAiFetch('/ai/approvals?surface=' + encodeURIComponent(surface), {})
+      .then(function (d) {
+        if (cancelled) return;
+        var pending = ((d && d.approvals) || []).filter(function (a) { return a && a.status === 'pending'; }).slice(0, 5);
+        if (!pending.length) return;
+        setMsgs(function (current) {
+          var next = current.slice();
+          pending.reverse().forEach(function (approval) {
+            var id = 'ai-approval-' + String(approval.id || '');
+            var entry = { id: id, role: 'bot', text: 'Это действие ещё ожидает вашего решения.', aiApproval: approval };
+            var idx = next.findIndex(function (m) { return m && m.id === id; });
+            if (idx >= 0) next[idx] = entry; else next.push(entry);
+          });
+          return next;
+        });
+      }).catch(function () {});
+    return function () { cancelled = true; };
+  }, []);
   const syncChatHistoryRef = React.useRef(async function () {});
   syncChatHistoryRef.current = async function (opts) {
     if (onbOnRef.current) return; // онбординг не грузит клиентскую историю поверх диалога настройки
+    if (window.__ME_SAAS_CTX) return; // SaaS никогда не читает legacy-историю «Мужской Эстетики»
     opts = opts || {};
     try {
       const ap = authPayload({});
@@ -12225,6 +12380,7 @@ function AChat() {
 	      const next = cur.filter((_, idx) => idx !== i);
 	      return next.length ? next : defaultChatMsgs();
 	    });
+	    if (window.__ME_SAAS_CTX) return; // локальное удаление tenant-scoped SaaS-ленты
 	    try {
 	      const ap = authPayload({
 	        delete_mode: 'one',
@@ -12251,8 +12407,9 @@ function AChat() {
 	    setMsgs(defaultChatMsgs());
 	    userHasSentRef.current = false;
 	    try {
-	      localStorage.removeItem(chatHistoryCacheKey());
+	      chatHistoryStorage().removeItem(chatHistoryCacheKey());
 	    } catch (e) {}
+	    if (window.__ME_SAAS_CTX) { setDeleteMode(false); return; }
 		    try {
 		      const ap = authPayload({ delete_mode: 'all' });
 		      await fetch(CHAT_PROXY + '?action=chat_delete', {
@@ -12989,6 +13146,9 @@ function AChat() {
     }
   }
   async function vmEnter() {
+    // Tenant-safe realtime/STT пока не подключён: universal-сессию нельзя
+    // отправлять в legacy voice backend другого бизнеса.
+    if (window.__ME_SAAS_CTX && !onbOnRef.current) return;
     if (vmRef.current.active) return;
     vmRef.current.active = true;
     setVoiceMode(true);
@@ -13023,6 +13183,7 @@ function AChat() {
   // ---- voice messages: record → base64 → ?action=chat {audio} → {transcript, reply, audio_reply} ----
   async function sendAudio(dataUrl) {
     if (onbOnRef.current) { onbSendAudio(dataUrl); return; } // онбординг: транскрипт → onbSend
+    if (window.__ME_SAAS_CTX) return; // fail closed: tenant-safe STT ещё нет
     if (sending || !dataUrl) return;
     userHasSentRef.current = true;
     forceChatBottomRef.current = true;
@@ -13443,6 +13604,7 @@ function AChat() {
       if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(8);
     } catch (e) {}
     if (target.kind === 'run_job') {
+      if (window.__ME_SAAS_CTX) { send(target.label || 'Подготовь действие'); return; }
       setMsgs(m => m.concat([{ role: 'user', text: target.label }]));
       const ap = authPayload({ message: target.confirm });
       fetch(CHAT_PROXY + '?action=chat', { method: 'POST', headers: ap.headers, body: JSON.stringify(ap.payload) }).then(r => r.json()).then(data => setMsgs(m => m.concat([{ role: 'bot', text: data && data.reply || 'Готово.' }]))).catch(() => setMsgs(m => m.concat([{ role: 'bot', text: 'Не получилось запустить — попробуйте из Панели.' }])));
@@ -13675,7 +13837,7 @@ function AChat() {
       fontSize: 11,
       color: t.dim
     }
-	  }, 'Администратор · онлайн'))), canClearChat && deleteMode ? e('button', {
+	  }, (chatSurface() === 'owner' ? 'Владелец' : (chatSurface() === 'staff' ? 'Сотрудник' : 'Администратор')) + ' · онлайн'))), canClearChat && deleteMode ? e('button', {
 	    type: 'button',
 	    title: 'Удалить всю переписку',
 	    onClick: clearMayaChat,
@@ -13729,19 +13891,24 @@ function AChat() {
     }
   }, (function () {
     // Maya OS 1E: пустой чат = командная строка (знак, MAYA, подсказки-команды)
-    var hasUser = msgs.some(function (m) { return m.role === 'user'; });
-    if (!onbOnRef.current && !hasUser && !sending) {
-      var staffCh = chatSurface() === 'staff';
-      var chips = staffCh ? [
-        ['Сводка за день', function () { send('Сводка за день'); }],
-        ['Записать клиента', function () { window.__meGo && window.__meGo('schedule'); }],
-        ['Запустить рассылку', function () { send('Запустить рассылку'); }]
-      ] : QUICKS.slice(0, 3).map(function (q) { return [q, function () { quickTap(q); }]; });
+	    var hasUser = msgs.some(function (m) { return m.role === 'user'; });
+	    if (!onbOnRef.current && !hasUser && !sending) {
+	      var surface = chatSurface();
+	      var staffCh = surface === 'staff';
+	      var ownerCh = surface === 'owner';
+	      var roleQuicks = defaultQuickReplies().slice(0, 3);
+	      var chips = window.__ME_SAAS_CTX
+	        ? roleQuicks.map(function (q) { return [q, function () { send(q); }]; })
+	        : (staffCh ? [
+	          ['Сводка за день', function () { send('Сводка за день'); }],
+	          ['Записать клиента', function () { window.__meGo && window.__meGo('schedule'); }],
+	          ['Запустить рассылку', function () { send('Запустить рассылку'); }]
+	        ] : QUICKS.slice(0, 3).map(function (q) { return [q, function () { quickTap(q); }]; }));
       return e('div', {
         style: { minHeight: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '10px 8px' }
       }, e(SeedLogoAnimated, { size: 110, color: t.ink }),
       e('div', { style: { fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.5em', paddingLeft: '0.5em', textTransform: 'uppercase', fontWeight: 300, color: t.ink, marginTop: 24 } }, 'MAYA'),
-      e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.6, color: t.dim, maxWidth: 260, marginTop: 12 } }, staffCh ? 'Операционная система вашего бизнеса. Задайте вопрос или дайте команду.' : 'Ваш ИИ-администратор. Спросите или запишитесь в пару сообщений.'),
+	      e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.6, color: t.dim, maxWidth: 280, marginTop: 12 } }, ownerCh ? 'AI-администратор вашего бизнеса. Покажу ситуацию и подготовлю действие к вашему подтверждению.' : (staffCh ? 'Ваш рабочий ассистент. Помогу с записями, расписанием и статистикой.' : 'Помогу выбрать услугу, найти время и проверить ваши записи.')),
       e('div', { style: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28, alignItems: 'center' } }, chips.map(function (c, ci) {
         return e('button', {
           key: ci, type: 'button', 'data-chat-quick-command': c[0], onClick: c[1],
@@ -13860,7 +14027,9 @@ function AChat() {
         startRec();
       }
     };
-    var micBtn = e('div', {
+    // Универсальный SaaS не отправляет голос в legacy backend другого бизнеса.
+    // Кнопка вернётся после подключения tenant-safe STT к /api/ai/chat.
+    var micBtn = universal ? null : e('div', {
       key: 'mic',
       onClick: micToggle,
       onContextMenu: function (ev) { try { ev.preventDefault(); } catch (e2) {} },
@@ -13884,7 +14053,7 @@ function AChat() {
     if (!kbdUp && !onbOnRef.current) {
       var items = (chatSurface() === 'staff' ? (window.STAFF_TABS || []) : (window.CLIENT_TABS || []));
       var loggedIn = !!(window.__meHasSession && window.__meHasSession());
-      var vis = items.filter(function (it) { return !it.auth || loggedIn || it.guestLabel || it.guestTap; });
+      var vis = items.filter(function (it) { return meTabFeatureAllowed(it) && (!it.auth || loggedIn || it.guestLabel || it.guestTap); });
       var EASE = 'cubic-bezier(.32,.72,0,1)';
       nav = e('div', {
         key: 'nav',
@@ -28624,7 +28793,7 @@ function MEApp() {
         if (window.__SAAS_FEATURES_EFFECTIVE && _ent) {
           _aiOk = _aiKeys.some(function (k) { return _ent.indexOf(k) >= 0 && (!window.__meFeatureReady || window.__meFeatureReady(k, { universal: true })); });
         } else {
-          _aiOk = !window.__meFeatureReady ? false : (window.__meFeatureReady('ai_chatbot', { universal: true }) || _aiKeys.some(function (k) { return window.__meFeatureReady(k, { universal: true }); }));
+          _aiOk = false; // readiness без authenticated entitlement никогда не разблокирует AI
         }
         if (!_aiOk) s = 'home';
       }
