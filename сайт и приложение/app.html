@@ -30085,19 +30085,85 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   }
   window.__meDropForeignLogin = __meDropForeignLogin;
   // Иконка приложения (нативка): до входа — знак MAYA, после входа — |M| барбершопа.
-  // iOS показывает системный алерт при смене — поэтому меняем только при РЕАЛЬНОЙ смене состояния.
+  // Источник истины — UIApplication через getName(), а не localStorage: после
+  // переустановки iOS сбрасывает alternate icon, сохраняя контейнер приложения.
+  var __meAppIconSyncBusy = false;
+  var __meAppIconDesired = null;
+  var __meAppIconRetryTimer = null;
+  var __meAppIconRetryCount = 0;
+  function __meScheduleAppIconRetry(){
+    try{
+      if(__meAppIconRetryTimer || __meAppIconRetryCount >= 3 || document.visibilityState === 'hidden') return;
+      __meAppIconRetryCount++;
+      __meAppIconRetryTimer = setTimeout(function(){
+        __meAppIconRetryTimer = null;
+        __meSyncAppIcon(hasSession());
+      }, 700 + (__meAppIconRetryCount * 700));
+    }catch(e){}
+  }
   function __meSyncAppIcon(loggedIn){
     try{
       var AI = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppIcon;
       if(!AI || !(window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
       var want = loggedIn ? 'AppIconBarber' : null;
-      var cur = null; try{ cur = localStorage.getItem('me_app_icon') || null; }catch(e){}
-      if(cur === (want || '')) return;
-      try{ localStorage.setItem('me_app_icon', want || ''); }catch(e){}
-      if(want) AI.change({ name: want, suppressNotification: true }).catch(function(){});
-      else AI.reset({ suppressNotification: true }).catch(function(){});
-    }catch(e){}
+      __meAppIconDesired = want;
+      if(document.visibilityState === 'hidden' || __meAppIconSyncBusy) return;
+      __meAppIconSyncBusy = true;
+      var requestedWant = want;
+      var supported = AI.isSupported ? AI.isSupported() : Promise.resolve({ value: true });
+      Promise.resolve(supported)
+        .then(function(support){
+          if(support && support.value === false){
+            var unsupported = new Error('Alternate icons are not supported');
+            unsupported.noRetry = true;
+            throw unsupported;
+          }
+          return AI.getName ? AI.getName() : { value: null };
+        })
+        .then(function(current){
+          if(__meAppIconDesired !== requestedWant) return;
+          var actual = current && typeof current.value === 'string' ? current.value : null;
+          if(actual === requestedWant) return;
+          var action = requestedWant
+            ? AI.change({ name: requestedWant, suppressNotification: true })
+            : AI.reset({ suppressNotification: true, disable: ['AppIconBarber'] });
+          return Promise.resolve(action).then(function(){
+            return AI.getName ? AI.getName() : { value: requestedWant };
+          }).then(function(after){
+            var actualAfter = after && typeof after.value === 'string' ? after.value : null;
+            if(actualAfter !== requestedWant) throw new Error('App icon change was not applied');
+          });
+        })
+        .then(function(){
+          if(__meAppIconDesired === requestedWant){
+            __meAppIconRetryCount = 0;
+            try{ localStorage.setItem('me_app_icon', requestedWant || ''); }catch(e){}
+          }
+        })
+        .catch(function(err){
+          try{ localStorage.removeItem('me_app_icon'); }catch(e){}
+          if(!(err && err.noRetry)) __meScheduleAppIconRetry();
+        })
+        .then(function(){
+          __meAppIconSyncBusy = false;
+          if(__meAppIconDesired !== requestedWant) __meSyncAppIcon(hasSession());
+        });
+    }catch(e){
+      __meAppIconSyncBusy = false;
+      try{ localStorage.removeItem('me_app_icon'); }catch(e2){}
+    }
   }
+  // Смена иконки разрешена iOS только в активном foreground-состоянии.
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState !== 'hidden'){
+      __meAppIconRetryCount = 0;
+      __meSyncAppIcon(hasSession());
+    }
+  });
+  window.addEventListener('pageshow', function(){
+    __meAppIconRetryCount = 0;
+    __meSyncAppIcon(hasSession());
+  });
   window.__meSyncAppIcon = __meSyncAppIcon;
   function meAuthRoute(){
     __meDropForeignLogin();
