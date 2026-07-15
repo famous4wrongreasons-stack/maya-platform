@@ -108,3 +108,5 @@ jobs:
           "сайт и приложение/maya-admin.html"
           "сайт и приложение/maya-start.html"
           "сайт и приложение/oauth-callback.html"
+      - name: Verify prepublication safety contracts
+        run: node scripts/verify-prepublication-contracts.mjs
