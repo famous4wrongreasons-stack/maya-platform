@@ -22,9 +22,9 @@ frontend state и CRM-specific кода.
 | Memory Engine | user/team/business memory без ПД в LLM | есть частично |
 | Knowledge Engine | RAG/документы/регламенты tenant | начато, нужно универсализировать |
 | Planner Engine | строит план действий и выбирает tools/agents | пока внутри prompt/tool-loop |
-| Tool Engine | исполняет backend tools | есть, но registry пока кодовый |
-| Tool Registry | описывает tools, schemas, permissions, risk tier | нужно выделить |
-| Action Engine | запускает подтвержденные действия | есть частично через jobs/action-cards |
+| Tool Engine | исполняет backend tools | первый tenant-scoped platform slice готов |
+| Tool Registry | описывает tools, schemas, permissions, risk tier | типизированный code registry готов для первого slice |
+| Action Engine | запускает подтвержденные действия | approval/idempotency runtime готов, UI pending |
 | Analytics Engine | KPI, BI, прогноз, причинность | есть basic analytics, нужен data mart |
 | Notification Engine | push/Telegram/SMS/email/WhatsApp | есть частично |
 | Billing Engine | тарифы, limits, usage, subscriptions | есть в SaaS backend |
@@ -213,3 +213,5 @@ classDiagram
 - [Authentication abuse protection](auth-abuse-protection-runbook.md)
 - [Authentication retention maintenance](auth-retention-maintenance-runbook.md)
 - [Production bootstrap hardening](production-bootstrap-hardening-runbook.md)
+- [AI tool runtime and approvals](ai-tool-runtime-runbook.md)
+- [Isolated staging readiness](staging-readiness-runbook.md)

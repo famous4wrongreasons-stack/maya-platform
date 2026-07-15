@@ -1,8 +1,9 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 
 import { AdminModule } from './admin/admin.module';
+import { AiToolsModule } from './ai-tools/ai-tools.module';
 import { OperationsAnalyticsModule } from './analytics/operations-analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -35,6 +36,8 @@ import { UsersModule } from './users/users.module';
 import { TenancyModule } from './tenancy/tenancy.module';
 import { TenantResolutionMiddleware } from './tenancy/tenant-resolution.middleware';
 import { validateRuntimeConfig } from './config/runtime-config';
+import { RequestMetricsInterceptor } from './request-metrics.interceptor';
+import { SystemMetricsService } from './system-metrics.service';
 
 @Module({
   imports: [
@@ -67,10 +70,16 @@ import { validateRuntimeConfig } from './config/runtime-config';
     OnboardingModule,
     AdminModule,
     OperationsAnalyticsModule,
+    AiToolsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    SystemMetricsService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestMetricsInterceptor,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

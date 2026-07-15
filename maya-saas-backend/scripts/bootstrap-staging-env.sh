@@ -5,8 +5,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET="$ROOT_DIR/.env.staging"
 TEMPLATE="$ROOT_DIR/.env.staging.example"
 HOST="${1:-}"
+HOST_PATTERN='^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9])(\.([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]))+$'
 
-if [[ -z "$HOST" || "$HOST" == *"/"* || "$HOST" == *":"* ]]; then
+if [[ -z "$HOST" || ! "$HOST" =~ $HOST_PATTERN ]]; then
   printf 'Usage: %s staging.example.com\n' "$0" >&2
   exit 64
 fi

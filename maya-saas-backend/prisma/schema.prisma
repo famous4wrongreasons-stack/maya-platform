@@ -58,6 +58,8 @@ model Tenant {
   loyaltyAccounts        LoyaltyAccount[]
   loyaltyTransactions    LoyaltyTransaction[]
   expenses               Expense[]
+  aiApprovalRequests     AiApprovalRequest[]
+  aiToolExecutions       AiToolExecution[]
 }
 
 /// Persisted white-label BrandingConfig. The database model name is retained
@@ -118,29 +120,32 @@ model Branch {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  tenantId            String?
-  branchId            String?
-  email               String
-  phone               String?
-  encryptedName       String?
-  passwordHash        String
-  role                String
-  status              String               @default("active")
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  tenant              Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch              Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  auditLogs           AuditLog[]
-  appointments        Appointment[]        @relation("ClientAppointments")
-  authIdentities      AuthIdentity[]
-  authSessions        AuthSession[]
-  memberships         Membership[]
-  internalProviders   InternalProvider[]
-  customerProfile     CustomerProfile?
-  loyaltyAccount      LoyaltyAccount?
-  loyaltyTransactions LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
-  createdExpenses     Expense[]            @relation("ExpenseCreator")
+  id                   String               @id @default(cuid())
+  tenantId             String?
+  branchId             String?
+  email                String
+  phone                String?
+  encryptedName        String?
+  passwordHash         String
+  role                 String
+  status               String               @default("active")
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  tenant               Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch               Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  auditLogs            AuditLog[]
+  appointments         Appointment[]        @relation("ClientAppointments")
+  authIdentities       AuthIdentity[]
+  authSessions         AuthSession[]
+  memberships          Membership[]
+  internalProviders    InternalProvider[]
+  customerProfile      CustomerProfile?
+  loyaltyAccount       LoyaltyAccount?
+  loyaltyTransactions  LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
+  createdExpenses      Expense[]            @relation("ExpenseCreator")
+  requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
+  decidedAiApprovals   AiApprovalRequest[]  @relation("AiApprovalDecider")
+  aiToolExecutions     AiToolExecution[]    @relation("AiToolExecutionActor")
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -481,6 +486,70 @@ model Expense {
   @@unique([id, tenantId])
   @@index([tenantId, occurredAt])
   @@index([tenantId, branchId, occurredAt])
+}
+
+model AiApprovalRequest {
+  id                  String           @id @default(cuid())
+  tenantId            String
+  requestedByUserId   String?
+  requestedByTenantId String?
+  decidedByUserId     String?
+  decidedByTenantId   String?
+  toolName            String
+  surface             String
+  riskTier            String
+  approvalPolicy      String
+  status              String           @default("pending")
+  summary             String
+  payloadHash         String
+  payloadPreviewJson  Json
+  encryptedArguments  String
+  idempotencyKey      String
+  expiresAt           DateTime
+  decidedAt           DateTime?
+  executedAt          DateTime?
+  errorCode           String?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  tenant              Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  requestedBy         User?            @relation("AiApprovalRequester", fields: [requestedByUserId, requestedByTenantId], references: [id, tenantId], onDelete: SetNull)
+  decidedBy           User?            @relation("AiApprovalDecider", fields: [decidedByUserId, decidedByTenantId], references: [id, tenantId], onDelete: SetNull)
+  execution           AiToolExecution?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, expiresAt])
+  @@index([tenantId, requestedByUserId, createdAt])
+}
+
+model AiToolExecution {
+  id                String             @id @default(cuid())
+  tenantId          String
+  actorUserId       String?
+  actorTenantId     String?
+  approvalRequestId String?
+  approvalTenantId  String?
+  toolName          String
+  surface           String
+  riskTier          String
+  status            String
+  inputHash         String
+  idempotencyKey    String
+  encryptedResult   String?
+  errorCode         String?
+  startedAt         DateTime           @default(now())
+  completedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actor             User?              @relation("AiToolExecutionActor", fields: [actorUserId, actorTenantId], references: [id, tenantId], onDelete: SetNull)
+  approvalRequest   AiApprovalRequest? @relation(fields: [approvalRequestId, approvalTenantId], references: [id, tenantId], onDelete: SetNull)
+
+  @@unique([approvalRequestId, approvalTenantId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, toolName, createdAt])
+  @@index([tenantId, actorUserId, createdAt])
+  @@index([tenantId, status, startedAt])
 }
 
 model InternalProviderService {

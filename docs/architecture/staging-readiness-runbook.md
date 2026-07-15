@@ -51,8 +51,21 @@ The repository-owned staging path is now:
 
 ```bash
 cd maya-saas-backend
+npm ci
 ./scripts/bootstrap-staging-env.sh staging.example.com
 ./scripts/staging-up.sh
+```
+
+`staging-up.sh` runs a fail-closed configuration preflight before building,
+waits for database-backed readiness, and then runs the same preflight inside the
+backend to confirm that every local migration is applied, no unknown migration
+exists in the database, and every applied checksum matches the immutable SQL in
+this release. The commands can also be run independently:
+
+```bash
+cd maya-saas-backend
+npm run release:preflight -- --env .env.staging --skip-db
+npm run release:preflight
 ```
 
 `compose.staging.yml` creates an isolated PostgreSQL volume, uploads volume,
@@ -64,6 +77,10 @@ their values. It intentionally leaves all external providers disabled.
 Before every live-provider canary, create a dump with
 `./scripts/staging-backup.sh`. A restore requires the explicit
 `RESTORE-STAGING` argument and stops the backend during replacement.
+
+Use `/api/health` for liveness and `/api/health/ready` for database-backed
+readiness. PII-free in-process route metrics are available to `platform_owner`
+at `/api/health/metrics` and reset when the backend restarts.
 
 ## Gate 2: Synthetic tenant verification
 

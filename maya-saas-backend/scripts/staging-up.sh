@@ -9,6 +9,14 @@ if [[ ! -f .env.staging ]]; then
   exit 66
 fi
 
+if [[ ! -x node_modules/.bin/ts-node ]]; then
+  printf 'Missing locked dependencies. Run npm ci before staging-up.\n' >&2
+  exit 69
+fi
+
+npm run release:preflight -- --env .env.staging --skip-db
 docker compose --env-file .env.staging -f compose.staging.yml up -d --build
+docker compose --env-file .env.staging -f compose.staging.yml exec -T backend \
+  npm run release:preflight
 docker compose --env-file .env.staging -f compose.staging.yml exec -T backend npm run prisma:seed
 docker compose --env-file .env.staging -f compose.staging.yml ps

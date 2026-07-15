@@ -119,6 +119,20 @@ export class CustomersService {
     }));
   }
 
+  async countCustomers(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const count = await this.prisma.user.count({
+      where: {
+        tenantId: scopedTenantId,
+        role: { in: [...CUSTOMER_ROLES] },
+        memberships: {
+          some: { tenantId: scopedTenantId, status: 'active' },
+        },
+      },
+    });
+    return { customer_count: count };
+  }
+
   async getCustomer(tenantId: string, userId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const user = await this.usersService.getTenantUserOrThrow(

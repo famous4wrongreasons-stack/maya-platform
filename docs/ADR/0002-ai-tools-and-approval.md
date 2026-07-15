@@ -3,6 +3,11 @@
 Дата: 2026-07-08
 Статус: accepted
 
+Implementation note: the first platform slice is implemented by migration
+`20260715210000_ai_tool_runtime` and the typed registry under
+`maya-saas-backend/src/ai-tools`. The final frontend/channel orchestration is a
+separate acceptance gate.
+
 ## Контекст
 
 Maya OS должна управлять записью, маркетингом, финансами, уведомлениями,

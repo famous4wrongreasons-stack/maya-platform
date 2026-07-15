@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 
 type ApiResponse = {
@@ -493,6 +494,29 @@ async function runSmoke() {
     }),
   );
   const clientToken = stringField(phoneLogin, 'access_token');
+  const clientAiTools = asArray(
+    asRecord(
+      await expectStatus('/ai/tools?surface=web', 200, {
+        headers: authHeaders(clientToken),
+      }),
+    ).tools,
+  ).map(asRecord);
+  assert(clientAiTools.some((tool) => tool.name === 'appointments.own.cancel'));
+  assert(
+    !clientAiTools.some((tool) => tool.name === 'analytics.business.read'),
+  );
+  const aiCatalogResult = asRecord(
+    await expectStatus('/ai/tools/catalog.services.read/execute', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(clientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ arguments: {}, surface: 'web' }),
+    }),
+  );
+  assert.equal(aiCatalogResult.status, 'completed');
+  assert(asArray(asRecord(aiCatalogResult.result).services).length > 0);
   const profile = asRecord(
     await expectStatus('/me', 200, {
       headers: authHeaders(clientToken),
@@ -787,10 +811,58 @@ async function runSmoke() {
     }),
   );
   assert.equal(asRecord(rescheduledSolo.appointment).source, 'internal');
-  await expectStatus(`/appointments/${soloAppointmentId}/cancel`, 201, {
-    method: 'POST',
-    headers: authHeaders(soloClientToken),
-  });
+  const aiCancelRequest = asRecord(
+    await expectStatus('/ai/tools/appointments.own.cancel/execute', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloClientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        arguments: { appointment_id: soloAppointmentId },
+        surface: 'native',
+        idempotencyKey: randomUUID(),
+      }),
+    }),
+  );
+  assert.equal(aiCancelRequest.status, 'approval_required');
+  const aiCancelApproval = asRecord(aiCancelRequest.approval);
+  const aiCancelApprovalId = stringField(aiCancelApproval, 'id');
+  const aiCancelPayloadHash = stringField(aiCancelApproval, 'payload_hash');
+  const appointmentsBeforeApproval = asArray(
+    await expectStatus('/appointments/my', 200, {
+      headers: authHeaders(soloClientToken),
+    }),
+  ).map(asRecord);
+  assert.equal(
+    appointmentsBeforeApproval.find(
+      (appointment) => appointment.id === soloAppointmentId,
+    )?.status,
+    'confirmed',
+  );
+  const aiCancelResult = asRecord(
+    await expectStatus(`/ai/approvals/${aiCancelApprovalId}/approve`, 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloClientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ payloadHash: aiCancelPayloadHash }),
+    }),
+  );
+  assert.equal(aiCancelResult.status, 'completed');
+  assert.equal(asRecord(aiCancelResult.result).status, 'canceled');
+  const replayedAiCancel = asRecord(
+    await expectStatus(`/ai/approvals/${aiCancelApprovalId}/approve`, 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(soloClientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ payloadHash: aiCancelPayloadHash }),
+    }),
+  );
+  assert.equal(replayedAiCancel.replayed, true);
   await expectStatus(`/appointments/${soloAppointmentId}/cancel`, 409, {
     method: 'POST',
     headers: authHeaders(soloClientToken),
@@ -839,7 +911,7 @@ async function runSmoke() {
   });
 
   console.log(
-    'HTTP smoke passed: verified trial funnel, AI onboarding, tenant fence, auth rotation, CRM preview and internal calendar booking',
+    'HTTP smoke passed: verified trial funnel, AI onboarding/tools/approval, tenant fence, auth rotation, CRM preview and internal calendar booking',
   );
 }
 

@@ -184,6 +184,8 @@ describe('runtime config validation', () => {
     config.PHONE_AUTH_RESEND_COOLDOWN_SECONDS = '600';
     config.EMAIL_AUTH_CODE_TTL = '300';
     config.EMAIL_AUTH_RESEND_COOLDOWN_SECONDS = '600';
+    config.AI_TOOL_RETENTION_DAYS = '2';
+    config.AI_TOOL_STALE_EXECUTION_MINUTES = '121';
     const message = validationMessage(config);
 
     expect(message).toContain('CORS origins must be explicit');
@@ -196,6 +198,12 @@ describe('runtime config validation', () => {
     );
     expect(message).toContain(
       'EMAIL_AUTH_RESEND_COOLDOWN_SECONDS cannot exceed EMAIL_AUTH_CODE_TTL',
+    );
+    expect(message).toContain(
+      'AI_TOOL_RETENTION_DAYS must be an integer from 7 to 365',
+    );
+    expect(message).toContain(
+      'AI_TOOL_STALE_EXECUTION_MINUTES must be an integer from 5 to 120',
     );
   });
 });

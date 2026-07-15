@@ -11,6 +11,8 @@
     "typecheck:scripts": "tsc --noEmit --project tsconfig.scripts.json --incremental false",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.ts\"",
     "auth:cleanup": "ts-node --project tsconfig.scripts.json --transpile-only scripts/auth-retention-cleanup.ts",
+    "ai:maintenance": "ts-node --project tsconfig.scripts.json --transpile-only scripts/ai-runtime-maintenance.ts",
+    "release:preflight": "ts-node --project tsconfig.scripts.json --transpile-only scripts/release-preflight.ts",
     "import:current-salon": "ts-node --project tsconfig.scripts.json --transpile-only scripts/import-current-salon.ts",
     "start": "nest start",
     "start:dev": "nest start --watch",

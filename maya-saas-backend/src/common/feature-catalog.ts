@@ -401,14 +401,14 @@ export const MAYA_FEATURE_READINESS: Record<
   'customer.portal': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
     'The resilient customer overview API is available; the final universal customer experience is still being unified in the frontend.',
   ]),
-  'ai.owner': defineReadiness('current_runtime_only', CURRENT_MAYA, [
-    'The role-aware owner tool runtime has not yet been tenantized in the platform backend.',
+  'ai.owner': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'Tenant-scoped, approval-gated owner tools are available in the platform backend; final frontend orchestration remains pending.',
   ]),
-  'ai.admin': defineReadiness('current_runtime_only', CURRENT_MAYA, [
-    'The role-aware administrator tool runtime has not yet been tenantized in the platform backend.',
+  'ai.admin': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'Tenant-scoped administrator tools are available in the platform backend; final frontend orchestration remains pending.',
   ]),
-  'ai.consultant': defineReadiness('current_runtime_only', CURRENT_MAYA, [
-    'The role-aware customer tool runtime has not yet been tenantized in the platform backend.',
+  'ai.consultant': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
+    'Tenant-scoped customer tools are available in the platform backend; final frontend orchestration remains pending.',
   ]),
   'telegram.owner': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'telegram.admin': defineReadiness('current_runtime_only', CURRENT_MAYA),
@@ -469,7 +469,13 @@ const PRO_PLAN_FEATURES: MayaFeatureKey[] = [
 export const MAYA_PLAN_FEATURES: Record<string, MayaFeatureKey[]> = {
   start: START_PLAN_FEATURES,
   pro: PRO_PLAN_FEATURES,
-  max: [...PRO_PLAN_FEATURES, 'video_analytics'],
+  max: [
+    ...PRO_PLAN_FEATURES,
+    'video_analytics',
+    'ai.owner',
+    'ai.admin',
+    'ai.consultant',
+  ],
 };
 
 const FEATURE_KEY_SET = new Set<string>(MAYA_FEATURE_KEYS);

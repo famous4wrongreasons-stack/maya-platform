@@ -60,6 +60,11 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `GET /api/loyalty/me/transactions`
   - `GET /api/features/registry`
   - `GET /api/features/effective`
+  - `GET /api/ai/tools?surface=web`
+  - `POST /api/ai/tools/:toolName/execute`
+  - `GET /api/ai/approvals?surface=web`
+  - `POST /api/ai/approvals/:id/approve`
+  - `POST /api/ai/approvals/:id/reject`
 - Maya-managed calendar API for specialists who do not use a CRM:
   - `GET /api/internal-calendar/setup`
   - `POST /api/internal-calendar/services`
@@ -127,6 +132,12 @@ immutable price snapshot in kopecks. Operational analytics excludes cancelled
 appointments, reports legacy rows without snapshots through `data_quality`, and
 keeps every currency in a separate total.
 
+The AI tool runtime is tenant-scoped and fail-closed. Reads return minimized
+data; booking cancellation and internal loyalty adjustment create immutable
+approval requests before execution. Arguments/results are encrypted and audit
+metadata contains no prompt, phone, email or CRM payload. See
+[the AI tool runtime runbook](../docs/architecture/ai-tool-runtime-runbook.md).
+
 ## Environment
 
 Copy `.env.example` to `.env` and adjust values:
@@ -144,6 +155,8 @@ AUTH_REFRESH_TOKEN_SECRET="change-me-to-an-independent-random-secret"
 AUTH_SESSION_METADATA_SECRET="change-me-to-another-independent-random-secret"
 AUTH_RATE_LIMIT_SECRET="change-me-to-a-third-independent-random-secret"
 CRM_ENCRYPTION_KEY="change-me-in-production"
+AI_TOOL_RETENTION_DAYS="30"
+AI_TOOL_STALE_EXECUTION_MINUTES="15"
 PORT=3000
 HOST="0.0.0.0"
 NODE_ENV="development"
@@ -686,5 +699,7 @@ npm run test
 npm run prisma:generate
 npm run prisma:migrate:deploy
 npm run prisma:seed
+npm run release:preflight -- --env .env.staging --skip-db
+npm run ai:maintenance
 docker compose up --build
 ```

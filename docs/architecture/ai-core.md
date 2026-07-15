@@ -50,9 +50,15 @@ Each tool declares name, input/output schema, permissions, features, allowed rol
 
 ## Migration path
 
-1. Inventory existing Python/Telegram tools.
-2. Wrap read-only tools behind typed contracts.
-3. Add shared policy/tenant context.
-4. Migrate booking commands with confirmation and idempotency.
-5. Route native and Telegram channels to the same orchestrator.
-6. Retire duplicated prompt-side business logic after parity tests.
+1. Completed: inventory existing Python/Telegram tools.
+2. Completed: wrap the first read-only platform tools behind typed contracts.
+3. Completed: add shared role, entitlement and TenantContext policy.
+4. Completed: add approval-gated cancellation and internal loyalty adjustment
+   with immutable hashes and idempotency.
+5. Pending frontend/channel work: route native, web, Telegram and voice through
+   the shared tool API and render approval cards.
+6. Pending cutover work: retire duplicated prompt-side business logic only after
+   parity and canary tests.
+
+Operational details and exact endpoints are in
+[AI Tool Runtime Runbook](ai-tool-runtime-runbook.md).

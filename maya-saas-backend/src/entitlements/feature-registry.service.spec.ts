@@ -29,14 +29,14 @@ describe('FeatureRegistryService', () => {
     expect(service.platformReady('video_analytics')).toBe(false);
   });
 
-  it('separates current runtime AI from platform-ready capabilities', () => {
+  it('publishes backend AI without overstating frontend readiness', () => {
     expect(service.get('client_app')).toMatchObject({
       implementationStatus: 'partial',
     });
     expect(service.platformReady('client_app')).toBe(false);
     expect(service.get('ai.owner')).toMatchObject({
-      implementationStatus: 'current_runtime_only',
-      availableIn: ['current_maya'],
+      implementationStatus: 'partial',
+      availableIn: ['current_maya', 'platform_backend'],
     });
     expect(service.platformReady('ai.owner')).toBe(false);
     expect(service.platformReady('calendar.internal')).toBe(true);

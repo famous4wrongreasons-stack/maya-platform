@@ -21,6 +21,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.disable('x-powered-by');
+  app.enableShutdownHooks();
   app.set(
     'trust proxy',
     resolveAuthTrustedProxies(configService.get<string>('AUTH_TRUST_PROXY')),

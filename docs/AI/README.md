@@ -214,7 +214,8 @@ Every recommendation should answer:
 
 ## Recommendations
 
-1. Build a persistent Tool Registry table/config before adding many agents.
+1. Extend the typed platform Tool Registry deliberately; persist executions and
+   approvals, not model-controlled tool definitions.
 2. Add AI evals for every risky workflow.
 3. Use deterministic Python/NestJS for analytics and actions.
 4. Keep "agent" as logical routing until scale demands separate workers.
