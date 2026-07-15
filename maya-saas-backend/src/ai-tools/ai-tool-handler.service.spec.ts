@@ -5,6 +5,7 @@ import { UserRole } from '../common/domain.enums';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -50,12 +51,14 @@ describe('AiToolHandlerService output minimization', () => {
     expect(JSON.stringify(result)).not.toContain('+70000000000');
     expect(JSON.stringify(result)).not.toContain('private@example.com');
     expect(JSON.stringify(result)).not.toContain('provider_payload');
+    expect(JSON.stringify(result)).not.toContain('staff-a');
+    expect(JSON.stringify(result)).not.toContain('Анна');
     expect(result).toMatchObject({
       appointments: [
         {
           id: 'appointment-a',
           branch: { id: 'branch-a', name: 'Филиал' },
-          staff: { id: 'staff-a', name: 'Анна' },
+          staff: { title: null, specialization: null },
         },
       ],
     });
@@ -172,11 +175,96 @@ describe('AiToolHandlerService output minimization', () => {
     });
   });
 
+  it('replaces staff names with deterministic booking labels', async () => {
+    const staffService = {
+      listStaff: jest.fn().mockResolvedValue([
+        {
+          id: 'staff-external-1',
+          name: 'Анна',
+          title: 'Барбер',
+          specialization: 'Стрижки',
+          avatar_url: 'https://private.example/avatar.jpg',
+        },
+      ]),
+    } as unknown as StaffService;
+    const service = createService({ staffService });
+
+    const result = await service.execute(
+      'catalog.staff.read',
+      principal,
+      {},
+      'execution-e',
+    );
+
+    expect(result).toEqual({
+      staff: [
+        {
+          id: 'staff-external-1',
+          label: 'specialist_1',
+          title: 'Барбер',
+          specialization: 'Стрижки',
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('Анна');
+    expect(JSON.stringify(result)).not.toContain('avatar.jpg');
+  });
+
+  it('removes booking identity and notes from appointment previews', async () => {
+    const appointmentsService = {
+      previewForClient: jest.fn().mockResolvedValue({
+        ok: true,
+        preview: true,
+        mode: 'preview',
+        branch_id: 'branch-a',
+        branch_timezone: 'Europe/Moscow',
+        client_name: 'Иван',
+        client_phone: '+79180000000',
+        staff_id: 'staff-a',
+        service_ids: ['service-a'],
+        requested_start: '2026-07-20T10:00:00.000Z',
+        matched_slot_start: '2026-07-20T10:00:00.000Z',
+        slot: {
+          start: '2026-07-20T10:00:00.000Z',
+          end: '2026-07-20T11:00:00.000Z',
+          staff_id: 'staff-a',
+          branch_id: 'branch-a',
+        },
+        total_price: 1_800,
+        duration_minutes: 60,
+        currency: 'RUB',
+        notes: 'private note',
+        warnings: [],
+      }),
+    } as unknown as AppointmentsService;
+    const service = createService({ appointmentsService });
+    const result = await service.execute(
+      'appointments.own.preview',
+      principal,
+      {
+        staff_id: 'staff-a',
+        service_ids: ['service-a'],
+        start: '2026-07-20T10:00:00.000Z',
+      },
+      'execution-f',
+    );
+
+    expect(JSON.stringify(result)).not.toContain('Иван');
+    expect(JSON.stringify(result)).not.toContain('+79180000000');
+    expect(JSON.stringify(result)).not.toContain('private note');
+    expect(result).toMatchObject({
+      preview: true,
+      staff_id: 'staff-a',
+      service_ids: ['service-a'],
+    });
+  });
+
   function createService(overrides: {
     appointmentsService?: AppointmentsService;
     expensesService?: ExpensesService;
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
+    staffService?: StaffService;
   }) {
     return new AiToolHandlerService(
       {} as CrmService,
@@ -185,6 +273,7 @@ describe('AiToolHandlerService output minimization', () => {
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),
       overrides.expensesService ?? ({} as ExpensesService),
       {} as CustomersService,
+      overrides.staffService ?? ({} as StaffService),
     );
   }
 });

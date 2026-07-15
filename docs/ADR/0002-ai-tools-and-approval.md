@@ -5,7 +5,8 @@
 
 Implementation note: the first platform slice is implemented by migration
 `20260715210000_ai_tool_runtime` and the typed registry under
-`maya-saas-backend/src/ai-tools`. The final frontend/channel orchestration is a
+`maya-saas-backend/src/ai-tools`. The channel-agnostic, privacy-redacted server
+orchestrator is available at `POST /api/ai/chat`; final channel UI binding is a
 separate acceptance gate.
 
 ## Контекст

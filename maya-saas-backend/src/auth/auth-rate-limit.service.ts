@@ -20,6 +20,7 @@ export type AuthRateLimitAction =
   | 'phone_verify'
   | 'refresh'
   | 'registration'
+  | 'ai_chat'
   | 'ai_onboarding'
   | 'trial_activation'
   | 'trial_signup';
@@ -45,6 +46,9 @@ const POLICIES: AuthRateLimitPolicy[] = [
   policy('registration', 'preflight', 'identity', '1h', 5, 3600),
   policy('registration', 'tenant', 'tenant', '1h', 100, 3600),
   policy('registration', 'tenant', 'identity', '1h', 3, 3600),
+  policy('ai_chat', 'tenant', 'tenant', '1m', 120, 60),
+  policy('ai_chat', 'tenant', 'identity', '1m', 20, 60),
+  policy('ai_chat', 'tenant', 'identity', '1h', 300, 3600),
   policy('ai_onboarding', 'preflight', 'ip', '1h', 120, 3600),
   policy('ai_onboarding', 'preflight', 'identity', '1h', 60, 3600),
   policy('phone_start', 'preflight', 'ip', '10m', 20, 600),

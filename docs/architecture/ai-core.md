@@ -33,6 +33,11 @@ sequenceDiagram
 
 Each tool declares name, input/output schema, permissions, features, allowed roles, confirmation requirement, idempotency behavior, audit policy and rate limit. Tool execution receives `MayaExecutionContext`; it never accepts tenant ID from model output.
 
+The channel-agnostic entry point is `POST /api/ai/chat`. It accepts a bounded
+conversation, an opaque client request ID and one of `native`, `web`,
+`telegram` or `voice`. The server resolves identity, tenant, role, entitlements
+and tools before any model request. Provider keys never reach a channel.
+
 ## Capability profiles
 
 - Maya OS: business analytics and owner actions; requires owner/manager permissions.
@@ -47,6 +52,13 @@ Each tool declares name, input/output schema, permissions, features, allowed rol
 - Financial/destructive actions use idempotency keys and auditable confirmation tokens.
 - Tool outputs are minimized to the requesting role and channel.
 - Provider failures cannot bypass policy through a fallback model.
+- Phone numbers, email addresses, links, credential-like strings and names in
+  common customer/staff phrases are redacted before provider calls.
+- Conversation text and tool results are never written to audit logs; only
+  provider/model identifiers, aggregate token counts and technical outcomes are
+  recorded.
+- AI chat has per-user and per-tenant cost/rate budgets. The model gets at most
+  three bounded tool steps and cannot repeat the same tool payload.
 
 ## Migration path
 
@@ -55,9 +67,11 @@ Each tool declares name, input/output schema, permissions, features, allowed rol
 3. Completed: add shared role, entitlement and TenantContext policy.
 4. Completed: add approval-gated cancellation and internal loyalty adjustment
    with immutable hashes and idempotency.
-5. Pending frontend/channel work: route native, web, Telegram and voice through
-   the shared tool API and render approval cards.
-6. Pending cutover work: retire duplicated prompt-side business logic only after
+5. Completed: add the shared privacy-safe DeepSeek/OpenAI orchestration endpoint
+   with deterministic no-key fallback, rate limits and aggregate usage audit.
+6. Pending frontend/channel work: route native, web, Telegram and voice through
+   `/api/ai/chat` and render approval cards.
+7. Pending cutover work: retire duplicated prompt-side business logic only after
    parity and canary tests.
 
 Operational details and exact endpoints are in

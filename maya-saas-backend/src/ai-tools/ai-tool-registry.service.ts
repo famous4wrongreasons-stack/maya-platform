@@ -13,6 +13,7 @@ import type {
 const MAX_RANGE_MS = 366 * 24 * 60 * 60 * 1000;
 const DEFAULT_RANGE_MS = 30 * 24 * 60 * 60 * 1000;
 const ENTITY_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+const EXTERNAL_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 
 @Injectable()
 export class AiToolRegistryService {
@@ -48,11 +49,40 @@ export class AiToolRegistryService {
     const args = this.assertObject(input);
     switch (toolName as MayaAiToolName) {
       case 'catalog.services.read':
+      case 'catalog.staff.read':
       case 'appointments.own.list':
       case 'loyalty.own.read':
       case 'customers.count':
         this.assertAllowedKeys(args, []);
         return {};
+      case 'booking.availability.read':
+        this.assertAllowedKeys(args, [
+          'date',
+          'staff_id',
+          'service_ids',
+          'branch_id',
+        ]);
+        return {
+          date: this.parseDate(args.date, 'date').toISOString(),
+          ...(args.staff_id === undefined
+            ? {}
+            : {
+                staff_id: this.assertExternalId(args.staff_id, 'staff_id'),
+              }),
+          ...(args.service_ids === undefined
+            ? {}
+            : {
+                service_ids: this.assertExternalIdArray(
+                  args.service_ids,
+                  'service_ids',
+                ),
+              }),
+          ...(args.branch_id === undefined
+            ? {}
+            : {
+                branch_id: this.assertExternalId(args.branch_id, 'branch_id'),
+              }),
+        };
       case 'analytics.employee.read':
       case 'analytics.business.read':
       case 'expenses.read':
@@ -64,6 +94,60 @@ export class AiToolRegistryService {
             args.appointment_id,
             'appointment_id',
           ),
+        };
+      case 'appointments.own.preview':
+      case 'appointments.own.create':
+        this.assertAllowedKeys(args, [
+          'staff_id',
+          'service_ids',
+          'start',
+          'branch_id',
+        ]);
+        return {
+          staff_id: this.assertExternalId(args.staff_id, 'staff_id'),
+          service_ids: this.assertExternalIdArray(
+            args.service_ids,
+            'service_ids',
+          ),
+          start: this.parseDate(args.start, 'start').toISOString(),
+          ...(args.branch_id === undefined
+            ? {}
+            : {
+                branch_id: this.assertExternalId(args.branch_id, 'branch_id'),
+              }),
+        };
+      case 'appointments.own.reschedule':
+        this.assertAllowedKeys(args, [
+          'appointment_id',
+          'start',
+          'staff_id',
+          'service_ids',
+          'branch_id',
+        ]);
+        return {
+          appointment_id: this.assertEntityId(
+            args.appointment_id,
+            'appointment_id',
+          ),
+          start: this.parseDate(args.start, 'start').toISOString(),
+          ...(args.staff_id === undefined
+            ? {}
+            : {
+                staff_id: this.assertExternalId(args.staff_id, 'staff_id'),
+              }),
+          ...(args.service_ids === undefined
+            ? {}
+            : {
+                service_ids: this.assertExternalIdArray(
+                  args.service_ids,
+                  'service_ids',
+                ),
+              }),
+          ...(args.branch_id === undefined
+            ? {}
+            : {
+                branch_id: this.assertExternalId(args.branch_id, 'branch_id'),
+              }),
         };
       case 'loyalty.internal.adjust':
         this.assertAllowedKeys(args, ['target_user_id', 'delta', 'reason']);
@@ -93,6 +177,31 @@ export class AiToolRegistryService {
         payload: {
           action: 'cancel_appointment',
           appointment_id: args.appointment_id,
+        },
+      };
+    }
+    if (toolName === 'appointments.own.create') {
+      return {
+        summary: 'Create the selected appointment.',
+        payload: {
+          action: 'create_appointment',
+          staff_id: args.staff_id,
+          service_ids: args.service_ids,
+          start: args.start,
+          branch_id: args.branch_id ?? null,
+        },
+      };
+    }
+    if (toolName === 'appointments.own.reschedule') {
+      return {
+        summary: 'Move the selected appointment to a new time.',
+        payload: {
+          action: 'reschedule_appointment',
+          appointment_id: args.appointment_id,
+          start: args.start,
+          staff_id: args.staff_id ?? null,
+          service_ids: args.service_ids ?? null,
+          branch_id: args.branch_id ?? null,
         },
       };
     }
@@ -171,6 +280,24 @@ export class AiToolRegistryService {
       this.invalidArguments(`${field} is invalid`);
     }
     return value;
+  }
+
+  private assertExternalId(value: unknown, field: string): string {
+    if (typeof value !== 'string' || !EXTERNAL_ID_PATTERN.test(value)) {
+      this.invalidArguments(`${field} is invalid`);
+    }
+    return value;
+  }
+
+  private assertExternalIdArray(value: unknown, field: string): string[] {
+    if (!Array.isArray(value) || value.length < 1 || value.length > 10) {
+      this.invalidArguments(`${field} must contain from 1 to 10 identifiers`);
+    }
+    const normalized = value.map((item) => this.assertExternalId(item, field));
+    if (new Set(normalized).size !== normalized.length) {
+      this.invalidArguments(`${field} must not contain duplicates`);
+    }
+    return normalized;
   }
 
   private assertDelta(value: unknown): number {

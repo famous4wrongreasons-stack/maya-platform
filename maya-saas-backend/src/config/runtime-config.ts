@@ -49,6 +49,8 @@ const INTEGER_RULES = [
   ['AUTH_RETENTION_BATCH_SIZE', 1, 10_000],
   ['AI_TOOL_RETENTION_DAYS', 7, 365],
   ['AI_TOOL_STALE_EXECUTION_MINUTES', 5, 120],
+  ['AI_CORE_TIMEOUT_MS', 1_000, 60_000],
+  ['AI_CORE_MAX_TOOL_STEPS', 1, 3],
 ] as const;
 
 export function validateRuntimeConfig(
@@ -70,6 +72,7 @@ export function validateRuntimeConfig(
   validateEmailAuthTiming(config, issues);
 
   validateConfiguredPolicies(config, environment, issues);
+  validateAiCoreProvider(config.AI_CORE_PROVIDER, issues);
 
   if (environment === 'production') {
     validateProductionConfig(config, issues);
@@ -85,6 +88,13 @@ export function validateRuntimeConfig(
   }
 
   return config;
+}
+
+function validateAiCoreProvider(value: unknown, issues: string[]): void {
+  const provider = stringValue(value).toLowerCase();
+  if (provider && !['auto', 'deepseek', 'openai', 'safe'].includes(provider)) {
+    issues.push('AI_CORE_PROVIDER must be auto, deepseek, openai or safe');
+  }
 }
 
 function validateConfiguredPolicies(

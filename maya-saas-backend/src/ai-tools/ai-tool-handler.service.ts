@@ -6,6 +6,7 @@ import { CrmService } from '../crm/crm.service';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { StaffService } from '../staff/staff.service';
 import type {
   AiToolPrincipal,
   ValidatedAiToolArguments,
@@ -20,6 +21,7 @@ export class AiToolHandlerService {
     private readonly analyticsService: OperationsAnalyticsService,
     private readonly expensesService: ExpensesService,
     private readonly customersService: CustomersService,
+    private readonly staffService: StaffService,
   ) {}
 
   async execute(
@@ -31,6 +33,10 @@ export class AiToolHandlerService {
     switch (toolName) {
       case 'catalog.services.read':
         return this.readServices(principal.tenantId);
+      case 'catalog.staff.read':
+        return this.readStaff(principal.tenantId);
+      case 'booking.availability.read':
+        return this.readAvailability(principal.tenantId, args);
       case 'appointments.own.list':
         return this.listOwnAppointments(principal);
       case 'loyalty.own.read':
@@ -56,6 +62,12 @@ export class AiToolHandlerService {
         return this.customersService.countCustomers(principal.tenantId);
       case 'appointments.own.cancel':
         return this.cancelOwnAppointment(principal, args);
+      case 'appointments.own.preview':
+        return this.previewOwnAppointment(principal, args);
+      case 'appointments.own.create':
+        return this.createOwnAppointment(principal, args);
+      case 'appointments.own.reschedule':
+        return this.rescheduleOwnAppointment(principal, args);
       case 'loyalty.internal.adjust':
         return this.adjustInternalLoyalty(principal, args, idempotencyKey);
       default:
@@ -84,6 +96,42 @@ export class AiToolHandlerService {
     );
     return {
       appointments: appointments.map((item) => this.safeAppointment(item)),
+    };
+  }
+
+  private async readStaff(tenantId: string) {
+    const staff = await this.staffService.listStaff(tenantId);
+    return {
+      staff: staff.map((item, index) => ({
+        id: item.id,
+        label: `specialist_${index + 1}`,
+        title: item.title ?? null,
+        specialization: item.specialization ?? null,
+      })),
+    };
+  }
+
+  private async readAvailability(
+    tenantId: string,
+    args: ValidatedAiToolArguments,
+  ) {
+    const slots = await this.appointmentsService.getAvailableSlots(tenantId, {
+      date: this.requiredString(args.date),
+      ...(typeof args.staff_id === 'string' ? { staffId: args.staff_id } : {}),
+      ...(Array.isArray(args.service_ids)
+        ? { serviceIds: this.stringArray(args.service_ids) }
+        : {}),
+      ...(typeof args.branch_id === 'string'
+        ? { branchId: args.branch_id }
+        : {}),
+    });
+    return {
+      slots: slots.map((slot) => ({
+        start: slot.start,
+        end: slot.end,
+        staff_id: slot.staff_id,
+        branch_id: slot.branch_id ?? null,
+      })),
     };
   }
 
@@ -149,7 +197,55 @@ export class AiToolHandlerService {
       principal.userId,
       this.requiredString(args.appointment_id),
     );
-    return this.safeAppointment(result);
+    return this.safeAppointmentOutput(result);
+  }
+
+  private async previewOwnAppointment(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const result = await this.appointmentsService.previewForClient(
+      principal.tenantId,
+      principal.userId,
+      this.bookingDto(args),
+    );
+    return this.safeAppointmentPreview(result);
+  }
+
+  private async createOwnAppointment(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const result = await this.appointmentsService.createForClient(
+      principal.tenantId,
+      principal.userId,
+      this.bookingDto(args),
+    );
+    return this.safeAppointmentOutput(result);
+  }
+
+  private async rescheduleOwnAppointment(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const result = await this.appointmentsService.rescheduleForClient(
+      principal.tenantId,
+      principal.userId,
+      this.requiredString(args.appointment_id),
+      {
+        start: this.requiredString(args.start),
+        ...(typeof args.staff_id === 'string'
+          ? { staffId: args.staff_id }
+          : {}),
+        ...(Array.isArray(args.service_ids)
+          ? { serviceIds: this.stringArray(args.service_ids) }
+          : {}),
+        ...(typeof args.branch_id === 'string'
+          ? { branchId: args.branch_id }
+          : {}),
+      },
+    );
+    return this.safeAppointmentOutput(result);
   }
 
   private async adjustInternalLoyalty(
@@ -210,8 +306,6 @@ export class AiToolHandlerService {
         : null,
       staff: staff
         ? {
-            id: staff.id ?? null,
-            name: staff.name ?? null,
             title: staff.title ?? null,
             specialization: staff.specialization ?? null,
           }
@@ -220,6 +314,53 @@ export class AiToolHandlerService {
       total_price: item.total_price ?? null,
       duration_minutes: item.duration_minutes ?? null,
       currency: item.currency ?? null,
+    };
+  }
+
+  private safeAppointmentOutput(value: unknown) {
+    const result = this.record(value);
+    const appointment = this.recordOrNull(result.appointment);
+    return this.safeAppointment(appointment ?? result);
+  }
+
+  private safeAppointmentPreview(value: unknown) {
+    const result = this.record(value);
+    const slot = this.recordOrNull(result.slot);
+    return {
+      ok: result.ok ?? null,
+      preview: result.preview ?? null,
+      mode: result.mode ?? null,
+      branch_id: result.branch_id ?? null,
+      branch_timezone: result.branch_timezone ?? null,
+      staff_id: result.staff_id ?? null,
+      service_ids: Array.isArray(result.service_ids)
+        ? this.stringArray(result.service_ids)
+        : [],
+      requested_start: result.requested_start ?? null,
+      matched_slot_start: result.matched_slot_start ?? null,
+      slot: slot
+        ? {
+            start: slot.start ?? null,
+            end: slot.end ?? null,
+            staff_id: slot.staff_id ?? null,
+            branch_id: slot.branch_id ?? null,
+          }
+        : null,
+      total_price: result.total_price ?? null,
+      duration_minutes: result.duration_minutes ?? null,
+      currency: result.currency ?? null,
+      warnings: Array.isArray(result.warnings) ? result.warnings : [],
+    };
+  }
+
+  private bookingDto(args: ValidatedAiToolArguments) {
+    return {
+      staffId: this.requiredString(args.staff_id),
+      serviceIds: this.stringArray(args.service_ids),
+      start: this.requiredString(args.start),
+      ...(typeof args.branch_id === 'string'
+        ? { branchId: args.branch_id }
+        : {}),
     };
   }
 
@@ -260,5 +401,15 @@ export class AiToolHandlerService {
       throw new Error('Validated AI tool number is missing');
     }
     return value;
+  }
+
+  private stringArray(value: unknown): string[] {
+    if (
+      !Array.isArray(value) ||
+      value.some((item) => typeof item !== 'string')
+    ) {
+      throw new Error('Validated AI tool string array is missing');
+    }
+    return value as string[];
   }
 }

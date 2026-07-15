@@ -173,6 +173,12 @@ verified, unexpired trial the internal MAYA calendar can use live booking and
 client registration is enabled. External CRM booking remains preview-only until
 a real CRM connection is verified.
 
+Effective entitlements for that trial temporarily include every feature whose
+registry readiness declares `platform_backend` availability. Explicit tenant
+denies still win. Planned flags and capabilities that exist only in the legacy
+single-business runtime are never unlocked merely because a trial says "full
+access".
+
 When the trial expires, the server lazily and during billing checks transitions
 the tenant to `past_due`, clears full trial access and blocks tenant features
 with HTTP `402`:

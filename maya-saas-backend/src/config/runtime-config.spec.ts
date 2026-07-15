@@ -186,6 +186,9 @@ describe('runtime config validation', () => {
     config.EMAIL_AUTH_RESEND_COOLDOWN_SECONDS = '600';
     config.AI_TOOL_RETENTION_DAYS = '2';
     config.AI_TOOL_STALE_EXECUTION_MINUTES = '121';
+    config.AI_CORE_TIMEOUT_MS = '999';
+    config.AI_CORE_MAX_TOOL_STEPS = '4';
+    config.AI_CORE_PROVIDER = 'unrestricted';
     const message = validationMessage(config);
 
     expect(message).toContain('CORS origins must be explicit');
@@ -204,6 +207,15 @@ describe('runtime config validation', () => {
     );
     expect(message).toContain(
       'AI_TOOL_STALE_EXECUTION_MINUTES must be an integer from 5 to 120',
+    );
+    expect(message).toContain(
+      'AI_CORE_TIMEOUT_MS must be an integer from 1000 to 60000',
+    );
+    expect(message).toContain(
+      'AI_CORE_MAX_TOOL_STEPS must be an integer from 1 to 3',
+    );
+    expect(message).toContain(
+      'AI_CORE_PROVIDER must be auto, deepseek, openai or safe',
     );
   });
 });

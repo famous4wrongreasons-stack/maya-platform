@@ -40,5 +40,8 @@ describe('FeatureRegistryService', () => {
     });
     expect(service.platformReady('ai.owner')).toBe(false);
     expect(service.platformReady('calendar.internal')).toBe(true);
+    expect(service.platformAvailable('ai.owner')).toBe(true);
+    expect(service.platformAvailable('shop')).toBe(false);
+    expect(service.platformAvailable('video_analytics')).toBe(false);
   });
 });

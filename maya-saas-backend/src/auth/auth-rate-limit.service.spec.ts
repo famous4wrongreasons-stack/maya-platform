@@ -134,6 +134,26 @@ describe('AuthRateLimitService', () => {
     ]);
   });
 
+  it('applies tenant and per-user AI cost budgets without storing user IDs', async () => {
+    const { consumeMock, service, tenantContext } = createService();
+
+    await tenantContext.runAsPublicTenant('tenant-a', () =>
+      service.assertTenant('ai_chat', {
+        tenantId: 'tenant-a',
+        identity: 'owner-user-id',
+      }),
+    );
+
+    const rules = consumeMock.mock.calls[0]?.[0] ?? [];
+    expect(rules).toHaveLength(3);
+    expect(rules.map((rule) => [rule.scope, rule.maxAttempts])).toEqual([
+      ['tenant', 120],
+      ['identity', 20],
+      ['identity', 300],
+    ]);
+    expect(JSON.stringify(rules)).not.toContain('owner-user-id');
+  });
+
   it('binds refresh session budgets to the authenticated principal', async () => {
     const { consumeMock, service, tenantContext } = createService();
 

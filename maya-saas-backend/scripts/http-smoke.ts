@@ -107,15 +107,17 @@ async function stopServer(child: ChildProcess | null) {
     return;
   }
 
+  const gracefulExit = once(child, 'exit');
   child.kill('SIGTERM');
   await Promise.race([
-    once(child, 'exit'),
+    gracefulExit,
     new Promise((resolve) => setTimeout(resolve, 3_000)),
   ]);
 
   if (child.exitCode === null) {
+    const forcedExit = once(child, 'exit');
     child.kill('SIGKILL');
-    await once(child, 'exit');
+    await forcedExit;
   }
 }
 
@@ -129,6 +131,7 @@ function startServer() {
     env: {
       ...process.env,
       HOST: '127.0.0.1',
+      AI_CORE_PROVIDER: 'safe',
       NODE_ENV: 'test',
       PHONE_AUTH_DEBUG: 'true',
       PHONE_AUTH_FIXED_CODE: fixedPhoneCode,
@@ -247,7 +250,10 @@ async function runSmoke() {
   );
   const aiDraftId = stringField(aiDraft, 'draft_id');
   const aiDraftToken = stringField(aiDraft, 'draft_token');
-  assert(asArray(aiDraft.missing_fields).includes('services'));
+  const aiBlueprint = asRecord(aiDraft.blueprint);
+  assert.equal(aiBlueprint.categoryId, 'solo_massage_therapist');
+  assert.equal(asArray(aiBlueprint.services).length, 4);
+  assert.deepEqual(aiDraft.missing_fields, ['calendar_source']);
   assert(Array.isArray(aiDraft.quick_replies));
   assert.equal(aiDraft.interpreter_source, 'safe_fallback');
   await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 401, {
@@ -262,7 +268,7 @@ async function runSmoke() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         draftToken: aiDraftToken,
-        message: 'Услуги: массаж 3000 руб 60 минут',
+        message: 'Буду вести записи во внутреннем календаре MAYA',
       }),
     }),
   );
@@ -369,7 +375,17 @@ async function runSmoke() {
   );
   assert.equal(aiCalendarSetup.ready, true);
   assert.equal(asArray(aiCalendarSetup.providers).length, 1);
-  assert.equal(asArray(aiCalendarSetup.services).length, 1);
+  assert.equal(asArray(aiCalendarSetup.services).length, 4);
+  const fullTrialEntitlements = asRecord(
+    await expectStatus('/features/effective', 200, {
+      headers: authHeaders(aiSignupToken),
+    }),
+  );
+  const fullTrialFeatureKeys = asArray(fullTrialEntitlements.featureKeys);
+  assert(fullTrialFeatureKeys.includes('ai.owner'));
+  assert(fullTrialFeatureKeys.includes('ai.admin'));
+  assert(fullTrialFeatureKeys.includes('ai.consultant'));
+  assert(!fullTrialFeatureKeys.includes('video_analytics'));
   const confirmedDraft = asRecord(
     await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 200, {
       method: 'POST',
@@ -401,7 +417,12 @@ async function runSmoke() {
     }),
   );
   assert.equal(asRecord(blockedAfterTrial.error).code, 'subscription_required');
-  assert(asArray(await expectStatus('/billing/plans', 200)).length > 0);
+  const billingPlans = asArray(await expectStatus('/billing/plans', 200)).map(
+    asRecord,
+  );
+  const maxPlan = billingPlans.find((plan) => plan.name === 'max');
+  assert(maxPlan, 'Expected seeded max plan');
+  const maxPlanId = stringField(maxPlan, 'id');
   await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
     headers: authHeaders(aiSignupToken),
   });
@@ -502,6 +523,10 @@ async function runSmoke() {
     ).tools,
   ).map(asRecord);
   assert(clientAiTools.some((tool) => tool.name === 'appointments.own.cancel'));
+  assert(clientAiTools.some((tool) => tool.name === 'appointments.own.create'));
+  assert(
+    clientAiTools.some((tool) => tool.name === 'booking.availability.read'),
+  );
   assert(
     !clientAiTools.some((tool) => tool.name === 'analytics.business.read'),
   );
@@ -517,6 +542,22 @@ async function runSmoke() {
   );
   assert.equal(aiCatalogResult.status, 'completed');
   assert(asArray(asRecord(aiCatalogResult.result).services).length > 0);
+  const aiChatResult = asRecord(
+    await expectStatus('/ai/chat', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(clientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        surface: 'web',
+        requestId: randomUUID(),
+        messages: [{ role: 'user', content: 'Какие услуги доступны?' }],
+      }),
+    }),
+  );
+  assert.equal(aiChatResult.source, 'safe_fallback');
+  assert.equal(aiChatResult.action, null);
   const profile = asRecord(
     await expectStatus('/me', 200, {
       headers: authHeaders(clientToken),
@@ -630,6 +671,7 @@ async function runSmoke() {
         ownerPhone: `+7998${String(Date.now() % 10_000_000).padStart(7, '0')}`,
         industryPresetId: 'solo_specialist',
         calendarSource: 'internal',
+        planId: maxPlanId,
         password: 'StrongPass123!',
         branchName: 'Private Studio',
         branchTimezone: 'Europe/Moscow',
@@ -934,10 +976,25 @@ async function main() {
     if (tail.trim()) {
       console.error(tail);
     }
-    throw error;
+    reportFailure(error);
   } finally {
     await stopServer(child);
   }
 }
 
-void main();
+function reportFailure(error: unknown): void {
+  process.stderr.write(
+    JSON.stringify({
+      ok: false,
+      error: {
+        code: 'http_smoke_failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    }) + '\n',
+  );
+  process.exitCode = 1;
+}
+
+void main().catch((error: unknown) => {
+  reportFailure(error);
+});

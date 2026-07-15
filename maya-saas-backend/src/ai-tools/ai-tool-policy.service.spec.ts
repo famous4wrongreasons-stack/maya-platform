@@ -51,9 +51,14 @@ describe('AiToolPolicyService', () => {
 
     expect(tools.map((tool) => tool.name)).toEqual([
       'catalog.services.read',
+      'catalog.staff.read',
+      'booking.availability.read',
       'appointments.own.list',
       'loyalty.own.read',
       'appointments.own.cancel',
+      'appointments.own.preview',
+      'appointments.own.create',
+      'appointments.own.reschedule',
     ]);
     expect(tools.some((tool) => tool.name === 'analytics.business.read')).toBe(
       false,

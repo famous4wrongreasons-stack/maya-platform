@@ -60,6 +60,7 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
   - `GET /api/loyalty/me/transactions`
   - `GET /api/features/registry`
   - `GET /api/features/effective`
+  - `POST /api/ai/chat`
   - `GET /api/ai/tools?surface=web`
   - `POST /api/ai/tools/:toolName/execute`
   - `GET /api/ai/approvals?surface=web`
@@ -132,10 +133,14 @@ immutable price snapshot in kopecks. Operational analytics excludes cancelled
 appointments, reports legacy rows without snapshots through `data_quality`, and
 keeps every currency in a separate total.
 
-The AI tool runtime is tenant-scoped and fail-closed. Reads return minimized
-data; booking cancellation and internal loyalty adjustment create immutable
-approval requests before execution. Arguments/results are encrypted and audit
-metadata contains no prompt, phone, email or CRM payload. See
+Maya AI Core is one tenant-scoped server endpoint for native, PWA, web,
+Telegram and voice. DeepSeek/OpenAI keys stay on the backend; contacts, common
+person-name phrases, links and credential-like values are redacted before a
+provider request. Model output can call only the role-filtered Tool Registry.
+Reads return minimized data; booking create/reschedule/cancellation and internal
+loyalty adjustment create immutable approval requests before execution.
+Arguments/results are encrypted and audit metadata contains no prompt, phone,
+email or CRM payload. See
 [the AI tool runtime runbook](../docs/architecture/ai-tool-runtime-runbook.md).
 
 ## Environment
@@ -157,6 +162,11 @@ AUTH_RATE_LIMIT_SECRET="change-me-to-a-third-independent-random-secret"
 CRM_ENCRYPTION_KEY="change-me-in-production"
 AI_TOOL_RETENTION_DAYS="30"
 AI_TOOL_STALE_EXECUTION_MINUTES="15"
+AI_CORE_PROVIDER="auto"
+AI_CORE_TIMEOUT_MS="15000"
+AI_CORE_MAX_TOOL_STEPS="2"
+DEEPSEEK_AI_CORE_MODEL=""
+OPENAI_AI_CORE_MODEL=""
 PORT=3000
 HOST="0.0.0.0"
 NODE_ENV="development"
@@ -250,9 +260,23 @@ Conversational onboarding:
 - `DEEPSEEK_THINKING=disabled`: keeps the short structured onboarding path fast and avoids persisting reasoning content
 - `OPENAI_AI_ONBOARDING_MODEL`: model used only for privacy-redacted semantic interpretation
 - Trial activation tokens are created only after the MAYA OS swipe and grant 10 days of full access only after tenant registration completes
+- Verified unexpired trials temporarily receive every feature implemented in the platform backend; explicit tenant denies remain authoritative and planned/current-runtime-only flags stay locked
 - `GET /api/admin/analytics/trials` counts a connected business only after that successful registration; abandoned swipes are reported separately
 
 See [the conversational onboarding and verified-trial contract](../docs/product/ai-onboarding.md).
+
+Universal MAYA AI Core:
+
+- `AI_CORE_PROVIDER=auto`: use the configured DeepSeek key, otherwise the
+  configured OpenAI key, otherwise return a deterministic no-model response
+- `AI_CORE_PROVIDER=deepseek|openai`: use only that server-side provider and
+  fail closed if it is unavailable
+- `AI_CORE_PROVIDER=safe`: never contact a model provider
+- `AI_CORE_TIMEOUT_MS`: one provider-call deadline from 1 to 60 seconds
+- `AI_CORE_MAX_TOOL_STEPS`: bounded tool loop from 1 to 3; writes still stop at
+  approval regardless of this value
+- `DEEPSEEK_AI_CORE_MODEL` and `OPENAI_AI_CORE_MODEL`: optional core-specific
+  model overrides; blank values reuse the onboarding model setting
 
 Tenant PWA installation:
 

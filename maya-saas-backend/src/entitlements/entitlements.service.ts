@@ -60,6 +60,19 @@ export class EntitlementsService {
 
     const now = Date.now();
 
+    if (
+      tenant.status === 'trial' &&
+      tenant.trialFullAccess === true &&
+      tenant.trialEndsAt !== null &&
+      tenant.trialEndsAt.getTime() > now
+    ) {
+      for (const featureKey of MAYA_FEATURE_KEYS) {
+        if (this.registry.platformAvailable(featureKey)) {
+          effective.set(featureKey, true);
+        }
+      }
+    }
+
     for (const override of tenant.entitlements) {
       if (
         !isMayaFeatureKey(override.featureKey) ||

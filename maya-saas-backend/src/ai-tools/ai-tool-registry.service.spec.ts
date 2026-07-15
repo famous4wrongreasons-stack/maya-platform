@@ -62,4 +62,46 @@ describe('AiToolRegistryService', () => {
       },
     });
   });
+
+  it('normalizes booking arguments while accepting provider-native IDs', () => {
+    expect(
+      service.validateArguments('appointments.own.create', {
+        staff_id: '7',
+        service_ids: ['15', 'svc-beard'],
+        start: '2026-07-20T10:00:00+03:00',
+        branch_id: '1',
+      }),
+    ).toEqual({
+      staff_id: '7',
+      service_ids: ['15', 'svc-beard'],
+      start: '2026-07-20T07:00:00.000Z',
+      branch_id: '1',
+    });
+    expect(() =>
+      service.validateArguments('appointments.own.create', {
+        staff_id: '7',
+        service_ids: ['15', '15'],
+        start: '2026-07-20T10:00:00.000Z',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('creates a PII-free booking approval payload', () => {
+    expect(
+      service.buildApprovalPreview('appointments.own.create', {
+        staff_id: 'staff-1',
+        service_ids: ['service-1'],
+        start: '2026-07-20T10:00:00.000Z',
+      }),
+    ).toEqual({
+      summary: 'Create the selected appointment.',
+      payload: {
+        action: 'create_appointment',
+        staff_id: 'staff-1',
+        service_ids: ['service-1'],
+        start: '2026-07-20T10:00:00.000Z',
+        branch_id: null,
+      },
+    });
+  });
 });

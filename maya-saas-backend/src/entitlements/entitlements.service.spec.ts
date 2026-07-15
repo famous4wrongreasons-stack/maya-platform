@@ -73,4 +73,73 @@ describe('EntitlementsService', () => {
     const result = await service.getEffectiveEntitlements('tenant-a');
     expect(result.features['calendar.external']).toBeUndefined();
   });
+
+  it('temporarily grants every implemented platform feature during a verified trial', async () => {
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+      planId: 'plan-start',
+      plan: {
+        featuresJson: { booking: true },
+        entitlements: [{ featureKey: 'booking', enabled: true }],
+      },
+      entitlements: [],
+    });
+
+    const result = await service.getEffectiveEntitlements('tenant-a');
+
+    expect(result.features['ai.owner']).toBe(true);
+    expect(result.features['ai.admin']).toBe(true);
+    expect(result.features['ai.consultant']).toBe(true);
+    expect(result.features['analytics.business']).toBe(true);
+    expect(result.features['expenses.core']).toBe(true);
+    expect(result.features.shop).toBeUndefined();
+    expect(result.features.video_analytics).toBeUndefined();
+  });
+
+  it('does not extend full access after the verified trial expires', async () => {
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() - 1_000),
+      planId: 'plan-start',
+      plan: {
+        featuresJson: { booking: true },
+        entitlements: [{ featureKey: 'booking', enabled: true }],
+      },
+      entitlements: [],
+    });
+
+    const result = await service.getEffectiveEntitlements('tenant-a');
+
+    expect(result.features.booking).toBe(true);
+    expect(result.features['ai.owner']).toBeUndefined();
+    expect(result.features['ai.consultant']).toBeUndefined();
+  });
+
+  it('keeps an explicit tenant deny authoritative during a full trial', async () => {
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+      planId: 'plan-start',
+      plan: { featuresJson: {}, entitlements: [] },
+      entitlements: [
+        {
+          featureKey: 'ai.consultant',
+          enabled: false,
+          expiresAt: null,
+        },
+      ],
+    });
+
+    const result = await service.getEffectiveEntitlements('tenant-a');
+
+    expect(result.features['ai.owner']).toBe(true);
+    expect(result.features['ai.consultant']).toBeUndefined();
+  });
 });

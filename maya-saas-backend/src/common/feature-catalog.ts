@@ -402,13 +402,13 @@ export const MAYA_FEATURE_READINESS: Record<
     'The resilient customer overview API is available; the final universal customer experience is still being unified in the frontend.',
   ]),
   'ai.owner': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'Tenant-scoped, approval-gated owner tools are available in the platform backend; final frontend orchestration remains pending.',
+    'The shared privacy-safe AI Core and approval-gated owner tools are available in the platform backend; final channel UI binding remains pending.',
   ]),
   'ai.admin': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'Tenant-scoped administrator tools are available in the platform backend; final frontend orchestration remains pending.',
+    'The shared privacy-safe AI Core and tenant-scoped administrator tools are available in the platform backend; final channel UI binding remains pending.',
   ]),
   'ai.consultant': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
-    'Tenant-scoped customer tools are available in the platform backend; final frontend orchestration remains pending.',
+    'The shared privacy-safe AI Core supports catalog, availability and approval-gated customer booking tools; final channel UI binding remains pending.',
   ]),
   'telegram.owner': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'telegram.admin': defineReadiness('current_runtime_only', CURRENT_MAYA),

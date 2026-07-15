@@ -37,6 +37,12 @@ export class FeatureRegistryService {
     );
   }
 
+  platformAvailable(featureKey: MayaFeatureKey): boolean {
+    return MAYA_FEATURE_READINESS[featureKey].availableIn.includes(
+      'platform_backend',
+    );
+  }
+
   dependencies(featureKey: MayaFeatureKey): readonly MayaFeatureKey[] {
     return MAYA_FEATURE_REGISTRY[featureKey].dependencies ?? [];
   }

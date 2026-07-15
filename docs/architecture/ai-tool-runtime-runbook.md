@@ -17,6 +17,7 @@ All routes require a bearer session and an authenticated tenant membership:
 
 | Method | Route | Purpose |
 |---|---|---|
+| `POST` | `/api/ai/chat` | Run one privacy-safe role-aware conversation turn and optional tool proposal |
 | `GET` | `/api/ai/tools?surface=web` | List tools allowed for the current role, plan and channel |
 | `POST` | `/api/ai/tools/:toolName/execute` | Execute a read or create an immutable approval request |
 | `GET` | `/api/ai/approvals?surface=web` | List approvals visible to the requester or required approver |
@@ -32,6 +33,8 @@ surface, tool or payload fails closed.
 | Tool | Roles | Risk | Approval |
 |---|---|---|---|
 | `catalog.services.read` | customer, staff, business | read | none |
+| `catalog.staff.read` | customer, staff, business | read | none |
+| `booking.availability.read` | customer, staff, business | read | none |
 | `appointments.own.list` | customer | read | none |
 | `loyalty.own.read` | customer | read | none |
 | `analytics.employee.read` | provider/employee/staff | read | none |
@@ -39,6 +42,9 @@ surface, tool or payload fails closed.
 | `expenses.read` | owner/admin/manager/accountant | read | none |
 | `customers.count` | owner/admin/manager/accountant | read | none |
 | `appointments.own.cancel` | customer | medium write | same customer |
+| `appointments.own.preview` | customer | read | none |
+| `appointments.own.create` | customer | medium write | same customer |
+| `appointments.own.reschedule` | customer | medium write | same customer |
 | `loyalty.internal.adjust` | owner/admin | high write | tenant owner |
 
 Every request is re-authorized at execution time against TenantContext, current
@@ -48,6 +54,9 @@ model cannot supply a tenant ID. External CRM loyalty remains read-only.
 ## Output minimization
 
 - Appointment output omits customer contacts, notes and provider payloads.
+- Staff output replaces names with deterministic turn labels while preserving
+  the provider ID required for a booking choice.
+- Booking previews omit resolved customer identity and free-text notes.
 - Expense output omits encrypted/free-text notes.
 - Customer analytics exposes a count, not a customer list.
 - Loyalty output contains the authoritative balance and sync state only.
@@ -59,8 +68,8 @@ model cannot supply a tenant ID. External CRM loyalty remains read-only.
 1. The validated payload is hashed together with tool, actor and surface.
 2. Arguments are encrypted and a safe preview is returned to the UI.
 3. Pending approvals expire after ten minutes.
-4. The actor confirms a cancellation; an owner confirms a high-risk loyalty
-   adjustment.
+4. The actor confirms booking creation/change/cancellation; an owner confirms a
+   high-risk loyalty adjustment.
 5. The backend verifies the unchanged hash, role, entitlement and requester
    status again.
 6. One execution row claims the idempotency key and stores the encrypted result.
@@ -84,7 +93,15 @@ batches. It never prints payloads. Configure:
 ```env
 AI_TOOL_RETENTION_DAYS="30"
 AI_TOOL_STALE_EXECUTION_MINUTES="15"
+AI_CORE_PROVIDER="auto"
+AI_CORE_TIMEOUT_MS="15000"
+AI_CORE_MAX_TOOL_STEPS="2"
 ```
+
+`AI_CORE_PROVIDER=auto` prefers the configured DeepSeek key and then the
+configured OpenAI key. `safe` makes `/api/ai/chat` return a deterministic
+no-model response and never contacts a provider. Explicit `deepseek` or
+`openai` modes fail closed when their selected provider is unavailable.
 
 Run dry-run daily and `--execute` from one controlled maintenance job after
 reviewing aggregate counts.
