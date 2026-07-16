@@ -6451,7 +6451,12 @@ def risk_signals(snap: dict = None, exp: dict = None, ret: dict = None,
             "type": "idle_capacity",
             "severity": "high" if snap.get("idle_masters") else "medium",
             "title": "Сегодня есть незаполненные окна",
-            "detail": "Свободная ёмкость дня ≈%d слотов." % _rub(snap.get("free_capacity_today")),
+            "detail": "Свободная ёмкость дня ≈%s." % _ru_count(
+                snap.get("free_capacity_today"),
+                "свободный слот",
+                "свободных слота",
+                "свободных слотов",
+            ),
             "potential_rub": _rub(snap.get("potential_fill_revenue_rub")),
             "action_hint": "Подними тёплый спрос: уснувшие + цикл-напоминание + лист ожидания.",
         })
@@ -6523,7 +6528,15 @@ def money_opportunities(snap: dict = None, exp: dict = None, ret: dict = None) -
         opps.append({
             "type": "empty_windows",
             "title": "Заполнить пустые окна сегодня",
-            "detail": "≈%d свободных слотов сегодня (%s)." % (snap["free_capacity_today"], who),
+            "detail": "≈%s сегодня (%s)." % (
+                _ru_count(
+                    snap["free_capacity_today"],
+                    "свободный слот",
+                    "свободных слота",
+                    "свободных слотов",
+                ),
+                who,
+            ),
             "potential_rub": snap.get("potential_fill_revenue_rub", 0),
             "estimate": True,
             "action": "fill_slots",

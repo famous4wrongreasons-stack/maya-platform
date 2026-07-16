@@ -529,6 +529,28 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("41 900 ₽", text)
         self.assertNotIn("ты, Илья", text)
 
+    def test_single_free_slot_uses_correct_russian_inflection(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        snap = {
+            "free_capacity_today": 1,
+            "potential_fill_revenue_rub": 2000,
+            "idle_masters": [],
+            "underused_masters": [],
+            "week_trend": {},
+        }
+
+        opportunity = next(
+            row for row in owner_ai.money_opportunities(snap=snap, exp={}, ret={})
+            if row["type"] == "empty_windows"
+        )
+        risk = next(
+            row for row in owner_ai.risk_signals(snap=snap, exp={}, ret={}, svc={})["risks"]
+            if row["type"] == "idle_capacity"
+        )
+
+        self.assertIn("1 свободный слот", opportunity["detail"])
+        self.assertIn("1 свободный слот", risk["detail"])
+
     def test_command_center_builds_stable_owner_os_contract(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
 
