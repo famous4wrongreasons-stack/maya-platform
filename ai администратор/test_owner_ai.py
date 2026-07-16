@@ -6,7 +6,13 @@ import unittest
 from datetime import date, timedelta
 
 
-def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | None = None):
+def _load_owner_ai(
+    *,
+    reactivation_payload: dict | None,
+    cycle_payload: dict | None = None,
+    schedule_rows: list[dict] | None = None,
+    schedule_references: dict[str, dict] | None = None,
+):
     fake_analytics = types.ModuleType("analytics")
     fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
         "2026-06-09",
@@ -241,7 +247,7 @@ def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | N
 
     class _FakeYClientsAPI:
         def get_working_masters(self, day):
-            return [
+            return schedule_rows if schedule_rows is not None else [
                 {"id": 1, "name": "Мастер 1", "is_working": True},
                 {"id": 2, "name": "Мастер 2", "is_working": True},
             ]
@@ -250,6 +256,15 @@ def _load_owner_ai(*, reactivation_payload: dict | None, cycle_payload: dict | N
             return [{"staff_id": 1}, {"staff_id": 1}]
 
     fake_yclients.YClientsAPI = _FakeYClientsAPI
+    fake_yclients.get_schedule_reference = lambda name, day: (
+        (schedule_references or {}).get(name)
+        or {
+            "configured": False,
+            "hours": None,
+            "is_working": None,
+            "updated": None,
+        }
+    )
 
     fake_growth_planner = types.ModuleType("growth_planner")
     fake_growth_planner.get_growth_plan = lambda **kwargs: {
@@ -382,6 +397,22 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(brief["today"]["avg_check_rub"], 2000)
         self.assertEqual(brief["today"]["expected_revenue_rub"], 4000)
         self.assertEqual(brief["today"]["free_capacity_today"], 14)
+        self.assertEqual(
+            [
+                row["name"]
+                for row in brief["today"]["staff_schedule"]["working"]
+            ],
+            ["Мастер 1", "Мастер 2"],
+        )
+        self.assertEqual(
+            [
+                row["name"]
+                for row in brief["today"]["staff_schedule"]["confirmed_working"]
+            ],
+            ["Мастер 1", "Мастер 2"],
+        )
+        self.assertEqual(brief["today"]["staff_schedule"]["status"], "verified")
+        self.assertFalse(brief["grounding_contract"]["infer_staff_names"])
         self.assertEqual(brief["top_priority"]["type"], "empty_windows")
         self.assertEqual(brief["top_priority"]["potential_rub"], 28000)
         self.assertTrue(brief["top_priority"]["estimate"])
@@ -404,6 +435,40 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(brief["owner_advisor"]["version"], "maya_owner_advisor_v1")
         self.assertEqual(len(brief["owner_advisor"]["dimensions"]), 6)
         self.assertIn("оценка", brief["note"].lower())
+
+    def test_daily_briefing_marks_baseline_schedule_conflict(self):
+        owner_ai = _load_owner_ai(
+            reactivation_payload=None,
+            schedule_references={
+                "Мастер 1": {
+                    "configured": True,
+                    "hours": "10:00-21:00",
+                    "is_working": True,
+                    "updated": "2026-07-01",
+                },
+                "Мастер 2": {
+                    "configured": True,
+                    "hours": None,
+                    "is_working": False,
+                    "updated": "2026-07-01",
+                },
+            },
+        )
+
+        brief = owner_ai.daily_briefing()
+        schedule = brief["today"]["staff_schedule"]
+
+        self.assertEqual(schedule["status"], "conflict")
+        self.assertEqual(
+            [row["name"] for row in schedule["confirmed_working"]],
+            ["Мастер 1"],
+        )
+        self.assertEqual(schedule["conflicts"][0]["name"], "Мастер 2")
+        self.assertEqual(schedule["conflicts"][0]["yclients_status"], "working")
+        self.assertEqual(schedule["conflicts"][0]["baseline_status"], "off")
+        self.assertEqual(brief["today"]["confirmed_working_masters"], 1)
+        self.assertEqual(brief["today"]["free_capacity_today"], 6)
+        self.assertNotIn("Мастер 2", brief["today"]["idle_masters"])
 
     def test_command_center_builds_stable_owner_os_contract(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})

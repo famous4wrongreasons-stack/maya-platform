@@ -221,15 +221,29 @@ def _week_trend() -> dict | None:
 def _today_load() -> dict:
     """Загрузка на сегодня: кто работает, сколько записей у каждого, кто простаивает."""
     today = _today()
-    working, recs = [], []
+    schedule_rows, recs = [], []
+    schedule_fetch_failed = False
+    reference_getter = None
+    yc = None
     try:
-        from yclients import YClientsAPI
-        yc = YClientsAPI()
-        working = [m for m in (yc.get_working_masters(today) or [])
-                   if isinstance(m, dict) and m.get("is_working")]
+        import yclients as yclients_module
+        yc = yclients_module.YClientsAPI()
+        reference_getter = getattr(yclients_module, "get_schedule_reference", None)
+        schedule_rows = [
+            row for row in (yc.get_working_masters(today) or [])
+            if isinstance(row, dict) and row.get("id")
+        ]
+    except Exception as e:
+        schedule_fetch_failed = True
+        logger.error(f"owner_ai today_load schedule: {e}")
+
+    try:
+        if yc is None:
+            import yclients as yclients_module
+            yc = yclients_module.YClientsAPI()
         recs = yc.get_company_records(today, today) or []
     except Exception as e:
-        logger.error(f"owner_ai today_load: {e}")
+        logger.error(f"owner_ai today_load records: {e}")
 
     by_staff = {}
     active_records = []
@@ -263,17 +277,103 @@ def _today_load() -> dict:
         else:
             unpriced_records += 1
 
+    schedule_entries = []
+    schedule_conflicts = []
+    target_date = date.fromisoformat(today)
+    for row in schedule_rows:
+        sid = row.get("id")
+        nm = row.get("name") or f"Мастер #{sid}"
+        schedule_unknown = bool(row.get("schedule_unknown"))
+        is_working = bool(row.get("is_working")) and not schedule_unknown
+        status = "unknown" if schedule_unknown else ("working" if is_working else "off")
+        start = row.get("work_start") or ""
+        end = row.get("work_end") or ""
+        live_hours = f"{start}-{end}" if start and end else None
+        reference = {
+            "configured": False,
+            "hours": None,
+            "is_working": None,
+            "updated": None,
+        }
+        if callable(reference_getter):
+            try:
+                candidate = reference_getter(nm, target_date)
+                if isinstance(candidate, dict):
+                    reference.update(candidate)
+            except Exception as e:
+                logger.warning("owner_ai schedule reference %s: %s", sid, e)
+
+        conflict_reason = None
+        if reference.get("configured") and not schedule_unknown:
+            if bool(reference.get("is_working")) != is_working:
+                conflict_reason = "working_status"
+            elif is_working and reference.get("hours") and live_hours:
+                if str(reference["hours"]) != live_hours:
+                    conflict_reason = "working_hours"
+
+        entry = {
+            "staff_id": sid,
+            "name": nm,
+            "status": status,
+            "work_start": start,
+            "work_end": end,
+            "work_slots": row.get("work_slots") or [],
+            "records_today": by_staff.get(sid, 0),
+            "baseline": {
+                "configured": bool(reference.get("configured")),
+                "is_working": reference.get("is_working"),
+                "hours": reference.get("hours"),
+                "updated": reference.get("updated"),
+            },
+            "baseline_conflict": bool(conflict_reason),
+        }
+        schedule_entries.append(entry)
+        if conflict_reason:
+            schedule_conflicts.append({
+                "staff_id": sid,
+                "name": nm,
+                "reason": conflict_reason,
+                "yclients_status": status,
+                "yclients_hours": live_hours,
+                "baseline_status": (
+                    "working" if reference.get("is_working") else "off"
+                ),
+                "baseline_hours": reference.get("hours"),
+                "baseline_updated": reference.get("updated"),
+                "records_today": by_staff.get(sid, 0),
+            })
+
+    working_entries = [row for row in schedule_entries if row["status"] == "working"]
+    off_entries = [row for row in schedule_entries if row["status"] == "off"]
+    unknown_entries = [row for row in schedule_entries if row["status"] == "unknown"]
+    confirmed_working = [row for row in working_entries if not row["baseline_conflict"]]
+    confirmed_off = [row for row in off_entries if not row["baseline_conflict"]]
+
+    if schedule_fetch_failed and not schedule_entries:
+        schedule_status = "unavailable"
+    elif unknown_entries:
+        schedule_status = "partial"
+    elif schedule_conflicts:
+        schedule_status = "conflict"
+    else:
+        schedule_status = "verified"
+
     masters, idle, underused = [], [], []
-    for m in working:
-        sid = m.get("id")
-        nm = m.get("name") or f"Мастер #{sid}"
+    for row in working_entries:
+        sid = row["staff_id"]
+        nm = row["name"]
         cnt = by_staff.get(sid, 0)
         free = max(0, _VISITS_PER_SHIFT - cnt)
         masters.append({
             "staff_id": sid, "name": nm, "records_today": cnt,
             "free_slots_est": free,
-            "work_start": m.get("work_start", ""), "work_end": m.get("work_end", ""),
+            "work_start": row["work_start"], "work_end": row["work_end"],
+            "baseline_conflict": row["baseline_conflict"],
         })
+        # Спорную смену показываем владельцу, но не используем для действий
+        # «заполнить окна», пока источники графика не будут согласованы.
+        if row["baseline_conflict"]:
+            continue
         if cnt == 0:
             idle.append(nm)
         elif free >= 3:
@@ -287,7 +387,19 @@ def _today_load() -> dict:
         "unpriced_records": unpriced_records,
         "single_service_records": single_service_records,
         "scheduled_service_items": scheduled_service_items,
-        "working_masters": len(working),
+        "working_masters": len(working_entries),
+        "confirmed_working_masters": len(confirmed_working),
+        "staff_schedule": {
+            "date": today,
+            "source": "yclients",
+            "status": schedule_status,
+            "working": working_entries,
+            "confirmed_working": confirmed_working,
+            "off": off_entries,
+            "confirmed_off": confirmed_off,
+            "unknown": unknown_entries,
+            "conflicts": schedule_conflicts,
+        },
         "idle_masters": idle,            # работают, но 0 записей
         "underused_masters": underused,  # работают, но много свободных окон
         "masters": masters,
@@ -299,7 +411,10 @@ def business_snapshot() -> dict:
     load = _today_load()
     avg = _avg_check_30d()
     base = _summary_30d() or {}
-    free_capacity = sum(m["free_slots_est"] for m in load["masters"])
+    free_capacity = sum(
+        m["free_slots_est"] for m in load["masters"]
+        if not m.get("baseline_conflict")
+    )
     priced_revenue = _rub(load.get("booked_service_revenue_rub"))
     unpriced = _rub(load.get("unpriced_records"))
     expected = priced_revenue + unpriced * avg
@@ -6518,6 +6633,8 @@ def daily_briefing() -> dict:
             "expected_revenue_rub": snap["expected_revenue_rub"],
             "avg_check_rub": snap["avg_check_rub"],
             "working_masters": snap["working_masters"],
+            "confirmed_working_masters": snap["confirmed_working_masters"],
+            "staff_schedule": snap["staff_schedule"],
             "idle_masters": snap["idle_masters"],
             "underused_masters": snap["underused_masters"],
             "free_capacity_today": snap["free_capacity_today"],
@@ -6535,5 +6652,14 @@ def daily_briefing() -> dict:
         "top_action": top_action,
         "owner_advisor": owner_advisor,
         "reputation": reputation_payload,
+        "grounding_contract": {
+            "working_staff_path": "today.staff_schedule.working",
+            "confirmed_working_staff_path": "today.staff_schedule.confirmed_working",
+            "off_staff_path": "today.staff_schedule.off",
+            "unknown_staff_path": "today.staff_schedule.unknown",
+            "conflicts_path": "today.staff_schedule.conflicts",
+            "infer_staff_names": False,
+            "conflicts_require_explicit_caveat": True,
+        },
         "note": snap["note"],
     }
