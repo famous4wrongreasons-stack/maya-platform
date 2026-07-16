@@ -202,6 +202,29 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["goal"]["target_rub"], 1500000)
 
+    def test_llm_cannot_mutate_persistent_business_memory(self):
+        claude_ai, logs = _load_claude_ai()
+
+        self.assertFalse(claude_ai._authorize("founder", "remember_business_rule"))
+        self.assertFalse(claude_ai._authorize("owner", "remember_business_rule"))
+        self.assertFalse(claude_ai._authorize("manager", "remember_business_rule"))
+
+        denied = json.loads(claude_ai._execute_tool(
+            "remember_business_rule",
+            {"rule": "При отмене предлагай перенос"},
+            user_id=339683535,
+        ))
+        founder_denied = json.loads(claude_ai._execute_tool(
+            "remember_business_rule",
+            {"rule": "При отмене предлагай перенос"},
+            user_id=948205934,
+        ))
+
+        self.assertIn("только основатель", denied["error"])
+        self.assertIn("недоступен", founder_denied["error"])
+        self.assertEqual(logs[-1][1], "founder")
+        self.assertFalse(logs[-1][4])
+
     def test_manager_can_read_maya_audience_stats(self):
         claude_ai, logs = _load_claude_ai()
 

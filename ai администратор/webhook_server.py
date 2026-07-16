@@ -6820,6 +6820,108 @@ def _rub(value) -> str:
     return f"{n:,}".replace(",", " ") + " ₽"
 
 
+_FOUNDER_RULE_DELETE_RE = re.compile(
+    r"^(?:забудь|удали|отмени|деактивируй)\s+правило\s*#?\s*(\d+)\s*[.!?]*$",
+    re.IGNORECASE,
+)
+_FOUNDER_RULE_ADD_RE = re.compile(
+    r"^(?:(?:запомни|сохрани|добавь)\s+(?:новое\s+)?правило"
+    r"(?:\s+(?:для\s+)?(?:майи|работы|бизнеса|салона))?"
+    r"|(?:научись|обучись)\s+(?:новому\s+)?правилу)\s*(?::|—|-)?\s*(.*)$",
+    re.IGNORECASE | re.DOTALL,
+)
+_FOUNDER_RULE_UNSAFE_RE = re.compile(
+    r"\b(?:игнорируй|обойди|отмени)\b.{0,80}"
+    r"\b(?:системн\w*\s+правил|безопасност|авторизац|провер\w*\s+доступ)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _founder_rule_command(message: str) -> tuple[str, str | int | None] | None:
+    """Parse only explicit procedural-memory commands, never ordinary chat."""
+    text = (message or "").strip()
+    if not text:
+        return None
+    text = re.sub(
+        r"^(?:майя|мая|маюш(?:а|ка)?)\s*[,!:—-]?\s*",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    low = text.lower().replace("ё", "е")
+
+    match = _FOUNDER_RULE_DELETE_RE.match(text)
+    if match:
+        return "delete", int(match.group(1))
+    if "чему я тебя науч" in low or (
+        any(word in low for word in ("покажи", "перечисли")) and "правил" in low
+    ):
+        return "list", None
+    match = _FOUNDER_RULE_ADD_RE.match(text)
+    if match:
+        rule = (match.group(1) or "").strip(" \t\r\n:—-")
+        return ("add", rule) if rule else ("usage", None)
+    return None
+
+
+def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Founder-only procedural memory available without an LLM round-trip."""
+    command = _founder_rule_command(message)
+    if not command:
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not info.get("is_founder"):
+        logger.warning("Founder memory command denied for chat_id=%s", chat_id)
+        return "Постоянные правила MAYA может менять только основатель."
+    if str(mode or "").strip().lower() != "staff":
+        return "Чтобы изменить постоянные правила MAYA, откройте рабочий чат."
+
+    action, value = command
+    if action == "usage":
+        return "Напишите правило полностью: «Майя, запомни правило: …»."
+    if action == "list":
+        rules = database.list_salon_rules(active_only=True, limit=40)
+        if not rules:
+            return "Постоянных правил пока нет."
+        lines = [f"{row['id']}. {row['rule_text']}" for row in rules]
+        return "Постоянные правила MAYA:\n" + "\n".join(lines)
+    if action == "delete":
+        deleted = database.deactivate_salon_rule(int(value))
+        if deleted:
+            return f"Удалила правило [{int(value)}]. Со следующего сообщения оно не действует."
+        return f"Действующего правила [{int(value)}] нет."
+
+    rule = str(value or "").strip()
+    if len(rule) < 8:
+        return "Правило слишком короткое. Уточните, что именно MAYA должна делать."
+    if len(rule) > 500:
+        return "Правило длиннее 500 символов. Сформулируйте его короче и конкретнее."
+    redacted = anonymizer.redact_pii(rule)
+    if redacted != rule:
+        return "Не сохранила правило: постоянная память не должна содержать персональные данные."
+    if _FOUNDER_RULE_UNSAFE_RE.search(rule):
+        return "Не сохранила правило: оно пытается отменить серверные ограничения безопасности."
+
+    rules = database.list_salon_rules(active_only=True, limit=100)
+    normalized = re.sub(r"\s+", " ", rule).strip().lower().replace("ё", "е")
+    for row in rules:
+        current = re.sub(r"\s+", " ", str(row.get("rule_text") or "")).strip().lower().replace("ё", "е")
+        if current == normalized:
+            return f"Это правило уже сохранено под номером [{row['id']}]."
+    if len(rules) >= 40:
+        return "Активных правил уже 40. Сначала удалите ненужное командой «Майя, удали правило N»."
+
+    rule_id = database.add_salon_rule(rule, created_by=int(chat_id))
+    return (
+        f"Запомнила правило [{rule_id}]: {rule}\n"
+        "Оно начнёт действовать со следующего сообщения во всех чатах MAYA."
+    )
+
+
 def _owner_daily_briefing_intent(message: str) -> bool:
     low = (message or "").strip().lower().replace("ё", "е")
     if not low:
@@ -7414,6 +7516,19 @@ async def chat_handler(request: web.Request) -> web.Response:
     conversations = load_conversations()
     history = conversations.get(history_key) or []
 
+    founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
+    if founder_learning_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_learning_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -7818,6 +7933,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
     history = conversations.get(history_key) or []
+
+    founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
+    if founder_learning_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_learning_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
 
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:

@@ -38,6 +38,33 @@ def _load_webhook_server():
     fake_database.get_master_by_chat_id = lambda _tg_id: None
     fake_database.is_admin = lambda tg_id: int(tg_id) == 948205934
     fake_database.has_valid_consent_by_chat_id = lambda _chat_id: True
+    _rules_store = []
+
+    def _add_salon_rule(rule_text, created_by=None):
+        rule_id = len(_rules_store) + 1
+        _rules_store.append({
+            "id": rule_id,
+            "rule_text": rule_text,
+            "created_by": created_by,
+            "active": True,
+        })
+        return rule_id
+
+    def _list_salon_rules(active_only=True, limit=40):
+        rows = [row for row in _rules_store if row["active"] or not active_only]
+        return [dict(row) for row in rows[:limit]]
+
+    def _deactivate_salon_rule(rule_id):
+        for row in _rules_store:
+            if row["id"] == int(rule_id) and row["active"]:
+                row["active"] = False
+                return True
+        return False
+
+    fake_database.add_salon_rule = _add_salon_rule
+    fake_database.list_salon_rules = _list_salon_rules
+    fake_database.deactivate_salon_rule = _deactivate_salon_rule
+    fake_database._rules_store = _rules_store
 
     fake_yclients = types.ModuleType("yclients")
 
@@ -71,6 +98,9 @@ def _load_webhook_server():
     fake_memory.save_conversations = _save_conversations
     fake_memory._store = _conversations_store
 
+    fake_anonymizer = types.ModuleType("anonymizer")
+    fake_anonymizer.redact_pii = lambda text: "[EMAIL]" if "@" in str(text or "") else text
+
     stubs = {
         "aiohttp": fake_aiohttp,
         "aiohttp.web": fake_web,
@@ -78,7 +108,7 @@ def _load_webhook_server():
         "telegram.error": fake_telegram_error,
         "telegram.ext": fake_telegram_ext,
         "ai_billing": types.ModuleType("ai_billing"),
-        "anonymizer": types.ModuleType("anonymizer"),
+        "anonymizer": fake_anonymizer,
         "config": fake_config,
         "cutmatch": types.ModuleType("cutmatch"),
         "database": fake_database,
@@ -198,6 +228,76 @@ class ChatRoutingTests(unittest.TestCase):
         )
 
         self.assertIsNone(reply)
+
+    def test_founder_can_manage_persistent_rules_with_explicit_chat_commands(self):
+        ws = _load_webhook_server()
+
+        saved = ws._founder_learning_reply(
+            948205934,
+            "Майя, запомни правило: при отмене всегда предлагай перенос",
+            mode="staff",
+        )
+        listed = ws._founder_learning_reply(
+            948205934,
+            "Майя, покажи правила",
+            mode="staff",
+        )
+        duplicate = ws._founder_learning_reply(
+            948205934,
+            "Запомни правило: при отмене всегда предлагай перенос",
+            mode="staff",
+        )
+        deleted = ws._founder_learning_reply(
+            948205934,
+            "Майя, удали правило 1",
+            mode="staff",
+        )
+
+        self.assertIn("Запомнила правило [1]", saved)
+        self.assertIn("1. при отмене всегда предлагай перенос", listed)
+        self.assertIn("уже сохранено", duplicate)
+        self.assertIn("Удалила правило [1]", deleted)
+        self.assertEqual(sys.modules["database"]._rules_store[0]["created_by"], 948205934)
+        self.assertFalse(sys.modules["database"]._rules_store[0]["active"])
+
+    def test_founder_memory_rejects_other_ids_client_surface_and_pii(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_setting = lambda key, default=None: (
+            "123456789" if key == "panel_manager_ids" else default
+        )
+
+        denied = ws._founder_learning_reply(
+            123456789,
+            "Майя, запомни правило: всегда предлагай перенос",
+            mode="staff",
+        )
+        wrong_surface = ws._founder_learning_reply(
+            948205934,
+            "Майя, запомни правило: всегда предлагай перенос",
+            mode="client",
+        )
+        pii = ws._founder_learning_reply(
+            948205934,
+            "Майя, запомни правило: пиши владельцу owner@example.com",
+            mode="staff",
+        )
+
+        self.assertIn("только основатель", denied)
+        self.assertIn("рабочий чат", wrong_surface)
+        self.assertIn("персональные данные", pii)
+        self.assertEqual(sys.modules["database"]._rules_store, [])
+
+    def test_founder_memory_never_learns_from_ordinary_chat(self):
+        ws = _load_webhook_server()
+
+        reply = ws._founder_learning_reply(
+            948205934,
+            "Клиентам лучше предлагать перенос при отмене",
+            mode="staff",
+        )
+
+        self.assertIsNone(reply)
+        self.assertEqual(sys.modules["database"]._rules_store, [])
 
     def test_manager_staff_surface_does_not_receive_master_profit_salary(self):
         ws = _load_webhook_server()

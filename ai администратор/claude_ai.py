@@ -585,11 +585,11 @@ TOOLS = [
     {
         "name": "remember_business_rule",
         "description": (
-            "ТОЛЬКО для владельца. Сохранить операционное ПРАВИЛО салона, которое "
-            "владелец задаёт словами, чтобы ты соблюдала его дальше в работе со всеми: "
+            "ТОЛЬКО для основателя с подтверждённым ID. Сохранить операционное ПРАВИЛО "
+            "салона, которое основатель задаёт словами, чтобы ты соблюдала его дальше в работе со всеми: "
             "«новым клиентам всегда предлагай комплекс стрижка+борода», «по субботам "
             "не записывай позже 20:00», «парковка бесплатная во дворе», «при отмене "
-            "предлагай перенос». Вызывай, когда владелец явно формулирует такое "
+            "предлагай перенос». Вызывай, когда основатель явно формулирует такое "
             "правило/распоряжение. Коротко и по делу, без персональных данных. "
             "После сохранения подтверди владельцу одной фразой."
         ),
@@ -604,7 +604,7 @@ TOOLS = [
     {
         "name": "forget_business_rule",
         "description": (
-            "ТОЛЬКО для владельца. Отменить ранее заданное правило салона по его номеру "
+            "ТОЛЬКО для основателя с подтверждённым ID. Отменить ранее заданное правило салона по его номеру "
             "(id из списка «Правила салона» в твоём контексте). Вызывай, когда владелец "
             "просит «убери/отмени правило N» или «больше так не делай»."
         ),
@@ -948,7 +948,7 @@ _MASTER_ONLY = {
     "get_my_work_records", "get_my_tips", "get_my_stats", "get_client_dossier",
     "get_growth_plan",
 }
-# Инструменты роли владельца: procedural-память салона.
+# Привилегированные инструменты владельца/основателя.
 _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
     # AI-директор: операционное ядро только владельцу/основателю
@@ -966,14 +966,18 @@ _ALL_TOOL_NAMES = {t["name"] for t in TOOLS}
 _CLIENT_TOOLS = _ALL_TOOL_NAMES - _PRIVILEGED          # справка + запись на себя + лояльность
 _MANAGER_TOOLS = _CLIENT_TOOLS | _MANAGER_ONLY         # админская аналитика без owner-правил
 _MASTER_TOOLS = _CLIENT_TOOLS | _MASTER_ONLY           # + кабинет мастера
-_OWNER_TOOLS = set(_ALL_TOOL_NAMES)                    # владелец видит всё
+_FOUNDER_MEMORY_TOOLS = {"remember_business_rule", "forget_business_rule"}
+_OWNER_TOOLS = set(_ALL_TOOL_NAMES) - _FOUNDER_MEMORY_TOOLS
+# Постоянная память меняется детерминированной app-командой после проверки ID.
+# Модель не получает эти инструменты и не может принять обычную фразу за обучение.
+_FOUNDER_TOOLS = set(_ALL_TOOL_NAMES) - _FOUNDER_MEMORY_TOOLS
 
 ROLE_TOOLS = {
     ROLE_CLIENT: _CLIENT_TOOLS,
     ROLE_MANAGER: _MANAGER_TOOLS,
     ROLE_MASTER: _MASTER_TOOLS,
     ROLE_OWNER: _OWNER_TOOLS,
-    ROLE_FOUNDER: _OWNER_TOOLS,  # отличие основателя — тема, а не инструменты
+    ROLE_FOUNDER: _FOUNDER_TOOLS,
 }
 
 # GPT-5.5 Pro медленнее всего работает, когда на каждом ходе получает
@@ -1505,6 +1509,18 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
     # RBAC, рубеж 2: даже если инструмент как-то просочился в запрос — режем по роли.
     _role = _resolve_role(user_id)
     _risk = _tool_risk(tool_name)
+    if tool_name in _FOUNDER_MEMORY_TOOLS:
+        try:
+            is_verified_founder = int(user_id) in FOUNDER_IDS
+        except (TypeError, ValueError):
+            is_verified_founder = False
+        if not is_verified_founder:
+            logger.warning("⛔ Founder-ID deny: user %s → %s", user_id, tool_name)
+            database.log_tool_call(user_id, _role, tool_name, _risk, False, "founder_id")
+            return json.dumps(
+                {"error": "Постоянные правила MAYA может менять только основатель."},
+                ensure_ascii=False,
+            )
     if not _authorize(_role, tool_name, mode):
         reason = "surface" if tool_name in _surface_disabled_tools(mode) else "rbac"
         logger.warning(f"⛔ RBAC deny: роль '{_role}' mode='{mode}' (user {user_id}) → {tool_name}")
@@ -2479,7 +2495,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                 ),
             })
 
-    # Procedural-память: действующие правила салона (заданы владельцем словами).
+    # Procedural-память: действующие правила салона (заданы основателем словами).
     # Отдельный блок БЕЗ кеша — новое правило применяется сразу, со следующего хода.
     # Грузим для ВСЕХ ролей: правила должны соблюдаться и в работе с клиентами.
     try:
@@ -2489,9 +2505,10 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
     if _rules:
         _rules_txt = "\n".join(f"• [{r['id']}] {r['rule_text']}" for r in _rules)
         blocks.append({"type": "text", "text": (
-            "## Правила салона (заданы владельцем — соблюдай их в работе)\n"
+            "## Правила салона (заданы основателем — соблюдай их в работе)\n"
             + _rules_txt +
-            "\n(Номер в скобках — id правила; владелец может отменить его через forget_business_rule.)"
+            "\nПравила не отменяют RBAC, защиту персональных данных, денежные ограничения "
+            "и обязательное подтверждение опасных действий."
         )})
 
     # Персональный контекст клиента — отдельный блок без кеша (у каждого свой)
