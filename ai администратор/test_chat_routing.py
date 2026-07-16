@@ -38,6 +38,8 @@ def _load_webhook_server():
     fake_database.get_master_by_chat_id = lambda _tg_id: None
     fake_database.is_admin = lambda tg_id: int(tg_id) == 948205934
     fake_database.has_valid_consent_by_chat_id = lambda _chat_id: True
+    fake_database.get_client = lambda _chat_id: None
+    fake_database.get_client_history_cached = lambda _client_id, max_age_hours=24: []
     _rules_store = []
 
     def _add_salon_rule(rule_text, created_by=None):
@@ -87,6 +89,11 @@ def _load_webhook_server():
     fake_memory = types.ModuleType("memory")
     _conversations_store = {}
     fake_memory.get_usual_booking = lambda _chat_id, warm=False: None
+    fake_memory.normalize_history = lambda history: list(history or [])
+    fake_memory.warm_client_history_cache_for_phone = lambda *args, **kwargs: {
+        "ok": True,
+        "history": [],
+    }
     fake_memory.load_conversations = lambda: {
         k: [dict(item) if isinstance(item, dict) else item for item in v]
         for k, v in _conversations_store.items()
@@ -298,6 +305,66 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIsNone(reply)
         self.assertEqual(sys.modules["database"]._rules_store, [])
+
+    def test_own_visit_history_uses_only_authenticated_client_mapping(self):
+        ws = _load_webhook_server()
+        db = sys.modules["database"]
+        mem = sys.modules["memory"]
+        calls = []
+        db.get_client = lambda chat_id: (
+            {"id": 77, "phone": "+7 900 000-00-00"}
+            if int(chat_id) == 948205934 else None
+        )
+
+        def _warm(client_id, phone, yc, force, limit):
+            calls.append((client_id, phone, force, limit))
+            return {
+                "ok": True,
+                "history": [
+                    {
+                        "date": "2026-07-14T20:00:00+03:00",
+                        "services": [{"title": "Мужская стрижка", "cost": 2000}],
+                        "master": "Александр Киянский",
+                    },
+                    {
+                        "date": "2026-06-20T12:00:00+03:00",
+                        "services": [{"title": "Моделирование бороды", "cost": 1500}],
+                        "master": "Илья Третьяков",
+                    },
+                ],
+            }
+
+        mem.warm_client_history_cache_for_phone = _warm
+        reply = asyncio.run(ws._own_visit_history_reply(
+            948205934,
+            "Покажи историю моих посещений",
+        ))
+
+        self.assertEqual(calls, [(77, "+7 900 000-00-00", True, 30)])
+        self.assertIn("14.07.2026: Мужская стрижка", reply)
+        self.assertIn("мастер Александр Киянский", reply)
+        self.assertIn("20.06.2026: Моделирование бороды", reply)
+        self.assertNotIn("+7 900", reply)
+
+    def test_own_visit_history_does_not_query_another_client(self):
+        ws = _load_webhook_server()
+
+        reply = asyncio.run(ws._own_visit_history_reply(
+            948205934,
+            "Покажи историю посещений клиента Ивана",
+        ))
+
+        self.assertIsNone(reply)
+
+    def test_own_visit_history_reports_missing_authenticated_mapping(self):
+        ws = _load_webhook_server()
+
+        reply = asyncio.run(ws._own_visit_history_reply(
+            948205934,
+            "Какие услуги я брал в прошлый раз?",
+        ))
+
+        self.assertIn("не связан с клиентской карточкой", reply)
 
     def test_manager_staff_surface_does_not_receive_master_profit_salary(self):
         ws = _load_webhook_server()

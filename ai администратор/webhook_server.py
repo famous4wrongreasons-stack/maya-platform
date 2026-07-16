@@ -6922,6 +6922,140 @@ def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> 
     )
 
 
+_OWN_VISIT_HISTORY_RE = re.compile(
+    r"\b(?:"
+    r"истори\w*\s+мо(?:их|ей)\s+(?:визит|посещ)\w*|"
+    r"мо[яию]\s+истори\w*\s+(?:визит|посещ)\w*|"
+    r"мо[ия]\s+(?:прошл\w*\s+)?(?:визит|посещ)\w*|"
+    r"когда\s+я\s+(?:был|приходил|ходил)\w*|"
+    r"что\s+я\s+(?:делал|брал)\w*\s+(?:в\s+)?прошл\w*\s+(?:раз|визит)\w*|"
+    r"к\s+кому\s+я\s+(?:ходил|записывался)\w*|"
+    r"какие\s+услуг\w*\s+я\s+(?:брал|делал)\w*"
+    r")\b",
+    re.IGNORECASE,
+)
+_OWN_VISIT_HISTORY_REQUEST_RE = re.compile(
+    r"\b(?:покажи|дай|расскажи|открой)\w*.{0,30}\bмне\b.{0,30}"
+    r"(?:истори|визит|посещ)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _own_visit_history_intent(message: str) -> bool:
+    """Match first-person history requests, never another client's dossier."""
+    text = (message or "").strip().lower().replace("ё", "е")
+    if not text:
+        return False
+    return bool(
+        _OWN_VISIT_HISTORY_RE.search(text)
+        or _OWN_VISIT_HISTORY_REQUEST_RE.search(text)
+    )
+
+
+def _visit_history_date_label(value) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return "дата не указана"
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return parsed.strftime("%d.%m.%Y")
+    except ValueError:
+        try:
+            return date.fromisoformat(raw[:10]).strftime("%d.%m.%Y")
+        except ValueError:
+            return raw[:10]
+
+
+async def _own_visit_history_reply(chat_id: int, message: str) -> str | None:
+    """Return only the authenticated user's attended YClients visits."""
+    if not _own_visit_history_intent(message):
+        return None
+    try:
+        client = database.get_client(int(chat_id))
+    except Exception as e:
+        logger.error("own visit history client lookup: %s", e)
+        client = None
+    if not client or not client.get("id"):
+        return (
+            "Ваш аккаунт пока не связан с клиентской карточкой. "
+            "Откройте личный кабинет и завершите привязку."
+        )
+    phone = str(client.get("phone") or "").strip()
+    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return "В клиентской карточке не подтверждён телефон. Завершите привязку в личном кабинете."
+
+    client_id = int(client["id"])
+    try:
+        cached = memory.normalize_history(
+            database.get_client_history_cached(client_id, max_age_hours=24 * 30)
+        )
+    except Exception:
+        cached = []
+
+    refreshed = None
+    try:
+        refreshed = await asyncio.to_thread(
+            memory.warm_client_history_cache_for_phone,
+            client_id,
+            phone,
+            _yc,
+            True,
+            30,
+        )
+    except Exception as e:
+        logger.error("own visit history refresh: %s", e)
+
+    if isinstance(refreshed, dict) and refreshed.get("ok"):
+        history = memory.normalize_history(refreshed.get("history") or [])
+        used_cached_fallback = False
+    else:
+        history = cached
+        used_cached_fallback = bool(cached)
+
+    history = [
+        row for row in history
+        if isinstance(row, dict) and (
+            row.get("date") or row.get("services") or row.get("master")
+        )
+    ]
+    history.sort(key=lambda row: str(row.get("date") or ""), reverse=True)
+    if not history:
+        return "В YClients не нашла завершённых посещений для вашей привязанной карточки."
+
+    low = (message or "").lower().replace("ё", "е")
+    full = any(marker in low for marker in (
+        "всю истор", "полную истор", "все посещ", "все визит",
+    ))
+    limit = 30 if full else 10
+    shown = history[:limit]
+    lines = ["Вот ваша история завершённых посещений из YClients:"]
+    for index, row in enumerate(shown, 1):
+        service_titles = [
+            str(item.get("title") or "").strip()
+            for item in (row.get("services") or [])
+            if isinstance(item, dict) and str(item.get("title") or "").strip()
+        ]
+        if not service_titles and str(row.get("service") or "").strip():
+            service_titles = [str(row["service"]).strip()]
+        services = ", ".join(service_titles) or "услуги не указаны"
+        master = str(row.get("master") or "").strip()
+        details = f"{_visit_history_date_label(row.get('date'))}: {services}"
+        if master:
+            details += f", мастер {master}"
+        lines.append(f"{index}. {details}")
+    if len(history) > len(shown):
+        lines.append(
+            f"Показала {len(shown)} последних из {len(history)} найденных. "
+            "Спросите «покажи полную историю моих посещений», чтобы увидеть больше."
+        )
+    if used_cached_fallback:
+        lines.append(
+            "YClients временно не ответил, поэтому показываю последнюю "
+            "синхронизированную историю."
+        )
+    return "\n".join(lines)
+
+
 def _owner_daily_briefing_intent(message: str) -> bool:
     low = (message or "").strip().lower().replace("ё", "е")
     if not low:
@@ -7529,6 +7663,19 @@ async def chat_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
+    own_history_reply = await _own_visit_history_reply(chat_id, message)
+    if own_history_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(own_history_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": own_history_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -7943,6 +8090,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _cabinet_response({
             "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    own_history_reply = await _own_visit_history_reply(chat_id, message)
+    if own_history_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(own_history_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": own_history_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })
