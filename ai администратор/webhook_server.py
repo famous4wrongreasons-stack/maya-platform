@@ -84,6 +84,7 @@ if not WEBPUSH_VAPID_PRIVATE_KEY:
 # Один экземпляр клиента YClients на всё время жизни сервера
 _yc = YClientsAPI()
 _VOICE_MASTER_NAMES_CACHE = {"names": (), "ts": 0.0}
+_VOICE_SERVICE_TITLES_CACHE = {"titles": (), "ts": 0.0}
 
 
 def _voice_known_master_names() -> tuple[str, ...]:
@@ -99,6 +100,25 @@ def _voice_known_master_names() -> tuple[str, ...]:
         names = ()
     _VOICE_MASTER_NAMES_CACHE.update(names=names, ts=now)
     return tuple(names)
+
+
+def _voice_known_service_titles() -> tuple[str, ...]:
+    now = time.time()
+    titles = _VOICE_SERVICE_TITLES_CACHE.get("titles") or ()
+    if titles and now - float(_VOICE_SERVICE_TITLES_CACHE.get("ts") or 0) < 3600:
+        return tuple(titles)
+    try:
+        services = _yc.get_services() or []
+        titles = tuple(
+            service.get("title", "")
+            for service in services
+            if isinstance(service, dict) and service.get("title")
+        )
+    except Exception as e:
+        logger.error(f"_voice_known_service_titles: {e}")
+        titles = ()
+    _VOICE_SERVICE_TITLES_CACHE.update(titles=titles, ts=now)
+    return tuple(titles)
 
 # Номиналы подарочных сертификатов, доступные к покупке в приложении
 _CERT_AMOUNTS = (2000, 3000, 5000)
@@ -5824,30 +5844,46 @@ def _transcribe_openai(raw: bytes) -> str | None:
         return None
 
 
-def _transcribe_audio_b64(audio_b64: str) -> str | None:
-    """
-    Расшифровывает аудио из приложения (base64, webm/ogg/mp4 от MediaRecorder) в текст.
-    Сначала OpenAI gpt-4o-mini-transcribe (точно/быстро), фолбэк — pydub→wav→Google.
-    """
-    import base64 as _b64
+def _voice_stt_provider() -> str:
+    provider = os.getenv("VOICE_STT_PROVIDER") or getattr(config, "VOICE_STT_PROVIDER", "local")
+    provider = str(provider).strip().lower()
+    return provider if provider in {"local", "openai", "google", "auto"} else "local"
+
+
+def _voice_stt_external_fallback_enabled() -> bool:
+    value = os.getenv("VOICE_STT_ALLOW_EXTERNAL_FALLBACK")
+    if value is None:
+        value = getattr(config, "VOICE_STT_ALLOW_EXTERNAL_FALLBACK", False)
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _transcribe_local(raw: bytes) -> str | None:
+    try:
+        import local_stt
+
+        names = ", ".join(_voice_known_master_names())
+        services = ", ".join(_voice_known_service_titles())
+        prompt = (
+            "Разговор с MAYA о записи, свободном окошке, услугах, расписании и работе бизнеса."
+        )
+        if names:
+            prompt += f" Имена специалистов: {names}."
+        if services:
+            prompt += f" Услуги: {services}."
+        return local_stt.transcribe(raw, initial_prompt=prompt)
+    except Exception as e:
+        logger.error(f"_transcribe_local: {e}")
+        return None
+
+
+def _transcribe_google(raw: bytes) -> str | None:
+    """Legacy external fallback, enabled only explicitly."""
     import tempfile as _tmp
     import os as _os
-    try:
-        s = audio_b64.strip()
-        if s.startswith("data:") and "," in s:
-            s = s.split(",", 1)[1]
-        raw = _b64.b64decode(s)
-    except Exception:
-        return None
-    if not raw or len(raw) > 8 * 1024 * 1024:  # лимит 8 МБ
-        return None
-    # 1) OpenAI — точнее и быстрее, формат принимает как есть
-    txt = _transcribe_openai(raw)
-    if txt:
-        return txt
-    # 2) фолбэк: pydub → wav → Google Speech (как раньше)
+
     import speech_recognition as sr
     from pydub import AudioSegment
+
     src_path = wav_path = None
     try:
         fd, src_path = _tmp.mkstemp(suffix=".bin"); _os.close(fd)
@@ -5860,15 +5896,45 @@ def _transcribe_audio_b64(audio_b64: str) -> str | None:
             audio_data = recognizer.record(source)
         return recognizer.recognize_google(audio_data, language="ru-RU")
     except Exception as e:
-        logger.error(f"_transcribe_audio_b64: {e}")
+        logger.error(f"_transcribe_google: {e}")
         return None
     finally:
-        for p in (src_path, wav_path):
-            if p and _os.path.exists(p):
+        for path in (src_path, wav_path):
+            if path and _os.path.exists(path):
                 try:
-                    _os.remove(p)
-                except Exception:
+                    _os.remove(path)
+                except OSError:
                     pass
+
+
+def _transcribe_audio_b64(audio_b64: str) -> str | None:
+    """Transcribe app audio locally before passing its text to DeepSeek."""
+    import base64 as _b64
+
+    try:
+        encoded = audio_b64.strip()
+        if encoded.startswith("data:") and "," in encoded:
+            encoded = encoded.split(",", 1)[1]
+        raw = _b64.b64decode(encoded)
+    except Exception:
+        return None
+    if not raw or len(raw) > 8 * 1024 * 1024:
+        return None
+
+    provider = _voice_stt_provider()
+    if provider in {"local", "auto"}:
+        text = _transcribe_local(raw)
+        if text or provider == "local":
+            return text
+        if not _voice_stt_external_fallback_enabled():
+            return None
+    if provider in {"openai", "auto"}:
+        text = _transcribe_openai(raw)
+        if text or provider == "openai":
+            return text
+    if provider in {"google", "auto"}:
+        return _transcribe_google(raw)
+    return None
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -7716,10 +7782,10 @@ async def chat_handler(request: web.Request) -> web.Response:
     transcript = None
     audio_b64 = body.get("audio")
     if audio_b64 and isinstance(audio_b64, str):
-        transcript = _transcribe_audio_b64(audio_b64)
+        transcript = await asyncio.to_thread(_transcribe_audio_b64, audio_b64)
         if not transcript:
             return _cabinet_response({
-                "reply": "Не расслышал голосовое 🙈 Попробуйте записать ещё раз или напишите текстом.",
+                "reply": "Не расслышала голосовое. Попробуйте записать ещё раз или напишите текстом.",
                 "transcript": "",
             })
         message = transcript
@@ -8163,10 +8229,10 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     transcript = None
     audio_b64 = body.get("audio")
     if audio_b64 and isinstance(audio_b64, str):
-        transcript = _transcribe_audio_b64(audio_b64)
+        transcript = await asyncio.to_thread(_transcribe_audio_b64, audio_b64)
         if not transcript:
             return _cabinet_response({
-                "reply": "Не расслышал голосовое 🙈 Попробуйте записать ещё раз или напишите текстом.",
+                "reply": "Не расслышала голосовое. Попробуйте записать ещё раз или напишите текстом.",
                 "transcript": "",
             })
         message = transcript
