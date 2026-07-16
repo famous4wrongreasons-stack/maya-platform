@@ -6887,6 +6887,175 @@ def _rub(value) -> str:
     return f"{n:,}".replace(",", " ") + " ₽"
 
 
+_STAFF_FACT_ANALYTICS_METRIC_RE = re.compile(
+    r"\b(выруч\w*|оборот\w*|касс\w*|заработ\w*|зарабат\w*|"
+    r"средн\w*\s+чек|визит\w*|клиент\w*|топ\s+услуг\w*|статистик\w*)\b",
+    re.IGNORECASE,
+)
+_STAFF_FACT_ANALYTICS_REQUEST_RE = re.compile(
+    r"(?:\b(?:сколько|какая|какой|покажи|показать|дай|посчитай|сводка)\b|"
+    r"\bза\s+(?:сегодня|вчера|недел\w*|месяц\w*|\d+\s+дн\w*)\b|"
+    r"\b(?:моя|мой|мои|наша|наш|общая|общий|личная|личный)\b)",
+    re.IGNORECASE,
+)
+_STAFF_FACT_ANALYTICS_PLANNING_RE = re.compile(
+    r"\b(почему|как\s+(?:поднять|увеличить|вырастить|улучшить)|"
+    r"план\w*|прогноз\w*|цель\w*|добить|увелич\w*|поднять|"
+    r"выраст\w*|улучш\w*|привлеч\w*|заполн\w*|теря\w*)\b",
+    re.IGNORECASE,
+)
+_STAFF_BUSINESS_SCOPE_RE = re.compile(
+    r"(?:\b(?:по|для)\s+(?:всему\s+)?(?:бизнесу|салону)\b|"
+    r"\b(?:бизнеса|салона|всего\s+бизнеса|всего\s+салона)\b|"
+    r"\b(?:по\s+всем|все|всех)\s+(?:мастер\w*|сотрудник\w*)\b|"
+    r"\b(?:общая|общий|общую)\s+(?:выруч\w*|касс\w*|статистик\w*)\b|"
+    r"\bкасс\w*\b|\bмы\s+заработ\w*|\bсколько\s+заработали\b|"
+    r"\bтоп\s+услуг\w*)",
+    re.IGNORECASE,
+)
+_STAFF_PERSONAL_SCOPE_RE = re.compile(
+    r"(?:\b(?:моя|мой|мои|личная|личный)\b|\bу\s+меня\b|"
+    r"\bсколько\s+я\b|\bя\s+(?:заработ\w*|сделал\w*)\b)",
+    re.IGNORECASE,
+)
+
+
+def _staff_fact_analytics_intent(message: str) -> bool:
+    """True only for a factual snapshot, not advice or growth planning."""
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low or not _STAFF_FACT_ANALYTICS_METRIC_RE.search(low):
+        return False
+    if _STAFF_FACT_ANALYTICS_PLANNING_RE.search(low):
+        return False
+    if _STAFF_FACT_ANALYTICS_REQUEST_RE.search(low):
+        return True
+    return bool(re.fullmatch(
+        r"(?:моя\s+)?(?:выручка|касса|оборот|статистика|средний\s+чек)[.!?\s]*",
+        low,
+    ))
+
+
+def _analytics_range_caption(date_from: str, date_to: str) -> str:
+    try:
+        start = date.fromisoformat(str(date_from)[:10])
+        end = date.fromisoformat(str(date_to)[:10])
+    except (TypeError, ValueError):
+        return f"{date_from} — {date_to}"
+    if start.year == end.year:
+        return f"{start:%d.%m}–{end:%d.%m.%Y}"
+    return f"{start:%d.%m.%Y}–{end:%d.%m.%Y}"
+
+
+def _staff_financial_analytics_reply(
+    chat_id: int,
+    message: str,
+    mode: str = "staff",
+) -> str | None:
+    """Return YClients-grounded staff analytics without allowing LLM arithmetic.
+
+    On the employee surface an unqualified "revenue" request means the linked
+    employee's own production. Business totals require explicit business/team
+    wording. This prevents a founder who is also a working master from receiving
+    the whole-company report when asking from their employee workspace.
+    """
+    if str(mode or "").strip().lower() != "staff":
+        return None
+    if not _staff_fact_analytics_intent(message):
+        return None
+
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+
+    explicit_business = bool(_STAFF_BUSINESS_SCOPE_RE.search(message or ""))
+    explicit_personal = bool(_STAFF_PERSONAL_SCOPE_RE.search(message or ""))
+    if explicit_business:
+        scope = "business"
+    elif explicit_personal or info.get("is_master"):
+        scope = "personal"
+    else:
+        scope = "business"
+
+    if scope == "business" and not (info.get("permissions") or {}).get("analytics"):
+        return (
+            "Общую выручку и кассу бизнеса я показываю только владельцу или "
+            "администратору. Вашу личную статистику могу показать отдельно."
+        )
+    if scope == "personal" and not info.get("staff_id"):
+        return (
+            "Не вижу привязку вашего входа к сотруднику YClients, поэтому не могу "
+            "безопасно определить личную выручку. Проверьте привязку профиля в кабинете."
+        )
+
+    try:
+        import analytics
+        period, date_from, date_to = _analytics_period_from_text(message)
+        frm, to, label = analytics.resolve_period(period, date_from, date_to)
+        wants_top = bool(re.search(r"\bтоп\s+услуг|что\s+прода", message or "", re.IGNORECASE))
+        summary = analytics.business_summary(frm, to, include_top=wants_top)
+    except Exception as e:
+        logger.error("staff financial analytics shortcut: %s", e)
+        return "Не смогла получить проверенную аналитику из YClients. Попробуйте ещё раз через минуту."
+
+    source_status = summary.get("source_status") or {}
+    if source_status.get("transactions") == "unavailable":
+        return "YClients сейчас не отдал финансовые операции. Я не буду показывать неподтверждённые цифры."
+
+    period_caption = f"{label}, {_analytics_range_caption(frm, to)}"
+    if scope == "business":
+        lines = [
+            f"Общая статистика бизнеса за период «{period_caption}»:",
+            f"Выручка: {_rub(summary.get('total_gross'))}",
+            f"Наличные: {_rub((summary.get('cash') or {}).get('sum'))}",
+            f"Карта: {_rub((summary.get('card') or {}).get('sum'))}",
+            f"Оплаченных визитов: {int(summary.get('visits') or 0)}",
+            f"Средний чек: {_rub(summary.get('avg_check'))}",
+        ]
+        top_services = summary.get("top_services") or []
+        if wants_top and top_services:
+            lines.append("Топ услуг:")
+            for index, service in enumerate(top_services[:3], 1):
+                lines.append(
+                    f"{index}. {service.get('title') or 'Услуга'} — {_rub(service.get('sum'))}"
+                )
+        lines.append("Источник: живые финансовые операции YClients на момент запроса.")
+        return "\n".join(lines)
+
+    staff_id = int(info.get("staff_id") or 0)
+    mine = next(
+        (
+            row for row in (summary.get("masters") or [])
+            if int((row or {}).get("staff_id") or 0) == staff_id
+        ),
+        None,
+    )
+    if not mine:
+        return (
+            f"Ваша личная статистика за период «{period_caption}»: проведённых оплат "
+            "по вашим услугам пока нет. Источник: YClients."
+        )
+
+    lines = [
+        f"Ваша личная статистика за период «{period_caption}»:",
+        f"Выручка по вашим услугам: {_rub(mine.get('gross'))}",
+        f"Оплаченных визитов: {int(mine.get('visits') or 0)}",
+        f"Средний чек: {_rub(mine.get('avg_check'))}",
+    ]
+    if mine.get("is_owner"):
+        lines.append(
+            "Зарплату владельца не приравниваю к этой выручке: личный доход "
+            "считается отдельно с учётом расходов бизнеса."
+        )
+    else:
+        lines.append(
+            f"Расчётная зарплата ({int(mine.get('percent') or 0)}%): "
+            f"{_rub(mine.get('salary'))}"
+        )
+    lines.append("Источник: живые финансовые операции YClients на момент запроса.")
+    return "\n".join(lines)
+
+
 _FOUNDER_RULE_DELETE_RE = re.compile(
     r"^(?:забудь|удали|отмени|деактивируй)\s+правило\s*#?\s*(\d+)\s*[.!?]*$",
     re.IGNORECASE,
@@ -7907,6 +8076,21 @@ async def chat_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
+    verified_analytics_reply = _staff_financial_analytics_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if verified_analytics_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(verified_analytics_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": verified_analytics_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     if transcript and should_clarify_transcript(message, history, _voice_known_master_names()):
         out = {
             "reply": CLARIFY_REPEAT_TEXT,
@@ -8349,6 +8533,21 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _cabinet_response({
             "reply": owner_profit_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    verified_analytics_reply = _staff_financial_analytics_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if verified_analytics_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(verified_analytics_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": verified_analytics_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })

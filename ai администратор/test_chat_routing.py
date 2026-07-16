@@ -188,6 +188,127 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("Стас Мосин — выходной", reply)
         self.assertIn("Илья Третьяков — нужна сверка", reply)
 
+    def test_linked_founder_revenue_defaults_to_personal_on_staff_surface(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
+            "yclients_staff_id": 1461615,
+            "full_name": "Владелец",
+            "can_redeem": True,
+        }
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 622500,
+            "cash": {"sum": 253100},
+            "card": {"sum": 369400},
+            "visits": 300,
+            "avg_check": 2075,
+            "masters": [{
+                "staff_id": 1461615,
+                "gross": 99400,
+                "salary": 99400,
+                "percent": 100,
+                "visits": 46,
+                "avg_check": 2161,
+                "is_owner": True,
+            }],
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Выручка за месяц",
+            mode="staff",
+        )
+
+        self.assertIn("Ваша личная статистика", reply)
+        self.assertIn("99 400 ₽", reply)
+        self.assertNotIn("622 500 ₽", reply)
+        self.assertNotIn("100%", reply)
+        self.assertIn("Зарплату владельца не приравниваю", reply)
+
+    def test_explicit_business_revenue_uses_company_total(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
+            "yclients_staff_id": 1461615,
+            "full_name": "Владелец",
+            "can_redeem": True,
+        }
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 622500,
+            "cash": {"sum": 253100},
+            "card": {"sum": 369400},
+            "visits": 300,
+            "avg_check": 2075,
+            "masters": [{
+                "staff_id": 1461615,
+                "gross": 99400,
+                "visits": 46,
+                "avg_check": 2161,
+                "is_owner": True,
+            }],
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Покажи выручку бизнеса за месяц по всем сотрудникам",
+            mode="staff",
+        )
+
+        self.assertIn("Общая статистика бизнеса", reply)
+        self.assertIn("622 500 ₽", reply)
+        self.assertIn("300", reply)
+        self.assertNotIn("Ваша личная статистика", reply)
+
+    def test_revenue_growth_advice_is_not_replaced_by_fact_snapshot(self):
+        ws = _load_webhook_server()
+
+        self.assertFalse(ws._staff_fact_analytics_intent(
+            "Как увеличить выручку за месяц?",
+        ))
+
+    def test_unavailable_yclients_transactions_never_render_zero_revenue(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
+            "yclients_staff_id": 1461615,
+            "full_name": "Владелец",
+            "can_redeem": True,
+        }
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "unavailable", "records": "ok"},
+            "total_gross": 0,
+            "masters": [],
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Выручка за месяц",
+            mode="staff",
+        )
+
+        self.assertIn("не отдал финансовые операции", reply)
+        self.assertNotIn("0 ₽", reply)
+
     def test_daily_business_shortcut_is_not_available_on_client_surface(self):
         ws = _load_webhook_server()
 

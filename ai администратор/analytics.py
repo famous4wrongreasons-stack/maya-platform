@@ -70,14 +70,19 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
     """Сводка по выручке и зарплатам за период [from_iso, to_iso] включительно.
     Только чтение. Логика совпадает с webhook_server._period_report.
     include_top=True добавляет топ услуг (из уже загруженных записей, бесплатно)."""
+    transactions_available = True
+    records_available = True
     try:
         txs = _yc.get_company_transactions(from_iso, to_iso)
     except Exception as e:
         logger.error(f"business_summary tx: {e}")
+        transactions_available = False
         txs = []
     try:
         recs = _yc.get_company_records(from_iso, to_iso)
-    except Exception:
+    except Exception as e:
+        logger.error(f"business_summary records: {e}")
+        records_available = False
         recs = []
 
     # record_id -> staff_id (если в транзакции мастер не указан)
@@ -224,6 +229,10 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
     result = {
         "from": from_iso,
         "to": to_iso,
+        "source_status": {
+            "transactions": "ok" if transactions_available else "unavailable",
+            "records": "ok" if records_available else "unavailable",
+        },
         "total_gross": total_gross,
         "cash": {"count": len(cash_recs), "sum": round(cash_sum)},
         "card": {"count": len(card_recs), "sum": round(card_sum)},
@@ -243,7 +252,11 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         },
         "masters": masters,
         "salary_total": salary_total,         # сумма к выплате мастерам (без владельца)
-        "note": "" if txs else "За период нет проведённых оплат в YClients.",
+        "note": (
+            "Не удалось получить финансовые операции из YClients."
+            if not transactions_available
+            else ("" if txs else "За период нет проведённых оплат в YClients.")
+        ),
     }
     if include_top:
         result["top_services"] = _top_from_records(recs)   # переиспользуем уже загруженные записи
