@@ -12,7 +12,8 @@ export class CreateBillingCheckoutDto {
 
   @ApiPropertyOptional({
     example: 'https://malesthetic.pro/app/maya-admin.html',
-    description: 'URL where YooKassa redirects the salon owner after checkout.',
+    description:
+      'URL where YooKassa redirects the business owner after checkout.',
   })
   @IsOptional()
   @IsUrl({ require_tld: false })

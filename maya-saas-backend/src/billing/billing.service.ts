@@ -11,6 +11,8 @@ import { TenantStatus } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
+import { BillingSystemGateway } from './billing-system.gateway';
 import { CreateBillingCheckoutDto } from './dto/create-billing-checkout.dto';
 import {
   YooKassaClientService,
@@ -46,6 +48,14 @@ type BillingPaymentRecord = {
   updatedAt: Date;
 };
 
+type BillingCandidateRecord = {
+  id: string;
+  planId: string | null;
+  trialEndsAt: Date | null;
+  currentPeriodEnd: Date | null;
+  billingMethodId: string | null;
+};
+
 @Injectable()
 export class BillingService {
   constructor(
@@ -53,11 +63,14 @@ export class BillingService {
     private readonly subscriptionsService: SubscriptionsService,
     private readonly yooKassaClient: YooKassaClientService,
     private readonly configService: ConfigService,
+    private readonly tenantContext: TenantContextService,
+    private readonly systemGateway: BillingSystemGateway,
   ) {}
 
   async createCheckout(tenantId: string, dto: CreateBillingCheckoutDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
+      where: { id: scopedTenantId },
       include: { plan: true },
     });
 
@@ -83,7 +96,7 @@ export class BillingService {
 
     const payment = await this.prisma.billingPayment.create({
       data: {
-        tenantId,
+        tenantId: scopedTenantId,
         planId: plan.id,
         provider: PAYMENT_PROVIDER_YOOKASSA,
         idempotenceKey: randomUUID(),
@@ -120,7 +133,7 @@ export class BillingService {
       );
 
       const syncedPayment = await this.prisma.billingPayment.update({
-        where: { id: payment.id },
+        where: this.paymentWhere(payment),
         data: {
           providerPaymentId: providerPayment.id,
           status: this.normalizeProviderStatus(providerPayment.status),
@@ -142,7 +155,7 @@ export class BillingService {
       };
     } catch (error) {
       await this.prisma.billingPayment.update({
-        where: { id: payment.id },
+        where: this.paymentWhere(payment),
         data: {
           status: PAYMENT_STATUS_FAILED,
           providerPayload: asJson({
@@ -156,8 +169,9 @@ export class BillingService {
   }
 
   async chargeTenant(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
+      where: { id: scopedTenantId },
       include: { plan: true },
     });
 
@@ -185,7 +199,7 @@ export class BillingService {
 
     const pendingPayment = await this.prisma.billingPayment.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         purpose: PAYMENT_PURPOSE_RECURRING,
         status: PAYMENT_STATUS_PENDING,
       },
@@ -204,7 +218,7 @@ export class BillingService {
     const amountKopecks = this.normalizeAmount(tenant.plan.priceMonthly);
     const payment = await this.prisma.billingPayment.create({
       data: {
-        tenantId,
+        tenantId: scopedTenantId,
         planId: tenant.plan.id,
         provider: PAYMENT_PROVIDER_YOOKASSA,
         idempotenceKey: randomUUID(),
@@ -239,7 +253,7 @@ export class BillingService {
       );
 
       const syncedPayment = await this.prisma.billingPayment.update({
-        where: { id: payment.id },
+        where: this.paymentWhere(payment),
         data: {
           providerPaymentId: providerPayment.id,
           status: this.normalizeProviderStatus(providerPayment.status),
@@ -258,7 +272,7 @@ export class BillingService {
       };
     } catch (error) {
       await this.prisma.billingPayment.update({
-        where: { id: payment.id },
+        where: this.paymentWhere(payment),
         data: {
           status: PAYMENT_STATUS_FAILED,
           providerPayload: asJson({
@@ -295,9 +309,10 @@ export class BillingService {
       };
     }
 
-    const payment = await this.prisma.billingPayment.findUnique({
-      where: { providerPaymentId },
-    });
+    const payment =
+      await this.systemGateway.findPaymentByProviderPaymentId(
+        providerPaymentId,
+      );
 
     if (!payment) {
       return {
@@ -308,30 +323,25 @@ export class BillingService {
       };
     }
 
-    const verifiedPayment =
-      await this.yooKassaClient.getPayment(providerPaymentId);
-    const result = await this.applyProviderPaymentIfFinal(
-      payment,
-      verifiedPayment,
-    );
+    return this.tenantContext.runAsSystemTenant(payment.tenantId, async () => {
+      const verifiedPayment =
+        await this.yooKassaClient.getPayment(providerPaymentId);
+      const result = await this.applyProviderPaymentIfFinal(
+        payment,
+        verifiedPayment,
+      );
 
-    return {
-      ok: true,
-      event,
-      payment: this.serializePayment(result.payment),
-      tenant: result.tenant,
-    };
+      return {
+        ok: true,
+        event,
+        payment: this.serializePayment(result.payment),
+        tenant: result.tenant,
+      };
+    });
   }
 
   async runDueBilling(now = new Date()) {
-    const candidates = await this.prisma.tenant.findMany({
-      where: {
-        status: {
-          in: [TenantStatus.ACTIVE, TenantStatus.TRIAL, TenantStatus.PAST_DUE],
-        },
-      },
-      include: { plan: true },
-    });
+    const candidates = await this.systemGateway.listBillingCandidates();
     const result = {
       checked: candidates.length,
       charged: 0,
@@ -342,51 +352,68 @@ export class BillingService {
     };
 
     for (const tenant of candidates) {
-      const accessWindowEndsAt =
-        tenant.currentPeriodEnd ?? tenant.trialEndsAt ?? null;
+      try {
+        const outcome = await this.tenantContext.runAsSystemTenant(
+          tenant.id,
+          () => this.processDueTenant(tenant, now),
+        );
 
-      if (!accessWindowEndsAt || accessWindowEndsAt.getTime() > now.getTime()) {
-        result.skipped += 1;
-        continue;
-      }
-
-      const pendingPayment = await this.prisma.billingPayment.findFirst({
-        where: {
-          tenantId: tenant.id,
-          status: PAYMENT_STATUS_PENDING,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      if (pendingPayment) {
-        result.skipped += 1;
-        continue;
-      }
-
-      if (tenant.billingMethodId && tenant.planId) {
-        try {
-          await this.chargeTenant(tenant.id);
+        if (outcome === 'charged') {
           result.charged += 1;
-        } catch (error) {
-          result.failed += 1;
-          result.errors.push({
-            tenant_id: tenant.id,
-            message: error instanceof Error ? error.message : 'unknown_error',
-          });
+        } else if (outcome === 'marked_past_due') {
+          result.marked_past_due += 1;
+        } else {
+          result.skipped += 1;
         }
-        continue;
+      } catch (error) {
+        result.failed += 1;
+        result.errors.push({
+          tenant_id: tenant.id,
+          message: error instanceof Error ? error.message : 'unknown_error',
+        });
       }
-
-      await this.markTenantPastDue(tenant.id);
-      result.marked_past_due += 1;
     }
 
     return result;
   }
 
+  private async processDueTenant(
+    tenant: BillingCandidateRecord,
+    now: Date,
+  ): Promise<'charged' | 'marked_past_due' | 'skipped'> {
+    const tenantId = this.tenantContext.assertTenantId(tenant.id);
+    const accessWindowEndsAt =
+      tenant.currentPeriodEnd ?? tenant.trialEndsAt ?? null;
+
+    if (!accessWindowEndsAt || accessWindowEndsAt.getTime() > now.getTime()) {
+      return 'skipped';
+    }
+
+    const pendingPayment = await this.prisma.billingPayment.findFirst({
+      where: {
+        tenantId,
+        status: PAYMENT_STATUS_PENDING,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (pendingPayment) {
+      return 'skipped';
+    }
+
+    if (tenant.billingMethodId && tenant.planId) {
+      await this.chargeTenant(tenantId);
+      return 'charged';
+    }
+
+    await this.markTenantPastDue(tenantId);
+    return 'marked_past_due';
+  }
+
   async listTenantPayments(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
+      where: { id: scopedTenantId },
       select: { id: true },
     });
 
@@ -395,7 +422,7 @@ export class BillingService {
     }
 
     const payments = await this.prisma.billingPayment.findMany({
-      where: { tenantId },
+      where: { tenantId: scopedTenantId },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
@@ -409,6 +436,7 @@ export class BillingService {
     payment: BillingPaymentRecord,
     providerPayment: YooKassaPayment,
   ) {
+    this.tenantContext.assertTenantId(payment.tenantId);
     this.assertProviderPaymentMatchesLocal(payment, providerPayment);
 
     if (providerPayment.status === PAYMENT_STATUS_SUCCEEDED) {
@@ -417,7 +445,7 @@ export class BillingService {
 
     if (providerPayment.status === PAYMENT_STATUS_CANCELED) {
       const canceledPayment = await this.prisma.billingPayment.update({
-        where: { id: payment.id },
+        where: this.paymentWhere(payment),
         data: {
           status: PAYMENT_STATUS_CANCELED,
           canceledAt: this.parseProviderDate(providerPayment.canceled_at),
@@ -436,7 +464,7 @@ export class BillingService {
     }
 
     const pendingPayment = await this.prisma.billingPayment.update({
-      where: { id: payment.id },
+      where: this.paymentWhere(payment),
       data: {
         status: this.normalizeProviderStatus(providerPayment.status),
         providerPayload: asJson(providerPayment),
@@ -453,12 +481,13 @@ export class BillingService {
     payment: BillingPaymentRecord,
     providerPayment: YooKassaPayment,
   ) {
+    const tenantId = this.tenantContext.assertTenantId(payment.tenantId);
     const paidAt =
       this.parseProviderDate(providerPayment.captured_at) ?? new Date();
 
     const result = await this.prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.findUnique({
-        where: { id: payment.tenantId },
+        where: { id: tenantId },
       });
 
       if (!tenant) {
@@ -478,7 +507,12 @@ export class BillingService {
           : tenant.billingMethodId;
 
       const updatedPayment = await tx.billingPayment.update({
-        where: { id: payment.id },
+        where: {
+          id_tenantId: {
+            id: payment.id,
+            tenantId,
+          },
+        },
         data: {
           status: PAYMENT_STATUS_SUCCEEDED,
           paidAt,
@@ -486,7 +520,7 @@ export class BillingService {
         },
       });
       const updatedTenant = await tx.tenant.update({
-        where: { id: tenant.id },
+        where: { id: tenantId },
         data: {
           status: TenantStatus.ACTIVE,
           planId: payment.planId ?? tenant.planId,
@@ -516,18 +550,49 @@ export class BillingService {
   }
 
   private async markTenantPastDue(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
     await this.prisma.tenant.update({
-      where: { id: tenantId },
+      where: { id: scopedTenantId },
       data: {
         status: TenantStatus.PAST_DUE,
+        trialFullAccess: false,
       },
     });
+  }
+
+  private paymentWhere(payment: Pick<BillingPaymentRecord, 'id' | 'tenantId'>) {
+    const tenantId = this.tenantContext.assertTenantId(payment.tenantId);
+
+    return {
+      id_tenantId: {
+        id: payment.id,
+        tenantId,
+      },
+    };
   }
 
   private assertProviderPaymentMatchesLocal(
     payment: BillingPaymentRecord,
     providerPayment: YooKassaPayment,
   ) {
+    const metadataTenantId = providerPayment.metadata?.tenant_id;
+    const metadataPaymentId = providerPayment.metadata?.billing_payment_id;
+
+    if (
+      !payment.providerPaymentId ||
+      providerPayment.id !== payment.providerPaymentId ||
+      !this.metadataIdentifierMatches(metadataTenantId, payment.tenantId) ||
+      !this.metadataIdentifierMatches(metadataPaymentId, payment.id)
+    ) {
+      throw new BadRequestException(
+        this.buildBillingError(
+          'billing_payment_identity_mismatch',
+          'YooKassa payment identity does not match the local billing payment.',
+        ),
+      );
+    }
+
     const providerAmount = providerPayment.amount;
 
     if (!providerAmount) {
@@ -550,6 +615,18 @@ export class BillingService {
         ),
       );
     }
+  }
+
+  private metadataIdentifierMatches(value: unknown, expected: string): boolean {
+    if (value === undefined) {
+      return true;
+    }
+
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      return false;
+    }
+
+    return String(value) === expected;
   }
 
   private resolveReturnUrl(returnUrl?: string): string {
@@ -661,6 +738,7 @@ export class BillingService {
     code:
       | 'billing_method_required'
       | 'billing_payment_amount_mismatch'
+      | 'billing_payment_identity_mismatch'
       | 'billing_payment_invalid'
       | 'billing_payment_pending'
       | 'billing_plan_price_invalid'

@@ -7,7 +7,6 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import {
   createHash,
@@ -20,18 +19,33 @@ import {
 import { UserRole, UserStatus } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { normalizeRussianPhone } from '../common/phone.util';
-import { PrismaService } from '../prisma/prisma.service';
+import {
+  resolveAllowedOauthRedirectUri,
+  resolveNodeEnvironment,
+} from '../config/security-config';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AuthClientMetadata } from './auth-client-metadata';
+import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
+import { AuthRateLimitService } from './auth-rate-limit.service';
+import { AuthSessionService } from './auth-session.service';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
+import { TenantAuthRepository } from './tenant-auth.repository';
 
 type SocialProvider = 'telegram' | 'yandex';
 
-type TenantAuthContext = {
+type ClientAccessTenant = {
+  currentPeriodEnd?: Date | null;
+  status: string;
+  trialEndsAt?: Date | null;
+  trialFullAccess?: boolean;
+};
+
+type TenantAuthContext = ClientAccessTenant & {
   id: string;
   slug: string;
-  status: string;
   allowSelfRegistration: boolean;
 };
 
@@ -98,30 +112,47 @@ export class SocialAuthService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
     private readonly tenantsService: TenantsService,
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private readonly tenantContext: TenantContextService,
+    private readonly authRepository: TenantAuthRepository,
+    private readonly flowSystemGateway: AuthFlowSystemGateway,
+    private readonly rateLimitService: AuthRateLimitService,
+    private readonly sessionService: AuthSessionService,
   ) {}
 
-  async startYandexLogin(dto: StartOauthLoginDto) {
+  async startYandexLogin(
+    dto: StartOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('yandex');
+    await this.rateLimitService.assertPreflight('oauth_start', {
+      clientIp: metadata.clientIp,
+    });
 
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
-    this.assertTenantAllowsClientAccess(tenant.status, true);
+    this.assertTenantAllowsClientAccess(tenant, true);
 
     const clientId = this.getRequiredConfig(
       'YANDEX_CLIENT_ID',
       'Yandex ID login is not configured.',
     );
     const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
-    const flow = await this.createAuthFlowState({
-      provider: 'yandex',
-      redirectUri,
-      tenantId: tenant.id,
-    });
+    const flow = await this.tenantContext.runAsPublicTenant(
+      tenant.id,
+      async () => {
+        await this.rateLimitService.assertTenant('oauth_start', {
+          tenantId: tenant.id,
+        });
+
+        return this.createAuthFlowState({
+          provider: 'yandex',
+          redirectUri,
+        });
+      },
+    );
     const authUrl = new URL('https://oauth.yandex.com/authorize');
 
     authUrl.searchParams.set('response_type', 'code');
@@ -143,45 +174,71 @@ export class SocialAuthService {
     };
   }
 
-  async completeYandexLogin(dto: CompleteOauthLoginDto) {
+  async completeYandexLogin(
+    dto: CompleteOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('yandex');
-
-    const flow = await this.getValidAuthFlowState(dto.state, 'yandex');
-    const profile = await this.exchangeYandexCode(flow, dto.code);
-    const result = await this.resolveOrCreateUser({
-      branchId: dto.branchId,
-      profile,
-      tenant: flow.tenant,
+    await this.rateLimitService.assertPreflight('oauth_complete', {
+      clientIp: metadata.clientIp,
+      identity: dto.state,
     });
 
-    await this.markAuthFlowStateConsumed(flow.id);
+    const flow = await this.getValidAuthFlowState(dto.state, 'yandex');
+    return this.tenantContext.runAsPublicTenant(flow.tenant.id, async () => {
+      await this.rateLimitService.assertTenant('oauth_complete', {
+        tenantId: flow.tenant.id,
+        identity: dto.state,
+      });
+      await this.claimAuthFlowStateOrThrow(flow.id, 'yandex');
+      const profile = await this.exchangeYandexCode(flow, dto.code);
+      const result = await this.resolveOrCreateUser({
+        branchId: dto.branchId,
+        profile,
+        tenant: flow.tenant,
+      });
 
-    return {
-      access_token: await this.signToken(result.user),
-      user: this.usersService.serializeUser(result.user),
-      is_new_user: result.isNewUser,
-      provider: 'yandex',
-    };
+      return {
+        ...(await this.sessionService.issueSession(result.user, metadata)),
+        user: this.usersService.serializeUser(result.user),
+        is_new_user: result.isNewUser,
+        provider: 'yandex',
+      };
+    });
   }
 
-  async startTelegramLogin(dto: StartOauthLoginDto) {
+  async startTelegramLogin(
+    dto: StartOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('telegram');
+    await this.rateLimitService.assertPreflight('oauth_start', {
+      clientIp: metadata.clientIp,
+    });
 
     const tenant = await this.tenantsService.getTenantBySlugOrThrow(
       dto.tenantSlug,
     );
-    this.assertTenantAllowsClientAccess(tenant.status, true);
+    this.assertTenantAllowsClientAccess(tenant, true);
 
     const clientId = this.getRequiredConfig(
       'TELEGRAM_CLIENT_ID',
       'Telegram login is not configured.',
     );
     const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
-    const flow = await this.createAuthFlowState({
-      provider: 'telegram',
-      redirectUri,
-      tenantId: tenant.id,
-    });
+    const flow = await this.tenantContext.runAsPublicTenant(
+      tenant.id,
+      async () => {
+        await this.rateLimitService.assertTenant('oauth_start', {
+          tenantId: tenant.id,
+        });
+
+        return this.createAuthFlowState({
+          provider: 'telegram',
+          redirectUri,
+        });
+      },
+    );
     const authUrl = new URL('https://oauth.telegram.org/auth');
 
     authUrl.searchParams.set('client_id', clientId);
@@ -202,25 +259,37 @@ export class SocialAuthService {
     };
   }
 
-  async completeTelegramLogin(dto: CompleteOauthLoginDto) {
+  async completeTelegramLogin(
+    dto: CompleteOauthLoginDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
     this.assertProviderEnabled('telegram');
-
-    const flow = await this.getValidAuthFlowState(dto.state, 'telegram');
-    const profile = await this.exchangeTelegramCode(flow, dto.code);
-    const result = await this.resolveOrCreateUser({
-      branchId: dto.branchId,
-      profile,
-      tenant: flow.tenant,
+    await this.rateLimitService.assertPreflight('oauth_complete', {
+      clientIp: metadata.clientIp,
+      identity: dto.state,
     });
 
-    await this.markAuthFlowStateConsumed(flow.id);
+    const flow = await this.getValidAuthFlowState(dto.state, 'telegram');
+    return this.tenantContext.runAsPublicTenant(flow.tenant.id, async () => {
+      await this.rateLimitService.assertTenant('oauth_complete', {
+        tenantId: flow.tenant.id,
+        identity: dto.state,
+      });
+      await this.claimAuthFlowStateOrThrow(flow.id, 'telegram');
+      const profile = await this.exchangeTelegramCode(flow, dto.code);
+      const result = await this.resolveOrCreateUser({
+        branchId: dto.branchId,
+        profile,
+        tenant: flow.tenant,
+      });
 
-    return {
-      access_token: await this.signToken(result.user),
-      user: this.usersService.serializeUser(result.user),
-      is_new_user: result.isNewUser,
-      provider: 'telegram',
-    };
+      return {
+        ...(await this.sessionService.issueSession(result.user, metadata)),
+        user: this.usersService.serializeUser(result.user),
+        is_new_user: result.isNewUser,
+        provider: 'telegram',
+      };
+    });
   }
 
   private async resolveOrCreateUser(params: {
@@ -228,23 +297,11 @@ export class SocialAuthService {
     profile: SocialProfile;
     tenant: TenantAuthContext;
   }) {
-    const existingIdentity = await this.prisma.authIdentity.findUnique({
-      where: {
-        tenantId_provider_providerUserId: {
-          tenantId: params.tenant.id,
-          provider: params.profile.provider,
-          providerUserId: params.profile.providerUserId,
-        },
-      },
-      include: {
-        user: {
-          include: {
-            branch: true,
-            tenant: true,
-          },
-        },
-      },
-    });
+    this.tenantContext.assertTenantId(params.tenant.id);
+    const existingIdentity = await this.authRepository.findIdentity(
+      params.profile.provider,
+      params.profile.providerUserId,
+    );
 
     if (existingIdentity) {
       this.assertUserCanLogin(existingIdentity.user);
@@ -283,16 +340,13 @@ export class SocialAuthService {
     if (matchedUser) {
       this.assertUserCanLogin(matchedUser);
 
-      await this.prisma.authIdentity.create({
-        data: {
-          tenantId: params.tenant.id,
-          userId: matchedUser.id,
-          provider: params.profile.provider,
-          providerUserId: params.profile.providerUserId,
-          email: params.profile.email,
-          phone: params.profile.phone,
-          profileJson: asJson(params.profile.raw),
-        },
+      await this.authRepository.createIdentity({
+        userId: matchedUser.id,
+        provider: params.profile.provider,
+        providerUserId: params.profile.providerUserId,
+        email: params.profile.email,
+        phone: params.profile.phone,
+        profileJson: asJson(params.profile.raw),
       });
 
       return {
@@ -301,7 +355,7 @@ export class SocialAuthService {
       };
     }
 
-    this.assertTenantAllowsClientRegistration(params.tenant.status);
+    this.assertTenantAllowsClientRegistration(params.tenant);
     this.assertTenantAllowsSelfRegistration(
       params.tenant.allowSelfRegistration,
     );
@@ -334,16 +388,13 @@ export class SocialAuthService {
       status: UserStatus.ACTIVE,
     });
 
-    await this.prisma.authIdentity.create({
-      data: {
-        tenantId: params.tenant.id,
-        userId: createdUser.id,
-        provider: params.profile.provider,
-        providerUserId: params.profile.providerUserId,
-        email: params.profile.email,
-        phone: params.profile.phone,
-        profileJson: asJson(params.profile.raw),
-      },
+    await this.authRepository.createIdentity({
+      userId: createdUser.id,
+      provider: params.profile.provider,
+      providerUserId: params.profile.providerUserId,
+      email: params.profile.email,
+      phone: params.profile.phone,
+      profileJson: asJson(params.profile.raw),
     });
 
     return {
@@ -700,7 +751,6 @@ export class SocialAuthService {
   private async createAuthFlowState(params: {
     provider: SocialProvider;
     redirectUri: string;
-    tenantId: string;
   }) {
     const codeVerifier = this.generateCodeVerifier();
     const expiresAt = new Date(
@@ -710,15 +760,12 @@ export class SocialAuthService {
       'base64url',
     )}`;
 
-    await this.prisma.authFlowState.create({
-      data: {
-        tenantId: params.tenantId,
-        provider: params.provider,
-        state,
-        redirectUri: params.redirectUri,
-        codeVerifier,
-        expiresAt,
-      },
+    await this.authRepository.createFlowState({
+      provider: params.provider,
+      state,
+      redirectUri: params.redirectUri,
+      codeVerifier,
+      expiresAt,
     });
 
     return {
@@ -737,19 +784,7 @@ export class SocialAuthService {
     redirectUri: string;
     tenant: TenantAuthContext;
   }> {
-    const flow = await this.prisma.authFlowState.findUnique({
-      where: { state },
-      include: {
-        tenant: {
-          select: {
-            id: true,
-            slug: true,
-            status: true,
-            allowSelfRegistration: true,
-          },
-        },
-      },
-    });
+    const flow = await this.flowSystemGateway.findByState(state);
 
     if (!flow || flow.provider !== provider || flow.consumedAt) {
       throw new BadRequestException(
@@ -769,7 +804,7 @@ export class SocialAuthService {
       );
     }
 
-    this.assertTenantAllowsClientAccess(flow.tenant.status, true);
+    this.assertTenantAllowsClientAccess(flow.tenant, true);
 
     return {
       id: flow.id,
@@ -780,76 +815,104 @@ export class SocialAuthService {
   }
 
   private async updateIdentityRecord(id: string, profile: SocialProfile) {
-    await this.prisma.authIdentity.update({
-      where: { id },
-      data: {
-        email: profile.email,
-        phone: profile.phone,
-        profileJson: asJson(profile.raw),
-      },
+    await this.authRepository.updateIdentity(id, {
+      email: profile.email,
+      phone: profile.phone,
+      profileJson: asJson(profile.raw),
     });
   }
 
-  private async markAuthFlowStateConsumed(id: string) {
-    await this.prisma.authFlowState.update({
-      where: { id },
-      data: {
-        consumedAt: new Date(),
-      },
-    });
-  }
+  private async claimAuthFlowStateOrThrow(
+    id: string,
+    provider: SocialProvider,
+  ) {
+    const claimed = await this.authRepository.claimFlowState(
+      id,
+      provider,
+      new Date(),
+    );
 
-  private async signToken(user: {
-    id: string;
-    tenantId: string | null;
-    role: string;
-  }) {
-    return this.jwtService.signAsync({
-      user_id: user.id,
-      tenant_id: user.tenantId,
-      role: user.role,
-    });
+    if (!claimed) {
+      throw new BadRequestException(
+        this.buildSocialAuthError(
+          'social_state_invalid',
+          'This social login request is no longer valid. Start again.',
+        ),
+      );
+    }
   }
 
   private assertUserCanLogin(user: {
     role: string;
     status: string;
-    tenant?: { status: string } | null;
+    tenant?: ClientAccessTenant | null;
   }) {
     if (user.status !== 'active') {
       throw new ForbiddenException('User is not active');
     }
 
     this.assertTenantAllowsClientAccess(
-      user.tenant?.status ?? 'active',
+      user.tenant ?? { status: 'active' },
       this.shouldAllowTrialTenantLogin(user.role as UserRole),
     );
   }
 
   private assertTenantAllowsClientAccess(
-    status: string,
+    tenant: ClientAccessTenant,
     allowTrial: boolean,
   ): void {
+    if (this.isUnpaidExpiredTrial(tenant) && !allowTrial) {
+      throw new ForbiddenException('Tenant is not accepting client access');
+    }
+
     const allowed = new Set<string>(['active', 'past_due']);
 
-    if (allowTrial) {
+    if (allowTrial || this.isFullTrialActive(tenant)) {
       allowed.add('trial');
     }
 
-    if (!allowed.has(status)) {
+    if (!allowed.has(tenant.status)) {
       throw new ForbiddenException('Tenant is not accepting client access');
     }
   }
 
-  private assertTenantAllowsClientRegistration(status: string): void {
-    if (status === 'trial') {
+  private assertTenantAllowsClientRegistration(
+    tenant: ClientAccessTenant,
+  ): void {
+    const expired = this.isUnpaidExpiredTrial(tenant);
+    if (
+      expired ||
+      (tenant.status === 'trial' && !this.isFullTrialActive(tenant))
+    ) {
       throw new ForbiddenException(
         this.buildSocialAuthError(
-          'trial_client_registration_disabled',
-          'Client registration is disabled while this salon is still in trial.',
+          expired
+            ? 'subscription_required'
+            : 'trial_client_registration_disabled',
+          expired
+            ? 'The trial has ended. A subscription is required.'
+            : 'Client registration is disabled while this business is still in trial.',
         ),
       );
     }
+  }
+
+  private isUnpaidExpiredTrial(tenant: ClientAccessTenant): boolean {
+    return (
+      new Set(['trial', 'past_due']).has(tenant.status) &&
+      Boolean(tenant.trialEndsAt) &&
+      tenant.trialEndsAt!.getTime() <= Date.now() &&
+      !tenant.currentPeriodEnd
+    );
+  }
+
+  private isFullTrialActive(tenant: ClientAccessTenant): boolean {
+    return (
+      tenant.status === 'trial' &&
+      tenant.trialFullAccess === true &&
+      Boolean(tenant.trialEndsAt) &&
+      tenant.trialEndsAt!.getTime() > Date.now()
+    );
   }
 
   private assertTenantAllowsSelfRegistration(
@@ -904,18 +967,20 @@ export class SocialAuthService {
   }
 
   private normalizeRedirectUri(redirectUri: string): string {
-    const normalized = String(redirectUri || '').trim();
-
-    if (!normalized) {
+    try {
+      return resolveAllowedOauthRedirectUri(
+        redirectUri,
+        this.configService.get<string>('OAUTH_ALLOWED_REDIRECT_URIS'),
+        resolveNodeEnvironment(this.configService.get<string>('NODE_ENV')),
+      );
+    } catch {
       throw new BadRequestException(
         this.buildSocialAuthError(
           'social_redirect_invalid',
-          'A redirect URI is required for social login.',
+          'The social login redirect URI is not allowed.',
         ),
       );
     }
-
-    return normalized;
   }
 
   private normalizeEmail(value: string | null): string | null {
@@ -1018,6 +1083,7 @@ export class SocialAuthService {
       | 'social_redirect_invalid'
       | 'social_state_invalid'
       | 'social_token_invalid'
+      | 'subscription_required'
       | 'trial_client_registration_disabled',
     message: string,
   ) {

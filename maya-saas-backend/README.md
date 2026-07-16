@@ -1,6 +1,6 @@
 # Maya SaaS Backend
 
-Multi-tenant white-label backend for Maya App. This service is a standalone `NestJS + Prisma + PostgreSQL` backend that lets one API and one mobile app serve many salons with isolated tenant data, branding, CRM integrations, branches, users, and plans.
+Multi-tenant white-label strangler-backend inside the existing Maya repository. It uses `NestJS + Prisma + PostgreSQL` to migrate selected capabilities safely while the working Python/PWA product remains compatible. One API and one client application can serve many service businesses with isolated data and configuration.
 
 ## Stack
 
@@ -14,11 +14,27 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
 
 ## What is included in v1
 
-- Tenant model and white-label branding settings
+- Tenant, Membership and server-side TenantContext
+- Domain/subdomain/session tenant resolution without trusting client tenant headers
+- Tenant-scoped Appointment repository and cross-tenant isolation tests
+- Feature Registry plus plan and tenant entitlement resolution
+- Tenant model and white-label BrandingConfig-compatible settings
 - Branches, users, CRM integrations, subscription plans, audit logs
 - Auth with `JWT` containing `user_id`, `tenant_id`, `role`
 - Public/mobile API:
+  - `GET /api/industry-presets`
+  - `GET /api/crm/providers`
   - `GET /api/mobile/config/:tenantSlug`
+  - `GET /api/mobile/pwa/:tenantSlug/install`
+  - `GET /api/mobile/pwa/:tenantSlug/manifest.webmanifest`
+  - `GET /api/mobile/pwa/:tenantSlug/icon/:size.png`
+  - `GET /api/onboarding/templates`
+  - `POST /api/onboarding/trial-activations`
+  - `POST /api/onboarding/ai/drafts`
+  - `POST /api/onboarding/ai/drafts/:draftId/messages`
+  - `POST /api/onboarding/ai/drafts/:draftId/read`
+  - `POST /api/onboarding/ai/drafts/:draftId/confirm`
+  - `GET /api/billing/plans`
   - `POST /api/auth/login`
   - `POST /api/auth/register`
   - `POST /api/auth/phone/start`
@@ -35,6 +51,31 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
   - `GET /api/available-slots`
   - `POST /api/appointments`
   - `GET /api/appointments/my`
+  - `POST /api/appointments/:id/cancel`
+  - `POST /api/appointments/:id/reschedule`
+  - `GET /api/customer-portal`
+  - `GET /api/customers/me/profile`
+  - `PATCH /api/customers/me/profile`
+  - `GET /api/loyalty/me`
+  - `GET /api/loyalty/me/transactions`
+  - `GET /api/features/registry`
+  - `GET /api/features/effective`
+  - `POST /api/ai/chat`
+  - `GET /api/ai/tools?surface=web`
+  - `POST /api/ai/tools/:toolName/execute`
+  - `GET /api/ai/approvals?surface=web`
+  - `POST /api/ai/approvals/:id/approve`
+  - `POST /api/ai/approvals/:id/reject`
+- Maya-managed calendar API for specialists who do not use a CRM:
+  - `GET /api/internal-calendar/setup`
+  - `POST /api/internal-calendar/services`
+  - `PATCH /api/internal-calendar/services/:serviceId`
+  - `DELETE /api/internal-calendar/services/:serviceId`
+  - `PATCH /api/internal-calendar/providers/:providerId`
+  - `GET /api/internal-calendar/providers/:providerId/schedule`
+  - `PUT /api/internal-calendar/providers/:providerId/schedule`
+  - `POST /api/internal-calendar/providers/:providerId/time-off`
+  - `DELETE /api/internal-calendar/providers/:providerId/time-off/:exceptionId`
 - Admin API:
   - `POST /api/admin/tenants`
   - `GET /api/admin/tenants`
@@ -51,14 +92,56 @@ Multi-tenant white-label backend for Maya App. This service is a standalone `Nes
   - `GET /api/admin/tenants/:id/billing/payments`
   - `POST /api/admin/tenants/:id/billing/charge`
   - `POST /api/admin/billing/run-due`
+  - `GET /api/admin/analytics/trials`
+  - `GET /api/customers`
+  - `GET /api/customers/:userId`
+  - `PATCH /api/customers/:userId/notes`
+  - `GET /api/admin/loyalty/:userId`
+  - `POST /api/admin/loyalty/:userId/adjust`
+  - `GET /api/expenses`
+  - `POST /api/expenses`
+  - `DELETE /api/expenses/:id`
+  - `GET /api/analytics/business`
+  - `GET /api/analytics/me`
 - Billing webhook:
   - `POST /api/billing/yookassa/webhook`
 - CRM adapter architecture with:
   - `MockCRMAdapter` working end-to-end
   - `YClients/Altegio adapter` for real catalog, staff, slots and appointment creation
-  - `DikidiCRMAdapter` scaffold
-  - `WhitelinesCRMAdapter` scaffold
-  - `SalonOnlineCRMAdapter` scaffold
+  - `DikidiCRMAdapter`, `WhitelinesCRMAdapter` and `SalonOnlineCRMAdapter`
+    retained as non-connectable scaffolds until real API operations and contract
+    tests exist
+
+`GET /api/features/registry` separates commercial entitlement from actual
+implementation maturity. Every feature includes `implementationStatus`,
+`availableIn` and optional `limitations`. A plan or tenant entitlement does not
+prove that a universal platform module is shipped.
+
+`GET /api/crm/providers` is the source of truth for CRM choices. Only providers
+with `connectable=true` may be stored. The backend rejects planned scaffolds with
+`error.code=crm_provider_not_available` before encrypting or persisting a token.
+
+External CRM loyalty is read-only in Maya and remains authoritative. YClients
+balances are resolved by exact normalized phone and cashback/bonus card; Maya
+never creates a local welcome balance for an external-calendar tenant. A cached
+balance is returned with `stale=true` during a temporary provider failure rather
+than being replaced with a false zero. Internal-calendar tenants use Maya's
+idempotent loyalty ledger instead.
+
+Appointments created after migration `20260715190000_operational_core` store an
+immutable price snapshot in kopecks. Operational analytics excludes cancelled
+appointments, reports legacy rows without snapshots through `data_quality`, and
+keeps every currency in a separate total.
+
+Maya AI Core is one tenant-scoped server endpoint for native, PWA, web,
+Telegram and voice. DeepSeek/OpenAI keys stay on the backend; contacts, common
+person-name phrases, links and credential-like values are redacted before a
+provider request. Model output can call only the role-filtered Tool Registry.
+Reads return minimized data; booking create/reschedule/cancellation and internal
+loyalty adjustment create immutable approval requests before execution.
+Arguments/results are encrypted and audit metadata contains no prompt, phone,
+email or CRM payload. See
+[the AI tool runtime runbook](../docs/architecture/ai-tool-runtime-runbook.md).
 
 ## Environment
 
@@ -73,14 +156,46 @@ Required variables:
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/maya_saas?schema=public"
 JWT_SECRET="change-me-in-production"
+AUTH_REFRESH_TOKEN_SECRET="change-me-to-an-independent-random-secret"
+AUTH_SESSION_METADATA_SECRET="change-me-to-another-independent-random-secret"
+AUTH_RATE_LIMIT_SECRET="change-me-to-a-third-independent-random-secret"
 CRM_ENCRYPTION_KEY="change-me-in-production"
+AI_TOOL_RETENTION_DAYS="30"
+AI_TOOL_STALE_EXECUTION_MINUTES="15"
+AI_CORE_PROVIDER="auto"
+AI_CORE_TIMEOUT_MS="15000"
+AI_CORE_MAX_TOOL_STEPS="2"
+DEEPSEEK_AI_CORE_MODEL=""
+OPENAI_AI_CORE_MODEL=""
 PORT=3000
+HOST="0.0.0.0"
 NODE_ENV="development"
+CORS_ALLOWED_ORIGINS="http://127.0.0.1:8787,http://localhost:8787,capacitor://localhost"
+SWAGGER_ENABLED="true"
 SELF_SERVE_TRIAL_SIGNUP="false"
+PWA_TENANT_INSTALL_ENABLED="false"
+PWA_PUBLIC_APP_URL="http://127.0.0.1:8787/app.html"
+PWA_PUBLIC_API_URL="http://127.0.0.1:3000/api"
+AI_ONBOARDING_PROVIDER="auto"
+DEEPSEEK_API_KEY=""
+DEEPSEEK_BASE_URL="https://api.deepseek.com"
+DEEPSEEK_AI_ONBOARDING_MODEL="deepseek-v4-flash"
+DEEPSEEK_AI_ONBOARDING_TIMEOUT_MS="12000"
+DEEPSEEK_THINKING="disabled"
+OPENAI_API_KEY=""
+OPENAI_AI_ONBOARDING_MODEL="gpt-5.4-mini"
+OPENAI_AI_ONBOARDING_TIMEOUT_MS="12000"
+TENANT_BASE_DOMAIN="malesthetic.pro"
+SEED_DEFAULT_TENANT_SLUG="malesthetic"
+SEED_DEFAULT_TENANT_NAME="Мужская Эстетика"
+SEED_PLATFORM_OWNER_PASSWORD="replace-me-before-seeding"
+SEED_DEMO_TENANT_ADMIN_PASSWORD="replace-me-before-seeding"
 YCLIENTS_BASE_URL="https://api.yclients.com/api/v1"
 YCLIENTS_PARTNER_TOKEN="change-me-in-production"
+PHONE_LOGIN_ENABLED="true"
 PHONE_AUTH_PROVIDER="auto"
 PHONE_AUTH_DEBUG="false"
+PHONE_AUTH_SECRET="change-me-to-a-fourth-independent-random-secret"
 PHONE_AUTH_CODE_TTL="300"
 PHONE_AUTH_RESEND_COOLDOWN_SECONDS="60"
 PHONE_AUTH_MAX_ATTEMPTS="5"
@@ -91,6 +206,7 @@ SMSRU_TEST="false"
 SMSRU_TIMEOUT_MS="15000"
 AUTH_FLOW_STATE_TTL_SECONDS="600"
 OAUTH_PROVIDER_TIMEOUT_MS="15000"
+OAUTH_ALLOWED_REDIRECT_URIS="http://127.0.0.1:8787/oauth-callback.html,http://localhost:8787/oauth-callback.html"
 YANDEX_LOGIN_ENABLED="false"
 YANDEX_CLIENT_ID=""
 YANDEX_CLIENT_SECRET=""
@@ -106,14 +222,25 @@ YOOKASSA_REQUEST_TIMEOUT_MS="15000"
 UPLOAD_ROOT="./uploads"
 ```
 
+Development keeps a narrow localhost/Capacitor CORS fallback. Production is fail-closed: it requires independent secrets, exact CORS origins, real SMS transport and complete settings for every enabled social provider. See [the production bootstrap hardening runbook](../docs/architecture/production-bootstrap-hardening-runbook.md) before any deployment.
+
 Phone auth delivery modes:
 
-- `SELF_SERVE_TRIAL_SIGNUP=true`: enables public self-serve trial salon signup in production
+- `PHONE_LOGIN_ENABLED=false`: keeps phone endpoints fail-closed so a production-like staging environment can start before SMS credentials are approved
+- `SELF_SERVE_TRIAL_SIGNUP=true`: enables public self-serve service-business signup in production
 
 - `PHONE_AUTH_PROVIDER=auto`: local/test defaults to debug, production requires SMS creds
 - `PHONE_AUTH_PROVIDER=debug`: always returns `debug_code`
 - `PHONE_AUTH_PROVIDER=smsru`: always uses SMS.ru and fails if creds are missing
 - `PHONE_AUTH_DEBUG=true`: emergency override that forces debug delivery in any env
+
+Email code login for existing tenant users:
+
+- `EMAIL_LOGIN_ENABLED=true`: enables `POST /api/auth/email/start` and `/verify`
+- `EMAIL_AUTH_PROVIDER=auto`: local/test uses debug unless SMTP is configured; production requires SMTP
+- `EMAIL_AUTH_PROVIDER=smtp`: sends the one-time code through `SMTP_HOST`/`SMTP_PORT`
+- `EMAIL_AUTH_DEBUG=true`: returns `debug_code` for local testing and is rejected in production
+- Email verification never creates a user; it only opens a session for an existing tenant account
 
 Social login toggles:
 
@@ -121,6 +248,42 @@ Social login toggles:
 - `TELEGRAM_LOGIN_ENABLED=true`: enables `POST /api/auth/oauth/telegram/start` and `/complete`
 - `AUTH_FLOW_STATE_TTL_SECONDS`: lifetime for OAuth `state + PKCE` records in PostgreSQL
 - `OAUTH_PROVIDER_TIMEOUT_MS`: timeout for Yandex and Telegram token exchanges
+- `OAUTH_ALLOWED_REDIRECT_URIS`: exact comma-separated callback allowlist; production callbacks must use HTTPS
+
+Conversational onboarding:
+
+- `AI_ONBOARDING_PROVIDER=auto`: select DeepSeek when its key is configured, otherwise OpenAI when its key is configured, otherwise the safe deterministic parser; a runtime model failure always falls back locally
+- `AI_ONBOARDING_PROVIDER=deepseek`: use only the DeepSeek JSON Output path; a missing or unavailable key falls back safely without silently switching providers
+- `AI_ONBOARDING_PROVIDER=openai`: use only OpenAI strict Structured Outputs
+- `AI_ONBOARDING_PROVIDER=safe`: force the deterministic, offline Russian parser
+- `DEEPSEEK_AI_ONBOARDING_MODEL`: privacy-redacted semantic interpreter; defaults to `deepseek-v4-flash`
+- `DEEPSEEK_THINKING=disabled`: keeps the short structured onboarding path fast and avoids persisting reasoning content
+- `OPENAI_AI_ONBOARDING_MODEL`: model used only for privacy-redacted semantic interpretation
+- Trial activation tokens are created only after the MAYA OS swipe and grant 10 days of full access only after tenant registration completes
+- Verified unexpired trials temporarily receive every feature implemented in the platform backend; explicit tenant denies remain authoritative and planned/current-runtime-only flags stay locked
+- `GET /api/admin/analytics/trials` counts a connected business only after that successful registration; abandoned swipes are reported separately
+
+See [the conversational onboarding and verified-trial contract](../docs/product/ai-onboarding.md).
+
+Universal MAYA AI Core:
+
+- `AI_CORE_PROVIDER=auto`: use the configured DeepSeek key, otherwise the
+  configured OpenAI key, otherwise return a deterministic no-model response
+- `AI_CORE_PROVIDER=deepseek|openai`: use only that server-side provider and
+  fail closed if it is unavailable
+- `AI_CORE_PROVIDER=safe`: never contact a model provider
+- `AI_CORE_TIMEOUT_MS`: one provider-call deadline from 1 to 60 seconds
+- `AI_CORE_MAX_TOOL_STEPS`: bounded tool loop from 1 to 3; writes still stop at
+  approval regardless of this value
+- `DEEPSEEK_AI_CORE_MODEL` and `OPENAI_AI_CORE_MODEL`: optional core-specific
+  model overrides; blank values reuse the onboarding model setting
+
+Tenant PWA installation:
+
+- `PWA_TENANT_INSTALL_ENABLED=true` exposes a manifest and normalized 180/192/512 PNG icons for each tenant.
+- Uploaded logos are fitted into a square white canvas; maskable variants use a larger safe area.
+- Production requires `PWA_PUBLIC_APP_URL` and `PWA_PUBLIC_API_URL` to be HTTPS URLs on the same origin. Route `/api` through the same public app host so browser PWA identity, scope and start URL remain valid.
+- The universal App Store application keeps the MAYA icon. Tenant logos belong to the tenant PWA; a separate native binary is required for a tenant-specific App Store icon.
 
 ## Run locally
 
@@ -142,6 +305,31 @@ Or run PostgreSQL separately and start the app directly:
 npm run prisma:migrate:deploy
 npm run start:dev
 ```
+
+## Isolated HTTPS staging
+
+The repository contains a production-mode staging stack that does not share a
+database, uploads or traffic with the current salon application:
+
+```bash
+./scripts/bootstrap-staging-env.sh staging.example.com
+./scripts/staging-up.sh
+```
+
+The stack serves the PWA and `/api` from one HTTPS origin through Caddy, keeps
+PostgreSQL private, persists uploads, applies migrations and seeds synthetic
+tenants. SMS, email, OAuth, AI providers, CRM writes and YooKassa stay disabled
+until their individual credentials and acceptance gates are approved.
+
+Create and restore a database backup with:
+
+```bash
+./scripts/staging-backup.sh
+./scripts/staging-restore.sh /absolute/path/to.dump RESTORE-STAGING
+```
+
+See [the staging readiness runbook](../docs/architecture/staging-readiness-runbook.md)
+before enabling any live provider.
 
 ## Migrations
 
@@ -168,19 +356,34 @@ npm run prisma:seed
 Seed creates:
 
 - Platform owner user
-- Demo tenant `demo-salon`
+- Default existing Maya tenant `malesthetic` with Aurora branding tokens
+- Industry-neutral demo tenant `demo-business`
 - Demo branding
 - Demo branch
 - Mock CRM integration
 - Demo subscription plan
 - Demo tenant admin user
 
-Default seed credentials:
+Runtime industry presets are available without authentication:
 
-- Platform owner: `owner@maya.local` / `ChangeMe123!`
-- Demo tenant admin: `admin@demo-salon.local` / `ChangeMe123!`
+```bash
+curl http://localhost:3000/api/industry-presets
+```
 
-Optional seed overrides:
+New tenants default to `general_service`. Self-serve onboarding can send an
+explicit `industryPresetId`, for example `solo_specialist`, `dental_clinic`,
+`auto_detailing` or `education`. The public tenant config returns the resolved
+preset and its provider/customer/booking/service/location terminology. Industry
+presets change configuration and labels; they never fork backend or frontend
+business logic.
+
+Scheduling works the same way. `Tenant.calendarSource=internal` uses Maya's own
+services, providers and availability; `external` uses the configured CRM
+adapter. Client applications continue to call the same services, staff, slots
+and appointment endpoints. See
+[the Maya-managed calendar contract](../docs/product/internal-calendar.md).
+
+Set local seed credentials explicitly before running seed. Never use local defaults in production:
 
 ```env
 SEED_PLATFORM_OWNER_EMAIL=
@@ -194,7 +397,7 @@ SEED_DEMO_TENANT_ADMIN_PASSWORD=
 Public config:
 
 ```bash
-curl http://localhost:3000/api/mobile/config/demo-salon
+curl http://localhost:3000/api/mobile/config/demo-business
 ```
 
 Login as platform owner:
@@ -210,7 +413,7 @@ Login as demo tenant admin:
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"tenantSlug":"demo-salon","email":"admin@demo-salon.local","password":"ChangeMe123!"}'
+  -d '{"tenantSlug":"demo-business","email":"admin@demo-business.local","password":"ChangeMe123!"}'
 ```
 
 Swagger docs:
@@ -218,6 +421,8 @@ Swagger docs:
 ```bash
 open http://localhost:3000/api/docs
 ```
+
+Swagger is enabled by default only outside production. Set `SWAGGER_ENABLED=true` explicitly only behind a reviewed private boundary.
 
 ## Safe appointment preview
 
@@ -242,7 +447,24 @@ What preview does:
 - returns normalized payload details
 - does not create a live appointment in YClients
 
+`POST /api/appointments` is fail-closed on the backend. It returns
+`403 live_booking_disabled` unless the tenant's effective booking mode is
+`live`. Effective live mode requires an active eligible tenant, the booking
+feature, an active non-mock CRM integration and an explicit owner request for
+live mode. The frontend flag is never the only live-write boundary.
+
 If the authenticated client already has a saved profile name and phone, `clientName` and `clientPhone` can be omitted. If the profile is incomplete, backend returns a machine-readable error so the frontend can prompt the user to complete it first.
+
+The CI HTTP smoke can also be run against a migrated and seeded test database:
+
+```bash
+npm run build
+npm run test:http
+```
+
+It starts the compiled backend on an isolated local port and verifies tenant
+fencing, phone auth, refresh rotation, preview booking, the live-write gate and
+trial registration safety.
 
 ## Phone-first client auth and profile
 
@@ -252,7 +474,7 @@ Start phone auth in safe local debug mode:
 curl -X POST http://localhost:3000/api/auth/phone/start \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "phone": "+79990000000"
   }'
 ```
@@ -263,7 +485,7 @@ Verify the code and receive a tenant client JWT:
 curl -X POST http://localhost:3000/api/auth/phone/verify \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "phone": "+79990000000",
     "code": "123456"
   }'
@@ -309,7 +531,7 @@ Start a Yandex login:
 curl -X POST http://localhost:3000/api/auth/oauth/yandex/start \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
   }'
 ```
@@ -331,7 +553,7 @@ Start a Telegram login:
 curl -X POST http://localhost:3000/api/auth/oauth/telegram/start \
   -H 'Content-Type: application/json' \
   -d '{
-    "tenantSlug": "demo-salon",
+    "tenantSlug": "demo-business",
     "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
   }'
 ```
@@ -427,7 +649,7 @@ curl -X POST http://localhost:3000/api/admin/tenants/<tenant-id>/crm \
 
 Notes:
 
-- `apiToken` is the tenant salon user token and is stored encrypted.
+- `apiToken` is the tenant CRM user token and is stored encrypted.
 - `YCLIENTS_PARTNER_TOKEN` stays platform-side only and is never returned by API.
 - `settingsJson.companyId` is required for `yclients` and `altegio`.
 - `activeMasterIds` is optional; if present, staff and aggregated slots are filtered to those masters.
@@ -474,25 +696,34 @@ What the import does:
 
 - CRM API tokens are stored only in encrypted form.
 - The mobile app never receives CRM secrets.
-- Tenant-scoped endpoints use JWT tenant context plus guards and service filters.
+- JWT validation reloads the active Membership from PostgreSQL.
+- Tenant resolution middleware creates AsyncLocalStorage TenantContext per request.
+- Tenant-scoped Appointment reads and writes inject `tenantId` from context and use tenant/client predicates.
+- Route, body and arbitrary tenant headers cannot grant tenant access.
 - `platform_owner` can manage all tenants.
 - `tenant_admin` can manage only its own tenant on allowed admin endpoints.
-- v1 keeps tenant isolation enforced in app logic; the initial SQL migration notes the future RLS hardening path for per-request PostgreSQL session settings.
+- Application-layer isolation is mandatory; PostgreSQL RLS remains a documented defence-in-depth hardening step.
+
+Detailed local, migration and verification instructions are in [the tenancy foundation runbook](../docs/architecture/tenancy-foundation-runbook.md).
 
 ## Adding a new CRM adapter
 
-1. Create a new adapter in [src/crm/adapters](/Users/stanislavmosin/Desktop/сайт и приложение/maya-saas-backend/src/crm/adapters).
-2. Implement the `CRMAdapter` contract in [src/crm/crm-adapter.interface.ts](/Users/stanislavmosin/Desktop/сайт и приложение/maya-saas-backend/src/crm/crm-adapter.interface.ts).
-3. Register the provider in [src/crm/crm-adapter.factory.ts](/Users/stanislavmosin/Desktop/сайт и приложение/maya-saas-backend/src/crm/crm-adapter.factory.ts).
+1. Create a new adapter in `src/crm/adapters`.
+2. Implement the contract in `src/crm/crm-adapter.interface.ts`.
+3. Register the provider in `src/crm/crm-adapter.factory.ts`.
 4. Keep all provider-specific business logic inside the adapter, not in controllers.
 
 ## Useful commands
 
 ```bash
 npm run build
+npm run typecheck
+npm run lint
 npm run test
 npm run prisma:generate
 npm run prisma:migrate:deploy
 npm run prisma:seed
+npm run release:preflight -- --env .env.staging --skip-db
+npm run ai:maintenance
 docker compose up --build
 ```

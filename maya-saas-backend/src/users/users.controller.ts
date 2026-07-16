@@ -15,7 +15,9 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: 'Get the current authenticated user' })
   async getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
-    const fullUser = await this.usersService.getUserOrThrow(user.userId);
+    const fullUser = user.tenantId
+      ? await this.usersService.getTenantUserOrThrow(user.userId, user.tenantId)
+      : await this.usersService.getUserOrThrow(user.userId);
     return this.usersService.serializeUser(fullUser);
   }
 
@@ -28,6 +30,10 @@ export class UsersController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateCurrentUserDto,
   ) {
-    return this.usersService.updateCurrentUserProfile(user.userId, dto);
+    return this.usersService.updateCurrentUserProfile(
+      user.userId,
+      dto,
+      user.tenantId,
+    );
   }
 }

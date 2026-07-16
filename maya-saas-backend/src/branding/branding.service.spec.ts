@@ -1,10 +1,11 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { mkdtemp, readFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { BrandingService } from './branding.service';
 
 type BrandingRecord = {
@@ -60,7 +61,12 @@ describe('BrandingService logo upload', () => {
       ),
     } as unknown as ConfigService;
 
-    return new BrandingService(prisma, configService);
+    const tenantContext = new TenantContextService();
+
+    return {
+      service: new BrandingService(prisma, configService, tenantContext),
+      tenantContext,
+    };
   };
 
   const createUpsertMock = () => {
@@ -86,15 +92,17 @@ describe('BrandingService logo upload', () => {
         upsert: upsertMock,
       },
     } as unknown as PrismaService;
-    const service = createService(prisma);
+    const { service, tenantContext } = createService(prisma);
     const fileBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
 
-    const branding = await service.uploadTenantLogo('tenant-1', {
-      buffer: fileBuffer,
-      mimetype: 'image/png',
-      originalname: 'logo.png',
-      size: fileBuffer.length,
-    });
+    const branding = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.uploadTenantLogo('tenant-1', {
+        buffer: fileBuffer,
+        mimetype: 'image/png',
+        originalname: 'logo.png',
+        size: fileBuffer.length,
+      }),
+    );
 
     expect(branding.logoUrl).toMatch(
       /^\/api\/public\/uploads\/tenant-logos\/tenant-1-[a-f0-9-]+\.png$/,
@@ -119,15 +127,17 @@ describe('BrandingService logo upload', () => {
         upsert: upsertMock,
       },
     } as unknown as PrismaService;
-    const service = createService(prisma);
+    const { service, tenantContext } = createService(prisma);
 
     await expect(
-      service.uploadTenantLogo('tenant-1', {
-        buffer: Buffer.from('<svg></svg>'),
-        mimetype: 'image/svg+xml',
-        originalname: 'logo.svg',
-        size: 11,
-      }),
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.uploadTenantLogo('tenant-1', {
+          buffer: Buffer.from('<svg></svg>'),
+          mimetype: 'image/svg+xml',
+          originalname: 'logo.svg',
+          size: 11,
+        }),
+      ),
     ).rejects.toThrow(BadRequestException);
     expect(upsertMock).not.toHaveBeenCalled();
   });
@@ -140,19 +150,96 @@ describe('BrandingService logo upload', () => {
         upsert: upsertMock,
       },
     } as unknown as PrismaService;
-    const service = createService(prisma);
+    const { service, tenantContext } = createService(prisma);
     const fileBuffer = Buffer.from([0xff, 0xd8, 0xff]);
-    const branding = await service.uploadTenantLogo('tenant-1', {
-      buffer: fileBuffer,
-      mimetype: 'image/jpeg',
-      originalname: 'logo.jpg',
-      size: fileBuffer.length,
-    });
+    const branding = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.uploadTenantLogo('tenant-1', {
+        buffer: fileBuffer,
+        mimetype: 'image/jpeg',
+        originalname: 'logo.jpg',
+        size: fileBuffer.length,
+      }),
+    );
     const filename = branding.logoUrl?.split('/').at(-1);
 
     const result = await service.readTenantLogo(filename ?? '');
 
     expect(result.contentType).toBe('image/jpeg');
     expect(result.buffer).toEqual(fileBuffer);
+  });
+
+  it('stores a tenant-scoped provider photo and returns its public URL', async () => {
+    const updateProviderMock = jest.fn().mockResolvedValue({ count: 1 });
+    const prisma = {
+      internalProvider: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'provider-1',
+          avatarUrl: null,
+        }),
+        updateMany: updateProviderMock,
+      },
+    } as unknown as PrismaService;
+    const { service, tenantContext } = createService(prisma);
+    const fileBuffer = Buffer.from([0xff, 0xd8, 0xff]);
+
+    const uploaded = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.uploadProviderAvatar('tenant-1', 'provider-1', {
+        buffer: fileBuffer,
+        mimetype: 'image/jpeg',
+        originalname: 'master.jpg',
+        size: fileBuffer.length,
+      }),
+    );
+
+    expect(uploaded.avatar_url).toMatch(
+      /^\/api\/public\/uploads\/provider-avatars\/tenant-1-provider-1-[a-f0-9-]+\.jpg$/,
+    );
+    expect(updateProviderMock).toHaveBeenCalledWith({
+      where: { id: 'provider-1', tenantId: 'tenant-1' },
+      data: { avatarUrl: uploaded.avatar_url },
+    });
+
+    const avatar = await service.readProviderAvatar(
+      uploaded.avatar_url.split('/').at(-1) ?? '',
+    );
+    expect(avatar).toEqual({
+      buffer: fileBuffer,
+      contentType: 'image/jpeg',
+    });
+  });
+
+  it('rejects a foreign tenant before reading or writing branding', async () => {
+    const findUniqueMock = jest.fn();
+    const upsertMock = jest.fn();
+    const prisma = {
+      brandingSettings: {
+        findUnique: findUniqueMock,
+        upsert: upsertMock,
+      },
+    } as unknown as PrismaService;
+    const { service, tenantContext } = createService(prisma);
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.upsertBranding('tenant-b', { appName: 'Blocked' }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(findUniqueMock).not.toHaveBeenCalled();
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
+  it('fails closed before branding writes without tenant context', async () => {
+    const upsertMock = jest.fn();
+    const prisma = {
+      brandingSettings: {
+        upsert: upsertMock,
+      },
+    } as unknown as PrismaService;
+    const { service } = createService(prisma);
+
+    await expect(
+      service.upsertBranding('tenant-1', { appName: 'Blocked' }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 });

@@ -31,4 +31,19 @@ export class BrandingController {
 
     return new StreamableFile(logo.buffer);
   }
+
+  @Public()
+  @Get('provider-avatars/:filename')
+  @Header('Cache-Control', 'public, max-age=31536000, immutable')
+  @ApiOperation({ summary: 'Read an uploaded provider profile image' })
+  async readProviderAvatar(
+    @Param('filename') filename: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const avatar = await this.brandingService.readProviderAvatar(filename);
+
+    response.type(avatar.contentType);
+
+    return new StreamableFile(avatar.buffer);
+  }
 }

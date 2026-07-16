@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
+import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
@@ -12,13 +13,14 @@ import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 @ApiTags('appointments')
 @ApiBearerAuth()
 @TenantScoped()
+@RequiresFeature('booking')
 @Controller('appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
   @ApiOperation({
-    summary: 'Create an appointment through the tenant CRM adapter',
+    summary: 'Create an appointment through the configured calendar source',
   })
   createAppointment(
     @CurrentUser() user: AuthenticatedUser,
@@ -33,8 +35,7 @@ export class AppointmentsController {
 
   @Post('preview')
   @ApiOperation({
-    summary:
-      'Validate an appointment request against the tenant CRM without creating a live booking',
+    summary: 'Validate an appointment request without creating a live booking',
   })
   previewAppointment(
     @CurrentUser() user: AuthenticatedUser,

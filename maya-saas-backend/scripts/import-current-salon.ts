@@ -8,8 +8,11 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 import {
+  MAYA_FEATURE_KEYS,
+  MAYA_FEATURE_REGISTRY,
   MAYA_PLAN_FEATURES,
   buildFeatureFlags,
+  expandFeatureKeys,
 } from '../src/common/feature-catalog';
 import {
   CurrentSalonPythonConfig,
@@ -25,7 +28,12 @@ interface CliOptions {
 }
 
 const backendRoot = resolve(__dirname, '..');
-const defaultConfigPath = resolve(backendRoot, '..', 'ai администратор', 'config.py');
+const defaultConfigPath = resolve(
+  backendRoot,
+  '..',
+  'ai администратор',
+  'config.py',
+);
 const defaultEnvPath = resolve(backendRoot, '.env');
 
 function parseArgs(argv: string[]): CliOptions {
@@ -298,12 +306,58 @@ async function upsertCurrentSalon(options: CliOptions) {
       },
     });
 
+    for (const key of MAYA_FEATURE_KEYS) {
+      const definition = MAYA_FEATURE_REGISTRY[key];
+
+      await prisma.feature.upsert({
+        where: { key },
+        update: {
+          name: definition.name,
+          description: definition.description,
+          module: definition.module,
+          status: definition.status,
+        },
+        create: {
+          key,
+          name: definition.name,
+          description: definition.description,
+          module: definition.module,
+          status: definition.status,
+        },
+      });
+    }
+
+    for (const featureKey of expandFeatureKeys([
+      ...MAYA_PLAN_FEATURES.max,
+      'ai_chatbot',
+    ])) {
+      await prisma.planEntitlement.upsert({
+        where: {
+          planId_featureKey: {
+            planId: importedPlan.id,
+            featureKey,
+          },
+        },
+        update: { enabled: true },
+        create: {
+          planId: importedPlan.id,
+          featureKey,
+          enabled: true,
+        },
+      });
+    }
+
     const tenant = await prisma.tenant.upsert({
       where: { slug: importData.tenantSlug },
       update: {
         name: importData.tenantName,
         status: 'active',
         planId: importedPlan.id,
+        industryPresetId: 'barbershop',
+        defaultCurrency: 'RUB',
+        defaultTimezone: 'Europe/Moscow',
+        defaultLocale: 'ru-RU',
+        subdomain: importData.tenantSlug,
         allowSelfRegistration: true,
       },
       create: {
@@ -311,6 +365,11 @@ async function upsertCurrentSalon(options: CliOptions) {
         slug: importData.tenantSlug,
         status: 'active',
         planId: importedPlan.id,
+        industryPresetId: 'barbershop',
+        defaultCurrency: 'RUB',
+        defaultTimezone: 'Europe/Moscow',
+        defaultLocale: 'ru-RU',
+        subdomain: importData.tenantSlug,
         allowSelfRegistration: true,
       },
     });
@@ -319,19 +378,47 @@ async function upsertCurrentSalon(options: CliOptions) {
       where: { tenantId: tenant.id },
       update: {
         appName: importData.tenantName,
-        primaryColor: '#111111',
-        secondaryColor: '#C6A86A',
-        fontFamily: 'Manrope',
-        buttonRadius: 18,
+        primaryColor: '#aaa69d',
+        secondaryColor: '#7d7970',
+        accentColor: '#aaa69d',
+        backgroundColor: '#f4f0eb',
+        surfaceColor: '#fffdf9',
+        textPrimaryColor: '#18160f',
+        textSecondaryColor: 'rgba(24,22,15,0.55)',
+        fontFamily: 'Montserrat',
+        headingFontFamily: 'Montserrat',
+        buttonRadius: 999,
+        buttonStyle: 'pill',
+        themeMode: 'system',
+        borderRadiusJson: {
+          sm: 12,
+          md: 18,
+          lg: 28,
+          full: 999,
+        } satisfies Prisma.InputJsonValue,
         themeJson,
       },
       create: {
         tenantId: tenant.id,
         appName: importData.tenantName,
-        primaryColor: '#111111',
-        secondaryColor: '#C6A86A',
-        fontFamily: 'Manrope',
-        buttonRadius: 18,
+        primaryColor: '#aaa69d',
+        secondaryColor: '#7d7970',
+        accentColor: '#aaa69d',
+        backgroundColor: '#f4f0eb',
+        surfaceColor: '#fffdf9',
+        textPrimaryColor: '#18160f',
+        textSecondaryColor: 'rgba(24,22,15,0.55)',
+        fontFamily: 'Montserrat',
+        headingFontFamily: 'Montserrat',
+        buttonRadius: 999,
+        buttonStyle: 'pill',
+        themeMode: 'system',
+        borderRadiusJson: {
+          sm: 12,
+          md: 18,
+          lg: 28,
+          full: 999,
+        } satisfies Prisma.InputJsonValue,
         themeJson,
       },
     });

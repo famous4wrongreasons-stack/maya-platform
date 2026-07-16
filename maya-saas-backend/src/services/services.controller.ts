@@ -14,7 +14,9 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List services from the tenant CRM adapter' })
+  @ApiOperation({
+    summary: 'List services from the configured calendar source',
+  })
   listServices(@CurrentUser() user: AuthenticatedUser) {
     return this.servicesService.listServices(user.tenantId!);
   }

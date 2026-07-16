@@ -2,14 +2,27 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { AppController } from './../src/app.controller';
+import { AppService } from './../src/app.service';
+import { PrismaService } from './../src/prisma/prisma.service';
+import { SystemMetricsService } from './../src/system-metrics.service';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      controllers: [AppController],
+      providers: [
+        AppService,
+        SystemMetricsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            $queryRaw: jest.fn().mockResolvedValue([{ value: 1 }]),
+          },
+        },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -27,6 +40,8 @@ describe('AppController (e2e)', () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 });

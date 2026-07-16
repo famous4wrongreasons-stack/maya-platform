@@ -1,11 +1,15 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { CalendarSource } from '../common/domain.enums';
+import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { CrmService } from '../crm/crm.service';
 import { AppointmentsService } from './appointments.service';
+import { TenantAppointmentRepository } from './tenant-appointment.repository';
 
 type BranchRecord = {
   id: string;
@@ -37,9 +41,13 @@ type AppointmentRecord = {
   clientId: string;
   branchId: string | null;
   crmExternalId: string | null;
+  source: string;
   staffExternalId: string;
   serviceIds: string[];
   startAt: Date;
+  endAt: Date;
+  blockedStartAt: Date;
+  blockedEndAt: Date;
   status: string;
   notes: string | null;
   providerPayload: unknown;
@@ -65,9 +73,13 @@ describe('AppointmentsService', () => {
       clientId: 'user-1',
       branchId: 'branch-1',
       crmExternalId: 'crm-1',
+      source: CalendarSource.EXTERNAL,
       staffExternalId: 'staff-1',
       serviceIds: ['svc-1'],
       startAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      endAt: new Date(now.getTime() + 25 * 60 * 60 * 1000),
+      blockedStartAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      blockedEndAt: new Date(now.getTime() + 25 * 60 * 60 * 1000),
       status: 'confirmed',
       notes: null,
       providerPayload: {},
@@ -167,6 +179,20 @@ describe('AppointmentsService', () => {
       status: 'canceled',
       raw: { cancelled: true },
     });
+    const createAppointmentMock: jest.MockedFunction<
+      CrmService['createAppointment']
+    > = jest.fn().mockResolvedValue({
+      external_id: 'crm-created-1',
+      status: 'confirmed',
+      start: '2026-07-05T11:00:00',
+      staff_id: 'staff-1',
+      service_ids: ['svc-1'],
+      branch_id: 'branch-1',
+      raw: { created: true },
+    });
+    const getCalendarSourceMock: jest.MockedFunction<
+      CrmService['getCalendarSource']
+    > = jest.fn().mockResolvedValue(CalendarSource.EXTERNAL);
     const rescheduleAppointmentMock: jest.MockedFunction<
       (
         tenantId: string,
@@ -193,8 +219,8 @@ describe('AppointmentsService', () => {
       service_ids: ['svc-1'],
       raw: { rescheduled: true },
     });
-    const getUserOrThrowMock: jest.MockedFunction<
-      (userId: string) => Promise<UserRecord>
+    const getTenantUserOrThrowMock: jest.MockedFunction<
+      (userId: string, tenantId: string) => Promise<UserRecord>
     > = jest.fn().mockResolvedValue({
       id: 'user-1',
       tenantId: 'tenant-1',
@@ -236,61 +262,128 @@ describe('AppointmentsService', () => {
     const crmService: Pick<
       CrmService,
       | 'cancelAppointment'
+      | 'createAppointment'
+      | 'getCalendarSource'
       | 'getAvailableSlots'
       | 'getServices'
       | 'getStaff'
       | 'rescheduleAppointment'
     > = {
       cancelAppointment: cancelAppointmentMock,
+      createAppointment: createAppointmentMock,
+      getCalendarSource: getCalendarSourceMock,
       getAvailableSlots: getAvailableSlotsMock,
       getServices: getServicesMock,
       getStaff: getStaffMock,
       rescheduleAppointment: rescheduleAppointmentMock,
     };
-    const tenantsService: Pick<TenantsService, 'assertBranchBelongsToTenant'> =
-      {
-        assertBranchBelongsToTenant: jest
-          .fn()
-          .mockResolvedValue(
-            undefined,
-          ) as TenantsService['assertBranchBelongsToTenant'],
-      };
-    const usersService: Pick<UsersService, 'getUserOrThrow' | 'serializeUser'> =
-      {
-        getUserOrThrow: getUserOrThrowMock,
-        serializeUser: serializeUserMock,
-      };
+    const assertLiveBookingEnabledMock: jest.MockedFunction<
+      (tenantId: string) => Promise<unknown>
+    > = jest.fn().mockResolvedValue({ effectiveMode: 'live' });
+    const tenantsService: Pick<
+      TenantsService,
+      'assertBranchBelongsToTenant' | 'assertLiveBookingEnabled'
+    > = {
+      assertBranchBelongsToTenant: jest
+        .fn()
+        .mockResolvedValue(
+          undefined,
+        ) as TenantsService['assertBranchBelongsToTenant'],
+      assertLiveBookingEnabled:
+        assertLiveBookingEnabledMock as TenantsService['assertLiveBookingEnabled'],
+    };
+    const usersService: Pick<
+      UsersService,
+      'getTenantUserOrThrow' | 'serializeUser'
+    > = {
+      getTenantUserOrThrow: getTenantUserOrThrowMock,
+      serializeUser: serializeUserMock,
+    };
     const auditLogService: Pick<AuditLogService, 'log'> = {
       log: auditLogMock,
     };
+    const internalCalendarService: Pick<
+      InternalCalendarService,
+      'getServiceTiming'
+    > = {
+      getServiceTiming: jest.fn().mockResolvedValue({
+        durationMinutes: 60,
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+      }),
+    };
+    const tenantContext: Pick<
+      TenantContextService,
+      'assertTenantId' | 'requireTenantId'
+    > = {
+      assertTenantId: jest.fn((tenantId: string) => tenantId),
+      requireTenantId: jest.fn(() => 'tenant-1'),
+    };
+    const appointmentRepository = new TenantAppointmentRepository(
+      prisma as PrismaService,
+      tenantContext as TenantContextService,
+    );
 
     return {
       service: new AppointmentsService(
         prisma as PrismaService,
+        tenantContext as TenantContextService,
+        appointmentRepository,
         crmService as CrmService,
+        internalCalendarService as InternalCalendarService,
         tenantsService as TenantsService,
         usersService as UsersService,
         auditLogService as AuditLogService,
       ),
       mocks: {
+        assertLiveBookingEnabledMock,
         auditLogMock,
         appointmentFindFirstMock,
         appointmentUpdateMock,
         cancelAppointmentMock,
+        createAppointmentMock,
+        getCalendarSourceMock,
         getAvailableSlotsMock,
         getServicesMock,
         getStaffMock,
-        getUserOrThrowMock,
+        getTenantUserOrThrowMock,
         rescheduleAppointmentMock,
         serializeUserMock,
       },
     };
   };
 
+  it('fails closed before contacting CRM when live booking is disabled', async () => {
+    const {
+      service,
+      mocks: { assertLiveBookingEnabledMock, getTenantUserOrThrowMock },
+    } = createService();
+
+    assertLiveBookingEnabledMock.mockRejectedValue(
+      new ForbiddenException({
+        message: 'Live booking is not enabled for this tenant.',
+        error: {
+          code: 'live_booking_disabled',
+          mode: 'preview',
+        },
+      }),
+    );
+
+    await expect(
+      service.createForClient('tenant-1', 'user-1', {
+        staffId: 'staff-1',
+        serviceIds: ['svc-1'],
+        start: '2026-07-05T11:00:00',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(assertLiveBookingEnabledMock).toHaveBeenCalledWith('tenant-1');
+    expect(getTenantUserOrThrowMock).not.toHaveBeenCalled();
+  });
+
   it('uses the stored client profile when preview payload omits name and phone', async () => {
     const {
       service,
-      mocks: { auditLogMock, getUserOrThrowMock, serializeUserMock },
+      mocks: { auditLogMock, getTenantUserOrThrowMock, serializeUserMock },
     } = createService();
 
     const result = await service.previewForClient('tenant-1', 'user-1', {
@@ -299,7 +392,7 @@ describe('AppointmentsService', () => {
       start: '2026-07-05T11:00:00',
     });
 
-    expect(getUserOrThrowMock).toHaveBeenCalledWith('user-1');
+    expect(getTenantUserOrThrowMock).toHaveBeenCalledWith('user-1', 'tenant-1');
     expect(serializeUserMock).toHaveBeenCalled();
     expect(result).toMatchObject({
       client_name: 'Станислав',
@@ -439,7 +532,13 @@ describe('AppointmentsService', () => {
     expect(cancelAppointmentMock).toHaveBeenCalledWith('tenant-1', 'crm-1');
     expect(appointmentUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'appt-1' },
+        where: {
+          id_tenantId_clientId: {
+            id: 'appt-1',
+            tenantId: 'tenant-1',
+            clientId: 'user-1',
+          },
+        },
         data: { status: 'canceled' },
       }),
     );
@@ -590,7 +689,13 @@ describe('AppointmentsService', () => {
     });
     const updateArgs = appointmentUpdateMock.mock.calls[0]?.[0] as
       | {
-          where: { id: string };
+          where: {
+            id_tenantId_clientId: {
+              id: string;
+              tenantId: string;
+              clientId: string;
+            };
+          };
           data: {
             staffExternalId: string;
             status: string;
@@ -600,7 +705,13 @@ describe('AppointmentsService', () => {
       | undefined;
 
     expect(updateArgs).toBeDefined();
-    expect(updateArgs?.where).toEqual({ id: 'appt-1' });
+    expect(updateArgs?.where).toEqual({
+      id_tenantId_clientId: {
+        id: 'appt-1',
+        tenantId: 'tenant-1',
+        clientId: 'user-1',
+      },
+    });
     expect(updateArgs?.data.staffExternalId).toBe('staff-1');
     expect(updateArgs?.data.status).toBe('confirmed');
     expect(updateArgs?.data.notes).toBe('Move later');

@@ -154,6 +154,7 @@ describe('TenantsService.createTenant', () => {
     expect(tenantCreateArgs.data.name).toBe('Barbershop Griva');
     expect(tenantCreateArgs.data.slug).toBe('griva');
     expect(tenantCreateArgs.data.status).toBe('trial');
+    expect(tenantCreateArgs.data.industryPresetId).toBe('general_service');
     expect(tenantCreateArgs.data.planId).toBeUndefined();
     expect(tenantCreateArgs.data.trialEndsAt).toEqual(expect.any(Date));
     expect(tenantCreateArgs.data.currentPeriodStart).toBeNull();

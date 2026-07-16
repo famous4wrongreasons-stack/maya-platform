@@ -120,6 +120,11 @@ Each tool definition includes:
 - timeout and retry policy;
 - fallback behavior.
 
+The first production-shaped implementation lives in
+`maya-saas-backend/src/ai-tools`: `POST /api/ai/chat` is the common model
+adapter/orchestrator and `/api/ai/tools/*` is the deterministic execution and
+approval boundary. Channels do not hold provider keys or duplicate prompts.
+
 ## Сценарии Использования
 
 ### Owner action card
@@ -214,7 +219,8 @@ Every recommendation should answer:
 
 ## Recommendations
 
-1. Build a persistent Tool Registry table/config before adding many agents.
+1. Extend the typed platform Tool Registry deliberately; persist executions and
+   approvals, not model-controlled tool definitions or conversation text.
 2. Add AI evals for every risky workflow.
 3. Use deterministic Python/NestJS for analytics and actions.
 4. Keep "agent" as logical routing until scale demands separate workers.

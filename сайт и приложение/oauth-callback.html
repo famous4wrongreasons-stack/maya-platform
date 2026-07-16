@@ -173,6 +173,9 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
       throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
     }
     dropPending(); // pending одноразовый
+    // P0-3: успешный вход = выход из незавершённого business-onboarding (клиент не должен
+    // попасть в чат «создадим ваш бизнес» из-за stale-состояния этой вкладки)
+    try { sessionStorage.removeItem('me_onb_v1'); } catch (e) {}
     $('title').textContent = 'Готово';
     $('msg').textContent = 'Возвращаемся в приложение…';
     setTimeout(function () { location.href = RET_URL; }, 400);

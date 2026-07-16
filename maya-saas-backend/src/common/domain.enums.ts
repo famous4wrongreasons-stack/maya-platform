@@ -8,10 +8,27 @@ export enum TenantStatus {
 
 export enum UserRole {
   PLATFORM_OWNER = 'platform_owner',
+  PLATFORM_ADMIN = 'platform_admin',
+  TENANT_OWNER = 'tenant_owner',
+  BUSINESS_OWNER = 'business_owner',
+  ADMINISTRATOR = 'administrator',
+  MANAGER = 'manager',
+  PROVIDER = 'provider',
+  EMPLOYEE = 'employee',
+  ACCOUNTANT = 'accountant',
+  CUSTOMER = 'customer',
+  INTEGRATION_SERVICE = 'integration_service',
+  // Compatibility roles used by the current Maya clients.
   TENANT_ADMIN = 'tenant_admin',
   BRANCH_MANAGER = 'branch_manager',
   STAFF = 'staff',
   CLIENT = 'client',
+}
+
+export enum MembershipStatus {
+  ACTIVE = 'active',
+  SUSPENDED = 'suspended',
+  INVITED = 'invited',
 }
 
 export enum UserStatus {
@@ -31,8 +48,14 @@ export enum CrmProvider {
 
 export enum CrmIntegrationStatus {
   ACTIVE = 'active',
+  PENDING_ACTIVATION = 'pending_activation',
   INACTIVE = 'inactive',
   ERROR = 'error',
+}
+
+export enum CalendarSource {
+  INTERNAL = 'internal',
+  EXTERNAL = 'external',
 }
 
 export enum AppointmentStatus {

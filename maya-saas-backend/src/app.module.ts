@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 
 import { AdminModule } from './admin/admin.module';
+import { AiToolsModule } from './ai-tools/ai-tools.module';
+import { OperationsAnalyticsModule } from './analytics/operations-analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppointmentsModule } from './appointments/appointments.module';
@@ -12,25 +14,42 @@ import { BillingModule } from './billing/billing.module';
 import { BranchesModule } from './branches/branches.module';
 import { BrandingModule } from './branding/branding.module';
 import { CrmModule } from './crm/crm.module';
+import { CustomersModule } from './customers/customers.module';
+import { CustomerPortalModule } from './customer-portal/customer-portal.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { EntitlementsModule } from './entitlements/entitlements.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { FeatureGuard } from './entitlements/feature.guard';
+import { InternalCalendarModule } from './internal-calendar/internal-calendar.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
+import { SubscriptionAccessGuard } from './guards/subscription-access.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { ServicesModule } from './services/services.module';
 import { StaffModule } from './staff/staff.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { UsersModule } from './users/users.module';
+import { TenancyModule } from './tenancy/tenancy.module';
+import { TenantResolutionMiddleware } from './tenancy/tenant-resolution.middleware';
+import { validateRuntimeConfig } from './config/runtime-config';
+import { RequestMetricsInterceptor } from './request-metrics.interceptor';
+import { SystemMetricsService } from './system-metrics.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
+      validate: validateRuntimeConfig,
     }),
     PrismaModule,
+    TenancyModule,
+    EntitlementsModule,
+    ExpensesModule,
     EncryptionModule,
     SubscriptionsModule,
     TenantsModule,
@@ -40,16 +59,27 @@ import { UsersModule } from './users/users.module';
     BrandingModule,
     BranchesModule,
     CrmModule,
+    CustomersModule,
+    CustomerPortalModule,
+    InternalCalendarModule,
+    LoyaltyModule,
     ServicesModule,
     StaffModule,
     AppointmentsModule,
     AuditLogModule,
     OnboardingModule,
     AdminModule,
+    OperationsAnalyticsModule,
+    AiToolsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    SystemMetricsService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestMetricsInterceptor,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
@@ -62,6 +92,18 @@ import { UsersModule } from './users/users.module';
       provide: APP_GUARD,
       useClass: TenantAccessGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: SubscriptionAccessGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: FeatureGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(TenantResolutionMiddleware).forRoutes('*path');
+  }
+}

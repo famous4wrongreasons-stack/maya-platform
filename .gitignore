@@ -17,6 +17,7 @@ signing-key-info.txt
 .sandbox_secret.key
 .env
 .env.*
+!.env.*.example
 
 # --- База данных и ПД (152-ФЗ) ---
 *.db
@@ -91,3 +92,4 @@ ai администратор/barber_knowledge_images/
 
 # Playwright CLI artifacts (logs/screenshots)
 .playwright-cli/
+output/playwright/

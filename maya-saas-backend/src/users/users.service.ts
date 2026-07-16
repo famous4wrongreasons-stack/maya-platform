@@ -13,6 +13,7 @@ import {
 } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
 
 type UserWithRelations = User & {
@@ -30,19 +31,58 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
     return this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         email: email.toLowerCase(),
+        memberships: {
+          some: {
+            tenantId: scopedTenantId,
+            status: 'active',
+          },
+        },
       },
       include: {
         tenant: true,
         branch: true,
       },
     });
+  }
+
+  async findEmailLoginCandidates(email: string) {
+    // Deliberately narrow cross-tenant lookup for the shared-app auth entry.
+    // Callers must not expose these records until the email code is verified.
+    const users = await this.prisma.user.findMany({
+      where: {
+        tenantId: { not: null },
+        email: email.toLowerCase(),
+        status: 'active',
+      },
+      include: {
+        tenant: true,
+        branch: true,
+        memberships: {
+          where: { status: 'active' },
+          select: { tenantId: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 25,
+    });
+
+    return users.filter(
+      (user) =>
+        Boolean(user.tenantId && user.tenant) &&
+        user.memberships.some(
+          (membership) => membership.tenantId === user.tenantId,
+        ),
+    );
   }
 
   async findPlatformOwnerByEmail(email: string) {
@@ -60,11 +100,18 @@ export class UsersService {
   }
 
   async findTenantUserByPhone(tenantId: string, phone: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: normalizedPhone,
+        memberships: {
+          some: {
+            tenantId: scopedTenantId,
+            status: 'active',
+          },
+        },
       },
       include: {
         tenant: true,
@@ -78,9 +125,15 @@ export class UsersService {
 
     const legacyUsers = await this.prisma.user.findMany({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: {
           not: null,
+        },
+        memberships: {
+          some: {
+            tenantId: scopedTenantId,
+            status: 'active',
+          },
         },
       },
       include: {
@@ -97,9 +150,12 @@ export class UsersService {
   }
 
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
+    const scopedTenantId = tenantId
+      ? this.tenantContext.assertTenantId(tenantId)
+      : null;
     const existing = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         email: email.toLowerCase(),
       },
       select: { id: true },
@@ -111,10 +167,13 @@ export class UsersService {
   }
 
   async ensurePhoneIsAvailable(tenantId: string | null, phone: string) {
+    const scopedTenantId = tenantId
+      ? this.tenantContext.assertTenantId(tenantId)
+      : null;
     const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: normalizedPhone,
       },
       select: { id: true },
@@ -126,7 +185,7 @@ export class UsersService {
 
     const legacyUsers = await this.prisma.user.findMany({
       where: {
-        tenantId,
+        tenantId: scopedTenantId,
         phone: {
           not: null,
         },
@@ -156,12 +215,15 @@ export class UsersService {
     role: string;
     status?: string;
   }) {
+    const tenantId = data.tenantId
+      ? this.tenantContext.assertTenantId(data.tenantId)
+      : null;
     const normalizedPhone = this.normalizeOptionalPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
 
     return this.prisma.user.create({
       data: {
-        tenantId: data.tenantId,
+        tenantId,
         branchId: data.branchId ?? null,
         email: data.email.toLowerCase(),
         phone: normalizedPhone,
@@ -171,6 +233,20 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: data.role,
         status: data.status ?? 'active',
+        memberships: tenantId
+          ? {
+              create: {
+                tenantId,
+                role: data.role,
+                status: data.status ?? 'active',
+                joinedAt:
+                  (data.status ?? 'active') === 'active'
+                    ? new Date()
+                    : undefined,
+                invitedAt: data.status === 'invited' ? new Date() : undefined,
+              },
+            }
+          : undefined,
       },
       include: {
         tenant: true,
@@ -187,12 +263,13 @@ export class UsersService {
     name?: string | null;
     passwordHash: string;
   }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
     const normalizedPhone = normalizeRussianPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
 
     return this.prisma.user.create({
       data: {
-        tenantId: data.tenantId,
+        tenantId,
         branchId: data.branchId ?? null,
         email: buildPhoneLoginEmail(data.tenantSlug, normalizedPhone),
         phone: normalizedPhone,
@@ -202,6 +279,14 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: UserRole.CLIENT,
         status: 'active',
+        memberships: {
+          create: {
+            tenantId,
+            role: UserRole.CLIENT,
+            status: 'active',
+            joinedAt: new Date(),
+          },
+        },
       },
       include: {
         tenant: true,
@@ -210,14 +295,23 @@ export class UsersService {
     });
   }
 
-  async updateCurrentUserProfile(userId: string, dto: UpdateCurrentUserDto) {
+  async updateCurrentUserProfile(
+    userId: string,
+    dto: UpdateCurrentUserDto,
+    expectedTenantId?: string | null,
+  ) {
     if (dto.name === undefined && dto.phone === undefined) {
       throw new BadRequestException(
         'At least one supported profile field must be provided',
       );
     }
 
-    const currentUser = await this.getUserOrThrow(userId);
+    const scopedTenantId = expectedTenantId
+      ? this.tenantContext.assertTenantId(expectedTenantId)
+      : null;
+    const currentUser = scopedTenantId
+      ? await this.getTenantUserOrThrow(userId, scopedTenantId)
+      : await this.getUserOrThrow(userId);
     const data: {
       encryptedName?: string | null;
       phone?: string | null;
@@ -244,12 +338,36 @@ export class UsersService {
 
       if (!currentUser.phone) {
         await this.ensurePhoneIsAvailable(
-          currentUser.tenantId,
+          scopedTenantId ?? currentUser.tenantId,
           normalizedPhone,
         );
       }
 
       data.phone = normalizedPhone;
+    }
+
+    if (scopedTenantId) {
+      const update = await this.prisma.user.updateMany({
+        where: {
+          id: userId,
+          tenantId: scopedTenantId,
+          memberships: {
+            some: {
+              tenantId: scopedTenantId,
+              status: 'active',
+            },
+          },
+        },
+        data,
+      });
+
+      if (update.count !== 1) {
+        throw new NotFoundException('User not found');
+      }
+
+      return this.serializeUser(
+        await this.getTenantUserOrThrow(userId, scopedTenantId),
+      );
     }
 
     const user = await this.prisma.user.update({
@@ -267,6 +385,32 @@ export class UsersService {
   async getUserOrThrow(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        tenant: true,
+        branch: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async getTenantUserOrThrow(userId: string, expectedTenantId: string) {
+    const tenantId = this.tenantContext.assertTenantId(expectedTenantId);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        tenantId,
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
+        },
+      },
       include: {
         tenant: true,
         branch: true,

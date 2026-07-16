@@ -1180,6 +1180,7 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
   try {
     localStorage.removeItem('maya_admin_handoff'); // legacy-глобальный ключ игнорируем и чистим
     var hoffNonce = (location.hash.match(/[#&]handoff=([a-z0-9]+)/i) || [])[1] || null;
+    var hoffView = (location.hash.match(/[#&]view=([a-z]+)/i) || [])[1] || null; // напр. crm из AI-онбординга
     var hoff = hoffNonce ? JSON.parse(localStorage.getItem('maya_admin_handoff:' + hoffNonce) || 'null') : null;
     // одноразовость: ключ уничтожается сразу, nonce из URL стирается
     if (hoffNonce) {
@@ -1210,7 +1211,15 @@ label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;lette
       S.session = hoff.session || null;
       S.user = hoff.user || {};
       var htid = S.user.tenant_id || S.user.tenantId || null;
-      if (htid) enter(htid);
+      if (htid) {
+        var afterEnter = function () {
+          if (!hoffView) return;
+          var nav = document.querySelector('.nav-item[data-view="' + hoffView + '"]');
+          if (nav) nav.click(); // открыть защищённый CRM-коннектор
+        };
+        var p = enter(htid);
+        if (p && p.then) p.then(afterEnter); else afterEnter();
+      }
     }
   } catch (e) {}
 })();

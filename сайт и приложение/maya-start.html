@@ -43,6 +43,10 @@ input::placeholder{color:var(--faint)}
 .btn:active{transform:scale(.985)}
 .btn[disabled]{opacity:.5;cursor:default;box-shadow:none}
 .ferr{color:var(--err);font-size:12.5px;margin-top:12px;line-height:1.5;display:none}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;font-size:13px;line-height:1.45;color:var(--dim);transition:border-color .15s}
+.opt:hover{border-color:var(--line2)}
+.opt b{color:var(--ink);font-weight:600}
+.opt input{margin-top:2px;accent-color:var(--acc);flex-shrink:0}
 .note{font-size:11.5px;color:var(--faint);margin-top:16px;text-align:center;line-height:1.6}
 /* успех */
 .done{display:none;text-align:center}
@@ -61,11 +65,15 @@ input::placeholder{color:var(--faint)}
 
 <div class="box" id="form-box">
   <h1>Создайте салон</h1>
-  <div class="sub">Минута — и у вас триал на 14 дней с demo-данными. CRM и оплату подключите позже, когда осмотритесь.</div>
-  <div class="field"><label>Название салона</label><input id="f-name" placeholder="Барбершоп «Грива»" autocomplete="organization"></div>
+  <div class="sub">Минута — и у вас триал на 14 дней. CRM и оплату подключите позже, когда осмотритесь.</div>
+  <div class="field"><label>Название проекта / бренда</label><input id="f-name" placeholder="Например: Студия Анны" autocomplete="organization"></div>
   <div class="field"><label>Адрес приложения (slug)</label><input id="f-slug" placeholder="griva"><div class="hint">Латиница и дефисы — это будет ссылка вашего приложения.</div></div>
+  <div class="field"><label>Как вы ведёте расписание?</label>
+    <label class="opt"><input type="radio" name="f-cal" value="internal" checked> <span><b>В самой MAYA</b> — я специалист: услуги, график и записи клиентов веду прямо здесь</span></label>
+    <label class="opt"><input type="radio" name="f-cal" value="external"> <span><b>Подключить CRM</b> — расписание останется во внешней системе (YClients и др.)</span></label>
+  </div>
   <div class="row2">
-    <div class="field"><label>Ваш e-mail</label><input id="f-email" type="email" placeholder="owner@salon.ru" autocomplete="email"></div>
+    <div class="field"><label>Ваш e-mail</label><input id="f-email" type="email" placeholder="you@mail.ru" autocomplete="email"></div>
     <div class="field"><label>Ваше имя</label><input id="f-oname" placeholder="Имя" autocomplete="name"></div>
   </div>
   <div class="row2">
@@ -133,6 +141,10 @@ input::placeholder{color:var(--faint)}
     var on = $('f-oname').value.trim(); if (on) body.ownerName = on;
     var ph = $('f-phone').value.replace(/\D/g, ''); if (ph.length >= 11) body.ownerPhone = '+' + (ph[0] === '8' ? '7' + ph.slice(1) : ph);
     var pw = $('f-pass').value; if (pw) body.password = pw;
+    var calSrc = (document.querySelector('input[name="f-cal"]:checked') || {}).value || 'internal';
+    body.calendarSource = calSrc;
+    // индивидуальный специалист без CRM: соло-пресет, API-токен не запрашиваем
+    if (calSrc === 'internal') body.industryPresetId = 'solo_specialist';
     body.branchName = name;
     body.branchTimezone = 'Europe/Moscow';
     this.disabled = true;
@@ -181,9 +193,13 @@ input::placeholder{color:var(--faint)}
       'E-mail: <code>' + esc(email) + '</code><br>' +
       (tp ? 'Пароль: <code>' + esc(tp) + '</code> <span style="color:var(--faint)">· показывается один раз</span>'
           : 'Пароль: тот, что вы задали.') +
-      '<br>Салон (slug): <code>' + esc(t.slug || '') + '</code>';
+      '<br>Проект (slug): <code>' + esc(t.slug || '') + '</code>';
     var appUrl = location.origin + '/app.html?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(API) + '&booking_tenant=' + encodeURIComponent(t.slug || '');
-    $('d-applink').innerHTML = 'Приложение вашего салона: <a href="' + appUrl + '" target="_blank" rel="noopener" style="color:var(--acc-hi)">открыть предпросмотр →</a>';
+    $('d-applink').innerHTML = 'Ваше приложение: <a href="' + appUrl + '" target="_blank" rel="noopener" style="color:var(--acc-hi)">открыть предпросмотр →</a>';
+    var calChoice = (document.querySelector('input[name="f-cal"]:checked') || {}).value || 'internal';
+    if (calChoice === 'internal') {
+      $('d-applink').innerHTML += '<br>Услуги и график настраиваются в приложении: <b>Кабинет → Календарь MAYA</b>. Стартовый график Пн–Пт 09:00–18:00 уже создан.';
+    }
   }
 
   $('d-admin').addEventListener('click', function () {

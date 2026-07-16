@@ -3,14 +3,15 @@ import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
   @ApiPropertyOptional({
-    description: 'Tenant slug for salon users. Omit for platform owner login.',
-    example: 'demo-salon',
+    description:
+      'Tenant slug for business users. Omit for platform owner login.',
+    example: 'demo-business',
   })
   @IsOptional()
   @IsString()
   tenantSlug?: string;
 
-  @ApiProperty({ example: 'admin@demo-salon.local' })
+  @ApiProperty({ example: 'admin@demo-business.local' })
   @IsEmail()
   email!: string;
 

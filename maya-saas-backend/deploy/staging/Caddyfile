@@ -1,0 +1,33 @@
+{$STAGING_HOST} {
+  encode zstd gzip
+
+  log {
+    output stdout
+    format json
+  }
+
+  @api path /api/*
+  handle @api {
+    reverse_proxy backend:3000
+  }
+
+  @pwaIcons path /icon-*.png /apple-touch-icon.png /manifest.json
+  handle @pwaIcons {
+    root * /srv/pwa-icons
+    header Cache-Control "public, max-age=300, stale-while-revalidate=3600"
+    file_server
+  }
+
+  handle {
+    root * /srv/maya
+    try_files {path} /app.html
+    header {
+      -Server
+      Referrer-Policy "strict-origin-when-cross-origin"
+      X-Content-Type-Options "nosniff"
+      X-Frame-Options "DENY"
+      Permissions-Policy "camera=(self), microphone=(self), geolocation=(self)"
+    }
+    file_server
+  }
+}

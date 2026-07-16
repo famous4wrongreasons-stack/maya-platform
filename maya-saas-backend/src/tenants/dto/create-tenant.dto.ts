@@ -3,20 +3,22 @@ import {
   IsDateString,
   IsBoolean,
   IsEnum,
+  IsIn,
   IsOptional,
   IsString,
   Matches,
   ValidateIf,
 } from 'class-validator';
 
-import { TenantStatus } from '../../common/domain.enums';
+import { CalendarSource, TenantStatus } from '../../common/domain.enums';
+import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 export class CreateTenantDto {
-  @ApiProperty({ example: 'Demo Salon' })
+  @ApiProperty({ example: 'Studio Vector' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'demo-salon' })
+  @ApiProperty({ example: 'studio-vector' })
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
   slug!: string;
@@ -30,6 +32,50 @@ export class CreateTenantDto {
   @IsOptional()
   @IsString()
   planId?: string;
+
+  @ApiPropertyOptional({
+    enum: INDUSTRY_PRESET_IDS,
+    example: 'general_service',
+    default: 'general_service',
+  })
+  @IsOptional()
+  @IsIn(INDUSTRY_PRESET_IDS)
+  industryPresetId?: string;
+
+  @ApiPropertyOptional({
+    enum: CalendarSource,
+    default: CalendarSource.EXTERNAL,
+  })
+  @IsOptional()
+  @IsEnum(CalendarSource)
+  calendarSource?: CalendarSource;
+
+  @ApiPropertyOptional({ example: 'RUB', default: 'RUB' })
+  @IsOptional()
+  @Matches(/^[A-Z]{3}$/)
+  defaultCurrency?: string;
+
+  @ApiPropertyOptional({ example: 'Europe/Moscow' })
+  @IsOptional()
+  @IsString()
+  defaultTimezone?: string;
+
+  @ApiPropertyOptional({ example: 'ru-RU' })
+  @IsOptional()
+  @IsString()
+  defaultLocale?: string;
+
+  @ApiPropertyOptional({ example: 'booking.example.com' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9.-]+$/)
+  customDomain?: string;
+
+  @ApiPropertyOptional({ example: 'studio-vector' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  subdomain?: string;
 
   @ApiPropertyOptional({
     example: '2026-07-19T12:00:00.000Z',
@@ -65,6 +111,15 @@ export class CreateTenantDto {
   @IsOptional()
   @IsString()
   billingMethodId?: string;
+
+  @ApiPropertyOptional({
+    default: false,
+    description:
+      'Enables client-facing features during a verified self-serve trial.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  trialFullAccess?: boolean;
 
   @ApiPropertyOptional({ default: true })
   @IsOptional()

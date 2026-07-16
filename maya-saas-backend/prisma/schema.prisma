@@ -12,85 +12,164 @@ datasource db {
 }
 
 model Tenant {
-  id                    String            @id @default(cuid())
-  name                  String
-  slug                  String            @unique
-  status                String            @default("trial")
-  planId                String?
-  trialEndsAt           DateTime?
-  currentPeriodStart    DateTime?
-  currentPeriodEnd      DateTime?
-  billingMethodId       String?
-  allowSelfRegistration Boolean           @default(true)
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  plan                  SubscriptionPlan? @relation(fields: [planId], references: [id])
-  brandingSettings      BrandingSettings?
-  branches              Branch[]
-  users                 User[]
-  crmIntegration        CrmIntegration?
-  auditLogs             AuditLog[]
-  appointments          Appointment[]
-  phoneAuthCodes        PhoneAuthCode[]
-  authIdentities        AuthIdentity[]
-  authFlowStates        AuthFlowState[]
-  billingPayments       BillingPayment[]
+  id                     String                          @id @default(cuid())
+  name                   String
+  slug                   String                          @unique
+  status                 String                          @default("trial")
+  planId                 String?
+  industryPresetId       String?
+  calendarSource         String                          @default("external")
+  defaultCurrency        String                          @default("RUB")
+  defaultTimezone        String                          @default("Europe/Moscow")
+  defaultLocale          String                          @default("ru-RU")
+  customDomain           String?                         @unique
+  subdomain              String?                         @unique
+  trialEndsAt            DateTime?
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  billingMethodId        String?
+  trialFullAccess        Boolean                         @default(false)
+  allowSelfRegistration  Boolean                         @default(true)
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+  plan                   SubscriptionPlan?               @relation(fields: [planId], references: [id])
+  brandingSettings       BrandingSettings?
+  branches               Branch[]
+  users                  User[]
+  crmIntegration         CrmIntegration?
+  auditLogs              AuditLog[]
+  appointments           Appointment[]
+  phoneAuthCodes         PhoneAuthCode[]
+  emailAuthCodes         EmailAuthCode[]
+  authIdentities         AuthIdentity[]
+  authFlowStates         AuthFlowState[]
+  authSessions           AuthSession[]
+  authRateLimitBuckets   AuthRateLimitBucket[]
+  billingPayments        BillingPayment[]
+  memberships            Membership[]
+  entitlements           TenantEntitlement[]
+  internalServices       InternalService[]
+  internalProviders      InternalProvider[]
+  availabilityRules      InternalAvailabilityRule[]
+  availabilityExceptions InternalAvailabilityException[]
+  aiOnboardingDrafts     AiOnboardingDraft[]             @relation("AiOnboardingConfirmedTenant")
+  trialActivation        TrialActivation?
+  customerProfiles       CustomerProfile[]
+  loyaltyAccounts        LoyaltyAccount[]
+  loyaltyTransactions    LoyaltyTransaction[]
+  expenses               Expense[]
+  aiApprovalRequests     AiApprovalRequest[]
+  aiToolExecutions       AiToolExecution[]
 }
 
+/// Persisted white-label BrandingConfig. The database model name is retained
+/// during the compatibility phase so existing Prisma calls keep working.
 model BrandingSettings {
-  id                 String   @id @default(cuid())
-  tenantId           String   @unique
-  logoUrl            String?
-  appName            String?
-  primaryColor       String?
-  secondaryColor     String?
-  backgroundImageUrl String?
-  fontFamily         String?
-  buttonRadius       Int?
-  themeJson          Json?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  tenantId             String   @unique
+  logoUrl              String?
+  iconUrl              String?
+  faviconUrl           String?
+  appName              String?
+  primaryColor         String?
+  secondaryColor       String?
+  accentColor          String?
+  backgroundColor      String?
+  surfaceColor         String?
+  textPrimaryColor     String?
+  textSecondaryColor   String?
+  backgroundImageUrl   String?
+  fontFamily           String?
+  headingFontFamily    String?
+  buttonRadius         Int?
+  buttonStyle          String?
+  themeMode            String   @default("system")
+  borderRadiusJson     Json?
+  contactDetailsJson   Json?
+  socialLinksJson      Json?
+  mapLinksJson         Json?
+  legalLinksJson       Json?
+  splashScreenJson     Json?
+  onboardingJson       Json?
+  storeListingJson     Json?
+  emailBrandingJson    Json?
+  telegramBrandingJson Json?
+  themeJson            Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model Branch {
-  id           String        @id @default(cuid())
-  tenantId     String
-  name         String
-  address      String?
-  phone        String?
-  timezone     String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  users        User[]
-  appointments Appointment[]
+  id                String             @id @default(cuid())
+  tenantId          String
+  name              String
+  address           String?
+  phone             String?
+  timezone          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users             User[]
+  appointments      Appointment[]
+  internalProviders InternalProvider[]
+  expenses          Expense[]
 
+  @@unique([id, tenantId])
   @@index([tenantId])
 }
 
 model User {
-  id             String         @id @default(cuid())
-  tenantId       String?
-  branchId       String?
-  email          String
-  phone          String?
-  encryptedName  String?
-  passwordHash   String
-  role           String
-  status         String         @default("active")
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  tenant         Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch         Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  auditLogs      AuditLog[]
-  appointments   Appointment[]  @relation("ClientAppointments")
-  authIdentities AuthIdentity[]
+  id                   String               @id @default(cuid())
+  tenantId             String?
+  branchId             String?
+  email                String
+  phone                String?
+  encryptedName        String?
+  passwordHash         String
+  role                 String
+  status               String               @default("active")
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  tenant               Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch               Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  auditLogs            AuditLog[]
+  appointments         Appointment[]        @relation("ClientAppointments")
+  authIdentities       AuthIdentity[]
+  authSessions         AuthSession[]
+  memberships          Membership[]
+  internalProviders    InternalProvider[]
+  customerProfile      CustomerProfile?
+  loyaltyAccount       LoyaltyAccount?
+  loyaltyTransactions  LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
+  createdExpenses      Expense[]            @relation("ExpenseCreator")
+  requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
+  decidedAiApprovals   AiApprovalRequest[]  @relation("AiApprovalDecider")
+  aiToolExecutions     AiToolExecution[]    @relation("AiToolExecutionActor")
 
+  @@unique([id, tenantId])
   @@unique([tenantId, email])
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+}
+
+model Membership {
+  id        String    @id @default(cuid())
+  tenantId  String
+  userId    String
+  role      String
+  status    String    @default("active")
+  invitedAt DateTime?
+  joinedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([tenantId, status])
+  @@index([userId, status])
 }
 
 model AuthIdentity {
@@ -105,8 +184,9 @@ model AuthIdentity {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
 
+  @@unique([id, tenantId])
   @@unique([tenantId, provider, providerUserId])
   @@index([userId])
   @@index([tenantId, provider])
@@ -125,7 +205,10 @@ model AuthFlowState {
   updatedAt    DateTime  @updatedAt
   tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([id, tenantId])
   @@index([tenantId, provider, expiresAt])
+  @@index([expiresAt])
+  @@index([consumedAt])
 }
 
 model PhoneAuthCode {
@@ -140,35 +223,444 @@ model PhoneAuthCode {
   updatedAt  DateTime  @updatedAt
   tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([id, tenantId])
   @@unique([tenantId, phone])
   @@index([tenantId, expiresAt])
+  @@index([expiresAt])
+  @@index([consumedAt])
+}
+
+model EmailAuthCode {
+  id         String    @id @default(cuid())
+  tenantId   String
+  email      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, email])
+  @@index([tenantId, expiresAt])
+  @@index([expiresAt])
+  @@index([consumedAt])
+}
+
+model AuthSession {
+  id            String             @id @default(cuid())
+  tenantId      String?
+  userId        String
+  deviceLabel   String
+  ipHash        String?
+  expiresAt     DateTime
+  lastUsedAt    DateTime           @default(now())
+  revokedAt     DateTime?
+  revokeReason  String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  tenant        Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens AuthRefreshToken[]
+
+  @@index([tenantId, userId, revokedAt])
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+model AuthRefreshToken {
+  id         String      @id
+  sessionId  String
+  tokenHash  String      @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime    @default(now())
+  session    AuthSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([expiresAt])
+}
+
+model AuthRateLimitBucket {
+  id              String   @id @default(cuid())
+  tenantId        String?
+  policyKey       String
+  action          String
+  scope           String
+  subjectHash     String
+  attempts        Int      @default(0)
+  windowStartedAt DateTime
+  windowEndsAt    DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([policyKey, subjectHash])
+  @@index([tenantId, action])
+  @@index([windowEndsAt])
 }
 
 model CrmIntegration {
-  id                String   @id @default(cuid())
-  tenantId          String   @unique
+  id                String    @id @default(cuid())
+  tenantId          String    @unique
   provider          String
   encryptedApiToken String
   baseUrl           String?
-  status            String   @default("active")
+  status            String    @default("active")
   settingsJson      Json?
+  verifiedAt        DateTime?
+  lastCheckedAt     DateTime?
+  lastSyncAt        DateTime?
+  lastErrorCode     String?
+  lastErrorAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model InternalService {
+  id                  String                    @id @default(cuid())
+  tenantId            String
+  name                String
+  description         String?
+  price               Int
+  currency            String                    @default("RUB")
+  durationMinutes     Int
+  bufferBeforeMinutes Int                       @default(0)
+  bufferAfterMinutes  Int                       @default(0)
+  active              Boolean                   @default(true)
+  sortOrder           Int                       @default(0)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  tenant              Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  providers           InternalProviderService[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, active, sortOrder])
+}
+
+model InternalProvider {
+  id                  String                          @id @default(cuid())
+  tenantId            String
+  userId              String?
+  branchId            String?
+  displayName         String
+  title               String?
+  specialization      String?
+  avatarUrl           String?
+  active              Boolean                         @default(true)
+  slotIntervalMinutes Int                             @default(30)
+  createdAt           DateTime                        @default(now())
+  updatedAt           DateTime                        @updatedAt
+  tenant              Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                User?                           @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  branch              Branch?                         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  services            InternalProviderService[]
+  availabilityRules   InternalAvailabilityRule[]
+  exceptions          InternalAvailabilityException[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, active])
+  @@index([branchId])
+}
+
+model AiOnboardingDraft {
+  id                   String           @id @default(cuid())
+  draftTokenHash       String           @unique
+  status               String           @default("draft")
+  templateId           String
+  blueprintJson        Json
+  missingFieldsJson    Json
+  inputDigest          String?
+  lastAssistantMessage String?
+  quickRepliesJson     Json             @default("[]")
+  lastConfidence       Float?
+  needsClarification   Boolean          @default(false)
+  interpreterSource    String           @default("safe_fallback")
+  turnCount            Int              @default(1)
+  expiresAt            DateTime
+  confirmedTenantId    String?
+  trialActivationId    String?          @unique
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  confirmedTenant      Tenant?          @relation("AiOnboardingConfirmedTenant", fields: [confirmedTenantId], references: [id], onDelete: SetNull)
+  trialActivation      TrialActivation? @relation(fields: [trialActivationId], references: [id], onDelete: SetNull)
+
+  @@index([status, expiresAt])
+  @@index([confirmedTenantId])
+}
+
+model TrialActivation {
+  id                  String             @id @default(cuid())
+  activationTokenHash String             @unique
+  status              String             @default("pending")
+  source              String             @default("maya_os")
+  expiresAt           DateTime
+  completedAt         DateTime?
+  tenantId            String?            @unique
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  tenant              Tenant?            @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  draft               AiOnboardingDraft?
+
+  @@index([status, expiresAt])
+  @@index([completedAt])
+}
+
+model CustomerProfile {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  userId             String
+  preferredLocale    String?
+  privacyConsentAt   DateTime?
+  marketingConsentAt DateTime?
+  encryptedNotes     String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([tenantId, updatedAt])
+}
+
+model LoyaltyAccount {
+  id                String               @id @default(cuid())
+  tenantId          String
+  userId            String
+  source            String               @default("internal")
+  balance           Int                  @default(0)
+  externalReference String?
+  syncedAt          DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user              User                 @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  transactions      LoyaltyTransaction[]
+
+  @@unique([id, tenantId])
+  @@unique([userId, tenantId])
+  @@index([tenantId, source, updatedAt])
+}
+
+model LoyaltyTransaction {
+  id              String         @id @default(cuid())
+  tenantId        String
+  accountId       String
+  actorUserId     String?
+  actorTenantId   String?
+  kind            String
+  delta           Int
+  balanceAfter    Int
+  encryptedReason String
+  idempotencyKey  String
+  externalRef     String?
+  createdAt       DateTime       @default(now())
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account         LoyaltyAccount @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  actor           User?          @relation("LoyaltyTransactionActor", fields: [actorUserId, actorTenantId], references: [id, tenantId], onDelete: SetNull)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, accountId, createdAt])
+  @@index([tenantId, actorUserId, createdAt])
+}
+
+model Expense {
+  id                String   @id @default(cuid())
+  tenantId          String
+  branchId          String?
+  branchTenantId    String?
+  createdById       String?
+  createdByTenantId String?
+  category          String
+  amountKopecks     Int
+  currency          String   @default("RUB")
+  occurredAt        DateTime
+  encryptedNote     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch            Branch?  @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)
+  createdBy         User?    @relation("ExpenseCreator", fields: [createdById, createdByTenantId], references: [id, tenantId], onDelete: SetNull)
+
+  @@unique([id, tenantId])
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, branchId, occurredAt])
+}
+
+model AiApprovalRequest {
+  id                  String           @id @default(cuid())
+  tenantId            String
+  requestedByUserId   String?
+  requestedByTenantId String?
+  decidedByUserId     String?
+  decidedByTenantId   String?
+  toolName            String
+  surface             String
+  riskTier            String
+  approvalPolicy      String
+  status              String           @default("pending")
+  summary             String
+  payloadHash         String
+  payloadPreviewJson  Json
+  encryptedArguments  String
+  idempotencyKey      String
+  expiresAt           DateTime
+  decidedAt           DateTime?
+  executedAt          DateTime?
+  errorCode           String?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  tenant              Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  requestedBy         User?            @relation("AiApprovalRequester", fields: [requestedByUserId, requestedByTenantId], references: [id, tenantId], onDelete: SetNull)
+  decidedBy           User?            @relation("AiApprovalDecider", fields: [decidedByUserId, decidedByTenantId], references: [id, tenantId], onDelete: SetNull)
+  execution           AiToolExecution?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, expiresAt])
+  @@index([tenantId, requestedByUserId, createdAt])
+}
+
+model AiToolExecution {
+  id                String             @id @default(cuid())
+  tenantId          String
+  actorUserId       String?
+  actorTenantId     String?
+  approvalRequestId String?
+  approvalTenantId  String?
+  toolName          String
+  surface           String
+  riskTier          String
+  status            String
+  inputHash         String
+  idempotencyKey    String
+  encryptedResult   String?
+  errorCode         String?
+  startedAt         DateTime           @default(now())
+  completedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actor             User?              @relation("AiToolExecutionActor", fields: [actorUserId, actorTenantId], references: [id, tenantId], onDelete: SetNull)
+  approvalRequest   AiApprovalRequest? @relation(fields: [approvalRequestId, approvalTenantId], references: [id, tenantId], onDelete: SetNull)
+
+  @@unique([approvalRequestId, approvalTenantId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, toolName, createdAt])
+  @@index([tenantId, actorUserId, createdAt])
+  @@index([tenantId, status, startedAt])
+}
+
+model InternalProviderService {
+  tenantId   String
+  providerId String
+  serviceId  String
+  active     Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  provider   InternalProvider @relation(fields: [providerId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  service    InternalService  @relation(fields: [serviceId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@id([tenantId, providerId, serviceId])
+  @@index([tenantId, serviceId, active])
+}
+
+model InternalAvailabilityRule {
+  id          String           @id @default(cuid())
+  tenantId    String
+  providerId  String
+  weekday     Int
+  startMinute Int
+  endMinute   Int
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider    InternalProvider @relation(fields: [providerId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, providerId, weekday, startMinute, endMinute])
+  @@index([tenantId, providerId, weekday, active])
+}
+
+model InternalAvailabilityException {
+  id         String           @id @default(cuid())
+  tenantId   String
+  providerId String
+  startAt    DateTime
+  endAt      DateTime
+  kind       String           @default("unavailable")
+  note       String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider   InternalProvider @relation(fields: [providerId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@index([tenantId, providerId, startAt, endAt])
 }
 
 model SubscriptionPlan {
-  id                  String           @id @default(cuid())
-  name                String           @unique
+  id                  String            @id @default(cuid())
+  name                String            @unique
   priceMonthly        Int
   maxBranches         Int
   maxStaff            Int
   featuresJson        Json?
-  isWhiteLabelEnabled Boolean          @default(false)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  isWhiteLabelEnabled Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   tenants             Tenant[]
   billingPayments     BillingPayment[]
+  entitlements        PlanEntitlement[]
+}
+
+model Feature {
+  key                String              @id
+  name               String
+  description        String?
+  module             String
+  status             String              @default("active")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  planEntitlements   PlanEntitlement[]
+  tenantEntitlements TenantEntitlement[]
+}
+
+model PlanEntitlement {
+  id         String           @id @default(cuid())
+  planId     String
+  featureKey String
+  enabled    Boolean          @default(true)
+  configJson Json?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  plan       SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature    Feature          @relation(fields: [featureKey], references: [key], onDelete: Cascade)
+
+  @@unique([planId, featureKey])
+  @@index([featureKey, enabled])
+}
+
+model TenantEntitlement {
+  id         String    @id @default(cuid())
+  tenantId   String
+  featureKey String
+  enabled    Boolean
+  configJson Json?
+  reason     String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  feature    Feature   @relation(fields: [featureKey], references: [key], onDelete: Cascade)
+
+  @@unique([tenantId, featureKey])
+  @@index([tenantId, enabled, expiresAt])
 }
 
 model BillingPayment {
@@ -192,6 +684,7 @@ model BillingPayment {
   tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan              SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
 
+  @@unique([id, tenantId])
   @@index([tenantId, createdAt])
   @@index([tenantId, status])
   @@index([provider, providerPaymentId])
@@ -214,24 +707,32 @@ model AuditLog {
 }
 
 model Appointment {
-  id              String   @id @default(cuid())
-  tenantId        String
-  clientId        String
-  branchId        String?
-  crmExternalId   String?
-  staffExternalId String
-  serviceIds      Json
-  startAt         DateTime
-  status          String   @default("confirmed")
-  notes           String?
-  providerPayload Json?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  client          User     @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
-  branch          Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  id                String   @id @default(cuid())
+  tenantId          String
+  clientId          String
+  branchId          String?
+  crmExternalId     String?
+  source            String   @default("external")
+  staffExternalId   String
+  serviceIds        Json
+  startAt           DateTime
+  endAt             DateTime
+  blockedStartAt    DateTime
+  blockedEndAt      DateTime
+  status            String   @default("confirmed")
+  notes             String?
+  totalPriceKopecks Int?
+  currency          String   @default("RUB")
+  providerPayload   Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client            User     @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+  branch            Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
+  @@unique([id, tenantId, clientId])
   @@index([tenantId])
   @@index([clientId])
   @@index([branchId])
+  @@index([tenantId, staffExternalId, startAt])
 }

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Matches } from 'class-validator';
 
 export class StartPhoneAuthDto {
-  @ApiProperty({ example: 'demo-salon' })
+  @ApiProperty({ example: 'demo-business' })
   @IsString()
   tenantSlug!: string;
 

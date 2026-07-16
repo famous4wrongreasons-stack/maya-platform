@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 
 export class VerifyPhoneAuthDto {
-  @ApiProperty({ example: 'demo-salon' })
+  @ApiProperty({ example: 'demo-business' })
   @IsString()
   tenantSlug!: string;
 

@@ -10,7 +10,8 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-import { TenantStatus } from '../../common/domain.enums';
+import { CalendarSource, TenantStatus } from '../../common/domain.enums';
+import { INDUSTRY_PRESET_IDS } from '../../common/industry-presets';
 
 const BOOKING_MODE_VALUES = ['preview', 'live'] as const;
 
@@ -35,6 +36,46 @@ export class UpdateTenantDto {
   @IsOptional()
   @IsString()
   planId?: string;
+
+  @ApiPropertyOptional({
+    enum: INDUSTRY_PRESET_IDS,
+    example: 'general_service',
+  })
+  @IsOptional()
+  @IsIn(INDUSTRY_PRESET_IDS)
+  industryPresetId?: string;
+
+  @ApiPropertyOptional({ enum: CalendarSource })
+  @IsOptional()
+  @IsEnum(CalendarSource)
+  calendarSource?: CalendarSource;
+
+  @ApiPropertyOptional({ example: 'RUB' })
+  @IsOptional()
+  @Matches(/^[A-Z]{3}$/)
+  defaultCurrency?: string;
+
+  @ApiPropertyOptional({ example: 'Europe/Moscow' })
+  @IsOptional()
+  @IsString()
+  defaultTimezone?: string;
+
+  @ApiPropertyOptional({ example: 'ru-RU' })
+  @IsOptional()
+  @IsString()
+  defaultLocale?: string;
+
+  @ApiPropertyOptional({ example: 'booking.example.com' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9.-]+$/)
+  customDomain?: string;
+
+  @ApiPropertyOptional({ example: 'studio-vector' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  subdomain?: string;
 
   @ApiPropertyOptional({
     example: '2026-07-19T12:00:00.000Z',
@@ -83,7 +124,7 @@ export class UpdateTenantDto {
   @ApiPropertyOptional({
     enum: BOOKING_MODE_VALUES,
     description:
-      'Requested booking mode for the client app. Effective live mode still requires an active tenant and a real active CRM integration.',
+      'Requested booking mode for the client app. Effective live mode still requires an active tenant and a ready configured calendar source.',
   })
   @IsOptional()
   @IsIn(BOOKING_MODE_VALUES)
