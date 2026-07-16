@@ -112,6 +112,17 @@ class _ToolUse:
     name: str
     input: dict
 
+
+@dataclass(frozen=True)
+class _GroundingRequirement:
+    domain: str
+    tools: frozenset[str]
+    fallback: str = (
+        "Не смогла подтвердить данные в системе. Я не буду ничего додумывать — "
+        "попробуйте ещё раз через минуту."
+    )
+    strict_numbers: bool = True
+
 # ─── Инструменты (tools) для AI ─────────────────────────────────────────────
 #
 # ВАЖНО: ни один инструмент не принимает и не возвращает персональные данные
@@ -1011,7 +1022,7 @@ _CLIENT_MANAGE_CONTEXT_RE = re.compile(
     re.IGNORECASE,
 )
 _CLIENT_LOYALTY_CONTEXT_RE = re.compile(
-    r"\b(балл|бонус|лояльн|скидк|промокод|день\s+рожд)\w*",
+    r"\b(балл|баланс|бонус|лояльн|скидк|промокод|день\s+рожд)\w*",
     re.IGNORECASE,
 )
 _CLIENT_SALES_CONTEXT_RE = re.compile(
@@ -3298,6 +3309,247 @@ def _message_text(msg: dict | None) -> str:
     return ""
 
 
+_MAX_AI_TOOL_ROUNDS = 8
+_MAX_GROUNDING_RETRIES = 1
+_GROUNDING_PLANNING_RE = re.compile(
+    r"\b(почему|как\s+(?:поднять|увеличить|вырастить|улучшить)|"
+    r"план\w*|прогноз\w*|цель\w*|добить|увелич\w*|поднять|"
+    r"выраст\w*|улучш\w*|привлеч\w*|заполн\w*|теря\w*)\b",
+    re.IGNORECASE,
+)
+_GROUNDING_FACT_RE = re.compile(
+    r"\b(сколько|какая|какой|покажи|показать|дай|посчитай|есть\s+ли|"
+    r"когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|"
+    r"за\s+недел\w*|за\s+месяц\w*)\b",
+    re.IGNORECASE,
+)
+_GROUNDING_MONEY_RE = re.compile(
+    r"\b(выруч\w*|оборот\w*|касс\w*|доход\w*|зарплат\w*|"
+    r"средн\w*\s+чек|прибыл\w*|марж\w*)\b",
+    re.IGNORECASE,
+)
+_GROUNDING_BUSINESS_SCOPE_RE = re.compile(
+    r"\b(бизнес\w*|салон\w*|по\s+всем|все\s+сотрудник\w*|"
+    r"все\s+мастер\w*|общ\w*\s+(?:выруч|касс|статист)|мы\s+заработ)\b",
+    re.IGNORECASE,
+)
+_GROUNDING_PERSONAL_SCOPE_RE = re.compile(
+    r"\b(моя|мой|мои|личн\w*|у\s+меня|сколько\s+я|я\s+заработ)\b",
+    re.IGNORECASE,
+)
+_GROUNDING_NUMBER_RE = re.compile(
+    r"(?<![\w])(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\w])"
+)
+_GROUNDING_SMALL_METRIC_RE = re.compile(
+    r"(?P<number>\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)"
+    r"\s*(?:₽|руб\w*|%|балл\w*|"
+    r"бонус\w*|визит\w*|клиент\w*|запис\w*|минут\w*|час\w*)",
+    re.IGNORECASE,
+)
+
+
+def _latest_user_text(messages: list[dict] | None) -> str:
+    for msg in reversed(messages or []):
+        if isinstance(msg, dict) and msg.get("role") == "user":
+            text = _message_text(msg).strip()
+            if text:
+                return text
+    return ""
+
+
+def _grounding_requirement(
+    messages: list[dict] | None,
+    role: str,
+    mode: str | None,
+    user_id: int | None = None,
+) -> _GroundingRequirement | None:
+    """Map factual user requests to the server tools that can prove them."""
+    text = _latest_user_text(messages)
+    low = text.lower().replace("ё", "е")
+    if not low:
+        return None
+
+    client_context = _is_client_ai_context(role, mode)
+    fact_request = bool(_GROUNDING_FACT_RE.search(low))
+
+    if client_context:
+        if re.search(r"\b(сколько\s+.*(?:балл|бонус)|баланс\w*|мои\s+балл|мои\s+бонус)\w*", low):
+            return _GroundingRequirement("client_loyalty", frozenset({"check_loyalty_balance"}))
+        if re.search(r"\b(мои\s+запис|когда\s+я\s+записан|истори\w*\s+запис)\w*", low):
+            return _GroundingRequirement("client_bookings", frozenset({"get_my_bookings"}))
+        if re.search(r"\b(свободн\w*|ближайш\w*\s+(?:окн|врем)|есть\s+ли\s+(?:окн|мест|врем)|какие\s+окн)\w*", low):
+            return _GroundingRequirement(
+                "booking_availability",
+                frozenset({"get_available_slots", "find_nearest_slots"}),
+            )
+        if re.search(r"\b(сколько\s+стоит|цен\w*|прайс\w*|какие\s+услуг|длительн\w*)\b", low):
+            return _GroundingRequirement("service_catalog", frozenset({"get_services"}))
+        if re.search(r"\b(какие\s+мастер|кто\s+из\s+мастер|специалист\w*|кто\s+стрижет)\b", low):
+            return _GroundingRequirement("staff_catalog", frozenset({"get_masters"}))
+        if re.search(r"\b(кто\s+работает|график\w*\s+мастер|работает\s+ли)\b", low):
+            return _GroundingRequirement(
+                "staff_schedule",
+                frozenset({"who_works", "get_master_schedule"}),
+            )
+        return None
+
+    if re.search(r"\b(чаев\w*|начаев\w*)\b", low) and fact_request:
+        return _GroundingRequirement("personal_tips", frozenset({"get_my_tips"}))
+    if re.search(r"\b(сколько\s+у\s+меня\s+запис|мои\s+рабоч\w*\s+запис|"
+                 r"кто\s+ко\s+мне|что\s+у\s+меня\s+(?:сегодня|завтра))\b", low):
+        return _GroundingRequirement("personal_work_records", frozenset({"get_my_work_records"}))
+    if re.search(r"\b(досье\s+клиент|расскажи\s+про\s+клиент|что\s+обычно\s+берет)\b", low):
+        return _GroundingRequirement("client_dossier", frozenset({"get_client_dossier"}))
+    if re.search(r"\b(кто\s+работает|график\w*|смен\w*|выходн\w*)\b", low) and fact_request:
+        return _GroundingRequirement(
+            "staff_schedule",
+            frozenset({"who_works", "get_master_schedule", "get_daily_briefing"}),
+        )
+
+    if _GROUNDING_MONEY_RE.search(low) and fact_request and not _GROUNDING_PLANNING_RE.search(low):
+        explicit_business = bool(_GROUNDING_BUSINESS_SCOPE_RE.search(low))
+        explicit_personal = bool(_GROUNDING_PERSONAL_SCOPE_RE.search(low))
+        linked_master = False
+        if user_id:
+            try:
+                linked_master = bool(database.get_master_by_chat_id(int(user_id)))
+            except Exception:
+                linked_master = False
+        if explicit_personal or role == ROLE_MASTER or (
+            normalize_surface(mode) == SURFACE_STAFF and linked_master and not explicit_business
+        ):
+            return _GroundingRequirement("personal_analytics", frozenset({"get_my_stats"}))
+        if re.search(r"\b(кто|мастер\w*)\b", low):
+            return _GroundingRequirement(
+                "master_performance",
+                frozenset({"get_master_performance", "get_business_report"}),
+            )
+        return _GroundingRequirement("business_analytics", frozenset({"get_business_report"}))
+
+    if re.search(r"\b(сводк\w*|как\s+дела|что\s+у\s+нас)\b", low) and re.search(
+        r"\b(сегодня|бизнес\w*|салон\w*)\b", low,
+    ):
+        return _GroundingRequirement("daily_briefing", frozenset({"get_daily_briefing"}))
+    return None
+
+
+def _grounding_available(
+    requirement: _GroundingRequirement | None,
+    role: str,
+    disabled_tools: set[str] | None,
+    mode: str | None,
+) -> bool:
+    if not requirement:
+        return True
+    allowed = _allowed_tool_names(role, mode) - _effective_disabled_tools(disabled_tools, mode)
+    return bool(requirement.tools & allowed)
+
+
+def _grounding_retry_message(requirement: _GroundingRequirement) -> dict:
+    tools = ", ".join(sorted(requirement.tools))
+    return {
+        "role": "user",
+        "content": (
+            "[SERVER DATA INTEGRITY GATE] The current factual request cannot be answered "
+            f"from memory. Call one of these tools now: {tools}. Do not provide figures, "
+            "dates, balances, prices, schedules or availability before a tool result."
+        ),
+    }
+
+
+def _normalize_grounding_number(raw) -> str | None:
+    if isinstance(raw, bool) or raw is None:
+        return None
+    text = str(raw).replace("\u00a0", "").replace(" ", "").replace(",", ".")
+    if not re.fullmatch(r"-?\d+(?:\.\d+)?", text):
+        return None
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    try:
+        return str(int(text)) if "." not in text else text
+    except ValueError:
+        return None
+
+
+def _numbers_from_value(value) -> set[str]:
+    values: set[str] = set()
+    if isinstance(value, dict):
+        for item in value.values():
+            values.update(_numbers_from_value(item))
+        return values
+    if isinstance(value, (list, tuple, set)):
+        for item in value:
+            values.update(_numbers_from_value(item))
+        return values
+    normalized = _normalize_grounding_number(value)
+    if normalized is not None:
+        values.add(normalized)
+        return values
+    if isinstance(value, str):
+        for match in _GROUNDING_NUMBER_RE.finditer(value):
+            normalized = _normalize_grounding_number(match.group(0))
+            if normalized is not None:
+                values.add(normalized)
+    return values
+
+
+def _grounding_claims(text: str) -> set[str]:
+    claims: set[str] = set()
+    for match in _GROUNDING_NUMBER_RE.finditer(text or ""):
+        normalized = _normalize_grounding_number(match.group(0))
+        if normalized is None:
+            continue
+        try:
+            if abs(float(normalized)) > 10:
+                claims.add(normalized)
+        except ValueError:
+            continue
+    for match in _GROUNDING_SMALL_METRIC_RE.finditer(text or ""):
+        normalized = _normalize_grounding_number(match.group("number"))
+        if normalized is not None:
+            claims.add(normalized)
+    return claims
+
+
+def _tool_result_values(tool_results: list[dict]) -> set[str]:
+    values: set[str] = set()
+    for result in tool_results:
+        content = result.get("content") if isinstance(result, dict) else None
+        if isinstance(content, str):
+            try:
+                content = json.loads(content)
+            except Exception:
+                pass
+        values.update(_numbers_from_value(content))
+    return values
+
+
+def _tool_result_succeeded(result: dict) -> bool:
+    content = result.get("content") if isinstance(result, dict) else None
+    if not isinstance(content, str):
+        return True
+    try:
+        payload = json.loads(content)
+    except Exception:
+        return True
+    return not (isinstance(payload, dict) and payload.get("error"))
+
+
+def _grounded_numbers_match(
+    text: str,
+    requirement: _GroundingRequirement | None,
+    tool_results: list[dict],
+    user_text: str,
+) -> bool:
+    if not requirement or not requirement.strict_numbers:
+        return True
+    claims = _grounding_claims(text)
+    if not claims:
+        return True
+    allowed = _tool_result_values(tool_results) | _numbers_from_value(user_text)
+    return claims.issubset(allowed)
+
+
 def _last_user_text_before_current_assistant(messages: list[dict]) -> str:
     for msg in reversed(messages[:-1]):
         if msg.get("role") == "user":
@@ -3504,11 +3756,26 @@ def get_ai_response(
     mdl = model or CLAUDE_MODEL
     role = _resolve_role(user_id)
     disabled_tools = set(disabled_tools or ())
+    user_text = _latest_user_text(conversation_history)
+    requirement = _grounding_requirement(
+        conversation_history, role, mode, user_id=user_id,
+    )
+    if not _grounding_available(requirement, role, disabled_tools, mode):
+        logger.warning(
+            "grounding unavailable domain=%s role=%s mode=%s",
+            requirement.domain if requirement else "none",
+            role,
+            mode,
+        )
+        return requirement.fallback, None, None
     started_at = time.perf_counter()
     rounds = 0
     total_tool_calls = 0
+    grounding_retries = 0
+    grounded_tool_names: set[str] = set()
+    grounding_tool_results: list[dict] = []
 
-    while True:
+    while rounds < _MAX_AI_TOOL_ROUNDS:
         rounds += 1
         response_text, tool_uses = _brain_turn(
             messages, user_id, role, mdl, max_tokens, disabled_tools, mode,
@@ -3517,6 +3784,40 @@ def get_ai_response(
 
         # Если модель закончила — возвращаем ответ
         if not tool_uses:
+            requirement_satisfied = bool(
+                not requirement or requirement.tools & grounded_tool_names
+            )
+            if not requirement_satisfied:
+                if grounding_retries < _MAX_GROUNDING_RETRIES:
+                    grounding_retries += 1
+                    logger.warning(
+                        "grounding retry domain=%s role=%s mode=%s",
+                        requirement.domain,
+                        role,
+                        mode,
+                    )
+                    messages.append(_grounding_retry_message(requirement))
+                    continue
+                logger.error(
+                    "grounding blocked unverified reply domain=%s role=%s mode=%s",
+                    requirement.domain,
+                    role,
+                    mode,
+                )
+                return requirement.fallback, contact_request, gift_cert_action
+            if not _grounded_numbers_match(
+                response_text,
+                requirement,
+                grounding_tool_results,
+                user_text,
+            ):
+                logger.error(
+                    "grounding blocked numeric mismatch domain=%s role=%s mode=%s",
+                    requirement.domain if requirement else "none",
+                    role,
+                    mode,
+                )
+                return requirement.fallback, contact_request, gift_cert_action
             elapsed = time.perf_counter() - started_at
             logger.info(
                 "🧠 AI done user=%s role=%s model=%s rounds=%s tool_calls=%s seconds=%.2f",
@@ -3532,6 +3833,10 @@ def get_ai_response(
         # Модель хочет вызвать инструменты — выполняем их (общий хелпер)
         messages.append({"role": "assistant", "content": _assistant_blocks(response_text, tool_uses)})
         tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools, mode=mode)
+        grounding_tool_results.extend(tool_results)
+        for tool_use, tool_result in zip(tool_uses, tool_results):
+            if _tool_result_succeeded(tool_result):
+                grounded_tool_names.add(tool_use.name)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
         terminal_text = _client_terminal_action_text(
@@ -3550,6 +3855,12 @@ def get_ai_response(
             )
             return terminal_text, contact_request, gift_cert_action
         messages.append({"role": "user", "content": tool_results})
+
+    logger.error("AI tool round limit reached role=%s mode=%s", role, mode)
+    fallback = requirement.fallback if requirement else (
+        "Не смогла безопасно завершить запрос. Попробуйте ещё раз через минуту."
+    )
+    return fallback, contact_request, gift_cert_action
 
 
 def get_ai_response_stream(
@@ -3584,8 +3895,31 @@ def get_ai_response_stream(
     role = _resolve_role(user_id)
     mdl = model or CLAUDE_MODEL
     disabled_tools = set(disabled_tools or ())
+    user_text = _latest_user_text(conversation_history)
+    requirement = _grounding_requirement(
+        conversation_history, role, mode, user_id=user_id,
+    )
+    if not _grounding_available(requirement, role, disabled_tools, mode):
+        logger.warning(
+            "stream grounding unavailable domain=%s role=%s mode=%s",
+            requirement.domain if requirement else "none",
+            role,
+            mode,
+        )
+        yield {
+            "type": "meta",
+            "contact_request": None,
+            "gift_cert_action": None,
+            "text": requirement.fallback,
+        }
+        return
+    rounds = 0
+    grounding_retries = 0
+    grounded_tool_names: set[str] = set()
+    grounding_tool_results: list[dict] = []
 
-    while True:
+    while rounds < _MAX_AI_TOOL_ROUNDS:
+        rounds += 1
         text_parts = []
         if AI_PROVIDER == "claude":
             final = None
@@ -3671,6 +4005,54 @@ def get_ai_response_stream(
 
         # Финальный ход — отдаём сигналы и выходим
         if not tool_uses:
+            requirement_satisfied = bool(
+                not requirement or requirement.tools & grounded_tool_names
+            )
+            if not requirement_satisfied:
+                yield {"type": "reset"}
+                if grounding_retries < _MAX_GROUNDING_RETRIES:
+                    grounding_retries += 1
+                    logger.warning(
+                        "stream grounding retry domain=%s role=%s mode=%s",
+                        requirement.domain,
+                        role,
+                        mode,
+                    )
+                    messages.append(_grounding_retry_message(requirement))
+                    continue
+                logger.error(
+                    "stream grounding blocked unverified reply domain=%s role=%s mode=%s",
+                    requirement.domain,
+                    role,
+                    mode,
+                )
+                yield {
+                    "type": "meta",
+                    "contact_request": contact_request,
+                    "gift_cert_action": gift_cert_action,
+                    "text": requirement.fallback,
+                }
+                return
+            if not _grounded_numbers_match(
+                final_text,
+                requirement,
+                grounding_tool_results,
+                user_text,
+            ):
+                yield {"type": "reset"}
+                logger.error(
+                    "stream grounding blocked numeric mismatch domain=%s role=%s mode=%s",
+                    requirement.domain if requirement else "none",
+                    role,
+                    mode,
+                )
+                yield {
+                    "type": "meta",
+                    "contact_request": contact_request,
+                    "gift_cert_action": gift_cert_action,
+                    "text": requirement.fallback,
+                }
+                return
             yield {
                 "type": "meta",
                 "contact_request": contact_request,
@@ -3685,6 +4067,10 @@ def get_ai_response_stream(
 
         messages.append({"role": "assistant", "content": _assistant_blocks(final_text, tool_uses)})
         tool_results, cr2, gc2 = _run_tool_uses(tool_uses, messages, user_id, disabled_tools, mode=mode)
+        grounding_tool_results.extend(tool_results)
+        for tool_use, tool_result in zip(tool_uses, tool_results):
+            if _tool_result_succeeded(tool_result):
+                grounded_tool_names.add(tool_use.name)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
         terminal_text = _client_terminal_action_text(
@@ -3699,3 +4085,13 @@ def get_ai_response_stream(
             }
             return
         messages.append({"role": "user", "content": tool_results})
+
+    logger.error("stream AI tool round limit reached role=%s mode=%s", role, mode)
+    yield {
+        "type": "meta",
+        "contact_request": contact_request,
+        "gift_cert_action": gift_cert_action,
+        "text": requirement.fallback if requirement else (
+            "Не смогла безопасно завершить запрос. Попробуйте ещё раз через минуту."
+        ),
+    }

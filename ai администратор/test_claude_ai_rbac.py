@@ -615,6 +615,102 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(tool_uses[0].name, "get_services")
         self.assertEqual(tool_uses[0].input, {})
 
+    def test_factual_price_reply_is_blocked_when_model_skips_tool(self):
+        claude_ai, _logs = _load_claude_ai()
+        calls = []
+
+        def _brain_turn(*args, **kwargs):
+            calls.append("brain")
+            return "Стрижка стоит 9 999 ₽.", []
+
+        claude_ai._brain_turn = _brain_turn
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Сколько стоит стрижка?"}],
+            user_id=123,
+            model="deepseek-v4-pro",
+            mode="client",
+        )
+
+        self.assertEqual(calls, ["brain", "brain"])
+        self.assertIn("не буду ничего додумывать", text)
+        self.assertNotIn("9 999", text)
+        self.assertIsNone(contact_request)
+        self.assertIsNone(action)
+
+    def test_factual_price_reply_accepts_only_numbers_from_tool_result(self):
+        claude_ai, _logs = _load_claude_ai()
+        turns = iter([
+            ("", [claude_ai._ToolUse(id="price", name="get_services", input={})]),
+            ("Мужская стрижка стоит 2 000 ₽.", []),
+        ])
+        claude_ai._brain_turn = lambda *args, **kwargs: next(turns)
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "price",
+                "content": json.dumps({
+                    "services": [{"title": "Мужская стрижка", "price": 2000}],
+                }, ensure_ascii=False),
+            }],
+            None,
+            None,
+        )
+
+        text, _contact_request, _action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Сколько стоит стрижка?"}],
+            user_id=123,
+            model="deepseek-v4-pro",
+            mode="client",
+        )
+
+        self.assertEqual(text, "Мужская стрижка стоит 2 000 ₽.")
+
+    def test_grounded_numeric_mismatch_fails_closed_after_tool_call(self):
+        claude_ai, _logs = _load_claude_ai()
+        turns = iter([
+            ("", [claude_ai._ToolUse(id="price", name="get_services", input={})]),
+            ("Мужская стрижка стоит 9 999 ₽.", []),
+        ])
+        claude_ai._brain_turn = lambda *args, **kwargs: next(turns)
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "price",
+                "content": json.dumps({"price": 2000}),
+            }],
+            None,
+            None,
+        )
+
+        text, _contact_request, _action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Сколько стоит стрижка?"}],
+            user_id=123,
+            model="deepseek-v4-pro",
+            mode="client",
+        )
+
+        self.assertIn("не буду ничего додумывать", text)
+        self.assertNotIn("9 999", text)
+
+    def test_stream_resets_unverified_factual_text_and_fails_closed(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._stream_chat_completion = lambda _body: iter([{
+            "choices": [{"delta": {"content": "Стрижка стоит 9 999 ₽."}}],
+        }])
+
+        events = list(claude_ai.get_ai_response_stream(
+            [{"role": "user", "content": "Сколько стоит стрижка?"}],
+            user_id=123,
+            model="deepseek-v4-pro",
+            mode="client",
+        ))
+
+        self.assertEqual(sum(event["type"] == "reset" for event in events), 2)
+        self.assertEqual(events[-1]["type"], "meta")
+        self.assertIn("не буду ничего додумывать", events[-1]["text"])
+        self.assertNotIn("9 999", events[-1]["text"])
+
     def test_generic_client_request_sends_only_small_tool_subset(self):
         claude_ai, _logs = _load_claude_ai()
 
