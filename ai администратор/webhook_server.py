@@ -51,6 +51,7 @@ import growth_planner
 import lead_alerts
 import master_briefing
 import masters_ai
+import maya_capabilities
 import memory
 import owner_ai
 import reputation
@@ -6835,6 +6836,11 @@ _FOUNDER_RULE_UNSAFE_RE = re.compile(
     r"\b(?:системн\w*\s+правил|безопасност|авторизац|провер\w*\s+доступ)\b",
     re.IGNORECASE | re.DOTALL,
 )
+_FOUNDER_RULE_PERMISSION_RE = re.compile(
+    r"\b(?:разреш\w*|запрет\w*|включ\w*|отключ\w*|открой\w*|закрой\w*)\b"
+    r".{0,100}\b(?:доступ\w*|прав\w*|истор\w*|данн\w*|карточ\w*)\b",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 def _founder_rule_command(message: str) -> tuple[str, str | int | None] | None:
@@ -6905,6 +6911,12 @@ def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> 
         return "Не сохранила правило: постоянная память не должна содержать персональные данные."
     if _FOUNDER_RULE_UNSAFE_RE.search(rule):
         return "Не сохранила правило: оно пытается отменить серверные ограничения безопасности."
+    if _FOUNDER_RULE_PERMISSION_RE.search(rule):
+        return (
+            "Не сохранила правило: разрешения меняются только прямой "
+            "командой из безопасного каталога. Например: «Майя, разреши всем "
+            "клиентам видеть свою историю посещений»."
+        )
 
     rules = database.list_salon_rules(active_only=True, limit=100)
     normalized = re.sub(r"\s+", " ", rule).strip().lower().replace("ё", "е")
@@ -6919,6 +6931,88 @@ def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> 
     return (
         f"Запомнила правило [{rule_id}]: {rule}\n"
         "Оно начнёт действовать со следующего сообщения во всех чатах MAYA."
+    )
+
+
+def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
+    """Parse explicit global capability commands from the founder."""
+    text = (message or "").strip()
+    if not text:
+        return None
+    text = re.sub(
+        r"^(?:майя|мая|маюш(?:а|ка)?)\s*[,!:—-]?\s*",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    low = text.lower().replace("ё", "е")
+    if (
+        any(marker in low for marker in ("покажи", "перечисли", "какие", "статус"))
+        and any(marker in low for marker in ("разрешен", "доступ", "возможност"))
+    ):
+        return "list", None
+
+    history_target = any(marker in low for marker in (
+        "истори", "прошлые посещ", "прошлые визит",
+    ))
+    all_clients = "клиент" in low or "всем пользовател" in low
+    if not (history_target and all_clients):
+        return None
+    if any(marker in low for marker in (
+        "запрети", "отключи", "выключи", "закрой доступ", "не разрешай",
+    )):
+        return maya_capabilities.CLIENT_SELF_VISIT_HISTORY, False
+    if any(marker in low for marker in (
+        "разреши", "включи", "открой доступ", "дай доступ",
+    )):
+        return maya_capabilities.CLIENT_SELF_VISIT_HISTORY, True
+    return None
+
+
+def _founder_permission_reply(
+    chat_id: int,
+    message: str,
+    mode: str = "staff",
+) -> str | None:
+    command = _founder_permission_command(message)
+    if not command:
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not info.get("is_founder"):
+        logger.warning("Founder capability command denied for chat_id=%s", chat_id)
+        return "Глобальные разрешения MAYA может менять только основатель."
+    if str(mode or "").strip().lower() != "staff":
+        return "Чтобы изменить разрешения MAYA, откройте рабочий чат."
+
+    capability, enabled = command
+    if capability == "list":
+        rows = maya_capabilities.list_capabilities()
+        lines = ["Разрешения MAYA для клиентов:"]
+        for row in rows:
+            status = "включено" if row["enabled"] else "отключено"
+            lines.append(f"• {row['label']}: {status}")
+        return "\n".join(lines)
+
+    try:
+        result = maya_capabilities.set_enabled(
+            capability,
+            bool(enabled),
+            actor_id=int(chat_id),
+        )
+    except (KeyError, PermissionError):
+        return "Такого безопасного разрешения нет в каталоге MAYA."
+    if result["enabled"]:
+        return (
+            "Разрешила всем авторизованным клиентам видеть в чате только свою "
+            "историю посещений. Доступ к чужим карточкам остаётся закрыт."
+        )
+    return (
+        "Отключила клиентам просмотр истории посещений через чат. "
+        "Данные в YClients не изменены."
     )
 
 
@@ -6970,6 +7064,10 @@ async def _own_visit_history_reply(chat_id: int, message: str) -> str | None:
     """Return only the authenticated user's attended YClients visits."""
     if not _own_visit_history_intent(message):
         return None
+    if not maya_capabilities.is_enabled(
+        maya_capabilities.CLIENT_SELF_VISIT_HISTORY
+    ):
+        return "Просмотр истории посещений через чат сейчас отключён владельцем."
     try:
         client = database.get_client(int(chat_id))
     except Exception as e:
@@ -7650,6 +7748,21 @@ async def chat_handler(request: web.Request) -> web.Response:
     conversations = load_conversations()
     history = conversations.get(history_key) or []
 
+    founder_permission_reply = _founder_permission_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if founder_permission_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_permission_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_permission_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
     if founder_learning_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -8080,6 +8193,21 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
     history = conversations.get(history_key) or []
+
+    founder_permission_reply = _founder_permission_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if founder_permission_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_permission_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_permission_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
 
     founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
     if founder_learning_reply:

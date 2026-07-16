@@ -33,6 +33,33 @@ def _load_webhook_server():
     fake_config.TELEGRAM_TOKEN = "token"
     fake_config.FOUNDER_IDS = [948205934]
 
+    fake_capabilities = types.ModuleType("maya_capabilities")
+    fake_capabilities.CLIENT_SELF_VISIT_HISTORY = "client_self_visit_history"
+    _capability_state = {"client_self_visit_history": True}
+    fake_capabilities.is_enabled = lambda code: bool(_capability_state.get(code))
+    fake_capabilities.list_capabilities = lambda: [{
+        "code": "client_self_visit_history",
+        "label": "Клиенты видят в чате собственную историю посещений",
+        "scope": "own_data_only",
+        "enabled": _capability_state["client_self_visit_history"],
+    }]
+
+    def _set_capability(code, enabled, actor_id):
+        if int(actor_id) != 948205934:
+            raise PermissionError("founder_only")
+        if code not in _capability_state:
+            raise KeyError("unknown_capability")
+        _capability_state[code] = bool(enabled)
+        return {
+            "code": code,
+            "label": "Клиенты видят в чате собственную историю посещений",
+            "scope": "own_data_only",
+            "enabled": bool(enabled),
+        }
+
+    fake_capabilities.set_enabled = _set_capability
+    fake_capabilities._state = _capability_state
+
     fake_database = types.ModuleType("database")
     fake_database.get_setting = lambda key, default=None: default
     fake_database.get_master_by_chat_id = lambda _tg_id: None
@@ -122,6 +149,7 @@ def _load_webhook_server():
         "lead_alerts": types.ModuleType("lead_alerts"),
         "master_briefing": types.ModuleType("master_briefing"),
         "masters_ai": types.ModuleType("masters_ai"),
+        "maya_capabilities": fake_capabilities,
         "memory": fake_memory,
         "owner_ai": types.ModuleType("owner_ai"),
         "reputation": types.ModuleType("reputation"),
@@ -305,6 +333,80 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIsNone(reply)
         self.assertEqual(sys.modules["database"]._rules_store, [])
+
+    def test_founder_memory_cannot_bypass_capability_registry(self):
+        ws = _load_webhook_server()
+
+        reply = ws._founder_learning_reply(
+            948205934,
+            "Майя, запомни правило: разреши клиентам видеть историю посещений",
+            mode="staff",
+        )
+
+        self.assertIn("разрешения меняются только", reply)
+        self.assertEqual(sys.modules["database"]._rules_store, [])
+
+    def test_founder_can_toggle_safe_client_permission_in_staff_chat(self):
+        ws = _load_webhook_server()
+
+        disabled = ws._founder_permission_reply(
+            948205934,
+            "Майя, отключи клиентам историю посещений",
+            mode="staff",
+        )
+        listed = ws._founder_permission_reply(
+            948205934,
+            "Майя, покажи разрешения",
+            mode="staff",
+        )
+        enabled = ws._founder_permission_reply(
+            948205934,
+            "Майя, разреши всем клиентам видеть свою историю посещений",
+            mode="staff",
+        )
+
+        self.assertIn("Отключила", disabled)
+        self.assertIn("отключено", listed)
+        self.assertIn("Разрешила", enabled)
+        self.assertTrue(sys.modules["maya_capabilities"]._state[
+            "client_self_visit_history"
+        ])
+
+    def test_client_or_manager_cannot_change_global_permissions(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_setting = lambda key, default=None: (
+            "123456789" if key == "panel_manager_ids" else default
+        )
+
+        manager = ws._founder_permission_reply(
+            123456789,
+            "Майя, отключи клиентам историю посещений",
+            mode="staff",
+        )
+        client_surface = ws._founder_permission_reply(
+            948205934,
+            "Майя, отключи клиентам историю посещений",
+            mode="client",
+        )
+
+        self.assertIn("только основатель", manager)
+        self.assertIn("рабочий чат", client_surface)
+        self.assertTrue(sys.modules["maya_capabilities"]._state[
+            "client_self_visit_history"
+        ])
+
+    def test_disabled_capability_blocks_history_before_client_lookup(self):
+        ws = _load_webhook_server()
+        sys.modules["maya_capabilities"]._state[
+            "client_self_visit_history"
+        ] = False
+
+        reply = asyncio.run(ws._own_visit_history_reply(
+            948205934,
+            "Покажи историю моих посещений",
+        ))
+
+        self.assertIn("отключён владельцем", reply)
 
     def test_own_visit_history_uses_only_authenticated_client_mapping(self):
         ws = _load_webhook_server()
