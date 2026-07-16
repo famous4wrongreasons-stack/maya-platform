@@ -302,6 +302,29 @@ async def _send_renew_push(app: Application, sub: dict, client: dict, plan: dict
         logger.info(f"sub renew push → {chat_id}: {e}")
     except Exception as e:
         logger.error(f"sub renew push → {chat_id}: {e}")
+    try:
+        import webhook_server
+        await webhook_server._send_client_push(
+            int(chat_id),
+            title="Абонемент скоро закончится 🎟",
+            body=f"{plan['title']} ({tier_label}) до {expires_h}. Продлим ещё на месяц?",
+            url="/app/?shop=subs",
+            tag=f"sub-renew-{sub['id']}",
+            data={"event": "subscription.renew_offer", "subscription_id": sub["id"]},
+            persist_in_chat=True,
+            chat_text=(
+                f"{name}, абонемент «{plan['title']}» ({tier_label}) заканчивается {expires_h}.\n\n"
+                f"{used_part}\n\n"
+                f"Если хотите, можем продлить ещё на месяц за {price} ₽."
+            ),
+            chat_action={
+                "type": "open_subs",
+                "label": f"Продлить — {price} ₽",
+            },
+            chat_dedupe_key=f"subscription-renew:{sub['id']}",
+        )
+    except Exception as e:
+        logger.error(f"sub renew app push → {chat_id}: {e}")
 
 
 async def run_subscriptions_job(app: Application) -> dict:

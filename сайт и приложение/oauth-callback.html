@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вход · MAYA</title>
+<link rel="stylesheet" href="/fonts.css">
+<style>
+:root{
+  --bg:#070810; --ink:#f2f0ec; --dim:rgba(242,240,236,.6); --faint:rgba(242,240,236,.36);
+  --line:rgba(242,240,236,.14); --acc:#c9c2ae; --acc-ink:#141310; --err:#e0564f;
+  --disp:'Montserrat',sans-serif; --body:'Manrope',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(120% 80% at 50% -10%,rgba(201,194,174,.08),transparent 55%),var(--bg);
+  color:var(--ink);font-family:var(--body);display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:360px;text-align:center}
+.spin{width:38px;height:38px;margin:0 auto 22px;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(201,194,174,0),var(--acc));
+  -webkit-mask:radial-gradient(farthest-side,#0000 calc(100% - 5px),#000 calc(100% - 5px));
+  mask:radial-gradient(farthest-side,#0000 calc(100% - 5px),#000 calc(100% - 5px));animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+h1{font-family:var(--disp);font-weight:300;font-size:19px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+p{color:var(--dim);font-size:13.5px;line-height:1.6}
+.err h1{color:var(--err)}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:46px;padding:0 24px;margin-top:22px;
+  border:0;border-radius:12px;font-family:var(--disp);font-weight:600;font-size:13px;cursor:pointer;
+  background:var(--acc);color:var(--acc-ink)}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="spin" id="spin"></div>
+  <h1 id="title">Входим…</h1>
+  <p id="msg">Завершаем вход в приложение салона.</p>
+  <button class="btn" id="btn" style="display:none">Вернуться</button>
+</div>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  // tenant-scoped namespace — формула продублирована в app.html (boot+компонент), менять синхронно
+  function nsOf(apiBase, slug) {
+    var a = String(apiBase).toLowerCase().replace(/\/+$/, '');
+    var sl = String(slug).toLowerCase();
+    var str = a + '|' + sl, h = 5381;
+    for (var i = 0; i < str.length; i++) h = (h * 33 + str.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36) + '_' + sl.replace(/[^a-z0-9-]/g, '').slice(0, 24);
+  }
+
+  function codeText(code, fallback) {
+    var m = {
+      social_provider_unavailable: 'Вход через этот сервис сейчас недоступен — войдите по номеру.',
+      social_state_invalid: 'Сессия входа устарела — начните заново.',
+      social_exchange_failed: 'Не удалось завершить вход. Попробуйте ещё раз.',
+      social_token_invalid: 'Не удалось завершить вход. Попробуйте ещё раз.',
+      social_identity_conflict: 'Этот аккаунт уже привязан к другому профилю.',
+      trial_client_registration_disabled: 'Салон ещё готовится к запуску — запись откроется скоро.',
+      self_registration_disabled: 'Регистрация в этом салоне сейчас закрыта.'
+    };
+    return m[code] || fallback || 'Не удалось войти.';
+  }
+
+  var RET_URL = '/app.html'; // выставляется из pending соответствующего state
+  function fail(text) {
+    $('spin').style.display = 'none';
+    $('card').classList.add('err');
+    $('title').textContent = 'Не получилось';
+    $('msg').textContent = text;
+    var b = $('btn');
+    b.style.display = 'inline-flex';
+    b.textContent = 'Вернуться ко входу';
+    b.onclick = function () { location.href = RET_URL; };
+  }
+
+  // pending привязан к OAuth state: параллельные входы разных салонов не пересекаются
+  function pendingKey(st) { return 'me_oauth_pending:' + st; }
+  function readPending(st) {
+    try { return JSON.parse(localStorage.getItem(pendingKey(st)) || 'null'); } catch (e) { return null; }
+  }
+  // уборка протухших pending (>15 мин) — server-side state тоже одноразовый
+  try {
+    for (var ki = localStorage.length - 1; ki >= 0; ki--) {
+      var kk = localStorage.key(ki);
+      if (kk && kk.indexOf('me_oauth_pending:') === 0) {
+        var pv = null; try { pv = JSON.parse(localStorage.getItem(kk) || 'null'); } catch (e) {}
+        if (!pv || !pv.ts || Date.now() - pv.ts > 15 * 60 * 1000) localStorage.removeItem(kk);
+      }
+    }
+  } catch (e) {}
+
+  // return URL только same-origin (без open redirect)
+  function safeRet(u) {
+    try {
+      var x = new URL(String(u || ''), location.origin);
+      if (x.origin === location.origin) return x.pathname + x.search + x.hash;
+    } catch (e) {}
+    return '/app.html';
+  }
+  var q = new URLSearchParams(location.search);
+  var err = q.get('error');
+  var errDesc = q.get('error_description');
+  var code = q.get('code');
+  var state = q.get('state') || '';
+
+  // СНАЧАЛА state → pending (c TTL) → корректный tenant return URL; потом уже ошибки
+  var pend = state ? readPending(state) : null;
+  // ts обязателен, числовой, не из будущего (+60с) и не старше 15 мин — иначе invalid
+  var pendTsOk = pend && typeof pend.ts === 'number' && isFinite(pend.ts)
+    && Date.now() - pend.ts <= 15 * 60 * 1000 && pend.ts <= Date.now() + 60 * 1000;
+  if (pend && !pendTsOk) {
+    try { localStorage.removeItem(pendingKey(state)); } catch (e) {}
+    pend = null;
+  }
+  if (pend) RET_URL = safeRet(pend.ret);
+  function dropPending() { try { localStorage.removeItem(pendingKey(state)); } catch (e) {} }
+
+  if (err) { dropPending(); fail(errDesc || codeText(err, 'Провайдер отклонил вход.')); return; } // cancel/error → возврат в исходный tenant
+  if (!code || !state) { dropPending(); fail('Не хватает данных для входа. Начните заново.'); return; }
+
+  var provider = state.indexOf('ya_') === 0 ? 'yandex' : state.indexOf('te_') === 0 ? 'telegram' : null;
+  if (!provider) { dropPending(); fail('Неизвестный тип входа. Начните заново.'); return; }
+
+  // чужой/отсутствующий/протухший pending-контекст: спокойная ошибка, токены НЕ записываем
+  if (!pend || !pend.apiBase || !pend.tenant) { fail('Сессия входа не найдена — начните вход заново.'); return; }
+  var apiBase = String(pend.apiBase).toLowerCase().replace(/\/+$/, '');
+  var tenantSlug = String(pend.tenant).toLowerCase();
+  var AUTH_KEY = 'me_saas_auth_v2:' + nsOf(apiBase, tenantSlug); // bundle ТОЛЬКО в namespace этого салона
+
+  fetch(apiBase + '/auth/oauth/' + provider + '/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ state: state, code: code })
+  }).then(function (r) {
+    return r.text().then(function (t) {
+      var data = null; try { data = t ? JSON.parse(t) : null; } catch (e) {}
+      if (!r.ok) {
+        var eo = data && typeof data === 'object' ? data.error : null;
+        var c = eo && eo.code;
+        // 429 auth_rate_limited: человеческое сообщение + countdown, без авто-ретрая
+        if (r.status === 429 && c === 'auth_rate_limited') {
+          var ra = Number((eo && eo.retry_after_seconds) != null ? eo.retry_after_seconds : r.headers.get('Retry-After'));
+          var w = isFinite(ra) && ra > 0 ? Math.ceil(ra) : 60;
+          var e2 = new Error('Слишком много попыток входа. Подождите ' + w + ' с и попробуйте снова.');
+          e2.rateLimited = true;
+          e2.retryAfterSeconds = w;
+          throw e2;
+        }
+        throw new Error(codeText(c, (eo && eo.message) || (data && data.message) || 'Не удалось войти.'));
+      }
+      return data;
+    });
+  }).then(function (data) {
+    if (!data || !data.access_token || !data.refresh_token) throw new Error('Пустой ответ входа.');
+    // сохраняем ПОЛНЫЙ bundle одним присваиванием (как phone-auth в app.html):
+    // новый access только со своим же refresh; запись верифицируем чтением обратно
+    try {
+      localStorage.setItem(AUTH_KEY, JSON.stringify({
+        token: data.access_token,
+        refresh_token: data.refresh_token,
+        access_expires_at: data.expires_in ? Date.now() + Number(data.expires_in) * 1000 : null,
+        refresh_expires_at: data.refresh_expires_at || null,
+        session: data.session || null,
+        user: data.user || null,
+        tenant_slug: tenantSlug, // контекст пары — проверяется при каждом чтении в app.html
+        api_base: apiBase
+      }));
+    } catch (e) {}
+    var back = null;
+    try { back = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch (e) {}
+    if (!back || back.token !== data.access_token || back.refresh_token !== data.refresh_token) {
+      throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
+    }
+    dropPending(); // pending одноразовый
+    $('title').textContent = 'Готово';
+    $('msg').textContent = 'Возвращаемся в приложение…';
+    setTimeout(function () { location.href = RET_URL; }, 400);
+  }).catch(function (e) {
+    dropPending(); // state одноразовый: и при ошибке complete pending не переживает
+    fail(e.message || 'Не удалось войти.');
+    // живой countdown в сообщении; кнопка «Вернуться» активна всегда
+    if (e && e.rateLimited && e.retryAfterSeconds) {
+      var until = Date.now() + e.retryAfterSeconds * 1000;
+      (function tick() {
+        var left = Math.ceil((until - Date.now()) / 1000);
+        if (left <= 0) { $('msg').textContent = 'Можно пробовать снова — вернитесь ко входу.'; return; }
+        $('msg').textContent = 'Слишком много попыток входа. Подождите ' + left + ' с.';
+        setTimeout(tick, 1000);
+      })();
+    }
+  });
+})();
+</script>
+</body>
+</html>

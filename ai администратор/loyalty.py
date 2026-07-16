@@ -42,6 +42,10 @@ logger = logging.getLogger(__name__)
 _yc = YClientsAPI()
 
 CASHBACK_PCT = 5
+# При первом входе постоянного клиента выдаём 5% от подтверждённой истории
+# YClients, но не больше WELCOME_CAP. Повторная выдача блокируется по телефону.
+BACKFILL_ENABLED = True
+WELCOME_CAP = 1000
 EXPIRY_MONTHS_NO_VISITS = 12
 REDEEM_CODE_TTL_DAYS = 14
 
@@ -62,6 +66,94 @@ CARE_TITLES_LOWER = {s["title"].lower().strip() for s in CARE_SERVICES}
 def _gen_token(length: int = 6) -> str:
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def _welcome_points(spent: int | float) -> int:
+    """Рассчитать ограниченный welcome-бонус из подтверждённой суммы трат."""
+    return min(round(max(0, spent) * CASHBACK_PCT / 100), WELCOME_CAP)
+
+
+def select_yclients_cashback_card(cards: list[dict]) -> dict | None:
+    """Выбирает бонусную/кэшбэк-карту, не путая её со скидочной картой."""
+    if not cards:
+        return None
+
+    def is_cashback(card: dict) -> bool:
+        title = str((card.get("type") or {}).get("title") or "").lower().replace("ё", "е")
+        if any(word in title for word in ("кешбек", "кэшбек", "cashback", "бонус")):
+            return True
+        for program in card.get("programs") or []:
+            loyalty_type = (program or {}).get("loyalty_type") or {}
+            if loyalty_type.get("is_cashback"):
+                return True
+        return False
+
+    def balance_value(card: dict) -> float:
+        try:
+            return float(card.get("balance") or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    cashback = [card for card in cards if is_cashback(card)]
+    # Если API не отдал программы/говорящее название, положительный баланс всё
+    # равно отличает бонусную карту от обычной скидочной карты без баллов.
+    candidates = cashback or [card for card in cards if balance_value(card) > 0]
+    if not candidates:
+        return None
+    return max(candidates, key=balance_value)
+
+
+def _yc_loyalty_card(phone: str) -> dict | None:
+    """Возвращает актуальную карту YClients для точного совпадения телефона."""
+    try:
+        client = _yc.find_client_by_phone(phone)
+        if not client or not client.get("id"):
+            return None
+        card = select_yclients_cashback_card(
+            _yc.get_client_loyalty_cards(int(client["id"]))
+        )
+        if not card or card.get("balance") is None:
+            return None
+        balance = int(round(float(card.get("balance") or 0)))
+        return {
+            "card_id": card.get("id"),
+            "balance": max(0, balance),
+            "sold_amount": int(round(float(card.get("sold_amount") or 0))),
+        }
+    except Exception as e:
+        logger.error(f"_yc_loyalty_card *{phone[-4:]}: {e}")
+        return None
+
+
+def import_yclients_loyalty_balance(client_id: int, phone: str) -> dict | None:
+    """Один раз выравнивает локальный ledger по фактическому балансу карты.
+
+    Это не периодический sync: после импорта локальные начисления/списания не
+    перетираются при каждом открытии кабинета.
+    """
+    if not phone or database.client_has_loyalty_yclients_import(client_id):
+        return None
+    card = _yc_loyalty_card(phone)
+    if card is None:
+        return None
+    current = database.loyalty_balance(client_id)
+    target = int(card["balance"])
+    delta = target - current
+    database.add_loyalty_transaction(
+        client_id=client_id,
+        type_="yc_import",
+        points=delta,
+        visit_record_id=None,
+        note=(
+            f"{delta:+d} импорт фактического баланса YClients "
+            f"(карта {card.get('card_id')}, итог {target})"
+        ),
+    )
+    logger.info(
+        f"🪙 YClients import: client_id={client_id} card_id={card.get('card_id')} "
+        f"old={current} target={target} delta={delta:+d}"
+    )
+    return {**card, "previous_balance": current, "delta": delta}
 
 
 def _parse_date_safe(raw: str | None) -> date | None:
@@ -430,7 +522,27 @@ def lazy_backfill_for_client(client_id: int, phone: str) -> dict | None:
     """
     if not phone:
         return None
+    # У действующего клиента источником стартового остатка является его карта
+    # YClients. Старый расчёт 5% от LTV с лимитом используется только если карты нет.
+    if database.client_has_loyalty_yclients_import(client_id):
+        return None
+    imported = import_yclients_loyalty_balance(client_id, phone)
+    if imported is not None:
+        # Старые вызывающие места показывают balance отдельной строкой. Не выдаём
+        # импорт за новый welcome-бонус и не дублируем клиенту уведомление.
+        return {
+            "points": 0,
+            "sold_amount": imported.get("sold_amount", 0),
+            "balance": imported["balance"],
+            "source": "yclients_card",
+        }
+    if not BACKFILL_ENABLED:
+        return None  # welcome из истории отключён — только фактическая карта
     if database.client_has_loyalty_backfill(client_id):
+        return None
+    # тот же человек под другим client_id (второй способ входа) — не дублируем
+    if database.loyalty_backfill_exists_for_phone(phone):
+        logger.info(f"🪙 Lazy backfill пропущен: по номеру *{phone[-4:]} welcome уже выдан (другой client_id={client_id})")
         return None
     # Фиксируем launch_date если ещё не зафиксирована
     get_launch_date()
@@ -438,13 +550,16 @@ def lazy_backfill_for_client(client_id: int, phone: str) -> dict | None:
     spent = _yc_search_sold_amount(phone)
     if spent is None or spent <= 0:
         return None
-    points = round(spent * CASHBACK_PCT / 100)
+    points = _welcome_points(spent)
     if points <= 0:
         return None
     database.add_loyalty_transaction(
         client_id=client_id, type_="backfill",
         points=points, visit_record_id=None,
-        note=f"+{points} welcome-бонус: 5% от LTV {spent} ₽ (ленивый backfill)",
+        note=(
+            f"+{points} welcome-бонус: {CASHBACK_PCT}% от LTV {spent} ₽ "
+            f"(лимит {WELCOME_CAP}, ленивый backfill)"
+        ),
     )
     logger.info(
         f"🪙 Lazy backfill: client_id={client_id} получил {points} баллов "
@@ -461,6 +576,9 @@ async def run_backfill_job() -> dict:
 
     Также фиксирует дату запуска программы (если ещё не зафиксирована).
     """
+    if not BACKFILL_ENABLED:
+        logger.info("run_backfill_job пропущен: BACKFILL_ENABLED=False")
+        return {"skipped": True, "reason": "backfill_disabled"}
     # Зафиксируем launch_date — после backfill clock «сгорания» начнёт идти
     get_launch_date()
 
@@ -482,6 +600,9 @@ async def run_backfill_job() -> dict:
             if database.client_has_loyalty_backfill(client_id):
                 summary["already_done"] += 1
                 continue
+            if database.loyalty_backfill_exists_for_phone(phone):
+                summary["already_done"] += 1
+                continue
 
             spent = _yc_search_sold_amount(phone)
             if spent is None:
@@ -491,7 +612,7 @@ async def run_backfill_job() -> dict:
                 summary["zero_spent"] += 1
                 continue
 
-            points = round(spent * CASHBACK_PCT / 100)
+            points = _welcome_points(spent)
             if points <= 0:
                 summary["zero_spent"] += 1
                 continue
@@ -499,7 +620,10 @@ async def run_backfill_job() -> dict:
             database.add_loyalty_transaction(
                 client_id=client_id, type_="backfill",
                 points=points, visit_record_id=None,
-                note=f"+{points} welcome-бонус: 5% от LTV {spent} ₽",
+                note=(
+                    f"+{points} welcome-бонус: {CASHBACK_PCT}% от LTV {spent} ₽ "
+                    f"(лимит {WELCOME_CAP})"
+                ),
             )
             summary["backfilled"] += 1
             summary["total_points"] += points

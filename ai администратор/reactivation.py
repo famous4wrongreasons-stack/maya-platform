@@ -8,7 +8,7 @@
   • не был реактивирован за последние 14 дней
   • не отказался от реактивации за последние 30 дней
 
-— шлёт персональное сообщение от Антона с inline-кнопками для записи.
+— шлёт персональное сообщение от MAYA с inline-кнопками для записи.
 
 Telegram запрещает писать тем, кто не нажимал /start. Поэтому охват
 ограничен теми, кто уже знаком с ботом. Постепенно (с подключением QR
@@ -174,6 +174,16 @@ async def run_reactivation_job(app: Application) -> dict:
     sent, blocked, errors = 0, 0, 0
 
     logger.info(f"🔄 Реактивация: найдено {len(candidates)} уснувших клиентов")
+    # AI-директор (owner_ai.return_candidates) читает это число мгновенно, без ре-скана
+    # базы, чтобы показать владельцу в брифинге «кого вернуть» с потенциалом в рублях.
+    try:
+        import json as _json
+        database.set_setting("reactivation_last", _json.dumps({
+            "count": len(candidates),
+            "at": date.today().isoformat(),
+        }))
+    except Exception as _e:
+        logger.error(f"reactivation persist count: {_e}")
 
     for c in candidates:
         # Персональные настройки: «давно не были» относится к семейству 'cycle' —

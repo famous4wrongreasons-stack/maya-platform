@@ -1,0 +1,272 @@
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
+
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { TenantStatus, UserRole, UserStatus } from '../common/domain.enums';
+import {
+  BrandingService,
+  UploadedLogoFile,
+} from '../branding/branding.service';
+import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
+import { CrmService } from '../crm/crm.service';
+import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
+import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
+import { UsersService } from '../users/users.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { TenantsService } from '../tenants/tenants.service';
+import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
+import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
+import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly brandingService: BrandingService,
+    private readonly crmService: CrmService,
+    private readonly usersService: UsersService,
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
+
+  createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
+    return this.tenantsService.createTenant(dto).then(async (tenant) => {
+      await this.auditLogService.log({
+        tenantId: tenant.id,
+        userId: actor.userId,
+        action: 'tenant.created',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        metadata: {
+          slug: tenant.slug,
+        },
+      });
+
+      return tenant;
+    });
+  }
+
+  listTenants() {
+    return this.tenantsService.listTenants();
+  }
+
+  listPlans() {
+    return this.subscriptionsService.listPlans();
+  }
+
+  async getTenant(id: string, actor: AuthenticatedUser) {
+    this.ensureTenantCanBeManaged(actor, id);
+    return this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(id),
+    );
+  }
+
+  async updateTenant(
+    id: string,
+    dto: UpdateTenantDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    const tenant = await this.tenantsService.updateTenant(id, dto);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'tenant.updated',
+      entityType: 'tenant',
+      entityId: id,
+      metadata: dto as unknown as Record<string, unknown>,
+    });
+
+    return tenant;
+  }
+
+  async updateBranding(
+    id: string,
+    dto: UpdateBrandingDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    const branding = await this.brandingService.upsertBranding(id, dto);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'branding.updated',
+      entityType: 'branding',
+      entityId: branding.id,
+      metadata: dto as unknown as Record<string, unknown>,
+    });
+
+    return this.serializeBranding(branding);
+  }
+
+  async uploadTenantLogo(
+    id: string,
+    file: UploadedLogoFile,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    await this.tenantsService.getTenantByIdOrThrow(id);
+    const branding = await this.brandingService.uploadTenantLogo(id, file);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'branding.logo_uploaded',
+      entityType: 'branding',
+      entityId: branding.id,
+      metadata: {
+        logo_url: branding.logoUrl,
+      },
+    });
+
+    return this.serializeBranding(branding);
+  }
+
+  async upsertCrm(
+    id: string,
+    dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    const integration = await this.crmService.createOrUpdateIntegration(
+      id,
+      dto,
+    );
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'crm.updated',
+      entityType: 'crm_integration',
+      entityId: integration.id,
+      metadata: {
+        provider: integration.provider,
+      },
+    });
+
+    return integration;
+  }
+
+  async testCrm(id: string, actor: AuthenticatedUser) {
+    this.ensureTenantCanBeManaged(actor, id);
+    const result = await this.crmService.testConnection(id);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'crm.tested',
+      entityType: 'crm_integration',
+      entityId: id,
+      metadata: result,
+    });
+
+    return result;
+  }
+
+  async createTenantUser(
+    id: string,
+    dto: CreateTenantUserDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    await this.tenantsService.getTenantByIdOrThrow(id);
+
+    if (dto.branchId) {
+      await this.tenantsService.assertBranchBelongsToTenant(dto.branchId, id);
+    }
+
+    await this.usersService.ensureEmailIsAvailable(id, dto.email);
+
+    if (dto.phone) {
+      await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
+    }
+
+    const temporaryPassword = dto.password?.trim() || this.generatePassword();
+    const user = await this.usersService.createUser({
+      tenantId: id,
+      branchId: dto.branchId ?? null,
+      email: dto.email,
+      phone: dto.phone ?? null,
+      name: dto.name ?? null,
+      passwordHash: await bcrypt.hash(temporaryPassword, 10),
+      role: dto.role ?? UserRole.TENANT_ADMIN,
+      status: UserStatus.ACTIVE,
+    });
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'tenant.user_created',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: {
+        role: user.role,
+        email: user.email,
+        branch_id: user.branchId,
+      },
+    });
+
+    return {
+      user: this.usersService.serializeUser(user),
+      temporary_password: dto.password ? null : temporaryPassword,
+    };
+  }
+
+  async setTenantStatus(
+    id: string,
+    status: TenantStatus,
+    actor: AuthenticatedUser,
+  ) {
+    const tenant = await this.tenantsService.setTenantStatus(id, status);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: `tenant.${status}`,
+      entityType: 'tenant',
+      entityId: id,
+      metadata: { status },
+    });
+
+    return tenant;
+  }
+
+  private generatePassword() {
+    return randomBytes(12).toString('base64url');
+  }
+
+  private ensureTenantCanBeManaged(actor: AuthenticatedUser, tenantId: string) {
+    if (actor.role === UserRole.PLATFORM_OWNER) {
+      return;
+    }
+
+    if (actor.role === UserRole.TENANT_ADMIN && actor.tenantId === tenantId) {
+      return;
+    }
+
+    throw new ForbiddenException('You cannot manage this tenant');
+  }
+
+  private serializeBranding(
+    branding: Awaited<ReturnType<BrandingService['upsertBranding']>>,
+  ) {
+    return {
+      id: branding.id,
+      tenant_id: branding.tenantId,
+      logo_url: branding.logoUrl,
+      app_name: branding.appName,
+      primary_color: branding.primaryColor,
+      secondary_color: branding.secondaryColor,
+      background_image_url: branding.backgroundImageUrl,
+      font_family: branding.fontFamily,
+      button_radius: branding.buttonRadius,
+      theme_json: branding.themeJson ?? {},
+      created_at: branding.createdAt,
+      updated_at: branding.updatedAt,
+    };
+  }
+}

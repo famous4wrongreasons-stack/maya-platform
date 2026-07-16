@@ -45,12 +45,27 @@ import ai_billing
 import anonymizer
 import config
 import cutmatch
+import cycle_reminder
 import database
+import growth_planner
+import lead_alerts
+import master_briefing
 import masters_ai
+import maya_capabilities
+import memory
+import owner_ai
+import reputation
 import subscriptions
 import web_auth
 import yukassa_api
+from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
+from maya_roles import (
+    allowed_surfaces_for_panel_role,
+    default_brain_profile,
+    surface_brain_profiles,
+)
 from config import WEBHOOK_SECRET, WEBHOOK_PORT, TELEGRAM_TOKEN
+from voice_guard import CLARIFY_REPEAT_TEXT, should_clarify_transcript
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -68,6 +83,22 @@ if not WEBPUSH_VAPID_PRIVATE_KEY:
 
 # Один экземпляр клиента YClients на всё время жизни сервера
 _yc = YClientsAPI()
+_VOICE_MASTER_NAMES_CACHE = {"names": (), "ts": 0.0}
+
+
+def _voice_known_master_names() -> tuple[str, ...]:
+    now = time.time()
+    names = _VOICE_MASTER_NAMES_CACHE.get("names") or ()
+    if names and now - float(_VOICE_MASTER_NAMES_CACHE.get("ts") or 0) < 3600:
+        return tuple(names)
+    try:
+        masters = _yc.get_masters() or []
+        names = tuple(m.get("name", "") for m in masters if isinstance(m, dict) and m.get("name"))
+    except Exception as e:
+        logger.error(f"_voice_known_master_names: {e}")
+        names = ()
+    _VOICE_MASTER_NAMES_CACHE.update(names=names, ts=now)
+    return tuple(names)
 
 # Номиналы подарочных сертификатов, доступные к покупке в приложении
 _CERT_AMOUNTS = (2000, 3000, 5000)
@@ -150,6 +181,13 @@ def _truncate_name(name: str | None, max_len: int = 30) -> str:
     if len(parts) >= 2:
         return f"{parts[0]} {parts[1][0]}."
     return name[:max_len - 1] + "…"
+
+
+def _push_preview_body(text: str, max_len: int = 180) -> str:
+    plain = re.sub(r"\s+", " ", _plain_maya_text(text or "")).strip()
+    if len(plain) <= max_len:
+        return plain
+    return plain[: max_len - 1].rstrip() + "…"
 
 
 def _format_datetime(dt_str: str | None) -> str:
@@ -508,8 +546,10 @@ async def _send_master_push(
             sent += 1
         except WebPushException as e:
             status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (404, 410):
+            if status in (403, 404, 410):
                 _delete_master_push_subscription_sqlite(endpoint)
+                logger.info(f"master push stale subscription removed status={status}")
+                continue
             logger.error(f"master push failed: {e}")
         except Exception as e:
             logger.error(f"master push failed: {e}")
@@ -518,9 +558,30 @@ async def _send_master_push(
 
 async def _send_client_push(chat_id, title: str, body: str,
                             url: str = "/app/", tag: str = "",
-                            data: dict | None = None) -> int:
+                            data: dict | None = None,
+                            persist_in_chat: bool = False,
+                            chat_text: str = "",
+                            chat_action: dict | None = None,
+                            chat_link=None,
+                            chat_mode: str = "client",
+                            chat_dedupe_key: str = "") -> int:
     """Push конкретному КЛИЕНТУ (по telegram_chat_id) — напр. предложение оставить чай
     после визита. Подписки клиента лежат в той же таблице (staff_id NULL)."""
+    if persist_in_chat and chat_id:
+        try:
+            text_for_chat = (chat_text or "").strip()
+            if not text_for_chat:
+                text_for_chat = (f"{title}\n\n{body}" if body else title).strip()
+            _store_assistant_message_in_chat(
+                int(chat_id),
+                text_for_chat,
+                mode=chat_mode,
+                action=chat_action,
+                link=chat_link,
+                dedupe_key=chat_dedupe_key or tag or "",
+            )
+        except Exception as e:
+            logger.error(f"client push chat mirror {chat_id}: {e}")
     if not chat_id or not WEBPUSH_VAPID_PRIVATE_KEY:
         return 0
     try:
@@ -556,8 +617,10 @@ async def _send_client_push(chat_id, title: str, body: str,
             sent += 1
         except WebPushException as e:
             status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (404, 410):
+            if status in (403, 404, 410):
                 _delete_master_push_subscription_sqlite(endpoint)
+                logger.info(f"client push stale subscription removed status={status}")
+                continue
             logger.error(f"client push failed: {e}")
         except Exception as e:
             logger.error(f"client push failed: {e}")
@@ -582,9 +645,20 @@ async def _offer_tip_to_client(record: dict, record_id: int) -> None:
             title="Спасибо за визит! 💈",
             body=(f"Понравилось у мастера {master_name}? " if master_name else "")
                  + "Можно оставить чаевые 💸",
-            url=f"/app/#tips={staff_id}",
+            url=f"/app/?tips={staff_id}",
             tag=f"tip-offer-{record_id}",
             data={"master": str(staff_id)},
+            persist_in_chat=True,
+            chat_text=(
+                "Спасибо за визит! 💈\n\n"
+                + ((f"Если понравилось у мастера {master_name}, " if master_name else "")
+                   + "можно оставить чаевые в приложении.")
+            ),
+            chat_link={
+                "label": "Оставить чаевые",
+                "url": f"https://malesthetic.pro/app/?tips={staff_id}",
+            },
+            chat_dedupe_key=f"tip-offer:{record_id}",
         )
         if n:
             logger.info(f"tip-offer push клиенту chat={cc} (мастер {staff_id}): отправлено {n}")
@@ -628,7 +702,16 @@ async def _notify_client_record(record: dict, record_id: int, kind: str) -> None
         n = await _send_client_push(
             int(cc), title=title, body=body,
             url="/app/", tag=f"client-rec-{kind}-{record_id}",
-            data={"record_id": record_id, "event": kind})
+            data={"record_id": record_id, "event": kind},
+            persist_in_chat=True,
+            chat_text=f"{title}\n\n{body}",
+            chat_action={
+                "type": "open_cabinet",
+                "label": "Мои записи",
+                "screen": "cabinet",
+            },
+            chat_dedupe_key=f"client-record:{kind}:{record_id}",
+        )
         if n:
             logger.info(f"client push ({kind}) chat={cc} record={record_id}: отправлено {n}")
     except Exception as e:
@@ -736,19 +819,11 @@ async def _fetch_client_history(client_id: int) -> list[dict]:
     """
     cached = database.get_client_history_cached(client_id)
     if cached is not None:
-        return cached
+        return memory.normalize_history(cached)
     history = await asyncio.to_thread(_yc.get_client_history, client_id)
-    # Сохраняем урезанную версию — только то, что нужно AI
-    minimal = []
-    for v in history[:20]:
-        minimal.append({
-            "date": v.get("date") or v.get("datetime"),
-            "services": [
-                {"title": s.get("title"), "cost": s.get("cost") or s.get("price") or 0}
-                for s in (v.get("services") or [])
-            ],
-            "staff": {"name": (v.get("staff") or {}).get("name")},
-        })
+    # Сохраняем урезанную версию — только то, что нужно AI, но в одном
+    # каноническом формате для всех потребителей.
+    minimal = memory.normalize_history(history[:20])
     database.set_client_history_cache(client_id, minimal)
     return minimal
 
@@ -806,6 +881,58 @@ def _save_record_state(record: dict, record_id: int):
         )
     except Exception as e:
         logger.error(f"_save_record_state({record_id}): {e}")
+
+
+def _close_local_booking_intent(record: dict, record_id: int):
+    """Закрывает зависший диалог, если запись пришла из внешнего YClients/PWA-пути."""
+    try:
+        client = record.get("client") or {}
+        phone = (
+            client.get("phone")
+            or client.get("phone_number")
+            or client.get("normalized_phone")
+            or ""
+        )
+        local_client = database.find_client_by_phone(str(phone)) if phone else None
+        if not local_client or not local_client.get("id"):
+            return
+        lead_alerts.on_booking_confirmed(int(local_client["id"]))
+        logger.info(
+            f"Webhook: record {record_id} closed local booking intent "
+            f"for client_id={local_client['id']}"
+        )
+    except Exception as e:
+        logger.error(f"Webhook: close local booking intent record {record_id}: {e}")
+
+
+def _booking_failure_reply(result: dict) -> str:
+    """Короткое понятное объяснение клиенту, почему запись не дошла до YClients."""
+    code = (result or {}).get("code") or ""
+    if code == "slot_taken":
+        return (
+            "Это время уже заняли или оно стало недоступно. "
+            "Давайте выберем другой ближайший слот."
+        )
+    if code == "bad_phone":
+        return (
+            "Не получилось записать из-за номера телефона. "
+            "Проверьте номер в профиле или напишите его заново."
+        )
+    if code == "bad_name":
+        return "Не получилось записать из-за имени. Напишите, пожалуйста, как вас записать."
+    if code == "bad_service":
+        return "Эта услуга сейчас недоступна для онлайн-записи. Давайте выберем услугу заново."
+    if code == "bad_staff":
+        return "Этот мастер сейчас недоступен для онлайн-записи. Давайте выберем другого мастера или время."
+    if code == "yclients_unavailable":
+        return (
+            "Сервер записи сейчас отвечает нестабильно, поэтому я не буду повторять заявку, "
+            "чтобы случайно не создать дубль. Проверьте «Мои записи» через минуту или напишите мне ещё раз."
+        )
+    return (
+        "Не получилось оформить запись автоматически. "
+        "Попробуйте выбрать другое время или напишите мне ещё раз."
+    )
 
 
 async def _process_record_create(app: Application, record_id: int) -> dict:
@@ -867,6 +994,7 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
     # Догружаем полный профиль клиента, чтобы корректно показать «N-й визит»
     # и дать AI его историю предпочтений.
     advice, ai_provider = None, "fallback"
+    money_full, money_short = "", ""     # денежная мотивация мастеру (цифры)
     client = record.get("client") or {}
     client_id = client.get("id")
     if client_id:
@@ -890,8 +1018,14 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
                 f"Webhook: AI ({ai_provider}) сгенерировал совет "
                 f"({len(advice) if advice else 0} символов) для записи {record_id}"
             )
+            try:
+                money_full, money_short = masters_ai.money_pitch(int(staff_id), history, record)
+            except Exception as e:
+                logger.error(f"Webhook: money_pitch для записи {record_id}: {e}")
         except Exception as e:
             logger.error(f"Webhook: ошибка получения совета AI: {e}")
+
+    _close_local_booking_intent(record, record_id)
 
     # 6. Лог в БД — будет нужен для статистики «зашёл / не зашёл совет»
     try:
@@ -913,6 +1047,9 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
 
     # 7. Готовим текст уведомления (с советом, если AI вернул что-то)
     text = _build_notification_text(record, advice=advice)
+    # Денежная мотивация мастеру: конкретные цифры (обычно/можешь, в мес, в год).
+    if money_full:
+        text = f"{text}\n\n{money_full}"
 
     # Inline-кнопки оплаты: 💵 Наличные / 💳 Карта.
     # callback_data: pay_<method>_<record_id> — record_id даёт идемпотентность.
@@ -944,6 +1081,8 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
             if len(_adv) > 220:
                 _adv = _adv[:219].rstrip() + "…"
             _push_body = f"{_push_body}\n💡 {_adv}"
+        if money_short:                       # короткая денежная строка в пуш
+            _push_body = f"{_push_body}\n{money_short}"
         await _send_master_push(
             master, title="Новая запись", body=_push_body,
             url="/app/?panel=schedule", tag=f"record-create-{record_id}",
@@ -1319,10 +1458,20 @@ async def _process_record_delete(app: Application, record_id: int, payload: dict
     return freed_result
 
 
+def _webhook_secret_ok(request: web.Request) -> bool:
+    provided = (
+        request.headers.get("X-Webhook-Secret")
+        or request.query.get("secret")
+        or ""
+    )
+    return hmac.compare_digest(str(provided), str(WEBHOOK_SECRET))
+
+
 async def handle_yclients_webhook(request: web.Request) -> web.Response:
     """HTTP-обработчик /yclients-webhook"""
-    # Проверка секрета
-    if request.query.get("secret") != WEBHOOK_SECRET:
+    # Проверка секрета. Header используется внутренним PHP-прокси, чтобы секрет
+    # не попадал в access-log как query string; query оставлен для совместимости.
+    if not _webhook_secret_ok(request):
         logger.warning(f"Webhook: чужой запрос с {request.remote}")
         return web.json_response({"error": "forbidden"}, status=403)
 
@@ -1469,6 +1618,108 @@ def _usual_master(history: list) -> dict | None:
     return {"id": best, "name": names.get(best, "")}
 
 
+def _client_card_name(card: dict | None) -> str:
+    """Полное имя клиента из карточки YClients."""
+    data = card if isinstance(card, dict) else {}
+    full = " ".join(
+        str(data.get(key) or "").strip()
+        for key in ("name", "surname", "patronymic")
+        if str(data.get(key) or "").strip()
+    ).strip()
+    return full or str(data.get("display_name") or "").strip()
+
+
+def _client_card_view(card: dict | None, fallback_visits: int) -> dict | None:
+    """Сжатый безопасный вид карточки клиента для кабинета."""
+    data = card if isinstance(card, dict) else {}
+    if not data:
+        return None
+    return {
+        "id": data.get("id"),
+        "name": _client_card_name(data),
+        "comment": str(data.get("comment") or "").strip(),
+        "visits": data.get("visits") if data.get("visits") is not None else fallback_visits,
+        "spent": data.get("spent") if data.get("spent") is not None else data.get("paid"),
+        "balance": data.get("balance"),
+        "discount": data.get("discount"),
+        "categories": data.get("categories") or [],
+    }
+
+
+def _load_cabinet_yclients(phone: str) -> dict:
+    """Тянет карточку клиента и его записи из YClients синхронно (для to_thread)."""
+    phone_digits = "".join(ch for ch in (phone or "") if ch.isdigit())
+    if len(phone_digits) < 10:
+        return {
+            "yc_client_id": None,
+            "client_card": None,
+            "loyalty_card": None,
+            "bookings": [],
+        }
+
+    yc_client_id = None
+    try:
+        for row in _yc.search_clients(phone, limit=8) or []:
+            row_digits = "".join(ch for ch in (row.get("phone") or "") if ch.isdigit())
+            if row_digits and row_digits[-10:] == phone_digits[-10:]:
+                yc_client_id = row.get("id")
+                break
+    except Exception as e:
+        logger.error(f"cabinet yclients search {phone_digits[-4:]}: {e}")
+        return {
+            "yc_client_id": None,
+            "client_card": None,
+            "loyalty_card": None,
+            "bookings": [],
+        }
+
+    if not yc_client_id:
+        return {
+            "yc_client_id": None,
+            "client_card": None,
+            "loyalty_card": None,
+            "bookings": [],
+        }
+
+    client_card = None
+    loyalty_card = None
+    bookings = []
+    try:
+        client_card = _yc.get_client(int(yc_client_id)) or None
+    except Exception as e:
+        logger.error(f"cabinet yclients client {yc_client_id}: {e}")
+
+    try:
+        import loyalty as _loy
+        loyalty_card = _loy.select_yclients_cashback_card(
+            _yc.get_client_loyalty_cards(int(yc_client_id))
+        )
+    except Exception as e:
+        logger.error(f"cabinet yclients loyalty {yc_client_id}: {e}")
+
+    try:
+        params = {
+            "client_id": int(yc_client_id),
+            "count": 200,
+            "start_date": (datetime.now() - timedelta(days=1825)).strftime("%Y-%m-%d"),
+            "end_date": (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%d"),
+        }
+        data = _yc._get(f"records/{_yc.company_id}", params)
+        for row in (data.get("data") or []):
+            if isinstance(row, dict):
+                bookings.append(row)
+    except Exception as e:
+        logger.error(f"cabinet yclients records {yc_client_id}: {e}")
+        bookings = []
+
+    return {
+        "yc_client_id": int(yc_client_id),
+        "client_card": client_card,
+        "loyalty_card": loyalty_card,
+        "bookings": bookings,
+    }
+
+
 async def cabinet_me_handler(request: web.Request) -> web.Response:
     """
     GET /api/cabinet/me
@@ -1483,248 +1734,10 @@ async def cabinet_me_handler(request: web.Request) -> web.Response:
              "message": "Подпись Telegram WebApp невалидна или устарела."},
             status=401,
         )
-
     chat_id = tg_user.get("id")
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
-
-    client = database.get_client(int(chat_id))
-    if not client:
-        # Клиент ещё не взаимодействовал с ботом
-        return _cabinet_response({
-            "known": False,
-            "tg_user": {
-                "first_name": tg_user.get("first_name", ""),
-                "username": tg_user.get("username", ""),
-            },
-            "message": "Сначала запишись через бот — после первой записи мы будем знать тебя.",
-        })
-
-    # 152-ФЗ: без подписанного согласия личный кабинет недоступен.
-    # Гейт в боте уже это контролирует, но кабинет доступен и из приложения —
-    # дублируем защиту здесь.
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return _cabinet_response({
-            "known": False,
-            "needs_consent": True,
-            "message": (
-                "Чтобы открыть личный кабинет, подпишите согласие на обработку "
-                "персональных данных. Откройте бот @malesthetic_bot и нажмите /start."
-            ),
-        }, status=403)
-
-    client_id = client["id"]
-    phone = client.get("phone") or ""
-
-    # Если телефон известен — подтянем welcome-баллы за прошлые визиты
-    # (идемпотентно). Так клиент видит свои баллы в кабинете даже до записи
-    # через бота.
-    if phone:
-        try:
-            import loyalty as _loy
-            await asyncio.to_thread(_loy.lazy_backfill_for_client, client_id, phone)
-        except Exception as e:
-            logger.error(f"cabinet_me: lazy_backfill {client_id}: {e}")
-
-    # Баллы
-    balance = database.loyalty_balance(client_id)
-
-    # Визиты — тянем напрямую по yclients_client_id, без шумного фильтра по
-    # номеру в общем потоке записей салона.
-    # 1) ищем YClients-id клиента по телефону.
-    #
-    # ⚠️ КРИТИЧНО: телефон ДОЛЖЕН быть валидным. Пустой quick_search в YClients
-    # возвращает ПЕРВУЮ страницу ВСЕХ клиентов салона — и мы бы показали чужую
-    # историю визитов (утечка ПД по 152-ФЗ). Поэтому без телефона НЕ ищем.
-    bookings = []
-    phone_digits = "".join(ch for ch in phone if ch.isdigit())
-    has_valid_phone = len(phone_digits) >= 10
-    if not has_valid_phone:
-        logger.info(
-            f"cabinet_me: у client_id={client_id} нет телефона — "
-            f"визиты из YClients не запрашиваем (защита от утечки чужих данных)"
-        )
-    if has_valid_phone:
-      try:
-        import requests as _rq
-        from config import (
-            YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKEN, YCLIENTS_COMPANY_ID,
-        )
-        headers = {
-            "Accept": "application/vnd.api.v2+json",
-            "Content-Type": "application/json",
-            "Authorization": (
-                f"Bearer {YCLIENTS_PARTNER_TOKEN}, User {YCLIENTS_USER_TOKEN}"
-            ),
-        }
-        search_url = (
-            f"https://api.yclients.com/api/v1/company/"
-            f"{YCLIENTS_COMPANY_ID}/clients/search"
-        )
-        r = _rq.post(search_url, json={
-            "fields": ["id", "name", "phone", "sold_amount", "visits_count"],
-            "filters": [{"type": "quick_search", "state": {"value": phone}}],
-        }, headers=headers, timeout=15)
-        yc_client_id = None
-        if r.status_code == 200:
-            items = (r.json() or {}).get("data") or []
-            # Доп. защита: сверяем телефон найденного клиента с искомым —
-            # quick_search нечёткий, может вернуть «похожих». Берём только
-            # точное совпадение по цифрам номера.
-            for it in items:
-                it_digits = "".join(ch for ch in (it.get("phone") or "") if ch.isdigit())
-                if it_digits and it_digits[-10:] == phone_digits[-10:]:
-                    yc_client_id = it.get("id")
-                    break
-
-        # 2) если нашли — забираем ВСЕ записи именно этого клиента
-        if yc_client_id:
-            from datetime import datetime as _dt
-            params = {
-                "client_id": yc_client_id,
-                "count": 200,
-                # окно 5 лет назад + 3 месяца вперёд — закроет всю историю
-                "start_date": (_dt.now() - timedelta(days=1825)).strftime("%Y-%m-%d"),
-                "end_date":   (_dt.now() + timedelta(days=90)).strftime("%Y-%m-%d"),
-            }
-            r2 = _rq.get(
-                f"https://api.yclients.com/api/v1/records/{YCLIENTS_COMPANY_ID}",
-                params=params, headers=headers, timeout=20,
-            )
-            if r2.status_code == 200:
-                raw_records = (r2.json() or {}).get("data") or []
-                # Нормализуем структуру под существующий цикл ниже
-                for r_rec in raw_records:
-                    if not isinstance(r_rec, dict):
-                        continue
-                    bookings.append({
-                        "id": r_rec.get("id"),
-                        "record_id": r_rec.get("id"),
-                        "date": r_rec.get("date") or r_rec.get("datetime", ""),
-                        "datetime": r_rec.get("datetime", ""),
-                        "services": r_rec.get("services") or [],
-                        "service_titles": [
-                            (s.get("title") or "")
-                            for s in (r_rec.get("services") or [])
-                            if isinstance(s, dict)
-                        ],
-                        "staff": r_rec.get("staff") or {},
-                        "staff_id": r_rec.get("staff_id"),
-                        "master": (r_rec.get("staff") or {}).get("name", ""),
-                        "attendance": r_rec.get("attendance", 0),
-                        "visit_attendance": r_rec.get("visit_attendance", 0),
-                    })
-        # Если точного совпадения по телефону не нашли — НЕ берём чужого
-        # клиента. Просто оставляем bookings пустым.
-      except Exception as e:
-        logger.error(f"cabinet_me: yc bookings err: {e}")
-        bookings = []
-
-    today_str = date.today().isoformat()
-    upcoming = []
-    history = []
-    visits_total = 0
-    visits_last_year = 0
-    year_ago = (date.today() - timedelta(days=365)).isoformat()
-    last_visit = None
-
-    for b in bookings:
-        if not isinstance(b, dict):
-            continue
-        record_id = b.get("id") or b.get("record_id")
-        if not record_id:
-            continue
-        dt = (b.get("datetime") or b.get("date") or "")[:10]
-        attended = b.get("attendance") == 1 or b.get("visit_attendance") == 1
-        services = b.get("service_titles") or [
-            (s.get("title") if isinstance(s, dict) else str(s))
-            for s in (b.get("services") or [])
-        ]
-        master = b.get("master") or (b.get("staff") or {}).get("name") or ""
-
-        item = {
-            "record_id": int(record_id),
-            "date": b.get("date") or b.get("datetime", ""),
-            "services": [t for t in services if t],
-            "master": master,
-            "master_id": _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id")),
-        }
-
-        if not attended and dt >= today_str:
-            upcoming.append(item)
-        elif attended:
-            history.append(item)
-            visits_total += 1
-            if dt >= year_ago:
-                visits_last_year += 1
-            if last_visit is None or dt > last_visit.get("date_short", ""):
-                last_visit = {**item, "date_short": dt}
-
-    upcoming.sort(key=lambda x: x["date"])
-    history.sort(key=lambda x: x["date"], reverse=True)
-
-    # Активный абонемент
-    sub = database.get_active_subscription_for_client(client_id)
-    sub_info = None
-    if sub:
-        import subscriptions as _subs
-        plan = _subs.get_plan(sub["plan_code"])
-        if plan:
-            tier = (sub.get("tier") or "top").lower()
-            sub_info = {
-                "title": plan["title"],
-                "tier_label": _subs.TIER_LABELS.get(tier, ""),
-                "used": sub.get("visits_used", 0),
-                "total": sub["visits_included"],
-                "expires_at": sub["expires_at"][:10],
-                "services_included": plan["services_included"],
-            }
-
-    # Реферальная ссылка
-    import referral as _ref
-    try:
-        ref_code = _ref.get_or_create_ref_code(client_id)
-        ref_link = _ref.build_ref_link(ref_code, "malesthetic_bot")
-        ref_stats = database.referral_stats_for_client(client_id)
-    except Exception as e:
-        logger.error(f"cabinet_me: ref err: {e}")
-        ref_code, ref_link, ref_stats = None, None, {}
-
-    # Полное имя — расшифровано
-    full_name = client.get("name") or tg_user.get("first_name", "")
-    first_name = (full_name.split() or [""])[0]
-
-    return _cabinet_response({
-        "known": True,
-        "has_phone": has_valid_phone,
-        "needs_phone": not has_valid_phone,
-        "name": first_name,
-        "full_name": full_name,
-        "phone_tail": phone[-4:] if has_valid_phone else "",
-        "booking_phone": phone if has_valid_phone else "",
-        "loyalty": {
-            "balance": balance,
-            "care_services": [
-                {"title": c["title"], "price": c["price"], "emoji": c["emoji"]}
-                for c in __import__("loyalty").CARE_SERVICES
-            ],
-        },
-        "visits": {
-            "total": visits_total,
-            "last_year": visits_last_year,
-            "last_visit": last_visit,
-        },
-        "usual_master": _usual_master(history),
-        "upcoming": upcoming,
-        "history": history[:30],  # последние 30
-        "subscription": sub_info,
-        "referral": {
-            "code": ref_code,
-            "link": ref_link,
-            "invited": ref_stats.get("granted", 0),
-            "pending": ref_stats.get("pending", 0),
-        },
-    })
+    return await _build_full_cabinet(int(chat_id), tg_user)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1815,13 +1828,17 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
     Общая логика построения ответа ЛК — используется и cabinet_me_handler,
     и cabinet_me_via_login_handler. Возвращает ту же структуру что ждёт фронт.
     """
+    tg_profile = normalize_tg_user(tg_user)
     client = database.get_client(int(chat_id))
     if not client:
         return _cabinet_response({
             "known": False,
             "tg_user": {
-                "first_name": tg_user.get("first_name", ""),
-                "username": tg_user.get("username", ""),
+                "first_name": tg_profile.get("first_name", ""),
+                "last_name": tg_profile.get("last_name", ""),
+                "full_name": tg_profile.get("full_name", ""),
+                "username": tg_profile.get("username", ""),
+                "photo_url": tg_profile.get("photo_url", ""),
             },
             "message": "Сначала запишись через бот — после первой записи мы будем знать тебя.",
         })
@@ -1847,82 +1864,31 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
         except Exception as e:
             logger.error(f"_build_full_cabinet: lazy_backfill {client_id}: {e}")
     balance = database.loyalty_balance(client_id)
+    loyalty_source = "maya_ledger"
 
-    # ⚠️ Без валидного телефона НЕ ищем в YClients — пустой quick_search вернёт
-    # чужих клиентов (утечка ПД). См. cabinet_me_handler.
     bookings = []
+    yc_client_id = None
+    yc_client_card = None
     phone_digits = "".join(ch for ch in phone if ch.isdigit())
     has_valid_phone = len(phone_digits) >= 10
     if has_valid_phone:
-      try:
-        import requests as _rq
-        from config import (
-            YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKEN, YCLIENTS_COMPANY_ID,
-        )
-        headers = {
-            "Accept": "application/vnd.api.v2+json",
-            "Content-Type": "application/json",
-            "Authorization": (
-                f"Bearer {YCLIENTS_PARTNER_TOKEN}, User {YCLIENTS_USER_TOKEN}"
-            ),
-        }
-        search_url = (
-            f"https://api.yclients.com/api/v1/company/"
-            f"{YCLIENTS_COMPANY_ID}/clients/search"
-        )
-        r = _rq.post(search_url, json={
-            "fields": ["id", "name", "phone", "sold_amount", "visits_count"],
-            "filters": [{"type": "quick_search", "state": {"value": phone}}],
-        }, headers=headers, timeout=15)
-        yc_client_id = None
-        if r.status_code == 200:
-            items = (r.json() or {}).get("data") or []
-            for it in items:
-                it_digits = "".join(ch for ch in (it.get("phone") or "") if ch.isdigit())
-                if it_digits and it_digits[-10:] == phone_digits[-10:]:
-                    yc_client_id = it.get("id")
-                    break
-        if yc_client_id:
-            from datetime import datetime as _dt
-            params = {
-                "client_id": yc_client_id,
-                "count": 200,
-                "start_date": (_dt.now() - timedelta(days=1825)).strftime("%Y-%m-%d"),
-                "end_date":   (_dt.now() + timedelta(days=90)).strftime("%Y-%m-%d"),
-            }
-            r2 = _rq.get(
-                f"https://api.yclients.com/api/v1/records/{YCLIENTS_COMPANY_ID}",
-                params=params, headers=headers, timeout=20,
-            )
-            if r2.status_code == 200:
-                raw_records = (r2.json() or {}).get("data") or []
-                for r_rec in raw_records:
-                    if not isinstance(r_rec, dict):
-                        continue
-                    bookings.append({
-                        "id": r_rec.get("id"),
-                        "record_id": r_rec.get("id"),
-                        "date": r_rec.get("date") or r_rec.get("datetime", ""),
-                        "datetime": r_rec.get("datetime", ""),
-                        "services": r_rec.get("services") or [],
-                        "service_titles": [
-                            (s.get("title") or "")
-                            for s in (r_rec.get("services") or [])
-                            if isinstance(s, dict)
-                        ],
-                        "staff": r_rec.get("staff") or {},
-                        "staff_id": r_rec.get("staff_id"),
-                        "master": (r_rec.get("staff") or {}).get("name", ""),
-                        "attendance": r_rec.get("attendance", 0),
-                        "visit_attendance": r_rec.get("visit_attendance", 0),
-                    })
-      except Exception as e:
-        logger.error(f"cabinet_via_login: yc bookings err: {e}")
-        bookings = []
+        try:
+            yc_payload = await asyncio.to_thread(_load_cabinet_yclients, phone)
+            yc_client_id = yc_payload.get("yc_client_id")
+            yc_client_card = yc_payload.get("client_card")
+            yc_loyalty_card = yc_payload.get("loyalty_card")
+            bookings = yc_payload.get("bookings") or []
+            if isinstance(yc_loyalty_card, dict) and yc_loyalty_card.get("balance") is not None:
+                balance = max(0, int(round(float(yc_loyalty_card.get("balance") or 0))))
+                loyalty_source = "yclients"
+        except Exception as e:
+            logger.error(f"cabinet_via_login: yc bookings err: {e}")
+            bookings = []
 
     today_str = date.today().isoformat()
     upcoming = []
     history = []
+    history_cache = []
     visits_total = 0
     visits_last_year = 0
     year_ago = (date.today() - timedelta(days=365)).isoformat()
@@ -1936,22 +1902,45 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             continue
         dt = (b.get("datetime") or b.get("date") or "")[:10]
         attended = b.get("attendance") == 1 or b.get("visit_attendance") == 1
-        services = b.get("service_titles") or [
-            (s.get("title") if isinstance(s, dict) else str(s))
-            for s in (b.get("services") or [])
-        ]
+        services = []
+        total_cost = 0
+        for svc in (b.get("services") or []):
+            if isinstance(svc, dict):
+                title = str(svc.get("title") or "").strip()
+                if not title:
+                    continue
+                cost = svc.get("cost")
+                if cost in (None, ""):
+                    cost = svc.get("price")
+                try:
+                    total_cost += int(float(cost or 0))
+                except (TypeError, ValueError):
+                    pass
+                services.append({"title": title, "cost": cost or 0})
+            elif str(svc or "").strip():
+                services.append({"title": str(svc).strip(), "cost": 0})
+        service_titles = [svc["title"] for svc in services if svc.get("title")]
         master = b.get("master") or (b.get("staff") or {}).get("name") or ""
+        master_id = _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id"))
         item = {
             "record_id": int(record_id),
             "date": b.get("date") or b.get("datetime", ""),
-            "services": [t for t in services if t],
+            "services": service_titles,
             "master": master,
-            "master_id": _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id")),
+            "master_id": master_id,
+            "cost": total_cost or None,
         }
         if not attended and dt >= today_str:
             upcoming.append(item)
         elif attended:
             history.append(item)
+            history_cache.append(memory.normalize_history_visit({
+                "date": b.get("date") or b.get("datetime", ""),
+                "services": services,
+                "staff": {"id": master_id, "name": master},
+                "master_id": master_id,
+                "master": master,
+            }))
             visits_total += 1
             if dt >= year_ago:
                 visits_last_year += 1
@@ -1960,6 +1949,13 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
 
     upcoming.sort(key=lambda x: x["date"])
     history.sort(key=lambda x: x["date"], reverse=True)
+    history_cache.sort(key=lambda x: str(x.get("date") or ""), reverse=True)
+
+    if has_valid_phone:
+        try:
+            database.set_client_history_cache(client_id, history_cache[:30])
+        except Exception as e:
+            logger.error(f"_build_full_cabinet: cache warm {client_id}: {e}")
 
     sub = database.get_active_subscription_for_client(client_id)
     sub_info = None
@@ -1989,8 +1985,16 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
     except Exception as e:
         logger.error(f"cabinet_via_login: ref err: {e}")
 
-    full_name = client.get("name") or tg_user.get("first_name", "")
-    first_name = (full_name.split() or [""])[0]
+    client_card = _client_card_view(yc_client_card, visits_total)
+    client_note = (client_card or {}).get("comment") or ""
+    client_card_name = (client_card or {}).get("name") or client.get("name") or ""
+    full_name = (
+        tg_profile.get("full_name")
+        or client_card_name
+        or tg_profile.get("first_name")
+        or ""
+    )
+    first_name = tg_profile.get("first_name") or (full_name.split() or [""])[0]
 
     return _cabinet_response({
         "known": True,
@@ -2002,6 +2006,7 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
         "booking_phone": phone if has_valid_phone else "",
         "loyalty": {
             "balance": balance,
+            "source": loyalty_source,
             "care_services": [
                 {"title": c["title"], "price": c["price"], "emoji": c["emoji"]}
                 for c in __import__("loyalty").CARE_SERVICES
@@ -2012,6 +2017,9 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             "last_year": visits_last_year,
             "last_visit": last_visit,
         },
+        "yc_client_id": yc_client_id,
+        "client_card": client_card,
+        "client_note": client_note,
         "usual_master": _usual_master(history),
         "upcoming": upcoming,
         "history": history[:30],
@@ -2023,9 +2031,12 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             "pending": ref_stats.get("pending", 0),
         },
         "tg_user": {
-            "first_name": tg_user.get("first_name", ""),
-            "username": tg_user.get("username", ""),
-            "photo_url": tg_user.get("photo_url", ""),
+            "id": tg_profile.get("id"),
+            "first_name": tg_profile.get("first_name", ""),
+            "last_name": tg_profile.get("last_name", ""),
+            "full_name": tg_profile.get("full_name", ""),
+            "username": tg_profile.get("username", ""),
+            "photo_url": tg_profile.get("photo_url", ""),
         },
     })
 
@@ -2059,41 +2070,26 @@ def _panel_resolve_role(tg_id: int) -> dict:
     staff_id = master_row.get("yclients_staff_id") if master_row else None
     master_name = (master_row.get("full_name") if master_row else "") or ""
     is_cashier = bool(master_row.get("can_redeem")) if master_row else False
-
-    role = None
-    if database.is_admin(int(tg_id)):
-        role = "owner"
-    elif tg_id in managers:
-        role = "manager"
-    elif is_master:
-        role = "master"
-
-    PERMS = {
-        "owner":   {"dashboard": True,  "analytics": True,  "marketing": True,  "jobs": True,
-                    "reviews": True,  "staff": True,  "roles": True,  "pii_export": True,
-                    "master_tools": True,  "redeem": True},
-        "manager": {"dashboard": True,  "analytics": True,  "marketing": True,  "jobs": True,
-                    "reviews": True,  "staff": False, "roles": False, "pii_export": False,
-                    "master_tools": False, "redeem": False},
-        "master":  {"dashboard": False, "analytics": False, "marketing": False, "jobs": False,
-                    "reviews": False, "staff": False, "roles": False, "pii_export": False,
-                    "master_tools": True,  "redeem": is_cashier},
-    }
-    perms = dict(PERMS.get(role, {}))
-    # Владелец/управляющий, который ещё и привязанный мастер → даём инструменты мастера
-    if is_master:
-        perms["master_tools"] = True
-        if is_cashier:
-            perms["redeem"] = True
-    # Основатель MAYA — доступ к закрытому GOD-режиму (founder-кабинет)
     try:
         from config import FOUNDER_IDS as _FIDS
-        is_founder = int(tg_id) in set(_FIDS)
+        founders = {int(x) for x in _FIDS}
     except Exception:
-        is_founder = False
+        founders = set()
+    is_founder = int(tg_id) in founders
+    is_admin = bool(database.is_admin(int(tg_id)))
+
+    role = resolve_panel_role(
+        tg_id=int(tg_id),
+        is_founder=is_founder,
+        is_admin=is_admin,
+        is_master=is_master,
+        manager_ids=managers,
+    )
+
+    perms = panel_permissions(role, is_master=is_master, is_cashier=is_cashier)
     return {"role": role, "is_cashier": is_cashier, "is_master": is_master,
             "staff_id": staff_id, "master_name": master_name, "permissions": perms,
-            "is_founder": is_founder}
+            "is_founder": is_founder, "is_admin": is_admin}
 
 
 def _panel_auth(body: dict, init_data_header: str):
@@ -2113,10 +2109,7 @@ def _panel_auth(body: dict, init_data_header: str):
     tok = (body or {}).get("session_token")
     if tok:
         try:
-            sess = web_auth.resolve_session(tok)
-            cid = sess.get("chat_id") if sess else None
-            if cid:
-                return {"id": int(cid), "first_name": (sess.get("display_name") or "")}
+            return session_tg_user(web_auth.resolve_session(tok))
         except Exception:
             pass
     return None
@@ -2153,7 +2146,21 @@ async def _promo_gift_notify(app, chat_id: int, code: str, pct: int, until_str: 
     try:
         await _send_client_push(chat_id, title=f"Ваш промокод −{pct}% 🎁",
                                 body=f"{code} — скидка {pct}% на первое посещение.", url="/app/",
-                                tag="promo-gift")
+                                tag="promo-gift",
+                                persist_in_chat=True,
+                                chat_text=(
+                                    "🎁 Для вас готов промокод на первое посещение.\n\n"
+                                    f"{code} — скидка {pct}%.\n"
+                                    + (f"Действует до {until_str[:10]}.\n" if until_str else "")
+                                    + "Когда будете готовы, откройте запись в приложении."
+                                ),
+                                chat_action={
+                                    "type": "open_booking",
+                                    "label": "Записаться",
+                                    "screen": "book",
+                                },
+                                chat_dedupe_key=f"promo-gift:{code}",
+                                )
     except Exception:
         pass
 
@@ -2224,7 +2231,8 @@ async def panel_me_handler(request: web.Request) -> web.Response:
         )
     except Exception:
         pass
-    _panel_record_seen(int(tg_id), tg_user.get("first_name", ""))
+    tg_profile = normalize_tg_user(tg_user)
+    _panel_record_seen(int(tg_id), tg_profile.get("first_name", ""))
     # Собственные чаевые мастера (для его панели): сумма и количество
     my_tips = None
     if info.get("is_master"):
@@ -2244,7 +2252,23 @@ async def panel_me_handler(request: web.Request) -> web.Response:
         "master_name": info["master_name"],
         "permissions": info["permissions"],
         "is_founder": info.get("is_founder", False),  # доступ к GOD-режиму (только Стас)
-        "name": tg_user.get("first_name", ""),
+        "is_admin": info.get("is_admin", False),
+        "name": tg_profile.get("display_name", ""),
+        "allowed_surfaces": allowed_surfaces_for_panel_role(
+            info.get("role"),
+            is_founder=bool(info.get("is_founder")),
+            is_master=bool(info.get("is_master")),
+        ),
+        "brain_profile": default_brain_profile(
+            info.get("role"),
+            is_founder=bool(info.get("is_founder")),
+            is_master=bool(info.get("is_master")),
+        ),
+        "surface_brain_profiles": surface_brain_profiles(
+            info.get("role"),
+            is_founder=bool(info.get("is_founder")),
+            is_master=bool(info.get("is_master")),
+        ),
         "my_tips": my_tips,
     })
 
@@ -2412,11 +2436,527 @@ async def panel_dashboard_handler(request: web.Request) -> web.Response:
         channels = await asyncio.to_thread(_yc_channels_breakdown, pp["start"], pp["end"])
     except Exception as e:
         logger.warning(f"panel_dashboard channels: {e}")
+    growth_plan = None
+    try:
+        growth_plan = await asyncio.to_thread(
+            growth_planner.get_growth_plan,
+            role="owner" if info.get("role") == "owner" else "manager",
+        )
+    except Exception as e:
+        logger.warning(f"panel_dashboard growth plan: {e}")
     return _cabinet_response({"role": info["role"], "period": pp["period"],
                               "period_label": pp["label"], "from": pp["start"], "to": pp["end"],
                               "metrics": metrics, "timeseries": timeseries,
                               "spend": spend, "tips_by_master": tips_by_master,
-                              "channels": channels})
+                              "channels": channels, "growth_plan": growth_plan})
+
+
+async def panel_command_center_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/command_center — Owner Command Center v1 (owner-only)."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Owner Command Center доступен только владельцу.",
+        }, status=403)
+    try:
+        payload = await asyncio.to_thread(owner_ai.command_center, include_personal_data=True)
+    except Exception as e:
+        logger.error(f"panel_command_center error: {e}")
+        return _cabinet_response({
+            "error": "server_error",
+            "message": "Не удалось собрать Owner Command Center.",
+        }, status=500)
+    return _cabinet_response({"role": info["role"], **payload})
+
+
+async def panel_plan_target_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/plan_target — daily target or strategic growth goal."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Настройка плана доступна только владельцу.",
+        }, status=403)
+    if body.get("mode") == "growth" or body.get("growth_target_rub") is not None:
+        raw_growth = body.get("growth_target_rub", body.get("target_rub"))
+        try:
+            growth_target = int(round(float(str(raw_growth).replace(" ", "").replace(",", ".") or 0)))
+            workstations = body.get("workstations_count")
+            workstations = int(workstations) if workstations not in (None, "") else None
+        except Exception:
+            return _cabinet_response({
+                "error": "bad_request",
+                "message": "Цель и количество рабочих мест должны быть числами.",
+            }, status=400)
+        try:
+            result = await asyncio.to_thread(
+                growth_planner.set_growth_goal,
+                target_rub=growth_target,
+                deadline=body.get("deadline"),
+                workstations_count=workstations,
+                created_by=tg_id,
+            )
+        except Exception as e:
+            logger.error(f"panel growth target error: {e}")
+            return _cabinet_response({
+                "error": "server_error",
+                "message": "Не удалось рассчитать план роста.",
+            }, status=500)
+        if not result.get("ok"):
+            return _cabinet_response(result, status=400)
+        return _cabinet_response({"role": info["role"], **result})
+    raw = body.get("target_rub", body.get("daily_target_rub", 0))
+    try:
+        target = int(round(float(str(raw).replace(" ", "").replace(",", ".") or 0)))
+    except Exception:
+        return _cabinet_response({"error": "bad_request", "message": "target_rub должен быть числом."}, status=400)
+    if target < 0 or target > 5000000:
+        return _cabinet_response({"error": "bad_request", "message": "План должен быть от 0 до 5 000 000 ₽."}, status=400)
+    try:
+        database.set_setting("owner_daily_target_rub", str(target))
+        payload = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_plan_target error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось сохранить план."}, status=500)
+    return _cabinet_response({"ok": True, "role": info["role"], **payload})
+
+
+async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/action/evaluate — проверить результат owner action."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Проверка результата доступна только владельцу.",
+        }, status=403)
+    try:
+        action_id = int(body.get("action_id") or 0)
+    except Exception:
+        action_id = 0
+    if not action_id:
+        return _cabinet_response({"error": "bad_request", "message": "action_id обязателен."}, status=400)
+    try:
+        item = await asyncio.to_thread(
+            database.evaluate_owner_action,
+            action_id,
+            force=bool(body.get("force")),
+        )
+    except Exception as e:
+        logger.error(f"panel_action_evaluate error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось проверить результат."}, status=500)
+    if not item:
+        return _cabinet_response({"error": "not_found"}, status=404)
+    return _cabinet_response({"ok": True, "action": item})
+
+
+def _owner_assignment_due_label(raw: str | None = "") -> str:
+    raw = str(raw or "").strip()
+    if not raw:
+        return ""
+    try:
+        dt = datetime.fromisoformat(raw[:19])
+        return dt.strftime("%d.%m %H:%M")
+    except Exception:
+        return raw[:16]
+
+
+def _owner_assignment_public_title(raw: str | None = "") -> str:
+    text = str(raw or "Новая задача").strip()
+    try:
+        text = anonymizer.redact_pii(text)
+    except Exception:
+        pass
+    text = re.sub(r"\b\d[\d\s.,]*(?:₽|руб(?:\.|лей|ля)?)", "сумма", text, flags=re.I)
+    return " ".join(text.split())[:140] or "Новая задача"
+
+
+def _owner_assignment_message(task: dict | None) -> str:
+    task = task or {}
+    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    summary = task.get("summary") if isinstance(task.get("summary"), dict) else {}
+    assigned_to = str(payload.get("assigned_to") or summary.get("assigned_to") or "team").lower()
+    role_label = {
+        "admin": "Админ",
+        "master": "Мастер",
+        "team": "Команда",
+    }.get(assigned_to, "Команда")
+    assignee_name = str(payload.get("assignee_name") or summary.get("assignee_name") or "").strip()
+    assigned_label = role_label + (f" · {assignee_name[:60]}" if assignee_name else "")
+    title = _owner_assignment_public_title(task.get("title") or "Новая задача")
+    due_label = _owner_assignment_due_label(task.get("result_due_at") or payload.get("due_at"))
+    lines = [
+        "Задача от владельца",
+        f"Исполнитель: {assigned_label}",
+        f"Задача: {title}",
+    ]
+    if due_label:
+        lines.append(f"Срок: {due_label}")
+    lines.append("Подробные финансовые показатели остаются в Owner OS.")
+    return "\n".join(lines)
+
+
+async def _deliver_owner_control_assignment(request: web.Request, task: dict | None) -> dict:
+    """Доставляет назначенную owner_control задачу в рабочий контур без лишней аналитики."""
+    if not isinstance(task, dict):
+        return {"ok": False, "skipped": True, "reason": "empty_task"}
+    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
+    assigned_to = str(payload.get("assigned_to") or "owner").strip().lower()
+    if assigned_to not in ("admin", "master", "team"):
+        return {"ok": True, "skipped": True, "reason": "internal_assignment"}
+    state = str(payload.get("assignment_delivery_state") or "").strip().lower()
+    if state == "delivered" and int(payload.get("assignment_delivery_message_id") or 0):
+        return {"ok": True, "skipped": True, "reason": "already_delivered"}
+    try:
+        action_id = int(task.get("id") or 0)
+    except Exception:
+        action_id = 0
+    if not action_id:
+        return {"ok": False, "skipped": True, "reason": "no_action_id"}
+    text = _owner_assignment_message(task)
+    try:
+        msg_id = await asyncio.to_thread(
+            database.add_staff_message,
+            0,
+            "MAYA · задачи",
+            text,
+            "", "", "", "", 0, 0,
+        )
+    except Exception as e:
+        logger.error(f"owner assignment team chat save: {e}")
+        marked = await asyncio.to_thread(
+            database.mark_owner_control_task_delivery,
+            action_id,
+            state="failed",
+            channel="team_chat",
+            error="team_chat_save_failed",
+        )
+        return {"ok": False, "state": "failed", "task": marked}
+    try:
+        await _push_team_message(request.app["bot_app"], 0, "MAYA · задачи", text, "")
+    except Exception as e:
+        logger.error(f"owner assignment team chat push: {e}")
+    marked = await asyncio.to_thread(
+        database.mark_owner_control_task_delivery,
+        action_id,
+        state="delivered",
+        channel="team_chat",
+        message_id=msg_id,
+    )
+    return {"ok": True, "state": "delivered", "message_id": msg_id, "task": marked}
+
+
+async def panel_control_update_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/control/update — lifecycle ручной контрольной задачи."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Контрольные задачи доступны только владельцу.",
+        }, status=403)
+    try:
+        task_id = int(body.get("task_id") or body.get("action_id") or 0)
+    except Exception:
+        task_id = 0
+    action = str(body.get("action") or "").strip().lower()
+    if not task_id or action not in ("complete", "cancel", "postpone", "reopen", "assign", "revision"):
+        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
+    try:
+        updated = await asyncio.to_thread(
+            owner_ai.update_control_task,
+            task_id=task_id,
+            action=action,
+            note=body.get("note") or "",
+            due_at=body.get("due_at"),
+            due_in_days=body.get("due_in_days"),
+            assigned_to=body.get("assigned_to") or "",
+            assignee_name=body.get("assignee_name") or "",
+        )
+        if not updated.get("ok"):
+            status = 404 if updated.get("error") == "not_found" else 400
+            return _cabinet_response(updated, status=status)
+        delivery = await _deliver_owner_control_assignment(request, updated.get("task"))
+        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
+            updated["task"] = delivery["task"]
+        updated["assignment_delivery"] = delivery
+        center = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_control_update error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
+    return _cabinet_response({"ok": True, "role": info["role"], "updated": updated.get("task"), **center})
+
+
+async def panel_control_create_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/control/create — создать ручной контроль из owner-сигнала."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Контрольные задачи доступны только владельцу.",
+        }, status=403)
+    title = str(body.get("title") or "").strip()
+    if not title:
+        return _cabinet_response({"error": "bad_request", "message": "title обязателен."}, status=400)
+    try:
+        created = await asyncio.to_thread(
+            owner_ai.create_control_task,
+            title=title,
+            detail=body.get("detail") or "",
+            priority=body.get("priority") or "medium",
+            due_at=body.get("due_at"),
+            due_in_days=body.get("due_in_days"),
+            potential_rub=body.get("potential_rub"),
+            owner_next_step=body.get("owner_next_step") or "",
+            signal_key=body.get("signal_key") or "",
+            signal_kind=body.get("signal_kind") or "",
+            signal_source=body.get("signal_source") or "",
+            action_job=body.get("action_job") or "",
+            assigned_to=body.get("assigned_to") or "owner",
+            assignee_name=body.get("assignee_name") or "",
+            created_by=tg_id,
+        )
+        if not created.get("ok"):
+            return _cabinet_response(created, status=400)
+        delivery = await _deliver_owner_control_assignment(request, created.get("task"))
+        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
+            created["task"] = delivery["task"]
+        created["assignment_delivery"] = delivery
+        center = await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_control_create error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось создать задачу."}, status=500)
+    return _cabinet_response({"ok": True, "role": info["role"], "created": created, **center})
+
+
+async def panel_autonomy_tick_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/autonomy/tick — безопасный автопилот Maya OS v2."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Автопилот Maya OS доступен только владельцу.",
+        }, status=403)
+    try:
+        limit = int(body.get("limit") or 5)
+    except Exception:
+        limit = 5
+    try:
+        result = await asyncio.to_thread(
+            owner_ai.run_autonomous_director_tick,
+            created_by=tg_id,
+            limit=limit,
+        )
+        deliveries = []
+        for item in result.get("created") or []:
+            task = item.get("task")
+            if isinstance(task, dict):
+                deliveries.append(await _deliver_owner_control_assignment(request, task))
+        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_autonomy_tick error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось запустить автопилот."}, status=500)
+    return _cabinet_response({
+        "ok": True,
+        "role": info["role"],
+        "autopilot": result,
+        "deliveries": deliveries,
+        **center,
+    })
+
+
+async def panel_autopilot_supervision_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/autopilot/supervise — контроль исполнения Autopilot 2.1."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Контроль исполнения Maya OS доступен только владельцу.",
+        }, status=403)
+    try:
+        limit = int(body.get("limit") or 8)
+    except Exception:
+        limit = 8
+    try:
+        result = await asyncio.to_thread(
+            owner_ai.run_autopilot_supervision_tick,
+            created_by=tg_id,
+            limit=limit,
+        )
+        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_autopilot_supervision error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось провести контроль исполнения."}, status=500)
+    return _cabinet_response({
+        "ok": True,
+        "role": info["role"],
+        "supervision": result,
+        **center,
+    })
+
+
+async def panel_execution_loop_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/execution/loop — замкнутый цикл исполнения Maya OS v3."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Замкнутый цикл Maya OS доступен только владельцу.",
+        }, status=403)
+    try:
+        limit = int(body.get("limit") or 6)
+    except Exception:
+        limit = 6
+    try:
+        result = await asyncio.to_thread(
+            owner_ai.run_execution_loop_tick,
+            created_by=tg_id,
+            limit=limit,
+        )
+        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
+    except Exception as e:
+        logger.error(f"panel_execution_loop error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось замкнуть цикл исполнения."}, status=500)
+    return _cabinet_response({
+        "ok": True,
+        "role": info["role"],
+        "execution_loop_tick": result,
+        **center,
+    })
+
+
+async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = int(tg_user["id"])
+    info = _panel_resolve_role(tg_id)
+    if info.get("role") not in ("owner", "manager", "master"):
+        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
+    try:
+        payload = await asyncio.to_thread(
+            owner_ai.staff_task_inbox,
+            viewer_role=info.get("role") or "",
+            limit=int(body.get("limit") or 12),
+        )
+    except Exception as e:
+        logger.error(f"panel_staff_tasks error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось загрузить задачи."}, status=500)
+    return _cabinet_response({"ok": True, "role": info.get("role"), **payload})
+
+
+async def panel_staff_task_update_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/staff_task/update — исполнитель отмечает ход поручения."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = int(tg_user["id"])
+    info = _panel_resolve_role(tg_id)
+    if info.get("role") not in ("owner", "manager", "master"):
+        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
+    try:
+        task_id = int(body.get("task_id") or body.get("action_id") or 0)
+    except Exception:
+        task_id = 0
+    action = str(body.get("action") or "").strip().lower()
+    if not task_id or action not in ("accept", "accepted", "start", "run", "running", "done", "complete", "finish", "blocked"):
+        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
+    actor_name = (
+        info.get("master_name")
+        or tg_user.get("full_name")
+        or " ".join([str(tg_user.get("first_name") or ""), str(tg_user.get("last_name") or "")]).strip()
+        or tg_user.get("username")
+        or "Сотрудник"
+    )
+    try:
+        updated = await asyncio.to_thread(
+            owner_ai.update_staff_task,
+            task_id=task_id,
+            viewer_role=info.get("role") or "",
+            actor_name=actor_name,
+            actor_chat_id=tg_id,
+            action=action,
+            note=body.get("note") or "",
+        )
+    except Exception as e:
+        logger.error(f"panel_staff_task_update error: {e}")
+        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
+    if not updated.get("ok"):
+        status = 403 if updated.get("error") == "forbidden" else (404 if updated.get("error") == "not_found" else 400)
+        return _cabinet_response(updated, status=status)
+    return _cabinet_response({"ok": True, "role": info.get("role"), **updated})
 
 
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
@@ -2611,7 +3151,7 @@ def _master_day_records(staff_id: int, date_q: str) -> dict:
         if d and d >= today_str:
             by_day.setdefault(d, []).append(r)
     days = sorted(by_day.keys())
-    target = date_q if (date_q and date_q in by_day) else (days[0] if days else None)
+    target = date_q if date_q else today_str
     day_recs = (sorted(by_day.get(target, []), key=lambda r: (r.get("datetime") or ""))
                 if target else [])
     try:
@@ -2657,7 +3197,9 @@ def _assemble_day_client(r: dict, hist_raw: list, advice_row: dict | None,
     advice = (advice_row or {}).get("advice_text") if advice_row else None
     return {"record_id": r.get("id"), "time": (r.get("datetime") or "")[11:16],
             "client": cname, "services": services, "cost": round(cost),
-            "visits": len(items), "tag": tag, "history": items[:12], "advice": advice}
+            "visits": len(items), "tag": tag, "history": items[:12], "advice": advice,
+            # «визит проведён и оплачен»: paid_full — единственный надёжный признак оплаты
+            "paid": bool(r.get("paid_full")), "arrived": r.get("attendance") == 1}
 
 
 async def panel_master_day_handler(request: web.Request) -> web.Response:
@@ -2692,9 +3234,6 @@ async def panel_master_day_handler(request: web.Request) -> web.Response:
                                   "message": "Некорректный staff_id."}, status=400)
     date_q = str(body.get("date") or "").strip()
     prep = await asyncio.to_thread(_master_day_records, staff_id, date_q)
-    if not prep["target"]:
-        return _cabinet_response({"date": None, "clients": [], "days": [],
-                                  "master_name": master_name})
     mnames = prep["mnames"]
 
     async def _enrich(r):
@@ -2722,8 +3261,20 @@ async def panel_master_day_handler(request: web.Request) -> web.Response:
     for c in enriched:
         if isinstance(c, Exception):
             logger.error(f"master day enrich failed: {c}")
+    day_plan = None
+    try:
+        forecasts = await _collect_master_day_forecasts(
+            prep["target"],
+            only_staff_id=staff_id,
+        )
+        if forecasts:
+            day_plan = forecasts[0]
+            day_plan.pop("delivery_master", None)
+    except Exception as e:
+        logger.error(f"master day plan staff={staff_id}: {e}")
     return _cabinet_response({"date": prep["target"], "clients": clients,
-                              "days": prep["days"], "master_name": master_name})
+                              "days": prep["days"], "master_name": master_name,
+                              "plan": day_plan})
 
 
 async def panel_redeem_handler(request: web.Request) -> web.Response:
@@ -2846,28 +3397,199 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
     if not spec:
         return _cabinet_response({"ok": False, "reason": "Неизвестная задача."}, status=400)
     mod_name, fn_name, label, kind = spec
+    dedupe_key = f"panel_job_last:{int(tg_id) if tg_id else 0}:{job}"
+    try:
+        last = float(database.get_setting(dedupe_key) or 0)
+    except Exception:
+        last = 0.0
+    now = time.time()
+    if last and now - last < 60:
+        return _cabinet_response({
+            "ok": False,
+            "duplicate": True,
+            "job": job,
+            "label": label,
+            "cooldown_seconds_left": int(max(1, 60 - (now - last))),
+            "reason": f"«{label}» уже запускалась меньше минуты назад. Подождите, чтобы не отправить дубли.",
+        })
     try:
         mod = __import__(mod_name)
         fn = getattr(mod, fn_name)
     except Exception as e:
         logger.error(f"panel job import {job}: {e}")
         return _cabinet_response({"ok": False, "reason": "Задача недоступна."}, status=500)
+    try:
+        database.set_setting(dedupe_key, str(now))
+    except Exception:
+        pass
+
+    action_id = None
+    source_control_id = 0
+    source_signal_key = ""
+    try:
+        journal_payload = {"label": label, "kind": kind}
+        try:
+            source_control_id = int(body.get("source_control_id") or 0)
+        except Exception:
+            source_control_id = 0
+        if source_control_id:
+            journal_payload["source_control_id"] = source_control_id
+        source_signal_key = str(body.get("source_signal_key") or "").strip()[:180]
+        if source_signal_key:
+            journal_payload["source_signal_key"] = source_signal_key
+        action_id = database.create_owner_action(
+            job,
+            title=str(body.get("title") or label),
+            source=str(body.get("source") or "panel_jobs"),
+            created_by=int(tg_id) if tg_id else None,
+            payload=journal_payload,
+        )
+        if action_id and source_control_id:
+            database.link_owner_control_task_action(
+                source_control_id,
+                action_id,
+                job,
+                action_status="running",
+                note="Действие запущено из очереди контроля.",
+            )
+    except Exception as e:
+        logger.warning(f"panel job journal create {job}: {e}")
 
     app = request.app["bot_app"]
     task = asyncio.create_task(fn(app))
     _panel_bg_tasks.add(task)
     task.add_done_callback(_panel_bg_tasks.discard)
+
+    def _finish_journal(t: asyncio.Task) -> None:
+        if not action_id:
+            return
+        try:
+            summary = t.result()
+            database.finish_owner_action(
+                action_id,
+                "done",
+                summary=summary if isinstance(summary, dict) else {},
+            )
+        except Exception as e:
+            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
+
+    task.add_done_callback(_finish_journal)
+
     # Быстрые задачи вернут результат сразу; долгие (массовые отправки) продолжат в фоне.
     try:
         summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
         return _cabinet_response({"ok": True, "done": True, "job": job, "label": label,
+                                  "action_id": action_id,
                                   "summary": summary if isinstance(summary, dict) else {}})
     except asyncio.TimeoutError:
         return _cabinet_response({"ok": True, "started": True, "running": True,
-                                  "job": job, "label": label})
+                                  "job": job, "label": label, "action_id": action_id})
     except Exception as e:
         logger.error(f"panel job run {job}: {e}")
+        if action_id:
+            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
         return _cabinet_response({"ok": False, "job": job, "reason": "Ошибка при выполнении."}, status=500)
+
+
+async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str) -> web.Response:
+    """Запуск салонной задачи по подтверждению из чата AI-директора (нажата кнопка
+    карточки → фронт прислал __runjob:<job>). Детерминированно, БЕЗ LLM. Только
+    владелец/founder; те же задачи и исполнитель, что в /api/panel/job/run."""
+    from memory import load_conversations, save_conversations
+    job = (job or "").strip().lower()
+    spec = _PANEL_JOBS.get(job)
+    info = _panel_resolve_role(int(chat_id)) if chat_id else {"permissions": {}}
+    role = info.get("role") or ""
+
+    def audit(allowed: bool, reason: str = "") -> None:
+        try:
+            database.log_tool_call(chat_id, role, f"run_job:{job or '?'}", "write", allowed, reason)
+        except Exception:
+            pass
+
+    if not spec:
+        audit(False, "unknown_job")
+        return _cabinet_response({"reply": "Не нашла такую задачу. Откройте Панель и запустите вручную."})
+    if role != "owner":
+        audit(False, "owner_only")
+        return _cabinet_response({"reply": "Эта задача доступна только владельцу."})
+    mod_name, fn_name, label, _kind = spec
+    # Защита от двойного тапа/повторной отправки action-card: тот же job не
+    # запускается повторно из чата чаще одного раза в минуту.
+    dedupe_key = f"owner_chat_job_last:{int(chat_id)}:{job}"
+    try:
+        last = float(database.get_setting(dedupe_key) or 0)
+    except Exception:
+        last = 0.0
+    now = time.time()
+    if last and now - last < 60:
+        audit(False, "duplicate_60s")
+        return _cabinet_response({"reply": f"«{label}» уже запущена. Дайте ей минуту, чтобы не отправить дубли."})
+    try:
+        database.set_setting(dedupe_key, str(now))
+    except Exception:
+        pass
+    action_id = None
+    try:
+        mod = __import__(mod_name)
+        fn = getattr(mod, fn_name)
+        app = request.app["bot_app"]
+        try:
+            action_id = database.create_owner_action(
+                job,
+                title=label,
+                source="chat_action_card",
+                created_by=int(chat_id) if chat_id else None,
+                payload={"label": label},
+            )
+        except Exception as e:
+            logger.warning(f"chat run_job journal create {job}: {e}")
+        task = asyncio.create_task(fn(app))
+        _panel_bg_tasks.add(task)
+        task.add_done_callback(_panel_bg_tasks.discard)
+
+        def _finish_chat_journal(t: asyncio.Task) -> None:
+            if not action_id:
+                return
+            try:
+                summary = t.result()
+                database.finish_owner_action(
+                    action_id,
+                    "done",
+                    summary=summary if isinstance(summary, dict) else {},
+                )
+            except Exception as exc:
+                database.finish_owner_action(action_id, "failed", error=str(exc)[:200])
+
+        task.add_done_callback(_finish_chat_journal)
+        audit(True, "started")
+        try:
+            summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
+            sent = summary.get("sent") if isinstance(summary, dict) else None
+            reply = (f"Готово — запустила «{label}»."
+                     + (f" Отправлено сообщений: {sent}." if sent is not None else " Выполняется."))
+        except asyncio.TimeoutError:
+            reply = f"Запустила «{label}» — рассылка идёт в фоне, дойдёт до всех за пару минут."
+    except Exception as e:
+        logger.error(f"chat run_job {job}: {e}")
+        audit(False, "run_error")
+        try:
+            if action_id:
+                database.finish_owner_action(action_id, "failed", error=str(e)[:200])
+        except Exception:
+            pass
+        reply = "Не получилось запустить задачу — попробуйте из Панели."
+    # Ответ Майи — в историю чата приложения.
+    try:
+        convs = load_conversations()
+        h = list(convs.get(chat_id) or [])
+        h.append({"role": "user", "content": label})
+        h.append({"role": "assistant", "content": reply})
+        convs[chat_id] = h[-30:]
+        save_conversations(convs)
+    except Exception:
+        pass
+    return _cabinet_response({"reply": reply})
 
 
 async def panel_reviews_handler(request: web.Request) -> web.Response:
@@ -2909,7 +3631,90 @@ async def panel_reviews_handler(request: web.Request) -> web.Response:
             "date": (it.get("responded_at") or it.get("visit_closed_at") or "")[:10],
             "master": names.get(it.get("staff_id"), ""),
         })
-    return _cabinet_response({"days": days, "summary": summary, "items": out})
+    try:
+        external = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=False)
+    except Exception as e:
+        logger.error(f"panel external reputation: {e}")
+        external = {"status": "warn", "summary": {}, "sources": [], "text_analysis": {}}
+    return _cabinet_response({
+        "days": days,
+        "summary": summary,
+        "items": out,
+        "external_reputation": external,
+    })
+
+
+async def panel_external_reviews_import_handler(request: web.Request) -> web.Response:
+    """Owner-only разрешённый импорт отзывов/снимка рейтинга с карт."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Импорт внешних отзывов доступен только владельцу.",
+        }, status=403)
+    source = str(body.get("source") or "").strip().lower()
+    imported = await asyncio.to_thread(
+        reputation.import_reviews,
+        source,
+        body.get("reviews") or [],
+    )
+    if not imported.get("ok"):
+        return _cabinet_response(imported, status=400)
+    source_snapshot = None
+    if body.get("rating") is not None or body.get("reviews_count") is not None:
+        source_snapshot = await asyncio.to_thread(
+            reputation.save_source_snapshot,
+            source,
+            rating=body.get("rating"),
+            reviews_count=body.get("reviews_count"),
+            observed_at=body.get("observed_at") or "",
+            origin="owner_authorized_import",
+        )
+    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=False)
+    return _cabinet_response({
+        "ok": True,
+        "import": imported,
+        "source_snapshot": source_snapshot,
+        "reputation": snapshot,
+    })
+
+
+async def panel_reputation_refresh_handler(request: web.Request) -> web.Response:
+    """Owner-only обновление официальной статистики подключённых площадок."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") != "owner":
+        return _cabinet_response({"error": "forbidden"}, status=403)
+    public_refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
+    pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
+    notification = {"delivered": False, "count": 0}
+    if pending:
+        notification = await _notify_owner_reputation(request.app["bot_app"], pending)
+        if notification.get("delivered"):
+            await asyncio.to_thread(
+                database.mark_external_reviews_alerted,
+                [row.get("id") for row in pending if row.get("id")],
+            )
+    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=True)
+    return _cabinet_response({
+        "ok": True,
+        "public_refresh": public_refresh,
+        "notification": notification,
+        "reputation": snapshot,
+    })
 
 
 async def broadcast_send_to_base(bot, text: str) -> dict:
@@ -2940,6 +3745,7 @@ async def broadcast_send_to_base(bot, text: str) -> dict:
                 skipped_too_soon += 1
                 continue
         personalized = _bt.render(text, client_name=c.get("name")) if has_placeholder else text
+        push_body = _push_preview_body(personalized) or "Откройте MAYA — внутри новое сообщение."
         try:
             await bot.send_message(chat_id, personalized, parse_mode="Markdown")
             sent += 1
@@ -2958,6 +3764,19 @@ async def broadcast_send_to_base(bot, text: str) -> dict:
         except Exception as e:
             errors += 1
             logger.error(f"broadcast → {chat_id}: {e}")
+        try:
+            await _send_client_push(
+                int(chat_id),
+                title="Сообщение от MAYA",
+                body=push_body,
+                url="/app/",
+                tag="marketing-broadcast",
+                data={"event": "marketing.broadcast"},
+                persist_in_chat=True,
+                chat_text=personalized,
+            )
+        except Exception as e:
+            logger.error(f"broadcast push/chat → {chat_id}: {e}")
     return {"sent": sent, "blocked": blocked, "errors": errors,
             "skipped_no_consent": skipped_no_consent,
             "skipped_opt_out": skipped_opt_out, "skipped_too_soon": skipped_too_soon}
@@ -3494,6 +4313,113 @@ async def panel_salary_handler(request: web.Request) -> web.Response:
     })
 
 
+def _service_cost(r: dict) -> float:
+    c = 0.0
+    for s in (r.get("services") or []):
+        if isinstance(s, dict):
+            try:
+                c += float(s.get("cost") or s.get("price_min") or 0)
+            except Exception:
+                pass
+    return c
+
+
+def _today_earn_from_records(recs: list, pct: float, today_iso: str) -> dict:
+    """Факт заработка за сегодня + ПОТЕНЦИАЛ MAYA из уже полученных записей мастера.
+    Потенциал = сегодняшние визиты × целевой чек (лучший из сегодняшнего/исторического
+    + 20% апселл-запас, который советует MAYA) × доля мастера. Красный/зелёный на плитке
+    считается фронтом из ratio earned/potential."""
+    visits_today, gross_today = 0, 0.0
+    hist = []
+    for r in recs:
+        if not isinstance(r, dict) or _is_gift_cert_record(r) or r.get("paid_full") != 1:
+            continue
+        d = (r.get("datetime") or r.get("date") or "")[:10]
+        cost = _service_cost(r)
+        if d == today_iso:
+            visits_today += 1
+            gross_today += cost
+        elif cost > 0:
+            hist.append(cost)
+    earned_today = round(gross_today * pct)
+    today_avg = (gross_today / visits_today) if visits_today else 0.0
+    # Цель = средний чек в ЛУЧШИЕ дни мастера (топ-40% исторических чеков за 60 дней) —
+    # то, что достижимо с апселлом/уходом по совету MAYA. Ориентир ФИКСИРОВАННЫЙ (не
+    # привязан к сегодняшнему), поэтому «продаёт себестоимость без допов» → чек низкий →
+    # ratio низкий → плитка красная; «делает как в лучшие дни» → ratio→1 → зелёная.
+    if hist:
+        hist.sort(reverse=True)
+        top = hist[:max(1, round(len(hist) * 0.4))]
+        target_check = sum(top) / len(top)
+    else:
+        target_check = today_avg * 1.3
+    target_check = max(target_check, today_avg)   # сегодня выше лучших → цель = сегодня (зелёный)
+    potential_today = round(visits_today * target_check * pct)
+    if potential_today < earned_today:
+        potential_today = earned_today
+    return {"earned_today": earned_today, "potential_today": potential_today,
+            "visits_today": visits_today}
+
+
+def _master_today_earn(staff_id: int, pct: float) -> dict:
+    """Отдельный расчёт факт/потенциал за сегодня (fetch 60 дней записей мастера)."""
+    today = date.today()
+    try:
+        recs = _yc.get_records_for_master(
+            staff_id, (today - timedelta(days=60)).isoformat(), today.isoformat()) or []
+    except Exception as e:
+        logger.error(f"today earn records staff={staff_id}: {e}")
+        recs = []
+    return _today_earn_from_records(recs, pct, today.isoformat())
+
+
+def _master_month_behind(staff_id: int, pct: float) -> bool:
+    """True, если личный доход за текущий месяц-к-дате отстаёт от прошлого месяца
+    на ту же дату (для окраски недельной плитки в красный)."""
+    today = date.today()
+    m_start, _ = _month_bounds(today, 0)
+    p_start, p_end = _month_bounds(today, 1)
+    p_cut = min(p_end, p_start + timedelta(days=(today - m_start).days))
+    try:
+        cur = _revenue_by_master(m_start.isoformat(), today.isoformat()).get(staff_id, 0.0)
+        prev = _revenue_by_master(p_start.isoformat(), p_cut.isoformat()).get(staff_id, 0.0)
+    except Exception as e:
+        logger.error(f"month behind staff={staff_id}: {e}")
+        return False
+    return round(cur * pct) < round(prev * pct)
+
+
+_GROSS_MONTH_CACHE: dict = {}  # sid -> (expires_ts, value)
+
+
+async def _gross_month_for(sid: int):
+    """Валовая мастера за текущий месяц. Двойной YClients-проход по месяцу дорогой,
+    поэтому кэш 15 мин; при холодном кэше ждём максимум 8с, дальше считаем в фоне
+    (эндпоинт не упирается в 25с-таймаут beget-прокси, фронт покажет «…» и добьёт
+    значение следующим заходом)."""
+    import time as _t
+    hit = _GROSS_MONTH_CACHE.get(sid)
+    if hit and hit[0] > _t.time():
+        return hit[1]
+    m_start, _m_end = _month_bounds(date.today())
+
+    async def _calc():
+        rev = await asyncio.to_thread(
+            _revenue_by_master, m_start.isoformat(), date.today().isoformat())
+        val = round(rev.get(sid, 0.0)) if isinstance(rev, dict) else 0
+        _GROSS_MONTH_CACHE[sid] = (_t.time() + 900, val)
+        return val
+
+    task = asyncio.create_task(_calc())
+    try:
+        return await asyncio.wait_for(asyncio.shield(task), timeout=8)
+    except asyncio.TimeoutError:
+        return None
+    except Exception as e:
+        logger.error(f"gross_month sid={sid}: {e}")
+        return None
+
+
 async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     """POST /api/panel/my_earnings — личный заработок мастера за ТЕКУЩУЮ расчётную
     неделю (Чт→Ср, до сегодня): валовая по услугам × его доля. Та же формула, что в
@@ -3523,13 +4449,236 @@ async def panel_my_earnings_handler(request: web.Request) -> web.Response:
     gross = round(rev_week.get(sid, 0.0))
     is_owner = (sid == OWNER_STAFF_ID)
     pct = 1.0 if is_owner else MASTER_SALARY_PCT.get(sid, MASTER_SALARY_DEFAULT)
+    # факт/потенциал за сегодня + отставание месяца (параллельно)
+    today_earn, behind = await asyncio.gather(
+        asyncio.to_thread(_master_today_earn, sid, pct),
+        asyncio.to_thread(_master_month_behind, sid, pct),
+    )
+    # валовая за месяц — кэш 15 мин + мягкий таймаут (см. _gross_month_for)
+    gross_month = await _gross_month_for(sid)
     return _cabinet_response({
         "pay_week": pw,
         "gross_week": gross,
         "percent": int(round(pct * 100)),
         "salary_week": round(gross * pct),
+        "gross_month": gross_month,
+        "salary_month": (round(gross_month * pct) if gross_month is not None else None),
+        "earned_today": today_earn["earned_today"],
+        "potential_today": today_earn["potential_today"],
+        "visits_today": today_earn["visits_today"],
+        "salary_today": today_earn["earned_today"],   # плитка теперь на той же (records) базе
+        "month_behind": bool(behind),
         "is_owner": is_owner,
     })
+
+
+def _month_bounds(anchor: date, months_back: int = 0):
+    """(first_day, last_day) месяца, отстоящего на months_back от anchor."""
+    y, m = anchor.year, anchor.month - months_back
+    while m <= 0:
+        m += 12; y -= 1
+    start = date(y, m, 1)
+    nxt = date(y + 1, 1, 1) if m == 12 else date(y, m + 1, 1)
+    end = nxt - timedelta(days=1)
+    return start, end
+
+
+def _client_key(rec: dict):
+    """Устойчивый ключ клиента: id, иначе нормализованное имя (без ПД в LLM не уходит)."""
+    c = rec.get("client") or {}
+    cid = c.get("id")
+    if cid:
+        return ("id", int(cid)) if str(cid).isdigit() else ("id", cid)
+    nm = (c.get("name") or "").strip().lower()
+    return ("nm", nm) if nm else None
+
+
+def _master_clients_month(staff_id: int) -> dict:
+    """Агрегат по клиентской базе мастера за текущий месяц + сравнение темпа
+    с прошлым месяцем + анонимные метрики для совета MAYA. Телефоны НЕ включаются."""
+    today = date.today()
+    m_start, _ = _month_bounds(today, 0)
+    p_start, p_end_full = _month_bounds(today, 1)
+    # окно ретроспективы: 6 полных месяцев до текущего — для «новый/вернувшийся»
+    look_start, _ = _month_bounds(today, 6)
+    try:
+        records = _yc.get_records_for_master(staff_id, look_start.isoformat(), today.isoformat()) or []
+    except Exception as e:
+        logger.error(f"master clients records staff={staff_id}: {e}")
+        records = []
+
+    # темп прошлого месяца: тот же по счёту день (столько же прошло дней)
+    days_elapsed = (today - m_start).days
+    p_cutoff = min(p_end_full, p_start + timedelta(days=days_elapsed))
+
+    served_now = {}          # key -> {name, visits}
+    served_prev_pace = set()
+    served_prev_full = set()
+    seen_before_month = set()  # был у мастера в look_start..m_start (до этого месяца)
+    visits_now = 0
+    visits_prev_pace = [0]     # визиты прошлого месяца к той же дате (list — чтоб мутировать в цикле)
+    visits_prev_full = [0]     # визиты за весь прошлый месяц
+    svc_freq = {}
+
+    for r in records:
+        if not isinstance(r, dict) or _is_gift_cert_record(r):
+            continue
+        if r.get("paid_full") != 1:       # «обслужен» = визит оплачен (paid_full — надёжный признак)
+            continue
+        d = (r.get("datetime") or r.get("date") or "")[:10]
+        if not d:
+            continue
+        key = _client_key(r)
+        if key is None:
+            continue
+        if look_start.isoformat() <= d < m_start.isoformat():
+            seen_before_month.add(key)
+        if m_start.isoformat() <= d <= today.isoformat():
+            nm = ((r.get("client") or {}).get("name") or "Клиент").strip() or "Клиент"
+            slot = served_now.setdefault(key, {"name": nm, "visits": 0})
+            slot["visits"] += 1
+            visits_now += 1
+            for s in (r.get("services") or []):
+                if isinstance(s, dict) and s.get("title"):
+                    svc_freq[s["title"]] = svc_freq.get(s["title"], 0) + 1
+        if p_start.isoformat() <= d <= p_cutoff.isoformat():
+            served_prev_pace.add(key)
+            visits_prev_pace[0] += 1
+        if p_start.isoformat() <= d <= p_end_full.isoformat():
+            served_prev_full.add(key)
+            visits_prev_full[0] += 1
+
+    unique_now = len(served_now)
+    new_react = sum(1 for k in served_now if k not in seen_before_month)
+    returning = unique_now - new_react
+    # темп считаем по ВИЗИТАМ (приёмам) — это то, что мастер сверяет с YClients
+    delta_pace = visits_now - visits_prev_pace[0]
+
+    # выручка мастера за месяц + личная доля
+    try:
+        rev_map = _revenue_by_master(m_start.isoformat(), today.isoformat())
+        gross = round(rev_map.get(staff_id, 0.0))
+    except Exception as e:
+        logger.error(f"master clients revenue staff={staff_id}: {e}")
+        gross = 0
+    is_owner = (staff_id == OWNER_STAFF_ID)
+    pct = 1.0 if is_owner else MASTER_SALARY_PCT.get(staff_id, MASTER_SALARY_DEFAULT)
+    personal = round(gross * pct)
+    avg_check = round(gross / visits_now) if visits_now else 0
+    top_services = sorted(svc_freq.items(), key=lambda kv: kv[1], reverse=True)[:3]
+    # факт/потенциал за сегодня — из тех же полученных записей (без лишнего запроса)
+    te = _today_earn_from_records(records, pct, today.isoformat())
+
+    # список имён (БЕЗ телефонов), по убыванию визитов затем по алфавиту
+    names = sorted(served_now.values(), key=lambda v: (-v["visits"], v["name"].lower()))
+    clients = [{"name": v["name"], "visits": v["visits"]} for v in names]
+
+    return {
+        "month": m_start.strftime("%Y-%m"),
+        "earned_today": te["earned_today"],
+        "potential_today": te["potential_today"],
+        "visits_today": te["visits_today"],
+        "total": visits_now,          # headline «Обслужено» = визиты/приёмы (как в YClients)
+        "unique": unique_now,         # уникальных людей за месяц
+        "clients": clients,
+        "prev_pace": visits_prev_pace[0],   # визитов к этой дате прошлого месяца
+        "prev_full": visits_prev_full[0],   # визитов за весь прошлый месяц
+        "prev_pace_unique": len(served_prev_pace),
+        "prev_full_unique": len(served_prev_full),
+        "delta": delta_pace,          # по визитам
+        "new_clients": new_react,
+        "returning": returning,
+        "visits": visits_now,
+        "gross": gross,
+        "personal": personal,
+        "percent": int(round(pct * 100)),
+        "avg_check": avg_check,
+        "top_services": [{"title": t, "count": c} for t, c in top_services],
+        "days_elapsed": days_elapsed,
+    }
+
+
+def _master_clients_advice(agg: dict, staff_id: int) -> str | None:
+    """Совет MAYA по клиентской базе. На вход — ТОЛЬКО анонимные агрегаты (без
+    имён/телефонов). Кэш на сутки в settings (mcli_adv:{staff_id})."""
+    cache_key = f"mcli_adv:{staff_id}"
+    today_iso = date.today().isoformat()
+    try:
+        raw = database.get_setting(cache_key)
+        if raw:
+            cached = _json.loads(raw)
+            if cached.get("date") == today_iso and cached.get("month") == agg.get("month"):
+                return cached.get("advice")
+    except Exception:
+        pass
+    if agg.get("total", 0) == 0 and agg.get("prev_full", 0) == 0:
+        return None
+    tops = ", ".join(f'{s["title"]} ({s["count"]})' for s in agg.get("top_services", [])) or "—"
+    pace = ("опережает" if agg["delta"] > 0 else "отстаёт" if agg["delta"] < 0 else "идёт вровень")
+    prompt = (
+        "Ты MAYA — AI-директор мужского барбершопа. Дай мастеру короткий разбор его "
+        "клиентской базы за текущий месяц и что конкретно сделать, чтобы поднять и "
+        "ВАЛОВЫЙ доход салона, и свой ЛИЧНЫЙ (он получает "
+        f'{agg["percent"]}% с услуг). Пиши по-русски, на «ты», деловито и по делу, '
+        "без воды и без выдуманных цифр. Дай 3–4 конкретных действия списком.\n\n"
+        "Данные (обезличенные):\n"
+        f'- приёмов (визитов) в этом месяце: {agg["visits"]}, уникальных клиентов: {agg.get("unique", 0)}\n'
+        f'- из них новых/вернувшихся после паузы: {agg["new_clients"]}, постоянных: {agg["returning"]}\n'
+        f'- темп по визитам к той же дате прошлого месяца: {pace} на {abs(agg["delta"])} '
+        f'(было {agg["prev_pace"]}, весь прошлый месяц {agg["prev_full"]})\n'
+        f'- валовая по услугам: {agg["gross"]} ₽, личный доход ~{agg["personal"]} ₽, средний чек {agg["avg_check"]} ₽\n'
+        f'- топ услуги: {tops}\n\n'
+        "Формат ответа: 1–2 предложения оценки, затем маркированный список действий. "
+        "Максимум 90 слов."
+    )
+    try:
+        from claude_ai import complete_text
+        advice = complete_text(prompt, max_tokens=320)
+    except Exception as e:
+        logger.error(f"master clients advice staff={staff_id}: {e}")
+        return None
+    advice = (advice or "").strip() or None
+    if advice:
+        try:
+            database.set_setting(cache_key, _json.dumps(
+                {"date": today_iso, "month": agg.get("month"), "advice": advice}, ensure_ascii=False))
+        except Exception:
+            pass
+    return advice
+
+
+async def panel_master_clients_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/master/clients — клиентская база мастера за текущий месяц:
+    общее число обслуженных, список имён (БЕЗ телефонов), темп к прошлому месяцу и
+    совет MAYA. Только привязанный мастер (или владелец/управляющий по staff_id)."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user:
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    tg_id = tg_user.get("id")
+    info = _panel_resolve_role(int(tg_id)) if tg_id else {}
+    staff_id = info.get("staff_id")
+    if not info.get("is_master"):
+        if info.get("permissions", {}).get("dashboard") and body.get("staff_id"):
+            staff_id = body.get("staff_id")
+        else:
+            return _cabinet_response({"error": "not_master",
+                                      "message": "Раздел доступен мастерам."}, status=403)
+    if not staff_id:
+        return _cabinet_response({"error": "not_master",
+                                  "message": "Мастер не привязан."}, status=403)
+    try:
+        staff_id = int(staff_id)
+    except (TypeError, ValueError):
+        return _cabinet_response({"error": "bad_request", "message": "Некорректный staff_id."}, status=400)
+
+    agg = await asyncio.to_thread(_master_clients_month, staff_id)
+    advice = await asyncio.to_thread(_master_clients_advice, agg, staff_id)
+    agg["advice"] = advice
+    return _cabinet_response(agg)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -3696,6 +4845,80 @@ def _god_health_checks() -> dict:
             add("renewals", "Предстоящие оплаты", "ok", "В ближайшее время нет")
     except Exception:
         add("renewals", "Предстоящие оплаты", "ok", "")
+
+    # 8) Dual-role аккаунты (мастер + клиент): контекст не должен теряться.
+    try:
+        audit = memory.audit_dual_role_client_context(yc=_yc, repair=True, limit=20)
+        issues = audit.get("issues") or []
+        repaired = audit.get("repaired") or []
+        dual_role = int(audit.get("dual_role") or 0)
+        healthy = int(audit.get("healthy") or 0)
+        fails = [it for it in issues if it.get("severity") == "fail"]
+        warns = [it for it in issues if it.get("severity") != "fail"]
+        if fails:
+            first = fails[0]
+            add(
+                "dual_role",
+                "Dual-role аккаунты",
+                "fail",
+                f"{first.get('name')}: {first.get('detail') or first.get('reason') or 'ошибка'}",
+            )
+        elif warns or repaired:
+            parts = []
+            if repaired:
+                parts.append("автопочинка: %d" % len(repaired))
+            if warns:
+                parts.append("внимание: %s" % ", ".join(it.get("name") or "аккаунт" for it in warns[:2]))
+            if dual_role:
+                parts.append("в норме %d/%d" % (healthy, dual_role))
+            add("dual_role", "Dual-role аккаунты", "warn", " · ".join(parts))
+        else:
+            detail = "Dual-role аккаунтов не найдено" if dual_role == 0 else "В норме %d/%d" % (healthy, dual_role)
+            add("dual_role", "Dual-role аккаунты", "ok", detail)
+    except Exception as e:
+        add("dual_role", "Dual-role аккаунты", "warn", str(e)[:90])
+
+    # 9) Ролевая матрица: founder=owner, прочие админы=manager, мастера не теряются.
+    try:
+        role_issues = []
+        admin_ids = [int(x) for x in (database.list_admins() or [])]
+        master_rows = list(database.list_masters() or [])
+        founder_count = 0
+        manager_admins = 0
+        master_ok = 0
+        for aid in admin_ids:
+            info = _panel_resolve_role(aid)
+            if info.get("is_founder"):
+                founder_count += 1
+                if info.get("role") != "owner":
+                    role_issues.append(f"founder {aid} не owner")
+            else:
+                manager_admins += 1
+                if info.get("role") != "manager":
+                    role_issues.append(f"admin {aid} не manager")
+        for row in master_rows:
+            chat_id = row.get("telegram_chat_id")
+            if not chat_id:
+                continue
+            info = _panel_resolve_role(int(chat_id))
+            if not info.get("is_master"):
+                role_issues.append(f"master {chat_id} потерян")
+                continue
+            if info.get("role") in ("owner", "manager", "master"):
+                master_ok += 1
+            else:
+                role_issues.append(f"master {chat_id} без роли")
+        if role_issues:
+            add("role_matrix", "Ролевая матрица", "fail", "; ".join(role_issues[:3]))
+        else:
+            add(
+                "role_matrix",
+                "Ролевая матрица",
+                "ok",
+                f"owner/founder: {founder_count}, admin→manager: {manager_admins}, masters: {master_ok}",
+            )
+    except Exception as e:
+        add("role_matrix", "Ролевая матрица", "warn", str(e)[:90])
 
     summary = {"ok": sum(1 for c in checks if c["status"] == "ok"),
                "warn": sum(1 for c in checks if c["status"] == "warn"),
@@ -4541,8 +5764,8 @@ async def panel_salon_today_handler(request: web.Request) -> web.Response:
 
 
 async def health_handler(request: web.Request) -> web.Response:
-    """GET /yclients-webhook?secret=... — health check для дебага."""
-    if request.query.get("secret") != WEBHOOK_SECRET:
+    """GET /yclients-webhook — health check для дебага."""
+    if not _webhook_secret_ok(request):
         return web.json_response({"error": "forbidden"}, status=403)
     return web.json_response({
         "status": "ready",
@@ -5191,9 +6414,14 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
             notify_by_sms=_nbs,
         )
         if not result.get("success"):
-            logger.error(f"chat booking failed chat_id={chat_id}: {result.get('error')}")
-            return ("Не получилось оформить запись автоматически 😔 Попробуйте через "
-                    "@malesthetic_bot или позвоните: 8-962-447-67-47.")
+            logger.error(
+                "chat booking failed chat_id=%s code=%s status=%s error=%s",
+                chat_id,
+                result.get("code"),
+                result.get("http_status"),
+                result.get("error"),
+            )
+            return _booking_failure_reply(result)
         try:
             if client and client.get("id"):
                 database.save_booking(
@@ -5274,6 +6502,1128 @@ def _master_chat_shortcut(chat_id: int, message: str) -> str | None:
     return None
 
 
+_UPSELL_OFFER_RE = re.compile(
+    r"(добавляем\s+что-то\s+или\s+только\s+стрижк|"
+    r"к\s+стрижк[еия]\s+можно\s+(?:еще|ещё)|"
+    r"можно\s+(?:еще|ещё)\s+добавить)",
+    re.IGNORECASE | re.DOTALL,
+)
+_UPSELL_ADDON_RE = re.compile(
+    r"(бород|моделирован|тонирован|уклад|камуфляж|усы|брить|комплекс|пакет)",
+    re.IGNORECASE,
+)
+_UPSELL_DECLINE_WORDS_RE = re.compile(
+    r"\b(нет|не\s+надо|без|только|остав|стри[дж]к[аеиуой]?)\b",
+    re.IGNORECASE,
+)
+
+
+def _history_text(item) -> str:
+    content = item.get("content") if isinstance(item, dict) else ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, dict) and isinstance(part.get("text"), str):
+                parts.append(part["text"])
+            elif isinstance(part, str):
+                parts.append(part)
+        return " ".join(parts)
+    return ""
+
+
+def _assistant_just_offered_upsell(history: list[dict]) -> bool:
+    for item in reversed(history[-8:]):
+        if not isinstance(item, dict) or item.get("role") != "assistant":
+            continue
+        return bool(_UPSELL_OFFER_RE.search(_history_text(item)))
+    return False
+
+
+def _looks_like_upsell_decline(message: str) -> bool:
+    text = (message or "").lower().replace("ё", "е").strip()
+    if not text:
+        return False
+    if re.search(r"\b(без|нет|не\s+надо|только)\b.*(бород|уклад|моделирован|тонирован|доп)", text):
+        return True
+    if _UPSELL_ADDON_RE.search(text):
+        return False
+    if re.fullmatch(r"[\s.,!?-]*(мужская\s+)?стри[дж]к[аеиуой]?[\s.,!?-]*", text):
+        return True
+    if _UPSELL_DECLINE_WORDS_RE.search(text) and len(text) <= 80:
+        return True
+    return False
+
+
+def _deterministic_upsell_reply(message: str, history: list[dict]) -> str | None:
+    """Do not interrupt the booking flow after an upsell decline.
+
+    The AI prompt and tool loop already suppress repeated upsells. Returning a
+    fixed reply here loses context such as the chosen master/time, so let the
+    model continue the current booking step.
+    """
+    return None
+
+
+_SHOP_SUBS_RE = re.compile(r"\b(абонемент\w*|подписк\w*)\b", re.IGNORECASE)
+_SHOP_CERT_RE = re.compile(r"\b(сертификат\w*|подарочн\w*)\b", re.IGNORECASE)
+_SHOP_BUY_INTENT_RE = re.compile(
+    r"\b(куп\w*|оформ\w*|хоч\w*|покаж\w*|откр\w*|выбер\w*|какие|цены|стоим\w*|тариф\w*)\b",
+    re.IGNORECASE,
+)
+_SHOP_STATUS_INTENT_RE = re.compile(
+    r"\b(мой|моя|мое|моё|у\s+меня|остат\w*|актив\w*|сколько|есть\s+ли|провер\w*)\b",
+    re.IGNORECASE,
+)
+
+
+def _direct_shop_action(message: str) -> tuple[str, dict] | None:
+    """Deterministic app navigation for obvious shop intents."""
+    text = (message or "").strip().lower().replace("ё", "е")
+    if not text:
+        return None
+    has_subs = bool(_SHOP_SUBS_RE.search(text))
+    has_cert = bool(_SHOP_CERT_RE.search(text))
+    if has_subs and _SHOP_STATUS_INTENT_RE.search(text) and not _SHOP_BUY_INTENT_RE.search(text):
+        return (
+            "Ваш активный абонемент и остаток услуг видны в личном кабинете.",
+            {"type": "open_cabinet", "label": "Открыть кабинет", "screen": "cabinet"},
+        )
+    if has_subs and (_SHOP_BUY_INTENT_RE.search(text) or len(text) <= 24):
+        return (
+            "Конечно. Открою раздел «Абонементы»: выберите тариф и уровень, оплатить можно картой прямо в приложении.",
+            {"type": "open_subs", "label": "Оформить абонемент"},
+        )
+    if has_cert and (_SHOP_BUY_INTENT_RE.search(text) or len(text) <= 28):
+        return (
+            "Конечно. Открою раздел «Сертификаты»: выберите номинал, для себя или в подарок, и оплатите картой.",
+            {"type": "open_certs", "label": "Оформить сертификат"},
+        )
+    return None
+
+
+CLIENT_CHAT_DISABLED_TOOLS = {"barber_knowledge"}
+CLIENT_CHAT_SURFACE_NUDGE = (
+    "\n\n[Это клиентский кабинет MAYA. Здесь нельзя использовать базу знаний по технике "
+    "стрижек, учебник барбера, схемы стрижек и картинки из книги. Отвечай только как "
+    "администратор салона: про запись, услуги, мастеров, уровни мастеров, свободное "
+    "время, скидки, абонементы, сертификаты, адрес, режим работы и клиентский сервис. "
+    "Если клиент спрашивает «как стричь/техника/схема» — мягко скажи, что в клиентском "
+    "чате помогаешь с записью и услугами салона.]"
+)
+CHAT_TEMPORARY_ERROR_REPLY = (
+    "MAYA временно недоступна. Записаться можно через кнопку ниже — "
+    "форма записи и свободные окна работают."
+)
+STAFF_CHAT_TEMPORARY_ERROR_REPLY = (
+    "MAYA временно недоступна. Рабочие данные в кабинете остаются доступны; "
+    "чат вернётся после восстановления AI-сервиса."
+)
+
+
+def _chat_temporary_error(mode: str) -> tuple[str, dict | None]:
+    if str(mode or "").strip().lower() == "staff":
+        return STAFF_CHAT_TEMPORARY_ERROR_REPLY, None
+    return CHAT_TEMPORARY_ERROR_REPLY, {
+        "type": "open_booking",
+        "label": "Записаться",
+        "screen": "book",
+    }
+STAFF_BOOKING_SCOPE_REPLY = (
+    "В рабочем чате я не записываю вас как клиента и не оформляю клиентские записи. "
+    "Здесь я помогаю по работе: аналитика, выручка, зарплаты, расписание и задачи салона. "
+    "Для личной записи откройте кабинет клиента."
+)
+STAFF_CHAT_SURFACE_NUDGE = (
+    "\n\n[Это рабочий кабинет MAYA для владельца/персонала. Не отвечай клиентской "
+    "витриной и не подменяй бизнес-вопросы списком команды. Если спрашивают про "
+    "выручку, прибыль, кассу, зарплаты, загрузку, клиентов, эффективность мастеров "
+    "или динамику бизнеса — используй доступные бизнес-инструменты и отвечай цифрами. "
+    "Если сотрудник просит записать его как клиента, оформить клиентскую запись, "
+    "перенести/отменить личную запись или открыть клиентский booking-flow — откажи "
+    "и скажи перейти в кабинет клиента. Не раскрывай телефоны/имена клиентов.]"
+)
+
+SALON_FOUNDED_YEAR = "2019"
+_BOOKING_INTENT_RE = re.compile(
+    r"\b(хочу|надо|нужно|можно|давай|запиши|записаться|запис[а-я]*|оформ[а-я]*|"
+    r"постричься|подстричься)\b",
+    re.IGNORECASE,
+)
+_BOOKING_SERVICE_RE = re.compile(
+    r"\b(стриж|стрид|бород|брит|камуфляж|тонир|уход|услуг|мастер)\w*",
+    re.IGNORECASE,
+)
+_BOOKING_SPECIFIC_RE = re.compile(
+    r"\b(сегодня|завтра|послезавтра|понедельник|вторник|сред[ау]|четверг|пятниц[ау]|"
+    r"суббот[ау]|воскресень[ея]|стас|илья|илюх|саша|сан[ея]|александр|алексей|л[её]ш|"
+    r"макс|максим|киянск|дарм|третьяк|мосин|чурсинов|\d{1,2}[:.]\d{2}|\b\d{1,2}\s*(?:час|ч|:00))\b",
+    re.IGNORECASE,
+)
+_BOOKING_START_ONLY_RE = re.compile(
+    r"^\s*(?:хочу\s+)?(?:записаться|запиши(?:те)?\s+меня|запись)\s*[.!?]*\s*$",
+    re.IGNORECASE,
+)
+_USUAL_MASTER_INTENT_RE = re.compile(
+    r"(?:\b(?:мой|моему|моего|свой|своему|своего)\s+"
+    r"(?:(?:постоянн|обычн|любим)\w*\s+)?(?:мастер|барбер)\w*\b|"
+    r"\b(?:постоянн|обычн|любим)\w*\s+(?:мастер|барбер)\w*\b|"
+    r"\bк\s+тому\s+же\s+(?:мастер|барбер)\w*\b|"
+    r"\bкак\s+обычно\b)",
+    re.IGNORECASE,
+)
+_STAFF_CLIENT_BOOKING_RE = re.compile(
+    r"\b("
+    r"запиши(?:те)?(?:\s+меня|\s+нас)?|записать\s+(?:меня|нас)|"
+    r"хочу\s+(?:записаться|постричься|подстричься|на\s+стриж)|"
+    r"(?:надо|нужно|можно)\s+(?:записаться|постричься|подстричься|на\s+стриж)|"
+    r"записаться|постричься|подстричься|"
+    r"(?:перенеси|перенести|отмени|отменить)\s+(?:мою|мне|меня)?\s*запис)"
+    r"\b",
+    re.IGNORECASE,
+)
+_ADDRESS_INTENT_RE = re.compile(
+    r"\b(адрес|где\s+вы|где\s+находитесь|как\s+добраться|куда\s+ехать|карты|2gis|2гис|"
+    r"яндекс\.?карт|лермонтова)\b",
+    re.IGNORECASE,
+)
+_DISCOUNT_INTENT_RE = re.compile(
+    r"\b(скидк|акци|балл|бонус|лояльн|промокод|реферал|день\s+рожд|др)\w*",
+    re.IGNORECASE,
+)
+_MASTERS_INTENT_RE = re.compile(
+    r"\b(мастер\w*|барбер\w*|команд\w*|кто\s+стрижет|кто\s+стриж[её]т|к\s+кому|посоветуй|"
+    r"топ-мастер|старш(?:ий|ие)|кто\s+лучше)\b",
+    re.IGNORECASE,
+)
+_BUSINESS_MASTER_ANALYTICS_RE = re.compile(
+    r"\b(прибыл\w*|выруч\w*|доход\w*|касс\w*|оборот\w*|деньг\w*|"
+    r"заработ\w*|зарабат\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
+    r"зарплат\w*|марж\w*|прибыльн\w*|рентабельн\w*|"
+    r"средн\w*\s+чек|чек\w*|визит\w*|клиент\w*)\b",
+    re.IGNORECASE,
+)
+_BUSINESS_ANALYTICS_RE = re.compile(
+    r"\b(аналитик\w*|отч[её]т\w*|валов\w*|прибыл\w*|выруч\w*|доход\w*|"
+    r"касс\w*|оборот\w*|марж\w*|зарплат\w*|заработ\w*|зарабат\w*|"
+    r"средн\w*\s+чек|чист\w*\s+прибыл\w*|сколько\s+заработ\w*)\b",
+    re.IGNORECASE,
+)
+_BUSINESS_PERSON_ANALYTICS_RE = re.compile(
+    r"\b(кто|какой|какая|какие)\b.{0,80}\b("
+    r"прибыл\w*|выруч\w*|доход\w*|касс\w*|оборот\w*|деньг\w*|"
+    r"заработ\w*|зарабат\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
+    r"зарплат\w*|марж\w*|прибыльн\w*|рентабельн\w*)\b",
+    re.IGNORECASE,
+)
+_FOUNDED_INTENT_RE = re.compile(
+    r"\b(когда\s+основан|год\s+основан|основан|сколько\s+лет|истори[яи]\s+салона)\b",
+    re.IGNORECASE,
+)
+
+
+def _chat_request_mode(body: dict | None) -> str:
+    mode = str((body or {}).get("mode") or "").strip().lower()
+    return "staff" if mode == "staff" else "client"
+
+
+def _chat_effective_mode(body: dict | None, chat_id: int) -> str:
+    """Resolve app surface mode after auth; staff mode is never trusted from payload alone."""
+    if _chat_request_mode(body) != "staff":
+        return "client"
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if info.get("is_master") or info.get("role") in ("owner", "manager", "master"):
+        return "staff"
+    return "client"
+
+
+def _chat_history_key(chat_id: int, mode: str) -> str:
+    """PWA chat memory is separated by app surface, not only by Telegram ID."""
+    surface = "staff" if mode == "staff" else "client"
+    return f"pwa:{surface}:{int(chat_id)}"
+
+
+def _chat_disabled_tools(mode: str) -> set[str]:
+    # В рабочем кабинете база знаний/аналитика должны быть доступны по RBAC.
+    return set() if mode == "staff" else set(CLIENT_CHAT_DISABLED_TOOLS)
+
+
+def _chat_llm_message(safe_message: str, *, mode: str, voice_mode: bool = False) -> str:
+    content = safe_message or ""
+    content += STAFF_CHAT_SURFACE_NUDGE if mode == "staff" else CLIENT_CHAT_SURFACE_NUDGE
+    if voice_mode:
+        content += _VOICE_STYLE_NUDGE
+    return content
+
+
+def _business_master_analytics_intent(message: str) -> bool:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return False
+    return bool(
+        (_MASTERS_INTENT_RE.search(low) and _BUSINESS_MASTER_ANALYTICS_RE.search(low))
+        or _BUSINESS_PERSON_ANALYTICS_RE.search(low)
+    )
+
+
+def _client_business_scope_reply(message: str) -> str | None:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not (_business_master_analytics_intent(low) or _BUSINESS_ANALYTICS_RE.search(low)):
+        return None
+    return (
+        "Это внутренний вопрос салона. В клиентском кабинете я не показываю выручку, "
+        "прибыль, зарплаты и аналитику мастеров. Здесь помогу выбрать услугу, мастера "
+        "или удобное время записи."
+    )
+
+
+def _staff_booking_scope_reply(message: str) -> str | None:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return None
+    if _STAFF_CLIENT_BOOKING_RE.search(low):
+        return STAFF_BOOKING_SCOPE_REPLY
+    return None
+
+
+def _allow_client_chat_shortcuts(body: dict, chat_id: int, message: str) -> bool:
+    if _chat_request_mode(body) == "staff":
+        return False
+    if _business_master_analytics_intent(message):
+        return False
+    return True
+
+
+def _analytics_period_from_text(message: str) -> tuple[str, str | None, str | None]:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if "вчера" in low:
+        return "yesterday", None, None
+    if "прошл" in low and "недел" in low:
+        return "last_week", None, None
+    if "недел" in low:
+        return "week", None, None
+    if "месяц" in low or "июл" in low or "июн" in low or "январ" in low or "феврал" in low:
+        return "month", None, None
+    if "сегодня" in low:
+        return "today", None, None
+    return "last_30", None, None
+
+
+def _rub(value) -> str:
+    try:
+        n = int(round(float(value or 0)))
+    except Exception:
+        n = 0
+    return f"{n:,}".replace(",", " ") + " ₽"
+
+
+_FOUNDER_RULE_DELETE_RE = re.compile(
+    r"^(?:забудь|удали|отмени|деактивируй)\s+правило\s*#?\s*(\d+)\s*[.!?]*$",
+    re.IGNORECASE,
+)
+_FOUNDER_RULE_ADD_RE = re.compile(
+    r"^(?:(?:запомни|сохрани|добавь)\s+(?:новое\s+)?правило"
+    r"(?:\s+(?:для\s+)?(?:майи|работы|бизнеса|салона))?"
+    r"|(?:научись|обучись)\s+(?:новому\s+)?правилу)\s*(?::|—|-)?\s*(.*)$",
+    re.IGNORECASE | re.DOTALL,
+)
+_FOUNDER_RULE_UNSAFE_RE = re.compile(
+    r"\b(?:игнорируй|обойди|отмени)\b.{0,80}"
+    r"\b(?:системн\w*\s+правил|безопасност|авторизац|провер\w*\s+доступ)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+_FOUNDER_RULE_PERMISSION_RE = re.compile(
+    r"\b(?:разреш\w*|запрет\w*|включ\w*|отключ\w*|открой\w*|закрой\w*)\b"
+    r".{0,100}\b(?:доступ\w*|прав\w*|истор\w*|данн\w*|карточ\w*)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _founder_rule_command(message: str) -> tuple[str, str | int | None] | None:
+    """Parse only explicit procedural-memory commands, never ordinary chat."""
+    text = (message or "").strip()
+    if not text:
+        return None
+    text = re.sub(
+        r"^(?:майя|мая|маюш(?:а|ка)?)\s*[,!:—-]?\s*",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    low = text.lower().replace("ё", "е")
+
+    match = _FOUNDER_RULE_DELETE_RE.match(text)
+    if match:
+        return "delete", int(match.group(1))
+    if "чему я тебя науч" in low or (
+        any(word in low for word in ("покажи", "перечисли")) and "правил" in low
+    ):
+        return "list", None
+    match = _FOUNDER_RULE_ADD_RE.match(text)
+    if match:
+        rule = (match.group(1) or "").strip(" \t\r\n:—-")
+        return ("add", rule) if rule else ("usage", None)
+    return None
+
+
+def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Founder-only procedural memory available without an LLM round-trip."""
+    command = _founder_rule_command(message)
+    if not command:
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not info.get("is_founder"):
+        logger.warning("Founder memory command denied for chat_id=%s", chat_id)
+        return "Постоянные правила MAYA может менять только основатель."
+    if str(mode or "").strip().lower() != "staff":
+        return "Чтобы изменить постоянные правила MAYA, откройте рабочий чат."
+
+    action, value = command
+    if action == "usage":
+        return "Напишите правило полностью: «Майя, запомни правило: …»."
+    if action == "list":
+        rules = database.list_salon_rules(active_only=True, limit=40)
+        if not rules:
+            return "Постоянных правил пока нет."
+        lines = [f"{row['id']}. {row['rule_text']}" for row in rules]
+        return "Постоянные правила MAYA:\n" + "\n".join(lines)
+    if action == "delete":
+        deleted = database.deactivate_salon_rule(int(value))
+        if deleted:
+            return f"Удалила правило [{int(value)}]. Со следующего сообщения оно не действует."
+        return f"Действующего правила [{int(value)}] нет."
+
+    rule = str(value or "").strip()
+    if len(rule) < 8:
+        return "Правило слишком короткое. Уточните, что именно MAYA должна делать."
+    if len(rule) > 500:
+        return "Правило длиннее 500 символов. Сформулируйте его короче и конкретнее."
+    redacted = anonymizer.redact_pii(rule)
+    if redacted != rule:
+        return "Не сохранила правило: постоянная память не должна содержать персональные данные."
+    if _FOUNDER_RULE_UNSAFE_RE.search(rule):
+        return "Не сохранила правило: оно пытается отменить серверные ограничения безопасности."
+    if _FOUNDER_RULE_PERMISSION_RE.search(rule):
+        return (
+            "Не сохранила правило: разрешения меняются только прямой "
+            "командой из безопасного каталога. Например: «Майя, разреши всем "
+            "клиентам видеть свою историю посещений»."
+        )
+
+    rules = database.list_salon_rules(active_only=True, limit=100)
+    normalized = re.sub(r"\s+", " ", rule).strip().lower().replace("ё", "е")
+    for row in rules:
+        current = re.sub(r"\s+", " ", str(row.get("rule_text") or "")).strip().lower().replace("ё", "е")
+        if current == normalized:
+            return f"Это правило уже сохранено под номером [{row['id']}]."
+    if len(rules) >= 40:
+        return "Активных правил уже 40. Сначала удалите ненужное командой «Майя, удали правило N»."
+
+    rule_id = database.add_salon_rule(rule, created_by=int(chat_id))
+    return (
+        f"Запомнила правило [{rule_id}]: {rule}\n"
+        "Оно начнёт действовать со следующего сообщения во всех чатах MAYA."
+    )
+
+
+def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
+    """Parse explicit global capability commands from the founder."""
+    text = (message or "").strip()
+    if not text:
+        return None
+    text = re.sub(
+        r"^(?:майя|мая|маюш(?:а|ка)?)\s*[,!:—-]?\s*",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    low = text.lower().replace("ё", "е")
+    if (
+        any(marker in low for marker in ("покажи", "перечисли", "какие", "статус"))
+        and any(marker in low for marker in ("разрешен", "доступ", "возможност"))
+    ):
+        return "list", None
+
+    history_target = any(marker in low for marker in (
+        "истори", "прошлые посещ", "прошлые визит",
+    ))
+    all_clients = "клиент" in low or "всем пользовател" in low
+    if not (history_target and all_clients):
+        return None
+    if any(marker in low for marker in (
+        "запрети", "отключи", "выключи", "закрой доступ", "не разрешай",
+    )):
+        return maya_capabilities.CLIENT_SELF_VISIT_HISTORY, False
+    if any(marker in low for marker in (
+        "разреши", "включи", "открой доступ", "дай доступ",
+    )):
+        return maya_capabilities.CLIENT_SELF_VISIT_HISTORY, True
+    return None
+
+
+def _founder_permission_reply(
+    chat_id: int,
+    message: str,
+    mode: str = "staff",
+) -> str | None:
+    command = _founder_permission_command(message)
+    if not command:
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not info.get("is_founder"):
+        logger.warning("Founder capability command denied for chat_id=%s", chat_id)
+        return "Глобальные разрешения MAYA может менять только основатель."
+    if str(mode or "").strip().lower() != "staff":
+        return "Чтобы изменить разрешения MAYA, откройте рабочий чат."
+
+    capability, enabled = command
+    if capability == "list":
+        rows = maya_capabilities.list_capabilities()
+        lines = ["Разрешения MAYA для клиентов:"]
+        for row in rows:
+            status = "включено" if row["enabled"] else "отключено"
+            lines.append(f"• {row['label']}: {status}")
+        return "\n".join(lines)
+
+    try:
+        result = maya_capabilities.set_enabled(
+            capability,
+            bool(enabled),
+            actor_id=int(chat_id),
+        )
+    except (KeyError, PermissionError):
+        return "Такого безопасного разрешения нет в каталоге MAYA."
+    if result["enabled"]:
+        return (
+            "Разрешила всем авторизованным клиентам видеть в чате только свою "
+            "историю посещений. Доступ к чужим карточкам остаётся закрыт."
+        )
+    return (
+        "Отключила клиентам просмотр истории посещений через чат. "
+        "Данные в YClients не изменены."
+    )
+
+
+_OWN_VISIT_HISTORY_RE = re.compile(
+    r"\b(?:"
+    r"истори\w*\s+мо(?:их|ей)\s+(?:визит|посещ)\w*|"
+    r"мо[яию]\s+истори\w*\s+(?:визит|посещ)\w*|"
+    r"мо[ия]\s+(?:прошл\w*\s+)?(?:визит|посещ)\w*|"
+    r"когда\s+я\s+(?:был|приходил|ходил)\w*|"
+    r"что\s+я\s+(?:делал|брал)\w*\s+(?:в\s+)?прошл\w*\s+(?:раз|визит)\w*|"
+    r"к\s+кому\s+я\s+(?:ходил|записывался)\w*|"
+    r"какие\s+услуг\w*\s+я\s+(?:брал|делал)\w*"
+    r")\b",
+    re.IGNORECASE,
+)
+_OWN_VISIT_HISTORY_REQUEST_RE = re.compile(
+    r"\b(?:покажи|дай|расскажи|открой)\w*.{0,30}\bмне\b.{0,30}"
+    r"(?:истори|визит|посещ)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _own_visit_history_intent(message: str) -> bool:
+    """Match first-person history requests, never another client's dossier."""
+    text = (message or "").strip().lower().replace("ё", "е")
+    if not text:
+        return False
+    return bool(
+        _OWN_VISIT_HISTORY_RE.search(text)
+        or _OWN_VISIT_HISTORY_REQUEST_RE.search(text)
+    )
+
+
+def _visit_history_date_label(value) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return "дата не указана"
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return parsed.strftime("%d.%m.%Y")
+    except ValueError:
+        try:
+            return date.fromisoformat(raw[:10]).strftime("%d.%m.%Y")
+        except ValueError:
+            return raw[:10]
+
+
+async def _own_visit_history_reply(chat_id: int, message: str) -> str | None:
+    """Return only the authenticated user's attended YClients visits."""
+    if not _own_visit_history_intent(message):
+        return None
+    if not maya_capabilities.is_enabled(
+        maya_capabilities.CLIENT_SELF_VISIT_HISTORY
+    ):
+        return "Просмотр истории посещений через чат сейчас отключён владельцем."
+    try:
+        client = database.get_client(int(chat_id))
+    except Exception as e:
+        logger.error("own visit history client lookup: %s", e)
+        client = None
+    if not client or not client.get("id"):
+        return (
+            "Ваш аккаунт пока не связан с клиентской карточкой. "
+            "Откройте личный кабинет и завершите привязку."
+        )
+    phone = str(client.get("phone") or "").strip()
+    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return "В клиентской карточке не подтверждён телефон. Завершите привязку в личном кабинете."
+
+    client_id = int(client["id"])
+    try:
+        cached = memory.normalize_history(
+            database.get_client_history_cached(client_id, max_age_hours=24 * 30)
+        )
+    except Exception:
+        cached = []
+
+    refreshed = None
+    try:
+        refreshed = await asyncio.to_thread(
+            memory.warm_client_history_cache_for_phone,
+            client_id,
+            phone,
+            _yc,
+            True,
+            30,
+        )
+    except Exception as e:
+        logger.error("own visit history refresh: %s", e)
+
+    if isinstance(refreshed, dict) and refreshed.get("ok"):
+        history = memory.normalize_history(refreshed.get("history") or [])
+        used_cached_fallback = False
+    else:
+        history = cached
+        used_cached_fallback = bool(cached)
+
+    history = [
+        row for row in history
+        if isinstance(row, dict) and (
+            row.get("date") or row.get("services") or row.get("master")
+        )
+    ]
+    history.sort(key=lambda row: str(row.get("date") or ""), reverse=True)
+    if not history:
+        return "В YClients не нашла завершённых посещений для вашей привязанной карточки."
+
+    low = (message or "").lower().replace("ё", "е")
+    full = any(marker in low for marker in (
+        "всю истор", "полную истор", "все посещ", "все визит",
+    ))
+    limit = 30 if full else 10
+    shown = history[:limit]
+    lines = ["Вот ваша история завершённых посещений из YClients:"]
+    for index, row in enumerate(shown, 1):
+        service_titles = [
+            str(item.get("title") or "").strip()
+            for item in (row.get("services") or [])
+            if isinstance(item, dict) and str(item.get("title") or "").strip()
+        ]
+        if not service_titles and str(row.get("service") or "").strip():
+            service_titles = [str(row["service"]).strip()]
+        services = ", ".join(service_titles) or "услуги не указаны"
+        master = str(row.get("master") or "").strip()
+        details = f"{_visit_history_date_label(row.get('date'))}: {services}"
+        if master:
+            details += f", мастер {master}"
+        lines.append(f"{index}. {details}")
+    if len(history) > len(shown):
+        lines.append(
+            f"Показала {len(shown)} последних из {len(history)} найденных. "
+            "Спросите «покажи полную историю моих посещений», чтобы увидеть больше."
+        )
+    if used_cached_fallback:
+        lines.append(
+            "YClients временно не ответил, поэтому показываю последнюю "
+            "синхронизированную историю."
+        )
+    return "\n".join(lines)
+
+
+def _owner_daily_briefing_intent(message: str) -> bool:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return False
+    if any(marker in low for marker in (
+        "сводка на сегодня",
+        "сводку на сегодня",
+        "брифинг на сегодня",
+        "план на день",
+        "с чего начать",
+        "что мне сделать",
+    )):
+        return True
+    has_today = "сегодня" in low or "на текущий день" in low
+    has_business_scope = any(marker in low for marker in (
+        "по бизнесу",
+        "по салону",
+        "с бизнесом",
+        "с салоном",
+        "что у нас",
+        "как дела",
+        "загрузка",
+    ))
+    return has_today and has_business_scope
+
+
+def _owner_daily_briefing_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Verified daily brief that does not depend on an available LLM quota."""
+    if str(mode or "").strip().lower() != "staff":
+        return None
+    if not _owner_daily_briefing_intent(message):
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if info.get("role") != "owner" and not info.get("is_founder"):
+        return None
+    try:
+        import owner_ai
+        return owner_ai.format_daily_briefing(owner_ai.daily_briefing())
+    except Exception as e:
+        logger.error("owner daily briefing shortcut: %s", e)
+        return "Не смогла собрать проверенную сводку из YClients. Попробуйте ещё раз через минуту."
+
+
+def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Deterministic answer for owner/founder questions about master revenue/profit."""
+    if str(mode or "").strip().lower() != "staff":
+        return None
+    if not _business_master_analytics_intent(message):
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not (info.get("permissions") or {}).get("analytics"):
+        return None
+    if info.get("role") != "owner" and not info.get("is_founder"):
+        return (
+            "Это уровень владельца: прибыль по мастерам, маржу после ЗП и выплаты "
+            "я показываю только владельцу. В рабочем кабинете могу помочь с вашей "
+            "разрешённой аналитикой, расписанием и операционными задачами."
+        )
+    try:
+        import analytics
+        period, date_from, date_to = _analytics_period_from_text(message)
+        frm, to, label = analytics.resolve_period(period, date_from, date_to)
+        summary = analytics.business_summary(frm, to)
+    except Exception as e:
+        logger.error(f"owner master profit shortcut: {e}")
+        return "Не смогла собрать аналитику по мастерам из YClients. Попробуйте ещё раз через минуту."
+
+    masters = [m for m in (summary.get("masters") or []) if isinstance(m, dict)]
+    masters = [m for m in masters if int(m.get("gross") or 0) > 0]
+    if not masters:
+        return f"За период «{label}» в YClients нет проведённых оплат по мастерам."
+
+    by_gross = sorted(masters, key=lambda m: int(m.get("gross") or 0), reverse=True)
+    employees = [m for m in masters if not m.get("is_owner")]
+    by_margin = sorted(
+        employees or masters,
+        key=lambda m: int(m.get("gross") or 0) - int(m.get("salary") or 0),
+        reverse=True,
+    )
+    leader = by_gross[0]
+    margin_leader = by_margin[0]
+
+    def row(m: dict) -> str:
+        margin = int(m.get("gross") or 0) - int(m.get("salary") or 0)
+        return (
+            f"{m.get('name') or 'Мастер'}: выручка {_rub(m.get('gross'))}, "
+            f"ЗП {_rub(m.get('salary'))}, маржа {_rub(margin)}, "
+            f"визитов {int(m.get('visits') or 0)}, средний чек {_rub(m.get('avg_check'))}"
+        )
+
+    top3 = "\n".join(f"{i}. {row(m)}" for i, m in enumerate(by_gross[:3], 1))
+    margin = int(margin_leader.get("gross") or 0) - int(margin_leader.get("salary") or 0)
+    return (
+        f"За период «{label}» лидер по выручке — {leader.get('name') or 'мастер'}.\n\n"
+        f"Топ по выручке:\n{top3}\n\n"
+        f"Если считать вклад мастера как выручка минус расчётная ЗП, "
+        f"лидер по марже — {margin_leader.get('name') or 'мастер'}: {_rub(margin)}. "
+        f"Это маржа после ЗП, не чистая прибыль салона: постоянные расходы здесь не разнесены по мастерам."
+    )
+
+
+def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
+    """Fast deterministic answers for the client-facing MAYA cabinet."""
+    text = (message or "").strip()
+    low = text.lower().replace("ё", "е")
+    if not low:
+        return None
+
+    if _BOOKING_START_ONLY_RE.fullmatch(low):
+        return (
+            "Конечно. На какую услугу вас записать?",
+            None,
+        )
+
+    if _ADDRESS_INTENT_RE.search(low):
+        return (
+            "Мы находимся в Ставрополе: ул. Лермонтова, 343. Работаем каждый день с 10:00 до 21:00.",
+            None,
+        )
+
+    if _FOUNDED_INTENT_RE.search(low):
+        return (
+            f"«Мужская Эстетика» работает с {SALON_FOUNDED_YEAR} года. "
+            "Сейчас это премиальный барбершоп в Ставрополе с сильной командой мастеров.",
+            None,
+        )
+
+    if _DISCOUNT_INTENT_RE.search(low):
+        return (
+            "По скидкам: в кабинете видны ваши баллы и бонусы, есть реферальная программа, "
+            "подарочные сертификаты и абонементы для более выгодных регулярных визитов.",
+            {"type": "open_cabinet", "label": "Открыть кабинет", "screen": "cabinet"},
+        )
+
+    if _MASTERS_INTENT_RE.search(low) and not _business_master_analytics_intent(low):
+        return (
+            "Команда: топ-мастера — Стас Мосин и Илья Третьяков; старшие мастера — "
+            "Алексей Дарма, Максим Чурсинов и Александр Киянский. "
+            "Под задачу и удобное время могу подобрать мастера и сразу проверить свободные окна.",
+            {"type": "open_team", "label": "Посмотреть мастеров", "screen": "team"},
+        )
+
+    if (
+        _BOOKING_INTENT_RE.search(low)
+        and _BOOKING_SERVICE_RE.search(low)
+        and not _BOOKING_SPECIFIC_RE.search(low)
+        and len(low) <= 120
+    ):
+        return (
+            "Конечно. Запишу вас. Подскажите, к какому мастеру хотите и на какой день или время?",
+            {"type": "open_booking", "label": "Открыть запись", "screen": "book"},
+        )
+
+    return None
+
+
+def _client_usual_booking_shortcut(
+    chat_id: int,
+    message: str,
+) -> tuple[str, dict | None] | None:
+    """Resolve "my regular master" deterministically from the client's visits."""
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low or not _USUAL_MASTER_INTENT_RE.search(low):
+        return None
+    try:
+        usual = memory.get_usual_booking(int(chat_id), warm=True)
+    except Exception as exc:
+        logger.error("usual booking shortcut: %s", exc)
+        usual = None
+    if not usual or not usual.get("master_name"):
+        return (
+            "Пока не вижу в истории постоянного мастера. Назовите мастера или выберите любого — я продолжу запись.",
+            None,
+        )
+
+    master_name = str(usual["master_name"]).strip()
+    service_text = str(usual.get("service_text") or "").strip()
+    asks_to_book = bool(_BOOKING_INTENT_RE.search(low) or "как обычно" in low)
+    if not asks_to_book:
+        return (
+            f"Ваш постоянный мастер по истории визитов — {master_name}. Записать вас к нему?",
+            None,
+        )
+
+    # If the client named a service in this message, it remains in chat history
+    # and wins over the historical set. Otherwise we can continue "as usual".
+    has_service_now = bool(re.search(
+        r"\b(?:стриж|стрид|бород|брит|камуфляж|тонир|уход|комплекс)\w*",
+        low,
+        re.IGNORECASE,
+    ))
+    use_usual_services = "как обычно" in low
+    if service_text and use_usual_services and not has_service_now:
+        return (
+            f"Выбрала вашего постоянного мастера — {master_name}. Обычно у вас: {service_text}. "
+            "На какой день и время записать? Можно сказать «ближайшее окно».",
+            None,
+        )
+    if has_service_now:
+        return (
+            f"Выбрала вашего постоянного мастера — {master_name}. "
+            "На какой день и время записать? Можно сказать «ближайшее окно».",
+            None,
+        )
+    return (
+        f"Выбрала вашего постоянного мастера — {master_name}. На какую услугу вас записать?",
+        None,
+    )
+
+
+def _plain_maya_delta(text: str) -> str:
+    if not text:
+        return ""
+    return re.sub(r"[*_`]+", "", str(text))
+
+
+def _plain_maya_text(text: str) -> str:
+    text = _plain_maya_delta(text or "")
+    text = re.sub(
+        r"\n?\s*[^.\n!?]{0,160}\bуточн[^\n.!?]{0,120}\bу\s+Стаса[.!?]?",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\n?\s*Детальн[^\n.!?]{0,220}\bу\s+Стаса[.!?]?",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\b([01]?\d|2[0-3])\s+час(?:а|ов)?\s+([0-5]?\d)\s+минут(?:а|ы)?\b",
+        lambda m: f"{int(m.group(1))}:{int(m.group(2)):02d}",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def _chat_knowledge_images(chat_id: int, message: str, mode: str = "client", limit: int = 3) -> list[dict]:
+    """База знаний по технике/схемам УБРАНА из мозга Майи (решение Стаса 2026-07-06).
+    Схемы стрижек больше НИКОГДА не прикрепляются — ни клиенту, ни сотруднику."""
+    return []
+
+
+async def knowledge_image_handler(request: web.Request) -> web.Response:
+    """GET /api/knowledge/image/{name} — optimized book page for MAYA knowledge answers."""
+    name = os.path.basename(str(request.match_info.get("name") or ""))
+    if not re.fullmatch(r"IMG_\d{4,}\.(?:jpg|jpeg|png|webp)", name, re.IGNORECASE):
+        return web.Response(status=404, text="not found")
+    path = os.path.join(os.path.dirname(__file__), "barber_knowledge_images", name)
+    if not os.path.isfile(path):
+        return web.Response(status=404, text="not found")
+    return web.FileResponse(path, headers={
+        "Cache-Control": "public, max-age=86400",
+        "Access-Control-Allow-Origin": "*",
+    })
+
+
+def _resolve_chat_tg_user(request: web.Request, body: dict) -> dict | None:
+    """Resolve the app chat identity from Telegram initData, widget auth, or web session."""
+    init_data = request.headers.get("X-Telegram-InitData", "")
+    tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN) if init_data else None
+    if not tg_user and isinstance(body.get("auth_data"), dict):
+        tg_user = _verify_telegram_login_widget(body["auth_data"], TELEGRAM_TOKEN)
+    if not tg_user and body.get("session_token"):
+        try:
+            tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
+        except Exception:
+            pass
+    return tg_user
+
+
+def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
+    messages = []
+    for i, item in enumerate(history or []):
+        if not isinstance(item, dict):
+            continue
+        role = item.get("role")
+        text = _plain_maya_text(_history_text(item))
+        if not text:
+            continue
+        if role == "user":
+            messages.append({"id": offset + i, "role": "user", "text": text})
+        elif role == "assistant":
+            msg = {"id": offset + i, "role": "bot", "text": text}
+            if item.get("link"):
+                msg["link"] = item.get("link")
+            if isinstance(item.get("action"), dict):
+                msg["action"] = item.get("action")
+            if isinstance(item.get("images"), list):
+                msg["images"] = item.get("images")
+            messages.append(msg)
+    return messages
+
+
+def _assistant_history_item(text: str, *, link=None, action=None, images=None) -> dict:
+    item = {"role": "assistant", "content": _plain_maya_text(text or "")}
+    if link:
+        item["link"] = link
+    if isinstance(action, dict):
+        item["action"] = action
+    if isinstance(images, list) and images:
+        item["images"] = images
+    return item
+
+
+def _store_assistant_message_in_chat(
+    chat_id: int,
+    text: str,
+    *,
+    mode: str = "client",
+    action: dict | None = None,
+    link=None,
+    images: list | None = None,
+    dedupe_key: str = "",
+) -> bool:
+    """Кладёт сервисное сообщение MAYA в историю чата приложения.
+
+    Нужен для мостика push → переписка: уведомление не только всплывает, но и
+    остаётся в чате, чтобы клиент мог открыть приложение позже и перечитать его.
+    """
+    try:
+        cid = int(chat_id)
+    except (TypeError, ValueError):
+        return False
+    clean = _plain_maya_text(text or "")
+    if not clean:
+        return False
+    try:
+        conversations = memory.load_conversations()
+        history_key = _chat_history_key(cid, mode)
+        history = list(conversations.get(history_key) or [])
+        want_key = str(dedupe_key or "").strip()[:160]
+        if want_key:
+            for item in reversed(history[-8:]):
+                if isinstance(item, dict) and item.get("role") == "assistant" and item.get("dedupe_key") == want_key:
+                    return False
+        item = _assistant_history_item(clean, link=link, action=action, images=images)
+        if want_key:
+            item["dedupe_key"] = want_key
+        history.append(item)
+        conversations[history_key] = history[-30:]
+        memory.save_conversations(conversations)
+        return True
+    except Exception as e:
+        logger.error(f"store assistant message in chat {cid}: {e}")
+        return False
+
+
+async def chat_history_handler(request: web.Request) -> web.Response:
+    """POST /api/chat/history — return the saved MAYA chat history for the logged-in user."""
+    from memory import load_conversations
+
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    if not isinstance(body, dict):
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+
+    tg_user = _resolve_chat_tg_user(request, body)
+    if not tg_user:
+        return _cabinet_response(
+            {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
+            status=401,
+        )
+
+    chat_id = tg_user.get("id")
+    if not chat_id:
+        return _cabinet_response({"error": "no_user_id"}, status=400)
+    chat_id = int(chat_id)
+
+    if not database.has_valid_consent_by_chat_id(chat_id):
+        return _cabinet_response({
+            "error": "needs_consent",
+            "message": ("Чтобы общаться с ассистентом, подпишите согласие на обработку "
+                        "персональных данных: откройте @malesthetic_bot и нажмите /start."),
+        }, status=403)
+
+    chat_mode = _chat_effective_mode(body, chat_id)
+    history_key = _chat_history_key(chat_id, chat_mode)
+    full_history = load_conversations().get(history_key) or []
+    offset = max(0, len(full_history) - 30)
+    messages = _chat_history_payload(full_history[-30:], offset=offset)
+
+    return _cabinet_response({"messages": messages})
+
+
+async def chat_delete_handler(request: web.Request) -> web.Response:
+    """POST /api/chat/delete — delete one MAYA message or clear the whole chat history."""
+    from memory import load_conversations, save_conversations
+
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    if not isinstance(body, dict):
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+
+    tg_user = _resolve_chat_tg_user(request, body)
+    if not tg_user:
+        return _cabinet_response(
+            {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
+            status=401,
+        )
+
+    chat_id = tg_user.get("id")
+    if not chat_id:
+        return _cabinet_response({"error": "no_user_id"}, status=400)
+    chat_id = int(chat_id)
+
+    chat_mode = _chat_effective_mode(body, chat_id)
+    history_key = _chat_history_key(chat_id, chat_mode)
+    conversations = load_conversations()
+    history = list(conversations.get(history_key) or [])
+    delete_mode = str(body.get("delete_mode") or body.get("delete") or "").strip().lower()
+    if not delete_mode:
+        legacy_mode = str(body.get("mode") or "").strip().lower()
+        if legacy_mode in ("all", "clear", "reset", "one"):
+            delete_mode = legacy_mode
+
+    if delete_mode in ("all", "clear", "reset"):
+        conversations.pop(history_key, None)
+        save_conversations(conversations)
+        return _cabinet_response({"ok": True, "deleted": "all", "messages": []})
+
+    deleted = False
+    raw_id = body.get("message_id", body.get("id"))
+    try:
+        msg_id = int(raw_id)
+    except Exception:
+        msg_id = None
+
+    if msg_id is not None and 0 <= msg_id < len(history):
+        del history[msg_id]
+        deleted = True
+
+    if not deleted:
+        want_role = str(body.get("role") or "").strip().lower()
+        if want_role == "bot":
+            want_role = "assistant"
+        want_text = _plain_maya_text(str(body.get("text") or ""))
+        if want_role in ("user", "assistant") and want_text:
+            for idx in range(len(history) - 1, -1, -1):
+                item = history[idx]
+                if not isinstance(item, dict) or item.get("role") != want_role:
+                    continue
+                if _plain_maya_text(_history_text(item)) == want_text:
+                    del history[idx]
+                    deleted = True
+                    break
+
+    if history:
+        conversations[history_key] = history[-30:]
+    else:
+        conversations.pop(history_key, None)
+    save_conversations(conversations)
+    messages = _chat_history_payload(conversations.get(history_key) or [])
+    return _cabinet_response({"ok": True, "deleted": bool(deleted), "messages": messages})
+
+
 async def chat_handler(request: web.Request) -> web.Response:
     """
     POST /api/chat — чат с ассистентом прямо в приложении.
@@ -5285,7 +7635,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     Тело: { "message": "...", "auth_data": {...}? }
     """
     # Ленивые импорты — чтобы не ловить циклические зависимости на загрузке модуля
-    from claude_ai import get_ai_response, VOICE_CLAUDE_MODEL
+    from claude_ai import get_ai_response, OPENAI_PWA_CHAT_MODEL, VOICE_CLAUDE_MODEL
     from memory import load_conversations, save_conversations
 
     try:
@@ -5296,6 +7646,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "invalid_json"}, status=400)
 
     message = (body.get("message") or "").strip()
+    chat_mode = _chat_request_mode(body)
 
     # Авторизация: сначала initData (Mini App), затем Login Widget (PWA)
     init_data = request.headers.get("X-Telegram-InitData", "")
@@ -5305,10 +7656,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Вход через ВК / по номеру (веб-сессия без Telegram): токен → chat_id.
     if not tg_user and body.get("session_token"):
         try:
-            _sess = web_auth.resolve_session(body.get("session_token"))
-            _cid = _sess.get("chat_id") if _sess else None
-            if _cid:
-                tg_user = {"id": int(_cid), "first_name": (_sess.get("display_name") or "")}
+            tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
     if not tg_user:
@@ -5321,6 +7669,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
+    chat_mode = _chat_effective_mode(body, chat_id)
 
     # 152-ФЗ: без согласия диалог с ассистентом недоступен (как и кабинет)
     if not database.has_valid_consent_by_chat_id(chat_id):
@@ -5333,7 +7682,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Голосовой помощник (hands-free): фронт шлёт сентинел "__vg__" при входе в
     # голосовой режим → MAYA здоровается ГОЛОСОМ (TTS без LLM и без записи в историю).
     if message == "__vg__":
-        # Узнаём собеседника: имя из Telegram + роль (founder/owner/master/client).
+        # Узнаём собеседника: имя из Telegram + роль (founder/owner/manager/master/client).
         # Без этого приветствие безличное — читается как «она меня не узнаёт».
         _nm = (tg_user.get("first_name") or "").strip()
         try:
@@ -5342,9 +7691,9 @@ async def chat_handler(request: web.Request) -> web.Response:
         except Exception:
             _role = "client"
         _hi = f"Здравствуйте, {_nm}!" if _nm else "Здравствуйте!"
-        if _role == "founder":
+        if chat_mode == "staff" and _role == "founder":
             greet = f"{_hi} Это MAYA, я на связи. Чем сегодня займёмся?"
-        elif _role in ("owner", "master"):
+        elif chat_mode == "staff" and _role in ("owner", "manager", "master"):
             greet = f"{_hi} Это MAYA. Чем помочь по работе?"
         else:
             greet = f"{_hi} Я MAYA. Слушаю вас — чем могу помочь?"
@@ -5380,16 +7729,197 @@ async def chat_handler(request: web.Request) -> web.Response:
     if len(message) > 2000:
         message = message[:2000]
 
-    master_reply = _master_chat_shortcut(chat_id, message)
+    # Карточка-действие директора: владелец нажал кнопку подтверждения — фронт шлёт
+    # детерминированную команду __runjob:<job>. Запускаем задачу БЕЗ LLM (только владелец).
+    if message.startswith("__runjob:"):
+        if chat_mode != "staff":
+            return _cabinet_response({
+                "reply": _client_business_scope_reply(message) or "Это действие доступно только в рабочем кабинете.",
+                "contact_request": False,
+                "transcript": transcript or "",
+            })
+        return await _run_owner_job_from_chat(request, chat_id, message.split(":", 1)[1].strip().lower())
+
+    master_reply = _master_chat_shortcut(chat_id, message) if chat_mode == "staff" else None
     if master_reply:
         return _cabinet_response({"reply": master_reply})
 
-    # Общая с Telegram история: те же ключи (user_id) и формат {role, content}
+    history_key = _chat_history_key(chat_id, chat_mode)
+    conversations = load_conversations()
+    history = conversations.get(history_key) or []
+
+    founder_permission_reply = _founder_permission_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if founder_permission_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_permission_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_permission_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
+    if founder_learning_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_learning_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    own_history_reply = await _own_visit_history_reply(chat_id, message)
+    if own_history_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(own_history_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": own_history_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
+    if staff_booking_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(staff_booking_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": staff_booking_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
+    if client_business_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(client_business_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
+    if owner_daily_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_daily_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_daily_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
+    if owner_profit_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_profit_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_profit_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    if transcript and should_clarify_transcript(message, history, _voice_known_master_names()):
+        out = {
+            "reply": CLARIFY_REPEAT_TEXT,
+            "contact_request": False,
+            "transcript": "",
+        }
+        try:
+            import voice
+            import base64 as _b64
+            _audio = await voice.synthesize(CLARIFY_REPEAT_TEXT, fmt="mp3")
+            if _audio:
+                out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
+        except Exception as e:
+            logger.error(f"chat_handler unclear voice tts: {e}")
+        return _cabinet_response(out)
+
+    direct_shop = _direct_shop_action(message) if chat_mode == "client" else None
+    if direct_shop:
+        direct_text, direct_action = direct_shop
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": direct_text,
+            "action": direct_action,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    client_shortcut = None
+    if _allow_client_chat_shortcuts(body, chat_id, message):
+        client_shortcut = (
+            _client_usual_booking_shortcut(chat_id, message)
+            or _client_chat_shortcut(message)
+        )
+    if client_shortcut:
+        direct_text, direct_action = client_shortcut
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        out = {
+            "reply": direct_text,
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        if direct_action:
+            out["action"] = direct_action
+        if transcript:
+            try:
+                import voice
+                import base64 as _b64
+                _audio = await voice.synthesize(direct_text, fmt="mp3")
+                if _audio:
+                    out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
+            except Exception as e:
+                logger.error(f"chat_handler shortcut tts: {e}")
+        return _cabinet_response(out)
+
+    deterministic_reply = _deterministic_upsell_reply(message, history)
+    if deterministic_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(deterministic_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": deterministic_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    # PWA-история разделена по поверхности кабинета, формат тот же: {role, content}
     # 152-ФЗ: обезличиваем сообщение клиента ДО отправки в LLM и ДО сохранения —
     # так же, как в Telegram-боте (bot.py: anonymizer.redact_pii). Веб-чат раньше слал сырьё.
     safe_message = anonymizer.redact_pii(message)
-    conversations = load_conversations()
-    history = conversations.get(chat_id) or []
     history.append({"role": "user", "content": safe_message})
     if len(history) > 30:
         history = history[-30:]
@@ -5397,37 +7927,48 @@ async def chat_handler(request: web.Request) -> web.Response:
     # Голос: ТОТ ЖЕ мозг/знания/инструменты, что и текст, но подача — под ОЗВУЧКУ:
     # живая разговорная речь, словами вместо сокращений/markdown. Это НЕ урезание
     # знаний (как было с «1-2 фразами»), а стиль для голоса. Транзиентно — в историю не пишем.
-    llm_history = history
-    if voice_mode and history:
-        llm_history = history[:-1] + [{
-            "role": "user",
-            "content": safe_message + "\n\n[Это голосовой разговор. Отвечай живой естественной "
-                       "разговорной речью — полно и точно по сути, но по делу, без воды. НЕ используй "
-                       "markdown, списки и сокращения: проговаривай словами (например «среда», а не "
-                       "«ср»; «рублей», а не «₽»; «телефон», а не «тел.»). Если нужно перечислить много "
-                       "(услуги, цены) — назови голосом главное и предложи прислать полный список текстом.]",
-        }]
+    llm_history = history[:-1] + [{
+        "role": "user",
+        "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
+    }]
     # Модель голоса: для консультаций и записи клиентов используем максимальную GPT-модель.
-    _vmodel = None
-    if voice_mode:
+    _vmodel = OPENAI_PWA_CHAT_MODEL if chat_mode == "client" else None
+    if voice_mode and chat_mode != "client":
         from claude_ai import _resolve_role
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
         response_text, contact_request, gift_cert_action = get_ai_response(
-            llm_history, user_id=chat_id, model=_vmodel)
+            llm_history,
+            user_id=chat_id,
+            model=_vmodel,
+            disabled_tools=_chat_disabled_tools(chat_mode),
+            mode=chat_mode,
+        )
     except Exception as e:
         logger.error(f"chat_handler: ошибка AI: {e}")
-        return _cabinet_response({
-            "error": "ai_error",
-            "message": "Не получилось ответить. Попробуйте ещё раз или позвоните: 8-962-447-67-47.",
-        }, status=502)
+        fallback_text, fallback_action = _chat_temporary_error(chat_mode)
+        history.append(_assistant_history_item(fallback_text, action=fallback_action))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        payload = {
+            "reply": fallback_text,
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        if fallback_action:
+            payload["action"] = fallback_action
+        return _cabinet_response(payload)
 
     # Если ИИ готов оформить запись (request_booking) — клиент авторизован,
     # оформляем сами (в Telegram это делает контакт-флоу бота, в приложении — мы).
     if contact_request:
-        booking_msg = _finalize_booking_for_chat(chat_id, contact_request)
-        if booking_msg:
-            response_text = booking_msg
+        if chat_mode == "staff":
+            response_text = STAFF_BOOKING_SCOPE_REPLY
+            contact_request = None
+        else:
+            booking_msg = _finalize_booking_for_chat(chat_id, contact_request)
+            if booking_msg:
+                response_text = booking_msg
 
     # Покупка из чата приложения — сертификат ИЛИ абонемент (общий слот gift_cert_action,
     # разделяем по kind). Вместо ссылки на бота отдаём in-app действие, которое
@@ -5448,6 +7989,19 @@ async def chat_handler(request: web.Request) -> web.Response:
             # всякий случай НЕ превращаем сигнал в (ошибочное) действие с
             # сертификатом — оставляем текст Антона как есть.
             pass
+        elif gift_cert_action.get("kind") == "run_job":
+            # AI-директор предложил запустить рассылку — отдаём карточку с кнопкой.
+            # Нажатие пришлёт __runjob:<job>, и задача запустится (см. _run_owner_job_from_chat).
+            _job = gift_cert_action.get("job")
+            cert_action = {
+                "type": "run_job",
+                "job": _job,
+                "label": gift_cert_action.get("label") or "Запустить рассылку",
+                "confirm": "__runjob:" + str(_job),
+            }
+            for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
+                if gift_cert_action.get(key) is not None:
+                    cert_action[key] = gift_cert_action.get(key)
         else:
             amt = gift_cert_action.get("amount")
             response_text = (
@@ -5459,9 +8013,10 @@ async def chat_handler(request: web.Request) -> web.Response:
             if amt in (2000, 3000, 5000):
                 cert_action["amount"] = amt
 
-    response_text = response_text or "Секунду, не расслышал — повторите, пожалуйста."
-    history.append({"role": "assistant", "content": response_text})
-    conversations[chat_id] = history
+    response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
+    knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
+    history.append(_assistant_history_item(response_text, link=reply_link, action=cert_action, images=knowledge_images))
+    conversations[history_key] = history
     save_conversations(conversations)
 
     # Чтобы числа с пробелом-разделителем («2 000 ₽») не разрывались по строкам
@@ -5492,6 +8047,8 @@ async def chat_handler(request: web.Request) -> web.Response:
         resp["link"] = reply_link
     if cert_action:
         resp["action"] = cert_action
+    if knowledge_images:
+        resp["images"] = knowledge_images
     if audio_reply_b64:
         resp["audio_reply"] = audio_reply_b64        # mp3 base64 — приложение проигрывает
     return _cabinet_response(resp)
@@ -5561,7 +8118,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     Не-стрим случаи (быстрый ответ мастеру, ошибки авторизации/согласия) отдаются
     обычным JSON — фронт это распознаёт по Content-Type и рендерит как /api/chat.
     """
-    from claude_ai import get_ai_response_stream
+    from claude_ai import get_ai_response_stream, OPENAI_PWA_CHAT_MODEL
     from memory import load_conversations, save_conversations
 
     try:
@@ -5572,6 +8129,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "invalid_json"}, status=400)
 
     message = (body.get("message") or "").strip()
+    chat_mode = _chat_request_mode(body)
 
     # Авторизация — идентична /api/chat
     init_data = request.headers.get("X-Telegram-InitData", "")
@@ -5580,10 +8138,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         tg_user = _verify_telegram_login_widget(body["auth_data"], TELEGRAM_TOKEN)
     if not tg_user and body.get("session_token"):
         try:
-            _sess = web_auth.resolve_session(body.get("session_token"))
-            _cid = _sess.get("chat_id") if _sess else None
-            if _cid:
-                tg_user = {"id": int(_cid), "first_name": (_sess.get("display_name") or "")}
+            tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
     if not tg_user:
@@ -5596,6 +8151,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
+    chat_mode = _chat_effective_mode(body, chat_id)
 
     if not database.has_valid_consent_by_chat_id(chat_id):
         return _cabinet_response({
@@ -5620,13 +8176,176 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if len(message) > 2000:
         message = message[:2000]
 
+    if message.startswith("__runjob:"):
+        if chat_mode != "staff":
+            return _cabinet_response({
+                "reply": _client_business_scope_reply(message) or "Это действие доступно только в рабочем кабинете.",
+                "contact_request": False,
+                "transcript": transcript or "",
+            })
+        return await _run_owner_job_from_chat(request, chat_id, message.split(":", 1)[1].strip().lower())
+
     # Быстрый ответ мастеру — без стрима, обычным JSON
-    master_reply = _master_chat_shortcut(chat_id, message)
+    master_reply = _master_chat_shortcut(chat_id, message) if chat_mode == "staff" else None
     if master_reply:
         return _cabinet_response({"reply": master_reply, "transcript": transcript or ""})
 
+    history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    history = conversations.get(chat_id) or []
+    history = conversations.get(history_key) or []
+
+    founder_permission_reply = _founder_permission_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if founder_permission_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_permission_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_permission_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
+    if founder_learning_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_learning_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    own_history_reply = await _own_visit_history_reply(chat_id, message)
+    if own_history_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(own_history_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": own_history_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
+    if staff_booking_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(staff_booking_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": staff_booking_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
+    if client_business_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(client_business_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
+    if owner_daily_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_daily_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_daily_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
+    if owner_profit_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_profit_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_profit_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    direct_shop = _direct_shop_action(message) if chat_mode == "client" else None
+    if direct_shop:
+        direct_text, direct_action = direct_shop
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": direct_text,
+            "action": direct_action,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    client_shortcut = None
+    if _allow_client_chat_shortcuts(body, chat_id, message):
+        client_shortcut = (
+            _client_usual_booking_shortcut(chat_id, message)
+            or _client_chat_shortcut(message)
+        )
+    if client_shortcut:
+        direct_text, direct_action = client_shortcut
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(direct_text, action=direct_action))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        out = {
+            "reply": direct_text,
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        if direct_action:
+            out["action"] = direct_action
+        if transcript and body.get("voice"):
+            try:
+                import voice
+                import base64 as _b64
+                _audio = await voice.synthesize(direct_text, fmt="mp3")
+                if _audio:
+                    out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
+            except Exception as e:
+                logger.error(f"chat_stream shortcut tts: {e}")
+        return _cabinet_response(out)
+
+    deterministic_reply = _deterministic_upsell_reply(message, history)
+    if deterministic_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(deterministic_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": deterministic_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     # 152-ФЗ: обезличиваем сообщение и в СТРИМ-пути тоже — фронт шлёт чат сюда
     # ПЕРВЫМ (фолбэк на /api/chat). Тот же redact_pii, что в не-стрим chat_handler.
     safe_message = anonymizer.redact_pii(message)
@@ -5638,14 +8357,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     # мозг/знания/инструменты, максимальная модель и стиль под озвучку —
     # транзиентно (в историю НЕ пишем). Озвучку шлём только когда фича включена.
     voice_mode = bool(body.get("voice"))
-    voice_model = None
-    llm_history = history
+    voice_unclear = bool(transcript and should_clarify_transcript(
+        message, history, _voice_known_master_names()
+    ))
+    model_override = OPENAI_PWA_CHAT_MODEL if chat_mode == "client" else None
+    llm_history = history[:-1] + [{
+        "role": "user",
+        "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
+    }]
     if voice_mode:
         from claude_ai import VOICE_CLAUDE_MODEL, _resolve_role
         # Голосовой консультант/запись клиентов — максимальная GPT-модель.
-        voice_model = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
-        if history:
-            llm_history = history[:-1] + [{"role": "user", "content": safe_message + _VOICE_STYLE_NUDGE}]
+        if chat_mode != "client":
+            model_override = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
 
     # ── Открываем SSE-поток ──────────────────────────────────────────────
     resp = web.StreamResponse(status=200, headers={
@@ -5662,6 +8386,40 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     async def _send(obj: dict) -> None:
         await resp.write(b"data: " + _json.dumps(obj, ensure_ascii=False).encode("utf-8") + b"\n\n")
 
+    if voice_unclear:
+        await _send({"type": "delta", "text": CLARIFY_REPEAT_TEXT})
+        audio_sent = False
+        if voice_mode:
+            try:
+                import voice as _voicemod
+                import base64 as _b64
+                if _voicemod.is_enabled():
+                    au = await _voicemod.synthesize(CLARIFY_REPEAT_TEXT, fmt="mp3")
+                    if au:
+                        await _send({
+                            "type": "audio",
+                            "seq": 0,
+                            "b64": _b64.b64encode(au).decode("ascii"),
+                        })
+                        audio_sent = True
+            except Exception as e:
+                logger.error(f"chat_stream unclear voice tts: {e}")
+        done = {
+            "type": "done",
+            "reply": CLARIFY_REPEAT_TEXT,
+            "contact_request": False,
+            "transcript": "",
+        }
+        if audio_sent:
+            done["voice"] = True
+            done["audio_chunks"] = 1
+        await _send(done)
+        try:
+            await resp.write_eof()
+        except Exception:
+            pass
+        return resp
+
     # Голос: отдаём расшифровку сразу — пользователь видит свои слова, пока MAYA думает.
     if transcript:
         await _send({"type": "transcript", "text": transcript})
@@ -5674,11 +8432,25 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     def _producer() -> None:
         try:
-            for ev in get_ai_response_stream(llm_history, user_id=chat_id, model=voice_model):
+            for ev in get_ai_response_stream(
+                llm_history,
+                user_id=chat_id,
+                model=model_override,
+                disabled_tools=_chat_disabled_tools(chat_mode),
+                mode=chat_mode,
+            ):
                 loop.call_soon_threadsafe(queue.put_nowait, ev)
         except Exception as e:
             logger.error(f"chat_stream: ошибка AI: {e}")
-            loop.call_soon_threadsafe(queue.put_nowait, {"type": "error"})
+            fallback_text, fallback_action = _chat_temporary_error(chat_mode)
+            loop.call_soon_threadsafe(
+                queue.put_nowait,
+                {
+                    "type": "fallback",
+                    "text": fallback_text,
+                    "action": fallback_action,
+                },
+            )
         finally:
             loop.call_soon_threadsafe(queue.put_nowait, SENTINEL)
 
@@ -5688,6 +8460,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     contact_request = None
     gift_cert_action = None
     meta_text = ""
+    fallback_action = None
     had_error = False
 
     # ── Озвучка по предложениям (sentence-boundary chunking) ─────────────────
@@ -5742,7 +8515,9 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 break
             t = ev.get("type")
             if t == "delta":
-                txt = ev.get("text", "")
+                txt = _plain_maya_delta(ev.get("text", ""))
+                if not txt:
+                    continue
                 streamed_parts.append(txt)
                 await _send({"type": "delta", "text": txt})
                 if tts_on:
@@ -5759,6 +8534,16 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 contact_request = ev.get("contact_request")
                 gift_cert_action = ev.get("gift_cert_action")
                 meta_text = ev.get("text") or ""
+            elif t == "fallback":
+                txt = _plain_maya_text(ev.get("text") or CHAT_TEMPORARY_ERROR_REPLY)
+                fallback_action = ev.get("action")
+                streamed_parts.clear()
+                if tts_on:
+                    _tts_buf = ""
+                    _cancel_audio()
+                await _send({"type": "reset"})
+                streamed_parts.append(txt)
+                await _send({"type": "delta", "text": txt})
             elif t == "error":
                 had_error = True
                 await _send({"type": "error"})
@@ -5788,16 +8573,20 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     response_text = ("".join(streamed_parts).strip()) or meta_text
 
     if contact_request:
-        try:
-            booking_msg = await loop.run_in_executor(
-                None, _finalize_booking_for_chat, chat_id, contact_request)
-        except Exception as e:
-            logger.error(f"chat_stream: booking finalize: {e}")
-            booking_msg = None
-        if booking_msg:
-            response_text = booking_msg
+        if chat_mode == "staff":
+            response_text = STAFF_BOOKING_SCOPE_REPLY
+            contact_request = None
+        else:
+            try:
+                booking_msg = await loop.run_in_executor(
+                    None, _finalize_booking_for_chat, chat_id, contact_request)
+            except Exception as e:
+                logger.error(f"chat_stream: booking finalize: {e}")
+                booking_msg = None
+            if booking_msg:
+                response_text = booking_msg
 
-    cert_action = None
+    cert_action = fallback_action
     if gift_cert_action:
         if gift_cert_action.get("kind") == "subscription":
             response_text = (
@@ -5812,6 +8601,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             # всякий случай НЕ превращаем сигнал в (ошибочное) действие с
             # сертификатом — оставляем текст Антона как есть.
             pass
+        elif gift_cert_action.get("kind") == "run_job":
+            # AI-директор предложил запустить рассылку — отдаём карточку с кнопкой.
+            # Нажатие пришлёт __runjob:<job>, и задача запустится (см. _run_owner_job_from_chat).
+            _job = gift_cert_action.get("job")
+            cert_action = {
+                "type": "run_job",
+                "job": _job,
+                "label": gift_cert_action.get("label") or "Запустить рассылку",
+                "confirm": "__runjob:" + str(_job),
+            }
+            for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
+                if gift_cert_action.get(key) is not None:
+                    cert_action[key] = gift_cert_action.get(key)
         else:
             amt = gift_cert_action.get("amount")
             response_text = (
@@ -5823,9 +8625,10 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             if amt in (2000, 3000, 5000):
                 cert_action["amount"] = amt
 
-    response_text = response_text or "Секунду, не расслышал — повторите, пожалуйста."
-    history.append({"role": "assistant", "content": response_text})
-    conversations[chat_id] = history
+    response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
+    knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
+    history.append(_assistant_history_item(response_text, action=cert_action, images=knowledge_images))
+    conversations[history_key] = history
     save_conversations(conversations)
 
     display_text = re.sub(r"(?<=\d)\s(?=[\d₽])", " ", response_text)
@@ -5837,6 +8640,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     }
     if cert_action:
         done["action"] = cert_action
+    if knowledge_images:
+        done["images"] = knowledge_images
     if tts_on:
         done["voice"] = True
         done["audio_chunks"] = _aud_seq    # сколько звуковых кусков прислали
@@ -5889,10 +8694,7 @@ async def realtime_handler(request: web.Request) -> web.Response:
         tg_user = _verify_telegram_login_widget(auth["auth_data"], TELEGRAM_TOKEN)
     if not tg_user and auth.get("session_token"):
         try:
-            _sess = web_auth.resolve_session(auth.get("session_token"))
-            _cid = _sess.get("chat_id") if _sess else None
-            if _cid:
-                tg_user = {"id": int(_cid)}
+            tg_user = session_tg_user(web_auth.resolve_session(auth.get("session_token")))
         except Exception:
             pass
     chat_id = int(tg_user["id"]) if (tg_user and tg_user.get("id")) else None
@@ -5905,9 +8707,13 @@ async def realtime_handler(request: web.Request) -> web.Response:
         await ws.close()
         return ws
 
+    # Режим страницы: 'staff' (рабочий кабинет сотрудника) или 'client' (по умолч.).
+    # Мост сам проверит серверную роль — клиент не получит staff-Майю.
+    mode = "staff" if str(auth.get("mode") or "").lower() == "staff" else "client"
+
     await ws.send_json({"type": "ready"})
     try:
-        await realtime_bridge.run_session(ws, chat_id)
+        await realtime_bridge.run_session(ws, chat_id, mode=mode)
     except Exception as e:
         logger.error(f"realtime_handler: {e}")
     if not ws.closed:
@@ -6085,6 +8891,45 @@ async def auth_vk_sdk_handler(request: web.Request) -> web.Response:
     return _cabinet_response(res, status=200 if res.get("ok") else 401)
 
 
+async def auth_yandex_start_handler(request: web.Request) -> web.Response:
+    """POST /api/auth/yandex/start Body: {state, redirect_uri?}
+    → готовая ссылка Yandex ID OAuth. Client secret на фронт не отдаём."""
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    body = body or {}
+    res = web_auth.build_yandex_auth_url(
+        str(body.get("state") or ""),
+        redirect_uri=body.get("redirect_uri"),
+    )
+    return _cabinet_response(res, status=200 if res.get("ok") else 403)
+
+
+async def auth_yandex_handler(request: web.Request) -> web.Response:
+    """POST /api/auth/yandex Body: {code, redirect_uri?}
+    → Yandex ID OAuth exchange → наша web-session."""
+    try:
+        body = await request.json()
+    except Exception:
+        return _cabinet_response({"error": "invalid_json"}, status=400)
+    body = body or {}
+    ex = await web_auth.exchange_yandex_code(
+        body.get("code", ""),
+        redirect_uri=body.get("redirect_uri"),
+    )
+    if not ex.get("ok"):
+        return _cabinet_response(ex, status=401)
+    res = web_auth.issue_yandex_session(
+        ex["yandex_user_id"],
+        name=ex.get("name", ""),
+        phone=ex.get("phone"),
+        email=ex.get("email", ""),
+        avatar_url=ex.get("avatar_url", ""),
+    )
+    return _cabinet_response(res)
+
+
 async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
     """POST /api/cabinet/me-via-session  Header: X-Session-Token.
     Кабинет для входа без Telegram. Если телефон сматчился с Telegram-клиентом —
@@ -6092,15 +8937,16 @@ async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
     sess = web_auth.resolve_session(request.headers.get("X-Session-Token", ""))
     if not sess:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    chat_id = sess.get("chat_id")
+    tg_user = session_tg_user(sess)
+    chat_id = tg_user.get("id") if tg_user else None
     if chat_id:
-        tg_user = {"first_name": sess.get("display_name", ""), "username": ""}
         return await _build_full_cabinet(int(chat_id), tg_user)
+    sess_profile = normalize_tg_user({"full_name": sess.get("display_name")})
     return _cabinet_response({
         "known": False,
         "needs_booking": True,
         "has_phone": bool(sess.get("phone_hash")),
-        "name": sess.get("display_name", ""),
+        "name": sess_profile.get("display_name", ""),
         "message": "Запишись на первую стрижку — и здесь появятся твой кабинет, баллы и история.",
     })
 
@@ -6225,6 +9071,463 @@ _SHIFT_REMINDER_OFFSETS = (60, 30)
 _SHIFT_REMINDERS_SENT: set[tuple[int, str, int]] = set()
 
 
+def _master_day_brief_send_hour() -> int:
+    raw = os.environ.get(
+        "MASTER_DAY_BRIEF_SEND_HOUR",
+        str(getattr(config, "MASTER_DAY_BRIEF_SEND_HOUR", 8)),
+    )
+    try:
+        return max(0, min(23, int(raw)))
+    except (TypeError, ValueError):
+        return 8
+
+
+def _growth_role_recipients() -> dict[str, set[int]]:
+    """Resolve owner and manager recipients from server-side role sources."""
+    try:
+        founders = {int(value) for value in (getattr(config, "FOUNDER_IDS", []) or [])}
+    except Exception:
+        founders = set()
+    try:
+        admins = {int(value) for value in (database.list_admins() or [])}
+    except Exception:
+        admins = set()
+    managers = set(admins) - founders
+    try:
+        raw = database.get_setting("panel_manager_ids") or ""
+        managers.update(
+            int(value) for value in raw.replace(" ", "").split(",")
+            if value.strip().lstrip("-").isdigit()
+        )
+    except Exception:
+        pass
+    managers.difference_update(founders)
+    return {"owner": founders, "manager": managers}
+
+
+async def _send_growth_role_briefs_once(
+    app: Application,
+    *,
+    now: datetime | None = None,
+    target_date: str | None = None,
+    force: bool = False,
+) -> dict:
+    """Deliver one aggregate morning brief to owner and manager roles."""
+    now = now or datetime.now()
+    date_s = target_date or master_briefing.scheduled_brief_date(
+        now,
+        send_hour=_master_day_brief_send_hour(),
+    )
+    if not date_s:
+        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
+    owner_plan = await asyncio.to_thread(growth_planner.get_growth_plan, role="owner")
+    manager_plan = growth_planner.manager_view(owner_plan)
+    payloads = {
+        "owner": {
+            "message": growth_planner.render_owner_morning_message(owner_plan),
+            "url": "https://malesthetic.pro/app/?panel=os",
+            "button": "Открыть план MAYA",
+        },
+        "manager": {
+            "message": growth_planner.render_manager_morning_message(manager_plan),
+            "url": "https://malesthetic.pro/app/?panel=analytics",
+            "button": "Открыть план мастеров",
+        },
+    }
+    sent = 0
+    skipped = 0
+    deliveries = []
+    for role, chat_ids in _growth_role_recipients().items():
+        payload = payloads[role]
+        for chat_id in sorted(chat_ids):
+            delivery_key = f"growth_role_brief_sent:{date_s}:{role}:{chat_id}"
+            if not force and database.get_setting(delivery_key):
+                skipped += 1
+                deliveries.append({"role": role, "state": "skipped", "reason": "already_sent"})
+                continue
+            try:
+                markup = InlineKeyboardMarkup([[
+                    InlineKeyboardButton(payload["button"], url=payload["url"]),
+                ]])
+                await app.bot.send_message(
+                    chat_id=int(chat_id),
+                    text=payload["message"],
+                    reply_markup=markup,
+                )
+                database.set_setting(delivery_key, now.isoformat(timespec="seconds"))
+                sent += 1
+                deliveries.append({"role": role, "state": "sent"})
+            except Exception as e:
+                logger.error(f"growth role brief {role}: {e}")
+                deliveries.append({"role": role, "state": "failed"})
+    return {
+        "ok": True,
+        "date": date_s,
+        "sent": sent,
+        "skipped_count": skipped,
+        "deliveries": deliveries,
+    }
+
+
+async def _collect_master_day_forecasts(
+    target_date: str,
+    *,
+    only_staff_id: int | None = None,
+) -> list[dict]:
+    """Собирает персональные планы без отправки сообщений."""
+    try:
+        parsed_date = date.fromisoformat(str(target_date)[:10]).isoformat()
+    except Exception:
+        return []
+    try:
+        masters = list(database.list_masters())
+    except Exception as e:
+        logger.error(f"master day brief: list_masters failed: {e}")
+        return []
+    try:
+        from business_rules import OWNER_STAFF_ID, salary_percent
+    except Exception:
+        OWNER_STAFF_ID = 0
+
+        def salary_percent(_staff_id):
+            return 0.5
+
+    try:
+        growth = await asyncio.to_thread(growth_planner.get_growth_plan, role="owner")
+        growth_by_staff = {
+            int(row.get("staff_id") or 0): row
+            for row in (growth.get("masters") or [])
+            if isinstance(row, dict) and row.get("staff_id")
+        }
+    except Exception as e:
+        logger.error(f"master day brief: growth plan failed: {e}")
+        growth_by_staff = {}
+
+    forecasts = []
+    for master in masters:
+        staff_id = _master_staff_id(master)
+        if not staff_id or int(staff_id) == int(OWNER_STAFF_ID or 0):
+            continue
+        if only_staff_id and int(staff_id) != int(only_staff_id):
+            continue
+        try:
+            records = await asyncio.to_thread(
+                _yc.get_records_for_master,
+                int(staff_id),
+                parsed_date,
+                parsed_date,
+            )
+        except Exception as e:
+            logger.error(f"master day brief: records staff={staff_id}: {e}")
+            continue
+        schedule_known = False
+        is_working = bool(records)
+        shift_hours = ""
+        try:
+            schedule_rows = await asyncio.to_thread(
+                _yc.get_staff_schedule,
+                int(staff_id),
+                parsed_date,
+                parsed_date,
+            )
+            valid_schedule_rows = [
+                row for row in (schedule_rows or [])
+                if isinstance(row, dict) and not row.get("error")
+            ]
+            schedule_row = next((
+                row for row in valid_schedule_rows
+                if str(row.get("date") or "")[:10] == parsed_date
+            ), valid_schedule_rows[0] if len(valid_schedule_rows) == 1 else None)
+            if schedule_row is not None:
+                schedule_known = True
+                is_working = bool(schedule_row.get("is_working") and schedule_row.get("slots"))
+                shift_hours = ", ".join(
+                    f"{slot.get('from', '')}-{slot.get('to', '')}"
+                    for slot in (schedule_row.get("slots") or [])
+                    if isinstance(slot, dict)
+                )
+        except Exception as e:
+            logger.info(f"master day brief: schedule staff={staff_id}: {e}")
+        if schedule_known and not is_working and not records:
+            continue
+        client_ids = set()
+        for record in records or []:
+            client = record.get("client") if isinstance(record, dict) else {}
+            try:
+                client_id = int((client or {}).get("id") or 0)
+            except (TypeError, ValueError):
+                client_id = 0
+            if client_id:
+                client_ids.add(client_id)
+        history_sem = asyncio.Semaphore(4)
+
+        async def _load_history(client_id: int) -> tuple[int, list[dict]]:
+            try:
+                async with history_sem:
+                    return client_id, await _fetch_client_history(client_id)
+            except Exception as e:
+                logger.info(f"master day brief: history client={client_id}: {e}")
+                return client_id, []
+
+        history_rows = await asyncio.gather(*(
+            _load_history(client_id) for client_id in sorted(client_ids)
+        ))
+        histories = dict(history_rows)
+        try:
+            catalog = await asyncio.to_thread(_yc.get_services, int(staff_id))
+        except Exception as e:
+            logger.info(f"master day brief: catalog staff={staff_id}: {e}")
+            catalog = []
+        growth_row = growth_by_staff.get(int(staff_id), {})
+        previous_result = None
+        try:
+            previous_date = (date.fromisoformat(parsed_date) - timedelta(days=1)).isoformat()
+            previous_raw = database.get_setting(
+                f"master_growth_day_plan:{previous_date}:{int(staff_id)}"
+            )
+            previous_forecast = _json.loads(previous_raw or "{}")
+            if isinstance(previous_forecast, dict) and previous_forecast.get("date"):
+                previous_records = await asyncio.to_thread(
+                    _yc.get_records_for_master,
+                    int(staff_id),
+                    previous_date,
+                    previous_date,
+                )
+                previous_result = master_briefing.evaluate_day_result(
+                    previous_forecast,
+                    previous_records or [],
+                )
+        except Exception as e:
+            logger.info(f"master day brief: previous result staff={staff_id}: {e}")
+        forecast = master_briefing.build_day_forecast(
+            staff_id=int(staff_id),
+            master_name=(
+                master.get("full_name")
+                or master.get("name")
+                or f"Мастер #{staff_id}"
+            ),
+            target_date=parsed_date,
+            records=records or [],
+            histories_by_client=histories,
+            salary_percent=salary_percent(int(staff_id)),
+            service_catalog=catalog or [],
+            previous_month_daily_target_rub=growth_row.get("previous_month_daily_rub") or 0,
+            growth_daily_target_rub=growth_row.get("daily_target_remaining_rub") or 0,
+            previous_day_result=previous_result,
+        )
+        forecast["is_working"] = is_working or bool(records)
+        forecast["schedule_known"] = schedule_known
+        forecast["shift_hours"] = shift_hours
+        forecast["delivery_master"] = master
+        forecasts.append(forecast)
+    return forecasts
+
+
+async def _send_master_day_briefs_once(
+    app: Application,
+    *,
+    now: datetime | None = None,
+    target_date: str | None = None,
+    only_staff_id: int | None = None,
+    force: bool = False,
+) -> dict:
+    """Send each scheduled master one role-safe plan for the target workday."""
+    now = now or datetime.now()
+    date_s = target_date or master_briefing.scheduled_brief_date(
+        now,
+        send_hour=_master_day_brief_send_hour(),
+    )
+    if not date_s:
+        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
+    forecasts = await _collect_master_day_forecasts(
+        date_s,
+        only_staff_id=only_staff_id,
+    )
+    sent = 0
+    skipped = 0
+    deliveries = []
+    for forecast in forecasts:
+        staff_id = int(forecast.get("staff_id") or 0)
+        master = forecast.pop("delivery_master", {})
+        if forecast.get("schedule_known") and not forecast.get("is_working"):
+            skipped += 1
+            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "day_off"})
+            continue
+        compact_forecast = master_briefing.compact_forecast_snapshot(forecast)
+        try:
+            database.set_setting(
+                f"master_growth_day_plan:{date_s}:{staff_id}",
+                _json.dumps(compact_forecast, ensure_ascii=False),
+            )
+        except Exception as e:
+            logger.error(f"master day brief snapshot staff={staff_id}: {e}")
+        delivery_key = f"master_day_brief_delivery:{date_s}:{staff_id}"
+        try:
+            delivery_state = _json.loads(database.get_setting(delivery_key) or "{}")
+            if not isinstance(delivery_state, dict):
+                delivery_state = {}
+        except Exception:
+            delivery_state = {}
+        chat_id = master.get("telegram_chat_id")
+        has_telegram = bool(
+            chat_id and not database.is_master_muted(int(chat_id))
+        )
+        try:
+            has_push = bool(
+                WEBPUSH_VAPID_PRIVATE_KEY
+                and _push_subscriptions_for_master(master)
+            )
+        except Exception as e:
+            logger.error(f"master day brief push lookup staff={staff_id}: {e}")
+            has_push = False
+        telegram_done = bool(delivery_state.get("telegram"))
+        push_done = bool(delivery_state.get("push"))
+        delivery_complete = master_briefing.delivery_is_complete(
+            delivery_state,
+            has_telegram=has_telegram,
+            has_push=has_push,
+        )
+        if not force and delivery_complete:
+            skipped += 1
+            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_sent"})
+            continue
+        message = master_briefing.render_master_day_message(forecast)
+        push_body = master_briefing.render_master_day_push(forecast)
+        telegram_sent = False
+        if has_telegram and (force or not telegram_done):
+            try:
+                await app.bot.send_message(chat_id=int(chat_id), text=message)
+                telegram_sent = True
+            except Exception as e:
+                logger.error(f"master day brief Telegram staff={staff_id}: {e}")
+        push_sent = 0
+        if has_push and (force or not push_done):
+            try:
+                target_label = "сегодня" if date_s == now.date().isoformat() else "завтра"
+                push_sent = await _send_master_push(
+                    master,
+                    title=f"MAYA · план на {target_label}",
+                    body=push_body,
+                    url="/app/?panel=schedule",
+                    tag=f"master-day-plan-{staff_id}-{date_s}",
+                    data={
+                        "event": "master.day_plan",
+                        "date": date_s,
+                        "staff_id": staff_id,
+                    },
+                )
+            except Exception as e:
+                logger.error(f"master day brief push staff={staff_id}: {e}")
+        telegram_done = telegram_done or telegram_sent
+        push_done = push_done or bool(push_sent)
+        delivery_complete = master_briefing.delivery_is_complete(
+            {"telegram": telegram_done, "push": push_done},
+            has_telegram=has_telegram,
+            has_push=has_push,
+        )
+        if telegram_done or push_done:
+            database.set_setting(
+                delivery_key,
+                _json.dumps({
+                    "telegram": telegram_done,
+                    "push": push_done,
+                    "updated_at": now.isoformat(timespec="seconds"),
+                }, ensure_ascii=False),
+            )
+        if telegram_sent or push_sent:
+            sent += 1
+            if delivery_complete:
+                database.set_setting(
+                    f"master_day_brief_sent:{date_s}:{staff_id}",
+                    now.isoformat(timespec="seconds"),
+                )
+            database.set_setting(
+                f"master_day_brief_last:{staff_id}",
+                _json.dumps({
+                    "date": date_s,
+                    "sent_at": now.isoformat(timespec="seconds"),
+                    "records_count": forecast.get("records_count"),
+                    "booked_revenue_rub": forecast.get("booked_revenue_rub"),
+                    "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
+                    "primary_daily_target_rub": forecast.get("primary_daily_target_rub"),
+                    "primary_target_progress_pct": forecast.get("primary_target_progress_pct"),
+                    "potential_target_progress_pct": forecast.get("potential_target_progress_pct"),
+                    "opportunities_count": forecast.get("opportunities_count"),
+                }, ensure_ascii=False),
+            )
+            deliveries.append({
+                "staff_id": staff_id,
+                "state": "sent" if delivery_complete else "partial",
+                "telegram": telegram_done,
+                "push": push_done,
+                "new_telegram": telegram_sent,
+                "new_push": int(push_sent or 0),
+            })
+        elif telegram_done or push_done:
+            deliveries.append({
+                "staff_id": staff_id,
+                "state": "partial",
+                "telegram": telegram_done,
+                "push": push_done,
+            })
+        else:
+            deliveries.append({"staff_id": staff_id, "state": "failed", "reason": "no_delivery_channel"})
+    return {
+        "ok": True,
+        "date": date_s,
+        "sent": sent,
+        "skipped_count": skipped,
+        "forecast_count": len(forecasts),
+        "deliveries": deliveries,
+    }
+
+
+async def panel_master_day_brief_handler(request: web.Request) -> web.Response:
+    """Owner-only preview/send персонального плана мастера."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") != "owner":
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Планы мастеров доступны только владельцу.",
+        }, status=403)
+    target_date = str(
+        body.get("date")
+        or date.today().isoformat()
+    )[:10]
+    try:
+        date.fromisoformat(target_date)
+    except Exception:
+        return _cabinet_response({"error": "bad_date"}, status=400)
+    try:
+        staff_id = int(body.get("staff_id") or 0) or None
+    except (TypeError, ValueError):
+        return _cabinet_response({"error": "bad_staff_id"}, status=400)
+    if body.get("send"):
+        result = await _send_master_day_briefs_once(
+            request.app["bot_app"],
+            target_date=target_date,
+            only_staff_id=staff_id,
+            force=bool(body.get("force")),
+        )
+        return _cabinet_response(result)
+    forecasts = await _collect_master_day_forecasts(target_date, only_staff_id=staff_id)
+    for forecast in forecasts:
+        forecast.pop("delivery_master", None)
+    return _cabinet_response({
+        "ok": True,
+        "mode": "preview",
+        "date": target_date,
+        "forecasts": forecasts,
+    })
+
+
 def _parse_work_start(value: Any, day: date) -> datetime | None:
     if not value:
         return None
@@ -6341,6 +9644,203 @@ async def master_shift_reminder_loop(app: Application):
         await asyncio.sleep(300)
 
 
+async def master_day_brief_loop(app: Application):
+    """Утром готовит и лично доставляет планы мастерам на текущий рабочий день."""
+    await asyncio.sleep(75)
+    while True:
+        try:
+            result = await _send_master_day_briefs_once(app)
+            if result and not result.get("skipped"):
+                logger.info(
+                    "master day brief: date=%s sent=%s skipped=%s",
+                    result.get("date"),
+                    result.get("sent"),
+                    result.get("skipped_count"),
+                )
+        except Exception as e:
+            logger.error(f"master day brief loop: {e}")
+        try:
+            role_result = await _send_growth_role_briefs_once(app)
+            if role_result and not role_result.get("skipped"):
+                logger.info(
+                    "growth role brief: date=%s sent=%s skipped=%s",
+                    role_result.get("date"),
+                    role_result.get("sent"),
+                    role_result.get("skipped_count"),
+                )
+        except Exception as e:
+            logger.error(f"growth role brief loop: {e}")
+        await asyncio.sleep(600)
+
+
+async def client_retention_refresh_loop(app: Application):
+    """Обновляет тяжёлый когортный снимок отдельно от запросов Command Center."""
+    await asyncio.sleep(120)
+    while True:
+        try:
+            result = await asyncio.to_thread(owner_ai.client_retention, force=True)
+            summary = (result or {}).get("summary") or {}
+            logger.info(
+                "client retention refreshed: cohort=%s returned=%s forward=%s%%",
+                summary.get("previous_cohort_clients"),
+                summary.get("returned_clients"),
+                summary.get("forward_booking_pct"),
+            )
+        except Exception as e:
+            logger.error(f"client retention refresh loop: {e}")
+        await asyncio.sleep(21600)
+
+
+def _owner_reputation_ids() -> list[int]:
+    owner_ids = set()
+    for value in getattr(config, "FOUNDER_IDS", []) or []:
+        try:
+            owner_ids.add(int(value))
+        except (TypeError, ValueError):
+            continue
+    return sorted(owner_ids)
+
+
+async def notify_owner_cycle_candidates(snapshot: dict) -> dict:
+    """Sends one PII-free Web Push for a newly changed return queue."""
+    payload = cycle_reminder.owner_alert_push_payload(snapshot)
+    if not payload:
+        return {"attempted": False, "owners": 0, "push": 0}
+    owner_ids = _owner_reputation_ids()
+    push_sent = 0
+    for owner_id in owner_ids:
+        try:
+            push_sent += await _send_client_push(
+                owner_id,
+                payload["title"],
+                payload["body"],
+                url=payload["url"],
+                tag=payload["tag"],
+                data=payload["data"],
+            )
+        except Exception as exc:
+            logger.error("cycle owner push delivery: %s", exc)
+    return {
+        "attempted": True,
+        "owners": len(owner_ids),
+        "push": push_sent,
+        "event_id": payload["data"]["event_id"],
+    }
+
+
+async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
+    alert = reputation.build_owner_review_alert(rows)
+    if not alert.get("text"):
+        return {"delivered": False, "count": 0, "owners": 0}
+    owner_ids = _owner_reputation_ids()
+    if not owner_ids:
+        return {"delivered": False, "count": alert.get("count", 0), "owners": 0}
+
+    delivered = False
+    try:
+        conversations = memory.load_conversations()
+        for owner_id in owner_ids:
+            history = list(conversations.get(owner_id) or [])
+            history.append({"role": "assistant", "content": alert["text"]})
+            conversations[owner_id] = history[-30:]
+        memory.save_conversations(conversations)
+        delivered = True
+    except Exception as e:
+        logger.error(f"reputation owner in-app delivery: {e}")
+
+    telegram_sent = 0
+    push_sent = 0
+    for owner_id in owner_ids:
+        try:
+            await app.bot.send_message(chat_id=owner_id, text=alert["text"])
+            telegram_sent += 1
+            delivered = True
+        except Exception as e:
+            logger.error(f"reputation owner Telegram delivery: {e}")
+        try:
+            push_sent += await _send_client_push(
+                owner_id,
+                alert["push_title"],
+                alert["push_body"],
+                url="/app/?god=1",
+                tag="maya-reputation-new",
+                data={"event": "reputation.new_review"},
+            )
+            if push_sent:
+                delivered = True
+        except Exception as e:
+            logger.error(f"reputation owner push delivery: {e}")
+    return {
+        "delivered": delivered,
+        "count": alert.get("count", 0),
+        "positive": alert.get("positive", 0),
+        "negative": alert.get("negative", 0),
+        "owners": len(owner_ids),
+        "telegram": telegram_sent,
+        "push": push_sent,
+    }
+
+
+async def reputation_monitor_loop(app: Application):
+    """Раз в час проверяет публичные карточки и сообщает только о новых отзывах."""
+    await asyncio.sleep(150)
+    while True:
+        try:
+            refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
+            pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
+            notification = {"delivered": False, "count": 0}
+            if pending:
+                notification = await _notify_owner_reputation(app, pending)
+                if notification.get("delivered"):
+                    await asyncio.to_thread(
+                        database.mark_external_reviews_alerted,
+                        [row.get("id") for row in pending if row.get("id")],
+                    )
+            logger.info(
+                "reputation monitor: sources=%s new=%s notified=%s",
+                refresh.get("sources_ready"),
+                refresh.get("new"),
+                notification.get("count"),
+            )
+        except Exception as e:
+            logger.error(f"reputation monitor loop: {e}")
+        await asyncio.sleep(3600)
+
+
+async def waitlist_admin_alert_loop(app: Application):
+    """Фоновый пинг админам (Антону) о новичках в листе ожидания (каждые ~2 мин)."""
+    import freed_slot
+    while True:
+        try:
+            await freed_slot.alert_admins_new_waitlist(app)
+        except Exception as e:
+            logger.error(f"waitlist admin alert loop: {e}")
+        await asyncio.sleep(120)
+
+
+async def maya_operating_rhythm_loop(app: Application):
+    """Безопасный rhythm-loop Maya OS: внутренние задачи, контроль и замыкание циклов."""
+    await asyncio.sleep(60)
+    while True:
+        try:
+            result = await asyncio.to_thread(
+                owner_ai.run_operating_rhythm_tick,
+                created_by="maya_os_scheduler",
+                force=False,
+            )
+            if result and not result.get("skipped"):
+                summary = result.get("summary") or {}
+                logger.info(
+                    "maya operating rhythm tick: created=%s updated=%s skipped=%s",
+                    summary.get("created_count"),
+                    summary.get("updated_count"),
+                    summary.get("skipped_count"),
+                )
+        except Exception as e:
+            logger.error(f"maya operating rhythm loop: {e}")
+        await asyncio.sleep(900)
+
+
 async def usage_fal_handler(request: web.Request) -> web.Response:
     """POST /api/usage/fal — фиксирует одну успешную генерацию fal.ai (cutmatch)
     = 1 изображение по фикс. цене ($0.15). Зовётся PHP-прокси после успешной
@@ -6355,11 +9855,14 @@ async def usage_fal_handler(request: web.Request) -> web.Response:
 async def auth_status_handler(request: web.Request) -> web.Response:
     """GET /api/auth/status — какие способы входа сейчас живые.
     Фронт красит огоньки на кнопках: зелёный = работает, красный = нет.
-    Telegram всегда доступен; VK — по флагу VK_LOGIN_ENABLED; телефон — когда
+    Telegram всегда доступен; Яндекс/VK — по флагам; телефон — когда
     задан ключ SMS.ru. Поменяю конфиг на сервере → огонёк сам позеленеет."""
     return _cabinet_response({
         "telegram": True,
         "vk": bool(getattr(config, "VK_LOGIN_ENABLED", False)),
+        "yandex": bool(getattr(config, "YANDEX_LOGIN_ENABLED", False)
+                       and getattr(config, "YANDEX_CLIENT_ID", "")
+                       and getattr(config, "YANDEX_CLIENT_SECRET", "")),
         "phone": bool(getattr(config, "SMSRU_API_ID", "")),
     })
 
@@ -6371,6 +9874,11 @@ async def analyze_face_handler(request: web.Request) -> web.Response:
     """POST /api/analyze-face — ИИ-анализ лица (анфас+профиль) + подбор стрижек.
     Требует авторизации (как чат): initData / auth_data / session_token.
     Лимит CUTMATCH_DAILY_LIMIT консультаций в день на пользователя."""
+    if not cutmatch.is_enabled():
+        return cutmatch._resp(
+            {"error": "disabled", "message": "CutMatch временно отключён."},
+            status=404,
+        )
     try:
         body = await request.json()
     except Exception:
@@ -6423,43 +9931,76 @@ async def analyze_face_handler(request: web.Request) -> web.Response:
     return cutmatch._resp(result)
 
 
-# ── Telegram-аватар пользователя для пилюли имени (только сотрудники) ──
-_TG_PHOTO_CACHE = {}   # chat_id -> (YYYY-MM-DD, data_uri|None)
+# ── Telegram-аватар пользователя для пилюли имени ──
+_TG_PHOTO_CACHE = {}   # chat_id -> {"value": data_uri|None, "expires_at": float}
 
 
 def _fetch_tg_photo(chat_id: int):
     """Скачивает аватар пользователя Telegram через бота (по chat_id) → data-URI.
-    Кеш на день. None, если фото скрыто приватностью пользователя или ошибка."""
+    Успешный ответ кешируем надолго, а сетевой сбой — только кратко, чтобы
+    флапающий Telegram-прокси не прятал фото до конца дня."""
     import requests, base64
-    today = date.today().isoformat()
+    now_ts = time.time()
     c = _TG_PHOTO_CACHE.get(chat_id)
-    if c and c[0] == today:
-        return c[1]
+    if c and float(c.get("expires_at") or 0) > now_ts:
+        return c.get("value")
     proxy = getattr(config, "PROXY_URL", "") or ""
     pr = {"http": proxy, "https": proxy} if proxy else None
     data_uri = None
+    had_network_error = False
     try:
         base = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
-        r = requests.get(base + "/getUserProfilePhotos",
-                         params={"user_id": chat_id, "limit": 1}, proxies=pr, timeout=15).json()
-        photos = (r.get("result") or {}).get("photos") or []
-        if photos:
-            file_id = photos[0][-1]["file_id"]   # самый крупный размер последнего фото
-            f = requests.get(base + "/getFile", params={"file_id": file_id}, proxies=pr, timeout=15).json()
-            path = (f.get("result") or {}).get("file_path")
-            if path:
-                img = requests.get(f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{path}", proxies=pr, timeout=20)
-                if img.status_code == 200 and img.content:
-                    data_uri = "data:image/jpeg;base64," + base64.b64encode(img.content).decode()
+        for attempt in range(3):
+            try:
+                r = requests.get(
+                    base + "/getUserProfilePhotos",
+                    params={"user_id": chat_id, "limit": 1},
+                    proxies=pr,
+                    timeout=20,
+                )
+                r.raise_for_status()
+                photos = (r.json().get("result") or {}).get("photos") or []
+                if photos:
+                    file_id = photos[0][-1]["file_id"]   # самый крупный размер последнего фото
+                    f = requests.get(
+                        base + "/getFile",
+                        params={"file_id": file_id},
+                        proxies=pr,
+                        timeout=20,
+                    )
+                    f.raise_for_status()
+                    path = (f.json().get("result") or {}).get("file_path")
+                    if path:
+                        img = requests.get(
+                            f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{path}",
+                            proxies=pr,
+                            timeout=25,
+                        )
+                        img.raise_for_status()
+                        if img.content:
+                            data_uri = "data:image/jpeg;base64," + base64.b64encode(img.content).decode()
+                had_network_error = False
+                break
+            except requests.RequestException as e:
+                had_network_error = True
+                if attempt == 2:
+                    raise
+                time.sleep(1.0 + attempt * 0.5)
     except Exception as e:
         logger.error("tg photo fetch %s: %s", chat_id, e)
-    _TG_PHOTO_CACHE[chat_id] = (today, data_uri)
+    if data_uri:
+        _TG_PHOTO_CACHE[chat_id] = {"value": data_uri, "expires_at": now_ts + 24 * 3600}
+    elif had_network_error:
+        if c and c.get("value"):
+            return c.get("value")
+        _TG_PHOTO_CACHE.pop(chat_id, None)
+    else:
+        _TG_PHOTO_CACHE[chat_id] = {"value": None, "expires_at": now_ts + 3600}
     return data_uri
 
 
 async def me_photo_handler(request: web.Request) -> web.Response:
-    """POST /api/me/photo — Telegram-аватар вошедшего сотрудника (data-URI) для пилюли.
-    Только для сотрудников (владелец/админ/мастер); клиентские фото не тянем."""
+    """POST /api/me/photo — Telegram-аватар авторизованного пользователя для пилюли."""
     try:
         body = await request.json()
     except Exception:
@@ -6468,14 +10009,9 @@ async def me_photo_handler(request: web.Request) -> web.Response:
     if not tg_user or not tg_user.get("id"):
         return _cabinet_response({"photo": None})
     uid = int(tg_user["id"])
-    is_staff = False
-    try:
-        is_staff = bool(database.is_admin(uid)) or bool(_master_by_chat_id(uid))
-    except Exception:
-        is_staff = False
-    if not is_staff:
-        return _cabinet_response({"photo": None})
     photo = await asyncio.to_thread(_fetch_tg_photo, uid)
+    if not photo:
+        photo = normalize_tg_user(tg_user).get("photo_url") or None
     return _cabinet_response({"photo": photo})
 
 
@@ -6969,6 +10505,24 @@ async def panel_journal_cancel_handler(request: web.Request) -> web.Response:
 
 # Вложения чата команды лежат статикой на Beget; принимаем только такие ссылки.
 TEAM_MEDIA_URL_PREFIX = "https://malesthetic.pro/app/media/team/"
+TEAM_MEDIA_TTL_SECONDS = 2 * 24 * 60 * 60
+
+
+def _team_chat_mark_media_expiry(messages: list[dict]) -> list[dict]:
+    for msg in messages:
+        if not (msg.get("media_kind") and msg.get("media_url")):
+            continue
+        created_raw = str(msg.get("created_at") or "")
+        try:
+            created_at = datetime.fromisoformat(created_raw)
+        except Exception:
+            continue
+        now = datetime.now(created_at.tzinfo) if created_at.tzinfo else datetime.now()
+        expires_at = created_at + timedelta(seconds=TEAM_MEDIA_TTL_SECONDS)
+        msg["media_expires_at"] = expires_at.isoformat(timespec="seconds")
+        if (now - created_at).total_seconds() >= TEAM_MEDIA_TTL_SECONDS:
+            msg["media_expired"] = True
+    return messages
 
 # ── Присутствие в чате команды (эфемерно, в памяти процесса) ──────────────
 # Кто онлайн (держит чат открытым) и кто печатает. Обновляется на каждом
@@ -7198,6 +10752,51 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     msg_id = await asyncio.to_thread(
         database.add_staff_message, tg_id, sender_name, text,
         media_kind, media_url, media_name, media_mime, media_size, media_dur)
+    maya_query = ""
+    if text and not has_media:
+        try:
+            import barber_knowledge
+            maya_query = barber_knowledge.extract_team_query(text)
+        except Exception as e:
+            logger.error(f"team_chat maya extract: {e}")
+
+    async def _maya_bg(query: str):
+        try:
+            import barber_knowledge
+            payload = await asyncio.to_thread(barber_knowledge.answer_payload, query)
+            reply = (payload.get("text") or "").strip()
+            images = payload.get("images") or []
+            if reply:
+                await asyncio.to_thread(
+                    database.add_staff_message,
+                    0,
+                    "MAYA · наставник",
+                    reply,
+                    "", "", "", "", 0, 0,
+                )
+            for img in images[:2]:
+                url = (img.get("url") or "").strip()
+                if not url:
+                    continue
+                await asyncio.to_thread(
+                    database.add_staff_message,
+                    0,
+                    "MAYA · наставник",
+                    img.get("title") or "Схема из базы знаний",
+                    "image",
+                    url,
+                    img.get("name") or "",
+                    "image/jpeg",
+                    0,
+                    0,
+                )
+        except Exception as e:
+            logger.error(f"team_chat maya reply: {e}")
+
+    if maya_query:
+        _mt = asyncio.create_task(_maya_bg(maya_query))
+        _panel_bg_tasks.add(_mt)
+        _mt.add_done_callback(_panel_bg_tasks.discard)
     # Пуши шлём в фоне (fire-and-forget). Telegram идёт через единый прокси и может
     # тормозить × N получателей — нельзя держать ответ синхронно: Beget-прокси ждёт
     # max 25с, по таймауту считает медиафайл «осиротевшим» и удаляет его (@unlink),
@@ -7211,6 +10810,21 @@ async def team_chat_send_handler(request: web.Request) -> web.Response:
     _panel_bg_tasks.add(_pt)
     _pt.add_done_callback(_panel_bg_tasks.discard)
     return _cabinet_response({"ok": True, "id": msg_id})
+
+
+async def team_chat_upload_auth_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/team_chat/upload_auth — lightweight staff auth before large media upload."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if not _is_staff_info(info):
+        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
+    return _cabinet_response({"ok": True})
 
 
 async def team_chat_delete_handler(request: web.Request) -> web.Response:
@@ -7249,7 +10863,8 @@ async def team_chat_delete_handler(request: web.Request) -> web.Response:
 
 async def team_chat_fetch_handler(request: web.Request) -> web.Response:
     """POST /api/panel/team_chat/fetch — забрать сообщения. Тело: {since_id?}.
-    since_id=0 → последние 50; >0 → новее since_id (поллинг открытого чата)."""
+    since_id=0 → последние 50, если не передан session_only=1.
+    session_only=1 → начать новую пустую сессию и читать только новые сообщения."""
     try:
         body = await request.json()
     except Exception:
@@ -7265,14 +10880,28 @@ async def team_chat_fetch_handler(request: web.Request) -> web.Response:
         since_id = int(body.get("since_id") or 0)
     except Exception:
         since_id = 0
+    session_only = bool(body.get("session_only"))
+    sender_name = (info.get("master_name") or info.get("name")
+                   or tg_user.get("first_name") or "Сотрудник")
+    if since_id <= 0 and session_only:
+        latest_id = await asyncio.to_thread(database.get_staff_latest_message_id)
+        _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
+        online, typing = _presence_snapshot(tg_id)
+        return _cabinet_response({
+            "messages": [],
+            "me": tg_id,
+            "online": online,
+            "typing": typing,
+            "latest_id": latest_id,
+            "session_only": True,
+        })
     if since_id > 0:
         msgs = await asyncio.to_thread(database.get_staff_messages_since, since_id, 100)
     else:
         msgs = await asyncio.to_thread(database.get_staff_messages_recent, 50)
+    msgs = _team_chat_mark_media_expiry(msgs)
     # присутствие: сам факт поллинга = «я онлайн»; флаг typing — что сейчас набираю
-    _presence_touch(tg_id, (info.get("master_name") or info.get("name")
-                            or tg_user.get("first_name") or "Сотрудник"),
-                    typing=bool(body.get("typing")))
+    _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
     online, typing = _presence_snapshot(tg_id)
     return _cabinet_response({"messages": msgs, "me": tg_id, "online": online, "typing": typing})
 
@@ -7636,6 +11265,9 @@ async def start_webhook_server(bot_app: Application):
     Запускает aiohttp-сервер на WEBHOOK_PORT в том же event loop, что и бот.
     Вызывается из post_init() бота.
     """
+    runner = globals().get("_WEBHOOK_RUNNER")
+    if runner is not None:
+        return
     # client_max_size: дефолт aiohttp = 1 МБ. Голосовое из приложения едет в JSON-теле
     # как base64-data-url; в нативном iOS-WKWebView (нет MediaRecorder) запись идёт
     # несжатым WAV (PCM) — крупнее webm/opus. Поднимаем лимит до 10 МБ, иначе запись
@@ -7654,7 +11286,7 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_post("/api/cabinet/me-via-login", cabinet_me_via_login_handler)
     web_app.router.add_options("/api/cabinet/me-via-login", cabinet_options_handler)
 
-    # Веб-вход БЕЗ Telegram (без VPN): VK ID + телефон по коду
+    # Веб-вход БЕЗ Telegram (без VPN): Yandex ID / VK ID + телефон по коду
     web_app.router.add_post("/api/auth/phone/start", auth_phone_start_handler)
     web_app.router.add_options("/api/auth/phone/start", cabinet_options_handler)
     web_app.router.add_post("/api/auth/phone/verify", auth_phone_verify_handler)
@@ -7663,6 +11295,10 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/auth/vk", cabinet_options_handler)
     web_app.router.add_post("/api/auth/vk-sdk", auth_vk_sdk_handler)
     web_app.router.add_options("/api/auth/vk-sdk", cabinet_options_handler)
+    web_app.router.add_post("/api/auth/yandex/start", auth_yandex_start_handler)
+    web_app.router.add_options("/api/auth/yandex/start", cabinet_options_handler)
+    web_app.router.add_post("/api/auth/yandex", auth_yandex_handler)
+    web_app.router.add_options("/api/auth/yandex", cabinet_options_handler)
     web_app.router.add_post("/api/cabinet/me-via-session", cabinet_me_via_session_handler)
     web_app.router.add_options("/api/cabinet/me-via-session", cabinet_options_handler)
     web_app.router.add_post("/api/cabinet/link-phone", cabinet_link_phone_handler)
@@ -7684,6 +11320,11 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/me/photo", cabinet_options_handler)
 
     # API чата с ассистентом в приложении (тот же мозг и история, что у бота)
+    web_app.router.add_get("/api/knowledge/image/{name}", knowledge_image_handler)
+    web_app.router.add_post("/api/chat/history", chat_history_handler)
+    web_app.router.add_options("/api/chat/history", chat_options_handler)
+    web_app.router.add_post("/api/chat/delete", chat_delete_handler)
+    web_app.router.add_options("/api/chat/delete", chat_options_handler)
     web_app.router.add_post("/api/chat", chat_handler)
     web_app.router.add_options("/api/chat", chat_options_handler)
     web_app.router.add_post("/api/chat/stream", chat_stream_handler)
@@ -7727,9 +11368,31 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/me", panel_options_handler)
     web_app.router.add_post("/api/panel/dashboard", panel_dashboard_handler)
     web_app.router.add_options("/api/panel/dashboard", panel_options_handler)
+    web_app.router.add_post("/api/panel/command_center", panel_command_center_handler)
+    web_app.router.add_options("/api/panel/command_center", panel_options_handler)
+    web_app.router.add_post("/api/panel/plan_target", panel_plan_target_handler)
+    web_app.router.add_options("/api/panel/plan_target", panel_options_handler)
+    web_app.router.add_post("/api/panel/action/evaluate", panel_action_evaluate_handler)
+    web_app.router.add_options("/api/panel/action/evaluate", panel_options_handler)
+    web_app.router.add_post("/api/panel/control/create", panel_control_create_handler)
+    web_app.router.add_options("/api/panel/control/create", panel_options_handler)
+    web_app.router.add_post("/api/panel/autonomy/tick", panel_autonomy_tick_handler)
+    web_app.router.add_options("/api/panel/autonomy/tick", panel_options_handler)
+    web_app.router.add_post("/api/panel/autopilot/supervise", panel_autopilot_supervision_handler)
+    web_app.router.add_options("/api/panel/autopilot/supervise", panel_options_handler)
+    web_app.router.add_post("/api/panel/execution/loop", panel_execution_loop_handler)
+    web_app.router.add_options("/api/panel/execution/loop", panel_options_handler)
+    web_app.router.add_post("/api/panel/control/update", panel_control_update_handler)
+    web_app.router.add_options("/api/panel/control/update", panel_options_handler)
+    web_app.router.add_post("/api/panel/staff_tasks", panel_staff_tasks_handler)
+    web_app.router.add_options("/api/panel/staff_tasks", panel_options_handler)
+    web_app.router.add_post("/api/panel/staff_task/update", panel_staff_task_update_handler)
+    web_app.router.add_options("/api/panel/staff_task/update", panel_options_handler)
     web_app.router.add_post("/api/panel/master/overview", panel_master_overview_handler)
     web_app.router.add_options("/api/panel/master/overview", panel_options_handler)
     web_app.router.add_post("/api/panel/master/day", panel_master_day_handler)
+
+    web_app.router.add_post("/api/panel/master/clients", panel_master_clients_handler)
     web_app.router.add_options("/api/panel/master/day", panel_options_handler)
     web_app.router.add_post("/api/panel/redeem", panel_redeem_handler)
     web_app.router.add_options("/api/panel/redeem", panel_options_handler)
@@ -7737,6 +11400,12 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/job/run", panel_options_handler)
     web_app.router.add_post("/api/panel/reviews", panel_reviews_handler)
     web_app.router.add_options("/api/panel/reviews", panel_options_handler)
+    web_app.router.add_post("/api/panel/external_reviews/import", panel_external_reviews_import_handler)
+    web_app.router.add_options("/api/panel/external_reviews/import", panel_options_handler)
+    web_app.router.add_post("/api/panel/reputation/refresh", panel_reputation_refresh_handler)
+    web_app.router.add_options("/api/panel/reputation/refresh", panel_options_handler)
+    web_app.router.add_post("/api/panel/master_day_brief", panel_master_day_brief_handler)
+    web_app.router.add_options("/api/panel/master_day_brief", panel_options_handler)
     web_app.router.add_post("/api/panel/broadcast", panel_broadcast_handler)
     web_app.router.add_options("/api/panel/broadcast", panel_options_handler)
     web_app.router.add_post("/api/panel/team", panel_team_handler)
@@ -7782,6 +11451,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/journal_cancel", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/send", team_chat_send_handler)
     web_app.router.add_options("/api/panel/team_chat/send", panel_options_handler)
+    web_app.router.add_post("/api/panel/team_chat/upload_auth", team_chat_upload_auth_handler)
+    web_app.router.add_options("/api/panel/team_chat/upload_auth", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/delete", team_chat_delete_handler)
     web_app.router.add_options("/api/panel/team_chat/delete", panel_options_handler)
     web_app.router.add_post("/api/panel/team_chat/fetch", team_chat_fetch_handler)
@@ -7811,5 +11482,12 @@ async def start_webhook_server(bot_app: Application):
     bind_host = getattr(config, "WEBHOOK_BIND", None) or "0.0.0.0"
     site = web.TCPSite(runner, bind_host, WEBHOOK_PORT)
     await site.start()
+    globals()["_WEBHOOK_RUNNER"] = runner
+    globals()["_WEBHOOK_SITE"] = site
+    asyncio.create_task(master_day_brief_loop(bot_app))
+    asyncio.create_task(client_retention_refresh_loop(bot_app))
+    asyncio.create_task(reputation_monitor_loop(bot_app))
     asyncio.create_task(master_shift_reminder_loop(bot_app))
+    asyncio.create_task(waitlist_admin_alert_loop(bot_app))
+    asyncio.create_task(maya_operating_rhythm_loop(bot_app))
     logger.info(f"📡 Webhook-сервер слушает {bind_host}:{WEBHOOK_PORT}")

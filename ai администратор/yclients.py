@@ -80,11 +80,12 @@ def get_schedule_from_file(master_name: str, days_ahead: int = 14) -> list[dict]
         return [{"error": str(e)}]
 
 
-def get_day_hours(master_name: str, date_obj) -> str | None:
-    """
-    Возвращает часы работы мастера на конкретную дату ('10:00-21:00')
-    или None, если выходной либо мастер не найден.
-    date_obj — объект datetime.date.
+def get_schedule_reference(master_name: str, date_obj) -> dict:
+    """Возвращает строку базового графика из ``schedule.json``.
+
+    Файл не заменяет живой график YClients. Он нужен как независимый базовый
+    шаблон, чтобы операционная сводка могла заметить расхождение и не выдать
+    спорную смену за бесспорный факт.
     """
     RU_DAYS = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"]
     try:
@@ -99,18 +100,46 @@ def get_day_hours(master_name: str, date_obj) -> str | None:
                 found_key = key
                 break
         if not found_key:
-            return None
+            return {
+                "configured": False,
+                "hours": None,
+                "is_working": None,
+                "updated": data.get("updated"),
+            }
 
         master_data = masters[found_key]
         overrides = master_data.get("overrides", {})
         date_str = date_obj.strftime("%Y-%m-%d")
         if date_str in overrides:
-            return overrides[date_str]
-
-        weekly = master_data.get("weekly", {})
-        return weekly.get(RU_DAYS[date_obj.weekday()])
+            hours = overrides[date_str]
+        else:
+            weekly = master_data.get("weekly", {})
+            hours = weekly.get(RU_DAYS[date_obj.weekday()])
+        return {
+            "configured": True,
+            "hours": hours or None,
+            "is_working": bool(hours),
+            "updated": data.get("updated"),
+        }
     except Exception:
+        return {
+            "configured": False,
+            "hours": None,
+            "is_working": None,
+            "updated": None,
+        }
+
+
+def get_day_hours(master_name: str, date_obj) -> str | None:
+    """
+    Возвращает часы работы мастера на конкретную дату ('10:00-21:00')
+    или None, если выходной либо мастер не найден.
+    date_obj — объект datetime.date.
+    """
+    reference = get_schedule_reference(master_name, date_obj)
+    if not reference.get("configured"):
         return None
+    return reference.get("hours")
 
 # Кэш: {ключ: (данные, время_записи)}
 _cache: dict = {}
@@ -120,6 +149,11 @@ CACHE_TTL = 1800  # 30 минут
 # чем общий справочник; и сюда НЕ кладём ошибки — иначе сбой залипнет на TTL).
 _sched_cache: dict = {}
 SCHED_TTL = 300  # 5 минут
+
+# Короткий кэш записей мастера на конкретный день: нужен для защитной сверки
+# свободных слотов с реальными record'ами YClients.
+_day_records_cache: dict = {}
+DAY_RECORDS_TTL = 60  # 1 минута
 
 
 def _cached(key: str, fn, *args, **kwargs):
@@ -131,6 +165,11 @@ def _cached(key: str, fn, *args, **kwargs):
     result = fn(*args, **kwargs)
     _cache[key] = (result, time.time())
     return result
+
+
+def _digits10(phone: str) -> str:
+    digits = "".join(ch for ch in (phone or "") if ch.isdigit())
+    return digits[-10:] if len(digits) >= 10 else digits
 
 
 def _clean_avatar(url: str) -> str:
@@ -295,17 +334,34 @@ class YClientsAPI:
         def _hm(v):
             return (v or "")[:5]   # '10:00:00' → '10:00'
 
+        def _row_for_date(rows):
+            valid = [row for row in (rows or []) if isinstance(row, dict)]
+            exact = next((
+                row for row in valid
+                if str(row.get("date") or "")[:10] == date_str
+            ), None)
+            if exact is not None:
+                return exact, False
+            # Некоторые совместимые ответы на однодневный запрос не содержат
+            # date. Единственную такую строку можно использовать безопасно.
+            if len(valid) == 1 and not valid[0].get("date"):
+                return valid[0], False
+            mismatch = bool(valid)
+            return {}, mismatch
+
         def _one(m):
             sid = m["id"]
             rows = self.get_staff_schedule(sid, date_str, date_str)
-            first = rows[0] if rows and isinstance(rows[0], dict) else {}
-            if first.get("error"):
+            first, date_mismatch = _row_for_date(rows)
+            if first.get("error") or date_mismatch:
                 rows = self.get_staff_schedule(sid, date_str, date_str)   # 1 ретрай
-                first = rows[0] if rows and isinstance(rows[0], dict) else {}
-            sched_err = bool(first.get("error"))
+                first, date_mismatch = _row_for_date(rows)
+            sched_err = bool(first.get("error") or date_mismatch)
             if sched_err:
-                logger.warning("schedule fetch failed for staff %s on %s: %s",
-                               sid, date_str, first.get("error"))
+                logger.warning(
+                    "schedule fetch failed or returned another date for staff %s on %s: %s",
+                    sid, date_str, first.get("error") or "date_mismatch",
+                )
             slots = first.get("slots") or []
             is_working = bool(first.get("is_working") and slots)
             work_slots = ([{"from": _hm(s.get("from")), "to": _hm(s.get("to"))}
@@ -397,6 +453,110 @@ class YClientsAPI:
         except Exception as e:
             return [{"error": str(e)}]
 
+    def _get_day_records_cached(self, staff_id: int, date: str) -> list[dict]:
+        """Короткий кэш реальных записей мастера на день.
+
+        Нужен как вторая линия обороны: если YClients book_times внезапно
+        вернул занятый слот свободным, мы всё равно уберём его по фактическим
+        record'ам этого мастера.
+        """
+        key = f"day_records:{self.company_id}:{staff_id}:{date}"
+        now = time.time()
+        hit = _day_records_cache.get(key)
+        if hit and now - hit[1] < DAY_RECORDS_TTL:
+            return hit[0]
+        rows = self.get_records_for_master(staff_id, date, date) or []
+        rows = rows if isinstance(rows, list) else []
+        _day_records_cache[key] = (rows, now)
+        return rows
+
+    def _filter_slots_with_real_records(
+        self, staff_id: int, date: str, slots: list[dict]
+    ) -> list[dict]:
+        """Вычищает из book_times слоты, которые пересекаются с реальными
+        записями мастера на этот день.
+
+        В норме book_times уже должен отдавать только свободные окна. Но если
+        между эндпоинтами YClients случился рассинхрон, лучше убрать спорный
+        слот у нас, чем пообещать его клиенту и упасть на финальном создании.
+        """
+        if not slots:
+            return slots
+
+        try:
+            records = self._get_day_records_cached(staff_id, date)
+        except Exception as e:
+            logger.warning(
+                "slot cross-check failed for staff %s on %s: %s",
+                staff_id,
+                date,
+                e,
+            )
+            return slots
+
+        intervals = []
+        for rec in records:
+            if not isinstance(rec, dict) or rec.get("deleted"):
+                continue
+            dt_raw = str(rec.get("datetime") or rec.get("date") or "").strip()
+            if not dt_raw:
+                continue
+            try:
+                start_dt = datetime.fromisoformat(dt_raw.replace("Z", "+00:00"))
+            except Exception:
+                continue
+            try:
+                length_sec = int(rec.get("length") or rec.get("seance_length") or 0)
+            except (TypeError, ValueError):
+                length_sec = 0
+            if length_sec <= 0:
+                length_sec = 3600
+            intervals.append((start_dt, start_dt + timedelta(seconds=length_sec)))
+
+        if not intervals:
+            return slots
+
+        filtered = []
+        removed = []
+        for slot in slots:
+            if not isinstance(slot, dict):
+                continue
+            dt_raw = str(slot.get("datetime") or "").strip()
+            if not dt_raw:
+                time_raw = str(slot.get("time") or "").strip()
+                if not time_raw:
+                    filtered.append(slot)
+                    continue
+                dt_raw = f"{date}T{time_raw}:00"
+            try:
+                slot_start = datetime.fromisoformat(dt_raw.replace("Z", "+00:00"))
+            except Exception:
+                filtered.append(slot)
+                continue
+            try:
+                slot_len = int(slot.get("seance_length") or 0)
+            except (TypeError, ValueError):
+                slot_len = 0
+            if slot_len <= 0:
+                slot_len = 3600
+            slot_end = slot_start + timedelta(seconds=slot_len)
+            busy = any(slot_start < rec_end and rec_start < slot_end
+                       for rec_start, rec_end in intervals)
+            if busy:
+                removed.append((slot.get("time") or dt_raw)[:5])
+            else:
+                filtered.append(slot)
+
+        if removed:
+            logger.warning(
+                "filtered %s busy slot(s) for staff %s on %s via records cross-check: %s",
+                len(removed),
+                staff_id,
+                date,
+                ", ".join(removed[:8]),
+            )
+        return filtered
+
     # ─── Свободные слоты ────────────────────────────────────────────────────
 
     def get_available_slots(
@@ -423,7 +583,7 @@ class YClientsAPI:
                     "datetime": s.get("datetime", ""),
                     "seance_length": s.get("seance_length", 0),
                 })
-            return slots
+            return self._filter_slots_with_real_records(staff_id, date, slots)
         except Exception as e:
             return [{"error": str(e)}]
 
@@ -516,6 +676,23 @@ class YClientsAPI:
             digits = "7" + digits
         return "+" + digits if not digits.startswith("+") else digits
 
+    @staticmethod
+    def _booking_error_code(message: str, status_code: int | None = None) -> str:
+        low = (message or "").lower()
+        if status_code in (429,) or (status_code is not None and status_code >= 500):
+            return "yclients_unavailable"
+        if any(x in low for x in ("busy", "занят", "недоступ", "not available", "slot", "seance")):
+            return "slot_taken"
+        if any(x in low for x in ("phone", "телефон")):
+            return "bad_phone"
+        if any(x in low for x in ("name", "имя", "fullname")):
+            return "bad_name"
+        if any(x in low for x in ("service", "услуг")):
+            return "bad_service"
+        if any(x in low for x in ("staff", "master", "мастер")):
+            return "bad_staff"
+        return "booking_failed"
+
     def create_booking(
         self,
         staff_id: int,
@@ -555,7 +732,12 @@ class YClientsAPI:
                     }
                 ],
             }
-            data = self._post(f"book_record/{self.company_id}", payload)
+            url = f"{self.base_url}/book_record/{self.company_id}"
+            resp = requests.post(url, headers=self.headers, json=payload, timeout=(5, 20))
+            try:
+                data = resp.json()
+            except ValueError:
+                data = {}
             if data.get("success"):
                 records = data.get("data", [])
                 if records:
@@ -567,9 +749,32 @@ class YClientsAPI:
                         "client": client_name,
                         "phone": client_phone,
                     }
-            return {"success": False, "error": data.get("meta", {}).get("message", "Ошибка")}
+            msg = (
+                data.get("meta", {}).get("message")
+                or data.get("message")
+                or data.get("error")
+                or ("YClients отклонил запись" if resp.status_code >= 400 else "Ошибка")
+            )
+            return {
+                "success": False,
+                "error": msg,
+                "code": self._booking_error_code(msg, resp.status_code),
+                "http_status": resp.status_code,
+            }
+        except requests.Timeout:
+            return {
+                "success": False,
+                "error": "YClients timeout",
+                "code": "yclients_unavailable",
+            }
+        except requests.RequestException as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "code": "yclients_unavailable",
+            }
         except Exception as e:
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": str(e), "code": "booking_failed"}
 
     def create_record_admin(
         self,
@@ -632,47 +837,87 @@ class YClientsAPI:
         и историю (для апсейла/лояльности/цикл-напоминания), и предстоящие.
         """
         try:
-            # Нормализуем телефон для сравнения — только цифры без +
-            def _digits(p: str) -> str:
-                d = "".join(filter(str.isdigit, p or ""))
-                return d[1:] if d.startswith("7") or d.startswith("8") else d
+            start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+            end_date = (datetime.now() + timedelta(days=days_ahead)).strftime("%Y-%m-%d")
+            target = _digits10(client_phone)
 
-            target = _digits(client_phone)
-
-            params = {
-                "start_date": (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d"),
-                "end_date":   (datetime.now() + timedelta(days=days_ahead)).strftime("%Y-%m-%d"),
-                "count": 500,
-            }
-            data = self._get(f"records/{self.company_id}", params=params)
+            def _append_booking(bookings: list[dict], record: dict):
+                client = record.get("client") or {}
+                staff = record.get("staff") or {}
+                raw_services = record.get("services") or []
+                bookings.append({
+                    "id": record.get("id"),            # для loyalty (record_id)
+                    "record_id": record.get("id"),
+                    "date": record.get("date") or record.get("datetime", ""),
+                    "datetime": record.get("datetime", ""),
+                    "services": raw_services,          # list[dict] — не строки!
+                    "service_titles": [s.get("title", "") for s in raw_services if isinstance(s, dict)],
+                    "staff": staff,                    # для freed_slot
+                    "master": staff.get("name", ""),
+                    "client_name": client.get("name", ""),
+                    "client_id": client.get("id"),
+                    "attendance": record.get("attendance", 0),
+                    "status": record.get("attendance", 0),
+                })
 
             bookings = []
-            for r in data.get("data", []):
-                try:
-                    client = r.get("client") or {}
-                    staff  = r.get("staff")  or {}
-                    # Фильтруем по телефону клиента на нашей стороне
-                    record_phone = _digits(client.get("phone", ""))
-                    if record_phone != target:
+            seen = set()
+            exact = self.find_client_by_phone(client_phone)
+
+            # Главный путь: ищем точную карточку клиента и грузим записи по client_id.
+            # Так история не ломается из-за мусорного имени в карточке или формата
+            # телефона в общем списке records.
+            if exact and exact.get("id"):
+                count = 200
+                page = 1
+                while page <= 25:
+                    data = self._get(
+                        f"records/{self.company_id}",
+                        {
+                            "client_id": int(exact["id"]),
+                            "start_date": start_date,
+                            "end_date": end_date,
+                            "count": count,
+                            "page": page,
+                        },
+                    )
+                    batch = data.get("data") or []
+                    if not batch:
+                        break
+                    new_rows = 0
+                    for r in batch:
+                        try:
+                            rid = r.get("id")
+                            if rid in seen:
+                                continue
+                            seen.add(rid)
+                            _append_booking(bookings, r)
+                            new_rows += 1
+                        except Exception:
+                            continue
+                    if len(batch) < count or new_rows == 0:
+                        break
+                    page += 1
+
+            # Fallback: если точную карточку не нашли, оставляем старый путь по
+            # телефону, чтобы не потерять совместимость на нестандартных данных.
+            if not bookings:
+                data = self._get(
+                    f"records/{self.company_id}",
+                    {
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "count": 500,
+                    },
+                )
+                for r in data.get("data", []):
+                    try:
+                        client = r.get("client") or {}
+                        if _digits10(client.get("phone", "")) != target:
+                            continue
+                        _append_booking(bookings, r)
+                    except Exception:
                         continue
-                    # Сохраняем услуги КАК ДИКТЫ (с title, price, etc.) — нужно
-                    # для loyalty (сумма за визит), freed_slot, suggest_upsell.
-                    raw_services = r.get("services") or []
-                    bookings.append({
-                        "id": r.get("id"),               # для loyalty (record_id)
-                        "record_id": r.get("id"),
-                        "date": r.get("date") or r.get("datetime", ""),
-                        "datetime": r.get("datetime", ""),
-                        "services": raw_services,        # list[dict] — не строки!
-                        "service_titles": [s.get("title", "") for s in raw_services if isinstance(s, dict)],
-                        "staff": staff,                  # для freed_slot
-                        "master": staff.get("name", ""),
-                        "client_name": client.get("name", ""),
-                        "attendance": r.get("attendance", 0),
-                        "status": r.get("attendance", 0),
-                    })
-                except Exception:
-                    continue
             return bookings if bookings else [{"message": "Записей не найдено"}]
         except Exception as e:
             return [{"error": str(e)}]
@@ -970,6 +1215,24 @@ class YClientsAPI:
             if len(out) >= int(limit or 8):
                 break
         return out
+
+    def find_client_by_phone(self, phone: str) -> dict | None:
+        """Ищет точную карточку клиента в YClients по последним 10 цифрам телефона."""
+        want = _digits10(phone)
+        if len(want) < 10:
+            return None
+        for row in self.search_clients(phone, limit=8) or []:
+            if _digits10(row.get("phone") or "") == want:
+                return row
+        return None
+
+    def get_client_loyalty_cards(self, client_id: int) -> list[dict]:
+        """Возвращает карты лояльности клиента с актуальными балансами."""
+        data = self._get(f"loyalty/client_cards/{int(client_id)}")
+        cards = data.get("data") if isinstance(data, dict) else None
+        if isinstance(cards, dict):
+            cards = [cards]
+        return [card for card in (cards or []) if isinstance(card, dict)]
 
     def get_records_for_master(
         self, staff_id: int, start_date: str, end_date: str, max_pages: int = 25

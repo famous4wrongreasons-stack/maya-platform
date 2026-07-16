@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "pro.malesthetic.twa",
+      "sha256_cert_fingerprints": [
+        "13:38:39:EE:BD:D0:05:A8:1D:FB:A7:16:EF:98:38:5C:9B:F3:EC:37:1D:6F:F0:49:CE:E2:D6:1F:7B:77:6E:FF"
+      ]
+    }
+  }
+]

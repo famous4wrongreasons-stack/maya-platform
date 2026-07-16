@@ -3,6 +3,7 @@ import io
 import logging
 import os
 import re
+import signal
 import tempfile
 from datetime import date, datetime, timedelta
 from collections import defaultdict
@@ -29,6 +30,7 @@ from telegram.ext import (
     filters,
     ContextTypes,
 )
+from telegram.request import HTTPXRequest
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import database
@@ -38,6 +40,7 @@ import anonymizer
 import birthday
 import broadcast_templates
 import cert_pdf
+import claude_ai
 import cycle_reminder
 import lead_alerts
 import loyalty
@@ -50,13 +53,18 @@ import sources
 import subscriptions
 import yukassa_api
 import webhook_server
+from identity_utils import normalize_tg_user
 from config import (
     TELEGRAM_TOKEN, PROXY_URL, REMINDER_MINUTES_BEFORE, BARBERSHOP_NAME,
     SITE_URL, APP_URL, INITIAL_ADMIN_IDS, BOT_USERNAME,
-    PII_RETENTION_MONTHS,
+    PII_RETENTION_MONTHS, FOUNDER_IDS,
 )
 from claude_ai import get_ai_response
-from memory import load_conversations, save_conversations
+from memory import (
+    load_conversations,
+    save_conversations,
+    warm_client_history_cache_for_phone,
+)
 from yclients import YClientsAPI
 import voice  # «дешёвый голос»: озвучка ответа MAYA (выключено флагом в config)
 
@@ -65,6 +73,29 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
+
+
+def _telegram_ai_model(update: Update | None = None) -> str:
+    """Telegram-текст держим на более лёгкой модели, голос — на отдельном профиле."""
+    message = getattr(update, "message", None)
+    if message and getattr(message, "voice", None):
+        return claude_ai.VOICE_CLAUDE_MODEL
+    return getattr(claude_ai, "OPENAI_TELEGRAM_CHAT_MODEL", claude_ai.OPENAI_CHAT_MODEL)
+
+
+async def _get_ai_response_async(
+    conversation_history: list[dict],
+    chat_id: int,
+    update: Update | None = None,
+) -> tuple[str, dict | None, dict | None]:
+    history_snapshot = conversation_history.copy()
+    return await asyncio.to_thread(
+        get_ai_response,
+        history_snapshot,
+        chat_id,
+        _telegram_ai_model(update),
+        420,
+    )
 
 # История переписки: {user_id: [...]}. Содержит только обезличенный текст —
 # персональные данные в неё не попадают.
@@ -81,7 +112,7 @@ booking_flow: dict[int, dict] = {}
 # stage: awaiting_amount → клиент назвал номинал → awaiting_method → кнопка нажата → flow удаляется.
 gift_cert_flow: dict[int, dict] = {}
 
-# Антон попросил клиента поделиться контактом (инструмент request_client_contact):
+# MAYA попросила клиента поделиться контактом (инструмент request_client_contact):
 # нужно узнать клиента (имя+телефон), чтобы найти записи/баллы/дозаполнить карточку.
 # chat_id лежит здесь, пока клиент не нажал кнопку «Поделиться контактом» →
 # handle_contact увидит его тут, сохранит ПД и бесшовно продолжит диалог.
@@ -553,11 +584,20 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             import web_auth
             token = web_auth._new_token()
             subject_kind = "staff" if _is_staff_chat_id(user.id) else "client"
+            tg_profile = normalize_tg_user({
+                "id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "username": user.username,
+            })
             database.create_web_session(
                 token,
                 chat_id=user.id,
-                display_name=user.first_name or "",
+                display_name=tg_profile.get("display_name") or "",
                 subject_kind=subject_kind,
+                tg_first_name=tg_profile.get("first_name") or "",
+                tg_last_name=tg_profile.get("last_name") or "",
+                tg_username=tg_profile.get("username") or "",
                 ttl_days=30,
             )
             ok = database.applogin_authorize(nonce, user.id, token)
@@ -1516,6 +1556,7 @@ ADMIN_JOBS_KB = InlineKeyboardMarkup([
     [InlineKeyboardButton("💤 Реактивация уснувших", callback_data="admin_run_react")],
     [InlineKeyboardButton("🎂 ДР-промокоды", callback_data="admin_run_birthday")],
     [InlineKeyboardButton("🔁 Цикл-напоминания", callback_data="admin_run_cycle")],
+    [InlineKeyboardButton("⭐ Запрос отзывов", callback_data="admin_run_reviews")],
     [InlineKeyboardButton("🎟 Sync абонементов", callback_data="admin_run_sub_now")],
     [InlineKeyboardButton("🪙 Начисление баллов", callback_data="admin_run_loy_now")],
     [InlineKeyboardButton("📨 Резолвер рефералов", callback_data="admin_run_ref_now")],
@@ -1628,6 +1669,7 @@ async def _admin_dispatch(context: ContextTypes.DEFAULT_TYPE, query, data: str):
         "admin_run_react":        cmd_reactivation_now,
         "admin_run_birthday":     cmd_birthday_now,
         "admin_run_cycle":        cmd_cycle_now,
+        "admin_run_reviews":      cmd_reviews_now,
         "admin_run_sub_now":      cmd_subscriptions_now,
         "admin_run_loy_now":      cmd_loyalty_now,
         "admin_run_ref_now":      cmd_referral_now,
@@ -2005,7 +2047,7 @@ async def cmd_mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ─── Кнопки (согласие и подтверждение записи) ──────────────────────────────
 
 # ──────────────────────────────────────────────────────────────────────
-#  Досье клиента для владельца: визиты из YClients + переписка с Антоном.
+#  Досье клиента для владельца: визиты из YClients + переписка с MAYA.
 #  Зачем: по «зависшей заявке» сразу видно — наш клиент или новенький.
 #  Owner-only. Текст шлём БЕЗ Markdown (в переписке клиента бывают * _ [ ]).
 # ──────────────────────────────────────────────────────────────────────
@@ -2058,20 +2100,20 @@ async def _build_dossier(yc_id, name, phone, chat_id, convo_verified=False) -> s
     lines.append("")
     convo = conversations.get(int(chat_id)) if chat_id else None
     if convo:
-        lines.append("💬 Переписка с Антоном (последнее):" if convo_verified
-                     else "💬 Переписка с Антоном — найдено по номеру, не подтверждено:")
+        lines.append("💬 Переписка с MAYA (последнее):" if convo_verified
+                     else "💬 Переписка с MAYA — найдена по номеру, не подтверждена:")
         shown = 0
         for msg in convo[-16:]:
             content = (msg.get("content") or "").strip().replace("\n", " ")
             if not content or content.startswith("[Систем"):
                 continue
-            who = "🧑 Клиент" if msg.get("role") == "user" else "🤖 Антон"
+            who = "🧑 Клиент" if msg.get("role") == "user" else "🤖 MAYA"
             lines.append(who + ": " + content[:200])
             shown += 1
         if not shown:
             lines.append("(значимых сообщений нет)")
     else:
-        lines.append("💬 Переписки с ботом нет — клиент не писал Антону.")
+        lines.append("💬 Переписки с MAYA нет — клиент ещё не писал в чат.")
     return "\n".join(lines)[:3900]
 
 
@@ -2338,8 +2380,8 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(conversations[chat_id]) > 30:
             conversations[chat_id] = conversations[chat_id][-30:]
         try:
-            response_text, contact_request, _ = get_ai_response(
-                conversations[chat_id], user_id=chat_id
+            response_text, contact_request, _ = await _get_ai_response_async(
+                conversations[chat_id], chat_id, update
             )
         except Exception as e:
             logger.error(f"Реактивация react_pick_other AI: {e}")
@@ -2376,8 +2418,8 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(conversations[chat_id]) > 30:
             conversations[chat_id] = conversations[chat_id][-30:]
         try:
-            response_text, contact_request, _ = get_ai_response(
-                conversations[chat_id], user_id=chat_id
+            response_text, contact_request, _ = await _get_ai_response_async(
+                conversations[chat_id], chat_id, update
             )
         except Exception as e:
             logger.error(f"Реактивация react_book AI: {e}")
@@ -2408,7 +2450,9 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(conversations[chat_id]) > 30:
             conversations[chat_id] = conversations[chat_id][-30:]
         try:
-            response_text, _, _ = get_ai_response(conversations[chat_id], user_id=chat_id)
+            response_text, _, _ = await _get_ai_response_async(
+                conversations[chat_id], chat_id, update
+            )
         except Exception as e:
             logger.error(f"Ошибка AI на cancel_confirm: {e}")
             response_text = "Не получилось проверить записи. Позвоните: 8-962-447-67-47"
@@ -2936,7 +2980,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # ── Контакт запрошен Антоном (инструмент request_client_contact) ──────────
+    # ── Контакт запрошен MAYA (инструмент request_client_contact) ──────────
     # Это НЕ флоу «Баллы»: сохраняем имя+телефон в карточку и бесшовно продолжаем
     # диалог — отвечаем на исходный вопрос клиента (теперь телефон в системе есть).
     if chat_id in pending_contact_share:
@@ -2948,28 +2992,34 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             database.update_client(client_id, name=name or None, phone=phone)
         except Exception as e:
-            logger.error(f"handle_contact (запрос Антона) update_client: {e}")
+            logger.error(f"handle_contact (запрос MAYA) update_client: {e}")
         # Баллы за прошлые визиты — идемпотентно, раз уж узнали телефон
         try:
             loyalty.lazy_backfill_for_client(client_id, phone)
         except Exception as e:
-            logger.error(f"handle_contact (запрос Антона) backfill: {e}")
-        # Продолжаем разговор: добавляем реплику клиента и снова спрашиваем Антона —
-        # теперь он найдёт записи/баллы по сохранённому телефону.
+            logger.error(f"handle_contact (запрос MAYA) backfill: {e}")
+        try:
+            await asyncio.to_thread(warm_client_history_cache_for_phone, client_id, phone)
+        except Exception as e:
+            logger.error(f"handle_contact (запрос MAYA) history warmup: {e}")
+        # Продолжаем разговор: добавляем реплику клиента и снова спрашиваем MAYA —
+        # теперь она найдёт записи/баллы по сохранённому телефону.
         conversations[chat_id].append({"role": "user", "content": "Поделился контактом ✅"})
         if len(conversations[chat_id]) > 30:
             conversations[chat_id] = conversations[chat_id][-30:]
         await context.bot.send_chat_action(chat_id=chat_id, action="typing")
         try:
-            resp_text, c_req, _gc = get_ai_response(conversations[chat_id], user_id=chat_id)
+            resp_text, c_req, _gc = await _get_ai_response_async(
+                conversations[chat_id], chat_id, update
+            )
         except Exception as e:
-            logger.error(f"handle_contact (запрос Антона) get_ai_response: {e}")
+            logger.error(f"handle_contact (запрос MAYA) get_ai_response: {e}")
             resp_text, c_req = None, None
         resp_text = resp_text or f"Готово, {name or 'друг'}! Теперь я тебя узнаю 🙂 Чем помочь?"
         conversations[chat_id].append({"role": "assistant", "content": resp_text})
         save_conversations(conversations)
         await update.message.reply_text(resp_text, reply_markup=_keyboard_for(chat_id))
-        # Если Антон сразу повёл к записи — запускаем оформление
+        # Если MAYA сразу повела к записи — запускаем оформление
         if c_req:
             await _start_contact_flow(context, chat_id, c_req)
         return
@@ -2990,6 +3040,10 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"handle_contact lazy_backfill: {e}")
         bf = None
+    try:
+        await asyncio.to_thread(warm_client_history_cache_for_phone, client_id, phone)
+    except Exception as e:
+        logger.error(f"handle_contact history warmup: {e}")
 
     if bf and bf.get("points"):
         await update.message.reply_text(
@@ -3506,7 +3560,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
 
     # Если клиент только что поставил 1-3 ⭐ и бот попросил описать что не так —
     # это сообщение и есть комментарий. Перехватываем ДО любых других флоу
-    # и AI, чтобы не дёрнуть Антона на текст вроде «мастер был грубый».
+    # и AI, чтобы не дёрнуть MAYA на текст вроде «мастер был грубый».
     if await reviews.handle_negative_comment(update, context):
         return
 
@@ -3668,7 +3722,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
             #  • короткое «да/нет/ок» → подсказываем нажать кнопку
             #  • что-то осмысленное → это намерение ИЗМЕНИТЬ запись (добавить
             #    услугу, поменять время и т.п.). Прерываем сбор контактов,
-            #    кидаем фразу обратно Антону с системной меткой — он
+            #    кидаем фразу обратно MAYA с системной меткой — она
             #    переоформит как обычно.
             short = text.strip().lower()
             if short in ("да", "ок", "+", "ага", "угу", "yes", "нет", "no", "."):
@@ -3693,8 +3747,8 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
                 chat_id=update.effective_chat.id, action="typing",
             )
             try:
-                response_text, contact_request, _ = get_ai_response(
-                    conversations[chat_id], user_id=chat_id
+                response_text, contact_request, _ = await _get_ai_response_async(
+                    conversations[chat_id], chat_id, update
                 )
             except Exception as e:
                 logger.error(f"Ошибка AI при перехвате confirm: {e}")
@@ -3799,8 +3853,8 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
             logger.error(f"lead_alerts hook on_client_message: {e}")
 
     try:
-        response_text, contact_request, gift_cert_action = get_ai_response(
-            conversations[chat_id], user_id=chat_id
+        response_text, contact_request, gift_cert_action = await _get_ai_response_async(
+            conversations[chat_id], chat_id, update
         )
     except Exception as e:
         logger.error(f"Ошибка AI: {e}")
@@ -3832,7 +3886,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
     if not sent_voice:
         await update.message.reply_text(response_text, reply_markup=MAIN_KEYBOARD)
 
-    # Lead-alert: запоминаем последний ответ Антона для контекста в алерте.
+    # Lead-alert: запоминаем последний ответ MAYA для контекста в алерте.
     if not _is_staff_chat_id(chat_id):
         try:
             lead_alerts.on_ai_reply(client_id_for_alert, response_text)
@@ -3860,9 +3914,26 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
                 chat_id, cat_text, parse_mode="Markdown", reply_markup=cat_kb,
             )
         elif gift_cert_action.get("kind") == "contact":
-            # Антон попросил узнать клиента — показываем защищённую кнопку
+            # MAYA попросила узнать клиента — показываем защищённую кнопку
             # «Поделиться контактом» вместо отправки к администратору.
             await _request_contact_share(context, chat_id)
+        elif gift_cert_action.get("kind") == "run_job":
+            cb = _owner_job_callback(gift_cert_action.get("job"))
+            rows = []
+            if cb:
+                rows.append([InlineKeyboardButton(
+                    gift_cert_action.get("label") or "Запустить",
+                    callback_data=cb,
+                )])
+            rows.append([InlineKeyboardButton("📊 Открыть кабинет", url="https://malesthetic.pro/app/?panel=report")])
+            text = _owner_action_text(gift_cert_action) or (
+                "MAYA подготовила действие для владельца."
+            )
+            await context.bot.send_message(
+                chat_id,
+                text,
+                reply_markup=InlineKeyboardMarkup(rows),
+            )
         else:
             amount = gift_cert_action["amount"]
             gift_cert_flow[chat_id] = {"stage": "awaiting_method", "amount": amount}
@@ -3878,7 +3949,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
 async def _request_contact_share(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     """Показывает клиенту защищённую кнопку «Поделиться контактом».
 
-    Антон вызвал инструмент request_client_contact: ему нужно узнать клиента
+    MAYA вызвала инструмент request_client_contact: ей нужно узнать клиента
     (имя+телефон), чтобы найти его записи/баллы или дозаполнить карточку — вместо
     того чтобы отправлять к администратору. handle_contact увидит chat_id в
     pending_contact_share, сохранит ПД и бесшовно продолжит диалог.
@@ -4133,7 +4204,7 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
         except Exception as e:
             logger.error(f"lead_alerts on_booking_confirmed: {e}")
         dt_human = _format_dt(cr["datetime_str"])
-        # Списание баллов лояльности: если Антон договорился с клиентом
+        # Списание баллов лояльности: если MAYA договорилась с клиентом
         # оплатить уход баллами — спишем сразу, привязав к record_id.
         # При отмене записи через webhook вернём баллы автоматически.
         loyalty_redemption_info = None
@@ -4215,11 +4286,44 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
         conversations[chat_id] = conversations[chat_id][-30:]
         save_conversations(conversations)
     else:
-        logger.error(f"Ошибка создания записи: {result.get('error')}")
+        def _booking_failure_reply(result: dict) -> str:
+            """Короткое понятное объяснение клиенту, почему запись не дошла до YClients."""
+            code = (result or {}).get("code") or ""
+            if code == "slot_taken":
+                return (
+                    "Это время уже заняли или оно стало недоступно. "
+                    "Давайте выберем другой ближайший слот."
+                )
+            if code == "bad_phone":
+                return (
+                    "Не получилось записать из-за номера телефона. "
+                    "Проверьте номер в профиле или отправьте его заново."
+                )
+            if code == "bad_name":
+                return "Не получилось записать из-за имени. Напишите, пожалуйста, как вас записать."
+            if code == "bad_service":
+                return "Эта услуга сейчас недоступна для онлайн-записи. Давайте выберем услугу заново."
+            if code == "bad_staff":
+                return "Этот мастер сейчас недоступен для онлайн-записи. Давайте выберем другого мастера или время."
+            if code == "yclients_unavailable":
+                return (
+                    "Сервер записи сейчас отвечает нестабильно, поэтому я не буду повторять заявку, "
+                    "чтобы случайно не создать дубль. Проверьте «Мои записи» через минуту или напишите ещё раз."
+                )
+            return (
+                "Не получилось оформить запись автоматически. "
+                "Попробуйте выбрать другое время или напишите ещё раз."
+            )
+
+        logger.error(
+            "Ошибка создания записи: code=%s status=%s error=%s",
+            result.get("code"),
+            result.get("http_status"),
+            result.get("error"),
+        )
         await context.bot.send_message(
             chat_id,
-            "Не получилось оформить запись 🙈 Попробуйте другое время "
-            "или позвоните нам: 8-962-447-67-47",
+            _booking_failure_reply(result),
             reply_markup=MAIN_KEYBOARD,
         )
 
@@ -4723,7 +4827,7 @@ async def _handle_cancel_record_confirm(context: ContextTypes.DEFAULT_TYPE, quer
             "✅ Запись отменена.\n\n_Если что — записывайся снова через «✂️ Записаться»._",
             parse_mode="Markdown",
         )
-        # Добавляем системную пометку в историю переписки — чтобы Антон
+        # Добавляем системную пометку в историю переписки — чтобы MAYA
         # не «помнил» отменённую запись и не говорил «у вас уже есть запись».
         # Прошлые user/assistant сообщения остаются, но эта метка явно
         # пере-уведомляет AI о новом состоянии.
@@ -4766,7 +4870,7 @@ async def _handle_cancel_record_confirm(context: ContextTypes.DEFAULT_TYPE, quer
 # Кнопки приходят из freed_slot.offer_freed_slot — формат:
 #   freed_book_<staff_id>_<YYYYMMDDHHMM>
 #   freed_decline
-# Принятие → проброс в Антона с готовым intent'ом, он проверит слот
+# Принятие → проброс в MAYA с готовым intent'ом, она проверит слот
 # через get_available_slots / find_nearest_slots и оформит запись.
 
 async def _handle_freed_slot_accept(context: ContextTypes.DEFAULT_TYPE, query, callback_data: str):
@@ -4789,7 +4893,7 @@ async def _handle_freed_slot_accept(context: ContextTypes.DEFAULT_TYPE, query, c
             action="accepted",
         )
 
-    # Имя мастера — для intent'а Антону
+    # Имя мастера — для intent'а MAYA
     master_label = ""
     for m in yc.get_masters():
         if m["id"] == staff_id:
@@ -4817,8 +4921,8 @@ async def _handle_freed_slot_accept(context: ContextTypes.DEFAULT_TYPE, query, c
         conversations[chat_id] = conversations[chat_id][-30:]
 
     try:
-        response_text, contact_request, _ = get_ai_response(
-            conversations[chat_id], user_id=chat_id
+        response_text, contact_request, _ = await _get_ai_response_async(
+            conversations[chat_id], chat_id
         )
     except Exception as e:
         logger.error(f"freed_book AI: {e}")
@@ -6055,6 +6159,9 @@ async def post_init(app: Application):
     # Webhook-приёмник для уведомлений мастерам (YClients → Beget → сюда)
     await webhook_server.start_webhook_server(app)
 
+    # Один быстрый self-check сразу после старта, чтобы не ждать ближайший cron-тик.
+    asyncio.create_task(_dual_role_guard_job(app))
+
     # Ежедневная ротация ПД в 03:00 МСК — обезличивает клиентов без активности
     # PII_RETENTION_MONTHS месяцев и просроченные сертификаты.
     scheduler.add_job(
@@ -6090,7 +6197,8 @@ async def post_init(app: Application):
         args=[app],
     )
 
-    # Напоминание по индивидуальному циклу в 11:00 МСК — клиенту, чьё
+    # Анализ индивидуального цикла в 11:00 МСК. Он формирует owner-очередь;
+    # отправка клиентам запускается отдельно после подтверждения владельца.
     # «обычное время постричься» подходит сегодня ± 3 дня.
     scheduler.add_job(
         _cycle_reminder_job,
@@ -6150,12 +6258,24 @@ async def post_init(app: Application):
     )
 
     # Алерт о зависшей заявке: каждые 5 минут проверяем,
-    # есть ли клиенты, кому Антон ответил, а они так и не записались.
+    # есть ли клиенты, кому MAYA ответила, а они так и не записались.
     scheduler.add_job(
         _lead_alerts_job,
         trigger="cron",
         minute="*/5",
         id="lead_alerts",
+        replace_existing=True,
+        args=[app],
+    )
+
+    # Guard dual-role аккаунтов (мастер + клиент): каждые 3 часа тихо
+    # прогреваем клиентский контекст заново и тревожим только если не починилось.
+    scheduler.add_job(
+        _dual_role_guard_job,
+        trigger="cron",
+        hour="*/3",
+        minute=17,
+        id="dual_role_guard",
         replace_existing=True,
         args=[app],
     )
@@ -6194,8 +6314,20 @@ async def post_init(app: Application):
         args=[app],
     )
 
+    # AI-директор: утренний брифинг владельцу (деньги-возможности + приоритет) —
+    # Майя сама пишет владельцу каждый день в 10:00 МСК + пуш в PWA.
+    scheduler.add_job(
+        _director_briefing_job,
+        trigger="cron",
+        hour=10,
+        minute=0,
+        id="director_briefing",
+        replace_existing=True,
+        args=[app],
+    )
+
     logger.info(
-        f"Бот Антон запущен 🚀 | БД готова | Админов: {len(database.list_admins())} "
+        f"Бот MAYA запущен 🚀 | БД готова | Админов: {len(database.list_admins())} "
         f"| Ротация ПД: каждый день 03:00 МСК (>{PII_RETENTION_MONTHS} мес)"
     )
 
@@ -6230,11 +6362,24 @@ async def _birthday_job(app: Application):
 
 
 async def _cycle_reminder_job(app: Application):
-    """Ежедневное напоминание клиентам, чей средний цикл подошёл."""
+    """Ежедневно формирует очередь; ничего клиентам сам не отправляет."""
     try:
-        await cycle_reminder.run_cycle_reminder_job(app)
+        snapshot = await asyncio.to_thread(cycle_reminder.scan_cycle_candidates)
+        alert = (snapshot or {}).get("owner_alert") or {}
+        if alert.get("notify_required"):
+            delivery = await webhook_server.notify_owner_cycle_candidates(snapshot)
+            await asyncio.to_thread(
+                cycle_reminder.mark_owner_alert_notified,
+                str(alert.get("event_id") or ""),
+                delivery,
+            )
+            logger.info(
+                "Цикл-сигнал владельцу: candidates=%s push=%s",
+                alert.get("candidate_count"),
+                delivery.get("push"),
+            )
     except Exception as e:
-        logger.error(f"Ошибка цикл-напоминания: {e}")
+        logger.error(f"Ошибка анализа личного цикла: {e}")
 
 
 async def _referral_resolver_job(app: Application):
@@ -6438,6 +6583,246 @@ async def _anton_expense_reminder_job(app: Application):
         logger.error(f"anton expense reminder: {e}")
 
 
+# ── AI-директор: Майя сама пишет владельцу + пуш ────────────────────────────
+def _m(n) -> str:
+    """35037 → «35 037» (разряды тонким пробелом)."""
+    try:
+        return f"{int(round(float(n or 0))):,}".replace(",", " ")
+    except Exception:
+        return "0"
+
+
+def _owner_job_callback(job: str | None) -> str | None:
+    return {
+        "reactivation": "admin_run_react",
+        "birthday": "admin_run_birthday",
+        "cycle": "admin_run_cycle",
+        "reviews": "admin_run_reviews",
+        "subscriptions": "admin_run_sub_now",
+    }.get((job or "").strip().lower())
+
+
+def _owner_action_text(action: dict | None) -> str:
+    if not isinstance(action, dict):
+        return ""
+    lines = []
+    if action.get("title"):
+        lines.append(str(action.get("title")))
+    if action.get("problem"):
+        lines.append("Что важно: " + str(action.get("problem")))
+    if action.get("reason"):
+        lines.append("Почему сейчас: " + str(action.get("reason")))
+    if action.get("potential_rub"):
+        lines.append("Потенциал: ~" + _m(action.get("potential_rub")) + " ₽")
+    if action.get("client_message"):
+        lines.append("Сообщение клиенту:\n" + str(action.get("client_message")))
+    return "\n\n".join(lines).strip()
+
+
+def _owner_recipient_ids() -> list[int]:
+    """Получатели AI-директора: только owner/founder, не все админы."""
+    out: set[int] = set()
+    for value in FOUNDER_IDS or []:
+        try:
+            out.add(int(value))
+        except Exception:
+            pass
+    return sorted(out)
+
+
+async def notify_owner(app: Application, text: str, push_title: str = "MAYA",
+                       push_body: str = "", tag: str = "maya_owner",
+                       url: str = "/app/?panel=report",
+                       button_label: str = "📊 Открыть кабинет",
+                       button_url: str = "https://malesthetic.pro/app/?panel=report",
+                       chat_action: dict | None = None) -> int:
+    """Единая точка проактивных сообщений AI-директора владельцу: Telegram + Web Push
+    в PWA. Майя может писать владельцу сама (брифинг, риск, возможность). Возвращает
+    число адресатов, которым доставлено в Telegram."""
+    owner_ids = _owner_recipient_ids()
+    if not owner_ids:
+        logger.warning("notify_owner: нет настроенных owner/founder получателей")
+        return 0
+    # Майя пишет владельцу и В ЧАТ ПРИЛОЖЕНИЯ (не только Telegram): кладём сообщение
+    # в историю переписки владельца, чтобы он увидел его в PWA-чате и мог ответить
+    # там же. Синхронный блок (load→append→save без await) — без гонок.
+    try:
+        from memory import load_conversations, save_conversations
+        convs = load_conversations()
+        for owner_id in owner_ids:
+            hist = list(convs.get(owner_id) or [])
+            item = {"role": "assistant", "content": text}
+            if isinstance(chat_action, dict):
+                item["action"] = chat_action
+            hist.append(item)
+            convs[owner_id] = hist[-30:]
+        save_conversations(convs)
+    except Exception as e:
+        logger.error(f"notify_owner in-app chat: {e}")
+
+    import webhook_server
+    kb = None
+    try:
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        rows = []
+        _cb = _owner_job_callback(chat_action.get("job")) if isinstance(chat_action, dict) else None
+        _cb_label = (chat_action.get("label") or "Запустить") if isinstance(chat_action, dict) else None
+        if _cb:
+            rows.append([InlineKeyboardButton(_cb_label, callback_data=_cb)])
+        if button_label and button_url:
+            rows.append([InlineKeyboardButton(button_label, url=button_url)])
+        if rows:
+            kb = InlineKeyboardMarkup(rows)
+    except Exception:
+            kb = None
+    sent = 0
+    for owner_id in owner_ids:
+        try:
+            await app.bot.send_message(chat_id=owner_id, text=text, reply_markup=kb)
+            sent += 1
+        except Exception as e:
+            logger.error(f"notify_owner tg → {owner_id}: {e}")
+        try:
+            await webhook_server._send_client_push(
+                owner_id, push_title, push_body or text[:120],
+                url=url, tag=tag,
+            )
+        except Exception as e:
+            logger.error(f"notify_owner push → {owner_id}: {e}")
+    return sent
+
+
+def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
+    """(telegram_text, push_title, push_body) в голосе Майи-директора из
+    owner_ai.daily_briefing(). Детерминированно — не зависит от LLM-мозга."""
+    t = brief.get("today") or {}
+    booked = t.get("booked") or 0
+    exp = t.get("expected_revenue_rub") or 0
+    avg = t.get("avg_check_rub") or 0
+    lines = ["Доброе утро! Посмотрела салон на сегодня 👇", "",
+             f"📅 Сегодня: {booked} записей, ожидаемо ~{_m(exp)} ₽ (средний чек {_m(avg)} ₽)."]
+    who = ", ".join((t.get("idle_masters") or []) + (t.get("underused_masters") or []))
+    if who:
+        lines.append(f"🪑 Недозагружены: {who} — ≈{t.get('free_capacity_today') or 0} свободных окон.")
+
+    tr = brief.get("week_trend") or {}
+    parts = []
+    for key, lbl in (("visits", "визиты"), ("avg_check", "средний чек")):
+        d = (tr.get(key) or {}).get("delta_pct")
+        if d:
+            parts.append(f"{lbl} {'+' if d >= 0 else ''}{d}%")
+    if parts:
+        lines.append(f"📈 За неделю: {', '.join(parts)}.")
+
+    advisor = brief.get("owner_advisor") or {}
+    advisor_items = advisor.get("top_advice") or []
+    if advisor_items:
+        lines += ["", "Совет владельцу по цифрам:"]
+        for i, item in enumerate(advisor_items[:3], 1):
+            evidence = str(item.get("evidence") or "").strip()
+            recommendation = str(item.get("recommendation") or "").strip()
+            money = f" Потенциал: ~{_m(item['potential_rub'])} ₽." if item.get("potential_rub") else ""
+            lines.append(
+                f"{i}. {item.get('title')}: {evidence} {recommendation}{money}".strip()
+            )
+
+    execution = brief.get("execution_plan") or {}
+    execution_steps = execution.get("steps") or []
+    if execution_steps:
+        lines += ["", f"🧭 План действий: {execution.get('headline') or 'что сделать сегодня'}"]
+        for i, step in enumerate(execution_steps[:3], 1):
+            money = f" — ~{_m(step['potential_rub'])} ₽" if step.get("potential_rub") else ""
+            next_step = step.get("owner_next_step") or step.get("detail") or ""
+            lines.append(f"{i}. {step.get('title')}{money}" + (f". {next_step}" if next_step else ""))
+
+    tasks = brief.get("task_center") or {}
+    task_sm = tasks.get("summary") or {}
+    if task_sm.get("overdue_count") or task_sm.get("effect_check_count") or task_sm.get("running_count"):
+        bits = []
+        if task_sm.get("overdue_count"):
+            bits.append(f"просрочено {task_sm.get('overdue_count')}")
+        if task_sm.get("effect_check_count"):
+            bits.append(f"проверить эффект {task_sm.get('effect_check_count')}")
+        if task_sm.get("running_count"):
+            bits.append(f"MAYA выполняет {task_sm.get('running_count')}")
+        lines.append(f"📌 Задачи: {', '.join(bits)}.")
+
+    focus = brief.get("control_focus") or {}
+    focus_items = focus.get("items") or []
+    if focus_items and not execution_steps:
+        lines += ["", f"🎯 Фокус контроля: {focus.get('headline') or 'что закрыть сегодня'}"]
+        for i, item in enumerate(focus_items[:3], 1):
+            label = item.get("focus_label") or item.get("status") or ""
+            money = f" — ~{_m(item['potential_rub'])} ₽" if item.get("potential_rub") else ""
+            step = item.get("owner_next_step") or item.get("detail") or ""
+            lines.append(f"{i}. {item.get('title')}{money}" + (f" · {label}" if label else "") + (f". {step}" if step else ""))
+
+    opps = brief.get("opportunities") or []
+    if opps:
+        lines += ["", "💰 Где деньги сегодня:"]
+        for i, o in enumerate(opps[:3], 1):
+            money = f" — ~{_m(o['potential_rub'])} ₽" if o.get("potential_rub") else ""
+            lines.append(f"{i}. {o.get('title')}{money}. {o.get('detail', '')}")
+        lines += ["", "Скажи — запущу рассылку (уснувшим / по сертификатам) или помогу заполнить окна."]
+    else:
+        lines += ["", "Пока всё ровно — держу руку на пульсе, замечу что-то важное — напишу."]
+
+    text = "\n".join(lines).strip()
+    top = brief.get("top_priority") or {}
+    if advisor_items and advisor.get("status") in ("risk", "warn"):
+        first = advisor_items[0]
+        push_body = f"{booked} записей сегодня. Совет: {first.get('title')} — {first.get('recommendation')}"
+        if len(push_body) > 180:
+            push_body = push_body[:179].rstrip() + "…"
+    elif execution_steps and execution.get("status") in ("risk", "warn"):
+        push_body = f"{booked} записей сегодня. План: {execution_steps[0].get('title') or execution.get('headline')}."
+    elif focus_items and focus.get("status") in ("risk", "warn"):
+        push_body = f"{booked} записей сегодня. Фокус: {focus.get('headline') or focus_items[0].get('title')}."
+    elif top:
+        money = f" (~{_m(top['potential_rub'])} ₽)" if top.get("potential_rub") else ""
+        push_body = f"{booked} записей сегодня. Приоритет: {top.get('title')}{money}."
+    else:
+        push_body = f"{booked} записей сегодня, ожидаемо ~{_m(exp)} ₽."
+    return text, "Брифинг директора 📊", push_body
+
+
+async def _director_briefing_job(app: Application):
+    """Утренний брифинг AI-директора владельцу: деньги-возможности + приоритет + пуш.
+    Майя сама пишет владельцу раз в день (проактивный директор)."""
+    try:
+        import owner_ai
+        brief = await asyncio.to_thread(owner_ai.daily_briefing)
+        text, push_title, push_body = _format_director_briefing(brief)
+        top_action = brief.get("top_action")
+    except Exception as e:
+        logger.error(f"director_briefing build: {e}")
+        return
+    if not text:
+        return
+    # Анти-дубль: один брифинг в день.
+    try:
+        import hashlib as _hl
+        from datetime import date as _d
+        sig = _d.today().isoformat() + ":" + _hl.md5(text.encode("utf-8")).hexdigest()[:10]
+        if database.get_setting("director_briefing_last") == sig:
+            logger.info("director_briefing: уже отправлен сегодня")
+            return
+        database.set_setting("director_briefing_last", sig)
+    except Exception:
+        pass
+    if isinstance(top_action, dict):
+        try:
+            pretty = _owner_action_text(top_action)
+            if pretty:
+                text = text + "\n\n" + pretty
+        except Exception:
+            pass
+    n = await notify_owner(app, text, push_title=push_title, push_body=push_body,
+                           tag="director_briefing", url="/app/?panel=report",
+                           chat_action=top_action if isinstance(top_action, dict) else None)
+    logger.info(f"📊 Брифинг AI-директора отправлен: {n} адресат(ов)")
+
+
 async def _daily_report_job(app: Application):
     """21:00 МСК — собираем дневной отчёт и уведомляем владельца: Telegram + PWA-пуш.
     Зарплаты барберов смены (выручка × реальный %) + сколько визитов нал/карта."""
@@ -6637,6 +7022,84 @@ async def _god_watch_job(app: Application):
             logger.error(f"god_watch push → {fid}: {e}")
 
 
+async def _dual_role_guard_job(app: Application):
+    """Тихий guard для аккаунтов «мастер + клиент»: сам чинит кеш истории,
+    а если не удалось — шлёт основателю сигнал."""
+    try:
+        import hashlib
+        import webhook_server
+        from config import FOUNDER_IDS
+        from memory import audit_dual_role_client_context
+    except Exception as e:
+        logger.error(f"dual_role_guard import: {e}")
+        return
+
+    try:
+        audit = await asyncio.to_thread(audit_dual_role_client_context, yc, True, 20)
+    except Exception as e:
+        logger.error(f"dual_role_guard run: {e}")
+        return
+
+    repaired = audit.get("repaired") or []
+    issues = audit.get("issues") or []
+    if repaired:
+        logger.warning(
+            "dual_role_guard auto-repaired %s account(s): %s",
+            len(repaired),
+            ", ".join(it.get("name") or str(it.get("chat_id")) for it in repaired),
+        )
+    if not issues:
+        return
+
+    fails = [it for it in issues if it.get("severity") == "fail"]
+    warns = [it for it in issues if it.get("severity") != "fail"]
+    lines = ["🛡️ MAYA · dual-role guard", ""]
+    if repaired:
+        lines.append(
+            "Автопочинка сработала: "
+            + ", ".join(
+                f"{it.get('name') or it.get('chat_id')} ({it.get('visits', 0)} виз.)"
+                for it in repaired
+            )
+        )
+        lines.append("")
+    if fails:
+        lines.append("🔴 Не удалось восстановить:")
+        for it in fails:
+            lines.append(f"• {it['name']}: {it.get('detail') or it.get('reason') or 'ошибка'}")
+        lines.append("")
+    if warns:
+        lines.append("🟡 Требует внимания:")
+        for it in warns:
+            lines.append(f"• {it['name']}: {it.get('detail') or it.get('reason') or 'проверьте'}")
+    text = "\n".join(lines).strip()
+
+    try:
+        sig_base = "|".join(f"{it.get('chat_id')}:{it.get('reason')}" for it in issues)
+        sig = date.today().isoformat() + ":" + hashlib.md5(sig_base.encode("utf-8")).hexdigest()[:12]
+        if (database.get_setting("dual_role_guard_last_alert") or "") == sig:
+            return
+        database.set_setting("dual_role_guard_last_alert", sig)
+    except Exception:
+        pass
+
+    for fid in FOUNDER_IDS:
+        try:
+            await app.bot.send_message(chat_id=fid, text=text)
+        except Exception as e:
+            logger.error(f"dual_role_guard tg → {fid}: {e}")
+        try:
+            await webhook_server._send_client_push(
+                fid,
+                "MAYA: dual-role guard 🛡️",
+                "Есть рассинхрон между ролями мастер/клиент — откройте Центр управления.",
+                url="/app/?god=1",
+                tag="dual_role_guard",
+            )
+        except Exception as e:
+            logger.error(f"dual_role_guard push → {fid}: {e}")
+
+
 async def _loyalty_job(app: Application):
     """Ежедневный таск по баллам: начисление + сгорание."""
     try:
@@ -6673,10 +7136,15 @@ def _telegram_reachable(timeout: float = 8.0, attempts: int = 3) -> bool:
     except Exception:
         return True
     proxies = {"https": PROXY_URL, "http": PROXY_URL}
+    # Корень api.telegram.org может подвисать на отдельных прокси/маршрутах, даже когда
+    # сам Bot API жив. Проверяем реальный bot-метод getMe тем же путём, которым стартует бот.
+    probe_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getMe"
     for i in range(max(1, attempts)):
         try:
-            requests.get("https://api.telegram.org", proxies=proxies, timeout=timeout)
-            return True  # любой HTTP-ответ = прокси жив и Telegram достижим
+            r = requests.get(probe_url, proxies=proxies, timeout=timeout)
+            if r.status_code < 500:
+                return True
+            raise requests.exceptions.RequestException(f"telegram probe HTTP {r.status_code}")
         except requests.exceptions.RequestException:
             if i < attempts - 1:
                 _t.sleep(3)
@@ -6685,13 +7153,108 @@ def _telegram_reachable(timeout: float = 8.0, attempts: int = 3) -> bool:
     return False
 
 
+def _telegram_httpx_request(*, for_updates: bool = False) -> HTTPXRequest:
+    """Единый request для Telegram через прокси.
+
+    На проде маршрут до Telegram иногда отвечает медленно через внешний HTTP-proxy:
+    requests/getMe проходит, а дефолтный httpx-таймаут PTB не дожидается ответа на
+    initialize()/get_me(). Даём более мягкие таймауты, а для getUpdates оставляем
+    длинное чтение под long-polling.
+    """
+    kwargs = {
+        "connect_timeout": 20.0,
+        "read_timeout": 70.0 if for_updates else 20.0,
+        "write_timeout": 20.0,
+        "pool_timeout": 20.0,
+    }
+    if PROXY_URL:
+        kwargs["proxy"] = PROXY_URL
+    return HTTPXRequest(**kwargs)
+
+
+async def _initialize_bot_with_retry(bot, attempts: int = 6, delay: float = 2.0) -> None:
+    """Дожидается успешного Bot.initialize() на флапающем прокси.
+
+    На этой VPS proxy-route до Telegram иногда отвечает серией 502/timeout, а затем
+    оживает через несколько секунд. PTB падает ещё до post_init(), из-за чего не
+    поднимаются webhook/REST. Здесь даём несколько попыток на том же httpx-стеке,
+    а после успеха дальнейший Application.initialize() уже не делает второй get_me().
+    """
+    last_error = None
+    for i in range(max(1, attempts)):
+        try:
+            await bot.initialize()
+            if i:
+                logger.info(f"Telegram bootstrap восстановился на попытке {i + 1}/{attempts}")
+            return
+        except Exception as e:
+            last_error = e
+            logger.warning(f"Telegram bootstrap {i + 1}/{attempts} не удался: {e!r}")
+            try:
+                await bot.shutdown()
+            except Exception:
+                pass
+            if i < attempts - 1:
+                await asyncio.sleep(delay)
+    raise last_error or RuntimeError("telegram bootstrap failed")
+
+
+async def _run_polling_resilient(app: Application) -> None:
+    """Запуск PTB без падения до post_init() из-за случайного proxy-flap."""
+    stop_event = asyncio.Event()
+    loop = asyncio.get_running_loop()
+
+    def _request_stop() -> None:
+        stop_event.set()
+
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGABRT):
+        try:
+            loop.add_signal_handler(sig, _request_stop)
+        except (NotImplementedError, RuntimeError, ValueError):
+            pass
+
+    # REST/webhook-контур приложения должен оживать сразу после старта процесса, даже
+    # если Telegram bootstrap временно буксует на флапающем proxy-route.
+    await webhook_server.start_webhook_server(app)
+    await _initialize_bot_with_retry(app.bot, attempts=8 if PROXY_URL else 1, delay=2.0)
+    await app.initialize()  # bot.initialize() уже успешен и идемпотентно пропустится
+    await post_init(app)
+
+    def error_callback(exc) -> None:
+        app.create_task(app.process_error(error=exc, update=None))
+
+    try:
+        await app.updater.start_polling(
+            poll_interval=0.0,
+            timeout=10,
+            bootstrap_retries=-1,
+            drop_pending_updates=True,
+            error_callback=error_callback,
+        )
+        await app.start()
+        await stop_event.wait()
+    finally:
+        try:
+            if app.updater:
+                await app.updater.stop()
+        finally:
+            try:
+                await app.stop()
+            finally:
+                await app.shutdown()
+
+
 async def _serve_webhook_only_until_telegram_back():
     """DEGRADED-режим (Telegram-прокси мёртв на старте): поднимаем ТОЛЬКО webhook/REST
     (:8080 — кабинет клиента, владельческая панель, приём YClients-вебхуков), чтобы они
     НЕ лежали вместе с Telegram-ботом. Ждём, пока прокси оживёт, и возвращаемся — main()
     выйдет с ненулевым кодом, и systemd перезапустит процесс в обычном режиме с ботом."""
     database.init_db()
-    app = Application.builder().token(TELEGRAM_TOKEN).build()  # без initialize/get_me
+    app = (Application.builder()
+           .token(TELEGRAM_TOKEN)
+           .request(_telegram_httpx_request())
+           .get_updates_request(_telegram_httpx_request(for_updates=True))
+           .build())  # без initialize/get_me
     await webhook_server.start_webhook_server(app)
     logger.warning("DEGRADED: webhook/REST :8080 поднят БЕЗ Telegram — кабинет/панель работают. Жду восстановления прокси…")
     while not await asyncio.to_thread(_telegram_reachable, 8.0, 1):
@@ -6716,10 +7279,13 @@ def main():
             import sys
             sys.exit(75)  # ненулевой код → systemd рестартит в обычном режиме
 
-    builder = Application.builder().token(TELEGRAM_TOKEN).post_init(post_init)
+    builder = (Application.builder()
+               .token(TELEGRAM_TOKEN)
+               .request(_telegram_httpx_request())
+               .get_updates_request(_telegram_httpx_request(for_updates=True))
+               .post_init(post_init))
     # На сервере в РФ Telegram доступен только через прокси
     if PROXY_URL:
-        builder = builder.proxy(PROXY_URL).get_updates_proxy(PROXY_URL)
         logger.info("Подключение к Telegram через прокси")
     app = builder.build()
 
@@ -6802,7 +7368,7 @@ def main():
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    app.run_polling(drop_pending_updates=True)
+    asyncio.run(_run_polling_resilient(app))
 
 
 if __name__ == "__main__":

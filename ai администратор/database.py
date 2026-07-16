@@ -13,6 +13,7 @@
 Бизнес-логика функций при этом не меняется.
 """
 import os
+import json as _json
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, date, timedelta
@@ -258,6 +259,15 @@ def init_db():
             CREATE UNIQUE INDEX IF NOT EXISTS idx_loyalty_tx_earn_unique
                 ON loyalty_transactions (client_id, visit_record_id, type)
                 WHERE type = 'earn' AND visit_record_id IS NOT NULL;
+            -- Welcome-бонус можно выдать локальной карточке только один раз.
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_loyalty_tx_backfill_unique
+                ON loyalty_transactions (client_id, type)
+                WHERE type = 'backfill';
+            -- Фактический остаток карты YClients импортируется в локальный ledger
+            -- только один раз; дальнейшие начисления и списания идут транзакциями.
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_loyalty_tx_yc_import_unique
+                ON loyalty_transactions (client_id, type)
+                WHERE type = 'yc_import';
 
             -- Одноразовые коды для списания баллов на услугу-уход.
             CREATE TABLE IF NOT EXISTS loyalty_redeem_codes (
@@ -416,6 +426,23 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_review_requests_client
                 ON review_requests (client_id);
 
+            -- Публичные отзывы с внешних площадок. Имена авторов не сохраняем;
+            -- текст перед записью обезличивает reputation.py.
+            CREATE TABLE IF NOT EXISTS external_reviews (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                source          TEXT    NOT NULL,
+                external_id     TEXT    NOT NULL,
+                rating          REAL,
+                review_text     TEXT,
+                published_at    TEXT,
+                imported_at     TEXT    NOT NULL,
+                response_state  TEXT    NOT NULL DEFAULT '',
+                alerted_at      TEXT,
+                UNIQUE (source, external_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
+                ON external_reviews (source, published_at);
+
             -- Состояние «текущего открытого диалога» клиента с ботом.
             -- Нужно для алерта о зависшей заявке: если клиент писал,
             -- Антон отвечал, а 30 мин спустя нет ни записи, ни явного отказа —
@@ -460,7 +487,12 @@ def init_db():
                 chat_id      INTEGER,
                 phone_hash   TEXT,
                 vk_user_id   INTEGER,
+                yandex_user_id TEXT,
                 display_name TEXT,
+                tg_first_name TEXT,
+                tg_last_name  TEXT,
+                tg_username   TEXT,
+                tg_photo_url  TEXT,
                 created_at   TEXT NOT NULL,
                 expires_at   TEXT NOT NULL,
                 last_seen_at TEXT,
@@ -577,6 +609,33 @@ def init_db():
                 active     INTEGER NOT NULL DEFAULT 1
             );
         """)
+        # Журнал действий AI-директора: что MAYA предложила владельцу и что было
+        # запущено вручную. Без ПД: только тип задачи, заголовок, статус и агрегаты.
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS owner_action_journal (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                source        TEXT    NOT NULL DEFAULT 'owner_os',
+                job           TEXT    NOT NULL,
+                title         TEXT,
+                status        TEXT    NOT NULL DEFAULT 'running',
+                created_by    INTEGER,
+                created_at    TEXT    NOT NULL,
+                started_at    TEXT,
+                completed_at  TEXT,
+                payload_json  TEXT,
+                summary_json  TEXT,
+                baseline_json TEXT,
+                result_due_at TEXT,
+                evaluated_at  TEXT,
+                impact_status TEXT,
+                impact_json   TEXT,
+                error         TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
+                ON owner_action_journal (created_at);
+            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
+                ON owner_action_journal (job, created_at);
+        """)
         # Миграция: добавляем зашифрованные колонки в clients и gift_certificates
         _migrate_add_encrypted_columns(conn)
         _backfill_encryption(conn)
@@ -616,6 +675,10 @@ def _migrate_add_encrypted_columns(conn):
     _add("clients", "marketing_consent_at", "TEXT")
     _add("clients", "marketing_consent_revoked_at", "TEXT")
 
+    # Лист ожидания: момент, когда об этой записи оповестили администратора
+    # (Антона). NULL — ещё не оповещали. Ставится фоновым сканером.
+    _add("slot_waitlist", "admin_notified_at", "TEXT")
+
     # Атрибуция источника привлечения — фиксируется на ПЕРВОМ /start.
     # Формат: «direct», «ad:direct_jan2026», «qr:check», «ref:REF-XXXXXX»,
     # «site:gift_cert», «app:book», «migration», «other:<payload>».
@@ -626,6 +689,13 @@ def _migrate_add_encrypted_columns(conn):
     # Последнее выбранное «настроение визита» клиента ('red'|'blue') — чтобы при
     # следующей записи можно было предложить тот же выбор по умолчанию.
     _add("clients", "default_visit_mood", "TEXT")
+    # Профиль Telegram в web-сессии: deep-link вход в приложении должен помнить
+    # имя, фамилию, username и аватар, а не только first_name.
+    _add("web_sessions", "tg_first_name", "TEXT")
+    _add("web_sessions", "tg_last_name", "TEXT")
+    _add("web_sessions", "tg_username", "TEXT")
+    _add("web_sessions", "tg_photo_url", "TEXT")
+    _add("web_sessions", "yandex_user_id", "TEXT")
 
 
 def _backfill_encryption(conn):
@@ -957,7 +1027,10 @@ def verify_web_login_code(phone_hash: str, code_hash: str, max_attempts: int = 5
 
 def create_web_session(token: str, *, phone_hash: str | None = None,
                        chat_id: int | None = None, vk_user_id: int | None = None,
+                       yandex_user_id: str | None = None,
                        display_name: str = "", subject_kind: str = "client",
+                       tg_first_name: str = "", tg_last_name: str = "",
+                       tg_username: str = "", tg_photo_url: str = "",
                        ttl_days: int = 30):
     """Создаёт сессию веб-входа (токен в браузере вместо Telegram initData)."""
     now = datetime.now()
@@ -966,11 +1039,13 @@ def create_web_session(token: str, *, phone_hash: str | None = None,
     with _db() as conn:
         conn.execute(
             "INSERT OR REPLACE INTO web_sessions "
-            "(token, subject_kind, chat_id, phone_hash, vk_user_id, display_name, "
+            "(token, subject_kind, chat_id, phone_hash, vk_user_id, yandex_user_id, display_name, "
+            " tg_first_name, tg_last_name, tg_username, tg_photo_url, "
             " created_at, expires_at, last_seen_at, revoked) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
-            (token, subject_kind, chat_id, phone_hash, vk_user_id,
-             display_name, now_s, exp_s, now_s),
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
+            (token, subject_kind, chat_id, phone_hash, vk_user_id, yandex_user_id,
+             display_name, tg_first_name, tg_last_name, tg_username, tg_photo_url,
+             now_s, exp_s, now_s),
         )
 
 
@@ -1206,6 +1281,89 @@ def set_notify_prefs(client_id: int, partial: dict) -> dict:
             "VALUES (?, ?, ?)",
             (int(client_id), _json_np.dumps(cur, ensure_ascii=False), _now()))
     return cur
+
+
+def get_maya_audience_stats() -> dict:
+    """Aggregated MAYA/Telegram audience counts without personal data.
+
+    The counters deliberately separate all connected accounts from the smaller
+    audience that has the required consents and notification settings for a
+    reactivation message. Telegram does not expose block/delivery status before
+    an actual send, so this function never labels the whole base as "active".
+    """
+    with _db() as conn:
+        _notify_prefs_ensure(conn)
+        rows = conn.execute(
+            "SELECT c.id, c.phone_enc, c.marketing_consent_at, np.prefs, "
+            "COALESCE(("
+            "  SELECT consent_given FROM consents "
+            "  WHERE client_id = c.id AND consent_version = ? "
+            "  ORDER BY id DESC LIMIT 1"
+            "), 0) AS pd_consent "
+            "FROM clients c "
+            "LEFT JOIN notify_prefs np ON np.client_id = c.id "
+            "WHERE c.telegram_chat_id IS NOT NULL",
+            (CONSENT_VERSION,),
+        ).fetchall()
+
+    stats = {
+        "telegram_connected": 0,
+        "identified_clients": 0,
+        "pd_consented": 0,
+        "marketing_consented": 0,
+        "marketing_enabled": 0,
+        "cycle_enabled": 0,
+        "reactivation_reachable": 0,
+    }
+    for row in rows:
+        prefs = dict(NOTIFY_PREFS_DEFAULTS)
+        try:
+            saved = _json_np.loads(row["prefs"] or "{}")
+            if isinstance(saved, dict):
+                for key in NOTIFY_PREFS_DEFAULTS:
+                    if key in saved:
+                        prefs[key] = saved[key]
+        except (TypeError, ValueError, _json_np.JSONDecodeError):
+            pass
+
+        identified = bool(row["phone_enc"])
+        pd_consented = bool(row["pd_consent"])
+        marketing_consented = bool(row["marketing_consent_at"])
+        marketing_enabled = marketing_consented and bool(prefs.get("marketing", True))
+        cycle_enabled = marketing_consented and bool(prefs.get("cycle", True))
+        reachable = (
+            identified
+            and pd_consented
+            and marketing_enabled
+            and cycle_enabled
+        )
+
+        stats["telegram_connected"] += 1
+        stats["identified_clients"] += int(identified)
+        stats["pd_consented"] += int(pd_consented)
+        stats["marketing_consented"] += int(marketing_consented)
+        stats["marketing_enabled"] += int(marketing_enabled)
+        stats["cycle_enabled"] += int(cycle_enabled)
+        stats["reactivation_reachable"] += int(reachable)
+
+    return {
+        "as_of": _now(),
+        **stats,
+        "definitions": {
+            "telegram_connected": "Все аккаунты, которые когда-либо подключились к Telegram-боту MAYA.",
+            "identified_clients": "Подключённые аккаунты, связанные с карточкой клиента.",
+            "marketing_consented": "Клиенты с действующим согласием на маркетинговые уведомления.",
+            "reactivation_reachable": "Идентифицированные клиенты с нужными согласиями и включёнными маркетинговыми и cycle-уведомлениями.",
+        },
+        "delivery_status_note": (
+            "Это аудитория по базе, согласиям и настройкам. Telegram не сообщает "
+            "заранее, кто заблокировал бота; фактическая доставка известна только после отправки."
+        ),
+        "instruction": (
+            "В ответе различай: подключены к MAYA, дали согласие на маркетинг и "
+            "доступны для реактивации. Не называй всех подключённых «активными подписчиками»."
+        ),
+    }
 
 
 def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
@@ -1804,7 +1962,8 @@ def list_masters() -> list[dict]:
 
 
 # ─── Внутренний чат сотрудников (общий канал команды) ───────────────────────
-# Человек-человек, БЕЗ ИИ. Сообщения хранятся локально; на новое сообщение
+# Обычно человек-человек. Если сотрудник явно обращается к MAYA, бэкенд добавляет
+# ответ наставника из базы знаний. Сообщения хранятся локально; на новое сообщение
 # бэкенд шлёт пуш (Telegram + Web Push) остальным сотрудникам.
 
 # Колонки сообщения (id + автор + текст + вложение). Один список — чтобы оба
@@ -1883,6 +2042,14 @@ def get_staff_messages_recent(limit: int = 50) -> list[dict]:
             (int(limit),),
         ).fetchall()
         return list(reversed([dict(r) for r in rows]))
+
+
+def get_staff_latest_message_id() -> int:
+    """Последний id сообщения команды. Нужен для новой пустой сессии чата."""
+    with _db() as conn:
+        _staff_messages_ensure(conn)
+        row = conn.execute("SELECT COALESCE(MAX(id), 0) AS id FROM staff_messages").fetchone()
+        return int((row or {}).get("id") or 0)
 
 
 def delete_staff_message(message_id: int, sender_chat_id: int) -> dict:
@@ -2480,6 +2647,35 @@ def add_slot_interest(client_id: int, chat_id, staff_id: int, slot_iso: str) -> 
         return True
 
 
+def get_waitlist_pending_admin_alert(limit: int = 20) -> list[dict]:
+    """Новые записи листа ожидания, о которых ещё НЕ сообщили админам (Антону).
+    Только будущие слоты и те, где клиент ещё не был оповещён об освобождении."""
+    from datetime import datetime as _dt
+    now_iso = _dt.now().isoformat(timespec="minutes")
+    with _db() as conn:
+        rows = conn.execute(
+            "SELECT id, client_id, chat_id, staff_id, slot_datetime, created_at "
+            "FROM slot_waitlist "
+            "WHERE admin_notified_at IS NULL AND notified_at IS NULL "
+            "AND slot_datetime >= ? "
+            "ORDER BY created_at ASC LIMIT ?",
+            (now_iso, int(limit)),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def mark_waitlist_admin_alerted(ids: list[int]) -> None:
+    """Помечаем записи листа ожидания как «админ оповещён» (Антону не дублируем)."""
+    ids = [int(i) for i in (ids or []) if i]
+    if not ids:
+        return
+    with _db() as conn:
+        conn.executemany(
+            "UPDATE slot_waitlist SET admin_notified_at=? WHERE id=?",
+            [(_now(), i) for i in ids],
+        )
+
+
 def get_slot_waitlist(staff_id: int, slot_iso: str, tolerance_min: int = 20) -> list[dict]:
     """Клиенты, ждавшие этот (или близкий ±tolerance_min) слот у мастера, кому
     ещё не писали. [{id, client_id, chat_id, slot_datetime}]."""
@@ -2817,6 +3013,139 @@ def list_recent_reviews(limit: int = 40, days: int = 180) -> list[dict]:
         return [dict(r) for r in rows]
 
 
+def _external_reviews_ensure(conn):
+    """Ленивая миграция для production-БД, созданной до reputation v1."""
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS external_reviews (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            source          TEXT    NOT NULL,
+            external_id     TEXT    NOT NULL,
+            rating          REAL,
+            review_text     TEXT,
+            published_at    TEXT,
+            imported_at     TEXT    NOT NULL,
+            response_state  TEXT    NOT NULL DEFAULT '',
+            alerted_at      TEXT,
+            UNIQUE (source, external_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
+            ON external_reviews (source, published_at);
+    """)
+    columns = {
+        str(row[1])
+        for row in conn.execute("PRAGMA table_info(external_reviews)").fetchall()
+    }
+    if "alerted_at" not in columns:
+        conn.execute("ALTER TABLE external_reviews ADD COLUMN alerted_at TEXT")
+
+
+def upsert_external_review(
+    *,
+    source: str,
+    external_id: str,
+    rating: float | None,
+    review_text: str,
+    published_at: str = "",
+    response_state: str = "",
+) -> dict:
+    """Идемпотентно сохраняет обезличенный публичный отзыв без автора."""
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        existing = conn.execute(
+            "SELECT id FROM external_reviews WHERE source = ? AND external_id = ?",
+            (str(source or "")[:24], str(external_id or "")[:160]),
+        ).fetchone()
+        conn.execute(
+            "INSERT INTO external_reviews "
+            "(source, external_id, rating, review_text, published_at, imported_at, response_state) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(source, external_id) DO UPDATE SET "
+            "rating=excluded.rating, review_text=excluded.review_text, "
+            "published_at=excluded.published_at, imported_at=excluded.imported_at, "
+            "response_state=excluded.response_state",
+            (
+                str(source or "")[:24],
+                str(external_id or "")[:160],
+                rating,
+                str(review_text or "")[:4000],
+                str(published_at or "")[:32],
+                _now(),
+                str(response_state or "")[:32],
+            ),
+        )
+        row = conn.execute(
+            "SELECT * FROM external_reviews WHERE source = ? AND external_id = ?",
+            (str(source or "")[:24], str(external_id or "")[:160]),
+        ).fetchone()
+        result = dict(row) if row else {}
+        result["created"] = existing is None and bool(row)
+        return result
+
+
+def list_external_reviews(days: int = 365, limit: int = 300) -> list[dict]:
+    cutoff = (datetime.now() - timedelta(days=max(1, int(days or 365)))).isoformat(
+        timespec="seconds"
+    )
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        rows = conn.execute(
+            "SELECT source, external_id, rating, review_text, published_at, imported_at, response_state "
+            "FROM external_reviews "
+            "WHERE COALESCE(NULLIF(published_at, ''), imported_at) >= ? "
+            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) DESC LIMIT ?",
+            (cutoff, max(1, min(int(limit or 300), 1000))),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def list_unalerted_external_reviews(limit: int = 20) -> list[dict]:
+    """Новые отзывы, которые ещё не были показаны владельцу."""
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        rows = conn.execute(
+            "SELECT id, source, external_id, rating, review_text, published_at, imported_at "
+            "FROM external_reviews WHERE alerted_at IS NULL "
+            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) ASC LIMIT ?",
+            (max(1, min(int(limit or 20), 100)),),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def mark_external_reviews_alerted(review_ids: list[int]) -> int:
+    ids = set()
+    for value in review_ids or []:
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            continue
+        if parsed > 0:
+            ids.add(parsed)
+    ids = sorted(ids)
+    if not ids:
+        return 0
+    placeholders = ",".join("?" for _ in ids)
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        cur = conn.execute(
+            f"UPDATE external_reviews SET alerted_at = ? "
+            f"WHERE id IN ({placeholders}) AND alerted_at IS NULL",
+            (_now(), *ids),
+        )
+        return cur.rowcount
+
+
+def mark_external_reviews_alerted_for_source(source: str) -> int:
+    """Первичный снимок становится базой и не рассылается как новый."""
+    with _db() as conn:
+        _external_reviews_ensure(conn)
+        cur = conn.execute(
+            "UPDATE external_reviews SET alerted_at = ? "
+            "WHERE source = ? AND alerted_at IS NULL",
+            (_now(), str(source or "")[:24]),
+        )
+        return cur.rowcount
+
+
 # ─── Алерт админу о зависшей заявке ──────────────────────────────
 
 def upsert_client_chat_state(
@@ -3120,6 +3449,34 @@ def client_has_loyalty_backfill(client_id: int) -> bool:
         return bool(row)
 
 
+def client_has_loyalty_yclients_import(client_id: int) -> bool:
+    """True, если фактический баланс карты YClients уже импортирован."""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM loyalty_transactions WHERE client_id = ? "
+            "AND type = 'yc_import' LIMIT 1",
+            (client_id,),
+        ).fetchone()
+        return bool(row)
+
+
+def loyalty_backfill_exists_for_phone(phone: str) -> bool:
+    """True, если welcome-бонус уже выдавали ЛЮБОМУ client_id с этим номером.
+    Один человек может существовать под несколькими client_id (Telegram и
+    Яндекс-вход) — без этой проверки каждый аккаунт получал 5% от одного LTV."""
+    phone_hash = pii_crypto.hash_phone(phone)
+    if not phone_hash:
+        return False
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM loyalty_transactions lt "
+            "JOIN clients c ON c.id = lt.client_id "
+            "WHERE c.phone_hash = ? AND lt.type = 'backfill' LIMIT 1",
+            (phone_hash,),
+        ).fetchone()
+        return bool(row)
+
+
 def loyalty_redemption_exists(client_id: int, visit_record_id: int,
                                 service_title: str) -> bool:
     """True если уже списали баллы за этот record + услугу (защита от дубля)."""
@@ -3213,6 +3570,24 @@ def claim_loyalty_code(code: str, admin_id: int) -> bool:
             (_now(), admin_id, code),
         )
         return cur.rowcount > 0
+
+
+def active_sold_gift_certs() -> dict:
+    """Активные ПРОДАННЫЕ сертификаты на руках у клиентов: оплачены, не погашены,
+    срок не вышел, И действительно куплены (есть покупатель или онлайн-оплата).
+    ИСКЛЮЧАЕТ пред-генерённый резерв «на продажу» (buyer_chat_id и yukassa_payment_id
+    оба пустые) — его нельзя считать деньгами на руках у клиентов.
+    Возвращает {count, value_rub}."""
+    now_iso = _now()
+    with _db() as conn:
+        r = conn.execute(
+            "SELECT COUNT(*) AS n, COALESCE(SUM(amount), 0) AS s "
+            "FROM gift_certificates "
+            "WHERE payment_status = 'paid' AND used_at IS NULL AND expires_at > ? "
+            "AND (buyer_chat_id IS NOT NULL OR yukassa_payment_id IS NOT NULL)",
+            (now_iso,),
+        ).fetchone()
+    return {"count": int(r["n"] or 0), "value_rub": int(r["s"] or 0)}
 
 
 def dashboard_metrics(days: int = 30, from_iso: str = None, to_iso: str = None) -> dict:
@@ -3899,6 +4274,707 @@ def recent_tool_audit(limit: int = 50, only_denied: bool = False) -> list:
             return [dict(r) for r in conn.execute(sql, (int(limit),)).fetchall()]
     except Exception:
         return []
+
+
+# ─── Журнал действий AI-директора / Owner Command Center ────────────────────
+
+def _json_dumps_safe(value) -> str:
+    try:
+        return _json.dumps(value if value is not None else {}, ensure_ascii=False)
+    except Exception:
+        return "{}"
+
+
+def _json_loads_safe(value: str | None):
+    try:
+        return _json.loads(value or "{}")
+    except Exception:
+        return {}
+
+
+def _ensure_owner_action_journal(conn) -> None:
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS owner_action_journal (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            source        TEXT    NOT NULL DEFAULT 'owner_os',
+            job           TEXT    NOT NULL,
+            title         TEXT,
+            status        TEXT    NOT NULL DEFAULT 'running',
+            created_by    INTEGER,
+            created_at    TEXT    NOT NULL,
+            started_at    TEXT,
+            completed_at  TEXT,
+            payload_json  TEXT,
+            summary_json  TEXT,
+            baseline_json TEXT,
+            result_due_at TEXT,
+            evaluated_at  TEXT,
+            impact_status TEXT,
+            impact_json   TEXT,
+            error         TEXT
+        );
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
+            ON owner_action_journal (created_at);
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
+            ON owner_action_journal (job, created_at);
+    """)
+    for col in (
+        ("baseline_json", "TEXT"),
+        ("result_due_at", "TEXT"),
+        ("evaluated_at", "TEXT"),
+        ("impact_status", "TEXT"),
+        ("impact_json", "TEXT"),
+    ):
+        try:
+            conn.execute(f"ALTER TABLE owner_action_journal ADD COLUMN {col[0]} {col[1]}")
+        except sqlite3.OperationalError:
+            pass
+
+
+def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
+                        created_by=None, payload=None, status: str = "running",
+                        baseline=None, result_due_at: str | None = None) -> int:
+    """Создаёт запись в журнале AI-директора. ПД не сохраняем."""
+    try:
+        uid = int(created_by) if created_by else None
+    except Exception:
+        uid = None
+    job = (job or "").strip().lower()[:80]
+    title = (title or job or "Действие")[:180]
+    status = (status or "running").strip().lower()[:40]
+    now = _now()
+    if baseline is None:
+        baseline = _owner_action_baseline(job)
+    if result_due_at is None:
+        result_due_at = _owner_action_due_at(job, now)
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        cur = conn.execute(
+            "INSERT INTO owner_action_journal "
+            "(source, job, title, status, created_by, created_at, started_at, "
+            "payload_json, summary_json, baseline_json, result_due_at, impact_status, "
+            "impact_json, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                (source or "owner_os")[:60],
+                job,
+                title,
+                status,
+                uid,
+                now,
+                now if status in ("running", "done", "failed") else None,
+                _json_dumps_safe(payload),
+                "{}",
+                _json_dumps_safe(baseline),
+                result_due_at,
+                "pending",
+                "{}",
+                "",
+            ),
+        )
+        return int(cur.lastrowid)
+
+
+def _compact_owner_action_summary(summary) -> dict:
+    if not isinstance(summary, dict):
+        return {}
+    out = {}
+    for key, value in list(summary.items())[:20]:
+        k = str(key or "")[:80]
+        if not k:
+            continue
+        if isinstance(value, (int, float, bool)) or value is None:
+            out[k] = value
+        elif isinstance(value, str):
+            out[k] = value[:180]
+    return out
+
+
+def link_owner_control_task_action(control_action_id, linked_action_id, linked_job: str = "",
+                                   *, action_status: str = "running", note: str = "",
+                                   summary=None, error: str = "") -> dict | None:
+    """Связывает контрольную задачу owner_control с запущенным действием.
+
+    Контроль не закрывается автоматически: MAYA фиксирует, что действие уже
+    запущено/выполнено, а владелец позже отмечает фактический результат.
+    """
+    try:
+        control_id = int(control_action_id)
+        action_id = int(linked_action_id)
+    except Exception:
+        return None
+    if not control_id or not action_id:
+        return None
+    action_status = (action_status or "running").strip().lower()[:40]
+    if action_status not in ("running", "done", "failed"):
+        action_status = "running"
+    now = _now()
+    linked_job = (linked_job or "").strip().lower()[:80]
+    note = (note or "")[:420]
+    error = (error or "")[:240]
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        control_row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (control_id,),
+        ).fetchone()
+        if not control_row:
+            return None
+        control = dict(control_row)
+        if control.get("source") != "owner_control" or control.get("job") != "control_task":
+            return None
+        action_row = conn.execute(
+            "SELECT job, result_due_at FROM owner_action_journal WHERE id = ?",
+            (action_id,),
+        ).fetchone()
+        if action_row:
+            linked_job = linked_job or str(action_row["job"] or "")[:80]
+
+        payload = _json_loads_safe(control.get("payload_json"))
+        control_summary = _json_loads_safe(control.get("summary_json"))
+        if not payload.get("linked_action_started_at"):
+            payload["linked_action_started_at"] = now
+        payload.update({
+            "linked_action_id": action_id,
+            "linked_action_job": linked_job,
+            "linked_action_status": action_status,
+            "linked_action_updated_at": now,
+        })
+        if action_status in ("done", "failed"):
+            payload["linked_action_completed_at"] = now
+        if action_row and action_row["result_due_at"]:
+            payload["linked_action_due_at"] = action_row["result_due_at"]
+            if not payload.get("due_at") and not control.get("result_due_at"):
+                payload["due_at"] = action_row["result_due_at"]
+
+        control_summary.update({
+            "manual": False,
+            "last_action": "linked_action_" + action_status,
+            "linked_action_id": action_id,
+            "linked_action_job": linked_job,
+            "linked_action_status": action_status,
+            "updated_at": now,
+        })
+        compact_summary = _compact_owner_action_summary(summary)
+        if compact_summary:
+            control_summary["linked_action_summary"] = compact_summary
+        if note:
+            control_summary["note"] = note
+        if error:
+            control_summary["linked_action_error"] = error
+
+        current_status = str(control.get("status") or "").lower()
+        if current_status in ("done", "canceled"):
+            next_status = current_status
+            completed_at = control.get("completed_at")
+        elif action_status == "failed":
+            next_status = "pending"
+            completed_at = None
+        else:
+            next_status = "running"
+            completed_at = None
+        result_due_at = control.get("result_due_at") or payload.get("due_at")
+
+        conn.execute(
+            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
+            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (
+                next_status,
+                completed_at,
+                result_due_at,
+                _json_dumps_safe(payload),
+                _json_dumps_safe(control_summary),
+                "",
+                control_id,
+            ),
+        )
+
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == control_id]
+    return actions[0] if actions else None
+
+
+def finish_owner_action(action_id, status: str, *, summary=None, error: str = "") -> bool:
+    """Завершает запись журнала AI-директора статусом done/failed/running."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return False
+    status = (status or "").strip().lower()[:40] or "done"
+    completed_at = _now() if status in ("done", "failed") else None
+    source_control_id = 0
+    linked_job = ""
+    try:
+        with _db() as conn:
+            _ensure_owner_action_journal(conn)
+            row = conn.execute(
+                "SELECT job, payload_json FROM owner_action_journal WHERE id = ?",
+                (aid,),
+            ).fetchone()
+            if row:
+                linked_job = str(row["job"] or "")[:80]
+                payload = _json_loads_safe(row["payload_json"])
+                try:
+                    source_control_id = int(payload.get("source_control_id") or 0)
+                except Exception:
+                    source_control_id = 0
+            conn.execute(
+                "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
+                "summary_json = ?, error = ? WHERE id = ?",
+                (status, completed_at, _json_dumps_safe(summary), (error or "")[:240], aid),
+            )
+    except Exception:
+        return False
+    if source_control_id:
+        try:
+            link_owner_control_task_action(
+                source_control_id,
+                aid,
+                linked_job,
+                action_status=status,
+                summary=summary,
+                error=error,
+            )
+        except Exception:
+            pass
+    return True
+
+
+def update_owner_control_task(action_id, action: str, *, note: str = "",
+                              due_at: str | None = None,
+                              assigned_to: str | None = None,
+                              assignee_name: str = "") -> dict | None:
+    """Меняет состояние ручной контрольной задачи owner_control."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    action = (action or "").strip().lower()
+    if action in ("complete", "done", "finish"):
+        next_status = "done"
+    elif action in ("cancel", "canceled", "cancelled"):
+        next_status = "canceled"
+    elif action in ("postpone", "snooze", "delay"):
+        next_status = "pending"
+    elif action in ("reopen", "open"):
+        next_status = "pending"
+    elif action in ("revision", "return", "redo", "rework"):
+        next_status = "running"
+    elif action in ("assign", "reassign"):
+        next_status = None
+    else:
+        return None
+
+    now = _now()
+    note = (note or "")[:420]
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        if item.get("source") != "owner_control" or item.get("job") != "control_task":
+            return None
+
+        payload = _json_loads_safe(item.get("payload_json"))
+        summary = _json_loads_safe(item.get("summary_json"))
+        if next_status is None:
+            next_status = str(item.get("status") or "pending")
+        summary.update({
+            "manual": True,
+            "last_action": action,
+            "note": note,
+            "updated_at": now,
+        })
+        completed_at = None
+        result_due_at = item.get("result_due_at")
+        if action in ("assign", "reassign"):
+            raw_assigned = (assigned_to or payload.get("assigned_to") or "owner")
+            assigned = str(raw_assigned or "owner").strip().lower()[:40]
+            if assigned not in ("owner", "maya", "admin", "master", "team"):
+                assigned = "owner"
+            name = (assignee_name or "")[:80]
+            payload["assigned_to"] = assigned
+            payload["assignee_name"] = name
+            if assigned in ("admin", "master", "team"):
+                delivery_channel = "team_chat"
+                delivery_state = "queued"
+            elif assigned == "maya":
+                delivery_channel = "maya_queue"
+                delivery_state = "internal"
+            else:
+                delivery_channel = "owner_control"
+                delivery_state = "owner_only"
+            payload["assignment_delivery_channel"] = delivery_channel
+            payload["assignment_delivery_state"] = delivery_state
+            payload["assignment_delivery_updated_at"] = now
+            payload["assignment_delivery_error"] = ""
+            payload["assignment_delivery_message_id"] = 0
+            payload["assignment_delivery_key"] = "%s:%s:%s:%s" % (aid, assigned, name, now)
+            summary["assigned_to"] = assigned
+            summary["assignee_name"] = name
+            summary["assigned_at"] = now
+            summary["assignment_delivery_channel"] = delivery_channel
+            summary["assignment_delivery_state"] = delivery_state
+        if next_status in ("done", "canceled"):
+            completed_at = now
+            summary["result"] = next_status
+        elif action in ("postpone", "snooze", "delay") and due_at:
+            result_due_at = str(due_at)[:19]
+            payload["due_at"] = result_due_at
+            summary["postponed_to"] = result_due_at
+        elif action in ("revision", "return", "redo", "rework"):
+            payload["assignment_work_state"] = "revision"
+            payload["assignment_work_updated_at"] = now
+            payload["assignment_work_actor_role"] = "owner"
+            payload["assignment_work_actor_name"] = "Владелец"
+            payload["assignment_work_note"] = note
+            summary["assignment_work_state"] = "revision"
+            summary["assignment_work_updated_at"] = now
+            summary["assignment_work_actor_role"] = "owner"
+            summary["assignment_work_actor_name"] = "Владелец"
+            summary["owner_revision_requested_at"] = now
+            if note:
+                summary["owner_revision_note"] = note
+
+        conn.execute(
+            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
+            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (
+                next_status,
+                completed_at,
+                result_due_at,
+                _json_dumps_safe(payload),
+                _json_dumps_safe(summary),
+                "",
+                aid,
+            ),
+        )
+
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
+def mark_owner_control_task_delivery(action_id, *, state: str = "delivered",
+                                     channel: str = "team_chat", message_id: int = 0,
+                                     error: str = "") -> dict | None:
+    """Фиксирует, что назначенная контрольная задача доставлена исполнителю."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    if not aid:
+        return None
+    state = (state or "delivered").strip().lower()[:40]
+    if state not in ("queued", "delivered", "failed", "internal", "owner_only"):
+        state = "delivered"
+    channel = (channel or "team_chat").strip().lower()[:40]
+    now = _now()
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        if item.get("source") != "owner_control" or item.get("job") != "control_task":
+            return None
+        payload = _json_loads_safe(item.get("payload_json"))
+        summary = _json_loads_safe(item.get("summary_json"))
+        payload["assignment_delivery_state"] = state
+        payload["assignment_delivery_channel"] = channel
+        payload["assignment_delivery_updated_at"] = now
+        payload["assignment_delivery_error"] = (error or "")[:240]
+        if message_id:
+            payload["assignment_delivery_message_id"] = int(message_id)
+            payload["assignment_delivered_at"] = now
+        elif state != "delivered":
+            payload["assignment_delivery_message_id"] = int(payload.get("assignment_delivery_message_id") or 0)
+        summary["assignment_delivery_state"] = state
+        summary["assignment_delivery_channel"] = channel
+        summary["assignment_delivery_updated_at"] = now
+        if message_id:
+            summary["assignment_delivery_message_id"] = int(message_id)
+        if error:
+            summary["assignment_delivery_error"] = (error or "")[:180]
+        conn.execute(
+            "UPDATE owner_action_journal SET payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (_json_dumps_safe(payload), _json_dumps_safe(summary), "", aid),
+        )
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
+def update_owner_assignment_work_state(action_id, state: str, *, actor_role: str = "",
+                                       actor_name: str = "", actor_chat_id: int = 0,
+                                       note: str = "") -> dict | None:
+    """Фиксирует работу исполнителя по назначенной owner_control задаче.
+
+    Это не закрывает контроль владельца: исполнитель может отметить «готово»,
+    а владелец всё равно проверяет результат и закрывает задачу вручную.
+    """
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    if not aid:
+        return None
+    state = (state or "").strip().lower()[:40]
+    aliases = {
+        "accept": "accepted",
+        "accepted": "accepted",
+        "start": "running",
+        "run": "running",
+        "running": "running",
+        "done": "done",
+        "complete": "done",
+        "finish": "done",
+        "blocked": "blocked",
+    }
+    state = aliases.get(state)
+    if not state:
+        return None
+    now = _now()
+    actor_role = (actor_role or "")[:40]
+    actor_name = (actor_name or "")[:80]
+    note = (note or "")[:300]
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        if item.get("source") != "owner_control" or item.get("job") != "control_task":
+            return None
+        current_status = str(item.get("status") or "pending").lower()
+        if current_status in ("done", "canceled"):
+            return None
+        payload = _json_loads_safe(item.get("payload_json"))
+        summary = _json_loads_safe(item.get("summary_json"))
+        payload["assignment_work_state"] = state
+        payload["assignment_work_updated_at"] = now
+        payload["assignment_work_actor_role"] = actor_role
+        payload["assignment_work_actor_name"] = actor_name
+        payload["assignment_work_actor_chat_id"] = int(actor_chat_id or 0)
+        payload["assignment_work_note"] = note
+        summary["assignment_work_state"] = state
+        summary["assignment_work_updated_at"] = now
+        summary["assignment_work_actor_role"] = actor_role
+        summary["assignment_work_actor_name"] = actor_name
+        if note:
+            summary["assignment_work_note"] = note
+        next_status = "running" if current_status == "pending" else current_status
+        conn.execute(
+            "UPDATE owner_action_journal SET status = ?, payload_json = ?, summary_json = ?, error = ? "
+            "WHERE id = ?",
+            (
+                next_status,
+                _json_dumps_safe(payload),
+                _json_dumps_safe(summary),
+                "",
+                aid,
+            ),
+        )
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
+def list_owner_actions(limit: int = 12) -> list[dict]:
+    """Последние действия AI-директора, новые первыми."""
+    try:
+        with _db() as conn:
+            _ensure_owner_action_journal(conn)
+            rows = conn.execute(
+                "SELECT id, source, job, title, status, created_by, created_at, "
+                "started_at, completed_at, payload_json, summary_json, baseline_json, "
+                "result_due_at, evaluated_at, impact_status, impact_json, error "
+                "FROM owner_action_journal ORDER BY id DESC LIMIT ?",
+                (max(1, min(int(limit or 12), 50)),),
+            ).fetchall()
+    except Exception:
+        return []
+    out = []
+    for row in rows:
+        item = dict(row)
+        item["payload"] = _json_loads_safe(item.pop("payload_json", None))
+        item["summary"] = _json_loads_safe(item.pop("summary_json", None))
+        item["baseline"] = _json_loads_safe(item.pop("baseline_json", None))
+        item["impact"] = _json_loads_safe(item.pop("impact_json", None))
+        out.append(item)
+    return out
+
+
+def _owner_action_due_at(job: str, created_at: str | None = None) -> str:
+    base = datetime.fromisoformat((created_at or _now())[:19])
+    # Клиентским касаниям нужно время на запись/реакцию; системным задачам меньше.
+    days = {
+        "reactivation": 3,
+        "cycle": 3,
+        "birthday": 3,
+        "subscriptions": 3,
+        "reviews": 7,
+        "loyalty": 1,
+        "referral": 1,
+        "leads": 1,
+    }.get((job or "").strip().lower(), 2)
+    return (base + timedelta(days=days)).isoformat(timespec="seconds")
+
+
+def _owner_action_baseline(job: str) -> dict:
+    """Baseline для последующей оценки результата. Только агрегаты, без ПД."""
+    out = {"captured_at": _now(), "job": (job or "").strip().lower()}
+    try:
+        out["dashboard_1d"] = dashboard_metrics(days=1)
+        out["dashboard_7d"] = dashboard_metrics(days=7)
+    except Exception as e:
+        out["error"] = str(e)[:160]
+    return out
+
+
+def _metric_get(data: dict, path: tuple[str, ...], default=0):
+    cur = data or {}
+    for key in path:
+        if not isinstance(cur, dict):
+            return default
+        cur = cur.get(key)
+    return default if cur is None else cur
+
+
+def _metric_delta(base: dict, current: dict, path: tuple[str, ...]) -> int:
+    try:
+        return int(_metric_get(current, path, 0) or 0) - int(_metric_get(base, path, 0) or 0)
+    except Exception:
+        return 0
+
+
+def _owner_action_impact(job: str, summary: dict, baseline: dict) -> dict:
+    """Осторожная оценка: observed_delta — наблюдаемый сдвиг, не причинность."""
+    job = (job or "").strip().lower()
+    current = {}
+    try:
+        current = {"dashboard_1d": dashboard_metrics(days=1), "dashboard_7d": dashboard_metrics(days=7)}
+    except Exception as e:
+        return {
+            "status": "unknown",
+            "message": "Не удалось собрать текущие агрегаты для оценки.",
+            "error": str(e)[:160],
+        }
+
+    sent = int((summary or {}).get("sent") or 0)
+    synced = int((summary or {}).get("synced") or 0)
+    alerts = int((summary or {}).get("alerts") or 0)
+    if job in ("reactivation", "cycle", "birthday"):
+        paths = [("dashboard_7d", "bookings", "created"), ("dashboard_7d", "bookings", "with_record_id")]
+        label = "Наблюдаемый сдвиг по записям за 7 дней"
+    elif job == "reviews":
+        paths = [("dashboard_7d", "reviews", "responded"), ("dashboard_7d", "reviews", "avg_rating")]
+        label = "Наблюдаемый сдвиг по ответам на отзывы за 7 дней"
+    elif job == "subscriptions":
+        paths = [("dashboard_7d", "subscriptions", "new_in_period"), ("dashboard_7d", "subscriptions", "new_revenue_rub")]
+        label = "Наблюдаемый сдвиг по абонементам за 7 дней"
+    elif job == "leads":
+        paths = [("dashboard_7d", "lead_alerts", "rescued"), ("dashboard_7d", "lead_alerts", "alerts_sent")]
+        label = "Наблюдаемый сдвиг по спасённым заявкам за 7 дней"
+    else:
+        paths = [("dashboard_7d", "bookings", "created")]
+        label = "Наблюдаемый сдвиг за 7 дней"
+
+    deltas = {".".join(path[1:]): _metric_delta(baseline, current, path) for path in paths}
+    positive = any((v or 0) > 0 for v in deltas.values())
+    if sent == 0 and synced == 0 and alerts == 0 and job in ("reactivation", "cycle", "birthday", "reviews", "subscriptions", "leads"):
+        status = "no_reach"
+        message = "Задача не дала охвата в summary, поэтому эффект пока не оцениваем."
+    elif positive:
+        status = "positive_signal"
+        message = label + ": есть положительный сигнал. Это наблюдение, не 100% атрибуция."
+    else:
+        status = "no_signal_yet"
+        message = label + ": явного положительного сигнала пока не видно."
+    return {
+        "status": status,
+        "message": message,
+        "evaluated_at": _now(),
+        "deltas": deltas,
+        "summary": summary or {},
+    }
+
+
+def evaluate_owner_action(action_id, *, force: bool = False) -> dict | None:
+    """Оценивает результат owner action. Возвращает обновлённую запись."""
+    try:
+        aid = int(action_id)
+    except Exception:
+        return None
+    now_iso = _now()
+    with _db() as conn:
+        _ensure_owner_action_journal(conn)
+        row = conn.execute(
+            "SELECT * FROM owner_action_journal WHERE id = ?",
+            (aid,),
+        ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        due_at = item.get("result_due_at") or ""
+        if not force and due_at and due_at > now_iso:
+            return {
+                **item,
+                "payload": _json_loads_safe(item.get("payload_json")),
+                "summary": _json_loads_safe(item.get("summary_json")),
+                "baseline": _json_loads_safe(item.get("baseline_json")),
+                "impact": _json_loads_safe(item.get("impact_json")),
+                "not_due": True,
+            }
+        summary = _json_loads_safe(item.get("summary_json"))
+        baseline = _json_loads_safe(item.get("baseline_json"))
+        impact = _owner_action_impact(item.get("job") or "", summary, baseline)
+        conn.execute(
+            "UPDATE owner_action_journal SET evaluated_at = ?, impact_status = ?, "
+            "impact_json = ? WHERE id = ?",
+            (
+                impact.get("evaluated_at") or now_iso,
+                impact.get("status") or "unknown",
+                _json_dumps_safe(impact),
+                aid,
+            ),
+        )
+    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
+    return actions[0] if actions else None
+
+
+def evaluate_due_owner_actions(limit: int = 5) -> int:
+    """Автоматически оценивает просроченные проверки. Возвращает число оценок."""
+    now_iso = _now()
+    try:
+        with _db() as conn:
+            _ensure_owner_action_journal(conn)
+            rows = conn.execute(
+                "SELECT id FROM owner_action_journal "
+                "WHERE status = 'done' AND evaluated_at IS NULL "
+                "AND result_due_at IS NOT NULL AND result_due_at <= ? "
+                "ORDER BY result_due_at ASC LIMIT ?",
+                (now_iso, max(1, min(int(limit or 5), 20))),
+            ).fetchall()
+    except Exception:
+        return 0
+    done = 0
+    for row in rows:
+        if evaluate_owner_action(row["id"], force=True):
+            done += 1
+    return done
 
 
 # ─── Durable-идемпотентность оплаты визита ───────────────────────────────────

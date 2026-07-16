@@ -102,6 +102,47 @@ def set_status(tenant_id: int, status: str) -> None:
     tr._q("UPDATE tenants SET status=%s, updated_at=now() WHERE id=%s", (status, tenant_id))
 
 
+def set_plan(tenant_id: int, plan: str) -> None:
+    """Сменить базовый тариф салона (валидируется по plan_catalog)."""
+    import plan_catalog as pc
+    if plan not in pc.PLANS:
+        raise ValueError(f"Неизвестный тариф: {plan!r}")
+    tr._q("UPDATE tenants SET plan=%s, updated_at=now() WHERE id=%s", (plan, tenant_id))
+
+
+# ── 5. Полное заведение салона одним вызовом ────────────────────────────────
+def onboard_salon(slug: str, display_name: str, *, plan: str = "start",
+                  addons: list[str] | None = None, brand: dict | None = None,
+                  owner_email: str = None, owner_phone: str = None,
+                  owner_tg_id: int = None, trial_days: int = 14,
+                  yclients: dict | None = None, provider=None) -> dict:
+    """«Звонок продаж закончился — салон живёт»: создаёт тенанта, ставит тариф,
+    включает допы, сохраняет бренд (Шаг 1), опционально подключает YClients и
+    тянет каталог. Возвращает паспорт салона для onboarding-письма.
+
+    yclients = {company_id, user_token[, cash_account_id, cashless_account_id]}
+    provider — фейк для тестов; в проде берётся из booking_provider по конфигу.
+    """
+    tid = create_tenant(slug, display_name, owner_email=owner_email,
+                        owner_phone=owner_phone, owner_tg_id=owner_tg_id,
+                        trial_days=trial_days)
+    set_plan(tid, plan)
+    if addons:
+        import tenant_features as tf
+        for a in addons:
+            tf.enable_addon(tid, a)
+    if brand:
+        import tenant_config as tc
+        tc.set_branding(tid, **brand)
+    catalog = None
+    if yclients:
+        connect_yclients(tid, **yclients)
+        catalog = sync_catalog(tid, provider=provider)
+    return {"tenant_id": tid, "slug": slug.strip().lower(), "plan": plan,
+            "addons": sorted(addons or []), "trial_days": trial_days,
+            "host": f"{slug.strip().lower()}.app.ru", "catalog": catalog}
+
+
 # Фейковый провайдер для тестов онбординга (без живого YClients).
 class FakeProvider:
     def get_masters(self):

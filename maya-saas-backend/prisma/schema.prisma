@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id                    String            @id @default(cuid())
+  name                  String
+  slug                  String            @unique
+  status                String            @default("trial")
+  planId                String?
+  trialEndsAt           DateTime?
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  billingMethodId       String?
+  allowSelfRegistration Boolean           @default(true)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  plan                  SubscriptionPlan? @relation(fields: [planId], references: [id])
+  brandingSettings      BrandingSettings?
+  branches              Branch[]
+  users                 User[]
+  crmIntegration        CrmIntegration?
+  auditLogs             AuditLog[]
+  appointments          Appointment[]
+  phoneAuthCodes        PhoneAuthCode[]
+  authIdentities        AuthIdentity[]
+  authFlowStates        AuthFlowState[]
+  billingPayments       BillingPayment[]
+}
+
+model BrandingSettings {
+  id                 String   @id @default(cuid())
+  tenantId           String   @unique
+  logoUrl            String?
+  appName            String?
+  primaryColor       String?
+  secondaryColor     String?
+  backgroundImageUrl String?
+  fontFamily         String?
+  buttonRadius       Int?
+  themeJson          Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Branch {
+  id           String        @id @default(cuid())
+  tenantId     String
+  name         String
+  address      String?
+  phone        String?
+  timezone     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users        User[]
+  appointments Appointment[]
+
+  @@index([tenantId])
+}
+
+model User {
+  id             String         @id @default(cuid())
+  tenantId       String?
+  branchId       String?
+  email          String
+  phone          String?
+  encryptedName  String?
+  passwordHash   String
+  role           String
+  status         String         @default("active")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  tenant         Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch         Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  auditLogs      AuditLog[]
+  appointments   Appointment[]  @relation("ClientAppointments")
+  authIdentities AuthIdentity[]
+
+  @@unique([tenantId, email])
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+  @@index([branchId])
+}
+
+model AuthIdentity {
+  id             String   @id @default(cuid())
+  tenantId       String
+  userId         String
+  provider       String
+  providerUserId String
+  email          String?
+  phone          String?
+  profileJson    Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider, providerUserId])
+  @@index([userId])
+  @@index([tenantId, provider])
+}
+
+model AuthFlowState {
+  id           String    @id @default(cuid())
+  tenantId     String
+  provider     String
+  state        String    @unique
+  redirectUri  String
+  codeVerifier String?
+  expiresAt    DateTime
+  consumedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, provider, expiresAt])
+}
+
+model PhoneAuthCode {
+  id         String    @id @default(cuid())
+  tenantId   String
+  phone      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, phone])
+  @@index([tenantId, expiresAt])
+}
+
+model CrmIntegration {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  provider          String
+  encryptedApiToken String
+  baseUrl           String?
+  status            String   @default("active")
+  settingsJson      Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model SubscriptionPlan {
+  id                  String           @id @default(cuid())
+  name                String           @unique
+  priceMonthly        Int
+  maxBranches         Int
+  maxStaff            Int
+  featuresJson        Json?
+  isWhiteLabelEnabled Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  tenants             Tenant[]
+  billingPayments     BillingPayment[]
+}
+
+model BillingPayment {
+  id                String            @id @default(cuid())
+  tenantId          String
+  planId            String?
+  provider          String            @default("yookassa")
+  providerPaymentId String?           @unique
+  idempotenceKey    String            @unique
+  purpose           String
+  status            String            @default("pending")
+  amountKopecks     Int
+  currency          String            @default("RUB")
+  confirmationUrl   String?
+  returnUrl         String?
+  paidAt            DateTime?
+  canceledAt        DateTime?
+  providerPayload   Json?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan              SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status])
+  @@index([provider, providerPaymentId])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  tenantId     String
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String
+  metadataJson Json?
+  createdAt    DateTime @default(now())
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model Appointment {
+  id              String   @id @default(cuid())
+  tenantId        String
+  clientId        String
+  branchId        String?
+  crmExternalId   String?
+  staffExternalId String
+  serviceIds      Json
+  startAt         DateTime
+  status          String   @default("confirmed")
+  notes           String?
+  providerPayload Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client          User     @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+  branch          Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([clientId])
+  @@index([branchId])
+}
