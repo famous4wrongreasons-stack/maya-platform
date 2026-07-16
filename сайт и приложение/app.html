@@ -4587,12 +4587,13 @@ function ALogin() {
       var q = new URLSearchParams(location.search);
       if (q.get('onboarded') === '1') {
         var openCalendar = q.get('calendar_setup') === '1';
-        q.delete('onboarded');
+        var openCrm = q.get('crm_connect') === '1'; // external-онбординг → экран «Интеграции»
+        q.delete('onboarded'); q.delete('crm_connect');
         history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString() : ''));
         // роутер (__meMode/__meGo) может подняться позже этого эффекта — ждём его
         var tries = 0;
         (function goHome() {
-          if (window.__meMode && window.__meGo) { window.__meMode('client'); window.__meGo(openCalendar ? 'book' : 'home'); return; }
+          if (window.__meMode && window.__meGo) { window.__meMode('client'); if (openCrm) { try { window.__meBootCrm = false; } catch (e4) {} } window.__meGo(openCrm ? 'crm' : (openCalendar ? 'book' : 'home')); return; }
           if (tries++ < 30) setTimeout(goHome, 150);
         })();
       }
@@ -11687,6 +11688,10 @@ function AChat() {
 	  function onbOpenApp(api, slug, cal) {
 	    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(slug) + '&onboarded=1' + (cal ? '&calendar_setup=1' : ''));
 	  }
+	  // внешний календарь: после создания бизнеса открываем экран «Интеграции» (CRM Center)
+	  function onbOpenAppCrm(api, slug) {
+	    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(slug) + '&onboarded=1&crm_connect=1');
+	  }
 	  function onbValidateConfirmation(c, ct) {
 	    var errors = {};
 	    // B.1: название необязательно, если бизнес отложил его (businessNameDeferred)
@@ -11811,7 +11816,9 @@ function AChat() {
 	      var when = ''; try { if (ends) when = new Date(ends).toLocaleDateString('ru-RU'); } catch (e) {}
 	      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: 'Готово — бизнес создан. Пробная версия MAYA OS активна' + (days != null ? (' на ' + days + ' дней') : '') + (when ? (', до ' + when) : '') + '.' }]); });
 	      setOnbConfirm(null);
-	      setOnbStage((nextStep === 'connect_crm' || c.calendarSource === 'external') ? 'crm' : 'logo');
+	      // external → сразу «Интеграции» (новый CRM Center на /api/integrations/crm/*); internal → логотип
+      if (nextStep === 'connect_crm' || c.calendarSource === 'external') { onbOpenAppCrm(api, saved.tenantSlug); return; }
+      setOnbStage('logo');
 	    } catch (e) {
 	      if (e.fieldErrors && Object.keys(e.fieldErrors).length) setOnbFieldErrors(e.fieldErrors);
 	      if (e.code === 'invalid_trial_activation_token' || e.code === 'trial_activation_expired' || e.code === 'trial_activation_token_required' || e.code === 'trial_activation_not_pending' || e.code === 'trial_activation_draft_mismatch') onbActivationDead(onbErrText(e.code));
@@ -17644,6 +17651,257 @@ function ASettings() {
   });
 }
 window.ASettings = ASettings;
+
+// ═══════════ CRM Integration Center (owner-only, new /api/integrations/crm/*) ═══════════
+// Токен CRM живёт ТОЛЬКО в state этого экрана (password-input), очищается после КАЖДОГО
+// запроса и никогда не пишется в storage/логи/аналитику. Старые /admin/tenants/:id/crm НЕ
+// используются. Единственный экран ввода tenant-креденшелов.
+var __CRM_ERR = {
+  crm_token_required: 'Введите токен CRM.',
+  crm_credentials_rejected: 'CRM отклонила токен. Проверьте токен и права доступа.',
+  crm_company_not_found: 'Филиал не найден или недоступен для этого токена.',
+  crm_provider_unreachable: 'CRM временно недоступна. Попробуйте ещё раз позже.',
+  crm_platform_configuration_error: 'Подключение временно не настроено на стороне MAYA.',
+  crm_connection_failed: 'Не удалось проверить подключение. Данные не сохранены.',
+  crm_provider_not_available: 'Эта интеграция пока недоступна.',
+  crm_integration_not_configured: 'CRM ещё не подключена.',
+  subscription_required: 'Пробный период закончился. Подключите подписку.'
+};
+// одноразовый refresh, уважающий межвкладочный lock и терминальные коды (как session-pipeline)
+async function crmTryRefresh(apiBase, ns, b) {
+  var LOCK = 'me_saas_refresh_lock:' + ns, KEY = 'me_saas_auth_v2:' + ns, oldTok = b.token;
+  function lockBusy() { try { var l = JSON.parse(localStorage.getItem(LOCK) || 'null'); return !!(l && l.exp > Date.now()); } catch (e) { return false; } }
+  function cur() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  if (lockBusy()) { for (var i = 0; i < 16; i++) { await new Promise(function (r) { setTimeout(r, 250); }); var c1 = cur(); if (!c1 || !c1.token) return false; if (c1.token !== oldTok) return true; if (!lockBusy()) break; } }
+  var c2 = cur(); if (!c2 || !c2.token) return false; if (c2.token !== oldTok) return true;
+  if (!c2.refresh_token) return false;
+  var myId = 'crm-' + Math.random().toString(36).slice(2);
+  try { if (lockBusy()) return false; localStorage.setItem(LOCK, JSON.stringify({ owner: myId, exp: Date.now() + 15000 })); } catch (e) {}
+  try {
+    var r = await fetch(apiBase + '/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: c2.refresh_token }) });
+    var d = null; try { d = await r.json(); } catch (e) {}
+    if (!r.ok) {
+      var code = d && d.error && d.error.code;
+      if (code === 'refresh_token_invalid' || code === 'refresh_token_reused' || code === 'session_expired' || code === 'session_revoked') {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        try { window.dispatchEvent(new CustomEvent('me-saas-logout', { detail: { reason: code } })); } catch (e) {}
+      }
+      return false;
+    }
+    if (!d || !d.access_token || !d.refresh_token) return false;
+    var c3 = cur(); if (!c3 || c3.token !== oldTok) return true;
+    var nb = Object.assign({}, c3, { token: d.access_token, refresh_token: d.refresh_token, access_expires_at: d.expires_in ? Date.now() + Number(d.expires_in) * 1000 : null, refresh_expires_at: d.refresh_expires_at || c3.refresh_expires_at, session: d.session || c3.session, user: d.user || c3.user });
+    try { localStorage.setItem(KEY, JSON.stringify(nb)); } catch (e) {}
+    var back = null; try { back = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    return !!(back && back.token === d.access_token);
+  } finally {
+    try { var l2 = JSON.parse(localStorage.getItem(LOCK) || 'null'); if (l2 && l2.owner === myId) localStorage.removeItem(LOCK); } catch (e) {}
+  }
+}
+async function crmRawFetch(apiBase, ns, path, init) {
+  init = init || {};
+  function bundle() { try { return JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ns) || 'null'); } catch (e) { return null; } }
+  var b = bundle(); if (!b || !b.token) { var eA = new Error('Сессия не найдена — войдите снова.'); eA.status = 401; throw eA; }
+  async function once(tok) {
+    var resp = await fetch(apiBase + path, Object.assign({}, init, { headers: Object.assign({}, init.headers, { Authorization: 'Bearer ' + tok }) }));
+    var text = await resp.text(); var body = null; try { body = text ? JSON.parse(text) : null; } catch (e) { body = text; }
+    if (!resp.ok) { var eo = body && typeof body === 'object' ? body.error : null; var er = new Error((eo && eo.message) || (body && body.message) || ('HTTP ' + resp.status)); er.status = resp.status; er.code = eo && eo.code; throw er; }
+    return body;
+  }
+  try { return await once(b.token); }
+  catch (e) {
+    if (e && e.status === 401) { var ok = await crmTryRefresh(apiBase, ns, b); if (ok) { var nb = bundle(); if (nb && nb.token) return once(nb.token); } }
+    throw e;
+  }
+}
+function ACrmCenter() {
+  var dark = window.__meDark;
+  var t = tokens("aurora", dark);
+  var e = React.createElement;
+  var ctx = window.__ME_SAAS_CTX || {};
+  var apiBase = String(ctx.api || (location.origin + '/api')).replace(/\/+$/, '');
+  var ns = ctx.ns;
+  var sPhase = React.useState('loading'); var phase = sPhase[0], setPhase = sPhase[1]; // loading|ready
+  var sStatus = React.useState(null); var status = sStatus[0], setStatus = sStatus[1];
+  var sProv = React.useState(null); var providers = sProv[0], setProviders = sProv[1];
+  var sSel = React.useState(''); var provider = sSel[0], setProvider = sSel[1];
+  var sTok = React.useState(''); var token = sTok[0], setTok = sTok[1]; // memory only
+  var sCo = React.useState(''); var company = sCo[0], setCompany = sCo[1];
+  var sBusy = React.useState(''); var busyKind = sBusy[0], setBusyKind = sBusy[1];
+  var sErr = React.useState(''); var err = sErr[0], setErr = sErr[1];
+  var sNote = React.useState(''); var note = sNote[0], setNote = sNote[1];
+  var sPrev = React.useState(null); var preview = sPrev[0], setPreview = sPrev[1];
+  var sRe = React.useState(false); var reconnecting = sRe[0], setReconnecting = sRe[1];
+  var sAsk = React.useState(false); var askDisc = sAsk[0], setAskDisc = sAsk[1];
+  var reqRef = React.useRef(false);
+  function af(path, init) { if (window.__meSaasAuthedFetch) return window.__meSaasAuthedFetch(path, init); return crmRawFetch(apiBase, ns, path, init); }
+  function errText(x) { var c = x && x.code; if (c === 'subscription_required') { try { if (window.__meSubOpen) window.__meSubOpen({}); } catch (e2) {} } return (c && __CRM_ERR[c]) || (x && x.message) || 'Не удалось выполнить запрос.'; }
+  function refreshStatus() { return af('/integrations/crm', {}).then(function (d) { setStatus(d || null); return d; }); }
+  React.useEffect(function () {
+    Promise.all([
+      af('/crm/providers', {}).catch(function () { return null; }),
+      af('/integrations/crm', {}).catch(function (x) { throw x; })
+    ]).then(function (r) {
+      var pr = r[0] || {}; var st = r[1] || null;
+      setProviders({ list: pr.providers || [], selectable: pr.selectable_provider_keys || [] });
+      setStatus(st);
+      var conn = st && st.connection;
+      var firstSel = (pr.selectable_provider_keys || [])[0] || '';
+      setProvider((conn && conn.provider) || firstSel);
+      setPhase('ready');
+    }).catch(function (x) { setPhase('ready'); setErr(errText(x)); });
+  }, []);
+  function fmtDT(iso) { if (!iso) return '—'; try { return new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(iso)); } catch (e2) { return String(iso); } }
+  function provLabel(key) { var p = ((providers && providers.list) || []).filter(function (x) { return x.provider === key; })[0]; return (p && p.name) || key; }
+  function needsCompany(key) { return key === 'yclients' || key === 'altegio'; }
+  // ── действия ──
+  function doConnect() {
+    var tok = String(token || '').trim();
+    if (!tok) { setErr(__CRM_ERR.crm_token_required); return; }
+    if (reqRef.current) return; reqRef.current = true; setBusyKind('connect'); setErr(''); setNote('');
+    var sj = String(company || '').trim() ? { companyId: isNaN(Number(company)) ? String(company).trim() : Number(company) } : {};
+    af('/integrations/crm/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: provider, apiToken: tok, settingsJson: sj }) })
+      .then(function (d) {
+        setTok(''); // очищаем токен сразу после запроса
+        setStatus(d && d.connection ? Object.assign({}, status, { configured: true, connection: d.connection, next_action: d.next_action }) : status);
+        setPreview((d && d.preview) || null); setReconnecting(false); setBusyKind(''); reqRef.current = false;
+      })
+      .catch(function (x) { setTok(''); setBusyKind(''); reqRef.current = false; setErr(errText(x)); refreshStatus().catch(function () {}); }); // прежнее active-состояние остаётся видимым
+  }
+  function doActivate() {
+    if (reqRef.current) return; reqRef.current = true; setBusyKind('activate'); setErr(''); setNote('');
+    af('/integrations/crm/activate', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(function (d) { setStatus(Object.assign({}, status, { configured: true, connection: d.connection, next_action: d.next_action })); setPreview((d && d.preview) || preview); setBusyKind(''); reqRef.current = false; setNote('CRM подключена и активна.'); try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'crm' } })); } catch (e2) {} })
+      .catch(function (x) { setBusyKind(''); reqRef.current = false; setErr(errText(x)); refreshStatus().catch(function () {}); });
+  }
+  function doRecheck() {
+    if (reqRef.current) return; reqRef.current = true; setBusyKind('recheck'); setErr(''); setNote('');
+    af('/integrations/crm/recheck', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(function (d) { if (d && d.connection) setStatus(Object.assign({}, status, { connection: d.connection, next_action: d.next_action != null ? d.next_action : (status && status.next_action) })); else refreshStatus().catch(function () {}); setBusyKind(''); reqRef.current = false; setNote(d && d.ok === false ? 'Связь не подтвердилась.' : 'Связь с CRM в порядке.'); })
+      .catch(function (x) { setBusyKind(''); reqRef.current = false; setErr(errText(x)); refreshStatus().catch(function () {}); });
+  }
+  function doPreview() {
+    if (reqRef.current) return; reqRef.current = true; setBusyKind('preview'); setErr('');
+    af('/integrations/crm/preview', {})
+      .then(function (d) { setPreview((d && d.preview) || preview); if (d && d.connection) setStatus(Object.assign({}, status, { connection: d.connection, next_action: d.next_action })); setBusyKind(''); reqRef.current = false; })
+      .catch(function (x) { setBusyKind(''); reqRef.current = false; setErr(errText(x)); });
+  }
+  function doDisconnect() {
+    if (reqRef.current) return; reqRef.current = true; setBusyKind('disconnect'); setErr('');
+    af('/integrations/crm', { method: 'DELETE' })
+      .then(function (d) { setStatus(d || { configured: false, connection: null, next_action: 'connect' }); setPreview(null); setAskDisc(false); setReconnecting(false); setBusyKind(''); reqRef.current = false; setNote('Интеграция отключена.'); try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'crm' } })); } catch (e2) {} })
+      .catch(function (x) { setBusyKind(''); reqRef.current = false; setErr(errText(x)); });
+  }
+  // ── UI-примитивы ──
+  var busy = !!busyKind;
+  function pill(label, onTap, kind) {
+    var primary = kind === 'primary';
+    var disabled = busy;
+    return e('div', { onClick: disabled ? null : onTap, style: { flex: '1 1 auto', textAlign: 'center', padding: '12px 10px', borderRadius: 12, cursor: disabled ? 'default' : 'pointer', fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', background: primary ? t.ink : 'transparent', color: primary ? (dark ? '#0b0b0c' : '#f4f0eb') : t.ink, border: '1px solid ' + (primary ? t.ink : t.line), opacity: disabled ? 0.55 : 1 } }, label);
+  }
+  var inp = { width: '100%', boxSizing: 'border-box', border: '1px solid ' + t.line, borderRadius: 11, padding: '12px 13px', fontFamily: BODY, fontSize: 13.5, color: t.ink, background: 'transparent', outline: 'none' };
+  var lbl = { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint, margin: '0 0 6px' };
+  function stat(label, val) { return e('div', { key: label, style: { flex: '1 1 44%', minWidth: 0, border: '1px solid ' + t.line, borderRadius: 12, padding: '11px 13px' } }, e('div', { style: lbl }, label), e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 13.5, color: t.ink, marginTop: 4, overflowWrap: 'anywhere' } }, val)); }
+  function previewBlock(pv) {
+    if (!pv) return null;
+    var svc = (pv.services && pv.services.items) || []; var stf = (pv.staff && pv.staff.items) || [];
+    return e('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '13px 14px', marginTop: 12 } },
+      e('div', { style: lbl }, 'Что импортируем из CRM'),
+      e('div', { style: { display: 'flex', gap: 8, marginTop: 4 } },
+        stat('Услуги', String((pv.services && pv.services.count) != null ? pv.services.count : svc.length)),
+        stat('Специалисты', String((pv.staff && pv.staff.count) != null ? pv.staff.count : stf.length))),
+      svc.length ? e('div', { style: { marginTop: 10 } }, e('div', { style: lbl }, 'Услуги'), svc.slice(0, 6).map(function (x, i) { return e('div', { key: x.id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 10, fontFamily: BODY, fontSize: 12, color: t.dim, padding: '3px 0' } }, e('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, String(x.name || '')), e('span', { style: { flex: 'none' } }, (Number(x.price) || 0).toLocaleString('ru-RU') + ' ₽')); })) : null,
+      stf.length ? e('div', { style: { marginTop: 10 } }, e('div', { style: lbl }, 'Специалисты'), stf.slice(0, 6).map(function (x, i) { return e('div', { key: x.id || i, style: { fontFamily: BODY, fontSize: 12, color: t.dim, padding: '3px 0', overflowWrap: 'anywhere' } }, String(x.name || '') + (x.title ? ' · ' + x.title : '')); })) : null);
+  }
+  function connectForm(reconnect) {
+    var sel = (providers && providers.selectable) || [];
+    return e(React.Fragment, null,
+      e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5, margin: '0 0 12px' } }, reconnect ? 'Введите токен заново, чтобы переподключить CRM. Прежний токен мы не храним и не показываем.' : 'Подключите систему записи вашего бизнеса. Токен хранится зашифрованно на сервере и никогда не показывается снова.'),
+      e('div', { style: lbl }, 'Провайдер'),
+      e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 14 } }, sel.map(function (k) {
+        var on = provider === k;
+        return e('div', { key: k, onClick: busy ? null : function () { setProvider(k); setErr(''); }, style: { fontFamily: BODY, fontSize: 12.5, padding: '8px 13px', borderRadius: 999, border: '1px solid ' + (on ? t.ink : t.line), color: on ? t.ink : t.dim, cursor: busy ? 'default' : 'pointer' } }, provLabel(k));
+      })),
+      e('div', { style: lbl }, 'API-токен CRM'),
+      e('input', { style: Object.assign({}, inp, { marginBottom: needsCompany(provider) ? 10 : 0 }), type: 'password', autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false, placeholder: 'Вставьте токен', value: token, onChange: function (ev) { setErr(''); setTok(ev.target.value); } }),
+      needsCompany(provider) ? e('input', { style: inp, inputMode: 'numeric', placeholder: 'ID филиала / компании', value: company, onChange: function (ev) { setCompany(ev.target.value); } }) : null,
+      err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, margin: '10px 0 0', lineHeight: 1.45 } }, err) : null,
+      e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
+        pill(busyKind === 'connect' ? 'Проверяем…' : 'Подключить и проверить', doConnect, 'primary'),
+        reconnect ? pill('Отмена', function () { setReconnecting(false); setTok(''); setErr(''); }, '') : null),
+      // «Подключить позже» открывает приложение владельца; вернуться сюда — из Профиля → «Интеграции»
+      reconnect ? null : e('div', { onClick: busy ? null : function () { setTok(''); if (window.__meSaasCabinet) window.__meSaasCabinet(); else if (window.__meGo) window.__meGo('home'); }, style: { textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: t.faint, marginTop: 14, cursor: busy ? 'default' : 'pointer' } }, 'Подключить позже'));
+  }
+  return e(OverlayShell, { title: 'Интеграции' }, function () {
+    if (phase === 'loading') return e('div', { style: { textAlign: 'center', color: t.dim, fontFamily: BODY, fontSize: 13, padding: '48px 0' } }, 'Загрузка…');
+    if (err && !status && !providers) return e('div', { style: { padding: '40px 0', textAlign: 'center' } }, e('div', { style: { fontFamily: BODY, fontSize: 13, color: t.dim, marginBottom: 12 } }, err), pill('Повторить', function () { setPhase('loading'); setErr(''); window.__meGo && window.__meGo('crm'); }, 'primary'));
+    var conn = status && status.connection;
+    var cs = conn && conn.status;
+    var notConnected = !status || !status.configured || !conn;
+    var isActive = cs === 'active';
+    var isPending = cs === 'pending_activation';
+    var isReconnect = cs === 'error' || (status && status.next_action === 'reconnect');
+    var unreachable = conn && conn.last_error_code === 'crm_provider_unreachable';
+    var head = e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5, margin: '0 0 6px' } }, 'CRM управляет записями и расписанием вашего бизнеса. Это единственное место для токена CRM — MAYA не спрашивает его в чате.');
+    // preview awaiting confirmation
+    if (isPending) {
+      return e('div', null, head,
+        e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 20, textTransform: 'uppercase', color: t.ink, margin: '14px 0 6px' } }, 'Проверьте импорт'),
+        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5 } }, provLabel(conn.provider) + '. Онлайн-запись через CRM включится только после активации.'),
+        previewBlock(preview),
+        note ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, marginTop: 10 } }, note) : null,
+        err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, marginTop: 10 } }, err) : null,
+        e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
+          pill(busyKind === 'activate' ? 'Активируем…' : 'Активировать', doActivate, 'primary'),
+          pill('Обновить импорт', doPreview, '')),
+        e('div', { onClick: busy ? null : function () { setAskDisc(true); }, style: { textAlign: 'center', fontFamily: BODY, fontSize: 12, color: t.faint, marginTop: 14, cursor: busy ? 'default' : 'pointer' } }, 'Отменить подключение'),
+        askDisc ? e('div', { style: { marginTop: 8, border: '1px solid ' + t.line, borderRadius: 12, padding: '12px 14px' } }, e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.ink, marginBottom: 10 } }, 'Отключить CRM? Онлайн-запись через неё останется выключенной.'), e('div', { style: { display: 'flex', gap: 8 } }, pill(busyKind === 'disconnect' ? 'Отключаем…' : 'Да, отключить', doDisconnect, 'primary'), pill('Нет', function () { setAskDisc(false); }, ''))) : null);
+    }
+    // active
+    if (isActive && !reconnecting) {
+      var companyId = (conn.settings_json && (conn.settings_json.companyId || conn.settings_json.company_id)) || null;
+      return e('div', null, head,
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, margin: '14px 0 10px' } }, e('div', { style: { width: 8, height: 8, borderRadius: 999, background: t.ink } }), e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 15, color: t.ink } }, provLabel(conn.provider) + ' · подключена')),
+        e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } },
+          stat('Провайдер', provLabel(conn.provider)),
+          stat('ID филиала', companyId != null ? String(companyId) : '—'),
+          stat('Проверено', fmtDT(conn.last_checked_at)),
+          stat('Синхронизация', fmtDT(conn.last_sync_at))),
+        note ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, marginTop: 10 } }, note) : null,
+        err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, marginTop: 10 } }, err) : null,
+        e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
+          pill(busyKind === 'recheck' ? 'Проверяем…' : 'Проверить', doRecheck, ''),
+          pill('Переподключить', function () { setReconnecting(true); setTok(''); setCompany(companyId != null ? String(companyId) : ''); setErr(''); setNote(''); }, '')),
+        e('div', { onClick: busy ? null : function () { setAskDisc(true); }, style: { textAlign: 'center', fontFamily: BODY, fontSize: 12, color: t.faint, marginTop: 16, cursor: busy ? 'default' : 'pointer' } }, 'Отключить интеграцию'),
+        askDisc ? e('div', { style: { marginTop: 8, border: '1px solid ' + t.line, borderRadius: 12, padding: '12px 14px' } }, e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.ink, marginBottom: 10 } }, 'Отключить CRM? Онлайн-запись через неё сразу выключится.'), e('div', { style: { display: 'flex', gap: 8 } }, pill(busyKind === 'disconnect' ? 'Отключаем…' : 'Да, отключить', doDisconnect, 'primary'), pill('Нет', function () { setAskDisc(false); }, ''))) : null);
+    }
+    // provider temporarily unavailable (health)
+    if ((isReconnect || unreachable) && !reconnecting && unreachable) {
+      return e('div', null, head,
+        e('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '14px', marginTop: 14 } },
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink } }, provLabel(conn.provider) + ' временно недоступна'),
+          e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, marginTop: 6, lineHeight: 1.5 } }, __CRM_ERR.crm_provider_unreachable),
+          err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, marginTop: 8 } }, err) : null,
+          e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
+            pill(busyKind === 'recheck' ? 'Проверяем…' : 'Попробовать снова', doRecheck, 'primary'),
+            pill('Переподключить', function () { setReconnecting(true); setTok(''); setErr(''); }, ''))));
+    }
+    // reconnect required
+    if (isReconnect && !reconnecting) {
+      return e('div', null, head,
+        e('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '14px', marginTop: 14, marginBottom: 12 } },
+          e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 14, color: t.ink } }, 'Требуется переподключение'),
+          e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, marginTop: 6, lineHeight: 1.5 } }, (conn && conn.last_error_code && __CRM_ERR[conn.last_error_code]) || 'CRM отклонила прежний токен. Введите новый, чтобы восстановить связь.')),
+        connectForm(true));
+    }
+    // not connected (or explicit reconnecting form)
+    return e('div', null, head,
+      e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 20, textTransform: 'uppercase', color: t.ink, margin: '14px 0 10px' } }, reconnecting ? 'Переподключение' : 'Подключить CRM'),
+      note ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, marginBottom: 8 } }, note) : null,
+      connectForm(reconnecting));
+  });
+}
+window.ACrmCenter = ACrmCenter;
 
 function AInvite() {
   const d = DS();
@@ -28621,6 +28879,8 @@ function MEApp() {
   const [screen, setScreen] = React.useState(function () {
     // reload во время онбординга: остаёмся в чате настройки (AChat восстановит черновик из session-scoped storage)
     try { var o = JSON.parse(sessionStorage.getItem('me_onb_v1') || 'null'); if (o && o.activationToken) return 'chat'; } catch (e) {}
+    // external-онбординг: сразу экран «Интеграции» (CRM Center) — приоритет над роль-роутингом
+    try { var _qCrm = new URLSearchParams(location.search); if (_qCrm.get('crm_connect') === '1') { window.__meBootCrm = true; return 'crm'; } } catch (e3) {}
     // P0-3: маршрут выбирает серверная сессия/membership (роль из bundle, который сервер
     // выдал при входе; ABookFlow всё равно перепроверит /me) — не кнопка входа и не
     // сохранённый onboarding-state. Клиент → клиентское приложение; владелец/менеджер и
@@ -28977,6 +29237,7 @@ function MEApp() {
     }],
     invite: [window.AInvite, {}],
     settings: [window.ASettings, {}],
+    crm: [window.ACrmCenter, {}],
     book: [window.ABookFlow || window.ABookMaster, {}],
     'staff-home': [window.AStaffHome, {}],
     'staff-clients': [window.AStaffClients, {}],
@@ -29306,6 +29567,12 @@ function MEApp() {
   }), _pmAuthed ? _pmRow('Настройки', function () {
     setProfileMenuOpen(false);
     window.__meGo && window.__meGo('settings');
+  }) : null, (_pmAuthed && window.__ME_SAAS_CTX && (function () {
+    // CRM Center — owner/manager tenant-сессии (роль из bundle). Возврат к экрану «Интеграции».
+    try { var _b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + window.__ME_SAAS_CTX.ns) || 'null'); var _r = String((_b && _b.user && _b.user.role) || '').toLowerCase(); return ['tenant_owner', 'business_owner', 'tenant_admin', 'administrator', 'manager'].indexOf(_r) >= 0; } catch (e) { return false; }
+  })()) ? _pmRow('Интеграции', function () {
+    setProfileMenuOpen(false);
+    window.__meGo && window.__meGo('crm');
   }) : null, (_pmAuthed && window.__ME_SAAS_CTX && typeof window.__meReturnToLegacyWorkspace === 'function') ? _pmRow('Вернуться в Мужскую Эстетику', function () {
     // D: возврат владельца в основной воркспейс «Мужская Эстетика». Тестовые бизнесы
     // MAYA OS остаются доступны по сохранённым auth-бандлам — ничего не удаляем.
@@ -30790,6 +31057,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     var freshLogin=false; try{ freshLogin=!!window.__meFreshLogin; window.__meFreshLogin=false; }catch(e){}
     // P0-3: SaaS tenant-сессия (bundle без легаси-токена) → роутинг по СЕРВЕРНОЙ роли bundle;
     // легаси panel_me тут ни при чём (это чужой бэкенд) и не должен уводить владельца на home.
+    // external-онбординг ведёт на экран «Интеграции» — не перебиваем роль-роутером
+    try { if (window.__meBootCrm) { window.__meBootCrm = false; if (window.__meMode) window.__meMode('client'); if (window.__meGo) window.__meGo('crm'); return true; } } catch (eCrm) {}
     try{
       var _sctx = window.__ME_SAAS_CTX;
       if (_sctx && _sctx.ns && !getTok()) {
