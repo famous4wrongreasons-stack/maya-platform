@@ -11,9 +11,18 @@ import type {
 } from './ai-tool.types';
 
 const MAX_RANGE_MS = 366 * 24 * 60 * 60 * 1000;
-const DEFAULT_RANGE_MS = 30 * 24 * 60 * 60 * 1000;
 const ENTITY_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
 const EXTERNAL_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
+const REPORTING_PERIODS = new Set([
+  'today',
+  'yesterday',
+  'week_to_date',
+  'month_to_date',
+  'last_7_days',
+  'last_30_days',
+  'last_month',
+  'custom',
+]);
 
 @Injectable()
 export class AiToolRegistryService {
@@ -86,7 +95,7 @@ export class AiToolRegistryService {
       case 'analytics.employee.read':
       case 'analytics.business.read':
       case 'expenses.read':
-        return this.parseDateRange(args);
+        return this.parseReportingPeriod(args);
       case 'appointments.own.cancel':
         this.assertAllowedKeys(args, ['appointment_id']);
         return {
@@ -222,27 +231,42 @@ export class AiToolRegistryService {
     });
   }
 
-  private parseDateRange(args: Record<string, unknown>) {
-    this.assertAllowedKeys(args, ['from', 'to', 'branch_id']);
+  private parseReportingPeriod(args: Record<string, unknown>) {
+    this.assertAllowedKeys(args, ['period', 'from', 'to', 'branch_id']);
+    if (
+      typeof args.period !== 'string' ||
+      !REPORTING_PERIODS.has(args.period)
+    ) {
+      this.invalidArguments('reporting period is invalid');
+    }
+    const period = args.period;
     const hasFrom = args.from !== undefined;
     const hasTo = args.to !== undefined;
-    if (hasFrom !== hasTo) {
-      this.invalidArguments('from and to must be provided together');
+    if (period !== 'custom' && (hasFrom || hasTo)) {
+      this.invalidArguments('relative periods must not include from or to');
     }
-    const to = hasTo ? this.parseDate(args.to, 'to') : new Date();
-    const from = hasFrom
-      ? this.parseDate(args.from, 'from')
-      : new Date(to.getTime() - DEFAULT_RANGE_MS);
-    if (
-      from.getTime() > to.getTime() ||
-      to.getTime() - from.getTime() > MAX_RANGE_MS
-    ) {
-      this.invalidArguments('date range must be ordered and at most 366 days');
+    if (period === 'custom' && (!hasFrom || !hasTo)) {
+      this.invalidArguments('custom period requires from and to');
+    }
+
+    let customRange: { from: string; to: string } | null = null;
+    if (period === 'custom') {
+      const from = this.parseDate(args.from, 'from');
+      const to = this.parseDate(args.to, 'to');
+      if (
+        from.getTime() > to.getTime() ||
+        to.getTime() - from.getTime() > MAX_RANGE_MS
+      ) {
+        this.invalidArguments(
+          'date range must be ordered and at most 366 days',
+        );
+      }
+      customRange = { from: from.toISOString(), to: to.toISOString() };
     }
 
     return {
-      from: from.toISOString(),
-      to: to.toISOString(),
+      period,
+      ...(customRange ?? {}),
       ...(args.branch_id === undefined
         ? {}
         : {

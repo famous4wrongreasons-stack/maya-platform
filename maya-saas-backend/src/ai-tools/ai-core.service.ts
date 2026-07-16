@@ -120,6 +120,32 @@ type ToolUsage = {
   execution_id: string | null;
 };
 
+type GroundingRequirement = {
+  domain: string;
+  toolNames: string[];
+  strictNumbers: boolean;
+};
+
+type GroundingReport = {
+  status: 'not_required' | 'verified' | 'blocked';
+  domain: string | null;
+  required_tools: string[];
+  evidence_tools: string[];
+};
+
+const GROUNDING_FACT_PATTERN =
+  /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел\w*|за\s+месяц\w*|сегодня|завтра)/i;
+const GROUNDING_ANALYTICS_PATTERN =
+  /(выруч\w*|оборот\w*|касс\w*|доход\w*|зарплат\w*|средн\w*\s+чек|прибыл\w*|марж\w*|аналитик\w*|статистик\w*|показател\w*|цифр\w*)/i;
+const GROUNDING_PERSONAL_SCOPE_PATTERN =
+  /(моя|мой|мои|личн\w*|у\s+меня|сколько\s+я|я\s+заработ)/i;
+const GROUNDING_BUSINESS_SCOPE_PATTERN =
+  /(бизнес\w*|компан\w*|по\s+всем|все\s+сотрудник\w*|все\s+специалист\w*|общ\w*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
+const GROUNDING_NUMBER_PATTERN =
+  /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
+const GROUNDING_SMALL_METRIC_PATTERN =
+  /(?<number>\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(?:₽|руб\w*|%|балл\w*|бонус\w*|визит\w*|клиент\w*|запис\w*|минут\w*|час\w*|специалист\w*)/giu;
+
 @Injectable()
 export class AiCoreService {
   constructor(
@@ -152,15 +178,48 @@ export class AiCoreService {
     const decisions: AiCoreModelDecision[] = [];
     const signatures = new Set<string>();
     const maxToolSteps = this.maxToolSteps();
+    const requirement = this.groundingRequirement(
+      sanitized.messages,
+      allowedNames,
+    );
+    const requiredToolNames =
+      requirement?.toolNames.filter((name) => allowedNames.has(name)) ?? [];
+    let groundingRetries = 0;
 
     try {
+      if (requirement && requiredToolNames.length === 0) {
+        return this.complete(
+          user,
+          dto,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          this.groundingFallback(requirement, toolResults),
+        );
+      }
       for (let step = 0; step <= maxToolSteps; step += 1) {
+        const requirementSatisfied = this.groundingSatisfied(
+          requirement,
+          toolResults,
+        );
+        if (requirement && !requirementSatisfied && step >= maxToolSteps) {
+          return this.complete(
+            user,
+            dto,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            this.groundingFallback(requirement, toolResults),
+          );
+        }
         const decision = await this.model.decide({
           surface: dto.surface,
           messages: sanitized.messages,
           tools,
           toolResults: [...toolResults],
           allowToolCall: step < maxToolSteps,
+          requiredToolNames:
+            requirement && !requirementSatisfied ? requiredToolNames : [],
         });
         if (!decision) {
           return this.complete(
@@ -174,11 +233,49 @@ export class AiCoreService {
                 'MAYA AI пока не подключена к этой среде. Доступные функции защищены и станут доступны после настройки серверного AI-ключа.',
               source: 'safe_fallback',
               action: null,
+              grounding: this.groundingReport(
+                requirement,
+                requirement ? 'blocked' : 'not_required',
+                toolResults,
+              ),
             },
           );
         }
         decisions.push(decision);
         if (!decision.toolCall) {
+          if (requirement && !requirementSatisfied) {
+            if (groundingRetries < 1 && step < maxToolSteps) {
+              groundingRetries += 1;
+              continue;
+            }
+            return this.complete(
+              user,
+              dto,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              this.groundingFallback(requirement, toolResults),
+            );
+          }
+          const reply = this.plainReply(decision.reply);
+          if (
+            requirement &&
+            !this.groundedNumbersMatch(
+              reply,
+              requirement,
+              toolResults,
+              this.latestUserText(sanitized.messages),
+            )
+          ) {
+            return this.complete(
+              user,
+              dto,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              this.groundingFallback(requirement, toolResults),
+            );
+          }
           return this.complete(
             user,
             dto,
@@ -186,9 +283,14 @@ export class AiCoreService {
             toolsUsed,
             decisions,
             {
-              reply: this.plainReply(decision.reply),
+              reply,
               source: decision.provider,
               action: null,
+              grounding: this.groundingReport(
+                requirement,
+                requirement ? 'verified' : 'not_required',
+                toolResults,
+              ),
             },
           );
         }
@@ -197,6 +299,20 @@ export class AiCoreService {
         }
         if (!allowedNames.has(decision.toolCall.name)) {
           this.modelFailure('ai_model_tool_not_allowed');
+        }
+        if (
+          requirement &&
+          !requirementSatisfied &&
+          !requiredToolNames.includes(decision.toolCall.name)
+        ) {
+          return this.complete(
+            user,
+            dto,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            this.groundingFallback(requirement, toolResults),
+          );
         }
         const signature = this.toolSignature(
           decision.toolCall.name,
@@ -253,15 +369,21 @@ export class AiCoreService {
                 status: 'approval_required',
                 approval: execution.approval ?? null,
               },
+              grounding: this.groundingReport(
+                requirement,
+                requirement ? 'verified' : 'not_required',
+                toolResults,
+              ),
             },
           );
         }
         if (status !== 'completed' || !('result' in execution)) {
           this.modelFailure('ai_tool_result_unavailable');
         }
+        const safeResult = this.sanitizeToolResult(execution.result);
         toolResults.push({
           name: decision.toolCall.name,
-          result: this.sanitizeToolResult(execution.result),
+          result: safeResult,
         });
       }
       this.modelFailure('ai_model_tool_step_limit');
@@ -294,8 +416,11 @@ export class AiCoreService {
       reply: string;
       source: 'deepseek' | 'openai' | 'safe_fallback';
       action: Record<string, unknown> | null;
+      grounding?: GroundingReport;
     },
   ) {
+    const grounding =
+      response.grounding ?? this.groundingReport(null, 'not_required', []);
     const usage = decisions.reduce(
       (totals, decision) => ({
         input_tokens: this.addTokenCount(
@@ -330,6 +455,9 @@ export class AiCoreService {
         model_calls: decisions.length,
         tools_used: toolsUsed.map((tool) => tool.name),
         outcome: response.action ? 'approval_required' : 'reply',
+        grounding_status: grounding.status,
+        grounding_domain: grounding.domain,
+        grounding_evidence_tools: grounding.evidence_tools,
         redacted_input: redacted,
         ...usage,
       },
@@ -341,7 +469,263 @@ export class AiCoreService {
       redacted_input: redacted,
       action: response.action,
       tools_used: toolsUsed,
+      grounding,
     };
+  }
+
+  private groundingRequirement(
+    messages: AiCoreMessage[],
+    allowedNames: Set<string>,
+  ): GroundingRequirement | null {
+    const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
+    if (!text) {
+      return null;
+    }
+    const factRequest = GROUNDING_FACT_PATTERN.test(text);
+
+    if (
+      /(баланс\w*|сколько\s+.*(?:балл|бонус)|мои\s+(?:балл|бонус))\w*/i.test(
+        text,
+      )
+    ) {
+      return this.requireGrounding('client_loyalty', ['loyalty.own.read']);
+    }
+    if (
+      /(мои\s+запис\w*|когда\s+я\s+записан\w*|истори\w*\s+(?:моих\s+)?запис\w*)/i.test(
+        text,
+      )
+    ) {
+      return this.requireGrounding('client_appointments', [
+        'appointments.own.list',
+      ]);
+    }
+    if (
+      /(свободн\w*\s+(?:окн\w*|врем\w*|слот\w*)|ближайш\w*\s+(?:окн\w*|врем\w*|слот\w*)|есть\s+ли\s+(?:окн\w*|мест\w*|врем\w*)|когда\s+можно\s+запис)/i.test(
+        text,
+      )
+    ) {
+      return this.requireGrounding('booking_availability', [
+        'booking.availability.read',
+      ]);
+    }
+    if (
+      !/(подписк\w*|тариф\w*|maya|майя)/i.test(text) &&
+      /(сколько\s+стоит|цен\w*|прайс\w*|какие\s+услуг\w*|длительн\w*\s+услуг\w*)/i.test(
+        text,
+      )
+    ) {
+      return this.requireGrounding('service_catalog', [
+        'catalog.services.read',
+      ]);
+    }
+    if (
+      /(кто\s+работает|график\w*\s+(?:работ|мастер|специалист)|смен\w*|выходн\w*)/i.test(
+        text,
+      ) &&
+      factRequest
+    ) {
+      // Availability is not a work roster, so this remains blocked until a
+      // dedicated tenant-scoped schedule tool exists.
+      return this.requireGrounding('staff_schedule', ['staff.schedule.read']);
+    }
+    if (
+      /(какие\s+(?:мастер|специалист)\w*|кто\s+(?:из\s+)?(?:мастер|специалист)\w*|выбрать\s+(?:мастер|специалист)\w*)/i.test(
+        text,
+      ) &&
+      !/(лучш\w*|выруч\w*|заработ\w*|эффектив\w*)/i.test(text)
+    ) {
+      return this.requireGrounding('staff_catalog', ['catalog.staff.read']);
+    }
+    if (/(расход\w*|затрат\w*)/i.test(text) && factRequest) {
+      return this.requireGrounding('business_expenses', ['expenses.read']);
+    }
+    if (
+      /(сколько\s+(?:у\s+нас\s+)?клиент\w*|количеств\w*\s+клиент\w*)/i.test(
+        text,
+      )
+    ) {
+      return this.requireGrounding('customer_count', ['customers.count']);
+    }
+    if (
+      (GROUNDING_ANALYTICS_PATTERN.test(text) && factRequest) ||
+      /(сводк\w*|что\s+у\s+нас\s+сегодня)/i.test(text)
+    ) {
+      const personal = GROUNDING_PERSONAL_SCOPE_PATTERN.test(text);
+      const business = GROUNDING_BUSINESS_SCOPE_PATTERN.test(text);
+      if (personal) {
+        return this.requireGrounding('personal_analytics', [
+          'analytics.employee.read',
+        ]);
+      }
+      if (business) {
+        return this.requireGrounding('business_analytics', [
+          'analytics.business.read',
+        ]);
+      }
+      if (
+        allowedNames.has('analytics.employee.read') &&
+        !allowedNames.has('analytics.business.read')
+      ) {
+        return this.requireGrounding('personal_analytics', [
+          'analytics.employee.read',
+        ]);
+      }
+      return this.requireGrounding('business_analytics', [
+        'analytics.business.read',
+      ]);
+    }
+    return null;
+  }
+
+  private requireGrounding(
+    domain: string,
+    toolNames: string[],
+  ): GroundingRequirement {
+    return { domain, toolNames, strictNumbers: true };
+  }
+
+  private groundingSatisfied(
+    requirement: GroundingRequirement | null,
+    toolResults: AiCoreToolResult[],
+  ): boolean {
+    return (
+      !requirement ||
+      toolResults.some((result) => requirement.toolNames.includes(result.name))
+    );
+  }
+
+  private groundingReport(
+    requirement: GroundingRequirement | null,
+    status: GroundingReport['status'],
+    toolResults: AiCoreToolResult[],
+  ): GroundingReport {
+    return {
+      status,
+      domain: requirement?.domain ?? null,
+      required_tools: requirement?.toolNames ?? [],
+      evidence_tools: requirement
+        ? [
+            ...new Set(
+              toolResults
+                .map((result) => result.name)
+                .filter((name) => requirement.toolNames.includes(name)),
+            ),
+          ]
+        : [],
+    };
+  }
+
+  private groundingFallback(
+    requirement: GroundingRequirement,
+    toolResults: AiCoreToolResult[],
+  ) {
+    return {
+      reply:
+        'Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.',
+      source: 'safe_fallback' as const,
+      action: null,
+      grounding: this.groundingReport(requirement, 'blocked', toolResults),
+    };
+  }
+
+  private latestUserText(messages: AiCoreMessage[]): string {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      if (message?.role === 'user' && message.content.trim()) {
+        return message.content.trim();
+      }
+    }
+    return '';
+  }
+
+  private groundedNumbersMatch(
+    reply: string,
+    requirement: GroundingRequirement | null,
+    toolResults: AiCoreToolResult[],
+    userText: string,
+  ): boolean {
+    if (!requirement?.strictNumbers) {
+      return true;
+    }
+    const claims = this.groundingClaims(reply);
+    if (claims.size === 0) {
+      return true;
+    }
+    const allowed = this.groundingNumbers(toolResults);
+    for (const value of this.groundingNumbers(userText)) {
+      allowed.add(value);
+    }
+    return [...claims].every((claim) => allowed.has(claim));
+  }
+
+  private groundingClaims(value: string): Set<string> {
+    const claims = new Set<string>();
+    for (const match of value.matchAll(GROUNDING_NUMBER_PATTERN)) {
+      const normalized = this.normalizeGroundingNumber(match[0]);
+      if (normalized !== null && Math.abs(Number(normalized)) > 10) {
+        claims.add(normalized);
+      }
+    }
+    for (const match of value.matchAll(GROUNDING_SMALL_METRIC_PATTERN)) {
+      const normalized = this.normalizeGroundingNumber(match.groups?.number);
+      if (normalized !== null) {
+        claims.add(normalized);
+      }
+    }
+    return claims;
+  }
+
+  private groundingNumbers(value: unknown): Set<string> {
+    const values = new Set<string>();
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        for (const number of this.groundingNumbers(item)) {
+          values.add(number);
+        }
+      });
+      return values;
+    }
+    if (value !== null && typeof value === 'object') {
+      Object.values(value as Record<string, unknown>).forEach((item) => {
+        for (const number of this.groundingNumbers(item)) {
+          values.add(number);
+        }
+      });
+      return values;
+    }
+    const normalized = this.normalizeGroundingNumber(value);
+    if (normalized !== null) {
+      values.add(normalized);
+      return values;
+    }
+    if (typeof value === 'string') {
+      for (const match of value.matchAll(GROUNDING_NUMBER_PATTERN)) {
+        const number = this.normalizeGroundingNumber(match[0]);
+        if (number !== null) {
+          values.add(number);
+        }
+      }
+    }
+    return values;
+  }
+
+  private normalizeGroundingNumber(value: unknown): string | null {
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      return null;
+    }
+    const normalized = String(value)
+      .replace(/[\s\u00a0]/g, '')
+      .replace(',', '.');
+    if (!/^-?\d+(?:\.\d+)?$/.test(normalized)) {
+      return null;
+    }
+    const parsed = Number(normalized);
+    if (!Number.isFinite(parsed)) {
+      return null;
+    }
+    return Number.isInteger(parsed)
+      ? String(parsed)
+      : String(parsed).replace(/0+$/, '').replace(/\.$/, '');
   }
 
   private sanitizeMessages(messages: AiCoreChatDto['messages']): {

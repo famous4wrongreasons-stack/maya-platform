@@ -17,6 +17,7 @@ describe('AiCoreModelService', () => {
     ],
     toolResults: [],
     allowToolCall: true,
+    requiredToolNames: ['analytics.business.read'],
   };
 
   afterEach(() => {
@@ -37,7 +38,7 @@ describe('AiCoreModelService', () => {
                 tool_call: {
                   name: 'analytics.business.read',
                   arguments_json:
-                    '{"from":"2026-07-01T00:00:00.000Z","to":"2026-07-15T00:00:00.000Z"}',
+                    '{"period":"custom","from":"2026-07-01T00:00:00.000Z","to":"2026-07-15T00:00:00.000Z"}',
                 },
               }),
             },
@@ -61,6 +62,7 @@ describe('AiCoreModelService', () => {
       toolCall: {
         name: 'analytics.business.read',
         arguments: {
+          period: 'custom',
           from: '2026-07-01T00:00:00.000Z',
           to: '2026-07-15T00:00:00.000Z',
         },
@@ -71,6 +73,18 @@ describe('AiCoreModelService', () => {
     expect(request?.[0]).toBe('https://deepseek.example.test/chat/completions');
     const body = JSON.stringify(request?.[1]?.body);
     expect(body).not.toContain('server-only-deepseek-key');
+    const requestBody = request?.[1]?.body;
+    expect(typeof requestBody).toBe('string');
+    if (typeof requestBody !== 'string') {
+      throw new Error('Expected JSON request body');
+    }
+    const payload = JSON.parse(requestBody) as {
+      messages: Array<{ content: string }>;
+    };
+    const modelInput = JSON.parse(payload.messages[1]?.content ?? '{}') as {
+      required_tools?: string[];
+    };
+    expect(modelInput.required_tools).toEqual(['analytics.business.read']);
     expect(
       (request?.[1]?.headers as Record<string, string>).Authorization,
     ).toBe('Bearer server-only-deepseek-key');

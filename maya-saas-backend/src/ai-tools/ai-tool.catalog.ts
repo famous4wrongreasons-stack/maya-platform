@@ -36,10 +36,26 @@ const EMPTY_OBJECT_SCHEMA = {
   properties: {},
 } as const;
 
-const DATE_RANGE_SCHEMA = {
+const REPORTING_PERIOD_SCHEMA = {
   type: 'object',
   additionalProperties: false,
+  required: ['period'],
   properties: {
+    period: {
+      type: 'string',
+      enum: [
+        'today',
+        'yesterday',
+        'week_to_date',
+        'month_to_date',
+        'last_7_days',
+        'last_30_days',
+        'last_month',
+        'custom',
+      ],
+      description:
+        'Server-resolved reporting period. Use custom only when the person supplied explicit dates.',
+    },
     from: { type: 'string', format: 'date-time' },
     to: { type: 'string', format: 'date-time' },
     branch_id: { type: 'string', minLength: 8, maxLength: 128 },
@@ -136,8 +152,9 @@ export const MAYA_AI_TOOL_CATALOG = [
   },
   {
     name: 'analytics.employee.read',
-    description: 'Read operational analytics scoped to the current employee.',
-    inputSchema: DATE_RANGE_SCHEMA,
+    description:
+      'Read operational analytics scoped to the current employee. Relative reporting periods are resolved by the server in the tenant timezone.',
+    inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: STAFF_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['analytics.employee'],
@@ -150,8 +167,9 @@ export const MAYA_AI_TOOL_CATALOG = [
   },
   {
     name: 'analytics.business.read',
-    description: 'Read tenant or branch operational analytics.',
-    inputSchema: DATE_RANGE_SCHEMA,
+    description:
+      'Read tenant or branch operational analytics. Relative reporting periods are resolved by the server in the tenant timezone.',
+    inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['analytics.business'],
@@ -164,8 +182,9 @@ export const MAYA_AI_TOOL_CATALOG = [
   },
   {
     name: 'expenses.read',
-    description: 'Read tenant expenses without decrypted free-text notes.',
-    inputSchema: DATE_RANGE_SCHEMA,
+    description:
+      'Read tenant expenses without decrypted free-text notes. Relative reporting periods are resolved by the server in the tenant timezone.',
+    inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['expenses.core'],

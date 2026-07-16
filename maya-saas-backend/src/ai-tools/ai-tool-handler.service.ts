@@ -5,7 +5,9 @@ import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
+import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
 import type {
   AiToolPrincipal,
@@ -22,6 +24,7 @@ export class AiToolHandlerService {
     private readonly expensesService: ExpensesService,
     private readonly customersService: CustomersService,
     private readonly staffService: StaffService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async execute(
@@ -41,21 +44,22 @@ export class AiToolHandlerService {
         return this.listOwnAppointments(principal);
       case 'loyalty.own.read':
         return this.readOwnLoyalty(principal);
-      case 'analytics.employee.read':
+      case 'analytics.employee.read': {
+        const query = await this.reportingQuery(principal.tenantId, args);
         return this.readAnalytics(
           this.analyticsService.getEmployeeOverview(
             principal.tenantId,
             principal.userId,
-            this.analyticsQuery(args),
+            query,
           ),
         );
-      case 'analytics.business.read':
+      }
+      case 'analytics.business.read': {
+        const query = await this.reportingQuery(principal.tenantId, args);
         return this.readAnalytics(
-          this.analyticsService.getBusinessOverview(
-            principal.tenantId,
-            this.analyticsQuery(args),
-          ),
+          this.analyticsService.getBusinessOverview(principal.tenantId, query),
         );
+      }
       case 'expenses.read':
         return this.readExpenses(principal.tenantId, args);
       case 'customers.count':
@@ -144,23 +148,21 @@ export class AiToolHandlerService {
   }
 
   private async readExpenses(tenantId: string, args: ValidatedAiToolArguments) {
-    const result = await this.expensesService.list(tenantId, {
-      from: this.requiredString(args.from),
-      to: this.requiredString(args.to),
-      ...(typeof args.branch_id === 'string'
-        ? { branchId: args.branch_id }
-        : {}),
-    });
+    const result = await this.expensesService.list(
+      tenantId,
+      await this.reportingQuery(tenantId, args),
+    );
     return {
       items: result.items.map((item) => ({
         id: item.id,
         branch_id: item.branch_id,
         category: item.category,
         amount_kopecks: item.amount_kopecks,
+        amount_major_units: this.majorUnits(item.amount_kopecks),
         currency: item.currency,
         occurred_at: item.occurred_at,
       })),
-      totals: result.totals,
+      totals: this.safeMoneyEntries(result.totals),
       truncated: result.truncated,
     };
   }
@@ -170,18 +172,27 @@ export class AiToolHandlerService {
     return {
       period: result.period ?? null,
       appointments: result.appointments ?? null,
-      revenue: result.revenue ?? [],
-      expenses: result.expenses ?? [],
-      net: result.net ?? [],
-      average_ticket: result.average_ticket ?? [],
-      daily: result.daily ?? [],
+      revenue: this.safeMoneyEntries(result.revenue),
+      expenses: this.safeMoneyEntries(result.expenses),
+      net: this.safeMoneyEntries(result.net),
+      average_ticket: this.safeMoneyEntries(result.average_ticket),
+      daily: Array.isArray(result.daily)
+        ? result.daily.map((entry) => {
+            const item = this.record(entry);
+            return {
+              date: item.date ?? null,
+              appointments: item.appointments ?? 0,
+              revenue: this.safeMoneyEntries(item.revenue),
+            };
+          })
+        : [],
       data_quality: result.data_quality ?? null,
       staff_summary: Array.isArray(result.staff)
         ? result.staff.map((entry) => {
             const item = this.record(entry);
             return {
               appointments: item.appointments ?? 0,
-              revenue: item.revenue ?? [],
+              revenue: this.safeMoneyEntries(item.revenue),
             };
           })
         : [],
@@ -266,14 +277,136 @@ export class AiToolHandlerService {
     return this.safeLoyalty(result);
   }
 
-  private analyticsQuery(args: ValidatedAiToolArguments) {
+  private async reportingQuery(
+    tenantId: string,
+    args: ValidatedAiToolArguments,
+  ) {
+    const period = this.requiredString(args.period);
+    const branchId =
+      typeof args.branch_id === 'string' ? args.branch_id : undefined;
+    if (period === 'custom') {
+      return {
+        from: this.requiredString(args.from),
+        to: this.requiredString(args.to),
+        ...(branchId ? { branchId } : {}),
+      };
+    }
+
+    const timezone = await this.reportingTimezone(tenantId, branchId);
+    const now = new Date();
+    const today = this.localDate(now, timezone);
+    const todayStart = localDateMinuteToUtc(today, 0, timezone);
+    let from: Date;
+    let to = now;
+
+    switch (period) {
+      case 'today':
+        from = todayStart;
+        break;
+      case 'yesterday': {
+        const yesterday = this.shiftLocalDate(today, -1);
+        from = localDateMinuteToUtc(yesterday, 0, timezone);
+        to = new Date(todayStart.getTime() - 1);
+        break;
+      }
+      case 'week_to_date': {
+        const weekday = this.localWeekday(today);
+        const monday = this.shiftLocalDate(today, -((weekday + 6) % 7));
+        from = localDateMinuteToUtc(monday, 0, timezone);
+        break;
+      }
+      case 'month_to_date':
+        from = localDateMinuteToUtc(`${today.slice(0, 7)}-01`, 0, timezone);
+        break;
+      case 'last_7_days':
+        from = localDateMinuteToUtc(
+          this.shiftLocalDate(today, -6),
+          0,
+          timezone,
+        );
+        break;
+      case 'last_30_days':
+        from = localDateMinuteToUtc(
+          this.shiftLocalDate(today, -29),
+          0,
+          timezone,
+        );
+        break;
+      case 'last_month': {
+        const currentMonth = `${today.slice(0, 7)}-01`;
+        const previousMonth = this.shiftLocalMonth(currentMonth, -1);
+        from = localDateMinuteToUtc(previousMonth, 0, timezone);
+        to = new Date(
+          localDateMinuteToUtc(currentMonth, 0, timezone).getTime() - 1,
+        );
+        break;
+      }
+      default:
+        throw new Error('Validated AI reporting period is invalid');
+    }
+
     return {
-      from: this.requiredString(args.from),
-      to: this.requiredString(args.to),
-      ...(typeof args.branch_id === 'string'
-        ? { branchId: args.branch_id }
-        : {}),
+      from: from.toISOString(),
+      to: to.toISOString(),
+      ...(branchId ? { branchId } : {}),
     };
+  }
+
+  private async reportingTimezone(
+    tenantId: string,
+    branchId?: string,
+  ): Promise<string> {
+    if (branchId) {
+      const branch = await this.prisma.branch.findFirst({
+        where: { id: branchId, tenantId },
+        select: { timezone: true },
+      });
+      if (!branch) {
+        throw new Error('AI reporting branch is unavailable');
+      }
+      if (branch.timezone) {
+        return branch.timezone;
+      }
+    }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+    if (!tenant) {
+      throw new Error('AI reporting tenant is unavailable');
+    }
+    return tenant.defaultTimezone;
+  }
+
+  private localDate(value: Date, timezone: string): string {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat('en', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+        .formatToParts(value)
+        .filter((part) => part.type !== 'literal')
+        .map((part) => [part.type, part.value]),
+    );
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  }
+
+  private shiftLocalDate(value: string, days: number): string {
+    const date = new Date(`${value}T00:00:00.000Z`);
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  private shiftLocalMonth(value: string, months: number): string {
+    const date = new Date(`${value}T00:00:00.000Z`);
+    date.setUTCMonth(date.getUTCMonth() + months);
+    return date.toISOString().slice(0, 10);
+  }
+
+  private localWeekday(value: string): number {
+    return new Date(`${value}T00:00:00.000Z`).getUTCDay();
   }
 
   private safeAppointment(value: unknown) {
@@ -375,6 +508,26 @@ export class AiToolHandlerService {
       stale: loyalty.stale ?? null,
       synced_at: loyalty.synced_at ?? null,
     };
+  }
+
+  private safeMoneyEntries(value: unknown) {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value.map((entry) => {
+      const item = this.record(entry);
+      return {
+        currency: item.currency ?? null,
+        amount_kopecks: item.amount_kopecks ?? null,
+        amount_major_units: this.majorUnits(item.amount_kopecks),
+      };
+    });
+  }
+
+  private majorUnits(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value)
+      ? value / 100
+      : null;
   }
 
   private record(value: unknown): Record<string, unknown> {

@@ -5,6 +5,7 @@ import { UserRole } from '../common/domain.enums';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
@@ -15,6 +16,10 @@ describe('AiToolHandlerService output minimization', () => {
     role: UserRole.CUSTOMER,
     surface: 'web' as const,
   };
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('removes provider payload and customer PII from appointments', async () => {
     const appointmentsService = {
@@ -79,7 +84,7 @@ describe('AiToolHandlerService output minimization', () => {
             encrypted_note: 'ciphertext',
           },
         ],
-        totals: { RUB: 100_000 },
+        totals: [{ currency: 'RUB', amount_kopecks: 100_000 }],
         truncated: false,
       }),
     } as unknown as ExpensesService;
@@ -88,6 +93,7 @@ describe('AiToolHandlerService output minimization', () => {
       'expenses.read',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
+        period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
       },
@@ -96,6 +102,22 @@ describe('AiToolHandlerService output minimization', () => {
 
     expect(JSON.stringify(result)).not.toContain('private note');
     expect(JSON.stringify(result)).not.toContain('ciphertext');
+    expect(result).toMatchObject({
+      items: [
+        {
+          amount_kopecks: 100_000,
+          amount_major_units: 1_000,
+          currency: 'RUB',
+        },
+      ],
+      totals: [
+        {
+          amount_kopecks: 100_000,
+          amount_major_units: 1_000,
+          currency: 'RUB',
+        },
+      ],
+    });
   });
 
   it('returns only the authoritative loyalty summary', async () => {
@@ -157,6 +179,7 @@ describe('AiToolHandlerService output minimization', () => {
       'analytics.employee.read',
       { ...principal, role: UserRole.EMPLOYEE },
       {
+        period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
       },
@@ -166,12 +189,57 @@ describe('AiToolHandlerService output minimization', () => {
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
     expect(JSON.stringify(result)).not.toContain('Анна');
     expect(result).toMatchObject({
+      revenue: [
+        {
+          amount_kopecks: 300_000,
+          amount_major_units: 3_000,
+          currency: 'RUB',
+        },
+      ],
       staff_summary: [
         {
           appointments: 2,
-          revenue: [{ currency: 'RUB', amount_kopecks: 300_000 }],
+          revenue: [
+            {
+              currency: 'RUB',
+              amount_kopecks: 300_000,
+              amount_major_units: 3_000,
+            },
+          ],
         },
       ],
+    });
+  });
+
+  it('resolves month-to-date on the server in the tenant timezone', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-17T01:00:00.000Z'));
+    const getBusinessOverview = jest.fn().mockResolvedValue({
+      period: {},
+      appointments: {},
+    });
+    const analyticsService = {
+      getBusinessOverview,
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ defaultTimezone: 'Europe/Moscow' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'month_to_date' },
+      'execution-period',
+    );
+
+    expect(getBusinessOverview).toHaveBeenCalledWith('tenant-a', {
+      from: '2026-06-30T21:00:00.000Z',
+      to: '2026-07-17T01:00:00.000Z',
     });
   });
 
@@ -265,6 +333,7 @@ describe('AiToolHandlerService output minimization', () => {
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
     staffService?: StaffService;
+    prisma?: PrismaService;
   }) {
     return new AiToolHandlerService(
       {} as CrmService,
@@ -274,6 +343,11 @@ describe('AiToolHandlerService output minimization', () => {
       overrides.expensesService ?? ({} as ExpensesService),
       {} as CustomersService,
       overrides.staffService ?? ({} as StaffService),
+      overrides.prisma ??
+        ({
+          tenant: { findUnique: jest.fn() },
+          branch: { findFirst: jest.fn() },
+        } as unknown as PrismaService),
     );
   }
 });

@@ -27,6 +27,7 @@ export interface AiCoreModelInput {
   tools: AiCoreToolDescriptor[];
   toolResults: AiCoreToolResult[];
   allowToolCall: boolean;
+  requiredToolNames: string[];
 }
 
 export interface AiCoreModelDecision {

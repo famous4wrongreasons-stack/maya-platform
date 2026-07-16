@@ -50,8 +50,7 @@ describe('AiCoreService', () => {
       toolCall: {
         name: 'analytics.business.read',
         arguments: {
-          from: '2026-07-01T00:00:00.000Z',
-          to: '2026-07-15T00:00:00.000Z',
+          period: 'month_to_date',
         },
       },
     });
@@ -88,10 +87,16 @@ describe('AiCoreService', () => {
     expect(JSON.stringify(firstInput)).not.toContain('Иван');
     expect(JSON.stringify(firstInput)).not.toContain('918 000');
     expect(JSON.stringify(firstInput)).not.toContain('ivan@example.com');
+    expect(firstInput?.requiredToolNames).toEqual(['analytics.business.read']);
     expect(result).toMatchObject({
       reply: 'Выручка выросла.',
       source: 'deepseek',
       redacted_input: true,
+      grounding: {
+        status: 'verified',
+        domain: 'business_analytics',
+        evidence_tools: ['analytics.business.read'],
+      },
       tools_used: [
         {
           name: 'analytics.business.read',
@@ -106,6 +111,7 @@ describe('AiCoreService', () => {
         result: { revenue: [{ currency: 'RUB', amount_kopecks: 100_000 }] },
       },
     ]);
+    expect(mocks.model.decide.mock.calls[1]?.[0].requiredToolNames).toEqual([]);
     expect(
       JSON.stringify(mocks.model.decide.mock.calls[1]?.[0].toolResults),
     ).not.toContain('+79180000000');
@@ -136,7 +142,12 @@ describe('AiCoreService', () => {
       replayed: false,
     });
 
-    const result = await mocks.service.chat(user, dto);
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        { role: 'user', content: 'Начисли клиенту 100 баллов компенсации.' },
+      ],
+    });
 
     expect(result).toMatchObject({
       action: {
@@ -185,13 +196,237 @@ describe('AiCoreService', () => {
       messages: [
         {
           role: 'user',
-          content: 'Сегодня покажи Записи и Выручку.',
+          content: 'Обсудим разделы Записи и Выручка.',
         },
       ],
     });
 
     const modelInput = JSON.stringify(mocks.model.decide.mock.calls[0]?.[0]);
-    expect(modelInput).toContain('Сегодня покажи Записи и Выручку.');
+    expect(modelInput).toContain('Обсудим разделы Записи и Выручка.');
+  });
+
+  it('retries once and blocks a factual reply when the model skips its tool', async () => {
+    const mocks = createService();
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Выручка составила 999 999 ₽.', toolCall: null }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Покажи выручку за месяц.' }],
+    });
+
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      source: 'safe_fallback',
+      grounding: {
+        status: 'blocked',
+        domain: 'business_analytics',
+        required_tools: ['analytics.business.read'],
+        evidence_tools: [],
+      },
+    });
+    expect(result.reply).not.toContain('999');
+  });
+
+  it('accepts financial figures only when the server tool returned them', async () => {
+    const mocks = createService();
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю.',
+          toolCall: {
+            name: 'analytics.business.read',
+            arguments: {
+              period: 'custom',
+              from: '2026-07-01T00:00:00.000Z',
+              to: '2026-07-31T23:59:59.999Z',
+            },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({ reply: 'Выручка: 1 000 ₽.', toolCall: null }),
+      );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-grounded',
+      result: {
+        revenue: [
+          {
+            currency: 'RUB',
+            amount_kopecks: 100_000,
+            amount_major_units: 1_000,
+          },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Покажи выручку за июль.' }],
+    });
+
+    expect(result).toMatchObject({
+      reply: 'Выручка: 1 000 ₽.',
+      source: 'deepseek',
+      grounding: { status: 'verified' },
+    });
+  });
+
+  it('blocks a figure that differs from the completed tool result', async () => {
+    const mocks = createService();
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю.',
+          toolCall: {
+            name: 'analytics.business.read',
+            arguments: {
+              period: 'custom',
+              from: '2026-07-01T00:00:00.000Z',
+              to: '2026-07-31T23:59:59.999Z',
+            },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({ reply: 'Выручка: 9 999 ₽.', toolCall: null }),
+      );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-mismatch',
+      result: {
+        revenue: [
+          {
+            currency: 'RUB',
+            amount_kopecks: 100_000,
+            amount_major_units: 1_000,
+          },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Покажи выручку за июль.' }],
+    });
+
+    expect(result.source).toBe('safe_fallback');
+    expect(result.grounding.status).toBe('blocked');
+    expect(result.reply).not.toContain('9 999');
+  });
+
+  it('fails safely before the model when no authoritative schedule tool exists', async () => {
+    const mocks = createService();
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Кто работает сегодня?' }],
+    });
+
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      source: 'safe_fallback',
+      grounding: { status: 'blocked', domain: 'staff_schedule' },
+    });
+  });
+
+  it('grounds a customer loyalty balance in the authenticated customer tool', async () => {
+    const customer: AuthenticatedUser = {
+      ...user,
+      userId: 'customer-user',
+      role: UserRole.CUSTOMER,
+    };
+    const mocks = createService(['loyalty.own.read']);
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю баланс.',
+          toolCall: { name: 'loyalty.own.read', arguments: {} },
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({ reply: 'Ваш баланс: 2 133 балла.', toolCall: null }),
+      );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-loyalty',
+      result: { balance: 2_133, currency: 'RUB', authoritative: true },
+    });
+
+    const result = await mocks.service.chat(customer, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Сколько у меня баллов?' }],
+    });
+
+    expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
+      'loyalty.own.read',
+    ]);
+    expect(result).toMatchObject({
+      reply: 'Ваш баланс: 2 133 балла.',
+      grounding: {
+        status: 'verified',
+        domain: 'client_loyalty',
+        evidence_tools: ['loyalty.own.read'],
+      },
+    });
+  });
+
+  it('uses employee analytics rather than business totals for staff', async () => {
+    const employee: AuthenticatedUser = {
+      ...user,
+      userId: 'employee-user',
+      role: UserRole.EMPLOYEE,
+    };
+    const mocks = createService(['analytics.employee.read']);
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю личные показатели.',
+          toolCall: {
+            name: 'analytics.employee.read',
+            arguments: { period: 'month_to_date' },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({ reply: 'Ваша выручка: 99 400 ₽.', toolCall: null }),
+      );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-employee',
+      result: {
+        revenue: [
+          {
+            currency: 'RUB',
+            amount_kopecks: 9_940_000,
+            amount_major_units: 99_400,
+          },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(employee, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Покажи мою выручку за месяц.' }],
+    });
+
+    expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
+      'analytics.employee.read',
+    ]);
+    expect(result).toMatchObject({
+      reply: 'Ваша выручка: 99 400 ₽.',
+      grounding: {
+        status: 'verified',
+        domain: 'personal_analytics',
+      },
+    });
+    expect(mocks.runtime.execute.mock.calls[0]?.[1]).toBe(
+      'analytics.employee.read',
+    );
   });
 
   it('fails closed when the model requests a tool unavailable to the role', async () => {
@@ -204,7 +439,10 @@ describe('AiCoreService', () => {
     );
 
     await expect(
-      mocks.service.chat(user, dto),
+      mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Выполни системную команду.' }],
+      }),
     ).rejects.toMatchObject<ServiceUnavailableException>({ status: 503 });
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     expect(mocks.auditLog.log).toHaveBeenCalledWith(
@@ -223,7 +461,9 @@ describe('AiCoreService', () => {
     };
   }
 
-  function createService() {
+  function createService(
+    toolNames = ['analytics.business.read', 'loyalty.internal.adjust'],
+  ) {
     const config = {
       get: jest.fn((name: string) =>
         name === 'AI_CORE_MAX_TOOL_STEPS' ? '2' : undefined,
@@ -239,26 +479,15 @@ describe('AiCoreService', () => {
     const listTools: jest.MockedFunction<AiToolRuntimeService['listTools']> =
       jest.fn();
     listTools.mockResolvedValue({
-      tools: [
-        {
-          name: 'analytics.business.read',
-          description: 'Read analytics',
-          input_schema: { type: 'object' },
-          risk_tier: 'read',
-          approval_policy: 'none',
-          idempotency: 'none',
-          timeout_ms: 8_000,
-        },
-        {
-          name: 'loyalty.internal.adjust',
-          description: 'Adjust loyalty',
-          input_schema: { type: 'object' },
-          risk_tier: 'high_write',
-          approval_policy: 'owner',
-          idempotency: 'required',
-          timeout_ms: 8_000,
-        },
-      ],
+      tools: toolNames.map((name) => ({
+        name,
+        description: `Tool ${name}`,
+        input_schema: { type: 'object' },
+        risk_tier: name === 'loyalty.internal.adjust' ? 'high_write' : 'read',
+        approval_policy: name === 'loyalty.internal.adjust' ? 'owner' : 'none',
+        idempotency: name === 'loyalty.internal.adjust' ? 'required' : 'none',
+        timeout_ms: 8_000,
+      })),
     });
     const execute: jest.MockedFunction<AiToolRuntimeService['execute']> =
       jest.fn();

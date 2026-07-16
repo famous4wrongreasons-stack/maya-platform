@@ -15,18 +15,33 @@ describe('AiToolRegistryService', () => {
   it('normalizes bounded analytics ranges', () => {
     expect(
       service.validateArguments('analytics.business.read', {
+        period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
         branch_id: 'branch_12345678',
       }),
     ).toEqual({
+      period: 'custom',
       from: '2026-07-01T00:00:00.000Z',
       to: '2026-07-15T00:00:00.000Z',
       branch_id: 'branch_12345678',
     });
     expect(() =>
       service.validateArguments('analytics.business.read', {
+        period: 'custom',
         from: '2025-01-01T00:00:00.000Z',
+        to: '2026-07-15T00:00:00.000Z',
+      }),
+    ).toThrow(BadRequestException);
+    expect(
+      service.validateArguments('analytics.business.read', {
+        period: 'month_to_date',
+      }),
+    ).toEqual({ period: 'month_to_date' });
+    expect(() =>
+      service.validateArguments('analytics.business.read', {
+        period: 'month_to_date',
+        from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
       }),
     ).toThrow(BadRequestException);
