@@ -209,7 +209,10 @@ export class OnboardingService {
               ends_at: trialEndsAt,
               full_access: trialFullAccess,
             },
-            next_step: 'open_admin',
+            next_step:
+              calendarSource === CalendarSource.EXTERNAL
+                ? 'connect_crm'
+                : 'upload_logo_or_open_app',
           };
         },
       );

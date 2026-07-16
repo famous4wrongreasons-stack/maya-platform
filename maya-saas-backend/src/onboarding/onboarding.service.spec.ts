@@ -265,7 +265,7 @@ describe('OnboardingService', () => {
     expect(result).toMatchObject({
       access_token: 'jwt-token',
       booking_mode: 'preview',
-      next_step: 'open_admin',
+      next_step: 'connect_crm',
       tenant: {
         id: 'tenant-1',
         slug: 'studio-vector',

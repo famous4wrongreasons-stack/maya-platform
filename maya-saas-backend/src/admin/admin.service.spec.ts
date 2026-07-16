@@ -30,7 +30,7 @@ describe('AdminService tenant update boundaries', () => {
     const service = new AdminService(
       { updateTenant: updateTenantMock } as unknown as TenantsService,
       {} as BrandingService,
-      { createOrUpdateIntegration: upsertCrmMock } as unknown as CrmService,
+      { connectAndActivateIntegration: upsertCrmMock } as unknown as CrmService,
       {} as UsersService,
       {} as SubscriptionsService,
       { log: auditLogMock } as unknown as AuditLogService,

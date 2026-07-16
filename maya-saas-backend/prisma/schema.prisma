@@ -305,16 +305,21 @@ model AuthRateLimitBucket {
 }
 
 model CrmIntegration {
-  id                String   @id @default(cuid())
-  tenantId          String   @unique
+  id                String    @id @default(cuid())
+  tenantId          String    @unique
   provider          String
   encryptedApiToken String
   baseUrl           String?
-  status            String   @default("active")
+  status            String    @default("active")
   settingsJson      Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  verifiedAt        DateTime?
+  lastCheckedAt     DateTime?
+  lastSyncAt        DateTime?
+  lastErrorCode     String?
+  lastErrorAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model InternalService {

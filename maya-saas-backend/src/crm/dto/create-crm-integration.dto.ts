@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 import { CrmIntegrationStatus, CrmProvider } from '../../common/domain.enums';
 
@@ -19,6 +25,7 @@ export class CreateCrmIntegrationDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(4096)
   apiToken?: string;
 
   @ApiPropertyOptional({ example: 'https://api.crm.example' })

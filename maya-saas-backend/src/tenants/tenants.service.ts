@@ -23,6 +23,7 @@ import { asJson } from '../common/json.util';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { serializePublicCrmSettings } from '../crm/crm-provider-settings';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { evaluateTenantAccessState } from './tenant-access-state';
@@ -313,6 +314,11 @@ export class TenantsService {
             baseUrl: true,
             status: true,
             settingsJson: true,
+            verifiedAt: true,
+            lastCheckedAt: true,
+            lastSyncAt: true,
+            lastErrorCode: true,
+            lastErrorAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -341,6 +347,11 @@ export class TenantsService {
             baseUrl: true,
             status: true,
             settingsJson: true,
+            verifiedAt: true,
+            lastCheckedAt: true,
+            lastSyncAt: true,
+            lastErrorCode: true,
+            lastErrorAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -940,7 +951,17 @@ export class TenantsService {
             provider: tenant.crmIntegration.provider,
             base_url: tenant.crmIntegration.baseUrl,
             status: tenant.crmIntegration.status,
-            settings_json: tenant.crmIntegration.settingsJson ?? {},
+            has_credentials: true,
+            verified: Boolean(tenant.crmIntegration.verifiedAt),
+            verified_at: tenant.crmIntegration.verifiedAt,
+            last_checked_at: tenant.crmIntegration.lastCheckedAt,
+            last_sync_at: tenant.crmIntegration.lastSyncAt,
+            last_error_code: tenant.crmIntegration.lastErrorCode,
+            last_error_at: tenant.crmIntegration.lastErrorAt,
+            settings_json: serializePublicCrmSettings(
+              tenant.crmIntegration.provider,
+              tenant.crmIntegration.settingsJson,
+            ),
             created_at: tenant.crmIntegration.createdAt,
             updated_at: tenant.crmIntegration.updatedAt,
           }

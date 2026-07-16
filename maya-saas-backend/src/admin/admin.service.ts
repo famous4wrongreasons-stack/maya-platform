@@ -138,7 +138,7 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     this.assertCrmUpdateFieldsAllowed(dto, actor);
-    const integration = await this.crmService.createOrUpdateIntegration(
+    const integration = await this.crmService.connectAndActivateIntegration(
       id,
       dto,
     );
@@ -330,10 +330,17 @@ export class AdminService {
     dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
     actor: AuthenticatedUser,
   ): void {
-    if (actor.role !== UserRole.PLATFORM_OWNER && dto.baseUrl !== undefined) {
-      throw new ForbiddenException(
-        'Only the platform owner can override the CRM base URL',
-      );
+    if (actor.role !== UserRole.PLATFORM_OWNER) {
+      if (dto.baseUrl !== undefined) {
+        throw new ForbiddenException(
+          'Only the platform owner can override the CRM base URL',
+        );
+      }
+      if (dto.status !== undefined) {
+        throw new ForbiddenException(
+          'CRM status is controlled by connection verification',
+        );
+      }
     }
   }
 }

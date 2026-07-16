@@ -48,6 +48,7 @@ export enum CrmProvider {
 
 export enum CrmIntegrationStatus {
   ACTIVE = 'active',
+  PENDING_ACTIVATION = 'pending_activation',
   INACTIVE = 'inactive',
   ERROR = 'error',
 }
