@@ -1,7 +1,11 @@
 import importlib
+import json
+import os
 import sys
+import tempfile
 import types
 import unittest
+from datetime import date
 
 
 def _load_yclients_module():
@@ -103,6 +107,54 @@ def _load_claude_module():
 
 
 class ScheduleRegressionTests(unittest.TestCase):
+    def test_schedule_reference_distinguishes_off_from_missing_master(self):
+        yclients = _load_yclients_module()
+        payload = {
+            "updated": "2026-07-01",
+            "masters": {
+                "Илья Третьяков": {
+                    "weekly": {"чт": None},
+                    "overrides": {},
+                },
+            },
+        }
+        fd, path = tempfile.mkstemp(suffix=".json")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                json.dump(payload, stream, ensure_ascii=False)
+            yclients.SCHEDULE_FILE = path
+
+            off = yclients.get_schedule_reference(
+                "Илья Третьяков", date(2026, 7, 16)
+            )
+            missing = yclients.get_schedule_reference(
+                "Другой мастер", date(2026, 7, 16)
+            )
+
+            self.assertTrue(off["configured"])
+            self.assertFalse(off["is_working"])
+            self.assertIsNone(off["hours"])
+            self.assertFalse(missing["configured"])
+            self.assertIsNone(missing["is_working"])
+        finally:
+            os.unlink(path)
+
+    def test_working_masters_rejects_schedule_row_for_another_date(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        api.get_masters = lambda: [{"id": 7, "name": "Мастер"}]
+        api.get_staff_schedule = lambda *args, **kwargs: [{
+            "date": "2026-07-15",
+            "is_working": 1,
+            "slots": [{"from": "10:00", "to": "21:00"}],
+        }]
+
+        rows = api.get_working_masters("2026-07-16")
+
+        self.assertEqual(len(rows), 1)
+        self.assertFalse(rows[0]["is_working"])
+        self.assertTrue(rows[0]["schedule_unknown"])
+
     def test_get_available_slots_filters_overlap_with_real_records(self):
         yclients = _load_yclients_module()
         yclients._day_records_cache.clear()

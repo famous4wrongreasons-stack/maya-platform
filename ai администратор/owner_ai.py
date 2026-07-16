@@ -221,15 +221,29 @@ def _week_trend() -> dict | None:
 def _today_load() -> dict:
     """Загрузка на сегодня: кто работает, сколько записей у каждого, кто простаивает."""
     today = _today()
-    working, recs = [], []
+    schedule_rows, recs = [], []
+    schedule_fetch_failed = False
+    reference_getter = None
+    yc = None
     try:
-        from yclients import YClientsAPI
-        yc = YClientsAPI()
-        working = [m for m in (yc.get_working_masters(today) or [])
-                   if isinstance(m, dict) and m.get("is_working")]
+        import yclients as yclients_module
+        yc = yclients_module.YClientsAPI()
+        reference_getter = getattr(yclients_module, "get_schedule_reference", None)
+        schedule_rows = [
+            row for row in (yc.get_working_masters(today) or [])
+            if isinstance(row, dict) and row.get("id")
+        ]
+    except Exception as e:
+        schedule_fetch_failed = True
+        logger.error(f"owner_ai today_load schedule: {e}")
+
+    try:
+        if yc is None:
+            import yclients as yclients_module
+            yc = yclients_module.YClientsAPI()
         recs = yc.get_company_records(today, today) or []
     except Exception as e:
-        logger.error(f"owner_ai today_load: {e}")
+        logger.error(f"owner_ai today_load records: {e}")
 
     by_staff = {}
     active_records = []
@@ -263,17 +277,103 @@ def _today_load() -> dict:
         else:
             unpriced_records += 1
 
+    schedule_entries = []
+    schedule_conflicts = []
+    target_date = date.fromisoformat(today)
+    for row in schedule_rows:
+        sid = row.get("id")
+        nm = row.get("name") or f"Мастер #{sid}"
+        schedule_unknown = bool(row.get("schedule_unknown"))
+        is_working = bool(row.get("is_working")) and not schedule_unknown
+        status = "unknown" if schedule_unknown else ("working" if is_working else "off")
+        start = row.get("work_start") or ""
+        end = row.get("work_end") or ""
+        live_hours = f"{start}-{end}" if start and end else None
+        reference = {
+            "configured": False,
+            "hours": None,
+            "is_working": None,
+            "updated": None,
+        }
+        if callable(reference_getter):
+            try:
+                candidate = reference_getter(nm, target_date)
+                if isinstance(candidate, dict):
+                    reference.update(candidate)
+            except Exception as e:
+                logger.warning("owner_ai schedule reference %s: %s", sid, e)
+
+        conflict_reason = None
+        if reference.get("configured") and not schedule_unknown:
+            if bool(reference.get("is_working")) != is_working:
+                conflict_reason = "working_status"
+            elif is_working and reference.get("hours") and live_hours:
+                if str(reference["hours"]) != live_hours:
+                    conflict_reason = "working_hours"
+
+        entry = {
+            "staff_id": sid,
+            "name": nm,
+            "status": status,
+            "work_start": start,
+            "work_end": end,
+            "work_slots": row.get("work_slots") or [],
+            "records_today": by_staff.get(sid, 0),
+            "baseline": {
+                "configured": bool(reference.get("configured")),
+                "is_working": reference.get("is_working"),
+                "hours": reference.get("hours"),
+                "updated": reference.get("updated"),
+            },
+            "baseline_conflict": bool(conflict_reason),
+        }
+        schedule_entries.append(entry)
+        if conflict_reason:
+            schedule_conflicts.append({
+                "staff_id": sid,
+                "name": nm,
+                "reason": conflict_reason,
+                "yclients_status": status,
+                "yclients_hours": live_hours,
+                "baseline_status": (
+                    "working" if reference.get("is_working") else "off"
+                ),
+                "baseline_hours": reference.get("hours"),
+                "baseline_updated": reference.get("updated"),
+                "records_today": by_staff.get(sid, 0),
+            })
+
+    working_entries = [row for row in schedule_entries if row["status"] == "working"]
+    off_entries = [row for row in schedule_entries if row["status"] == "off"]
+    unknown_entries = [row for row in schedule_entries if row["status"] == "unknown"]
+    confirmed_working = [row for row in working_entries if not row["baseline_conflict"]]
+    confirmed_off = [row for row in off_entries if not row["baseline_conflict"]]
+
+    if schedule_fetch_failed and not schedule_entries:
+        schedule_status = "unavailable"
+    elif unknown_entries:
+        schedule_status = "partial"
+    elif schedule_conflicts:
+        schedule_status = "conflict"
+    else:
+        schedule_status = "verified"
+
     masters, idle, underused = [], [], []
-    for m in working:
-        sid = m.get("id")
-        nm = m.get("name") or f"Мастер #{sid}"
+    for row in working_entries:
+        sid = row["staff_id"]
+        nm = row["name"]
         cnt = by_staff.get(sid, 0)
         free = max(0, _VISITS_PER_SHIFT - cnt)
         masters.append({
             "staff_id": sid, "name": nm, "records_today": cnt,
             "free_slots_est": free,
-            "work_start": m.get("work_start", ""), "work_end": m.get("work_end", ""),
+            "work_start": row["work_start"], "work_end": row["work_end"],
+            "baseline_conflict": row["baseline_conflict"],
         })
+        # Спорную смену показываем владельцу, но не используем для действий
+        # «заполнить окна», пока источники графика не будут согласованы.
+        if row["baseline_conflict"]:
+            continue
         if cnt == 0:
             idle.append(nm)
         elif free >= 3:
@@ -287,7 +387,19 @@ def _today_load() -> dict:
         "unpriced_records": unpriced_records,
         "single_service_records": single_service_records,
         "scheduled_service_items": scheduled_service_items,
-        "working_masters": len(working),
+        "working_masters": len(working_entries),
+        "confirmed_working_masters": len(confirmed_working),
+        "staff_schedule": {
+            "date": today,
+            "source": "yclients",
+            "status": schedule_status,
+            "working": working_entries,
+            "confirmed_working": confirmed_working,
+            "off": off_entries,
+            "confirmed_off": confirmed_off,
+            "unknown": unknown_entries,
+            "conflicts": schedule_conflicts,
+        },
         "idle_masters": idle,            # работают, но 0 записей
         "underused_masters": underused,  # работают, но много свободных окон
         "masters": masters,
@@ -299,7 +411,10 @@ def business_snapshot() -> dict:
     load = _today_load()
     avg = _avg_check_30d()
     base = _summary_30d() or {}
-    free_capacity = sum(m["free_slots_est"] for m in load["masters"])
+    free_capacity = sum(
+        m["free_slots_est"] for m in load["masters"]
+        if not m.get("baseline_conflict")
+    )
     priced_revenue = _rub(load.get("booked_service_revenue_rub"))
     unpriced = _rub(load.get("unpriced_records"))
     expected = priced_revenue + unpriced * avg
@@ -6336,7 +6451,12 @@ def risk_signals(snap: dict = None, exp: dict = None, ret: dict = None,
             "type": "idle_capacity",
             "severity": "high" if snap.get("idle_masters") else "medium",
             "title": "Сегодня есть незаполненные окна",
-            "detail": "Свободная ёмкость дня ≈%d слотов." % _rub(snap.get("free_capacity_today")),
+            "detail": "Свободная ёмкость дня ≈%s." % _ru_count(
+                snap.get("free_capacity_today"),
+                "свободный слот",
+                "свободных слота",
+                "свободных слотов",
+            ),
             "potential_rub": _rub(snap.get("potential_fill_revenue_rub")),
             "action_hint": "Подними тёплый спрос: уснувшие + цикл-напоминание + лист ожидания.",
         })
@@ -6408,7 +6528,15 @@ def money_opportunities(snap: dict = None, exp: dict = None, ret: dict = None) -
         opps.append({
             "type": "empty_windows",
             "title": "Заполнить пустые окна сегодня",
-            "detail": "≈%d свободных слотов сегодня (%s)." % (snap["free_capacity_today"], who),
+            "detail": "≈%s сегодня (%s)." % (
+                _ru_count(
+                    snap["free_capacity_today"],
+                    "свободный слот",
+                    "свободных слота",
+                    "свободных слотов",
+                ),
+                who,
+            ),
             "potential_rub": snap.get("potential_fill_revenue_rub", 0),
             "estimate": True,
             "action": "fill_slots",
@@ -6518,6 +6646,8 @@ def daily_briefing() -> dict:
             "expected_revenue_rub": snap["expected_revenue_rub"],
             "avg_check_rub": snap["avg_check_rub"],
             "working_masters": snap["working_masters"],
+            "confirmed_working_masters": snap["confirmed_working_masters"],
+            "staff_schedule": snap["staff_schedule"],
             "idle_masters": snap["idle_masters"],
             "underused_masters": snap["underused_masters"],
             "free_capacity_today": snap["free_capacity_today"],
@@ -6535,5 +6665,140 @@ def daily_briefing() -> dict:
         "top_action": top_action,
         "owner_advisor": owner_advisor,
         "reputation": reputation_payload,
+        "grounding_contract": {
+            "working_staff_path": "today.staff_schedule.working",
+            "confirmed_working_staff_path": "today.staff_schedule.confirmed_working",
+            "off_staff_path": "today.staff_schedule.off",
+            "unknown_staff_path": "today.staff_schedule.unknown",
+            "conflicts_path": "today.staff_schedule.conflicts",
+            "infer_staff_names": False,
+            "conflicts_require_explicit_caveat": True,
+        },
         "note": snap["note"],
     }
+
+
+def format_daily_briefing(brief: dict) -> str:
+    """Формирует проверенную owner-сводку без участия языковой модели."""
+    brief = brief if isinstance(brief, dict) else {}
+    today = brief.get("today") if isinstance(brief.get("today"), dict) else {}
+    schedule = (
+        today.get("staff_schedule")
+        if isinstance(today.get("staff_schedule"), dict)
+        else {}
+    )
+
+    def person(row: dict) -> str:
+        name = row.get("name") or "Мастер"
+        start = row.get("work_start") or ""
+        end = row.get("work_end") or ""
+        return f"{name} ({start}–{end})" if start and end else name
+
+    def date_label(value) -> str:
+        weekdays = [
+            "понедельник", "вторник", "среда", "четверг",
+            "пятница", "суббота", "воскресенье",
+        ]
+        months = [
+            "января", "февраля", "марта", "апреля", "мая", "июня",
+            "июля", "августа", "сентября", "октября", "ноября", "декабря",
+        ]
+        try:
+            parsed = date.fromisoformat(str(value or "")[:10])
+            return f"{weekdays[parsed.weekday()]}, {parsed.day} {months[parsed.month - 1]}"
+        except Exception:
+            return str(value or "сегодня")
+
+    lines = [
+        f"Вот проверенная сводка на сегодня — {date_label(brief.get('date'))}.",
+        "",
+        (
+            f"Загрузка: {_ru_count(today.get('booked'), 'запись', 'записи', 'записей')}. "
+            f"Ожидаемая выручка — около {_money(today.get('expected_revenue_rub'))}, "
+            f"средний чек — {_money(today.get('avg_check_rub'))}."
+        ),
+    ]
+
+    confirmed_working = [
+        row for row in (schedule.get("confirmed_working") or [])
+        if isinstance(row, dict)
+    ]
+    confirmed_off = [
+        row for row in (schedule.get("confirmed_off") or [])
+        if isinstance(row, dict)
+    ]
+    unknown = [
+        row for row in (schedule.get("unknown") or [])
+        if isinstance(row, dict)
+    ]
+    conflicts = [
+        row for row in (schedule.get("conflicts") or [])
+        if isinstance(row, dict)
+    ]
+
+    lines.extend(["", "График:"])
+    if confirmed_working:
+        lines.append("Работают подтверждённо: " + ", ".join(person(row) for row in confirmed_working) + ".")
+    else:
+        lines.append("Подтверждённых рабочих смен сейчас нет.")
+    if confirmed_off:
+        lines.append("Выходные подтверждены: " + ", ".join(row.get("name") or "Мастер" for row in confirmed_off) + ".")
+
+    if conflicts:
+        lines.append("Нужна сверка графика — источники расходятся:")
+        for row in conflicts:
+            live_status = row.get("yclients_status")
+            live_hours = row.get("yclients_hours")
+            if live_status == "working":
+                live = "YClients показывает смену" + (f" {live_hours.replace('-', '–')}" if live_hours else "")
+            else:
+                live = "YClients показывает выходной"
+            baseline = (
+                "базовый график показывает смену"
+                if row.get("baseline_status") == "working"
+                else "базовый график показывает выходной"
+            )
+            records = _rub(row.get("records_today"))
+            records_text = f", записей на день: {records}" if records else ""
+            lines.append(f"• {row.get('name') or 'Мастер'}: {live}; {baseline}{records_text}.")
+    if unknown:
+        lines.append(
+            "Не удалось проверить график: "
+            + ", ".join(row.get("name") or "Мастер" for row in unknown)
+            + "."
+        )
+
+    free_capacity = _rub(today.get("free_capacity_today"))
+    lines.append("")
+    lines.append(
+        f"Подтверждённая свободная ёмкость — примерно {free_capacity} "
+        + ("слот." if free_capacity == 1 else "слота." if 2 <= free_capacity <= 4 else "слотов.")
+    )
+
+    trend = brief.get("week_trend") if isinstance(brief.get("week_trend"), dict) else {}
+    gross = trend.get("gross") if isinstance(trend.get("gross"), dict) else {}
+    visits = trend.get("visits") if isinstance(trend.get("visits"), dict) else {}
+    trend_parts = []
+    if gross.get("delta_pct") is not None:
+        trend_parts.append(f"выручка {float(gross['delta_pct']):+g}%")
+    if visits.get("delta_pct") is not None:
+        trend_parts.append(f"визиты {float(visits['delta_pct']):+g}%")
+    if trend_parts:
+        lines.append("Неделя к прошлой: " + ", ".join(trend_parts) + ".")
+
+    top_risk = brief.get("top_risk") if isinstance(brief.get("top_risk"), dict) else {}
+    if top_risk:
+        risk_text = top_risk.get("detail") or top_risk.get("title")
+        if risk_text:
+            lines.append(f"Главный риск: {risk_text}")
+    top_priority = (
+        brief.get("top_priority")
+        if isinstance(brief.get("top_priority"), dict)
+        else {}
+    )
+    if top_priority:
+        priority_text = top_priority.get("detail") or top_priority.get("title")
+        if priority_text:
+            lines.append(f"Приоритет дня: {priority_text}")
+
+    return "\n".join(lines).strip()

@@ -80,11 +80,12 @@ def get_schedule_from_file(master_name: str, days_ahead: int = 14) -> list[dict]
         return [{"error": str(e)}]
 
 
-def get_day_hours(master_name: str, date_obj) -> str | None:
-    """
-    Возвращает часы работы мастера на конкретную дату ('10:00-21:00')
-    или None, если выходной либо мастер не найден.
-    date_obj — объект datetime.date.
+def get_schedule_reference(master_name: str, date_obj) -> dict:
+    """Возвращает строку базового графика из ``schedule.json``.
+
+    Файл не заменяет живой график YClients. Он нужен как независимый базовый
+    шаблон, чтобы операционная сводка могла заметить расхождение и не выдать
+    спорную смену за бесспорный факт.
     """
     RU_DAYS = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"]
     try:
@@ -99,18 +100,46 @@ def get_day_hours(master_name: str, date_obj) -> str | None:
                 found_key = key
                 break
         if not found_key:
-            return None
+            return {
+                "configured": False,
+                "hours": None,
+                "is_working": None,
+                "updated": data.get("updated"),
+            }
 
         master_data = masters[found_key]
         overrides = master_data.get("overrides", {})
         date_str = date_obj.strftime("%Y-%m-%d")
         if date_str in overrides:
-            return overrides[date_str]
-
-        weekly = master_data.get("weekly", {})
-        return weekly.get(RU_DAYS[date_obj.weekday()])
+            hours = overrides[date_str]
+        else:
+            weekly = master_data.get("weekly", {})
+            hours = weekly.get(RU_DAYS[date_obj.weekday()])
+        return {
+            "configured": True,
+            "hours": hours or None,
+            "is_working": bool(hours),
+            "updated": data.get("updated"),
+        }
     except Exception:
+        return {
+            "configured": False,
+            "hours": None,
+            "is_working": None,
+            "updated": None,
+        }
+
+
+def get_day_hours(master_name: str, date_obj) -> str | None:
+    """
+    Возвращает часы работы мастера на конкретную дату ('10:00-21:00')
+    или None, если выходной либо мастер не найден.
+    date_obj — объект datetime.date.
+    """
+    reference = get_schedule_reference(master_name, date_obj)
+    if not reference.get("configured"):
         return None
+    return reference.get("hours")
 
 # Кэш: {ключ: (данные, время_записи)}
 _cache: dict = {}
@@ -305,17 +334,34 @@ class YClientsAPI:
         def _hm(v):
             return (v or "")[:5]   # '10:00:00' → '10:00'
 
+        def _row_for_date(rows):
+            valid = [row for row in (rows or []) if isinstance(row, dict)]
+            exact = next((
+                row for row in valid
+                if str(row.get("date") or "")[:10] == date_str
+            ), None)
+            if exact is not None:
+                return exact, False
+            # Некоторые совместимые ответы на однодневный запрос не содержат
+            # date. Единственную такую строку можно использовать безопасно.
+            if len(valid) == 1 and not valid[0].get("date"):
+                return valid[0], False
+            mismatch = bool(valid)
+            return {}, mismatch
+
         def _one(m):
             sid = m["id"]
             rows = self.get_staff_schedule(sid, date_str, date_str)
-            first = rows[0] if rows and isinstance(rows[0], dict) else {}
-            if first.get("error"):
+            first, date_mismatch = _row_for_date(rows)
+            if first.get("error") or date_mismatch:
                 rows = self.get_staff_schedule(sid, date_str, date_str)   # 1 ретрай
-                first = rows[0] if rows and isinstance(rows[0], dict) else {}
-            sched_err = bool(first.get("error"))
+                first, date_mismatch = _row_for_date(rows)
+            sched_err = bool(first.get("error") or date_mismatch)
             if sched_err:
-                logger.warning("schedule fetch failed for staff %s on %s: %s",
-                               sid, date_str, first.get("error"))
+                logger.warning(
+                    "schedule fetch failed or returned another date for staff %s on %s: %s",
+                    sid, date_str, first.get("error") or "date_mismatch",
+                )
             slots = first.get("slots") or []
             is_working = bool(first.get("is_working") and slots)
             work_slots = ([{"from": _hm(s.get("from")), "to": _hm(s.get("to"))}

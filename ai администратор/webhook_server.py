@@ -51,6 +51,7 @@ import growth_planner
 import lead_alerts
 import master_briefing
 import masters_ai
+import maya_capabilities
 import memory
 import owner_ai
 import reputation
@@ -6820,6 +6821,385 @@ def _rub(value) -> str:
     return f"{n:,}".replace(",", " ") + " ₽"
 
 
+_FOUNDER_RULE_DELETE_RE = re.compile(
+    r"^(?:забудь|удали|отмени|деактивируй)\s+правило\s*#?\s*(\d+)\s*[.!?]*$",
+    re.IGNORECASE,
+)
+_FOUNDER_RULE_ADD_RE = re.compile(
+    r"^(?:(?:запомни|сохрани|добавь)\s+(?:новое\s+)?правило"
+    r"(?:\s+(?:для\s+)?(?:майи|работы|бизнеса|салона))?"
+    r"|(?:научись|обучись)\s+(?:новому\s+)?правилу)\s*(?::|—|-)?\s*(.*)$",
+    re.IGNORECASE | re.DOTALL,
+)
+_FOUNDER_RULE_UNSAFE_RE = re.compile(
+    r"\b(?:игнорируй|обойди|отмени)\b.{0,80}"
+    r"\b(?:системн\w*\s+правил|безопасност|авторизац|провер\w*\s+доступ)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+_FOUNDER_RULE_PERMISSION_RE = re.compile(
+    r"\b(?:разреш\w*|запрет\w*|включ\w*|отключ\w*|открой\w*|закрой\w*)\b"
+    r".{0,100}\b(?:доступ\w*|прав\w*|истор\w*|данн\w*|карточ\w*)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _founder_rule_command(message: str) -> tuple[str, str | int | None] | None:
+    """Parse only explicit procedural-memory commands, never ordinary chat."""
+    text = (message or "").strip()
+    if not text:
+        return None
+    text = re.sub(
+        r"^(?:майя|мая|маюш(?:а|ка)?)\s*[,!:—-]?\s*",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    low = text.lower().replace("ё", "е")
+
+    match = _FOUNDER_RULE_DELETE_RE.match(text)
+    if match:
+        return "delete", int(match.group(1))
+    if "чему я тебя науч" in low or (
+        any(word in low for word in ("покажи", "перечисли")) and "правил" in low
+    ):
+        return "list", None
+    match = _FOUNDER_RULE_ADD_RE.match(text)
+    if match:
+        rule = (match.group(1) or "").strip(" \t\r\n:—-")
+        return ("add", rule) if rule else ("usage", None)
+    return None
+
+
+def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Founder-only procedural memory available without an LLM round-trip."""
+    command = _founder_rule_command(message)
+    if not command:
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not info.get("is_founder"):
+        logger.warning("Founder memory command denied for chat_id=%s", chat_id)
+        return "Постоянные правила MAYA может менять только основатель."
+    if str(mode or "").strip().lower() != "staff":
+        return "Чтобы изменить постоянные правила MAYA, откройте рабочий чат."
+
+    action, value = command
+    if action == "usage":
+        return "Напишите правило полностью: «Майя, запомни правило: …»."
+    if action == "list":
+        rules = database.list_salon_rules(active_only=True, limit=40)
+        if not rules:
+            return "Постоянных правил пока нет."
+        lines = [f"{row['id']}. {row['rule_text']}" for row in rules]
+        return "Постоянные правила MAYA:\n" + "\n".join(lines)
+    if action == "delete":
+        deleted = database.deactivate_salon_rule(int(value))
+        if deleted:
+            return f"Удалила правило [{int(value)}]. Со следующего сообщения оно не действует."
+        return f"Действующего правила [{int(value)}] нет."
+
+    rule = str(value or "").strip()
+    if len(rule) < 8:
+        return "Правило слишком короткое. Уточните, что именно MAYA должна делать."
+    if len(rule) > 500:
+        return "Правило длиннее 500 символов. Сформулируйте его короче и конкретнее."
+    redacted = anonymizer.redact_pii(rule)
+    if redacted != rule:
+        return "Не сохранила правило: постоянная память не должна содержать персональные данные."
+    if _FOUNDER_RULE_UNSAFE_RE.search(rule):
+        return "Не сохранила правило: оно пытается отменить серверные ограничения безопасности."
+    if _FOUNDER_RULE_PERMISSION_RE.search(rule):
+        return (
+            "Не сохранила правило: разрешения меняются только прямой "
+            "командой из безопасного каталога. Например: «Майя, разреши всем "
+            "клиентам видеть свою историю посещений»."
+        )
+
+    rules = database.list_salon_rules(active_only=True, limit=100)
+    normalized = re.sub(r"\s+", " ", rule).strip().lower().replace("ё", "е")
+    for row in rules:
+        current = re.sub(r"\s+", " ", str(row.get("rule_text") or "")).strip().lower().replace("ё", "е")
+        if current == normalized:
+            return f"Это правило уже сохранено под номером [{row['id']}]."
+    if len(rules) >= 40:
+        return "Активных правил уже 40. Сначала удалите ненужное командой «Майя, удали правило N»."
+
+    rule_id = database.add_salon_rule(rule, created_by=int(chat_id))
+    return (
+        f"Запомнила правило [{rule_id}]: {rule}\n"
+        "Оно начнёт действовать со следующего сообщения во всех чатах MAYA."
+    )
+
+
+def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
+    """Parse explicit global capability commands from the founder."""
+    text = (message or "").strip()
+    if not text:
+        return None
+    text = re.sub(
+        r"^(?:майя|мая|маюш(?:а|ка)?)\s*[,!:—-]?\s*",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    low = text.lower().replace("ё", "е")
+    if (
+        any(marker in low for marker in ("покажи", "перечисли", "какие", "статус"))
+        and any(marker in low for marker in ("разрешен", "доступ", "возможност"))
+    ):
+        return "list", None
+
+    history_target = any(marker in low for marker in (
+        "истори", "прошлые посещ", "прошлые визит",
+    ))
+    all_clients = "клиент" in low or "всем пользовател" in low
+    if not (history_target and all_clients):
+        return None
+    if any(marker in low for marker in (
+        "запрети", "отключи", "выключи", "закрой доступ", "не разрешай",
+    )):
+        return maya_capabilities.CLIENT_SELF_VISIT_HISTORY, False
+    if any(marker in low for marker in (
+        "разреши", "включи", "открой доступ", "дай доступ",
+    )):
+        return maya_capabilities.CLIENT_SELF_VISIT_HISTORY, True
+    return None
+
+
+def _founder_permission_reply(
+    chat_id: int,
+    message: str,
+    mode: str = "staff",
+) -> str | None:
+    command = _founder_permission_command(message)
+    if not command:
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if not info.get("is_founder"):
+        logger.warning("Founder capability command denied for chat_id=%s", chat_id)
+        return "Глобальные разрешения MAYA может менять только основатель."
+    if str(mode or "").strip().lower() != "staff":
+        return "Чтобы изменить разрешения MAYA, откройте рабочий чат."
+
+    capability, enabled = command
+    if capability == "list":
+        rows = maya_capabilities.list_capabilities()
+        lines = ["Разрешения MAYA для клиентов:"]
+        for row in rows:
+            status = "включено" if row["enabled"] else "отключено"
+            lines.append(f"• {row['label']}: {status}")
+        return "\n".join(lines)
+
+    try:
+        result = maya_capabilities.set_enabled(
+            capability,
+            bool(enabled),
+            actor_id=int(chat_id),
+        )
+    except (KeyError, PermissionError):
+        return "Такого безопасного разрешения нет в каталоге MAYA."
+    if result["enabled"]:
+        return (
+            "Разрешила всем авторизованным клиентам видеть в чате только свою "
+            "историю посещений. Доступ к чужим карточкам остаётся закрыт."
+        )
+    return (
+        "Отключила клиентам просмотр истории посещений через чат. "
+        "Данные в YClients не изменены."
+    )
+
+
+_OWN_VISIT_HISTORY_RE = re.compile(
+    r"\b(?:"
+    r"истори\w*\s+мо(?:их|ей)\s+(?:визит|посещ)\w*|"
+    r"мо[яию]\s+истори\w*\s+(?:визит|посещ)\w*|"
+    r"мо[ия]\s+(?:прошл\w*\s+)?(?:визит|посещ)\w*|"
+    r"когда\s+я\s+(?:был|приходил|ходил)\w*|"
+    r"что\s+я\s+(?:делал|брал)\w*\s+(?:в\s+)?прошл\w*\s+(?:раз|визит)\w*|"
+    r"к\s+кому\s+я\s+(?:ходил|записывался)\w*|"
+    r"какие\s+услуг\w*\s+я\s+(?:брал|делал)\w*"
+    r")\b",
+    re.IGNORECASE,
+)
+_OWN_VISIT_HISTORY_REQUEST_RE = re.compile(
+    r"\b(?:покажи|дай|расскажи|открой)\w*.{0,30}\bмне\b.{0,30}"
+    r"(?:истори|визит|посещ)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _own_visit_history_intent(message: str) -> bool:
+    """Match first-person history requests, never another client's dossier."""
+    text = (message or "").strip().lower().replace("ё", "е")
+    if not text:
+        return False
+    return bool(
+        _OWN_VISIT_HISTORY_RE.search(text)
+        or _OWN_VISIT_HISTORY_REQUEST_RE.search(text)
+    )
+
+
+def _visit_history_date_label(value) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return "дата не указана"
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return parsed.strftime("%d.%m.%Y")
+    except ValueError:
+        try:
+            return date.fromisoformat(raw[:10]).strftime("%d.%m.%Y")
+        except ValueError:
+            return raw[:10]
+
+
+async def _own_visit_history_reply(chat_id: int, message: str) -> str | None:
+    """Return only the authenticated user's attended YClients visits."""
+    if not _own_visit_history_intent(message):
+        return None
+    if not maya_capabilities.is_enabled(
+        maya_capabilities.CLIENT_SELF_VISIT_HISTORY
+    ):
+        return "Просмотр истории посещений через чат сейчас отключён владельцем."
+    try:
+        client = database.get_client(int(chat_id))
+    except Exception as e:
+        logger.error("own visit history client lookup: %s", e)
+        client = None
+    if not client or not client.get("id"):
+        return (
+            "Ваш аккаунт пока не связан с клиентской карточкой. "
+            "Откройте личный кабинет и завершите привязку."
+        )
+    phone = str(client.get("phone") or "").strip()
+    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return "В клиентской карточке не подтверждён телефон. Завершите привязку в личном кабинете."
+
+    client_id = int(client["id"])
+    try:
+        cached = memory.normalize_history(
+            database.get_client_history_cached(client_id, max_age_hours=24 * 30)
+        )
+    except Exception:
+        cached = []
+
+    refreshed = None
+    try:
+        refreshed = await asyncio.to_thread(
+            memory.warm_client_history_cache_for_phone,
+            client_id,
+            phone,
+            _yc,
+            True,
+            30,
+        )
+    except Exception as e:
+        logger.error("own visit history refresh: %s", e)
+
+    if isinstance(refreshed, dict) and refreshed.get("ok"):
+        history = memory.normalize_history(refreshed.get("history") or [])
+        used_cached_fallback = False
+    else:
+        history = cached
+        used_cached_fallback = bool(cached)
+
+    history = [
+        row for row in history
+        if isinstance(row, dict) and (
+            row.get("date") or row.get("services") or row.get("master")
+        )
+    ]
+    history.sort(key=lambda row: str(row.get("date") or ""), reverse=True)
+    if not history:
+        return "В YClients не нашла завершённых посещений для вашей привязанной карточки."
+
+    low = (message or "").lower().replace("ё", "е")
+    full = any(marker in low for marker in (
+        "всю истор", "полную истор", "все посещ", "все визит",
+    ))
+    limit = 30 if full else 10
+    shown = history[:limit]
+    lines = ["Вот ваша история завершённых посещений из YClients:"]
+    for index, row in enumerate(shown, 1):
+        service_titles = [
+            str(item.get("title") or "").strip()
+            for item in (row.get("services") or [])
+            if isinstance(item, dict) and str(item.get("title") or "").strip()
+        ]
+        if not service_titles and str(row.get("service") or "").strip():
+            service_titles = [str(row["service"]).strip()]
+        services = ", ".join(service_titles) or "услуги не указаны"
+        master = str(row.get("master") or "").strip()
+        details = f"{_visit_history_date_label(row.get('date'))}: {services}"
+        if master:
+            details += f", мастер {master}"
+        lines.append(f"{index}. {details}")
+    if len(history) > len(shown):
+        lines.append(
+            f"Показала {len(shown)} последних из {len(history)} найденных. "
+            "Спросите «покажи полную историю моих посещений», чтобы увидеть больше."
+        )
+    if used_cached_fallback:
+        lines.append(
+            "YClients временно не ответил, поэтому показываю последнюю "
+            "синхронизированную историю."
+        )
+    return "\n".join(lines)
+
+
+def _owner_daily_briefing_intent(message: str) -> bool:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return False
+    if any(marker in low for marker in (
+        "сводка на сегодня",
+        "сводку на сегодня",
+        "брифинг на сегодня",
+        "план на день",
+        "с чего начать",
+        "что мне сделать",
+    )):
+        return True
+    has_today = "сегодня" in low or "на текущий день" in low
+    has_business_scope = any(marker in low for marker in (
+        "по бизнесу",
+        "по салону",
+        "с бизнесом",
+        "с салоном",
+        "что у нас",
+        "как дела",
+        "загрузка",
+    ))
+    return has_today and has_business_scope
+
+
+def _owner_daily_briefing_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Verified daily brief that does not depend on an available LLM quota."""
+    if str(mode or "").strip().lower() != "staff":
+        return None
+    if not _owner_daily_briefing_intent(message):
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if info.get("role") != "owner" and not info.get("is_founder"):
+        return None
+    try:
+        import owner_ai
+        return owner_ai.format_daily_briefing(owner_ai.daily_briefing())
+    except Exception as e:
+        logger.error("owner daily briefing shortcut: %s", e)
+        return "Не смогла собрать проверенную сводку из YClients. Попробуйте ещё раз через минуту."
+
+
 def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
     """Deterministic answer for owner/founder questions about master revenue/profit."""
     if str(mode or "").strip().lower() != "staff":
@@ -7368,6 +7748,47 @@ async def chat_handler(request: web.Request) -> web.Response:
     conversations = load_conversations()
     history = conversations.get(history_key) or []
 
+    founder_permission_reply = _founder_permission_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if founder_permission_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_permission_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_permission_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
+    if founder_learning_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_learning_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    own_history_reply = await _own_visit_history_reply(chat_id, message)
+    if own_history_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(own_history_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": own_history_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -7390,6 +7811,19 @@ async def chat_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _cabinet_response({
             "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
+    if owner_daily_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_daily_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_daily_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -7760,6 +8194,47 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     conversations = load_conversations()
     history = conversations.get(history_key) or []
 
+    founder_permission_reply = _founder_permission_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if founder_permission_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_permission_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_permission_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
+    if founder_learning_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(founder_learning_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": founder_learning_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    own_history_reply = await _own_visit_history_reply(chat_id, message)
+    if own_history_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(own_history_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": own_history_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -7782,6 +8257,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _cabinet_response({
             "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
+    if owner_daily_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_daily_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_daily_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })

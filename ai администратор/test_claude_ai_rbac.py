@@ -753,6 +753,19 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("start_gift_cert_purchase", names)
         self.assertNotIn("show_subscription_plans", names)
 
+    def test_founder_prompt_forbids_inferred_staff_schedule_names(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        prompt = json.dumps(
+            claude_ai._build_system_prompt(339683535, "founder", "staff"),
+            ensure_ascii=False,
+        )
+
+        self.assertIn("today.staff_schedule.working", prompt)
+        self.assertIn("слово «ты» тоже считается", prompt)
+        self.assertIn("status=conflict", prompt)
+        self.assertIn("infer_staff_names", prompt)
+
     def test_staff_surface_blocks_booking_tool_even_if_called_directly(self):
         claude_ai, logs = _load_claude_ai()
 
