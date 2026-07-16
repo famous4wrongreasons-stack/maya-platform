@@ -19,7 +19,7 @@ Current implementation state:
 |---|---|---:|---|
 | YClients | ready | yes | real connection after tenant acceptance |
 | Altegio | ready | yes | compatible adapter, requires tenant acceptance |
-| MAYA mock | development_only | yes | local/test/trial preview only |
+| MAYA mock | development_only | local only | local/test/trial preview only |
 | DIKIDI | planned | no | adapter scaffold only |
 | Whitelines | planned | no | adapter scaffold only |
 | Salon Online | planned | no | adapter scaffold only |
@@ -38,6 +38,48 @@ Each tenant configures ownership separately:
 | payments | maya, external_crm, payment_provider |
 
 Hybrid requires a documented conflict rule. Timestamp-only last-write-wins is not sufficient for bookings or money.
+
+## Tenant connection lifecycle
+
+Owner-facing clients use tenant-scoped routes and never send a tenant ID in the
+path. The authenticated membership resolves the tenant:
+
+| Method | Route | Purpose |
+|---|---|---|
+| `GET` | `/api/integrations/crm` | Safe connection status without credentials |
+| `POST` | `/api/integrations/crm/connect` | Verify candidate credentials, then store them encrypted as `pending_activation` |
+| `GET` | `/api/integrations/crm/preview` | Refresh normalized service and staff preview |
+| `POST` | `/api/integrations/crm/activate` | Recheck and atomically activate CRM plus external calendar source |
+| `POST` | `/api/integrations/crm/recheck` | Refresh connection health |
+| `DELETE` | `/api/integrations/crm` | Delete the tenant credential and disconnect |
+
+The MVP YClients/Altegio payload contains `provider`, `apiToken` and
+`settingsJson.companyId`. `activeMasterIds` and `currency` are optional. The
+token exists only in request memory. It is not accepted through AI chat,
+analytics, URLs or provider settings.
+
+DeepSeek/OpenAI, Yandex ID, Telegram Login, SMS, email delivery, MAYA
+subscription billing and the YClients partner token are platform-owned server
+secrets. A tenant never enters them. Per-tenant merchant acquiring is a
+separate future payment integration and is not implied by CRM activation.
+
+`connect` performs provider calls before encryption or persistence. A failed
+candidate returns a stable error code and leaves the previous connection
+untouched. A successful candidate returns a safe preview and is still blocked
+from booking until the owner calls `activate`.
+
+Connection statuses:
+
+| Status | Meaning | Booking use |
+|---|---|---|
+| `pending_activation` | Credentials verified, owner confirmation pending | blocked |
+| `active` | Verified and activated | allowed by the remaining booking gates |
+| `error` | Stored connection failed its latest check | blocked |
+| `inactive` | Deliberately disabled legacy state | blocked |
+
+The older platform-admin routes remain compatible, but now internally perform
+verify-before-save and immediate activation. New tenant UI must use the
+tenant-scoped routes above.
 
 ## Sync flow
 
@@ -62,9 +104,14 @@ sequenceDiagram
 ## Security and reliability
 
 - Credentials are encrypted at rest and never returned by API.
+- Provider settings are allowlisted before persistence and again before API
+  serialization so a token cannot be smuggled through `settingsJson`.
 - Connector factory receives tenant-bound decrypted credentials for one call scope.
 - Webhooks verify signatures where supported, map credentials to tenant server-side and use idempotency keys.
-- Sync cursors, retry count, last success, last error category and provider request ID are persisted.
+- Current connection health persists verification time, latest check, latest
+  successful preview/sync and a sanitized error category. Sync cursors, retry
+  counters and provider request IDs remain part of the later background-sync
+  worker.
 - Backoff distinguishes rate limit, transient network and permanent validation errors.
 - External IDs are unique per `(tenant, provider, entity_type, external_id)`.
 - Booking reschedule remains non-destructive; no delete-and-recreate fallback.

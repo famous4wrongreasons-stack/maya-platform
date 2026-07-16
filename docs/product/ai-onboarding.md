@@ -156,7 +156,8 @@ frontend must not infer fields from confidence or recreate parser rules.
 matching activation token, required owner contact data and optional edits from
 the confirmation card. For an internal calendar it creates the owner provider,
 additional providers, services and weekly schedules. For an external calendar
-it creates a safe CRM preview and returns `next_step: "connect_crm"`.
+it creates only a non-production mock preview and returns
+`next_step: "connect_crm"`. A real credential is never collected in chat.
 
 The response contains the owner session, tenant, trial state,
 `trial_activation.counted_as_connected_business: true`, `branding_mode:
@@ -164,6 +165,13 @@ The response contains the owner session, tenant, trial state,
 
 - `upload_logo_or_open_app`
 - `connect_crm`
+
+For `connect_crm`, the app opens the protected integration screen and uses the
+tenant-scoped lifecycle from `docs/architecture/crm-integration.md`. The owner
+first sees normalized services and specialists, then explicitly activates the
+connection. Choosing "connect later" keeps external booking blocked and leaves
+a permanent "Integrations" entry in owner settings; it must never become an
+unreachable onboarding dead end.
 
 ## Expiry and subscription fence
 
