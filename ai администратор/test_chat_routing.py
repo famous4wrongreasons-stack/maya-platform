@@ -170,6 +170,35 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("марже", reply)
         self.assertNotIn("Команда:", reply)
 
+    def test_founder_daily_business_question_uses_verified_shortcut(self):
+        ws = _load_webhook_server()
+        owner_ai = sys.modules["owner_ai"]
+        owner_ai.daily_briefing = lambda: {"date": "2026-07-16"}
+        owner_ai.format_daily_briefing = lambda brief: (
+            "Проверенная сводка: Стас Мосин — выходной; "
+            "Илья Третьяков — нужна сверка."
+        )
+
+        reply = ws._owner_daily_briefing_reply(
+            948205934,
+            "Маюш, что у нас по бизнесу сегодня?",
+            mode="staff",
+        )
+
+        self.assertIn("Стас Мосин — выходной", reply)
+        self.assertIn("Илья Третьяков — нужна сверка", reply)
+
+    def test_daily_business_shortcut_is_not_available_on_client_surface(self):
+        ws = _load_webhook_server()
+
+        reply = ws._owner_daily_briefing_reply(
+            948205934,
+            "Что у нас по бизнесу сегодня?",
+            mode="client",
+        )
+
+        self.assertIsNone(reply)
+
     def test_manager_staff_surface_does_not_receive_master_profit_salary(self):
         ws = _load_webhook_server()
         sys.modules["database"].get_setting = lambda key, default=None: (

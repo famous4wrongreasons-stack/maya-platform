@@ -6820,6 +6820,52 @@ def _rub(value) -> str:
     return f"{n:,}".replace(",", " ") + " ₽"
 
 
+def _owner_daily_briefing_intent(message: str) -> bool:
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return False
+    if any(marker in low for marker in (
+        "сводка на сегодня",
+        "сводку на сегодня",
+        "брифинг на сегодня",
+        "план на день",
+        "с чего начать",
+        "что мне сделать",
+    )):
+        return True
+    has_today = "сегодня" in low or "на текущий день" in low
+    has_business_scope = any(marker in low for marker in (
+        "по бизнесу",
+        "по салону",
+        "с бизнесом",
+        "с салоном",
+        "что у нас",
+        "как дела",
+        "загрузка",
+    ))
+    return has_today and has_business_scope
+
+
+def _owner_daily_briefing_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
+    """Verified daily brief that does not depend on an available LLM quota."""
+    if str(mode or "").strip().lower() != "staff":
+        return None
+    if not _owner_daily_briefing_intent(message):
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if info.get("role") != "owner" and not info.get("is_founder"):
+        return None
+    try:
+        import owner_ai
+        return owner_ai.format_daily_briefing(owner_ai.daily_briefing())
+    except Exception as e:
+        logger.error("owner daily briefing shortcut: %s", e)
+        return "Не смогла собрать проверенную сводку из YClients. Попробуйте ещё раз через минуту."
+
+
 def _owner_master_profit_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
     """Deterministic answer for owner/founder questions about master revenue/profit."""
     if str(mode or "").strip().lower() != "staff":
@@ -7394,6 +7440,19 @@ async def chat_handler(request: web.Request) -> web.Response:
             "transcript": transcript or "",
         })
 
+    owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
+    if owner_daily_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_daily_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_daily_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
     owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
     if owner_profit_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -7782,6 +7841,19 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _cabinet_response({
             "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
+    if owner_daily_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append({"role": "user", "content": safe_message})
+        history.append(_assistant_history_item(owner_daily_reply))
+        conversations[history_key] = history[-30:]
+        save_conversations(conversations)
+        return _cabinet_response({
+            "reply": owner_daily_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })

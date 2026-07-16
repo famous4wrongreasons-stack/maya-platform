@@ -470,6 +470,65 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(brief["today"]["free_capacity_today"], 6)
         self.assertNotIn("Мастер 2", brief["today"]["idle_masters"])
 
+    def test_daily_briefing_formatter_uses_only_verified_schedule_groups(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        brief = {
+            "date": "2026-07-16",
+            "today": {
+                "booked": 21,
+                "expected_revenue_rub": 41900,
+                "avg_check_rub": 2069,
+                "free_capacity_today": 3,
+                "staff_schedule": {
+                    "confirmed_working": [
+                        {
+                            "name": "Алексей Дарма",
+                            "work_start": "10:00",
+                            "work_end": "21:00",
+                        },
+                        {
+                            "name": "Максим Чурсинов",
+                            "work_start": "10:00",
+                            "work_end": "21:00",
+                        },
+                    ],
+                    "confirmed_off": [{"name": "Стас Мосин"}],
+                    "unknown": [],
+                    "conflicts": [
+                        {
+                            "name": "Илья Третьяков",
+                            "yclients_status": "working",
+                            "yclients_hours": "12:00-21:00",
+                            "baseline_status": "off",
+                            "records_today": 7,
+                        },
+                    ],
+                },
+            },
+            "week_trend": {
+                "gross": {"delta_pct": -10},
+                "visits": {"delta_pct": -10},
+            },
+            "top_risk": {
+                "detail": "Текущая неделя к прошлой: -10% по выручке.",
+            },
+            "top_priority": {
+                "detail": "Вернуть клиентов с наступившим циклом.",
+            },
+        }
+
+        text = owner_ai.format_daily_briefing(brief)
+
+        self.assertIn("Работают подтверждённо: Алексей Дарма", text)
+        self.assertIn("Максим Чурсинов", text)
+        self.assertIn("Выходные подтверждены: Стас Мосин", text)
+        self.assertIn("Илья Третьяков", text)
+        self.assertIn("YClients показывает смену 12:00–21:00", text)
+        self.assertIn("базовый график показывает выходной", text)
+        self.assertIn("записей на день: 7", text)
+        self.assertIn("41 900 ₽", text)
+        self.assertNotIn("ты, Илья", text)
+
     def test_command_center_builds_stable_owner_os_contract(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
 

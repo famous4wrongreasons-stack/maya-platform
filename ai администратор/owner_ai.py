@@ -6663,3 +6663,129 @@ def daily_briefing() -> dict:
         },
         "note": snap["note"],
     }
+
+
+def format_daily_briefing(brief: dict) -> str:
+    """Формирует проверенную owner-сводку без участия языковой модели."""
+    brief = brief if isinstance(brief, dict) else {}
+    today = brief.get("today") if isinstance(brief.get("today"), dict) else {}
+    schedule = (
+        today.get("staff_schedule")
+        if isinstance(today.get("staff_schedule"), dict)
+        else {}
+    )
+
+    def person(row: dict) -> str:
+        name = row.get("name") or "Мастер"
+        start = row.get("work_start") or ""
+        end = row.get("work_end") or ""
+        return f"{name} ({start}–{end})" if start and end else name
+
+    def date_label(value) -> str:
+        weekdays = [
+            "понедельник", "вторник", "среда", "четверг",
+            "пятница", "суббота", "воскресенье",
+        ]
+        months = [
+            "января", "февраля", "марта", "апреля", "мая", "июня",
+            "июля", "августа", "сентября", "октября", "ноября", "декабря",
+        ]
+        try:
+            parsed = date.fromisoformat(str(value or "")[:10])
+            return f"{weekdays[parsed.weekday()]}, {parsed.day} {months[parsed.month - 1]}"
+        except Exception:
+            return str(value or "сегодня")
+
+    lines = [
+        f"Вот проверенная сводка на сегодня — {date_label(brief.get('date'))}.",
+        "",
+        (
+            f"Загрузка: {_ru_count(today.get('booked'), 'запись', 'записи', 'записей')}. "
+            f"Ожидаемая выручка — около {_money(today.get('expected_revenue_rub'))}, "
+            f"средний чек — {_money(today.get('avg_check_rub'))}."
+        ),
+    ]
+
+    confirmed_working = [
+        row for row in (schedule.get("confirmed_working") or [])
+        if isinstance(row, dict)
+    ]
+    confirmed_off = [
+        row for row in (schedule.get("confirmed_off") or [])
+        if isinstance(row, dict)
+    ]
+    unknown = [
+        row for row in (schedule.get("unknown") or [])
+        if isinstance(row, dict)
+    ]
+    conflicts = [
+        row for row in (schedule.get("conflicts") or [])
+        if isinstance(row, dict)
+    ]
+
+    lines.extend(["", "График:"])
+    if confirmed_working:
+        lines.append("Работают подтверждённо: " + ", ".join(person(row) for row in confirmed_working) + ".")
+    else:
+        lines.append("Подтверждённых рабочих смен сейчас нет.")
+    if confirmed_off:
+        lines.append("Выходные подтверждены: " + ", ".join(row.get("name") or "Мастер" for row in confirmed_off) + ".")
+
+    if conflicts:
+        lines.append("Нужна сверка графика — источники расходятся:")
+        for row in conflicts:
+            live_status = row.get("yclients_status")
+            live_hours = row.get("yclients_hours")
+            if live_status == "working":
+                live = "YClients показывает смену" + (f" {live_hours.replace('-', '–')}" if live_hours else "")
+            else:
+                live = "YClients показывает выходной"
+            baseline = (
+                "базовый график показывает смену"
+                if row.get("baseline_status") == "working"
+                else "базовый график показывает выходной"
+            )
+            records = _rub(row.get("records_today"))
+            records_text = f", записей на день: {records}" if records else ""
+            lines.append(f"• {row.get('name') or 'Мастер'}: {live}; {baseline}{records_text}.")
+    if unknown:
+        lines.append(
+            "Не удалось проверить график: "
+            + ", ".join(row.get("name") or "Мастер" for row in unknown)
+            + "."
+        )
+
+    free_capacity = _rub(today.get("free_capacity_today"))
+    lines.append("")
+    lines.append(
+        f"Подтверждённая свободная ёмкость — примерно {free_capacity} "
+        + ("слот." if free_capacity == 1 else "слота." if 2 <= free_capacity <= 4 else "слотов.")
+    )
+
+    trend = brief.get("week_trend") if isinstance(brief.get("week_trend"), dict) else {}
+    gross = trend.get("gross") if isinstance(trend.get("gross"), dict) else {}
+    visits = trend.get("visits") if isinstance(trend.get("visits"), dict) else {}
+    trend_parts = []
+    if gross.get("delta_pct") is not None:
+        trend_parts.append(f"выручка {float(gross['delta_pct']):+g}%")
+    if visits.get("delta_pct") is not None:
+        trend_parts.append(f"визиты {float(visits['delta_pct']):+g}%")
+    if trend_parts:
+        lines.append("Неделя к прошлой: " + ", ".join(trend_parts) + ".")
+
+    top_risk = brief.get("top_risk") if isinstance(brief.get("top_risk"), dict) else {}
+    if top_risk:
+        risk_text = top_risk.get("detail") or top_risk.get("title")
+        if risk_text:
+            lines.append(f"Главный риск: {risk_text}")
+    top_priority = (
+        brief.get("top_priority")
+        if isinstance(brief.get("top_priority"), dict)
+        else {}
+    )
+    if top_priority:
+        priority_text = top_priority.get("detail") or top_priority.get("title")
+        if priority_text:
+            lines.append(f"Приоритет дня: {priority_text}")
+
+    return "\n".join(lines).strip()
