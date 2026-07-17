@@ -5,6 +5,7 @@ const DEVELOPMENT_CORS_ORIGINS = [
   'http://localhost:8787',
   'http://127.0.0.1:3000',
   'http://localhost:3000',
+  'https://malesthetic.pro',
   'capacitor://localhost',
   'ionic://localhost',
 ];

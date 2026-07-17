@@ -12,10 +12,14 @@ describe('security config', () => {
     const allowlist = resolveCorsAllowlist('', 'development');
 
     expect(allowlist).toContain('http://127.0.0.1:8787');
+    expect(allowlist).toContain('https://malesthetic.pro');
     expect(allowlist).toContain('capacitor://localhost');
     expect(isCorsOriginAllowed(undefined, allowlist, 'development')).toBe(true);
     expect(
       isCorsOriginAllowed('http://127.0.0.1:8787', allowlist, 'development'),
+    ).toBe(true);
+    expect(
+      isCorsOriginAllowed('https://malesthetic.pro', allowlist, 'development'),
     ).toBe(true);
     expect(
       isCorsOriginAllowed('https://attacker.example', allowlist, 'development'),
