@@ -6759,7 +6759,7 @@ _DISCOUNT_INTENT_RE = re.compile(
     re.IGNORECASE,
 )
 _MASTERS_INTENT_RE = re.compile(
-    r"\b(мастер\w*|барбер\w*|команд\w*|кто\s+стрижет|кто\s+стриж[её]т|к\s+кому|посоветуй|"
+    r"\b(мастер\w*|барбер\w*|сотрудник\w*|команд\w*|кто\s+стрижет|кто\s+стриж[её]т|к\s+кому|посоветуй|"
     r"топ-мастер|старш(?:ий|ие)|кто\s+лучше)\b",
     re.IGNORECASE,
 )
@@ -6777,7 +6777,7 @@ _BUSINESS_ANALYTICS_RE = re.compile(
     re.IGNORECASE,
 )
 _BUSINESS_PERSON_ANALYTICS_RE = re.compile(
-    r"\b(кто|какой|какая|какие)\b.{0,80}\b("
+    r"\bкто\b.{0,80}\b("
     r"прибыл\w*|выруч\w*|доход\w*|касс\w*|оборот\w*|деньг\w*|"
     r"заработ\w*|зарабат\w*|принос\w*|прин[еёо]с\w*|сделал\w*|сделали|"
     r"зарплат\w*|марж\w*|прибыльн\w*|рентабельн\w*)\b",
@@ -6889,6 +6889,7 @@ def _rub(value) -> str:
 
 _STAFF_FACT_ANALYTICS_METRIC_RE = re.compile(
     r"\b(выруч\w*|оборот\w*|касс\w*|заработ\w*|зарабат\w*|"
+    r"прибыл(?:ь|и|ью|е|ей)|потбыл\w*|пребыл\w*|прибел\w*|"
     r"средн\w*\s+чек|визит\w*|клиент\w*|топ\s+услуг\w*|статистик\w*)\b",
     re.IGNORECASE,
 )
@@ -6919,6 +6920,43 @@ _STAFF_PERSONAL_SCOPE_RE = re.compile(
     re.IGNORECASE,
 )
 
+_STAFF_PROFIT_WORD_RE = re.compile(
+    r"\b(?:прибыл(?:ь|и|ью|е|ей)|потбыл\w*|пребыл\w*|прибел\w*)\b",
+    re.IGNORECASE,
+)
+_STAFF_GROSS_PROFIT_RE = re.compile(r"\bвалов\w*\b", re.IGNORECASE)
+_STAFF_NET_PROFIT_RE = re.compile(r"\bчист\w*\b", re.IGNORECASE)
+_STAFF_FINANCIAL_FOLLOWUP_RE = re.compile(
+    r"^\s*(?:а\s+)?(?:сумм\w*\s+(?:мне\s+)?(?:назови|скажи|дай)|"
+    r"назови\s+(?:мне\s+)?сумм\w*|сколько\s+(?:это|получается|в\s+итоге))\s*[.!?]*\s*$",
+    re.IGNORECASE,
+)
+
+
+def _staff_financial_metric(message: str) -> str | None:
+    """Resolve the requested financial concept before the request reaches an LLM."""
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not _STAFF_PROFIT_WORD_RE.search(low):
+        return None
+    if _STAFF_NET_PROFIT_RE.search(low):
+        return "net_profit"
+    if _STAFF_GROSS_PROFIT_RE.search(low):
+        return "gross_profit"
+    return "unspecified_profit"
+
+
+def _staff_financial_context_message(message: str, history: list | None) -> str:
+    """Attach the last explicit metric to short follow-ups such as 'name the amount'."""
+    if not _STAFF_FINANCIAL_FOLLOWUP_RE.match(message or ""):
+        return message or ""
+    for item in reversed(list(history or [])[-10:]):
+        if not isinstance(item, dict) or item.get("role") != "user":
+            continue
+        content = item.get("content")
+        if isinstance(content, str) and _staff_financial_metric(content):
+            return f"{content}\n{message}"
+    return message or ""
+
 
 def _staff_fact_analytics_intent(message: str) -> bool:
     """True only for a factual snapshot, not advice or growth planning."""
@@ -6927,6 +6965,8 @@ def _staff_fact_analytics_intent(message: str) -> bool:
         return False
     if _STAFF_FACT_ANALYTICS_PLANNING_RE.search(low):
         return False
+    if _staff_financial_metric(low):
+        return True
     if _STAFF_FACT_ANALYTICS_REQUEST_RE.search(low):
         return True
     return bool(re.fullmatch(
@@ -6950,6 +6990,7 @@ def _staff_financial_analytics_reply(
     chat_id: int,
     message: str,
     mode: str = "staff",
+    history: list | None = None,
 ) -> str | None:
     """Return YClients-grounded staff analytics without allowing LLM arithmetic.
 
@@ -6960,17 +7001,23 @@ def _staff_financial_analytics_reply(
     """
     if str(mode or "").strip().lower() != "staff":
         return None
-    if not _staff_fact_analytics_intent(message):
+    intent_message = _staff_financial_context_message(message, history)
+    if not _staff_fact_analytics_intent(intent_message):
         return None
+
+    financial_metric = _staff_financial_metric(intent_message)
 
     try:
         info = _panel_resolve_role(int(chat_id))
     except Exception:
         info = {}
 
-    explicit_business = bool(_STAFF_BUSINESS_SCOPE_RE.search(message or ""))
-    explicit_personal = bool(_STAFF_PERSONAL_SCOPE_RE.search(message or ""))
-    if explicit_business:
+    explicit_business = bool(_STAFF_BUSINESS_SCOPE_RE.search(intent_message or ""))
+    explicit_personal = bool(_STAFF_PERSONAL_SCOPE_RE.search(intent_message or ""))
+    if financial_metric:
+        # Profit is a company metric. It must never silently become a master's revenue.
+        scope = "business"
+    elif explicit_business:
         scope = "business"
     elif explicit_personal or info.get("is_master"):
         scope = "personal"
@@ -6982,6 +7029,16 @@ def _staff_financial_analytics_reply(
             "Общую выручку и кассу бизнеса я показываю только владельцу или "
             "администратору. Вашу личную статистику могу показать отдельно."
         )
+    if financial_metric and info.get("role") != "owner" and not info.get("is_founder"):
+        return (
+            "Валовую и чистую прибыль я показываю только владельцу: расчёт использует "
+            "сводную зарплату и расходы бизнеса. Доступную вам выручку могу показать отдельно."
+        )
+    if financial_metric == "unspecified_profit":
+        return (
+            "Уточните, какую прибыль показать: валовую после прямой оплаты труда "
+            "или чистую после всех расходов. Эти суммы нельзя смешивать."
+        )
     if scope == "personal" and not info.get("staff_id"):
         return (
             "Не вижу привязку вашего входа к сотруднику YClients, поэтому не могу "
@@ -6990,9 +7047,11 @@ def _staff_financial_analytics_reply(
 
     try:
         import analytics
-        period, date_from, date_to = _analytics_period_from_text(message)
+        period, date_from, date_to = _analytics_period_from_text(intent_message)
         frm, to, label = analytics.resolve_period(period, date_from, date_to)
-        wants_top = bool(re.search(r"\bтоп\s+услуг|что\s+прода", message or "", re.IGNORECASE))
+        wants_top = bool(re.search(
+            r"\bтоп\s+услуг|что\s+прода", intent_message or "", re.IGNORECASE,
+        ))
         summary = analytics.business_summary(frm, to, include_top=wants_top)
     except Exception as e:
         logger.error("staff financial analytics shortcut: %s", e)
@@ -7004,6 +7063,31 @@ def _staff_financial_analytics_reply(
 
     period_caption = f"{label}, {_analytics_range_caption(frm, to)}"
     if scope == "business":
+        total_gross = int(round(float(summary.get("total_gross") or 0)))
+        salary_total = int(round(float(summary.get("salary_total") or 0)))
+        profit_after_payroll = total_gross - salary_total
+        if financial_metric == "gross_profit":
+            return "\n".join([
+                f"Расчётная валовая прибыль бизнеса за период «{period_caption}»: "
+                f"{_rub(profit_after_payroll)}.",
+                f"Формула: выручка {_rub(total_gross)} − расчётная зарплата "
+                f"мастеров {_rub(salary_total)}.",
+                "Это результат после прямой оплаты труда, но до материалов, аренды, "
+                "налогов, эквайринга, зарплаты администратора и других расходов. "
+                "Поэтому это не чистая прибыль.",
+                "Источник: одна актуальная выборка финансовых операций YClients.",
+            ])
+        if financial_metric == "net_profit":
+            return "\n".join([
+                f"Подтверждённую чистую прибыль за период «{period_caption}» сейчас "
+                "корректно назвать нельзя.",
+                f"Подтверждённая выручка: {_rub(total_gross)}. После расчётной зарплаты "
+                f"мастеров остаётся {_rub(profit_after_payroll)}.",
+                "В MAYA пока нет полного учёта аренды, материалов, налогов, эквайринга "
+                "и всех прочих расходов за этот период. Я не буду выдавать неполную "
+                "сумму за чистую прибыль.",
+                "Источник: одна актуальная выборка финансовых операций YClients.",
+            ])
         lines = [
             f"Общая статистика бизнеса за период «{period_caption}»:",
             f"Выручка: {_rub(summary.get('total_gross'))}",
@@ -8077,7 +8161,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         })
 
     verified_analytics_reply = _staff_financial_analytics_reply(
-        chat_id, message, mode=chat_mode,
+        chat_id, message, mode=chat_mode, history=history,
     )
     if verified_analytics_reply:
         safe_message = anonymizer.redact_pii(message)
@@ -8538,7 +8622,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         })
 
     verified_analytics_reply = _staff_financial_analytics_reply(
-        chat_id, message, mode=chat_mode,
+        chat_id, message, mode=chat_mode, history=history,
     )
     if verified_analytics_reply:
         safe_message = anonymizer.redact_pii(message)

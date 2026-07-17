@@ -273,6 +273,114 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("300", reply)
         self.assertNotIn("Ваша личная статистика", reply)
 
+    def test_gross_profit_typo_uses_one_deterministic_company_formula(self):
+        ws = _load_webhook_server()
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 328740,
+            "salary_total": 200000,
+            "masters": [{"name": "Илья Третьяков", "gross": 173000}],
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Валовая потбыль",
+            mode="staff",
+        )
+
+        self.assertIn("Расчётная валовая прибыль бизнеса", reply)
+        self.assertIn("128 740 ₽", reply)
+        self.assertIn("328 740 ₽", reply)
+        self.assertIn("200 000 ₽", reply)
+        self.assertNotIn("Илья Третьяков", reply)
+        self.assertNotIn("лидер", reply.lower())
+
+    def test_salon_gross_profit_is_not_routed_to_master_ranking(self):
+        ws = _load_webhook_server()
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 328740,
+            "salary_total": 200000,
+            "masters": [{"name": "Илья Третьяков", "gross": 173000}],
+        }
+        sys.modules["analytics"] = fake_analytics
+        question = "Какая у нас в салоне валовая прибыль в текущем месяце"
+
+        self.assertFalse(ws._business_master_analytics_intent(question))
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            question,
+            mode="staff",
+        )
+
+        self.assertIn("128 740 ₽", reply)
+        self.assertNotIn("Илья Третьяков", reply)
+
+    def test_short_amount_followup_inherits_previous_gross_profit_metric(self):
+        ws = _load_webhook_server()
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 328740,
+            "salary_total": 200000,
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Сумму мне назови",
+            mode="staff",
+            history=[{
+                "role": "user",
+                "content": "Какая у нас в салоне валовая прибыль в текущем месяце",
+            }],
+        )
+
+        self.assertIn("128 740 ₽", reply)
+
+    def test_net_profit_is_not_invented_without_complete_expenses(self):
+        ws = _load_webhook_server()
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 328740,
+            "salary_total": 200000,
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Назови чистую прибыль салона за месяц",
+            mode="staff",
+        )
+
+        self.assertIn("корректно назвать нельзя", reply)
+        self.assertIn("не буду выдавать неполную сумму", reply)
+        self.assertIn("128 740 ₽", reply)
+
     def test_revenue_growth_advice_is_not_replaced_by_fact_snapshot(self):
         ws = _load_webhook_server()
 
