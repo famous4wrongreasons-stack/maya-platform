@@ -6927,8 +6927,18 @@ _STAFF_PROFIT_WORD_RE = re.compile(
 _STAFF_GROSS_PROFIT_RE = re.compile(r"\bвалов\w*\b", re.IGNORECASE)
 _STAFF_NET_PROFIT_RE = re.compile(r"\bчист\w*\b", re.IGNORECASE)
 _STAFF_FINANCIAL_FOLLOWUP_RE = re.compile(
-    r"^\s*(?:а\s+)?(?:сумм\w*\s+(?:мне\s+)?(?:назови|скажи|дай)|"
-    r"назови\s+(?:мне\s+)?сумм\w*|сколько\s+(?:это|получается|в\s+итоге))\s*[.!?]*\s*$",
+    r"^\s*(?:а\s+)?(?:сумм\w*\s+(?:мне\w{0,2}\s*)?(?:назови|скажи|дай)|"
+    r"назови\s+(?:мне\s+)?сумм\w*|сколько\s+(?:это|получается|в\s+итоге)|"
+    r"общ(?:ая|ую|ий|ие)|всего|по\s+(?:всему\s+)?(?:салону|бизнесу)|"
+    r"мо[яю]|личн(?:ая|ую))\s*[.!?]*\s*$",
+    re.IGNORECASE,
+)
+_STAFF_BUSINESS_SCOPE_FOLLOWUP_RE = re.compile(
+    r"^\s*(?:общ(?:ая|ую|ий|ие)|всего|по\s+(?:всему\s+)?(?:салону|бизнесу))\s*[.!?]*\s*$",
+    re.IGNORECASE,
+)
+_STAFF_PERSONAL_SCOPE_FOLLOWUP_RE = re.compile(
+    r"^\s*(?:мо[яю]|личн(?:ая|ую))\s*[.!?]*\s*$",
     re.IGNORECASE,
 )
 _STAFF_ANALYTICS_PERIOD_RE = re.compile(
@@ -6961,14 +6971,17 @@ def _staff_financial_context_message(message: str, history: list | None) -> str:
 
     if _STAFF_FINANCIAL_FOLLOWUP_RE.match(context_message):
         previous_metric = next(
-            (content for content in recent_user_messages if _staff_financial_metric(content)),
+            (
+                content for content in recent_user_messages
+                if _STAFF_FACT_ANALYTICS_METRIC_RE.search(content)
+            ),
             None,
         )
         if previous_metric:
             context_message = f"{previous_metric}\n{context_message}"
 
     if (
-        _staff_financial_metric(context_message)
+        _STAFF_FACT_ANALYTICS_METRIC_RE.search(context_message)
         and not _STAFF_ANALYTICS_PERIOD_RE.search(context_message)
     ):
         previous_period = next(
@@ -7034,8 +7047,14 @@ def _staff_financial_analytics_reply(
     except Exception:
         info = {}
 
-    explicit_business = bool(_STAFF_BUSINESS_SCOPE_RE.search(intent_message or ""))
-    explicit_personal = bool(_STAFF_PERSONAL_SCOPE_RE.search(intent_message or ""))
+    explicit_business = bool(
+        _STAFF_BUSINESS_SCOPE_RE.search(intent_message or "")
+        or _STAFF_BUSINESS_SCOPE_FOLLOWUP_RE.match(message or "")
+    )
+    explicit_personal = bool(
+        _STAFF_PERSONAL_SCOPE_RE.search(intent_message or "")
+        or _STAFF_PERSONAL_SCOPE_FOLLOWUP_RE.match(message or "")
+    )
     if financial_metric:
         # Profit is a company metric. It must never silently become a master's revenue.
         scope = "business"
@@ -7089,16 +7108,16 @@ def _staff_financial_analytics_reply(
     if scope == "business":
         total_gross = int(round(float(summary.get("total_gross") or 0)))
         salary_total = int(round(float(summary.get("salary_total") or 0)))
-        profit_after_payroll = total_gross - salary_total
+        margin_after_payroll = total_gross - salary_total
         if financial_metric == "gross_profit":
             return "\n".join([
-                f"Расчётная валовая прибыль бизнеса за период «{period_caption}»: "
-                f"{_rub(profit_after_payroll)}.",
-                f"Формула: выручка {_rub(total_gross)} − расчётная зарплата "
-                f"мастеров {_rub(salary_total)}.",
-                "Это результат после прямой оплаты труда, но до материалов, аренды, "
-                "налогов, эквайринга, зарплаты администратора и других расходов. "
-                "Поэтому это не чистая прибыль.",
+                f"Точную валовую прибыль бизнеса за период «{period_caption}» сейчас "
+                "корректно назвать нельзя.",
+                f"Проверенная выручка: {_rub(total_gross)}. Расчётная зарплата "
+                f"мастеров: {_rub(salary_total)}. Маржа после зарплаты: "
+                f"{_rub(margin_after_payroll)}.",
+                "В YClients нет полной себестоимости материалов и других прямых затрат "
+                "за этот период. Поэтому маржу после зарплаты не выдаю за валовую прибыль.",
                 "Источник: одна актуальная выборка финансовых операций YClients.",
             ])
         if financial_metric == "net_profit":
@@ -7106,7 +7125,7 @@ def _staff_financial_analytics_reply(
                 f"Подтверждённую чистую прибыль за период «{period_caption}» сейчас "
                 "корректно назвать нельзя.",
                 f"Подтверждённая выручка: {_rub(total_gross)}. После расчётной зарплаты "
-                f"мастеров остаётся {_rub(profit_after_payroll)}.",
+                f"мастеров остаётся {_rub(margin_after_payroll)}.",
                 "В MAYA пока нет полного учёта аренды, материалов, налогов, эквайринга "
                 "и всех прочих расходов за этот период. Я не буду выдавать неполную "
                 "сумму за чистую прибыль.",

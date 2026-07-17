@@ -283,8 +283,8 @@ class ChatRoutingTests(unittest.TestCase):
         fake_analytics.resolve_period = _resolve_period
         fake_analytics.business_summary = lambda frm, to, include_top=False: {
             "source_status": {"transactions": "ok", "records": "ok"},
-            "total_gross": 328740,
-            "salary_total": 200000,
+            "total_gross": 622500,
+            "salary_total": 278850,
             "masters": [{"name": "Илья Третьяков", "gross": 173000}],
         }
         sys.modules["analytics"] = fake_analytics
@@ -295,10 +295,12 @@ class ChatRoutingTests(unittest.TestCase):
             mode="staff",
         )
 
-        self.assertIn("Расчётная валовая прибыль бизнеса", reply)
-        self.assertIn("128 740 ₽", reply)
-        self.assertIn("328 740 ₽", reply)
-        self.assertIn("200 000 ₽", reply)
+        self.assertIn("Точную валовую прибыль бизнеса", reply)
+        self.assertIn("корректно назвать нельзя", reply)
+        self.assertIn("343 650 ₽", reply)
+        self.assertIn("622 500 ₽", reply)
+        self.assertIn("278 850 ₽", reply)
+        self.assertIn("не выдаю за валовую прибыль", reply)
         self.assertNotIn("Илья Третьяков", reply)
         self.assertNotIn("лидер", reply.lower())
         self.assertEqual(requested_periods, ["month"])
@@ -313,8 +315,8 @@ class ChatRoutingTests(unittest.TestCase):
         )
         fake_analytics.business_summary = lambda frm, to, include_top=False: {
             "source_status": {"transactions": "ok", "records": "ok"},
-            "total_gross": 328740,
-            "salary_total": 200000,
+            "total_gross": 622500,
+            "salary_total": 278850,
             "masters": [{"name": "Илья Третьяков", "gross": 173000}],
         }
         sys.modules["analytics"] = fake_analytics
@@ -327,7 +329,7 @@ class ChatRoutingTests(unittest.TestCase):
             mode="staff",
         )
 
-        self.assertIn("128 740 ₽", reply)
+        self.assertIn("343 650 ₽", reply)
         self.assertNotIn("Илья Третьяков", reply)
 
     def test_short_amount_followup_inherits_previous_gross_profit_metric(self):
@@ -340,8 +342,8 @@ class ChatRoutingTests(unittest.TestCase):
         )
         fake_analytics.business_summary = lambda frm, to, include_top=False: {
             "source_status": {"transactions": "ok", "records": "ok"},
-            "total_gross": 328740,
-            "salary_total": 200000,
+            "total_gross": 622500,
+            "salary_total": 278850,
         }
         sys.modules["analytics"] = fake_analytics
 
@@ -355,7 +357,79 @@ class ChatRoutingTests(unittest.TestCase):
             }],
         )
 
-        self.assertIn("128 740 ₽", reply)
+        self.assertIn("343 650 ₽", reply)
+
+    def test_typo_amount_followup_inherits_previous_profit_metric(self):
+        ws = _load_webhook_server()
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 622500,
+            "salary_total": 278850,
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Сумму мнеиназови",
+            mode="staff",
+            history=[{
+                "role": "user",
+                "content": "Какая у нас в салоне валовая прибыль в текущем месяце",
+            }],
+        )
+
+        self.assertIn("343 650 ₽", reply)
+
+    def test_standalone_general_followup_switches_personal_revenue_to_business(self):
+        ws = _load_webhook_server()
+        sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
+            "yclients_staff_id": 1461615,
+            "full_name": "Владелец",
+            "can_redeem": True,
+        }
+        fake_analytics = types.ModuleType("analytics")
+        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+            "2026-07-01",
+            "2026-07-17",
+            "этот месяц",
+        )
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 622500,
+            "cash": {"sum": 253100},
+            "card": {"sum": 369400},
+            "visits": 300,
+            "avg_check": 2075,
+            "masters": [{
+                "staff_id": 1461615,
+                "gross": 99400,
+                "visits": 46,
+                "avg_check": 2161,
+                "is_owner": True,
+            }],
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Общая",
+            mode="staff",
+            history=[{
+                "role": "user",
+                "content": "Выручка за месяц",
+            }],
+        )
+
+        self.assertIn("Общая статистика бизнеса", reply)
+        self.assertIn("622 500 ₽", reply)
+        self.assertNotIn("99 400 ₽", reply)
+        self.assertNotIn("Ваша личная статистика", reply)
 
     def test_bare_profit_inherits_recent_user_period(self):
         ws = _load_webhook_server()
@@ -395,8 +469,8 @@ class ChatRoutingTests(unittest.TestCase):
         )
         fake_analytics.business_summary = lambda frm, to, include_top=False: {
             "source_status": {"transactions": "ok", "records": "ok"},
-            "total_gross": 328740,
-            "salary_total": 200000,
+            "total_gross": 622500,
+            "salary_total": 278850,
         }
         sys.modules["analytics"] = fake_analytics
 
@@ -408,7 +482,7 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIn("корректно назвать нельзя", reply)
         self.assertIn("не буду выдавать неполную сумму", reply)
-        self.assertIn("128 740 ₽", reply)
+        self.assertIn("343 650 ₽", reply)
 
     def test_revenue_growth_advice_is_not_replaced_by_fact_snapshot(self):
         ws = _load_webhook_server()
