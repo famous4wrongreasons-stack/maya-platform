@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '@prisma/client';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
@@ -20,6 +22,29 @@ const demoPassword =
   process.env.SEED_DEMO_TENANT_ADMIN_PASSWORD ?? 'ChangeMe123!';
 const fixedPhoneCode = '123456';
 const demoTenantSlug = 'demo-business';
+
+async function expirePastDueGrace(tenantId: string): Promise<void> {
+  const connectionString = process.env.DATABASE_URL;
+  assert(
+    connectionString,
+    'DATABASE_URL is required for HTTP smoke time travel',
+  );
+  const prisma = new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+  });
+
+  try {
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: {
+        pastDueAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1_000),
+        graceEndsAt: new Date(Date.now() - 60_000),
+      },
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
 
 function asRecord(value: unknown): Record<string, unknown> {
   assert(value && typeof value === 'object' && !Array.isArray(value));
@@ -408,9 +433,20 @@ async function runSmoke() {
   const expiredAiConfig = asRecord(
     await expectStatus(`/mobile/config/${aiTenantSlug}`, 200),
   );
-  assert.equal(expiredAiConfig.access_state, 'subscription_required');
-  assert.equal(expiredAiConfig.subscription_required, true);
-  assert.equal(expiredAiConfig.active, false);
+  assert.equal(expiredAiConfig.access_state, 'past_due_grace');
+  assert.equal(expiredAiConfig.subscription_required, false);
+  assert.equal(expiredAiConfig.active, true);
+  await expectStatus('/internal-calendar/setup', 200, {
+    headers: authHeaders(aiSignupToken),
+  });
+
+  await expirePastDueGrace(aiTenantId);
+  const afterGraceAiConfig = asRecord(
+    await expectStatus(`/mobile/config/${aiTenantSlug}`, 200),
+  );
+  assert.equal(afterGraceAiConfig.access_state, 'subscription_required');
+  assert.equal(afterGraceAiConfig.subscription_required, true);
+  assert.equal(afterGraceAiConfig.active, false);
   const blockedAfterTrial = asRecord(
     await expectStatus('/internal-calendar/setup', 402, {
       headers: authHeaders(aiSignupToken),
@@ -420,9 +456,11 @@ async function runSmoke() {
   const billingPlans = asArray(await expectStatus('/billing/plans', 200)).map(
     asRecord,
   );
-  const maxPlan = billingPlans.find((plan) => plan.name === 'max');
-  assert(maxPlan, 'Expected seeded max plan');
-  const maxPlanId = stringField(maxPlan, 'id');
+  const businessPlusPlan = billingPlans.find(
+    (plan) => plan.name === 'business_plus',
+  );
+  assert(businessPlusPlan, 'Expected seeded business_plus plan');
+  const businessPlusPlanId = stringField(businessPlusPlan, 'id');
   await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
     headers: authHeaders(aiSignupToken),
   });
@@ -671,7 +709,7 @@ async function runSmoke() {
         ownerPhone: `+7998${String(Date.now() % 10_000_000).padStart(7, '0')}`,
         industryPresetId: 'solo_specialist',
         calendarSource: 'internal',
-        planId: maxPlanId,
+        planId: businessPlusPlanId,
         password: 'StrongPass123!',
         branchName: 'Private Studio',
         branchTimezone: 'Europe/Moscow',
