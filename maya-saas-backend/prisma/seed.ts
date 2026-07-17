@@ -23,21 +23,62 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString }),
 });
 
-const platformOwnerEmail =
-  process.env.SEED_PLATFORM_OWNER_EMAIL ?? 'owner@maya.local';
-const platformOwnerPassword =
-  process.env.SEED_PLATFORM_OWNER_PASSWORD ?? 'ChangeMe123!';
-const demoTenantAdminEmail =
-  process.env.SEED_DEMO_TENANT_ADMIN_EMAIL ?? 'admin@demo-business.local';
-const demoTenantAdminPassword =
-  process.env.SEED_DEMO_TENANT_ADMIN_PASSWORD ?? 'ChangeMe123!';
+const isProduction = process.env.NODE_ENV === 'production';
+
+function seedValue(name: string, localDefault: string): string {
+  const configured = process.env[name]?.trim();
+  if (configured) {
+    return configured;
+  }
+  if (isProduction) {
+    throw new Error(`${name} is required when seeding production`);
+  }
+  return localDefault;
+}
+
+function seedSecret(
+  name: string,
+  localDefault: string,
+  minimumLength = 12,
+): string {
+  const value = seedValue(name, localDefault);
+  if (
+    isProduction &&
+    (value.length < minimumLength ||
+      /change-me|replace-me|changeme|example/i.test(value))
+  ) {
+    throw new Error(`${name} is not safe for production seeding`);
+  }
+  return value;
+}
+
+const platformOwnerEmail = seedValue(
+  'SEED_PLATFORM_OWNER_EMAIL',
+  'owner@maya.local',
+);
+const platformOwnerPassword = seedSecret(
+  'SEED_PLATFORM_OWNER_PASSWORD',
+  'ChangeMe123!',
+);
+const demoTenantAdminEmail = seedValue(
+  'SEED_DEMO_TENANT_ADMIN_EMAIL',
+  'admin@demo-business.local',
+);
+const demoTenantAdminPassword = seedSecret(
+  'SEED_DEMO_TENANT_ADMIN_PASSWORD',
+  'ChangeMe123!',
+);
+const crmEncryptionKey = seedSecret(
+  'CRM_ENCRYPTION_KEY',
+  'change-me-in-production',
+  32,
+);
 const defaultTenantSlug = process.env.SEED_DEFAULT_TENANT_SLUG ?? 'malesthetic';
 const defaultTenantName =
   process.env.SEED_DEFAULT_TENANT_NAME ?? 'Мужская Эстетика';
 
 const encryptToken = (plainText: string) => {
-  const secret = process.env.CRM_ENCRYPTION_KEY ?? 'change-me-in-production';
-  const key = createHash('sha256').update(secret).digest();
+  const key = createHash('sha256').update(crmEncryptionKey).digest();
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
   const encrypted = Buffer.concat([

@@ -1,3 +1,5 @@
+BEGIN;
+
 -- Fail before changing data if legacy values cannot be represented safely.
 DO $$
 BEGIN
@@ -349,3 +351,5 @@ ALTER INDEX "InternalAvailabilityRule_tenant_provider_weekday_active_idx"
   RENAME TO "InternalAvailabilityRule_tenantId_providerId_weekday_active_idx";
 ALTER INDEX "InternalAvailabilityRule_tenant_provider_weekday_range_key"
   RENAME TO "InternalAvailabilityRule_tenantId_providerId_weekday_startM_key";
+
+COMMIT;

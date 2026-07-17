@@ -12,6 +12,12 @@ Multi-tenant white-label strangler-backend inside the existing Maya repository. 
 - `Swagger / OpenAPI`
 - `Docker / docker-compose`
 
+## Architecture and release documents
+
+- [Multi-tenant security audit](docs/architecture/MULTI_TENANT_SECURITY_AUDIT.md)
+- [User to Membership migration plan](docs/architecture/USER_MEMBERSHIP_MIGRATION.md)
+- [Pre-production rollout runbook](docs/operations/PREPRODUCTION_RUNBOOK.md)
+
 ## What is included in v1
 
 - Tenant, Membership and server-side TenantContext
