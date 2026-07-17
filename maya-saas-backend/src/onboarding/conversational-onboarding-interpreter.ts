@@ -137,7 +137,7 @@ export class ConversationalOnboardingInterpreter {
         safe.missingFields,
         safe.blueprint.templateId,
       );
-      return this.mergeModelTurn(turn, safe, provider);
+      return this.mergeModelTurn(turn, safe, provider, sanitizedMessage);
     } catch (error) {
       this.logger.warn(
         `AI onboarding fallback activated: ${this.safeErrorName(error)}`,
@@ -331,8 +331,13 @@ export class ConversationalOnboardingInterpreter {
     turn: ModelTurn,
     safe: AiOnboardingInterpretation,
     provider: ModelProvider,
+    modelInput: string,
   ): AiOnboardingInterpretation {
-    const accepted = new Set(turn.accepted_fields);
+    const accepted = new Set(
+      turn.accepted_fields.filter((field) =>
+        this.hasGroundedModelField(field, modelInput, turn.patch),
+      ),
+    );
     const uncertain =
       turn.needs_clarification || turn.confidence < CONFIDENCE_THRESHOLD;
     const templateId =
@@ -433,6 +438,87 @@ export class ConversationalOnboardingInterpreter {
           : fallbackTurn.quickReplies,
       source: provider,
     };
+  }
+
+  private hasGroundedModelField(
+    field: AcceptedField,
+    message: string,
+    patch: ModelTurn['patch'],
+  ): boolean {
+    const normalized = message
+      .toLocaleLowerCase('ru-RU')
+      .replace(/ё/gu, 'е')
+      .replace(/\s+/gu, ' ')
+      .trim();
+
+    if (!normalized) return false;
+
+    if (field === 'business_name') {
+      // Names are resolved locally before redaction. The model must never
+      // create a client-facing label from an unrelated conversational turn.
+      return false;
+    }
+    if (field === 'template') {
+      return this.hasTemplateEvidence(normalized, patch.template_id);
+    }
+    if (field === 'calendar_source') {
+      return patch.calendar_source === CalendarSource.EXTERNAL
+        ? /(?:crm|срм|yclients|altegio|dikidi|whitelines|salon\s*online|внешн[^\s]*\s+календар|систем[^\s]*\s+(?:записи|расписания))/iu.test(
+            normalized,
+          )
+        : /(?:внутренн[^\s]*\s+календар|(?:в|через|внутри)\s+(?:maya|майя)|без\s+(?:crm|срм)|тетрад|блокнот|на\s+бумаге|вручную)/iu.test(
+            normalized,
+          );
+    }
+    if (field === 'provider_count') {
+      const count =
+        '(?:\\d{1,3}|один|одна|два|две|двое|вдвоем|три|трое|втроем|четыре|четверо|пять|пятеро|шесть|шестеро|семь|семеро|восемь|девять|десять)';
+      const people =
+        '(?:нас|команд[^\\s]*|тим[^\\s]*|мастер[^\\s]*|специалист[^\\s]*|сотрудник[^\\s]*|человек[^\\s]*|работник[^\\s]*)';
+      return (
+        /(?:работаю|принимаю)\s+(?:сам|сама|один|одна)/iu.test(normalized) ||
+        new RegExp(`${people}[^.!?\\n]{0,24}${count}`, 'iu').test(normalized) ||
+        new RegExp(`${count}[^.!?\\n]{0,24}${people}`, 'iu').test(normalized)
+      );
+    }
+    if (field === 'use_template_services') {
+      return /(?:автомат[^\s]*|автоматом|типов[^\s]*|стандартн[^\s]*|по\s+умолчанию|как\s+обычно|за\s+меня|подбери|готов[^\s]*\s+услуг)/iu.test(
+        normalized,
+      );
+    }
+    if (field === 'services') {
+      return /(?:услуг|прайс|оказыва[^\s]*|делаю|делаем|стоит|цена|руб|\u20bd|минут|(?:^|\s)час(?:а|ов)?(?=\s|$|[,.!?]))/iu.test(
+        normalized,
+      );
+    }
+    if (field === 'weekly_rules') {
+      return /(?:график|расписан|без\s+выходн|ежеднев|круглосуточ|понедел|вторник|сред[^\s]*|четверг|пятниц|суббот|воскрес|будн|выходн|\b(?:[01]?\d|2[0-3])[:.][0-5]\d\b|с\s+\d{1,2}\s+до\s+\d{1,2})/iu.test(
+        normalized,
+      );
+    }
+
+    return false;
+  }
+
+  private hasTemplateEvidence(
+    message: string,
+    templateId: string | null,
+  ): boolean {
+    const patterns: Partial<Record<string, RegExp>> = {
+      barbershop: /(?:фейд|бород|брит|стриж|барбер|волос)/iu,
+      beauty_and_care:
+        /(?:маник|педик|ногт|космет|бров|ресниц|макияж|уклад|окраш|волос)/iu,
+      clinic: /(?:зуб|стомат|пациент|леч|врач|клиник)/iu,
+      wellness: /(?:массаж|тренир|фитнес|спорт|спа\b|йог)/iu,
+      education_and_consulting:
+        /(?:урок|репетит|курс|обуч|адвокат|юрист|консульт|документ)/iu,
+      auto_service:
+        /(?:машин|тачк|авто\b|двигат|колес|шиномонт|полиров|химчист)/iu,
+      pet_services: /(?:животн|собак|кошк|грум|питом)/iu,
+      home_services: /(?:сантех|электр|уборк|клининг|ремонт|домашн)/iu,
+    };
+    const pattern = templateId ? patterns[templateId] : undefined;
+    return Boolean(pattern?.test(message));
   }
 
   private validateModelTurn(

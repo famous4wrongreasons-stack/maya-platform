@@ -61,6 +61,43 @@ describe('SafeOnboardingInterpreter', () => {
     ]);
   });
 
+  it.each([
+    'Названия пока нет',
+    'Пока без названия',
+    'Можно пока без названия',
+    'Название добавлю потом',
+    'Не определился с названием',
+  ])('treats "%s" as an intentional name deferral', (reply) => {
+    const workMode = interpreter.interpret('Я работаю на себя');
+    const category = interpreter.interpret(
+      'Я работаю барбером',
+      workMode.blueprint,
+    );
+
+    const result = interpreter.interpret(reply, category.blueprint);
+
+    expect(result.blueprint.businessName).toBeNull();
+    expect(result.blueprint.businessNameDeferred).toBe(true);
+    expect(result.missingFields).toEqual(['calendar_source']);
+  });
+
+  it('does not store conversational filler as a business name', () => {
+    const workMode = interpreter.interpret('Я работаю на себя');
+    const category = interpreter.interpret(
+      'Я работаю барбером',
+      workMode.blueprint,
+    );
+
+    const result = interpreter.interpret(
+      'Ну короче, всё как у людей',
+      category.blueprint,
+    );
+
+    expect(result.blueprint.businessName).toBeNull();
+    expect(result.blueprint.businessNameDeferred).toBe(false);
+    expect(result.missingFields).toEqual(['business_name', 'calendar_source']);
+  });
+
   it('uses business-specific choices and asks team size only for a business', () => {
     const workMode = interpreter.interpret('У меня бизнес');
 
@@ -284,6 +321,23 @@ describe('SafeOnboardingInterpreter', () => {
       expect.objectContaining({ name: 'поставь автоматически' }),
     );
     expect(result.missingFields).toEqual([]);
+  });
+
+  it('never stores an automatic-fill instruction as a service name', () => {
+    const result = interpreter.interpret(
+      'Короче я барбер, работаю один, услуги поставь нормальные типовые автоматически',
+    );
+
+    expect(result.blueprint.categoryId).toBe('solo_barber');
+    expect(result.blueprint.services).toHaveLength(6);
+    expect(result.blueprint.services.map((service) => service.name)).toContain(
+      'Мужская стрижка',
+    );
+    expect(result.blueprint.services).not.toContainEqual(
+      expect.objectContaining({
+        name: 'поставь нормальные типовые автоматически',
+      }),
+    );
   });
 
   it('treats solo specialist as business shape and keeps profession services', () => {

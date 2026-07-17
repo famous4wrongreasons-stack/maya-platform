@@ -119,9 +119,9 @@ describe('ConversationalOnboardingInterpreter', () => {
       intent: 'provide_details',
       confidence: 0.94,
       needs_clarification: false,
-      assistant_message: 'Поняла: барбершоп, три мастера и две услуги.',
+      assistant_message: 'Поняла: барбершоп и три мастера.',
       clarification_question: null,
-      accepted_fields: ['template', 'provider_count', 'services'],
+      accepted_fields: ['template', 'provider_count'],
       quick_replies: [],
       patch: {
         template_id: 'barbershop',
@@ -129,10 +129,7 @@ describe('ConversationalOnboardingInterpreter', () => {
         calendar_source: null,
         provider_count: 3,
         use_template_services: false,
-        services: [
-          { name: 'Стрижка', price: 2000, durationMinutes: 60 },
-          { name: 'Борода', price: 1200, durationMinutes: 30 },
-        ],
+        services: [],
         weekly_rules: [],
       },
     });
@@ -145,7 +142,7 @@ describe('ConversationalOnboardingInterpreter', () => {
       DEEPSEEK_THINKING: 'disabled',
     });
     const message =
-      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас движ «квант», в тиме три человека, всё нестандартно.';
+      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас движ по фейдам и бородам, в тиме три человека.';
 
     const result = await interpreter.interpret(message);
 
@@ -254,39 +251,33 @@ describe('ConversationalOnboardingInterpreter', () => {
       assistant_message:
         'Поняла: барбершоп, три специалиста и две основные услуги.',
       clarification_question: null,
-      accepted_fields: [
-        'template',
-        'business_name',
-        'calendar_source',
-        'provider_count',
-        'services',
-      ],
+      accepted_fields: ['template', 'provider_count'],
       quick_replies: [],
       patch: {
         template_id: 'barbershop',
-        business_name: 'Север',
-        calendar_source: 'internal',
+        business_name: null,
+        calendar_source: null,
         provider_count: 3,
         use_template_services: false,
-        services: [
-          { name: 'Стрижка', price: 2000, durationMinutes: 60 },
-          { name: 'Борода', price: 1200, durationMinutes: 30 },
-        ],
+        services: [],
         weekly_rules: [],
       },
     });
     const interpreter = createInterpreter();
     const message =
-      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас движ «квант», в тиме три человека, всё по-своему.';
+      'Меня зовут Иван Иванов, +79991234567, ivan@example.ru, API-токен: superSecretToken123. У нас движ по фейдам и бородам, в тиме три человека.';
 
     const result = await interpreter.interpret(message);
 
     expect(result.source).toBe('openai');
-    expect(result.missingFields).toEqual([]);
+    expect(result.missingFields).toEqual([
+      'business_name',
+      'services',
+      'calendar_source',
+    ]);
     expect(result.blueprint).toMatchObject({
       templateId: 'barbershop',
-      businessName: 'Север',
-      calendarSource: CalendarSource.INTERNAL,
+      businessName: null,
       providerCount: 3,
     });
 
@@ -492,6 +483,80 @@ describe('ConversationalOnboardingInterpreter', () => {
     expect(result.source).toBe('safe_fallback');
     expect(result.blueprint.businessName).toBe('Артем');
     expect(result.missingFields).toEqual(['services']);
+  });
+
+  it('keeps an explicit name deferral away from the model', async () => {
+    const requests = mockModelTurn(noChangeTurn());
+    const previous: AiOnboardingBlueprint = {
+      templateId: 'barbershop',
+      workMode: 'solo',
+      categoryId: 'solo_barber',
+      businessName: null,
+      summary: 'Барбер',
+      industryPresetId: 'barbershop',
+      calendarSource: CalendarSource.INTERNAL,
+      calendarSourceConfirmed: false,
+      providerCount: 1,
+      providerTitle: 'Барбер',
+      services: [{ name: 'Мужская стрижка', price: 0, durationMinutes: 60 }],
+      weeklyRules: [{ weekday: 1, startTime: '10:00', endTime: '20:00' }],
+      scheduleAssumed: true,
+    };
+
+    const result = await createInterpreter().interpret(
+      'Названия пока нет',
+      previous,
+    );
+
+    expect(requests).toHaveLength(0);
+    expect(result.source).toBe('safe_fallback');
+    expect(result.blueprint.businessName).toBeNull();
+    expect(result.blueprint.businessNameDeferred).toBe(true);
+    expect(result.missingFields).toEqual(['calendar_source']);
+  });
+
+  it('rejects model fields that have no evidence in the user message', async () => {
+    const requests = mockModelTurn({
+      ...noChangeTurn(),
+      accepted_fields: ['business_name', 'calendar_source'],
+      patch: {
+        template_id: null,
+        business_name: 'Всё как у людей',
+        calendar_source: CalendarSource.EXTERNAL,
+        provider_count: null,
+        use_template_services: false,
+        services: [],
+        weekly_rules: [],
+      },
+    });
+    const previous: AiOnboardingBlueprint = {
+      templateId: 'barbershop',
+      workMode: 'solo',
+      categoryId: 'solo_barber',
+      businessName: null,
+      businessNameDeferred: true,
+      summary: 'Барбер',
+      industryPresetId: 'barbershop',
+      calendarSource: CalendarSource.INTERNAL,
+      calendarSourceConfirmed: false,
+      providerCount: 1,
+      providerTitle: 'Барбер',
+      services: [{ name: 'Мужская стрижка', price: 0, durationMinutes: 60 }],
+      weeklyRules: [{ weekday: 1, startTime: '10:00', endTime: '20:00' }],
+      scheduleAssumed: true,
+    };
+
+    const result = await createInterpreter().interpret(
+      'Ну короче, всё как у людей, ты поняла',
+      previous,
+    );
+
+    expect(requests).toHaveLength(1);
+    expect(result.source).toBe('openai');
+    expect(result.blueprint.businessName).toBeNull();
+    expect(result.blueprint.calendarSource).toBe(CalendarSource.INTERNAL);
+    expect(result.blueprint.calendarSourceConfirmed).toBe(false);
+    expect(result.missingFields).toEqual(['calendar_source']);
   });
 
   it('never lets the model reopen a deliberately skipped business name', async () => {
