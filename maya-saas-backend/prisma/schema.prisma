@@ -27,6 +27,8 @@ model Tenant {
   trialEndsAt            DateTime?
   currentPeriodStart     DateTime?
   currentPeriodEnd       DateTime?
+  pastDueAt              DateTime?
+  graceEndsAt            DateTime?
   billingMethodId        String?
   trialFullAccess        Boolean                         @default(false)
   allowSelfRegistration  Boolean                         @default(true)
@@ -60,6 +62,8 @@ model Tenant {
   expenses               Expense[]
   aiApprovalRequests     AiApprovalRequest[]
   aiToolExecutions       AiToolExecution[]
+
+  @@index([status, graceEndsAt])
 }
 
 /// Persisted white-label BrandingConfig. The database model name is retained

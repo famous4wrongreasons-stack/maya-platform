@@ -12,6 +12,9 @@ type PublicTenantRecord = {
   trialEndsAt: Date | null;
   trialFullAccess: boolean;
   currentPeriodEnd: Date | null;
+  pastDueAt: Date | null;
+  graceEndsAt: Date | null;
+  updatedAt: Date;
   calendarSource: string;
   industryPresetId: string | null;
   allowSelfRegistration: boolean;
@@ -52,6 +55,9 @@ describe('TenantsService', () => {
     trialEndsAt: null,
     trialFullAccess: false,
     currentPeriodEnd: null,
+    pastDueAt: null,
+    graceEndsAt: null,
+    updatedAt: new Date('2026-07-13T12:00:00.000Z'),
     calendarSource: 'external',
     industryPresetId: 'beauty_salon',
     allowSelfRegistration: true,
@@ -117,10 +123,11 @@ describe('TenantsService', () => {
       (args: Record<string, unknown>) => Promise<PublicTenantRecord | null>
     > = jest.fn().mockResolvedValue(baseTenant());
 
+    const tenantUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
     const prisma: Pick<PrismaService, 'tenant'> = {
       tenant: {
         findUnique: tenantFindUniqueMock,
-        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        updateMany: tenantUpdateManyMock,
       } as PrismaService['tenant'],
     };
     const subscriptionsService: Pick<
@@ -138,6 +145,7 @@ describe('TenantsService', () => {
       ),
       mocks: {
         tenantFindUniqueMock,
+        tenantUpdateManyMock,
       },
     };
   };
@@ -382,10 +390,10 @@ describe('TenantsService', () => {
     expect(result.trial_full_access).toBe(true);
   });
 
-  it('returns a subscription CTA and disables public features after trial expiry', async () => {
+  it('keeps public features available during the three-day grace period', async () => {
     const {
       service,
-      mocks: { tenantFindUniqueMock },
+      mocks: { tenantFindUniqueMock, tenantUpdateManyMock },
     } = createService();
     const tenant = baseTenant();
 
@@ -394,6 +402,50 @@ describe('TenantsService', () => {
       status: 'trial',
       trialFullAccess: true,
       trialEndsAt: new Date(Date.now() - 60_000),
+    });
+
+    const result = await service.getPublicMobileConfig('demo-salon');
+
+    expect(result).toMatchObject({
+      active: true,
+      tenant_status: 'past_due',
+      access_state: 'past_due_grace',
+      subscription_required: false,
+      client_registration_enabled: true,
+      guest_access_ready: true,
+      booking_mode: 'preview',
+      subscription_cta: null,
+    });
+    expect(tenantUpdateManyMock).toHaveBeenCalledWith({
+      where: {
+        id: tenant.id,
+        status: 'trial',
+        updatedAt: tenant.updatedAt,
+      },
+      data: {
+        status: 'past_due',
+        trialFullAccess: false,
+        pastDueAt: expect.any(Date) as Date,
+        graceEndsAt: expect.any(Date) as Date,
+      },
+    });
+  });
+
+  it('returns a subscription CTA after the persisted grace period', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+    const now = Date.now();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      status: 'past_due',
+      trialFullAccess: false,
+      trialEndsAt: new Date(now - 4 * 24 * 60 * 60 * 1000),
+      pastDueAt: new Date(now - 4 * 24 * 60 * 60 * 1000),
+      graceEndsAt: new Date(now - 24 * 60 * 60 * 1000),
     });
 
     const result = await service.getPublicMobileConfig('demo-salon');

@@ -11,6 +11,8 @@ type TenantRecord = {
   trialEndsAt: Date | null;
   currentPeriodStart: Date | null;
   currentPeriodEnd: Date | null;
+  pastDueAt: Date | null;
+  graceEndsAt: Date | null;
   billingMethodId: string | null;
   allowSelfRegistration: boolean;
   createdAt: Date;
@@ -73,6 +75,10 @@ type BrandingUpsertArgs = {
 };
 
 describe('TenantsService.updateTenant', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   const baseTenant = (): TenantRecord => ({
     id: 'tenant-1',
     name: 'Demo Salon',
@@ -82,6 +88,8 @@ describe('TenantsService.updateTenant', () => {
     trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
     currentPeriodStart: new Date('2026-07-01T00:00:00.000Z'),
     currentPeriodEnd: new Date('2026-07-31T23:59:59.000Z'),
+    pastDueAt: null,
+    graceEndsAt: null,
     billingMethodId: null,
     allowSelfRegistration: true,
     createdAt: new Date(),
@@ -257,12 +265,15 @@ describe('TenantsService.updateTenant', () => {
   });
 
   it('persists manual billing dates and billing method id through tenant update', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-17T12:00:00.000Z'));
     const updatedTenant = {
       ...baseTenant(),
       status: 'past_due',
       trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
       currentPeriodStart: new Date('2026-07-20T00:00:00.000Z'),
       currentPeriodEnd: new Date('2026-08-19T23:59:59.000Z'),
+      pastDueAt: new Date('2026-07-17T12:00:00.000Z'),
+      graceEndsAt: new Date('2026-07-20T12:00:00.000Z'),
       billingMethodId: 'pm_yookassa_saved_card_123',
     };
     const tenantUpdateMock: jest.MockedFunction<
@@ -272,6 +283,8 @@ describe('TenantsService.updateTenant', () => {
           status?: string;
           currentPeriodStart?: Date | null;
           currentPeriodEnd?: Date | null;
+          pastDueAt?: Date | null;
+          graceEndsAt?: Date | null;
           billingMethodId?: string | null;
         };
       }) => Promise<void>
@@ -324,6 +337,12 @@ describe('TenantsService.updateTenant', () => {
     expect(tenantUpdateArgs.data.currentPeriodEnd).toEqual(
       new Date('2026-08-19T23:59:59.000Z'),
     );
+    expect(tenantUpdateArgs.data.pastDueAt).toEqual(
+      new Date('2026-07-17T12:00:00.000Z'),
+    );
+    expect(tenantUpdateArgs.data.graceEndsAt).toEqual(
+      new Date('2026-07-20T12:00:00.000Z'),
+    );
     expect(tenantUpdateArgs.data.billingMethodId).toBe(
       'pm_yookassa_saved_card_123',
     );
@@ -334,7 +353,7 @@ describe('TenantsService.updateTenant', () => {
       billing_method_id: 'pm_yookassa_saved_card_123',
     });
     expect(result.billing.grace_ends_at).toEqual(
-      new Date('2026-08-24T23:59:59.000Z'),
+      new Date('2026-07-20T12:00:00.000Z'),
     );
   });
 

@@ -12,6 +12,7 @@ import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { addDays, PAST_DUE_GRACE_DAYS } from '../tenants/tenant-access-state';
 import { BillingSystemGateway } from './billing-system.gateway';
 import { CreateBillingCheckoutDto } from './dto/create-billing-checkout.dto';
 import {
@@ -54,6 +55,8 @@ type BillingCandidateRecord = {
   trialEndsAt: Date | null;
   currentPeriodEnd: Date | null;
   billingMethodId: string | null;
+  pastDueAt: Date | null;
+  graceEndsAt: Date | null;
 };
 
 @Injectable()
@@ -406,7 +409,11 @@ export class BillingService {
       return 'charged';
     }
 
-    await this.markTenantPastDue(tenantId);
+    await this.markTenantPastDue(tenantId, {
+      transitionAt: now,
+      pastDueAt: tenant.pastDueAt,
+      graceEndsAt: tenant.graceEndsAt,
+    });
     return 'marked_past_due';
   }
 
@@ -454,7 +461,7 @@ export class BillingService {
       });
 
       if (payment.purpose === PAYMENT_PURPOSE_RECURRING) {
-        await this.markTenantPastDue(payment.tenantId);
+        await this.markTenantPastDue(payment.tenantId, { force: true });
       }
 
       return {
@@ -526,6 +533,8 @@ export class BillingService {
           planId: payment.planId ?? tenant.planId,
           currentPeriodStart: periodStartBase,
           currentPeriodEnd: periodEnd,
+          pastDueAt: null,
+          graceEndsAt: null,
           billingMethodId: savedPaymentMethodId,
         },
       });
@@ -549,16 +558,88 @@ export class BillingService {
     };
   }
 
-  private async markTenantPastDue(tenantId: string) {
+  private async markTenantPastDue(
+    tenantId: string,
+    options: {
+      transitionAt?: Date;
+      pastDueAt?: Date | null;
+      graceEndsAt?: Date | null;
+      force?: boolean;
+    } = {},
+    attempt = 0,
+  ): Promise<void> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-
-    await this.prisma.tenant.update({
+    const tenant = await this.prisma.tenant.findUnique({
       where: { id: scopedTenantId },
+      select: {
+        status: true,
+        trialFullAccess: true,
+        trialEndsAt: true,
+        currentPeriodEnd: true,
+        pastDueAt: true,
+        graceEndsAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    const transitionAt = options.transitionAt ?? new Date();
+    const accessEndsAt = tenant.currentPeriodEnd ?? tenant.trialEndsAt;
+    if (
+      !options.force &&
+      tenant.status !== String(TenantStatus.PAST_DUE) &&
+      (!accessEndsAt || accessEndsAt.getTime() > transitionAt.getTime())
+    ) {
+      return;
+    }
+
+    if (
+      tenant.status === String(TenantStatus.PAST_DUE) &&
+      tenant.pastDueAt &&
+      tenant.graceEndsAt &&
+      !tenant.trialFullAccess
+    ) {
+      return;
+    }
+
+    const pastDueAt =
+      tenant.status === String(TenantStatus.PAST_DUE)
+        ? (tenant.pastDueAt ?? options.pastDueAt ?? transitionAt)
+        : (options.pastDueAt ??
+          (options.force ? null : accessEndsAt) ??
+          transitionAt);
+    const graceEndsAt =
+      tenant.status === String(TenantStatus.PAST_DUE)
+        ? (tenant.graceEndsAt ??
+          options.graceEndsAt ??
+          addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
+        : (options.graceEndsAt ?? addDays(pastDueAt, PAST_DUE_GRACE_DAYS));
+
+    const updated = await this.prisma.tenant.updateMany({
+      where: {
+        id: scopedTenantId,
+        status: tenant.status,
+        updatedAt: tenant.updatedAt,
+      },
       data: {
         status: TenantStatus.PAST_DUE,
         trialFullAccess: false,
+        pastDueAt,
+        graceEndsAt,
       },
     });
+
+    if (updated.count === 0) {
+      if (attempt >= 2) {
+        throw new ConflictException(
+          'Tenant billing state changed during past-due transition.',
+        );
+      }
+      await this.markTenantPastDue(tenantId, options, attempt + 1);
+    }
   }
 
   private paymentWhere(payment: Pick<BillingPaymentRecord, 'id' | 'tenantId'>) {

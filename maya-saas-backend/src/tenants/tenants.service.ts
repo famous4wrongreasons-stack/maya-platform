@@ -26,7 +26,11 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { serializePublicCrmSettings } from '../crm/crm-provider-settings';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import { evaluateTenantAccessState } from './tenant-access-state';
+import {
+  addDays,
+  evaluateTenantAccessState,
+  PAST_DUE_GRACE_DAYS,
+} from './tenant-access-state';
 
 type PublicContentPair = [string, string];
 
@@ -55,7 +59,6 @@ type InternalCalendarCounts = {
 };
 
 const DEFAULT_TRIAL_PERIOD_DAYS = 14;
-const PAST_DUE_GRACE_DAYS = 5;
 const TENANT_STATUS_TRIAL = 'trial';
 const TENANT_STATUS_PAST_DUE = 'past_due';
 
@@ -254,14 +257,6 @@ function normalizeBillingMethodId(value?: string): string | null | undefined {
   return normalized.length > 0 ? normalized : null;
 }
 
-function addDays(date: Date | null, days: number): Date | null {
-  if (!date) {
-    return null;
-  }
-
-  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
-}
-
 @Injectable()
 export class TenantsService {
   constructor(
@@ -401,6 +396,9 @@ export class TenantsService {
       currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
     });
     const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
+    const status = dto.status ?? TenantStatus.TRIAL;
+    const pastDueAt = status === TenantStatus.PAST_DUE ? new Date() : null;
+    const graceEndsAt = addDays(pastDueAt, PAST_DUE_GRACE_DAYS);
 
     const tenant = await this.prisma.$transaction(async (tx) => {
       const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
@@ -410,7 +408,7 @@ export class TenantsService {
         data: {
           name: dto.name,
           slug: dto.slug.toLowerCase(),
-          status: dto.status ?? TenantStatus.TRIAL,
+          status,
           planId: dto.planId,
           industryPresetId: dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID,
           calendarSource: dto.calendarSource ?? CalendarSource.EXTERNAL,
@@ -422,6 +420,8 @@ export class TenantsService {
           trialEndsAt: billingDates.trialEndsAt,
           currentPeriodStart: billingDates.currentPeriodStart,
           currentPeriodEnd: billingDates.currentPeriodEnd,
+          pastDueAt,
+          graceEndsAt,
           billingMethodId,
           trialFullAccess: dto.trialFullAccess ?? false,
           allowSelfRegistration: dto.allowSelfRegistration ?? true,
@@ -498,6 +498,23 @@ export class TenantsService {
       existingCurrentPeriodEnd: existingTenant.currentPeriodEnd,
     });
     const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
+    const nextStatus = dto.status ?? existingTenant.status;
+    const enteringPastDue =
+      nextStatus === TENANT_STATUS_PAST_DUE &&
+      existingTenant.status !== TENANT_STATUS_PAST_DUE;
+    const pastDueAt =
+      nextStatus === TENANT_STATUS_PAST_DUE
+        ? enteringPastDue
+          ? new Date()
+          : (existingTenant.pastDueAt ?? new Date())
+        : null;
+    const graceEndsAt =
+      nextStatus === TENANT_STATUS_PAST_DUE
+        ? enteringPastDue
+          ? addDays(pastDueAt, PAST_DUE_GRACE_DAYS)
+          : (existingTenant.graceEndsAt ??
+            addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
+        : null;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.tenant.update({
@@ -517,6 +534,8 @@ export class TenantsService {
           trialEndsAt: billingDates.trialEndsAt,
           currentPeriodStart: billingDates.currentPeriodStart,
           currentPeriodEnd: billingDates.currentPeriodEnd,
+          pastDueAt,
+          graceEndsAt,
           billingMethodId,
           allowSelfRegistration: dto.allowSelfRegistration,
         },
@@ -554,10 +573,25 @@ export class TenantsService {
   }
 
   async setTenantStatus(id: string, status: TenantStatus) {
-    await this.getTenantByIdOrThrow(id);
+    const tenant = await this.getTenantByIdOrThrow(id);
+    const enteringPastDue =
+      status === TenantStatus.PAST_DUE &&
+      tenant.status !== TENANT_STATUS_PAST_DUE;
+    const pastDueAt =
+      status === TenantStatus.PAST_DUE
+        ? enteringPastDue
+          ? new Date()
+          : (tenant.pastDueAt ?? new Date())
+        : null;
+    const graceEndsAt =
+      status === TenantStatus.PAST_DUE
+        ? enteringPastDue
+          ? addDays(pastDueAt, PAST_DUE_GRACE_DAYS)
+          : (tenant.graceEndsAt ?? addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
+        : null;
     await this.prisma.tenant.update({
       where: { id },
-      data: { status },
+      data: { status, pastDueAt, graceEndsAt },
     });
 
     return this.serializeTenant(await this.getTenantByIdOrThrow(id));
@@ -571,6 +605,9 @@ export class TenantsService {
         trialEndsAt: true,
         trialFullAccess: true,
         currentPeriodEnd: true,
+        pastDueAt: true,
+        graceEndsAt: true,
+        updatedAt: true,
         calendarSource: true,
         plan: {
           select: {
@@ -689,16 +726,26 @@ export class TenantsService {
     }
 
     const access = evaluateTenantAccessState(tenant);
-    if (access.shouldMarkPastDue) {
+    const shouldPersistWindow =
+      access.tenantStatus === TENANT_STATUS_PAST_DUE &&
+      Boolean(access.pastDueAt && access.graceEndsAt) &&
+      (!tenant.pastDueAt || !tenant.graceEndsAt);
+    if (
+      access.shouldMarkPastDue ||
+      shouldPersistWindow ||
+      (access.subscriptionRequired && tenant.trialFullAccess)
+    ) {
       await this.prisma.tenant.updateMany({
         where: {
           id: tenant.id,
-          status: TenantStatus.TRIAL,
-          trialEndsAt: { lte: new Date() },
+          status: tenant.status,
+          updatedAt: tenant.updatedAt,
         },
         data: {
           status: TenantStatus.PAST_DUE,
           trialFullAccess: false,
+          pastDueAt: access.pastDueAt,
+          graceEndsAt: access.graceEndsAt,
         },
       });
     }
@@ -1069,10 +1116,6 @@ export class TenantsService {
     const access = evaluateTenantAccessState(tenant);
     const accessWindowEndsAt =
       tenant.currentPeriodEnd ?? tenant.trialEndsAt ?? null;
-    const graceEndsAt =
-      String(tenant.status) === TENANT_STATUS_PAST_DUE
-        ? addDays(accessWindowEndsAt, PAST_DUE_GRACE_DAYS)
-        : null;
 
     return {
       trial_ends_at: tenant.trialEndsAt,
@@ -1083,7 +1126,9 @@ export class TenantsService {
       current_period_start: tenant.currentPeriodStart,
       current_period_end: tenant.currentPeriodEnd,
       access_window_ends_at: accessWindowEndsAt,
-      grace_ends_at: graceEndsAt,
+      past_due_at: access.pastDueAt,
+      grace_ends_at: access.graceEndsAt,
+      grace_days_remaining: access.graceDaysRemaining,
       billing_method_attached: Boolean(tenant.billingMethodId),
       billing_method_id: tenant.billingMethodId ?? null,
     };

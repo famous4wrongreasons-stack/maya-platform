@@ -50,6 +50,8 @@ export class SubscriptionAccessGuard implements CanActivate {
         error: {
           code: 'subscription_required',
           trial_ended_at: access.trialEndsAt,
+          past_due_at: access.pastDueAt,
+          grace_ended_at: access.graceEndsAt,
           plans_path: '/api/billing/plans',
           checkout_path: `/api/admin/tenants/${tenantId}/billing/checkout`,
         },

@@ -47,9 +47,13 @@ type TenantRecord = {
   status: string;
   planId: string | null;
   trialEndsAt: Date | null;
+  trialFullAccess: boolean;
   currentPeriodStart?: Date | null;
   currentPeriodEnd: Date | null;
+  pastDueAt: Date | null;
+  graceEndsAt: Date | null;
   billingMethodId: string | null;
+  updatedAt: Date;
   plan?: {
     id: string;
     name: string;
@@ -65,6 +69,8 @@ type TenantUpdateArgs = {
     status?: string;
     currentPeriodStart?: Date | null;
     currentPeriodEnd?: Date | null;
+    pastDueAt?: Date | null;
+    graceEndsAt?: Date | null;
     billingMethodId?: string | null;
   };
 };
@@ -253,8 +259,12 @@ describe('BillingService', () => {
       status: 'trial',
       planId: 'plan-salon',
       trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
+      trialFullAccess: true,
       currentPeriodEnd: null,
+      pastDueAt: null,
+      graceEndsAt: null,
       billingMethodId: null,
+      updatedAt: new Date('2026-07-05T12:00:00.000Z'),
     };
     const billingPaymentUpdateMock = jest.fn().mockResolvedValue({
       ...payment,
@@ -320,6 +330,8 @@ describe('BillingService', () => {
     expect(tenantUpdateArgs.data.currentPeriodEnd).toEqual(
       new Date('2026-08-05T12:05:00.000Z'),
     );
+    expect(tenantUpdateArgs.data.pastDueAt).toBeNull();
+    expect(tenantUpdateArgs.data.graceEndsAt).toBeNull();
     expect(tenantUpdateArgs.data.billingMethodId).toBe('pm_saved_1');
     expect(billingPaymentUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -349,13 +361,18 @@ describe('BillingService', () => {
       status: TenantStatus.ACTIVE,
       planId: 'plan-salon',
       trialEndsAt: null,
+      trialFullAccess: false,
       currentPeriodEnd: new Date('2026-07-01T00:00:00.000Z'),
+      pastDueAt: null,
+      graceEndsAt: null,
       billingMethodId: null,
+      updatedAt: new Date('2026-07-05T11:00:00.000Z'),
     };
-    const tenantUpdateMock = jest.fn().mockResolvedValue(undefined);
+    const tenantUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
     const prisma = {
       tenant: {
-        update: tenantUpdateMock,
+        findUnique: jest.fn().mockResolvedValue(tenant),
+        updateMany: tenantUpdateManyMock,
       },
       billingPayment: {
         findFirst: jest.fn().mockResolvedValue(null),
@@ -363,9 +380,9 @@ describe('BillingService', () => {
     } as unknown as PrismaService;
     const { service, tenantContext, listBillingCandidatesMock } =
       createService(prisma);
-    tenantUpdateMock.mockImplementation(() => {
+    tenantUpdateManyMock.mockImplementation(() => {
       expect(tenantContext.requireTenantId()).toBe('tenant-1');
-      return Promise.resolve(undefined);
+      return Promise.resolve({ count: 1 });
     });
     listBillingCandidatesMock.mockResolvedValue([tenant]);
 
@@ -373,11 +390,17 @@ describe('BillingService', () => {
       new Date('2026-07-05T12:00:00.000Z'),
     );
 
-    expect(tenantUpdateMock).toHaveBeenCalledWith({
-      where: { id: 'tenant-1' },
+    expect(tenantUpdateManyMock).toHaveBeenCalledWith({
+      where: {
+        id: 'tenant-1',
+        status: TenantStatus.ACTIVE,
+        updatedAt: tenant.updatedAt,
+      },
       data: {
         status: TenantStatus.PAST_DUE,
         trialFullAccess: false,
+        pastDueAt: new Date('2026-07-01T00:00:00.000Z'),
+        graceEndsAt: new Date('2026-07-04T00:00:00.000Z'),
       },
     });
     expect(result).toMatchObject({
@@ -385,6 +408,41 @@ describe('BillingService', () => {
       marked_past_due: 1,
       charged: 0,
     });
+  });
+
+  it('does not extend an existing grace window on repeated billing runs', async () => {
+    const tenant: TenantRecord = {
+      id: 'tenant-1',
+      name: 'Demo Salon',
+      status: TenantStatus.PAST_DUE,
+      planId: 'plan-salon',
+      trialEndsAt: null,
+      trialFullAccess: false,
+      currentPeriodEnd: new Date('2026-07-01T00:00:00.000Z'),
+      pastDueAt: new Date('2026-07-01T00:00:00.000Z'),
+      graceEndsAt: new Date('2026-07-04T00:00:00.000Z'),
+      billingMethodId: null,
+      updatedAt: new Date('2026-07-01T00:00:00.000Z'),
+    };
+    const tenantUpdateManyMock = jest.fn();
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue(tenant),
+        updateMany: tenantUpdateManyMock,
+      },
+      billingPayment: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
+    } as unknown as PrismaService;
+    const { service, listBillingCandidatesMock } = createService(prisma);
+    listBillingCandidatesMock.mockResolvedValue([tenant]);
+
+    await service.runDueBilling(new Date('2026-07-05T12:00:00.000Z'));
+    await service.runDueBilling(new Date('2026-07-06T12:00:00.000Z'));
+
+    expect(tenantUpdateManyMock).not.toHaveBeenCalled();
+    expect(tenant.pastDueAt).toEqual(new Date('2026-07-01T00:00:00.000Z'));
+    expect(tenant.graceEndsAt).toEqual(new Date('2026-07-04T00:00:00.000Z'));
   });
 
   it('rejects a foreign billing tenant before database access', async () => {
