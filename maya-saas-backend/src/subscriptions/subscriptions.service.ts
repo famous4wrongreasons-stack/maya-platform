@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { normalizeFeatureFlags } from '../common/feature-catalog';
 import { PrismaService } from '../prisma/prisma.service';
+import { canonicalPlanName } from './plan-catalog';
 
 @Injectable()
 export class SubscriptionsService {
@@ -21,7 +22,7 @@ export class SubscriptionsService {
 
   async getPlanByNameOrThrow(name: string) {
     const plan = await this.prisma.subscriptionPlan.findUnique({
-      where: { name },
+      where: { name: canonicalPlanName(name) },
     });
 
     if (!plan) {

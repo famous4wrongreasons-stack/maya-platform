@@ -288,7 +288,7 @@ async function upsertCurrentSalon(options: CliOptions) {
         maxBranches: 5,
         maxStaff: 50,
         featuresJson: buildFeatureFlags([
-          ...MAYA_PLAN_FEATURES.max,
+          ...MAYA_PLAN_FEATURES.business_plus,
           'ai_chatbot',
         ]) satisfies Prisma.InputJsonValue,
         isWhiteLabelEnabled: true,
@@ -299,7 +299,7 @@ async function upsertCurrentSalon(options: CliOptions) {
         maxBranches: 5,
         maxStaff: 50,
         featuresJson: buildFeatureFlags([
-          ...MAYA_PLAN_FEATURES.max,
+          ...MAYA_PLAN_FEATURES.business_plus,
           'ai_chatbot',
         ]) satisfies Prisma.InputJsonValue,
         isWhiteLabelEnabled: true,
@@ -328,7 +328,7 @@ async function upsertCurrentSalon(options: CliOptions) {
     }
 
     for (const featureKey of expandFeatureKeys([
-      ...MAYA_PLAN_FEATURES.max,
+      ...MAYA_PLAN_FEATURES.business_plus,
       'ai_chatbot',
     ])) {
       await prisma.planEntitlement.upsert({

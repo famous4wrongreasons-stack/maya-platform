@@ -39,11 +39,14 @@ describe('feature catalog helpers', () => {
   });
 
   it('keeps paid plan upgrades monotonic', () => {
-    expect(new Set(MAYA_PLAN_FEATURES.pro)).toEqual(
-      new Set([...MAYA_PLAN_FEATURES.start, ...MAYA_PLAN_FEATURES.pro]),
+    expect(new Set(MAYA_PLAN_FEATURES.business)).toEqual(
+      new Set([...MAYA_PLAN_FEATURES.solo, ...MAYA_PLAN_FEATURES.business]),
     );
-    expect(new Set(MAYA_PLAN_FEATURES.max)).toEqual(
-      new Set([...MAYA_PLAN_FEATURES.pro, ...MAYA_PLAN_FEATURES.max]),
+    expect(new Set(MAYA_PLAN_FEATURES.business_plus)).toEqual(
+      new Set([
+        ...MAYA_PLAN_FEATURES.business,
+        ...MAYA_PLAN_FEATURES.business_plus,
+      ]),
     );
   });
 });

@@ -467,6 +467,16 @@ const PRO_PLAN_FEATURES: MayaFeatureKey[] = [
 ];
 
 export const MAYA_PLAN_FEATURES: Record<string, MayaFeatureKey[]> = {
+  solo: START_PLAN_FEATURES,
+  business: PRO_PLAN_FEATURES,
+  business_plus: [
+    ...PRO_PLAN_FEATURES,
+    'video_analytics',
+    'ai.owner',
+    'ai.admin',
+    'ai.consultant',
+  ],
+  // Legacy aliases remain readable while deployed clients migrate.
   start: START_PLAN_FEATURES,
   pro: PRO_PLAN_FEATURES,
   max: [

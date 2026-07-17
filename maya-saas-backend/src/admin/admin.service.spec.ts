@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
 
 import { CrmProvider, TenantStatus, UserRole } from '../common/domain.enums';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -6,6 +6,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { BrandingService } from '../branding/branding.service';
 import { CrmService } from '../crm/crm.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
@@ -25,19 +26,47 @@ describe('AdminService tenant update boundaries', () => {
 
   const createService = () => {
     const updateTenantMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
+    const getTenantByIdOrThrowMock = jest
+      .fn()
+      .mockResolvedValue({ id: 'tenant-1' });
     const upsertCrmMock = jest.fn().mockResolvedValue({ id: 'crm-1' });
+    const upsertBrandingMock = jest.fn().mockResolvedValue({
+      id: 'branding-1',
+      tenantId: 'tenant-1',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     const auditLogMock = jest.fn().mockResolvedValue(undefined);
+    const assertCanCreateMock = jest.fn().mockResolvedValue(undefined);
+    const assertCustomBrandingAllowedMock = jest
+      .fn()
+      .mockResolvedValue(undefined);
     const service = new AdminService(
-      { updateTenant: updateTenantMock } as unknown as TenantsService,
-      {} as BrandingService,
+      {
+        updateTenant: updateTenantMock,
+        getTenantByIdOrThrow: getTenantByIdOrThrowMock,
+      } as unknown as TenantsService,
+      { upsertBranding: upsertBrandingMock } as unknown as BrandingService,
       { connectAndActivateIntegration: upsertCrmMock } as unknown as CrmService,
       {} as UsersService,
       {} as SubscriptionsService,
       { log: auditLogMock } as unknown as AuditLogService,
       {} as TenantContextService,
+      {
+        assertCanCreate: assertCanCreateMock,
+        assertCustomBrandingAllowed: assertCustomBrandingAllowedMock,
+      } as unknown as QuotaService,
     );
 
-    return { service, updateTenantMock, upsertCrmMock, auditLogMock };
+    return {
+      service,
+      updateTenantMock,
+      upsertCrmMock,
+      upsertBrandingMock,
+      auditLogMock,
+      assertCanCreateMock,
+      assertCustomBrandingAllowedMock,
+    };
   };
 
   it('prevents a tenant admin from activating their own trial', async () => {
@@ -97,5 +126,41 @@ describe('AdminService tenant update boundaries', () => {
     await service.upsertCrm('tenant-1', dto, tenantAdmin);
 
     expect(upsertCrmMock).toHaveBeenCalledWith('tenant-1', dto);
+  });
+
+  it('checks staff quota before any tenant-user creation work', async () => {
+    const { service, assertCanCreateMock } = createService();
+    assertCanCreateMock.mockRejectedValue(
+      new ConflictException({ error: { code: 'quota_exceeded' } }),
+    );
+
+    await expect(
+      service.createTenantUser(
+        'tenant-1',
+        { email: 'staff@example.test', role: UserRole.STAFF },
+        tenantAdmin,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(assertCanCreateMock).toHaveBeenCalledWith('tenant-1', 'staff');
+  });
+
+  it('checks plan-level white-label access before persisting custom branding', async () => {
+    const { service, assertCustomBrandingAllowedMock, upsertBrandingMock } =
+      createService();
+    assertCustomBrandingAllowedMock.mockRejectedValue(
+      new ForbiddenException({ error: { code: 'white_label_locked' } }),
+    );
+
+    await expect(
+      service.updateBranding(
+        'tenant-1',
+        { primaryColor: '#000000' },
+        tenantAdmin,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(assertCustomBrandingAllowedMock).toHaveBeenCalledWith('tenant-1', [
+      'primaryColor',
+    ]);
+    expect(upsertBrandingMock).not.toHaveBeenCalled();
   });
 });

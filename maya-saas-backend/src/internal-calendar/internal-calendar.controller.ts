@@ -28,6 +28,8 @@ import { UserRole } from '../common/domain.enums';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
+import { QuotaResource } from '../quotas/quota-resource';
+import { RequiresQuota } from '../quotas/requires-quota.decorator';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
@@ -152,6 +154,7 @@ export class InternalCalendarController {
   }
 
   @Post('providers')
+  @RequiresQuota(QuotaResource.STAFF)
   @ApiOperation({ summary: 'Create a Maya-managed provider without a login' })
   createProvider(
     @CurrentUser() user: AuthenticatedUser,

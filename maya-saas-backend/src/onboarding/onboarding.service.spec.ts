@@ -85,7 +85,9 @@ describe('OnboardingService', () => {
       id: 'plan-explicit',
     });
     const getPlanByNameOrThrowMock = jest.fn((name: string) =>
-      Promise.resolve({ id: name === 'start' ? 'plan-start' : 'plan-pro' }),
+      Promise.resolve({
+        id: name === 'solo' ? 'plan-solo' : 'plan-business',
+      }),
     );
     const createUserMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<CreatedUser>
@@ -212,7 +214,7 @@ describe('OnboardingService', () => {
         name: 'Studio Vector',
         slug: 'studio-vector',
         status: TenantStatus.TRIAL,
-        planId: 'plan-pro',
+        planId: 'plan-business',
         industryPresetId: 'education',
         calendarSource: CalendarSource.EXTERNAL,
         trialFullAccess: false,
@@ -276,7 +278,7 @@ describe('OnboardingService', () => {
           id: 'education',
         },
         calendar_source: CalendarSource.EXTERNAL,
-        plan_id: 'plan-pro',
+        plan_id: 'plan-business',
         trial_full_access: false,
       },
       trial: {
@@ -306,7 +308,7 @@ describe('OnboardingService', () => {
       expect.objectContaining({
         industryPresetId: 'solo_specialist',
         calendarSource: CalendarSource.INTERNAL,
-        planId: 'plan-start',
+        planId: 'plan-solo',
       }),
     );
     expect(mocks.createOrUpdateIntegrationMock).not.toHaveBeenCalled();

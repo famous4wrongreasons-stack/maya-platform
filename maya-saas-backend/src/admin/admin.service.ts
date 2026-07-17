@@ -15,6 +15,8 @@ import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
 import { UsersService } from '../users/users.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { QuotaResource } from '../quotas/quota-resource';
+import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
@@ -31,6 +33,7 @@ export class AdminService {
     private readonly subscriptionsService: SubscriptionsService,
     private readonly auditLogService: AuditLogService,
     private readonly tenantContext: TenantContextService,
+    private readonly quotas: QuotaService,
   ) {}
 
   createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
@@ -94,6 +97,7 @@ export class AdminService {
     actor: AuthenticatedUser,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
+    await this.quotas.assertCustomBrandingAllowed(id, Object.keys(dto));
     const branding = await this.brandingService.upsertBranding(id, dto);
 
     await this.auditLogService.log({
@@ -180,6 +184,7 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     await this.tenantsService.getTenantByIdOrThrow(id);
+    await this.quotas.assertCanCreate(id, QuotaResource.STAFF);
 
     if (dto.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(dto.branchId, id);

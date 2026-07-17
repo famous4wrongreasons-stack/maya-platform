@@ -1,6 +1,11 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
 import { InternalCalendarService } from './internal-calendar.service';
@@ -31,6 +36,12 @@ describe('InternalCalendarService provider creation', () => {
     const createLinksMock: jest.MockedFunction<
       (args: {
         data: Array<Record<string, unknown>>;
+      }) => Promise<{ count: number }>
+    > = jest.fn().mockResolvedValue({ count: 1 });
+    const updateProviderMock: jest.MockedFunction<
+      (args: {
+        where: { id: string; tenantId: string };
+        data: Record<string, unknown>;
       }) => Promise<{ count: number }>
     > = jest.fn().mockResolvedValue({ count: 1 });
     const tx = {
@@ -64,6 +75,7 @@ describe('InternalCalendarService provider creation', () => {
       },
       internalProvider: {
         findFirst: jest.fn().mockResolvedValue(provider),
+        updateMany: updateProviderMock,
       },
       $transaction: jest.fn(
         (callback: (transaction: typeof tx) => Promise<unknown>) =>
@@ -71,17 +83,29 @@ describe('InternalCalendarService provider creation', () => {
       ),
     };
     const tenantContext = new TenantContextService();
+    const assertCanCreateMock = jest.fn().mockResolvedValue(undefined);
     const service = new InternalCalendarService(
       prisma as unknown as PrismaService,
       tenantContext,
       {} as UsersService,
+      {
+        assertCanCreate: assertCanCreateMock,
+      } as unknown as QuotaService,
     );
 
-    return { service, prisma, tenantContext, tx };
+    return {
+      service,
+      prisma,
+      tenantContext,
+      tx,
+      assertCanCreateMock,
+      updateProviderMock,
+    };
   }
 
   it('creates a login-free provider and scopes every write to the active tenant', async () => {
-    const { service, prisma, tenantContext, tx } = createService();
+    const { service, prisma, tenantContext, tx, assertCanCreateMock } =
+      createService();
 
     const result = await tenantContext.runAsSystemTenant('tenant-a', () =>
       service.createProvider('tenant-a', { displayName: 'Специалист 2' }),
@@ -92,6 +116,7 @@ describe('InternalCalendarService provider creation', () => {
       user_id: null,
       name: 'Специалист 2',
     });
+    expect(assertCanCreateMock).toHaveBeenCalledWith('tenant-a', 'staff');
     expect(tx.internalProvider.create.mock.calls[0]?.[0].data).toMatchObject({
       tenantId: 'tenant-a',
       userId: null,
@@ -129,6 +154,45 @@ describe('InternalCalendarService provider creation', () => {
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(prisma.tenant.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('does not start provider writes after a staff quota rejection', async () => {
+    const { service, tenantContext, tx, assertCanCreateMock } = createService();
+    assertCanCreateMock.mockRejectedValue(
+      new ConflictException({ error: { code: 'quota_exceeded' } }),
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.createProvider('tenant-a', { displayName: 'Blocked' }),
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(tx.internalProvider.create).not.toHaveBeenCalled();
+  });
+
+  it('checks staff quota before reactivating an independent provider', async () => {
+    const {
+      service,
+      prisma,
+      tenantContext,
+      assertCanCreateMock,
+      updateProviderMock,
+    } = createService();
+    prisma.internalProvider.findFirst.mockResolvedValueOnce({
+      active: false,
+      userId: null,
+    });
+
+    await tenantContext.runAsSystemTenant('tenant-a', () =>
+      service.updateProvider('tenant-a', 'provider-2', { active: true }),
+    );
+
+    expect(assertCanCreateMock).toHaveBeenCalledWith('tenant-a', 'staff');
+    expect(updateProviderMock.mock.calls[0]?.[0]?.where).toEqual({
+      id: 'provider-2',
+      tenantId: 'tenant-a',
+    });
+    expect(updateProviderMock.mock.calls[0]?.[0]?.data.active).toBe(true);
   });
 });
 
@@ -226,6 +290,7 @@ describe('InternalCalendarService journal', () => {
       prisma as unknown as PrismaService,
       tenantContext,
       usersService as unknown as UsersService,
+      {} as QuotaService,
     );
 
     return {

@@ -96,7 +96,7 @@ export class OnboardingService {
       const plan = dto.planId
         ? await this.subscriptionsService.getPlanByIdOrThrow(dto.planId)
         : await this.subscriptionsService.getPlanByNameOrThrow(
-            calendarSource === CalendarSource.INTERNAL ? 'start' : 'pro',
+            calendarSource === CalendarSource.INTERNAL ? 'solo' : 'business',
           );
       const trialFullAccess = Boolean(activationId);
       const trialEndsAt = this.addDays(new Date(), TRIAL_PERIOD_DAYS);

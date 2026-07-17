@@ -5,6 +5,7 @@ import { BrandingModule } from '../branding/branding.module';
 import { CrmModule } from '../crm/crm.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { OnboardingModule } from '../onboarding/onboarding.module';
+import { QuotasModule } from '../quotas/quotas.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
 import { AdminCatalogController } from './admin-catalog.controller';
@@ -21,6 +22,7 @@ import { AdminService } from './admin.service';
     SubscriptionsModule,
     AuditLogModule,
     OnboardingModule,
+    QuotasModule,
   ],
   controllers: [
     AdminController,

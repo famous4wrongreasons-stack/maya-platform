@@ -94,8 +94,8 @@ async function upsertTenantAdmin(
 ) {
   const existing = await prisma.user.findFirst({
     where: {
-      tenantId,
       email: demoTenantAdminEmail.toLowerCase(),
+      memberships: { some: { tenantId } },
     },
   });
 
@@ -118,6 +118,7 @@ async function upsertTenantAdmin(
         },
       },
       update: {
+        branchId,
         role: 'tenant_admin',
         status: 'active',
         joinedAt: existing.createdAt,
@@ -125,6 +126,7 @@ async function upsertTenantAdmin(
       create: {
         userId: existing.id,
         tenantId,
+        branchId,
         role: 'tenant_admin',
         status: 'active',
         joinedAt: existing.createdAt,
@@ -149,6 +151,7 @@ async function upsertTenantAdmin(
     data: {
       userId: created.id,
       tenantId,
+      branchId,
       role: 'tenant_admin',
       status: 'active',
       joinedAt: created.createdAt,
@@ -212,85 +215,88 @@ async function main() {
 
   await upsertFeatureRegistry();
 
-  const startPlan = await prisma.subscriptionPlan.upsert({
-    where: { name: 'start' },
+  const soloPlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'solo' },
     update: {
       priceMonthly: 990,
       maxBranches: 1,
       maxStaff: 5,
       featuresJson: buildFeatureFlags(
-        MAYA_PLAN_FEATURES.start,
+        MAYA_PLAN_FEATURES.solo,
       ) satisfies Prisma.InputJsonValue,
-      isWhiteLabelEnabled: true,
+      isWhiteLabelEnabled: false,
     },
     create: {
-      name: 'start',
+      name: 'solo',
       priceMonthly: 990,
       maxBranches: 1,
       maxStaff: 5,
       featuresJson: buildFeatureFlags(
-        MAYA_PLAN_FEATURES.start,
+        MAYA_PLAN_FEATURES.solo,
       ) satisfies Prisma.InputJsonValue,
-      isWhiteLabelEnabled: true,
+      isWhiteLabelEnabled: false,
     },
   });
 
-  const proPlan = await prisma.subscriptionPlan.upsert({
-    where: { name: 'pro' },
+  const businessPlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'business' },
     update: {
       priceMonthly: 1990,
       maxBranches: 3,
       maxStaff: 25,
       featuresJson: buildFeatureFlags(
-        MAYA_PLAN_FEATURES.pro,
+        MAYA_PLAN_FEATURES.business,
       ) satisfies Prisma.InputJsonValue,
-      isWhiteLabelEnabled: true,
+      isWhiteLabelEnabled: false,
     },
     create: {
-      name: 'pro',
+      name: 'business',
       priceMonthly: 1990,
       maxBranches: 3,
       maxStaff: 25,
       featuresJson: buildFeatureFlags(
-        MAYA_PLAN_FEATURES.pro,
+        MAYA_PLAN_FEATURES.business,
       ) satisfies Prisma.InputJsonValue,
-      isWhiteLabelEnabled: true,
+      isWhiteLabelEnabled: false,
     },
   });
 
-  const demoPlan = await prisma.subscriptionPlan.upsert({
-    where: { name: 'max' },
+  const businessPlusPlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'business_plus' },
     update: {
       priceMonthly: 2990,
       maxBranches: 10,
       maxStaff: 100,
       featuresJson: buildFeatureFlags(
-        MAYA_PLAN_FEATURES.max,
+        MAYA_PLAN_FEATURES.business_plus,
       ) satisfies Prisma.InputJsonValue,
       isWhiteLabelEnabled: true,
     },
     create: {
-      name: 'max',
+      name: 'business_plus',
       priceMonthly: 2990,
       maxBranches: 10,
       maxStaff: 100,
       featuresJson: buildFeatureFlags(
-        MAYA_PLAN_FEATURES.max,
+        MAYA_PLAN_FEATURES.business_plus,
       ) satisfies Prisma.InputJsonValue,
       isWhiteLabelEnabled: true,
     },
   });
 
-  await syncPlanEntitlements(startPlan.id, MAYA_PLAN_FEATURES.start);
-  await syncPlanEntitlements(proPlan.id, MAYA_PLAN_FEATURES.pro);
-  await syncPlanEntitlements(demoPlan.id, MAYA_PLAN_FEATURES.max);
+  await syncPlanEntitlements(soloPlan.id, MAYA_PLAN_FEATURES.solo);
+  await syncPlanEntitlements(businessPlan.id, MAYA_PLAN_FEATURES.business);
+  await syncPlanEntitlements(
+    businessPlusPlan.id,
+    MAYA_PLAN_FEATURES.business_plus,
+  );
 
   const defaultTenant = await prisma.tenant.upsert({
     where: { slug: defaultTenantSlug },
     update: {
       name: defaultTenantName,
       status: 'active',
-      planId: demoPlan.id,
+      planId: businessPlusPlan.id,
       industryPresetId: 'barbershop',
       calendarSource: 'external',
       defaultCurrency: 'RUB',
@@ -303,7 +309,7 @@ async function main() {
       name: defaultTenantName,
       slug: defaultTenantSlug,
       status: 'active',
-      planId: demoPlan.id,
+      planId: businessPlusPlan.id,
       industryPresetId: 'barbershop',
       calendarSource: 'external',
       defaultCurrency: 'RUB',
@@ -391,7 +397,7 @@ async function main() {
     update: {
       name: 'Maya Service Demo',
       status: 'active',
-      planId: demoPlan.id,
+      planId: businessPlusPlan.id,
       industryPresetId: 'general_service',
       calendarSource: 'external',
       defaultCurrency: 'RUB',
@@ -404,7 +410,7 @@ async function main() {
       name: 'Maya Service Demo',
       slug: 'demo-business',
       status: 'active',
-      planId: demoPlan.id,
+      planId: businessPlusPlan.id,
       industryPresetId: 'general_service',
       calendarSource: 'external',
       defaultCurrency: 'RUB',

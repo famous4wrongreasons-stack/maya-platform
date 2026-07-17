@@ -13,6 +13,8 @@ import type {
   StaffMember,
 } from '../crm/crm-adapter.interface';
 import { PrismaService } from '../prisma/prisma.service';
+import { QuotaResource } from '../quotas/quota-resource';
+import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
@@ -48,6 +50,7 @@ export class InternalCalendarService {
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
     private readonly usersService: UsersService,
+    private readonly quotas: QuotaService,
   ) {}
 
   async ensureProviderForUser(
@@ -395,6 +398,7 @@ export class InternalCalendarService {
   async createProvider(tenantId: string, dto: CreateInternalProviderDto) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertInternalSource(scopedTenantId);
+    await this.quotas.assertCanCreate(scopedTenantId, QuotaResource.STAFF);
     const branchId =
       dto.branchId ?? (await this.findFirstBranchId(scopedTenantId));
 
@@ -460,6 +464,20 @@ export class InternalCalendarService {
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertInternalSource(scopedTenantId);
+
+    if (dto.active === true) {
+      const existing = await this.prisma.internalProvider.findFirst({
+        where: { id: providerId, tenantId: scopedTenantId },
+        select: { active: true, userId: true },
+      });
+
+      if (!existing) {
+        throw new NotFoundException('Internal provider not found');
+      }
+      if (!existing.active && existing.userId === null) {
+        await this.quotas.assertCanCreate(scopedTenantId, QuotaResource.STAFF);
+      }
+    }
 
     if (dto.branchId) {
       const branch = await this.prisma.branch.findFirst({

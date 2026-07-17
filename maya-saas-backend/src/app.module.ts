@@ -28,6 +28,8 @@ import { RolesGuard } from './guards/roles.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
 import { SubscriptionAccessGuard } from './guards/subscription-access.guard';
 import { PrismaModule } from './prisma/prisma.module';
+import { QuotaGuard } from './quotas/quota.guard';
+import { QuotasModule } from './quotas/quotas.module';
 import { ServicesModule } from './services/services.module';
 import { StaffModule } from './staff/staff.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
@@ -47,6 +49,7 @@ import { SystemMetricsService } from './system-metrics.service';
       validate: validateRuntimeConfig,
     }),
     PrismaModule,
+    QuotasModule,
     TenancyModule,
     EntitlementsModule,
     ExpensesModule,
@@ -99,6 +102,10 @@ import { SystemMetricsService } from './system-metrics.service';
     {
       provide: APP_GUARD,
       useClass: FeatureGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: QuotaGuard,
     },
   ],
 })
