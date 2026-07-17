@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { TenantStatus as PrismaTenantStatus } from '@prisma/client';
 import type { Request } from 'express';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -14,7 +15,11 @@ import {
   TenantResolutionSource,
 } from './tenant-context.service';
 
-const PUBLIC_TENANT_STATUSES = ['trial', 'active', 'past_due'];
+const PUBLIC_TENANT_STATUSES: PrismaTenantStatus[] = [
+  'trial',
+  'active',
+  'past_due',
+];
 const PUBLIC_CONFIG_PATH = /\/(?:api\/)?mobile\/config\/([^/?#]+)/;
 
 interface ResolvedPublicTenant {

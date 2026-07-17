@@ -4,9 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import type {
+  MembershipStatus as PrismaMembershipStatus,
+  User,
+  UserRole as PrismaUserRole,
+} from '@prisma/client';
 
-import { UserRole } from '../common/domain.enums';
+import { UserRole, UserStatus } from '../common/domain.enums';
 import {
   buildPhoneLoginEmail,
   normalizeRussianPhone,
@@ -29,8 +33,8 @@ type MembershipProjection = {
   id: string;
   tenantId: string;
   branchId: string | null;
-  role: string;
-  status: string;
+  role: PrismaUserRole;
+  status: PrismaMembershipStatus;
   tenant: TenantSummary;
   branch: BranchSummary | null;
 };
@@ -241,14 +245,15 @@ export class UsersService {
     phone?: string | null;
     name?: string | null;
     passwordHash: string;
-    role: string;
-    status?: string;
+    role: UserRole;
+    status?: UserStatus;
   }) {
     const tenantId = data.tenantId
       ? this.tenantContext.assertTenantId(data.tenantId)
       : null;
     const normalizedPhone = this.normalizeOptionalPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
+    const status = data.status ?? UserStatus.ACTIVE;
 
     const user = await this.prisma.user.create({
       data: {
@@ -261,19 +266,17 @@ export class UsersService {
           : null,
         passwordHash: data.passwordHash,
         role: data.role,
-        status: data.status ?? 'active',
+        status,
         memberships: tenantId
           ? {
               create: {
                 tenantId,
                 branchId: data.branchId ?? null,
                 role: data.role,
-                status: data.status ?? 'active',
-                joinedAt:
-                  (data.status ?? 'active') === 'active'
-                    ? new Date()
-                    : undefined,
-                invitedAt: data.status === 'invited' ? new Date() : undefined,
+                status,
+                joinedAt: status === UserStatus.ACTIVE ? new Date() : undefined,
+                invitedAt:
+                  status === UserStatus.INVITED ? new Date() : undefined,
               },
             }
           : undefined,

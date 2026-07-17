@@ -11,14 +11,57 @@ datasource db {
   provider = "postgresql"
 }
 
+enum TenantStatus {
+  trial
+  active
+  past_due
+  suspended
+  cancelled
+}
+
+enum UserRole {
+  platform_owner
+  platform_admin
+  tenant_owner
+  business_owner
+  administrator
+  manager
+  provider
+  employee
+  accountant
+  customer
+  integration_service
+  tenant_admin
+  branch_manager
+  staff
+  client
+}
+
+enum UserStatus {
+  active
+  suspended
+  invited
+}
+
+enum MembershipStatus {
+  active
+  suspended
+  invited
+}
+
+enum CalendarSource {
+  internal
+  external
+}
+
 model Tenant {
   id                     String                          @id @default(cuid())
   name                   String
   slug                   String                          @unique
-  status                 String                          @default("trial")
+  status                 TenantStatus                    @default(trial)
   planId                 String?
   industryPresetId       String?
-  calendarSource         String                          @default("external")
+  calendarSource         CalendarSource                  @default(external)
   defaultCurrency        String                          @default("RUB")
   defaultTimezone        String                          @default("Europe/Moscow")
   defaultLocale          String                          @default("ru-RU")
@@ -132,20 +175,20 @@ model User {
   phone                String?
   encryptedName        String?
   passwordHash         String
-  role                 String
-  status               String               @default("active")
+  role                 UserRole
+  status               UserStatus           @default(active)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
   tenant               Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch               Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  branch               Branch?              @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
   auditLogs            AuditLog[]
   appointments         Appointment[]        @relation("ClientAppointments")
   authIdentities       AuthIdentity[]
   authSessions         AuthSession[]
   memberships          Membership[]
   internalProviders    InternalProvider[]
-  customerProfile      CustomerProfile?
-  loyaltyAccount       LoyaltyAccount?
+  customerProfiles     CustomerProfile[]
+  loyaltyAccounts      LoyaltyAccount[]
   loyaltyTransactions  LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
   createdExpenses      Expense[]            @relation("ExpenseCreator")
   requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
@@ -160,19 +203,25 @@ model User {
 }
 
 model Membership {
-  id        String    @id @default(cuid())
-  tenantId  String
-  userId    String
-  branchId  String?
-  role      String
-  status    String    @default("active")
-  invitedAt DateTime?
-  joinedAt  DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch    Branch?   @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  id                 String             @id @default(cuid())
+  tenantId           String
+  userId             String
+  branchId           String?
+  role               UserRole
+  status             MembershipStatus   @default(active)
+  invitedAt          DateTime?
+  joinedAt           DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch             Branch?            @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  authIdentities     AuthIdentity[]     @relation("AuthIdentityMembership")
+  authSessions       AuthSession[]      @relation("AuthSessionMembership")
+  internalProviders  InternalProvider[] @relation("InternalProviderMembership")
+  customerProfile    CustomerProfile?   @relation("CustomerProfileMembership")
+  loyaltyAccount     LoyaltyAccount?    @relation("LoyaltyAccountMembership")
+  clientAppointments Appointment[]      @relation("ClientMembershipAppointments")
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
@@ -181,7 +230,7 @@ model Membership {
 }
 
 model AuthIdentity {
-  id             String   @id @default(cuid())
+  id             String     @id @default(cuid())
   tenantId       String
   userId         String
   provider       String
@@ -189,10 +238,11 @@ model AuthIdentity {
   email          String?
   phone          String?
   profileJson    Json?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user           User     @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership     Membership @relation("AuthIdentityMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
 
   @@unique([id, tenantId])
   @@unique([tenantId, provider, providerUserId])
@@ -271,6 +321,7 @@ model AuthSession {
   updatedAt     DateTime           @updatedAt
   tenant        Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership    Membership?        @relation("AuthSessionMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
   refreshTokens AuthRefreshToken[]
 
   @@index([tenantId, userId, revokedAt])
@@ -365,8 +416,9 @@ model InternalProvider {
   createdAt           DateTime                        @default(now())
   updatedAt           DateTime                        @updatedAt
   tenant              Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user                User?                           @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
-  branch              Branch?                         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  user                User?                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership          Membership?                     @relation("InternalProviderMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+  branch              Branch?                         @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
   services            InternalProviderService[]
   availabilityRules   InternalAvailabilityRule[]
   exceptions          InternalAvailabilityException[]
@@ -421,17 +473,18 @@ model TrialActivation {
 }
 
 model CustomerProfile {
-  id                 String    @id @default(cuid())
+  id                 String     @id @default(cuid())
   tenantId           String
   userId             String
   preferredLocale    String?
   privacyConsentAt   DateTime?
   marketingConsentAt DateTime?
   encryptedNotes     String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User      @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  tenant             Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership         Membership @relation("CustomerProfileMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
 
   @@unique([userId, tenantId])
   @@index([tenantId, updatedAt])
@@ -448,7 +501,8 @@ model LoyaltyAccount {
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user              User                 @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership        Membership           @relation("LoyaltyAccountMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
   transactions      LoyaltyTransaction[]
 
   @@unique([id, tenantId])
@@ -471,7 +525,7 @@ model LoyaltyTransaction {
   createdAt       DateTime       @default(now())
   tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   account         LoyaltyAccount @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)
-  actor           User?          @relation("LoyaltyTransactionActor", fields: [actorUserId, actorTenantId], references: [id, tenantId], onDelete: SetNull)
+  actor           User?          @relation("LoyaltyTransactionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
 
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, accountId, createdAt])
@@ -494,7 +548,7 @@ model Expense {
   updatedAt         DateTime @updatedAt
   tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch            Branch?  @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)
-  createdBy         User?    @relation("ExpenseCreator", fields: [createdById, createdByTenantId], references: [id, tenantId], onDelete: SetNull)
+  createdBy         User?    @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@unique([id, tenantId])
   @@index([tenantId, occurredAt])
@@ -525,8 +579,8 @@ model AiApprovalRequest {
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   tenant              Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  requestedBy         User?            @relation("AiApprovalRequester", fields: [requestedByUserId, requestedByTenantId], references: [id, tenantId], onDelete: SetNull)
-  decidedBy           User?            @relation("AiApprovalDecider", fields: [decidedByUserId, decidedByTenantId], references: [id, tenantId], onDelete: SetNull)
+  requestedBy         User?            @relation("AiApprovalRequester", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  decidedBy           User?            @relation("AiApprovalDecider", fields: [decidedByUserId], references: [id], onDelete: SetNull)
   execution           AiToolExecution?
 
   @@unique([id, tenantId])
@@ -555,7 +609,7 @@ model AiToolExecution {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  actor             User?              @relation("AiToolExecutionActor", fields: [actorUserId, actorTenantId], references: [id, tenantId], onDelete: SetNull)
+  actor             User?              @relation("AiToolExecutionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
   approvalRequest   AiApprovalRequest? @relation(fields: [approvalRequestId, approvalTenantId], references: [id, tenantId], onDelete: SetNull)
 
   @@unique([approvalRequestId, approvalTenantId])
@@ -715,28 +769,29 @@ model AuditLog {
 }
 
 model Appointment {
-  id                String   @id @default(cuid())
+  id                String     @id @default(cuid())
   tenantId          String
   clientId          String
   branchId          String?
   crmExternalId     String?
-  source            String   @default("external")
+  source            String     @default("external")
   staffExternalId   String
   serviceIds        Json
   startAt           DateTime
   endAt             DateTime
   blockedStartAt    DateTime
   blockedEndAt      DateTime
-  status            String   @default("confirmed")
+  status            String     @default("confirmed")
   notes             String?
   totalPriceKopecks Int?
-  currency          String   @default("RUB")
+  currency          String     @default("RUB")
   providerPayload   Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  client            User     @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
-  branch            Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  tenant            Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client            User       @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+  clientMembership  Membership @relation("ClientMembershipAppointments", fields: [clientId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+  branch            Branch?    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
 
   @@unique([id, tenantId, clientId])
   @@index([tenantId])

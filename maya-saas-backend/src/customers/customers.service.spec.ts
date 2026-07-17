@@ -38,8 +38,8 @@ describe('CustomersService', () => {
                 status: 'active',
               },
             ],
-            customerProfile: null,
-            loyaltyAccount: { balance: 2133, source: 'yclients' },
+            customerProfiles: [],
+            loyaltyAccounts: [{ balance: 2133, source: 'yclients' }],
             _count: { appointments: 39 },
           },
         ]);

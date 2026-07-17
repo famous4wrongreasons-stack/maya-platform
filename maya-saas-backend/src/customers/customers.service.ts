@@ -110,8 +110,14 @@ export class CustomersService {
           },
           include: { tenant: true, branch: true },
         },
-        customerProfile: true,
-        loyaltyAccount: true,
+        customerProfiles: {
+          where: { tenantId: scopedTenantId },
+          take: 1,
+        },
+        loyaltyAccounts: {
+          where: { tenantId: scopedTenantId },
+          take: 1,
+        },
         _count: {
           select: {
             appointments: { where: { tenantId: scopedTenantId } },
@@ -122,13 +128,18 @@ export class CustomersService {
       take: Math.min(Math.max(limit, 1), 100),
     });
 
-    return users.map((user) => ({
-      ...this.usersService.serializeUser(user),
-      appointments_count: user._count.appointments,
-      loyalty_balance: user.loyaltyAccount?.balance ?? null,
-      loyalty_source: user.loyaltyAccount?.source ?? null,
-      profile: this.serializeAdminProfile(user.customerProfile),
-    }));
+    return users.map((user) => {
+      const profile = user.customerProfiles[0] ?? null;
+      const loyaltyAccount = user.loyaltyAccounts[0] ?? null;
+
+      return {
+        ...this.usersService.serializeUser(user),
+        appointments_count: user._count.appointments,
+        loyalty_balance: loyaltyAccount?.balance ?? null,
+        loyalty_source: loyaltyAccount?.source ?? null,
+        profile: this.serializeAdminProfile(profile),
+      };
+    });
   }
 
   async countCustomers(tenantId: string) {
