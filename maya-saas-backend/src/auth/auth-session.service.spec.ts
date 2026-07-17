@@ -179,11 +179,15 @@ describe('AuthSessionService', () => {
   it('issues a short access token and persists only a refresh-token hash', async () => {
     const { service, mocks } = createService();
 
-    const result = await service.issueSession(tenantUser, {
-      clientIp: '203.0.113.10',
-      userAgent:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Version/18.0 Mobile Safari/604.1',
-    });
+    const result = await service.issueSession(
+      tenantUser,
+      {
+        clientIp: '203.0.113.10',
+        userAgent:
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Version/18.0 Mobile Safari/604.1',
+      },
+      'tenant-a',
+    );
 
     expect(result.access_token).toBe('signed-access-token');
     expect(result.refresh_token).toMatch(
@@ -210,6 +214,15 @@ describe('AuthSessionService', () => {
     });
     expect(typeof signArgs?.[0].session_id).toBe('string');
     expect(signArgs?.[1]).toEqual({ expiresIn: 900 });
+  });
+
+  it('does not infer a tenant session from legacy User.tenantId', async () => {
+    const { service, mocks } = createService();
+
+    await expect(service.issueSession(tenantUser)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+    expect(mocks.getActiveMembershipMock).not.toHaveBeenCalled();
   });
 
   it('rotates a valid refresh token and returns a new credential', async () => {

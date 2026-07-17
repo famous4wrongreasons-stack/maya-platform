@@ -57,7 +57,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User is not active');
     }
 
-    if (user.role === 'platform_owner' && !payload.tenant_id) {
+    if (!payload.tenant_id) {
+      if (user.role !== 'platform_owner') {
+        throw new UnauthorizedException('Tenant membership is required');
+      }
+
       return {
         userId: user.id,
         sessionId: payload.session_id,
@@ -70,15 +74,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       };
     }
 
-    const tenantId = payload.tenant_id ?? user.tenantId;
-
-    if (!tenantId) {
-      throw new UnauthorizedException('Tenant membership is required');
-    }
-
     const membership = await this.membershipsService.getActiveMembership(
       user.id,
-      tenantId,
+      payload.tenant_id,
     );
 
     return {
@@ -87,7 +85,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       tenantId: membership.tenantId,
       role: membership.role as UserRole,
       email: user.email,
-      branchId: user.branchId,
+      branchId: membership.branchId,
       membershipId: membership.id,
       membershipStatus: membership.status,
     };

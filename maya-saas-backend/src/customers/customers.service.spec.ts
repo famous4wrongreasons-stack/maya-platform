@@ -11,22 +11,33 @@ import { CustomersService } from './customers.service';
 describe('CustomersService', () => {
   const createService = () => {
     const tenantContext = new TenantContextService();
-    let customerQueryTenantId: string | null = null;
     let membershipQueryTenantId: string | null = null;
     const userFindMany = jest.fn(
       (args: {
         where: {
-          tenantId: string;
-          memberships: { some: { tenantId: string; status: string } };
+          memberships: {
+            some: {
+              tenantId: string;
+              status: string;
+              role: { in: UserRole[] };
+            };
+          };
         };
       }) => {
-        customerQueryTenantId = args.where.tenantId;
         membershipQueryTenantId = args.where.memberships.some.tenantId;
         return Promise.resolve([
           {
             id: 'client-a',
-            tenantId: 'tenant-a',
-            role: UserRole.CLIENT,
+            tenantId: 'stale-tenant',
+            role: UserRole.TENANT_ADMIN,
+            memberships: [
+              {
+                tenantId: 'tenant-a',
+                branchId: null,
+                role: UserRole.CLIENT,
+                status: 'active',
+              },
+            ],
             customerProfile: null,
             loyaltyAccount: { balance: 2133, source: 'yclients' },
             _count: { appointments: 39 },
@@ -68,7 +79,6 @@ describe('CustomersService', () => {
       tenantContext,
       userFindMany,
       getTenantUserOrThrowMock,
-      getCustomerQueryTenantId: () => customerQueryTenantId,
       getMembershipQueryTenantId: () => membershipQueryTenantId,
       service: new CustomersService(
         prisma,
@@ -87,8 +97,23 @@ describe('CustomersService', () => {
       setup.service.listCustomers('tenant-a', 50),
     );
 
-    expect(setup.getCustomerQueryTenantId()).toBe('tenant-a');
     expect(setup.getMembershipQueryTenantId()).toBe('tenant-a');
+    expect(setup.userFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          memberships: {
+            some: {
+              tenantId: 'tenant-a',
+              status: 'active',
+              role: { in: [UserRole.CLIENT, UserRole.CUSTOMER] },
+            },
+          },
+        },
+      }),
+    );
+    expect(setup.userFindMany.mock.calls[0]?.[0]?.where).not.toHaveProperty(
+      'tenantId',
+    );
     expect(result).toEqual([
       expect.objectContaining({
         id: 'client-a',

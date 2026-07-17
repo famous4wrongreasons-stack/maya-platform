@@ -411,19 +411,23 @@ export class AiToolRuntimeService {
     if (!approval.requestedByUserId) {
       this.approvalConflict('ai_approval_requester_unavailable');
     }
-    const requester = await this.prisma.user.findUnique({
+    const requester = await this.prisma.membership.findUnique({
       where: {
-        id_tenantId: {
-          id: approval.requestedByUserId,
+        userId_tenantId: {
+          userId: approval.requestedByUserId,
           tenantId: approval.tenantId,
         },
       },
-      select: { id: true, tenantId: true, role: true, status: true },
+      select: {
+        role: true,
+        status: true,
+        user: { select: { id: true, status: true } },
+      },
     });
     if (
       !requester ||
-      requester.tenantId !== approval.tenantId ||
       requester.status !== 'active' ||
+      requester.user.status !== 'active' ||
       !this.isUserRole(requester.role)
     ) {
       await this.failApproval(approval, 'ai_approval_requester_unavailable');
@@ -433,7 +437,7 @@ export class AiToolRuntimeService {
     const surface = this.assertSurface(approval.surface);
     const principal = this.policy.buildPrincipal(
       approval.tenantId,
-      requester.id,
+      requester.user.id,
       requester.role,
       surface,
     );

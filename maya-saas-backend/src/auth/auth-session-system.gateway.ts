@@ -15,7 +15,6 @@ export class AuthSessionSystemGateway {
             user: {
               select: {
                 id: true,
-                tenantId: true,
                 role: true,
                 status: true,
               },

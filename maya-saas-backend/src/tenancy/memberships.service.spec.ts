@@ -12,16 +12,24 @@ describe('MembershipsService', () => {
       role: 'tenant_admin',
       status: 'active',
       tenant: { status: 'active' },
+      branch: { id: 'branch-a' },
     };
+    const findUnique = jest.fn().mockResolvedValue(membership);
     const prisma = {
       membership: {
-        findUnique: jest.fn().mockResolvedValue(membership),
+        findUnique,
       },
     } as unknown as PrismaService;
 
     await expect(
       new MembershipsService(prisma).getActiveMembership('user-a', 'tenant-a'),
     ).resolves.toBe(membership);
+    expect(findUnique).toHaveBeenCalledWith({
+      where: {
+        userId_tenantId: { userId: 'user-a', tenantId: 'tenant-a' },
+      },
+      include: { tenant: true, branch: true },
+    });
   });
 
   it('rejects a suspended membership', async () => {

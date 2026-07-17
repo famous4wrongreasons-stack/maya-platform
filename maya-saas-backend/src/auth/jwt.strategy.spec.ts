@@ -23,6 +23,7 @@ describe('JwtStrategy session validation', () => {
     const getActiveMembershipMock = jest.fn().mockResolvedValue({
       id: 'membership-a',
       tenantId: 'tenant-a',
+      branchId: 'branch-membership',
       role: UserRole.CLIENT,
       status: 'active',
     });
@@ -72,7 +73,22 @@ describe('JwtStrategy session validation', () => {
       sessionId: 'session-a',
       tenantId: 'tenant-a',
       membershipId: 'membership-a',
+      branchId: 'branch-membership',
     });
+  });
+
+  it('does not fall back to legacy User.tenantId when JWT tenant is absent', async () => {
+    const { strategy, mocks } = createStrategy();
+
+    await expect(
+      strategy.validate({
+        user_id: 'user-a',
+        tenant_id: null,
+        role: UserRole.CLIENT,
+        session_id: 'session-a',
+      }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(mocks.getActiveMembershipMock).not.toHaveBeenCalled();
   });
 
   it('rejects a legacy JWT without a session id', async () => {

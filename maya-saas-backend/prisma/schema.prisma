@@ -118,6 +118,7 @@ model Branch {
   appointments      Appointment[]
   internalProviders InternalProvider[]
   expenses          Expense[]
+  memberships       Membership[]
 
   @@unique([id, tenantId])
   @@index([tenantId])
@@ -162,6 +163,7 @@ model Membership {
   id        String    @id @default(cuid())
   tenantId  String
   userId    String
+  branchId  String?
   role      String
   status    String    @default("active")
   invitedAt DateTime?
@@ -170,10 +172,12 @@ model Membership {
   updatedAt DateTime  @updatedAt
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch    Branch?   @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
   @@index([userId, status])
+  @@index([tenantId, branchId])
 }
 
 model AuthIdentity {

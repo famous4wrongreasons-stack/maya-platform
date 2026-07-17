@@ -16,6 +16,25 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
 
+type TenantSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+};
+
+type BranchSummary = { id: string; name: string };
+
+type MembershipProjection = {
+  id: string;
+  tenantId: string;
+  branchId: string | null;
+  role: string;
+  status: string;
+  tenant: TenantSummary;
+  branch: BranchSummary | null;
+};
+
 type UserWithRelations = User & {
   tenant?: {
     id: string;
@@ -24,6 +43,7 @@ type UserWithRelations = User & {
     status: string;
   } | null;
   branch?: { id: string; name: string } | null;
+  memberships?: MembershipProjection[];
 };
 
 @Injectable()
@@ -37,9 +57,8 @@ export class UsersService {
   async findTenantUserByEmail(tenantId: string, email: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
-    return this.prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
-        tenantId: scopedTenantId,
         email: email.toLowerCase(),
         memberships: {
           some: {
@@ -49,10 +68,14 @@ export class UsersService {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId: scopedTenantId, status: 'active' },
+          include: { tenant: true, branch: true },
+        },
       },
     });
+
+    return user ? this.projectTenantMembership(user, scopedTenantId) : null;
   }
 
   async findEmailLoginCandidates(email: string) {
@@ -60,28 +83,24 @@ export class UsersService {
     // Callers must not expose these records until the email code is verified.
     const users = await this.prisma.user.findMany({
       where: {
-        tenantId: { not: null },
         email: email.toLowerCase(),
         status: 'active',
+        memberships: { some: { status: 'active' } },
       },
       include: {
-        tenant: true,
-        branch: true,
         memberships: {
           where: { status: 'active' },
-          select: { tenantId: true },
+          include: { tenant: true, branch: true },
         },
       },
       orderBy: { createdAt: 'desc' },
       take: 25,
     });
 
-    return users.filter(
-      (user) =>
-        Boolean(user.tenantId && user.tenant) &&
-        user.memberships.some(
-          (membership) => membership.tenantId === user.tenantId,
-        ),
+    return users.flatMap((user) =>
+      user.memberships.map((membership) =>
+        this.projectTenantMembership(user, membership.tenantId),
+      ),
     );
   }
 
@@ -104,7 +123,6 @@ export class UsersService {
     const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
-        tenantId: scopedTenantId,
         phone: normalizedPhone,
         memberships: {
           some: {
@@ -114,18 +132,19 @@ export class UsersService {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId: scopedTenantId, status: 'active' },
+          include: { tenant: true, branch: true },
+        },
       },
     });
 
     if (exact) {
-      return exact;
+      return this.projectTenantMembership(exact, scopedTenantId);
     }
 
     const legacyUsers = await this.prisma.user.findMany({
       where: {
-        tenantId: scopedTenantId,
         phone: {
           not: null,
         },
@@ -137,16 +156,20 @@ export class UsersService {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId: scopedTenantId, status: 'active' },
+          include: { tenant: true, branch: true },
+        },
       },
     });
 
-    return (
-      legacyUsers.find(
-        (user) => this.normalizeStoredPhone(user.phone) === normalizedPhone,
-      ) ?? null
+    const legacyUser = legacyUsers.find(
+      (user) => this.normalizeStoredPhone(user.phone) === normalizedPhone,
     );
+
+    return legacyUser
+      ? this.projectTenantMembership(legacyUser, scopedTenantId)
+      : null;
   }
 
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
@@ -155,8 +178,10 @@ export class UsersService {
       : null;
     const existing = await this.prisma.user.findFirst({
       where: {
-        tenantId: scopedTenantId,
         email: email.toLowerCase(),
+        ...(scopedTenantId
+          ? { memberships: { some: { tenantId: scopedTenantId } } }
+          : { tenantId: null, role: UserRole.PLATFORM_OWNER }),
       },
       select: { id: true },
     });
@@ -173,8 +198,10 @@ export class UsersService {
     const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
-        tenantId: scopedTenantId,
         phone: normalizedPhone,
+        ...(scopedTenantId
+          ? { memberships: { some: { tenantId: scopedTenantId } } }
+          : { tenantId: null, role: UserRole.PLATFORM_OWNER }),
       },
       select: { id: true },
     });
@@ -185,10 +212,12 @@ export class UsersService {
 
     const legacyUsers = await this.prisma.user.findMany({
       where: {
-        tenantId: scopedTenantId,
         phone: {
           not: null,
         },
+        ...(scopedTenantId
+          ? { memberships: { some: { tenantId: scopedTenantId } } }
+          : { tenantId: null, role: UserRole.PLATFORM_OWNER }),
       },
       select: {
         id: true,
@@ -221,7 +250,7 @@ export class UsersService {
     const normalizedPhone = this.normalizeOptionalPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         tenantId,
         branchId: data.branchId ?? null,
@@ -237,6 +266,7 @@ export class UsersService {
           ? {
               create: {
                 tenantId,
+                branchId: data.branchId ?? null,
                 role: data.role,
                 status: data.status ?? 'active',
                 joinedAt:
@@ -251,8 +281,13 @@ export class UsersService {
       include: {
         tenant: true,
         branch: true,
+        memberships: {
+          include: { tenant: true, branch: true },
+        },
       },
     });
+
+    return tenantId ? this.projectTenantMembership(user, tenantId) : user;
   }
 
   async createPhoneFirstClientUser(data: {
@@ -267,7 +302,7 @@ export class UsersService {
     const normalizedPhone = normalizeRussianPhone(data.phone);
     const normalizedName = this.normalizeOptionalName(data.name);
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         tenantId,
         branchId: data.branchId ?? null,
@@ -282,6 +317,7 @@ export class UsersService {
         memberships: {
           create: {
             tenantId,
+            branchId: data.branchId ?? null,
             role: UserRole.CLIENT,
             status: 'active',
             joinedAt: new Date(),
@@ -289,10 +325,14 @@ export class UsersService {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId },
+          include: { tenant: true, branch: true },
+        },
       },
     });
+
+    return this.projectTenantMembership(user, tenantId);
   }
 
   async updateCurrentUserProfile(
@@ -337,10 +377,7 @@ export class UsersService {
       }
 
       if (!currentUser.phone) {
-        await this.ensurePhoneIsAvailable(
-          scopedTenantId ?? currentUser.tenantId,
-          normalizedPhone,
-        );
+        await this.ensurePhoneIsAvailable(scopedTenantId, normalizedPhone);
       }
 
       data.phone = normalizedPhone;
@@ -350,7 +387,6 @@ export class UsersService {
       const update = await this.prisma.user.updateMany({
         where: {
           id: userId,
-          tenantId: scopedTenantId,
           memberships: {
             some: {
               tenantId: scopedTenantId,
@@ -403,7 +439,6 @@ export class UsersService {
     const user = await this.prisma.user.findFirst({
       where: {
         id: userId,
-        tenantId,
         memberships: {
           some: {
             tenantId,
@@ -412,8 +447,10 @@ export class UsersService {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId, status: 'active' },
+          include: { tenant: true, branch: true },
+        },
       },
     });
 
@@ -421,7 +458,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    return this.projectTenantMembership(user, tenantId);
   }
 
   getUserName(user: { encryptedName: string | null }): string | null {
@@ -433,6 +470,10 @@ export class UsersService {
   }
 
   serializeUser(user: UserWithRelations) {
+    if (user.memberships?.length === 1) {
+      user = this.projectTenantMembership(user, user.memberships[0].tenantId);
+    }
+
     const name = this.getUserName(user);
     const missingProfileFields = [
       ...(name ? [] : ['name']),
@@ -466,6 +507,29 @@ export class UsersService {
             name: user.branch.name,
           }
         : null,
+    };
+  }
+
+  private projectTenantMembership(
+    user: UserWithRelations,
+    tenantId: string,
+  ): UserWithRelations {
+    const membership = user.memberships?.find(
+      (candidate) => candidate.tenantId === tenantId,
+    );
+
+    if (!membership) {
+      throw new NotFoundException('Active tenant membership not found');
+    }
+
+    return {
+      ...user,
+      tenantId: membership.tenantId,
+      branchId: membership.branchId,
+      role: membership.role,
+      status: user.status === 'active' ? membership.status : user.status,
+      tenant: membership.tenant,
+      branch: membership.branch,
     };
   }
 

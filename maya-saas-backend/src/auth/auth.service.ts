@@ -68,7 +68,11 @@ export class AuthService {
     }
 
     return {
-      ...(await this.sessionService.issueSession(user, metadata)),
+      ...(await this.sessionService.issueSession(
+        user,
+        metadata,
+        dto.tenantSlug ? user.tenantId : null,
+      )),
       user: this.usersService.serializeUser(user),
     };
   }

@@ -112,11 +112,13 @@ describe('AiToolRuntimeService', () => {
     harness.approvalFindUniqueOrThrow.mockImplementation(() =>
       Promise.resolve({ ...createdApproval, status: 'approved' }),
     );
-    harness.userFindUnique.mockResolvedValue({
-      id: customer.userId,
-      tenantId: 'tenant-a',
+    harness.membershipFindUnique.mockResolvedValue({
       role: UserRole.CUSTOMER,
       status: 'active',
+      user: {
+        id: customer.userId,
+        status: 'active',
+      },
     });
     harness.executionFindUnique.mockResolvedValue(null);
     harness.executionCreate.mockResolvedValue({ id: 'execution-approved' });
@@ -279,7 +281,7 @@ function createHarness() {
     executionUpdateInput = input;
     return Promise.resolve({});
   });
-  const userFindUnique = jest.fn();
+  const membershipFindUnique = jest.fn();
   const prisma = {
     aiApprovalRequest: {
       findUnique: approvalFindUnique,
@@ -294,7 +296,7 @@ function createHarness() {
       create: executionCreate,
       update: executionUpdate,
     },
-    user: { findUnique: userFindUnique },
+    membership: { findUnique: membershipFindUnique },
     $transaction: jest.fn((operations: Array<Promise<unknown>>) =>
       Promise.all(operations),
     ),
@@ -355,7 +357,7 @@ function createHarness() {
     executionFindUnique,
     executionCreate,
     executionUpdate,
-    userFindUnique,
+    membershipFindUnique,
     handlerExecute,
     policyAssertCanExecute,
     policyAssertCanDecide,

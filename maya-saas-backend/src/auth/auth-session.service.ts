@@ -26,7 +26,6 @@ type SessionUser = {
   id: string;
   role: string;
   status: string;
-  tenantId: string | null;
 };
 
 type SessionErrorCode =
@@ -50,8 +49,14 @@ export class AuthSessionService {
   async issueSession(
     user: SessionUser,
     metadata: Partial<AuthClientMetadata> = {},
+    tenantId?: string | null,
   ) {
-    const principal = await this.resolveCurrentPrincipal(user);
+    const principal = await this.resolveCurrentPrincipal(
+      user,
+      tenantId !== undefined
+        ? tenantId
+        : (this.tenantContext.get()?.tenantId ?? null),
+    );
     const now = new Date();
     const expiresAt = new Date(
       now.getTime() + this.getRefreshTtlDays() * 24 * 60 * 60 * 1000,
@@ -120,17 +125,17 @@ export class AuthSessionService {
       throw this.unauthorized('session_expired', 'Session has expired.');
     }
 
-    if (
-      session.user.id !== session.userId ||
-      session.user.tenantId !== session.tenantId
-    ) {
+    if (session.user.id !== session.userId) {
       throw this.unauthorized(
         'refresh_token_invalid',
         'Refresh token is invalid.',
       );
     }
 
-    const principal = await this.resolveCurrentPrincipal(session.user);
+    const principal = await this.resolveCurrentPrincipal(
+      session.user,
+      session.tenantId,
+    );
     const next = this.createRefreshCredential(session.expiresAt);
     const outcome = await this.tenantContext.runAsAuthPrincipal(
       principal,
@@ -284,15 +289,16 @@ export class AuthSessionService {
 
   private async resolveCurrentPrincipal(
     user: SessionUser,
+    tenantId: string | null,
   ): Promise<SessionPrincipal> {
     if (user.status !== 'active') {
       throw new UnauthorizedException('User is not active');
     }
 
-    if (user.tenantId) {
+    if (tenantId) {
       const membership = await this.membershipsService.getActiveMembership(
         user.id,
-        user.tenantId,
+        tenantId,
       );
 
       return {

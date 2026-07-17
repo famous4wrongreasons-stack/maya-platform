@@ -17,6 +17,16 @@ type BranchRecord = {
   name: string;
 };
 
+type MembershipRecord = {
+  id: string;
+  tenantId: string;
+  branchId: string | null;
+  role: string;
+  status: string;
+  tenant: TenantRecord;
+  branch: BranchRecord | null;
+};
+
 type UserRecord = {
   id: string;
   tenantId: string | null;
@@ -31,6 +41,7 @@ type UserRecord = {
   updatedAt: Date;
   tenant: TenantRecord | null;
   branch: BranchRecord | null;
+  memberships?: MembershipRecord[];
 };
 
 describe('UsersService', () => {
@@ -48,6 +59,27 @@ describe('UsersService', () => {
     updatedAt: new Date(),
     tenant: null,
     branch: null,
+  });
+
+  const tenantUser = (overrides: Partial<UserRecord> = {}): UserRecord => ({
+    ...baseUser(),
+    ...overrides,
+    memberships: [
+      {
+        id: 'membership-1',
+        tenantId: 'tenant-1',
+        branchId: 'branch-1',
+        role: 'client',
+        status: 'active',
+        tenant: {
+          id: 'tenant-1',
+          name: 'Tenant One',
+          slug: 'tenant-one',
+          status: 'active',
+        },
+        branch: { id: 'branch-1', name: 'Main branch' },
+      },
+    ],
   });
 
   const createService = () => {
@@ -193,17 +225,21 @@ describe('UsersService', () => {
       tenantContext,
       mocks: { userFindFirstMock },
     } = createService();
-    userFindFirstMock.mockResolvedValue(baseUser());
+    userFindFirstMock.mockResolvedValue(tenantUser());
 
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
       service.getTenantUserOrThrow('user-1', 'tenant-1'),
     );
 
     expect(result.id).toBe('user-1');
+    expect(result).toMatchObject({
+      tenantId: 'tenant-1',
+      branchId: 'branch-1',
+      role: 'client',
+    });
     expect(userFindFirstMock).toHaveBeenCalledWith({
       where: {
         id: 'user-1',
-        tenantId: 'tenant-1',
         memberships: {
           some: {
             tenantId: 'tenant-1',
@@ -212,9 +248,36 @@ describe('UsersService', () => {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId: 'tenant-1', status: 'active' },
+          include: { tenant: true, branch: true },
+        },
       },
+    });
+  });
+
+  it('projects tenant authority from membership instead of stale user fields', async () => {
+    const {
+      service,
+      tenantContext,
+      mocks: { userFindFirstMock },
+    } = createService();
+    userFindFirstMock.mockResolvedValue(
+      tenantUser({
+        tenantId: 'legacy-tenant',
+        branchId: 'legacy-branch',
+        role: 'tenant_admin',
+      }),
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.getTenantUserOrThrow('user-1', 'tenant-1'),
+    );
+
+    expect(result).toMatchObject({
+      tenantId: 'tenant-1',
+      branchId: 'branch-1',
+      role: 'client',
     });
   });
 
@@ -251,10 +314,9 @@ describe('UsersService', () => {
       tenantContext,
       mocks: { userFindFirstMock, userUpdateManyMock, userUpdateMock },
     } = createService();
-    userFindFirstMock.mockResolvedValueOnce(baseUser()).mockResolvedValueOnce({
-      ...baseUser(),
-      encryptedName: 'enc:Алексей',
-    });
+    userFindFirstMock
+      .mockResolvedValueOnce(tenantUser())
+      .mockResolvedValueOnce(tenantUser({ encryptedName: 'enc:Алексей' }));
 
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
       service.updateCurrentUserProfile(
@@ -267,7 +329,6 @@ describe('UsersService', () => {
     expect(userUpdateManyMock).toHaveBeenCalledWith({
       where: {
         id: 'user-1',
-        tenantId: 'tenant-1',
         memberships: {
           some: {
             tenantId: 'tenant-1',
@@ -310,10 +371,7 @@ describe('UsersService', () => {
       mocks: { userFindFirstMock, userFindManyMock },
     } = createService();
 
-    const legacyUser = {
-      ...baseUser(),
-      phone: '8 (999) 000-00-00',
-    };
+    const legacyUser = tenantUser({ phone: '8 (999) 000-00-00' });
 
     userFindFirstMock.mockResolvedValue(null);
     userFindManyMock.mockResolvedValue([legacyUser]);
@@ -325,7 +383,6 @@ describe('UsersService', () => {
     expect(result?.id).toBe('user-1');
     expect(userFindFirstMock).toHaveBeenCalledWith({
       where: {
-        tenantId: 'tenant-1',
         phone: '+79990000000',
         memberships: {
           some: {
@@ -335,8 +392,10 @@ describe('UsersService', () => {
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: { tenantId: 'tenant-1', status: 'active' },
+          include: { tenant: true, branch: true },
+        },
       },
     });
   });

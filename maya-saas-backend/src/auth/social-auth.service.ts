@@ -304,11 +304,15 @@ export class SocialAuthService {
     );
 
     if (existingIdentity) {
-      this.assertUserCanLogin(existingIdentity.user);
+      const user = await this.usersService.getTenantUserOrThrow(
+        existingIdentity.user.id,
+        params.tenant.id,
+      );
+      this.assertUserCanLogin(user);
       await this.updateIdentityRecord(existingIdentity.id, params.profile);
 
       return {
-        user: existingIdentity.user,
+        user,
         isNewUser: false,
       };
     }

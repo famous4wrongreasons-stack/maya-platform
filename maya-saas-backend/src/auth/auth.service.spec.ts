@@ -576,7 +576,7 @@ describe('AuthService phone auth', () => {
       trialTenant.id,
       adminUser.email,
     );
-    expect(issueSessionMock).toHaveBeenCalledWith(adminUser, {});
+    expect(issueSessionMock).toHaveBeenCalledWith(adminUser, {}, 'tenant-1');
     expect(rateLimitPreflightMock).toHaveBeenCalledWith('password_login', {
       clientIp: undefined,
       identity: JSON.stringify([trialTenant.slug, adminUser.email]),
@@ -669,7 +669,7 @@ describe('AuthService phone auth', () => {
       password,
     });
 
-    expect(issueSessionMock).toHaveBeenCalledWith(clientUser, {});
+    expect(issueSessionMock).toHaveBeenCalledWith(clientUser, {}, 'tenant-1');
     expect(result).toMatchObject({ access_token: 'jwt-token' });
   });
 

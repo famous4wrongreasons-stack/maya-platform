@@ -93,18 +93,30 @@ export class CustomersService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const users = await this.prisma.user.findMany({
       where: {
-        tenantId: scopedTenantId,
-        role: { in: [...CUSTOMER_ROLES] },
         memberships: {
-          some: { tenantId: scopedTenantId, status: 'active' },
+          some: {
+            tenantId: scopedTenantId,
+            status: 'active',
+            role: { in: [...CUSTOMER_ROLES] },
+          },
         },
       },
       include: {
-        tenant: true,
-        branch: true,
+        memberships: {
+          where: {
+            tenantId: scopedTenantId,
+            status: 'active',
+            role: { in: [...CUSTOMER_ROLES] },
+          },
+          include: { tenant: true, branch: true },
+        },
         customerProfile: true,
         loyaltyAccount: true,
-        _count: { select: { appointments: true } },
+        _count: {
+          select: {
+            appointments: { where: { tenantId: scopedTenantId } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: Math.min(Math.max(limit, 1), 100),
@@ -123,10 +135,12 @@ export class CustomersService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const count = await this.prisma.user.count({
       where: {
-        tenantId: scopedTenantId,
-        role: { in: [...CUSTOMER_ROLES] },
         memberships: {
-          some: { tenantId: scopedTenantId, status: 'active' },
+          some: {
+            tenantId: scopedTenantId,
+            status: 'active',
+            role: { in: [...CUSTOMER_ROLES] },
+          },
         },
       },
     });
