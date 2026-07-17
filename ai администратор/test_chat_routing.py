@@ -276,11 +276,11 @@ class ChatRoutingTests(unittest.TestCase):
     def test_gross_profit_typo_uses_one_deterministic_company_formula(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
-        fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
-            "2026-07-01",
-            "2026-07-17",
-            "этот месяц",
-        )
+        requested_periods = []
+        def _resolve_period(period, date_from=None, date_to=None):
+            requested_periods.append(period)
+            return "2026-07-01", "2026-07-17", "этот месяц"
+        fake_analytics.resolve_period = _resolve_period
         fake_analytics.business_summary = lambda frm, to, include_top=False: {
             "source_status": {"transactions": "ok", "records": "ok"},
             "total_gross": 328740,
@@ -301,6 +301,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("200 000 ₽", reply)
         self.assertNotIn("Илья Третьяков", reply)
         self.assertNotIn("лидер", reply.lower())
+        self.assertEqual(requested_periods, ["month"])
 
     def test_salon_gross_profit_is_not_routed_to_master_ranking(self):
         ws = _load_webhook_server()
@@ -355,6 +356,34 @@ class ChatRoutingTests(unittest.TestCase):
         )
 
         self.assertIn("128 740 ₽", reply)
+
+    def test_bare_profit_inherits_recent_user_period(self):
+        ws = _load_webhook_server()
+        fake_analytics = types.ModuleType("analytics")
+        requested_periods = []
+        def _resolve_period(period, date_from=None, date_to=None):
+            requested_periods.append(period)
+            return "2026-07-13", "2026-07-17", "эта неделя"
+        fake_analytics.resolve_period = _resolve_period
+        fake_analytics.business_summary = lambda frm, to, include_top=False: {
+            "source_status": {"transactions": "ok", "records": "ok"},
+            "total_gross": 100000,
+            "salary_total": 40000,
+        }
+        sys.modules["analytics"] = fake_analytics
+
+        reply = ws._staff_financial_analytics_reply(
+            948205934,
+            "Валовая прибыль",
+            mode="staff",
+            history=[{
+                "role": "user",
+                "content": "Покажи выручку бизнеса за эту неделю",
+            }],
+        )
+
+        self.assertEqual(requested_periods, ["week"])
+        self.assertIn("60 000 ₽", reply)
 
     def test_net_profit_is_not_invented_without_complete_expenses(self):
         ws = _load_webhook_server()

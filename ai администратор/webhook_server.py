@@ -6931,6 +6931,10 @@ _STAFF_FINANCIAL_FOLLOWUP_RE = re.compile(
     r"назови\s+(?:мне\s+)?сумм\w*|сколько\s+(?:это|получается|в\s+итоге))\s*[.!?]*\s*$",
     re.IGNORECASE,
 )
+_STAFF_ANALYTICS_PERIOD_RE = re.compile(
+    r"\b(?:сегодня|вчера|позавчера|недел\w*|месяц\w*|последн\w*\s+30\s+дн\w*)\b",
+    re.IGNORECASE,
+)
 
 
 def _staff_financial_metric(message: str) -> str | None:
@@ -6947,15 +6951,33 @@ def _staff_financial_metric(message: str) -> str | None:
 
 def _staff_financial_context_message(message: str, history: list | None) -> str:
     """Attach the last explicit metric to short follow-ups such as 'name the amount'."""
-    if not _STAFF_FINANCIAL_FOLLOWUP_RE.match(message or ""):
-        return message or ""
+    context_message = message or ""
+    recent_user_messages = []
     for item in reversed(list(history or [])[-10:]):
-        if not isinstance(item, dict) or item.get("role") != "user":
-            continue
-        content = item.get("content")
-        if isinstance(content, str) and _staff_financial_metric(content):
-            return f"{content}\n{message}"
-    return message or ""
+        if isinstance(item, dict) and item.get("role") == "user":
+            content = item.get("content")
+            if isinstance(content, str):
+                recent_user_messages.append(content)
+
+    if _STAFF_FINANCIAL_FOLLOWUP_RE.match(context_message):
+        previous_metric = next(
+            (content for content in recent_user_messages if _staff_financial_metric(content)),
+            None,
+        )
+        if previous_metric:
+            context_message = f"{previous_metric}\n{context_message}"
+
+    if (
+        _staff_financial_metric(context_message)
+        and not _STAFF_ANALYTICS_PERIOD_RE.search(context_message)
+    ):
+        previous_period = next(
+            (content for content in recent_user_messages if _STAFF_ANALYTICS_PERIOD_RE.search(content)),
+            None,
+        )
+        if previous_period:
+            context_message = f"{context_message}\n{previous_period}"
+    return context_message
 
 
 def _staff_fact_analytics_intent(message: str) -> bool:
@@ -7048,6 +7070,8 @@ def _staff_financial_analytics_reply(
     try:
         import analytics
         period, date_from, date_to = _analytics_period_from_text(intent_message)
+        if financial_metric and not _STAFF_ANALYTICS_PERIOD_RE.search(intent_message):
+            period = "month"
         frm, to, label = analytics.resolve_period(period, date_from, date_to)
         wants_top = bool(re.search(
             r"\bтоп\s+услуг|что\s+прода", intent_message or "", re.IGNORECASE,
