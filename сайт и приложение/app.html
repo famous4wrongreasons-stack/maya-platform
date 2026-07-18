@@ -11009,6 +11009,159 @@ function ABookFlow() {
 }
 window.ABookFlow = ABookFlow;
 
+// ── Инлайн-виджет записи в ленте чата MAYA (мастер→услуга→дата→время→подтверждение→успех).
+// Самодостаточный: ходит в те же боевые эндпоинты, что ABookFlow, через мост window.__meSaasAuthedFetch.
+// Рабочую логику ABookFlow и онбординг не трогает — только презентация в чате.
+function ABookCard(props) {
+  var e = React.createElement;
+  var t = props.t || {}; var dark = !!props.dark;
+  var ink = t.ink || (dark ? '#f4f0eb' : '#18160f');
+  var faint = t.faint || (dark ? 'rgba(244,240,235,0.4)' : 'rgba(24,22,15,0.4)');
+  var line = t.line || (dark ? 'rgba(244,240,235,0.12)' : 'rgba(24,22,15,0.1)');
+  var muted = dark ? 'rgba(244,240,235,0.55)' : 'rgba(24,22,15,0.55)';
+  var surf = dark ? 'rgba(244,240,235,0.05)' : 'rgba(24,22,15,0.045)';
+  var line2 = dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.18)';
+  var bg2 = dark ? '#0b0b0c' : '#efeae1';
+  var invBg = dark ? '#f4f0eb' : '#18160f';
+  var invText = dark ? '#000' : '#f7f3ec';
+  var BODYF = (typeof BODY !== 'undefined') ? BODY : "'Montserrat',sans-serif";
+  var DISPF = (typeof DISPLAY !== 'undefined') ? DISPLAY : "'Montserrat',sans-serif";
+  var WD = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+  var MO = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+
+  var st = React.useState({ step: 0, master: null, svcs: [], date: null, time: null, done: false, doneMode: 'preview' });
+  var s = st[0], setS = st[1];
+  var dt = React.useState({ masters: null, services: null, days: null, slots: null });
+  var data = dt[0], setData = dt[1];
+  var uit = React.useState({ loading: true, err: '' });
+  var ui = uit[0], setUi = uit[1];
+
+  function af(path, init) { if (!window.__meSaasAuthedFetch) return Promise.reject({ code: 'no_bridge' }); return window.__meSaasAuthedFetch(path, init); }
+  function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
+  function setD(o) { setData(function (p) { return Object.assign({}, p, o); }); }
+  function isoOf(d) { return d.toISOString().slice(0, 10); }
+  function svcIds(arr) { return (arr || []).map(function (x) { return x.id; }).join(','); }
+  function fmtTime(iso) { try { var d = new Date(iso); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); } catch (er) { return ''; } }
+  function fmtDay(iso) { try { var d = new Date(iso + 'T00:00:00'); return { wd: WD[d.getDay()], dd: d.getDate(), full: d.getDate() + ' ' + MO[d.getMonth()] }; } catch (er) { return { wd: '', dd: '', full: iso }; } }
+  function money(n) { return Number(n || 0).toLocaleString('ru-RU') + ' ₽'; }
+  function bErr(er, fb) { var c = er && er.code; if (er && er.status === 402) return 'Пробный период завершён — нужна подписка.'; if (c === 'service_not_found') return 'Услуга больше недоступна — выберите заново.'; if (c === 'slot_taken') return 'Это время только что заняли — выберите другой слот.'; if (c === 'staff_unavailable') return 'Мастер недоступен в это время.'; if (er && er.status === 401) return 'Сессия устарела — войдите снова.'; return fb; }
+
+  React.useEffect(function () {
+    var alive = true; setUi({ loading: true, err: '' });
+    af('/staff').then(function (list) {
+      if (!alive) return;
+      var ms = (Array.isArray(list) ? list : []).map(function (m) { return { id: String(m && m.id || ''), name: (m && m.name) || 'Мастер', rank: (m && m.title) || '', rating: (m && m.rating) || null }; });
+      setD({ masters: ms }); setUi({ loading: false, err: '' });
+    }).catch(function (er) { if (alive) setUi({ loading: false, err: bErr(er, 'Не удалось загрузить мастеров') }); });
+    return function () { alive = false; };
+  }, []);
+
+  function pickMaster(m) {
+    patch({ master: m, svcs: [], date: null, time: null, step: 1 }); setD({ services: null }); setUi({ loading: true, err: '' });
+    af('/services').then(function (list) {
+      var sv = (Array.isArray(list) ? list : []).map(function (x) { return { id: String(x && x.id || ''), name: (x && x.name) || '', price: Number(x && x.price || 0), dur: Number(x && x.duration_minutes || 0) }; });
+      setD({ services: sv }); setUi({ loading: false, err: '' });
+    }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить услуги') }); });
+  }
+  function toggleSvc(sv) { patch({ svcs: (s.svcs.some(function (x) { return x.id === sv.id; }) ? s.svcs.filter(function (x) { return x.id !== sv.id; }) : s.svcs.concat([sv])) }); }
+  function goDates() {
+    if (!s.svcs.length) return;
+    patch({ date: null, time: null, step: 2 }); setD({ days: null }); setUi({ loading: true, err: '' });
+    var now = new Date(); var from = isoOf(now); var to = isoOf(new Date(now.getTime() + 30 * 86400000));
+    af('/available-days?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&staffId=' + encodeURIComponent(s.master.id) + '&serviceIds=' + encodeURIComponent(svcIds(s.svcs))).then(function (res) {
+      var days = (res && Array.isArray(res.days)) ? res.days : (Array.isArray(res) ? res : []);
+      setD({ days: days.map(function (d) { return (typeof d === 'string') ? d : (d && (d.date || d.day) || ''); }).filter(Boolean) }); setUi({ loading: false, err: '' });
+    }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить даты') }); });
+  }
+  function pickDate(iso) {
+    patch({ date: iso, time: null, step: 3 }); setD({ slots: null }); setUi({ loading: true, err: '' });
+    af('/available-slots?date=' + encodeURIComponent(iso + 'T00:00:00.000Z') + '&staffId=' + encodeURIComponent(s.master.id) + '&serviceIds=' + encodeURIComponent(svcIds(s.svcs))).then(function (list) {
+      var seen = {}, out = [];
+      (Array.isArray(list) ? list : []).forEach(function (sl) { var lb = fmtTime(sl && sl.start); if (!lb || seen[lb]) return; seen[lb] = true; out.push({ label: lb, start: sl && sl.start || '', branch_id: sl && sl.branch_id || null }); });
+      out.sort(function (a, b) { return String(a.start).localeCompare(String(b.start)); });
+      setD({ slots: out }); setUi({ loading: false, err: '' });
+    }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить время') }); });
+  }
+  function pickTime(sl) { patch({ time: sl, step: 4 }); }
+  function confirm() {
+    setUi({ loading: true, err: '' });
+    var live = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.booking_mode === 'live');
+    af(live ? '/appointments' : '/appointments/preview', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ branchId: (s.time && s.time.branch_id) || undefined, staffId: s.master.id, serviceIds: s.svcs.map(function (x) { return String(x.id); }), start: (s.time && s.time.start) || (s.date + 'T' + (s.time && s.time.label || '') + ':00') })
+    }).then(function () {
+      setUi({ loading: false, err: '' }); patch({ done: true, doneMode: live ? 'live' : 'preview' });
+      try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'appointments' } })); } catch (er) {}
+    }).catch(function (er) {
+      var c = er && er.code;
+      if (c === 'slot_taken' || c === 'staff_unavailable') { setUi({ loading: false, err: bErr(er, '') }); patch({ time: null, step: 3 }); pickDate(s.date); return; }
+      setUi({ loading: false, err: bErr(er, 'Не удалось оформить запись') });
+    });
+  }
+
+  var wrap = { border: '1px solid ' + line, borderRadius: 20, padding: 14, marginTop: 10, maxWidth: 420, background: surf };
+  var lab = { fontFamily: DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: muted, marginBottom: 12 };
+  var chip = { display: 'inline-flex', alignItems: 'center', gap: 6, background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.06)', borderRadius: 999, padding: '5px 11px', fontSize: 11.5, color: ink, marginRight: 6, marginBottom: 6 };
+  var prim = { width: '100%', height: 46, borderRadius: 999, border: 0, background: invBg, color: invText, fontFamily: BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer', marginTop: 12 };
+  var rowBtn = { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '1px solid ' + line2, borderRadius: 14, padding: '13px 15px', background: bg2, marginBottom: 8 };
+
+  function summaryChips() {
+    var ch = [];
+    if (s.master && s.step >= 1) ch.push(e('span', { key: 'm', style: chip }, s.master.name));
+    if (s.svcs.length && s.step >= 2) ch.push(e('span', { key: 'sv', style: chip }, s.svcs.map(function (x) { return x.name; }).join(', ')));
+    if (s.date && s.step >= 3) ch.push(e('span', { key: 'd', style: chip }, fmtDay(s.date).full));
+    if (s.time && s.step >= 4) ch.push(e('span', { key: 'tm', style: chip }, s.time.label));
+    return ch.length ? e('div', { style: { marginBottom: 12 } }, ch) : null;
+  }
+  function loadingEl() { return e('div', { style: { fontSize: 12.5, color: muted, padding: '6px 2px' } }, 'Секунду…'); }
+  function errEl() { return e('div', { style: { fontSize: 12.5, color: dark ? '#f0b8b8' : '#9a3b3b', padding: '8px 2px' } }, ui.err); }
+
+  if (s.done) {
+    return e('div', { style: wrap },
+      e('div', { style: { textAlign: 'center', padding: '8px 4px' } },
+        e('div', { style: { width: 52, height: 52, borderRadius: '50%', background: invBg, color: invText, display: 'grid', placeItems: 'center', margin: '0 auto', fontSize: 26 } }, '✓'),
+        e('div', { style: { fontFamily: DISPF, fontWeight: 300, fontSize: 16, color: ink, marginTop: 14 } }, s.doneMode === 'live' ? 'Запись подтверждена' : 'Заявка отправлена'),
+        e('div', { style: { fontSize: 12.5, color: muted, marginTop: 6, lineHeight: 1.5 } }, s.svcs.map(function (x) { return x.name; }).join(', ') + ' · ' + (s.master ? s.master.name : '') + ' · ' + fmtDay(s.date).full + ', ' + (s.time ? s.time.label : '')),
+        s.doneMode === 'live' ? null : e('div', { style: { fontSize: 11, color: faint, marginTop: 8, lineHeight: 1.5 } }, 'Мастер подтвердит запись — я пришлю уведомление.')
+      )
+    );
+  }
+
+  var body;
+  if (ui.loading && !data.masters && s.step === 0) body = loadingEl();
+  else if (ui.err && s.step === 0 && !(data.masters && data.masters.length)) body = e('div', null, errEl(), e('button', { style: prim, onClick: function () { setUi({ loading: true, err: '' }); af('/staff').then(function (list) { setD({ masters: (Array.isArray(list) ? list : []).map(function (m) { return { id: String(m && m.id || ''), name: (m && m.name) || 'Мастер', rank: (m && m.title) || '', rating: m && m.rating || null }; }) }); setUi({ loading: false, err: '' }); }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить мастеров') }); }); } }, 'Повторить'));
+  else if (s.step === 0) body = e('div', null, e('div', { style: lab }, 'Выберите мастера'), (data.masters || []).map(function (m, i) {
+    return e('div', { key: i, style: rowBtn, onClick: function () { pickMaster(m); } },
+      e('div', { style: { width: 40, height: 40, borderRadius: 11, flex: 'none', display: 'grid', placeItems: 'center', background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.08)', color: ink, fontSize: 16 } }, (m.name || '?').charAt(0)),
+      e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODYF, fontWeight: 600, fontSize: 13.5, color: ink } }, m.name), m.rank ? e('div', { style: { fontSize: 10.5, color: muted, marginTop: 2 } }, m.rank) : null),
+      m.rating ? e('div', { style: { fontSize: 11, color: ink } }, '★ ' + m.rating) : null);
+  }), (data.masters && !data.masters.length) ? e('div', { style: { fontSize: 12.5, color: muted, padding: '4px 2px' } }, 'Пока нет доступных мастеров.') : null);
+  else if (s.step === 1) body = e('div', null, e('div', { style: lab }, 'Выберите услугу'), ui.loading ? loadingEl() : (data.services || []).map(function (sv, i) {
+    var on = s.svcs.some(function (x) { return x.id === sv.id; });
+    return e('div', { key: i, style: Object.assign({}, rowBtn, { border: '1px solid ' + (on ? invBg : line2) }), onClick: function () { toggleSvc(sv); } },
+      e('div', { style: { width: 20, height: 20, borderRadius: 6, flex: 'none', display: 'grid', placeItems: 'center', border: '1px solid ' + (on ? invBg : line2), background: on ? invBg : 'transparent', color: invText, fontSize: 12 } }, on ? '✓' : ''),
+      e('div', { style: { flex: 1, minWidth: 0, fontFamily: BODYF, fontSize: 13.5, color: ink } }, sv.name, sv.dur ? e('div', { style: { fontSize: 11, color: muted, marginTop: 2 } }, sv.dur + ' мин') : null),
+      e('div', { style: { fontSize: 14, color: ink } }, money(sv.price)));
+  }), ui.err ? errEl() : null, e('button', { style: Object.assign({}, prim, { opacity: s.svcs.length ? 1 : 0.4 }), onClick: goDates }, 'Далее'));
+  else if (s.step === 2) body = e('div', null, e('div', { style: lab }, 'Выберите день'), ui.loading ? loadingEl() : e('div', { style: { display: 'flex', gap: 8, overflowX: 'auto' } }, (data.days || []).map(function (iso, i) { var f = fmtDay(iso); return e('div', { key: i, style: { flex: '0 0 56px', cursor: 'pointer', textAlign: 'center', border: '1px solid ' + line2, borderRadius: 16, padding: '12px 0', background: bg2 }, onClick: function () { pickDate(iso); } }, e('div', { style: { fontSize: 9, letterSpacing: '0.14em', color: muted } }, f.wd), e('div', { style: { fontSize: 20, fontWeight: 300, color: ink, marginTop: 5 } }, f.dd)); })), (data.days && !data.days.length && !ui.loading) ? e('div', { style: { fontSize: 12.5, color: muted, padding: '4px 2px' } }, 'Нет свободных дней в ближайший месяц.') : null, ui.err ? errEl() : null);
+  else if (s.step === 3) body = e('div', null, e('div', { style: lab }, 'Свободное время'), ui.loading ? loadingEl() : e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 } }, (data.slots || []).map(function (sl, i) { return e('div', { key: i, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + line2, borderRadius: 13, padding: '11px 0', fontSize: 13, color: ink, background: bg2 }, onClick: function () { pickTime(sl); } }, sl.label); })), (data.slots && !data.slots.length && !ui.loading) ? e('div', { style: { fontSize: 12.5, color: muted, padding: '4px 2px' } }, 'На этот день нет окон — выберите другой.') : null, ui.err ? errEl() : null);
+  else if (s.step === 4) {
+    var total = s.svcs.reduce(function (a, x) { return a + Number(x.price || 0); }, 0);
+    body = e('div', null, e('div', { style: lab }, 'Проверьте запись'),
+      e('div', { style: { border: '1px solid ' + line, borderRadius: 16, padding: 16, background: bg2 } },
+        e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Мастер'), e('span', { style: { fontSize: 13, color: ink } }, s.master.name)),
+        e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Услуга'), e('span', { style: { fontSize: 13, color: ink, textAlign: 'right', maxWidth: 200 } }, s.svcs.map(function (x) { return x.name; }).join(', '))),
+        e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Когда'), e('span', { style: { fontSize: 13, color: ink } }, fmtDay(s.date).full + ', ' + s.time.label)),
+        e('div', { style: { display: 'flex', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid ' + line } }, e('span', { style: { fontSize: 11, color: muted } }, 'Итого'), e('span', { style: { fontSize: 17, fontWeight: 300, color: ink } }, money(total)))
+      ),
+      ui.err ? errEl() : null,
+      e('button', { style: Object.assign({}, prim, { opacity: ui.loading ? 0.5 : 1 }), onClick: function () { if (!ui.loading) confirm(); } }, ui.loading ? 'Оформляю…' : 'Подтвердить запись'));
+  }
+
+  return e('div', { style: wrap }, summaryChips(), body);
+}
+window.ABookCard = ABookCard;
+
 // =====================================================================
 // AChat — in-app AI assistant «Антон». SSE streaming (?action=chat_stream)
 // with fallback (?action=chat). Aurora-styled. 3-channel auth.
@@ -11407,6 +11560,10 @@ function AChat() {
     return null;
   }
   function quickTap(label) {
+    if (/^записаться$/i.test(String(label || '').trim())) {
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: 'Отлично — подберём время. Выберите мастера:', bookWidget: true }]); });
+      return;
+    }
     var target = quickActionTarget(label);
     if (target) runChatAction(target);
     else if (/^мой постоянный мастер/i.test(String(label || ''))) {
@@ -13741,7 +13898,7 @@ function AChat() {
 	        wordBreak: 'break-word',
 	        maxWidth: '100%'
 	      }
-	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
+	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
 	    return e('div', {
 	      key: i,
 	      style: {
