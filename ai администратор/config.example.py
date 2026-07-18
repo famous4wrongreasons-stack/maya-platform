@@ -59,6 +59,19 @@ OPENAI_CLIENT_REASONING_EFFORT = _opt("OPENAI_CLIENT_REASONING_EFFORT", "medium"
 OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", "gpt-5.5-pro")
 REALTIME_VAD_EAGERNESS = _opt("REALTIME_VAD_EAGERNESS", "medium")
 
+# Аудиосообщения PWA/iPhone/Telegram: OpenAI распознаёт речь,
+# после чего обычный текстовый мозг MAYA формирует ответ.
+VOICE_STT_PROVIDER = _opt("VOICE_STT_PROVIDER", "openai")
+STT_MODEL = _opt("STT_MODEL", "gpt-4o-transcribe")
+VOICE_STT_ALLOW_LOCAL_FALLBACK = _opt(
+    "VOICE_STT_ALLOW_LOCAL_FALLBACK", "True"
+).lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_STT_ALLOW_EXTERNAL_FALLBACK = _opt(
+    "VOICE_STT_ALLOW_EXTERNAL_FALLBACK", "False"
+).lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_STT_MAX_BYTES = int(_opt("VOICE_STT_MAX_BYTES", str(8 * 1024 * 1024)))
+VOICE_STT_LOCAL_MODEL = _opt("VOICE_STT_LOCAL_MODEL", "base")
+
 # ── DeepSeek V4 — прямой OpenAI-compatible API ────────────────────────
 # Ключ хранить только в .env на VPS. Для перевода текстовых чатов:
 #   OPENAI_PWA_CHAT_MODEL=deepseek-v4-pro

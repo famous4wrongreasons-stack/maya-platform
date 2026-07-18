@@ -5797,10 +5797,31 @@ async def health_handler(request: web.Request) -> web.Response:
     })
 
 
-def _transcribe_openai(raw: bytes) -> str | None:
-    """STT через OpenAI gpt-4o-mini-transcribe (тот же ключ/прокси, что у TTS).
-    Принимает webm/mp4/ogg/wav как есть — без pydub-конвертации. Точнее и быстрее
-    бесплатного Google Web Speech (тот часто слышит мимо → MAYA «тупит»). None — сбой."""
+def _voice_stt_prompt() -> str:
+    """Short Russian context that improves recognition of business terms."""
+    names = ", ".join(
+        str(name).strip() for name in _voice_known_master_names()[:20] if str(name).strip()
+    )[:400].rstrip(" ,")
+    services = ", ".join(
+        str(title).strip()
+        for title in _voice_known_service_titles()[:50]
+        if str(title).strip()
+    )[:900].rstrip(" ,")
+    parts = [
+        "Русская речь в MAYA барбершопа «Мужская Эстетика».",
+        "Темы: запись, свободное окошко, услуги, мастера, расписание, YClients, "
+        "выручка, загрузка, средний чек и валовая прибыль.",
+    ]
+    if names:
+        parts.append(f"Имена специалистов: {names}.")
+    if services:
+        parts.append(f"Названия услуг: {services}.")
+    parts.append("Точная транскрипция с обычной пунктуацией, без добавления новых слов.")
+    return " ".join(parts)
+
+
+def _transcribe_openai(raw: bytes, *, prompt: str = "") -> str | None:
+    """Transcribe one audio message with OpenAI GPT-4o Transcribe."""
     try:
         import config as _c
         key = getattr(_c, "OPENAI_API_KEY", "") or ""
@@ -5823,12 +5844,15 @@ def _transcribe_openai(raw: bytes) -> str | None:
         if proxy:
             kw["proxy"] = proxy
         # Полная gpt-4o-transcribe точнее mini на трудной/шумной речи (имена, цифры).
-        _stt_model = getattr(_c, "STT_MODEL", "gpt-4o-transcribe")
+        _stt_model = os.getenv("STT_MODEL") or getattr(_c, "STT_MODEL", "gpt-4o-transcribe")
+        data = {"model": _stt_model, "language": "ru"}
+        if prompt:
+            data["prompt"] = prompt
         with httpx.Client(**kw) as c:
             r = c.post(
                 "https://api.openai.com/v1/audio/transcriptions",
                 headers={"Authorization": f"Bearer {key}"},
-                data={"model": _stt_model, "language": "ru"},
+                data=data,
                 files={"file": (f"audio.{ext}", raw, mime)},
             )
             r.raise_for_status()
@@ -5857,20 +5881,18 @@ def _voice_stt_external_fallback_enabled() -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _voice_stt_local_fallback_enabled() -> bool:
+    value = os.getenv("VOICE_STT_ALLOW_LOCAL_FALLBACK")
+    if value is None:
+        value = getattr(config, "VOICE_STT_ALLOW_LOCAL_FALLBACK", True)
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _transcribe_local(raw: bytes) -> str | None:
     try:
         import local_stt
 
-        names = ", ".join(_voice_known_master_names())
-        services = ", ".join(_voice_known_service_titles())
-        prompt = (
-            "Разговор с MAYA о записи, свободном окошке, услугах, расписании и работе бизнеса."
-        )
-        if names:
-            prompt += f" Имена специалистов: {names}."
-        if services:
-            prompt += f" Услуги: {services}."
-        return local_stt.transcribe(raw, initial_prompt=prompt)
+        return local_stt.transcribe(raw, initial_prompt=_voice_stt_prompt())
     except Exception as e:
         logger.error(f"_transcribe_local: {e}")
         return None
@@ -5907,8 +5929,44 @@ def _transcribe_google(raw: bytes) -> str | None:
                     pass
 
 
+def _transcribe_audio_bytes(raw: bytes) -> str | None:
+    """Route raw PWA/Telegram audio through the configured STT provider."""
+    try:
+        max_bytes = int(os.getenv("VOICE_STT_MAX_BYTES") or getattr(
+            config, "VOICE_STT_MAX_BYTES", 8 * 1024 * 1024
+        ))
+    except (TypeError, ValueError):
+        max_bytes = 8 * 1024 * 1024
+    if not raw or len(raw) > max(256 * 1024, max_bytes):
+        return None
+
+    provider = _voice_stt_provider()
+    if provider == "local":
+        return _transcribe_local(raw)
+    if provider == "openai":
+        text = _transcribe_openai(raw, prompt=_voice_stt_prompt())
+        if text:
+            return text
+        if _voice_stt_local_fallback_enabled():
+            return _transcribe_local(raw)
+        return None
+    if provider == "google":
+        return _transcribe_google(raw)
+
+    # auto keeps local audio on the server unless external fallback is explicitly enabled.
+    text = _transcribe_local(raw)
+    if text:
+        return text
+    if not _voice_stt_external_fallback_enabled():
+        return None
+    text = _transcribe_openai(raw, prompt=_voice_stt_prompt())
+    if text:
+        return text
+    return _transcribe_google(raw)
+
+
 def _transcribe_audio_b64(audio_b64: str) -> str | None:
-    """Transcribe app audio locally before passing its text to DeepSeek."""
+    """Decode PWA audio and pass it to the shared STT route."""
     import base64 as _b64
 
     try:
@@ -5918,23 +5976,7 @@ def _transcribe_audio_b64(audio_b64: str) -> str | None:
         raw = _b64.b64decode(encoded)
     except Exception:
         return None
-    if not raw or len(raw) > 8 * 1024 * 1024:
-        return None
-
-    provider = _voice_stt_provider()
-    if provider in {"local", "auto"}:
-        text = _transcribe_local(raw)
-        if text or provider == "local":
-            return text
-        if not _voice_stt_external_fallback_enabled():
-            return None
-    if provider in {"openai", "auto"}:
-        text = _transcribe_openai(raw)
-        if text or provider == "openai":
-            return text
-    if provider in {"google", "auto"}:
-        return _transcribe_google(raw)
-    return None
+    return _transcribe_audio_bytes(raw)
 
 
 # ════════════════════════════════════════════════════════════════════════

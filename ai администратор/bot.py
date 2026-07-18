@@ -8,9 +8,6 @@ import tempfile
 from datetime import date, datetime, timedelta
 from collections import defaultdict
 
-import speech_recognition as sr
-from pydub import AudioSegment
-
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
@@ -2915,15 +2912,10 @@ async def transcribe_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         voice_file = await update.message.voice.get_file()
         with tempfile.TemporaryDirectory() as tmpdir:
             ogg_path = os.path.join(tmpdir, "voice.ogg")
-            wav_path = os.path.join(tmpdir, "voice.wav")
             await voice_file.download_to_drive(ogg_path)
-            AudioSegment.from_ogg(ogg_path).export(wav_path, format="wav")
-            recognizer = sr.Recognizer()
-            with sr.AudioFile(wav_path) as source:
-                audio_data = recognizer.record(source)
-            return recognizer.recognize_google(audio_data, language="ru-RU")
-    except sr.UnknownValueError:
-        return None
+            with open(ogg_path, "rb") as audio_file:
+                raw = audio_file.read()
+        return await asyncio.to_thread(webhook_server._transcribe_audio_bytes, raw)
     except Exception as e:
         logger.error(f"Ошибка распознавания голоса: {e}")
         return None

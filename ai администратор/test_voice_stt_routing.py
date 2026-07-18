@@ -36,6 +36,70 @@ class VoiceSttRoutingTests(unittest.TestCase):
         openai.assert_not_called()
         google.assert_not_called()
 
+    def test_openai_provider_uses_business_prompt_without_local_stt(self):
+        raw = b"OggS" + b"\0" * 128
+        env = {"VOICE_STT_PROVIDER": "openai", "VOICE_STT_ALLOW_LOCAL_FALLBACK": "true"}
+        with mock.patch.dict(os.environ, env), mock.patch.object(
+            webhook_server, "_voice_stt_prompt", return_value="Контекст MAYA"
+        ), mock.patch.object(
+            webhook_server, "_transcribe_openai", return_value="Покажи выручку"
+        ) as openai, mock.patch.object(webhook_server, "_transcribe_local") as local:
+            text = webhook_server._transcribe_audio_bytes(raw)
+
+        self.assertEqual(text, "Покажи выручку")
+        openai.assert_called_once_with(raw, prompt="Контекст MAYA")
+        local.assert_not_called()
+
+    def test_openai_failure_falls_back_to_local_stt(self):
+        raw = b"OggS" + b"\0" * 128
+        env = {"VOICE_STT_PROVIDER": "openai", "VOICE_STT_ALLOW_LOCAL_FALLBACK": "true"}
+        with mock.patch.dict(os.environ, env), mock.patch.object(
+            webhook_server, "_voice_stt_prompt", return_value="Контекст MAYA"
+        ), mock.patch.object(
+            webhook_server, "_transcribe_openai", return_value=None
+        ), mock.patch.object(
+            webhook_server, "_transcribe_local", return_value="Запиши меня завтра"
+        ) as local:
+            text = webhook_server._transcribe_audio_bytes(raw)
+
+        self.assertEqual(text, "Запиши меня завтра")
+        local.assert_called_once_with(raw)
+
+    def test_openai_failure_can_disable_local_fallback(self):
+        raw = b"OggS" + b"\0" * 128
+        env = {"VOICE_STT_PROVIDER": "openai", "VOICE_STT_ALLOW_LOCAL_FALLBACK": "false"}
+        with mock.patch.dict(os.environ, env), mock.patch.object(
+            webhook_server, "_voice_stt_prompt", return_value="Контекст MAYA"
+        ), mock.patch.object(
+            webhook_server, "_transcribe_openai", return_value=None
+        ), mock.patch.object(webhook_server, "_transcribe_local") as local:
+            text = webhook_server._transcribe_audio_bytes(raw)
+
+        self.assertIsNone(text)
+        local.assert_not_called()
+
+    def test_app_base64_audio_uses_shared_bytes_route(self):
+        payload = _audio_payload()
+        with mock.patch.object(
+            webhook_server, "_transcribe_audio_bytes", return_value="Привет"
+        ) as transcribe:
+            text = webhook_server._transcribe_audio_b64(payload)
+
+        self.assertEqual(text, "Привет")
+        transcribe.assert_called_once_with(b"RIFF" + b"\0" * 128)
+
+    def test_business_prompt_contains_known_names_and_services(self):
+        with mock.patch.object(
+            webhook_server, "_voice_known_master_names", return_value=("Илья Третьяков",)
+        ), mock.patch.object(
+            webhook_server, "_voice_known_service_titles", return_value=("Мужская стрижка",)
+        ):
+            prompt = webhook_server._voice_stt_prompt()
+
+        self.assertIn("Илья Третьяков", prompt)
+        self.assertIn("Мужская стрижка", prompt)
+        self.assertIn("YClients", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()
