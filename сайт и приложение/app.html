@@ -485,6 +485,42 @@ window.APP_DATA = {
 
 </script>
 <script>
+/* ═══ MAYA OS staging boot (demo-business) — СТРОГО вне прод-домена ═══
+   Инжектит trusted __ME_TENANT_BOOT только на нативном localhost/private-LAN и
+   nip.io-стейдже. На malesthetic.* НЕ активируется (реальный клиентский апп не трогаем).
+   Плюс staging-only авто-регистрация клиента (внешние провайдеры на стейдже выключены),
+   строго гейтед по этому api base + demo-business — на любом другом тенанте не запускается. */
+(function () {
+  try {
+    var h = String(location.hostname || '').toLowerCase();
+    if (/(^|\.)malesthetic\./i.test(h)) return; // прод — никогда
+    var priv = (h === 'localhost' || h === '127.0.0.1' || h === '::1' || /\.local$/.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h));
+    var staging = /nip\.io$/i.test(h);
+    if (!priv && !staging) return;
+    var API = 'https://api.111.88.148.206.nip.io/api', SLUG = 'demo-business';
+    window.__ME_TENANT_BOOT = Object.freeze({ enabled: true, api: API, slug: SLUG });
+    var a = API.toLowerCase().replace(/\/+$/, ''), sl = SLUG.toLowerCase(), str = a + '|' + sl, hh = 5381;
+    for (var i = 0; i < str.length; i++) hh = (hh * 33 + str.charCodeAt(i)) | 0;
+    var ns = (hh >>> 0).toString(36) + '_' + sl.replace(/[^a-z0-9-]/g, '').slice(0, 24);
+    var key = 'me_saas_auth_v2:' + ns, have = false;
+    try { var b = JSON.parse(localStorage.getItem(key) || 'null'); have = !!(b && b.token); } catch (e) {}
+    if (have) return;
+    if (sessionStorage.getItem('__me_demo_autoreg')) return; // одна попытка на вкладку
+    sessionStorage.setItem('__me_demo_autoreg', '1');
+    var email = 'guest_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '@demo.maya';
+    var pwd = 'Maya' + Math.random().toString(36).slice(2, 12) + 'X9';
+    fetch(API + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantSlug: SLUG, name: 'Гость', email: email, password: pwd }) })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (res) {
+        if (!res || !res.access_token) return;
+        var bundle = { token: res.access_token, refresh_token: res.refresh_token, access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null, refresh_expires_at: res.refresh_expires_at || null, session: res.session || null, user: res.user || { name: 'Гость' }, tenant_slug: SLUG, api_base: a };
+        try { localStorage.setItem(key, JSON.stringify(bundle)); } catch (e) {}
+        location.reload();
+      }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
+<script>
 /* ═══ MAYA OS multi-tenant boot из платформенного backend ═══
    В dev включается явным saas-local; на public host — только server boot
    или canonical tenant start_url. API на public host всегда trusted/same-origin. */
@@ -510,25 +546,33 @@ window.APP_DATA = {
   try { var mt = document.querySelector('meta[name="me-tenant"]'); metaTenant = mt && mt.getAttribute('content'); } catch (e) {}
   var mode, apiBase, slug;
   if (isLocalDev) {
-    mode = qs && qs.get('booking_backend');
-    try {
-      if (mode === 'saas-local') localStorage.setItem('me_booking_backend', 'saas-local');
-      else if (mode === 'legacy') localStorage.removeItem('me_booking_backend');
-      mode = mode || localStorage.getItem('me_booking_backend');
-    } catch (e) {}
-    if (mode !== 'saas-local') return;
-    apiBase = (qs && qs.get('booking_api_base')) || null;
-    try {
-      if (apiBase) localStorage.setItem('me_booking_api_base', apiBase);
-      apiBase = apiBase || localStorage.getItem('me_booking_api_base');
-    } catch (e) {}
-    apiBase = String(apiBase || 'http://localhost:3000/api').replace(/\/+$/, '');
-    slug = (qs && qs.get('booking_tenant')) || null;
-    try {
-      if (slug) localStorage.setItem('me_booking_tenant_slug', slug);
-      slug = slug || localStorage.getItem('me_booking_tenant_slug');
-    } catch (e) {}
-    slug = String(slug || 'muzhskaya-estetika').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64) || 'muzhskaya-estetika';
+    // Нативный Capacitor-шелл видит свой origin как localhost. Доверенный srvBoot
+    // (window.__ME_TENANT_BOOT) должен побеждать здесь тоже: берём его HTTPS api/slug,
+    // а не localhost-query. Обычный локальный dev (без srvBoot) — прежняя query-логика.
+    if (srvBoot && srvBoot.enabled === true && typeof srvBoot.api === 'string' && /^https:\/\//.test(srvBoot.api) && !isLocalUrl(srvBoot.api)) {
+      apiBase = String(srvBoot.api).replace(/\/+$/, '');
+      slug = String(srvBoot.slug || metaTenant || 'muzhskaya-estetika').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64) || 'muzhskaya-estetika';
+    } else {
+      mode = qs && qs.get('booking_backend');
+      try {
+        if (mode === 'saas-local') localStorage.setItem('me_booking_backend', 'saas-local');
+        else if (mode === 'legacy') localStorage.removeItem('me_booking_backend');
+        mode = mode || localStorage.getItem('me_booking_backend');
+      } catch (e) {}
+      if (mode !== 'saas-local') return;
+      apiBase = (qs && qs.get('booking_api_base')) || null;
+      try {
+        if (apiBase) localStorage.setItem('me_booking_api_base', apiBase);
+        apiBase = apiBase || localStorage.getItem('me_booking_api_base');
+      } catch (e) {}
+      apiBase = String(apiBase || 'http://localhost:3000/api').replace(/\/+$/, '');
+      slug = (qs && qs.get('booking_tenant')) || null;
+      try {
+        if (slug) localStorage.setItem('me_booking_tenant_slug', slug);
+        slug = slug || localStorage.getItem('me_booking_tenant_slug');
+      } catch (e) {}
+      slug = String(slug || 'muzhskaya-estetika').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64) || 'muzhskaya-estetika';
+    }
   } else {
     // публичный домен: API/mode query-параметры не читаем; сохранённые private API чистим
     try {
@@ -11088,7 +11132,7 @@ function ABookCard(props) {
     var live = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.booking_mode === 'live');
     af(live ? '/appointments' : '/appointments/preview', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ branchId: (s.time && s.time.branch_id) || undefined, staffId: s.master.id, serviceIds: s.svcs.map(function (x) { return String(x.id); }), start: (s.time && s.time.start) || (s.date + 'T' + (s.time && s.time.label || '') + ':00') })
+      body: JSON.stringify((function () { var u = null; try { var ctx = window.__ME_SAAS_CTX; var bb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + (ctx && ctx.ns)) || 'null'); u = bb && bb.user; } catch (er) {} return { clientName: (u && u.name) || 'Гость', clientPhone: (u && u.phone) || undefined, branchId: (s.time && s.time.branch_id) || undefined, staffId: s.master.id, serviceIds: s.svcs.map(function (x) { return String(x.id); }), start: (s.time && s.time.start) || (s.date + 'T' + (s.time && s.time.label || '') + ':00') }; })())
     }).then(function () {
       setUi({ loading: false, err: '' }); patch({ done: true, doneMode: live ? 'live' : 'preview' });
       try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'appointments' } })); } catch (er) {}
