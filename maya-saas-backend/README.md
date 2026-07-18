@@ -733,3 +733,6 @@ npm run release:preflight -- --env .env.staging --skip-db
 npm run ai:maintenance
 docker compose up --build
 ```
+
+Public live-widget staging operations are documented in
+[`docs/operations/LIVE_WIDGETS_STAGING.md`](docs/operations/LIVE_WIDGETS_STAGING.md).
