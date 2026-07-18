@@ -12728,10 +12728,12 @@ function AChat() {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
     // «Записаться» (чип или ввод) → инлайн-виджет записи в ленте, а не в AI-чат
     var _bt = String(textArg != null ? textArg : input).trim();
-    if (/^записаться$/i.test(_bt)) {
+    // намерение записаться из свободного текста (клиентская эвристика; полноценно любую формулировку — сигнал widget от бэка).
+    // не срабатывает на «отменить/перенести запись».
+    if (_bt && /(?:^|[^а-яё])(?:запиш|записа|постри[чг]|подстри)|хочу\s+(?:стри|подстри|записа)|на\s+стрижк|нужн\w*\s+стрижк/i.test(_bt) && !/отмен|перенес|перенос/i.test(_bt)) {
       try { setInput(''); } catch (e) {}
       try { userHasSentRef.current = true; } catch (e) {} // выходим из welcome в тред, чтобы карточка отрисовалась
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: 'Записаться' }, { role: 'bot', text: 'Отлично — подберём время. Выберите мастера:', bookWidget: true }]); });
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Конечно, без проблем! Подберём удобное время — выбирайте мастера 👇', bookWidget: true }]); });
       return;
     }
     if (sending) return;
