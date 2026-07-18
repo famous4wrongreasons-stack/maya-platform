@@ -492,11 +492,16 @@ window.APP_DATA = {
    строго гейтед по этому api base + demo-business — на любом другом тенанте не запускается. */
 (function () {
   try {
+    // ⚠️ ВРЕМЕННО для теста виджетов: demo-boot включается в НАТИВНОМ приложении
+    // (origin нативки = server.hostname malesthetic.pro, поэтому гейтить по хосту нельзя)
+    // и на private/staging-вебе. Реальный ВЕБ-прод (malesthetic.pro в браузере, не нативка)
+    // НЕ трогаем. Перед реальным релизом нативки этот блок убрать.
+    var isNative = false;
+    try { isNative = !!(window.Capacitor && (typeof window.Capacitor.isNativePlatform === 'function' ? window.Capacitor.isNativePlatform() : true)); } catch (eNat) {}
     var h = String(location.hostname || '').toLowerCase();
-    if (/(^|\.)malesthetic\./i.test(h)) return; // прод — никогда
     var priv = (h === 'localhost' || h === '127.0.0.1' || h === '::1' || /\.local$/.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h));
     var staging = /nip\.io$/i.test(h);
-    if (!priv && !staging) return;
+    if (!isNative && !priv && !staging) return;
     var API = 'https://api.111.88.148.206.nip.io/api', SLUG = 'demo-business';
     window.__ME_TENANT_BOOT = Object.freeze({ enabled: true, api: API, slug: SLUG });
     var a = API.toLowerCase().replace(/\/+$/, ''), sl = SLUG.toLowerCase(), str = a + '|' + sl, hh = 5381;
