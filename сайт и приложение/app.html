@@ -509,7 +509,8 @@ window.APP_DATA = {
     sessionStorage.setItem('__me_demo_autoreg', '1');
     var email = 'guest_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '@demo.maya';
     var pwd = 'Maya' + Math.random().toString(36).slice(2, 12) + 'X9';
-    fetch(API + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantSlug: SLUG, name: 'Гость', email: email, password: pwd }) })
+    var phone = '+79' + String(Math.floor(100000000 + Math.random() * 900000000)); // уникальный телефон: preview требует clientPhone
+    fetch(API + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantSlug: SLUG, name: 'Гость', email: email, password: pwd, phone: phone }) })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (res) {
         if (!res || !res.access_token) return;
@@ -11080,7 +11081,24 @@ function ABookCard(props) {
   var uit = React.useState({ loading: true, err: '' });
   var ui = uit[0], setUi = uit[1];
 
-  function af(path, init) { if (!window.__meSaasAuthedFetch) return Promise.reject({ code: 'no_bridge' }); return window.__meSaasAuthedFetch(path, init); }
+  function af(path, init) {
+    if (window.__meSaasAuthedFetch) return window.__meSaasAuthedFetch(path, init);
+    // фолбэк: прямой authed-fetch по бандлу (когда ABookFlow не смонтирован — напр. на экране чата)
+    try {
+      var ctx = window.__ME_SAAS_CTX; if (!ctx || !ctx.api) return Promise.reject({ code: 'no_ctx' });
+      var bb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null');
+      if (!bb || !bb.token) return Promise.reject({ status: 401, code: 'no_session' });
+      var ini = init || {};
+      var headers = Object.assign({}, ini.headers || {}, { Authorization: 'Bearer ' + bb.token });
+      return fetch(String(ctx.api).replace(/\/+$/, '') + path, Object.assign({}, ini, { headers: headers })).then(function (r) {
+        return r.text().then(function (txt) {
+          var body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) {}
+          if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; }
+          return body;
+        });
+      });
+    } catch (e) { return Promise.reject({ code: 'fetch_failed' }); }
+  }
   function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
   function setD(o) { setData(function (p) { return Object.assign({}, p, o); }); }
   function isoOf(d) { return d.toISOString().slice(0, 10); }
@@ -11604,10 +11622,6 @@ function AChat() {
     return null;
   }
   function quickTap(label) {
-    if (/^записаться$/i.test(String(label || '').trim())) {
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: 'Отлично — подберём время. Выберите мастера:', bookWidget: true }]); });
-      return;
-    }
     var target = quickActionTarget(label);
     if (target) runChatAction(target);
     else if (/^мой постоянный мастер/i.test(String(label || ''))) {
@@ -12686,6 +12700,14 @@ function AChat() {
   }
   async function send(textArg) {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
+    // «Записаться» (чип или ввод) → инлайн-виджет записи в ленте, а не в AI-чат
+    var _bt = String(textArg != null ? textArg : input).trim();
+    if (/^записаться$/i.test(_bt)) {
+      try { setInput(''); } catch (e) {}
+      try { userHasSentRef.current = true; } catch (e) {} // выходим из welcome в тред, чтобы карточка отрисовалась
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: 'Записаться' }, { role: 'bot', text: 'Отлично — подберём время. Выберите мастера:', bookWidget: true }]); });
+      return;
+    }
     if (sending) return;
     const text = String(textArg != null ? textArg : input).trim();
     if (!text) return;
