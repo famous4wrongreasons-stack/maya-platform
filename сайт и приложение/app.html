@@ -11380,84 +11380,178 @@ function AChat() {
       return name && s.indexOf(String(name).toLowerCase()) >= 0;
     }) || /стрижк|бород|фейд|брить|уход|комплекс/.test(s);
   }
-  function staffChoiceChips(text) {
+  function cleanQuickLabel(value) {
+    var label = String(value || '').replace(/[*_`]/g, '').replace(/\s+/g, ' ').trim();
+    label = label.split(/\s+[\u2014\u2013]\s+|\s+-\s+/)[0].trim();
+    if (!/^\d{1,2}:\d{2}$/.test(label) && /^[^:]{2,34}:\s*(?:[~≈]?[\d₽]|нет\b|есть\b)/i.test(label)) label = label.split(':')[0].trim();
+    label = label.replace(/[.:;!?]+$/g, '').trim();
+    if (!label || label.length > 56 || /https?:\/\//i.test(label)) return '';
+    return label;
+  }
+  function listedChoiceChips(text) {
     var raw = String(text || '').replace(/\r/g, '');
-    var low = raw.toLowerCase();
-    var choices = [];
-    var numbered = /(?:^|\n)\s*\d{1,2}[.)]\s*([^\n]+)/g;
-    var match;
-    while ((match = numbered.exec(raw)) && choices.length < 6) {
-      var label = String(match[1] || '').split(/\s+[\u2014\u2013]\s+|\s+-\s+/)[0]
-        .replace(/[*_`]/g, '').replace(/[.:;!?]+$/g, '').trim();
-      var norm = label.toLowerCase();
-      if (/(?:написать|отправить).*(?:напомин|сообщен)/.test(norm) || (norm === 'написать' && /напомин|вернут|цикл|реактив/.test(low))) label = 'Отправить напоминание';
-      else if (/подготовить.*предлож/.test(norm)) label = 'Подготовить предложение';
-      else if (/открыть.*список/.test(norm)) label = 'Открыть список для звонка';
-      else if (/отлож/.test(norm)) label = 'Отложить';
-      if (label && label.length <= 42) choices.push(label);
-    }
-    choices = uniqChips(choices, 6);
-    if (choices.length >= 2) return choices;
-    if (/(?:запускаем|запустить|начинаем)[^?]{0,80}\?/.test(low)) return ['Запустить', 'Не сейчас'];
-    if (/(?:что|какой вариант) выбираешь/.test(low)) {
-      var explicit = [];
-      if (/написать.*без скидк|отправить.*напомин/.test(low)) explicit.push('Отправить напоминание');
-      if (/подготовить.*предлож/.test(low)) explicit.push('Подготовить предложение');
-      if (/открыть.*список/.test(low)) explicit.push('Открыть список для звонка');
-      if (/отлож/.test(low)) explicit.push('Отложить');
-      if (explicit.length >= 2) return uniqChips(explicit, 6);
+    var groups = [], current = [];
+    raw.split('\n').forEach(function (line) {
+      var match = line.match(/^\s*(?:\d{1,2}[.)]|[•●▪◦\-–—])\s+(.+)$/);
+      if (match) {
+        var label = cleanQuickLabel(match[1]);
+        if (label) current.push(label);
+        return;
+      }
+      if (current.length) groups.push(current);
+      current = [];
+    });
+    if (current.length) groups.push(current);
+    for (var i = groups.length - 1; i >= 0; i--) {
+      var choices = uniqChips(groups[i], 6);
+      if (choices.length >= 2) return choices;
     }
     return [];
   }
-  // Контекстные быстрые ответы после ответа Майи: не общий набор кнопок, а
-  // следующий логичный шаг воронки записи/покупки.
+  function explicitListedChoiceChips(text, question) {
+    var scope = String(text || '').replace(/\r/g, '').slice(-1600);
+    var q = String(question || '').toLowerCase();
+    var cue = /(?:вариант(?:ы|а)?|на выбор|выбер\w*|предлагаю|могу предложить)[^.!?\n]{0,140}(?::|\n)/ig;
+    var match, cueStart = -1;
+    while ((match = cue.exec(scope))) cueStart = match.index;
+    if (cueStart >= 0) return listedChoiceChips(scope.slice(cueStart));
+    return /какой[^?]{0,40}вариант/.test(q) ? listedChoiceChips(scope) : [];
+  }
+  function inlineChoiceChips(text) {
+    var raw = String(text || '').replace(/[*_`]/g, '').replace(/\r/g, '').trim();
+    var separator = /:\s+|[\u2014\u2013]\s+/g, match, start = -1;
+    while ((match = separator.exec(raw))) start = match.index + match[0].length;
+    if (start < 0) return [];
+    var tail = raw.slice(start).split(/[.!?](?:\s|$)/)[0].replace(/[?]+$/g, '').trim();
+    if (!tail || tail.length > 300) return [];
+    var parts = tail.split(/\s*(?:,|;)\s*|\s+(?:или|либо)\s+/i).map(cleanQuickLabel).filter(Boolean);
+    return parts.length >= 2 && parts.length <= 6 ? uniqChips(parts, 6) : [];
+  }
+  function bareOrChoiceChips(question) {
+    var raw = String(question || '').replace(/[?]+$/g, '').trim();
+    if (/:\s+|[\u2014\u2013]\s+/.test(raw)) return [];
+    var parts = raw.split(/\s+(?:или|либо)\s+/i);
+    if (parts.length < 2 || parts.length > 4) return [];
+    parts[0] = parts[0].replace(/^(?:(?:вы|вам|нам)\s+)?(?:хотите|предпочитаете|выбираете|будем|стоит|можно)\s+/i, '');
+    var choices = parts.map(cleanQuickLabel).filter(Boolean);
+    return choices.length === parts.length ? uniqChips(choices, 4) : [];
+  }
+  function quotedChoiceChips(text) {
+    var raw = String(text || ''), choices = [], match;
+    var quoted = /[«"]([^»"\n]{2,56})[»"]/g;
+    while ((match = quoted.exec(raw)) && choices.length < 8) {
+      var label = cleanQuickLabel(match[1]);
+      if (label && !/MAYA|Мужская Эстетика/i.test(label)) choices.push(label);
+    }
+    return uniqChips(choices, 6);
+  }
+  function lastMayaQuestion(text) {
+    var raw = String(text || '').replace(/\r/g, '').trim();
+    var end = raw.lastIndexOf('?');
+    if (end >= 0) {
+      var start = Math.max(
+        raw.lastIndexOf('\n', end), raw.lastIndexOf('.', end),
+        raw.lastIndexOf('!', end), raw.lastIndexOf('?', end - 1)
+      );
+      return raw.slice(start + 1, end + 1).replace(/\s+/g, ' ').trim();
+    }
+    var tail = raw.slice(-420).replace(/\s+/g, ' ').trim();
+    return /(?:выберите|выбери|уточните|напишите|назовите|скажите|что выбираем|какой вариант)[^.!?]{0,260}[.:]?$/.test(tail.toLowerCase()) ? tail : '';
+  }
+  function knownQuestionOptions(text, dict, limit) {
+    var low = String(text || '').toLowerCase(), found = [];
+    (dict || []).forEach(function (row) {
+      var idx = low.search(row[0]);
+      if (idx >= 0) found.push([idx, row[1]]);
+    });
+    found.sort(function (a, b) { return a[0] - b[0]; });
+    return uniqChips(found.map(function (row) { return row[1]; }), limit || 6);
+  }
+  function isChoiceQuestion(question) {
+    return /(?:выбер|вариант|какой из|какое из|что делаем|что выбира|что разбер|что смотрим|предпочит|подходит|\sили\s|\sлибо\s)/.test(String(question || '').toLowerCase());
+  }
+  function roleTopicChips(surface) {
+    if (surface === 'owner') return ['Что сегодня по бизнесу?', 'Выручка и прибыль', 'Загрузка мастеров', 'Что требует внимания?'];
+    if (surface === 'staff') return STAFF_QUICKS;
+    return QUICKS;
+  }
+  function yesNoQuestionChips(question) {
+    var q = String(question || '').toLowerCase();
+    if (!/(?:хотите|хочешь|могу|нужно ли|стоит ли|можно ли|запускаем|отправляем|продолжаем|показать|подготовить|сделать|оформляем|подтверждаете|подойд[её]т|устраивает|верно ли)/.test(q)) return [];
+    if (/запуск/.test(q)) return ['Запустить', 'Не сейчас'];
+    if (/отправ/.test(q)) return ['Отправить', 'Не сейчас'];
+    if (/продолж/.test(q)) return ['Продолжить', 'Не сейчас'];
+    if (/показ/.test(q)) return ['Показать', 'Не сейчас'];
+    if (/подготов/.test(q)) return ['Подготовить', 'Не сейчас'];
+    return ['Да', 'Нет'];
+  }
+  // Быстрые ответы показываются только на последний вопрос MAYA.
+  // Если вопроса или явного выбора нет, кнопок нет — старый контекст не протекает.
   const chatSuggest = function (text, history) {
-    var bot = String(text || '').toLowerCase();
-    var user = lastText(history, 'user').toLowerCase();
+    var raw = String(text || '');
+    var bot = raw.toLowerCase();
     var surface = chatSurface();
-    var staff = surface === 'staff';
-    var owner = surface === 'owner';
-    if (/https?:\/\/|записал вас|забронир|перейдите по ссыл|ссылк[ауе] (?:на|для) оплат|оплатить по ссыл/.test(bot)) return [];
-    if (owner) return defaultQuickReplies();
-    if (staff) {
-      if (/рабочем чате|кабинет клиента|не записываю|не оформляю\s+клиент/.test(bot)) return [];
-      var staffChoices = staffChoiceChips(text);
-      if (staffChoices.length) return staffChoices;
-      return defaultQuickReplies();
+    if (/https?:\/\/|записал(?:а)? вас|забронир|перейдите по ссыл|оплатить по ссыл/.test(bot)) return [];
+    if (/рабочем чате|кабинет клиента|не записываю|не оформляю\s+клиент/.test(bot)) return [];
+
+    var question = lastMayaQuestion(raw);
+    if (!question) return [];
+    var q = question.toLowerCase();
+
+    if (isChoiceQuestion(q)) {
+      var listed = explicitListedChoiceChips(raw, q);
+      if (listed.length >= 2) return listed;
+      var quoted = quotedChoiceChips(question);
+      if (quoted.length >= 2) return quoted;
+      var inline = inlineChoiceChips(question);
+      if (inline.length >= 2) return inline;
+      if (/(?:вариант|на выбор|выбер|предлагаю|могу (?:показать|разобрать|предложить))/i.test(raw)) {
+        var offeredInline = inlineChoiceChips(raw.slice(-700));
+        if (offeredInline.length >= 2) return offeredInline;
+      }
     }
-    if (!user) return defaultQuickReplies();
-    // Если Майя задаёт вопрос с ПЕРЕЧИСЛЕНИЕМ вариантов — чипы прямо из её вопроса.
-    if (bot.indexOf('?') >= 0) {
-      var extract = function (dict) {
-        var found = [];
-        dict.forEach(function (p) {
-          var idx = bot.search(p[0]);
-          if (idx >= 0) found.push([idx, p[1]]);
-        });
-        found.sort(function (a, b) { return a[0] - b[0]; });
-        return found.map(function (f) { return f[1]; });
-      };
-      var svcOpts = extract([[/комплекс|стрижк[ау] (?:и|\+|с) бород/, 'Комплекс: стрижка + борода'], [/стрижк/, 'Стрижка'], [/бород/, 'Борода'], [/уход/, 'Уход'], [/камуфляж|седин/, 'Камуфляж седины'], [/детск/, 'Детская стрижка'], [/бритьё|бритье/, 'Бритьё']]);
-      if (svcOpts.length >= 2) return uniqChips(svcOpts, 6);
-      var masterOpts = window.__ME_SAAS_CTX ? [] : extract([[/стас/, 'Стас'], [/иль[яе]/, 'Илья'], [/алексе/, 'Алексей'], [/максим/, 'Максим'], [/александр/, 'Александр']]);
-      if (masterOpts.length >= 2) return uniqChips(masterOpts.concat(['Любой мастер']), 6);
-      var timeOpts = extract([[/утр/, 'Утром'], [/дн[её]м|в обед/, 'Днём'], [/вечер/, 'Вечером'], [/сегодня/, 'Сегодня'], [/завтра/, 'Завтра'], [/выходн/, 'На выходных']]);
-      if (timeOpts.length >= 2) return uniqChips(timeOpts, 5);
+
+    if (/помочь.*запис|запис.*(?:или|либо).*услуг/.test(q)) return ['Записаться', 'Показать услуги'];
+
+    var exactSlots = uniqChips((raw.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g) || []), 8);
+    if (exactSlots.length && /(?:свобод|доступ|окн|слот|врем|подойд|выбер)/.test(q)) return exactSlots.concat(['Другое время']);
+
+    if (/какую услугу|на какую услугу|на что (?:вас |тебя )?запис|какая услуга|услугу хотите|что будем делать/.test(q)) return serviceChips();
+    if (/к какому мастеру|какого мастера|кого из мастеров|мастера выбираете|к кому|по какому мастеру|по кому смотрим|есть любимый мастер/.test(q)) return masterChips();
+
+    if (/за какой период|какой период|период смотрим|с каким периодом сравнить/.test(q)) {
+      var periodOptions = knownQuestionOptions(q, [[/сегодня/, 'Сегодня'], [/недел/, 'Эта неделя'], [/этот месяц|текущ.*месяц/, 'Этот месяц'], [/прошл.*месяц/, 'Прошлый месяц']], 4);
+      return periodOptions.length >= 2 ? periodOptions : ['Сегодня', 'Эта неделя', 'Этот месяц', 'Прошлый месяц'];
     }
-    var exactSlots = uniqChips((bot.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g) || []), 8);
-    if (exactSlots.length && /свобод|доступ|окн|слот|подойд|выбирайте|выберите/.test(bot)) return exactSlots.concat(['Другой день']);
-    if (/какую услугу|на какую услугу|на что (?:вас |тебя )?запис|что именно|какая услуга|услугу вас запис|услугу хотите|что выбираете|какой комплекс|что будем делать/.test(bot)) return serviceChips();
-    if (/к какому мастеру|какому мастеру|какого мастера|мастера выбираете|к кому|подойд[её]т любой|предпочтени[яе] по мастеру|есть любимый мастер/.test(bot)) return masterChips();
-    if (/какой день|на какую дату|когда удобно|когда вам удобно|на когда|какое время|во сколько|на какое время|время подходит|сегодня свободн|свободн.*(?:окн|слот|время)/.test(bot)) return ['Сегодня', 'Завтра', 'Ближайшее окно', 'После 18:00', 'На выходных'];
-    if (/оформляем|подтверждаете|подтвердите|записываю|записать вас|всё верно|все верно/.test(bot)) return ['Да, оформляем', 'Изменить время', 'Другой мастер', 'Другая услуга'];
-    if (/добавляем|добавить|что-то ещё|что-то еще|только .*стриж|только .*услуг|апсейл|дополнительно/.test(bot)) return ['Только выбранная услуга', 'Добавить бороду', 'Добавить уход', 'Показать цену'];
-    if (/абонемент/.test(bot) || /абонемент/.test(user)) return subChips();
-    if (/сертификат|подар/.test(bot) || /сертификат|подар/.test(user)) return certChips();
-    if (/₽|руб|стоит|стоимост|цен[ауеы]|прайс/.test(bot) || /цен|сколько стоит|прайс/.test(user)) return uniqChips(['Записаться'].concat(serviceChips().slice(0, 3), ['Абонемент выгоднее?', 'Сертификат в подарок']), 6);
-    if (/сколько по времени|длительн|минут|час/.test(bot) || /сколько по времени|долго|минут/.test(user)) return ['Записаться', 'Мужская стрижка', 'Комплекс: стрижка + борода', 'Ближайшее окно'];
-    if (/адрес|находим|лермонтов|как добра|на карт|как прое|как дое/.test(bot) || /где|адрес|как добраться/.test(user)) return ['Записаться', 'Построить маршрут', 'Позвонить', 'Какие цены?'];
-    if (pickedService(user)) return masterChips();
-    return defaultQuickReplies();
+    if (/какой показатель|что из аналитики|какую метрику|что разобрать по цифрам/.test(q)) {
+      var metricOptions = knownQuestionOptions(q, [[/выручк/, 'Выручка'], [/валов.*прибыл/, 'Валовая прибыль'], [/средн.*чек/, 'Средний чек'], [/загрузк/, 'Загрузка'], [/удержан|возврат/, 'Удержание клиентов']], 5);
+      return metricOptions.length >= 2 ? metricOptions : ['Выручка', 'Валовая прибыль', 'Средний чек', 'Загрузка', 'Удержание клиентов'];
+    }
+
+    if (/какой день|на какую дату|когда удобно|когда вам удобно|на когда|в какой день/.test(q)) {
+      var dateOptions = knownQuestionOptions(q, [[/сегодня/, 'Сегодня'], [/завтра/, 'Завтра'], [/ближайш/, 'Ближайший свободный день'], [/выходн/, 'На выходных']], 4);
+      return dateOptions.length >= 2 ? dateOptions : ['Сегодня', 'Завтра', 'Ближайший свободный день', 'На выходных'];
+    }
+    if (/какое время|во сколько|на какое время|время подходит|в какой части дня/.test(q)) {
+      var timeOptions = knownQuestionOptions(q, [[/утр/, 'Утром'], [/дн[её]м|в обед/, 'Днём'], [/вечер/, 'Вечером'], [/после 18/, 'После 18:00']], 4);
+      return timeOptions.length >= 2 ? timeOptions : ['Утром', 'Днём', 'Вечером', 'После 18:00'];
+    }
+
+    if (/оформляем|подтверждаете|подтвердите|записать вас|всё верно|все верно/.test(q)) return ['Да, подтверждаю', 'Изменить время', 'Другой мастер', 'Другая услуга'];
+    if (/добавить|что-то ещ[ёе]|дополнительн|без дополнен/.test(q)) {
+      var addons = knownQuestionOptions(q, [[/бород/, 'Добавить бороду'], [/уход/, 'Добавить уход'], [/камуфляж|седин/, 'Добавить камуфляж седины'], [/бритьё|бритье/, 'Добавить бритьё']], 4);
+      return addons.length ? addons.concat(['Без дополнений']) : ['Показать дополнительные услуги', 'Без дополнений'];
+    }
+
+    if (/(?:какой|какой из|выбрать).*абонемент/.test(q)) return subChips();
+    if (/(?:какой|какой из|выбрать).*(?:сертификат|подар)/.test(q)) return certChips();
+    if (/что (?:ещ[ёе] )?(?:смотрим|показать|разберём|разберем|проверим)|что вам подсказать|что интересует/.test(q)) return roleTopicChips(surface);
+
+    if (isChoiceQuestion(q)) {
+      var bare = bareOrChoiceChips(question);
+      if (bare.length >= 2) return bare;
+    }
+    return yesNoQuestionChips(q);
   };
   function quickActionTarget(label) {
     var s = String(label || '').toLowerCase();
@@ -14020,14 +14114,14 @@ function AChat() {
       padding: '9px 15px'
     }
   }, 'Перейти в приложение')) : null,
-  // контекстные быстрые ответы после КАЖДОГО ответа Майи — ведут к записи/покупке,
-  // пока Майя не даст ссылку на запись/оплату (тогда chatSuggest вернёт [] и они скроются)
+  // Быстрые ответы привязаны только к последнему вопросу MAYA.
+  // Карточка-действие или завершённый ответ не дублируются чипами.
   (function () {
     if (onbOnRef.current) return onbChips(); // онбординг: quick_replies бэка + переход к подтверждению
     if (sending) return null;
     if (msgs.filter(function (m) { return m.role === 'user'; }).length === 0) return null;
     var last = msgs[msgs.length - 1];
-    if (!last || last.role !== 'bot' || last.typing || !last.text) return null;
+    if (!last || last.role !== 'bot' || last.typing || !last.text || last.action || last.aiApproval) return null;
     var sug = chatSuggest(last.text, msgs);
     if (!sug.length) return null;
     return e('div', { key: 'sugg', style: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 } }, sug.map(function (q, i) {
