@@ -11083,21 +11083,47 @@ function ABookCard(props) {
 
   function af(path, init) {
     if (window.__meSaasAuthedFetch) return window.__meSaasAuthedFetch(path, init);
-    // фолбэк: прямой authed-fetch по бандлу (когда ABookFlow не смонтирован — напр. на экране чата)
-    try {
-      var ctx = window.__ME_SAAS_CTX; if (!ctx || !ctx.api) return Promise.reject({ code: 'no_ctx' });
-      var bb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null');
-      if (!bb || !bb.token) return Promise.reject({ status: 401, code: 'no_session' });
+    // фолбэк: прямой authed-fetch по бандлу (когда ABookFlow не смонтирован — напр. на экране чата),
+    // с refresh-on-401 + retry: Capacitor хранит localStorage между запусками, access-токен (15м) протухает.
+    var ctx = window.__ME_SAAS_CTX;
+    if (!ctx || !ctx.api) return Promise.reject({ code: 'no_ctx' });
+    var key = 'me_saas_auth_v2:' + ctx.ns;
+    var base = String(ctx.api).replace(/\/+$/, '');
+    var rd = function () { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } };
+    var finalize = function (r, body) { if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; } return body; };
+    var doFetch = function (token) {
       var ini = init || {};
-      var headers = Object.assign({}, ini.headers || {}, { Authorization: 'Bearer ' + bb.token });
-      return fetch(String(ctx.api).replace(/\/+$/, '') + path, Object.assign({}, ini, { headers: headers })).then(function (r) {
-        return r.text().then(function (txt) {
-          var body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) {}
-          if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; }
-          return body;
-        });
+      var headers = Object.assign({}, ini.headers || {}, { Authorization: 'Bearer ' + token });
+      return fetch(base + path, Object.assign({}, ini, { headers: headers })).then(function (r) {
+        return r.text().then(function (txt) { var body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) {} return { r: r, body: body }; });
       });
-    } catch (e) { return Promise.reject({ code: 'fetch_failed' }); }
+    };
+    var refresh = function (rt) {
+      return fetch(base + '/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: rt }) })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (res) {
+          if (!res || !res.access_token) return null;
+          var b = rd() || {};
+          b.token = res.access_token;
+          if (res.refresh_token) b.refresh_token = res.refresh_token;
+          b.access_expires_at = res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : b.access_expires_at;
+          if (res.refresh_expires_at) b.refresh_expires_at = res.refresh_expires_at;
+          if (res.user) b.user = res.user;
+          try { localStorage.setItem(key, JSON.stringify(b)); } catch (e) {}
+          return b.token;
+        }).catch(function () { return null; });
+    };
+    var b0 = rd();
+    if (!b0 || !b0.token) return Promise.reject({ status: 401, code: 'no_session' });
+    return doFetch(b0.token).then(function (out) {
+      if (out.r.status === 401 && b0.refresh_token) {
+        return refresh(b0.refresh_token).then(function (newTok) {
+          if (!newTok) { var e401 = new Error('http_401'); e401.status = 401; e401.code = 'session_expired'; throw e401; }
+          return doFetch(newTok).then(function (out2) { return finalize(out2.r, out2.body); });
+        });
+      }
+      return finalize(out.r, out.body);
+    });
   }
   function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
   function setD(o) { setData(function (p) { return Object.assign({}, p, o); }); }
