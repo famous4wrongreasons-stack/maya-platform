@@ -11678,7 +11678,7 @@ function AChat() {
     if (!window.__ME_SAAS_CTX) return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
     if (chatSurface() === 'owner') return ['Что сегодня по бизнесу?', 'Покажи аналитику', 'Записи сегодня', 'Что требует внимания?'];
     if (chatSurface() === 'staff') return ['Записи сегодня', 'Моя статистика', 'Моё расписание', 'Помоги с задачей'];
-    return ['Записаться', 'Показать услуги', 'Мои записи', 'Мои баллы'];
+    return ['Записаться', 'Мои записи', 'Баллы', 'Магазин', 'Профиль']; // чипы-меню открывают инлайн-виджеты
   }
   function uniqChips(list, limit) {
     var out = [];
@@ -14373,7 +14373,7 @@ function AChat() {
 	      var surface = chatSurface();
 	      var staffCh = surface === 'staff';
 	      var ownerCh = surface === 'owner';
-	      var roleQuicks = defaultQuickReplies().slice(0, 3);
+	      var roleQuicks = defaultQuickReplies().slice(0, 5); // виджет-меню: до 5 чипов-входов
 	      var chips = window.__ME_SAAS_CTX
 	        ? roleQuicks.map(function (q) { return [q, function () { send(q); }]; })
 	        : (staffCh ? [
