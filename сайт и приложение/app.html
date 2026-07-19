@@ -11356,6 +11356,81 @@ function AMyBookingsCard(props) {
 }
 window.AMyBookingsCard = AMyBookingsCard;
 
+function meWidgetTheme(t, dark) {
+  return {
+    ink: t.ink || (dark ? '#f4f0eb' : '#18160f'),
+    muted: dark ? 'rgba(244,240,235,0.55)' : 'rgba(24,22,15,0.55)',
+    faint: t.faint || (dark ? 'rgba(244,240,235,0.4)' : 'rgba(24,22,15,0.4)'),
+    line: t.line || (dark ? 'rgba(244,240,235,0.12)' : 'rgba(24,22,15,0.1)'),
+    line2: dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.18)',
+    surf: dark ? 'rgba(244,240,235,0.05)' : 'rgba(24,22,15,0.045)',
+    surf2: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.08)',
+    bg2: dark ? '#0b0b0c' : '#efeae1',
+    invBg: dark ? '#f4f0eb' : '#18160f',
+    invText: dark ? '#000' : '#f7f3ec',
+    errc: dark ? '#f0b8b8' : '#9a3b3b',
+    BODYF: (typeof BODY !== 'undefined') ? BODY : "'Montserrat',sans-serif",
+    DISPF: (typeof DISPLAY !== 'undefined') ? DISPLAY : "'Montserrat',sans-serif"
+  };
+}
+function meChatEvent(name) { try { window.dispatchEvent(new CustomEvent(name)); } catch (e) {} }
+
+function ALoyaltyCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var st = React.useState({ acc: null, loading: true, err: '' }); var s = st[0], setS = st[1];
+  function load() { setS({ acc: null, loading: true, err: '' }); meWidgetAf('/loyalty/me').then(function (a) { setS({ acc: a || {}, loading: false, err: '' }); }).catch(function (er) { setS({ acc: null, loading: false, err: (er && er.status === 402) ? 'Пробный период закончился.' : 'Не удалось загрузить баллы' }); }); }
+  React.useEffect(function () { load(); }, []);
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 18, marginTop: 10, maxWidth: 420, background: c.surf };
+  var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 };
+  var prim = { width: '100%', height: 44, borderRadius: 999, border: 0, background: c.invBg, color: c.invText, fontFamily: c.BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer', marginTop: 14 };
+  if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'Баллы и кэшбэк'), e('div', { style: { fontSize: 12.5, color: c.muted } }, 'Секунду…'));
+  if (s.err) return e('div', { style: wrap }, e('div', { style: lab }, 'Баллы и кэшбэк'), e('div', { style: { fontSize: 12.5, color: c.errc } }, s.err), e('button', { style: prim, onClick: load }, 'Повторить'));
+  var bal = Number((s.acc && s.acc.balance) || 0);
+  return e('div', { style: wrap }, e('div', { style: lab }, 'Баллы и кэшбэк'),
+    e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 8 } }, e('div', { style: { fontFamily: c.DISPF, fontWeight: 200, fontSize: 34, color: c.ink } }, bal.toLocaleString('ru-RU')), e('div', { style: { fontFamily: c.DISPF, fontSize: 16, color: c.muted } }, '₽')),
+    e('div', { style: { fontSize: 12.5, color: c.muted, marginTop: 6, lineHeight: 1.5 } }, bal > 0 ? 'Можно списать при оплате визита.' : 'Копите кэшбэк с каждого визита — вернётся баллами.'),
+    e('button', { style: prim, onClick: function () { meChatEvent('me-chat-book'); } }, 'Записаться'));
+}
+window.ALoyaltyCard = ALoyaltyCard;
+
+function AProfileCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var u = (function () { try { var ctx = window.__ME_SAAS_CTX; var b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null'); return (b && b.user) || {}; } catch (er) { return {}; } })();
+  var name = (u && u.name) || 'Гость';
+  var phone = (u && u.phone) || '';
+  var initial = String(name).trim().charAt(0).toUpperCase() || '·';
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 18, marginTop: 10, maxWidth: 420, background: c.surf };
+  var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 14 };
+  var row = function (label, onClick) { return e('div', { onClick: onClick, style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '13px 2px', borderTop: '1px solid ' + c.line } }, e('span', { style: { flex: 1, fontSize: 13.5, color: c.ink } }, label), e('span', { style: { fontSize: 16, color: c.faint } }, '›')); };
+  return e('div', { style: wrap }, e('div', { style: lab }, 'Профиль'),
+    e('div', { style: { display: 'flex', alignItems: 'center', gap: 13 } },
+      e('div', { style: { width: 52, height: 52, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: c.invBg, color: c.invText, fontFamily: c.DISPF, fontSize: 20 } }, initial),
+      e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontSize: 15, color: c.ink } }, name), phone ? e('div', { style: { fontSize: 11.5, color: c.muted, marginTop: 2 } }, phone) : null, e('div', { style: { fontSize: 10, color: c.faint, marginTop: 2 } }, 'клиент'))),
+    e('div', { style: { marginTop: 14 } }, row('Мои записи', function () { meChatEvent('me-chat-mybookings'); }), row('Баллы и кэшбэк', function () { meChatEvent('me-chat-loyalty'); }), row('Записаться', function () { meChatEvent('me-chat-book'); })));
+}
+window.AProfileCard = AProfileCard;
+
+function AShopCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var st = React.useState({ note: '' }); var s = st[0], setS = st[1];
+  var abos = [{ n: 'Стрижка × 5', d: '5 мужских стрижек', p: '8 100 ₽' }, { n: 'Стрижка + борода × 4', d: '4 комплекса', p: '7 900 ₽' }, { n: 'Безлимит · месяц', d: 'стрижки 30 дней', p: '6 500 ₽' }];
+  var certs = ['2 000 ₽', '3 000 ₽', '5 000 ₽', '10 000 ₽'];
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 14, marginTop: 10, maxWidth: 420, background: c.surf };
+  var subl = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '2px 0 10px' };
+  var soon = function () { setS({ note: 'Оформление подключим совсем скоро — уже в работе.' }); };
+  return e('div', { style: wrap }, e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 } }, 'Магазин'),
+    e('div', { style: subl }, 'Абонементы'),
+    e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, abos.map(function (a, i) {
+      return e('div', { key: i, onClick: soon, style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '1px solid ' + c.line2, borderRadius: 15, padding: '13px 15px', background: c.bg2 } },
+        e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: c.BODYF, fontWeight: 600, fontSize: 13.5, color: c.ink } }, a.n), e('div', { style: { fontSize: 11, color: c.muted, marginTop: 2 } }, a.d)),
+        e('div', { style: { fontSize: 14, fontWeight: 300, color: c.ink } }, a.p));
+    })),
+    e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '16px 0 10px' } }, 'Сертификаты'),
+    e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 } }, certs.map(function (v, i) { return e('div', { key: i, onClick: soon, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + c.line2, borderRadius: 13, padding: '15px 0', fontSize: 15, fontWeight: 300, color: c.ink, background: c.bg2 } }, v); })),
+    s.note ? e('div', { style: { fontSize: 12, color: c.faint, marginTop: 12, lineHeight: 1.5 } }, s.note) : null);
+}
+window.AShopCard = AShopCard;
+
 // =====================================================================
 // AChat — in-app AI assistant «Антон». SSE streaming (?action=chat_stream)
 // with fallback (?action=chat). Aurora-styled. 3-channel auth.
@@ -11821,9 +11896,14 @@ function AChat() {
 	  const msgsRef = React.useRef([]); // актуальная лента для сборки истории AI-чата (≤12 сообщений)
 	  React.useEffect(function () { msgsRef.current = msgs; }, [msgs]);
 	  React.useEffect(function () {
-	    function onBook() { try { userHasSentRef.current = true; } catch (e) {} setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: 'Конечно! Подберём удобное время — выбирайте мастера 👇', bookWidget: true }]); }); }
+	    var push = function (entry) { try { userHasSentRef.current = true; } catch (e) {} setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([entry]); }); };
+	    var onBook = function () { push({ role: 'bot', text: 'Конечно! Подберём удобное время — выбирайте мастера 👇', bookWidget: true }); };
+	    var onMy = function () { push({ role: 'bot', text: 'Вот ваши записи 👇', myBookings: true }); };
+	    var onLoy = function () { push({ role: 'bot', text: 'Смотрим ваши баллы 👇', loyaltyWidget: true }); };
 	    window.addEventListener('me-chat-book', onBook);
-	    return function () { window.removeEventListener('me-chat-book', onBook); };
+	    window.addEventListener('me-chat-mybookings', onMy);
+	    window.addEventListener('me-chat-loyalty', onLoy);
+	    return function () { window.removeEventListener('me-chat-book', onBook); window.removeEventListener('me-chat-mybookings', onMy); window.removeEventListener('me-chat-loyalty', onLoy); };
 	  }, []);
 	  const onbOnRef = React.useRef(onbActiveNow()); // заморожено на маунт; онбординг завершается редиректом в новый бизнес
 	  const [onbStage, setOnbStage] = React.useState('chat'); // chat|confirm|logo|crm
@@ -12844,6 +12924,27 @@ function AChat() {
       try { setInput(''); } catch (e) {}
       try { userHasSentRef.current = true; } catch (e) {}
       setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Вот ваши записи 👇', myBookings: true }]); });
+      return;
+    }
+    // баллы / кэшбэк
+    if (_bt && /(?:^|[^а-яё])(?:балл|кэшбэк|кешбэк|бонус)/i.test(_bt)) {
+      try { setInput(''); } catch (e) {}
+      try { userHasSentRef.current = true; } catch (e) {}
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Смотрим ваши баллы 👇', loyaltyWidget: true }]); });
+      return;
+    }
+    // магазин / абонемент / сертификат
+    if (_bt && /магазин|абонемент|сертификат|подарочн/i.test(_bt)) {
+      try { setInput(''); } catch (e) {}
+      try { userHasSentRef.current = true; } catch (e) {}
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Загляните на витрину 👇', shopWidget: true }]); });
+      return;
+    }
+    // профиль / мои данные
+    if (_bt && /(?:^|[^а-яё])(?:профил|аккаунт)|мои\s+данные|мой\s+профиль/i.test(_bt)) {
+      try { setInput(''); } catch (e) {}
+      try { userHasSentRef.current = true; } catch (e) {}
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Ваш профиль 👇', profileWidget: true }]); });
       return;
     }
     // намерение записаться из свободного текста (клиентская эвристика; полноценно любую формулировку — сигнал widget от бэка).
@@ -14110,7 +14211,7 @@ function AChat() {
 	        wordBreak: 'break-word',
 	        maxWidth: '100%'
 	      }
-	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.myBookings ? React.createElement(AMyBookingsCard, { key: 'mb', t: t, dark: dark }) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
+	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.myBookings ? React.createElement(AMyBookingsCard, { key: 'mb', t: t, dark: dark }) : null, m.loyaltyWidget ? React.createElement(ALoyaltyCard, { key: 'loy', t: t, dark: dark }) : null, m.shopWidget ? React.createElement(AShopCard, { key: 'shop', t: t, dark: dark }) : null, m.profileWidget ? React.createElement(AProfileCard, { key: 'prof', t: t, dark: dark }) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
 	    return e('div', {
 	      key: i,
 	      style: {
