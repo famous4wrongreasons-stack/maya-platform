@@ -11255,6 +11255,107 @@ function ABookCard(props) {
 }
 window.ABookCard = ABookCard;
 
+// Общий authed-fetch для чат-виджетов (фолбэк по бандлу + refresh-on-401), как в ABookCard.
+function meWidgetAf(path, init) {
+  if (window.__meSaasAuthedFetch) return window.__meSaasAuthedFetch(path, init);
+  var ctx = window.__ME_SAAS_CTX;
+  if (!ctx || !ctx.api) return Promise.reject({ code: 'no_ctx' });
+  var key = 'me_saas_auth_v2:' + ctx.ns;
+  var base = String(ctx.api).replace(/\/+$/, '');
+  var rd = function () { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } };
+  var finalize = function (r, body) { if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; } return body; };
+  var doFetch = function (token) {
+    var ini = init || {};
+    var headers = Object.assign({}, ini.headers || {}, { Authorization: 'Bearer ' + token });
+    return fetch(base + path, Object.assign({}, ini, { headers: headers })).then(function (r) {
+      return r.text().then(function (txt) { var body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) {} return { r: r, body: body }; });
+    });
+  };
+  var refresh = function (rt) {
+    return fetch(base + '/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: rt }) })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (res) {
+        if (!res || !res.access_token) return null;
+        var b = rd() || {};
+        b.token = res.access_token;
+        if (res.refresh_token) b.refresh_token = res.refresh_token;
+        b.access_expires_at = res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : b.access_expires_at;
+        if (res.user) b.user = res.user;
+        try { localStorage.setItem(key, JSON.stringify(b)); } catch (e) {}
+        return b.token;
+      }).catch(function () { return null; });
+  };
+  var b0 = rd();
+  if (!b0 || !b0.token) return Promise.reject({ status: 401, code: 'no_session' });
+  return doFetch(b0.token).then(function (out) {
+    if (out.r.status === 401 && b0.refresh_token) {
+      return refresh(b0.refresh_token).then(function (nt) {
+        if (!nt) { var e401 = new Error('http_401'); e401.status = 401; e401.code = 'session_expired'; throw e401; }
+        return doFetch(nt).then(function (o2) { return finalize(o2.r, o2.body); });
+      });
+    }
+    return finalize(out.r, out.body);
+  });
+}
+window.meWidgetAf = meWidgetAf;
+
+// ── Инлайн-виджет «Мои записи» в ленте чата: GET /appointments/my + отмена; пусто → CTA «Записаться».
+function AMyBookingsCard(props) {
+  var e = React.createElement;
+  var t = props.t || {}; var dark = !!props.dark;
+  var ink = t.ink || (dark ? '#f4f0eb' : '#18160f');
+  var muted = dark ? 'rgba(244,240,235,0.55)' : 'rgba(24,22,15,0.55)';
+  var line = t.line || (dark ? 'rgba(244,240,235,0.12)' : 'rgba(24,22,15,0.1)');
+  var line2 = dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.18)';
+  var surf = dark ? 'rgba(244,240,235,0.05)' : 'rgba(24,22,15,0.045)';
+  var bg2 = dark ? '#0b0b0c' : '#efeae1';
+  var invBg = dark ? '#f4f0eb' : '#18160f';
+  var invText = dark ? '#000' : '#f7f3ec';
+  var errc = dark ? '#f0b8b8' : '#9a3b3b';
+  var BODYF = (typeof BODY !== 'undefined') ? BODY : "'Montserrat',sans-serif";
+  var DISPF = (typeof DISPLAY !== 'undefined') ? DISPLAY : "'Montserrat',sans-serif";
+  var st = React.useState({ items: null, loading: true, err: '', cancelId: null, busy: false });
+  var s = st[0], setS = st[1];
+  function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
+  function fmt(iso, tz) { try { return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: tz || 'Europe/Moscow' }).format(new Date(iso)); } catch (er) { try { return new Date(iso).toLocaleString('ru-RU'); } catch (e2) { return String(iso || ''); } } }
+  function bErr(er, fb) { var c = er && er.code; if (er && er.status === 402) return 'Пробный период закончился. Подключите подписку.'; if (er && er.status === 401) return 'Сессия устарела — войдите снова.'; if (c === 'too_late_to_cancel') return 'Отменить уже нельзя — время записи наступило.'; return fb; }
+  function load() {
+    patch({ loading: true, err: '' });
+    meWidgetAf('/appointments/my').then(function (items) { patch({ items: Array.isArray(items) ? items : [], loading: false }); })
+      .catch(function (er) { patch({ loading: false, err: bErr(er, 'Не удалось загрузить записи') }); });
+  }
+  React.useEffect(function () { load(); }, []);
+  function cancel(a) {
+    if (s.cancelId !== a.id) { patch({ cancelId: a.id }); setTimeout(function () { setS(function (p) { return p.cancelId === a.id ? Object.assign({}, p, { cancelId: null }) : p; }); }, 4000); return; }
+    patch({ busy: true, err: '' });
+    meWidgetAf('/appointments/' + encodeURIComponent(a.id) + '/cancel', { method: 'POST' })
+      .then(function () { patch({ busy: false, cancelId: null }); load(); })
+      .catch(function (er) { var c = er && er.code; if (c === 'already_cancelled' || c === 'not_found') { patch({ busy: false, cancelId: null }); load(); return; } patch({ busy: false, cancelId: null, err: bErr(er, 'Не удалось отменить') }); });
+  }
+  function openBook() { try { window.dispatchEvent(new CustomEvent('me-chat-book')); } catch (er) {} }
+  var wrap = { border: '1px solid ' + line, borderRadius: 20, padding: 14, marginTop: 10, maxWidth: 420, background: surf };
+  var lab = { fontFamily: DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: muted, marginBottom: 12 };
+  var prim = { width: '100%', height: 44, borderRadius: 999, border: 0, background: invBg, color: invText, fontFamily: BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer', marginTop: 12 };
+  if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'Мои записи'), e('div', { style: { fontSize: 12.5, color: muted, padding: '6px 2px' } }, 'Секунду…'));
+  if (s.err && !(s.items && s.items.length)) return e('div', { style: wrap }, e('div', { style: lab }, 'Мои записи'), e('div', { style: { fontSize: 12.5, color: errc, padding: '6px 2px' } }, s.err), e('button', { style: prim, onClick: load }, 'Повторить'));
+  if (!s.items || !s.items.length) return e('div', { style: wrap }, e('div', { style: lab }, 'Мои записи'), e('div', { style: { fontSize: 13.5, color: ink, lineHeight: 1.5 } }, 'У вас пока нет предстоящих записей.'), e('button', { style: prim, onClick: openBook }, 'Записаться'));
+  return e('div', { style: wrap }, e('div', { style: lab }, 'Мои записи'),
+    e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, s.items.map(function (a, i) {
+      var svc = (Array.isArray(a.services) && a.services.length) ? a.services.map(function (x) { return x.name; }).join(', ') : (a.service_name || 'Услуга');
+      var master = (a.staff && a.staff.name) || a.staff_name || 'Мастер';
+      var when = fmt(a.start_at || a.start, a.branch && a.branch.timezone);
+      var confirming = s.cancelId === a.id;
+      return e('div', { key: i, style: { border: '1px solid ' + line2, borderRadius: 15, padding: '13px 15px', background: bg2 } },
+        e('div', { style: { fontFamily: BODYF, fontWeight: 600, fontSize: 13.5, color: ink } }, svc),
+        e('div', { style: { fontSize: 11.5, color: muted, marginTop: 3 } }, master + ' · ' + when),
+        e('div', { style: { display: 'flex', gap: 8, marginTop: 11 } },
+          e('button', { onClick: openBook, style: { flex: 1, height: 38, borderRadius: 999, border: '1px solid ' + line2, background: 'transparent', color: ink, fontFamily: BODYF, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' } }, 'Перенести'),
+          e('button', { onClick: function () { cancel(a); }, style: { flex: 1, height: 38, borderRadius: 999, border: '1px solid ' + (confirming ? errc : line2), background: 'transparent', color: confirming ? errc : muted, fontFamily: BODYF, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' } }, confirming ? 'Точно отменить?' : 'Отменить')));
+    })),
+    s.err ? e('div', { style: { fontSize: 11.5, color: errc, marginTop: 8 } }, s.err) : null);
+}
+window.AMyBookingsCard = AMyBookingsCard;
+
 // =====================================================================
 // AChat — in-app AI assistant «Антон». SSE streaming (?action=chat_stream)
 // with fallback (?action=chat). Aurora-styled. 3-channel auth.
@@ -11719,6 +11820,11 @@ function AChat() {
 	  const [msgs, setMsgs] = React.useState(function () { return onbActiveNow() ? [{ role: 'bot', text: ONB_GREETING }] : readCachedChatMsgs(); });
 	  const msgsRef = React.useRef([]); // актуальная лента для сборки истории AI-чата (≤12 сообщений)
 	  React.useEffect(function () { msgsRef.current = msgs; }, [msgs]);
+	  React.useEffect(function () {
+	    function onBook() { try { userHasSentRef.current = true; } catch (e) {} setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: 'Конечно! Подберём удобное время — выбирайте мастера 👇', bookWidget: true }]); }); }
+	    window.addEventListener('me-chat-book', onBook);
+	    return function () { window.removeEventListener('me-chat-book', onBook); };
+	  }, []);
 	  const onbOnRef = React.useRef(onbActiveNow()); // заморожено на маунт; онбординг завершается редиректом в новый бизнес
 	  const [onbStage, setOnbStage] = React.useState('chat'); // chat|confirm|logo|crm
 	  const onbCtxRef = React.useRef(null); // {apiBase, activationToken} — только память + session-scoped storage
@@ -12733,6 +12839,13 @@ function AChat() {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
     // «Записаться» (чип или ввод) → инлайн-виджет записи в ленте, а не в AI-чат
     var _bt = String(textArg != null ? textArg : input).trim();
+    // «мои записи» → виджет списка записей
+    if (_bt && /мои\s+запис|мои\s+брон|когда\s+я\s+запис|покажи\s+(?:мои\s+)?запис|мои\s+визит/i.test(_bt)) {
+      try { setInput(''); } catch (e) {}
+      try { userHasSentRef.current = true; } catch (e) {}
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Вот ваши записи 👇', myBookings: true }]); });
+      return;
+    }
     // намерение записаться из свободного текста (клиентская эвристика; полноценно любую формулировку — сигнал widget от бэка).
     // не срабатывает на «отменить/перенести запись».
     if (_bt && /(?:^|[^а-яё])(?:запиш|записа|постри[чг]|подстри)|хочу\s+(?:стри|подстри|записа)|на\s+стрижк|нужн\w*\s+стрижк/i.test(_bt) && !/отмен|перенес|перенос/i.test(_bt)) {
@@ -13997,7 +14110,7 @@ function AChat() {
 	        wordBreak: 'break-word',
 	        maxWidth: '100%'
 	      }
-	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
+	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.myBookings ? React.createElement(AMyBookingsCard, { key: 'mb', t: t, dark: dark }) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
 	    return e('div', {
 	      key: i,
 	      style: {
