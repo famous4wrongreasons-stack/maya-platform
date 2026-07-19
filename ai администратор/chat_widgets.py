@@ -13,6 +13,7 @@ CHAT_WIDGETS = frozenset({
     "history",
     "referral",
     "notify",
+    "tips",
 })
 
 _ACTION_WIDGETS = {
@@ -27,6 +28,7 @@ _ACTION_WIDGETS = {
     "open_history": "history",
     "open_referral": "referral",
     "open_notify": "notify",
+    "open_tips": "tips",
 }
 
 
@@ -34,6 +36,26 @@ def normalize_chat_widget(value: Any) -> str | None:
     """Return a supported widget name or None for untrusted/unknown values."""
     candidate = str(value or "").strip().lower()
     return candidate if candidate in CHAT_WIDGETS else None
+
+
+def normalize_chat_widget_data(widget: Any, value: Any) -> dict | None:
+    """Keep only server-approved payload fields for a supported widget."""
+    if normalize_chat_widget(widget) != "tips" or not isinstance(value, dict):
+        return None
+    result = {}
+    try:
+        master_id = int(value.get("master_id"))
+    except (TypeError, ValueError, OverflowError):
+        master_id = 0
+    if master_id > 0:
+        result["master_id"] = master_id
+    try:
+        base_amount = int(round(float(value.get("base_amount"))))
+    except (TypeError, ValueError, OverflowError):
+        base_amount = 0
+    if 0 < base_amount <= 10_000_000:
+        result["base_amount"] = base_amount
+    return result or None
 
 
 def widget_for_action(action: Any) -> str | None:

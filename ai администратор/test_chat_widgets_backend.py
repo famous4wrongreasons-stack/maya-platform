@@ -11,6 +11,7 @@ import client_record_actions
 from chat_widgets import (
     CHAT_WIDGETS,
     normalize_chat_widget,
+    normalize_chat_widget_data,
     widget_for_action,
     widget_from_signal,
 )
@@ -48,8 +49,9 @@ def _future_record(phone="+7 999 123-45-67"):
 
 
 class ChatWidgetContractTests(unittest.TestCase):
-    def test_contract_accepts_only_eight_known_widgets(self):
-        self.assertEqual(len(CHAT_WIDGETS), 8)
+    def test_contract_accepts_only_nine_known_widgets(self):
+        self.assertEqual(len(CHAT_WIDGETS), 9)
+        self.assertIn("tips", CHAT_WIDGETS)
         for widget in CHAT_WIDGETS:
             self.assertEqual(normalize_chat_widget(widget.upper()), widget)
         self.assertIsNone(normalize_chat_widget("payments"))
@@ -59,6 +61,7 @@ class ChatWidgetContractTests(unittest.TestCase):
         self.assertEqual(widget_for_action({"type": "open_booking"}), "book")
         self.assertEqual(widget_for_action({"type": "open_cabinet"}), "mybookings")
         self.assertEqual(widget_for_action({"type": "open_certs"}), "shop")
+        self.assertEqual(widget_for_action({"type": "open_tips"}), "tips")
         self.assertIsNone(widget_for_action({"type": "run_job"}))
 
     def test_model_signal_wins_and_unknown_signal_falls_back_safely(self):
@@ -74,6 +77,18 @@ class ChatWidgetContractTests(unittest.TestCase):
             "book",
         )
 
+    def test_tips_widget_data_is_allowlisted_and_normalized(self):
+        self.assertEqual(
+            normalize_chat_widget_data("tips", {
+                "master_id": "1461615",
+                "base_amount": "2500",
+                "client_phone": "+79990000000",
+            }),
+            {"master_id": 1461615, "base_amount": 2500},
+        )
+        self.assertIsNone(normalize_chat_widget_data("book", {"master_id": 1}))
+        self.assertIsNone(normalize_chat_widget_data("tips", {"master_id": "bad"}))
+
     def test_widget_tool_is_always_available_to_client_context(self):
         claude_ai, _ = _load_claude_ai()
         self.assertIn(
@@ -84,6 +99,8 @@ class ChatWidgetContractTests(unittest.TestCase):
         )
         self.assertTrue(claude_ai._authorize("client", "show_chat_widget", "client"))
         self.assertFalse(claude_ai._authorize("client", "show_chat_widget", "staff"))
+        tool = next(item for item in claude_ai.TOOLS if item.get("name") == "show_chat_widget")
+        self.assertIn("tips", tool["input_schema"]["properties"]["widget"]["enum"])
 
     def test_widget_tool_emits_backend_signal_without_terminal_text(self):
         claude_ai, _ = _load_claude_ai()

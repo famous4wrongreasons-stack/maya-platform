@@ -60,7 +60,12 @@ import subscriptions
 import web_auth
 import yukassa_api
 import client_record_actions
-from chat_widgets import normalize_chat_widget, widget_for_action, widget_from_signal
+from chat_widgets import (
+    normalize_chat_widget,
+    normalize_chat_widget_data,
+    widget_for_action,
+    widget_from_signal,
+)
 from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
 from maya_roles import (
     allowed_surfaces_for_panel_role,
@@ -586,6 +591,7 @@ async def _send_client_push(chat_id, title: str, body: str,
                             chat_text: str = "",
                             chat_action: dict | None = None,
                             chat_widget: str | None = None,
+                            chat_widget_data: dict | None = None,
                             chat_link=None,
                             chat_mode: str = "client",
                             chat_dedupe_key: str = "") -> int:
@@ -602,6 +608,7 @@ async def _send_client_push(chat_id, title: str, body: str,
                 mode=chat_mode,
                 action=chat_action,
                 widget=chat_widget,
+                widget_data=chat_widget_data,
                 link=chat_link,
                 dedupe_key=chat_dedupe_key or tag or "",
             )
@@ -623,8 +630,12 @@ async def _send_client_push(chat_id, title: str, body: str,
         return 0
     push_data = dict(data or {})
     widget = normalize_chat_widget(chat_widget)
+    push_data.pop("widget_data", None)
     if widget:
         push_data["widget"] = widget
+        widget_data = normalize_chat_widget_data(widget, chat_widget_data)
+        if widget_data:
+            push_data["widget_data"] = widget_data
     payload = _json.dumps({
         "title": title, "body": body, "url": url,
         "tag": tag or f"client-{chat_id}", **push_data,
@@ -656,6 +667,44 @@ async def _send_client_push(chat_id, title: str, body: str,
     return sent
 
 
+def _tip_offer_details(record: dict, master_name: str = "") -> tuple[str, int]:
+    services = []
+    base_amount = 0
+    for service in record.get("services") or []:
+        if not isinstance(service, dict):
+            continue
+        title = str(service.get("title") or "").strip()
+        if title:
+            services.append(title)
+        try:
+            cost = int(round(float(service.get("cost") or 0)))
+        except (TypeError, ValueError, OverflowError):
+            cost = 0
+        if cost > 0:
+            base_amount += cost
+    if base_amount <= 0:
+        for key in ("cost", "amount", "sum"):
+            try:
+                candidate = int(round(float(record.get(key) or 0)))
+            except (TypeError, ValueError, OverflowError):
+                candidate = 0
+            if candidate > 0:
+                base_amount = candidate
+                break
+
+    intro = "Визит завершён"
+    if services:
+        intro += " — " + ", ".join(services[:4])
+    if base_amount > 0:
+        intro += f" на {base_amount:,} ₽".replace(",", " ")
+    who = str(master_name or "").strip()
+    question = (
+        f"Ваш мастер — {who}. Поблагодарить чаевыми?"
+        if who else "Поблагодарить мастера чаевыми?"
+    )
+    return f"{intro}. {question}", base_amount
+
+
 async def _offer_tip_to_client(record: dict, record_id: int) -> None:
     """Визит закрыт → шлём клиенту web-push с кнопкой на страницу чаевых ЕГО мастера
     (если клиент подписан на уведомления). Телефон клиента → наш chat_id → подписка."""
@@ -669,20 +718,22 @@ async def _offer_tip_to_client(record: dict, record_id: int) -> None:
         master_name = staff.get("name") or ""
         if not cc or not staff_id:
             return
+        chat_text, base_amount = _tip_offer_details(record, master_name)
+        widget_data = {
+            "master_id": int(staff_id),
+            "base_amount": base_amount,
+        }
         n = await _send_client_push(
             int(cc),
             title="Спасибо за визит! 💈",
-            body=(f"Понравилось у мастера {master_name}? " if master_name else "")
-                 + "Можно оставить чаевые 💸",
+            body=chat_text,
             url=f"/app/?tips={staff_id}",
             tag=f"tip-offer-{record_id}",
             data={"master": str(staff_id)},
             persist_in_chat=True,
-            chat_text=(
-                "Спасибо за визит! 💈\n\n"
-                + ((f"Если понравилось у мастера {master_name}, " if master_name else "")
-                   + "можно оставить чаевые в приложении.")
-            ),
+            chat_text=chat_text,
+            chat_widget="tips",
+            chat_widget_data=widget_data,
             chat_link={
                 "label": "Оставить чаевые",
                 "url": f"https://malesthetic.pro/app/?tips={staff_id}",
@@ -894,20 +945,32 @@ def _record_datetime(record: dict) -> str:
     return s[:16]  # 'YYYY-MM-DD HH:MM'
 
 
+def _record_attendance(record: dict) -> int | None:
+    value = record.get("attendance")
+    if value is None:
+        value = record.get("visit_attendance")
+    try:
+        return int(value) if value is not None else None
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _visit_just_completed(record: dict, old_state: dict) -> bool:
+    return _record_attendance(record) == 1 and _record_attendance(old_state) != 1
+
+
 def _save_record_state(record: dict, record_id: int):
     """Сохраняет снимок состояния записи в БД (staff/время/услуги/attendance)."""
     try:
         staff = record.get("staff") or {}
         staff_id = staff.get("id") or record.get("staff_id")
-        attendance = record.get("attendance")
-        if attendance is None:
-            attendance = record.get("visit_attendance")
+        attendance = _record_attendance(record)
         database.upsert_record_state(
             record_id=record_id,
             staff_id=int(staff_id) if staff_id else None,
             datetime_str=_record_datetime(record),
             services_sig=_services_signature(record),
-            attendance=int(attendance) if attendance is not None else None,
+            attendance=attendance,
         )
     except Exception as e:
         logger.error(f"_save_record_state({record_id}): {e}")
@@ -1197,17 +1260,14 @@ async def _process_record_update(app: Application, record_id: int) -> dict:
     time_changed = bool(old_dt and new_dt and old_dt != new_dt)
     services_changed = (old_sig or "") != (new_sig or "")
 
-    # Если значимых изменений нет (только attendance/финансы) — тихо обновляем.
-    # НО: если визит только что закрылся (attendance стал 1) — предлагаем клиенту оставить чай.
-    if not (transferred or time_changed or services_changed):
+    if _visit_just_completed(record, old_state):
         try:
-            _new_att = record.get("attendance")
-            if _new_att is None:
-                _new_att = record.get("visit_attendance")
-            if _new_att == 1 and old_state.get("attendance") != 1:
-                await _offer_tip_to_client(record, record_id)
+            await _offer_tip_to_client(record, record_id)
         except Exception as e:
             logger.error(f"tip-offer trigger {record_id}: {e}")
+
+    # Если значимых изменений нет (только attendance/финансы) — тихо обновляем.
+    if not (transferred or time_changed or services_changed):
         _persist()
         return {"status": "no_meaningful_change", "record_id": record_id}
 
@@ -8084,6 +8144,9 @@ def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
             widget = normalize_chat_widget(item.get("widget"))
             if widget:
                 msg["widget"] = widget
+                widget_data = normalize_chat_widget_data(widget, item.get("widget_data"))
+                if widget_data:
+                    msg["widget_data"] = widget_data
             messages.append(msg)
     return messages
 
@@ -8095,6 +8158,7 @@ def _assistant_history_item(
     action=None,
     images=None,
     widget: str | None = None,
+    widget_data: dict | None = None,
 ) -> dict:
     item = {
         "id": _new_chat_message_id(),
@@ -8110,6 +8174,9 @@ def _assistant_history_item(
     normalized_widget = normalize_chat_widget(widget)
     if normalized_widget:
         item["widget"] = normalized_widget
+        normalized_data = normalize_chat_widget_data(normalized_widget, widget_data)
+        if normalized_data:
+            item["widget_data"] = normalized_data
     return item
 
 
@@ -8120,6 +8187,7 @@ def _store_assistant_message_in_chat(
     mode: str = "client",
     action: dict | None = None,
     widget: str | None = None,
+    widget_data: dict | None = None,
     link=None,
     images: list | None = None,
     dedupe_key: str = "",
@@ -8152,6 +8220,7 @@ def _store_assistant_message_in_chat(
             action=action,
             images=images,
             widget=widget,
+            widget_data=widget_data,
         )
         if want_key:
             item["dedupe_key"] = want_key
@@ -9807,21 +9876,23 @@ async def tip_sent_handler(request: web.Request) -> web.Response:
     except (TypeError, ValueError):
         amount_i = 0
     record_id = body.get("record_id")
+    note = _plain_maya_text(str(body.get("note") or "")).strip()[:240]
     # Записываем чаевые для аналитики по каждому мастеру (служебный сигнал, не банк. подтверждение)
     try:
         database.save_tip(
             master_id=body.get("master_id") or master.get("id") or master.get("staff_id"),
             master_slug=body.get("master") or master.get("slug", ""),
             master_name=master.get("name", ""),
-            amount=amount_i, record_id=record_id,
+            amount=amount_i, record_id=record_id, note=note,
         )
     except Exception as e:
         logger.error(f"tip_sent: save_tip failed: {e}")
     record_part = f"\nЗапись: #{record_id}" if record_id else ""
+    note_part = f"\nСообщение: {note.replace('[', '(').replace(']', ')')}" if note else ""
     text = (
         "💸 *Клиент отметил перевод чаевых*\n\n"
         f"Сумма: *{amount_i:,} ₽*".replace(",", " ")
-        + record_part +
+        + record_part + note_part +
         "\n\n_Проверь поступление в банковском приложении._"
     )
 
@@ -9840,7 +9911,7 @@ async def tip_sent_handler(request: web.Request) -> web.Response:
     sent_push = await _send_master_push(
         master,
         title="Вам оставили чай",
-        body="Вам оставили чай",
+        body="Вам оставили чай" + (" и сообщение" if note else ""),
         url="/app/?panel=schedule",
         tag=f"tip-{record_id or _master_staff_id(master) or 'master'}",
         data={"record_id": record_id, "event": "tip.sent", "amount": amount_i},
@@ -9850,6 +9921,7 @@ async def tip_sent_handler(request: web.Request) -> web.Response:
         "ok": True,
         "telegram": sent_tg,
         "push_sent": sent_push,
+        "note_saved": bool(note),
     })
 
 

@@ -663,6 +663,7 @@ def _migrate_add_encrypted_columns(conn):
     # Флаг «в диалоге было намерение записаться» — чтобы lead-alert
     # срабатывал только на реальные заявки, а не на «привет / как дела».
     _add("client_chat_state", "booking_intent", "INTEGER NOT NULL DEFAULT 0")
+    _add("tips", "note")
     # Состав услуг до и после совета AI — для аналитики «зашёл/не зашёл»
     _add("ai_advice_log", "initial_services_json", "TEXT")
     _add("ai_advice_log", "final_services_json", "TEXT")
@@ -4173,7 +4174,7 @@ init_db()
 
 # ─── Чаевые (аналитика по каждому мастеру) ──────────────────────────────
 def save_tip(master_id=None, master_slug: str = "", master_name: str = "",
-             amount=0, record_id=None) -> None:
+             amount=0, record_id=None, note: str = "") -> None:
     """Записать факт перевода чаевых (служебный сигнал клиента «Я перевёл»)."""
     try:
         amount_i = int(float(amount or 0))
@@ -4181,10 +4182,10 @@ def save_tip(master_id=None, master_slug: str = "", master_name: str = "",
         amount_i = 0
     with _db() as conn:
         conn.execute(
-            "INSERT INTO tips (master_id, master_slug, master_name, amount, record_id, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO tips (master_id, master_slug, master_name, amount, record_id, note, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
             (int(master_id) if master_id else None, master_slug or "", master_name or "",
-             amount_i, int(record_id) if record_id else None, _now()),
+             amount_i, int(record_id) if record_id else None, str(note or "").strip()[:240], _now()),
         )
 
 
