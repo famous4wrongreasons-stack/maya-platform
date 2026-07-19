@@ -11,6 +11,7 @@ import {
 import { UserRole } from '../../common/domain.enums';
 
 const MANAGEABLE_TENANT_ROLES = [
+  UserRole.TENANT_OWNER,
   UserRole.TENANT_ADMIN,
   UserRole.BRANCH_MANAGER,
   UserRole.STAFF,

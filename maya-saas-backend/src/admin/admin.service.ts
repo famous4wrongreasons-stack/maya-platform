@@ -183,6 +183,8 @@ export class AdminService {
     actor: AuthenticatedUser,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
+    const role = dto.role ?? UserRole.TENANT_ADMIN;
+    this.assertTenantRoleCanBeAssigned(role, actor);
     await this.tenantsService.getTenantByIdOrThrow(id);
     await this.quotas.assertCanCreate(id, QuotaResource.STAFF);
 
@@ -204,7 +206,7 @@ export class AdminService {
       phone: dto.phone ?? null,
       name: dto.name ?? null,
       passwordHash: await bcrypt.hash(temporaryPassword, 10),
-      role: dto.role ?? UserRole.TENANT_ADMIN,
+      role,
       status: UserStatus.ACTIVE,
     });
 
@@ -250,6 +252,20 @@ export class AdminService {
 
   private generatePassword() {
     return randomBytes(12).toString('base64url');
+  }
+
+  private assertTenantRoleCanBeAssigned(
+    role: UserRole,
+    actor: AuthenticatedUser,
+  ) {
+    if (
+      role === UserRole.TENANT_OWNER &&
+      actor.role !== UserRole.PLATFORM_OWNER
+    ) {
+      throw new ForbiddenException(
+        'Only the platform owner can assign a tenant owner',
+      );
+    }
   }
 
   private ensureTenantCanBeManaged(actor: AuthenticatedUser, tenantId: string) {

@@ -23,6 +23,16 @@ describe('AdminService tenant update boundaries', () => {
     membershipId: 'membership-1',
     membershipStatus: 'active',
   };
+  const platformOwner: AuthenticatedUser = {
+    userId: 'platform-owner-1',
+    sessionId: 'session-platform-1',
+    tenantId: null,
+    role: UserRole.PLATFORM_OWNER,
+    email: 'owner@example.test',
+    branchId: null,
+    membershipId: null,
+    membershipStatus: null,
+  };
 
   const createService = () => {
     const updateTenantMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
@@ -41,6 +51,25 @@ describe('AdminService tenant update boundaries', () => {
     const assertCustomBrandingAllowedMock = jest
       .fn()
       .mockResolvedValue(undefined);
+    const createUserMock = jest.fn().mockResolvedValue({
+      id: 'tenant-owner-1',
+      tenantId: 'tenant-1',
+      branchId: null,
+      email: 'owner@tenant.example',
+      phone: null,
+      encryptedName: null,
+      passwordHash: 'hash',
+      role: UserRole.TENANT_OWNER,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    const serializeUserMock = jest.fn(
+      (user: { id: string; role: UserRole }) => ({
+        id: user.id,
+        role: user.role,
+      }),
+    );
     const service = new AdminService(
       {
         updateTenant: updateTenantMock,
@@ -48,7 +77,12 @@ describe('AdminService tenant update boundaries', () => {
       } as unknown as TenantsService,
       { upsertBranding: upsertBrandingMock } as unknown as BrandingService,
       { connectAndActivateIntegration: upsertCrmMock } as unknown as CrmService,
-      {} as UsersService,
+      {
+        ensureEmailIsAvailable: jest.fn().mockResolvedValue(undefined),
+        ensurePhoneIsAvailable: jest.fn().mockResolvedValue(undefined),
+        createUser: createUserMock,
+        serializeUser: serializeUserMock,
+      } as unknown as UsersService,
       {} as SubscriptionsService,
       { log: auditLogMock } as unknown as AuditLogService,
       {} as TenantContextService,
@@ -66,6 +100,7 @@ describe('AdminService tenant update boundaries', () => {
       auditLogMock,
       assertCanCreateMock,
       assertCustomBrandingAllowedMock,
+      createUserMock,
     };
   };
 
@@ -142,6 +177,47 @@ describe('AdminService tenant update boundaries', () => {
       ),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(assertCanCreateMock).toHaveBeenCalledWith('tenant-1', 'staff');
+  });
+
+  it('prevents a tenant admin from assigning a tenant owner', async () => {
+    const { service, assertCanCreateMock, createUserMock } = createService();
+
+    await expect(
+      service.createTenantUser(
+        'tenant-1',
+        { email: 'owner@tenant.example', role: UserRole.TENANT_OWNER },
+        tenantAdmin,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(assertCanCreateMock).not.toHaveBeenCalled();
+    expect(createUserMock).not.toHaveBeenCalled();
+  });
+
+  it('allows only the platform owner to create a tenant owner', async () => {
+    const { service, createUserMock } = createService();
+
+    const result = await service.createTenantUser(
+      'tenant-1',
+      {
+        email: 'owner@tenant.example',
+        password: 'StrongPass123',
+        role: UserRole.TENANT_OWNER,
+      },
+      platformOwner,
+    );
+
+    expect(createUserMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        email: 'owner@tenant.example',
+        role: UserRole.TENANT_OWNER,
+      }),
+    );
+    expect(result).toMatchObject({
+      user: { id: 'tenant-owner-1', role: UserRole.TENANT_OWNER },
+      temporary_password: null,
+    });
   });
 
   it('checks plan-level white-label access before persisting custom branding', async () => {
