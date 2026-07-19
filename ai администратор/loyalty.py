@@ -230,6 +230,101 @@ def _visit_covered_by_subscription(
     return False
 
 
+def affordable_care_services(balance: int, catalog: list[dict] | None = None) -> list[dict]:
+    """Return only current YClients care services the confirmed balance covers."""
+    try:
+        available = max(0, int(balance))
+    except (TypeError, ValueError):
+        available = 0
+    rows = catalog if catalog is not None else (_yc.get_services() or [])
+    by_title = {
+        str(row.get("title") or "").strip().lower().replace("ё", "е"): row
+        for row in rows
+        if isinstance(row, dict) and not row.get("error") and row.get("title")
+    }
+    result = []
+    for care in CARE_SERVICES:
+        row = by_title.get(care["title"].lower().replace("ё", "е"))
+        if not row:
+            continue
+        prices = []
+        for key in ("price_max", "price_min", "price"):
+            try:
+                value = int(round(float(row.get(key) or 0)))
+            except (TypeError, ValueError):
+                value = 0
+            if value > 0:
+                prices.append(value)
+        # A range is affordable only when the confirmed balance covers its top.
+        price = max(prices) if prices else int(care["price"])
+        if price <= available:
+            result.append({
+                "id": row.get("id"),
+                "title": str(row.get("title") or care["title"]).strip(),
+                "price": price,
+            })
+    return sorted(result, key=lambda item: (item["price"], item["title"]))
+
+
+async def _send_affordable_care_offer(client: dict) -> bool:
+    """Persist one consented, frequency-capped care suggestion in MAYA chat."""
+    client_id = int(client.get("id") or 0)
+    chat_id = int(client.get("telegram_chat_id") or 0)
+    phone = str(client.get("phone") or "")
+    if not client_id or not chat_id or not phone:
+        return False
+    if not database.has_marketing_consent(client_id):
+        return False
+    prefs = database.get_notify_prefs(client_id)
+    if prefs.get("marketing") is False or database.in_quiet_hours(prefs, datetime.now().hour):
+        return False
+    frequency_days = getattr(database, "MARKETING_FREQ_DAYS", {}).get(
+        prefs.get("marketing_freq"), 14,
+    )
+    if database.marketing_sent_within(client_id, max(7, int(frequency_days or 14))):
+        return False
+
+    actual_card = _yc_loyalty_card(phone)
+    balance = (
+        int(actual_card["balance"])
+        if actual_card is not None
+        else int(database.loyalty_balance(client_id))
+    )
+    affordable = affordable_care_services(balance)
+    if not affordable:
+        return False
+    names = [item["title"] for item in affordable[-3:]]
+    text = (
+        f"У вас {balance} баллов. Их уже хватит на уход: "
+        f"{', '.join(names)}. Можно добавить один уход к следующей записи 👇"
+    )
+    try:
+        import webhook_server
+
+        await webhook_server._send_client_push(
+            chat_id,
+            "Баллы можно потратить на уход",
+            f"Баланс {balance}: {', '.join(names)}",
+            url="/app/?chat=1&widget=loyalty",
+            tag=f"loyalty-care-{client_id}-{date.today().isoformat()}",
+            data={"event": "loyalty_care_offer", "affordable": affordable},
+            persist_in_chat=True,
+            chat_text=text,
+            chat_action={
+                "type": "open_loyalty",
+                "label": "Посмотреть баллы",
+                "screen": "loyalty",
+            },
+            chat_widget="loyalty",
+            chat_dedupe_key=f"loyalty-care:{client_id}:{date.today().isoformat()}",
+        )
+        database.set_marketing_last_sent(client_id)
+        return True
+    except Exception as exc:
+        logger.error("loyalty care offer client_id=%s: %s", client_id, exc)
+        return False
+
+
 # ─── Начисление ─────────────────────────────────────────────────────────
 
 async def run_earning_job(app: Application | None = None) -> dict:
@@ -241,7 +336,13 @@ async def run_earning_job(app: Application | None = None) -> dict:
     """
     today = date.today()
     cutoff = today - timedelta(days=90)
-    summary = {"clients": 0, "earned_points": 0, "skipped_sub": 0, "errors": 0}
+    summary = {
+        "clients": 0,
+        "earned_points": 0,
+        "care_offers": 0,
+        "skipped_sub": 0,
+        "errors": 0,
+    }
 
     for client in database.list_telegram_clients():
         try:
@@ -250,6 +351,7 @@ async def run_earning_job(app: Application | None = None) -> dict:
             if not phone:
                 continue
             summary["clients"] += 1
+            earned_for_client = 0
 
             bookings = _yc.get_client_bookings(phone) or []
             # Все активные/expired подписки клиента — для проверки покрытия
@@ -285,6 +387,11 @@ async def run_earning_job(app: Application | None = None) -> dict:
                     note=f"+{points} за визит {v_date.isoformat()} (сумма {amount} ₽)",
                 )
                 summary["earned_points"] += points
+                earned_for_client += points
+            if app is not None and earned_for_client > 0:
+                summary["care_offers"] += int(
+                    await _send_affordable_care_offer(client)
+                )
         except Exception as e:
             summary["errors"] += 1
             logger.error(f"loyalty earn for client_id={client.get('id')}: {e}")

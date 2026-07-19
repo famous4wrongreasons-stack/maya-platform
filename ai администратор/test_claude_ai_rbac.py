@@ -723,7 +723,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         )
         names = {tool["name"] for tool in body["tools"]}
 
-        self.assertEqual(names, {"get_services", "get_masters"})
+        self.assertEqual(names, {"get_services", "get_masters", "show_chat_widget"})
         self.assertNotIn("check_birthday_promo", names)
 
     def test_booking_client_request_keeps_booking_tools(self):

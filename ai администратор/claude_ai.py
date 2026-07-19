@@ -900,6 +900,32 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "show_chat_widget",
+        "description": (
+            "Показать клиенту уместную интерактивную карточку прямо в чате приложения. "
+            "Вызывай только когда карточка реально помогает выполнить текущий запрос, "
+            "а не на каждую реплику. book — начать запись; mybookings — увидеть, отменить "
+            "или перенести свои записи; loyalty — баланс и баллы; shop — товары, "
+            "сертификаты или абонементы; profile — профиль; history — история посещений; "
+            "referral — пригласить друга; notify — настройки уведомлений. На обычный "
+            "разговор, приветствие или уточняющий вопрос инструмент не вызывай."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "widget": {
+                    "type": "string",
+                    "enum": [
+                        "book", "mybookings", "loyalty", "shop",
+                        "profile", "history", "referral", "notify",
+                    ],
+                    "description": "Карточка, которая лучше всего помогает ответить на текущий запрос клиента.",
+                },
+            },
+            "required": ["widget"],
+        },
+    },
+    {
         "name": "salon_action",
         "description": (
             "ТОЛЬКО для владельца. Показать owner action-card с подтверждаемым действием "
@@ -1011,6 +1037,7 @@ _CLIENT_BOOKING_MANAGEMENT_TOOLS = {
 _CLIENT_SALES_TOOLS = {"start_gift_cert_purchase", "show_subscription_plans"}
 _CLIENT_REFERRAL_TOOLS = {"get_referral_link"}
 _CLIENT_PREFERENCE_TOOLS = {"remember_client_preference"}
+_CLIENT_WIDGET_TOOLS = {"show_chat_widget"}
 
 _CLIENT_BOOKING_CONTEXT_RE = re.compile(
     r"\b(запис|стриж|стрид|бород|брит|услуг|мастер|барбер|слот|свободн|\bокн|"
@@ -1068,7 +1095,9 @@ def _client_context_text(messages: list | None) -> str:
 def _client_relevant_tool_names(messages: list | None) -> set[str]:
     """Keep the client tool schema small while preserving the current flow."""
     text = _client_context_text(messages)
-    names: set[str] = set()
+    # The model must be able to select a widget for free-form language, not only
+    # for requests caught by the deterministic context regexes below.
+    names: set[str] = set(_CLIENT_WIDGET_TOOLS)
 
     if _CLIENT_BOOKING_CONTEXT_RE.search(text):
         names.update(_CLIENT_BOOKING_TOOLS)
@@ -1087,7 +1116,7 @@ def _client_relevant_tool_names(messages: list | None) -> set[str]:
 
     # Unknown/free-form questions can still ask what the salon offers or who
     # works here. These two schemas are compact and keep that path reliable.
-    if not names:
+    if names == _CLIENT_WIDGET_TOOLS:
         names.update({"get_services", "get_masters"})
     return names
 
@@ -1103,6 +1132,7 @@ STAFF_DISABLED_TOOLS = {
     "get_my_bookings", "remember_wanted_slot", "request_client_contact",
     "suggest_upsell", "start_gift_cert_purchase", "show_subscription_plans",
     "check_birthday_promo", "get_referral_link", "check_loyalty_balance",
+    "show_chat_widget",
 }
 
 _ROLE_TOOLS_CACHED = {}
@@ -2299,6 +2329,15 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     result = {"status": "ready", **payload}
                 else:
                     result = {"error": "Неизвестная задача."}
+        elif tool_name == "show_chat_widget":
+            from chat_widgets import normalize_chat_widget
+
+            widget = normalize_chat_widget(tool_input.get("widget"))
+            result = (
+                {"status": "ready", "widget": widget}
+                if widget
+                else {"status": "error", "message": "Неизвестная карточка."}
+            )
         elif tool_name == "barber_knowledge":
             # База знаний по технике — только сотрудникам (мастер/владелец).
             is_staff = bool(user_id and (database.get_master_by_chat_id(int(user_id))
@@ -3594,6 +3633,8 @@ def _client_terminal_action_text(
     if not gift_cert_action:
         return None
     kind = gift_cert_action.get("kind")
+    if kind == "widget":
+        return None
     if kind == "subscription":
         return "Показываю доступные абонементы."
     if kind == "contact":
@@ -3722,6 +3763,13 @@ def _run_tool_uses(
             data = json.loads(tool_result_str)
             if data.get("status") == "ready" and data.get("job"):
                 gift_cert_action = {**data, "kind": "run_job"}
+        if tool_use.name == "show_chat_widget":
+            data = json.loads(tool_result_str)
+            if data.get("status") == "ready" and data.get("widget"):
+                gift_cert_action = {
+                    "kind": "widget",
+                    "widget": data["widget"],
+                }
 
         tool_results.append({
             "type": "tool_result",

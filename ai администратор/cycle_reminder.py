@@ -496,6 +496,33 @@ async def run_cycle_reminder_job(app: Application) -> dict:
         text, kb = _build_message(c)
         try:
             await app.bot.send_message(c["chat_id"], text, reply_markup=kb)
+            try:
+                # Lazy import avoids a module cycle during bot startup. Chat history
+                # is persisted even when this client has no active Web Push endpoint.
+                import webhook_server
+
+                await webhook_server._send_client_push(
+                    c["chat_id"],
+                    "Пора заглянуть к мастеру",
+                    f"Ваш привычный срок визита подошёл. Записать к {_first_name(c['last_master'])}?",
+                    url="/app/?chat=1&widget=book",
+                    tag=f"cycle-reminder-{c['client_id']}-{c['predicted_visit']}",
+                    data={"event": "cycle_reminder", "staff_id": c.get("last_staff_id")},
+                    persist_in_chat=True,
+                    chat_text=text,
+                    chat_action={
+                        "type": "open_booking",
+                        "label": "Выбрать время",
+                        "screen": "book",
+                        "staff_id": c.get("last_staff_id"),
+                    },
+                    chat_widget="book",
+                    chat_dedupe_key=(
+                        f"cycle-reminder:{c['client_id']}:{c['predicted_visit']}"
+                    ),
+                )
+            except Exception as e:
+                logger.error("cycle reminder PWA chat %s: %s", c["client_id"], e)
             database.log_cycle_reminder(
                 client_id=c["client_id"],
                 avg_cycle_days=c["cycle_days"],

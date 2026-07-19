@@ -58,6 +58,8 @@ import reputation
 import subscriptions
 import web_auth
 import yukassa_api
+import client_record_actions
+from chat_widgets import normalize_chat_widget, widget_for_action, widget_from_signal
 from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
 from maya_roles import (
     allowed_surfaces_for_panel_role,
@@ -582,6 +584,7 @@ async def _send_client_push(chat_id, title: str, body: str,
                             persist_in_chat: bool = False,
                             chat_text: str = "",
                             chat_action: dict | None = None,
+                            chat_widget: str | None = None,
                             chat_link=None,
                             chat_mode: str = "client",
                             chat_dedupe_key: str = "") -> int:
@@ -597,6 +600,7 @@ async def _send_client_push(chat_id, title: str, body: str,
                 text_for_chat,
                 mode=chat_mode,
                 action=chat_action,
+                widget=chat_widget,
                 link=chat_link,
                 dedupe_key=chat_dedupe_key or tag or "",
             )
@@ -616,9 +620,13 @@ async def _send_client_push(chat_id, title: str, body: str,
     except Exception as e:
         logger.error(f"Web Push отключён: {e}")
         return 0
+    push_data = dict(data or {})
+    widget = normalize_chat_widget(chat_widget)
+    if widget:
+        push_data["widget"] = widget
     payload = _json.dumps({
         "title": title, "body": body, "url": url,
-        "tag": tag or f"client-{chat_id}", **(data or {}),
+        "tag": tag or f"client-{chat_id}", **push_data,
     }, ensure_ascii=False)
     sent = 0
     for row in rows:
@@ -730,6 +738,7 @@ async def _notify_client_record(record: dict, record_id: int, kind: str) -> None
                 "label": "Мои записи",
                 "screen": "cabinet",
             },
+            chat_widget="mybookings",
             chat_dedupe_key=f"client-record:{kind}:{record_id}",
         )
         if n:
@@ -6022,6 +6031,156 @@ def _authed_chat_id(request: web.Request, body: dict | None = None) -> int | Non
     return None
 
 
+def _client_record_response(payload: dict, status: int = 200) -> web.Response:
+    response = _cabinet_response(payload, status=status)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def _client_record_failure(error: client_record_actions.ClientRecordError) -> web.Response:
+    return _client_record_response({
+        "success": False,
+        "ok": False,
+        "error": error.code,
+        "code": error.code,
+        "message": error.message,
+    }, status=error.status)
+
+
+async def _client_record_request_context(
+    request: web.Request,
+) -> tuple[dict | None, dict | None, int | None, web.Response | None]:
+    try:
+        body = await request.json()
+    except Exception:
+        return None, None, None, _client_record_response({
+            "success": False, "error": "invalid_json", "code": "invalid_json",
+        }, status=400)
+    if not isinstance(body, dict):
+        return None, None, None, _client_record_response({
+            "success": False, "error": "invalid_json", "code": "invalid_json",
+        }, status=400)
+
+    chat_id = _authed_chat_id(request, body)
+    if not chat_id:
+        return body, None, None, _client_record_response({
+            "success": False, "error": "unauthorized", "code": "unauthorized",
+        }, status=401)
+    if not database.has_valid_consent_by_chat_id(int(chat_id)):
+        return body, None, None, _client_record_response({
+            "success": False, "error": "needs_consent", "code": "needs_consent",
+        }, status=403)
+
+    client = database.get_client(int(chat_id))
+    if not client:
+        return body, None, None, _client_record_response({
+            "success": False, "error": "client_not_found", "code": "client_not_found",
+        }, status=404)
+    phone = str(client.get("phone") or "").strip()
+    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return body, client, None, _client_record_response({
+            "success": False, "error": "phone_required", "code": "phone_required",
+        }, status=409)
+    try:
+        record_id = int(body.get("record_id") or 0)
+    except (TypeError, ValueError):
+        record_id = 0
+    if record_id <= 0:
+        return body, client, None, _client_record_response({
+            "success": False, "error": "not_found", "code": "not_found",
+            "message": "Запись не найдена.",
+        }, status=404)
+    return body, client, record_id, None
+
+
+async def client_cancel_record_handler(request: web.Request) -> web.Response:
+    """Cancel only the authenticated client's future YClients record."""
+    body, client, record_id, error_response = await _client_record_request_context(request)
+    if error_response is not None:
+        return error_response
+
+    marker_set = False
+
+    def _mark_authorized(rid: int) -> None:
+        nonlocal marker_set
+        database.mark_cancel_actor(rid, "client")
+        marker_set = True
+
+    try:
+        result = await asyncio.to_thread(
+            client_record_actions.cancel_for_client,
+            _yc,
+            int(record_id),
+            str(client.get("phone") or ""),
+            before_write=_mark_authorized,
+        )
+    except client_record_actions.ClientRecordError as exc:
+        if marker_set:
+            database.pop_recent_cancel_actor(int(record_id), max_age=3600)
+        return _client_record_failure(exc)
+    except Exception as exc:
+        if marker_set:
+            database.pop_recent_cancel_actor(int(record_id), max_age=3600)
+        logger.error("client cancel record_id=%s: %s", record_id, exc)
+        return _client_record_response({
+            "success": False,
+            "error": "yclients_unavailable",
+            "code": "yclients_unavailable",
+            "message": "Не удалось связаться с системой записи.",
+        }, status=502)
+    return _client_record_response({
+        "success": True,
+        "ok": True,
+        "record_id": result["record_id"],
+        "widget": "mybookings",
+    })
+
+
+async def client_reschedule_record_handler(request: web.Request) -> web.Response:
+    """Reschedule only the authenticated client's future record via PUT."""
+    body, client, record_id, error_response = await _client_record_request_context(request)
+    if error_response is not None:
+        return error_response
+
+    marker_set = False
+
+    def _mark_authorized(rid: int) -> None:
+        nonlocal marker_set
+        database.mark_reschedule_actor(rid, "client")
+        marker_set = True
+
+    try:
+        result = await asyncio.to_thread(
+            client_record_actions.reschedule_for_client,
+            _yc,
+            int(record_id),
+            str(client.get("phone") or ""),
+            body,
+            before_write=_mark_authorized,
+        )
+    except client_record_actions.ClientRecordError as exc:
+        if marker_set:
+            database.pop_recent_reschedule_actor(int(record_id), max_age=3600)
+        return _client_record_failure(exc)
+    except Exception as exc:
+        if marker_set:
+            database.pop_recent_reschedule_actor(int(record_id), max_age=3600)
+        logger.error("client reschedule record_id=%s: %s", record_id, exc)
+        return _client_record_response({
+            "success": False,
+            "error": "yclients_unavailable",
+            "code": "yclients_unavailable",
+            "message": "Не удалось связаться с системой записи.",
+        }, status=502)
+    return _client_record_response({
+        "success": True,
+        "ok": True,
+        "record_id": result["record_id"],
+        "datetime": result["datetime"],
+        "widget": "mybookings",
+    })
+
+
 async def booking_prefill_handler(request: web.Request) -> web.Response:
     """
     POST /api/booking/prefill — имя и телефон для финального шага онлайн-записи.
@@ -7858,11 +8017,21 @@ def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
                 msg["action"] = item.get("action")
             if isinstance(item.get("images"), list):
                 msg["images"] = item.get("images")
+            widget = normalize_chat_widget(item.get("widget"))
+            if widget:
+                msg["widget"] = widget
             messages.append(msg)
     return messages
 
 
-def _assistant_history_item(text: str, *, link=None, action=None, images=None) -> dict:
+def _assistant_history_item(
+    text: str,
+    *,
+    link=None,
+    action=None,
+    images=None,
+    widget: str | None = None,
+) -> dict:
     item = {"role": "assistant", "content": _plain_maya_text(text or "")}
     if link:
         item["link"] = link
@@ -7870,6 +8039,9 @@ def _assistant_history_item(text: str, *, link=None, action=None, images=None) -
         item["action"] = action
     if isinstance(images, list) and images:
         item["images"] = images
+    normalized_widget = normalize_chat_widget(widget)
+    if normalized_widget:
+        item["widget"] = normalized_widget
     return item
 
 
@@ -7879,6 +8051,7 @@ def _store_assistant_message_in_chat(
     *,
     mode: str = "client",
     action: dict | None = None,
+    widget: str | None = None,
     link=None,
     images: list | None = None,
     dedupe_key: str = "",
@@ -7904,7 +8077,13 @@ def _store_assistant_message_in_chat(
             for item in reversed(history[-8:]):
                 if isinstance(item, dict) and item.get("role") == "assistant" and item.get("dedupe_key") == want_key:
                     return False
-        item = _assistant_history_item(clean, link=link, action=action, images=images)
+        item = _assistant_history_item(
+            clean,
+            link=link,
+            action=action,
+            images=images,
+            widget=widget,
+        )
         if want_key:
             item["dedupe_key"] = want_key
         history.append(item)
@@ -8184,11 +8363,12 @@ async def chat_handler(request: web.Request) -> web.Response:
     if own_history_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append(_assistant_history_item(own_history_reply))
+        history.append(_assistant_history_item(own_history_reply, widget="history"))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": own_history_reply,
+            "widget": "history",
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -8279,14 +8459,18 @@ async def chat_handler(request: web.Request) -> web.Response:
     direct_shop = _direct_shop_action(message) if chat_mode == "client" else None
     if direct_shop:
         direct_text, direct_action = direct_shop
+        direct_widget = widget_for_action(direct_action) or "shop"
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append(_assistant_history_item(direct_text, action=direct_action))
+        history.append(_assistant_history_item(
+            direct_text, action=direct_action, widget=direct_widget,
+        ))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": direct_text,
             "action": direct_action,
+            "widget": direct_widget,
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -8299,9 +8483,12 @@ async def chat_handler(request: web.Request) -> web.Response:
         )
     if client_shortcut:
         direct_text, direct_action = client_shortcut
+        direct_widget = widget_for_action(direct_action)
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append(_assistant_history_item(direct_text, action=direct_action))
+        history.append(_assistant_history_item(
+            direct_text, action=direct_action, widget=direct_widget,
+        ))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
         out = {
@@ -8311,6 +8498,8 @@ async def chat_handler(request: web.Request) -> web.Response:
         }
         if direct_action:
             out["action"] = direct_action
+        if direct_widget:
+            out["widget"] = direct_widget
         if transcript:
             try:
                 import voice
@@ -8376,6 +8565,9 @@ async def chat_handler(request: web.Request) -> web.Response:
         }
         if fallback_action:
             payload["action"] = fallback_action
+            fallback_widget = widget_for_action(fallback_action)
+            if fallback_widget:
+                payload["widget"] = fallback_widget
         return _cabinet_response(payload)
 
     # Если ИИ готов оформить запись (request_booking) — клиент авторизован,
@@ -8394,8 +8586,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     # открывает нужный раздел приложения с оплатой картой.
     reply_link = None
     cert_action = None
+    chat_widget = widget_from_signal(gift_cert_action)
     if gift_cert_action:
-        if gift_cert_action.get("kind") == "subscription":
+        if gift_cert_action.get("kind") == "widget":
+            pass
+        elif gift_cert_action.get("kind") == "subscription":
             response_text = (
                 "Абонементы 🎟 Нажмите кнопку ниже — откроется раздел «Абонементы»: "
                 "выберите тариф и уровень (Старший / Топ) и оплатите картой. "
@@ -8432,9 +8627,17 @@ async def chat_handler(request: web.Request) -> web.Response:
             if amt in (2000, 3000, 5000):
                 cert_action["amount"] = amt
 
+    chat_widget = chat_widget or widget_for_action(cert_action)
+
     response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
     knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
-    history.append(_assistant_history_item(response_text, link=reply_link, action=cert_action, images=knowledge_images))
+    history.append(_assistant_history_item(
+        response_text,
+        link=reply_link,
+        action=cert_action,
+        images=knowledge_images,
+        widget=chat_widget,
+    ))
     conversations[history_key] = history
     save_conversations(conversations)
 
@@ -8466,6 +8669,8 @@ async def chat_handler(request: web.Request) -> web.Response:
         resp["link"] = reply_link
     if cert_action:
         resp["action"] = cert_action
+    if chat_widget:
+        resp["widget"] = chat_widget
     if knowledge_images:
         resp["images"] = knowledge_images
     if audio_reply_b64:
@@ -8530,7 +8735,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
       {"type":"delta","text":"..."}  — кусок текста ответа
       {"type":"reset"}               — стереть настримленное (была присказка перед
                                        вызовом инструмента, сейчас придёт сам ответ)
-      {"type":"done","reply":"...","action":{...}?,"contact_request":bool}
+      {"type":"done","reply":"...","widget":"book"?,"action":{...}?,"contact_request":bool}
                                      — финал: авторитетный текст + booking/cert-действия
       {"type":"error"}               — сбой; фронт делает фолбэк на /api/chat
 
@@ -8645,11 +8850,12 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     if own_history_reply:
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append(_assistant_history_item(own_history_reply))
+        history.append(_assistant_history_item(own_history_reply, widget="history"))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": own_history_reply,
+            "widget": "history",
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -8724,14 +8930,18 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     direct_shop = _direct_shop_action(message) if chat_mode == "client" else None
     if direct_shop:
         direct_text, direct_action = direct_shop
+        direct_widget = widget_for_action(direct_action) or "shop"
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append(_assistant_history_item(direct_text, action=direct_action))
+        history.append(_assistant_history_item(
+            direct_text, action=direct_action, widget=direct_widget,
+        ))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
         return _cabinet_response({
             "reply": direct_text,
             "action": direct_action,
+            "widget": direct_widget,
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -8744,9 +8954,12 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         )
     if client_shortcut:
         direct_text, direct_action = client_shortcut
+        direct_widget = widget_for_action(direct_action)
         safe_message = anonymizer.redact_pii(message)
         history.append({"role": "user", "content": safe_message})
-        history.append(_assistant_history_item(direct_text, action=direct_action))
+        history.append(_assistant_history_item(
+            direct_text, action=direct_action, widget=direct_widget,
+        ))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
         out = {
@@ -8756,6 +8969,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         }
         if direct_action:
             out["action"] = direct_action
+        if direct_widget:
+            out["widget"] = direct_widget
         if transcript and body.get("voice"):
             try:
                 import voice
@@ -9021,8 +9236,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                 response_text = booking_msg
 
     cert_action = fallback_action
+    chat_widget = widget_from_signal(gift_cert_action, cert_action)
     if gift_cert_action:
-        if gift_cert_action.get("kind") == "subscription":
+        if gift_cert_action.get("kind") == "widget":
+            pass
+        elif gift_cert_action.get("kind") == "subscription":
             response_text = (
                 "Абонементы 🎟 Нажмите кнопку ниже — откроется раздел «Абонементы»: "
                 "выберите тариф и уровень (Старший / Топ) и оплатите картой. "
@@ -9059,9 +9277,16 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             if amt in (2000, 3000, 5000):
                 cert_action["amount"] = amt
 
+    chat_widget = chat_widget or widget_for_action(cert_action)
+
     response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
     knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
-    history.append(_assistant_history_item(response_text, action=cert_action, images=knowledge_images))
+    history.append(_assistant_history_item(
+        response_text,
+        action=cert_action,
+        images=knowledge_images,
+        widget=chat_widget,
+    ))
     conversations[history_key] = history
     save_conversations(conversations)
 
@@ -9074,6 +9299,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     }
     if cert_action:
         done["action"] = cert_action
+    if chat_widget:
+        done["widget"] = chat_widget
     if knowledge_images:
         done["images"] = knowledge_images
     if tts_on:
@@ -11739,6 +11966,10 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/cabinet/link-phone", cabinet_options_handler)
     web_app.router.add_post("/api/booking/prefill", booking_prefill_handler)
     web_app.router.add_options("/api/booking/prefill", cabinet_options_handler)
+    web_app.router.add_post("/api/client/cancel-record", client_cancel_record_handler)
+    web_app.router.add_options("/api/client/cancel-record", cabinet_options_handler)
+    web_app.router.add_post("/api/client/reschedule-record", client_reschedule_record_handler)
+    web_app.router.add_options("/api/client/reschedule-record", cabinet_options_handler)
     web_app.router.add_post("/api/panel/team_chat/normalize_voice", team_chat_normalize_voice_handler)
     web_app.router.add_options("/api/panel/team_chat/normalize_voice", cabinet_options_handler)
     web_app.router.add_get("/api/auth/status", auth_status_handler)

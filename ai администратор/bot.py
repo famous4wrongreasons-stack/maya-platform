@@ -4260,6 +4260,7 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
         _schedule_reminder(context.application, chat_id, {
             "datetime": cr["datetime_str"],
             "record_id": result.get("record_id"),
+            "master_name": cr.get("staff_name") or "",
         })
         # Настроение визита (🔴 тишина / 🔵 общение) — финальный вопрос кнопками.
         # Только когда клиент записывает СЕБЯ (для другого человека выбор не его).
@@ -6049,7 +6050,14 @@ def _schedule_reminder(app: Application, user_id: int, booking_data: dict):
         scheduler.add_job(
             _send_reminder, "date",
             run_date=remind_at,
-            args=[app, user_id, visit_dt, _mins],
+            args=[
+                app,
+                user_id,
+                visit_dt,
+                _mins,
+                booking_data.get("record_id"),
+                booking_data.get("master_name") or "",
+            ],
             id=job_id, replace_existing=True,
         )
         logger.info(f"Напоминание запланировано: {remind_at} для user {user_id}")
@@ -6057,7 +6065,14 @@ def _schedule_reminder(app: Application, user_id: int, booking_data: dict):
         logger.error(f"Ошибка планирования напоминания: {e}")
 
 
-async def _send_reminder(app, user_id, visit_dt, lead_mins=REMINDER_MINUTES_BEFORE):
+async def _send_reminder(
+    app,
+    user_id,
+    visit_dt,
+    lead_mins=REMINDER_MINUTES_BEFORE,
+    record_id=None,
+    master_name="",
+):
     # Защита: клиент мог выключить напоминания уже ПОСЛЕ постановки job.
     try:
         if database.get_notify_prefs_by_chat_id(user_id).get("reminder") is False:
@@ -6076,18 +6091,40 @@ async def _send_reminder(app, user_id, visit_dt, lead_mins=REMINDER_MINUTES_BEFO
             _lead = f" — через {_m} мин"
     except Exception:
         pass
+    reminder_text = (
+        f"⏰ Напоминаем о записи{_lead}!\n\n"
+        f"📅 {visit_dt.strftime('%d.%m')} в {visit_dt.strftime('%H:%M')}\n"
+        f"Барбершоп «{BARBERSHOP_NAME}»\n\n"
+        f"Если нужно перенести — откройте ваши записи 👇"
+    )
     try:
         await app.bot.send_message(
             chat_id=user_id,
-            text=(
-                f"⏰ Напоминаем о записи{_lead}!\n\n"
-                f"📅 {visit_dt.strftime('%d.%m')} в {visit_dt.strftime('%H:%M')}\n"
-                f"Барбершоп «{BARBERSHOP_NAME}»\n\n"
-                f"Если нужно перенести — напишите, поможем 👌"
-            ),
+            text=reminder_text,
         )
     except Exception as e:
         logger.error(f"Ошибка отправки напоминания: {e}")
+    try:
+        master_suffix = f" у {master_name}" if master_name else ""
+        await webhook_server._send_client_push(
+            user_id,
+            "Напоминание о записи",
+            f"{visit_dt.strftime('%d.%m в %H:%M')}{master_suffix}",
+            url="/app/?chat=1&widget=mybookings",
+            tag=f"appointment-reminder-{record_id or user_id}",
+            data={"event": "appointment_reminder", "record_id": record_id},
+            persist_in_chat=True,
+            chat_text=reminder_text,
+            chat_action={
+                "type": "open_cabinet",
+                "label": "Мои записи",
+                "screen": "cabinet",
+            },
+            chat_widget="mybookings",
+            chat_dedupe_key=f"appointment-reminder:{record_id or visit_dt.isoformat()}",
+        )
+    except Exception as e:
+        logger.error(f"Ошибка PWA-напоминания: {e}")
 
 
 # ─── Запуск ───────────────────────────────────────────────────────────────

@@ -90,6 +90,7 @@ def _load_loyalty():
 
     fake_database = _FakeDatabase()
     modules = {
+        "requests": types.ModuleType("requests"),
         "telegram": fake_telegram,
         "telegram.error": fake_telegram_error,
         "telegram.ext": fake_telegram_ext,
@@ -177,6 +178,35 @@ class LoyaltyBackfillTests(unittest.TestCase):
         self.assertEqual(self.database.loyalty_balance(25), 2_133)
         self.assertEqual(len(self.database.transactions), 1)
         self.assertEqual(self.database.transactions[0]["type"], "yc_import")
+
+    def test_affordable_care_uses_current_yclients_titles_and_prices(self):
+        catalog = [
+            {"id": 1, "title": "Массаж", "price_min": 450, "price_max": 450},
+            {"id": 2, "title": "Патчи", "price_min": 100, "price_max": 100},
+            {"id": 3, "title": "Spa для лица", "price_min": 1200, "price_max": 1200},
+            {"id": 4, "title": "Консультация", "price_min": 0, "price_max": 0},
+        ]
+
+        affordable = self.loyalty.affordable_care_services(600, catalog)
+
+        self.assertEqual(
+            [(item["title"], item["price"]) for item in affordable],
+            [("Патчи", 100), ("Массаж", 450)],
+        )
+
+    def test_care_price_range_must_be_fully_covered(self):
+        catalog = [{
+            "id": 1,
+            "title": "Уход за кожей головы",
+            "price_min": 500,
+            "price_max": 900,
+        }]
+
+        self.assertEqual(self.loyalty.affordable_care_services(700, catalog), [])
+        self.assertEqual(
+            self.loyalty.affordable_care_services(900, catalog)[0]["price"],
+            900,
+        )
 
     def test_real_card_import_works_when_fallback_backfill_is_disabled(self):
         self.loyalty.BACKFILL_ENABLED = False

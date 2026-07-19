@@ -160,6 +160,31 @@ async def send_pending_review_requests(app: Application) -> dict:
                 )
             except Exception:
                 pass  # некритично, callback всё равно поймаем по prefix
+            try:
+                import webhook_server
+
+                await webhook_server._send_client_push(
+                    client["telegram_chat_id"],
+                    "Как прошёл визит?",
+                    "Поставьте оценку в MAYA — это поможет нам стать лучше.",
+                    url="/app/?chat=1&widget=history",
+                    tag=f"review-request-{review_id}",
+                    data={"event": "review_request", "review_id": review_id},
+                    persist_in_chat=True,
+                    chat_text=(
+                        "Спасибо за визит! Как всё прошло? Поставьте оценку — "
+                        "это поможет нам стать лучше."
+                    ),
+                    chat_action={
+                        "type": "review_prompt",
+                        "label": "Оценить визит",
+                        "review_id": review_id,
+                    },
+                    chat_widget="history",
+                    chat_dedupe_key=f"review-request:{review_id}",
+                )
+            except Exception as e:
+                logger.error("reviews: PWA chat review_id=%s: %s", review_id, e)
             database.mark_review_request_sent(req["id"])
             sent += 1
             logger.info(
