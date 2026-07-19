@@ -33,6 +33,7 @@ import os
 import re
 import sqlite3
 import time
+import uuid
 from datetime import datetime, date, timedelta
 from typing import Any
 from urllib.parse import parse_qsl
@@ -7998,6 +7999,68 @@ def _resolve_chat_tg_user(request: web.Request, body: dict) -> dict | None:
     return tg_user
 
 
+_CHAT_MESSAGE_ID_RE = re.compile(r"^msg_[0-9a-f]{32}$")
+
+
+def _new_chat_message_id() -> str:
+    return f"msg_{uuid.uuid4().hex}"
+
+
+def _is_chat_message_id(value: object) -> bool:
+    return bool(_CHAT_MESSAGE_ID_RE.fullmatch(str(value or "").strip()))
+
+
+def _ensure_chat_history_ids(history: list[dict] | None) -> tuple[list[dict], bool]:
+    """Migrate legacy chat items to persistent, unique server IDs."""
+    normalized = []
+    seen: set[str] = set()
+    changed = False
+    for raw_item in history or []:
+        if not isinstance(raw_item, dict):
+            normalized.append(raw_item)
+            continue
+        item = raw_item
+        message_id = str(item.get("id") or "").strip()
+        if not _is_chat_message_id(message_id) or message_id in seen:
+            item = dict(item)
+            message_id = _new_chat_message_id()
+            item["id"] = message_id
+            changed = True
+        seen.add(message_id)
+        normalized.append(item)
+    return normalized, changed
+
+
+def _user_history_item(text: str) -> dict:
+    return {
+        "id": _new_chat_message_id(),
+        "role": "user",
+        "content": _plain_maya_text(text or ""),
+    }
+
+
+def _with_chat_turn_ids(payload: dict, history: list[dict]) -> dict:
+    """Attach IDs of the latest persisted user/assistant turn to a response."""
+    result = dict(payload)
+    user_message_id = None
+    assistant_message_id = None
+    for item in reversed(history or []):
+        if not isinstance(item, dict) or not _is_chat_message_id(item.get("id")):
+            continue
+        if assistant_message_id is None and item.get("role") == "assistant":
+            assistant_message_id = item["id"]
+        elif user_message_id is None and item.get("role") == "user":
+            user_message_id = item["id"]
+        if user_message_id and assistant_message_id:
+            break
+    if assistant_message_id:
+        result["id"] = assistant_message_id
+        result["message_id"] = assistant_message_id
+    if user_message_id:
+        result["user_message_id"] = user_message_id
+    return result
+
+
 def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
     messages = []
     for i, item in enumerate(history or []):
@@ -8007,10 +8070,11 @@ def _chat_history_payload(history: list[dict], offset: int = 0) -> list[dict]:
         text = _plain_maya_text(_history_text(item))
         if not text:
             continue
+        message_id = item.get("id") if _is_chat_message_id(item.get("id")) else offset + i
         if role == "user":
-            messages.append({"id": offset + i, "role": "user", "text": text})
+            messages.append({"id": message_id, "role": "user", "text": text})
         elif role == "assistant":
-            msg = {"id": offset + i, "role": "bot", "text": text}
+            msg = {"id": message_id, "role": "bot", "text": text}
             if item.get("link"):
                 msg["link"] = item.get("link")
             if isinstance(item.get("action"), dict):
@@ -8032,7 +8096,11 @@ def _assistant_history_item(
     images=None,
     widget: str | None = None,
 ) -> dict:
-    item = {"role": "assistant", "content": _plain_maya_text(text or "")}
+    item = {
+        "id": _new_chat_message_id(),
+        "role": "assistant",
+        "content": _plain_maya_text(text or ""),
+    }
     if link:
         item["link"] = link
     if isinstance(action, dict):
@@ -8072,6 +8140,7 @@ def _store_assistant_message_in_chat(
         conversations = memory.load_conversations()
         history_key = _chat_history_key(cid, mode)
         history = list(conversations.get(history_key) or [])
+        history, _ = _ensure_chat_history_ids(history)
         want_key = str(dedupe_key or "").strip()[:160]
         if want_key:
             for item in reversed(history[-8:]):
@@ -8097,7 +8166,7 @@ def _store_assistant_message_in_chat(
 
 async def chat_history_handler(request: web.Request) -> web.Response:
     """POST /api/chat/history — return the saved MAYA chat history for the logged-in user."""
-    from memory import load_conversations
+    from memory import load_conversations, save_conversations
 
     try:
         body = await request.json()
@@ -8127,9 +8196,17 @@ async def chat_history_handler(request: web.Request) -> web.Response:
 
     chat_mode = _chat_effective_mode(body, chat_id)
     history_key = _chat_history_key(chat_id, chat_mode)
-    full_history = load_conversations().get(history_key) or []
-    offset = max(0, len(full_history) - 30)
-    messages = _chat_history_payload(full_history[-30:], offset=offset)
+    conversations = load_conversations()
+    full_history, migrated = _ensure_chat_history_ids(
+        list(conversations.get(history_key) or [])
+    )
+    if len(full_history) > 30:
+        full_history = full_history[-30:]
+        migrated = True
+    if migrated:
+        conversations[history_key] = full_history
+        save_conversations(conversations)
+    messages = _chat_history_payload(full_history)
 
     return _cabinet_response({"messages": messages})
 
@@ -8161,6 +8238,7 @@ async def chat_delete_handler(request: web.Request) -> web.Response:
     history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
     history = list(conversations.get(history_key) or [])
+    history, _ = _ensure_chat_history_ids(history)
     delete_mode = str(body.get("delete_mode") or body.get("delete") or "").strip().lower()
     if not delete_mode:
         legacy_mode = str(body.get("mode") or "").strip().lower()
@@ -8173,27 +8251,47 @@ async def chat_delete_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"ok": True, "deleted": "all", "messages": []})
 
     deleted = False
+    deleted_id = None
+    want_role = str(body.get("role") or "").strip().lower()
+    if want_role == "bot":
+        want_role = "assistant"
+    want_text = _plain_maya_text(str(body.get("text") or ""))
     raw_id = body.get("message_id", body.get("id"))
-    try:
-        msg_id = int(raw_id)
-    except Exception:
-        msg_id = None
-
-    if msg_id is not None and 0 <= msg_id < len(history):
-        del history[msg_id]
-        deleted = True
+    server_id = str(raw_id or "").strip()
+    if _is_chat_message_id(server_id):
+        for idx, item in enumerate(history):
+            if isinstance(item, dict) and item.get("id") == server_id:
+                deleted_id = server_id
+                del history[idx]
+                deleted = True
+                break
+    else:
+        try:
+            legacy_index = int(raw_id)
+        except Exception:
+            legacy_index = None
+        if legacy_index is not None and 0 <= legacy_index < len(history):
+            item = history[legacy_index]
+            role_matches = not want_role or (
+                isinstance(item, dict) and item.get("role") == want_role
+            )
+            text_matches = not want_text or (
+                isinstance(item, dict)
+                and _plain_maya_text(_history_text(item)) == want_text
+            )
+            if role_matches and text_matches:
+                deleted_id = item.get("id") if isinstance(item, dict) else None
+                del history[legacy_index]
+                deleted = True
 
     if not deleted:
-        want_role = str(body.get("role") or "").strip().lower()
-        if want_role == "bot":
-            want_role = "assistant"
-        want_text = _plain_maya_text(str(body.get("text") or ""))
         if want_role in ("user", "assistant") and want_text:
             for idx in range(len(history) - 1, -1, -1):
                 item = history[idx]
                 if not isinstance(item, dict) or item.get("role") != want_role:
                     continue
                 if _plain_maya_text(_history_text(item)) == want_text:
+                    deleted_id = item.get("id")
                     del history[idx]
                     deleted = True
                     break
@@ -8204,7 +8302,12 @@ async def chat_delete_handler(request: web.Request) -> web.Response:
         conversations.pop(history_key, None)
     save_conversations(conversations)
     messages = _chat_history_payload(conversations.get(history_key) or [])
-    return _cabinet_response({"ok": True, "deleted": bool(deleted), "messages": messages})
+    return _cabinet_response({
+        "ok": True,
+        "deleted": bool(deleted),
+        "deleted_id": deleted_id,
+        "messages": messages,
+    })
 
 
 async def chat_handler(request: web.Request) -> web.Response:
@@ -8329,18 +8432,29 @@ async def chat_handler(request: web.Request) -> web.Response:
 
     history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    history = conversations.get(history_key) or []
+    history, migrated = _ensure_chat_history_ids(
+        list(conversations.get(history_key) or [])
+    )
+    if len(history) > 30:
+        history = history[-30:]
+        migrated = True
+    if migrated:
+        conversations[history_key] = history
+        save_conversations(conversations)
+
+    def _saved_chat_response(payload: dict) -> web.Response:
+        return _cabinet_response(_with_chat_turn_ids(payload, history))
 
     founder_permission_reply = _founder_permission_reply(
         chat_id, message, mode=chat_mode,
     )
     if founder_permission_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_permission_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": founder_permission_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8349,11 +8463,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
     if founder_learning_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_learning_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": founder_learning_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8362,11 +8476,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     own_history_reply = await _own_visit_history_reply(chat_id, message)
     if own_history_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(own_history_reply, widget="history"))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": own_history_reply,
             "widget": "history",
             "contact_request": False,
@@ -8376,11 +8490,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(staff_booking_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": staff_booking_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8389,11 +8503,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
     if client_business_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(client_business_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": client_business_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8402,11 +8516,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
     if owner_daily_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_daily_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": owner_daily_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8415,11 +8529,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
     if owner_profit_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_profit_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": owner_profit_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8430,11 +8544,11 @@ async def chat_handler(request: web.Request) -> web.Response:
     )
     if verified_analytics_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(verified_analytics_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": verified_analytics_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8461,13 +8575,13 @@ async def chat_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = direct_shop
         direct_widget = widget_for_action(direct_action) or "shop"
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": direct_text,
             "action": direct_action,
             "widget": direct_widget,
@@ -8485,7 +8599,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = client_shortcut
         direct_widget = widget_for_action(direct_action)
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
@@ -8509,16 +8623,16 @@ async def chat_handler(request: web.Request) -> web.Response:
                     out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
             except Exception as e:
                 logger.error(f"chat_handler shortcut tts: {e}")
-        return _cabinet_response(out)
+        return _saved_chat_response(out)
 
     deterministic_reply = _deterministic_upsell_reply(message, history)
     if deterministic_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(deterministic_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": deterministic_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8528,7 +8642,7 @@ async def chat_handler(request: web.Request) -> web.Response:
     # 152-ФЗ: обезличиваем сообщение клиента ДО отправки в LLM и ДО сохранения —
     # так же, как в Telegram-боте (bot.py: anonymizer.redact_pii). Веб-чат раньше слал сырьё.
     safe_message = anonymizer.redact_pii(message)
-    history.append({"role": "user", "content": safe_message})
+    history.append(_user_history_item(safe_message))
     if len(history) > 30:
         history = history[-30:]
 
@@ -8675,7 +8789,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         resp["images"] = knowledge_images
     if audio_reply_b64:
         resp["audio_reply"] = audio_reply_b64        # mp3 base64 — приложение проигрывает
-    return _cabinet_response(resp)
+    return _cabinet_response(_with_chat_turn_ids(resp, history))
 
 
 # Стиль для озвучки: тот же мозг/знания, но подача под голос (как в /api/chat).
@@ -8816,18 +8930,29 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    history = conversations.get(history_key) or []
+    history, migrated = _ensure_chat_history_ids(
+        list(conversations.get(history_key) or [])
+    )
+    if len(history) > 30:
+        history = history[-30:]
+        migrated = True
+    if migrated:
+        conversations[history_key] = history
+        save_conversations(conversations)
+
+    def _saved_chat_response(payload: dict) -> web.Response:
+        return _cabinet_response(_with_chat_turn_ids(payload, history))
 
     founder_permission_reply = _founder_permission_reply(
         chat_id, message, mode=chat_mode,
     )
     if founder_permission_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_permission_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": founder_permission_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8836,11 +8961,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     founder_learning_reply = _founder_learning_reply(chat_id, message, mode=chat_mode)
     if founder_learning_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_learning_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": founder_learning_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8849,11 +8974,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     own_history_reply = await _own_visit_history_reply(chat_id, message)
     if own_history_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(own_history_reply, widget="history"))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": own_history_reply,
             "widget": "history",
             "contact_request": False,
@@ -8863,11 +8988,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     staff_booking_reply = _staff_booking_scope_reply(message) if chat_mode == "staff" else None
     if staff_booking_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(staff_booking_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": staff_booking_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8876,11 +9001,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     client_business_reply = _client_business_scope_reply(message) if chat_mode == "client" else None
     if client_business_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(client_business_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": client_business_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8889,11 +9014,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     owner_daily_reply = _owner_daily_briefing_reply(chat_id, message, mode=chat_mode)
     if owner_daily_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_daily_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": owner_daily_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8902,11 +9027,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     owner_profit_reply = _owner_master_profit_reply(chat_id, message, mode=chat_mode)
     if owner_profit_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_profit_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": owner_profit_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8917,11 +9042,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     )
     if verified_analytics_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(verified_analytics_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": verified_analytics_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8932,13 +9057,13 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = direct_shop
         direct_widget = widget_for_action(direct_action) or "shop"
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": direct_text,
             "action": direct_action,
             "widget": direct_widget,
@@ -8956,7 +9081,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         direct_text, direct_action = client_shortcut
         direct_widget = widget_for_action(direct_action)
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
@@ -8980,16 +9105,16 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
                     out["audio_reply"] = _b64.b64encode(_audio).decode("ascii")
             except Exception as e:
                 logger.error(f"chat_stream shortcut tts: {e}")
-        return _cabinet_response(out)
+        return _saved_chat_response(out)
 
     deterministic_reply = _deterministic_upsell_reply(message, history)
     if deterministic_reply:
         safe_message = anonymizer.redact_pii(message)
-        history.append({"role": "user", "content": safe_message})
+        history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(deterministic_reply))
         conversations[history_key] = history[-30:]
         save_conversations(conversations)
-        return _cabinet_response({
+        return _saved_chat_response({
             "reply": deterministic_reply,
             "contact_request": False,
             "transcript": transcript or "",
@@ -8998,7 +9123,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     # 152-ФЗ: обезличиваем сообщение и в СТРИМ-пути тоже — фронт шлёт чат сюда
     # ПЕРВЫМ (фолбэк на /api/chat). Тот же redact_pii, что в не-стрим chat_handler.
     safe_message = anonymizer.redact_pii(message)
-    history.append({"role": "user", "content": safe_message})
+    history.append(_user_history_item(safe_message))
     if len(history) > 30:
         history = history[-30:]
 
@@ -9291,12 +9416,12 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     save_conversations(conversations)
 
     display_text = re.sub(r"(?<=\d)\s(?=[\d₽])", " ", response_text)
-    done = {
+    done = _with_chat_turn_ids({
         "type": "done",
         "reply": display_text,
         "contact_request": bool(contact_request),
         "transcript": transcript or "",
-    }
+    }, history)
     if cert_action:
         done["action"] = cert_action
     if chat_widget:
@@ -10402,7 +10527,8 @@ async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
         conversations = memory.load_conversations()
         for owner_id in owner_ids:
             history = list(conversations.get(owner_id) or [])
-            history.append({"role": "assistant", "content": alert["text"]})
+            history, _ = _ensure_chat_history_ids(history)
+            history.append(_assistant_history_item(alert["text"]))
             conversations[owner_id] = history[-30:]
         memory.save_conversations(conversations)
         delivered = True
