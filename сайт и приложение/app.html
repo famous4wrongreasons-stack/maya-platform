@@ -502,8 +502,9 @@ window.APP_DATA = {
     var priv = (h === 'localhost' || h === '127.0.0.1' || h === '::1' || /\.local$/.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h));
     var staging = /nip\.io$/i.test(h);
     if (!isNative && !priv && !staging) return;
-    var API = 'https://api.111.88.148.206.nip.io/api', SLUG = 'demo-business';
+    var API = 'https://api.111.88.148.206.nip.io/api', SLUG = 'muzhskaya-estetika';
     window.__ME_TENANT_BOOT = Object.freeze({ enabled: true, api: API, slug: SLUG });
+    if (SLUG !== 'demo-business') return; // живой тенант — обычный логин, demo-автогость только для demo-business
     var a = API.toLowerCase().replace(/\/+$/, ''), sl = SLUG.toLowerCase(), str = a + '|' + sl, hh = 5381;
     for (var i = 0; i < str.length; i++) hh = (hh * 33 + str.charCodeAt(i)) | 0;
     var ns = (hh >>> 0).toString(36) + '_' + sl.replace(/[^a-z0-9-]/g, '').slice(0, 24);
