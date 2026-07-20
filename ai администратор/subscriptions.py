@@ -466,7 +466,7 @@ def build_my_subscription_card(client_id: int) -> tuple[str, InlineKeyboardMarku
         return text, None
     plan = get_plan(active["plan_code"])
     if not plan:
-        return "Не нашёл план — позвоните: 8-962-447-67-47", None
+        return "Не нашла план — позвоните: 8-962-447-67-47", None
 
     expires = datetime.fromisoformat(active["expires_at"]).date()
     used = active.get("visits_used", 0)

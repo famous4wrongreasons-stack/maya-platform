@@ -690,7 +690,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             welcome = (
                 f"Привет, {user.first_name or 'друг'}! 👋\n"
-                f"Не нашёл такого реферального кода — но это не страшно, "
+                f"Не нашла такого реферального кода — но это не страшно, "
                 f"помогу записаться. Жми «✂️ Записаться»."
             )
         await update.message.reply_text(
@@ -737,7 +737,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if is_returning:
         text = (
             f"С возвращением, {user.first_name or 'друг'}! 👋\n"
-            "Рад снова вас видеть. Чем помочь?"
+            "Рада снова вас видеть. Чем помочь?"
         )
     else:
         text = (
@@ -2143,7 +2143,7 @@ async def cmd_client(update: Update, context: ContextTypes.DEFAULT_TYPE):
     matches = await asyncio.to_thread(yc.search_clients, q, 8)
     if not matches:
         await update.message.reply_text(
-            "В YClients не нашёл клиента по «" + q + "» — скорее всего новенький "
+            "В YClients не нашла клиента по «" + q + "» — скорее всего новенький "
             "(истории визитов нет)."
         )
         return
@@ -2360,7 +2360,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if client_row:
             database.log_reactivation(client_row["id"], "declined")
         await query.edit_message_text(
-            "Понял 👌 Не буду беспокоить. Если что — всегда можно записаться "
+            "Поняла 👌 Не буду беспокоить. Если что — всегда можно записаться "
             "через /start или кнопку «✂️ Записаться».",
         )
         return
@@ -2453,7 +2453,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             logger.error(f"Ошибка AI на cancel_confirm: {e}")
             response_text = "Не получилось проверить записи. Позвоните: 8-962-447-67-47"
-        response_text = response_text or "Не нашёл активных записей."
+        response_text = response_text or "Не нашла активных записей."
         conversations[chat_id].append({"role": "assistant", "content": response_text})
         save_conversations(conversations)
         await context.bot.send_message(chat_id, response_text, reply_markup=MAIN_KEYBOARD)
@@ -2477,7 +2477,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             record_id = int(data[len("cancel_rec_yes_"):])
         except ValueError:
-            await query.edit_message_text("Не разобрал id записи.")
+            await query.edit_message_text("Не разобрала id записи.")
             return
         await _handle_cancel_record_confirm(context, query, record_id)
         return
@@ -2494,7 +2494,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             record_id = int(data[len("cancel_rec_"):])
         except ValueError:
-            await query.edit_message_text("Не разобрал id записи.")
+            await query.edit_message_text("Не разобрала id записи.")
             return
         await _handle_cancel_record_request(context, query, record_id)
         return
@@ -2520,7 +2520,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             plan_code, tier = rest.rsplit("_", 1)
         except ValueError:
-            await query.edit_message_text("Не разобрал тариф. Откройте «🎟 Абонементы» заново.")
+            await query.edit_message_text("Не разобрала тариф. Откройте «🎟 Абонементы» заново.")
             return
         if tier not in ("senior", "top"):
             await query.edit_message_text("Неизвестный уровень.")
@@ -2936,7 +2936,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = await transcribe_voice(update, context)
     if not text:
         await update.message.reply_text(
-            "Не расслышал 😅 Попробуйте ещё раз или напишите текстом",
+            "Не расслышала 😅 Попробуйте ещё раз или напишите текстом",
             reply_markup=MAIN_KEYBOARD,
         )
         return
@@ -3039,7 +3039,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if bf and bf.get("points"):
         await update.message.reply_text(
-            f"🎁 Нашёл тебя! Начислили *{bf['points']} welcome-баллов* "
+            f"🎁 Нашла тебя! Начислили *{bf['points']} welcome-баллов* "
             f"за историю визитов (5% от {bf['sold_amount']} ₽).",
             parse_mode="Markdown",
             reply_markup=_keyboard_for(chat_id),
@@ -3283,7 +3283,7 @@ async def _handle_admin_bind_request(
     name_token = _extract_master_name_token(text)
     if not name_token:
         await update.message.reply_text(
-            "Я понял, что нужен код доступа для мастера, но не разобрал имя. "
+            "Я поняла, что нужен код доступа для мастера, но не разобрала имя. "
             "Напиши, например: «выдай новый код мастеру Алексею».",
         )
         return True
@@ -3300,7 +3300,7 @@ async def _handle_admin_bind_request(
     if not matches:
         names = ", ".join(sorted({(m.get("name") or "").split()[0] for m in (masters or []) if m.get("name")}))
         await update.message.reply_text(
-            f"Не нашёл мастера «{name_token}». Есть такие: {names}.\n"
+            f"Не нашла мастера «{name_token}». Есть такие: {names}.\n"
             f"Напиши имя точнее.",
         )
         return True
@@ -3773,7 +3773,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
             conversations[chat_id].append({"role": "user", "content": text})
             conversations[chat_id].append({
                 "role": "assistant",
-                "content": f"Уточнил: сертификат на {amount} ₽. Показал клиенту кнопки выбора способа покупки.",
+                "content": f"Уточнила: сертификат на {amount} ₽. Показала клиенту кнопки выбора способа покупки.",
             })
             conversations[chat_id] = conversations[chat_id][-30:]
             save_conversations(conversations)
@@ -3953,7 +3953,7 @@ async def _request_contact_share(context: ContextTypes.DEFAULT_TYPE, chat_id: in
     )
     await context.bot.send_message(
         chat_id,
-        "Чтобы я тебя узнал и нашёл всё по твоей истории — поделись контактом "
+        "Чтобы я тебя узнала и нашла всё по твоей истории — поделись контактом "
         "кнопкой ниже 👇\n\n_Имя и номер придут через Telegram, в защищённом виде. "
         "Звонить администратору не нужно._",
         parse_mode="Markdown",
@@ -4214,7 +4214,7 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
 
         await context.bot.send_message(
             chat_id,
-            f"Готово! Записал вас:\n\n"
+            f"Готово! Записала вас:\n\n"
             f"✂️ {', '.join(cr['service_names'])}\n"
             f"💈 {cr['staff_name']}\n"
             f"📅 {dt_human}\n\n"
@@ -4678,7 +4678,7 @@ async def _show_my_bookings(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     client_row = database.get_client(chat_id)
     if not client_row or not client_row.get("phone"):
         await update.message.reply_text(
-            "Записей не нашёл. Если ты записывался по телефону или на сайте — "
+            "Записей не нашла. Если ты записывался по телефону или на сайте — "
             "позвони: 8-962-447-67-47",
             reply_markup=MAIN_KEYBOARD,
         )
@@ -4940,7 +4940,7 @@ async def _handle_freed_slot_decline(context: ContextTypes.DEFAULT_TYPE, query):
             slot_datetime="", action="declined",
         )
     await query.edit_message_text(
-        "Понял 👌 Не буду беспокоить. Когда захочешь — кнопка «✂️ Записаться» всегда под рукой."
+        "Поняла 👌 Не буду беспокоить. Когда захочешь — кнопка «✂️ Записаться» всегда под рукой."
     )
 
 
@@ -5237,7 +5237,7 @@ async def _cmd_cashier_toggle(update: Update, context: ContextTypes.DEFAULT_TYPE
     master = database.find_master_by_partial_name(query)
     if not master:
         await update.message.reply_text(
-            f"Не нашёл мастера по запросу «{query}» либо нашлось больше одного. "
+            f"Не нашла мастера по запросу «{query}» либо нашлось больше одного. "
             f"Уточни имя точнее. Список мастеров можно посмотреть: `/cashiers`",
             parse_mode="Markdown",
         )
@@ -5391,7 +5391,7 @@ async def cmd_stats_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
             period_label = f"за последние {days} дн."
         except ValueError:
             await update.message.reply_text(
-                "Не понял число дней. Пример: `/stats_ai 30`",
+                "Не поняла число дней. Пример: `/stats_ai 30`",
                 parse_mode="Markdown",
             )
             return
@@ -6519,7 +6519,7 @@ async def _save_anton_expenses(update: Update, text: str) -> bool:
     items = await asyncio.to_thread(_parse_anton_expenses, text)
     if not items:
         await update.message.reply_text(
-            "Не разобрал суммы 🤔 Напишите списком, например:\n"
+            "Не разобрала суммы 🤔 Напишите списком, например:\n"
             "• кофе — 500\n• уборщица — 2000\n• касс. лента и средства — 800"
         )
         return False
@@ -6533,7 +6533,7 @@ async def _save_anton_expenses(update: Update, text: str) -> bool:
             logger.error(f"add_salon_expense: {e}")
     lines = "\n".join(f"• {it['item']} — {_fmt_rub_spaces(it['amount'])} ₽" for it in items)
     await update.message.reply_text(
-        f"Записал расходы за сегодня ✓\n{lines}\nИтого: {_fmt_rub_spaces(total)} ₽"
+        f"Записала расходы за сегодня ✓\n{lines}\nИтого: {_fmt_rub_spaces(total)} ₽"
         "\n\nОни уже в отчёте владельца. Если ошибся — пришли /rashod и список заново (перезапишу день)."
     )
     return True
@@ -6592,7 +6592,7 @@ async def cmd_kassa(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     fmt = lambda n: f"{n:,}".replace(",", " ")
     await update.message.reply_text(
-        f"Записал кассу за сегодня:\n• Всего налички в кассе: {fmt(total_till)} ₽\n"
+        f"Записала кассу за сегодня:\n• Всего налички в кассе: {fmt(total_till)} ₽\n"
         f"• Наличкой за день: {fmt(day_cash)} ₽\n"
         "Это уйдёт в отчёт владельцу со сверкой. Ошибся — пришли /kassa заново (перезапишу день)."
     )

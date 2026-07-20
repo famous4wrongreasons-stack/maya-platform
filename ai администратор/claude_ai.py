@@ -14,6 +14,7 @@ import ai_billing
 import database
 import config as _cfg
 from identity_utils import resolve_ai_role
+from maya_identity import enforce_maya_feminine
 from maya_roles import (
     ROLE_CLIENT,
     ROLE_FOUNDER,
@@ -2513,7 +2514,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         "(«люблю фейд», «не люблю болтать в кресле», «кофе без сахара», «стригусь "
         "раз в 3 недели», «чувствительная кожа») — тихо вызови инструмент "
         "remember_client_preference с короткой формулировкой (без имени/телефона). "
-        "Не объявляй «я записал в базу» — просто учитывай это дальше. Так мастер "
+        "Не объявляй «я записала в базу» — просто учитывай это дальше. Так мастер "
         "получит готовое досье, а клиент почувствует, что его помнят."
     )
 
@@ -3613,7 +3614,7 @@ def _plain_chat_text(text: str) -> str:
     text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
     text = re.sub(r"__([^_]+)__", r"\1", text)
     text = re.sub(r"`([^`]+)`", r"\1", text)
-    return text
+    return enforce_maya_feminine(text)
 
 
 def _client_terminal_action_text(

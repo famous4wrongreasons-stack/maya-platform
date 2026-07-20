@@ -72,6 +72,7 @@ from maya_roles import (
     default_brain_profile,
     surface_brain_profiles,
 )
+from maya_identity import enforce_maya_feminine
 from config import WEBHOOK_SECRET, WEBHOOK_PORT, TELEGRAM_TOKEN
 from voice_guard import CLARIFY_REPEAT_TEXT, should_clarify_transcript
 from yclients import YClientsAPI
@@ -3468,6 +3469,207 @@ _PANEL_JOBS = {
 }
 
 
+_OWNER_CLIENT_MESSAGE_JOBS = {"reactivation", "birthday", "cycle", "reviews"}
+_OWNER_JOB_APPROVAL_TTL_SECONDS = 15 * 60
+_OWNER_JOB_CONFIRM_RE = re.compile(
+    r"^\s*(?:я\s+)?(?:да|давай|подтверждаю|согласен|согласна|ок|окей|верно|"
+    r"всё\s+верно|все\s+верно|можно|запускай|запусти|отправляй|отправь|делай|сделай|"
+    r"выполняй|начинай|погнали)"
+    r"(?:[\s,]+(?:да|давай|подтверждаю|запускай|запусти|отправляй|отправь|делай|сделай|"
+    r"выполняй|начинай|погнали|"
+    r"рассылку|сообщения|клиентам|это|её|ее|всё|все|верно|можно))*[.!?]?\s*$",
+    re.IGNORECASE,
+)
+_OWNER_JOB_CANCEL_RE = re.compile(
+    r"^\s*(?:нет|стоп|отмена|отмени|не\s+надо|пока\s+не\s+надо|"
+    r"не\s+запускай|не\s+отправляй|отложи|позже)[.!?]?\s*$",
+    re.IGNORECASE,
+)
+_OWNER_JOB_STATUS_RE = re.compile(
+    r"(?:что\s+с\s+рассылк|статус\w*\s+рассылк|"
+    r"сколько\s+(?:ушло|отправлено)|рассылк\w*\s+(?:ушл|отправил|сработал)|"
+    r"почему\s+рассылк\w*\s+не\s+(?:ушл|отправил|сработал))",
+    re.IGNORECASE,
+)
+
+
+def _owner_pending_job_key(chat_id: int) -> str:
+    return f"owner_chat_pending_job:{int(chat_id)}"
+
+
+def _clear_pending_owner_job(chat_id: int) -> None:
+    try:
+        database.set_setting(_owner_pending_job_key(chat_id), "")
+    except Exception:
+        pass
+
+
+def _remember_pending_owner_job(chat_id: int, job: str) -> None:
+    if job not in _PANEL_JOBS:
+        return
+    try:
+        database.set_setting(_owner_pending_job_key(chat_id), _json.dumps({
+            "job": job,
+            "created_at": time.time(),
+        }))
+    except Exception:
+        pass
+
+
+def _pending_owner_job_decision(chat_id: int, message: str, mode: str) -> tuple[str | None, str | None]:
+    """Resolve a short natural reply only against a recent server-side action card."""
+    if mode != "staff":
+        return None, None
+    is_confirm = bool(_OWNER_JOB_CONFIRM_RE.fullmatch(message or ""))
+    is_cancel = bool(_OWNER_JOB_CANCEL_RE.fullmatch(message or ""))
+    if not is_confirm and not is_cancel:
+        return None, None
+    try:
+        payload = _json.loads(database.get_setting(_owner_pending_job_key(chat_id)) or "{}")
+    except Exception:
+        payload = {}
+    job = str(payload.get("job") or "").strip().lower()
+    try:
+        age = time.time() - float(payload.get("created_at") or 0)
+    except (TypeError, ValueError):
+        age = _OWNER_JOB_APPROVAL_TTL_SECONDS + 1
+    if job not in _PANEL_JOBS or age < 0 or age > _OWNER_JOB_APPROVAL_TTL_SECONDS:
+        _clear_pending_owner_job(chat_id)
+        return None, None
+    _clear_pending_owner_job(chat_id)
+    return ("confirm" if is_confirm else "cancel"), job
+
+
+def _known_owner_job_audience(job: str) -> int | None:
+    """Return a recent authoritative audience count without scanning or sending."""
+    try:
+        if job == "cycle":
+            snapshot = cycle_reminder.load_candidate_snapshot() or {}
+            generated = str(snapshot.get("generated_at") or "")
+            generated_at = datetime.fromisoformat(generated[:19])
+            if datetime.now() - generated_at > timedelta(hours=2):
+                return None
+            summary = snapshot.get("summary") or {}
+            return max(0, int(summary.get("pending") or 0))
+        if job == "reactivation":
+            raw = database.get_setting("reactivation_last")
+            payload = _json.loads(raw) if raw else {}
+            if str(payload.get("at") or "") != date.today().isoformat():
+                return None
+            return max(0, int(payload.get("count") or 0))
+    except Exception as exc:
+        logger.warning("owner job audience %s: %s", job, exc)
+    return None
+
+
+def _owner_job_no_audience_reply() -> str:
+    return (
+        "Проверила актуальную аудиторию: сейчас нет клиентов, которые одновременно "
+        "подходят под условия возврата и разрешили маркетинговые сообщения. "
+        "Поэтому никому ничего не отправила."
+    )
+
+
+def _owner_job_action_card(signal: dict, chat_id: int) -> tuple[dict | None, str | None]:
+    job = str((signal or {}).get("job") or "").strip().lower()
+    if job not in _PANEL_JOBS:
+        return None, "Не нашла такую задачу."
+    if job in ("cycle", "reactivation") and _known_owner_job_audience(job) == 0:
+        _clear_pending_owner_job(chat_id)
+        return None, _owner_job_no_audience_reply()
+    action = {
+        "type": "run_job",
+        "job": job,
+        "label": signal.get("label") or "Запустить рассылку",
+        "confirm": "__runjob:" + job,
+    }
+    for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
+        if signal.get(key) is not None:
+            action[key] = signal.get(key)
+    _remember_pending_owner_job(chat_id, job)
+    return action, None
+
+
+def _owner_job_result_reply(job: str, label: str, summary: dict | None) -> str:
+    summary = summary if isinstance(summary, dict) else {}
+    sent_raw = summary.get("sent")
+    candidates_raw = summary.get("candidates")
+    try:
+        sent = int(sent_raw) if sent_raw is not None else None
+    except (TypeError, ValueError):
+        sent = None
+    try:
+        candidates = int(candidates_raw) if candidates_raw is not None else None
+    except (TypeError, ValueError):
+        candidates = None
+    if job in _OWNER_CLIENT_MESSAGE_JOBS and candidates == 0:
+        return _owner_job_no_audience_reply()
+    if sent is not None and sent > 0:
+        return f"Готово. Отправила сообщения: {sent}."
+    if job in _OWNER_CLIENT_MESSAGE_JOBS and sent == 0:
+        skipped = int(summary.get("skipped") or 0)
+        blocked = int(summary.get("blocked") or 0)
+        errors = int(summary.get("errors") or 0)
+        details = []
+        if skipped:
+            details.append(f"пропущено по настройкам или тихим часам: {skipped}")
+        if blocked:
+            details.append(f"недоступных адресатов: {blocked}")
+        if errors:
+            details.append(f"ошибок доставки: {errors}")
+        suffix = " " + "; ".join(details) + "." if details else ""
+        return f"Проверила аудиторию, но ни одного сообщения не отправила.{suffix}"
+    if job in _OWNER_CLIENT_MESSAGE_JOBS:
+        return (
+            "Задача завершилась, но сервер не вернул подтверждённое число отправок. "
+            "Не буду утверждать, что сообщения доставлены; проверьте журнал действий."
+        )
+    return f"Готово. Выполнила «{label}»."
+
+
+def _owner_job_status_reply(chat_id: int, message: str, mode: str) -> str | None:
+    if mode != "staff" or not _OWNER_JOB_STATUS_RE.search(message or ""):
+        return None
+    if (_panel_resolve_role(chat_id) or {}).get("role") != "owner":
+        return None
+    actions = database.list_owner_actions(limit=20) or []
+    action = next(
+        (row for row in actions if str(row.get("job") or "") in _OWNER_CLIENT_MESSAGE_JOBS),
+        None,
+    )
+    if not action:
+        return "В журнале пока нет запущенных клиентских рассылок."
+    status = str(action.get("status") or "")
+    if status == "running":
+        return "Рассылка ещё выполняется. Скажу точное число после завершения."
+    if status == "failed":
+        return "Рассылка не выполнилась. Ошибка зафиксирована в журнале; клиентам не буду говорить, что она ушла."
+    label = str(action.get("title") or _PANEL_JOBS.get(action.get("job"), (None, None, "Рассылка", None))[2])
+    return _owner_job_result_reply(str(action.get("job") or ""), label, action.get("summary"))
+
+
+def _owner_job_chat_response(chat_id: int, user_text: str, reply: str) -> web.Response:
+    from memory import load_conversations, save_conversations
+    conversations = load_conversations()
+    history_key = _chat_history_key(chat_id, "staff")
+    history, _ = _ensure_chat_history_ids(list(conversations.get(history_key) or []))
+    try:
+        safe_user_text = anonymizer.redact_pii(user_text or "")
+    except Exception:
+        safe_user_text = user_text or ""
+    history.append(_user_history_item(safe_user_text))
+    reply = enforce_maya_feminine(reply)
+    history.append(_assistant_history_item(reply))
+    history = history[-30:]
+    conversations[history_key] = history
+    save_conversations(conversations)
+    return _cabinet_response(_with_chat_turn_ids({
+        "reply": reply,
+        "contact_request": False,
+        "transcript": "",
+    }, history))
+
+
 async def panel_job_run_handler(request: web.Request) -> web.Response:
     """POST /api/panel/job/run — ручной запуск фоновой задачи (owner/manager)."""
     try:
@@ -3585,8 +3787,8 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
     """Запуск салонной задачи по подтверждению из чата AI-директора (нажата кнопка
     карточки → фронт прислал __runjob:<job>). Детерминированно, БЕЗ LLM. Только
     владелец/founder; те же задачи и исполнитель, что в /api/panel/job/run."""
-    from memory import load_conversations, save_conversations
     job = (job or "").strip().lower()
+    _clear_pending_owner_job(chat_id)
     spec = _PANEL_JOBS.get(job)
     info = _panel_resolve_role(int(chat_id)) if chat_id else {"permissions": {}}
     role = info.get("role") or ""
@@ -3599,10 +3801,14 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
 
     if not spec:
         audit(False, "unknown_job")
-        return _cabinet_response({"reply": "Не нашла такую задачу. Откройте Панель и запустите вручную."})
+        return _owner_job_chat_response(
+            chat_id, job, "Не нашла такую задачу. Откройте Панель и запустите вручную."
+        )
     if role != "owner":
         audit(False, "owner_only")
-        return _cabinet_response({"reply": "Эта задача доступна только владельцу."})
+        return _owner_job_chat_response(
+            chat_id, job, "Эта задача доступна только владельцу."
+        )
     mod_name, fn_name, label, _kind = spec
     # Защита от двойного тапа/повторной отправки action-card: тот же job не
     # запускается повторно из чата чаще одного раза в минуту.
@@ -3614,7 +3820,11 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
     now = time.time()
     if last and now - last < 60:
         audit(False, "duplicate_60s")
-        return _cabinet_response({"reply": f"«{label}» уже запущена. Дайте ей минуту, чтобы не отправить дубли."})
+        return _owner_job_chat_response(
+            chat_id,
+            label,
+            f"«{label}» уже запущена. Дайте ей минуту, чтобы не отправить дубли.",
+        )
     try:
         database.set_setting(dedupe_key, str(now))
     except Exception:
@@ -3655,11 +3865,12 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
         audit(True, "started")
         try:
             summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-            sent = summary.get("sent") if isinstance(summary, dict) else None
-            reply = (f"Готово — запустила «{label}»."
-                     + (f" Отправлено сообщений: {sent}." if sent is not None else " Выполняется."))
+            reply = _owner_job_result_reply(job, label, summary)
         except asyncio.TimeoutError:
-            reply = f"Запустила «{label}» — рассылка идёт в фоне, дойдёт до всех за пару минут."
+            reply = (
+                f"Запустила «{label}». Задача ещё выполняется; "
+                "точное число отправок будет в журнале после завершения."
+            )
     except Exception as e:
         logger.error(f"chat run_job {job}: {e}")
         audit(False, "run_error")
@@ -3669,17 +3880,7 @@ async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str)
         except Exception:
             pass
         reply = "Не получилось запустить задачу — попробуйте из Панели."
-    # Ответ Майи — в историю чата приложения.
-    try:
-        convs = load_conversations()
-        h = list(convs.get(chat_id) or [])
-        h.append({"role": "user", "content": label})
-        h.append({"role": "assistant", "content": reply})
-        convs[chat_id] = h[-30:]
-        save_conversations(convs)
-    except Exception:
-        pass
-    return _cabinet_response({"reply": reply})
+    return _owner_job_chat_response(chat_id, label, reply)
 
 
 async def panel_reviews_handler(request: web.Request) -> web.Response:
@@ -6762,7 +6963,7 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
         except Exception as e:
             logger.error(f"chat save_booking chat_id={chat_id}: {e}")
         dt = str(cr["datetime_str"]).replace("T", " ")[:16]
-        return ("Готово, записал вас! ✅\n\n"
+        return ("Готово, записала вас! ✅\n\n"
                 "✂️ " + ", ".join(cr["service_names"]) + "\n"
                 "💈 " + cr["staff_name"] + "\n"
                 "📅 " + dt + "\n\nЖдём вас в «Мужской Эстетике»! 💈")
@@ -8022,7 +8223,7 @@ def _plain_maya_text(text: str) -> str:
     )
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
+    return enforce_maya_feminine(text).strip()
 
 
 def _chat_knowledge_images(chat_id: int, message: str, mode: str = "client", limit: int = 3) -> list[dict]:
@@ -8514,6 +8715,18 @@ async def chat_handler(request: web.Request) -> web.Response:
     def _saved_chat_response(payload: dict) -> web.Response:
         return _cabinet_response(_with_chat_turn_ids(payload, history))
 
+    pending_decision, pending_job = _pending_owner_job_decision(chat_id, message, chat_mode)
+    if pending_decision == "confirm" and pending_job:
+        return await _run_owner_job_from_chat(request, chat_id, pending_job)
+    if pending_decision == "cancel":
+        return _owner_job_chat_response(
+            chat_id, message, "Хорошо, рассылку не запускаю."
+        )
+
+    job_status_reply = _owner_job_status_reply(chat_id, message, chat_mode)
+    if job_status_reply:
+        return _owner_job_chat_response(chat_id, message, job_status_reply)
+
     founder_permission_reply = _founder_permission_reply(
         chat_id, message, mode=chat_mode,
     )
@@ -8789,16 +9002,9 @@ async def chat_handler(request: web.Request) -> web.Response:
         elif gift_cert_action.get("kind") == "run_job":
             # AI-директор предложил запустить рассылку — отдаём карточку с кнопкой.
             # Нажатие пришлёт __runjob:<job>, и задача запустится (см. _run_owner_job_from_chat).
-            _job = gift_cert_action.get("job")
-            cert_action = {
-                "type": "run_job",
-                "job": _job,
-                "label": gift_cert_action.get("label") or "Запустить рассылку",
-                "confirm": "__runjob:" + str(_job),
-            }
-            for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
-                if gift_cert_action.get(key) is not None:
-                    cert_action[key] = gift_cert_action.get(key)
+            cert_action, blocked_reply = _owner_job_action_card(gift_cert_action, chat_id)
+            if blocked_reply:
+                response_text = blocked_reply
         else:
             amt = gift_cert_action.get("amount")
             response_text = (
@@ -8812,7 +9018,7 @@ async def chat_handler(request: web.Request) -> web.Response:
 
     chat_widget = chat_widget or widget_for_action(cert_action)
 
-    response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
+    response_text = _plain_maya_text(response_text or "Секунду, не расслышала — повторите, пожалуйста.")
     knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
     history.append(_assistant_history_item(
         response_text,
@@ -9011,6 +9217,18 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     def _saved_chat_response(payload: dict) -> web.Response:
         return _cabinet_response(_with_chat_turn_ids(payload, history))
+
+    pending_decision, pending_job = _pending_owner_job_decision(chat_id, message, chat_mode)
+    if pending_decision == "confirm" and pending_job:
+        return await _run_owner_job_from_chat(request, chat_id, pending_job)
+    if pending_decision == "cancel":
+        return _owner_job_chat_response(
+            chat_id, message, "Хорошо, рассылку не запускаю."
+        )
+
+    job_status_reply = _owner_job_status_reply(chat_id, message, chat_mode)
+    if job_status_reply:
+        return _owner_job_chat_response(chat_id, message, job_status_reply)
 
     founder_permission_reply = _founder_permission_reply(
         chat_id, message, mode=chat_mode,
@@ -9332,7 +9550,9 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             if not sent:
                 break
             _tts_buf = rest
-            _aud_tasks.append(loop.create_task(_voicemod.synthesize(sent, fmt="mp3")))
+            _aud_tasks.append(loop.create_task(
+                _voicemod.synthesize(enforce_maya_feminine(sent), fmt="mp3")
+            ))
 
     async def _drain_ready() -> None:
         # отдаём ТОЛЬКО уже готовые куски с головы очереди — порядок не нарушаем,
@@ -9450,16 +9670,9 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         elif gift_cert_action.get("kind") == "run_job":
             # AI-директор предложил запустить рассылку — отдаём карточку с кнопкой.
             # Нажатие пришлёт __runjob:<job>, и задача запустится (см. _run_owner_job_from_chat).
-            _job = gift_cert_action.get("job")
-            cert_action = {
-                "type": "run_job",
-                "job": _job,
-                "label": gift_cert_action.get("label") or "Запустить рассылку",
-                "confirm": "__runjob:" + str(_job),
-            }
-            for key in ("title", "problem", "reason", "potential_rub", "client_message", "priority"):
-                if gift_cert_action.get(key) is not None:
-                    cert_action[key] = gift_cert_action.get(key)
+            cert_action, blocked_reply = _owner_job_action_card(gift_cert_action, chat_id)
+            if blocked_reply:
+                response_text = blocked_reply
         else:
             amt = gift_cert_action.get("amount")
             response_text = (
@@ -9473,7 +9686,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     chat_widget = chat_widget or widget_for_action(cert_action)
 
-    response_text = _plain_maya_text(response_text or "Секунду, не расслышал — повторите, пожалуйста.")
+    response_text = _plain_maya_text(response_text or "Секунду, не расслышала — повторите, пожалуйста.")
     knowledge_images = _chat_knowledge_images(chat_id, message, chat_mode)
     history.append(_assistant_history_item(
         response_text,
