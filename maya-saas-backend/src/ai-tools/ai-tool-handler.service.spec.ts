@@ -130,6 +130,24 @@ describe('AiToolHandlerService output minimization', () => {
         sync_status: 'fresh',
         stale: false,
         synced_at: '2026-07-15T00:00:00.000Z',
+        spend_options: {
+          status: 'available',
+          basis: 'price_estimate',
+          verification_required: true,
+          items: [
+            {
+              id: 'service-spa',
+              name: 'SPA для лица',
+              price: 1200,
+              points_required: 1200,
+              currency: 'RUB',
+              category: 'Уход',
+              internal_note: 'must not leak',
+            },
+          ],
+          best_service: { id: 'service-spa', points_required: 1200 },
+          next_service: null,
+        },
         phone: '+79180000000',
         provider_payload: { cards: [] },
       }),
@@ -150,6 +168,23 @@ describe('AiToolHandlerService output minimization', () => {
       sync_status: 'fresh',
       stale: false,
       synced_at: '2026-07-15T00:00:00.000Z',
+      spend_options: {
+        status: 'available',
+        basis: 'price_estimate',
+        verification_required: true,
+        items: [
+          {
+            id: 'service-spa',
+            name: 'SPA для лица',
+            price: 1200,
+            points_required: 1200,
+            currency: 'RUB',
+            category: 'Уход',
+          },
+        ],
+        best_service: { id: 'service-spa', points_required: 1200 },
+        next_service: null,
+      },
     });
   });
 

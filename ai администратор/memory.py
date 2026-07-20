@@ -61,10 +61,14 @@ def normalize_history_visit(visit: dict) -> dict:
         title = (item.get("title") or "").strip()
         if not title:
             continue
-        services.append({
+        normalized_service = {
             "title": title,
             "cost": item.get("cost") or item.get("price") or 0,
-        })
+        }
+        service_id = item.get("id", item.get("service_id"))
+        if isinstance(service_id, (str, int)) and str(service_id).strip():
+            normalized_service["id"] = service_id
+        services.append(normalized_service)
 
     direct_service = (visit.get("service") or "").strip()
     if not services and direct_service:
@@ -344,10 +348,15 @@ def get_usual_booking(user_id: int, *, warm: bool = False) -> dict | None:
         )
         history = normalize_history(warmed.get("history") or [])
 
+    history.sort(key=lambda visit: str(visit.get("date") or ""), reverse=True)
+
     usual = _usual_master_from_history(history)
     if usual and usual.get("name"):
         usual_id = usual.get("id")
         service_text = ""
+        service_names = []
+        service_ids = []
+        visit_date = None
         for visit in history:
             same_master = (
                 usual_id is not None and visit.get("master_id") == usual_id
@@ -358,20 +367,68 @@ def get_usual_booking(user_id: int, *, warm: bool = False) -> dict | None:
             if same_master:
                 service_text = _history_service_text(visit)
                 if service_text:
+                    visit_services = [
+                        item for item in (visit.get("services") or [])
+                        if isinstance(item, dict) and (item.get("title") or "").strip()
+                    ]
+                    service_names = [
+                        str(item.get("title") or "").strip()
+                        for item in visit_services
+                    ]
+                    service_ids = [
+                        item.get("id")
+                        for item in visit_services
+                        if isinstance(item.get("id"), (str, int))
+                        and str(item.get("id")).strip()
+                    ]
+                    visit_date = visit.get("date")
                     break
         return {
             "master_id": usual_id,
             "master_name": usual["name"],
             "service_text": service_text,
+            "service_names": service_names,
+            "service_ids": service_ids,
+            "visit_date": visit_date,
+            "history_visits": len(history),
             "source": "yclients_history",
         }
 
     last = database.get_last_booking(int(user_id))
     if last and (last.get("master") or "").strip():
+        service_text = (last.get("service") or "").strip()
+        raw_services = last.get("services") or []
+        if not isinstance(raw_services, (list, tuple)):
+            raw_services = [raw_services]
+        service_names = []
+        embedded_service_ids = []
+        for item in raw_services:
+            if isinstance(item, dict):
+                title = item.get("title") or item.get("name") or ""
+                service_id = item.get("id")
+                if isinstance(service_id, (str, int)) and str(service_id).strip():
+                    embedded_service_ids.append(service_id)
+            else:
+                title = item
+            title = str(title or "").strip()
+            if title:
+                service_names.append(title)
+        if not service_names and service_text:
+            service_names = [service_text]
+        raw_service_ids = last.get("service_ids") or embedded_service_ids
+        if not isinstance(raw_service_ids, (list, tuple)):
+            raw_service_ids = [raw_service_ids]
         return {
             "master_id": last.get("staff_id"),
             "master_name": (last.get("master") or "").strip(),
-            "service_text": (last.get("service") or "").strip(),
+            "service_text": service_text,
+            "service_names": service_names,
+            "service_ids": [
+                value for value in raw_service_ids
+                if isinstance(value, (str, int)) and str(value).strip()
+            ],
+            "visit_date": last.get("date") or last.get("datetime"),
+            "history_visits": 1,
             "source": "local_booking",
         }
     return None

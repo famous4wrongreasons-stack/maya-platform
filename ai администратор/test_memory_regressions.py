@@ -60,8 +60,8 @@ class MemoryRegressionTests(unittest.TestCase):
         visit = {
             "datetime": "2026-07-01T12:00:00+03:00",
             "services": [
-                {"title": "Стрижка", "price": 2200},
-                {"title": "Борода", "cost": 900},
+                {"id": 10, "title": "Стрижка", "price": 2200},
+                {"id": 11, "title": "Борода", "cost": 900},
             ],
             "staff": {"id": 3278920, "name": "Александр Киянский"},
         }
@@ -76,8 +76,8 @@ class MemoryRegressionTests(unittest.TestCase):
         self.assertEqual(
             got["services"],
             [
-                {"title": "Стрижка", "cost": 2200},
-                {"title": "Борода", "cost": 900},
+                {"title": "Стрижка", "cost": 2200, "id": 10},
+                {"title": "Борода", "cost": 900, "id": 11},
             ],
         )
 
@@ -135,7 +135,10 @@ class MemoryRegressionTests(unittest.TestCase):
         history = [
             {
                 "datetime": "2026-07-01T12:00:00+03:00",
-                "services": [{"title": "Мужская стрижка"}, {"title": "Борода"}],
+                "services": [
+                    {"id": 10, "title": "Мужская стрижка"},
+                    {"id": 11, "title": "Борода"},
+                ],
                 "staff": {"id": 3278920, "name": "Александр Киянский"},
             },
             {
@@ -155,6 +158,28 @@ class MemoryRegressionTests(unittest.TestCase):
         self.assertEqual(got["master_id"], 3278920)
         self.assertEqual(got["master_name"], "Александр Киянский")
         self.assertEqual(got["service_text"], "Мужская стрижка, Борода")
+        self.assertEqual(got["service_ids"], [10, 11])
+        self.assertEqual(got["service_names"], ["Мужская стрижка", "Борода"])
+        self.assertEqual(got["visit_date"], "2026-07-01T12:00:00+03:00")
+
+    def test_get_usual_booking_normalizes_embedded_local_services(self):
+        last_booking = {
+            "master": "Александр Киянский",
+            "staff_id": 3278920,
+            "services": [
+                {"id": 10, "title": "Мужская стрижка"},
+                {"id": 11, "name": "Борода"},
+            ],
+            "datetime": "2026-07-01T12:00:00+03:00",
+        }
+
+        with patch.object(memory.database, "get_client", return_value=None):
+            with patch.object(memory.database, "get_last_booking", return_value=last_booking):
+                got = memory.get_usual_booking(948205934)
+
+        self.assertEqual(got["service_names"], ["Мужская стрижка", "Борода"])
+        self.assertEqual(got["service_ids"], [10, 11])
+        self.assertEqual(got["source"], "local_booking")
 
     def test_audit_dual_role_repairs_missing_cache(self):
         state = {"cache": None}

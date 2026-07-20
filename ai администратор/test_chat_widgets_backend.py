@@ -89,6 +89,30 @@ class ChatWidgetContractTests(unittest.TestCase):
         self.assertIsNone(normalize_chat_widget_data("book", {"master_id": 1}))
         self.assertIsNone(normalize_chat_widget_data("tips", {"master_id": "bad"}))
 
+    def test_repeat_booking_widget_data_is_allowlisted_and_normalized(self):
+        self.assertEqual(
+            normalize_chat_widget_data("book", {
+                "repeat_booking": True,
+                "master_id": 3278920,
+                "master_name": "Александр Киянский",
+                "service_ids": [10, "11", "11"],
+                "service_names": ["Мужская стрижка", "Борода"],
+                "client_phone": "+79990000000",
+            }),
+            {
+                "repeat_booking": True,
+                "master_id": "3278920",
+                "master_name": "Александр Киянский",
+                "service_ids": ["10", "11"],
+                "service_names": ["Мужская стрижка", "Борода"],
+            },
+        )
+        self.assertIsNone(normalize_chat_widget_data("book", {
+            "repeat_booking": True,
+            "master_id": "bad/id",
+            "service_ids": ["10"],
+        }))
+
     def test_widget_tool_is_always_available_to_client_context(self):
         claude_ai, _ = _load_claude_ai()
         self.assertIn(

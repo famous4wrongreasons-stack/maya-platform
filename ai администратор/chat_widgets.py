@@ -40,7 +40,55 @@ def normalize_chat_widget(value: Any) -> str | None:
 
 def normalize_chat_widget_data(widget: Any, value: Any) -> dict | None:
     """Keep only server-approved payload fields for a supported widget."""
-    if normalize_chat_widget(widget) != "tips" or not isinstance(value, dict):
+    normalized_widget = normalize_chat_widget(widget)
+    if not isinstance(value, dict):
+        return None
+    if normalized_widget == "book":
+        if value.get("repeat_booking") is not True:
+            return None
+
+        def _external_id(raw: Any) -> str:
+            candidate = str(raw or "").strip()
+            if not candidate or len(candidate) > 120:
+                return ""
+            return candidate if all(ch.isalnum() or ch in "._:-" for ch in candidate) else ""
+
+        result: dict[str, Any] = {"repeat_booking": True}
+        master_id = _external_id(value.get("master_id"))
+        if master_id:
+            result["master_id"] = master_id
+        master_name = str(value.get("master_name") or "").strip()[:160]
+        if master_name:
+            result["master_name"] = master_name
+        service_ids = []
+        raw_service_ids = value.get("service_ids") or []
+        if not isinstance(raw_service_ids, (list, tuple)):
+            raw_service_ids = []
+        for raw in raw_service_ids:
+            service_id = _external_id(raw)
+            if service_id and service_id not in service_ids:
+                service_ids.append(service_id)
+            if len(service_ids) >= 16:
+                break
+        if service_ids:
+            result["service_ids"] = service_ids
+        service_names = []
+        raw_service_names = value.get("service_names") or []
+        if not isinstance(raw_service_names, (list, tuple)):
+            raw_service_names = []
+        for raw in raw_service_names:
+            name = str(raw or "").strip()[:200]
+            if name and name not in service_names:
+                service_names.append(name)
+            if len(service_names) >= 16:
+                break
+        if service_names:
+            result["service_names"] = service_names
+        if not (master_id or master_name) or not (service_ids or service_names):
+            return None
+        return result
+
+    if normalized_widget != "tips":
         return None
     result = {}
     try:

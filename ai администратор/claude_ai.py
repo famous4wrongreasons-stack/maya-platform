@@ -1900,28 +1900,44 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             # бэкенд оставит самую дорогую (выгодно клиенту).
             pay_with_points = tool_input.get("pay_with_points") or []
             import loyalty as _loy
-            care_lookup = {c["title"].lower(): c for c in _loy.CARE_SERVICES}
+            care_lookup = {
+                _loy._normalize_service_title(c.get("title")): c
+                for c in _loy.current_care_services()
+            }
             # 1) фильтруем: только реальные услуги-уходы И только те, что в заказе
-            in_order_lower = {s.lower() for s in service_names}
+            in_order_lower = {
+                _loy._normalize_service_title(s) for s in service_names
+            }
             candidates = []
             for svc in pay_with_points:
-                norm = (svc or "").strip().lower()
+                norm = _loy._normalize_service_title(svc)
                 if norm in care_lookup and norm in in_order_lower:
                     candidates.append(care_lookup[norm])
             # 2) проверяем баланс клиента
             balance = 0
+            client_row = None
             if user_id:
                 client_row = database.get_client(user_id)
                 if client_row:
-                    balance = database.loyalty_balance(client_row["id"])
+                    card = _loy._yc_loyalty_card(client_row.get("phone") or "")
+                    balance = (
+                        int(card["balance"])
+                        if card is not None
+                        else database.loyalty_balance(client_row["id"])
+                    )
             # 3) оставляем максимум 1 услугу — самую дорогую из тех, на которые
             # хватает баллов
             valid_pwp: list[str] = []
+            valid_pwp_quotes: list[dict] = []
             affordable = [c for c in candidates if balance >= c["price"]]
             if affordable:
                 # самая дорогая = максимальная экономия для клиента
                 best = max(affordable, key=lambda c: c["price"])
                 valid_pwp = [best["title"]]
+                valid_pwp_quotes = [{
+                    "title": best["title"],
+                    "price": int(best["price"]),
+                }]
             if len(pay_with_points) > 1 and valid_pwp:
                 logger.info(
                     f"request_booking: AI прислал {len(pay_with_points)} услуг "
@@ -1936,6 +1952,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 "service_names": service_names,
                 "datetime_str": datetime_str,
                 "pay_with_points": valid_pwp,
+                "pay_with_points_quotes": valid_pwp_quotes,
                 "instruction": (
                     "Запись проверена. Скажи клиенту одной короткой фразой, что "
                     "передаёшь запись на оформление. Имя и телефон НЕ спрашивай. "
@@ -1972,14 +1989,24 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
         elif tool_name == "check_loyalty_balance":
             import loyalty as _loy
             current_services = tool_input.get("current_service_names") or []
-            current_lower = {s.lower().strip() for s in current_services}
+            current_lower = {
+                _loy._normalize_service_title(s) for s in current_services
+            }
             # Какие услуги-уходы есть в текущем заказе
             care_in_order = [
-                c for c in _loy.CARE_SERVICES
-                if c["title"].lower() in current_lower
+                c for c in _loy.current_care_services()
+                if _loy._normalize_service_title(c.get("title")) in current_lower
             ]
             client_row = database.get_client(user_id) if user_id else None
-            balance = database.loyalty_balance(client_row["id"]) if client_row else 0
+            if client_row:
+                card = _loy._yc_loyalty_card(client_row.get("phone") or "")
+                balance = (
+                    int(card["balance"])
+                    if card is not None
+                    else database.loyalty_balance(client_row["id"])
+                )
+            else:
+                balance = 0
             affordable = [
                 {"title": c["title"], "price": c["price"]}
                 for c in care_in_order if balance >= c["price"]
@@ -4064,6 +4091,7 @@ def _run_tool_uses(
                     "service_names": data["service_names"],
                     "datetime_str": data["datetime_str"],
                     "pay_with_points": data.get("pay_with_points") or [],
+                    "pay_with_points_quotes": data.get("pay_with_points_quotes") or [],
                 }
         # start_gift_cert_purchase — backend покажет кнопки выбора способа покупки
         if tool_use.name == "start_gift_cert_purchase":

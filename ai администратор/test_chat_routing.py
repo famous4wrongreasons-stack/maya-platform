@@ -621,6 +621,87 @@ class ChatRoutingTests(unittest.TestCase):
         history = mem.load_conversations().get("pwa:client:948205934") or []
         self.assertEqual(len(history), 1)
 
+    def test_client_loyalty_offer_is_exact_and_deduplicated_per_balance(self):
+        ws = _load_webhook_server()
+        mem = sys.modules["memory"]
+        db = sys.modules["database"]
+        db.get_client = lambda _chat_id: {
+            "id": 25,
+            "phone": "+79990000000",
+        }
+        db.loyalty_balance = lambda _client_id: 600
+        fake_loyalty = types.ModuleType("loyalty")
+        fake_loyalty._yc_loyalty_card = lambda _phone: {"balance": 600}
+        fake_loyalty.loyalty_spend_summary = lambda _balance: {
+            "affordable_services": [
+                {"id": 1, "title": "Патчи", "price": 100},
+                {"id": 2, "title": "Массаж", "price": 450},
+            ],
+        }
+        sys.modules["loyalty"] = fake_loyalty
+
+        first = ws._ensure_client_loyalty_chat_offer(948205934)
+        second = ws._ensure_client_loyalty_chat_offer(948205934)
+
+        self.assertTrue(first)
+        self.assertFalse(second)
+        history = mem.load_conversations().get("pwa:client:948205934") or []
+        self.assertEqual(len(history), 1)
+        self.assertIn("600 баллов", history[0]["content"])
+        self.assertIn("Массаж — 450 баллов", history[0]["content"])
+        self.assertEqual(history[0]["widget"], "loyalty")
+        self.assertEqual(history[0]["action"]["type"], "open_booking")
+
+    def test_repeat_booking_offer_is_grounded_and_deduplicated(self):
+        ws = _load_webhook_server()
+        mem = sys.modules["memory"]
+        db = sys.modules["database"]
+        db.get_client = lambda _chat_id: {"id": 25, "phone": "+79990000000"}
+        mem.get_usual_booking = lambda _chat_id, warm=False: {
+            "master_id": 3278920,
+            "master_name": "Александр Киянский",
+            "service_text": "Мужская стрижка, Борода",
+            "service_ids": [10, 11],
+            "service_names": ["Мужская стрижка", "Борода"],
+            "visit_date": "2026-07-01T12:00:00+03:00",
+            "source": "yclients_history",
+        }
+        ws._yc.get_client_bookings = lambda *_args, **_kwargs: []
+
+        first = ws._ensure_client_repeat_booking_offer(948205934)
+        second = ws._ensure_client_repeat_booking_offer(948205934)
+
+        self.assertTrue(first)
+        self.assertFalse(second)
+        history = mem.load_conversations().get("pwa:client:948205934") or []
+        self.assertEqual(len(history), 1)
+        self.assertIn("Вам как в прошлый раз", history[0]["content"])
+        self.assertEqual(history[0]["action"]["type"], "repeat_booking")
+
+    def test_repeat_booking_offer_is_suppressed_for_upcoming_visit(self):
+        ws = _load_webhook_server()
+        mem = sys.modules["memory"]
+        db = sys.modules["database"]
+        db.get_client = lambda _chat_id: {"id": 25, "phone": "+79990000000"}
+        mem.get_usual_booking = lambda _chat_id, warm=False: {
+            "master_id": 3278920,
+            "master_name": "Александр Киянский",
+            "service_text": "Мужская стрижка",
+            "service_ids": [10],
+            "service_names": ["Мужская стрижка"],
+            "visit_date": "2026-07-01T12:00:00+03:00",
+            "source": "yclients_history",
+        }
+        ws._yc.get_client_bookings = lambda *_args, **_kwargs: [{
+            "datetime": "2099-01-01T12:00:00+03:00",
+            "attendance": 0,
+        }]
+
+        offered = ws._ensure_client_repeat_booking_offer(948205934)
+
+        self.assertFalse(offered)
+        self.assertFalse(mem.load_conversations().get("pwa:client:948205934"))
+
     def test_marketing_broadcast_is_mirrored_into_client_chat(self):
         ws = _load_webhook_server()
         mem = sys.modules["memory"]
@@ -708,6 +789,63 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("Александр Киянский", reply)
         self.assertIn("На какой день и время", reply)
         self.assertIsNone(action)
+
+    def test_yes_after_repeat_offer_returns_prefilled_booking_widget(self):
+        ws = _load_webhook_server()
+        sys.modules["memory"].get_usual_booking = lambda _chat_id, warm=False: {
+            "master_id": 3278920,
+            "master_name": "Александр Киянский",
+            "service_text": "Мужская стрижка, Борода",
+            "service_ids": [10, 11],
+            "service_names": ["Мужская стрижка", "Борода"],
+        }
+        history = [{
+            "role": "assistant",
+            "content": "Вам как в прошлый раз?",
+            "action": {"type": "repeat_booking"},
+        }]
+
+        result = ws._client_repeat_booking_decision(948205934, "Да", history)
+
+        self.assertEqual(result["widget"], "book")
+        self.assertTrue(result["widget_data"]["repeat_booking"])
+        self.assertEqual(result["widget_data"]["master_id"], "3278920")
+        self.assertEqual(result["widget_data"]["service_ids"], ["10", "11"])
+        self.assertIn("Выберите только дату и время", result["reply"])
+
+    def test_natural_confirmation_after_repeat_offer_is_supported(self):
+        ws = _load_webhook_server()
+        sys.modules["memory"].get_usual_booking = lambda _chat_id, warm=False: {
+            "master_id": 3278920,
+            "master_name": "Александр Киянский",
+            "service_text": "Мужская стрижка",
+            "service_ids": [10],
+            "service_names": ["Мужская стрижка"],
+        }
+        history = [{
+            "role": "assistant",
+            "content": "Вам как в прошлый раз?",
+            "action": {"type": "repeat_booking"},
+        }]
+
+        for answer in ("Ага", "Давай так", "То же самое"):
+            with self.subTest(answer=answer):
+                result = ws._client_repeat_booking_decision(
+                    948205934,
+                    answer,
+                    history,
+                )
+                self.assertEqual(result["widget"], "book")
+                self.assertTrue(result["widget_data"]["repeat_booking"])
+
+    def test_plain_yes_without_repeat_offer_is_not_intercepted(self):
+        ws = _load_webhook_server()
+
+        self.assertIsNone(ws._client_repeat_booking_decision(
+            948205934,
+            "Да",
+            [{"role": "assistant", "content": "Хотите сертификат?"}],
+        ))
 
     def test_regular_master_without_service_asks_for_service(self):
         ws = _load_webhook_server()

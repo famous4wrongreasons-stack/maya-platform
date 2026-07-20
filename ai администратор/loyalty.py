@@ -230,21 +230,25 @@ def _visit_covered_by_subscription(
     return False
 
 
-def affordable_care_services(balance: int, catalog: list[dict] | None = None) -> list[dict]:
-    """Return only current YClients care services the confirmed balance covers."""
+def _normalize_service_title(value: str | None) -> str:
+    return str(value or "").strip().lower().replace("ё", "е")
+
+
+def current_care_services(catalog: list[dict] | None = None) -> list[dict]:
+    """Return the redeemable care catalog with current YClients prices."""
     try:
-        available = max(0, int(balance))
-    except (TypeError, ValueError):
-        available = 0
-    rows = catalog if catalog is not None else (_yc.get_services() or [])
+        rows = catalog if catalog is not None else (_yc.get_services() or [])
+    except Exception as exc:
+        logger.error("current care catalog: %s", exc)
+        rows = []
     by_title = {
-        str(row.get("title") or "").strip().lower().replace("ё", "е"): row
+        _normalize_service_title(row.get("title")): row
         for row in rows
         if isinstance(row, dict) and not row.get("error") and row.get("title")
     }
     result = []
     for care in CARE_SERVICES:
-        row = by_title.get(care["title"].lower().replace("ё", "е"))
+        row = by_title.get(_normalize_service_title(care["title"]))
         if not row:
             continue
         prices = []
@@ -257,13 +261,65 @@ def affordable_care_services(balance: int, catalog: list[dict] | None = None) ->
                 prices.append(value)
         # A range is affordable only when the confirmed balance covers its top.
         price = max(prices) if prices else int(care["price"])
-        if price <= available:
-            result.append({
-                "id": row.get("id"),
-                "title": str(row.get("title") or care["title"]).strip(),
-                "price": price,
-            })
+        result.append({
+            "id": row.get("id"),
+            "title": str(row.get("title") or care["title"]).strip(),
+            "price": price,
+            "emoji": care.get("emoji") or "",
+        })
     return sorted(result, key=lambda item: (item["price"], item["title"]))
+
+
+def current_care_service(
+    service_title: str,
+    catalog: list[dict] | None = None,
+) -> dict | None:
+    """Resolve one redeemable care service and its current catalog price."""
+    wanted = _normalize_service_title(service_title)
+    return next(
+        (
+            item
+            for item in current_care_services(catalog)
+            if _normalize_service_title(item.get("title")) == wanted
+        ),
+        None,
+    )
+
+
+def affordable_care_services(balance: int, catalog: list[dict] | None = None) -> list[dict]:
+    """Return only current YClients care services the confirmed balance covers."""
+    try:
+        available = max(0, int(balance))
+    except (TypeError, ValueError):
+        available = 0
+    return [
+        item for item in current_care_services(catalog)
+        if int(item.get("price") or 0) <= available
+    ]
+
+
+def loyalty_spend_summary(balance: int, catalog: list[dict] | None = None) -> dict:
+    """Build a deterministic, UI-safe summary without asking the language model."""
+    try:
+        available = max(0, int(balance))
+    except (TypeError, ValueError):
+        available = 0
+    services = current_care_services(catalog)
+    affordable = [item for item in services if item["price"] <= available]
+    next_service = next((item for item in services if item["price"] > available), None)
+    if next_service:
+        next_service = {
+            **next_service,
+            "points_needed": max(0, int(next_service["price"]) - available),
+        }
+    return {
+        "balance": available,
+        "care_services": services,
+        "affordable_services": affordable,
+        "best_service": affordable[-1] if affordable else None,
+        "next_service": next_service,
+        "redemption_rule": "one_care_service_per_visit",
+    }
 
 
 async def _send_affordable_care_offer(client: dict) -> bool:
@@ -290,13 +346,14 @@ async def _send_affordable_care_offer(client: dict) -> bool:
         if actual_card is not None
         else int(database.loyalty_balance(client_id))
     )
-    affordable = affordable_care_services(balance)
+    spend = loyalty_spend_summary(balance)
+    affordable = spend["affordable_services"]
     if not affordable:
         return False
-    names = [item["title"] for item in affordable[-3:]]
+    names = [f'{item["title"]} — {item["price"]} баллов' for item in affordable[-3:]]
     text = (
-        f"У вас {balance} баллов. Их уже хватит на уход: "
-        f"{', '.join(names)}. Можно добавить один уход к следующей записи 👇"
+        f"У вас {balance} баллов. Ими можно оплатить один из уходов: "
+        f"{', '.join(names)}. Хотите добавить уход к следующей записи?"
     )
     try:
         import webhook_server
@@ -534,8 +591,13 @@ def _yc_search_sold_amount(phone: str) -> int | None:
         return None
 
 
-def apply_redemption_for_booking(*, client_id: int, record_id: int,
-                                   service_titles: list[str]) -> dict:
+def apply_redemption_for_booking(
+    *,
+    client_id: int,
+    record_id: int,
+    service_titles: list[str],
+    service_quotes: list[dict] | None = None,
+) -> dict:
     """
     Списывает баллы по списку услуг-уходов, прицепляя транзакции к record_id.
     Дополнительно отмечает в YClients-записи: обнуляет стоимость услуги +
@@ -545,11 +607,16 @@ def apply_redemption_for_booking(*, client_id: int, record_id: int,
     Идемпотентно: если для (client_id, record_id, service) уже есть redeem —
     повторно не списываем.
     """
-    care_lookup = {c["title"].lower(): c for c in CARE_SERVICES}
+    quoted = service_quotes if service_quotes is not None else current_care_services()
+    care_lookup = {
+        _normalize_service_title(c.get("title")): c
+        for c in quoted
+        if isinstance(c, dict) and int(c.get("price") or 0) > 0
+    }
     items: list[dict] = []
     total = 0
     for title in service_titles:
-        c = care_lookup.get((title or "").lower().strip())
+        c = care_lookup.get(_normalize_service_title(title))
         if not c:
             continue
         if database.loyalty_redemption_exists(client_id, record_id, c["title"]):
@@ -746,6 +813,7 @@ async def run_backfill_job() -> dict:
 
 def build_balance_card(client_id: int) -> tuple[str, InlineKeyboardMarkup]:
     balance = database.loyalty_balance(client_id)
+    current_services = current_care_services()
 
     lines = [
         "🪙 *Баллы лояльности*",
@@ -755,15 +823,18 @@ def build_balance_card(client_id: int) -> tuple[str, InlineKeyboardMarkup]:
         f"С каждого визита — *{CASHBACK_PCT}%* кэшбэка. Баллы не "
         f"начисляются на визиты по абонементу (защита от двойной выгоды).",
         "",
-        "*Тратятся на любой уход:*",
+        "*Тратятся на один уход за визит:*",
     ]
-    for c in CARE_SERVICES:
-        mark = "✅" if balance >= c["price"] else "🔒"
-        line = f"  {mark} {c['emoji']} {c['title']} — _{c['price']} ₽_"
-        if balance < c["price"]:
-            need = c["price"] - balance
-            line += f"  _(не хватает {need})_"
-        lines.append(line)
+    if current_services:
+        for c in current_services:
+            mark = "✅" if balance >= c["price"] else "🔒"
+            line = f"  {mark} {c['emoji']} {c['title']} — _{c['price']} ₽_"
+            if balance < c["price"]:
+                need = c["price"] - balance
+                line += f"  _(не хватает {need})_"
+            lines.append(line)
+    else:
+        lines.append("  Каталог временно недоступен — попробуйте чуть позже.")
     lines.append("")
     lines.append(
         "🤝 *Как потратить:* при записи через «✂️ Записаться» MAYA сама "
@@ -778,7 +849,7 @@ def build_balance_card(client_id: int) -> tuple[str, InlineKeyboardMarkup]:
 
     # Кнопки списания через код — fallback, если клиент уже в салоне
     buttons: list[list[InlineKeyboardButton]] = []
-    for c in CARE_SERVICES:
+    for c in current_services:
         if balance >= c["price"]:
             buttons.append([InlineKeyboardButton(
                 f"📟 Код на {c['emoji']} {c['title']}",
@@ -801,10 +872,7 @@ def generate_redeem_code(client_id: int, service_title: str) -> dict:
     Создаёт одноразовый код погашения. Проверяет баланс и срок:
     баллы холдируются (НЕ списываются) до момента подтверждения админом.
     """
-    care = next(
-        (c for c in CARE_SERVICES if c["title"].lower() == service_title.lower()),
-        None,
-    )
+    care = current_care_service(service_title)
     if not care:
         return {"ok": False, "reason": "не уход"}
     balance = database.loyalty_balance(client_id)

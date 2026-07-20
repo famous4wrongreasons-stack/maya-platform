@@ -377,6 +377,51 @@ describe('AiCoreService', () => {
     });
   });
 
+  it('grounds a request to spend bonuses before suggesting a service', async () => {
+    const customer: AuthenticatedUser = {
+      ...user,
+      userId: 'customer-user',
+      role: UserRole.CUSTOMER,
+    };
+    const mocks = createService(['loyalty.own.read']);
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю варианты.',
+          toolCall: { name: 'loyalty.own.read', arguments: {} },
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'У вас 2 133 балла. По сумме хватает на SPA за 1 200.',
+          toolCall: null,
+        }),
+      );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-loyalty-spend',
+      result: {
+        balance: 2_133,
+        spend_options: {
+          verification_required: true,
+          items: [{ name: 'SPA', points_required: 1_200 }],
+        },
+      },
+    });
+
+    const result = await mocks.service.chat(customer, {
+      surface: 'web',
+      messages: [{ role: 'user', content: 'На что я могу потратить бонусы?' }],
+    });
+
+    expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
+      'loyalty.own.read',
+    ]);
+    expect(result).toMatchObject({
+      grounding: { status: 'verified', domain: 'client_loyalty' },
+    });
+  });
+
   it('uses employee analytics rather than business totals for staff', async () => {
     const employee: AuthenticatedUser = {
       ...user,

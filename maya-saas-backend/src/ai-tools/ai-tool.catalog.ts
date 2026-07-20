@@ -138,7 +138,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'loyalty.own.read',
     description:
-      'Read the authenticated customer authoritative loyalty balance.',
+      'Read the authenticated customer authoritative loyalty balance and price-matched spend options.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: CLIENT_ROLES,
     allowedSurfaces: ALL_SURFACES,

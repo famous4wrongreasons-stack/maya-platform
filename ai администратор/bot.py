@@ -4208,6 +4208,7 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
                     client_id=client_id,
                     record_id=int(record_id),
                     service_titles=pay_with_points,
+                    service_quotes=cr.get("pay_with_points_quotes") or None,
                 )
             except Exception as e:
                 logger.error(f"loyalty redemption для record_id={record_id}: {e}")

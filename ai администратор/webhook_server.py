@@ -2007,7 +2007,11 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
                     total_cost += int(float(cost or 0))
                 except (TypeError, ValueError):
                     pass
-                services.append({"title": title, "cost": cost or 0})
+                normalized_service = {"title": title, "cost": cost or 0}
+                service_id = svc.get("id", svc.get("service_id"))
+                if isinstance(service_id, (str, int)) and str(service_id).strip():
+                    normalized_service["id"] = service_id
+                services.append(normalized_service)
             elif str(svc or "").strip():
                 services.append({"title": str(svc).strip(), "cost": 0})
         service_titles = [svc["title"] for svc in services if svc.get("title")]
@@ -2087,6 +2091,29 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
     )
     first_name = tg_profile.get("first_name") or (full_name.split() or [""])[0]
 
+    loyalty_details = {
+        "balance": balance,
+        "source": loyalty_source,
+        "care_services": [],
+        "affordable_services": [],
+        "best_service": None,
+        "next_service": None,
+        "redemption_rule": "one_care_service_per_visit",
+    }
+    try:
+        import loyalty as _loy
+
+        spend = await asyncio.to_thread(_loy.loyalty_spend_summary, balance)
+        loyalty_details.update({
+            "care_services": spend.get("care_services") or [],
+            "affordable_services": spend.get("affordable_services") or [],
+            "best_service": spend.get("best_service"),
+            "next_service": spend.get("next_service"),
+            "redemption_rule": spend.get("redemption_rule"),
+        })
+    except Exception as e:
+        logger.error(f"_build_full_cabinet: loyalty spend options {client_id}: {e}")
+
     return _cabinet_response({
         "known": True,
         "has_phone": has_valid_phone,
@@ -2095,14 +2122,7 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
         "full_name": full_name,
         "phone_tail": phone[-4:] if has_valid_phone else "",
         "booking_phone": phone if has_valid_phone else "",
-        "loyalty": {
-            "balance": balance,
-            "source": loyalty_source,
-            "care_services": [
-                {"title": c["title"], "price": c["price"], "emoji": c["emoji"]}
-                for c in __import__("loyalty").CARE_SERVICES
-            ],
-        },
+        "loyalty": loyalty_details,
         "visits": {
             "total": visits_total,
             "last_year": visits_last_year,
@@ -7210,7 +7230,20 @@ _USUAL_MASTER_INTENT_RE = re.compile(
     r"(?:(?:постоянн|обычн|любим)\w*\s+)?(?:мастер|барбер)\w*\b|"
     r"\b(?:постоянн|обычн|любим)\w*\s+(?:мастер|барбер)\w*\b|"
     r"\bк\s+тому\s+же\s+(?:мастер|барбер)\w*\b|"
-    r"\bкак\s+обычно\b)",
+    r"\bкак\s+обычно\b|\bкак\s+в\s+прошл\w*\s+раз\b|"
+    r"\b(?:то\s+же|тоже)\s+самое\b)",
+    re.IGNORECASE,
+)
+_REPEAT_BOOKING_YES_RE = re.compile(
+    r"^\s*(?:да|ага|угу|конечно|верно|точно|подходит|хочу|можно|"
+    r"давайте|давай\s+так|повтор(?:и|им|ить)|(?:то\s+же|тоже)\s+самое|"
+    r"да[,.!\s]+(?:давайте|конечно|как\s+(?:обычно|в\s+прошл\w*\s+раз))|"
+    r"как\s+(?:обычно|в\s+прошл\w*\s+раз))\s*[.!?]*\s*$",
+    re.IGNORECASE,
+)
+_REPEAT_BOOKING_NO_RE = re.compile(
+    r"^\s*(?:нет|не\s+сейчас|друг(?:ой|ого)\s+(?:мастер|барбер)|"
+    r"друг(?:ая|ую)\s+услуг(?:а|у)|хочу\s+изменить)\s*[.!?]*\s*$",
     re.IGNORECASE,
 )
 _STAFF_CLIENT_BOOKING_RE = re.compile(
@@ -8212,6 +8245,111 @@ def _client_usual_booking_shortcut(
     )
 
 
+def _repeat_booking_widget_data(usual: dict | None) -> dict | None:
+    """Build the allowlisted booking prefill from server-side visit history."""
+    if not isinstance(usual, dict):
+        return None
+    service_names = [
+        str(value or "").strip()
+        for value in (usual.get("service_names") or [])
+        if str(value or "").strip()
+    ]
+    if not service_names:
+        service_text = str(usual.get("service_text") or "").strip()
+        if service_text:
+            service_names = [
+                value.strip() for value in service_text.split(",") if value.strip()
+            ]
+    return normalize_chat_widget_data("book", {
+        "repeat_booking": True,
+        "master_id": usual.get("master_id"),
+        "master_name": usual.get("master_name"),
+        "service_ids": usual.get("service_ids") or [],
+        "service_names": service_names,
+    })
+
+
+def _latest_repeat_booking_offer(history: list | None) -> bool:
+    """A short "yes" is repeat-booking consent only after MAYA's exact offer."""
+    for item in reversed(history or []):
+        if not isinstance(item, dict):
+            continue
+        role = str(item.get("role") or "").strip().lower()
+        if role not in {"assistant", "user"}:
+            continue
+        action = item.get("action") if role == "assistant" else None
+        return bool(
+            isinstance(action, dict)
+            and str(action.get("type") or "").strip().lower() == "repeat_booking"
+        )
+    return False
+
+
+def _client_repeat_booking_decision(
+    chat_id: int,
+    message: str,
+    history: list | None,
+) -> dict | None:
+    """Resolve repeat booking without asking the model to remember master/services."""
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return None
+    pending_offer = _latest_repeat_booking_offer(history)
+    explicit_repeat = bool(
+        _USUAL_MASTER_INTENT_RE.search(low)
+        and (_BOOKING_INTENT_RE.search(low) or "как обычно" in low or "как в прошл" in low)
+    )
+    if pending_offer and _REPEAT_BOOKING_NO_RE.fullmatch(low):
+        return {
+            "reply": "Хорошо. Что меняем: мастера или услуги?",
+            "action": None,
+            "widget": None,
+            "widget_data": None,
+        }
+    if not explicit_repeat and not (
+        pending_offer and _REPEAT_BOOKING_YES_RE.fullmatch(low)
+    ):
+        return None
+
+    try:
+        usual = memory.get_usual_booking(int(chat_id), warm=True)
+    except Exception as exc:
+        logger.error("repeat booking decision: %s", exc)
+        usual = None
+    widget_data = _repeat_booking_widget_data(usual)
+    if not usual or not usual.get("master_name"):
+        return {
+            "reply": (
+                "Пока не вижу в истории постоянного мастера. "
+                "Выберите мастера — я продолжу запись."
+            ),
+            "action": {"type": "open_booking", "label": "Выбрать мастера", "screen": "book"},
+            "widget": "book",
+            "widget_data": None,
+        }
+    if not widget_data:
+        return {
+            "reply": (
+                f"Постоянного мастера вижу — {usual['master_name']}, но прошлые услуги "
+                "сейчас недоступны для точного повтора. Выберите услугу."
+            ),
+            "action": None,
+            "widget": "book",
+            "widget_data": None,
+        }
+    service_text = str(usual.get("service_text") or "").strip()
+    return {
+        "reply": (
+            f"Оставила как в прошлый раз: {usual['master_name']}"
+            f"{f' · {service_text}' if service_text else ''}. "
+            "Выберите только дату и время 👇"
+        ),
+        "action": None,
+        "widget": "book",
+        "widget_data": widget_data,
+    }
+
+
 def _plain_maya_delta(text: str) -> str:
     if not text:
         return ""
@@ -8430,7 +8568,7 @@ def _store_assistant_message_in_chat(
         history, _ = _ensure_chat_history_ids(history)
         want_key = str(dedupe_key or "").strip()[:160]
         if want_key:
-            for item in reversed(history[-8:]):
+            for item in reversed(history):
                 if isinstance(item, dict) and item.get("role") == "assistant" and item.get("dedupe_key") == want_key:
                     return False
         item = _assistant_history_item(
@@ -8462,6 +8600,130 @@ def _store_assistant_message_in_chat(
     except Exception as e:
         logger.error(f"store assistant message in chat {cid}: {e}")
         return False
+
+
+def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
+    """Persist one exact spend suggestion for each confirmed balance snapshot."""
+    try:
+        client = database.get_client(int(chat_id))
+    except Exception:
+        client = None
+    if not isinstance(client, dict):
+        return False
+    client_id = int(client.get("id") or 0)
+    phone = str(client.get("phone") or "").strip()
+    if not client_id or len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return False
+    try:
+        import loyalty as _loy
+
+        actual_card = _loy._yc_loyalty_card(phone)
+        balance = (
+            int(actual_card["balance"])
+            if actual_card is not None
+            else int(database.loyalty_balance(client_id))
+        )
+        spend = _loy.loyalty_spend_summary(balance)
+    except Exception as exc:
+        logger.error("client loyalty offer lookup %s: %s", client_id, exc)
+        return False
+    affordable = list(spend.get("affordable_services") or [])
+    if balance <= 0 or not affordable:
+        return False
+    shown = affordable[-4:]
+    options = "; ".join(
+        f'{item["title"]} — {int(item["price"])} баллов'
+        for item in shown
+    )
+    text = (
+        f"У вас {balance} баллов. Ими уже можно оплатить один из уходов: "
+        f"{options}. За одну запись баллами оплачивается один уход. "
+        "Выберите подходящий вариант ниже — помогу добавить его к записи."
+    )
+    signature = "|".join(
+        f'{item.get("id") or item.get("title")}:{item.get("price")}'
+        for item in affordable
+    )
+    return _store_assistant_message_in_chat(
+        int(chat_id),
+        text,
+        mode="client",
+        action={
+            "type": "open_booking",
+            "label": "Выбрать уход",
+            "screen": "book",
+        },
+        widget="loyalty",
+        dedupe_key=f"loyalty-spend:{client_id}:{balance}:{signature}"[:160],
+    )
+
+
+def _ensure_client_repeat_booking_offer(chat_id: int) -> bool:
+    """Offer one-click repeat booking from confirmed visit history."""
+    try:
+        client = database.get_client(int(chat_id))
+    except Exception:
+        client = None
+    if not isinstance(client, dict):
+        return False
+    client_id = int(client.get("id") or 0)
+    phone = str(client.get("phone") or "").strip()
+    if not client_id or len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return False
+    try:
+        usual = memory.get_usual_booking(int(chat_id), warm=True)
+    except Exception as exc:
+        logger.error("client repeat offer lookup %s: %s", client_id, exc)
+        return False
+    if not isinstance(usual, dict) or usual.get("source") != "yclients_history":
+        return False
+    widget_data = _repeat_booking_widget_data(usual)
+    if not widget_data:
+        return False
+
+    signature = "|".join([
+        str(usual.get("visit_date") or "")[:19],
+        str(usual.get("master_id") or usual.get("master_name") or ""),
+        ",".join(widget_data.get("service_ids") or widget_data.get("service_names") or []),
+    ])
+    dedupe_key = f"repeat-booking:{client_id}:{signature}"[:160]
+    if _chat_has_assistant_dedupe_key(int(chat_id), "client", dedupe_key):
+        return False
+
+    # Do not push a new repeat offer while the client already has an active visit.
+    try:
+        today = date.today().isoformat()
+        for booking in _yc.get_client_bookings(phone, days_back=1, days_ahead=90) or []:
+            if not isinstance(booking, dict) or booking.get("error") or booking.get("message"):
+                continue
+            visit_day = str(booking.get("datetime") or booking.get("date") or "")[:10]
+            attendance = booking.get("attendance", booking.get("status"))
+            try:
+                attendance = int(attendance)
+            except (TypeError, ValueError):
+                attendance = 0
+            if visit_day >= today and attendance not in (-1, 1):
+                return False
+    except Exception as exc:
+        # The attended-history result is still authoritative. A temporary CRM
+        # error must not make MAYA invent data, but it need not disable repeat.
+        logger.warning("client repeat upcoming lookup %s: %s", client_id, exc)
+
+    service_text = str(usual.get("service_text") or "").strip()
+    text = (
+        f"Вам как в прошлый раз: к {usual['master_name']}"
+        f"{f' на {service_text}' if service_text else ''}?"
+    )
+    return _store_assistant_message_in_chat(
+        int(chat_id),
+        text,
+        mode="client",
+        action={
+            "type": "repeat_booking",
+            "label": "Да, как в прошлый раз",
+        },
+        dedupe_key=dedupe_key,
+    )
 
 
 _TELEGRAM_CHAT_MIRROR_BOT_IDS: set[int] = set()
@@ -8569,6 +8831,9 @@ async def chat_history_handler(request: web.Request) -> web.Response:
 
     chat_mode = _chat_effective_mode(body, chat_id)
     history_key = _chat_history_key(chat_id, chat_mode)
+    if chat_mode == "client":
+        await asyncio.to_thread(_ensure_client_loyalty_chat_offer, chat_id)
+        await asyncio.to_thread(_ensure_client_repeat_booking_offer, chat_id)
     conversations = load_conversations()
     full_history, migrated = _ensure_chat_history_ids(
         list(conversations.get(history_key) or [])
@@ -8967,6 +9232,30 @@ async def chat_handler(request: web.Request) -> web.Response:
             "contact_request": False,
             "transcript": transcript or "",
         })
+
+    repeat_shortcut = None
+    if _allow_client_chat_shortcuts(body, chat_id, message):
+        repeat_shortcut = _client_repeat_booking_decision(chat_id, message, history)
+    if repeat_shortcut:
+        safe_message = anonymizer.redact_pii(message)
+        history.append(_user_history_item(safe_message))
+        history.append(_assistant_history_item(
+            repeat_shortcut["reply"],
+            action=repeat_shortcut.get("action"),
+            widget=repeat_shortcut.get("widget"),
+            widget_data=repeat_shortcut.get("widget_data"),
+        ))
+        conversations[history_key] = history
+        save_conversations(conversations)
+        out = {
+            "reply": repeat_shortcut["reply"],
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        for key in ("action", "widget", "widget_data"):
+            if repeat_shortcut.get(key):
+                out[key] = repeat_shortcut[key]
+        return _saved_chat_response(out)
 
     client_shortcut = None
     if _allow_client_chat_shortcuts(body, chat_id, message):
@@ -9450,6 +9739,30 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             "contact_request": False,
             "transcript": transcript or "",
         })
+
+    repeat_shortcut = None
+    if _allow_client_chat_shortcuts(body, chat_id, message):
+        repeat_shortcut = _client_repeat_booking_decision(chat_id, message, history)
+    if repeat_shortcut:
+        safe_message = anonymizer.redact_pii(message)
+        history.append(_user_history_item(safe_message))
+        history.append(_assistant_history_item(
+            repeat_shortcut["reply"],
+            action=repeat_shortcut.get("action"),
+            widget=repeat_shortcut.get("widget"),
+            widget_data=repeat_shortcut.get("widget_data"),
+        ))
+        conversations[history_key] = history
+        save_conversations(conversations)
+        out = {
+            "reply": repeat_shortcut["reply"],
+            "contact_request": False,
+            "transcript": transcript or "",
+        }
+        for key in ("action", "widget", "widget_data"):
+            if repeat_shortcut.get(key):
+                out[key] = repeat_shortcut[key]
+        return _saved_chat_response(out)
 
     client_shortcut = None
     if _allow_client_chat_shortcuts(body, chat_id, message):

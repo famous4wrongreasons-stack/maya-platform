@@ -208,6 +208,51 @@ class LoyaltyBackfillTests(unittest.TestCase):
             900,
         )
 
+    def test_spend_summary_selects_best_and_next_current_service(self):
+        catalog = [
+            {"id": 1, "title": "Патчи", "price_min": 100, "price_max": 100},
+            {"id": 2, "title": "Массаж", "price_min": 450, "price_max": 450},
+            {"id": 3, "title": "Spa для лица", "price_min": 1200, "price_max": 1200},
+        ]
+
+        summary = self.loyalty.loyalty_spend_summary(600, catalog)
+
+        self.assertEqual(summary["balance"], 600)
+        self.assertEqual(summary["best_service"]["title"], "Массаж")
+        self.assertEqual(summary["next_service"]["title"], "Spa для лица")
+        self.assertEqual(summary["next_service"]["points_needed"], 600)
+        self.assertEqual(summary["redemption_rule"], "one_care_service_per_visit")
+
+    def test_current_care_service_uses_catalog_price(self):
+        catalog = [{
+            "id": 9,
+            "title": "Массаж",
+            "price_min": 475,
+            "price_max": 475,
+        }]
+
+        service = self.loyalty.current_care_service("массаж", catalog)
+
+        self.assertEqual(service["id"], 9)
+        self.assertEqual(service["price"], 475)
+
+    def test_booking_redemption_uses_the_confirmed_current_quote(self):
+        self.database.loyalty_redemption_exists = lambda *_args: False
+        self.loyalty._yc.mark_record_loyalty_redemption = lambda **_kwargs: {
+            "success": True,
+            "matched_service": True,
+        }
+
+        result = self.loyalty.apply_redemption_for_booking(
+            client_id=25,
+            record_id=77,
+            service_titles=["Массаж"],
+            service_quotes=[{"title": "Массаж", "price": 475}],
+        )
+
+        self.assertEqual(result["total_points"], 475)
+        self.assertEqual(self.database.transactions[-1]["points"], -475)
+
     def test_real_card_import_works_when_fallback_backfill_is_disabled(self):
         self.loyalty.BACKFILL_ENABLED = False
         self.loyalty._yc.find_client_by_phone = lambda _phone: {"id": 104600668}

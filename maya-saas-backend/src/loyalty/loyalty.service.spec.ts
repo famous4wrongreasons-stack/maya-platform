@@ -52,6 +52,29 @@ describe('LoyaltyService', () => {
       sold_amount: 62150,
       currency: 'RUB',
     });
+    const getServicesMock = jest.fn().mockResolvedValue([
+      {
+        id: 'service-massage',
+        name: 'Массаж',
+        price: 450,
+        duration_minutes: 20,
+        currency: 'RUB',
+      },
+      {
+        id: 'service-spa',
+        name: 'SPA для лица',
+        price: 1200,
+        duration_minutes: 40,
+        currency: 'RUB',
+      },
+      {
+        id: 'service-premium',
+        name: 'Премиальный комплекс',
+        price: 2500,
+        duration_minutes: 90,
+        currency: 'RUB',
+      },
+    ]);
     const prisma = {
       loyaltyAccount: {
         findUnique: loyaltyFindUniqueMock,
@@ -68,6 +91,7 @@ describe('LoyaltyService', () => {
     const crmService = {
       getCalendarSource: getCalendarSourceMock,
       getClientLoyalty: getClientLoyaltyMock,
+      getServices: getServicesMock,
     } as unknown as CrmService;
     const encryptionService = {
       encrypt: jest.fn((value: string) => `encrypted:${value}`),
@@ -89,6 +113,7 @@ describe('LoyaltyService', () => {
       getTenantUserOrThrowMock,
       getCalendarSourceMock,
       getClientLoyaltyMock,
+      getServicesMock,
       getUpsertTenantId: () => upsertTenantId,
       getUpsertUserId: () => upsertUserId,
       getUpsertBalance: () => upsertBalance,
@@ -117,10 +142,40 @@ describe('LoyaltyService', () => {
       sync_status: 'current',
       stale: false,
       sold_amount: 62150,
+      spend_options: {
+        status: 'available',
+        verification_required: true,
+        best_service: {
+          id: 'service-spa',
+          points_required: 1200,
+        },
+        next_service: {
+          id: 'service-premium',
+          points_needed: 367,
+        },
+      },
     });
     expect(setup.getUpsertTenantId()).toBe('tenant-a');
     expect(setup.getUpsertUserId()).toBe('client-a');
     expect(setup.getUpsertBalance()).toBe(2133);
+  });
+
+  it('keeps the confirmed balance available when the service catalog fails', async () => {
+    const setup = createService();
+    setup.getServicesMock.mockRejectedValueOnce(new Error('Catalog timeout'));
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(result).toMatchObject({
+      balance: 2133,
+      authoritative: 'crm',
+      spend_options: {
+        status: 'catalog_unavailable',
+        items: [],
+      },
+    });
   });
 
   it('returns a cached CRM balance as stale instead of inventing zero', async () => {

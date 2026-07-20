@@ -499,6 +499,20 @@ export class AiToolHandlerService {
 
   private safeLoyalty(value: unknown) {
     const loyalty = this.record(value);
+    const spend = this.record(loyalty.spend_options);
+    const items = Array.isArray(spend.items)
+      ? spend.items.slice(0, 6).map((item) => {
+          const service = this.record(item);
+          return {
+            id: service.id ?? null,
+            name: service.name ?? null,
+            price: service.price ?? null,
+            points_required: service.points_required ?? null,
+            currency: service.currency ?? loyalty.currency ?? 'RUB',
+            category: service.category ?? null,
+          };
+        })
+      : [];
     return {
       balance: loyalty.balance ?? null,
       currency: loyalty.currency ?? 'RUB',
@@ -507,6 +521,14 @@ export class AiToolHandlerService {
       sync_status: loyalty.sync_status ?? null,
       stale: loyalty.stale ?? null,
       synced_at: loyalty.synced_at ?? null,
+      spend_options: {
+        status: spend.status ?? null,
+        basis: spend.basis ?? null,
+        verification_required: spend.verification_required ?? true,
+        items,
+        best_service: spend.best_service ?? null,
+        next_service: spend.next_service ?? null,
+      },
     };
   }
 

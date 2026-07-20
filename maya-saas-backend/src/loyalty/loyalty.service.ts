@@ -35,25 +35,29 @@ export class LoyaltyService {
     const calendarSource =
       await this.crmService.getCalendarSource(scopedTenantId);
 
-    if (calendarSource === CalendarSource.EXTERNAL) {
-      return this.getExternalAccount(scopedTenantId, user.id, user.phone);
-    }
+    const loyalty =
+      calendarSource === CalendarSource.EXTERNAL
+        ? await this.getExternalAccount(scopedTenantId, user.id, user.phone)
+        : this.serializeAccount(
+            await this.prisma.loyaltyAccount.upsert({
+              where: {
+                userId_tenantId: { userId, tenantId: scopedTenantId },
+              },
+              update: {},
+              create: {
+                tenantId: scopedTenantId,
+                userId,
+                source: CalendarSource.INTERNAL,
+              },
+            }),
+            {
+              authoritative: 'maya',
+              syncStatus: 'current',
+              stale: false,
+            },
+          );
 
-    const account = await this.prisma.loyaltyAccount.upsert({
-      where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
-      update: {},
-      create: {
-        tenantId: scopedTenantId,
-        userId,
-        source: CalendarSource.INTERNAL,
-      },
-    });
-
-    return this.serializeAccount(account, {
-      authoritative: 'maya',
-      syncStatus: 'current',
-      stale: false,
-    });
+    return this.withSpendOptions(scopedTenantId, loyalty);
   }
 
   async listTransactions(tenantId: string, userId: string, limit = 50) {
@@ -309,11 +313,103 @@ export class LoyaltyService {
       balance: 0,
       currency: 'RUB',
       source: 'external_crm',
-      authoritative: 'crm',
+      authoritative: 'crm' as const,
       sync_status: syncStatus,
       stale: false,
       synced_at: null,
     };
+  }
+
+  private async withSpendOptions<
+    T extends {
+      balance: number;
+      currency: string;
+      authoritative: 'crm' | 'maya';
+      stale: boolean;
+    },
+  >(tenantId: string, loyalty: T) {
+    const balance = Math.max(0, Number(loyalty.balance) || 0);
+    const base = {
+      basis: 'price_estimate',
+      points_to_currency_rate: 1,
+      verification_required: loyalty.authoritative === 'crm',
+      items: [] as Array<{
+        id: string;
+        name: string;
+        price: number;
+        points_required: number;
+        currency: string;
+        category: string | null;
+      }>,
+      best_service: null as null | {
+        id: string;
+        name: string;
+        price: number;
+        points_required: number;
+        currency: string;
+        category: string | null;
+      },
+      next_service: null as null | {
+        id: string;
+        name: string;
+        price: number;
+        points_required: number;
+        points_needed: number;
+        currency: string;
+        category: string | null;
+      },
+    };
+    if (loyalty.stale) {
+      return {
+        ...loyalty,
+        spend_options: { ...base, status: 'balance_unverified' },
+      };
+    }
+    if (balance <= 0) {
+      return { ...loyalty, spend_options: { ...base, status: 'empty' } };
+    }
+
+    try {
+      const priced = (await this.crmService.getServices(tenantId))
+        .filter(
+          (service) => Number.isFinite(service.price) && service.price > 0,
+        )
+        .map((service) => ({
+          id: service.id,
+          name: service.name,
+          price: service.price,
+          points_required: Math.ceil(service.price),
+          currency: service.currency || loyalty.currency,
+          category: service.category ?? null,
+        }));
+      const items = priced
+        .filter((service) => service.points_required <= balance)
+        .sort((left, right) => right.points_required - left.points_required)
+        .slice(0, 6);
+      const next = priced
+        .filter((service) => service.points_required > balance)
+        .sort((left, right) => left.points_required - right.points_required)[0];
+      return {
+        ...loyalty,
+        spend_options: {
+          ...base,
+          status: items.length > 0 ? 'available' : 'keep_earning',
+          items,
+          best_service: items[0] ?? null,
+          next_service: next
+            ? {
+                ...next,
+                points_needed: next.points_required - balance,
+              }
+            : null,
+        },
+      };
+    } catch {
+      return {
+        ...loyalty,
+        spend_options: { ...base, status: 'catalog_unavailable' },
+      };
+    }
   }
 
   private serializeAccount(
