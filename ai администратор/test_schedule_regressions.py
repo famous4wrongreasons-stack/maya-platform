@@ -197,6 +197,97 @@ class ScheduleRegressionTests(unittest.TestCase):
 
         self.assertEqual([slot["time"] for slot in got], ["14:00"])
 
+    def test_schedule_change_closes_day_with_new_yclients_endpoint(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        applied = {"value": False}
+        writes = []
+
+        def _schedule(*_args, **_kwargs):
+            return [{
+                "date": "2099-07-20",
+                "is_working": 0 if applied["value"] else 1,
+                "slots": [] if applied["value"] else [{"from": "10:00", "to": "20:00"}],
+            }]
+
+        def _put(endpoint, payload):
+            writes.append((endpoint, payload))
+            applied["value"] = True
+            return {"success": True, "data": []}
+
+        api.get_staff_schedule = _schedule
+        api._records_for_schedule_change = lambda *_args, **_kwargs: []
+        api._put = _put
+
+        preview = api.change_staff_day_schedule(7, "2099-07-20", "close_day")
+        self.assertEqual(preview["status"], "preview")
+        self.assertEqual(preview["proposed_slots"], [])
+        self.assertEqual(writes, [])
+
+        result = api.change_staff_day_schedule(7, "2099-07-20", "close_day", apply=True)
+        self.assertTrue(result["success"])
+        self.assertFalse(result["is_working"])
+        self.assertEqual(writes[0][0], "company/1/staff/schedule")
+        self.assertEqual(writes[0][1], {
+            "schedules_to_set": [],
+            "schedules_to_delete": [{"staff_id": 7, "dates": ["2099-07-20"]}],
+        })
+
+    def test_schedule_change_adds_break_as_two_work_intervals(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        api.get_staff_schedule = lambda *_args, **_kwargs: [{
+            "date": "2099-07-20",
+            "is_working": 1,
+            "slots": [{"from": "10:00", "to": "20:00"}],
+        }]
+        api._records_for_schedule_change = lambda *_args, **_kwargs: []
+
+        result = api.change_staff_day_schedule(
+            7,
+            "2099-07-20",
+            "set_break",
+            break_start="14:00",
+            break_end="15:00",
+        )
+
+        self.assertEqual(result["proposed_slots"], [
+            {"from": "10:00", "to": "14:00"},
+            {"from": "15:00", "to": "20:00"},
+        ])
+
+    def test_schedule_change_blocks_existing_record_outside_new_hours(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        api.get_staff_schedule = lambda *_args, **_kwargs: [{
+            "date": "2099-07-20",
+            "is_working": 1,
+            "slots": [{"from": "10:00", "to": "20:00"}],
+        }]
+        api._records_for_schedule_change = lambda *_args, **_kwargs: [{
+            "id": 1001,
+            "datetime": "2099-07-20T18:30:00+03:00",
+            "seance_length": 3600,
+            "attendance": 0,
+            "deleted": False,
+        }]
+        writes = []
+        api._put = lambda endpoint, payload: writes.append((endpoint, payload))
+
+        result = api.change_staff_day_schedule(
+            7,
+            "2099-07-20",
+            "set_hours",
+            work_start="10:00",
+            work_end="18:00",
+            apply=True,
+        )
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["error"], "existing_records_conflict")
+        self.assertEqual(result["conflict_times"], ["18:30"])
+        self.assertEqual(writes, [])
+
     def test_request_booking_recheck_rejects_time_missing_in_live_slots(self):
         claude_ai = _load_claude_module()
         claude_ai.yclients.get_available_slots = lambda staff_id, date, service_ids=None: [

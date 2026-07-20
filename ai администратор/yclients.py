@@ -287,6 +287,325 @@ class YClientsAPI:
         except Exception as e:
             return [{"error": str(e)}]   # ошибку наверх, но в кэш НЕ кладём
 
+    @staticmethod
+    def _schedule_time_minutes(value: str) -> int:
+        """Strict H:i parser used before any schedule mutation."""
+        raw = str(value or "").strip()
+        try:
+            parsed = datetime.strptime(raw, "%H:%M")
+        except ValueError as exc:
+            raise ValueError(f"Некорректное время '{raw}'. Нужен формат ЧЧ:ММ.") from exc
+        return parsed.hour * 60 + parsed.minute
+
+    @classmethod
+    def _normalise_schedule_slots(cls, slots: list[dict]) -> list[dict]:
+        """Validate, sort and merge touching work intervals."""
+        normalised = []
+        for slot in slots or []:
+            if not isinstance(slot, dict):
+                raise ValueError("Интервал графика должен содержать время начала и конца.")
+            start = str(slot.get("from") or "").strip()
+            end = str(slot.get("to") or "").strip()
+            start_min = cls._schedule_time_minutes(start)
+            end_min = cls._schedule_time_minutes(end)
+            if start_min >= end_min:
+                raise ValueError(f"Начало {start} должно быть раньше окончания {end}.")
+            normalised.append((start_min, end_min, start, end))
+
+        normalised.sort(key=lambda item: item[0])
+        result = []
+        for start_min, end_min, start, end in normalised:
+            if result:
+                previous_end = cls._schedule_time_minutes(result[-1]["to"])
+                if start_min < previous_end:
+                    raise ValueError("Рабочие интервалы не должны пересекаться.")
+                if start_min == previous_end:
+                    result[-1]["to"] = end
+                    continue
+            result.append({"from": start, "to": end})
+        return result
+
+    def _clear_staff_day_caches(self, staff_id: int, date_str: str) -> None:
+        staff_marker = f":{int(staff_id)}:"
+        for key in list(_sched_cache):
+            if staff_marker in key and date_str in key:
+                _sched_cache.pop(key, None)
+        _day_records_cache.pop(
+            f"day_records:{self.company_id}:{int(staff_id)}:{date_str}", None
+        )
+
+    def _records_for_schedule_change(self, staff_id: int, date_str: str) -> list[dict]:
+        """Fetch records without the fail-open behaviour used by report helpers."""
+        records = []
+        seen = set()
+        page = 1
+        while page <= 25:
+            data = self._get(
+                f"records/{self.company_id}",
+                {
+                    "staff_id": int(staff_id),
+                    "start_date": date_str,
+                    "end_date": date_str,
+                    "count": 200,
+                    "page": page,
+                },
+            )
+            batch = data.get("data", []) or []
+            for record in batch:
+                if not isinstance(record, dict):
+                    continue
+                record_id = record.get("id")
+                if record_id is not None and record_id in seen:
+                    continue
+                if record_id is not None:
+                    seen.add(record_id)
+                records.append(record)
+            if len(batch) < 200:
+                break
+            page += 1
+        return records
+
+    @classmethod
+    def _record_conflicts_with_slots(
+        cls, record: dict, date_str: str, slots: list[dict]
+    ) -> tuple[bool, str | None]:
+        if record.get("deleted") or record.get("attendance") == -1:
+            return False, None
+        raw = str(record.get("datetime") or record.get("date") or "").strip()
+        if not raw:
+            raise ValueError("У существующей записи нет времени начала.")
+        try:
+            starts_at = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ValueError("Не удалось проверить время существующей записи.") from exc
+        if starts_at.date().isoformat() != date_str:
+            return False, None
+        try:
+            duration = int(record.get("length") or record.get("seance_length") or 3600)
+        except (TypeError, ValueError):
+            duration = 3600
+        duration = max(duration, 60)
+        ends_at = starts_at + timedelta(seconds=duration)
+        now = datetime.now(starts_at.tzinfo) if starts_at.tzinfo else datetime.now()
+        if ends_at <= now:
+            return False, None
+
+        start_min = starts_at.hour * 60 + starts_at.minute
+        end_min = start_min + max(1, int((ends_at - starts_at).total_seconds() / 60))
+        fits = any(
+            cls._schedule_time_minutes(slot["from"]) <= start_min
+            and end_min <= cls._schedule_time_minutes(slot["to"])
+            for slot in slots
+        )
+        return (not fits), starts_at.strftime("%H:%M")
+
+    def change_staff_day_schedule(
+        self,
+        staff_id: int,
+        date_str: str,
+        action: str,
+        work_start: str = None,
+        work_end: str = None,
+        break_start: str = None,
+        break_end: str = None,
+        apply: bool = False,
+    ) -> dict:
+        """Preview or apply one safe schedule change for a staff member.
+
+        Supported actions: close_day, set_hours and set_break. Existing future
+        records are checked before the PUT and are never moved or deleted here.
+        """
+        try:
+            target_date = datetime.strptime(str(date_str or ""), "%Y-%m-%d").date()
+        except ValueError:
+            return {"success": False, "error": "invalid_date", "message": "Нужна дата YYYY-MM-DD."}
+        if target_date < datetime.now().date():
+            return {
+                "success": False,
+                "error": "past_date",
+                "message": "График за прошедший день менять через MAYA нельзя.",
+            }
+
+        action = str(action or "").strip().lower()
+        if action not in {"close_day", "set_hours", "set_break"}:
+            return {"success": False, "error": "invalid_action", "message": "Неизвестное изменение графика."}
+
+        if apply:
+            # Confirmation may arrive minutes after the preview; re-read live state.
+            self._clear_staff_day_caches(int(staff_id), date_str)
+        current_rows = self.get_staff_schedule(int(staff_id), date_str, date_str)
+        if current_rows and isinstance(current_rows[0], dict) and current_rows[0].get("error"):
+            return {
+                "success": False,
+                "error": "schedule_unavailable",
+                "message": "Не удалось получить текущий график из YClients.",
+            }
+        current = next(
+            (
+                row for row in (current_rows or [])
+                if isinstance(row, dict) and str(row.get("date") or "")[:10] == date_str
+            ),
+            {},
+        )
+        try:
+            current_slots = self._normalise_schedule_slots(current.get("slots") or [])
+            if action == "close_day":
+                proposed_slots = []
+            elif action == "set_hours":
+                if not work_start or not work_end:
+                    return {
+                        "success": False,
+                        "error": "missing_hours",
+                        "message": "Укажите новое начало и конец смены.",
+                    }
+                new_start = self._schedule_time_minutes(work_start)
+                new_end = self._schedule_time_minutes(work_end)
+                if new_start >= new_end:
+                    raise ValueError("Начало смены должно быть раньше окончания.")
+                # Preserve existing breaks while changing the outside bounds.
+                proposed_slots = []
+                for slot in current_slots:
+                    start = max(new_start, self._schedule_time_minutes(slot["from"]))
+                    end = min(new_end, self._schedule_time_minutes(slot["to"]))
+                    if start < end:
+                        proposed_slots.append(
+                            {"from": f"{start // 60:02d}:{start % 60:02d}", "to": f"{end // 60:02d}:{end % 60:02d}"}
+                        )
+                if not proposed_slots:
+                    proposed_slots = [{"from": work_start, "to": work_end}]
+            else:
+                if not break_start or not break_end:
+                    return {
+                        "success": False,
+                        "error": "missing_break",
+                        "message": "Укажите начало и конец перерыва.",
+                    }
+                if not current_slots:
+                    if not work_start or not work_end:
+                        return {
+                            "success": False,
+                            "error": "missing_workday",
+                            "message": "У мастера нет рабочей смены на эту дату. Сначала укажите часы смены.",
+                        }
+                    current_slots = self._normalise_schedule_slots(
+                        [{"from": work_start, "to": work_end}]
+                    )
+                pause_from = self._schedule_time_minutes(break_start)
+                pause_to = self._schedule_time_minutes(break_end)
+                if pause_from >= pause_to:
+                    raise ValueError("Начало перерыва должно быть раньше окончания.")
+                proposed_slots = []
+                touched = False
+                for slot in current_slots:
+                    start = self._schedule_time_minutes(slot["from"])
+                    end = self._schedule_time_minutes(slot["to"])
+                    if pause_to <= start or pause_from >= end:
+                        proposed_slots.append(slot)
+                        continue
+                    touched = True
+                    if start < pause_from:
+                        proposed_slots.append({"from": slot["from"], "to": break_start})
+                    if pause_to < end:
+                        proposed_slots.append({"from": break_end, "to": slot["to"]})
+                if not touched:
+                    return {
+                        "success": False,
+                        "error": "break_outside_shift",
+                        "message": "Перерыв не попадает в текущую рабочую смену.",
+                    }
+            proposed_slots = self._normalise_schedule_slots(proposed_slots)
+        except ValueError as exc:
+            return {"success": False, "error": "invalid_time", "message": str(exc)}
+
+        try:
+            records = self._records_for_schedule_change(int(staff_id), date_str)
+            conflicts = []
+            for record in records:
+                conflicts_with_change, time_label = self._record_conflicts_with_slots(
+                    record, date_str, proposed_slots
+                )
+                if conflicts_with_change and time_label:
+                    conflicts.append(time_label)
+        except Exception as exc:
+            logger.warning("schedule record check failed for staff %s on %s: %s", staff_id, date_str, exc)
+            return {
+                "success": False,
+                "error": "record_check_failed",
+                "message": "Не удалось безопасно проверить существующие записи. График не изменён.",
+            }
+
+        preview = {
+            "success": True,
+            "status": "preview",
+            "confirmation_required": True,
+            "staff_id": int(staff_id),
+            "date": date_str,
+            "action": action,
+            "current_slots": current_slots,
+            "proposed_slots": proposed_slots,
+            "conflict_count": len(conflicts),
+            "conflict_times": sorted(set(conflicts)),
+        }
+        if conflicts:
+            preview.update({
+                "success": False,
+                "status": "blocked",
+                "confirmation_required": False,
+                "error": "existing_records_conflict",
+                "message": "В новое расписание не помещаются существующие записи. Они не изменены.",
+            })
+            return preview
+        if not apply:
+            return preview
+
+        payload = {"schedules_to_set": [], "schedules_to_delete": []}
+        if proposed_slots:
+            payload["schedules_to_set"].append({
+                "staff_id": int(staff_id),
+                "dates": [date_str],
+                "slots": proposed_slots,
+            })
+        else:
+            payload["schedules_to_delete"].append({
+                "staff_id": int(staff_id),
+                "dates": [date_str],
+            })
+        try:
+            response = self._put(f"company/{self.company_id}/staff/schedule", payload)
+        except Exception as exc:
+            logger.warning("schedule update failed for staff %s on %s: %s", staff_id, date_str, exc)
+            return {
+                "success": False,
+                "error": "schedule_update_failed",
+                "message": "YClients не принял изменение графика.",
+            }
+        if not isinstance(response, dict) or response.get("success") is False:
+            return {
+                "success": False,
+                "error": "schedule_update_failed",
+                "message": "YClients не подтвердил изменение графика.",
+            }
+
+        self._clear_staff_day_caches(int(staff_id), date_str)
+        verified_rows = self.get_staff_schedule(int(staff_id), date_str, date_str)
+        verified = next(
+            (
+                row for row in (verified_rows or [])
+                if isinstance(row, dict) and str(row.get("date") or "")[:10] == date_str
+            ),
+            {},
+        )
+        verified_slots = self._normalise_schedule_slots(verified.get("slots") or [])
+        return {
+            "success": True,
+            "status": "applied",
+            "staff_id": int(staff_id),
+            "date": date_str,
+            "is_working": bool(proposed_slots),
+            "slots": proposed_slots,
+            "verified": verified_slots == proposed_slots,
+        }
+
     def who_works_on(self, date_str: str) -> dict:
         """
         Кто из мастеров работает в конкретный день. Тянет реальный график

@@ -113,6 +113,15 @@ class ChatRoutingTests(unittest.TestCase):
         sys.modules.clear()
         sys.modules.update(self._saved_modules)
 
+    def test_client_greeting_gets_warm_shortcut_without_ai_or_booking_lookup(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._client_chat_shortcut("Привет")
+
+        self.assertIn("Рада вас видеть", reply)
+        self.assertIn("записью", reply)
+        self.assertIsNone(action)
+
     def test_master_profit_question_is_not_client_team_shortcut(self):
         ws = _load_webhook_server()
 

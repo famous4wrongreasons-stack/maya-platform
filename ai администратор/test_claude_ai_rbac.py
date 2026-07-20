@@ -84,6 +84,18 @@ def _load_claude_ai():
         def get_services(self, *args, **kwargs):
             return []
 
+        def get_masters(self, *args, **kwargs):
+            return [{"id": 7, "name": "Стас Мосин"}]
+
+        def change_staff_day_schedule(self, **kwargs):
+            return {
+                "success": True,
+                "status": "applied" if kwargs.get("apply") else "preview",
+                "staff_id": kwargs.get("staff_id"),
+                "date": kwargs.get("date_str"),
+                "proposed_slots": [],
+            }
+
     fake_yclients.YClientsAPI = _DummyYClientsAPI
     fake_yclients.get_schedule_from_file = lambda *args, **kwargs: []
     fake_yclients.get_day_hours = lambda *args, **kwargs: None
@@ -726,6 +738,48 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(names, {"get_services", "get_masters", "show_chat_widget"})
         self.assertNotIn("check_birthday_promo", names)
 
+    def test_internal_client_policy_does_not_turn_greeting_into_availability_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        policy = (
+            "\n\n[Это клиентский кабинет MAYA. Здесь отвечай про запись, услуги, "
+            "мастеров и свободное время.]"
+        )
+        messages = [{"role": "user", "content": "Привет" + policy}]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "client", user_id=339683535,
+        )
+        body = claude_ai._responses_body(
+            messages,
+            user_id=339683535,
+            role="founder",
+            model="gpt-5.5-pro",
+            mode="client",
+        )
+
+        self.assertIsNone(requirement)
+        self.assertEqual(
+            {tool["name"] for tool in body["tools"]},
+            {"get_services", "get_masters", "show_chat_widget"},
+        )
+
+    def test_real_availability_request_remains_grounded_with_internal_policy(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [{
+            "role": "user",
+            "content": (
+                "Покажи ближайшее свободное окно"
+                "\n\n[Это клиентский кабинет MAYA. Здесь отвечай про свободное время.]"
+            ),
+        }]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "client", user_id=339683535,
+        )
+
+        self.assertIsNotNone(requirement)
+        self.assertEqual(requirement.domain, "booking_availability")
+
     def test_booking_client_request_keeps_booking_tools(self):
         claude_ai, _logs = _load_claude_ai()
 
@@ -862,6 +916,28 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("status=conflict", prompt)
         self.assertIn("infer_staff_names", prompt)
 
+    def test_client_prompt_adds_admin_persona_after_security_core(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        prompt = claude_ai._build_system_prompt(None, "client", "client")[0]["text"]
+
+        self.assertTrue(prompt.startswith("test"))
+        self.assertIn("── РОЛЬ: АДМИНИСТРАТОР ──", prompt)
+        self.assertIn("request_client_contact", prompt)
+        self.assertNotIn("── РОЛЬ: ДИРЕКТОР ──", prompt)
+        self.assertLess(prompt.index("test"), prompt.index("── РОЛЬ: АДМИНИСТРАТОР ──"))
+
+    def test_staff_prompt_adds_director_persona_after_security_core(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        prompt = claude_ai._build_system_prompt(None, "founder", "staff")[0]["text"]
+
+        self.assertTrue(prompt.startswith("test"))
+        self.assertIn("── РОЛЬ: ДИРЕКТОР ──", prompt)
+        self.assertIn("ТОЛЬКО из результатов инструментов", prompt)
+        self.assertNotIn("── РОЛЬ: АДМИНИСТРАТОР ──", prompt)
+        self.assertLess(prompt.index("test"), prompt.index("── РОЛЬ: ДИРЕКТОР ──"))
+
     def test_staff_surface_blocks_booking_tool_even_if_called_directly(self):
         claude_ai, logs = _load_claude_ai()
 
@@ -884,6 +960,106 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "request_booking")
         self.assertFalse(logs[-1][4])
         self.assertEqual(logs[-1][5], "surface")
+
+    def test_founder_can_preview_staff_schedule_change(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(claude_ai._execute_tool(
+            "manage_staff_schedule",
+            {
+                "staff_name": "Стас",
+                "date": "2099-07-20",
+                "action": "close_day",
+                "apply": False,
+            },
+            user_id=948205934,
+            mode="staff",
+        ))
+
+        self.assertEqual(result["status"], "preview")
+        self.assertEqual(result["staff_id"], 7)
+        self.assertEqual(result["staff_name"], "Стас")
+        self.assertEqual(logs[-1][3], "write")
+        self.assertTrue(logs[-1][4])
+
+    def test_schedule_apply_is_ignored_without_new_user_confirmation(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        result = json.loads(claude_ai._execute_tool(
+            "manage_staff_schedule",
+            {
+                "staff_name": "Стас",
+                "date": "2099-07-20",
+                "action": "close_day",
+                "apply": True,
+            },
+            user_id=948205934,
+            mode="staff",
+        ))
+
+        self.assertEqual(result["status"], "preview")
+        self.assertTrue(result["apply_ignored"])
+
+    def test_schedule_confirmation_requires_prior_preview_and_new_yes(self):
+        claude_ai, _logs = _load_claude_ai()
+        tool_use = claude_ai._ToolUse(
+            id="schedule",
+            name="manage_staff_schedule",
+            input={"apply": True},
+        )
+        messages = [
+            {"role": "assistant", "content": "Стас, 2099-07-20: график был 10:00–20:00; станет день закрыт. Применить?"},
+            {"role": "user", "content": "Да, применяй"},
+            {"role": "assistant", "content": claude_ai._assistant_blocks("", [tool_use])},
+        ]
+
+        self.assertTrue(claude_ai._schedule_confirmation_verified(messages))
+
+        messages[1]["content"] = "Закрой Стасу завтра"
+        self.assertFalse(claude_ai._schedule_confirmation_verified(messages))
+
+    def test_manager_cannot_change_staff_schedule(self):
+        claude_ai, logs = _load_claude_ai()
+
+        result = json.loads(claude_ai._execute_tool(
+            "manage_staff_schedule",
+            {
+                "staff_name": "Стас",
+                "date": "2099-07-20",
+                "action": "close_day",
+            },
+            user_id=339683535,
+            mode="staff",
+        ))
+
+        self.assertIn("error", result)
+        self.assertEqual(logs[-1][1], "manager")
+        self.assertFalse(logs[-1][4])
+
+    def test_schedule_change_tool_only_appears_in_owner_staff_surface(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        staff_names = {
+            tool["function"]["name"]
+            for tool in claude_ai._tools_for_openai("founder", mode="staff")
+        }
+        client_names = {
+            tool["function"]["name"]
+            for tool in claude_ai._tools_for_openai("founder", mode="client")
+        }
+
+        self.assertIn("manage_staff_schedule", staff_names)
+        self.assertNotIn("manage_staff_schedule", client_names)
+
+    def test_director_prompt_requires_preview_then_confirmation(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        prompt = claude_ai._build_system_prompt(948205934, "founder", "staff")[0]["text"]
+
+        self.assertIn("manage_staff_schedule", prompt)
+        self.assertIn("apply=false", prompt)
+        self.assertIn("apply=true", prompt)
+        self.assertIn("Применить?", prompt)
 
 
 if __name__ == "__main__":

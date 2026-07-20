@@ -3468,7 +3468,6 @@ _PANEL_JOBS = {
     "leads":         ("lead_alerts",     "scan_and_alert",            "Алерты по зависшим заявкам",     "system"),
 }
 
-
 _OWNER_CLIENT_MESSAGE_JOBS = {"reactivation", "birthday", "cycle", "reviews"}
 _OWNER_JOB_APPROVAL_TTL_SECONDS = 15 * 60
 _OWNER_JOB_CONFIRM_RE = re.compile(
@@ -7201,6 +7200,11 @@ _BOOKING_START_ONLY_RE = re.compile(
     r"^\s*(?:хочу\s+)?(?:записаться|запиши(?:те)?\s+меня|запись)\s*[.!?]*\s*$",
     re.IGNORECASE,
 )
+_CLIENT_GREETING_ONLY_RE = re.compile(
+    r"^\s*(?:привет(?:ствую)?|здравствуй(?:те)?|доброе\s+утро|добрый\s+день|"
+    r"добрый\s+вечер|салют|хай)\s*[!.,?]*\s*$",
+    re.IGNORECASE,
+)
 _USUAL_MASTER_INTENT_RE = re.compile(
     r"(?:\b(?:мой|моему|моего|свой|своему|своего)\s+"
     r"(?:(?:постоянн|обычн|любим)\w*\s+)?(?:мастер|барбер)\w*\b|"
@@ -8099,6 +8103,12 @@ def _client_chat_shortcut(message: str) -> tuple[str, dict | None] | None:
     low = text.lower().replace("ё", "е")
     if not low:
         return None
+
+    if _CLIENT_GREETING_ONLY_RE.fullmatch(low):
+        return (
+            "Здравствуйте! Рада вас видеть. Помочь с записью или подсказать по услугам?",
+            None,
+        )
 
     if _BOOKING_START_ONLY_RE.fullmatch(low):
         return (

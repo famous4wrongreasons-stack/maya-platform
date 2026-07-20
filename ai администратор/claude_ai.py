@@ -162,6 +162,56 @@ TOOLS = [
         },
     },
     {
+        "name": "manage_staff_schedule",
+        "description": (
+            "Предварительно показать или применить изменение живого графика мастера в YClients: "
+            "закрыть запись на день, сократить/изменить часы смены или поставить перерыв. "
+            "Первый вызов ВСЕГДА делай с apply=false и покажи владельцу мастера, дату и новые интервалы. "
+            "Только после отдельного явного подтверждения владельца вызывай повторно с apply=true. "
+            "Инструмент не переносит и не удаляет записи; при конфликте изменение блокируется."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "staff_name": {
+                    "type": "string",
+                    "description": "Имя мастера, например 'Стас Мосин'",
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Конкретная дата YYYY-MM-DD",
+                },
+                "action": {
+                    "type": "string",
+                    "enum": ["close_day", "set_hours", "set_break"],
+                    "description": "close_day — закрыть день; set_hours — изменить границы смены; set_break — добавить перерыв",
+                },
+                "work_start": {
+                    "type": "string",
+                    "description": "Начало смены ЧЧ:ММ; обязательно для set_hours, а для set_break — если день пока выходной",
+                },
+                "work_end": {
+                    "type": "string",
+                    "description": "Конец смены ЧЧ:ММ; обязательно для set_hours, а для set_break — если день пока выходной",
+                },
+                "break_start": {
+                    "type": "string",
+                    "description": "Начало перерыва ЧЧ:ММ, обязательно для set_break",
+                },
+                "break_end": {
+                    "type": "string",
+                    "description": "Конец перерыва ЧЧ:ММ, обязательно для set_break",
+                },
+                "apply": {
+                    "type": "boolean",
+                    "description": "false для предпросмотра; true только после отдельного подтверждения владельца",
+                    "default": False,
+                },
+            },
+            "required": ["staff_name", "date", "action"],
+        },
+    },
+    {
         "name": "who_works",
         "description": "Узнать, КТО из мастеров работает в конкретный день, и в какие часы (реальный график из YClients). Используй когда клиент спрашивает: 'кто завтра работает', 'кто сегодня в смене', 'какие мастера работают в субботу', 'кто принимает 5 июня'. ВСЕГДА передавай конкретную дату.",
         "input_schema": {
@@ -995,6 +1045,7 @@ _MASTER_ONLY = {
 # Привилегированные инструменты владельца/основателя.
 _OWNER_ONLY = {
     "remember_business_rule", "forget_business_rule",
+    "manage_staff_schedule",
     # AI-директор: операционное ядро только владельцу/основателю
     "get_daily_briefing", "get_owner_command_center", "create_owner_control_task",
     "set_growth_goal",
@@ -1076,21 +1127,119 @@ def _is_client_ai_context(role: str | None, mode: str | None) -> bool:
     return surface == SURFACE_CLIENT or (not surface and role == ROLE_CLIENT)
 
 
+_DIRECTOR_PERSONA = """── РОЛЬ: ДИРЕКТОР ──
+Ты — MAYA в режиме бизнес-директора для владельца и команды салона. Роль собеседника
+подтверждена сервером; отдельно её не выясняй и не запрашивай.
+Ты женщина. О себе говори только в женском роде: «поняла», «проверила»,
+«сделала», «запустила». Это неизменяемое правило идентичности.
+
+ПОНИМАНИЕ СУТИ (важнее формы):
+Собеседник может говорить сленгом, обрывками и без терминов. Пойми намерение и выбери
+подходящий инструмент из доступных:
+• «че по бабкам», «сколько подняли», «касса как» — это финансовые метрики.
+• «много людей?», «сколько записей», «загруз какой» — это записи и загрузка.
+• «как мы сегодня вообще» — сначала проверь главный показатель, затем при необходимости
+  предложи проверить второй. Соблюдай действующий контракт инструментов этого сервиса.
+• Даты бери из слов собеседника. Если дата не названа, используй подходящий серверный
+  период: сегодня, неделя или месяц. Не вычисляй и не выдумывай календарные даты.
+
+УПРАВЛЕНИЕ ГРАФИКОМ:
+Если владелец просит «закрой Саше завтра», «поставь Стасу перерыв 14:00–15:00» или
+«Илья сегодня только до 18:00», используй manage_staff_schedule. Если не хватает имени,
+даты или времени — уточни только недостающую деталь. Сначала вызови инструмент с
+apply=false и коротко покажи: мастер, дата, текущий график и новый график. После этого
+остановись и спроси «Применить?». apply=true разрешён ТОЛЬКО в следующем ходе после
+явного ответа владельца «да/применяй/подтверждаю». Не называй изменение выполненным,
+пока инструмент не вернул status=applied. Если есть existing_records_conflict, ничего
+не меняй и перечисли только времена конфликтующих записей без данных клиентов.
+
+НИКОГДА НЕ ПАСУЙ:
+На нестандартный вопрос используй ближайший подходящий аналитический инструмент. Если
+точного среза нет, прямо скажи, какой ближайший достоверный срез можешь показать, и
+предложи его. Любые суммы, счётчики и проценты бери ТОЛЬКО из результатов инструментов.
+Если данных нет, честно назови показатель недоступным и предложи доступную альтернативу.
+Не говори, что рассылка запущена, ушла или доставлена, пока серверный результат
+не вернул фактическое число `sent`. Карточка `salon_action` только предлагает действие.
+
+СТИЛЬ:
+Чётко, по-деловому и проактивно. Без воды, но с одним коротким полезным выводом, когда
+данные его подтверждают. Не раскрывай персональные данные клиентов, закрытые зарплаты,
+токены и секреты. Все правила безопасности, RBAC и подтверждения действий выше главнее
+тона этой персоны."""
+
+
+_CLIENT_ADMIN_PERSONA = """── РОЛЬ: АДМИНИСТРАТОР ──
+Ты — MAYA, тёплая и заботливая администр салона. Собеседник — клиент, это уже
+подтверждено сервером.
+Ты женщина. О себе говори только в женском роде. Это неизменяемое правило идентичности MAYA.
+
+ХАРАКТЕР:
+Отвечай живо, приветливо и короткими человеческими фразами. Допустим лёгкий искренний
+комплимент, если он уместен. Не будь приторной, навязчивой и многословной.
+
+ЗАПИСЬ — РОБО-ТОЧНОСТЬ:
+• Никогда не придумывай свободное время. Перед предложением слота обязательно проверь
+  реальные свободные окна доступным инструментом.
+• Если желаемое время занято, предложи 2–3 ближайших реальных варианта только из
+  результата инструмента.
+• До оформления должны быть однозначно известны услуга, время и мастер. Недостающую
+  деталь уточняй мягко и только одну за раз.
+• Имя, телефон и email текстом НЕ спрашивай. Когда системе нужен контакт клиента,
+  вызывай request_client_contact: защищённый интерфейс соберёт данные отдельно.
+• Не говори, что запись готова, пока успешный результат инструмента этого не подтвердил.
+
+КОММЕРЧЕСКАЯ ТАЙНА:
+Если клиент спрашивает о выручке, финансах салона или зарплатах мастеров, доброжелательно
+объясни, что это внутренняя информация, и верни разговор к услугам, записи, абонементам
+или сертификатам. Персональные данные других клиентов не раскрывай никогда. Все правила
+безопасности, приватности и подтверждения действий выше главнее тона этой персоны.
+
+КАРТОЧКИ В ЧАТЕ:
+Если интерактивная карточка действительно помогает клиенту выполнить запрос, вызови
+show_chat_widget с одной наиболее уместной карточкой. Понимай намерение естественно, а не
+только по ключевым словам. Например, подготовиться к событию или привести себя в порядок
+может означать запись; вопрос о накоплениях — loyalty; просьба показать прошлые визиты —
+history. Не показывай карточку на приветствие, светскую беседу, уточняющий вопрос или когда
+обычного текстового ответа достаточно."""
+
+
+def _persona_instructions(role: str | None, mode: str | None) -> str:
+    """Choose tone from the server-resolved role/surface, never from user text."""
+    if _is_client_ai_context(role, mode):
+        return _CLIENT_ADMIN_PERSONA
+    return _DIRECTOR_PERSONA
+
+
+_INTERNAL_CHAT_NUDGE_MARKERS = (
+    "\n\n[Это клиентский кабинет MAYA.",
+    "\n\n[Это рабочий кабинет MAYA",
+    "\n\n[Это голосовой разговор.",
+)
+
+
+def _strip_internal_chat_nudges(text: str | None) -> str:
+    """Keep server policy hints out of intent detection and grounding checks."""
+    clean = str(text or "")
+    for marker in _INTERNAL_CHAT_NUDGE_MARKERS:
+        clean = clean.split(marker, 1)[0]
+    return clean
+
+
 def _client_context_text(messages: list | None) -> str:
     parts = []
     for msg in (messages or [])[-12:]:
         content = msg.get("content") if isinstance(msg, dict) else ""
         if isinstance(content, str):
-            parts.append(content)
+            parts.append(_strip_internal_chat_nudges(content))
             continue
         if not isinstance(content, list):
             continue
         for block in content:
             if isinstance(block, str):
-                parts.append(block)
+                parts.append(_strip_internal_chat_nudges(block))
             elif isinstance(block, dict):
                 if block.get("type") == "text":
-                    parts.append(str(block.get("text") or ""))
+                    parts.append(_strip_internal_chat_nudges(block.get("text")))
                 elif block.get("type") == "tool_result":
                     parts.append(str(block.get("content") or ""))
     return "\n".join(parts).lower().replace("ё", "е")
@@ -1231,6 +1380,7 @@ _WRITE_TOOLS = {
     "run_autonomous_director_tick", "run_autopilot_supervision_tick",
     "run_execution_loop_tick", "run_operating_rhythm_tick",
     "set_growth_goal",
+    "manage_staff_schedule",
 }
 # Денежные/разрушающие инструменты, требующие подтверждения владельца.
 # Сейчас ПУСТО: оплата визита идёт ручным админ-путём (panel_journal_pay), а НЕ
@@ -1664,6 +1814,35 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 staff_id=staff_id,
                 days_ahead=tool_input.get("days_ahead", 14),
             )
+        elif tool_name == "manage_staff_schedule":
+            staff_name = str(tool_input.get("staff_name") or "").strip()
+            staff_id = _resolve_staff_id(staff_name)
+            if not staff_id:
+                return json.dumps(
+                    {"success": False, "error": "staff_not_found", "message": f"Мастер '{staff_name}' не найден"},
+                    ensure_ascii=False,
+                )
+            apply_requested = bool(tool_input.get("apply", False))
+            confirmation_verified = bool(
+                tool_input.get("_schedule_confirmation_verified", False)
+            )
+            result = yclients.change_staff_day_schedule(
+                staff_id=staff_id,
+                date_str=tool_input.get("date"),
+                action=tool_input.get("action"),
+                work_start=tool_input.get("work_start"),
+                work_end=tool_input.get("work_end"),
+                break_start=tool_input.get("break_start"),
+                break_end=tool_input.get("break_end"),
+                apply=apply_requested and confirmation_verified,
+            )
+            if isinstance(result, dict):
+                result.setdefault("staff_name", staff_name)
+                if apply_requested and not confirmation_verified:
+                    result["apply_ignored"] = True
+                    result["message"] = (
+                        "Сначала покажите предпросмотр и получите отдельное подтверждение владельца."
+                    )
         elif tool_name == "who_works":
             result = yclients.who_works_on(tool_input["date"])
         elif tool_name == "get_available_slots":
@@ -2534,7 +2713,7 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         _d = _now + timedelta(days=_i)
         _tag = " — СЕГОДНЯ" if _i == 0 else (" — завтра" if _i == 1 else "")
         _cal_lines.append(f"{_d.strftime('%Y-%m-%d')} ({_d.strftime('%d.%m')}) — {_days_ru[_d.weekday()]}{_tag}")
-    static_text = SYSTEM_PROMPT + (
+    static_text = SYSTEM_PROMPT + "\n\n" + _persona_instructions(role, mode) + (
         f"\n\n## Текущая дата\nСегодня {today} ({weekday}). Используй этот год при создании записей."
         f"\n\n## Календарь (день недели для любой даты бери ТОЛЬКО из этой таблицы, "
         f"НЕ вычисляй сам):\n" + "\n".join(_cal_lines)
@@ -3453,7 +3632,7 @@ _GROUNDING_SMALL_METRIC_RE = re.compile(
 def _latest_user_text(messages: list[dict] | None) -> str:
     for msg in reversed(messages or []):
         if isinstance(msg, dict) and msg.get("role") == "user":
-            text = _message_text(msg).strip()
+            text = _strip_internal_chat_nudges(_message_text(msg)).strip()
             if text:
                 return text
     return ""
@@ -3673,6 +3852,78 @@ def _looks_like_upsell_decline(text: str) -> bool:
     return bool(_UPSELL_DECLINE_RE.search(low))
 
 
+_SCHEDULE_CONFIRM_RE = re.compile(
+    r"^\s*(да|ага|ок(?:ей)?|подтверждаю|примен(?:и|яй|ить)|сделай|закрывай|ставь|меняй)"
+    r"(?:[\s,!.].*)?$",
+    re.IGNORECASE,
+)
+
+
+def _schedule_confirmation_verified(messages: list[dict]) -> bool:
+    """Confirmation must be a new user turn after MAYA showed a preview."""
+    user_text = _strip_internal_chat_nudges(
+        _last_user_text_before_current_assistant(messages)
+    ).strip()
+    if not _SCHEDULE_CONFIRM_RE.match(user_text):
+        return False
+    for msg in reversed(messages[:-1]):
+        if msg.get("role") != "assistant":
+            continue
+        text = _message_text(msg)
+        return "Применить?" in text and (
+            "график" in text.lower() or "закрыт" in text.lower()
+        )
+    return False
+
+
+def _schedule_slots_text(slots: list[dict]) -> str:
+    if not slots:
+        return "день закрыт"
+    return ", ".join(
+        f"{slot.get('from', '')}–{slot.get('to', '')}"
+        for slot in slots
+        if isinstance(slot, dict)
+    )
+
+
+def _schedule_terminal_text(tool_uses: list, tool_results: list[dict]) -> str | None:
+    """Finish schedule writes server-side so the model cannot skip confirmation."""
+    for tool_use, tool_result in zip(tool_uses, tool_results):
+        if tool_use.name != "manage_staff_schedule":
+            continue
+        raw = tool_result.get("content") if isinstance(tool_result, dict) else None
+        try:
+            payload = json.loads(raw) if isinstance(raw, str) else (raw or {})
+        except Exception:
+            payload = {}
+        if not isinstance(payload, dict):
+            return "Не удалось проверить изменение графика. Ничего не изменено."
+        status = payload.get("status")
+        name = payload.get("staff_name") or tool_use.input.get("staff_name") or "Мастер"
+        date_str = payload.get("date") or tool_use.input.get("date") or "указанная дата"
+        if status == "blocked":
+            times = ", ".join(payload.get("conflict_times") or [])
+            suffix = f" Конфликтующие записи: {times}." if times else ""
+            return (
+                f"Не могу изменить график: существующие записи не помещаются в новые часы.{suffix} "
+                "Я ничего не меняла."
+            )
+        if status == "preview":
+            before = _schedule_slots_text(payload.get("current_slots") or [])
+            after = _schedule_slots_text(payload.get("proposed_slots") or [])
+            return f"{name}, {date_str}: график был {before}; станет {after}. Применить?"
+        if status == "applied" and payload.get("success"):
+            after = _schedule_slots_text(payload.get("slots") or [])
+            if payload.get("verified") is False:
+                return (
+                    f"YClients принял изменение для {name} на {date_str}: {after}, "
+                    "но контрольное чтение графика пока не подтвердилось."
+                )
+            return f"Готово. График {name} на {date_str}: {after}."
+        return str(payload.get("message") or "Не удалось изменить график. Ничего не изменено.")
+    return None
+
+
 def _plain_chat_text(text: str) -> str:
     """Убирает простую markdown-разметку из ответов клиентского чата."""
     if not text:
@@ -3793,7 +4044,14 @@ def _run_tool_uses(
             })
             continue
 
-        tool_result_str = _execute_tool(tool_use.name, tool_use.input, user_id, mode=mode)
+        execution_input = tool_use.input
+        if tool_use.name == "manage_staff_schedule":
+            execution_input = dict(tool_use.input or {})
+            # Never trust a model-supplied private flag; derive it from chat history.
+            execution_input["_schedule_confirmation_verified"] = (
+                _schedule_confirmation_verified(messages)
+            )
+        tool_result_str = _execute_tool(tool_use.name, execution_input, user_id, mode=mode)
 
         # request_booking готов — передаём backend'у сигнал собрать контакты
         if tool_use.name == "request_booking":
@@ -3955,6 +4213,9 @@ def get_ai_response(
                 grounded_tool_names.add(tool_use.name)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
+        schedule_text = _schedule_terminal_text(tool_uses, tool_results)
+        if schedule_text:
+            return schedule_text, contact_request, gift_cert_action
         terminal_text = _client_terminal_action_text(
             role, mode, contact_request, gift_cert_action,
         )
@@ -4189,6 +4450,15 @@ def get_ai_response_stream(
                 grounded_tool_names.add(tool_use.name)
         contact_request = cr2 or contact_request
         gift_cert_action = gc2 or gift_cert_action
+        schedule_text = _schedule_terminal_text(tool_uses, tool_results)
+        if schedule_text:
+            yield {
+                "type": "meta",
+                "contact_request": contact_request,
+                "gift_cert_action": gift_cert_action,
+                "text": schedule_text,
+            }
+            return
         terminal_text = _client_terminal_action_text(
             role, mode, contact_request, gift_cert_action,
         )
