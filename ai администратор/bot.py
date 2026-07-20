@@ -6131,6 +6131,7 @@ async def _send_reminder(
 
 async def post_init(app: Application):
     database.init_db()
+    webhook_server.install_staff_telegram_chat_mirror(app.bot)
     # Заводим первых админов (идемпотентно — повторные запуски не дублируют)
     for admin_id in INITIAL_ADMIN_IDS:
         database.add_admin(admin_id)
@@ -6672,24 +6673,22 @@ async def notify_owner(app: Application, text: str, push_title: str = "MAYA",
     if not owner_ids:
         logger.warning("notify_owner: нет настроенных owner/founder получателей")
         return 0
-    # Майя пишет владельцу и В ЧАТ ПРИЛОЖЕНИЯ (не только Telegram): кладём сообщение
-    # в историю переписки владельца, чтобы он увидел его в PWA-чате и мог ответить
-    # там же. Синхронный блок (load→append→save без await) — без гонок.
+    import webhook_server
+    # Сохраняем карточку и при недоступном Telegram. Глобальное зеркало после
+    # успешной Telegram-доставки увидит тот же dedupe_key и не создаст дубль.
     try:
-        from memory import load_conversations, save_conversations
-        convs = load_conversations()
         for owner_id in owner_ids:
-            hist = list(convs.get(owner_id) or [])
-            item = {"role": "assistant", "content": text}
-            if isinstance(chat_action, dict):
-                item["action"] = chat_action
-            hist.append(item)
-            convs[owner_id] = hist[-30:]
-        save_conversations(convs)
+            webhook_server._store_assistant_message_in_chat(
+                owner_id,
+                text,
+                mode="staff",
+                action=chat_action if isinstance(chat_action, dict) else None,
+                dedupe_key=webhook_server._telegram_chat_mirror_dedupe_key(owner_id, text),
+                protect_content=True,
+            )
     except Exception as e:
         logger.error(f"notify_owner in-app chat: {e}")
 
-    import webhook_server
     kb = None
     try:
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup

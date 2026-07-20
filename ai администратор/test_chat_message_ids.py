@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import types
 import unittest
 
 
@@ -84,6 +85,60 @@ class ChatMessageIdTests(unittest.TestCase):
         self.assertEqual(first_ids, second_ids)
         self.assertEqual(first_ids, [item["id"] for item in memory._store[key]])
         self.assertTrue(all(ws._is_chat_message_id(value) for value in first_ids))
+
+    def test_history_handler_does_not_prune_messages(self):
+        ws = self._load()
+        memory = sys.modules["memory"]
+        key = ws._chat_history_key(12345, "client")
+        memory._store[key] = [
+            ws._assistant_history_item(f"Сообщение {index}")
+            for index in range(45)
+        ]
+
+        response = asyncio.run(ws.chat_history_handler(_Request({})))
+
+        self.assertEqual(len(response["data"]["messages"]), 45)
+        self.assertEqual(len(memory._store[key]), 45)
+
+    def test_successful_staff_telegram_message_is_mirrored_once(self):
+        ws = self._load()
+        memory = sys.modules["memory"]
+        database = sys.modules["database"]
+        vault = {}
+        fake_pii_crypto = types.ModuleType("pii_crypto")
+
+        def _encrypt(text):
+            token = f"encrypted-{len(vault) + 1}"
+            vault[token] = text
+            return token
+
+        fake_pii_crypto.encrypt = _encrypt
+        fake_pii_crypto.decrypt = lambda token: vault.get(token)
+        sys.modules["pii_crypto"] = fake_pii_crypto
+        database.get_master_by_chat_id = lambda chat_id: (
+            {"telegram_chat_id": chat_id, "yclients_staff_id": 7}
+            if int(chat_id) == 12345 else None
+        )
+
+        class FakeBot:
+            async def send_message(self, chat_id, text, **_kwargs):
+                return {"chat_id": chat_id, "text": text}
+
+        bot = FakeBot()
+        self.assertTrue(ws.install_staff_telegram_chat_mirror(bot))
+        asyncio.run(bot.send_message(chat_id=12345, text="MAYA · план на сегодня"))
+        asyncio.run(bot.send_message(chat_id=12345, text="MAYA · план на сегодня"))
+
+        key = ws._chat_history_key(12345, "staff")
+        self.assertEqual(len(memory._store[key]), 1)
+        stored = memory._store[key][0]
+        self.assertTrue(stored["protected"])
+        self.assertNotIn("план на сегодня", stored["content"])
+        self.assertNotIn("план на сегодня", stored["content_enc"])
+        self.assertEqual(
+            ws._chat_history_payload([stored])[0]["text"],
+            "MAYA · план на сегодня",
+        )
 
     def test_delete_uses_exact_server_id_even_when_text_is_duplicated(self):
         ws = self._load()

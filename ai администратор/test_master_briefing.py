@@ -51,6 +51,18 @@ class MasterDayForecastTests(unittest.TestCase):
             has_telegram=True,
             has_push=True,
         ))
+        self.assertFalse(master_briefing.delivery_is_complete(
+            {"telegram": True, "push": True, "chat": False},
+            has_telegram=True,
+            has_push=True,
+            has_chat=True,
+        ))
+        self.assertTrue(master_briefing.delivery_is_complete(
+            {"telegram": True, "push": True, "chat": True},
+            has_telegram=True,
+            has_push=True,
+            has_chat=True,
+        ))
 
     def test_forecast_sums_booked_and_historical_potential(self):
         records = [{

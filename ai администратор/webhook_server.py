@@ -3660,7 +3660,6 @@ def _owner_job_chat_response(chat_id: int, user_text: str, reply: str) -> web.Re
     history.append(_user_history_item(safe_user_text))
     reply = enforce_maya_feminine(reply)
     history.append(_assistant_history_item(reply))
-    history = history[-30:]
     conversations[history_key] = history
     save_conversations(conversations)
     return _cabinet_response(_with_chat_turn_ids({
@@ -7048,6 +7047,14 @@ _UPSELL_DECLINE_WORDS_RE = re.compile(
 
 
 def _history_text(item) -> str:
+    if isinstance(item, dict) and item.get("content_enc"):
+        try:
+            from pii_crypto import decrypt
+            decrypted = decrypt(item.get("content_enc"))
+            if decrypted:
+                return decrypted
+        except Exception:
+            pass
     content = item.get("content") if isinstance(item, dict) else ""
     if isinstance(content, str):
         return content
@@ -8392,6 +8399,7 @@ def _store_assistant_message_in_chat(
     link=None,
     images: list | None = None,
     dedupe_key: str = "",
+    protect_content: bool = False,
 ) -> bool:
     """Кладёт сервисное сообщение MAYA в историю чата приложения.
 
@@ -8423,15 +8431,100 @@ def _store_assistant_message_in_chat(
             widget=widget,
             widget_data=widget_data,
         )
+        if protect_content:
+            try:
+                from pii_crypto import encrypt
+                encrypted = encrypt(clean)
+            except Exception as exc:
+                logger.error("protected app chat storage failed: %s", exc)
+                return False
+            if not encrypted:
+                return False
+            item["content"] = "[Защищённое служебное сообщение MAYA]"
+            item["content_enc"] = encrypted
+            item["protected"] = True
         if want_key:
             item["dedupe_key"] = want_key
         history.append(item)
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         memory.save_conversations(conversations)
         return True
     except Exception as e:
         logger.error(f"store assistant message in chat {cid}: {e}")
         return False
+
+
+_TELEGRAM_CHAT_MIRROR_BOT_IDS: set[int] = set()
+
+
+def _telegram_chat_mirror_dedupe_key(chat_id: int, text: str) -> str:
+    clean = _plain_maya_text(text or "")
+    digest = hashlib.sha256(clean.encode("utf-8")).hexdigest()[:24]
+    return f"telegram:{int(chat_id)}:{digest}"
+
+
+def _chat_has_assistant_dedupe_key(chat_id: int, mode: str, dedupe_key: str) -> bool:
+    try:
+        conversations = memory.load_conversations()
+        history = conversations.get(_chat_history_key(int(chat_id), mode)) or []
+        return any(
+            isinstance(item, dict)
+            and item.get("role") == "assistant"
+            and item.get("dedupe_key") == dedupe_key
+            for item in reversed(history)
+        )
+    except Exception:
+        return False
+
+
+def _is_staff_chat_recipient(chat_id: int) -> bool:
+    try:
+        if database.get_master_by_chat_id(int(chat_id)):
+            return True
+    except Exception:
+        pass
+    try:
+        return bool(database.is_admin(int(chat_id)))
+    except Exception:
+        return False
+
+
+def install_staff_telegram_chat_mirror(bot) -> bool:
+    """Mirror every successful staff Telegram text into the durable app chat."""
+    if bot is None:
+        return False
+    bot_class = bot.__class__
+    original_attr = "_maya_original_send_message_for_chat_mirror"
+    original = getattr(bot_class, original_attr, None)
+    if original is None:
+        original = getattr(bot_class, "send_message", None)
+        if not callable(original):
+            return False
+        setattr(bot_class, original_attr, original)
+
+        async def _send_message_with_app_mirror(self, *args, **kwargs):
+            sent_message = await original(self, *args, **kwargs)
+            if id(self) not in _TELEGRAM_CHAT_MIRROR_BOT_IDS:
+                return sent_message
+            try:
+                chat_id = kwargs.get("chat_id", args[0] if args else None)
+                text = kwargs.get("text", args[1] if len(args) > 1 else "")
+                chat_id = int(chat_id)
+                if text and _is_staff_chat_recipient(chat_id):
+                    _store_assistant_message_in_chat(
+                        chat_id,
+                        str(text),
+                        mode="staff",
+                        dedupe_key=_telegram_chat_mirror_dedupe_key(chat_id, str(text)),
+                        protect_content=True,
+                    )
+            except Exception as exc:
+                logger.error("Telegram → app chat mirror failed: %s", exc)
+            return sent_message
+
+        setattr(bot_class, "send_message", _send_message_with_app_mirror)
+    _TELEGRAM_CHAT_MIRROR_BOT_IDS.add(id(bot))
+    return True
 
 
 async def chat_history_handler(request: web.Request) -> web.Response:
@@ -8470,9 +8563,6 @@ async def chat_history_handler(request: web.Request) -> web.Response:
     full_history, migrated = _ensure_chat_history_ids(
         list(conversations.get(history_key) or [])
     )
-    if len(full_history) > 30:
-        full_history = full_history[-30:]
-        migrated = True
     if migrated:
         conversations[history_key] = full_history
         save_conversations(conversations)
@@ -8567,7 +8657,7 @@ async def chat_delete_handler(request: web.Request) -> web.Response:
                     break
 
     if history:
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
     else:
         conversations.pop(history_key, None)
     save_conversations(conversations)
@@ -8705,9 +8795,6 @@ async def chat_handler(request: web.Request) -> web.Response:
     history, migrated = _ensure_chat_history_ids(
         list(conversations.get(history_key) or [])
     )
-    if len(history) > 30:
-        history = history[-30:]
-        migrated = True
     if migrated:
         conversations[history_key] = history
         save_conversations(conversations)
@@ -8734,7 +8821,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_permission_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": founder_permission_reply,
@@ -8747,7 +8834,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_learning_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": founder_learning_reply,
@@ -8760,7 +8847,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(own_history_reply, widget="history"))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": own_history_reply,
@@ -8774,7 +8861,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(staff_booking_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": staff_booking_reply,
@@ -8787,7 +8874,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(client_business_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": client_business_reply,
@@ -8800,7 +8887,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_daily_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": owner_daily_reply,
@@ -8813,7 +8900,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_profit_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": owner_profit_reply,
@@ -8828,7 +8915,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(verified_analytics_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": verified_analytics_reply,
@@ -8861,7 +8948,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": direct_text,
@@ -8885,7 +8972,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         out = {
             "reply": direct_text,
@@ -8912,7 +8999,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(deterministic_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": deterministic_reply,
@@ -8925,13 +9012,12 @@ async def chat_handler(request: web.Request) -> web.Response:
     # так же, как в Telegram-боте (bot.py: anonymizer.redact_pii). Веб-чат раньше слал сырьё.
     safe_message = anonymizer.redact_pii(message)
     history.append(_user_history_item(safe_message))
-    if len(history) > 30:
-        history = history[-30:]
 
     # Голос: ТОТ ЖЕ мозг/знания/инструменты, что и текст, но подача — под ОЗВУЧКУ:
     # живая разговорная речь, словами вместо сокращений/markdown. Это НЕ урезание
     # знаний (как было с «1-2 фразами»), а стиль для голоса. Транзиентно — в историю не пишем.
-    llm_history = history[:-1] + [{
+    model_history = history[-30:]
+    llm_history = model_history[:-1] + [{
         "role": "user",
         "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
     }]
@@ -8952,7 +9038,7 @@ async def chat_handler(request: web.Request) -> web.Response:
         logger.error(f"chat_handler: ошибка AI: {e}")
         fallback_text, fallback_action = _chat_temporary_error(chat_mode)
         history.append(_assistant_history_item(fallback_text, action=fallback_action))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         payload = {
             "reply": fallback_text,
@@ -9208,9 +9294,6 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     history, migrated = _ensure_chat_history_ids(
         list(conversations.get(history_key) or [])
     )
-    if len(history) > 30:
-        history = history[-30:]
-        migrated = True
     if migrated:
         conversations[history_key] = history
         save_conversations(conversations)
@@ -9237,7 +9320,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_permission_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": founder_permission_reply,
@@ -9250,7 +9333,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(founder_learning_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": founder_learning_reply,
@@ -9263,7 +9346,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(own_history_reply, widget="history"))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": own_history_reply,
@@ -9277,7 +9360,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(staff_booking_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": staff_booking_reply,
@@ -9290,7 +9373,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(client_business_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": client_business_reply,
@@ -9303,7 +9386,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_daily_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": owner_daily_reply,
@@ -9316,7 +9399,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(owner_profit_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": owner_profit_reply,
@@ -9331,7 +9414,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(verified_analytics_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": verified_analytics_reply,
@@ -9348,7 +9431,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": direct_text,
@@ -9372,7 +9455,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         history.append(_assistant_history_item(
             direct_text, action=direct_action, widget=direct_widget,
         ))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         out = {
             "reply": direct_text,
@@ -9399,7 +9482,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         safe_message = anonymizer.redact_pii(message)
         history.append(_user_history_item(safe_message))
         history.append(_assistant_history_item(deterministic_reply))
-        conversations[history_key] = history[-30:]
+        conversations[history_key] = history
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": deterministic_reply,
@@ -9411,8 +9494,6 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     # ПЕРВЫМ (фолбэк на /api/chat). Тот же redact_pii, что в не-стрим chat_handler.
     safe_message = anonymizer.redact_pii(message)
     history.append(_user_history_item(safe_message))
-    if len(history) > 30:
-        history = history[-30:]
 
     # Голосовой режим (hands-free): фронт шлёт voice=true вместе с аудио. Тот же
     # мозг/знания/инструменты, максимальная модель и стиль под озвучку —
@@ -9422,7 +9503,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         message, history, _voice_known_master_names()
     ))
     model_override = OPENAI_PWA_CHAT_MODEL if chat_mode == "client" else None
-    llm_history = history[:-1] + [{
+    model_history = history[-30:]
+    llm_history = model_history[:-1] + [{
         "role": "user",
         "content": _chat_llm_message(safe_message, mode=chat_mode, voice_mode=voice_mode),
     }]
@@ -10440,6 +10522,9 @@ async def _send_master_day_briefs_once(
         except Exception:
             delivery_state = {}
         chat_id = master.get("telegram_chat_id")
+        message = master_briefing.render_master_day_message(forecast)
+        push_body = master_briefing.render_master_day_push(forecast)
+        has_chat = bool(chat_id)
         has_telegram = bool(
             chat_id and not database.is_master_muted(int(chat_id))
         )
@@ -10453,17 +10538,52 @@ async def _send_master_day_briefs_once(
             has_push = False
         telegram_done = bool(delivery_state.get("telegram"))
         push_done = bool(delivery_state.get("push"))
+        chat_done = bool(delivery_state.get("chat"))
+        chat_stored = False
+        chat_dedupe_key = ""
+        if has_chat and (force or not chat_done):
+            chat_dedupe_key = _telegram_chat_mirror_dedupe_key(int(chat_id), message)
+            chat_stored = _store_assistant_message_in_chat(
+                int(chat_id),
+                message,
+                mode="staff",
+                dedupe_key=chat_dedupe_key,
+                protect_content=True,
+            )
+            chat_done = bool(
+                chat_done
+                or chat_stored
+                or _chat_has_assistant_dedupe_key(int(chat_id), "staff", chat_dedupe_key)
+            )
         delivery_complete = master_briefing.delivery_is_complete(
             delivery_state,
             has_telegram=has_telegram,
             has_push=has_push,
+            has_chat=has_chat,
         )
+        if chat_done and not delivery_state.get("chat"):
+            delivery_state["chat"] = True
+            delivery_complete = master_briefing.delivery_is_complete(
+                delivery_state,
+                has_telegram=has_telegram,
+                has_push=has_push,
+                has_chat=has_chat,
+            )
         if not force and delivery_complete:
-            skipped += 1
-            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_sent"})
+            database.set_setting(
+                delivery_key,
+                _json.dumps({
+                    **delivery_state,
+                    "updated_at": now.isoformat(timespec="seconds"),
+                }, ensure_ascii=False),
+            )
+            if chat_stored:
+                sent += 1
+                deliveries.append({"staff_id": staff_id, "state": "sent", "channels": ["chat"]})
+            else:
+                skipped += 1
+                deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_sent"})
             continue
-        message = master_briefing.render_master_day_message(forecast)
-        push_body = master_briefing.render_master_day_push(forecast)
         telegram_sent = False
         if has_telegram and (force or not telegram_done):
             try:
@@ -10492,20 +10612,22 @@ async def _send_master_day_briefs_once(
         telegram_done = telegram_done or telegram_sent
         push_done = push_done or bool(push_sent)
         delivery_complete = master_briefing.delivery_is_complete(
-            {"telegram": telegram_done, "push": push_done},
+            {"telegram": telegram_done, "push": push_done, "chat": chat_done},
             has_telegram=has_telegram,
             has_push=has_push,
+            has_chat=has_chat,
         )
-        if telegram_done or push_done:
+        if telegram_done or push_done or chat_done:
             database.set_setting(
                 delivery_key,
                 _json.dumps({
                     "telegram": telegram_done,
                     "push": push_done,
+                    "chat": chat_done,
                     "updated_at": now.isoformat(timespec="seconds"),
                 }, ensure_ascii=False),
             )
-        if telegram_sent or push_sent:
+        if telegram_sent or push_sent or chat_stored:
             sent += 1
             if delivery_complete:
                 database.set_setting(
@@ -10809,14 +10931,14 @@ async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
 
     delivered = False
     try:
-        conversations = memory.load_conversations()
         for owner_id in owner_ids:
-            history = list(conversations.get(owner_id) or [])
-            history, _ = _ensure_chat_history_ids(history)
-            history.append(_assistant_history_item(alert["text"]))
-            conversations[owner_id] = history[-30:]
-        memory.save_conversations(conversations)
-        delivered = True
+            delivered = _store_assistant_message_in_chat(
+                owner_id,
+                alert["text"],
+                mode="staff",
+                dedupe_key=_telegram_chat_mirror_dedupe_key(owner_id, alert["text"]),
+                protect_content=True,
+            ) or delivered
     except Exception as e:
         logger.error(f"reputation owner in-app delivery: {e}")
 

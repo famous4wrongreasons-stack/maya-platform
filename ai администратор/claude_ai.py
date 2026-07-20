@@ -314,11 +314,13 @@ TOOLS = [
         "name": "get_my_work_records",
         "description": (
             "РАБОЧИЕ записи самого мастера-сотрудника на конкретный день: кто к нему "
-            "записан, во сколько, на какие услуги. Вызывай ТОЛЬКО когда боту пишет сам "
+            "записан, во сколько, на какие услуги и какие подтверждённые историей советы "
+            "можно учесть перед визитом. Вызывай ТОЛЬКО когда боту пишет сам "
             "мастер/сотрудник и спрашивает про СВОИ записи/клиентов/услуги/загрузку "
             "('сколько у меня записей', 'во сколько какая запись', 'кто ко мне придёт', "
-            "'какие услуги в пятницу'). Это НЕ запись клиента и НЕ get_my_bookings. "
-            "ВСЕГДА передавай дату. Телефоны клиентов инструмент не возвращает — только имена."
+            "'какие услуги в пятницу', 'дай советы по клиентам на сегодня'). Это НЕ запись "
+            "клиента и НЕ get_my_bookings. ВСЕГДА передавай дату. Персональные данные "
+            "клиентов инструмент в модель не возвращает."
         ),
         "input_schema": {
             "type": "object",
@@ -1549,6 +1551,55 @@ def _recheck_requested_slot(
     return {"error": "slot_taken", "message": msg}
 
 
+def _master_record_advice(record: dict, service_catalog: list[dict] | None = None) -> str:
+    """Return PII-free, evidence-based preparation advice for one work record."""
+    import anonymizer as _anonymizer
+    import masters_ai as _masters_ai
+
+    record_id = record.get("id") or record.get("record_id")
+    if record_id:
+        try:
+            saved = database.get_ai_advice_for_record(int(record_id)) or {}
+            text = _anonymizer.redact_pii(str(saved.get("advice_text") or "")).strip()
+            if text:
+                return text[:700]
+        except Exception:
+            pass
+
+    client = record.get("client") or {}
+    try:
+        client_id = int(client.get("id") or 0)
+    except (TypeError, ValueError):
+        client_id = 0
+    history = []
+    if client_id:
+        try:
+            cached = database.get_client_history_cached(client_id)
+            if cached is None:
+                history = yclients.get_client_history(client_id, count=30) or []
+                database.set_client_history_cache(client_id, history[:30])
+            else:
+                history = cached
+        except Exception:
+            history = []
+    opportunity = _masters_ai.historical_addon_opportunity(
+        history,
+        record,
+        service_catalog=service_catalog or [],
+    )
+    if opportunity:
+        title = _anonymizer.redact_pii(str(opportunity.get("title") or "дополнительную услугу"))
+        times = int(opportunity.get("times_bought") or 0)
+        history_note = f"клиент выбирал её {times} раз(а)" if times > 1 else "клиент уже выбирал её раньше"
+        return (
+            f"Можно спокойно напомнить про «{title}»: {history_note}. "
+            "Не навязывай, предложи только как знакомую клиенту опцию."
+        )
+    if history:
+        return "История уже покрыта текущей записью: лучше качественно провести визит и предложить следующую запись."
+    return "Истории недостаточно для персонального совета: уточни ожидания перед услугой и не придумывай допродажу."
+
+
 def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: str | None = None) -> str:
     """Выполняет вызов инструмента и возвращает результат как строку."""
     logger.info(f"🔧 Вызов инструмента: {tool_name} | Параметры: {tool_input}")
@@ -1896,6 +1947,10 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 result = {"error": "Не указана дата."}
             else:
                 recs = yclients.get_records_for_master(int(sid), date, date) or []
+                try:
+                    service_catalog = yclients.get_services(int(sid)) or []
+                except Exception:
+                    service_catalog = []
                 items = []
                 for r in recs:
                     if not isinstance(r, dict):
@@ -1913,13 +1968,13 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                                 cost += int(s.get("cost") or 0)
                             except (TypeError, ValueError):
                                 pass
-                    cl = r.get("client") or {}
                     cname = "клиент"  # 152-ФЗ: имя клиента НЕ передаём в LLM (Claude/США); мастер видит имя в журнале (YClients, РФ)
                     status = {1: "пришёл", -1: "не пришёл", 2: "подтвердил"}.get(
                         r.get("attendance"), "ожидается")
                     items.append({
                         "time": tm, "client": cname, "services": svcs,
                         "cost": cost, "status": status,
+                        "advice": _master_record_advice(r, service_catalog),
                     })
                 items.sort(key=lambda x: x["time"])
                 result = {
@@ -1927,7 +1982,10 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     "count": len(items),
                     "total_sum": sum(i["cost"] for i in items),
                     "records": items,
-                    "note": "Телефоны клиентов не передаются (защита базы). Показывай мастеру только имя клиента.",
+                    "note": (
+                        "Советы основаны только на истории конкретного клиента. "
+                        "Персональные данные клиентов в модель не передаются; различай записи по времени."
+                    ),
                 }
         elif tool_name == "get_my_tips":
             master = database.get_master_by_chat_id(int(user_id)) if user_id else None
@@ -2599,6 +2657,9 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                         "инструмент get_my_work_records с нужной датой и ответь ПОДРОБНО: "
                         "перечисли каждую запись (время, имя клиента, услуги, статус), "
                         "посчитай итог по числу записей и сумме. Если записей нет — так и скажи. "
+                        "Если мастер просит советы, рекомендации или подготовку по СВОИМ клиентам "
+                        "на день — тоже вызови get_my_work_records. Для каждой записи перескажи "
+                        "поле advice по времени визита. Не добавляй услуги и факты от себя. "
                         "ЗАРАБОТОК: если мастер спрашивает «сколько я заработал / сколько сделал / "
                         "моя выручка / моя зарплата за день/неделю/месяц» — вызови get_my_work_records "
                         "за нужный период и назови валовую сумму по его услугам (это его личная "
@@ -3436,6 +3497,11 @@ def _grounding_requirement(
 
     if re.search(r"\b(чаев\w*|начаев\w*)\b", low) and fact_request:
         return _GroundingRequirement("personal_tips", frozenset({"get_my_tips"}))
+    if (
+        re.search(r"\b(совет\w*|рекомендац\w*|подскаж\w*|подготов\w*|что\s+предложить)\b", low)
+        and re.search(r"\b(клиент\w*|гост\w*|запис\w*)\b", low)
+    ):
+        return _GroundingRequirement("personal_work_records", frozenset({"get_my_work_records"}))
     if re.search(r"\b(сколько\s+у\s+меня\s+запис|мои\s+рабоч\w*\s+запис|"
                  r"кто\s+ко\s+мне|что\s+у\s+меня\s+(?:сегодня|завтра))\b", low):
         return _GroundingRequirement("personal_work_records", frozenset({"get_my_work_records"}))

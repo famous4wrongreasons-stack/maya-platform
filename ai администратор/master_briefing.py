@@ -328,13 +328,16 @@ def delivery_is_complete(
     *,
     has_telegram: bool,
     has_push: bool,
+    has_chat: bool = False,
 ) -> bool:
     """Готовность доставки с учётом реально доступных каналов мастера."""
     state = state if isinstance(state, dict) else {}
     telegram_done = bool(state.get("telegram"))
     push_done = bool(state.get("push"))
+    chat_done = bool(state.get("chat"))
     return bool(
         (telegram_done or not has_telegram)
         and (push_done or not has_push)
-        and (telegram_done or push_done)
+        and (chat_done or not has_chat)
+        and (telegram_done or push_done or chat_done)
     )
