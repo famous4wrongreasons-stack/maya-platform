@@ -485,47 +485,10 @@ window.APP_DATA = {
 
 </script>
 <script>
-/* ═══ MAYA OS staging boot (demo-business) — СТРОГО вне прод-домена ═══
-   Инжектит trusted __ME_TENANT_BOOT только на нативном localhost/private-LAN и
-   nip.io-стейдже. На malesthetic.* НЕ активируется (реальный клиентский апп не трогаем).
-   Плюс staging-only авто-регистрация клиента (внешние провайдеры на стейдже выключены),
-   строго гейтед по этому api base + demo-business — на любом другом тенанте не запускается. */
-(function () {
-  try {
-    // ⚠️ ВРЕМЕННО для теста виджетов: demo-boot включается в НАТИВНОМ приложении
-    // (origin нативки = server.hostname malesthetic.pro, поэтому гейтить по хосту нельзя)
-    // и на private/staging-вебе. Реальный ВЕБ-прод (malesthetic.pro в браузере, не нативка)
-    // НЕ трогаем. Перед реальным релизом нативки этот блок убрать.
-    var isNative = false;
-    try { isNative = !!(window.Capacitor && (typeof window.Capacitor.isNativePlatform === 'function' ? window.Capacitor.isNativePlatform() : true)); } catch (eNat) {}
-    var h = String(location.hostname || '').toLowerCase();
-    var priv = (h === 'localhost' || h === '127.0.0.1' || h === '::1' || /\.local$/.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h));
-    var staging = /nip\.io$/i.test(h);
-    if (!isNative && !priv && !staging) return;
-    var API = 'https://api.111.88.148.206.nip.io/api', SLUG = 'muzhskaya-estetika';
-    window.__ME_TENANT_BOOT = Object.freeze({ enabled: true, api: API, slug: SLUG });
-    if (SLUG !== 'demo-business') return; // живой тенант — обычный логин, demo-автогость только для demo-business
-    var a = API.toLowerCase().replace(/\/+$/, ''), sl = SLUG.toLowerCase(), str = a + '|' + sl, hh = 5381;
-    for (var i = 0; i < str.length; i++) hh = (hh * 33 + str.charCodeAt(i)) | 0;
-    var ns = (hh >>> 0).toString(36) + '_' + sl.replace(/[^a-z0-9-]/g, '').slice(0, 24);
-    var key = 'me_saas_auth_v2:' + ns, have = false;
-    try { var b = JSON.parse(localStorage.getItem(key) || 'null'); have = !!(b && b.token); } catch (e) {}
-    if (have) return;
-    if (sessionStorage.getItem('__me_demo_autoreg')) return; // одна попытка на вкладку
-    sessionStorage.setItem('__me_demo_autoreg', '1');
-    var email = 'guest_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '@demo.maya';
-    var pwd = 'Maya' + Math.random().toString(36).slice(2, 12) + 'X9';
-    var phone = '+79' + String(Math.floor(100000000 + Math.random() * 900000000)); // уникальный телефон: preview требует clientPhone
-    fetch(API + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantSlug: SLUG, name: 'Гость', email: email, password: pwd, phone: phone }) })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (res) {
-        if (!res || !res.access_token) return;
-        var bundle = { token: res.access_token, refresh_token: res.refresh_token, access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null, refresh_expires_at: res.refresh_expires_at || null, session: res.session || null, user: res.user || { name: 'Гость' }, tenant_slug: SLUG, api_base: a };
-        try { localStorage.setItem(key, JSON.stringify(bundle)); } catch (e) {}
-        location.reload();
-      }).catch(function () {});
-  } catch (e) {}
-})();
+/* ═══ demo-boot ОТКЛЮЧЁН (2026-07-19) ═══
+   Нативка и PWA работают на боевом бэке «Мужская Эстетика» (BF_PROXY → YClients 503759).
+   Чат-виджет записи ходит в ТОТ ЖЕ YClients, что и полноэкранная запись — новый SaaS-бэк
+   для клиентского аппа не используется. */
 </script>
 <script>
 /* ═══ MAYA OS multi-tenant boot из платформенного backend ═══
@@ -11087,7 +11050,33 @@ function ABookCard(props) {
   var uit = React.useState({ loading: true, err: '' });
   var ui = uit[0], setUi = uit[1];
 
+  // Легаси-ветка: боевой бэк «Мужская Эстетика» (BF_PROXY → YClients 503759).
+  // Транслирует SaaS-пути в те же вызовы, что использует полноэкранная запись (ABookFlow),
+  // чтобы чат-виджет создавал РЕАЛЬНЫЕ брони, а не в новом SaaS-стейдже.
+  function afLegacy(path, init) {
+    var BF = (typeof BF_PROXY !== 'undefined') ? BF_PROXY : 'https://malesthetic.pro/app/api-proxy.php';
+    var CO = (typeof BF_COMPANY !== 'undefined') ? BF_COMPANY : '503759';
+    var qi = path.indexOf('?'); var seg = qi < 0 ? path : path.slice(0, qi); var q = {};
+    if (qi >= 0) path.slice(qi + 1).split('&').forEach(function (kv) { var p = kv.split('='); q[p[0]] = decodeURIComponent((p[1] || '').replace(/\+/g, ' ')); });
+    var jget = function (url) { return fetch(url).then(function (r) { if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; throw er; } return r.json(); }); };
+    if (seg === '/staff') return Promise.resolve((window.__meBookMasters || []).map(function (m) { return { id: String(m.id), name: m.name, title: m.rank || '' }; }));
+    if (seg === '/services') return jget(BF + '?action=get_services&company_id=' + CO + '&staff_id=' + encodeURIComponent(q.staffId || '')).then(function (j) { return ((j && j.data && j.data.services) || []).map(function (x) { return { id: String(x.id), name: x.title || x.booking_title || 'Услуга', price: Number(x.price_min || x.discount || 0), duration_minutes: Math.round(Number(x.seance_length || 0) / 60) }; }); });
+    if (seg === '/available-days') return jget(BF + '?action=get_dates&company_id=' + CO + '&staff_id=' + encodeURIComponent(q.staffId || '') + '&service_id=' + encodeURIComponent(q.serviceIds || '') + '&date_from=' + encodeURIComponent(String(q.from || '').slice(0, 10)) + '&date_to=' + encodeURIComponent(String(q.to || '').slice(0, 10))).then(function (j) { return { days: (j && j.data) || [] }; });
+    if (seg === '/available-slots') { var day = String(q.date || '').slice(0, 10); return jget(BF + '?action=get_times&company_id=' + CO + '&staff_id=' + encodeURIComponent(q.staffId || '') + '&service_id=' + encodeURIComponent(q.serviceIds || '') + '&date=' + encodeURIComponent(day)).then(function (j) { return ((j && j.data) || []).map(function (tm) { var lb = (typeof tm === 'string') ? tm : (tm && (tm.time || (tm.datetime ? String(tm.datetime).slice(11, 16) : '')) || ''); return { start: day + 'T' + (String(lb).length === 5 ? lb + ':00' : lb), branch_id: null }; }); }); }
+    if (seg === '/appointments' || seg === '/appointments/preview') {
+      var b = {}; try { b = JSON.parse((init && init.body) || '{}'); } catch (eB) {}
+      var start = String(b.start || ''); var day2 = start.slice(0, 10); var time = start.slice(11, 16);
+      var cab = (window.APP_DATA && window.APP_DATA.cabinet) || {};
+      var nm = String(b.clientName || cab.fullName || cab.name || '').trim();
+      var ph = String(b.clientPhone || cab.bookingPhone || '').replace(/\D/g, '');
+      if (ph.length < 11) { var eP = new Error('client_phone_required'); eP.code = 'client_phone_required'; eP.status = 400; return Promise.reject(eP); }
+      return fetch(BF + '?action=create_record', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ company_id: CO, staff_id: b.staffId, service_id: (b.serviceIds || []).join(','), date: day2, time: time, user_token: '', phone: ph, fullname: nm }) })
+        .then(function (r) { return r.json(); }).then(function (j) { if (j && (j.success || j.data)) return j; var eF = new Error('book_failed'); eF.code = 'book_failed'; throw eF; });
+    }
+    return Promise.reject({ code: 'unsupported' });
+  }
   function af(path, init) {
+    if (!(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)) return afLegacy(path, init);
     if (window.__meSaasAuthedFetch) return window.__meSaasAuthedFetch(path, init);
     // фолбэк: прямой authed-fetch по бандлу (когда ABookFlow не смонтирован — напр. на экране чата),
     // с refresh-on-401 + retry: Capacitor хранит localStorage между запусками, access-токен (15м) протухает.
@@ -11152,7 +11141,7 @@ function ABookCard(props) {
 
   function pickMaster(m) {
     patch({ master: m, svcs: [], date: null, time: null, step: 1 }); setD({ services: null }); setUi({ loading: true, err: '' });
-    af('/services').then(function (list) {
+    af('/services?staffId=' + encodeURIComponent(m.id)).then(function (list) {
       var sv = (Array.isArray(list) ? list : []).map(function (x) { return { id: String(x && x.id || ''), name: (x && x.name) || '', price: Number(x && x.price || 0), dur: Number(x && x.duration_minutes || 0) }; });
       setD({ services: sv }); setUi({ loading: false, err: '' });
     }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить услуги') }); });
@@ -11179,7 +11168,7 @@ function ABookCard(props) {
   function pickTime(sl) { patch({ time: sl, step: 4 }); }
   function confirm() {
     setUi({ loading: true, err: '' });
-    var live = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.booking_mode === 'live');
+    var live = (!(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)) || !!(window.__SAAS_TENANT && window.__SAAS_TENANT.booking_mode === 'live');
     af(live ? '/appointments' : '/appointments/preview', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify((function () { var u = null; try { var ctx = window.__ME_SAAS_CTX; var bb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + (ctx && ctx.ns)) || 'null'); u = bb && bb.user; } catch (er) {} return { clientName: (u && u.name) || 'Гость', clientPhone: (u && u.phone) || undefined, branchId: (s.time && s.time.branch_id) || undefined, staffId: s.master.id, serviceIds: s.svcs.map(function (x) { return String(x.id); }), start: (s.time && s.time.start) || (s.date + 'T' + (s.time && s.time.label || '') + ':00') }; })())
@@ -11226,7 +11215,7 @@ function ABookCard(props) {
   else if (ui.err && s.step === 0 && !(data.masters && data.masters.length)) body = e('div', null, errEl(), e('button', { style: prim, onClick: function () { setUi({ loading: true, err: '' }); af('/staff').then(function (list) { setD({ masters: (Array.isArray(list) ? list : []).map(function (m) { return { id: String(m && m.id || ''), name: (m && m.name) || 'Мастер', rank: (m && m.title) || '', rating: m && m.rating || null }; }) }); setUi({ loading: false, err: '' }); }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить мастеров') }); }); } }, 'Повторить'));
   else if (s.step === 0) body = e('div', null, e('div', { style: lab }, 'Выберите мастера'), (data.masters || []).map(function (m, i) {
     return e('div', { key: i, style: rowBtn, onClick: function () { pickMaster(m); } },
-      e('div', { style: { width: 40, height: 40, borderRadius: 11, flex: 'none', display: 'grid', placeItems: 'center', background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.08)', color: ink, fontSize: 16 } }, (m.name || '?').charAt(0)),
+      (function () { var mph = (window.__meMasterPhoto && window.__meMasterPhoto(m.id)) || ''; return mph ? e('img', { src: mph, alt: '', style: { width: 40, height: 40, borderRadius: 11, flex: 'none', objectFit: 'cover' } }) : e('div', { style: { width: 40, height: 40, borderRadius: 11, flex: 'none', display: 'grid', placeItems: 'center', background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.08)', color: ink, fontSize: 16 } }, (m.name || '?').charAt(0)); })(),
       e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODYF, fontWeight: 600, fontSize: 13.5, color: ink } }, m.name), m.rank ? e('div', { style: { fontSize: 10.5, color: muted, marginTop: 2 } }, m.rank) : null),
       m.rating ? e('div', { style: { fontSize: 11, color: ink } }, '★ ' + m.rating) : null);
   }), (data.masters && !data.masters.length) ? e('div', { style: { fontSize: 12.5, color: muted, padding: '4px 2px' } }, 'Пока нет доступных мастеров.') : null);
@@ -11320,7 +11309,18 @@ function AMyBookingsCard(props) {
   function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
   function fmt(iso, tz) { try { return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: tz || 'Europe/Moscow' }).format(new Date(iso)); } catch (er) { try { return new Date(iso).toLocaleString('ru-RU'); } catch (e2) { return String(iso || ''); } } }
   function bErr(er, fb) { var c = er && er.code; if (er && er.status === 402) return 'Пробный период закончился. Подключите подписку.'; if (er && er.status === 401) return 'Сессия устарела — войдите снова.'; if (c === 'too_late_to_cancel') return 'Отменить уже нельзя — время записи наступило.'; return fb; }
+  function legCancelErr(code) { if (code === 'too_late_to_cancel') return 'Отменить уже нельзя — время записи наступило.'; if (code === 'not_yours') return 'Это не ваша запись.'; if (code === 'needs_consent') return 'Нужно согласие — обновите профиль в приложении.'; if (code === 'phone_required') return 'В профиле не хватает телефона.'; if (code === 'unauthorized') return 'Войдите снова, чтобы отменить.'; if (code === 'yclients_unavailable') return 'Онлайн-запись недоступна — попробуйте позже.'; return 'Не удалось отменить — попробуйте ещё раз.'; }
   function load() {
+    if (meIsLegacy()) {
+      patch({ loading: true, err: '' });
+      meEnsureCabinet(function () {
+        var cc = meCab();
+        var up = Array.isArray(cc.upcoming) ? cc.upcoming : [];
+        var items = up.map(function (b, i) { return { id: b.record_id || b.id || ('leg' + i), services: (b.services || []).map(function (n) { return { name: (typeof n === 'string' ? n : (n && (n.title || n.name))) || 'Услуга' }; }), staff: { name: b.master || '' }, start: b.date, _leg: true }; });
+        patch({ items: items, loading: false, err: '' });
+      });
+      return;
+    }
     patch({ loading: true, err: '' });
     meWidgetAf('/appointments/my').then(function (items) { patch({ items: Array.isArray(items) ? items : [], loading: false }); })
       .catch(function (er) { patch({ loading: false, err: bErr(er, 'Не удалось загрузить записи') }); });
@@ -11328,6 +11328,18 @@ function AMyBookingsCard(props) {
   React.useEffect(function () { load(); }, []);
   function cancel(a) {
     if (s.cancelId !== a.id) { patch({ cancelId: a.id }); setTimeout(function () { setS(function (p) { return p.cancelId === a.id ? Object.assign({}, p, { cancelId: null }) : p; }); }, 4000); return; }
+    if (a._leg || meIsLegacy()) { // легаси: реальная отмена записи в YClients через api-proxy
+      patch({ busy: true, err: '' });
+      meCabinetAction('client_cancel_record', { record_id: a.id }, function (res, err) {
+        if (err) {
+          if (err.code === 'not_found' || err.code === 'already_cancelled') { patch({ busy: false, cancelId: null }); load(); return; }
+          patch({ busy: false, cancelId: null, err: legCancelErr(err.code) });
+          return;
+        }
+        patch({ busy: false, cancelId: null }); load();
+      });
+      return;
+    }
     patch({ busy: true, err: '' });
     meWidgetAf('/appointments/' + encodeURIComponent(a.id) + '/cancel', { method: 'POST' })
       .then(function () { patch({ busy: false, cancelId: null }); load(); })
@@ -11375,11 +11387,45 @@ function meWidgetTheme(t, dark) {
   };
 }
 function meChatEvent(name) { try { window.dispatchEvent(new CustomEvent(name)); } catch (e) {} }
+// Легаси-контур клиентского аппа: данные виджетов берём из уже гидратированного кабинета
+// (cabinet_me → window.APP_DATA.cabinet), т.к. новый SaaS-бэк для боевого аппа не используется.
+function meIsLegacy() { return !(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api); }
+function meCab() { return (window.APP_DATA && window.APP_DATA.cabinet) || {}; }
+// Гарантируем, что кабинет догидратился (баллы/записи/профиль). __meHydrate тянет кабинет
+// только на экранах cabinet/invite/home — в чате его может ещё не быть → дёргаем и ждём.
+function meEnsureCabinet(cb) {
+  function ready() { return String(window.__meCabinetState || '') === 'full'; }
+  if (ready()) { cb(); return; }
+  try { if (window.__meHydrate) window.__meHydrate('cabinet'); } catch (e) {}
+  var tries = 0, done = false;
+  var iv = setInterval(function () {
+    tries++;
+    if (ready() || tries >= 14) { clearInterval(iv); if (!done) { done = true; cb(); } }
+  }, 350);
+}
+// «сказать в чат» из виджета: в легаси нет клиентских эндпоинтов отмены/покупки → отдаём намерение Майе.
+function meChatSay(text) { try { window.dispatchEvent(new CustomEvent('me-chat-say', { detail: { text: String(text || '') } })); } catch (e) {} }
+// Строковое поле `widget` из ответа Майи (умный триггер) / проактивных сообщений → инлайн-карточка.
+function meRenderWidgetCard(w, t, dark, data) {
+  var map = { book: window.ABookCard, mybookings: window.AMyBookingsCard, loyalty: window.ALoyaltyCard, shop: window.AShopCard, profile: window.AProfileCard, history: window.AHistoryCard, referral: window.AReferralCard, notify: window.ANotifyCard, tips: window.ATipsCard };
+  var C = map[String(w || '')];
+  return C ? React.createElement(C, { key: 'w-' + w, t: t, dark: dark, data: data }) : null;
+}
+// Клиентское действие в api-proxy (отмена/перенос) с той же 3-канальной авторизацией, что cabinet_me.
+function meCabinetAction(action, body, cb) {
+  var PROXY = 'https://malesthetic.pro/app/api-proxy.php';
+  var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
+  if (!rq) { cb(null, { code: 'unauthorized' }); return; }
+  fetch(PROXY + '?action=' + action, { method: 'POST', headers: rq.headers, body: rq.body })
+    .then(function (r) { return r.text().then(function (tx) { var j = null; try { j = tx ? JSON.parse(tx) : null; } catch (e) {} return { ok: r.ok, j: j }; }); })
+    .then(function (o) { if (o.ok && o.j && (o.j.success || o.j.ok)) cb(o.j, null); else cb(null, (o.j && (o.j.code || o.j.error)) ? { code: o.j.code || o.j.error } : { code: 'error' }); })
+    .catch(function () { cb(null, { code: 'network' }); });
+}
 
 function ALoyaltyCard(props) {
   var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
   var st = React.useState({ acc: null, loading: true, err: '' }); var s = st[0], setS = st[1];
-  function load() { setS({ acc: null, loading: true, err: '' }); meWidgetAf('/loyalty/me').then(function (a) { setS({ acc: a || {}, loading: false, err: '' }); }).catch(function (er) { setS({ acc: null, loading: false, err: (er && er.status === 402) ? 'Пробный период закончился.' : 'Не удалось загрузить баллы' }); }); }
+  function load() { if (meIsLegacy()) { setS({ acc: null, loading: true, err: '' }); meEnsureCabinet(function () { var cc = meCab(); var bal = parseInt(String(cc.points || '0').replace(/[^\d]/g, ''), 10) || 0; setS({ acc: { balance: bal, visits: cc.visits }, loading: false, err: '' }); }); return; } setS({ acc: null, loading: true, err: '' }); meWidgetAf('/loyalty/me').then(function (a) { setS({ acc: a || {}, loading: false, err: '' }); }).catch(function (er) { setS({ acc: null, loading: false, err: (er && er.status === 402) ? 'Пробный период закончился.' : 'Не удалось загрузить баллы' }); }); }
   React.useEffect(function () { load(); }, []);
   var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 18, marginTop: 10, maxWidth: 420, background: c.surf };
   var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 };
@@ -11396,7 +11442,11 @@ window.ALoyaltyCard = ALoyaltyCard;
 
 function AProfileCard(props) {
   var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
-  var u = (function () { try { var ctx = window.__ME_SAAS_CTX; var b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null'); return (b && b.user) || {}; } catch (er) { return {}; } })();
+  var rr = React.useState(0);
+  React.useEffect(function () { if (meIsLegacy()) meEnsureCabinet(function () { rr[1](function (x) { return x + 1; }); }); }, []);
+  var u = meIsLegacy()
+    ? (function () { var cc = meCab(); return { name: cc.fullName || cc.name || 'Гость', phone: cc.bookingPhone || cc.phone || '' }; })()
+    : (function () { try { var ctx = window.__ME_SAAS_CTX; var b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null'); return (b && b.user) || {}; } catch (er) { return {}; } })();
   var name = (u && u.name) || 'Гость';
   var phone = (u && u.phone) || '';
   var initial = String(name).trim().charAt(0).toUpperCase() || '·';
@@ -11418,19 +11468,148 @@ function AShopCard(props) {
   var certs = ['2 000 ₽', '3 000 ₽', '5 000 ₽', '10 000 ₽'];
   var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 14, marginTop: 10, maxWidth: 420, background: c.surf };
   var subl = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '2px 0 10px' };
-  var soon = function () { setS({ note: 'Оформление подключим совсем скоро — уже в работе.' }); };
+  var buy = function (name) { if (meIsLegacy()) { meChatSay('Хочу купить: ' + name + '. Подскажите, как оформить?'); setS({ note: 'Передал Майе — она поможет оформить.' }); } else { setS({ note: 'Оформление подключим совсем скоро — уже в работе.' }); } };
+  var activeSub = (function () { var cc = meCab(); var sb = cc.sub; return (meIsLegacy() && sb && sb[0] && sb[0] !== 'Нет активного абонемента') ? sb : null; })();
   return e('div', { style: wrap }, e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 } }, 'Магазин'),
+    activeSub ? e('div', { style: { border: '1px solid ' + c.line2, borderRadius: 15, padding: '12px 15px', background: c.bg2, marginBottom: 14 } }, e('div', { style: { fontFamily: c.BODYF, fontWeight: 600, fontSize: 13.5, color: c.ink } }, activeSub[0]), e('div', { style: { fontSize: 11.5, color: c.muted, marginTop: 3 } }, 'Ваш активный абонемент · осталось ' + Math.max(0, (Number(activeSub[3]) || 0) - (Number(activeSub[2]) || 0)) + ' из ' + (Number(activeSub[3]) || 0))) : null,
     e('div', { style: subl }, 'Абонементы'),
     e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, abos.map(function (a, i) {
-      return e('div', { key: i, onClick: soon, style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '1px solid ' + c.line2, borderRadius: 15, padding: '13px 15px', background: c.bg2 } },
+      return e('div', { key: i, onClick: function () { buy(a.n); }, style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '1px solid ' + c.line2, borderRadius: 15, padding: '13px 15px', background: c.bg2 } },
         e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: c.BODYF, fontWeight: 600, fontSize: 13.5, color: c.ink } }, a.n), e('div', { style: { fontSize: 11, color: c.muted, marginTop: 2 } }, a.d)),
         e('div', { style: { fontSize: 14, fontWeight: 300, color: c.ink } }, a.p));
     })),
     e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '16px 0 10px' } }, 'Сертификаты'),
-    e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 } }, certs.map(function (v, i) { return e('div', { key: i, onClick: soon, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + c.line2, borderRadius: 13, padding: '15px 0', fontSize: 15, fontWeight: 300, color: c.ink, background: c.bg2 } }, v); })),
+    e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 } }, certs.map(function (v, i) { return e('div', { key: i, onClick: function () { buy('Сертификат ' + v); }, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + c.line2, borderRadius: 13, padding: '15px 0', fontSize: 15, fontWeight: 300, color: c.ink, background: c.bg2 } }, v); })),
     s.note ? e('div', { style: { fontSize: 12, color: c.faint, marginTop: 12, lineHeight: 1.5 } }, s.note) : null);
 }
 window.AShopCard = AShopCard;
+
+// ── Друзья / реферал: ссылка + статистика из кабинета (APP_DATA.invite), «Поделиться».
+function AReferralCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var rr = React.useState(0); var cp = React.useState(false);
+  React.useEffect(function () { if (meIsLegacy()) meEnsureCabinet(function () { rr[1](function (x) { return x + 1; }); }); }, []);
+  var inv = (window.APP_DATA && window.APP_DATA.invite) || {};
+  var link = inv.link || ''; var full = window.__meInviteFullLink || (link && /\./.test(link) ? ('https://' + link) : '');
+  var stats = (Array.isArray(inv.stats) && inv.stats.length) ? inv.stats : [['0', 'приглашено'], ['0', 'пришли']];
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 18, marginTop: 10, maxWidth: 420, background: c.surf };
+  var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 };
+  var prim = { width: '100%', height: 44, borderRadius: 999, border: 0, background: c.invBg, color: c.invText, fontFamily: c.BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer', marginTop: 14 };
+  function share() {
+    if (!full) { meChatSay('Хочу пригласить друга — пришлите мою реферальную ссылку.'); return; }
+    try { if (navigator.share) { navigator.share({ title: 'Мужская Эстетика', url: full }); return; } } catch (er) {}
+    try { navigator.clipboard.writeText(full); cp[1](true); setTimeout(function () { cp[1](false); }, 2000); } catch (er) { meChatSay('Пришлите мою реферальную ссылку, пожалуйста.'); }
+  }
+  return e('div', { style: wrap }, e('div', { style: lab }, 'Пригласить друга'),
+    e('div', { style: { display: 'flex', gap: 10, marginBottom: 12 } }, stats.map(function (p, i) {
+      return e('div', { key: i, style: { flex: 1, border: '1px solid ' + c.line2, borderRadius: 14, padding: '12px 10px', background: c.bg2, textAlign: 'center' } }, e('div', { style: { fontFamily: c.DISPF, fontWeight: 200, fontSize: 24, color: c.ink } }, p[0]), e('div', { style: { fontSize: 10.5, color: c.muted, marginTop: 3 } }, p[1]));
+    })),
+    e('div', { style: { fontSize: 12.5, color: c.muted, lineHeight: 1.5 } }, 'Друг получит бонус на первый визит, а вы — баллы за каждого, кто придёт.'),
+    link ? e('div', { style: { fontSize: 12.5, color: c.ink, textAlign: 'center', padding: '10px 0 2px' } }, link) : null,
+    e('button', { style: prim, onClick: share }, cp[0] ? 'Ссылка скопирована' : 'Поделиться ссылкой'));
+}
+window.AReferralCard = AReferralCard;
+
+// ── История визитов: cabinet.history ([услуга, дата, сумма]).
+function AHistoryCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var st = React.useState({ loading: true, items: [] }); var s = st[0], setS = st[1];
+  React.useEffect(function () { if (meIsLegacy()) { meEnsureCabinet(function () { var h = meCab().history; setS({ loading: false, items: Array.isArray(h) ? h : [] }); }); } else { setS({ loading: false, items: [] }); } }, []);
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 14, marginTop: 10, maxWidth: 420, background: c.surf };
+  var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 };
+  var prim = { width: '100%', height: 44, borderRadius: 999, border: 0, background: c.invBg, color: c.invText, fontFamily: c.BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer', marginTop: 12 };
+  if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'История визитов'), e('div', { style: { fontSize: 12.5, color: c.muted, padding: '6px 2px' } }, 'Секунду…'));
+  if (!s.items.length) return e('div', { style: wrap }, e('div', { style: lab }, 'История визитов'), e('div', { style: { fontSize: 13.5, color: c.ink, lineHeight: 1.5 } }, 'Пока нет завершённых визитов.'), e('button', { style: prim, onClick: function () { meChatEvent('me-chat-book'); } }, 'Записаться'));
+  return e('div', { style: wrap }, e('div', { style: lab }, 'История визитов'),
+    e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, s.items.slice(0, 12).map(function (h, i) {
+      return e('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, border: '1px solid ' + c.line2, borderRadius: 14, padding: '12px 14px', background: c.bg2 } },
+        e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: c.BODYF, fontWeight: 600, fontSize: 13, color: c.ink } }, h[0] || 'Визит'), e('div', { style: { fontSize: 11, color: c.muted, marginTop: 2 } }, h[1] || '')),
+        h[2] ? e('div', { style: { fontSize: 13, color: c.ink } }, h[2]) : null);
+    })));
+}
+window.AHistoryCard = AHistoryCard;
+
+// ── Настройки уведомлений: notify_prefs (POST через __meAuthReq), тумблеры по категориям.
+function ANotifyCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var PROXY = 'https://malesthetic.pro/app/api-proxy.php';
+  var st = React.useState({ prefs: null, loading: true }); var s = st[0], setS = st[1];
+  function req(body, cb) { var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null; if (!rq) { cb && cb(null); return; } fetch(PROXY + '?action=notify_prefs', { method: 'POST', headers: rq.headers, body: rq.body }).then(function (r) { return r.json(); }).then(function (res) { cb && cb((res && res.prefs) || {}); }).catch(function () { cb && cb(null); }); }
+  React.useEffect(function () { req({}, function (p) { setS({ prefs: p || {}, loading: false }); }); }, []);
+  function on(k) { return !!(s.prefs && s.prefs[k] !== false); }
+  function toggle(k) { var n = Object.assign({}, s.prefs || {}); n[k] = !on(k); setS({ prefs: n, loading: false }); try { window.tactile && window.tactile(); } catch (er) {} req({ prefs: n }, function (p) { if (p) setS({ prefs: p, loading: false }); }); }
+  var ROWS = [['reminder', 'Напоминания о записи'], ['record_changes', 'Изменения записи'], ['freed_slot', 'Освободилось время'], ['marketing', 'Акции и новости']];
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 16, marginTop: 10, maxWidth: 420, background: c.surf };
+  var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 4 };
+  function Sw(isOn, click) { return e('div', { onClick: click, style: { width: 44, height: 26, borderRadius: 999, flex: '0 0 auto', cursor: 'pointer', background: isOn ? c.invBg : c.line2, position: 'relative', transition: 'background .2s' } }, e('div', { style: { position: 'absolute', top: 3, left: isOn ? 21 : 3, width: 20, height: 20, borderRadius: 999, background: c.invText, transition: 'left .2s' } })); }
+  if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 12.5, color: c.muted, padding: '6px 2px' } }, 'Секунду…'));
+  return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'),
+    ROWS.map(function (r, i) { return e('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, padding: '13px 2px', borderTop: i ? '1px solid ' + c.line : 'none' } }, e('span', { style: { flex: 1, fontSize: 13.5, color: c.ink } }, r[1]), Sw(on(r[0]), function () { toggle(r[0]); })); }));
+}
+window.ANotifyCard = ANotifyCard;
+
+// ── Чаевые мастеру: выбор мастера (аватары) → сумма → благодарность → перевод по СБП (__tipsSend).
+function ATipsCard(props) {
+  var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
+  var wd = props.data || {};
+  var MASTERS = window.__meBookMasters || [];
+  var wdMaster = (wd.master_id != null) ? String(wd.master_id) : null;
+  var usualId = (window.__meUsualMaster && window.__meUsualMaster.id) || null;
+  var defIdx = 0;
+  for (var k = 0; k < MASTERS.length; k++) { if (wdMaster && String(MASTERS[k].id) === wdMaster) { defIdx = k; break; } }
+  if (!wdMaster && usualId) { for (var k2 = 0; k2 < MASTERS.length; k2++) { if (String(MASTERS[k2].id) === String(usualId)) { defIdx = k2; break; } } }
+  var base = Number(wd.base_amount) || 0, pctMode = base > 0;
+  var r10 = function (n) { return Math.max(50, Math.round(n / 10) * 10); };
+  var PRESETS = pctMode ? [{ amt: r10(base * 0.10), pct: '10%' }, { amt: r10(base * 0.15), pct: '15%' }, { amt: r10(base * 0.20), pct: '20%' }] : [{ amt: 300, pct: '' }, { amt: 500, pct: '' }, { amt: 1000, pct: '' }];
+  var CUSTOM = [700, 1500, 2000];
+  var st = React.useState({ mi: defIdx, amt: PRESETS[1].amt, custom: false, note: null, sent: false, busy: false });
+  var s = st[0], setS = st[1];
+  function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
+  var NOTES = [['thanks', 'Спасибо!'], ['best', 'Лучший мастер'], ['clean', 'Чисто сработано'], ['again', 'Вернусь ещё']];
+  var money = function (n) { return Number(n || 0).toLocaleString('ru-RU'); };
+  var master = MASTERS[s.mi] || MASTERS[0] || { name: 'Мастер' };
+  var noteLabel = (function () { var f = NOTES.filter(function (x) { return x[0] === s.note; })[0]; return f ? f[1] : ''; })();
+  function doSend() { if (s.busy) return; patch({ busy: true }); try { if (window.__tipsSend) window.__tipsSend(s.mi, s.amt, noteLabel || undefined); } catch (er) {} setTimeout(function () { patch({ busy: false, sent: true }); }, 350); }
+  var wrap = { border: '1px solid ' + c.line, borderRadius: 22, padding: 16, marginTop: 10, maxWidth: 420, background: c.surf };
+  var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '15px 0 11px' };
+  var prim = { width: '100%', height: 48, marginTop: 18, borderRadius: 999, border: 0, background: c.invBg, color: c.invText, fontFamily: c.BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer' };
+  if (s.sent) {
+    return e('div', { style: wrap }, e('div', { style: { textAlign: 'center', padding: '6px 4px' } },
+      e('div', { style: { width: 54, height: 54, borderRadius: '50%', background: c.invBg, color: c.invText, display: 'grid', placeItems: 'center', margin: '0 auto', fontSize: 26 } }, '✓'),
+      e('div', { style: { fontFamily: c.DISPF, fontWeight: 300, fontSize: 17, color: c.ink, marginTop: 14 } }, 'Чаевые отправлены'),
+      e('div', { style: { fontFamily: c.DISPF, fontWeight: 200, fontSize: 26, color: c.ink, marginTop: 4 } }, money(s.amt) + ' ₽'),
+      e('div', { style: { fontSize: 12.5, color: c.muted, marginTop: 6, lineHeight: 1.5 } }, (master.name || 'Мастер') + ' получит перевод по СБП' + (noteLabel ? (' вместе с благодарностью «' + noteLabel + '».') : '.'))));
+  }
+  var masterRow = e('div', { style: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 } }, MASTERS.map(function (m, i) {
+    var on = i === s.mi; var ph = (window.__meMasterPhoto && window.__meMasterPhoto(m.id)) || '';
+    return e('div', { key: i, onClick: function () { patch({ mi: i }); }, style: { flex: '0 0 auto', cursor: 'pointer', textAlign: 'center', width: 60 } },
+      ph ? e('img', { src: ph, alt: '', style: { width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid ' + (on ? c.ink : 'transparent') } })
+         : e('div', { style: { width: 48, height: 48, borderRadius: '50%', margin: '0 auto', display: 'grid', placeItems: 'center', background: c.surf2, color: c.ink, border: '2px solid ' + (on ? c.ink : 'transparent') } }, (m.name || '?').charAt(0)),
+      e('div', { style: { fontSize: 10, color: on ? c.ink : c.muted, marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, (m.name || '').split(' ')[0]));
+  }));
+  var amountGrid = e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 } }, PRESETS.map(function (p, i) {
+    var on = !s.custom && s.amt === p.amt;
+    return e('div', { key: i, onClick: function () { patch({ amt: p.amt, custom: false }); }, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + (on ? c.ink : c.line2), borderRadius: 14, padding: '12px 0', background: on ? c.surf2 : c.bg2 } }, e('div', { style: { fontSize: 15, fontWeight: 300, color: c.ink } }, money(p.amt) + ' ₽'), p.pct ? e('div', { style: { fontSize: 9, color: c.muted, marginTop: 3 } }, p.pct) : null);
+  }));
+  var customRow = e('div', { onClick: function () { patch({ custom: true, amt: s.custom ? s.amt : CUSTOM[0] }); }, style: { cursor: 'pointer', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid ' + (s.custom ? c.ink : c.line2), borderRadius: 14, padding: '12px 15px', background: s.custom ? c.surf2 : c.bg2 } },
+    e('span', { style: { fontSize: 12.5, color: c.ink } }, 'Своя сумма'), e('span', { style: { fontSize: 14, fontWeight: 300, color: s.custom ? c.ink : c.faint } }, s.custom ? (money(s.amt) + ' ₽') : 'указать'));
+  var customChips = s.custom ? e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 8 } }, CUSTOM.map(function (v, i) {
+    var on = s.amt === v;
+    return e('div', { key: i, onClick: function () { patch({ amt: v, custom: true }); }, style: { cursor: 'pointer', fontSize: 12, padding: '8px 14px', borderRadius: 999, border: '1px solid ' + (on ? c.ink : c.line2), color: c.ink, background: on ? c.surf2 : 'transparent' } }, money(v) + ' ₽');
+  })) : null;
+  var noteChips = e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7 } }, NOTES.map(function (n, i) {
+    var on = s.note === n[0];
+    return e('div', { key: i, onClick: function () { patch({ note: on ? null : n[0] }); }, style: { cursor: 'pointer', fontSize: 11.5, padding: '8px 13px', borderRadius: 999, border: '1px solid ' + (on ? c.ink : c.line2), color: on ? c.ink : c.muted, background: on ? c.surf2 : 'transparent' } }, n[1]);
+  }));
+  return e('div', { style: wrap },
+    e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 4 } }, 'Чаевые мастеру'),
+    e('div', { style: Object.assign({}, lab, { margin: '13px 0 10px' }) }, 'Кого благодарим'), masterRow,
+    e('div', { style: lab }, 'Сумма чаевых'), amountGrid, customRow, customChips,
+    e('div', { style: lab }, 'Благодарность · по желанию'), noteChips,
+    e('button', { style: Object.assign({}, prim, { opacity: s.busy ? 0.6 : 1 }), onClick: doSend }, s.busy ? 'Открываю СБП…' : ('Отправить · ' + money(s.amt) + ' ₽')),
+    e('div', { style: { textAlign: 'center', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.faint, marginTop: 9 } }, 'Перевод напрямую мастеру по СБП · без комиссии'));
+}
+window.ATipsCard = ATipsCard;
 
 // =====================================================================
 // AChat — in-app AI assistant «Антон». SSE streaming (?action=chat_stream)
@@ -11872,6 +12051,8 @@ function AChat() {
       if (m && m.id != null) msg.id = m.id;
       if (m && m.link) msg.link = m.link;
       if (m && m.action) msg.action = m.action;
+      if (m && m.widget) msg.widget = m.widget; // проактивные/AI-виджеты восстанавливаются из истории
+      if (m && m.widget_data && typeof m.widget_data === 'object') msg.widget_data = m.widget_data;
       const images = Array.isArray(m && m.images) ? m.images.map(img => {
         if (typeof img === 'string') return { url: img };
         if (!img || !img.url) return null;
@@ -11901,10 +12082,12 @@ function AChat() {
 	    var onBook = function () { push({ role: 'bot', text: 'Конечно! Подберём удобное время — выбирайте мастера 👇', bookWidget: true }); };
 	    var onMy = function () { push({ role: 'bot', text: 'Вот ваши записи 👇', myBookings: true }); };
 	    var onLoy = function () { push({ role: 'bot', text: 'Смотрим ваши баллы 👇', loyaltyWidget: true }); };
+	    var onSay = function (ev) { var txt = ev && ev.detail && ev.detail.text; if (txt) { try { send(String(txt)); } catch (e) {} } };
 	    window.addEventListener('me-chat-book', onBook);
 	    window.addEventListener('me-chat-mybookings', onMy);
 	    window.addEventListener('me-chat-loyalty', onLoy);
-	    return function () { window.removeEventListener('me-chat-book', onBook); window.removeEventListener('me-chat-mybookings', onMy); window.removeEventListener('me-chat-loyalty', onLoy); };
+	    window.addEventListener('me-chat-say', onSay);
+	    return function () { window.removeEventListener('me-chat-book', onBook); window.removeEventListener('me-chat-mybookings', onMy); window.removeEventListener('me-chat-loyalty', onLoy); window.removeEventListener('me-chat-say', onSay); };
 	  }, []);
 	  const onbOnRef = React.useRef(onbActiveNow()); // заморожено на маунт; онбординг завершается редиректом в новый бизнес
 	  const [onbStage, setOnbStage] = React.useState('chat'); // chat|confirm|logo|crm
@@ -12595,7 +12778,7 @@ function AChat() {
       });
       if (!resp.ok) return;
       const data = await resp.json();
-      const loaded = normalizeChatMessages(data && data.messages);
+      const loaded = filterDeletedMsgs(normalizeChatMessages(data && data.messages));
       if ((opts.cancelled && opts.cancelled()) || !loaded.length) return;
       setMsgs(function (current) {
         const currentClean = normalizeChatMessages(current);
@@ -12802,8 +12985,16 @@ function AChat() {
 	      payload: payload
 	    };
 	  }
-	  function applyServerChatMessages(data, fallbackToGreeting) {
-	    const loaded = normalizeChatMessages(data && data.messages);
+	  function meChatDelStoreKey() { try { return chatHistoryCacheKey() + ':del'; } catch (e) { return 'me_chat_del'; } }
+  function meLoadDeletedSigs() { try { return JSON.parse(chatHistoryStorage().getItem(meChatDelStoreKey()) || '{}') || {}; } catch (e) { return {}; } }
+  function meSaveDeletedSigs(o) { try { chatHistoryStorage().setItem(meChatDelStoreKey(), JSON.stringify(o || {})); } catch (e) {} }
+  function meMsgRtSig(m) { return 'rt|MEDELSEP|' + (m && m.role) + '|MEDELSEP|' + String((m && m.text) || '').trim(); }
+  function markMsgDeleted(m) { var o = meLoadDeletedSigs(); if (m && m.id != null) o['id|MEDELSEP|' + m.id] = 1; else o[meMsgRtSig(m)] = 1; meSaveDeletedSigs(o); }
+  function unmarkMsgText(role, text) { var o = meLoadDeletedSigs(); var k = 'rt|MEDELSEP|' + role + '|MEDELSEP|' + String(text || '').trim(); if (o[k]) { delete o[k]; meSaveDeletedSigs(o); } }
+  function meIsMsgDeleted(m) { var o = meLoadDeletedSigs(); if (o[meMsgRtSig(m)]) return true; return !!(m && m.id != null && o['id|MEDELSEP|' + m.id]); }
+  function filterDeletedMsgs(list) { return (list || []).filter(function (m) { return !meIsMsgDeleted(m); }); }
+  function applyServerChatMessages(data, fallbackToGreeting) {
+	    const loaded = filterDeletedMsgs(normalizeChatMessages(data && data.messages));
 	    userHasSentRef.current = loaded.some(m => m && m.role === 'user');
 	    setMsgs(loaded.length ? loaded : fallbackToGreeting ? defaultChatMsgs() : []);
 	  }
@@ -12813,6 +13004,7 @@ function AChat() {
 	      return;
 	    }
 	    if (!window.confirm('Удалить это сообщение?')) return;
+	    markMsgDeleted(m); // помечаем удалённым, чтобы sync/re-apply его не вернули
 	    try {
 	      if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(8);
 	    } catch (e) {}
@@ -12835,7 +13027,7 @@ function AChat() {
 	      });
 	      if (!resp.ok) return;
 	      const data = await resp.json();
-	      if (data && Array.isArray(data.messages)) applyServerChatMessages(data, true);
+	      if (data && Array.isArray(data.messages)) applyServerChatMessages(data, true); // сервер удаляет по стабильному id/контенту → список авторитетный (+ tombstone-фильтр как страховка)
 	    } catch (e) {}
 	  }
 	  async function clearMayaChat() {
@@ -12908,6 +13100,18 @@ function AChat() {
 		    };
 		  }
 		  // patch the LAST message (the streaming bot bubble)
+  function applyMsgIds(botId, userId) {
+    if (!botId && !userId) return;
+    setMsgs(function (m) {
+      var c = m.slice(); var gotBot = !botId, gotUsr = !userId;
+      for (var i = c.length - 1; i >= 0; i--) {
+        if (!gotBot && c[i].role === 'bot') { c[i] = Object.assign({}, c[i], { id: botId }); gotBot = true; }
+        else if (!gotUsr && c[i].role === 'user' && c[i].id == null) { c[i] = Object.assign({}, c[i], { id: userId }); gotUsr = true; }
+        if (gotBot && gotUsr) break;
+      }
+      return c;
+    });
+  }
   function patchLast(patch) {
     setMsgs(m => {
       const c = m.slice();
@@ -12916,49 +13120,49 @@ function AChat() {
       return c;
     });
   }
+  // Единый детектор виджет-намерения — используется И для текста (send), И для голоса (sendAudio),
+  // чтобы «записаться» голосом открывало тот же виджет, что и текстом. 4 SaaS-виджета — только на SaaS-бэке;
+  // бронь — в обоих режимах (легаси YClients / SaaS). Не срабатывает на «отменить/перенести».
+  function chatWidgetIntent(txt) {
+    var _bt = String(txt == null ? '' : txt).trim();
+    if (!_bt) return null;
+    if (/истори|прошл\w*\s+(?:визит|запис|стрижк)|мои\s+прошл/i.test(_bt)) return 'history';
+    if (/мои\s+запис|мои\s+брон|когда\s+я\s+запис|покажи\s+(?:мои\s+)?запис|мои\s+визит/i.test(_bt)) return 'mybookings';
+    if (/(?:^|[^а-яё])(?:балл|кэшбэк|кешбэк|бонус)/i.test(_bt)) return 'loyalty';
+    if (/магазин|абонемент|сертификат|подарочн/i.test(_bt)) return 'shop';
+    if (/(?:^|[^а-яё])(?:профил|аккаунт)|мои\s+данные|мой\s+профиль/i.test(_bt)) return 'profile';
+    if (/(?:^|[^а-яё])(?:друз|пригласи|реферал)|поделит\w*\s+ссылк/i.test(_bt)) return 'referral';
+    if (/уведомлен|оповещен|настройк\w*\s+уведомл|что\s+присылать|напоминани\w*\s+настро/i.test(_bt)) return 'notify';
+    if (/чаев|поблагодар|дать\s+на\s+чай|благодар\w*\s+мастер/i.test(_bt)) return 'tips';
+    if (/(?:^|[^а-яё])(?:запиш|записа|постри[чг]|подстри)|хочу\s+(?:стри|подстри|записа)|на\s+стрижк|нужн\w*\s+стрижк/i.test(_bt) && !/отмен|перенес|перенос/i.test(_bt)) return 'book';
+    return null;
+  }
+  function chatWidgetBotBubble(kind) {
+    if (kind === 'mybookings') return { role: 'bot', text: 'Вот ваши записи 👇', myBookings: true };
+    if (kind === 'loyalty') return { role: 'bot', text: 'Смотрим ваши баллы 👇', loyaltyWidget: true };
+    if (kind === 'shop') return { role: 'bot', text: 'Загляните на витрину 👇', shopWidget: true };
+    if (kind === 'profile') return { role: 'bot', text: 'Ваш профиль 👇', profileWidget: true };
+    if (kind === 'history') return { role: 'bot', text: 'Ваши прошлые визиты 👇', historyWidget: true };
+    if (kind === 'referral') return { role: 'bot', text: 'Приглашайте друзей — это выгодно 👇', referralWidget: true };
+    if (kind === 'notify') return { role: 'bot', text: 'Настройки уведомлений 👇', notifyWidget: true };
+    if (kind === 'tips') return { role: 'bot', text: 'Хотите поблагодарить мастера? Это займёт секунду 👇', tipsWidget: true };
+    return { role: 'bot', text: 'Конечно, без проблем! Подберём удобное время — выбирайте мастера 👇', bookWidget: true };
+  }
   async function send(textArg) {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
-    // «Записаться» (чип или ввод) → инлайн-виджет записи в ленте, а не в AI-чат
+    // «Записаться» и др. виджеты (чип / ввод) → инлайн-виджет в ленте, а не в AI-чат
     var _bt = String(textArg != null ? textArg : input).trim();
-    // «мои записи» → виджет списка записей
-    if (_bt && /мои\s+запис|мои\s+брон|когда\s+я\s+запис|покажи\s+(?:мои\s+)?запис|мои\s+визит/i.test(_bt)) {
-      try { setInput(''); } catch (e) {}
-      try { userHasSentRef.current = true; } catch (e) {}
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Вот ваши записи 👇', myBookings: true }]); });
-      return;
-    }
-    // баллы / кэшбэк
-    if (_bt && /(?:^|[^а-яё])(?:балл|кэшбэк|кешбэк|бонус)/i.test(_bt)) {
-      try { setInput(''); } catch (e) {}
-      try { userHasSentRef.current = true; } catch (e) {}
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Смотрим ваши баллы 👇', loyaltyWidget: true }]); });
-      return;
-    }
-    // магазин / абонемент / сертификат
-    if (_bt && /магазин|абонемент|сертификат|подарочн/i.test(_bt)) {
-      try { setInput(''); } catch (e) {}
-      try { userHasSentRef.current = true; } catch (e) {}
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Загляните на витрину 👇', shopWidget: true }]); });
-      return;
-    }
-    // профиль / мои данные
-    if (_bt && /(?:^|[^а-яё])(?:профил|аккаунт)|мои\s+данные|мой\s+профиль/i.test(_bt)) {
-      try { setInput(''); } catch (e) {}
-      try { userHasSentRef.current = true; } catch (e) {}
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Ваш профиль 👇', profileWidget: true }]); });
-      return;
-    }
-    // намерение записаться из свободного текста (клиентская эвристика; полноценно любую формулировку — сигнал widget от бэка).
-    // не срабатывает на «отменить/перенести запись».
-    if (_bt && /(?:^|[^а-яё])(?:запиш|записа|постри[чг]|подстри)|хочу\s+(?:стри|подстри|записа)|на\s+стрижк|нужн\w*\s+стрижк/i.test(_bt) && !/отмен|перенес|перенос/i.test(_bt)) {
+    var _wi = chatWidgetIntent(_bt);
+    if (_wi) {
       try { setInput(''); } catch (e) {}
       try { userHasSentRef.current = true; } catch (e) {} // выходим из welcome в тред, чтобы карточка отрисовалась
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, { role: 'bot', text: 'Конечно, без проблем! Подберём удобное время — выбирайте мастера 👇', bookWidget: true }]); });
+      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: _bt }, chatWidgetBotBubble(_wi)]); });
       return;
     }
     if (sending) return;
     const text = String(textArg != null ? textArg : input).trim();
     if (!text) return;
+    unmarkMsgText('user', text); // повторная отправка того же текста снимает метку удаления
     userHasSentRef.current = true;
     forceChatBottomRef.current = true;
     setInput('');
@@ -13040,8 +13244,10 @@ function AChat() {
           typing: false,
           link: doneData.link,
           action: doneData.action,
-          images: doneData.images
+          images: doneData.images,
+          widget: doneData.widget
         });
+        applyMsgIds(doneData.message_id || doneData.id, doneData.user_message_id);
       } else if (!sawEvent) {
         let data;
         try {
@@ -13049,13 +13255,17 @@ function AChat() {
         } catch (_) {
           data = null;
         }
-        if (data && data.reply) patchLast({
-          text: data.reply,
-          typing: false,
-          link: data.link,
-          action: data.action,
-          images: data.images
-        });else throw new Error('no_events');
+        if (data && data.reply) {
+          patchLast({
+            text: data.reply,
+            typing: false,
+            link: data.link,
+            action: data.action,
+            images: data.images,
+            widget: data.widget
+          });
+          applyMsgIds(data.message_id || data.id, data.user_message_id);
+        } else throw new Error('no_events');
       } else if (!acc.trim()) {
         throw new Error('incomplete');
       }
@@ -13072,8 +13282,10 @@ function AChat() {
           typing: false,
           link: data && data.link,
           action: data && data.action,
-          images: data && data.images
+          images: data && data.images,
+          widget: data && data.widget
         });
+        applyMsgIds(data && (data.message_id || data.id), data && data.user_message_id);
       } catch (e2) {
         patchLast({
           text: 'Нет связи с ассистентом. Попробуйте позже.',
@@ -13685,6 +13897,25 @@ function AChat() {
         body: JSON.stringify(ap.payload)
       });
       const data = await r.json();
+      // голос-намерение → инлайн-виджет: сначала серверный widget (умный триггер), иначе эвристика по транскрипту
+      var _vwi = (data && data.widget) || chatWidgetIntent(data && data.transcript);
+      if (_vwi) {
+        setMsgs(m => {
+          const c = m.slice();
+          for (let i = c.length - 1; i >= 0; i--) {
+            if (c[i].role === 'bot') {
+              c[i] = Object.assign({}, c[i], chatWidgetBotBubble(_vwi), { typing: false });
+              for (let j = i - 1; j >= 0; j--) {
+                if (c[j].role === 'user' && c[j].voice) { c[j] = Object.assign({}, c[j], { text: '🎤 ' + (data && data.transcript || 'Голосовое') }); break; }
+              }
+              break;
+            }
+          }
+          return c;
+        });
+        setSending(false);
+        return;
+      }
       voicePlay(data && data.audio_reply);   // MAYA отвечает голосом (если бэк прислал аудио)
       setMsgs(m => {
         const c = m.slice();
@@ -13710,6 +13941,7 @@ function AChat() {
         }
         return c;
       });
+      applyMsgIds(data && (data.message_id || data.id), data && data.user_message_id);
     } catch (er) {
       patchLast({
         text: 'Нет связи с сервером. Попробуйте позже.',
@@ -14212,7 +14444,7 @@ function AChat() {
 	        wordBreak: 'break-word',
 	        maxWidth: '100%'
 	      }
-	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.myBookings ? React.createElement(AMyBookingsCard, { key: 'mb', t: t, dark: dark }) : null, m.loyaltyWidget ? React.createElement(ALoyaltyCard, { key: 'loy', t: t, dark: dark }) : null, m.shopWidget ? React.createElement(AShopCard, { key: 'shop', t: t, dark: dark }) : null, m.profileWidget ? React.createElement(AProfileCard, { key: 'prof', t: t, dark: dark }) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
+	    }, m.text), imageEls, m.aiApproval ? saasAiApprovalCard(m, i) : null, m.bookWidget ? React.createElement(ABookCard, { key: 'bw', t: t, dark: dark }) : null, m.myBookings ? React.createElement(AMyBookingsCard, { key: 'mb', t: t, dark: dark }) : null, m.loyaltyWidget ? React.createElement(ALoyaltyCard, { key: 'loy', t: t, dark: dark }) : null, m.shopWidget ? React.createElement(AShopCard, { key: 'shop', t: t, dark: dark }) : null, m.profileWidget ? React.createElement(AProfileCard, { key: 'prof', t: t, dark: dark }) : null, m.historyWidget ? React.createElement(AHistoryCard, { key: 'hist', t: t, dark: dark }) : null, m.referralWidget ? React.createElement(AReferralCard, { key: 'ref', t: t, dark: dark }) : null, m.notifyWidget ? React.createElement(ANotifyCard, { key: 'ntf', t: t, dark: dark }) : null, m.tipsWidget ? React.createElement(ATipsCard, { key: 'tip', t: t, dark: dark, data: m.widget_data }) : null, m.widget ? meRenderWidgetCard(m.widget, t, dark, m.widget_data) : null, m.link ? linkBtn(m.link) : null, m.action ? actionBtn(m.action) : null);
 	    return e('div', {
 	      key: i,
 	      style: {
@@ -14573,7 +14805,7 @@ window.AChat = AChat;
   // order matches [...d.masters.top, ...d.masters.senior] used by ATips
   var TIPS_STAFF = [1461615, 1460233, 1461618, 1461621, 3278920];
   var TIPS_SLUG = ['stas', 'ilya', 'alexey', 'maxim', 'alexander'];
-  window.__tipsSend = function (idx, amount) {
+  window.__tipsSend = function (idx, amount, note) {
     var sid = TIPS_STAFF[idx],
       slug = TIPS_SLUG[idx];
     if (!sid) {
@@ -14591,6 +14823,7 @@ window.AChat = AChat;
         amount: amount,
         source: 'app'
       };
+      if (note) body.note = String(note);
       try {
         var tok = localStorage.getItem('web_session_token');
         if (tok) body.session_token = tok;
@@ -30629,6 +30862,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     c.pointsHint = 'Баллы подтянутся после визитов';
     c.visits = '0';
     c.nextBooking = ['Нет предстоящих записей', 'Запишитесь в приложении'];
+    c.upcoming = [];
     c.sub = ['Нет активного абонемента', 'АБОНЕМЕНТ', 0, 0];
     c.history = [];
     c.note = '';
@@ -30719,6 +30953,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
       }
     } catch (e) {}
 
+    if (body.upcoming) c.upcoming = Array.isArray(body.upcoming) ? body.upcoming : []; // полный список для виджета «Мои записи»
     if (body.upcoming && body.upcoming.length) {
       var u = body.upcoming[0];
       var title = svcStr(u.services) || 'Запись';
