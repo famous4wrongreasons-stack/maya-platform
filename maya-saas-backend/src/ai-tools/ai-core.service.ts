@@ -12,11 +12,13 @@ import { createHash } from 'crypto';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { UserRole } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import type {
   AiCoreMessage,
   AiCoreModelDecision,
+  AiCorePersona,
   AiCoreToolDescriptor,
   AiCoreToolResult,
 } from './ai-core.types';
@@ -214,6 +216,7 @@ export class AiCoreService {
         }
         const decision = await this.model.decide({
           surface: dto.surface,
+          persona: this.resolvePersona(user.role),
           messages: sanitized.messages,
           tools,
           toolResults: [...toolResults],
@@ -404,6 +407,12 @@ export class AiCoreService {
       });
       throw error;
     }
+  }
+
+  private resolvePersona(role: UserRole): AiCorePersona {
+    return role === UserRole.CLIENT || role === UserRole.CUSTOMER
+      ? 'admin'
+      : 'director';
   }
 
   private async complete(

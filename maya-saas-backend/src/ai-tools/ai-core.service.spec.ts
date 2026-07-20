@@ -88,6 +88,7 @@ describe('AiCoreService', () => {
     expect(JSON.stringify(firstInput)).not.toContain('918 000');
     expect(JSON.stringify(firstInput)).not.toContain('ivan@example.com');
     expect(firstInput?.requiredToolNames).toEqual(['analytics.business.read']);
+    expect(firstInput?.persona).toBe('director');
     expect(result).toMatchObject({
       reply: 'Выручка выросла.',
       source: 'deepseek',
@@ -365,6 +366,7 @@ describe('AiCoreService', () => {
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
       'loyalty.own.read',
     ]);
+    expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe('admin');
     expect(result).toMatchObject({
       reply: 'Ваш баланс: 2 133 балла.',
       grounding: {

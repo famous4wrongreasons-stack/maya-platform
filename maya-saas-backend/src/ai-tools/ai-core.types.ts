@@ -2,6 +2,7 @@ import type { AiToolSurface } from './ai-tool.types';
 
 export type AiCoreMessageRole = 'assistant' | 'user';
 export type AiCoreProvider = 'deepseek' | 'openai';
+export type AiCorePersona = 'director' | 'admin';
 
 export interface AiCoreMessage {
   role: AiCoreMessageRole;
@@ -23,6 +24,7 @@ export interface AiCoreToolResult {
 
 export interface AiCoreModelInput {
   surface: AiToolSurface;
+  persona: AiCorePersona;
   messages: AiCoreMessage[];
   tools: AiCoreToolDescriptor[];
   toolResults: AiCoreToolResult[];
