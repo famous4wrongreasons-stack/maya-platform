@@ -12895,6 +12895,16 @@ function AChat() {
 
   const chatHeight = vvBox.height;
   const kbdUp = vvBox.keyboard > 0 || vvBox.height > 0 && vvBox.height < ((typeof window !== 'undefined' ? window.innerHeight : 9999) - 120);
+  // При открытии клавиатуры — домотать ленту к последнему сообщению (iOS резайзит вьюпорт с задержкой,
+  // поэтому повторяем через rAF + таймауты, пока анимация клавиатуры завершается).
+  React.useEffect(function () {
+    if (!kbdUp) return;
+    var toBottom = function () { try { var el = scRef.current; if (el) { el.scrollTop = el.scrollHeight; chatStickRef.current = true; } } catch (e) {} };
+    requestAnimationFrame(toBottom);
+    var t1 = setTimeout(toBottom, 130);
+    var t2 = setTimeout(toBottom, 340);
+    return function () { clearTimeout(t1); clearTimeout(t2); };
+  }, [kbdUp]);
   // ── КЛАВИАТУРА: не считаем её дважды ─────────────────────────────────
   // Глобальный viewport-script меняет --me-app-height на visibleViewport.height.
   // Плавающий composer остаётся bottom:0, а padding ленты не даёт ему перекрыть
@@ -14760,7 +14770,7 @@ function AChat() {
     }, midEl, rightBtn);
     // Maya OS 3D: стеклянный нав-бар под инпутом (прячем при клавиатуре и в онбординге — владелец остаётся в потоке)
     var nav = null;
-    if (!kbdUp && !onbOnRef.current) {
+    if (!kbdUp && !onbOnRef.current && !(window.__meChatOnly && chatSurface() === 'client')) {
       var items = (chatSurface() === 'staff' ? (window.STAFF_TABS || []) : (window.CLIENT_TABS || []));
       var loggedIn = !!(window.__meHasSession && window.__meHasSession());
       var vis = items.filter(function (it) { return meTabFeatureAllowed(it) && (!it.auth || loggedIn || it.guestLabel || it.guestTap); });
@@ -22845,8 +22855,7 @@ Object.assign(window, {
 // =====================================================================
 function ALiveSchedule() {
   const SS_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
-  const HOUR_H = 54;
-  const GUT = 40;
+  const GUT = 44;
   // colours match app.html journal EXACTLY: waiting(записан/ждём)=зелёный по умолчанию,
   // done(проведён/оплачен)=оранжевый, noshow(не пришёл)=красный. Most visits stay
   // attendance=0 in YClients here, so a normal worked day reads green — not "не начался".
@@ -22880,6 +22889,17 @@ function ALiveSchedule() {
   });
   const nowCol = dark ? 'rgba(255,255,255,0.72)' : 'rgba(0,0,0,0.6)'; // «сейчас»-линия: мягкая по теме
   const [offset, setOffset] = React.useState(0);
+  const [gridH, setGridH] = React.useState(0);
+  const gridWrapRef = React.useRef(null);
+  React.useLayoutEffect(function () {
+    function meas() {
+      const el = gridWrapRef.current;
+      if (el && el.clientHeight && el.clientHeight !== gridH) setGridH(el.clientHeight);
+    }
+    meas();
+    window.addEventListener('resize', meas);
+    return function () { window.removeEventListener('resize', meas); };
+  });
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState('');
@@ -22912,6 +22932,8 @@ function ALiveSchedule() {
   const [bookPhone, setBookPhone] = React.useState('');
   const [bookSvc, setBookSvc] = React.useState(null); // selected service id
   const [bookSvcList, setBookSvcList] = React.useState(null);
+  const [bookDur, setBookDur] = React.useState(60);        // длительность сеанса, мин
+  const [bookDurTouched, setBookDurTouched] = React.useState(false); // мастер задал вручную
   const [bookBusy, setBookBusy] = React.useState(false);
   const [bookErr, setBookErr] = React.useState('');
   const [bookSugg, setBookSugg] = React.useState([]); // client suggestions by phone
@@ -23062,6 +23084,32 @@ function ALiveSchedule() {
   }, {
     attendance: a
   });
+  // «стянуть»/растянуть визит: меняем длительность, время начала не трогаем
+  function changeDuration(delta) {
+    if (!detail || acting) return;
+    var cur = Number(detail.duration_minutes || 0);
+    if (!cur) {
+      try {
+        var a = String(detail.start || '').split(':'), b = String(detail.end || '').split(':');
+        cur = (+b[0] * 60 + +b[1]) - (+a[0] * 60 + +a[1]);
+      } catch (e) { cur = 0; }
+      if (!(cur > 0)) cur = 60;
+    }
+    var next = Math.max(5, Math.min(720, cur + delta));
+    if (next === cur) return;
+    var end = detail.end || '';
+    try {
+      var s = String(detail.start || '').split(':');
+      var mm = (+s[0] * 60 + +s[1]) + next;
+      end = pad2(Math.floor(mm / 60) % 24) + ':' + pad2(mm % 60);
+    } catch (e) {}
+    doAction('panel_journal_set_duration', {
+      duration_minutes: next
+    }, {
+      duration_minutes: next,
+      end: end
+    });
+  }
   function saveClientName() {
     if (!detail || clientNameBusy) return;
     const name = String(clientNameDraft || '').trim();
@@ -23203,11 +23251,42 @@ function ALiveSchedule() {
     setBookName('');
     setBookPhone('+7 ');
     setBookSvc(null);
+    setBookDur(60);
+    setBookDurTouched(false);
     setBookErr('');
     setBookSvcList(null);
     setBookSugg([]);
     setBookOpen(true);
     loadBookSvc(sid);
+  }
+  // длительность услуги в минутах (YClients отдаёт seance_length/duration в секундах)
+  function svcMinutes(s) {
+    if (!s) return 0;
+    var sec = Number(s.seance_length || s.duration || 0);
+    if (!sec) return 0;
+    return sec > 300 ? Math.round(sec / 60) : Math.round(sec);   // >300 → это секунды
+  }
+  // выбор услуги: подставляем её длительность, пока мастер не задал свою
+  function pickBookSvc(s) {
+    setBookSvc(s.id);
+    if (!bookDurTouched) {
+      var m = svcMinutes(s);
+      if (m >= 5) setBookDur(m);
+    }
+  }
+  function bumpDur(d) {
+    setBookDurTouched(true);
+    setBookDur(function (prev) {
+      var v = Math.round((Number(prev) || 60) + d);
+      return Math.max(5, Math.min(720, v));
+    });
+  }
+  // «1 ч 30 мин» / «45 мин»
+  function fmtDur(min) {
+    var m = Math.max(0, Math.round(Number(min) || 0));
+    var h = Math.floor(m / 60), r = m % 60;
+    if (!h) return r + ' мин';
+    return r ? h + ' ч ' + r + ' мин' : h + ' ч';
   }
   // phone formatting + live client suggestions from the salon base
   function fmtPhone(v) {
@@ -23294,7 +23373,8 @@ function ALiveSchedule() {
       service_ids: [bookSvc],
       datetime: dt,
       client_name: bookName.trim(),
-      client_phone: cleanPhone(bookPhone)
+      client_phone: cleanPhone(bookPhone),
+      duration_minutes: Math.max(5, Math.min(720, Math.round(Number(bookDur) || 60)))
     };
     const rq = window.__meAuthReq ? window.__meAuthReq(payload) : null;
     if (!rq) {
@@ -23329,7 +23409,7 @@ function ALiveSchedule() {
     let col = Math.floor((x - GUT) / cw);
     col = Math.max(0, Math.min(N - 1, col));
     const sid = colMasters[col] ? colMasters[col].id : null;
-    let mins = Math.round(((y - 16) / HOUR_H + startH) * 60 / 15) * 15;
+    let mins = Math.round((((y - TOP_PAD) / PPM) + startH * 60) / 15) * 15;
     mins = Math.max(startH * 60, Math.min(endH * 60, mins));
     openBook(sid, pad2(Math.floor(mins / 60)) + ':' + pad2(mins % 60));
   }
@@ -23357,6 +23437,76 @@ function ALiveSchedule() {
   for (let h = startH; h <= endH; h++) hours.push(h);
   const colLeft = c => 'calc(' + GUT + 'px + (100% - ' + GUT + 'px) / ' + N + ' * ' + c + ')';
   const colW = 'calc((100% - ' + GUT + 'px) / ' + N + ')';
+
+  // ── Дизайн-токены сетки расписания (handoff «Расписание — сетка») ──
+  const MONOF = "ui-monospace, SFMono-Regular, Menlo, 'IBM Plex Mono', monospace";
+  const inkC = dark ? '#f4f0eb' : '#191710';
+  const mutedC = dark ? 'rgba(244,240,235,0.55)' : 'rgba(25,23,16,0.55)';
+  const faintC = dark ? 'rgba(244,240,235,0.34)' : 'rgba(25,23,16,0.36)';
+  const lineC = dark ? 'rgba(244,240,235,0.10)' : 'rgba(25,23,16,0.09)';
+  const line2C = dark ? 'rgba(244,240,235,0.20)' : 'rgba(25,23,16,0.17)';
+  const sunkC = dark ? 'rgba(244,240,235,0.05)' : 'rgba(25,23,16,0.05)';
+  const cardBg = dark ? 'rgba(244,240,235,0.06)' : '#fffefb';
+  const cardBd = lineC;
+  const cardShadow = dark ? 'none' : '0 1px 2px rgba(0,0,0,.05)';
+  const invC = dark ? '#f4f0eb' : '#191710';
+  const invT = dark ? '#0a0a0b' : '#f7f3ec';
+  // масштаб: вся смена умещается по высоте контейнера (без вертикальной прокрутки)
+  const TOP_PAD = 8;
+  const TOTAL_MIN = Math.max((endH - startH) * 60, 60);
+  const PPM = gridH > 0 ? Math.max((gridH - TOP_PAD - 6) / TOTAL_MIN, 0.3) : 0.95;
+  const HOUR_H = PPM * 60;
+  // цветная метка по типу услуги + короткое имя услуги
+  const svcTone = s => {
+    s = String(s || '');
+    if (/детск/i.test(s)) return dark ? '#dfa94e' : '#b3822f';
+    if (/борода|тониров|моделиров|насадк/i.test(s)) return dark ? '#7fa8d6' : '#5b84b1';
+    return dark ? 'rgba(244,240,235,0.32)' : 'rgba(25,23,16,0.32)';
+  };
+  const shortSvc = s => String(s || '').replace('Мужская стрижка', 'Мужская').replace('Детская стрижка', 'Детская').replace('Стрижка машинкой + борода', 'Машинка + борода').replace('Стрижка под насадку, борода', 'Насадка + борода').replace('Стрижка, моделирование бороды', 'Стрижка + борода').replace('Стрижка, тонирование', 'Стрижка + тон');
+  function durLabel(m) {
+    m = Math.round(m);
+    if (m >= 60) { const h = Math.floor(m / 60), r = m % 60; return r ? h + ' ч ' + r : h + ' ч'; }
+    return m + ' мин';
+  }
+  function recWord(n) {
+    const a = n % 10, b = n % 100;
+    if (a === 1 && b !== 11) return 'запись';
+    if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return 'записи';
+    return 'записей';
+  }
+  // записи по колонкам → свободные окна (>=45 мин) и загрузка мастера
+  const byCol = colMasters.map(() => []);
+  recs.forEach(r => {
+    const ci = idIndex[r.staff_id];
+    const s = toDec(r.start), e = toDec(r.end);
+    if (ci == null || s == null) return;
+    byCol[ci].push({ s: s * 60, e: (e != null ? e : s + 0.5) * 60 });
+  });
+  byCol.forEach(l => l.sort((a, b) => a.s - b.s));
+  const shiftRange = m => {
+    const ws = toDec(m && m.work_start), we = toDec(m && m.work_end);
+    return [ws != null ? ws * 60 : startH * 60, we != null ? we * 60 : endH * 60];
+  };
+  const gapsByCol = colMasters.map((m, i) => {
+    const sh = shiftRange(m);
+    const out = [];
+    let cur = sh[0];
+    byCol[i].forEach(b => {
+      if (b.s - cur >= 45) out.push({ s: cur, e: b.s });
+      cur = Math.max(cur, b.e);
+    });
+    if (sh[1] - cur >= 45) out.push({ s: cur, e: sh[1] });
+    return out;
+  });
+  const loadByCol = colMasters.map((m, i) => {
+    const sh = shiftRange(m);
+    const dur = Math.max(sh[1] - sh[0], 1);
+    let busy = 0;
+    byCol[i].forEach(b => { busy += Math.max(0, Math.min(b.e, sh[1]) - Math.max(b.s, sh[0])); });
+    return Math.max(0, Math.min(100, Math.round(busy / dur * 100)));
+  });
+  const totalLoad = loadByCol.length ? Math.round(loadByCol.reduce((a, b) => a + b, 0) / loadByCol.length) : 0;
 
   // ---- drag-to-reschedule handlers ----
   const canResched = !!(data && ['owner', 'manager', 'master'].indexOf(data.role) >= 0);
@@ -23408,7 +23558,7 @@ function ALiveSchedule() {
       return;
     }
     if (ev.cancelable) ev.preventDefault();
-    let newMin = Math.round((dg.origMin + dy / HOUR_H * 60) / 15) * 15;
+    let newMin = Math.round((dg.origMin + dy / PPM) / 15) * 15;
     let colWpx = 0;
     const cv = canvasRef.current;
     if (cv) colWpx = (cv.clientWidth - GUT) / N;
@@ -23517,13 +23667,13 @@ function ALiveSchedule() {
     style: {
       fontFamily: DISPLAY,
       fontWeight: 400,
-      fontSize: 9,
-      letterSpacing: '0.12em',
+      fontSize: 8.5,
+      letterSpacing: '0.2em',
       textTransform: 'uppercase',
-      color: t.accent,
-      marginTop: 3
+      color: faintC,
+      marginTop: 4
     }
-  }, data ? (data.working_count != null ? data.working_count : colMasters.length) + ' ' + masterWord(data.working_count != null ? data.working_count : colMasters.length) + ' в смене' : '…')), React.createElement('span', {
+  }, data ? recs.length + ' ' + recWord(recs.length) + ' · загрузка ' + totalLoad + '%' : '…')), React.createElement('span', {
     onClick: () => setOffset(o => o + 1),
     style: {
       color: t.dim,
@@ -23619,7 +23769,62 @@ function ALiveSchedule() {
       color: t.dim,
       marginTop: 16
     }
-  }, humanDay(detail.date) + ' · ' + (detail.start || '') + (detail.end ? '–' + detail.end : '')), React.createElement('div', {
+  }, humanDay(detail.date) + ' · ' + (detail.start || '') + (detail.end ? '–' + detail.end : '')), canEdit ? React.createElement('div', {
+    style: {
+      marginTop: 14,
+      border: '1px solid ' + t.line,
+      borderRadius: 16,
+      padding: '12px 14px',
+      background: dark ? 'rgba(255,255,255,0.035)' : 'rgba(0,0,0,0.025)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10
+    }
+  }, React.createElement('div', null, React.createElement('div', {
+    style: {
+      fontFamily: DISPLAY,
+      fontWeight: 500,
+      fontSize: 9.5,
+      letterSpacing: '0.16em',
+      textTransform: 'uppercase',
+      color: t.faint,
+      marginBottom: 4
+    }
+  }, 'Длительность'), React.createElement('div', {
+    style: {
+      fontFamily: DISPLAY,
+      fontWeight: 300,
+      fontSize: 22,
+      color: t.ink
+    }
+  }, fmtDur(detail.duration_minutes || 0))), React.createElement('div', {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
+    }
+  }, ['−15', '+15'].map((s, i) => React.createElement('div', {
+    key: i,
+    onClick: () => changeDuration(i ? 15 : -15),
+    style: {
+      width: 54,
+      height: 40,
+      borderRadius: 13,
+      border: '1px solid ' + t.line,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: DISPLAY,
+      fontWeight: 500,
+      fontSize: 13,
+      color: t.ink,
+      cursor: 'pointer',
+      userSelect: 'none',
+      opacity: acting ? 0.5 : 1,
+      background: dark ? 'rgba(255,255,255,0.05)' : '#fff'
+    }
+  }, s)))) : null, React.createElement('div', {
     style: {
       marginTop: 14,
       border: '1px solid ' + t.line,
@@ -24178,16 +24383,16 @@ function ALiveSchedule() {
     onClick: () => openBook(null, null),
     style: {
       position: 'absolute',
-      right: 20,
+      right: 18,
       bottom: 24,
-      width: 58,
-      height: 58,
+      width: 56,
+      height: 56,
       borderRadius: 999,
-      background: '#a2a09c',
+      background: invC,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: '0 12px 28px rgba(162,160,156,0.5)',
+      boxShadow: dark ? '0 12px 28px rgba(0,0,0,.5)' : '0 12px 28px rgba(0,0,0,.28)',
       cursor: 'pointer',
       zIndex: 55
     }
@@ -24204,7 +24409,7 @@ function ALiveSchedule() {
       left: 2,
       right: 2,
       height: 3,
-      background: '#fff',
+      background: invT,
       borderRadius: 2
     }
   }), React.createElement('div', {
@@ -24214,7 +24419,7 @@ function ALiveSchedule() {
       top: 2,
       bottom: 2,
       width: 3,
-      background: '#fff',
+      background: invT,
       borderRadius: 2
     }
   }))) : null;
@@ -24385,7 +24590,30 @@ function ALiveSchedule() {
       minWidth: 84,
       textAlign: 'center'
     }
-  }, bookTime), stepBtn('+', () => bumpTime(15))), lbl('Имя клиента'), React.createElement('input', {
+  }, bookTime), stepBtn('+', () => bumpTime(15))), lbl('Длительность'), React.createElement('div', {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      marginBottom: 6
+    }
+  }, stepBtn('−', () => bumpDur(-15)), React.createElement('div', {
+    style: {
+      fontFamily: DISPLAY,
+      fontWeight: 300,
+      fontSize: 28,
+      color: t.ink,
+      minWidth: 130,
+      textAlign: 'center'
+    }
+  }, fmtDur(bookDur)), stepBtn('+', () => bumpDur(15))), React.createElement('div', {
+    style: {
+      fontFamily: BODY,
+      fontSize: 11,
+      color: t.faint,
+      marginBottom: 18
+    }
+  }, bookDurTouched ? 'Задано вручную — запись займёт ' + fmtDur(bookDur) : 'По услуге; можно стянуть или растянуть'), lbl('Имя клиента'), React.createElement('input', {
     value: bookName,
     onChange: e => setBookName(e.target.value),
     placeholder: 'Например, Андрей',
@@ -24459,7 +24687,7 @@ function ALiveSchedule() {
     }
   }, bookSvcList.map((s, i) => React.createElement('div', {
     key: i,
-    onClick: () => setBookSvc(s.id),
+    onClick: () => pickBookSvc(s),
     style: svcRowStyle(s.id === bookSvc)
   }, React.createElement('span', {
     style: {
@@ -24479,7 +24707,7 @@ function ALiveSchedule() {
       color: t.dim,
       flexShrink: 0
     }
-  }, s.price_min ? s.price_min + ' ₽' : s.price_max ? s.price_max + ' ₽' : '')))), bookErr ? React.createElement('div', {
+  }, [svcMinutes(s) ? fmtDur(svcMinutes(s)) : '', s.price_min ? s.price_min + ' ₽' : s.price_max ? s.price_max + ' ₽' : ''].filter(Boolean).join(' · '))))), bookErr ? React.createElement('div', {
     style: {
       fontFamily: BODY,
       fontSize: 12.5,
@@ -24569,70 +24797,92 @@ function ALiveSchedule() {
     style: {
       display: 'flex',
       paddingLeft: GUT,
-      borderBottom: '1px solid ' + t.line
+      borderTop: '1px solid ' + lineC,
+      borderBottom: '1px solid ' + lineC,
+      flex: 'none'
     }
   }, colMasters.map((m, i) => React.createElement('div', {
     key: i,
     style: {
       flex: 1,
-      padding: '10px 4px 12px',
-      textAlign: 'center',
-      borderLeft: i > 0 ? '1px solid ' + t.line : 'none',
+      padding: '11px 7px 10px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 5,
+      borderLeft: '1px solid ' + lineC,
       minWidth: 0
     }
   }, function () {
     var ph = window.__meMasterPhoto && window.__meMasterPhoto(m.id) || '';
-    return React.createElement('div', {
-      style: {
-        width: 34,
-        height: 34,
-        borderRadius: 999,
-        overflow: 'hidden',
-        margin: '0 auto 6px',
-        background: 'linear-gradient(145deg, ' + t.accentHi + ', ' + t.accentDeep + ')',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: BODY,
-        fontWeight: 700,
-        fontSize: 14,
-        color: '#1a1a18'
-      }
-    }, ph ? React.createElement('img', {
+    return ph ? React.createElement('img', {
       src: ph,
       alt: '',
       style: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
+        width: 34,
+        height: 34,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        filter: 'grayscale(1) contrast(1.05)',
+        flex: 'none'
       }
-    }) : (m.name || '·')[0]);
+    }) : React.createElement('div', {
+      style: {
+        width: 34,
+        height: 34,
+        borderRadius: '50%',
+        flex: 'none',
+        display: 'grid',
+        placeItems: 'center',
+        background: sunkC,
+        color: inkC,
+        fontFamily: BODY,
+        fontWeight: 600,
+        fontSize: 13
+      }
+    }, (m.name || '·')[0]);
   }(), React.createElement('div', {
     style: {
       fontFamily: BODY,
       fontWeight: 500,
-      fontSize: 10.5,
-      color: t.ink,
+      fontSize: 11.5,
+      color: inkC,
       lineHeight: 1.2,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap'
+      whiteSpace: 'nowrap',
+      maxWidth: '100%'
     }
   }, (m.name || '').split(' ')[0]), React.createElement('div', {
     style: {
       fontFamily: BODY,
       fontSize: 8.5,
-      color: t.faint,
-      marginTop: 3
+      color: faintC,
+      fontVariantNumeric: 'tabular-nums'
     }
-  }, m.work_start && m.work_end ? m.work_start + '–' + m.work_end : '—')))),
+  }, m.work_start && m.work_end ? m.work_start + '–' + m.work_end : '—'), React.createElement('div', {
+    style: {
+      width: '64%',
+      height: 2,
+      borderRadius: 2,
+      background: sunkC,
+      overflow: 'hidden'
+    }
+  }, React.createElement('div', {
+    style: {
+      width: (loadByCol[i] || 0) + '%',
+      height: '100%',
+      background: inkC,
+      opacity: 0.4
+    }
+  }))))),
   // timeline
   React.createElement('div', {
+    ref: gridWrapRef,
     style: {
       flex: 1,
-      overflow: 'auto',
-      overscrollBehavior: 'contain',
-      WebkitOverflowScrolling: 'touch',
+      minHeight: 0,
+      overflow: 'hidden',
       position: 'relative'
     }
   }, recs.length === 0 && colMasters.length === 0 ? React.createElement('div', {
@@ -24641,39 +24891,43 @@ function ALiveSchedule() {
       textAlign: 'center',
       fontFamily: BODY,
       fontSize: 13,
-      color: t.dim
+      color: mutedC
     }
   }, 'В этот день нет мастеров в смене.') : React.createElement('div', {
     ref: canvasRef,
     onClick: onCanvasTap,
     style: {
       position: 'relative',
-      height: (endH - startH) * HOUR_H + 92
+      height: '100%'
     }
-  }, hours.map((h, i) => React.createElement(React.Fragment, {
+  },
+  // часовые линии + метки времени (моно, первая метка не сдвигается)
+  hours.map((h, i) => React.createElement(React.Fragment, {
     key: h
   }, React.createElement('div', {
     style: {
       position: 'absolute',
-      top: i * HOUR_H + 16,
+      top: (h * 60 - startH * 60) * PPM + TOP_PAD,
       left: GUT,
       right: 0,
       height: 1,
-      background: t.line
+      background: lineC
     }
   }), React.createElement('span', {
     style: {
       position: 'absolute',
-      top: i * HOUR_H + 16,
-      transform: 'translateY(-50%)',
-      left: 2,
+      top: (h * 60 - startH * 60) * PPM + TOP_PAD,
+      transform: i === 0 ? 'none' : 'translateY(-50%)',
+      left: 6,
       lineHeight: 1,
-      fontFamily: DISPLAY,
-      fontWeight: 300,
-      fontSize: 9.5,
-      color: t.faint
+      fontFamily: MONOF,
+      fontSize: 9,
+      color: faintC,
+      fontVariantNumeric: 'tabular-nums'
     }
-  }, h + ':00'))), colMasters.map((m, c) => c === 0 ? null : React.createElement('div', {
+  }, h + ':00'))),
+  // границы колонок
+  colMasters.map((m, c) => React.createElement('div', {
     key: 'sep' + c,
     style: {
       position: 'absolute',
@@ -24681,15 +24935,60 @@ function ALiveSchedule() {
       bottom: 0,
       left: colLeft(c),
       width: 1,
-      background: t.line
+      background: lineC
     }
-  })), offset === 0 && nowMin >= startH * 60 && nowMin <= endH * 60 ? React.createElement('div', {
+  })),
+  // свободные окна (>= 45 мин) — пунктир, тап = запись на это время
+  gapsByCol.map((gl, c) => gl.map((g, gi) => React.createElement('div', {
+    key: 'gap' + c + '_' + gi,
+    onClick: ev => {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      const sid = colMasters[c] ? colMasters[c].id : null;
+      openBook(sid, pad2(Math.floor(g.s / 60)) + ':' + pad2(Math.round(g.s % 60)));
+    },
+    style: {
+      position: 'absolute',
+      top: (g.s - startH * 60) * PPM + TOP_PAD + 2,
+      height: Math.max((g.e - g.s) * PPM - 4, 16),
+      left: colLeft(c),
+      width: colW,
+      padding: '0 4px',
+      boxSizing: 'border-box',
+      cursor: 'pointer',
+      zIndex: 1
+    }
+  }, React.createElement('div', {
+    style: {
+      height: '100%',
+      borderRadius: 12,
+      border: '1px dashed ' + line2C,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 3,
+      color: faintC,
+      overflow: 'hidden'
+    }
+  }, React.createElement('span', {
+    style: { fontSize: 12, lineHeight: 1 }
+  }, '+'), (g.e - g.s) * PPM >= 34 ? React.createElement('span', {
+    style: {
+      fontFamily: DISPLAY,
+      fontSize: 8,
+      letterSpacing: '0.1em',
+      textTransform: 'uppercase',
+      whiteSpace: 'nowrap'
+    }
+  }, 'окно ' + durLabel(g.e - g.s)) : null)))),
+  // линия «сейчас» + бейдж
+  offset === 0 && nowMin >= startH * 60 && nowMin <= endH * 60 ? React.createElement('div', {
     key: 'nowline',
     style: {
       position: 'absolute',
-      top: (nowMin / 60 - startH) * HOUR_H + 16,
       left: 0,
       right: 0,
+      top: (nowMin - startH * 60) * PPM + TOP_PAD,
       height: 0,
       zIndex: 6,
       pointerEvents: 'none'
@@ -24697,47 +24996,46 @@ function ALiveSchedule() {
   }, React.createElement('div', {
     style: {
       position: 'absolute',
-      left: GUT,
-      right: 4,
-      top: -1,
-      height: 1,
-      background: nowCol
-    }
-  }), React.createElement('div', {
-    style: {
-      position: 'absolute',
-      left: GUT - 3,
-      top: -4,
-      width: 7,
-      height: 7,
-      borderRadius: 999,
-      background: nowCol
-    }
-  }), React.createElement('div', {
-    style: {
-      position: 'absolute',
       left: 0,
-      top: -6,
-      width: GUT - 4,
-      textAlign: 'right',
-      fontFamily: DISPLAY,
-      fontWeight: 600,
-      fontSize: 9,
-      color: nowCol,
-      lineHeight: 1
+      right: 0,
+      top: 0,
+      height: 1,
+      background: inkC,
+      opacity: 0.75
     }
-  }, pad2(Math.floor(nowMin / 60)) + ':' + pad2(nowMin % 60))) : null, recs.map((r, idx) => {
+  }), React.createElement('div', {
+    style: {
+      position: 'absolute',
+      left: 3,
+      top: 0,
+      transform: 'translateY(-50%)',
+      background: invC,
+      color: invT,
+      fontFamily: MONOF,
+      fontWeight: 600,
+      fontSize: 8,
+      padding: '2px 4px',
+      borderRadius: 4,
+      lineHeight: 1,
+      zIndex: 4
+    }
+  }, pad2(Math.floor(nowMin / 60)) + ':' + pad2(nowMin % 60))) : null,
+  // карточки записей — адаптивное содержимое по высоте
+  recs.map((r, idx) => {
     const s = toDec(r.start),
       e = toDec(r.end);
     if (s == null) return null;
     const ci = idIndex[r.staff_id];
-    const top = (s - startH) * HOUR_H + 16;
-    const hgt = Math.max(((e != null ? e : s + 0.5) - s) * HOUR_H - 3, 18);
-    const st = SC2[r.status] || SC2.waiting;
+    const durMin = ((e != null ? e : s + 0.5) - s) * 60;
+    const hgt = Math.max(durMin * PPM - 3, 16);
     const svc = (r.services || []).join(', ');
     const isDrag = dragging && dgRef.current.rid === r.record_id && dragHint;
-    const rTop = isDrag ? (dragHint.min / 60 - startH) * HOUR_H + 16 : top;
+    const rTop = isDrag ? (dragHint.min - startH * 60) * PPM + TOP_PAD + 1.5 : (s * 60 - startH * 60) * PPM + TOP_PAD + 1.5;
     const rLeft = isDrag ? colLeft(dragHint.col) : colLeft(ci);
+    const dimmed = r.status === 'noshow' || r.status === 'cancelled';
+    const wide = hgt >= 52,
+      med = hgt >= 38,
+      tight = hgt < 34;
     return React.createElement('div', {
       key: idx,
       onClick: ev => {
@@ -24761,55 +25059,71 @@ function ALiveSchedule() {
         height: hgt,
         left: rLeft,
         width: colW,
-        padding: '0 3px',
+        padding: '0 4px',
         boxSizing: 'border-box',
         cursor: 'pointer',
         touchAction: dragging ? 'none' : 'pan-y',
-        zIndex: isDrag ? 50 : 1,
-        opacity: isDrag ? 0.93 : 1,
+        zIndex: isDrag ? 50 : 2,
+        opacity: isDrag ? 0.93 : (dimmed ? 0.5 : 1),
         transition: isDrag ? 'none' : 'top .12s ease, left .12s ease',
-        boxShadow: isDrag ? '0 14px 32px rgba(0,0,0,0.45)' : 'none'
+        filter: isDrag ? 'drop-shadow(0 14px 32px rgba(0,0,0,0.45))' : 'none'
       }
     }, React.createElement('div', {
       style: {
+        position: 'relative',
         height: '100%',
-        borderRadius: 10,
-        padding: '6px 8px',
+        borderRadius: 13,
+        background: cardBg,
+        border: '1px solid ' + cardBd,
+        boxShadow: cardShadow,
+        padding: tight ? '1px 7px 1px 10px' : '5px 8px 5px 11px',
         overflow: 'hidden',
         boxSizing: 'border-box',
-        background: st.bg,
-        borderLeft: '3px solid ' + st.bd
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 1
       }
     }, React.createElement('div', {
       style: {
-        fontFamily: DISPLAY,
-        fontWeight: 400,
-        fontSize: 7.5,
-        color: 'rgba(20,20,18,0.62)',
-        letterSpacing: '0.02em'
+        position: 'absolute',
+        left: 0,
+        top: tight ? 3 : 7,
+        bottom: tight ? 3 : 7,
+        width: 3,
+        borderRadius: '0 3px 3px 0',
+        background: svcTone(svc)
       }
-    }, fmt(s) + (e != null ? '–' + fmt(e) : '')), React.createElement('div', {
+    }), wide ? React.createElement('div', {
       style: {
-        fontFamily: BODY,
-        fontWeight: 700,
-        fontSize: 10.5,
-        color: '#16140f',
-        marginTop: 2,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-      }
-    }, (r.mood === 'red' ? '🔴 ' : r.mood === 'blue' ? '🔵 ' : '') + (r.client || 'Клиент') + (r.phone ? ' · ' + r.phone : '')), svc && hgt > 38 ? React.createElement('div', {
-      style: {
-        fontFamily: BODY,
+        fontFamily: MONOF,
         fontSize: 8.5,
-        color: 'rgba(20,20,18,0.6)',
-        marginTop: 2,
+        color: faintC,
+        whiteSpace: 'nowrap',
+        lineHeight: 1.2
+      }
+    }, fmt(s) + (e != null ? '–' + fmt(e) : '')) : null, React.createElement('div', {
+      style: {
+        fontFamily: BODY,
+        fontWeight: 500,
+        fontSize: tight ? 11 : 11.5,
+        color: inkC,
+        lineHeight: tight ? 1.1 : 1.35,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap'
       }
-    }, svc) : null));
+    }, (r.mood === 'red' ? '🔴 ' : r.mood === 'blue' ? '🔵 ' : '') + (r.client || 'Клиент')), med && svc ? React.createElement('div', {
+      style: {
+        fontFamily: BODY,
+        fontSize: 9.5,
+        color: mutedC,
+        lineHeight: 1.35,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
+    }, shortSvc(svc)) : null));
   })))) : null));
 }
 window.ALiveSchedule = ALiveSchedule;
@@ -29742,6 +30056,13 @@ function MEApp() {
   React.useEffect(() => {
     window.__meRefresh = force;
     function go(s) {
+      // Чат-only (тест): залогиненного КЛИЕНТА держим в чате — любой клиентский экран
+      // редиректим в чат. Логин/смена входа/онбординг/ошибки проходят. Сотрудник (staff) — нет.
+      try {
+        var _coSess = window.__meHasSession && window.__meHasSession();
+        if (window.__meChatOnly && window.__meCurMode !== 'staff' && _coSess &&
+            ['chat', 'login', 'choose', 'role', 'idle', 'error', 'limit', 'crm'].indexOf(s) < 0) s = 'chat';
+      } catch (eCO) {}
       // CutMatch временно скрыт у всех, кроме основателя (Стас). Любой заход —
       // на главную. Видимость вкладки тоже гейтится (clientTabItems/__meTab).
       if (s === 'cutmatch' && !window.__meIsFounder) s = 'home';
@@ -30829,6 +31150,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   function firstWord(s) { if (!s) return ''; var p = String(s).trim().split(/\s+/); return p[0] || ''; }
 
   /* static booking master id map (no live catalog endpoint; get_services exists for live) */
+  // ТЕСТ: клиентская версия приложения = ТОЛЬКО чат (всё через виджеты).
+  // Флаг легко откатить (false) — вернёт классическую навигацию/экраны клиенту.
+  // Сотрудник/владелец (staff-режим) не затронуты. См. клетку в go() и скрытие нав-бара.
+  window.__meChatOnly = false; // ВРЕМЕННО ВЫКЛ: chat-only ломал клиента на устройстве (не воспроизвёлся в вебе) — вернём безопаснее
   window.__meBookMasters = window.__meBookMasters || [
     { id: 1461615, name: 'Стас Мосин' },
     { id: 1460233, name: 'Илья Третьяков' },
