@@ -2476,6 +2476,62 @@ function AuroraTab({
   });
   // Пружинистый «отскок» иконки таба при тапе (как в Telegram).
   const [pop, setPop] = React.useState(-1);
+  // ── «Жидкий» индикатор активного таба: два блоба с разной инерцией под
+  //    gooey-фильтром → при переходе тянется перемычка и схлопывается на цели.
+  const nTabs = Math.max(visItems.length, 1);
+  const [goo, setGoo] = React.useState(false);
+  const gooTm = React.useRef(null);
+  // Вкладки живут на РАЗНЫХ экранах: при переходе AuroraTab пересоздаётся.
+  // Поэтому прошлую позицию храним глобально — блоб «долетает» с неё на новую.
+  const [blobAt, setBlobAt] = React.useState(() => {
+    const p = window.__meTabPrev;
+    return p && p.n === nTabs && typeof p.i === "number" && p.i !== active ? p.i : active;
+  });
+  React.useEffect(() => {
+    window.__meTabPrev = { i: active, n: nTabs };
+    if (blobAt === active) return;
+    const raf = requestAnimationFrame(() => { setGoo(true); setBlobAt(active); });
+    clearTimeout(gooTm.current);
+    gooTm.current = setTimeout(() => setGoo(false), 760);
+    return () => { cancelAnimationFrame(raf); clearTimeout(gooTm.current); };
+  }, [active]);
+  const navInk = t.bg || (t.dark ? "#0b0b0c" : "#f4f0eb");
+  const blobStyle = head => ({
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 100 / nTabs + "%",
+    left: blobAt * 100 / nTabs + "%",
+    background: t.ink,
+    borderRadius: 16,
+    transition: head
+      ? "left .44s cubic-bezier(.34,1.28,.52,1)"
+      : "left .62s cubic-bezier(.55,0,.85,.4)",
+    willChange: "left"
+  });
+  const gooDefs = /*#__PURE__*/React.createElement("svg", {
+    key: "goodefs",
+    "aria-hidden": "true",
+    style: { position: "absolute", width: 0, height: 0, pointerEvents: "none" }
+  }, /*#__PURE__*/React.createElement("filter", {
+    id: "me-tab-goo"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    in: "SourceGraphic", stdDeviation: "7", result: "gooBlur"
+  }), /*#__PURE__*/React.createElement("feColorMatrix", {
+    in: "gooBlur", mode: "matrix",
+    values: "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -12"
+  })));
+  const tabIndicator = /*#__PURE__*/React.createElement("div", {
+    key: "tabind",
+    style: {
+      position: "absolute",
+      left: 5, right: 5, top: 5, bottom: 5,
+      pointerEvents: "none",
+      zIndex: 0,
+      filter: goo ? "url(#me-tab-goo)" : "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", { key: "tail", style: blobStyle(false) }),
+     /*#__PURE__*/React.createElement("div", { key: "head", style: blobStyle(true) }));
 
   return /*#__PURE__*/React.createElement("div", {
     "data-coach": "tabs",
@@ -2503,11 +2559,12 @@ function AuroraTab({
       border: `1px solid ${navLine}`,
       boxShadow: "0 12px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06)",
       backdropFilter: "blur(22px)",
-      WebkitBackdropFilter: "blur(22px)"
+      WebkitBackdropFilter: "blur(22px)",
+      position: "relative"
     }
-  }, visItems.map((it, i) => {
+  }, gooDefs, tabIndicator, visItems.map((it, i) => {
     const on = i === active;
-    const c = on ? t.ink : t.dim;
+    const c = on ? navInk : t.dim;
     const guestAuth = !loggedIn && it.auth;
     const tap = guestAuth && it.guestTap ? it.guestTap : it.onTap;
     const label = guestAuth && it.guestLabel ? it.guestLabel : it.label;
