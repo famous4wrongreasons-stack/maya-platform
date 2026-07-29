@@ -2476,39 +2476,66 @@ function AuroraTab({
   });
   // Пружинистый «отскок» иконки таба при тапе (как в Telegram).
   const [pop, setPop] = React.useState(-1);
-  // ── «Жидкий» индикатор активного таба: два блоба с разной инерцией под
-  //    gooey-фильтром → при переходе тянется перемычка и схлопывается на цели.
+  // ── «Жидкий» индикатор активного таба ────────────────────────────────
+  // Кривая и тайминги сняты покадрово с референса (60fps): длительность 600мс,
+  // хвост отстаёт на 60мс, разгон мягкий, БЕЗ перелёта. Два блоба шириной в
+  // ячейку под gooey-фильтром: пик расхождения 0.28 пути ⇒ даже прыжок через
+  // 3 вкладки даёт 0.83 ширины блоба — форма НИКОГДА не рвётся (как в референсе).
   const nTabs = Math.max(visItems.length, 1);
-  const [goo, setGoo] = React.useState(false);
-  const gooTm = React.useRef(null);
-  // Вкладки живут на РАЗНЫХ экранах: при переходе AuroraTab пересоздаётся.
-  // Поэтому прошлую позицию храним глобально — блоб «долетает» с неё на новую.
-  const [blobAt, setBlobAt] = React.useState(() => {
-    const p = window.__meTabPrev;
-    return p && p.n === nTabs && typeof p.i === "number" && p.i !== active ? p.i : active;
-  });
-  React.useEffect(() => {
-    window.__meTabPrev = { i: active, n: nTabs };
-    if (blobAt === active) return;
-    const raf = requestAnimationFrame(() => { setGoo(true); setBlobAt(active); });
-    clearTimeout(gooTm.current);
-    gooTm.current = setTimeout(() => setGoo(false), 760);
-    return () => { cancelAnimationFrame(raf); clearTimeout(gooTm.current); };
-  }, [active]);
   const navInk = t.bg || (t.dark ? "#0b0b0c" : "#f4f0eb");
-  const blobStyle = head => ({
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 100 / nTabs + "%",
-    left: blobAt * 100 / nTabs + "%",
-    background: t.ink,
-    borderRadius: 16,
-    transition: head
-      ? "left .44s cubic-bezier(.34,1.28,.52,1)"
-      : "left .62s cubic-bezier(.55,0,.85,.4)",
-    willChange: "left"
-  });
+  const headRef = React.useRef(null);
+  const tailRef = React.useRef(null);
+  const tabItemsRef = React.useRef([]);
+  const tabRaf = React.useRef(0);
+  const easeTab = React.useCallback(x => {           // cubic-bezier(.35,0,.15,1)
+    let lo = 0, hi = 1, u = x;
+    for (let i = 0; i < 22; i++) {
+      u = (lo + hi) / 2;
+      const bx = 3 * (1 - u) * (1 - u) * u * 0.35 + 3 * (1 - u) * u * u * 0.15 + u * u * u;
+      if (bx < x) lo = u; else hi = u;
+    }
+    return 3 * (1 - u) * u * u + u * u * u;
+  }, []);
+  // красим напрямую по DOM — без ре-рендера на каждый кадр
+  // ⚠️ на части экранов активной вкладки нет вовсе (глобальный нав шлёт active: 99) —
+  // тогда индикатор просто прячем, иначе блоб уехал бы за пределы бара.
+  const hasActive = active >= 0 && active < nTabs;
+  const paintTabs = React.useCallback((h, tl, show) => {
+    const w = 100 / nTabs;
+    if (headRef.current) {
+      headRef.current.style.left = h * w + "%";
+      headRef.current.style.opacity = show ? "1" : "0";
+    }
+    if (tailRef.current) {
+      tailRef.current.style.left = tl * w + "%";
+      tailRef.current.style.opacity = show ? "1" : "0";
+    }
+    const lo = Math.min(h, tl), hi = Math.max(h, tl) + 1;   // в «ячейках»
+    for (let i = 0; i < nTabs; i++) {
+      const el = tabItemsRef.current[i];
+      if (el) el.style.color = (show && i + 0.5 > lo && i + 0.5 < hi) ? navInk : t.dim;
+    }
+  }, [nTabs, navInk, t.dim]);
+  React.useEffect(() => {
+    if (!hasActive) { paintTabs(0, 0, false); return; }   // вкладка не выбрана — без индикатора
+    const prev = window.__meTabPrev;
+    const from = prev && prev.n === nTabs && typeof prev.i === "number" && prev.i >= 0 && prev.i < nTabs ? prev.i : active;
+    window.__meTabPrev = { i: active, n: nTabs };
+    if (from === active) { paintTabs(active, active, true); return; }
+    const D = 600, LAG = 60;
+    let t0 = 0;
+    const step = now => {
+      if (!t0) t0 = now;
+      const ms = now - t0;
+      const ph = easeTab(Math.max(0, Math.min(1, ms / D)));
+      const pt = easeTab(Math.max(0, Math.min(1, (ms - LAG) / D)));
+      paintTabs(from + (active - from) * ph, from + (active - from) * pt, true);
+      if (ms < D + LAG) tabRaf.current = requestAnimationFrame(step);
+    };
+    paintTabs(from, from, true);
+    tabRaf.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(tabRaf.current);
+  }, [active, hasActive, paintTabs, easeTab]);
   const gooDefs = /*#__PURE__*/React.createElement("svg", {
     key: "goodefs",
     "aria-hidden": "true",
@@ -2516,11 +2543,22 @@ function AuroraTab({
   }, /*#__PURE__*/React.createElement("filter", {
     id: "me-tab-goo"
   }, /*#__PURE__*/React.createElement("feGaussianBlur", {
-    in: "SourceGraphic", stdDeviation: "7", result: "gooBlur"
+    in: "SourceGraphic", stdDeviation: "6", result: "tabBlur"
   }), /*#__PURE__*/React.createElement("feColorMatrix", {
-    in: "gooBlur", mode: "matrix",
-    values: "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -12"
+    in: "tabBlur", mode: "matrix",
+    values: "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -11"
   })));
+  const blobBase = {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 100 / nTabs + "%",
+    left: (hasActive ? active : 0) * 100 / nTabs + "%",
+    opacity: hasActive ? 1 : 0,
+    background: t.ink,
+    borderRadius: 17,
+    willChange: "left"
+  };
   const tabIndicator = /*#__PURE__*/React.createElement("div", {
     key: "tabind",
     style: {
@@ -2528,10 +2566,10 @@ function AuroraTab({
       left: 5, right: 5, top: 5, bottom: 5,
       pointerEvents: "none",
       zIndex: 0,
-      filter: goo ? "url(#me-tab-goo)" : "none"
+      filter: "url(#me-tab-goo)"   // всегда включён: иначе блоб «прыгает» в размере
     }
-  }, /*#__PURE__*/React.createElement("div", { key: "tail", style: blobStyle(false) }),
-     /*#__PURE__*/React.createElement("div", { key: "head", style: blobStyle(true) }));
+  }, /*#__PURE__*/React.createElement("div", { key: "tail", ref: tailRef, style: blobBase }),
+     /*#__PURE__*/React.createElement("div", { key: "head", ref: headRef, style: blobBase }));
 
   return /*#__PURE__*/React.createElement("div", {
     "data-coach": "tabs",
@@ -2564,13 +2602,14 @@ function AuroraTab({
     }
   }, gooDefs, tabIndicator, visItems.map((it, i) => {
     const on = i === active;
-    const c = on ? navInk : t.dim;
+    const c = "currentColor";
     const guestAuth = !loggedIn && it.auth;
     const tap = guestAuth && it.guestTap ? it.guestTap : it.onTap;
     const label = guestAuth && it.guestLabel ? it.guestLabel : it.label;
     const ic = guestAuth && it.guestIc ? it.guestIc : it.ic;
     return /*#__PURE__*/React.createElement("div", {
       key: i,
+      ref: el => { tabItemsRef.current[i] = el; },
       onClick: () => {
         setPop(i);
         setTimeout(() => setPop(-1), 700);
@@ -2588,8 +2627,8 @@ function AuroraTab({
         justifyContent: "center",
         gap: shrunk ? 0 : 3,
         cursor: "pointer",
-        color: c,
-        transition: "color .3s"
+        color: on && hasActive ? navInk : t.dim,
+        transition: "color .2s linear"
       }
     }, ic(c, 20, on, t, pop === i), /*#__PURE__*/React.createElement("span", {
       style: {
