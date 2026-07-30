@@ -340,12 +340,8 @@ async def _send_affordable_care_offer(client: dict) -> bool:
     if database.marketing_sent_within(client_id, max(7, int(frequency_days or 14))):
         return False
 
-    actual_card = _yc_loyalty_card(phone)
-    balance = (
-        int(actual_card["balance"])
-        if actual_card is not None
-        else int(database.loyalty_balance(client_id))
-    )
+    lazy_backfill_for_client(client_id, phone)
+    balance = int(database.loyalty_balance(client_id))
     spend = loyalty_spend_summary(balance)
     affordable = spend["affordable_services"]
     if not affordable:
@@ -597,6 +593,7 @@ def apply_redemption_for_booking(
     record_id: int,
     service_titles: list[str],
     service_quotes: list[dict] | None = None,
+    reservation_id: str | None = None,
 ) -> dict:
     """
     Списывает баллы по списку услуг-уходов, прицепляя транзакции к record_id.
@@ -615,18 +612,38 @@ def apply_redemption_for_booking(
     }
     items: list[dict] = []
     total = 0
-    for title in service_titles:
+    # Business rule: at most one care service can be paid with points per visit.
+    for title in service_titles[:1]:
         c = care_lookup.get(_normalize_service_title(title))
         if not c:
             continue
         if database.loyalty_redemption_exists(client_id, record_id, c["title"]):
             continue
-        # 1) Списание в нашей БД
-        database.add_loyalty_transaction(
-            client_id=client_id, type_="redeem", points=-c["price"],
-            visit_record_id=record_id,
-            note=f"-{c['price']} списано за {c['title']} в записи {record_id}",
-        )
+        # 1) Atomic ledger write. The in-app flow reserves points before the
+        # external CRM call; Telegram uses the direct atomic redemption path.
+        if reservation_id:
+            spent = database.finalize_loyalty_reservation(
+                client_id=client_id,
+                request_id=reservation_id,
+                record_id=record_id,
+                service_title=c["title"],
+                points=int(c["price"]),
+            )
+        else:
+            spent = database.redeem_loyalty_points(
+                client_id=client_id,
+                points=int(c["price"]),
+                visit_record_id=record_id,
+                service_title=c["title"],
+            )
+        if not spent.get("ok"):
+            logger.warning(
+                "loyalty redemption refused client_id=%s record_id=%s reason=%s",
+                client_id,
+                record_id,
+                spent.get("reason") or spent.get("state") or "unknown",
+            )
+            continue
         # 2) Пометка в YClients — обнуляем cost + дописываем comment. Если
         # не получится (сетевая ошибка) — не откатываем списание; админ
         # увидит баллы в нашем боте, а в YClients поправит руками.

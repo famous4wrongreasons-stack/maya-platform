@@ -1675,12 +1675,12 @@ def _norm_id(x) -> int | None:
 
 
 def _usual_master(history: list) -> dict | None:
-    """«Мне как обычно» — мастер, к которому клиент ходит чаще всего, СРЕДИ
-    ДЕЙСТВУЮЩИХ мастеров. history — список посещённых визитов (отсортирован по
-    дате, новые первыми), каждый с master_id/master. Возвращает {"id","name"} или
-    None, если истории нет или среди визитов нет ни одного ДЕЙСТВУЮЩЕГО мастера.
-    Уволившихся мастеров не предлагаем — их нельзя забронировать (см. Размик).
-    При равной частоте побеждает самый недавний (история reverse=True, idx 0 — свежий)."""
+    """«Мне как обычно» — мастер из самого недавнего посещённого визита.
+
+    history отсортирована от новых визитов к старым. Уволившихся
+    мастеров пропускаем и берём следующего активного. Это буквальное
+    значение клиентского сценария «как в прошлый раз».
+    """
     if not history:
         return None
     try:
@@ -1688,25 +1688,16 @@ def _usual_master(history: list) -> dict | None:
         active = {int(x) for x in ACTIVE_MASTER_IDS}
     except Exception:
         active = None   # если список недоступен — не фильтруем (старое поведение)
-    counts: dict = {}
-    names: dict = {}
-    first_idx: dict = {}
-    for idx, h in enumerate(history):
+    for h in history:
         if not isinstance(h, dict):
             continue
-        mid = h.get("master_id")
+        mid = _norm_id(h.get("master_id"))
         if not mid:
             continue
         if active is not None and mid not in active:
             continue  # мастер уже не работает — пропускаем
-        counts[mid] = counts.get(mid, 0) + 1
-        if mid not in names:
-            names[mid] = h.get("master") or ""
-            first_idx[mid] = idx  # первое вхождение = самый недавний визит
-    if not counts:
-        return None
-    best = max(counts, key=lambda m: (counts[m], -first_idx[m]))
-    return {"id": best, "name": names.get(best, "")}
+        return {"id": mid, "name": h.get("master") or ""}
+    return None
 
 
 def _client_card_name(card: dict | None) -> str:
@@ -1954,8 +1945,15 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             await asyncio.to_thread(_loy.lazy_backfill_for_client, client_id, phone)
         except Exception as e:
             logger.error(f"_build_full_cabinet: lazy_backfill {client_id}: {e}")
+    # YClients card is imported into the MAYA ledger once. From that moment
+    # the ledger is authoritative: otherwise every cabinet refresh would put
+    # already-spent points back by overwriting the balance with the old card.
     balance = database.loyalty_balance(client_id)
-    loyalty_source = "maya_ledger"
+    loyalty_source = (
+        "yclients_import"
+        if database.client_has_loyalty_yclients_import(client_id)
+        else "maya_ledger"
+    )
 
     bookings = []
     yc_client_id = None
@@ -1967,11 +1965,7 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
             yc_payload = await asyncio.to_thread(_load_cabinet_yclients, phone)
             yc_client_id = yc_payload.get("yc_client_id")
             yc_client_card = yc_payload.get("client_card")
-            yc_loyalty_card = yc_payload.get("loyalty_card")
             bookings = yc_payload.get("bookings") or []
-            if isinstance(yc_loyalty_card, dict) and yc_loyalty_card.get("balance") is not None:
-                balance = max(0, int(round(float(yc_loyalty_card.get("balance") or 0))))
-                loyalty_source = "yclients"
         except Exception as e:
             logger.error(f"cabinet_via_login: yc bookings err: {e}")
             bookings = []
@@ -3232,7 +3226,7 @@ def _client_day_tag(history: list, this_staff_id: int, mnames: dict) -> dict:
     attended = len([h for h in history if isinstance(h, dict)])
     if attended == 0:
         return {"kind": "new", "label": "Новенький"}
-    usual = _usual_master(history)  # самый частый ДЕЙСТВУЮЩИЙ мастер (ушедших не берём)
+    usual = _usual_master(history)  # мастер из последнего визита (ушедших не берём)
     if usual and int(usual["id"]) != int(this_staff_id):
         # обычно ходит к действующему коллеге — полезно знать, к кому
         nm = mnames.get(usual["id"]) or usual.get("name") or ""
@@ -6461,6 +6455,265 @@ async def client_reschedule_record_handler(request: web.Request) -> web.Response
     })
 
 
+async def client_book_with_loyalty_handler(request: web.Request) -> web.Response:
+    """Create the authenticated client's booking and redeem one care service.
+
+    Nothing monetary is trusted from the browser. The service, current price,
+    balance and exact slot for the combined duration are rechecked server-side.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    chat_id = _authed_chat_id(request, body)
+    if not chat_id:
+        return _client_record_response({
+            "success": False, "error": "unauthorized", "code": "unauthorized",
+        }, status=401)
+    if not database.has_valid_consent_by_chat_id(int(chat_id)):
+        return _client_record_response({
+            "success": False, "error": "needs_consent", "code": "needs_consent",
+        }, status=403)
+    client = database.get_client(int(chat_id))
+    if not client:
+        return _client_record_response({
+            "success": False, "error": "client_not_found", "code": "client_not_found",
+        }, status=404)
+    phone = str(client.get("phone") or "").strip()
+    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
+        return _client_record_response({
+            "success": False, "error": "phone_required", "code": "phone_required",
+        }, status=409)
+
+    try:
+        staff_id = int(body.get("staff_id") or 0)
+        service_ids = list(dict.fromkeys(
+            int(item) for item in (body.get("service_ids") or []) if int(item) > 0
+        ))
+    except (TypeError, ValueError):
+        staff_id, service_ids = 0, []
+    if staff_id <= 0 or not service_ids or len(service_ids) > 8:
+        return _client_record_response({
+            "success": False, "error": "invalid_booking", "code": "invalid_booking",
+        }, status=400)
+    try:
+        active_ids = {int(item) for item in getattr(config, "ACTIVE_MASTER_IDS", [])}
+    except Exception:
+        active_ids = set()
+    if active_ids and staff_id not in active_ids:
+        return _client_record_response({
+            "success": False, "error": "staff_unavailable", "code": "staff_unavailable",
+        }, status=409)
+
+    start_raw = str(body.get("datetime") or body.get("start") or "").strip()
+    start_match = re.match(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2})?", start_raw)
+    if not start_match:
+        return _client_record_response({
+            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
+        }, status=400)
+    date_value, time_value = start_match.group(1), start_match.group(2)
+    try:
+        booking_dt = datetime.strptime(f"{date_value} {time_value}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        return _client_record_response({
+            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
+        }, status=400)
+    if booking_dt < datetime.now() - timedelta(minutes=2) or booking_dt > datetime.now() + timedelta(days=90):
+        return _client_record_response({
+            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
+        }, status=400)
+
+    request_id = str(body.get("request_id") or "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9_-]{8,80}", request_id):
+        return _client_record_response({
+            "success": False, "error": "invalid_request_id", "code": "invalid_request_id",
+        }, status=400)
+    requested_care_title = str(body.get("loyalty_service_title") or "").strip()
+    try:
+        requested_care_id = int(body.get("loyalty_service_id") or 0)
+    except (TypeError, ValueError):
+        requested_care_id = 0
+
+    try:
+        catalog = await asyncio.to_thread(_yc.get_services, staff_id)
+    except Exception as exc:
+        logger.error("loyalty booking catalog staff_id=%s: %s", staff_id, exc)
+        catalog = []
+    catalog = [row for row in (catalog or []) if isinstance(row, dict) and not row.get("error")]
+    catalog_by_id = {
+        int(row["id"]): row for row in catalog
+        if str(row.get("id") or "").isdigit()
+    }
+    if any(service_id not in catalog_by_id for service_id in service_ids):
+        return _client_record_response({
+            "success": False, "error": "service_not_found", "code": "service_not_found",
+        }, status=409)
+
+    import loyalty as _loy
+
+    care = _loy.current_care_service(requested_care_title, catalog)
+    if not care:
+        return _client_record_response({
+            "success": False, "error": "loyalty_service_unavailable",
+            "code": "loyalty_service_unavailable",
+        }, status=409)
+    care_id = int(care.get("id") or 0)
+    if care_id <= 0 or care_id not in service_ids or (requested_care_id and requested_care_id != care_id):
+        return _client_record_response({
+            "success": False, "error": "loyalty_service_mismatch",
+            "code": "loyalty_service_mismatch",
+        }, status=400)
+
+    try:
+        await asyncio.to_thread(
+            _loy.lazy_backfill_for_client,
+            int(client["id"]),
+            phone,
+        )
+    except Exception as exc:
+        logger.error("loyalty booking import client_id=%s: %s", client.get("id"), exc)
+
+    # Reserve before checking the live slot so a retry can return the already
+    # finalized booking even though that booking has made the slot unavailable.
+    # Invalid/taken slots release the temporary hold immediately below.
+    reservation = database.reserve_loyalty_points(
+        client_id=int(client["id"]),
+        points=int(care["price"]),
+        request_id=request_id,
+    )
+    if reservation.get("state") == "finalized":
+        return _client_record_response({
+            "success": True,
+            "ok": True,
+            "record_id": reservation.get("record_id"),
+            "spent_points": int(reservation.get("points") or care["price"]),
+            "remaining_points": int(reservation.get("balance") or 0),
+            "loyalty_service": care["title"],
+            "idempotent": True,
+        })
+    if reservation.get("state") == "in_progress":
+        return _client_record_response({
+            "success": False, "error": "booking_in_progress", "code": "booking_in_progress",
+        }, status=409)
+    if not reservation.get("ok"):
+        return _client_record_response({
+            "success": False, "error": "insufficient_points", "code": "insufficient_points",
+            "balance": int(reservation.get("balance") or 0),
+        }, status=409)
+
+    try:
+        slots = await asyncio.to_thread(
+            _yc.get_available_slots,
+            staff_id,
+            date_value,
+            service_ids,
+        )
+    except Exception as exc:
+        logger.error("loyalty booking slots staff_id=%s: %s", staff_id, exc)
+        slots = [{"error": "yclients_unavailable"}]
+    if slots and isinstance(slots[0], dict) and slots[0].get("error"):
+        database.release_loyalty_reservation(
+            client_id=int(client["id"]), request_id=request_id,
+        )
+        return _client_record_response({
+            "success": False, "error": "yclients_unavailable", "code": "yclients_unavailable",
+        }, status=502)
+
+    def _slot_time(slot: dict) -> str:
+        raw = str((slot or {}).get("time") or (slot or {}).get("datetime") or "")
+        match = re.search(r"(?:T|\s)(\d{2}:\d{2})", raw)
+        return match.group(1) if match else raw[:5]
+
+    if not any(_slot_time(slot) == time_value for slot in (slots or [])):
+        database.release_loyalty_reservation(
+            client_id=int(client["id"]), request_id=request_id,
+        )
+        return _client_record_response({
+            "success": False, "error": "slot_taken", "code": "slot_taken",
+            "message": "Это время уже недоступно. Выберите другое.",
+        }, status=409)
+
+    try:
+        prefs = database.get_notify_prefs_by_chat_id(int(chat_id))
+        notify_hours = int(prefs.get("reminder_hours") or 0) if prefs.get("reminder") else 0
+    except Exception:
+        notify_hours = 3
+    booking_result = await asyncio.to_thread(
+        _yc.create_booking,
+        staff_id=staff_id,
+        service_ids=service_ids,
+        datetime_str=f"{date_value}T{time_value}:00",
+        client_name=str(client.get("name") or "Клиент"),
+        client_phone=phone,
+        notify_by_sms=notify_hours,
+    )
+    if not booking_result.get("success"):
+        database.release_loyalty_reservation(
+            client_id=int(client["id"]), request_id=request_id,
+        )
+        code = str(booking_result.get("code") or "booking_failed")
+        status = 409 if code in {"slot_taken", "staff_unavailable"} else 502
+        return _client_record_response({
+            "success": False,
+            "error": code,
+            "code": code,
+            "message": _booking_failure_reply(booking_result),
+        }, status=status)
+
+    record_id = int(booking_result.get("record_id") or 0)
+    service_names = [
+        str(catalog_by_id[service_id].get("title") or "Услуга")
+        for service_id in service_ids
+    ]
+    if record_id <= 0:
+        database.release_loyalty_reservation(
+            client_id=int(client["id"]), request_id=request_id,
+        )
+        return _client_record_response({
+            "success": True,
+            "ok": True,
+            "record_id": None,
+            "loyalty_applied": False,
+            "warning": "booking_created_loyalty_needs_admin",
+        })
+
+    redemption = await asyncio.to_thread(
+        _loy.apply_redemption_for_booking,
+        client_id=int(client["id"]),
+        record_id=record_id,
+        service_titles=[care["title"]],
+        service_quotes=[care],
+        reservation_id=request_id,
+    )
+    if int(redemption.get("total_points") or 0) <= 0:
+        database.release_loyalty_reservation(
+            client_id=int(client["id"]), request_id=request_id,
+        )
+    try:
+        database.save_booking(
+            int(client["id"]),
+            service=", ".join(service_names),
+            master=str(catalog_by_id.get(care_id, {}).get("staff_name") or ""),
+            datetime_str=f"{date_value}T{time_value}:00",
+            yclients_record_id=record_id,
+        )
+    except Exception as exc:
+        logger.error("loyalty booking save record_id=%s: %s", record_id, exc)
+    return _client_record_response({
+        "success": True,
+        "ok": True,
+        "record_id": record_id,
+        "loyalty_applied": int(redemption.get("total_points") or 0) > 0,
+        "spent_points": int(redemption.get("total_points") or 0),
+        "remaining_points": int(redemption.get("remaining") or 0),
+        "loyalty_service": care["title"],
+        "datetime": f"{date_value}T{time_value}:00",
+        "services": service_names,
+    })
+
+
 async def booking_prefill_handler(request: web.Request) -> web.Response:
     """
     POST /api/booking/prefill — имя и телефон для финального шага онлайн-записи.
@@ -6945,6 +7198,30 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
             return ("Почти готово! Для записи нужен ваш номер телефона. Оформите эту запись "
                     "один раз через @malesthetic_bot (я попрошу телефон) — дальше всё будет "
                     "автоматически. Или позвоните: 8-962-447-67-47.")
+        loyalty_quote = None
+        requested_points = list(cr.get("pay_with_points") or [])
+        if requested_points and client and client.get("id"):
+            try:
+                import loyalty as _loy
+
+                _loy.lazy_backfill_for_client(int(client["id"]), phone)
+                balance = int(database.loyalty_balance(int(client["id"])))
+                in_order = {
+                    _loy._normalize_service_title(title)
+                    for title in (cr.get("service_names") or [])
+                }
+                candidates = [
+                    care for care in _loy.current_care_services()
+                    if _loy._normalize_service_title(care.get("title")) in in_order
+                    and _loy._normalize_service_title(care.get("title")) in {
+                        _loy._normalize_service_title(title) for title in requested_points
+                    }
+                    and int(care.get("price") or 0) <= balance
+                ]
+                if candidates:
+                    loyalty_quote = max(candidates, key=lambda care: int(care["price"]))
+            except Exception as exc:
+                logger.error("chat loyalty validation client_id=%s: %s", client.get("id"), exc)
         # YClients SMS/WhatsApp-напоминание — по персональной настройке клиента:
         # выключил напоминание → notify_by_sms=0 (YClients молчит); иначе за reminder_hours.
         try:
@@ -6980,11 +7257,32 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
                 )
         except Exception as e:
             logger.error(f"chat save_booking chat_id={chat_id}: {e}")
+        redemption = None
+        record_id = result.get("record_id")
+        if loyalty_quote and record_id and client and client.get("id"):
+            try:
+                import loyalty as _loy
+
+                redemption = _loy.apply_redemption_for_booking(
+                    client_id=int(client["id"]),
+                    record_id=int(record_id),
+                    service_titles=[loyalty_quote["title"]],
+                    service_quotes=[loyalty_quote],
+                )
+            except Exception as exc:
+                logger.error("chat loyalty redemption record_id=%s: %s", record_id, exc)
         dt = str(cr["datetime_str"]).replace("T", " ")[:16]
-        return ("Готово, записала вас! ✅\n\n"
-                "✂️ " + ", ".join(cr["service_names"]) + "\n"
-                "💈 " + cr["staff_name"] + "\n"
-                "📅 " + dt + "\n\nЖдём вас в «Мужской Эстетике»! 💈")
+        reply = ("Готово, записала вас! ✅\n\n"
+                 "✂️ " + ", ".join(cr["service_names"]) + "\n"
+                 "💈 " + cr["staff_name"] + "\n"
+                 "📅 " + dt)
+        if redemption and int(redemption.get("total_points") or 0) > 0:
+            reply += (
+                f"\n🪙 {int(redemption['total_points'])} баллов списано за "
+                f"{loyalty_quote['title']}. Осталось "
+                f"{int(redemption.get('remaining') or 0)} баллов."
+            )
+        return reply + "\n\nЖдём вас в «Мужской Эстетике»! 💈"
     except Exception as e:
         logger.error(f"_finalize_booking_for_chat chat_id={chat_id}: {e}")
         return None
@@ -7131,6 +7429,49 @@ _SHOP_STATUS_INTENT_RE = re.compile(
     r"\b(мой|моя|мое|моё|у\s+меня|остат\w*|актив\w*|сколько|есть\s+ли|провер\w*)\b",
     re.IGNORECASE,
 )
+_SHOP_AMOUNT_RE = re.compile(
+    r"(?<!\d)(\d{1,3}(?:[\s\u00a0\u202f]\d{3})+|\d{4,6})(?!\d)"
+)
+
+
+def _shop_rubles(value: Any) -> str:
+    try:
+        return f"{int(value):,}".replace(",", " ")
+    except (TypeError, ValueError, OverflowError):
+        return "0"
+
+
+def _requested_shop_amount(text: str) -> int | None:
+    match = _SHOP_AMOUNT_RE.search(text or "")
+    if not match:
+        return None
+    try:
+        return int(re.sub(r"\s+", "", match.group(1)))
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _subscription_shop_catalog() -> tuple[str, set[int]]:
+    offers = []
+    prices: set[int] = set()
+    for plan in getattr(subscriptions, "PLANS", ()) or ():
+        if not isinstance(plan, dict):
+            continue
+        title = str(plan.get("title") or "").strip()
+        plan_prices = plan.get("prices") if isinstance(plan.get("prices"), dict) else {}
+        try:
+            senior = int(plan_prices.get("senior"))
+            top = int(plan_prices.get("top"))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not title or senior <= 0 or top <= 0:
+            continue
+        prices.update((senior, top))
+        offers.append(
+            f"«{title}» — {_shop_rubles(senior)} ₽ у старшего / "
+            f"{_shop_rubles(top)} ₽ у топ-мастера"
+        )
+    return "; ".join(offers), prices
 
 
 def _direct_shop_action(message: str) -> tuple[str, dict] | None:
@@ -7140,19 +7481,54 @@ def _direct_shop_action(message: str) -> tuple[str, dict] | None:
         return None
     has_subs = bool(_SHOP_SUBS_RE.search(text))
     has_cert = bool(_SHOP_CERT_RE.search(text))
+    if has_subs and has_cert and _SHOP_BUY_INTENT_RE.search(text):
+        catalog, _ = _subscription_shop_catalog()
+        amounts = ", ".join(_shop_rubles(amount) for amount in _CERT_AMOUNTS[:-1])
+        amounts += f" и {_shop_rubles(_CERT_AMOUNTS[-1])} ₽"
+        catalog_text = (
+            f"Абонементы: {catalog}. "
+            if catalog
+            else "Актуальные абонементы и цены показаны в магазине. "
+        )
+        return (
+            catalog_text + f"Сертификаты: {amounts}. Открываю магазин.",
+            {"type": "open_shop", "label": "Открыть магазин", "screen": "shop"},
+        )
     if has_subs and _SHOP_STATUS_INTENT_RE.search(text) and not _SHOP_BUY_INTENT_RE.search(text):
         return (
             "Ваш активный абонемент и остаток услуг видны в личном кабинете.",
             {"type": "open_cabinet", "label": "Открыть кабинет", "screen": "cabinet"},
         )
     if has_subs and (_SHOP_BUY_INTENT_RE.search(text) or len(text) <= 24):
+        catalog, valid_prices = _subscription_shop_catalog()
+        requested_amount = _requested_shop_amount(text)
+        unavailable = (
+            f"Абонемента за {_shop_rubles(requested_amount)} ₽ в магазине нет. "
+            if requested_amount and requested_amount not in valid_prices
+            else ""
+        )
+        catalog_text = (
+            f"Доступны: {catalog}. "
+            if catalog
+            else "Актуальные варианты и цены показаны в магазине. "
+        )
         return (
-            "Конечно. Открою раздел «Абонементы»: выберите тариф и уровень, оплатить можно картой прямо в приложении.",
+            unavailable + catalog_text
+            + "Открываю раздел «Абонементы» — оплатить можно картой прямо в приложении.",
             {"type": "open_subs", "label": "Оформить абонемент"},
         )
     if has_cert and (_SHOP_BUY_INTENT_RE.search(text) or len(text) <= 28):
+        requested_amount = _requested_shop_amount(text)
+        unavailable = (
+            f"Сертификата на {_shop_rubles(requested_amount)} ₽ в магазине нет. "
+            if requested_amount and requested_amount not in _CERT_AMOUNTS
+            else ""
+        )
+        amounts = ", ".join(_shop_rubles(amount) for amount in _CERT_AMOUNTS[:-1])
+        amounts += f" и {_shop_rubles(_CERT_AMOUNTS[-1])} ₽"
         return (
-            "Конечно. Открою раздел «Сертификаты»: выберите номинал, для себя или в подарок, и оплатите картой.",
+            unavailable + f"Доступные номиналы: {amounts}. "
+            "Открываю раздел «Сертификаты»: выберите получателя и оплатите картой.",
             {"type": "open_certs", "label": "Оформить сертификат"},
         )
     return None
@@ -8023,6 +8399,128 @@ async def _own_visit_history_reply(chat_id: int, message: str) -> str | None:
     return "\n".join(lines)
 
 
+_OWNER_TODAY_SCHEDULE_RE = re.compile(
+    r"\b(?:расписан\w*|запис\w*|загрузк\w*|окн\w*)\b",
+    re.IGNORECASE,
+)
+_OWNER_TODAY_MONEY_RE = re.compile(
+    r"\b(?:сумм\w*|выруч\w*|заработ\w*|денег|деньг\w*|чек\w*)\b",
+    re.IGNORECASE,
+)
+_OWNER_TODAY_UPSELL_RE = re.compile(
+    r"\b(?:апсейл\w*|допродаж\w*|доп\w*\s+услуг\w*|"
+    r"дополнительн\w*\s+услуг\w*|увелич\w*\s+(?:средн\w*\s+)?чек\w*)\b",
+    re.IGNORECASE,
+)
+
+
+def _owner_today_commercial_intent(message: str) -> bool:
+    """Recognise one compound request about today's load, money and upsell."""
+    low = (message or "").strip().lower().replace("ё", "е")
+    if not low:
+        return False
+    has_today = "сегодня" in low or "на текущий день" in low
+    has_schedule = bool(_OWNER_TODAY_SCHEDULE_RE.search(low))
+    has_money = bool(_OWNER_TODAY_MONEY_RE.search(low))
+    has_upsell = bool(_OWNER_TODAY_UPSELL_RE.search(low))
+    return has_today and has_schedule and (has_money or has_upsell)
+
+
+def _owner_today_commercial_reply(
+    chat_id: int,
+    message: str,
+    mode: str = "staff",
+) -> str | None:
+    """Answer a compound owner request from one verified YClients snapshot."""
+    if str(mode or "").strip().lower() != "staff":
+        return None
+    if not _owner_today_commercial_intent(message):
+        return None
+    try:
+        info = _panel_resolve_role(int(chat_id))
+    except Exception:
+        info = {}
+    if info.get("role") != "owner" and not info.get("is_founder"):
+        return None
+
+    try:
+        import owner_ai
+        snapshot = owner_ai.business_snapshot()
+    except Exception as e:
+        logger.error("owner today commercial shortcut: %s", e)
+        return (
+            "Не смогла получить актуальное расписание и суммы из YClients. "
+            "Попробуйте ещё раз через минуту."
+        )
+
+    if not isinstance(snapshot, dict):
+        return (
+            "YClients сейчас не отдал проверенную картину дня. "
+            "Я не буду подставлять приблизительные цифры."
+        )
+
+    def whole(value) -> int:
+        try:
+            return max(0, int(round(float(value or 0))))
+        except (TypeError, ValueError):
+            return 0
+
+    booked = whole(snapshot.get("booked_today"))
+    priced_records = whole(snapshot.get("priced_records"))
+    unpriced_records = whole(snapshot.get("unpriced_records"))
+    priced_revenue = whole(snapshot.get("booked_service_revenue_rub"))
+    expected_revenue = whole(snapshot.get("expected_revenue_rub"))
+    upsell_potential = whole(snapshot.get("upsell_potential_rub"))
+    with_upsell = whole(snapshot.get("forecast_high_rub"))
+    if not with_upsell:
+        with_upsell = expected_revenue + upsell_potential
+
+    lines = [
+        "По сегодняшнему расписанию YClients:",
+        f"Записей: {booked}.",
+    ]
+    if unpriced_records:
+        lines.extend([
+            (
+                f"Подтверждённая сумма услуг в {priced_records} записях: "
+                f"{_rub(priced_revenue)}."
+            ),
+            (
+                f"Ещё {unpriced_records} записей без полной цены в расписании. "
+                f"Осторожная оценка всего дня: около {_rub(expected_revenue)}."
+            ),
+        ])
+    else:
+        lines.append(
+            f"Сумма услуг по текущим записям: {_rub(priced_revenue or expected_revenue)}."
+        )
+
+    if upsell_potential:
+        lines.extend([
+            f"Реалистичный потенциал допродаж: ещё около {_rub(upsell_potential)}.",
+            f"Итого день с апсейлом: около {_rub(with_upsell)}.",
+        ])
+        attach_rate = snapshot.get("historical_addon_attach_rate_pct")
+        avg_addon = whole(snapshot.get("historical_avg_addon_rub"))
+        if attach_rate and avg_addon:
+            lines.append(
+                "Прогноз допродаж рассчитан по реальной истории: "
+                f"допуслуга добавляется примерно в {whole(attach_rate)}% подходящих "
+                f"записей, средняя допродажа — {_rub(avg_addon)}."
+            )
+    else:
+        lines.append(
+            "Честный потенциал апсейла сейчас не рассчитываю: в истории недостаточно "
+            "подтверждённых допродаж."
+        )
+
+    lines.append(
+        "Сумма расписания и прогноз апсейла показаны отдельно: прогноз не является "
+        "уже полученной выручкой."
+    )
+    return "\n".join(lines)
+
+
 def _owner_daily_briefing_intent(message: str) -> bool:
     low = (message or "").strip().lower().replace("ё", "е")
     if not low:
@@ -8603,7 +9101,7 @@ def _store_assistant_message_in_chat(
 
 
 def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
-    """Persist one exact spend suggestion for each confirmed balance snapshot."""
+    """Invite a client into the slot-aware loyalty booking flow once per balance."""
     try:
         client = database.get_client(int(chat_id))
     except Exception:
@@ -8617,12 +9115,8 @@ def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
     try:
         import loyalty as _loy
 
-        actual_card = _loy._yc_loyalty_card(phone)
-        balance = (
-            int(actual_card["balance"])
-            if actual_card is not None
-            else int(database.loyalty_balance(client_id))
-        )
+        _loy.lazy_backfill_for_client(client_id, phone)
+        balance = int(database.loyalty_balance(client_id))
         spend = _loy.loyalty_spend_summary(balance)
     except Exception as exc:
         logger.error("client loyalty offer lookup %s: %s", client_id, exc)
@@ -8630,15 +9124,10 @@ def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
     affordable = list(spend.get("affordable_services") or [])
     if balance <= 0 or not affordable:
         return False
-    shown = affordable[-4:]
-    options = "; ".join(
-        f'{item["title"]} — {int(item["price"])} баллов'
-        for item in shown
-    )
     text = (
-        f"У вас {balance} баллов. Ими уже можно оплатить один из уходов: "
-        f"{options}. За одну запись баллами оплачивается один уход. "
-        "Выберите подходящий вариант ниже — помогу добавить его к записи."
+        f"У вас {balance} баллов — ими уже можно оплатить дополнительный уход. "
+        "Выберите мастера, услугу и время: я проверю оставшееся окно и предложу "
+        "только тот уход, который мастер действительно успеет сделать."
     )
     signature = "|".join(
         f'{item.get("id") or item.get("title")}:{item.get("price")}'
@@ -8650,10 +9139,10 @@ def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
         mode="client",
         action={
             "type": "open_booking",
-            "label": "Выбрать уход",
+            "label": "Подобрать по времени",
             "screen": "book",
         },
-        widget="loyalty",
+        widget="book",
         dedupe_key=f"loyalty-spend:{client_id}:{balance}:{signature}"[:160],
     )
 
@@ -9153,6 +9642,21 @@ async def chat_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_today_reply = _owner_today_commercial_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if owner_today_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append(_user_history_item(safe_message))
+        history.append(_assistant_history_item(owner_today_reply))
+        conversations[history_key] = history
+        save_conversations(conversations)
+        return _saved_chat_response({
+            "reply": owner_today_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -9676,6 +10180,21 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         save_conversations(conversations)
         return _saved_chat_response({
             "reply": client_business_reply,
+            "contact_request": False,
+            "transcript": transcript or "",
+        })
+
+    owner_today_reply = _owner_today_commercial_reply(
+        chat_id, message, mode=chat_mode,
+    )
+    if owner_today_reply:
+        safe_message = anonymizer.redact_pii(message)
+        history.append(_user_history_item(safe_message))
+        history.append(_assistant_history_item(owner_today_reply))
+        conversations[history_key] = history
+        save_conversations(conversations)
+        return _saved_chat_response({
+            "reply": owner_today_reply,
             "contact_request": False,
             "transcript": transcript or "",
         })
@@ -11759,7 +12278,9 @@ async def panel_journal_handler(request: web.Request) -> web.Response:
 async def panel_journal_create_handler(request: web.Request) -> web.Response:
     """POST /api/panel/journal_create — ручная запись клиента из журнала.
     ⚠️ Только ВЛАДЕЛЕЦ (вводится телефон клиента; по 152-ФЗ телефоны — только владельцу).
-    Тело: {staff_id, service_ids[], datetime, client_name, client_phone}."""
+    Тело: {staff_id, service_ids[], datetime, client_name, client_phone, duration_minutes?}.
+    duration_minutes — явная длительность сеанса (мастер «стянул» запись); без неё
+    длительность = сумма длительностей услуг."""
     try:
         body = await request.json()
     except Exception:
@@ -11787,17 +12308,27 @@ async def panel_journal_create_handler(request: web.Request) -> web.Response:
     phone = (body.get("client_phone") or "").strip() if is_owner else ""
     if not (staff_id and service_ids and dt and name):
         return _cabinet_response({"error": "missing", "message": "Заполните мастера, услугу, время и имя."}, status=400)
-    # Длительность сеанса = сумма длительностей выбранных услуг (для корректной
-    # высоты карточки и проверки занятости слота). Если не вышло — 1 час.
+    # Длительность сеанса: если персонал задал вручную (duration_minutes) — берём её,
+    # иначе = сумма длительностей выбранных услуг. Если не вышло — 1 час.
     seance_length = 0
-    try:
-        svcs = await asyncio.to_thread(_yc.get_services, staff_id)
-        by_id = {s.get("id"): s for s in (svcs or []) if isinstance(s, dict)}
-        for sid_ in service_ids:
-            d = by_id.get(sid_, {}).get("duration") or 0
-            seance_length += int(d) if d else 0
-    except Exception:
-        seance_length = 0
+    explicit_min = body.get("duration_minutes")
+    if explicit_min is not None:
+        try:
+            m = int(explicit_min)
+            # 5 минут … 12 часов — защита от опечатки/мусора
+            if 5 <= m <= 720:
+                seance_length = m * 60
+        except Exception:
+            seance_length = 0
+    if not seance_length:
+        try:
+            svcs = await asyncio.to_thread(_yc.get_services, staff_id)
+            by_id = {s.get("id"): s for s in (svcs or []) if isinstance(s, dict)}
+            for sid_ in service_ids:
+                d = by_id.get(sid_, {}).get("duration") or 0
+                seance_length += int(d) if d else 0
+        except Exception:
+            seance_length = 0
     try:
         # Админский эндпоинт — владелец может поставить запись на любой день/время
         # (book_record отклонял бы нерабочее время мастера).
@@ -12563,6 +13094,7 @@ async def panel_journal_record_handler(request: web.Request) -> web.Response:
         "start": start_hm,
         "end": end_hm,
         "date": dt[:10],
+        "duration_minutes": (int(length) // 60) if length else 0,   # для «стянуть/растянуть» в карточке
         "services": services,
         "total": total,
         "paid": paid,
@@ -12734,6 +13266,45 @@ async def panel_journal_set_services_handler(request: web.Request) -> web.Respon
     return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
 
 
+async def panel_journal_set_duration_handler(request: web.Request) -> web.Response:
+    """POST /api/panel/journal_set_duration {record_id, duration_minutes} — изменить
+    длительность визита («стянуть»/растянуть запись в журнале). Персонал.
+    Время начала, услуги, цены и клиент не меняются."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
+    if not tg_user or not tg_user.get("id"):
+        return _cabinet_response({"error": "unauthorized"}, status=401)
+    info = _panel_resolve_role(int(tg_user["id"]))
+    if info.get("role") not in ("owner", "manager", "master"):
+        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
+    try:
+        record_id = int(body.get("record_id") or 0)
+    except Exception:
+        record_id = 0
+    try:
+        minutes = int(body.get("duration_minutes") or 0)
+    except Exception:
+        minutes = 0
+    if not record_id:
+        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
+    if not (5 <= minutes <= 720):
+        return _cabinet_response({"error": "bad_duration", "message": "Длительность — от 5 минут до 12 часов."}, status=400)
+    _grec, _gerr = await _panel_record_guard(info, record_id)
+    if _gerr:
+        return _gerr
+    try:
+        result = await asyncio.to_thread(_yc.set_record_duration, record_id, minutes * 60)
+    except Exception as e:
+        logger.error("journal_set_duration %s: %s", record_id, e)
+        return _cabinet_response({"error": "yclients", "message": "Не удалось изменить длительность."}, status=502)
+    if result.get("success"):
+        return _cabinet_response({"ok": True, "record_id": record_id, "duration_minutes": minutes})
+    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+
+
 async def panel_journal_set_client_name_handler(request: web.Request) -> web.Response:
     """POST /api/panel/journal_set_client_name {record_id, client_name?, client_phone?} —
     обновить имя и/или телефон клиента в карточке записи. Персонал."""
@@ -12826,6 +13397,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/client/cancel-record", cabinet_options_handler)
     web_app.router.add_post("/api/client/reschedule-record", client_reschedule_record_handler)
     web_app.router.add_options("/api/client/reschedule-record", cabinet_options_handler)
+    web_app.router.add_post("/api/client/book-with-loyalty", client_book_with_loyalty_handler)
+    web_app.router.add_options("/api/client/book-with-loyalty", cabinet_options_handler)
     web_app.router.add_post("/api/panel/team_chat/normalize_voice", team_chat_normalize_voice_handler)
     web_app.router.add_options("/api/panel/team_chat/normalize_voice", cabinet_options_handler)
     web_app.router.add_get("/api/auth/status", auth_status_handler)
@@ -12988,6 +13561,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/panel/journal_add_service", panel_options_handler)
     web_app.router.add_post("/api/panel/journal_set_services", panel_journal_set_services_handler)
     web_app.router.add_options("/api/panel/journal_set_services", panel_options_handler)
+    web_app.router.add_post("/api/panel/journal_set_duration", panel_journal_set_duration_handler)
+    web_app.router.add_options("/api/panel/journal_set_duration", panel_options_handler)
     web_app.router.add_post("/api/panel/journal_set_client_name", panel_journal_set_client_name_handler)
     web_app.router.add_options("/api/panel/journal_set_client_name", panel_options_handler)
     web_app.router.add_post("/api/panel/journal_set_client_data", panel_journal_set_client_name_handler)

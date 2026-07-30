@@ -53,6 +53,12 @@ def _load_webhook_server():
     fake_voice_guard = types.ModuleType("voice_guard")
     fake_voice_guard.CLARIFY_REPEAT_TEXT = "Повторите, пожалуйста."
     fake_voice_guard.should_clarify_transcript = lambda *args, **kwargs: False
+    fake_subscriptions = types.ModuleType("subscriptions")
+    fake_subscriptions.PLANS = [
+        {"title": "Стрижка", "prices": {"senior": 3300, "top": 3700}},
+        {"title": "Комплекс", "prices": {"senior": 5200, "top": 6000}},
+        {"title": "Борода", "prices": {"senior": 1700, "top": 2100}},
+    ]
 
     sys.modules.pop("identity_utils", None)
     fake_identity_utils = importlib.import_module("identity_utils")
@@ -88,7 +94,7 @@ def _load_webhook_server():
         "memory": fake_memory,
         "owner_ai": types.ModuleType("owner_ai"),
         "reputation": types.ModuleType("reputation"),
-        "subscriptions": types.ModuleType("subscriptions"),
+        "subscriptions": fake_subscriptions,
         "web_auth": types.ModuleType("web_auth"),
         "yukassa_api": types.ModuleType("yukassa_api"),
         "identity_utils": fake_identity_utils,
@@ -121,6 +127,58 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("Рада вас видеть", reply)
         self.assertIn("записью", reply)
         self.assertIsNone(action)
+
+    def test_certificate_chat_uses_only_shop_denominations(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._direct_shop_action("Какие сертификаты можно купить?")
+
+        self.assertEqual(action["type"], "open_certs")
+        self.assertIn("2 000, 3 000 и 5 000 ₽", reply)
+        self.assertNotIn("10 000", reply)
+
+    def test_invalid_certificate_amount_is_rejected_with_real_catalog(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._direct_shop_action("Хочу сертификат на 10 000 рублей")
+
+        self.assertEqual(action["type"], "open_certs")
+        self.assertIn("Сертификата на 10 000 ₽ в магазине нет", reply)
+        self.assertIn("2 000, 3 000 и 5 000 ₽", reply)
+
+    def test_subscription_chat_uses_shop_catalog_prices(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._direct_shop_action("Покажи абонементы и цены")
+
+        self.assertEqual(action["type"], "open_subs")
+        self.assertIn("«Стрижка» — 3 300 ₽ у старшего / 3 700 ₽ у топ-мастера", reply)
+        self.assertIn("«Комплекс» — 5 200 ₽ у старшего / 6 000 ₽ у топ-мастера", reply)
+        self.assertIn("«Борода» — 1 700 ₽ у старшего / 2 100 ₽ у топ-мастера", reply)
+        self.assertNotIn("10 000", reply)
+
+    def test_combined_shop_question_lists_both_catalogs(self):
+        ws = _load_webhook_server()
+
+        reply, action = ws._direct_shop_action(
+            "Какие абонементы и сертификаты есть?"
+        )
+
+        self.assertEqual(action["type"], "open_shop")
+        self.assertIn("«Стрижка» — 3 300 ₽", reply)
+        self.assertIn("Сертификаты: 2 000, 3 000 и 5 000 ₽", reply)
+        self.assertNotIn("10 000", reply)
+
+    def test_usual_master_is_the_master_from_the_latest_visit(self):
+        ws = _load_webhook_server()
+
+        result = ws._usual_master([
+            {"master_id": 22, "master": "Последний мастер"},
+            {"master_id": 11, "master": "Частый мастер"},
+            {"master_id": 11, "master": "Частый мастер"},
+        ])
+
+        self.assertEqual(result, {"id": 22, "name": "Последний мастер"})
 
     def test_master_profit_question_is_not_client_team_shortcut(self):
         ws = _load_webhook_server()
@@ -196,6 +254,54 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIn("Стас Мосин — выходной", reply)
         self.assertIn("Илья Третьяков — нужна сверка", reply)
+
+    def test_compound_today_schedule_question_answers_bookings_money_and_upsell(self):
+        ws = _load_webhook_server()
+        owner_ai = sys.modules["owner_ai"]
+        owner_ai.business_snapshot = lambda: {
+            "booked_today": 21,
+            "priced_records": 20,
+            "unpriced_records": 1,
+            "booked_service_revenue_rub": 41900,
+            "expected_revenue_rub": 44000,
+            "upsell_potential_rub": 3600,
+            "forecast_high_rub": 47600,
+            "historical_addon_attach_rate_pct": 30,
+            "historical_avg_addon_rub": 600,
+        }
+        question = (
+            "Окей спасибо! Что там по расписанию на сегодня, сколько реально "
+            "записей, на какие суммы и сколько реально можно заработать, "
+            "если апсейлить мощно?"
+        )
+
+        self.assertTrue(ws._owner_today_commercial_intent(question))
+        reply = ws._owner_today_commercial_reply(
+            948205934,
+            question,
+            mode="staff",
+        )
+
+        self.assertIn("Записей: 21", reply)
+        self.assertIn("41 900 ₽", reply)
+        self.assertIn("44 000 ₽", reply)
+        self.assertIn("3 600 ₽", reply)
+        self.assertIn("47 600 ₽", reply)
+        self.assertIn("прогноз не является уже полученной выручкой", reply)
+        self.assertNotIn("Ваша личная статистика", reply)
+
+    def test_compound_today_schedule_question_is_owner_only(self):
+        ws = _load_webhook_server()
+        question = (
+            "Что по расписанию на сегодня, сколько записей и сколько "
+            "можно заработать на допродажах?"
+        )
+
+        self.assertIsNone(ws._owner_today_commercial_reply(
+            948205934,
+            question,
+            mode="client",
+        ))
 
     def test_linked_founder_revenue_defaults_to_personal_on_staff_surface(self):
         ws = _load_webhook_server()
@@ -621,7 +727,7 @@ class ChatRoutingTests(unittest.TestCase):
         history = mem.load_conversations().get("pwa:client:948205934") or []
         self.assertEqual(len(history), 1)
 
-    def test_client_loyalty_offer_is_exact_and_deduplicated_per_balance(self):
+    def test_client_loyalty_offer_defers_service_until_slot_is_checked(self):
         ws = _load_webhook_server()
         mem = sys.modules["memory"]
         db = sys.modules["database"]
@@ -632,6 +738,7 @@ class ChatRoutingTests(unittest.TestCase):
         db.loyalty_balance = lambda _client_id: 600
         fake_loyalty = types.ModuleType("loyalty")
         fake_loyalty._yc_loyalty_card = lambda _phone: {"balance": 600}
+        fake_loyalty.lazy_backfill_for_client = lambda _client_id, _phone: None
         fake_loyalty.loyalty_spend_summary = lambda _balance: {
             "affordable_services": [
                 {"id": 1, "title": "Патчи", "price": 100},
@@ -648,9 +755,212 @@ class ChatRoutingTests(unittest.TestCase):
         history = mem.load_conversations().get("pwa:client:948205934") or []
         self.assertEqual(len(history), 1)
         self.assertIn("600 баллов", history[0]["content"])
-        self.assertIn("Массаж — 450 баллов", history[0]["content"])
-        self.assertEqual(history[0]["widget"], "loyalty")
+        self.assertIn("проверю оставшееся окно", history[0]["content"])
+        self.assertNotIn("Массаж — 450 баллов", history[0]["content"])
+        self.assertEqual(history[0]["widget"], "book")
         self.assertEqual(history[0]["action"]["type"], "open_booking")
+
+    def test_loyalty_booking_rechecks_combined_slot_and_spends_once(self):
+        ws = _load_webhook_server()
+        db = sys.modules["database"]
+        ws._authed_chat_id = lambda _request, _body: 948205934
+        ws._client_record_response = lambda payload, status=200: {
+            "data": payload, "status": status,
+        }
+        ws.config.ACTIVE_MASTER_IDS = [3278920]
+        db.get_client = lambda _chat_id: {
+            "id": 25, "name": "Клиент", "phone": "+79990000000",
+        }
+        db.get_notify_prefs_by_chat_id = lambda _chat_id: {}
+        calls = {"reserve": 0, "release": 0, "create": 0, "save": 0}
+        db.reserve_loyalty_points = lambda **_kwargs: (
+            calls.__setitem__("reserve", calls["reserve"] + 1)
+            or {"ok": True, "state": "reserved", "balance": 500}
+        )
+        db.release_loyalty_reservation = lambda **_kwargs: calls.__setitem__(
+            "release", calls["release"] + 1
+        )
+        db.save_booking = lambda *_args, **_kwargs: calls.__setitem__(
+            "save", calls["save"] + 1
+        )
+
+        class FakeYClients:
+            def get_services(self, _staff_id):
+                return [
+                    {"id": 10, "title": "Мужская стрижка"},
+                    {"id": 11, "title": "Патчи"},
+                ]
+
+            def get_available_slots(self, _staff_id, _date, service_ids):
+                self.checked_service_ids = list(service_ids)
+                return [{"time": "12:00", "datetime": f"{_date}T12:00:00"}]
+
+            def create_booking(self, **kwargs):
+                calls["create"] += 1
+                self.created = kwargs
+                return {"success": True, "record_id": 7001}
+
+        fake_yc = FakeYClients()
+        ws._yc = fake_yc
+        fake_loyalty = types.ModuleType("loyalty")
+        fake_loyalty.current_care_service = lambda _title, _catalog: {
+            "id": 11, "title": "Патчи", "price": 100,
+        }
+        fake_loyalty.lazy_backfill_for_client = lambda *_args: None
+        fake_loyalty.apply_redemption_for_booking = lambda **kwargs: {
+            "total_points": 100,
+            "remaining": 500,
+            "reservation_id": kwargs.get("reservation_id"),
+        }
+        sys.modules["loyalty"] = fake_loyalty
+
+        day = (ws.datetime.now() + ws.timedelta(days=1)).strftime("%Y-%m-%d")
+
+        class Request:
+            headers = {}
+
+            async def json(self):
+                return {
+                    "staff_id": 3278920,
+                    "service_ids": [10, 11],
+                    "datetime": day + "T12:00:00",
+                    "loyalty_service_id": 11,
+                    "loyalty_service_title": "Патчи",
+                    "request_id": "booking_test_01",
+                }
+
+        response = asyncio.run(ws.client_book_with_loyalty_handler(Request()))
+
+        self.assertEqual(response["status"], 200)
+        self.assertEqual(response["data"]["spent_points"], 100)
+        self.assertEqual(fake_yc.checked_service_ids, [10, 11])
+        self.assertEqual(calls, {"reserve": 1, "release": 0, "create": 1, "save": 1})
+
+    def test_loyalty_booking_never_spends_when_addon_does_not_fit(self):
+        ws = _load_webhook_server()
+        db = sys.modules["database"]
+        ws._authed_chat_id = lambda _request, _body: 948205934
+        ws._client_record_response = lambda payload, status=200: {
+            "data": payload, "status": status,
+        }
+        ws.config.ACTIVE_MASTER_IDS = [3278920]
+        db.get_client = lambda _chat_id: {
+            "id": 25, "name": "Клиент", "phone": "+79990000000",
+        }
+        called = {"reserve": False, "release": False, "create": False}
+        db.reserve_loyalty_points = lambda **_kwargs: (
+            called.__setitem__("reserve", True)
+            or {"ok": True, "state": "reserved", "balance": 500}
+        )
+        db.release_loyalty_reservation = lambda **_kwargs: called.__setitem__(
+            "release", True
+        )
+
+        class FakeYClients:
+            def get_services(self, _staff_id):
+                return [
+                    {"id": 10, "title": "Мужская стрижка"},
+                    {"id": 11, "title": "Патчи"},
+                ]
+
+            def get_available_slots(self, _staff_id, _date, _service_ids):
+                return [{"time": "13:00", "datetime": f"{_date}T13:00:00"}]
+
+            def create_booking(self, **_kwargs):
+                called["create"] = True
+                return {"success": True, "record_id": 7002}
+
+        ws._yc = FakeYClients()
+        fake_loyalty = types.ModuleType("loyalty")
+        fake_loyalty.current_care_service = lambda _title, _catalog: {
+            "id": 11, "title": "Патчи", "price": 100,
+        }
+        fake_loyalty.lazy_backfill_for_client = lambda *_args: None
+        sys.modules["loyalty"] = fake_loyalty
+        day = (ws.datetime.now() + ws.timedelta(days=1)).strftime("%Y-%m-%d")
+
+        class Request:
+            headers = {}
+
+            async def json(self):
+                return {
+                    "staff_id": 3278920,
+                    "service_ids": [10, 11],
+                    "datetime": day + "T12:00:00",
+                    "loyalty_service_id": 11,
+                    "loyalty_service_title": "Патчи",
+                    "request_id": "booking_test_02",
+                }
+
+        response = asyncio.run(ws.client_book_with_loyalty_handler(Request()))
+
+        self.assertEqual(response["status"], 409)
+        self.assertEqual(response["data"]["code"], "slot_taken")
+        self.assertEqual(called, {"reserve": True, "release": True, "create": False})
+
+    def test_loyalty_booking_retry_returns_finalized_record_before_slot_check(self):
+        ws = _load_webhook_server()
+        db = sys.modules["database"]
+        ws._authed_chat_id = lambda _request, _body: 948205934
+        ws._client_record_response = lambda payload, status=200: {
+            "data": payload, "status": status,
+        }
+        ws.config.ACTIVE_MASTER_IDS = [3278920]
+        db.get_client = lambda _chat_id: {
+            "id": 25, "name": "Клиент", "phone": "+79990000000",
+        }
+        db.reserve_loyalty_points = lambda **_kwargs: {
+            "ok": True,
+            "state": "finalized",
+            "record_id": 7003,
+            "points": 100,
+            "balance": 500,
+        }
+        called = {"slots": False, "create": False}
+
+        class FakeYClients:
+            def get_services(self, _staff_id):
+                return [
+                    {"id": 10, "title": "Мужская стрижка"},
+                    {"id": 11, "title": "Патчи"},
+                ]
+
+            def get_available_slots(self, *_args):
+                called["slots"] = True
+                return []
+
+            def create_booking(self, **_kwargs):
+                called["create"] = True
+                return {"success": True, "record_id": 9999}
+
+        ws._yc = FakeYClients()
+        fake_loyalty = types.ModuleType("loyalty")
+        fake_loyalty.current_care_service = lambda _title, _catalog: {
+            "id": 11, "title": "Патчи", "price": 100,
+        }
+        fake_loyalty.lazy_backfill_for_client = lambda *_args: None
+        sys.modules["loyalty"] = fake_loyalty
+        day = (ws.datetime.now() + ws.timedelta(days=1)).strftime("%Y-%m-%d")
+
+        class Request:
+            headers = {}
+
+            async def json(self):
+                return {
+                    "staff_id": 3278920,
+                    "service_ids": [10, 11],
+                    "datetime": day + "T12:00:00",
+                    "loyalty_service_id": 11,
+                    "loyalty_service_title": "Патчи",
+                    "request_id": "booking_test_03",
+                }
+
+        response = asyncio.run(ws.client_book_with_loyalty_handler(Request()))
+
+        self.assertEqual(response["status"], 200)
+        self.assertEqual(response["data"]["record_id"], 7003)
+        self.assertTrue(response["data"]["idempotent"])
+        self.assertEqual(called, {"slots": False, "create": False})
 
     def test_repeat_booking_offer_is_grounded_and_deduplicated(self):
         ws = _load_webhook_server()

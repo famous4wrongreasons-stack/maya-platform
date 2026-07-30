@@ -296,10 +296,11 @@ def _history_service_text(visit: dict) -> str:
 
 
 def _usual_master_from_history(history) -> dict | None:
-    """«Обычный мастер» из YClients-истории визитов (как в кабинете): самый частый
-    среди ДЕЙСТВУЮЩИХ мастеров; при равенстве — самый недавний. history — список
-    визитов (новые первыми), каждый с master_id/master. Реплика _usual_master из
-    webhook_server (вынесено сюда, чтобы не тянуть circular import)."""
+    """«Как обычно» из YClients-истории: мастер из последнего визита.
+
+    history идёт от новых визитов к старым; неактивных мастеров пропускаем.
+    Реплика webhook_server._usual_master нужна здесь без circular import.
+    """
     if not history:
         return None
     try:
@@ -307,24 +308,15 @@ def _usual_master_from_history(history) -> dict | None:
         active = {int(x) for x in ACTIVE_MASTER_IDS}
     except Exception:
         active = None
-    counts, names, ids, first_idx = {}, {}, {}, {}
-    for idx, h in enumerate(normalize_history(history)):
+    for h in normalize_history(history):
         mid = h.get("master_id")
         name = _history_master_name(h)
         if not mid and not name:
             continue
         if active is not None and mid and mid not in active:
             continue
-        key = f"id:{mid}" if mid else f"name:{name.lower()}"
-        counts[key] = counts.get(key, 0) + 1
-        if key not in names:
-            names[key] = name
-            ids[key] = mid
-            first_idx[key] = idx
-    if not counts:
-        return None
-    best = max(counts, key=lambda m: (counts[m], -first_idx[m]))
-    return {"id": ids.get(best), "name": names.get(best, "")}
+        return {"id": mid, "name": name}
+    return None
 
 
 def get_usual_booking(user_id: int, *, warm: bool = False) -> dict | None:

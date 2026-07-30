@@ -50,6 +50,64 @@ class _FakeDatabase(types.ModuleType):
             }
         )
 
+    def redeem_loyalty_points(
+        self, *, client_id, points, visit_record_id, service_title
+    ):
+        balance = self.loyalty_balance(client_id)
+        if balance < points:
+            return {"ok": False, "reason": "insufficient", "balance": balance}
+        self.add_loyalty_transaction(
+            client_id=client_id,
+            type_="redeem",
+            points=-points,
+            visit_record_id=visit_record_id,
+            note=service_title,
+        )
+        return {"ok": True, "points": points, "balance": balance - points}
+
+    def reserve_loyalty_points(self, *, client_id, points, request_id):
+        balance = self.loyalty_balance(client_id)
+        if balance < points:
+            return {"ok": False, "state": "insufficient", "balance": balance}
+        self.add_loyalty_transaction(
+            client_id=client_id,
+            type_="redeem_hold",
+            points=-points,
+            note=f"[request:{request_id}]",
+        )
+        return {"ok": True, "state": "reserved", "balance": balance - points}
+
+    def finalize_loyalty_reservation(
+        self, *, client_id, request_id, record_id, service_title, points
+    ):
+        marker = f"[request:{request_id}]"
+        for tx in self.transactions:
+            if (
+                tx["client_id"] == client_id
+                and tx["type"] == "redeem_hold"
+                and marker in (tx.get("note") or "")
+            ):
+                tx.update(
+                    type="redeem",
+                    visit_record_id=record_id,
+                    note=f"{service_title} {marker}",
+                )
+                return {"ok": True, "record_id": record_id}
+        return {"ok": False, "reason": "hold_not_found"}
+
+    def release_loyalty_reservation(self, *, client_id, request_id):
+        marker = f"[request:{request_id}]"
+        before = len(self.transactions)
+        self.transactions = [
+            tx for tx in self.transactions
+            if not (
+                tx["client_id"] == client_id
+                and tx["type"] == "redeem_hold"
+                and marker in (tx.get("note") or "")
+            )
+        ]
+        return len(self.transactions) < before
+
     def list_telegram_clients(self):
         return self.clients
 
@@ -237,6 +295,9 @@ class LoyaltyBackfillTests(unittest.TestCase):
         self.assertEqual(service["price"], 475)
 
     def test_booking_redemption_uses_the_confirmed_current_quote(self):
+        self.database.add_loyalty_transaction(
+            client_id=25, type_="yc_import", points=600,
+        )
         self.database.loyalty_redemption_exists = lambda *_args: False
         self.loyalty._yc.mark_record_loyalty_redemption = lambda **_kwargs: {
             "success": True,
@@ -252,6 +313,71 @@ class LoyaltyBackfillTests(unittest.TestCase):
 
         self.assertEqual(result["total_points"], 475)
         self.assertEqual(self.database.transactions[-1]["points"], -475)
+
+    def test_booking_redemption_refuses_an_insufficient_balance(self):
+        self.database.add_loyalty_transaction(
+            client_id=25, type_="yc_import", points=300,
+        )
+        self.database.loyalty_redemption_exists = lambda *_args: False
+
+        result = self.loyalty.apply_redemption_for_booking(
+            client_id=25,
+            record_id=78,
+            service_titles=["Массаж"],
+            service_quotes=[{"title": "Массаж", "price": 475}],
+        )
+
+        self.assertEqual(result["total_points"], 0)
+        self.assertEqual(self.database.loyalty_balance(25), 300)
+
+    def test_booking_redemption_applies_only_one_service_per_visit(self):
+        self.database.add_loyalty_transaction(
+            client_id=25, type_="yc_import", points=1_000,
+        )
+        self.database.loyalty_redemption_exists = lambda *_args: False
+        self.loyalty._yc.mark_record_loyalty_redemption = lambda **_kwargs: {
+            "success": True,
+            "matched_service": True,
+        }
+
+        result = self.loyalty.apply_redemption_for_booking(
+            client_id=25,
+            record_id=79,
+            service_titles=["Патчи", "Массаж"],
+            service_quotes=[
+                {"title": "Патчи", "price": 100},
+                {"title": "Массаж", "price": 475},
+            ],
+        )
+
+        self.assertEqual(result["total_points"], 100)
+        self.assertEqual(len(result["items"]), 1)
+        self.assertEqual(self.database.loyalty_balance(25), 900)
+
+    def test_booking_redemption_finalizes_a_reserved_balance(self):
+        self.database.add_loyalty_transaction(
+            client_id=25, type_="yc_import", points=600,
+        )
+        self.database.loyalty_redemption_exists = lambda *_args: False
+        self.loyalty._yc.mark_record_loyalty_redemption = lambda **_kwargs: {
+            "success": True,
+            "matched_service": True,
+        }
+        hold = self.database.reserve_loyalty_points(
+            client_id=25, points=475, request_id="booking_123",
+        )
+
+        result = self.loyalty.apply_redemption_for_booking(
+            client_id=25,
+            record_id=80,
+            service_titles=["Массаж"],
+            service_quotes=[{"title": "Массаж", "price": 475}],
+            reservation_id="booking_123",
+        )
+
+        self.assertTrue(hold["ok"])
+        self.assertEqual(result["total_points"], 475)
+        self.assertEqual(self.database.loyalty_balance(25), 125)
 
     def test_real_card_import_works_when_fallback_backfill_is_disabled(self):
         self.loyalty.BACKFILL_ENABLED = False

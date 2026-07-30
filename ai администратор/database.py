@@ -3439,6 +3439,161 @@ def loyalty_balance(client_id: int) -> int:
         return int(row["bal"] or 0)
 
 
+def reserve_loyalty_points(*, client_id: int, points: int,
+                           request_id: str) -> dict:
+    """Atomically reserve points while an external booking is being created.
+
+    The temporary negative transaction makes concurrent requests see the
+    reduced balance. A stale hold is safe to remove because YClients is marked
+    only after the hold is finalized as a real redemption.
+    """
+    amount = max(0, int(points or 0))
+    token = str(request_id or "").strip()
+    if amount <= 0 or not token:
+        return {"ok": False, "reason": "invalid", "balance": loyalty_balance(client_id)}
+    marker = f"[request:{token}]"
+    stale_before = (datetime.now() - timedelta(minutes=20)).isoformat(timespec="seconds")
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute(
+            "DELETE FROM loyalty_transactions "
+            "WHERE type = 'redeem_hold' AND at < ?",
+            (stale_before,),
+        )
+        existing = conn.execute(
+            "SELECT type, points, visit_record_id FROM loyalty_transactions "
+            "WHERE client_id = ? AND instr(COALESCE(note, ''), ?) > 0 "
+            "AND type IN ('redeem_hold', 'redeem') ORDER BY id DESC LIMIT 1",
+            (client_id, marker),
+        ).fetchone()
+        balance_row = conn.execute(
+            "SELECT COALESCE(SUM(points), 0) AS bal FROM loyalty_transactions "
+            "WHERE client_id = ?",
+            (client_id,),
+        ).fetchone()
+        balance = int(balance_row["bal"] or 0)
+        if existing:
+            return {
+                "ok": existing["type"] == "redeem",
+                "state": "finalized" if existing["type"] == "redeem" else "in_progress",
+                "record_id": existing["visit_record_id"],
+                "points": abs(int(existing["points"] or 0)),
+                "balance": balance,
+            }
+        if balance < amount:
+            return {"ok": False, "state": "insufficient", "balance": balance}
+        conn.execute(
+            "INSERT INTO loyalty_transactions "
+            "(client_id, type, points, visit_record_id, note, at) "
+            "VALUES (?, 'redeem_hold', ?, NULL, ?, ?)",
+            (client_id, -amount, f"-{amount} hold {marker}", _now()),
+        )
+        return {
+            "ok": True,
+            "state": "reserved",
+            "points": amount,
+            "balance": balance - amount,
+        }
+
+
+def finalize_loyalty_reservation(*, client_id: int, request_id: str,
+                                 record_id: int, service_title: str,
+                                 points: int) -> dict:
+    """Turn one booking hold into the final redemption transaction."""
+    token = str(request_id or "").strip()
+    marker = f"[request:{token}]"
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        existing = conn.execute(
+            "SELECT id, type, points, visit_record_id FROM loyalty_transactions "
+            "WHERE client_id = ? AND instr(COALESCE(note, ''), ?) > 0 "
+            "AND type IN ('redeem_hold', 'redeem') ORDER BY id DESC LIMIT 1",
+            (client_id, marker),
+        ).fetchone()
+        if not existing:
+            return {"ok": False, "reason": "hold_not_found"}
+        if existing["type"] == "redeem":
+            return {
+                "ok": True,
+                "already_finalized": True,
+                "record_id": existing["visit_record_id"],
+            }
+        charged = abs(int(existing["points"] or 0))
+        expected = max(0, int(points or 0))
+        if charged <= 0 or charged != expected:
+            return {"ok": False, "reason": "hold_mismatch"}
+        conn.execute(
+            "UPDATE loyalty_transactions SET type = 'redeem', "
+            "visit_record_id = ?, note = ? WHERE id = ? AND type = 'redeem_hold'",
+            (
+                int(record_id),
+                f"-{charged} списано за {service_title} в записи "
+                f"{int(record_id)} {marker}",
+                existing["id"],
+            ),
+        )
+        return {"ok": True, "record_id": int(record_id)}
+
+
+def release_loyalty_reservation(*, client_id: int, request_id: str) -> bool:
+    """Release only an unfinished hold; finalized redemptions are immutable."""
+    token = str(request_id or "").strip()
+    if not token:
+        return False
+    marker = f"[request:{token}]"
+    with _db() as conn:
+        cursor = conn.execute(
+            "DELETE FROM loyalty_transactions WHERE client_id = ? "
+            "AND type = 'redeem_hold' AND instr(COALESCE(note, ''), ?) > 0",
+            (client_id, marker),
+        )
+        return cursor.rowcount > 0
+
+
+def redeem_loyalty_points(*, client_id: int, points: int,
+                          visit_record_id: int, service_title: str) -> dict:
+    """Atomically spend points once per visit for non-reserved booking flows."""
+    amount = max(0, int(points or 0))
+    if amount <= 0 or int(visit_record_id or 0) <= 0:
+        return {"ok": False, "reason": "invalid"}
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        existing = conn.execute(
+            "SELECT points FROM loyalty_transactions WHERE client_id = ? "
+            "AND visit_record_id = ? AND type = 'redeem' LIMIT 1",
+            (client_id, int(visit_record_id)),
+        ).fetchone()
+        balance_row = conn.execute(
+            "SELECT COALESCE(SUM(points), 0) AS bal FROM loyalty_transactions "
+            "WHERE client_id = ?",
+            (client_id,),
+        ).fetchone()
+        balance = int(balance_row["bal"] or 0)
+        if existing:
+            return {
+                "ok": True,
+                "already_redeemed": True,
+                "points": abs(int(existing["points"] or 0)),
+                "balance": balance,
+            }
+        if balance < amount:
+            return {"ok": False, "reason": "insufficient", "balance": balance}
+        conn.execute(
+            "INSERT INTO loyalty_transactions "
+            "(client_id, type, points, visit_record_id, note, at) "
+            "VALUES (?, 'redeem', ?, ?, ?, ?)",
+            (
+                client_id,
+                -amount,
+                int(visit_record_id),
+                f"-{amount} списано за {service_title} в записи "
+                f"{int(visit_record_id)}",
+                _now(),
+            ),
+        )
+        return {"ok": True, "points": amount, "balance": balance - amount}
+
+
 def client_has_loyalty_backfill(client_id: int) -> bool:
     """True, если уже выдавали welcome-бонус (защита от повторного начисления)."""
     with _db() as conn:

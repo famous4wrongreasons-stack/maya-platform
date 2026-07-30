@@ -1834,11 +1834,15 @@ class YClientsAPI:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def set_record_services(self, record_id: int, service_ids: list[int]) -> dict:
+    def set_record_services(self, record_id: int, service_ids: list[int],
+                            seance_length: int | None = None) -> dict:
         """Полностью задаёт список услуг визита (добавить / удалить / заменить).
         seance_length пересчитывается = сумме длительностей выбранных услуг
         (тайминг растёт/уменьшается по факту). Цены/скидки уже бывших услуг
-        сохраняются, новым ставится дефолтная цена мастера."""
+        сохраняются, новым ставится дефолтная цена мастера.
+
+        seance_length (сек) — ЯВНАЯ длительность визита: если передана, она
+        побеждает сумму услуг (мастер вручную «стянул» или растянул запись)."""
         try:
             ids = []
             for x in (service_ids or []):
@@ -1893,6 +1897,14 @@ class YClientsAPI:
                     total_dur = 0
             if total_dur <= 0:
                 total_dur = 3600
+            # Явная длительность (мастер задал вручную) важнее суммы услуг
+            if seance_length:
+                try:
+                    explicit = int(seance_length)
+                    if explicit > 0:
+                        total_dur = explicit
+                except Exception:
+                    pass
             payload = {
                 "staff_id": staff.get("id"),
                 "datetime": rec.get("datetime"),
@@ -1909,6 +1921,55 @@ class YClientsAPI:
             if upd.get("success") or upd.get("data"):
                 return {"success": True, "record_id": record_id}
             return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось изменить услуги"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_record_duration(self, record_id: int, seance_length: int) -> dict:
+        """Меняет ТОЛЬКО длительность визита (сек) — «стянуть»/растянуть запись
+        в журнале. Услуги, цены, клиент, время начала и статус сохраняются:
+        неразрушающий PUT record/{company}/{id} с текущими полями записи.
+        save_if_busy=True — растянуть запись поверх соседнего окна разрешаем
+        (в журнале решает мастер), но само время начала не двигаем."""
+        try:
+            try:
+                length = int(seance_length or 0)
+            except Exception:
+                length = 0
+            if length <= 0:
+                return {"success": False, "error": "Некорректная длительность"}
+            rec = self.get_record(record_id)
+            if not rec:
+                return {"success": False, "error": "Запись не найдена"}
+            client = rec.get("client") or {}
+            staff = rec.get("staff") or {}
+            services_payload = []
+            for s in (rec.get("services") or []):
+                if isinstance(s, dict) and s.get("id") is not None:
+                    services_payload.append({
+                        "id": s["id"],
+                        "cost": s.get("cost"),
+                        "discount": s.get("discount", 0),
+                        "first_cost": s.get("first_cost") or s.get("cost"),
+                    })
+            if not services_payload:
+                return {"success": False, "error": "В записи нет услуг"}
+            payload = {
+                "staff_id": staff.get("id"),
+                "datetime": rec.get("datetime"),
+                "seance_length": length,
+                "save_if_busy": True,
+                "send_sms": False,
+                "client": {"id": client.get("id"), "phone": client.get("phone", ""),
+                           "name": client.get("name", "")},
+                "services": services_payload,
+                "attendance": rec.get("attendance", 0),
+                "comment": rec.get("comment", ""),
+            }
+            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
+            if upd.get("success") or upd.get("data"):
+                return {"success": True, "record_id": record_id, "seance_length": length}
+            return {"success": False,
+                    "error": upd.get("meta", {}).get("message") or "Не удалось изменить длительность"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

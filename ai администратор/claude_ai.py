@@ -1919,12 +1919,10 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             if user_id:
                 client_row = database.get_client(user_id)
                 if client_row:
-                    card = _loy._yc_loyalty_card(client_row.get("phone") or "")
-                    balance = (
-                        int(card["balance"])
-                        if card is not None
-                        else database.loyalty_balance(client_row["id"])
-                    )
+                    phone = client_row.get("phone") or ""
+                    if phone:
+                        _loy.lazy_backfill_for_client(client_row["id"], phone)
+                    balance = database.loyalty_balance(client_row["id"])
             # 3) оставляем максимум 1 услугу — самую дорогую из тех, на которые
             # хватает баллов
             valid_pwp: list[str] = []

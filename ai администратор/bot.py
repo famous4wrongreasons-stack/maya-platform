@@ -4231,7 +4231,7 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
             await context.bot.send_message(
                 chat_id,
                 (
-                    f"🪙 Списал *{loyalty_redemption_info['total_points']} баллов* "
+                    f"🪙 Списала *{loyalty_redemption_info['total_points']} баллов* "
                     f"за {items_str}. На визите за эту услугу платить не нужно.\n\n"
                     f"Остаток баланса: *{loyalty_redemption_info['remaining']} баллов*."
                 ),
