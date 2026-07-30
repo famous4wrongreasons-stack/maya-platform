@@ -8006,6 +8006,7 @@ function ABookFlow() {
     }
     return mode === 'saas-local';
   });
+  const localSaasLive = localSaasMode && !!(window.__SAAS_TENANT && window.__SAAS_TENANT.booking_mode === 'live');
   const [localSaasApiBase] = React.useState(function () {
     var raw = bookingQs.get('booking_api_base');
     try {
@@ -8087,6 +8088,9 @@ function ABookFlow() {
   const [myCalBusy, setMyCalBusy] = React.useState(false);
   const [myCalSvcDraft, setMyCalSvcDraft] = React.useState({ name: '', price: '', duration: '' });
   const [myCalProvDraft, setMyCalProvDraft] = React.useState(null); // {id,name,title,interval}
+  const [myCalProvNew, setMyCalProvNew] = React.useState({ name: '', title: 'Барбер' });
+  const [myCalAccessDraft, setMyCalAccessDraft] = React.useState({ email: '', phone: '' });
+  const [myCalAccessDone, setMyCalAccessDone] = React.useState('');
   const [myCalPhotoBusy, setMyCalPhotoBusy] = React.useState(false); // C4: загрузка фото мастера (solo)
   const [myCalPhotoErr, setMyCalPhotoErr] = React.useState('');
   const myCalPhotoRef = React.useRef(null);
@@ -8967,21 +8971,42 @@ function ABookFlow() {
     }).then(function (r) { setMyLoyal({ acc: r[0] || null, tx: Array.isArray(r[1]) ? r[1].slice(0, 5) : [] }); })
       .catch(function () { setMyLoyal(null); });
   }
-  function loadMyCal() {
+  function selectMyCalProvider(provider, setup) {
+    if (!provider) {
+      setMyCalProvDraft(null);
+      setMyCalRules({});
+      return;
+    }
+    setMyCalProvDraft({
+      id: provider.id,
+      name: provider.name || '',
+      title: provider.title || '',
+      interval: String(provider.slot_interval_minutes || 30)
+    });
+    var rules = {};
+    (((setup && setup.weekly_rules) || [])).forEach(function (r) {
+      if (r.provider_id !== provider.id) return;
+      (rules[r.weekday] = rules[r.weekday] || []).push({ start: r.start_time, end: r.end_time });
+    });
+    setMyCalRules(rules);
+    setMyCalOffDraft({ start: '', end: '', note: '' });
+    setMyCalAccessDraft({ email: '', phone: '' });
+    setMyCalAccessDone('');
+    setMyCalPhotoErr('');
+  }
+  function loadMyCal(preferredProviderId) {
+    var selectedId = typeof preferredProviderId === 'string'
+      ? preferredProviderId
+      : (myCalProvDraft && myCalProvDraft.id);
     setMyCalErr('');
     ensureLocalSession().then(function (s) {
       return localBookingFetch('/internal-calendar/setup', { headers: { Authorization: 'Bearer ' + s.token } });
     }).then(function (d) {
       d = d || {};
       setMyCal(d);
-      var p = (d.providers || [])[0] || null;
-      if (p) setMyCalProvDraft({ id: p.id, name: p.name || '', title: p.title || '', interval: String(p.slot_interval_minutes || 30) });
-      var rules = {};
-      (d.weekly_rules || []).forEach(function (r) {
-        if (!p || r.provider_id !== p.id) return;
-        (rules[r.weekday] = rules[r.weekday] || []).push({ start: r.start_time, end: r.end_time });
-      });
-      setMyCalRules(rules); // lossless: храним ВСЕ интервалы дня, а не первый
+      var providers = d.providers || [];
+      var p = providers.find(function (item) { return item.id === selectedId; }) || providers.find(function (item) { return item.active !== false; }) || providers[0] || null;
+      selectMyCalProvider(p, d);
     }).catch(function (e) {
       setMyCal({});
       setMyCalErr(readErrorText(e, 'Не удалось загрузить календарь'));
@@ -9034,11 +9059,11 @@ function ABookFlow() {
     if (myCalBusy || myCalReqRef.current) return;
     myCalReqRef.current = true;
     setMyCalBusy(true); setMyCalErr('');
-    ensureLocalSession().then(fn).then(function () {
+    ensureLocalSession().then(fn).then(function (result) {
       myCalReqRef.current = false;
       setMyCalBusy(false);
-      if (after) after();
-      loadMyCal();
+      var preferredProviderId = after ? after(result) : null;
+      loadMyCal(typeof preferredProviderId === 'string' ? preferredProviderId : undefined);
     }).catch(function (e) {
       myCalReqRef.current = false;
       setMyCalBusy(false);
@@ -9095,6 +9120,52 @@ function ABookFlow() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
         body: JSON.stringify(body)
       });
+    });
+  }
+  function calAddProvider() {
+    var nm = String(myCalProvNew.name || '').trim();
+    var title = String(myCalProvNew.title || '').trim();
+    if (!nm) { setMyCalErr('Укажите имя нового барбера.'); return; }
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/providers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify({ displayName: nm, title: title || 'Барбер', slotIntervalMinutes: 30 })
+      });
+    }, function (provider) {
+      setMyCalProvNew({ name: '', title: 'Барбер' });
+      return provider && provider.id;
+    });
+  }
+  function calToggleProvider() {
+    var d = myCalProvDraft;
+    if (!d || !d.id) return;
+    var provider = ((myCal && myCal.providers) || []).find(function (p) { return p.id === d.id; });
+    if (!provider) return;
+    calMut(function (s) {
+      return localBookingFetch('/internal-calendar/providers/' + encodeURIComponent(d.id), {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify({ active: provider.active === false })
+      });
+    }, function () { return d.id; });
+  }
+  function calCreateProviderAccess() {
+    var d = myCalProvDraft;
+    var email = String(myCalAccessDraft.email || '').trim();
+    var phone = String(myCalAccessDraft.phone || '').trim();
+    var tenantId = saasUser && (saasUser.tenant_id || (saasUser.tenant && saasUser.tenant.id));
+    if (!d || !d.id || !tenantId) { setMyCalErr('Не удалось определить бизнес — обновите экран.'); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setMyCalErr('Укажите корректный email барбера.'); return; }
+    calMut(function (s) {
+      var body = { email: email, name: String(d.name || '').trim() || undefined };
+      if (phone) body.phone = phone;
+      return localBookingFetch('/admin/tenants/' + encodeURIComponent(tenantId) + '/providers/' + encodeURIComponent(d.id) + '/user', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.token },
+        body: JSON.stringify(body)
+      });
+    }, function () {
+      setMyCalAccessDone('Доступ подключён. Барбер может войти по коду из email.');
+      setMyCalAccessDraft({ email: '', phone: '' });
+      return d.id;
     });
   }
   function calSaveSchedule() {
@@ -10364,7 +10435,8 @@ function ABookFlow() {
           onClick: loadMyCal,
           style: { padding: '11px 14px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, textAlign: 'center', cursor: 'pointer' }
         }, 'Настроить услуги и график'));
-        var prov = (myCal.providers || [])[0] || null;
+        var providers = myCal.providers || [];
+        var prov = providers.find(function (p) { return myCalProvDraft && p.id === myCalProvDraft.id; }) || providers[0] || null;
         var ready = myCal.ready === true;
         var lbl = { fontFamily: DISPLAY, fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.faint, marginBottom: 4 };
         var inp = { width: '100%', border: '1px solid ' + t.line, outline: 'none', background: 'transparent', borderRadius: 10, fontFamily: BODY, fontWeight: 600, fontSize: 13, color: t.ink, padding: '8px 10px' };
@@ -10383,10 +10455,27 @@ function ABookFlow() {
         }), React.createElement('span', {
           style: { fontFamily: BODY, fontSize: 12.5, color: ready ? t.ink : t.dim }
         }, ready ? 'Календарь готов — клиенты могут записываться' : 'Добавьте услугу и график — запись откроется автоматически'));
-        // C4: solo-мастер (ровно один специалист) — блок «Загрузить фото мастера»
+        var providerTabs = providers.length ? React.createElement('div', {
+          style: { display: 'flex', gap: 7, overflowX: 'auto', padding: '1px 0 9px', WebkitOverflowScrolling: 'touch' }
+        }, providers.map(function (p) {
+          var selected = !!(prov && p.id === prov.id);
+          return React.createElement('div', {
+            key: p.id,
+            onClick: function () { setMyCalAccessDone(''); selectMyCalProvider(p, myCal); },
+            style: {
+              flex: 'none', padding: '8px 12px', borderRadius: 999,
+              border: '1px solid ' + (selected ? t.ink : t.line),
+              background: selected ? t.ink : 'transparent',
+              color: selected ? (t.dark ? '#0b0b0c' : '#f4f0eb') : (p.active === false ? t.faint : t.dim),
+              fontFamily: BODY, fontWeight: 600, fontSize: 11.5, cursor: 'pointer',
+              opacity: p.active === false ? 0.58 : 1, whiteSpace: 'nowrap'
+            }
+          }, (p.name || 'Барбер') + (p.active === false ? ' · выключен' : ''));
+        })) : null;
+        // Фото относится к выбранному барберу, а не только к solo-профилю.
         var apiOrigin = (function () { try { return new URL(localSaasApiBase).origin; } catch (e) { return ''; } })();
         var provPhoto = prov && prov.avatar_url ? (/^https?:/.test(prov.avatar_url) ? prov.avatar_url : apiOrigin + prov.avatar_url) : '';
-        var soloPhotoBlock = (prov && (myCal.providers || []).length === 1) ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, margin: '2px 0 12px' } },
+        var providerPhotoBlock = prov ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, margin: '2px 0 12px' } },
           (provPhoto
             ? React.createElement('img', { src: provPhoto, alt: '', style: { width: 56, height: 56, borderRadius: 14, objectFit: 'cover', flex: 'none', display: 'block' } })
             : React.createElement('div', { style: { width: 56, height: 56, borderRadius: 14, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', color: t.dim } }, React.createElement(SeedLogo, { size: 28, sw: 1.4 }))),
@@ -10396,13 +10485,36 @@ function ABookFlow() {
             (myCalPhotoErr ? React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.ink, marginTop: 5, lineHeight: 1.4 } }, myCalPhotoErr) : React.createElement('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, 'PNG/JPEG/WEBP/GIF, до 2 МБ')))) : null;
         var provCard = prov && myCalProvDraft ? React.createElement('div', { style: card },
           React.createElement('div', { style: lbl }, 'Специалист'),
-          soloPhotoBlock,
-          React.createElement('div', { style: { display: 'flex', gap: 8 } },
+          providerTabs,
+          providerPhotoBlock,
+          React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
             React.createElement('input', { style: Object.assign({}, inp, { flex: 2 }), value: myCalProvDraft.name, placeholder: 'Имя', onChange: function (e) { setMyCalProvDraft(Object.assign({}, myCalProvDraft, { name: e.target.value })); } }),
             React.createElement('input', { style: Object.assign({}, inp, { flex: 2 }), value: myCalProvDraft.title, placeholder: 'Роль', onChange: function (e) { setMyCalProvDraft(Object.assign({}, myCalProvDraft, { title: e.target.value })); } }),
             React.createElement('input', { style: Object.assign({}, inp, { flex: 1 }), value: myCalProvDraft.interval, inputMode: 'numeric', placeholder: 'Шаг', onChange: function (e) { setMyCalProvDraft(Object.assign({}, myCalProvDraft, { interval: e.target.value.replace(/\D/g, '') })); } })),
           React.createElement('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, 'Шаг — интервал слотов записи в минутах'),
-          btn('Сохранить специалиста', calSaveProvider)) : null;
+          btn('Сохранить барбера', calSaveProvider),
+          providers.length > 1 ? btn(prov.active === false ? 'Вернуть в запись' : 'Отключить барбера', calToggleProvider) : null) : null;
+        var canManageProviderAccess = ['tenant_admin', 'platform_owner'].indexOf(saasRole()) >= 0;
+        var accessCard = prov && canManageProviderAccess ? React.createElement('div', { style: card },
+          React.createElement('div', { style: lbl }, 'Доступ барбера'),
+          prov.user_id ? React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 12.5, color: t.ink, lineHeight: 1.5 }
+          }, 'Аккаунт связан с этим календарём. Личная статистика и записи доступны только этому барберу.') : (prov.active === false ? React.createElement('div', {
+            style: { fontFamily: BODY, fontSize: 12, color: t.faint, lineHeight: 1.5 }
+          }, 'Сначала верните барбера в запись, затем подключите ему вход.') : React.createElement(React.Fragment, null,
+            React.createElement('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.5, marginBottom: 8 } }, 'Укажите email. Барбер войдёт в MAYA по одноразовому коду и увидит только свои записи и показатели.'),
+            React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
+              React.createElement('input', { style: Object.assign({}, inp, { flex: '2 1 190px' }), type: 'email', value: myCalAccessDraft.email, placeholder: 'Email барбера', onChange: function (e) { setMyCalAccessDraft(Object.assign({}, myCalAccessDraft, { email: e.target.value })); } }),
+              React.createElement('input', { style: Object.assign({}, inp, { flex: '1 1 150px' }), inputMode: 'tel', value: myCalAccessDraft.phone, placeholder: 'Телефон, необязательно', onChange: function (e) { setMyCalAccessDraft(Object.assign({}, myCalAccessDraft, { phone: e.target.value })); } })),
+            myCalAccessDone ? React.createElement('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.ink, marginTop: 8, lineHeight: 1.45 } }, myCalAccessDone) : null,
+            btn('Подключить вход', calCreateProviderAccess, true)))) : null;
+        var addProviderCard = React.createElement('div', { style: card },
+          React.createElement('div', { style: lbl }, 'Команда'),
+          React.createElement('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.5, marginBottom: 8 } }, 'Новый барбер получит свой график и те же активные услуги. Доступ в приложение можно подключить после создания.'),
+          React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
+            React.createElement('input', { style: Object.assign({}, inp, { flex: '2 1 180px' }), value: myCalProvNew.name, placeholder: 'Имя барбера', onChange: function (e) { setMyCalProvNew(Object.assign({}, myCalProvNew, { name: e.target.value })); } }),
+            React.createElement('input', { style: Object.assign({}, inp, { flex: '1 1 120px' }), value: myCalProvNew.title, placeholder: 'Роль', onChange: function (e) { setMyCalProvNew(Object.assign({}, myCalProvNew, { title: e.target.value })); } })),
+          btn('Добавить барбера', calAddProvider, true));
         var svcRows = (myCal.services || []).map(function (sv, i) {
           if (myCalSvcEdit && myCalSvcEdit.id === sv.id) {
             // компактное редактирование: имя/цена/длительность → PATCH
@@ -10502,7 +10614,7 @@ function ABookFlow() {
           React.createElement('div', { style: lbl }, 'График недели'),
           React.createElement('div', null, schedRows),
           btn('Сохранить график', calSaveSchedule, true)) : null;
-        var offRows = (myCal.time_off || []).map(function (o, i) {
+        var offRows = (myCal.time_off || []).filter(function (o) { return prov && o.provider_id === prov.id; }).map(function (o, i) {
           var f = function (x) {
             try { return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(x)); } catch (e) { return String(x); }
           };
@@ -10530,7 +10642,7 @@ function ABookFlow() {
           btn('Закрыть время', calAddOff)) : null;
         return React.createElement(React.Fragment, null, head, myCalErr ? React.createElement('div', {
           style: { margin: '6px 0', fontFamily: BODY, fontSize: 12, color: '#aeaba8', textAlign: 'center' }
-        }, myCalErr) : null, myTab === 'schedule' ? readiness : null, myTab === 'schedule' ? provCard : null, myTab === 'services' ? svcCard : null, myTab === 'schedule' ? schedCard : null, myTab === 'schedule' ? offCard : null, React.createElement('div', {
+        }, myCalErr) : null, myTab === 'schedule' ? readiness : null, myTab === 'schedule' ? provCard : null, myTab === 'schedule' ? accessCard : null, myTab === 'schedule' ? addProviderCard : null, myTab === 'services' ? svcCard : null, myTab === 'schedule' ? schedCard : null, myTab === 'schedule' ? offCard : null, React.createElement('div', {
           onClick: myCalBusy ? null : loadMyCal,
           style: { textAlign: 'center', marginTop: 2, fontFamily: BODY, fontSize: 11.5, color: t.faint, cursor: 'pointer' }
         }, 'Обновить'));
@@ -11203,7 +11315,7 @@ function ABookFlow() {
         margin: '10px 2px 0',
         lineHeight: 1.5
       }
-    }, localSaasMode ? 'Локальная проверка нового backend. На этом шаге реальная запись не создаётся.' : 'Нажимая «Подтвердить», вы соглашаетесь на обработку персональных данных.'), ErrLine(t), React.createElement('div', {
+    }, localSaasMode ? (localSaasLive ? 'Запись будет создана во внутреннем календаре MAYA.' : 'Локальная проверка нового backend. На этом шаге реальная запись не создаётся.') : 'Нажимая «Подтвердить», вы соглашаетесь на обработку персональных данных.'), ErrLine(t), React.createElement('div', {
       onClick: submitting ? null : submit,
       style: {
         marginTop: 18,
@@ -11215,7 +11327,7 @@ function ABookFlow() {
       }
     }, React.createElement(PrimaryPill, {
       t: t,
-      label: submitting ? (localSaasMode ? 'Проверяем…' : 'Создаём запись…') : (localSaasMode ? 'Проверить локально' : 'Подтвердить запись'),
+      label: submitting ? (localSaasMode && !localSaasLive ? 'Проверяем…' : 'Создаём запись…') : (localSaasMode && !localSaasLive ? 'Проверить локально' : 'Подтвердить запись'),
       icon: AIcon.check
     })));
   });
@@ -12597,6 +12709,29 @@ function AChat() {
     if (/перейти к записи|открыть запись/.test(s)) return { kind: 'screen', screen: 'book' };
     return null;
   }
+  function quickLocalDateIso(dayOffset) {
+    var value = new Date();
+    value.setHours(12, 0, 0, 0);
+    value.setDate(value.getDate() + Number(dayOffset || 0));
+    return value.getFullYear() + '-' + String(value.getMonth() + 1).padStart(2, '0') + '-' + String(value.getDate()).padStart(2, '0');
+  }
+  function contextualQuickRequest(label) {
+    if (!window.__ME_SAAS_CTX) return String(label || '');
+    var value = String(label || '').trim();
+    var normalized = value.toLowerCase().replace(/ё/g, 'е');
+    if (normalized === 'сегодня') return 'Покажи свободные окна на ' + quickLocalDateIso(0) + ' по всем специалистам.';
+    if (normalized === 'завтра') return 'Покажи свободные окна на ' + quickLocalDateIso(1) + ' по всем специалистам.';
+    if (normalized === 'на выходных') {
+      var now = new Date();
+      var daysToSaturday = (6 - now.getDay() + 7) % 7;
+      return 'Покажи свободные окна на ' + quickLocalDateIso(daysToSaturday) + ' по всем специалистам.';
+    }
+    var lastBot = lastText(msgs, 'bot').toLowerCase();
+    if (normalized === 'показать' && /общую (?:картину|загрузку)|по всем/.test(lastBot)) {
+      return 'Покажи общую загрузку по всем специалистам на выбранную ранее дату.';
+    }
+    return value;
+  }
   function quickTap(label) {
     if (/связаться.*админ|позвонить.*админ/i.test(String(label || ''))) { meContactAdmin(); return; }
     var target = quickActionTarget(label);
@@ -12606,7 +12741,7 @@ function AChat() {
       var recent = lastText(msgs, 'user');
       var service = pickedService(recent) ? recent : '';
       send('Запиши меня к моему постоянному мастеру' + (usual && usual.name ? ' ' + usual.name : '') + (service ? ' на ' + service : ''));
-    } else send(label);
+    } else send(contextualQuickRequest(label), label);
   }
   const dark = window.__meDark;
   const setDark = window.__meSetDark;
@@ -13925,7 +14060,7 @@ function AChat() {
       return clean.concat(addition);
     });
   }
-  async function send(textArg) {
+  async function send(textArg, displayTextArg) {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
     var widgetText = String(textArg != null ? textArg : input).trim();
     var pendingRepeat = pendingRepeatBookingData();
@@ -13944,14 +14079,15 @@ function AChat() {
     if (sending) return;
     const text = String(textArg != null ? textArg : input).trim();
     if (!text) return;
-    unmarkMsgText('user', text);
+    const displayText = String(displayTextArg != null ? displayTextArg : text).trim() || text;
+    unmarkMsgText('user', displayText);
     protectLocalChat(12000);
     userHasSentRef.current = true;
     forceChatBottomRef.current = true;
     setInput('');
     setMsgs(m => m.concat([{
       role: 'user',
-      text: text
+      text: displayText
     }, {
       role: 'bot',
       text: '',
