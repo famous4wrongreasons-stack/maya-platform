@@ -2413,11 +2413,7 @@ function AuroraShell({
       WebkitMaskImage: "linear-gradient(to top, #000 0%, #000 46%, transparent 100%)",
       maskImage: "linear-gradient(to top, #000 0%, #000 46%, transparent 100%)"
     }
-  }), tab && /*#__PURE__*/React.createElement(AuroraTab, {
-    t: t,
-    items: tab.items,
-    active: tab.active
-  })));
+  })));   // нижний бар вынесен в корень приложения (единое меню)
 }
 function AuroraHeader({
   t,
@@ -2530,17 +2526,22 @@ function AuroraTab({
     return 3 * (1 - u) * u * u + u * u * u;
   }, []);
   // красим напрямую по DOM — без ре-рендера на каждый кадр
-  // ⚠️ на части экранов активной вкладки нет вовсе (глобальный нав шлёт active: 99) —
+  // ⚠️ на части экранов активной вкладки нет вовсе (корень шлёт active: -1) —
   // тогда индикатор просто прячем, иначе блоб уехал бы за пределы бара.
   const hasActive = active >= 0 && active < nTabs;
+  // последняя отрисованная позиция: если React перерисует бар посреди полёта
+  // (тема, скролл-shrink, resize), блобы не прыгнут в конец — стартовый inline-стиль
+  // берётся отсюда, а не из active.
+  const posRef = React.useRef(null);
   const paintTabs = React.useCallback((h, tl, show) => {
-    const w = 100 / nTabs;
+    posRef.current = show ? { h: h, t: tl } : null;
+    // сдвиг ровно на ячейку = translateX(100%) от собственной ширины блоба
     if (headRef.current) {
-      headRef.current.style.left = h * w + "%";
+      headRef.current.style.transform = "translate3d(" + h * 100 + "%,0,0)";
       headRef.current.style.opacity = show ? "1" : "0";
     }
     if (tailRef.current) {
-      tailRef.current.style.left = tl * w + "%";
+      tailRef.current.style.transform = "translate3d(" + tl * 100 + "%,0,0)";
       tailRef.current.style.opacity = show ? "1" : "0";
     }
     const lo = Math.min(h, tl), hi = Math.max(h, tl) + 1;   // в «ячейках»
@@ -2549,11 +2550,14 @@ function AuroraTab({
       if (el) el.style.color = (show && i + 0.5 > lo && i + 0.5 < hi) ? navInk : t.dim;
     }
   }, [nTabs, navInk, t.dim]);
+  // Бар — ЕДИНЫЙ и живёт в корне: он не перемонтируется при смене экрана,
+  // поэтому «откуда лететь» помним обычным ref'ом (глобальный хак больше не нужен).
+  const prevTab = React.useRef(-1);
   React.useEffect(() => {
-    if (!hasActive) { paintTabs(0, 0, false); return; }   // вкладка не выбрана — без индикатора
-    const prev = window.__meTabPrev;
-    const from = prev && prev.n === nTabs && typeof prev.i === "number" && prev.i >= 0 && prev.i < nTabs ? prev.i : active;
-    window.__meTabPrev = { i: active, n: nTabs };
+    if (!hasActive) { prevTab.current = -1; paintTabs(0, 0, false); return; }   // вкладка не выбрана — без индикатора
+    const p = prevTab.current;
+    const from = p >= 0 && p < nTabs ? p : active;
+    prevTab.current = active;
     if (from === active) { paintTabs(active, active, true); return; }
     const D = 600, LAG = 60;
     let t0 = 0;
@@ -2574,7 +2578,10 @@ function AuroraTab({
     "aria-hidden": "true",
     style: { position: "absolute", width: 0, height: 0, pointerEvents: "none" }
   }, /*#__PURE__*/React.createElement("filter", {
-    id: "me-tab-goo"
+    id: "me-tab-goo",
+    // регион с запасом: иначе размытие срезается краем и на месте ушедшего блоба
+    // остаются две тонкие чёрточки (сверху и снизу)
+    x: "-15%", y: "-80%", width: "130%", height: "260%"
   }, /*#__PURE__*/React.createElement("feGaussianBlur", {
     in: "SourceGraphic", stdDeviation: "6", result: "tabBlur"
   }), /*#__PURE__*/React.createElement("feColorMatrix", {
@@ -2585,13 +2592,18 @@ function AuroraTab({
     position: "absolute",
     top: 0,
     bottom: 0,
+    left: 0,
     width: 100 / nTabs + "%",
-    left: (hasActive ? active : 0) * 100 / nTabs + "%",
     opacity: hasActive ? 1 : 0,
     background: t.ink,
     borderRadius: 17,
-    willChange: "left"
+    willChange: "transform",
+    backfaceVisibility: "hidden"
   };
+  const restPos = hasActive ? active : 0;
+  const shift = p => ({ transform: "translate3d(" + p * 100 + "%,0,0)" });
+  const headStyle = Object.assign({}, blobBase, shift(posRef.current ? posRef.current.h : restPos));
+  const tailStyle = Object.assign({}, blobBase, shift(posRef.current ? posRef.current.t : restPos));
   const tabIndicator = /*#__PURE__*/React.createElement("div", {
     key: "tabind",
     style: {
@@ -2601,8 +2613,8 @@ function AuroraTab({
       zIndex: 0,
       filter: "url(#me-tab-goo)"   // всегда включён: иначе блоб «прыгает» в размере
     }
-  }, /*#__PURE__*/React.createElement("div", { key: "tail", ref: tailRef, style: blobBase }),
-     /*#__PURE__*/React.createElement("div", { key: "head", ref: headRef, style: blobBase }));
+  }, /*#__PURE__*/React.createElement("div", { key: "tail", ref: tailRef, style: tailStyle }),
+     /*#__PURE__*/React.createElement("div", { key: "head", ref: headRef, style: headStyle }));
 
   return /*#__PURE__*/React.createElement("div", {
     "data-coach": "tabs",
@@ -2647,6 +2659,8 @@ function AuroraTab({
         setPop(i);
         setTimeout(() => setPop(-1), 700);
         try { if (window.tactile) window.tactile(); else if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
+        // индикатор трогается сразу по тапу, не дожидаясь смены экрана
+        try { window.dispatchEvent(new CustomEvent("me-nav-tab", { detail: { i: i, n: nTabs } })); } catch (e) {}
         tap ? tap() : (window.__meTab && window.__meTab(i));
       },
       style: {
@@ -3367,11 +3381,7 @@ function TabBar({
   t,
   active = 0
 }) {
-  return /*#__PURE__*/React.createElement(AuroraTab, {
-    t: t,
-    items: clientTabItems(),
-    active: active
-  });
+  return null;   // нижний бар вынесен в корень приложения (единое меню)
   const items = [{
     ic: Icon.spark,
     label: "Главная"
@@ -13333,6 +13343,15 @@ function AChat() {
 
   const chatHeight = vvBox.height;
   const kbdUp = vvBox.keyboard > 0 || vvBox.height > 0 && vvBox.height < ((typeof window !== 'undefined' ? window.innerHeight : 9999) - 120);
+  // Единое нижнее меню живёт в корне — говорим ему прятаться, пока поднята клавиатура.
+  React.useEffect(function () {
+    try { window.dispatchEvent(new CustomEvent('me-bottom-nav-visibility', { detail: { hidden: !!kbdUp } })); } catch (e) {}
+  }, [kbdUp]);
+  React.useEffect(function () {
+    return function () {
+      try { window.dispatchEvent(new CustomEvent('me-bottom-nav-visibility', { detail: { hidden: false } })); } catch (e) {}
+    };
+  }, []);
   // ── КЛАВИАТУРА: не считаем её дважды ─────────────────────────────────
   // Глобальный viewport-script меняет --me-app-height на visibleViewport.height.
   // Плавающий composer остаётся bottom:0, а padding ленты не даёт ему перекрыть
@@ -15187,7 +15206,7 @@ function AChat() {
       flexDirection: 'column',
       alignItems: 'stretch',
       gap: 8,
-      padding: kbdUp ? '8px 14px 8px' : '8px 14px calc(12px + env(safe-area-inset-bottom,0px))',
+      padding: kbdUp ? '8px 14px 8px' : '8px 14px calc(62px + env(safe-area-inset-bottom,0px))',   // место под единое нижнее меню (было: бар в потоке)
       background: 'transparent',
       pointerEvents: 'auto'
     }
@@ -15240,15 +15259,42 @@ function AChat() {
       style: { display: 'flex', alignItems: 'center', gap: 6, minHeight: 52, borderRadius: 26, background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.72)', border: '1px solid ' + t.line, backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)', padding: '0 8px 0 17px' }
     }, midEl, rightBtn);
     // Maya OS 3D: стеклянный нав-бар под инпутом (прячем при клавиатуре и в онбординге — владелец остаётся в потоке)
-    var nav = null;
-    if (!kbdUp && !onbOnRef.current) {
+    var nav = null;   // бар вынесен в корень приложения (единое меню)
+    if (false) {
       var items = (chatSurface() === 'staff' ? (window.STAFF_TABS || []) : (window.CLIENT_TABS || []));
       var loggedIn = !!(window.__meHasSession && window.__meHasSession());
       var vis = items.filter(function (it) { return meTabFeatureAllowed(it) && (!it.auth || loggedIn || it.guestLabel || it.guestTap); });
       var EASE = 'cubic-bezier(.32,.72,0,1)';
+      // ── жидкий индикатор (та же механика, что в AuroraTab): экран чата имеет
+      //    собственный нав-бар, поэтому анимация продублирована здесь.
+      var nTab2 = Math.max(vis.length, 1), wTab2 = 100 / nTab2;
+      var navInk2 = t.bg || (dark ? '#0b0b0c' : '#f4f0eb');
+      var prevTab2 = window.__meTabPrev;
+      var fromTab2 = prevTab2 && prevTab2.n === nTab2 && typeof prevTab2.i === 'number' && prevTab2.i >= 0 && prevTab2.i < nTab2 ? prevTab2.i : 1;
+      window.__meTabPrev = { i: 1, n: nTab2 };
+      var kfTab2 = '@keyframes meNavHead{from{left:' + fromTab2 * wTab2 + '%}to{left:' + wTab2 + '%}}'
+                 + '@keyframes meNavTail{from{left:' + fromTab2 * wTab2 + '%}to{left:' + wTab2 + '%}}';
+      var blob2 = function (isHead) {
+        return {
+          position: 'absolute', top: 0, bottom: 0, width: wTab2 + '%', left: wTab2 + '%',
+          background: t.ink, borderRadius: 17,
+          animation: (isHead ? 'meNavHead' : 'meNavTail') + ' .6s cubic-bezier(.35,0,.15,1) ' + (isHead ? '0ms' : '60ms') + ' both'
+        };
+      };
+      var tabInd2 = e('div', {
+        key: 'ind2',
+        style: { position: 'absolute', left: 5, right: 5, top: 5, bottom: 5, pointerEvents: 'none', zIndex: 0, filter: 'url(#me-chat-goo)' }
+      }, e('style', { key: 'kf' }, kfTab2),
+         e('svg', { key: 'defs', 'aria-hidden': 'true', style: { position: 'absolute', width: 0, height: 0 } },
+           e('filter', { id: 'me-chat-goo' },
+             e('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '6', result: 'cb' }),
+             e('feColorMatrix', { in: 'cb', mode: 'matrix', values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -11' }))),
+         e('div', { key: 'tl', style: blob2(false) }),
+         e('div', { key: 'hd', style: blob2(true) }));
       nav = e('div', {
         key: 'nav',
         style: {
+          position: 'relative',
           display: 'flex', justifyContent: 'space-between', padding: 5, borderRadius: 22,
           background: dark ? 'rgba(8,8,8,0.5)' : universal ? 'rgba(0,0,0,0.08)' : 'rgba(24,22,15,0.10)',
           border: '1px solid ' + t.line,
@@ -15259,9 +15305,9 @@ function AChat() {
           opacity: chatNavShrunk ? 0.92 : 1,
           transition: 'transform .4s ' + EASE + ', opacity .4s ' + EASE
         }
-      }, vis.map(function (it, i2) {
+      }, tabInd2, vis.map(function (it, i2) {
         var on = i2 === 1; // «Чат» активен в обоих наборах
-        var c2 = on ? t.ink : t.dim;
+        var c2 = on ? navInk2 : t.dim;
         var guestAuth = !loggedIn && it.auth;
         var tap = guestAuth && it.guestTap ? it.guestTap : it.onTap;
         var label = guestAuth && it.guestLabel ? it.guestLabel : it.label;
@@ -23509,9 +23555,12 @@ function ALiveSchedule() {
     }).then(r => r.json()).then(j => {
       setDLoading(false);
       if (j && j.record_id) {
-        setDetail(j);
-        setClientNameDraft(j.client || j.client_name || j.name || '');
-        setClientPhoneDraft(fmtPhone(j.phone || j.client_phone || ''));
+        var normalized = Object.assign({}, j, {
+          duration_minutes: detailDurationMinutes(j)
+        });
+        setDetail(normalized);
+        setClientNameDraft(normalized.client || normalized.client_name || normalized.name || '');
+        setClientPhoneDraft(fmtPhone(normalized.phone || normalized.client_phone || ''));
       } else setDErr(j && (j.message || j.error) || 'Не удалось загрузить карточку.');
     }).catch(() => {
       setDLoading(false);
@@ -23567,7 +23616,7 @@ function ALiveSchedule() {
   // «стянуть»/растянуть визит: меняем длительность, время начала не трогаем
   function changeDuration(delta) {
     if (!detail || acting) return;
-    var cur = Number(detail.duration_minutes || 0);
+    var cur = detailDurationMinutes(detail);
     if (!cur) {
       try {
         var a = String(detail.start || '').split(':'), b = String(detail.end || '').split(':');
@@ -23767,6 +23816,21 @@ function ALiveSchedule() {
     var h = Math.floor(m / 60), r = m % 60;
     if (!h) return r + ' мин';
     return r ? h + ' ч ' + r + ' мин' : h + ' ч';
+  }
+  // Некоторые версии YClients не возвращают длительность в детальной записи.
+  // В таком случае интервал начала/конца остаётся надёжным источником истины.
+  function detailDurationMinutes(row) {
+    var explicit = Math.round(Number(row && row.duration_minutes || 0));
+    if (explicit > 0) return explicit;
+    var start = String(row && row.start || '').match(/^(\d{1,2}):(\d{2})/);
+    var end = String(row && row.end || '').match(/^(\d{1,2}):(\d{2})/);
+    if (!start || !end) return 0;
+    var sh = Number(start[1]), sm = Number(start[2]);
+    var eh = Number(end[1]), em = Number(end[2]);
+    if (sh > 23 || eh > 23 || sm > 59 || em > 59) return 0;
+    var minutes = eh * 60 + em - (sh * 60 + sm);
+    if (minutes <= 0) minutes += 24 * 60;
+    return minutes > 0 && minutes <= 720 ? minutes : 0;
   }
   // phone formatting + live client suggestions from the salon base
   function fmtPhone(v) {
@@ -24278,7 +24342,7 @@ function ALiveSchedule() {
       fontSize: 22,
       color: t.ink
     }
-  }, fmtDur(detail.duration_minutes || 0))), React.createElement('div', {
+  }, fmtDur(detailDurationMinutes(detail)))), React.createElement('div', {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -30798,11 +30862,33 @@ function MEApp() {
     strokeLinejoin: 'round'
   }))) : null;
   // persistent bottom tab bar for screens that don't render their own (so "menu is always there", no back needed)
-  const noOwnTab = ['shop', 'invite', 'settings', 'book', 'tips', 'panel']; // journal/schedule keeps its own back arrow, no bottom menu
-  const gStaffActive = {
-    'team-chat': 3
-  };
-  const gTab = !bottomNavHidden && !window.__meScanFS && !window.__meModalFS && noOwnTab.indexOf(screen) >= 0 && typeof AuroraTab !== 'undefined' && typeof CLIENT_TABS !== 'undefined' ? React.createElement('div', {
+  // ── ЕДИНОЕ нижнее меню: живёт в корне и НЕ пересоздаётся при смене экрана,
+  //    поэтому индикатор перетекает между вкладками непрерывно (как в референсе).
+  const NAV_BY_SCREEN_CLIENT = { home: 0, chat: 1, cabinet: 2 };
+  const NAV_BY_SCREEN_STAFF = { 'staff-home': 0, chat: 1, panel: 2, 'staff-clients': 3 };
+  // Экраны без нижнего меню: вход/выбор роли, полноэкранные модули и внутренний чат команды.
+  const NAV_NO_BAR = ['login', 'choose', 'crm', 'schedule', 'god', 'cutmatch', 'team-chat'];
+  const navIsStaff = modeRef.current === 'staff';
+  const navMap = navIsStaff ? NAV_BY_SCREEN_STAFF : NAV_BY_SCREEN_CLIENT;
+  const navScreenTab = navMap[screen] != null ? navMap[screen] : -1;
+  const [navTab, setNavTab] = React.useState(navScreenTab);
+  // Экран задаёт вкладку при обычной навигации; тап по бару двигает индикатор сразу
+  // (у «Профиля» своего экрана нет — он открывает меню, но подсветка всё равно едет).
+  React.useEffect(() => { if (navScreenTab >= 0) setNavTab(navScreenTab); }, [navScreenTab]);
+  React.useEffect(() => {
+    const onTap = ev => {
+      const i = ev && ev.detail ? ev.detail.i : -1;
+      if (typeof i === 'number' && i >= 0) setNavTab(i);
+    };
+    const onVis = ev => setBottomNavHidden(!!(ev && ev.detail && ev.detail.hidden));
+    window.addEventListener('me-nav-tab', onTap);
+    window.addEventListener('me-bottom-nav-visibility', onVis);
+    return () => {
+      window.removeEventListener('me-nav-tab', onTap);
+      window.removeEventListener('me-bottom-nav-visibility', onVis);
+    };
+  }, []);
+  const gTab = !bottomNavHidden && !window.__meScanFS && !window.__meModalFS && NAV_NO_BAR.indexOf(screen) < 0 && !(window.__meChatOnly && screen === 'chat') && typeof AuroraTab !== 'undefined' && typeof CLIENT_TABS !== 'undefined' ? React.createElement('div', {
     id: 'me-global-bottom-nav',
     style: {
       position: 'fixed',
@@ -30816,8 +30902,8 @@ function MEApp() {
     }
   }, React.createElement(AuroraTab, {
     t: tokens('aurora', window.__meDark),
-    items: modeRef.current === 'staff' ? STAFF_TABS : clientTabItems(),
-    active: modeRef.current === 'staff' ? gStaffActive[screen] != null ? gStaffActive[screen] : 99 : 99
+    items: navIsStaff ? STAFF_TABS : clientTabItems(),
+    active: navTab
   })) : null;
   var _lt = tokens('aurora', window.__meDark);
   // «Сменить вход» — для сотрудников (мастер/админ/владелец) на обеих главных:
