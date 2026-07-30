@@ -62,6 +62,67 @@ describe('YclientsCRMAdapter', () => {
     ]);
   });
 
+  it('discovers only active companies without exposing provider payload fields', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: () =>
+        Promise.resolve(
+          JSON.stringify({
+            data: [
+              {
+                id: 17,
+                title: 'Internal title',
+                public_title: 'Central branch',
+                address: 'Main street',
+                active: true,
+                phone: '+7 999 000-00-00',
+              },
+              {
+                id: 18,
+                title: 'Closed branch',
+                active: false,
+              },
+            ],
+          }),
+        ),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {},
+    });
+
+    await expect(adapter.discoverCompanies()).resolves.toEqual([
+      {
+        id: '17',
+        title: 'Central branch',
+        address: 'Main street',
+      },
+    ]);
+  });
+
+  it('keeps the provider status in rejected request errors', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      text: () =>
+        Promise.resolve(
+          JSON.stringify({ meta: { message: 'Недостаточно прав' } }),
+        ),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {},
+    });
+
+    await expect(adapter.discoverCompanies()).rejects.toThrow(
+      'YClients request failed with status 403: Недостаточно прав',
+    );
+  });
+
   it('maps service category into normalized services', async () => {
     global.fetch = jest
       .fn()

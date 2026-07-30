@@ -32,6 +32,7 @@ import {
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
+import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 import {
   normalizeCrmProviderSettings,
   serializePublicCrmSettings,
@@ -84,6 +85,44 @@ export class CrmService {
     private readonly tenantContext: TenantContextService,
     private readonly internalCalendarService: InternalCalendarService,
   ) {}
+
+  async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
+    this.tenantContext.assertTenantId(tenantId);
+    this.assertProviderCanBeTenantConnected(dto.provider);
+
+    const apiToken = dto.apiToken.trim();
+    if (!apiToken) {
+      throw new BadRequestException({
+        message: 'CRM API token is required',
+        error: { code: 'crm_token_required', provider: dto.provider },
+      });
+    }
+
+    const adapter = this.adapterFactory.create(dto.provider, {
+      provider: dto.provider,
+      apiToken,
+      settings: {},
+    });
+
+    if (!adapter.discoverCompanies) {
+      throw new BadRequestException({
+        message: 'CRM company discovery is not supported for this provider',
+        error: {
+          code: 'crm_company_discovery_not_supported',
+          provider: dto.provider,
+        },
+      });
+    }
+
+    try {
+      return {
+        provider: dto.provider,
+        companies: await adapter.discoverCompanies(),
+      };
+    } catch (error) {
+      throw this.toSafeConnectionException(dto.provider, error);
+    }
+  }
 
   async createOrUpdateIntegration(
     tenantId: string,
@@ -820,7 +859,7 @@ export class CrmService {
       return 'crm_platform_configuration_error';
     }
     if (
-      /\b(401|403)\b|unauthor|forbidden|credential|token|авторизац|доступ/.test(
+      /\b(401|403)\b|unauthor|forbidden|credential|token|авторизац|доступ|недостаточно прав/.test(
         normalized,
       )
     ) {

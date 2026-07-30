@@ -18,6 +18,7 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmService } from './crm.service';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
+import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 
 const CRM_MANAGEMENT_ROLES = [
   UserRole.TENANT_OWNER,
@@ -43,6 +44,32 @@ export class CrmIntegrationController {
   @ApiOperation({ summary: 'Get the current tenant CRM connection status' })
   status(@CurrentUser() actor: AuthenticatedUser) {
     return this.crmService.getIntegrationStatus(this.tenantId(actor));
+  }
+
+  @Post('discover')
+  @ApiOperation({
+    summary: 'Discover CRM companies available to the supplied credential',
+  })
+  async discover(
+    @Body() dto: DiscoverCrmCompaniesDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    const result = await this.crmService.discoverCompanies(tenantId, dto);
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.companies_discovered',
+      entityType: 'crm_integration',
+      entityId: tenantId,
+      metadata: {
+        provider: result.provider,
+        company_count: result.companies.length,
+      },
+    });
+
+    return result;
   }
 
   @Post('connect')

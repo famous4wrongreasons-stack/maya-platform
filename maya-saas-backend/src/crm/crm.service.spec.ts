@@ -12,6 +12,49 @@ describe('CrmService', () => {
     jest.useRealTimers();
   });
 
+  it('discovers tenant-visible companies without persisting the token', async () => {
+    const discoverCompanies = jest.fn().mockResolvedValue([
+      {
+        id: '42',
+        title: 'Main branch',
+        address: 'Central street',
+      },
+    ]);
+    const create = jest.fn().mockReturnValue({ discoverCompanies });
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {} as PrismaService,
+      {} as EncryptionService,
+      { create },
+      tenantContext,
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.discoverCompanies('tenant-1', {
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'tenant-secret',
+      }),
+    );
+
+    expect(create).toHaveBeenCalledWith(CrmProvider.YCLIENTS, {
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'tenant-secret',
+      settings: {},
+    });
+    expect(discoverCompanies).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      provider: CrmProvider.YCLIENTS,
+      companies: [
+        {
+          id: '42',
+          title: 'Main branch',
+          address: 'Central street',
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('tenant-secret');
+  });
+
   it('allows provider mock without an explicit apiToken', async () => {
     const checkedAt = new Date('2026-07-16T12:00:00.000Z');
     jest.useFakeTimers({ now: checkedAt });

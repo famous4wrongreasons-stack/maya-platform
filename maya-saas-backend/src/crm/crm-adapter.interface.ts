@@ -25,6 +25,12 @@ export interface StaffMember {
   rating?: number | null;
 }
 
+export interface CrmCompanyOption {
+  id: string;
+  title: string;
+  address: string | null;
+}
+
 export interface AvailableSlot {
   start: string;
   end: string;
@@ -79,6 +85,7 @@ export interface ClientLoyaltySnapshot {
 }
 
 export interface CRMAdapter {
+  discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
   getStaff(tenantId: string): Promise<StaffMember[]>;
   getAvailableSlots(params: {

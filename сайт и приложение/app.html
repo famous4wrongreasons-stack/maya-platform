@@ -19330,6 +19330,8 @@ var __CRM_ERR = {
   crm_platform_configuration_error: 'Подключение временно не настроено на стороне MAYA.',
   crm_connection_failed: 'Не удалось проверить подключение. Данные не сохранены.',
   crm_provider_not_available: 'Эта интеграция пока недоступна.',
+  crm_company_discovery_not_supported: 'Автоматический поиск филиалов для этой CRM пока недоступен.',
+  crm_no_companies_available: 'Для этого токена не найдено доступных филиалов.',
   crm_integration_not_configured: 'CRM ещё не подключена.',
   subscription_required: 'Пробный период закончился. Подключите подписку.'
 };
@@ -19393,6 +19395,7 @@ function ACrmCenter() {
   var sSel = React.useState(''); var provider = sSel[0], setProvider = sSel[1];
   var sTok = React.useState(''); var token = sTok[0], setTok = sTok[1]; // memory only
   var sCo = React.useState(''); var company = sCo[0], setCompany = sCo[1];
+  var sCos = React.useState(null); var companyOptions = sCos[0], setCompanyOptions = sCos[1];
   var sBusy = React.useState(''); var busyKind = sBusy[0], setBusyKind = sBusy[1];
   var sErr = React.useState(''); var err = sErr[0], setErr = sErr[1];
   var sNote = React.useState(''); var note = sNote[0], setNote = sNote[1];
@@ -19428,13 +19431,10 @@ function ACrmCenter() {
   function provLabel(key) { var p = ((providers && providers.list) || []).filter(function (x) { return x.provider === key; })[0]; return (p && p.name) || key; }
   function needsCompany(key) { return key === 'yclients' || key === 'altegio'; }
   // ── действия ──
-  function doConnect() {
-    var tok = String(token || '').trim();
-    if (!tok) { setErr(__CRM_ERR.crm_token_required); return; }
-    var selectable = (providers && providers.selectable) || [];
-    if (!provider || selectable.indexOf(provider) < 0) { setTok(''); setErr(__CRM_ERR.crm_provider_not_available); return; }
+  function connectWithToken(tok, companyId) {
     if (reqRef.current) return; reqRef.current = true; setBusyKind('connect'); setErr(''); setNote('');
-    var sj = String(company || '').trim() ? { companyId: isNaN(Number(company)) ? String(company).trim() : Number(company) } : {};
+    var selectedCompany = String(companyId || '').trim();
+    var sj = selectedCompany ? { companyId: isNaN(Number(selectedCompany)) ? selectedCompany : Number(selectedCompany) } : {};
     setTok(''); // секрет больше не остаётся в input/state после формирования запроса
     af('/integrations/crm/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: provider, apiToken: tok, settingsJson: sj }) })
       .then(function (d) {
@@ -19442,6 +19442,32 @@ function ACrmCenter() {
         setPreview((d && d.preview) || null); setReconnecting(false); setBusyKind(''); reqRef.current = false;
       })
       .catch(function (x) { setBusyKind(''); reqRef.current = false; setErr(errText(x)); refreshStatus().catch(function () {}); }); // прежнее active-состояние остаётся видимым
+  }
+  function doConnect() {
+    var tok = String(token || '').trim();
+    if (!tok) { setErr(__CRM_ERR.crm_token_required); return; }
+    var selectable = (providers && providers.selectable) || [];
+    if (!provider || selectable.indexOf(provider) < 0) { setTok(''); setErr(__CRM_ERR.crm_provider_not_available); return; }
+    if (reqRef.current) return;
+    if (needsCompany(provider) && !String(company || '').trim()) {
+      reqRef.current = true; setBusyKind('discover'); setErr(''); setNote('');
+      af('/integrations/crm/discover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: provider, apiToken: tok }) })
+        .then(function (d) {
+          var list = Array.isArray(d && d.companies) ? d.companies : [];
+          reqRef.current = false; setBusyKind(''); setCompanyOptions(list);
+          if (!list.length) { setErr(__CRM_ERR.crm_no_companies_available); return; }
+          if (list.length === 1) {
+            var onlyId = String(list[0].id || '');
+            setCompany(onlyId);
+            connectWithToken(tok, onlyId);
+            return;
+          }
+          setNote('MAYA нашла ' + list.length + ' филиалов. Выберите нужный и подтвердите подключение.');
+        })
+        .catch(function (x) { reqRef.current = false; setBusyKind(''); setErr(errText(x)); });
+      return;
+    }
+    connectWithToken(tok, company);
   }
   function doActivate() {
     if (reqRef.current) return; reqRef.current = true; setBusyKind('activate'); setErr(''); setNote('');
@@ -19488,24 +19514,57 @@ function ACrmCenter() {
       svc.length ? e('div', { style: { marginTop: 10 } }, e('div', { style: lbl }, 'Услуги'), svc.slice(0, 6).map(function (x, i) { return e('div', { key: x.id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 10, fontFamily: BODY, fontSize: 12, color: t.dim, padding: '3px 0' } }, e('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, String(x.name || '')), e('span', { style: { flex: 'none' } }, (Number(x.price) || 0).toLocaleString('ru-RU') + ' ₽')); })) : null,
       stf.length ? e('div', { style: { marginTop: 10 } }, e('div', { style: lbl }, 'Специалисты'), stf.slice(0, 6).map(function (x, i) { return e('div', { key: x.id || i, style: { fontFamily: BODY, fontSize: 12, color: t.dim, padding: '3px 0', overflowWrap: 'anywhere' } }, String(x.name || '') + (x.title ? ' · ' + x.title : '')); })) : null);
   }
+  function companyChooser() {
+    if (!needsCompany(provider)) return null;
+    if (Array.isArray(companyOptions) && companyOptions.length) {
+      return e('div', { style: { marginTop: 10 } },
+        e('div', { style: lbl }, 'Выберите филиал'),
+        e('div', { style: { display: 'flex', flexDirection: 'column', gap: 7, maxHeight: 220, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } },
+          companyOptions.map(function (item) {
+            var id = String(item && item.id || '');
+            var selected = String(company || '') === id;
+            return e('div', {
+              key: id,
+              onClick: busy ? null : function () { setCompany(id); setErr(''); setNote(''); },
+              style: {
+                border: '1px solid ' + (selected ? t.ink : t.line),
+                borderRadius: 12,
+                padding: '10px 12px',
+                cursor: busy ? 'default' : 'pointer',
+                background: selected ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)') : 'transparent'
+              }
+            },
+              e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 13, color: t.ink, lineHeight: 1.35 } }, String(item.title || ('Филиал ' + id))),
+              e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 3, lineHeight: 1.35 } }, (item.address ? String(item.address) + ' · ' : '') + 'ID ' + id));
+          })));
+    }
+    if (company) {
+      return e('div', { style: { marginTop: 10, border: '1px solid ' + t.line, borderRadius: 12, padding: '10px 12px' } },
+        e('div', { style: lbl }, 'Выбранный филиал'),
+        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.ink } }, 'ID ' + String(company)),
+        e('div', { onClick: busy ? null : function () { setCompany(''); setCompanyOptions(null); setErr(''); setNote(''); }, style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 6, cursor: busy ? 'default' : 'pointer' } }, 'Выбрать другой'));
+    }
+    return e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, marginTop: 8, lineHeight: 1.45 } }, 'ID искать не нужно — MAYA сама покажет филиалы, доступные этому токену.');
+  }
   function connectForm(reconnect) {
     var sel = (providers && providers.selectable) || [];
+    var actionLabel = busyKind === 'discover' ? 'Ищем филиалы…' : busyKind === 'connect' ? 'Проверяем…' : (needsCompany(provider) && !company ? 'Найти филиалы' : 'Подключить и проверить');
     return e(React.Fragment, null,
       e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5, margin: '0 0 12px' } }, reconnect ? 'Введите токен заново, чтобы переподключить CRM. Прежний токен зашифрован на сервере и никогда не показывается.' : 'Подключите систему записи вашего бизнеса. Токен хранится зашифрованно на сервере и никогда не показывается снова.'),
       e('div', { style: lbl }, 'Провайдер'),
       e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 14 } }, sel.map(function (k) {
         var on = provider === k;
-        return e('div', { key: k, onClick: busy ? null : function () { setProvider(k); setErr(''); }, style: { fontFamily: BODY, fontSize: 12.5, padding: '8px 13px', borderRadius: 999, border: '1px solid ' + (on ? t.ink : t.line), color: on ? t.ink : t.dim, cursor: busy ? 'default' : 'pointer' } }, provLabel(k));
+        return e('div', { key: k, onClick: busy ? null : function () { setProvider(k); setCompany(''); setCompanyOptions(null); setErr(''); setNote(''); }, style: { fontFamily: BODY, fontSize: 12.5, padding: '8px 13px', borderRadius: 999, border: '1px solid ' + (on ? t.ink : t.line), color: on ? t.ink : t.dim, cursor: busy ? 'default' : 'pointer' } }, provLabel(k));
       })),
       e('div', { style: lbl }, 'API-токен CRM'),
-      e('input', { style: Object.assign({}, inp, { marginBottom: needsCompany(provider) ? 10 : 0 }), type: 'password', autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false, placeholder: 'Вставьте токен', value: token, onChange: function (ev) { setErr(''); setTok(ev.target.value); } }),
-      needsCompany(provider) ? e('input', { style: inp, inputMode: 'numeric', placeholder: 'ID филиала / компании', value: company, onChange: function (ev) { setCompany(ev.target.value); } }) : null,
+      e('input', { style: inp, type: 'password', autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false, placeholder: 'Вставьте токен', value: token, onChange: function (ev) { setErr(''); setNote(''); setCompany(''); setCompanyOptions(null); setTok(ev.target.value); } }),
+      companyChooser(),
       err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, margin: '10px 0 0', lineHeight: 1.45 } }, err) : null,
       e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
-        pill(busyKind === 'connect' ? 'Проверяем…' : 'Подключить и проверить', doConnect, 'primary'),
-        reconnect ? pill('Отмена', function () { setReconnecting(false); setTok(''); setErr(''); }, '') : null),
+        pill(actionLabel, doConnect, 'primary'),
+        reconnect ? pill('Отмена', function () { setReconnecting(false); setTok(''); setCompanyOptions(null); setErr(''); }, '') : null),
       // «Подключить позже» открывает приложение владельца; вернуться сюда — из Профиля → «Интеграции»
-      reconnect ? null : e('div', { onClick: busy ? null : function () { setTok(''); if (window.__meSaasCabinet) window.__meSaasCabinet(); else if (window.__meGo) window.__meGo('home'); }, style: { textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: t.faint, marginTop: 14, cursor: busy ? 'default' : 'pointer' } }, 'Подключить позже'));
+      reconnect ? null : e('div', { onClick: busy ? null : function () { setTok(''); setCompanyOptions(null); if (window.__meSaasCabinet) window.__meSaasCabinet(); else if (window.__meGo) window.__meGo('home'); }, style: { textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: t.faint, marginTop: 14, cursor: busy ? 'default' : 'pointer' } }, 'Подключить позже'));
   }
   return e(OverlayShell, { title: 'Интеграции' }, function () {
     if (phase === 'loading') return e('div', { style: { textAlign: 'center', color: t.dim, fontFamily: BODY, fontSize: 13, padding: '48px 0' } }, 'Загрузка…');
@@ -19546,7 +19605,7 @@ function ACrmCenter() {
         err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, marginTop: 10 } }, err) : null,
         e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
           pill(busyKind === 'recheck' ? 'Проверяем…' : 'Проверить', doRecheck, ''),
-          pill('Переподключить', function () { setReconnecting(true); setTok(''); setCompany(companyId != null ? String(companyId) : ''); setErr(''); setNote(''); }, '')),
+          pill('Переподключить', function () { setReconnecting(true); setTok(''); setCompany(companyId != null ? String(companyId) : ''); setCompanyOptions(null); setErr(''); setNote(''); }, '')),
         e('div', { onClick: busy ? null : function () { setAskDisc(true); }, style: { textAlign: 'center', fontFamily: BODY, fontSize: 12, color: t.faint, marginTop: 16, cursor: busy ? 'default' : 'pointer' } }, 'Отключить интеграцию'),
         askDisc ? e('div', { style: { marginTop: 8, border: '1px solid ' + t.line, borderRadius: 12, padding: '12px 14px' } }, e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.ink, marginBottom: 10 } }, 'Отключить CRM? Онлайн-запись через неё сразу выключится.'), e('div', { style: { display: 'flex', gap: 8 } }, pill(busyKind === 'disconnect' ? 'Отключаем…' : 'Да, отключить', doDisconnect, 'primary'), pill('Нет', function () { setAskDisc(false); }, ''))) : null);
     }
@@ -19559,7 +19618,7 @@ function ACrmCenter() {
           err ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12, color: t.ink, marginTop: 8 } }, err) : null,
           e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
             pill(busyKind === 'recheck' ? 'Проверяем…' : 'Попробовать снова', doRecheck, 'primary'),
-            pill('Переподключить', function () { setReconnecting(true); setTok(''); setErr(''); }, ''))));
+            pill('Переподключить', function () { setReconnecting(true); setTok(''); setCompany(''); setCompanyOptions(null); setErr(''); }, ''))));
     }
     // reconnect required
     if (isReconnect && !reconnecting) {

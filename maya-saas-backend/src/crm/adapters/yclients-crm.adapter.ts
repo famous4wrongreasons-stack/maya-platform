@@ -5,6 +5,7 @@ import {
   CancelledAppointment,
   ClientLoyaltySnapshot,
   CRMAdapter,
+  CrmCompanyOption,
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
@@ -26,6 +27,15 @@ interface YclientsStaffApiItem {
   avatar?: string;
   photo?: string;
   rating?: number;
+}
+
+interface YclientsCompanyApiItem {
+  id?: number | string;
+  title?: string;
+  public_title?: string;
+  address?: string;
+  city?: string;
+  active?: boolean;
 }
 
 interface YclientsServiceCategoryApiItem {
@@ -119,6 +129,29 @@ export class YclientsCRMAdapter implements CRMAdapter {
         'YCLIENTS_PARTNER_TOKEN is not configured',
       );
     }
+  }
+
+  async discoverCompanies(): Promise<CrmCompanyOption[]> {
+    const response = await this.request<YclientsCompanyApiItem[]>('companies');
+
+    return (response.data || [])
+      .filter(
+        (company) =>
+          company.active !== false &&
+          company.id !== undefined &&
+          company.id !== null,
+      )
+      .slice(0, 200)
+      .map((company) => {
+        const id = String(company.id);
+        const title =
+          company.public_title?.trim() ||
+          company.title?.trim() ||
+          `Филиал ${id}`;
+        const address = company.address?.trim() || company.city?.trim() || null;
+
+        return { id, title, address };
+      });
   }
 
   async getServices(tenantId: string): Promise<ServiceItem[]> {
@@ -558,9 +591,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
 
     if (!response.ok) {
+      const providerMessage = payload.meta?.message?.trim();
       throw new Error(
-        payload.meta?.message ||
-          `YClients request failed with status ${response.status}`,
+        providerMessage
+          ? `YClients request failed with status ${response.status}: ${providerMessage}`
+          : `YClients request failed with status ${response.status}`,
       );
     }
 
