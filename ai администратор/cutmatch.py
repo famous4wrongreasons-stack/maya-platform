@@ -13,6 +13,8 @@ CutMatch — AI-консультант по стрижке + примерка.
 
 Поток: app.html → api-proxy.php → webhook_server → СЮДА → OpenAI.
 Авторизацию и лимит «2 консультации/день» навешивает webhook_server (там же БД).
+По умолчанию feature fail-closed: без CUTMATCH_ENABLED=True HTTP-handlers откажут,
+даже если кто-то случайно вернёт route.
 
 Замена движка (2026-06-06): было Claude vision + fal.ai nano-banana. Стало OpenAI
 gpt-4o + gpt-image-2 — клиент видел в приложении ChatGPT качество кратно выше.
@@ -51,6 +53,10 @@ FAL_KEY = getattr(config, "FAL_KEY", "") or os.environ.get("FAL_KEY", "")
 FAL_MODEL = "fal-ai/nano-banana/edit"
 _FAL_BASE = "https://fal.run"
 _FAL_COST_USD = float(getattr(config, "CUTMATCH_FAL_COST_USD", 0.039))
+
+
+def is_enabled() -> bool:
+    return bool(getattr(config, "CUTMATCH_ENABLED", False))
 
 
 def _proxy_kwargs(timeout: float) -> dict:
@@ -461,6 +467,8 @@ async def haircut_status(job_id: str) -> dict:
 
 async def submit_haircut_handler(request: web.Request) -> web.Response:
     """POST /api/try-haircut {photo,haircut} → {ok:true, request_id}."""
+    if not is_enabled():
+        return _resp({"error": "disabled", "message": "CutMatch временно отключён."}, status=404)
     try:
         body = await request.json()
     except Exception:
@@ -481,6 +489,8 @@ async def submit_haircut_handler(request: web.Request) -> web.Response:
 
 async def haircut_status_handler(request: web.Request) -> web.Response:
     """POST /api/haircut-status {request_id} → {status:...}."""
+    if not is_enabled():
+        return _resp({"error": "disabled", "message": "CutMatch временно отключён."}, status=404)
     try:
         body = await request.json()
     except Exception:

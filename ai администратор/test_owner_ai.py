@@ -1,0 +1,1364 @@
+import importlib
+import json
+import sys
+import types
+import unittest
+from datetime import date, timedelta
+
+
+def _load_owner_ai(
+    *,
+    reactivation_payload: dict | None,
+    cycle_payload: dict | None = None,
+    schedule_rows: list[dict] | None = None,
+    schedule_references: dict[str, dict] | None = None,
+):
+    fake_analytics = types.ModuleType("analytics")
+    fake_analytics.resolve_period = lambda period, date_from=None, date_to=None: (
+        "2026-06-09",
+        "2026-07-08",
+        "last 30",
+    )
+    def fake_business_summary(date_from, date_to, *args, **kwargs):
+        if date_from == "2026-06-09":
+            return {
+                "from": "2026-06-09",
+                "to": "2026-07-08",
+                "total_gross": 60000,
+                "visits": 30,
+                "avg_check": 2000,
+                "salary_total": 22000,
+                "masters": [
+                    {
+                        "staff_id": 1,
+                        "name": "Мастер 1",
+                        "gross": 40000,
+                        "salary": 14000,
+                        "visits": 20,
+                        "avg_check": 2000,
+                        "percent": 35,
+                        "is_owner": False,
+                    },
+                    {
+                        "staff_id": 2,
+                        "name": "Мастер 2",
+                        "gross": 20000,
+                        "salary": 8000,
+                        "visits": 10,
+                        "avg_check": 2000,
+                        "percent": 40,
+                        "is_owner": False,
+                    },
+                ],
+            }
+        return {
+            "total_gross": 4000,
+            "visits": 3,
+            "avg_check": 1333,
+            "masters": [
+                {
+                    "staff_id": 2,
+                    "name": "Мастер 2",
+                    "gross": 3000,
+                    "salary": 1200,
+                    "visits": 2,
+                    "is_owner": False,
+                },
+                {
+                    "staff_id": 1,
+                    "name": "Мастер 1",
+                    "gross": 1000,
+                    "salary": 0,
+                    "visits": 1,
+                    "is_owner": True,
+                },
+            ],
+        }
+
+    fake_analytics.business_summary = fake_business_summary
+    fake_analytics.business_pulse = lambda *args, **kwargs: {
+        "health": "ok",
+        "metrics": {
+            "gross": {"value": 120000, "delta": -5000, "delta_pct": -4},
+            "visits": {"value": 60, "delta": 6, "delta_pct": 11},
+            "avg_check": {"value": 2000, "delta": 100, "delta_pct": 5},
+        },
+        "anomaly": None,
+    }
+    fake_analytics.top_services = lambda date_from, date_to, limit=12: (
+        [
+            {"title": "Стрижка", "count": 20, "sum": 40000},
+            {"title": "Борода", "count": 5, "sum": 10000},
+        ]
+        if date_from == "2026-06-09"
+        else [
+            {"title": "Стрижка", "count": 18, "sum": 36000},
+            {"title": "Борода", "count": 9, "sum": 18000},
+        ]
+    )
+
+    fake_database = types.ModuleType("database")
+    owner_actions = [
+        {
+            "id": 1,
+            "source": "owner_os",
+            "job": "cycle",
+            "title": "Подогреть спрос",
+            "status": "done",
+            "created_at": "2026-07-07T10:00:00",
+            "result_due_at": "2020-01-01T10:00:00",
+            "evaluated_at": "2026-07-08T11:00:00",
+            "summary": {"sent": 3},
+            "impact_status": "positive_signal",
+            "impact": {"status": "positive_signal", "message": "Есть положительный сигнал."},
+            "payload": {},
+        }
+    ]
+    fake_database.dashboard_metrics = lambda days=30: {
+        "subscriptions": {"expiring_soon": 2, "active": 9}
+    }
+    fake_database.active_sold_gift_certs = lambda: {"count": 1, "value_rub": 10000}
+    settings = {}
+    def fake_get_setting(key, default=None):
+        if key == "reactivation_last" and reactivation_payload is not None:
+            return json.dumps(reactivation_payload, ensure_ascii=False)
+        if key == "cycle_candidates_snapshot_v1" and cycle_payload is not None:
+            return json.dumps(cycle_payload, ensure_ascii=False)
+        return settings.get(key, default)
+
+    def fake_set_setting(key, value):
+        settings[key] = value
+
+    fake_database.get_setting = fake_get_setting
+    fake_database.set_setting = fake_set_setting
+    fake_database.get_client_by_id = lambda client_id: {
+        11: {"id": 11, "name": "Иван Петров", "phone": "+7 999 111-22-33"},
+        12: {"id": 12, "name": "Максим Сидоров", "phone": "+7 999 444-55-66"},
+    }.get(int(client_id))
+    def fake_create_owner_action(job, title="", **kwargs):
+        action_id = max((int(it.get("id") or 0) for it in owner_actions), default=0) + 1
+        owner_actions.insert(0, {
+            "id": action_id,
+            "source": kwargs.get("source") or "owner_os",
+            "job": job,
+            "title": title,
+            "status": kwargs.get("status") or "running",
+            "created_at": "2026-07-08T10:00:00",
+            "result_due_at": kwargs.get("result_due_at"),
+            "summary": {},
+            "payload": kwargs.get("payload") or {},
+        })
+        return action_id
+
+    def fake_update_owner_control_task(action_id, action, **kwargs):
+        for item in owner_actions:
+            if int(item["id"]) != int(action_id):
+                continue
+            if item.get("source") != "owner_control":
+                return None
+            if action in ("complete", "done", "finish"):
+                item["status"] = "done"
+                item["summary"] = {"manual": True, "last_action": action}
+            elif action in ("cancel", "canceled", "cancelled"):
+                item["status"] = "canceled"
+                item["summary"] = {"manual": True, "last_action": action}
+            elif action in ("postpone", "snooze", "delay"):
+                item["status"] = "pending"
+                item["result_due_at"] = kwargs.get("due_at") or item.get("result_due_at")
+                item["payload"]["due_at"] = item["result_due_at"]
+            elif action in ("reopen", "open"):
+                item["status"] = "pending"
+            elif action in ("revision", "return", "redo", "rework"):
+                item["status"] = "running"
+                item["payload"]["assignment_work_state"] = "revision"
+                item["payload"]["assignment_work_updated_at"] = "2026-07-08T10:20:00"
+                item["payload"]["assignment_work_actor_role"] = "owner"
+                item["payload"]["assignment_work_actor_name"] = "Владелец"
+                item["payload"]["assignment_work_note"] = kwargs.get("note") or ""
+                item["summary"] = dict(item.get("summary") or {})
+                item["summary"]["manual"] = True
+                item["summary"]["last_action"] = action
+                item["summary"]["assignment_work_state"] = "revision"
+                item["summary"]["assignment_work_actor_role"] = "owner"
+                item["summary"]["assignment_work_actor_name"] = "Владелец"
+                item["summary"]["owner_revision_note"] = kwargs.get("note") or ""
+            elif action in ("assign", "reassign"):
+                item["payload"]["assigned_to"] = kwargs.get("assigned_to") or item["payload"].get("assigned_to") or "owner"
+                item["payload"]["assignee_name"] = kwargs.get("assignee_name") or ""
+                if item["payload"]["assigned_to"] in ("admin", "master", "team"):
+                    item["payload"]["assignment_delivery_channel"] = "team_chat"
+                    item["payload"]["assignment_delivery_state"] = "queued"
+                elif item["payload"]["assigned_to"] == "maya":
+                    item["payload"]["assignment_delivery_channel"] = "maya_queue"
+                    item["payload"]["assignment_delivery_state"] = "internal"
+                else:
+                    item["payload"]["assignment_delivery_channel"] = "owner_control"
+                    item["payload"]["assignment_delivery_state"] = "owner_only"
+                item["summary"] = {
+                    "manual": True,
+                    "last_action": action,
+                    "assigned_to": item["payload"]["assigned_to"],
+                    "assignee_name": item["payload"]["assignee_name"],
+                    "assignment_delivery_channel": item["payload"]["assignment_delivery_channel"],
+                    "assignment_delivery_state": item["payload"]["assignment_delivery_state"],
+                }
+            return json.loads(json.dumps(item, ensure_ascii=False))
+        return None
+
+    def fake_update_owner_assignment_work_state(action_id, state, **kwargs):
+        state_map = {
+            "accept": "accepted",
+            "accepted": "accepted",
+            "start": "running",
+            "run": "running",
+            "running": "running",
+            "done": "done",
+            "complete": "done",
+            "finish": "done",
+            "blocked": "blocked",
+        }
+        normalized = state_map.get(state)
+        if not normalized:
+            return None
+        for item in owner_actions:
+            if int(item["id"]) != int(action_id):
+                continue
+            if item.get("source") != "owner_control":
+                return None
+            item["status"] = "running" if item.get("status") == "pending" else item.get("status")
+            item["payload"]["assignment_work_state"] = normalized
+            item["payload"]["assignment_work_actor_role"] = kwargs.get("actor_role") or ""
+            item["payload"]["assignment_work_actor_name"] = kwargs.get("actor_name") or ""
+            item["payload"]["assignment_work_updated_at"] = "2026-07-08T10:10:00"
+            item["summary"] = dict(item.get("summary") or {})
+            item["summary"]["assignment_work_state"] = normalized
+            item["summary"]["assignment_work_actor_role"] = kwargs.get("actor_role") or ""
+            item["summary"]["assignment_work_actor_name"] = kwargs.get("actor_name") or ""
+            return json.loads(json.dumps(item, ensure_ascii=False))
+        return None
+
+    fake_database.create_owner_action = fake_create_owner_action
+    fake_database.update_owner_control_task = fake_update_owner_control_task
+    fake_database.update_owner_assignment_work_state = fake_update_owner_assignment_work_state
+    fake_database.list_owner_actions = lambda limit=8: owner_actions[:limit]
+    fake_database.evaluate_due_owner_actions = lambda limit=5: 0
+
+    fake_yclients = types.ModuleType("yclients")
+
+    class _FakeYClientsAPI:
+        def get_working_masters(self, day):
+            return schedule_rows if schedule_rows is not None else [
+                {"id": 1, "name": "Мастер 1", "is_working": True},
+                {"id": 2, "name": "Мастер 2", "is_working": True},
+            ]
+
+        def get_company_records(self, start_date, end_date):
+            return [{"staff_id": 1}, {"staff_id": 1}]
+
+    fake_yclients.YClientsAPI = _FakeYClientsAPI
+    fake_yclients.get_schedule_reference = lambda name, day: (
+        (schedule_references or {}).get(name)
+        or {
+            "configured": False,
+            "hours": None,
+            "is_working": None,
+            "updated": None,
+        }
+    )
+
+    fake_growth_planner = types.ModuleType("growth_planner")
+    fake_growth_planner.get_growth_plan = lambda **kwargs: {
+        "version": "maya_growth_plan_v1",
+        "as_of": "2026-07-08",
+        "status": "ok",
+        "goal": {
+            "requested_target_rub": 100000,
+            "committed_target_rub": 100000,
+            "planning_confidence_pct": 95,
+        },
+        "plan_fact": {"actual_rub": 40000, "projected_rub": 70000, "progress_pct": 40},
+        "capacity": {"theoretical_max_gross_rub": 150000, "realistic_95_ceiling_rub": 120000},
+        "client_segments": {"active_clients": 30, "recoverable_clients": 10},
+        "masters": [],
+        "actions": [],
+    }
+    sys.modules["analytics"] = fake_analytics
+    sys.modules["database"] = fake_database
+    sys.modules["yclients"] = fake_yclients
+    sys.modules["growth_planner"] = fake_growth_planner
+    sys.modules.pop("owner_ai", None)
+    mod = importlib.import_module("owner_ai")
+    mod._avg_cache.update(val=None, ts=0.0)
+    mod._summary30_cache.update(val=None, ts=0.0)
+    mod._today_master_cache.update(date=None, val=None, ts=0.0)
+    return mod
+
+
+class OwnerAITests(unittest.TestCase):
+    def test_owner_action_payload_is_card_only(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        payload = owner_ai.owner_action_payload("reactivation", potential_rub=12000)
+
+        self.assertEqual(payload["kind"], "run_job")
+        self.assertEqual(payload["job"], "reactivation")
+        self.assertEqual(payload["potential_rub"], 12000)
+        self.assertNotIn("execute", payload)
+        self.assertIsNone(owner_ai.owner_action_payload("unknown"))
+
+    def test_return_candidates_empty_state_does_not_invent_money(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        result = owner_ai.return_candidates()
+
+        self.assertIsNone(result["count"])
+        self.assertNotIn("potential_return_revenue_rub", result)
+        self.assertEqual(result["action"], "reactivation")
+        self.assertIn("Ещё не считалось", result["note"])
+
+    def test_personal_cycle_queue_exposes_contacts_only_to_owner_ui(self):
+        cycle_payload = {
+            "version": "maya_cycle_candidates_v1",
+            "generated_at": date.today().isoformat() + "T09:00:00",
+            "mode": "scan",
+            "summary": {
+                "candidates": 2, "pending": 2, "overdue": 1,
+                "due": 1, "due_soon": 0, "sent": 0,
+            },
+            "owner_alert": {
+                "version": "maya_cycle_owner_alert_v1",
+                "event_id": "cycle-20260711T090000-test",
+                "active": True,
+                "state": "new",
+                "candidate_count": 2,
+                "new_count": 2,
+                "created_at": date.today().isoformat() + "T09:00:00",
+                "notify_required": False,
+            },
+            "candidates": [{
+                "client_id": 11,
+                "cycle_days": 28,
+                "last_visit": "2026-06-08",
+                "predicted_visit": "2026-07-06",
+                "days_from_due": 2,
+                "urgency": "due",
+                "reason": "привычный срок прошёл 2 дн. назад · цикл 28 дн.",
+                "last_master": "Мастер 1",
+                "eligible_channels": ["telegram", "phone"],
+                "contact_status": "pending",
+            }, {
+                "client_id": 12,
+                "cycle_days": 21,
+                "last_visit": "2026-06-10",
+                "predicted_visit": "2026-07-01",
+                "days_from_due": 7,
+                "urgency": "overdue",
+                "reason": "привычный срок прошёл 7 дн. назад · цикл 21 дн.",
+                "last_master": "Мастер 2",
+                "eligible_channels": ["telegram", "phone"],
+                "contact_status": "pending",
+            }],
+        }
+        owner_ai = _load_owner_ai(
+            reactivation_payload={"count": 5, "at": date.today().isoformat()},
+            cycle_payload=cycle_payload,
+        )
+
+        llm_view = owner_ai.return_candidates()
+        owner_view = owner_ai.return_candidates(include_personal_data=True)
+
+        self.assertEqual(llm_view["cycle_due_count"], 2)
+        self.assertEqual(llm_view["cycle_overdue_count"], 1)
+        self.assertNotIn("candidates", llm_view)
+        self.assertNotIn("Иван", json.dumps(llm_view, ensure_ascii=False))
+        self.assertEqual(owner_view["candidates"][0]["name"], "Иван Петров")
+        self.assertTrue(owner_view["candidates"][0]["call_url"].startswith("tel:+"))
+        self.assertEqual(owner_view["decision_options"][0]["job"], "cycle")
+        self.assertEqual(owner_view["owner_alert"]["event_id"], "cycle-20260711T090000-test")
+
+        safe_center = owner_ai.command_center()
+        owner_center = owner_ai.command_center(include_personal_data=True)
+        self.assertNotIn("Иван", json.dumps(safe_center, ensure_ascii=False))
+        self.assertTrue(owner_center["owner_alert"]["active"])
+        clients_card = next(
+            card for card in owner_center["briefing"]["cards"] if card["key"] == "clients"
+        )
+        self.assertEqual(clients_card["candidate_count"], 2)
+        self.assertEqual(clients_card["candidate_queue"][0]["name"], "Иван Петров")
+        self.assertEqual(clients_card["owner_alert"]["new_count"], 2)
+        self.assertIn("MAYA уже отобрала 2", clients_card["analysis"])
+
+    def test_daily_briefing_ranks_money_and_prepares_action_card(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        brief = owner_ai.daily_briefing()
+
+        self.assertEqual(brief["today"]["booked"], 2)
+        self.assertEqual(brief["today"]["avg_check_rub"], 2000)
+        self.assertEqual(brief["today"]["expected_revenue_rub"], 4000)
+        self.assertEqual(brief["today"]["free_capacity_today"], 14)
+        self.assertEqual(
+            [
+                row["name"]
+                for row in brief["today"]["staff_schedule"]["working"]
+            ],
+            ["Мастер 1", "Мастер 2"],
+        )
+        self.assertEqual(
+            [
+                row["name"]
+                for row in brief["today"]["staff_schedule"]["confirmed_working"]
+            ],
+            ["Мастер 1", "Мастер 2"],
+        )
+        self.assertEqual(brief["today"]["staff_schedule"]["status"], "verified")
+        self.assertFalse(brief["grounding_contract"]["infer_staff_names"])
+        self.assertEqual(brief["top_priority"]["type"], "empty_windows")
+        self.assertEqual(brief["top_priority"]["potential_rub"], 28000)
+        self.assertTrue(brief["top_priority"]["estimate"])
+        self.assertEqual(brief["top_action"]["kind"], "run_job")
+        self.assertEqual(brief["top_action"]["job"], "cycle")
+        self.assertTrue(brief["next_best_actions"])
+        self.assertTrue(brief["execution_plan"]["steps"])
+        self.assertEqual(
+            brief["execution_plan"]["summary"]["steps_count"],
+            len(brief["execution_plan"]["steps"]),
+        )
+        self.assertTrue(brief["task_center"]["tasks"])
+        self.assertEqual(
+            brief["task_center"]["summary"]["tasks_count"],
+            len(brief["task_center"]["tasks"]),
+        )
+        self.assertTrue(brief["control_focus"]["items"])
+        self.assertEqual(brief["control_focus"]["summary"]["focus_count"], len(brief["control_focus"]["items"]))
+        self.assertTrue(brief["control_queue"])
+        self.assertEqual(brief["owner_advisor"]["version"], "maya_owner_advisor_v1")
+        self.assertEqual(len(brief["owner_advisor"]["dimensions"]), 6)
+        self.assertIn("оценка", brief["note"].lower())
+
+    def test_daily_briefing_marks_baseline_schedule_conflict(self):
+        owner_ai = _load_owner_ai(
+            reactivation_payload=None,
+            schedule_references={
+                "Мастер 1": {
+                    "configured": True,
+                    "hours": "10:00-21:00",
+                    "is_working": True,
+                    "updated": "2026-07-01",
+                },
+                "Мастер 2": {
+                    "configured": True,
+                    "hours": None,
+                    "is_working": False,
+                    "updated": "2026-07-01",
+                },
+            },
+        )
+
+        brief = owner_ai.daily_briefing()
+        schedule = brief["today"]["staff_schedule"]
+
+        self.assertEqual(schedule["status"], "conflict")
+        self.assertEqual(
+            [row["name"] for row in schedule["confirmed_working"]],
+            ["Мастер 1"],
+        )
+        self.assertEqual(schedule["conflicts"][0]["name"], "Мастер 2")
+        self.assertEqual(schedule["conflicts"][0]["yclients_status"], "working")
+        self.assertEqual(schedule["conflicts"][0]["baseline_status"], "off")
+        self.assertEqual(brief["today"]["confirmed_working_masters"], 1)
+        self.assertEqual(brief["today"]["free_capacity_today"], 6)
+        self.assertNotIn("Мастер 2", brief["today"]["idle_masters"])
+
+    def test_daily_briefing_formatter_uses_only_verified_schedule_groups(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        brief = {
+            "date": "2026-07-16",
+            "today": {
+                "booked": 21,
+                "expected_revenue_rub": 41900,
+                "avg_check_rub": 2069,
+                "free_capacity_today": 3,
+                "staff_schedule": {
+                    "confirmed_working": [
+                        {
+                            "name": "Алексей Дарма",
+                            "work_start": "10:00",
+                            "work_end": "21:00",
+                        },
+                        {
+                            "name": "Максим Чурсинов",
+                            "work_start": "10:00",
+                            "work_end": "21:00",
+                        },
+                    ],
+                    "confirmed_off": [{"name": "Стас Мосин"}],
+                    "unknown": [],
+                    "conflicts": [
+                        {
+                            "name": "Илья Третьяков",
+                            "yclients_status": "working",
+                            "yclients_hours": "12:00-21:00",
+                            "baseline_status": "off",
+                            "records_today": 7,
+                        },
+                    ],
+                },
+            },
+            "week_trend": {
+                "gross": {"delta_pct": -10},
+                "visits": {"delta_pct": -10},
+            },
+            "top_risk": {
+                "detail": "Текущая неделя к прошлой: -10% по выручке.",
+            },
+            "top_priority": {
+                "detail": "Вернуть клиентов с наступившим циклом.",
+            },
+        }
+
+        text = owner_ai.format_daily_briefing(brief)
+
+        self.assertIn("Работают подтверждённо: Алексей Дарма", text)
+        self.assertIn("Максим Чурсинов", text)
+        self.assertIn("Выходные подтверждены: Стас Мосин", text)
+        self.assertIn("Илья Третьяков", text)
+        self.assertIn("YClients показывает смену 12:00–21:00", text)
+        self.assertIn("базовый график показывает выходной", text)
+        self.assertIn("записей на день: 7", text)
+        self.assertIn("41 900 ₽", text)
+        self.assertNotIn("ты, Илья", text)
+
+    def test_single_free_slot_uses_correct_russian_inflection(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        snap = {
+            "free_capacity_today": 1,
+            "potential_fill_revenue_rub": 2000,
+            "idle_masters": [],
+            "underused_masters": [],
+            "week_trend": {},
+        }
+
+        opportunity = next(
+            row for row in owner_ai.money_opportunities(snap=snap, exp={}, ret={})
+            if row["type"] == "empty_windows"
+        )
+        risk = next(
+            row for row in owner_ai.risk_signals(snap=snap, exp={}, ret={}, svc={})["risks"]
+            if row["type"] == "idle_capacity"
+        )
+
+        self.assertIn("1 свободный слот", opportunity["detail"])
+        self.assertIn("1 свободный слот", risk["detail"])
+
+    def test_command_center_builds_stable_owner_os_contract(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        center = owner_ai.command_center()
+
+        self.assertEqual(center["version"], "owner_command_center_v1")
+        self.assertTrue(center["read_only"])
+        self.assertIn(center["status"], {"ok", "warn", "risk"})
+        self.assertGreater(center["summary"]["money_at_stake_rub"], 0)
+        self.assertEqual(center["summary"]["booked_today"], 2)
+        self.assertEqual(center["summary"]["free_capacity_today"], 14)
+        keys = {section["key"] for section in center["sections"]}
+        self.assertEqual(
+            {
+                "today",
+                "money",
+                "autonomous_director",
+                "autopilot_supervisor",
+                "execution_loop",
+                "kpi_scorecard",
+                "financial_director",
+                "business_goals",
+                "growth_plan",
+                "owner_advisor",
+                "reputation",
+                "decision_memory",
+                "operating_rhythm",
+                "plan_fact",
+                "control",
+                "owner_review",
+                "risks",
+                "clients",
+                "services",
+                "masters",
+                "actions",
+                "automations",
+                "automation_queue",
+                "journal",
+            },
+            keys,
+        )
+        self.assertEqual(center["summary"]["daily_target_rub"], 2000)
+        self.assertIsNotNone(center["summary"]["plan_progress_pct"])
+        self.assertEqual(center["plan_fact"]["daily_target_rub"], 2000)
+        self.assertEqual(center["growth_plan"]["version"], "maya_growth_plan_v1")
+        self.assertEqual(center["summary"]["top_profit_master"]["name"], "Мастер 1")
+        self.assertEqual(center["master_performance"]["top_profit_master"]["profit_after_salary_rub"], 26000)
+        self.assertTrue(center["next_best_actions"])
+        self.assertTrue(center["control_queue"])
+        self.assertTrue(center["attention_feed"])
+        self.assertEqual(center["summary"]["attention_count"], len(center["attention_feed"]))
+        self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
+        self.assertTrue(center["execution_plan"]["steps"])
+        self.assertEqual(
+            center["summary"]["execution_steps_count"],
+            center["execution_plan"]["summary"]["steps_count"],
+        )
+        self.assertLessEqual(center["execution_plan"]["summary"]["steps_count"], 3)
+        self.assertTrue(center["execution_plan"]["summary"]["actionable_count"])
+        self.assertTrue(center["task_center"]["tasks"])
+        self.assertEqual(center["summary"]["task_count"], center["task_center"]["summary"]["tasks_count"])
+        self.assertIn("overdue_task_count", center["summary"])
+        self.assertIn("owner_review_count", center["summary"])
+        self.assertIn("automation_queue_count", center["summary"])
+        self.assertIn("kpi_score", center["summary"])
+        self.assertIn("autonomous_task_candidates_count", center["summary"])
+        self.assertIn("autonomous_open_tasks_count", center["summary"])
+        self.assertIn("autopilot_supervision_count", center["summary"])
+        self.assertIn("autopilot_safe_actions_count", center["summary"])
+        self.assertIn("autopilot_overdue_count", center["summary"])
+        self.assertIn("execution_loop_open_count", center["summary"])
+        self.assertIn("execution_loop_broken_count", center["summary"])
+        self.assertIn("execution_loop_score", center["summary"])
+        self.assertIn("execution_loop_safe_actions_count", center["summary"])
+        self.assertIn("approval_required_count", center["summary"])
+        self.assertIn("projected_month_gross_rub", center["summary"])
+        self.assertIn("projected_month_contribution_after_salary_rub", center["summary"])
+        self.assertIn("business_goals_off_track_count", center["summary"])
+        self.assertIn("business_goals_risk_count", center["summary"])
+        self.assertIn("month_goal_progress_pct", center["summary"])
+        self.assertIn("month_goal_gap_rub", center["summary"])
+        self.assertIn("daily_load_pct", center["summary"])
+        self.assertIn("owner_advisor_score", center["summary"])
+        self.assertIn("owner_advisor_attention_count", center["summary"])
+        self.assertIn("maps_sources_connected", center["summary"])
+        self.assertIn("retention_90d_pct", center["summary"])
+        self.assertIn("decision_memory_count", center["summary"])
+        self.assertIn("open_decisions_count", center["summary"])
+        self.assertIn("unverified_results_count", center["summary"])
+        self.assertIn("positive_decision_signals_count", center["summary"])
+        self.assertIn("operating_rhythm_last_run_at", center["summary"])
+        self.assertIn("operating_rhythm_last_created_count", center["summary"])
+        self.assertIn("operating_rhythm_last_updated_count", center["summary"])
+        self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
+        self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
+        self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
+        self.assertEqual(center["autopilot_supervisor"]["mode"], "internal_supervision")
+        self.assertEqual(center["execution_loop"]["version"], "maya_os_v3_closed_loop")
+        self.assertEqual(center["execution_loop"]["mode"], "closed_loop_control")
+        self.assertIn(center["execution_loop"]["status"], {"ok", "warn", "risk"})
+        self.assertGreaterEqual(center["execution_loop"]["summary"]["closed_loop_score"], 0)
+        self.assertLessEqual(center["execution_loop"]["summary"]["closed_loop_score"], 100)
+        self.assertIn(center["kpi_scorecard"]["status"], {"ok", "warn", "risk"})
+        self.assertGreaterEqual(center["kpi_scorecard"]["score"], 0)
+        self.assertLessEqual(center["kpi_scorecard"]["score"], 100)
+        self.assertIn("projected_month_gross_rub", center["financial_director"]["summary"])
+        self.assertEqual(center["business_goals"]["version"], "maya_os_v4_business_goals")
+        self.assertEqual(center["business_goals"]["mode"], "plan_fact_goals")
+        self.assertIn(center["business_goals"]["status"], {"ok", "warn", "risk"})
+        goal_keys = {row["key"] for row in center["business_goals"]["goals"]}
+        self.assertTrue({"daily_revenue", "month_gross", "daily_load", "avg_check"}.issubset(goal_keys))
+        self.assertEqual(
+            center["business_goals"]["summary"]["goals_count"],
+            len(center["business_goals"]["goals"]),
+        )
+        self.assertEqual(center["owner_advisor"]["version"], "maya_owner_advisor_v1")
+        self.assertEqual(center["owner_advisor"]["mode"], "evidence_based_advice")
+        advisor_keys = {row["key"] for row in center["owner_advisor"]["dimensions"]}
+        self.assertEqual(
+            {"revenue", "load", "avg_check", "bookings", "retention", "quality"},
+            advisor_keys,
+        )
+        self.assertEqual(center["briefing"]["version"], "maya_owner_brief_v1")
+        self.assertEqual(center["growth_engine"]["version"], "maya_growth_engine_v1")
+        self.assertEqual(center["growth_engine"]["mode"], "evidence_to_action")
+        self.assertEqual(len(center["briefing"]["cards"]), 6)
+        self.assertEqual(
+            {row["key"] for row in center["briefing"]["cards"]},
+            {"pulse", "revenue", "load", "clients", "quality", "market"},
+        )
+        self.assertIn("simple_goal", center["briefing"])
+        self.assertEqual(center["briefing"]["simple_goal"]["title"], "План на сегодня")
+        leader = next(
+            row for row in center["briefing"]["quick_stats"]
+            if row["key"] == "top_master_today"
+        )
+        self.assertEqual(leader["label"], "Лидер сегодня")
+        self.assertEqual(leader["value"], "Мастер 2 · 3 000 ₽")
+        self.assertNotIn("money_at_stake_rub", center["briefing"])
+        self.assertEqual(
+            center["market_intelligence"]["version"],
+            "maya_market_intelligence_v1",
+        )
+        self.assertEqual(center["reputation"]["version"], "maya_reputation_v1")
+        self.assertEqual(center["client_retention"]["version"], "maya_client_retention_v1")
+        self.assertEqual(center["decision_memory"]["version"], "maya_os_v5_decision_memory")
+        self.assertEqual(center["decision_memory"]["mode"], "operating_memory")
+        self.assertIn(center["decision_memory"]["status"], {"ok", "warn", "risk"})
+        self.assertGreaterEqual(
+            center["decision_memory"]["summary"]["items_count"],
+            len(center["decision_memory"]["items"]),
+        )
+        self.assertGreaterEqual(center["decision_memory"]["summary"]["positive_signals_count"], 1)
+        self.assertTrue([
+            row for row in center["decision_memory"]["items"]
+            if row.get("kind") == "lesson"
+        ])
+        self.assertEqual(center["operating_rhythm"]["version"], "maya_os_v6_operating_rhythm")
+        self.assertEqual(center["operating_rhythm"]["mode"], "safe_scheduler")
+        self.assertTrue(center["operating_rhythm"]["summary"]["safe_only"])
+        self.assertEqual(center["approval_matrix"]["version"], "approval_matrix_v1")
+        self.assertTrue(center["approval_matrix"]["rows"])
+        self.assertEqual(
+            center["summary"]["autonomous_task_candidates_count"],
+            len(center["autonomous_director"]["task_candidates"]),
+        )
+        self.assertTrue([
+            task for task in center["task_center"]["tasks"]
+            if task.get("assigned_to") in ("owner", "maya")
+        ])
+        self.assertTrue(center["control_focus"]["items"])
+        self.assertEqual(center["summary"]["control_focus_count"], center["control_focus"]["summary"]["focus_count"])
+        self.assertIn("control", {section["key"] for section in center["sections"]})
+        self.assertEqual(center["journal"][0]["job"], "cycle")
+        self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
+        self.assertNotIn("execute", center["next_best_actions"][0])
+        self.assertTrue(center["automation_status"])
+        self.assertTrue(center["automation_queue"]["items"])
+        self.assertTrue(center["automation_queue"]["summary"]["items_count"])
+        self.assertEqual(len(center["automation_status"]), 5)
+        self.assertIn(
+            "automation_attention_count",
+            center["summary"],
+        )
+        self.assertTrue([
+            row for row in center["automation_status"]
+            if row.get("job") == "cycle" and row.get("recommended")
+        ])
+        cycle_auto = [
+            row for row in center["automation_status"]
+            if row.get("job") == "cycle"
+        ][0]
+        self.assertEqual(cycle_auto["last_action_id"], 1)
+        self.assertEqual(cycle_auto["last_evaluated_at"], "2026-07-08T11:00:00")
+        self.assertEqual(cycle_auto["last_summary"]["sent"], 3)
+        self.assertEqual(cycle_auto["last_impact_status"], "positive_signal")
+        self.assertIn("положительный", cycle_auto["last_impact"]["message"])
+
+    def test_autonomous_director_tick_creates_only_internal_control_tasks(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+        before = owner_ai.command_center()
+        open_candidates = [
+            row for row in before["autonomous_director"]["task_candidates"]
+            if row.get("safe_autocreate") and not row.get("in_control")
+        ]
+
+        result = owner_ai.run_autonomous_director_tick(created_by=948205934, limit=10)
+        again = owner_ai.run_autonomous_director_tick(created_by=948205934, limit=10)
+
+        self.assertTrue(open_candidates)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "supervised_autopilot")
+        self.assertGreater(result["created_count"], 0)
+        self.assertLessEqual(result["created_count"], 10)
+        self.assertEqual(again["created_count"], 0)
+        self.assertGreaterEqual(again["skipped_count"], 0)
+        for row in result["created"]:
+            task = row["task"]
+            payload = task["payload"]
+            self.assertEqual(task["source"], "owner_control")
+            self.assertEqual(task["job"], "control_task")
+            self.assertEqual(task["status"], "pending")
+            self.assertEqual(payload["signal_kind"], "autonomy")
+            self.assertEqual(payload["signal_source"], "maya_os_v2")
+            self.assertTrue(payload["signal_key"].startswith("autonomy:"))
+            self.assertTrue(payload["safe_autocreate"])
+        self.assertTrue([
+            task for task in result["center"]["task_center"]["tasks"]
+            if task.get("safe_autocreate")
+        ])
+
+    def test_autopilot_supervision_starts_maya_task_and_creates_escalation(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        maya_task = owner_ai.create_control_task(
+            title="MAYA подготовить сценарий",
+            priority="medium",
+            assigned_to="maya",
+            signal_key="autonomy:test_maya",
+            safe_autocreate=True,
+        )
+        overdue = owner_ai.create_control_task(
+            title="Админ просрочил контроль",
+            priority="high",
+            assigned_to="admin",
+            assignee_name="смена",
+            due_at="2020-01-01T10:00:00",
+            signal_key="autonomy:test_overdue",
+            safe_autocreate=True,
+        )
+        before = owner_ai.command_center()
+        kinds = {row["kind"] for row in before["autopilot_supervisor"]["items"]}
+
+        result = owner_ai.run_autopilot_supervision_tick(created_by=948205934, limit=10)
+        again = owner_ai.run_autopilot_supervision_tick(created_by=948205934, limit=10)
+        actions = sys.modules["database"].list_owner_actions(limit=50)
+        maya_row = [
+            row for row in actions
+            if row.get("id") == maya_task["task_id"]
+        ][0]
+        escalation_rows = [
+            row for row in actions
+            if (row.get("payload") or {}).get("signal_kind") == "autopilot_supervision"
+        ]
+
+        self.assertIn("start_maya_task", kinds)
+        self.assertIn("overdue", kinds)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "internal_supervision")
+        self.assertGreaterEqual(result["updated_count"], 1)
+        self.assertGreaterEqual(result["created_count"], 1)
+        self.assertEqual(maya_row["payload"]["assignment_work_state"], "running")
+        self.assertEqual(maya_row["payload"]["assignment_work_actor_role"], "maya")
+        self.assertTrue(escalation_rows)
+        self.assertTrue(escalation_rows[0]["payload"]["signal_key"].startswith("autopilot_supervision:overdue:"))
+        self.assertEqual(again["created_count"], 0)
+        self.assertEqual(overdue["control_item"]["assigned_to"], "admin")
+
+    def test_execution_loop_tick_creates_owner_followup_without_duplicates(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        created = owner_ai.create_control_task(
+            title="Проверить карточки клиентов",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="админ",
+        )
+        done = owner_ai.update_staff_task(
+            task_id=created["task_id"],
+            viewer_role="manager",
+            actor_name="Админ",
+            actor_chat_id=1,
+            action="done",
+        )
+        before = owner_ai.command_center()
+        loop_item = [
+            row for row in before["execution_loop"]["items"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        result = owner_ai.run_execution_loop_tick(created_by=948205934, limit=10)
+        again = owner_ai.run_execution_loop_tick(created_by=948205934, limit=10)
+        actions = sys.modules["database"].list_owner_actions(limit=50)
+        closed_loop_rows = [
+            row for row in actions
+            if (row.get("payload") or {}).get("signal_kind") == "closed_loop"
+        ]
+
+        self.assertTrue(done["ok"])
+        self.assertEqual(loop_item["stage"], "ready_review")
+        self.assertEqual(loop_item["break_kind"], "owner_acceptance_stale")
+        self.assertTrue(loop_item["safe_to_execute"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "closed_loop_control")
+        self.assertEqual(result["created_count"], 1)
+        self.assertEqual(again["created_count"], 0)
+        self.assertTrue(closed_loop_rows)
+        self.assertTrue(closed_loop_rows[0]["payload"]["signal_key"].startswith("closed_loop:owner_acceptance_stale:"))
+        self.assertEqual(closed_loop_rows[0]["payload"]["signal_source"], "maya_os_3_0")
+
+    def test_operating_rhythm_tick_runs_safe_layers_and_respects_cooldown(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        result = owner_ai.run_operating_rhythm_tick(created_by="test_scheduler", force=True)
+        again = owner_ai.run_operating_rhythm_tick(created_by="test_scheduler", force=False)
+        center = result["center"]
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["skipped"])
+        self.assertEqual(result["version"], "maya_os_v6_operating_rhythm")
+        self.assertEqual(result["mode"], "safe_scheduler")
+        self.assertTrue(result["summary"]["safe_only"])
+        self.assertIn("autonomous_director", result["results"])
+        self.assertIn("autopilot_supervision", result["results"])
+        self.assertIn("execution_loop", result["results"])
+        self.assertTrue(again["ok"])
+        self.assertTrue(again["skipped"])
+        self.assertEqual(again["reason"], "cooldown")
+        self.assertEqual(center["operating_rhythm"]["version"], "maya_os_v6_operating_rhythm")
+        self.assertTrue(center["operating_rhythm"]["summary"]["last_run_at"])
+
+    def test_command_center_survives_one_block_failure(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+
+        def boom():
+            raise RuntimeError("assets unavailable")
+
+        owner_ai.expiring_assets = boom
+        center = owner_ai.command_center()
+
+        self.assertEqual(center["version"], "owner_command_center_v1")
+        self.assertTrue(center["errors"])
+        self.assertIn("clients", {section["key"] for section in center["sections"]})
+        self.assertIn(center["status"], {"warn", "risk"})
+
+    def test_owner_control_task_appears_in_command_center_queue(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить план-факт вечером",
+            detail="Сравнить прогноз дня с ручным планом.",
+            priority="high",
+            due_in_days=1,
+            potential_rub=15000,
+            owner_next_step="Если разрыв сохранится — запустить тёплый спрос.",
+            action_job="cycle",
+            created_by=948205934,
+        )
+        center = owner_ai.command_center()
+        control = [
+            item for item in center["control_queue"]
+            if item.get("source") == "owner_control"
+        ]
+
+        self.assertTrue(created["ok"])
+        self.assertEqual(created["control_item"]["status"], "high")
+        self.assertTrue(control)
+        self.assertEqual(control[0]["title"], "Проверить план-факт вечером")
+        self.assertEqual(control[0]["potential_rub"], 15000)
+        self.assertEqual(created["control_item"]["action_job"], "cycle")
+        self.assertEqual(control[0]["action_job"], "cycle")
+        self.assertIn("тёплый спрос", control[0]["owner_next_step"])
+
+    def test_owner_control_task_surfaces_linked_action_status(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Запустить тёплый спрос",
+            detail="Добрать свободные окна.",
+            priority="medium",
+            due_in_days=2,
+            action_job="cycle",
+        )
+        linked_action_id = sys.modules["database"].create_owner_action(
+            "cycle",
+            "Подогреть спрос",
+            status="done",
+            payload={"source_control_id": created["task_id"]},
+        )
+        linked_action = [
+            row for row in sys.modules["database"].list_owner_actions(limit=20)
+            if row.get("id") == linked_action_id
+        ][0]
+        linked_action["evaluated_at"] = "2026-07-08T11:00:00"
+        linked_action["impact_status"] = "positive_signal"
+        linked_action["impact"] = {
+            "status": "positive_signal",
+            "message": "Есть положительный сигнал.",
+        }
+        task = [
+            row for row in sys.modules["database"].list_owner_actions(limit=20)
+            if row.get("id") == created["task_id"]
+        ][0]
+        task["status"] = "running"
+        task["payload"].update({
+            "linked_action_id": linked_action_id,
+            "linked_action_job": "cycle",
+            "linked_action_status": "done",
+            "linked_action_due_at": "2026-07-10T10:00:00",
+        })
+
+        center = owner_ai.command_center()
+        item = [
+            row for row in center["control_queue"]
+            if row.get("action_id") == created["task_id"]
+        ][0]
+
+        self.assertEqual(item["linked_action_id"], linked_action_id)
+        self.assertEqual(item["linked_action_job"], "cycle")
+        self.assertEqual(item["linked_action_status"], "done")
+        self.assertEqual(item["linked_action_evaluated_at"], "2026-07-08T11:00:00")
+        self.assertEqual(item["linked_action_impact_status"], "positive_signal")
+        self.assertIn("положительный", item["linked_action_impact_message"])
+        self.assertIn("Можно закрыть контроль", item["owner_next_step"])
+        self.assertEqual(center["control_focus"]["items"][0]["action_id"], created["task_id"])
+        self.assertEqual(center["control_focus"]["items"][0]["focus_reason"], "ready_to_close")
+        self.assertGreaterEqual(center["control_focus"]["summary"]["ready_to_close_count"], 1)
+
+    def test_control_task_from_same_signal_is_not_duplicated(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        first = owner_ai.create_control_task(
+            title="День ниже плана",
+            detail="Проверить свободные окна.",
+            priority="high",
+            signal_key="attention:plan_fact",
+        )
+        second = owner_ai.create_control_task(
+            title="День ниже плана",
+            detail="Повторный сигнал.",
+            priority="high",
+            signal_key="attention:plan_fact",
+        )
+
+        self.assertTrue(first["ok"])
+        self.assertTrue(second["ok"])
+        self.assertTrue(second["existing"])
+        self.assertEqual(second["task_id"], first["task_id"])
+        self.assertEqual(second["control_item"]["title"], "День ниже плана")
+
+    def test_attention_signal_knows_when_it_is_in_control(self):
+        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
+        initial = owner_ai.command_center()
+        signal = [
+            row for row in initial["attention_feed"]
+            if row.get("source") != "owner_control" and row.get("signal_key")
+        ][0]
+
+        created = owner_ai.create_control_task(
+            title=signal["title"],
+            detail=signal.get("detail") or "",
+            priority="high",
+            signal_key=signal["signal_key"],
+        )
+        center = owner_ai.command_center()
+        updated = [
+            row for row in center["attention_feed"]
+            if row.get("signal_key") == signal["signal_key"]
+        ][0]
+
+        self.assertTrue(created["ok"])
+        self.assertTrue(updated["in_control"])
+        self.assertEqual(updated["control_task_id"], created["task_id"])
+
+    def test_owner_control_task_lifecycle_updates_queue(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить просадку",
+            priority="medium",
+            due_in_days=1,
+        )
+        postponed = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="postpone",
+            due_in_days=2,
+        )
+        center_after_postpone = owner_ai.command_center()
+        completed = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="complete",
+            note="Проверено",
+        )
+        center_after_complete = owner_ai.command_center()
+
+        self.assertTrue(postponed["ok"])
+        self.assertEqual(postponed["task"]["status"], "pending")
+        self.assertTrue([
+            item for item in center_after_postpone["control_queue"]
+            if item.get("action_id") == created["task_id"]
+        ])
+        self.assertTrue(completed["ok"])
+        self.assertEqual(completed["task"]["status"], "done")
+        self.assertFalse([
+            item for item in center_after_complete["control_queue"]
+            if item.get("action_id") == created["task_id"]
+        ])
+
+    def test_owner_control_task_can_be_assigned(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить пустые окна",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="смена",
+        )
+        center = owner_ai.command_center()
+        task = [
+            row for row in center["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+        updated = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="assign",
+            assigned_to="master",
+            assignee_name="старший",
+        )
+        center_after_assign = owner_ai.command_center()
+        reassigned = [
+            row for row in center_after_assign["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        self.assertTrue(created["ok"])
+        self.assertEqual(task["assigned_to"], "admin")
+        self.assertEqual(task["assignment_delivery_channel"], "team_chat")
+        self.assertEqual(task["assignment_delivery_state"], "queued")
+        self.assertIn("Админ", task["assigned_label"])
+        self.assertTrue(updated["ok"])
+        self.assertEqual(reassigned["assigned_to"], "master")
+        self.assertEqual(reassigned["assignment_delivery_channel"], "team_chat")
+        self.assertEqual(reassigned["assignment_delivery_state"], "queued")
+        self.assertIn("Мастер", reassigned["assigned_label"])
+        self.assertIn("старший", reassigned["assigned_label"])
+
+    def test_staff_task_inbox_is_role_scoped_and_updates_work_state(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить окна администратора",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="смена",
+        )
+        manager_inbox = owner_ai.staff_task_inbox(viewer_role="manager")
+        master_inbox = owner_ai.staff_task_inbox(viewer_role="master")
+        accepted = owner_ai.update_staff_task(
+            task_id=created["task_id"],
+            viewer_role="manager",
+            actor_name="Админ",
+            actor_chat_id=1,
+            action="accept",
+        )
+        owner_center = owner_ai.command_center()
+        center_task = [
+            row for row in owner_center["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        self.assertEqual(len(manager_inbox["tasks"]), 1)
+        self.assertEqual(manager_inbox["tasks"][0]["assigned_to"], "admin")
+        self.assertEqual(master_inbox["tasks"], [])
+        self.assertTrue(accepted["ok"])
+        self.assertEqual(accepted["task"]["work_state"], "accepted")
+        self.assertEqual(center_task["assignment_work_state"], "accepted")
+        self.assertEqual(center_task["lane"], "running")
+
+    def test_owner_can_return_done_assignment_for_revision(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Проверить карточки клиентов",
+            priority="medium",
+            due_in_days=1,
+            assigned_to="admin",
+            assignee_name="админ",
+        )
+        done = owner_ai.update_staff_task(
+            task_id=created["task_id"],
+            viewer_role="manager",
+            actor_name="Админ",
+            actor_chat_id=1,
+            action="done",
+        )
+        center_ready = owner_ai.command_center()
+        review_ready = [
+            row for row in center_ready["owner_review"]["items"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+        returned = owner_ai.update_control_task(
+            task_id=created["task_id"],
+            action="revision",
+            note="Нужно проверить ещё раз",
+        )
+        inbox = owner_ai.staff_task_inbox(viewer_role="manager")
+        center = owner_ai.command_center()
+        center_task = [
+            row for row in center["task_center"]["tasks"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+        review_after_return = [
+            row for row in center["owner_review"]["items"]
+            if row.get("control_action_id") == created["task_id"]
+        ][0]
+
+        self.assertTrue(done["ok"])
+        self.assertEqual(done["task"]["work_state"], "done")
+        self.assertEqual(review_ready["review_state"], "ready")
+        self.assertEqual(review_ready["next_actions"], ["complete", "revision", "postpone"])
+        self.assertTrue(returned["ok"])
+        self.assertEqual(returned["task"]["payload"]["assignment_work_state"], "revision")
+        self.assertEqual(inbox["tasks"][0]["work_state"], "revision")
+        self.assertEqual(inbox["tasks"][0]["next_actions"], ["start", "done"])
+        self.assertEqual(center_task["assignment_work_state"], "revision")
+        self.assertEqual(center_task["lane"], "running")
+        self.assertEqual(review_after_return["review_state"], "revision")
+
+    def test_overdue_owner_control_task_is_urgent(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        created = owner_ai.create_control_task(
+            title="Просроченный контроль",
+            priority="low",
+            due_at="2020-01-01T10:00:00",
+        )
+        center = owner_ai.command_center()
+        item = [
+            row for row in center["control_queue"]
+            if row.get("action_id") == created["task_id"]
+        ][0]
+        control_section = [
+            section for section in center["sections"]
+            if section.get("key") == "control"
+        ][0]
+
+        self.assertEqual(item["status"], "high")
+        self.assertEqual(item["due_state"], "overdue")
+        self.assertIn("Срок контроля прошёл", item["owner_next_step"])
+        self.assertGreaterEqual(control_section["summary"]["overdue_count"], 1)
+        self.assertTrue([
+            row for row in center["attention_feed"]
+            if row.get("kind") == "control_overdue"
+            and row.get("control_key") == item.get("key")
+        ])
+
+    def test_plan_fact_uses_manual_owner_target_when_set(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        sys.modules["database"].get_setting = lambda key, default=None: (
+            "45000" if key == "owner_daily_target_rub" else default
+        )
+
+        plan = owner_ai.plan_fact(snap={
+            "date": "2026-07-08",
+            "booked_today": 2,
+            "expected_revenue_rub": 4000,
+            "avg_check_rub": 2000,
+        })
+
+        self.assertEqual(plan["target_source"], "manual_setting")
+        self.assertEqual(plan["daily_target_rub"], 45000)
+        self.assertEqual(plan["needed_visits_to_target"], 21)
+        self.assertEqual(plan["methodology_version"], "maya_smart_plan_v2")
+        self.assertIn("potential_revenue_rub", plan)
+
+    def test_smart_plan_uses_weekday_history_and_separates_forecast(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        target = date.today()
+        rows = []
+        for offset in range(29, -1, -1):
+            day = target - timedelta(days=offset)
+            rows.append({
+                "date": day.isoformat(),
+                "weekday": day.weekday(),
+                "gross_rub": 5000 if day.weekday() == target.weekday() else 1000,
+                "paid_visits": 2,
+            })
+        owner_ai._summary30_cache.update(val={
+            "total_gross": sum(row["gross_rub"] for row in rows),
+            "avg_check": 2000,
+            "daily": rows,
+        }, ts=owner_ai.time.time())
+
+        plan = owner_ai.plan_fact(snap={
+            "date": target.isoformat(),
+            "booked_today": 3,
+            "expected_revenue_rub": 6000,
+            "forecast_low_rub": 5200,
+            "forecast_high_rub": 6800,
+            "potential_revenue_rub": 12000,
+            "upsell_potential_rub": 800,
+            "potential_fill_revenue_rub": 5200,
+            "avg_check_rub": 2000,
+        })
+
+        self.assertEqual(plan["target_source"], "weekday_history_baseline")
+        self.assertGreater(plan["daily_target_rub"], plan["baseline"]["calendar_daily_average_rub"])
+        self.assertEqual(plan["projected_revenue_rub"], 6000)
+        self.assertEqual(plan["potential_revenue_rub"], 12000)
+        self.assertIn(plan["confidence"], {"medium", "high"})
+
+    def test_growth_engine_returns_auditable_decisions(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        engine = owner_ai._growth_engine(
+            snap={"free_capacity_today": 4, "avg_check_rub": 2000},
+            plan={"avg_check_rub": 2000, "upsell_potential_rub": 3000},
+            ret={},
+            retention={"summary": {"churn_candidates": 20, "forward_booking_pct": 10}},
+            reputation_payload={"summary": {"negative_reviews_30d": 1}, "recommendations": ["Разобрать ожидание."]},
+            market_payload={
+                "summary": {"competitors_scanned": 12},
+                "recommendations": [{"fact": "Цена около медианы.", "action": "Усилить комплекс.", "confidence": "high"}],
+            },
+        )
+
+        self.assertEqual(engine["mode"], "evidence_to_action")
+        self.assertTrue(engine["decisions"])
+        first = engine["decisions"][0]
+        self.assertTrue(first["evidence"])
+        self.assertTrue(first["action"])
+        self.assertTrue(first["kpi"])
+        self.assertIn("expected_effect", first)
+        self.assertTrue(first["requires_owner_approval"])
+
+    def test_master_performance_ranks_profit_after_salary(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        perf = owner_ai.master_performance()
+
+        self.assertEqual(perf["top_profit_master"]["name"], "Мастер 1")
+        self.assertEqual(perf["top_gross_master"]["name"], "Мастер 1")
+        self.assertEqual(perf["profit_after_salary_total_rub"], 38000)
+        self.assertIn("общие расходы", perf["note"])
+
+    def test_client_retention_uses_previous_cohort_and_future_booking(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        today = date.today()
+        rows = [
+            {
+                "client": {"id": 1},
+                "datetime": (today - timedelta(days=120)).isoformat(),
+                "attendance": 1,
+            },
+            {
+                "client": {"id": 2},
+                "datetime": (today - timedelta(days=110)).isoformat(),
+                "attendance": 1,
+            },
+            {
+                "client": {"id": 1},
+                "datetime": (today - timedelta(days=20)).isoformat(),
+                "attendance": 1,
+            },
+            {
+                "client": {"id": 1},
+                "datetime": (today + timedelta(days=10)).isoformat(),
+                "attendance": 0,
+            },
+        ]
+        owner_ai._retention_cache.update(val=None, ts=0.0)
+        fake_yclients = sys.modules["yclients"]
+        fake_yclients.YClientsAPI.get_company_records = lambda self, start, end: rows
+
+        result = owner_ai.client_retention(force=True)
+
+        self.assertEqual(result["summary"]["previous_cohort_clients"], 2)
+        self.assertEqual(result["summary"]["returned_clients"], 1)
+        self.assertEqual(result["summary"]["retention_90d_pct"], 50)
+        self.assertEqual(result["summary"]["forward_booking_pct"], 100)
+        self.assertEqual(result["snapshot_state"], "fresh")
+        self.assertEqual(result["data_source"], "yclients_records")
+
+        owner_ai._retention_cache.update(val=None, ts=0.0)
+        cached = owner_ai.client_retention()
+        self.assertEqual(cached["summary"], result["summary"])
+
+    def test_expiring_assets_counts_only_sold_certificates(self):
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+
+        assets = owner_ai.expiring_assets()
+
+        self.assertEqual(assets["subscriptions_expiring_7d"], 2)
+        self.assertEqual(assets["gift_certs_active_count"], 1)
+        self.assertEqual(assets["gift_certs_active_value_rub"], 10000)
+        self.assertIn("ПРОДАННЫЕ", assets["note"])
+
+
+if __name__ == "__main__":
+    unittest.main()

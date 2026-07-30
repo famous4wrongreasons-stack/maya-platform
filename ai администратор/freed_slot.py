@@ -268,6 +268,88 @@ def _in_quiet_hours() -> bool:
     return h < QUIET_HOUR_START or h >= QUIET_HOUR_END
 
 
+# ─── Уведомления администратору (Антону) по листу ожидания ───────────────
+
+def _admin_ids() -> list[int]:
+    try:
+        return [int(a) for a in (database.list_admins() or []) if a]
+    except Exception as e:
+        logger.error(f"freed_slot: list_admins: {e}")
+        return []
+
+
+async def _notify_admins(app: Application, text: str) -> int:
+    """Шлём операционное уведомление всем админам (среди них Антон). Внутреннее —
+    без тихого часа. Возвращает число успешных отправок."""
+    sent = 0
+    for aid in _admin_ids():
+        try:
+            await app.bot.send_message(aid, text, parse_mode="Markdown",
+                                       disable_web_page_preview=True)
+            sent += 1
+        except Exception as e:
+            logger.error(f"freed_slot: admin notify {aid}: {e}")
+    return sent
+
+
+def _client_name_phone(chat_id, client_id) -> tuple[str, str]:
+    cl = None
+    try:
+        if chat_id:
+            cl = database.get_client(int(chat_id))
+        if not cl and client_id:
+            cl = database.get_client_by_id(int(client_id))
+    except Exception:
+        cl = None
+    cl = cl or {}
+    return _first_name(cl.get("name")), (cl.get("phone") or "—")
+
+
+async def alert_admins_new_waitlist(app: Application) -> dict:
+    """Точка A: как только клиент попал в лист ожидания на занятое время —
+    пингуем админа (Антона), чтобы он знал и мог прозвонить/предложить альтернативу.
+    Идемпотентно: помечаем admin_notified_at, дважды по одной записи не шлём."""
+    try:
+        pending = database.get_waitlist_pending_admin_alert(limit=20)
+    except Exception as e:
+        logger.error(f"freed_slot: pending admin alert lookup: {e}")
+        return {"pending": 0, "alerted": 0}
+    if not pending:
+        return {"pending": 0, "alerted": 0}
+
+    done_ids: list[int] = []
+    alerted = 0
+    for w in pending:
+        name, phone = _client_name_phone(w.get("chat_id"), w.get("client_id"))
+        staff_name = _master_name(int(w.get("staff_id") or 0))
+        master_first = staff_name.split()[0] if staff_name else "мастеру"
+        try:
+            when = _format_slot(datetime.fromisoformat(str(w["slot_datetime"])[:16]))
+        except Exception:
+            when = str(w.get("slot_datetime") or "")
+        text = (
+            f"⏳ *Новый в листе ожидания*\n\n"
+            f"👤 {name} — `{phone}`\n"
+            f"🗓 хочет *{when}* · {master_first} (сейчас занято)\n\n"
+            f"Как освободится — Майя оповестит и клиента, и тебя. "
+            f"Можешь прозвонить и предложить альтернативу."
+        )
+        if await _notify_admins(app, text):
+            done_ids.append(int(w["id"]))
+            alerted += 1
+        else:
+            # админов нет/не доставилось — всё равно не долбим по кругу
+            done_ids.append(int(w["id"]))
+    if done_ids:
+        try:
+            database.mark_waitlist_admin_alerted(done_ids)
+        except Exception as e:
+            logger.error(f"freed_slot: mark_waitlist_admin_alerted: {e}")
+    if alerted:
+        logger.info(f"freed_slot: ⏳📣 админам о новых в листе ожидания: {alerted}")
+    return {"pending": len(pending), "alerted": alerted}
+
+
 async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -> dict:
     """
     Главная функция. Вызывается webhook'ом отмены.
@@ -294,6 +376,7 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
         logger.error(f"freed_slot: waitlist lookup: {e}")
         waitlist = []
     wl_ids = []
+    wl_notified_info: list[tuple[str, str]] = []   # (имя, телефон) — для прозвона Антоном
     for w in waitlist[:3]:                       # это люди, которые ПРОСИЛИ — но без фанатизма
         chat = w.get("chat_id")
         if not chat or chat in notified_chats:
@@ -307,15 +390,19 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
             pass
         cl = database.get_client(chat) or {}
         name = _first_name(cl.get("name")) or "клиент"
+        phone = cl.get("phone") or "—"
         text, kb = _build_message(name, staff_name, slot_dt, staff_id, waited=True)
         try:
             await app.bot.send_message(chat, text, parse_mode="Markdown", reply_markup=kb)
             database.log_freed_slot_offer(client_id=w["client_id"], staff_id=staff_id,
                                           slot_datetime=slot_iso, action="sent")
             notified_chats.add(chat); wl_ids.append(w["id"]); wl_sent += 1; sent += 1
+            wl_notified_info.append((name, phone))
             logger.info(f"freed_slot: ⏳✅ лист ожидания {name} (chat={chat}, slot={slot_dt})")
         except (Forbidden, BadRequest) as e:
             wl_ids.append(w["id"]); blocked += 1
+            # клиент не получит пуш (заблокировал бота) — тем важнее прозвон Антоном
+            wl_notified_info.append((name + " (не получил пуш)", phone))
             logger.info(f"freed_slot: ⏳🚫 {name}: {e}")
         except Exception as e:
             errors += 1
@@ -325,6 +412,18 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
             database.mark_slot_waitlist_notified(wl_ids)
         except Exception as e:
             logger.error(f"freed_slot: mark_notified: {e}")
+    # Точка B: слот из листа ожидания освободился — сообщаем Антону (прозвонить).
+    if wl_notified_info:
+        master_first = staff_name.split()[0] if staff_name else "мастеру"
+        lines = "\n".join(f"• {n} — `{p}`" for n, p in wl_notified_info)
+        try:
+            await _notify_admins(app, (
+                f"⏳✅ *Освободился слот из листа ожидания*\n\n"
+                f"🗓 *{_format_slot(slot_dt)}* · {master_first}\n"
+                f"Майя оповестила ждавших — можешь прозвонить, вдруг не увидят:\n{lines}"
+            ))
+        except Exception as e:
+            logger.error(f"freed_slot: admin freed-slot notify: {e}")
 
     # 2) Скоринг по циклу — добиваем оставшихся (тот же мастер + «пора стричься»)
     candidates = find_candidates(staff_id, slot_dt)

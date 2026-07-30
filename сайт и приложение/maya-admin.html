@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAYA · Админка салона</title>
+<link rel="stylesheet" href="/fonts.css">
+<style>
+/* ── MAYA admin · дом-стиль: слоистый уголь + один латунный акцент ── */
+:root{
+  --bg0:#0b0c10; --bg1:#111318; --bg2:#171a21; --bg3:#1e2230;
+  --ink:#f2f0ec; --dim:rgba(242,240,236,.60); --faint:rgba(242,240,236,.34);
+  --line:rgba(242,240,236,.10); --line2:rgba(242,240,236,.18);
+  --acc:#c2c0b8; --acc-deep:#9d9b93; --acc-ink:#15140f;
+  --ok:#34d399; --err:#e0564f;
+  --disp:'Montserrat',sans-serif; --body:'Manrope',sans-serif;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg0);color:var(--ink);font-family:var(--body);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:var(--body);font-size:14px;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;width:100%;outline:none;transition:border-color .15s}
+input:hover,select:hover,textarea:hover{border-color:var(--line2)}
+input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--acc);box-shadow:0 0 0 3px rgba(194,192,184,.15)}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+textarea{resize:vertical;min-height:96px;line-height:1.55}
+label{display:block;font-family:var(--disp);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 7px 2px}
+.hint{font-size:11.5px;color:var(--faint);margin-top:6px;line-height:1.5}
+.field{margin-bottom:18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 22px;border:0;border-radius:12px;font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.02em;background:linear-gradient(145deg,var(--acc),var(--acc-deep));color:var(--acc-ink);transition:transform .12s,opacity .15s,box-shadow .15s;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.btn:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 18px rgba(194,192,184,.18)}
+.btn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.btn:active{transform:scale(.985)}
+.btn[disabled]{opacity:.45;cursor:default;box-shadow:none}
+.btn.ghost{background:var(--bg2);color:var(--ink);border:1px solid var(--line2);box-shadow:none}
+.btn.ghost:hover{border-color:var(--acc)}
+
+.app{display:none;height:100vh;grid-template-columns:220px minmax(0,1fr) 430px}
+@media (max-width:1180px){.app{grid-template-columns:220px minmax(0,1fr)}.preview{display:none}}
+
+/* sidebar */
+.side{background:var(--bg1);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 14px}
+.logo{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.24em;padding:0 10px 20px;color:var(--ink)}
+.logo b{color:var(--acc);font-weight:300}
+.tname{font-size:12px;color:var(--dim);padding:0 10px 18px;border-bottom:1px solid var(--line);margin-bottom:14px;line-height:1.5}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:10px;padding:11px 12px;color:var(--dim);font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.06em;transition:background .15s,color .15s}
+.nav-item:hover{background:var(--bg2);color:var(--ink)}
+.nav-item:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.nav-item.on{background:var(--bg2);color:var(--ink);box-shadow:inset 2px 0 0 var(--acc)}
+.side .sp{flex:1}
+.who{font-size:11px;color:var(--faint);padding:10px 12px;line-height:1.5;border-top:1px solid var(--line)}
+
+/* main */
+.main{overflow-y:auto;padding:34px 42px 60px}
+.main h1{font-family:var(--disp);font-weight:300;font-size:22px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+.sub{color:var(--faint);font-size:12.5px;margin-bottom:26px}
+.card{background:var(--bg1);border:1px solid var(--line);border-radius:var(--r);padding:22px;max-width:560px;margin-bottom:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.card h2{font-family:var(--disp);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:16px}
+.actions{display:flex;gap:10px;align-items:center;max-width:560px;margin-top:4px}
+
+/* обзор */
+.kv{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.kv:last-child{border-bottom:0}
+.kv span:first-child{color:var(--faint)}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:var(--bg3);color:var(--dim);margin:0 4px 6px 0}
+.chip.ok{background:rgba(52,211,153,.12);color:var(--ok)}
+
+/* цвет */
+.colorbox{display:flex;gap:10px;align-items:center}
+.colorbox input[type=color]{width:46px;height:42px;padding:3px;cursor:pointer;flex-shrink:0}
+
+/* превью */
+.preview{background:var(--bg1);border-left:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:20px 18px}
+.preview .ph{font-family:var(--disp);font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;display:flex;gap:12px;align-items:center;width:100%;justify-content:space-between}
+.preview iframe{width:390px;height:calc(100vh - 92px);border:1px solid var(--line2);border-radius:26px;background:#070810}
+.mini{background:none;border:1px solid var(--line2);border-radius:9px;color:var(--dim);font-size:11px;padding:6px 12px;font-family:var(--disp);font-weight:600;letter-spacing:.05em}
+.mini:hover{color:var(--ink);border-color:var(--acc)}
+
+/* логин */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% -10%,rgba(194,192,184,.06),transparent 55%),var(--bg0)}
+.login .box{width:380px;background:var(--bg1);border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 30px 80px rgba(0,0,0,.5)}
+.login .logo{padding:0 0 4px;text-align:center}
+.login .tag{text-align:center;color:var(--faint);font-size:11.5px;letter-spacing:.08em;margin-bottom:24px}
+
+/* тосты и статусы */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--line2);border-radius:12px;padding:12px 20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:70vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:rgba(52,211,153,.4)}
+#toast.err{border-color:rgba(224,86,79,.5)}
+.ferr{color:var(--err);font-size:12.5px;margin-top:10px;line-height:1.5;display:none}
+.skel{height:14px;border-radius:7px;background:linear-gradient(90deg,var(--bg2),var(--bg3),var(--bg2));background-size:200% 100%;animation:sk 1.2s linear infinite;margin:10px 0}
+@keyframes sk{to{background-position:-200% 0}}
+.crm-status{font-size:12.5px;padding:12px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);margin-top:14px;line-height:1.6;display:none;white-space:pre-wrap}
+/* визард онбординга */
+.steps{display:flex;gap:8px;margin-bottom:22px;max-width:560px}
+.step{flex:1;height:4px;border-radius:2px;background:var(--bg3);transition:background .2s}
+.step.on{background:var(--acc)}
+.wiz-nav{display:flex;gap:10px;max-width:560px;margin-top:4px}
+.wiz-nav .sp{flex:1}
+.done-box{max-width:560px;background:var(--bg1);border:1px solid rgba(52,211,153,.35);border-radius:var(--r);padding:26px;text-align:center}
+.done-box .big{font-family:var(--disp);font-weight:300;font-size:19px;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 6px}
+.done-box code{display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;margin-top:10px;user-select:all;word-break:break-all}
+.wiz-log{font-size:12.5px;color:var(--dim);line-height:1.9;margin-top:14px;text-align:left}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ЛОГИН -->
+<div class="login" id="login">
+  <div class="box">
+    <div class="logo">MA<b>Y</b>A</div>
+    <div class="tag">админка салона</div>
+    <div class="field"><label>Салон (slug)</label><input id="l-slug" placeholder="demo-salon" autocomplete="organization"></div>
+    <div class="field"><label>E-mail</label><input id="l-email" type="email" placeholder="admin@salon.ru" autocomplete="username"></div>
+    <div class="field"><label>Пароль</label><input id="l-pass" type="password" autocomplete="current-password"></div>
+    <button class="btn" id="l-btn" style="width:100%">Войти</button>
+    <div class="ferr" id="l-err"></div>
+    <div class="hint" style="margin-top:14px">Владелец платформы может войти без slug — увидит все салоны.</div>
+  </div>
+</div>
+
+<!-- ПРИЛОЖЕНИЕ -->
+<div class="app" id="app">
+  <aside class="side">
+    <div class="logo">MA<b>Y</b>A</div>
+    <div class="tname" id="s-tenant"><div class="skel" style="width:80%"></div></div>
+    <button class="nav-item on" data-view="overview">Обзор</button>
+    <button class="nav-item" data-view="brand">Бренд</button>
+    <button class="nav-item" data-view="content">Тексты</button>
+    <button class="nav-item" data-view="crm">CRM</button>
+    <button class="nav-item" data-view="billing" id="nav-billing" hidden>Подписка</button>
+    <button class="nav-item" data-view="wizard" id="nav-wizard" hidden>＋ Новый салон</button>
+    <div class="sp"></div>
+    <div class="who" id="s-who"></div>
+    <button class="nav-item" id="s-logout">Выйти</button>
+  </aside>
+
+  <main class="main">
+    <!-- ОБЗОР -->
+    <section data-v="overview">
+      <h1>Обзор</h1><div class="sub">Состояние салона на платформе</div>
+      <div class="card"><h2>Салон</h2><div id="ov-rows"><div class="skel"></div><div class="skel" style="width:60%"></div></div></div>
+      <div class="card"><h2>Функции тарифа</h2><div id="ov-feats"><div class="skel" style="width:70%"></div></div></div>
+    </section>
+
+    <!-- БРЕНД -->
+    <section data-v="brand" hidden>
+      <h1>Бренд</h1><div class="sub">Как приложение выглядит у ваших клиентов</div>
+      <div class="card">
+        <h2>Айдентика</h2>
+        <div class="field"><label>Название приложения</label><input id="b-name" placeholder="Название салона"></div>
+        <div class="field">
+          <label>Логотип</label>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div id="b-logo-thumb" style="width:56px;height:56px;border-radius:12px;border:1px solid var(--line);background:var(--bg2) center/contain no-repeat;flex-shrink:0"></div>
+            <div style="flex:1">
+              <input type="file" id="b-logo-file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+              <button type="button" class="btn ghost" id="b-logo-pick" style="height:40px">Загрузить файл</button>
+              <div class="hint" style="margin-top:6px">PNG / JPEG / WEBP / GIF, до 2 МБ. SVG не принимается.</div>
+            </div>
+          </div>
+          <details style="margin-top:12px"><summary style="cursor:pointer;font-size:11.5px;color:var(--faint)">или указать URL вручную</summary>
+            <input id="b-logo" placeholder="https://…/logo.png" style="margin-top:8px"></details>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Основной цвет</label><div class="colorbox"><input type="color" id="b-c1c" value="#c2c0b8"><input id="b-c1" placeholder="#c2c0b8"></div></div>
+          <div class="field"><label>Дополнительный</label><div class="colorbox"><input type="color" id="b-c2c" value="#9d9b93"><input id="b-c2" placeholder="#9d9b93"></div></div>
+        </div>
+        <div class="field" style="max-width:200px"><label>Радиус кнопок · px</label><input id="b-rad" type="number" min="0" max="32" placeholder="18"></div>
+      </div>
+      <div class="actions"><button class="btn" id="b-save">Сохранить бренд</button><span class="hint">Превью справа обновится само.</span></div>
+    </section>
+
+    <!-- ТЕКСТЫ -->
+    <section data-v="content" hidden>
+      <h1>Тексты</h1><div class="sub">Слоганы и описания — то, что читают клиенты</div>
+      <div class="card">
+        <h2>Приветствие на главной</h2>
+        <div class="field"><label>Строка-приветствие</label><input id="c-tag" placeholder="Добро пожаловать"></div>
+        <div class="field"><label>Заголовок · до 3 строк</label>
+          <div class="row3"><input id="c-h1" placeholder="Строка 1"><input id="c-h2" placeholder="Строка 2"><input id="c-h3" placeholder="Строка 3"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Цифры о салоне</h2>
+        <div class="hint" style="margin:-6px 0 12px">Пусто — блок скрыт у клиентов. Пример: «7» + «лет».</div>
+        <div id="c-stats"></div>
+      </div>
+      <div class="card">
+        <h2>О салоне</h2>
+        <div class="field"><label>Текст · абзацы через пустую строку</label><textarea id="c-about" placeholder="Расскажите о салоне…"></textarea></div>
+      </div>
+      <div class="card">
+        <h2>Оценки на картах</h2>
+        <div class="hint" style="margin:-6px 0 12px">Пусто — блок скрыт. Название площадки + оценка.</div>
+        <div class="row2" style="margin-bottom:10px"><input id="c-r1n" placeholder="Яндекс"><input id="c-r1v" placeholder="4.9"></div>
+        <div class="row2"><input id="c-r2n" placeholder="2ГИС"><input id="c-r2v" placeholder="4.8"></div>
+      </div>
+      <div class="actions"><button class="btn" id="c-save">Сохранить тексты</button></div>
+    </section>
+
+    <!-- CRM -->
+    <section data-v="crm" hidden>
+      <h1>CRM</h1><div class="sub">Откуда приложение берёт мастеров, услуги и слоты</div>
+      <div class="card">
+        <h2>Подключение</h2>
+        <div class="field"><label>Система записи</label>
+          <select id="m-prov"><option value="yclients">YClients</option><option value="altegio">Altegio</option><option value="dikidi">DIKIDI</option><option value="salon_online">Salon Online</option><option value="whitelines">Whitelines</option><option value="mock">Demo (mock)</option></select>
+        </div>
+        <div class="field"><label>API-токен</label><input id="m-token" type="password" placeholder="вставьте токен"><div class="hint">Хранится в зашифрованном виде. Уже сохранённый токен не показывается — оставьте пустым, чтобы не менять.</div></div>
+        <div class="row2">
+          <div class="field"><label>ID компании</label><input id="m-company" placeholder="503759"></div>
+          <div class="field"><label>Base URL · опционально</label><input id="m-base" placeholder="по умолчанию"></div>
+        </div>
+        <div class="crm-status" id="m-status"></div>
+      </div>
+      <div class="actions" style="margin-bottom:18px">
+        <button class="btn" id="m-save">Сохранить CRM</button>
+        <button class="btn ghost" id="m-test">Проверить связь</button>
+      </div>
+      <div class="card">
+        <h2>Живая запись</h2>
+        <div id="lv-status" style="font-size:13.5px;line-height:1.7"></div>
+        <div id="lv-blockers" class="hint" style="margin-top:6px"></div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn ghost" id="lv-preview">Preview</button>
+          <button class="btn" id="lv-live">Включить Live</button>
+        </div>
+        <div class="hint" style="margin-top:12px">Preview: запись проверяется, но не создаётся. Live: клиенты создают настоящие записи в вашей CRM.</div>
+      </div>
+    </section>
+    <!-- ПОДПИСКА (операторская) -->
+    <section data-v="billing" hidden>
+      <h1>Подписка</h1><div class="sub">Ручное управление тарифом, статусом и периодом. Оплата/списания — отдельный этап.</div>
+      <div class="card">
+        <h2>Тариф и статус</h2>
+        <div class="row2">
+          <div class="field"><label>Тариф</label><select id="b-plan"><option value="">— не задан —</option></select></div>
+          <div class="field"><label>Статус</label>
+            <select id="b-status">
+              <option value="trial">Триал</option>
+              <option value="active">Активен</option>
+              <option value="past_due">Просрочен (грейс)</option>
+              <option value="suspended">Приостановлен</option>
+              <option value="cancelled">Отменён</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="display:flex;gap:10px;align-items:center;margin-top:4px">
+          <input type="checkbox" id="b-selfreg" style="width:18px;height:18px;flex-shrink:0">
+          <label for="b-selfreg" style="margin:0;cursor:pointer">Разрешить самостоятельную регистрацию клиентов</label>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Период</h2>
+        <div class="row2">
+          <div class="field"><label>Триал до</label><input type="date" id="b-trial"></div>
+          <div class="field"><label>Способ оплаты · ID</label><input id="b-method" placeholder="pm_… · пусто = не привязан"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Период с</label><input type="date" id="b-cps"></div>
+          <div class="field"><label>Период по</label><input type="date" id="b-cpe"></div>
+        </div>
+        <div class="hint" style="margin-top:2px">Очистка даты сохранится как «сбросить». Вычисляемые поля — ниже, только чтение.</div>
+      </div>
+      <div class="card">
+        <h2>Рассчитано сервером</h2>
+        <div id="b-computed"><div class="skel" style="width:70%"></div></div>
+      </div>
+      <div class="card">
+        <h2>Оплата</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="pay-checkout">Оплатить подписку</button>
+          <button class="btn ghost" id="pay-charge" style="display:none">Списать сейчас</button>
+          <button class="btn ghost" id="pay-rundue" style="display:none">Проверить просроченные</button>
+        </div>
+        <div id="pay-list" style="margin-top:16px"><div class="hint">Платежей пока нет.</div></div>
+        <div class="hint" style="margin-top:12px">Оплата проходит на стороне ЮKassa. Карта и списания — на бэкенде, здесь только кнопки.</div>
+      </div>
+      <div class="actions"><button class="btn" id="b-save">Сохранить подписку</button></div>
+    </section>
+
+    <!-- ВИЗАРД: НОВЫЙ САЛОН -->
+    <section data-v="wizard" hidden>
+      <h1>Новый салон</h1><div class="sub">Четыре шага — и у салона есть своё приложение</div>
+      <div class="steps"><div class="step on"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+
+      <div data-ws="0">
+        <div class="card">
+          <h2>Шаг 1 · Основное</h2>
+          <div class="field"><label>Название салона</label><input id="w-name" placeholder="Барбершоп «Грива»"></div>
+          <div class="field"><label>Адрес приложения (slug)</label><input id="w-slug" placeholder="griva"><div class="hint">Латиница и дефисы. Это будет ссылка салона.</div></div>
+          <div class="field"><label>Тариф</label><select id="w-plan"><option value="">Без тарифа · настроить позже</option></select></div>
+          <div class="row2">
+            <div class="field"><label>Адрес салона · опц.</label><input id="w-addr" placeholder="Краснодар, Красная 15"></div>
+            <div class="field"><label>Телефон салона · опц.</label><input id="w-phone" placeholder="+7 (900) 000-00-00"></div>
+          </div>
+          <div class="field" style="max-width:300px"><label>Часовой пояс</label>
+            <select id="w-tz">
+              <option value="Europe/Kaliningrad">Калининград · МСК−1</option>
+              <option value="Europe/Moscow" selected>Москва · МСК</option>
+              <option value="Europe/Samara">Самара · МСК+1</option>
+              <option value="Asia/Yekaterinburg">Екатеринбург · МСК+2</option>
+              <option value="Asia/Omsk">Омск · МСК+3</option>
+              <option value="Asia/Novosibirsk">Новосибирск · МСК+4</option>
+              <option value="Asia/Krasnoyarsk">Красноярск · МСК+4</option>
+              <option value="Asia/Irkutsk">Иркутск · МСК+5</option>
+              <option value="Asia/Yakutsk">Якутск · МСК+6</option>
+              <option value="Asia/Vladivostok">Владивосток · МСК+7</option>
+              <option value="Asia/Kamchatka">Камчатка · МСК+9</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div data-ws="1" hidden>
+        <div class="card">
+          <h2>Шаг 2 · Бренд</h2>
+          <div class="field"><label>Логотип · URL · опционально</label><input id="w-logo" placeholder="https://…/logo.png"></div>
+          <div class="row2">
+            <div class="field"><label>Основной цвет</label><div class="colorbox"><input type="color" id="w-c1c" value="#c2c0b8"><input id="w-c1" value="#c2c0b8"></div></div>
+            <div class="field"><label>Дополнительный</label><div class="colorbox"><input type="color" id="w-c2c" value="#9d9b93"><input id="w-c2" value="#9d9b93"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div data-ws="2" hidden>
+        <div class="card">
+          <h2>Шаг 3 · Тексты</h2>
+          <div class="field"><label>Приветствие</label><input id="w-tag" placeholder="Добро пожаловать"></div>
+          <div class="field"><label>Заголовок · до 3 строк</label>
+            <div class="row3"><input id="w-h1" placeholder="Строка 1"><input id="w-h2" placeholder="Строка 2"><input id="w-h3" placeholder="Строка 3"></div>
+            <div class="hint">Пусто — клиенты увидят нейтральный текст, его можно поменять позже.</div>
+          </div>
+          <div class="field"><label>О салоне · один-два абзаца</label><textarea id="w-about" placeholder="Пара честных предложений о салоне…"></textarea></div>
+        </div>
+      </div>
+
+      <div data-ws="3" hidden>
+        <div class="card">
+          <h2>Шаг 4 · Система записи</h2>
+          <div class="field"><label>CRM</label>
+            <select id="w-prov"><option value="mock">Demo-данные (подключить CRM позже)</option><option value="yclients">YClients</option><option value="altegio">Altegio</option><option value="dikidi">DIKIDI</option></select>
+          </div>
+          <div class="row2" id="w-crmrow" style="display:none">
+            <div class="field"><label>API-токен</label><input id="w-token" type="password" placeholder="токен"></div>
+            <div class="field"><label>ID компании</label><input id="w-company" placeholder="503759"></div>
+          </div>
+          <div class="hint">Demo-данные позволяют показать салону готовое приложение до подключения его CRM.</div>
+        </div>
+        <div class="card">
+          <h2>Доступ владельцу салона · опционально</h2>
+          <div class="row2">
+            <div class="field"><label>E-mail владельца</label><input id="w-aemail" type="email" placeholder="owner@salon.ru"></div>
+            <div class="field"><label>Имя</label><input id="w-aname" placeholder="Имя"></div>
+          </div>
+          <div class="hint">Создадим аккаунт администратора салона — пароль сгенерируется и покажется один раз на следующем экране.</div>
+          <div class="field" style="margin-top:14px;display:flex;gap:10px;align-items:center">
+            <input type="checkbox" id="w-activate" style="width:18px;height:18px;flex-shrink:0">
+            <label for="w-activate" style="margin:0;cursor:pointer">Активировать сразу · без триала</label>
+          </div>
+          <div class="hint">По умолчанию салон стартует в триале — владелец уже может входить и настраивать. Активация = сразу платный режим.</div>
+        </div>
+      </div>
+
+      <div data-ws="4" hidden>
+        <div class="done-box">
+          <div style="font-size:30px">✦</div>
+          <div class="big">Салон создан</div>
+          <div class="hint" id="w-done-name"></div>
+          <code id="w-done-link"></code>
+          <div id="w-creds" hidden style="margin-top:16px;padding:14px;border:1px dashed var(--line2);border-radius:12px;text-align:left">
+            <div style="font-family:var(--disp);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ok);margin-bottom:8px">Доступ владельца · показывается один раз</div>
+            <div style="font-size:13px;line-height:1.9" id="w-creds-body"></div>
+          </div>
+          <div class="wiz-log" id="w-log"></div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:18px">
+            <button class="btn" id="w-open">Открыть в админке</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wiz-nav" id="w-nav">
+        <button class="btn ghost" id="w-back" disabled>Назад</button>
+        <div class="sp"></div>
+        <button class="btn" id="w-next">Далее</button>
+      </div>
+      <div class="ferr" id="w-err" style="max-width:560px"></div>
+    </section>
+  </main>
+
+  <!-- ПРЕВЬЮ -->
+  <aside class="preview">
+    <div class="ph"><span>Превью клиента</span><button class="mini" id="p-reload">Обновить</button></div>
+    <iframe id="p-frame" title="Превью приложения клиента"></iframe>
+  </aside>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+  var qs = new URLSearchParams(location.search);
+  var API = (qs.get('api') || localStorage.getItem('maya_admin_api') || 'http://localhost:3000/api').replace(/\/+$/, '');
+  var APP = qs.get('app') || localStorage.getItem('maya_admin_app') || (location.origin + '/app.html');
+  try { localStorage.setItem('maya_admin_api', API); localStorage.setItem('maya_admin_app', APP); } catch (e) {}
+
+  var S = { token: null, refresh_token: null, access_expires_at: null, refresh_expires_at: null, session: null, user: null, tenant: null, themeJson: {} };
+
+  /* ── session-security: bundle + single-flight refresh ── */
+  var RT_TERMINAL = { refresh_token_invalid: 1, refresh_token_reused: 1, session_expired: 1, session_revoked: 1 };
+  var REFRESH_P = null;
+  function adminSetBundle(res) {
+    // пара всегда меняется целиком: новый access только со своим же refresh;
+    // половину пары не принимаем — прежний bundle не трогается
+    if (!res || !res.access_token || !res.refresh_token) return false;
+    S.token = res.access_token;
+    S.refresh_token = res.refresh_token;
+    S.access_expires_at = res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null;
+    S.refresh_expires_at = res.refresh_expires_at || null;
+    S.session = res.session || null;
+    if (res.user) S.user = res.user;
+    return true;
+  }
+  function adminSessionEnded(msg) {
+    S.token = null; S.refresh_token = null; S.access_expires_at = null; S.session = null;
+    $('app').style.display = 'none';
+    $('login').style.display = '';
+    var err = $('l-err');
+    err.textContent = msg || 'Сессия завершена — войдите снова.';
+    err.style.display = 'block';
+  }
+  function rawRefresh(rt) {
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var tm = ctl ? setTimeout(function () { try { ctl.abort(); } catch (e) {} }, 30000) : null;
+    return fetch(API + '/auth/refresh', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: rt }),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {}
+        return { r: r, d: d };
+      });
+    }).catch(function (e) {
+      if (e && e.r) throw e;
+      var eT = new Error('Не удалось обновить сессию — проверьте связь.');
+      eT.code = e && e.name === 'AbortError' ? 'refresh_timeout' : 'refresh_network';
+      throw eT;
+    }).finally(function () { if (tm) clearTimeout(tm); });
+  }
+  function doRefresh() {
+    if (REFRESH_P) return REFRESH_P; // single-flight: параллельные 401 делят один promise
+    REFRESH_P = (async function () {
+      if (!S.refresh_token) { var e0 = new Error('Сессия истекла — войдите снова.'); e0.code = 'refresh_unavailable'; throw e0; }
+      function acceptRotation(d) {
+        // успех = только полная пара; неполный ответ прежний bundle не перезаписывает
+        if (!d || !d.access_token || !d.refresh_token) {
+          var eH = new Error('Не удалось обновить сессию — попробуйте войти заново.');
+          eH.code = 'refresh_incomplete';
+          throw eH;
+        }
+        adminSetBundle(d);
+        return S.token;
+      }
+      function realErr(r, d, fb) {
+        var eo0 = d && typeof d === 'object' ? d.error : null;
+        var eX0 = new Error((eo0 && eo0.message) || fb);
+        eX0.code = (eo0 && eo0.code) || null; eX0.status = r.status;
+        return eX0;
+      }
+      var x = await rawRefresh(S.refresh_token);
+      if (x.r.ok) return acceptRotation(x.d);
+      var eo = x.d && typeof x.d === 'object' ? x.d.error : null;
+      var code = eo && eo.code;
+      if (RT_TERMINAL[code]) { adminSessionEnded(); var eT2 = new Error('Сессия завершена — войдите снова.'); eT2.code = code; throw eT2; }
+      if (!(x.r.status === 429 && code === 'auth_rate_limited')) throw realErr(x.r, x.d, 'refresh HTTP ' + x.r.status);
+      // 429: пара НЕ трогается; ровно один отложенный повтор
+      var ra = Number((eo && eo.retry_after_seconds) != null ? eo.retry_after_seconds : x.r.headers.get('Retry-After'));
+      var w = isFinite(ra) && ra > 0 ? Math.ceil(ra) : 60;
+      await new Promise(function (res) { setTimeout(res, w * 1000); });
+      if (!S.refresh_token) { var eL = new Error('Сессия завершена — войдите снова.'); eL.code = 'logged_out'; throw eL; }
+      var y = await rawRefresh(S.refresh_token);
+      if (y.r.ok) return acceptRotation(y.d);
+      var eo2 = y.d && typeof y.d === 'object' ? y.d.error : null;
+      var c2 = eo2 && eo2.code;
+      if (RT_TERMINAL[c2]) { adminSessionEnded(); var eT = new Error('Сессия завершена — войдите снова.'); eT.code = c2; throw eT; }
+      if (y.r.status === 429 && c2 === 'auth_rate_limited') {
+        var eR = new Error('Слишком много попыток — подождите и повторите.');
+        eR.code = 'auth_rate_limited'; eR.status = 429;
+        var ra2 = Number(eo2 && eo2.retry_after_seconds);
+        eR.retryAfterSeconds = isFinite(ra2) && ra2 > 0 ? Math.ceil(ra2) : w;
+        throw eR; // credentials сохранены
+      }
+      // вторую ошибку НЕ маскируем под rate limit; третьего повтора нет
+      throw realErr(y.r, y.d, 'refresh HTTP ' + y.r.status);
+    })().finally(function () { REFRESH_P = null; });
+    return REFRESH_P;
+  }
+  var $ = function (id) { return document.getElementById(id); };
+
+  function toast(msg, kind) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = 'show' + (kind ? ' ' + kind : '');
+    clearTimeout(t._h);
+    t._h = setTimeout(function () { t.className = ''; }, 3200);
+  }
+
+  // публичные auth-маршруты (без refresh-обвязки): login и сам /auth/refresh.
+  // Защищённые /auth/logout и /auth/sessions* идут через refresh-aware путь.
+  function isPublicAuthPath(path) {
+    var p = String(path);
+    return p === '/auth/refresh' || p.indexOf('/auth/login') === 0;
+  }
+  async function api(method, path, body) {
+    var isAuth = isPublicAuthPath(path);
+    // проактивная rotation: access истекает (<30с) — обновляем ДО запроса
+    if (!isAuth && S.token && S.refresh_token && S.access_expires_at && S.access_expires_at - Date.now() < 30000) {
+      try { await doRefresh(); } catch (e) { if (e && (e.code === 'auth_rate_limited' || RT_TERMINAL[e.code])) throw e; }
+    }
+    var attempt = async function () {
+      var r = await fetch(API + path, {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' },
+          S.token ? { Authorization: 'Bearer ' + S.token } : {}),
+        body: body != null ? JSON.stringify(body) : undefined
+      });
+      var text = await r.text();
+      var data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+      return { r: r, data: data };
+    };
+    var x = await attempt();
+    // первый 401 → одна rotation → повтор ТОЛЬКО после её успеха;
+    // network/timeout/5xx ошибка refresh уходит наружу как есть, без повтора со старым Bearer
+    if (x.r.status === 401 && !isAuth && S.refresh_token) {
+      await doRefresh();
+      x = await attempt();
+    }
+    var r = x.r, data = x.data;
+    if (!r.ok) {
+      var eobj = data && typeof data === 'object' ? data.error : null;
+      var msg = (eobj && eobj.message) || (data && data.message) || ('HTTP ' + r.status);
+      var err = new Error(Array.isArray(msg) ? msg.join('; ') : msg);
+      err.status = r.status;
+      err.code = (eobj && eobj.code) || null;
+      // 429 auth_rate_limited: серверное «когда можно снова» для countdown
+      var ra = Number((eobj && eobj.retry_after_seconds) != null ? eobj.retry_after_seconds : r.headers.get('Retry-After'));
+      if (isFinite(ra) && ra > 0) err.retryAfterSeconds = Math.ceil(ra);
+      throw err;
+    }
+    return data;
+  }
+
+  function busy(btn, on, txt) {
+    btn.disabled = on;
+    if (on) { btn._t = btn.textContent; btn.textContent = txt || 'Сохраняю…'; }
+    else if (btn._t) btn.textContent = btn._t;
+  }
+
+  /* ── логин ── */
+  $('l-btn').addEventListener('click', doLogin);
+  ['l-slug', 'l-email', 'l-pass'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+  });
+  // 429 auth_rate_limited: локальный countdown на кнопке входа
+  var LOGIN_LOCK = 0;
+  function loginCooldown() {
+    var b = $('l-btn');
+    var left = Math.ceil((LOGIN_LOCK - Date.now()) / 1000);
+    if (left <= 0) { b.disabled = false; b.textContent = 'Войти'; return; }
+    b.disabled = true;
+    b.textContent = 'Подождите · ' + left + ' с';
+    setTimeout(loginCooldown, 1000);
+  }
+  var LOGIN_BUSY = false; // sync-guard: два Enter в одном кадре = один запрос
+  async function doLogin() {
+    if (LOGIN_BUSY) return;
+    if (LOGIN_LOCK > Date.now()) return; // Enter в поле во время countdown
+    var err = $('l-err'); err.style.display = 'none';
+    var body = { email: $('l-email').value.trim(), password: $('l-pass').value };
+    var slug = $('l-slug').value.trim();
+    if (slug) body.tenantSlug = slug;
+    if (!body.email || !body.password) { err.textContent = 'Заполните e-mail и пароль.'; err.style.display = 'block'; return; }
+    LOGIN_BUSY = true;
+    busy($('l-btn'), true, 'Входим…');
+    try {
+      var res = await api('POST', '/auth/login', body);
+      if (!adminSetBundle(res)) throw new Error('Неполный ответ входа — попробуйте ещё раз.');
+      S.user = res.user || {};
+      var tid = S.user.tenant_id || S.user.tenantId || null;
+      if (!tid && S.user.role === 'platform_owner') {
+        var list = await api('GET', '/admin/tenants');
+        var items = Array.isArray(list) ? list : (list.items || list.tenants || []);
+        if (slug) { var hit = items.filter(function (t) { return t.slug === slug; })[0]; tid = hit && hit.id; }
+        if (!tid && items.length) tid = items[0].id;
+      }
+      if (!tid) throw new Error('Не удалось определить салон для этого пользователя');
+      await enter(tid);
+    } catch (e) {
+      // ошибка на этапе входа/первичной загрузки — возвращаем форму, чтобы сообщение было видно
+      $('login').style.display = '';
+      $('app').style.display = 'none';
+      if (e && e.status === 429 && e.code === 'auth_rate_limited') {
+        var w = e.retryAfterSeconds && isFinite(e.retryAfterSeconds) ? Math.ceil(e.retryAfterSeconds) : 60;
+        LOGIN_LOCK = Date.now() + w * 1000;
+        err.textContent = 'Слишком много попыток входа — подождите ' + w + ' с и попробуйте снова.';
+      } else {
+        err.textContent = e.message || 'Не удалось войти';
+      }
+      err.style.display = 'block';
+    } finally {
+      LOGIN_BUSY = false;
+      busy($('l-btn'), false);
+      if (LOGIN_LOCK > Date.now()) loginCooldown();
+    }
+  }
+
+  async function enter(tid) {
+    S.tid = tid;
+    $('login').style.display = 'none';
+    $('app').style.display = 'grid';
+    $('s-who').textContent = (S.user.email || '') + ' · ' + (S.user.role === 'platform_owner' ? 'владелец платформы' : 'администратор салона');
+    if (S.user.role === 'platform_owner') { $('nav-wizard').hidden = false; $('nav-billing').hidden = false; $('pay-charge').style.display = ''; $('pay-rundue').style.display = ''; }
+    await loadTenant();
+    reloadPreview();
+  }
+
+  $('s-logout').addEventListener('click', function () {
+    // серверный logout через refresh-aware pipeline (истёкший access сначала ротируется);
+    // локальная очистка (reload) — в finally-семантике в любом случае
+    var fin = function () { location.reload(); };
+    if (!S.token) { fin(); return; }
+    api('POST', '/auth/logout').catch(function () {}).then(fin);
+  });
+
+  /* ── данные тенанта ── */
+  var _billPlans = false;
+  async function billLoadPlans() {
+    if (_billPlans) return;
+    try {
+      var l = await api('GET', '/admin/plans');
+      var items = Array.isArray(l) ? l : (l.items || []);
+      var sel = $('b-plan');
+      items.forEach(function (p) {
+        var o = document.createElement('option');
+        o.value = p.id;
+        var price = p.price_monthly != null ? p.price_monthly : p.priceMonthly;
+        o.textContent = (p.name || p.id) + (price != null ? ' · ' + Number(price).toLocaleString('ru-RU') + ' ₽' : '');
+        sel.appendChild(o);
+      });
+      _billPlans = true;
+    } catch (e) {}
+  }
+  function isoDay(iso) { return iso ? String(iso).slice(0, 10) : ''; }
+  function fmtDT(iso) { try { return iso ? new Date(iso).toLocaleDateString('ru-RU') : '—'; } catch (e) { return '—'; } }
+  async function loadTenant() {
+    var t = await api('GET', '/admin/tenants/' + S.tid);
+    S.tenant = t;
+    var b = t.branding || {};
+    S.themeJson = (b.theme_json && typeof b.theme_json === 'object') ? b.theme_json : {};
+    $('s-tenant').textContent = (t.name || t.slug) + ' · ' + t.slug;
+
+    /* обзор */
+    var st = t.status || '—';
+    $('ov-rows').innerHTML =
+      kv('Название', esc(t.name || '—')) +
+      kv('Slug (адрес)', esc(t.slug || '—')) +
+      kv('Статус', '<span class="chip' + (st === 'active' || st === 'trial' ? ' ok' : '') + '">' + esc(st) + '</span>') +
+      kv('Тариф', esc((t.plan && (t.plan.name || t.plan.id)) || t.plan_id || '—')) +
+      kv('Филиалов', String(t.branch_count != null ? t.branch_count : (t.branches || []).length)) +
+      kv('Пользователей', String(t.user_count != null ? t.user_count : '—'));
+    var feats = (t.plan && t.plan.featuresJson) || {};
+    var keys = Object.keys(feats).filter(function (k) { return feats[k]; });
+    $('ov-feats').innerHTML = keys.length
+      ? keys.map(function (k) { return '<span class="chip ok">' + esc(k) + '</span>'; }).join('')
+      : '<span class="hint">Функции тарифа не настроены.</span>';
+
+    /* бренд */
+    $('b-name').value = b.app_name || '';
+    $('b-logo').value = b.logo_url || '';
+    setLogoThumb(b.logo_url || '');
+    setColor('b-c1', b.primary_color || '');
+    setColor('b-c2', b.secondary_color || '');
+    $('b-rad').value = b.button_radius != null ? b.button_radius : '';
+
+    /* тексты */
+    var ct = (S.themeJson && S.themeJson.content) || {};
+    $('c-tag').value = ct.hero_tag || '';
+    var ht = ct.hero_title || [];
+    $('c-h1').value = ht[0] || ''; $('c-h2').value = ht[1] || ''; $('c-h3').value = ht[2] || '';
+    renderStats(ct.stats || []);
+    $('c-about').value = (ct.about || []).join('\n\n');
+    var rt = ct.ratings || [];
+    $('c-r1n').value = (rt[0] || [])[0] || ''; $('c-r1v').value = (rt[0] || [])[1] || '';
+    $('c-r2n').value = (rt[1] || [])[0] || ''; $('c-r2v').value = (rt[1] || [])[1] || '';
+
+    /* CRM */
+    var crm = t.crm_integration || null;
+    if (crm) {
+      $('m-prov').value = crm.provider || 'yclients';
+      $('m-base').value = crm.base_url || crm.baseUrl || '';
+      var sj = crm.settings_json || crm.settingsJson || {};
+      $('m-company').value = sj.companyId != null ? sj.companyId : '';
+      crmStatus('Подключено: ' + (crm.provider || '') + ' · статус ' + (crm.status || '—'), true);
+    }
+
+    /* live-режим записи */
+    var req = t.booking_mode_requested || 'preview';
+    var eff = t.booking_mode_effective || 'preview';
+    $('lv-status').textContent =
+      eff === 'live' ? '🟢 Живая запись включена'
+      : req === 'live' ? '🟡 Live запрошен, но пока не активен'
+      : 'Сейчас: предпросмотр — запись проверяется, но не создаётся.';
+    var blMap = {
+      tenant_not_active: 'салон ещё не активирован',
+      mock_crm_only: 'подключена demo CRM — нужна реальная',
+      crm_not_active: 'CRM ещё не активна',
+      booking_feature_disabled: 'в тарифе нет функции записи'
+    };
+    var bl = (t.booking_live_blockers || []).map(function (b) { return blMap[b] || b; });
+    $('lv-blockers').textContent = bl.length ? 'Что мешает live: ' + bl.join(' · ') : '';
+    $('lv-live').textContent = req === 'live' ? (eff === 'live' ? 'Live включён' : 'Live запрошен') : 'Включить Live';
+    $('lv-live').disabled = req === 'live' && eff === 'live';
+    $('lv-preview').disabled = req === 'preview';
+
+    /* подписка (операторская) */
+    if (S.user && S.user.role === 'platform_owner') {
+      await billLoadPlans();
+      var bl = t.billing || {};
+      $('b-status').value = t.status || 'trial';
+      $('b-plan').value = t.plan_id || '';
+      $('b-selfreg').checked = t.allow_self_registration !== false;
+      $('b-trial').value = isoDay(bl.trial_ends_at);
+      $('b-cps').value = isoDay(bl.current_period_start);
+      $('b-cpe').value = isoDay(bl.current_period_end);
+      $('b-method').value = bl.billing_method_id || '';
+      var access = fmtDT(bl.access_window_ends_at);
+      var grace = fmtDT(bl.grace_ends_at);
+      var hot = t.status === 'past_due';
+      var trialHot = t.status === 'trial';
+      $('b-computed').innerHTML =
+        kv('Доступ оплачен до', esc(access)) +
+        kv(hot ? '<span style="color:#e0564f">Грейс до</span>' : 'Грейс до', esc(grace)) +
+        kv('Триал до', '<span' + (trialHot ? ' style="color:var(--acc)"' : '') + '>' + esc(fmtDT(bl.trial_ends_at)) + '</span>') +
+        kv('Способ оплаты', bl.billing_method_attached ? '<span class="chip ok">привязан</span>' : '<span class="hint">не привязан</span>');
+    }
+  }
+  function kv(k, v) { return '<div class="kv"><span>' + k + '</span><span>' + v + '</span></div>'; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* ── бренд ── */
+  function setColor(id, val) {
+    $(id).value = val || '';
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) $(id + 'c').value = val;
+  }
+  ['b-c1', 'b-c2'].forEach(function (id) {
+    $(id + 'c').addEventListener('input', function () { $(id).value = this.value; });
+    $(id).addEventListener('input', function () { if (/^#[0-9a-fA-F]{6}$/.test(this.value)) $(id + 'c').value = this.value; });
+  });
+  $('b-logo-pick').addEventListener('click', function () { $('b-logo-file').click(); });
+  $('b-logo-file').addEventListener('change', async function () {
+    var file = this.files && this.files[0];
+    this.value = '';
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return toast('Файл больше 2 МБ', 'err');
+    var fd = new FormData(); fd.append('file', file);
+    var btn = $('b-logo-pick'); busy(btn, true, 'Загружаю…');
+    try {
+      var r = await fetch(API + '/admin/tenants/' + S.tid + '/logo', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + S.token }, body: fd
+      });
+      var text = await r.text(); var data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (e) {}
+      if (!r.ok) {
+        var code = data && data.error && data.error.code;
+        var msg = { logo_file_required: 'Выберите файл логотипа.',
+                    logo_file_too_large: 'Файл больше 2 МБ.',
+                    logo_file_type_unsupported: 'Нужен PNG, JPEG, WEBP или GIF (не SVG).' }[code]
+                  || (data && (data.message || (data.error && data.error.message))) || ('HTTP ' + r.status);
+        throw new Error(msg);
+      }
+      var url = data && data.logo_url;
+      $('b-logo').value = url || '';
+      setLogoThumb(url || '');
+      toast('Логотип загружен', 'ok');
+      reloadPreview();
+    } catch (e) { toast(e.message, 'err'); }
+    finally { busy(btn, false); }
+  });
+  $('b-save').addEventListener('click', async function () {
+    var body = {};
+    var nm = $('b-name').value.trim(); if (nm) body.appName = nm;
+    body.logoUrl = $('b-logo').value.trim() || null;
+    var c1 = $('b-c1').value.trim(), c2 = $('b-c2').value.trim();
+    if (c1 && !/^#[0-9a-fA-F]{6}$/.test(c1)) return toast('Основной цвет: нужен hex вида #aabbcc', 'err');
+    if (c2 && !/^#[0-9a-fA-F]{6}$/.test(c2)) return toast('Дополнительный цвет: нужен hex вида #aabbcc', 'err');
+    if (c1) body.primaryColor = c1;
+    if (c2) body.secondaryColor = c2;
+    var rad = parseInt($('b-rad').value, 10);
+    if (!isNaN(rad)) body.buttonRadius = rad;
+    busy(this, true);
+    try {
+      await api('PATCH', '/admin/tenants/' + S.tid + '/branding', body);
+      toast('Бренд сохранён', 'ok');
+      await loadTenant(); reloadPreview();
+    } catch (e) { toast(e.message, 'err'); }
+    finally { busy(this, false); }
+  });
+
+  /* ── тексты ── */
+  var statRows = [];
+  function renderStats(pairs) {
+    statRows = [];
+    var host = $('c-stats');
+    host.innerHTML = '';
+    for (var i = 0; i < 4; i++) {
+      var p = pairs[i] || ['', ''];
+      var row = document.createElement('div');
+      row.className = 'row2'; row.style.marginBottom = '10px';
+      row.innerHTML = '<input placeholder="Значение · 7" value="' + esc(p[0]) + '"><input placeholder="Подпись · лет" value="' + esc(p[1]) + '">';
+      host.appendChild(row);
+      statRows.push(row);
+    }
+  }
+  $('c-save').addEventListener('click', async function () {
+    var ct = {};
+    var tag = $('c-tag').value.trim(); if (tag) ct.hero_tag = tag;
+    var ht = [$('c-h1').value, $('c-h2').value, $('c-h3').value].map(function (s) { return s.trim(); }).filter(Boolean);
+    if (ht.length) ct.hero_title = ht;
+    var stats = statRows.map(function (r) {
+      var i = r.querySelectorAll('input');
+      return [i[0].value.trim(), i[1].value.trim()];
+    }).filter(function (p) { return p[0] && p[1]; });
+    if (stats.length) ct.stats = stats;
+    var about = $('c-about').value.split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (about.length) ct.about = about;
+    var ratings = [[$('c-r1n').value.trim(), $('c-r1v').value.trim()], [$('c-r2n').value.trim(), $('c-r2v').value.trim()]]
+      .filter(function (p) { return p[0] && p[1]; });
+    if (ratings.length) ct.ratings = ratings;
+    var themeJson = Object.assign({}, S.themeJson, { content: ct });
+    busy(this, true);
+    try {
+      await api('PATCH', '/admin/tenants/' + S.tid + '/branding', { themeJson: themeJson });
+      toast('Тексты сохранены', 'ok');
+      await loadTenant(); reloadPreview();
+    } catch (e) { toast(e.message, 'err'); }
+    finally { busy(this, false); }
+  });
+
+  /* ── CRM ── */
+  function crmStatus(text, ok) {
+    var el = $('m-status');
+    el.style.display = 'block';
+    el.style.borderColor = ok ? 'rgba(52,211,153,.4)' : 'rgba(224,86,79,.5)';
+    el.textContent = text;
+  }
+  $('m-save').addEventListener('click', async function () {
+    var body = { provider: $('m-prov').value };
+    var tokenV = $('m-token').value.trim(); if (tokenV) body.apiToken = tokenV;
+    var baseV = $('m-base').value.trim(); if (baseV) body.baseUrl = baseV;
+    var comp = $('m-company').value.trim();
+    var sj = {};
+    if (comp) sj.companyId = isNaN(Number(comp)) ? comp : Number(comp);
+    if (Object.keys(sj).length) body.settingsJson = sj;
+    busy(this, true);
+    try {
+      // PATCH существующего; если интеграции ещё нет (404) — создаём POST'ом
+      try {
+        await api('PATCH', '/admin/tenants/' + S.tid + '/crm', body);
+      } catch (e1) {
+        if (e1.status !== 404) throw e1;
+        if (!tokenV && body.provider !== 'mock') throw new Error('Для нового подключения нужен API-токен');
+        await api('POST', '/admin/tenants/' + S.tid + '/crm', body);
+      }
+      toast('CRM сохранена', 'ok');
+      $('m-token').value = '';
+      await loadTenant(); reloadPreview();
+    } catch (e) { toast(e.message, 'err'); }
+    finally { busy(this, false); }
+  });
+  async function setBookingMode(mode, btn) {
+    busy(btn, true, 'Секунду…');
+    try {
+      await api('PATCH', '/admin/tenants/' + S.tid, { bookingMode: mode });
+      toast(mode === 'live' ? 'Live-режим запрошен' : 'Возвращён предпросмотр', 'ok');
+      await loadTenant();
+      reloadPreview();
+    } catch (e) { toast(e.message, 'err'); }
+    finally { busy(btn, false); }
+  }
+  $('lv-preview').addEventListener('click', function () { setBookingMode('preview', this); });
+  function billDate(id) { var v = $(id).value; return v ? new Date(v + 'T00:00:00.000Z').toISOString() : ''; }
+  $('b-save').addEventListener('click', async function () {
+    var body = {
+      status: $('b-status').value,
+      allowSelfRegistration: $('b-selfreg').checked,
+      trialEndsAt: billDate('b-trial'),
+      currentPeriodStart: billDate('b-cps'),
+      currentPeriodEnd: billDate('b-cpe'),
+      billingMethodId: $('b-method').value.trim()   // пусто = "" = сброс
+    };
+    if ($('b-plan').value) body.planId = $('b-plan').value;
+    busy(this, true);
+    try {
+      await api('PATCH', '/admin/tenants/' + S.tid, body);
+      toast('Подписка сохранена', 'ok');
+      await loadTenant();
+    } catch (e) { toast(e.message, 'err'); }
+    finally { busy(this, false); }
+  });
+  function payMsg(e) {
+    var c = e && e.code;
+    if (c === 'billing_provider_unavailable') return 'Оплата временно недоступна — провайдер не настроен.';
+    if (c === 'billing_method_missing') return 'Нет сохранённого способа оплаты для списания.';
+    return e && e.message || 'Ошибка оплаты';
+  }
+  async function billLoadPayments() {
+    try {
+      var r = await api('GET', '/admin/tenants/' + S.tid + '/billing/payments');
+      var list = (r && r.payments) || [];
+      var host = $('pay-list');
+      if (!list.length) { host.innerHTML = '<div class="hint">Платежей пока нет.</div>'; return; }
+      var purp = { initial_checkout: 'Первая оплата', recurring: 'Списание', recurring_charge: 'Списание' };
+      var st = { succeeded: ['оплачен', 'ok'], pending: ['ожидает', ''], canceled: ['отменён', ''] };
+      host.innerHTML = list.map(function (p) {
+        var ss = st[p.status] || [p.status || '—', ''];
+        var when = p.paid_at || p.canceled_at;
+        var amt = p.amount != null ? Number(p.amount).toLocaleString('ru-RU') + ' ' + (p.currency === 'RUB' || !p.currency ? '₽' : esc(p.currency)) : '';
+        return kv(esc(purp[p.purpose] || p.purpose || 'платёж') + ' · ' + amt,
+                  '<span class="chip ' + ss[1] + '">' + esc(ss[0]) + '</span> ' + (when ? esc(fmtDT(when)) : ''));
+      }).join('');
+    } catch (e) { $('pay-list').innerHTML = '<div class="hint">Не удалось загрузить платежи.</div>'; }
+  }
+  $('pay-checkout').addEventListener('click', async function () {
+    busy(this, true, 'Открываем…');
+    try {
+      var body = { returnUrl: location.href.split('#')[0] };
+      if ($('b-plan').value) body.planId = $('b-plan').value;
+      var r = await api('POST', '/admin/tenants/' + S.tid + '/billing/checkout', body);
+      var url = r && (r.confirmation_url || (r.payment && r.payment.confirmation_url));
+      if (url) { location.href = url; return; }
+      toast('Не получили ссылку оплаты', 'err');
+    } catch (e) { toast(payMsg(e), 'err'); }
+    finally { busy(this, false); }
+  });
+  $('pay-charge').addEventListener('click', async function () {
+    busy(this, true, 'Списываем…');
+    try { await api('POST', '/admin/tenants/' + S.tid + '/billing/charge'); toast('Списание запущено', 'ok'); await loadTenant(); await billLoadPayments(); }
+    catch (e) { toast(payMsg(e), 'err'); } finally { busy(this, false); }
+  });
+  $('pay-rundue').addEventListener('click', async function () {
+    busy(this, true, 'Проверяем…');
+    try { await api('POST', '/admin/billing/run-due'); toast('Проверка выполнена', 'ok'); await loadTenant(); await billLoadPayments(); }
+    catch (e) { toast(payMsg(e), 'err'); } finally { busy(this, false); }
+  });
+  $('lv-live').addEventListener('click', function () { setBookingMode('live', this); });
+  $('m-test').addEventListener('click', async function () {
+    busy(this, true, 'Проверяем…');
+    try {
+      var r = await api('POST', '/admin/tenants/' + S.tid + '/test-crm');
+      var parts = [];
+      if (r && typeof r === 'object') {
+        if (r.ok != null) parts.push(r.ok ? 'Связь установлена ✓' : 'Связь не установлена');
+        if (r.provider) parts.push('провайдер: ' + r.provider);
+        if (r.staff_count != null) parts.push('мастеров: ' + r.staff_count);
+        if (r.services_count != null) parts.push('услуг: ' + r.services_count);
+        if (r.message) parts.push(String(r.message));
+        if (!parts.length) parts.push(JSON.stringify(r));
+      }
+      crmStatus(parts.join(' · '), !(r && r.ok === false));
+      toast('Проверка выполнена', 'ok');
+    } catch (e) { crmStatus('Ошибка: ' + e.message, false); toast(e.message, 'err'); }
+    finally { busy(this, false); }
+  });
+
+  /* ── превью ── */
+  function absLogo(u) {
+    if (!u) return '';
+    if (/^(https?:|data:)/.test(u)) return u;
+    try { return new URL(API).origin + u; } catch (e) { return u; }
+  }
+  function setLogoThumb(u) {
+    var el = $('b-logo-thumb');
+    if (el) el.style.backgroundImage = u ? "url('" + absLogo(u).replace(/'/g, "%27") + "')" : 'none';
+  }
+  function previewUrl() {
+    var slug = S.tenant && S.tenant.slug;
+    return APP + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(API) + '&booking_tenant=' + encodeURIComponent(slug || '');
+  }
+  function reloadPreview() {
+    var f = $('p-frame');
+    if (f) f.src = previewUrl() + '&_=' + Date.now();
+  }
+  $('p-reload').addEventListener('click', reloadPreview);
+
+  /* ── визард онбординга (только владелец платформы) ── */
+  var W = { step: 0, tid: null, slug: null, plansLoaded: false };
+  async function wLoadPlans() {
+    if (W.plansLoaded) return;
+    try {
+      var l = await api('GET', '/admin/plans');
+      var items = Array.isArray(l) ? l : (l.items || []);
+      var sel = $('w-plan');
+      items.forEach(function (p) {
+        var o = document.createElement('option');
+        o.value = p.id;
+        var price = p.price_monthly != null ? p.price_monthly : p.priceMonthly;
+        o.textContent = (p.name || p.id) + (price != null ? ' · ' + Number(price).toLocaleString('ru-RU') + ' ₽/мес' : '');
+        sel.appendChild(o);
+      });
+      W.plansLoaded = true;
+    } catch (e) { /* без списка планов визард всё равно работает */ }
+  }
+  function wShow(n) {
+    W.step = n;
+    document.querySelectorAll('[data-ws]').forEach(function (el) {
+      el.hidden = el.getAttribute('data-ws') !== String(n);
+    });
+    document.querySelectorAll('.steps .step').forEach(function (el, i) {
+      el.classList.toggle('on', i <= Math.min(n, 3));
+    });
+    $('w-back').disabled = n === 0 || n === 4;
+    $('w-next').textContent = n === 3 ? 'Создать салон' : 'Далее';
+    $('w-nav').style.display = n === 4 ? 'none' : 'flex';
+    $('w-err').style.display = 'none';
+  }
+  function translit(str) {
+    var map = { а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya' };
+    return String(str || '').toLowerCase().split('').map(function (ch) {
+      return map[ch] != null ? map[ch] : ch;
+    }).join('').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  }
+  $('w-name').addEventListener('input', function () {
+    if (!$('w-slug')._touched) $('w-slug').value = translit(this.value);
+  });
+  $('w-slug').addEventListener('input', function () { this._touched = true; });
+  ['w-c1', 'w-c2'].forEach(function (id) {
+    $(id + 'c').addEventListener('input', function () { $(id).value = this.value; });
+    $(id).addEventListener('input', function () { if (/^#[0-9a-fA-F]{6}$/.test(this.value)) $(id + 'c').value = this.value; });
+  });
+  $('w-prov').addEventListener('change', function () {
+    $('w-crmrow').style.display = this.value === 'mock' ? 'none' : 'grid';
+  });
+  $('w-back').addEventListener('click', function () { if (W.step > 0) wShow(W.step - 1); });
+  $('w-next').addEventListener('click', async function () {
+    var err = $('w-err'); err.style.display = 'none';
+    if (W.step === 0) {
+      var nm = $('w-name').value.trim(), sl = $('w-slug').value.trim();
+      if (!nm) { err.textContent = 'Введите название салона.'; err.style.display = 'block'; return; }
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(sl)) { err.textContent = 'Slug: строчная латиница, цифры и дефисы.'; err.style.display = 'block'; return; }
+      return wShow(1);
+    }
+    if (W.step === 1) {
+      var c1 = $('w-c1').value.trim(), c2 = $('w-c2').value.trim();
+      if (c1 && !/^#[0-9a-fA-F]{6}$/.test(c1)) { err.textContent = 'Основной цвет: hex вида #aabbcc.'; err.style.display = 'block'; return; }
+      if (c2 && !/^#[0-9a-fA-F]{6}$/.test(c2)) { err.textContent = 'Дополнительный цвет: hex вида #aabbcc.'; err.style.display = 'block'; return; }
+      return wShow(2);
+    }
+    if (W.step === 2) return wShow(3);
+    if (W.step === 3) return wCreate(this);
+  });
+  async function wCreate(btn) {
+    var err = $('w-err');
+    var prov = $('w-prov').value;
+    if (prov !== 'mock' && !$('w-token').value.trim()) {
+      err.textContent = 'Для ' + prov + ' нужен API-токен (или выберите Demo-данные).';
+      err.style.display = 'block'; return;
+    }
+    busy(btn, true, 'Создаём…');
+    var log = [];
+    function step(t) { log.push('✓ ' + t); }
+    try {
+      /* 1. тенант (если упало на позднем шаге и жмут повторно — не дублируем) */
+      if (!W.tid) {
+        var cr = { name: $('w-name').value.trim(), slug: $('w-slug').value.trim() };
+        if ($('w-plan').value) cr.planId = $('w-plan').value;
+        cr.branchName = cr.name;
+        var wa = $('w-addr').value.trim(); if (wa) cr.branchAddress = wa;
+        var wp = $('w-phone').value.trim(); if (wp) cr.branchPhone = wp;
+        cr.branchTimezone = $('w-tz').value || 'Europe/Moscow';
+        var t = await api('POST', '/admin/tenants', cr);
+        W.tid = t.id; W.slug = t.slug;
+        step('Салон зарегистрирован (' + t.slug + ')');
+      } else step('Салон уже создан — продолжаем');
+      /* 2. бренд + тексты одним PATCH */
+      var content = {};
+      var tag = $('w-tag').value.trim(); if (tag) content.hero_tag = tag;
+      var ht = [$('w-h1').value, $('w-h2').value, $('w-h3').value].map(function (x) { return x.trim(); }).filter(Boolean);
+      if (ht.length) content.hero_title = ht;
+      var about = $('w-about').value.split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+      if (about.length) content.about = about;
+      var bBody = { appName: $('w-name').value.trim(), themeJson: { content: content } };
+      var lg = $('w-logo').value.trim(); if (lg) bBody.logoUrl = lg;
+      if ($('w-c1').value.trim()) bBody.primaryColor = $('w-c1').value.trim();
+      if ($('w-c2').value.trim()) bBody.secondaryColor = $('w-c2').value.trim();
+      await api('PATCH', '/admin/tenants/' + W.tid + '/branding', bBody);
+      step('Бренд и тексты сохранены');
+      /* 3. CRM */
+      var cBody = { provider: prov };
+      var tk = $('w-token').value.trim(); if (tk) cBody.apiToken = tk;
+      var cp = $('w-company').value.trim();
+      if (cp) cBody.settingsJson = { companyId: isNaN(Number(cp)) ? cp : Number(cp) };
+      try {
+        await api('PATCH', '/admin/tenants/' + W.tid + '/crm', cBody);
+      } catch (e1) {
+        if (e1.status !== 404) throw e1;
+        await api('POST', '/admin/tenants/' + W.tid + '/crm', cBody);
+      }
+      step('Система записи: ' + (prov === 'mock' ? 'demo-данные' : prov));
+      try {
+        var tr = await api('POST', '/admin/tenants/' + W.tid + '/test-crm');
+        step('Проверка связи: ' + (tr && tr.ok ? 'ок' : 'не прошла — проверьте токен в разделе CRM'));
+      } catch (e2) { step('Проверка связи не прошла: ' + e2.message); }
+      /* активация (триал сейчас блокирует вход владельца — интерим) */
+      if ($('w-activate').checked) {
+        try {
+          await api('POST', '/admin/tenants/' + W.tid + '/activate');
+          step('Салон активирован');
+        } catch (e4) { step('Активация не прошла: ' + e4.message); }
+      }
+      /* аккаунт владельца салона */
+      var aem = $('w-aemail').value.trim();
+      $('w-creds').hidden = true;
+      if (aem) {
+        try {
+          var ubody = { email: aem, role: 'tenant_admin' };
+          var an = $('w-aname').value.trim(); if (an) ubody.name = an;
+          var u = await api('POST', '/admin/tenants/' + W.tid + '/users', ubody);
+          step('Аккаунт владельца создан: ' + aem);
+          var tp = u && (u.temporary_password || u.temporaryPassword);
+          $('w-creds-body').innerHTML = 'Вход в админку: <b>' + esc(aem) + '</b>' +
+            (tp ? '<br>Временный пароль: <b>' + esc(tp) + '</b>' : '<br>Пароль задан заранее.') +
+            '<br>Салон (slug): <b>' + esc(W.slug) + '</b>';
+          $('w-creds').hidden = false;
+        } catch (e3) { step('Аккаунт владельца не создан: ' + e3.message); }
+      }
+      /* финал */
+      $('w-done-name').textContent = $('w-name').value.trim();
+      $('w-done-link').textContent = APP + '?booking_backend=saas-local&booking_api_base=' + API + '&booking_tenant=' + W.slug;
+      $('w-log').innerHTML = log.map(esc).join('<br>');
+      wShow(4);
+    } catch (e) {
+      err.textContent = e.message || 'Не получилось — попробуйте ещё раз';
+      err.style.display = 'block';
+      if (log.length) { $('w-log').innerHTML = log.map(esc).join('<br>'); }
+    } finally { busy(btn, false); }
+  }
+  $('w-open').addEventListener('click', async function () {
+    if (!W.tid) return;
+    S.tid = W.tid;
+    await loadTenant(); reloadPreview();
+    document.querySelector('.nav-item[data-view="overview"]').click();
+    W.tid = null; W.slug = null; wShow(0);
+    ['w-name','w-slug','w-tag','w-h1','w-h2','w-h3','w-about','w-logo','w-token','w-company','w-addr','w-phone','w-aemail','w-aname'].forEach(function (id) { $(id).value = ''; });
+    $('w-plan').value = ''; $('w-tz').value = 'Europe/Moscow'; $('w-creds').hidden = true;
+    $('w-slug')._touched = false;
+  });
+
+  /* ── навигация ── */
+  document.querySelectorAll('.nav-item[data-view]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (b.getAttribute('data-view') === 'wizard') wLoadPlans();
+      if (b.getAttribute('data-view') === 'billing') billLoadPayments();
+      document.querySelectorAll('.nav-item[data-view]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.querySelectorAll('section[data-v]').forEach(function (s) { s.hidden = s.getAttribute('data-v') !== b.getAttribute('data-view'); });
+    });
+  });
+
+  renderStats([]);
+
+  /* self-serve handoff: /maya-start.html кладёт bundle под одноразовым nonce (#handoff=…) */
+  try {
+    localStorage.removeItem('maya_admin_handoff'); // legacy-глобальный ключ игнорируем и чистим
+    var hoffNonce = (location.hash.match(/[#&]handoff=([a-z0-9]+)/i) || [])[1] || null;
+    var hoffView = (location.hash.match(/[#&]view=([a-z]+)/i) || [])[1] || null; // напр. crm из AI-онбординга
+    var hoff = hoffNonce ? JSON.parse(localStorage.getItem('maya_admin_handoff:' + hoffNonce) || 'null') : null;
+    // одноразовость: ключ уничтожается сразу, nonce из URL стирается
+    if (hoffNonce) {
+      localStorage.removeItem('maya_admin_handoff:' + hoffNonce);
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    }
+    // ts обязателен, конечен и в окне [-10мин; +60с]: отсутствующий/будущий/протухший — отклоняем
+    var tsOk = hoff && typeof hoff.ts === 'number' && isFinite(hoff.ts)
+      && Date.now() - hoff.ts <= 10 * 60 * 1000 && hoff.ts <= Date.now() + 60 * 1000;
+    if (!tsOk) hoff = null;
+    // уборка: протухшие maya_admin_handoff:* не должны хранить refresh навсегда
+    try {
+      for (var hi = localStorage.length - 1; hi >= 0; hi--) {
+        var hk = localStorage.key(hi);
+        if (hk && hk.indexOf('maya_admin_handoff:') === 0) {
+          var hv = null; try { hv = JSON.parse(localStorage.getItem(hk) || 'null'); } catch (e) {}
+          var hOk = hv && typeof hv.ts === 'number' && isFinite(hv.ts)
+            && Date.now() - hv.ts <= 10 * 60 * 1000 && hv.ts <= Date.now() + 60 * 1000;
+          if (!hOk) localStorage.removeItem(hk);
+        }
+      }
+    } catch (e) {}
+    if (hoff && hoff.token && hoff.refresh_token) {
+      S.token = hoff.token;
+      S.refresh_token = hoff.refresh_token;
+      S.access_expires_at = hoff.access_expires_at || null;
+      S.refresh_expires_at = hoff.refresh_expires_at || null;
+      S.session = hoff.session || null;
+      S.user = hoff.user || {};
+      var htid = S.user.tenant_id || S.user.tenantId || null;
+      if (htid) {
+        var afterEnter = function () {
+          if (!hoffView) return;
+          var nav = document.querySelector('.nav-item[data-view="' + hoffView + '"]');
+          if (nav) nav.click(); // открыть защищённый CRM-коннектор
+        };
+        var p = enter(htid);
+        if (p && p.then) p.then(afterEnter); else afterEnter();
+      }
+    }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

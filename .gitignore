@@ -17,6 +17,7 @@ signing-key-info.txt
 .sandbox_secret.key
 .env
 .env.*
+!.env.*.example
 
 # --- База данных и ПД (152-ФЗ) ---
 *.db
@@ -84,3 +85,11 @@ _archive/
 !requirements.txt
 !config.example.py
 !.env.example
+
+# Сканы книги барбера — тяжело (десятки МБ) и уже лежат на Beget; в git не тащим
+ai администратор/barber_knowledge_images/
+**/barber_knowledge_images/
+
+# Playwright CLI artifacts (logs/screenshots)
+.playwright-cli/
+output/playwright/

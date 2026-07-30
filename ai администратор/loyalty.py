@@ -42,6 +42,10 @@ logger = logging.getLogger(__name__)
 _yc = YClientsAPI()
 
 CASHBACK_PCT = 5
+# При первом входе постоянного клиента выдаём 5% от подтверждённой истории
+# YClients, но не больше WELCOME_CAP. Повторная выдача блокируется по телефону.
+BACKFILL_ENABLED = True
+WELCOME_CAP = 1000
 EXPIRY_MONTHS_NO_VISITS = 12
 REDEEM_CODE_TTL_DAYS = 14
 
@@ -62,6 +66,94 @@ CARE_TITLES_LOWER = {s["title"].lower().strip() for s in CARE_SERVICES}
 def _gen_token(length: int = 6) -> str:
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def _welcome_points(spent: int | float) -> int:
+    """Рассчитать ограниченный welcome-бонус из подтверждённой суммы трат."""
+    return min(round(max(0, spent) * CASHBACK_PCT / 100), WELCOME_CAP)
+
+
+def select_yclients_cashback_card(cards: list[dict]) -> dict | None:
+    """Выбирает бонусную/кэшбэк-карту, не путая её со скидочной картой."""
+    if not cards:
+        return None
+
+    def is_cashback(card: dict) -> bool:
+        title = str((card.get("type") or {}).get("title") or "").lower().replace("ё", "е")
+        if any(word in title for word in ("кешбек", "кэшбек", "cashback", "бонус")):
+            return True
+        for program in card.get("programs") or []:
+            loyalty_type = (program or {}).get("loyalty_type") or {}
+            if loyalty_type.get("is_cashback"):
+                return True
+        return False
+
+    def balance_value(card: dict) -> float:
+        try:
+            return float(card.get("balance") or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    cashback = [card for card in cards if is_cashback(card)]
+    # Если API не отдал программы/говорящее название, положительный баланс всё
+    # равно отличает бонусную карту от обычной скидочной карты без баллов.
+    candidates = cashback or [card for card in cards if balance_value(card) > 0]
+    if not candidates:
+        return None
+    return max(candidates, key=balance_value)
+
+
+def _yc_loyalty_card(phone: str) -> dict | None:
+    """Возвращает актуальную карту YClients для точного совпадения телефона."""
+    try:
+        client = _yc.find_client_by_phone(phone)
+        if not client or not client.get("id"):
+            return None
+        card = select_yclients_cashback_card(
+            _yc.get_client_loyalty_cards(int(client["id"]))
+        )
+        if not card or card.get("balance") is None:
+            return None
+        balance = int(round(float(card.get("balance") or 0)))
+        return {
+            "card_id": card.get("id"),
+            "balance": max(0, balance),
+            "sold_amount": int(round(float(card.get("sold_amount") or 0))),
+        }
+    except Exception as e:
+        logger.error(f"_yc_loyalty_card *{phone[-4:]}: {e}")
+        return None
+
+
+def import_yclients_loyalty_balance(client_id: int, phone: str) -> dict | None:
+    """Один раз выравнивает локальный ledger по фактическому балансу карты.
+
+    Это не периодический sync: после импорта локальные начисления/списания не
+    перетираются при каждом открытии кабинета.
+    """
+    if not phone or database.client_has_loyalty_yclients_import(client_id):
+        return None
+    card = _yc_loyalty_card(phone)
+    if card is None:
+        return None
+    current = database.loyalty_balance(client_id)
+    target = int(card["balance"])
+    delta = target - current
+    database.add_loyalty_transaction(
+        client_id=client_id,
+        type_="yc_import",
+        points=delta,
+        visit_record_id=None,
+        note=(
+            f"{delta:+d} импорт фактического баланса YClients "
+            f"(карта {card.get('card_id')}, итог {target})"
+        ),
+    )
+    logger.info(
+        f"🪙 YClients import: client_id={client_id} card_id={card.get('card_id')} "
+        f"old={current} target={target} delta={delta:+d}"
+    )
+    return {**card, "previous_balance": current, "delta": delta}
 
 
 def _parse_date_safe(raw: str | None) -> date | None:
@@ -138,6 +230,154 @@ def _visit_covered_by_subscription(
     return False
 
 
+def _normalize_service_title(value: str | None) -> str:
+    return str(value or "").strip().lower().replace("ё", "е")
+
+
+def current_care_services(catalog: list[dict] | None = None) -> list[dict]:
+    """Return the redeemable care catalog with current YClients prices."""
+    try:
+        rows = catalog if catalog is not None else (_yc.get_services() or [])
+    except Exception as exc:
+        logger.error("current care catalog: %s", exc)
+        rows = []
+    by_title = {
+        _normalize_service_title(row.get("title")): row
+        for row in rows
+        if isinstance(row, dict) and not row.get("error") and row.get("title")
+    }
+    result = []
+    for care in CARE_SERVICES:
+        row = by_title.get(_normalize_service_title(care["title"]))
+        if not row:
+            continue
+        prices = []
+        for key in ("price_max", "price_min", "price"):
+            try:
+                value = int(round(float(row.get(key) or 0)))
+            except (TypeError, ValueError):
+                value = 0
+            if value > 0:
+                prices.append(value)
+        # A range is affordable only when the confirmed balance covers its top.
+        price = max(prices) if prices else int(care["price"])
+        result.append({
+            "id": row.get("id"),
+            "title": str(row.get("title") or care["title"]).strip(),
+            "price": price,
+            "emoji": care.get("emoji") or "",
+        })
+    return sorted(result, key=lambda item: (item["price"], item["title"]))
+
+
+def current_care_service(
+    service_title: str,
+    catalog: list[dict] | None = None,
+) -> dict | None:
+    """Resolve one redeemable care service and its current catalog price."""
+    wanted = _normalize_service_title(service_title)
+    return next(
+        (
+            item
+            for item in current_care_services(catalog)
+            if _normalize_service_title(item.get("title")) == wanted
+        ),
+        None,
+    )
+
+
+def affordable_care_services(balance: int, catalog: list[dict] | None = None) -> list[dict]:
+    """Return only current YClients care services the confirmed balance covers."""
+    try:
+        available = max(0, int(balance))
+    except (TypeError, ValueError):
+        available = 0
+    return [
+        item for item in current_care_services(catalog)
+        if int(item.get("price") or 0) <= available
+    ]
+
+
+def loyalty_spend_summary(balance: int, catalog: list[dict] | None = None) -> dict:
+    """Build a deterministic, UI-safe summary without asking the language model."""
+    try:
+        available = max(0, int(balance))
+    except (TypeError, ValueError):
+        available = 0
+    services = current_care_services(catalog)
+    affordable = [item for item in services if item["price"] <= available]
+    next_service = next((item for item in services if item["price"] > available), None)
+    if next_service:
+        next_service = {
+            **next_service,
+            "points_needed": max(0, int(next_service["price"]) - available),
+        }
+    return {
+        "balance": available,
+        "care_services": services,
+        "affordable_services": affordable,
+        "best_service": affordable[-1] if affordable else None,
+        "next_service": next_service,
+        "redemption_rule": "one_care_service_per_visit",
+    }
+
+
+async def _send_affordable_care_offer(client: dict) -> bool:
+    """Persist one consented, frequency-capped care suggestion in MAYA chat."""
+    client_id = int(client.get("id") or 0)
+    chat_id = int(client.get("telegram_chat_id") or 0)
+    phone = str(client.get("phone") or "")
+    if not client_id or not chat_id or not phone:
+        return False
+    if not database.has_marketing_consent(client_id):
+        return False
+    prefs = database.get_notify_prefs(client_id)
+    if prefs.get("marketing") is False or database.in_quiet_hours(prefs, datetime.now().hour):
+        return False
+    frequency_days = getattr(database, "MARKETING_FREQ_DAYS", {}).get(
+        prefs.get("marketing_freq"), 14,
+    )
+    if database.marketing_sent_within(client_id, max(7, int(frequency_days or 14))):
+        return False
+
+    lazy_backfill_for_client(client_id, phone)
+    balance = int(database.loyalty_balance(client_id))
+    spend = loyalty_spend_summary(balance)
+    affordable = spend["affordable_services"]
+    if not affordable:
+        return False
+    names = [f'{item["title"]} — {item["price"]} баллов' for item in affordable[-3:]]
+    text = (
+        f"У вас {balance} баллов. Ими можно оплатить один из уходов: "
+        f"{', '.join(names)}. Хотите добавить уход к следующей записи?"
+    )
+    try:
+        import webhook_server
+
+        await webhook_server._send_client_push(
+            chat_id,
+            "Баллы можно потратить на уход",
+            f"Баланс {balance}: {', '.join(names)}",
+            url="/app/?chat=1&widget=loyalty",
+            tag=f"loyalty-care-{client_id}-{date.today().isoformat()}",
+            data={"event": "loyalty_care_offer", "affordable": affordable},
+            persist_in_chat=True,
+            chat_text=text,
+            chat_action={
+                "type": "open_loyalty",
+                "label": "Посмотреть баллы",
+                "screen": "loyalty",
+            },
+            chat_widget="loyalty",
+            chat_dedupe_key=f"loyalty-care:{client_id}:{date.today().isoformat()}",
+        )
+        database.set_marketing_last_sent(client_id)
+        return True
+    except Exception as exc:
+        logger.error("loyalty care offer client_id=%s: %s", client_id, exc)
+        return False
+
+
 # ─── Начисление ─────────────────────────────────────────────────────────
 
 async def run_earning_job(app: Application | None = None) -> dict:
@@ -149,7 +389,13 @@ async def run_earning_job(app: Application | None = None) -> dict:
     """
     today = date.today()
     cutoff = today - timedelta(days=90)
-    summary = {"clients": 0, "earned_points": 0, "skipped_sub": 0, "errors": 0}
+    summary = {
+        "clients": 0,
+        "earned_points": 0,
+        "care_offers": 0,
+        "skipped_sub": 0,
+        "errors": 0,
+    }
 
     for client in database.list_telegram_clients():
         try:
@@ -158,6 +404,7 @@ async def run_earning_job(app: Application | None = None) -> dict:
             if not phone:
                 continue
             summary["clients"] += 1
+            earned_for_client = 0
 
             bookings = _yc.get_client_bookings(phone) or []
             # Все активные/expired подписки клиента — для проверки покрытия
@@ -193,6 +440,11 @@ async def run_earning_job(app: Application | None = None) -> dict:
                     note=f"+{points} за визит {v_date.isoformat()} (сумма {amount} ₽)",
                 )
                 summary["earned_points"] += points
+                earned_for_client += points
+            if app is not None and earned_for_client > 0:
+                summary["care_offers"] += int(
+                    await _send_affordable_care_offer(client)
+                )
         except Exception as e:
             summary["errors"] += 1
             logger.error(f"loyalty earn for client_id={client.get('id')}: {e}")
@@ -335,8 +587,14 @@ def _yc_search_sold_amount(phone: str) -> int | None:
         return None
 
 
-def apply_redemption_for_booking(*, client_id: int, record_id: int,
-                                   service_titles: list[str]) -> dict:
+def apply_redemption_for_booking(
+    *,
+    client_id: int,
+    record_id: int,
+    service_titles: list[str],
+    service_quotes: list[dict] | None = None,
+    reservation_id: str | None = None,
+) -> dict:
     """
     Списывает баллы по списку услуг-уходов, прицепляя транзакции к record_id.
     Дополнительно отмечает в YClients-записи: обнуляет стоимость услуги +
@@ -346,21 +604,46 @@ def apply_redemption_for_booking(*, client_id: int, record_id: int,
     Идемпотентно: если для (client_id, record_id, service) уже есть redeem —
     повторно не списываем.
     """
-    care_lookup = {c["title"].lower(): c for c in CARE_SERVICES}
+    quoted = service_quotes if service_quotes is not None else current_care_services()
+    care_lookup = {
+        _normalize_service_title(c.get("title")): c
+        for c in quoted
+        if isinstance(c, dict) and int(c.get("price") or 0) > 0
+    }
     items: list[dict] = []
     total = 0
-    for title in service_titles:
-        c = care_lookup.get((title or "").lower().strip())
+    # Business rule: at most one care service can be paid with points per visit.
+    for title in service_titles[:1]:
+        c = care_lookup.get(_normalize_service_title(title))
         if not c:
             continue
         if database.loyalty_redemption_exists(client_id, record_id, c["title"]):
             continue
-        # 1) Списание в нашей БД
-        database.add_loyalty_transaction(
-            client_id=client_id, type_="redeem", points=-c["price"],
-            visit_record_id=record_id,
-            note=f"-{c['price']} списано за {c['title']} в записи {record_id}",
-        )
+        # 1) Atomic ledger write. The in-app flow reserves points before the
+        # external CRM call; Telegram uses the direct atomic redemption path.
+        if reservation_id:
+            spent = database.finalize_loyalty_reservation(
+                client_id=client_id,
+                request_id=reservation_id,
+                record_id=record_id,
+                service_title=c["title"],
+                points=int(c["price"]),
+            )
+        else:
+            spent = database.redeem_loyalty_points(
+                client_id=client_id,
+                points=int(c["price"]),
+                visit_record_id=record_id,
+                service_title=c["title"],
+            )
+        if not spent.get("ok"):
+            logger.warning(
+                "loyalty redemption refused client_id=%s record_id=%s reason=%s",
+                client_id,
+                record_id,
+                spent.get("reason") or spent.get("state") or "unknown",
+            )
+            continue
         # 2) Пометка в YClients — обнуляем cost + дописываем comment. Если
         # не получится (сетевая ошибка) — не откатываем списание; админ
         # увидит баллы в нашем боте, а в YClients поправит руками.
@@ -430,7 +713,27 @@ def lazy_backfill_for_client(client_id: int, phone: str) -> dict | None:
     """
     if not phone:
         return None
+    # У действующего клиента источником стартового остатка является его карта
+    # YClients. Старый расчёт 5% от LTV с лимитом используется только если карты нет.
+    if database.client_has_loyalty_yclients_import(client_id):
+        return None
+    imported = import_yclients_loyalty_balance(client_id, phone)
+    if imported is not None:
+        # Старые вызывающие места показывают balance отдельной строкой. Не выдаём
+        # импорт за новый welcome-бонус и не дублируем клиенту уведомление.
+        return {
+            "points": 0,
+            "sold_amount": imported.get("sold_amount", 0),
+            "balance": imported["balance"],
+            "source": "yclients_card",
+        }
+    if not BACKFILL_ENABLED:
+        return None  # welcome из истории отключён — только фактическая карта
     if database.client_has_loyalty_backfill(client_id):
+        return None
+    # тот же человек под другим client_id (второй способ входа) — не дублируем
+    if database.loyalty_backfill_exists_for_phone(phone):
+        logger.info(f"🪙 Lazy backfill пропущен: по номеру *{phone[-4:]} welcome уже выдан (другой client_id={client_id})")
         return None
     # Фиксируем launch_date если ещё не зафиксирована
     get_launch_date()
@@ -438,13 +741,16 @@ def lazy_backfill_for_client(client_id: int, phone: str) -> dict | None:
     spent = _yc_search_sold_amount(phone)
     if spent is None or spent <= 0:
         return None
-    points = round(spent * CASHBACK_PCT / 100)
+    points = _welcome_points(spent)
     if points <= 0:
         return None
     database.add_loyalty_transaction(
         client_id=client_id, type_="backfill",
         points=points, visit_record_id=None,
-        note=f"+{points} welcome-бонус: 5% от LTV {spent} ₽ (ленивый backfill)",
+        note=(
+            f"+{points} welcome-бонус: {CASHBACK_PCT}% от LTV {spent} ₽ "
+            f"(лимит {WELCOME_CAP}, ленивый backfill)"
+        ),
     )
     logger.info(
         f"🪙 Lazy backfill: client_id={client_id} получил {points} баллов "
@@ -461,6 +767,9 @@ async def run_backfill_job() -> dict:
 
     Также фиксирует дату запуска программы (если ещё не зафиксирована).
     """
+    if not BACKFILL_ENABLED:
+        logger.info("run_backfill_job пропущен: BACKFILL_ENABLED=False")
+        return {"skipped": True, "reason": "backfill_disabled"}
     # Зафиксируем launch_date — после backfill clock «сгорания» начнёт идти
     get_launch_date()
 
@@ -482,6 +791,9 @@ async def run_backfill_job() -> dict:
             if database.client_has_loyalty_backfill(client_id):
                 summary["already_done"] += 1
                 continue
+            if database.loyalty_backfill_exists_for_phone(phone):
+                summary["already_done"] += 1
+                continue
 
             spent = _yc_search_sold_amount(phone)
             if spent is None:
@@ -491,7 +803,7 @@ async def run_backfill_job() -> dict:
                 summary["zero_spent"] += 1
                 continue
 
-            points = round(spent * CASHBACK_PCT / 100)
+            points = _welcome_points(spent)
             if points <= 0:
                 summary["zero_spent"] += 1
                 continue
@@ -499,7 +811,10 @@ async def run_backfill_job() -> dict:
             database.add_loyalty_transaction(
                 client_id=client_id, type_="backfill",
                 points=points, visit_record_id=None,
-                note=f"+{points} welcome-бонус: 5% от LTV {spent} ₽",
+                note=(
+                    f"+{points} welcome-бонус: {CASHBACK_PCT}% от LTV {spent} ₽ "
+                    f"(лимит {WELCOME_CAP})"
+                ),
             )
             summary["backfilled"] += 1
             summary["total_points"] += points
@@ -515,6 +830,7 @@ async def run_backfill_job() -> dict:
 
 def build_balance_card(client_id: int) -> tuple[str, InlineKeyboardMarkup]:
     balance = database.loyalty_balance(client_id)
+    current_services = current_care_services()
 
     lines = [
         "🪙 *Баллы лояльности*",
@@ -524,15 +840,18 @@ def build_balance_card(client_id: int) -> tuple[str, InlineKeyboardMarkup]:
         f"С каждого визита — *{CASHBACK_PCT}%* кэшбэка. Баллы не "
         f"начисляются на визиты по абонементу (защита от двойной выгоды).",
         "",
-        "*Тратятся на любой уход:*",
+        "*Тратятся на один уход за визит:*",
     ]
-    for c in CARE_SERVICES:
-        mark = "✅" if balance >= c["price"] else "🔒"
-        line = f"  {mark} {c['emoji']} {c['title']} — _{c['price']} ₽_"
-        if balance < c["price"]:
-            need = c["price"] - balance
-            line += f"  _(не хватает {need})_"
-        lines.append(line)
+    if current_services:
+        for c in current_services:
+            mark = "✅" if balance >= c["price"] else "🔒"
+            line = f"  {mark} {c['emoji']} {c['title']} — _{c['price']} ₽_"
+            if balance < c["price"]:
+                need = c["price"] - balance
+                line += f"  _(не хватает {need})_"
+            lines.append(line)
+    else:
+        lines.append("  Каталог временно недоступен — попробуйте чуть позже.")
     lines.append("")
     lines.append(
         "🤝 *Как потратить:* при записи через «✂️ Записаться» MAYA сама "
@@ -547,7 +866,7 @@ def build_balance_card(client_id: int) -> tuple[str, InlineKeyboardMarkup]:
 
     # Кнопки списания через код — fallback, если клиент уже в салоне
     buttons: list[list[InlineKeyboardButton]] = []
-    for c in CARE_SERVICES:
+    for c in current_services:
         if balance >= c["price"]:
             buttons.append([InlineKeyboardButton(
                 f"📟 Код на {c['emoji']} {c['title']}",
@@ -570,10 +889,7 @@ def generate_redeem_code(client_id: int, service_title: str) -> dict:
     Создаёт одноразовый код погашения. Проверяет баланс и срок:
     баллы холдируются (НЕ списываются) до момента подтверждения админом.
     """
-    care = next(
-        (c for c in CARE_SERVICES if c["title"].lower() == service_title.lower()),
-        None,
-    )
+    care = current_care_service(service_title)
     if not care:
         return {"ok": False, "reason": "не уход"}
     balance = database.loyalty_balance(client_id)

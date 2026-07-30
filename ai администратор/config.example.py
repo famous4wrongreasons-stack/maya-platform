@@ -51,11 +51,83 @@ OPENAI_API_KEY = _req("OPENAI_API_KEY")
 OPENAI_BASE_URL = _opt("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_CHAT_MODEL = _opt("OPENAI_CHAT_MODEL", "gpt-5.5")
 OPENAI_FAST_MODEL = _opt("OPENAI_FAST_MODEL", "gpt-5.4-mini")
-OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", OPENAI_CHAT_MODEL)
+OPENAI_TELEGRAM_CHAT_MODEL = _opt("OPENAI_TELEGRAM_CHAT_MODEL", "gpt-5.5-pro")
+OPENAI_PWA_CHAT_MODEL = _opt("OPENAI_PWA_CHAT_MODEL", "gpt-5.5-pro")
+OPENAI_CLIENT_REASONING_EFFORT = _opt("OPENAI_CLIENT_REASONING_EFFORT", "medium")
+# Голос временно может быть отключён, но при включении должен думать тем же
+# сильным мозгом, что и основной клиентский чат.
+OPENAI_VOICE_CHAT_MODEL = _opt("OPENAI_VOICE_CHAT_MODEL", "gpt-5.5-pro")
+REALTIME_VAD_EAGERNESS = _opt("REALTIME_VAD_EAGERNESS", "medium")
 
-# ── Claude (Anthropic) — legacy/fallback, можно не задавать ──────────────────
+# Аудиосообщения PWA/iPhone/Telegram: OpenAI распознаёт речь,
+# после чего обычный текстовый мозг MAYA формирует ответ.
+VOICE_STT_PROVIDER = _opt("VOICE_STT_PROVIDER", "openai")
+STT_MODEL = _opt("STT_MODEL", "gpt-4o-transcribe")
+VOICE_STT_ALLOW_LOCAL_FALLBACK = _opt(
+    "VOICE_STT_ALLOW_LOCAL_FALLBACK", "True"
+).lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_STT_ALLOW_EXTERNAL_FALLBACK = _opt(
+    "VOICE_STT_ALLOW_EXTERNAL_FALLBACK", "False"
+).lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_STT_MAX_BYTES = int(_opt("VOICE_STT_MAX_BYTES", str(8 * 1024 * 1024)))
+VOICE_STT_LOCAL_MODEL = _opt("VOICE_STT_LOCAL_MODEL", "base")
+
+# ── DeepSeek V4 — прямой OpenAI-compatible API ────────────────────────
+# Ключ хранить только в .env на VPS. Для перевода текстовых чатов:
+#   OPENAI_PWA_CHAT_MODEL=deepseek-v4-pro
+#   OPENAI_TELEGRAM_CHAT_MODEL=deepseek-v4-pro
+#   OPENAI_CHAT_MODEL=deepseek-v4-flash
+#   OPENAI_FAST_MODEL=deepseek-v4-flash
+DEEPSEEK_API_KEY = _opt("DEEPSEEK_API_KEY", "")
+DEEPSEEK_BASE_URL = _opt("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+DEEPSEEK_PROXY_URL = _opt("DEEPSEEK_PROXY_URL", "")
+# disabled: быстрее и не требует хранить reasoning_content между tool-calls.
+DEEPSEEK_THINKING = _opt("DEEPSEEK_THINKING", "disabled")
+
+# ── AI-стилист / CutMatch ────────────────────────────────────────────────────
+# Fail-closed: без явного включения HTTP-handlers CutMatch отвечают disabled,
+# даже если route случайно вернули. Перед включением нужны consent/retention
+# policy и юридическая проверка обработки фото.
+CUTMATCH_ENABLED = _opt("CUTMATCH_ENABLED", "False").lower() in ("1", "true", "yes", "on", "y", "да")
+
+# ── Голос MAYA: OpenAI TTS по умолчанию, Yandex SpeechKit как внешний TTS ─────
+# Единый рубильник ОЗВУЧКИ ответов MAYA (голос) для ВСЕХ поверхностей: орб
+# (realtime), голосовые сообщения в чате и Telegram-бот. False → Майя отвечает
+# ТЕКСТОМ везде; запись голоса (STT-ввод) при этом продолжает работать.
+VOICE_REPLIES_ENABLED = _opt("VOICE_REPLIES_ENABLED", "False").lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_TTS_PROVIDER = _opt("VOICE_TTS_PROVIDER", "openai")  # "openai" | "yandex"
+VOICE_TTS_FALLBACK_OPENAI = _opt("VOICE_TTS_FALLBACK_OPENAI", "False").lower() in ("1", "true", "yes", "on", "y", "да")
+VOICE_TTS_MODEL = _opt("VOICE_TTS_MODEL", "gpt-4o-mini-tts")
+VOICE_TTS_VOICE = _opt("VOICE_TTS_VOICE", "marin")
+VOICE_TTS_SPEED = float(_opt("VOICE_TTS_SPEED", "1.0") or "1.0")
+VOICE_TTS_PITCH = float(_opt("VOICE_TTS_PITCH", "1.0") or "1.0")
+VOICE_TTS_INSTRUCTIONS = _opt(
+    "VOICE_TTS_INSTRUCTIONS",
+    "Говори по-русски естественно и спокойно, светлым женским голосом чуть выше среднего. "
+    "Без иностранного акцента, без театральности, темп средний, дикция чёткая."
+)
+YANDEX_SPEECHKIT_API_KEY = _opt("YANDEX_SPEECHKIT_API_KEY", "")
+YANDEX_SPEECHKIT_IAM_TOKEN = _opt("YANDEX_SPEECHKIT_IAM_TOKEN", "")
+YANDEX_CLOUD_FOLDER_ID = _opt("YANDEX_CLOUD_FOLDER_ID", "")
+YANDEX_SPEECHKIT_VOICE = _opt("YANDEX_SPEECHKIT_VOICE", "lera")
+YANDEX_SPEECHKIT_ROLE = _opt("YANDEX_SPEECHKIT_ROLE", "friendly")
+YANDEX_SPEECHKIT_SPEED = float(_opt("YANDEX_SPEECHKIT_SPEED", "1.0") or "1.0")
+YANDEX_SPEECHKIT_PITCH_SHIFT = float(_opt("YANDEX_SPEECHKIT_PITCH_SHIFT", "0") or "0")
+YANDEX_SPEECHKIT_MAX_CHARS = int(float(_opt("YANDEX_SPEECHKIT_MAX_CHARS", "240") or "240"))
+
+# ── Claude (Anthropic) — альтернативный мозг MAYA (голос + чат) ──────────────
+# AI_PROVIDER выбирает мозг для get_ai_response / get_ai_response_stream:
+#   "openai" (по умолчанию) — тир gpt-5.x, текущий рабочий;
+#   "claude" — Anthropic Sonnet (живее/человечнее, точный tool-use, как было ДО
+#              миграции на OpenAI), НО требует АКТИВНОЙ Anthropic-организации на
+#              CLAUDE_API_KEY. При отключённой организации Claude отвечает 400
+#              «This organization has been disabled» на КАЖДЫЙ вызов — ставить
+#              "claude" только с рабочим ключом Anthropic.
+AI_PROVIDER = _opt("AI_PROVIDER", "openai")
 CLAUDE_API_KEY = _opt("CLAUDE_API_KEY", "")
 CLAUDE_MODEL = _opt("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
+# Модель Claude для голоса (пусто = та же, что CLAUDE_MODEL).
+CLAUDE_VOICE_MODEL = _opt("CLAUDE_VOICE_MODEL", "")
 
 # ── YClients ────────────────────────────────────────────────────────────────
 YCLIENTS_PARTNER_TOKEN = _req("YCLIENTS_PARTNER_TOKEN")
@@ -84,10 +156,17 @@ SITE_URL = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai"        # www.мужс
 APP_URL  = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app"    # www.мужскаяэстетика.рф/app
 
 # ── VK ID (вход через ВКонтакте) ──────────────────────────────────────────────
-VK_APP_ID = 54619325                       # публичный id приложения — не секрет
+VK_APP_ID = 54620400                       # публичный id приложения — не секрет
 VK_SECURE_KEY = _opt("VK_SECURE_KEY", "")  # «Защищённый ключ» (client_secret) — СЕКРЕТ
 VK_REDIRECT_URI = "https://malesthetic.pro/app/"
 VK_LOGIN_ENABLED = False
+
+# ── Yandex ID (вход через Яндекс) ─────────────────────────────────────────────
+YANDEX_CLIENT_ID = _opt("YANDEX_CLIENT_ID", "")
+YANDEX_CLIENT_SECRET = _opt("YANDEX_CLIENT_SECRET", "")
+YANDEX_REDIRECT_URI = _opt("YANDEX_REDIRECT_URI", "https://malesthetic.pro/app/")
+YANDEX_LOGIN_ENABLED = _opt("YANDEX_LOGIN_ENABLED", "False").lower() in ("1", "true", "yes", "on")
+YANDEX_STAFF_CHAT_MAP = {}  # {"yandex_user_id": telegram_chat_id, "email@yandex.ru": telegram_chat_id}
 
 # ── Расход: серверы и fal.ai (для /ai_cost и панели) — не секрет ───
 SERVER_COSTS_RUB = {
@@ -124,6 +203,17 @@ YUKASSA_SECRET_KEY = _opt("YUKASSA_SECRET_KEY", "")          # 'live_...' из �
 BOT_USERNAME = "malesthetic_bot"
 REMINDER_MINUTES_BEFORE = 120
 
+# Рейтинг салона на картах — Майя называет эти цифры, если спрашивают про
+# рейтинг/отзывы. Оставь пустым, если не хочешь озвучивать конкретные числа
+# (тогда Майя просто скажет «высокие оценки» и даст ссылки). Формат — как удобно
+# произнести: "4.9 (более 300 отзывов)".
+SALON_RATING_YANDEX = _opt("SALON_RATING_YANDEX", "")
+SALON_RATING_2GIS = _opt("SALON_RATING_2GIS", "")
+# 2ГИС Places API: официальная автоматическая синхронизация рейтинга и количества.
+# API не отдаёт тексты отзывов; они импортируются отдельно из разрешённого источника.
+TWOGIS_API_KEY = _opt("TWOGIS_API_KEY", "")
+TWOGIS_BRANCH_ID = _opt("TWOGIS_BRANCH_ID", "70000001038177627")
+
 # ── Шифрование ПД (152-ФЗ, Fernet) ────────────────────────────────────────────
 # ВНИМАНИЕ: смена этого ключа делает уже зашифрованные ПД нечитаемыми.
 # Ротировать ТОЛЬКО с миграцией (перешифровать данные старым→новым ключом).
@@ -140,5 +230,9 @@ WEBHOOK_BIND = _opt("WEBHOOK_BIND", "0.0.0.0")
 # ── AI-советы мастерам ────────────────────────────────────────────────────────
 MASTERS_AI_PROVIDER = "openai"              # "claude" | "openai"
 MASTERS_CLAUDE_MODEL = "claude-haiku-4-5"   # legacy/fallback
-MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", "gpt-5.4")
+MASTERS_OPENAI_MODEL = _opt("MASTERS_OPENAI_MODEL", OPENAI_CHAT_MODEL)
 MASTERS_AI_TIMEOUT = 5.0
+
+# Персональный план мастера отправляется утром на текущий рабочий день.
+# Scheduler работает каждые 10 минут и не повторяет уже доставленный план.
+MASTER_DAY_BRIEF_SEND_HOUR = int(float(_opt("MASTER_DAY_BRIEF_SEND_HOUR", "8") or "8"))

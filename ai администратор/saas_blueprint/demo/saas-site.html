@@ -1,38 +1,67 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark">
+<html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" id="metaTheme" content="#f3f0e9">
+<meta name="description" content="MAYA — фирменное приложение вашего салона поверх YClients: ИИ-администратор 24/7, магазин, лояльность и аналитика. Запуск за вечер.">
 <title>MAYA — приложение вашего салона на YClients</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#060607; --bg2:#0d0d0f; --ink:#f5f5f6; --mut:#86868b; --faint:#5a5a60;
+  /* тёмная база (фичевые секции) */
+  --bg:#0b0b0d; --bg2:#111114; --ink:#f5f5f6; --mut:#8a8a90; --faint:#5e5e66;
   --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.18);
-  --panel:#0e0e10; --panel2:#141416;
+  --panel:#111114; --panel2:#17171b;
+  /* цветные акценты */
+  --acc:#7c6cff; --acc2:#18c29c; --acc3:#ff7a59; --acc4:#3b9dff; --acc5:#ffb020;
+  --acc-dim:rgba(124,108,255,.16);
+  /* светлая «бумага» */
+  --paper:#f3f0e9; --paper2:#e9e5db; --ink-d:#15140f; --pink:#15140f; --pmut:#6b675e; --pline:rgba(20,18,12,.12);
 }
-[data-theme="light"]{
-  --bg:#fbfbfa; --bg2:#f1f1ef; --ink:#0a0a0b; --mut:#6a6a6f; --faint:#a0a0a5;
-  --line:rgba(0,0,0,.12); --line2:rgba(0,0,0,.22);
-  --panel:#ffffff; --panel2:#f4f4f2;
-}
+/* локальный «светлый» скоуп — переопределяет токены, компоненты адаптируются сами */
+.lightsec{background:var(--paper);color:var(--ink-d);
+  --ink:var(--ink-d); --mut:var(--pmut); --faint:#9a968c;
+  --line:var(--pline); --line2:rgba(20,18,12,.2);
+  --panel:#ffffff; --panel2:#faf8f3; --acc-dim:rgba(124,108,255,.12);}
+.lightsec{border-bottom:1px solid var(--pline)}
+.lightsec .btn-primary{background:#15140f;color:#fff}
+.lightsec .btn-primary:hover{opacity:.9}
+.lightsec .btn-ghost{color:var(--ink-d);border-color:var(--pline)}
+.lightsec .btn-ghost:hover{border-color:rgba(20,18,12,.28)}
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,sans-serif;line-height:1.6;
-  overflow-x:hidden;transition:background .4s,color .4s;-webkit-font-smoothing:antialiased}
+  overflow-x:clip;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 a{color:inherit;text-decoration:none}
-h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;line-height:1.04;font-weight:600}
+h1,h2,h3{font-family:'Inter Tight','Inter',sans-serif;letter-spacing:-.03em;line-height:1.05;font-weight:700}
+h4{font-family:'Inter Tight','Inter',sans-serif;letter-spacing:-.02em}
 .muted{color:var(--mut)}
+section{padding:104px 0;border-bottom:1px solid var(--line);scroll-margin-top:72px;position:relative}
+::selection{background:var(--acc);color:#fff}
 
-/* nav */
-nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);
-  background:color-mix(in srgb,var(--bg) 72%,transparent);border-bottom:1px solid var(--line)}
-.nav{display:flex;align-items:center;justify-content:space-between;height:66px}
-.logo{font-family:'Space Grotesk';font-weight:700;font-size:20px;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
-.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--ink)}
-.navlinks{display:flex;gap:30px;align-items:center;font-size:14px}
+/* ---------- preloader ---------- */
+#preloader{position:fixed;inset:0;z-index:99999;display:flex;pointer-events:none}
+.pl-col{flex:1;height:100%;background:#0a0a0b;transform-origin:top center}
+#plMark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Space Grotesk';font-weight:700;font-size:22px;letter-spacing:.34em;color:#f5f5f6;padding-left:.34em}
+#plMark .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:14px;animation:plPulse 1.1s ease-in-out infinite}
+@keyframes plPulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+
+/* ---------- editorial grid overlay ---------- */
+.grid-overlay{position:fixed;inset:0;z-index:60;pointer-events:none;
+  background-image:linear-gradient(90deg,rgba(127,127,127,.05) 0 1px,transparent 1px 100%);
+  background-size:calc(100%/12) 100%}
+
+/* ---------- nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:80;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:color-mix(in srgb,var(--bg) 74%,transparent);border-bottom:1px solid var(--line);
+  transform:translateY(-110%);}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:'Space Grotesk';font-weight:700;font-size:19px;letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+.logo .dot{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.navlinks{display:flex;gap:28px;align-items:center;font-size:14px}
 .navlinks a{color:var(--mut);transition:color .2s}
 .navlinks a:hover{color:var(--ink)}
 .navbtns{display:flex;gap:10px;align-items:center}
@@ -40,45 +69,95 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);
 .iconbtn:hover{border-color:var(--line2)}
 .btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;padding:12px 20px;font-weight:600;font-size:14px;cursor:pointer;border:1px solid transparent;font-family:'Inter';transition:transform .15s,opacity .2s,border-color .2s,background .2s;white-space:nowrap}
 .btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,.iconbtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.btn:active{transform:translateY(0) scale(.985)}
 .btn-primary{background:var(--ink);color:var(--bg)}
-.btn-primary:hover{opacity:.88}
+.btn-primary:hover{opacity:.9}
 .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
 .btn-ghost:hover{border-color:var(--line2)}
+.rl{position:relative;display:inline-block;overflow:hidden;line-height:1.3em;vertical-align:middle;white-space:nowrap}
+.rl-dup{position:absolute;left:0;top:0;width:100%}
 .navBurger{display:none}
 @media(max-width:820px){
-  .navlinks{position:absolute;top:66px;left:0;right:0;flex-direction:column;align-items:stretch;background:var(--bg2);border-bottom:1px solid var(--line);padding:8px 24px 16px;gap:2px;display:none;box-shadow:0 22px 40px rgba(0,0,0,.4)}
+  .navlinks{position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:stretch;background:var(--bg2);border-bottom:1px solid var(--line);padding:8px 24px 16px;gap:2px;display:none;box-shadow:0 22px 40px rgba(0,0,0,.4)}
   .navlinks.open{display:flex}
   .navlinks a{padding:12px 2px;font-size:15px}
   .navBurger{display:inline-flex;align-items:center;justify-content:center}
 }
 
-/* hero */
-.hero{position:relative;overflow:hidden;min-height:92vh;display:flex;align-items:center;border-bottom:1px solid var(--line)}
-#pollen{position:absolute;inset:0;width:100%;height:100%;z-index:0}
-.heroIn{position:relative;z-index:2;text-align:center;padding:90px 0 100px;width:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* ---------- hero (пин-переворот: до MAYA → с MAYA) ---------- */
+.hero{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--paper)}
+#pollen{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0;visibility:hidden}
+.heroStage{position:relative;z-index:2;height:100%}
+.hstate{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px}
+.hstate>*:not(.fcardH){position:relative;z-index:1}
+.fcardH{z-index:0}
+.heroB{opacity:0;visibility:hidden;pointer-events:none}
+
+.heroChip{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--pmut);
+  border:1px solid var(--pline);padding:7px 16px;border-radius:30px;margin-bottom:28px;background:rgba(255,255,255,.5)}
+.heroChip .tdot{width:7px;height:7px;border-radius:50%;background:#d64545}
+.h1A{color:var(--pink);font-size:clamp(38px,7vw,86px);font-weight:700;letter-spacing:-.04em;max-width:15ch}
+.subA{color:var(--pmut);font-size:clamp(15px,1.8vw,19px);margin-top:24px;max-width:520px}
+
 .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12.5px;color:var(--mut);
-  border:1px solid var(--line);padding:7px 15px;border-radius:30px;background:color-mix(in srgb,var(--bg) 50%,transparent);margin-bottom:30px;backdrop-filter:blur(6px)}
-.eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 0 var(--ink);animation:pulse 2.4s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ink) 50%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.hero h1{font-size:clamp(42px,7.6vw,88px);font-weight:700;letter-spacing:-.04em;margin:0 auto;max-width:14ch}
-.hero h1 em{font-style:normal;-webkit-text-stroke:1.4px var(--ink);color:transparent;-webkit-text-fill-color:transparent}
-.hero p.lead{font-size:clamp(16px,1.9vw,20px);color:var(--mut);margin:26px auto 34px;max-width:600px}
+  border:1px solid var(--line);padding:7px 15px;border-radius:30px;margin-bottom:28px;background:color-mix(in srgb,var(--bg) 50%,transparent);backdrop-filter:blur(6px)}
+.eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 0 var(--acc);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(143,125,255,.5)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.h1B{font-size:clamp(38px,6.6vw,82px);font-weight:700;letter-spacing:-.04em}
+.h1B em{font-style:normal;-webkit-text-stroke:1.4px var(--ink);color:transparent;-webkit-text-fill-color:transparent}
+.lmask{display:block;overflow:hidden;padding-bottom:.06em;margin-bottom:-.06em}
+.bigline{display:block;will-change:transform}
+.leadB{font-size:clamp(15px,1.9vw,19px);color:var(--mut);margin:24px auto 32px;max-width:580px}
 .heroCtas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 .microcopy{font-size:12.5px;color:var(--faint);margin-top:16px}
-.trust{display:flex;gap:36px;margin-top:48px;flex-wrap:wrap;justify-content:center;color:var(--mut);font-size:13px}
-.trust b{display:block;color:var(--ink);font-family:'Space Grotesk';font-weight:600;font-size:15px;margin-bottom:2px}
-.scrollHint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:2;color:var(--faint);font-size:20px;animation:bob 2s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
+.trust{display:flex;gap:34px;margin-top:40px;flex-wrap:wrap;justify-content:center;color:var(--mut);font-size:13px}
+.trust b{display:block;color:var(--ink);font-family:'Inter Tight','Inter',sans-serif;font-weight:700;font-size:15px;margin-bottom:2px}
+.scrollHint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:3;color:var(--pmut);font-size:12.5px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;letter-spacing:.12em;text-transform:uppercase}
+.scrollHint i{font-size:19px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
-/* sections */
-section{padding:96px 0;border-bottom:1px solid var(--line)}
+/* плавающие карточки хиро */
+.fcardH{position:absolute;width:250px;text-align:left;border-radius:16px;padding:14px 16px;font-size:13.5px;line-height:1.45;will-change:transform}
+.fcardH .fm{display:block;font-size:11.5px;margin-top:8px;letter-spacing:.02em}
+.chaos-card{background:#fff;color:var(--pink);border:1px solid var(--pline);box-shadow:0 18px 40px rgba(20,20,20,.10)}
+.chaos-card .fm{color:#9b978e}
+.solve-card{background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.solve-card .fm{color:var(--faint)}
+.solve-card .fm b{color:var(--acc);font-weight:600}
+.solve-card.maya{border-color:rgba(143,125,255,.35)}
+.solve-card .who{display:flex;align-items:center;gap:8px;font-weight:600;font-size:12px;margin-bottom:7px;color:var(--mut)}
+.solve-card .who .mdot{width:7px;height:7px;border-radius:50%;background:var(--acc)}
+.stars{color:#d6a545;letter-spacing:2px;font-size:12px}
+.hp1{top:15%;left:3.5%} .hp2{top:13%;right:3.5%}
+.hp3{bottom:14%;left:4.5%}.hp4{bottom:10%;right:3%}
+.hp5{top:44%;left:2.5%;max-width:230px}
+.phoneCard{width:180px;padding:0;overflow:hidden;border-radius:22px}
+.phoneCard img{display:block;width:100%;height:auto}
+@media(max-width:1050px){.hp5{display:none}.fcardH{width:210px;font-size:12.5px}.phoneCard{width:150px}}
+@media(max-width:820px){.hp3{display:none}.hp1{top:10%;left:3%}.hp2{top:auto;bottom:12%;right:3%}.hp4{display:none}
+  .fcardH{width:min(200px,44vw)}
+  .heroB .fcardH{display:none}} /* в тёмной сцене на телефоне карточкам нет места */
+
+/* ---------- живой счётчик ---------- */
+#live{padding:120px 0;text-align:center;position:relative}
+#live .huge{font-family:'Space Grotesk';font-weight:700;font-size:clamp(72px,14vw,180px);letter-spacing:-.04em;
+  line-height:1;color:var(--acc);font-variant-numeric:tabular-nums}
+#live .cap{font-size:clamp(15px,1.9vw,19px);color:var(--mut);max-width:560px;margin:18px auto 0}
+#live .cap b{color:var(--ink);font-weight:600}
+#live .sub{font-size:13px;color:var(--faint);margin-top:12px}
+#live .sub b{color:var(--acc);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---------- sections common ---------- */
 .sec-head{max-width:680px;margin-bottom:48px}
-.kicker{color:var(--mut);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px;font-family:'Space Grotesk'}
-.sec-head h2{font-size:clamp(28px,3.8vw,44px);font-weight:600}
+.kicker{color:var(--mut);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px;font-family:'Inter Tight','Inter',sans-serif}
+.kicker::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:9px;vertical-align:1px}
+.sec-head h2{font-size:clamp(30px,4.2vw,50px);font-weight:600}
 .sec-head p{color:var(--mut);margin-top:16px;font-size:16.5px}
 
 /* what */
+#manifesto{font-family:'Inter Tight','Inter',sans-serif;font-weight:600;font-size:clamp(19px,2.6vw,29px);line-height:1.42;letter-spacing:-.015em;max-width:920px;margin-bottom:56px}
 .what{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
 @media(max-width:780px){.what{grid-template-columns:1fr}}
 .whatCard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;transition:border-color .25s}
@@ -89,71 +168,101 @@ section{padding:96px 0;border-bottom:1px solid var(--line)}
 .flow .pill{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 15px}
 .flow i{color:var(--faint)}
 
-/* feature grid */
-.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:880px){.feat{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.feat{grid-template-columns:1fr}}
+/* feature cards (why / forwhom) */
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .fcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;transition:transform .2s,border-color .25s}
 .fcard:hover{transform:translateY(-4px);border-color:var(--line2)}
 .fcard .ic{width:46px;height:46px;border-radius:13px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--ink);margin-bottom:16px}
 .fcard h3{font-size:17px;margin-bottom:7px;font-weight:600}
 .fcard p{color:var(--mut);font-size:14px}
+.hang{transform-origin:top center;will-change:transform}
+.hang:hover{transform:none}
 
-/* steps */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
-@media(max-width:780px){.steps{grid-template-columns:1fr}}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;position:relative}
-.step::before{counter-increment:s;content:"0" counter(s);font-family:'Space Grotesk';font-weight:700;font-size:42px;color:var(--ink);opacity:.14}
-.step h3{font-size:19px;margin:12px 0 9px;font-weight:600}
-.step p{color:var(--mut);font-size:14.5px}
+/* ---------- deck (возможности) ---------- */
+.deckWrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+@media(max-width:880px){.deckWrap{grid-template-columns:1fr;gap:36px}}
+.deckText h3{font-size:clamp(24px,3vw,36px);font-weight:600;min-height:2.2em}
+.deckText p{color:var(--mut);font-size:16px;margin-top:14px;min-height:5.2em}
+.deckIdx{font-family:'Space Grotesk';font-size:13px;color:var(--faint);letter-spacing:.14em;margin-top:22px}
+.deckIdx b{color:var(--acc);font-weight:600}
+.deckNav{display:flex;gap:12px;margin-top:18px}
+.deckNav button{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center;transition:transform .2s,border-color .2s}
+.deckNav button:hover{border-color:var(--line2);transform:scale(1.06)}
+.deckNav button:active{transform:scale(.94)}
+.deckNav button:disabled{opacity:.4;cursor:not-allowed}
+#deckStack{position:relative;height:400px}
+.deck-card{position:absolute;inset:0;margin:auto;width:min(380px,92%);height:330px;border-radius:22px;
+  background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  padding:28px;display:flex;flex-direction:column;justify-content:space-between;will-change:transform;
+  box-shadow:0 24px 60px rgba(0,0,0,.45);cursor:pointer}
+.deck-card .num{font-family:'Space Grotesk';font-weight:700;font-size:15px;color:var(--faint)}
+.deck-card .ic{width:56px;height:56px;border-radius:16px;background:var(--acc-dim);border:1px solid rgba(143,125,255,.3);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--acc)}
+.deck-card h4{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.deck-card .tag{font-size:12.5px;color:var(--mut)}
+
+/* ---------- how: sticky-каскад ---------- */
+.cascade{display:flex;flex-direction:column;gap:26px}
+.cascade-card{position:sticky;background:var(--panel);border:1px solid var(--line2);border-radius:22px;
+  padding:44px 40px;min-height:300px;display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:center;
+  box-shadow:0 -18px 50px rgba(0,0,0,.45)}
+.cascade-card .bignum{font-family:'Space Grotesk';font-weight:700;font-size:clamp(56px,8vw,110px);line-height:1;color:transparent;-webkit-text-stroke:1.3px var(--faint)}
+.cascade-card h3{font-size:clamp(20px,2.4vw,28px);margin-bottom:12px}
+.cascade-card p{color:var(--mut);font-size:15.5px;max-width:560px}
+.cascade-card:nth-child(1){top:88px;z-index:1}
+.cascade-card:nth-child(2){top:104px;z-index:2}
+.cascade-card:nth-child(3){top:120px;z-index:3}
+@media(max-width:680px){.cascade-card{grid-template-columns:1fr;gap:10px;padding:30px 24px;min-height:240px}}
 
 /* compare */
 .cmp{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--panel)}
 .cmp-row{display:grid;grid-template-columns:1.7fr 1fr 1fr;align-items:center;border-top:1px solid var(--line)}
 .cmp-row:first-child{border-top:none}
 .cmp-row>div{padding:15px 18px;font-size:14.5px}
-.cmp-row.cmp-head>div{color:var(--mut);font-size:13px;font-weight:600;font-family:'Space Grotesk'}
+.cmp-row.cmp-head>div{color:var(--mut);font-size:13px;font-weight:600;font-family:'Inter Tight','Inter',sans-serif}
 .cmp-row>div:nth-child(2),.cmp-row>div:nth-child(3){text-align:center}
-.cmp-row>div:nth-child(3){background:color-mix(in srgb,var(--ink) 6%,transparent);font-weight:600}
+.cmp-row>div:nth-child(3){background:var(--acc-dim);font-weight:600}
 .cmp .yes{color:var(--ink);font-weight:700}.cmp .no{color:var(--faint)}
 @media(max-width:560px){.cmp-row{grid-template-columns:1.5fr .7fr .7fr}.cmp-row>div{padding:12px 9px;font-size:12.5px}}
+
+/* results */
+.bignum-stat{font-family:'Space Grotesk';font-weight:700;font-size:46px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 
 /* pricing */
 .plans{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:30px;max-width:780px;margin-left:auto;margin-right:auto}
 @media(max-width:780px){.plans{grid-template-columns:1fr}}
 .plan{position:relative;background:var(--panel);border:1.5px solid var(--line);border-radius:20px;padding:26px;cursor:pointer;transition:border-color .2s,transform .15s}
 .plan:hover{transform:translateY(-2px)}
-.plan[aria-selected="true"]{border-color:var(--ink)}
-.plan .pt{font-family:'Space Grotesk';font-weight:600;font-size:22px}
+.plan[aria-selected="true"]{border-color:var(--acc)}
+.plan .pt{font-family:'Inter Tight','Inter',sans-serif;font-weight:700;font-size:22px}
 .plan .pg{color:var(--mut);font-size:13px;margin-top:3px;min-height:34px}
 .plan .pp{font-size:34px;font-family:'Space Grotesk';font-weight:700;margin:10px 0 2px;letter-spacing:-.02em}
 .plan .pp small{font-size:14px;color:var(--mut);font-weight:500;font-family:'Inter'}
 .plan .pm{font-size:12px;color:var(--mut);margin-bottom:16px}
 .plan ul{list-style:none;display:flex;flex-direction:column;gap:8px}
-.plan li{font-size:13px;display:flex;gap:9px;color:var(--mut)}.plan li .c{color:var(--ink)}
+.plan li{font-size:13px;display:flex;gap:9px;color:var(--mut)}.plan li .c{color:var(--acc)}
 .plan .radio{position:absolute;top:22px;right:22px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line)}
-.plan[aria-selected="true"] .radio{border-color:var(--ink);background:radial-gradient(circle,var(--ink) 0 5px,transparent 6px)}
-.badge{position:absolute;top:-11px;left:26px;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;font-family:'Space Grotesk';letter-spacing:.02em}
+.plan[aria-selected="true"] .radio{border-color:var(--acc);background:radial-gradient(circle,var(--acc) 0 5px,transparent 6px)}
+.badge{position:absolute;top:-11px;left:26px;background:var(--acc);color:#fff;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;font-family:'Inter Tight','Inter',sans-serif;letter-spacing:.02em}
 .addons{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;max-width:780px;margin:0 auto}
 @media(max-width:680px){.addons{grid-template-columns:1fr}}
 .addon{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .2s}
-.addon[aria-pressed="true"]{border-color:var(--ink)}.addon.incl{opacity:.6;cursor:default}
+.addon[aria-pressed="true"]{border-color:var(--acc)}.addon.incl{opacity:.6;cursor:default}
 .addon .at{font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
 .addon .ag{font-size:12.5px;color:var(--mut)}.addon .ap{font-size:13px;font-weight:600;margin-top:4px}
 .soon{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);border:1px solid var(--line);border-radius:20px;padding:2px 8px;margin-left:8px}
 .sw{flex:none;width:40px;height:23px;border-radius:20px;background:var(--line);position:relative;transition:background .2s}
 .sw::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--mut);transition:left .2s,background .2s}
-.addon[aria-pressed="true"] .sw{background:var(--ink)}.addon[aria-pressed="true"] .sw::after{left:18px;background:var(--bg)}
+.addon[aria-pressed="true"] .sw{background:var(--acc)}.addon[aria-pressed="true"] .sw::after{left:18px;background:#fff}
 .priceBar{margin:28px auto 0;max-width:780px;background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:22px 26px;
   display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.priceBar .tot{font-family:'Space Grotesk';font-weight:700;font-size:34px;letter-spacing:-.02em}
+.priceBar .tot{font-family:'Space Grotesk';font-weight:700;font-size:34px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .priceBar .tot small{font-size:14px;color:var(--mut);font-weight:500;font-family:'Inter'}
 
 /* panel teaser */
 .panelTease{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center}
 @media(max-width:880px){.panelTease{grid-template-columns:1fr}}
 .miniDash{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.miniDash .mh{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);font-family:'Space Grotesk'}
+.miniDash .mh{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);font-family:'Inter Tight','Inter',sans-serif}
 .miniRow{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13.5px}
 .miniRow:last-child{border-bottom:none}
 .miniRow .l{display:flex;align-items:center;gap:10px}
@@ -173,59 +282,172 @@ section{padding:96px 0;border-bottom:1px solid var(--line)}
 .q p{padding:0 22px 20px;color:var(--mut);font-size:14.5px}
 
 /* final */
-.final{text-align:center}
-.final h2{font-size:clamp(30px,4.4vw,52px);font-weight:700;letter-spacing:-.03em}
-.final p{color:var(--mut);margin:18px auto 30px;max-width:540px}
+.final{text-align:center;padding:130px 0}
+.final h2{font-size:clamp(34px,5vw,64px);font-weight:700;letter-spacing:-.03em}
+.final p{color:var(--mut);margin:20px auto 32px;max-width:540px}
 footer{padding:42px 0;color:var(--mut);font-size:13px}
 
+/* reveal + sparkles */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
+.spark{position:fixed;pointer-events:none;z-index:9999;font-size:15px;color:var(--acc);user-select:none;will-change:transform}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  .reveal{opacity:1;transform:none}
+}
+
+/* ============ РЕДИЗАЙН: хиро с рукой-телефоном, шкалы, меню-таблетка ============ */
+
+/* --- хиро: центрированная рука с телефоном + скраб-скролл --- */
+.hero{position:relative;height:100svh;overflow:hidden;padding:0;
+  background:radial-gradient(120% 92% at 50% 38%, #fbf7f0 0%, #f3efe7 68%, #eee9df 100%)}
+.hero .blob{position:absolute;border-radius:50%;filter:blur(80px);z-index:0;pointer-events:none}
+.blobA{width:520px;height:520px;background:var(--acc);top:-120px;right:4%;opacity:.20}
+.blobB{width:460px;height:460px;background:var(--acc2);bottom:-140px;left:2%;opacity:.16}
+.blobC{width:380px;height:380px;background:var(--acc3);top:40%;right:8%;opacity:.11}
+.blobD{width:360px;height:360px;background:var(--acc4);top:36%;left:6%;opacity:.10}
+.heroInner{position:relative;z-index:2;height:100%;max-width:1140px;margin:0 auto;padding:78px 24px 26px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center}
+.hChip{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-d);
+  border:1px solid var(--pline);padding:7px 15px;border-radius:30px;margin-bottom:16px;background:rgba(255,255,255,.7);backdrop-filter:blur(6px)}
+.hChip .pulse{width:7px;height:7px;border-radius:50%;background:var(--acc2);box-shadow:0 0 0 0 var(--acc2);animation:pulse 2.4s infinite}
+.hHead{color:var(--ink-d);font-size:clamp(34px,5.7vw,74px);font-weight:800;letter-spacing:-.045em;line-height:.98}
+.heroTop,.heroBottom{position:relative;z-index:4;flex:none;will-change:transform}
+.heroPhone{position:relative;z-index:3;flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.heroPhone .phone{height:min(60vh,600px);width:auto;max-width:94%;object-fit:contain;will-change:transform;
+  -webkit-mask:radial-gradient(100% 108% at 50% 47%, #000 46%, transparent 74%);
+          mask:radial-gradient(100% 108% at 50% 47%, #000 46%, transparent 74%)}
+.hTag{font-family:'Inter Tight','Inter',sans-serif;font-weight:700;font-size:clamp(17px,2.3vw,27px);letter-spacing:-.02em;color:var(--ink-d);max-width:640px;margin:0 auto}
+.hTag .g{background:linear-gradient(96deg,var(--acc),var(--acc4) 48%,var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .heroCtas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.fchip{position:absolute;background:#fff;border:1px solid rgba(20,18,12,.07);border-radius:14px;
+  padding:10px 13px;font-size:12.5px;font-weight:600;color:var(--ink-d);
+  box-shadow:0 14px 34px rgba(20,18,12,.16);display:flex;align-items:center;gap:9px;white-space:nowrap;will-change:transform;z-index:5}
+.fchip .cd{width:9px;height:9px;border-radius:50%;flex:none}
+.fchip small{display:block;font-weight:500;color:var(--pmut);font-size:11px;margin-top:1px}
+.fc1{top:6%;left:2%;animation:floaty 5.5s ease-in-out infinite}
+.fc2{top:30%;right:1%;animation:floaty 6.5s ease-in-out infinite .4s}
+.fc3{bottom:8%;left:4%;animation:floaty 6s ease-in-out infinite .8s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@media(max-width:1050px){.fc1{left:-1%}.fc2{right:-1%}.fc3{left:0}}
+@media(max-width:820px){
+  .heroInner{padding:70px 20px 20px}
+  .heroPhone .phone{height:auto;width:min(70vw,320px);max-width:none}
+  .fc2{display:none}.fc1{top:4%;left:0}.fc3{bottom:6%;left:0}
+  .fchip{font-size:11px;padding:8px 10px}
+}
+
+/* --- меню-таблетка снизу --- */
+#pillnav{position:fixed;left:50%;bottom:22px;z-index:80;display:flex;align-items:center;gap:2px;
+  background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:44px;padding:7px 7px 7px 6px;
+  box-shadow:0 16px 44px rgba(0,0,0,.24);transform:translate(-50%,160%);
+  transition:transform .7s cubic-bezier(.2,.7,.2,1);font-size:13.5px}
+#pillnav.up{transform:translate(-50%,0)}
+.pn-brand{display:flex;align-items:center;gap:8px;font-family:'Inter Tight','Inter',sans-serif;font-weight:800;color:#141414;padding:0 12px 0 12px;letter-spacing:.02em}
+.pn-dot{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+#pillnav a{color:#4a4a4a;padding:9px 13px;border-radius:26px;transition:background .2s,color .2s;font-weight:500}
+#pillnav a:hover{background:#f1f0ee;color:#111}
+#pillnav a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.pn-cta{background:#141414 !important;color:#fff !important;font-weight:600 !important;margin-left:2px}
+.pn-cta:hover{background:#000 !important;color:#fff !important}
+@media(max-width:680px){#pillnav a:not(.pn-cta){display:none}#pillnav{bottom:16px}}
+
+/* --- секция шумовых шкал --- */
+#chart{padding:104px 0}
+#chart .barsWrap{position:relative;margin-top:44px}
+#barCanvas{display:block;width:100%;height:500px}
+@media(max-width:640px){#barCanvas{height:380px}}
+#chart .chartFoot{margin-top:22px;font-size:12.5px;color:var(--pmut)}
+
+/* --- цветные вставки --- */
+.kicker.k-mint::before{background:var(--acc2)}
+.kicker.k-coral::before{background:var(--acc3)}
+.kicker.k-blue::before{background:var(--acc4)}
+.kicker.k-amber::before{background:var(--acc5)}
+#live .huge{background:linear-gradient(92deg,var(--acc),var(--acc4) 55%,var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.deck-card:nth-child(5n+1) .ic{color:var(--acc); background:rgba(124,108,255,.14);border-color:rgba(124,108,255,.32)}
+.deck-card:nth-child(5n+2) .ic{color:var(--acc2);background:rgba(24,194,156,.14);border-color:rgba(24,194,156,.32)}
+.deck-card:nth-child(5n+3) .ic{color:var(--acc3);background:rgba(255,122,89,.14);border-color:rgba(255,122,89,.32)}
+.deck-card:nth-child(5n+4) .ic{color:var(--acc4);background:rgba(59,157,255,.14);border-color:rgba(59,157,255,.32)}
+.deck-card:nth-child(5n+5) .ic{color:var(--acc5);background:rgba(255,176,32,.14);border-color:rgba(255,176,32,.32)}
+#why .fcard:nth-child(4n+1) .ic{color:var(--acc)} #why .fcard:nth-child(4n+2) .ic{color:var(--acc2)}
+#why .fcard:nth-child(4n+3) .ic{color:var(--acc3)} #why .fcard:nth-child(4n+4) .ic{color:var(--acc4)}
+#forwhom .fcard:nth-child(4n+1) .ic{color:var(--acc4)} #forwhom .fcard:nth-child(4n+2) .ic{color:var(--acc3)}
+#forwhom .fcard:nth-child(4n+3) .ic{color:var(--acc2)} #forwhom .fcard:nth-child(4n+4) .ic{color:var(--acc5)}
+.res-a{color:var(--acc2) !important}.res-b{color:var(--acc3) !important}
 </style>
 </head>
 <body>
 
-<nav><div class="wrap nav">
-  <div class="logo"><span class="dot"></span>MAYA</div>
-  <div class="navlinks">
-    <a href="#what">О продукте</a>
-    <a href="#features">Возможности</a>
-    <a href="#how">Как работает</a>
-    <a href="#pricing">Тарифы</a>
-    <a href="panel.html">Панель</a>
-  </div>
-  <div class="navbtns">
-    <button class="iconbtn navBurger" id="navBurger" aria-label="Меню"><i class="ti ti-menu-2"></i></button>
-    <button class="iconbtn" id="themeBtn" title="Тема">☾</button>
-    <a class="btn btn-primary" href="onboarding.html">Подключить салон</a>
-  </div>
-</div></nav>
+<div id="preloader" aria-hidden="true">
+  <div class="pl-col"></div><div class="pl-col"></div><div class="pl-col"></div><div class="pl-col"></div>
+  <div class="pl-col"></div><div class="pl-col"></div><div class="pl-col"></div><div class="pl-col"></div>
+  <div class="pl-col"></div><div class="pl-col"></div><div class="pl-col"></div><div class="pl-col"></div>
+  <div id="plMark"><span class="dot"></span>MAYA</div>
+</div>
 
-<header class="hero">
-  <canvas id="pollen"></canvas>
-  <div class="wrap heroIn">
-    <span class="eyebrow"><span class="pulse"></span>Работает поверх вашего YClients</span>
-    <h1>Ваш салон.<br>Ваше приложение.<br><em>Ваш ИИ.</em></h1>
-    <p class="lead">Фирменное приложение поверх вашего YClients — с вашим логотипом, ИИ-администратором 24/7 и аналитикой, которая считает деньги за вас. Запуск за вечер, без разработчиков и миграций.</p>
-    <div class="heroCtas">
-      <a class="btn btn-primary" href="onboarding.html"><i class="ti ti-plug-connected"></i> Подключить салон</a>
-      <a class="btn btn-ghost" href="#features">Посмотреть возможности</a>
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<!-- белое выезжающее меню-таблетка (как на референсе) -->
+<div id="pillnav" aria-label="Навигация">
+  <span class="pn-brand"><span class="pn-dot"></span>MAYA</span>
+  <a href="#features">Возможности</a>
+  <a href="#how">Как работает</a>
+  <a href="#pricing">Тарифы</a>
+  <a class="pn-cta btn-roll" href="onboarding.html"><span class="rl">Подключить</span></a>
+</div>
+
+<!-- ХИРО: центрированная рука с телефоном (актуальный интерфейс), скраб-скролл -->
+<header class="hero lightsec" id="hero">
+  <span class="blob blobA"></span><span class="blob blobB"></span><span class="blob blobC"></span><span class="blob blobD"></span>
+  <div class="heroInner">
+    <div class="heroTop">
+      <span class="hChip"><span class="pulse"></span>Работает поверх вашего YClients</span>
+      <h1 class="hHead" aria-label="Приложение вашего салона">Приложение<br>вашего салона</h1>
     </div>
-    <div class="microcopy">Бесплатный пробный период · подключение за вечер · без обязательств</div>
-    <div class="trust">
-      <span><b>YClients</b>ваша база остаётся</span>
-      <span><b>За вечер</b>без разработчиков</span>
-      <span><b>152-ФЗ</b>данные в РФ</span>
+    <div class="heroPhone">
+      <img class="phone" src="hero-phone.webp" alt="Рука держит телефон с приложением салона MAYA" width="1200" height="1490" fetchpriority="high" decoding="async">
+      <div class="fchip fc1"><span class="cd" style="background:var(--acc)"></span><span>MAYA · ответ за 4 сек<small>03:47, ночью</small></span></div>
+      <div class="fchip fc2"><span class="cd" style="background:var(--acc2)"></span><span>Запись создана<small>синхронно с YClients</small></span></div>
+      <div class="fchip fc3"><span class="cd" style="background:var(--acc3)"></span><span>+38 баллов<small>клиент вернётся</small></span></div>
+    </div>
+    <div class="heroBottom">
+      <p class="hTag">С ИИ, который <span class="g">не спит</span> — отвечает и записывает клиентов 24/7</p>
+      <div class="heroCtas">
+        <a class="btn btn-primary btn-roll" href="onboarding.html"><i class="ti ti-plug-connected"></i> <span class="rl">Подключить салон</span></a>
+        <a class="btn btn-ghost" href="#features">Возможности</a>
+      </div>
     </div>
   </div>
-  <div class="scrollHint"><i class="ti ti-chevron-down"></i></div>
 </header>
 
-<section id="what"><div class="wrap">
-  <div class="sec-head reveal">
-    <div class="kicker">Что это</div>
-    <h2>Ваш бренд снаружи, ваш YClients внутри</h2>
-    <p>MAYA — фирменное приложение для барбершопа или салона, которое надевается поверх вашего YClients. На домашнем экране клиента — ваш логотип, ваш цвет, ваше название, рядом с приложениями, которыми он дорожит. Под капотом остаётся YClients, который вы уже знаете: запись, журнал, кабинет сотрудника и зарплаты — всё в синхроне, без миграций и переучивания. А сверху MAYA достраивает то, что окупает себя: ИИ-администратор записывает круглосуточно, аналитика считает деньги за вас, магазин и лояльность возвращают клиента.</p>
+<!-- ШУМОВЫЕ ШКАЛЫ (как на референсе) -->
+<section id="chart" class="lightsec"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker k-coral">Живые цифры</div>
+    <h2 class="sth">С каждым месяцем MAYA берёт<br>на себя всё больше</h2>
+    <p>Сколько диалогов клиентов ИИ-администратор закрыл сам — по месяцам, на пилотном салоне «Мужская Эстетика».</p>
   </div>
+  <div class="barsWrap"><canvas id="barCanvas"></canvas></div>
+  <div class="chartFoot">Данные из боевого развёртывания MAYA, февраль–июнь 2026. Выручка и персональные данные не показываются.</div>
+</div></section>
+
+<!-- живой счётчик -->
+<section id="live">
+  <div class="wrap">
+    <div class="huge" id="liveSec">0</div>
+    <p class="cap">секунд вы на этой странице. Ночной клиент столько ждать не будет — <b>MAYA отвечает за 4 секунды.</b></p>
+    <p class="sub">За это время MAYA успела бы ответить <b id="liveAns">0</b> клиентам</p>
+  </div>
+</section>
+
+<section id="what"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker">Что это</div>
+    <h2 class="sth">Ваш бренд снаружи, ваш YClients внутри</h2>
+  </div>
+  <p id="manifesto">MAYA — фирменное приложение для барбершопа или салона, которое надевается поверх вашего YClients. На домашнем экране клиента — ваш логотип, ваш цвет, ваше название. Под капотом остаётся YClients, который вы уже знаете: запись, журнал, зарплаты — всё в синхроне, без миграций. А сверху MAYA достраивает то, что окупает себя: ИИ-администратор записывает круглосуточно, аналитика считает деньги за вас, магазин и лояльность возвращают клиента.</p>
   <div class="what">
     <div class="whatCard reveal"><h3>Клиенту</h3><p>Записаться, увидеть услуги и мастеров, купить сертификат, накопить баллы, задать вопрос ИИ-администратору — в одном приложении вашего бренда.</p></div>
     <div class="whatCard reveal"><h3>Салону</h3><p>Журнал записи, кабинет мастера, аналитика и зарплаты, дневной отчёт в Telegram — всё в одной панели.</p></div>
@@ -238,9 +460,9 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
 </div></section>
 
 <section id="why"><div class="wrap">
-  <div class="sec-head reveal">
-    <div class="kicker">Почему MAYA</div>
-    <h2>Не просто запись — слой, который окупает себя</h2>
+  <div class="sec-head">
+    <div class="kicker k-blue">Почему MAYA</div>
+    <h2 class="sth">Не просто запись — слой, который окупает себя</h2>
   </div>
   <div class="feat">
     <div class="fcard reveal"><div class="ic"><i class="ti ti-palette"></i></div><h3>Ваш бренд на домашнем экране</h3><p>Логотип, цвет, название — клиент открывает не сервис записи, а ваше приложение. Тот же статус, что у больших сетей, без их бюджетов и без единого чужого логотипа.</p></div>
@@ -250,35 +472,48 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
   </div>
 </div></section>
 
+<!-- возможности: колода карточек -->
 <section id="features"><div class="wrap">
-  <div class="sec-head reveal">
-    <div class="kicker">Возможности</div>
-    <h2>Всё, что нужно салону — в одном приложении</h2>
+  <div class="sec-head">
+    <div class="kicker k-mint">Возможности</div>
+    <h2 class="sth">Всё, что нужно салону — в одном приложении</h2>
     <p>Базовое ядро + модули, которые вы включаете по мере роста.</p>
   </div>
-  <div class="feat" id="featGrid"></div>
+  <div class="deckWrap">
+    <div class="deckText">
+      <h3 id="deckTitle"></h3>
+      <p id="deckDesc"></p>
+      <div class="deckIdx"><b id="deckCur">01</b> — <span id="deckTotal">08</span></div>
+      <div class="deckNav">
+        <button id="deckPrev" aria-label="Предыдущая"><i class="ti ti-arrow-left"></i></button>
+        <button id="deckNext" aria-label="Следующая"><i class="ti ti-arrow-right"></i></button>
+      </div>
+    </div>
+    <div id="deckStack" aria-live="polite"></div>
+  </div>
 </div></section>
 
+<!-- как работает: sticky-каскад -->
 <section id="how"><div class="wrap">
-  <div class="sec-head reveal">
-    <div class="kicker">Как работает</div>
-    <h2>Запуск за три шага</h2>
+  <div class="sec-head">
+    <div class="kicker k-amber">Как работает</div>
+    <h2 class="sth">Запуск за три шага</h2>
     <p>Без разработчиков и переноса базы.</p>
   </div>
-  <div class="steps">
-    <div class="step reveal"><h3>Подключаем ваш YClients</h3><p>MAYA встаёт поверх вашей базы за вечер. Записи, мастера, услуги и расписание подтягиваются как есть — ничего не переносим и не ломаем. Команда продолжает работать в привычном YClients.</p></div>
-    <div class="step reveal"><h3>Надеваем ваш бренд</h3><p>Загружаете логотип, выбираете фирменный цвет и название — и приложение становится вашим. Ни одного чужого логотипа: клиент открывает приложение салона, а не сторонний сервис записи.</p></div>
-    <div class="step reveal"><h3>Включаете то, что приносит деньги</h3><p>Собираете тариф как конструктор: запись, ИИ-администратор, аналитика, магазин и лояльность. В тот же вечер клиенты записываются 24/7, а отчёт по выручке приходит вам в Telegram.</p></div>
+  <div class="cascade">
+    <div class="cascade-card"><div class="bignum">01</div><div><h3>Подключаем ваш YClients</h3><p>MAYA встаёт поверх вашей базы за вечер. Записи, мастера, услуги и расписание подтягиваются как есть — ничего не переносим и не ломаем. Команда продолжает работать в привычном YClients.</p></div></div>
+    <div class="cascade-card"><div class="bignum">02</div><div><h3>Надеваем ваш бренд</h3><p>Загружаете логотип, выбираете фирменный цвет и название — и приложение становится вашим. Ни одного чужого логотипа: клиент открывает приложение салона, а не сторонний сервис записи.</p></div></div>
+    <div class="cascade-card"><div class="bignum">03</div><div><h3>Включаете то, что приносит деньги</h3><p>Собираете тариф как конструктор: запись, ИИ-администратор, аналитика, магазин и лояльность. В тот же вечер клиенты записываются 24/7, а отчёт по выручке приходит вам в Telegram.</p></div></div>
   </div>
 </div></section>
 
 <section id="compare"><div class="wrap">
-  <div class="sec-head reveal">
+  <div class="sec-head">
     <div class="kicker">YClients + MAYA</div>
-    <h2>Тот же YClients — но с вашим брендом и слоем, который окупает себя</h2>
+    <h2 class="sth">Тот же YClients — но с вашим брендом и слоем, который окупает себя</h2>
     <p>MAYA ничего не заменяет. Запись и база клиентов остаются в YClients, а сверху появляется то, чего в нём нет.</p>
   </div>
-  <div class="cmp reveal">
+  <div class="cmp">
     <div class="cmp-row cmp-head"><div>Возможность</div><div>YClients</div><div>+ MAYA</div></div>
     <div class="cmp-row"><div>Онлайн-запись и база клиентов</div><div class="yes">✓</div><div class="yes">✓</div></div>
     <div class="cmp-row"><div>Приложение с вашим логотипом на домашнем экране</div><div class="no">—</div><div class="yes">✓</div></div>
@@ -290,9 +525,9 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
 </div></section>
 
 <section id="results"><div class="wrap">
-  <div class="sec-head reveal">
-    <div class="kicker">Результаты</div>
-    <h2>Уже работает — на реальном салоне</h2>
+  <div class="sec-head">
+    <div class="kicker k-coral">Результаты</div>
+    <h2 class="sth">Уже работает — на реальном салоне</h2>
     <p>MAYA запущена на «Мужской Эстетике» в Ставрополе. Цифры ниже — из живой системы за неполный месяц, а не маркетинг.</p>
   </div>
   <div class="what">
@@ -305,36 +540,36 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
       <div class="muted" style="font-size:13px;margin-top:auto">— Станислав, владелец</div>
     </div>
     <div class="reveal" style="display:grid;grid-template-rows:1fr 1fr;gap:16px">
-      <div class="fcard" style="display:flex;flex-direction:column;justify-content:center"><div style="font-family:'Space Grotesk';font-weight:700;font-size:40px;letter-spacing:-.02em">540</div><div class="muted" style="font-size:14px;margin-top:4px">ответов ИИ-бота клиентам — в том числе ночью и в выходные</div></div>
-      <div class="fcard" style="display:flex;flex-direction:column;justify-content:center"><div style="font-family:'Space Grotesk';font-weight:700;font-size:40px;letter-spacing:-.02em">315</div><div class="muted" style="font-size:14px;margin-top:4px">ИИ-подсказок мастерам по допродажам — апсейл прямо во время визита</div></div>
+      <div class="fcard" style="display:flex;flex-direction:column;justify-content:center"><div class="bignum-stat res-a" data-count="540">0</div><div class="muted" style="font-size:14px;margin-top:4px">ответов ИИ-бота клиентам — в том числе ночью и в выходные</div></div>
+      <div class="fcard" style="display:flex;flex-direction:column;justify-content:center"><div class="bignum-stat res-b" data-count="315">0</div><div class="muted" style="font-size:14px;margin-top:4px">ИИ-подсказок мастерам по допродажам — апсейл прямо во время визита</div></div>
     </div>
   </div>
   <p class="muted reveal" style="font-size:12.5px;margin-top:16px;text-align:center">Данные из боевого развёртывания MAYA, 27 мая – 14 июня 2026. Выручка и персональные данные не показываются.</p>
 </div></section>
 
 <section id="forwhom"><div class="wrap">
-  <div class="sec-head reveal"><div class="kicker">Для кого</div><h2>Под ваш формат</h2><p>Один продукт — разная выгода под тип салона.</p></div>
+  <div class="sec-head"><div class="kicker k-blue">Для кого</div><h2 class="sth">Под ваш формат</h2><p>Один продукт — разная выгода под тип салона.</p></div>
   <div class="feat">
-    <div class="fcard reveal"><div class="ic"><i class="ti ti-razor"></i></div><h3>Мужской барбершоп</h3><p>ИИ-бот ловит ночные записи, циклические напоминания возвращают клиента в срок, абонементы продают вперёд.</p></div>
-    <div class="fcard reveal"><div class="ic"><i class="ti ti-sparkles"></i></div><h3>Женский салон</h3><p>Брендированное приложение, абонементы и баллы, мягкие напоминания — клиентки записываются сами и не теряются.</p></div>
-    <div class="fcard reveal"><div class="ic"><i class="ti ti-wand"></i></div><h3>Бьюти-студия</h3><p>Сертификаты в подарок, программа лояльности, дневной отчёт по выручке — продажи и аналитика в одном экране.</p></div>
-    <div class="fcard reveal"><div class="ic"><i class="ti ti-building-store"></i></div><h3>Сеть салонов</h3><p>Единый бренд, у каждого филиала свои записи и аналитика, общий отчёт владельцу по всей сети.</p></div>
+    <div class="fcard hang reveal"><div class="ic"><i class="ti ti-razor"></i></div><h3>Мужской барбершоп</h3><p>ИИ-бот ловит ночные записи, циклические напоминания возвращают клиента в срок, абонементы продают вперёд.</p></div>
+    <div class="fcard hang reveal"><div class="ic"><i class="ti ti-sparkles"></i></div><h3>Женский салон</h3><p>Брендированное приложение, абонементы и баллы, мягкие напоминания — клиентки записываются сами и не теряются.</p></div>
+    <div class="fcard hang reveal"><div class="ic"><i class="ti ti-wand"></i></div><h3>Бьюти-студия</h3><p>Сертификаты в подарок, программа лояльности, дневной отчёт по выручке — продажи и аналитика в одном экране.</p></div>
+    <div class="fcard hang reveal"><div class="ic"><i class="ti ti-building-store"></i></div><h3>Сеть салонов</h3><p>Единый бренд, у каждого филиала свои записи и аналитика, общий отчёт владельцу по всей сети.</p></div>
   </div>
 </div></section>
 
 <section id="pricing"><div class="wrap">
-  <div class="sec-head reveal" style="margin-left:auto;margin-right:auto;text-align:center">
-    <div class="kicker">Тарифы</div>
-    <h2>Соберите свой тариф</h2>
+  <div class="sec-head" style="margin-left:auto;margin-right:auto;text-align:center">
+    <div class="kicker k-mint">Тарифы</div>
+    <h2 class="sth">Соберите свой тариф</h2>
     <p>Выберите основу под размер салона и подключите нужные модули. Платите только за то, что используете. Пробный период — для всех тарифов.</p>
   </div>
   <div class="plans" id="plans"></div>
-  <h3 style="font-family:'Space Grotesk';font-size:17px;margin:6px auto 14px;max-width:780px;font-weight:600">Дополнительные модули</h3>
+  <h3 style="font-size:17px;margin:6px auto 14px;max-width:780px">Дополнительные модули</h3>
   <div class="addons" id="addons"></div>
   <div class="priceBar">
     <div><div class="muted" id="sumLine" style="font-size:13px">—</div><div class="tot" id="total">—<small> ₽/мес</small></div></div>
     <div style="text-align:right">
-      <button class="btn btn-primary" id="cta"><i class="ti ti-plug-connected"></i> Попробовать бесплатно</button>
+      <button class="btn btn-primary btn-roll" id="cta"><i class="ti ti-plug-connected"></i> <span class="rl">Попробовать бесплатно</span></button>
       <div class="muted" style="font-size:12px;margin-top:8px">Пробный период · отключить в любой момент · без обязательств</div>
     </div>
   </div>
@@ -344,7 +579,7 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
   <div class="panelTease">
     <div class="reveal">
       <div class="kicker">Панель управления</div>
-      <h2 style="font-family:'Space Grotesk';font-size:clamp(24px,3vw,38px);font-weight:600">Все ваши салоны — в одном месте</h2>
+      <h2 style="font-size:clamp(24px,3vw,38px)">Все ваши салоны — в одном месте</h2>
       <p class="muted" style="margin:16px 0 24px;max-width:460px">Статусы подписок, выручка платформы, бренд каждого салона, блокировка и активация в один клик. Чистая панель вместо таблиц-простыней.</p>
       <a class="btn btn-primary" href="panel.html"><i class="ti ti-layout-dashboard"></i> Открыть панель</a>
     </div>
@@ -356,7 +591,7 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-head reveal"><div class="kicker">Вопросы</div><h2>Частые вопросы</h2></div>
+  <div class="sec-head"><div class="kicker">Вопросы</div><h2 class="sth">Частые вопросы</h2></div>
   <div class="faq" id="faq"></div>
 </div></section>
 
@@ -364,17 +599,17 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
   <div class="reveal" style="background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap">
     <div style="max-width:580px">
       <div class="kicker">Партнёрам</div>
-      <h3 style="font-family:'Space Grotesk';font-size:clamp(20px,2.6vw,28px);font-weight:600;margin-bottom:10px">Приведите салон — получите вознаграждение</h3>
+      <h3 style="font-size:clamp(20px,2.6vw,28px);margin-bottom:10px">Приведите салон — получите вознаграждение</h3>
       <p class="muted" style="font-size:14.5px">Знаете владельца салона на YClients? Поделитесь ссылкой — за каждый подключённый салон начисляем бонус. Для студий, франшиз и мастеров — отдельные условия.</p>
     </div>
-    <a class="btn btn-primary" href="onboarding.html"><i class="ti ti-gift"></i> Стать партнёром</a>
+    <a class="btn btn-primary btn-roll" href="onboarding.html"><i class="ti ti-gift"></i> <span class="rl">Стать партнёром</span></a>
   </div>
 </div></section>
 
 <section class="final"><div class="wrap">
-  <h2 class="reveal">Ваш салон заслуживает собственное приложение</h2>
+  <h2 class="sth">Ваш салон заслуживает<br>собственное приложение</h2>
   <p class="reveal">Покажем MAYA на вашем YClients и соберём тариф под ваш салон. Запуск за вечер, без разработчиков и миграций, данные в России по 152-ФЗ.</p>
-  <a class="btn btn-primary reveal" href="onboarding.html" style="font-size:16px;padding:15px 30px"><i class="ti ti-plug-connected"></i> Запустить MAYA</a>
+  <a class="btn btn-primary btn-roll reveal" href="onboarding.html" id="finalCta" style="font-size:16px;padding:15px 30px"><i class="ti ti-plug-connected"></i> <span class="rl">Запустить MAYA</span></a>
   <div class="muted reveal" style="font-size:12.5px;margin-top:16px">Бесплатный пробный период · отключить в любой момент</div>
 </div></section>
 
@@ -383,47 +618,285 @@ footer{padding:42px 0;color:var(--mut);font-size:13px}
   <div class="muted">MAYA · приложение салона на YClients · данные в РФ (152-ФЗ) · © 2026</div>
 </div></footer>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.min.js"></script>
 <script>
+/* ==================================================================
+   MAYA SaaS landing · скроллителлинг-версия
+   Приёмы (по мотивам patternbreak.ing, код свой):
+   прелоадер-шторка · пин-переворот хиро · SplitText line-mask ·
+   скролл-чтение манифеста · живой счётчик · колода карточек ·
+   sticky-каскад · count-up · rolling-кнопки · маятниковый hover
+================================================================== */
+gsap.registerPlugin(ScrollTrigger, SplitText);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE = matchMedia('(pointer: fine)').matches;
+const fmt = n => n.toLocaleString('ru-RU');
+
+/* ---------- Lenis (один общий RAF с GSAP) ---------- */
+let lenis = null;
+if (!RM && window.Lenis) {
+  lenis = new Lenis({ autoRaf: false, anchors: { offset: -72 } });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+}
+
+/* ---------- прелоадер + интро хиро ---------- */
+/* стартуем только когда вкладка видима: в фоновой вкладке rAF заморожен */
+const FORCE_ANIM = /anim=force/.test(location.search); // для автотестов в headless-превью
+const whenVisible = fn => {
+  if (FORCE_ANIM || !document.hidden) return fn();
+  const h = () => { if (!document.hidden) { document.removeEventListener('visibilitychange', h); fn(); } };
+  document.addEventListener('visibilitychange', h);
+};
+document.fonts.ready.then(() => whenVisible(() => {
+  const pl = document.getElementById('preloader');
+  if (RM) { pl.style.display = 'none'; revealInstant(); return; }
+  lenis && lenis.stop();
+  gsap.timeline({ onComplete(){ pl.style.display = 'none'; lenis && lenis.start(); } })
+    .to('#plMark', { opacity: 0, duration: .35, delay: .3, ease: 'power1.out' })
+    .to('.pl-col', { scaleY: 0, duration: .6, ease: 'power3.inOut',
+        stagger: { amount: .5, from: 'start' } }, '-=0.1')
+    .add(heroIntro, '-=0.28');
+}));
+
+function heroIntro(){
+  const s = SplitText.create('.hHead', { type: 'lines', mask: 'lines' });
+  gsap.from(s.lines, { yPercent: 110, duration: .8, stagger: .1, ease: 'power3.out' });
+  gsap.from('.hChip, .hTag, .hero .heroCtas', { autoAlpha: 0, y: 18, duration: .6, stagger: .1, delay: .15, ease: 'power2.out' });
+  gsap.from('.heroPhone .phone', { autoAlpha: 0, y: 60, scale: .9, duration: 1, ease: 'power3.out', delay: .1 });
+  gsap.from('.fchip', { autoAlpha: 0, scale: .5, duration: .5, stagger: .12, delay: .7, ease: 'back.out(2)' });
+  showPill(.55);
+  buildHeroScrub();
+  initScrollFx();
+  initBars();
+}
+/* пин-хиро: скролл «протягивает» кадр — телефон наезжает, заголовок и низ уходят параллаксом */
+function buildHeroScrub(){
+  if (RM || innerWidth < 900) return;
+  gsap.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', end: '+=115%', scrub: 1, pin: true, anticipatePin: 1 } })
+    .to('.heroPhone .phone', { scale: 1.14, yPercent: -5, ease: 'none' }, 0)
+    .to('.heroTop', { yPercent: -46, autoAlpha: .12, ease: 'none' }, 0)
+    .to('.heroBottom', { yPercent: 42, autoAlpha: .12, ease: 'none' }, 0)
+    .to('.fchip', { y: '-=16', ease: 'none' }, 0);
+}
+function revealInstant(){
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  showPill(0); initBars();
+}
+function showPill(){
+  const p = document.getElementById('pillnav'); if (!p) return;
+  if (RM) { p.classList.add('up'); return; }
+  // таблетка выезжает, когда уходим с хиро (как на референсе), и прячется на самом верху
+  ScrollTrigger.create({ trigger: '#chart', start: 'top 92%',
+    onEnter: () => p.classList.add('up'), onLeaveBack: () => p.classList.remove('up') });
+}
+
+/* ---------- шумовые шкалы (canvas) ---------- */
+function initBars(){
+  const cv = document.getElementById('barCanvas'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const DATA = [
+    { m:'ФЕВРАЛЬ', v:90,  c:'#3b9dff' },
+    { m:'МАРТ',    v:180, c:'#18c29c' },
+    { m:'АПРЕЛЬ',  v:310, c:'#7c6cff' },
+    { m:'МАЙ',     v:430, c:'#ffb020' },
+    { m:'ИЮНЬ',    v:540, c:'#ff7a59' },
+  ];
+  const maxV = 540, inkD = '#15140f', mut = '#6b675e';
+  let W = 0, H = 0, DPR = Math.min(devicePixelRatio || 1, 2), prog = 0;
+  function resize(){
+    const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
+    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    draw();
+  }
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    const n = DATA.length, pad = Math.max(12, W * 0.012);
+    const colW = (W - pad * (n - 1)) / n;
+    const barW = Math.min(colW * 0.64, 150);
+    const baseY = H - 4, maxBarH = H - 240;
+    DATA.forEach((d, i) => {
+      const x = i * (colW + pad) + (colW - barW) / 2;
+      const bh = (d.v / maxV) * maxBarH * prog;
+      const topY = baseY - bh;
+      const zone = Math.min(112, bh * 0.85);
+      ctx.fillStyle = d.c;
+      ctx.fillRect(x, topY, barW, bh);
+      // шумовая шапка — частицы редеют кверху
+      for (let k = 0, kn = Math.round(barW * zone / 13); k < kn; k++){
+        const yy = topY - Math.random() * zone;
+        const frac = (topY - yy) / zone;           // 0 у края → 1 наверху
+        if (Math.random() > frac) {
+          ctx.globalAlpha = 1 - frac * 0.5;
+          const s = Math.random() < .5 ? 1.6 : 2.4;
+          ctx.fillRect(x + Math.random() * barW, yy, s, s);
+        }
+      }
+      ctx.globalAlpha = 1;
+      // подпись над шкалой (снизу вверх: сабтайтл → число → месяц)
+      let yy = topY - zone - 14;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = mut;  ctx.font = '500 12px Inter, sans-serif';               ctx.fillText('диалогов ИИ', x, yy); yy -= 20;
+      ctx.fillStyle = inkD; ctx.font = '800 30px "Inter Tight", Inter, sans-serif'; ctx.fillText(fmt(Math.round(d.v * prog)), x, yy); yy -= 34;
+      ctx.fillStyle = mut;  ctx.font = '600 11px Inter, sans-serif';               ctx.fillText(d.m, x, yy);
+    });
+  }
+  addEventListener('resize', resize);
+  resize();
+  if (RM) { prog = 1; draw(); return; }
+  gsap.to({}, { duration: 1.6, ease: 'power2.out',
+    onUpdate: function(){ prog = this.progress(); draw(); },
+    scrollTrigger: { trigger: '#chart', start: 'top 72%', once: true } });
+}
+
+/* ---------- скролл-эффекты секций ---------- */
+function initScrollFx(){
+  // заголовки: line-mask reveal
+  document.querySelectorAll('.sth').forEach(h => {
+    const sp = SplitText.create(h, { type: 'lines', mask: 'lines' });
+    gsap.from(sp.lines, {
+      y: 84, autoAlpha: 0, stagger: .07, duration: .75, ease: 'power3.out',
+      scrollTrigger: { trigger: h, start: 'top 84%', toggleActions: 'play none none reverse' }
+    });
+  });
+  // манифест: чтение по словам под скролл
+  const man = document.getElementById('manifesto');
+  const ws = SplitText.create(man, { type: 'words' });
+  gsap.fromTo(ws.words, { opacity: .13 }, {
+    opacity: 1, stagger: .04, ease: 'none',
+    scrollTrigger: { trigger: man, start: 'top 80%', end: 'bottom 45%', scrub: true }
+  });
+  // сравнение: построчный каскад
+  gsap.set('.cmp-row', { autoAlpha: 0, y: 16 });
+  ScrollTrigger.batch('.cmp-row', {
+    start: 'top 90%',
+    onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .07, duration: .5, ease: 'power2.out', overwrite: true })
+  });
+  // count-up цифр
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const obj = { v: 0 }, to = +el.dataset.count;
+    gsap.to(obj, {
+      v: to, duration: 1.7, ease: 'power2.out',
+      onUpdate: () => el.textContent = fmt(Math.round(obj.v)),
+      scrollTrigger: { trigger: el, start: 'top 86%', once: true }
+    });
+  });
+  ScrollTrigger.refresh();
+}
+
+/* ---------- generic reveal (IntersectionObserver) ---------- */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+}), { threshold: .12 });
+if (!RM) document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ---------- живой счётчик ---------- */
+(() => {
+  const t0 = Date.now(), sEl = document.getElementById('liveSec'), aEl = document.getElementById('liveAns');
+  setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    sEl.textContent = fmt(s);
+    aEl.textContent = fmt(Math.floor(s / 4));
+  }, 500);
+})();
+
+/* ---------- rolling-кнопки (двухэтажный текст) ---------- */
+function rollify(btn){
+  const label = btn.querySelector('.rl');
+  if (!label || label.dataset.rolled) return;
+  label.dataset.rolled = '1';
+  const txt = label.textContent;
+  label.innerHTML = `<span class="rl-line">${txt}</span><span class="rl-line rl-dup" aria-hidden="true">${txt}</span>`;
+  const a = new SplitText(label.querySelector('.rl-line:not(.rl-dup)'), { type: 'chars' });
+  const b = new SplitText(label.querySelector('.rl-dup'), { type: 'chars' });
+  gsap.set(b.chars, { y: '1.3em' });
+  const tl = gsap.timeline({ paused: true })
+    .to(a.chars, { y: '-1.3em', duration: .38, stagger: .022, ease: 'power2.inOut' })
+    .to(b.chars, { y: 0, duration: .38, stagger: .022, ease: 'power2.inOut' }, '<');
+  btn.addEventListener('mouseenter', () => tl.play());
+  btn.addEventListener('mouseleave', () => tl.reverse());
+}
+if (!RM && FINE) document.fonts.ready.then(() => document.querySelectorAll('.btn-roll').forEach(rollify));
+
+/* ---------- маятниковый hover («для кого») ---------- */
+const swinging = new WeakSet();
+if (!RM && FINE) document.querySelectorAll('.hang').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    if (swinging.has(card)) return;
+    swinging.add(card);
+    const tl = gsap.timeline({ onComplete: () => swinging.delete(card) });
+    [8, -6, 4, -2.5, 1.2, 0].forEach((r, i) => {
+      tl.to(card, { rotation: r, duration: i === 0 ? .35 : .45, ease: i === 5 ? 'power2.out' : 'power2.inOut', transformOrigin: 'top center' });
+    });
+  });
+});
+
+/* ---------- искры на финальном CTA и бейдже «Хит» ---------- */
+function sparkleOn(el){
+  let iv = null;
+  el.addEventListener('mouseenter', () => {
+    if (iv) return;
+    iv = setInterval(() => {
+      const r = el.getBoundingClientRect();
+      const sp = document.createElement('span');
+      sp.className = 'spark'; sp.textContent = '✦';
+      sp.style.left = (r.left + Math.random() * r.width) + 'px';
+      sp.style.top = (r.top + Math.random() * 10) + 'px';
+      document.body.appendChild(sp);
+      gsap.timeline({ onComplete: () => sp.remove() })
+        .fromTo(sp, { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .12 })
+        .to(sp, { y: -60 - Math.random() * 50, x: (Math.random() - .5) * 26, rotation: (Math.random() - .5) * 90, duration: .9, ease: 'power2.out' }, .1)
+        .to(sp, { opacity: 0, duration: .4 }, .6);
+    }, 110);
+  });
+  el.addEventListener('mouseleave', () => { clearInterval(iv); iv = null; });
+}
+if (!RM && FINE) sparkleOn(document.getElementById('finalCta'));
+
 /* ---------- каталог тарифов (из plan_catalog.py) ---------- */
 const CATALOG = {"features": {"booking": "Онлайн-запись (YClients)", "branding": "Брендированный интерфейс: лого, цвета, тексты", "client_app": "Клиентское приложение: услуги, команда, инфо о салоне", "loyalty": "Баллы и лояльность", "shop": "Магазин: сертификаты и абонементы", "tg_basic": "Telegram-уведомления о записи", "tg_marketing": "Telegram-маркетинг: напоминания, реактивация, ДР, отзывы, рассылки", "journal": "Журнал записи: расписание дня, перенос, статусы", "staff_cabinet": "Кабинет сотрудника: режим мастера, история визитов, чаевые", "analytics": "Аналитика: дневной отчёт, выручка, зарплаты", "ai_chatbot": "Умный чат-бот: AI-администратор отвечает и записывает клиентов", "priority_support": "Приоритетная поддержка"}, "plans": [{"key": "start", "title": "Запись", "tagline": "Старт для небольшого салона", "price_rub": 990, "max_masters": 5, "features": ["booking", "branding", "client_app", "loyalty", "tg_basic"]}, {"key": "pro", "title": "Салон", "tagline": "Всё для работы салона", "price_rub": 2490, "max_masters": null, "features": ["booking", "branding", "client_app", "loyalty", "shop", "tg_basic", "tg_marketing", "journal", "staff_cabinet", "analytics", "priority_support"]}], "addons": [{"key": "ai_chatbot", "metered": {"unit": "dialog", "quota": 150, "overage_rub": 15, "model": "sonnet", "billing": "auto"}, "title": "Умный чат-бот", "tagline": "AI-администратор: отвечает клиентам, записывает, делает апсейл", "price_rub": 1990, "features": ["ai_chatbot"]}, {"key": "store_publish", "title": "Публикация в App Store и Google Play", "tagline": "Нативное приложение салона в сторах: сборка, аккаунты разработчика, ревью и обновления — под вашим брендом", "price_rub": 1490, "soon": true, "features": ["store_publish"]}]};
-const F=CATALOG.features, fmt=n=>n.toLocaleString("ru-RU");
-const METERED={ai_chatbot:{quota:150,overage_rub:15,unit:'dialog'}};
-const unitRu=u=>u==='dialog'?'диалогов':(u==='consultation'?'консультаций':u);
-const DISABLED=['cutmatch','video_analytics']; // временно скрыты (см. plan_catalog.DISABLED); вернуть = []
-const planOf=k=>CATALOG.plans.find(p=>p.key===k);
-const planFeat=k=>new Set(planOf(k).features);
-const redundant=(pk,ad)=>ad.features.every(f=>planFeat(pk).has(f));
-let plan="pro"; const addons=new Set();
-function total(){let s=planOf(plan).price_rub;for(const a of CATALOG.addons)if(addons.has(a.key)&&!redundant(plan,a))s+=a.price_rub;return s;}
+const F = CATALOG.features;
+const METERED = { ai_chatbot: { quota: 150, overage_rub: 15, unit: 'dialog' } };
+const unitRu = u => u === 'dialog' ? 'диалогов' : (u === 'consultation' ? 'консультаций' : u);
+const DISABLED = ['cutmatch','video_analytics']; // временно скрыты (см. plan_catalog.DISABLED); вернуть = []
+const planOf = k => CATALOG.plans.find(p => p.key === k);
+const planFeat = k => new Set(planOf(k).features);
+const redundant = (pk, ad) => ad.features.every(f => planFeat(pk).has(f));
+let plan = "pro"; const addons = new Set();
+function total(){ let s = planOf(plan).price_rub; for (const a of CATALOG.addons) if (addons.has(a.key) && !redundant(plan, a)) s += a.price_rub; return s; }
 function renderPlans(){
-  document.getElementById("plans").innerHTML=CATALOG.plans.map(p=>`
-   <div class="plan" aria-selected="${p.key===plan}" data-k="${p.key}">
-     ${p.key==='pro'?'<span class="badge">Хит</span>':''}<span class="radio"></span>
+  document.getElementById("plans").innerHTML = CATALOG.plans.map(p => `
+   <div class="plan" aria-selected="${p.key === plan}" data-k="${p.key}">
+     ${p.key === 'pro' ? '<span class="badge">Хит</span>' : ''}<span class="radio"></span>
      <div class="pt">${p.title}</div><div class="pg">${p.tagline}</div>
      <div class="pp">${fmt(p.price_rub)} <small>₽/мес</small></div>
-     <div class="pm">${p.max_masters?('до '+p.max_masters+' мастеров'):'без лимита мастеров'}</div>
-     <ul>${p.features.filter(f=>!DISABLED.includes(f)).map(f=>`<li><span class="c">✓</span>${F[f]}</li>`).join('')}</ul></div>`).join('');
-  document.querySelectorAll(".plan").forEach(el=>el.onclick=()=>{plan=el.dataset.k;render();});
+     <div class="pm">${p.max_masters ? ('до ' + p.max_masters + ' мастеров') : 'без лимита мастеров'}</div>
+     <ul>${p.features.filter(f => !DISABLED.includes(f)).map(f => `<li><span class="c">✓</span>${F[f]}</li>`).join('')}</ul></div>`).join('');
+  document.querySelectorAll(".plan").forEach(el => el.onclick = () => { plan = el.dataset.k; render(); });
 }
 function renderAddons(){
-  document.getElementById("addons").innerHTML=CATALOG.addons.filter(a=>!DISABLED.includes(a.key)).map(a=>{
-    const incl=redundant(plan,a),on=incl||addons.has(a.key);
-    return `<div class="addon ${incl?'incl':''}" aria-pressed="${on}" data-k="${a.key}" ${incl?'data-incl="1"':''}>
-      <div class="at"><span>${a.title}${a.soon?'<span class="soon">скоро</span>':''}</span><span class="sw"></span></div>
-      <div class="ag">${a.tagline}</div><div class="ap">${incl?'Входит в тариф':'+ '+fmt(a.price_rub)+' ₽/мес'}</div>${(!incl&&METERED[a.key])?'<div class="ag" style="margin-top:5px;opacity:.85">'+METERED[a.key].quota+' '+unitRu(METERED[a.key].unit)+' включено, далее '+METERED[a.key].overage_rub+' ₽</div>':''}</div>`;
+  document.getElementById("addons").innerHTML = CATALOG.addons.filter(a => !DISABLED.includes(a.key)).map(a => {
+    const incl = redundant(plan, a), on = incl || addons.has(a.key);
+    return `<div class="addon ${incl ? 'incl' : ''}" aria-pressed="${on}" data-k="${a.key}" ${incl ? 'data-incl="1"' : ''}>
+      <div class="at"><span>${a.title}${a.soon ? '<span class="soon">скоро</span>' : ''}</span><span class="sw"></span></div>
+      <div class="ag">${a.tagline}</div><div class="ap">${incl ? 'Входит в тариф' : '+ ' + fmt(a.price_rub) + ' ₽/мес'}</div>${(!incl && METERED[a.key]) ? '<div class="ag" style="margin-top:5px;opacity:.85">' + METERED[a.key].quota + ' ' + unitRu(METERED[a.key].unit) + ' включено, далее ' + METERED[a.key].overage_rub + ' ₽</div>' : ''}</div>`;
   }).join('');
-  document.querySelectorAll(".addon").forEach(el=>el.onclick=()=>{if(el.dataset.incl)return;const k=el.dataset.k;addons.has(k)?addons.delete(k):addons.add(k);render();});
+  document.querySelectorAll(".addon").forEach(el => el.onclick = () => { if (el.dataset.incl) return; const k = el.dataset.k; addons.has(k) ? addons.delete(k) : addons.add(k); render(); });
 }
 function renderBar(){
-  const act=CATALOG.addons.filter(a=>addons.has(a.key)&&!redundant(plan,a)).map(a=>a.title);
-  document.getElementById("sumLine").textContent="Тариф «"+planOf(plan).title+"»"+(act.length?(" + "+act.join(" + ")):" — без допов")+" · ≈ "+fmt(Math.round(total()/30))+" ₽/день";
-  document.getElementById("total").innerHTML=fmt(total())+'<small> ₽/мес</small>';
+  const act = CATALOG.addons.filter(a => addons.has(a.key) && !redundant(plan, a)).map(a => a.title);
+  document.getElementById("sumLine").textContent = "Тариф «" + planOf(plan).title + "»" + (act.length ? (" + " + act.join(" + ")) : " — без допов") + " · ≈ " + fmt(Math.round(total() / 30)) + " ₽/день";
+  document.getElementById("total").innerHTML = fmt(total()) + '<small> ₽/мес</small>';
 }
-function render(){renderPlans();renderAddons();renderBar();}
-document.getElementById("cta").onclick=()=>{location.href='onboarding.html?plan='+plan+(addons.size?'&addons='+[...addons].join(','):'');};
+function render(){ renderPlans(); renderAddons(); renderBar(); }
+document.getElementById("cta").onclick = () => { location.href = 'onboarding.html?plan=' + plan + (addons.size ? '&addons=' + [...addons].join(',') : ''); };
 
-/* ---------- features ---------- */
-const FEAT=[
+/* ---------- возможности: колода карточек ---------- */
+const FEAT = [
  ["ti-calendar-event","Онлайн-запись","Клиент записывается в пару касаний, всё мгновенно синхронно с вашим YClients — без двойных записей и ручной сверки."],
  ["ti-palette","Брендинг","Ваш логотип, цвет и название на домашнем экране клиента — статус большой сети без её бюджета и без чужих логотипов."],
  ["ti-clipboard-list","Журнал записи","Расписание дня на ладони: записать, перенести и отменить можно прямо из приложения, привязка к смене мастера встроена."],
@@ -433,18 +906,84 @@ const FEAT=[
  ["ti-message-chatbot","ИИ-администратор","Чат-бот ведёт диалог как живой человек и записывает 24/7 — ни одной потерянной заявки ночью и в выходной."],
  ["ti-heart-handshake","Баллы лояльности","Баллы и Telegram-рассылки возвращают клиента снова и снова — повторный визит закрывается сам, без напоминаний вручную."],
 ];
-document.getElementById("featGrid").innerHTML=FEAT.map(f=>`
-  <div class="fcard reveal"><div class="ic"><i class="ti ${f[0]}"></i></div><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join('');
+(() => {
+  const stack = document.getElementById('deckStack');
+  stack.innerHTML = FEAT.map((f, i) => `
+    <article class="deck-card" data-i="${i}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="ic"><i class="ti ${f[0]}"></i></div>
+        <span class="num">0${i + 1}</span>
+      </div>
+      <div><h4>${f[1]}</h4><div class="tag" style="margin-top:8px">MAYA · модуль приложения</div></div>
+    </article>`).join('');
+  const cards = gsap.utils.toArray('.deck-card');
+  const totalC = cards.length;
+  const ROT = [-3, 2, -1.5, 1, -2, 1.5, -1, 2.5];
+  let cur = 0, busy = false;
+  const tEl = document.getElementById('deckTitle'), dEl = document.getElementById('deckDesc'),
+        cEl = document.getElementById('deckCur');
+  document.getElementById('deckTotal').textContent = '0' + totalC;
+
+  const posOf = (si, ci) => ({ scale: 1 - si * .035, y: si * 11, rot: ROT[ci % ROT.length], z: totalC - si, op: si < 4 ? 1 : 0 });
+  function layout(anim){
+    cards.forEach((card, i) => {
+      const si = (i - cur + totalC) % totalC;
+      const p = posOf(si, i);
+      gsap[anim ? 'to' : 'set'](card, { zIndex: p.z, scale: p.scale, y: p.y, rotation: p.rot, opacity: p.op, x: 0,
+        duration: anim ? .35 : 0, ease: 'power2.inOut', transformOrigin: 'center center' });
+    });
+  }
+  function setText(){
+    gsap.to([tEl, dEl], { opacity: 0, duration: .16, onComplete(){
+      tEl.textContent = FEAT[cur][1]; dEl.textContent = FEAT[cur][2];
+      cEl.textContent = '0' + (cur + 1);
+      gsap.to([tEl, dEl], { opacity: 1, duration: .3 });
+    }});
+  }
+  function next(){
+    if (busy) return; busy = true;
+    const top = cards[cur], rot = ROT[cur % ROT.length];
+    gsap.set(top, { transformOrigin: '80% 100%' });
+    gsap.timeline({ onComplete(){ busy = false; } })
+      .to(top, { x: 210, rotation: rot + 26, zIndex: 1000, duration: .22, ease: 'power2.out' })
+      .to(top, { x: 255, zIndex: -1, duration: .1, ease: 'power2.inOut' })     // нырок под колоду
+      .add(() => { cur = (cur + 1) % totalC; setText(); layout(true); })
+      .to(top, { x: 0, transformOrigin: 'center center', duration: .25, ease: 'power2.inOut' }, '-=0.05');
+  }
+  function prev(){
+    if (busy) return; busy = true;
+    cur = (cur - 1 + totalC) % totalC;
+    const top = cards[cur], rot = ROT[cur % ROT.length];
+    gsap.set(top, { transformOrigin: '20% 100%' });
+    setText();
+    gsap.timeline({ onComplete(){ busy = false; } })
+      .set(top, { opacity: 1, zIndex: 500 })
+      .to(top, { x: -240, rotation: rot - 26, scale: 1.04, zIndex: 1000, duration: .25, ease: 'power2.out' })
+      .add(() => layout(true), '-=0.05')
+      .to(top, { x: 0, rotation: rot, scale: 1, transformOrigin: 'center center', duration: .25, ease: 'power2.inOut' });
+  }
+  layout(false);
+  tEl.textContent = FEAT[0][1]; dEl.textContent = FEAT[0][2];
+  document.getElementById('deckNext').addEventListener('click', next);
+  document.getElementById('deckPrev').addEventListener('click', prev);
+  stack.addEventListener('click', e => { if (e.target.closest('.deck-card')) next(); });
+  let tx = 0;
+  stack.addEventListener('touchstart', e => tx = e.touches[0].clientX, { passive: true });
+  stack.addEventListener('touchend', e => {
+    const d = tx - e.changedTouches[0].clientX;
+    if (Math.abs(d) > 40) (d > 0 ? next : prev)();
+  }, { passive: true });
+})();
 
 /* ---------- mini dashboard ---------- */
-const SALONS=[["Мужская Эстетика","#f5f5f6","Салон","a","Активен",2490],["Barber Loft","#9a9a9f","Запись","t","Триал",990],["Классика и Бритва","#6a6a6f","Салон","a","Активен",2490]];
-document.getElementById("miniRows").innerHTML=SALONS.map(s=>`
+const SALONS = [["Мужская Эстетика","#f5f5f6","Салон","a","Активен",2490],["Barber Loft","#9a9a9f","Запись","t","Триал",990],["Классика и Бритва","#6a6a6f","Салон","a","Активен",2490]];
+document.getElementById("miniRows").innerHTML = SALONS.map(s => `
   <div class="miniRow"><span class="l"><span class="cdot" style="background:${s[1]}"></span>${s[0]} <span class="muted" style="font-size:12px">· ${s[2]}</span></span>
   <span class="pill ${s[3]}">${s[4]}</span></div>`).join('');
-document.querySelector('.miniDash .mh span:last-child').textContent='MRR '+SALONS.reduce((a,s)=>a+s[5],0).toLocaleString('ru-RU')+' ₽';
+document.querySelector('.miniDash .mh span:last-child').textContent = 'MRR ' + SALONS.reduce((a, s) => a + s[5], 0).toLocaleString('ru-RU') + ' ₽';
 
 /* ---------- faq ---------- */
-const FAQ=[
+const FAQ = [
  ["Нужно ли уходить из YClients или что-то переносить?","Нет. MAYA работает поверх вашего YClients — он остаётся вашей рабочей системой. Запись, клиентская база, расписание, услуги синхронизируются в реальном времени. Команда работает как привыкла, переучивать и мигрировать ничего не нужно. MAYA просто добавляет сверху ваш бренд и ИИ."],
  ["Как клиенты устанавливают приложение?","По ссылке или QR-коду. Клиент открывает страницу и добавляет приложение на домашний экран в один тап — иконка с вашим логотипом появляется рядом с привычными приложениями. Это PWA: ничего скачивать из магазина и ждать одобрения не нужно, приложение доступно сразу."],
  ["А в App Store и Google Play оно есть?","По умолчанию MAYA работает как PWA — устанавливается напрямую по ссылке, без магазинов, модерации и комиссий сторов. Этого достаточно для записи, кабинета и всех функций. Публикацию в App Store и Google Play под вашим брендом подключаем отдельной услугой — это модуль в конструкторе тарифов."],
@@ -456,65 +995,15 @@ const FAQ=[
  ["У меня несколько филиалов или сеть — это поддерживается?","Да. На тарифе «Салон» нет лимита мастеров и филиалов: несколько точек работают под единым брендом, у каждой свои записи, команда и аналитика. Владелец видит выручку и отчёты как по отдельной точке, так и по всей сети — в одном приложении и в Telegram."],
  ["Чем это лучше обычного YClients?","YClients остаётся вашим движком внутри — MAYA достраивает сверху то, чего в нём нет. Клиент открывает приложение с вашим именем, а не безликий виджет записи. Внутри — ИИ-администратор, который записывает 24/7, магазин, баллы лояльности и дневной отчёт по выручке в Telegram. Тот же YClients, но с вашим брендом и слоем, который окупает себя."],
 ];
-document.getElementById("faq").innerHTML=FAQ.map((q,i)=>`<details class="q" ${i===0?'open':''}><summary>${q[0]}</summary><p>${q[1]}</p></details>`).join('');
+document.getElementById("faq").innerHTML = FAQ.map((q, i) => `<details class="q" ${i === 0 ? 'open' : ''}><summary>${q[0]}</summary><p>${q[1]}</p></details>`).join('');
 
-/* ---------- theme ---------- */
-document.getElementById("themeBtn").onclick=function(){
-  const light=document.documentElement.getAttribute("data-theme")==="light";
-  document.documentElement.setAttribute("data-theme",light?"dark":"light");
-  this.textContent=light?"☾":"☀"; buildPollen();
-};
+/* ---------- прячем подсказку скролла после первого скролла ---------- */
+addEventListener('scroll', () => {
+  const h = document.getElementById('scrollHint');
+  if (h && scrollY > 60) { h.style.transition = 'opacity .4s'; h.style.opacity = '0'; }
+}, { passive: true });
 
-/* ---------- reveal on scroll ---------- */
-function checkReveal(){document.querySelectorAll(".reveal:not(.in)").forEach(el=>{const r=el.getBoundingClientRect();if(r.top<innerHeight*0.88&&r.bottom>0)el.classList.add("in");});}
-addEventListener("scroll",checkReveal,{passive:true});
-
-/* мобильное меню (бургер) */
-(function(){var b=document.getElementById('navBurger'),nl=document.querySelector('.navlinks');
-  if(b)b.onclick=function(){nl.classList.toggle('open');};
-  document.querySelectorAll('.navlinks a').forEach(function(a){a.addEventListener('click',function(){nl.classList.remove('open');});});})();
-
-/* ---------- POLLEN: пыль-созвездие, разлетается от курсора ---------- */
-const cv=document.getElementById("pollen"),ctx=cv.getContext("2d");
-let P=[],mouse={x:-999,y:-999},DPR=Math.min(devicePixelRatio||1,2),W=0,H=0,RGB="245,245,246";
-function buildPollen(){
-  const hero=document.querySelector(".hero");
-  W=hero.clientWidth;H=hero.clientHeight;
-  cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+"px";cv.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0);
-  RGB=document.documentElement.getAttribute("data-theme")==="light"?"10,10,11":"245,245,246";
-  const n=Math.min(110,Math.round(W*H/12000));
-  P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,
-    r:Math.random()*1.6+0.5,bx:Math.random()*W,by:Math.random()*H,
-    vx:0,vy:0,ph:Math.random()*6.28,a:Math.random()*0.45+0.22}));
-}
-function tick(t){
-  ctx.clearRect(0,0,W,H);
-  for(const p of P){
-    p.bx+=Math.cos(p.ph)*0.05;p.by+=Math.sin(p.ph*0.7)*0.04;p.ph+=0.0025;
-    const tx=p.bx+Math.sin(t/1500+p.ph)*9, ty=p.by+Math.cos(t/1700+p.ph)*9;
-    const dx=p.x-mouse.x, dy=p.y-mouse.y, d2=dx*dx+dy*dy, R=130;
-    if(d2<R*R){const d=Math.sqrt(d2)||1,f=(1-d/R)*5;p.vx+=dx/d*f;p.vy+=dy/d*f;}
-    p.vx+=(tx-p.x)*0.011; p.vy+=(ty-p.y)*0.011; p.vx*=0.87; p.vy*=0.87;
-    p.x+=p.vx; p.y+=p.vy;
-  }
-  /* связи-созвездие */
-  for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){
-    const a=P[i],b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);
-    if(d<92){ctx.strokeStyle="rgba("+RGB+","+((1-d/92)*0.08).toFixed(3)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
-  }
-  for(const p of P){
-    const tw=0.65+0.35*Math.sin(t/600+p.ph);
-    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);
-    ctx.fillStyle="rgba("+RGB+","+(p.a*tw).toFixed(2)+")";ctx.fill();
-  }
-  requestAnimationFrame(tick);
-}
-const hero=document.querySelector(".hero");
-hero.addEventListener("mousemove",e=>{const b=hero.getBoundingClientRect();mouse.x=e.clientX-b.left;mouse.y=e.clientY-b.top;});
-hero.addEventListener("mouseleave",()=>{mouse.x=mouse.y=-999;});
-addEventListener("resize",buildPollen);
-
-render(); buildPollen(); checkReveal(); requestAnimationFrame(tick);
+render();
 </script>
 </body>
 </html>

@@ -1,0 +1,15 @@
+import { Module } from '@nestjs/common';
+
+import { BrandingModule } from '../branding/branding.module';
+import { QuotasModule } from '../quotas/quotas.module';
+import { UsersModule } from '../users/users.module';
+import { InternalCalendarController } from './internal-calendar.controller';
+import { InternalCalendarService } from './internal-calendar.service';
+
+@Module({
+  imports: [BrandingModule, UsersModule, QuotasModule],
+  controllers: [InternalCalendarController],
+  providers: [InternalCalendarService],
+  exports: [InternalCalendarService],
+})
+export class InternalCalendarModule {}

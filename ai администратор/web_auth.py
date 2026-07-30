@@ -6,11 +6,13 @@ web_auth.py — вход в веб-приложение БЕЗ Telegram (и, з�
                      цифры входящего номера), при неудаче — обычная SMS.
   • VK ID          — Authorization Code Flow: фронт получает code, сервер меняет
                      его на токен по защищённому ключу, узнаёт пользователя.
+  • Yandex ID      — Authorization Code Flow: фронт просит у сервера auth_url,
+                     сервер меняет code на токен и узнаёт Yandex-профиль.
 
-Сетевые вызовы (SMS.ru, VK) идут НАПРЯМУЮ — это российские сервисы, доступные
+Сетевые вызовы (SMS.ru, VK, Yandex) идут НАПРЯМУЮ — это российские сервисы, доступные
 с РФ-сервера без прокси (в отличие от Telegram и Claude).
 
-В Claude/модель отсюда ничего не уходит — только телефон/VK для идентификации.
+В Claude/модель отсюда ничего не уходит — только телефон/VK/Yandex для идентификации.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ import hashlib
 import hmac
 import logging
 import secrets
+import urllib.parse
 
 import httpx
 
@@ -47,6 +50,9 @@ def _yc_headers() -> dict:
 # и он не видит redirect, заданный в новом VK ID-кабинете. Поэтому id.vk.com.
 _VKID_TOKEN_URL = "https://id.vk.com/oauth2/auth"
 _VKID_USERINFO_URL = "https://id.vk.com/oauth2/user_info"
+_YANDEX_AUTH_URL = "https://oauth.yandex.com/authorize"
+_YANDEX_TOKEN_URL = "https://oauth.yandex.com/token"
+_YANDEX_USERINFO_URL = "https://login.yandex.ru/info"
 
 
 # ─── Утилиты ────────────────────────────────────────────────────────────
@@ -78,6 +84,13 @@ def mask_phone(phone: str) -> str:
 
 def _new_token() -> str:
     return secrets.token_urlsafe(32)
+
+
+def _enabled_bool(name: str, default: bool = False) -> bool:
+    value = getattr(config, name, default)
+    if isinstance(value, str):
+        return value.strip().lower() in ("1", "true", "yes", "on")
+    return bool(value)
 
 
 # ─── Телефонный вход ────────────────────────────────────────────────────
@@ -121,7 +134,7 @@ async def verify_phone_login(phone: str, code: str) -> dict:
     if not data.get("success"):
         return {"ok": False, "error": "wrong_code"}
     name = ((data.get("data") or {}).get("name") or "").strip()
-    return _issue_session(phone=norm, vk_user_id=None, name=name)
+    return _issue_session(phone=norm, vk_user_id=None, yandex_user_id=None, name=name)
 
 
 # ─── VK ID ──────────────────────────────────────────────────────────────
@@ -187,7 +200,7 @@ async def exchange_vk_code(code: str, redirect_uri: str | None = None,
 def issue_vk_session(vk_user_id: int, name: str = "", phone: str | None = None) -> dict:
     """Выдаёт сессию для VK-пользователя. Если телефон известен — привязываем к
     YClients; если нет — сессия «без телефона», фронт попросит номер отдельно."""
-    return _issue_session(phone=phone, vk_user_id=vk_user_id, name=name)
+    return _issue_session(phone=phone, vk_user_id=vk_user_id, yandex_user_id=None, name=name)
 
 
 async def vk_session_from_token(access_token: str, vk_user_id, name: str = "") -> dict:
@@ -242,9 +255,115 @@ async def vk_session_from_token(access_token: str, vk_user_id, name: str = "") -
     return issue_vk_session(verified_id, name=nm, phone=phone)
 
 
+# ─── Yandex ID ─────────────────────────────────────────────────────────
+def build_yandex_auth_url(state: str, redirect_uri: str | None = None) -> dict:
+    """Готовит URL для Yandex ID OAuth. Секреты остаются на сервере."""
+    client_id = str(getattr(config, "YANDEX_CLIENT_ID", "") or "").strip()
+    redirect = redirect_uri or getattr(config, "YANDEX_REDIRECT_URI", "") or ""
+    if not _enabled_bool("YANDEX_LOGIN_ENABLED") or not client_id:
+        return {"ok": False, "error": "yandex_not_configured"}
+    if not state:
+        return {"ok": False, "error": "bad_state"}
+    params = {
+        "response_type": "code",
+        "client_id": client_id,
+        "redirect_uri": redirect,
+        "state": state,
+        "scope": "login:info login:email login:avatar",
+        "optional_scope": "login:default_phone",
+    }
+    return {"ok": True, "auth_url": _YANDEX_AUTH_URL + "?" + urllib.parse.urlencode(params)}
+
+
+async def exchange_yandex_code(code: str, redirect_uri: str | None = None) -> dict:
+    """Меняет code Yandex ID на профиль пользователя."""
+    if not code:
+        return {"ok": False, "error": "no_code"}
+    client_id = str(getattr(config, "YANDEX_CLIENT_ID", "") or "").strip()
+    client_secret = str(getattr(config, "YANDEX_CLIENT_SECRET", "") or "").strip()
+    if not _enabled_bool("YANDEX_LOGIN_ENABLED") or not client_id or not client_secret:
+        return {"ok": False, "error": "yandex_not_configured"}
+
+    try:
+        token_payload = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
+        redirect = str(redirect_uri or "").strip()
+        if redirect:
+            token_payload["redirect_uri"] = redirect
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            r = await cli.post(_YANDEX_TOKEN_URL, data=token_payload)
+            tok = r.json()
+            access_token = tok.get("access_token")
+            if not access_token:
+                logger.error("web_auth: Yandex ID обмен кода не удался: %s", tok)
+                return {"ok": False, "error": tok.get("error_description")
+                        or tok.get("error") or "yandex_exchange_failed"}
+            ur = await cli.get(
+                _YANDEX_USERINFO_URL,
+                params={"format": "json"},
+                headers={"Authorization": f"OAuth {access_token}", "Accept": "application/json"},
+            )
+            user = ur.json() or {}
+    except Exception as e:
+        logger.error("web_auth: Yandex ID обмен ошибка: %s", e)
+        return {"ok": False, "error": "yandex_exchange_failed"}
+
+    yandex_user_id = str(user.get("id") or user.get("uid") or "").strip()
+    if not yandex_user_id:
+        logger.error("web_auth: Yandex ID user_info без id: %s", user)
+        return {"ok": False, "error": "yandex_userinfo_failed"}
+
+    email = (user.get("default_email") or user.get("email") or "").strip()
+    if not email:
+        emails = user.get("emails") or []
+        if isinstance(emails, list) and emails:
+            email = str(emails[0] or "").strip()
+    name = (
+        (user.get("real_name") or "").strip()
+        or (user.get("display_name") or "").strip()
+        or ((user.get("first_name") or "") + " " + (user.get("last_name") or "")).strip()
+        or email
+        or (user.get("login") or "").strip()
+    )
+    raw_phone = user.get("default_phone")
+    if isinstance(raw_phone, dict):
+        raw_phone = raw_phone.get("number")
+    phone = normalize_phone(raw_phone or "")
+    avatar = ""
+    if user.get("default_avatar_id") and not user.get("is_avatar_empty"):
+        avatar = f"https://avatars.yandex.net/get-yapic/{user.get('default_avatar_id')}/islands-200"
+    return {
+        "ok": True,
+        "yandex_user_id": yandex_user_id,
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "avatar_url": avatar,
+    }
+
+
+def issue_yandex_session(yandex_user_id: str, name: str = "",
+                         phone: str | None = None, email: str = "",
+                         avatar_url: str = "") -> dict:
+    """Выдаёт сессию для Yandex ID. Staff можно сматчить по user_id или email."""
+    return _issue_session(
+        phone=phone,
+        vk_user_id=None,
+        yandex_user_id=str(yandex_user_id or ""),
+        name=name,
+        email=email,
+        avatar_url=avatar_url,
+    )
+
+
 # ─── Сессии ─────────────────────────────────────────────────────────────
 def _issue_session(*, phone: str | None, vk_user_id: int | None,
-                   name: str) -> dict:
+                   yandex_user_id: str | None,
+                   name: str, email: str = "", avatar_url: str = "") -> dict:
     """Общая выдача сессии. Если телефон сматчился с Telegram-клиентом —
     подставляем его chat_id, и кабинет работает как в Telegram."""
     phone_hash = pii_crypto.hash_phone(phone) if phone else None
@@ -265,9 +384,17 @@ def _issue_session(*, phone: str | None, vk_user_id: int | None,
     # до staff включаем только при VK_LOGIN_ENABLED: пока VK-вход выключен, карта может
     # быть заполнена «на будущее», а путь /api/auth/vk-sdk уже задеплоен и открыт.
     if (not chat_id and vk_user_id
-            and getattr(config, "VK_LOGIN_ENABLED", False)):
+            and _enabled_bool("VK_LOGIN_ENABLED")):
         staff_map = getattr(config, "VK_STAFF_CHAT_MAP", {}) or {}
         mapped = staff_map.get(int(vk_user_id)) or staff_map.get(str(vk_user_id))
+        if mapped:
+            chat_id = int(mapped)
+
+    if (not chat_id and yandex_user_id
+            and _enabled_bool("YANDEX_LOGIN_ENABLED")):
+        staff_map = getattr(config, "YANDEX_STAFF_CHAT_MAP", {}) or {}
+        mapped = (staff_map.get(str(yandex_user_id))
+                  or staff_map.get((email or "").strip().lower()))
         if mapped:
             chat_id = int(mapped)
 
@@ -285,7 +412,9 @@ def _issue_session(*, phone: str | None, vk_user_id: int | None,
         phone_hash=phone_hash,
         chat_id=int(chat_id) if chat_id else None,
         vk_user_id=int(vk_user_id) if vk_user_id else None,
+        yandex_user_id=str(yandex_user_id) if yandex_user_id else None,
         display_name=display,
+        tg_photo_url=avatar_url or "",
         subject_kind=subject_kind,
         ttl_days=SESSION_TTL_DAYS,
     )
@@ -298,6 +427,7 @@ def _issue_session(*, phone: str | None, vk_user_id: int | None,
             "subject_kind": subject_kind,
             "is_staff": subject_kind == "staff",
             "name": display,
+            "email": email or "",
         },
     }
 
