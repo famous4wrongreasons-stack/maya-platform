@@ -101,6 +101,16 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('keeps a booking availability day stable across timezone offsets', () => {
+    expect(
+      service.validateArguments('booking.availability.read', {
+        date: '2026-07-31T00:00:00+03:00',
+      }),
+    ).toEqual({
+      date: '2026-07-31T00:00:00.000Z',
+    });
+  });
+
   it('creates a PII-free booking approval payload', () => {
     expect(
       service.buildApprovalPreview('appointments.own.create', {

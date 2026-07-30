@@ -72,7 +72,7 @@ export class AiToolRegistryService {
           'branch_id',
         ]);
         return {
-          date: this.parseDate(args.date, 'date').toISOString(),
+          date: this.parseBookingDay(args.date, 'date'),
           ...(args.staff_id === undefined
             ? {}
             : {
@@ -363,6 +363,24 @@ export class AiToolRegistryService {
       this.invalidArguments(`${field} must be an ISO date-time`);
     }
     return date;
+  }
+
+  private parseBookingDay(value: unknown, field: string): string {
+    if (typeof value !== 'string') {
+      this.invalidArguments(`${field} must be an ISO date or date-time`);
+    }
+    const datePart = value.trim().match(/^(\d{4}-\d{2}-\d{2})(?:T.*)?$/)?.[1];
+    if (!datePart) {
+      this.invalidArguments(`${field} must be an ISO date or date-time`);
+    }
+    const normalized = new Date(`${datePart}T00:00:00.000Z`);
+    if (
+      Number.isNaN(normalized.getTime()) ||
+      normalized.toISOString().slice(0, 10) !== datePart
+    ) {
+      this.invalidArguments(`${field} must be an ISO date or date-time`);
+    }
+    return normalized.toISOString();
   }
 
   private invalidArguments(message: string): never {

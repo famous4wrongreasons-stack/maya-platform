@@ -43,7 +43,7 @@ describe('AiCoreService', () => {
     });
   });
 
-  it('redacts PII, executes an allowed read tool and synthesizes the reply', async () => {
+  it('redacts PII, executes an allowed read tool and formats the reply deterministically', async () => {
     const mocks = createService();
     const first = decision({
       reply: 'Проверяю.',
@@ -90,7 +90,7 @@ describe('AiCoreService', () => {
     expect(firstInput?.requiredToolNames).toEqual(['analytics.business.read']);
     expect(firstInput?.persona).toBe('director');
     expect(result).toMatchObject({
-      reply: 'Выручка выросла.',
+      reply: 'Выручка по бизнесу за выбранный период: 1 000 ₽.',
       source: 'deepseek',
       redacted_input: true,
       grounding: {
@@ -106,16 +106,8 @@ describe('AiCoreService', () => {
         },
       ],
     });
-    expect(mocks.model.decide.mock.calls[1]?.[0].toolResults).toEqual([
-      {
-        name: 'analytics.business.read',
-        result: { revenue: [{ currency: 'RUB', amount_kopecks: 100_000 }] },
-      },
-    ]);
-    expect(mocks.model.decide.mock.calls[1]?.[0].requiredToolNames).toEqual([]);
-    expect(
-      JSON.stringify(mocks.model.decide.mock.calls[1]?.[0].toolResults),
-    ).not.toContain('+79180000000');
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.reply).not.toContain('+79180000000');
   });
 
   it('stops at the immutable approval instead of letting the model write', async () => {
@@ -184,6 +176,75 @@ describe('AiCoreService', () => {
     expect(modelInput).not.toContain('Иван');
     expect(modelInput).not.toContain('Ивана');
     expect(modelInput).toContain('[name removed]');
+  });
+
+  it('preserves an ISO booking date while redacting a phone number', async () => {
+    const mocks = createService(['booking.availability.read']);
+    mocks.model.decide.mockResolvedValue(null);
+
+    await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        {
+          role: 'user',
+          content:
+            'Покажи свободные окна на 2026-07-31. Телефон +7 918 000-00-00.',
+        },
+      ],
+    });
+
+    const firstInput = mocks.model.decide.mock.calls[0]?.[0];
+    expect(JSON.stringify(firstInput)).toContain('2026-07-31');
+    expect(JSON.stringify(firstInput)).not.toContain('918 000');
+  });
+
+  it('returns deterministic availability instead of letting the model contradict slots', async () => {
+    const mocks = createService(['booking.availability.read']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю окна.',
+        toolCall: {
+          name: 'booking.availability.read',
+          arguments: { date: '2026-07-31T00:00:00.000Z' },
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-availability',
+      result: {
+        slots: [
+          {
+            start: '2026-07-31T07:00:00.000Z',
+            end: '2026-07-31T08:00:00.000Z',
+          },
+          {
+            start: '2026-07-31T08:00:00.000Z',
+            end: '2026-07-31T09:00:00.000Z',
+          },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        {
+          role: 'user',
+          content: 'Покажи свободные окна на 2026-07-31.',
+        },
+      ],
+    });
+
+    expect(result).toMatchObject({
+      reply:
+        'На 31.07.2026 есть свободные окна: 2 варианта времени. Уточните специалиста или услугу, чтобы сузить выбор.',
+      grounding: {
+        status: 'verified',
+        domain: 'booking_availability',
+      },
+    });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('keeps ordinary capitalized words so the model can understand the request', async () => {
@@ -270,10 +331,11 @@ describe('AiCoreService', () => {
     });
 
     expect(result).toMatchObject({
-      reply: 'Выручка: 1 000 ₽.',
+      reply: 'Выручка по бизнесу за выбранный период: 1 000 ₽.',
       source: 'deepseek',
       grounding: { status: 'verified' },
     });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('blocks a figure that differs from the completed tool result', async () => {
@@ -311,7 +373,7 @@ describe('AiCoreService', () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: 'user', content: 'Покажи выручку за июль.' }],
+      messages: [{ role: 'user', content: 'Покажи аналитику за июль.' }],
     });
 
     expect(result.source).toBe('safe_fallback');
@@ -375,6 +437,7 @@ describe('AiCoreService', () => {
         evidence_tools: ['loyalty.own.read'],
       },
     });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('grounds a request to spend bonuses before suggesting a service', async () => {
@@ -418,8 +481,83 @@ describe('AiCoreService', () => {
       'loyalty.own.read',
     ]);
     expect(result).toMatchObject({
+      reply:
+        'Ваш баланс: 2 133 балла. Можно рассмотреть: SPA — 1 200 баллов. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.',
       grounding: { status: 'verified', domain: 'client_loyalty' },
     });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+  });
+
+  it('grounds the authenticated customer appointment history', async () => {
+    const customer: AuthenticatedUser = {
+      ...user,
+      userId: 'customer-user',
+      role: UserRole.CUSTOMER,
+    };
+    const mocks = createService(['appointments.own.list']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю записи.',
+        toolCall: { name: 'appointments.own.list', arguments: {} },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-appointments',
+      result: {
+        appointments: [
+          { status: 'confirmed', is_upcoming: true },
+          { status: 'canceled', is_upcoming: false },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(customer, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Какие у меня записи?' }],
+    });
+
+    expect(result).toMatchObject({
+      reply:
+        'В вашей истории 2 записи. Предстоящих: 1, отменённых: 1. Подробности доступны в разделе «Записи».',
+      grounding: {
+        status: 'verified',
+        domain: 'client_appointments',
+        evidence_tools: ['appointments.own.list'],
+      },
+    });
+    expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
+      'appointments.own.list',
+    ]);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+  });
+
+  it('explains access denial without pretending the protected source is offline', async () => {
+    const customer: AuthenticatedUser = {
+      ...user,
+      userId: 'customer-user',
+      role: UserRole.CUSTOMER,
+    };
+    const mocks = createService(['appointments.own.list']);
+
+    const result = await mocks.service.chat(customer, {
+      ...dto,
+      messages: [
+        { role: 'user', content: 'Какая выручка бизнеса за этот месяц?' },
+      ],
+    });
+
+    expect(result).toMatchObject({
+      reply:
+        'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.',
+      source: 'safe_fallback',
+      grounding: {
+        status: 'blocked',
+        domain: 'business_analytics',
+      },
+    });
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
   it('uses employee analytics rather than business totals for staff', async () => {
@@ -465,7 +603,7 @@ describe('AiCoreService', () => {
       'analytics.employee.read',
     ]);
     expect(result).toMatchObject({
-      reply: 'Ваша выручка: 99 400 ₽.',
+      reply: 'Выручка по вашим данным за выбранный период: 99 400 ₽.',
       grounding: {
         status: 'verified',
         domain: 'personal_analytics',
@@ -474,6 +612,95 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.execute.mock.calls[0]?.[1]).toBe(
       'analytics.employee.read',
     );
+  });
+
+  it('refuses to label operating data as gross profit', async () => {
+    const mocks = createService(['analytics.business.read']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю.',
+        toolCall: {
+          name: 'analytics.business.read',
+          arguments: { period: 'month_to_date' },
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-profit',
+      result: {
+        revenue: [
+          {
+            currency: 'RUB',
+            amount_kopecks: 10_000_000,
+            amount_major_units: 100_000,
+          },
+        ],
+        net: [
+          {
+            currency: 'RUB',
+            amount_kopecks: 6_000_000,
+            amount_major_units: 60_000,
+          },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        { role: 'user', content: 'Какая валовая прибыль бизнеса за месяц?' },
+      ],
+    });
+
+    expect(result.reply).toContain('Валовая прибыль сейчас не рассчитывается');
+    expect(result.reply).not.toContain('100 000');
+    expect(result.reply).not.toContain('60 000');
+    expect(result.grounding).toMatchObject({
+      status: 'verified',
+      domain: 'business_analytics',
+    });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+  });
+
+  it('grounds an appointment count in business analytics', async () => {
+    const mocks = createService(['analytics.business.read']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю.',
+        toolCall: {
+          name: 'analytics.business.read',
+          arguments: { period: 'month_to_date' },
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-appointment-count',
+      result: {
+        appointments: { total: 12, active: 10, cancelled: 2 },
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        { role: 'user', content: 'Сколько записей у бизнеса за месяц?' },
+      ],
+    });
+
+    expect(result).toMatchObject({
+      reply:
+        'Записей по бизнесу за выбранный период: 12. Активных: 10, отменённых: 2.',
+      grounding: {
+        status: 'verified',
+        domain: 'business_analytics',
+      },
+    });
+    expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
+      'analytics.business.read',
+    ]);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('fails closed when the model requests a tool unavailable to the role', async () => {

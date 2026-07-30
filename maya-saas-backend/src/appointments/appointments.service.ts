@@ -218,7 +218,7 @@ export class AppointmentsService {
     });
 
     return this.serializeAppointment(appointment, {
-      servicesById: new Map(),
+      servicesById: new Map(services.map((service) => [service.id, service])),
       staffById: new Map(),
     });
   }
@@ -830,10 +830,22 @@ export class AppointmentsService {
       (services.length > 0
         ? services.reduce((sum, service) => sum + service.price, 0)
         : null);
-    const durationMinutes =
+    const catalogDurationMinutes =
       services.length > 0
         ? services.reduce((sum, service) => sum + service.duration_minutes, 0)
-        : null;
+        : 0;
+    const storedDurationMinutes = appointment.endAt
+      ? Math.round(
+          (appointment.endAt.getTime() - appointment.startAt.getTime()) /
+            60_000,
+        )
+      : 0;
+    const durationMinutes =
+      catalogDurationMinutes > 0
+        ? catalogDurationMinutes
+        : storedDurationMinutes > 0
+          ? storedDurationMinutes
+          : null;
     const currency = appointment.currency ?? services[0]?.currency ?? null;
     const isUpcoming = appointment.startAt.getTime() >= Date.now();
 

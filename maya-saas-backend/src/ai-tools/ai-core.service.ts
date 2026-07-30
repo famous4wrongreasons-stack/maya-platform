@@ -136,13 +136,15 @@ type GroundingReport = {
 };
 
 const GROUNDING_FACT_PATTERN =
-  /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел\w*|за\s+месяц\w*|сегодня|завтра)/i;
+  /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел[а-яёa-z]*|за\s+месяц[а-яёa-z]*|сегодня|завтра)/i;
 const GROUNDING_ANALYTICS_PATTERN =
-  /(выруч\w*|оборот\w*|касс\w*|доход\w*|зарплат\w*|средн\w*\s+чек|прибыл\w*|марж\w*|аналитик\w*|статистик\w*|показател\w*|цифр\w*)/i;
+  /(выруч[а-яёa-z]*|оборот[а-яёa-z]*|касс[а-яёa-z]*|доход[а-яёa-z]*|зарплат[а-яёa-z]*|средн[а-яёa-z]*\s+чек|прибыл[а-яёa-z]*|марж[а-яёa-z]*|аналитик[а-яёa-z]*|статистик[а-яёa-z]*|показател[а-яёa-z]*|цифр[а-яёa-z]*)/i;
+const GROUNDING_APPOINTMENT_METRIC_PATTERN =
+  /(?:(?:сколько|количеств[а-яёa-z]*|числ[а-яёa-z]*).{0,32}запис[а-яёa-z]*|запис[а-яёa-z]*.{0,32}(?:за\s+)?(?:сегодня|вчера|недел[а-яёa-z]*|месяц[а-яёa-z]*))/i;
 const GROUNDING_PERSONAL_SCOPE_PATTERN =
-  /(моя|мой|мои|личн\w*|у\s+меня|сколько\s+я|я\s+заработ)/i;
+  /(моя|мой|мои|личн[а-яёa-z]*|у\s+меня|сколько\s+я|я\s+заработ)/i;
 const GROUNDING_BUSINESS_SCOPE_PATTERN =
-  /(бизнес\w*|компан\w*|по\s+всем|все\s+сотрудник\w*|все\s+специалист\w*|общ\w*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
+  /(бизнес[а-яёa-z]*|компан[а-яёa-z]*|по\s+всем|все\s+сотрудник[а-яёa-z]*|все\s+специалист[а-яёa-z]*|общ[а-яёa-z]*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 const GROUNDING_SMALL_METRIC_PATTERN =
@@ -196,7 +198,7 @@ export class AiCoreService {
           sanitized.redacted,
           toolsUsed,
           decisions,
-          this.groundingFallback(requirement, toolResults),
+          this.groundingFallback(requirement, toolResults, true),
         );
       }
       for (let step = 0; step <= maxToolSteps; step += 1) {
@@ -388,6 +390,30 @@ export class AiCoreService {
           name: decision.toolCall.name,
           result: safeResult,
         });
+        const deterministicReply = this.deterministicGroundedReply(
+          requirement,
+          toolResults,
+          this.latestUserText(sanitized.messages),
+        );
+        if (deterministicReply) {
+          return this.complete(
+            user,
+            dto,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: deterministicReply,
+              source: decision.provider,
+              action: null,
+              grounding: this.groundingReport(
+                requirement,
+                'verified',
+                toolResults,
+              ),
+            },
+          );
+        }
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
@@ -493,14 +519,14 @@ export class AiCoreService {
     const factRequest = GROUNDING_FACT_PATTERN.test(text);
 
     if (
-      /(баланс\w*|сколько\s+.*(?:балл|бонус)|мои\s+(?:балл|бонус)|(?:потрат|спис|оплат)\w*.*(?:балл|бонус)|на\s+что.*(?:балл|бонус))\w*/i.test(
+      /(баланс[а-яёa-z]*|сколько\s+.*(?:балл|бонус)|мои\s+(?:балл|бонус)|(?:потрат|спис|оплат)[а-яёa-z]*.*(?:балл|бонус)|на\s+что.*(?:балл|бонус))[а-яёa-z]*/i.test(
         text,
       )
     ) {
       return this.requireGrounding('client_loyalty', ['loyalty.own.read']);
     }
     if (
-      /(мои\s+запис\w*|когда\s+я\s+записан\w*|истори\w*\s+(?:моих\s+)?запис\w*)/i.test(
+      /(мои\s+запис[а-яёa-z]*|(?:какие|сколько)\s+у\s+меня\s+запис[а-яёa-z]*|когда\s+я\s+записан[а-яёa-z]*|истори[а-яёa-z]*\s+(?:моих\s+)?запис[а-яёa-z]*)/i.test(
         text,
       )
     ) {
@@ -509,7 +535,7 @@ export class AiCoreService {
       ]);
     }
     if (
-      /(свободн\w*\s+(?:окн\w*|врем\w*|слот\w*)|ближайш\w*\s+(?:окн\w*|врем\w*|слот\w*)|есть\s+ли\s+(?:окн\w*|мест\w*|врем\w*)|когда\s+можно\s+запис)/i.test(
+      /(свободн[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|ближайш[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|есть\s+ли\s+(?:окн[а-яёa-z]*|мест[а-яёa-z]*|врем[а-яёa-z]*)|когда\s+можно\s+запис)/i.test(
         text,
       )
     ) {
@@ -519,7 +545,7 @@ export class AiCoreService {
     }
     if (
       !/(подписк\w*|тариф\w*|maya|майя)/i.test(text) &&
-      /(сколько\s+стоит|цен\w*|прайс\w*|какие\s+услуг\w*|длительн\w*\s+услуг\w*)/i.test(
+      /(сколько\s+стоит|цен[а-яёa-z]*|прайс[а-яёa-z]*|какие\s+услуг[а-яёa-z]*|длительн[а-яёa-z]*\s+услуг[а-яёa-z]*)/i.test(
         text,
       )
     ) {
@@ -528,7 +554,7 @@ export class AiCoreService {
       ]);
     }
     if (
-      /(кто\s+работает|график\w*\s+(?:работ|мастер|специалист)|смен\w*|выходн\w*)/i.test(
+      /(кто\s+работает|график[а-яёa-z]*\s+(?:работ|мастер|специалист)|смен[а-яёa-z]*|выходн[а-яёa-z]*)/i.test(
         text,
       ) &&
       factRequest
@@ -538,26 +564,30 @@ export class AiCoreService {
       return this.requireGrounding('staff_schedule', ['staff.schedule.read']);
     }
     if (
-      /(какие\s+(?:мастер|специалист)\w*|кто\s+(?:из\s+)?(?:мастер|специалист)\w*|выбрать\s+(?:мастер|специалист)\w*)/i.test(
+      /(какие\s+(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*)/i.test(
         text,
       ) &&
-      !/(лучш\w*|выруч\w*|заработ\w*|эффектив\w*)/i.test(text)
+      !/(лучш[а-яёa-z]*|выруч[а-яёa-z]*|заработ[а-яёa-z]*|эффектив[а-яёa-z]*)/i.test(
+        text,
+      )
     ) {
       return this.requireGrounding('staff_catalog', ['catalog.staff.read']);
     }
-    if (/(расход\w*|затрат\w*)/i.test(text) && factRequest) {
+    if (/(расход[а-яёa-z]*|затрат[а-яёa-z]*)/i.test(text) && factRequest) {
       return this.requireGrounding('business_expenses', ['expenses.read']);
     }
     if (
-      /(сколько\s+(?:у\s+нас\s+)?клиент\w*|количеств\w*\s+клиент\w*)/i.test(
+      /(сколько\s+(?:у\s+нас\s+)?клиент[а-яёa-z]*|количеств[а-яёa-z]*\s+клиент[а-яёa-z]*)/i.test(
         text,
       )
     ) {
       return this.requireGrounding('customer_count', ['customers.count']);
     }
     if (
-      (GROUNDING_ANALYTICS_PATTERN.test(text) && factRequest) ||
-      /(сводк\w*|что\s+у\s+нас\s+сегодня)/i.test(text)
+      ((GROUNDING_ANALYTICS_PATTERN.test(text) ||
+        GROUNDING_APPOINTMENT_METRIC_PATTERN.test(text)) &&
+        factRequest) ||
+      /(сводк[а-яёa-z]*|что\s+у\s+нас\s+сегодня)/i.test(text)
     ) {
       const personal = GROUNDING_PERSONAL_SCOPE_PATTERN.test(text);
       const business = GROUNDING_BUSINESS_SCOPE_PATTERN.test(text);
@@ -627,14 +657,209 @@ export class AiCoreService {
   private groundingFallback(
     requirement: GroundingRequirement,
     toolResults: AiCoreToolResult[],
+    unavailableForCurrentAccess = false,
   ) {
     return {
-      reply:
-        'Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.',
+      reply: unavailableForCurrentAccess
+        ? 'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.'
+        : 'Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.',
       source: 'safe_fallback' as const,
       action: null,
       grounding: this.groundingReport(requirement, 'blocked', toolResults),
     };
+  }
+
+  private deterministicGroundedReply(
+    requirement: GroundingRequirement | null,
+    toolResults: AiCoreToolResult[],
+    userText: string,
+  ): string | null {
+    if (requirement?.domain === 'booking_availability') {
+      const evidence = toolResults.find(
+        (result) => result.name === 'booking.availability.read',
+      );
+      if (!evidence) {
+        return null;
+      }
+      const slots = this.record(evidence.result).slots;
+      if (!Array.isArray(slots)) {
+        return null;
+      }
+      const dateMatch = userText.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
+      const dateLabel = dateMatch
+        ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
+        : 'выбранную дату';
+      if (slots.length === 0) {
+        return `На ${dateLabel} свободных окон нет. Проверить другую дату?`;
+      }
+      return `На ${dateLabel} есть свободные окна: ${slots.length} ${this.pluralize(slots.length, 'вариант', 'варианта', 'вариантов')} времени. Уточните специалиста или услугу, чтобы сузить выбор.`;
+    }
+
+    if (requirement?.domain === 'client_loyalty') {
+      const evidence = toolResults.find(
+        (result) => result.name === 'loyalty.own.read',
+      );
+      if (!evidence) {
+        return null;
+      }
+      const loyalty = this.record(evidence.result);
+      const balance = this.safeMetricNumber(loyalty.balance);
+      const balanceLabel = `${this.formatMetricNumber(balance)} ${this.pluralize(balance, 'балл', 'балла', 'баллов')}`;
+      const text = userText.toLowerCase().replace(/ё/g, 'е');
+      if (!/(потрат|спис|оплат|на\s+что)/i.test(text)) {
+        return `Ваш баланс: ${balanceLabel}.`;
+      }
+      const spend = this.record(loyalty.spend_options);
+      const items = Array.isArray(spend.items)
+        ? spend.items
+            .slice(0, 3)
+            .map((entry) => {
+              const item = this.record(entry);
+              if (typeof item.name !== 'string') {
+                return null;
+              }
+              const points = this.safeMetricNumber(item.points_required);
+              return `${item.name} — ${this.formatMetricNumber(points)} ${this.pluralize(points, 'балл', 'балла', 'баллов')}`;
+            })
+            .filter((entry): entry is string => entry !== null)
+        : [];
+      return items.length > 0
+        ? `Ваш баланс: ${balanceLabel}. Можно рассмотреть: ${items.join('; ')}. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.`
+        : `Ваш баланс: ${balanceLabel}. Подходящих услуг для списания сейчас нет.`;
+    }
+
+    if (requirement?.domain === 'client_appointments') {
+      const evidence = toolResults.find(
+        (result) => result.name === 'appointments.own.list',
+      );
+      if (!evidence) {
+        return null;
+      }
+      const appointments = this.record(evidence.result).appointments;
+      if (!Array.isArray(appointments) || appointments.length === 0) {
+        return 'У вас пока нет записей.';
+      }
+      const upcoming = appointments.filter((entry) => {
+        const item = this.record(entry);
+        return item.is_upcoming === true && item.status !== 'canceled';
+      }).length;
+      const cancelled = appointments.filter(
+        (entry) => this.record(entry).status === 'canceled',
+      ).length;
+      return `В вашей истории ${appointments.length} ${this.pluralize(appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming}, отменённых: ${cancelled}. Подробности доступны в разделе «Записи».`;
+    }
+
+    if (
+      requirement?.domain !== 'business_analytics' &&
+      requirement?.domain !== 'personal_analytics'
+    ) {
+      return null;
+    }
+    const toolName =
+      requirement.domain === 'personal_analytics'
+        ? 'analytics.employee.read'
+        : 'analytics.business.read';
+    const evidence = toolResults.find((result) => result.name === toolName);
+    if (!evidence) {
+      return null;
+    }
+    const data = this.record(evidence.result);
+    const text = userText.toLowerCase().replace(/ё/g, 'е');
+    const scope =
+      requirement.domain === 'personal_analytics' ? 'вашим данным' : 'бизнесу';
+
+    if (/зарплат[а-яa-z]*/i.test(text)) {
+      return 'Зарплата не рассчитывается из выручки автоматически. Для точного ответа нужны подтверждённые правила оплаты труда и начисления.';
+    }
+    if (/валов[а-яa-z]*\s+прибыл[а-яa-z]*/i.test(text)) {
+      return 'Валовая прибыль сейчас не рассчитывается: в данных есть выручка и внесённые расходы, но прямые затраты на оказание услуг не выделены отдельно. Я не буду подменять её выручкой или операционным результатом.';
+    }
+    if (/марж[а-яa-z]*/i.test(text)) {
+      return 'Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.';
+    }
+    if (/средн[а-яa-z]*\s+чек/i.test(text)) {
+      return `Средний чек по ${scope} за выбранный период: ${this.formatMoneyEntries(data.average_ticket)}.`;
+    }
+    if (GROUNDING_APPOINTMENT_METRIC_PATTERN.test(text)) {
+      const appointments = this.record(data.appointments);
+      const total = this.safeMetricNumber(appointments.total);
+      const active = this.safeMetricNumber(appointments.active);
+      const cancelled = this.safeMetricNumber(appointments.cancelled);
+      return `Записей по ${scope} за выбранный период: ${total}. Активных: ${active}, отменённых: ${cancelled}.`;
+    }
+    if (/чист[а-яa-z]*\s+прибыл[а-яa-z]*|прибыл[а-яa-z]*/i.test(text)) {
+      return `Операционный результат по ${scope} за выбранный период: ${this.formatMoneyEntries(data.net)}. Это выручка минус внесённые расходы, а не бухгалтерская чистая прибыль.`;
+    }
+    if (
+      /выруч[а-яa-z]*|оборот[а-яa-z]*|касс[а-яa-z]*|доход[а-яa-z]*/i.test(text)
+    ) {
+      return `Выручка по ${scope} за выбранный период: ${this.formatMoneyEntries(data.revenue)}.`;
+    }
+    return null;
+  }
+
+  private formatMoneyEntries(value: unknown): string {
+    if (!Array.isArray(value) || value.length === 0) {
+      return '0 ₽';
+    }
+    const formatted = value
+      .map((entry) => {
+        const item = this.record(entry);
+        const majorUnits =
+          typeof item.amount_major_units === 'number'
+            ? item.amount_major_units
+            : typeof item.amount_kopecks === 'number'
+              ? item.amount_kopecks / 100
+              : null;
+        if (majorUnits === null || !Number.isFinite(majorUnits)) {
+          return null;
+        }
+        const currency =
+          typeof item.currency === 'string' ? item.currency.toUpperCase() : '';
+        const currencyLabel =
+          { RUB: '₽', USD: '$', EUR: '€', KZT: '₸' }[currency] || currency;
+        const amount = new Intl.NumberFormat('ru-RU', {
+          maximumFractionDigits: 2,
+        })
+          .format(majorUnits)
+          .replace(/\u00a0/g, ' ');
+        return `${amount}${currencyLabel ? ` ${currencyLabel}` : ''}`;
+      })
+      .filter((entry): entry is string => entry !== null);
+    return formatted.length > 0 ? formatted.join(', ') : '0 ₽';
+  }
+
+  private safeMetricNumber(value: unknown): number {
+    return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+  }
+
+  private formatMetricNumber(value: number): string {
+    return new Intl.NumberFormat('ru-RU', {
+      maximumFractionDigits: 2,
+    })
+      .format(value)
+      .replace(/\u00a0/g, ' ');
+  }
+
+  private pluralize(
+    value: number,
+    one: string,
+    few: string,
+    many: string,
+  ): string {
+    const remainder10 = Math.abs(value) % 10;
+    const remainder100 = Math.abs(value) % 100;
+    if (remainder10 === 1 && remainder100 !== 11) {
+      return one;
+    }
+    if (
+      remainder10 >= 2 &&
+      remainder10 <= 4 &&
+      (remainder100 < 12 || remainder100 > 14)
+    ) {
+      return few;
+    }
+    return many;
   }
 
   private latestUserText(messages: AiCoreMessage[]): string {
@@ -776,7 +1001,11 @@ export class AiCoreService {
       )
       .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, '[email removed]')
       .replace(/https?:\/\/[^\s]+/gi, '[link removed]')
-      .replace(/\+?\d[\d\s().-]{7,}\d/g, '[phone removed]')
+      .replace(/(?<!\d)\+?\d[\d\s().-]{7,}\d(?!\d)/g, (candidate) =>
+        /^\d{4}-\d{2}-\d{2}$/.test(candidate.trim())
+          ? candidate
+          : '[phone removed]',
+      )
       .replace(/\b\d(?:[ -]?\d){11,18}\b/g, '[number removed]')
       .replace(
         /(^|[\s,;:])(клиент(?:а|у|ом)?|сотрудник(?:а|у|ом)?|мастер(?:а|у|ом)?|врач(?:а|у|ом)?)\s+[А-ЯЁA-Z][А-ЯЁа-яёA-Za-z-]{1,40}(?=$|[\s,.;:!?])/giu,

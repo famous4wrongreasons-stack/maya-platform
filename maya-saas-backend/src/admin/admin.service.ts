@@ -21,6 +21,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
+import { CreateProviderUserDto } from './dto/create-provider-user.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 
 @Injectable()
@@ -226,6 +227,51 @@ export class AdminService {
     return {
       user: this.usersService.serializeUser(user),
       temporary_password: dto.password ? null : temporaryPassword,
+    };
+  }
+
+  async createProviderUser(
+    id: string,
+    providerId: string,
+    dto: CreateProviderUserDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    await this.tenantsService.getTenantByIdOrThrow(id);
+    await this.usersService.ensureEmailIsAvailable(id, dto.email);
+
+    if (dto.phone) {
+      await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
+    }
+
+    const temporaryPassword = dto.password?.trim() || this.generatePassword();
+    const user = await this.usersService.createStaffUserForInternalProvider({
+      tenantId: id,
+      providerId,
+      email: dto.email,
+      phone: dto.phone ?? null,
+      name: dto.name ?? null,
+      passwordHash: await bcrypt.hash(temporaryPassword, 10),
+    });
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'tenant.provider_user_created',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: {
+        role: user.role,
+        email: user.email,
+        branch_id: user.branchId,
+        provider_id: providerId,
+      },
+    });
+
+    return {
+      user: this.usersService.serializeUser(user),
+      temporary_password: dto.password ? null : temporaryPassword,
+      provider_id: providerId,
     };
   }
 

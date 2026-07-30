@@ -30,6 +30,7 @@ import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
 import { QuotaResource } from '../quotas/quota-resource';
 import { RequiresQuota } from '../quotas/requires-quota.decorator';
+import { CreateProviderUserDto } from './dto/create-provider-user.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 import { AdminService } from './admin.service';
 
@@ -164,6 +165,21 @@ export class AdminController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.adminService.createTenantUser(id, dto, actor);
+  }
+
+  @Post(':id/providers/:providerId/user')
+  @Roles(UserRole.PLATFORM_OWNER, UserRole.TENANT_ADMIN)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
+  @ApiOperation({
+    summary: 'Create a staff login for an existing internal-calendar provider',
+  })
+  createProviderUser(
+    @Param('id') id: string,
+    @Param('providerId') providerId: string,
+    @Body() dto: CreateProviderUserDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adminService.createProviderUser(id, providerId, dto, actor);
   }
 
   @Post(':id/suspend')

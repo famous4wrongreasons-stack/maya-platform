@@ -50,6 +50,8 @@ type AppointmentRecord = {
   blockedEndAt: Date;
   status: string;
   notes: string | null;
+  totalPriceKopecks?: number | null;
+  currency?: string;
   providerPayload: unknown;
   createdAt: Date;
   updatedAt: Date;
@@ -96,6 +98,13 @@ describe('AppointmentsService', () => {
     const appointmentFindManyMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown[]>
     > = jest.fn().mockResolvedValue([]);
+    const appointmentCreateMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<AppointmentRecord>
+    > = jest.fn().mockResolvedValue({
+      ...appointmentRecord,
+      totalPriceKopecks: 250_000,
+      currency: 'RUB',
+    });
     const appointmentUpdateMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<AppointmentRecord>
     > = jest.fn().mockResolvedValue({
@@ -251,6 +260,7 @@ describe('AppointmentsService', () => {
 
     const prisma: Pick<PrismaService, 'appointment' | 'branch'> = {
       appointment: {
+        create: appointmentCreateMock,
         findFirst: appointmentFindFirstMock,
         findMany: appointmentFindManyMock,
         update: appointmentUpdateMock,
@@ -340,6 +350,7 @@ describe('AppointmentsService', () => {
         auditLogMock,
         appointmentFindFirstMock,
         appointmentUpdateMock,
+        appointmentCreateMock,
         cancelAppointmentMock,
         createAppointmentMock,
         getCalendarSourceMock,
@@ -378,6 +389,30 @@ describe('AppointmentsService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(assertLiveBookingEnabledMock).toHaveBeenCalledWith('tenant-1');
     expect(getTenantUserOrThrowMock).not.toHaveBeenCalled();
+  });
+
+  it('returns catalog details and a non-zero duration immediately after booking', async () => {
+    const { service } = createService();
+
+    const result = await service.createForClient('tenant-1', 'user-1', {
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T11:00:00',
+      branchId: 'branch-1',
+    });
+
+    expect(result).toMatchObject({
+      service_ids: ['svc-1'],
+      services: [
+        expect.objectContaining({
+          id: 'svc-1',
+          duration_minutes: 60,
+        }),
+      ],
+      total_price: 2500,
+      duration_minutes: 60,
+      currency: 'RUB',
+    });
   });
 
   it('uses the stored client profile when preview payload omits name and phone', async () => {

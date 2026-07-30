@@ -293,6 +293,102 @@ export class UsersService {
     return tenantId ? this.projectTenantMembership(user, tenantId) : user;
   }
 
+  async createStaffUserForInternalProvider(data: {
+    tenantId: string;
+    providerId: string;
+    email: string;
+    phone?: string | null;
+    name?: string | null;
+    passwordHash: string;
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const normalizedPhone = this.normalizeOptionalPhone(data.phone);
+    const normalizedName = this.normalizeOptionalName(data.name);
+
+    return this.prisma.$transaction(async (tx) => {
+      const provider = await tx.internalProvider.findFirst({
+        where: { id: data.providerId, tenantId },
+        select: {
+          id: true,
+          branchId: true,
+          displayName: true,
+          userId: true,
+          active: true,
+        },
+      });
+
+      if (!provider) {
+        throw new NotFoundException({
+          message: 'Internal provider not found.',
+          error: { code: 'provider_not_found' },
+        });
+      }
+      if (!provider.active) {
+        throw new ConflictException({
+          message: 'Inactive provider cannot receive an account.',
+          error: { code: 'provider_inactive' },
+        });
+      }
+      if (provider.userId) {
+        throw new ConflictException({
+          message: 'This provider already has a user account.',
+          error: { code: 'provider_account_already_linked' },
+        });
+      }
+
+      const effectiveName =
+        normalizedName ?? this.normalizeOptionalName(provider.displayName);
+      const user = await tx.user.create({
+        data: {
+          tenantId,
+          branchId: provider.branchId,
+          email: data.email.toLowerCase(),
+          phone: normalizedPhone,
+          encryptedName: effectiveName
+            ? this.encryptionService.encrypt(effectiveName)
+            : null,
+          passwordHash: data.passwordHash,
+          role: UserRole.STAFF,
+          status: UserStatus.ACTIVE,
+          memberships: {
+            create: {
+              tenantId,
+              branchId: provider.branchId,
+              role: UserRole.STAFF,
+              status: UserStatus.ACTIVE,
+              joinedAt: new Date(),
+            },
+          },
+        },
+        include: {
+          tenant: true,
+          branch: true,
+          memberships: {
+            include: { tenant: true, branch: true },
+          },
+        },
+      });
+
+      const linked = await tx.internalProvider.updateMany({
+        where: {
+          id: provider.id,
+          tenantId,
+          userId: null,
+          active: true,
+        },
+        data: { userId: user.id },
+      });
+      if (linked.count !== 1) {
+        throw new ConflictException({
+          message: 'Provider account linking changed during the request.',
+          error: { code: 'provider_account_link_conflict' },
+        });
+      }
+
+      return this.projectTenantMembership(user, tenantId);
+    });
+  }
+
   async createPhoneFirstClientUser(data: {
     tenantId: string;
     tenantSlug: string;

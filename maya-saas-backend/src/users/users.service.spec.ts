@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -398,5 +402,130 @@ describe('UsersService', () => {
         },
       },
     });
+  });
+
+  it('creates and links a staff account to the exact tenant provider atomically', async () => {
+    const providerFindFirstMock = jest.fn().mockResolvedValue({
+      id: 'provider-2',
+      branchId: 'branch-1',
+      displayName: 'Илья',
+      userId: null,
+      active: true,
+    });
+    const providerUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
+    const createdUser = tenantUser({
+      id: 'staff-user-1',
+      email: 'barber@example.test',
+      phone: '+79990000000',
+      branchId: 'branch-1',
+      role: 'staff',
+      encryptedName: 'enc:Илья',
+    });
+    createdUser.memberships![0] = {
+      ...createdUser.memberships![0],
+      branchId: 'branch-1',
+      role: 'staff',
+      branch: { id: 'branch-1', name: 'Main branch' },
+    };
+    const userCreateMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<UserRecord>
+    > = jest.fn().mockResolvedValue(createdUser);
+    const transactionMock = jest.fn(
+      async (run: (tx: Record<string, unknown>) => Promise<unknown>) =>
+        run({
+          internalProvider: {
+            findFirst: providerFindFirstMock,
+            updateMany: providerUpdateManyMock,
+          },
+          user: { create: userCreateMock },
+        }),
+    );
+    const tenantContext = new TenantContextService();
+    const encryptionService = {
+      encrypt: jest.fn((value: string) => `enc:${value}`),
+      decrypt: jest.fn((value: string) => value.replace(/^enc:/, '')),
+    } as unknown as EncryptionService;
+    const service = new UsersService(
+      { $transaction: transactionMock } as unknown as PrismaService,
+      encryptionService,
+      tenantContext,
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.createStaffUserForInternalProvider({
+        tenantId: 'tenant-1',
+        providerId: 'provider-2',
+        email: 'BARBER@example.test',
+        phone: '+7 (999) 000-00-00',
+        passwordHash: 'hash',
+      }),
+    );
+
+    const createArgs = userCreateMock.mock.calls[0][0];
+    expect(createArgs.data).toEqual(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        branchId: 'branch-1',
+        email: 'barber@example.test',
+        role: 'staff',
+      }),
+    );
+    expect(providerUpdateManyMock).toHaveBeenCalledWith({
+      where: {
+        id: 'provider-2',
+        tenantId: 'tenant-1',
+        userId: null,
+        active: true,
+      },
+      data: { userId: 'staff-user-1' },
+    });
+    expect(result.role).toBe('staff');
+  });
+
+  it('rolls back provider-account creation when a concurrent link wins', async () => {
+    const transactionMock = jest.fn(
+      async (run: (tx: Record<string, unknown>) => Promise<unknown>) =>
+        run({
+          internalProvider: {
+            findFirst: jest.fn().mockResolvedValue({
+              id: 'provider-2',
+              branchId: null,
+              displayName: 'Илья',
+              userId: null,
+              active: true,
+            }),
+            updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          },
+          user: {
+            create: jest.fn().mockResolvedValue(
+              tenantUser({
+                id: 'staff-user-1',
+                email: 'barber@example.test',
+                role: 'staff',
+              }),
+            ),
+          },
+        }),
+    );
+    const tenantContext = new TenantContextService();
+    const service = new UsersService(
+      { $transaction: transactionMock } as unknown as PrismaService,
+      {
+        encrypt: (value: string) => `enc:${value}`,
+        decrypt: (value: string) => value.replace(/^enc:/, ''),
+      } as EncryptionService,
+      tenantContext,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.createStaffUserForInternalProvider({
+          tenantId: 'tenant-1',
+          providerId: 'provider-2',
+          email: 'barber@example.test',
+          passwordHash: 'hash',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 });
