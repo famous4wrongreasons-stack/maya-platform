@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 
-const file = process.argv[2] ?? "сайт и приложение/app.html";
+const args = process.argv.slice(2);
+const native = args.includes("--native");
+const file =
+  args.find((argument) => argument !== "--native") ??
+  "сайт и приложение/app.html";
 const source = readFileSync(file, "utf8");
 
 function requireText(text, description) {
@@ -19,7 +23,22 @@ function requireOrder(start, guard, request, description) {
   }
 }
 
-requireText("apiBase = location.origin + '/api'", "same-origin public API boot");
+if (native) {
+  requireText(
+    "var trustedBoot = !!(srvBoot",
+    "trusted native MAYA OS boot",
+  );
+  requireText(
+    "window.__ME_MAYA_OS_PREVIEW === true && isNativeApp()",
+    "native-only owner preview",
+  );
+  requireText(
+    "Обычный запуск нативного клиента всегда возвращается в legacy production.",
+    "legacy-safe normal native launch",
+  );
+} else {
+  requireText("apiBase = location.origin + '/api'", "same-origin public API boot");
+}
 requireText("CHAT_HISTORY_CACHE + ':saas:' + ctx.ns", "tenant-scoped chat cache");
 requireText("return window.__ME_SAAS_CTX ? sessionStorage : localStorage", "isolated SaaS chat storage");
 requireText("window.__SAAS_FEATURES_EFFECTIVE === true", "authenticated feature gate");
@@ -27,7 +46,10 @@ requireText("_aiOk = false; // readiness", "fail-closed AI entitlement gate");
 requireText("x.amount_kopecks", "backend kopeck amount support");
 requireText("x.delta != null ? x.delta : x.amount", "backend loyalty delta support");
 requireText("/ai/approvals?surface=", "pending approval recovery");
-requireText("var micBtn = universal ? null", "tenant-safe voice UI gate");
+requireText(
+  native ? "var showMic = !universal" : "var micBtn = universal ? null",
+  "tenant-safe voice UI gate",
+);
 requireText("localBookingFetch('/customer-portal'", "resilient customer portal integration");
 requireText("window.addEventListener('me-saas-data-changed'", "post-approval data refresh");
 requireText("var roleQuicks = defaultQuickReplies().slice(0, 3)", "role-aware chat welcome commands");

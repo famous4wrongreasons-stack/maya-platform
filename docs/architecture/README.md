@@ -216,3 +216,4 @@ classDiagram
 - [AI tool runtime and approvals](ai-tool-runtime-runbook.md)
 - [Isolated staging readiness](staging-readiness-runbook.md)
 - [Pre-publication readiness, 2026-07-15](prepublication-readiness-2026-07-15.md)
+- [Release readiness, 2026-07-30](release-readiness-2026-07-30.md)
