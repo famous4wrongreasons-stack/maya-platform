@@ -4597,9 +4597,10 @@ function ALogin() {
   const dark = window.__meDark;
   const setDark = window.__meSetDark;
   const t = tokens("aurora", dark);
+  const lgRecoveryHint = (function () { try { return window.__ME_LOGIN_RECOVERY || null; } catch (e) { return null; } })();
   // Maya OS 0A: вход по email (поле-пилюля + стрелка)
-  const [lgEmail, setLgEmail] = React.useState('');
-  const [lgNote, setLgNote] = React.useState('');
+  const [lgEmail, setLgEmail] = React.useState(function () { return String(lgRecoveryHint && lgRecoveryHint.email || ''); });
+  const [lgNote, setLgNote] = React.useState(function () { return String(lgRecoveryHint && lgRecoveryHint.note || ''); });
   // ── «Создать свою MAYA»: self-serve онбординг прямо в приложении ──
   const [lgCreate, setLgCreate] = React.useState(false);
   const [lgCr, setLgCr] = React.useState({ name: '', oname: '', email: '', phone: '', pass: '', cal: 'internal' });
@@ -4633,9 +4634,9 @@ function ALogin() {
   const [lgCrmLoaded, setLgCrmLoaded] = React.useState(false);
   const lgCrmReqRef = React.useRef(false);
   // ── MAYA OS: вход по email спрятан за строкой (как Telegram/Яндекс) ──
-  const [lgEmailOpen, setLgEmailOpen] = React.useState(false);
+  const [lgEmailOpen, setLgEmailOpen] = React.useState(!!lgRecoveryHint);
   // ── MAYA OS: двухшаговый вход по одноразовому email-коду ──
-  const [lgEmailStep, setLgEmailStep] = React.useState('email'); // email | code
+  const [lgEmailStep, setLgEmailStep] = React.useState(function () { return lgRecoveryHint && lgRecoveryHint.step === 'code' ? 'code' : 'email'; }); // email | code
   const [lgEmailCode, setLgEmailCode] = React.useState('');
   const [lgEmailBusy, setLgEmailBusy] = React.useState(false);
   const [lgEmailErr, setLgEmailErr] = React.useState('');
@@ -4859,7 +4860,8 @@ function ALogin() {
   };
   // API-base текущего контекста (тот же, что boot-скрипт/followup)
   const lgApiBase = () => {
-    var api = (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)
+    var api = (lgRecoveryHint && lgRecoveryHint.apiBase)
+      || (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)
       || window.__ME_MAYA_OS_API_BASE
       || (function () { try { return localStorage.getItem('me_booking_api_base'); } catch (e) { return null; } })()
       || 'http://localhost:3000/api';
@@ -5114,7 +5116,7 @@ function ALogin() {
   };
   // Tenant из ссылки остаётся быстрым путём; в общем приложении backend
   // определяет бизнес по email и раскрывает его только после правильного кода.
-  const lgEmailTenant = () => { try { return (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.slug) || ''; } catch (e) { return ''; } };
+  const lgEmailTenant = () => { try { if (lgRecoveryHint && lgRecoveryHint.crossTenant) return ''; return (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.slug) || ''; } catch (e) { return ''; } };
   const lgEmailErrText = (code, fallback) => {
     var m = {
       email_code_invalid: 'Неверный код. Проверьте и введите ещё раз.',
@@ -12879,6 +12881,8 @@ function AChat() {
 	      ai_onboarding_incomplete: 'Ещё не всё готово — ответьте на вопрос Майи.',
 	      ai_onboarding_confirmation_in_progress: 'Уже создаю ваш бизнес — секунду.',
 	      ai_onboarding_not_editable: 'Этот черновик уже подтверждён.',
+	      ai_onboarding_owner_mismatch: 'Этот бизнес привязан к другому адресу владельца.',
+	      auth_rate_limited: 'Регистрация уже выполнялась. Проверяю созданный бизнес…',
 	      invalid_trial_activation_token: 'Пробную версию не удалось подтвердить. Активируйте её заново с экрана входа.',
 	      trial_activation_expired: 'Срок активации пробной версии истёк. Активируйте заново с экрана входа.',
 	      trial_activation_not_pending: 'Пробная версия уже активирована.',
@@ -13054,6 +13058,82 @@ function AChat() {
 	  function onbOpenApp(api, slug, cal) {
 	    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(slug) + '&onboarded=1' + (cal ? '&calendar_setup=1' : ''));
 	  }
+	  function onbOwnerRole(user) {
+	    var role = String(user && user.role || '').toLowerCase();
+	    return ['tenant_admin', 'tenant_owner', 'business_owner', 'administrator'].indexOf(role) >= 0;
+	  }
+	  async function onbResumeStoredOwner(email) {
+	    var target = String(email || '').trim().toLowerCase();
+	    var candidates = [];
+	    try {
+	      for (var i = 0; i < localStorage.length; i++) {
+	        var key = localStorage.key(i);
+	        if (!key || key.indexOf('me_saas_auth_v2:') !== 0) continue;
+	        var bundle = null; try { bundle = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) {}
+	        var bundleEmail = String(bundle && bundle.user && bundle.user.email || '').trim().toLowerCase();
+	        if (bundle && bundle.token && bundle.refresh_token && bundle.tenant_slug && bundle.api_base && bundleEmail === target) candidates.push({ key: key, bundle: bundle });
+	      }
+	    } catch (e) {}
+	    for (var n = 0; n < candidates.length; n++) {
+	      var entry = candidates[n], b = entry.bundle;
+	      var api = String(b.api_base || '').replace(/\/+$/, '');
+	      var check = await fetch(api + '/me', { headers: { Authorization: 'Bearer ' + b.token } }).catch(function () { return null; });
+	      if (check && check.status === 401 && b.refresh_token) {
+	        var rr = await fetch(api + '/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: b.refresh_token }) }).catch(function () { return null; });
+	        var rd = null; if (rr) { try { rd = await rr.json(); } catch (e) {} }
+	        if (rr && rr.ok && rd && rd.access_token && rd.refresh_token) {
+	          b.token = rd.access_token; b.refresh_token = rd.refresh_token;
+	          b.access_expires_at = rd.expires_in ? Date.now() + Number(rd.expires_in) * 1000 : null;
+	          b.refresh_expires_at = rd.refresh_expires_at || null; b.session = rd.session || b.session || null;
+	          try { localStorage.setItem(entry.key, JSON.stringify(b)); } catch (e) {}
+	          check = await fetch(api + '/me', { headers: { Authorization: 'Bearer ' + b.token } }).catch(function () { return null; });
+	        }
+	      }
+	      var me = null; if (check && check.ok) { try { me = await check.json(); } catch (e) {} }
+	      if (!me || String(me.email || '').trim().toLowerCase() !== target || !onbOwnerRole(me)) continue;
+	      b.user = me; try { localStorage.setItem(entry.key, JSON.stringify(b)); } catch (e) {}
+	      onbClearAllSS(); try { window.__meOnb = null; } catch (e) {}
+	      onbOpenApp(api, b.tenant_slug, false);
+	      return true;
+	    }
+	    return false;
+	  }
+	  function onbOpenEmailRecovery(email, api, codeStarted) {
+	    try {
+	      window.__ME_LOGIN_RECOVERY = {
+	        email: String(email || '').trim(), apiBase: api, crossTenant: true,
+	        step: codeStarted ? 'code' : 'email',
+	        note: codeStarted ? 'Бизнес уже создан. Введите код из письма, чтобы открыть его.' : 'Бизнес мог быть создан раньше. Войдите по email владельца.'
+	      };
+	    } catch (e) {}
+	    onbClearAllSS(); try { window.__meOnb = null; } catch (e) {}
+	    if (window.__meGo) window.__meGo('login');
+	  }
+	  async function onbRecoverExistingBusiness(email, businessName) {
+	    if (await onbResumeStoredOwner(email)) return true;
+	    var api = onbApiBase();
+	    var started = await fetch(api + '/auth/email/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: String(email || '').trim() }) }).catch(function () { return null; });
+	    var startData = null; if (started) { try { startData = await started.json(); } catch (e) {} }
+	    var debugCode = started && started.ok && startData && startData.debug_code ? String(startData.debug_code) : '';
+	    if (debugCode) {
+	      var verify = await fetch(api + '/auth/email/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: String(email || '').trim(), code: debugCode }) }).catch(function () { return null; });
+	      var verifyData = null; try { verifyData = await verify.json(); } catch (e) {}
+	      if (verify && verify.ok && verifyData && verifyData.next_step === 'select_business' && Array.isArray(verifyData.businesses) && verifyData.businesses.length) {
+	        var wanted = String(businessName || '').trim().toLowerCase();
+	        var selected = verifyData.businesses.filter(function (x) { return String(x && x.name || '').trim().toLowerCase() === wanted; })[0] || verifyData.businesses[0];
+	        verify = await fetch(api + '/auth/email/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: String(email || '').trim(), code: debugCode, tenantSlug: selected.slug }) }).catch(function () { return null; });
+	        try { verifyData = await verify.json(); } catch (e) { verifyData = null; }
+	      }
+	      if (verify && verify.ok && verifyData && verifyData.access_token && onbOwnerRole(verifyData.user)) {
+	        var saved = onbSaveBundle(verifyData, api);
+	        onbClearAllSS(); try { window.__meOnb = null; } catch (e) {}
+	        onbOpenApp(api, saved.tenantSlug, false);
+	        return true;
+	      }
+	    }
+	    onbOpenEmailRecovery(email, api, !!(started && started.ok));
+	    return true;
+	  }
 	  // внешний календарь: после создания бизнеса открываем экран «Интеграции» (CRM Center)
 	  function onbOpenAppCrm(api, slug) {
 	    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(slug) + '&onboarded=1&crm_connect=1');
@@ -13199,6 +13279,7 @@ function AChat() {
 	      if (e.fieldErrors && Object.keys(e.fieldErrors).length) setOnbFieldErrors(e.fieldErrors);
 	      if (e.code === 'invalid_trial_activation_token' || e.code === 'trial_activation_expired' || e.code === 'trial_activation_token_required' || e.code === 'trial_activation_not_pending' || e.code === 'trial_activation_draft_mismatch') onbActivationDead(onbErrText(e.code));
 	      else if (e.code === 'invalid_ai_onboarding_token' || e.code === 'ai_onboarding_expired') onbHardReset(onbErrText(e.code) + ' Вернитесь на вход и активируйте пробную версию заново.');
+	      else if (e.code === 'auth_rate_limited') await onbRecoverExistingBusiness(normalized.ownerEmail, normalized.businessName);
 	      else setOnbErr(onbErrText(e.code, e.emsg));
 	    } finally {
 	      onbReq.current = false; setOnbBusy(false);
