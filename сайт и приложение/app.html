@@ -28491,6 +28491,30 @@ function ALivePanel() {
       }
     }, money(m.salary))))));
   }
+  function antonSalarySection(data, label) {
+    if (!data || !data.anton) return null;
+    const anton = data.anton;
+    const dayParts = [];
+    if (anton.workdays != null) dayParts.push(num(anton.workdays) + ' раб. дн.');
+    if (anton.days_off != null) dayParts.push(num(anton.days_off) + ' выходных');
+    return Section('Антон · администратор · ' + label, Card(e('div', null, e('div', {
+      style: {
+        fontFamily: DISPLAY,
+        fontWeight: 200,
+        fontSize: 30,
+        color: t.ink,
+        lineHeight: 1
+      }
+    }, money(anton.total)), e('div', {
+      style: {
+        fontFamily: BODY,
+        fontSize: 11,
+        color: t.faint,
+        marginTop: 6,
+        marginBottom: 12
+      }
+    }, 'Заработал за выбранный период' + (dayParts.length ? ' · ' + dayParts.join(' · ') : '')), row('Фиксированная часть', money(anton.base)), row((anton.pct || 0) + '% от выручки рабочих дней', money(anton.pct_amount)))));
+  }
   function growthExecutionSection(plan) {
     if (!plan || !(plan.masters || []).length) return null;
     const rows = plan.masters || [];
@@ -28538,7 +28562,7 @@ function ALivePanel() {
         };
       }
     }
-    const salon = e('div', null, kassaSection(pmoney, pLabel, monthCompare), salarySection(pmoney, pLabel));
+    const salon = e('div', null, kassaSection(pmoney, pLabel, monthCompare), salarySection(pmoney, pLabel), antonSalarySection(pmoney, pLabel));
     const growthExec = growthExecutionSection(dash && dash.growth_plan);
     const sh = c => c == null ? '…' : c === 0 ? 'нет сессии' : c === 200 ? 'OK' : 'код ' + c;
     const bad = repStatus != null && repStatus !== 200 || dashStatus != null && dashStatus !== 200;
@@ -28744,7 +28768,7 @@ function ALivePanel() {
         (diff < -100 ? e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 7, lineHeight: 1.45 } }, 'Недостача чаще всего = внесены не все расходы за день. Добавьте недостающие закупки — сверка сойдётся.') : null))));
       return e('div', null, net, cash);
     }
-    return e('div', null, ownerNetBlock(), kassaSection(rep, repLabel()), salarySection(rep, repLabel()), Section('Ассистент · Антон', Card(e('div', {
+    return e('div', null, ownerNetBlock(), kassaSection(rep, repLabel()), salarySection(rep, repLabel()), Section('Антон · администратор', Card(e('div', {
       style: {
         display: 'flex',
         justifyContent: 'space-between',

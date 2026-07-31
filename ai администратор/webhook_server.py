@@ -66,6 +66,13 @@ from chat_widgets import (
     widget_for_action,
     widget_from_signal,
 )
+from business_rules import (
+    ANTON_DAYS_OFF,
+    ANTON_GROSS_PCT,
+    ANTON_WEEKEND_PAY,
+    ANTON_WORKDAY_BASE,
+    anton_salary_for_period,
+)
 from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
 from maya_roles import (
     allowed_surfaces_for_panel_role,
@@ -4458,13 +4465,9 @@ MASTER_SALARY_PCT = {1460233: 0.60}   # Илья Третьяков — 60%
 MASTER_SALARY_DEFAULT = 0.50
 OWNER_STAFF_ID = 1461615              # Стас — владелец
 
-# ── Антон (ассистент): фикс по дням недели ──────────────────────────────────
+# ── Антон (администратор): фикс по дням недели ──────────────────────────────
 # Вс и Пн — выходной, платим 2000₽. Вт–Сб — ставка 1500₽ + 5% от валовой
 # выручки салона за день. (weekday(): Пн=0 … Вс=6.)
-ANTON_WEEKEND_PAY  = 2000   # вс/пн — выходной
-ANTON_WORKDAY_BASE = 1500   # вт–сб — ставка за выход
-ANTON_GROSS_PCT    = 0.05   # + 5% от валовой выручки за день
-ANTON_DAYS_OFF     = (6, 0) # вс, пн
 # Telegram-id ассистента Антона: только ему бот шлёт напоминания о расходах,
 # и только он (помимо владельца) видит аналитику/отчёт. Переопределяется настройкой.
 def _anton_chat_id() -> int:
@@ -5466,21 +5469,13 @@ def _preliminary_payout() -> dict:
                      "gross_week": round(g), "percent": int(round(pct * 100)), "salary": sal})
         masters_total += sal
     rows.sort(key=lambda x: x["salary"], reverse=True)
-    # Антон — суммируем по каждому дню недели от start до end включительно
-    anton_total = 0
-    d = date.fromisoformat(start)
-    last = date.fromisoformat(end)
-    while d <= last:
-        if d.weekday() in ANTON_DAYS_OFF:
-            anton_total += ANTON_WEEKEND_PAY
-        else:
-            anton_total += ANTON_WORKDAY_BASE + round(ANTON_GROSS_PCT * by_day.get(d.isoformat(), 0.0))
-        d += timedelta(days=1)
-    anton_total = round(anton_total)
+    # Антон — тот же единый расчёт, что используется в месячной аналитике.
+    anton = anton_salary_for_period(start, end, by_day)
+    anton_total = anton["total"]
     return {
         "week": {"start": start, "end": pw["end"], "through": end, "pay_date": pw.get("pay_date")},
         "masters": rows,
-        "anton": {"name": "Антон", "salary": anton_total},
+        "anton": {**anton, "salary": anton_total},
         "masters_total": masters_total,
         "total": masters_total + anton_total,
     }
@@ -5732,6 +5727,7 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
         if isinstance(r, dict) and r.get("id") is not None and r.get("staff_id") is not None:
             rec_staff[r.get("id")] = r.get("staff_id")
     rev = {}
+    by_day = {}
     cash_sum = 0.0; card_sum = 0.0
     cash_recs = set(); card_recs = set()
     for t in txs:
@@ -5743,6 +5739,9 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
             a = 0.0
         if a <= 0:
             continue
+        day = str(t.get("date") or t.get("last_change_date") or "")[:10]
+        if day:
+            by_day[day] = by_day.get(day, 0.0) + a
         sid = None
         m = t.get("master")
         if isinstance(m, dict) and m.get("id"):
@@ -5785,6 +5784,7 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
     masters.sort(key=lambda x: x["salary"], reverse=True)
     total_gross_val = round(sum(rev.values()))
     salary_total_val = round(sum(m["salary"] for m in masters if not m.get("is_owner")))
+    anton = anton_salary_for_period(from_iso, to_iso, by_day)
     return {
         "from": from_iso, "to": to_iso, "range": True,
         "masters": masters,
@@ -5792,6 +5792,7 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
         "card": {"count": len(card_recs), "sum": round(card_sum)},
         "total_gross": total_gross_val,
         "salary_total": salary_total_val,
+        "anton": anton,
         "note": "" if txs else "За период нет проведённых оплат.",
     }
 

@@ -19,7 +19,7 @@ import logging
 from datetime import date, timedelta
 
 from yclients import YClientsAPI
-from business_rules import OWNER_STAFF_ID, salary_percent
+from business_rules import OWNER_STAFF_ID, anton_salary_for_period, salary_percent
 
 logger = logging.getLogger(__name__)
 
@@ -252,6 +252,7 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         },
         "masters": masters,
         "salary_total": salary_total,         # сумма к выплате мастерам (без владельца)
+        "anton": anton_salary_for_period(from_iso, to_iso, daily_gross),
         "note": (
             "Не удалось получить финансовые операции из YClients."
             if not transactions_available
