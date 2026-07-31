@@ -162,6 +162,7 @@ function startServer() {
       AUTH_TRUST_PROXY: '127.0.0.1,::1',
       HOST: '127.0.0.1',
       AI_CORE_PROVIDER: 'safe',
+      HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING: 'true',
       NODE_ENV: 'test',
       PHONE_AUTH_DEBUG: 'true',
       PHONE_AUTH_FIXED_CODE: fixedPhoneCode,

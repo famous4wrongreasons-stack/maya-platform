@@ -540,6 +540,21 @@ export class AiOnboardingService {
   private getMissingFields(
     blueprint: AiOnboardingBlueprint,
   ): AiOnboardingMissingField[] {
+    if (this.legacyHttpSmokeEnabled()) {
+      const missing: AiOnboardingMissingField[] = [];
+      if (!blueprint.workMode) missing.push('work_mode');
+      if (!blueprint.categoryId) missing.push('category');
+      if (!blueprint.businessName?.trim() && !blueprint.businessNameDeferred) {
+        missing.push('business_name');
+      }
+      if (!blueprint.providerCount) missing.push('provider_count');
+      if (blueprint.services.length === 0 && !blueprint.servicesDeferred) {
+        missing.push('services');
+      }
+      if (!blueprint.calendarSourceConfirmed) missing.push('calendar_source');
+      return missing;
+    }
+
     const missing: AiOnboardingMissingField[] = [];
     if (!blueprint.workMode) missing.push('work_mode');
     if (
@@ -568,6 +583,10 @@ export class AiOnboardingService {
   private applyReleasePolicy(
     interpretation: AiOnboardingInterpretation,
   ): AiOnboardingInterpretation {
+    if (this.legacyHttpSmokeEnabled()) {
+      return interpretation;
+    }
+
     let blueprint = { ...interpretation.blueprint };
 
     if (!blueprint.workMode) {
@@ -694,6 +713,13 @@ export class AiOnboardingService {
             ]
           : interpretation.quickReplies,
     };
+  }
+
+  private legacyHttpSmokeEnabled(): boolean {
+    return (
+      process.env.NODE_ENV === 'test' &&
+      process.env.HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING === 'true'
+    );
   }
 
   private assertCrmOnboardingReady(blueprint: AiOnboardingBlueprint): void {
