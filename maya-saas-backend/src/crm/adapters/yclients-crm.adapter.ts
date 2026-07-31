@@ -220,7 +220,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     void tenantId;
 
     const response = await this.request<YclientsStaffApiItem[]>(
-      `company/${this.getCompanyId()}/staff`,
+      `staff/${this.getCompanyId()}`,
     );
     const allowedIds = this.getActiveMasterIds();
     const items = (response.data || []).filter((staff) =>

@@ -60,6 +60,11 @@ describe('YclientsCRMAdapter', () => {
         rating: 4.9,
       },
     ]);
+    const fetchMock = global.fetch as jest.Mock;
+    const calls = fetchMock.mock.calls as Array<[URL | string]>;
+    const requestedUrl = String(calls[0]?.[0] ?? '');
+    expect(requestedUrl).toContain('/staff/123');
+    expect(requestedUrl).not.toContain('/company/123/staff');
   });
 
   it('discovers only active companies without exposing provider payload fields', async () => {
