@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 
@@ -80,6 +81,8 @@ export type CrmImportPreview = {
 
 @Injectable()
 export class CrmService {
+  private readonly logger = new Logger(CrmService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
@@ -769,17 +772,23 @@ export class CrmService {
     config: CrmAdapterConfig,
   ): Promise<CrmImportPreview> {
     const adapter = this.adapterFactory.create(provider, config);
-    const check = await adapter.testConnection(tenantId);
+    const check = await this.loadPreviewPart(provider, 'connection_check', () =>
+      adapter.testConnection(tenantId),
+    );
 
     if (!check.ok) {
       throw new Error('CRM connection check failed');
     }
 
     const [services, staff, company] = await Promise.all([
-      adapter.getServices(tenantId),
-      adapter.getStaff(tenantId),
+      this.loadPreviewPart(provider, 'services', () =>
+        adapter.getServices(tenantId),
+      ),
+      this.loadPreviewPart(provider, 'staff', () => adapter.getStaff(tenantId)),
       adapter.getCompanyProfile
-        ? adapter.getCompanyProfile()
+        ? this.loadPreviewPart(provider, 'company_profile', () =>
+            adapter.getCompanyProfile!(),
+          )
         : Promise.resolve(null),
     ]);
     const settings = config.settings ?? {};
@@ -810,6 +819,23 @@ export class CrmService {
       },
       warnings,
     };
+  }
+
+  private async loadPreviewPart<T>(
+    provider: CrmProvider,
+    operation: string,
+    loader: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await loader();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const status = message.match(/\bstatus\s+(\d{3})\b/i)?.[1] ?? 'unknown';
+      this.logger.warn(
+        `CRM preview failed provider=${provider} operation=${operation} status=${status}`,
+      );
+      throw error;
+    }
   }
 
   private async activateVerifiedIntegration(tenantId: string) {

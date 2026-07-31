@@ -163,24 +163,45 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   async getCompanyProfile(): Promise<CrmCompanyProfile | null> {
-    const response = await this.request<YclientsCompanyApiItem>(
-      `company/${this.getCompanyId()}`,
-    );
-    const company = response.data;
+    const companyId = this.getCompanyId();
 
-    if (!company?.id) {
+    try {
+      const response = await this.request<YclientsCompanyApiItem>(
+        `company/${companyId}`,
+      );
+      const company = response.data;
+
+      if (company?.id) {
+        const id = String(company.id);
+        return {
+          id,
+          title:
+            company.title?.trim() ||
+            company.public_title?.trim() ||
+            `Филиал ${id}`,
+          address: company.address?.trim() || company.city?.trim() || null,
+          logo_url: company.logo?.trim() || null,
+          timezone: company.timezone?.trim() || null,
+          schedule: company.schedule?.trim() || null,
+        };
+      }
+    } catch {
+      // Company discovery is the authoritative access check and is available
+      // even when the optional detailed profile endpoint is restricted.
+    }
+
+    const discovered = (await this.discoverCompanies()).find(
+      (company) => company.id === String(companyId),
+    );
+    if (!discovered) {
       return null;
     }
 
-    const id = String(company.id);
     return {
-      id,
-      title:
-        company.title?.trim() || company.public_title?.trim() || `Филиал ${id}`,
-      address: company.address?.trim() || company.city?.trim() || null,
-      logo_url: company.logo?.trim() || null,
-      timezone: company.timezone?.trim() || null,
-      schedule: company.schedule?.trim() || null,
+      ...discovered,
+      logo_url: null,
+      timezone: null,
+      schedule: null,
     };
   }
 
@@ -219,9 +240,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async getStaff(tenantId: string): Promise<StaffMember[]> {
     void tenantId;
 
-    const response = await this.request<YclientsStaffApiItem[]>(
-      `staff/${this.getCompanyId()}`,
-    );
+    const companyId = this.getCompanyId();
+    const response = await this.requestFirstAvailable<YclientsStaffApiItem[]>([
+      `company/${companyId}/staff`,
+      `staff/${companyId}`,
+      `book_staff/${companyId}`,
+    ]);
     const allowedIds = this.getActiveMasterIds();
     const items = (response.data || []).filter((staff) =>
       allowedIds ? allowedIds.includes(staff.id) : true,
@@ -554,20 +578,39 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async testConnection(tenantId: string) {
     void tenantId;
 
-    const staff = await this.getStaff('');
+    const companyId = String(this.getCompanyId());
+    const company = (await this.discoverCompanies()).find(
+      (candidate) => candidate.id === companyId,
+    );
+    if (!company) {
+      throw new Error('YClients selected company is not available');
+    }
+
     return {
       ok: true,
       provider: this.config.provider,
-      message: `YClients connection is valid. Staff loaded: ${staff.length}`,
+      message: 'YClients connection and selected company are valid',
     };
   }
 
   private async fetchServices(): Promise<YclientsServiceApiItem[]> {
-    const response = await this.request<{
-      services?: YclientsServiceApiItem[];
-    }>(`book_services/${this.getCompanyId()}`);
+    const companyId = this.getCompanyId();
 
-    return response.data?.services || [];
+    try {
+      const response = await this.request<{
+        services?: YclientsServiceApiItem[];
+      }>(`book_services/${companyId}`);
+      if (Array.isArray(response.data?.services)) {
+        return response.data.services;
+      }
+    } catch {
+      // Fall through to the management catalog endpoint.
+    }
+
+    const fallback = await this.request<YclientsServiceApiItem[]>(
+      `services/${companyId}`,
+    );
+    return fallback.data || [];
   }
 
   private async fetchServiceCategories(): Promise<
@@ -630,6 +673,24 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
 
     return payload;
+  }
+
+  private async requestFirstAvailable<TData>(
+    paths: string[],
+  ): Promise<YclientsResponse<TData>> {
+    let lastError: unknown;
+
+    for (const path of paths) {
+      try {
+        return await this.request<TData>(path);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('YClients request failed for every supported endpoint');
   }
 
   private getCompanyId(): number {

@@ -63,8 +63,43 @@ describe('YclientsCRMAdapter', () => {
     const fetchMock = global.fetch as jest.Mock;
     const calls = fetchMock.mock.calls as Array<[URL | string]>;
     const requestedUrl = String(calls[0]?.[0] ?? '');
-    expect(requestedUrl).toContain('/staff/123');
-    expect(requestedUrl).not.toContain('/company/123/staff');
+    expect(requestedUrl).toContain('/company/123/staff');
+  });
+
+  it('falls back to alternate staff endpoints when the management route is unavailable', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Route not available' } }),
+            { status: 404 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [{ id: 7, name: 'Alex', specialization: 'Barber' }],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getStaff('tenant-1')).resolves.toEqual([
+      expect.objectContaining({ id: '7', name: 'Alex' }),
+    ]);
+    expect(requestedUrls[0]).toContain('/company/123/staff');
+    expect(requestedUrls[1]).toContain('/staff/123');
   });
 
   it('discovers only active companies without exposing provider payload fields', async () => {
@@ -186,6 +221,97 @@ describe('YclientsCRMAdapter', () => {
         category: 'Haircuts',
       },
     ]);
+  });
+
+  it('falls back to the management service catalog', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.includes('/book_services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Route not available' } }),
+            { status: 404 },
+          ),
+        );
+      }
+      if (url.includes('/services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 9, title: 'Haircut', price_min: 1900 }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getServices('tenant-1')).resolves.toEqual([
+      expect.objectContaining({
+        id: '9',
+        name: 'Haircut',
+        price: 1900,
+        duration_minutes: 60,
+      }),
+    ]);
+    expect(requestedUrls.some((url) => url.includes('/services/123'))).toBe(
+      true,
+    );
+  });
+
+  it('uses the discovered company when the optional profile route is unavailable', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/company/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Route not available' } }),
+            { status: 404 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 123,
+                title: 'Main branch',
+                address: 'Central street',
+                active: true,
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getCompanyProfile()).resolves.toEqual({
+      id: '123',
+      title: 'Main branch',
+      address: 'Central street',
+      logo_url: null,
+      timezone: null,
+      schedule: null,
+    });
   });
 
   it('normalizes ISO datetime query and maps slots', async () => {
