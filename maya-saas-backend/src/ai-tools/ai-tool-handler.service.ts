@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
+import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
+import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
@@ -13,6 +15,14 @@ import type {
   AiToolPrincipal,
   ValidatedAiToolArguments,
 } from './ai-tool.types';
+
+const CRM_FINANCE_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.ACCOUNTANT,
+]);
 
 @Injectable()
 export class AiToolHandlerService {
@@ -56,9 +66,7 @@ export class AiToolHandlerService {
       }
       case 'analytics.business.read': {
         const query = await this.reportingQuery(principal.tenantId, args);
-        return this.readAnalytics(
-          this.analyticsService.getBusinessOverview(principal.tenantId, query),
-        );
+        return this.readBusinessAnalytics(principal, query);
       }
       case 'expenses.read':
         return this.readExpenses(principal.tenantId, args);
@@ -168,8 +176,111 @@ export class AiToolHandlerService {
   }
 
   private async readAnalytics(resultPromise: Promise<unknown>) {
-    const result = this.record(await resultPromise);
+    return this.safeAnalytics(await resultPromise);
+  }
+
+  private async readBusinessAnalytics(
+    principal: AiToolPrincipal,
+    query: AnalyticsRangeQueryDto,
+  ) {
+    const overview = this.record(
+      await this.analyticsService.getBusinessOverview(
+        principal.tenantId,
+        query,
+      ),
+    );
+    const operational = this.safeAnalytics(overview);
+    if (overview.data_source !== 'crm') {
+      return operational;
+    }
+
+    const failClosed = {
+      ...operational,
+      revenue: [],
+      expenses: [],
+      net: [],
+      average_ticket: [],
+      daily: operational.daily.map((entry) => ({ ...entry, revenue: [] })),
+      staff_summary: operational.staff_summary.map((entry) => ({
+        ...entry,
+        revenue: [],
+      })),
+    };
+
+    if (query.branchId) {
+      return {
+        ...failClosed,
+        finance: this.unavailableFinance('company_scope_only'),
+      };
+    }
+    if (!CRM_FINANCE_ROLES.has(principal.role)) {
+      return {
+        ...failClosed,
+        finance: this.unavailableFinance('role_restricted'),
+      };
+    }
+
+    try {
+      const summary = this.record(
+        await this.analyticsService.getBusinessFinance(
+          principal.tenantId,
+          query,
+        ),
+      );
+      const revenue = this.record(summary.revenue);
+      const payroll = this.record(summary.payroll);
+      const revenueTotal =
+        revenue.status === 'available' && revenue.verified === true
+          ? this.safeMoneyAmount(revenue.total)
+          : null;
+      const payrollAvailable =
+        payroll.status === 'available' && payroll.verified === true;
+
+      return {
+        ...failClosed,
+        period: summary.period ?? failClosed.period,
+        revenue: revenueTotal ? [revenueTotal] : [],
+        finance: {
+          source: summary.source ?? 'external_crm',
+          provider: summary.provider ?? null,
+          verified: summary.verified === true,
+          revenue: {
+            status: revenue.status ?? 'unavailable',
+            verified: revenue.verified === true,
+            transaction_count:
+              typeof revenue.transaction_count === 'number'
+                ? revenue.transaction_count
+                : null,
+            total: revenueTotal,
+          },
+          payroll: {
+            status: payroll.status ?? 'unavailable',
+            verified: payroll.verified === true,
+            accrued_total: payrollAvailable
+              ? this.safeMoneyAmount(payroll.accrued_total)
+              : null,
+            paid_total: payrollAvailable
+              ? this.safeMoneyAmount(payroll.paid_total)
+              : null,
+            balance_total: payrollAvailable
+              ? this.safeMoneyAmount(payroll.balance_total)
+              : null,
+          },
+          warning_codes: this.safeWarningCodes(summary.warnings),
+        },
+      };
+    } catch {
+      return {
+        ...failClosed,
+        finance: this.unavailableFinance('finance_unavailable'),
+      };
+    }
+  }
+
+  private safeAnalytics(value: unknown) {
+    const result = this.record(value);
     return {
+      data_source: result.data_source ?? null,
       period: result.period ?? null,
       appointments: result.appointments ?? null,
       revenue: this.safeMoneyEntries(result.revenue),
@@ -196,6 +307,28 @@ export class AiToolHandlerService {
             };
           })
         : [],
+    };
+  }
+
+  private unavailableFinance(code: string) {
+    return {
+      source: 'external_crm',
+      provider: null,
+      verified: false,
+      revenue: {
+        status: 'unavailable',
+        verified: false,
+        transaction_count: null,
+        total: null,
+      },
+      payroll: {
+        status: 'unavailable',
+        verified: false,
+        accrued_total: null,
+        paid_total: null,
+        balance_total: null,
+      },
+      warning_codes: [code],
     };
   }
 
@@ -544,6 +677,33 @@ export class AiToolHandlerService {
         amount_major_units: this.majorUnits(item.amount_kopecks),
       };
     });
+  }
+
+  private safeMoneyAmount(value: unknown) {
+    const item = this.record(value);
+    if (
+      typeof item.amount_kopecks !== 'number' ||
+      !Number.isFinite(item.amount_kopecks)
+    ) {
+      return null;
+    }
+    return {
+      currency: typeof item.currency === 'string' ? item.currency : null,
+      amount_kopecks: item.amount_kopecks,
+      amount_major_units: this.majorUnits(item.amount_kopecks),
+    };
+  }
+
+  private safeWarningCodes(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .map((warning) => this.record(warning).code)
+      .filter(
+        (code): code is string =>
+          typeof code === 'string' && /^[a-z0-9_:-]{1,80}$/i.test(code),
+      );
   }
 
   private majorUnits(value: unknown): number | null {

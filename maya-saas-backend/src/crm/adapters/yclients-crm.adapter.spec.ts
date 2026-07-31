@@ -663,4 +663,256 @@ describe('YclientsCRMAdapter', () => {
     });
     expect(JSON.stringify(journal)).not.toContain('+7 918 000-00-00');
   });
+
+  it('returns exact YClients sales and official payroll without raw client data', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 1,
+                  amount: '2000',
+                  sold_item_type: 'service',
+                  account: { title: 'Основная касса', is_cash: true },
+                  client: { name: 'Must not leave adapter', phone: '+7999' },
+                },
+                {
+                  id: 2,
+                  amount: 500,
+                  sold_item_type: 'goods_transaction',
+                  account: { title: 'Расчетный счет', is_cash: false },
+                },
+                {
+                  id: 3,
+                  amount: -100,
+                  sold_item_type: 'loyalty_certificate',
+                  account: { title: 'Основная касса', is_cash: true },
+                },
+                { id: 4, amount: 999, sold_item_type: null },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                { id: 11, name: 'Alex', fired: 0, hidden: 0 },
+                { id: 12, name: 'Ilya', fired: false, hidden: false },
+                {
+                  id: 14,
+                  name: 'Back office',
+                  fired: false,
+                  hidden: true,
+                },
+                { id: 13, name: 'Former', fired: true, hidden: false },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/11')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '1000', expense: '700', balance: '300' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/12')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '500', expense: '100', balance: '400' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/14')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '250', expense: '50', balance: '200' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getFinancialSummary({
+      tenantId: 'tenant-1',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(result).toMatchObject({
+      source: 'external_crm',
+      provider: CrmProvider.YCLIENTS,
+      verified: true,
+      period: { from: '2026-07-01', to: '2026-07-31' },
+      revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 2,
+        total: { currency: 'RUB', amount_kopecks: 250_000 },
+        by_type: [
+          {
+            key: 'service',
+            label: 'Услуги',
+            amount_kopecks: 200_000,
+          },
+          {
+            key: 'goods_transaction',
+            label: 'Товары',
+            amount_kopecks: 50_000,
+          },
+        ],
+      },
+      payroll: {
+        status: 'available',
+        verified: true,
+        accrued_total: { currency: 'RUB', amount_kopecks: 175_000 },
+        paid_total: { currency: 'RUB', amount_kopecks: 85_000 },
+        balance_total: { currency: 'RUB', amount_kopecks: 90_000 },
+        staff: [
+          {
+            staff_id: '11',
+            name: 'Alex',
+            status: 'available',
+            accrued: { amount_kopecks: 100_000 },
+          },
+          {
+            staff_id: '12',
+            name: 'Ilya',
+            status: 'available',
+            accrued: { amount_kopecks: 50_000 },
+          },
+          {
+            staff_id: '14',
+            name: 'Back office',
+            status: 'available',
+            accrued: { amount_kopecks: 25_000 },
+          },
+        ],
+      },
+      warnings: [],
+    });
+    expect(JSON.stringify(result)).not.toContain('Must not leave adapter');
+    expect(JSON.stringify(result)).not.toContain('+7999');
+  });
+
+  it('hides payroll totals when YClients returns only a partial result', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 1, amount: 2000, sold_item_type: 'service' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                { id: 11, name: 'Alex' },
+                { id: 12, name: 'Ilya' },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/11')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '1000', expense: '700', balance: '300' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/12')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Недостаточно прав' } }),
+            { status: 403 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getFinancialSummary({
+      tenantId: 'tenant-1',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(result.verified).toBe(false);
+    expect(result.payroll).toMatchObject({
+      status: 'partial',
+      verified: false,
+      accrued_total: null,
+      paid_total: null,
+      balance_total: null,
+      staff: [
+        { staff_id: '11', status: 'available', verified: true },
+        {
+          staff_id: '12',
+          status: 'unavailable',
+          verified: false,
+          accrued: null,
+        },
+      ],
+    });
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'crm_payroll_partially_unavailable',
+        }),
+      ]),
+    );
+  });
 });

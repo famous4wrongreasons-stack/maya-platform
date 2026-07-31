@@ -130,8 +130,36 @@ describe('OperationsAnalyticsService', () => {
         },
       ],
     });
+    const crmGetFinancialSummary = jest.fn().mockResolvedValue({
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+      period: {
+        from: '2026-07-01',
+        to: '2026-07-31',
+        timezone: 'Europe/Moscow',
+      },
+      revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 10,
+        total: { currency: 'RUB', amount_kopecks: 250_000 },
+        by_type: [],
+        by_account: [],
+      },
+      payroll: {
+        status: 'available',
+        verified: true,
+        accrued_total: { currency: 'RUB', amount_kopecks: 100_000 },
+        paid_total: { currency: 'RUB', amount_kopecks: 80_000 },
+        balance_total: { currency: 'RUB', amount_kopecks: 20_000 },
+        staff: [],
+      },
+      warnings: [],
+    });
     const crmService = {
       getJournal: crmGetJournal,
+      getFinancialSummary: crmGetFinancialSummary,
     } as unknown as CrmService;
 
     return {
@@ -141,6 +169,7 @@ describe('OperationsAnalyticsService', () => {
       appointmentFindMany,
       expenseFindMany,
       crmGetJournal,
+      crmGetFinancialSummary,
       getAppointmentQueryTenantId: () => appointmentQueryTenantId,
       getExpenseQueryTenantId: () => expenseQueryTenantId,
       service: new OperationsAnalyticsService(
@@ -244,5 +273,66 @@ describe('OperationsAnalyticsService', () => {
     expect(result.revenue).toEqual([
       { currency: 'RUB', amount_kopecks: 250_000 },
     ]);
+  });
+
+  it('returns tenant-scoped verified CRM finance without local calculations', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessFinance('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T20:59:59.000Z',
+      }),
+    );
+
+    expect(setup.crmGetFinancialSummary).toHaveBeenCalledWith('tenant-a', {
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+    });
+    expect(result).toMatchObject({
+      source: 'external_crm',
+      verified: true,
+      revenue: {
+        total: { currency: 'RUB', amount_kopecks: 250_000 },
+      },
+      payroll: {
+        accrued_total: { currency: 'RUB', amount_kopecks: 100_000 },
+      },
+    });
+    expect(setup.appointmentFindMany).not.toHaveBeenCalled();
+    expect(setup.expenseFindMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects a finance tenant mismatch before contacting the CRM', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+
+    await expect(
+      setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.getBusinessFinance('tenant-b', {
+          from: '2026-07-01T00:00:00.000Z',
+          to: '2026-07-31T20:59:59.000Z',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+  });
+
+  it('rejects a misleading Maya branch filter for company-wide CRM finance', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+
+    await expect(
+      setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.getBusinessFinance('tenant-a', {
+          from: '2026-07-01T00:00:00.000Z',
+          to: '2026-07-31T20:59:59.000Z',
+          branchId: '11111111-1111-4111-8111-111111111111',
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'crm_finance_branch_filter_not_supported' },
+      },
+    });
+    expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
   });
 });

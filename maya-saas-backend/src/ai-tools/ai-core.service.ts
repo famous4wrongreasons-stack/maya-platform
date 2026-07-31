@@ -764,12 +764,34 @@ export class AiCoreService {
       return null;
     }
     const data = this.record(evidence.result);
+    const finance = this.record(data.finance);
+    const payroll = this.record(finance.payroll);
     const text = userText.toLowerCase().replace(/ё/g, 'е');
     const scope =
       requirement.domain === 'personal_analytics' ? 'вашим данным' : 'бизнесу';
 
     if (/зарплат[а-яa-z]*/i.test(text)) {
-      return 'Зарплата не рассчитывается из выручки автоматически. Для точного ответа нужны подтверждённые правила оплаты труда и начисления.';
+      const accrued = this.formatMoneyAmount(payroll.accrued_total);
+      if (
+        requirement.domain === 'business_analytics' &&
+        payroll.status === 'available' &&
+        payroll.verified === true &&
+        accrued
+      ) {
+        const paid = this.formatMoneyAmount(payroll.paid_total);
+        const balance = this.formatMoneyAmount(payroll.balance_total);
+        return [
+          `Начислено сотрудникам по данным CRM за выбранный период: ${accrued}.`,
+          paid ? `Выплачено: ${paid}.` : null,
+          balance ? `Остаток к выплате: ${balance}.` : null,
+        ]
+          .filter((part): part is string => part !== null)
+          .join(' ');
+      }
+      if (payroll.status === 'partial') {
+        return 'CRM вернула расчёт зарплаты не по всем сотрудникам, поэтому общую сумму я не называю. Проверьте права финансового доступа в CRM.';
+      }
+      return 'Подтверждённый расчёт зарплаты за выбранный период недоступен. Я не буду рассчитывать его приблизительно из выручки.';
     }
     if (/валов[а-яa-z]*\s+прибыл[а-яa-z]*/i.test(text)) {
       return 'Валовая прибыль сейчас не рассчитывается: в данных есть выручка и внесённые расходы, но прямые затраты на оказание услуг не выделены отдельно. Я не буду подменять её выручкой или операционным результатом.';
@@ -778,7 +800,12 @@ export class AiCoreService {
       return 'Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.';
     }
     if (/средн[а-яa-z]*\s+чек/i.test(text)) {
-      return `Средний чек по ${scope} за выбранный период: ${this.formatMoneyEntries(data.average_ticket)}.`;
+      const averageTicket = this.formatVerifiedMoneyEntries(
+        data.average_ticket,
+      );
+      return averageTicket
+        ? `Средний чек по ${scope} за выбранный период: ${averageTicket}.`
+        : `Подтверждённый средний чек по ${scope} за выбранный период недоступен. Я не буду выводить его из стоимости записей приблизительно.`;
     }
     if (GROUNDING_APPOINTMENT_METRIC_PATTERN.test(text)) {
       const appointments = this.record(data.appointments);
@@ -788,12 +815,21 @@ export class AiCoreService {
       return `Записей по ${scope} за выбранный период: ${total}. Активных: ${active}, отменённых: ${cancelled}.`;
     }
     if (/чист[а-яa-z]*\s+прибыл[а-яa-z]*|прибыл[а-яa-z]*/i.test(text)) {
-      return `Операционный результат по ${scope} за выбранный период: ${this.formatMoneyEntries(data.net)}. Это выручка минус внесённые расходы, а не бухгалтерская чистая прибыль.`;
+      const net = this.formatVerifiedMoneyEntries(data.net);
+      return net
+        ? `Операционный результат по ${scope} за выбранный период: ${net}. Это выручка минус внесённые расходы, а не бухгалтерская чистая прибыль.`
+        : `Операционный результат по ${scope} за выбранный период недоступен: CRM не передала полный набор подтверждённых расходов. Я не буду подменять прибыль выручкой.`;
     }
     if (
       /выруч[а-яa-z]*|оборот[а-яa-z]*|касс[а-яa-z]*|доход[а-яa-z]*/i.test(text)
     ) {
-      return `Выручка по ${scope} за выбранный период: ${this.formatMoneyEntries(data.revenue)}.`;
+      const revenue = this.formatVerifiedMoneyEntries(data.revenue);
+      if (!revenue) {
+        return `Подтверждённые денежные поступления по ${scope} за выбранный период недоступны. Я не буду использовать вместо них стоимость записей.`;
+      }
+      return finance.source === 'external_crm'
+        ? `Подтверждённые поступления по данным CRM за выбранный период: ${revenue}.`
+        : `Выручка по ${scope} за выбранный период: ${revenue}.`;
     }
     return null;
   }
@@ -827,6 +863,26 @@ export class AiCoreService {
       })
       .filter((entry): entry is string => entry !== null);
     return formatted.length > 0 ? formatted.join(', ') : '0 ₽';
+  }
+
+  private formatVerifiedMoneyEntries(value: unknown): string | null {
+    if (!Array.isArray(value) || value.length === 0) {
+      return null;
+    }
+    const valid = value.filter((entry) => {
+      const item = this.record(entry);
+      return (
+        (typeof item.amount_major_units === 'number' &&
+          Number.isFinite(item.amount_major_units)) ||
+        (typeof item.amount_kopecks === 'number' &&
+          Number.isFinite(item.amount_kopecks))
+      );
+    });
+    return valid.length > 0 ? this.formatMoneyEntries(valid) : null;
+  }
+
+  private formatMoneyAmount(value: unknown): string | null {
+    return this.formatVerifiedMoneyEntries([value]);
   }
 
   private safeMetricNumber(value: unknown): number {

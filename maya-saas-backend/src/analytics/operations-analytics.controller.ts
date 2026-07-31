@@ -19,6 +19,14 @@ const BUSINESS_ANALYTICS_ROLES = [
   UserRole.ACCOUNTANT,
 ] as const;
 
+const BUSINESS_FINANCE_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.ACCOUNTANT,
+] as const;
+
 const EMPLOYEE_ANALYTICS_ROLES = [
   UserRole.PROVIDER,
   UserRole.EMPLOYEE,
@@ -41,6 +49,19 @@ export class OperationsAnalyticsController {
     @Query() query: AnalyticsRangeQueryDto,
   ) {
     return this.analytics.getBusinessOverview(user.tenantId!, query);
+  }
+
+  @Get('business/finance')
+  @Roles(...BUSINESS_FINANCE_ROLES)
+  @RequiresFeature('analytics.business')
+  @ApiOperation({
+    summary: 'Get verified tenant finance and payroll from the external CRM',
+  })
+  getBusinessFinance(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: AnalyticsRangeQueryDto,
+  ) {
+    return this.analytics.getBusinessFinance(user.tenantId!, query);
   }
 
   @Get('me')

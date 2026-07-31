@@ -46,6 +46,21 @@ export class OperationsAnalyticsService {
     return this.buildOverview(tenantId, query, null);
   }
 
+  async getBusinessFinance(tenantId: string, query: AnalyticsRangeQueryDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (query.branchId) {
+      throw new BadRequestException({
+        message:
+          'CRM finance is scoped to the connected company and cannot be filtered by a Maya branch.',
+        error: { code: 'crm_finance_branch_filter_not_supported' },
+      });
+    }
+    return this.crmService.getFinancialSummary(scopedTenantId, {
+      from: query.from,
+      to: query.to,
+    });
+  }
+
   async getEmployeeOverview(
     tenantId: string,
     userId: string,

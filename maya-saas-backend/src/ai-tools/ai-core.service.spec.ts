@@ -663,6 +663,100 @@ describe('AiCoreService', () => {
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
+  it('returns only the verified CRM payroll aggregate for salary questions', async () => {
+    const mocks = createService(['analytics.business.read']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю.',
+        toolCall: {
+          name: 'analytics.business.read',
+          arguments: { period: 'month_to_date' },
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-payroll',
+      result: {
+        data_source: 'crm',
+        finance: {
+          source: 'external_crm',
+          payroll: {
+            status: 'available',
+            verified: true,
+            accrued_total: {
+              currency: 'RUB',
+              amount_kopecks: 56_388_001,
+              amount_major_units: 563_880.01,
+            },
+            paid_total: {
+              currency: 'RUB',
+              amount_kopecks: 0,
+              amount_major_units: 0,
+            },
+            balance_total: {
+              currency: 'RUB',
+              amount_kopecks: 56_388_001,
+              amount_major_units: 563_880.01,
+            },
+          },
+        },
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        { role: 'user', content: 'Какая зарплата сотрудников за месяц?' },
+      ],
+    });
+
+    expect(result.reply).toBe(
+      'Начислено сотрудникам по данным CRM за выбранный период: 563 880,01 ₽. Выплачено: 0 ₽. Остаток к выплате: 563 880,01 ₽.',
+    );
+    expect(result.grounding).toMatchObject({
+      status: 'verified',
+      domain: 'business_analytics',
+    });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not turn unavailable CRM revenue into zero', async () => {
+    const mocks = createService(['analytics.business.read']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю.',
+        toolCall: {
+          name: 'analytics.business.read',
+          arguments: { period: 'month_to_date' },
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-revenue-unavailable',
+      result: {
+        data_source: 'crm',
+        revenue: [],
+        finance: {
+          source: 'external_crm',
+          revenue: { status: 'unavailable', verified: false, total: null },
+        },
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Какая выручка за месяц?' }],
+    });
+
+    expect(result.reply).toContain(
+      'Подтверждённые денежные поступления по бизнесу за выбранный период недоступны',
+    );
+    expect(result.reply).not.toContain('0 ₽');
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+  });
+
   it('grounds an appointment count in business analytics', async () => {
     const mocks = createService(['analytics.business.read']);
     mocks.model.decide.mockResolvedValue(

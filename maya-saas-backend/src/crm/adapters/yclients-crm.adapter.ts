@@ -8,8 +8,10 @@ import {
   CRMAdapter,
   CrmCompanyOption,
   CrmCompanyProfile,
+  CrmFinancialSummary,
   CrmJournal,
   CrmJournalAppointment,
+  CrmStaffPayroll,
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
@@ -134,6 +136,28 @@ interface YclientsLoyaltyCard {
   programs?: Array<{
     loyalty_type?: { is_cashback?: boolean } | null;
   }>;
+}
+
+interface YclientsFinanceTransactionApiItem {
+  id?: number | string;
+  amount?: number | string;
+  sold_item_type?: string | null;
+  account?: {
+    title?: string;
+    name?: string;
+    is_cash?: boolean | number;
+  } | null;
+}
+
+interface YclientsPayrollApiData {
+  total_sum?: {
+    income?: number | string;
+    expense?: number | string;
+    balance?: number | string;
+  } | null;
+  currency?: {
+    symbol?: string;
+  } | null;
 }
 
 export class YclientsCRMAdapter implements CRMAdapter {
@@ -277,17 +301,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       return allowedIds ? allowedIds.includes(staff.id) : true;
     });
 
-    return items.map((staff) => ({
-      id: String(staff.id),
-      name: staff.name || '',
-      title: staff.specialization || '',
-      specialization: staff.specialization || '',
-      avatar_url: staff.avatar || staff.photo || null,
-      rating:
-        typeof staff.rating === 'number' && Number.isFinite(staff.rating)
-          ? staff.rating
-          : null,
-    }));
+    return items.map((staff) => this.mapStaffMember(staff));
   }
 
   async getAvailableSlots(params: {
@@ -654,6 +668,133 @@ export class YclientsCRMAdapter implements CRMAdapter {
     };
   }
 
+  async getFinancialSummary(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+  }): Promise<CrmFinancialSummary> {
+    void params.tenantId;
+    const from = this.dateKeyInTimezone(params.from, params.timezone);
+    const to = this.dateKeyInTimezone(params.to, params.timezone);
+    const currency = this.settings.currency || 'RUB';
+    const warnings: CrmFinancialSummary['warnings'] = [];
+    const [transactionsResult, staffResult] = await Promise.allSettled([
+      this.fetchFinancialTransactions(from, to),
+      this.getPayrollStaff(),
+    ]);
+
+    let revenue: CrmFinancialSummary['revenue'];
+    if (transactionsResult.status === 'fulfilled') {
+      try {
+        revenue = this.aggregateRevenue(transactionsResult.value, currency);
+      } catch {
+        revenue = this.unavailableRevenue();
+        warnings.push({
+          code: 'crm_finance_response_invalid',
+          message:
+            'YClients вернул некорректные финансовые данные. Суммы скрыты, чтобы не показывать приблизительный результат.',
+        });
+      }
+    } else {
+      revenue = this.unavailableRevenue();
+      warnings.push({
+        code: 'crm_finance_unavailable',
+        message:
+          'Финансовые операции YClients недоступны для этого токена. Проверьте права доступа к финансам.',
+      });
+    }
+
+    let payroll: CrmFinancialSummary['payroll'];
+    if (staffResult.status === 'fulfilled') {
+      const staffPayroll = await this.fetchStaffPayroll(
+        staffResult.value,
+        from,
+        to,
+        currency,
+      );
+      const unavailableCount = staffPayroll.filter(
+        (item) => item.status === 'unavailable',
+      ).length;
+      const status =
+        unavailableCount === 0
+          ? 'available'
+          : unavailableCount === staffPayroll.length
+            ? 'unavailable'
+            : 'partial';
+      const available = staffPayroll.filter(
+        (item) => item.status === 'available',
+      );
+      const allBalancesAvailable = available.every((item) => item.balance);
+
+      payroll = {
+        status,
+        verified: status === 'available',
+        accrued_total:
+          status === 'available'
+            ? this.money(
+                available.reduce(
+                  (total, item) => total + (item.accrued?.amount_kopecks ?? 0),
+                  0,
+                ),
+                currency,
+              )
+            : null,
+        paid_total:
+          status === 'available'
+            ? this.money(
+                available.reduce(
+                  (total, item) => total + (item.paid?.amount_kopecks ?? 0),
+                  0,
+                ),
+                currency,
+              )
+            : null,
+        balance_total:
+          status === 'available' && allBalancesAvailable
+            ? this.money(
+                available.reduce(
+                  (total, item) => total + (item.balance?.amount_kopecks ?? 0),
+                  0,
+                ),
+                currency,
+              )
+            : null,
+        staff: staffPayroll,
+      };
+
+      if (status !== 'available') {
+        warnings.push({
+          code:
+            status === 'partial'
+              ? 'crm_payroll_partially_unavailable'
+              : 'crm_payroll_unavailable',
+          message:
+            status === 'partial'
+              ? 'YClients вернул расчёт не по всем сотрудникам. Общая сумма скрыта, доступны только подтверждённые строки.'
+              : 'Расчёт зарплаты YClients недоступен для этого токена. Приблизительный расчёт не выполняется.',
+        });
+      }
+    } else {
+      payroll = this.unavailablePayroll();
+      warnings.push({
+        code: 'crm_staff_unavailable_for_payroll',
+        message:
+          'Не удалось получить активных сотрудников для расчёта зарплаты. Приблизительный расчёт не выполняется.',
+      });
+    }
+
+    return {
+      source: 'external_crm',
+      provider: this.config.provider,
+      verified: revenue.verified && payroll.verified,
+      period: { from, to, timezone: params.timezone },
+      revenue,
+      payroll,
+      warnings,
+    };
+  }
+
   async getClientLoyalty(params: {
     tenantId: string;
     phone: string;
@@ -833,6 +974,256 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
 
     return records;
+  }
+
+  private async fetchFinancialTransactions(
+    startDate: string,
+    endDate: string,
+  ): Promise<YclientsFinanceTransactionApiItem[]> {
+    const transactions: YclientsFinanceTransactionApiItem[] = [];
+    const seen = new Set<string>();
+    const count = 200;
+    const maxPages = 40;
+
+    for (let page = 1; page <= maxPages; page += 1) {
+      const query = new URLSearchParams({
+        start_date: startDate,
+        end_date: endDate,
+        count: String(count),
+        page: String(page),
+      });
+      const response = await this.request<YclientsFinanceTransactionApiItem[]>(
+        `transactions/${this.getCompanyId()}`,
+        { query },
+      );
+      const batch = response.data || [];
+      let appended = 0;
+
+      for (const transaction of batch) {
+        const id =
+          transaction.id === undefined || transaction.id === null
+            ? null
+            : String(transaction.id);
+        if (id && seen.has(id)) {
+          continue;
+        }
+        if (id) {
+          seen.add(id);
+        }
+        transactions.push(transaction);
+        appended += 1;
+      }
+
+      if (batch.length < count || appended === 0) {
+        return transactions;
+      }
+      if (page === maxPages) {
+        throw new Error('YClients finance result exceeds the safe page limit');
+      }
+    }
+
+    return transactions;
+  }
+
+  private async getPayrollStaff(): Promise<StaffMember[]> {
+    const companyId = this.getCompanyId();
+    const response = await this.requestFirstAvailable<YclientsStaffApiItem[]>([
+      `company/${companyId}/staff`,
+      `staff/${companyId}`,
+      `book_staff/${companyId}`,
+    ]);
+
+    return (response.data || [])
+      .filter((staff) => !this.isFiredStaff(staff))
+      .map((staff) => this.mapStaffMember(staff));
+  }
+
+  private aggregateRevenue(
+    transactions: YclientsFinanceTransactionApiItem[],
+    currency: string,
+  ): CrmFinancialSummary['revenue'] {
+    const labels: Record<string, string> = {
+      service: 'Услуги',
+      goods_transaction: 'Товары',
+      loyalty_abonement: 'Абонементы',
+      loyalty_certificate: 'Сертификаты',
+    };
+    const byType = new Map<string, number>();
+    const byAccount = new Map<
+      string,
+      { name: string; isCash: boolean | null; amountKopecks: number }
+    >();
+    let totalKopecks = 0;
+    let transactionCount = 0;
+
+    for (const transaction of transactions) {
+      const type = String(transaction.sold_item_type || '').trim();
+      if (!type) {
+        continue;
+      }
+      const amountKopecks = this.requireMoneyKopecks(transaction.amount);
+      if (amountKopecks <= 0) {
+        continue;
+      }
+
+      totalKopecks += amountKopecks;
+      transactionCount += 1;
+      byType.set(type, (byType.get(type) ?? 0) + amountKopecks);
+
+      const accountName =
+        transaction.account?.title?.trim() ||
+        transaction.account?.name?.trim() ||
+        'Без указания счёта';
+      const rawIsCash = transaction.account?.is_cash;
+      const isCash =
+        rawIsCash === true || rawIsCash === 1
+          ? true
+          : rawIsCash === false || rawIsCash === 0
+            ? false
+            : null;
+      const accountKey = `${accountName}:${String(isCash)}`;
+      const current = byAccount.get(accountKey) ?? {
+        name: accountName,
+        isCash,
+        amountKopecks: 0,
+      };
+      current.amountKopecks += amountKopecks;
+      byAccount.set(accountKey, current);
+    }
+
+    return {
+      status: 'available',
+      verified: true,
+      transaction_count: transactionCount,
+      total: this.money(totalKopecks, currency),
+      by_type: [...byType.entries()]
+        .sort((left, right) => right[1] - left[1])
+        .map(([key, amountKopecks]) => ({
+          key,
+          label: labels[key] || key,
+          currency,
+          amount_kopecks: amountKopecks,
+        })),
+      by_account: [...byAccount.values()]
+        .sort((left, right) => right.amountKopecks - left.amountKopecks)
+        .map((account) => ({
+          name: account.name,
+          is_cash: account.isCash,
+          currency,
+          amount_kopecks: account.amountKopecks,
+        })),
+    };
+  }
+
+  private async fetchStaffPayroll(
+    staff: StaffMember[],
+    from: string,
+    to: string,
+    currency: string,
+  ): Promise<CrmFinancialSummary['payroll']['staff']> {
+    const result = new Array<CrmStaffPayroll>(staff.length);
+    let cursor = 0;
+    const workers = Array.from(
+      { length: Math.min(4, Math.max(1, staff.length)) },
+      async () => {
+        while (cursor < staff.length) {
+          const index = cursor;
+          cursor += 1;
+          const member = staff[index];
+
+          try {
+            const query = new URLSearchParams({
+              date_from: from,
+              date_to: to,
+            });
+            const response = await this.request<YclientsPayrollApiData>(
+              `company/${this.getCompanyId()}/salary/calculation/staff/${this.toNumericId(member.id, 'staff.id')}`,
+              { query },
+            );
+            const totals = response.data?.total_sum;
+            if (
+              !totals ||
+              totals.income === undefined ||
+              totals.expense === undefined
+            ) {
+              throw new Error('YClients payroll totals are incomplete');
+            }
+
+            result[index] = {
+              staff_id: member.id,
+              name: member.name,
+              status: 'available',
+              verified: true,
+              accrued: this.money(
+                this.requireMoneyKopecks(totals.income),
+                currency,
+              ),
+              paid: this.money(
+                this.requireMoneyKopecks(totals.expense),
+                currency,
+              ),
+              balance:
+                totals.balance === undefined
+                  ? null
+                  : this.money(
+                      this.requireMoneyKopecks(totals.balance),
+                      currency,
+                    ),
+            };
+          } catch {
+            result[index] = {
+              staff_id: member.id,
+              name: member.name,
+              status: 'unavailable',
+              verified: false,
+              accrued: null,
+              paid: null,
+              balance: null,
+            };
+          }
+        }
+      },
+    );
+
+    await Promise.all(workers);
+    return result;
+  }
+
+  private unavailableRevenue(): CrmFinancialSummary['revenue'] {
+    return {
+      status: 'unavailable',
+      verified: false,
+      transaction_count: null,
+      total: null,
+      by_type: [],
+      by_account: [],
+    };
+  }
+
+  private unavailablePayroll(): CrmFinancialSummary['payroll'] {
+    return {
+      status: 'unavailable',
+      verified: false,
+      accrued_total: null,
+      paid_total: null,
+      balance_total: null,
+      staff: [],
+    };
+  }
+
+  private money(
+    amountKopecks: number,
+    currency: string,
+  ): { currency: string; amount_kopecks: number } {
+    return { currency, amount_kopecks: amountKopecks };
+  }
+
+  private requireMoneyKopecks(value: unknown): number {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      throw new Error('YClients money amount is invalid');
+    }
+    return Math.round(parsed * 100);
   }
 
   private mapJournalAppointment(
@@ -1075,11 +1466,26 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private isInactiveStaff(staff: YclientsStaffApiItem): boolean {
     return (
-      staff.fired === true ||
-      staff.fired === 1 ||
-      staff.hidden === true ||
-      staff.hidden === 1
+      this.isFiredStaff(staff) || staff.hidden === true || staff.hidden === 1
     );
+  }
+
+  private isFiredStaff(staff: YclientsStaffApiItem): boolean {
+    return staff.fired === true || staff.fired === 1;
+  }
+
+  private mapStaffMember(staff: YclientsStaffApiItem): StaffMember {
+    return {
+      id: String(staff.id),
+      name: staff.name || '',
+      title: staff.specialization || '',
+      specialization: staff.specialization || '',
+      avatar_url: staff.avatar || staff.photo || null,
+      rating:
+        typeof staff.rating === 'number' && Number.isFinite(staff.rating)
+          ? staff.rating
+          : null,
+    };
   }
 
   private selectCashbackCard(

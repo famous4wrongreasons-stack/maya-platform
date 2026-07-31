@@ -23,6 +23,7 @@ import {
   CreatedAppointment,
   CrmAdapterConfig,
   CrmCompanyProfile,
+  CrmFinancialSummary,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
@@ -668,6 +669,56 @@ export class CrmService {
       to: to.toISOString(),
       timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
       providerId: query.providerId,
+    });
+  }
+
+  async getFinancialSummary(
+    tenantId: string,
+    query: { from: string; to: string },
+  ): Promise<CrmFinancialSummary> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM finance range is invalid.',
+        error: { code: 'crm_finance_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM finance range must not exceed 31 days.',
+        error: { code: 'crm_finance_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getFinancialSummary) {
+      throw new ConflictException({
+        message: 'CRM financial analytics is not available for this provider.',
+        error: { code: 'crm_finance_not_supported' },
+      });
+    }
+
+    return adapter.getFinancialSummary({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
     });
   }
 

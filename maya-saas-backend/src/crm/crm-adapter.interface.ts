@@ -136,6 +136,64 @@ export interface CrmJournal {
   appointments: CrmJournalAppointment[];
 }
 
+export type CrmFinanceStatus = 'available' | 'partial' | 'unavailable';
+
+export interface CrmMoneyAmount {
+  currency: string;
+  amount_kopecks: number;
+}
+
+export interface CrmRevenueBreakdown extends CrmMoneyAmount {
+  key: string;
+  label: string;
+}
+
+export interface CrmRevenueAccountBreakdown extends CrmMoneyAmount {
+  name: string;
+  is_cash: boolean | null;
+}
+
+export interface CrmStaffPayroll {
+  staff_id: string;
+  name: string;
+  status: 'available' | 'unavailable';
+  verified: boolean;
+  accrued: CrmMoneyAmount | null;
+  paid: CrmMoneyAmount | null;
+  balance: CrmMoneyAmount | null;
+}
+
+export interface CrmFinancialSummary {
+  source: 'external_crm';
+  provider: string;
+  verified: boolean;
+  period: {
+    from: string;
+    to: string;
+    timezone: string;
+  };
+  revenue: {
+    status: 'available' | 'unavailable';
+    verified: boolean;
+    transaction_count: number | null;
+    total: CrmMoneyAmount | null;
+    by_type: CrmRevenueBreakdown[];
+    by_account: CrmRevenueAccountBreakdown[];
+  };
+  payroll: {
+    status: CrmFinanceStatus;
+    verified: boolean;
+    accrued_total: CrmMoneyAmount | null;
+    paid_total: CrmMoneyAmount | null;
+    balance_total: CrmMoneyAmount | null;
+    staff: CrmStaffPayroll[];
+  };
+  warnings: Array<{
+    code: string;
+    message: string;
+  }>;
+}
+
 export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
@@ -173,6 +231,12 @@ export interface CRMAdapter {
     timezone: string;
     providerId?: string;
   }): Promise<CrmJournal>;
+  getFinancialSummary?(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+  }): Promise<CrmFinancialSummary>;
   getClientLoyalty(params: {
     tenantId: string;
     phone: string;
