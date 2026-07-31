@@ -1,12 +1,16 @@
 import { ForbiddenException } from '@nestjs/common';
 
+import { CalendarSource } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { OperationsAnalyticsService } from './operations-analytics.service';
 
 describe('OperationsAnalyticsService', () => {
-  const createService = () => {
+  const createService = (
+    calendarSource: CalendarSource = CalendarSource.INTERNAL,
+  ) => {
     const tenantContext = new TenantContextService();
     let appointmentQueryTenantId: string | null = null;
     let expenseQueryTenantId: string | null = null;
@@ -76,6 +80,7 @@ describe('OperationsAnalyticsService', () => {
       tenant: {
         findUnique: jest.fn().mockResolvedValue({
           defaultTimezone: 'Europe/Moscow',
+          calendarSource,
         }),
       },
       appointment: { findMany: appointmentFindMany },
@@ -85,6 +90,49 @@ describe('OperationsAnalyticsService', () => {
     const tenantsService = {
       assertBranchBelongsToTenant: jest.fn(),
     } as unknown as TenantsService;
+    const crmGetJournal = jest.fn().mockResolvedValue({
+      calendar_source: 'external',
+      timezone: 'Europe/Moscow',
+      range: {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      },
+      provider_id: null,
+      count: 2,
+      appointments: [
+        {
+          id: 'crm-active',
+          client: { id: 'crm-client', name: 'Client' },
+          provider: { id: 'crm-staff', name: 'Provider' },
+          branch: null,
+          service_ids: ['service-a'],
+          services: [],
+          start_at: '2026-07-10T09:00:00.000Z',
+          end_at: '2026-07-10T10:00:00.000Z',
+          status: 'confirmed',
+          notes: null,
+          total_price: 2_500,
+          currency: 'RUB',
+        },
+        {
+          id: 'crm-cancelled',
+          client: { id: 'crm-client-2', name: 'Client 2' },
+          provider: { id: 'crm-staff', name: 'Provider' },
+          branch: null,
+          service_ids: ['service-a'],
+          services: [],
+          start_at: '2026-07-11T09:00:00.000Z',
+          end_at: '2026-07-11T10:00:00.000Z',
+          status: 'cancelled',
+          notes: null,
+          total_price: 3_000,
+          currency: 'RUB',
+        },
+      ],
+    });
+    const crmService = {
+      getJournal: crmGetJournal,
+    } as unknown as CrmService;
 
     return {
       tenantContext,
@@ -92,12 +140,14 @@ describe('OperationsAnalyticsService', () => {
       tenantsService,
       appointmentFindMany,
       expenseFindMany,
+      crmGetJournal,
       getAppointmentQueryTenantId: () => appointmentQueryTenantId,
       getExpenseQueryTenantId: () => expenseQueryTenantId,
       service: new OperationsAnalyticsService(
         prisma,
         tenantContext,
         tenantsService,
+        crmService,
       ),
     };
   };
@@ -164,5 +214,35 @@ describe('OperationsAnalyticsService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(setup.appointmentFindMany).not.toHaveBeenCalled();
     expect(setup.expenseFindMany).not.toHaveBeenCalled();
+  });
+
+  it('uses the external CRM journal for business analytics', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(setup.appointmentFindMany).not.toHaveBeenCalled();
+    expect(setup.crmGetJournal).toHaveBeenCalledWith(
+      'tenant-a',
+      expect.objectContaining({
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+    expect(result.data_source).toBe('crm');
+    expect(result.appointments).toEqual({
+      total: 2,
+      active: 1,
+      cancelled: 1,
+      unique_clients: 1,
+    });
+    expect(result.revenue).toEqual([
+      { currency: 'RUB', amount_kopecks: 250_000 },
+    ]);
   });
 });
