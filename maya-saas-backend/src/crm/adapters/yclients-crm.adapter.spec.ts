@@ -102,6 +102,32 @@ describe('YclientsCRMAdapter', () => {
     expect(requestedUrls[1]).toContain('/staff/123');
   });
 
+  it('excludes fired and hidden historical staff from the active team', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          data: [
+            { id: 1, name: 'Active barber', fired: 0, hidden: 0 },
+            { id: 2, name: 'Former barber', fired: 1, hidden: 1 },
+            { id: 3, name: 'Hidden barber', fired: 0, hidden: 1 },
+            { id: 4, name: 'Boolean active', fired: false, hidden: false },
+          ],
+        }),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getStaff('tenant-1')).resolves.toEqual([
+      expect.objectContaining({ id: '1', name: 'Active barber' }),
+      expect.objectContaining({ id: '4', name: 'Boolean active' }),
+    ]);
+  });
+
   it('discovers only active companies without exposing provider payload fields', async () => {
     let requestedUrl = '';
     const fetchMock = jest.fn<typeof fetch>((input) => {

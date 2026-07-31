@@ -28,6 +28,10 @@ interface YclientsStaffApiItem {
   avatar?: string;
   photo?: string;
   rating?: number;
+  fired?: boolean | number;
+  hidden?: boolean | number;
+  bookable?: boolean;
+  status?: number;
 }
 
 interface YclientsCompanyApiItem {
@@ -247,9 +251,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
       `book_staff/${companyId}`,
     ]);
     const allowedIds = this.getActiveMasterIds();
-    const items = (response.data || []).filter((staff) =>
-      allowedIds ? allowedIds.includes(staff.id) : true,
-    );
+    const items = (response.data || []).filter((staff) => {
+      if (this.isInactiveStaff(staff)) {
+        return false;
+      }
+      return allowedIds ? allowedIds.includes(staff.id) : true;
+    });
 
     return items.map((staff) => ({
       id: String(staff.id),
@@ -704,6 +711,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
     return this.settings.activeMasterIds.map((id) =>
       this.toNumericId(id, 'settings.activeMasterIds[]'),
+    );
+  }
+
+  private isInactiveStaff(staff: YclientsStaffApiItem): boolean {
+    return (
+      staff.fired === true ||
+      staff.fired === 1 ||
+      staff.hidden === true ||
+      staff.hidden === 1
     );
   }
 
