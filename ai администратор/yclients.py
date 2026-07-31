@@ -3,6 +3,7 @@ import os
 import time
 import logging
 import requests
+from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta
 from config import YCLIENTS_BASE_URL, YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKEN, YCLIENTS_COMPANY_ID, YCLIENTS_CASH_ACCOUNT_ID, YCLIENTS_CASHLESS_ACCOUNT_ID, ACTIVE_MASTER_IDS
 
@@ -1728,6 +1729,39 @@ class YClientsAPI:
         except Exception as e:
             print(f"YClients get_company_transactions error: {e}")
         return out
+
+    def get_staff_payroll_summary(
+        self, staff_id: int, start_date: str, end_date: str
+    ) -> dict:
+        """Фактические взаиморасчёты сотрудника за период из YClients.
+
+        ``income`` — начисленная зарплата, которую YClients показывает в разделе
+        «Взаиморасчёты». Метод намеренно не рассчитывает зарплату самостоятельно.
+        """
+        payload = self._get(
+            f"company/{self.company_id}/salary/calculation/staff/{int(staff_id)}",
+            {"date_from": start_date, "date_to": end_date},
+        )
+        data = payload.get("data") if isinstance(payload, dict) else None
+        totals = data.get("total_sum") if isinstance(data, dict) else None
+        if not isinstance(totals, dict) or totals.get("income") is None:
+            raise ValueError("YClients payroll response has no total_sum.income")
+
+        def amount(value) -> int | float:
+            try:
+                parsed = Decimal(str(value or "0"))
+            except (InvalidOperation, ValueError) as exc:
+                raise ValueError("YClients payroll amount is invalid") from exc
+            if parsed == parsed.to_integral_value():
+                return int(parsed)
+            return float(parsed.quantize(Decimal("0.01")))
+
+        return {
+            "source": "yclients_payroll",
+            "verified": True,
+            "accrued": amount(totals.get("income")),
+            "paid": amount(totals.get("expense")),
+        }
 
     def get_client_history(
         self, client_id: int, count: int = 30

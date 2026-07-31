@@ -10,16 +10,17 @@ business_rules.py — единый каталог бизнес-правил са
 импортировать из любого модуля (бот, webhook, analytics).
 """
 
-from datetime import date, timedelta
+from datetime import date
 
 # Доля мастера от его валовой выручки ПО УСЛУГАМ (после скидок).
 # Стас (владелец) — показываем 100% (оставляет себе, не выплачивается).
 MASTER_SALARY_PCT = {1460233: 0.60}    # Илья Третьяков — 60%
 MASTER_SALARY_DEFAULT = 0.50           # остальные мастера — 50%
 OWNER_STAFF_ID = 1461615               # Стас — владелец (staff_id в YClients)
+ANTON_STAFF_ID = 1461625                # Антон — администратор (staff_id в YClients)
 
-# Антон — администратор салона. Зарплата считается детерминированно по каждому
-# календарному дню, чтобы отчёт и ответы MAYA всегда показывали одну сумму.
+# Условия Антона остаются в каталоге как договорные настройки. Финансовые
+# отчёты не пересчитывают их сами: фактом считаются только начисления YClients.
 ANTON_WEEKEND_PAY = 1000
 ANTON_WORKDAY_BASE = 1500
 ANTON_GROSS_PCT = 0.05
@@ -37,39 +38,35 @@ def salary_percent(staff_id: int) -> float:
 def anton_salary_for_period(
     from_iso: str,
     to_iso: str,
-    gross_by_day: dict[str, float] | None = None,
+    payroll: dict | None = None,
 ) -> dict:
-    """Возвращает фактическую зарплату Антона за включительный диапазон дат."""
+    """Нормализует подтверждённые начисления Антона из YClients.
+
+    Зарплату нельзя восстанавливать по календарю или выручке: начисление в
+    YClients может быть создано не за каждую запланированную смену. Поэтому при
+    недоступном payroll возвращаем ``total=None`` и не подменяем факт прогнозом.
+    """
     start = date.fromisoformat(str(from_iso)[:10])
     end = date.fromisoformat(str(to_iso)[:10])
     if end < start:
         raise ValueError("to_iso must not be earlier than from_iso")
 
-    gross_by_day = gross_by_day or {}
-    fixed_total = 0
-    percent_total = 0
-    workdays = 0
-    days_off = 0
-    cursor = start
-    while cursor <= end:
-        if cursor.weekday() in ANTON_DAYS_OFF:
-            days_off += 1
-            fixed_total += ANTON_WEEKEND_PAY
-        else:
-            workdays += 1
-            fixed_total += ANTON_WORKDAY_BASE
-            percent_total += round(
-                ANTON_GROSS_PCT * float(gross_by_day.get(cursor.isoformat(), 0) or 0)
-            )
-        cursor += timedelta(days=1)
+    payroll = payroll if isinstance(payroll, dict) else {}
+    verified = bool(payroll.get("verified")) and payroll.get("accrued") is not None
+    total = payroll.get("accrued") if verified else None
+    paid = payroll.get("paid") if verified else None
 
     return {
         "name": "Антон",
-        "days": workdays + days_off,
-        "workdays": workdays,
-        "days_off": days_off,
-        "base": round(fixed_total),
-        "pct": int(round(ANTON_GROSS_PCT * 100)),
-        "pct_amount": round(percent_total),
-        "total": round(fixed_total + percent_total),
+        "staff_id": ANTON_STAFF_ID,
+        "from": start.isoformat(),
+        "to": end.isoformat(),
+        "source": "yclients_payroll",
+        "verified": verified,
+        "available": verified,
+        "accrued": total,
+        "paid": paid,
+        "total": total,
+        "salary": total,
+        "note": "" if verified else "YClients не отдал подтверждённые начисления зарплаты.",
     }

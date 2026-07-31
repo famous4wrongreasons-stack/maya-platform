@@ -28494,9 +28494,11 @@ function ALivePanel() {
   function antonSalarySection(data, label) {
     if (!data || !data.anton) return null;
     const anton = data.anton;
-    const dayParts = [];
-    if (anton.workdays != null) dayParts.push(num(anton.workdays) + ' раб. дн.');
-    if (anton.days_off != null) dayParts.push(num(anton.days_off) + ' выходных');
+    if (!anton.verified || anton.total == null) {
+      return Section('Антон · администратор · ' + label, Card(e('div', {
+        style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.55 }
+      }, 'YClients не отдал подтверждённые начисления зарплаты. MAYA не будет заменять их расчётной суммой.')));
+    }
     return Section('Антон · администратор · ' + label, Card(e('div', null, e('div', {
       style: {
         fontFamily: DISPLAY,
@@ -28513,7 +28515,7 @@ function ALivePanel() {
         marginTop: 6,
         marginBottom: 12
       }
-    }, 'Заработал за выбранный период' + (dayParts.length ? ' · ' + dayParts.join(' · ') : '')), row('Фиксированная часть', money(anton.base)), row((anton.pct || 0) + '% от выручки рабочих дней', money(anton.pct_amount)))));
+    }, 'Фактически начислено за выбранный период'), row('Источник', 'YClients · взаиморасчёты'), anton.paid ? row('Выплачено за период', money(anton.paid)) : null)));
   }
   function growthExecutionSection(plan) {
     if (!plan || !(plan.masters || []).length) return null;
@@ -28733,6 +28735,7 @@ function ALivePanel() {
         items: [],
         total: 0
       };
+    const antonVerified = anton.verified === true && anton.total != null;
     // Блок «чистая прибыль» + касса — приходит с бэка ТОЛЬКО основателю (owner_net),
     // другим owner/Антону его не отдают. Рендерим, если поле есть.
     function ownerNetBlock() {
@@ -28780,21 +28783,21 @@ function ALivePanel() {
         fontSize: 13,
         color: t.ink
       }
-    }, anton.day_off ? 'Выходной' : 'Рабочий день'), e('div', {
+    }, antonVerified ? 'Начислено в YClients' : 'Нет данных YClients'), e('div', {
       style: {
         fontFamily: BODY,
         fontSize: 9.5,
         color: t.faint,
         marginTop: 2
       }
-    }, anton.day_off ? 'фикс' : 'фикс ' + money(anton.base) + ' + ' + (anton.pct || 0) + '% от выручки')), e('span', {
+    }, antonVerified ? 'фактическое начисление за день' : 'расчётная сумма отключена')), e('span', {
       style: {
         fontFamily: DISPLAY,
         fontWeight: 500,
         fontSize: 15,
         color: t.ink
       }
-    }, money(anton.total))))), Section('Расходы за день', Card(e('div', null, (rep.masters || []).length ? row('ЗП мастеров', money(rep.salary_total)) : null, row('Антон', money(anton.total)), (extra.items || []).map((it, i) => e('div', {
+    }, antonVerified ? money(anton.total) : '—')))), Section('Расходы за день', Card(e('div', null, (rep.masters || []).length ? row('ЗП мастеров', money(rep.salary_total)) : null, row('Антон', antonVerified ? money(anton.total) : '—'), (extra.items || []).map((it, i) => e('div', {
       key: i
     }, row(it.label, money(it.amount)))), ((rep.salon_expenses || {}).items || []).map((it, i) => e('div', {
       key: 'se' + i
@@ -28822,7 +28825,7 @@ function ALivePanel() {
         fontSize: 17,
         color: t.accent
       }
-    }, money(rep.expenses_total)))))), function () {
+    }, rep.expenses_total != null ? money(rep.expenses_total) : '—'))))), function () {
       var pp = rep.prelim_payout;
       if (!pp || !((pp.masters || []).length || (pp.anton || {}).salary)) return null;
       var wk = pp.week || {};
@@ -28839,7 +28842,7 @@ function ALivePanel() {
         return e('div', {
           key: i
         }, row(m.name + ' · ' + (m.percent || 0) + '%', money(m.salary)));
-      }), (pp.anton || {}).salary ? row('Антон', money(pp.anton.salary)) : null, e('div', {
+      }), (pp.anton || {}).verified ? row('Антон', money(pp.anton.salary)) : row('Антон', 'Нет данных YClients'), e('div', {
         style: {
           display: 'flex',
           justifyContent: 'space-between',
@@ -28863,7 +28866,7 @@ function ALivePanel() {
           fontSize: 17,
           color: t.accent
         }
-      }, money(pp.total))))));
+      }, pp.total != null ? money(pp.total) : '—')))));
     }(), rep.note ? e('div', {
       style: {
         fontFamily: BODY,

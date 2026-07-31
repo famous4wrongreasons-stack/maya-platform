@@ -19,7 +19,12 @@ import logging
 from datetime import date, timedelta
 
 from yclients import YClientsAPI
-from business_rules import OWNER_STAFF_ID, anton_salary_for_period, salary_percent
+from business_rules import (
+    ANTON_STAFF_ID,
+    OWNER_STAFF_ID,
+    anton_salary_for_period,
+    salary_percent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +89,13 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         logger.error(f"business_summary records: {e}")
         records_available = False
         recs = []
+    try:
+        anton_payroll = _yc.get_staff_payroll_summary(ANTON_STAFF_ID, from_iso, to_iso)
+        anton_payroll_available = True
+    except Exception as e:
+        logger.error(f"business_summary anton payroll: {e}")
+        anton_payroll_available = False
+        anton_payroll = None
 
     # record_id -> staff_id (если в транзакции мастер не указан)
     rec_staff = {}
@@ -232,6 +244,7 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         "source_status": {
             "transactions": "ok" if transactions_available else "unavailable",
             "records": "ok" if records_available else "unavailable",
+            "anton_salary": "ok" if anton_payroll_available else "unavailable",
         },
         "total_gross": total_gross,
         "cash": {"count": len(cash_recs), "sum": round(cash_sum)},
@@ -252,7 +265,7 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         },
         "masters": masters,
         "salary_total": salary_total,         # сумма к выплате мастерам (без владельца)
-        "anton": anton_salary_for_period(from_iso, to_iso, daily_gross),
+        "anton": anton_salary_for_period(from_iso, to_iso, anton_payroll),
         "note": (
             "Не удалось получить финансовые операции из YClients."
             if not transactions_available

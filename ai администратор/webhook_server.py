@@ -67,10 +67,7 @@ from chat_widgets import (
     widget_from_signal,
 )
 from business_rules import (
-    ANTON_DAYS_OFF,
-    ANTON_GROSS_PCT,
-    ANTON_WEEKEND_PAY,
-    ANTON_WORKDAY_BASE,
+    ANTON_STAFF_ID,
     anton_salary_for_period,
 )
 from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
@@ -4540,6 +4537,20 @@ def _pay_week() -> dict:
             "pay_date": (end + timedelta(days=1)).isoformat()}
 
 
+def _anton_payroll(from_iso: str, to_iso: str) -> dict:
+    """Подтверждённые начисления Антона из взаиморасчётов YClients.
+
+    При сбое не используем календарный прогноз: финансовый отчёт должен явно
+    показать отсутствие данных, а не правдоподобную, но неверную сумму.
+    """
+    try:
+        payroll = _yc.get_staff_payroll_summary(ANTON_STAFF_ID, from_iso, to_iso)
+    except Exception as exc:
+        logger.error("anton payroll %s..%s: %s", from_iso, to_iso, exc)
+        payroll = None
+    return anton_salary_for_period(from_iso, to_iso, payroll)
+
+
 async def _yearly_gross_refresh():
     """Фоном пересчитывает валовую по мастерам за год (с 1 янв). Кеш на день."""
     today = date.today()
@@ -5411,7 +5422,7 @@ def _preliminary_payout() -> dict:
     """Предварительная выплата за ТЕКУЩУЮ расчётную неделю (Чт→Ср, до сегодня)
     для ВСЕХ, кроме Стаса-владельца:
       • каждый мастер = его валовая за неделю × его доля,
-      • Антон = фикс по дням недели (вс/пн=1000, вт–сб=1500) + 5% от валовой за каждый рабочий день.
+      • Антон = фактически начислено в YClients за тот же период.
     Кладётся в дневной отчёт, чтобы владелец каждый день видел накопленную сумму к выплате."""
     pw = _pay_week()
     start = pw["start"]
@@ -5429,7 +5440,6 @@ def _preliminary_payout() -> dict:
     rec_staff = {r.get("id"): r.get("staff_id") for r in recs
                  if isinstance(r, dict) and r.get("id") is not None and r.get("staff_id") is not None}
     by_master = {}                 # staff_id -> валовая за неделю (услуги)
-    by_day = {}                    # 'YYYY-MM-DD' -> валовая салона за день (услуги)
     for t in txs:
         if not isinstance(t, dict) or t.get("sold_item_type") != "service":
             continue
@@ -5447,9 +5457,6 @@ def _preliminary_payout() -> dict:
             sid = rec_staff.get(t.get("record_id"))
         if sid is not None:
             by_master[sid] = by_master.get(sid, 0.0) + a
-        day = str(t.get("date") or "")[:10]
-        if day:
-            by_day[day] = by_day.get(day, 0.0) + a
     try:
         roster = _yc.get_masters() or []
     except Exception:
@@ -5469,15 +5476,14 @@ def _preliminary_payout() -> dict:
                      "gross_week": round(g), "percent": int(round(pct * 100)), "salary": sal})
         masters_total += sal
     rows.sort(key=lambda x: x["salary"], reverse=True)
-    # Антон — тот же единый расчёт, что используется в месячной аналитике.
-    anton = anton_salary_for_period(start, end, by_day)
+    anton = _anton_payroll(start, end)
     anton_total = anton["total"]
     return {
         "week": {"start": start, "end": pw["end"], "through": end, "pay_date": pw.get("pay_date")},
         "masters": rows,
         "anton": {**anton, "salary": anton_total},
         "masters_total": masters_total,
-        "total": masters_total + anton_total,
+        "total": (masters_total + anton_total) if anton_total is not None else None,
     }
 
 
@@ -5590,19 +5596,8 @@ def _daily_report(date_iso: str) -> dict:
     total_gross_val = round(sum(rev.values()))
     salary_total_val = round(sum(m["salary"] for m in masters if not m.get("is_owner")))
 
-    # ── Антон (ассистент): фикс по дню недели + % от выручки ──
-    try:
-        wd = date.fromisoformat(date_iso).weekday()   # Пн=0 … Вс=6
-    except Exception:
-        wd = 0
-    anton_off = wd in ANTON_DAYS_OFF                   # вс/пн — выходной
-    if anton_off:
-        anton_base = ANTON_WEEKEND_PAY
-        anton_pct_amount = 0
-    else:
-        anton_base = ANTON_WORKDAY_BASE
-        anton_pct_amount = round(ANTON_GROSS_PCT * total_gross_val)
-    anton_total = anton_base + anton_pct_amount
+    anton = _anton_payroll(date_iso, date_iso)
+    anton_total = anton.get("total")
 
     # ── Дополнительные расходы (каждый день) ──
     extra_items = [{"label": e["label"], "amount": e["amount"]} for e in DAILY_EXTRA_EXPENSES]
@@ -5616,7 +5611,10 @@ def _daily_report(date_iso: str) -> dict:
         salon_exp_items = []
     salon_exp_total = sum(int(x.get("amount") or 0) for x in salon_exp_items)
 
-    expenses_total = salary_total_val + anton_total + extra_total + salon_exp_total
+    expenses_total = (
+        salary_total_val + anton_total + extra_total + salon_exp_total
+        if anton_total is not None else None
+    )
 
     # Предварительная выплата за неделю (Чт→Ср до сегодня) — все, кроме Стаса (#11)
     try:
@@ -5631,7 +5629,7 @@ def _daily_report(date_iso: str) -> dict:
     owner_gross = round(sum(m["gross"] for m in masters if m.get("is_owner")))
     employees_gross = max(0, total_gross_val - owner_gross)
     employees_margin = employees_gross - salary_total_val
-    owner_net = {
+    owner_net = ({
         "own": owner_gross,                       # заработал сам (свои услуги, 100%)
         "employees_gross": employees_gross,       # валовая сотрудников
         "employees_salary": salary_total_val,     # − их зарплаты
@@ -5640,7 +5638,7 @@ def _daily_report(date_iso: str) -> dict:
         "purchases": salon_exp_total,             # − покупки (внёс Антон)
         "extra": extra_total,                     # − фикс. доп.расходы
         "net": total_gross_val - expenses_total,  # = чистыми
-    }
+    } if expenses_total is not None else None)
 
     # ── Касса со слов Антона + сверка с расчётной наличкой YClients ──
     try:
@@ -5692,13 +5690,7 @@ def _daily_report(date_iso: str) -> dict:
         "card": {"count": len(card_recs), "sum": round(card_sum)},
         "total_gross": total_gross_val,
         "salary_total": salary_total_val,
-        "anton": {
-            "day_off": anton_off,
-            "base": anton_base,
-            "pct": int(round(ANTON_GROSS_PCT * 100)),
-            "pct_amount": anton_pct_amount,
-            "total": anton_total,
-        },
+        "anton": anton,
         "extra_expenses": {"items": extra_items, "total": extra_total},
         "salon_expenses": {"items": salon_exp_items, "total": salon_exp_total},
         "expenses_total": expenses_total,
@@ -5727,7 +5719,6 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
         if isinstance(r, dict) and r.get("id") is not None and r.get("staff_id") is not None:
             rec_staff[r.get("id")] = r.get("staff_id")
     rev = {}
-    by_day = {}
     cash_sum = 0.0; card_sum = 0.0
     cash_recs = set(); card_recs = set()
     for t in txs:
@@ -5739,9 +5730,6 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
             a = 0.0
         if a <= 0:
             continue
-        day = str(t.get("date") or t.get("last_change_date") or "")[:10]
-        if day:
-            by_day[day] = by_day.get(day, 0.0) + a
         sid = None
         m = t.get("master")
         if isinstance(m, dict) and m.get("id"):
@@ -5784,7 +5772,7 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
     masters.sort(key=lambda x: x["salary"], reverse=True)
     total_gross_val = round(sum(rev.values()))
     salary_total_val = round(sum(m["salary"] for m in masters if not m.get("is_owner")))
-    anton = anton_salary_for_period(from_iso, to_iso, by_day)
+    anton = _anton_payroll(from_iso, to_iso)
     return {
         "from": from_iso, "to": to_iso, "range": True,
         "masters": masters,
