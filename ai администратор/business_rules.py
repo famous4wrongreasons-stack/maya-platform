@@ -20,10 +20,10 @@ OWNER_STAFF_ID = 1461615               # Стас — владелец (staff_id
 
 # Антон — администратор салона. Зарплата считается детерминированно по каждому
 # календарному дню, чтобы отчёт и ответы MAYA всегда показывали одну сумму.
-ANTON_WEEKEND_PAY = 2000
+ANTON_WEEKEND_PAY = 1000
 ANTON_WORKDAY_BASE = 1500
 ANTON_GROSS_PCT = 0.05
-ANTON_DAYS_OFF = (6, 0)                 # воскресенье, понедельник
+ANTON_DAYS_OFF = (6, 0)                 # два выходных: воскресенье, понедельник
 
 
 def salary_percent(staff_id: int) -> float:

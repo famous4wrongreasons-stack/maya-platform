@@ -14,9 +14,17 @@ class AntonSalaryTests(unittest.TestCase):
 
         self.assertEqual(result["workdays"], 1)
         self.assertEqual(result["days_off"], 1)
-        self.assertEqual(result["base"], 3_500)
+        self.assertEqual(result["base"], 2_500)
         self.assertEqual(result["pct_amount"], 2_000)
-        self.assertEqual(result["total"], 5_500)
+        self.assertEqual(result["total"], 4_500)
+
+    def test_full_week_has_five_workdays_and_two_paid_days_off(self):
+        result = anton_salary_for_period("2026-07-06", "2026-07-12", {})
+
+        self.assertEqual(result["workdays"], 5)
+        self.assertEqual(result["days_off"], 2)
+        self.assertEqual(result["base"], 9_500)
+        self.assertEqual(result["total"], 9_500)
 
     def test_empty_month_still_returns_configured_fixed_pay(self):
         result = anton_salary_for_period("2026-07-01", "2026-07-31", {})
