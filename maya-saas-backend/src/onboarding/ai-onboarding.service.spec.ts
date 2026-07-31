@@ -99,7 +99,10 @@ describe('AiOnboardingService', () => {
       },
     };
     const rateLimit = { assertPreflight: jest.fn() };
-    const onboarding = { createTrialSignup: jest.fn() };
+    const onboarding = {
+      createTrialSignup: jest.fn(),
+      resumeConfirmedTrialSignup: jest.fn(),
+    };
     const crm = {
       discoverCompaniesForCredential: jest.fn(),
       previewCredentials: jest.fn(),
@@ -339,6 +342,45 @@ describe('AiOnboardingService', () => {
       }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+  });
+
+  it('resumes the confirmed business instead of consuming another signup', async () => {
+    const token = 'a'.repeat(43);
+    const { service, onboarding } = createService({
+      findDraft: jest.fn().mockResolvedValue({
+        id: 'draft-1',
+        status: 'confirmed',
+        draftTokenHash: createHash('sha256').update(token).digest('hex'),
+        blueprintJson: completeBlueprint,
+        missingFieldsJson: [],
+        expiresAt: new Date(Date.now() + 60_000),
+        confirmedTenantId: 'tenant-1',
+      }),
+    });
+    onboarding.resumeConfirmedTrialSignup.mockResolvedValue({
+      access_token: 'access-token',
+      refresh_token: 'refresh-token',
+      tenant: { id: 'tenant-1', slug: 'muzhskaya-estetika' },
+      user: { id: 'owner-1', role: 'tenant_admin' },
+    });
+
+    const result = await service.confirmDraft('draft-1', {
+      draftToken: token,
+      ownerEmail: 'owner@example.ru',
+      ownerName: 'Владелец',
+      ownerPhone: '+79990000000',
+    });
+
+    expect(onboarding.resumeConfirmedTrialSignup).toHaveBeenCalledWith(
+      'tenant-1',
+      'owner@example.ru',
+      {},
+    );
+    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+    expect(result.ai_onboarding).toMatchObject({
+      draft_id: 'draft-1',
+      resumed: true,
+    });
   });
 
   it('uses the owner name internally when a solo specialist skipped a brand name', async () => {

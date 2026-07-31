@@ -313,6 +313,30 @@ export class AiOnboardingService {
     metadata: Partial<AuthClientMetadata> = {},
   ) {
     const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
+    this.assertNotExpired(draft);
+    if (draft.status === 'confirmed' && draft.confirmedTenantId) {
+      const signup = await this.onboardingService.resumeConfirmedTrialSignup(
+        draft.confirmedTenantId,
+        dto.ownerEmail,
+        metadata,
+      );
+      const blueprint = this.readBlueprint(draft.blueprintJson);
+
+      return {
+        ...signup,
+        ai_onboarding: {
+          draft_id: draft.id,
+          template_id: blueprint.templateId,
+          blueprint,
+          resumed: true,
+        },
+        branding_mode: 'logo_only',
+        next_step:
+          blueprint.calendarSource === CalendarSource.EXTERNAL
+            ? 'connect_crm'
+            : 'upload_logo_or_open_app',
+      };
+    }
     this.assertEditable(draft);
     let blueprint = this.applyConfirmationOverrides(
       this.readBlueprint(draft.blueprintJson),
