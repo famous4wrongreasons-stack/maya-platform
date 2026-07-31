@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Get,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -19,6 +20,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmService } from './crm.service';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
+import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
 
 const CRM_MANAGEMENT_ROLES = [
   UserRole.TENANT_OWNER,
@@ -119,6 +121,17 @@ export class CrmIntegrationController {
     });
 
     return result;
+  }
+
+  @Get('journal')
+  @ApiOperation({
+    summary: 'Read the tenant operational journal from the connected CRM',
+  })
+  journal(
+    @Query() query: ListCrmJournalDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.crmService.getJournal(this.tenantId(actor), query);
   }
 
   @Post('activate')

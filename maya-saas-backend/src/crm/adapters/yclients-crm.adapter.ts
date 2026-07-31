@@ -3,10 +3,13 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   AvailableSlot,
   CancelledAppointment,
+  ClientAppointmentsParams,
   ClientLoyaltySnapshot,
   CRMAdapter,
   CrmCompanyOption,
   CrmCompanyProfile,
+  CrmJournal,
+  CrmJournalAppointment,
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
@@ -14,6 +17,7 @@ import {
   ServiceItem,
   StaffMember,
 } from '../crm-adapter.interface';
+import { localDateMinuteToUtc } from '../../internal-calendar/internal-calendar.utils';
 
 interface YclientsSettings {
   companyId?: number | string;
@@ -76,18 +80,33 @@ interface YclientsRecordClientApiItem {
 
 interface YclientsRecordStaffApiItem {
   id?: number | string;
+  name?: string;
+  specialization?: string;
+  avatar?: string;
+  photo?: string;
 }
 
 interface YclientsRecordServiceApiItem {
   id?: number | string;
+  title?: string;
+  cost?: number | string;
+  price_min?: number | string;
+  duration?: number | null;
+  seance_length?: number;
 }
 
 interface YclientsRecordApiItem {
   id?: number | string;
+  date?: string;
   datetime?: string;
+  length?: number;
   seance_length?: number;
   attendance?: number;
+  visit_attendance?: number;
+  paid_full?: boolean | number;
+  deleted?: boolean;
   comment?: string;
+  staff_id?: number | string;
   client?: YclientsRecordClientApiItem | null;
   staff?: YclientsRecordStaffApiItem | null;
   services?: YclientsRecordServiceApiItem[] | null;
@@ -515,9 +534,124 @@ export class YclientsCRMAdapter implements CRMAdapter {
     };
   }
 
-  getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
-    void clientId;
-    return Promise.resolve([]);
+  async getClientAppointments(
+    params: ClientAppointmentsParams,
+  ): Promise<CreatedAppointment[]> {
+    void params.tenantId;
+    const client = await this.findClientByPhone(params.phone);
+
+    if (client?.id === undefined) {
+      return [];
+    }
+
+    const from =
+      params.from ||
+      new Date(Date.now() - 730 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+    const to =
+      params.to ||
+      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+    const timezone = params.timezone || 'Europe/Moscow';
+    const records = await this.fetchRecords({
+      startDate: from.slice(0, 10),
+      endDate: to.slice(0, 10),
+      clientId: this.toNumericId(client.id, 'client.id'),
+    });
+
+    return records
+      .filter((record) => record.id !== undefined)
+      .map((record) => {
+        const timing = this.recordTiming(record, timezone);
+        const serviceIds = (record.services || [])
+          .map((service) =>
+            service.id === undefined ? null : String(service.id),
+          )
+          .filter((serviceId): serviceId is string => Boolean(serviceId));
+        const serviceCosts = (record.services || [])
+          .map((service) => Number(service.cost ?? service.price_min))
+          .filter((cost) => Number.isFinite(cost));
+
+        return {
+          external_id: String(record.id),
+          status: this.recordStatus(record),
+          start: timing.start.toISOString(),
+          end: timing.end.toISOString(),
+          staff_id: String(record.staff_id ?? record.staff?.id ?? ''),
+          service_ids: serviceIds,
+          branch_id: null,
+          total_price:
+            serviceCosts.length > 0
+              ? serviceCosts.reduce((total, cost) => total + cost, 0)
+              : null,
+          currency: this.settings.currency || 'RUB',
+          raw: {
+            provider: this.config.provider,
+            imported: true,
+            attendance: record.attendance ?? 0,
+          },
+        };
+      })
+      .filter((record) => Boolean(record.staff_id));
+  }
+
+  async getJournal(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+    providerId?: string;
+  }): Promise<CrmJournal> {
+    void params.tenantId;
+    const startDate = this.dateKeyInTimezone(params.from, params.timezone);
+    const inclusiveEnd = new Date(new Date(params.to).getTime() - 1);
+    const endDate = this.dateKeyInTimezone(
+      inclusiveEnd.toISOString(),
+      params.timezone,
+    );
+    const [records, staff, services] = await Promise.all([
+      this.fetchRecords({
+        startDate,
+        endDate,
+        staffId: params.providerId
+          ? this.toNumericId(params.providerId, 'providerId')
+          : undefined,
+      }),
+      this.getStaff(params.tenantId),
+      this.getServices(params.tenantId),
+    ]);
+    const staffById = new Map(staff.map((member) => [member.id, member]));
+    const servicesById = new Map(
+      services.map((service) => [service.id, service]),
+    );
+    const appointments = records
+      .filter((record) => !record.deleted && record.id !== undefined)
+      .map((record) =>
+        this.mapJournalAppointment(
+          record,
+          params.timezone,
+          staffById,
+          servicesById,
+        ),
+      )
+      .filter(
+        (appointment): appointment is CrmJournalAppointment =>
+          appointment !== null,
+      );
+
+    return {
+      calendar_source: 'external',
+      timezone: params.timezone,
+      range: {
+        from: params.from,
+        to: params.to,
+      },
+      provider_id: params.providerId ?? null,
+      count: appointments.length,
+      appointments,
+    };
   }
 
   async getClientLoyalty(params: {
@@ -531,26 +665,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       return null;
     }
 
-    const search = await this.request<YclientsClientSearchItem[]>(
-      `company/${this.getCompanyId()}/clients/search`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          fields: ['id', 'name', 'phone'],
-          filters: [
-            { type: 'quick_search', state: { value: normalizedPhone } },
-          ],
-          page: 1,
-          page_size: 8,
-        }),
-      },
-    );
-    const client = (search.data || []).find((candidate) => {
-      const candidateDigits = String(candidate.phone || '')
-        .replace(/\D/g, '')
-        .slice(-10);
-      return candidateDigits === wantedDigits;
-    });
+    const client = await this.findClientByPhone(normalizedPhone);
     if (client?.id === undefined) {
       return null;
     }
@@ -628,6 +743,250 @@ export class YclientsCRMAdapter implements CRMAdapter {
     );
 
     return response.data || [];
+  }
+
+  private async findClientByPhone(
+    phone: string,
+  ): Promise<YclientsClientSearchItem | null> {
+    const normalizedPhone = this.normalizePhone(phone);
+    const wantedDigits = normalizedPhone.replace(/\D/g, '').slice(-10);
+
+    if (wantedDigits.length !== 10) {
+      return null;
+    }
+
+    const search = await this.request<YclientsClientSearchItem[]>(
+      `company/${this.getCompanyId()}/clients/search`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          fields: ['id', 'name', 'phone'],
+          filters: [
+            { type: 'quick_search', state: { value: normalizedPhone } },
+          ],
+          page: 1,
+          page_size: 8,
+        }),
+      },
+    );
+
+    return (
+      (search.data || []).find((candidate) => {
+        const candidateDigits = String(candidate.phone || '')
+          .replace(/\D/g, '')
+          .slice(-10);
+        return candidateDigits === wantedDigits;
+      }) ?? null
+    );
+  }
+
+  private async fetchRecords(params: {
+    startDate: string;
+    endDate: string;
+    clientId?: number;
+    staffId?: number;
+  }): Promise<YclientsRecordApiItem[]> {
+    const records: YclientsRecordApiItem[] = [];
+    const seen = new Set<string>();
+    const count = 200;
+
+    for (let page = 1; page <= 25; page += 1) {
+      const query = new URLSearchParams({
+        start_date: params.startDate,
+        end_date: params.endDate,
+        count: String(count),
+        page: String(page),
+      });
+
+      if (params.clientId) {
+        query.set('client_id', String(params.clientId));
+      }
+      if (params.staffId) {
+        query.set('staff_id', String(params.staffId));
+      }
+
+      const response = await this.request<YclientsRecordApiItem[]>(
+        `records/${this.getCompanyId()}`,
+        { query },
+      );
+      const batch = response.data || [];
+      let appended = 0;
+
+      for (const record of batch) {
+        const id =
+          record.id === undefined || record.id === null
+            ? null
+            : String(record.id);
+        if (id && seen.has(id)) {
+          continue;
+        }
+        if (id) {
+          seen.add(id);
+        }
+        records.push(record);
+        appended += 1;
+      }
+
+      if (batch.length < count || appended === 0) {
+        break;
+      }
+    }
+
+    return records;
+  }
+
+  private mapJournalAppointment(
+    record: YclientsRecordApiItem,
+    timezone: string,
+    staffById: Map<string, StaffMember>,
+    servicesById: Map<string, ServiceItem>,
+  ): CrmJournalAppointment | null {
+    const externalId =
+      record.id === undefined || record.id === null ? '' : String(record.id);
+    const staffId = String(record.staff_id ?? record.staff?.id ?? '');
+
+    if (!externalId || !staffId) {
+      return null;
+    }
+
+    const timing = this.recordTiming(record, timezone);
+    const provider = staffById.get(staffId);
+    const recordServices = (record.services || []).flatMap((rawService) => {
+      const serviceId =
+        rawService.id === undefined || rawService.id === null
+          ? ''
+          : String(rawService.id);
+      const catalogService = serviceId
+        ? servicesById.get(serviceId)
+        : undefined;
+      const rawPrice = Number(rawService.cost ?? rawService.price_min);
+      const price = Number.isFinite(rawPrice)
+        ? rawPrice
+        : (catalogService?.price ?? 0);
+      const durationSeconds =
+        rawService.seance_length || rawService.duration || 0;
+
+      if (!serviceId && !rawService.title) {
+        return [];
+      }
+
+      return [
+        {
+          id: serviceId || `record-${externalId}-service`,
+          name: rawService.title || catalogService?.name || 'Услуга',
+          price,
+          duration_minutes:
+            catalogService?.duration_minutes ??
+            Math.max(1, Math.round(durationSeconds / 60) || 60),
+          currency: this.settings.currency || 'RUB',
+          category: catalogService?.category,
+        },
+      ];
+    });
+    const totalPrice =
+      recordServices.length > 0
+        ? recordServices.reduce((total, service) => total + service.price, 0)
+        : null;
+
+    return {
+      id: `crm-${externalId}`,
+      client: {
+        id:
+          record.client?.id === undefined || record.client?.id === null
+            ? null
+            : String(record.client.id),
+        name: record.client?.name?.trim() || 'Клиент',
+      },
+      provider: {
+        id: staffId,
+        name: provider?.name || record.staff?.name || 'Специалист',
+        title:
+          provider?.title ||
+          provider?.specialization ||
+          record.staff?.specialization ||
+          '',
+        avatar_url:
+          provider?.avatar_url ||
+          record.staff?.avatar ||
+          record.staff?.photo ||
+          null,
+      },
+      branch: null,
+      service_ids: recordServices.map((service) => service.id),
+      services: recordServices,
+      start_at: timing.start.toISOString(),
+      end_at: timing.end.toISOString(),
+      status: this.recordStatus(record),
+      notes: record.comment?.trim() || null,
+      total_price: totalPrice,
+      currency: this.settings.currency || 'RUB',
+    };
+  }
+
+  private recordStatus(record: YclientsRecordApiItem): string {
+    if (record.deleted) {
+      return 'canceled';
+    }
+    if (record.attendance === -1 || record.visit_attendance === -1) {
+      return 'no_show';
+    }
+    if (
+      record.attendance === 1 ||
+      record.visit_attendance === 1 ||
+      record.paid_full === true ||
+      record.paid_full === 1
+    ) {
+      return 'completed';
+    }
+    return 'confirmed';
+  }
+
+  private recordTiming(
+    record: YclientsRecordApiItem,
+    timezone: string,
+  ): { start: Date; end: Date } {
+    const raw = String(record.datetime || record.date || '').trim();
+    const localMatch = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})/.exec(raw);
+    let start: Date;
+
+    if (localMatch && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw)) {
+      start = localDateMinuteToUtc(
+        localMatch[1],
+        Number(localMatch[2]) * 60 + Number(localMatch[3]),
+        timezone,
+      );
+    } else {
+      start = new Date(raw);
+    }
+
+    if (Number.isNaN(start.getTime())) {
+      throw new Error('YClients record has an invalid datetime');
+    }
+
+    const durationSeconds = Math.max(
+      60,
+      Number(record.length || record.seance_length || 3600),
+    );
+
+    return {
+      start,
+      end: new Date(start.getTime() + durationSeconds * 1000),
+    };
+  }
+
+  private dateKeyInTimezone(value: string, timezone: string): string {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      throw new Error('Invalid CRM journal date');
+    }
+
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
   }
 
   private async request<TData>(

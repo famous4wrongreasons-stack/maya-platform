@@ -60,9 +60,12 @@ export interface CreatedAppointment {
   external_id: string;
   status: string;
   start: string;
+  end?: string;
   staff_id: string;
   service_ids: string[];
   branch_id?: string | null;
+  total_price?: number | null;
+  currency?: string;
   raw?: Record<string, unknown>;
 }
 
@@ -88,6 +91,49 @@ export interface ClientLoyaltySnapshot {
   balance: number;
   sold_amount: number | null;
   currency: string;
+}
+
+export interface ClientAppointmentsParams {
+  tenantId: string;
+  phone: string;
+  from?: string;
+  to?: string;
+  timezone?: string;
+}
+
+export interface CrmJournalAppointment {
+  id: string;
+  client: {
+    id: string | null;
+    name: string;
+  };
+  provider: {
+    id: string;
+    name: string;
+    title?: string;
+    avatar_url?: string | null;
+  };
+  branch: null;
+  service_ids: string[];
+  services: ServiceItem[];
+  start_at: string;
+  end_at: string;
+  status: string;
+  notes: string | null;
+  total_price: number | null;
+  currency: string;
+}
+
+export interface CrmJournal {
+  calendar_source: 'external';
+  timezone: string;
+  range: {
+    from: string;
+    to: string;
+  };
+  provider_id: string | null;
+  count: number;
+  appointments: CrmJournalAppointment[];
 }
 
 export interface CRMAdapter {
@@ -117,7 +163,16 @@ export interface CRMAdapter {
     serviceIds?: string[];
     notes?: string | null;
   }): Promise<RescheduledAppointment>;
-  getClientAppointments(clientId: string): Promise<CreatedAppointment[]>;
+  getClientAppointments(
+    params: ClientAppointmentsParams,
+  ): Promise<CreatedAppointment[]>;
+  getJournal?(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+    providerId?: string;
+  }): Promise<CrmJournal>;
   getClientLoyalty(params: {
     tenantId: string;
     phone: string;

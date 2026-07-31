@@ -67,6 +67,19 @@ export class TenantAppointmentRepository {
     });
   }
 
+  findByCrmExternalIdForClient(crmExternalId: string, clientId: string) {
+    const tenantId = this.tenantContext.requireTenantId();
+
+    return this.prisma.appointment.findFirst({
+      where: {
+        tenantId,
+        clientId,
+        crmExternalId,
+      },
+      include: { branch: true },
+    });
+  }
+
   findForClient(appointmentId: string, clientId: string) {
     const tenantId = this.tenantContext.requireTenantId();
 

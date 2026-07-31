@@ -483,6 +483,15 @@ describe('CrmService', () => {
     };
     const crmUpdateMock = jest.fn().mockResolvedValue(activeIntegration);
     const tenantUpdateMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
+    const brandingFindMock = jest.fn().mockResolvedValue({
+      themeJson: {
+        booking: { mode: 'preview' },
+        custom: { retained: true },
+      },
+    });
+    const brandingUpsertMock = jest.fn().mockResolvedValue({
+      tenantId: 'tenant-1',
+    });
     const transactionMock = jest
       .fn()
       .mockImplementation((callback: (tx: unknown) => unknown) =>
@@ -490,6 +499,10 @@ describe('CrmService', () => {
           callback({
             crmIntegration: { update: crmUpdateMock },
             tenant: { update: tenantUpdateMock },
+            brandingSettings: {
+              findUnique: brandingFindMock,
+              upsert: brandingUpsertMock,
+            },
           }),
         ),
       );
@@ -538,6 +551,22 @@ describe('CrmService', () => {
     expect(tenantUpdateMock).toHaveBeenCalledWith({
       where: { id: 'tenant-1' },
       data: { calendarSource: 'external' },
+    });
+    expect(brandingUpsertMock).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-1' },
+      create: {
+        tenantId: 'tenant-1',
+        themeJson: {
+          booking: { mode: 'live' },
+          custom: { retained: true },
+        },
+      },
+      update: {
+        themeJson: {
+          booking: { mode: 'live' },
+          custom: { retained: true },
+        },
+      },
     });
     expect(result.status).toBe(CrmIntegrationStatus.ACTIVE);
   });

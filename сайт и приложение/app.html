@@ -9041,8 +9041,10 @@ function ABookFlow() {
     setMyJournalBusy(true); setMyJournalErr('');
     var to = new Date(from.getTime() + 7 * 86400000); // 7 дней < лимита 31; inclusive from / exclusive to
     var qs = 'from=' + encodeURIComponent(from.toISOString()) + '&to=' + encodeURIComponent(to.toISOString());
+    var external = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source && window.__SAAS_TENANT.calendar_source !== 'internal');
+    var journalPath = external ? '/integrations/crm/journal?' + qs : '/internal-calendar/journal?' + qs;
     ensureLocalSession().then(function (s) {
-      return localBookingFetch('/internal-calendar/journal?' + qs, { headers: { Authorization: 'Bearer ' + s.token } });
+      return localBookingFetch(journalPath, { headers: { Authorization: 'Bearer ' + s.token } });
     }).then(function (d) {
       myJournalReqRef.current = false;
       setMyJournalBusy(false);
@@ -9050,7 +9052,7 @@ function ABookFlow() {
     }).catch(function (e) {
       myJournalReqRef.current = false;
       setMyJournalBusy(false);
-      setMyJournal({ _err: true, _code: (e && e.message) ? String(e.message) : '' });
+      setMyJournal({ _err: true, _code: (e && (e.code || e.message)) ? String(e.code || e.message) : '' });
       setMyJournalErr(readErrorText(e, 'Не удалось загрузить журнал'));
     });
   }
@@ -10277,7 +10279,7 @@ function ABookFlow() {
           var on = myTab === tb[0];
           return React.createElement('div', {
             key: tb[0],
-            onClick: function () { setMyTab(tb[0]); if (tb[0] === 'profile' && mySessions === null) loadMySessions(); if ((tb[0] === 'services' || tb[0] === 'schedule') && myCal === null) loadMyCal(); if (tb[0] === 'calendar' && !(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source && window.__SAAS_TENANT.calendar_source !== 'internal')) loadMyJournal(myJournalFrom); if (tb[0] === 'biz' && myBiz === null) loadMyBiz(); if (tb[0] === 'mystat' && myStat === null) loadMyStat(); },
+            onClick: function () { setMyTab(tb[0]); if (tb[0] === 'profile' && mySessions === null) loadMySessions(); if ((tb[0] === 'services' || tb[0] === 'schedule') && myCal === null) loadMyCal(); if (tb[0] === 'calendar') loadMyJournal(myJournalFrom); if (tb[0] === 'biz' && myBiz === null) loadMyBiz(); if (tb[0] === 'mystat' && myStat === null) loadMyStat(); },
             style: { flex: 'none', padding: '8px 14px', borderRadius: 999, border: '1px solid ' + (on ? t.ink : t.line), background: on ? t.ink : 'transparent', color: on ? (t.dark ? '#0b0b0c' : '#f4f0eb') : t.dim, fontFamily: DISPLAY, fontWeight: 600, fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }
           }, tb[1]);
         });
@@ -10352,15 +10354,14 @@ function ABookFlow() {
           React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint, margin: '0 2px 10px' } }, 'Последние 30 дней · только ваши данные'),
           rows.length ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } }, rows) : Loader(t, 'Пока нет данных'));
       })(), (function () {
-        // === Календарь: реальный операционный журнал внутреннего календаря (GET /internal-calendar/journal) ===
+        // === Календарь: единый журнал MAYA или подключённой CRM ===
         if (myTab !== 'calendar') return null;
         var tnt = window.__SAAS_TENANT;
-        var isExternal = !!(tnt && tnt.calendar_source && tnt.calendar_source !== 'internal');
         var j = myJournal;
         var extState = React.createElement('div', {
           style: { margin: '6px 0', padding: '16px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.55, textAlign: 'center' }
         }, 'Календарь ведётся в вашей внешней CRM. Операционный журнал появится здесь, когда backend добавит адаптер этой CRM — записи и статусы сейчас живут в CRM.');
-        if (isExternal || (j && j._err && j._code === 'internal_calendar_disabled')) return extState;
+        if (j && j._err && (j._code === 'internal_calendar_disabled' || j._code === 'crm_journal_not_supported')) return extState;
         var tz = (j && j.timezone) || (tnt && tnt.timezone) || undefined;
         var win = myJournalFrom || journalWindowStart();
         var winEnd = new Date(win.getTime() + 6 * 86400000);

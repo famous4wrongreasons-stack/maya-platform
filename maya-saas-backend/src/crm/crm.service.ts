@@ -35,6 +35,7 @@ import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
+import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
 import {
   normalizeCrmProviderSettings,
   serializePublicCrmSettings,
@@ -601,7 +602,7 @@ export class CrmService {
     });
   }
 
-  async getClientAppointments(tenantId: string, clientId: string) {
+  async getClientAppointments(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
     if (
@@ -610,8 +611,64 @@ export class CrmService {
       return [];
     }
 
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { defaultTimezone: true },
+    });
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.getClientAppointments(clientId);
+    return adapter.getClientAppointments({
+      tenantId: scopedTenantId,
+      phone,
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+    });
+  }
+
+  async getJournal(tenantId: string, query: ListCrmJournalDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM journal range is invalid.',
+        error: { code: 'crm_journal_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM journal range must not exceed 31 days.',
+        error: { code: 'crm_journal_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getJournal) {
+      throw new ConflictException({
+        message: 'CRM journal is not available for this provider.',
+        error: { code: 'crm_journal_not_supported' },
+      });
+    }
+
+    return adapter.getJournal({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      providerId: query.providerId,
+    });
   }
 
   async getClientLoyalty(tenantId: string, phone: string) {
@@ -862,10 +919,56 @@ export class CrmService {
         where: { id: scopedTenantId },
         data: { calendarSource: CalendarSource.EXTERNAL },
       });
+      if ((existing.provider as CrmProvider) !== CrmProvider.MOCK) {
+        const branding = await tx.brandingSettings.findUnique({
+          where: { tenantId: scopedTenantId },
+          select: { themeJson: true },
+        });
+        await tx.brandingSettings.upsert({
+          where: { tenantId: scopedTenantId },
+          create: {
+            tenantId: scopedTenantId,
+            themeJson: this.withRequestedBookingMode(
+              branding?.themeJson,
+              'live',
+            ),
+          },
+          update: {
+            themeJson: this.withRequestedBookingMode(
+              branding?.themeJson,
+              'live',
+            ),
+          },
+        });
+      }
       return activated;
     });
 
     return this.serializeIntegration(integration);
+  }
+
+  private withRequestedBookingMode(
+    themeJson: unknown,
+    mode: 'live' | 'preview',
+  ) {
+    const theme =
+      themeJson && typeof themeJson === 'object' && !Array.isArray(themeJson)
+        ? (themeJson as Record<string, unknown>)
+        : {};
+    const booking =
+      theme.booking &&
+      typeof theme.booking === 'object' &&
+      !Array.isArray(theme.booking)
+        ? (theme.booking as Record<string, unknown>)
+        : {};
+
+    return asJson({
+      ...theme,
+      booking: {
+        ...booking,
+        mode,
+      },
+    });
   }
 
   private async recordStoredConnectionFailure(

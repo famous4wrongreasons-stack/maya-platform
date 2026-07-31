@@ -9,7 +9,11 @@ import { Prisma } from '@prisma/client';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AppointmentStatus, CalendarSource } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
-import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
+import {
+  CreatedAppointment,
+  ServiceItem,
+  StaffMember,
+} from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
 import { AvailableSlotsQueryDto } from '../crm/dto/available-slots-query.dto';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
@@ -333,6 +337,24 @@ export class AppointmentsService {
 
   async listClientAppointments(tenantId: string, clientId: string) {
     this.tenantContext.assertTenantId(tenantId);
+    const calendarSource = await this.crmService.getCalendarSource(tenantId);
+
+    if (calendarSource === CalendarSource.EXTERNAL) {
+      const client = await this.usersService.getTenantUserOrThrow(
+        clientId,
+        tenantId,
+      );
+      const profile = this.usersService.serializeUser(client);
+
+      if (profile.phone) {
+        const remoteAppointments = await this.crmService.getClientAppointments(
+          tenantId,
+          profile.phone,
+        );
+        await this.syncExternalClientAppointments(clientId, remoteAppointments);
+      }
+    }
+
     const appointments =
       await this.appointmentRepository.listForClient(clientId);
     const catalog = await this.loadAppointmentCatalog(tenantId);
@@ -340,6 +362,75 @@ export class AppointmentsService {
     return appointments.map((appointment) =>
       this.serializeAppointment(appointment, catalog),
     );
+  }
+
+  private async syncExternalClientAppointments(
+    clientId: string,
+    remoteAppointments: CreatedAppointment[],
+  ): Promise<void> {
+    for (const remote of remoteAppointments) {
+      const startAt = new Date(remote.start);
+      const endAt = remote.end
+        ? new Date(remote.end)
+        : new Date(startAt.getTime() + 60 * 60 * 1000);
+
+      if (
+        Number.isNaN(startAt.getTime()) ||
+        Number.isNaN(endAt.getTime()) ||
+        endAt.getTime() <= startAt.getTime() ||
+        !remote.external_id ||
+        !remote.staff_id
+      ) {
+        continue;
+      }
+
+      const existing =
+        await this.appointmentRepository.findByCrmExternalIdForClient(
+          remote.external_id,
+          clientId,
+        );
+      const data = {
+        source: CalendarSource.EXTERNAL,
+        staffExternalId: remote.staff_id,
+        serviceIds: asJson(remote.service_ids),
+        startAt,
+        endAt,
+        blockedStartAt: startAt,
+        blockedEndAt: endAt,
+        status: remote.status || AppointmentStatus.CONFIRMED,
+        totalPriceKopecks:
+          remote.total_price === undefined || remote.total_price === null
+            ? null
+            : Math.round(remote.total_price * 100),
+        currency: remote.currency || 'RUB',
+        providerPayload: asJson(
+          remote.raw ?? {
+            provider: CalendarSource.EXTERNAL,
+            imported: true,
+          },
+        ),
+      };
+
+      if (existing) {
+        await this.appointmentRepository.updateForClient(
+          existing.id,
+          clientId,
+          {
+            ...data,
+            notes: existing.notes,
+          },
+        );
+        continue;
+      }
+
+      await this.appointmentRepository.createForClient({
+        clientId,
+        branchId: null,
+        crmExternalId: remote.external_id,
+        notes: null,
+        ...data,
+      });
+    }
   }
 
   async cancelForClient(

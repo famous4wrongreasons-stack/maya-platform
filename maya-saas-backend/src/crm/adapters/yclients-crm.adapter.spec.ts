@@ -493,4 +493,174 @@ describe('YclientsCRMAdapter', () => {
           : loyaltyRequest?.url || '';
     expect(loyaltyUrl).toContain('/loyalty/client_cards/88');
   });
+
+  it('loads a client appointment history by exact phone and client id', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+
+      if (url.includes('/clients/search')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 88, name: 'Exact', phone: '+7 918 417-20-35' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 901,
+                datetime: '2026-07-31T10:00:00',
+                seance_length: 4500,
+                attendance: 0,
+                staff: { id: 15, name: 'Stanislav' },
+                client: { id: 88, name: 'Exact' },
+                services: [
+                  { id: 7, title: 'Haircut', cost: 2000 },
+                  { id: 9, title: 'Patches', cost: 0 },
+                ],
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getClientAppointments({
+        tenantId: 'tenant-1',
+        phone: '8 (918) 417-20-35',
+        timezone: 'Europe/Moscow',
+        from: '2026-01-01',
+        to: '2026-12-31',
+      }),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        external_id: '901',
+        start: '2026-07-31T07:00:00.000Z',
+        end: '2026-07-31T08:15:00.000Z',
+        staff_id: '15',
+        service_ids: ['7', '9'],
+        total_price: 2000,
+      }),
+    ]);
+    expect(
+      requestedUrls.some(
+        (url) =>
+          url.includes('/records/123') &&
+          url.includes('client_id=88') &&
+          url.includes('start_date=2026-01-01'),
+      ),
+    ).toBe(true);
+  });
+
+  it('maps the external CRM journal without exposing client phones', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 902,
+                  datetime: '2026-07-31T10:00:00',
+                  seance_length: 3600,
+                  attendance: 0,
+                  staff: { id: 15, name: 'Stanislav' },
+                  client: {
+                    id: 88,
+                    name: 'Client',
+                    phone: '+7 918 000-00-00',
+                  },
+                  services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 15, name: 'Stanislav', specialization: 'Barber' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/book_services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                services: [
+                  {
+                    id: 7,
+                    title: 'Haircut',
+                    price_min: 2000,
+                    seance_length: 3600,
+                  },
+                ],
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const journal = await adapter.getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-07-30T21:00:00.000Z',
+      to: '2026-08-06T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(journal).toMatchObject({
+      calendar_source: 'external',
+      count: 1,
+      appointments: [
+        {
+          id: 'crm-902',
+          client: { id: '88', name: 'Client' },
+          provider: {
+            id: '15',
+            name: 'Stanislav',
+            title: 'Barber',
+          },
+          service_ids: ['7'],
+          start_at: '2026-07-31T07:00:00.000Z',
+          end_at: '2026-07-31T08:00:00.000Z',
+          total_price: 2000,
+        },
+      ],
+    });
+    expect(JSON.stringify(journal)).not.toContain('+7 918 000-00-00');
+  });
 });
