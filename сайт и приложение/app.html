@@ -627,6 +627,7 @@ window.__meReturnToLegacyWorkspace = function () {
       if (!cfg) return;
       var b = cfg.brand || {};
       window.__SAAS_BRAND = b;
+      window.__ME_LOGO_UPLOADED = false;
       var _tr = cfg.trial || {};
       window.__SAAS_TENANT = {
         slug: cfg.slug || slug,
@@ -695,6 +696,7 @@ window.__meReturnToLegacyWorkspace = function () {
         if (row[0] === 'phone' && b.phone) row[1] = b.phone;
         if (row[0] === 'pin' && b.address) row[1] = b.address;
       });
+      try { if (window.__meSyncAppIcon) window.__meSyncAppIcon(hasSession()); } catch (e) {}
     } catch (e) {}
   }
   // кэш конфига ns-scoped + slug-проверка: бренд салона A не применяется к B даже временно
@@ -12844,6 +12846,8 @@ function AChat() {
 	  const [onbLogoName, setOnbLogoName] = React.useState('');
 	  const onbFileRef = React.useRef(null);
 	  const [onbCrm, setOnbCrm] = React.useState({ provider: 'yclients', token: '', company: '' }); // токен ТОЛЬКО в памяти
+	  const [onbCrmCompanies, setOnbCrmCompanies] = React.useState(null);
+	  const [onbCrmSearch, setOnbCrmSearch] = React.useState('');
 	  const [onbCrmBusy, setOnbCrmBusy] = React.useState(false);
 	  const [onbCrmMsg, setOnbCrmMsg] = React.useState(null);
 	  const onbCrmReq = React.useRef(false);
@@ -12857,7 +12861,7 @@ function AChat() {
 	      setOnbProviders(list);
 	      var fc = onbFirstConnectable(list);
 	      // если текущий выбор не подключаем (в т.ч. восстановлен из stale) — переводим на реально доступный
-	      if (fc) setOnbCrm(function (x) { return onbProvOk(list, x.provider) ? x : Object.assign({}, x, { provider: fc.provider, token: '' }); });
+	      if (fc) setOnbCrm(function (x) { return onbProvOk(list, x.provider) ? x : Object.assign({}, x, { provider: fc.provider, token: '', company: '' }); });
 	      return list;
 	    }).catch(function () { setOnbProviders([]); return []; });
 	  }
@@ -12880,6 +12884,11 @@ function AChat() {
 	      trial_activation_draft_exists: 'Черновик настройки уже существует, но доступ к нему потерян.',
 	      trial_activation_draft_mismatch: 'Черновик не совпал с активацией. Начнём настройку заново.',
 	      trial_activation_token_required: 'Нужна активная пробная версия. Вернитесь и активируйте её.',
+	      crm_credentials_rejected: 'CRM отклонила токен. Проверьте его и повторите.',
+	      crm_company_not_found: 'Выбранный филиал недоступен для этого токена.',
+	      crm_company_profile_missing: 'Не удалось загрузить профиль филиала. Выберите его ещё раз.',
+	      crm_provider_unreachable: 'CRM временно недоступна. Попробуйте ещё раз.',
+	      crm_platform_configuration_error: 'Подключение CRM временно недоступно на стороне MAYA.',
 	      validation: 'Проверьте заполненные данные.'
 	    };
 	    return m[code] || fallback || 'Не получилось — попробуйте ещё раз.';
@@ -12942,6 +12951,7 @@ function AChat() {
 	    if (data && data.missing_fields) setOnbMissing(data.missing_fields);
 	    setOnbNeedsClar(!!(data && data.needs_clarification));
 	    setOnbQuick((data && data.quick_replies) || []);
+	    if (data && Array.isArray(data.missing_fields) && data.missing_fields.indexOf('crm_import') >= 0) setOnbStage('crm');
 	  }
 	  async function onbSend(textArg, templateIdArg) {
 	    var msg = String(textArg != null ? textArg : input).trim();
@@ -12990,8 +13000,8 @@ function AChat() {
 	      if (tx) onbSend(tx); else setOnbErr('Не расслышала — попробуйте ещё раз или введите текстом.');
 	    } catch (e) { setOnbBusy(false); setOnbErr('Голос сейчас недоступен — введите текстом.'); }
 	  }
-	  function onbToConfirm() {
-	    var b = onbBlueprint || {};
+	  function onbToConfirm(sourceBlueprint) {
+	    var b = sourceBlueprint || onbBlueprint || {};
 	    setOnbConfirm({
 	      businessName: b.businessName || '',
 	      businessNameDeferred: !!b.businessNameDeferred,
@@ -13005,7 +13015,16 @@ function AChat() {
 	      scheduleAssumed: !!b.scheduleAssumed,
 	      workMode: b.workMode || (Number(b.providerCount || 1) > 1 ? 'business' : 'solo'),
 	      categoryId: b.categoryId || null,
-	      templateId: b.templateId
+	      templateId: b.templateId,
+	      crmImported: !!b.crmImported,
+	      crmProvider: b.crmProvider || null,
+	      crmCompanyId: b.crmCompanyId || null,
+	      crmLogoUrl: b.crmLogoUrl || null,
+	      crmAddress: b.crmAddress || null,
+	      crmTimezone: b.crmTimezone || null,
+	      crmScheduleLabel: b.crmScheduleLabel || null,
+	      crmServiceCount: Number(b.crmServiceCount != null ? b.crmServiceCount : (b.services || []).length),
+	      crmStaffCount: Number(b.crmStaffCount != null ? b.crmStaffCount : (b.providerCount || 0))
 	    });
 	    setOnbErr(''); setOnbFieldErrors({}); setOnbStage('confirm');
 	  }
@@ -13048,12 +13067,13 @@ function AChat() {
 
 	    var providerCountText = String(c.providerCount == null ? '' : c.providerCount).trim();
 	    var providerCount = Number(providerCountText);
-	    if (!/^\d+$/.test(providerCountText) || !Number.isInteger(providerCount) || providerCount < 1 || providerCount > 100) errors.providerCount = onbFriendlyValidation('providerCount');
+	    if (!c.crmImported && (!/^\d+$/.test(providerCountText) || !Number.isInteger(providerCount) || providerCount < 1 || providerCount > 100)) errors.providerCount = onbFriendlyValidation('providerCount');
+	    if (c.crmImported && (!Number.isFinite(providerCount) || providerCount < 1)) providerCount = Math.max(1, Number(c.crmStaffCount || 1));
 
 	    var services = [];
 	    var serviceRows = Array.isArray(c.services) ? c.services : [];
-	    if (!serviceRows.length && !c.servicesDeferred) errors.services = onbFriendlyValidation('services'); // B.2: услуги можно отложить
-	    if (serviceRows.length > 30) errors.services = 'Можно добавить не больше 30 услуг.';
+	    if (!c.crmImported && !serviceRows.length && !c.servicesDeferred) errors.services = onbFriendlyValidation('services'); // B.2: услуги можно отложить
+	    if (!c.crmImported && serviceRows.length > 30) errors.services = 'Можно добавить не больше 30 услуг.';
 	    serviceRows.forEach(function (service, index) {
 	      var nameField = 'services.' + index + '.name';
 	      var priceField = 'services.' + index + '.price';
@@ -13063,9 +13083,9 @@ function AChat() {
 	      var durationText = String(service.duration == null ? '' : service.duration).replace(/\s/g, '');
 	      var price = Number(priceText);
 	      var duration = Number(durationText);
-	      if (name.length < 2 || name.length > 120) errors[nameField] = onbFriendlyValidation(nameField);
-	      if (!/^\d+$/.test(priceText) || !Number.isInteger(price) || price < 0 || price > 10000000) errors[priceField] = onbFriendlyValidation(priceField);
-	      if (!/^\d+$/.test(durationText) || !Number.isInteger(duration) || duration < 5 || duration > 1440) errors[durationField] = onbFriendlyValidation(durationField);
+	      if (!c.crmImported && (name.length < 2 || name.length > 120)) errors[nameField] = onbFriendlyValidation(nameField);
+	      if (!c.crmImported && (!/^\d+$/.test(priceText) || !Number.isInteger(price) || price < 0 || price > 10000000)) errors[priceField] = onbFriendlyValidation(priceField);
+	      if (!c.crmImported && (!/^\d+$/.test(durationText) || !Number.isInteger(duration) || duration < 5 || duration > 1440)) errors[durationField] = onbFriendlyValidation(durationField);
 	      services.push({ name: name, price: price, durationMinutes: duration });
 	    });
 
@@ -13087,7 +13107,7 @@ function AChat() {
 	      var weekday = Number(weekdayKey); if (weekday === 7) weekday = 0;
 	      weeklyRules.push({ weekday: weekday, startTime: start, endTime: end });
 	    });
-	    if (!weeklyRules.length) errors.weekly = 'Включите хотя бы один рабочий день.';
+	    if (!c.crmImported && !weeklyRules.length) errors.weekly = 'Включите хотя бы один рабочий день.';
 
 	    var ownerEmail = String(ct.email || '').trim();
 	    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail)) errors.ownerEmail = onbFriendlyValidation('ownerEmail');
@@ -13143,6 +13163,11 @@ function AChat() {
 	        weeklyRules: normalized.weeklyRules
 	      };
 	      if (!normalized.businessName) delete body.businessName; // B.1: пустое имя (отложено) не шлём
+	      if (c.crmImported) {
+	        delete body.providerCount;
+	        delete body.services;
+	        delete body.weeklyRules;
+	      }
 	      if (c.templateId) body.templateId = c.templateId;
 	      var r = await fetch(api + '/onboarding/ai/drafts/' + encodeURIComponent(onbDraft.current.id) + '/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 	      var data = await r.json();
@@ -13156,15 +13181,19 @@ function AChat() {
 	      var trial = data.trial || (data.trial_activation && data.trial_activation.trial) || null;
 	      var nextStep = data.next_step || (c.calendarSource === 'external' ? 'connect_crm' : 'upload_logo_or_open_app');
 	      onbClearAllSS();
-	      setOnbResult({ api: api, tenantSlug: saved.tenantSlug, tenantId: saved.tenantId, token: saved.token, trial: trial, nextStep: nextStep });
+	      var created = { api: api, tenantSlug: saved.tenantSlug, tenantId: saved.tenantId, token: saved.token, trial: trial, nextStep: nextStep };
+	      setOnbResult(created);
 	      var days = trial && (trial.days != null ? trial.days : trial.days_remaining);
 	      var ends = trial && (trial.ends_at || trial.endsAt);
 	      var when = ''; try { if (ends) when = new Date(ends).toLocaleDateString('ru-RU'); } catch (e) {}
 	      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: 'Готово — бизнес создан. Пробная версия MAYA OS активна' + (days != null ? (' на ' + days + ' дней') : '') + (when ? (', до ' + when) : '') + '.' }]); });
 	      setOnbConfirm(null);
-	      // external → сразу «Интеграции» (новый CRM Center на /api/integrations/crm/*); internal → логотип
-      if (nextStep === 'connect_crm' || c.calendarSource === 'external') { onbOpenAppCrm(api, saved.tenantSlug); return; }
-      setOnbStage('logo');
+	      if (c.crmImported) {
+	        setOnbStage('crm');
+	        if (await onbActivateCreatedTenant(created)) { onbOpenApp(api, saved.tenantSlug, false); return; }
+	        return;
+	      }
+	      setOnbStage('crm');
 	    } catch (e) {
 	      if (e.fieldErrors && Object.keys(e.fieldErrors).length) setOnbFieldErrors(e.fieldErrors);
 	      if (e.code === 'invalid_trial_activation_token' || e.code === 'trial_activation_expired' || e.code === 'trial_activation_token_required' || e.code === 'trial_activation_not_pending' || e.code === 'trial_activation_draft_mismatch') onbActivationDead(onbErrText(e.code));
@@ -13187,38 +13216,81 @@ function AChat() {
 	  function onbSkipLogo() { var res = onbResult; if (res) onbOpenApp(res.api, res.tenantSlug, true); }
 	  // 400 crm_provider_not_available: токен из памяти чистим, каталог обновляем, возвращаемся к выбору
 	  function onbCrmProviderUnavailable(msg) {
-	    setOnbCrm(function (p) { return Object.assign({}, p, { token: '' }); });
+	    setOnbCrm(function (p) { return Object.assign({}, p, { company: '' }); });
+	    setOnbCrmCompanies(null);
 	    onbLoadProviders();
 	    setOnbCrmMsg({ kind: 'err', text: msg || 'Этот провайдер пока недоступен. Выберите YClients или Altegio.' });
 	  }
-	  async function onbCrmSaveTest() {
-	    var res = onbResult; if (!res || !res.tenantId || onbCrmReq.current) return;
-	    // fail-closed: сохраняем только реально подключаемый провайдер (каталог /crm/providers), даже из stale-состояния
-	    if (!onbProvOk(onbProviders, onbCrm.provider)) { onbCrmProviderUnavailable('Этот провайдер пока недоступен. Выберите доступную CRM: YClients или Altegio.'); return; }
-	    var tok = String(onbCrm.token || '').trim(); var comp = String(onbCrm.company || '').trim();
-	    if (!tok) { setOnbCrmMsg({ kind: 'err', text: 'Вставьте API-токен вашей CRM.' }); return; }
-	    if (!comp) { setOnbCrmMsg({ kind: 'err', text: 'Укажите ID компании в CRM.' }); return; }
-	    onbCrmReq.current = true; setOnbCrmBusy(true); setOnbCrmMsg({ kind: 'info', text: 'Сохраняем и проверяем связь…' });
+	  function onbCrmErrorPayload(data, fallback) {
+	    var error = data && data.error || {};
+	    return { code: error.code, text: onbErrText(error.code, error.message || (data && data.message) || fallback) };
+	  }
+	  async function onbCrmDiscover() {
+	    if (!onbDraft.current.id || onbCrmReq.current) return;
+	    if (!onbProvOk(onbProviders, onbCrm.provider)) { onbCrmProviderUnavailable(); return; }
+	    var tok = String(onbCrm.token || '').trim();
+	    if (!tok) { setOnbCrmMsg({ kind: 'err', text: 'Вставьте user token вашей CRM.' }); return; }
+	    onbCrmReq.current = true; setOnbCrmBusy(true); setOnbCrmMsg({ kind: 'info', text: 'Ищу филиалы, которыми вы управляете…' });
 	    try {
-	      var sj = { companyId: isNaN(Number(comp)) ? comp : Number(comp) };
-	      var b = { provider: onbCrm.provider, apiToken: tok, settingsJson: sj };
-	      var doReq = function (method) { return fetch(res.api + '/admin/tenants/' + encodeURIComponent(res.tenantId) + '/crm', { method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + res.token }, body: JSON.stringify(b) }); };
-	      var rr = await doReq('PATCH'); if (rr.status === 404) rr = await doReq('POST');
-	      if (!rr.ok) {
-	        var e = null; try { e = await rr.json(); } catch (x) {}
-	        var code = e && e.error && e.error.code;
-	        if (rr.status === 400 && code === 'crm_provider_not_available') { onbCrmReq.current = false; setOnbCrmBusy(false); onbCrmProviderUnavailable(); return; }
-	        throw new Error((e && e.error && e.error.message) || (e && e.message) || 'Не удалось сохранить подключение.');
-	      }
-	      var tr = await fetch(res.api + '/admin/tenants/' + encodeURIComponent(res.tenantId) + '/test-crm', { method: 'POST', headers: { Authorization: 'Bearer ' + res.token } });
-	      var td = null; try { td = await tr.json(); } catch (x) {}
-	      setOnbCrm(function (p) { return Object.assign({}, p, { token: '' }); });
-	      if (tr.ok && !(td && td.ok === false)) { setOnbCrmMsg({ kind: 'ok', text: 'CRM подключена. Открываем приложение…' }); setTimeout(function () { onbOpenApp(res.api, res.tenantSlug, false); }, 900); }
-	      else setOnbCrmMsg({ kind: 'err', text: (td && (td.message || (td.error && td.error.message))) || 'Сохранили, но связь не подтвердилась. Проверьте токен и ID компании.' });
+	      var rr = await fetch(onbApiBase() + '/onboarding/ai/drafts/' + encodeURIComponent(onbDraft.current.id) + '/crm/discover', {
+	        method: 'POST', headers: { 'Content-Type': 'application/json' },
+	        body: JSON.stringify({ draftToken: onbDraft.current.token, provider: onbCrm.provider, apiToken: tok })
+	      });
+	      var data = await rr.json();
+	      if (!rr.ok) { var err = onbCrmErrorPayload(data, 'Не удалось получить список филиалов.'); throw Object.assign(new Error(err.text), { code: err.code }); }
+	      var companies = Array.isArray(data && data.companies) ? data.companies : [];
+	      setOnbCrmCompanies(companies);
+	      setOnbCrmSearch('');
+	      setOnbCrm(function (x) { return Object.assign({}, x, { company: companies.length === 1 ? String(companies[0].id) : '' }); });
+	      setOnbCrmMsg({ kind: companies.length ? 'ok' : 'err', text: companies.length ? (companies.length === 1 ? 'Филиал найден. Проверьте его и продолжите.' : 'Выберите нужный филиал из списка.') : 'Для этого токена не найдено доступных филиалов.' });
 	    } catch (e) { setOnbCrmMsg({ kind: 'err', text: e && e.message || 'Не получилось — попробуйте ещё раз.' }); }
 	    finally { onbCrmReq.current = false; setOnbCrmBusy(false); }
 	  }
-	  function onbCrmLater() { var res = onbResult; if (res) onbOpenApp(res.api, res.tenantSlug, false); }
+	  async function onbCrmImport() {
+	    if (!onbDraft.current.id || onbCrmReq.current) return;
+	    var tok = String(onbCrm.token || '').trim(); var comp = String(onbCrm.company || '').trim();
+	    if (!comp) { setOnbCrmMsg({ kind: 'err', text: 'Выберите филиал.' }); return; }
+	    onbCrmReq.current = true; setOnbCrmBusy(true); setOnbCrmMsg({ kind: 'info', text: 'Проверяю филиал и загружаю данные бизнеса…' });
+	    try {
+	      var rr = await fetch(onbApiBase() + '/onboarding/ai/drafts/' + encodeURIComponent(onbDraft.current.id) + '/crm/import', {
+	        method: 'POST', headers: { 'Content-Type': 'application/json' },
+	        body: JSON.stringify({ draftToken: onbDraft.current.token, provider: onbCrm.provider, apiToken: tok, companyId: comp })
+	      });
+	      var data = await rr.json();
+	      if (!rr.ok) { var err = onbCrmErrorPayload(data, 'Не удалось загрузить данные филиала.'); throw Object.assign(new Error(err.text), { code: err.code }); }
+	      onbApply(data);
+	      onbToConfirm(data.blueprint);
+	    } catch (e) { setOnbCrmMsg({ kind: 'err', text: e && e.message || 'Не получилось — попробуйте ещё раз.' }); }
+	    finally { onbCrmReq.current = false; setOnbCrmBusy(false); }
+	  }
+	  async function onbActivateCreatedTenant(res) {
+	    if (!res || !res.tenantId) return false;
+	    var tok = String(onbCrm.token || '').trim(); var comp = String(onbCrm.company || '').trim();
+	    if (!tok || !comp) { setOnbCrmMsg({ kind: 'err', text: 'Токен или выбранный филиал потеряны. Введите токен ещё раз.' }); return false; }
+	    setOnbCrmMsg({ kind: 'info', text: 'Шифрую токен и включаю синхронизацию CRM…' });
+	    var body = { provider: onbCrm.provider, apiToken: tok, settingsJson: { companyId: isNaN(Number(comp)) ? comp : Number(comp) } };
+	    var connect = await fetch(res.api + '/integrations/crm/connect', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + res.token }, body: JSON.stringify(body) });
+	    var cd = await connect.json();
+	    if (!connect.ok) { var ce = onbCrmErrorPayload(cd, 'Не удалось сохранить подключение CRM.'); setOnbCrmMsg({ kind: 'err', text: ce.text }); return false; }
+	    var activate = await fetch(res.api + '/integrations/crm/activate', { method: 'POST', headers: { Authorization: 'Bearer ' + res.token } });
+	    var ad = await activate.json();
+	    if (!activate.ok) { var ae = onbCrmErrorPayload(ad, 'CRM проверена, но не активирована. Повторите попытку.'); setOnbCrmMsg({ kind: 'err', text: ae.text }); return false; }
+	    setOnbCrm(function (p) { return Object.assign({}, p, { token: '' }); });
+	    setOnbCrmMsg({ kind: 'ok', text: 'CRM подключена. Открываю ваш бизнес…' });
+	    return true;
+	  }
+	  async function onbCrmSaveTest() {
+	    if (onbCrmReq.current) return;
+	    if (onbResult) {
+	      onbCrmReq.current = true; setOnbCrmBusy(true);
+	      try { if (await onbActivateCreatedTenant(onbResult)) onbOpenApp(onbResult.api, onbResult.tenantSlug, false); }
+	      catch (e) { setOnbCrmMsg({ kind: 'err', text: e && e.message || 'Не получилось — попробуйте ещё раз.' }); }
+	      finally { onbCrmReq.current = false; setOnbCrmBusy(false); }
+	      return;
+	    }
+	    if (onbCrmCompanies === null) return onbCrmDiscover();
+	    return onbCrmImport();
+	  }
 	  // чипы под последним ответом MAYA: quick_replies бэка + переход к подтверждению + восстановление
 	  function onbChips() {
 	    if (!onbOnRef.current) return null;
@@ -13245,16 +13317,18 @@ function AChat() {
 	      var qLabel = isStr ? q : String(q && (q.label || q.message || q.value) || '').trim();
 	      var qAction = isStr ? null : (q && q.action);
 	      var qTpl = isStr ? null : (q && q.templateId);
+	      var qDisabled = qAction === 'disabled';
 	      if (!qLabel) return;
-	      if (qAction !== 'focus' && qAction !== 'confirm' && qAction !== 'edit' && !qText) return;
+	      if (qAction !== 'focus' && qAction !== 'confirm' && qAction !== 'edit' && qAction !== 'connect_crm' && !qDisabled && !qText) return;
 	      kids.push(e('button', {
-	        key: 'q-' + i, type: 'button', disabled: onbBusy, 'data-onboarding-action': qAction || 'quick-reply',
-	        onClick: onbBusy ? undefined : function () {
+	        key: 'q-' + i, type: 'button', disabled: onbBusy || qDisabled, 'data-onboarding-action': qAction || 'quick-reply',
+	        onClick: onbBusy || qDisabled ? undefined : function () {
 	          if (qAction === 'confirm' || qAction === 'edit') { onbToConfirm(); return; }
 	          if (qAction === 'focus') { onbFocusComposer(); return; }
+	          if (qAction === 'connect_crm' && !qText) { setOnbStage('crm'); return; }
 	          onbSend(qText, qTpl);
 	        },
-	        style: Object.assign({}, qAction === 'confirm' ? chipStrong : chip, onbBusy ? { opacity: 0.5, cursor: 'default' } : {})
+	        style: Object.assign({}, qAction === 'confirm' ? chipStrong : chip, onbBusy || qDisabled ? { opacity: 0.42, cursor: 'default' } : {})
 	      }, qLabel));
 	    });
 	    // A.5: не дублируем свой «К подтверждению», если backend уже прислал confirm/edit
@@ -13283,6 +13357,20 @@ function AChat() {
 	      var ct = onbContact; var setCt = function (p) { setOnbContact(Object.assign({}, ct, p)); };
 	      var WDMAP = { 0: 'Вс', 1: 'Пн', 2: 'Вт', 3: 'Ср', 4: 'Чт', 5: 'Пт', 6: 'Сб', 7: 'Вс' };
 	      var rows = [];
+	      if (c.crmImported) {
+	        rows.push(e('div', { key: 'crm-summary', style: card },
+	          e('div', { style: lbl }, 'Данные из CRM · подтверждены'),
+	          e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+	            c.crmLogoUrl ? e('img', { src: c.crmLogoUrl, alt: '', style: { width: 52, height: 52, borderRadius: 12, objectFit: 'contain', border: '1px solid ' + onbTone.line, background: onbTone.surface } }) : null,
+	            e('div', { style: { minWidth: 0 } },
+	              e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 16, color: onbTone.ink, overflowWrap: 'anywhere' } }, c.businessName),
+	              e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: onbTone.dim, marginTop: 3 } }, (c.crmProvider === 'altegio' ? 'Altegio' : 'YClients') + ' · филиал ' + c.crmCompanyId))),
+	          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 } },
+	            e('div', { style: { border: '1px solid ' + onbTone.line, borderRadius: 10, padding: 10 } }, e('div', { style: lbl }, 'Специалисты'), e('div', { style: { fontFamily: BODY, fontSize: 16, fontWeight: 700, color: onbTone.ink } }, String(c.crmStaffCount || c.providerCount || 0))),
+	            e('div', { style: { border: '1px solid ' + onbTone.line, borderRadius: 10, padding: 10 } }, e('div', { style: lbl }, 'Услуги'), e('div', { style: { fontFamily: BODY, fontSize: 16, fontWeight: 700, color: onbTone.ink } }, String(c.crmServiceCount || (c.services || []).length || 0)))),
+	          c.crmAddress ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, marginTop: 10, lineHeight: 1.45 } }, c.crmAddress) : null,
+	          e('div', { style: { fontFamily: BODY, fontSize: 11, color: onbTone.faint, marginTop: 8, lineHeight: 1.45 } }, 'Расписание и актуальные окна остаются под управлением CRM' + (c.crmScheduleLabel ? (' · ' + c.crmScheduleLabel) : '') + '.')));
+	      } else {
 	      rows.push(e('div', { key: 'bn', style: card }, e('div', { style: lbl }, 'Название бизнеса' + (c.businessNameDeferred ? ' · по желанию' : '')), e('input', { style: onbInput('businessName'), placeholder: c.businessNameDeferred ? 'Без названия — можно добавить позже' : 'Название', value: c.businessName, onChange: function (ev) { onbClearFieldError('businessName'); setC({ businessName: ev.target.value }); } }), (c.businessNameDeferred && !String(c.businessName || '').trim() ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 4 } }, 'Без названия — можно добавить позже') : null), onbHint('businessName')));
 	      var onbCatLbl = onbCategoryLabel(c); // B.3: реальная сфера/профессия из categories
 	      if (onbCatLbl || (onbTemplates && onbTemplates.length)) rows.push(e('div', { key: 'ty', style: card }, e('div', { style: lbl }, 'Сфера / профессия'), (onbCatLbl ? e('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 13.5, color: onbTone.ink, marginBottom: (onbTemplates && onbTemplates.length) ? 8 : 0 } }, onbCatLbl) : null), ((onbTemplates && onbTemplates.length) ? e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7 } }, onbTemplates.map(function (tp) { return e('div', { key: tp.id, onClick: function () { setC({ templateId: tp.id }); }, style: { fontFamily: BODY, fontSize: 12, padding: '6px 11px', borderRadius: 999, border: '1px solid ' + (c.templateId === tp.id ? onbTone.ink : onbTone.line), color: c.templateId === tp.id ? onbTone.ink : onbTone.dim, cursor: 'pointer' } }, tp.name); })) : null)));
@@ -13325,6 +13413,7 @@ function AChat() {
 	              : e('div', { onClick: toggle, style: { flex: 1, padding: '10px 12px', borderRadius: 10, border: '1px dashed ' + onbTone.line, fontFamily: BODY, fontSize: 12, color: onbTone.faint, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' } }, 'Выходной')),
 	            r.on ? onbHint([startField, endField]) : null);
 	        })), onbHint('weekly'));
+	      }
 	      rows.push(e('div', { key: 'ct', style: card }, e('div', { style: lbl }, 'Контакты владельца'),
 	        e('input', { style: onbInput('ownerEmail', { marginBottom: 7 }), placeholder: 'E-mail', type: 'email', inputMode: 'email', value: ct.email, onChange: function (ev) { onbClearFieldError('ownerEmail'); setCt({ email: ev.target.value }); } }),
 	        onbHint('ownerEmail'),
@@ -13340,7 +13429,7 @@ function AChat() {
 	      if (onbErr) rows.push(e('div', { key: 'e', style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, margin: '6px 2px 0', lineHeight: 1.5 } }, onbErr));
 	      rows.push(e('div', { key: 'go', onClick: onbBusy ? undefined : onbConfirmGo, style: { marginTop: 12, textAlign: 'center', padding: '14px', borderRadius: 14, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Создаём…' : 'Создать бизнес'));
 	      rows.push(e('div', { key: 'bk', onClick: function () { setOnbStage('chat'); setOnbErr(''); setOnbFieldErrors({}); }, style: { marginTop: 10, textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: onbTone.faint, cursor: 'pointer' } }, '← Вернуться к диалогу'));
-	      return e('div', { style: { marginTop: 6 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink, margin: '4px 2px 2px' } }, 'Проверьте и подтвердите'), e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, margin: '0 2px 8px', lineHeight: 1.5 } }, 'Всё можно поправить прямо здесь.'), rows);
+	      return e('div', { style: { marginTop: 6 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink, margin: '4px 2px 2px' } }, 'Проверьте и подтвердите'), e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, margin: '0 2px 8px', lineHeight: 1.5 } }, c.crmImported ? 'Данные бизнеса загружены из CRM. Здесь остаются только контакты владельца.' : 'Всё можно поправить прямо здесь.'), rows);
 	    }
 	    if (onbStage === 'logo') {
 	      return e('div', { style: card },
@@ -13357,31 +13446,39 @@ function AChat() {
 	      var selCap = (cat || []).filter(function (p) { return p.provider === onbCrm.provider; })[0];
 	      var selConnectable = onbProvOk(cat, onbCrm.provider);
 	      var visible = (cat || []).filter(function (p) { return p.provider !== 'mock'; }); // mock — превью, не внешняя CRM
+	      var crmFilter = String(onbCrmSearch || '').trim().toLowerCase();
+	      var filteredCompanies = (onbCrmCompanies || []).filter(function (company) { return !crmFilter || (String(company.title || '') + ' ' + String(company.address || '')).toLowerCase().indexOf(crmFilter) >= 0; });
 	      var chips = e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 } },
 	        cat === null ? e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.faint } }, 'Загружаем список CRM…')
 	          : visible.map(function (p) {
 	            var real = p.connectable && p.provider !== 'mock'; // planned → недоступен
 	            var sel = onbCrm.provider === p.provider && real;
-	            return e('div', { key: p.provider, onClick: real ? function () { setOnbCrm(function (x) { return Object.assign({}, x, { provider: p.provider }); }); setOnbCrmMsg(null); } : undefined,
+	            return e('div', { key: p.provider, onClick: real ? function () { setOnbCrm(function (x) { return Object.assign({}, x, { provider: p.provider, company: '' }); }); setOnbCrmCompanies(null); setOnbCrmSearch(''); setOnbCrmMsg(null); } : undefined,
 	              style: { fontFamily: BODY, fontSize: 12, padding: '7px 12px', borderRadius: 999, border: '1px solid ' + (sel ? onbTone.ink : onbTone.line), color: real ? (sel ? onbTone.ink : onbTone.dim) : onbTone.faint, cursor: real ? 'pointer' : 'default', opacity: real ? 1 : 0.5 } },
 	              p.name + (real ? '' : ' · Скоро'));
 	          }));
 	      var form;
 	      if (cat === null) form = null;
 	      else if (selConnectable) form = e(React.Fragment, null,
-	        e('input', { style: Object.assign({}, inp, { marginBottom: 8 }), type: 'password', autoComplete: 'off', placeholder: 'API-токен CRM', value: onbCrm.token, onChange: function (ev) { setOnbCrm(function (x) { return Object.assign({}, x, { token: ev.target.value }); }); } }),
-	        e('input', { style: inp, inputMode: 'numeric', placeholder: 'ID компании в CRM', value: onbCrm.company, onChange: function (ev) { setOnbCrm(function (x) { return Object.assign({}, x, { company: ev.target.value }); }); } }),
+	        e('input', { style: Object.assign({}, inp, { marginBottom: 8 }), type: 'password', autoComplete: 'off', placeholder: 'User token CRM', value: onbCrm.token, onChange: function (ev) { var value = ev.target.value; setOnbCrm(function (x) { return Object.assign({}, x, { token: value, company: '' }); }); setOnbCrmCompanies(null); setOnbCrmSearch(''); setOnbCrmMsg(null); } }),
+	        onbCrmCompanies !== null && onbCrmCompanies.length > 5 ? e('input', { style: Object.assign({}, inp, { marginBottom: 8 }), placeholder: 'Найти филиал', value: onbCrmSearch, onChange: function (ev) { setOnbCrmSearch(ev.target.value); } }) : null,
+	        onbCrmCompanies !== null ? e('div', { style: { display: 'grid', gap: 7, maxHeight: 250, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } },
+	          filteredCompanies.map(function (company) {
+	            var selected = String(onbCrm.company) === String(company.id);
+	            return e('button', { key: company.id, type: 'button', onClick: function () { setOnbCrm(function (x) { return Object.assign({}, x, { company: String(company.id) }); }); setOnbCrmMsg(null); }, style: { width: '100%', textAlign: 'left', borderRadius: 12, border: '1px solid ' + (selected ? onbTone.ink : onbTone.line), background: selected ? onbTone.soft : 'transparent', color: onbTone.ink, padding: '10px 12px', fontFamily: BODY, cursor: 'pointer' } },
+	              e('div', { style: { fontSize: 13, fontWeight: 650 } }, company.title || ('Филиал ' + company.id)),
+	              company.address ? e('div', { style: { fontSize: 10.5, color: onbTone.faint, marginTop: 3 } }, company.address) : null);
+	          })) : null,
 	        (selCap && selCap.limitations && selCap.limitations.length) ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 7, lineHeight: 1.4 } }, selCap.limitations[0]) : null);
-	      else form = e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, lineHeight: 1.5, padding: '4px 0' } }, (selCap ? (selCap.name + ' пока недоступна. ') : '') + 'Выберите YClients или Altegio — или ведите запись во Внутреннем календаре MAYA без CRM («Подключить позже»).');
+	      else form = e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, lineHeight: 1.5, padding: '4px 0' } }, (selCap ? (selCap.name + ' пока недоступна. ') : '') + 'На первом этапе выберите YClients или Altegio.');
 	      return e('div', { style: card },
 	        e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink } }, 'Подключите CRM'),
-	        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: onbTone.dim, margin: '8px 0 14px', lineHeight: 1.5 } }, 'Система записи вашего бизнеса. Ключи хранятся зашифрованно и не попадают в диалог. Без CRM можно вести запись во Внутреннем календаре MAYA.'),
+	        e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: onbTone.dim, margin: '8px 0 14px', lineHeight: 1.5 } }, 'Вставьте user token. MAYA покажет только доступные вам филиалы, затем сама подтянет название, мастеров, услуги, расписание и логотип. Токен не попадает в чат.'),
 	        chips,
 	        form,
 	        cm ? e('div', { style: { fontFamily: BODY, fontSize: 12, fontWeight: cm.kind === 'err' ? 600 : 400, marginTop: 10, lineHeight: 1.5, color: cm.kind === 'info' ? onbTone.dim : onbTone.ink } }, cm.text) : null,
 	        e('div', { style: { display: 'flex', gap: 8, marginTop: 14 } },
-	          selConnectable ? e('div', { onClick: onbCrmBusy ? undefined : onbCrmSaveTest, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: onbCrmBusy ? 'default' : 'pointer', opacity: onbCrmBusy ? 0.6 : 1 } }, onbCrmBusy ? 'Проверяем…' : 'Сохранить и проверить') : null,
-	          e('div', { onClick: onbCrmBusy ? undefined : onbCrmLater, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, border: '1px solid ' + onbTone.line, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: onbTone.ink, cursor: onbCrmBusy ? 'default' : 'pointer' } }, 'Подключить позже')));
+	          selConnectable ? e('div', { onClick: onbCrmBusy || (onbCrmCompanies !== null && !onbResult && !onbCrm.company) ? undefined : onbCrmSaveTest, style: { flex: 1, textAlign: 'center', padding: '13px', borderRadius: 12, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: onbCrmBusy ? 'default' : 'pointer', opacity: onbCrmBusy || (onbCrmCompanies !== null && !onbResult && !onbCrm.company) ? 0.45 : 1 } }, onbCrmBusy ? 'Проверяю…' : (onbResult ? 'Повторить подключение' : (onbCrmCompanies === null ? 'Найти мои филиалы' : 'Подтянуть данные CRM'))) : null));
 	    }
 	    return null;
 	  }
@@ -13402,6 +13499,7 @@ function AChat() {
 	          onbDraft.current = { id: s.draftId, token: s.draftToken };
 	          if (res.d.blueprint) setOnbBlueprint(res.d.blueprint);
 	          if (res.d.missing_fields) setOnbMissing(res.d.missing_fields);
+	          if (Array.isArray(res.d.missing_fields) && res.d.missing_fields.indexOf('crm_import') >= 0) setOnbStage('crm');
 	          if (res.d.quick_replies) setOnbQuick(res.d.quick_replies);
 	          setOnbNeedsClar(!!res.d.needs_clarification);
 	          setMsgs([{ role: 'bot', text: 'С возвращением — я сохранила ваш черновик. Продолжим, или можно «Начать заново».' }]);
@@ -33054,7 +33152,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     }catch(e){}
   }
   window.__meDropForeignLogin = __meDropForeignLogin;
-  // Иконка приложения (нативка): до входа — знак MAYA, после входа — |M| барбершопа.
+  // Иконка приложения (нативка): |M| доступна только подтверждённому бренду
+  // «Мужская Эстетика». Остальные SaaS-тенанты сохраняют общую иконку MAYA.
   // Источник истины — UIApplication через getName(), а не localStorage: после
   // переустановки iOS сбрасывает alternate icon, сохраняя контейнер приложения.
   var __meAppIconSyncBusy = false;
@@ -33075,7 +33174,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     try{
       var AI = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppIcon;
       if(!AI || !(window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
-      var want = loggedIn ? 'AppIconBarber' : null;
+      var tenantBrandName = String(window.__SAAS_BRAND && window.__SAAS_BRAND.name || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/g, ' ').trim();
+      var hasMatchingNativeIcon = !window.__ME_SAAS_CTX || (window.__ME_LOGO_UPLOADED === true && tenantBrandName === 'мужская эстетика');
+      var want = loggedIn && hasMatchingNativeIcon ? 'AppIconBarber' : null;
       __meAppIconDesired = want;
       if(document.visibilityState === 'hidden' || __meAppIconSyncBusy) return;
       __meAppIconSyncBusy = true;

@@ -6,6 +6,7 @@ import {
   ClientLoyaltySnapshot,
   CRMAdapter,
   CrmCompanyOption,
+  CrmCompanyProfile,
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
@@ -36,6 +37,9 @@ interface YclientsCompanyApiItem {
   address?: string;
   city?: string;
   active?: boolean;
+  logo?: string;
+  timezone?: string;
+  schedule?: string;
 }
 
 interface YclientsServiceCategoryApiItem {
@@ -132,7 +136,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   async discoverCompanies(): Promise<CrmCompanyOption[]> {
-    const response = await this.request<YclientsCompanyApiItem[]>('companies');
+    const query = new URLSearchParams();
+    query.set('my', '1');
+    const response = await this.request<YclientsCompanyApiItem[]>('companies', {
+      query,
+    });
 
     return (response.data || [])
       .filter(
@@ -145,13 +153,35 @@ export class YclientsCRMAdapter implements CRMAdapter {
       .map((company) => {
         const id = String(company.id);
         const title =
-          company.public_title?.trim() ||
           company.title?.trim() ||
+          company.public_title?.trim() ||
           `Филиал ${id}`;
         const address = company.address?.trim() || company.city?.trim() || null;
 
         return { id, title, address };
       });
+  }
+
+  async getCompanyProfile(): Promise<CrmCompanyProfile | null> {
+    const response = await this.request<YclientsCompanyApiItem>(
+      `company/${this.getCompanyId()}`,
+    );
+    const company = response.data;
+
+    if (!company?.id) {
+      return null;
+    }
+
+    const id = String(company.id);
+    return {
+      id,
+      title:
+        company.title?.trim() || company.public_title?.trim() || `Филиал ${id}`,
+      address: company.address?.trim() || company.city?.trim() || null,
+      logo_url: company.logo?.trim() || null,
+      timezone: company.timezone?.trim() || null,
+      schedule: company.schedule?.trim() || null,
+    };
   }
 
   async getServices(tenantId: string): Promise<ServiceItem[]> {

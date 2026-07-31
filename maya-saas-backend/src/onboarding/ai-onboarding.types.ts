@@ -8,6 +8,7 @@ import type {
 export type AiOnboardingMissingField =
   | 'work_mode'
   | 'category'
+  | 'crm_import'
   | 'business_name'
   | 'provider_count'
   | 'services'
@@ -28,7 +29,7 @@ export interface AiOnboardingWeeklyRule {
 export interface AiOnboardingQuickReply {
   label: string;
   message: string;
-  action?: 'confirm' | 'edit' | 'focus';
+  action?: 'confirm' | 'edit' | 'focus' | 'connect_crm' | 'disabled';
   templateId?: string;
 }
 
@@ -49,6 +50,15 @@ export interface AiOnboardingBlueprint {
   servicesDeferred?: boolean;
   weeklyRules: AiOnboardingWeeklyRule[];
   scheduleAssumed: boolean;
+  crmImported?: boolean;
+  crmProvider?: string | null;
+  crmCompanyId?: string | null;
+  crmLogoUrl?: string | null;
+  crmAddress?: string | null;
+  crmTimezone?: string | null;
+  crmScheduleLabel?: string | null;
+  crmServiceCount?: number | null;
+  crmStaffCount?: number | null;
 }
 
 export interface AiOnboardingInterpretation {

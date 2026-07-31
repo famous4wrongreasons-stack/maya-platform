@@ -31,6 +31,12 @@ export interface CrmCompanyOption {
   address: string | null;
 }
 
+export interface CrmCompanyProfile extends CrmCompanyOption {
+  logo_url: string | null;
+  timezone: string | null;
+  schedule: string | null;
+}
+
 export interface AvailableSlot {
   start: string;
   end: string;
@@ -86,6 +92,7 @@ export interface ClientLoyaltySnapshot {
 
 export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
+  getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
   getStaff(tenantId: string): Promise<StaffMember[]>;
   getAvailableSlots(params: {

@@ -21,6 +21,7 @@ import {
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
+  CrmCompanyProfile,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
@@ -62,9 +63,10 @@ type StoredCrmIntegration = {
   updatedAt: Date;
 };
 
-type CrmImportPreview = {
+export type CrmImportPreview = {
   provider: CrmProvider;
   company_id: number | string | null;
+  company: CrmCompanyProfile | null;
   services: {
     count: number;
     items: ServiceItem[];
@@ -88,6 +90,10 @@ export class CrmService {
 
   async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
     this.tenantContext.assertTenantId(tenantId);
+    return this.discoverCompaniesForCredential(dto);
+  }
+
+  async discoverCompaniesForCredential(dto: DiscoverCrmCompaniesDto) {
     this.assertProviderCanBeTenantConnected(dto.provider);
 
     const apiToken = dto.apiToken.trim();
@@ -121,6 +127,34 @@ export class CrmService {
       };
     } catch (error) {
       throw this.toSafeConnectionException(dto.provider, error);
+    }
+  }
+
+  async previewCredentials(
+    provider: CrmProvider,
+    apiToken: string,
+    settingsJson: Record<string, unknown>,
+  ): Promise<CrmImportPreview> {
+    this.assertProviderCanBeTenantConnected(provider);
+    const normalizedToken = apiToken.trim();
+
+    if (!normalizedToken) {
+      throw new BadRequestException({
+        message: 'CRM API token is required',
+        error: { code: 'crm_token_required', provider },
+      });
+    }
+
+    const settings = normalizeCrmProviderSettings(provider, settingsJson);
+
+    try {
+      return await this.loadConnectionPreview('onboarding-preview', provider, {
+        provider,
+        apiToken: normalizedToken,
+        settings,
+      });
+    } catch (error) {
+      throw this.toSafeConnectionException(provider, error);
     }
   }
 
@@ -741,9 +775,12 @@ export class CrmService {
       throw new Error('CRM connection check failed');
     }
 
-    const [services, staff] = await Promise.all([
+    const [services, staff, company] = await Promise.all([
       adapter.getServices(tenantId),
       adapter.getStaff(tenantId),
+      adapter.getCompanyProfile
+        ? adapter.getCompanyProfile()
+        : Promise.resolve(null),
     ]);
     const settings = config.settings ?? {};
     const warnings: string[] = [];
@@ -762,13 +799,14 @@ export class CrmService {
         typeof settings.companyId === 'string'
           ? settings.companyId
           : null,
+      company,
       services: {
         count: services.length,
-        items: services.slice(0, 12),
+        items: services.slice(0, 30),
       },
       staff: {
         count: staff.length,
-        items: staff.slice(0, 12),
+        items: staff.slice(0, 30),
       },
       warnings,
     };

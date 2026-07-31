@@ -63,10 +63,11 @@ describe('YclientsCRMAdapter', () => {
   });
 
   it('discovers only active companies without exposing provider payload fields', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      text: () =>
-        Promise.resolve(
+    let requestedUrl = '';
+    const fetchMock = jest.fn<typeof fetch>((input) => {
+      requestedUrl = String(input);
+      return Promise.resolve(
+        new Response(
           JSON.stringify({
             data: [
               {
@@ -84,8 +85,11 @@ describe('YclientsCRMAdapter', () => {
               },
             ],
           }),
+          { status: 200 },
         ),
-    }) as typeof fetch;
+      );
+    });
+    global.fetch = fetchMock;
 
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,
@@ -96,10 +100,11 @@ describe('YclientsCRMAdapter', () => {
     await expect(adapter.discoverCompanies()).resolves.toEqual([
       {
         id: '17',
-        title: 'Central branch',
+        title: 'Internal title',
         address: 'Main street',
       },
     ]);
+    expect(requestedUrl).toContain('my=1');
   });
 
   it('keeps the provider status in rejected request errors', async () => {

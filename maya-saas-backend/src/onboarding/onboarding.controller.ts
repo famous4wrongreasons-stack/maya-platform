@@ -18,6 +18,8 @@ import {
   ConfirmAiOnboardingDraftDto,
   ContinueAiOnboardingDraftDto,
   CreateAiOnboardingDraftDto,
+  DiscoverAiOnboardingCrmDto,
+  ImportAiOnboardingCrmDto,
   ReadAiOnboardingDraftDto,
 } from './dto/ai-onboarding.dto';
 import { AiOnboardingService } from './ai-onboarding.service';
@@ -95,6 +97,44 @@ export class OnboardingController {
     @Body() dto: ReadAiOnboardingDraftDto,
   ) {
     return this.aiOnboardingService.readDraft(draftId, dto.draftToken);
+  }
+
+  @Public()
+  @Post('ai/drafts/:draftId/crm/discover')
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Discover owner-managed CRM companies without persisting the credential',
+  })
+  discoverAiDraftCrm(
+    @Param('draftId') draftId: string,
+    @Body() dto: DiscoverAiOnboardingCrmDto,
+    @Req() request: Request,
+  ) {
+    return this.aiOnboardingService.discoverDraftCrm(
+      draftId,
+      dto,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Public()
+  @Post('ai/drafts/:draftId/crm/import')
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Verify the selected CRM company and import a safe onboarding preview',
+  })
+  importAiDraftCrm(
+    @Param('draftId') draftId: string,
+    @Body() dto: ImportAiOnboardingCrmDto,
+    @Req() request: Request,
+  ) {
+    return this.aiOnboardingService.importDraftCrm(
+      draftId,
+      dto,
+      resolveAuthClientMetadata(request),
+    );
   }
 
   @Public()

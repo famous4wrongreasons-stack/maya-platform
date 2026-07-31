@@ -734,6 +734,7 @@ export class SafeOnboardingInterpreter {
         blueprint.workMode === 'solo'
           ? 'Чем вы занимаетесь?'
           : 'Какой у вас бизнес?',
+      crm_import: 'Подключите CRM, чтобы я загрузила данные бизнеса.',
       business_name:
         blueprint.workMode === 'solo'
           ? 'Как вас знают клиенты? Можно написать имя или название. Если названия нет, пропустим этот шаг.'

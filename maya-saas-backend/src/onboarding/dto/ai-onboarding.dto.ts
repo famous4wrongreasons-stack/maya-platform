@@ -17,7 +17,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { CalendarSource } from '../../common/domain.enums';
+import { CalendarSource, CrmProvider } from '../../common/domain.enums';
 import { BUSINESS_TEMPLATE_IDS } from '../business-templates';
 
 export class CreateAiOnboardingDraftDto {
@@ -62,6 +62,34 @@ export class ReadAiOnboardingDraftDto {
   @IsString()
   @MinLength(32)
   draftToken!: string;
+}
+
+export class DiscoverAiOnboardingCrmDto {
+  @ApiProperty()
+  @IsString()
+  @MinLength(32)
+  draftToken!: string;
+
+  @ApiProperty({ enum: CrmProvider })
+  @IsEnum(CrmProvider)
+  provider!: CrmProvider;
+
+  @ApiProperty({
+    description:
+      'CRM credential used only for discovery. It is not persisted in the onboarding draft.',
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(4096)
+  apiToken!: string;
+}
+
+export class ImportAiOnboardingCrmDto extends DiscoverAiOnboardingCrmDto {
+  @ApiProperty({ example: '503759' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  companyId!: string;
 }
 
 export class AiOnboardingServiceDto {
