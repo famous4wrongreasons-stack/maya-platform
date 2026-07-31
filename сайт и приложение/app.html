@@ -13253,10 +13253,11 @@ function AChat() {
 	      var r = await fetch(api + '/onboarding/ai/drafts/' + encodeURIComponent(onbDraft.current.id) + '/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 	      var data = await r.json();
 	      if (!r.ok) {
-	        var apiError = data && data.error || {};
-	        var apiFields = apiError.code === 'validation' ? onbApiFieldErrors(apiError.details, body) : {};
+	        var apiError = data && typeof data.error === 'object' ? data.error : {};
+	        var apiCode = r.status === 429 ? 'auth_rate_limited' : (apiError.code || (data && data.code));
+	        var apiFields = apiCode === 'validation' ? onbApiFieldErrors(apiError.details || (data && data.details), body) : {};
 	        var apiFirst = Object.keys(apiFields)[0];
-	        throw Object.assign(new Error('confirm'), { code: apiError.code, emsg: apiFirst ? apiFields[apiFirst] : apiError.message, fieldErrors: apiFields });
+	        throw Object.assign(new Error('confirm'), { code: apiCode, emsg: apiFirst ? apiFields[apiFirst] : (apiError.message || (data && data.message)), fieldErrors: apiFields });
 	      }
 	      var saved = onbSaveBundle(data, api);
 	      var trial = data.trial || (data.trial_activation && data.trial_activation.trial) || null;
