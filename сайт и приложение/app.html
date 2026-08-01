@@ -8735,7 +8735,7 @@ function ABookFlow() {
   var __rtMap = window.__meSaasRtMap = window.__meSaasRtMap || {};
   var RT = __rtMap[SAAS_NS] || (__rtMap[SAAS_NS] = { p: null, bc: null, tomb: false });
   var SAAS_RT_LOCK = 'me_saas_refresh_lock:' + SAAS_NS;
-  var SAAS_RT_TERMINAL = { refresh_token_invalid: 1, refresh_token_reused: 1, session_expired: 1, session_revoked: 1 };
+  var SAAS_RT_TERMINAL = { refresh_token_invalid: 1, refresh_token_reused: 1, session_expired: 1, session_revoked: 1, crm_staff_access_disabled: 1 };
   function saasBc() {
     if (RT.bc !== null || typeof BroadcastChannel === 'undefined') return RT.bc;
     try { RT.bc = new BroadcastChannel('me_saas_auth:' + SAAS_NS); } catch (e) { RT.bc = null; }
@@ -9009,6 +9009,7 @@ function ABookFlow() {
   }
   function authCodeText(e, fallback) {
     var code = e && e.code;
+    if (code === 'crm_staff_access_disabled') return 'Доступ к этому бизнесу отключён: сотрудник больше не активен в CRM.';
     if (code === 'auth_rate_limited') {
       var w = e && e.retryAfterSeconds ? Math.ceil(Number(e.retryAfterSeconds)) : 60;
       return 'Слишком много попыток. Подождите ' + w + ' с и попробуйте снова.';
@@ -13609,7 +13610,7 @@ function AChat() {
 	        displayName: String(member.display_name || member.name || 'Сотрудник'),
 	        title: String(member.title || ''),
 	        avatarUrl: member.avatar_url || null,
-	        role: 'staff',
+	        role: member.suggested_role === 'administrator' ? 'administrator' : 'staff',
 	        email: '',
 	        phone: ''
 	      }; })
@@ -13880,7 +13881,7 @@ function AChat() {
 	    var teamMembers = [];
 	    (c.team || []).forEach(function (member, index) {
 	      var externalStaffId = String(member.externalStaffId || '').trim();
-	      if (!externalStaffId || externalStaffId === ownerExternalStaffId || member.role === 'none') return;
+	      if (!externalStaffId || externalStaffId === ownerExternalStaffId) return;
 	      if (usedStaffIds[externalStaffId]) { errors.team = 'Один сотрудник CRM не может иметь две роли.'; return; }
 	      usedStaffIds[externalStaffId] = true;
 	      var role = member.role === 'administrator' ? 'administrator' : 'staff';
@@ -14225,7 +14226,7 @@ function AChat() {
 	        e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, 'Вы останетесь владельцем с полным доступом. Email и телефон — ваши личные способы входа.')));
 	      if (c.crmImported && (c.team || []).length) rows.push(e('div', { key: 'team', style: card },
 	        e('div', { style: lbl }, 'Команда и роли'),
-	        e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, lineHeight: 1.5, marginBottom: 4 } }, 'Отметьте себя в списке CRM. Для остальных выберите роль. Email или телефон можно указать сразу или оставить пустым.'),
+	        e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, lineHeight: 1.5, marginBottom: 4 } }, 'Отметьте себя в списке CRM. Каждый активный сотрудник получит роль мастера или администратора. Email или телефон нужен для его первого входа и может быть добавлен позже.'),
 	        onbHint('team'),
 	        (c.team || []).map(function (member, index) {
 	          var isOwner = String(c.ownerExternalStaffId || '') === String(member.externalStaffId || '');
@@ -14242,15 +14243,14 @@ function AChat() {
 	            isOwner ? e('div', { style: { fontFamily: BODY, fontSize: 11, color: onbTone.dim, marginTop: 9, lineHeight: 1.45 } }, 'Профиль CRM привязан к владельцу. Полный доступ и контакты берутся из формы выше.') : e(React.Fragment, null,
 	              e('select', { value: member.role || 'staff', onChange: function (ev) { setMember({ role: ev.target.value }); }, style: Object.assign({}, inp, { marginTop: 9, WebkitAppearance: 'menulist', appearance: 'auto' }) },
 	                e('option', { value: 'staff' }, 'Мастер'),
-	                e('option', { value: 'administrator' }, 'Администратор'),
-	                e('option', { value: 'none' }, 'Без доступа в MAYA')),
-	              member.role !== 'none' ? e(React.Fragment, null,
+	                e('option', { value: 'administrator' }, 'Администратор')),
+	              e(React.Fragment, null,
 	                e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.dim, marginTop: 6, lineHeight: 1.4 } }, member.role === 'administrator' ? 'Доступ: расписание, клиенты и бизнес-аналитика.' : 'Доступ: личные записи и личная аналитика.'),
 	                e('input', { style: onbInput(emailField, { marginTop: 7 }), placeholder: 'Email для входа · можно позже', type: 'email', inputMode: 'email', value: member.email || '', onChange: function (ev) { onbClearFieldError(emailField); setMember({ email: ev.target.value }); } }),
 	                onbHint(emailField),
 	                e('input', { style: onbInput(phoneField, { marginTop: 7 }), placeholder: 'Телефон для входа · можно позже', inputMode: 'tel', value: member.phone || '', onChange: function (ev) { onbClearFieldError(phoneField); setMember({ phone: ev.target.value }); } }),
 	                onbHint(phoneField),
-	                e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: hasContact ? onbTone.dim : onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, hasContact ? 'Доступ будет готов после подтверждения кода.' : 'Роль сохранится, но без контакта учётная запись пока не создастся.')) : e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 7 } }, 'Сотрудник останется в CRM, но не получит доступ к MAYA.')));
+	                e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: hasContact ? onbTone.dim : onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, hasContact ? 'Доступ будет готов после подтверждения кода.' : 'Роль уже сохранится. Чтобы сотрудник смог войти, добавьте его email или телефон позже.'))));
 	        })));
 	      if (onbErr) rows.push(e('div', { key: 'e', style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, margin: '6px 2px 0', lineHeight: 1.5 } }, onbErr));
 	      rows.push(e('div', { key: 'go', onClick: onbBusy ? undefined : onbConfirmGo, style: { marginTop: 12, textAlign: 'center', padding: '14px', borderRadius: 14, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Создаём…' : 'Создать бизнес'));
