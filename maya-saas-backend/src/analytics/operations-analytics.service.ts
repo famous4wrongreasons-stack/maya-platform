@@ -6,6 +6,7 @@ import {
 
 import { CalendarSource } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
+import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -40,6 +41,7 @@ export class OperationsAnalyticsService {
     private readonly tenantContext: TenantContextService,
     private readonly tenantsService: TenantsService,
     private readonly crmService: CrmService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async getBusinessOverview(tenantId: string, query: AnalyticsRangeQueryDto) {
@@ -67,30 +69,66 @@ export class OperationsAnalyticsService {
     query: AnalyticsRangeQueryDto,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const provider = await this.prisma.internalProvider.findFirst({
-      where: { tenantId: scopedTenantId, userId, active: true },
-      select: { id: true, displayName: true },
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { calendarSource: true },
     });
-    if (!provider) {
-      throw new NotFoundException({
-        message: 'Employee calendar identity is not linked.',
-        error: {
-          code: 'staff_identity_not_linked',
-          message:
-            'Link this user to a calendar provider before opening employee analytics.',
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    const external =
+      (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
+    let providerId: string;
+    let providerName: string;
+    if (external) {
+      const identity = await this.prisma.crmStaffAccess.findFirst({
+        where: {
+          tenantId: scopedTenantId,
+          userId,
+          status: 'active',
         },
+        select: { externalStaffId: true, encryptedDisplayName: true },
       });
+      if (!identity) {
+        throw this.staffIdentityNotLinked();
+      }
+      providerId = identity.externalStaffId;
+      providerName = this.encryptionService.decrypt(
+        identity.encryptedDisplayName,
+      );
+    } else {
+      const identity = await this.prisma.internalProvider.findFirst({
+        where: { tenantId: scopedTenantId, userId, active: true },
+        select: { id: true, displayName: true },
+      });
+      if (!identity) {
+        throw this.staffIdentityNotLinked();
+      }
+      providerId = identity.id;
+      providerName = identity.displayName;
     }
 
     const overview = await this.buildOverview(
       scopedTenantId,
       query,
-      provider.id,
+      providerId,
     );
     return {
       ...overview,
-      employee: { provider_id: provider.id, name: provider.displayName },
+      employee: { provider_id: providerId, name: providerName },
     };
+  }
+
+  private staffIdentityNotLinked(): NotFoundException {
+    return new NotFoundException({
+      message: 'Employee calendar identity is not linked.',
+      error: {
+        code: 'staff_identity_not_linked',
+        message:
+          'Link this user to a calendar provider before opening employee analytics.',
+      },
+    });
   }
 
   private async buildOverview(

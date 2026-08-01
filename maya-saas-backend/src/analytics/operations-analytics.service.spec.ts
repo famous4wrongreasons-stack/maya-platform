@@ -2,6 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { CalendarSource } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
+import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -86,6 +87,7 @@ describe('OperationsAnalyticsService', () => {
       appointment: { findMany: appointmentFindMany },
       expense: { findMany: expenseFindMany },
       internalProvider: { findFirst: jest.fn() },
+      crmStaffAccess: { findFirst: jest.fn() },
     } as unknown as PrismaService;
     const tenantsService = {
       assertBranchBelongsToTenant: jest.fn(),
@@ -177,6 +179,10 @@ describe('OperationsAnalyticsService', () => {
         tenantContext,
         tenantsService,
         crmService,
+        {
+          encrypt: (value: string) => `enc:${value}`,
+          decrypt: (value: string) => value.replace(/^enc:/, ''),
+        } as EncryptionService,
       ),
     };
   };
@@ -273,6 +279,40 @@ describe('OperationsAnalyticsService', () => {
     expect(result.revenue).toEqual([
       { currency: 'RUB', amount_kopecks: 250_000 },
     ]);
+  });
+
+  it('uses the tenant-scoped CRM staff link for employee analytics', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+    const crmStaffFindFirst = (
+      setup.prisma.crmStaffAccess.findFirst as jest.Mock
+    ).mockResolvedValue({
+      externalStaffId: 'crm-staff',
+      encryptedDisplayName: 'enc:Илья',
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getEmployeeOverview('tenant-a', 'staff-user', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(crmStaffFindFirst).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-a',
+        userId: 'staff-user',
+        status: 'active',
+      },
+      select: { externalStaffId: true, encryptedDisplayName: true },
+    });
+    expect(setup.crmGetJournal).toHaveBeenCalledWith(
+      'tenant-a',
+      expect.objectContaining({ providerId: 'crm-staff' }),
+    );
+    expect(result.employee).toEqual({
+      provider_id: 'crm-staff',
+      name: 'Илья',
+    });
   });
 
   it('returns tenant-scoped verified CRM finance without local calculations', async () => {

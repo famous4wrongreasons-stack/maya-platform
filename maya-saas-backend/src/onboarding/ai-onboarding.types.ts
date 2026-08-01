@@ -59,6 +59,7 @@ export interface AiOnboardingBlueprint {
   crmScheduleLabel?: string | null;
   crmServiceCount?: number | null;
   crmStaffCount?: number | null;
+  crmStaffIdentityHashes?: string[];
 }
 
 export interface AiOnboardingInterpretation {

@@ -4,6 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import type {
   MembershipStatus as PrismaMembershipStatus,
   User,
@@ -48,6 +50,15 @@ type UserWithRelations = User & {
   } | null;
   branch?: { id: string; name: string } | null;
   memberships?: MembershipProjection[];
+};
+
+export type CrmTeamMemberAssignment = {
+  externalStaffId: string;
+  displayName: string;
+  title?: string | null;
+  role: UserRole.ADMINISTRATOR | UserRole.STAFF;
+  email?: string | null;
+  phone?: string | null;
 };
 
 @Injectable()
@@ -386,6 +397,214 @@ export class UsersService {
       }
 
       return this.projectTenantMembership(user, tenantId);
+    });
+  }
+
+  async provisionCrmTeamAccess(data: {
+    tenantId: string;
+    tenantSlug: string;
+    ownerUserId: string;
+    ownerExternalStaffId?: string | null;
+    members: CrmTeamMemberAssignment[];
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const ownerExternalStaffId = data.ownerExternalStaffId?.trim() || null;
+    const seenStaffIds = new Set<string>();
+    const seenEmails = new Set<string>();
+    const seenPhones = new Set<string>();
+
+    const preparedMembers = await Promise.all(
+      data.members.map(async (member) => {
+        const externalStaffId = member.externalStaffId.trim();
+        const displayName = member.displayName.trim();
+        const email = member.email?.trim().toLowerCase() || null;
+        const phone = this.normalizeOptionalPhone(member.phone);
+
+        if (!externalStaffId || !displayName) {
+          throw new BadRequestException({
+            message: 'CRM team member identity is incomplete.',
+            error: { code: 'crm_team_member_invalid' },
+          });
+        }
+        if (
+          member.role !== UserRole.ADMINISTRATOR &&
+          member.role !== UserRole.STAFF
+        ) {
+          throw new BadRequestException({
+            message: 'Unsupported onboarding team role.',
+            error: { code: 'crm_team_role_invalid' },
+          });
+        }
+        if (
+          externalStaffId === ownerExternalStaffId ||
+          seenStaffIds.has(externalStaffId)
+        ) {
+          throw new BadRequestException({
+            message: 'Each CRM staff identity can be assigned only once.',
+            error: { code: 'crm_team_member_duplicate' },
+          });
+        }
+        seenStaffIds.add(externalStaffId);
+
+        if (email && seenEmails.has(email)) {
+          throw new BadRequestException({
+            message: 'Each team login email must be unique.',
+            error: { code: 'crm_team_email_duplicate' },
+          });
+        }
+        if (phone && seenPhones.has(phone)) {
+          throw new BadRequestException({
+            message: 'Each team login phone must be unique.',
+            error: { code: 'crm_team_phone_duplicate' },
+          });
+        }
+        if (email) seenEmails.add(email);
+        if (phone) seenPhones.add(phone);
+
+        const hasLoginChannel = Boolean(email || phone);
+        return {
+          externalStaffId,
+          displayName,
+          encryptedDisplayName: this.encryptionService.encrypt(displayName),
+          title: member.title?.trim() || null,
+          role: member.role,
+          email,
+          phone,
+          loginEmail:
+            email ??
+            (phone ? buildPhoneLoginEmail(data.tenantSlug, phone) : null),
+          passwordHash: hasLoginChannel
+            ? await bcrypt.hash(randomBytes(24).toString('base64url'), 10)
+            : null,
+        };
+      }),
+    );
+
+    return this.prisma.$transaction(async (tx) => {
+      const owner = await tx.user.findFirst({
+        where: {
+          id: data.ownerUserId,
+          memberships: { some: { tenantId, status: 'active' } },
+        },
+        select: { id: true, email: true, phone: true, encryptedName: true },
+      });
+      if (!owner) {
+        throw new NotFoundException({
+          message: 'Tenant owner was not found.',
+          error: { code: 'crm_team_owner_not_found' },
+        });
+      }
+
+      const branch = await tx.branch.findFirst({
+        where: { tenantId },
+        orderBy: { createdAt: 'asc' },
+        select: { id: true },
+      });
+      const ownerEmail = owner.email.toLowerCase();
+      const ownerPhone = this.normalizeStoredPhone(owner.phone);
+      if (
+        seenEmails.has(ownerEmail) ||
+        (ownerPhone && seenPhones.has(ownerPhone))
+      ) {
+        throw new BadRequestException({
+          message:
+            'The owner login channel cannot be reused by another member.',
+          error: { code: 'crm_team_owner_contact_duplicate' },
+        });
+      }
+
+      if (ownerExternalStaffId) {
+        await tx.crmStaffAccess.create({
+          data: {
+            tenantId,
+            externalStaffId: ownerExternalStaffId,
+            userId: owner.id,
+            encryptedDisplayName:
+              owner.encryptedName ?? this.encryptionService.encrypt('Owner'),
+            role: UserRole.TENANT_ADMIN,
+            status: 'active',
+          },
+        });
+      }
+
+      const assignments = [];
+      for (const member of preparedMembers) {
+        let userId: string | null = null;
+        let status: 'pending_contact' | 'active' = 'pending_contact';
+
+        if (member.loginEmail && member.passwordHash) {
+          const contactConflict = await tx.user.findFirst({
+            where: {
+              memberships: { some: { tenantId } },
+              OR: [
+                { email: member.loginEmail },
+                ...(member.phone ? [{ phone: member.phone }] : []),
+              ],
+            },
+            select: { id: true },
+          });
+          if (contactConflict) {
+            throw new ConflictException({
+              message: 'A team login channel is already used in this business.',
+              error: { code: 'crm_team_contact_already_used' },
+            });
+          }
+
+          const user = await tx.user.create({
+            data: {
+              tenantId,
+              branchId: branch?.id ?? null,
+              email: member.loginEmail,
+              phone: member.phone,
+              encryptedName: member.encryptedDisplayName,
+              passwordHash: member.passwordHash,
+              role: member.role,
+              status: UserStatus.ACTIVE,
+              memberships: {
+                create: {
+                  tenantId,
+                  branchId: branch?.id ?? null,
+                  role: member.role,
+                  status: 'active',
+                  joinedAt: new Date(),
+                },
+              },
+            },
+            select: { id: true },
+          });
+          userId = user.id;
+          status = 'active';
+        }
+
+        await tx.crmStaffAccess.create({
+          data: {
+            tenantId,
+            externalStaffId: member.externalStaffId,
+            userId,
+            encryptedDisplayName: member.encryptedDisplayName,
+            title: member.title,
+            role: member.role,
+            status,
+          },
+        });
+        assignments.push({
+          external_staff_id: member.externalStaffId,
+          role: member.role,
+          access_status: status,
+          login_channel: member.email ? 'email' : member.phone ? 'phone' : null,
+        });
+      }
+
+      return {
+        owner_linked_to_crm_staff: Boolean(ownerExternalStaffId),
+        assignments,
+        active_accounts: assignments.filter(
+          (assignment) => assignment.access_status === 'active',
+        ).length,
+        pending_contacts: assignments.filter(
+          (assignment) => assignment.access_status === 'pending_contact',
+        ).length,
+      };
     });
   }
 

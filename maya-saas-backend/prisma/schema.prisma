@@ -49,6 +49,12 @@ enum MembershipStatus {
   invited
 }
 
+enum CrmStaffAccessStatus {
+  pending_contact
+  active
+  disabled
+}
+
 enum CalendarSource {
   internal
   external
@@ -105,6 +111,7 @@ model Tenant {
   expenses               Expense[]
   aiApprovalRequests     AiApprovalRequest[]
   aiToolExecutions       AiToolExecution[]
+  crmStaffAccesses       CrmStaffAccess[]
 
   @@index([status, graceEndsAt])
 }
@@ -194,6 +201,7 @@ model User {
   requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
   decidedAiApprovals   AiApprovalRequest[]  @relation("AiApprovalDecider")
   aiToolExecutions     AiToolExecution[]    @relation("AiToolExecutionActor")
+  crmStaffAccesses     CrmStaffAccess[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -227,6 +235,29 @@ model Membership {
   @@index([tenantId, status])
   @@index([userId, status])
   @@index([tenantId, branchId])
+}
+
+/// Tenant-scoped link between a CRM staff record and MAYA access. A role can
+/// be prepared before a login is created; userId is attached only when the
+/// owner supplies a verified login channel for that staff member.
+model CrmStaffAccess {
+  id                   String               @id @default(cuid())
+  tenantId             String
+  externalStaffId      String
+  userId               String?
+  encryptedDisplayName String
+  title                String?
+  role                 UserRole
+  status               CrmStaffAccessStatus @default(pending_contact)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                 User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, externalStaffId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, role, status])
+  @@index([userId])
 }
 
 model AuthIdentity {

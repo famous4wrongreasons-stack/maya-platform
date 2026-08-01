@@ -16,6 +16,7 @@ import { CrmService } from '../crm/crm.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { UsersService } from '../users/users.service';
 import type {
   AiOnboardingBlueprint,
   AiOnboardingInterpretation,
@@ -54,6 +55,7 @@ export class AiOnboardingService {
     private readonly rateLimitService: AuthRateLimitService,
     private readonly tenantContext: TenantContextService,
     private readonly trialActivationService: TrialActivationService,
+    private readonly usersService: UsersService,
   ) {}
 
   listTemplates() {
@@ -265,6 +267,13 @@ export class AiOnboardingService {
       crmScheduleLabel: company.schedule,
       crmServiceCount: preview.services.count,
       crmStaffCount: preview.staff.count,
+      crmStaffIdentityHashes: preview.staff.items.map((staff) =>
+        this.crmStaffIdentityHash(
+          dto.provider,
+          String(preview.company_id ?? company.id),
+          staff.id,
+        ),
+      ),
     };
     const missingFields = this.getMissingFields(blueprint);
     const interpretation: AiOnboardingInterpretation = {
@@ -304,7 +313,15 @@ export class AiOnboardingService {
       },
     });
 
-    return this.serializeDraft(updated, undefined, interpretation);
+    return {
+      ...this.serializeDraft(updated, undefined, interpretation),
+      crm_staff: preview.staff.items.map((staff) => ({
+        external_staff_id: staff.id,
+        display_name: staff.name,
+        title: staff.title ?? staff.specialization ?? null,
+        avatar_url: this.safeRemoteLogoUrl(staff.avatar_url ?? null),
+      })),
+    };
   }
 
   async confirmDraft(
@@ -355,6 +372,7 @@ export class AiOnboardingService {
         },
       });
     }
+    this.assertCrmTeamAssignments(blueprint, dto);
 
     const claimed = await this.prisma.aiOnboardingDraft.updateMany({
       where: {
@@ -397,6 +415,26 @@ export class AiOnboardingService {
         { expectedActivationId: draft.trialActivationId },
       );
       createdTenantId = signup.tenant.id;
+      const teamSetup =
+        blueprint.crmImported &&
+        (dto.ownerExternalStaffId || (dto.teamMembers?.length ?? 0) > 0)
+          ? await this.tenantContext.runAsSystemTenant(createdTenantId, () =>
+              this.usersService.provisionCrmTeamAccess({
+                tenantId: createdTenantId!,
+                tenantSlug: signup.tenant.slug,
+                ownerUserId: signup.user.id,
+                ownerExternalStaffId: dto.ownerExternalStaffId,
+                members: (dto.teamMembers ?? []).map((member) => ({
+                  externalStaffId: member.externalStaffId,
+                  displayName: member.displayName,
+                  title: member.title,
+                  role: member.role,
+                  email: member.email,
+                  phone: member.phone,
+                })),
+              }),
+            )
+          : null;
 
       if (blueprint.crmImported) {
         await this.prisma.brandingSettings.update({
@@ -435,6 +473,7 @@ export class AiOnboardingService {
           blueprint.calendarSource === CalendarSource.EXTERNAL
             ? 'connect_crm'
             : 'upload_logo_or_open_app',
+        team_setup: teamSetup,
       };
     } catch (error) {
       if (createdTenantId) {
@@ -538,6 +577,56 @@ export class AiOnboardingService {
         dto.weeklyRules?.map((rule) => ({ ...rule })) ?? current.weeklyRules,
       scheduleAssumed: dto.weeklyRules ? false : current.scheduleAssumed,
     };
+  }
+
+  private assertCrmTeamAssignments(
+    blueprint: AiOnboardingBlueprint,
+    dto: ConfirmAiOnboardingDraftDto,
+  ): void {
+    const requestedIds = [
+      ...(dto.ownerExternalStaffId ? [dto.ownerExternalStaffId] : []),
+      ...(dto.teamMembers ?? []).map((member) => member.externalStaffId),
+    ];
+    if (requestedIds.length === 0) return;
+    if (
+      !blueprint.crmImported ||
+      !blueprint.crmProvider ||
+      !blueprint.crmCompanyId
+    ) {
+      throw new BadRequestException({
+        message: 'CRM team roles require a verified CRM import.',
+        error: { code: 'crm_team_requires_verified_import' },
+      });
+    }
+
+    const verifiedHashes = new Set(blueprint.crmStaffIdentityHashes ?? []);
+    const invalid = requestedIds.find(
+      (externalStaffId) =>
+        !verifiedHashes.has(
+          this.crmStaffIdentityHash(
+            blueprint.crmProvider!,
+            blueprint.crmCompanyId!,
+            externalStaffId,
+          ),
+        ),
+    );
+    if (invalid) {
+      throw new BadRequestException({
+        message:
+          'A selected team member is not part of the verified CRM branch.',
+        error: { code: 'crm_team_member_not_verified' },
+      });
+    }
+  }
+
+  private crmStaffIdentityHash(
+    provider: string,
+    companyId: string,
+    externalStaffId: string,
+  ): string {
+    return createHash('sha256')
+      .update(`${provider}:${companyId}:${externalStaffId.trim()}`)
+      .digest('hex');
   }
 
   private materializeDeferredBusinessName(

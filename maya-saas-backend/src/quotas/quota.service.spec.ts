@@ -30,11 +30,13 @@ describe('QuotaService', () => {
       (args: StaffCountArgs) => Promise<number>
     > = jest.fn().mockResolvedValue(4);
     const providerCount = jest.fn().mockResolvedValue(1);
+    const crmStaffCount = jest.fn().mockResolvedValue(0);
     const prisma = {
       tenant: { findUnique: tenantFindUnique },
       branch: { count: branchCount },
       membership: { count: membershipCount },
       internalProvider: { count: providerCount },
+      crmStaffAccess: { count: crmStaffCount },
     } as unknown as PrismaService;
     const tenantContext = new TenantContextService();
 
@@ -46,6 +48,7 @@ describe('QuotaService', () => {
         branchCount,
         membershipCount,
         providerCount,
+        crmStaffCount,
       },
     };
   };
@@ -77,6 +80,13 @@ describe('QuotaService', () => {
     );
     expect(mocks.providerCount).toHaveBeenCalledWith({
       where: { tenantId: 'tenant-a', active: true, userId: null },
+    });
+    expect(mocks.crmStaffCount).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-a',
+        status: 'pending_contact',
+        userId: null,
+      },
     });
   });
 

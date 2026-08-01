@@ -13415,6 +13415,7 @@ function AChat() {
 	  const [onbCrmSearch, setOnbCrmSearch] = React.useState('');
 	  const [onbCrmBusy, setOnbCrmBusy] = React.useState(false);
 	  const [onbCrmMsg, setOnbCrmMsg] = React.useState(null);
+	  const [onbCrmStaff, setOnbCrmStaff] = React.useState([]); // активные сотрудники подтверждённого филиала; только память
 	  const onbCrmReq = React.useRef(false);
 	  const [onbProviders, setOnbProviders] = React.useState(null); // каталог /crm/providers — источник истины (fail-closed)
 	  // провайдер реально подключаем ТОЛЬКО если каталог это подтвердил и это не mock (mock = превью, не внешняя CRM)
@@ -13454,6 +13455,12 @@ function AChat() {
 	      crm_credentials_rejected: 'CRM отклонила токен. Проверьте его и повторите.',
 	      crm_company_not_found: 'Выбранный филиал недоступен для этого токена.',
 	      crm_company_profile_missing: 'Не удалось загрузить профиль филиала. Выберите его ещё раз.',
+	      crm_team_member_not_verified: 'Сотрудник не найден в подтверждённом филиале CRM. Подтяните данные заново.',
+	      crm_team_member_duplicate: 'Одного сотрудника можно назначить только один раз.',
+	      crm_team_email_duplicate: 'Email для входа не должен повторяться.',
+	      crm_team_phone_duplicate: 'Телефон для входа не должен повторяться.',
+	      crm_team_owner_contact_duplicate: 'Контакт владельца нельзя использовать для другого сотрудника.',
+	      crm_team_contact_already_used: 'Этот email или телефон уже используется в бизнесе.',
 	      crm_provider_unreachable: 'CRM временно недоступна. Попробуйте ещё раз.',
 	      crm_platform_configuration_error: 'Подключение CRM временно недоступно на стороне MAYA.',
 	      validation: 'Проверьте заполненные данные.'
@@ -13476,6 +13483,8 @@ function AChat() {
 	      return 'Услуга ' + number + ': длительность должна быть от 5 минут до 24 часов.';
 	    }
 	    if (/^weekly(?:Rules)?\./.test(field)) return 'Проверьте время начала и окончания рабочего дня.';
+	    var team = String(field || '').match(/^teamMembers\.(\d+)\.(email|phone)$/);
+	    if (team) return team[2] === 'email' ? 'Укажите корректный email сотрудника.' : 'Укажите телефон с кодом страны.';
 	    var messages = {
 	      ownerEmail: 'Укажите корректный e-mail.',
 	      ownerName: 'Укажите ваше имя — минимум 2 символа.',
@@ -13490,7 +13499,7 @@ function AChat() {
 	    var result = {};
 	    (Array.isArray(details) ? details : []).forEach(function (detail) {
 	      var field = String(detail && detail.field || '');
-	      var localField = field.replace(/\.durationMinutes$/, '.duration');
+	      var localField = field.replace(/\.durationMinutes$/, '.duration').replace(/^teamMembers\./, 'team.');
 	      var weekly = field.match(/^weeklyRules\.(\d+)\.(startTime|endTime)$/);
 	      if (weekly && body && body.weeklyRules && body.weeklyRules[Number(weekly[1])]) {
 	        localField = 'weekly.' + body.weeklyRules[Number(weekly[1])].weekday + '.' + (weekly[2] === 'startTime' ? 'start' : 'end');
@@ -13506,13 +13515,14 @@ function AChat() {
 	  }
 	  function onbActivationDead(note) {
 	    onbClearAllSS(); try { window.__meOnb = null; } catch (e) {}
-	    onbDraft.current = { id: null, token: null }; setOnbConfirm(null); setOnbStage('chat'); setOnbDead(true); setOnbErr(''); setOnbFieldErrors({});
+	    onbDraft.current = { id: null, token: null }; setOnbConfirm(null); setOnbCrmStaff([]); setOnbStage('chat'); setOnbDead(true); setOnbErr(''); setOnbFieldErrors({});
 	    setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: note || 'Пробную версию нужно активировать заново.' }]); });
 	  }
 	  function onbExitToLogin() { onbClearAllSS(); try { window.__meOnb = null; } catch (e) {} if (window.__meGo) window.__meGo('login'); }
 	  function onbApply(data) {
 	    setMsgs(function (m) { var b = m.filter(function (x) { return !x.typing; }); if (data && data.assistant_message) b = b.concat([{ role: 'bot', text: data.assistant_message }]); return b; });
 	    if (data && data.blueprint) setOnbBlueprint(data.blueprint);
+	    if (data && Array.isArray(data.crm_staff)) setOnbCrmStaff(data.crm_staff);
 	    // источник истины по типу бизнеса — серверный blueprint; устаревший выбранный шаблон не перекрывает профессию
 	    if (data && data.blueprint && data.blueprint.templateId) setOnbTpl(data.blueprint.templateId);
 	    if (data && data.missing_fields) setOnbMissing(data.missing_fields);
@@ -13567,8 +13577,9 @@ function AChat() {
 	      if (tx) onbSend(tx); else setOnbErr('Не расслышала — попробуйте ещё раз или введите текстом.');
 	    } catch (e) { setOnbBusy(false); setOnbErr('Голос сейчас недоступен — введите текстом.'); }
 	  }
-	  function onbToConfirm(sourceBlueprint) {
+	  function onbToConfirm(sourceBlueprint, sourceStaff) {
 	    var b = sourceBlueprint || onbBlueprint || {};
+	    var importedStaff = Array.isArray(sourceStaff) ? sourceStaff : onbCrmStaff;
 	    setOnbConfirm({
 	      businessName: b.businessName || '',
 	      businessNameDeferred: !!b.businessNameDeferred,
@@ -13591,7 +13602,17 @@ function AChat() {
 	      crmTimezone: b.crmTimezone || null,
 	      crmScheduleLabel: b.crmScheduleLabel || null,
 	      crmServiceCount: Number(b.crmServiceCount != null ? b.crmServiceCount : (b.services || []).length),
-	      crmStaffCount: Number(b.crmStaffCount != null ? b.crmStaffCount : (b.providerCount || 0))
+	      crmStaffCount: Number(b.crmStaffCount != null ? b.crmStaffCount : (b.providerCount || 0)),
+	      ownerExternalStaffId: '',
+	      team: (importedStaff || []).map(function (member) { return {
+	        externalStaffId: String(member.external_staff_id || member.id || ''),
+	        displayName: String(member.display_name || member.name || 'Сотрудник'),
+	        title: String(member.title || ''),
+	        avatarUrl: member.avatar_url || null,
+	        role: 'staff',
+	        email: '',
+	        phone: ''
+	      }; })
 	    });
 	    setOnbErr(''); setOnbFieldErrors({}); setOnbStage('confirm');
 	  }
@@ -13849,6 +13870,46 @@ function AChat() {
 	    }
 	    if (phoneDigits.length < 10 || phoneDigits.length > 15) errors.ownerPhone = onbFriendlyValidation('ownerPhone');
 
+	    var ownerExternalStaffId = String(c.ownerExternalStaffId || '').trim();
+	    var knownStaffIds = {};
+	    (c.team || []).forEach(function (member) { knownStaffIds[String(member.externalStaffId || '').trim()] = true; });
+	    if (ownerExternalStaffId && !knownStaffIds[ownerExternalStaffId]) errors.team = 'Выберите владельца из подтверждённого списка CRM.';
+	    var usedStaffIds = {};
+	    var usedEmails = {}; usedEmails[ownerEmail.toLowerCase()] = true;
+	    var usedPhones = {}; if (phoneDigits.length >= 10) usedPhones['+' + phoneDigits] = true;
+	    var teamMembers = [];
+	    (c.team || []).forEach(function (member, index) {
+	      var externalStaffId = String(member.externalStaffId || '').trim();
+	      if (!externalStaffId || externalStaffId === ownerExternalStaffId || member.role === 'none') return;
+	      if (usedStaffIds[externalStaffId]) { errors.team = 'Один сотрудник CRM не может иметь две роли.'; return; }
+	      usedStaffIds[externalStaffId] = true;
+	      var role = member.role === 'administrator' ? 'administrator' : 'staff';
+	      var email = String(member.email || '').trim().toLowerCase();
+	      var emailField = 'team.' + index + '.email';
+	      var phoneField = 'team.' + index + '.phone';
+	      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errors[emailField] = 'Укажите корректный email сотрудника.';
+	      if (email && usedEmails[email]) errors[emailField] = 'Этот email уже назначен другому пользователю.';
+	      if (email) usedEmails[email] = true;
+	      var memberPhoneRaw = String(member.phone || '').trim();
+	      var memberPhone = '';
+	      if (memberPhoneRaw) {
+	        var memberDigits = memberPhoneRaw.replace(/\D/g, '');
+	        if (memberPhoneRaw.indexOf('+') !== 0) {
+	          if (memberDigits.length === 11 && (memberDigits[0] === '8' || memberDigits[0] === '7')) memberDigits = memberDigits.slice(1);
+	          if (memberDigits.length === 10) memberDigits = '7' + memberDigits;
+	        }
+	        if (memberDigits.length < 10 || memberDigits.length > 15) errors[phoneField] = 'Укажите телефон с кодом страны.';
+	        else memberPhone = '+' + memberDigits;
+	        if (memberPhone && usedPhones[memberPhone]) errors[phoneField] = 'Этот телефон уже назначен другому пользователю.';
+	        if (memberPhone) usedPhones[memberPhone] = true;
+	      }
+	      var prepared = { externalStaffId: externalStaffId, displayName: String(member.displayName || 'Сотрудник').trim(), role: role };
+	      if (String(member.title || '').trim()) prepared.title = String(member.title).trim();
+	      if (email) prepared.email = email;
+	      if (memberPhone) prepared.phone = memberPhone;
+	      teamMembers.push(prepared);
+	    });
+
 	    return {
 	      errors: errors,
 	      businessName: businessName,
@@ -13857,7 +13918,9 @@ function AChat() {
 	      weeklyRules: weeklyRules,
 	      ownerEmail: ownerEmail,
 	      ownerName: ownerName,
-	      ownerPhone: '+' + phoneDigits
+	      ownerPhone: '+' + phoneDigits,
+	      ownerExternalStaffId: ownerExternalStaffId,
+	      teamMembers: teamMembers
 	    };
 	  }
 	  async function onbConfirmGo() {
@@ -13877,6 +13940,8 @@ function AChat() {
 	        ownerEmail: normalized.ownerEmail,
 	        ownerName: normalized.ownerName,
 	        ownerPhone: normalized.ownerPhone,
+	        ownerExternalStaffId: normalized.ownerExternalStaffId,
+	        teamMembers: normalized.teamMembers,
 	        businessName: normalized.businessName,
 	        calendarSource: c.calendarSource,
 	        providerCount: normalized.providerCount,
@@ -13884,6 +13949,8 @@ function AChat() {
 	        weeklyRules: normalized.weeklyRules
 	      };
 	      if (!normalized.businessName) delete body.businessName; // B.1: пустое имя (отложено) не шлём
+	      if (!normalized.ownerExternalStaffId) delete body.ownerExternalStaffId;
+	      if (!normalized.teamMembers.length) delete body.teamMembers;
 	      if (c.crmImported) {
 	        delete body.providerCount;
 	        delete body.services;
@@ -13986,7 +14053,7 @@ function AChat() {
 	      var data = await rr.json();
 	      if (!rr.ok) { var err = onbCrmErrorPayload(data, 'Не удалось загрузить данные филиала.'); throw Object.assign(new Error(err.text), { code: err.code }); }
 	      onbApply(data);
-	      onbToConfirm(data.blueprint);
+	      onbToConfirm(data.blueprint, data.crm_staff);
 	    } catch (e) { setOnbCrmMsg({ kind: 'err', text: e && e.message || 'Не получилось — попробуйте ещё раз.' }); }
 	    finally { onbCrmReq.current = false; setOnbCrmBusy(false); }
 	  }
@@ -14141,7 +14208,10 @@ function AChat() {
 	            r.on ? onbHint([startField, endField]) : null);
 	        })), onbHint('weekly'));
 	      }
-	      rows.push(e('div', { key: 'ct', style: card }, e('div', { style: lbl }, 'Контакты владельца'),
+	      rows.push(e('div', { key: 'ct', style: card },
+	        e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 } },
+	          e('div', { style: Object.assign({}, lbl, { marginBottom: 0 }) }, 'Владелец и вход'),
+	          e('div', { style: { border: '1px solid ' + onbTone.ink, borderRadius: 999, padding: '5px 9px', fontFamily: DISPLAY, fontSize: 8, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: onbTone.ink } }, 'Полный доступ')),
 	        e('input', { style: onbInput('ownerEmail', { marginBottom: 7 }), placeholder: 'E-mail', type: 'email', inputMode: 'email', value: ct.email, onChange: function (ev) { onbClearFieldError('ownerEmail'); setCt({ email: ev.target.value }); } }),
 	        onbHint('ownerEmail'),
 	        e('input', { style: onbInput('ownerName', { marginTop: 7, marginBottom: 7 }), placeholder: 'Ваше имя', value: ct.name, onChange: function (ev) { onbClearFieldError('ownerName'); setCt({ name: ev.target.value }); } }),
@@ -14152,11 +14222,40 @@ function AChat() {
 	          (onbCc === 'other' ? e('input', { style: onbInput('ownerPhone', { width: 64, minWidth: 0, flex: 'none' }), placeholder: '+код', inputMode: 'tel', value: onbCcCustom, onChange: function (ev) { onbClearFieldError('ownerPhone'); setOnbCcCustom(ev.target.value); } }) : null),
 	          e('input', { style: onbInput('ownerPhone', { flex: 1, minWidth: 0 }), placeholder: onbCc === '+7' ? '999 000-00-00' : 'Номер телефона', inputMode: 'tel', value: ct.phone, onChange: function (ev) { onbClearFieldError('ownerPhone'); setCt({ phone: ev.target.value }); } })),
 	        onbHint('ownerPhone'),
-	        e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, 'Код страны — слева. Для +7 можно ввести 8 999… или 999… — приведём к формату. Полный номер с «+» сохраним как есть.')));
+	        e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, 'Вы останетесь владельцем с полным доступом. Email и телефон — ваши личные способы входа.')));
+	      if (c.crmImported && (c.team || []).length) rows.push(e('div', { key: 'team', style: card },
+	        e('div', { style: lbl }, 'Команда и роли'),
+	        e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, lineHeight: 1.5, marginBottom: 4 } }, 'Отметьте себя в списке CRM. Для остальных выберите роль. Email или телефон можно указать сразу или оставить пустым.'),
+	        onbHint('team'),
+	        (c.team || []).map(function (member, index) {
+	          var isOwner = String(c.ownerExternalStaffId || '') === String(member.externalStaffId || '');
+	          var setMember = function (patch) { var team = c.team.slice(); team[index] = Object.assign({}, member, patch); setC({ team: team }); };
+	          var emailField = 'team.' + index + '.email'; var phoneField = 'team.' + index + '.phone';
+	          var hasContact = !!(String(member.email || '').trim() || String(member.phone || '').trim());
+	          return e('div', { key: member.externalStaffId || index, style: { borderTop: '1px solid ' + onbTone.line, padding: '12px 0 4px', marginTop: 10 } },
+	            e('div', { style: { display: 'flex', alignItems: 'center', gap: 9 } },
+	              member.avatarUrl ? e('img', { src: member.avatarUrl, alt: '', style: { width: 38, height: 38, flex: 'none', borderRadius: '50%', objectFit: 'cover', border: '1px solid ' + onbTone.line } }) : e('div', { style: { width: 38, height: 38, flex: 'none', borderRadius: '50%', border: '1px solid ' + onbTone.line, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: DISPLAY, fontSize: 13, color: onbTone.ink } }, String(member.displayName || '?').slice(0, 1).toUpperCase()),
+	              e('div', { style: { minWidth: 0, flex: 1 } },
+	                e('div', { style: { fontFamily: BODY, fontSize: 13.5, fontWeight: 700, color: onbTone.ink, overflowWrap: 'anywhere' } }, member.displayName),
+	                member.title ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 2 } }, member.title) : null),
+	              e('button', { type: 'button', onClick: function () { onbClearFieldError('team'); setC({ ownerExternalStaffId: isOwner ? '' : member.externalStaffId }); }, style: { flex: 'none', border: '1px solid ' + (isOwner ? onbTone.ink : onbTone.line), borderRadius: 999, padding: '7px 10px', background: isOwner ? onbTone.ink : 'transparent', color: isOwner ? onbTone.inverse : onbTone.dim, fontFamily: DISPLAY, fontSize: 8.5, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer' } }, isOwner ? 'Это я · владелец' : 'Это я')),
+	            isOwner ? e('div', { style: { fontFamily: BODY, fontSize: 11, color: onbTone.dim, marginTop: 9, lineHeight: 1.45 } }, 'Профиль CRM привязан к владельцу. Полный доступ и контакты берутся из формы выше.') : e(React.Fragment, null,
+	              e('select', { value: member.role || 'staff', onChange: function (ev) { setMember({ role: ev.target.value }); }, style: Object.assign({}, inp, { marginTop: 9, WebkitAppearance: 'menulist', appearance: 'auto' }) },
+	                e('option', { value: 'staff' }, 'Мастер'),
+	                e('option', { value: 'administrator' }, 'Администратор'),
+	                e('option', { value: 'none' }, 'Без доступа в MAYA')),
+	              member.role !== 'none' ? e(React.Fragment, null,
+	                e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.dim, marginTop: 6, lineHeight: 1.4 } }, member.role === 'administrator' ? 'Доступ: расписание, клиенты и бизнес-аналитика.' : 'Доступ: личные записи и личная аналитика.'),
+	                e('input', { style: onbInput(emailField, { marginTop: 7 }), placeholder: 'Email для входа · можно позже', type: 'email', inputMode: 'email', value: member.email || '', onChange: function (ev) { onbClearFieldError(emailField); setMember({ email: ev.target.value }); } }),
+	                onbHint(emailField),
+	                e('input', { style: onbInput(phoneField, { marginTop: 7 }), placeholder: 'Телефон для входа · можно позже', inputMode: 'tel', value: member.phone || '', onChange: function (ev) { onbClearFieldError(phoneField); setMember({ phone: ev.target.value }); } }),
+	                onbHint(phoneField),
+	                e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: hasContact ? onbTone.dim : onbTone.faint, marginTop: 6, lineHeight: 1.4 } }, hasContact ? 'Доступ будет готов после подтверждения кода.' : 'Роль сохранится, но без контакта учётная запись пока не создастся.')) : e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: onbTone.faint, marginTop: 7 } }, 'Сотрудник останется в CRM, но не получит доступ к MAYA.')));
+	        })));
 	      if (onbErr) rows.push(e('div', { key: 'e', style: { fontFamily: BODY, fontSize: 12, fontWeight: 600, color: onbTone.ink, margin: '6px 2px 0', lineHeight: 1.5 } }, onbErr));
 	      rows.push(e('div', { key: 'go', onClick: onbBusy ? undefined : onbConfirmGo, style: { marginTop: 12, textAlign: 'center', padding: '14px', borderRadius: 14, background: onbTone.ink, color: onbTone.inverse, fontFamily: DISPLAY, fontWeight: 600, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: onbBusy ? 'default' : 'pointer', opacity: onbBusy ? 0.6 : 1 } }, onbBusy ? 'Создаём…' : 'Создать бизнес'));
 	      rows.push(e('div', { key: 'bk', onClick: function () { setOnbStage('chat'); setOnbErr(''); setOnbFieldErrors({}); }, style: { marginTop: 10, textAlign: 'center', fontFamily: BODY, fontSize: 12.5, color: onbTone.faint, cursor: 'pointer' } }, '← Вернуться к диалогу'));
-	      return e('div', { style: { marginTop: 6 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink, margin: '4px 2px 2px' } }, 'Проверьте и подтвердите'), e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, margin: '0 2px 8px', lineHeight: 1.5 } }, c.crmImported ? 'Данные бизнеса загружены из CRM. Здесь остаются только контакты владельца.' : 'Всё можно поправить прямо здесь.'), rows);
+	      return e('div', { style: { marginTop: 6 } }, e('div', { style: { fontFamily: DISPLAY, fontWeight: 200, fontSize: 18, textTransform: 'uppercase', color: onbTone.ink, margin: '4px 2px 2px' } }, 'Проверьте и подтвердите'), e('div', { style: { fontFamily: BODY, fontSize: 12, color: onbTone.dim, margin: '0 2px 8px', lineHeight: 1.5 } }, c.crmImported ? 'Бизнес загружен из CRM. Теперь подтвердите владельца и распределите роли команды.' : 'Всё можно поправить прямо здесь.'), rows);
 	    }
 	    if (onbStage === 'logo') {
 	      return e('div', { style: card },

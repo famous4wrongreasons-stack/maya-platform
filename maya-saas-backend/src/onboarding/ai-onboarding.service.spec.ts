@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   GoneException,
   UnauthorizedException,
@@ -7,11 +8,12 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
-import { CalendarSource, CrmProvider } from '../common/domain.enums';
+import { CalendarSource, CrmProvider, UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { UsersService } from '../users/users.service';
 import type { AiOnboardingBlueprint } from './ai-onboarding.types';
 import { AiOnboardingService } from './ai-onboarding.service';
 import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
@@ -125,6 +127,9 @@ describe('AiOnboardingService', () => {
         authorizePendingToken: jest.fn(),
         releaseCompletedTenant: jest.fn(),
       } as unknown as TrialActivationService,
+      {
+        provisionCrmTeamAccess: jest.fn(),
+      } as unknown as UsersService,
     );
 
     return {
@@ -227,7 +232,13 @@ describe('AiOnboardingService', () => {
           },
         ],
       },
-      staff: { count: 5, items: [] },
+      staff: {
+        count: 2,
+        items: [
+          { id: 'staff-1', name: 'Илья', title: 'Барбер' },
+          { id: 'staff-2', name: 'Антон', title: 'Администратор' },
+        ],
+      },
       warnings: [],
     });
     updateDraft.mockImplementation(({ data }) =>
@@ -249,7 +260,7 @@ describe('AiOnboardingService', () => {
 
     expect(result.blueprint).toMatchObject({
       businessName: 'Мужская Эстетика',
-      providerCount: 5,
+      providerCount: 2,
       crmImported: true,
       crmCompanyId: '503759',
       crmLogoUrl: 'https://example.com/logo.png',
@@ -258,6 +269,19 @@ describe('AiOnboardingService', () => {
     expect(JSON.stringify(updateDraft.mock.calls[0]?.[0])).not.toContain(
       'raw-user-token',
     );
+    expect(JSON.stringify(updateDraft.mock.calls[0]?.[0])).not.toContain(
+      'Илья',
+    );
+    expect(result.crm_staff).toEqual([
+      expect.objectContaining({
+        external_staff_id: 'staff-1',
+        display_name: 'Илья',
+      }),
+      expect.objectContaining({
+        external_staff_id: 'staff-2',
+        display_name: 'Антон',
+      }),
+    ]);
   });
 
   it('persists only a structured blueprint and input digest, never the raw story', async () => {
@@ -341,6 +365,48 @@ describe('AiOnboardingService', () => {
         ownerPhone: '+79990000000',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+  });
+
+  it('rejects a CRM staff identity that was not verified for the imported branch', async () => {
+    const token = 'a'.repeat(43);
+    const claimDraft = jest.fn();
+    const { service, onboarding } = createService({
+      findDraft: jest.fn().mockResolvedValue({
+        id: 'draft-1',
+        status: 'draft',
+        draftTokenHash: createHash('sha256').update(token).digest('hex'),
+        blueprintJson: {
+          ...completeBlueprint,
+          crmStaffIdentityHashes: [
+            createHash('sha256')
+              .update('yclients:503759:staff-verified')
+              .digest('hex'),
+          ],
+        },
+        missingFieldsJson: [],
+        expiresAt: new Date(Date.now() + 60_000),
+        confirmedTenantId: null,
+      }),
+      claimDraft,
+    });
+
+    await expect(
+      service.confirmDraft('draft-1', {
+        draftToken: token,
+        ownerEmail: 'owner@example.ru',
+        ownerName: 'Владелец',
+        ownerPhone: '+79990000000',
+        teamMembers: [
+          {
+            externalStaffId: 'staff-from-another-branch',
+            displayName: 'Чужой мастер',
+            role: UserRole.STAFF,
+          },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(claimDraft).not.toHaveBeenCalled();
     expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
   });
 
