@@ -844,6 +844,19 @@ window.__meReturnToLegacyWorkspace = function () {
       var ctx = window.__ME_SAAS_CTX; if (!ctx || !ctx.ns) return;
       var b = null; try { b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ctx.ns) || 'null'); } catch (e) {}
       if (!b || !b.token) return;
+      // Этот boot-скрипт выполняется раньше общего authenticated-fetch. Не отправляем
+      // потенциально просроченный access token напрямую: после разбора страницы общий
+      // single-flight pipeline подхватит запрос и безопасно выполнит одну rotation.
+      if (!window.__meSaasAuthedFetch) {
+        if (!window.__meEffectiveFeaturesRetryPending) {
+          window.__meEffectiveFeaturesRetryPending = true;
+          setTimeout(function () {
+            window.__meEffectiveFeaturesRetryPending = false;
+            try { window.__meLoadEffectiveFeatures(); } catch (e) {}
+          }, 50);
+        }
+        return;
+      }
       var request = window.__meSaasAuthedFetch
         ? window.__meSaasAuthedFetch('/features/effective', {})
         : fetch(String(ctx.api).replace(/\/+$/, '') + '/features/effective', { headers: { Authorization: 'Bearer ' + b.token } })
@@ -4419,6 +4432,67 @@ function meSaasDefaultCabinetTab(role) {
   role = String(role || '').toLowerCase();
   return meSaasIsManagerRole(role) ? 'biz' : (meSaasIsBusinessRole(role) ? 'mystat' : 'appts');
 }
+function meSaasStoreUser(user) {
+  var b = meSaasCurrentBundle();
+  var ctx = window.__ME_SAAS_CTX;
+  if (!b || !ctx || !ctx.ns || !user) return null;
+  var userTenantSlug = String(user.tenant && user.tenant.slug || '').trim().toLowerCase();
+  var bundleTenantSlug = String(b.tenant_slug || ctx.slug || '').trim().toLowerCase();
+  if (userTenantSlug && bundleTenantSlug && userTenantSlug !== bundleTenantSlug) return null;
+  b.user = user;
+  try { localStorage.setItem('me_saas_auth_v2:' + ctx.ns, JSON.stringify(b)); } catch (e) {}
+  return b;
+}
+// Роль в интерфейсе никогда не выводится из введённого телефона или CRM-токена.
+// Её подтверждает только tenant-scoped /me, то есть подписанная сервером сессия
+// плюс активное Membership в конкретном бизнесе.
+function meSaasApplyIdentity(user) {
+  if (!user) return false;
+  var role = String(user.role || '').toLowerCase();
+  var business = meSaasIsBusinessRole(role);
+  if (!business) return false;
+  if (!meSaasStoreUser(user)) return false;
+  var manager = meSaasIsManagerRole(role);
+  var name = String(user.name || '').trim() || String(user.email || '').split('@')[0] || 'Владелец';
+  var legacyRole = manager ? 'owner' : 'master';
+  window.__meIsStaff = true;
+  window.__meIsMaster = !manager;
+  window.__meIsFounder = false;
+  window.__meRole = legacyRole;
+  window.__meStaffName = name;
+  window.__panelInfo = Object.assign({}, window.__panelInfo || {}, user, {
+    role: legacyRole,
+    tenant_role: role,
+    master_name: name,
+    is_master: !manager,
+    is_founder: false,
+    permissions: manager ? {
+      dashboard: true,
+      analytics: true,
+      staff: true,
+      jobs: true,
+      marketing: true,
+      reviews: true,
+      redeem: true
+    } : { dashboard: true }
+  });
+  try { localStorage.setItem('me_is_staff', '1'); } catch (e) {}
+  return true;
+}
+function meSaasRefreshIdentity() {
+  if (!window.__ME_SAAS_CTX || typeof meWidgetAf !== 'function') return Promise.reject(new Error('no_saas_context'));
+  return meWidgetAf('/me').then(function (user) {
+    if (!meSaasApplyIdentity(user)) {
+      var err = new Error('owner_membership_required');
+      err.code = 'owner_membership_required';
+      throw err;
+    }
+    if (window.__meRefresh) window.__meRefresh();
+    return user;
+  });
+}
+window.meSaasApplyIdentity = meSaasApplyIdentity;
+window.meSaasRefreshIdentity = meSaasRefreshIdentity;
 // Maya OS 3A: вкладки клиента — Запись / Чат / Записи / Профиль
 const CLIENT_TABS = [{
   ic: TabIcCalPlus,
@@ -4854,10 +4928,13 @@ function ALogin() {
         (function goHome() {
           if (window.__meMode && window.__meGo) {
             window.__meMode('staff');
-            window.__meSaasWantCabinet = !openCrm;
-            window.__meSaasWantCabinetTab = openCalendar ? 'schedule' : (requestedCabinet || 'biz');
+            window.__meSaasWantCabinet = false;
+            window.__meSaasWantCabinetTab = null;
+            var panelTabMap = { analytics: 'analytics', customers: 'clients', team: 'staff', calendar: 'schedule', services: 'services', schedule: 'schedule', profile: 'profile', integrations: 'integrations' };
+            var panelTab = openCalendar ? 'schedule' : (panelTabMap[requestedCabinet] || 'maya');
+            window.__meSaasPanelTab = panelTab;
             if (openCrm) { try { window.__meBootCrm = false; } catch (e4) {} }
-            window.__meGo(openCrm ? 'crm' : 'book');
+            window.__meGo(openCrm ? 'crm' : (openCalendar || !!panelTabMap[requestedCabinet] ? 'panel' : 'staff-home'));
             return;
           }
           if (tries++ < 30) setTimeout(goHome, 150);
@@ -12118,12 +12195,30 @@ window.ABookCard = ABookCard;
 
 // Общий authed-fetch для чат-виджетов (фолбэк по бандлу + refresh-on-401), как в ABookCard.
 function meWidgetAf(path, init) {
-  if (window.__meSaasAuthedFetch) return window.__meSaasAuthedFetch(path, init);
+  if (window.__meSaasAuthedFetch && window.__meSaasAuthedFetch !== meWidgetAf) return window.__meSaasAuthedFetch(path, init);
   var ctx = window.__ME_SAAS_CTX;
   if (!ctx || !ctx.api) return Promise.reject({ code: 'no_ctx' });
   var key = 'me_saas_auth_v2:' + ctx.ns;
   var base = String(ctx.api).replace(/\/+$/, '');
-  var rd = function () { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } };
+  var rd = function () {
+    try {
+      var b = JSON.parse(localStorage.getItem(key) || 'null');
+      if (!b || !b.token) return null;
+      var tenant = String(b.tenant_slug || '').trim().toLowerCase();
+      var expectedTenant = String(ctx.slug || '').trim().toLowerCase();
+      var api = String(b.api_base || '').replace(/\/+$/, '').toLowerCase();
+      if ((tenant && expectedTenant && tenant !== expectedTenant) || (api && api !== base.toLowerCase())) return null;
+      return b;
+    } catch (e) { return null; }
+  };
+  var authError = function (r, body) {
+    var detail = body && typeof body === 'object' ? body.error : null;
+    var er = new Error((detail && detail.message) || (body && body.message) || ('http_' + r.status));
+    er.status = r.status;
+    er.code = (detail && detail.code) || (body && body.code) || null;
+    er.body = body;
+    return er;
+  };
   var finalize = function (r, body) { if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; } return body; };
   var doFetch = function (token) {
     var ini = init || {};
@@ -12132,33 +12227,98 @@ function meWidgetAf(path, init) {
       return r.text().then(function (txt) { var body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) {} return { r: r, body: body }; });
     });
   };
-  var refresh = function (rt) {
-    return fetch(base + '/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: rt }) })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (res) {
-        if (!res || !res.access_token) return null;
-        var b = rd() || {};
-        b.token = res.access_token;
-        if (res.refresh_token) b.refresh_token = res.refresh_token;
-        b.access_expires_at = res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : b.access_expires_at;
-        if (res.user) b.user = res.user;
-        try { localStorage.setItem(key, JSON.stringify(b)); } catch (e) {}
-        return b.token;
-      }).catch(function () { return null; });
-  };
-  var b0 = rd();
-  if (!b0 || !b0.token) return Promise.reject({ status: 401, code: 'no_session' });
-  return doFetch(b0.token).then(function (out) {
-    if (out.r.status === 401 && b0.refresh_token) {
-      return refresh(b0.refresh_token).then(function (nt) {
-        if (!nt) { var e401 = new Error('http_401'); e401.status = 401; e401.code = 'session_expired'; throw e401; }
-        return doFetch(nt).then(function (o2) { return finalize(o2.r, o2.body); });
+  var refresh = function (expectedToken) {
+    var map = window.__meSaasRtMap = window.__meSaasRtMap || {};
+    var rtState = map[ctx.ns] || (map[ctx.ns] = { p: null, bc: null, tomb: false });
+    if (rtState.p) return rtState.p;
+    function clearMatching(sentRefresh, reason) {
+      var current = rd();
+      if (!current || current.refresh_token !== sentRefresh) return;
+      try { localStorage.removeItem(key); } catch (e) {}
+      try { window.dispatchEvent(new CustomEvent('me-saas-logout', { detail: { reason: reason || 'session_expired' } })); } catch (e) {}
+    }
+    async function rotate() {
+      var before = rd();
+      if (!before) { var e0 = new Error('Требуется вход'); e0.status = 401; e0.code = 'no_session'; throw e0; }
+      if (expectedToken && before.token !== expectedToken) return before;
+      if (!before.refresh_token) { var e1 = new Error('Требуется вход'); e1.status = 401; e1.code = 'refresh_unavailable'; throw e1; }
+      var sentRefresh = before.refresh_token;
+      var response = await fetch(base + '/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: sentRefresh })
       });
+      var txt = await response.text();
+      var body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) { body = txt; }
+      var latest = rd();
+      // Пока запрос был в сети, другая вкладка могла уже сохранить новую пару.
+      // Поздний ответ не имеет права перезаписывать более свежую сессию.
+      if (latest && latest.refresh_token !== sentRefresh) return latest;
+      if (!response.ok) {
+        var failure = authError(response, body);
+        if (failure.status === 401 || ['refresh_token_invalid', 'refresh_token_reused', 'session_expired', 'session_revoked'].indexOf(failure.code) >= 0) clearMatching(sentRefresh, failure.code);
+        throw failure;
+      }
+      if (!body || !body.access_token || !body.refresh_token) {
+        clearMatching(sentRefresh, 'refresh_incomplete');
+        var incomplete = new Error('Сессия завершена — войдите снова.');
+        incomplete.status = 401; incomplete.code = 'refresh_incomplete';
+        throw incomplete;
+      }
+      latest = rd();
+      if (!latest || latest.refresh_token !== sentRefresh) return latest || before;
+      var next = Object.assign({}, latest, {
+        token: body.access_token,
+        refresh_token: body.refresh_token,
+        access_expires_at: body.expires_in ? Date.now() + Number(body.expires_in) * 1000 : null,
+        refresh_expires_at: body.refresh_expires_at || latest.refresh_expires_at || null,
+        session: body.session || latest.session || null,
+        user: body.user || latest.user || null,
+        tenant_slug: String(ctx.slug || latest.tenant_slug || '').trim().toLowerCase(),
+        api_base: base
+      });
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch (e) {
+        var writeError = new Error('Не удалось сохранить обновлённую сессию.');
+        writeError.code = 'session_write_failed'; throw writeError;
+      }
+      var saved = rd();
+      if (!saved || saved.token !== next.token || saved.refresh_token !== next.refresh_token) {
+        var verifyError = new Error('Не удалось сохранить обновлённую сессию.');
+        verifyError.code = 'session_write_failed'; throw verifyError;
+      }
+      return saved;
+    }
+    rtState.p = (async function () {
+      if (typeof navigator !== 'undefined' && navigator.locks && navigator.locks.request) {
+        return navigator.locks.request('me_saas_auth_refresh:' + ctx.ns, { mode: 'exclusive' }, rotate);
+      }
+      return rotate();
+    })().finally(function () { rtState.p = null; });
+    return rtState.p;
+  };
+  return (async function () {
+    var b0 = rd();
+    if (!b0 || !b0.token) { var noSession = new Error('Требуется вход'); noSession.status = 401; noSession.code = 'no_session'; throw noSession; }
+    // Обновляем заранее, до того как несколько экранов одновременно отправят
+    // уже просроченный access token.
+    if (b0.refresh_token && b0.access_expires_at && Number(b0.access_expires_at) - Date.now() < 30000) b0 = await refresh(b0.token);
+    var sentToken = b0.token;
+    var out = await doFetch(sentToken);
+    if (out.r.status === 401 && b0.refresh_token) {
+      var latest = rd();
+      if (latest && latest.token !== sentToken) b0 = latest;
+      else b0 = await refresh(sentToken);
+      if (!b0 || !b0.token) { var expired = new Error('Сессия завершена'); expired.status = 401; expired.code = 'session_expired'; throw expired; }
+      out = await doFetch(b0.token);
     }
     return finalize(out.r, out.body);
-  });
+  })();
 }
 window.meWidgetAf = meWidgetAf;
+// Полный кабинет владельца может открыться без монтирования booking-flow.
+// Поэтому общий канал авторизованных запросов должен существовать уже сейчас,
+// а не появляться только после посещения экрана записи.
+if (!window.__meSaasAuthedFetch) window.__meSaasAuthedFetch = meWidgetAf;
 
 // ── Инлайн-виджет «Мои записи» в ленте чата: GET /appointments/my + отмена; пусто → CTA «Записаться».
 function AMyBookingsCard(props) {
@@ -12849,7 +13009,7 @@ function AChat() {
     if (['tenant_owner', 'business_owner', 'tenant_admin', 'administrator', 'manager'].indexOf(sr) >= 0) return 'owner';
     if (['provider', 'employee', 'staff'].indexOf(sr) >= 0) return 'staff';
     try {
-      return window.__meCurMode === 'staff' || window.__meChatReturn === 'staff-home' || (window.__ME_SAAS_CTX && window.__meChatReturn === 'book') ? 'staff' : 'client';
+      return window.__meCurMode === 'staff' || window.__meChatReturn === 'staff-home' || window.__meChatReturn === 'panel' ? 'staff' : 'client';
     } catch (e) {
       return 'client';
     }
@@ -13455,7 +13615,24 @@ function AChat() {
 	    try { localStorage.setItem('me_saas_auth_v2:' + ns, JSON.stringify(bundle)); } catch (e) {}
 	    var back = null; try { back = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ns) || 'null'); } catch (e) {}
 	    if (!back || back.token !== bundle.token || back.refresh_token !== bundle.refresh_token) throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
-	    return { tenantSlug: tSlug, tenantId: tId, token: res.access_token };
+	    return { tenantSlug: tSlug, tenantId: tId, token: res.access_token, ns: ns, key: 'me_saas_auth_v2:' + ns };
+	  }
+	  async function onbVerifyOwnerBundle(saved, api) {
+	    if (!saved || !saved.key || !saved.token) throw new Error('Не удалось подтвердить вход владельца.');
+	    var r = await fetch(String(api || '').replace(/\/+$/, '') + '/me', { headers: { Authorization: 'Bearer ' + saved.token } });
+	    var me = null; try { me = await r.json(); } catch (e) {}
+	    if (!r.ok || !onbOwnerRole(me) || String(me.tenant_id || '') !== String(saved.tenantId || '')) {
+	      try { localStorage.removeItem(saved.key); } catch (e) {}
+	      var identityMessage = 'Сервер не подтвердил роль владельца. Бизнес не будет открыт с чужими правами.';
+	      throw Object.assign(new Error(identityMessage), { code: 'owner_identity_not_verified', emsg: identityMessage });
+	    }
+	    var bundle = null; try { bundle = JSON.parse(localStorage.getItem(saved.key) || 'null'); } catch (e) {}
+	    if (!bundle || !bundle.token) throw new Error('Не удалось сохранить подтверждённый вход владельца.');
+	    bundle.user = me;
+	    try { localStorage.setItem(saved.key, JSON.stringify(bundle)); } catch (e) {}
+	    var currentCtx = window.__ME_SAAS_CTX;
+	    if (currentCtx && currentCtx.ns === saved.ns && typeof meSaasApplyIdentity === 'function') meSaasApplyIdentity(me);
+	    return me;
 	  }
 	  function onbOpenApp(api, slug, cal) {
 	    try {
@@ -13723,6 +13900,10 @@ function AChat() {
 	        throw Object.assign(new Error('confirm'), { code: apiCode, emsg: apiFirst ? apiFields[apiFirst] : (apiError.message || (data && data.message)), fieldErrors: apiFields });
 	      }
 	      var saved = onbSaveBundle(data, api);
+	      // Не доверяем контактной форме для назначения роли. Сразу после создания
+	      // перепроверяем подписанную сессию и Membership через /me; только затем
+	      // открываем полноценный кабинет владельца.
+	      await onbVerifyOwnerBundle(saved, api);
 	      var trial = data.trial || (data.trial_activation && data.trial_activation.trial) || null;
 	      var nextStep = data.next_step || (c.calendarSource === 'external' ? 'connect_crm' : 'upload_logo_or_open_app');
 	      onbClearAllSS();
@@ -20755,7 +20936,7 @@ const STAFF_TABS = [{
   label: "Чат",
   onTap: () => {
     var role = meSaasCurrentRole();
-    window.__meChatReturn = window.__ME_SAAS_CTX && meSaasIsBusinessRole(role) ? "book" : "staff-home";
+    window.__meChatReturn = window.__ME_SAAS_CTX && meSaasIsBusinessRole(role) ? "panel" : "staff-home";
     window.__meGo && window.__meGo("chat");
   }
 }, {
@@ -20782,23 +20963,23 @@ const STAFF_TABS = [{
   }
 }];
 
-// Universal MAYA OS does not send a tenant owner into the legacy barbershop
-// panels. These tabs open role-safe surfaces backed by the SaaS API.
+// Universal MAYA OS uses the same information architecture as the production
+// staff app, but every screen below is backed only by the current tenant API.
 function saasStaffTabItems() {
   var role = meSaasCurrentRole();
   if (!window.__ME_SAAS_CTX || !meSaasIsBusinessRole(role)) return STAFF_TABS;
   if (meSaasIsManagerRole(role)) return [{
     ic: StaffIcCab,
     label: "Кабинет",
-    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('biz', 0)
+    onTap: () => window.__meGo && window.__meGo('staff-home')
   }, {
     ic: TabIcChat,
     label: "Чат",
-    onTap: () => { if (window.__meMode) window.__meMode('staff'); window.__meChatReturn = "book"; window.__meGo && window.__meGo("chat"); }
+    onTap: () => { if (window.__meMode) window.__meMode('staff'); window.__meChatReturn = "staff-home"; window.__meGo && window.__meGo("chat"); }
   }, {
     ic: StaffIcFin,
     label: "Финансы",
-    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('biz', 2)
+    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('analytics', 2)
   }, {
     ic: StaffIcPeople,
     label: "Клиенты",
@@ -20807,15 +20988,15 @@ function saasStaffTabItems() {
   return [{
     ic: StaffIcCab,
     label: "Кабинет",
-    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('mystat', 0)
+    onTap: () => window.__meGo && window.__meGo('staff-home')
   }, {
     ic: TabIcChat,
     label: "Чат",
-    onTap: () => { if (window.__meMode) window.__meMode('staff'); window.__meChatReturn = "book"; window.__meGo && window.__meGo("chat"); }
+    onTap: () => { if (window.__meMode) window.__meMode('staff'); window.__meChatReturn = "staff-home"; window.__meGo && window.__meGo("chat"); }
   }, {
     ic: StaffIcFin,
     label: "Статистика",
-    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('mystat', 2)
+    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('analytics', 2)
   }, {
     ic: TabIcUser,
     label: "Профиль",
@@ -23176,6 +23357,9 @@ function AEarnTile(props) {
     e('div', { style: { position: 'absolute', inset: 0, borderRadius: '24%', boxShadow: 'inset 0 1px 1px rgba(255,255,255,.5), inset 0 0 0 1px rgba(255,255,255,.16)', pointerEvents: 'none' } }));
 }
 function AStaffHome() {
+  const saasRole = meSaasCurrentRole();
+  const saasBusiness = !!window.__ME_SAAS_CTX && meSaasIsBusinessRole(saasRole);
+  const saasManager = saasBusiness && meSaasIsManagerRole(saasRole);
   const [shToday, setShToday] = React.useState(null);
   const [shTomorrow, setShTomorrow] = React.useState(null);
   const [shRev, setShRev] = React.useState(null);
@@ -23186,8 +23370,83 @@ function AStaffHome() {
   const [staffTasks, setStaffTasks] = React.useState([]);
   const [staffTaskBusy, setStaffTaskBusy] = React.useState({});
   const STAFF_TASK_PX = "https://malesthetic.pro/app/api-proxy.php";
+  function saasRange(from, to) {
+    return 'from=' + encodeURIComponent(from.toISOString()) + '&to=' + encodeURIComponent(to.toISOString());
+  }
+  function saasAmount(list) {
+    if (!Array.isArray(list) || !list.length) return 0;
+    var item = list.filter(function (x) { return !x.currency || x.currency === 'RUB'; })[0] || list[0];
+    return (Number(item && item.amount_kopecks) || 0) / 100;
+  }
   React.useEffect(function () {
     try {
+      if (saasBusiness) {
+        var now = new Date();
+        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var tomorrowStart = new Date(todayStart.getTime() + 86400000);
+        var analyticsPath = saasManager ? '/analytics/business?' : '/analytics/me?';
+        var monthQ = saasRange(monthStart, now);
+        var todayQ = saasRange(todayStart, tomorrowStart);
+        var emptyAnalytics = function (error) {
+          return { _error: error || null, appointments: { total: 0, active: 0, cancelled: 0, unique_clients: 0 }, revenue: [], expenses: [], net: [], average_ticket: [], daily: [], staff: [] };
+        };
+        // Membership is the authority. CRM availability only controls the data
+        // calls and must never downgrade an authenticated owner to client UI.
+        Promise.all([
+          meSaasRefreshIdentity(),
+          saasManager ? meWidgetAf('/integrations/crm').catch(function (x) { return { _error: x, configured: false, connection: null }; }) : Promise.resolve(null)
+        ]).then(function (base) {
+          var crm = base[1] || {};
+          var source = String(crm.calendar_source || (window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source) || 'external').toLowerCase();
+          var connection = crm.connection || {};
+          var provider = String(connection.provider || (window.__SAAS_TENANT && window.__SAAS_TENANT.crm_provider) || '').toLowerCase();
+          var status = String(connection.status || (window.__SAAS_TENANT && window.__SAAS_TENANT.crm_status) || '').toLowerCase();
+          var externalCrmReady = source === 'external' && provider && provider !== 'mock' && status === 'active';
+          var analyticsReady = source !== 'external' || externalCrmReady;
+          return Promise.all([
+            Promise.resolve(base[0]),
+            analyticsReady ? meWidgetAf(analyticsPath + monthQ).catch(emptyAnalytics) : Promise.resolve(emptyAnalytics({ code: 'crm_not_ready' })),
+            analyticsReady ? meWidgetAf(analyticsPath + todayQ).catch(emptyAnalytics) : Promise.resolve(emptyAnalytics({ code: 'crm_not_ready' })),
+            saasManager && externalCrmReady ? meWidgetAf('/integrations/crm/journal?' + saasRange(todayStart, tomorrowStart)).catch(function (x) { return { appointments: [], _error: x }; }) : Promise.resolve({ appointments: [] }),
+            saasManager && externalCrmReady ? meWidgetAf('/analytics/business/finance?' + monthQ).catch(function () { return null; }) : Promise.resolve(null),
+            Promise.resolve(crm)
+          ]);
+        }).then(function (r) {
+          var me = r[0] || {};
+          var month = r[1] || {};
+          var today = r[2] || {};
+          var journal = r[3] || {};
+          var finance = r[4] || null;
+          var crmState = r[5] || {};
+          var crmConnection = crmState.connection || {};
+          var crmReady = String(crmState.calendar_source || '').toLowerCase() !== 'external' ||
+            (String(crmConnection.provider || '').toLowerCase() !== 'mock' && String(crmConnection.status || '').toLowerCase() === 'active');
+          if (me && me.name) window.__meStaffName = me.name;
+          var monthRevenue = finance && finance.revenue && finance.revenue.status === 'available' && finance.revenue.total
+            ? (Number(finance.revenue.total.amount_kopecks) || 0) / 100
+            : saasAmount(month.revenue);
+          var todayRevenue = saasAmount(today.revenue);
+          setShEarn({ gross_month: monthRevenue, earned_today: todayRevenue, salary_week: monthRevenue, saas_owner: saasManager, crm_ready: crmReady });
+          setShRev(todayRevenue);
+          var active = (Array.isArray(journal.appointments) ? journal.appointments : []).filter(function (a) {
+            var st = String(a && a.status || '').toLowerCase();
+            return st !== 'cancelled' && st !== 'canceled' && st !== 'no_show' && st !== 'noshow';
+          }).sort(function (a, b) { return String(a.start_at || '').localeCompare(String(b.start_at || '')); });
+          var upcoming = active.filter(function (a) { return new Date(a.start_at).getTime() >= Date.now(); });
+          var next = upcoming[0] || null;
+          var nextTime = '';
+          try { if (next) nextTime = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: journal.timezone || (month.period && month.period.timezone) || 'Europe/Moscow' }).format(new Date(next.start_at)); } catch (e) {}
+          setShToday({ count: active.length || Number(today.appointments && today.appointments.active || 0), upcoming: upcoming.length, next: next ? { start: nextTime } : null, dayOff: !saasManager && active.length === 0, mine: !saasManager });
+          try { window.__meSaasOwnerSnapshot = { me: me, month: month, today: today, journal: journal, finance: finance, crm: crmState }; } catch (e) {}
+        }).catch(function (error) {
+          setShEarn({ gross_month: 0, earned_today: 0, salary_week: 0, saas_owner: saasManager });
+          setShRev(0);
+          setShToday({ count: 0, upcoming: 0, next: null, dayOff: false, mine: !saasManager });
+          if (error && error.status === 401 && window.__meGo) window.__meGo('login');
+        });
+        return;
+      }
       if (!window.__meAuthReq) return;
       var PX = "https://malesthetic.pro/app/api-proxy.php";
       var d = new Date();
@@ -23329,6 +23588,7 @@ function AStaffHome() {
   }, []);
   function loadStaffTasks() {
     try {
+      if (saasBusiness) return;
       if (!window.__meAuthReq) return;
       var rq = window.__meAuthReq({ limit: 8 });
       if (!rq) return;
@@ -23368,6 +23628,10 @@ function AStaffHome() {
     return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
   }
   function openDayTile() {
+    if (saasBusiness) {
+      window.__meSaasCabinet && window.__meSaasCabinet('schedule', 0);
+      return;
+    }
     if (window.__meIsMaster) {
       setDayDate(new Date().getHours() >= 21 ? staffIsoDate(1) : null);
       setDayOpen(true);
@@ -23435,7 +23699,7 @@ function AStaffHome() {
   const compactHome = typeof meCompactViewport === "function" && meCompactViewport();
   return /*#__PURE__*/React.createElement(AuroraShell, {
     tab: {
-      items: STAFF_TABS,
+      items: saasBusiness ? saasStaffTabItems() : STAFF_TABS,
       active: 0
     },
     showLogo: false,
@@ -23471,7 +23735,7 @@ function AStaffHome() {
     style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 20 }
   }, /*#__PURE__*/React.createElement("div", {
     // 1 · Валовая прибыль мастера за месяц
-    onClick: () => { if (dbgTap('MY_EARNINGS', function () { return JSON.stringify(shEarn, null, 1); })) return; window.__meGo && window.__meGo("panel"); },
+    onClick: () => { if (dbgTap('MY_EARNINGS', function () { return JSON.stringify(shEarn, null, 1); })) return; if (saasManager && window.__meSaasCabinet) window.__meSaasCabinet('analytics', 2); else window.__meGo && window.__meGo("panel"); },
     style: { border: "1px solid " + t.line, borderRadius: 18, padding: "14px 12px", background: t.card, cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: DISPLAY, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: t.dim }
@@ -23479,9 +23743,9 @@ function AStaffHome() {
     style: { fontFamily: DISPLAY, fontSize: 19, fontWeight: 200, marginTop: 8, color: t.ink, whiteSpace: "nowrap" }
   }, shEarn && shEarn.gross_month != null ? Number(shEarn.gross_month).toLocaleString("ru-RU") : "…"), /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: BODY, fontSize: 9.5, color: t.dim, marginTop: 2 }
-  }, "₽ · валовая")), /*#__PURE__*/React.createElement("div", {
+  }, saasManager ? (shEarn && shEarn.crm_ready ? "₽ · поступления CRM" : "₽ · после подключения CRM") : "₽ · валовая")), /*#__PURE__*/React.createElement("div", {
     // 2 · Заработал за день
-    onClick: () => window.__meGo && window.__meGo("panel"),
+    onClick: () => saasManager ? (window.__meSaasCabinet && window.__meSaasCabinet('analytics', 2)) : (window.__meGo && window.__meGo("panel")),
     style: { border: "1px solid " + t.line, borderRadius: 18, padding: "14px 12px", cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: DISPLAY, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: t.dim }
@@ -23492,7 +23756,7 @@ function AStaffHome() {
     return v != null ? Number(v).toLocaleString("ru-RU") : "…";
   })()), /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: BODY, fontSize: 9.5, color: t.dim, marginTop: 2 }
-  }, "₽ · заработал")), /*#__PURE__*/React.createElement("div", {
+  }, saasManager ? (shEarn && shEarn.crm_ready ? "₽ · выручка сегодня" : "₽ · после подключения CRM") : "₽ · заработал")), /*#__PURE__*/React.createElement("div", {
     // 3 · Записи: всего · ближайшая · осталось
     "data-coach": "s-book",
     onClick: () => { if (dbgTap('RECORDS_TODAY', function () { return (window.__meDbgRecs || []).join('\n') || 'нет данных'; })) return; openDayTile(); },
@@ -23513,16 +23777,16 @@ function AStaffHome() {
     t: t,
     height: 52,
     label: "Записать клиента",
-    onClick: () => window.__meGo && window.__meGo("schedule"),
+    onClick: () => window.__meGo && window.__meGo(saasBusiness ? "book" : "schedule"),
     style: { marginTop: 10 }
-  }), isFounder ? /*#__PURE__*/React.createElement("div", {
-    onClick: () => window.__meGo && window.__meGo("god"),
+  }), (isFounder || saasManager) ? /*#__PURE__*/React.createElement("div", {
+    onClick: () => window.__meGo && window.__meGo(saasManager ? "panel" : "god"),
     style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, background: t.card, cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("span", {
     style: { width: 7, height: 7, borderRadius: 999, background: t.ink, flex: "none" }
   }), /*#__PURE__*/React.createElement("div", {
     style: { flex: 1, fontFamily: BODY, fontSize: 12, lineHeight: 1.4, color: t.ink }
-  }, "Центр управления · GOD Mode"), Icon.arrow(t.dim, 16)) : null, /*#__PURE__*/React.createElement("div", {
+  }, saasManager ? "Центр управления · Владелец" : "Центр управления · GOD Mode"), Icon.arrow(t.dim, 16)) : null, /*#__PURE__*/React.createElement("div", {
     onClick: () => { window.__meChatReturn = "staff-home"; window.__meGo && window.__meGo("chat"); },
     style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, cursor: "pointer", color: t.ink }
   }, /*#__PURE__*/React.createElement(SeedLogo, { size: 20, sw: 1.7 }), /*#__PURE__*/React.createElement("div", {
@@ -23532,13 +23796,13 @@ function AStaffHome() {
   }, "Спросить Maya"), /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 1 }
   }, "Администратор · онлайн")), Icon.arrow(t.dim, 16)), /*#__PURE__*/React.createElement("div", {
-    onClick: () => window.__meGo && window.__meGo("staff-clients"),
+    onClick: () => saasManager ? (window.__meSaasCabinet && window.__meSaasCabinet('clients', 3)) : (window.__meGo && window.__meGo("staff-clients")),
     style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("div", {
     style: { flex: 1 }
   }, /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: "0.24em", textTransform: "uppercase", color: t.dim }
-  }, shEarn ? "Мой заработок · неделя" : "Выручка сегодня"), /*#__PURE__*/React.createElement("div", {
+  }, saasManager ? (shEarn && shEarn.crm_ready ? "Поступления CRM · месяц" : "CRM ещё не подключена") : (shEarn ? "Мой заработок · неделя" : "Выручка сегодня")), /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: DISPLAY, fontSize: 20, fontWeight: 200, color: t.ink, marginTop: 6 }
   }, (shEarn ? (shEarn.salary_week != null ? Number(shEarn.salary_week).toLocaleString("ru-RU") : "…") : (shRev != null ? Number(shRev).toLocaleString("ru-RU") : "…")) + " ₽")), Icon.arrow(t.dim, 16)), renderStaffTasks(t)));
 }
@@ -27554,11 +27818,223 @@ Object.assign(window, {
   AStaffDashboard
 });
 
+// Полноценная панель владельца MAYA OS. Визуально повторяет рабочую MAYA,
+// но получает данные только через tenant-scoped backend текущего бизнеса.
+function ASaasOwnerPanel() {
+  const e = React.createElement;
+  const initialTab = String(window.__meSaasPanelTab || 'maya');
+  const [tabKey, setTabKey] = React.useState(initialTab);
+  const [period, setPeriod] = React.useState('month');
+  const [data, setData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [err, setErr] = React.useState('');
+  const requestRef = React.useRef(0);
+  const TABS = [
+    { key: 'maya', label: 'MAYA' },
+    { key: 'analytics', label: 'Аналитика' },
+    { key: 'schedule', label: 'Расписание' },
+    { key: 'staff', label: 'Сотрудники' },
+    { key: 'services', label: 'Услуги' },
+    { key: 'clients', label: 'Клиенты' },
+    { key: 'integrations', label: 'Интеграции' },
+    { key: 'profile', label: 'Профиль' }
+  ];
+  function dateRange(kind) {
+    var now = new Date();
+    var from;
+    if (kind === 'day') from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    else if (kind === 'week') { from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0); }
+    else from = new Date(now.getFullYear(), now.getMonth(), 1);
+    return { from: from, to: now };
+  }
+  function qs(from, to) {
+    return 'from=' + encodeURIComponent(from.toISOString()) + '&to=' + encodeURIComponent(to.toISOString());
+  }
+  function load() {
+    var requestId = ++requestRef.current;
+    setLoading(true); setErr('');
+    var range = dateRange(period);
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var scheduleTo = new Date(today.getTime() + 7 * 86400000);
+    var emptyAnalytics = function (error) {
+      return { _error: error || null, data_source: 'unavailable', appointments: { total: 0, active: 0, cancelled: 0, unique_clients: 0 }, revenue: [], expenses: [], net: [], average_ticket: [], daily: [], staff: [] };
+    };
+    Promise.all([
+      meSaasRefreshIdentity(),
+      meWidgetAf('/integrations/crm').catch(function (x) { return { _error: x, configured: false, connection: null }; })
+    ]).then(function (base) {
+      var crm = base[1] || {};
+      var source = String(crm.calendar_source || (window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source) || 'external').toLowerCase();
+      var connection = crm.connection || {};
+      var provider = String(connection.provider || (window.__SAAS_TENANT && window.__SAAS_TENANT.crm_provider) || '').toLowerCase();
+      var status = String(connection.status || (window.__SAAS_TENANT && window.__SAAS_TENANT.crm_status) || '').toLowerCase();
+      var externalCrmReady = source === 'external' && provider && provider !== 'mock' && status === 'active';
+      var analyticsReady = source !== 'external' || externalCrmReady;
+      return Promise.all([
+        Promise.resolve(base[0]),
+        analyticsReady ? meWidgetAf('/analytics/business?' + qs(range.from, range.to)).catch(emptyAnalytics) : Promise.resolve(emptyAnalytics({ code: 'crm_not_ready' })),
+        externalCrmReady ? meWidgetAf('/analytics/business/finance?' + qs(range.from, range.to)).catch(function (x) { return { _error: x }; }) : Promise.resolve({ _error: { code: 'crm_not_ready' } }),
+        externalCrmReady ? meWidgetAf('/integrations/crm/journal?' + qs(today, scheduleTo)).catch(function (x) { return { appointments: [], _error: x }; }) : Promise.resolve({ appointments: [], _error: { code: 'crm_not_ready' } }),
+        meWidgetAf('/staff').catch(function () { return []; }),
+        meWidgetAf('/services').catch(function () { return []; }),
+        meWidgetAf('/customers?limit=50').catch(function () { return []; }),
+        Promise.resolve(crm)
+      ]);
+    }).then(function (r) {
+      if (requestId !== requestRef.current) return;
+      setData({ me: r[0] || {}, analytics: r[1] || {}, finance: r[2] || {}, journal: r[3] || {}, staff: Array.isArray(r[4]) ? r[4] : (r[4] && r[4].items || []), services: Array.isArray(r[5]) ? r[5] : (r[5] && r[5].items || []), customers: Array.isArray(r[6]) ? r[6] : (r[6] && r[6].items || []), crm: r[7] || {} });
+      setLoading(false);
+    }).catch(function (x) {
+      if (requestId !== requestRef.current) return;
+      setLoading(false);
+      setErr(x && x.status === 401 ? 'Сессия владельца истекла. Войдите снова.' : 'Не удалось загрузить данные бизнеса. Проверьте подключение и повторите.');
+    });
+  }
+  React.useEffect(function () { load(); }, [period]);
+  React.useEffect(function () {
+    window.__meSaasPanelTab = null;
+    window.__meSetSaasPanelTab = function (key) {
+      var next = TABS.some(function (x) { return x.key === key; }) ? key : 'maya';
+      setTabKey(next);
+    };
+    return function () { window.__meSetSaasPanelTab = null; };
+  }, []);
+  function firstMoney(list) {
+    if (!Array.isArray(list) || !list.length) return null;
+    return list.filter(function (x) { return !x.currency || x.currency === 'RUB'; })[0] || list[0];
+  }
+  function major(item) { return item && item.amount_kopecks != null ? (Number(item.amount_kopecks) || 0) / 100 : null; }
+  function rub(value) { return value == null ? '—' : Number(value).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₽'; }
+  function num(value) { return Number(value || 0).toLocaleString('ru-RU'); }
+  function safeStatus(a) {
+    var s = String(a && a.status || '').toLowerCase();
+    return s !== 'cancelled' && s !== 'canceled' && s !== 'no_show' && s !== 'noshow';
+  }
+  function dayLabel(iso, tz) {
+    try { return new Intl.DateTimeFormat('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz || 'Europe/Moscow' }).format(new Date(iso)); } catch (x) { return String(iso || '').slice(0, 10); }
+  }
+  function timeLabel(iso, tz) {
+    try { return new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: tz || 'Europe/Moscow' }).format(new Date(iso)); } catch (x) { return ''; }
+  }
+  function content(t) {
+    var d = data || {};
+    var a = d.analytics || {};
+    var f = d.finance || {};
+    var j = d.journal || {};
+    var crmConnection = d.crm && d.crm.connection || {};
+    var crmReady = !!(d.crm && d.crm.configured && String(crmConnection.provider || '').toLowerCase() !== 'mock' && String(crmConnection.status || '').toLowerCase() === 'active');
+    var sourceLabel = crmReady ? (String(crmConnection.provider || '').toLowerCase() === 'yclients' ? 'YClients' : (crmConnection.provider || 'CRM')) : 'MAYA';
+    var tz = j.timezone || (a.period && a.period.timezone) || 'Europe/Moscow';
+    var verifiedRevenue = f.revenue && f.revenue.status === 'available' ? major(f.revenue.total) : null;
+    var appointmentRevenue = major(firstMoney(a.revenue));
+    var revenue = verifiedRevenue != null ? verifiedRevenue : appointmentRevenue;
+    var avg = major(firstMoney(a.average_ticket));
+    var appt = a.appointments || {};
+    var allJournal = (Array.isArray(j.appointments) ? j.appointments : []).filter(safeStatus).sort(function (x, y) { return String(x.start_at || '').localeCompare(String(y.start_at || '')); });
+    var now = new Date(); var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(); var tomorrow = todayStart + 86400000;
+    var todayRows = allJournal.filter(function (x) { var ts = new Date(x.start_at).getTime(); return ts >= todayStart && ts < tomorrow; });
+    var todayRevenue = todayRows.reduce(function (sum, x) { return sum + (Number(x.total_price) || 0); }, 0);
+    var staffById = {};
+    (d.staff || []).forEach(function (x) { staffById[String(x.id)] = x; });
+    var payrollById = {};
+    ((f.payroll && f.payroll.staff) || []).forEach(function (x) { payrollById[String(x.staff_id)] = x; });
+    var perfById = {};
+    (a.staff || []).forEach(function (x) { perfById[String(x.staff_external_id)] = x; });
+    function card(children, extra) {
+      return e('div', { style: Object.assign({ border: '1px solid ' + t.line, borderRadius: 18, padding: 16, background: t.card, color: t.ink }, extra || {}) }, children);
+    }
+    function section(label, children) {
+      return e('div', { style: { marginTop: 24 } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.23em', textTransform: 'uppercase', color: t.dim, margin: '0 2px 10px' } }, label), children);
+    }
+    function kpi(label, value, sub) {
+      return card(e(React.Fragment, null,
+        e('div', { style: { fontFamily: DISPLAY, fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.dim } }, label),
+        e('div', { style: { fontFamily: DISPLAY, fontSize: 23, fontWeight: 200, color: t.ink, marginTop: 10, lineHeight: 1.05 } }, value),
+        sub ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 6, lineHeight: 1.35 } }, sub) : null
+      ));
+    }
+    function action(label, sub, onClick, filled) {
+      return e('button', { type: 'button', onClick: onClick, style: { width: '100%', border: '1px solid ' + (filled ? t.ink : t.line), borderRadius: 16, padding: '14px 16px', background: filled ? t.ink : 'transparent', color: filled ? t.bg : t.ink, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', cursor: 'pointer' } },
+        e('div', { style: { flex: 1 } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 10.5, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase' } }, label), sub ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, opacity: 0.62, marginTop: 4 } }, sub) : null), e('span', { style: { fontSize: 20, fontWeight: 200 } }, '→'));
+    }
+    if (loading && !data) return e('div', { style: { padding: '56px 0', textAlign: 'center', fontFamily: BODY, color: t.dim } }, 'Загружаю данные бизнеса…');
+    if (err && !data) return card(e(React.Fragment, null, e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.5 } }, err), e('button', { onClick: load, style: { marginTop: 14, border: '1px solid ' + t.line, borderRadius: 999, background: 'transparent', color: t.ink, padding: '9px 16px' } }, 'Повторить')));
+    if (tabKey === 'maya') {
+      var recommendation = todayRows.length
+        ? ('Сегодня ' + num(todayRows.length) + ' записей на ' + rub(todayRevenue) + '. Проверьте ближайшие окна и загрузку сотрудников.')
+        : (crmReady ? 'На сегодня активных записей не найдено. Проверьте доступность онлайн-записи и расписание сотрудников в CRM.' : 'Подключите CRM в защищённом центре интеграций. После проверки MAYA сама загрузит расписание, сотрудников, услуги и аналитику.');
+      return e(React.Fragment, null,
+        e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 12 } }, e('div', { style: { flex: 1 } },
+          e('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: t.dim } }, 'MAYA · БИЗНЕС'),
+          e('h1', { style: { fontFamily: BODY, fontSize: 25, lineHeight: 1.08, color: t.ink, margin: '10px 0 8px' } }, todayRows.length ? ('Сегодня ' + num(todayRows.length) + ' записей') : 'Сегодня записей пока нет'),
+          e('div', { style: { fontFamily: BODY, fontSize: 13, color: t.dim, lineHeight: 1.45 } }, crmReady ? ('Ожидаемые поступления ' + rub(todayRevenue) + '. Источник: ' + sourceLabel + '.') : 'Данные бизнеса появятся сразу после подключения и проверки CRM.')
+        ), e('button', { onClick: load, style: { border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, padding: '10px 13px', fontFamily: BODY, fontWeight: 600 } }, loading ? '…' : 'Обновить')),
+        e('div', { style: { marginTop: 20, borderRadius: 24, padding: '22px 20px', minHeight: 280, boxSizing: 'border-box', background: '#15140f', color: '#f4f0eb', display: 'flex', flexDirection: 'column' } },
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, e(SeedLogo, { size: 22, sw: 1.6 }), e('span', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', opacity: 0.62 } }, 'MAYA · ГЛАВНОЕ')),
+          e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 22, lineHeight: 1.2, marginTop: 28 } }, recommendation),
+          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, borderTop: '1px solid rgba(255,255,255,.16)', marginTop: 24, paddingTop: 20 } },
+            e('div', null, e('div', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200 } }, rub(todayRevenue)), e('div', { style: { fontFamily: BODY, fontSize: 11, opacity: 0.55, marginTop: 5 } }, 'ожидаем сегодня')),
+            e('div', null, e('div', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200 } }, num(todayRows.length)), e('div', { style: { fontFamily: BODY, fontSize: 11, opacity: 0.55, marginTop: 5 } }, 'активных записей'))
+          ),
+          e('div', { style: { marginTop: 'auto', paddingTop: 30, fontFamily: BODY, fontSize: 12, lineHeight: 1.5, opacity: 0.62 } }, verifiedRevenue != null ? 'Финансовые показатели подтверждены CRM.' : (crmReady ? 'Операционные показатели рассчитаны по журналу CRM; кассовая сводка сейчас недоступна.' : 'Права владельца подтверждены. Ожидается подключение источника данных бизнеса.'))
+        ),
+        e('div', { style: { display: 'grid', gap: 9, marginTop: 14 } }, action('Спросить MAYA', 'Задать вопрос по текущему бизнесу', function () { window.__meChatReturn = 'panel'; window.__meGo && window.__meGo('chat'); }), action('Записать клиента', 'Открыть выбор мастера, услуги, даты и времени', function () { window.__meGo && window.__meGo('book'); }, true)),
+        section('Ближайшие записи', todayRows.length ? e('div', { style: { display: 'grid', gap: 8 } }, todayRows.slice(0, 5).map(function (x) { return card(e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 18, minWidth: 52 } }, timeLabel(x.start_at, tz)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.client && x.client.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 3 } }, (x.provider && x.provider.name || 'Специалист') + (x.services && x.services.length ? ' · ' + x.services.map(function (s) { return s.name; }).join(', ') : ''))), e('div', { style: { fontFamily: DISPLAY, fontSize: 11 } }, rub(x.total_price))), { padding: '12px 14px' }); })) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Активных записей на сегодня нет.')))
+      );
+    }
+    if (tabKey === 'analytics') {
+      var payroll = f.payroll || {};
+      var grid = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 };
+      var financeWarnings = Array.isArray(f.warnings) ? f.warnings : [];
+      return e(React.Fragment, null,
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, e('div', { style: { flex: 1 } }, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Аналитика'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 6 } }, (crmReady ? sourceLabel : 'CRM не подключена') + ' · данные текущего бизнеса')), e('button', { onClick: load, style: { border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, padding: '10px 13px' } }, loading ? '…' : 'Обновить')),
+        e('div', { style: { display: 'flex', gap: 7, marginTop: 18 } }, [['day', 'День'], ['week', '7 дней'], ['month', 'Месяц']].map(function (x) { var on = period === x[0]; return e('button', { key: x[0], onClick: function () { setPeriod(x[0]); }, style: { flex: 1, border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, background: on ? t.ink : 'transparent', color: on ? t.bg : t.ink, padding: '9px 4px', fontFamily: DISPLAY, fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' } }, x[1]); })),
+        section('Показатели', e('div', { style: grid }, kpi('Визиты', num(appt.active), 'отменено: ' + num(appt.cancelled)), kpi('Клиенты', num(appt.unique_clients), 'уникальные за период'), kpi(verifiedRevenue != null ? 'Поступления CRM' : 'Выручка записей', rub(revenue), verifiedRevenue != null ? 'подтверждено YClients' : 'по стоимости визитов'), kpi('Средний чек', rub(avg), 'по проведённым визитам'), kpi('Начислено зарплат', rub(major(payroll.accrued_total)), payroll.verified ? 'подтверждено CRM' : 'статус CRM'), kpi('Операции кассы', f.revenue && f.revenue.transaction_count != null ? num(f.revenue.transaction_count) : '—', f.revenue && f.revenue.verified ? 'подтверждено YClients' : 'нет подтверждения'))),
+        section('Кассы и способы оплаты', (f.revenue && Array.isArray(f.revenue.by_account) && f.revenue.by_account.length) ? card(e('div', null, f.revenue.by_account.map(function (x, i, arr) { return e('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Касса'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 2 } }, x.is_cash === true ? 'наличные' : (x.is_cash === false ? 'безналичные' : 'тип не указан'))), e('div', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(x)))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Разбивка по кассам недоступна в CRM.'))),
+        section('Продажи по данным CRM', (f.revenue && Array.isArray(f.revenue.by_type) && f.revenue.by_type.length) ? card(e('div', null, f.revenue.by_type.map(function (x, i, arr) { return e('div', { key: x.key || i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.label || x.key), e('span', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(x)))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Разбивка продаж недоступна.'))),
+        section('Динамика по дням', (a.daily && a.daily.length) ? card(e('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 7, height: 130 } }, (function () { var vals = a.daily.map(function (x) { return major(firstMoney(x.revenue)) || 0; }); var max = Math.max.apply(Math, vals.concat([1])); return a.daily.map(function (x, i) { return e('div', { key: x.date, style: { flex: 1, minWidth: 7, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' } }, e('div', { title: rub(vals[i]), style: { height: Math.max(4, vals[i] / max * 100) + '%', borderRadius: '6px 6px 2px 2px', background: t.ink, opacity: .82 } }), e('div', { style: { fontFamily: DISPLAY, fontSize: 7.5, color: t.dim, marginTop: 7, textAlign: 'center' } }, String(x.date).slice(8, 10))); }); })())) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'За выбранный период нет данных.'))),
+        section('Сотрудники', (a.staff && a.staff.length) ? card(e('div', null, a.staff.slice().sort(function (x, y) { return (major(firstMoney(y.revenue)) || 0) - (major(firstMoney(x.revenue)) || 0); }).map(function (x, i, arr) { var member = staffById[String(x.staff_external_id)] || {}; return e('div', { key: x.staff_external_id, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, member.name || ('Сотрудник ' + x.staff_external_id)), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, num(x.appointments) + ' визитов')), e('div', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(firstMoney(x.revenue))))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Нет данных по сотрудникам.'))),
+        financeWarnings.length ? section('Важно', card(e('div', null, financeWarnings.map(function (x, i) { return e('div', { key: i, style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.5, color: t.dim, marginTop: i ? 8 : 0 } }, x.message || x.code); })))) : null
+      );
+    }
+    if (tabKey === 'schedule') {
+      var byDay = {};
+      allJournal.forEach(function (x) { var key = dayLabel(x.start_at, tz); (byDay[key] = byDay[key] || []).push(x); });
+      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Расписание'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, crmReady ? ('Ближайшие 7 дней · источник ' + sourceLabel) : 'Подключите CRM, чтобы загрузить актуальное расписание'), e('div', { style: { display: 'grid', gap: 9, marginTop: 18 } }, Object.keys(byDay).length ? Object.keys(byDay).map(function (key) { return e('div', { key: key }, e('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim, margin: '15px 2px 8px' } }, key), byDay[key].map(function (x) { return card(e('div', { style: { display: 'flex', gap: 12, alignItems: 'flex-start' } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 17, minWidth: 52 } }, timeLabel(x.start_at, tz)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.client && x.client.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 3 } }, x.provider && x.provider.name || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 3 } }, (x.services || []).map(function (s) { return s.name; }).join(', '))), e('div', { style: { fontFamily: DISPLAY, fontSize: 12 } }, rub(x.total_price))), { padding: '12px 14px', marginBottom: 7 }); })); }) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, crmReady ? 'На ближайшие 7 дней активных записей нет.' : 'Расписание появится автоматически после подключения CRM.'))), e('div', { style: { marginTop: 14 } }, action(crmReady ? 'Записать клиента' : 'Подключить CRM', crmReady ? 'Создать запись в подключённой CRM' : 'Открыть защищённый центр интеграций', function () { window.__meGo && window.__meGo(crmReady ? 'book' : 'crm'); }, true)));
+    }
+    if (tabKey === 'staff') {
+      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Сотрудники'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, num((d.staff || []).length) + ' активных профилей из CRM'), section('Команда', (d.staff || []).length ? e('div', { style: { display: 'grid', gap: 9 } }, d.staff.map(function (x) { var perf = perfById[String(x.id)] || {}; var pay = payrollById[String(x.id)] || {}; return card(e('div', { style: { display: 'flex', gap: 13, alignItems: 'center' } }, x.avatar_url ? e('img', { src: x.avatar_url, alt: '', style: { width: 46, height: 46, borderRadius: 14, objectFit: 'cover' } }) : e('div', { style: { width: 46, height: 46, borderRadius: 14, display: 'grid', placeItems: 'center', border: '1px solid ' + t.line, fontFamily: DISPLAY, fontSize: 16 } }, String(x.name || '?').charAt(0)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 14, fontWeight: 700 } }, x.name || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.title || x.specialization || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, num(perf.appointments) + ' визитов · ' + rub(major(firstMoney(perf.revenue))))), e('div', { style: { fontFamily: DISPLAY, fontSize: 12, textAlign: 'right' } }, pay.accrued ? rub(major(pay.accrued)) : '—')), { padding: '13px 14px' }); })) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'CRM не вернула активных сотрудников.'))));
+    }
+    if (tabKey === 'services') {
+      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Услуги'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, num((d.services || []).length) + ' услуг из CRM'), section('Каталог', (d.services || []).length ? card(e('div', null, d.services.map(function (x, i, arr) { return e('div', { key: x.id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Услуга'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.duration_minutes ? x.duration_minutes + ' мин' : 'длительность не указана')), e('div', { style: { fontFamily: DISPLAY, fontSize: 14 } }, rub(x.price))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Список услуг пуст.'))));
+    }
+    if (tabKey === 'clients') {
+      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Клиенты'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, 'Клиенты бизнеса и пользователи приложения'), section('За выбранный период', e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 } }, kpi('Клиенты CRM', num(appt.unique_clients), 'уникальные посетители'), kpi('В MAYA', num((d.customers || []).length), 'зарегистрированные аккаунты'))), section('Аккаунты MAYA', (d.customers || []).length ? card(e('div', null, d.customers.map(function (x, i, arr) { return e('div', { key: x.id || i, style: { padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.phone || x.email || 'Контакт скрыт')); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Пока нет клиентов, зарегистрированных именно в приложении MAYA. История CRM при этом учитывается в аналитике.'))));
+    }
+    if (tabKey === 'integrations') {
+      var conn = d.crm && d.crm.connection || {};
+      var active = !!(d.crm && d.crm.configured && conn.status === 'active');
+      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Интеграции'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, 'Токен хранится на сервере в зашифрованном виде'), section('CRM', card(e(React.Fragment, null, e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, e('span', { style: { width: 9, height: 9, borderRadius: 999, background: active ? '#3f9e6a' : t.dim } }), e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 14, fontWeight: 700 } }, active ? ((conn.provider || 'CRM') + ' · подключена') : 'CRM не подключена')), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 12, lineHeight: 1.55 } }, active ? 'Расписание, сотрудники, услуги и финансовые показатели берутся из CRM текущего бизнеса.' : 'Подключите CRM, чтобы MAYA получила актуальные данные бизнеса.'), e('div', { style: { marginTop: 14 } }, action(active ? 'Проверить или переподключить' : 'Подключить CRM', 'Открыть защищённый центр интеграций', function () { window.__meGo && window.__meGo('crm'); }))))));
+    }
+    var me = d.me || {};
+    return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Профиль'), section('Владелец бизнеса', card(e(React.Fragment, null, [['Имя', me.name || '—'], ['Email', me.email || '—'], ['Телефон', me.phone || '—'], ['Бизнес', me.tenant && me.tenant.name || '—'], ['Роль', 'Владелец']].map(function (x, i) { return e('div', { key: x[0], style: { display: 'flex', justifyContent: 'space-between', gap: 14, padding: '11px 0', borderBottom: i < 4 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim } }, x[0]), e('span', { style: { fontFamily: BODY, fontSize: 12.5, fontWeight: 650, textAlign: 'right' } }, x[1])); })))), e('div', { style: { marginTop: 14 } }, action('Выйти из учётной записи', 'Сессия владельца будет закрыта на этом устройстве', function () { window.__meAskLogout && window.__meAskLogout(); })));
+  }
+  return e(AuroraShell, { tab: { items: saasStaffTabItems(), active: 2 }, showLogo: false, showToggle: true, scroll: true }, function (t) {
+    return e(React.Fragment, null,
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, e('div', { style: { flex: 1, fontFamily: DISPLAY, fontSize: 20, fontWeight: 250, color: t.ink } }, 'Панель управления'), e('div', { style: { border: '1px solid ' + t.line, borderRadius: 999, padding: '7px 12px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim } }, 'Владелец')),
+      e('div', { className: 'me-noscroll', style: { display: 'flex', gap: 7, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', margin: '18px -2px 0', padding: '0 2px 12px' } }, TABS.map(function (x) { var on = x.key === tabKey; return e('button', { key: x.key, type: 'button', onClick: function () { setTabKey(x.key); }, style: { flex: 'none', border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, padding: '9px 15px', background: on ? t.ink : 'transparent', color: on ? t.bg : t.dim, fontFamily: DISPLAY, fontSize: 9, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' } }, x.label); })),
+      e('div', { style: { paddingTop: 18 } }, content(t))
+    );
+  });
+}
+window.ASaasOwnerPanel = ASaasOwnerPanel;
+
 // =====================================================================
 // ALivePanel — LIVE owner/staff panel, all 8 tabs wired, permission-gated.
 // Аналитика/Расписание/Отчёт/Отзывы/Задачи/Рассылка/Команда/Гашение.
 // =====================================================================
 function ALivePanel() {
+  if (window.__ME_SAAS_CTX && meSaasIsManagerRole(meSaasCurrentRole())) return React.createElement(ASaasOwnerPanel);
   const PX = 'https://malesthetic.pro/app/api-proxy.php';
   const RAMP = ['#afaca8', '#a3a09d', '#aca9a6', '#7f7d7a', '#7f7d7b', '#a8a5a2'];
   const ALL_TABS = [{
@@ -31663,8 +32139,10 @@ function ChooseVersion() {
   }), roleBtn('Я сотрудник', ['M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M20 4L8.6 15.4', 'M14.5 14.5L20 20', 'M8.6 8.6L12 12'], false, function () {
     window.__meMode && window.__meMode('staff');
     if (window.__ME_SAAS_CTX && meSaasIsBusinessRole(meSaasCurrentRole())) {
-      window.__meChatReturn = 'book';
-      window.__meSaasCabinet && window.__meSaasCabinet(meSaasDefaultCabinetTab(meSaasCurrentRole()), 0);
+      window.__meChatReturn = 'staff-home';
+      var b = meSaasCurrentBundle();
+      if (b && b.user) meSaasApplyIdentity(b.user);
+      window.__meGo && window.__meGo('staff-home');
       return;
     }
     window.__meChatReturn = 'staff-home';
@@ -31694,11 +32172,14 @@ function MEApp() {
             var requestedTab = '';
             try {
               var routeTab = String(new URLSearchParams(location.search).get('cabinet') || '');
-              if (['biz', 'mystat', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile'].indexOf(routeTab) >= 0) requestedTab = routeTab;
+              if (['biz', 'mystat', 'analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations'].indexOf(routeTab) >= 0) requestedTab = routeTab;
             } catch (e4) {}
-            window.__meSaasWantCabinet = true;
-            window.__meSaasWantCabinetTab = requestedTab || meSaasDefaultCabinetTab(role);
-            return 'book';
+            meSaasApplyIdentity(b.user);
+            if (['analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations'].indexOf(requestedTab) >= 0) {
+              window.__meSaasPanelTab = requestedTab === 'team' ? 'staff' : (requestedTab === 'calendar' ? 'schedule' : requestedTab);
+              return 'panel';
+            }
+            return 'staff-home';
           }
           return 'home';
         }
@@ -31731,7 +32212,7 @@ function MEApp() {
   React.useEffect(function () {
     function toGuest() {
       force(); // перерисовать шелл → nav пересчитает loggedIn (bundle уже удалён)
-      try { if (['book', 'cabinet', 'chat', 'settings'].indexOf(screen) >= 0 && window.__meGo) window.__meGo('login'); } catch (e) {}
+      try { if (['book', 'cabinet', 'chat', 'settings', 'staff-home', 'panel', 'crm', 'staff-clients'].indexOf(screen) >= 0 && window.__meGo) window.__meGo('login'); } catch (e) {}
     }
     function onSaasLogout() { toGuest(); }
     function onStorage(ev) {
@@ -31844,6 +32325,13 @@ function MEApp() {
   }, []);
   React.useEffect(() => {
     window.__meRefresh = force;
+    try {
+      var _identityBundle = meSaasCurrentBundle();
+      if (_identityBundle && _identityBundle.user && meSaasIsBusinessRole(_identityBundle.user.role)) {
+        meSaasApplyIdentity(_identityBundle.user);
+        meSaasRefreshIdentity().catch(function () {});
+      }
+    } catch (eIdentity) {}
     function go(s) {
       // CutMatch временно скрыт у всех, кроме основателя (Стас). Любой заход —
       // на главную. Видимость вкладки тоже гейтится (clientTabItems/__meTab).
@@ -31876,24 +32364,20 @@ function MEApp() {
       }
     }
     window.__meGo = go;
-    // MAYA OS: «Личный кабинет»/профиль ведёт во внутренний кабинет ABookFlow (myView),
-    // а не в легаси-кабинет салона. В обычном (не saas) приложении поведение прежнее.
+    // MAYA OS: владелец открывает полноценный tenant-safe кабинет. Экран book
+    // остаётся только флоу записи и больше не используется как бизнес-панель.
     window.__meSaasCabinet = function (requestedTab, navIndex) {
       if (!window.__ME_SAAS_CTX) { if (window.__meGo) window.__meGo('cabinet'); return; }
       var role = meSaasCurrentRole();
       var target = requestedTab || meSaasDefaultCabinetTab(role);
-      var alreadyMounted = screenRef.current === 'book';
       if (meSaasIsBusinessRole(role) && window.__meMode) window.__meMode('staff');
-      window.__meSaasWantCabinet = true;         // ABookFlow при монтировании прочитает флаг
-      window.__meSaasWantCabinetTab = target;
-      if (window.__meGo) window.__meGo('book');   // на экран бронирования (там живёт кабинет)
-      // При переходе с другого screen старый ABookFlow ещё может жить один такт.
-      // Не отдаём ему команду: новый ABookFlow сам подхватит pending tab при mount.
-      if (alreadyMounted && window.__meOpenSaasCabinet) {
-        window.__meSaasWantCabinet = false;
-        window.__meSaasWantCabinetTab = null;
-        window.__meOpenSaasCabinet(target);
-      }
+      var panelMap = { analytics: 'analytics', clients: 'clients', customers: 'clients', staff: 'staff', team: 'staff', calendar: 'schedule', services: 'services', schedule: 'schedule', profile: 'profile', integrations: 'integrations' };
+      var panelTab = panelMap[target];
+      if (panelTab && meSaasIsManagerRole(role)) {
+        window.__meSaasPanelTab = panelTab;
+        if (screenRef.current === 'panel' && window.__meSetSaasPanelTab) window.__meSetSaasPanelTab(panelTab);
+        else if (window.__meGo) window.__meGo('panel');
+      } else if (window.__meGo) window.__meGo('staff-home');
       if (typeof navIndex === 'number') {
         try { window.dispatchEvent(new CustomEvent('me-nav-tab', { detail: { i: navIndex } })); } catch (e) {}
       }
@@ -33935,9 +34419,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
           var _sbiz = ['tenant_owner','business_owner','tenant_admin','administrator','manager','provider','employee','staff'].indexOf(_srole) >= 0;
           if (window.__meMode) window.__meMode(_sbiz ? 'staff' : 'client');
           if (_sbiz) {
-            window.__meSaasWantCabinet = true;
-            window.__meSaasWantCabinetTab = meSaasDefaultCabinetTab(_srole);
-            window.__meGo('book');
+            meSaasApplyIdentity(_sb.user);
+            meSaasRefreshIdentity().catch(function () {});
+            window.__meGo('staff-home');
           } else window.__meGo('home');
           return true;
         }

@@ -448,6 +448,63 @@ describe('AuthService phone auth', () => {
     });
   });
 
+  it('restores the existing tenant owner by verified phone without creating a client', async () => {
+    const {
+      service,
+      mocks: {
+        createPhoneFirstClientUserMock,
+        findTenantUserByPhoneMock,
+        phoneAuthFindUniqueMock,
+        serializeUserMock,
+        issueSessionMock,
+      },
+    } = createService();
+    const codeHash = createHash('sha256')
+      .update(`jwt-secret:${tenant.id}:${phone}:123456`)
+      .digest('hex');
+    const owner: UserRecord = {
+      id: 'owner-1',
+      tenantId: tenant.id,
+      branchId: null,
+      email: 'owner@demo-salon.test',
+      phone,
+      passwordHash: 'hash',
+      role: UserRole.TENANT_ADMIN,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tenant,
+      branch: null,
+    };
+
+    phoneAuthFindUniqueMock.mockResolvedValue({
+      id: 'challenge-owner-1',
+      tenantId: tenant.id,
+      phone,
+      codeHash,
+      attempts: 0,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+    });
+    findTenantUserByPhoneMock.mockResolvedValue(owner);
+
+    const result = await service.verifyPhoneAuth({
+      tenantSlug: tenant.slug,
+      phone,
+      code: '123456',
+    });
+
+    expect(findTenantUserByPhoneMock).toHaveBeenCalledWith(tenant.id, phone);
+    expect(createPhoneFirstClientUserMock).not.toHaveBeenCalled();
+    expect(issueSessionMock).toHaveBeenCalledWith(owner, {});
+    expect(serializeUserMock).toHaveBeenCalledWith(owner);
+    expect(result).toMatchObject({
+      access_token: 'jwt-token',
+      user: owner,
+      is_new_user: false,
+    });
+  });
+
   it('atomically records an invalid phone code attempt', async () => {
     const {
       service,
