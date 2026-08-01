@@ -267,7 +267,7 @@ export class AiOnboardingService {
       crmScheduleLabel: company.schedule,
       crmServiceCount: preview.services.count,
       crmStaffCount: preview.staff.count,
-      crmStaffIdentityHashes: preview.staff.items.map((staff) =>
+      crmStaffIdentityHashes: preview.team.items.map((staff) =>
         this.crmStaffIdentityHash(
           dto.provider,
           String(preview.company_id ?? company.id),
@@ -315,11 +315,13 @@ export class AiOnboardingService {
 
     return {
       ...this.serializeDraft(updated, undefined, interpretation),
-      crm_staff: preview.staff.items.map((staff) => ({
+      crm_staff: preview.team.items.map((staff) => ({
         external_staff_id: staff.id,
         display_name: staff.name,
         title: staff.title ?? staff.specialization ?? null,
         avatar_url: this.safeRemoteLogoUrl(staff.avatar_url ?? null),
+        bookable: staff.bookable,
+        suggested_role: staff.suggested_role,
       })),
     };
   }

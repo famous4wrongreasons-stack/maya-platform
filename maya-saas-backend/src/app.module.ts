@@ -45,7 +45,7 @@ import { SystemMetricsService } from './system-metrics.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env'],
+      envFilePath: ['.env.local', '.env'],
       validate: validateRuntimeConfig,
     }),
     PrismaModule,

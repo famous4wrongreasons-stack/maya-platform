@@ -11,6 +11,7 @@ import {
   CrmFinancialSummary,
   CrmJournal,
   CrmJournalAppointment,
+  CrmTeamMember,
   CrmStaffPayroll,
   CreatedAppointment,
   CrmAdapterConfig,
@@ -164,6 +165,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   private readonly baseUrl: string;
   private readonly partnerToken: string;
   private readonly settings: YclientsSettings;
+  private staffCatalogPromise: Promise<YclientsStaffApiItem[]> | null = null;
 
   constructor(private readonly config: CrmAdapterConfig) {
     this.baseUrl = (
@@ -287,14 +289,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async getStaff(tenantId: string): Promise<StaffMember[]> {
     void tenantId;
 
-    const companyId = this.getCompanyId();
-    const response = await this.requestFirstAvailable<YclientsStaffApiItem[]>([
-      `company/${companyId}/staff`,
-      `staff/${companyId}`,
-      `book_staff/${companyId}`,
-    ]);
+    const catalog = await this.getStaffCatalog();
     const allowedIds = this.getActiveMasterIds();
-    const items = (response.data || []).filter((staff) => {
+    const items = catalog.filter((staff) => {
       if (this.isInactiveStaff(staff)) {
         return false;
       }
@@ -302,6 +299,32 @@ export class YclientsCRMAdapter implements CRMAdapter {
     });
 
     return items.map((staff) => this.mapStaffMember(staff));
+  }
+
+  async getTeamMembers(tenantId: string): Promise<CrmTeamMember[]> {
+    void tenantId;
+
+    const catalog = await this.getStaffCatalog();
+    const allowedIds = this.getActiveMasterIds();
+
+    return catalog
+      .filter((staff) => !this.isFiredStaff(staff))
+      .map((staff) => {
+        const bookable =
+          staff.hidden !== true &&
+          staff.hidden !== 1 &&
+          staff.bookable !== false &&
+          (!allowedIds || allowedIds.includes(staff.id));
+        const member = this.mapStaffMember(staff);
+
+        return {
+          ...member,
+          bookable,
+          suggested_role: this.isAdministrativeStaff(staff, bookable)
+            ? 'administrator'
+            : 'staff',
+        };
+      });
   }
 
   async getAvailableSlots(params: {
@@ -1026,14 +1049,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   private async getPayrollStaff(): Promise<StaffMember[]> {
-    const companyId = this.getCompanyId();
-    const response = await this.requestFirstAvailable<YclientsStaffApiItem[]>([
-      `company/${companyId}/staff`,
-      `staff/${companyId}`,
-      `book_staff/${companyId}`,
-    ]);
-
-    return (response.data || [])
+    return (await this.getStaffCatalog())
       .filter((staff) => !this.isFiredStaff(staff))
       .map((staff) => this.mapStaffMember(staff));
   }
@@ -1464,6 +1480,21 @@ export class YclientsCRMAdapter implements CRMAdapter {
     );
   }
 
+  private getStaffCatalog(): Promise<YclientsStaffApiItem[]> {
+    if (!this.staffCatalogPromise) {
+      const companyId = this.getCompanyId();
+      this.staffCatalogPromise = this.requestFirstAvailable<
+        YclientsStaffApiItem[]
+      >([
+        `company/${companyId}/staff`,
+        `staff/${companyId}`,
+        `book_staff/${companyId}`,
+      ]).then((response) => response.data || []);
+    }
+
+    return this.staffCatalogPromise;
+  }
+
   private isInactiveStaff(staff: YclientsStaffApiItem): boolean {
     return (
       this.isFiredStaff(staff) || staff.hidden === true || staff.hidden === 1
@@ -1472,6 +1503,23 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private isFiredStaff(staff: YclientsStaffApiItem): boolean {
     return staff.fired === true || staff.fired === 1;
+  }
+
+  private isAdministrativeStaff(
+    staff: YclientsStaffApiItem,
+    bookable: boolean,
+  ): boolean {
+    const title = String(staff.specialization || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\u0451/g, '\u0435');
+
+    return (
+      !bookable ||
+      /\u0430\u0434\u043c\u0438\u043d|\u0443\u043f\u0440\u0430\u0432\u043b\u044f\u044e\u0449|\u043c\u0435\u043d\u0435\u0434\u0436\u0435\u0440|administrator|manager/.test(
+        title,
+      )
+    );
   }
 
   private mapStaffMember(staff: YclientsStaffApiItem): StaffMember {

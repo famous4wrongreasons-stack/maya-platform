@@ -25,6 +25,11 @@ export interface StaffMember {
   rating?: number | null;
 }
 
+export interface CrmTeamMember extends StaffMember {
+  bookable: boolean;
+  suggested_role: 'administrator' | 'staff';
+}
+
 export interface CrmCompanyOption {
   id: string;
   title: string;
@@ -199,6 +204,7 @@ export interface CRMAdapter {
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
   getStaff(tenantId: string): Promise<StaffMember[]>;
+  getTeamMembers?(tenantId: string): Promise<CrmTeamMember[]>;
   getAvailableSlots(params: {
     tenantId: string;
     date: string;

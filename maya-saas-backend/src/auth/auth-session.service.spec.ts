@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createHmac } from 'crypto';
 
 import { UserRole } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthRateLimitService } from './auth-rate-limit.service';
@@ -93,6 +94,7 @@ describe('AuthSessionService', () => {
     const findAccessSessionMock = jest.fn().mockResolvedValue(null);
     const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
     const rateLimitSessionMock = jest.fn().mockResolvedValue(undefined);
+    const assertCrmStaffAccessMock = jest.fn().mockResolvedValue(undefined);
     const tenantContext = new TenantContextService();
     const service = new AuthSessionService(
       {
@@ -118,6 +120,9 @@ describe('AuthSessionService', () => {
         findRefreshCredentialById: findRefreshCredentialMock,
         findAccessSessionById: findAccessSessionMock,
       } as unknown as AuthSessionSystemGateway,
+      {
+        assertCrmStaffAccessActive: assertCrmStaffAccessMock,
+      } as unknown as CrmService,
     );
 
     return {
@@ -125,6 +130,7 @@ describe('AuthSessionService', () => {
       tenantContext,
       mocks: {
         createSessionMock,
+        assertCrmStaffAccessMock,
         findAccessSessionMock,
         findRefreshCredentialMock,
         getActiveMembershipMock,
@@ -201,6 +207,10 @@ describe('AuthSessionService', () => {
       tenantId: 'tenant-a',
       role: UserRole.CLIENT,
     });
+    expect(mocks.assertCrmStaffAccessMock).toHaveBeenCalledWith(
+      'tenant-a',
+      'user-a',
+    );
     const createParams = createArgs?.[1];
     expect(createParams?.deviceLabel).toBe('Safari on iPhone');
     expect(createParams?.ipHash).toMatch(/^[a-f0-9]{64}$/);
@@ -223,6 +233,24 @@ describe('AuthSessionService', () => {
       UnauthorizedException,
     );
     expect(mocks.getActiveMembershipMock).not.toHaveBeenCalled();
+  });
+
+  it('does not issue a session when CRM staff access was disabled', async () => {
+    const { service, mocks } = createService();
+    mocks.assertCrmStaffAccessMock.mockRejectedValueOnce(
+      new UnauthorizedException({
+        error: { code: 'crm_staff_access_disabled' },
+      }),
+    );
+
+    await expect(
+      service.issueSession(tenantUser, {}, 'tenant-a'),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'crm_staff_access_disabled' } },
+    });
+    expect(mocks.getActiveMembershipMock).not.toHaveBeenCalled();
+    expect(mocks.createSessionMock).not.toHaveBeenCalled();
+    expect(mocks.signAsyncMock).not.toHaveBeenCalled();
   });
 
   it('rotates a valid refresh token and returns a new credential', async () => {
@@ -250,6 +278,10 @@ describe('AuthSessionService', () => {
       userId: 'user-a',
       identity: 'session-a',
     });
+    expect(mocks.assertCrmStaffAccessMock).toHaveBeenCalledWith(
+      'tenant-a',
+      'user-a',
+    );
     expect(result.session).toMatchObject({
       id: 'session-a',
       is_current: true,

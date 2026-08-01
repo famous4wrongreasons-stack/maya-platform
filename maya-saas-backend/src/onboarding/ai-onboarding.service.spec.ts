@@ -233,10 +233,26 @@ describe('AiOnboardingService', () => {
         ],
       },
       staff: {
+        count: 1,
+        items: [{ id: 'staff-1', name: 'Илья', title: 'Барбер' }],
+      },
+      team: {
         count: 2,
         items: [
-          { id: 'staff-1', name: 'Илья', title: 'Барбер' },
-          { id: 'staff-2', name: 'Антон', title: 'Администратор' },
+          {
+            id: 'staff-1',
+            name: 'Илья',
+            title: 'Барбер',
+            bookable: true,
+            suggested_role: 'staff',
+          },
+          {
+            id: 'staff-2',
+            name: 'Антон',
+            title: 'Администратор',
+            bookable: false,
+            suggested_role: 'administrator',
+          },
         ],
       },
       warnings: [],
@@ -260,7 +276,7 @@ describe('AiOnboardingService', () => {
 
     expect(result.blueprint).toMatchObject({
       businessName: 'Мужская Эстетика',
-      providerCount: 2,
+      providerCount: 1,
       crmImported: true,
       crmCompanyId: '503759',
       crmLogoUrl: 'https://example.com/logo.png',
@@ -280,6 +296,7 @@ describe('AiOnboardingService', () => {
       expect.objectContaining({
         external_staff_id: 'staff-2',
         display_name: 'Антон',
+        suggested_role: 'administrator',
       }),
     ]);
   });

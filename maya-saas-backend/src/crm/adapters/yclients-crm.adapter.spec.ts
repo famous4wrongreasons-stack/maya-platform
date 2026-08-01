@@ -126,6 +126,26 @@ describe('YclientsCRMAdapter', () => {
       expect.objectContaining({ id: '1', name: 'Active barber' }),
       expect.objectContaining({ id: '4', name: 'Boolean active' }),
     ]);
+    await expect(adapter.getTeamMembers('tenant-1')).resolves.toEqual([
+      expect.objectContaining({
+        id: '1',
+        name: 'Active barber',
+        bookable: true,
+        suggested_role: 'staff',
+      }),
+      expect.objectContaining({
+        id: '3',
+        name: 'Hidden barber',
+        bookable: false,
+        suggested_role: 'administrator',
+      }),
+      expect.objectContaining({
+        id: '4',
+        name: 'Boolean active',
+        bookable: true,
+        suggested_role: 'staff',
+      }),
+    ]);
   });
 
   it('discovers only active companies without exposing provider payload fields', async () => {

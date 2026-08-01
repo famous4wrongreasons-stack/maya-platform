@@ -4,12 +4,14 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import {
   CalendarSource,
   CrmIntegrationStatus,
   CrmProvider,
+  UserRole,
 } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -24,6 +26,7 @@ import {
   CrmAdapterConfig,
   CrmCompanyProfile,
   CrmFinancialSummary,
+  CrmTeamMember,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
@@ -77,6 +80,10 @@ export type CrmImportPreview = {
   staff: {
     count: number;
     items: StaffMember[];
+  };
+  team: {
+    count: number;
+    items: CrmTeamMember[];
   };
   warnings: string[];
 };
@@ -402,6 +409,8 @@ export class CrmService {
       throw this.toSafeConnectionException(provider, error);
     }
 
+    await this.reconcileCrmTeamAccess(scopedTenantId, preview.team.items);
+
     const checkedAt = new Date();
     const status =
       integration.status === 'active'
@@ -450,6 +459,8 @@ export class CrmService {
       if (!result.ok) {
         throw new Error('CRM connection check failed');
       }
+      const team = await this.loadTeamMembers(adapter, scopedTenantId);
+      await this.reconcileCrmTeamAccess(scopedTenantId, team);
 
       const checkedAt = new Date();
       const status =
@@ -494,6 +505,48 @@ export class CrmService {
       connection: null,
       next_action: 'connect',
     };
+  }
+
+  async assertCrmStaffAccessActive(tenantId: string, userId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId: scopedTenantId, userId },
+      select: {
+        externalStaffId: true,
+        role: true,
+        status: true,
+      },
+    });
+
+    if (!access || this.isOwnerAccessRole(access.role)) return;
+
+    try {
+      const integration = await this.getStoredIntegration(scopedTenantId);
+      if ((integration.provider as CrmProvider) !== CrmProvider.MOCK) {
+        const adapter = this.adapterFactory.create(
+          integration.provider as CrmProvider,
+          this.createAdapterConfig(integration),
+        );
+        const team = await this.loadTeamMembers(adapter, scopedTenantId);
+        await this.reconcileCrmTeamAccess(scopedTenantId, team);
+      }
+    } catch (error) {
+      if (access.status === 'disabled') {
+        throw this.crmStaffAccessDisabled();
+      }
+      this.logger.warn(
+        `CRM staff access check deferred tenant=${scopedTenantId} user=${userId}: ${this.safeErrorCode(error)}`,
+      );
+      return;
+    }
+
+    const current = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId: scopedTenantId, userId },
+      select: { status: true },
+    });
+    if (!current || current.status !== 'active') {
+      throw this.crmStaffAccessDisabled();
+    }
   }
 
   async getServices(tenantId: string) {
@@ -888,11 +941,14 @@ export class CrmService {
       throw new Error('CRM connection check failed');
     }
 
-    const [services, staff, company] = await Promise.all([
+    const [services, staff, team, company] = await Promise.all([
       this.loadPreviewPart(provider, 'services', () =>
         adapter.getServices(tenantId),
       ),
       this.loadPreviewPart(provider, 'staff', () => adapter.getStaff(tenantId)),
+      this.loadPreviewPart(provider, 'team', () =>
+        this.loadTeamMembers(adapter, tenantId),
+      ),
       adapter.getCompanyProfile
         ? this.loadPreviewPart(provider, 'company_profile', () =>
             adapter.getCompanyProfile!(),
@@ -925,8 +981,124 @@ export class CrmService {
         count: staff.length,
         items: staff.slice(0, 30),
       },
+      team: {
+        count: team.length,
+        items: team.slice(0, 50),
+      },
       warnings,
     };
+  }
+
+  private async loadTeamMembers(
+    adapter: CRMAdapter,
+    tenantId: string,
+  ): Promise<CrmTeamMember[]> {
+    if (adapter.getTeamMembers) {
+      return adapter.getTeamMembers(tenantId);
+    }
+
+    return (await adapter.getStaff(tenantId)).map((member) => ({
+      ...member,
+      bookable: true,
+      suggested_role: 'staff',
+    }));
+  }
+
+  private async reconcileCrmTeamAccess(
+    tenantId: string,
+    team: CrmTeamMember[],
+  ): Promise<void> {
+    const accesses = await this.prisma.crmStaffAccess.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        externalStaffId: true,
+        userId: true,
+        role: true,
+        status: true,
+      },
+    });
+    if (accesses.length === 0) return;
+
+    const activeIds = new Set(team.map((member) => String(member.id)));
+    const now = new Date();
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const access of accesses) {
+        if (this.isOwnerAccessRole(access.role)) continue;
+
+        const present = activeIds.has(access.externalStaffId);
+        const nextStatus = present
+          ? access.userId
+            ? 'active'
+            : 'pending_contact'
+          : 'disabled';
+
+        if (access.status !== nextStatus) {
+          await tx.crmStaffAccess.update({
+            where: { id: access.id },
+            data: { status: nextStatus },
+          });
+        }
+
+        if (!access.userId) continue;
+        if (present) {
+          // Reactivate only an account that this CRM fence disabled earlier.
+          // An unrelated manual membership suspension must remain in force.
+          if (access.status !== 'disabled') continue;
+          await tx.membership.updateMany({
+            where: { tenantId, userId: access.userId, status: 'suspended' },
+            data: { status: 'active' },
+          });
+          continue;
+        }
+
+        await tx.membership.updateMany({
+          where: { tenantId, userId: access.userId, status: 'active' },
+          data: { status: 'suspended' },
+        });
+        await tx.authSession.updateMany({
+          where: {
+            tenantId,
+            userId: access.userId,
+            revokedAt: null,
+          },
+          data: {
+            revokedAt: now,
+            revokeReason: 'crm_staff_inactive',
+          },
+        });
+      }
+    });
+  }
+
+  private isOwnerAccessRole(role: string): boolean {
+    return new Set<string>([
+      UserRole.TENANT_ADMIN,
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+    ]).has(role);
+  }
+
+  private crmStaffAccessDisabled(): UnauthorizedException {
+    return new UnauthorizedException({
+      message: 'CRM staff access is no longer active.',
+      error: {
+        code: 'crm_staff_access_disabled',
+        message:
+          '\u0414\u043e\u0441\u0442\u0443\u043f \u043a MAYA \u043e\u0442\u043a\u043b\u044e\u0447\u0451\u043d: \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u0430\u043a\u0442\u0438\u0432\u0435\u043d \u0432 CRM.',
+      },
+    });
+  }
+
+  private safeErrorCode(error: unknown): string {
+    if (!error || typeof error !== 'object') return 'unknown';
+    const candidate = error as {
+      code?: unknown;
+      response?: { error?: { code?: unknown } };
+    };
+    const value = candidate.response?.error?.code ?? candidate.code;
+    return typeof value === 'string' ? value.slice(0, 64) : 'unavailable';
   }
 
   private async loadPreviewPart<T>(
