@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<meta name="maya-build" content="2026-08-01-crm-analytics-v2"/>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"/>
 <meta name="theme-color" content="#000000" id="me-theme-color"/><meta name="color-scheme" content="dark" id="me-color-scheme"/><meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -9142,17 +9143,31 @@ function ABookFlow() {
     setMyBizBusy(true); setMyBizErr('');
     ensureLocalSession().then(function (sess) {
       var h = { headers: { Authorization: 'Bearer ' + sess.token } };
-      var external = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source && window.__SAAS_TENANT.calendar_source !== 'internal');
+      var externalHint = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source && window.__SAAS_TENANT.calendar_source !== 'internal');
       return Promise.all([
         localBookingFetch('/analytics/business?' + meRange30(), h),
         localBookingFetch('/customers', h).catch(function () { return null; }),
-        external ? Promise.resolve(null) : localBookingFetch('/expenses?' + meRange30(), h).catch(function () { return null; }),
-        external
+        externalHint ? Promise.resolve(null) : localBookingFetch('/expenses?' + meRange30(), h).catch(function () { return null; }),
+        externalHint
           ? localBookingFetch('/analytics/business/finance?' + meRange30(), h).catch(function (e) {
               return { _unavailable: true, message: readErrorText(e, 'Финансы CRM недоступны') };
             })
-          : Promise.resolve(null)
-      ]);
+          : Promise.resolve(null),
+        Promise.resolve(h)
+      ]).then(function (r) {
+        // Публичный конфиг может прийти позже первого запроса кабинета. Решение
+        // о CRM принимаем по tenant-scoped ответу analytics, а не по гонке boot UI.
+        if (r[0] && r[0].data_source === 'crm' && !r[3]) {
+          return localBookingFetch('/analytics/business/finance?' + meRange30(), r[4]).then(function (finance) {
+            r[3] = finance;
+            return r;
+          }).catch(function (e) {
+            r[3] = { _unavailable: true, message: readErrorText(e, 'Финансы CRM недоступны') };
+            return r;
+          });
+        }
+        return r;
+      });
     }).then(function (r) {
       setMyBizBusy(false);
       setMyBiz({ a: r[0] || {}, customers: Array.isArray(r[1]) ? r[1].length : (r[1] && r[1].total != null ? r[1].total : null), exp: r[2] || null, finance: r[3] || null });
@@ -10568,20 +10583,38 @@ function ABookFlow() {
           if (myBiz === null || myBizBusy) return Loader(t, 'Загружаем аналитику…');
           var A = (myBiz && myBiz.a) || {}; var ap = A.appointments || {};
           var F = (myBiz && myBiz.finance) || null;
-          var isCrm = A.data_source === 'crm';
+          var isCrm = A.data_source === 'crm' || !!(F && F.source === 'external_crm');
           var expTotals = myBiz && myBiz.exp && myBiz.exp.totals;
           var expItems = (myBiz && myBiz.exp && Array.isArray(myBiz.exp.items)) ? myBiz.exp.items.slice(0, 5) : [];
+          var revenueReady = !!(F && F.revenue && F.revenue.status === 'available' && F.revenue.total);
+          var payrollReady = !!(F && F.payroll && F.payroll.status === 'available');
+          var accountBreakdown = isCrm && F && F.revenue && Array.isArray(F.revenue.by_account) ? F.revenue.by_account : [];
+          var salesBreakdown = isCrm && F && F.revenue && Array.isArray(F.revenue.by_type) ? F.revenue.by_type : [];
+          var payrollStaff = isCrm && F && F.payroll && Array.isArray(F.payroll.staff) ? F.payroll.staff : [];
+          var dailyRows = Array.isArray(A.daily) ? A.daily : [];
+          var staffPerformance = Array.isArray(A.staff) ? A.staff : [];
+          var firstKopecks = function (list) {
+            return Array.isArray(list) && list[0] ? Number(list[0].amount_kopecks != null ? list[0].amount_kopecks : list[0].amountKopecks) || 0 : 0;
+          };
+          var sectionLabel = function (text) {
+            return React.createElement('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '18px 2px 9px' } }, text);
+          };
+          var detailRow = function (key, label, value, sub) {
+            return React.createElement('div', { key: key, style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderBottom: '1px solid ' + t.line, padding: '10px 2px' } },
+              React.createElement('div', { style: { minWidth: 0 } },
+                React.createElement('div', { style: { fontFamily: BODY, fontWeight: 600, fontSize: 12.5, color: t.ink, overflowWrap: 'anywhere' } }, label),
+                sub ? React.createElement('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 2 } }, sub) : null),
+              React.createElement('div', { style: { flex: 'none', fontFamily: DISPLAY, fontWeight: 500, fontSize: 12.5, color: t.dim, textAlign: 'right' } }, value));
+          };
           var cards = [
-            statCard('Записи', String(ap.total != null ? ap.total : 0), (ap.active != null ? 'активных: ' + ap.active : null)),
-            statCard('Клиенты', String(myBiz.customers > 0 ? myBiz.customers : (ap.unique_clients != null ? ap.unique_clients : 0)), 'уникальные')
+            statCard('Визиты', String(ap.active != null ? ap.active : (ap.total != null ? ap.total : 0)), ap.cancelled ? 'отменено: ' + ap.cancelled : 'по данным CRM'),
+            statCard('Клиенты', String(ap.unique_clients != null ? ap.unique_clients : (myBiz.customers || 0)), 'уникальные за период')
           ];
           if (isCrm) {
-            var revenueReady = !!(F && F.revenue && F.revenue.status === 'available' && F.revenue.total);
-            var payrollReady = !!(F && F.payroll && F.payroll.status === 'available');
-            cards.push(statCard('Поступления CRM', revenueReady ? moneyList([F.revenue.total]) : 'Недоступно', revenueReady ? 'подтверждено кассой CRM' : 'проверьте права токена'));
+            cards.push(statCard('Поступления YClients', revenueReady ? moneyList([F.revenue.total]) : 'Недоступно', revenueReady ? 'финансовые операции' : 'проверьте права токена'));
+            cards.push(statCard('Средний чек', moneyList(A.average_ticket), 'по проведённым визитам'));
             cards.push(statCard('Начислено ЗП', payrollReady && F.payroll.accrued_total ? moneyList([F.payroll.accrued_total]) : 'Недоступно', payrollReady ? 'взаиморасчёты CRM' : 'без приблизительного расчёта'));
-            cards.push(statCard('Выплачено ЗП', payrollReady && F.payroll.paid_total ? moneyList([F.payroll.paid_total]) : 'Недоступно', payrollReady ? 'взаиморасчёты CRM' : 'без приблизительного расчёта'));
-            if (payrollReady && F.payroll.balance_total) cards.push(statCard('Баланс ЗП', moneyList([F.payroll.balance_total]), 'по данным CRM'));
+            cards.push(statCard('Операции кассы', revenueReady && F.revenue.transaction_count != null ? String(F.revenue.transaction_count) : '—', 'подтверждено YClients'));
           } else {
             cards.push(statCard('Выручка', moneyList(A.revenue), null));
             cards.push(statCard('Чистыми', moneyList(A.net), 'выручка − расходы'));
@@ -10592,28 +10625,53 @@ function ABookFlow() {
             ? ((F && Array.isArray(F.warnings) ? F.warnings : []).map(function (w) { return String(w && w.message || ''); }).filter(Boolean))
             : [];
           if (isCrm && F && F._unavailable && F.message) financeWarnings.unshift(String(F.message));
-          var salesBreakdown = isCrm && F && F.revenue && Array.isArray(F.revenue.by_type) ? F.revenue.by_type : [];
-          var payrollStaff = isCrm && F && F.payroll && Array.isArray(F.payroll.staff) ? F.payroll.staff : [];
+          var payrollById = {};
+          payrollStaff.forEach(function (x) { if (x && x.staff_id != null) payrollById[String(x.staff_id)] = x; });
+          var performanceById = {};
+          staffPerformance.forEach(function (x) { if (x && x.staff_external_id != null) performanceById[String(x.staff_external_id)] = { stats: x, payroll: payrollById[String(x.staff_external_id)] || null }; });
+          payrollStaff.forEach(function (x) { var id = String(x && x.staff_id || ''); if (id && !performanceById[id]) performanceById[id] = { stats: null, payroll: x }; });
+          var teamRows = Object.keys(performanceById).map(function (id) { return Object.assign({ id: id }, performanceById[id]); }).sort(function (a, b) {
+            return firstKopecks(b.stats && b.stats.revenue) - firstKopecks(a.stats && a.stats.revenue);
+          });
+          var chartRows = dailyRows.slice(-14);
+          var chartMax = Math.max.apply(Math, [1].concat(chartRows.map(function (x) { return firstKopecks(x && x.revenue); })));
           return React.createElement(React.Fragment, null,
-            React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint, margin: '0 2px 10px' } }, 'Последние 30 дней · источник: ' + (isCrm ? String(F && F.provider || 'CRM').toUpperCase() : 'MAYA')),
+            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, margin: '0 2px 10px' } },
+              React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'Последние 30 дней · источник: ' + (isCrm ? String(F && F.provider || 'YClients').toUpperCase() : 'MAYA')),
+              React.createElement('button', { type: 'button', disabled: myBizBusy, onClick: loadMyBiz, style: { flex: 'none', border: '1px solid ' + t.line, borderRadius: 999, background: 'transparent', color: t.dim, padding: '6px 10px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase' } }, 'Обновить')),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } }, cards),
+            accountBreakdown.length ? React.createElement(React.Fragment, null,
+              sectionLabel('Кассы и способы оплаты'),
+              React.createElement('div', null, accountBreakdown.map(function (x, i) {
+                return detailRow('account-' + i, String(x.name || (x.is_cash ? 'Наличные' : 'Безналичные')), moneyList([x]), x.is_cash === true ? 'наличные' : (x.is_cash === false ? 'безналичные' : null));
+              }))) : null,
             salesBreakdown.length ? React.createElement(React.Fragment, null,
-              React.createElement('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '18px 2px 9px' } }, 'Продажи по данным CRM'),
-              React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } }, salesBreakdown.map(function (x, i) {
-                return React.createElement('div', { key: x.key || i, style: { display: 'flex', justifyContent: 'space-between', gap: 10, borderBottom: '1px solid ' + t.line, padding: '8px 2px' } },
-                  React.createElement('span', { style: { fontFamily: BODY, fontSize: 12.5, color: t.ink } }, String(x.label || x.key || 'Продажи')),
-                  React.createElement('span', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 12.5, color: t.dim, flex: 'none' } }, moneyList([x])));
+              sectionLabel('Продажи по данным YClients'),
+              React.createElement('div', null, salesBreakdown.map(function (x, i) { return detailRow(x.key || i, String(x.label || x.key || 'Продажи'), moneyList([x])); }))) : null,
+            chartRows.length ? React.createElement(React.Fragment, null,
+              sectionLabel('Динамика выручки · последние 14 дней'),
+              React.createElement('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '14px 12px 11px' } },
+                React.createElement('div', { style: { height: 92, display: 'flex', alignItems: 'flex-end', gap: 4 } }, chartRows.map(function (x, i) {
+                  var amount = firstKopecks(x && x.revenue);
+                  return React.createElement('div', { key: x.date || i, title: moneyList(x.revenue), style: { flex: 1, minWidth: 0, height: Math.max(4, Math.round(amount / chartMax * 88)) + 'px', borderRadius: '4px 4px 1px 1px', background: t.ink, opacity: 0.28 + 0.72 * amount / chartMax } });
+                })),
+                React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 8, fontFamily: BODY, fontSize: 9.5, color: t.faint } },
+                  React.createElement('span', null, chartRows[0] && String(chartRows[0].date || '').slice(5).split('-').reverse().join('.')),
+                  React.createElement('span', null, chartRows[chartRows.length - 1] && String(chartRows[chartRows.length - 1].date || '').slice(5).split('-').reverse().join('.'))))) : null,
+            teamRows.length ? React.createElement(React.Fragment, null,
+              sectionLabel('Команда · выручка и начисления'),
+              React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } }, teamRows.map(function (row, i) {
+                var s = row.stats || {}; var p = row.payroll || {}; var salaryReady = p.status === 'available' && p.accrued;
+                var meta = [];
+                if (s.appointments != null) meta.push('визитов: ' + s.appointments);
+                if (s.revenue && s.revenue.length) meta.push('выручка: ' + moneyList(s.revenue));
+                return React.createElement('div', { key: row.id || i, style: { border: '1px solid ' + t.line, borderRadius: 12, padding: '11px 13px' } },
+                  React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 } },
+                    React.createElement('div', { style: { minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.5, color: t.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, String(p.name || 'Сотрудник')),
+                    React.createElement('div', { style: { flex: 'none', fontFamily: DISPLAY, fontWeight: 500, fontSize: 12, color: t.dim } }, salaryReady ? moneyList([p.accrued]) : '—')),
+                  React.createElement('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 4, lineHeight: 1.4 } }, (meta.length ? meta.join(' · ') + ' · ' : '') + (salaryReady ? 'начислено ЗП' : 'ЗП недоступна')));
               }))) : null,
-            payrollStaff.length ? React.createElement(React.Fragment, null,
-              React.createElement('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '18px 2px 9px' } }, 'Взаиморасчёты сотрудников'),
-              React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } }, payrollStaff.map(function (x, i) {
-                var ready = x && x.status === 'available' && x.accrued;
-                return React.createElement('div', { key: x.staff_id || i, style: { border: '1px solid ' + t.line, borderRadius: 12, padding: '10px 13px', display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' } },
-                  React.createElement('div', { style: { minWidth: 0 } },
-                    React.createElement('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 12.5, color: t.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, String(x.name || 'Сотрудник')),
-                    React.createElement('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 2 } }, ready && x.paid ? 'выплачено: ' + moneyList([x.paid]) : 'данные недоступны')),
-                  React.createElement('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 12.5, color: t.dim, flex: 'none' } }, ready ? moneyList([x.accrued]) : '—'));
-              }))) : null,
+            isCrm ? React.createElement('div', { style: { marginTop: 14, fontFamily: BODY, fontSize: 10.5, lineHeight: 1.45, color: t.faint } }, 'Чистая прибыль не рассчитывается приблизительно: YClients подтверждает поступления и начисления, но не содержит всех расходов бизнеса.') : null,
             financeWarnings.length ? React.createElement('div', { style: { marginTop: 14, padding: '11px 13px', border: '1px solid ' + t.line, borderRadius: 12, fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, color: t.dim } }, financeWarnings.join(' ')) : null,
             !isCrm && expItems.length ? React.createElement(React.Fragment, null,
               React.createElement('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '18px 2px 9px' } }, 'Последние расходы'),
