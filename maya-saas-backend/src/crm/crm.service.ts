@@ -507,6 +507,28 @@ export class CrmService {
     };
   }
 
+  async synchronizeCrmTeamAccess(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    try {
+      const integration = await this.getStoredIntegration(scopedTenantId);
+      const adapter = this.adapterFactory.create(
+        integration.provider as CrmProvider,
+        this.createAdapterConfig(integration),
+      );
+      const team = await this.loadTeamMembers(adapter, scopedTenantId);
+      await this.reconcileCrmTeamAccess(scopedTenantId, team);
+
+      return { synced: true, active_crm_team: team.length };
+    } catch (error) {
+      const errorCode = this.safeErrorCode(error);
+      this.logger.warn(
+        `CRM team access synchronization deferred tenant=${scopedTenantId}: ${errorCode}`,
+      );
+      return { synced: false, active_crm_team: null, error_code: errorCode };
+    }
+  }
+
   async assertCrmStaffAccessActive(tenantId: string, userId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const access = await this.prisma.crmStaffAccess.findFirst({
@@ -520,23 +542,11 @@ export class CrmService {
 
     if (!access || this.isOwnerAccessRole(access.role)) return;
 
-    try {
-      const integration = await this.getStoredIntegration(scopedTenantId);
-      if ((integration.provider as CrmProvider) !== CrmProvider.MOCK) {
-        const adapter = this.adapterFactory.create(
-          integration.provider as CrmProvider,
-          this.createAdapterConfig(integration),
-        );
-        const team = await this.loadTeamMembers(adapter, scopedTenantId);
-        await this.reconcileCrmTeamAccess(scopedTenantId, team);
-      }
-    } catch (error) {
+    const synchronization = await this.synchronizeCrmTeamAccess(scopedTenantId);
+    if (!synchronization.synced) {
       if (access.status === 'disabled') {
         throw this.crmStaffAccessDisabled();
       }
-      this.logger.warn(
-        `CRM staff access check deferred tenant=${scopedTenantId} user=${userId}: ${this.safeErrorCode(error)}`,
-      );
       return;
     }
 
@@ -1016,16 +1026,28 @@ export class CrmService {
         userId: true,
         role: true,
         status: true,
+        encryptedDisplayName: true,
+        title: true,
       },
     });
-    if (accesses.length === 0) return;
 
-    const activeIds = new Set(team.map((member) => String(member.id)));
+    const teamById = new Map(team.map((member) => [String(member.id), member]));
+    const activeIds = new Set(teamById.keys());
+    const knownIds = new Set(accesses.map((access) => access.externalStaffId));
     const now = new Date();
 
     await this.prisma.$transaction(async (tx) => {
       for (const access of accesses) {
-        if (this.isOwnerAccessRole(access.role)) continue;
+        const member = teamById.get(access.externalStaffId);
+        if (this.isOwnerAccessRole(access.role)) {
+          if (member && access.title !== (member.title ?? null)) {
+            await tx.crmStaffAccess.update({
+              where: { id: access.id },
+              data: { title: member.title ?? null },
+            });
+          }
+          continue;
+        }
 
         const present = activeIds.has(access.externalStaffId);
         const nextStatus = present
@@ -1034,10 +1056,16 @@ export class CrmService {
             : 'pending_contact'
           : 'disabled';
 
-        if (access.status !== nextStatus) {
+        if (
+          access.status !== nextStatus ||
+          (member && access.title !== (member.title ?? null))
+        ) {
           await tx.crmStaffAccess.update({
             where: { id: access.id },
-            data: { status: nextStatus },
+            data: {
+              status: nextStatus,
+              ...(member ? { title: member.title ?? null } : {}),
+            },
           });
         }
 
@@ -1067,6 +1095,26 @@ export class CrmService {
             revokedAt: now,
             revokeReason: 'crm_staff_inactive',
           },
+        });
+      }
+
+      const newMembers = team.filter(
+        (member) => !knownIds.has(String(member.id)),
+      );
+      if (newMembers.length) {
+        await tx.crmStaffAccess.createMany({
+          data: newMembers.map((member) => ({
+            tenantId,
+            externalStaffId: String(member.id),
+            encryptedDisplayName: this.encryptionService.encrypt(member.name),
+            title: member.title ?? null,
+            role:
+              member.suggested_role === 'administrator'
+                ? UserRole.ADMINISTRATOR
+                : UserRole.STAFF,
+            status: 'pending_contact' as const,
+          })),
+          skipDuplicates: true,
         });
       }
     });

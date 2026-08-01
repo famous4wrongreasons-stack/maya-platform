@@ -631,6 +631,7 @@ describe('CrmService', () => {
       })
       .mockResolvedValueOnce({ status: 'disabled' });
     const accessUpdate = jest.fn().mockResolvedValue({});
+    const accessCreateMany = jest.fn().mockResolvedValue({ count: 1 });
     const membershipUpdateMany = jest.fn().mockResolvedValue({ count: 1 });
     type SessionUpdateArgs = {
       where: { tenantId: string; userId: string; revokedAt: null };
@@ -642,7 +643,10 @@ describe('CrmService', () => {
     const transaction = jest.fn(
       async (run: (tx: Record<string, unknown>) => Promise<void>) =>
         run({
-          crmStaffAccess: { update: accessUpdate },
+          crmStaffAccess: {
+            update: accessUpdate,
+            createMany: accessCreateMany,
+          },
           membership: { updateMany: membershipUpdateMany },
           authSession: { updateMany: sessionUpdateMany },
         }),
@@ -685,6 +689,9 @@ describe('CrmService', () => {
       } as unknown as PrismaService,
       {
         decrypt: jest.fn().mockReturnValue('tenant-token'),
+        encrypt: jest
+          .fn()
+          .mockImplementation((value: string) => `enc:${value}`),
       } as unknown as EncryptionService,
       {
         create: jest.fn().mockReturnValue({
@@ -718,6 +725,17 @@ describe('CrmService', () => {
         status: 'active',
       },
       data: { status: 'suspended' },
+    });
+    expect(accessCreateMany).toHaveBeenCalledWith({
+      data: [
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          externalStaffId: 'crm-active',
+          role: UserRole.STAFF,
+          status: 'pending_contact',
+        }),
+      ],
+      skipDuplicates: true,
     });
     const revokeArgs = sessionUpdateMany.mock.calls[0]?.[0];
     if (!revokeArgs) throw new Error('Expected active sessions to be revoked');

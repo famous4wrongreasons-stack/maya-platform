@@ -585,8 +585,22 @@ export class AiOnboardingService {
     blueprint: AiOnboardingBlueprint,
     dto: ConfirmAiOnboardingDraftDto,
   ): void {
+    const ownerExternalStaffId = dto.ownerExternalStaffId?.trim() || null;
+    const verifiedHashes = new Set(blueprint.crmStaffIdentityHashes ?? []);
+    if (
+      blueprint.crmImported &&
+      verifiedHashes.size > 0 &&
+      !ownerExternalStaffId
+    ) {
+      throw new BadRequestException({
+        message:
+          'Select your CRM employee profile before creating the business.',
+        error: { code: 'crm_team_owner_required' },
+      });
+    }
+
     const requestedIds = [
-      ...(dto.ownerExternalStaffId ? [dto.ownerExternalStaffId] : []),
+      ...(ownerExternalStaffId ? [ownerExternalStaffId] : []),
       ...(dto.teamMembers ?? []).map((member) => member.externalStaffId),
     ];
     if (requestedIds.length === 0) return;
@@ -601,7 +615,6 @@ export class AiOnboardingService {
       });
     }
 
-    const verifiedHashes = new Set(blueprint.crmStaffIdentityHashes ?? []);
     const invalid = requestedIds.find(
       (externalStaffId) =>
         !verifiedHashes.has(

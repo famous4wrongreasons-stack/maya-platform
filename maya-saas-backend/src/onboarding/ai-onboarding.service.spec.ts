@@ -414,6 +414,7 @@ describe('AiOnboardingService', () => {
         ownerEmail: 'owner@example.ru',
         ownerName: 'Владелец',
         ownerPhone: '+79990000000',
+        ownerExternalStaffId: 'staff-verified',
         teamMembers: [
           {
             externalStaffId: 'staff-from-another-branch',
@@ -423,6 +424,45 @@ describe('AiOnboardingService', () => {
         ],
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+    expect(claimDraft).not.toHaveBeenCalled();
+    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+  });
+
+  it('requires the owner to select their verified CRM employee profile', async () => {
+    const token = 'a'.repeat(43);
+    const claimDraft = jest.fn();
+    const { service, onboarding } = createService({
+      findDraft: jest.fn().mockResolvedValue({
+        id: 'draft-1',
+        status: 'draft',
+        draftTokenHash: createHash('sha256').update(token).digest('hex'),
+        blueprintJson: {
+          ...completeBlueprint,
+          crmStaffIdentityHashes: [
+            createHash('sha256')
+              .update('yclients:503759:staff-owner')
+              .digest('hex'),
+          ],
+        },
+        missingFieldsJson: [],
+        expiresAt: new Date(Date.now() + 60_000),
+        confirmedTenantId: null,
+      }),
+      claimDraft,
+    });
+
+    await expect(
+      service.confirmDraft('draft-1', {
+        draftToken: token,
+        ownerEmail: 'owner@example.ru',
+        ownerName: 'Владелец',
+        ownerPhone: '+79990000000',
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'crm_team_owner_required' },
+      },
+    });
     expect(claimDraft).not.toHaveBeenCalled();
     expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
   });

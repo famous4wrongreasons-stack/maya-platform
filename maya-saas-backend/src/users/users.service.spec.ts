@@ -694,4 +694,294 @@ describe('UsersService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(transaction).not.toHaveBeenCalled();
   });
+
+  it('lists owner, active and pending CRM access without exposing synthetic phone emails', async () => {
+    const tenantContext = new TenantContextService();
+    const service = new UsersService(
+      {
+        crmStaffAccess: {
+          findMany: jest.fn().mockResolvedValue([
+            {
+              externalStaffId: 'crm-owner',
+              userId: 'owner-1',
+              encryptedDisplayName: 'enc:Владелец',
+              title: 'Владелец',
+              role: UserRole.TENANT_ADMIN,
+              status: 'active',
+              user: {
+                id: 'owner-1',
+                email: 'owner@example.test',
+                phone: '+79990000000',
+              },
+            },
+            {
+              externalStaffId: 'crm-admin',
+              userId: 'admin-1',
+              encryptedDisplayName: 'enc:Антон',
+              title: 'Администратор',
+              role: UserRole.ADMINISTRATOR,
+              status: 'active',
+              user: {
+                id: 'admin-1',
+                email: 'phone-79991112233@tenant-one.client.local',
+                phone: '+79991112233',
+              },
+            },
+            {
+              externalStaffId: 'crm-master',
+              userId: null,
+              encryptedDisplayName: 'enc:Илья',
+              title: 'Барбер',
+              role: UserRole.STAFF,
+              status: 'pending_contact',
+              user: null,
+            },
+          ]),
+        },
+      } as unknown as PrismaService,
+      {
+        encrypt: (value: string) => `enc:${value}`,
+        decrypt: (value: string) => value.replace(/^enc:/, ''),
+      } as EncryptionService,
+      tenantContext,
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.listCrmTeamAccess('tenant-1', 'owner-1'),
+    );
+
+    expect(result).toMatchObject({
+      total: 3,
+      active_accounts: 2,
+      pending_contacts: 1,
+      disabled_accounts: 0,
+    });
+    expect(result.items[0]).toMatchObject({
+      display_name: 'Владелец',
+      is_owner: true,
+      email: 'owner@example.test',
+    });
+    expect(
+      result.items.find((item) => item.external_staff_id === 'crm-admin'),
+    ).toMatchObject({
+      display_name: 'Антон',
+      email: null,
+      phone: '+79991112233',
+      can_login: true,
+    });
+  });
+
+  it('activates pending CRM staff access when the owner adds an email', async () => {
+    const accessUpdate = jest.fn().mockResolvedValue({});
+    type UserCreateArgs = {
+      data: {
+        tenantId: string;
+        branchId: string | null;
+        email: string;
+        role: UserRole;
+        [key: string]: unknown;
+      };
+      select: { id: boolean };
+    };
+    const userCreate: jest.MockedFunction<
+      (args: UserCreateArgs) => Promise<{ id: string }>
+    > = jest.fn().mockResolvedValue({ id: 'staff-user-1' });
+    const transaction = jest.fn(
+      async (run: (tx: Record<string, unknown>) => Promise<unknown>) =>
+        run({
+          crmStaffAccess: {
+            findFirst: jest.fn().mockResolvedValue({
+              id: 'access-1',
+              externalStaffId: 'crm-master',
+              userId: null,
+              encryptedDisplayName: 'enc:Илья',
+              title: 'Барбер',
+              role: UserRole.STAFF,
+              status: 'pending_contact',
+              user: null,
+            }),
+            update: accessUpdate,
+          },
+          user: {
+            findMany: jest.fn().mockResolvedValue([]),
+            create: userCreate,
+          },
+          tenant: {
+            findUnique: jest.fn().mockResolvedValue({ slug: 'tenant-one' }),
+          },
+          branch: {
+            findFirst: jest.fn().mockResolvedValue({ id: 'branch-1' }),
+          },
+          membership: { updateMany: jest.fn() },
+          authSession: { updateMany: jest.fn() },
+        }),
+    );
+    const tenantContext = new TenantContextService();
+    const service = new UsersService(
+      {
+        $transaction: transaction,
+        crmStaffAccess: {
+          findMany: jest.fn().mockResolvedValue([
+            {
+              externalStaffId: 'crm-master',
+              userId: 'staff-user-1',
+              encryptedDisplayName: 'enc:Илья',
+              title: 'Барбер',
+              role: UserRole.STAFF,
+              status: 'active',
+              user: {
+                id: 'staff-user-1',
+                email: 'ilya@example.test',
+                phone: null,
+              },
+            },
+          ]),
+        },
+      } as unknown as PrismaService,
+      {
+        encrypt: (value: string) => `enc:${value}`,
+        decrypt: (value: string) => value.replace(/^enc:/, ''),
+      } as EncryptionService,
+      tenantContext,
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.updateCrmTeamAccess({
+        tenantId: 'tenant-1',
+        actorUserId: 'owner-1',
+        externalStaffId: 'crm-master',
+        update: { role: UserRole.STAFF, email: 'ILYA@example.test' },
+      }),
+    );
+
+    const createdUserArgs = userCreate.mock.calls[0]?.[0];
+    expect(createdUserArgs).toMatchObject({
+      data: {
+        tenantId: 'tenant-1',
+        branchId: 'branch-1',
+        email: 'ilya@example.test',
+        role: UserRole.STAFF,
+      },
+      select: { id: true },
+    });
+    expect(accessUpdate).toHaveBeenCalledWith({
+      where: { id: 'access-1' },
+      data: {
+        role: UserRole.STAFF,
+        userId: 'staff-user-1',
+        status: 'active',
+      },
+    });
+    expect(result).toMatchObject({
+      external_staff_id: 'crm-master',
+      email: 'ilya@example.test',
+      can_login: true,
+    });
+  });
+
+  it('links the authenticated tenant owner to an unclaimed CRM employee', async () => {
+    const accessUpdate = jest.fn().mockResolvedValue({});
+    const accessFindFirst = jest
+      .fn()
+      .mockResolvedValueOnce({
+        id: 'access-owner',
+        externalStaffId: 'crm-owner',
+        userId: null,
+        role: UserRole.STAFF,
+        status: 'pending_contact',
+      })
+      .mockResolvedValueOnce(null);
+    const transaction = jest.fn(
+      async (run: (tx: Record<string, unknown>) => Promise<unknown>) =>
+        run({
+          membership: {
+            findFirst: jest
+              .fn()
+              .mockResolvedValue({ role: UserRole.TENANT_ADMIN }),
+          },
+          crmStaffAccess: {
+            findFirst: accessFindFirst,
+            update: accessUpdate,
+          },
+        }),
+    );
+    const tenantContext = new TenantContextService();
+    const service = new UsersService(
+      {
+        $transaction: transaction,
+        crmStaffAccess: {
+          findMany: jest.fn().mockResolvedValue([
+            {
+              externalStaffId: 'crm-owner',
+              userId: 'owner-1',
+              encryptedDisplayName: 'enc:Стас Мосин',
+              title: 'Барбер',
+              role: UserRole.TENANT_ADMIN,
+              status: 'active',
+              user: {
+                id: 'owner-1',
+                email: 'owner@example.test',
+                phone: '+79990000000',
+              },
+            },
+          ]),
+        },
+      } as unknown as PrismaService,
+      {
+        encrypt: (value: string) => `enc:${value}`,
+        decrypt: (value: string) => value.replace(/^enc:/, ''),
+      } as EncryptionService,
+      tenantContext,
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.claimCrmTeamOwner({
+        tenantId: 'tenant-1',
+        actorUserId: 'owner-1',
+        externalStaffId: 'crm-owner',
+      }),
+    );
+
+    expect(accessUpdate).toHaveBeenCalledWith({
+      where: { id: 'access-owner' },
+      data: {
+        userId: 'owner-1',
+        role: UserRole.TENANT_ADMIN,
+        status: 'active',
+      },
+    });
+    expect(result).toMatchObject({
+      external_staff_id: 'crm-owner',
+      is_owner: true,
+      can_login: true,
+    });
+  });
+
+  it('does not let a non-owner claim the CRM owner identity', async () => {
+    const transaction = jest.fn(
+      async (run: (tx: Record<string, unknown>) => Promise<unknown>) =>
+        run({
+          membership: { findFirst: jest.fn().mockResolvedValue(null) },
+        }),
+    );
+    const tenantContext = new TenantContextService();
+    const service = new UsersService(
+      { $transaction: transaction } as unknown as PrismaService,
+      {
+        encrypt: (value: string) => `enc:${value}`,
+        decrypt: (value: string) => value.replace(/^enc:/, ''),
+      } as EncryptionService,
+      tenantContext,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.claimCrmTeamOwner({
+          tenantId: 'tenant-1',
+          actorUserId: 'staff-1',
+          externalStaffId: 'crm-owner',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
 });

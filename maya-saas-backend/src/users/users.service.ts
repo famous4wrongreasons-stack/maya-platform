@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -21,6 +22,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
+import { UpdateCrmTeamAccessDto } from './dto/update-crm-team-access.dto';
 
 type TenantSummary = {
   id: string;
@@ -60,6 +62,12 @@ export type CrmTeamMemberAssignment = {
   email?: string | null;
   phone?: string | null;
 };
+
+const CRM_OWNER_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+];
 
 @Injectable()
 export class UsersService {
@@ -608,6 +616,397 @@ export class UsersService {
     });
   }
 
+  async listCrmTeamAccess(tenantId: string, currentUserId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const accesses = await this.prisma.crmStaffAccess.findMany({
+      where: { tenantId: scopedTenantId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    const items = accesses
+      .map((access) => {
+        const email = this.publicLoginEmail(access.user?.email ?? null);
+        const phone = access.user?.phone ?? null;
+        const isOwner =
+          access.userId === currentUserId ||
+          this.isOwnerAccessRole(access.role);
+
+        return {
+          external_staff_id: access.externalStaffId,
+          display_name: this.encryptionService.decrypt(
+            access.encryptedDisplayName,
+          ),
+          title: access.title,
+          role: access.role,
+          access_status: access.status,
+          email,
+          phone,
+          login_channels: [
+            ...(email ? ['email'] : []),
+            ...(phone ? ['phone'] : []),
+          ],
+          can_login: access.status === 'active' && Boolean(email || phone),
+          is_owner: isOwner,
+        };
+      })
+      .sort((left, right) => {
+        if (left.is_owner !== right.is_owner) return left.is_owner ? -1 : 1;
+        if (left.role !== right.role) {
+          return String(left.role) === 'administrator' ? -1 : 1;
+        }
+        return left.display_name.localeCompare(right.display_name, 'ru');
+      });
+
+    return {
+      items,
+      total: items.length,
+      active_accounts: items.filter((item) => item.can_login).length,
+      pending_contacts: items.filter(
+        (item) => item.access_status === 'pending_contact',
+      ).length,
+      disabled_accounts: items.filter(
+        (item) => item.access_status === 'disabled',
+      ).length,
+    };
+  }
+
+  async updateCrmTeamAccess(data: {
+    tenantId: string;
+    actorUserId: string;
+    externalStaffId: string;
+    update: UpdateCrmTeamAccessDto;
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const externalStaffId = data.externalStaffId.trim();
+    const email = data.update.email?.trim().toLowerCase() || null;
+    const phone = this.normalizeOptionalPhone(data.update.phone);
+    const requestedRole = data.update.role;
+
+    if (!externalStaffId) {
+      throw new BadRequestException({
+        message: 'CRM staff identity is required.',
+        error: { code: 'crm_team_member_invalid' },
+      });
+    }
+    if (!requestedRole && !email && !phone) {
+      throw new BadRequestException({
+        message: 'Provide a role, email or phone to update team access.',
+        error: { code: 'crm_team_access_update_empty' },
+      });
+    }
+
+    const fallbackPasswordHash =
+      email || phone
+        ? await bcrypt.hash(randomBytes(24).toString('base64url'), 10)
+        : null;
+
+    await this.prisma.$transaction(async (tx) => {
+      const access = await tx.crmStaffAccess.findFirst({
+        where: { tenantId, externalStaffId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              phone: true,
+              role: true,
+            },
+          },
+        },
+      });
+      if (!access) {
+        throw new NotFoundException({
+          message: 'CRM team member access was not found.',
+          error: { code: 'crm_team_access_not_found' },
+        });
+      }
+      if (
+        access.userId === data.actorUserId ||
+        this.isOwnerAccessRole(access.role)
+      ) {
+        throw new ForbiddenException({
+          message: 'Owner access is managed from the owner profile.',
+          error: { code: 'crm_team_owner_access_read_only' },
+        });
+      }
+      if (access.status === 'disabled') {
+        throw new ConflictException({
+          message: 'This employee is no longer active in CRM.',
+          error: { code: 'crm_staff_access_disabled' },
+        });
+      }
+
+      const role = requestedRole ?? access.role;
+      if (role !== UserRole.ADMINISTRATOR && role !== UserRole.STAFF) {
+        throw new BadRequestException({
+          message: 'Unsupported team access role.',
+          error: { code: 'crm_team_role_invalid' },
+        });
+      }
+
+      const contactClauses = [
+        ...(email ? [{ email }] : []),
+        ...(phone ? [{ phone }] : []),
+      ];
+
+      let userId = access.userId;
+      let priorRole = access.user?.role ?? null;
+      let contactChanged = false;
+
+      if (userId && access.user) {
+        contactChanged = Boolean(
+          (email && email !== access.user.email) ||
+          (phone && phone !== access.user.phone),
+        );
+        if (contactClauses.length) {
+          const conflict = await tx.user.findFirst({
+            where: {
+              id: { not: userId },
+              memberships: { some: { tenantId } },
+              OR: contactClauses,
+            },
+            select: { id: true },
+          });
+          if (conflict) this.throwCrmTeamContactConflict();
+        }
+
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            ...(email ? { email } : {}),
+            ...(phone ? { phone } : {}),
+            role,
+            status: UserStatus.ACTIVE,
+          },
+        });
+        await tx.membership.updateMany({
+          where: { tenantId, userId },
+          data: { role, status: 'active' },
+        });
+      } else if (contactClauses.length) {
+        const matches = await tx.user.findMany({
+          where: {
+            memberships: { some: { tenantId } },
+            OR: contactClauses,
+          },
+          select: {
+            id: true,
+            email: true,
+            phone: true,
+            role: true,
+          },
+          take: 2,
+        });
+        if (matches.length > 1) this.throwCrmTeamContactConflict();
+
+        const existingUser = matches[0] ?? null;
+        if (existingUser) {
+          const existingAccess = await tx.crmStaffAccess.findFirst({
+            where: {
+              tenantId,
+              userId: existingUser.id,
+              id: { not: access.id },
+            },
+            select: { id: true },
+          });
+          if (existingAccess) this.throwCrmTeamContactConflict();
+
+          userId = existingUser.id;
+          priorRole = existingUser.role;
+          contactChanged = Boolean(
+            (email && email !== existingUser.email) ||
+            (phone && phone !== existingUser.phone),
+          );
+          await tx.user.update({
+            where: { id: existingUser.id },
+            data: {
+              ...(email ? { email } : {}),
+              ...(phone ? { phone } : {}),
+              role,
+              status: UserStatus.ACTIVE,
+            },
+          });
+          await tx.membership.updateMany({
+            where: { tenantId, userId: existingUser.id },
+            data: { role, status: 'active' },
+          });
+        } else {
+          const [tenant, branch] = await Promise.all([
+            tx.tenant.findUnique({
+              where: { id: tenantId },
+              select: { slug: true },
+            }),
+            tx.branch.findFirst({
+              where: { tenantId },
+              orderBy: { createdAt: 'asc' },
+              select: { id: true },
+            }),
+          ]);
+          if (!tenant || !fallbackPasswordHash) {
+            throw new NotFoundException({
+              message: 'Tenant was not found.',
+              error: { code: 'tenant_not_found' },
+            });
+          }
+
+          const user = await tx.user.create({
+            data: {
+              tenantId,
+              branchId: branch?.id ?? null,
+              email: email ?? buildPhoneLoginEmail(tenant.slug, phone!),
+              phone,
+              encryptedName: access.encryptedDisplayName,
+              passwordHash: fallbackPasswordHash,
+              role,
+              status: UserStatus.ACTIVE,
+              memberships: {
+                create: {
+                  tenantId,
+                  branchId: branch?.id ?? null,
+                  role,
+                  status: 'active',
+                  joinedAt: new Date(),
+                },
+              },
+            },
+            select: { id: true },
+          });
+          userId = user.id;
+        }
+      }
+
+      await tx.crmStaffAccess.update({
+        where: { id: access.id },
+        data: {
+          role,
+          userId,
+          status: userId ? 'active' : 'pending_contact',
+        },
+      });
+
+      if (userId && contactChanged) {
+        await tx.authIdentity.deleteMany({
+          where: { tenantId, userId },
+        });
+      }
+      if (userId && (contactChanged || (priorRole && priorRole !== role))) {
+        await tx.authSession.updateMany({
+          where: { tenantId, userId, revokedAt: null },
+          data: {
+            revokedAt: new Date(),
+            revokeReason: contactChanged
+              ? 'crm_staff_login_changed'
+              : 'crm_staff_role_changed',
+          },
+        });
+      }
+    });
+
+    const snapshot = await this.listCrmTeamAccess(tenantId, data.actorUserId);
+    return snapshot.items.find(
+      (item) => item.external_staff_id === externalStaffId,
+    );
+  }
+
+  async claimCrmTeamOwner(data: {
+    tenantId: string;
+    actorUserId: string;
+    externalStaffId: string;
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const externalStaffId = data.externalStaffId.trim();
+
+    if (!externalStaffId) {
+      throw new BadRequestException({
+        message: 'CRM staff identity is required.',
+        error: { code: 'crm_team_member_invalid' },
+      });
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const ownerMembership = await tx.membership.findFirst({
+        where: {
+          tenantId,
+          userId: data.actorUserId,
+          status: 'active',
+          role: { in: CRM_OWNER_ROLES },
+        },
+        select: { role: true },
+      });
+      if (!ownerMembership) {
+        throw new ForbiddenException({
+          message: 'Only the tenant owner can claim the CRM owner identity.',
+          error: { code: 'crm_team_owner_claim_forbidden' },
+        });
+      }
+
+      const access = await tx.crmStaffAccess.findFirst({
+        where: { tenantId, externalStaffId },
+        select: {
+          id: true,
+          userId: true,
+          role: true,
+          status: true,
+        },
+      });
+      if (!access) {
+        throw new NotFoundException({
+          message: 'CRM team member access was not found.',
+          error: { code: 'crm_team_access_not_found' },
+        });
+      }
+      if (access.status === 'disabled') {
+        throw new ConflictException({
+          message: 'This employee is no longer active in CRM.',
+          error: { code: 'crm_staff_access_disabled' },
+        });
+      }
+      if (access.userId && access.userId !== data.actorUserId) {
+        throw new ConflictException({
+          message: 'This CRM employee is already linked to another account.',
+          error: { code: 'crm_team_owner_claim_assigned' },
+        });
+      }
+
+      const existingOwnerLink = await tx.crmStaffAccess.findFirst({
+        where: {
+          tenantId,
+          id: { not: access.id },
+          OR: [{ userId: data.actorUserId }, { role: { in: CRM_OWNER_ROLES } }],
+        },
+        select: { id: true },
+      });
+      if (existingOwnerLink) {
+        throw new ConflictException({
+          message: 'The tenant owner is already linked to a CRM employee.',
+          error: { code: 'crm_team_owner_already_linked' },
+        });
+      }
+
+      await tx.crmStaffAccess.update({
+        where: { id: access.id },
+        data: {
+          userId: data.actorUserId,
+          role: ownerMembership.role,
+          status: 'active',
+        },
+      });
+    });
+
+    const snapshot = await this.listCrmTeamAccess(tenantId, data.actorUserId);
+    return snapshot.items.find(
+      (item) => item.external_staff_id === externalStaffId,
+    );
+  }
+
   async createPhoneFirstClientUser(data: {
     tenantId: string;
     tenantSlug: string;
@@ -879,5 +1278,21 @@ export class UsersService {
     } catch {
       return null;
     }
+  }
+
+  private publicLoginEmail(email: string | null): string | null {
+    if (!email || /^phone-\d+@.+\.client\.local$/i.test(email)) return null;
+    return email;
+  }
+
+  private isOwnerAccessRole(role: string): boolean {
+    return CRM_OWNER_ROLES.includes(role as UserRole);
+  }
+
+  private throwCrmTeamContactConflict(): never {
+    throw new ConflictException({
+      message: 'This email or phone is already used in this business.',
+      error: { code: 'crm_team_contact_already_used' },
+    });
   }
 }
