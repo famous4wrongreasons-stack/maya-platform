@@ -13872,9 +13872,10 @@ function AChat() {
 	    if (phoneDigits.length < 10 || phoneDigits.length > 15) errors.ownerPhone = onbFriendlyValidation('ownerPhone');
 
 	    var ownerExternalStaffId = String(c.ownerExternalStaffId || '').trim();
-	    var knownStaffIds = {};
-	    (c.team || []).forEach(function (member) { knownStaffIds[String(member.externalStaffId || '').trim()] = true; });
-	    if (ownerExternalStaffId && !knownStaffIds[ownerExternalStaffId]) errors.team = 'Выберите владельца из подтверждённого списка CRM.';
+	    var knownStaffIds = {}; var knownStaffCount = 0;
+	    (c.team || []).forEach(function (member) { var id = String(member.externalStaffId || '').trim(); if (id) { knownStaffIds[id] = true; knownStaffCount += 1; } });
+	    if (c.crmImported && knownStaffCount && !ownerExternalStaffId) errors.team = 'Отметьте себя в списке сотрудников CRM.';
+	    else if (ownerExternalStaffId && !knownStaffIds[ownerExternalStaffId]) errors.team = 'Выберите владельца из подтверждённого списка CRM.';
 	    var usedStaffIds = {};
 	    var usedEmails = {}; usedEmails[ownerEmail.toLowerCase()] = true;
 	    var usedPhones = {}; if (phoneDigits.length >= 10) usedPhones['+' + phoneDigits] = true;
@@ -27917,6 +27918,145 @@ Object.assign(window, {
   AStaffDashboard
 });
 
+function ASaasTeamAccessManager(props) {
+  var e = React.createElement;
+  var t = props.t || {};
+  var items = Array.isArray(props.items) ? props.items : [];
+  var [drafts, setDrafts] = React.useState({});
+  var [busyId, setBusyId] = React.useState('');
+  var [notes, setNotes] = React.useState({});
+  var [claimId, setClaimId] = React.useState('');
+
+  React.useEffect(function () {
+    var next = {};
+    items.forEach(function (item) {
+      next[String(item.external_staff_id)] = {
+        role: item.role === 'administrator' ? 'administrator' : 'staff',
+        email: item.email || '',
+        phone: item.phone || ''
+      };
+    });
+    setDrafts(next);
+  }, [items]);
+
+  function patchDraft(id, key, value) {
+    setDrafts(function (current) {
+      var next = Object.assign({}, current);
+      next[id] = Object.assign({}, next[id] || {}, {});
+      next[id][key] = value;
+      return next;
+    });
+  }
+
+  function messageFor(error) {
+    var code = error && error.code;
+    if (code === 'crm_team_contact_already_used') return 'Этот email или телефон уже используется другим аккаунтом этого бизнеса.';
+    if (code === 'crm_staff_access_disabled') return 'Сотрудник больше не активен в CRM. Доступ MAYA отключён автоматически.';
+    if (code === 'crm_team_owner_access_read_only') return 'Контакты владельца меняются в профиле владельца.';
+    if (code === 'crm_team_owner_claim_assigned') return 'Этот сотрудник уже привязан к другому аккаунту.';
+    if (code === 'crm_team_owner_already_linked') return 'Профиль владельца уже связан с другим сотрудником CRM.';
+    if (code === 'validation') return 'Проверьте формат email или телефона.';
+    if (error && error.status === 401) return 'Сессия завершена. Войдите снова.';
+    if (error && error.status === 403) return 'Изменять доступы может только владелец бизнеса.';
+    return 'Не удалось сохранить доступ. Проверьте данные и повторите.';
+  }
+
+  function save(item) {
+    var id = String(item.external_staff_id);
+    var draft = drafts[id] || {};
+    var email = String(draft.email || '').trim();
+    var phone = String(draft.phone || '').trim();
+    var payload = { role: draft.role === 'administrator' ? 'administrator' : 'staff' };
+    if (email) payload.email = email;
+    if (phone) payload.phone = phone;
+    setBusyId(id);
+    setNotes(function (current) { var next = Object.assign({}, current); delete next[id]; return next; });
+    meWidgetAf('/integrations/crm/team-access/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (result) {
+      setBusyId('');
+      setNotes(function (current) {
+        var next = Object.assign({}, current);
+        next[id] = result && result.can_login
+          ? 'Доступ активирован. Сотрудник может войти через общий экран MAYA.'
+          : 'Роль сохранена. Добавьте email или телефон, чтобы сотрудник смог войти.';
+        return next;
+      });
+      if (props.onSaved) props.onSaved();
+    }).catch(function (error) {
+      setBusyId('');
+      setNotes(function (current) { var next = Object.assign({}, current); next[id] = messageFor(error); return next; });
+    });
+  }
+
+  function claimOwner(item) {
+    var id = String(item.external_staff_id);
+    setBusyId(id);
+    setNotes(function (current) { var next = Object.assign({}, current); delete next[id]; return next; });
+    meWidgetAf('/integrations/crm/team-access/' + encodeURIComponent(id) + '/claim-owner', {
+      method: 'PATCH'
+    }).then(function () {
+      setBusyId('');
+      setClaimId('');
+      setNotes(function (current) { var next = Object.assign({}, current); next[id] = 'Профиль CRM связан с вашим аккаунтом владельца.'; return next; });
+      if (props.onSaved) props.onSaved();
+    }).catch(function (error) {
+      setBusyId('');
+      setNotes(function (current) { var next = Object.assign({}, current); next[id] = messageFor(error); return next; });
+    });
+  }
+
+  if (!items.length) {
+    return e('div', { style: { border: '1px solid ' + t.line, borderRadius: 18, padding: 16, fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Команда появится после синхронизации с CRM.');
+  }
+
+  var inputStyle = {
+    width: '100%', boxSizing: 'border-box', minHeight: 43, border: '1px solid ' + t.line,
+    borderRadius: 13, background: 'transparent', color: t.ink, padding: '10px 12px',
+    fontFamily: BODY, fontSize: 12.5, outline: 'none'
+  };
+
+  var hasOwner = items.some(function (item) { return !!item.is_owner; });
+  return e('div', { style: { display: 'grid', gap: 10 } },
+    !hasOwner ? e('div', { style: { border: '1px solid ' + t.ink, borderRadius: 16, padding: '12px 14px', fontFamily: BODY, fontSize: 11.5, lineHeight: 1.5, color: t.ink } }, 'Найдите себя в списке и нажмите «Это я». Так MAYA свяжет владельца с его профилем CRM и откроет персональные данные без повторной регистрации.') : null,
+    items.map(function (item) {
+    var id = String(item.external_staff_id);
+    var draft = drafts[id] || { role: item.role, email: item.email || '', phone: item.phone || '' };
+    var disabled = item.access_status === 'disabled';
+    var owner = !!item.is_owner;
+    var ready = !!item.can_login;
+    var statusText = owner ? 'Владелец · доступ активен' : disabled ? 'Отключён: сотрудник неактивен в CRM' : ready ? 'Доступ активен' : 'Нужен email или телефон для входа';
+    var statusColor = disabled ? '#c94a43' : ready || owner ? '#3f9e6a' : t.dim;
+    return e('div', { key: id, style: { border: '1px solid ' + t.line, borderRadius: 18, padding: 15, background: t.card, color: t.ink } },
+      e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 11 } },
+        e('div', { style: { width: 42, height: 42, borderRadius: 14, border: '1px solid ' + t.line, display: 'grid', placeItems: 'center', flexShrink: 0, fontFamily: DISPLAY, fontSize: 15 } }, String(item.display_name || '?').charAt(0)),
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('div', { style: { fontFamily: BODY, fontSize: 14, fontWeight: 700 } }, item.display_name || 'Сотрудник'),
+          e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, item.title || (owner ? 'Владелец' : 'Сотрудник CRM')),
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 6, fontFamily: BODY, fontSize: 10.5, color: statusColor, marginTop: 6 } }, e('span', { style: { width: 7, height: 7, borderRadius: 999, background: statusColor } }), statusText)
+        )
+      ),
+      owner ? e('div', { style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.5, color: t.dim, marginTop: 13, paddingTop: 12, borderTop: '1px solid ' + t.line } }, 'Ваш доступ владельца уже подтверждён. Email и телефон меняются в разделе «Профиль».') : e(React.Fragment, null,
+        !hasOwner && !disabled ? e('div', { style: { marginTop: 13, paddingTop: 12, borderTop: '1px solid ' + t.line } },
+          e('button', { type: 'button', disabled: busyId === id, onClick: function () { if (claimId === id) claimOwner(item); else setClaimId(id); }, style: { width: '100%', minHeight: 42, border: '1px solid ' + t.ink, borderRadius: 14, background: claimId === id ? t.ink : 'transparent', color: claimId === id ? t.bg : t.ink, opacity: busyId === id ? .55 : 1, fontFamily: DISPLAY, fontSize: 9.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase' } }, busyId === id ? 'Связываю…' : claimId === id ? 'Подтвердить · это я' : 'Это я · владелец'),
+          claimId === id ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, lineHeight: 1.45, marginTop: 7 } }, 'После подтверждения этот сотрудник CRM будет связан с вашим текущим аккаунтом владельца.') : null
+        ) : null,
+        e('div', { style: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 8, marginTop: 13, paddingTop: 12, borderTop: '1px solid ' + t.line } },
+          e('label', { style: { display: 'grid', gap: 5 } }, e('span', { style: { fontFamily: DISPLAY, fontSize: 8, letterSpacing: '.16em', textTransform: 'uppercase', color: t.dim } }, 'Роль в MAYA'), e('select', { value: draft.role || 'staff', disabled: disabled, onChange: function (event) { patchDraft(id, 'role', event.target.value); }, style: Object.assign({}, inputStyle, { appearance: 'auto' }) }, e('option', { value: 'staff' }, 'Мастер / сотрудник'), e('option', { value: 'administrator' }, 'Администратор'))),
+          e('label', { style: { display: 'grid', gap: 5 } }, e('span', { style: { fontFamily: DISPLAY, fontSize: 8, letterSpacing: '.16em', textTransform: 'uppercase', color: t.dim } }, 'Email для входа'), e('input', { type: 'email', inputMode: 'email', autoCapitalize: 'none', autoCorrect: 'off', value: draft.email || '', disabled: disabled, placeholder: 'name@example.com', onChange: function (event) { patchDraft(id, 'email', event.target.value); }, style: inputStyle })),
+          e('label', { style: { display: 'grid', gap: 5 } }, e('span', { style: { fontFamily: DISPLAY, fontSize: 8, letterSpacing: '.16em', textTransform: 'uppercase', color: t.dim } }, 'Телефон для входа'), e('input', { type: 'tel', inputMode: 'tel', value: draft.phone || '', disabled: disabled, placeholder: '+7 999 000-00-00', onChange: function (event) { patchDraft(id, 'phone', event.target.value); }, style: inputStyle }))
+        ),
+        e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, lineHeight: 1.45, marginTop: 9 } }, 'Достаточно одного контакта. Вход общий для MAYA: отдельный Telegram-бот салона не нужен.'),
+        notes[id] ? e('div', { style: { fontFamily: BODY, fontSize: 11, color: notes[id].indexOf('Не удалось') === 0 ? '#c94a43' : t.dim, lineHeight: 1.45, marginTop: 9 } }, notes[id]) : null,
+        e('button', { type: 'button', disabled: disabled || busyId === id, onClick: function () { save(item); }, style: { width: '100%', minHeight: 44, border: '1px solid ' + t.ink, borderRadius: 14, background: disabled ? 'transparent' : t.ink, color: disabled ? t.dim : t.bg, opacity: busyId === id ? .55 : 1, marginTop: 11, fontFamily: DISPLAY, fontSize: 9.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase' } }, disabled ? 'Доступ отключён CRM' : busyId === id ? 'Сохраняю…' : ready ? 'Сохранить изменения' : 'Открыть доступ')
+      )
+    );
+  }));
+}
+window.ASaasTeamAccessManager = ASaasTeamAccessManager;
+
 // Полноценная панель владельца MAYA OS. Визуально повторяет рабочую MAYA,
 // но получает данные только через tenant-scoped backend текущего бизнеса.
 function ASaasOwnerPanel() {
@@ -27977,11 +28117,12 @@ function ASaasOwnerPanel() {
         meWidgetAf('/staff').catch(function () { return []; }),
         meWidgetAf('/services').catch(function () { return []; }),
         meWidgetAf('/customers?limit=50').catch(function () { return []; }),
-        Promise.resolve(crm)
+        Promise.resolve(crm),
+        meWidgetAf('/integrations/crm/team-access').catch(function (x) { return { items: [], _error: x }; })
       ]);
     }).then(function (r) {
       if (requestId !== requestRef.current) return;
-      setData({ me: r[0] || {}, analytics: r[1] || {}, finance: r[2] || {}, journal: r[3] || {}, staff: Array.isArray(r[4]) ? r[4] : (r[4] && r[4].items || []), services: Array.isArray(r[5]) ? r[5] : (r[5] && r[5].items || []), customers: Array.isArray(r[6]) ? r[6] : (r[6] && r[6].items || []), crm: r[7] || {} });
+      setData({ me: r[0] || {}, analytics: r[1] || {}, finance: r[2] || {}, journal: r[3] || {}, staff: Array.isArray(r[4]) ? r[4] : (r[4] && r[4].items || []), services: Array.isArray(r[5]) ? r[5] : (r[5] && r[5].items || []), customers: Array.isArray(r[6]) ? r[6] : (r[6] && r[6].items || []), crm: r[7] || {}, teamAccess: r[8] || { items: [] } });
       setLoading(false);
     }).catch(function (x) {
       if (requestId !== requestRef.current) return;
@@ -28102,7 +28243,15 @@ function ASaasOwnerPanel() {
       return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Расписание'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, crmReady ? ('Ближайшие 7 дней · источник ' + sourceLabel) : 'Подключите CRM, чтобы загрузить актуальное расписание'), e('div', { style: { display: 'grid', gap: 9, marginTop: 18 } }, Object.keys(byDay).length ? Object.keys(byDay).map(function (key) { return e('div', { key: key }, e('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim, margin: '15px 2px 8px' } }, key), byDay[key].map(function (x) { return card(e('div', { style: { display: 'flex', gap: 12, alignItems: 'flex-start' } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 17, minWidth: 52 } }, timeLabel(x.start_at, tz)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.client && x.client.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 3 } }, x.provider && x.provider.name || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 3 } }, (x.services || []).map(function (s) { return s.name; }).join(', '))), e('div', { style: { fontFamily: DISPLAY, fontSize: 12 } }, rub(x.total_price))), { padding: '12px 14px', marginBottom: 7 }); })); }) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, crmReady ? 'На ближайшие 7 дней активных записей нет.' : 'Расписание появится автоматически после подключения CRM.'))), e('div', { style: { marginTop: 14 } }, action(crmReady ? 'Записать клиента' : 'Подключить CRM', crmReady ? 'Создать запись в подключённой CRM' : 'Открыть защищённый центр интеграций', function () { window.__meGo && window.__meGo(crmReady ? 'book' : 'crm'); }, true)));
     }
     if (tabKey === 'staff') {
-      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Сотрудники'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, num((d.staff || []).length) + ' активных профилей из CRM'), section('Команда', (d.staff || []).length ? e('div', { style: { display: 'grid', gap: 9 } }, d.staff.map(function (x) { var perf = perfById[String(x.id)] || {}; var pay = payrollById[String(x.id)] || {}; return card(e('div', { style: { display: 'flex', gap: 13, alignItems: 'center' } }, x.avatar_url ? e('img', { src: x.avatar_url, alt: '', style: { width: 46, height: 46, borderRadius: 14, objectFit: 'cover' } }) : e('div', { style: { width: 46, height: 46, borderRadius: 14, display: 'grid', placeItems: 'center', border: '1px solid ' + t.line, fontFamily: DISPLAY, fontSize: 16 } }, String(x.name || '?').charAt(0)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 14, fontWeight: 700 } }, x.name || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.title || x.specialization || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, num(perf.appointments) + ' визитов · ' + rub(major(firstMoney(perf.revenue))))), e('div', { style: { fontFamily: DISPLAY, fontSize: 12, textAlign: 'right' } }, pay.accrued ? rub(major(pay.accrued)) : '—')), { padding: '13px 14px' }); })) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'CRM не вернула активных сотрудников.'))));
+      var teamAccess = d.teamAccess || { items: [] };
+      var managedTeam = (teamAccess.items || []).filter(function (item) { return !item.is_owner; });
+      return e(React.Fragment, null,
+        e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Сотрудники'),
+        e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, num(managedTeam.length) + ' сотрудников CRM · ' + num(managedTeam.filter(function (item) { return item.can_login; }).length) + ' аккаунтов с входом'),
+        teamAccess.crm_sync && teamAccess.crm_sync.synced === false ? e('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '11px 13px', marginTop: 14, fontFamily: BODY, fontSize: 11, color: t.dim, lineHeight: 1.45 } }, 'CRM временно не ответила. Показаны последние сохранённые доступы; попробуйте обновить позже.') : null,
+        section('Роли и вход', e(ASaasTeamAccessManager, { items: teamAccess.items || [], t: t, onSaved: load })),
+        section('Специалисты для записи', (d.staff || []).length ? e('div', { style: { display: 'grid', gap: 9 } }, d.staff.map(function (x) { var perf = perfById[String(x.id)] || {}; var pay = payrollById[String(x.id)] || {}; return card(e('div', { style: { display: 'flex', gap: 13, alignItems: 'center' } }, x.avatar_url ? e('img', { src: x.avatar_url, alt: '', style: { width: 46, height: 46, borderRadius: 14, objectFit: 'cover' } }) : e('div', { style: { width: 46, height: 46, borderRadius: 14, display: 'grid', placeItems: 'center', border: '1px solid ' + t.line, fontFamily: DISPLAY, fontSize: 16 } }, String(x.name || '?').charAt(0)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 14, fontWeight: 700 } }, x.name || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.title || x.specialization || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 5 } }, num(perf.appointments) + ' визитов · ' + rub(major(firstMoney(perf.revenue))))), e('div', { style: { fontFamily: DISPLAY, fontSize: 12, textAlign: 'right' } }, pay.accrued ? rub(major(pay.accrued)) : '—')), { padding: '13px 14px' }); })) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'CRM не вернула специалистов, доступных для записи.')))
+      );
     }
     if (tabKey === 'services') {
       return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Услуги'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, num((d.services || []).length) + ' услуг из CRM'), section('Каталог', (d.services || []).length ? card(e('div', null, d.services.map(function (x, i, arr) { return e('div', { key: x.id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Услуга'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.duration_minutes ? x.duration_minutes + ' мин' : 'длительность не указана')), e('div', { style: { fontFamily: DISPLAY, fontSize: 14 } }, rub(x.price))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Список услуг пуст.'))));
