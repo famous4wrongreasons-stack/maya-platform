@@ -550,7 +550,17 @@ window.__meReturnToLegacyWorkspace = function () {
     if (/^10\./.test(h) || /^192\.168\./.test(h)) return true;
     var m = h.match(/^172\.(\d{1,2})\./); return !!(m && Number(m[1]) >= 16 && Number(m[1]) <= 31);
   }
-  var isLocalDev = isPrivateHost(location.hostname) && location.protocol !== 'https:';
+  // Нативная RC-сборка может получить стабильный private-LAN адрес из
+  // build-time инъекции. Публичный bundle сам этот флаг никогда не выставляет.
+  var previewApiBase = '', previewTenantSlug = '';
+  try {
+    var previewCandidate = String(window.__ME_MAYA_OS_API_BASE || '').replace(/\/+$/, '');
+    if (window.__ME_MAYA_OS_PREVIEW === true && /^http:\/\//.test(previewCandidate) && isPrivateHost(new URL(previewCandidate).hostname)) {
+      previewApiBase = previewCandidate;
+      previewTenantSlug = String(window.__ME_MAYA_OS_TENANT_SLUG || '').trim().toLowerCase();
+    }
+  } catch (e) {}
+  var isLocalDev = (isPrivateHost(location.hostname) && location.protocol !== 'https:') || !!previewApiBase;
   function isLocalUrl(u) { try { return isPrivateHost(new URL(String(u)).hostname); } catch (e) { return true; } }
   // доверенный серверный boot-конфиг: инжектится платформой в отдаваемый bundle
   var srvBoot = (typeof window.__ME_TENANT_BOOT === 'object' && window.__ME_TENANT_BOOT) || null;
@@ -558,20 +568,20 @@ window.__meReturnToLegacyWorkspace = function () {
   try { var mt = document.querySelector('meta[name="me-tenant"]'); metaTenant = mt && mt.getAttribute('content'); } catch (e) {}
   var mode, apiBase, slug;
   if (isLocalDev) {
-    mode = qs && qs.get('booking_backend');
+    mode = previewApiBase ? 'saas-local' : (qs && qs.get('booking_backend'));
     try {
       if (mode === 'saas-local') localStorage.setItem('me_booking_backend', 'saas-local');
       else if (mode === 'legacy') localStorage.removeItem('me_booking_backend');
       mode = mode || localStorage.getItem('me_booking_backend');
     } catch (e) {}
     if (mode !== 'saas-local') return;
-    apiBase = (qs && qs.get('booking_api_base')) || null;
+    apiBase = previewApiBase || (qs && qs.get('booking_api_base')) || null;
     try {
       if (apiBase) localStorage.setItem('me_booking_api_base', apiBase);
       apiBase = apiBase || localStorage.getItem('me_booking_api_base');
     } catch (e) {}
     apiBase = String(apiBase || 'http://localhost:3000/api').replace(/\/+$/, '');
-    slug = (qs && qs.get('booking_tenant')) || null;
+    slug = previewTenantSlug || (qs && qs.get('booking_tenant')) || null;
     try {
       if (slug) localStorage.setItem('me_booking_tenant_slug', slug);
       slug = slug || localStorage.getItem('me_booking_tenant_slug');
@@ -33920,6 +33930,20 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   window.__meHydrate = function (screen) {
     if (!CAN_FETCH || !hasSession()) return; /* marketing-only -> baked data */
 
+    /* MAYA OS owns its identity and tenant data. Never let the legacy
+       single-salon hydrator overwrite a verified tenant-scoped session. */
+    if (window.__ME_SAAS_CTX) {
+      if (screen === 'choose' || screen === 'panel' || screen === 'schedule' ||
+          screen === 'staff-home' || screen === 'role') {
+        try {
+          if (typeof meSaasRefreshIdentity === 'function') {
+            meSaasRefreshIdentity().catch(function () {});
+          }
+        } catch (eSaasHydrate) {}
+      }
+      return;
+    }
+
     /* cabinet + invite + home(greeting name) share the cabinet endpoint */
     if (screen === 'cabinet' || screen === 'invite' || screen === 'home') {
       if (_inflight.cabinet) return;
@@ -34659,7 +34683,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     try { if (window.__meBootCrm) { window.__meBootCrm = false; if (window.__meMode) window.__meMode('client'); if (window.__meGo) window.__meGo('crm'); return true; } } catch (eCrm) {}
     try{
       var _sctx = window.__ME_SAAS_CTX;
-      if (_sctx && _sctx.ns && !getTok()) {
+      if (_sctx && _sctx.ns) {
         var _sb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + _sctx.ns) || 'null');
         var _sslug = String(_sctx.slug || '').toLowerCase();
         if (_sb && _sb.token && (!_sb.tenant_slug || String(_sb.tenant_slug).toLowerCase() === _sslug)) {
