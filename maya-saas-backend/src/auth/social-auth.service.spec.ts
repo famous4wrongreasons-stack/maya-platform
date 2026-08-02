@@ -99,7 +99,9 @@ describe('SocialAuthService', () => {
       AUTH_FLOW_STATE_TTL_SECONDS: '600',
       OAUTH_PROVIDER_TIMEOUT_MS: '15000',
       OAUTH_ALLOWED_REDIRECT_URIS:
-        'https://malesthetic.pro/app/oauth-callback.html',
+        'https://maya.example/oauth-callback.html,https://maya.example/api/auth/oauth/native/callback',
+      OAUTH_NATIVE_REDIRECT_URI:
+        'https://maya.example/api/auth/oauth/native/callback',
       YANDEX_LOGIN_ENABLED: 'true',
       YANDEX_CLIENT_ID: 'yandex-client-id',
       YANDEX_CLIENT_SECRET: 'yandex-client-secret',
@@ -254,7 +256,8 @@ describe('SocialAuthService', () => {
 
     const result = await service.startYandexLogin({
       tenantSlug: tenant.slug,
-      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      platform: 'web',
     });
 
     expect(result).toMatchObject({
@@ -265,12 +268,15 @@ describe('SocialAuthService', () => {
     expect(result.auth_url).toContain('https://oauth.yandex.com/authorize');
     expect(result.auth_url).toContain('client_id=yandex-client-id');
     expect(result.auth_url).toContain('code_challenge_method=S256');
-    expect(result.auth_url).toContain('optional_scope=login%3Adefault_phone');
+    expect(result.auth_url).toContain(
+      'scope=login%3Ainfo+login%3Aemail+login%3Adefault_phone',
+    );
+    expect(result.auth_url).not.toContain('optional_scope=');
     const createArgs = authFlowStateCreateMock.mock.calls[0]?.[0];
 
     expect(createArgs.provider).toBe('yandex');
     expect(createArgs.redirectUri).toBe(
-      'https://malesthetic.pro/app/oauth-callback.html',
+      'https://maya.example/oauth-callback.html',
     );
     expect(createArgs.state).toEqual(expect.stringMatching(/^ya_/));
     expect(createArgs.codeVerifier).toEqual(expect.any(String));
@@ -287,8 +293,7 @@ describe('SocialAuthService', () => {
   it('rejects an unlisted OAuth redirect before persisting flow state', async () => {
     const { service, mocks } = createService({
       config: {
-        OAUTH_ALLOWED_REDIRECT_URIS:
-          'https://malesthetic.pro/app/oauth-callback.html',
+        OAUTH_ALLOWED_REDIRECT_URIS: 'https://maya.example/oauth-callback.html',
       },
     });
 
@@ -296,6 +301,7 @@ describe('SocialAuthService', () => {
       service.startYandexLogin({
         tenantSlug: tenant.slug,
         redirectUri: 'https://attacker.example/oauth-callback.html',
+        platform: 'web',
       }),
     ).rejects.toMatchObject({
       response: {
@@ -304,6 +310,63 @@ describe('SocialAuthService', () => {
     });
     expect(mocks.authFlowStateCreateMock).not.toHaveBeenCalled();
     expect(mocks.rateLimitTenantMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the server-owned neutral callback for native iOS login', async () => {
+    const { service, mocks } = createService();
+
+    const result = await service.startYandexLogin({
+      tenantSlug: tenant.slug,
+      platform: 'ios',
+    });
+
+    expect(result.auth_url).toContain(
+      encodeURIComponent('https://maya.example/api/auth/oauth/native/callback'),
+    );
+    expect(mocks.authFlowStateCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        redirectUri: 'https://maya.example/api/auth/oauth/native/callback',
+      }),
+    );
+  });
+
+  it('fails closed when native social login has no neutral callback', async () => {
+    const { service, mocks } = createService({
+      config: {
+        OAUTH_NATIVE_REDIRECT_URI: '',
+      },
+    });
+
+    await expect(
+      service.startYandexLogin({
+        tenantSlug: tenant.slug,
+        platform: 'ios',
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'social_native_callback_unavailable' },
+      },
+    });
+    expect(mocks.authFlowStateCreateMock).not.toHaveBeenCalled();
+  });
+
+  it('returns only validated one-time provider fields to the native app', () => {
+    const { service } = createService();
+
+    expect(
+      service.buildNativeCallbackUrl({
+        code: 'one-time-code',
+        state: 'ya_state_12345678',
+      }),
+    ).toBe(
+      'mayaos://oauth-callback?state=ya_state_12345678&code=one-time-code',
+    );
+    expect(() =>
+      service.buildNativeCallbackUrl({
+        code: 'one-time-code',
+        state: 'foreign_state',
+      }),
+    ).toThrow('The native social login callback is invalid');
   });
 
   it('allows an unlisted loopback redirect only in development', async () => {
@@ -318,6 +381,7 @@ describe('SocialAuthService', () => {
       service.startYandexLogin({
         tenantSlug: tenant.slug,
         redirectUri: 'http://127.0.0.1:8787/oauth-callback.html',
+        platform: 'web',
       }),
     ).resolves.toMatchObject({
       ok: true,
@@ -356,7 +420,7 @@ describe('SocialAuthService', () => {
       id: 'flow-1',
       state: 'ya_state_1',
       provider: 'yandex',
-      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      redirectUri: 'https://maya.example/oauth-callback.html',
       codeVerifier: 'code-verifier-1',
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       consumedAt: null,
@@ -444,7 +508,7 @@ describe('SocialAuthService', () => {
       id: 'flow-1',
       state: 'ya_state_1',
       provider: 'yandex',
-      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      redirectUri: 'https://maya.example/oauth-callback.html',
       codeVerifier: 'code-verifier-1',
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       consumedAt: null,
@@ -486,6 +550,60 @@ describe('SocialAuthService', () => {
     expect(result.is_new_user).toBe(false);
   });
 
+  it('does not open a CRM client account without a provider-verified phone', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityCreateMock,
+        createUserMock,
+        findTenantUserByEmailMock,
+        issueSessionMock,
+      },
+    } = createService();
+
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-without-phone',
+      state: 'ya_without_phone',
+      provider: 'yandex',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'code-verifier-without-phone',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    findTenantUserByEmailMock.mockResolvedValue(baseUser());
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          access_token: 'ya-access-token',
+          token_type: 'bearer',
+        }),
+      )
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          id: 'yandex-user-without-phone',
+          default_email: 'client@example.com',
+          real_name: 'Иван Клиент',
+        }),
+      );
+
+    await expect(
+      service.completeYandexLogin({
+        state: 'ya_without_phone',
+        code: 'oauth-code-without-phone',
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'social_phone_required' },
+      },
+    });
+    expect(authIdentityCreateMock).not.toHaveBeenCalled();
+    expect(createUserMock).not.toHaveBeenCalled();
+    expect(issueSessionMock).not.toHaveBeenCalled();
+  });
+
   it('rejects a replayed OAuth state before provider exchange', async () => {
     const {
       service,
@@ -499,7 +617,7 @@ describe('SocialAuthService', () => {
       id: 'flow-replayed',
       state: 'ya_replayed',
       provider: 'yandex',
-      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      redirectUri: 'https://maya.example/oauth-callback.html',
       codeVerifier: 'code-verifier-replayed',
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       consumedAt: null,
@@ -528,7 +646,7 @@ describe('SocialAuthService', () => {
       id: 'flow-foreign-domain',
       state: 'ya_foreign_domain',
       provider: 'yandex',
-      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      redirectUri: 'https://maya.example/oauth-callback.html',
       codeVerifier: 'code-verifier-domain',
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       consumedAt: null,
@@ -597,7 +715,7 @@ describe('SocialAuthService', () => {
       id: 'flow-telegram-1',
       state: 'te_state_1',
       provider: 'telegram',
-      redirectUri: 'https://malesthetic.pro/app/oauth-callback.html',
+      redirectUri: 'https://maya.example/oauth-callback.html',
       codeVerifier: 'telegram-code-verifier',
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       consumedAt: null,

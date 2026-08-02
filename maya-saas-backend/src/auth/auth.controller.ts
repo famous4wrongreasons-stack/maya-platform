@@ -6,10 +6,12 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -151,6 +153,29 @@ export class AuthController {
     return this.socialAuthService.completeTelegramLogin(
       dto,
       resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Public()
+  @Get('oauth/native/callback')
+  @ApiOperation({
+    summary: 'Return a social login result to the native MAYA OS application',
+  })
+  nativeOauthCallback(
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') error: string | undefined,
+    @Query('error_description') errorDescription: string | undefined,
+    @Res() response: Response,
+  ) {
+    return response.redirect(
+      302,
+      this.socialAuthService.buildNativeCallbackUrl({
+        code,
+        state,
+        error,
+        errorDescription,
+      }),
     );
   }
 

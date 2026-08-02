@@ -213,6 +213,7 @@ SMSRU_TIMEOUT_MS="15000"
 AUTH_FLOW_STATE_TTL_SECONDS="600"
 OAUTH_PROVIDER_TIMEOUT_MS="15000"
 OAUTH_ALLOWED_REDIRECT_URIS="http://127.0.0.1:8787/oauth-callback.html,http://localhost:8787/oauth-callback.html"
+OAUTH_NATIVE_REDIRECT_URI=""
 YANDEX_LOGIN_ENABLED="false"
 YANDEX_CLIENT_ID=""
 YANDEX_CLIENT_SECRET=""
@@ -255,6 +256,7 @@ Social login toggles:
 - `AUTH_FLOW_STATE_TTL_SECONDS`: lifetime for OAuth `state + PKCE` records in PostgreSQL
 - `OAUTH_PROVIDER_TIMEOUT_MS`: timeout for Yandex and Telegram token exchanges
 - `OAUTH_ALLOWED_REDIRECT_URIS`: exact comma-separated callback allowlist; production callbacks must use HTTPS
+- `OAUTH_NATIVE_REDIRECT_URI`: server-owned neutral HTTPS callback for iOS, for example `https://maya.example/api/auth/oauth/native/callback`; it must also be present in `OAUTH_ALLOWED_REDIRECT_URIS`
 
 Conversational onboarding:
 
@@ -528,7 +530,8 @@ curl -X POST http://localhost:3000/api/auth/oauth/yandex/start \
   -H 'Content-Type: application/json' \
   -d '{
     "tenantSlug": "demo-business",
-    "redirectUri": "https://malesthetic.pro/app/"
+    "redirectUri": "https://maya.example/oauth-callback.html",
+    "platform": "web"
   }'
 ```
 
@@ -550,7 +553,8 @@ curl -X POST http://localhost:3000/api/auth/oauth/telegram/start \
   -H 'Content-Type: application/json' \
   -d '{
     "tenantSlug": "demo-business",
-    "redirectUri": "https://malesthetic.pro/app/"
+    "redirectUri": "https://maya.example/oauth-callback.html",
+    "platform": "web"
   }'
 ```
 

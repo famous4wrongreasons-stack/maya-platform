@@ -1,4 +1,5 @@
 import {
+  resolveAllowedOauthRedirectUri,
   resolveCorsAllowlist,
   resolveNodeEnvironment,
   resolveOauthRedirectAllowlist,
@@ -116,6 +117,20 @@ function validateConfiguredPolicies(
   } catch (error) {
     issues.push(errorMessage(error));
   }
+
+  if (stringValue(config.OAUTH_NATIVE_REDIRECT_URI)) {
+    try {
+      resolveAllowedOauthRedirectUri(
+        config.OAUTH_NATIVE_REDIRECT_URI,
+        config.OAUTH_ALLOWED_REDIRECT_URIS,
+        environment,
+      );
+    } catch {
+      issues.push(
+        'OAUTH_NATIVE_REDIRECT_URI must be an exact entry in OAUTH_ALLOWED_REDIRECT_URIS',
+      );
+    }
+  }
 }
 
 function validateProductionConfig(
@@ -211,6 +226,10 @@ function validateProductionConfig(
     issues.push(
       'OAUTH_ALLOWED_REDIRECT_URIS is required when social login is enabled',
     );
+  }
+
+  if (yandexEnabled || telegramEnabled) {
+    requireSetting(config, 'OAUTH_NATIVE_REDIRECT_URI', issues);
   }
 }
 

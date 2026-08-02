@@ -134,6 +134,31 @@ describe('runtime config validation', () => {
     expect(message).toContain(
       'OAUTH_ALLOWED_REDIRECT_URIS is required when social login is enabled',
     );
+    expect(message).toContain(
+      'OAUTH_NATIVE_REDIRECT_URI is required when its provider is enabled',
+    );
+  });
+
+  it('requires the native callback to be in the exact OAuth allowlist', () => {
+    const config = productionConfig();
+    config.YANDEX_LOGIN_ENABLED = 'true';
+    config.YANDEX_CLIENT_ID = 'yandex-client-id';
+    config.YANDEX_CLIENT_SECRET = secret('yandex');
+    config.OAUTH_ALLOWED_REDIRECT_URIS =
+      'https://maya.example/oauth-callback.html';
+    config.OAUTH_NATIVE_REDIRECT_URI =
+      'https://maya.example/api/auth/oauth/native/callback';
+
+    expect(validationMessage(config)).toContain(
+      'OAUTH_NATIVE_REDIRECT_URI must be an exact entry in OAUTH_ALLOWED_REDIRECT_URIS',
+    );
+
+    config.OAUTH_ALLOWED_REDIRECT_URIS +=
+      ',https://maya.example/api/auth/oauth/native/callback';
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      OAUTH_NATIVE_REDIRECT_URI:
+        'https://maya.example/api/auth/oauth/native/callback',
+    });
   });
 
   it('requires independent secrets and SMTP when email login is enabled', () => {

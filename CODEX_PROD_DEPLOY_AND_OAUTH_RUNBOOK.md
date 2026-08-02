@@ -90,6 +90,7 @@ UPLOAD_ROOT="./uploads"
 ```text
 http://127.0.0.1:8787/oauth-callback.html
 https://<maya-platform-domain>/oauth-callback.html
+https://<maya-platform-domain>/api/auth/oauth/native/callback
 ```
 
 Если production callback будет жить не в `/app/`, добавить фактический URL callback-страницы.
@@ -134,14 +135,15 @@ docker compose up -d --build
 ```
 
 6. Разместить PWA на platform-origin и поставить reverse proxy `<maya-platform-domain>/api -> localhost:3000`.
-7. Выпустить SSL.
-8. Проверить:
+7. Указать `OAUTH_NATIVE_REDIRECT_URI=https://<maya-platform-domain>/api/auth/oauth/native/callback`; этот URL должен дословно присутствовать и в `OAUTH_ALLOWED_REDIRECT_URIS`, и в настройках Яндекс ID/Telegram OIDC.
+8. Выпустить SSL.
+9. Проверить:
 
 ```bash
 curl -i https://<maya-platform-domain>/api/health
 ```
 
-9. Smoke-check без переключения реального приложения:
+10. Smoke-check без переключения реального приложения:
    - `GET /api/health`
    - `GET /api/admin/plans` с platform-owner JWT
    - `POST /api/onboarding/trial`

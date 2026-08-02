@@ -139,7 +139,7 @@ export class SocialAuthService {
       'YANDEX_CLIENT_ID',
       'Yandex ID login is not configured.',
     );
-    const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
+    const redirectUri = this.resolveStartRedirectUri(dto);
     const flow = await this.tenantContext.runAsPublicTenant(
       tenant.id,
       async () => {
@@ -159,8 +159,10 @@ export class SocialAuthService {
     authUrl.searchParams.set('client_id', clientId);
     authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('state', flow.state);
-    authUrl.searchParams.set('scope', 'login:info login:email');
-    authUrl.searchParams.set('optional_scope', 'login:default_phone');
+    authUrl.searchParams.set(
+      'scope',
+      'login:info login:email login:default_phone',
+    );
     authUrl.searchParams.set('code_challenge', flow.codeChallenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
@@ -225,7 +227,7 @@ export class SocialAuthService {
       'TELEGRAM_CLIENT_ID',
       'Telegram login is not configured.',
     );
-    const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
+    const redirectUri = this.resolveStartRedirectUri(dto);
     const flow = await this.tenantContext.runAsPublicTenant(
       tenant.id,
       async () => {
@@ -292,6 +294,50 @@ export class SocialAuthService {
     });
   }
 
+  buildNativeCallbackUrl(params: {
+    code?: string;
+    state?: string;
+    error?: string;
+    errorDescription?: string;
+  }): string {
+    const state = this.asTrimmedString(params.state ?? null);
+    const code = this.asTrimmedString(params.code ?? null);
+    const error = this.asTrimmedString(params.error ?? null);
+    const errorDescription = this.asTrimmedString(
+      params.errorDescription ?? null,
+    );
+
+    if (
+      !state ||
+      !/^(?:ya|te)_[A-Za-z0-9_-]{8,128}$/.test(state) ||
+      (!code && !error) ||
+      (code?.length ?? 0) > 2048 ||
+      (error?.length ?? 0) > 128 ||
+      (errorDescription?.length ?? 0) > 512
+    ) {
+      throw new BadRequestException(
+        this.buildSocialAuthError(
+          'social_callback_invalid',
+          'The native social login callback is invalid.',
+        ),
+      );
+    }
+
+    const deepLink = new URL('mayaos://oauth-callback');
+
+    deepLink.searchParams.set('state', state);
+    if (code) {
+      deepLink.searchParams.set('code', code);
+    } else if (error) {
+      deepLink.searchParams.set('error', error);
+      if (errorDescription) {
+        deepLink.searchParams.set('error_description', errorDescription);
+      }
+    }
+
+    return deepLink.toString();
+  }
+
   private async resolveOrCreateUser(params: {
     branchId?: string;
     profile: SocialProfile;
@@ -350,6 +396,7 @@ export class SocialAuthService {
 
     if (matchedUser) {
       this.assertUserCanLogin(matchedUser);
+      this.assertClientIdentityHasVerifiedPhone(matchedUser, params.profile);
 
       await this.authRepository.createIdentity({
         userId: matchedUser.id,
@@ -378,6 +425,10 @@ export class SocialAuthService {
     this.assertTenantAllowsClientRegistration(params.tenant);
     this.assertTenantAllowsSelfRegistration(
       params.tenant.allowSelfRegistration,
+    );
+    this.assertClientIdentityHasVerifiedPhone(
+      { role: UserRole.CLIENT, phone: null },
+      params.profile,
     );
 
     if (params.branchId) {
@@ -952,6 +1003,34 @@ export class SocialAuthService {
     return role !== UserRole.CLIENT;
   }
 
+  private assertClientIdentityHasVerifiedPhone(
+    user: { role: string; phone?: string | null },
+    profile: SocialProfile,
+  ): void {
+    if (user.role !== 'client') {
+      return;
+    }
+
+    if (!profile.phone) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_phone_required',
+          'Allow the identity provider to share a verified phone number to open the CRM client account.',
+        ),
+      );
+    }
+
+    const storedPhone = this.normalizeProviderPhone(user.phone ?? null);
+    if (storedPhone && storedPhone !== profile.phone) {
+      throw new ConflictException(
+        this.buildSocialAuthError(
+          'social_identity_conflict',
+          'The verified social phone does not match this client account.',
+        ),
+      );
+    }
+  }
+
   private assertProviderEnabled(provider: SocialProvider) {
     const key =
       provider === 'yandex' ? 'YANDEX_LOGIN_ENABLED' : 'TELEGRAM_LOGIN_ENABLED';
@@ -1001,6 +1080,36 @@ export class SocialAuthService {
         ),
       );
     }
+  }
+
+  private resolveStartRedirectUri(dto: StartOauthLoginDto): string {
+    if (dto.platform === 'ios') {
+      const nativeRedirectUri = this.configService
+        .get<string>('OAUTH_NATIVE_REDIRECT_URI')
+        ?.trim();
+
+      if (!nativeRedirectUri) {
+        throw new ServiceUnavailableException(
+          this.buildSocialAuthError(
+            'social_native_callback_unavailable',
+            'Native social login requires the neutral MAYA OS callback domain.',
+          ),
+        );
+      }
+
+      return this.normalizeRedirectUri(nativeRedirectUri);
+    }
+
+    if (!dto.redirectUri) {
+      throw new BadRequestException(
+        this.buildSocialAuthError(
+          'social_redirect_invalid',
+          'The social login redirect URI is required for web clients.',
+        ),
+      );
+    }
+
+    return this.normalizeRedirectUri(dto.redirectUri);
   }
 
   private normalizeEmail(value: string | null): string | null {
@@ -1098,7 +1207,10 @@ export class SocialAuthService {
     code:
       | 'self_registration_disabled'
       | 'social_exchange_failed'
+      | 'social_callback_invalid'
       | 'social_identity_conflict'
+      | 'social_native_callback_unavailable'
+      | 'social_phone_required'
       | 'social_provider_unavailable'
       | 'social_redirect_invalid'
       | 'social_state_invalid'

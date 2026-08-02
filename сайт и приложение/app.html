@@ -565,7 +565,7 @@ window.__meReturnToLegacyWorkspace = function () {
       return;
     }
     // В Safari, открытом из Capacitor, хранилище отдельное: возвращаем code в приложение.
-    location.replace('pro.malesthetic.app://oauth-callback?' + callback.toString());
+    location.replace('mayaos://oauth-callback?' + callback.toString());
   } catch (e) {}
 })();
 
@@ -5232,13 +5232,19 @@ function ALogin() {
     if (code === 'auth_rate_limited') return 'Слишком часто. Подождите минуту и повторите.';
     if (code === 'social_state_invalid') return 'Сессия входа устарела. Начните вход заново.';
     if (code === 'social_identity_conflict') return 'Этот аккаунт уже связан с другим профилем.';
+    if (code === 'social_phone_required') return 'Разрешите передать подтверждённый номер телефона, чтобы открыть ваш кабинет в CRM.';
+    if (code === 'social_native_callback_unavailable') return 'Вход на iPhone ещё не подключён к защищённому адресу MAYA OS.';
     return fallback || 'Не получилось войти. Попробуйте ещё раз.';
   };
-  const lgSocialRedirectUri = () => {
+  const lgSocialStartPayload = (tenant) => {
     try {
-      if (window.__meIsNative && window.__meIsNative()) return 'https://malesthetic.pro/app/';
-      if (location.protocol === 'http:' && /^(?:localhost|127\.0\.0\.1)$/.test(location.hostname)) return location.origin + '/oauth-callback.html';
-      if (location.protocol === 'https:') return new URL('/app/', location.origin).href;
+      if (window.__meIsNative && window.__meIsNative()) return { tenantSlug: tenant, platform: 'ios' };
+      if (location.protocol === 'http:' && /^(?:localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+        return { tenantSlug: tenant, platform: 'web', redirectUri: location.origin + '/oauth-callback.html' };
+      }
+      if (location.protocol === 'https:') {
+        return { tenantSlug: tenant, platform: 'web', redirectUri: new URL('/oauth-callback.html', location.origin).href };
+      }
     } catch (e) {}
     throw new Error('Откройте MAYA через приложение или защищённую веб-ссылку.');
   };
@@ -5306,6 +5312,10 @@ function ALogin() {
   const lgSocialLogin = async (provider) => {
     var ctx = lgSaasSocialContext();
     if (!ctx) {
+      if (window.__ME_MAYA_OS_PREVIEW === true) {
+        setLgSocialErr('Сначала откройте ссылку вашего бизнеса — так MAYA поймёт, в какой кабинет вас впустить.');
+        return;
+      }
       if (provider === 'yandex' && window.loginYandex) window.loginYandex();
       else if (provider === 'telegram' && window.__meTgLogin) window.__meTgLogin();
       return;
@@ -5314,10 +5324,10 @@ function ALogin() {
     lgSocialReqRef.current = true;
     setLgSocialBusy(provider); setLgSocialErr(''); setLgNote('');
     try {
-      var redirectUri = lgSocialRedirectUri();
+      var startPayload = lgSocialStartPayload(ctx.tenant);
       var response = await fetch(ctx.api + '/auth/oauth/' + provider + '/start', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantSlug: ctx.tenant, redirectUri: redirectUri })
+        body: JSON.stringify(startPayload)
       });
       var body = null; try { body = await response.json(); } catch (e) {}
       if (!response.ok) {
@@ -9367,6 +9377,8 @@ function ABookFlow() {
     if (code === 'social_state_invalid') return 'Сессия входа устарела — начните заново.';
     if (code === 'social_exchange_failed' || code === 'social_token_invalid') return 'Не удалось завершить вход. Попробуйте ещё раз.';
     if (code === 'social_identity_conflict') return 'Этот аккаунт уже привязан к другому профилю.';
+    if (code === 'social_phone_required') return 'Разрешите Яндексу или Telegram передать подтверждённый номер телефона, чтобы открыть кабинет клиента.';
+    if (code === 'social_native_callback_unavailable') return 'Вход на iPhone ещё не подключён к защищённому адресу MAYA OS.';
     if (code === 'phone_verification_required') return 'Номер должен подтвердить Яндекс или Telegram.';
     if (code === 'self_registration_disabled') return 'Регистрация клиентов у этого бизнеса сейчас закрыта.';
     return readErrorText(e, fallback);
@@ -9541,17 +9553,23 @@ function ABookFlow() {
       setAuthBusy(false);
       try { localStorage.removeItem(pKey); } catch (e2) {}
       authRateLimit('social', e);
+      if (e && e.code === 'social_phone_required') {
+        setAuthSocialProvider(provider === 'telegram' ? 'telegram' : 'yandex');
+        setAuthStage('social_phone_required');
+      }
       setAuthErr(authCodeText(e, 'Не удалось завершить вход'));
     });
     return true;
   }
-  function authSocialRedirectUri() {
+  function authSocialStartPayload() {
     try {
-      if (window.__meIsNative && window.__meIsNative()) return 'https://malesthetic.pro/app/';
+      if (window.__meIsNative && window.__meIsNative()) return { tenantSlug: localTenantSlug, platform: 'ios' };
       if (location.protocol === 'http:' && /^(?:localhost|127\.0\.0\.1)$/.test(location.hostname)) {
-        return location.origin + '/oauth-callback.html';
+        return { tenantSlug: localTenantSlug, platform: 'web', redirectUri: location.origin + '/oauth-callback.html' };
       }
-      if (location.protocol === 'https:') return new URL('/app/', location.origin).href;
+      if (location.protocol === 'https:') {
+        return { tenantSlug: localTenantSlug, platform: 'web', redirectUri: new URL('/oauth-callback.html', location.origin).href };
+      }
     } catch (e) {}
     throw new Error('Откройте MAYA через приложение или защищённую веб-ссылку.');
   }
@@ -9559,8 +9577,8 @@ function ABookFlow() {
     if (authReqRef.current) return;
     authReqRef.current = true;
     setAuthBusy(true); setAuthErr('');
-    var redirectUri = '';
-    try { redirectUri = authSocialRedirectUri(); }
+    var startPayload = null;
+    try { startPayload = authSocialStartPayload(); }
     catch (e) {
       authReqRef.current = false;
       setAuthBusy(false);
@@ -9569,7 +9587,7 @@ function ABookFlow() {
     }
     localBookingFetch('/auth/oauth/' + provider + '/start', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenantSlug: localTenantSlug, redirectUri: redirectUri })
+      body: JSON.stringify(startPayload)
     }).then(function (res) {
       if (!res || !res.auth_url) throw new Error('Сервис входа недоступен');
       // pending-контекст привязан к OAuth state: параллельные входы разных салонов не пересекаются.
@@ -9590,6 +9608,10 @@ function ABookFlow() {
       authReqRef.current = false;
       setAuthBusy(false);
       authRateLimit('social', e);
+      if (e && e.code === 'social_phone_required') {
+        setAuthSocialProvider(provider === 'telegram' ? 'telegram' : 'yandex');
+        setAuthStage('social_phone_required');
+      }
       setAuthErr(authCodeText(e, 'Не удалось начать вход'));
     });
   }
@@ -35082,7 +35104,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
         AppPlugin.addListener('appUrlOpen', function(data){
           try{
             var raw = data && data.url ? String(data.url) : '';
-            if(raw && raw.indexOf('pro.malesthetic.app://oauth-callback') === 0){
+            if(raw && (raw.indexOf('mayaos://oauth-callback') === 0 || raw.indexOf('pro.malesthetic.app://oauth-callback') === 0)){
               if(typeof window.__meSaasOauthComplete === 'function') window.__meSaasOauthComplete(raw);
               else window.__mePendingSaasOauthUrl = raw;
               return;
@@ -35098,7 +35120,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
         AppPlugin.getLaunchUrl().then(function(data){
           try{
             var raw = data && data.url ? String(data.url) : '';
-            if(raw && raw.indexOf('pro.malesthetic.app://oauth-callback') === 0){
+            if(raw && (raw.indexOf('mayaos://oauth-callback') === 0 || raw.indexOf('pro.malesthetic.app://oauth-callback') === 0)){
               if(typeof window.__meSaasOauthComplete === 'function') window.__meSaasOauthComplete(raw);
               else window.__mePendingSaasOauthUrl = raw;
               return;
