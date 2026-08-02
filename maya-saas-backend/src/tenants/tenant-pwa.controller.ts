@@ -18,6 +18,16 @@ export class TenantPwaController {
   constructor(private readonly tenantPwaService: TenantPwaService) {}
 
   @Public()
+  @Get('search')
+  @ApiOperation({ summary: 'Find a client-ready tenant by name or city' })
+  searchBusinesses(
+    @Query('q') query: string = '',
+    @Query('city') city?: string,
+  ) {
+    return this.tenantPwaService.searchBusinesses(query, city);
+  }
+
+  @Public()
   @Get(':tenantSlug/install')
   @ApiOperation({ summary: 'Get tenant-specific PWA installation metadata' })
   getInstallMetadata(@Param('tenantSlug') tenantSlug: string) {
@@ -59,5 +69,22 @@ export class TenantPwaController {
       'public, max-age=300, stale-while-revalidate=3600',
     );
     return new StreamableFile(icon);
+  }
+
+  @Public()
+  @Get(':tenantSlug/qr.svg')
+  @ApiOperation({ summary: 'Get a QR code for the tenant smart link' })
+  async getQr(
+    @Param('tenantSlug') tenantSlug: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const svg = await this.tenantPwaService.renderQrSvg(tenantSlug);
+    response.type('image/svg+xml; charset=utf-8');
+    response.setHeader(
+      'Cache-Control',
+      'public, max-age=300, stale-while-revalidate=3600',
+    );
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    return svg;
   }
 }

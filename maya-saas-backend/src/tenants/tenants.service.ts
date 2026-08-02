@@ -61,6 +61,8 @@ type InternalCalendarCounts = {
 const DEFAULT_TRIAL_PERIOD_DAYS = 14;
 const TENANT_STATUS_TRIAL = 'trial';
 const TENANT_STATUS_PAST_DUE = 'past_due';
+const PUBLIC_TENANT_SEARCH_LIMIT = 12;
+const PUBLIC_TENANT_SEARCH_CANDIDATE_LIMIT = 100;
 
 function isInternalCalendarReady(
   counts: InternalCalendarCounts | null | undefined,
@@ -83,6 +85,22 @@ function asNonEmptyString(value: unknown): string | null {
 
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : null;
+}
+
+function normalizePublicSearchText(value: unknown): string {
+  const text =
+    typeof value === 'string'
+      ? value
+      : typeof value === 'number' && Number.isFinite(value)
+        ? String(value)
+        : '';
+
+  return text
+    .normalize('NFKC')
+    .toLocaleLowerCase('ru-RU')
+    .replace(/[^\p{L}\p{N}\s-]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function asStringList(value: unknown, maxItems?: number): string[] {
@@ -899,6 +917,88 @@ export class TenantsService {
         status: tenant.crmIntegration?.status ?? null,
       },
     };
+  }
+
+  async searchPublicMobileConfigs(rawQuery: string, rawCity?: string) {
+    const query = normalizePublicSearchText(rawQuery);
+    const city = normalizePublicSearchText(rawCity);
+
+    if (query.length < 2 || query.length > 80 || city.length > 80) {
+      throw new BadRequestException({
+        message: 'Enter at least two characters to find a business.',
+        error: {
+          code: 'public_business_search_invalid',
+          message: 'Enter at least two characters to find a business.',
+        },
+      });
+    }
+
+    const queryTokens = query.split(' ').filter(Boolean).slice(0, 8);
+    const cityTokens = city.split(' ').filter(Boolean).slice(0, 4);
+    const candidates = await this.prisma.tenant.findMany({
+      where: {
+        status: {
+          in: [TenantStatus.ACTIVE, TenantStatus.TRIAL, TenantStatus.PAST_DUE],
+        },
+      },
+      orderBy: [{ name: 'asc' }, { createdAt: 'asc' }],
+      take: PUBLIC_TENANT_SEARCH_CANDIDATE_LIMIT,
+      select: {
+        slug: true,
+        name: true,
+        brandingSettings: {
+          select: {
+            appName: true,
+            themeJson: true,
+          },
+        },
+        branches: {
+          orderBy: { createdAt: 'asc' },
+          take: 3,
+          select: {
+            name: true,
+            address: true,
+          },
+        },
+      },
+    });
+
+    const matchingSlugs = candidates
+      .filter((tenant) => {
+        const theme = asRecord(tenant.brandingSettings?.themeJson);
+        const cityValue = normalizePublicSearchText(theme?.city);
+        const addressValue = tenant.branches
+          .map((branch) => branch.address)
+          .filter(Boolean)
+          .join(' ');
+        const haystack = normalizePublicSearchText(
+          [
+            tenant.name,
+            tenant.slug,
+            tenant.brandingSettings?.appName,
+            cityValue,
+            addressValue,
+            tenant.branches.map((branch) => branch.name).join(' '),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        );
+
+        return (
+          queryTokens.every((token) => haystack.includes(token)) &&
+          cityTokens.every((token) => haystack.includes(token))
+        );
+      })
+      .slice(0, PUBLIC_TENANT_SEARCH_LIMIT)
+      .map((tenant) => tenant.slug);
+
+    const configs = await Promise.all(
+      matchingSlugs.map((slug) => this.getPublicMobileConfig(slug)),
+    );
+
+    return configs.filter(
+      (config) => config.active && config.guest_access_ready === true,
+    );
   }
 
   async assertBranchBelongsToTenant(branchId: string, tenantId: string) {

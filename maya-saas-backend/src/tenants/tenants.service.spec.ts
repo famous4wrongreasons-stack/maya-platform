@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -32,6 +32,7 @@ type PublicTenantRecord = {
     themeJson: Record<string, unknown> | null;
   } | null;
   branches: Array<{
+    name?: string;
     address: string | null;
     phone: string | null;
   }>;
@@ -103,6 +104,7 @@ describe('TenantsService', () => {
     },
     branches: [
       {
+        name: 'Основной филиал',
         address: 'Moscow, Tverskaya 1',
         phone: '+79990000000',
       },
@@ -124,9 +126,26 @@ describe('TenantsService', () => {
     > = jest.fn().mockResolvedValue(baseTenant());
 
     const tenantUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
+    const tenantFindManyMock = jest.fn().mockResolvedValue([
+      {
+        slug: 'demo-salon',
+        name: 'Demo Salon',
+        brandingSettings: {
+          appName: 'Грива',
+          themeJson: { city: 'Moscow' },
+        },
+        branches: [
+          {
+            name: 'Основной филиал',
+            address: 'Moscow, Tverskaya 1',
+          },
+        ],
+      },
+    ]);
     const prisma: Pick<PrismaService, 'tenant'> = {
       tenant: {
         findUnique: tenantFindUniqueMock,
+        findMany: tenantFindManyMock,
         updateMany: tenantUpdateManyMock,
       } as PrismaService['tenant'],
     };
@@ -145,10 +164,32 @@ describe('TenantsService', () => {
       ),
       mocks: {
         tenantFindUniqueMock,
+        tenantFindManyMock,
         tenantUpdateManyMock,
       },
     };
   };
+
+  it('finds only client-ready businesses by name and city', async () => {
+    const { service, mocks } = createService();
+
+    const result = await service.searchPublicMobileConfigs('Грива', 'Moscow');
+
+    expect(mocks.tenantFindManyMock).toHaveBeenCalledTimes(1);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      slug: 'demo-salon',
+      guest_access_ready: true,
+    });
+  });
+
+  it('rejects empty public business searches', async () => {
+    const { service } = createService();
+
+    await expect(service.searchPublicMobileConfigs(' ')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
 
   it('promotes normalized tenant content into top-level mobile config', async () => {
     const { service } = createService();

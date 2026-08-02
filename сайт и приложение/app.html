@@ -4867,6 +4867,13 @@ function ALogin() {
   const [lgSocialBusy, setLgSocialBusy] = React.useState('');
   const [lgSocialErr, setLgSocialErr] = React.useState('');
   const lgSocialReqRef = React.useRef(false);
+  const [lgFinderOpen, setLgFinderOpen] = React.useState(false);
+  const [lgFinderQuery, setLgFinderQuery] = React.useState('');
+  const [lgFinderItems, setLgFinderItems] = React.useState([]);
+  const [lgFinderBusy, setLgFinderBusy] = React.useState(false);
+  const [lgFinderErr, setLgFinderErr] = React.useState('');
+  const [lgFinderSearched, setLgFinderSearched] = React.useState(false);
+  const lgFinderReqRef = React.useRef(0);
   React.useEffect(function () { if (lgEmailResend <= 0) return; var id = setTimeout(function () { setLgEmailResend(function (s) { return s > 0 ? s - 1 : 0; }); }, 1000); return function () { clearTimeout(id); }; }, [lgEmailResend]);
   // ── MAYA OS: нижний лист пробной активации (свайп → POST trial-activations) ──
   const [lgTrialOpen, setLgTrialOpen] = React.useState(false);
@@ -5102,6 +5109,58 @@ function ALogin() {
       || (function () { try { return localStorage.getItem('me_booking_api_base'); } catch (e) { return null; } })()
       || 'http://localhost:3000/api';
     return String(api).replace(/\/+$/, '');
+  };
+  const lgAbsoluteApiAsset = path => {
+    if (!path) return '';
+    try {
+      if (/^https?:\/\//i.test(path)) return path;
+      var apiUrl = new URL(lgApiBase(), location.href);
+      return new URL(String(path), apiUrl.origin).toString();
+    } catch (e) { return String(path); }
+  };
+  const lgFindBusinesses = async () => {
+    var query = String(lgFinderQuery || '').trim();
+    if (query.length < 2) {
+      setLgFinderErr('Введите хотя бы две буквы названия или города.');
+      return;
+    }
+    var requestId = ++lgFinderReqRef.current;
+    setLgFinderBusy(true); setLgFinderErr(''); setLgFinderSearched(true);
+    try {
+      var response = await fetch(lgApiBase() + '/mobile/pwa/search?q=' + encodeURIComponent(query), {
+        headers: { 'Accept': 'application/json' }
+      });
+      var body = null; try { body = await response.json(); } catch (e) {}
+      if (!response.ok) {
+        var message = body && body.error && body.error.message || body && body.message || 'Не удалось выполнить поиск.';
+        throw new Error(Array.isArray(message) ? message.join('; ') : message);
+      }
+      if (requestId !== lgFinderReqRef.current) return;
+      setLgFinderItems(Array.isArray(body && body.items) ? body.items : []);
+    } catch (e) {
+      if (requestId !== lgFinderReqRef.current) return;
+      setLgFinderItems([]);
+      setLgFinderErr(e && e.message || 'Не удалось выполнить поиск. Попробуйте ещё раз.');
+    } finally {
+      if (requestId === lgFinderReqRef.current) setLgFinderBusy(false);
+    }
+  };
+  const lgOpenFoundBusiness = item => {
+    try {
+      var target = new URL(String(item && item.smart_url || ''), location.href);
+      if (target.protocol !== 'https:' && target.protocol !== 'http:') throw new Error('invalid_business_link');
+      try {
+        var targetParams = target.searchParams;
+        var targetApi = targetParams.get('booking_api_base');
+        var targetSlug = targetParams.get('booking_tenant');
+        if (targetApi) localStorage.setItem('me_booking_api_base', targetApi);
+        if (targetSlug) localStorage.setItem('me_booking_tenant_slug', targetSlug);
+        localStorage.setItem('me_booking_backend', 'saas-local');
+      } catch (e) {}
+      location.assign(target.toString());
+    } catch (e) {
+      setLgFinderErr('Ссылка бизнеса повреждена. Найдите бизнес ещё раз.');
+    }
   };
   // сохранить owner-сессию в namespace нового tenant (как self-serve signup); redirect отдельно
   const lgSaveBundle = (res, api) => {
@@ -5957,6 +6016,70 @@ function ALogin() {
       cursor: "pointer"
     }
   }, "Понятно"))) : null;
+  const FinderModal = lgFinderOpen ? /*#__PURE__*/React.createElement("div", {
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-labelledby": "me-business-finder-title",
+    onClick: () => setLgFinderOpen(false),
+    style: {
+      position: "fixed", inset: 0, zIndex: 9350, display: "flex", alignItems: "flex-end",
+      justifyContent: "center", padding: "18px 14px calc(env(safe-area-inset-bottom, 0px) + 14px)",
+      boxSizing: "border-box", background: "rgba(0,0,0,0.56)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: ev => ev.stopPropagation(),
+    style: {
+      width: "min(100%, 430px)", maxHeight: "min(78vh, 660px)", overflowY: "auto", borderRadius: 26,
+      padding: "24px 20px 20px", boxSizing: "border-box", background: t.dark ? "#111111" : "#ffffff",
+      color: t.ink, border: "1px solid " + t.line, boxShadow: "0 24px 80px rgba(0,0,0,0.32)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", alignItems: "flex-start", gap: 14 }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { flex: 1 }
+  }, /*#__PURE__*/React.createElement("div", {
+    id: "me-business-finder-title",
+    style: { fontFamily: DISPLAY, fontSize: 24, fontWeight: 250, lineHeight: 1.15 }
+  }, "Найти свой бизнес"), /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5, marginTop: 8 }
+  }, "Введите название барбершопа или город. Показываются только подключённые к MAYA бизнесы.")), /*#__PURE__*/React.createElement("button", {
+    type: "button", onClick: () => setLgFinderOpen(false), "aria-label": "Закрыть",
+    style: { width: 38, height: 38, borderRadius: 999, border: "1px solid " + t.line, background: "transparent", color: t.ink, fontSize: 22, lineHeight: 1, cursor: "pointer" }
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", gap: 8, marginTop: 20 }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: lgFinderQuery,
+    onChange: ev => { setLgFinderQuery(ev.target.value); setLgFinderErr(''); setLgFinderSearched(false); },
+    onKeyDown: ev => { if (ev.key === 'Enter') lgFindBusinesses(); },
+    autoFocus: true,
+    placeholder: "Название или город",
+    style: { flex: 1, minWidth: 0, minHeight: 50, borderRadius: 15, border: "1px solid " + t.line, background: t.card, color: t.ink, padding: "0 15px", boxSizing: "border-box", outline: "none", fontFamily: BODY, fontSize: 14 }
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button", disabled: lgFinderBusy, onClick: lgFindBusinesses,
+    style: { width: 50, minHeight: 50, borderRadius: 15, border: 0, background: t.ink, color: t.bg, display: "grid", placeItems: "center", cursor: lgFinderBusy ? "default" : "pointer", opacity: lgFinderBusy ? 0.58 : 1 }
+  }, lgFinderBusy ? "…" : Icon.arrow(t.bg, 18))), lgFinderErr ? /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 12, color: "#e0564f", lineHeight: 1.45, marginTop: 12 }
+  }, lgFinderErr) : null, lgFinderItems.length ? /*#__PURE__*/React.createElement("div", {
+    style: { display: "grid", gap: 8, marginTop: 16 }
+  }, lgFinderItems.map(function (item) {
+    var imageUrl = lgAbsoluteApiAsset(item.icon_url || item.logo_url);
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button", key: item.tenant_slug, onClick: () => lgOpenFoundBusiness(item),
+      style: { width: "100%", border: "1px solid " + t.line, borderRadius: 17, background: t.card, color: t.ink, padding: 12, display: "flex", alignItems: "center", gap: 12, textAlign: "left", cursor: "pointer" }
+    }, imageUrl ? /*#__PURE__*/React.createElement("img", {
+      src: imageUrl, alt: "", style: { width: 46, height: 46, borderRadius: 13, objectFit: "contain", background: "#ffffff", border: "1px solid " + t.line }
+    }) : /*#__PURE__*/React.createElement("div", {
+      style: { width: 46, height: 46, borderRadius: 13, border: "1px solid " + t.line, display: "grid", placeItems: "center", fontFamily: DISPLAY, fontSize: 17, flex: "none" }
+    }, String(item.name || 'M').charAt(0)), /*#__PURE__*/React.createElement("div", {
+      style: { flex: 1, minWidth: 0 }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: { fontFamily: BODY, fontSize: 14, fontWeight: 700 }
+    }, item.name || 'Бизнес'), /*#__PURE__*/React.createElement("div", {
+      style: { fontFamily: BODY, fontSize: 11, color: t.dim, lineHeight: 1.4, marginTop: 3 }
+    }, [item.city, item.address].filter(Boolean).join(' · ') || 'Открыть приложение')), Icon.arrow(t.ink, 17));
+  })) : lgFinderSearched && !lgFinderBusy && !lgFinderErr ? /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5, textAlign: "center", padding: "22px 12px 6px" }
+  }, "Подключённый бизнес не найден. Проверьте название или попробуйте указать город.") : null)) : null;
   return /*#__PURE__*/React.createElement(IOSDevice, {
     dark: dark
   }, /*#__PURE__*/React.createElement("div", {
@@ -6058,7 +6181,11 @@ function ALogin() {
     icon: AIcon.tg(22),
     label: lgSocialBusy === 'telegram' ? "Открываем Telegram…" : "Войти через Telegram",
     onClick: () => lgSocialBusy ? null : lgSocialLogin('telegram')
-  }), lgSocialErr ? /*#__PURE__*/React.createElement("div", {
+  }), !window.__ME_SAAS_CTX ? /*#__PURE__*/React.createElement(SocialBtn, {
+    icon: AIcon.pin ? AIcon.pin(t.ink, 22) : /*#__PURE__*/React.createElement(SeedLogo, { size: 20, sw: 1.6 }),
+    label: "Найти свой бизнес",
+    onClick: () => { setLgFinderOpen(true); setLgFinderErr(''); }
+  }) : null, lgSocialErr ? /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: BODY, fontSize: 11.5, color: "#e0564f", textAlign: "center", lineHeight: 1.5, padding: "0 8px" }
   }, lgSocialErr) : null, lgEmailOpen ? /*#__PURE__*/React.createElement("div", {
     style: { display: "flex", flexDirection: "column", gap: 8 }
@@ -6196,7 +6323,7 @@ function ALogin() {
     type: "button",
     onClick: function () { setLgSoonOpen(false); },
     style: { width: "100%", minHeight: 50, border: 0, borderRadius: 15, background: t.dark ? "#111111" : "#ffffff", color: t.dark ? "#ffffff" : "#111111", fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", cursor: "pointer" }
-  }, "Понятно"))) : null);
+  }, "Понятно"))) : null, FinderModal);
 }
 
 // =====================================================================
@@ -28370,6 +28497,10 @@ function ASaasOwnerPanel() {
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState('');
+  const [clientConnect, setClientConnect] = React.useState(null);
+  const [clientConnectState, setClientConnectState] = React.useState('idle');
+  const [clientConnectNote, setClientConnectNote] = React.useState('');
+  const [clientConnectBusy, setClientConnectBusy] = React.useState('');
   const requestRef = React.useRef(0);
   const TABS = [
     { key: 'maya', label: 'MAYA' },
@@ -28378,6 +28509,7 @@ function ASaasOwnerPanel() {
     { key: 'staff', label: 'Сотрудники' },
     { key: 'services', label: 'Услуги' },
     { key: 'clients', label: 'Клиенты' },
+    { key: 'connect', label: 'Клиентам' },
     { key: 'integrations', label: 'Интеграции' },
     { key: 'profile', label: 'Профиль' }
   ];
@@ -28433,7 +28565,100 @@ function ASaasOwnerPanel() {
       setErr(x && x.status === 401 ? 'Сессия владельца истекла. Войдите снова.' : 'Не удалось загрузить данные бизнеса. Проверьте подключение и повторите.');
     });
   }
+  function absoluteTenantAsset(path) {
+    if (!path) return '';
+    try {
+      if (/^https?:\/\//i.test(path)) return path;
+      var ctx = window.__ME_SAAS_CTX || {};
+      var apiUrl = new URL(String(ctx.api || ''), location.href);
+      return new URL(String(path), apiUrl.origin).toString();
+    } catch (e) { return String(path); }
+  }
+  function loadClientConnection() {
+    var ctx = window.__ME_SAAS_CTX || {};
+    if (!ctx.api || !ctx.slug) {
+      setClientConnectState('error');
+      setClientConnectNote('Не удалось определить текущий бизнес. Войдите снова.');
+      return;
+    }
+    setClientConnectState('loading'); setClientConnectNote('');
+    fetch(String(ctx.api).replace(/\/+$/, '') + '/mobile/pwa/' + encodeURIComponent(ctx.slug) + '/install', {
+      headers: { 'Accept': 'application/json' }
+    }).then(function (response) {
+      return response.json().catch(function () { return null; }).then(function (body) {
+        if (!response.ok) {
+          var message = body && body.error && body.error.message || body && body.message || 'Не удалось получить ссылку бизнеса.';
+          throw new Error(Array.isArray(message) ? message.join('; ') : message);
+        }
+        return body;
+      });
+    }).then(function (body) {
+      setClientConnect(body || null); setClientConnectState('done');
+    }).catch(function (error) {
+      setClientConnectState('error');
+      setClientConnectNote(error && error.message || 'Не удалось получить ссылку бизнеса.');
+    });
+  }
+  function copyClientLink(message) {
+    var url = clientConnect && clientConnect.smart_url;
+    if (!url) return Promise.reject(new Error('Ссылка ещё не готова.'));
+    var nativeCopy = navigator.clipboard && navigator.clipboard.writeText
+      ? navigator.clipboard.writeText(url)
+      : Promise.reject(new Error('clipboard_unavailable'));
+    return nativeCopy.catch(function () {
+      var input = document.createElement('textarea');
+      input.value = url; input.setAttribute('readonly', '');
+      input.style.position = 'fixed'; input.style.opacity = '0';
+      document.body.appendChild(input); input.select();
+      var copied = document.execCommand('copy');
+      document.body.removeChild(input);
+      if (!copied) throw new Error('copy_failed');
+    }).then(function () {
+      setClientConnectNote(message || 'Ссылка скопирована.');
+      try { if (window.tactile) window.tactile('SUCCESS'); } catch (e) {}
+    });
+  }
+  function shareClientLink() {
+    if (!clientConnect || !clientConnect.smart_url) return;
+    setClientConnectBusy('share'); setClientConnectNote('');
+    var title = clientConnect.app_name || 'MAYA';
+    var task = navigator.share
+      ? navigator.share({ title: title, text: 'Запись и личный кабинет ' + title, url: clientConnect.smart_url })
+      : copyClientLink('Ссылка скопирована. Отправьте её клиенту в любом мессенджере.');
+    Promise.resolve(task).catch(function (error) {
+      if (!error || error.name !== 'AbortError') setClientConnectNote('Не удалось поделиться ссылкой. Попробуйте скопировать её.');
+    }).finally(function () { setClientConnectBusy(''); });
+  }
+  function writeClientNfc() {
+    if (!clientConnect || !clientConnect.nfc_url || clientConnectBusy) return;
+    var nativeWriter = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MayaNfcWriter;
+    var directWriterAvailable = !!(nativeWriter && typeof nativeWriter.writeUrl === 'function') || typeof window.NDEFReader === 'function';
+    setClientConnectBusy('nfc');
+    setClientConnectNote(directWriterAvailable ? 'Поднесите NFC-метку к верхней части телефона.' : 'Готовлю ссылку для NFC-метки…');
+    var operation;
+    if (nativeWriter && typeof nativeWriter.writeUrl === 'function') {
+      operation = nativeWriter.writeUrl({ url: clientConnect.nfc_url });
+    } else if (typeof window.NDEFReader === 'function') {
+      try {
+        var writer = new window.NDEFReader();
+        operation = writer.write({ records: [{ recordType: 'url', data: clientConnect.nfc_url }] });
+      } catch (error) { operation = Promise.reject(error); }
+    } else {
+      operation = copyClientLink('NFC-ссылка скопирована. Запишите её на пустую метку через NFC Tools; клиенту после этого достаточно коснуться метки телефоном.').then(function () { return { copied: true }; });
+    }
+    Promise.resolve(operation).then(function (result) {
+      if (!(result && result.copied)) setClientConnectNote('NFC-метка записана. Проверьте её другим телефоном.');
+      try { if (window.tactile) window.tactile('SUCCESS'); } catch (e) {}
+    }).catch(function (error) {
+      var code = String(error && (error.code || error.message) || '');
+      if (/cancel/i.test(code)) setClientConnectNote('Запись NFC отменена.');
+      else setClientConnectNote('Не удалось записать метку. Убедитесь, что она поддерживает NDEF и не защищена от записи.');
+    }).finally(function () { setClientConnectBusy(''); });
+  }
   React.useEffect(function () { load(); }, [period]);
+  React.useEffect(function () {
+    if (tabKey === 'connect' && clientConnectState === 'idle') loadClientConnection();
+  }, [tabKey]);
   React.useEffect(function () {
     window.__meSaasPanelTab = null;
     window.__meSetSaasPanelTab = function (key) {
@@ -28561,6 +28786,42 @@ function ASaasOwnerPanel() {
     }
     if (tabKey === 'clients') {
       return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Клиенты'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, 'Клиенты бизнеса и пользователи приложения'), section('За выбранный период', e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 } }, kpi('Клиенты CRM', num(appt.unique_clients), 'уникальные посетители'), kpi('В MAYA', num((d.customers || []).length), 'зарегистрированные аккаунты'))), section('Аккаунты MAYA', (d.customers || []).length ? card(e('div', null, d.customers.map(function (x, i, arr) { return e('div', { key: x.id || i, style: { padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, x.phone || x.email || 'Контакт скрыт')); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Пока нет клиентов, зарегистрированных именно в приложении MAYA. История CRM при этом учитывается в аналитике.'))));
+    }
+    if (tabKey === 'connect') {
+      var install = clientConnect || {};
+      var qrUrl = absoluteTenantAsset(install.qr_url);
+      var ready = install.installable === true;
+      var nativeNfcWriter = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MayaNfcWriter;
+      var directNfcWriterAvailable = !!(nativeNfcWriter && typeof nativeNfcWriter.writeUrl === 'function') || typeof window.NDEFReader === 'function';
+      return e(React.Fragment, null,
+        e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Подключить клиентов'),
+        e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7, lineHeight: 1.5 } }, 'Одна умная ссылка работает в сообщениях, QR-коде и NFC-метке.'),
+        clientConnectState === 'loading' ? card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Готовлю ссылку бизнеса…'), { marginTop: 18 }) : null,
+        clientConnectState === 'error' ? card(e(React.Fragment, null, e('div', { style: { fontFamily: BODY, fontSize: 12.5, lineHeight: 1.5 } }, clientConnectNote || 'Не удалось получить ссылку.'), e('button', { type: 'button', onClick: loadClientConnection, style: { marginTop: 13, border: '1px solid ' + t.line, borderRadius: 999, background: 'transparent', color: t.ink, padding: '9px 15px' } }, 'Повторить')), { marginTop: 18 }) : null,
+        clientConnectState === 'done' ? e(React.Fragment, null,
+          section('Умная ссылка', card(e(React.Fragment, null,
+            e('div', { style: { fontFamily: BODY, fontSize: 14, fontWeight: 700 } }, install.app_name || 'Ваш бизнес'),
+            e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 7, lineHeight: 1.45 } }, [install.city, install.address].filter(Boolean).join(' · ') || 'Ссылка на клиентское приложение'),
+            e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 13, lineHeight: 1.45, overflowWrap: 'anywhere', userSelect: 'all', WebkitUserSelect: 'all' } }, install.smart_url),
+            e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 15 } },
+              e('button', { type: 'button', onClick: shareClientLink, disabled: !ready || !!clientConnectBusy, style: { minHeight: 46, border: 0, borderRadius: 14, background: t.ink, color: t.bg, fontFamily: DISPLAY, fontSize: 9.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: ready ? 1 : .45 } }, clientConnectBusy === 'share' ? 'Открываю…' : 'Поделиться'),
+              e('button', { type: 'button', onClick: function () { copyClientLink().catch(function () { setClientConnectNote('Не удалось скопировать ссылку.'); }); }, disabled: !ready, style: { minHeight: 46, border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, fontFamily: DISPLAY, fontSize: 9.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: ready ? 1 : .45 } }, 'Скопировать')
+            )
+          ))),
+          ready ? section('QR для стойки и зеркала', card(e(React.Fragment, null,
+            e('div', { style: { background: '#ffffff', borderRadius: 18, padding: 16, display: 'grid', placeItems: 'center' } }, e('img', { src: qrUrl, alt: 'QR-код ' + (install.app_name || 'бизнеса'), style: { display: 'block', width: 'min(100%, 270px)', aspectRatio: '1', objectFit: 'contain' } })),
+            e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.5, marginTop: 12 } }, 'Клиент сканирует QR и сразу открывает приложение именно вашего бизнеса.'),
+            e('button', { type: 'button', onClick: function () { window.open(qrUrl, '_blank', 'noopener,noreferrer'); }, style: { width: '100%', minHeight: 46, marginTop: 13, border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, fontFamily: DISPLAY, fontSize: 9.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase' } }, 'Открыть для печати')
+          ))) : section('Подключение пока закрыто', card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5 } }, 'Ссылка станет активной после проверки CRM, услуг, специалистов и онлайн-записи.'))),
+          ready ? section('NFC-метка', card(e(React.Fragment, null,
+            e('div', { style: { fontFamily: BODY, fontSize: 13.5, fontWeight: 700 } }, 'Коснуться телефоном вместо сканирования'),
+            e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.55, marginTop: 8 } }, directNfcWriterAvailable ? 'Нажмите кнопку и поднесите пустую NFC-метку к верхней части телефона. В метку запишется та же умная ссылка.' : 'Подготовьте ту же умную ссылку для пустой NFC-метки. После однократной записи клиенту достаточно коснуться метки телефоном.'),
+            e('button', { type: 'button', onClick: writeClientNfc, disabled: !!clientConnectBusy, style: { width: '100%', minHeight: 50, marginTop: 15, border: 0, borderRadius: 15, background: t.ink, color: t.bg, fontFamily: DISPLAY, fontSize: 10, fontWeight: 600, letterSpacing: '.13em', textTransform: 'uppercase', opacity: clientConnectBusy ? .58 : 1 } }, clientConnectBusy === 'nfc' ? (directNfcWriterAvailable ? 'Поднесите метку…' : 'Копирую ссылку…') : (directNfcWriterAvailable ? 'Записать NFC-метку' : 'Подготовить NFC-метку'))
+          ))) : null,
+          clientConnectNote ? e('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '11px 13px', marginTop: 16, fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.5 } }, clientConnectNote) : null,
+          e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, lineHeight: 1.55, marginTop: 18 } }, 'На iPhone установка PWA всегда подтверждается самим клиентом через «На экран Домой». NFC и QR не могут установить приложение без этого системного подтверждения.')
+        ) : null
+      );
     }
     if (tabKey === 'integrations') {
       var conn = d.crm && d.crm.connection || {};
@@ -32723,10 +32984,10 @@ function MEApp() {
             var requestedTab = '';
             try {
               var routeTab = String(new URLSearchParams(location.search).get('cabinet') || '');
-              if (['biz', 'mystat', 'analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations'].indexOf(routeTab) >= 0) requestedTab = routeTab;
+              if (['biz', 'mystat', 'analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations', 'connect'].indexOf(routeTab) >= 0) requestedTab = routeTab;
             } catch (e4) {}
             meSaasApplyIdentity(b.user);
-            if (['analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations'].indexOf(requestedTab) >= 0) {
+            if (['analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations', 'connect'].indexOf(requestedTab) >= 0) {
               window.__meSaasPanelTab = requestedTab === 'team' ? 'staff' : (requestedTab === 'calendar' ? 'schedule' : requestedTab);
               return 'panel';
             }
@@ -32922,7 +33183,7 @@ function MEApp() {
       var role = meSaasCurrentRole();
       var target = requestedTab || meSaasDefaultCabinetTab(role);
       if (meSaasIsBusinessRole(role) && window.__meMode) window.__meMode('staff');
-      var panelMap = { analytics: 'analytics', clients: 'clients', customers: 'clients', staff: 'staff', team: 'staff', calendar: 'schedule', services: 'services', schedule: 'schedule', profile: 'profile', integrations: 'integrations' };
+      var panelMap = { analytics: 'analytics', clients: 'clients', customers: 'clients', staff: 'staff', team: 'staff', calendar: 'schedule', services: 'services', schedule: 'schedule', profile: 'profile', integrations: 'integrations', connect: 'connect' };
       var panelTab = panelMap[target];
       if (panelTab && meSaasIsManagerRole(role)) {
         window.__meSaasPanelTab = panelTab;
