@@ -533,6 +533,42 @@ window.__meReturnToLegacyWorkspace = function () {
 };
 </script>
 <script>
+/* Возврат из системного браузера в нативную MAYA OS.
+   Провайдер возвращает только одноразовые code+state; JWT в URL не попадает. */
+(function routeNativeSaasOauthReturn() {
+  try {
+    var callback = new URLSearchParams(location.search || '');
+    var state = callback.get('state') || '';
+    var code = callback.get('code') || '';
+    var providerError = callback.get('error') || '';
+    if ((!code && !providerError) || !/^(?:ya|te)_/.test(state)) return;
+    var pending = null;
+    try { pending = JSON.parse(localStorage.getItem('me_oauth_pending:' + state) || 'null'); } catch (e) {}
+    // Провайдер возвращает на фиксированный /app/ без tenant query. В PWA сначала
+    // восстанавливаем исходный URL бизнеса, сохраняя одноразовые callback-поля.
+    if (pending && pending.ret) {
+      try {
+        var original = new URL(String(pending.ret), location.href);
+        var currentWithoutOauth = new URL(location.href);
+        ['code', 'state', 'error', 'error_description', 'error_uri'].forEach(function (key) {
+          currentWithoutOauth.searchParams.delete(key);
+        });
+        if (original.origin === location.origin && currentWithoutOauth.href !== original.href) {
+          callback.forEach(function (value, key) {
+            if (['code', 'state', 'error', 'error_description', 'error_uri'].indexOf(key) >= 0) {
+              original.searchParams.set(key, value);
+            }
+          });
+          location.replace(original.href);
+        }
+      } catch (e) {}
+      return;
+    }
+    // В Safari, открытом из Capacitor, хранилище отдельное: возвращаем code в приложение.
+    location.replace('pro.malesthetic.app://oauth-callback?' + callback.toString());
+  } catch (e) {}
+})();
+
 /* ═══ MAYA OS multi-tenant boot из платформенного backend ═══
    В dev включается явным saas-local; на public host — только server boot
    или canonical tenant start_url. API на public host всегда trusted/same-origin. */
@@ -4828,6 +4864,9 @@ function ALogin() {
   const [lgEmailDebug, setLgEmailDebug] = React.useState(''); // debug_code ТОЛЬКО в памяти (локальный режим), не логируем/не храним
   const [lgEmailBusinesses, setLgEmailBusinesses] = React.useState([]);
   const lgEmailReqRef = React.useRef(false);
+  const [lgSocialBusy, setLgSocialBusy] = React.useState('');
+  const [lgSocialErr, setLgSocialErr] = React.useState('');
+  const lgSocialReqRef = React.useRef(false);
   React.useEffect(function () { if (lgEmailResend <= 0) return; var id = setTimeout(function () { setLgEmailResend(function (s) { return s > 0 ? s - 1 : 0; }); }, 1000); return function () { clearTimeout(id); }; }, [lgEmailResend]);
   // ── MAYA OS: нижний лист пробной активации (свайп → POST trial-activations) ──
   const [lgTrialOpen, setLgTrialOpen] = React.useState(false);
@@ -5078,6 +5117,7 @@ function ALogin() {
       access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null,
       refresh_expires_at: res.refresh_expires_at || null,
       session: res.session || null, user: res.user || null,
+      auth_provider: res.provider || null,
       tenant_slug: tSlug, api_base: aNorm
     };
     try { localStorage.setItem('me_saas_auth_v2:' + ns, JSON.stringify(bundle)); } catch (e) {}
@@ -5111,6 +5151,155 @@ function ALogin() {
     } catch (e) {}
     location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(tSlug) + '&onboarded=1&workspace=business&cabinet=schedule&calendar_setup=1');
   };
+  // Первый экран и клиентский кабинет используют один tenant-scoped OAuth.
+  // Без контекста бизнеса сохраняем старый production-вход «Мужской Эстетики».
+  const lgSaasSocialContext = () => {
+    var ctx = window.__ME_SAAS_CTX;
+    if (!ctx || !ctx.api || !ctx.slug) return null;
+    var tenant = String(ctx.slug || '').trim().toLowerCase();
+    if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(tenant)) return null;
+    return { api: String(ctx.api).replace(/\/+$/, ''), tenant: tenant };
+  };
+  const lgStripOauthParams = () => {
+    try {
+      var clean = new URL(location.href);
+      ['code', 'state', 'error', 'error_description', 'error_uri'].forEach(function (key) { clean.searchParams.delete(key); });
+      history.replaceState(null, '', clean.pathname + clean.search + clean.hash);
+    } catch (e) {}
+  };
+  const lgSocialErrorText = (provider, code, fallback) => {
+    var name = provider === 'telegram' ? 'Telegram' : 'Яндекс';
+    if (code === 'social_provider_unavailable') return name + ' пока настраивается. ' + (provider === 'telegram' ? 'Войдите через Яндекс.' : 'Попробуйте позже.');
+    if (code === 'auth_rate_limited') return 'Слишком часто. Подождите минуту и повторите.';
+    if (code === 'social_state_invalid') return 'Сессия входа устарела. Начните вход заново.';
+    if (code === 'social_identity_conflict') return 'Этот аккаунт уже связан с другим профилем.';
+    return fallback || 'Не получилось войти. Попробуйте ещё раз.';
+  };
+  const lgSocialRedirectUri = () => {
+    try {
+      if (window.__meIsNative && window.__meIsNative()) return 'https://malesthetic.pro/app/';
+      if (location.protocol === 'http:' && /^(?:localhost|127\.0\.0\.1)$/.test(location.hostname)) return location.origin + '/oauth-callback.html';
+      if (location.protocol === 'https:') return new URL('/app/', location.origin).href;
+    } catch (e) {}
+    throw new Error('Откройте MAYA через приложение или защищённую веб-ссылку.');
+  };
+  const lgSocialRoute = (data, api, tenant) => {
+    var saved = lgSaveBundle(Object.assign({}, data, {
+      tenant: { slug: tenant, id: data && data.user && (data.user.tenant_id || data.user.tenantId) }
+    }), api);
+    try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (e) {}
+    var role = String(data && data.user && data.user.role || '').toLowerCase();
+    var owner = ['tenant_admin', 'tenant_owner', 'business_owner', 'administrator', 'manager'].indexOf(role) >= 0;
+    var staff = ['provider', 'employee', 'staff'].indexOf(role) >= 0;
+    if (owner || staff) lgOpenBusinessApp(api, saved.tenantSlug, owner ? 'biz' : 'mystat');
+    else lgOpenApp(api, saved.tenantSlug);
+  };
+  const lgCompleteSocialCallback = async (rawUrl) => {
+    var parsed = null;
+    try { parsed = new URL(String(rawUrl || ''), location.href); } catch (e) {}
+    var q = parsed && parsed.searchParams;
+    var state = q && q.get('state') || '';
+    var code = q && q.get('code') || '';
+    var providerError = q && q.get('error') || '';
+    var provider = state.indexOf('ya_') === 0 ? 'yandex' : state.indexOf('te_') === 0 ? 'telegram' : null;
+    if (!provider || (!code && !providerError) || lgSocialReqRef.current) return false;
+    var key = 'me_oauth_pending:' + state;
+    var pending = null;
+    try { pending = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) {}
+    var ctx = lgSaasSocialContext();
+    var fresh = pending && typeof pending.ts === 'number' && isFinite(pending.ts)
+      && Date.now() - pending.ts <= 15 * 60 * 1000 && pending.ts <= Date.now() + 60 * 1000;
+    if (!ctx || !fresh || String(pending.apiBase || '').toLowerCase().replace(/\/+$/, '') !== ctx.api.toLowerCase()
+        || String(pending.tenant || '').toLowerCase() !== ctx.tenant || (pending.provider && pending.provider !== provider)) {
+      lgStripOauthParams();
+      setLgSocialErr('Сессия входа устарела. Начните вход заново.');
+      return false;
+    }
+    if (providerError) {
+      try { localStorage.removeItem(key); } catch (e) {}
+      lgStripOauthParams();
+      setLgSocialErr(q.get('error_description') || 'Вход отменён. Попробуйте ещё раз.');
+      return true;
+    }
+    lgSocialReqRef.current = true;
+    setLgSocialBusy(provider); setLgSocialErr('');
+    try {
+      var response = await fetch(ctx.api + '/auth/oauth/' + provider + '/complete', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ state: state, code: code })
+      });
+      var body = null; try { body = await response.json(); } catch (e) {}
+      if (!response.ok) {
+        var err = body && body.error;
+        throw Object.assign(new Error((err && err.message) || (body && body.message) || 'Не получилось завершить вход.'), { code: err && err.code });
+      }
+      if (!body || !body.access_token || !body.refresh_token) throw new Error('Сервер не вернул сессию.');
+      try { localStorage.removeItem(key); } catch (e) {}
+      lgSocialRoute(body, ctx.api, ctx.tenant);
+    } catch (e) {
+      try { localStorage.removeItem(key); } catch (e2) {}
+      lgStripOauthParams();
+      lgSocialReqRef.current = false;
+      setLgSocialBusy('');
+      setLgSocialErr(lgSocialErrorText(provider, e && e.code, e && e.message));
+    }
+    return true;
+  };
+  const lgSocialLogin = async (provider) => {
+    var ctx = lgSaasSocialContext();
+    if (!ctx) {
+      if (provider === 'yandex' && window.loginYandex) window.loginYandex();
+      else if (provider === 'telegram' && window.__meTgLogin) window.__meTgLogin();
+      return;
+    }
+    if (lgSocialReqRef.current) return;
+    lgSocialReqRef.current = true;
+    setLgSocialBusy(provider); setLgSocialErr(''); setLgNote('');
+    try {
+      var redirectUri = lgSocialRedirectUri();
+      var response = await fetch(ctx.api + '/auth/oauth/' + provider + '/start', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantSlug: ctx.tenant, redirectUri: redirectUri })
+      });
+      var body = null; try { body = await response.json(); } catch (e) {}
+      if (!response.ok) {
+        var err = body && body.error;
+        throw Object.assign(new Error((err && err.message) || (body && body.message) || 'Сервис входа недоступен.'), { code: err && err.code });
+      }
+      var state = body && body.state;
+      var urlState = null; try { urlState = new URL(body && body.auth_url || '').searchParams.get('state'); } catch (e) {}
+      if (!body || !body.auth_url || !state || !urlState || String(state) !== String(urlState)) throw new Error('Сервис входа вернул неверный ответ.');
+      var ret = location.href;
+      try {
+        var clean = new URL(location.href);
+        ['code', 'state', 'error', 'error_description', 'error_uri'].forEach(function (key) { clean.searchParams.delete(key); });
+        ret = clean.href;
+      } catch (e) {}
+      var key = 'me_oauth_pending:' + state;
+      var value = JSON.stringify({ apiBase: ctx.api.toLowerCase(), tenant: ctx.tenant, provider: provider, ret: ret, ts: Date.now(), source: 'login_gate' });
+      try { localStorage.setItem(key, value); } catch (e) {}
+      var savedPending = null; try { savedPending = localStorage.getItem(key); } catch (e) {}
+      if (savedPending !== value) throw new Error('Не удалось сохранить вход. Попробуйте ещё раз.');
+      lgSocialReqRef.current = false;
+      location.href = body.auth_url;
+    } catch (e) {
+      lgSocialReqRef.current = false;
+      setLgSocialBusy('');
+      setLgSocialErr(lgSocialErrorText(provider, e && e.code, e && e.message));
+    }
+  };
+  React.useEffect(function () {
+    if (!lgSaasSocialContext()) return undefined;
+    var previous = window.__meSaasOauthComplete;
+    window.__meSaasOauthComplete = lgCompleteSocialCallback;
+    var queued = window.__mePendingSaasOauthUrl || null;
+    window.__mePendingSaasOauthUrl = null;
+    var q = null; try { q = new URLSearchParams(location.search || ''); } catch (e) {}
+    if (queued) setTimeout(function () { lgCompleteSocialCallback(queued); }, 0);
+    else if (q && /^(?:ya|te)_/.test(q.get('state') || '') && (q.get('code') || q.get('error'))) setTimeout(function () { lgCompleteSocialCallback(location.href); }, 0);
+    return function () {
+      if (window.__meSaasOauthComplete === lgCompleteSocialCallback) window.__meSaasOauthComplete = previous || null;
+    };
+  }, []);
   // external: ЗАЩИЩЁННЫЙ in-app CRM-коннектор (внутри app.html, без maya-admin).
   // Токен из памяти текущего flow (lgAiResult.token); в localStorage bundle не лезем.
   const lgCrmSaveTest = async () => {
@@ -5862,14 +6051,16 @@ function ALogin() {
     onClick: () => { setLgEmailOpen(function (v) { return !v; }); if (lgNote) setLgNote(''); }
   }), /*#__PURE__*/React.createElement(SocialBtn, {
     icon: YandexBadge,
-    label: "\u0412\u043E\u0439\u0442\u0438 \u0447\u0435\u0440\u0435\u0437 \u042F\u043D\u0434\u0435\u043A\u0441",
-    onClick: () => window.loginYandex && window.loginYandex()
+    label: lgSocialBusy === 'yandex' ? "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C \u042F\u043D\u0434\u0435\u043A\u0441\u2026" : "\u0412\u043E\u0439\u0442\u0438 \u0447\u0435\u0440\u0435\u0437 \u042F\u043D\u0434\u0435\u043A\u0441",
+    onClick: () => lgSocialBusy ? null : lgSocialLogin('yandex')
   }), /*#__PURE__*/React.createElement(SocialBtn, {
     // MAYA OS: \u0432\u0445\u043E\u0434 \u043F\u043E email \u0432 \u043E\u0431\u0449\u0435\u0439 \u0433\u0440\u0443\u043F\u043F\u0435 \u0441 Telegram/\u042F\u043D\u0434\u0435\u043A\u0441; \u043F\u043E\u043B\u0435 \u0440\u0430\u0441\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F \u043F\u043E \u0442\u0430\u043F\u0443
     icon: AIcon.tg(22),
-    label: "Войти через Telegram",
-    onClick: () => window.__meTgLogin && window.__meTgLogin()
-  }), lgEmailOpen ? /*#__PURE__*/React.createElement("div", {
+    label: lgSocialBusy === 'telegram' ? "Открываем Telegram…" : "Войти через Telegram",
+    onClick: () => lgSocialBusy ? null : lgSocialLogin('telegram')
+  }), lgSocialErr ? /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 11.5, color: "#e0564f", textAlign: "center", lineHeight: 1.5, padding: "0 8px" }
+  }, lgSocialErr) : null, lgEmailOpen ? /*#__PURE__*/React.createElement("div", {
     style: { display: "flex", flexDirection: "column", gap: 8 }
   }, lgEmailStep === 'code' ? /*#__PURE__*/React.createElement(React.Fragment, null,
     /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 4px" } },
@@ -8309,6 +8500,7 @@ function ABookFlow() {
   const [authErr, setAuthErr] = React.useState('');
   const [authBusy, setAuthBusy] = React.useState(false);
   const [authHint, setAuthHint] = React.useState(null);
+  const [authSocialProvider, setAuthSocialProvider] = React.useState('yandex');
   const [authResendAt, setAuthResendAt] = React.useState(0); // P3: кулдаун повторной отправки
   const [authLocks, setAuthLocks] = React.useState({}); // 429 auth_rate_limited: {verify|social: untilTs}
   const authReqRef = React.useRef(false); // same-frame guard: двойной тап/Enter = один запрос
@@ -8374,6 +8566,19 @@ function ABookFlow() {
   const myCancelT = React.useRef(null);
   const [reschedId, setReschedId] = React.useState(null); // перенос записи из кабинета
   const [reschedInfo, setReschedInfo] = React.useState(null);
+  React.useEffect(function () {
+    if (!localSaasMode) return;
+    window.__meSaasOauthComplete = authCompleteSocialCallback;
+    var queued = window.__mePendingSaasOauthUrl || null;
+    window.__mePendingSaasOauthUrl = null;
+    if (queued) setTimeout(function () { authCompleteSocialCallback(queued); }, 0);
+    else if (/^(?:ya|te)_/.test(bookingQs.get('state') || '') && (bookingQs.get('code') || bookingQs.get('error'))) {
+      setTimeout(function () { authCompleteSocialCallback(location.href); }, 0);
+    }
+    return function () {
+      if (window.__meSaasOauthComplete === authCompleteSocialCallback) window.__meSaasOauthComplete = null;
+    };
+  }, [localSaasMode, SAAS_NS]);
   React.useEffect(() => {
     if (!localSaasMode || bookingQs.get('calendar_setup') !== '1') return;
     setMyView(true);
@@ -8717,6 +8922,7 @@ function ABookFlow() {
       access_expires_at: res.expires_in ? Date.now() + Number(res.expires_in) * 1000 : null,
       refresh_expires_at: res.refresh_expires_at || null,
       session: res.session || null,
+      auth_provider: res.provider || null,
       user: res.user || fallbackUser || null,
       tenant_slug: SAAS_NORM_SLUG, // контекст пары: проверяется при каждом чтении
       api_base: SAAS_NORM_API
@@ -9034,6 +9240,7 @@ function ABookFlow() {
     if (code === 'social_state_invalid') return 'Сессия входа устарела — начните заново.';
     if (code === 'social_exchange_failed' || code === 'social_token_invalid') return 'Не удалось завершить вход. Попробуйте ещё раз.';
     if (code === 'social_identity_conflict') return 'Этот аккаунт уже привязан к другому профилю.';
+    if (code === 'phone_verification_required') return 'Номер должен подтвердить Яндекс или Telegram.';
     if (code === 'self_registration_disabled') return 'Регистрация клиентов у этого бизнеса сейчас закрыта.';
     return readErrorText(e, fallback);
   }
@@ -9126,12 +9333,12 @@ function ABookFlow() {
     });
   }
   // ── соц-вход (Яндекс/Telegram) + завершение профиля ──
-  function authRouteProfile(me) {
+  function authRouteProfile(me, provider) {
     if (me && me.profile_completed === false) {
       var miss = (me && me.missing_profile_fields) || [];
       if (miss.indexOf('phone') >= 0 || !me.phone) {
-        setAuthPhone(me && me.phone ? fmtPhone(me.phone) : '');
-        setAuthErr(''); setAuthStage('phone_complete'); setSaasAuth('anon'); return;
+        setAuthSocialProvider(provider === 'telegram' ? 'telegram' : 'yandex');
+        setAuthErr(''); setAuthStage('social_phone_required'); setSaasAuth('anon'); return;
       }
       setAuthName((me && me.name) || ''); setAuthErr(''); setAuthStage('name'); setSaasAuth('anon'); return;
     }
@@ -9159,13 +9366,83 @@ function ABookFlow() {
       setAuthErr(authCodeText(e, 'Не удалось сохранить телефон'));
     });
   }
+  function authCompleteSocialCallback(rawUrl) {
+    var parsed = null;
+    try { parsed = new URL(String(rawUrl || ''), location.href); } catch (e) {}
+    var q = parsed && parsed.searchParams;
+    var state = q && q.get('state') || '';
+    var code = q && q.get('code') || '';
+    var providerError = q && q.get('error') || '';
+    var providerErrorText = q && q.get('error_description') || '';
+    var provider = state.indexOf('ya_') === 0 ? 'yandex' : state.indexOf('te_') === 0 ? 'telegram' : null;
+    if (!provider || (!code && !providerError) || !state || authReqRef.current) return false;
+    var pKey = 'me_oauth_pending:' + state;
+    var pending = null;
+    try { pending = JSON.parse(localStorage.getItem(pKey) || 'null'); } catch (e) {}
+    var pendingFresh = pending && typeof pending.ts === 'number' && isFinite(pending.ts)
+      && Date.now() - pending.ts <= 15 * 60 * 1000 && pending.ts <= Date.now() + 60 * 1000;
+    if (!pendingFresh || String(pending.apiBase || '').toLowerCase().replace(/\/+$/, '') !== SAAS_NORM_API
+        || String(pending.tenant || '').toLowerCase() !== SAAS_NORM_SLUG) {
+      setAuthErr('Сессия входа устарела. Начните вход заново.');
+      return false;
+    }
+    if (providerError) {
+      try { localStorage.removeItem(pKey); } catch (e) {}
+      setAuthErr(providerErrorText || 'Вход отменён. Попробуйте ещё раз.');
+      return true;
+    }
+    authReqRef.current = true;
+    setAuthBusy(true); setAuthErr('');
+    localBookingFetch('/auth/oauth/' + provider + '/complete', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state: state, code: code })
+    }).then(function (res) {
+      if (!res || !res.access_token || !res.refresh_token) throw new Error('Пустой ответ авторизации');
+      if (!saasSaveBundle(res, null)) throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
+      try { localStorage.removeItem(pKey); } catch (e) {}
+      try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (e) {}
+      try {
+        var ret = new URL(String(pending.ret || ''), location.href);
+        if (ret.origin === location.origin) history.replaceState(null, '', ret.pathname + ret.search + ret.hash);
+      } catch (e) {}
+      setSaasUser(res.user || null);
+      authReqRef.current = false;
+      setAuthBusy(false);
+      authRouteProfile(res.user || null, provider);
+    }).catch(function (e) {
+      authReqRef.current = false;
+      setAuthBusy(false);
+      try { localStorage.removeItem(pKey); } catch (e2) {}
+      authRateLimit('social', e);
+      setAuthErr(authCodeText(e, 'Не удалось завершить вход'));
+    });
+    return true;
+  }
+  function authSocialRedirectUri() {
+    try {
+      if (window.__meIsNative && window.__meIsNative()) return 'https://malesthetic.pro/app/';
+      if (location.protocol === 'http:' && /^(?:localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+        return location.origin + '/oauth-callback.html';
+      }
+      if (location.protocol === 'https:') return new URL('/app/', location.origin).href;
+    } catch (e) {}
+    throw new Error('Откройте MAYA через приложение или защищённую веб-ссылку.');
+  }
   function authSocial(provider) {
     if (authReqRef.current) return;
     authReqRef.current = true;
     setAuthBusy(true); setAuthErr('');
+    var redirectUri = '';
+    try { redirectUri = authSocialRedirectUri(); }
+    catch (e) {
+      authReqRef.current = false;
+      setAuthBusy(false);
+      setAuthErr(e && e.message ? e.message : 'Не удалось начать вход');
+      return;
+    }
     localBookingFetch('/auth/oauth/' + provider + '/start', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenantSlug: localTenantSlug, redirectUri: location.origin + '/oauth-callback.html' })
+      body: JSON.stringify({ tenantSlug: localTenantSlug, redirectUri: redirectUri })
     }).then(function (res) {
       if (!res || !res.auth_url) throw new Error('Сервис входа недоступен');
       // pending-контекст привязан к OAuth state: параллельные входы разных салонов не пересекаются.
@@ -9175,7 +9452,7 @@ function ABookFlow() {
       var oState = res.state || null;
       if (!oState || !urlState || String(oState) !== String(urlState)) throw new Error('Сервис входа недоступен');
       var pKey = 'me_oauth_pending:' + oState;
-      var pVal = JSON.stringify({ apiBase: SAAS_NORM_API, tenant: SAAS_NORM_SLUG, ret: location.href, ts: Date.now() });
+      var pVal = JSON.stringify({ apiBase: SAAS_NORM_API, tenant: SAAS_NORM_SLUG, provider: provider, ret: location.href, ts: Date.now(), source: 'client_flow' });
       try { localStorage.setItem(pKey, pVal); } catch (e) {}
       var pBack = null;
       try { pBack = localStorage.getItem(pKey); } catch (e) {}
@@ -9830,7 +10107,7 @@ function ABookFlow() {
       setRestoreErr('');
       saasUpdateUser(me || s.user);
       setSaasUser(me || s.user || null);
-      authRouteProfile(me);
+      authRouteProfile(me, s.auth_provider || null);
     }).catch(function (err) {
       if (cancelled) return;
       var code = err && err.code;
@@ -10476,6 +10753,14 @@ function ABookFlow() {
       var box = { padding: '13px 15px', borderRadius: 16, border: '1px solid ' + t.line, background: t.card, marginTop: 16 };
       var h2s = { fontFamily: DISPLAY, fontWeight: 200, fontSize: 24, textTransform: 'uppercase', color: t.ink, margin: '12px 0 10px' };
       var aErr = authErr ? React.createElement('div', { style: { margin: '14px 0 0', padding: '11px 14px', borderRadius: 12, background: 'rgba(108,106,104,0.14)', border: '1px solid rgba(108,106,104,0.3)', fontFamily: BODY, fontSize: 12.5, color: '#aeaba8', textAlign: 'center' } }, authErr) : null;
+      var socialButton = function (provider, title, mark, marginTop) {
+        var left = authLockLeft('social');
+        var waiting = left > 0;
+        return React.createElement('div', {
+          onClick: authBusy || waiting ? null : function () { authSocial(provider); },
+          style: { height: 50, borderRadius: 14, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: marginTop == null ? 10 : marginTop, cursor: waiting ? 'default' : 'pointer', opacity: waiting ? 0.55 : 1 }
+        }, React.createElement('span', { style: { color: t.dim, fontWeight: 800 } }, mark), waiting ? title + ' · ' + left + ' с' : title);
+      };
       if (saasAuth === 'retry') return (function () {
         var rl = Math.max(0, Math.ceil((restoreWaitAt - Date.now()) / 1000));
         var rWait = rl > 0; // до серверного времени кнопка заблокирована, авто-повтора нет
@@ -10529,13 +10814,21 @@ function ABookFlow() {
         onClick: authBusy ? null : authFinishName,
         style: { marginTop: 18, opacity: authBusy ? 0.6 : 1 }
       }, React.createElement(PrimaryPill, { t: t, label: authBusy ? 'Секунду…' : 'Сохранить' })));
-      if (authStage === 'phone_complete') return React.createElement(React.Fragment, null, React.createElement(Eyebrow, { t: t }, 'Почти готово'), React.createElement('h2', { style: h2s }, 'Ваш', React.createElement('br'), 'телефон'), React.createElement('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'По номеру подтверждаем записи и напоминаем о визите.'), React.createElement('div', { style: box }, React.createElement('div', { style: label }, 'Телефон'), React.createElement('input', { value: authPhone, onChange: function (e) { setAuthPhone(fmtPhone(e.target.value)); }, inputMode: 'tel', placeholder: '+7 (___) ___-__-__', autoFocus: true, style: input })), aErr, React.createElement('div', { onClick: authBusy ? null : authFinishPhone, style: { marginTop: 18, opacity: authBusy ? 0.6 : 1 } }, React.createElement(PrimaryPill, { t: t, label: authBusy ? '\u0421\u0435\u043a\u0443\u043d\u0434\u0443\u2026' : 'Сохранить' })));
+      if (authStage === 'social_phone_required') return React.createElement(React.Fragment, null,
+        React.createElement(Eyebrow, { t: t }, 'Безопасный вход'),
+        React.createElement('h2', { style: h2s }, 'Разрешите', React.createElement('br'), 'доступ к номеру'),
+        React.createElement('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.55 } },
+          (authSocialProvider === 'telegram' ? 'Telegram' : 'Яндекс') + ' не передал подтверждённый номер. Без него MAYA не может безопасно найти вашу карточку и историю в YClients.'),
+        aErr,
+        socialButton(authSocialProvider, 'Повторить через ' + (authSocialProvider === 'telegram' ? 'Telegram' : 'Яндекс'), authSocialProvider === 'telegram' ? '\u2708' : 'Я', 18),
+        authSocialProvider === 'telegram' ? socialButton('yandex', 'Войти через Яндекс', 'Я', 10) : null,
+        React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint, marginTop: 13, lineHeight: 1.5 } }, 'Номер нельзя вписать вручную: это защищает историю записей другого клиента.'));
       return React.createElement(React.Fragment, null, React.createElement(Eyebrow, {
         t: t
-      }, 'Вход по номеру'), React.createElement('h2', { style: h2s }, 'Ваш номер', React.createElement('br'), 'телефона'), LocalModeNote(t), window.__SAAS_TENANT && window.__SAAS_TENANT.client_registration === false ? React.createElement('div', { style: { margin: '12px 0 0', padding: '11px 14px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5 } }, 'Бизнес готовится к запуску — вход пока только для сотрудников.') : null, React.createElement('div', { style: box }, React.createElement('div', { style: label }, 'Телефон'), React.createElement('input', {
+      }, 'Вход клиента'), React.createElement('h2', { style: h2s }, 'Без', React.createElement('br'), 'SMS'), React.createElement('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.55 } }, 'Яндекс или Telegram подтвердят вас и подключат вашу карточку клиента.'), LocalModeNote(t), window.__SAAS_TENANT && window.__SAAS_TENANT.client_registration === false ? React.createElement('div', { style: { margin: '12px 0 0', padding: '11px 14px', borderRadius: 12, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5 } }, 'Бизнес готовится к запуску — вход пока только для сотрудников.') : null, socialButton('yandex', 'Войти через Яндекс', 'Я', 16), socialButton('telegram', 'Войти через Telegram', '\u2708', 10), React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 4px' } }, React.createElement('div', { style: { flex: 1, height: 1, background: t.line } }), React.createElement('span', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'или по номеру'), React.createElement('div', { style: { flex: 1, height: 1, background: t.line } })), React.createElement('div', { style: box }, React.createElement('div', { style: label }, 'Телефон'), React.createElement('input', {
         value: authPhone,
         onChange: function (e) { setAuthPhone(fmtPhone(e.target.value)); },
-        inputMode: 'tel', placeholder: '+7 (___) ___-__-__', autoFocus: true, style: input
+        inputMode: 'tel', placeholder: '+7 (___) ___-__-__', style: input
       })), aErr, (function () {
         var sLeft = Math.max(0, Math.ceil((authResendAt - Date.now()) / 1000));
         var sWait = sLeft > 0;
@@ -10543,9 +10836,9 @@ function ABookFlow() {
           onClick: authBusy || sWait ? null : authStart,
           style: { marginTop: 18, opacity: authBusy || sWait ? 0.6 : 1 }
         }, React.createElement(PrimaryPill, { t: t, label: authBusy ? 'Секунду…' : (sWait ? 'Новый код · ' + sLeft + ' с' : 'Получить код') }));
-      })(), React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 4px' } }, React.createElement('div', { style: { flex: 1, height: 1, background: t.line } }), React.createElement('span', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'или'), React.createElement('div', { style: { flex: 1, height: 1, background: t.line } })), (function () { var soL = authLockLeft('social'); var soW = soL > 0; return React.createElement('div', { onClick: authBusy || soW ? null : function () { authSocial('yandex'); }, style: { height: 46, borderRadius: 12, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: 12, cursor: soW ? 'default' : 'pointer', opacity: soW ? 0.55 : 1 } }, React.createElement('span', { style: { color: '#686664', fontWeight: 800 } }, 'Я'), soW ? 'Яндекс · ' + soL + ' с' : 'Войти через Яндекс'); })(), (function () { var soL = authLockLeft('social'); var soW = soL > 0; return React.createElement('div', { onClick: authBusy || soW ? null : function () { authSocial('telegram'); }, style: { height: 46, borderRadius: 12, border: '1px solid ' + t.line, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, color: t.ink, marginTop: 10, cursor: soW ? 'default' : 'pointer', opacity: soW ? 0.55 : 1 } }, React.createElement('span', { style: { color: '#94928f', fontWeight: 800 } }, '\u2708'), soW ? 'Telegram · ' + soL + ' с' : 'Войти через Telegram'); })(), React.createElement('div', {
+      })(), React.createElement('div', {
         style: { fontFamily: BODY, fontSize: 11, color: t.faint, marginTop: 12, lineHeight: 1.5 }
-      }, 'Локальный режим: SMS не отправляется, debug-код показывается на экране.'));
+      }, /^https?:\/\/(?:127\.0\.0\.1|localhost)(?::|\/)/.test(localSaasApiBase) ? 'Локальный режим: код показывается на экране.' : 'Вход по номеру заработает после подключения сервиса сообщений.'));
     });
   }
 
@@ -34322,6 +34615,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
         AppPlugin.addListener('appUrlOpen', function(data){
           try{
             var raw = data && data.url ? String(data.url) : '';
+            if(raw && raw.indexOf('pro.malesthetic.app://oauth-callback') === 0){
+              if(typeof window.__meSaasOauthComplete === 'function') window.__meSaasOauthComplete(raw);
+              else window.__mePendingSaasOauthUrl = raw;
+              return;
+            }
             if(raw && raw.indexOf('code=') !== -1 && (raw.indexOf('pro.malesthetic.app://vk-auth') === 0 || raw.indexOf('pro.malesthetic.app://yandex-auth') === 0 || raw.indexOf('https://malesthetic.pro/app') === 0 || raw.indexOf('http://malesthetic.pro/app') === 0)){
               if(__meIsYandexReturnUrl(raw)) handleYandexRedirect(raw);
               else handleVkRedirect(raw);
@@ -34333,6 +34631,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
         AppPlugin.getLaunchUrl().then(function(data){
           try{
             var raw = data && data.url ? String(data.url) : '';
+            if(raw && raw.indexOf('pro.malesthetic.app://oauth-callback') === 0){
+              if(typeof window.__meSaasOauthComplete === 'function') window.__meSaasOauthComplete(raw);
+              else window.__mePendingSaasOauthUrl = raw;
+              return;
+            }
             if(raw && raw.indexOf('code=') !== -1 && (raw.indexOf('pro.malesthetic.app://vk-auth') === 0 || raw.indexOf('pro.malesthetic.app://yandex-auth') === 0 || raw.indexOf('https://malesthetic.pro/app') === 0 || raw.indexOf('http://malesthetic.pro/app') === 0)){
               if(__meIsYandexReturnUrl(raw)) handleYandexRedirect(raw);
               else handleVkRedirect(raw);

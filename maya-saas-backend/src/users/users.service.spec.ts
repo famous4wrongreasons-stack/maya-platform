@@ -103,6 +103,9 @@ describe('UsersService', () => {
     const userUpdateManyMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<{ count: number }>
     > = jest.fn().mockResolvedValue({ count: 1 });
+    const authIdentityFindFirstMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<{ id: string } | null>
+    > = jest.fn().mockResolvedValue(null);
     const encryptMock: jest.MockedFunction<(value: string) => string> = jest
       .fn()
       .mockImplementation((value: string) => `enc:${value}`);
@@ -110,7 +113,10 @@ describe('UsersService', () => {
       .fn()
       .mockImplementation((value: string) => value.replace(/^enc:/, ''));
 
-    const prisma: Pick<PrismaService, 'user'> = {
+    const prisma: Pick<PrismaService, 'authIdentity' | 'user'> = {
+      authIdentity: {
+        findFirst: authIdentityFindFirstMock,
+      } as PrismaService['authIdentity'],
       user: {
         findFirst: userFindFirstMock,
         findUnique: userFindUniqueMock,
@@ -135,6 +141,7 @@ describe('UsersService', () => {
       mocks: {
         decryptMock,
         encryptMock,
+        authIdentityFindFirstMock,
         userFindFirstMock,
         userFindUniqueMock,
         userFindManyMock,
@@ -187,39 +194,83 @@ describe('UsersService', () => {
     expect(result.name).toBe('Алексей');
   });
 
-  it('allows completing the current user phone when it is still missing', async () => {
+  it('rejects an unverified phone added through the profile endpoint', async () => {
     const {
       service,
       tenantContext,
-      mocks: { userFindFirstMock, userFindUniqueMock, userUpdateMock },
+      mocks: { userFindFirstMock, userUpdateMock },
     } = createService();
     const userWithoutPhone = {
       ...baseUser(),
       phone: null,
     };
 
-    userFindUniqueMock.mockResolvedValue(userWithoutPhone);
-    userFindFirstMock.mockResolvedValueOnce(null);
-    userUpdateMock.mockResolvedValue({
-      ...userWithoutPhone,
-      phone: '+79991112233',
+    userFindFirstMock.mockResolvedValueOnce(userWithoutPhone);
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.updateCurrentUserProfile('user-1', {
+          phone: '8 (999) 111-22-33',
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'phone_verification_required' },
+      },
     });
 
+    expect(userUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('attaches a phone verified by a social identity in the same tenant', async () => {
+    const {
+      service,
+      tenantContext,
+      mocks: {
+        authIdentityFindFirstMock,
+        userFindFirstMock,
+        userFindManyMock,
+        userUpdateManyMock,
+      },
+    } = createService();
+    const userWithoutPhone = tenantUser({ phone: null });
+    const userWithPhone = tenantUser({ phone: '+79991112233' });
+
+    userFindFirstMock
+      .mockResolvedValueOnce(userWithoutPhone)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(userWithPhone);
+    userFindManyMock.mockResolvedValueOnce([]);
+    authIdentityFindFirstMock.mockResolvedValueOnce({ id: 'identity-1' });
+
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.updateCurrentUserProfile('user-1', {
-        phone: '8 (999) 111-22-33',
-      }),
+      service.attachVerifiedSocialPhone(
+        'user-1',
+        'tenant-1',
+        '8 (999) 111-22-33',
+      ),
     );
 
-    expect(userUpdateMock).toHaveBeenCalledWith({
-      where: { id: 'user-1' },
-      data: {
+    expect(authIdentityFindFirstMock).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
         phone: '+79991112233',
       },
-      include: {
-        tenant: true,
-        branch: true,
+      select: { id: true },
+    });
+    expect(userUpdateManyMock).toHaveBeenCalledWith({
+      where: {
+        id: 'user-1',
+        phone: null,
+        memberships: {
+          some: {
+            tenantId: 'tenant-1',
+            status: 'active',
+          },
+        },
       },
+      data: { phone: '+79991112233' },
     });
     expect(result.phone).toBe('+79991112233');
   });

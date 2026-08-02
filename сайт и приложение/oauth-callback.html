@@ -51,7 +51,7 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
 
   function codeText(code, fallback) {
     var m = {
-      social_provider_unavailable: 'Вход через этот сервис сейчас недоступен — войдите по номеру.',
+      social_provider_unavailable: 'Вход через этот сервис сейчас недоступен — попробуйте войти через Яндекс.',
       social_state_invalid: 'Сессия входа устарела — начните заново.',
       social_exchange_failed: 'Не удалось завершить вход. Попробуйте ещё раз.',
       social_token_invalid: 'Не удалось завершить вход. Попробуйте ещё раз.',
@@ -162,6 +162,7 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
         access_expires_at: data.expires_in ? Date.now() + Number(data.expires_in) * 1000 : null,
         refresh_expires_at: data.refresh_expires_at || null,
         session: data.session || null,
+        auth_provider: data.provider || provider,
         user: data.user || null,
         tenant_slug: tenantSlug, // контекст пары — проверяется при каждом чтении в app.html
         api_base: apiBase

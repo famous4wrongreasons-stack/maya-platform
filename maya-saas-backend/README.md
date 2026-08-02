@@ -508,17 +508,6 @@ curl -X PATCH http://localhost:3000/api/me \
   }'
 ```
 
-Update the current authenticated user profile phone after a social login that did not return one:
-
-```bash
-curl -X PATCH http://localhost:3000/api/me \
-  -H 'Authorization: Bearer <tenant-client-jwt>' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "phone": "+79990000000"
-  }'
-```
-
 Notes:
 
 - In local/test mode with `PHONE_AUTH_PROVIDER=auto`, the backend returns `debug_code`.
@@ -526,6 +515,7 @@ Notes:
 - `SMSRU_FROM` is optional and requires a pre-approved sender name in SMS.ru.
 - The backend forwards the requesting client IP to SMS.ru when available, which helps SMS flood protection on auth-code flows.
 - Social login stores provider identities per tenant, so the same Yandex/Telegram account can belong to different salons without cross-tenant leakage.
+- A client phone is accepted only from a verified login provider. `PATCH /api/me` cannot attach an arbitrary phone to another CRM history.
 - Client profile names are stored encrypted at rest.
 - `GET /api/me` now returns `name`, `profile_completed`, and `missing_profile_fields`.
 
@@ -538,7 +528,7 @@ curl -X POST http://localhost:3000/api/auth/oauth/yandex/start \
   -H 'Content-Type: application/json' \
   -d '{
     "tenantSlug": "demo-business",
-    "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
+    "redirectUri": "https://malesthetic.pro/app/"
   }'
 ```
 
@@ -560,7 +550,7 @@ curl -X POST http://localhost:3000/api/auth/oauth/telegram/start \
   -H 'Content-Type: application/json' \
   -d '{
     "tenantSlug": "demo-business",
-    "redirectUri": "https://malesthetic.pro/app/oauth-callback.html"
+    "redirectUri": "https://malesthetic.pro/app/"
   }'
 ```
 
@@ -580,7 +570,7 @@ Provider notes:
 - Yandex flow uses OAuth Authorization Code with PKCE against `https://oauth.yandex.com/authorize` and `https://oauth.yandex.com/token`, then loads profile data from `https://login.yandex.ru/info`.
 - Telegram flow uses OIDC Authorization Code with PKCE against `https://oauth.telegram.org/auth` and `https://oauth.telegram.org/token`.
 - Telegram ID tokens are verified against JWKS before the backend trusts the user identity.
-- If Yandex or Telegram do not return a Russian phone number, the login still succeeds, but the frontend should ask the user to complete their phone in `PATCH /api/me`.
+- If Yandex or Telegram do not return a verified Russian phone number, login succeeds without CRM history; the client must retry with phone consent or be linked by an administrator.
 
 ## YooKassa billing
 

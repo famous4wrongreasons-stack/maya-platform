@@ -1087,14 +1087,11 @@ export class UsersService {
     if (dto.phone !== undefined) {
       const normalizedPhone = normalizeRussianPhone(dto.phone);
 
-      if (currentUser.phone && currentUser.phone !== normalizedPhone) {
-        throw new ConflictException(
-          'Phone is already set for this user and cannot be changed here',
-        );
-      }
-
-      if (!currentUser.phone) {
-        await this.ensurePhoneIsAvailable(scopedTenantId, normalizedPhone);
+      if (currentUser.phone !== normalizedPhone) {
+        throw new ForbiddenException({
+          message: 'Phone can only be added through a verified login provider.',
+          error: { code: 'phone_verification_required' },
+        });
       }
 
       data.phone = normalizedPhone;
@@ -1133,6 +1130,66 @@ export class UsersService {
     });
 
     return this.serializeUser(user);
+  }
+
+  async attachVerifiedSocialPhone(
+    userId: string,
+    expectedTenantId: string,
+    phone: string,
+  ) {
+    const tenantId = this.tenantContext.assertTenantId(expectedTenantId);
+    const normalizedPhone = normalizeRussianPhone(phone);
+    const currentUser = await this.getTenantUserOrThrow(userId, tenantId);
+
+    if (currentUser.phone) {
+      if (currentUser.phone !== normalizedPhone) {
+        throw new ConflictException({
+          message: 'The verified social phone conflicts with this account.',
+          error: { code: 'social_identity_conflict' },
+        });
+      }
+      return currentUser;
+    }
+
+    const verifiedIdentity = await this.prisma.authIdentity.findFirst({
+      where: {
+        tenantId,
+        userId,
+        phone: normalizedPhone,
+      },
+      select: { id: true },
+    });
+
+    if (!verifiedIdentity) {
+      throw new ForbiddenException({
+        message: 'The social provider did not verify this phone.',
+        error: { code: 'phone_verification_required' },
+      });
+    }
+
+    await this.ensurePhoneIsAvailable(tenantId, normalizedPhone);
+    const update = await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        phone: null,
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
+        },
+      },
+      data: { phone: normalizedPhone },
+    });
+
+    if (update.count !== 1) {
+      throw new ConflictException({
+        message: 'The verified phone could not be attached to this account.',
+        error: { code: 'social_identity_conflict' },
+      });
+    }
+
+    return this.getTenantUserOrThrow(userId, tenantId);
   }
 
   async getUserOrThrow(userId: string) {

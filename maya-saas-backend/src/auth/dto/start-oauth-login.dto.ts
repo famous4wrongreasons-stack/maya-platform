@@ -7,7 +7,7 @@ export class StartOauthLoginDto {
   tenantSlug!: string;
 
   @ApiProperty({
-    example: 'https://malesthetic.pro/app/oauth-callback.html',
+    example: 'https://malesthetic.pro/app/',
   })
   @IsString()
   @MaxLength(1024)

@@ -304,12 +304,19 @@ export class SocialAuthService {
     );
 
     if (existingIdentity) {
-      const user = await this.usersService.getTenantUserOrThrow(
+      let user = await this.usersService.getTenantUserOrThrow(
         existingIdentity.user.id,
         params.tenant.id,
       );
       this.assertUserCanLogin(user);
       await this.updateIdentityRecord(existingIdentity.id, params.profile);
+      if (!user.phone && params.profile.phone) {
+        user = await this.usersService.attachVerifiedSocialPhone(
+          user.id,
+          params.tenant.id,
+          params.profile.phone,
+        );
+      }
 
       return {
         user,
@@ -353,8 +360,17 @@ export class SocialAuthService {
         profileJson: asJson(params.profile.raw),
       });
 
+      const resolvedUser =
+        !matchedUser.phone && params.profile.phone
+          ? await this.usersService.attachVerifiedSocialPhone(
+              matchedUser.id,
+              params.tenant.id,
+              params.profile.phone,
+            )
+          : matchedUser;
+
       return {
-        user: matchedUser,
+        user: resolvedUser,
         isNewUser: false,
       };
     }

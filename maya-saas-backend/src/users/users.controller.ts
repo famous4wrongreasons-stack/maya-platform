@@ -23,8 +23,7 @@ export class UsersController {
 
   @Patch()
   @ApiOperation({
-    summary:
-      'Update the current authenticated user profile, including initial phone completion for social logins.',
+    summary: 'Update the current authenticated user profile',
   })
   updateCurrentUser(
     @CurrentUser() user: AuthenticatedUser,
