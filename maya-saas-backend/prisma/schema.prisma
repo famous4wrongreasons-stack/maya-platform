@@ -112,6 +112,7 @@ model Tenant {
   aiApprovalRequests     AiApprovalRequest[]
   aiToolExecutions       AiToolExecution[]
   crmStaffAccesses       CrmStaffAccess[]
+  dashboardPreferences   DashboardPreference[]
 
   @@index([status, graceEndsAt])
 }
@@ -211,30 +212,48 @@ model User {
 }
 
 model Membership {
-  id                 String             @id @default(cuid())
-  tenantId           String
-  userId             String
-  branchId           String?
-  role               UserRole
-  status             MembershipStatus   @default(active)
-  invitedAt          DateTime?
-  joinedAt           DateTime?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch             Branch?            @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  authIdentities     AuthIdentity[]     @relation("AuthIdentityMembership")
-  authSessions       AuthSession[]      @relation("AuthSessionMembership")
-  internalProviders  InternalProvider[] @relation("InternalProviderMembership")
-  customerProfile    CustomerProfile?   @relation("CustomerProfileMembership")
-  loyaltyAccount     LoyaltyAccount?    @relation("LoyaltyAccountMembership")
-  clientAppointments Appointment[]      @relation("ClientMembershipAppointments")
+  id                   String                @id @default(cuid())
+  tenantId             String
+  userId               String
+  branchId             String?
+  role                 UserRole
+  status               MembershipStatus      @default(active)
+  invitedAt            DateTime?
+  joinedAt             DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch               Branch?               @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  authIdentities       AuthIdentity[]        @relation("AuthIdentityMembership")
+  authSessions         AuthSession[]         @relation("AuthSessionMembership")
+  internalProviders    InternalProvider[]    @relation("InternalProviderMembership")
+  customerProfile      CustomerProfile?      @relation("CustomerProfileMembership")
+  loyaltyAccount       LoyaltyAccount?       @relation("LoyaltyAccountMembership")
+  clientAppointments   Appointment[]         @relation("ClientMembershipAppointments")
+  dashboardPreferences DashboardPreference[]
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
   @@index([userId, status])
   @@index([tenantId, branchId])
+}
+
+/// Personal dashboard layout and targets for one membership. Preferences are
+/// tenant-scoped so the same MAYA account can configure each business safely.
+model DashboardPreference {
+  id         String     @id @default(cuid())
+  tenantId   String
+  userId     String
+  section    String     @default("finance")
+  configJson Json       @default("{}")
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([userId, tenantId, section])
+  @@index([tenantId, section])
 }
 
 /// Tenant-scoped link between a CRM staff record and MAYA access. A role can

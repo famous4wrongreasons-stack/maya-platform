@@ -13461,9 +13461,66 @@ function AChat() {
   }
   function defaultQuickReplies() {
     if (!window.__ME_SAAS_CTX) return chatSurface() === 'staff' ? STAFF_QUICKS : QUICKS;
-    if (chatSurface() === 'owner') return ['Что сегодня по бизнесу?', 'Покажи аналитику', 'Записи сегодня', 'Что требует внимания?'];
+    if (chatSurface() === 'owner') return ['Что умеет MAYA OS?', 'Настроить финансы', 'Что сегодня по бизнесу?', 'Записи сегодня'];
     if (chatSurface() === 'staff') return ['Записи сегодня', 'Моя статистика', 'Моё расписание', 'Помоги с задачей'];
     return ['Записаться', 'Показать услуги', 'Мои записи', 'Мои баллы'];
+  }
+  var OWNER_CAPABILITY_LABELS = {
+    'crm.integration': 'защищённо подключать YClients или Altegio',
+    'calendar.external': 'читать актуальное расписание и окна из CRM',
+    'booking.public': 'принимать онлайн-запись по умной ссылке, QR и NFC',
+    'booking.customer_app': 'создавать запись внутри клиентского приложения',
+    'customers.core': 'работать с клиентами текущего бизнеса',
+    'analytics.business': 'показывать владельцу выручку, кассы, продажи, сотрудников и планы',
+    'analytics.employee': 'показывать сотруднику только его рабочие показатели',
+    'customer.portal': 'давать клиенту личный кабинет и историю записей',
+    'loyalty': 'показывать клиенту его бонусный баланс',
+    'ai.owner': 'отвечать владельцу по данным его бизнеса',
+    'ai.admin': 'помогать администратору с операционной работой',
+    'ai.consultant': 'консультировать клиента и вести к записи',
+    'branding.custom': 'использовать название и логотип бизнеса',
+    'notifications.core': 'хранить рабочие уведомления внутри MAYA'
+  };
+  function ownerCapabilitiesIntent(text) {
+    return /что\s+(?:ты|майя|maya|maya\s*os)\s+уме|возможност(?:и|ей)|список\s+функц|что\s+доступно/i.test(String(text || ''));
+  }
+  function ownerFinanceSettingsIntent(text) {
+    return /настро(?:ить|й)\s+(?:блок\s+)?финанс|настройк\w*\s+финанс|финанс(?:ы|ах)\s+под\s+себя/i.test(String(text || ''));
+  }
+  async function showOwnerCapabilities(userText) {
+    if (sending) return;
+    var display = String(userText || 'Что умеет MAYA OS?').trim();
+    setInput('');
+    setSending(true);
+    setMsgs(function (messages) { return messages.concat([{ role: 'user', text: display }, { role: 'bot', text: '', typing: true }]); });
+    try {
+      var result = await Promise.all([
+        saasAiFetch('/features/effective', {}),
+        saasAiFetch('/features/registry', {}).catch(function () { return { features: [] }; })
+      ]);
+      var effective = result[0] || {};
+      var enabled = Array.isArray(effective.featureKeys) ? effective.featureKeys : Object.keys(effective.features || {}).filter(function (key) { return effective.features[key]; });
+      var readiness = {};
+      ((result[1] && result[1].features) || []).forEach(function (feature) { if (feature && feature.key) readiness[feature.key] = feature; });
+      var rows = Object.keys(OWNER_CAPABILITY_LABELS).filter(function (key) {
+        var ready = readiness[key];
+        return enabled.indexOf(key) >= 0 && (!ready || ready.implementationStatus !== 'planned');
+      }).map(function (key) { return '• ' + OWNER_CAPABILITY_LABELS[key]; });
+      var reply = 'В вашем бизнесе MAYA OS сейчас может:\n\n' + (rows.length ? rows.join('\n') : '• принимать записи и показывать данные подключённого бизнеса') + '\n\nБлок «Финансы» можно настроить под себя: выбрать показатели и задать общий план и планы специалистов. Платформенные данные MAYA, включая наши расходы на ИИ, другим владельцам не показываются.';
+      setMsgs(function (messages) { return messages.filter(function (item) { return !item.typing; }).concat([{ role: 'bot', text: reply }]); });
+    } catch (error) {
+      setMsgs(function (messages) { return messages.filter(function (item) { return !item.typing; }).concat([{ role: 'bot', text: 'Не удалось загрузить актуальный список возможностей. Проверьте соединение и повторите.' }]); });
+    } finally {
+      setSending(false);
+    }
+  }
+  function openOwnerFinanceSettings(userText) {
+    var display = String(userText || 'Настроить финансы').trim();
+    setInput('');
+    setMsgs(function (messages) { return messages.concat([{ role: 'user', text: display }, { role: 'bot', text: 'Открываю настройку финансов. Там можно выбрать нужные блоки и задать планы.' }]); });
+    window.__meSaasPanelTab = 'analytics';
+    window.__meFinanceSettingsOnMount = true;
+    setTimeout(function () { leaveChat('panel'); }, 180);
   }
   function uniqChips(list, limit) {
     var out = [];
@@ -15418,6 +15475,14 @@ function AChat() {
   async function send(textArg, displayTextArg) {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
     var widgetText = String(textArg != null ? textArg : input).trim();
+    if (saasAiCtx() && chatSurface() === 'owner' && ownerCapabilitiesIntent(widgetText)) {
+      showOwnerCapabilities(widgetText);
+      return;
+    }
+    if (saasAiCtx() && chatSurface() === 'owner' && ownerFinanceSettingsIntent(widgetText)) {
+      openOwnerFinanceSettings(widgetText);
+      return;
+    }
     var pendingRepeat = pendingRepeatBookingData();
     var directRepeat = window.__ME_SAAS_CTX && (repeatBookingIntent(widgetText) ? window.__meRepeatBookingData : (/^\s*(?:да|ага|угу|конечно|верно|точно|подходит|хочу|можно|давайте|давай\s+так|повтор(?:и|им|ить)|(?:то\s+же|тоже)\s+самое|как\s+(?:обычно|в\s+прошл\w*\s+раз))\s*[.!?]*\s*$/i.test(widgetText) ? pendingRepeat : null));
     if (directRepeat) {
@@ -28501,6 +28566,21 @@ function ASaasOwnerPanel() {
   const [clientConnectState, setClientConnectState] = React.useState('idle');
   const [clientConnectNote, setClientConnectNote] = React.useState('');
   const [clientConnectBusy, setClientConnectBusy] = React.useState('');
+  const FINANCE_WIDGETS = [
+    { key: 'summary', label: 'Главные показатели', note: 'визиты, клиенты, поступления и средний чек' },
+    { key: 'cash_accounts', label: 'Кассы и оплаты', note: 'наличные, безналичные и кассы CRM' },
+    { key: 'sales_types', label: 'Состав продаж', note: 'услуги, товары и другие типы продаж' },
+    { key: 'daily', label: 'Динамика по дням', note: 'график поступлений за выбранный период' },
+    { key: 'staff_results', label: 'Результаты специалистов', note: 'весь активный штат и показатели за период' },
+    { key: 'payroll', label: 'Начисления сотрудникам', note: 'расчёты, которые вернула CRM' },
+    { key: 'plans', label: 'Исполнение планов', note: 'общий план бизнеса и личные планы специалистов' }
+  ];
+  const DEFAULT_FINANCE_PREFS = { schema_version: 1, enabled_widgets: FINANCE_WIDGETS.map(function (x) { return x.key; }), monthly_target_rub: null, staff_targets_rub: {} };
+  const [financePrefs, setFinancePrefs] = React.useState(DEFAULT_FINANCE_PREFS);
+  const [financeSettingsOpen, setFinanceSettingsOpen] = React.useState(window.__meFinanceSettingsOnMount === true);
+  const [financeDraft, setFinanceDraft] = React.useState(null);
+  const [financeSaveState, setFinanceSaveState] = React.useState('idle');
+  const [financeSaveNote, setFinanceSaveNote] = React.useState('');
   const requestRef = React.useRef(0);
   const TABS = [
     { key: 'maya', label: 'MAYA' },
@@ -28518,6 +28598,10 @@ function ASaasOwnerPanel() {
     var from;
     if (kind === 'day') from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     else if (kind === 'week') { from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0); }
+    else if (kind === 'previous_month') {
+      from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      now = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    }
     else from = new Date(now.getFullYear(), now.getMonth(), 1);
     return { from: from, to: now };
   }
@@ -28553,16 +28637,73 @@ function ASaasOwnerPanel() {
         meWidgetAf('/services').catch(function () { return []; }),
         meWidgetAf('/customers?limit=50').catch(function () { return []; }),
         Promise.resolve(crm),
-        meWidgetAf('/integrations/crm/team-access').catch(function (x) { return { items: [], _error: x }; })
+        meWidgetAf('/integrations/crm/team-access').catch(function (x) { return { items: [], _error: x }; }),
+        meWidgetAf('/me/dashboard/finance').catch(function () { return { config: DEFAULT_FINANCE_PREFS }; })
       ]);
     }).then(function (r) {
       if (requestId !== requestRef.current) return;
       setData({ me: r[0] || {}, analytics: r[1] || {}, finance: r[2] || {}, journal: r[3] || {}, staff: Array.isArray(r[4]) ? r[4] : (r[4] && r[4].items || []), services: Array.isArray(r[5]) ? r[5] : (r[5] && r[5].items || []), customers: Array.isArray(r[6]) ? r[6] : (r[6] && r[6].items || []), crm: r[7] || {}, teamAccess: r[8] || { items: [] } });
+      setFinancePrefs(normalizeFinancePrefs(r[9] && r[9].config));
       setLoading(false);
     }).catch(function (x) {
       if (requestId !== requestRef.current) return;
       setLoading(false);
       setErr(x && x.status === 401 ? 'Сессия владельца истекла. Войдите снова.' : 'Не удалось загрузить данные бизнеса. Проверьте подключение и повторите.');
+    });
+  }
+  function normalizeFinancePrefs(value) {
+    var source = value && typeof value === 'object' ? value : {};
+    var allowed = FINANCE_WIDGETS.map(function (x) { return x.key; });
+    var widgets = Array.isArray(source.enabled_widgets) ? source.enabled_widgets.filter(function (key, index, list) { return allowed.indexOf(key) >= 0 && list.indexOf(key) === index; }) : allowed;
+    var staffTargets = source.staff_targets_rub && typeof source.staff_targets_rub === 'object' ? source.staff_targets_rub : {};
+    return {
+      schema_version: 1,
+      enabled_widgets: widgets,
+      monthly_target_rub: source.monthly_target_rub == null ? null : Number(source.monthly_target_rub),
+      staff_targets_rub: staffTargets
+    };
+  }
+  function openFinanceSettings() {
+    var prefs = normalizeFinancePrefs(financePrefs);
+    var targetDrafts = {};
+    Object.keys(prefs.staff_targets_rub || {}).forEach(function (id) { targetDrafts[id] = String(prefs.staff_targets_rub[id]); });
+    setFinanceDraft({ enabled_widgets: prefs.enabled_widgets.slice(), monthly_target_rub: prefs.monthly_target_rub == null ? '' : String(prefs.monthly_target_rub), staff_targets_rub: targetDrafts });
+    setFinanceSaveNote('');
+    setFinanceSaveState('idle');
+    setFinanceSettingsOpen(true);
+  }
+  function saveFinanceSettings() {
+    if (financeSaveState === 'saving') return;
+    var currentPrefs = normalizeFinancePrefs(financePrefs);
+    var draft = financeDraft || {
+      enabled_widgets: currentPrefs.enabled_widgets.slice(),
+      monthly_target_rub: currentPrefs.monthly_target_rub == null ? '' : String(currentPrefs.monthly_target_rub),
+      staff_targets_rub: Object.assign({}, currentPrefs.staff_targets_rub)
+    };
+    var staffTargets = {};
+    Object.keys(draft.staff_targets_rub || {}).forEach(function (id) {
+      var raw = String(draft.staff_targets_rub[id] == null ? '' : draft.staff_targets_rub[id]).replace(',', '.').trim();
+      if (raw !== '' && Number.isFinite(Number(raw)) && Number(raw) >= 0) staffTargets[id] = Number(raw);
+    });
+    var monthlyRaw = String(draft.monthly_target_rub == null ? '' : draft.monthly_target_rub).replace(',', '.').trim();
+    var body = {
+      enabledWidgets: draft.enabled_widgets.slice(),
+      monthlyTargetRub: monthlyRaw === '' ? null : Number(monthlyRaw),
+      staffTargetsRub: staffTargets
+    };
+    if (body.monthlyTargetRub !== null && (!Number.isFinite(body.monthlyTargetRub) || body.monthlyTargetRub < 0)) {
+      setFinanceSaveNote('Проверьте общий план: нужна сумма от нуля и выше.');
+      return;
+    }
+    setFinanceSaveState('saving'); setFinanceSaveNote('');
+    meWidgetAf('/me/dashboard/finance', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (result) {
+      setFinancePrefs(normalizeFinancePrefs(result && result.config));
+      setFinanceSaveState('saved');
+      setFinanceSaveNote('Настройка сохранена для вашего аккаунта.');
+      setTimeout(function () { setFinanceSettingsOpen(false); }, 450);
+    }).catch(function () {
+      setFinanceSaveState('error');
+      setFinanceSaveNote('Не удалось сохранить настройку. Попробуйте ещё раз.');
     });
   }
   function absoluteTenantAsset(path) {
@@ -28667,6 +28808,11 @@ function ASaasOwnerPanel() {
     };
     return function () { window.__meSetSaasPanelTab = null; };
   }, []);
+  React.useEffect(function () {
+    window.__meFinanceSettingsOnMount = false;
+    window.__meOpenFinanceSettings = function () { setTabKey('analytics'); openFinanceSettings(); };
+    return function () { window.__meOpenFinanceSettings = null; };
+  }, [financePrefs]);
   function firstMoney(list) {
     if (!Array.isArray(list) || !list.length) return null;
     return list.filter(function (x) { return !x.currency || x.currency === 'RUB'; })[0] || list[0];
@@ -28754,14 +28900,74 @@ function ASaasOwnerPanel() {
       var payroll = f.payroll || {};
       var grid = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 };
       var financeWarnings = Array.isArray(f.warnings) ? f.warnings : [];
+      var prefs = normalizeFinancePrefs(financePrefs);
+      var widgetOn = function (key) { return prefs.enabled_widgets.indexOf(key) >= 0; };
+      var activeStaff = (d.staff || []).slice();
+      if (!activeStaff.length) activeStaff = (a.staff || []).map(function (row) { return { id: row.staff_external_id, name: 'Сотрудник ' + row.staff_external_id }; });
+      var staffResults = activeStaff.map(function (member) {
+        var performance = perfById[String(member.id)] || {};
+        return { member: member, performance: performance, appointments: Number(performance.appointments || 0), revenue: major(firstMoney(performance.revenue)) || 0 };
+      }).sort(function (x, y) { return y.revenue - x.revenue || String(x.member.name || '').localeCompare(String(y.member.name || ''), 'ru'); });
+      var periodText = (function () {
+        var source = a.period || {};
+        var from = source.from ? new Date(source.from) : dateRange(period).from;
+        var to = source.to ? new Date(source.to) : dateRange(period).to;
+        try {
+          var formatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: tz });
+          return formatter.format(from) + ' — ' + formatter.format(to);
+        } catch (e) { return String(source.from || '').slice(0, 10) + ' — ' + String(source.to || '').slice(0, 10); }
+      })();
+      function progressRow(label, actual, target, note) {
+        var percent = target > 0 ? Math.round(actual / target * 100) : 0;
+        return e('div', { style: { padding: '12px 0' } },
+          e('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' } }, e('div', { style: { minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, label), note ? e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, note) : null), e('div', { style: { fontFamily: DISPLAY, fontSize: 12, textAlign: 'right', whiteSpace: 'nowrap' } }, target > 0 ? (percent + '%') : 'план не задан')),
+          e('div', { style: { height: 7, borderRadius: 999, background: t.line, marginTop: 9, overflow: 'hidden' } }, e('div', { style: { width: Math.max(0, Math.min(100, percent)) + '%', height: '100%', borderRadius: 999, background: t.ink, transition: 'width .35s ease' } })),
+          e('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 6, fontFamily: BODY, fontSize: 10.5, color: t.dim } }, e('span', null, 'Факт ' + rub(actual)), e('span', null, target > 0 ? ('План ' + rub(target)) : 'Добавьте в настройке'))
+        );
+      }
+      if (financeSettingsOpen) {
+        var draft = financeDraft || { enabled_widgets: prefs.enabled_widgets.slice(), monthly_target_rub: prefs.monthly_target_rub == null ? '' : String(prefs.monthly_target_rub), staff_targets_rub: Object.assign({}, prefs.staff_targets_rub) };
+        var fieldStyle = { width: '100%', boxSizing: 'border-box', minHeight: 48, border: '1px solid ' + t.line, borderRadius: 14, background: t.card, color: t.ink, padding: '0 14px', fontFamily: BODY, fontSize: 14, outline: 'none' };
+        return e(React.Fragment, null,
+          e('button', { type: 'button', onClick: function () { setFinanceSettingsOpen(false); }, style: { border: 0, background: 'transparent', color: t.dim, fontFamily: BODY, fontSize: 12, padding: '0 0 12px' } }, '← Вернуться к аналитике'),
+          e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Настроить финансы'),
+          e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.55, marginTop: 8 } }, 'Выберите нужные блоки и задайте планы. Настройка действует только в вашем аккаунте и не меняет данные YClients.'),
+          section('Показывать в финансах', e('div', { style: { display: 'grid', gap: 8 } }, FINANCE_WIDGETS.map(function (item) {
+            var on = draft.enabled_widgets.indexOf(item.key) >= 0;
+            return e('button', { key: item.key, type: 'button', onClick: function () {
+              var next = on ? draft.enabled_widgets.filter(function (key) { return key !== item.key; }) : draft.enabled_widgets.concat([item.key]);
+              setFinanceDraft(Object.assign({}, draft, { enabled_widgets: next }));
+            }, style: { width: '100%', display: 'flex', alignItems: 'center', gap: 12, border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 16, background: on ? t.ink : t.card, color: on ? t.bg : t.ink, padding: '13px 14px', textAlign: 'left' } },
+              e('span', { style: { width: 22, height: 22, border: '1px solid ' + (on ? t.bg : t.line), borderRadius: 7, display: 'grid', placeItems: 'center', flex: 'none', fontSize: 12 } }, on ? '✓' : ''),
+              e('span', { style: { flex: 1, minWidth: 0 } }, e('span', { style: { display: 'block', fontFamily: BODY, fontSize: 13, fontWeight: 700 } }, item.label), e('span', { style: { display: 'block', fontFamily: BODY, fontSize: 10.5, opacity: .62, marginTop: 3, lineHeight: 1.4 } }, item.note))
+            );
+          }))),
+          section('Общий план на месяц', e('input', { type: 'number', inputMode: 'decimal', min: '0', placeholder: 'Например, 1 500 000 ₽', value: draft.monthly_target_rub, onChange: function (event) { setFinanceDraft(Object.assign({}, draft, { monthly_target_rub: event.target.value })); }, style: fieldStyle })),
+          section('Планы специалистов на месяц', activeStaff.length ? e('div', { style: { display: 'grid', gap: 9 } }, activeStaff.map(function (member) {
+            var id = String(member.id);
+            return card(e('label', { style: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(120px, .65fr)', alignItems: 'center', gap: 12 } }, e('span', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, member.name || 'Специалист'), e('input', { type: 'number', inputMode: 'decimal', min: '0', placeholder: 'Не задан', value: draft.staff_targets_rub[id] == null ? '' : draft.staff_targets_rub[id], onChange: function (event) { var targets = Object.assign({}, draft.staff_targets_rub); targets[id] = event.target.value; setFinanceDraft(Object.assign({}, draft, { staff_targets_rub: targets })); }, style: Object.assign({}, fieldStyle, { minHeight: 42 }) })), { padding: '11px 12px' });
+          })) : card(e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim } }, 'Сначала подключите и синхронизируйте специалистов CRM.'))),
+          financeSaveNote ? e('div', { style: { marginTop: 15, fontFamily: BODY, fontSize: 11.5, color: financeSaveState === 'error' ? '#c94a43' : t.dim, lineHeight: 1.45 } }, financeSaveNote) : null,
+          e('button', { type: 'button', disabled: financeSaveState === 'saving', onClick: saveFinanceSettings, style: { width: '100%', minHeight: 52, border: 0, borderRadius: 16, background: t.ink, color: t.bg, marginTop: 18, fontFamily: DISPLAY, fontSize: 10, fontWeight: 600, letterSpacing: '.13em', textTransform: 'uppercase', opacity: financeSaveState === 'saving' ? .55 : 1 } }, financeSaveState === 'saving' ? 'Сохраняю…' : 'Сохранить настройку')
+        );
+      }
       return e(React.Fragment, null,
-        e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, e('div', { style: { flex: 1 } }, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Аналитика'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 6 } }, (crmReady ? sourceLabel : 'CRM не подключена') + ' · данные текущего бизнеса')), e('button', { onClick: load, style: { border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, padding: '10px 13px' } }, loading ? '…' : 'Обновить')),
-        e('div', { style: { display: 'flex', gap: 7, marginTop: 18 } }, [['day', 'День'], ['week', '7 дней'], ['month', 'Месяц']].map(function (x) { var on = period === x[0]; return e('button', { key: x[0], onClick: function () { setPeriod(x[0]); }, style: { flex: 1, border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, background: on ? t.ink : 'transparent', color: on ? t.bg : t.ink, padding: '9px 4px', fontFamily: DISPLAY, fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' } }, x[1]); })),
-        section('Показатели', e('div', { style: grid }, kpi('Визиты', num(appt.active), 'отменено: ' + num(appt.cancelled)), kpi('Клиенты', num(appt.unique_clients), 'уникальные за период'), kpi(verifiedRevenue != null ? 'Поступления CRM' : 'Выручка записей', rub(revenue), verifiedRevenue != null ? 'подтверждено YClients' : 'по стоимости визитов'), kpi('Средний чек', rub(avg), 'по проведённым визитам'), kpi('Начислено зарплат', rub(major(payroll.accrued_total)), payroll.verified ? 'подтверждено CRM' : 'статус CRM'), kpi('Операции кассы', f.revenue && f.revenue.transaction_count != null ? num(f.revenue.transaction_count) : '—', f.revenue && f.revenue.verified ? 'подтверждено YClients' : 'нет подтверждения'))),
-        section('Кассы и способы оплаты', (f.revenue && Array.isArray(f.revenue.by_account) && f.revenue.by_account.length) ? card(e('div', null, f.revenue.by_account.map(function (x, i, arr) { return e('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Касса'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 2 } }, x.is_cash === true ? 'наличные' : (x.is_cash === false ? 'безналичные' : 'тип не указан'))), e('div', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(x)))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Разбивка по кассам недоступна в CRM.'))),
-        section('Продажи по данным CRM', (f.revenue && Array.isArray(f.revenue.by_type) && f.revenue.by_type.length) ? card(e('div', null, f.revenue.by_type.map(function (x, i, arr) { return e('div', { key: x.key || i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.label || x.key), e('span', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(x)))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Разбивка продаж недоступна.'))),
-        section('Динамика по дням', (a.daily && a.daily.length) ? card(e('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 7, height: 130 } }, (function () { var vals = a.daily.map(function (x) { return major(firstMoney(x.revenue)) || 0; }); var max = Math.max.apply(Math, vals.concat([1])); return a.daily.map(function (x, i) { return e('div', { key: x.date, style: { flex: 1, minWidth: 7, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' } }, e('div', { title: rub(vals[i]), style: { height: Math.max(4, vals[i] / max * 100) + '%', borderRadius: '6px 6px 2px 2px', background: t.ink, opacity: .82 } }), e('div', { style: { fontFamily: DISPLAY, fontSize: 7.5, color: t.dim, marginTop: 7, textAlign: 'center' } }, String(x.date).slice(8, 10))); }); })())) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'За выбранный период нет данных.'))),
-        section('Сотрудники', (a.staff && a.staff.length) ? card(e('div', null, a.staff.slice().sort(function (x, y) { return (major(firstMoney(y.revenue)) || 0) - (major(firstMoney(x.revenue)) || 0); }).map(function (x, i, arr) { var member = staffById[String(x.staff_external_id)] || {}; return e('div', { key: x.staff_external_id, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, member.name || ('Сотрудник ' + x.staff_external_id)), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, num(x.appointments) + ' визитов')), e('div', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(firstMoney(x.revenue))))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Нет данных по сотрудникам.'))),
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } }, e('div', { style: { flex: 1 } }, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Аналитика'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 6 } }, (crmReady ? sourceLabel : 'CRM не подключена') + ' · ' + periodText)), e('button', { onClick: openFinanceSettings, style: { border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, padding: '10px 11px', fontFamily: BODY, fontSize: 11 } }, 'Настроить'), e('button', { onClick: load, style: { border: '1px solid ' + t.line, borderRadius: 14, background: 'transparent', color: t.ink, padding: '10px 11px' } }, loading ? '…' : '↻')),
+        e('div', { className: 'me-noscroll', style: { display: 'flex', gap: 7, overflowX: 'auto', marginTop: 18, paddingBottom: 2 } }, [['day', 'День'], ['week', '7 дней'], ['month', 'Этот месяц'], ['previous_month', 'Прошлый месяц']].map(function (x) { var on = period === x[0]; return e('button', { key: x[0], onClick: function () { setPeriod(x[0]); }, style: { flex: 'none', border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, background: on ? t.ink : 'transparent', color: on ? t.bg : t.ink, padding: '9px 13px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '.09em', textTransform: 'uppercase', whiteSpace: 'nowrap' } }, x[1]); })),
+        widgetOn('summary') ? section('Главные показатели', e('div', { style: grid }, kpi('Визиты', num(appt.active), 'отменено: ' + num(appt.cancelled)), kpi('Клиенты', num(appt.unique_clients), 'уникальные за период'), kpi(verifiedRevenue != null ? 'Поступления CRM' : 'Выручка записей', rub(revenue), verifiedRevenue != null ? 'подтверждено YClients' : 'по стоимости визитов'), kpi('Средний чек', rub(avg), 'по проведённым визитам'), kpi('Активные специалисты', num(activeStaff.length), 'актуальный состав из CRM'), kpi('С визитами', num(staffResults.filter(function (row) { return row.appointments > 0; }).length), 'за выбранный период'))) : null,
+        widgetOn('plans') ? section('Исполнение планов', card(e('div', null,
+          progressRow('План бизнеса', revenue || 0, Number(prefs.monthly_target_rub || 0), (period === 'month' || period === 'previous_month') ? periodText : 'Для точного процента выберите месяц'),
+          staffResults.map(function (row) { var target = Number((prefs.staff_targets_rub || {})[String(row.member.id)] || 0); return progressRow(row.member.name || 'Специалист', row.revenue, target, num(row.appointments) + ' визитов · выручка записей'); })
+        ))) : null,
+        widgetOn('cash_accounts') ? section('Кассы и способы оплаты', (f.revenue && Array.isArray(f.revenue.by_account) && f.revenue.by_account.length) ? card(e('div', null, f.revenue.by_account.map(function (x, i, arr) { return e('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.name || 'Касса'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 2 } }, x.is_cash === true ? 'наличные' : (x.is_cash === false ? 'безналичные' : 'тип не указан'))), e('div', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(x)))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Разбивка по кассам недоступна в CRM.'))) : null,
+        widgetOn('sales_types') ? section('Продажи по данным CRM', (f.revenue && Array.isArray(f.revenue.by_type) && f.revenue.by_type.length) ? card(e('div', null, f.revenue.by_type.map(function (x, i, arr) { return e('div', { key: x.key || i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.label || x.key), e('span', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(major(x)))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Разбивка продаж недоступна.'))) : null,
+        widgetOn('daily') ? section('Динамика по дням', (a.daily && a.daily.length) ? card(e('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 7, height: 130 } }, (function () { var vals = a.daily.map(function (x) { return major(firstMoney(x.revenue)) || 0; }); var max = Math.max.apply(Math, vals.concat([1])); return a.daily.map(function (x, i) { return e('div', { key: x.date, style: { flex: 1, minWidth: 7, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' } }, e('div', { title: rub(vals[i]), style: { height: Math.max(4, vals[i] / max * 100) + '%', borderRadius: '6px 6px 2px 2px', background: t.ink, opacity: .82 } }), e('div', { style: { fontFamily: DISPLAY, fontSize: 7.5, color: t.dim, marginTop: 7, textAlign: 'center' } }, String(x.date).slice(8, 10))); }); })())) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'За выбранный период нет данных.'))) : null,
+        widgetOn('staff_results') ? section('Результаты специалистов · ' + periodText, activeStaff.length ? card(e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, lineHeight: 1.45, paddingBottom: 10, borderBottom: '1px solid ' + t.line } }, 'Показан весь активный состав из CRM. Это не список смены на сегодня; сумма и визиты относятся только к выбранному периоду.'), staffResults.map(function (row, i, arr) { return e('div', { key: row.member.id, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid ' + t.line : '0' } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, row.member.name || ('Сотрудник ' + row.member.id)), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 3 } }, num(row.appointments) + ' визитов за выбранный период')), e('div', { style: { fontFamily: DISPLAY, fontSize: 15 } }, rub(row.revenue))); }))) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'CRM не вернула активных специалистов.'))) : null,
+        widgetOn('payroll') ? section('Начисления сотрудникам', payroll.status === 'available' ? card(e('div', null,
+          e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, paddingBottom: 10 } }, e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim } }, 'Начислено'), e('div', { style: { fontFamily: DISPLAY, fontSize: 20, marginTop: 5 } }, rub(major(payroll.accrued_total)))), e('div', null, e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.dim } }, 'Остаток'), e('div', { style: { fontFamily: DISPLAY, fontSize: 20, marginTop: 5 } }, rub(major(payroll.balance_total))))),
+          (payroll.staff || []).map(function (row, i, arr) { var member = staffById[String(row.staff_id)] || {}; return e('div', { key: row.staff_id || i, style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderTop: '1px solid ' + t.line } }, e('span', { style: { fontFamily: BODY, fontSize: 12.5, fontWeight: 650 } }, row.staff_name || member.name || ('Сотрудник ' + row.staff_id)), e('span', { style: { fontFamily: DISPLAY, fontSize: 14 } }, rub(major(row.accrued)))); })
+        )) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'YClients не вернул подтверждённые начисления за этот период.'))) : null,
+        !prefs.enabled_widgets.length ? card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim, lineHeight: 1.5 } }, 'Все блоки скрыты. Нажмите «Настроить», чтобы вернуть нужные показатели.'), { marginTop: 22 }) : null,
         financeWarnings.length ? section('Важно', card(e('div', null, financeWarnings.map(function (x, i) { return e('div', { key: i, style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.5, color: t.dim, marginTop: i ? 8 : 0 } }, x.message || x.code); })))) : null
       );
     }

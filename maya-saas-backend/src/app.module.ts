@@ -16,6 +16,7 @@ import { BrandingModule } from './branding/branding.module';
 import { CrmModule } from './crm/crm.module';
 import { CustomersModule } from './customers/customers.module';
 import { CustomerPortalModule } from './customer-portal/customer-portal.module';
+import { DashboardPreferencesModule } from './dashboard-preferences/dashboard-preferences.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { EntitlementsModule } from './entitlements/entitlements.module';
 import { ExpensesModule } from './expenses/expenses.module';
@@ -64,6 +65,7 @@ import { SystemMetricsService } from './system-metrics.service';
     CrmModule,
     CustomersModule,
     CustomerPortalModule,
+    DashboardPreferencesModule,
     InternalCalendarModule,
     LoyaltyModule,
     ServicesModule,
