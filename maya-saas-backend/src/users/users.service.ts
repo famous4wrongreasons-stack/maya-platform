@@ -13,7 +13,7 @@ import type {
   UserRole as PrismaUserRole,
 } from '@prisma/client';
 
-import { UserRole, UserStatus } from '../common/domain.enums';
+import { MembershipStatus, UserRole, UserStatus } from '../common/domain.enums';
 import {
   buildPhoneLoginEmail,
   normalizePhoneE164,
@@ -25,6 +25,24 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
 import { UpdateCrmTeamAccessDto } from './dto/update-crm-team-access.dto';
+
+/**
+ * Статус пользователя → статус его членства в тенанте.
+ *
+ * До появления UserStatus.MERGED составы двух перечислений совпадали, и
+ * UserStatus передавался в membership напрямую — TypeScript пропускал это
+ * структурно. Теперь значения разошлись, и перевод обязан быть явным:
+ * MERGED — терминальный статус самого аккаунта, а его членство при слиянии
+ * гасится как SUSPENDED (удалять членство нельзя — каскады унесут визиты,
+ * баллы и согласия).
+ */
+function membershipStatusFor(status: UserStatus): PrismaMembershipStatus {
+  return status === UserStatus.INVITED
+    ? MembershipStatus.INVITED
+    : status === UserStatus.ACTIVE
+      ? MembershipStatus.ACTIVE
+      : MembershipStatus.SUSPENDED;
+}
 
 type TenantSummary = {
   id: string;
@@ -356,7 +374,12 @@ export class UsersService {
                 tenantId,
                 branchId: data.branchId ?? null,
                 role: data.role,
-                status,
+                // Статус членства — своё перечисление. Раньше сюда напрямую
+                // передавался UserStatus: составы совпадали, и TypeScript
+                // пропускал. С появлением UserStatus.MERGED (терминальный
+                // статус погашенного дубля) значения разошлись, и совпадение
+                // перестало быть случайно верным — переводим явно.
+                status: membershipStatusFor(status),
                 joinedAt: status === UserStatus.ACTIVE ? new Date() : undefined,
                 invitedAt:
                   status === UserStatus.INVITED ? new Date() : undefined,

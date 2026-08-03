@@ -41,6 +41,9 @@ enum UserStatus {
   active
   suspended
   invited
+  // Терминальный статус погашенного дубля. Обратно в active не переводится:
+  // suspended для этой роли не подходит — его воскрешает сверка с CRM.
+  merged
 }
 
 enum MembershipStatus {
@@ -114,6 +117,7 @@ model Tenant {
   aiToolExecutions       AiToolExecution[]
   crmStaffAccesses       CrmStaffAccess[]
   dashboardPreferences   DashboardPreference[]
+  userMerges             UserMerge[]
 
   @@index([status, graceEndsAt])
 }
@@ -210,6 +214,35 @@ model User {
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+}
+
+/// Карта слияния дублей аккаунта.
+///
+/// Дубли появлялись, когда соц-вход не находил рабочий аккаунт и заводил
+/// человеку второй, клиентский. Слияние переносит владение на рабочий аккаунт
+/// и гасит дубль статусом UserStatus.merged — БЕЗ физического удаления, иначе
+/// каскады по Membership унесли бы визиты, баллы и согласия.
+///
+/// @@unique([tenantId, duplicateUserId]) — замок идемпотентности: повторный
+/// commit не создаёт вторую запись, а возвращает исходный отчёт.
+/// Внешних ключей на User намеренно нет: карта обязана пережить любое будущее
+/// удаление пользователя, иначе обезличится ровно тогда, когда понадобится.
+model UserMerge {
+  id              String   @id @default(cuid())
+  tenantId        String
+  primaryUserId   String
+  duplicateUserId String
+  actorUserId     String?
+  /// Чем доказано, что это один человек: identity_email | identity_phone |
+  /// primary_login_email_digits | operator_bearer_primary
+  evidence        String
+  /// Счётчики перенесённого и id — без персональных данных.
+  reportJson      Json
+  createdAt       DateTime @default(now())
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, duplicateUserId])
+  @@index([tenantId, primaryUserId])
 }
 
 model Membership {
