@@ -41,6 +41,14 @@ type UserRecord = {
   branch: BranchRecord | null;
 };
 
+/** Ответ UsersService.findTenantIdentityByPhone — лукап личности без фильтра по статусу. */
+type TenantIdentityLookup = {
+  user: { id: string; phone: string };
+  membershipRole: UserRole | null;
+  membershipStatus: string | null;
+  crmStaffAccess: { id: string; externalStaffId: string } | null;
+};
+
 type AuthFlowStateRecord = {
   id: string;
   state: string;
@@ -152,7 +160,7 @@ describe('SocialAuthService', () => {
     // Лукап личности, игнорирующий статус membership: по умолчанию «в тенанте
     // такого номера нет», отдельные тесты подменяют на подавленного мастера.
     const findTenantIdentityByPhoneMock: jest.MockedFunction<
-      (tenantId: string, phone: string) => Promise<unknown>
+      (tenantId: string, phone: string) => Promise<TenantIdentityLookup | null>
     > = jest.fn().mockResolvedValue(null);
     const createUserMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<UserRecord>
@@ -534,7 +542,7 @@ describe('SocialAuthService', () => {
     });
   });
 
-  it.each([
+  it.each<[string, TenantIdentityLookup]>([
     [
       'подавленного сверкой с CRM мастера',
       {
@@ -606,9 +614,7 @@ describe('SocialAuthService', () => {
         }),
       ).rejects.toMatchObject({
         response: {
-          error: expect.objectContaining({
-            code: 'social_business_access_suspended',
-          }),
+          error: { code: 'social_business_access_suspended' },
         },
       });
 
