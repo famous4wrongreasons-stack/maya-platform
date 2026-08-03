@@ -139,6 +139,29 @@ describe('runtime config validation', () => {
     );
   });
 
+  it('accepts only a credential-free local Telegram OAuth proxy', () => {
+    const config = productionConfig();
+    config.TELEGRAM_LOGIN_ENABLED = 'true';
+    config.TELEGRAM_CLIENT_ID = 'telegram-client-id';
+    config.TELEGRAM_CLIENT_SECRET = secret('telegram');
+    config.TELEGRAM_JWKS_URL =
+      'https://oauth.telegram.org/.well-known/jwks.json';
+    config.OAUTH_ALLOWED_REDIRECT_URIS =
+      'https://maya.example/api/auth/oauth/native/callback';
+    config.OAUTH_NATIVE_REDIRECT_URI =
+      'https://maya.example/api/auth/oauth/native/callback';
+    config.TELEGRAM_OAUTH_PROXY_URL = 'socks5h://127.0.0.1:1081';
+
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      TELEGRAM_OAUTH_PROXY_URL: 'socks5h://127.0.0.1:1081',
+    });
+
+    config.TELEGRAM_OAUTH_PROXY_URL = 'https://proxy.example.test:443';
+    expect(validationMessage(config)).toContain(
+      'TELEGRAM_OAUTH_PROXY_URL must be a credential-free local socks5h URL with an explicit port',
+    );
+  });
+
   it('requires the native callback to be in the exact OAuth allowlist', () => {
     const config = productionConfig();
     config.YANDEX_LOGIN_ENABLED = 'true';

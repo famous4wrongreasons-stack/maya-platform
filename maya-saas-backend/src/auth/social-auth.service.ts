@@ -15,6 +15,8 @@ import {
   randomBytes,
   type JsonWebKey as CryptoJsonWebKey,
 } from 'crypto';
+import { request as httpsRequest } from 'node:https';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import { UserRole, UserStatus } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
@@ -102,9 +104,17 @@ type TelegramJwk = CryptoJsonWebKey & {
   use?: string;
 };
 
+type TelegramRequestInit = {
+  body?: string | URLSearchParams;
+  headers?: HeadersInit;
+  method?: string;
+  signal?: AbortSignal;
+};
+
 @Injectable()
 export class SocialAuthService {
   private readonly logger = new Logger(SocialAuthService.name);
+  private telegramProxyAgent: SocksProxyAgent | null = null;
   private telegramJwksCache: {
     fetchedAt: number;
     keys: TelegramJwk[];
@@ -613,16 +623,19 @@ export class SocialAuthService {
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString(
       'base64',
     );
-    const tokenResponse = await fetch('https://oauth.telegram.org/token', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Basic ${basicAuth}`,
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    const tokenResponse = await this.fetchTelegramProvider(
+      'https://oauth.telegram.org/token',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Basic ${basicAuth}`,
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: tokenPayload,
+        signal: AbortSignal.timeout(this.getOauthTimeoutMs()),
       },
-      body: tokenPayload,
-      signal: AbortSignal.timeout(this.getOauthTimeoutMs()),
-    });
+    );
     const tokenJson =
       await this.parseJsonResponse<TelegramTokenResponse>(tokenResponse);
 
@@ -777,7 +790,7 @@ export class SocialAuthService {
       return this.telegramJwksCache.keys;
     }
 
-    const response = await fetch(
+    const response = await this.fetchTelegramProvider(
       this.configService.get<string>('TELEGRAM_JWKS_URL')?.trim() ||
         'https://oauth.telegram.org/.well-known/jwks.json',
       {
@@ -805,6 +818,106 @@ export class SocialAuthService {
     };
 
     return keys;
+  }
+
+  private async fetchTelegramProvider(
+    url: string,
+    init: TelegramRequestInit,
+  ): Promise<Response> {
+    try {
+      const proxyUrl = this.configService
+        .get<string>('TELEGRAM_OAUTH_PROXY_URL')
+        ?.trim();
+
+      if (!proxyUrl) {
+        return await fetch(url, init);
+      }
+
+      return await this.fetchTelegramThroughProxy(url, init, proxyUrl);
+    } catch (error) {
+      const errorName = error instanceof Error ? error.name : 'UnknownError';
+
+      this.logger.warn(
+        `Telegram OAuth provider request failed (${errorName}).`,
+      );
+      throw new ServiceUnavailableException(
+        this.buildSocialAuthError(
+          'social_provider_unavailable',
+          'Telegram login is temporarily unavailable. Please try again.',
+        ),
+      );
+    }
+  }
+
+  private fetchTelegramThroughProxy(
+    url: string,
+    init: TelegramRequestInit,
+    proxyUrl: string,
+  ): Promise<Response> {
+    const body =
+      init.body instanceof URLSearchParams ? init.body.toString() : init.body;
+
+    if (!this.telegramProxyAgent) {
+      this.telegramProxyAgent = new SocksProxyAgent(proxyUrl);
+    }
+
+    return new Promise<Response>((resolve, reject) => {
+      const request = httpsRequest(
+        url,
+        {
+          agent: this.telegramProxyAgent!,
+          headers: Object.fromEntries(new Headers(init.headers).entries()),
+          method: init.method || 'GET',
+          signal: init.signal,
+        },
+        (providerResponse) => {
+          const chunks: Buffer[] = [];
+          let totalBytes = 0;
+
+          providerResponse.on('data', (chunk: Buffer | string) => {
+            const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+
+            totalBytes += buffer.length;
+            if (totalBytes > 1_048_576) {
+              providerResponse.destroy(
+                new Error('Telegram OAuth response exceeded the size limit.'),
+              );
+              return;
+            }
+            chunks.push(buffer);
+          });
+          providerResponse.on('error', reject);
+          providerResponse.on('end', () => {
+            const headers = new Headers();
+
+            for (
+              let index = 0;
+              index < providerResponse.rawHeaders.length;
+              index += 2
+            ) {
+              headers.append(
+                providerResponse.rawHeaders[index],
+                providerResponse.rawHeaders[index + 1],
+              );
+            }
+
+            resolve(
+              new Response(Buffer.concat(chunks), {
+                headers,
+                status: providerResponse.statusCode || 502,
+                statusText: providerResponse.statusMessage,
+              }),
+            );
+          });
+        },
+      );
+
+      request.on('error', reject);
+      if (body) {
+        request.write(body);
+      }
+      request.end();
+    });
   }
 
   private async parseJsonResponse<TPayload>(

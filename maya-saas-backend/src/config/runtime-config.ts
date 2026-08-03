@@ -217,6 +217,7 @@ function validateProductionConfig(
     requireSetting(config, 'TELEGRAM_CLIENT_ID', issues);
     requireSetting(config, 'TELEGRAM_CLIENT_SECRET', issues);
     validateHttpsUrl(config.TELEGRAM_JWKS_URL, 'TELEGRAM_JWKS_URL', issues);
+    validateTelegramOauthProxyUrl(config.TELEGRAM_OAUTH_PROXY_URL, issues);
   }
 
   if (
@@ -436,6 +437,39 @@ function validateHttpsUrl(
     }
   } catch {
     issues.push(`${name} must be an HTTPS URL`);
+  }
+}
+
+function validateTelegramOauthProxyUrl(value: unknown, issues: string[]): void {
+  const raw = stringValue(value);
+
+  if (!raw) {
+    return;
+  }
+
+  try {
+    const parsed = new URL(raw);
+    const localHosts = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
+    const isRootPath = parsed.pathname === '' || parsed.pathname === '/';
+
+    if (
+      parsed.protocol !== 'socks5h:' ||
+      !localHosts.has(parsed.hostname) ||
+      !parsed.port ||
+      parsed.username ||
+      parsed.password ||
+      !isRootPath ||
+      parsed.search ||
+      parsed.hash
+    ) {
+      issues.push(
+        'TELEGRAM_OAUTH_PROXY_URL must be a credential-free local socks5h URL with an explicit port',
+      );
+    }
+  } catch {
+    issues.push(
+      'TELEGRAM_OAUTH_PROXY_URL must be a credential-free local socks5h URL with an explicit port',
+    );
   }
 }
 

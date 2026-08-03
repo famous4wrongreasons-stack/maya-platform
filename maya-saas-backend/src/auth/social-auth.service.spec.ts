@@ -762,6 +762,39 @@ describe('SocialAuthService', () => {
       provider: 'telegram',
     });
   });
+
+  it('returns a controlled unavailable error when Telegram cannot be reached', async () => {
+    const {
+      service,
+      mocks: { authFlowStateFindUniqueMock },
+    } = createService();
+
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-telegram-network',
+      state: 'te_network_failure',
+      provider: 'telegram',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'telegram-code-verifier',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    global.fetch = jest.fn().mockRejectedValue(new TypeError('fetch failed'));
+
+    await expect(
+      service.completeTelegramLogin({
+        state: 'te_network_failure',
+        code: 'telegram-code-network',
+      }),
+    ).rejects.toMatchObject({
+      status: 503,
+      response: {
+        error: {
+          code: 'social_provider_unavailable',
+        },
+      },
+    });
+  });
 });
 
 function signJwt(
