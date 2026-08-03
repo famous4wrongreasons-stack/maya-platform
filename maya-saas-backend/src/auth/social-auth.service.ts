@@ -472,37 +472,24 @@ export class SocialAuthService {
       this.assertUserCanLogin(matchedUser);
       this.assertClientIdentityHasVerifiedPhone(matchedUser, params.profile);
 
-      // ── Рабочий аккаунт нельзя забрать снаружи по одному телефону ────────
+      // ── Рабочий аккаунт: заявка снаружи только на ПЕРВУЮ привязку ────────
       //
-      // Телефон бизнес-аккаунта вводится в форму при регистрации бизнеса и
-      // НИКЕМ не доказан как принадлежащий владельцу: подтверждения там нет,
-      // признака «телефон проверен» у пользователя тоже нет. Опечатка в одной
-      // цифре — и номер принадлежит постороннему, который, войдя со своим
-      // подтверждённым номером, получал рабочий аккаунт.
+      // Телефон бизнес-аккаунта вводится в форму при регистрации и никем не
+      // доказан, поэтому был соблазн вообще запретить вход по совпадению
+      // телефона. Такой запрет ставился и был снят: он запирает самого
+      // владельца. Свежесозданный бизнес не имеет ни одного привязанного
+      // провайдера, а запасные входы (код на почту, код по SMS) в окружении
+      // могут быть выключены — тогда войти становится нечем вообще.
       //
-      // Совпадение по e-mail — другое дело: его подтвердил сам провайдер, и
-      // владелец должен контролировать почтовый ящик бизнеса. Такой вход
-      // остаётся разрешённым.
+      // Поэтому рубеж один и он стоит там, где реально опасно: аккаунт, у
+      // которого провайдер УЖЕ привязан, снаружи не отдаётся никому — ни по
+      // телефону, ни по почте. Второй провайдер добавляется изнутри аккаунта
+      // через /auth/oauth/{provider}/link/complete.
       //
-      // Владелец без совпадения по почте (например вход через Telegram, где
-      // почты нет вовсе) не заперт: он входит по коду на почту и привязывает
-      // провайдера изнутри профиля через /auth/oauth/{provider}/link/complete.
-      if (
-        byPhone &&
-        !byEmail &&
-        this.isBusinessRole(byPhone.role as UserRole)
-      ) {
-        throw new ConflictException(
-          this.buildSocialAuthError(
-            'social_business_phone_claim_forbidden',
-            'A work account cannot be claimed by phone number alone. Sign in with the business e-mail code, then link this provider from your profile.',
-          ),
-        );
-      }
-
-      // Дополнительный рубеж: аккаунт, у которого провайдер уже привязан,
-      // не отдаём новой личности и по совпадению почты — второй провайдер
-      // добавляется изнутри аккаунта, а не заявкой снаружи.
+      // Остаточный риск — первая заявка на аккаунт с ошибочно введённым
+      // телефоном. Он закрывается не запретом, а привязкой владельца к той
+      // личности, что создала бизнес (сессия онбординга), — это отдельная
+      // задача, см. MAYA_OS_AUDIT.
       if (this.isBusinessRole(matchedUser.role as UserRole)) {
         const linkedProviders =
           await this.authRepository.listIdentityProvidersForUser(
@@ -1574,7 +1561,6 @@ export class SocialAuthService {
       | 'social_exchange_failed'
       | 'social_business_access_suspended'
       | 'social_business_link_required'
-      | 'social_business_phone_claim_forbidden'
       | 'social_callback_invalid'
       | 'social_identity_conflict'
       | 'social_link_forbidden'

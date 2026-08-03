@@ -645,26 +645,68 @@ describe('SocialAuthService', () => {
       )
       .mockResolvedValueOnce(createFetchResponse(profile));
 
-  it('НЕ отдаёт рабочий аккаунт по одному совпадению телефона', async () => {
+  it('пускает владельца в свежий рабочий аккаунт по совпадению телефона', async () => {
     const {
       service,
       mocks: {
         authFlowStateFindUniqueMock,
         authIdentityCreateMock,
+        authIdentityListMock,
         findTenantUserByPhoneMock,
         findTenantUserByEmailMock,
       },
     } = createService();
 
-    // Телефон бизнес-аккаунта вводится в форму при регистрации и никем не
-    // доказан. Опечатка владельца в одной цифре — и посторонний, которому этот
-    // номер принадлежит на самом деле, забирал рабочий аккаунт.
+    // Только что созданный бизнес: привязанных провайдеров ещё нет, а запасные
+    // входы (код на почту/SMS) в окружении могут быть выключены. Запрет на
+    // заявку по телефону здесь запирал бы самого владельца — рубеж стоит
+    // дальше, на аккаунте с уже привязанным провайдером.
     findTenantUserByPhoneMock.mockResolvedValue({
       ...baseUser(),
       id: 'owner-1',
       role: UserRole.TENANT_ADMIN,
     });
     findTenantUserByEmailMock.mockResolvedValue(null);
+    authIdentityListMock.mockResolvedValue([]);
+
+    authFlowStateFindUniqueMock.mockResolvedValue(yandexFlow());
+    global.fetch = yandexProfileFetch({
+      id: 'yandex-owner',
+      default_phone: { number: '8 (999) 000-00-00' },
+      real_name: 'Владелец',
+    });
+
+    await service.completeYandexLogin({
+      state: 'ya_state_1',
+      code: 'oauth-code-1',
+    });
+
+    expect(authIdentityCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'owner-1', provider: 'yandex' }),
+    );
+  });
+
+  it('НЕ отдаёт по телефону аккаунт, у которого провайдер уже привязан', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityCreateMock,
+        authIdentityListMock,
+        findTenantUserByPhoneMock,
+        findTenantUserByEmailMock,
+      },
+    } = createService();
+
+    findTenantUserByPhoneMock.mockResolvedValue({
+      ...baseUser(),
+      id: 'owner-1',
+      role: UserRole.TENANT_ADMIN,
+    });
+    findTenantUserByEmailMock.mockResolvedValue(null);
+    authIdentityListMock.mockResolvedValue([
+      { provider: 'telegram', createdAt: new Date(), updatedAt: new Date() },
+    ]);
 
     authFlowStateFindUniqueMock.mockResolvedValue(yandexFlow());
     global.fetch = yandexProfileFetch({
@@ -679,9 +721,7 @@ describe('SocialAuthService', () => {
         code: 'oauth-code-1',
       }),
     ).rejects.toMatchObject({
-      response: {
-        error: { code: 'social_business_phone_claim_forbidden' },
-      },
+      response: { error: { code: 'social_business_link_required' } },
     });
 
     expect(authIdentityCreateMock).not.toHaveBeenCalled();
