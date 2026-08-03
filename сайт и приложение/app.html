@@ -635,13 +635,22 @@ window.__meReturnToLegacyWorkspace = function () {
     } catch (e) {}
     var publicSlug = qs && qs.get('booking_tenant');
     publicSlug = /^[a-z0-9][a-z0-9-]{0,63}$/.test(String(publicSlug || '').toLowerCase()) ? String(publicSlug).toLowerCase() : null;
+    // Возврат в приложение без ?booking_tenant (иконка с домашнего экрана, закладка,
+    // возврат из внешнего перехода) обязан восстанавливать бизнес из сохранённого слага.
+    // Без этого ns считался от другого слага, сохранённая сессия владельца не находилась,
+    // и соц-вход уходил в технический тенант maya-os («Self registration is disabled»).
+    var savedSlug = null;
+    try { savedSlug = localStorage.getItem('me_booking_tenant_slug'); } catch (e) {}
+    savedSlug = /^[a-z0-9][a-z0-9-]{0,63}$/.test(String(savedSlug || '').toLowerCase()) ? String(savedSlug).toLowerCase() : null;
+    if (savedSlug === 'maya-os') savedSlug = null;   // платформенный тенант бизнесом не считаем
+    if (publicSlug) { try { localStorage.setItem('me_booking_tenant_slug', publicSlug); } catch (e) {} }
     mode = null;
     try { mode = localStorage.getItem('me_booking_backend'); } catch (e) {}
-    if ((srvBoot && srvBoot.enabled === true) || publicSlug) mode = 'saas-local';
+    if ((srvBoot && srvBoot.enabled === true) || publicSlug || savedSlug) mode = 'saas-local';
     if (mode !== 'saas-local') return;
     apiBase = location.origin + '/api'; // same-origin по умолчанию — никогда не localhost
     if (srvBoot && typeof srvBoot.api === 'string' && /^https:\/\//.test(srvBoot.api) && !isLocalUrl(srvBoot.api)) apiBase = String(srvBoot.api).replace(/\/+$/, '');
-    slug = (srvBoot && srvBoot.slug) || metaTenant || publicSlug || 'maya-os';
+    slug = (srvBoot && srvBoot.slug) || metaTenant || publicSlug || savedSlug || 'maya-os';
     slug = String(slug).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64) || 'maya-os';
     if (isLocalUrl(apiBase)) return; // fail closed: локальный API на публичном хосте невозможен
   }
@@ -4619,11 +4628,33 @@ function meSaasReadWorkspace() {
     return value === 'client' || value === 'business' ? value : null;
   } catch (e) { return null; }
 }
-function meSaasSetWorkspace(value) {
+function meSaasExplicitKey() {
+  var ctx = window.__ME_SAAS_CTX;
+  return ctx && ctx.ns ? 'me_saas_workspace_explicit_v1:' + ctx.ns : null;
+}
+function meSaasWorkspacePinExplicit() {
+  var key = meSaasExplicitKey();
+  if (!key) return false;
+  try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+}
+// Пин, очищенный от «автоматических» решений: клиентская версия, выбранная НЕ
+// пользователем, а фолбэком по урезанной роли, не должна навсегда прятать экран
+// выбора у того, у кого на сервере есть бизнес-роль. Иначе один сбойный вход
+// закрывал рабочий кабинет насовсем — даже после починки роли на сервере.
+function meSaasPinnedWorkspace(role) {
+  var pin = meSaasReadWorkspace();
+  if (pin === 'client' && !meSaasWorkspacePinExplicit() && meSaasIsBusinessRole(role || meSaasCurrentRole())) return null;
+  return pin;
+}
+function meSaasSetWorkspace(value, explicit) {
   value = String(value || '').toLowerCase();
   if (value !== 'client' && value !== 'business') return null;
   var key = meSaasWorkspaceKey();
   try { if (key) localStorage.setItem(key, value); } catch (e) {}
+  try {
+    var ekey = meSaasExplicitKey();
+    if (ekey) { if (explicit === true) localStorage.setItem(ekey, '1'); else localStorage.removeItem(ekey); }
+  } catch (e) {}
   // Deep-link parameters select the initial surface only. Once the user has
   // chosen explicitly, remove them so they cannot override later switches.
   try {
@@ -4637,11 +4668,12 @@ function meSaasSetWorkspace(value) {
 function meSaasClearWorkspace() {
   var key = meSaasWorkspaceKey();
   try { if (key) localStorage.removeItem(key); } catch (e) {}
+  try { var ekey = meSaasExplicitKey(); if (ekey) localStorage.removeItem(ekey); } catch (e) {}
 }
 function meSaasEffectiveWorkspace(role) {
   role = String(role || meSaasCurrentRole() || '').toLowerCase();
   if (!meSaasIsBusinessRole(role)) return 'client';
-  return meSaasRequestedWorkspace() || meSaasReadWorkspace() || null;
+  return meSaasRequestedWorkspace() || meSaasPinnedWorkspace(role) || null;
 }
 function meSaasIsClientWorkspace(role) {
   return meSaasEffectiveWorkspace(role) === 'client';
@@ -11894,7 +11926,7 @@ function ABookFlow() {
         onClick: function () {
           if (viewBusiness) {
             setMyView(false);
-            if (typeof meSaasSetWorkspace === 'function') meSaasSetWorkspace('client');
+            if (typeof meSaasSetWorkspace === 'function') meSaasSetWorkspace('client', true);   // осознанное переключение
             if (window.__meMode) window.__meMode('client');
             if (window.__meGo) window.__meGo('home');
             return;
@@ -33602,7 +33634,7 @@ function ChooseVersion() {
   }, 'Бизнес готовится к запуску — вход пока только для сотрудников.') : null), React.createElement('div', {
     style: { padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 10 }
   }, roleBtn('Клиентское приложение', ['M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2'], true, function () {
-    if (typeof meSaasSetWorkspace === 'function') meSaasSetWorkspace('client');
+    if (typeof meSaasSetWorkspace === 'function') meSaasSetWorkspace('client', true);   // выбор на экране версий
     window.__meMode && window.__meMode('client');
     window.__meChatReturn = 'home';
     window.__meGo && window.__meGo('home');
@@ -33643,7 +33675,7 @@ function MEApp() {
               if (['biz', 'mystat', 'analytics', 'customers', 'team', 'calendar', 'services', 'schedule', 'profile', 'integrations', 'connect'].indexOf(routeTab) >= 0) requestedTab = routeTab;
             } catch (e4) {}
             var requestedWorkspace = typeof meSaasRequestedWorkspace === 'function' ? meSaasRequestedWorkspace() : null;
-            var workspace = requestedWorkspace || (typeof meSaasReadWorkspace === 'function' ? meSaasReadWorkspace() : null);
+            var workspace = requestedWorkspace || (typeof meSaasPinnedWorkspace === 'function' ? meSaasPinnedWorkspace(meSaasCurrentRole()) : null);
             if (requestedTab) workspace = 'business';
             if (workspace === 'client') return 'home';
             if (workspace !== 'business') return 'choose';
@@ -34400,7 +34432,7 @@ function MEApp() {
     if (_pmClientWorkspace) {
       meSaasOpenBusinessWorkspace(_pmSaasRole);
     } else {
-      meSaasSetWorkspace('client');
+      meSaasSetWorkspace('client', true);   // «Сменить вход» в меню профиля
       if (window.__meMode) window.__meMode('client');
       if (window.__meGo) window.__meGo('home');
     }
@@ -35964,6 +35996,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
             if (typeof meSaasSetWorkspace === 'function') meSaasSetWorkspace('client');
             if (window.__meMode) window.__meMode('client');
             window.__meGo('home');
+            // Кэш роли мог протухнуть (роль чинили на сервере, дубль слили,
+            // сотрудника вернули из suspended) — спрашиваем сервер и, если он
+            // отдал бизнес-роль, переигрываем маршрут вместо урезанного экрана.
+            meSaasRefreshIdentity().then(function (fresh) {
+              var freshRole = String((fresh && fresh.role) || '').toLowerCase();
+              if (!meSaasIsBusinessRole(freshRole)) return;
+              var ws = typeof meSaasEffectiveWorkspace === 'function' ? meSaasEffectiveWorkspace(freshRole) : null;
+              if (ws === 'business') meSaasOpenBusinessWorkspace(freshRole);
+              else { if (window.__meMode) window.__meMode('client'); window.__meGo('choose'); }
+            }).catch(function () {});
           }
           return true;
         }
