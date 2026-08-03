@@ -21,7 +21,7 @@ import { SocksProxyAgent } from 'socks-proxy-agent';
 import { UserRole, UserStatus } from '../common/domain.enums';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { asJson } from '../common/json.util';
-import { normalizeRussianPhone } from '../common/phone.util';
+import { normalizePhoneE164 } from '../common/phone.util';
 import {
   resolveAllowedOauthRedirectUri,
   resolveNodeEnvironment,
@@ -1412,16 +1412,13 @@ export class SocialAuthService {
     return normalized.includes('@') ? normalized : null;
   }
 
+  // Раньше здесь стоял строгий российский нормализатор в try/catch: любой
+  // подтверждённый провайдером не-российский номер молча превращался в null,
+  // то есть становился неотличим от «пользователь отказался дать телефон».
+  // Теперь номер сохраняется в E.164, а решение о допуске принимает
+  // вызывающая сторона.
   private normalizeProviderPhone(value: string | null): string | null {
-    if (!value) {
-      return null;
-    }
-
-    try {
-      return normalizeRussianPhone(value);
-    } catch {
-      return null;
-    }
+    return normalizePhoneE164(value);
   }
 
   private generateCodeVerifier(): string {

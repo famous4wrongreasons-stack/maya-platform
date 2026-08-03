@@ -21,6 +21,7 @@ import {
   StaffMember,
 } from '../crm-adapter.interface';
 import { localDateMinuteToUtc } from '../../internal-calendar/internal-calendar.utils';
+import { normalizePhoneE164 } from '../../common/phone.util';
 
 interface YclientsSettings {
   companyId?: number | string;
@@ -1582,16 +1583,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return numeric;
   }
 
+  // Правила нормализации общие с платформой (common/phone.util). Своя копия
+  // расходилась с ней и ломала сверку клиента по номеру.
   private normalizePhone(phone: string): string {
-    let digits = phone.replace(/\D/g, '');
-
-    if (digits.length === 11 && digits.startsWith('8')) {
-      digits = `7${digits.slice(1)}`;
-    } else if (digits.length === 10) {
-      digits = `7${digits}`;
-    }
-
-    return `+${digits}`;
+    return (
+      normalizePhoneE164(phone) ?? `+${String(phone ?? '').replace(/\D/g, '')}`
+    );
   }
 
   private toYclientsDate(date: string): string {
