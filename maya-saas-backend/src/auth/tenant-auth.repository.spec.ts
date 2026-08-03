@@ -39,6 +39,7 @@ describe('TenantAuthRepository', () => {
     const identityUpdateMock = jest
       .fn()
       .mockResolvedValue({ id: 'identity-1' });
+    const identityFindManyMock = jest.fn().mockResolvedValue([]);
     const transactionClient = {
       phoneAuthCode: {
         upsert: phoneUpsertMock,
@@ -56,6 +57,7 @@ describe('TenantAuthRepository', () => {
       },
       authIdentity: {
         findUnique: identityFindUniqueMock,
+        findMany: identityFindManyMock,
         create: identityCreateMock,
         update: identityUpdateMock,
       },
@@ -77,6 +79,7 @@ describe('TenantAuthRepository', () => {
         flowCreateMock,
         flowUpdateManyMock,
         identityCreateMock,
+        identityFindManyMock,
         identityFindUniqueMock,
         identityUpdateMock,
         emailFindUniqueMock,
@@ -284,6 +287,13 @@ describe('TenantAuthRepository', () => {
         phone: '+79990000000',
         profileJson: {},
       });
+      await repository.reassignIdentity('identity-1', {
+        userId: 'owner-1',
+        email: null,
+        phone: '+79990000000',
+        profileJson: {},
+      });
+      await repository.listIdentityProvidersForUser('owner-1');
     });
 
     expect(mocks.identityFindUniqueMock).toHaveBeenCalledWith(
@@ -303,7 +313,7 @@ describe('TenantAuthRepository', () => {
       tenantId: 'tenant-a',
       userId: 'user-1',
     });
-    expect(mocks.identityUpdateMock).toHaveBeenCalledWith({
+    expect(mocks.identityUpdateMock).toHaveBeenNthCalledWith(1, {
       where: {
         id_tenantId: {
           id: 'identity-1',
@@ -315,6 +325,25 @@ describe('TenantAuthRepository', () => {
         phone: '+79990000000',
         profileJson: {},
       },
+    });
+    expect(mocks.identityUpdateMock).toHaveBeenNthCalledWith(2, {
+      where: {
+        id_tenantId: {
+          id: 'identity-1',
+          tenantId: 'tenant-a',
+        },
+      },
+      data: {
+        userId: 'owner-1',
+        email: null,
+        phone: '+79990000000',
+        profileJson: {},
+      },
+    });
+    expect(mocks.identityFindManyMock).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-a', userId: 'owner-1' },
+      select: { provider: true, createdAt: true, updatedAt: true },
+      orderBy: { provider: 'asc' },
     });
   });
 

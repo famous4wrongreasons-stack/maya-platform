@@ -18,7 +18,7 @@ export class UsersController {
     const fullUser = user.tenantId
       ? await this.usersService.getTenantUserOrThrow(user.userId, user.tenantId)
       : await this.usersService.getUserOrThrow(user.userId);
-    return this.usersService.serializeUser(fullUser);
+    return this.usersService.serializeCurrentUser(fullUser);
   }
 
   @Patch()

@@ -1284,6 +1284,58 @@ export class UsersService {
     };
   }
 
+  async serializeCurrentUser(user: UserWithRelations) {
+    const serialized = this.serializeUser(user);
+    const tenantId = serialized.tenant_id;
+
+    if (!tenantId) {
+      return {
+        ...serialized,
+        staff_profile: { linked: false, source: null, title: null },
+      };
+    }
+
+    const crmStaffProfile = await this.prisma.crmStaffAccess.findFirst({
+      where: {
+        tenantId,
+        userId: serialized.id,
+        status: 'active',
+      },
+      select: { title: true },
+    });
+
+    if (crmStaffProfile) {
+      return {
+        ...serialized,
+        staff_profile: {
+          linked: true,
+          source: 'crm',
+          title: crmStaffProfile.title,
+        },
+      };
+    }
+
+    const internalStaffProfile = await this.prisma.internalProvider.findFirst({
+      where: {
+        tenantId,
+        userId: serialized.id,
+        active: true,
+      },
+      select: { title: true },
+    });
+
+    return {
+      ...serialized,
+      staff_profile: internalStaffProfile
+        ? {
+            linked: true,
+            source: 'internal',
+            title: internalStaffProfile.title,
+          }
+        : { linked: false, source: null, title: null },
+    };
+  }
+
   private projectTenantMembership(
     user: UserWithRelations,
     tenantId: string,

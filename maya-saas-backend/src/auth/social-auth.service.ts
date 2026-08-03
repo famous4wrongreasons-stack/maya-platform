@@ -19,6 +19,7 @@ import { request as httpsRequest } from 'node:https';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import { UserRole, UserStatus } from '../common/domain.enums';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { asJson } from '../common/json.util';
 import { normalizeRussianPhone } from '../common/phone.util';
 import {
@@ -304,6 +305,42 @@ export class SocialAuthService {
     });
   }
 
+  completeYandexLink(
+    dto: CompleteOauthLoginDto,
+    user: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    return this.completeIdentityLink('yandex', dto, user, metadata);
+  }
+
+  completeTelegramLink(
+    dto: CompleteOauthLoginDto,
+    user: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    return this.completeIdentityLink('telegram', dto, user, metadata);
+  }
+
+  async listLinkedIdentities(user: AuthenticatedUser) {
+    if (!user.tenantId) {
+      throw new ForbiddenException('Tenant-scoped account is required');
+    }
+
+    this.tenantContext.assertAuthPrincipal(user.userId, user.tenantId);
+    const identities = await this.authRepository.listIdentityProvidersForUser(
+      user.userId,
+    );
+
+    return {
+      ok: true,
+      providers: identities.map((identity) => ({
+        provider: identity.provider,
+        linked_at: identity.createdAt,
+        updated_at: identity.updatedAt,
+      })),
+    };
+  }
+
   buildNativeCallbackUrl(params: {
     code?: string;
     state?: string;
@@ -364,6 +401,33 @@ export class SocialAuthService {
         existingIdentity.user.id,
         params.tenant.id,
       );
+
+      // An owner may have used the same social account as a customer before
+      // creating the tenant. A provider-verified phone is the only safe signal
+      // for promoting that identity to the already provisioned business user.
+      // The owner still keeps the customer workspace through the role-aware UI.
+      if (this.isClientRole(user.role) && params.profile.phone) {
+        const businessUser = await this.usersService.findTenantUserByPhone(
+          params.tenant.id,
+          params.profile.phone,
+        );
+
+        if (
+          businessUser &&
+          businessUser.id !== user.id &&
+          this.isBusinessRole(businessUser.role as UserRole)
+        ) {
+          this.assertUserCanLogin(businessUser);
+          await this.authRepository.reassignIdentity(existingIdentity.id, {
+            userId: businessUser.id,
+            email: params.profile.email,
+            phone: params.profile.phone,
+            profileJson: asJson(params.profile.raw),
+          });
+          user = businessUser;
+        }
+      }
+
       this.assertUserCanLogin(user);
       await this.updateIdentityRecord(existingIdentity.id, params.profile);
       if (!user.phone && params.profile.phone) {
@@ -482,6 +546,100 @@ export class SocialAuthService {
       user: createdUser,
       isNewUser: true,
     };
+  }
+
+  private async completeIdentityLink(
+    provider: SocialProvider,
+    dto: CompleteOauthLoginDto,
+    principal: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata>,
+  ) {
+    this.assertProviderEnabled(provider);
+    if (!principal.tenantId || !this.isBusinessRole(principal.role)) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_link_forbidden',
+          'Only an authenticated business account can link this sign-in method.',
+        ),
+      );
+    }
+
+    await this.rateLimitService.assertPreflight('oauth_complete', {
+      clientIp: metadata.clientIp,
+      identity: dto.state,
+    });
+
+    const flow = await this.getValidAuthFlowState(dto.state, provider);
+    if (flow.tenant.id !== principal.tenantId) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_link_tenant_mismatch',
+          'This sign-in request belongs to another business.',
+        ),
+      );
+    }
+
+    return this.tenantContext.runAsAuthPrincipal(principal, async () => {
+      await this.rateLimitService.assertTenant('oauth_complete', {
+        tenantId: flow.tenant.id,
+        identity: dto.state,
+      });
+      await this.claimAuthFlowStateOrThrow(flow.id, provider);
+
+      const profile =
+        provider === 'yandex'
+          ? await this.exchangeYandexCode(flow, dto.code)
+          : await this.exchangeTelegramCode(flow, dto.code);
+      const targetUser = await this.usersService.getTenantUserOrThrow(
+        principal.userId,
+        flow.tenant.id,
+      );
+
+      this.assertUserCanLogin(targetUser);
+      const existingIdentity = await this.authRepository.findIdentity(
+        provider,
+        profile.providerUserId,
+      );
+      let transferredFromClient = false;
+
+      if (existingIdentity && existingIdentity.user.id !== targetUser.id) {
+        if (!this.isClientRole(existingIdentity.user.role)) {
+          throw new ConflictException(
+            this.buildSocialAuthError(
+              'social_identity_conflict',
+              'This social account is already linked to another staff account.',
+            ),
+          );
+        }
+
+        await this.authRepository.reassignIdentity(existingIdentity.id, {
+          userId: targetUser.id,
+          email: profile.email,
+          phone: profile.phone,
+          profileJson: asJson(profile.raw),
+        });
+        transferredFromClient = true;
+      } else if (existingIdentity) {
+        await this.updateIdentityRecord(existingIdentity.id, profile);
+      } else {
+        await this.authRepository.createIdentity({
+          userId: targetUser.id,
+          provider,
+          providerUserId: profile.providerUserId,
+          email: profile.email,
+          phone: profile.phone,
+          profileJson: asJson(profile.raw),
+        });
+      }
+
+      return {
+        ok: true,
+        provider,
+        linked: true,
+        transferred_from_client: transferredFromClient,
+        user: await this.usersService.serializeCurrentUser(targetUser),
+      };
+    });
   }
 
   private async exchangeYandexCode(
@@ -1006,6 +1164,25 @@ export class SocialAuthService {
     });
   }
 
+  private isClientRole(role: string): boolean {
+    return new Set<string>([UserRole.CLIENT, UserRole.CUSTOMER]).has(role);
+  }
+
+  private isBusinessRole(role: UserRole): boolean {
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+      UserRole.MANAGER,
+      UserRole.BRANCH_MANAGER,
+      UserRole.PROVIDER,
+      UserRole.STAFF,
+      UserRole.EMPLOYEE,
+      UserRole.ACCOUNTANT,
+    ].includes(role);
+  }
+
   private async claimAuthFlowStateOrThrow(
     id: string,
     provider: SocialProvider,
@@ -1322,6 +1499,8 @@ export class SocialAuthService {
       | 'social_exchange_failed'
       | 'social_callback_invalid'
       | 'social_identity_conflict'
+      | 'social_link_forbidden'
+      | 'social_link_tenant_mismatch'
       | 'social_native_callback_unavailable'
       | 'social_phone_required'
       | 'social_provider_unavailable'

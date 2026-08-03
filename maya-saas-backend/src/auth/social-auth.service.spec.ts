@@ -2,6 +2,7 @@ import { createSign, generateKeyPairSync } from 'crypto';
 
 import { ConfigService } from '@nestjs/config';
 
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -132,6 +133,10 @@ describe('SocialAuthService', () => {
     const authIdentityUpdateMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
+    const authIdentityReassignMock: jest.MockedFunction<
+      (id: string, args: Record<string, unknown>) => Promise<unknown>
+    > = jest.fn().mockResolvedValue(undefined);
+    const authIdentityListMock = jest.fn().mockResolvedValue([]);
     const getTenantBySlugOrThrowMock: jest.MockedFunction<
       (slug: string) => Promise<TenantRecord>
     > = jest.fn().mockResolvedValue(tenant);
@@ -147,6 +152,7 @@ describe('SocialAuthService', () => {
     const createUserMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<UserRecord>
     > = jest.fn().mockResolvedValue(baseUser());
+    const getTenantUserOrThrowMock = jest.fn().mockResolvedValue(baseUser());
     const serializeUserMock: jest.MockedFunction<
       (user: UserRecord) => Record<string, unknown>
     > = jest.fn((user: UserRecord) => ({
@@ -155,6 +161,19 @@ describe('SocialAuthService', () => {
       phone: user.phone,
       role: user.role,
     }));
+    const serializeCurrentUserMock = jest.fn((user: UserRecord) =>
+      Promise.resolve({
+        ...serializeUserMock(user),
+        staff_profile: { linked: false, source: null, title: null },
+      }),
+    );
+    const attachVerifiedSocialPhoneMock = jest.fn(
+      (_userId: string, _tenantId: string, phone: string) =>
+        Promise.resolve({
+          ...baseUser(),
+          phone,
+        }),
+    );
     const issueSessionMock = jest.fn().mockResolvedValue({
       access_token: 'jwt-token',
       refresh_token: 'refresh-token',
@@ -175,6 +194,8 @@ describe('SocialAuthService', () => {
       claimFlowState: authFlowStateUpdateMock,
       createIdentity: authIdentityCreateMock,
       findIdentity: authIdentityFindUniqueMock,
+      listIdentityProvidersForUser: authIdentityListMock,
+      reassignIdentity: authIdentityReassignMock,
       updateIdentity: authIdentityUpdateMock,
     } as unknown as TenantAuthRepository;
     const flowSystemGateway = {
@@ -192,11 +213,17 @@ describe('SocialAuthService', () => {
       | 'createUser'
       | 'findTenantUserByEmail'
       | 'findTenantUserByPhone'
+      | 'getTenantUserOrThrow'
+      | 'attachVerifiedSocialPhone'
+      | 'serializeCurrentUser'
       | 'serializeUser'
     > = {
       createUser: createUserMock,
       findTenantUserByEmail: findTenantUserByEmailMock,
       findTenantUserByPhone: findTenantUserByPhoneMock,
+      getTenantUserOrThrow: getTenantUserOrThrowMock,
+      attachVerifiedSocialPhone: attachVerifiedSocialPhoneMock,
+      serializeCurrentUser: serializeCurrentUserMock,
       serializeUser: serializeUserMock,
     };
     return {
@@ -221,14 +248,19 @@ describe('SocialAuthService', () => {
         authFlowStateUpdateMock,
         authIdentityCreateMock,
         authIdentityFindUniqueMock,
+        authIdentityListMock,
+        authIdentityReassignMock,
         authIdentityUpdateMock,
+        attachVerifiedSocialPhoneMock,
         createUserMock,
         findTenantUserByEmailMock,
         findTenantUserByPhoneMock,
         getTenantBySlugOrThrowMock,
+        getTenantUserOrThrowMock,
         rateLimitPreflightMock,
         rateLimitTenantMock,
         serializeUserMock,
+        serializeCurrentUserMock,
         issueSessionMock,
       },
     };
@@ -548,6 +580,262 @@ describe('SocialAuthService', () => {
     expect(authIdentityArgs.phone).toBe('+79990000000');
     expect(authIdentityArgs.profileJson).toEqual(expect.any(Object));
     expect(result.is_new_user).toBe(false);
+  });
+
+  it('restores a business role when the social identity was previously linked to a client', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityFindUniqueMock,
+        authIdentityReassignMock,
+        findTenantUserByPhoneMock,
+        getTenantUserOrThrowMock,
+        issueSessionMock,
+      },
+    } = createService();
+    const oldClient = { ...baseUser(), id: 'old-client-1' };
+    const owner = {
+      ...baseUser(),
+      id: 'owner-1',
+      email: 'owner@example.com',
+      role: UserRole.TENANT_OWNER,
+    };
+
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-owner-restore',
+      state: 'ya_owner_restore',
+      provider: 'yandex',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'owner-restore-verifier',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    authIdentityFindUniqueMock.mockResolvedValue({
+      id: 'identity-old-client',
+      user: oldClient,
+    });
+    getTenantUserOrThrowMock.mockResolvedValue(oldClient);
+    findTenantUserByPhoneMock.mockResolvedValue(owner);
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        createFetchResponse({ access_token: 'ya-owner-access' }),
+      )
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          id: 'yandex-owner-1',
+          default_phone: { number: '+7 (999) 000-00-00' },
+          real_name: 'Владелец',
+        }),
+      );
+
+    const result = await service.completeYandexLogin({
+      state: 'ya_owner_restore',
+      code: 'oauth-owner-restore',
+    });
+
+    expect(authIdentityReassignMock).toHaveBeenCalledWith(
+      'identity-old-client',
+      expect.objectContaining({
+        userId: owner.id,
+        phone: '+79990000000',
+      }),
+    );
+    expect(issueSessionMock).toHaveBeenCalledWith(owner, {});
+    expect(result).toMatchObject({
+      is_new_user: false,
+      user: { id: owner.id, role: UserRole.TENANT_OWNER },
+    });
+  });
+
+  it('links Yandex explicitly to the authenticated owner account', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityCreateMock,
+        getTenantUserOrThrowMock,
+        issueSessionMock,
+      },
+    } = createService();
+    const owner = { ...baseUser(), id: 'owner-1', role: UserRole.TENANT_OWNER };
+    const principal: AuthenticatedUser = {
+      userId: owner.id,
+      sessionId: 'session-owner',
+      tenantId: tenant.id,
+      role: UserRole.TENANT_OWNER,
+      email: owner.email,
+      branchId: null,
+      membershipId: 'membership-owner',
+      membershipStatus: 'active',
+    };
+
+    getTenantUserOrThrowMock.mockResolvedValue(owner);
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-owner-link',
+      state: 'ya_owner_link',
+      provider: 'yandex',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'owner-link-verifier',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        createFetchResponse({ access_token: 'ya-owner-access' }),
+      )
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          id: 'yandex-owner-1',
+          default_phone: { number: '+7 (999) 111-22-33' },
+          real_name: 'Владелец',
+        }),
+      );
+
+    const result = await service.completeYandexLink(
+      { state: 'ya_owner_link', code: 'owner-link-code' },
+      principal,
+    );
+
+    expect(authIdentityCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: owner.id,
+        provider: 'yandex',
+        providerUserId: 'yandex-owner-1',
+      }),
+    );
+    expect(issueSessionMock).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      ok: true,
+      linked: true,
+      provider: 'yandex',
+      transferred_from_client: false,
+      user: { id: owner.id, role: UserRole.TENANT_OWNER },
+    });
+  });
+
+  it('moves a social identity from a client profile to its authenticated owner', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityCreateMock,
+        authIdentityFindUniqueMock,
+        authIdentityReassignMock,
+        getTenantUserOrThrowMock,
+      },
+    } = createService();
+    const owner = { ...baseUser(), id: 'owner-1', role: UserRole.TENANT_OWNER };
+    const oldClient = { ...baseUser(), id: 'old-client-1' };
+    const principal: AuthenticatedUser = {
+      userId: owner.id,
+      sessionId: 'session-owner',
+      tenantId: tenant.id,
+      role: UserRole.TENANT_OWNER,
+      email: owner.email,
+      branchId: null,
+      membershipId: 'membership-owner',
+      membershipStatus: 'active',
+    };
+
+    getTenantUserOrThrowMock.mockResolvedValue(owner);
+    authIdentityFindUniqueMock.mockResolvedValue({
+      id: 'identity-client',
+      user: oldClient,
+    });
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-owner-transfer',
+      state: 'ya_owner_transfer',
+      provider: 'yandex',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'owner-transfer-verifier',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        createFetchResponse({ access_token: 'ya-owner-access' }),
+      )
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          id: 'yandex-owner-1',
+          default_phone: { number: '+7 (999) 111-22-33' },
+        }),
+      );
+
+    const result = await service.completeYandexLink(
+      { state: 'ya_owner_transfer', code: 'owner-transfer-code' },
+      principal,
+    );
+
+    expect(authIdentityReassignMock).toHaveBeenCalledWith(
+      'identity-client',
+      expect.objectContaining({ userId: owner.id }),
+    );
+    expect(authIdentityCreateMock).not.toHaveBeenCalled();
+    expect(result.transferred_from_client).toBe(true);
+  });
+
+  it('does not take a social identity away from another staff account', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityFindUniqueMock,
+        authIdentityReassignMock,
+        getTenantUserOrThrowMock,
+      },
+    } = createService();
+    const owner = { ...baseUser(), id: 'owner-1', role: UserRole.TENANT_OWNER };
+    const otherStaff = { ...baseUser(), id: 'staff-2', role: UserRole.STAFF };
+    const principal: AuthenticatedUser = {
+      userId: owner.id,
+      sessionId: 'session-owner',
+      tenantId: tenant.id,
+      role: UserRole.TENANT_OWNER,
+      email: owner.email,
+      branchId: null,
+      membershipId: 'membership-owner',
+      membershipStatus: 'active',
+    };
+
+    getTenantUserOrThrowMock.mockResolvedValue(owner);
+    authIdentityFindUniqueMock.mockResolvedValue({
+      id: 'identity-staff',
+      user: otherStaff,
+    });
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-owner-conflict',
+      state: 'ya_owner_conflict',
+      provider: 'yandex',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'owner-conflict-verifier',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        createFetchResponse({ access_token: 'ya-owner-access' }),
+      )
+      .mockResolvedValueOnce(createFetchResponse({ id: 'yandex-owner-1' }));
+
+    await expect(
+      service.completeYandexLink(
+        { state: 'ya_owner_conflict', code: 'owner-conflict-code' },
+        principal,
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'social_identity_conflict' } },
+    });
+    expect(authIdentityReassignMock).not.toHaveBeenCalled();
   });
 
   it('does not open a CRM client account without a provider-verified phone', async () => {

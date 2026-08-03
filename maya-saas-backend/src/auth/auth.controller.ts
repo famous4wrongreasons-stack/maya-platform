@@ -129,6 +129,23 @@ export class AuthController {
     );
   }
 
+  @Post('oauth/yandex/link/complete')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Link Yandex ID to the authenticated business account',
+  })
+  completeYandexLink(
+    @Body() dto: CompleteOauthLoginDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.socialAuthService.completeYandexLink(
+      dto,
+      user,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
   @Public()
   @Post('oauth/telegram/start')
   @ApiOperation({
@@ -154,6 +171,30 @@ export class AuthController {
       dto,
       resolveAuthClientMetadata(request),
     );
+  }
+
+  @Post('oauth/telegram/link/complete')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Link Telegram to the authenticated business account',
+  })
+  completeTelegramLink(
+    @Body() dto: CompleteOauthLoginDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.socialAuthService.completeTelegramLink(
+      dto,
+      user,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Get('oauth/links')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List social sign-in methods linked to this user' })
+  listOauthLinks(@CurrentUser() user: AuthenticatedUser) {
+    return this.socialAuthService.listLinkedIdentities(user);
   }
 
   @Public()

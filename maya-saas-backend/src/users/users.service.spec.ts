@@ -106,6 +106,16 @@ describe('UsersService', () => {
     const authIdentityFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<{ id: string } | null>
     > = jest.fn().mockResolvedValue(null);
+    const crmStaffAccessFindFirstMock: jest.MockedFunction<
+      (
+        args: Record<string, unknown>,
+      ) => Promise<{ title: string | null } | null>
+    > = jest.fn().mockResolvedValue(null);
+    const internalProviderFindFirstMock: jest.MockedFunction<
+      (
+        args: Record<string, unknown>,
+      ) => Promise<{ title: string | null } | null>
+    > = jest.fn().mockResolvedValue(null);
     const encryptMock: jest.MockedFunction<(value: string) => string> = jest
       .fn()
       .mockImplementation((value: string) => `enc:${value}`);
@@ -113,10 +123,19 @@ describe('UsersService', () => {
       .fn()
       .mockImplementation((value: string) => value.replace(/^enc:/, ''));
 
-    const prisma: Pick<PrismaService, 'authIdentity' | 'user'> = {
+    const prisma: Pick<
+      PrismaService,
+      'authIdentity' | 'crmStaffAccess' | 'internalProvider' | 'user'
+    > = {
       authIdentity: {
         findFirst: authIdentityFindFirstMock,
       } as PrismaService['authIdentity'],
+      crmStaffAccess: {
+        findFirst: crmStaffAccessFindFirstMock,
+      } as PrismaService['crmStaffAccess'],
+      internalProvider: {
+        findFirst: internalProviderFindFirstMock,
+      } as PrismaService['internalProvider'],
       user: {
         findFirst: userFindFirstMock,
         findUnique: userFindUniqueMock,
@@ -142,6 +161,8 @@ describe('UsersService', () => {
         decryptMock,
         encryptMock,
         authIdentityFindFirstMock,
+        crmStaffAccessFindFirstMock,
+        internalProviderFindFirstMock,
         userFindFirstMock,
         userFindUniqueMock,
         userFindManyMock,
@@ -163,6 +184,42 @@ describe('UsersService', () => {
     expect(result.name).toBe('Станислав');
     expect(result.profile_completed).toBe(true);
     expect(result.missing_profile_fields).toEqual([]);
+  });
+
+  it('marks an owner linked to CRM staff as a hybrid staff profile', async () => {
+    const {
+      service,
+      mocks: { crmStaffAccessFindFirstMock, internalProviderFindFirstMock },
+    } = createService();
+
+    crmStaffAccessFindFirstMock.mockResolvedValue({ title: 'Барбер' });
+    const owner = tenantUser({ role: UserRole.TENANT_OWNER });
+    owner.memberships![0].role = UserRole.TENANT_OWNER;
+
+    const result = await service.serializeCurrentUser(owner);
+
+    expect(result.role).toBe(UserRole.TENANT_OWNER);
+    expect(result.staff_profile).toEqual({
+      linked: true,
+      source: 'crm',
+      title: 'Барбер',
+    });
+    expect(internalProviderFindFirstMock).not.toHaveBeenCalled();
+  });
+
+  it('does not invent a staff profile for an unlinked owner', async () => {
+    const { service } = createService();
+    const owner = tenantUser({ role: UserRole.TENANT_OWNER });
+    owner.memberships![0].role = UserRole.TENANT_OWNER;
+
+    const result = await service.serializeCurrentUser(owner);
+
+    expect(result.role).toBe(UserRole.TENANT_OWNER);
+    expect(result.staff_profile).toEqual({
+      linked: false,
+      source: null,
+      title: null,
+    });
   });
 
   it('updates the current user profile with an encrypted name', async () => {
