@@ -1179,13 +1179,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
                 this.requireMoneyKopecks(totals.expense),
                 currency,
               ),
-              balance:
-                totals.balance === undefined
-                  ? null
-                  : this.money(
-                      this.requireMoneyKopecks(totals.balance),
-                      currency,
-                    ),
+              // 🔴 YClients отдаёт в `balance` САЛЬДО СЧЁТА сотрудника, а не
+              // остаток за выбранный период: у владельца при начислениях
+              // 26 050 ₽ поле показывало −16 846 240 ₽. Доверяем ему только
+              // если сходится инвариант balance == income − expense
+              // (допуск 1 ₽ на округления). Иначе честнее не показать ничего,
+              // чем показать заведомо ложное число.
+              balance: this.periodBalanceOrNull(totals, currency),
             };
           } catch {
             result[index] = {
@@ -1233,6 +1233,39 @@ export class YclientsCRMAdapter implements CRMAdapter {
     currency: string,
   ): { currency: string; amount_kopecks: number } {
     return { currency, amount_kopecks: amountKopecks };
+  }
+
+  /**
+   * Остаток сотрудника ЗА ПЕРИОД — или null, если YClients прислал не его.
+   *
+   * Поле `total_sum.balance` в ответе salary/calculation — сальдо счёта
+   * сотрудника, накопленное за всё время, а не разница за выбранные даты.
+   * Показанное рядом с period-scoped «Начислено» оно даёт абсурд: при
+   * начислениях 26 050 ₽ владелец видел остаток −16 846 240 ₽.
+   *
+   * Доверяем значению, только если сходится инвариант
+   * `balance == income − expense` с допуском в 1 ₽ на округления.
+   */
+  private periodBalanceOrNull(
+    totals: { income?: unknown; expense?: unknown; balance?: unknown },
+    currency: string,
+  ): { currency: string; amount_kopecks: number } | null {
+    if (totals.balance === undefined) {
+      return null;
+    }
+
+    try {
+      const balance = this.requireMoneyKopecks(totals.balance);
+      const expected =
+        this.requireMoneyKopecks(totals.income) -
+        this.requireMoneyKopecks(totals.expense);
+
+      return Math.abs(balance - expected) <= 100
+        ? this.money(balance, currency)
+        : null;
+    } catch {
+      return null;
+    }
   }
 
   private requireMoneyKopecks(value: unknown): number {
