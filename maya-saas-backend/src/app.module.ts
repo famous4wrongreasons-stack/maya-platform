@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
 import { BranchesModule } from './branches/branches.module';
 import { BrandingModule } from './branding/branding.module';
+import { CommerceModule } from './commerce/commerce.module';
 import { CrmModule } from './crm/crm.module';
 import { CustomersModule } from './customers/customers.module';
 import { CustomerPortalModule } from './customer-portal/customer-portal.module';
@@ -61,6 +62,7 @@ import { SystemMetricsService } from './system-metrics.service';
     AuthModule,
     BillingModule,
     BrandingModule,
+    CommerceModule,
     BranchesModule,
     CrmModule,
     CustomersModule,

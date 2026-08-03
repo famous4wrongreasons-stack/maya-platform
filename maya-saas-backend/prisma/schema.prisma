@@ -88,6 +88,7 @@ model Tenant {
   branches               Branch[]
   users                  User[]
   crmIntegration         CrmIntegration?
+  commerceIntegration    CommerceIntegration?
   auditLogs              AuditLog[]
   appointments           Appointment[]
   phoneAuthCodes         PhoneAuthCode[]
@@ -429,6 +430,24 @@ model CrmIntegration {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Payment credentials belonging to one tenant's customer-facing commerce.
+/// These credentials are intentionally separate from MAYA subscription billing.
+model CommerceIntegration {
+  id                 String    @id @default(cuid())
+  tenantId           String    @unique
+  provider           String    @default("yookassa")
+  encryptedShopId    String
+  encryptedSecretKey String
+  status             String    @default("active")
+  verifiedAt         DateTime?
+  lastCheckedAt      DateTime?
+  lastErrorCode      String?
+  lastErrorAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model InternalService {

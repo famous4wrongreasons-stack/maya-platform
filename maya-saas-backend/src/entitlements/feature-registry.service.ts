@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import {
   MAYA_FEATURE_KEYS,
+  MAYA_ADD_ON_CATALOG,
   MAYA_FEATURE_READINESS,
   MAYA_FEATURE_REGISTRY,
   MayaFeatureKey,
@@ -10,6 +11,13 @@ import {
 
 @Injectable()
 export class FeatureRegistryService {
+  listAddOns() {
+    return MAYA_ADD_ON_CATALOG.map((addOn) => ({
+      ...addOn,
+      feature_keys: [...addOn.feature_keys],
+    }));
+  }
+
   list() {
     return MAYA_FEATURE_KEYS.map((key) => ({
       key,

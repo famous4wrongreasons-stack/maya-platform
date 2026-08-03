@@ -458,13 +458,44 @@ const START_PLAN_FEATURES: MayaFeatureKey[] = [
 
 const PRO_PLAN_FEATURES: MayaFeatureKey[] = [
   ...START_PLAN_FEATURES,
-  'shop',
   'tg_marketing',
   'journal',
   'staff_cabinet',
   'analytics',
   'priority_support',
 ];
+
+export const MAYA_ADD_ON_FEATURES = {
+  commerce: [
+    'shop',
+    'commerce.store',
+    'commerce.certificates',
+    'commerce.memberships',
+    'commerce.redemption',
+  ],
+  referrals: ['referrals'],
+} as const satisfies Record<string, readonly MayaFeatureKey[]>;
+
+export const MAYA_ADD_ON_CATALOG = [
+  {
+    key: 'commerce',
+    name: 'Магазин, сертификаты и абонементы',
+    description:
+      'Отдельный модуль продаж бизнеса с собственным подключением YooKassa.',
+    billing_mode: 'separate_subscription',
+    feature_keys: MAYA_ADD_ON_FEATURES.commerce,
+    implementation_status: 'configuration_ready',
+  },
+  {
+    key: 'referrals',
+    name: 'Реферальная программа',
+    description:
+      'Отдельный модуль приглашений и вознаграждений клиентов конкретного бизнеса.',
+    billing_mode: 'separate_subscription',
+    feature_keys: MAYA_ADD_ON_FEATURES.referrals,
+    implementation_status: 'planned',
+  },
+] as const;
 
 export const MAYA_PLAN_FEATURES: Record<string, MayaFeatureKey[]> = {
   solo: START_PLAN_FEATURES,
