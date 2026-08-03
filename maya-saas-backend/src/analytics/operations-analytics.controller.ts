@@ -28,6 +28,12 @@ const BUSINESS_FINANCE_ROLES = [
 ] as const;
 
 const EMPLOYEE_ANALYTICS_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
   UserRole.PROVIDER,
   UserRole.EMPLOYEE,
   UserRole.STAFF,

@@ -8,6 +8,7 @@ import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { DashboardPreferencesService } from './dashboard-preferences.service';
+import { UpdateAssistantPreferencesDto } from './dto/update-assistant-preferences.dto';
 import { UpdateFinanceDashboardDto } from './dto/update-finance-dashboard.dto';
 
 const FINANCE_DASHBOARD_ROLES = [
@@ -15,6 +16,8 @@ const FINANCE_DASHBOARD_ROLES = [
   UserRole.BUSINESS_OWNER,
   UserRole.TENANT_ADMIN,
   UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
   UserRole.ACCOUNTANT,
 ] as const;
 
@@ -40,5 +43,20 @@ export class DashboardPreferencesController {
     @Body() dto: UpdateFinanceDashboardDto,
   ) {
     return this.service.updateFinance(user.tenantId!, user.userId, dto);
+  }
+
+  @Get('assistant')
+  @ApiOperation({ summary: 'Get personal MAYA capability configuration' })
+  getAssistant(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.getAssistant(user.tenantId!, user.userId);
+  }
+
+  @Patch('assistant')
+  @ApiOperation({ summary: 'Update personal MAYA capability configuration' })
+  updateAssistant(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateAssistantPreferencesDto,
+  ) {
+    return this.service.updateAssistant(user.tenantId!, user.userId, dto);
   }
 }

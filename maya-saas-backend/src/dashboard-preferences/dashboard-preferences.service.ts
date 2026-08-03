@@ -5,6 +5,13 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import {
+  ASSISTANT_CAPABILITIES,
+  ASSISTANT_CAPABILITY_CATALOG,
+  DEFAULT_ASSISTANT_CAPABILITIES,
+  type AssistantCapability,
+} from './assistant-capabilities.constants';
+import { UpdateAssistantPreferencesDto } from './dto/update-assistant-preferences.dto';
 import { UpdateFinanceDashboardDto } from './dto/update-finance-dashboard.dto';
 import {
   DEFAULT_FINANCE_DASHBOARD_WIDGETS,
@@ -19,8 +26,14 @@ type FinanceDashboardConfig = {
   staff_targets_rub: Record<string, number>;
 };
 
-const SECTION = 'finance';
+const FINANCE_SECTION = 'finance';
+const ASSISTANT_SECTION = 'assistant';
 const EXTERNAL_STAFF_ID = /^[A-Za-z0-9_.:-]{1,128}$/;
+
+type AssistantConfig = {
+  schema_version: 1;
+  enabled_capabilities: AssistantCapability[];
+};
 
 @Injectable()
 export class DashboardPreferencesService {
@@ -37,7 +50,7 @@ export class DashboardPreferencesService {
         userId_tenantId_section: {
           userId,
           tenantId: scopedTenantId,
-          section: SECTION,
+          section: FINANCE_SECTION,
         },
       },
     });
@@ -61,7 +74,7 @@ export class DashboardPreferencesService {
         userId_tenantId_section: {
           userId,
           tenantId: scopedTenantId,
-          section: SECTION,
+          section: FINANCE_SECTION,
         },
       },
     });
@@ -87,13 +100,13 @@ export class DashboardPreferencesService {
         userId_tenantId_section: {
           userId,
           tenantId: scopedTenantId,
-          section: SECTION,
+          section: FINANCE_SECTION,
         },
       },
       create: {
         tenantId: scopedTenantId,
         userId,
-        section: SECTION,
+        section: FINANCE_SECTION,
         configJson: asJson(next),
       },
       update: { configJson: asJson(next) },
@@ -184,8 +197,125 @@ export class DashboardPreferencesService {
     return {
       tenant_id: tenantId,
       user_id: userId,
-      section: SECTION,
+      section: FINANCE_SECTION,
       config,
+      updated_at: updatedAt,
+    };
+  }
+
+  async getAssistant(tenantId: string, userId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const preference = await this.prisma.dashboardPreference.findUnique({
+      where: {
+        userId_tenantId_section: {
+          userId,
+          tenantId: scopedTenantId,
+          section: ASSISTANT_SECTION,
+        },
+      },
+    });
+    return this.serializeAssistant(
+      scopedTenantId,
+      userId,
+      this.normalizeAssistantConfig(preference?.configJson),
+      preference?.updatedAt ?? null,
+    );
+  }
+
+  async updateAssistant(
+    tenantId: string,
+    userId: string,
+    dto: UpdateAssistantPreferencesDto,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const current = await this.prisma.dashboardPreference.findUnique({
+      where: {
+        userId_tenantId_section: {
+          userId,
+          tenantId: scopedTenantId,
+          section: ASSISTANT_SECTION,
+        },
+      },
+    });
+    const previous = this.normalizeAssistantConfig(current?.configJson);
+    const next: AssistantConfig = {
+      schema_version: 1,
+      enabled_capabilities:
+        dto.enabledCapabilities === undefined
+          ? previous.enabled_capabilities
+          : this.normalizeAssistantCapabilities(dto.enabledCapabilities),
+    };
+    const preference = await this.prisma.dashboardPreference.upsert({
+      where: {
+        userId_tenantId_section: {
+          userId,
+          tenantId: scopedTenantId,
+          section: ASSISTANT_SECTION,
+        },
+      },
+      create: {
+        tenantId: scopedTenantId,
+        userId,
+        section: ASSISTANT_SECTION,
+        configJson: asJson(next),
+      },
+      update: { configJson: asJson(next) },
+    });
+    await this.auditLogService.log({
+      tenantId: scopedTenantId,
+      userId,
+      action: 'assistant.preferences.updated',
+      entityType: 'dashboard_preference',
+      entityId: preference.id,
+      metadata: { enabled_capabilities: next.enabled_capabilities },
+    });
+    return this.serializeAssistant(
+      scopedTenantId,
+      userId,
+      next,
+      preference.updatedAt,
+    );
+  }
+
+  private normalizeAssistantConfig(
+    value: Prisma.JsonValue | undefined,
+  ): AssistantConfig {
+    const source =
+      value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    return {
+      schema_version: 1,
+      enabled_capabilities:
+        source.enabled_capabilities === undefined
+          ? [...DEFAULT_ASSISTANT_CAPABILITIES]
+          : this.normalizeAssistantCapabilities(source.enabled_capabilities),
+    };
+  }
+
+  private normalizeAssistantCapabilities(
+    value: unknown,
+  ): AssistantCapability[] {
+    if (!Array.isArray(value)) return [...DEFAULT_ASSISTANT_CAPABILITIES];
+    const allowed = new Set<string>(ASSISTANT_CAPABILITIES);
+    return value.filter(
+      (capability, index, capabilities): capability is AssistantCapability =>
+        typeof capability === 'string' &&
+        allowed.has(capability) &&
+        capabilities.indexOf(capability) === index,
+    );
+  }
+
+  private serializeAssistant(
+    tenantId: string,
+    userId: string,
+    config: AssistantConfig,
+    updatedAt: Date | null,
+  ) {
+    return {
+      tenant_id: tenantId,
+      user_id: userId,
+      section: ASSISTANT_SECTION,
+      config,
+      catalog: ASSISTANT_CAPABILITY_CATALOG,
       updated_at: updatedAt,
     };
   }

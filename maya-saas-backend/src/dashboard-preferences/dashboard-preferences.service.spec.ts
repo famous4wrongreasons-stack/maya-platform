@@ -130,4 +130,32 @@ describe('DashboardPreferencesService', () => {
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
+
+  it('stores tenant-scoped MAYA capability preferences', async () => {
+    const setup = createService();
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.updateAssistant('tenant-a', 'owner-a', {
+        enabledCapabilities: ['business_analytics', 'staff_performance'],
+      }),
+    );
+
+    expect(result.config.enabled_capabilities).toEqual([
+      'business_analytics',
+      'staff_performance',
+    ]);
+    expect(result.catalog).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: 'staff_performance' }),
+      ]),
+    );
+    expect(setup.upsert.mock.calls[0]?.[0].create).toMatchObject({
+      tenantId: 'tenant-a',
+      userId: 'owner-a',
+      section: 'assistant',
+    });
+    expect(setup.auditLogWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'assistant.preferences.updated' }),
+    );
+  });
 });

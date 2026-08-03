@@ -13,6 +13,11 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
+import {
+  ASSISTANT_CAPABILITY_CATALOG,
+  type AssistantCapability,
+} from '../dashboard-preferences/assistant-capabilities.constants';
+import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import type {
@@ -149,6 +154,15 @@ const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 const GROUNDING_SMALL_METRIC_PATTERN =
   /(?<number>\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(?:₽|руб\w*|%|балл\w*|бонус\w*|визит\w*|клиент\w*|запис\w*|минут\w*|час\w*|специалист\w*)/giu;
+const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.ACCOUNTANT,
+]);
 
 @Injectable()
 export class AiCoreService {
@@ -159,6 +173,7 @@ export class AiCoreService {
     private readonly runtime: AiToolRuntimeService,
     private readonly model: AiCoreModelService,
     private readonly auditLog: AuditLogService,
+    private readonly dashboardPreferences: DashboardPreferencesService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -168,6 +183,17 @@ export class AiCoreService {
       identity: user.userId,
     });
     const sanitized = this.sanitizeMessages(dto.messages);
+    const assistantCommand = await this.handleAssistantCommand(
+      user,
+      sanitized.messages,
+    );
+    if (assistantCommand) {
+      return this.complete(user, dto, sanitized.redacted, [], [], {
+        ...assistantCommand,
+        source: 'safe_fallback',
+        action: null,
+      });
+    }
     const listed = await this.runtime.listTools(user, dto.surface);
     const tools: AiCoreToolDescriptor[] = listed.tools.map((tool) => ({
       name: tool.name,
@@ -439,6 +465,139 @@ export class AiCoreService {
     return role === UserRole.CLIENT || role === UserRole.CUSTOMER
       ? 'admin'
       : 'director';
+  }
+
+  private async handleAssistantCommand(
+    user: AuthenticatedUser,
+    messages: AiCoreMessage[],
+  ): Promise<{ reply: string } | null> {
+    const text = this.latestUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .replace(/[!?.,:;]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!text) return null;
+
+    const asksCapabilities =
+      /(что\s+ты\s+умеешь|что\s+умеет\s+(?:майя|maya)|возможност[а-яa-z]*\s+(?:майи|maya)|на\s+что\s+ты\s+способна|познакомься|расскажи\s+(?:о\s+себе|что\s+можешь)|настро(?:ить|й)\s+анализ)/i.test(
+        text,
+      );
+    const togglesOn =
+      /(?:^|\s)(?:включи|подключи|активируй|добавь)(?:\s|$)/i.test(text);
+    const togglesOff =
+      /(?:^|\s)(?:выключи|отключи|деактивируй|убери)(?:\s|$)/i.test(text);
+    const requested = this.requestedAssistantCapabilities(text);
+    const isClient =
+      user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER;
+
+    if (isClient) {
+      if (!asksCapabilities) return null;
+      return {
+        reply:
+          'Я MAYA, помощница вашего бизнеса. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, показать ваши записи и проверить баллы. Личные и финансовые данные других людей я не раскрываю.',
+      };
+    }
+
+    if (!ASSISTANT_MANAGER_ROLES.has(user.role)) {
+      if (togglesOn || togglesOff) {
+        return {
+          reply:
+            'Настройки аналитики меняет владелец или администратор. Я продолжу отвечать на доступные вашей роли вопросы о рабочем дне и личных показателях.',
+        };
+      }
+      if (!asksCapabilities) return null;
+      return {
+        reply:
+          'Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна и доступные вашей роли показатели. Данные бизнеса и клиентов всегда ограничены серверными правами доступа.',
+      };
+    }
+
+    if (!asksCapabilities && !togglesOn && !togglesOff) return null;
+    const tenantId = this.requireTenant(user);
+    const preferences = await this.dashboardPreferences.getAssistant(
+      tenantId,
+      user.userId,
+    );
+    const enabled = new Set<AssistantCapability>(
+      preferences.config.enabled_capabilities,
+    );
+
+    if ((togglesOn || togglesOff) && requested.length > 0) {
+      for (const capability of requested) {
+        if (togglesOn) enabled.add(capability);
+        if (togglesOff) enabled.delete(capability);
+      }
+      const updated = await this.dashboardPreferences.updateAssistant(
+        tenantId,
+        user.userId,
+        { enabledCapabilities: [...enabled] },
+      );
+      const changed = requested
+        .map((capability) => this.assistantCapabilityTitle(capability))
+        .join(', ');
+      return {
+        reply: `${togglesOn ? 'Включила' : 'Отключила'}: ${changed}. ${this.assistantCapabilitiesSummary(updated.config.enabled_capabilities)}`,
+      };
+    }
+
+    if (togglesOn || togglesOff) {
+      return {
+        reply: `${this.assistantCapabilitiesSummary([...enabled])} Напишите, например: «включи анализ сотрудников» или «отключи ежедневную сводку».`,
+      };
+    }
+
+    return {
+      reply: `Я MAYA, ваша операционная помощница. Работаю только с данными, которые подтверждены CRM и разрешены вашей ролью. ${this.assistantCapabilitiesSummary([...enabled])} Настройки можно менять прямо здесь командами «включи...» и «отключи...».`,
+    };
+  }
+
+  private requestedAssistantCapabilities(text: string): AssistantCapability[] {
+    const result: AssistantCapability[] = [];
+    const add = (capability: AssistantCapability, pattern: RegExp) => {
+      if (pattern.test(text) && !result.includes(capability)) {
+        result.push(capability);
+      }
+    };
+    add(
+      'daily_brief',
+      /(ежедневн|утренн|дневн|сводк[а-яa-z]*\s+дн|план[а-яa-z]*\s+на\s+день)/i,
+    );
+    add(
+      'finance_analytics',
+      /(финанс|касс|деньг|выруч|оборот|средн[а-яa-z]*\s+чек)/i,
+    );
+    add(
+      'staff_performance',
+      /(сотрудник|мастер|специалист|команд|персонал|исполнен[а-яa-z]*\s+план)/i,
+    );
+    add(
+      'client_return',
+      /(возврат[а-яa-z]*\s+клиент|клиент[а-яa-z]*\s+верн|просроченн[а-яa-z]*\s+цикл)/i,
+    );
+    add(
+      'business_analytics',
+      /(анализ[а-яa-z]*\s+бизнес|бизнес[а-яa-z]*\s+аналитик|общ[а-яa-z]*\s+показател)/i,
+    );
+    return result;
+  }
+
+  private assistantCapabilityTitle(capability: AssistantCapability): string {
+    return (
+      ASSISTANT_CAPABILITY_CATALOG.find((item) => item.key === capability)
+        ?.title ?? capability
+    );
+  }
+
+  private assistantCapabilitiesSummary(
+    enabledCapabilities: AssistantCapability[],
+  ): string {
+    const enabled = new Set(enabledCapabilities);
+    const lines = ASSISTANT_CAPABILITY_CATALOG.map(
+      (item) =>
+        `${enabled.has(item.key) ? 'включено' : 'выключено'} — ${item.title}`,
+    );
+    return `Ваши модули: ${lines.join('; ')}.`;
   }
 
   private async complete(

@@ -5,6 +5,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
+import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
@@ -27,6 +28,42 @@ describe('AiCoreService', () => {
     requestId: 'request_12345678',
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
+
+  it('introduces MAYA and lists personal analytics settings without calling a model', async () => {
+    const mocks = createService();
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Что ты умеешь?' }],
+    });
+
+    expect(result.reply).toContain('Я MAYA, ваша операционная помощница');
+    expect(result.reply).toContain('Аналитика бизнеса');
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.listTools).not.toHaveBeenCalled();
+  });
+
+  it('enables a named analytics capability directly from chat', async () => {
+    const mocks = createService();
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Включи анализ сотрудников' }],
+    });
+
+    expect(result.reply).toContain('Включила: Эффективность команды');
+    const updateCall = mocks.dashboardPreferences.updateAssistant.mock.calls[0];
+    expect(updateCall?.[0]).toBe('tenant-a');
+    expect(updateCall?.[1]).toBe('owner-user');
+    const enabledCapabilities = (
+      updateCall?.[2] as { enabledCapabilities?: string[] } | undefined
+    )?.enabledCapabilities;
+    expect(enabledCapabilities).toEqual([
+      'business_analytics',
+      'staff_performance',
+    ]);
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+  });
 
   it('returns a safe fallback without calling tools when no model is configured', async () => {
     const mocks = createService();
@@ -866,6 +903,21 @@ describe('AiCoreService', () => {
     const decide: jest.MockedFunction<AiCoreModelService['decide']> = jest.fn();
     const model = { decide };
     const auditLog = { log: jest.fn().mockResolvedValue(undefined) };
+    const dashboardPreferences = {
+      getAssistant: jest.fn().mockResolvedValue({
+        config: { enabled_capabilities: ['business_analytics'] },
+      }),
+      updateAssistant: jest.fn((_: string, __: string, value: object) =>
+        Promise.resolve({
+          config: {
+            enabled_capabilities:
+              'enabledCapabilities' in value
+                ? (value.enabledCapabilities as string[])
+                : ['business_analytics'],
+          },
+        }),
+      ),
+    };
     const service = new AiCoreService(
       config as unknown as ConfigService,
       tenantContext as unknown as TenantContextService,
@@ -873,7 +925,15 @@ describe('AiCoreService', () => {
       runtime as unknown as AiToolRuntimeService,
       model as unknown as AiCoreModelService,
       auditLog as unknown as AuditLogService,
+      dashboardPreferences as unknown as DashboardPreferencesService,
     );
-    return { auditLog, model, rateLimit, runtime, service };
+    return {
+      auditLog,
+      dashboardPreferences,
+      model,
+      rateLimit,
+      runtime,
+      service,
+    };
   }
 });

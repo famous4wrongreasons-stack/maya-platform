@@ -6,6 +6,7 @@ import { AuditLogModule } from '../audit-log/audit-log.module';
 import { AuthModule } from '../auth/auth.module';
 import { CrmModule } from '../crm/crm.module';
 import { CustomersModule } from '../customers/customers.module';
+import { DashboardPreferencesModule } from '../dashboard-preferences/dashboard-preferences.module';
 import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { ExpensesModule } from '../expenses/expenses.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
@@ -27,6 +28,7 @@ import { AiToolsController } from './ai-tools.controller';
     AuthModule,
     CrmModule,
     CustomersModule,
+    DashboardPreferencesModule,
     EntitlementsModule,
     ExpensesModule,
     LoyaltyModule,
