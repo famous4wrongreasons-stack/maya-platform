@@ -16,7 +16,9 @@ import type {
 import { UserRole, UserStatus } from '../common/domain.enums';
 import {
   buildPhoneLoginEmail,
+  normalizePhoneE164,
   normalizeRussianPhone,
+  phonesMatch,
 } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -143,7 +145,15 @@ export class UsersService {
 
   async findTenantUserByPhone(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const normalizedPhone = normalizeRussianPhone(phone);
+    // Лукап личности не имеет права падать 400-й на не-российский номер:
+    // подтверждённый провайдером иностранный телефон — это «не нашли», а не
+    // «плохой запрос». Строгая валидация остаётся на записи в РФ-салон и SMS.
+    const normalizedPhone = normalizePhoneE164(phone);
+
+    if (!normalizedPhone) {
+      return null;
+    }
+
     const exact = await this.prisma.user.findFirst({
       where: {
         phone: normalizedPhone,
@@ -186,13 +196,67 @@ export class UsersService {
       },
     });
 
-    const legacyUser = legacyUsers.find(
-      (user) => this.normalizeStoredPhone(user.phone) === normalizedPhone,
+    const legacyUser = legacyUsers.find((user) =>
+      phonesMatch(user.phone, normalizedPhone),
     );
 
     return legacyUser
       ? this.projectTenantMembership(legacyUser, scopedTenantId)
       : null;
+  }
+
+  /**
+   * Поиск ЛИЧНОСТИ в тенанте по телефону — в отличие от findTenantUserByPhone
+   * НЕ фильтрует по `status: 'active'`.
+   *
+   * Личность и право входа — разные вещи. Пока лукап требовал активного
+   * membership, подавленный сверкой с CRM мастер был невидим, и следующий
+   * соц-вход заводил ему второй client-аккаунт вместо понятной ошибки.
+   * Сверка идёт по phoneMatchKey, поэтому формат записи в CRM значения не имеет.
+   *
+   * Возвращает пользователя, его membership в этом тенанте (любого статуса) и
+   * признак привязки к карточке сотрудника CRM.
+   */
+  async findTenantIdentityByPhone(tenantId: string, phone: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const normalizedPhone = normalizePhoneE164(phone);
+
+    if (!normalizedPhone) {
+      return null;
+    }
+
+    const candidates = await this.prisma.user.findMany({
+      where: {
+        phone: { not: null },
+        memberships: { some: { tenantId: scopedTenantId } },
+      },
+      include: {
+        memberships: {
+          where: { tenantId: scopedTenantId },
+          include: { tenant: true, branch: true },
+        },
+        crmStaffAccesses: { where: { tenantId: scopedTenantId } },
+      },
+    });
+
+    const matched = candidates.find((user) =>
+      phonesMatch(user.phone, normalizedPhone),
+    );
+
+    if (!matched) {
+      return null;
+    }
+
+    const membership = matched.memberships.find(
+      (candidate) => candidate.tenantId === scopedTenantId,
+    );
+
+    return {
+      user: matched,
+      membershipRole: membership?.role ?? null,
+      membershipStatus: membership?.status ?? null,
+      crmStaffAccess: matched.crmStaffAccesses[0] ?? null,
+    };
   }
 
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
@@ -1377,16 +1441,10 @@ export class UsersService {
     return trimmed.length > 0 ? trimmed : null;
   }
 
+  // Раньше здесь стоял строгий российский нормализатор в try/catch: сохранённый
+  // не-российский номер превращался в null и не совпадал ни с чем.
   private normalizeStoredPhone(phone: string | null): string | null {
-    if (!phone) {
-      return null;
-    }
-
-    try {
-      return normalizeRussianPhone(phone);
-    } catch {
-      return null;
-    }
+    return normalizePhoneE164(phone);
   }
 
   private publicLoginEmail(email: string | null): string | null {

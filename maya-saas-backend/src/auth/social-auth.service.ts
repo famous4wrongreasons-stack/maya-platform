@@ -496,6 +496,37 @@ export class SocialAuthService {
       };
     }
 
+    // ЖЁСТКОЕ ПРАВИЛО: если у номера в этом тенанте уже есть бизнес-личность —
+    // клиентский аккаунт не создаём никогда.
+    //
+    // Сюда мы попадаем только когда лукап активного membership ничего не нашёл.
+    // Раньше этого было достаточно, чтобы завести дубль: reconcileCrmTeamAccess
+    // по одному несовпадающему ответу CRM переводит memberships не-владельцев в
+    // `suspended`, а поиск фильтровал по `status: 'active'` — подавленный мастер
+    // становился невидим, и следующий вход создавал ему второй, параллельный
+    // client-аккаунт. Штатно это уже не чинилось: телефон оказывался занят
+    // дублем, и экран «Команда» отвечал crm_team_contact_already_used.
+    if (params.profile.phone) {
+      const businessIdentity =
+        await this.usersService.findTenantIdentityByPhone(
+          params.tenant.id,
+          params.profile.phone,
+        );
+
+      if (
+        businessIdentity &&
+        (this.isBusinessRole(businessIdentity.membershipRole as UserRole) ||
+          businessIdentity.crmStaffAccess !== null)
+      ) {
+        throw new ConflictException(
+          this.buildSocialAuthError(
+            'social_business_access_suspended',
+            'This phone already belongs to a business account in this workspace. Restore that access instead of opening a client account.',
+          ),
+        );
+      }
+    }
+
     this.assertTenantAllowsClientRegistration(params.tenant);
     this.assertTenantAllowsSelfRegistration(
       params.tenant.allowSelfRegistration,
@@ -1494,6 +1525,7 @@ export class SocialAuthService {
     code:
       | 'self_registration_disabled'
       | 'social_exchange_failed'
+      | 'social_business_access_suspended'
       | 'social_callback_invalid'
       | 'social_identity_conflict'
       | 'social_link_forbidden'

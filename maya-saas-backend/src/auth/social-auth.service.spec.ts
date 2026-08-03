@@ -149,6 +149,11 @@ describe('SocialAuthService', () => {
     const findTenantUserByEmailMock: jest.MockedFunction<
       (tenantId: string, email: string) => Promise<UserRecord | null>
     > = jest.fn().mockResolvedValue(null);
+    // Лукап личности, игнорирующий статус membership: по умолчанию «в тенанте
+    // такого номера нет», отдельные тесты подменяют на подавленного мастера.
+    const findTenantIdentityByPhoneMock: jest.MockedFunction<
+      (tenantId: string, phone: string) => Promise<unknown>
+    > = jest.fn().mockResolvedValue(null);
     const createUserMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<UserRecord>
     > = jest.fn().mockResolvedValue(baseUser());
@@ -211,6 +216,7 @@ describe('SocialAuthService', () => {
     const usersService: Pick<
       UsersService,
       | 'createUser'
+      | 'findTenantIdentityByPhone'
       | 'findTenantUserByEmail'
       | 'findTenantUserByPhone'
       | 'getTenantUserOrThrow'
@@ -219,6 +225,8 @@ describe('SocialAuthService', () => {
       | 'serializeUser'
     > = {
       createUser: createUserMock,
+      findTenantIdentityByPhone:
+        findTenantIdentityByPhoneMock as unknown as UsersService['findTenantIdentityByPhone'],
       findTenantUserByEmail: findTenantUserByEmailMock,
       findTenantUserByPhone: findTenantUserByPhoneMock,
       getTenantUserOrThrow: getTenantUserOrThrowMock,
@@ -253,6 +261,7 @@ describe('SocialAuthService', () => {
         authIdentityUpdateMock,
         attachVerifiedSocialPhoneMock,
         createUserMock,
+        findTenantIdentityByPhoneMock,
         findTenantUserByEmailMock,
         findTenantUserByPhoneMock,
         getTenantBySlugOrThrowMock,
@@ -524,6 +533,89 @@ describe('SocialAuthService', () => {
       provider: 'yandex',
     });
   });
+
+  it.each([
+    [
+      'подавленного сверкой с CRM мастера',
+      {
+        user: { id: 'staff-1', phone: '+79990000000' },
+        membershipRole: UserRole.STAFF,
+        membershipStatus: 'suspended',
+        crmStaffAccess: null,
+      },
+    ],
+    [
+      'сотрудника, у которого membership ещё не активирован',
+      {
+        user: { id: 'staff-2', phone: '+79990000000' },
+        membershipRole: null,
+        membershipStatus: 'invited',
+        crmStaffAccess: { id: 'crm-1', externalStaffId: '4242' },
+      },
+    ],
+  ])(
+    'НЕ создаёт клиентский дубль для %s и отдаёт понятную ошибку',
+    async (_label, identity) => {
+      const {
+        service,
+        mocks: {
+          authFlowStateFindUniqueMock,
+          authIdentityCreateMock,
+          createUserMock,
+          findTenantIdentityByPhoneMock,
+        },
+      } = createService();
+
+      // Активного membership нет → старый код проваливался в ветку создания и
+      // заводил второй, параллельный client-аккаунт на тот же телефон.
+      findTenantIdentityByPhoneMock.mockResolvedValue(identity);
+
+      authFlowStateFindUniqueMock.mockResolvedValue({
+        id: 'flow-1',
+        state: 'ya_state_1',
+        provider: 'yandex',
+        redirectUri: 'https://maya.example/oauth-callback.html',
+        codeVerifier: 'code-verifier-1',
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        consumedAt: null,
+        tenant,
+      });
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          createFetchResponse({
+            access_token: 'ya-access-token',
+            token_type: 'bearer',
+          }),
+        )
+        .mockResolvedValueOnce(
+          createFetchResponse({
+            id: 'yandex-user-1',
+            default_email: 'ya-client@example.com',
+            real_name: 'Иван Мастер',
+            // тот же номер, записанный в другом формате — сверка идёт по
+            // phoneMatchKey, поэтому формат значения не имеет
+            default_phone: { number: '8 (999) 000-00-00' },
+          }),
+        );
+
+      await expect(
+        service.completeYandexLogin({
+          state: 'ya_state_1',
+          code: 'oauth-code-1',
+        }),
+      ).rejects.toMatchObject({
+        response: {
+          error: expect.objectContaining({
+            code: 'social_business_access_suspended',
+          }),
+        },
+      });
+
+      expect(createUserMock).not.toHaveBeenCalled();
+      expect(authIdentityCreateMock).not.toHaveBeenCalled();
+    },
+  );
 
   it('links Yandex identity to an existing tenant user by phone', async () => {
     const {
