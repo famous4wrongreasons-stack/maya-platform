@@ -24,6 +24,7 @@ import {
   DEFAULT_INDUSTRY_PRESET_ID,
   getIndustryPreset,
 } from '../common/industry-presets';
+import { normalizePhoneE164 } from '../common/phone.util';
 import { CrmService } from '../crm/crm.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -147,7 +148,10 @@ export class OnboardingService {
           const user = await this.usersService.createUser({
             tenantId: tenant.id,
             email: dto.ownerEmail,
-            phone: dto.ownerPhone ?? null,
+            // Нормализуем сразу: телефон владельца — ключ восстановления
+            // доступа, и он обязан храниться в том же виде, в каком его потом
+            // ищет резолвер личности.
+            phone: normalizePhoneE164(dto.ownerPhone),
             name: dto.ownerName ?? null,
             passwordHash: await bcrypt.hash(temporaryPassword, 10),
             role: UserRole.TENANT_ADMIN,

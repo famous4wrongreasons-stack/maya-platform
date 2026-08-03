@@ -472,6 +472,32 @@ export class SocialAuthService {
       this.assertUserCanLogin(matchedUser);
       this.assertClientIdentityHasVerifiedPhone(matchedUser, params.profile);
 
+      // Телефон бизнес-аккаунта задаётся при регистрации бизнеса ОБЫЧНЫМ вводом
+      // в форму и никем не подтверждается. Значит совпадения по нему
+      // недостаточно, чтобы отдать чужой соц-идентичности уже занятый рабочий
+      // аккаунт: опечатка владельца в одной цифре — и его бизнес забирает
+      // человек, которому этот номер принадлежит на самом деле.
+      //
+      // Первый вход владельца при этом не страдает: у свежесозданного аккаунта
+      // привязанных провайдеров ещё нет. А второй провайдер добавляется изнутри
+      // аккаунта через /auth/oauth/{provider}/link/complete, а не заявкой по
+      // телефону снаружи.
+      if (this.isBusinessRole(matchedUser.role as UserRole)) {
+        const linkedProviders =
+          await this.authRepository.listIdentityProvidersForUser(
+            matchedUser.id,
+          );
+
+        if (linkedProviders.length > 0) {
+          throw new ConflictException(
+            this.buildSocialAuthError(
+              'social_business_link_required',
+              'This business account already has a linked sign-in method. Add another provider from inside the account instead of claiming it by phone.',
+            ),
+          );
+        }
+      }
+
       await this.authRepository.createIdentity({
         userId: matchedUser.id,
         provider: params.profile.provider,
@@ -1526,6 +1552,7 @@ export class SocialAuthService {
       | 'self_registration_disabled'
       | 'social_exchange_failed'
       | 'social_business_access_suspended'
+      | 'social_business_link_required'
       | 'social_callback_invalid'
       | 'social_identity_conflict'
       | 'social_link_forbidden'
