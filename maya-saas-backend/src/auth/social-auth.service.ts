@@ -472,16 +472,37 @@ export class SocialAuthService {
       this.assertUserCanLogin(matchedUser);
       this.assertClientIdentityHasVerifiedPhone(matchedUser, params.profile);
 
-      // Телефон бизнес-аккаунта задаётся при регистрации бизнеса ОБЫЧНЫМ вводом
-      // в форму и никем не подтверждается. Значит совпадения по нему
-      // недостаточно, чтобы отдать чужой соц-идентичности уже занятый рабочий
-      // аккаунт: опечатка владельца в одной цифре — и его бизнес забирает
-      // человек, которому этот номер принадлежит на самом деле.
+      // ── Рабочий аккаунт нельзя забрать снаружи по одному телефону ────────
       //
-      // Первый вход владельца при этом не страдает: у свежесозданного аккаунта
-      // привязанных провайдеров ещё нет. А второй провайдер добавляется изнутри
-      // аккаунта через /auth/oauth/{provider}/link/complete, а не заявкой по
-      // телефону снаружи.
+      // Телефон бизнес-аккаунта вводится в форму при регистрации бизнеса и
+      // НИКЕМ не доказан как принадлежащий владельцу: подтверждения там нет,
+      // признака «телефон проверен» у пользователя тоже нет. Опечатка в одной
+      // цифре — и номер принадлежит постороннему, который, войдя со своим
+      // подтверждённым номером, получал рабочий аккаунт.
+      //
+      // Совпадение по e-mail — другое дело: его подтвердил сам провайдер, и
+      // владелец должен контролировать почтовый ящик бизнеса. Такой вход
+      // остаётся разрешённым.
+      //
+      // Владелец без совпадения по почте (например вход через Telegram, где
+      // почты нет вовсе) не заперт: он входит по коду на почту и привязывает
+      // провайдера изнутри профиля через /auth/oauth/{provider}/link/complete.
+      if (
+        byPhone &&
+        !byEmail &&
+        this.isBusinessRole(byPhone.role as UserRole)
+      ) {
+        throw new ConflictException(
+          this.buildSocialAuthError(
+            'social_business_phone_claim_forbidden',
+            'A work account cannot be claimed by phone number alone. Sign in with the business e-mail code, then link this provider from your profile.',
+          ),
+        );
+      }
+
+      // Дополнительный рубеж: аккаунт, у которого провайдер уже привязан,
+      // не отдаём новой личности и по совпадению почты — второй провайдер
+      // добавляется изнутри аккаунта, а не заявкой снаружи.
       if (this.isBusinessRole(matchedUser.role as UserRole)) {
         const linkedProviders =
           await this.authRepository.listIdentityProvidersForUser(
@@ -1553,6 +1574,7 @@ export class SocialAuthService {
       | 'social_exchange_failed'
       | 'social_business_access_suspended'
       | 'social_business_link_required'
+      | 'social_business_phone_claim_forbidden'
       | 'social_callback_invalid'
       | 'social_identity_conflict'
       | 'social_link_forbidden'
