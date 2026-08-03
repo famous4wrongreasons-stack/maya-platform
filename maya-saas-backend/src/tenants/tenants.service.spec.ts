@@ -394,6 +394,33 @@ describe('TenantsService', () => {
     expect(result.booking_live_enabled).toBe(false);
   });
 
+  it('marks the neutral MAYA OS tenant as a platform bootstrap', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      slug: 'maya-os',
+      allowSelfRegistration: false,
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          platform_bootstrap: true,
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('maya-os');
+
+    expect(result.platform_bootstrap).toBe(true);
+    expect(result.client_registration_enabled).toBe(false);
+    expect(result.guest_access_ready).toBe(false);
+  });
+
   it('opens client registration and internal live booking for a verified trial', async () => {
     const {
       service,

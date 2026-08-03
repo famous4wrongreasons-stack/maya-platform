@@ -229,7 +229,15 @@ async function syncPlanEntitlements(
   planId: string,
   featureKeys: ReadonlyArray<string>,
 ) {
-  for (const featureKey of expandFeatureKeys(featureKeys)) {
+  const expandedFeatureKeys = expandFeatureKeys(featureKeys);
+  await prisma.planEntitlement.updateMany({
+    where: {
+      planId,
+      featureKey: { notIn: expandedFeatureKeys },
+    },
+    data: { enabled: false },
+  });
+  for (const featureKey of expandedFeatureKeys) {
     await prisma.planEntitlement.upsert({
       where: {
         planId_featureKey: {
@@ -432,6 +440,80 @@ async function main() {
       },
     });
   }
+
+  const platformBootstrapTenant = await prisma.tenant.upsert({
+    where: { slug: 'maya-os' },
+    update: {
+      name: 'MAYA OS',
+      status: 'active',
+      planId: null,
+      industryPresetId: 'general_service',
+      calendarSource: 'external',
+      defaultCurrency: 'RUB',
+      defaultTimezone: 'Europe/Moscow',
+      defaultLocale: 'ru-RU',
+      allowSelfRegistration: false,
+      trialFullAccess: false,
+    },
+    create: {
+      name: 'MAYA OS',
+      slug: 'maya-os',
+      status: 'active',
+      planId: null,
+      industryPresetId: 'general_service',
+      calendarSource: 'external',
+      defaultCurrency: 'RUB',
+      defaultTimezone: 'Europe/Moscow',
+      defaultLocale: 'ru-RU',
+      allowSelfRegistration: false,
+      trialFullAccess: false,
+    },
+  });
+
+  await prisma.brandingSettings.upsert({
+    where: { tenantId: platformBootstrapTenant.id },
+    update: {
+      appName: 'MAYA OS',
+      logoUrl: null,
+      primaryColor: '#000000',
+      secondaryColor: '#FFFFFF',
+      accentColor: '#000000',
+      backgroundColor: '#FFFFFF',
+      surfaceColor: '#FFFFFF',
+      textPrimaryColor: '#000000',
+      textSecondaryColor: 'rgba(0,0,0,0.58)',
+      fontFamily: 'Manrope',
+      headingFontFamily: 'Montserrat',
+      buttonRadius: 18,
+      buttonStyle: 'rounded',
+      themeMode: 'system',
+      themeJson: {
+        appearance: 'maya-monochrome',
+        platform_bootstrap: true,
+      } satisfies Prisma.InputJsonValue,
+    },
+    create: {
+      tenantId: platformBootstrapTenant.id,
+      appName: 'MAYA OS',
+      logoUrl: null,
+      primaryColor: '#000000',
+      secondaryColor: '#FFFFFF',
+      accentColor: '#000000',
+      backgroundColor: '#FFFFFF',
+      surfaceColor: '#FFFFFF',
+      textPrimaryColor: '#000000',
+      textSecondaryColor: 'rgba(0,0,0,0.58)',
+      fontFamily: 'Manrope',
+      headingFontFamily: 'Montserrat',
+      buttonRadius: 18,
+      buttonStyle: 'rounded',
+      themeMode: 'system',
+      themeJson: {
+        appearance: 'maya-monochrome',
+        platform_bootstrap: true,
+      } satisfies Prisma.InputJsonValue,
+    },
+  });
 
   const demoTenant = await prisma.tenant.upsert({
     where: { slug: 'demo-business' },

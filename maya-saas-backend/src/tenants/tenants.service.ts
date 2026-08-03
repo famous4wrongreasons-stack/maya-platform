@@ -836,6 +836,7 @@ export class TenantsService {
 
     return {
       slug: tenant.slug,
+      platform_bootstrap: theme.platform_bootstrap === true,
       active: !new Set(['subscription_required', 'disabled']).has(
         access.accessState,
       ),
