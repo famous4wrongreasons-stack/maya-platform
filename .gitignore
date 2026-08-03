@@ -93,3 +93,6 @@ ai администратор/barber_knowledge_images/
 # Playwright CLI artifacts (logs/screenshots)
 .playwright-cli/
 output/playwright/
+
+# --- локальные артефакты генерации (PDF/PNG превью) ---
+tmp/
