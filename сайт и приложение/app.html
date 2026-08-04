@@ -9793,7 +9793,15 @@ function ABookFlow() {
     });
   }
   // ── соц-вход (Яндекс/Telegram) + завершение профиля ──
-  function authRouteProfile(me, provider) {
+  // opts.skipRedirect — не уводить пользователя с текущего экрана.
+  // 🔴 Эту функцию зовут ДВА разных сценария: настоящий вход (там маршрут нужен)
+  // и восстановление сессии при открытии экрана записи. Во втором случае
+  // владелец с бизнес-ролью улетал в рабочий кабинет прямо из «Записаться»:
+  // экран открывался, проверял сессию и сам себя выкидывал. Проверки полноты
+  // профиля (нет телефона / нет имени) остаются в обоих случаях — без них
+  // запись всё равно не создать.
+  function authRouteProfile(me, provider, opts) {
+    var skipRedirect = !!(opts && opts.skipRedirect);
     if (me && me.profile_completed === false) {
       var miss = (me && me.missing_profile_fields) || [];
       if (miss.indexOf('phone') >= 0 || !me.phone) {
@@ -9810,6 +9818,8 @@ function ABookFlow() {
     var role = String(me && me.role || '').toLowerCase();
     if (meSaasIsBusinessRole(role)) {
       try { meSaasApplyIdentity(me); } catch (e) {}
+      // Пользователь уже на нужном экране — личность применили, но никуда не уводим.
+      if (skipRedirect) return;
       var workspace = typeof meSaasEffectiveWorkspace === 'function' ? meSaasEffectiveWorkspace(role) : null;
       if (!workspace) {
         setTimeout(function () { if (window.__meGo) window.__meGo('choose'); }, 0);
@@ -10600,7 +10610,7 @@ function ABookFlow() {
       setRestoreErr('');
       saasUpdateUser(me || s.user);
       setSaasUser(me || s.user || null);
-      authRouteProfile(me, s.auth_provider || null);
+      authRouteProfile(me, s.auth_provider || null, { skipRedirect: true });
     }).catch(function (err) {
       if (cancelled) return;
       var code = err && err.code;
@@ -11192,7 +11202,11 @@ function ABookFlow() {
     onClick: function () { var f = retryRef.current; retryRef.current = null; setErr(''); if (f) f(); },
     style: { marginTop: 9, display: 'inline-block', padding: '7px 18px', borderRadius: 999, border: '1px solid rgba(174,171,168,0.5)', fontFamily: DISPLAY, fontWeight: 600, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#aeaba8', cursor: 'pointer' }
   }, 'Повторить') : null) : null;
-  const LocalModeNote = t => localSaasMode ? React.createElement(ATile, {
+  // 🔴 Баннер показываем ТОЛЬКО когда запись действительно не боевая.
+  // Раньше он висел в любом SaaS-режиме и врал владельцу «реальная запись
+  // отключена» даже тогда, когда она работала: текст писался во времена,
+  // когда новый бэкенд жил только на локальной машине.
+  const LocalModeNote = t => localSaasMode && !localSaasLive ? React.createElement(ATile, {
     t: t,
     radius: 14,
     noSheen: true
@@ -11217,7 +11231,7 @@ function ABookFlow() {
       marginTop: 5,
       lineHeight: 1.55
     }
-  }, 'Новый backend подключен только к этой локальной копии приложения. Реальная запись отключена.'), React.createElement('div', {
+  }, 'Бизнес ещё не переведён в боевой режим записи, поэтому запись сейчас только проверочная и в CRM не уходит.'), React.createElement('div', {
     style: {
       fontFamily: DISPLAY,
       fontSize: 8,
@@ -12597,7 +12611,9 @@ function ABookFlow() {
         margin: '10px 2px 0',
         lineHeight: 1.5
       }
-    }, localSaasMode ? (localSaasLive ? 'Запись будет создана во внутреннем календаре MAYA.' : 'Локальная проверка нового backend. На этом шаге реальная запись не создаётся.') : 'Нажимая «Подтвердить», вы соглашаетесь на обработку персональных данных.'), ErrLine(t), React.createElement('div', {
+    }, localSaasMode ? (localSaasLive ? ((window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source === 'external')
+      ? 'Запись будет создана в вашей CRM.'
+      : 'Запись будет создана во внутреннем календаре MAYA.') : 'Локальная проверка нового backend. На этом шаге реальная запись не создаётся.') : 'Нажимая «Подтвердить», вы соглашаетесь на обработку персональных данных.'), ErrLine(t), React.createElement('div', {
       onClick: submitting ? null : submit,
       style: {
         marginTop: 18,

@@ -11,6 +11,7 @@ import {
   CrmFinancialSummary,
   CrmJournal,
   CrmJournalAppointment,
+  CrmJournalMaster,
   CrmTeamMember,
   CrmStaffPayroll,
   CreatedAppointment,
@@ -153,6 +154,12 @@ interface YclientsFinanceTransactionApiItem {
     name?: string;
     is_cash?: boolean | number;
   } | null;
+}
+
+interface YclientsScheduleApiItem {
+  date?: string;
+  is_working?: boolean | number;
+  slots?: Array<{ from?: string; to?: string }> | null;
 }
 
 interface YclientsPayrollApiData {
@@ -725,6 +732,40 @@ export class YclientsCRMAdapter implements CRMAdapter {
           appointment !== null,
       );
 
+    // Мастера со сменами — только для однодневного журнала: смена привязана к
+    // дате, и отдавать её для диапазона значило бы соврать. Сетка расписания
+    // всегда запрашивает один день.
+    let masters: CrmJournalMaster[] | undefined;
+    let allMasters: CrmJournalMaster[] | undefined;
+
+    if (startDate === endDate) {
+      const schedules = await Promise.all(
+        staff.map((member) =>
+          this.fetchStaffSchedule(member.id, startDate).then(
+            (schedule) => [member.id, schedule] as const,
+          ),
+        ),
+      );
+      const scheduleByStaffId = new Map(schedules);
+      const staffIdsWithRecords = new Set(
+        appointments.map((appointment) => appointment.provider.id),
+      );
+
+      allMasters = staff.map((member) =>
+        this.buildJournalMaster(
+          member,
+          scheduleByStaffId.get(member.id) ?? null,
+        ),
+      );
+      // В сетку берём тех, кто в смене, плюс тех, у кого есть записи (мастер
+      // мог принять клиента вне графика — колонка обязана появиться), плюс тех,
+      // по кому график неизвестен: спрятать их значило бы спрятать их записи.
+      masters = allMasters.filter(
+        (master) =>
+          master.is_working !== false || staffIdsWithRecords.has(master.id),
+      );
+    }
+
     return {
       calendar_source: 'external',
       timezone: params.timezone,
@@ -735,6 +776,59 @@ export class YclientsCRMAdapter implements CRMAdapter {
       provider_id: params.providerId ?? null,
       count: appointments.length,
       appointments,
+      ...(masters ? { masters } : {}),
+      ...(allMasters ? { all_masters: allMasters } : {}),
+    };
+  }
+
+  /**
+   * График смены мастера на конкретный день: schedule/{company}/{staff}/{from}/{to}.
+   *
+   * Отказ по одному мастеру НЕ должен ронять весь журнал — у токена может не
+   * быть прав на график, и тогда сетка обязана нарисоваться хотя бы по фактам
+   * записей. Поэтому здесь null вместо исключения.
+   */
+  private async fetchStaffSchedule(
+    staffId: string,
+    dateKey: string,
+  ): Promise<YclientsScheduleApiItem | null> {
+    try {
+      const numericId = this.toNumericId(staffId, 'staffId');
+      const response = await this.request<YclientsScheduleApiItem[]>(
+        `schedule/${this.getCompanyId()}/${numericId}/${dateKey}/${dateKey}`,
+      );
+      const rows = response.data || [];
+
+      return rows.find((row) => row && !('error' in row)) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Строка мастера для сетки: смена + факт наличия записей. */
+  private buildJournalMaster(
+    member: StaffMember,
+    schedule: YclientsScheduleApiItem | null,
+  ): CrmJournalMaster {
+    const slots = (schedule?.slots || [])
+      .map((slot) => ({
+        from: String(slot?.from || '').trim(),
+        to: String(slot?.to || '').trim(),
+      }))
+      .filter((slot) => slot.from && slot.to);
+
+    return {
+      id: member.id,
+      name: member.name,
+      title: member.specialization ?? null,
+      avatar_url: member.avatar_url ?? null,
+      // null — график в CRM не отдан (нет прав/не заведён), а не «выходной».
+      is_working: schedule
+        ? Boolean(schedule.is_working) || slots.length > 0
+        : null,
+      work_start: slots.length ? slots[0].from : null,
+      work_end: slots.length ? slots[slots.length - 1].to : null,
+      work_slots: slots,
     };
   }
 

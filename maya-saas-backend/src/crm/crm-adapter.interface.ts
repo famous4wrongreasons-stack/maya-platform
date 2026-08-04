@@ -129,6 +129,27 @@ export interface CrmJournalAppointment {
   currency: string;
 }
 
+/**
+ * Мастер в журнале дня: кто в смене и с какого по какой час.
+ *
+ * Без этого сетку расписания рисовать не из чего — колонки строятся по
+ * мастерам, а высота столбца по границам смены. Раньше журнал отдавал только
+ * записи, поэтому кабинет показывал плоский список вместо сетки.
+ */
+export interface CrmJournalMaster {
+  id: string;
+  name: string;
+  title?: string | null;
+  avatar_url?: string | null;
+  /** null — график в CRM не заведён; сетка покажет мастера по факту записей. */
+  is_working: boolean | null;
+  /** «ЧЧ:ММ» в часовом поясе филиала; null, если смены нет. */
+  work_start: string | null;
+  work_end: string | null;
+  /** Интервалы смены с перерывами — сетка рисует по ним свободные окна. */
+  work_slots: Array<{ from: string; to: string }>;
+}
+
 export interface CrmJournal {
   calendar_source: 'external';
   timezone: string;
@@ -139,6 +160,10 @@ export interface CrmJournal {
   provider_id: string | null;
   count: number;
   appointments: CrmJournalAppointment[];
+  /** В смене сегодня (или есть записи) — колонки сетки. */
+  masters?: CrmJournalMaster[];
+  /** Весь активный штат — для переноса записи на мастера вне смены. */
+  all_masters?: CrmJournalMaster[];
 }
 
 export type CrmFinanceStatus = 'available' | 'partial' | 'unavailable';
