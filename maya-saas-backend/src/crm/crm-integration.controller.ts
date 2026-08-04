@@ -25,12 +25,37 @@ import { CrmService } from './crm.service';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
+import {
+  CreateCrmJournalAppointmentDto,
+  RescheduleCrmJournalAppointmentDto,
+  SearchCrmClientsDto,
+  SetCrmAttendanceDto,
+  SetCrmDurationDto,
+  SetCrmServicesDto,
+} from './dto/crm-visit-operations.dto';
 
 const CRM_MANAGEMENT_ROLES = [
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
   UserRole.TENANT_ADMIN,
   UserRole.ADMINISTRATOR,
+];
+
+/**
+ * Журнал и операции над визитом — работа всей смены, а не только владельца.
+ * Мастер обязан видеть свою сетку и вести в ней записи, иначе кабинет
+ * сотрудника отличается от PWA, где это умеет каждый.
+ */
+const CRM_JOURNAL_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.STAFF,
 ];
 
 const CRM_TEAM_ACCESS_ROLES = [
@@ -135,6 +160,7 @@ export class CrmIntegrationController {
   }
 
   @Get('journal')
+  @Roles(...CRM_JOURNAL_ROLES)
   @ApiOperation({
     summary: 'Read the tenant operational journal from the connected CRM',
   })
@@ -143,6 +169,204 @@ export class CrmIntegrationController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.crmService.getJournal(this.tenantId(actor), query);
+  }
+
+  @Post('journal/appointments')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({
+    summary: 'Book a client by hand from the schedule grid (admin path)',
+  })
+  async createJournalAppointment(
+    @Body() dto: CreateCrmJournalAppointmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    // 🔴 Сознательно НЕ через appointments/createForClient: тот путь требует
+    // совпадения со свободным окном и отвечает slot_taken. Мастер в журнале
+    // сажает клиента куда решил — это админская запись, allowBusy.
+    const result = await this.crmService.createAppointment(tenantId, {
+      clientId: actor.userId,
+      clientName: dto.client_name || '',
+      clientPhone: dto.client_phone,
+      staffId: dto.staff_id,
+      serviceIds: dto.service_ids,
+      start: dto.start,
+      notes: dto.notes ?? null,
+      allowBusy: true,
+      durationMinutes: dto.duration_minutes,
+    });
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.appointment_created_by_staff',
+      entityType: 'crm_appointment',
+      entityId: result.external_id,
+      metadata: {
+        staff_id: dto.staff_id,
+        service_count: dto.service_ids.length,
+      },
+    });
+
+    return result;
+  }
+
+  @Get('journal/appointments/:externalId')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Read one visit card from the connected CRM' })
+  appointmentDetail(
+    @Param('externalId') externalId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.crmService.getAppointmentDetail(this.tenantId(actor), externalId);
+  }
+
+  @Post('journal/appointments/:externalId/attendance')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Mark the client as arrived or no-show' })
+  async setAttendance(
+    @Param('externalId') externalId: string,
+    @Body() dto: SetCrmAttendanceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    const result = await this.crmService.markAppointmentAttendance(
+      tenantId,
+      externalId,
+      dto.attendance,
+    );
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.appointment_attendance_set',
+      entityType: 'crm_appointment',
+      entityId: externalId,
+      metadata: { attendance: result.attendance },
+    });
+
+    return result;
+  }
+
+  @Post('journal/appointments/:externalId/duration')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Shrink or stretch a visit without moving its start' })
+  async setDuration(
+    @Param('externalId') externalId: string,
+    @Body() dto: SetCrmDurationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    const result = await this.crmService.setAppointmentDuration(
+      tenantId,
+      externalId,
+      dto.duration_minutes,
+    );
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.appointment_duration_set',
+      entityType: 'crm_appointment',
+      entityId: externalId,
+      metadata: { duration_minutes: result.duration_minutes },
+    });
+
+    return result;
+  }
+
+  @Post('journal/appointments/:externalId/services')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Replace the services of a visit, keeping prices' })
+  async setServices(
+    @Param('externalId') externalId: string,
+    @Body() dto: SetCrmServicesDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    const result = await this.crmService.setAppointmentServices(
+      tenantId,
+      externalId,
+      dto.service_ids,
+    );
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.appointment_services_set',
+      entityType: 'crm_appointment',
+      entityId: externalId,
+      metadata: { service_count: result.service_ids.length },
+    });
+
+    return result;
+  }
+
+  @Post('journal/appointments/:externalId/reschedule')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Move a visit to another time or master' })
+  async rescheduleJournalAppointment(
+    @Param('externalId') externalId: string,
+    @Body() dto: RescheduleCrmJournalAppointmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    const result = await this.crmService.rescheduleAppointment(tenantId, {
+      externalId,
+      start: dto.start,
+      staffId: dto.staff_id,
+      serviceIds: dto.service_ids,
+    });
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.appointment_rescheduled_by_staff',
+      entityType: 'crm_appointment',
+      entityId: externalId,
+      metadata: { start: result.start, staff_id: result.staff_id },
+    });
+
+    return result;
+  }
+
+  @Post('journal/appointments/:externalId/cancel')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Cancel a visit from the schedule grid' })
+  async cancelJournalAppointment(
+    @Param('externalId') externalId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    const tenantId = this.tenantId(actor);
+    const result = await this.crmService.cancelAppointment(tenantId, externalId);
+
+    await this.auditLogService.log({
+      tenantId,
+      userId: actor.userId,
+      action: 'crm.appointment_cancelled_by_staff',
+      entityType: 'crm_appointment',
+      entityId: externalId,
+      metadata: { status: result.status },
+    });
+
+    return result;
+  }
+
+  @Get('clients/search')
+  @Roles(...CRM_JOURNAL_ROLES)
+  @ApiOperation({ summary: 'Suggest a returning client while booking by hand' })
+  async searchClients(
+    @Query() query: SearchCrmClientsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    // Подсказку в аудит не пишем: это чтение чужих ПД по подстроке, и лог
+    // превратился бы во второй, никем не охраняемый список клиентов.
+    const clients = await this.crmService.searchClients(
+      this.tenantId(actor),
+      query.query,
+    );
+
+    return { count: clients.length, clients };
   }
 
   @Get('team-access')

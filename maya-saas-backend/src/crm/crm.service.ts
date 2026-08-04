@@ -24,6 +24,7 @@ import {
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
+  CrmAppointmentDetail,
   CrmCompanyProfile,
   CrmFinancialSummary,
   CrmTeamMember,
@@ -623,6 +624,8 @@ export class CrmService {
       serviceIds: string[];
       start: string;
       notes?: string | null;
+      allowBusy?: boolean;
+      durationMinutes?: number;
     },
   ): Promise<CreatedAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
@@ -733,6 +736,154 @@ export class CrmService {
       timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
       providerId: query.providerId,
     });
+  }
+
+  /**
+   * Операции над визитом из сетки расписания.
+   *
+   * Провайдер может их не уметь — метод в адаптере тогда просто не объявлен.
+   * Отдаём 409 с кодом, по которому кабинет прячет кнопку, а не падает.
+   */
+  private async getVisitCapableAdapter<TMethod extends keyof CRMAdapter>(
+    tenantId: string,
+    method: TMethod,
+    code: string,
+  ): Promise<CRMAdapter & Required<Pick<CRMAdapter, TMethod>>> {
+    await this.assertExternalSource(tenantId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+
+    if (typeof adapter[method] !== 'function') {
+      throw new ConflictException({
+        message: 'CRM visit operation is not available for this provider.',
+        error: { code },
+      });
+    }
+
+    return adapter as CRMAdapter & Required<Pick<CRMAdapter, TMethod>>;
+  }
+
+  private async tenantTimezone(tenantId: string): Promise<string> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+
+    return tenant?.defaultTimezone ?? 'Europe/Moscow';
+  }
+
+  async getAppointmentDetail(
+    tenantId: string,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getAppointmentDetail',
+      'crm_appointment_detail_not_supported',
+    );
+
+    return adapter.getAppointmentDetail({
+      tenantId: scopedTenantId,
+      externalId,
+      timezone: await this.tenantTimezone(scopedTenantId),
+    });
+  }
+
+  async markAppointmentAttendance(
+    tenantId: string,
+    externalId: string,
+    attendance: number,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (![1, 0, -1].includes(attendance)) {
+      throw new BadRequestException({
+        message: 'CRM attendance must be one of 1, 0, -1.',
+        error: { code: 'crm_attendance_invalid' },
+      });
+    }
+
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'markAppointmentAttendance',
+      'crm_attendance_not_supported',
+    );
+
+    return adapter.markAppointmentAttendance({
+      tenantId: scopedTenantId,
+      externalId,
+      attendance,
+    });
+  }
+
+  async setAppointmentDuration(
+    tenantId: string,
+    externalId: string,
+    durationMinutes: number,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      !Number.isFinite(durationMinutes) ||
+      durationMinutes < 5 ||
+      durationMinutes > 720
+    ) {
+      throw new BadRequestException({
+        message: 'CRM visit duration must be between 5 and 720 minutes.',
+        error: { code: 'crm_duration_invalid' },
+      });
+    }
+
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'setAppointmentDuration',
+      'crm_duration_not_supported',
+    );
+
+    return adapter.setAppointmentDuration({
+      tenantId: scopedTenantId,
+      externalId,
+      durationMinutes: Math.round(durationMinutes),
+    });
+  }
+
+  async setAppointmentServices(
+    tenantId: string,
+    externalId: string,
+    serviceIds: string[],
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    // Пустой состав стёр бы цену визита — в журнале это всегда ошибка ввода.
+    if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
+      throw new BadRequestException({
+        message: 'CRM visit must keep at least one service.',
+        error: { code: 'crm_services_empty' },
+      });
+    }
+
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'setAppointmentServices',
+      'crm_services_not_supported',
+    );
+
+    return adapter.setAppointmentServices({
+      tenantId: scopedTenantId,
+      externalId,
+      serviceIds,
+    });
+  }
+
+  async searchClients(tenantId: string, query: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'searchClients',
+      'crm_client_search_not_supported',
+    );
+
+    return adapter.searchClients({ tenantId: scopedTenantId, query });
   }
 
   async getFinancialSummary(

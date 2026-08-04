@@ -25913,6 +25913,7 @@ function ALiveSchedule() {
   const [dLoading, setDLoading] = React.useState(false);
   const [dErr, setDErr] = React.useState('');
   const [acting, setActing] = React.useState(false);
+  const ssTz = React.useRef(null);
   const [svcCat, setSvcCat] = React.useState(null);
   const [svcOpen, setSvcOpen] = React.useState(false);
   const [svcBusy, setSvcBusy] = React.useState(false);
@@ -25991,6 +25992,33 @@ function ALiveSchedule() {
     if (s === 'completed') return 'done';
     return 'waiting';
   }
+  // Журнал отдаёт идентификатор визита как «crm-<id>»; в роуты операций уходит
+  // голый идентификатор записи CRM.
+  function ssRecId(id) {
+    return String(id == null ? '' : id).replace(/^crm-/, '');
+  }
+  function ssReq(path, init) {
+    var ctx = window.__ME_SAAS_CTX;
+    var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+    if (!ctx || !ctx.api || !bundle || !bundle.token) return Promise.reject(new Error('no-session'));
+    var o = init || {};
+    var headers = { Accept: 'application/json', Authorization: 'Bearer ' + bundle.token };
+    if (o.body) headers['Content-Type'] = 'application/json';
+    return fetch(ctx.api + path, { method: o.method || 'GET', headers: headers, body: o.body })
+      .then(function (r) {
+        return r.json().catch(function () { return null; }).then(function (j) {
+          return { ok: r.ok, status: r.status, body: j };
+        });
+      });
+  }
+  function ssErrText(res, fallback) {
+    // 403 от CRM значит «токену салона не хватает прав», а не «сломалось».
+    if (res && res.status === 403) return 'В CRM не хватает прав на это действие.';
+    var b = res && res.body;
+    var m = b && (b.message || (b.error && b.error.message));
+    if (Array.isArray(m)) m = m.join('; ');
+    return m || fallback;
+  }
   function ssLoad(o) {
     var ctx = window.__ME_SAAS_CTX;
     var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
@@ -26023,6 +26051,7 @@ function ALiveSchedule() {
       }
       var j = res.body || {};
       var tz = j.timezone;
+      ssTz.current = tz || null;      // карточка визита пояса не отдаёт — берём отсюда
       setData({
         masters: (j.masters || []).map(function (m) {
           return {
@@ -26096,6 +26125,81 @@ function ALiveSchedule() {
     return () => clearInterval(iv);
   }, []);
 
+  // ---- SaaS: карточка визита и операции над ним через /integrations/crm ----
+  function ssOpenDetail(id) {
+    ssReq('/integrations/crm/journal/appointments/' + encodeURIComponent(ssRecId(id))).then(function (res) {
+      setDLoading(false);
+      if (!res.ok) { setDErr(ssErrText(res, 'Не удалось загрузить карточку.')); return; }
+      var a = res.body || {};
+      var tz = ssTz.current;
+      var name = a.client && a.client.name || 'Клиент';
+      var d = {
+        record_id: a.id || id,
+        staff_id: a.provider && a.provider.id,
+        client: name, client_name: name, name: name,
+        phone: a.client_phone || '', client_phone: a.client_phone || '',
+        services: (a.services || []).map(function (x) {
+          return { id: x.id, title: x.name, name: x.name, cost: x.price, price_min: x.price };
+        }),
+        start: ssHHMM(a.start_at, tz), end: ssHHMM(a.end_at, tz),
+        duration_minutes: a.duration_minutes || 0,
+        attendance: a.attendance || 0,
+        paid: !!a.paid,
+        // Ни имени клиента, ни оплаты через SaaS не правим: таких операций в
+        // контракте нет, а показать кнопку, которая молчит, хуже, чем не показать.
+        can_edit_phone: false,
+        saas: true
+      };
+      setDetail(d);
+      setClientNameDraft(name);
+      setClientPhoneDraft(fmtPhone(d.phone));
+    }).catch(function () { setDLoading(false); setDErr('Ошибка сети.'); });
+  }
+  function ssDoAction(action, extra, patch) {
+    var map = {
+      panel_journal_attendance: { path: '/attendance', body: { attendance: extra && extra.attendance } },
+      panel_journal_set_duration: { path: '/duration', body: { duration_minutes: extra && extra.duration_minutes } },
+      panel_journal_cancel: { path: '/cancel', body: {} }
+    };
+    var m = map[action];
+    if (!m) { setDErr('Это действие доступно только в самой CRM.'); return; }
+    setActing(true);
+    setDErr('');
+    ssReq('/integrations/crm/journal/appointments/' + encodeURIComponent(ssRecId(detail.record_id)) + m.path, {
+      method: 'POST', body: JSON.stringify(m.body)
+    }).then(function (res) {
+      setActing(false);
+      if (!res.ok) { setDErr(ssErrText(res, 'Не удалось выполнить.')); return; }
+      setDetail(Object.assign({}, detail, patch));
+      load(offset);
+    }).catch(function () { setActing(false); setDErr('Ошибка сети.'); });
+  }
+  function ssSetServices(ids) {
+    setSvcBusy(true);
+    setDErr('');
+    ssReq('/integrations/crm/journal/appointments/' + encodeURIComponent(ssRecId(detail.record_id)) + '/services', {
+      method: 'POST', body: JSON.stringify({ service_ids: ids })
+    }).then(function (res) {
+      setSvcBusy(false);
+      if (!res.ok) { setDErr(ssErrText(res, 'Не удалось изменить услуги.')); return; }
+      setSvcOpen(false);
+      openDetail(detail.record_id);
+      load(offset);
+    }).catch(function () { setSvcBusy(false); setDErr('Ошибка сети.'); });
+  }
+  // Каталог услуг тенанта, приведённый к форме легаси-списка.
+  function ssLoadServices(done) {
+    ssReq('/services').then(function (res) {
+      var list = res.ok && Array.isArray(res.body) ? res.body : (res.body && res.body.services) || [];
+      done(list.map(function (x) {
+        return {
+          id: x.id, title: x.name,
+          price_min: x.price, price_max: x.price,
+          seance_length: Math.max(0, Math.round(Number(x.duration_minutes) || 0)) * 60
+        };
+      }));
+    }).catch(function () { done([]); });
+  }
   // ---- record detail card (tap a record) + payment/attendance write-ops ----
   function openDetail(id) {
     setDetailId(id);
@@ -26105,6 +26209,7 @@ function ALiveSchedule() {
     setClientNameOpen(false);
     setDErr('');
     setDLoading(true);
+    if (ssSaas) { ssOpenDetail(id); return; }
     const rq = window.__meAuthReq ? window.__meAuthReq({
       record_id: id
     }) : null;
@@ -26142,6 +26247,7 @@ function ALiveSchedule() {
   }
   function doAction(action, extra, patch) {
     if (!detail || acting) return;
+    if (ssSaas) { ssDoAction(action, extra, patch); return; }
     setActing(true);
     setDErr('');
     const rq = window.__meAuthReq ? window.__meAuthReq(Object.assign({
@@ -26277,6 +26383,7 @@ function ALiveSchedule() {
   }
   function setServices(ids) {
     if (!detail || svcBusy) return;
+    if (ssSaas) { ssSetServices(ids); return; }
     setSvcBusy(true);
     setDErr('');
     const rq = window.__meAuthReq ? window.__meAuthReq({
@@ -26319,6 +26426,7 @@ function ALiveSchedule() {
   function openSvcPicker() {
     setSvcOpen(v => !v);
     if (svcCat || !detail || !detail.staff_id) return;
+    if (ssSaas) { ssLoadServices(setSvcCat); return; }
     fetch(SS_PROXY + '?action=get_services&company_id=503759&staff_id=' + detail.staff_id).then(r => r.json()).then(j => {
       setSvcCat(j && j.data && j.data.services || j && j.services || []);
     }).catch(() => {
@@ -26330,6 +26438,7 @@ function ALiveSchedule() {
   function loadBookSvc(sid) {
     setBookSvcList(null);
     if (!sid) return;
+    if (ssSaas) { ssLoadServices(setBookSvcList); return; }
     fetch(SS_PROXY + '?action=get_services&company_id=503759&staff_id=' + sid).then(r => r.json()).then(j => {
       setBookSvcList(j && j.data && j.data.services || j && j.services || []);
     }).catch(() => {
@@ -26418,6 +26527,12 @@ function ALiveSchedule() {
     return d.length >= 11 ? '+' + d.slice(0, 11) : '';
   }
   function searchClients(local) {
+    if (ssSaas) {
+      ssReq('/integrations/crm/clients/search?query=' + encodeURIComponent(local)).then(function (res) {
+        setBookSugg(res.ok && res.body && res.body.clients || []);
+      }).catch(function () { setBookSugg([]); });
+      return;
+    }
     const rq = window.__meAuthReq ? window.__meAuthReq({
       query: local
     }) : null;
@@ -26460,6 +26575,28 @@ function ALiveSchedule() {
     mm = Math.max(0, Math.min(23 * 60 + 45, mm + d));
     setBookTime(pad2(Math.floor(mm / 60)) + ':' + pad2(mm % 60));
   }
+  function ssSubmitBook() {
+    // 🔴 Время отправляем БЕЗ часового пояса: бэкенд трактует такую строку как
+    // настенное время салона и отдаёт её в CRM как есть. Пошли бы ISO с «Z» —
+    // запись уехала бы на разницу поясов.
+    var start = isoForOffset(offset) + 'T' + bookTime + ':00';
+    ssReq('/integrations/crm/journal/appointments', {
+      method: 'POST',
+      body: JSON.stringify({
+        staff_id: String(bookStaff),
+        service_ids: [String(bookSvc)],
+        start: start,
+        client_name: bookName.trim(),
+        client_phone: cleanPhone(bookPhone),
+        duration_minutes: Math.max(5, Math.min(720, Math.round(Number(bookDur) || 60)))
+      })
+    }).then(function (res) {
+      setBookBusy(false);
+      if (!res.ok) { setBookErr(ssErrText(res, 'Не удалось создать запись.')); return; }
+      setBookOpen(false);
+      load(offset);
+    }).catch(function () { setBookBusy(false); setBookErr('Ошибка сети.'); });
+  }
   function submitBook() {
     if (bookBusy) return;
     if (!bookStaff) {
@@ -26485,6 +26622,7 @@ function ALiveSchedule() {
       client_phone: cleanPhone(bookPhone),
       duration_minutes: Math.max(5, Math.min(720, Math.round(Number(bookDur) || 60)))
     };
+    if (ssSaas) { ssSubmitBook(); return; }
     const rq = window.__meAuthReq ? window.__meAuthReq(payload) : null;
     if (!rq) {
       setBookBusy(false);
@@ -26702,6 +26840,19 @@ function ALiveSchedule() {
   function doReschedule(rid, dtStr, staffId) {
     setActing(true);
     setErr('');
+    if (ssSaas) {
+      // Пробел на «T»: бэкенд ждёт ISO без пояса и трактует его как настенное
+      // время салона — ровно тот же формат, что и при ручной записи.
+      ssReq('/integrations/crm/journal/appointments/' + encodeURIComponent(ssRecId(rid)) + '/reschedule', {
+        method: 'POST',
+        body: JSON.stringify({ start: String(dtStr).replace(' ', 'T'), staff_id: staffId ? String(staffId) : undefined })
+      }).then(function (res) {
+        setActing(false);
+        if (!res.ok) { setErr(ssErrText(res, 'Не удалось перенести запись.')); return; }
+        load(offset);
+      }).catch(function () { setActing(false); setErr('Ошибка сети. Повторите.'); });
+      return;
+    }
     const rq = window.__meAuthReq ? window.__meAuthReq({
       record_id: rid,
       datetime: dtStr,
@@ -27070,7 +27221,7 @@ function ALiveSchedule() {
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, clientPhone ? fmtPhone(clientPhone) : 'Телефон не указан')), React.createElement('div', {
+  }, clientPhone ? fmtPhone(clientPhone) : 'Телефон не указан')), ssSaas ? null : React.createElement('div', {
     onClick: () => {
       setClientNameDraft(clientName);
       setClientPhoneDraft(fmtPhone(clientPhone));
@@ -27364,7 +27515,7 @@ function ALiveSchedule() {
       color: t.ink,
       marginTop: 10
     }
-  }, 'Оплачено')) : React.createElement('div', {
+  }, 'Оплачено')) : ssSaas ? null : React.createElement('div', {
     style: {
       marginTop: 16,
       border: '1px solid ' + t.line,

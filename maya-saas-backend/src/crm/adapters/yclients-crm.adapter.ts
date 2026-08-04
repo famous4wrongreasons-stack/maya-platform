@@ -6,6 +6,7 @@ import {
   ClientAppointmentsParams,
   ClientLoyaltySnapshot,
   CRMAdapter,
+  CrmAppointmentDetail,
   CrmCompanyOption,
   CrmCompanyProfile,
   CrmFinancialSummary,
@@ -396,12 +397,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const selectedServices = serviceCatalog.filter((service) =>
       params.serviceIds.includes(String(service.id)),
     );
+    const manualMinutes = Number(params.durationMinutes);
     const seanceLengthSeconds =
-      selectedServices.reduce(
-        (total, service) =>
-          total + (service.seance_length || service.duration || 0),
-        0,
-      ) || 3600;
+      Number.isFinite(manualMinutes) && manualMinutes >= 5 && manualMinutes <= 720
+        ? Math.round(manualMinutes) * 60
+        : selectedServices.reduce(
+            (total, service) =>
+              total + (service.seance_length || service.duration || 0),
+            0,
+          ) || 3600;
 
     const payload = {
       staff_id: this.toNumericId(params.staffId, 'staffId'),
@@ -415,7 +419,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
       },
       datetime: this.toYclientsDateTime(params.start),
       seance_length: seanceLengthSeconds,
-      save_if_busy: false,
+      // Ручная запись из журнала: мастер сажает клиента поверх занятого окна
+      // или вне графика сознательно — это его решение, а не ошибка ввода.
+      save_if_busy: params.allowBusy === true,
       send_sms: false,
       comment: params.notes || '',
     };
@@ -960,6 +966,112 @@ export class YclientsCRMAdapter implements CRMAdapter {
     );
 
     return { external_id: params.externalId, service_ids: params.serviceIds };
+  }
+
+  /**
+   * Карточка визита по тапу в сетке: то же, что в журнале, плюс телефон
+   * клиента, длительность и отметка о приходе — их в списке дня нет.
+   */
+  async getAppointmentDetail(params: {
+    tenantId: string;
+    externalId: string;
+    timezone: string;
+  }): Promise<CrmAppointmentDetail> {
+    const numericId = this.toNumericId(params.externalId, 'externalId');
+    const [response, staff, services] = await Promise.all([
+      this.request<YclientsRecordApiItem>(
+        `record/${this.getCompanyId()}/${numericId}`,
+      ),
+      this.getStaff(params.tenantId),
+      this.getServices(params.tenantId),
+    ]);
+    const record = response.data;
+
+    if (!record) {
+      throw new Error('YClients record was not found');
+    }
+
+    const appointment = this.mapJournalAppointment(
+      record,
+      params.timezone,
+      new Map(staff.map((member) => [member.id, member])),
+      new Map(services.map((service) => [service.id, service])),
+    );
+
+    if (!appointment) {
+      throw new Error('YClients record is malformed');
+    }
+
+    const seconds = Number(record.seance_length ?? record.length);
+    const durationMinutes =
+      Number.isFinite(seconds) && seconds > 0
+        ? Math.round(seconds / 60)
+        : Math.max(
+            5,
+            Math.round(
+              (new Date(appointment.end_at).getTime() -
+                new Date(appointment.start_at).getTime()) /
+                60000,
+            ),
+          );
+
+    return {
+      ...appointment,
+      client_phone: record.client?.phone
+        ? this.normalizePhone(record.client.phone)
+        : null,
+      duration_minutes: durationMinutes,
+      attendance: typeof record.attendance === 'number' ? record.attendance : 0,
+      paid: record.paid_full === true || record.paid_full === 1,
+      // Удалённую запись править нечего — кабинет спрячет кнопки.
+      can_edit: record.deleted !== true,
+    };
+  }
+
+  /**
+   * Подсказка постоянного клиента при ручной записи.
+   *
+   * 🔴 Короткий запрос НЕ ищем: YClients на пустой quick_search отдаёт просто
+   * первых клиентов подряд — это утечка чужих ПД в подсказку. Тот же порог,
+   * что в легаси-бэкенде: 4 цифры телефона или 3 символа имени.
+   */
+  async searchClients(params: {
+    tenantId: string;
+    query: string;
+  }): Promise<Array<{ id: string; name: string; phone: string | null }>> {
+    void params.tenantId;
+    const query = String(params.query ?? '').trim();
+    const digits = query.replace(/\D/g, '');
+
+    if (digits.length < 4 && query.length < 3) {
+      return [];
+    }
+
+    // Отказ поиска не должен ронять экран записи — подсказка необязательна.
+    try {
+      const response = await this.request<YclientsClientSearchItem[]>(
+        `company/${this.getCompanyId()}/clients/search`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            fields: ['id', 'name', 'phone'],
+            filters: [{ type: 'quick_search', state: { value: query } }],
+            page: 1,
+            page_size: 10,
+          }),
+        },
+      );
+
+      return (response.data || [])
+        .filter((candidate) => candidate?.id !== undefined)
+        .map((candidate) => ({
+          id: String(candidate.id),
+          name: String(candidate.name || '').trim(),
+          phone: candidate.phone ? this.normalizePhone(candidate.phone) : null,
+        }));
+    } catch {
+      return [];
+    }
   }
 
   /**

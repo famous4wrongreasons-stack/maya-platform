@@ -59,6 +59,17 @@ export interface CreateAppointmentParams {
   serviceIds: string[];
   start: string;
   notes?: string | null;
+  /**
+   * Админская запись из журнала: разрешить занятое окно и время вне графика.
+   * Клиентский путь всегда оставляет это выключенным — иначе клиент запишется
+   * на нерабочее время.
+   */
+  allowBusy?: boolean;
+  /**
+   * Длительность сеанса, заданная мастером вручную. Без неё длительность
+   * считается суммой услуг — так же, как в журнале салона.
+   */
+  durationMinutes?: number;
 }
 
 export interface CreatedAppointment {
