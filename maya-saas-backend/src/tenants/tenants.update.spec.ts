@@ -149,6 +149,14 @@ describe('TenantsService.updateTenant', () => {
   });
 
   it('persists requested booking mode and exposes effective live mode in admin payload', async () => {
+    // 🔴 Часы фиксируем, как в соседнем тесте ниже. Без этого тест — бомба
+    // замедленного действия: в фикстуре currentPeriodEnd = 31.07.2026, после
+    // него включается льготный период PAST_DUE_GRACE_DAYS = 3 дня, и начиная
+    // с 04.08.2026 тенант становится past_due → subscriptionRequired → режим
+    // записи падает в 'preview'. Тест зелёный до этой даты и красный после —
+    // именно так он и упал на CI утром 04.08.
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-17T12:00:00.000Z'));
+
     const tenantUpdateMock = jest.fn().mockResolvedValue(undefined);
     const brandingUpsertMock: jest.MockedFunction<
       (args: BrandingUpsertArgs) => Promise<void>
