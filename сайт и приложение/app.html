@@ -25969,9 +25969,95 @@ function ALiveSchedule() {
     const mm = Math.round((h - hh) * 60);
     return hh + ':' + pad2(mm);
   };
+  // ── SaaS-тенант: журнал из своего API, приведённый к легаси-форме ─────────
+  // Сетка (колонки мастеров, свободные окна, линия «сейчас») написана под ответ
+  // legacy `panel_journal`. Переписывать её под второй формат — значит держать
+  // две геометрии; вместо этого нормализуем SaaS-ответ в ту же форму.
+  const ssSaas = !!(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api);
+  function ssHHMM(iso, tz) {
+    try {
+      return new Intl.DateTimeFormat('ru-RU', {
+        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz || undefined
+      }).format(new Date(iso));
+    } catch (e) {
+      var d = new Date(iso);
+      return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    }
+  }
+  function ssStatus(s) {
+    // Легаси-палитра сетки знает ровно четыре состояния.
+    if (s === 'canceled' || s === 'cancelled') return 'cancelled';
+    if (s === 'no_show') return 'noshow';
+    if (s === 'completed') return 'done';
+    return 'waiting';
+  }
+  function ssLoad(o) {
+    var ctx = window.__ME_SAAS_CTX;
+    var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+    if (!bundle || !bundle.token) {
+      setLoading(false);
+      setErr('Войдите в рабочий кабинет, чтобы видеть расписание.');
+      return;
+    }
+    // 🔴 Границы дня считаем в ЛОКАЛЬНОМ поясе устройства, а не в UTC.
+    // Сервер переводит присланные моменты в пояс филиала и отдаёт мастеров со
+    // сменами только когда начало и конец попадают в ОДИН день. С UTC-границами
+    // для салона в Москве конец дня уезжал бы на следующую дату — мастера не
+    // пришли бы, и сетка снова выродилась бы в список.
+    var dayStart = new Date();
+    dayStart.setDate(dayStart.getDate() + o);
+    dayStart.setHours(0, 0, 0, 0);
+    var dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+    var from = dayStart.toISOString();
+    var to = dayEnd.toISOString();
+    fetch(ctx.api + '/integrations/crm/journal?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to), {
+      headers: { Accept: 'application/json', Authorization: 'Bearer ' + bundle.token }
+    }).then(function (r) {
+      return r.json().then(function (j) { return { ok: r.ok, status: r.status, body: j }; });
+    }).then(function (res) {
+      setLoading(false);
+      if (!res.ok) {
+        var msg = res.body && res.body.error && res.body.error.message || res.body && res.body.message;
+        setErr(Array.isArray(msg) ? msg.join('; ') : (msg || 'Не удалось загрузить расписание.'));
+        return;
+      }
+      var j = res.body || {};
+      var tz = j.timezone;
+      setData({
+        masters: (j.masters || []).map(function (m) {
+          return {
+            id: m.id, name: m.name,
+            // is_working === null значит «график неизвестен», а не выходной —
+            // такого мастера сетка обязана показать, иначе спрячет его записи.
+            is_working: m.is_working !== false,
+            work_start: m.work_start || '', work_end: m.work_end || '',
+            work_slots: m.work_slots || []
+          };
+        }),
+        all_masters: j.all_masters || j.masters || [],
+        records: (j.appointments || []).map(function (a) {
+          return {
+            record_id: a.id,
+            staff_id: a.provider && a.provider.id,
+            start: ssHHMM(a.start_at, tz),
+            end: ssHHMM(a.end_at, tz),
+            client: a.client && a.client.name || 'Клиент',
+            services: (a.services || []).map(function (s) { return s.name; }),
+            status: ssStatus(a.status),
+            mood: null                                // настроения визита в SaaS пока нет
+          };
+        }),
+        can_see_phone: false
+      });
+    }).catch(function () {
+      setLoading(false);
+      setErr('Ошибка сети. Повторите.');
+    });
+  }
   function load(o) {
     setLoading(true);
     setErr('');
+    if (ssSaas) { ssLoad(o); return; }
     const rq = window.__meAuthReq ? window.__meAuthReq({
       date: isoForOffset(o)
     }) : null;
