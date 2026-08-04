@@ -184,14 +184,12 @@ describe('CrmService: операции над визитом', () => {
   });
 
   it('мастер работает со своим визитом', async () => {
-    const getAppointmentDetail = jest
-      .fn()
-      .mockResolvedValue(detailOf('1461615'));
+    const getAppointmentStaffId = jest.fn().mockResolvedValue('1461615');
     const markAppointmentAttendance = jest
       .fn()
       .mockResolvedValue({ external_id: '77', attendance: 1 });
     const { service, run } = build(
-      { getAppointmentDetail, markAppointmentAttendance },
+      { getAppointmentStaffId, markAppointmentAttendance },
       { externalStaffId: '1461615', status: 'active' },
     );
 
@@ -200,6 +198,22 @@ describe('CrmService: операции над визитом', () => {
     );
 
     expect(markAppointmentAttendance).toHaveBeenCalledTimes(1);
+    // Владельца визита проверяем ОДНИМ запросом, без полной карточки.
+    expect(getAppointmentStaffId).toHaveBeenCalledTimes(1);
+  });
+
+  it('мастер не может изменить чужой визит', async () => {
+    const getAppointmentStaffId = jest.fn().mockResolvedValue('999');
+    const markAppointmentAttendance = jest.fn();
+    const { service, run } = build(
+      { getAppointmentStaffId, markAppointmentAttendance },
+      { externalStaffId: '1461615', status: 'active' },
+    );
+
+    await expect(
+      run(() => service.markAppointmentAttendance('tenant-1', MASTER, '77', 1)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(markAppointmentAttendance).not.toHaveBeenCalled();
   });
 
   it('без активной привязки к мастеру журнал закрыт (fail-closed)', async () => {

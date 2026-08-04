@@ -289,6 +289,11 @@ export interface CRMAdapter {
    * Все опциональные: провайдер, который их не умеет, просто не объявляет метод,
    * и кабинет прячет соответствующую кнопку вместо того, чтобы падать.
    */
+  /** Чей визит — для стража доступа, без загрузки полной карточки. */
+  getAppointmentStaffId?(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<string | null>;
   getAppointmentDetail?(params: {
     tenantId: string;
     externalId: string;

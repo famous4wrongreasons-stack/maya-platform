@@ -816,11 +816,10 @@ export class CrmService {
    * Возвращает уже загруженную карточку, если ради проверки её пришлось
    * прочитать — чтобы не ходить в CRM дважды.
    */
-  private async assertJournalRecordAccess(
+  private async journalStaffBinding(
     tenantId: string,
     actor: AuthenticatedUser,
-    externalId: string,
-  ): Promise<CrmAppointmentDetail | null> {
+  ): Promise<string | null> {
     if (CrmService.JOURNAL_FULL_ACCESS_ROLES.has(actor.role)) {
       return null;
     }
@@ -830,18 +829,38 @@ export class CrmService {
       select: { externalStaffId: true, status: true },
     });
 
-    // Нет привязки к мастеру в CRM — значит и своих визитов нет. Fail-closed.
+    // Нет активной привязки к мастеру в CRM — значит и своих визитов нет.
     if (!access || access.status !== 'active') {
       throw this.journalRecordForbidden();
     }
 
-    const detail = await this.loadAppointmentDetail(tenantId, externalId);
+    return access.externalStaffId;
+  }
 
-    if (String(detail.provider.id) !== String(access.externalStaffId)) {
-      throw this.journalRecordForbidden();
+  private async assertJournalRecordAccess(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+  ): Promise<void> {
+    const boundStaffId = await this.journalStaffBinding(tenantId, actor);
+
+    if (boundStaffId === null) {
+      return;
     }
 
-    return detail;
+    const adapter = await this.getVisitCapableAdapter(
+      tenantId,
+      'getAppointmentStaffId',
+      'crm_appointment_detail_not_supported',
+    );
+    const ownerStaffId = await adapter.getAppointmentStaffId({
+      tenantId,
+      externalId,
+    });
+
+    if (!ownerStaffId || String(ownerStaffId) !== String(boundStaffId)) {
+      throw this.journalRecordForbidden();
+    }
   }
 
   private async loadAppointmentDetail(
@@ -867,13 +886,17 @@ export class CrmService {
     externalId: string,
   ): Promise<CrmAppointmentDetail> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const guarded = await this.assertJournalRecordAccess(
-      scopedTenantId,
-      actor,
-      externalId,
-    );
-    const detail =
-      guarded ?? (await this.loadAppointmentDetail(scopedTenantId, externalId));
+    // Здесь карточку всё равно грузим — проверяем владельца по ней, без
+    // отдельного запроса в CRM.
+    const boundStaffId = await this.journalStaffBinding(scopedTenantId, actor);
+    const detail = await this.loadAppointmentDetail(scopedTenantId, externalId);
+
+    if (
+      boundStaffId !== null &&
+      String(detail.provider.id) !== String(boundStaffId)
+    ) {
+      throw this.journalRecordForbidden();
+    }
 
     if (CrmService.CLIENT_PHONE_ROLES.has(actor.role)) {
       return detail;

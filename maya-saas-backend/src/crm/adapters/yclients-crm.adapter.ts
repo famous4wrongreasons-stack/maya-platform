@@ -1004,6 +1004,32 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   /**
+   * Чей это визит — одним запросом.
+   *
+   * Страж доступа вызывается перед КАЖДОЙ операцией мастера, а полная карточка
+   * тянет ещё штат и каталог услуг. Для проверки владельца этого не нужно.
+   */
+  async getAppointmentStaffId(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<string | null> {
+    void params.tenantId;
+    const numericId = this.toNumericId(params.externalId, 'externalId');
+    const response = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${numericId}`,
+    );
+    const record = response.data;
+
+    if (!record) {
+      return null;
+    }
+
+    const staffId = String(record.staff_id ?? record.staff?.id ?? '');
+
+    return staffId || null;
+  }
+
+  /**
    * Карточка визита по тапу в сетке: то же, что в журнале, плюс телефон
    * клиента, длительность и отметка о приходе — их в списке дня нет.
    */
