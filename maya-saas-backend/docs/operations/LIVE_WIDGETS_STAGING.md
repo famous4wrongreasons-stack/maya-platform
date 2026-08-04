@@ -2,9 +2,10 @@
 
 Status: active as of 2026-07-19.
 
-This deployment exists to test MAYA chat widgets from the production PWA and
-the Capacitor iOS shell without switching the existing Python backend or the
-real `malesthetic` tenant.
+This deployment exists to test MAYA chat widgets from the current tenant PWA
+and the Capacitor iOS shell without switching the existing Python backend or
+the real `malesthetic` tenant. The `malesthetic.pro` domain belongs to that
+tenant and is not the future platform domain of MAYA APP.
 
 ## Public contract
 
@@ -13,7 +14,8 @@ real `malesthetic` tenant.
 - Demo tenant slug: `demo-business`
 - Calendar source: mock CRM
 - Booking mode: preview
-- CORS origins: `https://malesthetic.pro`, `https://www.malesthetic.pro`,
+- Temporary CORS origins used by this staging test:
+  `https://malesthetic.pro`, `https://www.malesthetic.pro`,
   `capacitor://localhost`
 
 The mock tenant contains two providers and three services. It is isolated from
@@ -108,7 +110,8 @@ legacy bot environment into this service, and never print
 ## Limits
 
 - This is a public staging endpoint, not the final commercial production URL.
-- The hostname uses `nip.io` until `api.malesthetic.pro` receives a DNS record.
+- The hostname uses `nip.io` until MAYA APP receives its own neutral
+  platform domain. Do not create `api.malesthetic.pro` for the platform.
 - The demo tenant is mock-only and cannot create a real salon appointment.
 - External authentication, payments and real CRM credentials are disabled.
 - Proactive `widget` signals in `POST /api/ai/chat` are a separate contract;

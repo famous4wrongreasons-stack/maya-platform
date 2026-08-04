@@ -33,7 +33,7 @@ describe('SafeOnboardingInterpreter', () => {
       industryPresetId: 'barbershop',
       providerCount: 1,
     });
-    expect(category.blueprint.services).toHaveLength(6);
+    expect(category.blueprint.services).toHaveLength(17);
     expect(category.missingFields).toEqual([
       'business_name',
       'calendar_source',
@@ -172,6 +172,39 @@ describe('SafeOnboardingInterpreter', () => {
     expect(second.blueprint.calendarSourceConfirmed).toBe(true);
   });
 
+  it('does not mistake a calendar answer for a missing business name', () => {
+    const first = interpreter.interpret(
+      'У меня барбершоп, работают 2 барбера. Услуги поставь автоматически.',
+    );
+
+    expect(first.blueprint.businessName).toBeNull();
+    expect(first.missingFields).toEqual(['business_name', 'calendar_source']);
+
+    const second = interpreter.interpret(
+      'Записи ведем во внутреннем календаре MAYA',
+      first.blueprint,
+    );
+
+    expect(second.blueprint.businessName).toBeNull();
+    expect(second.blueprint.calendarSource).toBe(CalendarSource.INTERNAL);
+    expect(second.blueprint.calendarSourceConfirmed).toBe(true);
+    expect(second.missingFields).toEqual(['business_name']);
+  });
+
+  it.each(['каждый день', 'ежедневно', 'без выходных'])(
+    'creates a seven-day schedule for the phrase "%s"',
+    (schedulePhrase) => {
+      const result = interpreter.interpret(
+        `Барбершоп называется Север. Работают 2 барбера. Услуги поставь автоматически. Работаем ${schedulePhrase} с 10:00 до 20:00 без CRM.`,
+      );
+
+      expect(result.blueprint.weeklyRules.map((rule) => rule.weekday)).toEqual([
+        0, 1, 2, 3, 4, 5, 6,
+      ]);
+      expect(result.blueprint.scheduleAssumed).toBe(false);
+    },
+  );
+
   it('marks a CRM-based business for external calendar connection', () => {
     const result = interpreter.interpret(
       'Студия называется Контур, 2 мастера. Услуги: консультация 1000 руб 30 минут. Работаем в YClients.',
@@ -291,12 +324,12 @@ describe('SafeOnboardingInterpreter', () => {
 
     expect(first.blueprint.templateId).toBe('barbershop');
     expect(completed.missingFields).toEqual([]);
-    expect(completed.blueprint.services).toHaveLength(6);
+    expect(completed.blueprint.services).toHaveLength(17);
     expect(completed.blueprint.services.map((service) => service.name)).toEqual(
       expect.arrayContaining([
         'Мужская стрижка',
-        'Стрижка машинкой',
-        'Коррекция бороды и усов',
+        'Стрижка машинкой + фейд',
+        'Моделирование бороды',
         'Бритьё головы',
         'Укладка',
       ]),
@@ -316,7 +349,7 @@ describe('SafeOnboardingInterpreter', () => {
       businessName: 'Артем',
       providerCount: 1,
     });
-    expect(result.blueprint.services).toHaveLength(6);
+    expect(result.blueprint.services).toHaveLength(17);
     expect(result.blueprint.services).not.toContainEqual(
       expect.objectContaining({ name: 'поставь автоматически' }),
     );
@@ -329,7 +362,7 @@ describe('SafeOnboardingInterpreter', () => {
     );
 
     expect(result.blueprint.categoryId).toBe('solo_barber');
-    expect(result.blueprint.services).toHaveLength(6);
+    expect(result.blueprint.services).toHaveLength(17);
     expect(result.blueprint.services.map((service) => service.name)).toContain(
       'Мужская стрижка',
     );
@@ -352,7 +385,7 @@ describe('SafeOnboardingInterpreter', () => {
       industryPresetId: 'barbershop',
       providerCount: 1,
     });
-    expect(result.blueprint.services).toHaveLength(6);
+    expect(result.blueprint.services).toHaveLength(17);
     expect(result.blueprint.services).not.toContainEqual(
       expect.objectContaining({ name: 'Консультация' }),
     );
@@ -421,7 +454,7 @@ describe('SafeOnboardingInterpreter', () => {
 
     expect(
       interpreter.interpret(message, first.blueprint).blueprint.services,
-    ).toHaveLength(6);
+    ).toHaveLength(17);
   });
 
   it('does not overwrite custom services with a vague auto reply', () => {

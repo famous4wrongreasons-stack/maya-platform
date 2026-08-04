@@ -15,10 +15,13 @@ import {
   randomBytes,
   type JsonWebKey as CryptoJsonWebKey,
 } from 'crypto';
+import { request as httpsRequest } from 'node:https';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import { UserRole, UserStatus } from '../common/domain.enums';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { asJson } from '../common/json.util';
-import { normalizeRussianPhone } from '../common/phone.util';
+import { normalizePhoneE164 } from '../common/phone.util';
 import {
   resolveAllowedOauthRedirectUri,
   resolveNodeEnvironment,
@@ -102,9 +105,17 @@ type TelegramJwk = CryptoJsonWebKey & {
   use?: string;
 };
 
+type TelegramRequestInit = {
+  body?: string | URLSearchParams;
+  headers?: HeadersInit;
+  method?: string;
+  signal?: AbortSignal;
+};
+
 @Injectable()
 export class SocialAuthService {
   private readonly logger = new Logger(SocialAuthService.name);
+  private telegramProxyAgent: SocksProxyAgent | null = null;
   private telegramJwksCache: {
     fetchedAt: number;
     keys: TelegramJwk[];
@@ -139,7 +150,7 @@ export class SocialAuthService {
       'YANDEX_CLIENT_ID',
       'Yandex ID login is not configured.',
     );
-    const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
+    const redirectUri = this.resolveStartRedirectUri(dto);
     const flow = await this.tenantContext.runAsPublicTenant(
       tenant.id,
       async () => {
@@ -159,8 +170,10 @@ export class SocialAuthService {
     authUrl.searchParams.set('client_id', clientId);
     authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('state', flow.state);
-    authUrl.searchParams.set('scope', 'login:info login:email');
-    authUrl.searchParams.set('optional_scope', 'login:default_phone');
+    authUrl.searchParams.set(
+      'scope',
+      'login:info login:email login:default_phone',
+    );
     authUrl.searchParams.set('code_challenge', flow.codeChallenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
@@ -225,7 +238,7 @@ export class SocialAuthService {
       'TELEGRAM_CLIENT_ID',
       'Telegram login is not configured.',
     );
-    const redirectUri = this.normalizeRedirectUri(dto.redirectUri);
+    const redirectUri = this.resolveStartRedirectUri(dto);
     const flow = await this.tenantContext.runAsPublicTenant(
       tenant.id,
       async () => {
@@ -292,6 +305,86 @@ export class SocialAuthService {
     });
   }
 
+  completeYandexLink(
+    dto: CompleteOauthLoginDto,
+    user: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    return this.completeIdentityLink('yandex', dto, user, metadata);
+  }
+
+  completeTelegramLink(
+    dto: CompleteOauthLoginDto,
+    user: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    return this.completeIdentityLink('telegram', dto, user, metadata);
+  }
+
+  async listLinkedIdentities(user: AuthenticatedUser) {
+    if (!user.tenantId) {
+      throw new ForbiddenException('Tenant-scoped account is required');
+    }
+
+    this.tenantContext.assertAuthPrincipal(user.userId, user.tenantId);
+    const identities = await this.authRepository.listIdentityProvidersForUser(
+      user.userId,
+    );
+
+    return {
+      ok: true,
+      providers: identities.map((identity) => ({
+        provider: identity.provider,
+        linked_at: identity.createdAt,
+        updated_at: identity.updatedAt,
+      })),
+    };
+  }
+
+  buildNativeCallbackUrl(params: {
+    code?: string;
+    state?: string;
+    error?: string;
+    errorDescription?: string;
+  }): string {
+    const state = this.asTrimmedString(params.state ?? null);
+    const code = this.asTrimmedString(params.code ?? null);
+    const error = this.asTrimmedString(params.error ?? null);
+    const errorDescription = this.asTrimmedString(
+      params.errorDescription ?? null,
+    );
+
+    if (
+      !state ||
+      !/^(?:ya|te)_[A-Za-z0-9_-]{8,128}$/.test(state) ||
+      (!code && !error) ||
+      (code?.length ?? 0) > 2048 ||
+      (error?.length ?? 0) > 128 ||
+      (errorDescription?.length ?? 0) > 512
+    ) {
+      throw new BadRequestException(
+        this.buildSocialAuthError(
+          'social_callback_invalid',
+          'The native social login callback is invalid.',
+        ),
+      );
+    }
+
+    const deepLink = new URL('mayaos://oauth-callback');
+
+    deepLink.searchParams.set('state', state);
+    if (code) {
+      deepLink.searchParams.set('code', code);
+    } else if (error) {
+      deepLink.searchParams.set('error', error);
+      if (errorDescription) {
+        deepLink.searchParams.set('error_description', errorDescription);
+      }
+    }
+
+    return deepLink.toString();
+  }
+
   private async resolveOrCreateUser(params: {
     branchId?: string;
     profile: SocialProfile;
@@ -304,12 +397,46 @@ export class SocialAuthService {
     );
 
     if (existingIdentity) {
-      const user = await this.usersService.getTenantUserOrThrow(
+      let user = await this.usersService.getTenantUserOrThrow(
         existingIdentity.user.id,
         params.tenant.id,
       );
+
+      // An owner may have used the same social account as a customer before
+      // creating the tenant. A provider-verified phone is the only safe signal
+      // for promoting that identity to the already provisioned business user.
+      // The owner still keeps the customer workspace through the role-aware UI.
+      if (this.isClientRole(user.role) && params.profile.phone) {
+        const businessUser = await this.usersService.findTenantUserByPhone(
+          params.tenant.id,
+          params.profile.phone,
+        );
+
+        if (
+          businessUser &&
+          businessUser.id !== user.id &&
+          this.isBusinessRole(businessUser.role as UserRole)
+        ) {
+          this.assertUserCanLogin(businessUser);
+          await this.authRepository.reassignIdentity(existingIdentity.id, {
+            userId: businessUser.id,
+            email: params.profile.email,
+            phone: params.profile.phone,
+            profileJson: asJson(params.profile.raw),
+          });
+          user = businessUser;
+        }
+      }
+
       this.assertUserCanLogin(user);
       await this.updateIdentityRecord(existingIdentity.id, params.profile);
+      if (!user.phone && params.profile.phone) {
+        user = await this.usersService.attachVerifiedSocialPhone(
+          user.id,
+          params.tenant.id,
+          params.profile.phone,
+        );
+      }
 
       return {
         user,
@@ -343,6 +470,41 @@ export class SocialAuthService {
 
     if (matchedUser) {
       this.assertUserCanLogin(matchedUser);
+      this.assertClientIdentityHasVerifiedPhone(matchedUser, params.profile);
+
+      // ── Рабочий аккаунт: заявка снаружи только на ПЕРВУЮ привязку ────────
+      //
+      // Телефон бизнес-аккаунта вводится в форму при регистрации и никем не
+      // доказан, поэтому был соблазн вообще запретить вход по совпадению
+      // телефона. Такой запрет ставился и был снят: он запирает самого
+      // владельца. Свежесозданный бизнес не имеет ни одного привязанного
+      // провайдера, а запасные входы (код на почту, код по SMS) в окружении
+      // могут быть выключены — тогда войти становится нечем вообще.
+      //
+      // Поэтому рубеж один и он стоит там, где реально опасно: аккаунт, у
+      // которого провайдер УЖЕ привязан, снаружи не отдаётся никому — ни по
+      // телефону, ни по почте. Второй провайдер добавляется изнутри аккаунта
+      // через /auth/oauth/{provider}/link/complete.
+      //
+      // Остаточный риск — первая заявка на аккаунт с ошибочно введённым
+      // телефоном. Он закрывается не запретом, а привязкой владельца к той
+      // личности, что создала бизнес (сессия онбординга), — это отдельная
+      // задача, см. MAYA_OS_AUDIT.
+      if (this.isBusinessRole(matchedUser.role as UserRole)) {
+        const linkedProviders =
+          await this.authRepository.listIdentityProvidersForUser(
+            matchedUser.id,
+          );
+
+        if (linkedProviders.length > 0) {
+          throw new ConflictException(
+            this.buildSocialAuthError(
+              'social_business_link_required',
+              'This business account already has a linked sign-in method. Add another provider from inside the account instead of claiming it by phone.',
+            ),
+          );
+        }
+      }
 
       await this.authRepository.createIdentity({
         userId: matchedUser.id,
@@ -353,15 +515,59 @@ export class SocialAuthService {
         profileJson: asJson(params.profile.raw),
       });
 
+      const resolvedUser =
+        !matchedUser.phone && params.profile.phone
+          ? await this.usersService.attachVerifiedSocialPhone(
+              matchedUser.id,
+              params.tenant.id,
+              params.profile.phone,
+            )
+          : matchedUser;
+
       return {
-        user: matchedUser,
+        user: resolvedUser,
         isNewUser: false,
       };
+    }
+
+    // ЖЁСТКОЕ ПРАВИЛО: если у номера в этом тенанте уже есть бизнес-личность —
+    // клиентский аккаунт не создаём никогда.
+    //
+    // Сюда мы попадаем только когда лукап активного membership ничего не нашёл.
+    // Раньше этого было достаточно, чтобы завести дубль: reconcileCrmTeamAccess
+    // по одному несовпадающему ответу CRM переводит memberships не-владельцев в
+    // `suspended`, а поиск фильтровал по `status: 'active'` — подавленный мастер
+    // становился невидим, и следующий вход создавал ему второй, параллельный
+    // client-аккаунт. Штатно это уже не чинилось: телефон оказывался занят
+    // дублем, и экран «Команда» отвечал crm_team_contact_already_used.
+    if (params.profile.phone) {
+      const businessIdentity =
+        await this.usersService.findTenantIdentityByPhone(
+          params.tenant.id,
+          params.profile.phone,
+        );
+
+      if (
+        businessIdentity &&
+        (this.isBusinessRole(businessIdentity.membershipRole as UserRole) ||
+          businessIdentity.crmStaffAccess !== null)
+      ) {
+        throw new ConflictException(
+          this.buildSocialAuthError(
+            'social_business_access_suspended',
+            'This phone already belongs to a business account in this workspace. Restore that access instead of opening a client account.',
+          ),
+        );
+      }
     }
 
     this.assertTenantAllowsClientRegistration(params.tenant);
     this.assertTenantAllowsSelfRegistration(
       params.tenant.allowSelfRegistration,
+    );
+    this.assertClientIdentityHasVerifiedPhone(
+      { role: UserRole.CLIENT, phone: null },
+      params.profile,
     );
 
     if (params.branchId) {
@@ -405,6 +611,100 @@ export class SocialAuthService {
       user: createdUser,
       isNewUser: true,
     };
+  }
+
+  private async completeIdentityLink(
+    provider: SocialProvider,
+    dto: CompleteOauthLoginDto,
+    principal: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata>,
+  ) {
+    this.assertProviderEnabled(provider);
+    if (!principal.tenantId || !this.isBusinessRole(principal.role)) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_link_forbidden',
+          'Only an authenticated business account can link this sign-in method.',
+        ),
+      );
+    }
+
+    await this.rateLimitService.assertPreflight('oauth_complete', {
+      clientIp: metadata.clientIp,
+      identity: dto.state,
+    });
+
+    const flow = await this.getValidAuthFlowState(dto.state, provider);
+    if (flow.tenant.id !== principal.tenantId) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_link_tenant_mismatch',
+          'This sign-in request belongs to another business.',
+        ),
+      );
+    }
+
+    return this.tenantContext.runAsAuthPrincipal(principal, async () => {
+      await this.rateLimitService.assertTenant('oauth_complete', {
+        tenantId: flow.tenant.id,
+        identity: dto.state,
+      });
+      await this.claimAuthFlowStateOrThrow(flow.id, provider);
+
+      const profile =
+        provider === 'yandex'
+          ? await this.exchangeYandexCode(flow, dto.code)
+          : await this.exchangeTelegramCode(flow, dto.code);
+      const targetUser = await this.usersService.getTenantUserOrThrow(
+        principal.userId,
+        flow.tenant.id,
+      );
+
+      this.assertUserCanLogin(targetUser);
+      const existingIdentity = await this.authRepository.findIdentity(
+        provider,
+        profile.providerUserId,
+      );
+      let transferredFromClient = false;
+
+      if (existingIdentity && existingIdentity.user.id !== targetUser.id) {
+        if (!this.isClientRole(existingIdentity.user.role)) {
+          throw new ConflictException(
+            this.buildSocialAuthError(
+              'social_identity_conflict',
+              'This social account is already linked to another staff account.',
+            ),
+          );
+        }
+
+        await this.authRepository.reassignIdentity(existingIdentity.id, {
+          userId: targetUser.id,
+          email: profile.email,
+          phone: profile.phone,
+          profileJson: asJson(profile.raw),
+        });
+        transferredFromClient = true;
+      } else if (existingIdentity) {
+        await this.updateIdentityRecord(existingIdentity.id, profile);
+      } else {
+        await this.authRepository.createIdentity({
+          userId: targetUser.id,
+          provider,
+          providerUserId: profile.providerUserId,
+          email: profile.email,
+          phone: profile.phone,
+          profileJson: asJson(profile.raw),
+        });
+      }
+
+      return {
+        ok: true,
+        provider,
+        linked: true,
+        transferred_from_client: transferredFromClient,
+        user: await this.usersService.serializeCurrentUser(targetUser),
+      };
+    });
   }
 
   private async exchangeYandexCode(
@@ -546,16 +846,19 @@ export class SocialAuthService {
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString(
       'base64',
     );
-    const tokenResponse = await fetch('https://oauth.telegram.org/token', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Basic ${basicAuth}`,
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    const tokenResponse = await this.fetchTelegramProvider(
+      'https://oauth.telegram.org/token',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Basic ${basicAuth}`,
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: tokenPayload,
+        signal: AbortSignal.timeout(this.getOauthTimeoutMs()),
       },
-      body: tokenPayload,
-      signal: AbortSignal.timeout(this.getOauthTimeoutMs()),
-    });
+    );
     const tokenJson =
       await this.parseJsonResponse<TelegramTokenResponse>(tokenResponse);
 
@@ -710,7 +1013,7 @@ export class SocialAuthService {
       return this.telegramJwksCache.keys;
     }
 
-    const response = await fetch(
+    const response = await this.fetchTelegramProvider(
       this.configService.get<string>('TELEGRAM_JWKS_URL')?.trim() ||
         'https://oauth.telegram.org/.well-known/jwks.json',
       {
@@ -738,6 +1041,106 @@ export class SocialAuthService {
     };
 
     return keys;
+  }
+
+  private async fetchTelegramProvider(
+    url: string,
+    init: TelegramRequestInit,
+  ): Promise<Response> {
+    try {
+      const proxyUrl = this.configService
+        .get<string>('TELEGRAM_OAUTH_PROXY_URL')
+        ?.trim();
+
+      if (!proxyUrl) {
+        return await fetch(url, init);
+      }
+
+      return await this.fetchTelegramThroughProxy(url, init, proxyUrl);
+    } catch (error) {
+      const errorName = error instanceof Error ? error.name : 'UnknownError';
+
+      this.logger.warn(
+        `Telegram OAuth provider request failed (${errorName}).`,
+      );
+      throw new ServiceUnavailableException(
+        this.buildSocialAuthError(
+          'social_provider_unavailable',
+          'Telegram login is temporarily unavailable. Please try again.',
+        ),
+      );
+    }
+  }
+
+  private fetchTelegramThroughProxy(
+    url: string,
+    init: TelegramRequestInit,
+    proxyUrl: string,
+  ): Promise<Response> {
+    const body =
+      init.body instanceof URLSearchParams ? init.body.toString() : init.body;
+
+    if (!this.telegramProxyAgent) {
+      this.telegramProxyAgent = new SocksProxyAgent(proxyUrl);
+    }
+
+    return new Promise<Response>((resolve, reject) => {
+      const request = httpsRequest(
+        url,
+        {
+          agent: this.telegramProxyAgent!,
+          headers: Object.fromEntries(new Headers(init.headers).entries()),
+          method: init.method || 'GET',
+          signal: init.signal,
+        },
+        (providerResponse) => {
+          const chunks: Buffer[] = [];
+          let totalBytes = 0;
+
+          providerResponse.on('data', (chunk: Buffer | string) => {
+            const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+
+            totalBytes += buffer.length;
+            if (totalBytes > 1_048_576) {
+              providerResponse.destroy(
+                new Error('Telegram OAuth response exceeded the size limit.'),
+              );
+              return;
+            }
+            chunks.push(buffer);
+          });
+          providerResponse.on('error', reject);
+          providerResponse.on('end', () => {
+            const headers = new Headers();
+
+            for (
+              let index = 0;
+              index < providerResponse.rawHeaders.length;
+              index += 2
+            ) {
+              headers.append(
+                providerResponse.rawHeaders[index],
+                providerResponse.rawHeaders[index + 1],
+              );
+            }
+
+            resolve(
+              new Response(Buffer.concat(chunks), {
+                headers,
+                status: providerResponse.statusCode || 502,
+                statusText: providerResponse.statusMessage,
+              }),
+            );
+          });
+        },
+      );
+
+      request.on('error', reject);
+      if (body) {
+        request.write(body);
+      }
+      request.end();
+    });
   }
 
   private async parseJsonResponse<TPayload>(
@@ -824,6 +1227,25 @@ export class SocialAuthService {
       phone: profile.phone,
       profileJson: asJson(profile.raw),
     });
+  }
+
+  private isClientRole(role: string): boolean {
+    return new Set<string>([UserRole.CLIENT, UserRole.CUSTOMER]).has(role);
+  }
+
+  private isBusinessRole(role: UserRole): boolean {
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+      UserRole.MANAGER,
+      UserRole.BRANCH_MANAGER,
+      UserRole.PROVIDER,
+      UserRole.STAFF,
+      UserRole.EMPLOYEE,
+      UserRole.ACCOUNTANT,
+    ].includes(role);
   }
 
   private async claimAuthFlowStateOrThrow(
@@ -936,6 +1358,34 @@ export class SocialAuthService {
     return role !== UserRole.CLIENT;
   }
 
+  private assertClientIdentityHasVerifiedPhone(
+    user: { role: string; phone?: string | null },
+    profile: SocialProfile,
+  ): void {
+    if (user.role !== 'client') {
+      return;
+    }
+
+    if (!profile.phone) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_phone_required',
+          'Allow the identity provider to share a verified phone number to open the CRM client account.',
+        ),
+      );
+    }
+
+    const storedPhone = this.normalizeProviderPhone(user.phone ?? null);
+    if (storedPhone && storedPhone !== profile.phone) {
+      throw new ConflictException(
+        this.buildSocialAuthError(
+          'social_identity_conflict',
+          'The verified social phone does not match this client account.',
+        ),
+      );
+    }
+  }
+
   private assertProviderEnabled(provider: SocialProvider) {
     const key =
       provider === 'yandex' ? 'YANDEX_LOGIN_ENABLED' : 'TELEGRAM_LOGIN_ENABLED';
@@ -987,6 +1437,36 @@ export class SocialAuthService {
     }
   }
 
+  private resolveStartRedirectUri(dto: StartOauthLoginDto): string {
+    if (dto.platform === 'ios') {
+      const nativeRedirectUri = this.configService
+        .get<string>('OAUTH_NATIVE_REDIRECT_URI')
+        ?.trim();
+
+      if (!nativeRedirectUri) {
+        throw new ServiceUnavailableException(
+          this.buildSocialAuthError(
+            'social_native_callback_unavailable',
+            'Native social login requires the neutral MAYA OS callback domain.',
+          ),
+        );
+      }
+
+      return this.normalizeRedirectUri(nativeRedirectUri);
+    }
+
+    if (!dto.redirectUri) {
+      throw new BadRequestException(
+        this.buildSocialAuthError(
+          'social_redirect_invalid',
+          'The social login redirect URI is required for web clients.',
+        ),
+      );
+    }
+
+    return this.normalizeRedirectUri(dto.redirectUri);
+  }
+
   private normalizeEmail(value: string | null): string | null {
     if (!value) {
       return null;
@@ -997,16 +1477,13 @@ export class SocialAuthService {
     return normalized.includes('@') ? normalized : null;
   }
 
+  // Раньше здесь стоял строгий российский нормализатор в try/catch: любой
+  // подтверждённый провайдером не-российский номер молча превращался в null,
+  // то есть становился неотличим от «пользователь отказался дать телефон».
+  // Теперь номер сохраняется в E.164, а решение о допуске принимает
+  // вызывающая сторона.
   private normalizeProviderPhone(value: string | null): string | null {
-    if (!value) {
-      return null;
-    }
-
-    try {
-      return normalizeRussianPhone(value);
-    } catch {
-      return null;
-    }
+    return normalizePhoneE164(value);
   }
 
   private generateCodeVerifier(): string {
@@ -1082,7 +1559,14 @@ export class SocialAuthService {
     code:
       | 'self_registration_disabled'
       | 'social_exchange_failed'
+      | 'social_business_access_suspended'
+      | 'social_business_link_required'
+      | 'social_callback_invalid'
       | 'social_identity_conflict'
+      | 'social_link_forbidden'
+      | 'social_link_tenant_mismatch'
+      | 'social_native_callback_unavailable'
+      | 'social_phone_required'
       | 'social_provider_unavailable'
       | 'social_redirect_invalid'
       | 'social_state_invalid'

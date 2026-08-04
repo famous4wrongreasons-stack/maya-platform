@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 
+import { CrmModule } from '../crm/crm.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
@@ -27,6 +28,7 @@ import { TenantAuthRepository } from './tenant-auth.repository';
 @Module({
   imports: [
     ConfigModule,
+    CrmModule,
     PassportModule,
     PrismaModule,
     UsersModule,

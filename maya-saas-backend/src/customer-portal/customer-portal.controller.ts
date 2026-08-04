@@ -9,10 +9,28 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { CustomerPortalService } from './customer-portal.service';
 
+// A tenant user can also be a customer of the same business. The endpoint is
+// self-scoped by the authenticated user id, so allowing business roles here
+// changes the available surface without widening access to another customer.
+const CUSTOMER_PORTAL_ROLES = [
+  UserRole.CLIENT,
+  UserRole.CUSTOMER,
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.STAFF,
+  UserRole.ACCOUNTANT,
+] as const;
+
 @ApiTags('customer-portal')
 @ApiBearerAuth()
 @TenantScoped()
-@Roles(UserRole.CLIENT, UserRole.CUSTOMER)
+@Roles(...CUSTOMER_PORTAL_ROLES)
 @RequiresFeature('customer.portal')
 @Controller('customer-portal')
 export class CustomerPortalController {

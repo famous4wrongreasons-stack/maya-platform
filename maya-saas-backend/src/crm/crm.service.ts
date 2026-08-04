@@ -2,13 +2,16 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import {
   CalendarSource,
   CrmIntegrationStatus,
   CrmProvider,
+  UserRole,
 } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -21,6 +24,9 @@ import {
   CRMAdapter,
   CreatedAppointment,
   CrmAdapterConfig,
+  CrmCompanyProfile,
+  CrmFinancialSummary,
+  CrmTeamMember,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
@@ -32,6 +38,8 @@ import {
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
+import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
+import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
 import {
   normalizeCrmProviderSettings,
   serializePublicCrmSettings,
@@ -61,9 +69,10 @@ type StoredCrmIntegration = {
   updatedAt: Date;
 };
 
-type CrmImportPreview = {
+export type CrmImportPreview = {
   provider: CrmProvider;
   company_id: number | string | null;
+  company: CrmCompanyProfile | null;
   services: {
     count: number;
     items: ServiceItem[];
@@ -72,11 +81,17 @@ type CrmImportPreview = {
     count: number;
     items: StaffMember[];
   };
+  team: {
+    count: number;
+    items: CrmTeamMember[];
+  };
   warnings: string[];
 };
 
 @Injectable()
 export class CrmService {
+  private readonly logger = new Logger(CrmService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
@@ -84,6 +99,76 @@ export class CrmService {
     private readonly tenantContext: TenantContextService,
     private readonly internalCalendarService: InternalCalendarService,
   ) {}
+
+  async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
+    this.tenantContext.assertTenantId(tenantId);
+    return this.discoverCompaniesForCredential(dto);
+  }
+
+  async discoverCompaniesForCredential(dto: DiscoverCrmCompaniesDto) {
+    this.assertProviderCanBeTenantConnected(dto.provider);
+
+    const apiToken = dto.apiToken.trim();
+    if (!apiToken) {
+      throw new BadRequestException({
+        message: 'CRM API token is required',
+        error: { code: 'crm_token_required', provider: dto.provider },
+      });
+    }
+
+    const adapter = this.adapterFactory.create(dto.provider, {
+      provider: dto.provider,
+      apiToken,
+      settings: {},
+    });
+
+    if (!adapter.discoverCompanies) {
+      throw new BadRequestException({
+        message: 'CRM company discovery is not supported for this provider',
+        error: {
+          code: 'crm_company_discovery_not_supported',
+          provider: dto.provider,
+        },
+      });
+    }
+
+    try {
+      return {
+        provider: dto.provider,
+        companies: await adapter.discoverCompanies(),
+      };
+    } catch (error) {
+      throw this.toSafeConnectionException(dto.provider, error);
+    }
+  }
+
+  async previewCredentials(
+    provider: CrmProvider,
+    apiToken: string,
+    settingsJson: Record<string, unknown>,
+  ): Promise<CrmImportPreview> {
+    this.assertProviderCanBeTenantConnected(provider);
+    const normalizedToken = apiToken.trim();
+
+    if (!normalizedToken) {
+      throw new BadRequestException({
+        message: 'CRM API token is required',
+        error: { code: 'crm_token_required', provider },
+      });
+    }
+
+    const settings = normalizeCrmProviderSettings(provider, settingsJson);
+
+    try {
+      return await this.loadConnectionPreview('onboarding-preview', provider, {
+        provider,
+        apiToken: normalizedToken,
+        settings,
+      });
+    } catch (error) {
+      throw this.toSafeConnectionException(provider, error);
+    }
+  }
 
   async createOrUpdateIntegration(
     tenantId: string,
@@ -324,6 +409,8 @@ export class CrmService {
       throw this.toSafeConnectionException(provider, error);
     }
 
+    await this.reconcileCrmTeamAccess(scopedTenantId, preview.team.items);
+
     const checkedAt = new Date();
     const status =
       integration.status === 'active'
@@ -372,6 +459,8 @@ export class CrmService {
       if (!result.ok) {
         throw new Error('CRM connection check failed');
       }
+      const team = await this.loadTeamMembers(adapter, scopedTenantId);
+      await this.reconcileCrmTeamAccess(scopedTenantId, team);
 
       const checkedAt = new Date();
       const status =
@@ -416,6 +505,58 @@ export class CrmService {
       connection: null,
       next_action: 'connect',
     };
+  }
+
+  async synchronizeCrmTeamAccess(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    try {
+      const integration = await this.getStoredIntegration(scopedTenantId);
+      const adapter = this.adapterFactory.create(
+        integration.provider as CrmProvider,
+        this.createAdapterConfig(integration),
+      );
+      const team = await this.loadTeamMembers(adapter, scopedTenantId);
+      await this.reconcileCrmTeamAccess(scopedTenantId, team);
+
+      return { synced: true, active_crm_team: team.length };
+    } catch (error) {
+      const errorCode = this.safeErrorCode(error);
+      this.logger.warn(
+        `CRM team access synchronization deferred tenant=${scopedTenantId}: ${errorCode}`,
+      );
+      return { synced: false, active_crm_team: null, error_code: errorCode };
+    }
+  }
+
+  async assertCrmStaffAccessActive(tenantId: string, userId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId: scopedTenantId, userId },
+      select: {
+        externalStaffId: true,
+        role: true,
+        status: true,
+      },
+    });
+
+    if (!access || this.isOwnerAccessRole(access.role)) return;
+
+    const synchronization = await this.synchronizeCrmTeamAccess(scopedTenantId);
+    if (!synchronization.synced) {
+      if (access.status === 'disabled') {
+        throw this.crmStaffAccessDisabled();
+      }
+      return;
+    }
+
+    const current = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId: scopedTenantId, userId },
+      select: { status: true },
+    });
+    if (!current || current.status !== 'active') {
+      throw this.crmStaffAccessDisabled();
+    }
   }
 
   async getServices(tenantId: string) {
@@ -525,7 +666,7 @@ export class CrmService {
     });
   }
 
-  async getClientAppointments(tenantId: string, clientId: string) {
+  async getClientAppointments(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
     if (
@@ -534,8 +675,114 @@ export class CrmService {
       return [];
     }
 
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { defaultTimezone: true },
+    });
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.getClientAppointments(clientId);
+    return adapter.getClientAppointments({
+      tenantId: scopedTenantId,
+      phone,
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+    });
+  }
+
+  async getJournal(tenantId: string, query: ListCrmJournalDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM journal range is invalid.',
+        error: { code: 'crm_journal_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM journal range must not exceed 31 days.',
+        error: { code: 'crm_journal_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getJournal) {
+      throw new ConflictException({
+        message: 'CRM journal is not available for this provider.',
+        error: { code: 'crm_journal_not_supported' },
+      });
+    }
+
+    return adapter.getJournal({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      providerId: query.providerId,
+    });
+  }
+
+  async getFinancialSummary(
+    tenantId: string,
+    query: { from: string; to: string },
+  ): Promise<CrmFinancialSummary> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM finance range is invalid.',
+        error: { code: 'crm_finance_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM finance range must not exceed 31 days.',
+        error: { code: 'crm_finance_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getFinancialSummary) {
+      throw new ConflictException({
+        message: 'CRM financial analytics is not available for this provider.',
+        error: { code: 'crm_finance_not_supported' },
+      });
+    }
+
+    return adapter.getFinancialSummary({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+    });
   }
 
   async getClientLoyalty(tenantId: string, phone: string) {
@@ -696,15 +943,27 @@ export class CrmService {
     config: CrmAdapterConfig,
   ): Promise<CrmImportPreview> {
     const adapter = this.adapterFactory.create(provider, config);
-    const check = await adapter.testConnection(tenantId);
+    const check = await this.loadPreviewPart(provider, 'connection_check', () =>
+      adapter.testConnection(tenantId),
+    );
 
     if (!check.ok) {
       throw new Error('CRM connection check failed');
     }
 
-    const [services, staff] = await Promise.all([
-      adapter.getServices(tenantId),
-      adapter.getStaff(tenantId),
+    const [services, staff, team, company] = await Promise.all([
+      this.loadPreviewPart(provider, 'services', () =>
+        adapter.getServices(tenantId),
+      ),
+      this.loadPreviewPart(provider, 'staff', () => adapter.getStaff(tenantId)),
+      this.loadPreviewPart(provider, 'team', () =>
+        this.loadTeamMembers(adapter, tenantId),
+      ),
+      adapter.getCompanyProfile
+        ? this.loadPreviewPart(provider, 'company_profile', () =>
+            adapter.getCompanyProfile!(),
+          )
+        : Promise.resolve(null),
     ]);
     const settings = config.settings ?? {};
     const warnings: string[] = [];
@@ -723,16 +982,188 @@ export class CrmService {
         typeof settings.companyId === 'string'
           ? settings.companyId
           : null,
+      company,
       services: {
         count: services.length,
-        items: services.slice(0, 12),
+        items: services.slice(0, 30),
       },
       staff: {
         count: staff.length,
-        items: staff.slice(0, 12),
+        items: staff.slice(0, 30),
+      },
+      team: {
+        count: team.length,
+        items: team.slice(0, 50),
       },
       warnings,
     };
+  }
+
+  private async loadTeamMembers(
+    adapter: CRMAdapter,
+    tenantId: string,
+  ): Promise<CrmTeamMember[]> {
+    if (adapter.getTeamMembers) {
+      return adapter.getTeamMembers(tenantId);
+    }
+
+    return (await adapter.getStaff(tenantId)).map((member) => ({
+      ...member,
+      bookable: true,
+      suggested_role: 'staff',
+    }));
+  }
+
+  private async reconcileCrmTeamAccess(
+    tenantId: string,
+    team: CrmTeamMember[],
+  ): Promise<void> {
+    const accesses = await this.prisma.crmStaffAccess.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        externalStaffId: true,
+        userId: true,
+        role: true,
+        status: true,
+        encryptedDisplayName: true,
+        title: true,
+      },
+    });
+
+    const teamById = new Map(team.map((member) => [String(member.id), member]));
+    const activeIds = new Set(teamById.keys());
+    const knownIds = new Set(accesses.map((access) => access.externalStaffId));
+    const now = new Date();
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const access of accesses) {
+        const member = teamById.get(access.externalStaffId);
+        if (this.isOwnerAccessRole(access.role)) {
+          if (member && access.title !== (member.title ?? null)) {
+            await tx.crmStaffAccess.update({
+              where: { id: access.id },
+              data: { title: member.title ?? null },
+            });
+          }
+          continue;
+        }
+
+        const present = activeIds.has(access.externalStaffId);
+        const nextStatus = present
+          ? access.userId
+            ? 'active'
+            : 'pending_contact'
+          : 'disabled';
+
+        if (
+          access.status !== nextStatus ||
+          (member && access.title !== (member.title ?? null))
+        ) {
+          await tx.crmStaffAccess.update({
+            where: { id: access.id },
+            data: {
+              status: nextStatus,
+              ...(member ? { title: member.title ?? null } : {}),
+            },
+          });
+        }
+
+        if (!access.userId) continue;
+        if (present) {
+          // Reactivate only an account that this CRM fence disabled earlier.
+          // An unrelated manual membership suspension must remain in force.
+          if (access.status !== 'disabled') continue;
+          await tx.membership.updateMany({
+            where: { tenantId, userId: access.userId, status: 'suspended' },
+            data: { status: 'active' },
+          });
+          continue;
+        }
+
+        await tx.membership.updateMany({
+          where: { tenantId, userId: access.userId, status: 'active' },
+          data: { status: 'suspended' },
+        });
+        await tx.authSession.updateMany({
+          where: {
+            tenantId,
+            userId: access.userId,
+            revokedAt: null,
+          },
+          data: {
+            revokedAt: now,
+            revokeReason: 'crm_staff_inactive',
+          },
+        });
+      }
+
+      const newMembers = team.filter(
+        (member) => !knownIds.has(String(member.id)),
+      );
+      if (newMembers.length) {
+        await tx.crmStaffAccess.createMany({
+          data: newMembers.map((member) => ({
+            tenantId,
+            externalStaffId: String(member.id),
+            encryptedDisplayName: this.encryptionService.encrypt(member.name),
+            title: member.title ?? null,
+            role:
+              member.suggested_role === 'administrator'
+                ? UserRole.ADMINISTRATOR
+                : UserRole.STAFF,
+            status: 'pending_contact' as const,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    });
+  }
+
+  private isOwnerAccessRole(role: string): boolean {
+    return new Set<string>([
+      UserRole.TENANT_ADMIN,
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+    ]).has(role);
+  }
+
+  private crmStaffAccessDisabled(): UnauthorizedException {
+    return new UnauthorizedException({
+      message: 'CRM staff access is no longer active.',
+      error: {
+        code: 'crm_staff_access_disabled',
+        message:
+          '\u0414\u043e\u0441\u0442\u0443\u043f \u043a MAYA \u043e\u0442\u043a\u043b\u044e\u0447\u0451\u043d: \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u0430\u043a\u0442\u0438\u0432\u0435\u043d \u0432 CRM.',
+      },
+    });
+  }
+
+  private safeErrorCode(error: unknown): string {
+    if (!error || typeof error !== 'object') return 'unknown';
+    const candidate = error as {
+      code?: unknown;
+      response?: { error?: { code?: unknown } };
+    };
+    const value = candidate.response?.error?.code ?? candidate.code;
+    return typeof value === 'string' ? value.slice(0, 64) : 'unavailable';
+  }
+
+  private async loadPreviewPart<T>(
+    provider: CrmProvider,
+    operation: string,
+    loader: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await loader();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const status = message.match(/\bstatus\s+(\d{3})\b/i)?.[1] ?? 'unknown';
+      this.logger.warn(
+        `CRM preview failed provider=${provider} operation=${operation} status=${status}`,
+      );
+      throw error;
+    }
   }
 
   private async activateVerifiedIntegration(tenantId: string) {
@@ -759,10 +1190,56 @@ export class CrmService {
         where: { id: scopedTenantId },
         data: { calendarSource: CalendarSource.EXTERNAL },
       });
+      if ((existing.provider as CrmProvider) !== CrmProvider.MOCK) {
+        const branding = await tx.brandingSettings.findUnique({
+          where: { tenantId: scopedTenantId },
+          select: { themeJson: true },
+        });
+        await tx.brandingSettings.upsert({
+          where: { tenantId: scopedTenantId },
+          create: {
+            tenantId: scopedTenantId,
+            themeJson: this.withRequestedBookingMode(
+              branding?.themeJson,
+              'live',
+            ),
+          },
+          update: {
+            themeJson: this.withRequestedBookingMode(
+              branding?.themeJson,
+              'live',
+            ),
+          },
+        });
+      }
       return activated;
     });
 
     return this.serializeIntegration(integration);
+  }
+
+  private withRequestedBookingMode(
+    themeJson: unknown,
+    mode: 'live' | 'preview',
+  ) {
+    const theme =
+      themeJson && typeof themeJson === 'object' && !Array.isArray(themeJson)
+        ? (themeJson as Record<string, unknown>)
+        : {};
+    const booking =
+      theme.booking &&
+      typeof theme.booking === 'object' &&
+      !Array.isArray(theme.booking)
+        ? (theme.booking as Record<string, unknown>)
+        : {};
+
+    return asJson({
+      ...theme,
+      booking: {
+        ...booking,
+        mode,
+      },
+    });
   }
 
   private async recordStoredConnectionFailure(
@@ -820,7 +1297,7 @@ export class CrmService {
       return 'crm_platform_configuration_error';
     }
     if (
-      /\b(401|403)\b|unauthor|forbidden|credential|token|авторизац|доступ/.test(
+      /\b(401|403)\b|unauthor|forbidden|credential|token|авторизац|доступ|недостаточно прав/.test(
         normalized,
       )
     ) {

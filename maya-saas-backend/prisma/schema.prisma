@@ -41,12 +41,21 @@ enum UserStatus {
   active
   suspended
   invited
+  // Терминальный статус погашенного дубля. Обратно в active не переводится:
+  // suspended для этой роли не подходит — его воскрешает сверка с CRM.
+  merged
 }
 
 enum MembershipStatus {
   active
   suspended
   invited
+}
+
+enum CrmStaffAccessStatus {
+  pending_contact
+  active
+  disabled
 }
 
 enum CalendarSource {
@@ -82,6 +91,7 @@ model Tenant {
   branches               Branch[]
   users                  User[]
   crmIntegration         CrmIntegration?
+  commerceIntegration    CommerceIntegration?
   auditLogs              AuditLog[]
   appointments           Appointment[]
   phoneAuthCodes         PhoneAuthCode[]
@@ -105,6 +115,9 @@ model Tenant {
   expenses               Expense[]
   aiApprovalRequests     AiApprovalRequest[]
   aiToolExecutions       AiToolExecution[]
+  crmStaffAccesses       CrmStaffAccess[]
+  dashboardPreferences   DashboardPreference[]
+  userMerges             UserMerge[]
 
   @@index([status, graceEndsAt])
 }
@@ -194,6 +207,7 @@ model User {
   requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
   decidedAiApprovals   AiApprovalRequest[]  @relation("AiApprovalDecider")
   aiToolExecutions     AiToolExecution[]    @relation("AiToolExecutionActor")
+  crmStaffAccesses     CrmStaffAccess[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -202,31 +216,101 @@ model User {
   @@index([branchId])
 }
 
+/// Карта слияния дублей аккаунта.
+///
+/// Дубли появлялись, когда соц-вход не находил рабочий аккаунт и заводил
+/// человеку второй, клиентский. Слияние переносит владение на рабочий аккаунт
+/// и гасит дубль статусом UserStatus.merged — БЕЗ физического удаления, иначе
+/// каскады по Membership унесли бы визиты, баллы и согласия.
+///
+/// @@unique([tenantId, duplicateUserId]) — замок идемпотентности: повторный
+/// commit не создаёт вторую запись, а возвращает исходный отчёт.
+/// Внешних ключей на User намеренно нет: карта обязана пережить любое будущее
+/// удаление пользователя, иначе обезличится ровно тогда, когда понадобится.
+model UserMerge {
+  id              String   @id @default(cuid())
+  tenantId        String
+  primaryUserId   String
+  duplicateUserId String
+  actorUserId     String?
+  /// Чем доказано, что это один человек: identity_email | identity_phone |
+  /// primary_login_email_digits | operator_bearer_primary
+  evidence        String
+  /// Счётчики перенесённого и id — без персональных данных.
+  reportJson      Json
+  createdAt       DateTime @default(now())
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, duplicateUserId])
+  @@index([tenantId, primaryUserId])
+}
+
 model Membership {
-  id                 String             @id @default(cuid())
-  tenantId           String
-  userId             String
-  branchId           String?
-  role               UserRole
-  status             MembershipStatus   @default(active)
-  invitedAt          DateTime?
-  joinedAt           DateTime?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch             Branch?            @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  authIdentities     AuthIdentity[]     @relation("AuthIdentityMembership")
-  authSessions       AuthSession[]      @relation("AuthSessionMembership")
-  internalProviders  InternalProvider[] @relation("InternalProviderMembership")
-  customerProfile    CustomerProfile?   @relation("CustomerProfileMembership")
-  loyaltyAccount     LoyaltyAccount?    @relation("LoyaltyAccountMembership")
-  clientAppointments Appointment[]      @relation("ClientMembershipAppointments")
+  id                   String                @id @default(cuid())
+  tenantId             String
+  userId               String
+  branchId             String?
+  role                 UserRole
+  status               MembershipStatus      @default(active)
+  invitedAt            DateTime?
+  joinedAt             DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch               Branch?               @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  authIdentities       AuthIdentity[]        @relation("AuthIdentityMembership")
+  authSessions         AuthSession[]         @relation("AuthSessionMembership")
+  internalProviders    InternalProvider[]    @relation("InternalProviderMembership")
+  customerProfile      CustomerProfile?      @relation("CustomerProfileMembership")
+  loyaltyAccount       LoyaltyAccount?       @relation("LoyaltyAccountMembership")
+  clientAppointments   Appointment[]         @relation("ClientMembershipAppointments")
+  dashboardPreferences DashboardPreference[]
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
   @@index([userId, status])
   @@index([tenantId, branchId])
+}
+
+/// Personal dashboard layout and targets for one membership. Preferences are
+/// tenant-scoped so the same MAYA account can configure each business safely.
+model DashboardPreference {
+  id         String     @id @default(cuid())
+  tenantId   String
+  userId     String
+  section    String     @default("finance")
+  configJson Json       @default("{}")
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([userId, tenantId, section])
+  @@index([tenantId, section])
+}
+
+/// Tenant-scoped link between a CRM staff record and MAYA access. A role can
+/// be prepared before a login is created; userId is attached only when the
+/// owner supplies a verified login channel for that staff member.
+model CrmStaffAccess {
+  id                   String               @id @default(cuid())
+  tenantId             String
+  externalStaffId      String
+  userId               String?
+  encryptedDisplayName String
+  title                String?
+  role                 UserRole
+  status               CrmStaffAccessStatus @default(pending_contact)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                 User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, externalStaffId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, role, status])
+  @@index([userId])
 }
 
 model AuthIdentity {
@@ -379,6 +463,24 @@ model CrmIntegration {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Payment credentials belonging to one tenant's customer-facing commerce.
+/// These credentials are intentionally separate from MAYA subscription billing.
+model CommerceIntegration {
+  id                 String    @id @default(cuid())
+  tenantId           String    @unique
+  provider           String    @default("yookassa")
+  encryptedShopId    String
+  encryptedSecretKey String
+  status             String    @default("active")
+  verifiedAt         DateTime?
+  lastCheckedAt      DateTime?
+  lastErrorCode      String?
+  lastErrorAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model InternalService {

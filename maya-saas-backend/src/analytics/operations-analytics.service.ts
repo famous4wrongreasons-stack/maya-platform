@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { CalendarSource } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
+import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -37,10 +40,27 @@ export class OperationsAnalyticsService {
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
     private readonly tenantsService: TenantsService,
+    private readonly crmService: CrmService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async getBusinessOverview(tenantId: string, query: AnalyticsRangeQueryDto) {
     return this.buildOverview(tenantId, query, null);
+  }
+
+  async getBusinessFinance(tenantId: string, query: AnalyticsRangeQueryDto) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (query.branchId) {
+      throw new BadRequestException({
+        message:
+          'CRM finance is scoped to the connected company and cannot be filtered by a Maya branch.',
+        error: { code: 'crm_finance_branch_filter_not_supported' },
+      });
+    }
+    return this.crmService.getFinancialSummary(scopedTenantId, {
+      from: query.from,
+      to: query.to,
+    });
   }
 
   async getEmployeeOverview(
@@ -49,30 +69,66 @@ export class OperationsAnalyticsService {
     query: AnalyticsRangeQueryDto,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const provider = await this.prisma.internalProvider.findFirst({
-      where: { tenantId: scopedTenantId, userId, active: true },
-      select: { id: true, displayName: true },
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { calendarSource: true },
     });
-    if (!provider) {
-      throw new NotFoundException({
-        message: 'Employee calendar identity is not linked.',
-        error: {
-          code: 'staff_identity_not_linked',
-          message:
-            'Link this user to a calendar provider before opening employee analytics.',
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    const external =
+      (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
+    let providerId: string;
+    let providerName: string;
+    if (external) {
+      const identity = await this.prisma.crmStaffAccess.findFirst({
+        where: {
+          tenantId: scopedTenantId,
+          userId,
+          status: 'active',
         },
+        select: { externalStaffId: true, encryptedDisplayName: true },
       });
+      if (!identity) {
+        throw this.staffIdentityNotLinked();
+      }
+      providerId = identity.externalStaffId;
+      providerName = this.encryptionService.decrypt(
+        identity.encryptedDisplayName,
+      );
+    } else {
+      const identity = await this.prisma.internalProvider.findFirst({
+        where: { tenantId: scopedTenantId, userId, active: true },
+        select: { id: true, displayName: true },
+      });
+      if (!identity) {
+        throw this.staffIdentityNotLinked();
+      }
+      providerId = identity.id;
+      providerName = identity.displayName;
     }
 
     const overview = await this.buildOverview(
       scopedTenantId,
       query,
-      provider.id,
+      providerId,
     );
     return {
       ...overview,
-      employee: { provider_id: provider.id, name: provider.displayName },
+      employee: { provider_id: providerId, name: providerName },
     };
+  }
+
+  private staffIdentityNotLinked(): NotFoundException {
+    return new NotFoundException({
+      message: 'Employee calendar identity is not linked.',
+      error: {
+        code: 'staff_identity_not_linked',
+        message:
+          'Link this user to a calendar provider before opening employee analytics.',
+      },
+    });
   }
 
   private async buildOverview(
@@ -90,32 +146,41 @@ export class OperationsAnalyticsService {
     }
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: scopedTenantId },
-      select: { defaultTimezone: true },
+      select: { defaultTimezone: true, calendarSource: true },
     });
     if (!tenant) {
       throw new NotFoundException('Tenant not found');
     }
 
+    const external =
+      (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
     const [appointments, expenses] = await Promise.all([
-      this.prisma.appointment.findMany({
-        where: {
-          tenantId: scopedTenantId,
-          startAt: { gte: from, lte: to },
-          ...(query.branchId ? { branchId: query.branchId } : {}),
-          ...(staffExternalId ? { staffExternalId } : {}),
-        },
-        select: {
-          id: true,
-          clientId: true,
-          branchId: true,
-          staffExternalId: true,
-          startAt: true,
-          status: true,
-          totalPriceKopecks: true,
-          currency: true,
-        },
-        orderBy: { startAt: 'asc' },
-      }),
+      external
+        ? this.loadExternalAppointments(
+            scopedTenantId,
+            from,
+            to,
+            staffExternalId,
+          )
+        : this.prisma.appointment.findMany({
+            where: {
+              tenantId: scopedTenantId,
+              startAt: { gte: from, lte: to },
+              ...(query.branchId ? { branchId: query.branchId } : {}),
+              ...(staffExternalId ? { staffExternalId } : {}),
+            },
+            select: {
+              id: true,
+              clientId: true,
+              branchId: true,
+              staffExternalId: true,
+              startAt: true,
+              status: true,
+              totalPriceKopecks: true,
+              currency: true,
+            },
+            orderBy: { startAt: 'asc' },
+          }),
       staffExternalId
         ? Promise.resolve([] as AnalyticsExpense[])
         : this.prisma.expense.findMany({
@@ -138,6 +203,64 @@ export class OperationsAnalyticsService {
       tenant.defaultTimezone,
       from,
       to,
+      external ? 'crm' : 'maya',
+    );
+  }
+
+  private async loadExternalAppointments(
+    tenantId: string,
+    from: Date,
+    to: Date,
+    providerId: string | null,
+  ): Promise<AnalyticsAppointment[]> {
+    if (from.getTime() === to.getTime()) {
+      return [];
+    }
+
+    const maxChunkMs = 31 * 24 * 60 * 60 * 1000;
+    const journals = [];
+    let cursor = from.getTime();
+    while (cursor < to.getTime()) {
+      const chunkTo = Math.min(cursor + maxChunkMs, to.getTime());
+      journals.push(
+        await this.crmService.getJournal(tenantId, {
+          from: new Date(cursor).toISOString(),
+          to: new Date(chunkTo).toISOString(),
+          ...(providerId ? { providerId } : {}),
+        }),
+      );
+      cursor = chunkTo;
+    }
+
+    const unique = new Map<string, AnalyticsAppointment>();
+    for (const journal of journals) {
+      for (const appointment of journal.appointments) {
+        const startAt = new Date(appointment.start_at);
+        if (
+          Number.isNaN(startAt.getTime()) ||
+          startAt.getTime() < from.getTime() ||
+          startAt.getTime() > to.getTime()
+        ) {
+          continue;
+        }
+        unique.set(appointment.id, {
+          id: appointment.id,
+          clientId: appointment.client.id ?? `anonymous:${appointment.id}`,
+          branchId: appointment.branch,
+          staffExternalId: appointment.provider.id,
+          startAt,
+          status: appointment.status,
+          totalPriceKopecks:
+            appointment.total_price === null
+              ? null
+              : Math.round(appointment.total_price * 100),
+          currency: appointment.currency,
+        });
+      }
+    }
+
+    return [...unique.values()].sort(
+      (left, right) => left.startAt.getTime() - right.startAt.getTime(),
     );
   }
 
@@ -147,6 +270,7 @@ export class OperationsAnalyticsService {
     timezone: string,
     from: Date,
     to: Date,
+    dataSource: 'maya' | 'crm' = 'maya',
   ) {
     const activeAppointments = appointments.filter(
       (appointment) => !this.isCancelled(appointment.status),
@@ -209,6 +333,7 @@ export class OperationsAnalyticsService {
     }
 
     return {
+      data_source: dataSource,
       period: {
         from: from.toISOString(),
         to: to.toISOString(),

@@ -10,7 +10,13 @@ describe('TenantPwaService', () => {
     ({
       slug: 'demo-business',
       active: true,
-      brand: { name: 'Мастер Артём' },
+      guest_access_ready: true,
+      brand: {
+        name: 'Мастер Артём',
+        city: 'Ставрополь',
+        address: 'ул. Лермонтова, 343',
+        logo_url: logoUrl,
+      },
       branding: {
         app_name: 'Мастер Артём',
         logo_url: logoUrl,
@@ -32,6 +38,9 @@ describe('TenantPwaService', () => {
       getPublicMobileConfig: jest
         .fn()
         .mockResolvedValue(mobileConfig(tenantLogoUrl)),
+      searchPublicMobileConfigs: jest
+        .fn()
+        .mockResolvedValue([mobileConfig(tenantLogoUrl)]),
     } as unknown as TenantsService;
     const brandingService = {
       readTenantLogo: jest.fn(),
@@ -83,8 +92,12 @@ describe('TenantPwaService', () => {
 
     expect(metadata).toMatchObject({
       has_custom_icon: true,
+      installable: true,
+      qr_url: '/api/mobile/pwa/demo-business/qr.svg',
       native_app_icon_policy: 'maya_brand_only',
     });
+    expect(metadata.smart_url).toContain('booking_tenant=demo-business');
+    expect(metadata.nfc_url).toContain('booking_tenant=demo-business');
     expect(manifest.icons).toContainEqual(
       expect.objectContaining({
         src: '/api/mobile/pwa/demo-business/icon/512.png?purpose=maskable',
@@ -134,5 +147,39 @@ describe('TenantPwaService', () => {
         error: { code: 'tenant_pwa_install_disabled' },
       },
     });
+  });
+
+  it('returns only safe public business fields for client search', async () => {
+    const { service } = createService({
+      PWA_TENANT_INSTALL_ENABLED: 'true',
+      PWA_PUBLIC_APP_URL: 'https://app.example.test/app.html',
+      PWA_PUBLIC_API_URL: 'https://app.example.test/api',
+    });
+
+    const result = await service.searchBusinesses('Мастер', 'Ставрополь');
+
+    expect(result.query).toBe('Мастер');
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toMatchObject({
+      tenant_slug: 'demo-business',
+      name: 'Мастер Артём',
+      city: 'Ставрополь',
+    });
+    expect(result.items[0]?.smart_url).toContain(
+      'booking_tenant=demo-business',
+    );
+  });
+
+  it('renders a printable QR code for the same smart link', async () => {
+    const { service } = createService({
+      PWA_TENANT_INSTALL_ENABLED: 'true',
+      PWA_PUBLIC_APP_URL: 'https://app.example.test/app.html',
+      PWA_PUBLIC_API_URL: 'https://app.example.test/api',
+    });
+
+    const svg = await service.renderQrSvg('demo-business');
+
+    expect(svg).toContain('<svg');
+    expect(svg).toContain('viewBox=');
   });
 });

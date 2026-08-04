@@ -9,6 +9,7 @@ import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'crypto';
 
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthClientMetadata } from './auth-client-metadata';
@@ -44,6 +45,7 @@ export class AuthSessionService {
     private readonly rateLimitService: AuthRateLimitService,
     private readonly repository: AuthSessionRepository,
     private readonly systemGateway: AuthSessionSystemGateway,
+    private readonly crmService: CrmService,
   ) {}
 
   async issueSession(
@@ -51,11 +53,14 @@ export class AuthSessionService {
     metadata: Partial<AuthClientMetadata> = {},
     tenantId?: string | null,
   ) {
-    const principal = await this.resolveCurrentPrincipal(
-      user,
+    const requestedTenantId =
       tenantId !== undefined
         ? tenantId
-        : (this.tenantContext.get()?.tenantId ?? null),
+        : (this.tenantContext.get()?.tenantId ?? null);
+    await this.assertCurrentCrmStaffAccess(user.id, requestedTenantId);
+    const principal = await this.resolveCurrentPrincipal(
+      user,
+      requestedTenantId,
     );
     const now = new Date();
     const expiresAt = new Date(
@@ -132,6 +137,7 @@ export class AuthSessionService {
       );
     }
 
+    await this.assertCurrentCrmStaffAccess(session.user.id, session.tenantId);
     const principal = await this.resolveCurrentPrincipal(
       session.user,
       session.tenantId,
@@ -317,6 +323,17 @@ export class AuthSessionService {
       tenantId: null,
       role: UserRole.PLATFORM_OWNER,
     };
+  }
+
+  private async assertCurrentCrmStaffAccess(
+    userId: string,
+    tenantId: string | null,
+  ): Promise<void> {
+    if (!tenantId) return;
+
+    await this.tenantContext.runAsSystemTenant(tenantId, () =>
+      this.crmService.assertCrmStaffAccessActive(tenantId, userId),
+    );
   }
 
   private fromAuthenticatedUser(user: AuthenticatedUser): SessionPrincipal {

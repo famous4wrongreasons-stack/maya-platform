@@ -60,6 +60,158 @@ describe('YclientsCRMAdapter', () => {
         rating: 4.9,
       },
     ]);
+    const fetchMock = global.fetch as jest.Mock;
+    const calls = fetchMock.mock.calls as Array<[URL | string]>;
+    const requestedUrl = String(calls[0]?.[0] ?? '');
+    expect(requestedUrl).toContain('/company/123/staff');
+  });
+
+  it('falls back to alternate staff endpoints when the management route is unavailable', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Route not available' } }),
+            { status: 404 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [{ id: 7, name: 'Alex', specialization: 'Barber' }],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getStaff('tenant-1')).resolves.toEqual([
+      expect.objectContaining({ id: '7', name: 'Alex' }),
+    ]);
+    expect(requestedUrls[0]).toContain('/company/123/staff');
+    expect(requestedUrls[1]).toContain('/staff/123');
+  });
+
+  it('excludes fired and hidden historical staff from the active team', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          data: [
+            { id: 1, name: 'Active barber', fired: 0, hidden: 0 },
+            { id: 2, name: 'Former barber', fired: 1, hidden: 1 },
+            { id: 3, name: 'Hidden barber', fired: 0, hidden: 1 },
+            { id: 4, name: 'Boolean active', fired: false, hidden: false },
+          ],
+        }),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getStaff('tenant-1')).resolves.toEqual([
+      expect.objectContaining({ id: '1', name: 'Active barber' }),
+      expect.objectContaining({ id: '4', name: 'Boolean active' }),
+    ]);
+    await expect(adapter.getTeamMembers('tenant-1')).resolves.toEqual([
+      expect.objectContaining({
+        id: '1',
+        name: 'Active barber',
+        bookable: true,
+        suggested_role: 'staff',
+      }),
+      expect.objectContaining({
+        id: '3',
+        name: 'Hidden barber',
+        bookable: false,
+        suggested_role: 'administrator',
+      }),
+      expect.objectContaining({
+        id: '4',
+        name: 'Boolean active',
+        bookable: true,
+        suggested_role: 'staff',
+      }),
+    ]);
+  });
+
+  it('discovers only active companies without exposing provider payload fields', async () => {
+    let requestedUrl = '';
+    const fetchMock = jest.fn<typeof fetch>((input) => {
+      requestedUrl = String(input);
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 17,
+                title: 'Internal title',
+                public_title: 'Central branch',
+                address: 'Main street',
+                active: true,
+                phone: '+7 999 000-00-00',
+              },
+              {
+                id: 18,
+                title: 'Closed branch',
+                active: false,
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+    global.fetch = fetchMock;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {},
+    });
+
+    await expect(adapter.discoverCompanies()).resolves.toEqual([
+      {
+        id: '17',
+        title: 'Internal title',
+        address: 'Main street',
+      },
+    ]);
+    expect(requestedUrl).toContain('my=1');
+  });
+
+  it('keeps the provider status in rejected request errors', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      text: () =>
+        Promise.resolve(
+          JSON.stringify({ meta: { message: 'Недостаточно прав' } }),
+        ),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {},
+    });
+
+    await expect(adapter.discoverCompanies()).rejects.toThrow(
+      'YClients request failed with status 403: Недостаточно прав',
+    );
   });
 
   it('maps service category into normalized services', async () => {
@@ -115,6 +267,97 @@ describe('YclientsCRMAdapter', () => {
         category: 'Haircuts',
       },
     ]);
+  });
+
+  it('falls back to the management service catalog', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.includes('/book_services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Route not available' } }),
+            { status: 404 },
+          ),
+        );
+      }
+      if (url.includes('/services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 9, title: 'Haircut', price_min: 1900 }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getServices('tenant-1')).resolves.toEqual([
+      expect.objectContaining({
+        id: '9',
+        name: 'Haircut',
+        price: 1900,
+        duration_minutes: 60,
+      }),
+    ]);
+    expect(requestedUrls.some((url) => url.includes('/services/123'))).toBe(
+      true,
+    );
+  });
+
+  it('uses the discovered company when the optional profile route is unavailable', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/company/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Route not available' } }),
+            { status: 404 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 123,
+                title: 'Main branch',
+                address: 'Central street',
+                active: true,
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(adapter.getCompanyProfile()).resolves.toEqual({
+      id: '123',
+      title: 'Main branch',
+      address: 'Central street',
+      logo_url: null,
+      timezone: null,
+      schedule: null,
+    });
   });
 
   it('normalizes ISO datetime query and maps slots', async () => {
@@ -269,5 +512,427 @@ describe('YclientsCRMAdapter', () => {
           ? loyaltyRequest.href
           : loyaltyRequest?.url || '';
     expect(loyaltyUrl).toContain('/loyalty/client_cards/88');
+  });
+
+  it('loads a client appointment history by exact phone and client id', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+
+      if (url.includes('/clients/search')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 88, name: 'Exact', phone: '+7 918 417-20-35' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 901,
+                datetime: '2026-07-31T10:00:00',
+                seance_length: 4500,
+                attendance: 0,
+                staff: { id: 15, name: 'Stanislav' },
+                client: { id: 88, name: 'Exact' },
+                services: [
+                  { id: 7, title: 'Haircut', cost: 2000 },
+                  { id: 9, title: 'Patches', cost: 0 },
+                ],
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getClientAppointments({
+        tenantId: 'tenant-1',
+        phone: '8 (918) 417-20-35',
+        timezone: 'Europe/Moscow',
+        from: '2026-01-01',
+        to: '2026-12-31',
+      }),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        external_id: '901',
+        start: '2026-07-31T07:00:00.000Z',
+        end: '2026-07-31T08:15:00.000Z',
+        staff_id: '15',
+        service_ids: ['7', '9'],
+        total_price: 2000,
+      }),
+    ]);
+    expect(
+      requestedUrls.some(
+        (url) =>
+          url.includes('/records/123') &&
+          url.includes('client_id=88') &&
+          url.includes('start_date=2026-01-01'),
+      ),
+    ).toBe(true);
+  });
+
+  it('maps the external CRM journal without exposing client phones', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 902,
+                  datetime: '2026-07-31T10:00:00',
+                  seance_length: 3600,
+                  attendance: 0,
+                  staff: { id: 15, name: 'Stanislav' },
+                  client: {
+                    id: 88,
+                    name: 'Client',
+                    phone: '+7 918 000-00-00',
+                  },
+                  services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 15, name: 'Stanislav', specialization: 'Barber' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/book_services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                services: [
+                  {
+                    id: 7,
+                    title: 'Haircut',
+                    price_min: 2000,
+                    seance_length: 3600,
+                  },
+                ],
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const journal = await adapter.getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-07-30T21:00:00.000Z',
+      to: '2026-08-06T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(journal).toMatchObject({
+      calendar_source: 'external',
+      count: 1,
+      appointments: [
+        {
+          id: 'crm-902',
+          client: { id: '88', name: 'Client' },
+          provider: {
+            id: '15',
+            name: 'Stanislav',
+            title: 'Barber',
+          },
+          service_ids: ['7'],
+          start_at: '2026-07-31T07:00:00.000Z',
+          end_at: '2026-07-31T08:00:00.000Z',
+          total_price: 2000,
+        },
+      ],
+    });
+    expect(JSON.stringify(journal)).not.toContain('+7 918 000-00-00');
+  });
+
+  it('returns exact YClients sales and official payroll without raw client data', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 1,
+                  amount: '2000',
+                  sold_item_type: 'service',
+                  account: { title: 'Основная касса', is_cash: true },
+                  client: { name: 'Must not leave adapter', phone: '+7999' },
+                },
+                {
+                  id: 2,
+                  amount: 500,
+                  sold_item_type: 'goods_transaction',
+                  account: { title: 'Расчетный счет', is_cash: false },
+                },
+                {
+                  id: 3,
+                  amount: -100,
+                  sold_item_type: 'loyalty_certificate',
+                  account: { title: 'Основная касса', is_cash: true },
+                },
+                { id: 4, amount: 999, sold_item_type: null },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                { id: 11, name: 'Alex', fired: 0, hidden: 0 },
+                { id: 12, name: 'Ilya', fired: false, hidden: false },
+                {
+                  id: 14,
+                  name: 'Back office',
+                  fired: false,
+                  hidden: true,
+                },
+                { id: 13, name: 'Former', fired: true, hidden: false },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/11')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '1000', expense: '700', balance: '300' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/12')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '500', expense: '100', balance: '400' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/14')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '250', expense: '50', balance: '200' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getFinancialSummary({
+      tenantId: 'tenant-1',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(result).toMatchObject({
+      source: 'external_crm',
+      provider: CrmProvider.YCLIENTS,
+      verified: true,
+      period: { from: '2026-07-01', to: '2026-07-31' },
+      revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 2,
+        total: { currency: 'RUB', amount_kopecks: 250_000 },
+        by_type: [
+          {
+            key: 'service',
+            label: 'Услуги',
+            amount_kopecks: 200_000,
+          },
+          {
+            key: 'goods_transaction',
+            label: 'Товары',
+            amount_kopecks: 50_000,
+          },
+        ],
+      },
+      payroll: {
+        status: 'available',
+        verified: true,
+        accrued_total: { currency: 'RUB', amount_kopecks: 175_000 },
+        paid_total: { currency: 'RUB', amount_kopecks: 85_000 },
+        balance_total: { currency: 'RUB', amount_kopecks: 90_000 },
+        staff: [
+          {
+            staff_id: '11',
+            name: 'Alex',
+            status: 'available',
+            accrued: { amount_kopecks: 100_000 },
+          },
+          {
+            staff_id: '12',
+            name: 'Ilya',
+            status: 'available',
+            accrued: { amount_kopecks: 50_000 },
+          },
+          {
+            staff_id: '14',
+            name: 'Back office',
+            status: 'available',
+            accrued: { amount_kopecks: 25_000 },
+          },
+        ],
+      },
+      warnings: [],
+    });
+    expect(JSON.stringify(result)).not.toContain('Must not leave adapter');
+    expect(JSON.stringify(result)).not.toContain('+7999');
+  });
+
+  it('hides payroll totals when YClients returns only a partial result', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 1, amount: 2000, sold_item_type: 'service' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                { id: 11, name: 'Alex' },
+                { id: 12, name: 'Ilya' },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/11')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                total_sum: { income: '1000', expense: '700', balance: '300' },
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/salary/calculation/staff/12')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ meta: { message: 'Недостаточно прав' } }),
+            { status: 403 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getFinancialSummary({
+      tenantId: 'tenant-1',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(result.verified).toBe(false);
+    expect(result.payroll).toMatchObject({
+      status: 'partial',
+      verified: false,
+      accrued_total: null,
+      paid_total: null,
+      balance_total: null,
+      staff: [
+        { staff_id: '11', status: 'available', verified: true },
+        {
+          staff_id: '12',
+          status: 'unavailable',
+          verified: false,
+          accrued: null,
+        },
+      ],
+    });
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'crm_payroll_partially_unavailable',
+        }),
+      ]),
+    );
   });
 });

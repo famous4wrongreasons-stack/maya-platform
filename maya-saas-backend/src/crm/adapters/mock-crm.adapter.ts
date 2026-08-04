@@ -6,6 +6,7 @@ import {
 import {
   AvailableSlot,
   CancelledAppointment,
+  ClientAppointmentsParams,
   ClientLoyaltySnapshot,
   CRMAdapter,
   CreatedAppointment,
@@ -266,8 +267,10 @@ export class MockCRMAdapter implements CRMAdapter {
     });
   }
 
-  getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
-    void clientId;
+  getClientAppointments(
+    params: ClientAppointmentsParams,
+  ): Promise<CreatedAppointment[]> {
+    void params;
     return Promise.resolve([]);
   }
 

@@ -9,7 +9,11 @@ import { Prisma } from '@prisma/client';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AppointmentStatus, CalendarSource } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
-import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
+import {
+  CreatedAppointment,
+  ServiceItem,
+  StaffMember,
+} from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
 import { AvailableSlotsQueryDto } from '../crm/dto/available-slots-query.dto';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
@@ -218,7 +222,7 @@ export class AppointmentsService {
     });
 
     return this.serializeAppointment(appointment, {
-      servicesById: new Map(),
+      servicesById: new Map(services.map((service) => [service.id, service])),
       staffById: new Map(),
     });
   }
@@ -333,6 +337,24 @@ export class AppointmentsService {
 
   async listClientAppointments(tenantId: string, clientId: string) {
     this.tenantContext.assertTenantId(tenantId);
+    const calendarSource = await this.crmService.getCalendarSource(tenantId);
+
+    if (calendarSource === CalendarSource.EXTERNAL) {
+      const client = await this.usersService.getTenantUserOrThrow(
+        clientId,
+        tenantId,
+      );
+      const profile = this.usersService.serializeUser(client);
+
+      if (profile.phone) {
+        const remoteAppointments = await this.crmService.getClientAppointments(
+          tenantId,
+          profile.phone,
+        );
+        await this.syncExternalClientAppointments(clientId, remoteAppointments);
+      }
+    }
+
     const appointments =
       await this.appointmentRepository.listForClient(clientId);
     const catalog = await this.loadAppointmentCatalog(tenantId);
@@ -340,6 +362,75 @@ export class AppointmentsService {
     return appointments.map((appointment) =>
       this.serializeAppointment(appointment, catalog),
     );
+  }
+
+  private async syncExternalClientAppointments(
+    clientId: string,
+    remoteAppointments: CreatedAppointment[],
+  ): Promise<void> {
+    for (const remote of remoteAppointments) {
+      const startAt = new Date(remote.start);
+      const endAt = remote.end
+        ? new Date(remote.end)
+        : new Date(startAt.getTime() + 60 * 60 * 1000);
+
+      if (
+        Number.isNaN(startAt.getTime()) ||
+        Number.isNaN(endAt.getTime()) ||
+        endAt.getTime() <= startAt.getTime() ||
+        !remote.external_id ||
+        !remote.staff_id
+      ) {
+        continue;
+      }
+
+      const existing =
+        await this.appointmentRepository.findByCrmExternalIdForClient(
+          remote.external_id,
+          clientId,
+        );
+      const data = {
+        source: CalendarSource.EXTERNAL,
+        staffExternalId: remote.staff_id,
+        serviceIds: asJson(remote.service_ids),
+        startAt,
+        endAt,
+        blockedStartAt: startAt,
+        blockedEndAt: endAt,
+        status: remote.status || AppointmentStatus.CONFIRMED,
+        totalPriceKopecks:
+          remote.total_price === undefined || remote.total_price === null
+            ? null
+            : Math.round(remote.total_price * 100),
+        currency: remote.currency || 'RUB',
+        providerPayload: asJson(
+          remote.raw ?? {
+            provider: CalendarSource.EXTERNAL,
+            imported: true,
+          },
+        ),
+      };
+
+      if (existing) {
+        await this.appointmentRepository.updateForClient(
+          existing.id,
+          clientId,
+          {
+            ...data,
+            notes: existing.notes,
+          },
+        );
+        continue;
+      }
+
+      await this.appointmentRepository.createForClient({
+        clientId,
+        branchId: null,
+        crmExternalId: remote.external_id,
+        notes: null,
+        ...data,
+      });
+    }
   }
 
   async cancelForClient(
@@ -830,10 +921,22 @@ export class AppointmentsService {
       (services.length > 0
         ? services.reduce((sum, service) => sum + service.price, 0)
         : null);
-    const durationMinutes =
+    const catalogDurationMinutes =
       services.length > 0
         ? services.reduce((sum, service) => sum + service.duration_minutes, 0)
-        : null;
+        : 0;
+    const storedDurationMinutes = appointment.endAt
+      ? Math.round(
+          (appointment.endAt.getTime() - appointment.startAt.getTime()) /
+            60_000,
+        )
+      : 0;
+    const durationMinutes =
+      catalogDurationMinutes > 0
+        ? catalogDurationMinutes
+        : storedDurationMinutes > 0
+          ? storedDurationMinutes
+          : null;
     const currency = appointment.currency ?? services[0]?.currency ?? null;
     const isUpcoming = appointment.startAt.getTime() >= Date.now();
 

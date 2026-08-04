@@ -64,6 +64,19 @@ describe('AdminService tenant update boundaries', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+    const createStaffUserForInternalProviderMock = jest.fn().mockResolvedValue({
+      id: 'staff-user-1',
+      tenantId: 'tenant-1',
+      branchId: 'branch-1',
+      email: 'barber@example.test',
+      phone: '+79990000000',
+      encryptedName: null,
+      passwordHash: 'hash',
+      role: UserRole.STAFF,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     const serializeUserMock = jest.fn(
       (user: { id: string; role: UserRole }) => ({
         id: user.id,
@@ -81,6 +94,8 @@ describe('AdminService tenant update boundaries', () => {
         ensureEmailIsAvailable: jest.fn().mockResolvedValue(undefined),
         ensurePhoneIsAvailable: jest.fn().mockResolvedValue(undefined),
         createUser: createUserMock,
+        createStaffUserForInternalProvider:
+          createStaffUserForInternalProviderMock,
         serializeUser: serializeUserMock,
       } as unknown as UsersService,
       {} as SubscriptionsService,
@@ -101,6 +116,7 @@ describe('AdminService tenant update boundaries', () => {
       assertCanCreateMock,
       assertCustomBrandingAllowedMock,
       createUserMock,
+      createStaffUserForInternalProviderMock,
     };
   };
 
@@ -217,6 +233,54 @@ describe('AdminService tenant update boundaries', () => {
     expect(result).toMatchObject({
       user: { id: 'tenant-owner-1', role: UserRole.TENANT_OWNER },
       temporary_password: null,
+    });
+  });
+
+  it('links a staff login to an existing provider without consuming quota twice', async () => {
+    const {
+      service,
+      assertCanCreateMock,
+      createStaffUserForInternalProviderMock,
+      auditLogMock,
+    } = createService();
+
+    const result = await service.createProviderUser(
+      'tenant-1',
+      'provider-2',
+      {
+        email: 'barber@example.test',
+        phone: '+79990000000',
+        password: 'StrongPass123',
+      },
+      tenantAdmin,
+    );
+
+    expect(assertCanCreateMock).not.toHaveBeenCalled();
+    expect(createStaffUserForInternalProviderMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        providerId: 'provider-2',
+        email: 'barber@example.test',
+        phone: '+79990000000',
+      }),
+    );
+    expect(auditLogMock).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      userId: 'admin-1',
+      action: 'tenant.provider_user_created',
+      entityType: 'user',
+      entityId: 'staff-user-1',
+      metadata: {
+        role: UserRole.STAFF,
+        email: 'barber@example.test',
+        branch_id: 'branch-1',
+        provider_id: 'provider-2',
+      },
+    });
+    expect(result).toMatchObject({
+      user: { id: 'staff-user-1', role: UserRole.STAFF },
+      temporary_password: null,
+      provider_id: 'provider-2',
     });
   });
 

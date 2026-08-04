@@ -18,13 +18,12 @@ export class UsersController {
     const fullUser = user.tenantId
       ? await this.usersService.getTenantUserOrThrow(user.userId, user.tenantId)
       : await this.usersService.getUserOrThrow(user.userId);
-    return this.usersService.serializeUser(fullUser);
+    return this.usersService.serializeCurrentUser(fullUser);
   }
 
   @Patch()
   @ApiOperation({
-    summary:
-      'Update the current authenticated user profile, including initial phone completion for social logins.',
+    summary: 'Update the current authenticated user profile',
   })
   updateCurrentUser(
     @CurrentUser() user: AuthenticatedUser,

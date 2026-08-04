@@ -70,7 +70,7 @@ export const CRM_PROVIDER_CATALOG: Record<CrmProvider, CrmProviderCapability> =
       requirements: { apiToken: true, companyId: true },
       operations: COMPLETE_OPERATIONS,
       limitations: [
-        'Requires a tenant user token, company ID and platform partner token.',
+        'Нужен user token владельца. Доступный филиал вы выберете на следующем шаге.',
       ],
     },
     [CrmProvider.ALTEGIO]: {
@@ -83,7 +83,7 @@ export const CRM_PROVIDER_CATALOG: Record<CrmProvider, CrmProviderCapability> =
       requirements: { apiToken: true, companyId: true },
       operations: COMPLETE_OPERATIONS,
       limitations: [
-        'Uses the compatible YClients adapter contract and requires live acceptance testing for the tenant account.',
+        'Нужен user token владельца. Перед запуском MAYA проверит доступные филиалы.',
       ],
     },
     [CrmProvider.MOCK]: {

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -23,6 +24,7 @@ import {
   DEFAULT_INDUSTRY_PRESET_ID,
   getIndustryPreset,
 } from '../common/industry-presets';
+import { normalizePhoneE164 } from '../common/phone.util';
 import { CrmService } from '../crm/crm.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -146,7 +148,10 @@ export class OnboardingService {
           const user = await this.usersService.createUser({
             tenantId: tenant.id,
             email: dto.ownerEmail,
-            phone: dto.ownerPhone ?? null,
+            // Нормализуем сразу: телефон владельца — ключ восстановления
+            // доступа, и он обязан храниться в том же виде, в каком его потом
+            // ищет резолвер личности.
+            phone: normalizePhoneE164(dto.ownerPhone),
             name: dto.ownerName ?? null,
             passwordHash: await bcrypt.hash(temporaryPassword, 10),
             role: UserRole.TENANT_ADMIN,
@@ -240,6 +245,66 @@ export class OnboardingService {
       }
       throw error;
     }
+  }
+
+  async resumeConfirmedTrialSignup(
+    tenantId: string,
+    ownerEmail: string,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    const tenant = await this.tenantsService.getTenantByIdOrThrow(tenantId);
+    const serializedTenant = this.tenantsService.serializeTenant(tenant);
+
+    return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
+      const user = await this.usersService.findTenantUserByEmail(
+        tenant.id,
+        ownerEmail.trim().toLowerCase(),
+      );
+      const ownerRoles = new Set<UserRole>([
+        UserRole.TENANT_ADMIN,
+        UserRole.TENANT_OWNER,
+        UserRole.BUSINESS_OWNER,
+        UserRole.ADMINISTRATOR,
+      ]);
+
+      if (
+        !user ||
+        (user.status as UserStatus) !== UserStatus.ACTIVE ||
+        !ownerRoles.has(user.role as UserRole)
+      ) {
+        throw new UnauthorizedException({
+          message: 'Confirmed business owner does not match',
+          error: { code: 'ai_onboarding_owner_mismatch' },
+        });
+      }
+
+      const trialEndsAt = tenant.trialEndsAt;
+      const trialDaysRemaining = serializedTenant.billing.trial_days_remaining;
+
+      return {
+        ...(await this.authService.issueSession(user, metadata)),
+        user: this.usersService.serializeUser(user),
+        tenant: serializedTenant,
+        temporary_password: null,
+        booking_mode: serializedTenant.booking_mode_effective,
+        calendar_source: tenant.calendarSource,
+        trial: trialEndsAt
+          ? {
+              days: trialDaysRemaining,
+              starts_at: new Date(
+                trialEndsAt.getTime() - TRIAL_PERIOD_DAYS * 24 * 60 * 60 * 1000,
+              ),
+              ends_at: trialEndsAt,
+              full_access: tenant.trialFullAccess,
+            }
+          : null,
+        next_step:
+          (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL
+            ? 'connect_crm'
+            : 'upload_logo_or_open_app',
+        trial_activation: null,
+      };
+    });
   }
 
   private assertSelfServeTrialSignupEnabled() {

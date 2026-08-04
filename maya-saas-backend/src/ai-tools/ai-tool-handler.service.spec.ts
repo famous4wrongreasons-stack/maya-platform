@@ -278,6 +278,157 @@ describe('AiToolHandlerService output minimization', () => {
     });
   });
 
+  it('replaces external appointment prices with verified CRM finance totals', async () => {
+    const getBusinessFinance = jest.fn().mockResolvedValue({
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+      period: {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+        timezone: 'Europe/Moscow',
+      },
+      revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 821,
+        total: { currency: 'RUB', amount_kopecks: 120_439_000 },
+        by_type: [],
+        by_account: [],
+      },
+      payroll: {
+        status: 'available',
+        verified: true,
+        accrued_total: { currency: 'RUB', amount_kopecks: 56_388_001 },
+        paid_total: { currency: 'RUB', amount_kopecks: 0 },
+        balance_total: { currency: 'RUB', amount_kopecks: 56_388_001 },
+        staff: [
+          {
+            staff_id: 'provider-secret-id',
+            name: 'Антон',
+            status: 'available',
+            verified: true,
+          },
+        ],
+      },
+      warnings: [],
+    });
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: {},
+        appointments: { total: 10, active: 10, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+        expenses: [{ currency: 'RUB', amount_kopecks: 1 }],
+        net: [{ currency: 'RUB', amount_kopecks: 9_999_998 }],
+        average_ticket: [{ currency: 'RUB', amount_kopecks: 999_999 }],
+        daily: [
+          {
+            date: '2026-07-01',
+            appointments: 10,
+            revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+          },
+        ],
+        staff: [
+          {
+            staff_external_id: 'provider-secret-id',
+            appointments: 10,
+            revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+          },
+        ],
+      }),
+      getBusinessFinance,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-finance',
+    );
+
+    expect(result).toMatchObject({
+      data_source: 'crm',
+      revenue: [
+        {
+          currency: 'RUB',
+          amount_kopecks: 120_439_000,
+          amount_major_units: 1_204_390,
+        },
+      ],
+      expenses: [],
+      net: [],
+      average_ticket: [],
+      finance: {
+        source: 'external_crm',
+        provider: 'yclients',
+        revenue: { verified: true, transaction_count: 821 },
+        payroll: {
+          status: 'available',
+          verified: true,
+          accrued_total: {
+            amount_kopecks: 56_388_001,
+            amount_major_units: 563_880.01,
+          },
+        },
+      },
+    });
+    expect(JSON.stringify(result)).not.toContain('Антон');
+    expect(JSON.stringify(result)).not.toContain('provider-secret-id');
+    expect(JSON.stringify(result)).not.toContain('9999999');
+    expect(getBusinessFinance).toHaveBeenCalledWith('tenant-a', {
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T23:59:59.999Z',
+    });
+  });
+
+  it('fails closed for external finance when the role cannot read payroll', async () => {
+    const getBusinessFinance = jest.fn();
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: {},
+        appointments: { total: 3, active: 3, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 300_000 }],
+        expenses: [],
+        net: [{ currency: 'RUB', amount_kopecks: 300_000 }],
+        average_ticket: [{ currency: 'RUB', amount_kopecks: 100_000 }],
+        daily: [],
+        staff: [],
+      }),
+      getBusinessFinance,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.MANAGER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-15T00:00:00.000Z',
+      },
+      'execution-manager-finance',
+    );
+
+    expect(result).toMatchObject({
+      appointments: { total: 3 },
+      revenue: [],
+      expenses: [],
+      net: [],
+      finance: {
+        verified: false,
+        warning_codes: ['role_restricted'],
+      },
+    });
+    expect(getBusinessFinance).not.toHaveBeenCalled();
+  });
+
   it('replaces staff names with deterministic booking labels', async () => {
     const staffService = {
       listStaff: jest.fn().mockResolvedValue([

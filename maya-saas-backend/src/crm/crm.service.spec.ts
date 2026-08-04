@@ -1,6 +1,14 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
-import { CrmIntegrationStatus, CrmProvider } from '../common/domain.enums';
+import {
+  CrmIntegrationStatus,
+  CrmProvider,
+  UserRole,
+} from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -10,6 +18,49 @@ import { CrmService } from './crm.service';
 describe('CrmService', () => {
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('discovers tenant-visible companies without persisting the token', async () => {
+    const discoverCompanies = jest.fn().mockResolvedValue([
+      {
+        id: '42',
+        title: 'Main branch',
+        address: 'Central street',
+      },
+    ]);
+    const create = jest.fn().mockReturnValue({ discoverCompanies });
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {} as PrismaService,
+      {} as EncryptionService,
+      { create },
+      tenantContext,
+    );
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.discoverCompanies('tenant-1', {
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'tenant-secret',
+      }),
+    );
+
+    expect(create).toHaveBeenCalledWith(CrmProvider.YCLIENTS, {
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'tenant-secret',
+      settings: {},
+    });
+    expect(discoverCompanies).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      provider: CrmProvider.YCLIENTS,
+      companies: [
+        {
+          id: '42',
+          title: 'Main branch',
+          address: 'Central street',
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('tenant-secret');
   });
 
   it('allows provider mock without an explicit apiToken', async () => {
@@ -440,6 +491,15 @@ describe('CrmService', () => {
     };
     const crmUpdateMock = jest.fn().mockResolvedValue(activeIntegration);
     const tenantUpdateMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
+    const brandingFindMock = jest.fn().mockResolvedValue({
+      themeJson: {
+        booking: { mode: 'preview' },
+        custom: { retained: true },
+      },
+    });
+    const brandingUpsertMock = jest.fn().mockResolvedValue({
+      tenantId: 'tenant-1',
+    });
     const transactionMock = jest
       .fn()
       .mockImplementation((callback: (tx: unknown) => unknown) =>
@@ -447,6 +507,10 @@ describe('CrmService', () => {
           callback({
             crmIntegration: { update: crmUpdateMock },
             tenant: { update: tenantUpdateMock },
+            brandingSettings: {
+              findUnique: brandingFindMock,
+              upsert: brandingUpsertMock,
+            },
           }),
         ),
       );
@@ -496,6 +560,22 @@ describe('CrmService', () => {
       where: { id: 'tenant-1' },
       data: { calendarSource: 'external' },
     });
+    expect(brandingUpsertMock).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-1' },
+      create: {
+        tenantId: 'tenant-1',
+        themeJson: {
+          booking: { mode: 'live' },
+          custom: { retained: true },
+        },
+      },
+      update: {
+        themeJson: {
+          booking: { mode: 'live' },
+          custom: { retained: true },
+        },
+      },
+    });
     expect(result.status).toBe(CrmIntegrationStatus.ACTIVE);
   });
 
@@ -539,5 +619,202 @@ describe('CrmService', () => {
       },
     });
     expect(adapterCreateMock).not.toHaveBeenCalled();
+  });
+
+  it('revokes tenant access when an assigned employee disappears from the active CRM team', async () => {
+    const accessFindFirst = jest
+      .fn()
+      .mockResolvedValueOnce({
+        externalStaffId: 'crm-fired',
+        role: UserRole.STAFF,
+        status: 'active',
+      })
+      .mockResolvedValueOnce({ status: 'disabled' });
+    const accessUpdate = jest.fn().mockResolvedValue({});
+    const accessCreateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const membershipUpdateMany = jest.fn().mockResolvedValue({ count: 1 });
+    type SessionUpdateArgs = {
+      where: { tenantId: string; userId: string; revokedAt: null };
+      data: { revokedAt: Date; revokeReason: string };
+    };
+    const sessionUpdateMany: jest.MockedFunction<
+      (args: SessionUpdateArgs) => Promise<{ count: number }>
+    > = jest.fn().mockResolvedValue({ count: 2 });
+    const transaction = jest.fn(
+      async (run: (tx: Record<string, unknown>) => Promise<void>) =>
+        run({
+          crmStaffAccess: {
+            update: accessUpdate,
+            createMany: accessCreateMany,
+          },
+          membership: { updateMany: membershipUpdateMany },
+          authSession: { updateMany: sessionUpdateMany },
+        }),
+    );
+    const integration = {
+      id: 'crm-1',
+      tenantId: 'tenant-1',
+      provider: CrmProvider.YCLIENTS,
+      encryptedApiToken: 'encrypted',
+      baseUrl: null,
+      status: CrmIntegrationStatus.ACTIVE,
+      settingsJson: { companyId: 42 },
+      verifiedAt: new Date(),
+      lastCheckedAt: new Date(),
+      lastSyncAt: new Date(),
+      lastErrorCode: null,
+      lastErrorAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {
+        crmStaffAccess: {
+          findFirst: accessFindFirst,
+          findMany: jest.fn().mockResolvedValue([
+            {
+              id: 'access-1',
+              externalStaffId: 'crm-fired',
+              userId: 'user-1',
+              role: UserRole.STAFF,
+              status: 'active',
+            },
+          ]),
+        },
+        crmIntegration: {
+          findUnique: jest.fn().mockResolvedValue(integration),
+        },
+        $transaction: transaction,
+      } as unknown as PrismaService,
+      {
+        decrypt: jest.fn().mockReturnValue('tenant-token'),
+        encrypt: jest
+          .fn()
+          .mockImplementation((value: string) => `enc:${value}`),
+      } as unknown as EncryptionService,
+      {
+        create: jest.fn().mockReturnValue({
+          getTeamMembers: jest.fn().mockResolvedValue([
+            {
+              id: 'crm-active',
+              name: 'Active master',
+              bookable: true,
+              suggested_role: 'staff',
+            },
+          ]),
+        }),
+      },
+      tenantContext,
+      {} as never,
+    );
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.assertCrmStaffAccessActive('tenant-1', 'user-1'),
+      ),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(accessUpdate).toHaveBeenCalledWith({
+      where: { id: 'access-1' },
+      data: { status: 'disabled' },
+    });
+    expect(membershipUpdateMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
+        status: 'active',
+      },
+      data: { status: 'suspended' },
+    });
+    expect(accessCreateMany).toHaveBeenCalledWith({
+      data: [
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          externalStaffId: 'crm-active',
+          role: UserRole.STAFF,
+          status: 'pending_contact',
+        }),
+      ],
+      skipDuplicates: true,
+    });
+    const revokeArgs = sessionUpdateMany.mock.calls[0]?.[0];
+    if (!revokeArgs) throw new Error('Expected active sessions to be revoked');
+    expect(revokeArgs.where).toEqual({
+      tenantId: 'tenant-1',
+      userId: 'user-1',
+      revokedAt: null,
+    });
+    expect(revokeArgs.data.revokeReason).toBe('crm_staff_inactive');
+    expect(revokeArgs.data.revokedAt).toBeInstanceOf(Date);
+  });
+
+  it('does not undo an unrelated manual membership suspension during CRM reconciliation', async () => {
+    const membershipUpdateMany = jest.fn();
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {
+        crmStaffAccess: {
+          findFirst: jest
+            .fn()
+            .mockResolvedValueOnce({
+              externalStaffId: 'crm-active',
+              role: UserRole.STAFF,
+              status: 'active',
+            })
+            .mockResolvedValueOnce({ status: 'active' }),
+          findMany: jest.fn().mockResolvedValue([
+            {
+              id: 'access-1',
+              externalStaffId: 'crm-active',
+              userId: 'user-1',
+              role: UserRole.STAFF,
+              status: 'active',
+            },
+          ]),
+        },
+        crmIntegration: {
+          findUnique: jest.fn().mockResolvedValue({
+            id: 'crm-1',
+            tenantId: 'tenant-1',
+            provider: CrmProvider.YCLIENTS,
+            encryptedApiToken: 'encrypted',
+            baseUrl: null,
+            status: CrmIntegrationStatus.ACTIVE,
+            settingsJson: { companyId: 42 },
+          }),
+        },
+        $transaction: jest.fn(
+          async (run: (tx: Record<string, unknown>) => Promise<void>) =>
+            run({
+              crmStaffAccess: { update: jest.fn() },
+              membership: { updateMany: membershipUpdateMany },
+              authSession: { updateMany: jest.fn() },
+            }),
+        ),
+      } as unknown as PrismaService,
+      {
+        decrypt: jest.fn().mockReturnValue('tenant-token'),
+      } as unknown as EncryptionService,
+      {
+        create: jest.fn().mockReturnValue({
+          getTeamMembers: jest.fn().mockResolvedValue([
+            {
+              id: 'crm-active',
+              name: 'Active master',
+              bookable: true,
+              suggested_role: 'staff',
+            },
+          ]),
+        }),
+      },
+      tenantContext,
+      {} as never,
+    );
+
+    await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.assertCrmStaffAccessActive('tenant-1', 'user-1'),
+    );
+
+    expect(membershipUpdateMany).not.toHaveBeenCalled();
   });
 });
