@@ -24644,7 +24644,13 @@ function AStaffHome() {
   }
   function openDayTile() {
     if (saasBusiness) {
-      window.__meSaasCabinet && window.__meSaasCabinet('schedule', 0);
+      // Плитка «Записи» ведёт в полноэкранную сетку, а не во вкладку панели:
+      // через __meSaasCabinet менеджерская роль уходила в панель с плоским
+      // списком, тогда как мастеру в PWA открывается лист дня. ALiveSchedule
+      // умеет SaaS сама, поэтому одинаково годится любой бизнес-роли.
+      // Возврат ставим явно — иначе останется 'panel' от прошлого входа.
+      window.__meScheduleReturn = 'staff-home';
+      window.__meGo && window.__meGo('schedule');
       return;
     }
     if (window.__meIsMaster) {
@@ -24792,7 +24798,13 @@ function AStaffHome() {
     t: t,
     height: 52,
     label: "Записать клиента",
-    onClick: () => window.__meGo && window.__meGo(saasBusiness ? "book" : "schedule"),
+    // Сотрудник записывает КЛИЕНТА, а не себя. Ветка saasBusiness вела в 'book'
+    // (ABookFlow) — это клиентская самозапись: на шаге подтверждения она
+    // подставляет имя и телефон вошедшего из GET /me, и владелец заводил визит
+    // на самого себя. Ручная запись живёт в сетке расписания (openBook →
+    // ssSubmitBook: пустая форма, выбор мастера, поиск клиента по телефону),
+    // и она уже работает в обоих контурах — легаси и SaaS.
+    onClick: () => window.__meGo && window.__meGo("schedule"),
     style: { marginTop: 10 }
   }), (isFounder || saasManager) ? /*#__PURE__*/React.createElement("div", {
     onClick: () => window.__meGo && window.__meGo(saasManager ? "panel" : "god"),
@@ -24810,7 +24822,20 @@ function AStaffHome() {
     style: { fontFamily: BODY, fontSize: 12.5, color: t.ink }
   }, "Спросить Maya"), /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 1 }
-  }, "Администратор · онлайн")), Icon.arrow(t.dim, 16)), /*#__PURE__*/React.createElement("div", {
+  }, "Администратор · онлайн")), Icon.arrow(t.dim, 16)), saasBusiness ? null : /*#__PURE__*/React.createElement("div", {
+    // Единственный вход в чат смены: в нижнем меню сотрудника четыре вкладки
+    // (индекс 3 — «Клиенты»), а карта __meTab с 'team-chat' осталась только в
+    // мёртвом коде — без этой строки экран ATeamChat недостижим вообще.
+    // В SaaS скрыт: ATeamChat ходит в легаси-прокси МЭ и у чужого тенанта промолчит.
+    onClick: () => window.__meGo && window.__meGo("team-chat"),
+    style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, cursor: "pointer", color: t.ink }
+  }, AIcon.chat(t.ink, 20), /*#__PURE__*/React.createElement("div", {
+    style: { flex: 1 }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 12.5, color: t.ink }
+  }, "Команда"), /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 1 }
+  }, "Внутренний чат смены")), Icon.arrow(t.dim, 16)), /*#__PURE__*/React.createElement("div", {
     onClick: () => saasManager ? (window.__meSaasCabinet && window.__meSaasCabinet('clients', 3)) : (window.__meGo && window.__meGo("staff-clients")),
     style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("div", {
@@ -29274,6 +29299,13 @@ function ASaasOwnerPanel() {
   const [financeSaveState, setFinanceSaveState] = React.useState('idle');
   const [financeSaveNote, setFinanceSaveNote] = React.useState('');
   const requestRef = React.useRef(0);
+  // Роль подтверждает только tenant-сессия (/me), поэтому набор вкладок считаем от неё,
+  // а не от того, что панель вообще умеет рисовать: сотруднику незачем видеть разделы,
+  // на которые сервер всё равно ответит 403. В легаси-панели такой фильтр (avail) есть.
+  const MANAGER_ONLY_TABS = ['staff', 'services', 'connect', 'integrations'];
+  const panelRole = meSaasCurrentRole();
+  const panelBusiness = meSaasIsBusinessRole(panelRole);
+  const panelManager = meSaasIsManagerRole(panelRole);
   const TABS = [
     { key: 'maya', label: 'MAYA' },
     { key: 'analytics', label: 'Аналитика' },
@@ -29284,7 +29316,17 @@ function ASaasOwnerPanel() {
     { key: 'connect', label: 'Клиентам' },
     { key: 'integrations', label: 'Интеграции' },
     { key: 'profile', label: 'Профиль' }
-  ];
+  ].filter(function (x) {
+    // Fail-closed: роль не опознана как бизнес-роль — остаётся только «Профиль» с выходом.
+    if (!panelBusiness) return x.key === 'profile';
+    if (MANAGER_ONLY_TABS.indexOf(x.key) >= 0) return panelManager;
+    return true;
+  });
+  // Вкладку навязывают снаружи: deep-link пишет window.__meSaasPanelTab ДО монтирования,
+  // минуя проверку в __meSetSaasPanelTab. Снимаем чужую роли вкладку прямо в рендере —
+  // эффект сработал бы после кадра, и запрещённый раздел успел бы отрисоваться и
+  // дёрнуть tenant-запрос.
+  if (!TABS.some(function (x) { return x.key === tabKey; })) setTabKey(TABS[0] ? TABS[0].key : 'profile');
   function dateRange(kind) {
     var now = new Date();
     var from;
@@ -29717,9 +29759,14 @@ function ASaasOwnerPanel() {
       );
     }
     if (tabKey === 'schedule') {
-      var byDay = {};
-      allJournal.forEach(function (x) { var key = dayLabel(x.start_at, tz); (byDay[key] = byDay[key] || []).push(x); });
-      return e(React.Fragment, null, e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Расписание'), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 7 } }, crmReady ? ('Ближайшие 7 дней · источник ' + sourceLabel) : 'Подключите CRM, чтобы загрузить актуальное расписание'), e('div', { style: { display: 'grid', gap: 9, marginTop: 18 } }, Object.keys(byDay).length ? Object.keys(byDay).map(function (key) { return e('div', { key: key }, e('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim, margin: '15px 2px 8px' } }, key), byDay[key].map(function (x) { return card(e('div', { style: { display: 'flex', gap: 12, alignItems: 'flex-start' } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 17, minWidth: 52 } }, timeLabel(x.start_at, tz)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.client && x.client.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 3 } }, x.provider && x.provider.name || 'Специалист'), e('div', { style: { fontFamily: BODY, fontSize: 10.5, color: t.faint, marginTop: 3 } }, (x.services || []).map(function (s) { return s.name; }).join(', '))), e('div', { style: { fontFamily: DISPLAY, fontSize: 12 } }, rub(x.total_price))), { padding: '12px 14px', marginBottom: 7 }); })); }) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, crmReady ? 'На ближайшие 7 дней активных записей нет.' : 'Расписание появится автоматически после подключения CRM.'))), e('div', { style: { marginTop: 14 } }, action(crmReady ? 'Записать клиента' : 'Подключить CRM', crmReady ? 'Создать запись в подключённой CRM' : 'Открыть защищённый центр интеграций', function () { window.__meGo && window.__meGo(crmReady ? 'book' : 'crm'); }, true)));
+      // 🔴 «Расписание» — всегда полноэкранная сетка ALiveSchedule, а не вкладка
+      // панели: колонки мастеров и перетаскивание визитов не живут внутри
+      // скролл-контейнера. Пилюля таба уводит на сетку сама, но в панель
+      // попадают и мимо неё (__meSaasCabinet('schedule'), deep-link ?tab=calendar),
+      // и тогда владельцу показывался плоский список вместо привычной сетки.
+      // Переход откладываем на тик: менять чужой экран прямо в рендере нельзя.
+      setTimeout(function () { if (!window.__meGo) return; window.__meScheduleReturn = 'panel'; window.__meGo('schedule'); }, 0);
+      return card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Открываю сетку расписания…'));
     }
     if (tabKey === 'staff') {
       var teamAccess = d.teamAccess || { items: [] };
@@ -29838,22 +29885,39 @@ function ASaasOwnerPanel() {
     }
     return e(React.Fragment, null,
       e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Профиль'),
-      section('Владелец бизнеса', card(e(React.Fragment, null, [['Имя', me.name || '—'], ['Email', me.email || '—'], ['Телефон', me.phone || '—'], ['Бизнес', me.tenant && me.tenant.name || '—'], ['Роль', me.staff_profile && me.staff_profile.linked ? 'Владелец · мастер' : 'Владелец']].map(function (x, i) { return e('div', { key: x[0], style: { display: 'flex', justifyContent: 'space-between', gap: 14, padding: '11px 0', borderBottom: i < 4 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim } }, x[0]), e('span', { style: { fontFamily: BODY, fontSize: 12.5, fontWeight: 650, textAlign: 'right' } }, x[1])); })))),
+      section('Владелец бизнеса', card(e(React.Fragment, null, [['Имя', me.name || '—'], ['Email', me.email || '—'], ['Телефон', me.phone || '—'], ['Бизнес', me.tenant && me.tenant.name || '—'], ['Роль', roleTitle(me.role) + (me.staff_profile && me.staff_profile.linked ? ' · мастер' : '')]].map(function (x, i) { return e('div', { key: x[0], style: { display: 'flex', justifyContent: 'space-between', gap: 14, padding: '11px 0', borderBottom: i < 4 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim } }, x[0]), e('span', { style: { fontFamily: BODY, fontSize: 12.5, fontWeight: 650, textAlign: 'right' } }, x[1])); })))),
       section('Настройки бизнеса', action('Токены и интеграции', 'CRM, ЮKassa и статусы подключений', function () { setTabKey('integrations'); }, true)),
       section('Вход без SMS', e('div', { style: { display: 'grid', gap: 9 } }, socialAction('telegram', 'Telegram'), socialAction('yandex', 'Яндекс'), socialMessage ? card(e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.5 } }, socialMessage), { padding: '11px 13px' }) : null)),
       e('div', { style: { marginTop: 14 } }, action('Выйти из учётной записи', 'Сессия владельца будет закрыта на этом устройстве', function () { window.__meAskLogout && window.__meAskLogout(); }))
     );
   }
+  // Панель открыта не только владельцу: под ней же сидят администратор,
+  // управляющий и мастер, а зашитое «Владелец» подписывало их чужой ролью.
+  // Легаси-панель (badgeRole) подписывает честно — приводим SaaS к тому же.
+  function roleTitle(role) {
+    var r = String(role || meSaasCurrentRole() || '').toLowerCase();
+    if (r === 'tenant_owner' || r === 'business_owner' || r === 'owner') return 'Владелец';
+    if (r === 'tenant_admin' || r === 'administrator' || r === 'admin') return 'Администратор';
+    if (r === 'manager' || r === 'branch_manager') return 'Управляющий';
+    if (r === 'provider' || r === 'employee' || r === 'staff' || r === 'master') return 'Мастер';
+    return 'Панель';
+  }
   return e(AuroraShell, { tab: { items: saasStaffTabItems(), active: 2 }, showLogo: false, showToggle: true, scroll: true }, function (t) {
     return e(React.Fragment, null,
-      e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, e('div', { style: { flex: 1, fontFamily: DISPLAY, fontSize: 20, fontWeight: 250, color: t.ink } }, 'Панель управления'), e('div', { style: { border: '1px solid ' + t.line, borderRadius: 999, padding: '7px 12px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim } }, 'Владелец')),
+      // Шапка панели закреплена, как в кабинете PWA: пролистав длинную аналитику,
+      // владелец не должен возвращаться в начало ради переключателя разделов.
+      // Отрицательные поля гасят боковой паддинг шелла, иначе контент просвечивал
+      // бы по краям; хвост градиента из t.bg даёт мягкий край на обеих темах.
+      e('div', { style: { position: 'sticky', top: 0, zIndex: 3, margin: '0 -18px', padding: '0 18px',
+        background: 'linear-gradient(180deg, ' + t.bg + ' 0%, ' + t.bg + ' calc(100% - 10px), rgba(0,0,0,0) 100%)' } },
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, e('div', { style: { flex: 1, fontFamily: DISPLAY, fontSize: 20, fontWeight: 250, color: t.ink } }, 'Панель управления'), e('div', { style: { border: '1px solid ' + t.line, borderRadius: 999, padding: '7px 12px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim } }, roleTitle())),
       e('div', { className: 'me-noscroll', style: { display: 'flex', gap: 7, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', margin: '18px -2px 0', padding: '0 2px 12px' } }, TABS.map(function (x) { var on = x.key === tabKey; return e('button', { key: x.key, type: 'button', onClick: function () {
         // 🔴 «Расписание» — это полноэкранная СЕТКА (ALiveSchedule), а не вкладка
         // панели: колонки мастеров и drag&drop не живут внутри скролл-контейнера.
         // Внутри панели раньше рисовался плоский список — не то, чем пользуется владелец.
         if (x.key === 'schedule' && window.__meGo) { window.__meScheduleReturn = 'panel'; window.__meGo('schedule'); return; }
         setTabKey(x.key);
-      }, style: { flex: 'none', border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, padding: '9px 15px', background: on ? t.ink : 'transparent', color: on ? t.bg : t.dim, fontFamily: DISPLAY, fontSize: 9, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' } }, x.label); })),
+      }, style: { flex: 'none', border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, padding: '9px 15px', background: on ? t.ink : 'transparent', color: on ? t.bg : t.dim, fontFamily: DISPLAY, fontSize: 9, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' } }, x.label); }))),
       e('div', { style: { paddingTop: 18 } }, content(t))
     );
   });
@@ -34485,11 +34549,24 @@ function MEApp() {
   //    поэтому индикатор перетекает между вкладками непрерывно (как в референсе).
   const NAV_BY_SCREEN_CLIENT = { home: 0, chat: 1, cabinet: 2 };
   const NAV_BY_SCREEN_STAFF = { 'staff-home': 0, book: 0, chat: 1, panel: 2, 'staff-clients': 3 };
+  // SaaS переиспользует легаси-экраны: на 'book' живёт кабинет сотрудника
+  // («Моя статистика» / «Профиль»), на 'panel' — разделы владельца. По имени экрана
+  // вкладку там не опознать: из-за этого «Статистика» подсвечивала «Главная»
+  // (book → 0), а «Клиенты» владельца — «Финансы» (panel → 2). Карты раздельные,
+  // потому что индекс 3 у владельца это «Клиенты», а у сотрудника — «Профиль».
+  const NAV_BY_SAAS_CAB_TAB = { mystat: 2, profile: 3 };
+  const NAV_BY_SAAS_PANEL_TAB = { maya: 2, analytics: 2, clients: 3 };
   // Экраны без нижнего меню: вход/выбор роли, полноэкранные модули и внутренний чат команды.
   const NAV_NO_BAR = ['login', 'choose', 'crm', 'schedule', 'god', 'cutmatch', 'team-chat'];
   const navIsStaff = modeRef.current === 'staff';
   const navMap = navIsStaff ? NAV_BY_SCREEN_STAFF : NAV_BY_SCREEN_CLIENT;
-  const navScreenTab = navMap[screen] != null ? navMap[screen] : -1;
+  const navSaasShared = navIsStaff && !!window.__ME_SAAS_CTX && meSaasIsBusinessRole(meSaasCurrentRole()) && (screen === 'book' || screen === 'panel');
+  // Вкладку читаем из того же window-состояния, которое __meSaasCabinet выставляет
+  // ДО перехода, поэтому она уже верна на первом рендере нового экрана.
+  const navSaasTab = !navSaasShared ? null : (screen === 'panel' ? NAV_BY_SAAS_PANEL_TAB[window.__meSaasPanelTab] : NAV_BY_SAAS_CAB_TAB[window.__meSaasWantCabinetTab]);
+  // -1 = «не опознали»: эффект ниже такой индикатор не двигает, и подсветка остаётся
+  // там, куда её поставил тап по бару (событие 'me-nav-tab'), а не прыгает на 0.
+  const navScreenTab = navSaasShared ? (typeof navSaasTab === 'number' ? navSaasTab : -1) : (navMap[screen] != null ? navMap[screen] : -1);
   const [navTab, setNavTab] = React.useState(navScreenTab);
   // Экран задаёт вкладку при обычной навигации; тап по бару двигает индикатор сразу
   // (у «Профиля» своего экрана нет — он открывает меню, но подсветка всё равно едет).
@@ -34771,7 +34848,16 @@ function MEApp() {
   }, _pmSub))), _pmRow(_pmCabinetLabel, function () {
     setProfileMenuOpen(false);
     if (!_pmAuthed) { window.__meGo && window.__meGo('login'); return; }
-    if (window.__meSaasCabinet && window.__ME_SAAS_CTX) { window.__meSaasCabinet(meSaasDefaultCabinetTab(_pmSaasRole), 0); return; }
+    if (window.__meSaasCabinet && window.__ME_SAAS_CTX) {
+      // 🔴 Дефолтная вкладка кабинета рядового сотрудника — 'mystat', а такого
+      // ключа нет в карте разделов внутри __meSaasCabinet, поэтому пункт уводил
+      // обратно на staff-home — на тот самый экран, из шапки которого меню и
+      // открыто, то есть выглядел как неработающий. Ведём сотрудника тем же
+      // маршрутом, что и нижняя вкладка «Статистика» (analytics → mystat).
+      if (meSaasIsBusinessRole(_pmSaasRole) && !meSaasIsManagerRole(_pmSaasRole) && !_pmClientWorkspace) { window.__meSaasCabinet('analytics', 2); return; }
+      window.__meSaasCabinet(meSaasDefaultCabinetTab(_pmSaasRole), 0);
+      return;
+    }
     window.__meGo && window.__meGo('cabinet');
   }), (_pmAuthed && window.__ME_SAAS_CTX && meSaasIsBusinessRole(_pmSaasRole)) ? _pmRow(_pmClientWorkspace ? 'Рабочий кабинет' : 'Клиентская версия', function () {
     setProfileMenuOpen(false);
