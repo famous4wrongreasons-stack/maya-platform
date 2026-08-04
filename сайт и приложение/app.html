@@ -26733,7 +26733,12 @@ function ALiveSchedule() {
       padding: '6px 16px 12px'
     }
   }, React.createElement('div', {
-    onClick: () => window.__meGo && window.__meGo('staff-home'),
+    onClick: () => {
+      var back = window.__meScheduleReturn || 'staff-home';
+      window.__meScheduleReturn = null;
+      if (back === 'panel' && window.__meSaasCabinet) { window.__meSaasCabinet('biz', 0); return; }
+      if (window.__meGo) window.__meGo(back);
+    },
     style: {
       width: 40,
       height: 40,
@@ -29662,7 +29667,13 @@ function ASaasOwnerPanel() {
   return e(AuroraShell, { tab: { items: saasStaffTabItems(), active: 2 }, showLogo: false, showToggle: true, scroll: true }, function (t) {
     return e(React.Fragment, null,
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, e('div', { style: { flex: 1, fontFamily: DISPLAY, fontSize: 20, fontWeight: 250, color: t.ink } }, 'Панель управления'), e('div', { style: { border: '1px solid ' + t.line, borderRadius: 999, padding: '7px 12px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '.18em', textTransform: 'uppercase', color: t.dim } }, 'Владелец')),
-      e('div', { className: 'me-noscroll', style: { display: 'flex', gap: 7, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', margin: '18px -2px 0', padding: '0 2px 12px' } }, TABS.map(function (x) { var on = x.key === tabKey; return e('button', { key: x.key, type: 'button', onClick: function () { setTabKey(x.key); }, style: { flex: 'none', border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, padding: '9px 15px', background: on ? t.ink : 'transparent', color: on ? t.bg : t.dim, fontFamily: DISPLAY, fontSize: 9, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' } }, x.label); })),
+      e('div', { className: 'me-noscroll', style: { display: 'flex', gap: 7, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', margin: '18px -2px 0', padding: '0 2px 12px' } }, TABS.map(function (x) { var on = x.key === tabKey; return e('button', { key: x.key, type: 'button', onClick: function () {
+        // 🔴 «Расписание» — это полноэкранная СЕТКА (ALiveSchedule), а не вкладка
+        // панели: колонки мастеров и drag&drop не живут внутри скролл-контейнера.
+        // Внутри панели раньше рисовался плоский список — не то, чем пользуется владелец.
+        if (x.key === 'schedule' && window.__meGo) { window.__meScheduleReturn = 'panel'; window.__meGo('schedule'); return; }
+        setTabKey(x.key);
+      }, style: { flex: 'none', border: '1px solid ' + (on ? t.ink : t.line), borderRadius: 999, padding: '9px 15px', background: on ? t.ink : 'transparent', color: on ? t.bg : t.dim, fontFamily: DISPLAY, fontSize: 9, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' } }, x.label); })),
       e('div', { style: { paddingTop: 18 } }, content(t))
     );
   });

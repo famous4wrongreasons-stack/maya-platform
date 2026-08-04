@@ -150,6 +150,17 @@ export interface CrmJournalMaster {
   work_slots: Array<{ from: string; to: string }>;
 }
 
+/** Карточка визита по тапу в сетке расписания. */
+export interface CrmAppointmentDetail extends CrmJournalAppointment {
+  client_phone: string | null;
+  /** Длительность визита в минутах — её меняют кнопками ±15. */
+  duration_minutes: number;
+  attendance: number;
+  paid: boolean;
+  /** Что владельцу разрешено делать с этой записью прямо сейчас. */
+  can_edit: boolean;
+}
+
 export interface CrmJournal {
   calendar_source: 'external';
   timezone: string;
@@ -262,6 +273,39 @@ export interface CRMAdapter {
     timezone: string;
     providerId?: string;
   }): Promise<CrmJournal>;
+  /**
+   * Операции над визитом из журнала — то, чем владелец пользуется каждый день.
+   * Все опциональные: провайдер, который их не умеет, просто не объявляет метод,
+   * и кабинет прячет соответствующую кнопку вместо того, чтобы падать.
+   */
+  getAppointmentDetail?(params: {
+    tenantId: string;
+    externalId: string;
+    timezone: string;
+  }): Promise<CrmAppointmentDetail>;
+  /** «Пришёл» / «не пришёл»: attendance 1 | -1 | 0 (ожидание). */
+  markAppointmentAttendance?(params: {
+    tenantId: string;
+    externalId: string;
+    attendance: number;
+  }): Promise<{ external_id: string; attendance: number }>;
+  /** Стянуть/растянуть визит. Услуги, цены и время начала не трогаются. */
+  setAppointmentDuration?(params: {
+    tenantId: string;
+    externalId: string;
+    durationMinutes: number;
+  }): Promise<{ external_id: string; duration_minutes: number }>;
+  /** Полная замена состава услуг визита с сохранением цен уже стоявших услуг. */
+  setAppointmentServices?(params: {
+    tenantId: string;
+    externalId: string;
+    serviceIds: string[];
+  }): Promise<{ external_id: string; service_ids: string[] }>;
+  /** Подсказка постоянного клиента по хвосту телефона при ручной записи. */
+  searchClients?(params: {
+    tenantId: string;
+    query: string;
+  }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
   getFinancialSummary?(params: {
     tenantId: string;
     from: string;

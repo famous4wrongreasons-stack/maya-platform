@@ -782,6 +782,187 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   /**
+   * НЕРАЗРУШАЮЩЕЕ обновление визита: PUT record/{company}/{id}.
+   *
+   * 🔴 YClients при PUT перезаписывает запись ЦЕЛИКОМ: всё, что не прислали,
+   * теряется. Поэтому сначала читаем текущую запись и собираем полный payload
+   * (клиент, мастер, услуги С ЦЕНАМИ и скидками, время, длительность,
+   * присутствие, комментарий), и только потом накладываем изменение.
+   * Именно так это годами делает легаси-бэкенд; попытка «прислать только то,
+   * что меняем» стирает цены и состав услуг.
+   */
+  private async putRecordPreserving(
+    externalId: string,
+    overrides: Record<string, unknown>,
+    options?: { saveIfBusy?: boolean },
+  ): Promise<YclientsRecordApiItem> {
+    const numericId = this.toNumericId(externalId, 'externalId');
+    const current = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${numericId}`,
+    );
+    const record = current.data;
+
+    if (!record) {
+      throw new Error('YClients record was not found');
+    }
+
+    const client = record.client || {};
+    const services = (record.services || [])
+      .filter((service) => service?.id !== undefined)
+      .map((service) => {
+        const cost = Number(service.cost);
+        const discount = Number(service.discount);
+        const firstCost = Number(service.first_cost);
+
+        return {
+          id: this.toNumericId(String(service.id), 'serviceId'),
+          amount: 1,
+          ...(Number.isFinite(cost)
+            ? {
+                cost,
+                first_cost: Number.isFinite(firstCost) ? firstCost : cost,
+              }
+            : {}),
+          ...(Number.isFinite(discount) ? { discount } : {}),
+        };
+      });
+
+    const payload: Record<string, unknown> = {
+      staff_id: this.toNumericId(
+        String(record.staff?.id ?? record.staff_id ?? ''),
+        'staffId',
+      ),
+      datetime: record.datetime || record.date,
+      seance_length: record.seance_length ?? record.length ?? 3600,
+      save_if_busy: options?.saveIfBusy === true,
+      send_sms: false,
+      client: {
+        ...(client.id !== undefined
+          ? { id: this.toNumericId(String(client.id), 'client.id') }
+          : {}),
+        phone: client.phone ? this.normalizePhone(client.phone) : '',
+        name: client.name || client.phone || '',
+      },
+      services,
+      attendance: typeof record.attendance === 'number' ? record.attendance : 0,
+      comment: record.comment ?? '',
+      ...overrides,
+    };
+
+    const response = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${numericId}`,
+      { method: 'PUT', body: JSON.stringify(payload) },
+    );
+
+    return response.data ?? record;
+  }
+
+  async markAppointmentAttendance(params: {
+    tenantId: string;
+    externalId: string;
+    attendance: number;
+  }): Promise<{ external_id: string; attendance: number }> {
+    void params.tenantId;
+    const attendance = [1, 0, -1].includes(params.attendance)
+      ? params.attendance
+      : 0;
+    await this.putRecordPreserving(params.externalId, { attendance });
+
+    return { external_id: params.externalId, attendance };
+  }
+
+  async setAppointmentDuration(params: {
+    tenantId: string;
+    externalId: string;
+    durationMinutes: number;
+  }): Promise<{ external_id: string; duration_minutes: number }> {
+    void params.tenantId;
+    const minutes = Math.round(Number(params.durationMinutes));
+
+    if (!Number.isFinite(minutes) || minutes < 5 || minutes > 720) {
+      throw new Error('Длительность визита должна быть от 5 до 720 минут');
+    }
+
+    // save_if_busy: растянуть визит поверх соседнего окна разрешаем — в журнале
+    // это решает мастер. Время начала при этом не двигается.
+    await this.putRecordPreserving(
+      params.externalId,
+      { seance_length: minutes * 60 },
+      { saveIfBusy: true },
+    );
+
+    return { external_id: params.externalId, duration_minutes: minutes };
+  }
+
+  async setAppointmentServices(params: {
+    tenantId: string;
+    externalId: string;
+    serviceIds: string[];
+  }): Promise<{ external_id: string; service_ids: string[] }> {
+    void params.tenantId;
+
+    if (!params.serviceIds.length) {
+      throw new Error('В визите должна остаться хотя бы одна услуга');
+    }
+
+    const numericId = this.toNumericId(params.externalId, 'externalId');
+    const current = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${numericId}`,
+    );
+    // Цены уже стоявших услуг сохраняем, новым берём каталожную стоимость.
+    const keptPrices = new Map<string, { cost: number; discount: number }>();
+
+    for (const service of current.data?.services || []) {
+      const cost = Number(service?.cost);
+      if (service?.id !== undefined && Number.isFinite(cost)) {
+        const discount = Number(service.discount);
+        keptPrices.set(String(service.id), {
+          cost,
+          discount: Number.isFinite(discount) ? discount : 0,
+        });
+      }
+    }
+
+    const catalog = await this.fetchServices();
+    const catalogById = new Map(
+      catalog.map((service) => [String(service.id), service]),
+    );
+    const services = params.serviceIds.map((serviceId) => {
+      const kept = keptPrices.get(String(serviceId));
+      const cost =
+        kept?.cost ??
+        catalogById.get(String(serviceId))?.price_min ??
+        catalogById.get(String(serviceId))?.price_max ??
+        0;
+
+      return {
+        id: this.toNumericId(serviceId, 'serviceId'),
+        amount: 1,
+        cost,
+        first_cost: cost,
+        discount: kept?.discount ?? 0,
+      };
+    });
+    // Длительность визита = сумма длительностей услуг, как в журнале салона.
+    const seanceLength =
+      params.serviceIds.reduce((total, serviceId) => {
+        const service = catalogById.get(String(serviceId));
+        return total + (service?.seance_length || service?.duration || 0);
+      }, 0) || undefined;
+
+    await this.putRecordPreserving(
+      params.externalId,
+      {
+        services,
+        ...(seanceLength ? { seance_length: seanceLength } : {}),
+      },
+      { saveIfBusy: true },
+    );
+
+    return { external_id: params.externalId, service_ids: params.serviceIds };
+  }
+
+  /**
    * График смены мастера на конкретный день: schedule/{company}/{staff}/{from}/{to}.
    *
    * Отказ по одному мастеру НЕ должен ронять весь журнал — у токена может не
