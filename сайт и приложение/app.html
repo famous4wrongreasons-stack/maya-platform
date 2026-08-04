@@ -25998,18 +25998,36 @@ function ALiveSchedule() {
     return String(id == null ? '' : id).replace(/^crm-/, '');
   }
   function ssReq(path, init) {
+    var o = init || {};
+    var headers = { Accept: 'application/json' };
+    if (o.body) headers['Content-Type'] = 'application/json';
+    // 🔴 Ходим через общий мост, а не своим fetch: он обновляет истёкший access
+    // и повторяет запрос. Со своим fetch журнал через четверть часа начинал
+    // отвечать «Unauthorized» на каждое действие.
+    if (window.__meSaasAuthedFetch) {
+      return window.__meSaasAuthedFetch(path, { method: o.method || 'GET', headers: headers, body: o.body })
+        .then(function (body) { return { ok: true, status: 200, body: body }; })
+        .catch(function (e) { return { ok: false, status: (e && e.status) || 0, body: (e && e.body) || null }; });
+    }
     var ctx = window.__ME_SAAS_CTX;
     var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
     if (!ctx || !ctx.api || !bundle || !bundle.token) return Promise.reject(new Error('no-session'));
-    var o = init || {};
-    var headers = { Accept: 'application/json', Authorization: 'Bearer ' + bundle.token };
-    if (o.body) headers['Content-Type'] = 'application/json';
+    headers.Authorization = 'Bearer ' + bundle.token;
     return fetch(ctx.api + path, { method: o.method || 'GET', headers: headers, body: o.body })
       .then(function (r) {
         return r.json().catch(function () { return null; }).then(function (j) {
           return { ok: r.ok, status: r.status, body: j };
         });
       });
+  }
+  // Сетка написана под легаси-роли ('owner' | 'manager' | 'master') и гейтит по
+  // ним запись, перенос и показ телефона. SaaS-роли приводим к ним же, иначе
+  // data.role остаётся пустым и все эти входы закрыты.
+  function ssRole() {
+    var r = typeof meSaasCurrentRole === 'function' ? meSaasCurrentRole() : null;
+    if (['tenant_owner', 'business_owner', 'tenant_admin', 'administrator'].indexOf(r) >= 0) return 'owner';
+    if (['manager', 'branch_manager'].indexOf(r) >= 0) return 'manager';
+    return 'master';
   }
   function ssErrText(res, fallback) {
     // 403 от CRM значит «токену салона не хватает прав», а не «сломалось».
@@ -26076,7 +26094,10 @@ function ALiveSchedule() {
             mood: null                                // настроения визита в SaaS пока нет
           };
         }),
-        can_see_phone: false
+        role: ssRole(),
+        // Телефоны клиентов сервер отдаёт только владельцу/администратору —
+        // ровно та же граница, что в легаси-кабинете.
+        can_see_phone: ssRole() === 'owner'
       });
     }).catch(function () {
       setLoading(false);
@@ -26145,6 +26166,10 @@ function ALiveSchedule() {
         duration_minutes: a.duration_minutes || 0,
         attendance: a.attendance || 0,
         paid: !!a.paid,
+        total: a.total_price,
+        // Без этого поля карточка считает визит нередактируемым и прячет
+        // и ±15 минут, и правку услуг — то есть половину пакета.
+        can_edit: a.can_edit !== false,
         // Ни имени клиента, ни оплаты через SaaS не правим: таких операций в
         // контракте нет, а показать кнопку, которая молчит, хуже, чем не показать.
         can_edit_phone: false,

@@ -64,9 +64,11 @@ export class CreateCrmJournalAppointmentDto {
   @IsDateString()
   start!: string;
 
-  @ApiProperty({ example: '+79990000000' })
+  /** Пусто, когда записывает мастер: поле телефона видит только владелец. */
+  @ApiPropertyOptional({ example: '+79990000000' })
+  @IsOptional()
   @IsString()
-  client_phone!: string;
+  client_phone?: string;
 
   @ApiPropertyOptional({ example: 'Станислав' })
   @IsOptional()

@@ -387,7 +387,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async createAppointment(
     params: CreateAppointmentParams,
   ): Promise<CreatedAppointment> {
-    if (!params.clientPhone) {
+    // 🔴 Клиентская запись без телефона невозможна — иначе клиента не с кем
+    // связать. Но в журнале телефон вводит только владелец: мастеру поле ПД не
+    // показывают, и легаси-кабинет годами создаёт такие записи с пустым
+    // телефоном. Поэтому на админском пути требование снимаем.
+    if (!params.clientPhone && params.allowBusy !== true) {
       throw new Error(
         'YClients appointment creation requires a client phone number',
       );
@@ -414,8 +418,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
         amount: 1,
       })),
       client: {
-        phone: this.normalizePhone(params.clientPhone),
-        name: params.clientName || params.clientPhone,
+        phone: params.clientPhone ? this.normalizePhone(params.clientPhone) : '',
+        name: params.clientName || params.clientPhone || 'Клиент',
       },
       datetime: this.toYclientsDateTime(params.start),
       seance_length: seanceLengthSeconds,
@@ -569,7 +573,22 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const selectedServices = serviceCatalog.filter((service) =>
       finalServiceIds.includes(String(service.id)),
     );
+    // 🔴 Длительность при переносе НЕ пересчитываем, если состав услуг не
+    // меняли. На визите может стоять длительность, выставленная мастером —
+    // кнопками ±15 в сетке или прямо при ручной записи. Пересчёт по каталогу
+    // схлопывал бы её обратно, и визит наезжал бы на следующего клиента.
+    const servicesChanged = Boolean(
+      params.serviceIds && params.serviceIds.length > 0,
+    );
+    const currentSeanceLength = Number(record.seance_length);
+    const keptSeanceLength =
+      !servicesChanged &&
+      Number.isFinite(currentSeanceLength) &&
+      currentSeanceLength > 0
+        ? currentSeanceLength
+        : 0;
     const seanceLengthSeconds =
+      keptSeanceLength ||
       selectedServices.reduce(
         (total, service) =>
           total + (service.seance_length || service.duration || 0),
@@ -872,7 +891,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const attendance = [1, 0, -1].includes(params.attendance)
       ? params.attendance
       : 0;
-    await this.putRecordPreserving(params.externalId, { attendance });
+    // 🔴 save_if_busy обязателен: время визита мы не двигаем, но слот занят
+    // самой же этой записью, а у журнальной записи поверх чужого окна — ещё и
+    // соседней. С save_if_busy=false YClients отклонил бы PUT, и кнопки
+    // «Пришёл» / «Не пришёл» не работали бы вовсе.
+    await this.putRecordPreserving(
+      params.externalId,
+      { attendance },
+      { saveIfBusy: true },
+    );
 
     return { external_id: params.externalId, attendance };
   }
@@ -916,15 +943,23 @@ export class YclientsCRMAdapter implements CRMAdapter {
       `record/${this.getCompanyId()}/${numericId}`,
     );
     // Цены уже стоявших услуг сохраняем, новым берём каталожную стоимость.
-    const keptPrices = new Map<string, { cost: number; discount: number }>();
+    // 🔴 Вместе с cost переносим и first_cost — цену ДО скидки. Если подставить
+    // сюда цену со скидкой, YClients пересчитает визит от неё, и скидка
+    // применится второй раз: договорённость с клиентом уедет вниз.
+    const keptPrices = new Map<
+      string,
+      { cost: number; discount: number; firstCost: number }
+    >();
 
     for (const service of current.data?.services || []) {
       const cost = Number(service?.cost);
       if (service?.id !== undefined && Number.isFinite(cost)) {
         const discount = Number(service.discount);
+        const firstCost = Number(service.first_cost);
         keptPrices.set(String(service.id), {
           cost,
           discount: Number.isFinite(discount) ? discount : 0,
+          firstCost: Number.isFinite(firstCost) ? firstCost : cost,
         });
       }
     }
@@ -945,7 +980,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         id: this.toNumericId(serviceId, 'serviceId'),
         amount: 1,
         cost,
-        first_cost: cost,
+        first_cost: kept?.firstCost ?? cost,
         discount: kept?.discount ?? 0,
       };
     });

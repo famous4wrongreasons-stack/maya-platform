@@ -58,6 +58,12 @@ const CRM_JOURNAL_ROLES = [
   UserRole.STAFF,
 ];
 
+/**
+ * Телефоны клиентов — ПД (152-ФЗ). В легаси-кабинете подсказку по базе видел
+ * только владелец; рядовой мастер перебором выгрузил бы всю базу салона.
+ */
+const CRM_CLIENT_PII_ROLES = CRM_MANAGEMENT_ROLES;
+
 const CRM_TEAM_ACCESS_ROLES = [
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
@@ -187,7 +193,7 @@ export class CrmIntegrationController {
     const result = await this.crmService.createAppointment(tenantId, {
       clientId: actor.userId,
       clientName: dto.client_name || '',
-      clientPhone: dto.client_phone,
+      clientPhone: dto.client_phone || null,
       staffId: dto.staff_id,
       serviceIds: dto.service_ids,
       start: dto.start,
@@ -218,7 +224,11 @@ export class CrmIntegrationController {
     @Param('externalId') externalId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.crmService.getAppointmentDetail(this.tenantId(actor), externalId);
+    return this.crmService.getAppointmentDetail(
+      this.tenantId(actor),
+      actor,
+      externalId,
+    );
   }
 
   @Post('journal/appointments/:externalId/attendance')
@@ -232,6 +242,7 @@ export class CrmIntegrationController {
     const tenantId = this.tenantId(actor);
     const result = await this.crmService.markAppointmentAttendance(
       tenantId,
+      actor,
       externalId,
       dto.attendance,
     );
@@ -259,6 +270,7 @@ export class CrmIntegrationController {
     const tenantId = this.tenantId(actor);
     const result = await this.crmService.setAppointmentDuration(
       tenantId,
+      actor,
       externalId,
       dto.duration_minutes,
     );
@@ -286,6 +298,7 @@ export class CrmIntegrationController {
     const tenantId = this.tenantId(actor);
     const result = await this.crmService.setAppointmentServices(
       tenantId,
+      actor,
       externalId,
       dto.service_ids,
     );
@@ -311,12 +324,16 @@ export class CrmIntegrationController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.rescheduleAppointment(tenantId, {
-      externalId,
-      start: dto.start,
-      staffId: dto.staff_id,
-      serviceIds: dto.service_ids,
-    });
+    const result = await this.crmService.rescheduleJournalAppointment(
+      tenantId,
+      actor,
+      {
+        externalId,
+        start: dto.start,
+        staffId: dto.staff_id,
+        serviceIds: dto.service_ids,
+      },
+    );
 
     await this.auditLogService.log({
       tenantId,
@@ -338,7 +355,11 @@ export class CrmIntegrationController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.cancelAppointment(tenantId, externalId);
+    const result = await this.crmService.cancelJournalAppointment(
+      tenantId,
+      actor,
+      externalId,
+    );
 
     await this.auditLogService.log({
       tenantId,
@@ -353,7 +374,7 @@ export class CrmIntegrationController {
   }
 
   @Get('clients/search')
-  @Roles(...CRM_JOURNAL_ROLES)
+  @Roles(...CRM_CLIENT_PII_ROLES)
   @ApiOperation({ summary: 'Suggest a returning client while booking by hand' })
   async searchClients(
     @Query() query: SearchCrmClientsDto,

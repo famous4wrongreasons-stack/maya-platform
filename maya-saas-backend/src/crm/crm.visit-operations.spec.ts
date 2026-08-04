@@ -1,6 +1,11 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 
-import { CrmProvider } from '../common/domain.enums';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { CrmProvider, UserRole } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -10,18 +15,41 @@ import { CrmService } from './crm.service';
 /**
  * Операции над визитом из сетки расписания.
  *
- * Проверяем ровно то, что отличает этот путь от клиентского: провайдер без
- * нужного метода отвечает понятным кодом, невалидный ввод не доезжает до CRM,
- * а ручная запись идёт админским путём (allowBusy) с длительностью мастера.
+ * Проверяем ровно то, что отличает этот путь от клиентского: границу доступа к
+ * чужой записи, границу показа телефона, отсев невалидного ввода до похода в
+ * CRM и админский характер ручной записи.
  */
 describe('CrmService: операции над визитом', () => {
-  function build(adapter: Record<string, unknown>) {
+  const OWNER: AuthenticatedUser = {
+    userId: 'user-owner',
+    sessionId: 's1',
+    tenantId: 'tenant-1',
+    role: UserRole.TENANT_OWNER,
+    email: 'owner@example.com',
+    branchId: null,
+    membershipId: null,
+    membershipStatus: null,
+  };
+  const MASTER: AuthenticatedUser = {
+    ...OWNER,
+    userId: 'user-master',
+    role: UserRole.STAFF,
+    email: 'master@example.com',
+  };
+
+  function build(
+    adapter: Record<string, unknown>,
+    staffAccess: unknown = null,
+  ) {
     const prisma = {
       tenant: {
         findUnique: jest.fn().mockResolvedValue({
           calendarSource: 'external',
           defaultTimezone: 'Europe/Moscow',
         }),
+      },
+      crmStaffAccess: {
+        findFirst: jest.fn().mockResolvedValue(staffAccess),
       },
       crmIntegration: {
         findUnique: jest.fn().mockResolvedValue({
@@ -65,11 +93,31 @@ describe('CrmService: операции над визитом', () => {
     };
   }
 
+  const detailOf = (staffId: string) => ({
+    id: `crm-77`,
+    provider: { id: staffId, name: 'Илья' },
+    client: { id: '5', name: 'Клиент' },
+    client_phone: '+79990000000',
+    services: [],
+    service_ids: [],
+    start_at: '2026-08-04T09:00:00.000Z',
+    end_at: '2026-08-04T10:00:00.000Z',
+    status: 'confirmed',
+    notes: null,
+    total_price: 1000,
+    currency: 'RUB',
+    duration_minutes: 60,
+    attendance: 0,
+    paid: false,
+    can_edit: true,
+    branch: null,
+  });
+
   it('отвечает понятным кодом, когда провайдер не умеет операцию', async () => {
     const { service, run } = build({});
 
     await expect(
-      run(() => service.markAppointmentAttendance('tenant-1', '77', 1)),
+      run(() => service.markAppointmentAttendance('tenant-1', OWNER, '77', 1)),
     ).rejects.toMatchObject({
       response: { error: { code: 'crm_attendance_not_supported' } },
     });
@@ -80,7 +128,7 @@ describe('CrmService: операции над визитом', () => {
     const { service, run } = build({ markAppointmentAttendance });
 
     await expect(
-      run(() => service.markAppointmentAttendance('tenant-1', '77', 5)),
+      run(() => service.markAppointmentAttendance('tenant-1', OWNER, '77', 5)),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(markAppointmentAttendance).not.toHaveBeenCalled();
   });
@@ -90,10 +138,10 @@ describe('CrmService: операции над визитом', () => {
     const { service, run } = build({ setAppointmentDuration });
 
     await expect(
-      run(() => service.setAppointmentDuration('tenant-1', '77', 4)),
+      run(() => service.setAppointmentDuration('tenant-1', OWNER, '77', 4)),
     ).rejects.toBeInstanceOf(BadRequestException);
     await expect(
-      run(() => service.setAppointmentDuration('tenant-1', '77', 721)),
+      run(() => service.setAppointmentDuration('tenant-1', OWNER, '77', 721)),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(setAppointmentDuration).not.toHaveBeenCalled();
   });
@@ -103,7 +151,7 @@ describe('CrmService: операции над визитом', () => {
     const { service, run } = build({ setAppointmentServices });
 
     await expect(
-      run(() => service.setAppointmentServices('tenant-1', '77', [])),
+      run(() => service.setAppointmentServices('tenant-1', OWNER, '77', [])),
     ).rejects.toMatchObject({
       response: { error: { code: 'crm_services_empty' } },
     });
@@ -111,16 +159,78 @@ describe('CrmService: операции над визитом', () => {
   });
 
   it('карточка визита берёт пояс филиала из тенанта', async () => {
-    const getAppointmentDetail = jest.fn().mockResolvedValue({ id: 'crm-77' });
+    const getAppointmentDetail = jest.fn().mockResolvedValue(detailOf('1'));
     const { service, run } = build({ getAppointmentDetail });
 
-    await run(() => service.getAppointmentDetail('tenant-1', '77'));
+    await run(() => service.getAppointmentDetail('tenant-1', OWNER, '77'));
 
     expect(getAppointmentDetail).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
       externalId: '77',
       timezone: 'Europe/Moscow',
     });
+  });
+
+  it('мастер не может открыть чужой визит по перебору идентификатора', async () => {
+    const getAppointmentDetail = jest.fn().mockResolvedValue(detailOf('999'));
+    const { service, run } = build(
+      { getAppointmentDetail },
+      { externalStaffId: '1461615', status: 'active' },
+    );
+
+    await expect(
+      run(() => service.getAppointmentDetail('tenant-1', MASTER, '77')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('мастер работает со своим визитом', async () => {
+    const getAppointmentDetail = jest
+      .fn()
+      .mockResolvedValue(detailOf('1461615'));
+    const markAppointmentAttendance = jest
+      .fn()
+      .mockResolvedValue({ external_id: '77', attendance: 1 });
+    const { service, run } = build(
+      { getAppointmentDetail, markAppointmentAttendance },
+      { externalStaffId: '1461615', status: 'active' },
+    );
+
+    await run(() =>
+      service.markAppointmentAttendance('tenant-1', MASTER, '77', 1),
+    );
+
+    expect(markAppointmentAttendance).toHaveBeenCalledTimes(1);
+  });
+
+  it('без активной привязки к мастеру журнал закрыт (fail-closed)', async () => {
+    const getAppointmentDetail = jest
+      .fn()
+      .mockResolvedValue(detailOf('1461615'));
+    const { service, run } = build({ getAppointmentDetail }, null);
+
+    await expect(
+      run(() => service.getAppointmentDetail('tenant-1', MASTER, '77')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(getAppointmentDetail).not.toHaveBeenCalled();
+  });
+
+  it('телефон клиента виден владельцу и скрыт от мастера', async () => {
+    const ownerSide = build({
+      getAppointmentDetail: jest.fn().mockResolvedValue(detailOf('1461615')),
+    });
+    const ownerDetail = await ownerSide.run(() =>
+      ownerSide.service.getAppointmentDetail('tenant-1', OWNER, '77'),
+    );
+    expect(ownerDetail.client_phone).toBe('+79990000000');
+
+    const masterSide = build(
+      { getAppointmentDetail: jest.fn().mockResolvedValue(detailOf('1461615')) },
+      { externalStaffId: '1461615', status: 'active' },
+    );
+    const masterDetail = await masterSide.run(() =>
+      masterSide.service.getAppointmentDetail('tenant-1', MASTER, '77'),
+    );
+    expect(masterDetail.client_phone).toBeNull();
   });
 
   it('ручная запись из журнала идёт админским путём и несёт длительность мастера', async () => {

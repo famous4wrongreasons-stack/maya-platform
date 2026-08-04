@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -13,6 +14,7 @@ import {
   CrmProvider,
   UserRole,
 } from '../common/domain.enums';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
@@ -771,30 +773,125 @@ export class CrmService {
     return tenant?.defaultTimezone ?? 'Europe/Moscow';
   }
 
-  async getAppointmentDetail(
+  /**
+   * Кому журнал открыт целиком: владелец, управляющий, администратор.
+   * Остальные — только собственные визиты (см. assertJournalRecordAccess).
+   */
+  private static readonly JOURNAL_FULL_ACCESS_ROLES = new Set<string>([
+    UserRole.TENANT_OWNER,
+    UserRole.BUSINESS_OWNER,
+    UserRole.TENANT_ADMIN,
+    UserRole.ADMINISTRATOR,
+    UserRole.MANAGER,
+    UserRole.BRANCH_MANAGER,
+  ]);
+
+  /**
+   * Кому видны телефоны клиентов. Уже — чем доступ к журналу: телефон это ПД
+   * (152-ФЗ), и в легаси-кабинете его видел только владелец. Управляющий ведёт
+   * записи всего салона, но номера ему не показываются.
+   */
+  private static readonly CLIENT_PHONE_ROLES = new Set<string>([
+    UserRole.TENANT_OWNER,
+    UserRole.BUSINESS_OWNER,
+    UserRole.TENANT_ADMIN,
+    UserRole.ADMINISTRATOR,
+  ]);
+
+  private journalRecordForbidden(): ForbiddenException {
+    return new ForbiddenException({
+      message: 'Эта запись не из вашего расписания.',
+      error: { code: 'crm_record_forbidden' },
+    });
+  }
+
+  /**
+   * 🔴 BOLA-страж журнальных операций.
+   *
+   * Внешний идентификатор записи в CRM перебираем. Без этой проверки мастер,
+   * подставив чужой id, читал бы карточку любого визита салона вместе с ПД
+   * клиента и мог бы его отменить, перенести или переписать. Ровно эту границу
+   * держит легаси-кабинет (_panel_record_guard).
+   *
+   * Возвращает уже загруженную карточку, если ради проверки её пришлось
+   * прочитать — чтобы не ходить в CRM дважды.
+   */
+  private async assertJournalRecordAccess(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail | null> {
+    if (CrmService.JOURNAL_FULL_ACCESS_ROLES.has(actor.role)) {
+      return null;
+    }
+
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId, userId: actor.userId },
+      select: { externalStaffId: true, status: true },
+    });
+
+    // Нет привязки к мастеру в CRM — значит и своих визитов нет. Fail-closed.
+    if (!access || access.status !== 'active') {
+      throw this.journalRecordForbidden();
+    }
+
+    const detail = await this.loadAppointmentDetail(tenantId, externalId);
+
+    if (String(detail.provider.id) !== String(access.externalStaffId)) {
+      throw this.journalRecordForbidden();
+    }
+
+    return detail;
+  }
+
+  private async loadAppointmentDetail(
     tenantId: string,
     externalId: string,
   ): Promise<CrmAppointmentDetail> {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const adapter = await this.getVisitCapableAdapter(
-      scopedTenantId,
+      tenantId,
       'getAppointmentDetail',
       'crm_appointment_detail_not_supported',
     );
 
     return adapter.getAppointmentDetail({
-      tenantId: scopedTenantId,
+      tenantId,
       externalId,
-      timezone: await this.tenantTimezone(scopedTenantId),
+      timezone: await this.tenantTimezone(tenantId),
     });
+  }
+
+  async getAppointmentDetail(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const guarded = await this.assertJournalRecordAccess(
+      scopedTenantId,
+      actor,
+      externalId,
+    );
+    const detail =
+      guarded ?? (await this.loadAppointmentDetail(scopedTenantId, externalId));
+
+    if (CrmService.CLIENT_PHONE_ROLES.has(actor.role)) {
+      return detail;
+    }
+
+    // Телефон вырезаем на выходе, а не полагаемся на то, что фронт его не
+    // покажет: ответ API читается и в обход интерфейса.
+    return { ...detail, client_phone: null };
   }
 
   async markAppointmentAttendance(
     tenantId: string,
+    actor: AuthenticatedUser,
     externalId: string,
     attendance: number,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
 
     if (![1, 0, -1].includes(attendance)) {
       throw new BadRequestException({
@@ -818,10 +915,12 @@ export class CrmService {
 
   async setAppointmentDuration(
     tenantId: string,
+    actor: AuthenticatedUser,
     externalId: string,
     durationMinutes: number,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
 
     if (
       !Number.isFinite(durationMinutes) ||
@@ -849,10 +948,12 @@ export class CrmService {
 
   async setAppointmentServices(
     tenantId: string,
+    actor: AuthenticatedUser,
     externalId: string,
     serviceIds: string[],
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
 
     // Пустой состав стёр бы цену визита — в журнале это всегда ошибка ввода.
     if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
@@ -873,6 +974,39 @@ export class CrmService {
       externalId,
       serviceIds,
     });
+  }
+
+  /** Перенос визита из журнала — под тем же стражем, что и правки. */
+  async rescheduleJournalAppointment(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    params: {
+      externalId: string;
+      start: string;
+      staffId?: string;
+      serviceIds?: string[];
+    },
+  ): Promise<RescheduledAppointment> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(
+      scopedTenantId,
+      actor,
+      params.externalId,
+    );
+
+    return this.rescheduleAppointment(scopedTenantId, params);
+  }
+
+  /** Отмена визита из журнала — под тем же стражем. */
+  async cancelJournalAppointment(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+  ): Promise<CancelledAppointment> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
+
+    return this.cancelAppointment(scopedTenantId, externalId);
   }
 
   async searchClients(tenantId: string, query: string) {
