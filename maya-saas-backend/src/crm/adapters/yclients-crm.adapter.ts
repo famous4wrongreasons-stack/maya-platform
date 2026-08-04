@@ -94,6 +94,10 @@ interface YclientsRecordServiceApiItem {
   id?: number | string;
   title?: string;
   cost?: number | string;
+  /** Скидка по услуге в визите — при PUT обязана переноситься, иначе теряется. */
+  discount?: number | string;
+  /** Цена до скидки. YClients ждёт её вместе с cost при перезаписи состава. */
+  first_cost?: number | string;
   price_min?: number | string;
   duration?: number | null;
   seance_length?: number;
@@ -516,6 +520,38 @@ export class YclientsCRMAdapter implements CRMAdapter {
       throw new Error('YClients record does not have services to retain');
     }
 
+    // Цены и скидки из ТЕКУЩЕЙ записи, а не из каталога: в визите могла стоять
+    // ручная цена или скидка, и каталожная стоимость её бы затёрла.
+    const pricedServices = new Map<
+      string,
+      { cost?: number; discount?: number; first_cost?: number }
+    >();
+
+    for (const service of record.services || []) {
+      if (service?.id === undefined) {
+        continue;
+      }
+
+      const cost = Number(service.cost);
+      const discount = Number(service.discount);
+      const firstCost = Number(service.first_cost);
+      const kept: { cost?: number; discount?: number; first_cost?: number } =
+        {};
+
+      if (Number.isFinite(cost)) {
+        kept.cost = cost;
+        kept.first_cost = Number.isFinite(firstCost) ? firstCost : cost;
+      }
+
+      if (Number.isFinite(discount)) {
+        kept.discount = discount;
+      }
+
+      if (Object.keys(kept).length > 0) {
+        pricedServices.set(String(service.id), kept);
+      }
+    }
+
     const serviceCatalog = await this.fetchServices();
     const selectedServices = serviceCatalog.filter((service) =>
       finalServiceIds.includes(String(service.id)),
@@ -542,10 +578,20 @@ export class YclientsCRMAdapter implements CRMAdapter {
         phone: client.phone ? this.normalizePhone(client.phone) : '',
         name: client.name || client.phone || '',
       },
-      services: finalServiceIds.map((serviceId) => ({
-        id: this.toNumericId(serviceId, 'serviceId'),
-        amount: 1,
-      })),
+      // 🔴 Цены переносим ЯВНО. YClients при PUT перезаписывает состав услуг
+      // целиком: услуга, пришедшая без cost/first_cost, теряет свою стоимость.
+      // Перенос визита с ручной ценой или скидкой обнулял бы договорённость с
+      // клиентом. Легаси-бэкенд во всех неразрушающих PUT шлёт полный набор
+      // {id, cost, discount, first_cost} — повторяем то же самое.
+      services: finalServiceIds.map((serviceId) => {
+        const kept = pricedServices.get(String(serviceId));
+
+        return {
+          id: this.toNumericId(serviceId, 'serviceId'),
+          amount: 1,
+          ...(kept ? kept : {}),
+        };
+      }),
       attendance: typeof record.attendance === 'number' ? record.attendance : 0,
       comment: params.notes ?? record.comment ?? '',
     };
