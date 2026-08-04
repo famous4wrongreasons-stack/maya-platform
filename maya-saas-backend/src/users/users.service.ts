@@ -1388,7 +1388,7 @@ export class UsersService {
         userId: serialized.id,
         status: 'active',
       },
-      select: { title: true },
+      select: { title: true, externalStaffId: true },
     });
 
     if (crmStaffProfile) {
@@ -1398,6 +1398,9 @@ export class UsersService {
           linked: true,
           source: 'crm',
           title: crmStaffProfile.title,
+          // Свой идентификатор в CRM: по нему кабинет отбирает из журнала дня
+          // ИМЕННО свои визиты. Это собственный id пользователя, не чужие ПД.
+          external_staff_id: crmStaffProfile.externalStaffId,
         },
       };
     }

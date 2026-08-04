@@ -4709,7 +4709,11 @@ function meSaasDefaultCabinetTab(role) {
   return meSaasIsManagerRole(role) ? 'biz' : (meSaasIsBusinessRole(role) ? 'mystat' : 'appts');
 }
 function meSaasBusinessEntryScreen(role) {
-  return meSaasIsManagerRole(role) ? 'panel' : 'staff-home';
+  // Вход в рабочий кабинет — всегда ГЛАВНАЯ сотрудника, как в боевом PWA.
+  // Владельца раньше бросало сразу в «Панель управления», из-за чего кабинет
+  // и выглядел, и вёл себя иначе. Панель доступна из «Финансов» и с главной.
+  void role;
+  return 'staff-home';
 }
 function meSaasOpenBusinessWorkspace(role) {
   role = String(role || meSaasCurrentRole() || '').toLowerCase();
@@ -21933,15 +21937,8 @@ const StaffIcFin = (c, s) => TabSvg(c, s, ["M3 21h18", "M6 21V10", "M11 21V6", "
 const StaffIcPeople = (c, s) => TabSvg(c, s, ["M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2", "M16 3.5a4 4 0 0 1 0 7", "M21 21v-2a4 4 0 0 0-3-3.85"]);
 const STAFF_TABS = [{
   ic: StaffIcCab,
-  label: "Кабинет",
-  onTap: () => {
-    var role = meSaasCurrentRole();
-    if (window.__ME_SAAS_CTX && meSaasIsBusinessRole(role) && window.__meSaasCabinet) {
-      window.__meSaasCabinet(meSaasDefaultCabinetTab(role), 0);
-      return;
-    }
-    window.__meGo && window.__meGo("staff-home");
-  }
+  label: "Главная",
+  onTap: () => window.__meGo && window.__meGo("staff-home")
 }, {
   ic: TabIcChat,
   label: "Чат",
@@ -21981,8 +21978,10 @@ function saasStaffTabItems() {
   if (!window.__ME_SAAS_CTX || !meSaasIsBusinessRole(role)) return STAFF_TABS;
   if (meSaasIsManagerRole(role)) return [{
     ic: StaffIcCab,
-    label: "Кабинет",
-    onTap: () => window.__meSaasCabinet && window.__meSaasCabinet('maya', 0)
+    label: "Главная",
+    // Первая вкладка ведёт на ГЛАВНУЮ сотрудника — как в боевом PWA. Раньше
+    // владелец попадал сразу в «Панель управления», и кабинет выглядел иначе.
+    onTap: () => window.__meGo && window.__meGo('staff-home')
   }, {
     ic: TabIcChat,
     label: "Чат",
@@ -21998,7 +21997,7 @@ function saasStaffTabItems() {
   }];
   return [{
     ic: StaffIcCab,
-    label: "Кабинет",
+    label: "Главная",
     onTap: () => window.__meGo && window.__meGo('staff-home')
   }, {
     ic: TabIcChat,
@@ -24419,7 +24418,7 @@ function AStaffHome() {
             Promise.resolve(base[0]),
             analyticsReady ? meWidgetAf(analyticsPath + monthQ).catch(emptyAnalytics) : Promise.resolve(emptyAnalytics({ code: 'crm_not_ready' })),
             analyticsReady ? meWidgetAf(analyticsPath + todayQ).catch(emptyAnalytics) : Promise.resolve(emptyAnalytics({ code: 'crm_not_ready' })),
-            saasManager && externalCrmReady ? meWidgetAf('/integrations/crm/journal?' + saasRange(todayStart, tomorrowStart)).catch(function (x) { return { appointments: [], _error: x }; }) : Promise.resolve({ appointments: [] }),
+            externalCrmReady ? meWidgetAf('/integrations/crm/journal?' + saasRange(todayStart, tomorrowStart)).catch(function (x) { return { appointments: [], _error: x }; }) : Promise.resolve({ appointments: [] }),
             saasManager && externalCrmReady ? meWidgetAf('/analytics/business/finance?' + monthQ).catch(function () { return null; }) : Promise.resolve(null),
             Promise.resolve(crm)
           ]);
@@ -24440,15 +24439,20 @@ function AStaffHome() {
           var todayRevenue = saasAmount(today.revenue);
           setShEarn({ gross_month: monthRevenue, earned_today: todayRevenue, salary_week: monthRevenue, saas_owner: saasManager, crm_ready: crmReady });
           setShRev(todayRevenue);
+          // Управляющий видит день всего салона, мастер — только свои визиты:
+          // журнал отдаёт весь день, отбор по своему staff-идентификатору.
+          var myStaffId = me && me.staff_profile && me.staff_profile.external_staff_id;
           var active = (Array.isArray(journal.appointments) ? journal.appointments : []).filter(function (a) {
             var st = String(a && a.status || '').toLowerCase();
-            return st !== 'cancelled' && st !== 'canceled' && st !== 'no_show' && st !== 'noshow';
+            if (st === 'cancelled' || st === 'canceled' || st === 'no_show' || st === 'noshow') return false;
+            if (saasManager || !myStaffId) return true;
+            return String(a && a.provider && a.provider.id || '') === String(myStaffId);
           }).sort(function (a, b) { return String(a.start_at || '').localeCompare(String(b.start_at || '')); });
           var upcoming = active.filter(function (a) { return new Date(a.start_at).getTime() >= Date.now(); });
           var next = upcoming[0] || null;
           var nextTime = '';
           try { if (next) nextTime = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: journal.timezone || (month.period && month.period.timezone) || 'Europe/Moscow' }).format(new Date(next.start_at)); } catch (e) {}
-          setShToday({ count: active.length || Number(today.appointments && today.appointments.active || 0), upcoming: upcoming.length, next: next ? { start: nextTime } : null, dayOff: !saasManager && active.length === 0, mine: !saasManager });
+          setShToday({ count: active.length || Number(today.appointments && today.appointments.active || 0), upcoming: upcoming.length, next: next ? { start: nextTime } : null, dayOff: !saasManager && active.length === 0 && Array.isArray(journal.appointments), mine: !saasManager });
           try { window.__meSaasOwnerSnapshot = { me: me, month: month, today: today, journal: journal, finance: finance, crm: crmState }; } catch (e) {}
         }).catch(function (error) {
           setShEarn({ gross_month: 0, earned_today: 0, salary_week: 0, saas_owner: saasManager });
@@ -34226,6 +34230,23 @@ function MEApp() {
         window.__meSaasPanelTab = panelTab;
         if (screenRef.current === 'panel' && window.__meSetSaasPanelTab) window.__meSetSaasPanelTab(panelTab);
         else if (window.__meGo) window.__meGo('panel');
+      } else if (panelTab === 'schedule') {
+        // Сетка расписания — отдельный полноэкранный экран, он уже умеет SaaS.
+        // Рядовому мастеру она нужна так же, как владельцу.
+        window.__meScheduleReturn = 'staff-home';
+        if (window.__meGo) window.__meGo('schedule');
+      } else if (panelTab) {
+        // 🔴 Рядовой сотрудник: ведём в ЕГО разделы, а не в панель владельца.
+        // Раньше этот путь возвращал на ту же главную, из-за чего «Статистика»,
+        // «Профиль» и плитки дохода в кабинете просто ничего не открывали.
+        var staffTab = ({
+          analytics: 'mystat', biz: 'mystat', maya: 'mystat',
+          clients: 'mystat', customers: 'mystat', profile: 'profile'
+        })[panelTab] || 'mystat';
+        window.__meSaasWantCabinet = true;
+        window.__meSaasWantCabinetTab = staffTab;
+        if (window.__meGo) window.__meGo('book');
+        if (window.__meOpenSaasCabinet) window.__meOpenSaasCabinet(staffTab);
       } else if (window.__meGo) window.__meGo('staff-home');
       if (typeof navIndex === 'number') {
         try { window.dispatchEvent(new CustomEvent('me-nav-tab', { detail: { i: navIndex } })); } catch (e) {}
