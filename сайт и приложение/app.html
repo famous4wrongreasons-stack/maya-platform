@@ -15641,11 +15641,32 @@ function AChat() {
   function applyKbd() {
     try {
       var vv = window.visualViewport;
-      var raw = vv ? Math.round((window.innerHeight || 0) - vv.height - (vv.offsetTop || 0)) : 0;
-      var kbd = raw > 100 ? raw : (window.__meKbdHeight || 0);
-      if (footRef.current) footRef.current.style.bottom = '0px';
+      var innerH = Math.round(window.innerHeight || 0);
+      var raw = vv ? Math.round(innerH - vv.height - (vv.offsetTop || 0)) : 0;
+      // Плагин Capacitor на части сборок отдаёт keyboardHeight в device-px, а не в CSS-px —
+      // приводим к CSS-px, если значение физически не помещается в экран.
+      var nat = Math.round(window.__meKbdHeight || 0);
+      var dpr = window.devicePixelRatio || 1;
+      if (nat && innerH && dpr > 1 && nat > innerH * 0.8) nat = Math.round(nat / dpr);
+      // Источников два: в вебе клавиатуру видит visualViewport, в нативе ("no resize") —
+      // ТОЛЬКО событие плагина, и оно приходит позже фокуса. Берём максимум, поэтому
+      // ни порядок, ни задержка событий на результат не влияют.
+      var kbd = Math.max(raw > 100 ? raw : 0, nat);
+      if (innerH) kbd = Math.min(kbd, Math.round(innerH * 0.75)); // страховка от абсурдных значений
+      // 🔴 Часть клавиатуры boot-скрипт уже вычел из --me-app-height — это высота оболочки чата,
+      // а футер прижат к её низу. Поднимаем футер только на НЕучтённый остаток: иначе в вебе
+      // клавиатура посчиталась бы дважды. В нативе оболочка полноэкранная ⇒ остаток = вся клавиатура.
+      var shellH = parseFloat(document.documentElement.style.getPropertyValue('--me-app-height')) || innerH;
+      var lift = Math.max(0, kbd - Math.max(0, innerH - Math.round(shellH)));
+      if (footRef.current) {
+        footRef.current.style.bottom = lift + 'px';
+        // Под баром зарезервировано место под единое нижнее меню; при поднятой клавиатуре
+        // меню скрыто, и без этого строка ввода висела бы с пустым зазором над клавиатурой.
+        var bar = footRef.current.lastElementChild;
+        if (bar) bar.style.paddingBottom = kbd ? '8px' : 'calc(62px + env(safe-area-inset-bottom,0px))';
+      }
       // клиренс ленты = высота плавающего футера (пилюля+чипы+нав); при клавиатуре нав скрыт
-      if (scRef.current) scRef.current.style.paddingBottom = kbd ? '150px' : 'calc(env(safe-area-inset-bottom, 0px) + 200px)';
+      if (scRef.current) scRef.current.style.paddingBottom = kbd ? (lift + 150) + 'px' : 'calc(env(safe-area-inset-bottom, 0px) + 200px)';
       if (window.pageYOffset || window.scrollY) window.scrollTo(0, 0);
     } catch (e2) {}
   }
@@ -17540,7 +17561,12 @@ function AChat() {
       flexDirection: 'column',
       alignItems: 'stretch',
       gap: 8,
-      padding: kbdUp ? '8px 14px 8px' : '8px 14px calc(62px + env(safe-area-inset-bottom,0px))',   // место под единое нижнее меню (было: бар в потоке)
+      // Нижнее меню — плавающая пилюля AuroraTab: bottom = safe-area + 12px, высота ровно 48px (5 + 38 + 5).
+      // Значит верх меню = safe-area + 60px, а тут было 62px → зазор 2px, инпут «слипался» с меню.
+      // Считаем от ТОГО ЖЕ основания, что и меню (та же safe-area и та же dvh/vh-поправка),
+      // иначе на разных iPhone инпут и меню разъедутся: 12 + 48 + 14 = 74px, из них 14px — воздух.
+      // max() — страховка: padding не бывает отрицательным, и при сильно минусовой поправке он бы схлопнулся в 0.
+      padding: kbdUp ? '8px 14px 8px' : '8px 14px max(14px, calc(env(safe-area-inset-bottom, 0px) + 74px + 100dvh - 100vh))',
       background: 'transparent',
       pointerEvents: 'auto'
     }
@@ -20558,7 +20584,16 @@ function AOwnerTrial(props) {
   var ownerScreen = (screen === 'home' || screen === 'cabinet' || screen === 'staff-home');
   var badge = null;
   if (!info && ownerScreen && isOwner() && ten.access_state === 'trial_active' && ten.trial_days_remaining != null) {
-    badge = e('div', { style: { position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom,0px) + 90px)', zIndex: 40, display: 'flex', justifyContent: 'center', pointerEvents: 'none' } },
+    // Плашка триала стояла в той же полосе, что и плавающий док: bottom +90px
+    // против floatDockBottom +82px у «Сменить вход» (~30px высотой). Пилюля
+    // центрирована по всей ширине, поэтому на узких экранах её левый край
+    // заезжал под кнопку, а та перекрывала текст (zIndex 80 против 40) — отсюда
+    // обрезанное «...обная версия MAYA OS · 9 дн.». Поднимаем плашку НАД доком:
+    // берём ту же опору, что и floatDockBottom (включая поправку 100dvh - 100vh
+    // на нативный вьюпорт, иначе плашка «отвяжется» от кнопки в Capacitor),
+    // плюс высота док-кнопки 30px и просвет 10px. Развод по вертикали, а не по
+    // горизонтали, — потому что при любой ширине экрана пересечения уже нет.
+    badge = e('div', { style: { position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom,0px) + 122px + 100dvh - 100vh)', zIndex: 40, display: 'flex', justifyContent: 'center', pointerEvents: 'none' } },
       e('div', { style: { pointerEvents: 'auto', fontFamily: BODY, fontSize: 11, color: t.dim, background: dark ? 'rgba(8,8,10,0.7)' : 'rgba(255,255,255,0.85)', border: '1px solid ' + t.line, borderRadius: 999, padding: '6px 13px', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' } }, 'Пробная версия MAYA OS · ' + ten.trial_days_remaining + ' дн.'));
   }
   var sheet = null;
