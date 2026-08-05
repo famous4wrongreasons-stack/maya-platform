@@ -45,11 +45,29 @@ surface, tool or payload fails closed.
 | `appointments.own.preview` | customer | read | none |
 | `appointments.own.create` | customer | medium write | same customer |
 | `appointments.own.reschedule` | customer | medium write | same customer |
+| `staff.schedule.update` | owner/admin/manager/branch manager | medium write | actor |
 | `loyalty.internal.adjust` | owner/admin | high write | tenant owner |
 
 Every request is re-authorized at execution time against TenantContext, current
 user status, role, AI profile entitlement and domain feature entitlement. A
 model cannot supply a tenant ID. External CRM loyalty remains read-only.
+
+## Native staff schedule pilot
+
+`staff.schedule.update` is exposed only on the `native` surface and requires
+the `booking` entitlement. A deterministic command parser handles close-day,
+break and shortened-day intents before model sanitization, resolves the staff
+member inside the authenticated tenant and creates an immutable actor approval.
+
+The backend reads the exact current day from the CRM adapter, computes the
+proposed slots and rejects the operation if an existing future appointment no
+longer fits. Approval rechecks the schedule revision, authorization,
+entitlement and conflicts before the adapter writes. Existing appointments are
+never deleted, recreated or moved. The YClients adapter verifies the written
+schedule and attempts a best-effort restore if verification differs.
+
+The operational and product contract is documented in
+[`native-staff-schedule-chat.md`](../product/native-staff-schedule-chat.md).
 
 ## Output minimization
 
@@ -96,12 +114,17 @@ AI_TOOL_STALE_EXECUTION_MINUTES="15"
 AI_CORE_PROVIDER="auto"
 AI_CORE_TIMEOUT_MS="15000"
 AI_CORE_MAX_TOOL_STEPS="2"
+MAYA_NATIVE_SCHEDULE_ACTIONS_ENABLED="true"
 ```
 
 `AI_CORE_PROVIDER=auto` prefers the configured DeepSeek key and then the
 configured OpenAI key. `safe` makes `/api/ai/chat` return a deterministic
 no-model response and never contacts a provider. Explicit `deepseek` or
 `openai` modes fail closed when their selected provider is unavailable.
+
+Set `MAYA_NATIVE_SCHEDULE_ACTIONS_ENABLED="false"` and restart the backend to
+disable the native schedule parser and tool flow. The current implementation
+is enabled unless this value is explicitly `false`.
 
 Run dry-run daily and `--execute` from one controlled maintenance job after
 reviewing aggregate counts.
