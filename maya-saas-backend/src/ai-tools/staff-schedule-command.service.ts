@@ -240,19 +240,21 @@ export class StaffScheduleCommandService {
   }
 
   private detectOperation(text: string): ScheduleOperation | null {
-    if (/\b(перерыв|обед)\b/.test(text)) {
+    if (/(?:^|[^а-я])(перерыв|обед)(?:$|[^а-я])/.test(text)) {
       return 'set_break';
     }
     if (
-      /(\bзакр(?:ой|ыть|ывай|ываем)\b|\bвыходн(?:ой|ым)\b)/.test(text) &&
-      /(\bзапис|\bден|сегодня|завтра|послезавтра|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2}|[а-яё]+ник|\bсред|\bпятниц|\bсуббот|\bвоскрес)/.test(
+      /(?:^|[^а-я])(?:закр(?:ой|ыть|ывай|ываем)|выходн(?:ой|ым))(?:$|[^а-я])/.test(
+        text,
+      ) &&
+      /(запис|ден|сегодня|завтра|послезавтра|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2}|[а-я]+ник|сред|пятниц|суббот|воскрес)/.test(
         text,
       )
     ) {
       return 'close_day';
     }
     if (
-      /(\bсократ|\bтолько\s+до\b|\bсмен\w*.*\bдо\b|\bработ\w*.*\bс\s+\d)/.test(
+      /(сократ|только\s+до|смен[а-я]*.*до|работ[а-я]*.*(?:с\s+\d|до\s+\d))/.test(
         text,
       )
     ) {
@@ -405,13 +407,13 @@ export class StaffScheduleCommandService {
 
   private parseDate(text: string, timezone: string): string | null {
     const today = this.localDate(new Date(), timezone);
-    if (/\bпослезавтра\b/.test(text)) {
+    if (/(?:^|[^а-я])послезавтра(?:$|[^а-я])/.test(text)) {
       return this.shiftDate(today, 2);
     }
-    if (/\bзавтра\b/.test(text)) {
+    if (/(?:^|[^а-я])завтра(?:$|[^а-я])/.test(text)) {
       return this.shiftDate(today, 1);
     }
-    if (/\bсегодня\b/.test(text)) {
+    if (/(?:^|[^а-я])сегодня(?:$|[^а-я])/.test(text)) {
       return today;
     }
     const iso = text.match(/\b(\d{4}-\d{2}-\d{2})\b/)?.[1];
@@ -434,7 +436,9 @@ export class StaffScheduleCommandService {
     }
     const monthPattern = [...MONTHS.keys()].join('|');
     const named = text.match(
-      new RegExp(`\\b(\\d{1,2})\\s+(${monthPattern})(?:\\s+(\\d{4}))?\\b`),
+      new RegExp(
+        `\\b(\\d{1,2})\\s+(${monthPattern})(?:\\s+(\\d{4}))?(?=$|[^\u0430-\u044f0-9])`,
+      ),
     );
     if (named) {
       return this.futureDateKey(
@@ -445,7 +449,11 @@ export class StaffScheduleCommandService {
       );
     }
     for (const [word, weekday] of WEEKDAYS.entries()) {
-      if (new RegExp(`\\b${word}\\b`).test(text)) {
+      if (
+        new RegExp(`(?:^|[^\u0430-\u044f])${word}(?:$|[^\u0430-\u044f])`).test(
+          text,
+        )
+      ) {
         const current = new Date(`${today}T00:00:00.000Z`).getUTCDay();
         return this.shiftDate(today, (weekday - current + 7) % 7);
       }
@@ -455,7 +463,7 @@ export class StaffScheduleCommandService {
 
   private parseTimeRange(text: string): { from: string; to: string } | null {
     const match = text.match(
-      /(?:\bс\s+)?(\d{1,2}(?::[0-5]\d)?)(?:\s*(?:-|\u2013|\u2014)\s*|\s+до\s+)(\d{1,2}(?::[0-5]\d)?)/,
+      /(?:^|\s)(?:с\s+)?(\d{1,2}(?::[0-5]\d)?)(?:\s*(?:-|\u2013|\u2014)\s*|\s+до\s+)(\d{1,2}(?::[0-5]\d)?)(?=$|\s|[.,!?])/,
     );
     if (!match) {
       return null;
@@ -468,7 +476,9 @@ export class StaffScheduleCommandService {
   }
 
   private parseEndTime(text: string): string | null {
-    const match = text.match(/\bдо\s+(\d{1,2}(?::[0-5]\d)?)\b/);
+    const match = text.match(
+      /(?:^|\s)до\s+(\d{1,2}(?::[0-5]\d)?)(?=$|\s|[.,!?])/,
+    );
     return match ? this.normalizeTime(match[1]) : null;
   }
 

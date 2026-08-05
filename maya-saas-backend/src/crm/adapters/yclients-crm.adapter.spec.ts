@@ -935,4 +935,145 @@ describe('YclientsCRMAdapter', () => {
       ]),
     );
   });
+
+  it('closes a staff day through the YClients schedule endpoint and verifies it', async () => {
+    let scheduleSlots = [{ from: '10:00', to: '20:00' }];
+    let writtenPayload: Record<string, unknown> | null = null;
+    global.fetch = jest.fn<typeof fetch>((input, init) => {
+      const url = String(input);
+      if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  date: '2026-08-06',
+                  is_working: scheduleSlots.length > 0,
+                  slots: scheduleSlots,
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: [] }), { status: 200 }),
+        );
+      }
+      if (
+        url.includes('/company/123/staff/schedule') &&
+        init?.method === 'PUT'
+      ) {
+        writtenPayload = JSON.parse(String(init.body));
+        scheduleSlots = [];
+        return Promise.resolve(
+          new Response(JSON.stringify({ success: true, data: {} }), {
+            status: 200,
+          }),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+    const current = await adapter.getStaffScheduleDay({
+      tenantId: 'tenant-1',
+      staffId: '7',
+      date: '2026-08-06',
+    });
+
+    await expect(
+      adapter.applyStaffScheduleDayChange({
+        tenantId: 'tenant-1',
+        staffId: '7',
+        date: '2026-08-06',
+        slots: [],
+        expectedRevision: current.revision,
+        timezone: 'Europe/Moscow',
+      }),
+    ).resolves.toEqual({
+      staff_id: '7',
+      date: '2026-08-06',
+      is_working: false,
+      slots: [],
+      verified: true,
+    });
+    expect(writtenPayload).toEqual({
+      schedules_to_set: [],
+      schedules_to_delete: [{ staff_id: 7, dates: ['2026-08-06'] }],
+    });
+  });
+
+  it('refuses schedule changes that would cut through an existing appointment', async () => {
+    const fetchMock = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  date: '2026-08-06',
+                  is_working: true,
+                  slots: [{ from: '10:00', to: '20:00' }],
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 901,
+                  datetime: '2026-08-06T18:30:00',
+                  seance_length: 3600,
+                  attendance: 0,
+                  staff: { id: 7, name: 'Anton' },
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    global.fetch = fetchMock;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.previewStaffScheduleDayChange({
+        tenantId: 'tenant-1',
+        staffId: '7',
+        date: '2026-08-06',
+        slots: [{ from: '10:00', to: '18:00' }],
+        timezone: 'Europe/Moscow',
+      }),
+    ).resolves.toMatchObject({ conflict_times: ['18:30'] });
+    expect(
+      fetchMock.mock.calls.some(
+        ([input, init]) =>
+          String(input).includes('/company/123/staff/schedule') &&
+          init?.method === 'PUT',
+      ),
+    ).toBe(false);
+  });
 });
