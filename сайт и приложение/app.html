@@ -20453,8 +20453,11 @@ function AOwnerTrial(props) {
   function ownerTok() { try { var ns = window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.ns; if (!ns) return null; var b = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + ns) || 'null'); return b && b.token; } catch (er) { return null; } }
   function isOwner() { var r = window.__meRole; return r === 'tenant_admin' || r === 'tenant_owner' || r === 'business_owner' || r === 'administrator' || r === 'owner'; }
   function doCheckout() {
-    var cp = info && info.checkout_path; var api = (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api) || '';
-    if (!cp) { setMsg('Оплата подписки будет доступна в разделе биллинга.'); return; }
+    // 🔴 Самообслуживание: /billing/checkout работает для владельца всегда и без
+    // идентификатора тенанта в адресе. Раньше при отсутствии серверной подсказки
+    // лист отвечал «будет доступно позже» — то есть заплатить было нечем.
+    var cp = (info && info.checkout_path) || '/api/billing/checkout';
+    var api = (window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api) || '';
     if (plans && plans.length && !selectedPlanId) { setMsg('Выберите тариф.'); return; }
     var url; try { url = cp.charAt(0) === '/' ? (new URL(api).origin + cp) : cp; } catch (er) { url = cp; }
     var tok = ownerTok(); if (!tok) { setMsg('Войдите как владелец бизнеса, чтобы оформить подписку.'); return; }
@@ -29896,6 +29899,9 @@ function ASaasOwnerPanel() {
     return e(React.Fragment, null,
       e('h1', { style: { fontFamily: DISPLAY, fontSize: 28, fontWeight: 200, margin: 0, color: t.ink } }, 'Профиль'),
       section('Владелец бизнеса', card(e(React.Fragment, null, [['Имя', me.name || '—'], ['Email', me.email || '—'], ['Телефон', me.phone || '—'], ['Бизнес', me.tenant && me.tenant.name || '—'], ['Роль', roleTitle(me.role) + (me.staff_profile && me.staff_profile.linked ? ' · мастер' : '')]].map(function (x, i) { return e('div', { key: x[0], style: { display: 'flex', justifyContent: 'space-between', gap: 14, padding: '11px 0', borderBottom: i < 4 ? '1px solid ' + t.line : '0' } }, e('span', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim } }, x[0]), e('span', { style: { fontFamily: BODY, fontSize: 12.5, fontWeight: 650, textAlign: 'right' } }, x[1])); })))),
+      // Подписка должна быть видна ВСЕГДА, а не открываться в момент блокировки:
+      // худший момент для первого разговора о цене — когда салон уже отключён.
+      section('Подписка', action('Тариф и оплата', 'Текущий план, срок и продление', function () { if (window.__meSubOpen) window.__meSubOpen({}); }, true)),
       section('Настройки бизнеса', action('Токены и интеграции', 'CRM, ЮKassa и статусы подключений', function () { setTabKey('integrations'); }, true)),
       section('Вход без SMS', e('div', { style: { display: 'grid', gap: 9 } }, socialAction('telegram', 'Telegram'), socialAction('yandex', 'Яндекс'), socialMessage ? card(e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, lineHeight: 1.5 } }, socialMessage), { padding: '11px 13px' }) : null)),
       e('div', { style: { marginTop: 14 } }, action('Выйти из учётной записи', 'Сессия владельца будет закрыта на этом устройстве', function () { window.__meAskLogout && window.__meAskLogout(); }))
