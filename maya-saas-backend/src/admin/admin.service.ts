@@ -381,6 +381,15 @@ export class AdminService {
       'currentPeriodStart',
       'currentPeriodEnd',
       'billingMethodId',
+      // 🔴 Адресация тенанта. Раньше администратор ЛЮБОГО салона мог задать
+      // себе customDomain или subdomain — в том числе платформенный. Резолвер
+      // определяет тенанта по домену, поэтому чужой салон наутро получал бы
+      // 403 на каждый запрос: его адрес указывал бы на другой бизнес.
+      'customDomain',
+      'subdomain',
+      'slug',
+      // Кто может регистрироваться в бизнес — тоже не решение самого салона.
+      'allowSelfRegistration',
     ];
     const attemptedField = protectedFields.find(
       (field) => dto[field] !== undefined,

@@ -480,7 +480,63 @@ export class TenantsService {
     });
   }
 
+  /**
+   * Имена, которые не может занять ни один салон.
+   *
+   * 🔴 Резолвер определяет тенанта по домену. Салон, забравший себе
+   * платформенное имя, увёл бы к себе адресацию всей платформы, а чужие
+   * салоны получили бы отказ. Проверка действует и для платформы тоже —
+   * от опечатки она защищает так же, как от умысла.
+   */
+  private static readonly RESERVED_HOST_NAMES = new Set<string>([
+    'www', 'api', 'app', 'admin', 'auth', 'login', 'billing', 'pay',
+    'static', 'assets', 'cdn', 'mail', 'smtp', 'ftp', 'ns', 'ns1', 'ns2',
+    'maya', 'maya-os', 'mayaos', 'platform', 'system', 'support', 'help',
+    'status', 'docs', 'blog', 'test', 'staging', 'dev', 'local',
+  ]);
+
+  private assertHostNamesAllowed(dto: {
+    subdomain?: string | null;
+    customDomain?: string | null;
+    slug?: string | null;
+  }): void {
+    const candidates = [dto.subdomain, dto.slug]
+      .map((v) => String(v ?? '').trim().toLowerCase())
+      .filter(Boolean);
+
+    for (const value of candidates) {
+      if (TenantsService.RESERVED_HOST_NAMES.has(value)) {
+        throw new BadRequestException({
+          message: `Имя «${value}» зарезервировано платформой. Выберите другое.`,
+          error: { code: 'tenant_host_name_reserved', value },
+        });
+      }
+    }
+
+    const domain = String(dto.customDomain ?? '').trim().toLowerCase();
+
+    if (!domain) {
+      return;
+    }
+
+    const platformDomain = String(process.env.PLATFORM_BASE_DOMAIN ?? '')
+      .trim()
+      .toLowerCase();
+
+    // Сам платформенный домен и всё, что под ним, салону не отдаём.
+    if (
+      platformDomain &&
+      (domain === platformDomain || domain.endsWith(`.${platformDomain}`))
+    ) {
+      throw new BadRequestException({
+        message: 'Этот домен принадлежит платформе и не может быть занят.',
+        error: { code: 'tenant_domain_reserved', value: domain },
+      });
+    }
+  }
+
   async updateTenant(id: string, dto: UpdateTenantDto) {
+    this.assertHostNamesAllowed(dto);
     const existingTenant = await this.getTenantByIdOrThrow(id);
     const existingThemeJson =
       (existingTenant.brandingSettings?.themeJson as Record<
