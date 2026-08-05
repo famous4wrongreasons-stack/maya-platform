@@ -520,4 +520,30 @@ describe('BillingService', () => {
     expect(transactionMock).not.toHaveBeenCalled();
     expect(tenantContext.get()).toBeUndefined();
   });
+  it('повторное уведомление о том же платеже не продлевает подписку второй раз', async () => {
+    const transactionMock = jest.fn();
+    const prisma = {
+      $transaction: transactionMock,
+    } as unknown as PrismaService;
+    const { service, getPaymentMock, findPaymentByProviderPaymentIdMock } =
+      createService(prisma);
+    // Платёж УЖЕ применён: в базе он succeeded.
+    findPaymentByProviderPaymentIdMock.mockResolvedValue({
+      ...basePayment(),
+      status: 'succeeded',
+      providerPaymentId: 'yk-payment-1',
+      paidAt: new Date('2026-07-05T12:05:00.000Z'),
+    });
+    getPaymentMock.mockResolvedValue(succeededProviderPayment());
+
+    await service.handleYooKassaWebhook({
+      type: 'notification',
+      event: 'payment.succeeded',
+      object: { id: 'yk-payment-1' },
+    });
+
+    // Ни одной записи в базу: срок подписки не сдвинулся.
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
+
 });

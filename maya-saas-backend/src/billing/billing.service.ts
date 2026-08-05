@@ -417,6 +417,63 @@ export class BillingService {
     return 'marked_past_due';
   }
 
+  /**
+   * Состояние подписки для кабинета: тариф, срок, чем платим.
+   *
+   * Нужно, чтобы раздел «Подписка» был виден ВСЕГДА, а не только после
+   * блокировки: раньше владелец узнавал о деньгах в момент, когда его уже
+   * отключили, и это худший момент для первого разговора о цене.
+   */
+  async getSubscriptionSummary(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      include: { plan: true },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    const now = new Date();
+    const trialEndsAt = tenant.trialEndsAt ?? null;
+    const periodEnd = tenant.currentPeriodEnd ?? null;
+    const activeUntil = periodEnd ?? trialEndsAt;
+    const daysLeft = activeUntil
+      ? Math.max(
+          0,
+          Math.ceil((activeUntil.getTime() - now.getTime()) / 86400000),
+        )
+      : null;
+
+    return {
+      status: tenant.status,
+      plan: tenant.plan
+        ? {
+            id: tenant.plan.id,
+            name: tenant.plan.name,
+            price_monthly_kopecks: this.normalizeAmount(
+              tenant.plan.priceMonthly,
+            ),
+            currency: 'RUB',
+          }
+        : null,
+      trial_ends_at: trialEndsAt ? trialEndsAt.toISOString() : null,
+      current_period_start: tenant.currentPeriodStart
+        ? tenant.currentPeriodStart.toISOString()
+        : null,
+      current_period_end: periodEnd ? periodEnd.toISOString() : null,
+      past_due_at: tenant.pastDueAt ? tenant.pastDueAt.toISOString() : null,
+      grace_ends_at: tenant.graceEndsAt
+        ? tenant.graceEndsAt.toISOString()
+        : null,
+      days_left: daysLeft,
+      // Карта сохранена — значит продление спишется само, и это надо сказать
+      // прямо: иначе владелец ждёт счёта и удивляется списанию.
+      autopay_enabled: Boolean(tenant.billingMethodId),
+    };
+  }
+
   async listTenantPayments(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const tenant = await this.prisma.tenant.findUnique({
@@ -447,6 +504,14 @@ export class BillingService {
     this.assertProviderPaymentMatchesLocal(payment, providerPayment);
 
     if (providerPayment.status === PAYMENT_STATUS_SUCCEEDED) {
+      // 🔴 Идемпотентность. ЮKassa повторяет уведомление, пока не получит 200,
+      // и один платёж легко приходит дважды. applySuccessfulPayment сдвигает
+      // currentPeriodEnd на месяц ВПЕРЁД от текущего — повторное применение
+      // дарило салону лишний оплаченный месяц. Один платёж применяем один раз.
+      if (payment.status === PAYMENT_STATUS_SUCCEEDED) {
+        return { payment, tenant: null };
+      }
+
       return this.applySuccessfulPayment(payment, providerPayment);
     }
 
