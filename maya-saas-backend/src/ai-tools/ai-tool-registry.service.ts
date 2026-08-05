@@ -67,6 +67,7 @@ export class AiToolRegistryService {
       case 'appointments.own.list':
       case 'loyalty.own.read':
       case 'customers.count':
+      case 'analytics.business.compare_years':
         this.assertAllowedKeys(args, []);
         return {};
       case 'booking.availability.read':

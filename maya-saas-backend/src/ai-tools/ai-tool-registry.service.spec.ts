@@ -48,6 +48,17 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('keeps year comparison arguments server-controlled', () => {
+    expect(
+      service.validateArguments('analytics.business.compare_years', {}),
+    ).toEqual({});
+    expect(() =>
+      service.validateArguments('analytics.business.compare_years', {
+        from: '2026-01-01T00:00:00.000Z',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
   it('rejects PII and invalid amounts in loyalty reasons', () => {
     expect(() =>
       service.validateArguments('loyalty.internal.adjust', {
@@ -161,23 +172,23 @@ describe('AiToolRegistryService', () => {
         { from: '15:00', to: '20:00' },
       ],
     });
-    expect(
-      service.buildApprovalPreview('staff.schedule.update', args),
-    ).toEqual({
-      summary:
-        'Change one staff workday. Existing appointments will be preserved.',
-      payload: {
-        action: 'update_staff_schedule',
-        date: '2026-08-06',
-        operation: 'set_break',
-        current_slots: currentSlots,
-        proposed_slots: [
-          { from: '10:00', to: '14:00' },
-          { from: '15:00', to: '20:00' },
-        ],
-        existing_appointments_preserved: true,
+    expect(service.buildApprovalPreview('staff.schedule.update', args)).toEqual(
+      {
+        summary:
+          'Change one staff workday. Existing appointments will be preserved.',
+        payload: {
+          action: 'update_staff_schedule',
+          date: '2026-08-06',
+          operation: 'set_break',
+          current_slots: currentSlots,
+          proposed_slots: [
+            { from: '10:00', to: '14:00' },
+            { from: '15:00', to: '20:00' },
+          ],
+          existing_appointments_preserved: true,
+        },
       },
-    });
+    );
   });
 
   it('rejects a schedule preview whose revision does not match', () => {

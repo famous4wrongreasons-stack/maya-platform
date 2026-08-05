@@ -52,6 +52,7 @@ const INTEGER_RULES = [
   ['AI_TOOL_STALE_EXECUTION_MINUTES', 5, 120],
   ['AI_CORE_TIMEOUT_MS', 1_000, 60_000],
   ['AI_CORE_MAX_TOOL_STEPS', 1, 3],
+  ['AI_SPEECH_TIMEOUT_MS', 1_000, 60_000],
 ] as const;
 
 export function validateRuntimeConfig(

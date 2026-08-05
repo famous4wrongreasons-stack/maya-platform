@@ -159,6 +159,8 @@ const GROUNDING_PERSONAL_SCOPE_PATTERN =
   /(моя|мой|мои|личн[а-яёa-z]*|у\s+меня|сколько\s+я|я\s+заработ)/i;
 const GROUNDING_BUSINESS_SCOPE_PATTERN =
   /(бизнес[а-яёa-z]*|компан[а-яёa-z]*|по\s+всем|все\s+сотрудник[а-яёa-z]*|все\s+специалист[а-яёa-z]*|общ[а-яёa-z]*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
+const GROUNDING_YEAR_COMPARISON_PATTERN =
+  /(?:сравн[а-яёa-z]*.{0,48}(?:год|года).{0,48}(?:прошл|предыдущ)|(?:этот|текущ)[а-яёa-z]*\s+год.{0,48}(?:прошл|предыдущ)[а-яёa-z]*\s+год|год\s+к\s+году)/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 const GROUNDING_SMALL_METRIC_PATTERN =
@@ -823,6 +825,11 @@ export class AiCoreService {
     ) {
       return this.requireGrounding('customer_count', ['customers.count']);
     }
+    if (GROUNDING_YEAR_COMPARISON_PATTERN.test(text)) {
+      return this.requireGrounding('business_year_comparison', [
+        'analytics.business.compare_years',
+      ]);
+    }
     if (
       ((GROUNDING_ANALYTICS_PATTERN.test(text) ||
         GROUNDING_APPOINTMENT_METRIC_PATTERN.test(text)) &&
@@ -914,6 +921,69 @@ export class AiCoreService {
     toolResults: AiCoreToolResult[],
     userText: string,
   ): string | null {
+    if (requirement?.domain === 'business_year_comparison') {
+      const evidence = toolResults.find(
+        (result) => result.name === 'analytics.business.compare_years',
+      );
+      if (!evidence) {
+        return null;
+      }
+      const data = this.record(evidence.result);
+      const periods = this.record(data.periods);
+      const currentPeriod = this.record(periods.current);
+      const previousPeriod = this.record(periods.previous);
+      const revenue = this.record(data.revenue);
+      const transactions = this.record(data.transactions);
+      const currentRevenue = this.formatMoneyAmount(revenue.current);
+      const previousRevenue = this.formatMoneyAmount(revenue.previous);
+      const revenueDelta = this.formatMoneyAmount(revenue.delta);
+
+      if (
+        data.verified !== true ||
+        !currentRevenue ||
+        !previousRevenue ||
+        !revenueDelta
+      ) {
+        return 'Не удалось получить подтверждённые финансовые операции сразу за оба годовых периода. Я не буду подменять их стоимостью записей или приблизительным расчётом.';
+      }
+
+      const currentLabel =
+        this.comparisonPeriodLabel(currentPeriod) ?? 'текущий период';
+      const previousLabel =
+        this.comparisonPeriodLabel(previousPeriod) ??
+        'аналогичный период прошлого года';
+      const revenueDeltaKopecks = this.optionalMetricNumber(
+        this.record(revenue.delta).amount_kopecks,
+      );
+      const transactionCurrent = this.optionalMetricNumber(
+        transactions.current,
+      );
+      const transactionPrevious = this.optionalMetricNumber(
+        transactions.previous,
+      );
+      const transactionDelta = this.optionalMetricNumber(transactions.delta);
+      const revenuePercent = this.formatSignedPercent(revenue.percent_change);
+      const transactionPercent = this.formatSignedPercent(
+        transactions.percent_change,
+      );
+      const financeLine = `Поступления: ${currentRevenue} против ${previousRevenue}. Изменение: ${this.signedValue(revenueDeltaKopecks, revenueDelta)}${revenuePercent ? ` (${revenuePercent})` : ''}.`;
+      const transactionLine =
+        transactionCurrent !== null &&
+        transactionPrevious !== null &&
+        transactionDelta !== null
+          ? `Положительных финансовых операций: ${this.formatMetricNumber(transactionCurrent)} против ${this.formatMetricNumber(transactionPrevious)}. Изменение: ${this.signedValue(transactionDelta, this.formatMetricNumber(Math.abs(transactionDelta)))}${transactionPercent ? ` (${transactionPercent})` : ''}.`
+          : null;
+
+      return [
+        `Сравнила одинаковые периоды: ${currentLabel} и ${previousLabel}.`,
+        financeLine,
+        transactionLine,
+        'Источник — подтверждённые операции CRM.',
+      ]
+        .filter((part): part is string => part !== null)
+        .join(' ');
+    }
+
     if (requirement?.domain === 'booking_availability') {
       const evidence = toolResults.find(
         (result) => result.name === 'booking.availability.read',
@@ -1127,6 +1197,45 @@ export class AiCoreService {
 
   private safeMetricNumber(value: unknown): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+  }
+
+  private optionalMetricNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  private signedValue(value: number | null, formatted: string): string {
+    if (value === null || value === 0) {
+      return formatted;
+    }
+    return value > 0 ? `+${formatted}` : `−${formatted.replace(/^-/, '')}`;
+  }
+
+  private formatSignedPercent(value: unknown): string | null {
+    const metric = this.optionalMetricNumber(value);
+    if (metric === null) {
+      return null;
+    }
+    const formatted = `${this.formatMetricNumber(Math.abs(metric))}%`;
+    return this.signedValue(metric, formatted);
+  }
+
+  private comparisonPeriodLabel(value: Record<string, unknown>): string | null {
+    const year = this.optionalMetricNumber(value.year);
+    const startDay = this.optionalMetricNumber(value.start_day);
+    const startMonth = this.optionalMetricNumber(value.start_month);
+    const endDay = this.optionalMetricNumber(value.end_day);
+    const endMonth = this.optionalMetricNumber(value.end_month);
+    if (
+      year === null ||
+      startDay === null ||
+      startMonth === null ||
+      endDay === null ||
+      endMonth === null
+    ) {
+      return null;
+    }
+    const pad = (part: number) => String(part).padStart(2, '0');
+    return `${pad(startDay)}.${pad(startMonth)}.${year}–${pad(endDay)}.${pad(endMonth)}.${year}`;
   }
 
   private formatMetricNumber(value: number): string {

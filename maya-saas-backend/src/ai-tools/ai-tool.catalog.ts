@@ -24,6 +24,7 @@ const OWNER_AND_ADMIN_ROLES = [
   UserRole.TENANT_ADMIN,
   UserRole.ADMINISTRATOR,
 ] as const;
+const FINANCE_ROLES = [...OWNER_AND_ADMIN_ROLES, UserRole.ACCOUNTANT] as const;
 const SCHEDULE_MANAGER_ROLES = [
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
@@ -185,6 +186,21 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'none',
     idempotency: 'none',
     timeoutMs: 8_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'analytics.business.compare_years',
+    description:
+      'Compare verified business revenue for the current year to date with the same elapsed period of the previous year. Dates and percentage deltas are calculated by the server in the tenant timezone.',
+    inputSchema: EMPTY_OBJECT_SCHEMA,
+    allowedRoles: FINANCE_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['analytics.business'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 45_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },

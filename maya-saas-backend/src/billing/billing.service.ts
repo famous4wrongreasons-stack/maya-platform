@@ -351,6 +351,64 @@ export class BillingService {
     });
   }
 
+  /**
+   * Сверка «зависших» платежей с банком.
+   *
+   * 🔴 Уведомление от ЮKassa может не дойти: не настроен адрес, таймаут,
+   * недоступный сервер. Тогда деньги списаны, а подписка не продлена — салон
+   * заплатил и наутро отключён. Это худшее, что может случиться с платящим
+   * клиентом, и полагаться на один канал доставки нельзя.
+   *
+   * Поэтому спрашиваем у банка сами: берём платежи, которые у нас всё ещё
+   * «в ожидании», но у которых есть номер в банке, и досчитываем финальные.
+   * Проверка идёт через тот же путь, что и уведомление, — статус берётся у
+   * ЮKassa, а не выдумывается.
+   */
+  async reconcilePendingPayments(now = new Date()) {
+    // Свежие платежи не трогаем: человек может прямо сейчас быть на странице
+    // оплаты, и дёргать банк на каждом тике незачем.
+    const olderThan = new Date(now.getTime() - 5 * 60 * 1000);
+    const pending = await this.systemGateway.listPendingPayments(olderThan);
+    const result = { checked: pending.length, applied: 0, failed: 0 };
+
+    for (const payment of pending) {
+      if (!payment.providerPaymentId) {
+        continue;
+      }
+
+      try {
+        await this.tenantContext.runAsSystemTenant(payment.tenantId, async () => {
+          const providerPayment = await this.yooKassaClient.getPayment(
+            payment.providerPaymentId as string,
+          );
+          const outcome = await this.applyProviderPaymentIfFinal(
+            payment,
+            providerPayment,
+          );
+
+          if (outcome?.payment?.status !== PAYMENT_STATUS_PENDING) {
+            result.applied += 1;
+          }
+        });
+      } catch (error) {
+        result.failed += 1;
+        this.logger.warn(
+          `Сверка платежа ${payment.providerPaymentId} не удалась: ${
+            error instanceof Error ? error.message : 'unknown'
+          }`,
+        );
+      }
+    }
+
+    if (result.applied > 0) {
+      this.logger.log(
+        `Сверка с банком: досчитано ${result.applied} из ${result.checked}.`,
+      );
+    }
+
+    return result;
+  }
+
   async runDueBilling(now = new Date()) {
     const candidates = await this.systemGateway.listBillingCandidates();
     const result = {

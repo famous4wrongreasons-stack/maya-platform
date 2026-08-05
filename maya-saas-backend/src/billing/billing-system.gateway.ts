@@ -13,6 +13,24 @@ export class BillingSystemGateway {
     });
   }
 
+  /**
+   * Платежи, которые у нас «в ожидании», но уже имеют номер в банке.
+   *
+   * Системный шлюз: сверка идёт мимо тенант-скоупа, потому что проверяем всю
+   * платформу разом. Тенант подставляется при применении каждого платежа.
+   */
+  listPendingPayments(olderThan: Date) {
+    return this.prisma.billingPayment.findMany({
+      where: {
+        status: 'pending',
+        providerPaymentId: { not: null },
+        createdAt: { lt: olderThan },
+      },
+      orderBy: { createdAt: 'asc' },
+      take: 200,
+    });
+  }
+
   listBillingCandidates() {
     return this.prisma.tenant.findMany({
       where: {

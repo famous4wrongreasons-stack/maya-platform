@@ -30,6 +30,7 @@ import {
   CrmAppointmentDetail,
   CrmCompanyProfile,
   CrmFinancialSummary,
+  CrmRevenueSummary,
   CrmTeamMember,
   RescheduledAppointment,
   ServiceItem,
@@ -1209,6 +1210,56 @@ export class CrmService {
     }
 
     return adapter.getFinancialSummary({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+    });
+  }
+
+  async getRevenueSummary(
+    tenantId: string,
+    query: { from: string; to: string },
+  ): Promise<CrmRevenueSummary> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM revenue range is invalid.',
+        error: { code: 'crm_revenue_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > 366 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM revenue range must not exceed 366 days.',
+        error: { code: 'crm_revenue_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getRevenueSummary) {
+      throw new ConflictException({
+        message: 'CRM revenue analytics is not available for this provider.',
+        error: { code: 'crm_revenue_not_supported' },
+      });
+    }
+
+    return adapter.getRevenueSummary({
       tenantId: scopedTenantId,
       from: from.toISOString(),
       to: to.toISOString(),

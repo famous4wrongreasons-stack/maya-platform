@@ -25,6 +25,16 @@ describe('MayaBrainRouterService', () => {
     });
   });
 
+  it('routes year-over-year questions to verified business analytics', () => {
+    expect(
+      service.route(UserRole.TENANT_OWNER, 'Сравни этот год с предыдущим'),
+    ).toMatchObject({
+      persona: 'director',
+      profile: 'maya_analytics',
+      intent: 'business_analytics',
+    });
+  });
+
   it('marks procedural answers as knowledge-grounded', () => {
     const result = service.route(
       UserRole.STAFF,

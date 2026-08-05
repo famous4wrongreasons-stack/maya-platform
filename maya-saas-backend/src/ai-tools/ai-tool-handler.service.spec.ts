@@ -484,6 +484,96 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getBusinessFinance).not.toHaveBeenCalled();
   });
 
+  it('compares equal year-to-date periods and calculates deltas on the server', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:34:56.789Z'));
+    const getRevenueSummary = jest
+      .fn()
+      .mockResolvedValueOnce({
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: true,
+        period: {},
+        revenue: {
+          status: 'available',
+          verified: true,
+          transaction_count: 120,
+          total: { currency: 'RUB', amount_kopecks: 15_000_000 },
+        },
+        warnings: [],
+      })
+      .mockResolvedValueOnce({
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: true,
+        period: {},
+        revenue: {
+          status: 'available',
+          verified: true,
+          transaction_count: 100,
+          total: { currency: 'RUB', amount_kopecks: 10_000_000 },
+        },
+        warnings: [],
+      });
+    const crmService = { getRevenueSummary } as unknown as CrmService;
+    const prisma = {
+      tenant: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ defaultTimezone: 'Europe/Moscow' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ crmService, prisma });
+
+    const result = await service.execute(
+      'analytics.business.compare_years',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {},
+      'execution-year-comparison',
+    );
+
+    expect(getRevenueSummary).toHaveBeenNthCalledWith(1, 'tenant-a', {
+      from: '2025-12-31T21:00:00.000Z',
+      to: '2026-08-06T12:34:56.789Z',
+    });
+    expect(getRevenueSummary).toHaveBeenNthCalledWith(2, 'tenant-a', {
+      from: '2024-12-31T21:00:00.000Z',
+      to: '2025-08-06T12:34:56.789Z',
+    });
+    expect(result).toMatchObject({
+      comparison: 'current_year_to_date_vs_previous_year_same_period',
+      verified: true,
+      periods: {
+        current: {
+          year: 2026,
+          start_day: 1,
+          start_month: 1,
+          end_day: 6,
+          end_month: 8,
+        },
+        previous: {
+          year: 2025,
+          start_day: 1,
+          start_month: 1,
+          end_day: 6,
+          end_month: 8,
+        },
+      },
+      revenue: {
+        current: { amount_major_units: 150_000 },
+        previous: { amount_major_units: 100_000 },
+        delta: { amount_major_units: 50_000 },
+        percent_change: 50,
+      },
+      transactions: {
+        current: 120,
+        previous: 100,
+        delta: 20,
+        percent_change: 20,
+      },
+    });
+  });
+
   it('replaces staff names with deterministic booking labels', async () => {
     const staffService = {
       listStaff: jest.fn().mockResolvedValue([

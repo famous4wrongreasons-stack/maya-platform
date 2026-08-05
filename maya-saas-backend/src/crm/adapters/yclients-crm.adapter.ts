@@ -16,6 +16,7 @@ import {
   CrmCompanyOption,
   CrmCompanyProfile,
   CrmFinancialSummary,
+  CrmRevenueSummary,
   CrmJournal,
   CrmJournalAppointment,
   CrmJournalMaster,
@@ -1583,6 +1584,48 @@ export class YclientsCRMAdapter implements CRMAdapter {
       payroll,
       warnings,
     };
+  }
+
+  async getRevenueSummary(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+  }): Promise<CrmRevenueSummary> {
+    void params.tenantId;
+    const from = this.dateKeyInTimezone(params.from, params.timezone);
+    const to = this.dateKeyInTimezone(params.to, params.timezone);
+    const currency = this.settings.currency || 'RUB';
+
+    try {
+      const revenue = this.aggregateRevenue(
+        await this.fetchFinancialTransactions(from, to),
+        currency,
+      );
+      return {
+        source: 'external_crm',
+        provider: this.config.provider,
+        verified: revenue.verified,
+        period: { from, to, timezone: params.timezone },
+        revenue,
+        warnings: [],
+      };
+    } catch {
+      return {
+        source: 'external_crm',
+        provider: this.config.provider,
+        verified: false,
+        period: { from, to, timezone: params.timezone },
+        revenue: this.unavailableRevenue(),
+        warnings: [
+          {
+            code: 'crm_revenue_unavailable',
+            message:
+              'YClients не вернул подтверждённые финансовые операции за выбранный период.',
+          },
+        ],
+      };
+    }
   }
 
   async getClientLoyalty(params: {

@@ -20,6 +20,7 @@ import { MayaBrainService } from '../ai-brain/maya-brain.service';
 import { AiCoreController } from './ai-core.controller';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
+import { AiSpeechService } from './ai-speech.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
@@ -50,6 +51,7 @@ import { StaffScheduleCommandService } from './staff-schedule-command.service';
     MayaBrainService,
     AiCoreModelService,
     AiCoreService,
+    AiSpeechService,
     AiToolHandlerService,
     AiToolPolicyService,
     AiToolRegistryService,

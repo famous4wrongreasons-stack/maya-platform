@@ -21,8 +21,17 @@ describe('BillingSchedulerService', () => {
       errors: [],
     });
 
-  const build = (runDueBilling: jest.Mock, env: Record<string, string> = {}) => {
-    const billingService = { runDueBilling } as unknown as BillingService;
+  const build = (
+    runDueBilling: jest.Mock,
+    env: Record<string, string> = {},
+    reconcilePendingPayments: jest.Mock = jest
+      .fn()
+      .mockResolvedValue({ checked: 0, applied: 0, failed: 0 }),
+  ) => {
+    const billingService = {
+      runDueBilling,
+      reconcilePendingPayments,
+    } as unknown as BillingService;
     const configService = {
       get: (key: string) => env[key],
     } as unknown as ConfigService;
@@ -102,4 +111,23 @@ describe('BillingSchedulerService', () => {
     setIntervalSpy.mockRestore();
     scheduler.onModuleDestroy();
   });
+  it('сверяет зависшие платежи ДО продления', async () => {
+    const order: string[] = [];
+    const reconcile = jest.fn().mockImplementation(() => {
+      order.push('сверка');
+      return Promise.resolve({ checked: 0, applied: 0, failed: 0 });
+    });
+    const runDueBilling = jest.fn().mockImplementation(() => {
+      order.push('продление');
+      return emptyRun();
+    });
+    const scheduler = build(runDueBilling, {}, reconcile);
+
+    await scheduler.tick();
+
+    // Порядок важен: платёж мог пройти, а уведомление не дойти. Если не
+    // досчитать его первым, салон с оплаченной подпиской выглядел бы должником.
+    expect(order).toEqual(['сверка', 'продление']);
+  });
+
 });

@@ -884,6 +884,85 @@ describe('AiCoreService', () => {
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
+  it('answers year-over-year questions only from the dedicated comparison tool', async () => {
+    const mocks = createService(['analytics.business.compare_years']);
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Проверяю.',
+        toolCall: {
+          name: 'analytics.business.compare_years',
+          arguments: {},
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-year-comparison',
+      result: {
+        verified: true,
+        periods: {
+          current: {
+            year: 2026,
+            start_day: 1,
+            start_month: 1,
+            end_day: 6,
+            end_month: 8,
+          },
+          previous: {
+            year: 2025,
+            start_day: 1,
+            start_month: 1,
+            end_day: 6,
+            end_month: 8,
+          },
+        },
+        revenue: {
+          current: {
+            currency: 'RUB',
+            amount_kopecks: 15_000_000,
+            amount_major_units: 150_000,
+          },
+          previous: {
+            currency: 'RUB',
+            amount_kopecks: 10_000_000,
+            amount_major_units: 100_000,
+          },
+          delta: {
+            currency: 'RUB',
+            amount_kopecks: 5_000_000,
+            amount_major_units: 50_000,
+          },
+          percent_change: 50,
+        },
+        transactions: {
+          current: 120,
+          previous: 100,
+          delta: 20,
+          percent_change: 20,
+        },
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Сравни этот год с предыдущим' }],
+    });
+
+    expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
+      'analytics.business.compare_years',
+    ]);
+    expect(result).toMatchObject({
+      reply:
+        'Сравнила одинаковые периоды: 01.01.2026–06.08.2026 и 01.01.2025–06.08.2025. Поступления: 150 000 ₽ против 100 000 ₽. Изменение: +50 000 ₽ (+50%). Положительных финансовых операций: 120 против 100. Изменение: +20 (+20%). Источник — подтверждённые операции CRM.',
+      grounding: {
+        status: 'verified',
+        domain: 'business_year_comparison',
+        evidence_tools: ['analytics.business.compare_years'],
+      },
+    });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+  });
+
   it('fails closed when the model requests a tool unavailable to the role', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(

@@ -88,6 +88,11 @@ export class BillingSchedulerService implements OnModuleInit, OnModuleDestroy {
     this.running = true;
 
     try {
+      // Сначала сверка: платёж мог пройти, а уведомление не дойти. Если не
+      // досчитать его ДО продления, салон выглядел бы должником с оплаченной
+      // подпиской — и мог получить второе списание.
+      await this.billingService.reconcilePendingPayments();
+
       const result = await this.billingService.runDueBilling();
 
       if (result.charged > 0 || result.marked_past_due > 0 || result.failed > 0) {

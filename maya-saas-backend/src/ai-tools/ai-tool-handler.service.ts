@@ -77,6 +77,8 @@ export class AiToolHandlerService {
         const query = await this.reportingQuery(principal.tenantId, args);
         return this.readBusinessAnalytics(principal, query);
       }
+      case 'analytics.business.compare_years':
+        return this.compareBusinessYears(principal);
       case 'expenses.read':
         return this.readExpenses(principal.tenantId, args);
       case 'customers.count':
@@ -315,6 +317,176 @@ export class AiToolHandlerService {
         finance: this.unavailableFinance('finance_unavailable'),
       };
     }
+  }
+
+  private async compareBusinessYears(principal: AiToolPrincipal) {
+    const ranges = await this.businessYearComparisonRanges(principal.tenantId);
+    const [currentSummary, previousSummary] = await Promise.all([
+      this.crmService.getRevenueSummary(principal.tenantId, ranges.current),
+      this.crmService.getRevenueSummary(principal.tenantId, ranges.previous),
+    ]);
+    const currentRevenue = this.record(currentSummary.revenue);
+    const previousRevenue = this.record(previousSummary.revenue);
+    const currentTotal = this.safeMoneyAmount(currentRevenue.total);
+    const previousTotal = this.safeMoneyAmount(previousRevenue.total);
+    const currentTransactions = this.optionalMetricNumber(
+      currentRevenue.transaction_count,
+    );
+    const previousTransactions = this.optionalMetricNumber(
+      previousRevenue.transaction_count,
+    );
+    const comparableMoney =
+      currentTotal !== null &&
+      previousTotal !== null &&
+      currentTotal.currency === previousTotal.currency;
+    const revenueDeltaKopecks = comparableMoney
+      ? currentTotal.amount_kopecks - previousTotal.amount_kopecks
+      : null;
+    const transactionDelta =
+      currentTransactions !== null && previousTransactions !== null
+        ? currentTransactions - previousTransactions
+        : null;
+
+    return {
+      comparison: 'current_year_to_date_vs_previous_year_same_period',
+      timezone: ranges.timezone,
+      verified:
+        currentSummary.verified === true && previousSummary.verified === true,
+      periods: {
+        current: {
+          year: ranges.currentYear,
+          from: ranges.current.from,
+          to: ranges.current.to,
+          start_day: 1,
+          start_month: 1,
+          end_day: ranges.currentEndDay,
+          end_month: ranges.currentEndMonth,
+        },
+        previous: {
+          year: ranges.previousYear,
+          from: ranges.previous.from,
+          to: ranges.previous.to,
+          start_day: 1,
+          start_month: 1,
+          end_day: ranges.previousEndDay,
+          end_month: ranges.previousEndMonth,
+        },
+      },
+      revenue: {
+        current: currentTotal,
+        previous: previousTotal,
+        delta:
+          revenueDeltaKopecks === null || !currentTotal
+            ? null
+            : {
+                currency: currentTotal.currency,
+                amount_kopecks: revenueDeltaKopecks,
+                amount_major_units: this.majorUnits(revenueDeltaKopecks),
+              },
+        percent_change:
+          comparableMoney && previousTotal
+            ? this.percentageDelta(
+                currentTotal.amount_kopecks,
+                previousTotal.amount_kopecks,
+              )
+            : null,
+      },
+      transactions: {
+        current: currentTransactions,
+        previous: previousTransactions,
+        delta: transactionDelta,
+        percent_change:
+          currentTransactions !== null && previousTransactions !== null
+            ? this.percentageDelta(currentTransactions, previousTransactions)
+            : null,
+      },
+      warning_codes: [
+        ...new Set([
+          ...this.safeWarningCodes(currentSummary.warnings),
+          ...this.safeWarningCodes(previousSummary.warnings),
+        ]),
+      ],
+    };
+  }
+
+  private async businessYearComparisonRanges(tenantId: string) {
+    const timezone = await this.reportingTimezone(tenantId);
+    const now = new Date();
+    const local = this.localDateTime(now, timezone);
+    const currentYear = Number(local.date.slice(0, 4));
+    const previousYear = currentYear - 1;
+    const previousDate = this.sameLocalDateInYear(local.date, previousYear);
+    const previousTo = new Date(
+      localDateMinuteToUtc(
+        previousDate,
+        local.hour * 60 + local.minute,
+        timezone,
+      ).getTime() +
+        local.second * 1_000 +
+        now.getUTCMilliseconds(),
+    );
+    const currentFromDate = `${currentYear}-01-01`;
+    const previousFromDate = `${previousYear}-01-01`;
+
+    return {
+      timezone,
+      currentYear,
+      previousYear,
+      current: {
+        from: localDateMinuteToUtc(currentFromDate, 0, timezone).toISOString(),
+        to: now.toISOString(),
+      },
+      previous: {
+        from: localDateMinuteToUtc(previousFromDate, 0, timezone).toISOString(),
+        to: previousTo.toISOString(),
+      },
+      currentEndDay: Number(local.date.slice(8, 10)),
+      currentEndMonth: Number(local.date.slice(5, 7)),
+      previousEndDay: Number(previousDate.slice(8, 10)),
+      previousEndMonth: Number(previousDate.slice(5, 7)),
+    };
+  }
+
+  private localDateTime(value: Date, timezone: string) {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat('en', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23',
+      })
+        .formatToParts(value)
+        .filter((part) => part.type !== 'literal')
+        .map((part) => [part.type, part.value]),
+    );
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      hour: Number(parts.hour),
+      minute: Number(parts.minute),
+      second: Number(parts.second),
+    };
+  }
+
+  private sameLocalDateInYear(value: string, year: number): string {
+    const month = Number(value.slice(5, 7));
+    const day = Number(value.slice(8, 10));
+    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(Math.min(day, lastDay)).padStart(2, '0')}`;
+  }
+
+  private optionalMetricNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  private percentageDelta(current: number, previous: number): number | null {
+    if (previous === 0) {
+      return null;
+    }
+    return Math.round(((current - previous) / Math.abs(previous)) * 1_000) / 10;
   }
 
   private safeAnalytics(value: unknown) {

@@ -55,6 +55,13 @@ export class MayaBrainRouterService {
       return 'schedule_management';
     }
     if (
+      /(?:сравн[а-яa-z]*.{0,48}(?:год|года).{0,48}(?:прошл|предыдущ)|(?:этот|текущ)[а-яa-z]*\s+год.{0,48}(?:прошл|предыдущ)[а-яa-z]*\s+год|год\s+к\s+году)/i.test(
+        text,
+      )
+    ) {
+      return 'business_analytics';
+    }
+    if (
       /(выруч|оборот|касс|доход|расход|прибыл|марж|средн[а-яa-z]*\s+чек|зарплат)/i.test(
         text,
       )

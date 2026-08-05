@@ -282,6 +282,22 @@ export interface CrmFinancialSummary {
   }>;
 }
 
+export interface CrmRevenueSummary {
+  source: 'external_crm';
+  provider: string;
+  verified: boolean;
+  period: {
+    from: string;
+    to: string;
+    timezone: string;
+  };
+  revenue: CrmFinancialSummary['revenue'];
+  warnings: Array<{
+    code: string;
+    message: string;
+  }>;
+}
+
 export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
@@ -379,6 +395,12 @@ export interface CRMAdapter {
     to: string;
     timezone: string;
   }): Promise<CrmFinancialSummary>;
+  getRevenueSummary?(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+  }): Promise<CrmRevenueSummary>;
   getClientLoyalty(params: {
     tenantId: string;
     phone: string;

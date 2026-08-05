@@ -847,6 +847,54 @@ describe('YclientsCRMAdapter', () => {
     expect(JSON.stringify(result)).not.toContain('+7999');
   });
 
+  it('reads a long revenue period without loading payroll', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        expect(url).toContain('start_date=2026-01-01');
+        expect(url).toContain('end_date=2026-08-06');
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 1,
+                  amount: '2500',
+                  sold_item_type: 'service',
+                  account: { title: 'Основная касса', is_cash: true },
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      throw new Error(`Unexpected payroll request: ${url}`);
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getRevenueSummary({
+      tenantId: 'tenant-1',
+      from: '2025-12-31T21:00:00.000Z',
+      to: '2026-08-06T12:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(result).toMatchObject({
+      verified: true,
+      period: { from: '2026-01-01', to: '2026-08-06' },
+      revenue: {
+        status: 'available',
+        transaction_count: 1,
+        total: { currency: 'RUB', amount_kopecks: 250_000 },
+      },
+    });
+  });
+
   it('hides payroll totals when YClients returns only a partial result', async () => {
     global.fetch = jest.fn<typeof fetch>((input) => {
       const url = String(input);
