@@ -1371,8 +1371,45 @@ export class UsersService {
     };
   }
 
+  /**
+   * Основатель платформы MAYA.
+   *
+   * 🔴 Это НЕ «владелец с полным доступом». Владелец салона распоряжается своим
+   * бизнесом целиком, но GOD-режим и затраты на ИИ — это метрики и деньги ВСЕЙ
+   * платформы, то есть данные всех тенантов сразу. Признак задаётся списком
+   * MAYA_FOUNDER_IDS / MAYA_FOUNDER_EMAILS в окружении и никак не выводится из
+   * роли внутри тенанта.
+   */
+  private isPlatformFounder(serialized: {
+    id: string;
+    email: string | null;
+    role: string;
+  }): boolean {
+    if (serialized.role === UserRole.PLATFORM_OWNER) {
+      return true;
+    }
+
+    const parse = (raw?: string) =>
+      String(raw || '')
+        .split(',')
+        .map((x) => x.trim().toLowerCase())
+        .filter(Boolean);
+    const ids = parse(process.env.MAYA_FOUNDER_IDS);
+    const emails = parse(process.env.MAYA_FOUNDER_EMAILS);
+    const email = String(serialized.email || '').toLowerCase();
+
+    return (
+      ids.includes(String(serialized.id).toLowerCase()) ||
+      (email.length > 0 && emails.includes(email))
+    );
+  }
+
   async serializeCurrentUser(user: UserWithRelations) {
-    const serialized = this.serializeUser(user);
+    const serialized = {
+      ...this.serializeUser(user),
+      is_platform_owner: false,
+    };
+    serialized.is_platform_owner = this.isPlatformFounder(serialized);
     const tenantId = serialized.tenant_id;
 
     if (!tenantId) {

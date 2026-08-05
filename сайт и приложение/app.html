@@ -4753,7 +4753,11 @@ function meSaasApplyIdentity(user) {
   var legacyRole = manager ? 'owner' : 'master';
   window.__meIsStaff = true;
   window.__meIsMaster = personalStaff;
-  window.__meIsFounder = false;
+  // 🔴 GOD-режим и затраты на ИИ — это платформа MAYA, а не бизнес салона.
+  // Владелец салона с полным доступом к СВОЕМУ бизнесу их видеть не должен:
+  // там расходы и метрики всех тенантов. Признак берём ТОЛЬКО из роли,
+  // подписанной сервером, и никогда не выводим из «владелец с полным доступом».
+  window.__meIsFounder = role === 'platform_owner' || user.is_platform_owner === true;
   window.__meRole = legacyRole;
   window.__meStaffName = name;
   window.__panelInfo = Object.assign({}, window.__panelInfo || {}, user, {
@@ -22118,6 +22122,12 @@ function StaffBookBtn({
 function AGodMode(props) {
   props = props || {};
   var e = React.createElement;
+  // Защита на самом экране, а не только на подступах: сюда ведут пуш-уведомление
+  // и deep-link, и полагаться на то, что «сюда просто не попасть», нельзя.
+  if (!window.__meIsFounder) {
+    return e('div', { style: { minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center', fontFamily: 'Montserrat, system-ui, sans-serif', fontSize: 13, lineHeight: 1.6, color: 'rgba(128,128,128,0.9)' } },
+      'Этот раздел доступен только основателю MAYA.');
+  }
   var dark = window.__meDark;
   var baseT = tokens('aurora', dark);
   var t = dark ? Object.assign({}, baseT, {
