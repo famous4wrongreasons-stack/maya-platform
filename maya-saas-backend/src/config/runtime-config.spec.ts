@@ -237,6 +237,7 @@ describe('runtime config validation', () => {
     config.AI_CORE_TIMEOUT_MS = '999';
     config.AI_CORE_MAX_TOOL_STEPS = '4';
     config.AI_CORE_PROVIDER = 'unrestricted';
+    config.MAYA_BRAIN_PROVIDER = 'unrestricted';
     const message = validationMessage(config);
 
     expect(message).toContain('CORS origins must be explicit');
@@ -264,6 +265,9 @@ describe('runtime config validation', () => {
     );
     expect(message).toContain(
       'AI_CORE_PROVIDER must be auto, deepseek, openai or safe',
+    );
+    expect(message).toContain(
+      'MAYA_BRAIN_PROVIDER must be auto, deepseek, openai or safe',
     );
   });
 });

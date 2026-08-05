@@ -73,7 +73,12 @@ export function validateRuntimeConfig(
   validateEmailAuthTiming(config, issues);
 
   validateConfiguredPolicies(config, environment, issues);
-  validateAiCoreProvider(config.AI_CORE_PROVIDER, issues);
+  validateAiCoreProvider(config.AI_CORE_PROVIDER, 'AI_CORE_PROVIDER', issues);
+  validateAiCoreProvider(
+    config.MAYA_BRAIN_PROVIDER,
+    'MAYA_BRAIN_PROVIDER',
+    issues,
+  );
 
   if (environment === 'production') {
     validateProductionConfig(config, issues);
@@ -91,10 +96,14 @@ export function validateRuntimeConfig(
   return config;
 }
 
-function validateAiCoreProvider(value: unknown, issues: string[]): void {
+function validateAiCoreProvider(
+  value: unknown,
+  name: 'AI_CORE_PROVIDER' | 'MAYA_BRAIN_PROVIDER',
+  issues: string[],
+): void {
   const provider = stringValue(value).toLowerCase();
   if (provider && !['auto', 'deepseek', 'openai', 'safe'].includes(provider)) {
-    issues.push('AI_CORE_PROVIDER must be auto, deepseek, openai or safe');
+    issues.push(`${name} must be auto, deepseek, openai or safe`);
   }
 }
 
