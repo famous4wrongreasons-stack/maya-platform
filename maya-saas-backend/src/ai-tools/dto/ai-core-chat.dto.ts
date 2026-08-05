@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsIn,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -30,6 +31,11 @@ export class AiCoreChatDto {
   @IsString()
   @Matches(/^[A-Za-z0-9_-]{8,128}$/)
   requestId!: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z0-9_-]{8,128}$/)
+  brainSessionId?: string;
 
   @ArrayMinSize(1)
   @ArrayMaxSize(12)

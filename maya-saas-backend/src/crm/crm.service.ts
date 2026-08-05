@@ -1709,6 +1709,16 @@ export class CrmService {
         'Не удалось проверить подключение к CRM. Данные не были сохранены.',
     };
 
+    // 🔴 Причину пишем в лог. Раньше она молча превращалась в общий текст, и
+    // когда салон говорил «CRM отклонила токен», в логах не было НИЧЕГО —
+    // диагностировать было нечем. Токен сюда не попадает: логируем только
+    // сообщение провайдера и класс ошибки.
+    const detail =
+      error instanceof Error ? error.message : String(error ?? 'unknown');
+    this.logger.warn(
+      `CRM connection failed provider=${provider} code=${code} detail=${detail.slice(0, 300)}`,
+    );
+
     return new BadRequestException({
       message: messages[code],
       error: { code, provider },
