@@ -19,6 +19,7 @@ import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { AiToolsController } from './ai-tools.controller';
+import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AiToolsController } from './ai-tools.controller';
     AiToolPolicyService,
     AiToolRegistryService,
     AiToolRuntimeService,
+    StaffScheduleCommandService,
   ],
   exports: [AiCoreService, AiToolRegistryService, AiToolRuntimeService],
 })

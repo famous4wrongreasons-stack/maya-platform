@@ -29,6 +29,7 @@ import type {
 } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
+import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
 const MAX_CHAT_INPUT_BYTES = 16 * 1_024;
 const COMMON_PERSON_NAME_FORMS = buildCommonPersonNameForms([
@@ -174,6 +175,7 @@ export class AiCoreService {
     private readonly model: AiCoreModelService,
     private readonly auditLog: AuditLogService,
     private readonly dashboardPreferences: DashboardPreferencesService,
+    private readonly staffScheduleCommand: StaffScheduleCommandService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -182,6 +184,24 @@ export class AiCoreService {
       tenantId,
       identity: user.userId,
     });
+    const scheduleCommand = await this.staffScheduleCommand.tryHandle(
+      user,
+      dto,
+    );
+    if (scheduleCommand) {
+      return this.complete(
+        user,
+        dto,
+        false,
+        scheduleCommand.toolUsage ? [scheduleCommand.toolUsage] : [],
+        [],
+        {
+          reply: scheduleCommand.reply,
+          source: 'safe_fallback',
+          action: scheduleCommand.action,
+        },
+      );
+    }
     const sanitized = this.sanitizeMessages(dto.messages);
     const assistantCommand = await this.handleAssistantCommand(
       user,

@@ -188,6 +188,61 @@ describe('AiToolHandlerService output minimization', () => {
     });
   });
 
+  it('applies only the immutable schedule approved by a manager', async () => {
+    const crmService = {
+      applyStaffScheduleDayChange: jest.fn().mockResolvedValue({
+        staff_id: '1461615',
+        date: '2026-08-06',
+        is_working: true,
+        slots: [
+          { from: '10:00', to: '14:00' },
+          { from: '15:00', to: '18:00' },
+        ],
+        verified: true,
+      }),
+    } as unknown as CrmService;
+    const service = createService({ crmService });
+
+    await expect(
+      service.execute(
+        'staff.schedule.update',
+        { ...principal, role: UserRole.TENANT_OWNER, surface: 'native' },
+        {
+          staff_id: '1461615',
+          date: '2026-08-06',
+          current_revision: 'a'.repeat(64),
+          slots: [
+            { from: '10:00', to: '14:00' },
+            { from: '15:00', to: '18:00' },
+          ],
+        },
+        'execution-schedule',
+      ),
+    ).resolves.toEqual({
+      status: 'applied',
+      date: '2026-08-06',
+      is_working: true,
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '18:00' },
+      ],
+      verified: true,
+      existing_appointments_preserved: true,
+    });
+    expect(crmService.applyStaffScheduleDayChange).toHaveBeenCalledWith(
+      'tenant-a',
+      {
+        staffId: '1461615',
+        date: '2026-08-06',
+        slots: [
+          { from: '10:00', to: '14:00' },
+          { from: '15:00', to: '18:00' },
+        ],
+        expectedRevision: 'a'.repeat(64),
+      },
+    );
+  });
+
   it('removes employee names and provider identifiers from analytics', async () => {
     const analyticsService = {
       getEmployeeOverview: jest.fn().mockResolvedValue({
@@ -514,6 +569,7 @@ describe('AiToolHandlerService output minimization', () => {
   });
 
   function createService(overrides: {
+    crmService?: CrmService;
     appointmentsService?: AppointmentsService;
     expensesService?: ExpensesService;
     loyaltyService?: LoyaltyService;
@@ -522,7 +578,7 @@ describe('AiToolHandlerService output minimization', () => {
     prisma?: PrismaService;
   }) {
     return new AiToolHandlerService(
-      {} as CrmService,
+      overrides.crmService ?? ({} as CrmService),
       overrides.appointmentsService ?? ({} as AppointmentsService),
       overrides.loyaltyService ?? ({} as LoyaltyService),
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),

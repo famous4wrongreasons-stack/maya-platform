@@ -11,6 +11,7 @@ import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
 import type { AiCoreModelDecision } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
+import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
 describe('AiCoreService', () => {
   const user: AuthenticatedUser = {
@@ -918,6 +919,9 @@ describe('AiCoreService', () => {
         }),
       ),
     };
+    const staffScheduleCommand = {
+      tryHandle: jest.fn().mockResolvedValue(null),
+    };
     const service = new AiCoreService(
       config as unknown as ConfigService,
       tenantContext as unknown as TenantContextService,
@@ -926,6 +930,7 @@ describe('AiCoreService', () => {
       model as unknown as AiCoreModelService,
       auditLog as unknown as AuditLogService,
       dashboardPreferences as unknown as DashboardPreferencesService,
+      staffScheduleCommand as unknown as StaffScheduleCommandService,
     );
     return {
       auditLog,
@@ -934,6 +939,7 @@ describe('AiCoreService', () => {
       rateLimit,
       runtime,
       service,
+      staffScheduleCommand,
     };
   }
 });

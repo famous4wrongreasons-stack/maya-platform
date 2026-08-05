@@ -4,6 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
+import {
+  normalizeScheduleSlots,
+  staffScheduleRevision,
+} from '../crm/staff-schedule.utils';
 import { MAYA_AI_TOOL_CATALOG, MayaAiToolName } from './ai-tool.catalog';
 import type {
   AiToolDefinition,
@@ -158,6 +163,42 @@ export class AiToolRegistryService {
                 branch_id: this.assertExternalId(args.branch_id, 'branch_id'),
               }),
         };
+      case 'staff.schedule.update': {
+        this.assertAllowedKeys(args, [
+          'staff_id',
+          'date',
+          'operation',
+          'current_revision',
+          'current_slots',
+          'slots',
+        ]);
+        const staffId = this.assertExternalId(args.staff_id, 'staff_id');
+        const date = this.assertDateKey(args.date, 'date');
+        const operation = this.assertScheduleOperation(args.operation);
+        const currentSlots = this.assertScheduleSlots(
+          args.current_slots,
+          'current_slots',
+        );
+        const slots = this.assertScheduleSlots(args.slots, 'slots');
+        const currentRevision = this.assertScheduleRevision(
+          args.current_revision,
+        );
+        if (
+          currentRevision !== staffScheduleRevision(staffId, date, currentSlots)
+        ) {
+          this.invalidArguments(
+            'current_revision does not match the schedule preview',
+          );
+        }
+        return {
+          staff_id: staffId,
+          date,
+          operation,
+          current_revision: currentRevision,
+          current_slots: currentSlots,
+          slots,
+        };
+      }
       case 'loyalty.internal.adjust':
         this.assertAllowedKeys(args, ['target_user_id', 'delta', 'reason']);
         return {
@@ -222,6 +263,20 @@ export class AiToolRegistryService {
           target_user_id: args.target_user_id,
           delta: args.delta,
           reason: args.reason,
+        },
+      };
+    }
+    if (toolName === 'staff.schedule.update') {
+      return {
+        summary:
+          'Change one staff workday. Existing appointments will be preserved.',
+        payload: {
+          action: 'update_staff_schedule',
+          date: args.date,
+          operation: args.operation,
+          current_slots: args.current_slots,
+          proposed_slots: args.slots,
+          existing_appointments_preserved: true,
         },
       };
     }
@@ -324,6 +379,42 @@ export class AiToolRegistryService {
     return normalized;
   }
 
+  private assertScheduleSlots(
+    value: unknown,
+    field: string,
+  ): StaffScheduleSlot[] {
+    if (!Array.isArray(value) || value.length > 12) {
+      this.invalidArguments(`${field} must contain at most 12 intervals`);
+    }
+    const slots = value.map((item) => {
+      const slot = this.assertObject(item);
+      this.assertAllowedKeys(slot, ['from', 'to']);
+      if (typeof slot.from !== 'string' || typeof slot.to !== 'string') {
+        this.invalidArguments(`${field} intervals must contain from and to`);
+      }
+      return { from: slot.from, to: slot.to };
+    });
+    try {
+      return normalizeScheduleSlots(slots);
+    } catch {
+      this.invalidArguments(`${field} contains an invalid interval`);
+    }
+  }
+
+  private assertScheduleOperation(value: unknown): string {
+    if (!['close_day', 'set_break', 'set_hours'].includes(String(value))) {
+      this.invalidArguments('schedule operation is invalid');
+    }
+    return String(value);
+  }
+
+  private assertScheduleRevision(value: unknown): string {
+    if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
+      this.invalidArguments('current_revision is invalid');
+    }
+    return value;
+  }
+
   private assertDelta(value: unknown): number {
     if (
       typeof value !== 'number' ||
@@ -381,6 +472,20 @@ export class AiToolRegistryService {
       this.invalidArguments(`${field} must be an ISO date or date-time`);
     }
     return normalized.toISOString();
+  }
+
+  private assertDateKey(value: unknown, field: string): string {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      this.invalidArguments(`${field} must be YYYY-MM-DD`);
+    }
+    const parsed = new Date(`${value}T00:00:00.000Z`);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== value
+    ) {
+      this.invalidArguments(`${field} must be a valid date`);
+    }
+    return value;
   }
 
   private invalidArguments(message: string): never {

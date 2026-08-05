@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
+import { staffScheduleRevision } from '../crm/staff-schedule.utils';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 
 describe('AiToolRegistryService', () => {
@@ -128,5 +129,67 @@ describe('AiToolRegistryService', () => {
         branch_id: null,
       },
     });
+  });
+
+  it('validates an immutable staff schedule preview', () => {
+    const currentSlots = [{ from: '10:00', to: '20:00' }];
+    const currentRevision = staffScheduleRevision(
+      '1461615',
+      '2026-08-06',
+      currentSlots,
+    );
+    const args = service.validateArguments('staff.schedule.update', {
+      staff_id: '1461615',
+      date: '2026-08-06',
+      operation: 'set_break',
+      current_revision: currentRevision,
+      current_slots: currentSlots,
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '20:00' },
+      ],
+    });
+
+    expect(args).toEqual({
+      staff_id: '1461615',
+      date: '2026-08-06',
+      operation: 'set_break',
+      current_revision: currentRevision,
+      current_slots: currentSlots,
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '20:00' },
+      ],
+    });
+    expect(
+      service.buildApprovalPreview('staff.schedule.update', args),
+    ).toEqual({
+      summary:
+        'Change one staff workday. Existing appointments will be preserved.',
+      payload: {
+        action: 'update_staff_schedule',
+        date: '2026-08-06',
+        operation: 'set_break',
+        current_slots: currentSlots,
+        proposed_slots: [
+          { from: '10:00', to: '14:00' },
+          { from: '15:00', to: '20:00' },
+        ],
+        existing_appointments_preserved: true,
+      },
+    });
+  });
+
+  it('rejects a schedule preview whose revision does not match', () => {
+    expect(() =>
+      service.validateArguments('staff.schedule.update', {
+        staff_id: '1461615',
+        date: '2026-08-06',
+        operation: 'close_day',
+        current_revision: '0'.repeat(64),
+        current_slots: [{ from: '10:00', to: '20:00' }],
+        slots: [],
+      }),
+    ).toThrow(BadRequestException);
   });
 });

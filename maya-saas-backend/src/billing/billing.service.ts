@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Logger,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -61,6 +62,8 @@ type BillingCandidateRecord = {
 
 @Injectable()
 export class BillingService {
+  private readonly logger = new Logger(BillingService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
@@ -125,6 +128,11 @@ export class BillingService {
           capture: true,
           save_payment_method: true,
           description: this.buildPaymentDescription(tenant.name, plan.name),
+          ...this.buildReceipt(
+            tenant,
+            plan.name,
+            amountKopecks,
+          ),
           metadata: {
             tenant_id: tenant.id,
             billing_payment_id: payment.id,
@@ -775,23 +783,98 @@ export class BillingService {
     return String(value) === expected;
   }
 
+  /**
+   * Чек по 54-ФЗ.
+   *
+   * 🔴 Если магазин в ЮKassa настроен на формирование чеков через API, платёж
+   * БЕЗ чека отклоняется — салон видит непонятный отказ на ровном месте. Если
+   * же чеки шлёт касса магазина, лишний чек тоже ошибка. Поэтому включается
+   * явным YOOKASSA_SEND_RECEIPT=true, а не угадыванием.
+   *
+   * Контакт покупателя обязателен: без email или телефона чек не примут.
+   */
+  private buildReceipt(
+    tenant: { email?: string | null; phone?: string | null; name?: string | null },
+    planName: string,
+    amountKopecks: number,
+  ): Record<string, unknown> {
+    const enabled =
+      String(this.configService.get<string>('YOOKASSA_SEND_RECEIPT') ?? '')
+        .trim()
+        .toLowerCase() === 'true';
+
+    if (!enabled) {
+      return {};
+    }
+
+    const email = String(tenant.email || '').trim();
+    const phone = String(tenant.phone || '').trim();
+
+    if (!email && !phone) {
+      this.logger.warn(
+        'Чек не приложен: у тенанта нет ни email, ни телефона для отправки.',
+      );
+      return {};
+    }
+
+    const vatCode = Number(
+      this.configService.get<string>('YOOKASSA_VAT_CODE') ?? 1,
+    );
+
+    return {
+      receipt: {
+        customer: {
+          ...(email ? { email } : {}),
+          ...(phone ? { phone } : {}),
+        },
+        items: [
+          {
+            description: `Подписка MAYA OS · ${planName}`.slice(0, 128),
+            quantity: '1.00',
+            amount: {
+              value: this.formatKopecks(amountKopecks),
+              currency: RUB_CURRENCY,
+            },
+            vat_code: Number.isFinite(vatCode) && vatCode >= 1 && vatCode <= 6 ? vatCode : 1,
+            payment_mode: 'full_payment',
+            payment_subject: 'service',
+          },
+        ],
+      },
+    };
+  }
+
   private resolveReturnUrl(returnUrl?: string): string {
     const resolved =
       returnUrl?.trim() ||
       this.configService.get<string>('YOOKASSA_RETURN_URL')?.trim() ||
       this.configService.get<string>('BILLING_RETURN_URL')?.trim();
 
-    if (!resolved) {
-      throw new BadRequestException(
-        this.buildBillingError(
-          'billing_return_url_required',
-          'Set returnUrl or YOOKASSA_RETURN_URL before starting checkout.',
-          'returnUrl',
-        ),
-      );
+    if (resolved) {
+      return resolved;
     }
 
-    return resolved;
+    // 🔴 Раньше без настройки чекаут просто отказывал. Для салона это выглядело
+    // как «оплатить нельзя», хотя причина была в пустой переменной окружения.
+    // Возвращаем человека на страницу приложения с меткой — по ней кабинет
+    // понимает, что надо перепроверить подписку.
+    const publicBase = (
+      this.configService.get<string>('PUBLIC_APP_URL')?.trim() ||
+      this.configService.get<string>('APP_PUBLIC_URL')?.trim() ||
+      ''
+    ).replace(/\/+$/, '');
+
+    if (publicBase) {
+      return `${publicBase}/app/?billing=return`;
+    }
+
+    throw new BadRequestException(
+      this.buildBillingError(
+        'billing_return_url_required',
+        'Укажите адрес возврата: параметр returnUrl либо переменная PUBLIC_APP_URL / YOOKASSA_RETURN_URL.',
+        'returnUrl',
+      ),
+    );
   }
 
   private normalizeAmount(priceMonthly: number): number {

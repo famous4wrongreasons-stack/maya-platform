@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
+import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
@@ -22,6 +23,14 @@ const CRM_FINANCE_ROLES = new Set<UserRole>([
   UserRole.TENANT_ADMIN,
   UserRole.ADMINISTRATOR,
   UserRole.ACCOUNTANT,
+]);
+const SCHEDULE_MANAGER_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
 ]);
 
 @Injectable()
@@ -80,6 +89,8 @@ export class AiToolHandlerService {
         return this.createOwnAppointment(principal, args);
       case 'appointments.own.reschedule':
         return this.rescheduleOwnAppointment(principal, args);
+      case 'staff.schedule.update':
+        return this.applyStaffScheduleDayChange(principal, args);
       case 'loyalty.internal.adjust':
         return this.adjustInternalLoyalty(principal, args, idempotencyKey);
       default:
@@ -153,6 +164,35 @@ export class AiToolHandlerService {
       principal.userId,
     );
     return this.safeLoyalty(loyalty);
+  }
+
+  private async applyStaffScheduleDayChange(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    if (!SCHEDULE_MANAGER_ROLES.has(principal.role)) {
+      throw new ForbiddenException({
+        message: 'Staff schedule management is not available to this role.',
+        error: { code: 'staff_schedule_forbidden' },
+      });
+    }
+    const result = await this.crmService.applyStaffScheduleDayChange(
+      principal.tenantId,
+      {
+        staffId: this.requiredString(args.staff_id),
+        date: this.requiredString(args.date),
+        slots: this.scheduleSlots(args.slots),
+        expectedRevision: this.requiredString(args.current_revision),
+      },
+    );
+    return {
+      status: 'applied',
+      date: result.date,
+      is_working: result.is_working,
+      slots: result.slots,
+      verified: result.verified,
+      existing_appointments_preserved: true,
+    };
   }
 
   private async readExpenses(tenantId: string, args: ValidatedAiToolArguments) {
@@ -736,6 +776,19 @@ export class AiToolHandlerService {
       throw new Error('Validated AI tool number is missing');
     }
     return value;
+  }
+
+  private scheduleSlots(value: unknown): StaffScheduleSlot[] {
+    if (!Array.isArray(value)) {
+      throw new Error('Validated AI tool schedule slots are missing');
+    }
+    return value.map((item) => {
+      const slot = this.record(item);
+      return {
+        from: this.requiredString(slot.from),
+        to: this.requiredString(slot.to),
+      };
+    });
   }
 
   private stringArray(value: unknown): string[] {

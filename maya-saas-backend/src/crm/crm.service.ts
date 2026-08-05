@@ -25,6 +25,7 @@ import {
   CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
+  AppliedStaffScheduleDayChange,
   CrmAdapterConfig,
   CrmAppointmentDetail,
   CrmCompanyProfile,
@@ -33,6 +34,9 @@ import {
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
+  StaffScheduleChangePreview,
+  StaffScheduleDay,
+  StaffScheduleSlot,
 } from './crm-adapter.interface';
 import {
   getCrmProviderCapability,
@@ -662,6 +666,58 @@ export class CrmService {
     });
   }
 
+  async previewStaffScheduleDayChange(
+    tenantId: string,
+    params: { staffId: string; date: string; slots: StaffScheduleSlot[] },
+  ): Promise<StaffScheduleChangePreview> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getScheduleCapableAdapter(
+      scopedTenantId,
+      'previewStaffScheduleDayChange',
+    );
+    return adapter.previewStaffScheduleDayChange({
+      tenantId: scopedTenantId,
+      ...params,
+      timezone: await this.tenantTimezone(scopedTenantId),
+    });
+  }
+
+  async getStaffScheduleDay(
+    tenantId: string,
+    params: { staffId: string; date: string },
+  ): Promise<StaffScheduleDay> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getScheduleCapableAdapter(
+      scopedTenantId,
+      'getStaffScheduleDay',
+    );
+    return adapter.getStaffScheduleDay({
+      tenantId: scopedTenantId,
+      ...params,
+    });
+  }
+
+  async applyStaffScheduleDayChange(
+    tenantId: string,
+    params: {
+      staffId: string;
+      date: string;
+      slots: StaffScheduleSlot[];
+      expectedRevision: string;
+    },
+  ): Promise<AppliedStaffScheduleDayChange> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getScheduleCapableAdapter(
+      scopedTenantId,
+      'applyStaffScheduleDayChange',
+    );
+    return adapter.applyStaffScheduleDayChange({
+      tenantId: scopedTenantId,
+      ...params,
+      timezone: await this.tenantTimezone(scopedTenantId),
+    });
+  }
+
   async createAppointment(
     tenantId: string,
     params: {
@@ -808,6 +864,26 @@ export class CrmService {
       });
     }
 
+    return adapter as CRMAdapter & Required<Pick<CRMAdapter, TMethod>>;
+  }
+
+  private async getScheduleCapableAdapter<
+    TMethod extends
+      | 'getStaffScheduleDay'
+      | 'previewStaffScheduleDayChange'
+      | 'applyStaffScheduleDayChange',
+  >(
+    tenantId: string,
+    method: TMethod,
+  ): Promise<CRMAdapter & Required<Pick<CRMAdapter, TMethod>>> {
+    await this.assertExternalSource(tenantId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (typeof adapter[method] !== 'function') {
+      throw new ConflictException({
+        message: 'CRM schedule operation is not available for this provider.',
+        error: { code: 'crm_schedule_update_not_supported' },
+      });
+    }
     return adapter as CRMAdapter & Required<Pick<CRMAdapter, TMethod>>;
   }
 

@@ -49,6 +49,42 @@ export interface AvailableSlot {
   branch_id?: string | null;
 }
 
+export interface StaffScheduleSlot {
+  from: string;
+  to: string;
+}
+
+export interface StaffScheduleDay {
+  staff_id: string;
+  date: string;
+  is_working: boolean;
+  slots: StaffScheduleSlot[];
+  revision: string;
+}
+
+export interface StaffScheduleChangePreview {
+  current: StaffScheduleDay;
+  proposed: StaffScheduleDay;
+  conflict_times: string[];
+}
+
+export interface ApplyStaffScheduleDayChangeParams {
+  tenantId: string;
+  staffId: string;
+  date: string;
+  slots: StaffScheduleSlot[];
+  expectedRevision: string;
+  timezone: string;
+}
+
+export interface AppliedStaffScheduleDayChange {
+  staff_id: string;
+  date: string;
+  is_working: boolean;
+  slots: StaffScheduleSlot[];
+  verified: boolean;
+}
+
 export interface CreateAppointmentParams {
   tenantId: string;
   clientId: string;
@@ -259,6 +295,21 @@ export interface CRMAdapter {
     serviceIds?: string[];
     branchId?: string;
   }): Promise<AvailableSlot[]>;
+  getStaffScheduleDay?(params: {
+    tenantId: string;
+    staffId: string;
+    date: string;
+  }): Promise<StaffScheduleDay>;
+  previewStaffScheduleDayChange?(params: {
+    tenantId: string;
+    staffId: string;
+    date: string;
+    slots: StaffScheduleSlot[];
+    timezone: string;
+  }): Promise<StaffScheduleChangePreview>;
+  applyStaffScheduleDayChange?(
+    params: ApplyStaffScheduleDayChangeParams,
+  ): Promise<AppliedStaffScheduleDayChange>;
   createAppointment(
     params: CreateAppointmentParams,
   ): Promise<CreatedAppointment>;

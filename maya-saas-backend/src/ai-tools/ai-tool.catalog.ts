@@ -24,6 +24,14 @@ const OWNER_AND_ADMIN_ROLES = [
   UserRole.TENANT_ADMIN,
   UserRole.ADMINISTRATOR,
 ] as const;
+const SCHEDULE_MANAGER_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+] as const;
 const ALL_INTERACTIVE_TENANT_ROLES = [
   ...CLIENT_ROLES,
   ...STAFF_ROLES,
@@ -318,6 +326,71 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'actor',
     idempotency: 'required',
     timeoutMs: 12_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'staff.schedule.update',
+    description:
+      'Apply one precomputed staff-day schedule after actor approval. Existing appointments are never moved or deleted.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: [
+        'staff_id',
+        'date',
+        'operation',
+        'current_revision',
+        'current_slots',
+        'slots',
+      ],
+      properties: {
+        staff_id: { type: 'string', minLength: 1, maxLength: 128 },
+        date: { type: 'string', format: 'date' },
+        operation: {
+          type: 'string',
+          enum: ['close_day', 'set_break', 'set_hours'],
+        },
+        current_revision: {
+          type: 'string',
+          minLength: 64,
+          maxLength: 64,
+        },
+        current_slots: {
+          type: 'array',
+          maxItems: 12,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['from', 'to'],
+            properties: {
+              from: { type: 'string', pattern: '^\\d{2}:\\d{2}$' },
+              to: { type: 'string', pattern: '^\\d{2}:\\d{2}$' },
+            },
+          },
+        },
+        slots: {
+          type: 'array',
+          maxItems: 12,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['from', 'to'],
+            properties: {
+              from: { type: 'string', pattern: '^\\d{2}:\\d{2}$' },
+              to: { type: 'string', pattern: '^\\d{2}:\\d{2}$' },
+            },
+          },
+        },
+      },
+    },
+    allowedRoles: SCHEDULE_MANAGER_ROLES,
+    allowedSurfaces: ['native'],
+    requiredFeatures: ['booking'],
+    riskTier: 'medium_write',
+    approvalPolicy: 'actor',
+    idempotency: 'required',
+    timeoutMs: 15_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },

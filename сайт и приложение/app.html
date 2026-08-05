@@ -20472,6 +20472,33 @@ function AOwnerTrial(props) {
   var ss = React.useState(null); var selectedPlanId = ss[0], setSelectedPlanId = ss[1];
   var bs = React.useState(false); var busy = bs[0], setBusy = bs[1];
   var ms = React.useState(''); var msg = ms[0], setMsg = ms[1];
+  var paidRef = React.useRef(false);
+  // 🔴 Оплата уходит во внешний браузер, и приложение о результате не узнаёт:
+  // человек платит, возвращается — а лист по-прежнему предлагает оплатить.
+  // Ловим возврат фокуса и спрашиваем сервер, чем всё кончилось.
+  React.useEffect(function () {
+    function recheck() {
+      if (!paidRef.current || document.hidden) return;
+      var af = window.__meSaasAuthedFetch;
+      if (!af) return;
+      af('/billing/subscription', {}).then(function (sub) {
+        if (!sub) return;
+        var active = String(sub.status || '').toLowerCase() === 'active';
+        var paidTill = sub.current_period_end;
+        if (active && paidTill) {
+          paidRef.current = false;
+          setMsg('Оплата прошла. Подписка активна.');
+          setTimeout(function () { if (window.__meSubClose) window.__meSubClose(); }, 1600);
+        }
+      }).catch(function () {});
+    }
+    document.addEventListener('visibilitychange', recheck);
+    window.addEventListener('focus', recheck);
+    return function () {
+      document.removeEventListener('visibilitychange', recheck);
+      window.removeEventListener('focus', recheck);
+    };
+  }, []);
   React.useEffect(function () {
     window.__meSubOpen = function (i) { setInfo(i || {}); setPlans(null); setSelectedPlanId(null); setMsg(''); setTimeout(function () { setVis(true); }, 30); };
     window.__meSubClose = function () { setVis(false); setTimeout(function () { setInfo(null); }, 320); };
@@ -20504,7 +20531,7 @@ function AOwnerTrial(props) {
       .then(function (r) { return r.json().catch(function () { return null; }).then(function (d) { if (!r.ok) { var m = d && ((d.error && d.error.message) || d.message); throw new Error(m || 'Не удалось создать оплату.'); } return d; }); })
       .then(function (d) {
         setBusy(false); var u = d && (d.confirmation_url || d.checkout_url || d.url || d.payment_url);
-        if (u) { try { if (window.__meExt) window.__meExt(u); else { var opened = window.open(u, '_blank', 'noopener'); if (!opened) window.location.href = u; } } catch (er) { window.location.href = u; } }
+        if (u) { paidRef.current = true; setMsg('Открываю оплату. Вернитесь в приложение — покажу результат.'); try { if (window.__meExt) window.__meExt(u); else { var opened = window.open(u, '_blank', 'noopener'); if (!opened) window.location.href = u; } } catch (er) { window.location.href = u; } }
         else setMsg('Сервер не вернул ссылку на оплату — попробуйте ещё раз.');
       })
       .catch(function (er) { setBusy(false); setMsg((er && er.message) || 'Не удалось открыть оплату — попробуйте ещё раз.'); });

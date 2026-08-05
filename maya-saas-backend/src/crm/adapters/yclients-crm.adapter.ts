@@ -1,7 +1,13 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import {
   AvailableSlot,
+  AppliedStaffScheduleDayChange,
+  ApplyStaffScheduleDayChangeParams,
   CancelledAppointment,
   ClientAppointmentsParams,
   ClientLoyaltySnapshot,
@@ -21,9 +27,18 @@ import {
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
+  StaffScheduleChangePreview,
+  StaffScheduleDay,
+  StaffScheduleSlot,
 } from '../crm-adapter.interface';
 import { localDateMinuteToUtc } from '../../internal-calendar/internal-calendar.utils';
 import { normalizePhoneE164 } from '../../common/phone.util';
+import {
+  normalizeScheduleSlots,
+  scheduleMinutesLabel,
+  scheduleSlotsContain,
+  staffScheduleRevision,
+} from '../staff-schedule.utils';
 
 interface YclientsSettings {
   companyId?: number | string;
@@ -250,7 +265,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
     if (Number.isFinite(offset) && offset >= -12 && offset <= 14) {
       const rounded = Math.trunc(offset);
       if (rounded === 0) return 'UTC';
-      return rounded > 0 ? `Etc/GMT-${rounded}` : `Etc/GMT+${Math.abs(rounded)}`;
+      return rounded > 0
+        ? `Etc/GMT-${rounded}`
+        : `Etc/GMT+${Math.abs(rounded)}`;
     }
 
     return null;
@@ -435,7 +452,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
     );
     const manualMinutes = Number(params.durationMinutes);
     const seanceLengthSeconds =
-      Number.isFinite(manualMinutes) && manualMinutes >= 5 && manualMinutes <= 720
+      Number.isFinite(manualMinutes) &&
+      manualMinutes >= 5 &&
+      manualMinutes <= 720
         ? Math.round(manualMinutes) * 60
         : selectedServices.reduce(
             (total, service) =>
@@ -450,7 +469,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
         amount: 1,
       })),
       client: {
-        phone: params.clientPhone ? this.normalizePhone(params.clientPhone) : '',
+        phone: params.clientPhone
+          ? this.normalizePhone(params.clientPhone)
+          : '',
         name: params.clientName || params.clientPhone || 'Клиент',
       },
       datetime: this.toYclientsDateTime(params.start),
@@ -1167,6 +1188,231 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
   }
 
+  async getStaffScheduleDay(params: {
+    tenantId: string;
+    staffId: string;
+    date: string;
+  }): Promise<StaffScheduleDay> {
+    void params.tenantId;
+    return this.readStaffScheduleDay(params.staffId, params.date);
+  }
+
+  async previewStaffScheduleDayChange(params: {
+    tenantId: string;
+    staffId: string;
+    date: string;
+    slots: StaffScheduleSlot[];
+    timezone: string;
+  }): Promise<StaffScheduleChangePreview> {
+    void params.tenantId;
+    const today = this.dateKeyInTimezone(
+      new Date().toISOString(),
+      params.timezone,
+    );
+    if (params.date < today) {
+      throw new BadRequestException({
+        message: 'График за прошедший день менять через MAYA нельзя.',
+        error: { code: 'staff_schedule_past_date' },
+      });
+    }
+    const proposedSlots = normalizeScheduleSlots(params.slots);
+    const current = await this.readStaffScheduleDay(
+      params.staffId,
+      params.date,
+    );
+    const records = await this.fetchRecords({
+      startDate: params.date,
+      endDate: params.date,
+      staffId: this.toNumericId(params.staffId, 'staffId'),
+    });
+    const conflictTimes = this.staffScheduleConflictTimes(
+      records,
+      params.date,
+      proposedSlots,
+      params.timezone,
+    );
+
+    return {
+      current,
+      proposed: this.staffScheduleDay(
+        params.staffId,
+        params.date,
+        proposedSlots,
+      ),
+      conflict_times: conflictTimes,
+    };
+  }
+
+  async applyStaffScheduleDayChange(
+    params: ApplyStaffScheduleDayChangeParams,
+  ): Promise<AppliedStaffScheduleDayChange> {
+    const preview = await this.previewStaffScheduleDayChange(params);
+    if (preview.current.revision !== params.expectedRevision) {
+      throw new ConflictException({
+        message: 'График уже изменился. Повторите команду.',
+        error: { code: 'staff_schedule_revision_conflict' },
+      });
+    }
+    if (preview.conflict_times.length > 0) {
+      throw new ConflictException({
+        message: 'Существующие записи не помещаются в новый график.',
+        error: {
+          code: 'staff_schedule_existing_appointments_conflict',
+          conflict_times: preview.conflict_times,
+        },
+      });
+    }
+
+    await this.writeStaffScheduleDay(
+      params.staffId,
+      params.date,
+      preview.proposed.slots,
+    );
+    const verified = await this.readStaffScheduleDay(
+      params.staffId,
+      params.date,
+    );
+
+    if (verified.revision !== preview.proposed.revision) {
+      try {
+        await this.writeStaffScheduleDay(
+          params.staffId,
+          params.date,
+          preview.current.slots,
+        );
+      } catch {
+        // The failed verification is reported below; recovery is best effort.
+      }
+      throw new ConflictException({
+        message: 'YClients не подтвердил новый график. Изменение откачено.',
+        error: { code: 'staff_schedule_update_unverified' },
+      });
+    }
+
+    return {
+      staff_id: verified.staff_id,
+      date: verified.date,
+      is_working: verified.is_working,
+      slots: verified.slots,
+      verified: true,
+    };
+  }
+
+  private async readStaffScheduleDay(
+    staffId: string,
+    dateKey: string,
+  ): Promise<StaffScheduleDay> {
+    const schedule = await this.fetchStaffScheduleStrict(staffId, dateKey);
+    const slots = normalizeScheduleSlots(
+      (schedule?.slots || [])
+        .map((slot) => ({
+          from: String(slot?.from || '').trim(),
+          to: String(slot?.to || '').trim(),
+        }))
+        .filter((slot) => slot.from && slot.to),
+    );
+    return this.staffScheduleDay(staffId, dateKey, slots);
+  }
+
+  private staffScheduleDay(
+    staffId: string,
+    date: string,
+    slots: StaffScheduleSlot[],
+  ): StaffScheduleDay {
+    const normalized = normalizeScheduleSlots(slots);
+    return {
+      staff_id: String(staffId),
+      date,
+      is_working: normalized.length > 0,
+      slots: normalized,
+      revision: staffScheduleRevision(staffId, date, normalized),
+    };
+  }
+
+  private async writeStaffScheduleDay(
+    staffId: string,
+    date: string,
+    slots: StaffScheduleSlot[],
+  ): Promise<void> {
+    const normalized = normalizeScheduleSlots(slots);
+    const numericStaffId = this.toNumericId(staffId, 'staffId');
+    const payload = normalized.length
+      ? {
+          schedules_to_set: [
+            { staff_id: numericStaffId, dates: [date], slots: normalized },
+          ],
+          schedules_to_delete: [],
+        }
+      : {
+          schedules_to_set: [],
+          schedules_to_delete: [{ staff_id: numericStaffId, dates: [date] }],
+        };
+    const response = await this.request<unknown>(
+      `company/${this.getCompanyId()}/staff/schedule`,
+      { method: 'PUT', body: JSON.stringify(payload) },
+    );
+    if (response.success === false) {
+      throw new Error('YClients did not accept the staff schedule update');
+    }
+  }
+
+  private staffScheduleConflictTimes(
+    records: YclientsRecordApiItem[],
+    date: string,
+    slots: StaffScheduleSlot[],
+    timezone: string,
+  ): string[] {
+    const conflicts = new Set<string>();
+    const now = new Date();
+    for (const record of records) {
+      if (
+        record.deleted ||
+        record.attendance === -1 ||
+        record.visit_attendance === -1
+      ) {
+        continue;
+      }
+      const timing = this.recordTiming(record, timezone);
+      if (timing.end.getTime() <= now.getTime()) {
+        continue;
+      }
+      if (
+        this.dateKeyInTimezone(timing.start.toISOString(), timezone) !== date
+      ) {
+        continue;
+      }
+      const fromMinutes = this.minuteInTimezone(timing.start, timezone);
+      const endDate = this.dateKeyInTimezone(
+        timing.end.toISOString(),
+        timezone,
+      );
+      const toMinutes = this.minuteInTimezone(timing.end, timezone);
+      if (
+        endDate !== date ||
+        !scheduleSlotsContain(slots, fromMinutes, toMinutes)
+      ) {
+        conflicts.add(scheduleMinutesLabel(fromMinutes));
+      }
+    }
+    return [...conflicts].sort();
+  }
+
+  private async fetchStaffScheduleStrict(
+    staffId: string,
+    dateKey: string,
+  ): Promise<YclientsScheduleApiItem | null> {
+    const numericId = this.toNumericId(staffId, 'staffId');
+    const response = await this.request<YclientsScheduleApiItem[]>(
+      `schedule/${this.getCompanyId()}/${numericId}/${dateKey}/${dateKey}`,
+    );
+    const rows = response.data || [];
+    return (
+      rows.find(
+        (row) => row && String(row.date || '').slice(0, 10) === dateKey,
+      ) ?? null
+    );
+  }
+
   /**
    * График смены мастера на конкретный день: schedule/{company}/{staff}/{from}/{to}.
    *
@@ -1179,13 +1425,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     dateKey: string,
   ): Promise<YclientsScheduleApiItem | null> {
     try {
-      const numericId = this.toNumericId(staffId, 'staffId');
-      const response = await this.request<YclientsScheduleApiItem[]>(
-        `schedule/${this.getCompanyId()}/${numericId}/${dateKey}/${dateKey}`,
-      );
-      const rows = response.data || [];
-
-      return rows.find((row) => row && !('error' in row)) ?? null;
+      return await this.fetchStaffScheduleStrict(staffId, dateKey);
     } catch {
       return null;
     }
@@ -1954,6 +2194,21 @@ export class YclientsCRMAdapter implements CRMAdapter {
       month: '2-digit',
       day: '2-digit',
     }).format(date);
+  }
+
+  private minuteInTimezone(value: Date, timezone: string): number {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(value);
+    const hour = Number(parts.find((part) => part.type === 'hour')?.value);
+    const minute = Number(parts.find((part) => part.type === 'minute')?.value);
+    if (!Number.isInteger(hour) || !Number.isInteger(minute)) {
+      throw new Error('Could not resolve CRM record time');
+    }
+    return hour * 60 + minute;
   }
 
   private async request<TData>(
