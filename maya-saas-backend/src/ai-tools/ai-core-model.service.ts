@@ -193,7 +193,8 @@ export class AiCoreModelService {
   constructor(private readonly configService: ConfigService) {}
 
   async decide(input: AiCoreModelInput): Promise<AiCoreModelDecision | null> {
-    const candidates = this.resolveCandidates();
+    const configuredProvider = this.configuredProvider(input);
+    const candidates = this.resolveCandidates(configuredProvider);
     if (candidates.length === 0) {
       return null;
     }
@@ -209,7 +210,7 @@ export class AiCoreModelService {
         this.logger.warn(
           `AI Core provider failed: ${provider}:${this.safeErrorName(error)}`,
         );
-        if (this.configuredProvider() !== 'auto') {
+        if (configuredProvider !== 'auto') {
           break;
         }
       }
@@ -470,8 +471,9 @@ export class AiCoreModelService {
     return [...new Set(value as string[])];
   }
 
-  private resolveCandidates(): AiCoreProvider[] {
-    const configured = this.configuredProvider();
+  private resolveCandidates(
+    configured: 'auto' | AiCoreProvider | 'safe',
+  ): AiCoreProvider[] {
     if (configured === 'safe') {
       return [];
     }
@@ -488,12 +490,19 @@ export class AiCoreModelService {
     return candidates;
   }
 
-  private configuredProvider(): 'auto' | 'deepseek' | 'openai' | 'safe' {
+  private configuredProvider(
+    input: AiCoreModelInput,
+  ): 'auto' | 'deepseek' | 'openai' | 'safe' {
+    const brainProvider = input.brain.active
+      ? this.configService.get<string>('MAYA_BRAIN_PROVIDER')?.trim()
+      : '';
     const provider =
+      brainProvider?.toLowerCase() ||
       this.configService
         .get<string>('AI_CORE_PROVIDER')
         ?.trim()
-        .toLowerCase() || 'auto';
+        .toLowerCase() ||
+      'auto';
     if (
       provider === 'auto' ||
       provider === 'deepseek' ||

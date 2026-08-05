@@ -117,6 +117,7 @@ Configuration:
 MAYA_BRAIN_V1_ENABLED="false"
 MAYA_BRAIN_V1_SURFACES="native"
 MAYA_BRAIN_V1_TENANT_IDS=""
+MAYA_BRAIN_PROVIDER="safe"
 AI_BRAIN_SESSION_TTL_HOURS="24"
 AI_BRAIN_MEMORY_RETENTION_DAYS="180"
 ```
@@ -137,6 +138,11 @@ The production PWA source is not modified by this slice.
 The tenant allowlist is mandatory and fails closed. An empty allowlist keeps
 Brain on the legacy path even when the global flag is enabled, so a native
 canary cannot silently expand to every tenant.
+
+`MAYA_BRAIN_PROVIDER` overrides `AI_CORE_PROVIDER` only for active Brain
+sessions. This allows a native canary to use `deepseek` or `openai` while the
+legacy web/PWA chat remains in `safe` mode. An empty value inherits the legacy
+provider; production canaries should set it explicitly.
 
 ## Retention
 
