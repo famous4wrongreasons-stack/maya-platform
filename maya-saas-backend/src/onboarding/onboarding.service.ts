@@ -316,9 +316,14 @@ export class OnboardingService {
       return;
     }
 
-    throw new ForbiddenException(
-      'Self-serve trial signup is disabled in this environment',
-    );
+    // Машиночитаемый код и человеческий текст: в это сообщение упирается ЧУЖОЙ
+    // салон, который дошёл до регистрации. Английская строка без кода не
+    // объясняла ему ничего и выглядела как поломка.
+    throw new ForbiddenException({
+      message:
+        'Регистрация новых салонов сейчас закрыта. Напишите нам — откроем доступ.',
+      error: { code: 'self_serve_signup_disabled' },
+    });
   }
 
   private generatePassword() {

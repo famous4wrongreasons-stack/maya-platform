@@ -661,7 +661,15 @@ window.__meReturnToLegacyWorkspace = function () {
     if (publicSlug) { try { localStorage.setItem('me_booking_tenant_slug', publicSlug); } catch (e) {} }
     mode = null;
     try { mode = localStorage.getItem('me_booking_backend'); } catch (e) {}
-    if ((srvBoot && srvBoot.enabled === true) || publicSlug || savedSlug) mode = 'saas-local';
+    // 🔴 Боевое приложение «Мужской Эстетики» живёт на своих доменах и должно
+    // остаться нетронутым. Любой ДРУГОЙ публичный хост — это платформа MAYA OS.
+    // Раньше на нейтральном хосте без метки салона SaaS не включался вовсе, и
+    // чужой владелец видел чужой бизнес: заголовок «Мужская Эстетика», её
+    // адрес и телефон. Для продажи это первый же и последний экран.
+    var LEGACY_HOSTS = ['malesthetic.pro', 'www.malesthetic.pro',
+      'xn--80ahdheogk5l.xn--p1ai', 'www.xn--80ahdheogk5l.xn--p1ai'];
+    var isLegacyHost = LEGACY_HOSTS.indexOf(String(location.hostname || '').toLowerCase()) >= 0;
+    if ((srvBoot && srvBoot.enabled === true) || publicSlug || savedSlug || !isLegacyHost) mode = 'saas-local';
     if (mode !== 'saas-local') return;
     apiBase = location.origin + '/api'; // same-origin по умолчанию — никогда не localhost
     if (srvBoot && typeof srvBoot.api === 'string' && /^https:\/\//.test(srvBoot.api) && !isLocalUrl(srvBoot.api)) apiBase = String(srvBoot.api).replace(/\/+$/, '');
@@ -5215,7 +5223,16 @@ function ALogin() {
     var privateLocal = host === 'localhost' || host === '127.0.0.1'
       || /^192\.168\./.test(host) || /^10\./.test(host)
       || /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-    var previewAllowed = window.__ME_MAYA_OS_PREVIEW === true || privateLocal;
+    // 🔴 Раньше регистрация открывалась ТОЛЬКО в отладочной сборке и на локальной
+    // сети: на публичном хосте и в любом релизном билде единственная кнопка входа
+    // для нового салона показывала «Скоро». То есть зарегистрироваться было
+    // физически нельзя. Теперь она работает везде, где включён SaaS-контур, а
+    // «Скоро» остаётся выключателем на стороне сервера (__ME_TENANT_BOOT.signup).
+    var srvSignup = null;
+    try { srvSignup = window.__ME_TENANT_BOOT && window.__ME_TENANT_BOOT.signup; } catch (eS) {}
+    var previewAllowed = srvSignup === false
+      ? false
+      : (srvSignup === true || window.__ME_MAYA_OS_PREVIEW === true || privateLocal || !!window.__ME_SAAS_CTX);
     if (!previewAllowed) {
       try {
         var capacitor = window.Capacitor;
@@ -8867,7 +8884,21 @@ function ABookFlow() {
   const BF_LOCAL_API_BASE_KEY = 'me_booking_api_base';
   const BF_LOCAL_TENANT_KEY = 'me_booking_tenant_slug';
   const BF_LOCAL_CLIENT_KEY = 'me_booking_saas_client';
-  const BF_LOCAL_DEFAULT_API_BASE = 'http://localhost:3000/api';
+  // 🔴 Адрес API по умолчанию. localhost годится только на машине разработчика:
+  // на публичном хосте запросы входа молча падали (смешанный контент / отказ в
+  // соединении), а человек видел «Не удалось». Контекст SaaS уже знает верный
+  // адрес — берём его, локальный оставляем лишь как крайний случай.
+  const BF_LOCAL_DEFAULT_API_BASE = (function () {
+    try {
+      var ctx = window.__ME_SAAS_CTX;
+      if (ctx && ctx.api) return String(ctx.api).replace(/\/+$/, '');
+      if (/^https?:$/.test(location.protocol) && location.hostname
+          && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        return location.origin + '/api';
+      }
+    } catch (e) {}
+    return 'http://localhost:3000/api';
+  })();
   const BF_LOCAL_DEFAULT_TENANT = 'maya-os';
   const BF_MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
   const BF_MONTH = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
