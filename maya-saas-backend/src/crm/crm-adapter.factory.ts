@@ -35,11 +35,14 @@ export class CrmAdapterFactory implements OnModuleInit {
   create(provider: CrmProvider, config: CrmAdapterConfig): CRMAdapter {
     switch (provider) {
       case CrmProvider.YCLIENTS:
+        return new YclientsCRMAdapter({
+          ...config,
+          baseUrl:
+            config.baseUrl ||
+            process.env.YCLIENTS_BASE_URL ||
+            'https://api.yclients.com/api/v1',
+        });
       case CrmProvider.ALTEGIO:
-        // 🔴 Altegio — тот же продукт, что YClients, но ДРУГОЙ хост API.
-        // Раньше сюда отдавался адаптер с адресом api.yclients.com, и токен
-        // владельца Altegio уходил в чужой сервис: подключение отвечало
-        // «CRM отклонила токен», а причина была не в токене.
         return new YclientsCRMAdapter({
           ...config,
           baseUrl:
