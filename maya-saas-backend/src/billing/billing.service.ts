@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 
-import { TenantStatus } from '../common/domain.enums';
+import { TenantStatus, UserRole } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -128,11 +128,11 @@ export class BillingService {
           capture: true,
           save_payment_method: true,
           description: this.buildPaymentDescription(tenant.name, plan.name),
-          ...this.buildReceipt(
-            tenant,
+          ...(await this.buildReceipt(
+            scopedTenantId,
             plan.name,
             amountKopecks,
-          ),
+          )),
           metadata: {
             tenant_id: tenant.id,
             billing_payment_id: payment.id,
@@ -784,6 +784,35 @@ export class BillingService {
   }
 
   /**
+   * Кому выписывать чек.
+   *
+   * 🔴 У бизнеса нет полей почты и телефона вовсе — контакт есть только у
+   * людей. Берём владельца: он и платит. Без контакта чек не примут, а без
+   * чека магазин, настроенный на фискализацию через API, отклонит платёж.
+   */
+  private async resolveReceiptCustomer(
+    tenantId: string,
+  ): Promise<{ email?: string | null; phone?: string | null }> {
+    const owner = await this.prisma.user.findFirst({
+      where: {
+        tenantId,
+        role: {
+          in: [
+            UserRole.TENANT_OWNER,
+            UserRole.BUSINESS_OWNER,
+            UserRole.TENANT_ADMIN,
+            UserRole.ADMINISTRATOR,
+          ],
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { email: true, phone: true },
+    });
+
+    return { email: owner?.email ?? null, phone: owner?.phone ?? null };
+  }
+
+  /**
    * Чек по 54-ФЗ.
    *
    * 🔴 Если магазин в ЮKassa настроен на формирование чеков через API, платёж
@@ -793,11 +822,11 @@ export class BillingService {
    *
    * Контакт покупателя обязателен: без email или телефона чек не примут.
    */
-  private buildReceipt(
-    tenant: { email?: string | null; phone?: string | null; name?: string | null },
+  private async buildReceipt(
+    tenantId: string,
     planName: string,
     amountKopecks: number,
-  ): Record<string, unknown> {
+  ): Promise<Record<string, unknown>> {
     const enabled =
       String(this.configService.get<string>('YOOKASSA_SEND_RECEIPT') ?? '')
         .trim()
@@ -807,8 +836,9 @@ export class BillingService {
       return {};
     }
 
-    const email = String(tenant.email || '').trim();
-    const phone = String(tenant.phone || '').trim();
+    const customer = await this.resolveReceiptCustomer(tenantId);
+    const email = String(customer.email || '').trim();
+    const phone = String(customer.phone || '').trim();
 
     if (!email && !phone) {
       this.logger.warn(

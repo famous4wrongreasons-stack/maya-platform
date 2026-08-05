@@ -123,6 +123,50 @@ describe('AiCoreModelService', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('uses a Brain-only provider while the legacy chat remains safe', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockResolvedValue({
+        choices: [
+          {
+            finish_reason: 'stop',
+            message: {
+              content: JSON.stringify({
+                reply: 'Здравствуйте! Чем помочь?',
+                citation_ids: [],
+                tool_call: null,
+              }),
+            },
+          },
+        ],
+      }),
+    } as unknown as Response);
+    const service = createService({
+      AI_CORE_PROVIDER: 'safe',
+      MAYA_BRAIN_PROVIDER: 'deepseek',
+      DEEPSEEK_API_KEY: 'server-only-deepseek-key',
+    });
+    const generalInput = {
+      ...input,
+      tools: [],
+      requiredToolNames: [],
+      allowToolCall: false,
+    };
+
+    await expect(service.decide(generalInput)).resolves.toMatchObject({
+      provider: 'deepseek',
+      reply: 'Здравствуйте! Чем помочь?',
+    });
+    await expect(
+      service.decide({
+        ...generalInput,
+        brain: { ...generalInput.brain, active: false },
+      }),
+    ).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the OpenAI structured-output adapter without storing responses', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
