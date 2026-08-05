@@ -438,9 +438,56 @@ export class CrmService {
     };
   }
 
+  /**
+   * Часовой пояс салона — из его же CRM.
+   *
+   * 🔴 Пояс тенанта задавался только при создании и оставался московским. Для
+   * салона в Новосибирске или Калининграде это означало пустую сетку
+   * расписания: границы дня уезжали мимо рабочих часов, и владелец видел
+   * «нет записей» при полном дне. CRM — источник истины про локаль салона.
+   */
+  private async syncTenantTimezoneFromCrm(
+    tenantId: string,
+    profile: CrmCompanyProfile | null,
+  ): Promise<void> {
+    const timezone = profile?.timezone?.trim();
+
+    if (!timezone) {
+      return;
+    }
+
+    // Проверяем, что зона вообще существует: подсунутая ерунда сломала бы
+    // форматирование дат на всех экранах разом.
+    try {
+      new Intl.DateTimeFormat('ru-RU', { timeZone: timezone });
+    } catch {
+      this.logger.warn(`CRM returned an unknown timezone: ${timezone}`);
+      return;
+    }
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+
+    if (tenant?.defaultTimezone === timezone) {
+      return;
+    }
+
+    await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { defaultTimezone: timezone },
+    });
+    this.logger.log(`Tenant timezone set from CRM: ${timezone}`);
+  }
+
   async activateIntegration(tenantId: string) {
     const preview = await this.getImportPreview(tenantId);
     const connection = await this.activateVerifiedIntegration(tenantId);
+    await this.syncTenantTimezoneFromCrm(
+      this.tenantContext.assertTenantId(tenantId),
+      preview.preview.company,
+    );
 
     return {
       connection,

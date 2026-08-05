@@ -76,14 +76,18 @@ export const CRM_PROVIDER_CATALOG: Record<CrmProvider, CrmProviderCapability> =
     [CrmProvider.ALTEGIO]: {
       provider: CrmProvider.ALTEGIO,
       name: 'Altegio',
+      // Адаптер общий с YClients (это один продукт), адрес API свой. Но живьём
+      // ни один салон на Altegio ещё не подключался, поэтому «проверено в бою»
+      // не заявляем: обещание, которое некому подтвердить, дороже молчания.
       implementationStatus: 'ready',
       connectable: true,
-      productionReady: true,
+      productionReady: false,
       bookingMode: 'live_capable',
       requirements: { apiToken: true, companyId: true },
       operations: COMPLETE_OPERATIONS,
       limitations: [
         'Нужен user token владельца. Перед запуском MAYA проверит доступные филиалы.',
+        'Подключение Altegio ещё не проверялось на живом салоне — напишите нам, поможем на первом запуске.',
       ],
     },
     [CrmProvider.MOCK]: {

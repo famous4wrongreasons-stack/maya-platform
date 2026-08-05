@@ -52,7 +52,10 @@ interface YclientsCompanyApiItem {
   city?: string;
   active?: boolean;
   logo?: string;
-  timezone?: string;
+  /** Числовое смещение от UTC (например 7 для Новосибирска). */
+  timezone?: string | number;
+  /** Имя зоны IANA, если YClients его отдал. */
+  timezone_name?: string;
   schedule?: string;
 }
 
@@ -224,6 +227,35 @@ export class YclientsCRMAdapter implements CRMAdapter {
       });
   }
 
+  /**
+   * Часовой пояс салона из CRM.
+   *
+   * 🔴 Раньше пояс тенанта никогда не брался из CRM и оставался московским.
+   * Для салона в Новосибирске или Калининграде это означало пустую сетку
+   * расписания: границы дня уезжали мимо рабочих часов.
+   *
+   * YClients отдаёт либо имя зоны, либо числовое смещение. Имя предпочтительнее
+   * (оно знает про переходы), смещение переводим в Etc/GMT — знак там обратный,
+   * это не опечатка, а стандарт POSIX.
+   */
+  private toIanaTimezone(company: YclientsCompanyApiItem): string | null {
+    const name = String(company.timezone_name || '').trim();
+
+    if (/^[A-Za-z]+\/[A-Za-z_+\-/]+$/.test(name)) {
+      return name;
+    }
+
+    const offset = Number(company.timezone);
+
+    if (Number.isFinite(offset) && offset >= -12 && offset <= 14) {
+      const rounded = Math.trunc(offset);
+      if (rounded === 0) return 'UTC';
+      return rounded > 0 ? `Etc/GMT-${rounded}` : `Etc/GMT+${Math.abs(rounded)}`;
+    }
+
+    return null;
+  }
+
   async getCompanyProfile(): Promise<CrmCompanyProfile | null> {
     const companyId = this.getCompanyId();
 
@@ -243,7 +275,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
             `Филиал ${id}`,
           address: company.address?.trim() || company.city?.trim() || null,
           logo_url: company.logo?.trim() || null,
-          timezone: company.timezone?.trim() || null,
+          timezone: this.toIanaTimezone(company),
           schedule: company.schedule?.trim() || null,
         };
       }

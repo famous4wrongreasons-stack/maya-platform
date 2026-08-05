@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
 import { CrmProvider } from '../common/domain.enums';
 import { DikidiCRMAdapter } from './adapters/dikidi-crm.adapter';
@@ -9,12 +9,44 @@ import { YclientsCRMAdapter } from './adapters/yclients-crm.adapter';
 import { CRMAdapter, CrmAdapterConfig } from './crm-adapter.interface';
 
 @Injectable()
-export class CrmAdapterFactory {
+export class CrmAdapterFactory implements OnModuleInit {
+  private readonly logger = new Logger(CrmAdapterFactory.name);
+
+  /**
+   * 🔴 Партнёрский токен проверяем при СТАРТЕ, а не в момент подключения.
+   *
+   * Без него служба поднимается «здоровой», а каждое подключение CRM падает с
+   * невнятным «подключение временно не настроено». Салон уверен, что дело в
+   * его токене, и уходит. Приложение при этом обязано подниматься: тенанты на
+   * внутреннем календаре живут и без CRM — поэтому громко предупреждаем, а не
+   * отказываемся стартовать.
+   */
+  onModuleInit(): void {
+    if (String(process.env.YCLIENTS_PARTNER_TOKEN || '').trim()) {
+      return;
+    }
+
+    this.logger.error(
+      'YCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет ' +
+        'отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.',
+    );
+  }
+
   create(provider: CrmProvider, config: CrmAdapterConfig): CRMAdapter {
     switch (provider) {
       case CrmProvider.YCLIENTS:
       case CrmProvider.ALTEGIO:
-        return new YclientsCRMAdapter(config);
+        // 🔴 Altegio — тот же продукт, что YClients, но ДРУГОЙ хост API.
+        // Раньше сюда отдавался адаптер с адресом api.yclients.com, и токен
+        // владельца Altegio уходил в чужой сервис: подключение отвечало
+        // «CRM отклонила токен», а причина была не в токене.
+        return new YclientsCRMAdapter({
+          ...config,
+          baseUrl:
+            config.baseUrl ||
+            process.env.ALTEGIO_BASE_URL ||
+            'https://api.alteg.io/api/v1',
+        });
       case CrmProvider.MOCK:
         return new MockCRMAdapter(config);
       case CrmProvider.DIKIDI:
