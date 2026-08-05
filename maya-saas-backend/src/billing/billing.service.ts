@@ -126,7 +126,7 @@ export class BillingService {
             return_url: returnUrl,
           },
           capture: true,
-          save_payment_method: true,
+          save_payment_method: this.isRecurringEnabled(),
           description: this.buildPaymentDescription(tenant.name, plan.name),
           ...(await this.buildReceipt(
             scopedTenantId,
@@ -412,7 +412,7 @@ export class BillingService {
       return 'skipped';
     }
 
-    if (tenant.billingMethodId && tenant.planId) {
+    if (tenant.billingMethodId && tenant.planId && this.isRecurringEnabled()) {
       await this.chargeTenant(tenantId);
       return 'charged';
     }
@@ -790,6 +790,27 @@ export class BillingService {
    * людей. Берём владельца: он и платит. Без контакта чек не примут, а без
    * чека магазин, настроенный на фискализацию через API, отклонит платёж.
    */
+  /**
+   * Разрешены ли магазину рекуррентные платежи (сохранение карты).
+   *
+   * 🔴 ЮKassa отвечает 403 «This store can't make recurring payments», если
+   * магазину такое право не выдано, и платёж не проходит ВООБЩЕ. Лучше дать
+   * салону заплатить вручную, чем отказать совсем: подписка продлится, просто
+   * без автосписания. Включается обратно одной переменной, когда ЮKassa
+   * подключит рекуррентные.
+   */
+  private isRecurringEnabled(): boolean {
+    const raw = this.configService.get<string>('YOOKASSA_RECURRING_ENABLED');
+
+    if (raw === undefined || raw === null || String(raw).trim() === '') {
+      return true;
+    }
+
+    return !['false', '0', 'off', 'no'].includes(
+      String(raw).trim().toLowerCase(),
+    );
+  }
+
   private async resolveReceiptCustomer(
     tenantId: string,
   ): Promise<{ email?: string | null; phone?: string | null }> {

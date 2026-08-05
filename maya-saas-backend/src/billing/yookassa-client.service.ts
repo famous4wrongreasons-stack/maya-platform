@@ -112,10 +112,23 @@ export class YooKassaClientService {
         `YooKassa отказал: HTTP ${response.status} ${JSON.stringify(providerBody).slice(0, 400)}`,
       );
 
+      // Понятный текст вместо общего: салон должен видеть, ЧТО делать.
+      // «Магазину не разрешены рекуррентные платежи» — это заявка в ЮKassa,
+      // а не поломка у нас, и человек не должен догадываться об этом сам.
+      const description = String(
+        (providerBody as { description?: unknown })?.description ?? '',
+      );
+      const recurringForbidden =
+        response.status === 403 && /recurring/i.test(description);
+
       throw new BadGatewayException(
         this.buildYooKassaError(
-          'billing_provider_error',
-          'YooKassa rejected the billing request.',
+          recurringForbidden
+            ? 'billing_recurring_not_allowed'
+            : 'billing_provider_error',
+          recurringForbidden
+            ? 'Магазину в ЮKassa не разрешены автосписания. Напишите менеджеру ЮKassa, чтобы подключить рекуррентные платежи, — или отключите автопродление в настройках MAYA.'
+            : 'YooKassa rejected the billing request.',
           { status: response.status, body: providerBody },
         ),
       );
@@ -173,7 +186,10 @@ export class YooKassaClientService {
   }
 
   private buildYooKassaError(
-    code: 'billing_provider_error' | 'billing_provider_unavailable',
+    code:
+      | 'billing_provider_error'
+      | 'billing_provider_unavailable'
+      | 'billing_recurring_not_allowed',
     message: string,
     extra?: Record<string, unknown>,
   ) {
