@@ -214,7 +214,12 @@ export class MayaBrainKnowledgeService {
     return scored
       .sort((left, right) => right.score - left.score)
       .slice(0, 4)
-      .map(({ score: _score, ...item }) => item);
+      .map((item) => ({
+        citationId: item.citationId,
+        sourceId: item.sourceId,
+        title: item.title,
+        excerpt: item.excerpt,
+      }));
   }
 
   private assertSafe(value: string): void {
@@ -269,7 +274,12 @@ export class MayaBrainKnowledgeService {
   private tokens(value: string): string[] {
     return [
       ...new Set(
-        (value.toLowerCase().replace(/ё/g, 'е').match(/[a-zа-я0-9]{3,}/g) ?? [])
+        (
+          value
+            .toLowerCase()
+            .replace(/ё/g, 'е')
+            .match(/[a-zа-я0-9]{3,}/g) ?? []
+        )
           .filter((token) => !STOP_WORDS.has(token))
           .slice(0, 24),
       ),
@@ -286,7 +296,10 @@ export class MayaBrainKnowledgeService {
   }
 
   private clean(value: string): string {
-    return value.replace(/\r\n/g, '\n').replace(/[\t ]+\n/g, '\n').trim();
+    return value
+      .replace(/\r\n/g, '\n')
+      .replace(/[\t ]+\n/g, '\n')
+      .trim();
   }
 
   private hash(value: string): string {

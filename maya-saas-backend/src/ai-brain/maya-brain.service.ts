@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -35,12 +36,23 @@ export class MayaBrainService {
     const tenantId = this.requireTenant(user);
     const text = this.latestUserText(messages);
     const route = this.router.route(user.role, text);
+    const prompt = this.prompts.resolve(route.profile);
+    if (!this.enabled(dto.surface, tenantId)) {
+      return {
+        ...route,
+        active: false,
+        sessionId: `disabled-${dto.requestId}`,
+        promptVersion: 'legacy',
+        profileInstructions: '',
+        preferences: [],
+        knowledge: [],
+      };
+    }
     await this.memory.captureExplicitPreferences(user, text);
     const preferences = await this.memory.list(user);
     const knowledge = route.knowledgeRequired
       ? await this.knowledge.search(user, text)
       : [];
-    const prompt = this.prompts.resolve(route.profile);
     const key = dto.brainSessionId ?? `${user.sessionId}:${dto.surface}`;
     const sessionKeyHash = createHash('sha256')
       .update(`${tenantId}\0${user.userId}\0${key}`)
@@ -74,7 +86,7 @@ export class MayaBrainService {
         surface: dto.surface,
         profile: route.profile,
         intent: route.intent,
-        planJson: plan,
+        planJson: this.planJson(plan),
         lastRequestId: dto.requestId,
         turnCount: 1,
         expiresAt: this.sessionExpiry(),
@@ -84,7 +96,7 @@ export class MayaBrainService {
         profile: route.profile,
         intent: route.intent,
         status: 'active',
-        planJson: plan,
+        planJson: this.planJson(plan),
         lastRequestId: dto.requestId,
         turnCount: { increment: 1 },
         expiresAt: this.sessionExpiry(),
@@ -93,6 +105,7 @@ export class MayaBrainService {
     });
     return {
       ...route,
+      active: true,
       plan,
       sessionId: session.id,
       promptVersion: prompt.version,
@@ -111,6 +124,9 @@ export class MayaBrainService {
       citedIds: string[];
     },
   ): Promise<MayaBrainPlan> {
+    if (!context.active) {
+      return context.plan;
+    }
     const terminal =
       context.intent === 'general' ||
       context.intent === 'support' ||
@@ -131,21 +147,27 @@ export class MayaBrainService {
       steps: context.plan.steps.map((step, index) => ({
         ...step,
         status:
-          status === 'completed' ||
-          (status === 'awaiting_approval' && index < context.plan.steps.length)
+          status === 'completed'
             ? 'completed'
-            : step.status,
+            : status === 'blocked'
+              ? index === context.plan.steps.length - 1
+                ? 'blocked'
+                : step.status
+              : status === 'awaiting_approval'
+                ? index === context.plan.steps.length - 1
+                  ? 'ready'
+                  : 'completed'
+                : step.status,
       })),
     };
     await this.prisma.aiBrainSession.updateMany({
       where: { id: context.sessionId },
       data: {
         status,
-        planJson: {
-          ...plan,
+        planJson: this.planJson(plan, {
           last_tools: [...new Set(options.toolNames)].slice(0, 8),
           cited_source_count: options.citedIds.length,
-        },
+        }),
       },
     });
     return plan;
@@ -172,7 +194,12 @@ export class MayaBrainService {
     const record = value as Record<string, unknown>;
     const steps = Array.isArray(record.steps) ? record.steps : null;
     if (!steps) return fallback;
-    const allowedStatuses = new Set(['pending', 'ready', 'completed', 'blocked']);
+    const allowedStatuses = new Set([
+      'pending',
+      'ready',
+      'completed',
+      'blocked',
+    ]);
     const restored = steps
       .map((item) => {
         if (item === null || typeof item !== 'object' || Array.isArray(item)) {
@@ -197,11 +224,27 @@ export class MayaBrainService {
       : fallback;
   }
 
+  private planJson(
+    plan: MayaBrainPlan,
+    extra: Record<string, Prisma.InputJsonValue> = {},
+  ): Prisma.InputJsonObject {
+    return {
+      status: plan.status,
+      steps: plan.steps.map((step) => ({
+        key: step.key,
+        status: step.status,
+      })),
+      ...extra,
+    };
+  }
+
   private latestUserText(messages: AiCoreMessage[]): string {
-    return [...messages]
-      .reverse()
-      .find((message) => message.role === 'user')
-      ?.content.trim() ?? '';
+    return (
+      [...messages]
+        .reverse()
+        .find((message) => message.role === 'user')
+        ?.content.trim() ?? ''
+    );
   }
 
   private sessionExpiry(): Date {
@@ -211,6 +254,46 @@ export class MayaBrainService {
       throw new Error('ai_brain_session_ttl_invalid');
     }
     return new Date(Date.now() + hours * 60 * 60 * 1_000);
+  }
+
+  private enabled(
+    surface: AiCoreChatDto['surface'],
+    tenantId: string,
+  ): boolean {
+    const enabled =
+      this.configService
+        .get<string>('MAYA_BRAIN_V1_ENABLED')
+        ?.trim()
+        .toLowerCase() === 'true';
+    if (!enabled) return false;
+    const configured =
+      this.configService.get<string>('MAYA_BRAIN_V1_SURFACES')?.trim() ||
+      'native';
+    const surfaces = new Set(
+      configured
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean),
+    );
+    if (
+      [...surfaces].some(
+        (item) => !['native', 'web', 'telegram', 'voice'].includes(item),
+      )
+    ) {
+      throw new Error('maya_brain_surfaces_invalid');
+    }
+    if (!surfaces.has(surface)) return false;
+    const configuredTenants = this.configService
+      .get<string>('MAYA_BRAIN_V1_TENANT_IDS')
+      ?.trim();
+    if (!configuredTenants) return false;
+    const tenants = new Set(
+      configuredTenants
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+    );
+    return tenants.has(tenantId);
   }
 
   private requireTenant(user: AuthenticatedUser): string {

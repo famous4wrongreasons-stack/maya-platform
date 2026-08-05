@@ -5,6 +5,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
+import { MayaBrainService } from '../ai-brain/maya-brain.service';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
@@ -70,7 +71,10 @@ describe('AiCoreService', () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(null);
 
-    const result = await mocks.service.chat(user, dto);
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Привет' }],
+    });
 
     expect(result.source).toBe('safe_fallback');
     expect(result.action).toBeNull();
@@ -79,6 +83,51 @@ describe('AiCoreService', () => {
       tenantId: 'tenant-a',
       identity: 'owner-user',
     });
+    expect(mocks.brain.recordOutcome).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ blocked: false }),
+    );
+  });
+
+  it('does not let an active Brain invent a procedural answer without a source', async () => {
+    const mocks = createService();
+    mocks.brain.prepare.mockResolvedValue({
+      active: true,
+      sessionId: 'brain-session-knowledge',
+      persona: 'director',
+      profile: 'maya_os',
+      intent: 'knowledge',
+      knowledgeRequired: true,
+      plan: {
+        status: 'active',
+        steps: [
+          { key: 'retrieve_sources', status: 'pending' },
+          { key: 'answer_with_citations', status: 'pending' },
+        ],
+      },
+      promptVersion: 'maya-brain-test',
+      profileInstructions: 'Use only retrieved knowledge.',
+      preferences: [],
+      knowledge: [],
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Как правильно закрыть смену?' }],
+    });
+
+    expect(result).toMatchObject({
+      source: 'safe_fallback',
+      brain: { active: true, intent: 'knowledge' },
+    });
+    expect(result.reply).toContain('Не нашла подтверждённого ответа');
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.listTools).not.toHaveBeenCalled();
+    expect(mocks.brain.recordOutcome).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ blocked: true }),
+    );
   });
 
   it('redacts PII, executes an allowed read tool and formats the reply deterministically', async () => {
@@ -861,6 +910,7 @@ describe('AiCoreService', () => {
   ): AiCoreModelDecision {
     return {
       ...value,
+      citationIds: [],
       provider: 'deepseek',
       model: 'test-model',
       usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 },
@@ -922,6 +972,35 @@ describe('AiCoreService', () => {
     const staffScheduleCommand = {
       tryHandle: jest.fn().mockResolvedValue(null),
     };
+    const brainContext = {
+      active: true,
+      sessionId: 'brain-session-a',
+      persona: 'director' as const,
+      profile: 'maya_os' as const,
+      intent: 'general' as const,
+      knowledgeRequired: false,
+      plan: {
+        status: 'active' as const,
+        steps: [{ key: 'respond', status: 'pending' as const }],
+      },
+      promptVersion: 'maya-brain-test',
+      profileInstructions: 'Use verified tools.',
+      preferences: [],
+      knowledge: [],
+    };
+    const brain = {
+      prepare: jest.fn((actor: AuthenticatedUser) =>
+        Promise.resolve({
+          ...brainContext,
+          persona:
+            actor.role === UserRole.CLIENT || actor.role === UserRole.CUSTOMER
+              ? ('admin' as const)
+              : ('director' as const),
+        }),
+      ),
+      citations: jest.fn().mockReturnValue([]),
+      recordOutcome: jest.fn().mockResolvedValue(brainContext.plan),
+    };
     const service = new AiCoreService(
       config as unknown as ConfigService,
       tenantContext as unknown as TenantContextService,
@@ -931,6 +1010,7 @@ describe('AiCoreService', () => {
       auditLog as unknown as AuditLogService,
       dashboardPreferences as unknown as DashboardPreferencesService,
       staffScheduleCommand as unknown as StaffScheduleCommandService,
+      brain as unknown as MayaBrainService,
     );
     return {
       auditLog,
@@ -940,6 +1020,7 @@ describe('AiCoreService', () => {
       runtime,
       service,
       staffScheduleCommand,
+      brain,
     };
   }
 });

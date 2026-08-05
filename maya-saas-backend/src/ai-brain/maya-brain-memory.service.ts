@@ -162,7 +162,11 @@ export class MayaBrainMemoryService {
     if (/(отвечай|пиши|говори).{0,16}(?:по-?русски|на\s+русском)/i.test(text)) {
       result.set('language', 'ru');
     }
-    if (/(отвечай|пиши|говори).{0,16}(?:по-?английски|на\s+английском)/i.test(text)) {
+    if (
+      /(отвечай|пиши|говори).{0,16}(?:по-?английски|на\s+английском)/i.test(
+        text,
+      )
+    ) {
       result.set('language', 'en');
     }
     return [...result].map(([key, value]) => ({ key, value }));
@@ -175,7 +179,9 @@ export class MayaBrainMemoryService {
   }
 
   private retentionDays(): number {
-    const raw = this.configService.get<string>('AI_BRAIN_MEMORY_RETENTION_DAYS');
+    const raw = this.configService.get<string>(
+      'AI_BRAIN_MEMORY_RETENTION_DAYS',
+    );
     const value = raw ? Number(raw) : 180;
     if (!Number.isInteger(value) || value < 7 || value > 365) {
       throw new Error('ai_brain_memory_retention_invalid');

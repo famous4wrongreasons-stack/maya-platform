@@ -74,5 +74,10 @@ and tools before any model request. Provider keys never reach a channel.
 7. Pending cutover work: retire duplicated prompt-side business logic only after
    parity and canary tests.
 
+Maya Brain v1 now adds an optional routing, safe-memory, tenant-knowledge,
+versioned-prompt and structured-plan layer over this core. It is disabled by
+default and can be canaried on `native` while the legacy web/PWA model contract
+remains unchanged. See [Maya Brain v1](maya-brain-v1.md).
+
 Operational details and exact endpoints are in
 [AI Tool Runtime Runbook](ai-tool-runtime-runbook.md).

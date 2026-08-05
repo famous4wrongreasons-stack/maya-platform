@@ -184,12 +184,32 @@ async function main(): Promise<void> {
         take: options.batchSize,
       })
     ).map((row) => row.id);
+    const brainSessionIds = (
+      await prisma.aiBrainSession.findMany({
+        where: { expiresAt: { lte: now } },
+        select: { id: true },
+        orderBy: { expiresAt: 'asc' },
+        take: options.batchSize,
+      })
+    ).map((row) => row.id);
+    const memoryFactIds = (
+      await prisma.aiMemoryFact.findMany({
+        where: {
+          OR: [{ expiresAt: { lte: now } }, { deletedAt: { not: null } }],
+        },
+        select: { id: true },
+        orderBy: { expiresAt: 'asc' },
+        take: options.batchSize,
+      })
+    ).map((row) => row.id);
     const candidates = {
       expired_pending_approvals: expiredPending,
       stale_approvals: staleApprovals,
       stale_executions: staleExecutions,
       retained_executions_selected: executionIds.length,
       retained_approvals_selected: approvalIds.length,
+      expired_brain_sessions_selected: brainSessionIds.length,
+      expired_or_forgotten_memory_selected: memoryFactIds.length,
     };
 
     if (options.dryRun) {
@@ -237,6 +257,19 @@ async function main(): Promise<void> {
           where: { id: { in: approvalIds }, execution: null },
         })
       : { count: 0 };
+    const deletedBrainSessions = brainSessionIds.length
+      ? await prisma.aiBrainSession.deleteMany({
+          where: { id: { in: brainSessionIds }, expiresAt: { lte: now } },
+        })
+      : { count: 0 };
+    const deletedMemoryFacts = memoryFactIds.length
+      ? await prisma.aiMemoryFact.deleteMany({
+          where: {
+            id: { in: memoryFactIds },
+            OR: [{ expiresAt: { lte: now } }, { deletedAt: { not: null } }],
+          },
+        })
+      : { count: 0 };
 
     process.stdout.write(
       JSON.stringify(
@@ -249,6 +282,8 @@ async function main(): Promise<void> {
             stale_executions: staleExecutionResult.count,
             deleted_executions: deletedExecutions.count,
             deleted_approvals: deletedApprovals.count,
+            deleted_brain_sessions: deletedBrainSessions.count,
+            deleted_memory_facts: deletedMemoryFacts.count,
           },
         },
         null,

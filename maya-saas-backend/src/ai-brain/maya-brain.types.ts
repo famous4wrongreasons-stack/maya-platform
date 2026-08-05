@@ -54,6 +54,7 @@ export interface MayaBrainRoute {
 }
 
 export interface MayaBrainContext extends MayaBrainRoute {
+  active: boolean;
   sessionId: string;
   promptVersion: string;
   profileInstructions: string;

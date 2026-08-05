@@ -19,11 +19,12 @@ import {
 } from '../dashboard-preferences/assistant-capabilities.constants';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { MayaBrainService } from '../ai-brain/maya-brain.service';
+import type { MayaBrainContext } from '../ai-brain/maya-brain.types';
 import { AiCoreModelService } from './ai-core-model.service';
 import type {
   AiCoreMessage,
   AiCoreModelDecision,
-  AiCorePersona,
   AiCoreToolDescriptor,
   AiCoreToolResult,
 } from './ai-core.types';
@@ -141,6 +142,13 @@ type GroundingReport = {
   evidence_tools: string[];
 };
 
+type AiCoreCompletion = {
+  reply: string;
+  source: 'deepseek' | 'openai' | 'safe_fallback';
+  action: Record<string, unknown> | null;
+  grounding?: GroundingReport;
+};
+
 const GROUNDING_FACT_PATTERN =
   /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел[а-яёa-z]*|за\s+месяц[а-яёa-z]*|сегодня|завтра)/i;
 const GROUNDING_ANALYTICS_PATTERN =
@@ -176,6 +184,7 @@ export class AiCoreService {
     private readonly auditLog: AuditLogService,
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
+    private readonly brain: MayaBrainService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -184,6 +193,8 @@ export class AiCoreService {
       tenantId,
       identity: user.userId,
     });
+    const sanitized = this.sanitizeMessages(dto.messages);
+    const brain = await this.brain.prepare(user, dto, sanitized.messages);
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
       user,
       dto,
@@ -192,6 +203,7 @@ export class AiCoreService {
       return this.complete(
         user,
         dto,
+        brain,
         false,
         scheduleCommand.toolUsage ? [scheduleCommand.toolUsage] : [],
         [],
@@ -202,14 +214,25 @@ export class AiCoreService {
         },
       );
     }
-    const sanitized = this.sanitizeMessages(dto.messages);
     const assistantCommand = await this.handleAssistantCommand(
       user,
       sanitized.messages,
     );
     if (assistantCommand) {
-      return this.complete(user, dto, sanitized.redacted, [], [], {
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         ...assistantCommand,
+        source: 'safe_fallback',
+        action: null,
+      });
+    }
+    if (
+      brain.active &&
+      brain.knowledgeRequired &&
+      brain.knowledge.length === 0
+    ) {
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply:
+          'В базе знаний пока нет подтверждённого материала по этому вопросу. Я не буду придумывать ответ — добавьте источник или сформулируйте запрос точнее.',
         source: 'safe_fallback',
         action: null,
       });
@@ -241,6 +264,7 @@ export class AiCoreService {
         return this.complete(
           user,
           dto,
+          brain,
           sanitized.redacted,
           toolsUsed,
           decisions,
@@ -256,6 +280,7 @@ export class AiCoreService {
           return this.complete(
             user,
             dto,
+            brain,
             sanitized.redacted,
             toolsUsed,
             decisions,
@@ -264,18 +289,20 @@ export class AiCoreService {
         }
         const decision = await this.model.decide({
           surface: dto.surface,
-          persona: this.resolvePersona(user.role),
+          persona: brain.persona,
           messages: sanitized.messages,
           tools,
           toolResults: [...toolResults],
           allowToolCall: step < maxToolSteps,
           requiredToolNames:
             requirement && !requirementSatisfied ? requiredToolNames : [],
+          brain,
         });
         if (!decision) {
           return this.complete(
             user,
             dto,
+            brain,
             sanitized.redacted,
             toolsUsed,
             decisions,
@@ -302,6 +329,7 @@ export class AiCoreService {
             return this.complete(
               user,
               dto,
+              brain,
               sanitized.redacted,
               toolsUsed,
               decisions,
@@ -321,6 +349,7 @@ export class AiCoreService {
             return this.complete(
               user,
               dto,
+              brain,
               sanitized.redacted,
               toolsUsed,
               decisions,
@@ -330,6 +359,7 @@ export class AiCoreService {
           return this.complete(
             user,
             dto,
+            brain,
             sanitized.redacted,
             toolsUsed,
             decisions,
@@ -359,6 +389,7 @@ export class AiCoreService {
           return this.complete(
             user,
             dto,
+            brain,
             sanitized.redacted,
             toolsUsed,
             decisions,
@@ -410,6 +441,7 @@ export class AiCoreService {
           return this.complete(
             user,
             dto,
+            brain,
             sanitized.redacted,
             toolsUsed,
             decisions,
@@ -445,6 +477,7 @@ export class AiCoreService {
           return this.complete(
             user,
             dto,
+            brain,
             sanitized.redacted,
             toolsUsed,
             decisions,
@@ -479,12 +512,6 @@ export class AiCoreService {
       });
       throw error;
     }
-  }
-
-  private resolvePersona(role: UserRole): AiCorePersona {
-    return role === UserRole.CLIENT || role === UserRole.CUSTOMER
-      ? 'admin'
-      : 'director';
   }
 
   private async handleAssistantCommand(
@@ -623,18 +650,29 @@ export class AiCoreService {
   private async complete(
     user: AuthenticatedUser,
     dto: AiCoreChatDto,
+    brain: MayaBrainContext,
     redacted: boolean,
     toolsUsed: ToolUsage[],
     decisions: AiCoreModelDecision[],
-    response: {
-      reply: string;
-      source: 'deepseek' | 'openai' | 'safe_fallback';
-      action: Record<string, unknown> | null;
-      grounding?: GroundingReport;
-    },
+    response: AiCoreCompletion,
   ) {
+    const citedIds = [
+      ...new Set(decisions.flatMap((decision) => decision.citationIds ?? [])),
+    ];
+    const citations = this.brain.citations(brain, citedIds);
+    const missingRequiredCitation =
+      brain.active && brain.knowledgeRequired && citations.length === 0;
+    const completedResponse: AiCoreCompletion = missingRequiredCitation
+      ? {
+          reply:
+            'Не нашла подтверждённого ответа в базе знаний. Я не буду дополнять его догадками.',
+          source: 'safe_fallback',
+          action: null,
+        }
+      : response;
     const grounding =
-      response.grounding ?? this.groundingReport(null, 'not_required', []);
+      completedResponse.grounding ??
+      this.groundingReport(null, 'not_required', []);
     const usage = decisions.reduce(
       (totals, decision) => ({
         input_tokens: this.addTokenCount(
@@ -656,6 +694,12 @@ export class AiCoreService {
         total_tokens: null as number | null,
       },
     );
+    const plan = await this.brain.recordOutcome(brain, {
+      toolNames: toolsUsed.map((tool) => tool.name),
+      approvalRequired: completedResponse.action !== null,
+      blocked: missingRequiredCitation || grounding.status === 'blocked',
+      citedIds: citations.map((citation) => citation.id),
+    });
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
       userId: user.userId,
@@ -664,11 +708,18 @@ export class AiCoreService {
       entityId: dto.requestId,
       metadata: {
         surface: dto.surface,
-        source: response.source,
+        source: completedResponse.source,
         models: [...new Set(decisions.map((decision) => decision.model))],
         model_calls: decisions.length,
         tools_used: toolsUsed.map((tool) => tool.name),
-        outcome: response.action ? 'approval_required' : 'reply',
+        outcome: completedResponse.action ? 'approval_required' : 'reply',
+        brain_profile: brain.profile,
+        brain_active: brain.active,
+        brain_intent: brain.intent,
+        brain_prompt_version: brain.promptVersion,
+        brain_plan_status: plan.status,
+        brain_memory_keys: brain.preferences.map((item) => item.key),
+        brain_citation_count: citations.length,
         grounding_status: grounding.status,
         grounding_domain: grounding.domain,
         grounding_evidence_tools: grounding.evidence_tools,
@@ -678,12 +729,22 @@ export class AiCoreService {
     });
     return {
       request_id: dto.requestId,
-      reply: response.reply,
-      source: response.source,
+      reply: completedResponse.reply,
+      source: completedResponse.source,
       redacted_input: redacted,
-      action: response.action,
+      action: completedResponse.action,
       tools_used: toolsUsed,
       grounding,
+      citations,
+      brain: {
+        session_id: brain.sessionId,
+        active: brain.active,
+        profile: brain.profile,
+        intent: brain.intent,
+        prompt_version: brain.promptVersion,
+        plan,
+        memory_applied: brain.preferences.map((item) => item.key),
+      },
     };
   }
 

@@ -67,6 +67,13 @@ Responsibilities:
 - produce action draft;
 - never invent business facts.
 
+The first production-shaped slice is implemented in
+`maya-saas-backend/src/ai-brain`. It provides deterministic profile routing,
+bounded structured plans, encrypted allowlisted preference memory, encrypted
+tenant knowledge with role audiences, exact citation validation and a
+native-only feature flag. The operational contract and current limitations are
+documented in [Maya Brain v1](../architecture/maya-brain-v1.md).
+
 Non-responsibilities:
 
 - direct database queries;

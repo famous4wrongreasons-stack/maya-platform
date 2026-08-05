@@ -8,10 +8,7 @@ import type {
   MayaBrainRoute,
 } from './maya-brain.types';
 
-const CLIENT_ROLES = new Set<UserRole>([
-  UserRole.CLIENT,
-  UserRole.CUSTOMER,
-]);
+const CLIENT_ROLES = new Set<UserRole>([UserRole.CLIENT, UserRole.CUSTOMER]);
 
 const FINANCE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -44,6 +41,13 @@ export class MayaBrainRouterService {
       return 'booking';
     }
     if (
+      /(как\s+(?:делать|сделать|работает|правильно)|инструкц|регламент|правил[ао]|политик|процедур|по\s+базе\s+знаний|найди\s+в\s+базе)/i.test(
+        text,
+      )
+    ) {
+      return 'knowledge';
+    }
+    if (
       /(закрой|закрыть|перерыв|сократ[а-яa-z]*\s+(?:день|смен)|график|смен[ауеы]|рабоч[а-яa-z]*\s+день)/i.test(
         text,
       )
@@ -71,7 +75,9 @@ export class MayaBrainRouterService {
     ) {
       return 'staff_operations';
     }
-    if (/(рассыл|маркет|акци[яию]|возврат[а-яa-z]*\s+клиент|промо)/i.test(text)) {
+    if (
+      /(рассыл|маркет|акци[яию]|возврат[а-яa-z]*\s+клиент|промо)/i.test(text)
+    ) {
       return 'marketing';
     }
     if (/(балл|бонус|лояльност)/i.test(text)) {
@@ -79,13 +85,6 @@ export class MayaBrainRouterService {
     }
     if (/(услуг|цен[аы]|прайс|абонемент|сертификат|кто\s+стриж)/i.test(text)) {
       return 'catalog';
-    }
-    if (
-      /(как\s+(?:делать|сделать|работает|правильно)|инструкц|регламент|правил[ао]|политик|процедур|по\s+базе\s+знаний|найди\s+в\s+базе)/i.test(
-        text,
-      )
-    ) {
-      return 'knowledge';
     }
     if (/(ошибк|не\s+работает|проблем|помоги|поддержк)/i.test(text)) {
       return 'support';

@@ -115,6 +115,10 @@ model Tenant {
   expenses               Expense[]
   aiApprovalRequests     AiApprovalRequest[]
   aiToolExecutions       AiToolExecution[]
+  aiBrainSessions        AiBrainSession[]
+  aiMemoryFacts          AiMemoryFact[]
+  aiKnowledgeSources     AiKnowledgeSource[]
+  aiKnowledgeChunks      AiKnowledgeChunk[]
   crmStaffAccesses       CrmStaffAccess[]
   dashboardPreferences   DashboardPreference[]
   userMerges             UserMerge[]
@@ -181,33 +185,34 @@ model Branch {
 }
 
 model User {
-  id                   String               @id @default(cuid())
-  tenantId             String?
-  branchId             String?
-  email                String
-  phone                String?
-  encryptedName        String?
-  passwordHash         String
-  role                 UserRole
-  status               UserStatus           @default(active)
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  tenant               Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch               Branch?              @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  auditLogs            AuditLog[]
-  appointments         Appointment[]        @relation("ClientAppointments")
-  authIdentities       AuthIdentity[]
-  authSessions         AuthSession[]
-  memberships          Membership[]
-  internalProviders    InternalProvider[]
-  customerProfiles     CustomerProfile[]
-  loyaltyAccounts      LoyaltyAccount[]
-  loyaltyTransactions  LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
-  createdExpenses      Expense[]            @relation("ExpenseCreator")
-  requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
-  decidedAiApprovals   AiApprovalRequest[]  @relation("AiApprovalDecider")
-  aiToolExecutions     AiToolExecution[]    @relation("AiToolExecutionActor")
-  crmStaffAccesses     CrmStaffAccess[]
+  id                        String               @id @default(cuid())
+  tenantId                  String?
+  branchId                  String?
+  email                     String
+  phone                     String?
+  encryptedName             String?
+  passwordHash              String
+  role                      UserRole
+  status                    UserStatus           @default(active)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  tenant                    Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch                    Branch?              @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  auditLogs                 AuditLog[]
+  appointments              Appointment[]        @relation("ClientAppointments")
+  authIdentities            AuthIdentity[]
+  authSessions              AuthSession[]
+  memberships               Membership[]
+  internalProviders         InternalProvider[]
+  customerProfiles          CustomerProfile[]
+  loyaltyAccounts           LoyaltyAccount[]
+  loyaltyTransactions       LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
+  createdExpenses           Expense[]            @relation("ExpenseCreator")
+  requestedAiApprovals      AiApprovalRequest[]  @relation("AiApprovalRequester")
+  decidedAiApprovals        AiApprovalRequest[]  @relation("AiApprovalDecider")
+  aiToolExecutions          AiToolExecution[]    @relation("AiToolExecutionActor")
+  createdAiKnowledgeSources AiKnowledgeSource[]  @relation("AiKnowledgeSourceCreator")
+  crmStaffAccesses          CrmStaffAccess[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -266,6 +271,8 @@ model Membership {
   loyaltyAccount       LoyaltyAccount?       @relation("LoyaltyAccountMembership")
   clientAppointments   Appointment[]         @relation("ClientMembershipAppointments")
   dashboardPreferences DashboardPreference[]
+  aiBrainSessions      AiBrainSession[]
+  aiMemoryFacts        AiMemoryFact[]
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
@@ -719,6 +726,98 @@ model AiToolExecution {
   @@index([tenantId, toolName, createdAt])
   @@index([tenantId, actorUserId, createdAt])
   @@index([tenantId, status, startedAt])
+}
+
+/// Bounded, structured state for one Maya Brain conversation. Raw messages and
+/// chain-of-thought are deliberately never persisted.
+model AiBrainSession {
+  id             String     @id @default(cuid())
+  tenantId       String
+  actorUserId    String
+  sessionKeyHash String
+  surface        String
+  profile        String
+  intent         String
+  status         String     @default("active")
+  planJson       Json       @default("{}")
+  lastRequestId  String
+  turnCount      Int        @default(0)
+  expiresAt      DateTime
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership     Membership @relation(fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, actorUserId, sessionKeyHash])
+  @@index([tenantId, expiresAt])
+  @@index([tenantId, actorUserId, updatedAt])
+}
+
+/// Allowlisted, encrypted memory facts. Values are small enums such as
+/// response_detail=compact; arbitrary conversation text is not accepted.
+model AiMemoryFact {
+  id             String     @id @default(cuid())
+  tenantId       String
+  subjectUserId  String
+  scope          String
+  key            String
+  encryptedValue String
+  valueHash      String
+  source         String
+  confidence     Int
+  retentionDays  Int
+  expiresAt      DateTime
+  deletedAt      DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership     Membership @relation(fields: [subjectUserId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, subjectUserId, scope, key])
+  @@index([tenantId, subjectUserId, expiresAt])
+  @@index([tenantId, expiresAt, deletedAt])
+}
+
+/// Tenant-owned knowledge source. Titles and body chunks are encrypted; only
+/// opaque identifiers and aggregate metadata cross audit boundaries.
+model AiKnowledgeSource {
+  id                String             @id @default(cuid())
+  tenantId          String
+  createdByUserId   String?
+  createdByTenantId String?
+  encryptedTitle    String
+  sourceType        String
+  locale            String             @default("ru-RU")
+  status            String             @default("active")
+  audienceRolesJson Json               @default("[]")
+  contentHash       String
+  effectiveAt       DateTime           @default(now())
+  expiresAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy         User?              @relation("AiKnowledgeSourceCreator", fields: [createdByUserId, createdByTenantId], references: [id, tenantId], onDelete: SetNull)
+  chunks            AiKnowledgeChunk[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, contentHash])
+  @@index([tenantId, status, effectiveAt])
+  @@index([tenantId, expiresAt])
+}
+
+model AiKnowledgeChunk {
+  id               String            @id @default(cuid())
+  tenantId         String
+  sourceId         String
+  ordinal          Int
+  encryptedContent String
+  contentHash      String
+  createdAt        DateTime          @default(now())
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source           AiKnowledgeSource @relation(fields: [sourceId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([sourceId, tenantId, ordinal])
+  @@index([tenantId, sourceId])
 }
 
 model InternalProviderService {
