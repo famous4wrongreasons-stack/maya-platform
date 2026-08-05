@@ -8938,7 +8938,25 @@ function ABookFlow() {
     } catch (e) {
       raw = raw || BF_LOCAL_DEFAULT_API_BASE;
     }
-    return String(raw || BF_LOCAL_DEFAULT_API_BASE).replace(/\/+$/, '');
+    var resolved = String(raw || BF_LOCAL_DEFAULT_API_BASE).replace(/\/+$/, '');
+    // 🔴 Залежавшийся адрес разработчика ломает боевое приложение молча.
+    // Сохранённый localhost переживал и перезапуск, и переустановку, а клиент
+    // получал «Локальный backend недоступен» на списке мастеров. Контекст
+    // салона знает верный адрес — он и главнее сохранённого.
+    try {
+      var ctxApi = window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api;
+      var isLocal = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:|\/|$)/i.test(resolved);
+      if (ctxApi) {
+        var ctxNorm = String(ctxApi).replace(/\/+$/, '');
+        var ctxIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:|\/|$)/i.test(ctxNorm);
+        // Забираем адрес из контекста, если сохранённый локальный, а контекст нет.
+        if (isLocal && !ctxIsLocal) {
+          try { localStorage.removeItem(BF_LOCAL_API_BASE_KEY); } catch (e2) {}
+          resolved = ctxNorm;
+        }
+      }
+    } catch (e3) {}
+    return resolved;
   });
   const [localTenantSlug] = React.useState(function () {
     var raw = bookingQs.get('booking_tenant');
