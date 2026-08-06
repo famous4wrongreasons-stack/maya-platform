@@ -151,6 +151,12 @@ type AiCoreCompletion = {
   source: 'deepseek' | 'openai' | 'safe_fallback';
   action: Record<string, unknown> | null;
   grounding?: GroundingReport;
+  /**
+   * Числа, из-за которых ответ модели был отклонён. Уходят в аудит: без них
+   * подмена ответа шаблоном невидима, и понять, что именно не сошлось,
+   * можно только гаданием.
+   */
+  unsourced?: string[];
 };
 
 const GROUNDING_FACT_PATTERN =
@@ -512,16 +518,20 @@ export class AiCoreService {
                     reply: deterministicReply,
                     source: 'safe_fallback',
                     action: null,
+                    unsourced,
                     grounding: this.groundingReport(
                       requirement,
                       'verified',
                       toolResults,
                     ),
                   }
-                : this.groundingFallback(
-                    requirement as GroundingRequirement,
-                    toolResults,
-                  ),
+                : {
+                    ...this.groundingFallback(
+                      requirement as GroundingRequirement,
+                      toolResults,
+                    ),
+                    unsourced,
+                  },
             );
           }
           return this.complete(
@@ -1041,6 +1051,8 @@ export class AiCoreService {
         grounding_status: grounding.status,
         grounding_domain: grounding.domain,
         grounding_evidence_tools: grounding.evidence_tools,
+        // Почему ответ модели был отклонён. Только числа, без текста.
+        unsourced_numbers: completedResponse.unsourced ?? [],
         redacted_input: redacted,
         ...usage,
       },
@@ -2362,9 +2374,44 @@ export class AiCoreService {
         problems.push(`${claim.value} (в данных это снижение, а не рост)`);
         continue;
       }
+      // 🔴 То же число в правильной единице — не выдумка. В changes денежные
+      // дельты лежат ТОЛЬКО в копейках, рублёвого двойника у них нет: сказать
+      // «выручка упала на 10 000 ₽» при серверных −1000000 было невозможно, и
+      // весь разбор просадки — а он именно про изменение денег — обречённо
+      // сваливался в шаблон. Признаём копейки→рубли и долю→проценты.
+      if (this.scaledMatch(claim.value, allowed)) {
+        continue;
+      }
       problems.push(claim.value);
     }
     return [...new Set(problems)].slice(0, 8);
+  }
+
+  /**
+   * То же значение в другой единице измерения.
+   *
+   * Разрешаем ровно два перевода, оба однозначные и присутствующие в данных
+   * как соседние поля: копейки→рубли (×100) и доля→проценты (÷100). Это не
+   * послабление к выдумыванию: число всё равно обязано быть в результате
+   * инструмента, меняется только запись. Свободного счёта это не открывает —
+   * сумма, разность или среднее по-прежнему не пройдут.
+   */
+  private scaledMatch(claim: string, allowed: Set<string>): boolean {
+    const value = Number(claim);
+    if (!Number.isFinite(value) || value === 0) {
+      return false;
+    }
+    const asText = (input: number) =>
+      Number.isInteger(input)
+        ? String(input)
+        : String(Number(input.toFixed(6)));
+    for (const scaled of [value * 100, value / 100]) {
+      if (!Number.isFinite(scaled)) continue;
+      if (allowed.has(asText(scaled)) || allowed.has(asText(-scaled))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

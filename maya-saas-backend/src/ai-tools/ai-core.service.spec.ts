@@ -2125,6 +2125,98 @@ describe('AiCoreService', () => {
     expect(result.source).toBe('deepseek');
   });
 
+  it('lets the model name a money change in roubles when the server counted it in kopecks', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-kopecks-delta',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        metrics: { revenue_amount_kopecks: 20_250_000 },
+        changes: {
+          // Рублёвого двойника у дельты в changes нет — только копейки.
+          revenue_amount_kopecks: {
+            current: 20_250_000,
+            previous: 21_250_000,
+            delta: -1_000_000,
+            percent_change: -4.7,
+          },
+        },
+        current: {},
+        service_changes: [],
+      },
+    });
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'Поступления упали на 10 000 ₽ — это −4,7% к прошлому периоду.',
+        toolCall: null,
+      }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Почему просела выручка?' }],
+    });
+
+    // 🔴 Из-за этого разбор просадки и сваливался в шаблон: сервер держит
+    // дельту в копейках (−1 000 000), человек говорит «10 000 ₽», и сторож
+    // считал верную сумму выдумкой. Та же величина в правильной единице —
+    // не выдумка; переписывать ответ незачем.
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.reply).toContain('10 000 ₽');
+    expect(result.source).toBe('deepseek');
+  });
+
+  it('still rejects a money figure that is not in the data at any scale', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-invented-money',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        metrics: { revenue_amount_kopecks: 20_250_000 },
+        changes: {
+          revenue_amount_kopecks: {
+            current: 20_250_000,
+            previous: 21_250_000,
+            delta: -1_000_000,
+            percent_change: -4.7,
+          },
+        },
+        current: {},
+        service_changes: [],
+      },
+    });
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Поступления упали примерно на 12 345 ₽.',
+          toolCall: null,
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({ reply: 'Поступления упали на 10 000 ₽.', toolCall: null }),
+      );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Почему просела выручка?' }],
+    });
+
+    // Послабление касается только единиц измерения. Округление «примерно»
+    // остаётся выдумкой и по-прежнему отправляется на переписывание.
+    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+      '12345',
+    );
+    expect(result.reply).toContain('10 000 ₽');
+  });
+
   it('does not treat an hour inside a timestamp as a confirmed metric', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.runtime.execute.mockResolvedValue({
