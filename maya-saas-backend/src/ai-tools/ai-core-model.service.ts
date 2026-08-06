@@ -12,7 +12,10 @@ import type {
   AiCoreProvider,
 } from './ai-core.types';
 
-const MAX_MODEL_OUTPUT_TOKENS = 1_200;
+// 🔴 Не 1200. Разбор просадки на русском — это 1500–2000 знаков, а обрезка по
+// лимиту токенов у DeepSeek приходит как finish_reason='length' и убивает ВЕСЬ
+// ответ (см. ниже), а не укорачивает его. Дешевле дать запас.
+const MAX_MODEL_OUTPUT_TOKENS = 2_000;
 const MAX_TOOL_ARGUMENT_BYTES = 8 * 1_024;
 const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-flash';
