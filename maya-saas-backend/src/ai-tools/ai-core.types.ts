@@ -32,6 +32,18 @@ export interface AiCoreModelInput {
   allowToolCall: boolean;
   requiredToolNames: string[];
   brain: MayaBrainContext;
+  /**
+   * Серверное «сейчас» в UTC. Без него модель не знает, какой сегодня день, и
+   * при этом ей запрещено подставлять календарь самой — любой вопрос про
+   * динамику становился неотвечаемым.
+   */
+  nowUtc?: string;
+  /**
+   * Замечания предыдущего прохода: числа, которых нет в результатах
+   * инструментов. Даём модели переписать ответ вместо того, чтобы молча
+   * заменить его шаблоном.
+   */
+  corrections?: string[];
 }
 
 export interface AiCoreModelDecision {

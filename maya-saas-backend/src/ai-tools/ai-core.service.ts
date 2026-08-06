@@ -133,6 +133,10 @@ type GroundingRequirement = {
   domain: string;
   toolNames: string[];
   strictNumbers: boolean;
+  presetToolCall?: {
+    name: string;
+    arguments: Record<string, unknown>;
+  };
 };
 
 type GroundingReport = {
@@ -160,9 +164,25 @@ const GROUNDING_PERSONAL_SCOPE_PATTERN =
 const GROUNDING_BUSINESS_SCOPE_PATTERN =
   /(бизнес[а-яёa-z]*|компан[а-яёa-z]*|по\s+всем|все\s+сотрудник[а-яёa-z]*|все\s+специалист[а-яёa-z]*|общ[а-яёa-z]*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
 const GROUNDING_YEAR_COMPARISON_PATTERN =
-  /(?:сравн[а-яёa-z]*.{0,48}(?:год|года).{0,48}(?:прошл|предыдущ)|(?:этот|текущ)[а-яёa-z]*\s+год.{0,48}(?:прошл|предыдущ)[а-яёa-z]*\s+год|год\s+к\s+году)/i;
+  /(?:год[а-яёa-z]*.{0,96}(?:сравн|прошл|предыдущ)|(?:сравн|прошл|предыдущ).{0,96}год[а-яёa-z]*|год\s+к\s+году)/i;
+const GROUNDING_CUSTOMER_COUNT_PATTERN =
+  /(сколько\s+(?:у\s+нас\s+)?клиент[а-яёa-z]*|количеств[а-яёa-z]*\s+клиент[а-яёa-z]*|по\s+клиент[а-яёa-z]*)/i;
+// 🔴 «Посоветуй как вернуть клиентов» под старый список не подходило: там были
+// только «что делать» и «как исправить». Просьба о совете оставалась без совета.
+const BUSINESS_ACTION_REQUEST_PATTERN =
+  /(что\s+(?:с\s+этим\s+)?делать|как\s+(?:это\s+)?исправить|как\s+(?:это\s+)?улучшить|объясни.{0,32}что\s+делать|дай\s+(?:план|рекомендац)|какие\s+действия|что\s+предпринять|посоветуй|подскажи|совет[а-яёa-z]*|как\s+(?:мне\s+)?(?:вернуть|поднять|увеличить|нарастить|удержать)|что\s+можно\s+сделать)/i;
+// Просьба объяснить или разобрать. Отдельно от просьбы о действии: «почему»
+// требует диагноза, «что делать» — плана, и вопрос часто содержит оба.
+const BUSINESS_EXPLANATION_REQUEST_PATTERN =
+  /(почему|причин[а-яёa-z]*|за\s+сч[её]т\s+чего|что\s+повлиял[оа]?|разбер[а-яёa-z]*|проанализир[а-яёa-z]*|анализ[а-яёa-z]*|объясни)/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
+/**
+ * \u0427\u0438\u0441\u043b\u0430 \u0412\u041d\u0423\u0422\u0420\u0418 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u044e\u0449\u0438\u0445 \u0434\u0430\u043d\u043d\u044b\u0445 \u2014 \u0431\u0435\u0437 \u043e\u0433\u043b\u044f\u0434\u043a\u0438 \u043d\u0430 \u0441\u043e\u0441\u0435\u0434\u043d\u0438\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b.
+ * \u0421\u0442\u0440\u043e\u0433\u0438\u0439 \u0448\u0430\u0431\u043b\u043e\u043d \u0432\u044b\u0448\u0435 \u043f\u0440\u043e\u043f\u0443\u0441\u043a\u0430\u043b \u0433\u043e\u0434 \u0432 \u00ab2026-01-01\u00bb, \u0438\u0437-\u0437\u0430 \u0447\u0435\u0433\u043e \u043d\u0430\u0437\u0432\u0430\u043d\u043d\u044b\u0439
+ * \u043c\u043e\u0434\u0435\u043b\u044c\u044e \u0433\u043e\u0434 \u0441\u0447\u0438\u0442\u0430\u043b\u0441\u044f \u0432\u044b\u0434\u0443\u043c\u0430\u043d\u043d\u044b\u043c.
+ */
+const GROUNDING_EVIDENCE_NUMBER_PATTERN = /-?\d+(?:[.,]\d+)?/g;
 const GROUNDING_SMALL_METRIC_PATTERN =
   /(?<number>\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(?:₽|руб\w*|%|балл\w*|бонус\w*|визит\w*|клиент\w*|запис\w*|минут\w*|час\w*|специалист\w*)/giu;
 const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
@@ -256,10 +276,13 @@ export class AiCoreService {
     const requirement = this.groundingRequirement(
       sanitized.messages,
       allowedNames,
+      brain,
     );
     const requiredToolNames =
       requirement?.toolNames.filter((name) => allowedNames.has(name)) ?? [];
     let groundingRetries = 0;
+    let numberRetries = 0;
+    let corrections: string[] = [];
 
     try {
       if (requirement && requiredToolNames.length === 0) {
@@ -272,6 +295,56 @@ export class AiCoreService {
           decisions,
           this.groundingFallback(requirement, toolResults, true),
         );
+      }
+      if (requirement?.presetToolCall) {
+        const preset = requirement.presetToolCall;
+        if (!requiredToolNames.includes(preset.name)) {
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            this.groundingFallback(requirement, toolResults, true),
+          );
+        }
+        const execution = this.record(
+          await this.runtime.execute(user, preset.name, {
+            surface: dto.surface,
+            arguments: preset.arguments,
+            idempotencyKey: this.toolIdempotencyKey(
+              tenantId,
+              user.userId,
+              dto.requestId,
+              0,
+              preset.name,
+            ),
+          }),
+        );
+        const status =
+          typeof execution.status === 'string' ? execution.status : 'unknown';
+        toolsUsed.push({
+          name: preset.name,
+          status,
+          execution_id:
+            typeof execution.execution_id === 'string'
+              ? execution.execution_id
+              : null,
+        });
+        if (status !== 'completed' || !('result' in execution)) {
+          this.modelFailure('ai_tool_result_unavailable');
+        }
+        toolResults.push({
+          name: preset.name,
+          result: this.sanitizeToolResult(execution.result),
+        });
+        signatures.add(this.toolSignature(preset.name, preset.arguments));
+        // 🔴 Здесь раньше стоял возврат готового шаблона, и цикл с моделью не
+        // начинался вовсе — на типовые вопросы владельца («сколько заработали»,
+        // «почему просело», «посоветуй») отвечал конструктор строк. Теперь этот
+        // вызов — только предзагрузка: данные уже на руках, а озвучивает их
+        // модель на первом же шаге цикла, без лишнего обращения к провайдеру.
       }
       for (let step = 0; step <= maxToolSteps; step += 1) {
         const requirementSatisfied = this.groundingSatisfied(
@@ -289,6 +362,8 @@ export class AiCoreService {
             this.groundingFallback(requirement, toolResults),
           );
         }
+        const pendingCorrections = corrections;
+        corrections = [];
         const decision = await this.model.decide({
           surface: dto.surface,
           persona: brain.persona,
@@ -299,8 +374,35 @@ export class AiCoreService {
           requiredToolNames:
             requirement && !requirementSatisfied ? requiredToolNames : [],
           brain,
+          nowUtc: new Date().toISOString(),
+          corrections: pendingCorrections,
         });
         if (!decision) {
+          const deterministicReply = this.deterministicGroundedReply(
+            requirement,
+            toolResults,
+            this.latestUserText(sanitized.messages),
+          );
+          if (deterministicReply) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: deterministicReply,
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'verified',
+                  toolResults,
+                ),
+              },
+            );
+          }
           return this.complete(
             user,
             dto,
@@ -338,16 +440,37 @@ export class AiCoreService {
               this.groundingFallback(requirement, toolResults),
             );
           }
-          const reply = this.plainReply(decision.reply);
-          if (
-            requirement &&
-            !this.groundedNumbersMatch(
-              reply,
+          const reply = this.guardClientUpsell(
+            brain,
+            sanitized.messages,
+            this.plainReply(decision.reply),
+            toolResults,
+          );
+          const unsourced = requirement
+            ? this.unsourcedNumbers(
+                reply,
+                requirement,
+                toolResults,
+                this.latestUserText(sanitized.messages),
+              )
+            : [];
+          if (unsourced.length > 0) {
+            // Раньше любое неподтверждённое число молча стирало весь ответ. Это
+            // самая частая причина шаблонов: достаточно было написать процент
+            // или округлить сумму. Даём переписать один раз, назвав виновные
+            // числа, и только потом падаем в детерминированный текст.
+            if (numberRetries < 1 && step < maxToolSteps) {
+              numberRetries += 1;
+              corrections = [
+                `Эти числа отсутствуют в tool_results: ${unsourced.join(', ')}. Перепиши ответ, оставив только значения, которые есть в результатах инструментов.`,
+              ];
+              continue;
+            }
+            const deterministicReply = this.deterministicGroundedReply(
               requirement,
               toolResults,
               this.latestUserText(sanitized.messages),
-            )
-          ) {
+            );
             return this.complete(
               user,
               dto,
@@ -355,7 +478,21 @@ export class AiCoreService {
               sanitized.redacted,
               toolsUsed,
               decisions,
-              this.groundingFallback(requirement, toolResults),
+              deterministicReply
+                ? {
+                    reply: deterministicReply,
+                    source: 'safe_fallback',
+                    action: null,
+                    grounding: this.groundingReport(
+                      requirement,
+                      'verified',
+                      toolResults,
+                    ),
+                  }
+                : this.groundingFallback(
+                    requirement as GroundingRequirement,
+                    toolResults,
+                  ),
             );
           }
           return this.complete(
@@ -470,34 +607,82 @@ export class AiCoreService {
           name: decision.toolCall.name,
           result: safeResult,
         });
-        const deterministicReply = this.deterministicGroundedReply(
-          requirement,
-          toolResults,
-          this.latestUserText(sanitized.messages),
-        );
-        if (deterministicReply) {
-          return this.complete(
-            user,
-            dto,
-            brain,
-            sanitized.redacted,
-            toolsUsed,
-            decisions,
-            {
-              reply: deterministicReply,
-              source: decision.provider,
-              action: null,
-              grounding: this.groundingReport(
-                requirement,
-                'verified',
-                toolResults,
-              ),
-            },
-          );
-        }
+        // 🔴 Здесь раньше стоял второй перехват: как только инструмент отдавал
+        // данные, ход завершался шаблоном — модель уходила за цифрами и не
+        // возвращалась к микрофону, так и не увидев того, что сама запросила.
+        // Теперь цикл идёт дальше, и следующий шаг — её ответ по этим данным.
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
+      const deterministicReply = this.deterministicGroundedReply(
+        requirement,
+        toolResults,
+        this.latestUserText(sanitized.messages),
+      );
+      if (deterministicReply) {
+        // Ход упал, но пользователь получит связный текст из уже собранных
+        // данных. Раньше такой случай выглядел в аудите как обычный успешный
+        // ответ, и деградация модели была невидима — теперь она отмечена.
+        await this.auditLog.log({
+          tenantId,
+          userId: user.userId,
+          action: 'ai.core_turn_degraded',
+          entityType: 'ai_core_turn',
+          entityId: dto.requestId,
+          metadata: {
+            surface: dto.surface,
+            error_code: this.safeErrorCode(error),
+            model_calls: decisions.length,
+            tools_used: toolsUsed.map((tool) => tool.name),
+            grounding_domain: requirement?.domain ?? null,
+          },
+        });
+        return this.complete(
+          user,
+          dto,
+          brain,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          {
+            reply: deterministicReply,
+            source: 'safe_fallback',
+            action: null,
+            grounding: this.groundingReport(
+              requirement,
+              'verified',
+              toolResults,
+            ),
+          },
+        );
+      }
+      if (
+        toolResults.length === 0 &&
+        (requirement?.domain === 'business_query' ||
+          requirement?.domain === 'employee_query')
+      ) {
+        return this.complete(
+          user,
+          dto,
+          brain,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          {
+            reply:
+              requirement.domain === 'employee_query'
+                ? 'Сейчас не отвечает источник личных показателей CRM. Это временная проблема данных, а не отсутствие ответа у MAYA. Повторите через минуту.'
+                : 'Сейчас не отвечает источник бизнес-данных CRM. Это временная проблема соединения, а не отсутствие ответа у MAYA. Повторите через минуту.',
+            source: 'safe_fallback',
+            action: null,
+            grounding: this.groundingReport(
+              requirement,
+              'blocked',
+              toolResults,
+            ),
+          },
+        );
+      }
       await this.auditLog.log({
         tenantId,
         userId: user.userId,
@@ -599,6 +784,65 @@ export class AiCoreService {
     return {
       reply: `Я MAYA, ваша операционная помощница. Работаю только с данными, которые подтверждены CRM и разрешены вашей ролью. ${this.assistantCapabilitiesSummary([...enabled])} Настройки можно менять прямо здесь командами «включи...» и «отключи...».`,
     };
+  }
+
+  private guardClientUpsell(
+    brain: MayaBrainContext,
+    messages: AiCoreMessage[],
+    reply: string,
+    toolResults: AiCoreToolResult[],
+  ): string {
+    if (brain.persona !== 'admin' || !this.looksLikeUpsell(reply)) {
+      return reply;
+    }
+    const latest = this.latestUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .trim();
+    const clientRefused =
+      /(?:^|\s)(?:нет|не\s+надо|не\s+нужно|только|без\s+доп|без\s+дополнительн|ничего\s+больше)(?=\s|[.!?,]|$)/i.test(
+        latest,
+      ) ||
+      (/^(?:мужская\s+)?стрижк[а-яa-z]*[.!\s]*$/i.test(latest) &&
+        messages.some(
+          (message) =>
+            message.role === 'assistant' &&
+            this.looksLikeUpsell(message.content),
+        ));
+    const upsellAlreadyMade = messages.some(
+      (message) =>
+        message.role === 'assistant' && this.looksLikeUpsell(message.content),
+    );
+    const continueBooking =
+      'Хорошо, без дополнительных услуг. Продолжаем запись: уточните мастера или удобное время.';
+    if (clientRefused) {
+      return continueBooking;
+    }
+    const catalogRead = toolResults.some(
+      (result) =>
+        result.name === 'catalog.services.read' &&
+        Array.isArray(this.record(result.result).services),
+    );
+    if (!catalogRead) {
+      return 'Сначала уточним основную услугу, мастера и удобное время. Дополнения предложу только после проверки каталога.';
+    }
+    if (!clientRefused && !upsellAlreadyMade) {
+      return reply;
+    }
+
+    const cleaned = reply
+      .split(/(?<=[.!?])\s+/u)
+      .filter((sentence) => !this.looksLikeUpsell(sentence))
+      .join(' ')
+      .trim();
+    return cleaned || continueBooking;
+  }
+
+  private looksLikeUpsell(text: string): boolean {
+    const normalized = text.toLowerCase().replace(/ё/g, 'е');
+    return /(?:можно|можем|хотите|предлагаю|давайте).{0,48}(?:добавить|дополнить|еще\s+услуг|доп[а-яa-z]*\s+услуг)|(?:добавим|добавляем).{0,48}(?:к\s+стрижке|к\s+услуге|еще)|обязательн[а-яa-z]*\s+апсейл/i.test(
+      normalized,
+    );
   }
 
   private requestedAssistantCapabilities(text: string): AssistantCapability[] {
@@ -753,8 +997,12 @@ export class AiCoreService {
   private groundingRequirement(
     messages: AiCoreMessage[],
     allowedNames: Set<string>,
+    brain: MayaBrainContext,
   ): GroundingRequirement | null {
     const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
+    const previousUserText = this.previousUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е');
     if (!text) {
       return null;
     }
@@ -818,17 +1066,56 @@ export class AiCoreService {
     if (/(расход[а-яёa-z]*|затрат[а-яёa-z]*)/i.test(text) && factRequest) {
       return this.requireGrounding('business_expenses', ['expenses.read']);
     }
+    const customerCountRequest = GROUNDING_CUSTOMER_COUNT_PATTERN.test(text);
     if (
-      /(сколько\s+(?:у\s+нас\s+)?клиент[а-яёa-z]*|количеств[а-яёa-z]*\s+клиент[а-яёa-z]*)/i.test(
-        text,
-      )
+      GROUNDING_YEAR_COMPARISON_PATTERN.test(text) ||
+      (customerCountRequest &&
+        GROUNDING_YEAR_COMPARISON_PATTERN.test(previousUserText))
     ) {
+      if (
+        allowedNames.has('analytics.business.query') &&
+        (BUSINESS_ACTION_REQUEST_PATTERN.test(text) ||
+          // 🔴 «Почему просадка» уходило в compare_years, а тот отдаёт ровно
+          // три числа: выручку, число операций и клиентов. Ни услуг, ни дней,
+          // ни отмен — объяснить причину по ним невозможно. Просьба разобраться
+          // должна идти в business.query: там 12 метрик со сравнением и разрез
+          // по услугам. Чистое «на сколько изменилось» по-прежнему берёт
+          // compare_years — только он сверяет деньги сразу за два года.
+          BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text))
+      ) {
+        return this.businessQueryRequirement(text, previousUserText);
+      }
+      if (allowedNames.has('analytics.business.compare_years')) {
+        return this.requireGrounding('business_year_comparison', [
+          'analytics.business.compare_years',
+        ]);
+      }
+      if (allowedNames.has('analytics.employee.query')) {
+        return this.employeeQueryRequirement(text, previousUserText);
+      }
+    }
+    if (customerCountRequest) {
+      if (allowedNames.has('analytics.business.query')) {
+        return this.businessQueryRequirement(text, previousUserText);
+      }
       return this.requireGrounding('customer_count', ['customers.count']);
     }
-    if (GROUNDING_YEAR_COMPARISON_PATTERN.test(text)) {
-      return this.requireGrounding('business_year_comparison', [
-        'analytics.business.compare_years',
-      ]);
+    if (
+      allowedNames.has('analytics.business.query') &&
+      this.isBusinessQuestion(brain, text, previousUserText, factRequest)
+    ) {
+      return this.businessQueryRequirement(text, previousUserText);
+    }
+    if (
+      allowedNames.has('analytics.employee.query') &&
+      this.isEmployeePerformanceQuestion(
+        brain,
+        text,
+        previousUserText,
+        factRequest,
+      )
+    ) {
+      return this.employeeQueryRequirement(text, previousUserText);
     }
     if (
       ((GROUNDING_ANALYTICS_PATTERN.test(text) ||
@@ -866,8 +1153,189 @@ export class AiCoreService {
   private requireGrounding(
     domain: string,
     toolNames: string[],
+    presetToolCall?: GroundingRequirement['presetToolCall'],
   ): GroundingRequirement {
-    return { domain, toolNames, strictNumbers: true };
+    return {
+      domain,
+      toolNames,
+      strictNumbers: true,
+      ...(presetToolCall ? { presetToolCall } : {}),
+    };
+  }
+
+  private businessQueryRequirement(
+    text: string,
+    previousUserText: string,
+  ): GroundingRequirement {
+    return this.requireGrounding(
+      'business_query',
+      ['analytics.business.query'],
+      {
+        name: 'analytics.business.query',
+        arguments: {
+          period: this.reportingPeriodForQuestion(text, previousUserText),
+          comparison: this.comparisonForQuestion(text, previousUserText),
+        },
+      },
+    );
+  }
+
+  private employeeQueryRequirement(
+    text: string,
+    previousUserText: string,
+  ): GroundingRequirement {
+    return this.requireGrounding(
+      'employee_query',
+      ['analytics.employee.query'],
+      {
+        name: 'analytics.employee.query',
+        arguments: {
+          period: this.reportingPeriodForQuestion(text, previousUserText),
+          comparison: this.comparisonForQuestion(text, previousUserText),
+        },
+      },
+    );
+  }
+
+  private isBusinessQuestion(
+    brain: MayaBrainContext,
+    text: string,
+    previousUserText: string,
+    factRequest: boolean,
+  ): boolean {
+    if (
+      [
+        'booking',
+        'schedule_management',
+        'knowledge',
+        'catalog',
+        'loyalty',
+        'support',
+      ].includes(brain.intent)
+    ) {
+      return false;
+    }
+    if (
+      [
+        'business_analytics',
+        'finance',
+        'staff_operations',
+        'marketing',
+      ].includes(brain.intent)
+    ) {
+      return true;
+    }
+    const businessSignal =
+      /(бизнес|салон|филиал|клиент|посетител|запис|визит|отмен|услуг|мастер|сотрудник|команд|выруч|оборот|касс|доход|прибыл|марж|деньг|чек|загруз|повторн|возврат|удержан|просад|рост|динамик|эффективност|показател|план|kpi)/i;
+    if (businessSignal.test(text)) {
+      return true;
+    }
+    if (
+      brain.intent === 'general' &&
+      !/^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|спасибо|пока|кто\s+ты|что\s+ты\s+умеешь|как\s+дела)[!.?\s]*$/i.test(
+        text.trim(),
+      )
+    ) {
+      return true;
+    }
+    const shortFollowUp =
+      /^(?:а\s+)?(?:почему|что\s+делать|как\s+исправить|как\s+улучшить|подробнее|а\s+по\s+этому|и\s+что|какой\s+вывод)\??$/i.test(
+        text.trim(),
+      );
+    return (
+      shortFollowUp && (businessSignal.test(previousUserText) || factRequest)
+    );
+  }
+
+  private isEmployeePerformanceQuestion(
+    brain: MayaBrainContext,
+    text: string,
+    previousUserText: string,
+    factRequest: boolean,
+  ): boolean {
+    if (
+      [
+        'booking',
+        'schedule_management',
+        'knowledge',
+        'catalog',
+        'loyalty',
+        'support',
+      ].includes(brain.intent)
+    ) {
+      return false;
+    }
+    if (
+      [
+        'business_analytics',
+        'finance',
+        'staff_operations',
+        'marketing',
+      ].includes(brain.intent)
+    ) {
+      return true;
+    }
+    const performanceSignal =
+      /(мой|мои|у\s+меня|я\s+заработ|моя\s+работ|мои\s+клиент|запис|выруч|чек|клиент|отмен|загруз|повторн|услуг|показател|план|kpi)/i;
+    if (performanceSignal.test(text)) {
+      return true;
+    }
+    return (
+      factRequest &&
+      /^(?:а\s+)?(?:почему|что\s+делать|как\s+улучшить|подробнее)/i.test(
+        text,
+      ) &&
+      performanceSignal.test(previousUserText)
+    );
+  }
+
+  private reportingPeriodForQuestion(
+    text: string,
+    previousUserText: string,
+  ):
+    | 'today'
+    | 'yesterday'
+    | 'week_to_date'
+    | 'month_to_date'
+    | 'year_to_date'
+    | 'last_7_days'
+    | 'last_30_days'
+    | 'last_month' {
+    const context = `${previousUserText} ${text}`;
+    if (/(?:за\s+)?вчера/i.test(context)) return 'yesterday';
+    if (/(?:за\s+)?сегодня|сегодняшн/i.test(context)) return 'today';
+    if (/последн[а-яa-z]*\s+7\s+дн/i.test(context)) return 'last_7_days';
+    if (/последн[а-яa-z]*\s+30\s+дн/i.test(context)) return 'last_30_days';
+    if (
+      /(?:за\s+)?прошл[а-яa-z]*\s+месяц/i.test(context) &&
+      !/(сравн|по\s+сравнению|динамик|просел|вырос|рост|снизил|упал)/i.test(
+        context,
+      )
+    ) {
+      return 'last_month';
+    }
+    if (/год|годов|годовой/i.test(context)) return 'year_to_date';
+    if (/недел/i.test(context)) return 'week_to_date';
+    if (/месяц/i.test(context)) return 'month_to_date';
+    return 'month_to_date';
+  }
+
+  private comparisonForQuestion(
+    text: string,
+    previousUserText: string,
+  ): 'none' | 'previous_period' | 'previous_year_same_period' {
+    const context = `${previousUserText} ${text}`;
+    if (GROUNDING_YEAR_COMPARISON_PATTERN.test(context)) {
+      return 'previous_year_same_period';
+    }
+    if (
+      /(сравн|по\s+сравнению|динамик|изменил|просад|просел|вырос|рост|снизил|упал|лучше|хуже|предыдущ[а-яa-z]*\s+(?:период|месяц|недел)|прошл[а-яa-z]*\s+(?:период|месяц|недел))/i.test(
+        context,
+      )
+    ) {
+      return 'previous_period';
+    }
+    return 'none';
   }
 
   private groundingSatisfied(
@@ -921,6 +1389,25 @@ export class AiCoreService {
     toolResults: AiCoreToolResult[],
     userText: string,
   ): string | null {
+    if (
+      requirement?.domain === 'business_query' ||
+      requirement?.domain === 'employee_query'
+    ) {
+      const reply = this.deterministicAnalyticsQueryReply(
+        requirement,
+        toolResults,
+        userText,
+      );
+      if (!reply) {
+        return null;
+      }
+      const toolName =
+        requirement.domain === 'employee_query'
+          ? 'analytics.employee.query'
+          : 'analytics.business.query';
+      const evidence = toolResults.find((result) => result.name === toolName);
+      return this.appendAnalyticsFreshness(reply, evidence?.result);
+    }
     if (requirement?.domain === 'business_year_comparison') {
       const evidence = toolResults.find(
         (result) => result.name === 'analytics.business.compare_years',
@@ -934,6 +1421,7 @@ export class AiCoreService {
       const previousPeriod = this.record(periods.previous);
       const revenue = this.record(data.revenue);
       const transactions = this.record(data.transactions);
+      const clients = this.record(data.clients);
       const currentRevenue = this.formatMoneyAmount(revenue.current);
       const previousRevenue = this.formatMoneyAmount(revenue.previous);
       const revenueDelta = this.formatMoneyAmount(revenue.delta);
@@ -966,6 +1454,27 @@ export class AiCoreService {
       const transactionPercent = this.formatSignedPercent(
         transactions.percent_change,
       );
+      const clientCurrent = this.optionalMetricNumber(clients.current);
+      const clientPrevious = this.optionalMetricNumber(clients.previous);
+      const clientDelta = this.optionalMetricNumber(clients.delta);
+      const clientPercent = this.formatSignedPercent(clients.percent_change);
+      const clientLine =
+        clients.verified === true &&
+        clientCurrent !== null &&
+        clientPrevious !== null &&
+        clientDelta !== null
+          ? `Уникальных клиентов с CRM-картой по неотменённым записям: ${this.formatMetricNumber(clientCurrent)} против ${this.formatMetricNumber(clientPrevious)}. Изменение: ${this.signedValue(clientDelta, this.formatMetricNumber(Math.abs(clientDelta)))}${clientPercent ? ` (${clientPercent})` : ''}.`
+          : null;
+      const customerFocused = GROUNDING_CUSTOMER_COUNT_PATTERN.test(
+        userText.toLowerCase().replace(/ё/g, 'е'),
+      );
+
+      if (customerFocused) {
+        const reply = clientLine
+          ? `Сравнила одинаковые периоды: ${currentLabel} и ${previousLabel}. ${clientLine} Источник — подтверждённый журнал записей CRM.`
+          : 'Не удалось получить из CRM подтверждённое число уникальных клиентов сразу за оба периода. Я не буду подменять клиентов транзакциями или локальным счётчиком.';
+        return this.appendAnalyticsFreshness(reply, evidence.result);
+      }
       const financeLine = `Поступления: ${currentRevenue} против ${previousRevenue}. Изменение: ${this.signedValue(revenueDeltaKopecks, revenueDelta)}${revenuePercent ? ` (${revenuePercent})` : ''}.`;
       const transactionLine =
         transactionCurrent !== null &&
@@ -974,14 +1483,18 @@ export class AiCoreService {
           ? `Положительных финансовых операций: ${this.formatMetricNumber(transactionCurrent)} против ${this.formatMetricNumber(transactionPrevious)}. Изменение: ${this.signedValue(transactionDelta, this.formatMetricNumber(Math.abs(transactionDelta)))}${transactionPercent ? ` (${transactionPercent})` : ''}.`
           : null;
 
-      return [
+      const reply = [
         `Сравнила одинаковые периоды: ${currentLabel} и ${previousLabel}.`,
         financeLine,
         transactionLine,
-        'Источник — подтверждённые операции CRM.',
+        clientLine,
+        clientLine
+          ? 'Источник — подтверждённые операции и журнал записей CRM.'
+          : 'Источник — подтверждённые операции CRM.',
       ]
         .filter((part): part is string => part !== null)
         .join(' ');
+      return this.appendAnalyticsFreshness(reply, evidence.result);
     }
 
     if (requirement?.domain === 'booking_availability') {
@@ -1144,6 +1657,417 @@ export class AiCoreService {
     return null;
   }
 
+  private appendAnalyticsFreshness(reply: string, evidence: unknown): string {
+    const data = this.record(evidence);
+    const freshness = this.record(data.freshness);
+    if (
+      freshness.status !== 'stale' ||
+      typeof freshness.snapshot_at !== 'string'
+    ) {
+      return reply;
+    }
+    const snapshotAt = new Date(freshness.snapshot_at);
+    if (!Number.isFinite(snapshotAt.getTime())) {
+      return `${reply} Временно показываю последний подтверждённый снимок: CRM сейчас не ответила, данные не обнулены.`;
+    }
+    const period = this.record(data.period);
+    const timezone =
+      typeof period.timezone === 'string'
+        ? period.timezone
+        : typeof data.timezone === 'string'
+          ? data.timezone
+          : 'UTC';
+    let label: string;
+    try {
+      label = new Intl.DateTimeFormat('ru-RU', {
+        timeZone: timezone,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(snapshotAt);
+    } catch {
+      label = snapshotAt.toISOString();
+    }
+    return `${reply} Временно показываю последний подтверждённый снимок от ${label}: CRM сейчас не ответила, данные не обнулены.`;
+  }
+
+  private deterministicAnalyticsQueryReply(
+    requirement: GroundingRequirement,
+    toolResults: AiCoreToolResult[],
+    userText: string,
+  ): string | null {
+    const personal = requirement.domain === 'employee_query';
+    const toolName = personal
+      ? 'analytics.employee.query'
+      : 'analytics.business.query';
+    const evidence = toolResults.find((result) => result.name === toolName);
+    if (!evidence) {
+      return null;
+    }
+
+    const data = this.record(evidence.result);
+    const metrics = this.record(data.metrics);
+    const changes = this.record(data.changes);
+    const current = this.record(data.current);
+    const comparison = this.record(data.comparison);
+    const text = userText.toLowerCase().replace(/ё/g, 'е');
+    const requestedRecommendation = BUSINESS_ACTION_REQUEST_PATTERN.test(text)
+      ? this.analyticsRecommendation(data, personal)
+      : null;
+    const requestedDiagnosis = BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text)
+      ? this.analyticsDiagnosis(data, personal)
+      : null;
+    const withRecommendation = (reply: string) =>
+      [reply, requestedDiagnosis, requestedRecommendation]
+        .filter((part): part is string => Boolean(part))
+        .join(' ');
+    const comparisonLabel =
+      comparison.mode === 'previous_year_same_period'
+        ? 'с аналогичным периодом прошлого года'
+        : comparison.mode === 'previous_period'
+          ? 'с предыдущим равным периодом'
+          : null;
+    const metric = (key: string) => this.optionalMetricNumber(metrics[key]);
+    const metricChange = (
+      key: string,
+      formatter: (value: number) => string = (value) =>
+        this.formatMetricNumber(value),
+    ) => {
+      const change = this.record(changes[key]);
+      const delta = this.optionalMetricNumber(change.delta);
+      if (delta === null || !comparisonLabel) {
+        return '';
+      }
+      const percent = this.formatSignedPercent(change.percent_change);
+      return ` Изменение ${comparisonLabel}: ${this.signedValue(delta, formatter(Math.abs(delta)))}${percent ? ` (${percent})` : ''}.`;
+    };
+    const money = (value: number) =>
+      this.formatMoneyEntries([
+        {
+          currency: this.analyticsCurrency(current),
+          amount_kopecks: value,
+        },
+      ]);
+    const countLine = (
+      label: string,
+      key: string,
+      suffix = '',
+    ): string | null => {
+      const value = metric(key);
+      const previous = this.optionalMetricNumber(
+        this.record(changes[key]).previous,
+      );
+      return value === null
+        ? null
+        : `${label}: ${this.formatMetricNumber(value)}${suffix}${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}${suffix}` : ''}.${metricChange(key)}`;
+    };
+
+    if (
+      /(чист[а-яa-z]*|бухгалтер[а-яa-z]*)\s+прибыл|прибыл[а-яa-z]*/i.test(text)
+    ) {
+      const revenue = metric('revenue_amount_kopecks');
+      return `Бухгалтерскую чистую прибыль CRM не подтверждает: нет полного учёта налогов и всех расходов.${revenue === null ? '' : ` Ближайший подтверждённый показатель — поступления ${money(revenue)}.`}`;
+    }
+    if (/зарплат[а-яa-z]*/i.test(text) && !personal) {
+      const payroll = this.record(this.record(current.finance).payroll);
+      const accrued = this.formatMoneyAmount(payroll.accrued_total);
+      if (
+        payroll.status === 'available' &&
+        payroll.verified === true &&
+        accrued
+      ) {
+        const paid = this.formatMoneyAmount(payroll.paid_total);
+        const balance = this.formatMoneyAmount(payroll.balance_total);
+        return [
+          `Начислено сотрудникам по данным CRM: ${accrued}.`,
+          paid ? `Выплачено: ${paid}.` : null,
+          balance ? `Остаток к выплате: ${balance}.` : null,
+        ]
+          .filter((part): part is string => part !== null)
+          .join(' ');
+      }
+      return 'Подтверждённый расчёт зарплат за выбранный период недоступен. Я не буду рассчитывать его из выручки.';
+    }
+    if (/(марж|валов[а-яa-z]*\s+прибыл)/i.test(text)) {
+      return 'В CRM нет распределения прямых затрат по услугам, поэтому валовую маржу достоверно рассчитать нельзя. Доступны поступления, средний чек, записи, клиенты, отмены и динамика услуг.';
+    }
+    if (
+      /(roi|окупаемост[^а-яa-z]*реклам|эффективност[^а-яa-z]*реклам)/i.test(
+        text,
+      )
+    ) {
+      return 'В CRM нет расходов на рекламу с атрибуцией к записям, поэтому marketing ROI пока не рассчитывается. Могу оценить динамику клиентов, записей и поступлений.';
+    }
+    if (
+      // 🔴 Было /(?:...|по).{0,24}клиент/ без границы слова, и предлог «по»
+      // находился внутри «ПОсоветуй как вернуть клиентов»: просьбу о совете
+      // ветка принимала за вопрос «сколько клиентов» и отвечала счётчиком.
+      /(?:количеств[а-яa-z]*|сколько|числ[а-яa-z]*|(?<![а-яa-z])по)\s[^.?!]{0,24}клиент|клиент.{0,24}(?:просел|вырос|динамик)/i.test(
+        text,
+      )
+    ) {
+      const line = countLine(
+        personal
+          ? 'Ваших уникальных клиентов по неотменённым записям'
+          : 'Уникальных клиентов с CRM-картой по неотменённым записям',
+        'unique_clients',
+      );
+      if (!line) {
+        return 'В журнале CRM нет подтверждённого идентификатора клиента для этого среза; записи и транзакции при этом доступны.';
+      }
+      return withRecommendation(line);
+    }
+    if (/(повторн|возвращ|удержан)/i.test(text)) {
+      const repeat = metric('repeat_clients_in_period');
+      const rate = metric('repeat_client_rate_percent');
+      if (repeat !== null) {
+        return withRecommendation(
+          `Повторных клиентов внутри выбранного периода: ${this.formatMetricNumber(repeat)}${rate === null ? '' : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange('repeat_clients_in_period')}`,
+        );
+      }
+    }
+    if (/(отмен|не\s+пришел|неявк)/i.test(text)) {
+      const cancelled = metric('appointments_cancelled');
+      const rate = metric('cancellation_rate_percent');
+      if (cancelled !== null) {
+        return withRecommendation(
+          `Отменённых записей: ${this.formatMetricNumber(cancelled)}${rate === null ? '' : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange('appointments_cancelled')}`,
+        );
+      }
+    }
+    if (/средн[а-яa-z]*\s+чек/i.test(text)) {
+      const key = personal
+        ? 'average_booked_value_amount_kopecks'
+        : 'average_ticket_amount_kopecks';
+      const value = metric(key);
+      return value === null
+        ? personal
+          ? 'Личная кассовая выручка мастера не атрибутируется CRM. Доступна средняя стоимость записанных услуг.'
+          : 'Подтверждённый средний чек за выбранный период недоступен.'
+        : `${personal ? 'Средняя стоимость записанных услуг' : 'Средний чек'}: ${money(value)}.${metricChange(key, money)}${
+            personal
+              ? ' Первое действие: после консультации предлагайте один действительно подходящий уход из каталога, без давления и повторной продажи после отказа.'
+              : ''
+          }`;
+    }
+    if (/(выруч|оборот|касс|доход|деньг|заработ)/i.test(text)) {
+      const key = personal
+        ? 'booked_value_amount_kopecks'
+        : 'revenue_amount_kopecks';
+      const value = metric(key);
+      return value === null
+        ? personal
+          ? 'Кассовую выручку конкретного мастера CRM не подтверждает. Могу показать стоимость его записанных услуг, загрузку и повторных клиентов.'
+          : 'Подтверждённые денежные поступления за выбранный период недоступны.'
+        : withRecommendation(
+            `${personal ? 'Стоимость записанных вам услуг' : 'Подтверждённые поступления'}: ${money(value)}.${metricChange(key, money)}${personal ? ' Это стоимость записей, а не кассовая выручка.' : ''}`,
+          );
+    }
+    if (/(услуг|стриж|бород|популяр|спрос)/i.test(text)) {
+      const serviceChanges = Array.isArray(data.service_changes)
+        ? data.service_changes.map((entry) => this.record(entry))
+        : [];
+      const declining = serviceChanges.find(
+        (entry) =>
+          this.optionalMetricNumber(entry.delta) !== null &&
+          Number(entry.delta) < 0,
+      );
+      if (declining && typeof declining.name === 'string') {
+        const delta = this.safeMetricNumber(declining.delta);
+        const currentAppointments = this.safeMetricNumber(
+          declining.current_appointments,
+        );
+        const previousAppointments = this.safeMetricNumber(
+          declining.previous_appointments,
+        );
+        const percent = this.formatSignedPercent(declining.percent_change);
+        return withRecommendation(
+          `Наибольшая просадка по услугам: ${declining.name} — ${this.formatMetricNumber(currentAppointments)} записей против ${this.formatMetricNumber(previousAppointments)}, изменение ${this.signedValue(delta, this.formatMetricNumber(Math.abs(delta)))}${percent ? ` (${percent})` : ''}.`,
+        );
+      }
+      const services = Array.isArray(current.service_summary)
+        ? current.service_summary
+            .slice(0, 3)
+            .map((entry) => this.record(entry))
+            .filter((entry) => typeof entry.name === 'string')
+        : [];
+      if (services.length > 0) {
+        return withRecommendation(
+          `Лидеры по числу записей: ${services
+            .map(
+              (entry) =>
+                `${String(entry.name)} — ${this.formatMetricNumber(this.safeMetricNumber(entry.appointments))}`,
+            )
+            .join('; ')}.`,
+        );
+      }
+    }
+    if (/(загруз|час|минут|занятост)/i.test(text)) {
+      const minutes = metric('booked_minutes');
+      if (minutes !== null) {
+        return withRecommendation(
+          `Записанное рабочее время: ${this.formatDuration(minutes)}.${metricChange('booked_minutes', (value) => this.formatDuration(value))}`,
+        );
+      }
+    }
+    if (/(запис|визит|посещен)/i.test(text)) {
+      const total = metric('appointments_total');
+      const active = metric('appointments_active');
+      const cancelled = metric('appointments_cancelled');
+      if (total !== null) {
+        return withRecommendation(
+          `Записей: ${this.formatMetricNumber(total)}${active === null ? '' : `, активных ${this.formatMetricNumber(active)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}.${metricChange('appointments_total')}`,
+        );
+      }
+    }
+
+    const summary = [
+      personal
+        ? this.analyticsMoneySummary(
+            'Стоимость записанных услуг',
+            metric('booked_value_amount_kopecks'),
+            money,
+          )
+        : this.analyticsMoneySummary(
+            'Поступления',
+            metric('revenue_amount_kopecks'),
+            money,
+          ),
+      countLine('Записи', 'appointments_total'),
+      countLine('Уникальные клиенты', 'unique_clients'),
+    ].filter((part): part is string => Boolean(part));
+    const recommendation =
+      requestedRecommendation ?? this.analyticsRecommendation(data, personal);
+    const insight = [requestedDiagnosis, recommendation]
+      .filter((part): part is string => Boolean(part))
+      .join(' ');
+    return summary.length > 0
+      ? `${summary.join(' ')}${insight ? ` ${insight}` : ''}`
+      : null;
+  }
+
+  private analyticsMoneySummary(
+    label: string,
+    value: number | null,
+    formatter: (value: number) => string,
+  ): string | null {
+    return value === null ? null : `${label}: ${formatter(value)}.`;
+  }
+
+  private analyticsRecommendation(
+    data: Record<string, unknown>,
+    personal: boolean,
+  ): string | null {
+    const metrics = this.record(data.metrics);
+    const changes = this.record(data.changes);
+    const cancellationRate = this.optionalMetricNumber(
+      metrics.cancellation_rate_percent,
+    );
+    const clientChange = this.record(changes.unique_clients);
+    const clientDelta = this.optionalMetricNumber(clientChange.delta);
+    const serviceChanges = Array.isArray(data.service_changes)
+      ? data.service_changes.map((entry) => this.record(entry))
+      : [];
+    const decliningService = serviceChanges.find(
+      (entry) =>
+        this.optionalMetricNumber(entry.delta) !== null &&
+        Number(entry.delta) < 0,
+    );
+
+    if (cancellationRate !== null && cancellationRate >= 10) {
+      return `Первое действие: снизить отмены через подтверждение записи и точечное напоминание — сейчас их доля ${this.formatMetricNumber(cancellationRate)}%.`;
+    }
+    if (clientDelta !== null && clientDelta < 0) {
+      return personal
+        ? 'Первое действие: вернуться к клиентам, у которых уже закончился обычный цикл визита.'
+        : 'Первое действие: сегментировать уснувших клиентов по их обычному циклу и запустить точечный возврат.';
+    }
+    if (decliningService && typeof decliningService.name === 'string') {
+      return `Первое действие: разобрать просадку услуги «${decliningService.name}» по мастерам, окнам и повторным визитам.`;
+    }
+    return null;
+  }
+
+  private analyticsDiagnosis(
+    data: Record<string, unknown>,
+    personal: boolean,
+  ): string | null {
+    const changes = this.record(data.changes);
+    const candidates = [
+      {
+        key: 'unique_clients',
+        label: personal
+          ? 'число ваших уникальных клиентов'
+          : 'число уникальных клиентов',
+      },
+      { key: 'appointments_total', label: 'количество записей' },
+      {
+        key: personal
+          ? 'average_booked_value_amount_kopecks'
+          : 'average_ticket_amount_kopecks',
+        label: personal ? 'средняя стоимость записи' : 'средний чек',
+      },
+      { key: 'booked_minutes', label: 'записанное рабочее время' },
+    ]
+      .map((candidate) => {
+        const change = this.record(changes[candidate.key]);
+        return {
+          ...candidate,
+          percent: this.optionalMetricNumber(change.percent_change),
+        };
+      })
+      .filter(
+        (
+          candidate,
+        ): candidate is { key: string; label: string; percent: number } =>
+          candidate.percent !== null && candidate.percent < 0,
+      )
+      .sort((left, right) => left.percent - right.percent);
+    const strongest = candidates[0];
+    if (!strongest) {
+      return 'В доступных CRM-показателях нет подтверждённого снижения, поэтому конкретную причину просадки назвать нельзя.';
+    }
+
+    const averageKey = personal
+      ? 'average_booked_value_amount_kopecks'
+      : 'average_ticket_amount_kopecks';
+    const averageChange = this.record(changes[averageKey]);
+    const averagePercent = this.optionalMetricNumber(
+      averageChange.percent_change,
+    );
+    const offset =
+      averagePercent !== null && averagePercent > 0
+        ? ` При этом ${personal ? 'средняя стоимость записи' : 'средний чек'} вырос${personal ? 'ла' : ''} на ${this.formatMetricNumber(averagePercent)}%, поэтому он частично компенсирует падение потока.`
+        : '';
+    return `Самое сильное подтверждённое ухудшение в доступных данных — ${strongest.label}: ${this.formatSignedPercent(strongest.percent)}.${offset}`;
+  }
+
+  private analyticsCurrency(current: Record<string, unknown>): string {
+    for (const key of ['revenue', 'average_ticket']) {
+      const entries = current[key];
+      if (!Array.isArray(entries) || entries.length === 0) {
+        continue;
+      }
+      const currency = this.record(entries[0]).currency;
+      if (typeof currency === 'string' && currency.trim()) {
+        return currency;
+      }
+    }
+    return 'RUB';
+  }
+
+  private formatDuration(minutes: number): string {
+    const rounded = Math.max(0, Math.round(minutes));
+    const hours = Math.floor(rounded / 60);
+    const remainder = rounded % 60;
+    if (hours === 0) {
+      return `${remainder} мин`;
+    }
+    return remainder === 0 ? `${hours} ч` : `${hours} ч ${remainder} мин`;
+  }
+
   private formatMoneyEntries(value: unknown): string {
     if (!Array.isArray(value) || value.length === 0) {
       return '0 ₽';
@@ -1277,24 +2201,61 @@ export class AiCoreService {
     return '';
   }
 
+  private previousUserText(messages: AiCoreMessage[]): string {
+    let latestFound = false;
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      if (message?.role !== 'user' || !message.content.trim()) {
+        continue;
+      }
+      if (!latestFound) {
+        latestFound = true;
+        continue;
+      }
+      return message.content.trim();
+    }
+    return '';
+  }
+
   private groundedNumbersMatch(
     reply: string,
     requirement: GroundingRequirement | null,
     toolResults: AiCoreToolResult[],
     userText: string,
   ): boolean {
+    return (
+      this.unsourcedNumbers(reply, requirement, toolResults, userText).length ===
+      0
+    );
+  }
+
+  /**
+   * Числа из ответа модели, которых нет в результатах инструментов.
+   *
+   * Асимметрия намеренная: к тому, что модель УТВЕРЖДАЕТ, требования строгие,
+   * а к тому, что считается ПОДТВЕРЖДЕНИЕМ, — щедрые. Иначе сторож ловил
+   * добросовестные ответы: год из строки «2026-01-01» не извлекался вовсе, а
+   * «снизилось на 9,2%» не сходилось с серверным −9.2 из-за знака, и весь
+   * ответ уходил в мусор.
+   */
+  private unsourcedNumbers(
+    reply: string,
+    requirement: GroundingRequirement | null,
+    toolResults: AiCoreToolResult[],
+    userText: string,
+  ): string[] {
     if (!requirement?.strictNumbers) {
-      return true;
+      return [];
     }
     const claims = this.groundingClaims(reply);
     if (claims.size === 0) {
-      return true;
+      return [];
     }
     const allowed = this.groundingNumbers(toolResults);
     for (const value of this.groundingNumbers(userText)) {
       allowed.add(value);
     }
-    return [...claims].every((claim) => allowed.has(claim));
+    return [...claims].filter((claim) => !allowed.has(claim)).slice(0, 8);
   }
 
   private groundingClaims(value: string): Set<string> {
@@ -1334,18 +2295,34 @@ export class AiCoreService {
     }
     const normalized = this.normalizeGroundingNumber(value);
     if (normalized !== null) {
-      values.add(normalized);
+      this.addGroundingNumber(values, normalized);
       return values;
     }
     if (typeof value === 'string') {
-      for (const match of value.matchAll(GROUNDING_NUMBER_PATTERN)) {
-        const number = this.normalizeGroundingNumber(match[0]);
-        if (number !== null) {
-          values.add(number);
-        }
+      // Внутри строк подтверждения ищем свободнее, чем в ответе модели:
+      // GROUNDING_NUMBER_PATTERN отбрасывал число, окружённое дефисами, и год
+      // из «2026-01-01» переставал считаться подтверждённым.
+      for (const match of value.matchAll(GROUNDING_EVIDENCE_NUMBER_PATTERN)) {
+        this.addGroundingNumber(
+          values,
+          this.normalizeGroundingNumber(match[0]),
+        );
       }
     }
     return values;
+  }
+
+  private addGroundingNumber(values: Set<string>, normalized: string | null) {
+    if (normalized === null) {
+      return;
+    }
+    values.add(normalized);
+    // Сервер отдаёт дельту со знаком (−9.2), а человек говорит «снизилось на
+    // 9,2%». Направление несут слова, поэтому сверяем по модулю: само число
+    // всё равно обязано прийти из инструмента.
+    if (normalized.startsWith('-')) {
+      values.add(normalized.slice(1));
+    }
   }
 
   private normalizeGroundingNumber(value: unknown): string | null {

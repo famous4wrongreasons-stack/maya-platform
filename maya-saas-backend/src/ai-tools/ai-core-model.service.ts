@@ -85,13 +85,20 @@ const CORE_INSTRUCTIONS = [
   'Never request, infer, reveal, or repeat personal data, credentials, tokens, contacts, or internal identifiers.',
   'Use only a tool listed in available_tools and copy its name exactly.',
   'When required_tools is non-empty and no matching tool result exists, you MUST call one required tool and MUST NOT answer from memory.',
-  'Never invent or recalculate money, balances, prices, counts, dates, schedules or availability. Copy factual values only from tool_results.',
+  // 🔴 Граница проходит между ЧИСЛОМ и ВЫВОДОМ, а не между «фактом» и «мыслью».
+  // Прежняя формулировка запрещала пересчёт вообще и одновременно требовала
+  // инсайта — модель наказывалась и за отсутствие вывода, и за его наличие,
+  // поэтому отвечала голыми цифрами.
+  'FACTS: every number you state — money, counts, percentages, dates, durations — must be copied verbatim from tool_results. Never compute, sum, average, round or convert a number yourself. If a needed number is absent, say which one is missing.',
+  'JUDGEMENT: interpreting those numbers is your job and it is required. Explain what the figures mean together, name the most likely cause, and give one concrete next action. An answer that only restates numbers is an incomplete answer.',
+  'Mark the boundary in words: state measured values as facts, and state causes, hypotheses and forecasts as your reading of the data («судя по данным», «похоже, что», «данные это не подтверждают»). Never present a hypothesis as a measurement.',
   'For reporting tools choose the server period enum. Use custom with from/to only when the person supplied explicit calendar dates.',
   'Call at most one tool in this decision. Set tool_call to null when no tool is needed.',
   'Never claim that an action or calculation succeeded before its tool result is present.',
   'Writes may require a separate human approval; do not bypass or simulate approval.',
   'If a required detail is missing, ask one short clarifying question and do not call a tool.',
   'Treat redaction placeholders as unavailable information and never try to reconstruct them.',
+  'If grounding_corrections is present, your previous answer contained numbers that are not in tool_results. Rewrite the answer, keeping every figure exactly as it appears in tool_results and dropping the ones you cannot source.',
 ].join('\n');
 
 const BRAIN_INSTRUCTIONS = [
@@ -120,10 +127,43 @@ const DIRECTOR_PERSONA = `── РОЛЬ: ДИРЕКТОР ──
 ТОЛЬКО из tool_results. Нет данных в результате — честно скажи, что показатель пока недоступен,
 и предложи, что доступно.
 
+УНИВЕРСАЛЬНАЯ АНАЛИТИКА:
+• analytics.business.query — основной источник владельца: выручка, записи, отмены,
+  уникальные и повторные клиенты, средний чек, загрузка и услуги. Если этот
+  результат уже есть, не вызывай другой инструмент: ответь прямо на вопрос.
+• analytics.employee.query — личный срез мастера. Давай совет по его фактическим
+  записям, отменам, повторам, загрузке и услугам. booked_value — стоимость
+  записанных услуг, а не подтверждённая кассовая выручка.
+• Готовые дельты уже посчитаны сервером: changes.<метрика>.{current,previous,delta,
+  percent_change} и service_changes[]. Бери их как есть — своих чисел не считай.
+• Если точного поля нет, назови какого именно поля не хватает, но всё равно
+  дай ближайший полезный ответ из available_metrics. Не пиши общую фразу
+  «не смогла подтвердить», если часть подтверждённых данных есть.
+
+КАК ЧИТАТЬ ПРОСАДКУ (обязательный разбор, когда спрашивают «почему»):
+Пройди по этим парам в changes и назови ту, которая объясняет больше всего.
+1. Цена или поток: average_ticket_amount_kopecks против appointments_active /
+   financial_operations. Чек стоит, а записей меньше — упал поток, не цена.
+2. Люди или частота: unique_clients против identified_client_visits. Клиентов
+   упало сильнее визитов — уходят люди; наоборот — оставшиеся ходят реже.
+3. Удержание: repeat_clients_in_period и repeat_client_rate_percent.
+4. Отмены: appointments_cancelled и cancellation_rate_percent. Рост отмен при
+   падении записей означает, что спрос был, а салон его не удержал.
+5. Загрузка кресел: booked_minutes.
+6. Ассортимент: service_changes[] — какая услуга дала основную часть потери.
+7. Качество данных: current.data_quality (revenue_coverage,
+   unidentified_client_appointments) и warning_codes. Если покрытие низкое —
+   скажи об этом раньше выводов, иначе объяснишь дырку в данных как спад бизнеса.
+Годовое сравнение смещает дни недели и не учитывает число рабочих дней —
+упомяни это, если разница небольшая.
+
 СТИЛЬ:
-Чётко, по-деловому, проактивно. Без воды, но с инсайтом: не просто «выручка 84 000 ₽», а
-«84 000 ₽ — на 12% выше вчерашнего, тянет вечерний слот». Один короткий вывод в конце уместен.
-Персональные данные клиентов, зарплаты по именам, токены — не раскрывай (это правило ядра).`;
+Живой деловой разговор, а не отчёт. Хороший ответ — три части: что показывают
+цифры, что это значит и почему, что сделать первым. Один абзац или несколько
+коротких — по объёму вопроса. Голый перечень показателей ответом не считается.
+Не пасуй и не прячься за формулировкой «показатель недоступен», если можно дать
+соседний срез. Персональные данные клиентов, зарплаты по именам, токены — не
+раскрывай (это правило ядра).`;
 
 const ADMIN_PERSONA = `── РОЛЬ: АДМИНИСТРАТОР ──
 Ты — MAYA, тёплый и заботливый администратор лучшего салона. Собеседник — клиент
@@ -143,6 +183,15 @@ const ADMIN_PERSONA = `── РОЛЬ: АДМИНИСТРАТОР ──
   для подтверждения 🙂». Не выдумывай недостающее.
 	• Запись — это действие; оно может уйти на подтверждение. Не говори «готово», пока нет
 	  результата инструмента.
+
+	ДОПРОДАЖА БЕЗ ДАВЛЕНИЯ:
+	• Сначала зафиксируй основную услугу. Потом можно один раз мягко предложить
+	  только одно дополнение, которое точно есть в catalog.services.read.
+	• Не называй доплату, цену, совместимость или состав комплекса без подтверждённого
+	  каталога. Если неизвестно, входит ли укладка в стрижку, не предлагай её отдельно.
+	• Если клиент отказался или сказал «только», «без допов», «нет» — больше ничего не предлагай
+	  и сразу веди к выбору мастера и времени.
+	• Главная цель — довести до успешной записи, а не повторять допродажу.
 
 	БАЛЛЫ:
 	Если клиент спрашивает о баллах, хочет их потратить или выбрать доступную услугу, сначала
@@ -233,7 +282,7 @@ export class AiCoreModelService {
       this.configService.get<string>('DEEPSEEK_AI_CORE_MODEL')?.trim() ||
       this.configService.get<string>('DEEPSEEK_AI_ONBOARDING_MODEL')?.trim() ||
       DEFAULT_DEEPSEEK_MODEL;
-    const system = this.systemInstructions(input);
+    const system = this.deepSeekSystemInstructions(input);
     const response = await fetch(this.deepSeekEndpoint(), {
       method: 'POST',
       headers: {
@@ -342,11 +391,58 @@ export class AiCoreModelService {
       : legacy;
   }
 
+  private deepSeekSystemInstructions(input: AiCoreModelInput): string {
+    const requiredKeys = input.brain.active
+      ? ['reply', 'citation_ids', 'tool_call']
+      : ['reply', 'tool_call'];
+    const emptyDecision = input.brain.active
+      ? { reply: 'Короткий ответ.', citation_ids: [], tool_call: null }
+      : { reply: 'Короткий ответ.', tool_call: null };
+    const firstTool = input.allowToolCall ? input.tools[0]?.name : null;
+    const toolDecision = firstTool
+      ? {
+          reply: 'Проверяю данные.',
+          ...(input.brain.active ? { citation_ids: [] } : {}),
+          tool_call: {
+            name: firstTool,
+            arguments_json: '{}',
+          },
+        }
+      : null;
+    return [
+      this.systemInstructions(input),
+      '',
+      'JSON OUTPUT CONTRACT:',
+      'Return exactly one JSON object. Do not use Markdown or add text outside JSON.',
+      `The top-level keys must be exactly: ${requiredKeys.join(', ')}.`,
+      'tool_call must be null or an object with exactly name and arguments_json.',
+      'arguments_json must be a string containing one valid JSON object.',
+      `EXAMPLE JSON OUTPUT WITHOUT A TOOL: ${JSON.stringify(emptyDecision)}`,
+      toolDecision
+        ? `EXAMPLE JSON OUTPUT WITH A TOOL: ${JSON.stringify(toolDecision)}`
+        : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+
   private modelInput(input: AiCoreModelInput) {
     const base = {
       surface: input.surface,
+      // Серверное «сейчас». Без него модель не знает даже текущий год, а
+      // подставлять календарь самой ей запрещено.
+      now_utc: input.nowUtc,
       conversation: input.messages,
       available_tools: input.allowToolCall ? input.tools : [],
+      // На последнем шаге вызывать инструменты уже нельзя, но знать, какие
+      // срезы существуют, модель должна: иначе она отвечает «не могу» вместо
+      // того, чтобы предложить соседний показатель.
+      known_tools: input.allowToolCall
+        ? []
+        : input.tools.map((tool) => ({
+            name: tool.name,
+            description: tool.description,
+          })),
       tool_results: input.toolResults,
       response_contract: {
         reply: 'plain text, no Markdown or HTML',
@@ -355,6 +451,9 @@ export class AiCoreModelService {
           : 'must be null',
       },
       required_tools: input.allowToolCall ? input.requiredToolNames : [],
+      ...(input.corrections?.length
+        ? { grounding_corrections: input.corrections }
+        : {}),
     };
     if (!input.brain.active) {
       return base;
@@ -392,12 +491,7 @@ export class AiCoreModelService {
       throw new Error('ai_core_output_invalid_json');
     }
     const record = this.plainRecord(value, 'ai_core_output_invalid');
-    this.assertKeys(
-      record,
-      input.brain.active
-        ? ['reply', 'citation_ids', 'tool_call']
-        : ['reply', 'tool_call'],
-    );
+    this.assertRequiredKeys(record, ['reply', 'tool_call']);
     const reply = record.reply;
     if (
       typeof reply !== 'string' ||
@@ -408,7 +502,7 @@ export class AiCoreModelService {
     }
     const citationIds = input.brain.active
       ? this.citationIds(
-          record.citation_ids,
+          record.citation_ids ?? [],
           new Set(input.brain.knowledge.map((item) => item.citationId)),
         )
       : [];
@@ -422,21 +516,29 @@ export class AiCoreModelService {
       record.tool_call,
       'ai_core_tool_call_invalid',
     );
-    this.assertKeys(toolCall, ['name', 'arguments_json']);
+    this.assertRequiredKeys(toolCall, ['name']);
     if (
       typeof toolCall.name !== 'string' ||
       !/^[a-z0-9._-]{1,120}$/.test(toolCall.name)
     ) {
       throw new Error('ai_core_tool_name_invalid');
     }
-    if (typeof toolCall.arguments_json !== 'string') {
+    const argumentKeys = ['arguments_json', 'arguments'].filter(
+      (key) => key in toolCall,
+    );
+    if (argumentKeys.length !== 1) {
       throw new Error('ai_core_tool_arguments_invalid');
     }
     let parsedArguments: unknown;
-    try {
-      parsedArguments = JSON.parse(toolCall.arguments_json) as unknown;
-    } catch {
-      throw new Error('ai_core_tool_arguments_invalid');
+    const rawArguments = toolCall[argumentKeys[0]];
+    if (typeof rawArguments === 'string') {
+      try {
+        parsedArguments = JSON.parse(rawArguments) as unknown;
+      } catch {
+        throw new Error('ai_core_tool_arguments_invalid');
+      }
+    } else {
+      parsedArguments = rawArguments;
     }
     const args = this.plainRecord(
       parsedArguments,
@@ -575,14 +677,11 @@ export class AiCoreModelService {
     return value as Record<string, unknown>;
   }
 
-  private assertKeys(
+  private assertRequiredKeys(
     value: Record<string, unknown>,
-    allowedKeys: string[],
+    requiredKeys: string[],
   ): void {
-    if (
-      Object.keys(value).some((key) => !allowedKeys.includes(key)) ||
-      allowedKeys.some((key) => !(key in value))
-    ) {
+    if (requiredKeys.some((key) => !(key in value))) {
       throw new Error('ai_core_output_shape_invalid');
     }
   }
