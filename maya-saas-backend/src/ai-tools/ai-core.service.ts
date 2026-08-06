@@ -163,8 +163,11 @@ const GROUNDING_PERSONAL_SCOPE_PATTERN =
   /(моя|мой|мои|личн[а-яёa-z]*|у\s+меня|сколько\s+я|я\s+заработ)/i;
 const GROUNDING_BUSINESS_SCOPE_PATTERN =
   /(бизнес[а-яёa-z]*|компан[а-яёa-z]*|по\s+всем|все\s+сотрудник[а-яёa-z]*|все\s+специалист[а-яёa-z]*|общ[а-яёa-z]*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
+// 🔴 Граница слова обязательна: «се-ГОД-ня» содержит «год», и без неё запрос
+// «сравни сегодня с прошлой неделей» уезжал в годовое сравнение, а «сколько
+// записей сегодня?» получал сопоставление с прошлым годом.
 const GROUNDING_YEAR_COMPARISON_PATTERN =
-  /(?:год[а-яёa-z]*.{0,96}(?:сравн|прошл|предыдущ)|(?:сравн|прошл|предыдущ).{0,96}год[а-яёa-z]*|год\s+к\s+году)/i;
+  /(?:(?<![а-яёa-z])год[а-яёa-z]*.{0,96}(?:сравн|прошл|предыдущ)|(?:сравн|прошл|предыдущ).{0,96}(?<![а-яёa-z])год[а-яёa-z]*|(?<![а-яёa-z])год\s+к\s+году)/i;
 const GROUNDING_CUSTOMER_COUNT_PATTERN =
   /(сколько\s+(?:у\s+нас\s+)?клиент[а-яёa-z]*|количеств[а-яёa-z]*\s+клиент[а-яёa-z]*|по\s+клиент[а-яёa-z]*)/i;
 // 🔴 «Посоветуй как вернуть клиентов» под старый список не подходило: там были
@@ -183,8 +186,30 @@ const GROUNDING_NUMBER_PATTERN =
  * \u043c\u043e\u0434\u0435\u043b\u044c\u044e \u0433\u043e\u0434 \u0441\u0447\u0438\u0442\u0430\u043b\u0441\u044f \u0432\u044b\u0434\u0443\u043c\u0430\u043d\u043d\u044b\u043c.
  */
 const GROUNDING_EVIDENCE_NUMBER_PATTERN = /-?\d+(?:[.,]\d+)?/g;
+/** Дата или метка времени: из такой строки берём только год. */
+const DATE_LIKE_PATTERN = /\d{4}-\d{2}-\d{2}|\d{2}:\d{2}/;
+/**
+ * Слова о движении показателя. Нужны, чтобы поймать переворот направления:
+ * сервер отдал −9.2, а модель написала «выросли на 9,2%». По модулю число
+ * подтверждено, и без этой проверки владелец увидел бы рост вместо падения.
+ */
+const GROWTH_WORD_PATTERN =
+  /(вырос[а-яёa-z]*|рост[а-яёa-z]*|раст[её]т|увеличил[а-яёa-z]*|прибавил[а-яёa-z]*|поднял[а-яёa-z]*|выше|больше|плюс)/i;
+const DECLINE_WORD_PATTERN =
+  /(упал[а-яёa-z]*|снизил[а-яёa-z]*|снижен[а-яёa-z]*|просел[а-яёa-z]*|сократил[а-яёa-z]*|уменьшил[а-яёa-z]*|паден[а-яёa-z]*|потер[а-яёa-z]*|ниже|меньше|минус)/i;
 const GROUNDING_SMALL_METRIC_PATTERN =
   /(?<number>\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(?:₽|руб\w*|%|балл\w*|бонус\w*|визит\w*|клиент\w*|запис\w*|минут\w*|час\w*|специалист\w*)/giu;
+/**
+ * Домены, где результат инструмента — личные данные самого спрашивающего.
+ *
+ * Их ответ собирает сервер, и во внешнюю модель полезная нагрузка не уходит.
+ * Обезличивание по именам ключей тут недостаточно: история визитов человека
+ * идентифицирует его сама по себе, даже без имени и телефона.
+ */
+const PII_SENSITIVE_DOMAINS = new Set([
+  'client_appointments',
+  'client_loyalty',
+]);
 const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
@@ -317,7 +342,11 @@ export class AiCoreService {
               tenantId,
               user.userId,
               dto.requestId,
-              0,
+              // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. При
+              // совпадении ключа рантайм сверяет аргументы и на расхождении
+              // бросает конфликт идемпотентности — вопрос вида «а за прошлый
+              // месяц целиком?» падал бы вместо ответа.
+              -1,
               preset.name,
             ),
           }),
@@ -607,10 +636,46 @@ export class AiCoreService {
           name: decision.toolCall.name,
           result: safeResult,
         });
-        // 🔴 Здесь раньше стоял второй перехват: как только инструмент отдавал
+        // Здесь раньше стоял второй перехват: как только инструмент отдавал
         // данные, ход завершался шаблоном — модель уходила за цифрами и не
         // возвращалась к микрофону, так и не увидев того, что сама запросила.
-        // Теперь цикл идёт дальше, и следующий шаг — её ответ по этим данным.
+        // Теперь цикл идёт дальше и следующий шаг — её ответ по этим данным.
+        //
+        // 🔴 Кроме личных данных клиента. Для собственной истории визитов и
+        // баланса баллов перехват сохранён: там результат инструмента — это ПД
+        // самого спрашивающего (даты визитов, услуги, суммы, идентификаторы
+        // CRM), и отправлять их во внешнюю модель значит вывезти их за периметр.
+        // Обезличивание ключей с именами тут не помогает: набор визитов сам по
+        // себе привязан к человеку. Контур 152-ФЗ важнее гладкой формулировки.
+        if (PII_SENSITIVE_DOMAINS.has(requirement?.domain ?? '')) {
+          const deterministicReply = this.deterministicGroundedReply(
+            requirement,
+            toolResults,
+            this.latestUserText(sanitized.messages),
+          );
+          if (deterministicReply) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: deterministicReply,
+                // Текст собрал сервер, а не провайдер: источник называем честно,
+                // иначе в аудите шаблон не отличить от ответа модели.
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'verified',
+                  toolResults,
+                ),
+              },
+            );
+          }
+        }
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
@@ -623,20 +688,27 @@ export class AiCoreService {
         // Ход упал, но пользователь получит связный текст из уже собранных
         // данных. Раньше такой случай выглядел в аудите как обычный успешный
         // ответ, и деградация модели была невидима — теперь она отмечена.
-        await this.auditLog.log({
-          tenantId,
-          userId: user.userId,
-          action: 'ai.core_turn_degraded',
-          entityType: 'ai_core_turn',
-          entityId: dto.requestId,
-          metadata: {
-            surface: dto.surface,
-            error_code: this.safeErrorCode(error),
-            model_calls: decisions.length,
-            tools_used: toolsUsed.map((tool) => tool.name),
-            grounding_domain: requirement?.domain ?? null,
-          },
-        });
+        //
+        // 🔴 Без await и с проглатыванием ошибки: мы уже внутри catch, и
+        // исключение отсюда ловить некому. Отказ базы аудита и отказ модели
+        // приходят вместе, так что падение здесь уничтожило бы готовый ответ
+        // ровно в тот момент, ради которого деградация и написана.
+        void this.auditLog
+          .log({
+            tenantId,
+            userId: user.userId,
+            action: 'ai.core_turn_degraded',
+            entityType: 'ai_core_turn',
+            entityId: dto.requestId,
+            metadata: {
+              surface: dto.surface,
+              error_code: this.safeErrorCode(error),
+              model_calls: decisions.length,
+              tools_used: toolsUsed.map((tool) => tool.name),
+              grounding_domain: requirement?.domain ?? null,
+            },
+          })
+          .catch(() => undefined);
         return this.complete(
           user,
           dto,
@@ -1332,6 +1404,16 @@ export class AiCoreService {
       /(сравн|по\s+сравнению|динамик|изменил|просад|просел|вырос|рост|снизил|упал|лучше|хуже|предыдущ[а-яa-z]*\s+(?:период|месяц|недел)|прошл[а-яa-z]*\s+(?:период|месяц|недел))/i.test(
         context,
       )
+    ) {
+      return 'previous_period';
+    }
+    // 🔴 Просьба объяснить или посоветовать без сравнения бессмысленна: без
+    // него инструмент вернёт changes={} и service_changes=[], и разбирать
+    // будет нечего — ответом снова станет перечень текущих счётчиков, ровно
+    // та жалоба, ради которой всё и затевалось.
+    if (
+      BUSINESS_ACTION_REQUEST_PATTERN.test(text) ||
+      BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text)
     ) {
       return 'previous_period';
     }
@@ -2248,31 +2330,90 @@ export class AiCoreService {
       return [];
     }
     const claims = this.groundingClaims(reply);
-    if (claims.size === 0) {
+    if (claims.length === 0) {
       return [];
     }
     const allowed = this.groundingNumbers(toolResults);
     for (const value of this.groundingNumbers(userText)) {
       allowed.add(value);
     }
-    return [...claims].filter((claim) => !allowed.has(claim)).slice(0, 8);
+    const problems: string[] = [];
+    for (const claim of claims) {
+      if (allowed.has(claim.value)) {
+        // Число совпало со знаком. Если сервер отдал его отрицательным, а рядом
+        // в тексте стоит слово о падении — всё верно.
+        if (
+          claim.value.startsWith('-') ||
+          !this.directionConflict(reply, claim, 'positive')
+        ) {
+          continue;
+        }
+        problems.push(`${claim.value} (в данных это не снижение)`);
+        continue;
+      }
+      // Знака нет, но по модулю число подтверждено: «снизилось на 9,2%» при
+      // серверном −9.2 — нормальная человеческая формулировка, её и добивались.
+      // А вот «выросло на 9,2%» на тех же данных — переворот направления, и
+      // раньше его случайно ловил сторож чисел. Ловим явно.
+      if (!claim.value.startsWith('-') && allowed.has(`-${claim.value}`)) {
+        if (!this.directionConflict(reply, claim, 'negative')) {
+          continue;
+        }
+        problems.push(`${claim.value} (в данных это снижение, а не рост)`);
+        continue;
+      }
+      problems.push(claim.value);
+    }
+    return [...new Set(problems)].slice(0, 8);
   }
 
-  private groundingClaims(value: string): Set<string> {
-    const claims = new Set<string>();
-    for (const match of value.matchAll(GROUNDING_NUMBER_PATTERN)) {
+  /**
+   * Описывает ли текст рядом с числом движение, противоположное данным.
+   *
+   * Смотрим только назад и близко: «выручка выросла на 9,2%» — слово стоит
+   * перед числом. Дальше по предложению могут идти другие показатели со своим
+   * направлением, поэтому окно узкое.
+   */
+  private directionConflict(
+    reply: string,
+    claim: { value: string; index: number },
+    actual: 'positive' | 'negative',
+  ): boolean {
+    const window = reply.slice(Math.max(0, claim.index - 48), claim.index);
+    return actual === 'negative'
+      ? GROWTH_WORD_PATTERN.test(window)
+      : DECLINE_WORD_PATTERN.test(window);
+  }
+
+  private groundingClaims(
+    value: string,
+  ): Array<{ value: string; index: number }> {
+    // Типографский минус («−», U+2212) и тире модель ставит чаще дефиса, а
+    // шаблон ниже знает только ASCII. Без этой замены «−9,2%» разбиралось как
+    // «9,2» и теряло знак ещё до сверки.
+    const text = value.replace(/[−–—]/g, '-');
+    const claims = new Map<string, number>();
+    const remember = (normalized: string | null, index: number) => {
+      if (normalized !== null && !claims.has(normalized)) {
+        claims.set(normalized, index);
+      }
+    };
+    for (const match of text.matchAll(GROUNDING_NUMBER_PATTERN)) {
       const normalized = this.normalizeGroundingNumber(match[0]);
       if (normalized !== null && Math.abs(Number(normalized)) > 10) {
-        claims.add(normalized);
+        remember(normalized, match.index ?? 0);
       }
     }
-    for (const match of value.matchAll(GROUNDING_SMALL_METRIC_PATTERN)) {
-      const normalized = this.normalizeGroundingNumber(match.groups?.number);
-      if (normalized !== null) {
-        claims.add(normalized);
-      }
+    for (const match of text.matchAll(GROUNDING_SMALL_METRIC_PATTERN)) {
+      remember(
+        this.normalizeGroundingNumber(match.groups?.number),
+        match.index ?? 0,
+      );
     }
-    return claims;
+    return [...claims].map(([claimValue, index]) => ({
+      value: claimValue,
+      index,
+    }));
   }
 
   private groundingNumbers(value: unknown): Set<string> {
@@ -2295,34 +2436,29 @@ export class AiCoreService {
     }
     const normalized = this.normalizeGroundingNumber(value);
     if (normalized !== null) {
-      this.addGroundingNumber(values, normalized);
+      values.add(normalized);
       return values;
     }
     if (typeof value === 'string') {
-      // Внутри строк подтверждения ищем свободнее, чем в ответе модели:
-      // GROUNDING_NUMBER_PATTERN отбрасывал число, окружённое дефисами, и год
-      // из «2026-01-01» переставал считаться подтверждённым.
+      // 🔴 Даты и метки времени НЕ разбираем на числа. Из
+      // «2026-08-01T21:00:00.000Z» иначе выпадают 8, 1, 21, 0, 59 и прочая
+      // мелочь, которая тут же становится «подтверждённой»: модель могла бы
+      // написать «доля отмен 21%», и сторож пропустил бы это, потому что 21 —
+      // это час из таймзоны. Забираем из таких строк только год.
+      if (DATE_LIKE_PATTERN.test(value)) {
+        for (const match of value.matchAll(/(?<!\d)\d{4}(?!\d)/g)) {
+          values.add(match[0]);
+        }
+        return values;
+      }
       for (const match of value.matchAll(GROUNDING_EVIDENCE_NUMBER_PATTERN)) {
-        this.addGroundingNumber(
-          values,
-          this.normalizeGroundingNumber(match[0]),
-        );
+        const normalized = this.normalizeGroundingNumber(match[0]);
+        if (normalized !== null) {
+          values.add(normalized);
+        }
       }
     }
     return values;
-  }
-
-  private addGroundingNumber(values: Set<string>, normalized: string | null) {
-    if (normalized === null) {
-      return;
-    }
-    values.add(normalized);
-    // Сервер отдаёт дельту со знаком (−9.2), а человек говорит «снизилось на
-    // 9,2%». Направление несут слова, поэтому сверяем по модулю: само число
-    // всё равно обязано прийти из инструмента.
-    if (normalized.startsWith('-')) {
-      values.add(normalized.slice(1));
-    }
   }
 
   private normalizeGroundingNumber(value: unknown): string | null {

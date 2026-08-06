@@ -548,19 +548,19 @@ describe('AiCoreService', () => {
       'loyalty.own.read',
     ]);
     expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe('admin');
-    const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.toolResults?.[0]?.name).toBe('loyalty.own.read');
-    expect(second?.persona).toBe('admin');
+    // 🔴 Баланс — личные данные спрашивающего, поэтому ответ собирает сервер, а
+    // результат инструмента во внешнюю модель не уходит вовсе: второго вызова
+    // нет. Ради гладкой формулировки контур 152-ФЗ не размениваем.
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       reply: 'Ваш баланс: 2 133 балла.',
-      source: 'deepseek',
+      source: 'safe_fallback',
       grounding: {
         status: 'verified',
         domain: 'client_loyalty',
         evidence_tools: ['loyalty.own.read'],
       },
     });
-    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
   it('grounds a request to spend bonuses before suggesting a service', async () => {
@@ -603,16 +603,23 @@ describe('AiCoreService', () => {
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
       'loyalty.own.read',
     ]);
-    // И баланс, и цена услуги в баллах названы моделью, но обе цифры пришли
-    // из own-scope инструмента — иначе сторож чисел не пропустил бы ответ.
-    const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.toolResults?.[0]?.name).toBe('loyalty.own.read');
+    // Ни баланс, ни доступные к списанию услуги во внешнюю модель не уезжают.
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(
+      JSON.stringify(mocks.model.decide.mock.calls[0]?.[0].toolResults),
+    ).not.toContain('SPA');
     expect(result).toMatchObject({
-      reply: 'У вас 2 133 балла. По сумме хватает на SPA за 1 200.',
-      source: 'deepseek',
+      source: 'safe_fallback',
       grounding: { status: 'verified', domain: 'client_loyalty' },
     });
-    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    // 🔴 Обещание переподтверждения обязано звучать всегда: без него клиент
+    // решит, что баллы уже списаны. Это гарантия сервера, а не добрая воля
+    // модели — поэтому проверяем дословно.
+    expect(result.reply).toContain(
+      'Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.',
+    );
+    expect(result.reply).toContain('2 133');
+    expect(result.reply).toContain('1 200');
   });
 
   it('grounds the authenticated customer appointment history', async () => {
@@ -654,8 +661,8 @@ describe('AiCoreService', () => {
 
     expect(result).toMatchObject({
       reply:
-        'Одна запись впереди, ещё одна была отменена. Подробности — в разделе «Записи».',
-      source: 'deepseek',
+        'В вашей истории 2 записи. Предстоящих: 1, отменённых: 1. Подробности доступны в разделе «Записи».',
+      source: 'safe_fallback',
       grounding: {
         status: 'verified',
         domain: 'client_appointments',
@@ -668,10 +675,14 @@ describe('AiCoreService', () => {
       'appointments.own.list',
     ]);
     expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe('admin');
-    const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.toolResults?.[0]?.name).toBe('appointments.own.list');
-    expect(second?.persona).toBe('admin');
-    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    // 🔴 Главное в этом тесте. Набор визитов идентифицирует человека сам по
+    // себе — по датам, услугам и суммам, даже без имени и телефона. Поэтому
+    // ответ собирает сервер, а во внешнюю модель история НЕ уходит: второго
+    // вызова нет, и ни один визит не попадает в её вход.
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(
+      JSON.stringify(mocks.model.decide.mock.calls[0]?.[0].toolResults),
+    ).toBe('[]');
   });
 
   it('explains access denial without pretending the protected source is offline', async () => {
@@ -1336,11 +1347,14 @@ describe('AiCoreService', () => {
       ],
     });
 
+    // 🔴 Просьба о совете тянет сравнение с предыдущим периодом. Без него
+    // инструмент вернул бы changes={} и service_changes=[], и советовать было
+    // бы не из чего — ответ выродился бы в перечень текущих счётчиков.
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       employee,
       'analytics.employee.query',
       expect.objectContaining({
-        arguments: { period: 'month_to_date', comparison: 'none' },
+        arguments: { period: 'month_to_date', comparison: 'previous_period' },
       }),
     );
     expect(result.grounding).toMatchObject({
@@ -2051,6 +2065,108 @@ describe('AiCoreService', () => {
       source: 'deepseek',
       grounding: { status: 'verified', domain: 'business_query' },
     });
+  });
+
+  it('catches a decline described as growth even though the figure itself is real', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-direction',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_year_same_period' },
+        metrics: { revenue_amount_kopecks: 7_000_000 },
+        changes: {
+          revenue_amount_kopecks: {
+            current: 7_000_000,
+            previous: 7_711_000,
+            delta: -711_000,
+            percent_change: -9.2,
+          },
+        },
+        current: {},
+        service_changes: [],
+      },
+    });
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Поступления выросли на 9,2% к прошлому году. Отличный темп.',
+          toolCall: null,
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Поступления снизились на 9,2% к прошлому году.',
+          toolCall: null,
+        }),
+      );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Насколько просела выручка по сравнению с прошлым годом?',
+        },
+      ],
+    });
+
+    // 🔴 Число 9,2 в данных есть — но со знаком минус. Сверки по модулю мало:
+    // «выросли» на падении это не ошибка в цифре, а перевёрнутый смысл, и
+    // владелец принял бы решение по несуществующему росту. Ловим по словам
+    // рядом с числом и требуем переписать.
+    const correction = mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0];
+    expect(correction).toContain('снижение, а не рост');
+    expect(result.reply).toContain('снизились на 9,2%');
+    expect(result.reply).not.toContain('выросли');
+    expect(result.source).toBe('deepseek');
+  });
+
+  it('does not treat an hour inside a timestamp as a confirmed metric', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-timestamp',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        // 21 здесь встречается только как час в смещении Europe/Moscow.
+        period: {
+          from: '2026-08-01T21:00:00.000Z',
+          to: '2026-08-07T20:59:59.999Z',
+          timezone: 'Europe/Moscow',
+        },
+        metrics: { appointments_total: 40 },
+        changes: {},
+        current: {},
+        service_changes: [],
+      },
+    });
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({ reply: 'Доля отмен — 21%.', toolCall: null }),
+      )
+      .mockResolvedValueOnce(
+        decision({ reply: 'Записей за период: 40.', toolCall: null }),
+      );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Что с записями за неделю?' }],
+    });
+
+    // 🔴 Разбирая строки дат на числа, сторож считал бы подтверждёнными часы,
+    // минуты и дни месяца — и пропустил бы любой процент от 0 до 59. Из таких
+    // строк берём только год.
+    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+      '21',
+    );
+    expect(result.reply).toBe('Записей за период: 40.');
   });
 
   it('gives the model the server time instead of letting it guess the calendar', async () => {
