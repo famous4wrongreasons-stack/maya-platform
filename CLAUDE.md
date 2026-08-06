@@ -29,6 +29,32 @@
 - **Бэкенд → VPS:** `scp` `.py` из `ai администратор/` на `botadmin@111.88.148.206:/home/botadmin/barbershop-bot/`, затем `systemctl restart barbershop-bot`. Бэкенд и фронт деплоятся **раздельно**.
 - **Фронт → Beget:** вручную залить `app.html`, `api-proxy.php` (если менялись эндпоинты), `index.html`. SW push-only ⇒ новый html подтянется без version-bump.
 
+### MAYA OS / SaaS (`mayaos.ru`) — топология не такая, как кажется
+
+`mayaos.ru` резолвится в **Beget `45.130.41.193`**, но это только фронт. Бэкенд —
+NestJS на том же VPS, что и бот: **`111.88.148.206`**.
+
+| Что | Где |
+|---|---|
+| Сайт + `app/` | Beget, `~/mayaos.ru/public_html` (логин `mocine3388@prime.beget.com`) |
+| `/api/*` | PHP-реле `maya-platform-api.php` → `https://maya.111.88.148.206.nip.io/api` |
+| NestJS | VPS `111.88.148.206`, `/opt/maya-saas/current` → `releases/<стамп>`, юнит `maya-saas`, порт 3107 |
+| Секреты | `/etc/maya-saas/live-widgets.env` (читается systemd только при старте юнита) |
+
+🔴 **VPS закрыт напрямую** — с рабочей машины недоступны ни 22, ни 80, ни 443.
+Ходить только через Beget как трамплин; ключи при этом остаются локально:
+
+```
+ssh -o ProxyCommand="ssh -i ~/.ssh/beget_deploy -W %h:%p mocine3388@prime.beget.com" \
+    -i ~/.ssh/yandex_bot botadmin@111.88.148.206
+```
+
+Гочи выката: `/opt/maya-saas/releases` принадлежит `maya-saas`, поэтому каталог
+релиза создавать `sudo mkdir` + `chown botadmin` (у `botadmin` есть `NOPASSWD: ALL`).
+Строку `ProxyCommand` нельзя протащить в `rsync -e` — кавычки теряются, нужна
+обёртка-скрипт. Симлинк `current` переключать только после смоука нового релиза
+на запасном порту.
+
 ## Критические гочи (read before you touch)
 
 1. 🔴 **Секреты в открытом виде** в `ai администратор/config.py`, `smm_bot/config.py`, `tg-config.php`, `api-proxy.php`. Проект не под git. **Ключи ещё НЕ ротированы** — см. [SECURITY_REMEDIATION.md](SECURITY_REMEDIATION.md). Готов каркас выноса в env: `ai администратор/config.example.py` + `.env.example`.
