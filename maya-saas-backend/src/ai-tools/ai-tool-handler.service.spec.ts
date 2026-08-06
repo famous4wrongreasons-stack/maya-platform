@@ -189,17 +189,18 @@ describe('AiToolHandlerService output minimization', () => {
   });
 
   it('applies only the immutable schedule approved by a manager', async () => {
+    const applyStaffScheduleDayChange = jest.fn().mockResolvedValue({
+      staff_id: '1461615',
+      date: '2026-08-06',
+      is_working: true,
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '18:00' },
+      ],
+      verified: true,
+    });
     const crmService = {
-      applyStaffScheduleDayChange: jest.fn().mockResolvedValue({
-        staff_id: '1461615',
-        date: '2026-08-06',
-        is_working: true,
-        slots: [
-          { from: '10:00', to: '14:00' },
-          { from: '15:00', to: '18:00' },
-        ],
-        verified: true,
-      }),
+      applyStaffScheduleDayChange,
     } as unknown as CrmService;
     const service = createService({ crmService });
 
@@ -229,18 +230,15 @@ describe('AiToolHandlerService output minimization', () => {
       verified: true,
       existing_appointments_preserved: true,
     });
-    expect(crmService.applyStaffScheduleDayChange).toHaveBeenCalledWith(
-      'tenant-a',
-      {
-        staffId: '1461615',
-        date: '2026-08-06',
-        slots: [
-          { from: '10:00', to: '14:00' },
-          { from: '15:00', to: '18:00' },
-        ],
-        expectedRevision: 'a'.repeat(64),
-      },
-    );
+    expect(applyStaffScheduleDayChange).toHaveBeenCalledWith('tenant-a', {
+      staffId: '1461615',
+      date: '2026-08-06',
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '18:00' },
+      ],
+      expectedRevision: 'a'.repeat(64),
+    });
   });
 
   it('removes employee names and provider identifiers from analytics', async () => {
@@ -418,7 +416,13 @@ describe('AiToolHandlerService output minimization', () => {
       ],
       expenses: [],
       net: [],
-      average_ticket: [],
+      average_ticket: [
+        {
+          currency: 'RUB',
+          amount_kopecks: 146_698,
+          amount_major_units: 1_466.98,
+        },
+      ],
       finance: {
         source: 'external_crm',
         provider: 'yclients',
@@ -523,7 +527,20 @@ describe('AiToolHandlerService output minimization', () => {
       },
       branch: { findFirst: jest.fn() },
     } as unknown as PrismaService;
-    const service = createService({ crmService, prisma });
+    const getBusinessOverview = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data_source: 'crm',
+        appointments: { unique_clients: 80 },
+      })
+      .mockResolvedValueOnce({
+        data_source: 'crm',
+        appointments: { unique_clients: 100 },
+      });
+    const analyticsService = {
+      getBusinessOverview,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ crmService, prisma, analyticsService });
 
     const result = await service.execute(
       'analytics.business.compare_years',
@@ -531,12 +548,26 @@ describe('AiToolHandlerService output minimization', () => {
       {},
       'execution-year-comparison',
     );
+    const cachedResult = await service.execute(
+      'analytics.business.compare_years',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {},
+      'execution-year-comparison-cached',
+    );
 
     expect(getRevenueSummary).toHaveBeenNthCalledWith(1, 'tenant-a', {
       from: '2025-12-31T21:00:00.000Z',
       to: '2026-08-06T12:34:56.789Z',
     });
     expect(getRevenueSummary).toHaveBeenNthCalledWith(2, 'tenant-a', {
+      from: '2024-12-31T21:00:00.000Z',
+      to: '2025-08-06T12:34:56.789Z',
+    });
+    expect(getBusinessOverview).toHaveBeenNthCalledWith(1, 'tenant-a', {
+      from: '2025-12-31T21:00:00.000Z',
+      to: '2026-08-06T12:34:56.789Z',
+    });
+    expect(getBusinessOverview).toHaveBeenNthCalledWith(2, 'tenant-a', {
       from: '2024-12-31T21:00:00.000Z',
       to: '2025-08-06T12:34:56.789Z',
     });
@@ -571,7 +602,285 @@ describe('AiToolHandlerService output minimization', () => {
         delta: 20,
         percent_change: 20,
       },
+      clients: {
+        verified: true,
+        source: 'crm',
+        definition: 'identified_unique_clients_with_non_cancelled_appointments',
+        current: 80,
+        previous: 100,
+        delta: -20,
+        percent_change: -20,
+      },
     });
+    expect(cachedResult).toEqual(result);
+    expect(getRevenueSummary).toHaveBeenCalledTimes(2);
+    expect(getBusinessOverview).toHaveBeenCalledTimes(2);
+  });
+
+  it('answers a universal business query with server-computed metric and service changes', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const getBusinessOverview = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data_source: 'maya',
+        period: { from: 'current-from', to: 'current-to', timezone: 'UTC' },
+        appointments: {
+          total: 120,
+          active: 108,
+          cancelled: 12,
+          cancellation_rate_percent: 10,
+          unique_clients: 80,
+          repeat_clients_in_period: 28,
+          repeat_client_rate_percent: 35,
+          identified_client_visits: 108,
+          booked_minutes: 6_480,
+        },
+        revenue: [{ currency: 'RUB', amount_kopecks: 15_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [{ currency: 'RUB', amount_kopecks: 125_000 }],
+        daily: [],
+        staff: [],
+        services: [
+          {
+            name: 'Мужская стрижка',
+            appointments: 60,
+            booked_value: [{ currency: 'RUB', amount_kopecks: 9_000_000 }],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        data_source: 'maya',
+        period: { from: 'previous-from', to: 'previous-to', timezone: 'UTC' },
+        appointments: {
+          total: 140,
+          active: 132,
+          cancelled: 8,
+          cancellation_rate_percent: 5.7,
+          unique_clients: 100,
+          repeat_clients_in_period: 40,
+          repeat_client_rate_percent: 40,
+          identified_client_visits: 132,
+          booked_minutes: 7_920,
+        },
+        revenue: [{ currency: 'RUB', amount_kopecks: 17_500_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [{ currency: 'RUB', amount_kopecks: 125_000 }],
+        daily: [],
+        staff: [],
+        services: [
+          {
+            name: 'Мужская стрижка',
+            appointments: 75,
+            booked_value: [{ currency: 'RUB', amount_kopecks: 11_250_000 }],
+          },
+        ],
+      });
+    const analyticsService = {
+      getBusinessOverview,
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'month_to_date', comparison: 'previous_period' },
+      'execution-universal-business',
+    );
+
+    expect(result).toMatchObject({
+      verified: true,
+      metrics: {
+        revenue_amount_kopecks: 15_000_000,
+        appointments_total: 120,
+        unique_clients: 80,
+        average_ticket_amount_kopecks: 125_000,
+      },
+      changes: {
+        revenue_amount_kopecks: {
+          current: 15_000_000,
+          previous: 17_500_000,
+          delta: -2_500_000,
+          percent_change: -14.3,
+        },
+        unique_clients: {
+          current: 80,
+          previous: 100,
+          delta: -20,
+          percent_change: -20,
+        },
+      },
+      service_changes: [
+        {
+          name: 'Мужская стрижка',
+          current_appointments: 60,
+          previous_appointments: 75,
+          delta: -15,
+          percent_change: -20,
+        },
+      ],
+    });
+    expect(getBusinessOverview).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps a universal employee query scoped to the current master', async () => {
+    const getEmployeeOverview = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data_source: 'crm',
+        period: { from: 'current-from', to: 'current-to', timezone: 'UTC' },
+        appointments: {
+          total: 20,
+          active: 18,
+          cancelled: 2,
+          cancellation_rate_percent: 10,
+          unique_clients: 15,
+          repeat_clients_in_period: 3,
+          repeat_client_rate_percent: 20,
+          identified_client_visits: 18,
+          booked_minutes: 1_080,
+        },
+        revenue: [{ currency: 'RUB', amount_kopecks: 3_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [{ currency: 'RUB', amount_kopecks: 150_000 }],
+        daily: [],
+        staff: [],
+        services: [],
+        employee: { provider_id: 'secret-provider', name: 'Анна' },
+      })
+      .mockResolvedValueOnce({
+        data_source: 'crm',
+        period: { from: 'previous-from', to: 'previous-to', timezone: 'UTC' },
+        appointments: {
+          total: 16,
+          active: 16,
+          cancelled: 0,
+          cancellation_rate_percent: 0,
+          unique_clients: 13,
+          repeat_clients_in_period: 3,
+          repeat_client_rate_percent: 23.1,
+          identified_client_visits: 16,
+          booked_minutes: 960,
+        },
+        revenue: [{ currency: 'RUB', amount_kopecks: 2_240_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [{ currency: 'RUB', amount_kopecks: 140_000 }],
+        daily: [],
+        staff: [],
+        services: [],
+        employee: { provider_id: 'secret-provider', name: 'Анна' },
+      });
+    const analyticsService = {
+      getEmployeeOverview,
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = await service.execute(
+      'analytics.employee.query',
+      { ...principal, userId: 'employee-user', role: UserRole.EMPLOYEE },
+      { period: 'month_to_date', comparison: 'previous_period' },
+      'execution-universal-employee',
+    );
+
+    expect(result).toMatchObject({
+      verified: true,
+      metrics: {
+        booked_value_amount_kopecks: 3_000_000,
+        average_booked_value_amount_kopecks: 150_000,
+        appointments_total: 20,
+        unique_clients: 15,
+      },
+      changes: {
+        booked_value_amount_kopecks: {
+          delta: 760_000,
+          percent_change: 33.9,
+        },
+      },
+    });
+    expect(JSON.stringify(result)).not.toContain('secret-provider');
+    expect(JSON.stringify(result)).not.toContain('Анна');
+    expect(getEmployeeOverview).toHaveBeenCalledTimes(2);
+    expect(getEmployeeOverview).toHaveBeenCalledWith(
+      'tenant-a',
+      'employee-user',
+      expect.any(Object),
+    );
+  });
+
+  it('caches verified CRM operations even when the finance feed is unavailable', async () => {
+    const getBusinessOverview = jest.fn().mockResolvedValue({
+      data_source: 'crm',
+      period: { from: 'from', to: 'to', timezone: 'UTC' },
+      appointments: {
+        total: 12,
+        active: 12,
+        cancelled: 0,
+        cancellation_rate_percent: 0,
+        unique_clients: 9,
+        repeat_clients_in_period: 3,
+        repeat_client_rate_percent: 33.3,
+        identified_client_visits: 12,
+        booked_minutes: 720,
+      },
+      revenue: [],
+      expenses: [],
+      net: [],
+      average_ticket: [],
+      daily: [],
+      staff: [],
+      services: [],
+    });
+    const getBusinessFinance = jest
+      .fn()
+      .mockRejectedValue(new Error('finance temporarily unavailable'));
+    const analyticsService = {
+      getBusinessOverview,
+      getBusinessFinance,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+    const args = {
+      period: 'custom',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T23:59:59.999Z',
+      comparison: 'previous_period',
+    };
+
+    const first = await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      args,
+      'execution-crm-cache-a',
+    );
+    const second = await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      args,
+      'execution-crm-cache-b',
+    );
+
+    expect(first).toMatchObject({
+      verified: true,
+      finance_verified: false,
+      metrics: { appointments_total: 12, unique_clients: 9 },
+    });
+    expect(second).toEqual(first);
+    expect(getBusinessOverview).toHaveBeenCalledTimes(2);
+    expect(getBusinessFinance).toHaveBeenCalledTimes(2);
   });
 
   it('replaces staff names with deterministic booking labels', async () => {
@@ -677,7 +986,12 @@ describe('AiToolHandlerService output minimization', () => {
       overrides.staffService ?? ({} as StaffService),
       overrides.prisma ??
         ({
-          tenant: { findUnique: jest.fn() },
+          tenant: {
+            findUnique: jest.fn().mockResolvedValue({
+              calendarSource: 'external',
+              defaultTimezone: 'UTC',
+            }),
+          },
           branch: { findFirst: jest.fn() },
         } as unknown as PrismaService),
     );

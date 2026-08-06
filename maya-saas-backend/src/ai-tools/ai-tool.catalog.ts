@@ -57,6 +57,7 @@ const REPORTING_PERIOD_SCHEMA = {
         'yesterday',
         'week_to_date',
         'month_to_date',
+        'year_to_date',
         'last_7_days',
         'last_30_days',
         'last_month',
@@ -68,6 +69,21 @@ const REPORTING_PERIOD_SCHEMA = {
     from: { type: 'string', format: 'date-time' },
     to: { type: 'string', format: 'date-time' },
     branch_id: { type: 'string', minLength: 8, maxLength: 128 },
+  },
+} as const;
+
+const BUSINESS_QUERY_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['period', 'comparison'],
+  properties: {
+    ...REPORTING_PERIOD_SCHEMA.properties,
+    comparison: {
+      type: 'string',
+      enum: ['none', 'previous_period', 'previous_year_same_period'],
+      description:
+        'Use previous_period for adjacent equal-length periods and previous_year_same_period for the same local calendar dates one year earlier.',
+    },
   },
 } as const;
 
@@ -175,6 +191,21 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'analytics.employee.query',
+    description:
+      'Universal personal performance analytics for the current employee. Returns appointments, cancellations, unique and repeat clients, booked service value, average booked value, booked minutes, service demand and optional comparison. This never exposes another employee data and booked value is not cash revenue.',
+    inputSchema: BUSINESS_QUERY_SCHEMA,
+    allowedRoles: STAFF_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['analytics.employee'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 70_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'last_verified_snapshot',
+  },
+  {
     name: 'analytics.business.read',
     description:
       'Read tenant or branch operational analytics. Relative reporting periods are resolved by the server in the tenant timezone.',
@@ -190,9 +221,24 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'analytics.business.query',
+    description:
+      'Universal verified business analytics for an owner or manager. Returns revenue and financial operations, appointments, cancellations, unique and repeat clients, average ticket, booked minutes, daily dynamics, service demand and optional comparison with the previous equal period or previous year. Use this for any factual business-performance question that is not a personal employee question.',
+    inputSchema: BUSINESS_QUERY_SCHEMA,
+    allowedRoles: BUSINESS_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['analytics.business'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 70_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'last_verified_snapshot',
+  },
+  {
     name: 'analytics.business.compare_years',
     description:
-      'Compare verified business revenue for the current year to date with the same elapsed period of the previous year. Dates and percentage deltas are calculated by the server in the tenant timezone.',
+      'Compare verified business revenue, positive financial operations and unique clients from non-cancelled appointments for the current year to date with the same elapsed period of the previous year. Dates and percentage deltas are calculated by the server in the tenant timezone.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: FINANCE_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -200,9 +246,9 @@ export const MAYA_AI_TOOL_CATALOG = [
     riskTier: 'read',
     approvalPolicy: 'none',
     idempotency: 'none',
-    timeoutMs: 45_000,
+    timeoutMs: 70_000,
     retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
+    fallbackPolicy: 'last_verified_snapshot',
   },
   {
     name: 'expenses.read',

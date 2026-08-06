@@ -57,6 +57,60 @@ describe('AiToolRuntimeService', () => {
     expect(JSON.stringify(executionUpdateData)).not.toContain('customer_count');
   });
 
+  it('returns the latest verified analytics snapshot when the CRM read fails', async () => {
+    const harness = createHarness();
+    harness.executionFindUnique.mockResolvedValue(null);
+    harness.executionCreate.mockResolvedValue({ id: 'execution-failed' });
+    harness.handlerExecute.mockRejectedValue(new Error('crm timeout'));
+    harness.executionFindFirst.mockResolvedValue({
+      id: 'execution-snapshot',
+      encryptedResult: encryptFixture({
+        verified: true,
+        period: { timezone: 'Europe/Moscow' },
+        metrics: { unique_clients: 41 },
+      }),
+      completedAt: new Date('2026-08-06T12:00:00.000Z'),
+    });
+
+    const result = await harness.tenantContext.runAsSystemTenant(
+      'tenant-a',
+      () =>
+        harness.runtime.execute(
+          { ...customer, role: UserRole.TENANT_OWNER },
+          'analytics.business.query',
+          {
+            arguments: {
+              period: 'month_to_date',
+              comparison: 'previous_period',
+            },
+            surface: 'native',
+          },
+        ),
+    );
+
+    expect(result).toMatchObject({
+      status: 'completed',
+      execution_id: 'execution-snapshot',
+      replayed: true,
+      stale: true,
+      result: {
+        verified: true,
+        metrics: { unique_clients: 41 },
+        freshness: {
+          status: 'stale',
+          snapshot_at: '2026-08-06T12:00:00.000Z',
+          reason: 'ai_tool_execution_failed',
+        },
+      },
+    });
+    expect(harness.getLastAuditLogInput()).toEqual(
+      expect.objectContaining({
+        action: 'ai.tool_execution_stale_replayed',
+        entityId: 'execution-failed',
+      }),
+    );
+  });
+
   it('creates an approval without executing a write tool', async () => {
     const harness = createHarness();
     let capturedApprovalData: Record<string, unknown> = {};
@@ -273,6 +327,7 @@ function createHarness() {
     return Promise.resolve({});
   });
   const executionFindUnique = jest.fn();
+  const executionFindFirst = jest.fn();
   const executionCreate = jest.fn();
   let executionUpdateInput: unknown;
   const executionUpdate = jest.fn<
@@ -293,6 +348,7 @@ function createHarness() {
     },
     aiToolExecution: {
       findUnique: executionFindUnique,
+      findFirst: executionFindFirst,
       create: executionCreate,
       update: executionUpdate,
     },
@@ -334,9 +390,12 @@ function createHarness() {
       ),
     ),
   } as unknown as EncryptionService;
-  const auditLog = {
-    log: jest.fn().mockResolvedValue({ id: 'audit-a' }),
-  } as unknown as AuditLogService;
+  let lastAuditLogInput: unknown;
+  const auditLogLog = jest.fn((input: unknown): Promise<{ id: string }> => {
+    lastAuditLogInput = input;
+    return Promise.resolve({ id: 'audit-a' });
+  });
+  const auditLog = { log: auditLogLog } as unknown as AuditLogService;
 
   return {
     runtime: new AiToolRuntimeService(
@@ -355,12 +414,14 @@ function createHarness() {
     approvalFindUniqueOrThrow,
     approvalUpdate,
     executionFindUnique,
+    executionFindFirst,
     executionCreate,
     executionUpdate,
     membershipFindUnique,
     handlerExecute,
     policyAssertCanExecute,
     policyAssertCanDecide,
+    getLastAuditLogInput: () => lastAuditLogInput,
     getApprovalUpdateInput: () => approvalUpdateInput,
     getExecutionUpdateInput: () => executionUpdateInput,
   };

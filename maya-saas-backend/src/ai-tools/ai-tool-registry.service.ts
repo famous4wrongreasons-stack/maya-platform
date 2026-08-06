@@ -23,6 +23,7 @@ const REPORTING_PERIODS = new Set([
   'yesterday',
   'week_to_date',
   'month_to_date',
+  'year_to_date',
   'last_7_days',
   'last_30_days',
   'last_month',
@@ -102,6 +103,9 @@ export class AiToolRegistryService {
       case 'analytics.business.read':
       case 'expenses.read':
         return this.parseReportingPeriod(args);
+      case 'analytics.employee.query':
+      case 'analytics.business.query':
+        return this.parseAnalyticsQuery(args);
       case 'appointments.own.cancel':
         this.assertAllowedKeys(args, ['appointment_id']);
         return {
@@ -329,6 +333,30 @@ export class AiToolRegistryService {
             branch_id: this.assertEntityId(args.branch_id, 'branch_id'),
           }),
     };
+  }
+
+  private parseAnalyticsQuery(args: Record<string, unknown>) {
+    this.assertAllowedKeys(args, [
+      'period',
+      'from',
+      'to',
+      'branch_id',
+      'comparison',
+    ]);
+    if (
+      typeof args.comparison !== 'string' ||
+      !['none', 'previous_period', 'previous_year_same_period'].includes(
+        args.comparison,
+      )
+    ) {
+      this.invalidArguments('analytics comparison is invalid');
+    }
+    const period = this.parseReportingPeriod(
+      Object.fromEntries(
+        Object.entries(args).filter(([key]) => key !== 'comparison'),
+      ),
+    );
+    return { ...period, comparison: args.comparison };
   }
 
   private assertObject(input: unknown): Record<string, unknown> {

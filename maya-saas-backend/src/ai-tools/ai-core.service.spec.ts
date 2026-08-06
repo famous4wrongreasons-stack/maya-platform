@@ -2067,6 +2067,61 @@ describe('AiCoreService', () => {
     });
   });
 
+  it('does not mistake decline wording next to an absolute figure for an error', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-absolute-decline',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        metrics: {
+          average_ticket_amount_kopecks: 143_617,
+          appointments_total: 141,
+        },
+        changes: {
+          average_ticket_amount_kopecks: {
+            current: 143_617,
+            previous: 150_374,
+            delta: -6_757,
+            percent_change: -4.5,
+          },
+          appointments_total: {
+            current: 141,
+            previous: 171,
+            delta: -30,
+            percent_change: -17.5,
+          },
+        },
+        current: {},
+        service_changes: [],
+      },
+    });
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply:
+          'Средний чек просел до 1 436,17 ₽ с 1 503,74 ₽, это −4,5%. Записей стало меньше: 141 против 171.',
+        toolCall: null,
+      }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Че у нас за просадки' }],
+    });
+
+    // 🔴 Из-за этого «что у нас за просадки» и отвечалось шаблоном: сторож
+    // видел слово «просел» рядом с числом 1436.17 и объявлял его ошибкой
+    // направления. Но абсолютная величина направления не несёт — падает не
+    // число, а показатель. Проверка направления имеет смысл только для дельт.
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.source).toBe('deepseek');
+    expect(result.reply).toContain('1 436,17 ₽');
+    expect(result.reply).toContain('141 против 171');
+  });
+
   it('catches a decline described as growth even though the figure itself is real', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.runtime.execute.mockResolvedValue({

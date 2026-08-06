@@ -2366,16 +2366,25 @@ export class AiCoreService {
     if (claims.length === 0) {
       return [];
     }
-    const allowed = this.groundingNumbers(toolResults);
+    const evidence = this.groundingEvidence(toolResults);
     for (const value of this.groundingNumbers(userText)) {
-      allowed.add(value);
+      evidence.absolute.add(value);
     }
+    const allowed = new Set([...evidence.absolute, ...evidence.delta]);
     const problems: string[] = [];
     for (const claim of claims) {
       if (allowed.has(claim.value)) {
-        // Число совпало со знаком. Если сервер отдал его отрицательным, а рядом
-        // в тексте стоит слово о падении — всё верно.
+        // 🔴 Проверять направление у АБСОЛЮТНОЙ величины нельзя: она его не
+        // несёт. «Средний чек 1 436,17 ₽ — просел с 1 503,74» — правильная
+        // фраза, а прежний сторож видел «просел» рядом с положительным числом
+        // и браковал ответ. На вопросе «что у нас за просадки» под нож
+        // попадало всё сразу: семь верных чисел из одного ответа.
+        // Смысл направление имеет только у дельт и процентов изменения.
+        const onlyDelta =
+          evidence.delta.has(claim.value) &&
+          !evidence.absolute.has(claim.value);
         if (
+          !onlyDelta ||
           claim.value.startsWith('-') ||
           !this.directionConflict(reply, claim, 'positive')
         ) {
@@ -2482,6 +2491,43 @@ export class AiCoreService {
       value: claimValue,
       index,
     }));
+  }
+
+  /**
+   * Разделяет подтверждённые числа на абсолютные величины и изменения.
+   *
+   * Различие нужно ровно для одной проверки — направления. Выручка, число
+   * записей и средний чек сами по себе не растут и не падают, их можно
+   * упоминать в любом контексте. А вот дельта и процент изменения несут знак,
+   * и назвать падение ростом — уже искажение факта.
+   */
+  private groundingEvidence(value: unknown): {
+    absolute: Set<string>;
+    delta: Set<string>;
+  } {
+    const absolute = new Set<string>();
+    const delta = new Set<string>();
+    const isChangeKey = (key: string) =>
+      key === 'delta' || key === 'percent_change';
+    const walk = (node: unknown, inChange: boolean) => {
+      if (Array.isArray(node)) {
+        node.forEach((item) => walk(item, inChange));
+        return;
+      }
+      if (node !== null && typeof node === 'object') {
+        for (const [key, item] of Object.entries(
+          node as Record<string, unknown>,
+        )) {
+          walk(item, isChangeKey(key));
+        }
+        return;
+      }
+      for (const number of this.groundingNumbers(node)) {
+        (inChange ? delta : absolute).add(number);
+      }
+    };
+    walk(value, false);
+    return { absolute, delta };
   }
 
   private groundingNumbers(value: unknown): Set<string> {

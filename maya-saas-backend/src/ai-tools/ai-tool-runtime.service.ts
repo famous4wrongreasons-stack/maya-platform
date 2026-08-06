@@ -29,6 +29,7 @@ import type { ExecuteAiToolDto } from './dto/execute-ai-tool.dto';
 
 const APPROVAL_TTL_MS = 10 * 60 * 1000;
 const MAX_CANONICAL_INPUT_BYTES = 8 * 1024;
+const LAST_VERIFIED_SNAPSHOT_TTL_MS = 24 * 60 * 60 * 1000;
 const APPROVAL_STATUS = {
   PENDING: 'pending',
   APPROVED: 'approved',
@@ -659,8 +660,97 @@ export class AiToolRuntimeService {
           error_code: errorCode,
         },
       });
+      const snapshot = await this.lastVerifiedSnapshot(params, errorCode).catch(
+        () => null,
+      );
+      if (snapshot) {
+        await this.auditLog.log({
+          tenantId: params.principal.tenantId,
+          userId: params.principal.userId,
+          action: 'ai.tool_execution_stale_replayed',
+          entityType: 'ai_tool_execution',
+          entityId: execution.id,
+          metadata: {
+            tool_name: params.definition.name,
+            risk_tier: params.definition.riskTier,
+            surface: params.principal.surface,
+            error_code: errorCode,
+            snapshot_execution_id: snapshot.executionId,
+          },
+        });
+        return {
+          status: EXECUTION_STATUS.COMPLETED,
+          execution_id: snapshot.executionId,
+          tool_name: params.definition.name,
+          result: snapshot.result,
+          replayed: true,
+          stale: true,
+        };
+      }
       throw error;
     }
+  }
+
+  private async lastVerifiedSnapshot(
+    params: {
+      principal: AiToolPrincipal;
+      definition: AiToolDefinition;
+      inputHash: string;
+      approval: ApprovalRecord | null;
+    },
+    errorCode: string,
+  ): Promise<{ executionId: string; result: unknown } | null> {
+    if (
+      params.approval ||
+      params.definition.fallbackPolicy !== 'last_verified_snapshot'
+    ) {
+      return null;
+    }
+    const snapshot = await this.prisma.aiToolExecution.findFirst({
+      where: {
+        tenantId: params.principal.tenantId,
+        actorUserId: params.principal.userId,
+        toolName: params.definition.name,
+        surface: params.principal.surface,
+        inputHash: params.inputHash,
+        status: EXECUTION_STATUS.COMPLETED,
+        encryptedResult: { not: null },
+        completedAt: {
+          gte: new Date(Date.now() - LAST_VERIFIED_SNAPSHOT_TTL_MS),
+        },
+      },
+      orderBy: { completedAt: 'desc' },
+      select: {
+        id: true,
+        encryptedResult: true,
+        completedAt: true,
+      },
+    });
+    if (!snapshot?.encryptedResult || !snapshot.completedAt) {
+      return null;
+    }
+    const decrypted = this.parseJson(
+      this.encryption.decrypt(snapshot.encryptedResult),
+    );
+    if (
+      !decrypted ||
+      typeof decrypted !== 'object' ||
+      Array.isArray(decrypted) ||
+      (decrypted as Record<string, unknown>).verified !== true
+    ) {
+      return null;
+    }
+    return {
+      executionId: snapshot.id,
+      result: {
+        ...(decrypted as Record<string, unknown>),
+        freshness: {
+          status: 'stale',
+          snapshot_at: snapshot.completedAt.toISOString(),
+          reason: errorCode,
+        },
+      },
+    };
   }
 
   private async replayCompletedApproval(approval: ApprovalRecord) {

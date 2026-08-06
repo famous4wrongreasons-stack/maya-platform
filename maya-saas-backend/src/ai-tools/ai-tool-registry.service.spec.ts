@@ -59,6 +59,33 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('validates universal business and employee analytics comparisons', () => {
+    expect(
+      service.validateArguments('analytics.business.query', {
+        period: 'year_to_date',
+        comparison: 'previous_year_same_period',
+      }),
+    ).toEqual({
+      period: 'year_to_date',
+      comparison: 'previous_year_same_period',
+    });
+    expect(
+      service.validateArguments('analytics.employee.query', {
+        period: 'month_to_date',
+        comparison: 'previous_period',
+      }),
+    ).toEqual({
+      period: 'month_to_date',
+      comparison: 'previous_period',
+    });
+    expect(() =>
+      service.validateArguments('analytics.business.query', {
+        period: 'month_to_date',
+        comparison: 'invented_period',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
   it('rejects PII and invalid amounts in loyalty reasons', () => {
     expect(() =>
       service.validateArguments('loyalty.internal.adjust', {

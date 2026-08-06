@@ -262,18 +262,27 @@ export class AiCoreModelService {
 
     let lastError: unknown = null;
     for (const provider of candidates) {
-      try {
-        return provider === 'deepseek'
-          ? await this.requestDeepSeek(input)
-          : await this.requestOpenAi(input);
-      } catch (error) {
-        lastError = error;
-        this.logger.warn(
-          `AI Core provider failed: ${provider}:${this.safeErrorName(error)}`,
-        );
-        if (configuredProvider !== 'auto') {
-          break;
+      // 🔴 Две попытки на провайдера. Осечки формата ответа — пустое тело,
+      // сбитый JSON, лишний ключ — у языковой модели случайны и проходят со
+      // второго раза. Когда провайдер задан явно, запасного варианта нет, и
+      // одна такая осечка означала для владельца шаблон вместо разбора.
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          return provider === 'deepseek'
+            ? await this.requestDeepSeek(input)
+            : await this.requestOpenAi(input);
+        } catch (error) {
+          lastError = error;
+          this.logger.warn(
+            `AI Core provider failed: ${provider}:${this.safeErrorName(error)} (попытка ${attempt + 1})`,
+          );
+          if (attempt === 1 || !this.isRetriable(error)) {
+            break;
+          }
         }
+      }
+      if (configuredProvider !== 'auto') {
+        break;
       }
     }
 
@@ -503,7 +512,11 @@ export class AiCoreModelService {
       throw new Error('ai_core_output_invalid_json');
     }
     const record = this.plainRecord(value, 'ai_core_output_invalid');
-    this.assertRequiredKeys(record, ['reply', 'tool_call']);
+    // 🔴 Только reply. Отсутствие tool_call — это отсутствие вызова, а не
+    // испорченный ответ: deepseek-v4-pro просто не пишет ключ, когда он пустой,
+    // и весь ответ отбрасывался. При провайдере без запасного варианта это
+    // означало ai_model_unavailable и шаблон вместо разбора.
+    this.assertRequiredKeys(record, ['reply']);
     const reply = record.reply;
     if (
       typeof reply !== 'string' ||
@@ -518,7 +531,7 @@ export class AiCoreModelService {
           new Set(input.brain.knowledge.map((item) => item.citationId)),
         )
       : [];
-    if (record.tool_call === null) {
+    if (record.tool_call === null || record.tool_call === undefined) {
       return { reply: reply.trim(), citationIds, toolCall: null };
     }
     if (!input.allowToolCall) {
@@ -696,6 +709,27 @@ export class AiCoreModelService {
     if (requiredKeys.some((key) => !(key in value))) {
       throw new Error('ai_core_output_shape_invalid');
     }
+  }
+
+  /**
+   * Стоит ли повторить запрос к тому же провайдеру.
+   *
+   * Повторяем только осечки, случайные по природе: модель вернула пустое тело,
+   * сбитый JSON, лишний или недостающий ключ, либо сервер провайдера ответил
+   * пятисоткой. Отказ по ключу, неверный адрес или запрет вызова инструмента
+   * повторять бессмысленно — второй раз будет то же самое.
+   */
+  private isRetriable(error: unknown): boolean {
+    const name = this.safeErrorName(error);
+    return (
+      /_output_missing$/.test(name) ||
+      /_http_5\d\d$/.test(name) ||
+      /^ai_core_output_(invalid_json|invalid|shape_invalid)$/.test(name) ||
+      /^ai_core_(reply|citations)_invalid$/.test(name) ||
+      /^deepseek_finish_/.test(name) ||
+      name === 'TimeoutError' ||
+      name === 'AbortError'
+    );
   }
 
   private safeErrorName(error: unknown): string {

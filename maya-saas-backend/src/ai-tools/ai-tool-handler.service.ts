@@ -35,6 +35,19 @@ const SCHEDULE_MANAGER_ROLES = new Set<UserRole>([
 
 @Injectable()
 export class AiToolHandlerService {
+  private readonly businessYearComparisonCache = new Map<
+    string,
+    { expiresAt: number; value: unknown }
+  >();
+  private readonly businessQueryCache = new Map<
+    string,
+    { expiresAt: number; value: unknown }
+  >();
+  private readonly employeeQueryCache = new Map<
+    string,
+    { expiresAt: number; value: unknown }
+  >();
+
   constructor(
     private readonly crmService: CrmService,
     private readonly appointmentsService: AppointmentsService,
@@ -73,10 +86,14 @@ export class AiToolHandlerService {
           ),
         );
       }
+      case 'analytics.employee.query':
+        return this.queryEmployeeAnalytics(principal, args);
       case 'analytics.business.read': {
         const query = await this.reportingQuery(principal.tenantId, args);
         return this.readBusinessAnalytics(principal, query);
       }
+      case 'analytics.business.query':
+        return this.queryBusinessAnalytics(principal, args);
       case 'analytics.business.compare_years':
         return this.compareBusinessYears(principal);
       case 'expenses.read':
@@ -225,12 +242,29 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     query: AnalyticsRangeQueryDto,
   ) {
-    const overview = this.record(
-      await this.analyticsService.getBusinessOverview(
-        principal.tenantId,
-        query,
-      ),
-    );
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: principal.tenantId },
+      select: { calendarSource: true },
+    });
+    const shouldReadFinance =
+      tenant?.calendarSource === 'external' &&
+      !query.branchId &&
+      CRM_FINANCE_ROLES.has(principal.role);
+    const [overviewValue, financeSummary] = await Promise.all([
+      this.analyticsService.getBusinessOverview(principal.tenantId, query),
+      shouldReadFinance
+        ? Promise.resolve()
+            .then(() =>
+              this.analyticsService.getBusinessFinance(
+                principal.tenantId,
+                query,
+              ),
+            )
+            .then((value) => this.record(value))
+            .catch(() => null)
+        : Promise.resolve(null),
+    ]);
+    const overview = this.record(overviewValue);
     const operational = this.safeAnalytics(overview);
     if (overview.data_source !== 'crm') {
       return operational;
@@ -261,70 +295,476 @@ export class AiToolHandlerService {
         finance: this.unavailableFinance('role_restricted'),
       };
     }
-
-    try {
-      const summary = this.record(
-        await this.analyticsService.getBusinessFinance(
-          principal.tenantId,
-          query,
-        ),
-      );
-      const revenue = this.record(summary.revenue);
-      const payroll = this.record(summary.payroll);
-      const revenueTotal =
-        revenue.status === 'available' && revenue.verified === true
-          ? this.safeMoneyAmount(revenue.total)
-          : null;
-      const payrollAvailable =
-        payroll.status === 'available' && payroll.verified === true;
-
-      return {
-        ...failClosed,
-        period: summary.period ?? failClosed.period,
-        revenue: revenueTotal ? [revenueTotal] : [],
-        finance: {
-          source: summary.source ?? 'external_crm',
-          provider: summary.provider ?? null,
-          verified: summary.verified === true,
-          revenue: {
-            status: revenue.status ?? 'unavailable',
-            verified: revenue.verified === true,
-            transaction_count:
-              typeof revenue.transaction_count === 'number'
-                ? revenue.transaction_count
-                : null,
-            total: revenueTotal,
-          },
-          payroll: {
-            status: payroll.status ?? 'unavailable',
-            verified: payroll.verified === true,
-            accrued_total: payrollAvailable
-              ? this.safeMoneyAmount(payroll.accrued_total)
-              : null,
-            paid_total: payrollAvailable
-              ? this.safeMoneyAmount(payroll.paid_total)
-              : null,
-            balance_total: payrollAvailable
-              ? this.safeMoneyAmount(payroll.balance_total)
-              : null,
-          },
-          warning_codes: this.safeWarningCodes(summary.warnings),
-        },
-      };
-    } catch {
+    if (!financeSummary) {
       return {
         ...failClosed,
         finance: this.unavailableFinance('finance_unavailable'),
       };
     }
+
+    const revenue = this.record(financeSummary.revenue);
+    const payroll = this.record(financeSummary.payroll);
+    const revenueTotal =
+      revenue.status === 'available' && revenue.verified === true
+        ? this.safeMoneyAmount(revenue.total)
+        : null;
+    const transactionCount =
+      typeof revenue.transaction_count === 'number' &&
+      Number.isFinite(revenue.transaction_count)
+        ? revenue.transaction_count
+        : null;
+    const averageTicket =
+      revenueTotal && transactionCount && transactionCount > 0
+        ? {
+            currency: revenueTotal.currency,
+            amount_kopecks: Math.round(
+              revenueTotal.amount_kopecks / transactionCount,
+            ),
+            amount_major_units: this.majorUnits(
+              Math.round(revenueTotal.amount_kopecks / transactionCount),
+            ),
+          }
+        : null;
+    const payrollAvailable =
+      payroll.status === 'available' && payroll.verified === true;
+
+    return {
+      ...failClosed,
+      period: financeSummary.period ?? failClosed.period,
+      revenue: revenueTotal ? [revenueTotal] : [],
+      average_ticket: averageTicket ? [averageTicket] : [],
+      finance: {
+        source: financeSummary.source ?? 'external_crm',
+        provider: financeSummary.provider ?? null,
+        verified: financeSummary.verified === true,
+        revenue: {
+          status: revenue.status ?? 'unavailable',
+          verified: revenue.verified === true,
+          transaction_count: transactionCount,
+          total: revenueTotal,
+        },
+        payroll: {
+          status: payroll.status ?? 'unavailable',
+          verified: payroll.verified === true,
+          accrued_total: payrollAvailable
+            ? this.safeMoneyAmount(payroll.accrued_total)
+            : null,
+          paid_total: payrollAvailable
+            ? this.safeMoneyAmount(payroll.paid_total)
+            : null,
+          balance_total: payrollAvailable
+            ? this.safeMoneyAmount(payroll.balance_total)
+            : null,
+        },
+        warning_codes: this.safeWarningCodes(financeSummary.warnings),
+      },
+    };
+  }
+
+  private async queryBusinessAnalytics(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const comparison = this.requiredString(args.comparison);
+    if (
+      !['none', 'previous_period', 'previous_year_same_period'].includes(
+        comparison,
+      )
+    ) {
+      throw new Error('Invalid business analytics comparison');
+    }
+    const cacheKey = [
+      principal.tenantId,
+      principal.role,
+      this.requiredString(args.period),
+      comparison,
+      typeof args.from === 'string' ? args.from : '',
+      typeof args.to === 'string' ? args.to : '',
+      typeof args.branch_id === 'string' ? args.branch_id : '',
+    ].join('|');
+    const cached = this.businessQueryCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    if (cached) {
+      this.businessQueryCache.delete(cacheKey);
+    }
+
+    const currentQuery = await this.reportingQuery(principal.tenantId, args);
+    const previousQuery =
+      comparison === 'none'
+        ? null
+        : await this.comparisonReportingQuery(
+            principal.tenantId,
+            currentQuery,
+            comparison as 'previous_period' | 'previous_year_same_period',
+          );
+    const read = (query: AnalyticsRangeQueryDto) =>
+      this.retryAnalyticsRead(() =>
+        this.readBusinessAnalytics(principal, query),
+      );
+    const [current, previous] = await Promise.all([
+      read(currentQuery),
+      previousQuery ? read(previousQuery) : Promise.resolve(null),
+    ]);
+    const currentSnapshot = this.businessMetricSnapshot(current);
+    const previousSnapshot = previous
+      ? this.businessMetricSnapshot(previous)
+      : null;
+    const result = {
+      verified: this.businessOperationalAnalyticsVerified(current),
+      finance_verified:
+        this.record(this.record(current).finance).verified === true,
+      source: this.record(current).data_source ?? null,
+      period: this.record(current).period ?? currentQuery,
+      comparison: {
+        mode: comparison,
+        period: previous
+          ? (this.record(previous).period ?? previousQuery)
+          : null,
+      },
+      current,
+      previous,
+      metrics: currentSnapshot,
+      changes: previousSnapshot
+        ? this.businessMetricChanges(currentSnapshot, previousSnapshot)
+        : {},
+      service_changes: previous
+        ? this.businessServiceChanges(current, previous)
+        : [],
+      available_metrics: Object.entries(currentSnapshot)
+        .filter(([, value]) => value !== null)
+        .map(([key]) => key),
+      unavailable_metrics: [
+        {
+          key: 'accounting_net_profit',
+          reason: 'requires verified taxes and all accounting expenses',
+        },
+        {
+          key: 'gross_margin',
+          reason: 'requires direct cost allocation by service',
+        },
+        {
+          key: 'marketing_roi',
+          reason: 'requires advertising spend and attribution data',
+        },
+      ],
+    };
+    if (result.verified) {
+      this.businessQueryCache.set(cacheKey, {
+        expiresAt: Date.now() + 5 * 60 * 1_000,
+        value: result,
+      });
+    }
+    return result;
+  }
+
+  private async queryEmployeeAnalytics(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const comparison = this.requiredString(args.comparison);
+    if (
+      !['none', 'previous_period', 'previous_year_same_period'].includes(
+        comparison,
+      )
+    ) {
+      throw new Error('Invalid employee analytics comparison');
+    }
+    const cacheKey = [
+      principal.tenantId,
+      principal.userId,
+      this.requiredString(args.period),
+      comparison,
+      typeof args.from === 'string' ? args.from : '',
+      typeof args.to === 'string' ? args.to : '',
+      typeof args.branch_id === 'string' ? args.branch_id : '',
+    ].join('|');
+    const cached = this.employeeQueryCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    if (cached) {
+      this.employeeQueryCache.delete(cacheKey);
+    }
+
+    const currentQuery = await this.reportingQuery(principal.tenantId, args);
+    const previousQuery =
+      comparison === 'none'
+        ? null
+        : await this.comparisonReportingQuery(
+            principal.tenantId,
+            currentQuery,
+            comparison as 'previous_period' | 'previous_year_same_period',
+          );
+    const read = (query: AnalyticsRangeQueryDto) =>
+      this.readAnalytics(
+        this.analyticsService.getEmployeeOverview(
+          principal.tenantId,
+          principal.userId,
+          query,
+        ),
+      );
+    const [current, previous] = await Promise.all([
+      read(currentQuery),
+      previousQuery ? read(previousQuery) : Promise.resolve(null),
+    ]);
+    const currentSnapshot = this.employeeMetricSnapshot(current);
+    const previousSnapshot = previous
+      ? this.employeeMetricSnapshot(previous)
+      : null;
+    const currentSource = this.record(current).data_source;
+    const result = {
+      verified:
+        typeof currentSource === 'string' &&
+        ['crm', 'maya'].includes(currentSource),
+      source: typeof currentSource === 'string' ? currentSource : null,
+      period: this.record(current).period ?? currentQuery,
+      comparison: {
+        mode: comparison,
+        period: previous
+          ? (this.record(previous).period ?? previousQuery)
+          : null,
+      },
+      current,
+      previous,
+      metrics: currentSnapshot,
+      changes: previousSnapshot
+        ? this.businessMetricChanges(currentSnapshot, previousSnapshot)
+        : {},
+      service_changes: previous
+        ? this.businessServiceChanges(current, previous)
+        : [],
+      available_metrics: Object.entries(currentSnapshot)
+        .filter(([, value]) => value !== null)
+        .map(([key]) => key),
+      unavailable_metrics: [
+        {
+          key: 'personal_cash_revenue',
+          reason:
+            'CRM confirms appointment and booked service value, not employee cash attribution',
+        },
+        {
+          key: 'other_employee_personal_data',
+          reason: 'role scope permits only the current employee data',
+        },
+      ],
+    };
+    if (result.verified) {
+      this.employeeQueryCache.set(cacheKey, {
+        expiresAt: Date.now() + 5 * 60 * 1_000,
+        value: result,
+      });
+    }
+    return result;
+  }
+
+  private async comparisonReportingQuery(
+    tenantId: string,
+    current: AnalyticsRangeQueryDto,
+    comparison: 'previous_period' | 'previous_year_same_period',
+  ): Promise<AnalyticsRangeQueryDto> {
+    const from = new Date(current.from);
+    const to = new Date(current.to);
+    if (comparison === 'previous_period') {
+      const duration = to.getTime() - from.getTime();
+      const previousTo = new Date(from.getTime() - 1);
+      return {
+        from: new Date(previousTo.getTime() - duration).toISOString(),
+        to: previousTo.toISOString(),
+        ...(current.branchId ? { branchId: current.branchId } : {}),
+      };
+    }
+
+    const timezone = await this.reportingTimezone(tenantId, current.branchId);
+    const shift = (value: Date) => {
+      const local = this.localDateTime(value, timezone);
+      const year = Number(local.date.slice(0, 4)) - 1;
+      const date = this.sameLocalDateInYear(local.date, year);
+      return new Date(
+        localDateMinuteToUtc(
+          date,
+          local.hour * 60 + local.minute,
+          timezone,
+        ).getTime() +
+          local.second * 1_000 +
+          value.getUTCMilliseconds(),
+      );
+    };
+    return {
+      from: shift(from).toISOString(),
+      to: shift(to).toISOString(),
+      ...(current.branchId ? { branchId: current.branchId } : {}),
+    };
+  }
+
+  private businessOperationalAnalyticsVerified(value: unknown): boolean {
+    const data = this.record(value);
+    return data.data_source === 'maya' || data.data_source === 'crm';
+  }
+
+  private async retryAnalyticsRead<T>(read: () => Promise<T>): Promise<T> {
+    try {
+      return await read();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      return read();
+    }
+  }
+
+  private businessMetricSnapshot(value: unknown) {
+    const data = this.record(value);
+    const appointments = this.record(data.appointments);
+    const finance = this.record(data.finance);
+    const financeRevenue = this.record(finance.revenue);
+    const revenue =
+      this.safeMoneyAmount(financeRevenue.total) ??
+      (Array.isArray(data.revenue)
+        ? this.safeMoneyAmount(data.revenue[0])
+        : null);
+    const averageTicket = Array.isArray(data.average_ticket)
+      ? this.safeMoneyAmount(data.average_ticket[0])
+      : null;
+    return {
+      revenue_amount_kopecks: revenue?.amount_kopecks ?? null,
+      financial_operations: this.optionalMetricNumber(
+        financeRevenue.transaction_count,
+      ),
+      appointments_total: this.optionalMetricNumber(appointments.total),
+      appointments_active: this.optionalMetricNumber(appointments.active),
+      appointments_cancelled: this.optionalMetricNumber(appointments.cancelled),
+      cancellation_rate_percent: this.optionalMetricNumber(
+        appointments.cancellation_rate_percent,
+      ),
+      unique_clients: this.optionalMetricNumber(appointments.unique_clients),
+      repeat_clients_in_period: this.optionalMetricNumber(
+        appointments.repeat_clients_in_period,
+      ),
+      repeat_client_rate_percent: this.optionalMetricNumber(
+        appointments.repeat_client_rate_percent,
+      ),
+      identified_client_visits: this.optionalMetricNumber(
+        appointments.identified_client_visits,
+      ),
+      average_ticket_amount_kopecks: averageTicket?.amount_kopecks ?? null,
+      booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
+    };
+  }
+
+  private employeeMetricSnapshot(value: unknown) {
+    const data = this.record(value);
+    const appointments = this.record(data.appointments);
+    const bookedValue = Array.isArray(data.revenue)
+      ? this.safeMoneyAmount(data.revenue[0])
+      : null;
+    const averageBookedValue = Array.isArray(data.average_ticket)
+      ? this.safeMoneyAmount(data.average_ticket[0])
+      : null;
+    return {
+      booked_value_amount_kopecks: bookedValue?.amount_kopecks ?? null,
+      appointments_total: this.optionalMetricNumber(appointments.total),
+      appointments_active: this.optionalMetricNumber(appointments.active),
+      appointments_cancelled: this.optionalMetricNumber(appointments.cancelled),
+      cancellation_rate_percent: this.optionalMetricNumber(
+        appointments.cancellation_rate_percent,
+      ),
+      unique_clients: this.optionalMetricNumber(appointments.unique_clients),
+      repeat_clients_in_period: this.optionalMetricNumber(
+        appointments.repeat_clients_in_period,
+      ),
+      repeat_client_rate_percent: this.optionalMetricNumber(
+        appointments.repeat_client_rate_percent,
+      ),
+      identified_client_visits: this.optionalMetricNumber(
+        appointments.identified_client_visits,
+      ),
+      average_booked_value_amount_kopecks:
+        averageBookedValue?.amount_kopecks ?? null,
+      booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
+    };
+  }
+
+  private businessMetricChanges(
+    current: Record<string, number | null>,
+    previous: Record<string, number | null>,
+  ) {
+    return Object.fromEntries(
+      Object.keys(current).flatMap((key) => {
+        const currentValue = current[key];
+        const previousValue = previous[key];
+        if (currentValue === null || previousValue === null) {
+          return [];
+        }
+        return [
+          [
+            key,
+            {
+              current: currentValue,
+              previous: previousValue,
+              delta: currentValue - previousValue,
+              percent_change: this.percentageDelta(currentValue, previousValue),
+            },
+          ],
+        ];
+      }),
+    );
+  }
+
+  private businessServiceChanges(current: unknown, previous: unknown) {
+    const rows = (value: unknown) => {
+      const data = this.record(value);
+      if (!Array.isArray(data.service_summary))
+        return new Map<string, number>();
+      return new Map(
+        data.service_summary.flatMap((entry) => {
+          const item = this.record(entry);
+          return typeof item.name === 'string' &&
+            typeof item.appointments === 'number'
+            ? [[item.name, item.appointments] as const]
+            : [];
+        }),
+      );
+    };
+    const currentRows = rows(current);
+    const previousRows = rows(previous);
+    return [...new Set([...currentRows.keys(), ...previousRows.keys()])]
+      .map((name) => {
+        const currentAppointments = currentRows.get(name) ?? 0;
+        const previousAppointments = previousRows.get(name) ?? 0;
+        return {
+          name,
+          current_appointments: currentAppointments,
+          previous_appointments: previousAppointments,
+          delta: currentAppointments - previousAppointments,
+          percent_change: this.percentageDelta(
+            currentAppointments,
+            previousAppointments,
+          ),
+        };
+      })
+      .sort(
+        (left, right) =>
+          Math.abs(right.delta) - Math.abs(left.delta) ||
+          left.name.localeCompare(right.name),
+      );
   }
 
   private async compareBusinessYears(principal: AiToolPrincipal) {
+    const cached = this.businessYearComparisonCache.get(principal.tenantId);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    if (cached) {
+      this.businessYearComparisonCache.delete(principal.tenantId);
+    }
+
     const ranges = await this.businessYearComparisonRanges(principal.tenantId);
-    const [currentSummary, previousSummary] = await Promise.all([
-      this.crmService.getRevenueSummary(principal.tenantId, ranges.current),
-      this.crmService.getRevenueSummary(principal.tenantId, ranges.previous),
-    ]);
+    const [currentSummary, previousSummary, clientAnalytics] =
+      await Promise.all([
+        this.crmService.getRevenueSummary(principal.tenantId, ranges.current),
+        this.crmService.getRevenueSummary(principal.tenantId, ranges.previous),
+        this.businessYearClientComparison(principal.tenantId, ranges),
+      ]);
     const currentRevenue = this.record(currentSummary.revenue);
     const previousRevenue = this.record(previousSummary.revenue);
     const currentTotal = this.safeMoneyAmount(currentRevenue.total);
@@ -347,7 +787,7 @@ export class AiToolHandlerService {
         ? currentTransactions - previousTransactions
         : null;
 
-    return {
+    const result = {
       comparison: 'current_year_to_date_vs_previous_year_same_period',
       timezone: ranges.timezone,
       verified:
@@ -400,6 +840,7 @@ export class AiToolHandlerService {
             ? this.percentageDelta(currentTransactions, previousTransactions)
             : null,
       },
+      clients: clientAnalytics,
       warning_codes: [
         ...new Set([
           ...this.safeWarningCodes(currentSummary.warnings),
@@ -407,6 +848,75 @@ export class AiToolHandlerService {
         ]),
       ],
     };
+    if (result.verified && result.clients.verified) {
+      this.businessYearComparisonCache.set(principal.tenantId, {
+        expiresAt: Date.now() + 5 * 60 * 1_000,
+        value: result,
+      });
+    }
+    return result;
+  }
+
+  private async businessYearClientComparison(
+    tenantId: string,
+    ranges: {
+      current: { from: string; to: string };
+      previous: { from: string; to: string };
+    },
+  ) {
+    try {
+      const [currentOverview, previousOverview] = await Promise.all([
+        this.analyticsService.getBusinessOverview(tenantId, ranges.current),
+        this.analyticsService.getBusinessOverview(tenantId, ranges.previous),
+      ]);
+      const current = this.record(currentOverview);
+      const previous = this.record(previousOverview);
+      const currentAppointments = this.record(current.appointments);
+      const previousAppointments = this.record(previous.appointments);
+      const currentClients = this.optionalMetricNumber(
+        currentAppointments.unique_clients,
+      );
+      const previousClients = this.optionalMetricNumber(
+        previousAppointments.unique_clients,
+      );
+      const sourceCurrent =
+        current.data_source === 'crm' || current.data_source === 'maya'
+          ? current.data_source
+          : null;
+      const sourcePrevious =
+        previous.data_source === 'crm' || previous.data_source === 'maya'
+          ? previous.data_source
+          : null;
+      const verified =
+        currentClients !== null &&
+        previousClients !== null &&
+        sourceCurrent !== null &&
+        sourceCurrent === sourcePrevious;
+      const delta = verified ? currentClients - previousClients : null;
+
+      return {
+        verified,
+        source: sourceCurrent === sourcePrevious ? sourceCurrent : null,
+        definition: 'identified_unique_clients_with_non_cancelled_appointments',
+        current: verified ? currentClients : null,
+        previous: verified ? previousClients : null,
+        delta,
+        percent_change:
+          verified && previousClients !== null
+            ? this.percentageDelta(currentClients, previousClients)
+            : null,
+      };
+    } catch {
+      return {
+        verified: false,
+        source: null,
+        definition: 'identified_unique_clients_with_non_cancelled_appointments',
+        current: null,
+        previous: null,
+        delta: null,
+        percent_change: null,
+      };
+    }
   }
 
   private async businessYearComparisonRanges(tenantId: string) {
@@ -516,6 +1026,16 @@ export class AiToolHandlerService {
             return {
               appointments: item.appointments ?? 0,
               revenue: this.safeMoneyEntries(item.revenue),
+            };
+          })
+        : [],
+      service_summary: Array.isArray(result.services)
+        ? result.services.map((entry) => {
+            const item = this.record(entry);
+            return {
+              name: typeof item.name === 'string' ? item.name : 'Услуга',
+              appointments: item.appointments ?? 0,
+              booked_value: this.safeMoneyEntries(item.booked_value),
             };
           })
         : [],
@@ -662,6 +1182,9 @@ export class AiToolHandlerService {
       }
       case 'month_to_date':
         from = localDateMinuteToUtc(`${today.slice(0, 7)}-01`, 0, timezone);
+        break;
+      case 'year_to_date':
+        from = localDateMinuteToUtc(`${today.slice(0, 4)}-01-01`, 0, timezone);
         break;
       case 'last_7_days':
         from = localDateMinuteToUtc(
