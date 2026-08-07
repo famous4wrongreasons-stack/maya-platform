@@ -20,7 +20,10 @@ import {
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
-import type { MayaBrainRoute } from '../ai-brain/maya-brain.types';
+import type {
+  MayaBrainIntent,
+  MayaBrainRoute,
+} from '../ai-brain/maya-brain.types';
 import { AiCoreModelService } from './ai-core-model.service';
 import type {
   AiCoreMessage,
@@ -129,9 +132,30 @@ type ToolUsage = {
   execution_id: string | null;
 };
 
+/**
+ * Требование заземления: «на этот вопрос отвечаем только по данным».
+ *
+ * 🔴 Тему здесь НЕ решают. Раньше решали — и промах регулярки в угадывании
+ * темы рушил весь ход: владелец получал отказ или шаблон. Теперь тему называет
+ * инструмент, который отработал, а до него известно ровно одно: вопрос про
+ * данные, значит числа строгие и отвечать раньше инструмента нельзя.
+ */
 type GroundingRequirement = {
-  domain: string;
-  toolNames: string[];
+  /**
+   * Инструменты данных, доступные этой роли и тарифу; вероятный стоит первым.
+   * Доказательством считается ЛЮБОЙ из них — промах подсказки больше не отказ.
+   */
+  evidenceToolNames: string[];
+  /**
+   * Домен для отчёта, пока ни один инструмент не отработал. Взят из вероятного
+   * инструмента и живёт только до первого результата: дальше домен — факт.
+   */
+  fallbackDomain: string | null;
+  /**
+   * Вопрос закрыт для роли или тарифа: ни один инструмент, способный на него
+   * ответить, этому человеку не выдан. Это факт доступа, а не догадка о теме.
+   */
+  closedForAccess: boolean;
   strictNumbers: boolean;
   presetToolCall?: {
     name: string;
@@ -159,23 +183,58 @@ type AiCoreCompletion = {
   unsourced?: string[];
 };
 
+/**
+ * Спрашивают про факт, а не ведут разговор.
+ *
+ * Нужен только клиентской ветке предиката: «хочу стрижку» — это запись, а
+ * «сколько стоит стрижка» — вопрос про данные, и различает их именно форма.
+ */
 const GROUNDING_FACT_PATTERN =
   /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел[а-яёa-z]*|за\s+месяц[а-яёa-z]*|сегодня|завтра)/i;
-const GROUNDING_ANALYTICS_PATTERN =
-  /(выруч[а-яёa-z]*|оборот[а-яёa-z]*|касс[а-яёa-z]*|доход[а-яёa-z]*|зарплат[а-яёa-z]*|средн[а-яёa-z]*\s+чек|прибыл[а-яёa-z]*|марж[а-яёa-z]*|аналитик[а-яёa-z]*|статистик[а-яёa-z]*|показател[а-яёa-z]*|цифр[а-яёa-z]*)/i;
-const GROUNDING_APPOINTMENT_METRIC_PATTERN =
-  /(?:(?:сколько|количеств[а-яёa-z]*|числ[а-яёa-z]*).{0,32}запис[а-яёa-z]*|запис[а-яёa-z]*.{0,32}(?:за\s+)?(?:сегодня|вчера|недел[а-яёa-z]*|месяц[а-яёa-z]*))/i;
-const GROUNDING_PERSONAL_SCOPE_PATTERN =
-  /(моя|мой|мои|личн[а-яёa-z]*|у\s+меня|сколько\s+я|я\s+заработ)/i;
-const GROUNDING_BUSINESS_SCOPE_PATTERN =
-  /(бизнес[а-яёa-z]*|компан[а-яёa-z]*|по\s+всем|все\s+сотрудник[а-яёa-z]*|все\s+специалист[а-яёa-z]*|общ[а-яёa-z]*\s+(?:выруч|касс|статист)|мы\s+заработ)/i;
+/**
+ * ЕДИНСТВЕННЫЙ предикат темы: деньги, записи, клиенты, услуги, расходы,
+ * расписание, баллы.
+ *
+ * 🔴 Он не выбирает инструмент и ничего не запрещает. Всё, что он включает, —
+ * строгий режим чисел и запрет отвечать раньше инструмента. Раньше на его
+ * месте стояла дюжина тематических регулярок, и каждая была развилкой, на
+ * которой ход мог сломаться.
+ */
+const DATA_TOPIC_PATTERN =
+  /(деньг|выруч|оборот|касс|доход|прибыл|марж|рентабельн|чек|зарплат|начисл|заработ|окупа|стоит|стоимост|цен[аеуы]|прайс|расход|затрат|трат|бюджет|реклам|аренд|налог|запис|визит|посещен|окн[аоу]|слот|свободн|расписан|график|смен[аеуы]|выходн|загруз|занятост|клиент|гост|посетител|мастер|специалист|сотрудник|команд|персонал|услуг|стриж|бород|балл|бонус|кэшбэк|лояльн|показател|метрик|аналитик|статистик|сводк|отчет|динамик|просад|просел|(?<![а-яё])рост|падени|отмен|повторн|средн)/i;
+/** Приветствие и вежливость: ради них отчёт по салону не поднимают. */
+const SMALL_TALK_PATTERN =
+  /^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|доброе\s+утро|спасибо|пока|ок|окей|ясно|понятно|кто\s+ты|что\s+ты\s+умеешь|как\s+дела)[!.?\s]*$/i;
+/**
+ * Интенты, в которых разговор идёт не про цифры: запись клиента, правка
+ * расписания, база знаний, поддержка. Каталог и баллы сюда не входят: их
+ * фактические вопросы ловит подсказка и заземляет как обычно.
+ */
+const NON_DATA_INTENTS = new Set<MayaBrainIntent>([
+  'booking',
+  'schedule_management',
+  'knowledge',
+  'support',
+  'catalog',
+  'loyalty',
+]);
+/**
+ * Интенты про ДЕНЬГИ и показатели салона.
+ *
+ * Только они закрываются отказом, когда аналитики нет: клиенту такие данные не
+ * положены никогда, а на младшем тарифе их нечем посчитать. Намеренно БЕЗ
+ * staff_operations и marketing — вопрос «какие у вас мастера» задаёт и гость,
+ * и он получает обезличенный список, а не отказ.
+ */
+const MONEY_INTENTS = new Set<MayaBrainIntent>([
+  'finance',
+  'business_analytics',
+]);
 // 🔴 Граница слова обязательна: «се-ГОД-ня» содержит «год», и без неё запрос
 // «сравни сегодня с прошлой неделей» уезжал в годовое сравнение, а «сколько
 // записей сегодня?» получал сопоставление с прошлым годом.
 const GROUNDING_YEAR_COMPARISON_PATTERN =
   /(?:(?<![а-яёa-z])год[а-яёa-z]*.{0,96}(?:сравн|прошл|предыдущ)|(?:сравн|прошл|предыдущ).{0,96}(?<![а-яёa-z])год[а-яёa-z]*|(?<![а-яёa-z])год\s+к\s+году)/i;
-const GROUNDING_CUSTOMER_COUNT_PATTERN =
-  /(сколько\s+(?:у\s+нас\s+)?клиент[а-яёa-z]*|количеств[а-яёa-z]*\s+клиент[а-яёa-z]*|по\s+клиент[а-яёa-z]*)/i;
 // 🔴 «Посоветуй как вернуть клиентов» под старый список не подходило: там были
 // только «что делать» и «как исправить». Просьба о совете оставалась без совета.
 const BUSINESS_ACTION_REQUEST_PATTERN =
@@ -222,9 +281,27 @@ const CLIENT_ACQUISITION_QUESTION_PATTERN =
 /**
  * Разрезы, которых в инструменте прибыли нет. Вопрос «прибыль по мастерам»
  * должен идти в аналитику с разрезом, а не в общую экономику салона.
+ *
+ * Это единственное, что этот шаблон теперь решает: какой инструмент ПРЕДЗАГРУЗИТЬ.
+ * Ошибиться им больше не страшно — модель вправе взять другой.
  */
 const PROFIT_BREAKDOWN_ESCAPE_PATTERN =
   /(мастер[а-яёa-z]*|сотрудник[а-яёa-z]*|специалист[а-яёa-z]*|по\s+услуг[а-яёa-z]*|по\s+дням|по\s+филиал[а-яёa-z]*)/i;
+/** Подсказка: спрашивают про баллы. */
+const LOYALTY_HINT_PATTERN =
+  /(баланс[а-яёa-z]*|сколько\s+.*(?:балл|бонус)|мои\s+(?:балл|бонус)|(?:потрат|спис|оплат)[а-яёa-z]*.*(?:балл|бонус)|на\s+что.*(?:балл|бонус))/i;
+/** Подсказка: спрашивают про СВОИ записи. */
+const OWN_APPOINTMENTS_HINT_PATTERN =
+  /(мои\s+запис[а-яёa-z]*|(?:какие|сколько)\s+у\s+меня\s+запис[а-яёa-z]*|когда\s+я\s+записан[а-яёa-z]*|истори[а-яёa-z]*\s+(?:моих\s+)?запис[а-яёa-z]*)/i;
+/** Подсказка: спрашивают про свободное время. */
+const AVAILABILITY_HINT_PATTERN =
+  /(свободн[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|ближайш[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|есть\s+ли\s+(?:окн[а-яёa-z]*|мест[а-яёa-z]*|врем[а-яёa-z]*)|когда\s+можно\s+запис)/i;
+/** Подсказка: спрашивают прайс. Подписка и тариф MAYA — не позиция прайса. */
+const PRICE_HINT_PATTERN =
+  /(сколько\s+стоит|цен[а-яёa-z]*|прайс[а-яёa-z]*|какие\s+услуг[а-яёa-z]*|длительн[а-яёa-z]*\s+услуг[а-яёa-z]*)/i;
+/** Подсказка: спрашивают про мастеров — поимённо. */
+const STAFF_HINT_PATTERN =
+  /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит))/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 /**
@@ -247,15 +324,45 @@ const DECLINE_WORD_PATTERN =
 const GROUNDING_SMALL_METRIC_PATTERN =
   /(?<number>\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(?:₽|руб\w*|%|балл\w*|бонус\w*|визит\w*|клиент\w*|запис\w*|минут\w*|час\w*|специалист\w*)/giu;
 /**
- * Домены, где результат инструмента — личные данные самого спрашивающего.
+ * Инструменты данных и домен каждого.
+ *
+ * 🔴 Здесь и только здесь живёт соответствие «инструмент → тема». Домен —
+ * свойство инструмента, а значит известен ПОСЛЕ его выполнения, а не до. От
+ * него зависят перехват ПД, выбор детерминированного ответа и отчёт в аудите.
+ * Ключи этого справочника — исчерпывающий список того, что считается
+ * доказательством: всё остальное (запись, отмена, начисление) — действие.
+ */
+const DATA_TOOL_DOMAINS: Record<string, string> = {
+  'analytics.business.query': 'business_query',
+  'analytics.employee.query': 'employee_query',
+  'analytics.business.profit': 'business_profit',
+  'expenses.read': 'business_expenses',
+  'customers.count': 'customer_count',
+  'catalog.services.read': 'service_catalog',
+  'catalog.staff.read': 'staff_catalog',
+  'booking.availability.read': 'booking_availability',
+  'appointments.own.list': 'client_appointments',
+  'loyalty.own.read': 'client_loyalty',
+};
+/** Инструменты, которые предзагружаем: подсказка к ним однозначна. */
+const PRELOADABLE_TOOLS = new Set([
+  'analytics.business.query',
+  'analytics.employee.query',
+  'analytics.business.profit',
+  'expenses.read',
+]);
+/**
+ * Инструменты, чей результат — личные данные самого спрашивающего.
  *
  * Их ответ собирает сервер, и во внешнюю модель полезная нагрузка не уходит.
  * Обезличивание по именам ключей тут недостаточно: история визитов человека
- * идентифицирует его сама по себе, даже без имени и телефона.
+ * идентифицирует его сама по себе, даже без имени и телефона. Проверка идёт по
+ * фактически вызванному инструменту, а не по предположению о теме: инструмент
+ * невозможно «угадать неверно» — он либо отработал, либо нет.
  */
-const PII_SENSITIVE_DOMAINS = new Set([
-  'client_appointments',
-  'client_loyalty',
+const PII_SENSITIVE_TOOLS = new Set([
+  'appointments.own.list',
+  'loyalty.own.read',
 ]);
 const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -344,14 +451,22 @@ export class AiCoreService {
       allowedNames,
       brain,
     );
-    const requiredToolNames =
-      requirement?.toolNames.filter((name) => allowedNames.has(name)) ?? [];
+    // Список для модели: вероятный инструмент первым, за ним — остальные
+    // доступные инструменты данных. Первый — рекомендация, любой другой из
+    // списка тоже принимается как доказательство.
+    const requiredToolNames = requirement?.evidenceToolNames ?? [];
     let groundingRetries = 0;
     let numberRetries = 0;
     let corrections: string[] = [];
 
     try {
-      if (requirement && requiredToolNames.length === 0) {
+      // Единственный оставшийся отказ ДО модели: вопрос про данные, а данных
+      // этой роли или тарифу не выдано вовсе. Молчать здесь нельзя — человек
+      // должен услышать причину.
+      if (
+        requirement &&
+        (requirement.closedForAccess || requiredToolNames.length === 0)
+      ) {
         return this.complete(
           user,
           dto,
@@ -364,17 +479,6 @@ export class AiCoreService {
       }
       if (requirement?.presetToolCall) {
         const preset = requirement.presetToolCall;
-        if (!requiredToolNames.includes(preset.name)) {
-          return this.complete(
-            user,
-            dto,
-            brain,
-            sanitized.redacted,
-            toolsUsed,
-            decisions,
-            this.groundingFallback(requirement, toolResults, true),
-          );
-        }
         const execution = this.record(
           await this.runtime.execute(user, preset.name, {
             surface: dto.surface,
@@ -383,10 +487,12 @@ export class AiCoreService {
               tenantId,
               user.userId,
               dto.requestId,
-              // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. При
-              // совпадении ключа рантайм сверяет аргументы и на расхождении
-              // бросает конфликт идемпотентности — вопрос вида «а за прошлый
-              // месяц целиком?» падал бы вместо ответа.
+              // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. Ключ
+              // считается по паре «шаг + инструмент», поэтому чужой инструмент
+              // на шаге 0 конфликта не даёт, а вот тот же самый — дал бы:
+              // рантайм сверяет аргументы и на расхождении бросает конфликт
+              // идемпотентности. Вопрос вида «а за прошлый месяц целиком?»
+              // падал бы вместо ответа.
               -1,
               preset.name,
             ),
@@ -448,7 +554,6 @@ export class AiCoreService {
         });
         if (!decision) {
           const deterministicReply = this.deterministicGroundedReply(
-            requirement,
             toolResults,
             this.latestUserText(sanitized.messages),
           );
@@ -541,7 +646,6 @@ export class AiCoreService {
               continue;
             }
             const deterministicReply = this.deterministicGroundedReply(
-              requirement,
               toolResults,
               this.latestUserText(sanitized.messages),
             );
@@ -598,27 +702,22 @@ export class AiCoreService {
         if (!allowedNames.has(decision.toolCall.name)) {
           this.modelFailure('ai_model_tool_not_allowed');
         }
-        if (
-          requirement &&
-          !requirementSatisfied &&
-          !requiredToolNames.includes(decision.toolCall.name)
-        ) {
-          return this.complete(
-            user,
-            dto,
-            brain,
-            sanitized.redacted,
-            toolsUsed,
-            decisions,
-            this.groundingFallback(requirement, toolResults),
-          );
-        }
+        // 🔴 Здесь раньше стоял отказ: модель попросила инструмент не из
+        // списка — и ход обрывался. Список составляла регулярка, угадывавшая
+        // тему, поэтому промах регулярки был для владельца отказом. Теперь
+        // разрешён любой инструмент, доступный роли (проверка выше), а
+        // требование «ответить только после данных» никуда не делось: оно
+        // проверяется по результату, а не по имени в списке.
         const signature = this.toolSignature(
           decision.toolCall.name,
           decision.toolCall.arguments,
         );
         if (signatures.has(signature)) {
-          this.modelFailure('ai_model_repeated_tool_call');
+          // Тот же вызов уже сделан — чаще всего это предзагруженный сервером
+          // инструмент, который модель попросила повторно. Данные у неё на
+          // руках; повторять запрос незачем, а падать тем более — иначе
+          // предзагрузка сама себе создавала бы конфликт.
+          continue;
         }
         signatures.add(signature);
 
@@ -696,40 +795,55 @@ export class AiCoreService {
         // CRM), и отправлять их во внешнюю модель значит вывезти их за периметр.
         // Обезличивание ключей с именами тут не помогает: набор визитов сам по
         // себе привязан к человеку. Контур 152-ФЗ важнее гладкой формулировки.
-        if (PII_SENSITIVE_DOMAINS.has(requirement?.domain ?? '')) {
+        //
+        // 🔴 Условие теперь по ФАКТИЧЕСКИ вызванному инструменту, а не по
+        // угаданной теме: инструмент нельзя «не угадать» — он либо отработал,
+        // либо нет. Раньше промах темы означал бы утечку истории визитов.
+        if (PII_SENSITIVE_TOOLS.has(decision.toolCall.name)) {
           const deterministicReply = this.deterministicGroundedReply(
-            requirement,
             toolResults,
             this.latestUserText(sanitized.messages),
           );
-          if (deterministicReply) {
-            return this.complete(
-              user,
-              dto,
-              brain,
-              sanitized.redacted,
-              toolsUsed,
-              decisions,
-              {
-                reply: deterministicReply,
-                // Текст собрал сервер, а не провайдер: источник называем честно,
-                // иначе в аудите шаблон не отличить от ответа модели.
-                source: 'safe_fallback',
-                action: null,
-                grounding: this.groundingReport(
-                  requirement,
-                  'verified',
-                  toolResults,
-                ),
-              },
-            );
-          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            deterministicReply
+              ? {
+                  reply: deterministicReply,
+                  // Текст собрал сервер, а не провайдер: источник называем
+                  // честно, иначе в аудите шаблон не отличить от ответа модели.
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'verified',
+                    toolResults,
+                  ),
+                }
+              : // Собрать текст не вышло — ход всё равно заканчивается здесь.
+                // Отдать эти данные модели «раз уж шаблон не сложился» значит
+                // разменять контур 152-ФЗ на удобство формулировки.
+                {
+                  reply:
+                    'Ваши данные получены, но собрать по ним ответ не удалось. Загляните в раздел «Записи» или повторите вопрос чуть позже.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'verified',
+                    toolResults,
+                  ),
+                },
+          );
         }
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
       const deterministicReply = this.deterministicGroundedReply(
-        requirement,
         toolResults,
         this.latestUserText(sanitized.messages),
       );
@@ -754,7 +868,7 @@ export class AiCoreService {
               error_code: this.safeErrorCode(error),
               model_calls: decisions.length,
               tools_used: toolsUsed.map((tool) => tool.name),
-              grounding_domain: requirement?.domain ?? null,
+              grounding_domain: this.groundingDomain(requirement, toolResults),
             },
           })
           .catch(() => undefined);
@@ -777,10 +891,12 @@ export class AiCoreService {
           },
         );
       }
+      // Данных нет вовсе, а вопрос был про аналитику: молчание CRM — это сбой
+      // связи, и называть его надо сбоем, а не отсутствием ответа у MAYA.
+      const failedDomain = requirement?.fallbackDomain;
       if (
         toolResults.length === 0 &&
-        (requirement?.domain === 'business_query' ||
-          requirement?.domain === 'employee_query')
+        (failedDomain === 'business_query' || failedDomain === 'employee_query')
       ) {
         return this.complete(
           user,
@@ -791,7 +907,7 @@ export class AiCoreService {
           decisions,
           {
             reply:
-              requirement.domain === 'employee_query'
+              failedDomain === 'employee_query'
                 ? 'Сейчас не отвечает источник личных показателей CRM. Это временная проблема данных, а не отсутствие ответа у MAYA. Повторите через минуту.'
                 : 'Сейчас не отвечает источник бизнес-данных CRM. Это временная проблема соединения, а не отсутствие ответа у MAYA. Повторите через минуту.',
             source: 'safe_fallback',
@@ -1087,6 +1203,14 @@ export class AiCoreService {
     };
   }
 
+  /**
+   * Нужно ли отвечать только по данным — и что может быть доказательством.
+   *
+   * 🔴 Здесь решается ровно один вопрос: спрашивают ли про данные. Инструмент
+   * не выбирается. Доказательством считаются ВСЕ инструменты данных, доступные
+   * роли и тарифу; вероятный лишь ставится первым — как подсказка модели и как
+   * кандидат на предзагрузку. Промах подсказки перестал быть отказом.
+   */
   private groundingRequirement(
     messages: AiCoreMessage[],
     allowedNames: Set<string>,
@@ -1096,342 +1220,231 @@ export class AiCoreService {
     const previousUserText = this.previousUserText(messages)
       .toLowerCase()
       .replace(/ё/g, 'е');
-    if (!text) {
+    const hinted = this.toolHint(text);
+    if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
     }
-    const factRequest = GROUNDING_FACT_PATTERN.test(text);
+    // 🔴 Нет подсказки — НЕ ГАДАЕМ. Здесь стоял «выбор по умолчанию», и он
+    // немедленно родил отказы, которых до переделки не было: клиент спрашивал
+    // «сколько длится стрижка», сервер подставлял его историю визитов и
+    // отвечал «у вас пока нет записей»; вопрос «сколько у вас мастеров»
+    // упирался в жёсткий отказ по роли, потому что список по умолчанию состоял
+    // из инструментов, которых клиенту не выдают никогда.
+    //
+    // Это была ровно та ошибка, ради ухода от которой всё и затевалось —
+    // догадка о теме до единого вызова. Теперь при отсутствии подсказки модель
+    // получает ВСЕ доступные ей инструменты данных как равные и выбирает сама.
+    const dataTools = [...allowedNames].filter(
+      (name) => name in DATA_TOOL_DOMAINS,
+    );
+    // Единственный уцелевший выбор по умолчанию — и только для команды салона:
+    // на открытый вопрос владельца («как дела», «почему просадка») универсальная
+    // аналитика подходит почти всегда, а предзагрузка экономит ему обращение к
+    // модели. Клиенту по умолчанию НЕ подставляем ничего: там догадка стоила
+    // ответа «у вас пока нет записей» на вопрос о длительности стрижки.
+    const teamDefault =
+      brain.persona === 'director'
+        ? ['analytics.employee.query', 'analytics.business.query'].find(
+            (name) => allowedNames.has(name),
+          )
+        : undefined;
+    const preferred =
+      hinted?.find((name) => allowedNames.has(name)) ?? teamDefault ?? null;
+    const fallbackDomain = preferred
+      ? (DATA_TOOL_DOMAINS[preferred] ?? null)
+      : null;
+    // Честный отказ по доступу — когда недоступна ВСЯ семья, к которой относится
+    // вопрос. Владелец на младшем тарифе спрашивает про выручку, а инструмента,
+    // способного её дать, у него нет: правильный ответ — «недоступно по тарифу»,
+    // а не рассказ из прайс-листа. Но если тема не названа прямо, отказывать
+    // не за что — пусть модель выберет из того, что есть.
+    const familyClosed =
+      hinted !== null && !hinted.some((n) => allowedNames.has(n));
+    // Вопрос про деньги салона без единого инструмента, способного их дать.
+    // Ни каталог услуг, ни свободные окна на него не отвечают: клиенту такие
+    // данные не положены, а на младшем тарифе их нечем посчитать. Честный
+    // отказ здесь лучше подмены ответа из прайса.
+    const moneyWithoutAnalytics =
+      MONEY_INTENTS.has(brain.intent) && !teamDefault;
+    if (
+      dataTools.length === 0 ||
+      (familyClosed && !teamDefault) ||
+      moneyWithoutAnalytics
+    ) {
+      return {
+        evidenceToolNames: [],
+        // Тему отказа называем даже без подсказки: в аудите должно быть видно,
+        // ЧТО спрашивали и почему закрыли, иначе отказ неотличим от сбоя.
+        fallbackDomain: hinted
+          ? (DATA_TOOL_DOMAINS[hinted[0]] ?? null)
+          : moneyWithoutAnalytics
+            ? 'business_query'
+            : null,
+        closedForAccess: true,
+        strictNumbers: true,
+      };
+    }
+    if (!preferred) {
+      return {
+        evidenceToolNames: dataTools,
+        fallbackDomain: null,
+        closedForAccess: false,
+        strictNumbers: true,
+      };
+    }
+    return {
+      evidenceToolNames: [
+        preferred,
+        ...[...allowedNames].filter(
+          (name) => name !== preferred && name in DATA_TOOL_DOMAINS,
+        ),
+      ],
+      fallbackDomain,
+      closedForAccess: false,
+      strictNumbers: true,
+      ...(PRELOADABLE_TOOLS.has(preferred)
+        ? {
+            presetToolCall: {
+              name: preferred,
+              arguments: this.preloadArguments(
+                preferred,
+                text,
+                previousUserText,
+              ),
+            },
+          }
+        : {}),
+    };
+  }
 
-    if (
-      /(баланс[а-яёa-z]*|сколько\s+.*(?:балл|бонус)|мои\s+(?:балл|бонус)|(?:потрат|спис|оплат)[а-яёa-z]*.*(?:балл|бонус)|на\s+что.*(?:балл|бонус))[а-яёa-z]*/i.test(
-        text,
-      )
-    ) {
-      return this.requireGrounding('client_loyalty', ['loyalty.own.read']);
+  /**
+   * ЕДИНСТВЕННЫЙ предикат маршрутизации: спрашивают ли про ДАННЫЕ — деньги,
+   * записи, клиентов, услуги, расходы, расписание, баллы.
+   *
+   * От ответа зависят ровно две вещи: строгий режим чисел и запрет отвечать
+   * раньше инструмента. Тему он не определяет — её назовёт тот инструмент,
+   * который отработает.
+   */
+  private isDataQuestion(
+    brain: MayaBrainRoute,
+    text: string,
+    hinted: boolean,
+  ): boolean {
+    if (!text) {
+      return false;
     }
-    if (
-      /(мои\s+запис[а-яёa-z]*|(?:какие|сколько)\s+у\s+меня\s+запис[а-яёa-z]*|когда\s+я\s+записан[а-яёa-z]*|истори[а-яёa-z]*\s+(?:моих\s+)?запис[а-яёa-z]*)/i.test(
-        text,
-      )
-    ) {
-      return this.requireGrounding('client_appointments', [
-        'appointments.own.list',
-      ]);
-    }
-    if (
-      /(свободн[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|ближайш[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|есть\s+ли\s+(?:окн[а-яёa-z]*|мест[а-яёa-z]*|врем[а-яёa-z]*)|когда\s+можно\s+запис)/i.test(
-        text,
-      )
-    ) {
-      return this.requireGrounding('booking_availability', [
-        'booking.availability.read',
-      ]);
-    }
-    // Команда записать расход не требует подтверждающего чтения: подтверждать
-    // будет человек, карточкой. Требование источника здесь только заставило бы
-    // MAYA сперва прочитать отчёт, а потом уже услышать просьбу.
+    // Команда записать расход — это действие, а не вопрос. Требование
+    // источника заставило бы MAYA сперва прочитать отчёт по салону и только
+    // потом услышать просьбу.
     if (EXPENSE_RECORD_COMMAND_PATTERN.test(text)) {
-      return null;
+      return false;
     }
-    // 🔴 До справочника услуг. «Сколько стоит привести нового клиента» и
-    // «какая прибыль» — вопросы экономики салона, и оба раньше уезжали не туда:
-    // первый в прайс-лист, второй в операционный обзор без прибыли.
+    if (SMALL_TALK_PATTERN.test(text.trim())) {
+      return false;
+    }
+    if (hinted) {
+      return true;
+    }
+    if (brain.persona === 'director') {
+      // Владелец и команда приходят в MAYA за салоном: всё, кроме записи
+      // клиента, правки расписания, базы знаний и поддержки, — вопрос о данных.
+      return !NON_DATA_INTENTS.has(brain.intent);
+    }
+    // Клиент чаще ведёт запись, чем читает отчёты: «хочу стрижку» — это
+    // разговор, а «сколько стоит стрижка» — вопрос о факте. Различает форма.
+    return DATA_TOPIC_PATTERN.test(text) && GROUNDING_FACT_PATTERN.test(text);
+  }
+
+  /**
+   * Подсказка: с какого инструмента вероятнее начать.
+   *
+   * 🔴 Это ПОДСКАЗКА, а не приговор. Она встаёт первой в required_tools и, если
+   * однозначна, предзагружается, но модель вправе взять любой другой доступный
+   * инструмент данных. Внутри списка порядок — по убыванию полноты ответа, а
+   * выбирает из него не догадка, а факт: что выдано роли и тарифу. Поэтому
+   * «сколько у меня записей» у клиента идёт в его историю, а у мастера — в его
+   * личную аналитику, без отдельной ветки на каждую роль.
+   */
+  private toolHint(text: string): string[] | null {
+    if (LOYALTY_HINT_PATTERN.test(text)) {
+      return ['loyalty.own.read'];
+    }
+    if (OWN_APPOINTMENTS_HINT_PATTERN.test(text)) {
+      return [
+        'appointments.own.list',
+        'analytics.employee.query',
+        'analytics.business.query',
+      ];
+    }
+    if (AVAILABILITY_HINT_PATTERN.test(text)) {
+      return ['booking.availability.read'];
+    }
+    // 🔴 До справочника услуг. «Сколько стоит привести нового клиента» и «какая
+    // прибыль» — вопросы экономики салона, и оба раньше уезжали не туда: первый
+    // в прайс-лист, второй в операционный обзор, где прибыли нет по построению.
     if (
-      allowedNames.has('analytics.business.profit') &&
-      (CLIENT_ACQUISITION_QUESTION_PATTERN.test(text) ||
-        (PROFIT_QUESTION_PATTERN.test(text) &&
-          !PROFIT_BREAKDOWN_ESCAPE_PATTERN.test(text)))
+      CLIENT_ACQUISITION_QUESTION_PATTERN.test(text) ||
+      (PROFIT_QUESTION_PATTERN.test(text) &&
+        !PROFIT_BREAKDOWN_ESCAPE_PATTERN.test(text))
     ) {
-      return this.businessProfitRequirement(text, previousUserText);
+      return [
+        'analytics.business.profit',
+        'analytics.business.query',
+        'analytics.employee.query',
+      ];
+    }
+    if (EXPENSE_STRUCTURE_QUESTION_PATTERN.test(text)) {
+      return [
+        'expenses.read',
+        'analytics.business.profit',
+        'analytics.business.query',
+      ];
     }
     if (
-      !/(подписк\w*|тариф\w*|maya|майя)/i.test(text) &&
-      // Цена привлечения клиента — не позиция прайса. Проверка нужна и здесь:
-      // инструмент прибыли доступен не всем ролям, и без неё вопрос владельца
-      // без доступа к финансам снова свалился бы в стоимость стрижки.
+      PRICE_HINT_PATTERN.test(text) &&
+      // Цена привлечения клиента — не позиция прайса, а подписка MAYA не услуга
+      // салона: ни то, ни другое в каталоге не лежит.
       !CLIENT_ACQUISITION_QUESTION_PATTERN.test(text) &&
-      /(сколько\s+стоит|цен[а-яёa-z]*|прайс[а-яёa-z]*|какие\s+услуг[а-яёa-z]*|длительн[а-яёa-z]*\s+услуг[а-яёa-z]*)/i.test(
-        text,
-      )
+      !/(подписк\w*|тариф\w*|maya|майя)/i.test(text)
     ) {
-      return this.requireGrounding('service_catalog', [
-        'catalog.services.read',
-      ]);
+      return ['catalog.services.read'];
     }
-    if (
-      /(кто\s+работает|график[а-яёa-z]*\s+(?:работ|мастер|специалист)|смен[а-яёa-z]*|выходн[а-яёa-z]*)/i.test(
-        text,
-      ) &&
-      factRequest
-    ) {
-      // Availability is not a work roster, so this remains blocked until a
-      // dedicated tenant-scoped schedule tool exists.
-      return this.requireGrounding('staff_schedule', ['staff.schedule.read']);
-    }
-    // 🔴 Справочника мастеров здесь больше нет. `catalog.staff.read` отдавал
-    // обезличенные ярлыки («specialist_1»), и вопрос «какие у нас мастера»
-    // получал ответ, в котором ни одного имени. Вопросы о мастерах уходят в
-    // аналитику ниже: там разрез по людям поимённо, с их числами.
-    if (
-      EXPENSE_STRUCTURE_QUESTION_PATTERN.test(text) &&
-      // «На что больше всего тратим» — уже вопрос-факт сам по себе, слова
-      // «сколько» в нём нет, и требовать его значило бы отправить вопрос о
-      // деньгах в операционный обзор, где разреза по статьям нет вовсе.
-      (factRequest || /на\s+что|куда/i.test(text))
-    ) {
-      // Период разрешается здесь же, а разрез по статьям считает сервер:
-      // модели складывать и делить нельзя, а перечень платежей — не ответ.
-      return this.requireGrounding('business_expenses', ['expenses.read'], {
-        name: 'expenses.read',
-        arguments: this.reportingPeriodForQuestion(text, previousUserText),
-      });
-    }
-    const customerCountRequest = GROUNDING_CUSTOMER_COUNT_PATTERN.test(text);
-    if (
-      GROUNDING_YEAR_COMPARISON_PATTERN.test(text) ||
-      (customerCountRequest &&
-        GROUNDING_YEAR_COMPARISON_PATTERN.test(previousUserText))
-    ) {
-      // 🔴 Сравнение с прошлым годом теперь целиком в business.query.
-      // Отдельный compare_years отдавал ровно три числа — выручку, число
-      // операций и клиентов, — и по ним нельзя было ни объяснить причину, ни
-      // назвать мастера. `comparisonForQuestion` сам ставит режим
-      // `previous_year_same_period`, а `reportingPeriodForQuestion` —
-      // `year_to_date`: тот же вопрос, но с двенадцатью метриками и разрезами.
-      if (allowedNames.has('analytics.business.query')) {
-        return this.businessQueryRequirement(text, previousUserText);
-      }
-      if (allowedNames.has('analytics.employee.query')) {
-        return this.employeeQueryRequirement(text, previousUserText);
-      }
-    }
-    if (customerCountRequest) {
-      // Аналитика отвечает лучше: там уникальные клиенты, когорты и сравнение,
-      // а голое число ответом почти никогда не было.
-      if (allowedNames.has('analytics.employee.query')) {
-        return this.employeeQueryRequirement(text, previousUserText);
-      }
-      if (allowedNames.has('analytics.business.query')) {
-        return this.businessQueryRequirement(text, previousUserText);
-      }
-      // 🔴 Но на младшем тарифе аналитики нет вовсе, а счётчик клиентов —
-      // есть. Без этого запасного пути салон, который только что подключился
-      // и платит, на вопрос «сколько у нас клиентов» не получал НИЧЕГО.
-      if (allowedNames.has('customers.count')) {
-        return this.requireGrounding('customer_count', ['customers.count']);
-      }
-      return this.businessQueryRequirement(text, previousUserText);
-    }
-    // 🔴 Вопрос о мастерах: владельцу — аналитика, клиенту — справочник.
-    // Вся аналитика для клиентских ролей закрыта, поэтому без этой ветки
-    // «какие у вас мастера» в публичном чате не заземлялось ничем и модель
-    // отвечала из головы.
-    if (
-      /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит))/i.test(
-        text,
-      ) &&
-      !allowedNames.has('analytics.business.query') &&
-      !allowedNames.has('analytics.employee.query') &&
-      allowedNames.has('catalog.staff.read')
-    ) {
-      return this.requireGrounding('staff_catalog', ['catalog.staff.read']);
-    }
-    if (
-      allowedNames.has('analytics.business.query') &&
-      this.isBusinessQuestion(brain, text, previousUserText, factRequest)
-    ) {
-      return this.businessQueryRequirement(text, previousUserText);
-    }
-    if (
-      allowedNames.has('analytics.employee.query') &&
-      this.isEmployeePerformanceQuestion(
-        brain,
-        text,
-        previousUserText,
-        factRequest,
-      )
-    ) {
-      return this.employeeQueryRequirement(text, previousUserText);
-    }
-    if (
-      ((GROUNDING_ANALYTICS_PATTERN.test(text) ||
-        GROUNDING_APPOINTMENT_METRIC_PATTERN.test(text)) &&
-        factRequest) ||
-      /(сводк[а-яёa-z]*|что\s+у\s+нас\s+сегодня)/i.test(text)
-    ) {
-      // 🔴 Обзорные `analytics.*.read` убраны: query-версии перекрывают их
-      // целиком и отдают сверх того сравнение, когорты и разрез по мастерам.
-      // Развилка «личное или по салону» осталась прежней — меняется только
-      // инструмент на её концах.
-      const personal = GROUNDING_PERSONAL_SCOPE_PATTERN.test(text);
-      const business = GROUNDING_BUSINESS_SCOPE_PATTERN.test(text);
-      if (personal) {
-        return this.employeeQueryRequirement(text, previousUserText);
-      }
-      if (business) {
-        return this.businessQueryRequirement(text, previousUserText);
-      }
-      if (
-        allowedNames.has('analytics.employee.query') &&
-        !allowedNames.has('analytics.business.query')
-      ) {
-        return this.employeeQueryRequirement(text, previousUserText);
-      }
-      return this.businessQueryRequirement(text, previousUserText);
+    if (STAFF_HINT_PATTERN.test(text)) {
+      // 🔴 Справочник мастеров — последний: он отдаёт обезличенные ярлыки
+      // («specialist_1»). Владельцу нужен разрез по людям поимённо с их
+      // числами, и он есть в аналитике; клиенту справочник — единственное, что
+      // вообще доступно.
+      return [
+        'analytics.business.query',
+        'analytics.employee.query',
+        'catalog.staff.read',
+      ];
     }
     return null;
   }
 
-  private requireGrounding(
-    domain: string,
-    toolNames: string[],
-    presetToolCall?: GroundingRequirement['presetToolCall'],
-  ): GroundingRequirement {
+  /**
+   * Аргументы предзагрузки: период разрешает сервер, сравнение — тоже.
+   *
+   * Модели их не доверяют не из недоверия, а по устройству: календаря у неё
+   * нет, а без сравнения разбор просадки вырождается в перечень счётчиков.
+   */
+  private preloadArguments(
+    toolName: string,
+    text: string,
+    previousUserText: string,
+  ): Record<string, unknown> {
+    const period = this.reportingPeriodForQuestion(text, previousUserText);
+    if (
+      toolName === 'analytics.business.profit' ||
+      toolName === 'expenses.read'
+    ) {
+      return period;
+    }
     return {
-      domain,
-      toolNames,
-      strictNumbers: true,
-      ...(presetToolCall ? { presetToolCall } : {}),
+      ...period,
+      comparison: this.comparisonForQuestion(text, previousUserText),
     };
-  }
-
-  private businessQueryRequirement(
-    text: string,
-    previousUserText: string,
-  ): GroundingRequirement {
-    return this.requireGrounding(
-      'business_query',
-      ['analytics.business.query'],
-      {
-        name: 'analytics.business.query',
-        arguments: {
-          ...this.reportingPeriodForQuestion(text, previousUserText),
-          comparison: this.comparisonForQuestion(text, previousUserText),
-        },
-      },
-    );
-  }
-
-  private employeeQueryRequirement(
-    text: string,
-    previousUserText: string,
-  ): GroundingRequirement {
-    return this.requireGrounding(
-      'employee_query',
-      ['analytics.employee.query'],
-      {
-        name: 'analytics.employee.query',
-        arguments: {
-          ...this.reportingPeriodForQuestion(text, previousUserText),
-          comparison: this.comparisonForQuestion(text, previousUserText),
-        },
-      },
-    );
-  }
-
-  private businessProfitRequirement(
-    text: string,
-    previousUserText: string,
-  ): GroundingRequirement {
-    return this.requireGrounding(
-      'business_profit',
-      ['analytics.business.profit'],
-      {
-        name: 'analytics.business.profit',
-        arguments: this.reportingPeriodForQuestion(text, previousUserText),
-      },
-    );
-  }
-
-  private isBusinessQuestion(
-    brain: MayaBrainRoute,
-    text: string,
-    previousUserText: string,
-    factRequest: boolean,
-  ): boolean {
-    if (
-      [
-        'booking',
-        'schedule_management',
-        'knowledge',
-        'catalog',
-        'loyalty',
-        'support',
-      ].includes(brain.intent)
-    ) {
-      return false;
-    }
-    if (
-      [
-        'business_analytics',
-        'finance',
-        'staff_operations',
-        'marketing',
-      ].includes(brain.intent)
-    ) {
-      return true;
-    }
-    const businessSignal =
-      /(бизнес|салон|филиал|клиент|посетител|запис|визит|отмен|услуг|мастер|сотрудник|команд|выруч|оборот|касс|доход|прибыл|марж|деньг|чек|загруз|повторн|возврат|удержан|просад|рост|динамик|эффективност|показател|план|kpi)/i;
-    if (businessSignal.test(text)) {
-      return true;
-    }
-    if (
-      brain.intent === 'general' &&
-      !/^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|спасибо|пока|кто\s+ты|что\s+ты\s+умеешь|как\s+дела)[!.?\s]*$/i.test(
-        text.trim(),
-      )
-    ) {
-      return true;
-    }
-    const shortFollowUp =
-      /^(?:а\s+)?(?:почему|что\s+делать|как\s+исправить|как\s+улучшить|подробнее|а\s+по\s+этому|и\s+что|какой\s+вывод)\??$/i.test(
-        text.trim(),
-      );
-    return (
-      shortFollowUp && (businessSignal.test(previousUserText) || factRequest)
-    );
-  }
-
-  private isEmployeePerformanceQuestion(
-    brain: MayaBrainRoute,
-    text: string,
-    previousUserText: string,
-    factRequest: boolean,
-  ): boolean {
-    if (
-      [
-        'booking',
-        'schedule_management',
-        'knowledge',
-        'catalog',
-        'loyalty',
-        'support',
-      ].includes(brain.intent)
-    ) {
-      return false;
-    }
-    if (
-      [
-        'business_analytics',
-        'finance',
-        'staff_operations',
-        'marketing',
-      ].includes(brain.intent)
-    ) {
-      return true;
-    }
-    const performanceSignal =
-      /(мой|мои|у\s+меня|я\s+заработ|моя\s+работ|мои\s+клиент|запис|выруч|чек|клиент|отмен|загруз|повторн|услуг|показател|план|kpi)/i;
-    if (performanceSignal.test(text)) {
-      return true;
-    }
-    return (
-      factRequest &&
-      /^(?:а\s+)?(?:почему|что\s+делать|как\s+улучшить|подробнее)/i.test(
-        text,
-      ) &&
-      performanceSignal.test(previousUserText)
-    );
   }
 
   private reportingPeriodForQuestion(
@@ -1557,14 +1570,37 @@ export class AiCoreService {
     return 'none';
   }
 
+  /** Данные на руках: отработал любой из доступных инструментов данных. */
   private groundingSatisfied(
     requirement: GroundingRequirement | null,
     toolResults: AiCoreToolResult[],
   ): boolean {
     return (
       !requirement ||
-      toolResults.some((result) => requirement.toolNames.includes(result.name))
+      toolResults.some((result) =>
+        requirement.evidenceToolNames.includes(result.name),
+      )
     );
+  }
+
+  /**
+   * Домен хода: по факту, а не по догадке.
+   *
+   * Пока ни один инструмент не отработал, называется вероятный домен — только
+   * чтобы отчёт и текст отказа не были безымянными. Как только результат есть,
+   * тему называет он: берём последний отработавший инструмент данных.
+   */
+  private groundingDomain(
+    requirement: GroundingRequirement | null,
+    toolResults: AiCoreToolResult[],
+  ): string | null {
+    for (let index = toolResults.length - 1; index >= 0; index -= 1) {
+      const domain = DATA_TOOL_DOMAINS[toolResults[index]?.name ?? ''];
+      if (domain) {
+        return domain;
+      }
+    }
+    return requirement?.fallbackDomain ?? null;
   }
 
   private groundingReport(
@@ -1574,14 +1610,16 @@ export class AiCoreService {
   ): GroundingReport {
     return {
       status,
-      domain: requirement?.domain ?? null,
-      required_tools: requirement?.toolNames ?? [],
+      domain: requirement
+        ? this.groundingDomain(requirement, toolResults)
+        : null,
+      required_tools: requirement?.evidenceToolNames ?? [],
       evidence_tools: requirement
         ? [
             ...new Set(
               toolResults
                 .map((result) => result.name)
-                .filter((name) => requirement.toolNames.includes(name)),
+                .filter((name) => requirement.evidenceToolNames.includes(name)),
             ),
           ]
         : [],
@@ -1603,127 +1641,112 @@ export class AiCoreService {
     };
   }
 
+  /**
+   * Ответ без модели — по тому инструменту, который ОТРАБОТАЛ.
+   *
+   * 🔴 Раньше ветка выбиралась по угаданной теме: промах регулярки — и текст
+   * не собирался вовсе, а владелец получал извинение вместо цифр, которые уже
+   * лежали на руках. Теперь тему называет имя инструмента, и промахнуться в
+   * нём нельзя. Идём с конца: последний ответивший инструмент и есть тема хода.
+   */
   private deterministicGroundedReply(
-    requirement: GroundingRequirement | null,
     toolResults: AiCoreToolResult[],
     userText: string,
   ): string | null {
-    if (
-      requirement?.domain === 'business_query' ||
-      requirement?.domain === 'employee_query'
-    ) {
-      const reply = this.deterministicAnalyticsQueryReply(
-        requirement,
-        toolResults,
-        userText,
-      );
-      if (!reply) {
-        return null;
-      }
-      const toolName =
-        requirement.domain === 'employee_query'
-          ? 'analytics.employee.query'
-          : 'analytics.business.query';
-      const evidence = toolResults.find((result) => result.name === toolName);
-      return this.appendAnalyticsFreshness(reply, evidence?.result);
-    }
-    if (requirement?.domain === 'business_expenses') {
-      const evidence = toolResults.find(
-        (result) => result.name === 'expenses.read',
-      );
-      return evidence ? this.deterministicExpenseReply(evidence.result) : null;
-    }
-    if (requirement?.domain === 'business_profit') {
-      const evidence = toolResults.find(
-        (result) => result.name === 'analytics.business.profit',
-      );
-      return evidence
-        ? this.deterministicProfitReply(
-            evidence.result,
-            // Спросили про цену клиента — с неё и начинаем. Ответ на вопрос
-            // не должен ждать, пока договорит отчёт о прибыли.
-            CLIENT_ACQUISITION_QUESTION_PATTERN.test(
-              userText.toLowerCase().replace(/ё/g, 'е'),
-            ),
-          )
+    for (let index = toolResults.length - 1; index >= 0; index -= 1) {
+      const evidence = toolResults[index];
+      const reply = evidence
+        ? this.deterministicReplyForTool(evidence, userText)
         : null;
+      if (reply) {
+        return reply;
+      }
     }
-    if (requirement?.domain === 'booking_availability') {
-      const evidence = toolResults.find(
-        (result) => result.name === 'booking.availability.read',
-      );
-      if (!evidence) {
-        return null;
-      }
-      const slots = this.record(evidence.result).slots;
-      if (!Array.isArray(slots)) {
-        return null;
-      }
-      const dateMatch = userText.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
-      const dateLabel = dateMatch
-        ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
-        : 'выбранную дату';
-      if (slots.length === 0) {
-        return `На ${dateLabel} свободных окон нет. Проверить другую дату?`;
-      }
-      return `На ${dateLabel} есть свободные окна: ${slots.length} ${this.pluralize(slots.length, 'вариант', 'варианта', 'вариантов')} времени. Уточните специалиста или услугу, чтобы сузить выбор.`;
-    }
-
-    if (requirement?.domain === 'client_loyalty') {
-      const evidence = toolResults.find(
-        (result) => result.name === 'loyalty.own.read',
-      );
-      if (!evidence) {
-        return null;
-      }
-      const loyalty = this.record(evidence.result);
-      const balance = this.safeMetricNumber(loyalty.balance);
-      const balanceLabel = `${this.formatMetricNumber(balance)} ${this.pluralize(balance, 'балл', 'балла', 'баллов')}`;
-      const text = userText.toLowerCase().replace(/ё/g, 'е');
-      if (!/(потрат|спис|оплат|на\s+что)/i.test(text)) {
-        return `Ваш баланс: ${balanceLabel}.`;
-      }
-      const spend = this.record(loyalty.spend_options);
-      const items = Array.isArray(spend.items)
-        ? spend.items
-            .slice(0, 3)
-            .map((entry) => {
-              const item = this.record(entry);
-              if (typeof item.name !== 'string') {
-                return null;
-              }
-              const points = this.safeMetricNumber(item.points_required);
-              return `${item.name} — ${this.formatMetricNumber(points)} ${this.pluralize(points, 'балл', 'балла', 'баллов')}`;
-            })
-            .filter((entry): entry is string => entry !== null)
-        : [];
-      return items.length > 0
-        ? `Ваш баланс: ${balanceLabel}. Можно рассмотреть: ${items.join('; ')}. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.`
-        : `Ваш баланс: ${balanceLabel}. Подходящих услуг для списания сейчас нет.`;
-    }
-
-    if (requirement?.domain === 'client_appointments') {
-      const evidence = toolResults.find(
-        (result) => result.name === 'appointments.own.list',
-      );
-      if (!evidence) {
-        return null;
-      }
-      const appointments = this.record(evidence.result).appointments;
-      if (!Array.isArray(appointments) || appointments.length === 0) {
-        return 'У вас пока нет записей.';
-      }
-      const upcoming = appointments.filter((entry) => {
-        const item = this.record(entry);
-        return item.is_upcoming === true && item.status !== 'canceled';
-      }).length;
-      const cancelled = appointments.filter(
-        (entry) => this.record(entry).status === 'canceled',
-      ).length;
-      return `В вашей истории ${appointments.length} ${this.pluralize(appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming}, отменённых: ${cancelled}. Подробности доступны в разделе «Записи».`;
-    }
-
     return null;
+  }
+
+  private deterministicReplyForTool(
+    evidence: AiCoreToolResult,
+    userText: string,
+  ): string | null {
+    const text = userText.toLowerCase().replace(/ё/g, 'е');
+    switch (evidence.name) {
+      case 'analytics.business.query':
+      case 'analytics.employee.query': {
+        const reply = this.deterministicAnalyticsQueryReply(
+          evidence.name === 'analytics.employee.query',
+          evidence.result,
+          userText,
+        );
+        return reply
+          ? this.appendAnalyticsFreshness(reply, evidence.result)
+          : null;
+      }
+      case 'expenses.read':
+        return this.deterministicExpenseReply(evidence.result);
+      case 'analytics.business.profit':
+        return this.deterministicProfitReply(
+          evidence.result,
+          // Спросили про цену клиента — с неё и начинаем. Ответ на вопрос не
+          // должен ждать, пока договорит отчёт о прибыли.
+          CLIENT_ACQUISITION_QUESTION_PATTERN.test(text),
+        );
+      case 'booking.availability.read': {
+        const slots = this.record(evidence.result).slots;
+        if (!Array.isArray(slots)) {
+          return null;
+        }
+        const dateMatch = userText.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
+        const dateLabel = dateMatch
+          ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
+          : 'выбранную дату';
+        if (slots.length === 0) {
+          return `На ${dateLabel} свободных окон нет. Проверить другую дату?`;
+        }
+        return `На ${dateLabel} есть свободные окна: ${slots.length} ${this.pluralize(slots.length, 'вариант', 'варианта', 'вариантов')} времени. Уточните специалиста или услугу, чтобы сузить выбор.`;
+      }
+      case 'loyalty.own.read': {
+        const loyalty = this.record(evidence.result);
+        const balance = this.safeMetricNumber(loyalty.balance);
+        const balanceLabel = `${this.formatMetricNumber(balance)} ${this.pluralize(balance, 'балл', 'балла', 'баллов')}`;
+        if (!/(потрат|спис|оплат|на\s+что)/i.test(text)) {
+          return `Ваш баланс: ${balanceLabel}.`;
+        }
+        const spend = this.record(loyalty.spend_options);
+        const items = Array.isArray(spend.items)
+          ? spend.items
+              .slice(0, 3)
+              .map((entry) => {
+                const item = this.record(entry);
+                if (typeof item.name !== 'string') {
+                  return null;
+                }
+                const points = this.safeMetricNumber(item.points_required);
+                return `${item.name} — ${this.formatMetricNumber(points)} ${this.pluralize(points, 'балл', 'балла', 'баллов')}`;
+              })
+              .filter((entry): entry is string => entry !== null)
+          : [];
+        return items.length > 0
+          ? `Ваш баланс: ${balanceLabel}. Можно рассмотреть: ${items.join('; ')}. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.`
+          : `Ваш баланс: ${balanceLabel}. Подходящих услуг для списания сейчас нет.`;
+      }
+      case 'appointments.own.list': {
+        const appointments = this.record(evidence.result).appointments;
+        if (!Array.isArray(appointments) || appointments.length === 0) {
+          return 'У вас пока нет записей.';
+        }
+        const upcoming = appointments.filter((entry) => {
+          const item = this.record(entry);
+          return item.is_upcoming === true && item.status !== 'canceled';
+        }).length;
+        const cancelled = appointments.filter(
+          (entry) => this.record(entry).status === 'canceled',
+        ).length;
+        return `В вашей истории ${appointments.length} ${this.pluralize(appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming}, отменённых: ${cancelled}. Подробности доступны в разделе «Записи».`;
+      }
+      default:
+        return null;
+    }
   }
 
   /**
@@ -1946,20 +1969,11 @@ export class AiCoreService {
   }
 
   private deterministicAnalyticsQueryReply(
-    requirement: GroundingRequirement,
-    toolResults: AiCoreToolResult[],
+    personal: boolean,
+    evidence: unknown,
     userText: string,
   ): string | null {
-    const personal = requirement.domain === 'employee_query';
-    const toolName = personal
-      ? 'analytics.employee.query'
-      : 'analytics.business.query';
-    const evidence = toolResults.find((result) => result.name === toolName);
-    if (!evidence) {
-      return null;
-    }
-
-    const data = this.record(evidence.result);
+    const data = this.record(evidence);
     const metrics = this.record(data.metrics);
     const changes = this.record(data.changes);
     const current = this.record(data.current);

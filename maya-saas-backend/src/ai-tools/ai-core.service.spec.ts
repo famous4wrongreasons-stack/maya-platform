@@ -456,20 +456,60 @@ describe('AiCoreService', () => {
     expect(result.reply).not.toContain('9 999');
   });
 
-  it('fails safely before the model when no authoritative schedule tool exists', async () => {
-    const mocks = createService();
+  /**
+   * 🔴 Раньше здесь стоял глухой отказ: регулярка про «кто работает» вела к
+   * инструменту `staff.schedule.read`, которого в каталоге нет, и ход
+   * обрывался до модели. Отказ порождала не нехватка данных, а промах
+   * подсказки — ровно то, ради чего маршрутизация и переделана. Теперь вопрос
+   * заземляется тем, что у роли есть, и MAYA говорит, чего у неё нет, вместо
+   * «повторите позже».
+   */
+  it('grounds a roster question in the data it does have instead of dead-ending', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-roster',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'none' },
+        metrics: { appointments_total: 12 },
+        changes: {},
+        current: {},
+        service_changes: [],
+      },
+    });
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply:
+          'Рабочего графика смен я не веду. По записям на сегодня в салоне 12 визитов — показать по мастерам?',
+        toolCall: null,
+      }),
+    );
 
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [{ role: 'user', content: 'Кто работает сегодня?' }],
     });
 
-    expect(mocks.model.decide).not.toHaveBeenCalled();
-    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).toHaveBeenCalledWith(
+      user,
+      'analytics.business.query',
+      expect.objectContaining({
+        arguments: { period: 'today', comparison: 'none' },
+      }),
+    );
     expect(result).toMatchObject({
-      source: 'safe_fallback',
-      grounding: { status: 'blocked', domain: 'staff_schedule' },
+      source: 'deepseek',
+      grounding: {
+        status: 'verified',
+        domain: 'business_query',
+        evidence_tools: ['analytics.business.query'],
+      },
     });
+    // Смены выдумывать по-прежнему нельзя: сторож чисел работает, а имён в
+    // результате нет — назвать их модели неоткуда.
+    expect(result.reply).toContain('12 визитов');
   });
 
   it('grounds a customer loyalty balance in the authenticated customer tool', async () => {
