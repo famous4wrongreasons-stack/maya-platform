@@ -2401,6 +2401,159 @@ describe('AiCoreService', () => {
     expect(result.grounding).toMatchObject({ status: 'verified' });
   });
 
+  it('rejects a real number pinned to the wrong master and ships the corrected answer', async () => {
+    const mocks = createService(['analytics.business.query'], {
+      AI_CORE_ATTRIBUTION_GUARD: 'true',
+    });
+    mocks.runtime.execute.mockResolvedValue(attributionExecution());
+    mocks.model.decide
+      // 🔴 Каждое число здесь настоящее: «Борода» действительно просела на 12.
+      // Ложь ровно одна — просела она у Ильи, а названа у Стаса. Прежний
+      // сторож пропускал такую фразу без единой пометки, и владелец шёл
+      // разговаривать не с тем человеком.
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'У Стаса «Борода» просела на 12 записей.',
+          toolCall: null,
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'У Ильи «Борода» просела на 12 записей: 19 против 31.',
+          toolCall: null,
+        }),
+      );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        { role: 'user', content: 'Кто из мастеров просел за этот месяц?' },
+      ],
+    });
+
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    const correction = mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0];
+    expect(correction).toContain('12');
+    expect(correction).toContain('Стас');
+    expect(result.reply).toBe(
+      'У Ильи «Борода» просела на 12 записей: 19 против 31.',
+    );
+    expect(result.source).not.toBe('safe_fallback');
+  });
+
+  it('rejects the salon total presented as one master earnings', async () => {
+    const mocks = createService(['analytics.business.query'], {
+      AI_CORE_ATTRIBUTION_GUARD: 'true',
+    });
+    mocks.runtime.execute.mockResolvedValue(attributionExecution());
+    mocks.model.decide
+      // 104 500 ₽ — выручка всего салона, а не Ильи.
+      .mockResolvedValueOnce(
+        decision({ reply: 'Илья заработал 104 500 ₽.', toolCall: null }),
+      )
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'По салону 104 500 ₽ за период, у Ильи 19 записей.',
+          toolCall: null,
+        }),
+      );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Сколько заработали за месяц?' }],
+    });
+
+    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+      '104500',
+    );
+    expect(result.reply).toBe(
+      'По салону 104 500 ₽ за период, у Ильи 19 записей.',
+    );
+  });
+
+  it('lets a salon-wide sentence without any master name through untouched', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue(attributionExecution());
+    // Общие показатели салона названы без имени рядом — придираться не к чему.
+    // Ложные тревоги тут дороже пропусков: прошлая проверка направления
+    // браковала верные ответы пачками.
+    const reply =
+      'За период 40 записей и 104 500 ₽ выручки, 33 уникальных клиента. Записи просели на 12 (−23,1%).';
+    mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Что у нас по записям за месяц?' }],
+    });
+
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.reply).toBe(reply);
+    expect(result.source).not.toBe('safe_fallback');
+    expect(result.grounding).toMatchObject({ status: 'verified' });
+  });
+
+  it('keeps a full three-part answer with per-master detail intact', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue(attributionExecution());
+    // Живой ответ директора: имена, их числа, салонный итог отдельной фразой и
+    // рекомендация. Каждое число стоит у своего владельца — придираться не к
+    // чему, и ни одной пометки быть не должно.
+    const reply =
+      'У Ильи «Борода» просела: 19 записей против 31, это −12 (−38,7%). У Стаса ровно — 21 запись, как и было. По салону 40 записей и 104 500 ₽, 33 уникальных клиента. Первым делом верните бородачей: обзвон тех, кто был в прошлом месяце.';
+    mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        { role: 'user', content: 'Почему просели записи в этом месяце?' },
+      ],
+    });
+
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.reply).toBe(reply);
+    expect(result.source).not.toBe('safe_fallback');
+  });
+
+  it('writes the misattribution reason into the audit trail separately', async () => {
+    const mocks = createService(['analytics.business.query'], {
+      AI_CORE_ATTRIBUTION_GUARD: 'true',
+    });
+    mocks.runtime.execute.mockResolvedValue(attributionExecution());
+    // Модель повторяет ту же подмену — ответ уходит в детерминированный текст.
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'У Стаса «Борода» просела на 12 записей.',
+        toolCall: null,
+      }),
+    );
+
+    await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        { role: 'user', content: 'Кто из мастеров просел за этот месяц?' },
+      ],
+    });
+
+    const completed = (
+      mocks.auditLog.log.mock.calls as unknown as Array<
+        [{ action: string; metadata: Record<string, unknown> }]
+      >
+    )
+      .map((call) => call[0])
+      .find((entry) => entry.action === 'ai.core_turn_completed');
+    // Причина отказа должна читаться без гадания: число настоящее, ложной была
+    // привязка — и это отдельное поле, а не общая свалка с unsourced_numbers.
+    expect(completed?.metadata.misattributed_numbers).toEqual([
+      '12 (это не данные «Стас → Борода»)',
+    ]);
+    expect(completed?.metadata.unsourced_numbers).toEqual([]);
+  });
+
   it('leaves the model answer byte-for-byte alone instead of rewriting master labels', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
@@ -2436,6 +2589,106 @@ describe('AiCoreService', () => {
     expect(new Date(String(nowUtc)).toISOString()).toBe(nowUtc);
   });
 
+  /**
+   * Салон с двумя мастерами и двумя услугами: просадка только у Ильи.
+   *
+   * Числа подобраны так, что порознь всё сходится — 12 действительно есть у
+   * «Бороды», 104 500 ₽ действительно есть у салона. Отличить верную фразу от
+   * ложной можно только по привязке.
+   */
+  function attributionExecution() {
+    return {
+      status: 'completed',
+      execution_id: 'execution-attribution',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        metrics: { appointments_total: 40, unique_clients: 33 },
+        changes: {
+          appointments_total: {
+            current: 40,
+            previous: 52,
+            delta: -12,
+            percent_change: -23.1,
+          },
+        },
+        current: {
+          revenue: [
+            {
+              currency: 'RUB',
+              amount_kopecks: 10_450_000,
+              amount_major_units: 104_500,
+            },
+          ],
+          staff_summary: [
+            {
+              name: 'Стас',
+              appointments: 21,
+              revenue: [],
+              booked_minutes: 630,
+              services: [{ name: 'Мужская стрижка', appointments: 21 }],
+            },
+            {
+              name: 'Илья',
+              appointments: 19,
+              revenue: [],
+              booked_minutes: 570,
+              services: [{ name: 'Борода', appointments: 19 }],
+            },
+          ],
+          service_summary: [
+            { name: 'Мужская стрижка', appointments: 21, booked_value: [] },
+            { name: 'Борода', appointments: 19, booked_value: [] },
+          ],
+        },
+        service_changes: [
+          {
+            name: 'Борода',
+            current_appointments: 19,
+            previous_appointments: 31,
+            delta: -12,
+            percent_change: -38.7,
+          },
+        ],
+        staff_changes: [
+          {
+            name: 'Илья',
+            current_appointments: 19,
+            previous_appointments: 31,
+            delta: -12,
+            percent_change: -38.7,
+            services: [
+              {
+                name: 'Борода',
+                current_appointments: 19,
+                previous_appointments: 31,
+                delta: -12,
+                percent_change: -38.7,
+              },
+            ],
+          },
+          {
+            name: 'Стас',
+            current_appointments: 21,
+            previous_appointments: 21,
+            delta: 0,
+            percent_change: 0,
+            services: [
+              {
+                name: 'Мужская стрижка',
+                current_appointments: 21,
+                previous_appointments: 21,
+                delta: 0,
+                percent_change: 0,
+              },
+            ],
+          },
+        ],
+      },
+    };
+  }
+
   function decision(
     value: Pick<AiCoreModelDecision, 'reply' | 'toolCall'>,
   ): AiCoreModelDecision {
@@ -2450,10 +2703,18 @@ describe('AiCoreService', () => {
 
   function createService(
     toolNames = ['analytics.business.read', 'loyalty.internal.adjust'],
+    // Сверка привязки числа к сущности выключена в проде: на замере она дала
+    // 22,6% ложных тревог на верных ответах. Тесты, которые проверяют саму
+    // сверку, включают её явно.
+    env: Record<string, string> = {},
   ) {
     const config = {
       get: jest.fn((name: string) =>
-        name === 'AI_CORE_MAX_TOOL_STEPS' ? '2' : undefined,
+        name in env
+          ? env[name]
+          : name === 'AI_CORE_MAX_TOOL_STEPS'
+            ? '2'
+            : undefined,
       ),
     };
     const tenantContext = {

@@ -1016,6 +1016,273 @@ describe('AiToolHandlerService output minimization', () => {
     expect(JSON.stringify(result)).not.toContain('9999999');
   });
 
+  it('publishes client cohorts as metrics and compares them between periods', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const period = (
+      cohort: Record<string, unknown>,
+      uniqueClients: number,
+    ) => ({
+      data_source: 'maya',
+      period: { from: 'from', to: 'to', timezone: 'UTC' },
+      appointments: {
+        total: 100,
+        active: 100,
+        cancelled: 0,
+        unique_clients: uniqueClients,
+        // 🔴 Внутрипериодный показатель мал по природе: на неделе при цикле
+        // стрижки в 3–4 недели повторов почти нет. Именно из-за него владельцу
+        // сказали, что салон живёт на новых гостях.
+        repeat_clients_in_period: 3,
+        repeat_client_rate_percent: 3.2,
+        cohort_status: 'available',
+        cohort_unavailable_reason: null,
+        cohort_lookback_days: 90,
+        ...cohort,
+      },
+      revenue: [],
+      expenses: [],
+      net: [],
+      average_ticket: [],
+      daily: [],
+      services: [],
+      staff: [],
+    });
+    const getBusinessOverview = jest
+      .fn()
+      .mockResolvedValueOnce(
+        period(
+          {
+            clients_returning: 62,
+            clients_new: 32,
+            returning_share_percent: 66,
+          },
+          94,
+        ),
+      )
+      .mockResolvedValueOnce(
+        period(
+          {
+            clients_returning: 50,
+            clients_new: 40,
+            returning_share_percent: 55.6,
+          },
+          90,
+        ),
+      );
+    const analyticsService = {
+      getBusinessOverview,
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = (await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'last_7_days', comparison: 'previous_period' },
+      'execution-client-cohorts',
+    )) as Record<string, unknown>;
+
+    expect(result).toMatchObject({
+      metrics: {
+        clients_returning: 62,
+        clients_new: 32,
+        returning_share_percent: 66,
+        // Горизонт — часть показателя: «вернувшихся 66%» без него не значит
+        // ничего.
+        cohort_lookback_days: 90,
+        repeat_clients_in_period: 3,
+      },
+      changes: {
+        clients_returning: { current: 62, previous: 50, delta: 12 },
+        returning_share_percent: { current: 66, previous: 55.6 },
+      },
+    });
+    expect(result.available_metrics).toEqual(
+      expect.arrayContaining([
+        'clients_returning',
+        'clients_new',
+        'returning_share_percent',
+        'cohort_lookback_days',
+      ]),
+    );
+    expect(result.unavailable_metrics).toEqual(
+      expect.not.arrayContaining([
+        expect.objectContaining({ key: 'client_cohorts' }),
+      ]),
+    );
+  });
+
+  it('reports unavailable client cohorts with a reason instead of zeroes', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'maya',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: {
+          total: 100,
+          active: 100,
+          cancelled: 0,
+          unique_clients: 94,
+          clients_returning: null,
+          clients_new: null,
+          returning_share_percent: null,
+          cohort_lookback_days: 90,
+          cohort_status: 'unavailable',
+          cohort_unavailable_reason: 'lookback_window_unavailable',
+        },
+        revenue: [],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = (await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'last_7_days', comparison: 'none' },
+      'execution-cohorts-unavailable',
+    )) as Record<string, unknown>;
+
+    // 🔴 Ноль здесь означал бы «вернувшихся нет». Недоступность обязана быть
+    // названа словами, иначе модель посчитает её фактом.
+    expect(result.metrics).toMatchObject({
+      clients_returning: null,
+      clients_new: null,
+      returning_share_percent: null,
+    });
+    expect(result.available_metrics).toEqual(
+      expect.not.arrayContaining([
+        'clients_returning',
+        'clients_new',
+        'returning_share_percent',
+      ]),
+    );
+    expect(result.unavailable_metrics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'client_cohorts',
+          reason: expect.stringContaining('90-day'),
+        }),
+      ]),
+    );
+  });
+
+  it('compares cancellations and repeat clients per master without leaking the CRM id', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const period = (staff: unknown[]) => ({
+      data_source: 'crm',
+      period: { from: 'from', to: 'to', timezone: 'UTC' },
+      appointments: { total: 40, active: 36, cancelled: 4 },
+      revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+      expenses: [],
+      net: [],
+      average_ticket: [],
+      daily: [],
+      services: [],
+      staff,
+    });
+    const getBusinessOverview = jest
+      .fn()
+      .mockResolvedValueOnce(
+        period([
+          {
+            staff_external_id: 'provider-secret-id',
+            name: 'Илья',
+            appointments: 8,
+            cancelled: 6,
+            cancellation_rate_percent: 42.9,
+            unique_clients: 7,
+            repeat_clients_in_period: 1,
+            revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+            booked_minutes: 240,
+            services: [{ name: 'Борода', appointments: 8 }],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(
+        period([
+          {
+            staff_external_id: 'provider-secret-id',
+            name: 'Илья',
+            appointments: 20,
+            cancelled: 2,
+            cancellation_rate_percent: 9.1,
+            unique_clients: 18,
+            repeat_clients_in_period: 2,
+            revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+            booked_minutes: 600,
+            services: [{ name: 'Борода', appointments: 20 }],
+          },
+        ]),
+      );
+    const analyticsService = {
+      getBusinessOverview,
+      getBusinessFinance: jest.fn().mockRejectedValue(new Error('unavailable')),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'last_7_days', comparison: 'previous_period' },
+      'execution-staff-cancellations',
+    )) as Record<string, unknown>;
+
+    expect(result).toMatchObject({
+      current: {
+        staff_summary: [
+          {
+            name: 'Илья',
+            appointments: 8,
+            cancelled: 6,
+            cancellation_rate_percent: 42.9,
+            unique_clients: 7,
+            repeat_clients_in_period: 1,
+            // Журнальные цены в режиме внешней CRM деньгами не признаются.
+            revenue: [],
+          },
+        ],
+      },
+      staff_changes: [
+        {
+          name: 'Илья',
+          current_appointments: 8,
+          previous_appointments: 20,
+          current_cancelled: 6,
+          previous_cancelled: 2,
+          cancelled_delta: 4,
+          current_cancellation_rate_percent: 42.9,
+          previous_cancellation_rate_percent: 9.1,
+          cancellation_rate_delta_percentage_points: 33.8,
+          current_unique_clients: 7,
+          previous_unique_clients: 18,
+          unique_clients_delta: -11,
+          current_repeat_clients_in_period: 1,
+          previous_repeat_clients_in_period: 2,
+          repeat_clients_delta: -1,
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('provider-secret-id');
+    expect(JSON.stringify(result)).not.toContain('9999999');
+  });
+
   it('hides the named master breakdown from a role that only manages itself', async () => {
     const analyticsService = {
       getBusinessOverview: jest.fn().mockResolvedValue({

@@ -193,7 +193,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'analytics.employee.query',
     description:
-      'Universal personal performance analytics for the current employee. Returns appointments, cancellations, unique and repeat clients, booked service value, average booked value, booked minutes, service demand and optional comparison. This never exposes another employee data and booked value is not cash revenue.',
+      'Universal personal performance analytics for the current employee. Returns appointments, cancellations, unique clients, client cohorts, booked service value, average booked value, booked minutes, service demand and optional comparison. clients_returning counts this employee clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal clients overall, while repeat_clients_in_period only counts clients who came more than once INSIDE the period. This never exposes another employee data and booked value is not cash revenue.',
     inputSchema: BUSINESS_QUERY_SCHEMA,
     allowedRoles: STAFF_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -223,7 +223,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'analytics.business.query',
     description:
-      'Universal verified business analytics for an owner or manager. Returns revenue and financial operations, appointments, cancellations, unique and repeat clients, average ticket, booked minutes, daily dynamics, service demand and optional comparison with the previous equal period or previous year. Use this for any factual business-performance question that is not a personal employee question.',
+      'Universal verified business analytics for an owner or manager. Returns revenue and financial operations, appointments, cancellations, unique clients, client cohorts, average ticket, booked minutes, daily dynamics, service demand, a per-master breakdown with cancellations and repeat clients, and optional comparison with the previous equal period or previous year. clients_returning counts clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal or regular clients of the salon overall. repeat_clients_in_period is a different and much narrower thing: clients who came more than once INSIDE the period, which is near zero on a short period by nature and must never be presented as retention. Use this for any factual business-performance question that is not a personal employee question.',
     inputSchema: BUSINESS_QUERY_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,

@@ -215,6 +215,203 @@ describe('OperationsAnalyticsService', () => {
     };
   };
 
+  /**
+   * Внутренний календарь с раздельными ответами на окно и на lookback.
+   *
+   * Общий `createService` отдаёт один и тот же список на любой запрос, а
+   * когорты только тем и заняты, что отличают визиты ДО периода от визитов
+   * внутри него. Поэтому здесь запросы различаются: у основного среза в
+   * `select` есть `id`, у прохода за историей — только клиент и статус.
+   */
+  const createCohortService = (options: {
+    windowAppointments: Array<Record<string, unknown>>;
+    lookback:
+      Array<{ clientId: string | null; status: string }> | 'unavailable';
+  }) => {
+    const tenantContext = new TenantContextService();
+    const lookbackQueries: Array<Record<string, unknown>> = [];
+    const appointmentFindMany = jest.fn(
+      (args: {
+        where: Record<string, unknown>;
+        select: Record<string, boolean>;
+      }) => {
+        if (args.select?.id === true) {
+          return Promise.resolve(options.windowAppointments);
+        }
+        lookbackQueries.push(args.where);
+        return options.lookback === 'unavailable'
+          ? Promise.reject(new Error('calendar unavailable'))
+          : Promise.resolve(options.lookback);
+      },
+    );
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          defaultTimezone: 'Europe/Moscow',
+          calendarSource: CalendarSource.INTERNAL,
+        }),
+      },
+      appointment: { findMany: appointmentFindMany },
+      expense: { findMany: jest.fn().mockResolvedValue([]) },
+      internalProvider: { findFirst: jest.fn() },
+      crmStaffAccess: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+
+    return {
+      tenantContext,
+      appointmentFindMany,
+      lookbackQueries,
+      service: new OperationsAnalyticsService(
+        prisma,
+        tenantContext,
+        { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
+        { getJournal: jest.fn() } as unknown as CrmService,
+        {
+          encrypt: (value: string) => `enc:${value}`,
+          decrypt: (value: string) => value,
+        } as EncryptionService,
+      ),
+    };
+  };
+
+  const internalVisit = (
+    id: string,
+    clientId: string | null,
+    startAt: string,
+    status = 'confirmed',
+  ) => ({
+    id,
+    clientId,
+    branchId: null,
+    staffExternalId: 'staff-a',
+    startAt: new Date(startAt),
+    endAt: new Date(new Date(startAt).getTime() + 30 * 60_000),
+    status,
+    totalPriceKopecks: 200_000,
+    currency: 'RUB',
+  });
+
+  it('counts a client with an earlier visit as returning and one without as new', async () => {
+    const setup = createCohortService({
+      windowAppointments: [
+        internalVisit('a', 'client-regular', '2026-07-10T09:00:00.000Z'),
+        internalVisit('b', 'client-first-time', '2026-07-11T09:00:00.000Z'),
+      ],
+      // Визит того же клиента ДО начала окна — на этом и держится когорта.
+      lookback: [{ clientId: 'client-regular', status: 'confirmed' }],
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(result.appointments).toMatchObject({
+      unique_clients: 2,
+      clients_returning: 1,
+      clients_new: 1,
+      returning_share_percent: 50,
+      cohort_lookback_days: 90,
+      cohort_status: 'available',
+      cohort_unavailable_reason: null,
+      // 🔴 Внутрипериодный показатель остаётся нулём — и именно поэтому по нему
+      // нельзя было судить об удержании: оба клиента приходили по одному разу.
+      repeat_clients_in_period: 0,
+    });
+    // История берётся ровно за горизонт и строго ДО начала периода.
+    expect(setup.lookbackQueries).toEqual([
+      expect.objectContaining({
+        tenantId: 'tenant-a',
+        startAt: {
+          gte: new Date('2026-04-02T00:00:00.000Z'),
+          lte: new Date('2026-06-30T23:59:59.999Z'),
+        },
+      }),
+    ]);
+    // Один запрос за окно и один за историю — больше ничего.
+    expect(setup.appointmentFindMany).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not count a cancelled earlier appointment as a previous visit', async () => {
+    const setup = createCohortService({
+      windowAppointments: [
+        internalVisit('a', 'client-a', '2026-07-10T09:00:00.000Z'),
+      ],
+      lookback: [{ clientId: 'client-a', status: 'canceled' }],
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(result.appointments).toMatchObject({
+      clients_returning: 0,
+      clients_new: 1,
+      returning_share_percent: 0,
+      cohort_status: 'available',
+    });
+  });
+
+  it('marks cohorts unavailable instead of zero when the history cannot be read', async () => {
+    const setup = createCohortService({
+      windowAppointments: [
+        internalVisit('a', 'client-a', '2026-07-10T09:00:00.000Z'),
+      ],
+      lookback: 'unavailable',
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    // 🔴 Ноль здесь читался бы как «вернувшихся нет» — ровно то враньё, ради
+    // которого когорты и делались. Недоступность обязана быть видимой.
+    expect(result.appointments).toMatchObject({
+      clients_returning: null,
+      clients_new: null,
+      returning_share_percent: null,
+      cohort_lookback_days: 90,
+      cohort_status: 'unavailable',
+      cohort_unavailable_reason: 'lookback_window_unavailable',
+    });
+    // Остальная аналитика от недоступной истории не страдает.
+    expect(result.appointments.unique_clients).toBe(1);
+  });
+
+  it('refuses cohorts for a period longer than the lookback horizon without extra queries', async () => {
+    const setup = createCohortService({
+      windowAppointments: [
+        internalVisit('a', 'client-a', '2026-03-10T09:00:00.000Z'),
+      ],
+      lookback: [],
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(result.appointments).toMatchObject({
+      clients_returning: null,
+      clients_new: null,
+      cohort_lookback_days: 90,
+      cohort_status: 'unavailable',
+      cohort_unavailable_reason: 'period_longer_than_cohort_lookback',
+    });
+    expect(setup.lookbackQueries).toEqual([]);
+    expect(setup.appointmentFindMany).toHaveBeenCalledTimes(1);
+  });
+
   it('excludes cancellations and keeps all currencies explicit', async () => {
     const setup = createService();
 
@@ -403,6 +600,10 @@ describe('OperationsAnalyticsService', () => {
         staff_external_id: 'staff-a',
         name: 'Анна',
         appointments: 1,
+        cancelled: 0,
+        cancellation_rate_percent: 0,
+        unique_clients: 1,
+        repeat_clients_in_period: 0,
         revenue: [{ currency: 'RUB', amount_kopecks: 200_000 }],
         booked_minutes: 30,
         services: [{ name: 'Мужская стрижка', appointments: 1 }],
@@ -411,13 +612,201 @@ describe('OperationsAnalyticsService', () => {
         staff_external_id: 'staff-b',
         name: 'Илья',
         appointments: 2,
+        cancelled: 0,
+        cancellation_rate_percent: 0,
+        unique_clients: 2,
+        repeat_clients_in_period: 0,
         revenue: [{ currency: 'RUB', amount_kopecks: 400_000 }],
         booked_minutes: 60,
         services: [{ name: 'Борода', appointments: 2 }],
       },
     ]);
-    // Разбивка по мастерам не должна стоить ни одного лишнего обращения к CRM.
-    expect(setup.crmGetJournal).toHaveBeenCalledTimes(1);
+    // Разбивка по мастерам не должна стоить ни одного лишнего обращения к CRM:
+    // единственные запросы — один за сам период и проход за lookback-окно
+    // когорт, который читается теми же чанками по 31 дню (90 дней → 3 чанка).
+    expect(setup.crmGetJournal).toHaveBeenCalledTimes(4);
+  });
+
+  it('counts cancellations per master and keeps a master who only had cancellations', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+    const journalAppointment = (
+      id: string,
+      providerId: string,
+      providerName: string,
+      status: string,
+      startAt: string,
+      clientId: string,
+    ) => ({
+      id,
+      client: { id: clientId, name: 'Client' },
+      provider: { id: providerId, name: providerName },
+      branch: null,
+      service_ids: ['service-cut'],
+      services: [
+        {
+          id: 'service-cut',
+          name: 'Мужская стрижка',
+          price: 2_000,
+          currency: 'RUB',
+        },
+      ],
+      start_at: startAt,
+      end_at: new Date(new Date(startAt).getTime() + 30 * 60_000).toISOString(),
+      status,
+      notes: null,
+      total_price: 2_000,
+      currency: 'RUB',
+    });
+    setup.crmGetJournal.mockResolvedValue({
+      calendar_source: 'external',
+      timezone: 'Europe/Moscow',
+      range: {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      },
+      provider_id: null,
+      count: 5,
+      appointments: [
+        journalAppointment(
+          'a-1',
+          'staff-a',
+          'Анна',
+          'confirmed',
+          '2026-07-10T09:00:00.000Z',
+          'client-1',
+        ),
+        journalAppointment(
+          'a-2',
+          'staff-a',
+          'Анна',
+          'confirmed',
+          '2026-07-12T09:00:00.000Z',
+          'client-1',
+        ),
+        journalAppointment(
+          'a-3',
+          'staff-a',
+          'Анна',
+          'cancelled',
+          '2026-07-13T09:00:00.000Z',
+          'client-2',
+        ),
+        // Мастер, у которого в периоде НИЧЕГО, кроме отмен: без отдельного
+        // прохода он исчезал из разреза целиком.
+        journalAppointment(
+          'b-1',
+          'staff-b',
+          'Илья',
+          'canceled',
+          '2026-07-14T09:00:00.000Z',
+          'client-3',
+        ),
+        journalAppointment(
+          'b-2',
+          'staff-b',
+          'Илья',
+          'cancelled',
+          '2026-07-15T09:00:00.000Z',
+          'client-4',
+        ),
+      ],
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(result.staff).toMatchObject([
+      {
+        staff_external_id: 'staff-a',
+        name: 'Анна',
+        appointments: 2,
+        cancelled: 1,
+        cancellation_rate_percent: 33.3,
+        unique_clients: 1,
+        repeat_clients_in_period: 1,
+      },
+      {
+        staff_external_id: 'staff-b',
+        name: 'Илья',
+        appointments: 0,
+        cancelled: 2,
+        cancellation_rate_percent: 100,
+        unique_clients: 0,
+        repeat_clients_in_period: 0,
+      },
+    ]);
+    // Отмены не должны утекать в активные записи салона.
+    expect(result.appointments).toMatchObject({
+      total: 5,
+      active: 2,
+      cancelled: 3,
+    });
+  });
+
+  it('reads the cohort history for external CRM in one extra chunked journal pass', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+    const visit = (id: string, clientId: string, startAt: string) => ({
+      id,
+      client: { id: clientId, name: 'Client' },
+      provider: { id: 'staff-a', name: 'Анна' },
+      branch: null,
+      service_ids: [],
+      services: [],
+      start_at: startAt,
+      end_at: new Date(new Date(startAt).getTime() + 30 * 60_000).toISOString(),
+      status: 'confirmed',
+      notes: null,
+      total_price: 2_000,
+      currency: 'RUB',
+    });
+    const windowStart = new Date('2026-07-01T00:00:00.000Z').getTime();
+    setup.crmGetJournal.mockImplementation(
+      (_tenantId: string, range: { from: string; to: string }) =>
+        Promise.resolve({
+          calendar_source: 'external',
+          timezone: 'Europe/Moscow',
+          range,
+          provider_id: null,
+          count: 1,
+          appointments:
+            new Date(range.from).getTime() >= windowStart
+              ? [
+                  visit('w-1', 'client-regular', '2026-07-10T09:00:00.000Z'),
+                  visit('w-2', 'client-first-time', '2026-07-11T09:00:00.000Z'),
+                ]
+              : [visit('h-1', 'client-regular', '2026-06-15T09:00:00.000Z')],
+        }),
+    );
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getBusinessOverview('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(result.appointments).toMatchObject({
+      unique_clients: 2,
+      clients_returning: 1,
+      clients_new: 1,
+      returning_share_percent: 50,
+      cohort_lookback_days: 90,
+      cohort_status: 'available',
+    });
+    // 🔴 Один запрос за сам период плюс ОДИН проход за историю, нарезанный на
+    // чанки по 31 дню (90 дней → 3). Ни одного обращения сверх этого: добор
+    // истории по каждому клиенту превратил бы вопрос в чате в сотню запросов.
+    expect(setup.crmGetJournal).toHaveBeenCalledTimes(4);
+    const historyRanges = setup.crmGetJournal.mock.calls
+      .map(([, range]: [string, { from: string; to: string }]) => range)
+      .filter((range) => new Date(range.from).getTime() < windowStart);
+    expect(historyRanges).toHaveLength(3);
+    expect(historyRanges[0].from).toBe('2026-04-02T00:00:00.000Z');
+    expect(historyRanges[2].to).toBe('2026-06-30T23:59:59.999Z');
   });
 
   it('names internal calendar masters from their provider card in one query', async () => {

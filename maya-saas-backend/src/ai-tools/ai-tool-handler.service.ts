@@ -495,6 +495,8 @@ export class AiToolHandlerService {
         .filter(([, value]) => value !== null)
         .map(([key]) => key),
       unavailable_metrics: [
+        ...this.clientCohortUnavailableMetrics(current),
+        ...this.cancellationUnavailableMetrics(current),
         {
           key: 'accounting_net_profit',
           reason: 'requires verified taxes and all accounting expenses',
@@ -613,6 +615,8 @@ export class AiToolHandlerService {
         .filter(([, value]) => value !== null)
         .map(([key]) => key),
       unavailable_metrics: [
+        ...this.clientCohortUnavailableMetrics(current),
+        ...this.cancellationUnavailableMetrics(current),
         {
           key: 'personal_cash_revenue',
           reason:
@@ -720,9 +724,88 @@ export class AiToolHandlerService {
       identified_client_visits: this.optionalMetricNumber(
         appointments.identified_client_visits,
       ),
+      ...this.clientCohortMetrics(appointments),
       average_ticket_amount_kopecks: averageTicket?.amount_kopecks ?? null,
       booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
     };
+  }
+
+  /**
+   * Когорты клиентов как метрики.
+   *
+   * 🔴 Недоступные когорты обязаны быть `null`, а не нулём: ноль читается как
+   * «вернувшихся нет». Именно на этом владельцу однажды сказали, что салон
+   * живёт на новых гостях, хотя всё было наоборот. `null` выпадает и из
+   * `available_metrics`, и из `changes`, а причина уезжает в
+   * `unavailable_metrics`.
+   *
+   * `cohort_lookback_days` отдаётся всегда: «вернувшихся 62%» без горизонта —
+   * это число без единицы измерения.
+   */
+  private clientCohortMetrics(appointments: Record<string, unknown>) {
+    const available = appointments.cohort_status === 'available';
+    return {
+      clients_returning: available
+        ? this.optionalMetricNumber(appointments.clients_returning)
+        : null,
+      clients_new: available
+        ? this.optionalMetricNumber(appointments.clients_new)
+        : null,
+      returning_share_percent: available
+        ? this.optionalMetricNumber(appointments.returning_share_percent)
+        : null,
+      cohort_lookback_days: this.optionalMetricNumber(
+        appointments.cohort_lookback_days,
+      ),
+    };
+  }
+
+  /**
+   * Почему когорт нет — словами, а не кодом.
+   *
+   * Пустой массив означает «когорты посчитаны»: причина появляется только
+   * когда показатели действительно недоступны.
+   */
+  private clientCohortUnavailableMetrics(value: unknown) {
+    const appointments = this.record(this.record(value).appointments);
+    if (appointments.cohort_status === 'available') {
+      return [];
+    }
+    const days = this.optionalMetricNumber(appointments.cohort_lookback_days);
+    const horizon = days === null ? 'lookback' : `${days}-day`;
+    const reason =
+      appointments.cohort_unavailable_reason ===
+      'period_longer_than_cohort_lookback'
+        ? `the analysed period is longer than the ${horizon} cohort horizon, so returning clients cannot be told apart from clients first seen inside the period`
+        : `requires the ${horizon} visit history before the period, which the calendar source did not return`;
+    return [
+      {
+        key: 'client_cohorts',
+        reason: `clients_returning, clients_new and returning_share_percent are unavailable: ${reason}`,
+      },
+    ];
+  }
+
+  /**
+   * Отмены во внешней CRM невидимы, и ноль здесь — не измерение.
+   *
+   * 🔴 Журнал YClients отдаёт только неудалённые записи, а статус «отменена»
+   * выводится ровно из признака удаления. То есть отменённая запись до
+   * аналитики не доходит вообще, и счётчик всегда равен нулю — независимо от
+   * того, сколько отмен было на самом деле. Молчаливый ноль опаснее пропуска:
+   * MAYA уверенно отвечала «отмен нет», и по этому «факту» принимались решения.
+   */
+  private cancellationUnavailableMetrics(value: unknown) {
+    if (this.record(value).data_source !== 'crm') {
+      return [];
+    }
+    return [
+      {
+        key: 'cancellations',
+        reason:
+          'appointments_cancelled, cancellation_rate_percent and per-staff cancellations are unavailable: the CRM journal returns only non-deleted records, so cancelled appointments never reach analytics and a zero here means "not measured", not "none"',
+      },
+    ];
   }
 
   private employeeMetricSnapshot(value: unknown) {
@@ -752,6 +835,7 @@ export class AiToolHandlerService {
       identified_client_visits: this.optionalMetricNumber(
         appointments.identified_client_visits,
       ),
+      ...this.clientCohortMetrics(appointments),
       average_booked_value_amount_kopecks:
         averageBookedValue?.amount_kopecks ?? null,
       booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
@@ -1135,6 +1219,15 @@ export class AiToolHandlerService {
                   : null,
               staff_name: typeof item.name === 'string' ? item.name : null,
               appointments: item.appointments ?? 0,
+              // Отмены по мастеру: раньше их не было ни в одном поле, и на
+              // вопрос «у кого больше отмен» отвечать было нечем.
+              cancelled: this.optionalMetricNumber(item.cancelled) ?? 0,
+              cancellation_rate_percent:
+                this.optionalMetricNumber(item.cancellation_rate_percent) ?? 0,
+              unique_clients:
+                this.optionalMetricNumber(item.unique_clients) ?? 0,
+              repeat_clients_in_period:
+                this.optionalMetricNumber(item.repeat_clients_in_period) ?? 0,
               revenue: this.safeMoneyEntries(item.revenue),
               booked_minutes:
                 typeof item.booked_minutes === 'number' &&
@@ -1337,6 +1430,13 @@ export class AiToolHandlerService {
         .map((row) => ({
           name: staffScope.names.get(row.externalId as string) ?? null,
           appointments: row.entry.appointments ?? 0,
+          cancelled: this.optionalMetricNumber(row.entry.cancelled) ?? 0,
+          cancellation_rate_percent:
+            this.optionalMetricNumber(row.entry.cancellation_rate_percent) ?? 0,
+          unique_clients:
+            this.optionalMetricNumber(row.entry.unique_clients) ?? 0,
+          repeat_clients_in_period:
+            this.optionalMetricNumber(row.entry.repeat_clients_in_period) ?? 0,
           revenue: this.safeMoneyEntries(row.entry.revenue),
           booked_minutes: row.entry.booked_minutes ?? 0,
           services: this.staffServiceRows(row.entry),
@@ -1373,38 +1473,90 @@ export class AiToolHandlerService {
       );
     const currentRows = rows(current);
     const previousRows = rows(previous);
-    return [...new Set([...currentRows.keys(), ...previousRows.keys()])]
-      .filter(
-        (externalId) =>
-          scope.allowedExternalIds === null ||
-          scope.allowedExternalIds.has(externalId),
-      )
-      .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
-      .map((externalId) => {
-        const currentRow = currentRows.get(externalId);
-        const previousRow = previousRows.get(externalId);
-        const currentAppointments = currentRow?.appointments ?? 0;
-        const previousAppointments = previousRow?.appointments ?? 0;
-        return {
-          name: scope.names.get(externalId) ?? null,
-          current_appointments: currentAppointments,
-          previous_appointments: previousAppointments,
-          delta: currentAppointments - previousAppointments,
-          percent_change: this.percentageDelta(
-            currentAppointments,
-            previousAppointments,
-          ),
-          services: this.serviceChangeRows(
-            this.staffServiceMap(currentRow?.entry),
-            this.staffServiceMap(previousRow?.entry),
-          ),
-        };
-      })
-      // 🔴 По возрастанию дельты, а не по модулю. Сортировка по модулю ставила
-      // первым мастера с самым большим РОСТОМ, и на вопрос «кто больше всего в
-      // просадке» модель называла лучшего — с верным числом, поэтому сторож
-      // молчал. Худший результат должен быть первым.
-      .sort((left, right) => left.delta - right.delta);
+    return (
+      [...new Set([...currentRows.keys(), ...previousRows.keys()])]
+        .filter(
+          (externalId) =>
+            scope.allowedExternalIds === null ||
+            scope.allowedExternalIds.has(externalId),
+        )
+        .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
+        .map((externalId) => {
+          const currentRow = currentRows.get(externalId);
+          const previousRow = previousRows.get(externalId);
+          const currentAppointments = currentRow?.appointments ?? 0;
+          const previousAppointments = previousRow?.appointments ?? 0;
+          const staffNumber = (
+            row: { entry: Record<string, unknown> } | undefined,
+            key: string,
+          ) => (row ? (this.optionalMetricNumber(row.entry[key]) ?? 0) : 0);
+          const currentCancelled = staffNumber(currentRow, 'cancelled');
+          const previousCancelled = staffNumber(previousRow, 'cancelled');
+          const currentCancellationRate = staffNumber(
+            currentRow,
+            'cancellation_rate_percent',
+          );
+          const previousCancellationRate = staffNumber(
+            previousRow,
+            'cancellation_rate_percent',
+          );
+          const currentUniqueClients = staffNumber(
+            currentRow,
+            'unique_clients',
+          );
+          const previousUniqueClients = staffNumber(
+            previousRow,
+            'unique_clients',
+          );
+          const currentRepeatClients = staffNumber(
+            currentRow,
+            'repeat_clients_in_period',
+          );
+          const previousRepeatClients = staffNumber(
+            previousRow,
+            'repeat_clients_in_period',
+          );
+          return {
+            name: scope.names.get(externalId) ?? null,
+            current_appointments: currentAppointments,
+            previous_appointments: previousAppointments,
+            delta: currentAppointments - previousAppointments,
+            percent_change: this.percentageDelta(
+              currentAppointments,
+              previousAppointments,
+            ),
+            current_cancelled: currentCancelled,
+            previous_cancelled: previousCancelled,
+            cancelled_delta: currentCancelled - previousCancelled,
+            current_cancellation_rate_percent: currentCancellationRate,
+            previous_cancellation_rate_percent: previousCancellationRate,
+            // 🔴 Разница долей — в процентных пунктах, а не в процентах: «отмены
+            // выросли на 5» у мастера с 5% и с 40% означают разное, и путать эти
+            // две величины в одном поле нельзя. Округление обязательно — обе
+            // доли уже округлены до десятых, и вычитание даёт хвост из
+            // двоичной дроби.
+            cancellation_rate_delta_percentage_points:
+              Math.round(
+                (currentCancellationRate - previousCancellationRate) * 10,
+              ) / 10,
+            current_unique_clients: currentUniqueClients,
+            previous_unique_clients: previousUniqueClients,
+            unique_clients_delta: currentUniqueClients - previousUniqueClients,
+            current_repeat_clients_in_period: currentRepeatClients,
+            previous_repeat_clients_in_period: previousRepeatClients,
+            repeat_clients_delta: currentRepeatClients - previousRepeatClients,
+            services: this.serviceChangeRows(
+              this.staffServiceMap(currentRow?.entry),
+              this.staffServiceMap(previousRow?.entry),
+            ),
+          };
+        })
+        // 🔴 По возрастанию дельты, а не по модулю. Сортировка по модулю ставила
+        // первым мастера с самым большим РОСТОМ, и на вопрос «кто больше всего в
+        // просадке» модель называла лучшего — с верным числом, поэтому сторож
+        // молчал. Худший результат должен быть первым.
+        .sort((left, right) => left.delta - right.delta)
+    );
   }
 
   private staffServiceMap(

@@ -52,9 +52,40 @@ type AnalyticsBreakdown = {
 type AnalyticsStaffBreakdown = AnalyticsBreakdown & {
   name: string | null;
   bookedMinutes: number;
+  /** Отменённые записи мастера. Считаются отдельным проходом по отменам. */
+  cancelled: number;
+  /** Идентифицированный клиент → его состоявшиеся визиты к этому мастеру. */
+  clientVisits: Map<string, number>;
   /** Ключ — идентификатор услуги, чтобы одноимённые позиции не слипались. */
   services: Map<string, { name: string; appointments: number }>;
 };
+
+/**
+ * Горизонт когорт клиентов.
+ *
+ * 🔴 «Повторный клиент» и «клиент, пришедший больше одного раза за неделю» —
+ * разные вещи. При цикле стрижки в 3–4 недели второй показатель на недельном
+ * окне близок к нулю ПО ПРИРОДЕ, и по нему владельцу отвечали, что салон
+ * держится на новых гостях, хотя всё наоборот. Поэтому «вернувшийся» считается
+ * относительно визитов ДО начала окна, а не внутри него.
+ *
+ * 90 дней — компромисс: три цикла стрижки покрывают почти всех постоянных, а
+ * журнал внешней CRM читается чанками по 31 дню, поэтому горизонт стоит ровно
+ * три запроса. Год стоил бы двенадцати на каждый вопрос в чате.
+ */
+export const CLIENT_COHORT_LOOKBACK_DAYS = 90;
+const CLIENT_COHORT_LOOKBACK_MS =
+  CLIENT_COHORT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+
+/**
+ * Когорты либо посчитаны честно, либо недоступны с причиной.
+ *
+ * 🔴 Третьего состояния нет специально. Нули вместо неизвестности читаются как
+ * «повторных нет» — ровно та ошибка, из-за которой всё и переделывалось.
+ */
+type ClientCohortHistory =
+  | { status: 'available'; clientIds: Set<string> }
+  | { status: 'unavailable'; reason: string };
 
 @Injectable()
 export class OperationsAnalyticsService {
@@ -212,7 +243,8 @@ export class OperationsAnalyticsService {
 
     const external =
       (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
-    const [appointments, expenses] = await Promise.all([
+    const cohortWindow = this.clientCohortWindow(from, to);
+    const [appointments, expenses, cohortClientIds] = await Promise.all([
       external
         ? this.loadExternalAppointments(
             scopedTenantId,
@@ -272,6 +304,15 @@ export class OperationsAnalyticsService {
               occurredAt: true,
             },
           }),
+      cohortWindow
+        ? this.loadCohortClientIds(
+            scopedTenantId,
+            external,
+            cohortWindow,
+            query.branchId ?? null,
+            staffExternalId,
+          )
+        : Promise.resolve(null),
     ]);
 
     return this.aggregate(
@@ -283,7 +324,105 @@ export class OperationsAnalyticsService {
       from,
       to,
       external ? 'crm' : 'maya',
+      this.clientCohortHistory(cohortWindow, cohortClientIds),
     );
+  }
+
+  /**
+   * Окно, за которое ищем прошлые визиты: [начало периода − горизонт; начало).
+   *
+   * `null` означает «когорты в этом разрезе не считаем»: окно анализа само
+   * длиннее горизонта, и «вернувшийся за 90 дней» перестаёт отличаться от
+   * «постоянного, впервые замеченного внутри окна». Считать в такой ситуации
+   * нельзя, а молчать — тем более: вызывающий превратит `null` в честное
+   * «недоступно с причиной».
+   */
+  private clientCohortWindow(
+    from: Date,
+    to: Date,
+  ): { from: Date; to: Date } | null {
+    if (to.getTime() - from.getTime() > CLIENT_COHORT_LOOKBACK_MS) {
+      return null;
+    }
+    return {
+      from: new Date(from.getTime() - CLIENT_COHORT_LOOKBACK_MS),
+      // Ровно до начала окна, без нахлёста: визит внутри периода не делает
+      // клиента вернувшимся сам по себе.
+      to: new Date(from.getTime() - 1),
+    };
+  }
+
+  private clientCohortHistory(
+    window: { from: Date; to: Date } | null,
+    clientIds: Set<string> | null,
+  ): ClientCohortHistory {
+    if (!window) {
+      return {
+        status: 'unavailable',
+        reason: 'period_longer_than_cohort_lookback',
+      };
+    }
+    if (!clientIds) {
+      return { status: 'unavailable', reason: 'lookback_window_unavailable' };
+    }
+    return { status: 'available', clientIds };
+  }
+
+  /**
+   * Клиенты с состоявшимся визитом ДО начала периода.
+   *
+   * 🔴 Ровно один дополнительный проход источника: для внешней CRM — тот же
+   * путь журнала с чанкованием по 31 дню, что и у основного периода, для
+   * внутреннего календаря — один запрос к БД. Никакого пер-клиентского
+   * добора, иначе один вопрос в чате превратился бы в сотню запросов.
+   *
+   * Отменённая запись прошлым визитом не считается: клиент тогда не приходил.
+   * Любая ошибка загрузки возвращает `null` — когорты станут недоступными, а
+   * не нулевыми.
+   */
+  private async loadCohortClientIds(
+    tenantId: string,
+    external: boolean,
+    window: { from: Date; to: Date },
+    branchId: string | null,
+    staffExternalId: string | null,
+  ): Promise<Set<string> | null> {
+    try {
+      let visits: Array<{ clientId: string | null; status: string }>;
+      if (external) {
+        visits = await this.loadExternalAppointments(
+          tenantId,
+          window.from,
+          window.to,
+          staffExternalId,
+        );
+      } else {
+        if (typeof this.prisma.appointment?.findMany !== 'function') {
+          return null;
+        }
+        visits = await this.prisma.appointment.findMany({
+          where: {
+            tenantId,
+            startAt: { gte: window.from, lte: window.to },
+            ...(branchId ? { branchId } : {}),
+            ...(staffExternalId ? { staffExternalId } : {}),
+          },
+          select: { clientId: true, status: true },
+        });
+      }
+      const clientIds = new Set<string>();
+      for (const visit of visits) {
+        if (this.isCancelled(visit.status)) {
+          continue;
+        }
+        if (typeof visit.clientId === 'string' && visit.clientId !== '') {
+          clientIds.add(visit.clientId);
+        }
+      }
+      return clientIds;
+    } catch {
+      return null;
+    }
   }
 
   /**
@@ -408,11 +547,18 @@ export class OperationsAnalyticsService {
     from: Date,
     to: Date,
     dataSource: 'maya' | 'crm' = 'maya',
+    cohortHistory: ClientCohortHistory = {
+      status: 'unavailable',
+      reason: 'lookback_window_unavailable',
+    },
   ) {
     const activeAppointments = appointments.filter(
       (appointment) => !this.isCancelled(appointment.status),
     );
-    const cancelledCount = appointments.length - activeAppointments.length;
+    const cancelledAppointments = appointments.filter((appointment) =>
+      this.isCancelled(appointment.status),
+    );
+    const cancelledCount = cancelledAppointments.length;
     const pricedAppointments = activeAppointments.filter(
       (appointment) => appointment.totalPriceKopecks !== null,
     );
@@ -463,6 +609,7 @@ export class OperationsAnalyticsService {
     const repeatClientsInPeriod = [...identifiedClientVisits.values()].filter(
       (visits) => visits > 1,
     ).length;
+    const cohorts = this.clientCohorts(identifiedClientVisits, cohortHistory);
     const bookedMinutes = activeAppointments.reduce(
       (total, appointment) => total + appointment.durationMinutes,
       0,
@@ -488,18 +635,16 @@ export class OperationsAnalyticsService {
       this.addRevenue(dayItem, appointment);
       daily.set(day, dayItem);
 
-      const staffItem = staff.get(appointment.staffExternalId) ?? {
-        name: null,
-        appointments: 0,
-        bookedMinutes: 0,
-        revenueByCurrency: new Map<string, number>(),
-        services: new Map<string, { name: string; appointments: number }>(),
-      };
+      const staffItem = this.staffBucket(staff, appointment);
       staffItem.appointments += 1;
       staffItem.bookedMinutes += appointment.durationMinutes;
-      staffItem.name ??= appointment.staffName;
+      if (appointment.clientId) {
+        staffItem.clientVisits.set(
+          appointment.clientId,
+          (staffItem.clientVisits.get(appointment.clientId) ?? 0) + 1,
+        );
+      }
       this.addRevenue(staffItem, appointment);
-      staff.set(appointment.staffExternalId, staffItem);
 
       for (const service of appointment.services) {
         const serviceItem = services.get(service.id) ?? {
@@ -524,6 +669,16 @@ export class OperationsAnalyticsService {
         staffService.appointments += 1;
         staffItem.services.set(service.id, staffService);
       }
+    }
+
+    // 🔴 Отдельный проход по отменам. Основной цикл идёт по активным записям —
+    // отменённые до него не доходили вовсе, и на вопрос «у кого больше отмен»
+    // ответа не существовало ни в одном поле. Здесь же заводится строка
+    // мастера, у которого в периоде НИЧЕГО, кроме отмен, не было: это тоже
+    // ответ. Новых обращений к CRM или БД проход не стоит — отменённые записи
+    // уже лежат в тех же исходных данных.
+    for (const appointment of cancelledAppointments) {
+      this.staffBucket(staff, appointment).cancelled += 1;
     }
 
     return {
@@ -551,6 +706,16 @@ export class OperationsAnalyticsService {
           (total, visits) => total + visits,
           0,
         ),
+        // Когорты по горизонту, а не по нахлёсту визитов внутри окна.
+        // `cohort_lookback_days` обязателен всегда, в том числе когда когорты
+        // недоступны: без горизонта числа «вернувшихся» ничего не значат.
+        clients_returning: cohorts.returning,
+        clients_new: cohorts.fresh,
+        returning_share_percent: cohorts.returningSharePercent,
+        cohort_lookback_days: CLIENT_COHORT_LOOKBACK_DAYS,
+        cohort_status: cohortHistory.status,
+        cohort_unavailable_reason:
+          cohortHistory.status === 'available' ? null : cohortHistory.reason,
         booked_minutes: bookedMinutes,
       },
       revenue: revenueByCurrency,
@@ -582,6 +747,18 @@ export class OperationsAnalyticsService {
           staff_external_id,
           name: value.name,
           appointments: value.appointments,
+          cancelled: value.cancelled,
+          cancellation_rate_percent:
+            value.appointments + value.cancelled === 0
+              ? 0
+              : Math.round(
+                  (value.cancelled / (value.appointments + value.cancelled)) *
+                    1_000,
+                ) / 10,
+          unique_clients: value.clientVisits.size,
+          repeat_clients_in_period: [...value.clientVisits.values()].filter(
+            (visits) => visits > 1,
+          ).length,
           revenue: this.serializeCurrencyMap(value.revenueByCurrency),
           booked_minutes: value.bookedMinutes,
           services: [...value.services.values()]
@@ -619,6 +796,65 @@ export class OperationsAnalyticsService {
             ? null
             : 'Appointments created before price snapshots are excluded from revenue.',
       },
+    };
+  }
+
+  /**
+   * Строка мастера, создавая её при первом появлении.
+   *
+   * Заводится и активной записью, и отменой: иначе мастер, у которого в
+   * периоде одни отмены, просто исчезал бы из разреза.
+   */
+  private staffBucket(
+    staff: Map<string, AnalyticsStaffBreakdown>,
+    appointment: AnalyticsAppointment,
+  ): AnalyticsStaffBreakdown {
+    const item = staff.get(appointment.staffExternalId) ?? {
+      name: null,
+      appointments: 0,
+      cancelled: 0,
+      bookedMinutes: 0,
+      clientVisits: new Map<string, number>(),
+      revenueByCurrency: new Map<string, number>(),
+      services: new Map<string, { name: string; appointments: number }>(),
+    };
+    item.name ??= appointment.staffName;
+    staff.set(appointment.staffExternalId, item);
+    return item;
+  }
+
+  /**
+   * Разделение клиентов периода на вернувшихся и впервые замеченных.
+   *
+   * «Вернувшийся» здесь означает ровно одно: у клиента был визит в течение
+   * lookback-горизонта ДО начала периода. Это НЕ «постоянный клиент салона» —
+   * тот, кто ходит раз в полгода, в 90-дневный горизонт не попадёт.
+   */
+  private clientCohorts(
+    identifiedClientVisits: Map<string, number>,
+    history: ClientCohortHistory,
+  ): {
+    returning: number | null;
+    fresh: number | null;
+    returningSharePercent: number | null;
+  } {
+    if (history.status !== 'available') {
+      return { returning: null, fresh: null, returningSharePercent: null };
+    }
+    let returning = 0;
+    for (const clientId of identifiedClientVisits.keys()) {
+      if (history.clientIds.has(clientId)) {
+        returning += 1;
+      }
+    }
+    const identified = identifiedClientVisits.size;
+    return {
+      returning,
+      fresh: identified - returning,
+      returningSharePercent:
+        identified === 0
+          ? 0
+          : Math.round((returning / identified) * 1_000) / 10,
     };
   }
 
