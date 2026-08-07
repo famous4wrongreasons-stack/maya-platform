@@ -2788,16 +2788,31 @@ export class AiCoreService {
       redacted ||= sensitive.redacted || names.redacted;
       return { role: message.role, content: names.content };
     });
-    if (
-      Buffer.byteLength(JSON.stringify(sanitized), 'utf8') >
-      MAX_CHAT_INPUT_BYTES
-    ) {
+    // 🔴 Длинный разговор ОБРЕЗАЕМ, а не отвергаем.
+    //
+    // Здесь стоял отказ 400, и он положил чат в проде: фронт присылает до 12
+    // сообщений по 2000 знаков, по-русски это до 48 КБ при пороге в 16 —
+    // а сработало только теперь, потому что ответы MAYA стали длиннее. Владелец
+    // видел молчание: запрос не доходил даже до обработчика, поэтому в логах
+    // было пусто, а в аудите ни строки.
+    //
+    // Отвергать разговор за то, что он получился содержательным, нельзя.
+    // Убираем самые старые реплики, пока не влезет; последнюю — вопрос, на
+    // который отвечаем, — не трогаем никогда.
+    const fits = (items: AiCoreMessage[]) =>
+      Buffer.byteLength(JSON.stringify(items), 'utf8') <= MAX_CHAT_INPUT_BYTES;
+    const trimmed = [...sanitized];
+    while (trimmed.length > 1 && !fits(trimmed)) {
+      trimmed.shift();
+    }
+    if (!fits(trimmed)) {
+      // Не влезает даже одно сообщение — вот это уже действительно ошибка ввода.
       throw new BadRequestException({
         message: 'AI chat input is too large.',
         error: { code: 'ai_chat_input_too_large' },
       });
     }
-    return { messages: sanitized, redacted };
+    return { messages: trimmed, redacted };
   }
 
   private redactSensitiveText(value: string): {

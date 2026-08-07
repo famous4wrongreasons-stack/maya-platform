@@ -2417,6 +2417,35 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
+  it('trims a long conversation instead of refusing to answer it', async () => {
+    const mocks = createService();
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Отвечаю по последнему вопросу.', toolCall: null }),
+    );
+    // 🔴 Ровно тот разговор, который положил чат в проде: 12 реплик по 2000
+    // знаков кириллицей — это ~48 КБ при пороге 16. Раньше сюда прилетал отказ
+    // 400 ДО обработчика: владелец видел молчание, в логах пусто, в аудите ни
+    // строки. Содержательный разговор — не ошибка ввода.
+    const long = 'а'.repeat(2_000);
+    const messages = [
+      ...Array.from({ length: 11 }, (_, index) => ({
+        role: (index % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: long,
+      })),
+      // Последняя реплика — пользовательская и намеренно не про данные:
+      // проверяем обрезку разговора, а не работу аналитики.
+      { role: 'user' as const, content: 'Привет!' },
+    ];
+
+    const result = await mocks.service.chat(user, { ...dto, messages });
+
+    expect(result.reply).toBe('Отвечаю по последнему вопросу.');
+    const sent = mocks.model.decide.mock.calls[0]?.[0]?.messages ?? [];
+    // Старое отрезано, последний вопрос на месте — отвечаем именно на него.
+    expect(sent.length).toBeLessThan(12);
+    expect(sent.at(-1)?.content).toBe('Привет!');
+  });
+
   it('gives the model the server time instead of letting it guess the calendar', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
