@@ -118,21 +118,6 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
-    name: 'catalog.staff.read',
-    description:
-      'Read privacy-safe staff labels, titles and specializations for booking.',
-    inputSchema: EMPTY_OBJECT_SCHEMA,
-    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['booking'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    timeoutMs: 8_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
     name: 'booking.availability.read',
     description: 'Read available appointment slots without customer PII.',
     inputSchema: {
@@ -191,25 +176,6 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
-    name: 'analytics.employee.read',
-    description:
-      'Read operational analytics scoped to the current employee, together with the salary accrued to that employee by the CRM payroll calculation. Accrued salary is a salon cost, not the employee revenue: confirmed per-employee revenue does not exist and is reported as unavailable with a reason. Relative reporting periods are resolved by the server in the tenant timezone.',
-    inputSchema: REPORTING_PERIOD_SCHEMA,
-    allowedRoles: STAFF_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['analytics.employee'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    // Личный срез теперь дочитывает расчёт зарплаты из CRM: это отдельный
-    // запрос на каждого сотрудника компании, и в прежние 8 секунд он не
-    // укладывается. Тайм-аут инструмента жёсткий — на нём падал бы весь ответ,
-    // включая записи и клиентов, которые пришли вовремя.
-    timeoutMs: 20_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
     name: 'analytics.employee.query',
     description:
       'Universal personal performance analytics for the current employee. Returns appointments, cancellations, unique clients, client cohorts, booked service value, average booked value, booked minutes, service demand, the salary accrued to this employee by the CRM payroll calculation, and optional comparison. clients_returning counts this employee clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal clients overall, while repeat_clients_in_period only counts clients who came more than once INSIDE the period. This never exposes another employee data. Booked value is not cash revenue, and staff_summary[].salary is what the salon accrued TO this employee, never how much money he brought in: confirmed per-employee revenue does not exist and is reported as unavailable with a reason.',
@@ -225,43 +191,11 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'last_verified_snapshot',
   },
   {
-    name: 'analytics.business.read',
-    description:
-      'Read tenant or branch operational analytics. For roles allowed to read finance it also returns verified company revenue and the payroll accrued per master. Per-master revenue does not exist in any source and is reported as unavailable with a reason: accrued salary is what the salon owes the master, not what the master brought in. Relative reporting periods are resolved by the server in the tenant timezone.',
-    inputSchema: REPORTING_PERIOD_SCHEMA,
-    allowedRoles: BUSINESS_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['analytics.business'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    // Тот же расчёт зарплаты по каждому сотруднику, что и в личном срезе:
-    // финансовая сводка читалась здесь и раньше, а 8 секунд на неё не хватало.
-    timeoutMs: 20_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
     name: 'analytics.business.query',
     description:
       'Universal verified business analytics for an owner or manager. Returns revenue and financial operations, appointments, cancellations, unique clients, client cohorts, average ticket, booked minutes, daily dynamics, service demand, a per-master breakdown with cancellations and repeat clients, and optional comparison with the previous equal period or previous year. clients_returning counts clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal or regular clients of the salon overall. repeat_clients_in_period is a different and much narrower thing: clients who came more than once INSIDE the period, which is near zero on a short period by nature and must never be presented as retention. Money per master is two separate fields that must never be mixed: staff_summary[].confirmed_revenue is how much cash that master brought in and is always unavailable with a reason, because the CRM confirms money for the company as a whole and never per employee, while staff_summary[].salary is payroll accrued and paid TO that master for the period, which is a salon cost and only a percentage of what he sold. Salary is present only for roles allowed to read finance. Use this for any factual business-performance question that is not a personal employee question.',
     inputSchema: BUSINESS_QUERY_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['analytics.business'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    timeoutMs: 70_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'last_verified_snapshot',
-  },
-  {
-    name: 'analytics.business.compare_years',
-    description:
-      'Compare verified business revenue, positive financial operations and unique clients from non-cancelled appointments for the current year to date with the same elapsed period of the previous year. Dates and percentage deltas are calculated by the server in the tenant timezone.',
-    inputSchema: EMPTY_OBJECT_SCHEMA,
-    allowedRoles: FINANCE_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['analytics.business'],
     riskTier: 'read',
@@ -291,6 +225,36 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'catalog.staff.read',
+    description:
+      'Read privacy-safe staff labels, titles and specializations for booking. Client-facing: the only staff list available to a guest, since analytics is closed to client roles.',
+    inputSchema: EMPTY_OBJECT_SCHEMA,
+    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['booking'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 8_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'customers.count',
+    description:
+      'Read a tenant customer count without customer PII. Kept for tariffs that have no business analytics: there it is the only answer to "how many clients do we have".',
+    inputSchema: EMPTY_OBJECT_SCHEMA,
+    allowedRoles: BUSINESS_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['customers.core'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 5_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'expenses.read',
     description:
       'Read tenant expenses without decrypted free-text notes, together with by_category totals already summed by the server for the period. Use by_category for "сколько ушло на расходники", "на что больше всего тратим": never add the individual items up yourself. Relative reporting periods are resolved by the server in the tenant timezone.',
@@ -302,20 +266,6 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'none',
     idempotency: 'none',
     timeoutMs: 8_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
-    name: 'customers.count',
-    description: 'Read a tenant customer count without customer PII.',
-    inputSchema: EMPTY_OBJECT_SCHEMA,
-    allowedRoles: BUSINESS_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['customers.core'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    timeoutMs: 5_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },
@@ -336,36 +286,6 @@ export const MAYA_AI_TOOL_CATALOG = [
     riskTier: 'medium_write',
     approvalPolicy: 'actor',
     idempotency: 'required',
-    timeoutMs: 10_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
-    name: 'appointments.own.preview',
-    description:
-      'Validate one authenticated customer booking without creating it.',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['staff_id', 'service_ids', 'start'],
-      properties: {
-        staff_id: { type: 'string', minLength: 1, maxLength: 128 },
-        service_ids: {
-          type: 'array',
-          minItems: 1,
-          maxItems: 10,
-          items: { type: 'string', minLength: 1, maxLength: 128 },
-        },
-        start: { type: 'string', format: 'date-time' },
-        branch_id: { type: 'string', minLength: 1, maxLength: 128 },
-      },
-    },
-    allowedRoles: CLIENT_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['booking.customer_app'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
     timeoutMs: 10_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',

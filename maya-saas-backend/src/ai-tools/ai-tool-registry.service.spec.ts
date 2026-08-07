@@ -16,7 +16,7 @@ describe('AiToolRegistryService', () => {
 
   it('normalizes bounded analytics ranges', () => {
     expect(
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
@@ -29,33 +29,22 @@ describe('AiToolRegistryService', () => {
       branch_id: 'branch_12345678',
     });
     expect(() =>
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'custom',
         from: '2025-01-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
       }),
     ).toThrow(BadRequestException);
     expect(
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'month_to_date',
       }),
     ).toEqual({ period: 'month_to_date' });
     expect(() =>
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'month_to_date',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
-      }),
-    ).toThrow(BadRequestException);
-  });
-
-  it('keeps year comparison arguments server-controlled', () => {
-    expect(
-      service.validateArguments('analytics.business.compare_years', {}),
-    ).toEqual({});
-    expect(() =>
-      service.validateArguments('analytics.business.compare_years', {
-        from: '2026-01-01T00:00:00.000Z',
       }),
     ).toThrow(BadRequestException);
   });

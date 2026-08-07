@@ -13,7 +13,7 @@
  */
 import { ConfigService } from '@nestjs/config';
 
-import { MayaBrainService } from '../ai-brain/maya-brain.service';
+import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -21,14 +21,12 @@ import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
-import { CustomersService } from '../customers/customers.service';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { StaffService } from '../staff/staff.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { AiCoreModelService } from './ai-core-model.service';
@@ -457,8 +455,6 @@ function createHarness(
     {} as LoyaltyService,
     analytics,
     expensesService,
-    {} as CustomersService,
-    {} as StaffService,
     prisma,
   );
   const runtime = new AiToolRuntimeService(
@@ -476,22 +472,6 @@ function createHarness(
     [AiCoreModelInput]
   >();
   const model = { decide } as unknown as AiCoreModelService;
-  const brainContext = {
-    active: true,
-    sessionId: 'brain-session-a',
-    persona: 'director' as const,
-    profile: 'maya_os' as const,
-    intent: 'general' as const,
-    knowledgeRequired: false,
-    plan: {
-      status: 'active' as const,
-      steps: [{ key: 'respond', status: 'pending' as const }],
-    },
-    promptVersion: 'maya-brain-acceptance',
-    profileInstructions: '',
-    preferences: [],
-    knowledge: [],
-  };
   const service = new AiCoreService(
     {
       get: jest.fn((name: string) =>
@@ -514,11 +494,7 @@ function createHarness(
     {
       tryHandle: jest.fn().mockResolvedValue(null),
     } as unknown as StaffScheduleCommandService,
-    {
-      prepare: jest.fn().mockResolvedValue(brainContext),
-      citations: jest.fn().mockReturnValue([]),
-      recordOutcome: jest.fn().mockResolvedValue(brainContext.plan),
-    } as unknown as MayaBrainService,
+    new MayaBrainRouterService(),
   );
 
   let request = 0;
@@ -556,7 +532,6 @@ function echoModel(harness: ReturnType<typeof createHarness>, reply: string) {
   harness.decide.mockImplementation((input: AiCoreModelInput) =>
     Promise.resolve({
       reply: input.toolResults.length > 0 ? reply : 'Смотрю данные.',
-      citationIds: [],
       toolCall: null,
       provider: 'deepseek' as const,
       model: 'test-model',
@@ -739,7 +714,6 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     h.decide.mockImplementation((input: AiCoreModelInput) =>
       Promise.resolve({
         reply: 'Подготовила запись расхода.',
-        citationIds: [],
         toolCall:
           input.toolResults.length === 0
             ? {

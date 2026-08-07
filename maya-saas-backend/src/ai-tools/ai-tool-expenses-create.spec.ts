@@ -6,13 +6,11 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
-import { CustomersService } from '../customers/customers.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { StaffService } from '../staff/staff.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
@@ -472,8 +470,6 @@ function createHarness() {
     {} as LoyaltyService,
     {} as OperationsAnalyticsService,
     expensesService,
-    {} as CustomersService,
-    {} as StaffService,
     prisma,
   );
   const runtime = new AiToolRuntimeService(

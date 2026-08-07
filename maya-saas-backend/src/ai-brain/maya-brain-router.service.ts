@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { UserRole } from '../common/domain.enums';
-import type {
-  MayaBrainIntent,
-  MayaBrainPlan,
-  MayaBrainProfile,
-  MayaBrainRoute,
-} from './maya-brain.types';
+import type { MayaBrainIntent, MayaBrainRoute } from './maya-brain.types';
 
 const CLIENT_ROLES = new Set<UserRole>([UserRole.CLIENT, UserRole.CUSTOMER]);
 const STAFF_ROLES = new Set<UserRole>([
@@ -15,24 +10,21 @@ const STAFF_ROLES = new Set<UserRole>([
   UserRole.STAFF,
 ]);
 
-const FINANCE_ROLES = new Set<UserRole>([
-  UserRole.TENANT_OWNER,
-  UserRole.BUSINESS_OWNER,
-  UserRole.TENANT_ADMIN,
-  UserRole.ACCOUNTANT,
-]);
-
+/**
+ * Единственная часть мозга MAYA, которая работает ВСЕГДА — без флагов,
+ * поверхностей и списка арендаторов.
+ *
+ * 🔴 Гейт активации убран намеренно. Он выключал маршрутизацию по умолчанию, и
+ * персона клиента доставалась владельцу: разница между «директором» и
+ * «администратором» — 216 строк промпта, и это единственное, что в мозге
+ * действительно меняло ответ.
+ */
 @Injectable()
 export class MayaBrainRouterService {
   route(role: UserRole, text: string): MayaBrainRoute {
-    const intent = this.intent(role, text);
-    const profile = this.profile(role, intent);
     return {
       persona: CLIENT_ROLES.has(role) ? 'admin' : 'director',
-      profile,
-      intent,
-      knowledgeRequired: intent === 'knowledge',
-      plan: this.plan(intent),
+      intent: this.intent(role, text),
     };
   }
 
@@ -108,62 +100,5 @@ export class MayaBrainRouterService {
       return 'support';
     }
     return 'general';
-  }
-
-  private profile(role: UserRole, intent: MayaBrainIntent): MayaBrainProfile {
-    if (CLIENT_ROLES.has(role)) {
-      return intent === 'booking' ? 'maya_admin' : 'maya_consult';
-    }
-    if (intent === 'finance' && FINANCE_ROLES.has(role)) {
-      return 'maya_finance';
-    }
-    if (intent === 'business_analytics') {
-      return 'maya_analytics';
-    }
-    if (intent === 'marketing') {
-      return 'maya_marketing';
-    }
-    if (intent === 'staff_operations') {
-      return 'maya_hr';
-    }
-    if (intent === 'booking' || intent === 'schedule_management') {
-      return 'maya_admin';
-    }
-    if (intent === 'support') {
-      return 'maya_assistant';
-    }
-    return 'maya_os';
-  }
-
-  private plan(intent: MayaBrainIntent): MayaBrainPlan {
-    const keys: Record<MayaBrainIntent, string[]> = {
-      booking: [
-        'resolve_service',
-        'resolve_staff_preference',
-        'resolve_date_time',
-        'verify_availability',
-        'confirm_booking',
-      ],
-      schedule_management: [
-        'resolve_staff',
-        'resolve_date',
-        'read_schedule',
-        'check_conflicts',
-        'request_approval',
-      ],
-      business_analytics: ['resolve_metric', 'read_source', 'explain_result'],
-      finance: ['resolve_period', 'read_finance_source', 'explain_result'],
-      staff_operations: ['resolve_staff_scope', 'read_staff_source', 'respond'],
-      marketing: ['resolve_audience', 'prepare_draft', 'request_approval'],
-      knowledge: ['retrieve_sources', 'answer_with_citations'],
-      catalog: ['read_catalog', 'respond'],
-      loyalty: ['read_loyalty', 'respond'],
-      support: ['identify_problem', 'offer_safe_next_step'],
-      general: ['respond'],
-    };
-    return {
-      status: 'active',
-      steps: keys[intent].map((key) => ({ key, status: 'pending' })),
-    };
   }
 }

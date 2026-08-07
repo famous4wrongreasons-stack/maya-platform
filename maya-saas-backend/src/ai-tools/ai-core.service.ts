@@ -19,8 +19,8 @@ import {
 } from '../dashboard-preferences/assistant-capabilities.constants';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { MayaBrainService } from '../ai-brain/maya-brain.service';
-import type { MayaBrainContext } from '../ai-brain/maya-brain.types';
+import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
+import type { MayaBrainRoute } from '../ai-brain/maya-brain.types';
 import { AiCoreModelService } from './ai-core-model.service';
 import type {
   AiCoreMessage,
@@ -157,138 +157,7 @@ type AiCoreCompletion = {
    * можно только гаданием.
    */
   unsourced?: string[];
-  /**
-   * Числа, отклонённые по ПРИВЯЗКЕ: сами по себе они настоящие, но названы
-   * рядом с мастером или услугой, которой не принадлежат. Отдельное поле, а не
-   * общая свалка с unsourced: причина отказа тут другая, и по аудиту её надо
-   * различать без гадания — «выдумала цифру» и «приписала чужую» чинятся
-   * по-разному.
-   */
-  misattributed?: string[];
 };
-
-/**
- * Массивы результата, элементы которых — самостоятельные сущности с именем.
- *
- * Именно они дают привязку «имя → его числа». `services` встречается дважды:
- * внутри строки мастера в staff_summary[] и в staff_changes[], и оба раза это
- * разрез конкретного человека, а не общий срез салона.
- */
-const ATTRIBUTION_ENTITY_ARRAY_KEYS = new Set([
-  'staff_summary',
-  'staff_changes',
-  'service_summary',
-  'service_changes',
-  'services',
-]);
-/**
- * Дальше этого расстояния число уже не «про это имя».
- *
- * Считается по символам ОТ КРАЯ имени ДО КРАЯ числа в любую сторону: по-русски
- * владелец числа стоит и слева («у Ильи 61 запись»), и справа («17 записей у
- * Ильи»). Прежнее окно смотрело только вперёд, и во фразе «17 записей у Ильи и
- * 23 у Стаса» второе число объявлялось чужим — на этом и набралась пятая часть
- * ложных тревог.
- */
-const ATTRIBUTION_ATTACH_DISTANCE = 64;
-/**
- * Надбавка к расстоянию за союз между именем и числом.
- *
- * «И», «а», «но» вводят новую мысль, поэтому имя за союзом — кандидат слабый:
- * в «17 у Ильи и 23 у Стаса» до 23 от обоих имён по три символа, и без этой
- * надбавки выбор был бы монеткой. Надбавка, а не запрет: если других кандидатов
- * нет, привязка через союз всё равно состоится.
- */
-const ATTRIBUTION_CONJUNCTION_PENALTY = 40;
-/**
- * Насколько кандидаты должны различаться, чтобы выбор считался определённым.
- * Разница меньше — сторож молчит: ложная тревога дороже пропуска.
- */
-const ATTRIBUTION_TIE_MARGIN = 8;
-/**
- * Оговорка «это по салону, а не по нему». Рядом с такой пометкой общий итог
- * назван честно, и придираться к нему нельзя — иначе сторож забракует ровно
- * ту формулировку, которой мы от модели и добиваемся.
- */
-const SALON_SCOPE_MARKER =
-  /(по\s+салону|салон[а-яa-z]*|в\s+целом|итого|суммарно|в\s+сумме|по\s+итогам|на\s+двоих|на\s+троих|вместе|общ[а-яa-z]*|из\s+них|на\s+всех|(?<!больше\s)(?<!меньше\s)(?<!чаще\s)всего)/i;
-/** «19 из 40» — второе число это база, а не показатель названного мастера. */
-const SHARE_BASE_MARKER = /(?:^|[\s(])(?:из|от)\s+$/i;
-/**
- * Союз, вводящий новую мысль. Между именем и числом означает, что число, скорее
- * всего, принадлежит не этому имени.
- */
-const ATTRIBUTION_CONJUNCTION_PATTERN =
-  /(?:^|[\s(-])(?:и|а|но|зато|хотя|же|при\s+этом|тогда\s+как|причем|причём)(?:\s|$)/i;
-/**
- * Перечисление сущностей: «Илья и Стас», «у Ильи и у Стаса».
- *
- * Такая пара — совместное подлежащее, и число за ней относится к обоим сразу
- * («Илья и Стас дали 40 записей»). Проверить сумму по строкам нельзя, поэтому
- * на перечислении сторож молчит.
- */
-const ATTRIBUTION_ENUMERATION_JOINER =
-  /^[\s]*(?:и|или|с|плюс|вместе\s+с)[\s]*(?:у|от|для|по|в)?[\s]*$/i;
-/**
- * Имена, которые сущностью не считаем.
- *
- * Строку без названия сервер подписывает словом «Услуга», и такая «сущность»
- * совпала бы с любым «по услугам» в обычной речи — а следом за этим совпадением
- * под проверку привязки попал бы весь салонный итог. То же с «мастер» и
- * «клиент»: это слова связки, а не имена.
- */
-const ATTRIBUTION_GENERIC_NAMES = new Set([
-  'услуга',
-  'услуги',
-  'мастер',
-  'специалист',
-  'сотрудник',
-  'клиент',
-  'запись',
-  'прочее',
-  'другое',
-  'без названия',
-  'не указано',
-]);
-
-type AttributionEntity = {
-  key: string;
-  name: string;
-  numbers: Set<string>;
-  kind: 'staff' | 'service';
-  /**
-   * Для услуги: её числа В СТРОКЕ конкретного мастера.
-   *
-   * Плоского множества услуги мало. «Борода» просела на 19 у Ильи и стояла
-   * ровно у Стаса — по общему набору «Бороды» обе фразы одинаково законны, и
-   * подмена мастера проходит незамеченной. Разрез по владельцу — единственное,
-   * что их различает.
-   */
-  byOwner: Map<string, Set<string>>;
-  /** Для мастера: выдан ли по нему разрез по услугам. */
-  detailed: boolean;
-};
-
-type AttributionMention = {
-  entity: AttributionEntity;
-  start: number;
-  end: number;
-};
-
-/**
- * Кандидат на владение числом: одно имя или перечисление имён.
- *
- * Перечисление держим отдельной сущностью, потому что число за ним не
- * принадлежит ни одному из членов по отдельности.
- */
-type AttributionTarget = {
-  members: AttributionMention[];
-  kind: 'staff' | 'service';
-  start: number;
-  end: number;
-};
-
-type AttributionClause = { start: number; end: number };
 
 const GROUNDING_FACT_PATTERN =
   /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел[а-яёa-z]*|за\s+месяц[а-яёa-z]*|сегодня|завтра)/i;
@@ -409,7 +278,7 @@ export class AiCoreService {
     private readonly auditLog: AuditLogService,
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
-    private readonly brain: MayaBrainService,
+    private readonly brainRouter: MayaBrainRouterService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -419,7 +288,13 @@ export class AiCoreService {
       identity: user.userId,
     });
     const sanitized = this.sanitizeMessages(dto.messages);
-    const brain = await this.brain.prepare(user, dto, sanitized.messages);
+    // Маршрутизация — синхронная и безусловная: ни флага, ни списка
+    // арендаторов, ни записи в базу. Она решает ровно две вещи — персону и
+    // намерение, и обе нужны уже на первом шаге.
+    const brain = this.brainRouter.route(
+      user.role,
+      this.latestUserText(sanitized.messages),
+    );
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
       user,
       dto,
@@ -446,18 +321,6 @@ export class AiCoreService {
     if (assistantCommand) {
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         ...assistantCommand,
-        source: 'safe_fallback',
-        action: null,
-      });
-    }
-    if (
-      brain.active &&
-      brain.knowledgeRequired &&
-      brain.knowledge.length === 0
-    ) {
-      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
-        reply:
-          'В базе знаний пока нет подтверждённого материала по этому вопросу. Я не буду придумывать ответ — добавьте источник или сформулируйте запрос точнее.',
         source: 'safe_fallback',
         action: null,
       });
@@ -580,7 +443,6 @@ export class AiCoreService {
           allowToolCall: step < maxToolSteps,
           requiredToolNames:
             requirement && !requirementSatisfied ? requiredToolNames : [],
-          brain,
           nowUtc: new Date().toISOString(),
           corrections: pendingCorrections,
         });
@@ -666,25 +528,7 @@ export class AiCoreService {
                 this.conversationText(sanitized.messages),
               )
             : [];
-          // Число может быть настоящим и всё равно ложным: сказанное рядом с
-          // именем, оно утверждает принадлежность. Сверка происхождения этого
-          // не ловит — её множество плоское.
-          // 🔴 Здесь, в отличие от сверки происхождения, идёт РЕПЛИКА
-          // ВЛАДЕЛЬЦА, а не весь диалог. Числа из прошлых ответов MAYA привязку
-          // не подтверждают: «61» могло стоять у Ильи ходом раньше, и зачесть
-          // его Стасу сейчас — это ровно та ошибка, которую сторож ищет.
-          const misattributed =
-            requirement &&
-            unsourced.length === 0 &&
-            this.attributionGuardEnabled()
-              ? this.misattributedNumbers(
-                  reply,
-                  requirement,
-                  toolResults,
-                  this.latestUserText(sanitized.messages),
-                )
-              : [];
-          if (unsourced.length > 0 || misattributed.length > 0) {
+          if (unsourced.length > 0) {
             // Раньше любое неподтверждённое число молча стирало весь ответ. Это
             // самая частая причина шаблонов: достаточно было написать процент
             // или округлить сумму. Даём переписать один раз, назвав виновные
@@ -692,16 +536,7 @@ export class AiCoreService {
             if (numberRetries < 1 && step < maxToolSteps) {
               numberRetries += 1;
               corrections = [
-                ...(unsourced.length > 0
-                  ? [
-                      `Эти числа отсутствуют в tool_results: ${unsourced.join(', ')}. Перепиши ответ, оставив только значения, которые есть в результатах инструментов.`,
-                    ]
-                  : []),
-                ...(misattributed.length > 0
-                  ? [
-                      `Эти числа названы рядом с сущностью, которой они не принадлежат: ${misattributed.join(', ')}. Число, стоящее рядом с именем мастера или услуги, обязано быть взято из строки именно этого мастера или этой услуги; салонный итог мастеру не приписывай. Если по названному мастеру или услуге данных нет — скажи это, а не бери ближайшую цифру.`,
-                    ]
-                  : []),
+                `Эти числа отсутствуют в tool_results: ${unsourced.join(', ')}. Перепиши ответ, оставив только значения, которые есть в результатах инструментов.`,
               ];
               continue;
             }
@@ -723,7 +558,6 @@ export class AiCoreService {
                     source: 'safe_fallback',
                     action: null,
                     unsourced,
-                    misattributed,
                     grounding: this.groundingReport(
                       requirement,
                       'verified',
@@ -736,7 +570,6 @@ export class AiCoreService {
                       toolResults,
                     ),
                     unsourced,
-                    misattributed,
                   },
             );
           }
@@ -1075,7 +908,7 @@ export class AiCoreService {
   }
 
   private guardClientUpsell(
-    brain: MayaBrainContext,
+    brain: MayaBrainRoute,
     messages: AiCoreMessage[],
     reply: string,
     toolResults: AiCoreToolResult[],
@@ -1184,26 +1017,13 @@ export class AiCoreService {
   private async complete(
     user: AuthenticatedUser,
     dto: AiCoreChatDto,
-    brain: MayaBrainContext,
+    brain: MayaBrainRoute,
     redacted: boolean,
     toolsUsed: ToolUsage[],
     decisions: AiCoreModelDecision[],
     response: AiCoreCompletion,
   ) {
-    const citedIds = [
-      ...new Set(decisions.flatMap((decision) => decision.citationIds ?? [])),
-    ];
-    const citations = this.brain.citations(brain, citedIds);
-    const missingRequiredCitation =
-      brain.active && brain.knowledgeRequired && citations.length === 0;
-    const completedResponse: AiCoreCompletion = missingRequiredCitation
-      ? {
-          reply:
-            'Не нашла подтверждённого ответа в базе знаний. Я не буду дополнять его догадками.',
-          source: 'safe_fallback',
-          action: null,
-        }
-      : response;
+    const completedResponse = response;
     const grounding =
       completedResponse.grounding ??
       this.groundingReport(null, 'not_required', []);
@@ -1228,12 +1048,6 @@ export class AiCoreService {
         total_tokens: null as number | null,
       },
     );
-    const plan = await this.brain.recordOutcome(brain, {
-      toolNames: toolsUsed.map((tool) => tool.name),
-      approvalRequired: completedResponse.action !== null,
-      blocked: missingRequiredCitation || grounding.status === 'blocked',
-      citedIds: citations.map((citation) => citation.id),
-    });
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
       userId: user.userId,
@@ -1247,22 +1061,13 @@ export class AiCoreService {
         model_calls: decisions.length,
         tools_used: toolsUsed.map((tool) => tool.name),
         outcome: completedResponse.action ? 'approval_required' : 'reply',
-        brain_profile: brain.profile,
-        brain_active: brain.active,
+        brain_persona: brain.persona,
         brain_intent: brain.intent,
-        brain_prompt_version: brain.promptVersion,
-        brain_plan_status: plan.status,
-        brain_memory_keys: brain.preferences.map((item) => item.key),
-        brain_citation_count: citations.length,
         grounding_status: grounding.status,
         grounding_domain: grounding.domain,
         grounding_evidence_tools: grounding.evidence_tools,
         // Почему ответ модели был отклонён. Только числа, без текста.
         unsourced_numbers: completedResponse.unsourced ?? [],
-        // Отдельно от предыдущего: тут числа настоящие, ложной была привязка
-        // к мастеру или услуге. Смешивать их в один список нельзя — по аудиту
-        // разбирают, что именно пошло не так.
-        misattributed_numbers: completedResponse.misattributed ?? [],
         redacted_input: redacted,
         ...usage,
       },
@@ -1275,15 +1080,9 @@ export class AiCoreService {
       action: completedResponse.action,
       tools_used: toolsUsed,
       grounding,
-      citations,
       brain: {
-        session_id: brain.sessionId,
-        active: brain.active,
-        profile: brain.profile,
+        persona: brain.persona,
         intent: brain.intent,
-        prompt_version: brain.promptVersion,
-        plan,
-        memory_applied: brain.preferences.map((item) => item.key),
       },
     };
   }
@@ -1291,7 +1090,7 @@ export class AiCoreService {
   private groundingRequirement(
     messages: AiCoreMessage[],
     allowedNames: Set<string>,
-    brain: MayaBrainContext,
+    brain: MayaBrainRoute,
   ): GroundingRequirement | null {
     const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
     const previousUserText = this.previousUserText(messages)
@@ -1368,21 +1167,10 @@ export class AiCoreService {
       // dedicated tenant-scoped schedule tool exists.
       return this.requireGrounding('staff_schedule', ['staff.schedule.read']);
     }
-    if (
-      /(какие\s+(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*)/i.test(
-        text,
-      ) &&
-      // 🔴 «Кто из мастеров больше всего в просадке» — это вопрос аналитики, а
-      // не справочника. Прежний список исключений знал только «лучший»,
-      // «выручка», «заработал» и «эффективность», поэтому вопрос уходил в
-      // catalog.staff.read, цифры оттуда не подтверждались, и владелец получал
-      // «не смогла подтвердить данные».
-      !/(лучш[а-яёa-z]*|худш[а-яёa-z]*|хуже|выруч[а-яёa-z]*|заработ[а-яёa-z]*|эффектив[а-яёa-z]*|просад[а-яёa-z]*|просел[а-яёa-z]*|упал[а-яёa-z]*|снизил[а-яёa-z]*|динамик[а-яёa-z]*|загруз[а-яёa-z]*|отмен[а-яёa-z]*|повторн[а-яёa-z]*|показател[а-яёa-z]*|средн[а-яёa-z]*\s+чек|больше\s+всего|меньше\s+всего)/i.test(
-        text,
-      )
-    ) {
-      return this.requireGrounding('staff_catalog', ['catalog.staff.read']);
-    }
+    // 🔴 Справочника мастеров здесь больше нет. `catalog.staff.read` отдавал
+    // обезличенные ярлыки («specialist_1»), и вопрос «какие у нас мастера»
+    // получал ответ, в котором ни одного имени. Вопросы о мастерах уходят в
+    // аналитику ниже: там разрез по людям поимённо, с их числами.
     if (
       EXPENSE_STRUCTURE_QUESTION_PATTERN.test(text) &&
       // «На что больше всего тратим» — уже вопрос-факт сам по себе, слова
@@ -1403,33 +1191,49 @@ export class AiCoreService {
       (customerCountRequest &&
         GROUNDING_YEAR_COMPARISON_PATTERN.test(previousUserText))
     ) {
-      if (
-        allowedNames.has('analytics.business.query') &&
-        (BUSINESS_ACTION_REQUEST_PATTERN.test(text) ||
-          // 🔴 «Почему просадка» уходило в compare_years, а тот отдаёт ровно
-          // три числа: выручку, число операций и клиентов. Ни услуг, ни дней,
-          // ни отмен — объяснить причину по ним невозможно. Просьба разобраться
-          // должна идти в business.query: там 12 метрик со сравнением и разрез
-          // по услугам. Чистое «на сколько изменилось» по-прежнему берёт
-          // compare_years — только он сверяет деньги сразу за два года.
-          BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text))
-      ) {
+      // 🔴 Сравнение с прошлым годом теперь целиком в business.query.
+      // Отдельный compare_years отдавал ровно три числа — выручку, число
+      // операций и клиентов, — и по ним нельзя было ни объяснить причину, ни
+      // назвать мастера. `comparisonForQuestion` сам ставит режим
+      // `previous_year_same_period`, а `reportingPeriodForQuestion` —
+      // `year_to_date`: тот же вопрос, но с двенадцатью метриками и разрезами.
+      if (allowedNames.has('analytics.business.query')) {
         return this.businessQueryRequirement(text, previousUserText);
-      }
-      if (allowedNames.has('analytics.business.compare_years')) {
-        return this.requireGrounding('business_year_comparison', [
-          'analytics.business.compare_years',
-        ]);
       }
       if (allowedNames.has('analytics.employee.query')) {
         return this.employeeQueryRequirement(text, previousUserText);
       }
     }
     if (customerCountRequest) {
+      // Аналитика отвечает лучше: там уникальные клиенты, когорты и сравнение,
+      // а голое число ответом почти никогда не было.
+      if (allowedNames.has('analytics.employee.query')) {
+        return this.employeeQueryRequirement(text, previousUserText);
+      }
       if (allowedNames.has('analytics.business.query')) {
         return this.businessQueryRequirement(text, previousUserText);
       }
-      return this.requireGrounding('customer_count', ['customers.count']);
+      // 🔴 Но на младшем тарифе аналитики нет вовсе, а счётчик клиентов —
+      // есть. Без этого запасного пути салон, который только что подключился
+      // и платит, на вопрос «сколько у нас клиентов» не получал НИЧЕГО.
+      if (allowedNames.has('customers.count')) {
+        return this.requireGrounding('customer_count', ['customers.count']);
+      }
+      return this.businessQueryRequirement(text, previousUserText);
+    }
+    // 🔴 Вопрос о мастерах: владельцу — аналитика, клиенту — справочник.
+    // Вся аналитика для клиентских ролей закрыта, поэтому без этой ветки
+    // «какие у вас мастера» в публичном чате не заземлялось ничем и модель
+    // отвечала из головы.
+    if (
+      /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит))/i.test(
+        text,
+      ) &&
+      !allowedNames.has('analytics.business.query') &&
+      !allowedNames.has('analytics.employee.query') &&
+      allowedNames.has('catalog.staff.read')
+    ) {
+      return this.requireGrounding('staff_catalog', ['catalog.staff.read']);
     }
     if (
       allowedNames.has('analytics.business.query') &&
@@ -1454,29 +1258,25 @@ export class AiCoreService {
         factRequest) ||
       /(сводк[а-яёa-z]*|что\s+у\s+нас\s+сегодня)/i.test(text)
     ) {
+      // 🔴 Обзорные `analytics.*.read` убраны: query-версии перекрывают их
+      // целиком и отдают сверх того сравнение, когорты и разрез по мастерам.
+      // Развилка «личное или по салону» осталась прежней — меняется только
+      // инструмент на её концах.
       const personal = GROUNDING_PERSONAL_SCOPE_PATTERN.test(text);
       const business = GROUNDING_BUSINESS_SCOPE_PATTERN.test(text);
       if (personal) {
-        return this.requireGrounding('personal_analytics', [
-          'analytics.employee.read',
-        ]);
+        return this.employeeQueryRequirement(text, previousUserText);
       }
       if (business) {
-        return this.requireGrounding('business_analytics', [
-          'analytics.business.read',
-        ]);
+        return this.businessQueryRequirement(text, previousUserText);
       }
       if (
-        allowedNames.has('analytics.employee.read') &&
-        !allowedNames.has('analytics.business.read')
+        allowedNames.has('analytics.employee.query') &&
+        !allowedNames.has('analytics.business.query')
       ) {
-        return this.requireGrounding('personal_analytics', [
-          'analytics.employee.read',
-        ]);
+        return this.employeeQueryRequirement(text, previousUserText);
       }
-      return this.requireGrounding('business_analytics', [
-        'analytics.business.read',
-      ]);
+      return this.businessQueryRequirement(text, previousUserText);
     }
     return null;
   }
@@ -1543,7 +1343,7 @@ export class AiCoreService {
   }
 
   private isBusinessQuestion(
-    brain: MayaBrainContext,
+    brain: MayaBrainRoute,
     text: string,
     previousUserText: string,
     factRequest: boolean,
@@ -1593,7 +1393,7 @@ export class AiCoreService {
   }
 
   private isEmployeePerformanceQuestion(
-    brain: MayaBrainContext,
+    brain: MayaBrainRoute,
     text: string,
     previousUserText: string,
     factRequest: boolean,
@@ -1848,95 +1648,6 @@ export class AiCoreService {
           )
         : null;
     }
-    if (requirement?.domain === 'business_year_comparison') {
-      const evidence = toolResults.find(
-        (result) => result.name === 'analytics.business.compare_years',
-      );
-      if (!evidence) {
-        return null;
-      }
-      const data = this.record(evidence.result);
-      const periods = this.record(data.periods);
-      const currentPeriod = this.record(periods.current);
-      const previousPeriod = this.record(periods.previous);
-      const revenue = this.record(data.revenue);
-      const transactions = this.record(data.transactions);
-      const clients = this.record(data.clients);
-      const currentRevenue = this.formatMoneyAmount(revenue.current);
-      const previousRevenue = this.formatMoneyAmount(revenue.previous);
-      const revenueDelta = this.formatMoneyAmount(revenue.delta);
-
-      if (
-        data.verified !== true ||
-        !currentRevenue ||
-        !previousRevenue ||
-        !revenueDelta
-      ) {
-        return 'Не удалось получить подтверждённые финансовые операции сразу за оба годовых периода. Я не буду подменять их стоимостью записей или приблизительным расчётом.';
-      }
-
-      const currentLabel =
-        this.comparisonPeriodLabel(currentPeriod) ?? 'текущий период';
-      const previousLabel =
-        this.comparisonPeriodLabel(previousPeriod) ??
-        'аналогичный период прошлого года';
-      const revenueDeltaKopecks = this.optionalMetricNumber(
-        this.record(revenue.delta).amount_kopecks,
-      );
-      const transactionCurrent = this.optionalMetricNumber(
-        transactions.current,
-      );
-      const transactionPrevious = this.optionalMetricNumber(
-        transactions.previous,
-      );
-      const transactionDelta = this.optionalMetricNumber(transactions.delta);
-      const revenuePercent = this.formatSignedPercent(revenue.percent_change);
-      const transactionPercent = this.formatSignedPercent(
-        transactions.percent_change,
-      );
-      const clientCurrent = this.optionalMetricNumber(clients.current);
-      const clientPrevious = this.optionalMetricNumber(clients.previous);
-      const clientDelta = this.optionalMetricNumber(clients.delta);
-      const clientPercent = this.formatSignedPercent(clients.percent_change);
-      const clientLine =
-        clients.verified === true &&
-        clientCurrent !== null &&
-        clientPrevious !== null &&
-        clientDelta !== null
-          ? `Уникальных клиентов с CRM-картой по неотменённым записям: ${this.formatMetricNumber(clientCurrent)} против ${this.formatMetricNumber(clientPrevious)}. Изменение: ${this.signedValue(clientDelta, this.formatMetricNumber(Math.abs(clientDelta)))}${clientPercent ? ` (${clientPercent})` : ''}.`
-          : null;
-      const customerFocused = GROUNDING_CUSTOMER_COUNT_PATTERN.test(
-        userText.toLowerCase().replace(/ё/g, 'е'),
-      );
-
-      if (customerFocused) {
-        const reply = clientLine
-          ? `Сравнила одинаковые периоды: ${currentLabel} и ${previousLabel}. ${clientLine} Источник — подтверждённый журнал записей CRM.`
-          : 'Не удалось получить из CRM подтверждённое число уникальных клиентов сразу за оба периода. Я не буду подменять клиентов транзакциями или локальным счётчиком.';
-        return this.appendAnalyticsFreshness(reply, evidence.result);
-      }
-      const financeLine = `Поступления: ${currentRevenue} против ${previousRevenue}. Изменение: ${this.signedValue(revenueDeltaKopecks, revenueDelta)}${revenuePercent ? ` (${revenuePercent})` : ''}.`;
-      const transactionLine =
-        transactionCurrent !== null &&
-        transactionPrevious !== null &&
-        transactionDelta !== null
-          ? `Положительных финансовых операций: ${this.formatMetricNumber(transactionCurrent)} против ${this.formatMetricNumber(transactionPrevious)}. Изменение: ${this.signedValue(transactionDelta, this.formatMetricNumber(Math.abs(transactionDelta)))}${transactionPercent ? ` (${transactionPercent})` : ''}.`
-          : null;
-
-      const reply = [
-        `Сравнила одинаковые периоды: ${currentLabel} и ${previousLabel}.`,
-        financeLine,
-        transactionLine,
-        clientLine,
-        clientLine
-          ? 'Источник — подтверждённые операции и журнал записей CRM.'
-          : 'Источник — подтверждённые операции CRM.',
-      ]
-        .filter((part): part is string => part !== null)
-        .join(' ');
-      return this.appendAnalyticsFreshness(reply, evidence.result);
-    }
-
     if (requirement?.domain === 'booking_availability') {
       const evidence = toolResults.find(
         (result) => result.name === 'booking.availability.read',
@@ -2012,88 +1723,6 @@ export class AiCoreService {
       return `В вашей истории ${appointments.length} ${this.pluralize(appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming}, отменённых: ${cancelled}. Подробности доступны в разделе «Записи».`;
     }
 
-    if (
-      requirement?.domain !== 'business_analytics' &&
-      requirement?.domain !== 'personal_analytics'
-    ) {
-      return null;
-    }
-    const toolName =
-      requirement.domain === 'personal_analytics'
-        ? 'analytics.employee.read'
-        : 'analytics.business.read';
-    const evidence = toolResults.find((result) => result.name === toolName);
-    if (!evidence) {
-      return null;
-    }
-    const data = this.record(evidence.result);
-    const finance = this.record(data.finance);
-    const payroll = this.record(finance.payroll);
-    const text = userText.toLowerCase().replace(/ё/g, 'е');
-    const scope =
-      requirement.domain === 'personal_analytics' ? 'вашим данным' : 'бизнесу';
-
-    if (/зарплат[а-яa-z]*/i.test(text)) {
-      const accrued = this.formatMoneyAmount(payroll.accrued_total);
-      if (
-        requirement.domain === 'business_analytics' &&
-        payroll.status === 'available' &&
-        payroll.verified === true &&
-        accrued
-      ) {
-        const paid = this.formatMoneyAmount(payroll.paid_total);
-        const balance = this.formatMoneyAmount(payroll.balance_total);
-        return [
-          `Начислено сотрудникам по данным CRM за выбранный период: ${accrued}.`,
-          paid ? `Выплачено: ${paid}.` : null,
-          balance ? `Остаток к выплате: ${balance}.` : null,
-        ]
-          .filter((part): part is string => part !== null)
-          .join(' ');
-      }
-      if (payroll.status === 'partial') {
-        return 'CRM вернула расчёт зарплаты не по всем сотрудникам, поэтому общую сумму я не называю. Проверьте права финансового доступа в CRM.';
-      }
-      return 'Подтверждённый расчёт зарплаты за выбранный период недоступен. Я не буду рассчитывать его приблизительно из выручки.';
-    }
-    if (/валов[а-яa-z]*\s+прибыл[а-яa-z]*/i.test(text)) {
-      return 'Валовая прибыль сейчас не рассчитывается: в данных есть выручка и внесённые расходы, но прямые затраты на оказание услуг не выделены отдельно. Я не буду подменять её выручкой или операционным результатом.';
-    }
-    if (/марж[а-яa-z]*/i.test(text)) {
-      return 'Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.';
-    }
-    if (/средн[а-яa-z]*\s+чек/i.test(text)) {
-      const averageTicket = this.formatVerifiedMoneyEntries(
-        data.average_ticket,
-      );
-      return averageTicket
-        ? `Средний чек по ${scope} за выбранный период: ${averageTicket}.`
-        : `Подтверждённый средний чек по ${scope} за выбранный период недоступен. Я не буду выводить его из стоимости записей приблизительно.`;
-    }
-    if (GROUNDING_APPOINTMENT_METRIC_PATTERN.test(text)) {
-      const appointments = this.record(data.appointments);
-      const total = this.safeMetricNumber(appointments.total);
-      const active = this.safeMetricNumber(appointments.active);
-      const cancelled = this.safeMetricNumber(appointments.cancelled);
-      return `Записей по ${scope} за выбранный период: ${total}. Активных: ${active}, отменённых: ${cancelled}.`;
-    }
-    if (/чист[а-яa-z]*\s+прибыл[а-яa-z]*|прибыл[а-яa-z]*/i.test(text)) {
-      const net = this.formatVerifiedMoneyEntries(data.net);
-      return net
-        ? `Операционный результат по ${scope} за выбранный период: ${net}. Это выручка минус внесённые расходы, а не бухгалтерская чистая прибыль.`
-        : `Операционный результат по ${scope} за выбранный период недоступен: CRM не передала полный набор подтверждённых расходов. Я не буду подменять прибыль выручкой.`;
-    }
-    if (
-      /выруч[а-яa-z]*|оборот[а-яa-z]*|касс[а-яa-z]*|доход[а-яa-z]*/i.test(text)
-    ) {
-      const revenue = this.formatVerifiedMoneyEntries(data.revenue);
-      if (!revenue) {
-        return `Подтверждённые денежные поступления по ${scope} за выбранный период недоступны. Я не буду использовать вместо них стоимость записей.`;
-      }
-      return finance.source === 'external_crm'
-        ? `Подтверждённые поступления по данным CRM за выбранный период: ${revenue}.`
-        : `Выручка по ${scope} за выбранный период: ${revenue}.`;
-    }
     return null;
   }
 
@@ -2387,6 +2016,16 @@ export class AiCoreService {
         : `${label}: ${this.formatMetricNumber(value)}${suffix}${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}${suffix}` : ''}.${metricChange(key)}`;
     };
 
+    // 🔴 Валовая прибыль и маржа — отдельные отказы, а не разновидность
+    // «чистой». Оба переехали сюда из обзорных `analytics.*.read`: без них
+    // вопрос про валовую прибыль получал ответ про бухгалтерскую чистую, то
+    // есть про другой показатель.
+    if (/валов[а-яa-z]*\s+прибыл[а-яa-z]*/i.test(text)) {
+      return 'Валовая прибыль сейчас не рассчитывается: в данных есть выручка и внесённые расходы, но прямые затраты на оказание услуг не выделены отдельно. Я не буду подменять её выручкой или операционным результатом.';
+    }
+    if (/(?<![а-яё])марж[аеиуы][а-яa-z]*/i.test(text)) {
+      return 'Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.';
+    }
     if (
       /(чист[а-яa-z]*|бухгалтер[а-яa-z]*)\s+прибыл|прибыл[а-яa-z]*/i.test(text)
     ) {
@@ -2546,18 +2185,22 @@ export class AiCoreService {
       }
     }
 
+    // 🔴 Деньги в общей сводке идут СО СРАВНЕНИЕМ, как и счётчики.
+    // Пока сравнение года с годом жило в отдельном инструменте, его шаблон
+    // называл прошлогоднюю сумму сам. Инструмент убран, и без этой строки
+    // ответ на «сравни этот год с прошлым» терял ровно то число, ради
+    // которого вопрос и задавали.
+    const moneyKey = personal
+      ? 'booked_value_amount_kopecks'
+      : 'revenue_amount_kopecks';
+    const moneyValue = metric(moneyKey);
+    const moneyPrevious = this.optionalMetricNumber(
+      this.record(changes[moneyKey]).previous,
+    );
     const summary = [
-      personal
-        ? this.analyticsMoneySummary(
-            'Стоимость записанных услуг',
-            metric('booked_value_amount_kopecks'),
-            money,
-          )
-        : this.analyticsMoneySummary(
-            'Поступления',
-            metric('revenue_amount_kopecks'),
-            money,
-          ),
+      moneyValue === null
+        ? null
+        : `${personal ? 'Стоимость записанных услуг' : 'Поступления'}: ${money(moneyValue)}${comparisonLabel && moneyPrevious !== null ? ` против ${money(moneyPrevious)}` : ''}.${metricChange(moneyKey, money)}`,
       countLine('Записи', 'appointments_total'),
       countLine('Уникальные клиенты', 'unique_clients'),
     ].filter((part): part is string => Boolean(part));
@@ -2569,14 +2212,6 @@ export class AiCoreService {
     return summary.length > 0
       ? `${summary.join(' ')}${insight ? ` ${insight}` : ''}`
       : null;
-  }
-
-  private analyticsMoneySummary(
-    label: string,
-    value: number | null,
-    formatter: (value: number) => string,
-  ): string | null {
-    return value === null ? null : `${label}: ${formatter(value)}.`;
   }
 
   private analyticsRecommendation(
@@ -2766,25 +2401,6 @@ export class AiCoreService {
     return this.signedValue(metric, formatted);
   }
 
-  private comparisonPeriodLabel(value: Record<string, unknown>): string | null {
-    const year = this.optionalMetricNumber(value.year);
-    const startDay = this.optionalMetricNumber(value.start_day);
-    const startMonth = this.optionalMetricNumber(value.start_month);
-    const endDay = this.optionalMetricNumber(value.end_day);
-    const endMonth = this.optionalMetricNumber(value.end_month);
-    if (
-      year === null ||
-      startDay === null ||
-      startMonth === null ||
-      endDay === null ||
-      endMonth === null
-    ) {
-      return null;
-    }
-    const pad = (part: number) => String(part).padStart(2, '0');
-    return `${pad(startDay)}.${pad(startMonth)}.${year}–${pad(endDay)}.${pad(endMonth)}.${year}`;
-  }
-
   private formatMetricNumber(value: number): string {
     return new Intl.NumberFormat('ru-RU', {
       maximumFractionDigits: 2,
@@ -2849,18 +2465,6 @@ export class AiCoreService {
       return message.content.trim();
     }
     return '';
-  }
-
-  private groundedNumbersMatch(
-    reply: string,
-    requirement: GroundingRequirement | null,
-    toolResults: AiCoreToolResult[],
-    userText: string,
-  ): boolean {
-    return (
-      this.unsourcedNumbers(reply, requirement, toolResults, userText)
-        .length === 0
-    );
   }
 
   /**
@@ -2937,497 +2541,6 @@ export class AiCoreService {
   }
 
   /**
-   * Числа, названные рядом с сущностью, которой они не принадлежат.
-   *
-   * Сторож происхождения проверяет только ОТКУДА число: множество
-   * подтверждённых значений плоское, поэтому «У Стаса «Борода» просела на 12
-   * записей» проходило без единой пометки, хотя просадка у Ильи, а «Илья
-   * заработал 104 500 ₽» — при том что это выручка всего салона. Цифры при
-   * этом настоящие, и владелец шёл разговаривать с человеком по выдуманной
-   * привязке.
-   *
-   * 🔴 Разбор построен вокруг одного правила: ЛОЖНАЯ ТРЕВОГА ДОРОЖЕ ПРОПУСКА.
-   * Забракованный верный ответ уходит в шаблон — ровно та беда, от которой
-   * лечили мозг MAYA. Поэтому сторож молчит везде, где привязка неочевидна:
-   * число вне клаузы с именем, перечисление имён, два одинаково близких
-   * кандидата, салонная пометка рядом, число из реплики самого владельца.
-   * Число, не подтверждённое нигде, здесь не наша забота — им занимается
-   * unsourcedNumbers, и дублировать его в двух списках нельзя.
-   */
-  private misattributedNumbers(
-    reply: string,
-    requirement: GroundingRequirement | null,
-    toolResults: AiCoreToolResult[],
-    userText: string,
-  ): string[] {
-    if (!requirement?.strictNumbers) {
-      return [];
-    }
-    const entities = this.attributionEntities(toolResults);
-    if (entities.length === 0) {
-      return [];
-    }
-    const text = reply.replace(/[−–—]/g, '-');
-    const mentions = this.entityMentions(text, entities);
-    if (mentions.length === 0) {
-      return [];
-    }
-    const evidence = this.groundingEvidence(toolResults);
-    const sourced = new Set([...evidence.absolute, ...evidence.delta]);
-    // Число, названное самим владельцем, привязке не подлежит: за ним нет
-    // строки данных, с которой можно свериться.
-    const spoken = this.groundingNumbers(userText);
-    const occurrences = this.numberOccurrences(text);
-    const problems: string[] = [];
-    for (const clause of this.attributionClauses(text)) {
-      const targets = this.attributionTargets(
-        text,
-        mentions.filter(
-          (mention) =>
-            mention.start >= clause.start && mention.end <= clause.end,
-        ),
-      );
-      // Ни одного имени в клаузе — это общий показатель салона. Он назван
-      // честно, и придираться не к чему.
-      if (targets.length === 0) {
-        continue;
-      }
-      for (const occurrence of occurrences) {
-        if (
-          occurrence.index < clause.start ||
-          occurrence.index >= clause.end ||
-          !this.numberInSet(occurrence.value, sourced) ||
-          this.numberInSet(occurrence.value, spoken) ||
-          this.salonScopeExempt(text, clause, occurrence.index)
-        ) {
-          continue;
-        }
-        const target = this.attributionTarget(text, targets, occurrence);
-        if (!target) {
-          continue;
-        }
-        const allowed = this.attributionAllowed(target, targets);
-        if (!allowed || this.numberInSet(occurrence.value, allowed.numbers)) {
-          continue;
-        }
-        problems.push(`${occurrence.value} (это не данные «${allowed.label}»)`);
-      }
-    }
-    return [...new Set(problems)].slice(0, 8);
-  }
-
-  /**
-   * Клаузы ответа — рамка, внутри которой число ищет владельца.
-   *
-   * Запятая границей считается наравне с точкой: «Илья сделал 61 запись,
-   * средний чек 2 612 ₽» — чек тут салонный, и без границы он приписался бы
-   * человеку. Двоеточие и тире, наоборот, границей НЕ считаются: по-русски они
-   * как раз вводят данные названного («Илья: 61 запись», «лидер - Стас, 142»).
-   */
-  private attributionClauses(text: string): AttributionClause[] {
-    const clauses: AttributionClause[] = [];
-    let start = 0;
-    for (let cursor = 0; cursor < text.length; cursor += 1) {
-      if (!this.attributionBoundary(text, cursor)) {
-        continue;
-      }
-      if (cursor > start) {
-        clauses.push({ start, end: cursor });
-      }
-      start = cursor + 1;
-    }
-    if (start < text.length) {
-      clauses.push({ start, end: text.length });
-    }
-    return clauses;
-  }
-
-  /**
-   * Разделитель между цифрами разделителем не считается: «38,7» и «0.94» иначе
-   * разрывались бы посреди числа.
-   */
-  private attributionBoundary(text: string, index: number): boolean {
-    const character = text[index];
-    if (/[;!?\n•()]/.test(character)) {
-      return true;
-    }
-    if (character !== '.' && character !== ',') {
-      return false;
-    }
-    return !(
-      /\d/.test(text[index - 1] ?? '') && /\d/.test(text[index + 1] ?? '')
-    );
-  }
-
-  /**
-   * Оговорки, при которых общий итог рядом с именем — не нарушение.
-   *
-   * Смотрим всю клаузу целиком: пометка «по салону» может стоять и до числа, и
-   * после него («у Ильи 61, по салону 268» / «Илья дал 61 из 268 по салону»).
-   * Узкое окно ловило только первый порядок и браковало второй.
-   */
-  private salonScopeExempt(
-    text: string,
-    clause: AttributionClause,
-    numberIndex: number,
-  ): boolean {
-    return (
-      SALON_SCOPE_MARKER.test(text.slice(clause.start, clause.end)) ||
-      SHARE_BASE_MARKER.test(text.slice(clause.start, numberIndex))
-    );
-  }
-
-  /** Значение есть в наборе — с точностью до знака и единицы измерения. */
-  private numberInSet(value: string, values: Set<string>): boolean {
-    if (values.has(value)) {
-      return true;
-    }
-    const unsigned = value.startsWith('-') ? value.slice(1) : `-${value}`;
-    if (values.has(unsigned)) {
-      return true;
-    }
-    return this.scaledMatch(value, values);
-  }
-
-  /**
-   * Карта «сущность → числа её поддерева» плюс разрез услуги по владельцу.
-   *
-   * Одноимённые строки из разных массивов объединяются: у мастера есть срез за
-   * период в staff_summary[] и сравнение периодов в staff_changes[], и оба
-   * набора — его собственные числа. Раздельно они дали бы ложные тревоги на
-   * первой же фразе вида «у Ильи 19 записей против 31».
-   *
-   * 🔴 Услуга живёт в двух видах сразу: салонная строка (service_changes[]) и
-   * строка внутри мастера (staff_changes[].services[]). Плоское объединение
-   * стирает разницу — а именно она отличает «у Ильи просела «Борода»» от «у
-   * Стаса просела «Борода»», когда цифра в обеих фразах одна и та же настоящая.
-   * Поэтому числа услуги дополнительно раскладываются по владельцу.
-   */
-  private attributionEntities(value: unknown): AttributionEntity[] {
-    const entities = new Map<string, AttributionEntity>();
-    const entityKey = (name: string) =>
-      name.toLowerCase().replace(/ё/g, 'е').trim();
-    const remember = (
-      name: string,
-      node: unknown,
-      kind: AttributionEntity['kind'],
-      owner: string | null,
-    ): string | null => {
-      const key = entityKey(name);
-      if (key.length < 3 || ATTRIBUTION_GENERIC_NAMES.has(key)) {
-        return null;
-      }
-      const entity: AttributionEntity = entities.get(key) ?? {
-        key,
-        name: name.trim(),
-        numbers: new Set<string>(),
-        kind,
-        byOwner: new Map<string, Set<string>>(),
-        detailed: false,
-      };
-      const numbers = this.groundingNumbers(node);
-      for (const number of numbers) {
-        entity.numbers.add(number);
-      }
-      if (owner) {
-        const scoped = entity.byOwner.get(owner) ?? new Set<string>();
-        for (const number of numbers) {
-          scoped.add(number);
-        }
-        entity.byOwner.set(owner, scoped);
-      }
-      // Мастер сильнее услуги: если имя встретилось в обеих ролях, разбор
-      // «мастер + его услуга» должен остаться возможным.
-      if (kind === 'staff') {
-        entity.kind = 'staff';
-        const nested = (node as Record<string, unknown> | null)?.services;
-        entity.detailed ||= Array.isArray(nested) && nested.length > 0;
-      }
-      entities.set(key, entity);
-      return key;
-    };
-    const walk = (node: unknown, owner: string | null) => {
-      if (Array.isArray(node)) {
-        node.forEach((item) => walk(item, owner));
-        return;
-      }
-      if (node === null || typeof node !== 'object') {
-        return;
-      }
-      for (const [key, item] of Object.entries(
-        node as Record<string, unknown>,
-      )) {
-        if (!ATTRIBUTION_ENTITY_ARRAY_KEYS.has(key) || !Array.isArray(item)) {
-          walk(item, owner);
-          continue;
-        }
-        const kind = key.startsWith('staff') ? 'staff' : 'service';
-        for (const entry of item) {
-          if (entry === null || typeof entry !== 'object') {
-            continue;
-          }
-          const name = (entry as Record<string, unknown>).name;
-          if (typeof name !== 'string' || name.trim() === '') {
-            walk(entry, owner);
-            continue;
-          }
-          // Услуга наследует владельца только внутри строки мастера; в
-          // service_summary[]/service_changes[] она салонная и владельца не
-          // имеет.
-          const scope = kind === 'staff' ? null : owner;
-          const stored = remember(name, entry, kind, scope);
-          walk(entry, kind === 'staff' ? stored : owner);
-        }
-      }
-    };
-    walk(value, null);
-    return [...entities.values()];
-  }
-
-  /**
-   * Где в ответе названы сущности из данных.
-   *
-   * Имена склоняются («у Ильи», «по Анне», «мужской стрижки»), поэтому ищем по
-   * основе слова с коротким хвостом. Вложенные совпадения («стрижка» внутри
-   * «мужская стрижка») отбрасываем: иначе окно внешнего имени схлопнется в
-   * ноль и проверка молча перестанет работать.
-   */
-  private entityMentions(
-    text: string,
-    entities: AttributionEntity[],
-  ): AttributionMention[] {
-    const haystack = text.toLowerCase().replace(/ё/g, 'е');
-    const found: AttributionMention[] = [];
-    for (const entity of entities) {
-      const pattern = this.entityNamePattern(entity.name);
-      if (!pattern) continue;
-      for (const match of haystack.matchAll(pattern)) {
-        const start = match.index ?? 0;
-        found.push({ entity, start, end: start + match[0].length });
-      }
-    }
-    found.sort((left, right) =>
-      left.start !== right.start
-        ? left.start - right.start
-        : right.end - left.end,
-    );
-    const mentions: AttributionMention[] = [];
-    for (const mention of found) {
-      const previous = mentions.at(-1);
-      if (previous && mention.start < previous.end) {
-        continue;
-      }
-      mentions.push(mention);
-    }
-    return mentions;
-  }
-
-  /**
-   * Имена клаузы, свёрнутые до кандидатов на владение числом.
-   *
-   * Соседние однородные имена без числа между ними — перечисление: «Илья и
-   * Стас дали 268 записей» говорит о паре, а не о Стасе, и требовать 268 от
-   * последнего названного нельзя. Такие пары склеиваем в один кандидат, и на
-   * нём сторож потом промолчит.
-   */
-  private attributionTargets(
-    text: string,
-    mentions: AttributionMention[],
-  ): AttributionTarget[] {
-    const targets: AttributionTarget[] = [];
-    for (const mention of mentions) {
-      const previous = targets.at(-1);
-      const gap = previous ? text.slice(previous.end, mention.start) : '';
-      if (
-        previous &&
-        previous.kind === mention.entity.kind &&
-        !/\d/.test(gap) &&
-        ATTRIBUTION_ENUMERATION_JOINER.test(gap)
-      ) {
-        previous.members.push(mention);
-        previous.end = mention.end;
-        continue;
-      }
-      targets.push({
-        members: [mention],
-        kind: mention.entity.kind,
-        start: mention.start,
-        end: mention.end,
-      });
-    }
-    return targets;
-  }
-
-  /**
-   * Кому принадлежит число — по БЛИЖАЙШЕМУ имени в любую сторону.
-   *
-   * Русский порядок слов свободен: «у Ильи 61 запись» и «61 запись у Ильи»
-   * одинаково нормальны, поэтому смотрим и влево, и вправо. Союз между именем
-   * и числом удорожает кандидата: во фразе «17 записей у Ильи и 23 у Стаса»
-   * до 23 от обоих имён по три символа, и без надбавки выбор был бы случайным.
-   * Если два кандидата всё равно почти равны или ближайший слишком далеко —
-   * возвращаем null, и сторож молчит.
-   */
-  private attributionTarget(
-    text: string,
-    targets: AttributionTarget[],
-    occurrence: { value: string; index: number; end: number },
-  ): AttributionTarget | null {
-    const scored = targets
-      .map((target) => {
-        if (occurrence.index >= target.start && occurrence.end <= target.end) {
-          return { target, distance: 0 };
-        }
-        const gap =
-          occurrence.index >= target.end
-            ? text.slice(target.end, occurrence.index)
-            : text.slice(occurrence.end, target.start);
-        const penalty = ATTRIBUTION_CONJUNCTION_PATTERN.test(gap)
-          ? ATTRIBUTION_CONJUNCTION_PENALTY
-          : 0;
-        return { target, distance: gap.length + penalty };
-      })
-      .sort((left, right) => left.distance - right.distance);
-    const best = scored[0];
-    if (!best || best.distance > ATTRIBUTION_ATTACH_DISTANCE) {
-      return null;
-    }
-    const runnerUp = scored[1];
-    if (
-      runnerUp &&
-      runnerUp.target.kind === best.target.kind &&
-      runnerUp.distance - best.distance < ATTRIBUTION_TIE_MARGIN
-    ) {
-      // Два одинаково близких имени одного рода — угадывать нельзя.
-      return null;
-    }
-    return best.target;
-  }
-
-  /**
-   * Какие числа кандидат вправе носить.
-   *
-   * Услуга без мастера в клаузе отвечает за свой салонный набор. Услуга рядом
-   * с мастером — за набор ИМЕННО ЕГО строки, плюс за любые числа самого
-   * мастера: «у Ильи 61 запись, «Борода» 24» — 61 принадлежит человеку, а не
-   * услуге, и требовать его от строки услуги было бы ложной тревогой. Прежняя
-   * схема брала пересечение мастера и услуги и заваливалась именно на этом.
-   */
-  private attributionAllowed(
-    target: AttributionTarget,
-    targets: AttributionTarget[],
-  ): { numbers: Set<string>; label: string } | null {
-    // Перечисление сущностей: число может быть их суммой, а сумму мы не считаем.
-    if (target.members.length > 1) {
-      return null;
-    }
-    const entity = target.members[0].entity;
-    if (entity.kind === 'staff') {
-      return { numbers: entity.numbers, label: entity.name };
-    }
-    const staffTargets = targets.filter(
-      (item) => item.kind === 'staff' && item.members.length === 1,
-    );
-    if (staffTargets.length === 0) {
-      return { numbers: entity.numbers, label: entity.name };
-    }
-    if (staffTargets.length > 1) {
-      // Два мастера в одной клаузе — чья это услуга, не определить.
-      return null;
-    }
-    const owner = staffTargets[0].members[0].entity;
-    const scoped = entity.byOwner.get(owner.key);
-    const label = `${owner.name} → ${entity.name}`;
-    if (scoped) {
-      return { numbers: new Set([...owner.numbers, ...scoped]), label };
-    }
-    // Разрез по услугам у мастера есть, а этой услуги в нём нет — значит она
-    // не его. Разреза нет вовсе — судить не по чему, и услуга отвечает за свой
-    // общий набор.
-    return owner.detailed
-      ? { numbers: owner.numbers, label }
-      : {
-          numbers: new Set([...owner.numbers, ...entity.numbers]),
-          label,
-        };
-  }
-
-  private entityNamePattern(name: string): RegExp | null {
-    const words = name
-      .toLowerCase()
-      .replace(/ё/g, 'е')
-      .split(/[^\p{L}\p{N}]+/u)
-      .filter((word) => word.length > 0);
-    if (words.length === 0) {
-      return null;
-    }
-    const parts = words.map((word) => {
-      let stem = word;
-      for (let drop = 0; drop < 2; drop += 1) {
-        if (stem.length <= 3 || !/[аеиоуыэюяйь]$/.test(stem)) break;
-        stem = stem.slice(0, -1);
-      }
-      const escaped = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return `${escaped}[а-яa-z]{0,3}`;
-    });
-    try {
-      return new RegExp(
-        `(?<![а-яa-z])${parts.join('[\\s\\-]+')}(?![а-яa-z])`,
-        'giu',
-      );
-    } catch {
-      return null;
-    }
-  }
-
-  /**
-   * Все вхождения чисел с позициями — без склейки одинаковых значений.
-   *
-   * groundingClaims оставляет от повторов только первое вхождение: для сверки
-   * происхождения этого достаточно, а для привязки — нет. Одно и то же «19»
-   * может стоять и у Ильи (верно), и у Стаса (нет).
-   */
-  private numberOccurrences(
-    text: string,
-  ): Array<{ value: string; index: number; end: number }> {
-    const seen = new Set<string>();
-    const found: Array<{ value: string; index: number; end: number }> = [];
-    const remember = (
-      raw: string | undefined,
-      index: number,
-      requireLarge: boolean,
-    ) => {
-      const normalized = this.normalizeGroundingNumber(raw);
-      if (normalized === null) return;
-      if (requireLarge && Math.abs(Number(normalized)) <= 10) return;
-      const key = `${normalized}@${index}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      // Конец вхождения нужен привязке: расстояние до имени СПРАВА считается от
-      // последней цифры, иначе «142 у Стаса» мерилось бы от первой.
-      found.push({ value: normalized, index, end: index + (raw?.length ?? 0) });
-    };
-    for (const match of text.matchAll(GROUNDING_NUMBER_PATTERN)) {
-      remember(match[0], match.index ?? 0, true);
-    }
-    for (const match of text.matchAll(GROUNDING_SMALL_METRIC_PATTERN)) {
-      const index = match.index ?? 0;
-      // «−18 записей» ловится обоими шаблонами: первым со знаком, вторым без.
-      // Это одно и то же место в тексте, и в аудите оно должно быть одной
-      // строкой, а не парой «-18» и «18».
-      if (
-        seen.has(
-          `-${this.normalizeGroundingNumber(match.groups?.number)}@${index - 1}`,
-        )
-      ) {
-        continue;
-      }
-      remember(match.groups?.number, index, false);
-    }
-    return found;
-  }
-
-  /**
    * То же значение в другой единице измерения.
    *
    * Разрешаем ровно два перевода, оба однозначные и присутствующие в данных
@@ -3461,41 +2574,6 @@ export class AiCoreService {
    * перед числом. Дальше по предложению могут идти другие показатели со своим
    * направлением, поэтому окно узкое.
    */
-  /**
-   * Включена ли сверка привязки числа к сущности.
-   *
-   * 🔴 Включена по умолчанию — но только после того, как замер показал НОЛЬ
-   * ложных тревог. Прежний разбор бракова́л 7 верных ответов из 31 (22,6%), и с
-   * таким счётом сторож вредил больше, чем помогал: каждый пятый разбор
-   * подменялся шаблоном. После перехода на «ближайшее имя в клаузе в любую
-   * сторону» замер на 58 ответах (46 верных + 12 подмен) дал 0 ложных тревог
-   * при 10 пойманных подменах из 12 — см. `describe('сверка привязки числа к
-   * сущности — замер')` в спеке, набор там же.
-   * `AI_CORE_ATTRIBUTION_GUARD=false` глушит сверку без выката, если на живом
-   * трафике всплывёт формулировка, которую разбор не понимает.
-   */
-  private attributionGuardEnabled(): boolean {
-    // 🔴 Снова ВЫКЛЮЧЕНА по умолчанию. Замер на собственном наборе дал ноль
-    // ложных тревог, но независимый ревизор на СВОЁМ наборе получил две — и
-    // главное, нашёл целый класс, который набор не покрывал: год из даты
-    // привязывается к мастеру («За август 2026 у Дмитрия 118 записей» → «2026
-    // это не данные Дмитрия»), семь ложных тревог из восьми фраз с годом.
-    //
-    // Плюс структурное ограничение: числа сущности лежат плоским множеством,
-    // поэтому перестановка метрик ВНУТРИ одного мастера проходит молча — «у
-    // Дмитрия 76 отмен», где 76 это его стрижки. А это и есть самая частая
-    // ошибка. Сторож, который ловит редкое и пропускает частое, ценой ложных
-    // тревог покупать нельзя: они возвращают владельцу шаблоны.
-    //
-    // Чинится сверкой на уровне МЕТРИКИ, а не сущности. До тех пор — opt-in.
-    return (
-      this.configService
-        .get<string>('AI_CORE_ATTRIBUTION_GUARD')
-        ?.trim()
-        .toLowerCase() === 'true'
-    );
-  }
-
   private directionConflict(
     reply: string,
     claim: { value: string; index: number },
@@ -3519,6 +2597,50 @@ export class AiCoreService {
     return actual === 'negative'
       ? GROWTH_WORD_PATTERN.test(window)
       : DECLINE_WORD_PATTERN.test(window);
+  }
+
+  /**
+   * Все вхождения чисел с позициями — без склейки одинаковых значений.
+   *
+   * Крупные числа берём по строгому шаблону, мелкие — только рядом с единицей
+   * измерения: «17 записей» это показатель, а «17» в дате — нет.
+   */
+  private numberOccurrences(
+    text: string,
+  ): Array<{ value: string; index: number }> {
+    const seen = new Set<string>();
+    const found: Array<{ value: string; index: number }> = [];
+    const remember = (
+      raw: string | undefined,
+      index: number,
+      requireLarge: boolean,
+    ) => {
+      const normalized = this.normalizeGroundingNumber(raw);
+      if (normalized === null) return;
+      if (requireLarge && Math.abs(Number(normalized)) <= 10) return;
+      const key = `${normalized}@${index}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      found.push({ value: normalized, index });
+    };
+    for (const match of text.matchAll(GROUNDING_NUMBER_PATTERN)) {
+      remember(match[0], match.index ?? 0, true);
+    }
+    for (const match of text.matchAll(GROUNDING_SMALL_METRIC_PATTERN)) {
+      const index = match.index ?? 0;
+      // «−18 записей» ловится обоими шаблонами: первым со знаком, вторым без.
+      // Это одно и то же место в тексте, и в аудите оно должно быть одной
+      // строкой, а не парой «-18» и «18».
+      if (
+        seen.has(
+          `-${this.normalizeGroundingNumber(match.groups?.number)}@${index - 1}`,
+        )
+      ) {
+        continue;
+      }
+      remember(match.groups?.number, index, false);
+    }
+    return found;
   }
 
   private groundingClaims(

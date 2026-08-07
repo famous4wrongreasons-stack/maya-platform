@@ -1,214 +1,74 @@
-# Maya Brain v1
+# Maya Brain
 
 ## Status
 
-Maya Brain v1 is the first production-shaped orchestration slice over the
-existing AI Core. It is additive, disabled by default, and can be enabled for
-the native channel without changing the production PWA path.
+Maya Brain is **one router**. It picks the persona (`director` / `admin`) and
+the intent for a turn, and that is all. It runs unconditionally: no feature
+flag, no surface allowlist, no tenant allowlist, no database write.
 
-This slice is not the complete universal analytics architecture from PR #21.
-It establishes the safe routing, memory, knowledge, prompt and plan contracts
-that later analytical vertical slices can reuse.
+Everything else that once lived here — eight prompt profiles, a prompt
+registry, a step plan with statuses, a four-switch preference memory, an
+encrypted knowledge base with citations, per-turn session rows, the
+`/api/ai/brain/*` endpoints and a second provider switch — was removed on
+2026-08-07 after a measurement pass.
 
-## Runtime flow
+## Why it shrank
+
+| Removed | Measured reason |
+|---|---|
+| 8 prompt profiles + registry | One question routed through all eight profiles changed the model input by **2 lines out of 17 443 characters**. The persona split (216 lines) did all the real work. |
+| Plan with step statuses | Written on every turn, read by nobody except the cleanup job. |
+| Preference memory (4 switches) | Empty in production. |
+| Knowledge base + citations | Empty in production, and analytical questions never routed into it. |
+| `AiBrainSession` rows | Session identity already exists in the auth session; the row only carried the plan. |
+| Activation gate (`MAYA_BRAIN_V1_ENABLED` / `_SURFACES` / `_TENANT_IDS`) | Off by default, so the owner received the **client** persona. |
+| `MAYA_BRAIN_PROVIDER` | 🔴 A second provider switch that overrode `AI_CORE_PROVIDER` **only where the brain was active** — the native channel. An empty value there meant "no model" precisely where the brain was being switched on. |
+
+## What remains
 
 ```mermaid
 sequenceDiagram
-  participant Native as Native channel
+  participant Channel as Channel
   participant Core as AI Core
-  participant Brain as Maya Brain
-  participant Memory as Safe memory
-  participant Knowledge as Tenant knowledge
+  participant Router as Maya Brain router
   participant Policy as Tool policy
   participant Model as Model adapter
 
-  Native->>Core: bounded messages + opaque session ID
+  Channel->>Core: bounded messages
   Core->>Core: redact PII
-  Core->>Brain: actor, tenant, role, surface, redacted message
-  Brain->>Brain: route intent and profile
-  Brain->>Memory: read or update allowlisted preferences
-  Brain->>Knowledge: retrieve role-visible encrypted chunks
-  Brain-->>Core: safe context + structured plan + citation IDs
+  Core->>Router: role + redacted latest message
+  Router-->>Core: persona + intent (synchronous, no I/O)
   Core->>Policy: list role-allowed tools
-  Core->>Model: safe context + allowed tools
-  Model-->>Core: one tool call or answer + exact citation IDs
+  Core->>Model: persona prompt + allowed tools + tool results
+  Model-->>Core: one tool call or an answer
   Core->>Policy: validate or request approval
-  Core-->>Native: answer + plan + citations + action card
+  Core-->>Channel: answer + grounding report + action card
 ```
 
-## Implemented contracts
+`MayaBrainRouterService.route(role, text)` returns exactly:
 
-### Router and profiles
-
-The deterministic router classifies a bounded set of intents and selects one
-logical profile over the shared core:
-
-- Maya OS;
-- Maya Admin;
-- Maya Consult;
-- Maya Finance;
-- Maya Analytics;
-- Maya Marketing;
-- Maya HR;
-- Maya Assistant.
-
-Profiles do not grant permissions. The authenticated membership, role,
-entitlements and typed tool registry remain the authorization boundary.
-
-### Structured plan state
-
-`AiBrainSession` stores only:
-
-- a one-way hash of the client session key;
-- tenant and authenticated actor relation;
-- selected profile and intent;
-- bounded step keys and statuses;
-- technical request ID, counters and expiry.
-
-Raw messages, model reasoning and chain-of-thought are not stored.
-
-### Safe preference memory
-
-`AiMemoryFact` accepts only explicit enum preferences:
-
-- compact or detailed replies;
-- emoji on or off;
-- formal or informal address;
-- Russian or English.
-
-Values are encrypted at rest. Every fact has source, confidence, retention and
-expiry. The current user can inspect and forget their preferences. Arbitrary
-conversation text, names, phones, emails and free-form notes are rejected by
-the contract.
-
-### Tenant knowledge
-
-Owners and authorized managers can add encrypted tenant knowledge sources.
-Sources have role audiences and are split into bounded encrypted chunks.
-Retrieval is tenant-scoped and role-filtered.
-
-The model may cite only exact IDs supplied by retrieval. Invented citation IDs
-fail closed. A procedural question without a matching source receives an
-explicit no-source answer instead of a hallucination.
-
-This first version uses deterministic lexical retrieval. Vector search,
-document parsing and external knowledge connectors are intentionally deferred.
-
-### Prompt registry
-
-Profile prompts are selected from a code-versioned registry. The current
-version is `maya-brain-v1.0.0`. Provider-specific model adapters consume the
-same safe Brain context and typed tool contracts.
-
-## API
-
-- `POST /api/ai/chat` accepts optional `brainSessionId`.
-- `GET /api/ai/brain/memory` lists the current user's safe preferences.
-- `DELETE /api/ai/brain/memory` forgets the current user's memory.
-- `GET /api/ai/brain/knowledge` lists tenant knowledge for managers.
-- `POST /api/ai/brain/knowledge` creates an encrypted source.
-- `DELETE /api/ai/brain/knowledge/:sourceId` archives a source.
-
-## Canary and rollback
-
-Configuration:
-
-```dotenv
-MAYA_BRAIN_V1_ENABLED="false"
-MAYA_BRAIN_V1_SURFACES="native"
-MAYA_BRAIN_V1_TENANT_IDS=""
-# ⚠️ "safe" means "no model at all", not "a safer model". Because this value
-# overrides AI_CORE_PROVIDER only while a Brain session is active, the former
-# default switched the model off on exactly the channel the canary enabled.
-# Leave it empty to inherit AI_CORE_PROVIDER, or name a provider explicitly.
-MAYA_BRAIN_PROVIDER=""
-AI_BRAIN_SESSION_TTL_HOURS="24"
-AI_BRAIN_MEMORY_RETENTION_DAYS="180"
+```ts
+{ persona: 'director' | 'admin', intent: MayaBrainIntent }
 ```
 
-The safe rollout is:
+- **persona** — clients and customers get `admin`, everyone else gets
+  `director`. This selects one of two persona prompts in the model adapter.
+- **intent** — one of `booking`, `schedule_management`, `business_analytics`,
+  `finance`, `staff_operations`, `marketing`, `knowledge`, `catalog`,
+  `loyalty`, `support`, `general`. AI Core uses it to decide whether a question
+  must be grounded in verified analytics before the model may answer.
 
-1. deploy the additive migration and code with Brain disabled;
-2. verify health, migrations and legacy AI Core traffic;
-3. enable `MAYA_BRAIN_V1_ENABLED=true`, keep `native` as the only surface and
-   add the internal tenant UUID to `MAYA_BRAIN_V1_TENANT_IDS`;
-4. run native role, citation, memory and approval canaries;
-5. disable the flag immediately if the canary regresses.
+Both values are reported in the chat response under `brain` and in the audit
+trail as `brain_persona` / `brain_intent`.
 
-When Brain is disabled, the model receives the previous system prompt and
-legacy response schema. No Brain session, memory or knowledge rows are written.
-The production PWA source is not modified by this slice.
+## Database
 
-The tenant allowlist is mandatory and fails closed. An empty allowlist keeps
-Brain on the legacy path even when the global flag is enabled, so a native
-canary cannot silently expand to every tenant.
+The tables `AiBrainSession`, `AiMemoryFact`, `AiKnowledgeSource` and
+`AiKnowledgeChunk` still exist in the schema. Nothing reads or writes them any
+more. Dropping them is a one-way door and is deliberately left as a separate
+decision; `scripts/ai-runtime-maintenance.ts` continues to drain expired rows.
 
-`MAYA_BRAIN_PROVIDER` overrides `AI_CORE_PROVIDER` only for active Brain
-sessions. This allows a native canary to use `deepseek` or `openai` while the
-legacy web/PWA chat remains in `safe` mode. An empty value inherits the legacy
-provider; production canaries should set it explicitly.
+## Configuration
 
-## Retention
-
-`npm run ai:maintenance` removes expired Brain sessions and expired or
-user-forgotten memory facts in bounded batches. Dry-run remains the default and
-does not print payloads.
-
-## Salon economics: profit, expenses and the cost of a new client
-
-Profit has exactly one honest source, the `analytics.business.profit` tool over
-`OperationsAnalyticsService.getBusinessProfitability`. It is deliberately not a
-field of the operational overview.
-
-- Profit is till-confirmed cash from CRM financial transactions minus a
-  COMPLETE expense ledger. Booked appointment prices are never used: booked is
-  not paid.
-- Completeness has three states, not two. `complete`, `incomplete` (the
-  category is absent), and `understated` (the category exists but its amount is
-  implausibly small against the confirmed cash of the same period — see
-  `MIN_PLAUSIBLE_EXPENSE_SHARE_OF_CONFIRMED_REVENUE`). One kopeck of rent must
-  never unlock a profit figure that is almost equal to revenue.
-- Salary comes ONLY from the CRM payroll calculation and never from a manual
-  expense. Manual entry of payroll is blocked in the category dictionary, so
-  its absence is reported as its own reason (`payroll`), never as an item in
-  `missing_categories`. Anything listed there is something the owner can
-  actually record, which is what MAYA offers to do.
-- Return on advertising does not exist in any source and stays in
-  `unavailable_metrics`. The nearest honest metric is the cost of a new client:
-  advertising spend divided by the new guests of the period within the cohort
-  lookback window.
-
-`GET /analytics/business` keeps its previous `net` field for tenants on the
-internal calendar. The cabinet is deployed separately and renders a «Чистыми»
-card from that array; an empty array reads as «0 ₽». The AI layer calls
-`getBusinessOverview` directly and still sees no profit there.
-
-Named calendar months («в июле», «за март») are a first-class reporting period
-(`named_month` plus `month` as `YYYY-MM`) resolved by the server in the tenant
-timezone. A month still running is counted up to today and the answer says so.
-
-## Security invariants
-
-- Tenant IDs come from authenticated server context, never model output.
-- Session keys are hashed before persistence.
-- Knowledge and memory values are encrypted at rest.
-- Knowledge ingestion rejects obvious PII and credential patterns.
-- Role filtering happens before knowledge reaches the model.
-- PII redaction happens before Brain and provider calls.
-- Tools, approvals, idempotency and audit remain deterministic backend
-  boundaries.
-- Audit stores technical metadata, profile, intent, citation count and memory
-  keys, never conversation or knowledge content.
-
-## Deliberately deferred
-
-- CRM-independent canonical analytics and the period-comparison slice from PR
-  #21;
-- vector embeddings and rich file ingestion;
-- customer, staff and business free-form memories;
-- long-running autonomous plans and background agents;
-- Telegram, voice and production PWA cutover;
-- tenant-editable prompt versions and an eval promotion UI.
-
-These are separate vertical slices and must keep the same feature-flag,
-tenant-isolation and rollback discipline.
+None. The router reads no environment variable. The only AI provider switch is
+`AI_CORE_PROVIDER`.

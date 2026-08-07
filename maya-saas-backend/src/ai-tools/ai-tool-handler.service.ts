@@ -8,9 +8,9 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { UserRole } from '../common/domain.enums';
+import { CustomersService } from '../customers/customers.service';
 import { CrmService } from '../crm/crm.service';
 import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
-import { CustomersService } from '../customers/customers.service';
 import {
   findExpenseCategory,
   resolveExpenseCategory,
@@ -113,10 +113,6 @@ const STAFF_CONFIRMED_REVENUE_UNAVAILABLE = {
 
 @Injectable()
 export class AiToolHandlerService {
-  private readonly businessYearComparisonCache = new Map<
-    string,
-    { expiresAt: number; value: unknown }
-  >();
   private readonly businessQueryCache = new Map<
     string,
     { expiresAt: number; value: unknown }
@@ -132,9 +128,9 @@ export class AiToolHandlerService {
     private readonly loyaltyService: LoyaltyService,
     private readonly analyticsService: OperationsAnalyticsService,
     private readonly expensesService: ExpensesService,
+    private readonly prisma: PrismaService,
     private readonly customersService: CustomersService,
     private readonly staffService: StaffService,
-    private readonly prisma: PrismaService,
   ) {}
 
   async execute(
@@ -144,50 +140,30 @@ export class AiToolHandlerService {
     idempotencyKey: string,
   ): Promise<unknown> {
     switch (toolName) {
-      case 'catalog.services.read':
-        return this.readServices(principal.tenantId);
       case 'catalog.staff.read':
         return this.readStaff(principal.tenantId);
+      case 'customers.count':
+        return this.customersService.countCustomers(principal.tenantId);
+      case 'catalog.services.read':
+        return this.readServices(principal.tenantId);
       case 'booking.availability.read':
         return this.readAvailability(principal.tenantId, args);
       case 'appointments.own.list':
         return this.listOwnAppointments(principal);
       case 'loyalty.own.read':
         return this.readOwnLoyalty(principal);
-      case 'analytics.employee.read': {
-        const query = await this.reportingQuery(principal.tenantId, args);
-        const internal = await this.readEmployeeAnalytics(principal, query);
-        return this.publishAnalytics(
-          internal,
-          this.employeeStaffScope(internal),
-        );
-      }
       case 'analytics.employee.query':
         return this.queryEmployeeAnalytics(principal, args);
-      case 'analytics.business.read': {
-        const query = await this.reportingQuery(principal.tenantId, args);
-        const internal = await this.readBusinessAnalytics(principal, query);
-        return this.publishAnalytics(
-          internal,
-          this.businessStaffScope(principal, internal),
-        );
-      }
       case 'analytics.business.query':
         return this.queryBusinessAnalytics(principal, args);
-      case 'analytics.business.compare_years':
-        return this.compareBusinessYears(principal);
       case 'analytics.business.profit':
         return this.readBusinessProfit(principal, args);
       case 'expenses.read':
         return this.readExpenses(principal.tenantId, args);
       case 'expenses.create':
         return this.createExpense(principal, args, idempotencyKey);
-      case 'customers.count':
-        return this.customersService.countCustomers(principal.tenantId);
       case 'appointments.own.cancel':
         return this.cancelOwnAppointment(principal, args);
-      case 'appointments.own.preview':
-        return this.previewOwnAppointment(principal, args);
       case 'appointments.own.create':
         return this.createOwnAppointment(principal, args);
       case 'appointments.own.reschedule':
@@ -225,6 +201,13 @@ export class AiToolHandlerService {
     };
   }
 
+  /**
+   * Обезличенный список мастеров для записи.
+   *
+   * Ярлыки specialist_N вместо имён: это единственный список, доступный ГОСТЮ,
+   * а гостю знать состав смены поимённо незачем. Владельцу имена приходят из
+   * аналитики, где они уместны.
+   */
   private async readStaff(tenantId: string) {
     const staff = await this.staffService.listStaff(tenantId);
     return {
@@ -1481,214 +1464,6 @@ export class AiToolHandlerService {
       );
   }
 
-  private async compareBusinessYears(principal: AiToolPrincipal) {
-    const cached = this.businessYearComparisonCache.get(principal.tenantId);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
-    }
-    if (cached) {
-      this.businessYearComparisonCache.delete(principal.tenantId);
-    }
-
-    const ranges = await this.businessYearComparisonRanges(principal.tenantId);
-    const [currentSummary, previousSummary, clientAnalytics] =
-      await Promise.all([
-        this.crmService.getRevenueSummary(principal.tenantId, ranges.current),
-        this.crmService.getRevenueSummary(principal.tenantId, ranges.previous),
-        this.businessYearClientComparison(principal.tenantId, ranges),
-      ]);
-    const currentRevenue = this.record(currentSummary.revenue);
-    const previousRevenue = this.record(previousSummary.revenue);
-    const currentTotal = this.safeMoneyAmount(currentRevenue.total);
-    const previousTotal = this.safeMoneyAmount(previousRevenue.total);
-    const currentTransactions = this.optionalMetricNumber(
-      currentRevenue.transaction_count,
-    );
-    const previousTransactions = this.optionalMetricNumber(
-      previousRevenue.transaction_count,
-    );
-    const comparableMoney =
-      currentTotal !== null &&
-      previousTotal !== null &&
-      currentTotal.currency === previousTotal.currency;
-    const revenueDeltaKopecks = comparableMoney
-      ? currentTotal.amount_kopecks - previousTotal.amount_kopecks
-      : null;
-    const transactionDelta =
-      currentTransactions !== null && previousTransactions !== null
-        ? currentTransactions - previousTransactions
-        : null;
-
-    const result = {
-      comparison: 'current_year_to_date_vs_previous_year_same_period',
-      timezone: ranges.timezone,
-      verified:
-        currentSummary.verified === true && previousSummary.verified === true,
-      periods: {
-        current: {
-          year: ranges.currentYear,
-          from: ranges.current.from,
-          to: ranges.current.to,
-          start_day: 1,
-          start_month: 1,
-          end_day: ranges.currentEndDay,
-          end_month: ranges.currentEndMonth,
-        },
-        previous: {
-          year: ranges.previousYear,
-          from: ranges.previous.from,
-          to: ranges.previous.to,
-          start_day: 1,
-          start_month: 1,
-          end_day: ranges.previousEndDay,
-          end_month: ranges.previousEndMonth,
-        },
-      },
-      revenue: {
-        current: currentTotal,
-        previous: previousTotal,
-        delta:
-          revenueDeltaKopecks === null || !currentTotal
-            ? null
-            : {
-                currency: currentTotal.currency,
-                amount_kopecks: revenueDeltaKopecks,
-                amount_major_units: this.majorUnits(revenueDeltaKopecks),
-              },
-        percent_change:
-          comparableMoney && previousTotal
-            ? this.percentageDelta(
-                currentTotal.amount_kopecks,
-                previousTotal.amount_kopecks,
-              )
-            : null,
-      },
-      transactions: {
-        current: currentTransactions,
-        previous: previousTransactions,
-        delta: transactionDelta,
-        percent_change:
-          currentTransactions !== null && previousTransactions !== null
-            ? this.percentageDelta(currentTransactions, previousTransactions)
-            : null,
-      },
-      clients: clientAnalytics,
-      warning_codes: [
-        ...new Set([
-          ...this.safeWarningCodes(currentSummary.warnings),
-          ...this.safeWarningCodes(previousSummary.warnings),
-        ]),
-      ],
-    };
-    if (result.verified && result.clients.verified) {
-      this.businessYearComparisonCache.set(principal.tenantId, {
-        expiresAt: Date.now() + 5 * 60 * 1_000,
-        value: result,
-      });
-    }
-    return result;
-  }
-
-  private async businessYearClientComparison(
-    tenantId: string,
-    ranges: {
-      current: { from: string; to: string };
-      previous: { from: string; to: string };
-    },
-  ) {
-    try {
-      const [currentOverview, previousOverview] = await Promise.all([
-        this.analyticsService.getBusinessOverview(tenantId, ranges.current),
-        this.analyticsService.getBusinessOverview(tenantId, ranges.previous),
-      ]);
-      const current = this.record(currentOverview);
-      const previous = this.record(previousOverview);
-      const currentAppointments = this.record(current.appointments);
-      const previousAppointments = this.record(previous.appointments);
-      const currentClients = this.optionalMetricNumber(
-        currentAppointments.unique_clients,
-      );
-      const previousClients = this.optionalMetricNumber(
-        previousAppointments.unique_clients,
-      );
-      const sourceCurrent =
-        current.data_source === 'crm' || current.data_source === 'maya'
-          ? current.data_source
-          : null;
-      const sourcePrevious =
-        previous.data_source === 'crm' || previous.data_source === 'maya'
-          ? previous.data_source
-          : null;
-      const verified =
-        currentClients !== null &&
-        previousClients !== null &&
-        sourceCurrent !== null &&
-        sourceCurrent === sourcePrevious;
-      const delta = verified ? currentClients - previousClients : null;
-
-      return {
-        verified,
-        source: sourceCurrent === sourcePrevious ? sourceCurrent : null,
-        definition: 'identified_unique_clients_with_non_cancelled_appointments',
-        current: verified ? currentClients : null,
-        previous: verified ? previousClients : null,
-        delta,
-        percent_change:
-          verified && previousClients !== null
-            ? this.percentageDelta(currentClients, previousClients)
-            : null,
-      };
-    } catch {
-      return {
-        verified: false,
-        source: null,
-        definition: 'identified_unique_clients_with_non_cancelled_appointments',
-        current: null,
-        previous: null,
-        delta: null,
-        percent_change: null,
-      };
-    }
-  }
-
-  private async businessYearComparisonRanges(tenantId: string) {
-    const timezone = await this.reportingTimezone(tenantId);
-    const now = new Date();
-    const local = this.localDateTime(now, timezone);
-    const currentYear = Number(local.date.slice(0, 4));
-    const previousYear = currentYear - 1;
-    const previousDate = this.sameLocalDateInYear(local.date, previousYear);
-    const previousTo = new Date(
-      localDateMinuteToUtc(
-        previousDate,
-        local.hour * 60 + local.minute,
-        timezone,
-      ).getTime() +
-        local.second * 1_000 +
-        now.getUTCMilliseconds(),
-    );
-    const currentFromDate = `${currentYear}-01-01`;
-    const previousFromDate = `${previousYear}-01-01`;
-
-    return {
-      timezone,
-      currentYear,
-      previousYear,
-      current: {
-        from: localDateMinuteToUtc(currentFromDate, 0, timezone).toISOString(),
-        to: now.toISOString(),
-      },
-      previous: {
-        from: localDateMinuteToUtc(previousFromDate, 0, timezone).toISOString(),
-        to: previousTo.toISOString(),
-      },
-      currentEndDay: Number(local.date.slice(8, 10)),
-      currentEndMonth: Number(local.date.slice(5, 7)),
-      previousEndDay: Number(previousDate.slice(8, 10)),
-      previousEndMonth: Number(previousDate.slice(5, 7)),
-    };
-  }
-
   private localDateTime(value: Date, timezone: string) {
     const parts = Object.fromEntries(
       new Intl.DateTimeFormat('en', {
@@ -2226,18 +2001,6 @@ export class AiToolHandlerService {
     return this.safeAppointmentOutput(result);
   }
 
-  private async previewOwnAppointment(
-    principal: AiToolPrincipal,
-    args: ValidatedAiToolArguments,
-  ) {
-    const result = await this.appointmentsService.previewForClient(
-      principal.tenantId,
-      principal.userId,
-      this.bookingDto(args),
-    );
-    return this.safeAppointmentPreview(result);
-  }
-
   private async createOwnAppointment(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
@@ -2524,36 +2287,6 @@ export class AiToolHandlerService {
     const result = this.record(value);
     const appointment = this.recordOrNull(result.appointment);
     return this.safeAppointment(appointment ?? result);
-  }
-
-  private safeAppointmentPreview(value: unknown) {
-    const result = this.record(value);
-    const slot = this.recordOrNull(result.slot);
-    return {
-      ok: result.ok ?? null,
-      preview: result.preview ?? null,
-      mode: result.mode ?? null,
-      branch_id: result.branch_id ?? null,
-      branch_timezone: result.branch_timezone ?? null,
-      staff_id: result.staff_id ?? null,
-      service_ids: Array.isArray(result.service_ids)
-        ? this.stringArray(result.service_ids)
-        : [],
-      requested_start: result.requested_start ?? null,
-      matched_slot_start: result.matched_slot_start ?? null,
-      slot: slot
-        ? {
-            start: slot.start ?? null,
-            end: slot.end ?? null,
-            staff_id: slot.staff_id ?? null,
-            branch_id: slot.branch_id ?? null,
-          }
-        : null,
-      total_price: result.total_price ?? null,
-      duration_minutes: result.duration_minutes ?? null,
-      currency: result.currency ?? null,
-      warnings: Array.isArray(result.warnings) ? result.warnings : [],
-    };
   }
 
   private bookingDto(args: ValidatedAiToolArguments) {

@@ -74,10 +74,9 @@ export class AiToolRegistryService {
     switch (toolName as MayaAiToolName) {
       case 'catalog.services.read':
       case 'catalog.staff.read':
+      case 'customers.count':
       case 'appointments.own.list':
       case 'loyalty.own.read':
-      case 'customers.count':
-      case 'analytics.business.compare_years':
         this.assertAllowedKeys(args, []);
         return {};
       case 'booking.availability.read':
@@ -108,8 +107,6 @@ export class AiToolRegistryService {
                 branch_id: this.assertExternalId(args.branch_id, 'branch_id'),
               }),
         };
-      case 'analytics.employee.read':
-      case 'analytics.business.read':
       case 'analytics.business.profit':
       case 'expenses.read':
         return this.parseReportingPeriod(args);
@@ -124,7 +121,6 @@ export class AiToolRegistryService {
             'appointment_id',
           ),
         };
-      case 'appointments.own.preview':
       case 'appointments.own.create':
         this.assertAllowedKeys(args, [
           'staff_id',

@@ -1,5 +1,4 @@
 import type { AiToolSurface } from './ai-tool.types';
-import type { MayaBrainContext } from '../ai-brain/maya-brain.types';
 
 export type AiCoreMessageRole = 'assistant' | 'user';
 export type AiCoreProvider = 'deepseek' | 'openai';
@@ -31,7 +30,6 @@ export interface AiCoreModelInput {
   toolResults: AiCoreToolResult[];
   allowToolCall: boolean;
   requiredToolNames: string[];
-  brain: MayaBrainContext;
   /**
    * Серверное «сейчас» в UTC. Без него модель не знает, какой сегодня день, и
    * при этом ей запрещено подставлять календарь самой — любой вопрос про
@@ -48,7 +46,6 @@ export interface AiCoreModelInput {
 
 export interface AiCoreModelDecision {
   reply: string;
-  citationIds: string[];
   toolCall: {
     name: string;
     arguments: Record<string, unknown>;

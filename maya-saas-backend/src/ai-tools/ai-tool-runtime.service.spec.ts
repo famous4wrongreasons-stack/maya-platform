@@ -27,7 +27,7 @@ describe('AiToolRuntimeService', () => {
 
   it('executes read-only tools directly and stores only encrypted results', async () => {
     const harness = createHarness();
-    harness.handlerExecute.mockResolvedValue({ customer_count: 7 });
+    harness.handlerExecute.mockResolvedValue({ services: [] });
     harness.executionFindUnique.mockResolvedValue(null);
     harness.executionCreate.mockResolvedValue({ id: 'execution-a' });
 
@@ -36,7 +36,7 @@ describe('AiToolRuntimeService', () => {
       () =>
         harness.runtime.execute(
           { ...customer, role: UserRole.TENANT_OWNER },
-          'customers.count',
+          'catalog.services.read',
           { arguments: {}, surface: 'web' },
         ),
     );
@@ -44,7 +44,7 @@ describe('AiToolRuntimeService', () => {
     expect(result).toMatchObject({
       status: 'completed',
       execution_id: 'execution-a',
-      result: { customer_count: 7 },
+      result: { services: [] },
       replayed: false,
     });
     expect(harness.approvalCreate).not.toHaveBeenCalled();

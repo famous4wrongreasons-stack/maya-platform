@@ -1,15 +1,5 @@
 import type { AiCorePersona } from '../ai-tools/ai-core.types';
 
-export type MayaBrainProfile =
-  | 'maya_os'
-  | 'maya_admin'
-  | 'maya_consult'
-  | 'maya_finance'
-  | 'maya_analytics'
-  | 'maya_marketing'
-  | 'maya_hr'
-  | 'maya_assistant';
-
 export type MayaBrainIntent =
   | 'booking'
   | 'schedule_management'
@@ -23,47 +13,17 @@ export type MayaBrainIntent =
   | 'support'
   | 'general';
 
-export interface MayaBrainPlanStep {
-  key: string;
-  status: 'pending' | 'ready' | 'completed' | 'blocked';
-}
-
-export interface MayaBrainPlan {
-  status: 'active' | 'awaiting_approval' | 'completed' | 'blocked';
-  steps: MayaBrainPlanStep[];
-}
-
-export interface MayaBrainMemoryPreference {
-  key: 'response_detail' | 'emoji' | 'address_form' | 'language';
-  value: string;
-}
-
-export interface MayaBrainKnowledgeItem {
-  citationId: string;
-  sourceId: string;
-  title: string;
-  excerpt: string;
-}
-
+/**
+ * Всё, что мозг MAYA решает до обращения к модели.
+ *
+ * 🔴 Ровно два поля, и оба меняют ответ по-настоящему. `persona` разводит
+ * директора и администратора — это 216 строк разницы в промпте. `intent`
+ * определяет, поедет ли вопрос в аналитику. Профили, план со статусами, память
+ * предпочтений и база знаний из этой структуры убраны: прогон показал, что все
+ * восемь профилей давали разницу во входе модели в две строки из 17 443, план
+ * никто не читал, а память и база знаний стояли пустыми.
+ */
 export interface MayaBrainRoute {
   persona: AiCorePersona;
-  profile: MayaBrainProfile;
   intent: MayaBrainIntent;
-  knowledgeRequired: boolean;
-  plan: MayaBrainPlan;
-}
-
-export interface MayaBrainContext extends MayaBrainRoute {
-  active: boolean;
-  sessionId: string;
-  promptVersion: string;
-  profileInstructions: string;
-  preferences: MayaBrainMemoryPreference[];
-  knowledge: MayaBrainKnowledgeItem[];
-}
-
-export interface MayaBrainCitation {
-  id: string;
-  source_id: string;
-  title: string;
 }

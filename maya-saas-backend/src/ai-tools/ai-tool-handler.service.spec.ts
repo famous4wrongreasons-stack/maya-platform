@@ -2,11 +2,9 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { UserRole } from '../common/domain.enums';
-import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -340,19 +338,20 @@ describe('AiToolHandlerService output minimization', () => {
     } as unknown as OperationsAnalyticsService;
     const service = createService({ analyticsService });
     const result = await service.execute(
-      'analytics.employee.read',
+      'analytics.employee.query',
       { ...principal, role: UserRole.EMPLOYEE },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
+        comparison: 'none',
       },
       'execution-d',
     );
 
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
     expect(JSON.stringify(result)).not.toContain('Анна');
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       revenue: [
         {
           amount_kopecks: 300_000,
@@ -395,9 +394,9 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService, prisma });
 
     await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
-      { period: 'month_to_date' },
+      { period: 'month_to_date', comparison: 'none' },
       'execution-period',
     );
 
@@ -471,17 +470,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-finance',
     );
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       data_source: 'crm',
       revenue: [
         {
@@ -541,17 +541,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.MANAGER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
+        comparison: 'none',
       },
       'execution-manager-finance',
     );
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       appointments: { total: 3 },
       revenue: [],
       expenses: [],
@@ -650,17 +651,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-owner-staff-payroll',
     );
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         {
           name: 'Стас',
@@ -740,18 +742,19 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.MANAGER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
+        comparison: 'none',
       },
       'execution-manager-staff-payroll',
     );
 
     // Управляющий видит разрез по мастерам поимённо, но не их деньги.
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         {
           name: 'Стас',
@@ -848,17 +851,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = await service.execute(
-      'analytics.employee.read',
+      'analytics.employee.query',
       { ...principal, userId: 'employee-user', role: UserRole.STAFF },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-employee-own-payroll',
     );
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         {
           name: 'Илья',
@@ -939,18 +943,19 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
         period: 'custom',
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-owner-payroll-range',
     );
 
     // 🔴 Ноль здесь читался бы как «мастеру ничего не начислено».
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         {
           name: 'Стас',
@@ -1001,17 +1006,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService, prisma });
 
     const result = await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
+        comparison: 'none',
       },
       'execution-owner-internal-payroll',
     );
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         {
           name: 'Стас',
@@ -1085,37 +1091,17 @@ describe('AiToolHandlerService output minimization', () => {
     );
   });
 
-  it('compares equal year-to-date periods and calculates deltas on the server', async () => {
+  /**
+   * 🔴 Год к году считает та же query-версия, что и всё остальное.
+   *
+   * Отдельный `analytics.business.compare_years` отдавал ровно три числа —
+   * выручку, число операций и клиентов — и по ним нельзя было ни объяснить
+   * причину, ни назвать мастера. Здесь проверяется, что при
+   * `previous_year_same_period` сервер сам разрешает ОБА окна в часовом поясе
+   * салона: текущий год с 1 января по «сейчас» и тот же отрезок годом раньше.
+   */
+  it('resolves both year-to-date windows on the server for a year-over-year query', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:34:56.789Z'));
-    const getRevenueSummary = jest
-      .fn()
-      .mockResolvedValueOnce({
-        source: 'external_crm',
-        provider: 'yclients',
-        verified: true,
-        period: {},
-        revenue: {
-          status: 'available',
-          verified: true,
-          transaction_count: 120,
-          total: { currency: 'RUB', amount_kopecks: 15_000_000 },
-        },
-        warnings: [],
-      })
-      .mockResolvedValueOnce({
-        source: 'external_crm',
-        provider: 'yclients',
-        verified: true,
-        period: {},
-        revenue: {
-          status: 'available',
-          verified: true,
-          transaction_count: 100,
-          total: { currency: 'RUB', amount_kopecks: 10_000_000 },
-        },
-        warnings: [],
-      });
-    const crmService = { getRevenueSummary } as unknown as CrmService;
     const prisma = {
       tenant: {
         findUnique: jest
@@ -1128,38 +1114,40 @@ describe('AiToolHandlerService output minimization', () => {
       .fn()
       .mockResolvedValueOnce({
         data_source: 'crm',
-        appointments: { unique_clients: 80 },
+        period: { from: 'from', to: 'to', timezone: 'Europe/Moscow' },
+        appointments: { total: 120, active: 120, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 15_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [],
       })
       .mockResolvedValueOnce({
         data_source: 'crm',
-        appointments: { unique_clients: 100 },
+        period: { from: 'from', to: 'to', timezone: 'Europe/Moscow' },
+        appointments: { total: 100, active: 100, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 10_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [],
       });
     const analyticsService = {
       getBusinessOverview,
     } as unknown as OperationsAnalyticsService;
-    const service = createService({ crmService, prisma, analyticsService });
+    const service = createService({ analyticsService, prisma });
 
-    const result = await service.execute(
-      'analytics.business.compare_years',
+    const result = (await service.execute(
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
-      {},
-      'execution-year-comparison',
-    );
-    const cachedResult = await service.execute(
-      'analytics.business.compare_years',
-      { ...principal, role: UserRole.TENANT_OWNER },
-      {},
-      'execution-year-comparison-cached',
-    );
+      { period: 'year_to_date', comparison: 'previous_year_same_period' },
+      'execution-year-over-year',
+    )) as Record<string, unknown>;
 
-    expect(getRevenueSummary).toHaveBeenNthCalledWith(1, 'tenant-a', {
-      from: '2025-12-31T21:00:00.000Z',
-      to: '2026-08-06T12:34:56.789Z',
-    });
-    expect(getRevenueSummary).toHaveBeenNthCalledWith(2, 'tenant-a', {
-      from: '2024-12-31T21:00:00.000Z',
-      to: '2025-08-06T12:34:56.789Z',
-    });
     expect(getBusinessOverview).toHaveBeenNthCalledWith(1, 'tenant-a', {
       from: '2025-12-31T21:00:00.000Z',
       to: '2026-08-06T12:34:56.789Z',
@@ -1169,49 +1157,17 @@ describe('AiToolHandlerService output minimization', () => {
       to: '2025-08-06T12:34:56.789Z',
     });
     expect(result).toMatchObject({
-      comparison: 'current_year_to_date_vs_previous_year_same_period',
       verified: true,
-      periods: {
-        current: {
-          year: 2026,
-          start_day: 1,
-          start_month: 1,
-          end_day: 6,
-          end_month: 8,
+      comparison: { mode: 'previous_year_same_period' },
+      changes: {
+        appointments_total: {
+          current: 120,
+          previous: 100,
+          delta: 20,
+          percent_change: 20,
         },
-        previous: {
-          year: 2025,
-          start_day: 1,
-          start_month: 1,
-          end_day: 6,
-          end_month: 8,
-        },
-      },
-      revenue: {
-        current: { amount_major_units: 150_000 },
-        previous: { amount_major_units: 100_000 },
-        delta: { amount_major_units: 50_000 },
-        percent_change: 50,
-      },
-      transactions: {
-        current: 120,
-        previous: 100,
-        delta: 20,
-        percent_change: 20,
-      },
-      clients: {
-        verified: true,
-        source: 'crm',
-        definition: 'identified_unique_clients_with_non_cancelled_appointments',
-        current: 80,
-        previous: 100,
-        delta: -20,
-        percent_change: -20,
       },
     });
-    expect(cachedResult).toEqual(result);
-    expect(getRevenueSummary).toHaveBeenCalledTimes(2);
-    expect(getBusinessOverview).toHaveBeenCalledTimes(2);
   });
 
   it('answers a universal business query with server-computed metric and service changes', async () => {
@@ -1527,12 +1483,13 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = (await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-staff-namesakes',
     )) as Record<string, unknown>;
@@ -1540,7 +1497,7 @@ describe('AiToolHandlerService output minimization', () => {
     // Различитель раздаётся по отсортированному внешнему id, а не по порядку
     // строк: secret-a идёт раньше secret-z, поэтому «Илья» — тот, у кого 20
     // записей, независимо от того, кто первым вышел в смену.
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         { name: 'Илья (2)', appointments: 10 },
         { name: 'Илья', appointments: 20 },
@@ -1585,17 +1542,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = (await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       { ...principal, role: UserRole.TENANT_OWNER },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-crm-staff-failclosed',
     )) as Record<string, unknown>;
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [
         {
           name: 'Илья',
@@ -1907,7 +1865,7 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = (await service.execute(
-      'analytics.business.read',
+      'analytics.business.query',
       // Каталог такую роль к бизнес-аналитике не пускает. Проверяем вторую
       // границу: даже если пустит, имена коллег с ней не поедут.
       { ...principal, role: UserRole.STAFF },
@@ -1915,11 +1873,14 @@ describe('AiToolHandlerService output minimization', () => {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-staff-role-scope',
     )) as Record<string, unknown>;
 
-    expect(result.staff_summary).toEqual([]);
+    expect(
+      (published(result) as Record<string, unknown>).staff_summary,
+    ).toEqual([]);
     expect(JSON.stringify(result)).not.toContain('Илья');
   });
 
@@ -1960,17 +1921,18 @@ describe('AiToolHandlerService output minimization', () => {
     const service = createService({ analyticsService });
 
     const result = (await service.execute(
-      'analytics.employee.read',
+      'analytics.employee.query',
       { ...principal, userId: 'employee-user', role: UserRole.STAFF },
       {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.999Z',
+        comparison: 'none',
       },
       'execution-employee-self-scope',
     )) as Record<string, unknown>;
 
-    expect(result).toMatchObject({
+    expect(published(result)).toMatchObject({
       staff_summary: [{ name: 'Илья', appointments: 8 }],
     });
     expect(JSON.stringify(result)).not.toContain('Анна');
@@ -2132,89 +2094,16 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getBusinessFinance).toHaveBeenCalledTimes(2);
   });
 
-  it('replaces staff names with deterministic booking labels', async () => {
-    const staffService = {
-      listStaff: jest.fn().mockResolvedValue([
-        {
-          id: 'staff-external-1',
-          name: 'Анна',
-          title: 'Барбер',
-          specialization: 'Стрижки',
-          avatar_url: 'https://private.example/avatar.jpg',
-        },
-      ]),
-    } as unknown as StaffService;
-    const service = createService({ staffService });
-
-    const result = await service.execute(
-      'catalog.staff.read',
-      principal,
-      {},
-      'execution-e',
-    );
-
-    expect(result).toEqual({
-      staff: [
-        {
-          id: 'staff-external-1',
-          label: 'specialist_1',
-          title: 'Барбер',
-          specialization: 'Стрижки',
-        },
-      ],
-    });
-    expect(JSON.stringify(result)).not.toContain('Анна');
-    expect(JSON.stringify(result)).not.toContain('avatar.jpg');
-  });
-
-  it('removes booking identity and notes from appointment previews', async () => {
-    const appointmentsService = {
-      previewForClient: jest.fn().mockResolvedValue({
-        ok: true,
-        preview: true,
-        mode: 'preview',
-        branch_id: 'branch-a',
-        branch_timezone: 'Europe/Moscow',
-        client_name: 'Иван',
-        client_phone: '+79180000000',
-        staff_id: 'staff-a',
-        service_ids: ['service-a'],
-        requested_start: '2026-07-20T10:00:00.000Z',
-        matched_slot_start: '2026-07-20T10:00:00.000Z',
-        slot: {
-          start: '2026-07-20T10:00:00.000Z',
-          end: '2026-07-20T11:00:00.000Z',
-          staff_id: 'staff-a',
-          branch_id: 'branch-a',
-        },
-        total_price: 1_800,
-        duration_minutes: 60,
-        currency: 'RUB',
-        notes: 'private note',
-        warnings: [],
-      }),
-    } as unknown as AppointmentsService;
-    const service = createService({ appointmentsService });
-    const result = await service.execute(
-      'appointments.own.preview',
-      principal,
-      {
-        staff_id: 'staff-a',
-        service_ids: ['service-a'],
-        start: '2026-07-20T10:00:00.000Z',
-      },
-      'execution-f',
-    );
-
-    expect(JSON.stringify(result)).not.toContain('Иван');
-    expect(JSON.stringify(result)).not.toContain('+79180000000');
-    expect(JSON.stringify(result)).not.toContain('private note');
-    expect(result).toMatchObject({
-      preview: true,
-      staff_id: 'staff-a',
-      service_ids: ['service-a'],
-    });
-  });
+  /**
+   * Опубликованный срез текущего периода из ответа query-инструмента.
+   *
+   * Обзорные `analytics.*.read` убраны, но их минимизация никуда не делась: тот
+   * же `publishAnalytics` собирает `current` внутри query-версии. Проверки
+   * приватности остались на месте — сменился только адрес.
+   */
+  function published(value: unknown): unknown {
+    return (value as { current?: unknown }).current;
+  }
 
   function createService(overrides: {
     crmService?: CrmService;
@@ -2222,7 +2111,6 @@ describe('AiToolHandlerService output minimization', () => {
     expensesService?: ExpensesService;
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
-    staffService?: StaffService;
     prisma?: PrismaService;
   }) {
     return new AiToolHandlerService(
@@ -2231,8 +2119,6 @@ describe('AiToolHandlerService output minimization', () => {
       overrides.loyaltyService ?? ({} as LoyaltyService),
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),
       overrides.expensesService ?? ({} as ExpensesService),
-      {} as CustomersService,
-      overrides.staffService ?? ({} as StaffService),
       overrides.prisma ??
         ({
           tenant: {
