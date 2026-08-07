@@ -120,6 +120,82 @@ describe('AiToolHandlerService output minimization', () => {
     });
   });
 
+  it('converts the spoken rubles into kopecks and stamps the expense as manual', async () => {
+    const expensesCreate = jest.fn().mockResolvedValue({
+      id: 'expense-new',
+      tenant_id: 'tenant-a',
+      branch_id: null,
+      category: 'rent',
+      category_label: 'Аренда',
+      category_kind: 'fixed',
+      category_known: true,
+      category_raw: 'rent',
+      amount_kopecks: 6_000_000,
+      currency: 'RUB',
+      occurred_at: new Date('2026-08-07T09:00:00.000Z'),
+      source: 'manual',
+      external_id: null,
+      note: 'Аренда за август',
+      created_at: new Date('2026-08-07T09:00:00.000Z'),
+      updated_at: new Date('2026-08-07T09:00:00.000Z'),
+    });
+    const expensesService = {
+      create: expensesCreate,
+    } as unknown as ExpensesService;
+    const service = createService({
+      expensesService,
+      prisma: {
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            calendarSource: 'external',
+            defaultTimezone: 'Europe/Moscow',
+          }),
+        },
+        branch: { findFirst: jest.fn() },
+      } as unknown as PrismaService,
+    });
+
+    const result = await service.execute(
+      'expenses.create',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        category: 'rent',
+        amount_rubles: 60_000,
+        occurred_on: '2026-08-07',
+        note: 'Аренда за август',
+      },
+      'approval-key-1',
+    );
+
+    // 60 тысяч рублей — это 6 000 000 копеек, и считает это сервер, не модель.
+    expect(expensesCreate).toHaveBeenCalledWith(
+      'tenant-a',
+      'customer-a',
+      expect.objectContaining({
+        category: 'rent',
+        amountKopecks: 6_000_000,
+        currency: 'RUB',
+        // Полдень по Москве — расход не переезжает в соседний день или месяц.
+        occurredAt: '2026-08-07T09:00:00.000Z',
+        note: 'Аренда за август',
+      }),
+      { source: 'manual', idempotencyKey: 'approval-key-1' },
+    );
+    expect(result).toMatchObject({
+      recorded: true,
+      expense_id: 'expense-new',
+      category: 'rent',
+      category_kind: 'fixed',
+      amount_kopecks: 6_000_000,
+      amount_major_units: 60_000,
+      currency: 'RUB',
+      occurred_on: '2026-08-07',
+      source: 'manual',
+    });
+    // Заметка — свободный текст: наружу из инструмента она не возвращается.
+    expect(JSON.stringify(result)).not.toContain('Аренда за август');
+  });
+
   it('returns only the authoritative loyalty summary', async () => {
     const loyaltyService = {
       getForUser: jest.fn().mockResolvedValue({

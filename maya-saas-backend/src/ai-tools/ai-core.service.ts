@@ -315,6 +315,47 @@ const BUSINESS_ACTION_REQUEST_PATTERN =
 // требует диагноза, «что делать» — плана, и вопрос часто содержит оба.
 const BUSINESS_EXPLANATION_REQUEST_PATTERN =
   /(почему|причин[а-яёa-z]*|за\s+сч[её]т\s+чего|что\s+повлиял[оа]?|разбер[а-яёa-z]*|проанализир[а-яёa-z]*|анализ[а-яёa-z]*|объясни)/i;
+/**
+ * Вопрос о ПРИБЫЛИ, а не о выручке.
+ *
+ * Прибыль живёт в отдельном инструменте: она считается от подтверждённой кассы
+ * минус полные расходы, и в операционном обзоре её нет по построению. Без
+ * этой развилки «какая прибыль» уходило туда, где прибыли не существует, и
+ * владелец получал перечень счётчиков вместо ответа.
+ */
+const PROFIT_QUESTION_PATTERN =
+  /(прибыл[а-яёa-z]*|маржинальн[а-яёa-z]*|рентабельн[а-яёa-z]*|(?<![а-яё])марж[аеиуы][а-яёa-z]*|в\s+плюсе|в\s+минусе|в\s+ноль|чист[а-яёa-z]*\s+(?:прибыл|доход|остат)[а-яёa-z]*|(?<![а-яё])чистыми(?![а-яё])|после\s+(?:всех\s+)?расход[а-яёa-z]*|за\s+вычетом\s+расход[а-яёa-z]*|сколько\s+(?:я\s+|мы\s+)?(?:в\s+итоге\s+)?(?:заработал|остал)[а-яёa-z]*|(?:что|сколько)\s+(?:в\s+итоге\s+)?остал[а-яёa-z]*|окупа[а-яёa-z]*)/i;
+/**
+ * Вопрос о СТРУКТУРЕ расходов: «на что больше всего тратим», «куда уходят
+ * деньги», «сколько ушло на расходники». Отвечает разрез по статьям, а не
+ * операционный обзор, в котором расходы — одна общая сумма.
+ */
+/**
+ * Команда записать расход, а не вопрос о нём.
+ *
+ * 🔴 «Запиши аренду 60 тысяч» — это действие. Без этой развилки просьба
+ * уезжала в аналитику: любая фраза, не похожая на приветствие, считается
+ * бизнес-вопросом, и на команду сначала грузился весь отчёт по салону.
+ */
+const EXPENSE_RECORD_COMMAND_PATTERN =
+  /(запиш|запис(?:ать|ал)|внес|добав|провед|отмет|учт)[а-яёa-z]*\s+(?:[^,.]{0,40}\s+)?(аренд|расход|зарплат|реклам|налог|коммунал|закуп|материал|трат)/i;
+const EXPENSE_STRUCTURE_QUESTION_PATTERN =
+  /(расход[а-яёa-z]*|затрат[а-яёa-z]*|на\s+что\s+(?:мы\s+)?(?:больше\s+всего\s+)?(?:трат|уход|ушл)[а-яёa-z]*|куда\s+(?:у\s+нас\s+)?(?:уход|дева|ушл)[а-яёa-z]*|сколько\s+(?:мы\s+)?потратил[а-яёa-z]*|на\s+что\s+ушл[а-яёa-z]*)/i;
+/**
+ * 🔴 «Сколько стоит привести нового клиента» — это НЕ прайс-лист.
+ *
+ * Регулярка справочника услуг ловила любое «сколько стоит», и на вопрос о цене
+ * привлечения MAYA отвечала стоимостью стрижки. Разводится по дополнению:
+ * стоит УСЛУГА — прайс, стоит ПРИВЕСТИ КЛИЕНТА — экономика салона.
+ */
+const CLIENT_ACQUISITION_QUESTION_PATTERN =
+  /(сколько\s+стоит\s+(?:нам\s+|мне\s+)?(?:привест|привлеч|получ|нов[а-яё]+\s+клиент|один\s+клиент|клиент)|(?:во\s+)?сколько\s+(?:нам\s+|мне\s+)?обходится\s+(?:нов[а-яё]+\s+)?клиент|(?:во\s+)?сколько\s+обходится\s+(?:нам|мне)\s+(?:нов[а-яё]+\s+)?клиент|цена\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент[а-яё]*|стоимост[ьи]\s+(?:привлечени[а-яё]*|одного\s+клиент[а-яё]*|нов[а-яё]+\s+клиент[а-яё]*)|привлечени[ея]\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент)/i;
+/**
+ * Разрезы, которых в инструменте прибыли нет. Вопрос «прибыль по мастерам»
+ * должен идти в аналитику с разрезом, а не в общую экономику салона.
+ */
+const PROFIT_BREAKDOWN_ESCAPE_PATTERN =
+  /(мастер[а-яёa-z]*|сотрудник[а-яёa-z]*|специалист[а-яёa-z]*|по\s+услуг[а-яёa-z]*|по\s+дням|по\s+филиал[а-яёa-z]*)/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 /**
@@ -1286,8 +1327,29 @@ export class AiCoreService {
         'booking.availability.read',
       ]);
     }
+    // Команда записать расход не требует подтверждающего чтения: подтверждать
+    // будет человек, карточкой. Требование источника здесь только заставило бы
+    // MAYA сперва прочитать отчёт, а потом уже услышать просьбу.
+    if (EXPENSE_RECORD_COMMAND_PATTERN.test(text)) {
+      return null;
+    }
+    // 🔴 До справочника услуг. «Сколько стоит привести нового клиента» и
+    // «какая прибыль» — вопросы экономики салона, и оба раньше уезжали не туда:
+    // первый в прайс-лист, второй в операционный обзор без прибыли.
+    if (
+      allowedNames.has('analytics.business.profit') &&
+      (CLIENT_ACQUISITION_QUESTION_PATTERN.test(text) ||
+        (PROFIT_QUESTION_PATTERN.test(text) &&
+          !PROFIT_BREAKDOWN_ESCAPE_PATTERN.test(text)))
+    ) {
+      return this.businessProfitRequirement(text, previousUserText);
+    }
     if (
       !/(подписк\w*|тариф\w*|maya|майя)/i.test(text) &&
+      // Цена привлечения клиента — не позиция прайса. Проверка нужна и здесь:
+      // инструмент прибыли доступен не всем ролям, и без неё вопрос владельца
+      // без доступа к финансам снова свалился бы в стоимость стрижки.
+      !CLIENT_ACQUISITION_QUESTION_PATTERN.test(text) &&
       /(сколько\s+стоит|цен[а-яёa-z]*|прайс[а-яёa-z]*|какие\s+услуг[а-яёa-z]*|длительн[а-яёa-z]*\s+услуг[а-яёa-z]*)/i.test(
         text,
       )
@@ -1321,8 +1383,19 @@ export class AiCoreService {
     ) {
       return this.requireGrounding('staff_catalog', ['catalog.staff.read']);
     }
-    if (/(расход[а-яёa-z]*|затрат[а-яёa-z]*)/i.test(text) && factRequest) {
-      return this.requireGrounding('business_expenses', ['expenses.read']);
+    if (
+      EXPENSE_STRUCTURE_QUESTION_PATTERN.test(text) &&
+      // «На что больше всего тратим» — уже вопрос-факт сам по себе, слова
+      // «сколько» в нём нет, и требовать его значило бы отправить вопрос о
+      // деньгах в операционный обзор, где разреза по статьям нет вовсе.
+      (factRequest || /на\s+что|куда/i.test(text))
+    ) {
+      // Период разрешается здесь же, а разрез по статьям считает сервер:
+      // модели складывать и делить нельзя, а перечень платежей — не ответ.
+      return this.requireGrounding('business_expenses', ['expenses.read'], {
+        name: 'expenses.read',
+        arguments: this.reportingPeriodForQuestion(text, previousUserText),
+      });
     }
     const customerCountRequest = GROUNDING_CUSTOMER_COUNT_PATTERN.test(text);
     if (
@@ -1431,7 +1504,7 @@ export class AiCoreService {
       {
         name: 'analytics.business.query',
         arguments: {
-          period: this.reportingPeriodForQuestion(text, previousUserText),
+          ...this.reportingPeriodForQuestion(text, previousUserText),
           comparison: this.comparisonForQuestion(text, previousUserText),
         },
       },
@@ -1448,9 +1521,23 @@ export class AiCoreService {
       {
         name: 'analytics.employee.query',
         arguments: {
-          period: this.reportingPeriodForQuestion(text, previousUserText),
+          ...this.reportingPeriodForQuestion(text, previousUserText),
           comparison: this.comparisonForQuestion(text, previousUserText),
         },
+      },
+    );
+  }
+
+  private businessProfitRequirement(
+    text: string,
+    previousUserText: string,
+  ): GroundingRequirement {
+    return this.requireGrounding(
+      'business_profit',
+      ['analytics.business.profit'],
+      {
+        name: 'analytics.business.profit',
+        arguments: this.reportingPeriodForQuestion(text, previousUserText),
       },
     );
   }
@@ -1550,32 +1637,96 @@ export class AiCoreService {
   private reportingPeriodForQuestion(
     text: string,
     previousUserText: string,
-  ):
-    | 'today'
-    | 'yesterday'
-    | 'week_to_date'
-    | 'month_to_date'
-    | 'year_to_date'
-    | 'last_7_days'
-    | 'last_30_days'
-    | 'last_month' {
+  ): { period: string; month?: string } {
     const context = `${previousUserText} ${text}`;
-    if (/(?:за\s+)?вчера/i.test(context)) return 'yesterday';
-    if (/(?:за\s+)?сегодня|сегодняшн/i.test(context)) return 'today';
-    if (/последн[а-яa-z]*\s+7\s+дн/i.test(context)) return 'last_7_days';
-    if (/последн[а-яa-z]*\s+30\s+дн/i.test(context)) return 'last_30_days';
+    if (/(?:за\s+)?вчера/i.test(context)) return { period: 'yesterday' };
+    if (/(?:за\s+)?сегодня|сегодняшн/i.test(context)) {
+      return { period: 'today' };
+    }
+    if (/последн[а-яa-z]*\s+7\s+дн/i.test(context)) {
+      return { period: 'last_7_days' };
+    }
+    if (/последн[а-яa-z]*\s+30\s+дн/i.test(context)) {
+      return { period: 'last_30_days' };
+    }
+    // 🔴 Месяц, названный словом, — раньше его тут не было вовсе. «Прибыль в
+    // июле» молча считалась за текущий месяц по сегодня: числа настоящие,
+    // период чужой, и заметить подмену по ответу нельзя.
+    // 🔴 Сначала текущая реплика, и только потом предыдущая. Склеенный контекст
+    // ставит прошлое сообщение левее, а месяц берётся самый левый — поэтому
+    // «а прибыль в августе?» после «прибыль в июле» считалось за ИЮЛЬ. Человек
+    // спрашивает про то, что назвал сейчас; прошлый ход — только подсказка,
+    // когда в текущем месяца нет вовсе («а прибыль?»).
+    const namedMonth =
+      this.namedMonthForQuestion(text) ??
+      this.namedMonthForQuestion(previousUserText);
+    if (namedMonth) {
+      return { period: 'named_month', month: namedMonth };
+    }
     if (
       /(?:за\s+)?прошл[а-яa-z]*\s+месяц/i.test(context) &&
       !/(сравн|по\s+сравнению|динамик|просел|вырос|рост|снизил|упал)/i.test(
         context,
       )
     ) {
-      return 'last_month';
+      return { period: 'last_month' };
     }
-    if (/год|годов|годовой/i.test(context)) return 'year_to_date';
-    if (/недел/i.test(context)) return 'week_to_date';
-    if (/месяц/i.test(context)) return 'month_to_date';
-    return 'month_to_date';
+    if (/год|годов|годовой/i.test(context)) return { period: 'year_to_date' };
+    if (/недел/i.test(context)) return { period: 'week_to_date' };
+    if (/месяц/i.test(context)) return { period: 'month_to_date' };
+    return { period: 'month_to_date' };
+  }
+
+  /**
+   * Название месяца из вопроса → `YYYY-MM`.
+   *
+   * Год выбирается ближайшим назад: месяц, который в этом году ещё не
+   * наступил, — это месяц прошлого года. В августе «декабрь» означает
+   * прошедший декабрь, а не тот, что впереди: спрашивают всегда про то, что
+   * уже случилось.
+   *
+   * Границы окна разрешает сервер в часовом поясе салона — здесь только
+   * называется месяц.
+   */
+  private namedMonthForQuestion(context: string): string | null {
+    const months = [
+      /(?<![а-яё])январ[ьяей]|(?<![а-яё])янв(?![а-яё])/i,
+      /(?<![а-яё])феврал[ьяей]|(?<![а-яё])фев(?![а-яё])/i,
+      /(?<![а-яё])март[ае]?(?![а-яё])/i,
+      /(?<![а-яё])апрел[ьяей]/i,
+      /(?<![а-яё])ма[йея](?![а-яё])/i,
+      /(?<![а-яё])июн[ьяей]/i,
+      /(?<![а-яё])июл[ьяей]/i,
+      /(?<![а-яё])август[ае]?(?![а-яё])/i,
+      /(?<![а-яё])сентябр[ьяей]/i,
+      /(?<![а-яё])октябр[ьяей]/i,
+      /(?<![а-яё])ноябр[ьяей]/i,
+      /(?<![а-яё])декабр[ьяей]/i,
+    ];
+    // Берём месяц, названный РАНЬШЕ всех в тексте: в «сравни июль с августом»
+    // спрашивают про июль, а не про тот месяц, что меньше по номеру.
+    let matched = -1;
+    let earliest = Number.POSITIVE_INFINITY;
+    months.forEach((pattern, index) => {
+      const found = context.search(pattern);
+      if (found >= 0 && found < earliest) {
+        earliest = found;
+        matched = index;
+      }
+    });
+    if (matched < 0) {
+      return null;
+    }
+    const now = new Date();
+    const currentMonth = now.getUTCMonth();
+    let year = now.getUTCFullYear();
+    if (matched > currentMonth) {
+      year -= 1;
+    }
+    if (/прошл[а-яa-z]*\s+год|прошлогодн/i.test(context)) {
+      year -= 1;
+    }
+    return `${year}-${String(matched + 1).padStart(2, '0')}`;
   }
 
   private comparisonForQuestion(
@@ -1675,6 +1826,27 @@ export class AiCoreService {
           : 'analytics.business.query';
       const evidence = toolResults.find((result) => result.name === toolName);
       return this.appendAnalyticsFreshness(reply, evidence?.result);
+    }
+    if (requirement?.domain === 'business_expenses') {
+      const evidence = toolResults.find(
+        (result) => result.name === 'expenses.read',
+      );
+      return evidence ? this.deterministicExpenseReply(evidence.result) : null;
+    }
+    if (requirement?.domain === 'business_profit') {
+      const evidence = toolResults.find(
+        (result) => result.name === 'analytics.business.profit',
+      );
+      return evidence
+        ? this.deterministicProfitReply(
+            evidence.result,
+            // Спросили про цену клиента — с неё и начинаем. Ответ на вопрос
+            // не должен ждать, пока договорит отчёт о прибыли.
+            CLIENT_ACQUISITION_QUESTION_PATTERN.test(
+              userText.toLowerCase().replace(/ё/g, 'е'),
+            ),
+          )
+        : null;
     }
     if (requirement?.domain === 'business_year_comparison') {
       const evidence = toolResults.find(
@@ -1923,6 +2095,189 @@ export class AiCoreService {
         : `Выручка по ${scope} за выбранный период: ${revenue}.`;
     }
     return null;
+  }
+
+  /**
+   * Ответ про структуру расходов без модели.
+   *
+   * Разрез уже сложен сервером — здесь только называние. Пустая книга расходов
+   * это не «ноль», а «за период ничего не заведено», и предложение завести
+   * обязано прозвучать: иначе разговор упирается в тупик.
+   */
+  private deterministicExpenseReply(evidence: unknown): string | null {
+    const data = this.record(evidence);
+    const rows = Array.isArray(data.by_category)
+      ? data.by_category.map((row) => this.record(row))
+      : [];
+    if (rows.length === 0) {
+      return 'За этот период расходов не заведено ни одного. Назовите статью и сумму — запишу, и разбор по статьям появится.';
+    }
+    const named = rows
+      .slice(0, 5)
+      .map(
+        (row) =>
+          `${this.categoryLabel(row)} — ${this.formatMoneyAmount(row) ?? '—'}`,
+      );
+    const total = this.formatVerifiedMoneyEntries(data.totals);
+    return `Расходы за период по статьям: ${named.join(', ')}.${
+      total ? ` Всего ${total}.` : ''
+    } Больше всего — «${this.categoryLabel(rows[0])}».`;
+  }
+
+  /** Человеческое имя статьи расходов из строки разреза. */
+  private categoryLabel(row: Record<string, unknown>): string {
+    if (typeof row.label === 'string' && row.label.trim()) {
+      return row.label;
+    }
+    return typeof row.category === 'string' ? row.category : 'без статьи';
+  }
+
+  /**
+   * Ответ про прибыль без модели: тем же текстом, что сказал бы человек.
+   *
+   * Здесь нет ни одного вычисления — все числа уже посчитаны сервером. Отказ
+   * обязан называть недостающую статью словом из жизни салона и предлагать её
+   * внести: «не хватает данных» без продолжения — это тупик, а не ответ.
+   */
+  private deterministicProfitReply(
+    evidence: unknown,
+    acquisitionFirst = false,
+  ): string | null {
+    const data = this.record(evidence);
+    const revenue = this.record(data.confirmed_revenue);
+    const net = this.record(data.net_profit);
+    const acquisition = this.record(data.client_acquisition_cost);
+    const period = this.record(data.period);
+    const expenses = this.record(data.expenses);
+    const payroll = this.record(data.payroll);
+    const profitParts: string[] = [];
+    const acquisitionParts: string[] = [];
+
+    const truncated =
+      period.truncated_to_today === true
+        ? ' Месяц ещё не закончился, поэтому считаю по сегодняшний день.'
+        : '';
+
+    if (net.status === 'available') {
+      const total = this.formatMoneyAmount(net.total);
+      const revenueTotal = this.formatMoneyAmount(revenue.total);
+      const margin =
+        typeof net.margin_percent === 'number'
+          ? ` Это ${this.formatMetricNumber(net.margin_percent)}% от поступлений.`
+          : '';
+      profitParts.push(
+        `Чистая прибыль: ${total ?? '—'}. Поступления в кассу — ${revenueTotal ?? '—'}.${margin}${truncated}`,
+      );
+      const categories = Array.isArray(expenses.by_category)
+        ? expenses.by_category
+            .map((row) => this.record(row))
+            .slice(0, 4)
+            .map(
+              (row) =>
+                `${this.categoryLabel(row)}: ${this.formatMoneyAmount(row) ?? '—'}`,
+            )
+        : [];
+      if (categories.length > 0) {
+        profitParts.push(`Расходы: ${categories.join(', ')}.`);
+      }
+    } else {
+      const labels = (value: unknown): string[] =>
+        Array.isArray(value)
+          ? value
+              .map((item) => this.record(item).label)
+              .filter((label): label is string => typeof label === 'string')
+          : [];
+      const missing = labels(net.missing_categories);
+      const understated = labels(net.understated_categories);
+      // 🔴 Текст следует ПРИЧИНЕ из результата, а не собственному перебору
+      // условий. Иначе порядок проверок здесь и в движке расходится, и MAYA
+      // называет одну помеху, пока сервер считает главной другую.
+      const reason =
+        typeof net.unavailable_reason === 'string'
+          ? net.unavailable_reason
+          : '';
+      if (reason.startsWith('required_expense_categories_are_missing')) {
+        profitParts.push(
+          `Прибыль за период посчитать не могу: за него не внесена ${
+            missing.join(' и ') || 'часть обязательных статей расходов'
+          }. Внесите — и я посчитаю. Хотите, запишу прямо сейчас: назовите сумму.`,
+        );
+      } else if (
+        reason.startsWith('recorded_expense_categories_are_implausibly_small')
+      ) {
+        profitParts.push(
+          `Прибыль за период посчитать не могу: похоже, внесено не всё — сумма по статье «${understated.join(
+            '», «',
+          )}» слишком мала на фоне кассы за этот же период. Проверьте и добавьте недостающее, тогда посчитаю.`,
+        );
+      } else if (reason.startsWith('salary_comes_only_from_the_crm_payroll')) {
+        profitParts.push(
+          'Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю. Вносить зарплату руками не нужно и нельзя: она задвоится.',
+        );
+      } else if (reason.startsWith('crm_confirms_cash_for_the_whole_company')) {
+        profitParts.push(
+          'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком, разложить её по филиалам нечем. Спросите по всему салону.',
+        );
+      } else if (
+        reason.startsWith('expenses_and_confirmed_cash_are_recorded_in_diff')
+      ) {
+        profitParts.push(
+          'Прибыль за период посчитать не могу: расходы и касса записаны в разных валютах, а курса у меня нет. Приведите их к одной валюте, тогда посчитаю.',
+        );
+      } else if (revenue.status !== 'available') {
+        // 🔴 Причин отсутствия кассы четыре, а объяснение было одно — про
+        // внутренний календарь. Салону на YClients, у которого CRM просто не
+        // ответила, MAYA рассказывала про чужое устройство и советовала не то.
+        const revenueReason =
+          typeof revenue.unavailable_reason === 'string'
+            ? revenue.unavailable_reason
+            : '';
+        profitParts.push(
+          revenueReason.startsWith('crm_finance_did_not_answer')
+            ? 'Прибыль считается от подтверждённой кассы, а CRM за этот период её не отдала. Это сбой связи, а не отсутствие денег — повторите вопрос через минуту.'
+            : revenueReason.startsWith('crm_returned_cash_revenue_without')
+              ? 'Прибыль считается от подтверждённой кассы, а CRM вернула суммы без подтверждения. Показывать их как прибыль я не буду.'
+              : revenueReason.startsWith('crm_confirms_cash_for_the_whole')
+                ? 'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком. Спросите по всему салону.'
+                : 'Прибыль считается от подтверждённой кассы, а её за этот период нет: внутренний календарь хранит цены записей, а не пробитые деньги. Стоимость записанного я показать могу, но называть её прибылью не буду.',
+        );
+      } else if (payroll.status !== 'available') {
+        profitParts.push(
+          'Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю.',
+        );
+      } else {
+        profitParts.push(
+          'Прибыль за период посчитать не могу: расходы за него неполные. Скажите, каких статей не хватает, и я их запишу.',
+        );
+      }
+    }
+
+    if (acquisition.status === 'available') {
+      const cost = this.formatMoneyAmount(acquisition.cost_per_new_client);
+      const lookback =
+        typeof acquisition.cohort_lookback_days === 'number'
+          ? acquisition.cohort_lookback_days
+          : null;
+      acquisitionParts.push(
+        `Новый гость обходился в ${cost ?? '—'}${
+          lookback === null
+            ? ''
+            : ` — это те, кого не было у нас последние ${lookback} дней`
+        }. Столько мы тратили на рекламу в расчёте на одного нового гостя, а не доказательство, что его привела реклама.`,
+      );
+    } else if (
+      acquisition.unavailable_reason ===
+      'no_advertising_expenses_are_recorded_for_this_period'
+    ) {
+      acquisitionParts.push(
+        'Стоимость нового клиента посчитать не из чего: расходов на рекламу за период не внесено. Запишу их — назовите сумму, и число появится.',
+      );
+    }
+
+    const ordered = acquisitionFirst
+      ? [...acquisitionParts, ...profitParts]
+      : [...profitParts, ...acquisitionParts];
+    return ordered.length > 0 ? ordered.join(' ') : null;
   }
 
   private appendAnalyticsFreshness(reply: string, evidence: unknown): string {

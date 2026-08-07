@@ -653,6 +653,9 @@ model Expense {
   currency          String   @default("RUB")
   occurredAt        DateTime
   encryptedNote     String?
+  source            String   @default("manual")
+  externalId        String?
+  idempotencyKey    String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -660,8 +663,11 @@ model Expense {
   createdBy         User?    @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@unique([id, tenantId])
+  @@unique([tenantId, externalId])
+  @@unique([tenantId, idempotencyKey])
   @@index([tenantId, occurredAt])
   @@index([tenantId, branchId, occurredAt])
+  @@index([tenantId, source, occurredAt])
 }
 
 model AiApprovalRequest {

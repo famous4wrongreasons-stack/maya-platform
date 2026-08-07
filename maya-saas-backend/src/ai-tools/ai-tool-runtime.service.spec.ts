@@ -378,6 +378,21 @@ function createHarness() {
   const handlerExecute = jest.fn();
   const handler = {
     execute: handlerExecute,
+    // Доводка аргументов и обогащение карточки — тождественные для всего,
+    // кроме записи расхода; настоящее поведение проверяется в её собственных
+    // прогонах, здесь важно только что рантайм их зовёт.
+    normalizeArguments: jest.fn(
+      (_toolName: string, _principal: unknown, args: unknown) =>
+        Promise.resolve(args),
+    ),
+    enrichApprovalPreview: jest.fn(
+      (
+        _toolName: string,
+        _principal: unknown,
+        _args: unknown,
+        payload: unknown,
+      ) => Promise.resolve(payload),
+    ),
   } as unknown as AiToolHandlerService;
   const encryption = {
     encrypt: jest.fn(

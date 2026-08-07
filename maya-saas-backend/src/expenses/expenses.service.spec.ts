@@ -1,4 +1,5 @@
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -17,22 +18,37 @@ describe('ExpensesService', () => {
     currency: 'RUB',
     occurredAt: new Date('2026-07-10T10:00:00.000Z'),
     encryptedNote: 'encrypted:July rent',
+    source: 'manual',
+    externalId: null,
+    idempotencyKey: null,
     createdAt: new Date('2026-07-10T10:00:00.000Z'),
     updatedAt: new Date('2026-07-10T10:00:00.000Z'),
   };
 
-  const createService = () => {
+  const createService = (
+    overrides: {
+      findFirst?: jest.Mock;
+      create?: jest.Mock;
+      findMany?: jest.Mock;
+    } = {},
+  ) => {
     const tenantContext = new TenantContextService();
     let createdData: Record<string, unknown> | null = null;
     let listTenantId: string | null = null;
-    const expenseCreate = jest.fn((args: { data: Record<string, unknown> }) => {
-      createdData = args.data;
-      return Promise.resolve(expense);
-    });
-    const expenseFindMany = jest.fn((args: { where: { tenantId: string } }) => {
-      listTenantId = args.where.tenantId;
-      return Promise.resolve([expense]);
-    });
+    const expenseCreate =
+      overrides.create ??
+      jest.fn((args: { data: Record<string, unknown> }) => {
+        createdData = args.data;
+        return Promise.resolve(expense);
+      });
+    const expenseFindMany =
+      overrides.findMany ??
+      jest.fn((args: { where: { tenantId: string } }) => {
+        listTenantId = args.where.tenantId;
+        return Promise.resolve([expense]);
+      });
+    const expenseFindFirst =
+      overrides.findFirst ?? jest.fn().mockResolvedValue(null);
     const assertBranchBelongsToTenantMock = jest
       .fn()
       .mockResolvedValue(undefined);
@@ -40,7 +56,7 @@ describe('ExpensesService', () => {
       expense: {
         create: expenseCreate,
         findMany: expenseFindMany,
-        findFirst: jest.fn().mockResolvedValue(expense),
+        findFirst: expenseFindFirst,
         delete: jest.fn().mockResolvedValue(expense),
       },
     } as unknown as PrismaService;
@@ -60,6 +76,7 @@ describe('ExpensesService', () => {
       prisma,
       expenseCreate,
       expenseFindMany,
+      expenseFindFirst,
       tenantsService,
       encryptionService,
       auditLogService,
@@ -100,12 +117,143 @@ describe('ExpensesService', () => {
       createdById: 'owner-a',
       createdByTenantId: 'tenant-a',
       encryptedNote: 'encrypted:July rent',
+      source: 'manual',
+      externalId: null,
+      idempotencyKey: null,
     });
     expect(result).toMatchObject({
       id: 'expense-a',
       tenant_id: 'tenant-a',
       note: 'July rent',
+      category: 'rent',
+      category_kind: 'fixed',
+      category_known: true,
+      source: 'manual',
     });
+  });
+
+  it('refuses a category outside the dictionary before touching the database', async () => {
+    const setup = createService();
+
+    await expect(
+      setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.create('tenant-a', 'owner-a', {
+          category: 'arenda-avgust',
+          amountKopecks: 150_000,
+          occurredAt: '2026-07-10T10:00:00.000Z',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(setup.expenseCreate).not.toHaveBeenCalled();
+  });
+
+  it('refuses payroll by hand and explains that the CRM already accrues it', async () => {
+    const setup = createService();
+
+    const failure = await setup.tenantContext
+      .runAsSystemTenant('tenant-a', () =>
+        setup.service.create('tenant-a', 'owner-a', {
+          category: 'payroll',
+          amountKopecks: 6_000_000,
+          occurredAt: '2026-07-10T10:00:00.000Z',
+        }),
+      )
+      .catch((error: unknown) => error);
+
+    expect(failure).toBeInstanceOf(BadRequestException);
+    const response = (failure as BadRequestException).getResponse() as {
+      message: string;
+      error: { code: string; reason: string };
+    };
+    expect(response.error.code).toBe('expense_category_not_manual');
+    expect(response.error.reason).toBe('payroll_is_calculated_by_the_crm');
+    expect(response.message).toContain('twice');
+    expect(setup.expenseCreate).not.toHaveBeenCalled();
+  });
+
+  it('still accepts payroll from the CRM import path', async () => {
+    const setup = createService();
+
+    await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.create(
+        'tenant-a',
+        'owner-a',
+        {
+          category: 'payroll',
+          amountKopecks: 6_000_000,
+          occurredAt: '2026-07-10T10:00:00.000Z',
+        },
+        { source: 'crm', externalId: 'yclients-777' },
+      ),
+    );
+
+    expect(setup.getCreatedData()).toMatchObject({
+      category: 'payroll',
+      source: 'crm',
+      externalId: 'yclients-777',
+    });
+  });
+
+  it('returns the existing expense instead of a second one for the same key', async () => {
+    const stored = {
+      ...expense,
+      id: 'expense-idem',
+      idempotencyKey: 'approval-key',
+    };
+    const setup = createService({
+      findFirst: jest.fn().mockResolvedValue(stored),
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.create(
+        'tenant-a',
+        'owner-a',
+        {
+          category: 'rent',
+          amountKopecks: 150_000,
+          occurredAt: '2026-07-10T10:00:00.000Z',
+        },
+        { idempotencyKey: 'approval-key' },
+      ),
+    );
+
+    expect(result).toMatchObject({ id: 'expense-idem' });
+    expect(setup.expenseCreate).not.toHaveBeenCalled();
+  });
+
+  it('survives a race on the same key by returning the row the index kept', async () => {
+    const stored = {
+      ...expense,
+      id: 'expense-raced',
+      idempotencyKey: 'approval-key',
+    };
+    const findFirst = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(stored);
+    const create = jest.fn().mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('duplicate', {
+        code: 'P2002',
+        clientVersion: 'test',
+      }),
+    );
+    const setup = createService({ findFirst, create });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.create(
+        'tenant-a',
+        'owner-a',
+        {
+          category: 'rent',
+          amountKopecks: 150_000,
+          occurredAt: '2026-07-10T10:00:00.000Z',
+        },
+        { idempotencyKey: 'approval-key' },
+      ),
+    );
+
+    expect(result).toMatchObject({ id: 'expense-raced' });
+    expect(create).toHaveBeenCalledTimes(1);
   });
 
   it('lists only tenant-scoped rows and returns currency totals', async () => {
@@ -122,6 +270,28 @@ describe('ExpensesService', () => {
     expect(result.totals).toEqual([
       { currency: 'RUB', amount_kopecks: 150_000 },
     ]);
+  });
+
+  it('reads a legacy free-text category as other and keeps the original string', async () => {
+    const setup = createService({
+      findMany: jest
+        .fn()
+        .mockResolvedValue([{ ...expense, category: 'arenda-avgust' }]),
+    });
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.list('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.000Z',
+      }),
+    );
+
+    expect(result.items[0]).toMatchObject({
+      category: 'other',
+      category_known: false,
+      category_raw: 'arenda-avgust',
+      category_kind: 'variable',
+    });
   });
 
   it('rejects a tenant mismatch before reading or writing expenses', async () => {

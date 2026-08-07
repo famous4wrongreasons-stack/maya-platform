@@ -123,6 +123,27 @@ describe('AiCoreModelService', () => {
     expect(system).toContain('Никогда не\nпроизноси служебные имена');
     expect(system).toContain('🔴 ПЕРИОД — В КАЖДОМ ОТВЕТЕ С ЧИСЛАМИ:');
     expect(system).toContain('предупреди об этом ПЕРВОЙ фразой');
+    // 🔴 Деньги. Без этих правил модель складывает поступления с начислениями,
+    // вычитает из выручки один расход на 500 ₽ и называет остаток прибылью, а
+    // окупаемость рекламы считает от общей выручки салона.
+    expect(system).toContain(
+      '🔴 ПОСТУПЛЕНИЯ, НАЧИСЛЕНИЯ И ПРИБЫЛЬ — ТРИ РАЗНЫЕ ВЕЛИЧИНЫ:',
+    );
+    expect(system).toContain('Прибыль — поступления минус ПОЛНЫЕ расходы');
+    expect(system).toContain(
+      '🔴 НЕТ ПОЛНОТЫ РАСХОДОВ — НАЗЫВАЙ КАТЕГОРИЮ, А НЕ ЦИФРУ:',
+    );
+    expect(system).toContain('как минимум аренда и зарплата');
+    expect(system).toContain(
+      'Предложить\nвладельцу внести недостающие расходы УМЕСТНО и полезно',
+    );
+    expect(system).toContain('входит в расходы ровно один раз');
+    expect(system).toContain('🔴 СТОИМОСТЬ НОВОГО КЛИЕНТА:');
+    expect(system).toContain('На нуле новых гостей делить нечего');
+    expect(system).toContain(
+      '🔴 ОКУПАЕМОСТЬ РЕКЛАМЫ (ROMI) НЕ СУЩЕСТВУЕТ И НЕ ПОЯВИТСЯ:',
+    );
+    expect(system).toContain('CRM не\nхранит, откуда пришёл клиент');
     expect(system).toContain(
       'Never expose the data schema to the person: no field names, tool names',
     );

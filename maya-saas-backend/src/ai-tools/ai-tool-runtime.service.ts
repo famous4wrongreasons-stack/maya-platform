@@ -108,8 +108,17 @@ export class AiToolRuntimeService {
   ) {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
-    const args = this.registry.validateArguments(toolName, dto.arguments);
+    const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    // 🔴 Доводка ДО подписи: то, что подписано и показано человеку, обязано
+    // совпадать с тем, что будет исполнено. Разрешение «сегодня» в местную
+    // дату происходит здесь — при повторной проверке уже сохранённых
+    // аргументов оно тождественно, поэтому хеш карточки не разъезжается.
+    const args = await this.handler.normalizeArguments(
+      toolName,
+      principal,
+      validated,
+    );
     const inputHash = this.inputHash(toolName, args, principal);
 
     if (definition.approvalPolicy !== 'none') {
@@ -347,6 +356,12 @@ export class AiToolRuntimeService {
     }
 
     const preview = this.registry.buildApprovalPreview(definition.name, args);
+    const previewPayload = await this.handler.enrichApprovalPreview(
+      definition.name,
+      principal,
+      args,
+      preview.payload,
+    );
     const now = new Date();
     let approval: ApprovalRecord;
     try {
@@ -362,7 +377,7 @@ export class AiToolRuntimeService {
           status: APPROVAL_STATUS.PENDING,
           summary: preview.summary,
           payloadHash: inputHash,
-          payloadPreviewJson: asJson(preview.payload),
+          payloadPreviewJson: asJson(previewPayload),
           encryptedArguments: this.encryption.encrypt(JSON.stringify(args)),
           idempotencyKey,
           expiresAt: new Date(now.getTime() + APPROVAL_TTL_MS),

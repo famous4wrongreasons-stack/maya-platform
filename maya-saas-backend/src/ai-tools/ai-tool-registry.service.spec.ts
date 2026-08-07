@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
+import { UserRole } from '../common/domain.enums';
 import { staffScheduleRevision } from '../crm/staff-schedule.utils';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 
@@ -101,6 +102,157 @@ describe('AiToolRegistryService', () => {
         reason: 'Корректировка',
       }),
     ).toThrow(BadRequestException);
+  });
+
+  it('takes an expense amount in rubles and refuses anything that is not money', () => {
+    expect(
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: 60_000,
+        occurred_on: '2026-08-07',
+        note: 'Аренда за август',
+      }),
+    ).toEqual({
+      category: 'rent',
+      amount_rubles: 60_000,
+      occurred_on: '2026-08-07',
+      note: 'Аренда за август',
+    });
+    // Дата необязательна: «сегодня» разрешает сервер в часовом поясе салона.
+    expect(
+      service.validateArguments('expenses.create', {
+        category: 'supplies',
+        amount_rubles: 1_234.56,
+      }),
+    ).toEqual({ category: 'supplies', amount_rubles: 1_234.56 });
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: 0,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: '60000',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: 60_000,
+        amount_kopecks: 6_000_000,
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('refuses an invented expense category and payroll by hand', () => {
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'arenda-avgust',
+        amount_rubles: 60_000,
+      }),
+    ).toThrow(BadRequestException);
+
+    let payrollDetail = '';
+    try {
+      service.validateArguments('expenses.create', {
+        category: 'payroll',
+        amount_rubles: 60_000,
+      });
+    } catch (error) {
+      const response = (error as BadRequestException).getResponse() as {
+        error: { code: string; detail: string };
+      };
+      payrollDetail = response.error.detail;
+      expect(response.error.code).toBe('ai_tool_arguments_invalid');
+    }
+    expect(payrollDetail).toContain('payroll');
+    expect(payrollDetail).toContain('twice');
+  });
+
+  it('re-validates stored expense arguments to the same payload', () => {
+    // Аргументы подтверждения проходят валидатор второй раз при исполнении:
+    // если бы валидатор что-то дописывал, хеш карточки перестал бы сходиться.
+    const once = service.validateArguments('expenses.create', {
+      category: 'marketing',
+      amount_rubles: 15_000,
+      note: '  таргет  ',
+    });
+    expect(service.validateArguments('expenses.create', once)).toEqual(once);
+  });
+
+  it('requires a human confirmation for a money-writing expense tool', () => {
+    const definition = service.get('expenses.create');
+    expect(definition.riskTier).toBe('high_write');
+    expect(definition.approvalPolicy).toBe('owner');
+    expect(definition.idempotency).toBe('required');
+    expect(definition.requiredFeatures).toEqual(['expenses.core']);
+    expect(definition.allowedRoles).toEqual([
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+      UserRole.ACCOUNTANT,
+    ]);
+    const properties = definition.inputSchema.properties as Record<
+      string,
+      { enum?: string[] }
+    >;
+    expect(properties.category.enum).toContain('rent');
+    expect(properties.category.enum).not.toContain('payroll');
+  });
+
+  it('shows the human rubles and the server kopecks on the expense card', () => {
+    expect(
+      service.buildApprovalPreview('expenses.create', {
+        category: 'rent',
+        amount_rubles: 60_000,
+        occurred_on: '2026-08-05',
+        note: 'Аренда за август',
+      }),
+    ).toEqual({
+      // Русского словаря для этого инструмента у отдельно деплоящегося фронта
+      // нет, поэтому подтверждаемое действие читается целиком из summary.
+      summary: 'Записать расход: Аренда — 60 000 ₽ за 05.08.2026.',
+      payload: {
+        sum: '60 000 ₽',
+        date: '05.08.2026',
+        type: 'Аренда',
+        action: 'create_expense',
+        comment: 'Аренда за август',
+        category: 'rent',
+        currency: 'RUB',
+        amount_rubles: 60_000,
+        category_kind: 'fixed',
+        amount_kopecks: 6_000_000,
+      },
+    });
+  });
+
+  it('puts the amount, the date and the category first even after a jsonb round trip', () => {
+    const { payload } = service.buildApprovalPreview('expenses.create', {
+      category: 'rent',
+      amount_rubles: 60_000,
+      occurred_on: '2026-08-05',
+      note: 'Аренда за август',
+    });
+    // Точный код карточки из app.html.
+    const visible = (preview: Record<string, unknown>) =>
+      Object.keys(preview)
+        .filter((key) => key !== 'action')
+        .slice(0, 6);
+    // 🔴 Хранится превью в jsonb, а он сортирует ключи по длине и байтам, а не
+    // по порядку вставки. Поэтому проверяем ОБА порядка: как отдали и как
+    // вернёт Postgres. В обоих сумма, дата и статья обязаны быть первыми.
+    const afterJsonb = Object.fromEntries(
+      Object.entries(payload).sort(
+        ([left], [right]) =>
+          left.length - right.length || (left < right ? -1 : 1),
+      ),
+    );
+    expect(visible(payload)).toEqual(visible(afterJsonb));
+    expect(visible(payload).slice(0, 3)).toEqual(['sum', 'date', 'type']);
   });
 
   it('builds an immutable, explicit approval preview', () => {

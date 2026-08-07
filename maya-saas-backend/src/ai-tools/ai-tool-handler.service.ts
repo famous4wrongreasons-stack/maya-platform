@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
@@ -7,6 +11,11 @@ import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
 import { CustomersService } from '../customers/customers.service';
+import {
+  findExpenseCategory,
+  resolveExpenseCategory,
+  rublesToKopecks,
+} from '../expenses/expense-category';
 import { ExpensesService } from '../expenses/expenses.service';
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import { LoyaltyService } from '../loyalty/loyalty.service';
@@ -167,8 +176,12 @@ export class AiToolHandlerService {
         return this.queryBusinessAnalytics(principal, args);
       case 'analytics.business.compare_years':
         return this.compareBusinessYears(principal);
+      case 'analytics.business.profit':
+        return this.readBusinessProfit(principal, args);
       case 'expenses.read':
         return this.readExpenses(principal.tenantId, args);
+      case 'expenses.create':
+        return this.createExpense(principal, args, idempotencyKey);
       case 'customers.count':
         return this.customersService.countCustomers(principal.tenantId);
       case 'appointments.own.cancel':
@@ -291,18 +304,275 @@ export class AiToolHandlerService {
       await this.reportingQuery(tenantId, args),
     );
     return {
+      // 🔴 Разрез по статьям считает сервер. «Сколько ушло на расходники» без
+      // него неотвечаемо: модели складывать запрещено, а перечень отдельных
+      // платежей — это не ответ, а работа, переложенная на владельца.
+      by_category: this.expenseCategoryTotals(result.items),
       items: result.items.map((item) => ({
         id: item.id,
         branch_id: item.branch_id,
         category: item.category,
+        // Постоянная или переменная — без этого маржу не разложить.
+        category_kind: item.category_kind,
+        // Записи со старой свободной категорией читаются как `other`,
+        // но то, что там было написано, не прячем.
+        category_raw: item.category_raw,
         amount_kopecks: item.amount_kopecks,
         amount_major_units: this.majorUnits(item.amount_kopecks),
         currency: item.currency,
         occurred_at: item.occurred_at,
+        source: item.source,
       })),
       totals: this.safeMoneyEntries(result.totals),
       truncated: result.truncated,
     };
+  }
+
+  /**
+   * Суммы по статьям расходов за период — уже сложенные.
+   *
+   * Ключ — статья и валюта: складывать рубли с тенге нельзя, а разложить по
+   * валютам дешевле, чем объяснять потом, откуда взялась смесь. Порядок —
+   * от большего к меньшему: вопрос «на что больше всего тратим» отвечается
+   * первой строкой, а не поиском максимума в голове у модели.
+   */
+  private expenseCategoryTotals(
+    items: Array<{
+      category: string;
+      category_label?: string;
+      category_kind?: string;
+      currency: string;
+      amount_kopecks: number;
+    }>,
+  ) {
+    const totals = new Map<
+      string,
+      {
+        category: string;
+        label: string;
+        kind: string;
+        currency: string;
+        amount_kopecks: number;
+        expense_count: number;
+      }
+    >();
+    for (const item of items) {
+      const resolved = resolveExpenseCategory(item.category);
+      const key = `${resolved.slug}|${item.currency}`;
+      const row = totals.get(key) ?? {
+        category: resolved.slug,
+        label: resolved.label,
+        kind: resolved.kind,
+        currency: item.currency,
+        amount_kopecks: 0,
+        expense_count: 0,
+      };
+      row.amount_kopecks += item.amount_kopecks;
+      row.expense_count += 1;
+      totals.set(key, row);
+    }
+    return [...totals.values()]
+      .sort(
+        (left, right) =>
+          right.amount_kopecks - left.amount_kopecks ||
+          left.category.localeCompare(right.category),
+      )
+      .map((row) => ({
+        ...row,
+        amount_major_units: this.majorUnits(row.amount_kopecks),
+      }));
+  }
+
+  /**
+   * Прибыль, структура расходов и стоимость нового клиента.
+   *
+   * 🔴 Единственный путь из прода к движку прибыли. Пока его не было, движок
+   * существовал только в собственном спеке: владелец спрашивал «прибыль
+   * какая», а отвечать было нечем — вопрос уходил в операционный обзор, где
+   * прибыли нет по построению.
+   *
+   * Обзор и финсводка загружаются здесь один раз и передаются движку
+   * контекстом: без этого один вопрос стоил бы двойного прохода журнала CRM.
+   */
+  private async readBusinessProfit(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const profitability = await this.analyticsService.getBusinessProfitability(
+      principal.tenantId,
+      window.query,
+    );
+    const data = this.record(profitability);
+    const period = this.record(data.period);
+    return {
+      ...data,
+      period: {
+        ...period,
+        named_month: window.namedMonth,
+        // Месяц ещё не кончился — сказать это обязаны мы, а не владелец,
+        // который сам заметит расхождение с бухгалтерией.
+        truncated_to_today: window.truncatedToToday,
+      },
+    };
+  }
+
+  /**
+   * Записать расход из чата — уже после подтверждения человеком.
+   *
+   * Сумма приходит в рублях: модель повторяет то, что сказал человек, и не
+   * пересчитывает разряды. В копейки её переводит сервер — единственным
+   * помощником `rublesToKopecks`, чтобы «60 тысяч» не превратились в 600.
+   */
+  private async createExpense(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+    idempotencyKey: string,
+  ) {
+    const category = this.requiredString(args.category);
+    const amountKopecks = rublesToKopecks(args.amount_rubles);
+    if (amountKopecks === null) {
+      throw new BadRequestException({
+        message: 'AI tool arguments are invalid.',
+        error: {
+          code: 'ai_tool_arguments_invalid',
+          detail: 'amount_rubles is not a valid ruble amount',
+        },
+      });
+    }
+
+    const timezone = await this.reportingTimezone(principal.tenantId);
+    // Дата к этому моменту уже проставлена: её подставляет `normalizeArguments`
+    // ДО того, как карточка ушла человеку, — иначе он подтверждал бы расход, не
+    // видя числа, за которое тот пишется.
+    const occurredOn =
+      typeof args.occurred_on === 'string'
+        ? args.occurred_on
+        : this.localDate(new Date(), timezone);
+    // Полдень по часовому поясу салона: любой сдвиг ±14 часов оставляет
+    // отметку внутри того же местного дня, поэтому расход не переезжает
+    // в соседний месяц на границе периода.
+    const occurredAt = localDateMinuteToUtc(occurredOn, 12 * 60, timezone);
+    const note = typeof args.note === 'string' ? args.note : undefined;
+
+    const expense = await this.expensesService.create(
+      principal.tenantId,
+      principal.userId,
+      {
+        category,
+        amountKopecks,
+        currency: 'RUB',
+        occurredAt: occurredAt.toISOString(),
+        ...(note ? { note } : {}),
+      },
+      // Повторное подтверждение той же карточки вернёт уже созданный расход.
+      { source: 'manual', idempotencyKey },
+    );
+
+    const resolved = resolveExpenseCategory(expense.category);
+    return {
+      recorded: true,
+      expense_id: expense.id,
+      category: resolved.slug,
+      category_label: resolved.label,
+      category_kind: resolved.kind,
+      amount_kopecks: expense.amount_kopecks,
+      amount_major_units: this.majorUnits(expense.amount_kopecks),
+      currency: expense.currency,
+      occurred_at: expense.occurred_at,
+      // Местная дата берётся из сохранённой записи, а не из аргументов: при
+      // повторном подтверждении вернётся дата уже существующего расхода.
+      occurred_on: this.localDate(new Date(expense.occurred_at), timezone),
+      source: expense.source,
+      // Тот же платёж мог приехать из CRM. Не блокируем — владелец может знать
+      // лучше, — но говорим вслух, чтобы дубль не жил молча.
+      possible_duplicate: expense.possible_duplicate ?? null,
+    };
+  }
+
+  /**
+   * Доводка аргументов ДО подписи и показа карточки.
+   *
+   * 🔴 Почему не в реестре: там нет ни тенанта, ни его часового пояса, а
+   * «сегодня» — понятие местное. И почему до хеша: карточка подтверждения
+   * обязана показывать ту самую дату, которая будет записана. Если оставить
+   * «сегодня» неразрешённым до момента исполнения, человек подтверждает одно,
+   * а сервер пишет другое — на границе суток буквально другое число.
+   *
+   * Для всех остальных инструментов это тождественное преобразование.
+   */
+  async normalizeArguments(
+    toolName: string,
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ): Promise<ValidatedAiToolArguments> {
+    if (
+      toolName !== 'expenses.create' ||
+      typeof args.occurred_on === 'string'
+    ) {
+      return args;
+    }
+    const timezone = await this.reportingTimezone(principal.tenantId);
+    return { ...args, occurred_on: this.localDate(new Date(), timezone) };
+  }
+
+  /**
+   * Дописать в карточку подтверждения то, что видно только из базы.
+   *
+   * Пока что это одно: похоже ли расход на дубль уже записанного платежа из
+   * другого источника. Предупреждение встаёт сразу после даты — то есть в
+   * пределах тех шести полей, которые карточка вообще показывает.
+   */
+  async enrichApprovalPreview(
+    toolName: string,
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+    payload: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    if (toolName !== 'expenses.create') {
+      return payload;
+    }
+    const amountKopecks = rublesToKopecks(args.amount_rubles);
+    const category = findExpenseCategory(args.category);
+    if (amountKopecks === null || !category) {
+      return payload;
+    }
+    const timezone = await this.reportingTimezone(principal.tenantId);
+    const occurredOn =
+      typeof args.occurred_on === 'string'
+        ? args.occurred_on
+        : this.localDate(new Date(), timezone);
+    // Подсказка о дубле — украшение карточки. Если её не удалось собрать,
+    // расход всё равно должен дойти до подтверждения: потерять запись из-за
+    // необязательной проверки хуже, чем не предупредить.
+    const duplicates = await this.expensesService
+      .findProbableDuplicates(principal.tenantId, {
+        category: category.slug,
+        amountKopecks,
+        currency: 'RUB',
+        occurredAt: localDateMinuteToUtc(occurredOn, 12 * 60, timezone),
+        source: 'manual',
+      })
+      .catch(() => []);
+    if (duplicates.length === 0) {
+      return payload;
+    }
+    const first = duplicates[0];
+    const enriched: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(payload)) {
+      enriched[key] = value;
+      if (key === 'date') {
+        enriched.alert = `Похоже на дубль: такой же расход уже записан ${this.humanDay(
+          this.localDate(new Date(first.occurred_at), timezone),
+        )}${first.source === 'crm' ? ' (пришёл из CRM)' : ''}. Записать всё равно?`;
+      }
+    }
+    return enriched;
+  }
+
+  private humanDay(localDate: string): string {
+    const [year, month, day] = localDate.split('-');
+    return `${day}.${month}.${year}`;
   }
 
   /**
@@ -2026,14 +2296,36 @@ export class AiToolHandlerService {
     tenantId: string,
     args: ValidatedAiToolArguments,
   ) {
+    return (await this.reportingWindow(tenantId, args)).query;
+  }
+
+  /**
+   * Окно отчёта вместе с тем, что о нём нужно сказать вслух.
+   *
+   * `truncatedToToday` относится только к названному месяцу: спросили про
+   * текущий месяц по имени — считаем по сегодня, и это обязано прозвучать в
+   * ответе, иначе «июль» и «июль по седьмое» выглядят одинаково.
+   */
+  private async reportingWindow(
+    tenantId: string,
+    args: ValidatedAiToolArguments,
+  ): Promise<{
+    query: AnalyticsRangeQueryDto;
+    truncatedToToday: boolean;
+    namedMonth: string | null;
+  }> {
     const period = this.requiredString(args.period);
     const branchId =
       typeof args.branch_id === 'string' ? args.branch_id : undefined;
     if (period === 'custom') {
       return {
-        from: this.requiredString(args.from),
-        to: this.requiredString(args.to),
-        ...(branchId ? { branchId } : {}),
+        query: {
+          from: this.requiredString(args.from),
+          to: this.requiredString(args.to),
+          ...(branchId ? { branchId } : {}),
+        },
+        truncatedToToday: false,
+        namedMonth: null,
       };
     }
 
@@ -2043,6 +2335,8 @@ export class AiToolHandlerService {
     const todayStart = localDateMinuteToUtc(today, 0, timezone);
     let from: Date;
     let to = now;
+    let truncatedToToday = false;
+    let namedMonth: string | null = null;
 
     switch (period) {
       case 'today':
@@ -2089,14 +2383,42 @@ export class AiToolHandlerService {
         );
         break;
       }
+      case 'named_month': {
+        // Названный месяц — это КАЛЕНДАРНЫЙ месяц целиком, от первого числа до
+        // последней миллисекунды последнего. Отвечать на «прибыль в июле»
+        // цифрами текущего месяца по сегодня — самая незаметная ложь из
+        // возможных: числа настоящие, период чужой.
+        namedMonth = this.requiredString(args.month);
+        const firstDay = `${namedMonth}-01`;
+        from = localDateMinuteToUtc(firstDay, 0, timezone);
+        const monthEnd = new Date(
+          localDateMinuteToUtc(
+            this.shiftLocalMonth(firstDay, 1),
+            0,
+            timezone,
+          ).getTime() - 1,
+        );
+        if (monthEnd.getTime() > now.getTime()) {
+          // Месяц ещё идёт: считаем по сегодня и обязаны это сказать.
+          to = now;
+          truncatedToToday = true;
+        } else {
+          to = monthEnd;
+        }
+        break;
+      }
       default:
         throw new Error('Validated AI reporting period is invalid');
     }
 
     return {
-      from: from.toISOString(),
-      to: to.toISOString(),
-      ...(branchId ? { branchId } : {}),
+      query: {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        ...(branchId ? { branchId } : {}),
+      },
+      truncatedToToday,
+      namedMonth,
     };
   }
 

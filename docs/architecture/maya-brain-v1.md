@@ -117,6 +117,11 @@ Configuration:
 MAYA_BRAIN_V1_ENABLED="false"
 MAYA_BRAIN_V1_SURFACES="native"
 MAYA_BRAIN_V1_TENANT_IDS=""
+# ⚠️ "safe" means "no model at all", not "a safer model". Because this value
+# overrides AI_CORE_PROVIDER only while a Brain session is active, the former
+# default switched the model off on exactly the channel the canary enabled.
+# Leave it empty to inherit AI_CORE_PROVIDER, or name a provider explicitly.
+MAYA_BRAIN_PROVIDER=""
 AI_BRAIN_SESSION_TTL_HOURS="24"
 AI_BRAIN_MEMORY_RETENTION_DAYS="180"
 ```
@@ -138,11 +143,49 @@ The tenant allowlist is mandatory and fails closed. An empty allowlist keeps
 Brain on the legacy path even when the global flag is enabled, so a native
 canary cannot silently expand to every tenant.
 
+`MAYA_BRAIN_PROVIDER` overrides `AI_CORE_PROVIDER` only for active Brain
+sessions. This allows a native canary to use `deepseek` or `openai` while the
+legacy web/PWA chat remains in `safe` mode. An empty value inherits the legacy
+provider; production canaries should set it explicitly.
+
 ## Retention
 
 `npm run ai:maintenance` removes expired Brain sessions and expired or
 user-forgotten memory facts in bounded batches. Dry-run remains the default and
 does not print payloads.
+
+## Salon economics: profit, expenses and the cost of a new client
+
+Profit has exactly one honest source, the `analytics.business.profit` tool over
+`OperationsAnalyticsService.getBusinessProfitability`. It is deliberately not a
+field of the operational overview.
+
+- Profit is till-confirmed cash from CRM financial transactions minus a
+  COMPLETE expense ledger. Booked appointment prices are never used: booked is
+  not paid.
+- Completeness has three states, not two. `complete`, `incomplete` (the
+  category is absent), and `understated` (the category exists but its amount is
+  implausibly small against the confirmed cash of the same period — see
+  `MIN_PLAUSIBLE_EXPENSE_SHARE_OF_CONFIRMED_REVENUE`). One kopeck of rent must
+  never unlock a profit figure that is almost equal to revenue.
+- Salary comes ONLY from the CRM payroll calculation and never from a manual
+  expense. Manual entry of payroll is blocked in the category dictionary, so
+  its absence is reported as its own reason (`payroll`), never as an item in
+  `missing_categories`. Anything listed there is something the owner can
+  actually record, which is what MAYA offers to do.
+- Return on advertising does not exist in any source and stays in
+  `unavailable_metrics`. The nearest honest metric is the cost of a new client:
+  advertising spend divided by the new guests of the period within the cohort
+  lookback window.
+
+`GET /analytics/business` keeps its previous `net` field for tenants on the
+internal calendar. The cabinet is deployed separately and renders a «Чистыми»
+card from that array; an empty array reads as «0 ₽». The AI layer calls
+`getBusinessOverview` directly and still sees no profit there.
+
+Named calendar months («в июле», «за март») are a first-class reporting period
+(`named_month` plus `month` as `YYYY-MM`) resolved by the server in the tenant
+timezone. A month still running is counted up to today and the answer says so.
 
 ## Security invariants
 

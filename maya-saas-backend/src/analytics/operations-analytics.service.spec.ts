@@ -6,7 +6,12 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
-import { OperationsAnalyticsService } from './operations-analytics.service';
+import {
+  CLIENT_COHORT_LOOKBACK_DAYS,
+  MARKETING_ROI_UNAVAILABLE,
+  OperationsAnalyticsService,
+  type ProfitabilityCohortSource,
+} from './operations-analytics.service';
 
 describe('OperationsAnalyticsService', () => {
   const createService = (
@@ -441,11 +446,13 @@ describe('OperationsAnalyticsService', () => {
       { currency: 'EUR', amount_kopecks: 3_000 },
       { currency: 'RUB', amount_kopecks: 2_500 },
     ]);
-    expect(result.net).toEqual([
-      { currency: 'EUR', amount_kopecks: -3_000 },
-      { currency: 'RUB', amount_kopecks: 7_500 },
-      { currency: 'USD', amount_kopecks: 2_000 },
-    ]);
+    // 🔴 Прибыли в операционном обзоре нет. Раньше здесь стояло 7 500 ₽ по
+    // рублям — «выручка минус расходы», где выручка была суммой цен из журнала
+    // записей, а расходы — тем, что владелец успел завести руками. Обе части
+    // не те, чем кажутся, и вместе давали прибыль почти равную выручке.
+    expect(result.net).toEqual([]);
+    expect(result.net_status).toBe('unavailable');
+    expect(result.net_unavailable_reason).toContain('till_confirmed_cash');
     expect(result.average_ticket).toEqual([
       { currency: 'RUB', amount_kopecks: 10_000 },
       { currency: 'USD', amount_kopecks: 2_000 },
@@ -1061,5 +1068,746 @@ describe('OperationsAnalyticsService', () => {
       },
     });
     expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Прибыль и стоимость нового клиента.
+   *
+   * 🔴 Всё, что здесь проверяется, — про один и тот же класс вранья: показать
+   * владельцу число, которое выглядит как прибыль, но собрано не из того.
+   */
+  describe('profitability', () => {
+    const createProfitabilityService = (options: {
+      calendarSource?: CalendarSource;
+      expenses?: Array<{
+        category: string;
+        amountKopecks: number;
+        currency: string;
+        occurredAt: Date;
+      }>;
+      expensesUnavailable?: boolean;
+      revenueKopecks?: number | null;
+      revenueVerified?: boolean;
+      payrollAccruedKopecks?: number | null;
+      financeFails?: boolean;
+    }) => {
+      const tenantContext = new TenantContextService();
+      const expenseFindMany = jest.fn(() =>
+        options.expensesUnavailable
+          ? Promise.reject(new Error('expense ledger unavailable'))
+          : Promise.resolve(options.expenses ?? []),
+      );
+      const prisma = {
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            defaultTimezone: 'Europe/Moscow',
+            calendarSource: options.calendarSource ?? CalendarSource.EXTERNAL,
+          }),
+        },
+        appointment: { findMany: jest.fn().mockResolvedValue([]) },
+        expense: { findMany: expenseFindMany },
+        internalProvider: {
+          findFirst: jest.fn(),
+          findMany: jest.fn().mockResolvedValue([]),
+        },
+        crmStaffAccess: { findFirst: jest.fn() },
+      } as unknown as PrismaService;
+      const revenueKopecks =
+        options.revenueKopecks === undefined
+          ? 1_000_000
+          : options.revenueKopecks;
+      const payrollAccruedKopecks =
+        options.payrollAccruedKopecks === undefined
+          ? null
+          : options.payrollAccruedKopecks;
+      const crmGetFinancialSummary = jest.fn(() =>
+        options.financeFails
+          ? Promise.reject(new Error('crm finance is unavailable'))
+          : Promise.resolve({
+              source: 'external_crm',
+              provider: 'yclients',
+              verified: true,
+              period: {
+                from: '2026-07-01',
+                to: '2026-07-31',
+                timezone: 'Europe/Moscow',
+              },
+              revenue: {
+                status: revenueKopecks === null ? 'unavailable' : 'available',
+                verified: options.revenueVerified ?? true,
+                transaction_count: 120,
+                total:
+                  revenueKopecks === null
+                    ? null
+                    : { currency: 'RUB', amount_kopecks: revenueKopecks },
+                by_type: [],
+                by_account: [],
+              },
+              payroll: {
+                status:
+                  payrollAccruedKopecks === null ? 'unavailable' : 'available',
+                verified: payrollAccruedKopecks !== null,
+                accrued_total:
+                  payrollAccruedKopecks === null
+                    ? null
+                    : {
+                        currency: 'RUB',
+                        amount_kopecks: payrollAccruedKopecks,
+                      },
+                paid_total: null,
+                balance_total: null,
+                staff: [],
+              },
+              warnings: [],
+            }),
+      );
+      /**
+       * Журнал записей нарочно «богаче» кассы: 50 000 ₽ записанных услуг
+       * против 10 000 ₽ подтверждённой кассы. Если прибыль хоть где-то
+       * возьмёт цены расписания вместо кассы, числа разойдутся в пять раз и
+       * тест это увидит.
+       */
+      const crmGetJournal = jest.fn().mockResolvedValue({
+        calendar_source: 'external',
+        timezone: 'Europe/Moscow',
+        range: { from: '', to: '' },
+        provider_id: null,
+        count: 1,
+        appointments: [
+          {
+            id: 'journal-rich',
+            client: { id: 'client-1', name: 'Client' },
+            provider: { id: 'staff-1', name: 'Provider' },
+            branch: null,
+            service_ids: ['service-a'],
+            services: [
+              {
+                id: 'service-a',
+                name: 'Мужская стрижка',
+                price: 50_000,
+                currency: 'RUB',
+              },
+            ],
+            start_at: '2026-07-10T09:00:00.000Z',
+            end_at: '2026-07-10T10:00:00.000Z',
+            status: 'confirmed',
+            notes: null,
+            total_price: 50_000,
+            currency: 'RUB',
+          },
+        ],
+      });
+      const crmService = {
+        getJournal: crmGetJournal,
+        getFinancialSummary: crmGetFinancialSummary,
+        getRevenueSummary: jest.fn(),
+      } as unknown as CrmService;
+
+      return {
+        tenantContext,
+        expenseFindMany,
+        crmGetFinancialSummary,
+        crmGetJournal,
+        service: new OperationsAnalyticsService(
+          prisma,
+          tenantContext,
+          {
+            assertBranchBelongsToTenant: jest.fn(),
+          } as unknown as TenantsService,
+          crmService,
+          {
+            encrypt: (value: string) => `enc:${value}`,
+            decrypt: (value: string) => value,
+          } as EncryptionService,
+        ),
+      };
+    };
+
+    const july = {
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+    };
+
+    const expense = (
+      category: string,
+      amountKopecks: number,
+      currency = 'RUB',
+    ) => ({
+      category,
+      amountKopecks,
+      currency,
+      occurredAt: new Date('2026-07-05T09:00:00.000Z'),
+    });
+
+    const cohorts = (
+      clientsNew: number | null,
+      status: 'available' | 'unavailable' = 'available',
+      reason: string | null = null,
+    ): ProfitabilityCohortSource => ({
+      appointments: {
+        clients_new: clientsNew,
+        cohort_status: status,
+        cohort_unavailable_reason: reason,
+        cohort_lookback_days: CLIENT_COHORT_LOOKBACK_DAYS,
+      },
+    });
+
+    it('computes profit from till-confirmed cash and not from journal prices', async () => {
+      const setup = createProfitabilityService({
+        // Подтверждённая касса 10 000 ₽ — она и есть база прибыли.
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.confirmed_revenue).toMatchObject({
+        status: 'available',
+        verified: true,
+        source: 'crm_financial_transactions',
+        total: { currency: 'RUB', amount_kopecks: 1_000_000 },
+      });
+      expect(result.completeness).toMatchObject({ status: 'complete' });
+      // 10 000 ₽ кассы − 3 000 ₽ зарплаты − 2 000 ₽ аренды = 5 000 ₽.
+      expect(result.net_profit).toMatchObject({
+        status: 'available',
+        total: {
+          currency: 'RUB',
+          amount_kopecks: 500_000,
+          amount_major_units: 5_000,
+        },
+        margin_percent: 50,
+        unavailable_reason: null,
+      });
+      expect(setup.crmGetFinancialSummary).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores the booked value of the journal even when it loads the overview itself', async () => {
+      const setup = createProfitabilityService({
+        // Касса 10 000 ₽, а записанных услуг в журнале на 50 000 ₽.
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () => setup.service.getBusinessProfitability('tenant-a', july),
+      );
+
+      // Журнал прочитан — из него берутся когорты для стоимости гостя.
+      expect(setup.crmGetJournal).toHaveBeenCalled();
+      // Но прибыль всё равно от кассы: 10 000 − 5 000 = 5 000 ₽, а не
+      // 50 000 − 5 000 = 45 000 ₽.
+      expect(result.net_profit).toMatchObject({
+        status: 'available',
+        total: { amount_kopecks: 500_000, amount_major_units: 5_000 },
+      });
+      expect(result.confirmed_revenue.total).toMatchObject({
+        amount_kopecks: 1_000_000,
+      });
+    });
+
+    it('refuses profit and names the missing expense category by its salon word', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        // Зарплата ЕСТЬ: иначе настоящим блокером была бы она, и совет
+        // «внесите аренду» никуда бы не привёл — владелец внёс бы её и всё
+        // равно не получил прибыль. Проверяем гейт полноты, а не расчёт ЗП.
+        payrollAccruedKopecks: 300_000,
+        // Ровно тот случай, ради которого писался гейт: один расход на 500 ₽
+        // за месяц. Раньше он дал бы «прибыль» 9 500 ₽ при выручке 10 000 ₽.
+        expenses: [expense('coffee', 50_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.net_profit).toMatchObject({
+        status: 'unavailable',
+        total: null,
+        unavailable_reason:
+          'required_expense_categories_are_missing_for_this_period',
+      });
+      expect(result.completeness.status).toBe('incomplete');
+      expect(result.completeness.missing_categories).toEqual([
+        { category: 'rent', label: 'аренда' },
+      ]);
+      // 🔴 Зарплаты в списке «что внести» нет и быть не может: ручной ввод
+      // зарплаты запрещён, и совет её внести был бы советом невозможного.
+      expect(result.completeness.missing_categories).not.toContainEqual(
+        expect.objectContaining({ category: 'salary' }),
+      );
+      // Зарплата в этой фикстуре есть — блокером остаётся только аренда.
+      // Владельцу её всё равно вносить нельзя: она приходит расчётом CRM.
+      expect(result.payroll).toMatchObject({
+        status: 'available',
+        owner_can_record: false,
+      });
+      expect(result.unavailable_metrics).toContainEqual(
+        expect.objectContaining({ key: 'net_profit' }),
+      );
+    });
+
+    it('does not let one kopeck of rent close the completeness gate', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        // 🔴 Аренда «внесена» — на один рубль при кассе в 10 000 ₽. Прежний
+        // гейт «сумма больше нуля» считал это полнотой, и прибыль выходила
+        // 6 900 ₽ при настоящих расходах, которых никто не заводил.
+        expenses: [expense('rent', 100)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.completeness.status).toBe('understated');
+      expect(result.completeness.missing_categories).toEqual([]);
+      expect(result.completeness.understated_categories).toEqual([
+        {
+          category: 'rent',
+          label: 'аренда',
+          recorded: {
+            currency: 'RUB',
+            amount_kopecks: 100,
+            amount_major_units: 1,
+          },
+          share_of_confirmed_revenue_percent: 0.01,
+        },
+      ]);
+      expect(result.net_profit).toMatchObject({
+        status: 'unavailable',
+        total: null,
+        unavailable_reason:
+          'recorded_expense_categories_are_implausibly_small_against_the_confirmed_cash_of_this_period_and_look_partially_entered',
+      });
+    });
+
+    it('names only rent when the CRM payroll already covers salary', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('supplies', 40_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.completeness.missing_categories).toEqual([
+        { category: 'rent', label: 'аренда' },
+      ]);
+      expect(result.net_profit.status).toBe('unavailable');
+    });
+
+    it('accepts a category synonym so a real ledger is not called incomplete', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        // Владелец написал слаги по-своему: справочника категорий в базе нет.
+        expenses: [expense('arenda', 200_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.completeness.status).toBe('complete');
+      expect(result.completeness.missing_categories).toEqual([]);
+      expect(result.net_profit).toMatchObject({
+        status: 'available',
+        total: { amount_kopecks: 500_000 },
+      });
+    });
+
+    it('counts salary once when CRM payroll and a manual salary expense both exist', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000), expense('salary', 900_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      // 🔴 Сложение обеих зарплат дало бы расходов на 14 000 ₽ и «убыток»
+      // −4 000 ₽ там, где салон в плюсе на 5 000 ₽.
+      expect(result.expenses.totals).toEqual([
+        { currency: 'RUB', amount_kopecks: 500_000, amount_major_units: 5_000 },
+      ]);
+      expect(result.expenses.salary_source).toBe('crm_payroll');
+      expect(result.expenses.by_category).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            category: 'salary',
+            source: 'crm_payroll',
+            amount_kopecks: 300_000,
+          }),
+        ]),
+      );
+      expect(
+        result.expenses.by_category.filter((row) => row.category === 'salary'),
+      ).toHaveLength(1);
+      expect(result.expenses.ignored_manual_salary).toEqual([
+        { currency: 'RUB', amount_kopecks: 900_000, amount_major_units: 9_000 },
+      ]);
+      expect(result.warnings).toContainEqual(
+        expect.objectContaining({
+          code: 'manual_salary_expenses_replaced_by_crm_payroll',
+        }),
+      );
+      expect(result.net_profit).toMatchObject({
+        status: 'available',
+        total: { amount_kopecks: 500_000 },
+      });
+    });
+
+    it('refuses profit when the CRM gave no payroll, and does not ask to enter it by hand', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        // Расчёт есть, но он нулевой — значит за период его просто не сделали.
+        payrollAccruedKopecks: 0,
+        expenses: [expense('rent', 200_000), expense('salary', 300_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      // 🔴 Замкнутый круг: раньше ручная зарплата закрывала гейт, хотя вносить
+      // её запрещено, и MAYA советовала сделать невозможное. Теперь зарплата
+      // признаётся только из расчёта CRM, а её отсутствие — отдельная причина.
+      expect(result.expenses.salary_source).toBe('owner_manual');
+      expect(result.payroll).toMatchObject({
+        status: 'unavailable',
+        unavailable_reason:
+          'salary_comes_only_from_the_crm_payroll_calculation_and_the_crm_returned_none_for_this_period',
+        owner_can_record: false,
+      });
+      expect(result.net_profit).toMatchObject({
+        status: 'unavailable',
+        total: null,
+        unavailable_reason:
+          'salary_comes_only_from_the_crm_payroll_calculation_and_the_crm_returned_none_for_this_period',
+      });
+      // И список «что внести» пуст: аренда есть, а зарплату вносить нельзя.
+      expect(result.net_profit.missing_categories).toEqual([]);
+    });
+
+    it('refuses profit for an internal calendar because there is no till at all', async () => {
+      const setup = createProfitabilityService({
+        calendarSource: CalendarSource.INTERNAL,
+        expenses: [expense('rent', 200_000), expense('salary', 300_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+      expect(result.confirmed_revenue).toMatchObject({
+        status: 'unavailable',
+        total: null,
+        unavailable_reason:
+          'internal_calendar_records_booked_appointment_prices_and_has_no_till_confirmed_cash',
+      });
+      // Расходы полные, а прибыли всё равно нет: вычитать не из чего.
+      expect(result.completeness.status).toBe('complete');
+      expect(result.net_profit).toMatchObject({
+        status: 'unavailable',
+        total: null,
+        unavailable_reason:
+          'profit_requires_till_confirmed_cash_and_there_is_none_for_this_period',
+      });
+    });
+
+    it('refuses profit when the CRM did not confirm the cash', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        revenueVerified: false,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.confirmed_revenue).toMatchObject({
+        status: 'unavailable',
+        unavailable_reason: 'crm_returned_cash_revenue_without_confirmation',
+      });
+      expect(result.net_profit.status).toBe('unavailable');
+    });
+
+    it('refuses to net expenses recorded in another currency', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000), expense('supplies', 5_000, 'EUR')],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      // Отбросить евро значило бы занизить расходы и завысить прибыль — курса
+      // у нас нет, поэтому отказ.
+      expect(result.net_profit).toMatchObject({
+        status: 'unavailable',
+        unavailable_reason:
+          'expenses_and_confirmed_cash_are_recorded_in_different_currencies_and_cannot_be_netted',
+      });
+    });
+
+    it('refuses profit for a branch filter without touching the CRM or the ledger', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', {
+            ...july,
+            branchId: '11111111-1111-4111-8111-111111111111',
+          }),
+      );
+
+      expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+      expect(setup.expenseFindMany).not.toHaveBeenCalled();
+      expect(result.net_profit.unavailable_reason).toBe(
+        'crm_confirms_cash_for_the_whole_company_and_has_no_branch_split',
+      );
+      expect(result.client_acquisition_cost.unavailable_reason).toBe(
+        'marketing_spend_and_client_cohorts_are_company_scoped_and_have_no_branch_split',
+      );
+    });
+
+    it('refuses everything when the expense ledger cannot be read', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expensesUnavailable: true,
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(4),
+          }),
+      );
+
+      expect(result.expenses.status).toBe('unavailable');
+      expect(result.net_profit.unavailable_reason).toBe(
+        'expense_ledger_did_not_answer_for_this_period',
+      );
+      expect(result.client_acquisition_cost.unavailable_reason).toBe(
+        'expense_ledger_did_not_answer_for_this_period',
+      );
+    });
+
+    it('computes the cost of a new client and always carries the cohort horizon', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000), expense('ads', 600_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(4),
+          }),
+      );
+
+      expect(result.client_acquisition_cost).toMatchObject({
+        status: 'available',
+        // 6 000 ₽ рекламы на 4 новых гостя — 1 500 ₽ за гостя.
+        cost_per_new_client: {
+          currency: 'RUB',
+          amount_kopecks: 150_000,
+          amount_major_units: 1_500,
+        },
+        marketing_spend: { currency: 'RUB', amount_kopecks: 600_000 },
+        new_clients: 4,
+        cohort_lookback_days: CLIENT_COHORT_LOOKBACK_DAYS,
+        unavailable_reason: null,
+      });
+      // Реклама остаётся обычным расходом и участвует в прибыли.
+      expect(result.expenses.totals).toEqual([
+        {
+          currency: 'RUB',
+          amount_kopecks: 1_100_000,
+          amount_major_units: 11_000,
+        },
+      ]);
+    });
+
+    it('refuses the cost of a new client instead of dividing by zero', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000), expense('marketing', 600_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(0),
+          }),
+      );
+
+      expect(result.client_acquisition_cost).toMatchObject({
+        status: 'unavailable',
+        cost_per_new_client: null,
+        marketing_spend: { amount_kopecks: 600_000 },
+        new_clients: 0,
+        cohort_lookback_days: CLIENT_COHORT_LOOKBACK_DAYS,
+        unavailable_reason:
+          'this_period_has_no_new_clients_so_cost_per_new_client_has_no_denominator',
+      });
+    });
+
+    it('carries the cohort reason when new clients cannot be counted at all', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000), expense('marketing', 600_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(
+              null,
+              'unavailable',
+              'lookback_window_unavailable',
+            ),
+          }),
+      );
+
+      expect(result.client_acquisition_cost).toMatchObject({
+        status: 'unavailable',
+        cost_per_new_client: null,
+        new_clients: null,
+        unavailable_reason: 'lookback_window_unavailable',
+      });
+    });
+
+    it('refuses the cost of a new client when no advertising is recorded', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(4),
+          }),
+      );
+
+      expect(result.client_acquisition_cost).toMatchObject({
+        status: 'unavailable',
+        cost_per_new_client: null,
+        marketing_spend: null,
+        new_clients: 4,
+        unavailable_reason:
+          'no_advertising_expenses_are_recorded_for_this_period',
+      });
+    });
+
+    it('reports marketing ROI as permanently unavailable and points at the cost of a new client', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+        payrollAccruedKopecks: 300_000,
+        expenses: [expense('rent', 200_000), expense('ads', 600_000)],
+      });
+
+      const result = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () =>
+          setup.service.getBusinessProfitability('tenant-a', july, {
+            overview: cohorts(4),
+          }),
+      );
+
+      expect(result.unavailable_metrics).toContainEqual({
+        key: 'marketing_roi',
+        reason: MARKETING_ROI_UNAVAILABLE,
+        nearest_available_metric: 'client_acquisition_cost',
+      });
+      expect(MARKETING_ROI_UNAVAILABLE).toContain('attribution');
+    });
+
+    it('rejects a profitability tenant mismatch before any query', async () => {
+      const setup = createProfitabilityService({
+        revenueKopecks: 1_000_000,
+      });
+
+      await expect(
+        setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+          setup.service.getBusinessProfitability('tenant-b', july),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(setup.expenseFindMany).not.toHaveBeenCalled();
+      expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+    });
   });
 });

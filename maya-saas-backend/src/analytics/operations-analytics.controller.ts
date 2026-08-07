@@ -54,7 +54,10 @@ export class OperationsAnalyticsController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AnalyticsRangeQueryDto,
   ) {
-    return this.analytics.getBusinessOverview(user.tenantId!, query);
+    // 🔴 Кабинетный вариант: со старым полем `net`. Подробности — в
+    // комментарии к `getBusinessOverviewForCabinet`. AI-слой ходит в
+    // `getBusinessOverview` напрямую и этого поля не видит.
+    return this.analytics.getBusinessOverviewForCabinet(user.tenantId!, query);
   }
 
   @Get('business/finance')
@@ -78,7 +81,7 @@ export class OperationsAnalyticsController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AnalyticsRangeQueryDto,
   ) {
-    return this.analytics.getEmployeeOverview(
+    return this.analytics.getEmployeeOverviewForCabinet(
       user.tenantId!,
       user.userId,
       query,

@@ -1,4 +1,8 @@
 import { UserRole } from '../common/domain.enums';
+import {
+  MANUAL_EXPENSE_CATEGORY_SLUGS,
+  MAX_EXPENSE_RUBLES,
+} from '../expenses/expense-category';
 import type { AiToolDefinition } from './ai-tool.types';
 
 const ALL_SURFACES = ['native', 'web', 'telegram', 'voice'] as const;
@@ -61,10 +65,21 @@ const REPORTING_PERIOD_SCHEMA = {
         'last_7_days',
         'last_30_days',
         'last_month',
+        'named_month',
         'custom',
       ],
       description:
-        'Server-resolved reporting period. Use custom only when the person supplied explicit dates.',
+        'Server-resolved reporting period. Use named_month together with month when the person named a calendar month ("в июле", "за март"). Use custom only when the person supplied explicit dates.',
+    },
+    /**
+     * Календарный месяц целиком. Без него «прибыль в июле» молча считалась за
+     * текущий месяц по сегодня — вопрос про июль отвечался числами августа.
+     */
+    month: {
+      type: 'string',
+      pattern: '^\\d{4}-(0[1-9]|1[0-2])$',
+      description:
+        'Calendar month as YYYY-MM, required by named_month and forbidden otherwise. A month already finished is counted whole; a month still running is counted up to today and the server says so.',
     },
     from: { type: 'string', format: 'date-time' },
     to: { type: 'string', format: 'date-time' },
@@ -257,9 +272,28 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'last_verified_snapshot',
   },
   {
+    name: 'analytics.business.profit',
+    description:
+      'Net profit, expense structure and cost of one new client for the salon. This is the ONLY honest source of profit: it is computed from till-confirmed cash of the CRM financial transactions minus a COMPLETE expense ledger, never from booked appointment prices and never from a partial ledger. Use it for "какая прибыль", "сколько в итоге осталось", "я в плюсе", "маржа", "на что уходят деньги", "сколько стоит привести нового клиента", "цена клиента". Every money figure is already calculated: never subtract, divide or scale anything yourself. net_profit.status may be unavailable, and then unavailable_reason says why and net_profit.missing_categories lists ONLY the expense categories the owner can record himself, so they can be offered as a next step; salary is never in that list because it comes from the CRM payroll calculation and cannot be entered by hand, and its absence is reported separately in payroll. client_acquisition_cost is advertising spend divided by new clients of the period within cohort_lookback_days, which is the price of a new guest, not proof that advertising brought him. Return on advertising does not exist in any source and is listed in unavailable_metrics.',
+    inputSchema: REPORTING_PERIOD_SCHEMA,
+    // Те же роли, что и у чтения финансов: подтверждённая касса и расходы —
+    // коммерческая тайна, управляющему и руководителю филиала они не открыты.
+    allowedRoles: FINANCE_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['analytics.business'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    // Внутри — финсводка CRM (включая расчёт зарплаты по каждому сотруднику) и
+    // полный обзор с когортами: тот же порядок работы, что у business.query.
+    timeoutMs: 70_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'expenses.read',
     description:
-      'Read tenant expenses without decrypted free-text notes. Relative reporting periods are resolved by the server in the tenant timezone.',
+      'Read tenant expenses without decrypted free-text notes, together with by_category totals already summed by the server for the period. Use by_category for "сколько ушло на расходники", "на что больше всего тратим": never add the individual items up yourself. Relative reporting periods are resolved by the server in the tenant timezone.',
     inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -483,6 +517,54 @@ export const MAYA_AI_TOOL_CATALOG = [
     allowedRoles: OWNER_AND_ADMIN_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['loyalty'],
+    riskTier: 'high_write',
+    approvalPolicy: 'owner',
+    idempotency: 'required',
+    timeoutMs: 10_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'expenses.create',
+    description:
+      'Record one salon expense after owner approval. The amount is given in RUBLES exactly as the person said them ("шестьдесят тысяч" is amount_rubles 60000): never convert to kopecks, the server does that. category must be one of the fixed slugs, because a free-text category splits one cost line into several and breaks the margin. Salary is never recorded here: master payroll already arrives from the CRM payroll calculation and a manual copy would count it twice, so a payroll request is rejected. occurred_on is optional and defaults to today in the salon timezone. Nothing is written until a human confirms the card.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['category', 'amount_rubles'],
+      properties: {
+        category: {
+          type: 'string',
+          enum: MANUAL_EXPENSE_CATEGORY_SLUGS,
+          description:
+            'rent — аренда, supplies — расходники, marketing — реклама, taxes — налоги, utilities — коммунальные платежи, other — прочее.',
+        },
+        amount_rubles: {
+          type: 'number',
+          exclusiveMinimum: 0,
+          maximum: MAX_EXPENSE_RUBLES,
+          description:
+            'Amount in rubles, at most two decimals. 60 тысяч рублей is 60000, not 6000000.',
+        },
+        occurred_on: {
+          type: 'string',
+          format: 'date',
+          pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+          description:
+            'Local salon date of the expense. Omit it for today: the server resolves today in the salon timezone.',
+        },
+        note: {
+          type: 'string',
+          minLength: 2,
+          maxLength: 160,
+          description:
+            'Short human note without personal data, phone numbers or emails.',
+        },
+      },
+    },
+    allowedRoles: FINANCE_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['expenses.core'],
     riskTier: 'high_write',
     approvalPolicy: 'owner',
     idempotency: 'required',

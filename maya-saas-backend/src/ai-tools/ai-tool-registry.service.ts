@@ -9,6 +9,12 @@ import {
   normalizeScheduleSlots,
   staffScheduleRevision,
 } from '../crm/staff-schedule.utils';
+import {
+  MANUAL_EXPENSE_CATEGORY_SLUGS,
+  findExpenseCategory,
+  isManualExpenseCategory,
+  rublesToKopecks,
+} from '../expenses/expense-category';
 import { MAYA_AI_TOOL_CATALOG, MayaAiToolName } from './ai-tool.catalog';
 import type {
   AiToolDefinition,
@@ -27,8 +33,11 @@ const REPORTING_PERIODS = new Set([
   'last_7_days',
   'last_30_days',
   'last_month',
+  'named_month',
   'custom',
 ]);
+/** Календарный месяц, названный словом: «в июле», «за март». */
+const CALENDAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 @Injectable()
 export class AiToolRegistryService {
@@ -101,6 +110,7 @@ export class AiToolRegistryService {
         };
       case 'analytics.employee.read':
       case 'analytics.business.read':
+      case 'analytics.business.profit':
       case 'expenses.read':
         return this.parseReportingPeriod(args);
       case 'analytics.employee.query':
@@ -204,6 +214,32 @@ export class AiToolRegistryService {
           slots,
         };
       }
+      case 'expenses.create':
+        this.assertAllowedKeys(args, [
+          'category',
+          'amount_rubles',
+          'occurred_on',
+          'note',
+        ]);
+        return {
+          category: this.assertManualExpenseCategory(args.category),
+          // Сумма остаётся В РУБЛЯХ: карточку подтверждения человек читает в
+          // рублях, а в копейки её переводит сервер уже при исполнении.
+          // Переводить здесь нельзя — валидатор прогоняется второй раз по
+          // сохранённым аргументам, и лишний ключ сломал бы хеш подтверждения.
+          amount_rubles: this.assertExpenseRubles(args.amount_rubles),
+          ...(args.occurred_on === undefined
+            ? {}
+            : {
+                occurred_on: this.assertDateKey(
+                  args.occurred_on,
+                  'occurred_on',
+                ),
+              }),
+          ...(args.note === undefined
+            ? {}
+            : { note: this.assertSafeReason(args.note) }),
+        };
       case 'loyalty.internal.adjust':
         this.assertAllowedKeys(args, ['target_user_id', 'delta', 'reason']);
         return {
@@ -271,6 +307,46 @@ export class AiToolRegistryService {
         },
       };
     }
+    if (toolName === 'expenses.create') {
+      const category = findExpenseCategory(args.category);
+      const amountRubles =
+        typeof args.amount_rubles === 'number' ? args.amount_rubles : 0;
+      const occurredOn =
+        typeof args.occurred_on === 'string' ? args.occurred_on : null;
+      const money = this.formatRubles(amountRubles);
+      const day = occurredOn ? this.formatLocalDay(occurredOn) : null;
+      return {
+        // 🔴 Заголовок карточки на фронте — это имя инструмента, а описание —
+        // вот эта строка. Русского словаря для нового инструмента у отдельно
+        // деплоящегося фронта нет, поэтому подтверждаемое действие обязано
+        // читаться целиком отсюда: что, сколько и за какое число.
+        summary: `Записать расход: ${category?.label ?? 'без категории'} — ${money}${
+          day ? ` за ${day}` : ''
+        }.`,
+        // 🔴 ПОРЯДОК КЛЮЧЕЙ ЗДЕСЬ — ЧАСТЬ ПОВЕДЕНИЯ, А НЕ ОФОРМЛЕНИЕ.
+        // Карточка показывает первые ШЕСТЬ полей превью, а хранится превью в
+        // jsonb, который порядок вставки не сохраняет: он сортирует ключи по
+        // ДЛИНЕ, а при равной длине побайтово. Раньше сумма и категория
+        // занимали длинные имена, а дата — самое длинное, и владелец
+        // подтверждал расход, не видя, за какое число он пишется.
+        // Поэтому короткие имена достались ровно тому, что человек обязан
+        // увидеть: сумма, дата, статья, предупреждение о дубле. Ключи
+        // перечислены в том же порядке, в котором их выдаст jsonb, чтобы
+        // карточка выглядела одинаково и в тестах, и на проде.
+        payload: {
+          sum: money,
+          date: day,
+          type: category?.label ?? null,
+          action: 'create_expense',
+          comment: args.note ?? null,
+          category: category?.slug ?? null,
+          currency: 'RUB',
+          amount_rubles: amountRubles,
+          category_kind: category?.kind ?? null,
+          amount_kopecks: rublesToKopecks(amountRubles),
+        },
+      };
+    }
     if (toolName === 'staff.schedule.update') {
       return {
         summary:
@@ -292,7 +368,13 @@ export class AiToolRegistryService {
   }
 
   private parseReportingPeriod(args: Record<string, unknown>) {
-    this.assertAllowedKeys(args, ['period', 'from', 'to', 'branch_id']);
+    this.assertAllowedKeys(args, [
+      'period',
+      'month',
+      'from',
+      'to',
+      'branch_id',
+    ]);
     if (
       typeof args.period !== 'string' ||
       !REPORTING_PERIODS.has(args.period)
@@ -307,6 +389,23 @@ export class AiToolRegistryService {
     }
     if (period === 'custom' && (!hasFrom || !hasTo)) {
       this.invalidArguments('custom period requires from and to');
+    }
+    // Месяц живёт только вместе с named_month. Пустить его в другие периоды
+    // значило бы завести второй способ задать окно — и молча его игнорировать.
+    if (period !== 'named_month' && args.month !== undefined) {
+      this.invalidArguments(
+        'month is only allowed with the named_month period',
+      );
+    }
+    let namedMonth: string | null = null;
+    if (period === 'named_month') {
+      if (
+        typeof args.month !== 'string' ||
+        !CALENDAR_MONTH_PATTERN.test(args.month)
+      ) {
+        this.invalidArguments('named_month requires month as YYYY-MM');
+      }
+      namedMonth = args.month;
     }
 
     let customRange: { from: string; to: string } | null = null;
@@ -326,6 +425,7 @@ export class AiToolRegistryService {
 
     return {
       period,
+      ...(namedMonth === null ? {} : { month: namedMonth }),
       ...(customRange ?? {}),
       ...(args.branch_id === undefined
         ? {}
@@ -336,12 +436,17 @@ export class AiToolRegistryService {
   }
 
   private parseAnalyticsQuery(args: Record<string, unknown>) {
+    // 🔴 'month' обязателен в списке. Роутер подмешивает {period:'named_month',
+    // month:'2026-07'} на любой вопрос с названием месяца, а валидатор ключ не
+    // знал и отбивал аргументы целиком — «что по деньгам за июль» падало с
+    // ошибкой инструмента, и владелец слышал, что CRM недоступна.
     this.assertAllowedKeys(args, [
       'period',
       'from',
       'to',
       'branch_id',
       'comparison',
+      'month',
     ]);
     if (
       typeof args.comparison !== 'string' ||
@@ -455,6 +560,57 @@ export class AiToolRegistryService {
       this.invalidArguments('delta must be a non-zero integer within limits');
     }
     return value;
+  }
+
+  /**
+   * Категория расхода при записи из чата.
+   *
+   * Справочник закрыт, а зарплата отбивается отдельным сообщением: начисления
+   * мастерам приходят расчётом из CRM, и ручной дубль сложил бы зарплату саму
+   * с собой. Модель должна услышать причину, а не «invalid enum».
+   */
+  private assertManualExpenseCategory(value: unknown): string {
+    const category = findExpenseCategory(value);
+    if (!category) {
+      this.invalidArguments(
+        `category must be one of: ${MANUAL_EXPENSE_CATEGORY_SLUGS.join(', ')}`,
+      );
+    }
+    if (!isManualExpenseCategory(category.slug)) {
+      this.invalidArguments(
+        'payroll is never recorded by hand: master payroll already comes from the CRM payroll calculation and a manual copy would count it twice',
+      );
+    }
+    return category.slug;
+  }
+
+  /** «60 000 ₽» — как человек читает деньги, а не как их хранит база. */
+  private formatRubles(amountRubles: number): string {
+    const kopecks = rublesToKopecks(amountRubles);
+    if (kopecks === null) {
+      return `${amountRubles} ₽`;
+    }
+    const whole = Math.trunc(kopecks / 100);
+    const rest = kopecks % 100;
+    const grouped = String(whole).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return rest === 0
+      ? `${grouped} ₽`
+      : `${grouped},${String(rest).padStart(2, '0')} ₽`;
+  }
+
+  /** `2026-08-05` → `05.08.2026`: дата в карточке читается, а не расшифровывается. */
+  private formatLocalDay(value: string): string {
+    const [year, month, day] = value.split('-');
+    return `${day}.${month}.${year}`;
+  }
+
+  private assertExpenseRubles(value: unknown): number {
+    if (rublesToKopecks(value) === null) {
+      this.invalidArguments(
+        'amount_rubles must be a positive amount in rubles with at most two decimals',
+      );
+    }
+    return value as number;
   }
 
   private assertSafeReason(value: unknown): string {
