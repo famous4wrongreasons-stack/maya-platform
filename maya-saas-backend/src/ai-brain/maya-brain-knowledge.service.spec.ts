@@ -115,6 +115,36 @@ describe('MayaBrainKnowledgeService', () => {
     });
   });
 
+  it('treats staff compatibility roles as the same protected audience', async () => {
+    const mocks = createService();
+    mocks.prisma.aiKnowledgeSource.findMany.mockResolvedValue([
+      {
+        id: 'ckbsource1',
+        encryptedTitle: encrypted('Техника кропа'),
+        audienceRolesJson: [UserRole.STAFF],
+        chunks: [
+          {
+            id: 'ckbchunk1',
+            ordinal: 0,
+            encryptedContent: encrypted('Кроп начинается с диагностики формы.'),
+          },
+        ],
+      },
+    ]);
+
+    const providerResult = await mocks.service.search(
+      { ...owner, role: UserRole.PROVIDER },
+      'Как стричь кроп?',
+    );
+    const clientResult = await mocks.service.search(
+      { ...owner, role: UserRole.CLIENT },
+      'Как стричь кроп?',
+    );
+
+    expect(providerResult).toHaveLength(1);
+    expect(clientResult).toEqual([]);
+  });
+
   function createService() {
     const prisma = {
       aiKnowledgeSource: {

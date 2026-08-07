@@ -12,6 +12,7 @@ describe('YclientsCRMAdapter', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     process.env.YCLIENTS_PARTNER_TOKEN = originalPartnerToken;
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -985,6 +986,10 @@ describe('YclientsCRMAdapter', () => {
   });
 
   it('closes a staff day through the YClients schedule endpoint and verifies it', async () => {
+    // Дата в запросах и ответах прибита к 2026-08-06, а адаптер запрещает
+    // менять график задним числом. Без фиксации часов тест «протухал» ровно
+    // на следующий день и падал на защите, а не на проверяемом поведении.
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T09:00:00.000Z'));
     let scheduleSlots = [{ from: '10:00', to: '20:00' }];
     let writtenPayload: Record<string, unknown> | null = null;
     global.fetch = jest.fn<typeof fetch>((input, init) => {
@@ -1060,6 +1065,8 @@ describe('YclientsCRMAdapter', () => {
   });
 
   it('refuses schedule changes that would cut through an existing appointment', async () => {
+    // См. соседний тест: дата прибита к 2026-08-06, часы фиксируем.
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T09:00:00.000Z'));
     const fetchMock = jest.fn<typeof fetch>((input) => {
       const url = String(input);
       if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {

@@ -730,6 +730,390 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getBusinessOverview).toHaveBeenCalledTimes(2);
   });
 
+  it('matches one master across both periods by name and never exposes the CRM id', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const period = (staff: unknown[]) => ({
+      data_source: 'maya',
+      period: { from: 'from', to: 'to', timezone: 'UTC' },
+      appointments: { total: 40, active: 40, cancelled: 0 },
+      revenue: [{ currency: 'RUB', amount_kopecks: 1_000_000 }],
+      expenses: [],
+      net: [],
+      average_ticket: [],
+      daily: [],
+      services: [],
+      staff,
+    });
+    const getBusinessOverview = jest
+      .fn()
+      .mockResolvedValueOnce(
+        period([
+          // Порядок «кто первым вышел в смену»: в текущем периоде Илья идёт
+          // первым, в прошлом — вторым. Сопоставление обязано идти по внешнему
+          // id, а не по позиции в массиве.
+          {
+            staff_external_id: 'secret-b',
+            name: 'Илья',
+            appointments: 8,
+            revenue: [{ currency: 'RUB', amount_kopecks: 400_000 }],
+            booked_minutes: 240,
+            services: [{ name: 'Борода', appointments: 8 }],
+          },
+          {
+            staff_external_id: 'secret-a',
+            name: 'Анна',
+            appointments: 32,
+            revenue: [{ currency: 'RUB', amount_kopecks: 600_000 }],
+            booked_minutes: 960,
+            services: [{ name: 'Мужская стрижка', appointments: 32 }],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(
+        period([
+          {
+            staff_external_id: 'secret-a',
+            name: 'Анна',
+            appointments: 30,
+            revenue: [{ currency: 'RUB', amount_kopecks: 600_000 }],
+            booked_minutes: 900,
+            services: [{ name: 'Мужская стрижка', appointments: 30 }],
+          },
+          {
+            staff_external_id: 'secret-b',
+            name: 'Илья',
+            appointments: 20,
+            revenue: [{ currency: 'RUB', amount_kopecks: 900_000 }],
+            booked_minutes: 600,
+            services: [{ name: 'Борода', appointments: 20 }],
+          },
+          // Мастер, которого в текущем периоде нет вовсе.
+          {
+            staff_external_id: 'secret-c',
+            name: 'Пётр',
+            appointments: 4,
+            revenue: [],
+            booked_minutes: 120,
+            services: [{ name: 'Борода', appointments: 4 }],
+          },
+        ]),
+      );
+    const analyticsService = {
+      getBusinessOverview,
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = (await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'month_to_date', comparison: 'previous_period' },
+      'execution-staff-names',
+    )) as Record<string, unknown>;
+
+    expect(result).toMatchObject({
+      current: {
+        staff_summary: [
+          {
+            name: 'Илья',
+            appointments: 8,
+            booked_minutes: 240,
+            services: [{ name: 'Борода', appointments: 8 }],
+          },
+          { name: 'Анна', appointments: 32 },
+        ],
+      },
+      previous: {
+        staff_summary: [
+          { name: 'Анна', appointments: 30 },
+          { name: 'Илья', appointments: 20 },
+          { name: 'Пётр', appointments: 4 },
+        ],
+      },
+      staff_changes: [
+        {
+          name: 'Илья',
+          current_appointments: 8,
+          previous_appointments: 20,
+          delta: -12,
+          percent_change: -60,
+          // 🔴 Ради этого разреза всё и переделывалось: «у Ильи просела
+          // «Борода» на 12 записей» берётся отсюда и больше ниоткуда.
+          services: [
+            {
+              name: 'Борода',
+              current_appointments: 8,
+              previous_appointments: 20,
+              delta: -12,
+              percent_change: -60,
+            },
+          ],
+        },
+        {
+          name: 'Пётр',
+          current_appointments: 0,
+          previous_appointments: 4,
+          delta: -4,
+          percent_change: -100,
+          services: [
+            {
+              name: 'Борода',
+              current_appointments: 0,
+              previous_appointments: 4,
+              delta: -4,
+              percent_change: -100,
+            },
+          ],
+        },
+        {
+          name: 'Анна',
+          current_appointments: 32,
+          previous_appointments: 30,
+          delta: 2,
+          services: [
+            {
+              name: 'Мужская стрижка',
+              current_appointments: 32,
+              previous_appointments: 30,
+              delta: 2,
+            },
+          ],
+        },
+      ],
+    });
+    // 🔴 Внешний идентификатор CRM наружу не уходит ни при какой роли: он ключ
+    // к чужой системе, а не показатель.
+    expect(JSON.stringify(result)).not.toContain('secret-a');
+    expect(JSON.stringify(result)).not.toContain('secret-b');
+    expect(JSON.stringify(result)).not.toContain('secret-c');
+    expect(JSON.stringify(result)).not.toContain('staff_external_id');
+  });
+
+  it('tells two masters with the same name apart instead of merging them', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'maya',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 30, active: 30, cancelled: 0 },
+        revenue: [],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'secret-z',
+            name: 'Илья',
+            appointments: 10,
+            revenue: [],
+            booked_minutes: 300,
+            services: [{ name: 'Борода', appointments: 10 }],
+          },
+          {
+            staff_external_id: 'secret-a',
+            name: 'Илья',
+            appointments: 20,
+            revenue: [],
+            booked_minutes: 600,
+            services: [{ name: 'Борода', appointments: 20 }],
+          },
+        ],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-staff-namesakes',
+    )) as Record<string, unknown>;
+
+    // Различитель раздаётся по отсортированному внешнему id, а не по порядку
+    // строк: secret-a идёт раньше secret-z, поэтому «Илья» — тот, у кого 20
+    // записей, независимо от того, кто первым вышел в смену.
+    expect(result).toMatchObject({
+      staff_summary: [
+        { name: 'Илья (2)', appointments: 10 },
+        { name: 'Илья', appointments: 20 },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('secret-a');
+    expect(JSON.stringify(result)).not.toContain('secret-z');
+  });
+
+  it('keeps journal prices out of a CRM answer while names and services survive', async () => {
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: {},
+        appointments: { total: 8, active: 8, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [
+          {
+            name: 'Борода',
+            appointments: 8,
+            // 🔴 Цена из журнала записей, а не подтверждённая касса.
+            booked_value: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+          },
+        ],
+        staff: [
+          {
+            staff_external_id: 'provider-secret-id',
+            name: 'Илья',
+            appointments: 8,
+            revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+            booked_minutes: 240,
+            services: [{ name: 'Борода', appointments: 8 }],
+          },
+        ],
+      }),
+      getBusinessFinance: jest.fn().mockRejectedValue(new Error('unavailable')),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-crm-staff-failclosed',
+    )) as Record<string, unknown>;
+
+    expect(result).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Илья',
+          appointments: 8,
+          // Стоимость записей журнала — не подтверждённые деньги: остаётся пустой.
+          revenue: [],
+          booked_minutes: 240,
+          services: [{ name: 'Борода', appointments: 8 }],
+        },
+      ],
+      // 🔴 Та же граница для услуг: журнальная цена не выдаётся за выручку.
+      service_summary: [{ name: 'Борода', appointments: 8, booked_value: [] }],
+    });
+    expect(JSON.stringify(result)).not.toContain('provider-secret-id');
+    expect(JSON.stringify(result)).not.toContain('9999999');
+  });
+
+  it('hides the named master breakdown from a role that only manages itself', async () => {
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'maya',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 8, active: 8, cancelled: 0 },
+        revenue: [],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'secret-a',
+            name: 'Илья',
+            appointments: 8,
+            revenue: [],
+            booked_minutes: 240,
+            services: [{ name: 'Борода', appointments: 8 }],
+          },
+        ],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.business.read',
+      // Каталог такую роль к бизнес-аналитике не пускает. Проверяем вторую
+      // границу: даже если пустит, имена коллег с ней не поедут.
+      { ...principal, role: UserRole.STAFF },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-staff-role-scope',
+    )) as Record<string, unknown>;
+
+    expect(result.staff_summary).toEqual([]);
+    expect(JSON.stringify(result)).not.toContain('Илья');
+  });
+
+  it('shows a master only their own row even when the source returns colleagues', async () => {
+    const analyticsService = {
+      getEmployeeOverview: jest.fn().mockResolvedValue({
+        data_source: 'maya',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 8, active: 8, cancelled: 0 },
+        revenue: [],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        employee: { provider_id: 'secret-self', name: 'Илья' },
+        staff: [
+          {
+            staff_external_id: 'secret-self',
+            name: 'Илья',
+            appointments: 8,
+            revenue: [],
+            booked_minutes: 240,
+            services: [{ name: 'Борода', appointments: 8 }],
+          },
+          // 🔴 Источник подмешал коллегу. Полагаться на его аккуратность нельзя.
+          {
+            staff_external_id: 'secret-colleague',
+            name: 'Анна',
+            appointments: 32,
+            revenue: [],
+            booked_minutes: 960,
+            services: [{ name: 'Мужская стрижка', appointments: 32 }],
+          },
+        ],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.employee.read',
+      { ...principal, userId: 'employee-user', role: UserRole.STAFF },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-employee-self-scope',
+    )) as Record<string, unknown>;
+
+    expect(result).toMatchObject({
+      staff_summary: [{ name: 'Илья', appointments: 8 }],
+    });
+    expect(JSON.stringify(result)).not.toContain('Анна');
+    expect(JSON.stringify(result)).not.toContain('secret-self');
+    expect(JSON.stringify(result)).not.toContain('secret-colleague');
+  });
+
   it('keeps a universal employee query scoped to the current master', async () => {
     const getEmployeeOverview = jest
       .fn()

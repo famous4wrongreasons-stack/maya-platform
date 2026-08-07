@@ -2316,6 +2316,108 @@ describe('AiCoreService', () => {
     expect(result.reply).toBe('Записей за период: 40.');
   });
 
+  it('lets a per-master service drop through the number guard by name', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-staff-names',
+      result: {
+        verified: true,
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        metrics: { appointments_total: 40 },
+        changes: {},
+        current: {
+          staff_summary: [
+            {
+              name: 'Анна',
+              appointments: 32,
+              revenue: [],
+              booked_minutes: 960,
+              services: [{ name: 'Мужская стрижка', appointments: 32 }],
+            },
+            {
+              name: 'Илья',
+              appointments: 19,
+              revenue: [],
+              booked_minutes: 570,
+              services: [{ name: 'Борода', appointments: 19 }],
+            },
+          ],
+        },
+        service_changes: [],
+        staff_changes: [
+          {
+            name: 'Илья',
+            current_appointments: 19,
+            previous_appointments: 31,
+            delta: -12,
+            percent_change: -38.7,
+            // 🔴 Ради этих трёх чисел всё и переделывалось. Без разреза по
+            // услугам внутри мастера числа 19/31/−12 нет ни в одном поле
+            // результата, сторож бракует ответ целиком, и владелец получает
+            // шаблон вместо разбора.
+            services: [
+              {
+                name: 'Борода',
+                current_appointments: 19,
+                previous_appointments: 31,
+                delta: -12,
+                percent_change: -38.7,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'У Ильи просела «Борода»: 19 записей против 31, это −12.',
+        toolCall: null,
+      }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Кто из мастеров просел по сравнению с прошлым месяцем?',
+        },
+      ],
+    });
+
+    // Имя уходит в модель напрямую — иначе назвать мастера она не сможет.
+    const modelInput = JSON.stringify(mocks.model.decide.mock.calls[0]?.[0]);
+    expect(modelInput).toContain('Илья');
+    expect(modelInput).toContain('Борода');
+    // Разбор доходит до пользователя дословно: ни сторож чисел, ни подстановка
+    // имён его больше не трогают.
+    expect(result.reply).toBe(
+      'У Ильи просела «Борода»: 19 записей против 31, это −12.',
+    );
+    expect(result.source).not.toBe('safe_fallback');
+    expect(result.grounding).toMatchObject({ status: 'verified' });
+  });
+
+  it('leaves the model answer byte-for-byte alone instead of rewriting master labels', async () => {
+    const mocks = createService();
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Сегодня в смене master_2.', toolCall: null }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Привет' }],
+    });
+
+    // Прежняя схема переписывала этот текст в «Мастер 2». Подстановки больше
+    // нет: сервер в готовый ответ не лезет.
+    expect(result.reply).toBe('Сегодня в смене master_2.');
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
   it('gives the model the server time instead of letting it guess the calendar', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(

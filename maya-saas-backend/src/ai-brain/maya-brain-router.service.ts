@@ -9,6 +9,11 @@ import type {
 } from './maya-brain.types';
 
 const CLIENT_ROLES = new Set<UserRole>([UserRole.CLIENT, UserRole.CUSTOMER]);
+const STAFF_ROLES = new Set<UserRole>([
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.STAFF,
+]);
 
 const FINANCE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -20,7 +25,7 @@ const FINANCE_ROLES = new Set<UserRole>([
 @Injectable()
 export class MayaBrainRouterService {
   route(role: UserRole, text: string): MayaBrainRoute {
-    const intent = this.intent(text);
+    const intent = this.intent(role, text);
     const profile = this.profile(role, intent);
     return {
       persona: CLIENT_ROLES.has(role) ? 'admin' : 'director',
@@ -31,8 +36,9 @@ export class MayaBrainRouterService {
     };
   }
 
-  private intent(raw: string): MayaBrainIntent {
+  private intent(role: UserRole, raw: string): MayaBrainIntent {
     const text = raw.toLowerCase().replace(/ё/g, 'е');
+    const client = CLIENT_ROLES.has(role);
     if (
       /(записат|запиши|перенес|отмен[а-яa-z]*\s+запис|свободн[а-яa-z]*\s+(?:окн|слот|врем))/i.test(
         text,
@@ -41,21 +47,14 @@ export class MayaBrainRouterService {
       return 'booking';
     }
     if (
-      /(как\s+(?:делать|сделать|работает|правильно)|инструкц|регламент|правил[ао]|политик|процедур|по\s+базе\s+знаний|найди\s+в\s+базе)/i.test(
-        text,
-      )
-    ) {
-      return 'knowledge';
-    }
-    if (
-      /(закрой|закрыть|перерыв|сократ[а-яa-z]*\s+(?:день|смен)|график|смен[ауеы]|рабоч[а-яa-z]*\s+день)/i.test(
+      /(?:закрой|закрыть|постав[а-яa-z]*.{0,32}перерыв|сдела[а-яa-z]*.{0,32}перерыв|сократ[а-яa-z]*.{0,32}(?:день|смен[ауеы]?)|(?:измени|поменяй|установи|поставь).{0,32}(?:график|смен[ауеы]?)|(?:график|смен[ауеы]?).{0,32}(?:измени|поменяй|установи|поставь)|рабоч[а-яa-z]*\s+день.{0,32}(?:сократ|измен|закрой))/i.test(
         text,
       )
     ) {
       return 'schedule_management';
     }
     if (
-      /(?:сравн[а-яa-z]*.{0,48}(?:год|года).{0,48}(?:прошл|предыдущ)|(?:этот|текущ)[а-яa-z]*\s+год.{0,48}(?:прошл|предыдущ)[а-яa-z]*\s+год|год\s+к\s+году)/i.test(
+      /(?:сравн[а-яa-z]*.{0,96}(?:год|месяц|недел|период).{0,96}(?:прошл|предыдущ)|(?:год|месяц|недел|период)\s+к\s+(?:году|месяцу|неделе|периоду)|динамик|тренд|просад|просел|вырос|рост|снизил|упал|потерял)/i.test(
         text,
       )
     ) {
@@ -69,11 +68,23 @@ export class MayaBrainRouterService {
       return 'finance';
     }
     if (
-      /(аналитик|показател|статистик|динамик|прогноз|загруз|сколько\s+(?:клиент|запис))/i.test(
+      /(аналитик|показател|статистик|прогноз|загруз|сколько\s+(?:клиент|запис)|отмен[а-яa-z]*|повторн[а-яa-z]*\s+клиент|популярн[а-яa-z]*\s+услуг|лучш[а-яa-z]*\s+услуг|как[ая]\s+услуг[а-яa-z]*\s+(?:лучш|хуж|просел))/i.test(
         text,
       )
     ) {
       return 'business_analytics';
+    }
+    if (
+      !client &&
+      (/(по\s+базе\s+знаний|найди\s+в\s+базе|инструкц|регламент|процедур)/i.test(
+        text,
+      ) ||
+        (STAFF_ROLES.has(role) &&
+          /(как|совет|техник|правильно).{0,64}(стрич|стриж|фейд|fade|кроп|сайд|окантов|тушев|градуир|ножниц|машинк|бород)/i.test(
+            text,
+          )))
+    ) {
+      return 'knowledge';
     }
     if (
       /(сотрудник|мастер|команд|персонал|опоздан|задач[ауи]|kpi|эффективност)/i.test(

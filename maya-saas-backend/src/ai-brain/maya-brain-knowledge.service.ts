@@ -32,6 +32,17 @@ const STOP_WORDS = new Set([
   'with',
 ]);
 
+const STAFF_AUDIENCE_ROLES = new Set<UserRole>([
+  UserRole.STAFF,
+  UserRole.EMPLOYEE,
+  UserRole.PROVIDER,
+]);
+
+const CLIENT_AUDIENCE_ROLES = new Set<UserRole>([
+  UserRole.CLIENT,
+  UserRole.CUSTOMER,
+]);
+
 @Injectable()
 export class MayaBrainKnowledgeService {
   constructor(
@@ -178,7 +189,9 @@ export class MayaBrainKnowledgeService {
     });
     const scored: Array<MayaBrainKnowledgeItem & { score: number }> = [];
     for (const source of sources) {
-      if (!this.roles(source.audienceRolesJson).includes(user.role)) {
+      if (
+        !this.canReadAudience(user.role, this.roles(source.audienceRolesJson))
+      ) {
         continue;
       }
       let title: string;
@@ -220,6 +233,19 @@ export class MayaBrainKnowledgeService {
         title: item.title,
         excerpt: item.excerpt,
       }));
+  }
+
+  private canReadAudience(role: UserRole, audience: UserRole[]): boolean {
+    if (audience.includes(role)) {
+      return true;
+    }
+    if (STAFF_AUDIENCE_ROLES.has(role)) {
+      return audience.some((candidate) => STAFF_AUDIENCE_ROLES.has(candidate));
+    }
+    if (CLIENT_AUDIENCE_ROLES.has(role)) {
+      return audience.some((candidate) => CLIENT_AUDIENCE_ROLES.has(candidate));
+    }
+    return false;
   }
 
   private assertSafe(value: string): void {

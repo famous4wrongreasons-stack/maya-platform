@@ -32,6 +32,24 @@ const SCHEDULE_MANAGER_ROLES = new Set<UserRole>([
   UserRole.MANAGER,
   UserRole.BRANCH_MANAGER,
 ]);
+/**
+ * Кому можно показывать именованный разрез ПО ВСЕМ мастерам.
+ *
+ * Список повторяет BUSINESS_ROLES из каталога инструментов — те же владелец,
+ * админ, управляющий и бухгалтер. Дублирование намеренное: каталог решает,
+ * кого пускать к инструменту, а это — кого пускать к чужим именам. Если
+ * когда-нибудь бизнес-аналитику откроют мастеру, имена коллег не поедут
+ * вместе с ней.
+ */
+const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.ACCOUNTANT,
+]);
 
 @Injectable()
 export class AiToolHandlerService {
@@ -78,19 +96,27 @@ export class AiToolHandlerService {
         return this.readOwnLoyalty(principal);
       case 'analytics.employee.read': {
         const query = await this.reportingQuery(principal.tenantId, args);
-        return this.readAnalytics(
+        const internal = await this.readAnalytics(
           this.analyticsService.getEmployeeOverview(
             principal.tenantId,
             principal.userId,
             query,
           ),
         );
+        return this.publishAnalytics(
+          internal,
+          this.employeeStaffScope(internal),
+        );
       }
       case 'analytics.employee.query':
         return this.queryEmployeeAnalytics(principal, args);
       case 'analytics.business.read': {
         const query = await this.reportingQuery(principal.tenantId, args);
-        return this.readBusinessAnalytics(principal, query);
+        const internal = await this.readBusinessAnalytics(principal, query);
+        return this.publishAnalytics(
+          internal,
+          this.businessStaffScope(principal, internal),
+        );
       }
       case 'analytics.business.query':
         return this.queryBusinessAnalytics(principal, args);
@@ -234,10 +260,16 @@ export class AiToolHandlerService {
     };
   }
 
+  /**
+   * Промежуточное представление аналитики: имя и внешний идентификатор мастера
+   * ещё на месте. Отдавать это наружу нельзя — обязательно через
+   * publishAnalytics.
+   */
   private async readAnalytics(resultPromise: Promise<unknown>) {
     return this.safeAnalytics(await resultPromise);
   }
 
+  /** Тоже промежуточное представление — см. readAnalytics. */
   private async readBusinessAnalytics(
     principal: AiToolPrincipal,
     query: AnalyticsRangeQueryDto,
@@ -280,6 +312,14 @@ export class AiToolHandlerService {
       staff_summary: operational.staff_summary.map((entry) => ({
         ...entry,
         revenue: [],
+      })),
+      // 🔴 booked_value — это цены из журнала записей, а не подтверждённая
+      // касса. В CRM-режиме деньги признаются только через getBusinessFinance,
+      // и оставлять здесь суммы значило бы отдать владельцу неподтверждённую
+      // выручку в разрезе услуг — ровно то, ради чего fail-closed и написан.
+      service_summary: operational.service_summary.map((entry) => ({
+        ...entry,
+        booked_value: [],
       })),
     };
 
@@ -403,10 +443,22 @@ export class AiToolHandlerService {
       this.retryAnalyticsRead(() =>
         this.readBusinessAnalytics(principal, query),
       );
-    const [current, previous] = await Promise.all([
+    const [currentInternal, previousInternal] = await Promise.all([
       read(currentQuery),
       previousQuery ? read(previousQuery) : Promise.resolve(null),
     ]);
+    // Имена раздаются один раз на оба периода: тёзки обязаны получить один и
+    // тот же различитель слева и справа, иначе «Илья (2)» в сравнении означал
+    // бы разных людей.
+    const staffScope = this.businessStaffScope(
+      principal,
+      currentInternal,
+      previousInternal,
+    );
+    const current = this.publishAnalytics(currentInternal, staffScope);
+    const previous = previousInternal
+      ? this.publishAnalytics(previousInternal, staffScope)
+      : null;
     const currentSnapshot = this.businessMetricSnapshot(current);
     const previousSnapshot = previous
       ? this.businessMetricSnapshot(previous)
@@ -431,6 +483,13 @@ export class AiToolHandlerService {
         : {},
       service_changes: previous
         ? this.businessServiceChanges(current, previous)
+        : [],
+      staff_changes: previousInternal
+        ? this.businessStaffChanges(
+            currentInternal,
+            previousInternal,
+            staffScope,
+          )
         : [],
       available_metrics: Object.entries(currentSnapshot)
         .filter(([, value]) => value !== null)
@@ -505,10 +564,18 @@ export class AiToolHandlerService {
           query,
         ),
       );
-    const [current, previous] = await Promise.all([
+    const [currentInternal, previousInternal] = await Promise.all([
       read(currentQuery),
       previousQuery ? read(previousQuery) : Promise.resolve(null),
     ]);
+    const staffScope = this.employeeStaffScope(
+      currentInternal,
+      previousInternal,
+    );
+    const current = this.publishAnalytics(currentInternal, staffScope);
+    const previous = previousInternal
+      ? this.publishAnalytics(previousInternal, staffScope)
+      : null;
     const currentSnapshot = this.employeeMetricSnapshot(current);
     const previousSnapshot = previous
       ? this.employeeMetricSnapshot(previous)
@@ -534,6 +601,13 @@ export class AiToolHandlerService {
         : {},
       service_changes: previous
         ? this.businessServiceChanges(current, previous)
+        : [],
+      staff_changes: previousInternal
+        ? this.businessStaffChanges(
+            currentInternal,
+            previousInternal,
+            staffScope,
+          )
         : [],
       available_metrics: Object.entries(currentSnapshot)
         .filter(([, value]) => value !== null)
@@ -713,24 +787,42 @@ export class AiToolHandlerService {
   private businessServiceChanges(current: unknown, previous: unknown) {
     const rows = (value: unknown) => {
       const data = this.record(value);
-      if (!Array.isArray(data.service_summary))
-        return new Map<string, number>();
-      return new Map(
-        data.service_summary.flatMap((entry) => {
-          const item = this.record(entry);
-          return typeof item.name === 'string' &&
-            typeof item.appointments === 'number'
-            ? [[item.name, item.appointments] as const]
-            : [];
-        }),
-      );
+      const totals = new Map<string, number>();
+      if (!Array.isArray(data.service_summary)) {
+        return totals;
+      }
+      for (const entry of data.service_summary) {
+        const item = this.record(entry);
+        if (
+          typeof item.name !== 'string' ||
+          typeof item.appointments !== 'number'
+        ) {
+          continue;
+        }
+        // Одноимённые позиции складываем: раньше вторая затирала первую и
+        // объём просто исчезал из сравнения.
+        totals.set(item.name, (totals.get(item.name) ?? 0) + item.appointments);
+      }
+      return totals;
     };
-    const currentRows = rows(current);
-    const previousRows = rows(previous);
-    return [...new Set([...currentRows.keys(), ...previousRows.keys()])]
+    return this.serviceChangeRows(rows(current), rows(previous));
+  }
+
+  /**
+   * Дельты по услугам из двух срезов «название → записи».
+   *
+   * Один и тот же счёт нужен и салону целиком, и каждому мастеру по
+   * отдельности, поэтому он вынесен сюда: расхождение формул между этими
+   * двумя разрезами читалось бы как расхождение данных.
+   */
+  private serviceChangeRows(
+    current: Map<string, number>,
+    previous: Map<string, number>,
+  ) {
+    return [...new Set([...current.keys(), ...previous.keys()])]
       .map((name) => {
-        const currentAppointments = currentRows.get(name) ?? 0;
-        const previousAppointments = previousRows.get(name) ?? 0;
+        const currentAppointments = current.get(name) ?? 0;
+        const previousAppointments = previous.get(name) ?? 0;
         return {
           name,
           current_appointments: currentAppointments,
@@ -1020,12 +1112,44 @@ export class AiToolHandlerService {
           })
         : [],
       data_quality: result.data_quality ?? null,
+      // 🔴 Промежуточное представление: внешний идентификатор мастера здесь
+      // ещё есть, потому что по нему идёт сопоставление периодов и различение
+      // тёзок. Наружу он не уходит никогда — publishAnalytics его снимает.
+      // Возвращать safeAnalytics из обработчика напрямую нельзя.
+      //
+      // Идентификатор самого спрашивающего сотрудника — тоже служебный ключ:
+      // по нему личный срез отфильтровывается до одного человека, если
+      // источник вдруг вернул чужие строки.
+      employee_external_id:
+        typeof this.record(result.employee).provider_id === 'string' &&
+        this.record(result.employee).provider_id !== ''
+          ? (this.record(result.employee).provider_id as string)
+          : null,
       staff_summary: Array.isArray(result.staff)
         ? result.staff.map((entry) => {
             const item = this.record(entry);
             return {
+              staff_external_id:
+                typeof item.staff_external_id === 'string'
+                  ? item.staff_external_id
+                  : null,
+              staff_name: typeof item.name === 'string' ? item.name : null,
               appointments: item.appointments ?? 0,
               revenue: this.safeMoneyEntries(item.revenue),
+              booked_minutes:
+                typeof item.booked_minutes === 'number' &&
+                Number.isFinite(item.booked_minutes)
+                  ? item.booked_minutes
+                  : 0,
+              services: Array.isArray(item.services)
+                ? item.services.map((service) => {
+                    const row = this.record(service);
+                    return {
+                      name: typeof row.name === 'string' ? row.name : 'Услуга',
+                      appointments: row.appointments ?? 0,
+                    };
+                  })
+                : [],
             };
           })
         : [],
@@ -1040,6 +1164,269 @@ export class AiToolHandlerService {
           })
         : [],
     };
+  }
+
+  /**
+   * Строки мастеров промежуточного представления.
+   *
+   * Отдельный разбор нужен потому, что по этим строкам работают сразу три
+   * вещи: раздача имён, сопоставление периодов и разрез по услугам.
+   */
+  private staffRows(value: unknown): Array<{
+    externalId: string | null;
+    name: string | null;
+    appointments: number;
+    entry: Record<string, unknown>;
+  }> {
+    const data = this.record(value);
+    if (!Array.isArray(data.staff_summary)) {
+      return [];
+    }
+    return data.staff_summary.map((entry) => {
+      const item = this.record(entry);
+      return {
+        externalId:
+          typeof item.staff_external_id === 'string' &&
+          item.staff_external_id !== ''
+            ? item.staff_external_id
+            : null,
+        name:
+          typeof item.staff_name === 'string' && item.staff_name.trim() !== ''
+            ? item.staff_name.trim()
+            : null,
+        appointments: this.optionalMetricNumber(item.appointments) ?? 0,
+        entry: item,
+      };
+    });
+  }
+
+  /** Услуги внутри строки мастера — уже нормализованные safeAnalytics. */
+  private staffServiceRows(
+    entry: Record<string, unknown>,
+  ): Array<{ name: string; appointments: number }> {
+    if (!Array.isArray(entry.services)) {
+      return [];
+    }
+    return entry.services.map((service) => {
+      const row = this.record(service);
+      return {
+        name: typeof row.name === 'string' ? row.name : 'Услуга',
+        appointments: this.optionalMetricNumber(row.appointments) ?? 0,
+      };
+    });
+  }
+
+  /**
+   * Кого и под каким именем показывать в разрезе мастеров.
+   *
+   * `names` пусто и `allowedExternalIds` — пустое множество означают «разрез
+   * закрыт»: наружу уйдут пустые массивы. Отдельный флаг для этого не нужен,
+   * фильтр по множеству и так fail-closed.
+   */
+  private staffScope(
+    names: Map<string, string>,
+    allowedExternalIds: Set<string> | null,
+  ): { names: Map<string, string>; allowedExternalIds: Set<string> | null } {
+    return { names, allowedExternalIds };
+  }
+
+  /**
+   * Разрез мастеров для бизнес-аналитики: все мастера, по именам.
+   *
+   * Роль проверяется здесь, а не только в каталоге инструментов: каталог
+   * решает, кого пускать к инструменту, а имена коллег — отдельная граница.
+   */
+  private businessStaffScope(
+    principal: AiToolPrincipal,
+    ...periods: unknown[]
+  ) {
+    if (!NAMED_STAFF_BREAKDOWN_ROLES.has(principal.role)) {
+      return this.staffScope(new Map(), new Set<string>());
+    }
+    return this.staffScope(this.staffDisplayNames(...periods), null);
+  }
+
+  /**
+   * Разрез мастеров для личного среза сотрудника: только он сам.
+   *
+   * 🔴 Источник и так отдаёт записи одного человека, но полагаться на это
+   * нельзя. Ключ — идентификатор сотрудника из ответа аналитики; если его нет,
+   * разрез закрывается целиком, а не открывается на всех.
+   */
+  private employeeStaffScope(...periods: unknown[]) {
+    const allowed = new Set<string>();
+    for (const period of periods) {
+      const externalId = this.record(period).employee_external_id;
+      if (typeof externalId === 'string' && externalId !== '') {
+        allowed.add(externalId);
+      }
+    }
+    return this.staffScope(this.staffDisplayNames(...periods), allowed);
+  }
+
+  /**
+   * Внешний идентификатор мастера → имя для выдачи.
+   *
+   * 🔴 Тёзок различаем устойчиво. Порядок нумерации — по ОБЪЕДИНЕНИЮ внешних
+   * идентификаторов всех переданных периодов, отсортированному по кодовым
+   * точкам: иначе один и тот же Илья был бы «Илья» в текущем периоде и
+   * «Илья (2)» в прошлом, и сравнение «у кого просело» сопоставляло бы разных
+   * людей. localeCompare здесь нельзя — его порядок зависит от локали и
+   * версии ICU. Молча склеивать двух людей в одного нельзя тем более: у них
+   * разные записи и разная выручка.
+   *
+   * Мастер без имени получает безличное «Мастер N» по тому же порядку —
+   * внешний идентификатор наружу не отдаём никогда.
+   */
+  private staffDisplayNames(...periods: unknown[]): Map<string, string> {
+    const names = new Map<string, string | null>();
+    for (const period of periods) {
+      for (const row of this.staffRows(period)) {
+        if (!row.externalId) continue;
+        if (!names.get(row.externalId)) {
+          names.set(row.externalId, row.name);
+        }
+      }
+    }
+    const display = new Map<string, string>();
+    const taken = new Set<string>();
+    [...names.keys()]
+      .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
+      .forEach((externalId, index) => {
+        const base = names.get(externalId) ?? `Мастер ${index + 1}`;
+        let candidate = base;
+        let suffix = 1;
+        while (taken.has(candidate)) {
+          suffix += 1;
+          candidate = `${base} (${suffix})`;
+        }
+        taken.add(candidate);
+        display.set(externalId, candidate);
+      });
+    return display;
+  }
+
+  /**
+   * Убирает внешний идентификатор мастера, оставляя имя.
+   *
+   * 🔴 Идентификатор CRM наружу не уходит ни при каких ролях: он ключ к чужой
+   * системе, а не показатель. Служебный `employee_external_id` снимается
+   * здесь же — он живёт только внутри обработчика.
+   */
+  private publishAnalytics(
+    value: unknown,
+    scope?: {
+      names: Map<string, string>;
+      allowedExternalIds: Set<string> | null;
+    },
+  ): Record<string, unknown> {
+    const data = this.record(value);
+    const published = { ...data };
+    delete published.employee_external_id;
+    const staffScope =
+      scope ?? this.staffScope(this.staffDisplayNames(data), null);
+    return {
+      ...published,
+      staff_summary: this.staffRows(data)
+        .filter(
+          (row) =>
+            row.externalId !== null &&
+            (staffScope.allowedExternalIds === null ||
+              staffScope.allowedExternalIds.has(row.externalId)),
+        )
+        .map((row) => ({
+          name: staffScope.names.get(row.externalId as string) ?? null,
+          appointments: row.entry.appointments ?? 0,
+          revenue: this.safeMoneyEntries(row.entry.revenue),
+          booked_minutes: row.entry.booked_minutes ?? 0,
+          services: this.staffServiceRows(row.entry),
+        })),
+    };
+  }
+
+  /**
+   * Сравнение мастеров между периодами.
+   *
+   * 🔴 Ключ сопоставления — внешний идентификатор. Ни имя (оно повторяется и
+   * меняется), ни позиция в массиве (она зависит от того, кто первым вышел в
+   * смену) для этого не годятся. Мастер, отсутствующий в одном из периодов,
+   * попадает в результат с нулём на своей стороне: уход человека из смены —
+   * это тоже ответ на вопрос «что изменилось».
+   *
+   * 🔴 Разрез по услугам ВНУТРИ мастера — ради него всё и считается. Без него
+   * фразы «у Ильи просела «Борода» на 12 записей» не существует: числа 12 нет
+   * ни в одном поле, сторож чисел бракует ответ, и владелец получает шаблон.
+   */
+  private businessStaffChanges(
+    current: unknown,
+    previous: unknown,
+    scope: {
+      names: Map<string, string>;
+      allowedExternalIds: Set<string> | null;
+    },
+  ) {
+    const rows = (value: unknown) =>
+      new Map(
+        this.staffRows(value).flatMap((row) =>
+          row.externalId ? [[row.externalId, row] as const] : [],
+        ),
+      );
+    const currentRows = rows(current);
+    const previousRows = rows(previous);
+    return [...new Set([...currentRows.keys(), ...previousRows.keys()])]
+      .filter(
+        (externalId) =>
+          scope.allowedExternalIds === null ||
+          scope.allowedExternalIds.has(externalId),
+      )
+      .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
+      .map((externalId) => {
+        const currentRow = currentRows.get(externalId);
+        const previousRow = previousRows.get(externalId);
+        const currentAppointments = currentRow?.appointments ?? 0;
+        const previousAppointments = previousRow?.appointments ?? 0;
+        return {
+          name: scope.names.get(externalId) ?? null,
+          current_appointments: currentAppointments,
+          previous_appointments: previousAppointments,
+          delta: currentAppointments - previousAppointments,
+          percent_change: this.percentageDelta(
+            currentAppointments,
+            previousAppointments,
+          ),
+          services: this.serviceChangeRows(
+            this.staffServiceMap(currentRow?.entry),
+            this.staffServiceMap(previousRow?.entry),
+          ),
+        };
+      })
+      // 🔴 По возрастанию дельты, а не по модулю. Сортировка по модулю ставила
+      // первым мастера с самым большим РОСТОМ, и на вопрос «кто больше всего в
+      // просадке» модель называла лучшего — с верным числом, поэтому сторож
+      // молчал. Худший результат должен быть первым.
+      .sort((left, right) => left.delta - right.delta);
+  }
+
+  private staffServiceMap(
+    entry: Record<string, unknown> | undefined,
+  ): Map<string, number> {
+    if (!entry) {
+      return new Map<string, number>();
+    }
+    // 🔴 Складываем, а не перезаписываем. Аналитика копит услуги по
+    // идентификатору, а сюда они приходят уже без него — только с названием.
+    // Прежний `new Map(...)` при двух одноимённых позициях молча оставлял
+    // последнюю, и объём терялся: дельта выходила −5 вместо −15, причём
+    // ответ противоречил сам себе. Идентификатора здесь нет, поэтому
+    // одноимённые позиции честно суммируем.
+    const rows = new Map<string, number>();
+    for (const service of this.staffServiceRows(entry)) {
+      rows.set(
+        service.name,
+        (rows.get(service.name) ?? 0) + service.appointments,
+      );
+    }
+    return rows;
   }
 
   private unavailableFinance(code: string) {

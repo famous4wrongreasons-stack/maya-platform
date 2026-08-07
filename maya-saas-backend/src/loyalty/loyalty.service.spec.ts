@@ -10,6 +10,15 @@ import { UsersService } from '../users/users.service';
 import { LoyaltyService } from './loyalty.service';
 
 describe('LoyaltyService', () => {
+  const originalFetch = global.fetch;
+
+  afterEach(() => {
+    delete process.env.MAYA_LEGACY_BRIDGE_TOKEN;
+    delete process.env.MAYA_LEGACY_BRIDGE_URL;
+    delete process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS;
+    global.fetch = originalFetch;
+  });
+
   const createService = () => {
     const tenantContext = new TenantContextService();
     const loyaltyFindUniqueMock = jest.fn().mockResolvedValue(null);
@@ -21,7 +30,7 @@ describe('LoyaltyService', () => {
         where: {
           userId_tenantId: { userId: string; tenantId: string };
         };
-        update: { balance?: number };
+        update: { balance?: number; source?: string };
       }) => {
         upsertTenantId = args.where.userId_tenantId.tenantId;
         upsertUserId = args.where.userId_tenantId.userId;
@@ -30,8 +39,8 @@ describe('LoyaltyService', () => {
           id: 'account-a',
           tenantId: 'tenant-a',
           userId: 'client-a',
-          source: CrmProvider.YCLIENTS,
-          balance: 2133,
+          source: args.update.source || CrmProvider.YCLIENTS,
+          balance: args.update.balance ?? 2133,
           externalReference: 'card-a',
           syncedAt: new Date('2026-07-15T10:00:00.000Z'),
         });
@@ -76,6 +85,12 @@ describe('LoyaltyService', () => {
       },
     ]);
     const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      authIdentity: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
       loyaltyAccount: {
         findUnique: loyaltyFindUniqueMock,
         upsert: loyaltyUpsertMock,
@@ -114,6 +129,16 @@ describe('LoyaltyService', () => {
       getCalendarSourceMock,
       getClientLoyaltyMock,
       getServicesMock,
+      tenantFindUniqueMock: (
+        prisma as unknown as {
+          tenant: { findUnique: jest.Mock };
+        }
+      ).tenant.findUnique,
+      authIdentityFindFirstMock: (
+        prisma as unknown as {
+          authIdentity: { findFirst: jest.Mock };
+        }
+      ).authIdentity.findFirst,
       getUpsertTenantId: () => upsertTenantId,
       getUpsertUserId: () => upsertUserId,
       getUpsertBalance: () => upsertBalance,
@@ -158,6 +183,50 @@ describe('LoyaltyService', () => {
     expect(setup.getUpsertTenantId()).toBe('tenant-a');
     expect(setup.getUpsertUserId()).toBe('client-a');
     expect(setup.getUpsertBalance()).toBe(2133);
+  });
+
+  it('uses the existing MAYA ledger for a configured migrated tenant', async () => {
+    const setup = createService();
+    process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
+    process.env.MAYA_LEGACY_BRIDGE_URL =
+      'http://127.0.0.1:8080/api/internal/loyalty-snapshot';
+    process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS = 'tenant-a-slug';
+    setup.tenantFindUniqueMock.mockResolvedValueOnce({ slug: 'tenant-a-slug' });
+    setup.authIdentityFindFirstMock.mockResolvedValueOnce({
+      providerUserId: '987654321',
+    });
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          found: true,
+          balance: 385,
+          source: 'maya_ledger',
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(result).toMatchObject({
+      balance: 385,
+      source: 'legacy_maya',
+      authoritative: 'maya',
+      sync_status: 'current',
+      stale: false,
+    });
+    expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
+    expect(global.fetch).toHaveBeenCalledWith(
+      new URL('http://127.0.0.1:8080/api/internal/loyalty-snapshot'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'X-Maya-Legacy-Bridge': 'x'.repeat(48),
+        }),
+      }),
+    );
   });
 
   it('keeps the confirmed balance available when the service catalog fails', async () => {

@@ -60,4 +60,41 @@ describe('MayaBrainRouterService', () => {
       intent: 'schedule_management',
     });
   });
+
+  it('keeps business improvement questions in verified analytics', () => {
+    expect(
+      service.route(
+        UserRole.TENANT_OWNER,
+        'Как правильно увеличить выручку и вернуть клиентов?',
+      ),
+    ).toMatchObject({
+      profile: 'maya_finance',
+      intent: 'finance',
+      knowledgeRequired: false,
+    });
+  });
+
+  it('routes service decline questions to business analytics', () => {
+    expect(
+      service.route(
+        UserRole.TENANT_OWNER,
+        'Какая услуга просела за этот месяц?',
+      ),
+    ).toMatchObject({
+      profile: 'maya_analytics',
+      intent: 'business_analytics',
+      knowledgeRequired: false,
+    });
+  });
+
+  it('opens technical knowledge only for staff roles', () => {
+    expect(service.route(UserRole.STAFF, 'Как стричь кроп?')).toMatchObject({
+      intent: 'knowledge',
+      knowledgeRequired: true,
+    });
+    expect(service.route(UserRole.CLIENT, 'Как стричь кроп?')).toMatchObject({
+      persona: 'admin',
+      knowledgeRequired: false,
+    });
+  });
 });

@@ -219,6 +219,14 @@ export class LoyaltyService {
     const cached = await this.prisma.loyaltyAccount.findUnique({
       where: { userId_tenantId: { userId, tenantId } },
     });
+    const legacyAccount = await this.getLegacyMayaAccount(
+      tenantId,
+      userId,
+      cached,
+    );
+    if (legacyAccount) {
+      return legacyAccount;
+    }
     if (!phone) {
       return cached
         ? this.serializeAccount(cached, {
@@ -304,6 +312,140 @@ export class LoyaltyService {
         },
         cause: error instanceof Error ? error.name : 'unknown',
       });
+    }
+  }
+
+  private async getLegacyMayaAccount(
+    tenantId: string,
+    userId: string,
+    cached: {
+      id: string;
+      balance: number;
+      source: string;
+      syncedAt: Date | null;
+      externalReference?: string | null;
+    } | null,
+  ) {
+    const token = String(process.env.MAYA_LEGACY_BRIDGE_TOKEN || '').trim();
+    const allowedSlugs = new Set(
+      String(process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS || '')
+        .split(',')
+        .map((slug) => slug.trim().toLowerCase())
+        .filter(Boolean),
+    );
+    if (token.length < 32 || allowedSlugs.size === 0) {
+      return null;
+    }
+
+    const configuredUrl = String(
+      process.env.MAYA_LEGACY_BRIDGE_URL ||
+        'http://127.0.0.1:8080/api/internal/loyalty-snapshot',
+    ).trim();
+    let bridgeUrl: URL;
+    try {
+      bridgeUrl = new URL(configuredUrl);
+    } catch {
+      return null;
+    }
+    if (
+      bridgeUrl.protocol !== 'http:' ||
+      !['127.0.0.1', 'localhost', '[::1]', '::1'].includes(bridgeUrl.hostname)
+    ) {
+      return null;
+    }
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { slug: true },
+    });
+    if (!tenant || !allowedSlugs.has(tenant.slug.toLowerCase())) {
+      return null;
+    }
+
+    const identity = await this.prisma.authIdentity.findFirst({
+      where: { tenantId, userId, provider: 'telegram' },
+      select: { providerUserId: true },
+    });
+    if (!identity?.providerUserId) {
+      return null;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2_500);
+    try {
+      const response = await fetch(bridgeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Maya-Legacy-Bridge': token,
+        },
+        body: JSON.stringify({ telegram_user_id: identity.providerUserId }),
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        throw new Error(`Legacy loyalty bridge returned ${response.status}`);
+      }
+      const payload = (await response.json()) as {
+        found?: boolean;
+        balance?: unknown;
+      };
+      const balance = Number(payload.balance);
+      if (!payload.found || !Number.isFinite(balance) || balance < 0) {
+        return null;
+      }
+
+      const normalizedBalance = Math.round(balance);
+      const changed =
+        !cached ||
+        cached.balance !== normalizedBalance ||
+        cached.source !== 'legacy_maya';
+      const account = await this.prisma.loyaltyAccount.upsert({
+        where: { userId_tenantId: { userId, tenantId } },
+        update: {
+          source: 'legacy_maya',
+          balance: normalizedBalance,
+          externalReference: null,
+          syncedAt: new Date(),
+        },
+        create: {
+          tenantId,
+          userId,
+          source: 'legacy_maya',
+          balance: normalizedBalance,
+          syncedAt: new Date(),
+        },
+      });
+
+      if (changed) {
+        await this.auditLogService.log({
+          tenantId,
+          userId,
+          action: 'loyalty.legacy_balance_synced',
+          entityType: 'loyalty_account',
+          entityId: account.id,
+          metadata: {
+            provider: 'legacy_maya',
+            balance: normalizedBalance,
+          },
+        });
+      }
+
+      return this.serializeAccount(account, {
+        authoritative: 'maya',
+        syncStatus: 'current',
+        stale: false,
+      });
+    } catch {
+      if (cached?.source === 'legacy_maya') {
+        return this.serializeAccount(cached, {
+          authoritative: 'maya',
+          syncStatus: 'temporarily_unavailable',
+          stale: true,
+        });
+      }
+      return null;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
