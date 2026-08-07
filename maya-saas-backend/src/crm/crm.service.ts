@@ -796,7 +796,18 @@ export class CrmService {
     });
   }
 
-  async getJournal(tenantId: string, query: ListCrmJournalDto) {
+  /**
+   * @param options.includeCanceled — отдать отменённые визиты. Намеренно НЕ в
+   * DTO: тогда флаг стал бы частью HTTP-контракта журнала, а его ответом
+   * рисуется сетка расписания — отменённая запись нарисовала бы карточку
+   * поверх времени, которое салон уже перепродал. Просят его только изнутри,
+   * из аналитики.
+   */
+  async getJournal(
+    tenantId: string,
+    query: ListCrmJournalDto,
+    options?: { includeCanceled?: boolean },
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const from = new Date(query.from);
@@ -841,6 +852,7 @@ export class CrmService {
       to: to.toISOString(),
       timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
       providerId: query.providerId,
+      includeCanceled: options?.includeCanceled === true,
     });
   }
 

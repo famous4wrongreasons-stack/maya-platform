@@ -152,6 +152,33 @@ export class OperationsAnalyticsService {
     } satisfies CrmFinancialSummary;
   }
 
+  /**
+   * Финансовая сводка CRM для ЛИЧНОГО среза сотрудника.
+   *
+   * 🔴 Источник ровно тот же, что и у владельца: расчёт зарплаты в CRM ведётся
+   * по компании, отдельного «только про меня» эндпоинта у провайдера нет.
+   * Поэтому метод возвращает сводку ЦЕЛИКОМ, а вызывающий ОБЯЗАН отфильтровать
+   * её до строки самого сотрудника — чужие начисления наружу не уходят.
+   *
+   * `null` означает «денег в этом срезе не будет»: либо запрошен филиал (расчёт
+   * ведётся по компании и к филиалу не сводится), либо CRM не ответила. Ни то,
+   * ни другое не должно ронять личную аналитику: записи, клиенты и загрузка
+   * полезны и без денег.
+   */
+  async getStaffFinance(
+    tenantId: string,
+    query: AnalyticsRangeQueryDto,
+  ): Promise<CrmFinancialSummary | null> {
+    if (query.branchId) {
+      return null;
+    }
+    try {
+      return await this.getBusinessFinance(tenantId, query);
+    } catch {
+      return null;
+    }
+  }
+
   async getEmployeeOverview(
     tenantId: string,
     userId: string,
@@ -481,11 +508,19 @@ export class OperationsAnalyticsService {
     while (cursor < to.getTime()) {
       const chunkTo = Math.min(cursor + maxChunkMs, to.getTime());
       journals.push(
-        await this.crmService.getJournal(tenantId, {
-          from: new Date(cursor).toISOString(),
-          to: new Date(chunkTo).toISOString(),
-          ...(providerId ? { providerId } : {}),
-        }),
+        // 🔴 Аналитике отмены нужны. Без этого флага отменённая запись не
+        // доходит сюда вообще, счётчик отмен всегда ноль, и владельцу
+        // отвечали «отмен нет (0%)» вместо «не вижу». Сетка расписания флаг не
+        // ставит и отменённых визитов по-прежнему не показывает.
+        await this.crmService.getJournal(
+          tenantId,
+          {
+            from: new Date(cursor).toISOString(),
+            to: new Date(chunkTo).toISOString(),
+            ...(providerId ? { providerId } : {}),
+          },
+          { includeCanceled: true },
+        ),
       );
       cursor = chunkTo;
     }

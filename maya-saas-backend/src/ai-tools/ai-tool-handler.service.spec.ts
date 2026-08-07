@@ -488,6 +488,527 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getBusinessFinance).not.toHaveBeenCalled();
   });
 
+  it('gives the owner accrued payroll per master and never calls it master revenue', async () => {
+    const getBusinessFinance = jest.fn().mockResolvedValue({
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+      period: {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+        timezone: 'Europe/Moscow',
+      },
+      revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 100,
+        total: { currency: 'RUB', amount_kopecks: 50_000_000 },
+        by_type: [],
+        by_account: [],
+      },
+      payroll: {
+        // 🔴 Расчёт неполный: по одному мастеру CRM промолчала. Второй посчитан
+        // честно, и прятать его начисления из-за соседа нельзя.
+        status: 'partial',
+        verified: false,
+        accrued_total: null,
+        paid_total: null,
+        balance_total: null,
+        staff: [
+          {
+            staff_id: 'crm-staff-1',
+            // Имя из расчёта зарплаты — чужой источник имён. Наружу должно уйти
+            // имя из операционного разреза, а это — нет.
+            name: 'Антон',
+            status: 'available',
+            verified: true,
+            accrued: { currency: 'RUB', amount_kopecks: 12_000_000 },
+            paid: { currency: 'RUB', amount_kopecks: 5_000_000 },
+            balance: null,
+          },
+          {
+            staff_id: 'crm-staff-2',
+            name: 'Пётр',
+            status: 'unavailable',
+            verified: false,
+            accrued: null,
+            paid: null,
+            balance: null,
+          },
+        ],
+      },
+      warnings: [],
+    });
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: {},
+        appointments: { total: 50, active: 50, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'crm-staff-1',
+            name: 'Стас',
+            appointments: 30,
+            revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+            booked_minutes: 1_800,
+            services: [],
+          },
+          {
+            staff_external_id: 'crm-staff-2',
+            name: 'Илья',
+            appointments: 20,
+            revenue: [{ currency: 'RUB', amount_kopecks: 4_000_000 }],
+            booked_minutes: 1_200,
+            services: [],
+          },
+        ],
+      }),
+      getBusinessFinance,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-owner-staff-payroll',
+    );
+
+    expect(result).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Стас',
+          appointments: 30,
+          // Цены журнала по-прежнему обнулены: подтверждённых денег мастера нет.
+          revenue: [],
+          confirmed_revenue: {
+            status: 'unavailable',
+            amount: null,
+            unavailable_reason: expect.stringContaining('whole_company'),
+          },
+          salary: {
+            status: 'available',
+            basis: 'crm_payroll_accrual',
+            accrued: {
+              currency: 'RUB',
+              amount_kopecks: 12_000_000,
+              amount_major_units: 120_000,
+            },
+            paid: {
+              currency: 'RUB',
+              amount_kopecks: 5_000_000,
+              amount_major_units: 50_000,
+            },
+            unavailable_reason: null,
+          },
+        },
+        {
+          name: 'Илья',
+          appointments: 20,
+          revenue: [],
+          salary: {
+            status: 'unavailable',
+            basis: null,
+            accrued: null,
+            paid: null,
+            unavailable_reason: 'crm_payroll_row_unavailable_for_this_master',
+          },
+        },
+      ],
+    });
+    // 🔴 Граница «зарплата по именам» держится тем, что имя из расчёта зарплаты
+    // не переносится вообще: мастер называется именем операционного разреза.
+    expect(JSON.stringify(result)).not.toContain('Антон');
+    expect(JSON.stringify(result)).not.toContain('Пётр');
+    expect(JSON.stringify(result)).not.toContain('crm-staff-1');
+    // Начисление не выдаётся за выручку: цен журнала в ответе нет.
+    expect(JSON.stringify(result)).not.toContain('6000000');
+  });
+
+  it('withholds per-master payroll from a role that may see names but not finance', async () => {
+    const getBusinessFinance = jest.fn();
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: {},
+        appointments: { total: 30, active: 30, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'crm-staff-1',
+            name: 'Стас',
+            appointments: 30,
+            revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+            booked_minutes: 1_800,
+            services: [],
+          },
+        ],
+      }),
+      getBusinessFinance,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.MANAGER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-15T00:00:00.000Z',
+      },
+      'execution-manager-staff-payroll',
+    );
+
+    // Управляющий видит разрез по мастерам поимённо, но не их деньги.
+    expect(result).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Стас',
+          appointments: 30,
+          salary: {
+            status: 'unavailable',
+            accrued: null,
+            unavailable_reason: 'role_not_allowed_to_read_payroll',
+          },
+        },
+      ],
+    });
+    expect(getBusinessFinance).not.toHaveBeenCalled();
+  });
+
+  it('gives a master their own accrued salary and never a colleague payroll row', async () => {
+    const getStaffFinance = jest.fn().mockResolvedValue({
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+      period: {},
+      revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 10,
+        total: { currency: 'RUB', amount_kopecks: 50_000_000 },
+        by_type: [],
+        by_account: [],
+      },
+      payroll: {
+        status: 'available',
+        verified: true,
+        accrued_total: { currency: 'RUB', amount_kopecks: 42_000_000 },
+        paid_total: null,
+        balance_total: null,
+        staff: [
+          {
+            staff_id: 'crm-self',
+            name: 'Антон',
+            status: 'available',
+            verified: true,
+            accrued: { currency: 'RUB', amount_kopecks: 12_000_000 },
+            paid: null,
+            balance: null,
+          },
+          {
+            staff_id: 'crm-colleague',
+            name: 'Анна',
+            status: 'available',
+            verified: true,
+            accrued: { currency: 'RUB', amount_kopecks: 30_000_000 },
+            paid: null,
+            balance: null,
+          },
+        ],
+      },
+      warnings: [],
+    });
+    const analyticsService = {
+      getEmployeeOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 8, active: 8, cancelled: 0 },
+        revenue: [],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        employee: { provider_id: 'crm-self', name: 'Илья' },
+        staff: [
+          {
+            staff_external_id: 'crm-self',
+            name: 'Илья',
+            appointments: 8,
+            revenue: [],
+            booked_minutes: 240,
+            services: [],
+          },
+          // 🔴 Источник подмешал коллегу — его начисления не должны существовать
+          // в ответе даже как число.
+          {
+            staff_external_id: 'crm-colleague',
+            name: 'Анна',
+            appointments: 32,
+            revenue: [],
+            booked_minutes: 960,
+            services: [],
+          },
+        ],
+      }),
+      getStaffFinance,
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = await service.execute(
+      'analytics.employee.read',
+      { ...principal, userId: 'employee-user', role: UserRole.STAFF },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-employee-own-payroll',
+    );
+
+    expect(result).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Илья',
+          appointments: 8,
+          salary: {
+            status: 'available',
+            basis: 'crm_payroll_accrual',
+            accrued: {
+              currency: 'RUB',
+              amount_kopecks: 12_000_000,
+              amount_major_units: 120_000,
+            },
+          },
+          confirmed_revenue: { status: 'unavailable', amount: null },
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('Анна');
+    expect(JSON.stringify(result)).not.toContain('Антон');
+    expect(JSON.stringify(result)).not.toContain('crm-self');
+    // Начисления коллеги и общий фонд оплаты труда салона.
+    expect(JSON.stringify(result)).not.toContain('30000000');
+    expect(JSON.stringify(result)).not.toContain('42000000');
+  });
+
+  it('reports per-master payroll as unavailable with the CRM reason instead of zero', async () => {
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: {},
+        appointments: { total: 30, active: 30, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'crm-staff-1',
+            name: 'Стас',
+            appointments: 30,
+            revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+            booked_minutes: 1_800,
+            services: [],
+          },
+        ],
+      }),
+      getBusinessFinance: jest.fn().mockResolvedValue({
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: false,
+        period: {},
+        revenue: {
+          status: 'available',
+          verified: true,
+          transaction_count: 400,
+          total: { currency: 'RUB', amount_kopecks: 90_000_000 },
+          by_type: [],
+          by_account: [],
+        },
+        payroll: {
+          status: 'unavailable',
+          verified: false,
+          accrued_total: null,
+          paid_total: null,
+          balance_total: null,
+          staff: [],
+        },
+        warnings: [
+          {
+            code: 'crm_payroll_range_too_large',
+            message: 'Расчёт зарплаты доступен только за период до 31 дня.',
+          },
+        ],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-07-31T23:59:59.999Z',
+      },
+      'execution-owner-payroll-range',
+    );
+
+    // 🔴 Ноль здесь читался бы как «мастеру ничего не начислено».
+    expect(result).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Стас',
+          salary: {
+            status: 'unavailable',
+            accrued: null,
+            paid: null,
+            unavailable_reason: 'crm_payroll_range_too_large',
+          },
+        },
+      ],
+    });
+  });
+
+  it('says the internal calendar has no payroll instead of showing an empty salary', async () => {
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'maya',
+        period: {},
+        appointments: { total: 12, active: 12, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 2_400_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'internal-provider-1',
+            name: 'Стас',
+            appointments: 12,
+            revenue: [{ currency: 'RUB', amount_kopecks: 2_400_000 }],
+            booked_minutes: 720,
+            services: [],
+          },
+        ],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          calendarSource: 'internal',
+          defaultTimezone: 'UTC',
+        }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = await service.execute(
+      'analytics.business.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-15T00:00:00.000Z',
+      },
+      'execution-owner-internal-payroll',
+    );
+
+    expect(result).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Стас',
+          // Внутренний календарь свои цены отдаёт — но это стоимость записей.
+          revenue: [{ amount_kopecks: 2_400_000 }],
+          confirmed_revenue: {
+            status: 'unavailable',
+            amount: null,
+            unavailable_reason: expect.stringContaining('booked'),
+          },
+          salary: {
+            status: 'unavailable',
+            accrued: null,
+            unavailable_reason: 'internal_calendar_has_no_payroll_calculation',
+          },
+        },
+      ],
+    });
+  });
+
+  it('names per-master revenue as an unavailable metric with its reason', async () => {
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 30, active: 30, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'crm-staff-1',
+            name: 'Стас',
+            appointments: 30,
+            revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
+            booked_minutes: 1_800,
+            services: [],
+          },
+        ],
+      }),
+      getBusinessFinance: jest.fn().mockRejectedValue(new Error('crm is down')),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-15T00:00:00.000Z',
+        comparison: 'none',
+      },
+      'execution-staff-revenue-metric',
+    )) as Record<string, unknown>;
+
+    expect(result.unavailable_metrics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'staff_revenue',
+          reason: expect.stringContaining('accrued payroll'),
+        }),
+        expect.objectContaining({
+          key: 'staff_accrued_salary',
+          reason: expect.stringContaining('crm_finance_unavailable'),
+        }),
+      ]),
+    );
+  });
+
   it('compares equal year-to-date periods and calculates deltas on the server', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:34:56.789Z'));
     const getRevenueSummary = jest
@@ -1432,6 +1953,7 @@ describe('AiToolHandlerService output minimization', () => {
       });
     const analyticsService = {
       getEmployeeOverview,
+      getStaffFinance: jest.fn().mockResolvedValue(null),
     } as unknown as OperationsAnalyticsService;
     const prisma = {
       tenant: {

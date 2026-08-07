@@ -182,27 +182,53 @@ const ATTRIBUTION_ENTITY_ARRAY_KEYS = new Set([
   'services',
 ]);
 /**
- * Окно после имени, в котором число считается сказанным ПРО эту сущность.
- * Дальше начинается другая мысль, и приписывать ей имя уже нельзя.
+ * Дальше этого расстояния число уже не «про это имя».
+ *
+ * Считается по символам ОТ КРАЯ имени ДО КРАЯ числа в любую сторону: по-русски
+ * владелец числа стоит и слева («у Ильи 61 запись»), и справа («17 записей у
+ * Ильи»). Прежнее окно смотрело только вперёд, и во фразе «17 записей у Ильи и
+ * 23 у Стаса» второе число объявлялось чужим — на этом и набралась пятая часть
+ * ложных тревог.
  */
-const ATTRIBUTION_WINDOW = 120;
+const ATTRIBUTION_ATTACH_DISTANCE = 64;
+/**
+ * Надбавка к расстоянию за союз между именем и числом.
+ *
+ * «И», «а», «но» вводят новую мысль, поэтому имя за союзом — кандидат слабый:
+ * в «17 у Ильи и 23 у Стаса» до 23 от обоих имён по три символа, и без этой
+ * надбавки выбор был бы монеткой. Надбавка, а не запрет: если других кандидатов
+ * нет, привязка через союз всё равно состоится.
+ */
+const ATTRIBUTION_CONJUNCTION_PENALTY = 40;
+/**
+ * Насколько кандидаты должны различаться, чтобы выбор считался определённым.
+ * Разница меньше — сторож молчит: ложная тревога дороже пропуска.
+ */
+const ATTRIBUTION_TIE_MARGIN = 8;
 /**
  * Оговорка «это по салону, а не по нему». Рядом с такой пометкой общий итог
  * назван честно, и придираться к нему нельзя — иначе сторож забракует ровно
  * ту формулировку, которой мы от модели и добиваемся.
  */
 const SALON_SCOPE_MARKER =
-  /(по\s+салону|салон[а-яa-z]*|в\s+целом|итого|суммарно|общ[а-яa-z]*|из\s+них|на\s+всех|(?<!больше\s)(?<!меньше\s)(?<!чаще\s)всего)/i;
+  /(по\s+салону|салон[а-яa-z]*|в\s+целом|итого|суммарно|в\s+сумме|по\s+итогам|на\s+двоих|на\s+троих|вместе|общ[а-яa-z]*|из\s+них|на\s+всех|(?<!больше\s)(?<!меньше\s)(?<!чаще\s)всего)/i;
 /** «19 из 40» — второе число это база, а не показатель названного мастера. */
 const SHARE_BASE_MARKER = /(?:^|[\s(])(?:из|от)\s+$/i;
 /**
- * Разрыв мысли между двумя именами. За ним услуга уже названа сама по себе, а
- * не как услуга предыдущего мастера: «у Стаса ровно, а «Борода» просела».
+ * Союз, вводящий новую мысль. Между именем и числом означает, что число, скорее
+ * всего, принадлежит не этому имени.
  */
-const ATTRIBUTION_BREAK_PATTERN =
-  /[.;!?\n•]|(?:^|[\s,—-])(?:а|но|зато|хотя|при\s+этом|тогда\s+как|причем)(?:\s|$)/i;
-/** Насколько близко к имени мастера услуга ещё читается как ЕГО услуга. */
-const ATTRIBUTION_NESTING_GAP = 40;
+const ATTRIBUTION_CONJUNCTION_PATTERN =
+  /(?:^|[\s(-])(?:и|а|но|зато|хотя|же|при\s+этом|тогда\s+как|причем|причём)(?:\s|$)/i;
+/**
+ * Перечисление сущностей: «Илья и Стас», «у Ильи и у Стаса».
+ *
+ * Такая пара — совместное подлежащее, и число за ней относится к обоим сразу
+ * («Илья и Стас дали 40 записей»). Проверить сумму по строкам нельзя, поэтому
+ * на перечислении сторож молчит.
+ */
+const ATTRIBUTION_ENUMERATION_JOINER =
+  /^[\s]*(?:и|или|с|плюс|вместе\s+с)[\s]*(?:у|от|для|по|в)?[\s]*$/i;
 /**
  * Имена, которые сущностью не считаем.
  *
@@ -226,15 +252,43 @@ const ATTRIBUTION_GENERIC_NAMES = new Set([
 ]);
 
 type AttributionEntity = {
+  key: string;
   name: string;
   numbers: Set<string>;
   kind: 'staff' | 'service';
+  /**
+   * Для услуги: её числа В СТРОКЕ конкретного мастера.
+   *
+   * Плоского множества услуги мало. «Борода» просела на 19 у Ильи и стояла
+   * ровно у Стаса — по общему набору «Бороды» обе фразы одинаково законны, и
+   * подмена мастера проходит незамеченной. Разрез по владельцу — единственное,
+   * что их различает.
+   */
+  byOwner: Map<string, Set<string>>;
+  /** Для мастера: выдан ли по нему разрез по услугам. */
+  detailed: boolean;
 };
 
-type AttributionMention = AttributionEntity & {
+type AttributionMention = {
+  entity: AttributionEntity;
   start: number;
   end: number;
 };
+
+/**
+ * Кандидат на владение числом: одно имя или перечисление имён.
+ *
+ * Перечисление держим отдельной сущностью, потому что число за ним не
+ * принадлежит ни одному из членов по отдельности.
+ */
+type AttributionTarget = {
+  members: AttributionMention[];
+  kind: 'staff' | 'service';
+  start: number;
+  end: number;
+};
+
+type AttributionClause = { start: number; end: number };
 
 const GROUNDING_FACT_PATTERN =
   /(сколько|какая|какой|какие|покажи|показать|дай|посчитай|есть\s+ли|когда|кто|мои|моя|мой|у\s+меня|за\s+сегодня|за\s+вчера|за\s+недел[а-яёa-z]*|за\s+месяц[а-яёa-z]*|сегодня|завтра)/i;
@@ -574,14 +628,10 @@ export class AiCoreService {
           // Число может быть настоящим и всё равно ложным: сказанное рядом с
           // именем, оно утверждает принадлежность. Сверка происхождения этого
           // не ловит — её множество плоское.
-          // 🔴 По умолчанию ВЫКЛЮЧЕНА. На замере она забраковала 7 верных
-          // ответов из 31 — 22,6% ложных тревог. Причина в разборе русского:
-          // окно смотрит вперёд от имени, а число часто стоит перед владельцем
-          // («17 записей у Ильи и 23 у Стаса»), и второе объявляется чужим.
-          // Сторож, глушащий каждый пятый верный ответ, вреднее проблемы,
-          // которую он решает: MAYA снова начнёт отвечать шаблонами. Код и
-          // тесты оставлены — включается флагом, когда разбор станет точнее.
-          // Пока привязку держит правило в промпте.
+          // 🔴 Здесь, в отличие от сверки происхождения, идёт РЕПЛИКА
+          // ВЛАДЕЛЬЦА, а не весь диалог. Числа из прошлых ответов MAYA привязку
+          // не подтверждают: «61» могло стоять у Ильи ходом раньше, и зачесть
+          // его Стасу сейчас — это ровно та ошибка, которую сторож ищет.
           const misattributed =
             requirement &&
             unsourced.length === 0 &&
@@ -590,7 +640,7 @@ export class AiCoreService {
                   reply,
                   requirement,
                   toolResults,
-                  this.conversationText(sanitized.messages),
+                  this.latestUserText(sanitized.messages),
                 )
               : [];
           if (unsourced.length > 0 || misattributed.length > 0) {
@@ -2541,10 +2591,13 @@ export class AiCoreService {
    * этом настоящие, и владелец шёл разговаривать с человеком по выдуманной
    * привязке.
    *
-   * Проверяем только то, что стоит ПОСЛЕ имени, до следующего имени и до конца
-   * предложения: общий итог салона, названный без имени рядом, нарушением не
-   * считается. Число, не подтверждённое нигде, здесь не наша забота — им
-   * занимается unsourcedNumbers, и дублировать его в двух списках нельзя.
+   * 🔴 Разбор построен вокруг одного правила: ЛОЖНАЯ ТРЕВОГА ДОРОЖЕ ПРОПУСКА.
+   * Забракованный верный ответ уходит в шаблон — ровно та беда, от которой
+   * лечили мозг MAYA. Поэтому сторож молчит везде, где привязка неочевидна:
+   * число вне клаузы с именем, перечисление имён, два одинаково близких
+   * кандидата, салонная пометка рядом, число из реплики самого владельца.
+   * Число, не подтверждённое нигде, здесь не наша забота — им занимается
+   * unsourcedNumbers, и дублировать его в двух списках нельзя.
    */
   private misattributedNumbers(
     reply: string,
@@ -2565,104 +2618,107 @@ export class AiCoreService {
       return [];
     }
     const evidence = this.groundingEvidence(toolResults);
-    const allowed = new Set([...evidence.absolute, ...evidence.delta]);
-    for (const value of this.groundingNumbers(userText)) {
-      allowed.add(value);
-    }
+    const sourced = new Set([...evidence.absolute, ...evidence.delta]);
+    // Число, названное самим владельцем, привязке не подлежит: за ним нет
+    // строки данных, с которой можно свериться.
+    const spoken = this.groundingNumbers(userText);
     const occurrences = this.numberOccurrences(text);
     const problems: string[] = [];
-    for (let index = 0; index < mentions.length; index += 1) {
-      const mention = mentions[index];
-      const next = mentions[index + 1];
-      // Конец предложения — тоже граница. «…«Борода» 19. Кресло занято 1 830
-      // минут» — минуты относятся к мастеру целиком, а не к последней
-      // упомянутой услуге, и без этой границы верный ответ шёл бы под нож.
-      const windowEnd = Math.min(
-        mention.end + ATTRIBUTION_WINDOW,
-        next ? next.start : text.length,
-        this.sentenceEnd(text, mention.end),
+    for (const clause of this.attributionClauses(text)) {
+      const targets = this.attributionTargets(
+        text,
+        mentions.filter(
+          (mention) =>
+            mention.start >= clause.start && mention.end <= clause.end,
+        ),
       );
+      // Ни одного имени в клаузе — это общий показатель салона. Он назван
+      // честно, и придираться не к чему.
+      if (targets.length === 0) {
+        continue;
+      }
       for (const occurrence of occurrences) {
-        if (occurrence.index < mention.end || occurrence.index >= windowEnd) {
+        if (
+          occurrence.index < clause.start ||
+          occurrence.index >= clause.end ||
+          !this.numberInSet(occurrence.value, sourced) ||
+          this.numberInSet(occurrence.value, spoken) ||
+          this.salonScopeExempt(text, clause, occurrence.index)
+        ) {
           continue;
         }
-        if (this.numberInSet(occurrence.value, mention.numbers)) {
+        const target = this.attributionTarget(text, targets, occurrence);
+        if (!target) {
           continue;
         }
-        if (!this.numberInSet(occurrence.value, allowed)) {
-          // Не подтверждено вовсе — это уже поймал сторож происхождения.
+        const allowed = this.attributionAllowed(target, targets);
+        if (!allowed || this.numberInSet(occurrence.value, allowed.numbers)) {
           continue;
         }
-        if (this.attributionExempt(text, mention.end, occurrence.index)) {
-          continue;
-        }
-        problems.push(`${occurrence.value} (это не данные «${mention.name}»)`);
+        problems.push(`${occurrence.value} (это не данные «${allowed.label}»)`);
       }
     }
     return [...new Set(problems)].slice(0, 8);
   }
 
   /**
-   * Оговорки, при которых общий итог рядом с именем — не нарушение.
+   * Клаузы ответа — рамка, внутри которой число ищет владельца.
    *
-   * Ложные тревоги тут опаснее пропусков: прошлая проверка направления
-   * браковала верные ответы пачками. «У Ильи 19 из 40 записей салона» —
-   * нормальная фраза, и 40 в ней названо базой, а не показателем Ильи.
+   * Запятая границей считается наравне с точкой: «Илья сделал 61 запись,
+   * средний чек 2 612 ₽» — чек тут салонный, и без границы он приписался бы
+   * человеку. Двоеточие и тире, наоборот, границей НЕ считаются: по-русски они
+   * как раз вводят данные названного («Илья: 61 запись», «лидер - Стас, 142»).
    */
-  private attributionExempt(
-    text: string,
-    mentionEnd: number,
-    numberIndex: number,
-  ): boolean {
-    // Назад — до начала предложения, но не дальше имени. «Илья: 61 запись
-    // против 79. По салону за месяц 168 записей и 241 276,56 ₽» — пометка
-    // стоит в начале фразы, а числа тянутся до конца, и жёсткое окно в
-    // несколько слов забраковало бы последнее из них.
-    const clauseStart = Math.max(
-      mentionEnd,
-      this.sentenceStart(text, numberIndex),
-    );
-    const before = text.slice(clauseStart, numberIndex);
-    if (SHARE_BASE_MARKER.test(before) || SALON_SCOPE_MARKER.test(before)) {
-      return true;
-    }
-    // Вперёд смотрим коротко: пометка должна стоять вплотную к числу. Шире
-    // окно — и «просела на 12 записей, а по салону ровно» перестанет ловиться.
-    return SALON_SCOPE_MARKER.test(text.slice(numberIndex, numberIndex + 18));
-  }
-
-  private sentenceStart(text: string, index: number): number {
-    for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
-      if (this.sentenceBoundary(text, cursor)) {
-        return cursor + 1;
+  private attributionClauses(text: string): AttributionClause[] {
+    const clauses: AttributionClause[] = [];
+    let start = 0;
+    for (let cursor = 0; cursor < text.length; cursor += 1) {
+      if (!this.attributionBoundary(text, cursor)) {
+        continue;
       }
-    }
-    return 0;
-  }
-
-  private sentenceEnd(text: string, index: number): number {
-    for (let cursor = index; cursor < text.length; cursor += 1) {
-      if (this.sentenceBoundary(text, cursor)) {
-        return cursor;
+      if (cursor > start) {
+        clauses.push({ start, end: cursor });
       }
+      start = cursor + 1;
     }
-    return text.length;
+    if (start < text.length) {
+      clauses.push({ start, end: text.length });
+    }
+    return clauses;
   }
 
   /**
-   * Точка между цифрами границей не считается: «покрытие выручки 0.94» иначе
-   * обрывало бы предложение посреди числа.
+   * Разделитель между цифрами разделителем не считается: «38,7» и «0.94» иначе
+   * разрывались бы посреди числа.
    */
-  private sentenceBoundary(text: string, index: number): boolean {
+  private attributionBoundary(text: string, index: number): boolean {
     const character = text[index];
-    if (/[;!?\n•]/.test(character)) {
+    if (/[;!?\n•()]/.test(character)) {
       return true;
     }
-    if (character !== '.') {
+    if (character !== '.' && character !== ',') {
       return false;
     }
     return !(
       /\d/.test(text[index - 1] ?? '') && /\d/.test(text[index + 1] ?? '')
+    );
+  }
+
+  /**
+   * Оговорки, при которых общий итог рядом с именем — не нарушение.
+   *
+   * Смотрим всю клаузу целиком: пометка «по салону» может стоять и до числа, и
+   * после него («у Ильи 61, по салону 268» / «Илья дал 61 из 268 по салону»).
+   * Узкое окно ловило только первый порядок и браковало второй.
+   */
+  private salonScopeExempt(
+    text: string,
+    clause: AttributionClause,
+    numberIndex: number,
+  ): boolean {
+    return (
+      SALON_SCOPE_MARKER.test(text.slice(clause.start, clause.end)) ||
+      SHARE_BASE_MARKER.test(text.slice(clause.start, numberIndex))
     );
   }
 
@@ -2679,43 +2735,65 @@ export class AiCoreService {
   }
 
   /**
-   * Карта «сущность → числа её поддерева».
+   * Карта «сущность → числа её поддерева» плюс разрез услуги по владельцу.
    *
    * Одноимённые строки из разных массивов объединяются: у мастера есть срез за
    * период в staff_summary[] и сравнение периодов в staff_changes[], и оба
    * набора — его собственные числа. Раздельно они дали бы ложные тревоги на
    * первой же фразе вида «у Ильи 19 записей против 31».
+   *
+   * 🔴 Услуга живёт в двух видах сразу: салонная строка (service_changes[]) и
+   * строка внутри мастера (staff_changes[].services[]). Плоское объединение
+   * стирает разницу — а именно она отличает «у Ильи просела «Борода»» от «у
+   * Стаса просела «Борода»», когда цифра в обеих фразах одна и та же настоящая.
+   * Поэтому числа услуги дополнительно раскладываются по владельцу.
    */
   private attributionEntities(value: unknown): AttributionEntity[] {
     const entities = new Map<string, AttributionEntity>();
+    const entityKey = (name: string) =>
+      name.toLowerCase().replace(/ё/g, 'е').trim();
     const remember = (
       name: string,
       node: unknown,
       kind: AttributionEntity['kind'],
-    ) => {
-      const key = name.toLowerCase().replace(/ё/g, 'е').trim();
+      owner: string | null,
+    ): string | null => {
+      const key = entityKey(name);
       if (key.length < 3 || ATTRIBUTION_GENERIC_NAMES.has(key)) {
-        return;
+        return null;
       }
-      const existing = entities.get(key);
-      const entity: AttributionEntity = existing ?? {
+      const entity: AttributionEntity = entities.get(key) ?? {
+        key,
         name: name.trim(),
         numbers: new Set<string>(),
         kind,
+        byOwner: new Map<string, Set<string>>(),
+        detailed: false,
       };
-      for (const number of this.groundingNumbers(node)) {
+      const numbers = this.groundingNumbers(node);
+      for (const number of numbers) {
         entity.numbers.add(number);
+      }
+      if (owner) {
+        const scoped = entity.byOwner.get(owner) ?? new Set<string>();
+        for (const number of numbers) {
+          scoped.add(number);
+        }
+        entity.byOwner.set(owner, scoped);
       }
       // Мастер сильнее услуги: если имя встретилось в обеих ролях, разбор
       // «мастер + его услуга» должен остаться возможным.
       if (kind === 'staff') {
         entity.kind = 'staff';
+        const nested = (node as Record<string, unknown> | null)?.services;
+        entity.detailed ||= Array.isArray(nested) && nested.length > 0;
       }
       entities.set(key, entity);
+      return key;
     };
-    const walk = (node: unknown) => {
+    const walk = (node: unknown, owner: string | null) => {
       if (Array.isArray(node)) {
-        node.forEach((item) => walk(item));
+        node.forEach((item) => walk(item, owner));
         return;
       }
       if (node === null || typeof node !== 'object') {
@@ -2724,20 +2802,30 @@ export class AiCoreService {
       for (const [key, item] of Object.entries(
         node as Record<string, unknown>,
       )) {
-        if (ATTRIBUTION_ENTITY_ARRAY_KEYS.has(key) && Array.isArray(item)) {
-          const kind = key.startsWith('staff') ? 'staff' : 'service';
-          for (const entry of item) {
-            if (entry === null || typeof entry !== 'object') continue;
-            const name = (entry as Record<string, unknown>).name;
-            if (typeof name === 'string' && name.trim() !== '') {
-              remember(name, entry, kind);
-            }
-          }
+        if (!ATTRIBUTION_ENTITY_ARRAY_KEYS.has(key) || !Array.isArray(item)) {
+          walk(item, owner);
+          continue;
         }
-        walk(item);
+        const kind = key.startsWith('staff') ? 'staff' : 'service';
+        for (const entry of item) {
+          if (entry === null || typeof entry !== 'object') {
+            continue;
+          }
+          const name = (entry as Record<string, unknown>).name;
+          if (typeof name !== 'string' || name.trim() === '') {
+            walk(entry, owner);
+            continue;
+          }
+          // Услуга наследует владельца только внутри строки мастера; в
+          // service_summary[]/service_changes[] она салонная и владельца не
+          // имеет.
+          const scope = kind === 'staff' ? null : owner;
+          const stored = remember(name, entry, kind, scope);
+          walk(entry, kind === 'staff' ? stored : owner);
+        }
       }
     };
-    walk(value);
+    walk(value, null);
     return [...entities.values()];
   }
 
@@ -2760,13 +2848,7 @@ export class AiCoreService {
       if (!pattern) continue;
       for (const match of haystack.matchAll(pattern)) {
         const start = match.index ?? 0;
-        found.push({
-          name: entity.name,
-          numbers: entity.numbers,
-          kind: entity.kind,
-          start,
-          end: start + match[0].length,
-        });
+        found.push({ entity, start, end: start + match[0].length });
       }
     }
     found.sort((left, right) =>
@@ -2780,48 +2862,139 @@ export class AiCoreService {
       if (previous && mention.start < previous.end) {
         continue;
       }
-      // 🔴 «У Стаса «Борода» просела на 12 записей» — самый дорогой случай:
-      // и мастер настоящий, и услуга настоящая, и −12 у этой услуги реально
-      // есть, вот только просела она у Ильи. Оба имени названы подряд, поэтому
-      // число утверждает пересечение: оно обязано быть и у мастера, и у его
-      // услуги. Проверять их по отдельности бесполезно — порознь всё сходится.
-      if (previous && this.nestedAttribution(text, previous, mention)) {
-        mentions.push({
-          ...mention,
-          name: `${previous.name} → ${mention.name}`,
-          numbers: new Set(
-            [...mention.numbers].filter((number) =>
-              this.numberInSet(number, previous.numbers),
-            ),
-          ),
-        });
-        continue;
-      }
       mentions.push(mention);
     }
     return mentions;
   }
 
   /**
-   * Названа ли вторая сущность как принадлежность первой.
+   * Имена клаузы, свёрнутые до кандидатов на владение числом.
    *
-   * Только «мастер + услуга» и только вплотную, без разрыва мысли. Два мастера
-   * подряд принадлежностью не считаются, иначе фраза «Илья: 19, у Стаса 21»
-   * потребовала бы от 21 быть числом сразу обоих.
+   * Соседние однородные имена без числа между ними — перечисление: «Илья и
+   * Стас дали 268 записей» говорит о паре, а не о Стасе, и требовать 268 от
+   * последнего названного нельзя. Такие пары склеиваем в один кандидат, и на
+   * нём сторож потом промолчит.
    */
-  private nestedAttribution(
+  private attributionTargets(
     text: string,
-    previous: AttributionMention,
-    mention: AttributionMention,
-  ): boolean {
-    if (previous.kind === mention.kind) {
-      return false;
+    mentions: AttributionMention[],
+  ): AttributionTarget[] {
+    const targets: AttributionTarget[] = [];
+    for (const mention of mentions) {
+      const previous = targets.at(-1);
+      const gap = previous ? text.slice(previous.end, mention.start) : '';
+      if (
+        previous &&
+        previous.kind === mention.entity.kind &&
+        !/\d/.test(gap) &&
+        ATTRIBUTION_ENUMERATION_JOINER.test(gap)
+      ) {
+        previous.members.push(mention);
+        previous.end = mention.end;
+        continue;
+      }
+      targets.push({
+        members: [mention],
+        kind: mention.entity.kind,
+        start: mention.start,
+        end: mention.end,
+      });
     }
-    const gap = text.slice(previous.end, mention.start);
-    return (
-      gap.length <= ATTRIBUTION_NESTING_GAP &&
-      !ATTRIBUTION_BREAK_PATTERN.test(gap)
+    return targets;
+  }
+
+  /**
+   * Кому принадлежит число — по БЛИЖАЙШЕМУ имени в любую сторону.
+   *
+   * Русский порядок слов свободен: «у Ильи 61 запись» и «61 запись у Ильи»
+   * одинаково нормальны, поэтому смотрим и влево, и вправо. Союз между именем
+   * и числом удорожает кандидата: во фразе «17 записей у Ильи и 23 у Стаса»
+   * до 23 от обоих имён по три символа, и без надбавки выбор был бы случайным.
+   * Если два кандидата всё равно почти равны или ближайший слишком далеко —
+   * возвращаем null, и сторож молчит.
+   */
+  private attributionTarget(
+    text: string,
+    targets: AttributionTarget[],
+    occurrence: { value: string; index: number; end: number },
+  ): AttributionTarget | null {
+    const scored = targets
+      .map((target) => {
+        if (occurrence.index >= target.start && occurrence.end <= target.end) {
+          return { target, distance: 0 };
+        }
+        const gap =
+          occurrence.index >= target.end
+            ? text.slice(target.end, occurrence.index)
+            : text.slice(occurrence.end, target.start);
+        const penalty = ATTRIBUTION_CONJUNCTION_PATTERN.test(gap)
+          ? ATTRIBUTION_CONJUNCTION_PENALTY
+          : 0;
+        return { target, distance: gap.length + penalty };
+      })
+      .sort((left, right) => left.distance - right.distance);
+    const best = scored[0];
+    if (!best || best.distance > ATTRIBUTION_ATTACH_DISTANCE) {
+      return null;
+    }
+    const runnerUp = scored[1];
+    if (
+      runnerUp &&
+      runnerUp.target.kind === best.target.kind &&
+      runnerUp.distance - best.distance < ATTRIBUTION_TIE_MARGIN
+    ) {
+      // Два одинаково близких имени одного рода — угадывать нельзя.
+      return null;
+    }
+    return best.target;
+  }
+
+  /**
+   * Какие числа кандидат вправе носить.
+   *
+   * Услуга без мастера в клаузе отвечает за свой салонный набор. Услуга рядом
+   * с мастером — за набор ИМЕННО ЕГО строки, плюс за любые числа самого
+   * мастера: «у Ильи 61 запись, «Борода» 24» — 61 принадлежит человеку, а не
+   * услуге, и требовать его от строки услуги было бы ложной тревогой. Прежняя
+   * схема брала пересечение мастера и услуги и заваливалась именно на этом.
+   */
+  private attributionAllowed(
+    target: AttributionTarget,
+    targets: AttributionTarget[],
+  ): { numbers: Set<string>; label: string } | null {
+    // Перечисление сущностей: число может быть их суммой, а сумму мы не считаем.
+    if (target.members.length > 1) {
+      return null;
+    }
+    const entity = target.members[0].entity;
+    if (entity.kind === 'staff') {
+      return { numbers: entity.numbers, label: entity.name };
+    }
+    const staffTargets = targets.filter(
+      (item) => item.kind === 'staff' && item.members.length === 1,
     );
+    if (staffTargets.length === 0) {
+      return { numbers: entity.numbers, label: entity.name };
+    }
+    if (staffTargets.length > 1) {
+      // Два мастера в одной клаузе — чья это услуга, не определить.
+      return null;
+    }
+    const owner = staffTargets[0].members[0].entity;
+    const scoped = entity.byOwner.get(owner.key);
+    const label = `${owner.name} → ${entity.name}`;
+    if (scoped) {
+      return { numbers: new Set([...owner.numbers, ...scoped]), label };
+    }
+    // Разрез по услугам у мастера есть, а этой услуги в нём нет — значит она
+    // не его. Разреза нет вовсе — судить не по чему, и услуга отвечает за свой
+    // общий набор.
+    return owner.detailed
+      ? { numbers: owner.numbers, label }
+      : {
+          numbers: new Set([...owner.numbers, ...entity.numbers]),
+          label,
+        };
   }
 
   private entityNamePattern(name: string): RegExp | null {
@@ -2861,9 +3034,9 @@ export class AiCoreService {
    */
   private numberOccurrences(
     text: string,
-  ): Array<{ value: string; index: number }> {
+  ): Array<{ value: string; index: number; end: number }> {
     const seen = new Set<string>();
-    const found: Array<{ value: string; index: number }> = [];
+    const found: Array<{ value: string; index: number; end: number }> = [];
     const remember = (
       raw: string | undefined,
       index: number,
@@ -2875,7 +3048,9 @@ export class AiCoreService {
       const key = `${normalized}@${index}`;
       if (seen.has(key)) return;
       seen.add(key);
-      found.push({ value: normalized, index });
+      // Конец вхождения нужен привязке: расстояние до имени СПРАВА считается от
+      // последней цифры, иначе «142 у Стаса» мерилось бы от первой.
+      found.push({ value: normalized, index, end: index + (raw?.length ?? 0) });
     };
     for (const match of text.matchAll(GROUNDING_NUMBER_PATTERN)) {
       remember(match[0], match.index ?? 0, true);
@@ -2934,10 +3109,30 @@ export class AiCoreService {
   /**
    * Включена ли сверка привязки числа к сущности.
    *
-   * Выключена по умолчанию: на замере 22,6% ложных тревог на верных ответах.
-   * `AI_CORE_ATTRIBUTION_GUARD=true` включает её для замеров и доводки.
+   * 🔴 Включена по умолчанию — но только после того, как замер показал НОЛЬ
+   * ложных тревог. Прежний разбор бракова́л 7 верных ответов из 31 (22,6%), и с
+   * таким счётом сторож вредил больше, чем помогал: каждый пятый разбор
+   * подменялся шаблоном. После перехода на «ближайшее имя в клаузе в любую
+   * сторону» замер на 58 ответах (46 верных + 12 подмен) дал 0 ложных тревог
+   * при 10 пойманных подменах из 12 — см. `describe('сверка привязки числа к
+   * сущности — замер')` в спеке, набор там же.
+   * `AI_CORE_ATTRIBUTION_GUARD=false` глушит сверку без выката, если на живом
+   * трафике всплывёт формулировка, которую разбор не понимает.
    */
   private attributionGuardEnabled(): boolean {
+    // 🔴 Снова ВЫКЛЮЧЕНА по умолчанию. Замер на собственном наборе дал ноль
+    // ложных тревог, но независимый ревизор на СВОЁМ наборе получил две — и
+    // главное, нашёл целый класс, который набор не покрывал: год из даты
+    // привязывается к мастеру («За август 2026 у Дмитрия 118 записей» → «2026
+    // это не данные Дмитрия»), семь ложных тревог из восьми фраз с годом.
+    //
+    // Плюс структурное ограничение: числа сущности лежат плоским множеством,
+    // поэтому перестановка метрик ВНУТРИ одного мастера проходит молча — «у
+    // Дмитрия 76 отмен», где 76 это его стрижки. А это и есть самая частая
+    // ошибка. Сторож, который ловит редкое и пропускает частое, ценой ложных
+    // тревог покупать нельзя: они возвращают владельцу шаблоны.
+    //
+    // Чинится сверкой на уровне МЕТРИКИ, а не сущности. До тех пор — opt-in.
     return (
       this.configService
         .get<string>('AI_CORE_ATTRIBUTION_GUARD')

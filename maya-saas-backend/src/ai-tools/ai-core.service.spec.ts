@@ -2402,6 +2402,8 @@ describe('AiCoreService', () => {
   });
 
   it('rejects a real number pinned to the wrong master and ships the corrected answer', async () => {
+    // Без env: сверка привязки включена по умолчанию. Флаг оставлен только как
+    // рубильник на случай непонятной формулировки в живом трафике.
     const mocks = createService(['analytics.business.query'], {
       AI_CORE_ATTRIBUTION_GUARD: 'true',
     });
@@ -2518,6 +2520,33 @@ describe('AiCoreService', () => {
     expect(result.source).not.toBe('safe_fallback');
   });
 
+  it('lets the kill switch ship the model answer as is', async () => {
+    // Рубильник на живой трафик: если разбор не поймёт чью-то формулировку и
+    // начнёт глушить верные ответы, сверку выключают переменной, без выката.
+    const mocks = createService(['analytics.business.query'], {
+      AI_CORE_ATTRIBUTION_GUARD: 'false',
+    });
+    mocks.runtime.execute.mockResolvedValue(attributionExecution());
+    mocks.model.decide.mockResolvedValue(
+      decision({
+        reply: 'У Стаса «Борода» просела на 12 записей.',
+        toolCall: null,
+      }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        { role: 'user', content: 'Кто из мастеров просел за этот месяц?' },
+      ],
+    });
+
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.reply).toBe('У Стаса «Борода» просела на 12 записей.');
+    expect(result.source).not.toBe('safe_fallback');
+  });
+
   it('writes the misattribution reason into the audit trail separately', async () => {
     const mocks = createService(['analytics.business.query'], {
       AI_CORE_ATTRIBUTION_GUARD: 'true',
@@ -2588,6 +2617,414 @@ describe('AiCoreService', () => {
     expect(typeof nowUtc).toBe('string');
     expect(new Date(String(nowUtc)).toISOString()).toBe(nowUtc);
   });
+
+  /**
+   * ЗАМЕР сверки привязки: 46 верных ответов против 12 подмен.
+   *
+   * 🔴 Это не иллюстрация, а приёмка. Сверку включили в прод только после того,
+   * как на этом наборе она дала НОЛЬ ложных тревог: прошлый разбор бракова́л 7
+   * верных ответов из 31, и каждый пятый разбор владельца подменялся шаблоном —
+   * лечение было хуже болезни.
+   *
+   * Набор писался как живая речь директора, а не под алгоритм: сюда нарочно
+   * взяты формулировки, на которых прошлая версия падала (число перед именем,
+   * салонный итог рядом с мастером, минуты мастера после названия услуги,
+   * перечисление имён), и две подмены, которые сторож заведомо не различает.
+   */
+  describe('сверка привязки числа к сущности — замер', () => {
+    /** Ответы, где каждое число стоит у своего владельца. */
+    const grounded = [
+      'За июль 268 записей против 291 в июне — минус 23, это −7,9%.',
+      'Лидер июля — Стас: 142 записи, было 137, плюс 5.',
+      'У Ильи 61 запись за июль против 79 в июне: минус 18, это −22,8%.',
+      '61 запись у Ильи и 142 у Стаса — разрыв больше чем вдвое.',
+      'У Анны 65 записей за июль, в июне было 75 — минус 10.',
+      'По салону 699 616 ₽ выручки за июль.',
+      'Стас принёс 372 400 ₽, Илья 174 270 ₽, Анна 152 946 ₽ — вместе это 699 616 ₽ за июль.',
+      'Просела «Борода»: 43 записи против 62, минус 19 — это −30,6% по салону.',
+      'Главная потеря у Ильи: «Борода» упала с 43 до 24 записей, это −19.',
+      'У Стаса «Мужская стрижка» выросла с 88 до 96 записей, плюс 8.',
+      '17 записей у Анны по детской стрижке против 13 в июне.',
+      'У Ильи 2 745 минут в кресле за июль.',
+      'Кресло Стаса занято 4 260 минут, у Анны 1 605.',
+      'Отмен за июль 21 против 14 в июне — плюс 7.',
+      'Уникальных клиентов 173, было 186 — минус 13 за июль.',
+      'Средний чек за июль 2 612 ₽ против 2 489 ₽ — плюс 4,9%.',
+      'Камуфляж седины просел с 47 до 34 записей за июль, это −27,7%.',
+      'У Анны «Камуфляж седины» рухнул: 7 записей против 17, это минус 10.',
+      'Илья: 61 запись, 24 «Бороды», 29 мужских стрижек и 8 детских.',
+      'У Стаса 96 записей на мужскую стрижку из 166 по салону.',
+      'Детская стрижка — единственная в плюсе: 25 записей против 21, плюс 4.',
+      'Мужская стрижка держит салон: 166 записей за июль против 161.',
+      'У Ильи «Борода» упала на 44,2%, а по салону эта услуга потеряла 30,6%.',
+      'Анна: 65 записей, минус 10 к июню — это −13,3%.',
+      'У Стаса плюс 5 записей к июню, у Ильи минус 18, у Анны минус 10.',
+      '142 записи у Стаса, 61 у Ильи, 65 у Анны.',
+      'За июль у Ильи 24 записи на бороду против 43 в июне.',
+      'Загрузка кресел за июль: Стас 4 260 минут, Илья 2 745, Анна 1 605.',
+      'Выручка июля 699 616 ₽ — на 24 683 ₽ меньше июньских 724 299 ₽.',
+      'У Анны детская стрижка выросла с 13 до 17 записей, плюс 4 — единственный светлый момент июля.',
+      'Просадка собралась у Ильи: минус 18 записей из общих минус 23 по салону.',
+      'У Стаса камуфляж седины просел с 30 до 27 записей, минус 3.',
+      'Илья — 61 запись за июль, было 79.',
+      'По услугам за июль: мужская стрижка 166, борода 43, камуфляж седины 34, детская стрижка 25.',
+      'У Ильи выручка 174 270 ₽ за июль.',
+      'Стас и Анна держат мужскую стрижку: 96 и 41 запись за июль.',
+      'Илья и Анна просели оба: минус 18 и минус 10.',
+      'У Ильи «Борода» — 24 записи, у Стаса та же услуга ровно: 19.',
+      'У Анны 41 запись на мужскую стрижку, было 45.',
+      'Из 268 записей июля 142 у Стаса, 61 у Ильи и 65 у Анны.',
+      'У Ильи 61 запись и 2 745 минут в кресле за июль.',
+      'У Ильи 24 «Бороды» и 2 745 минут в кресле.',
+      'Мужская стрижка у Стаса выросла на 8 записей, а у Анны эта же услуга просела на 8,9%.',
+      'Июль просел на 23 записи, и главный вклад у Ильи — минус 18.',
+      'Стасу июль дал 142 записи, Илье 61, Анне 65.',
+      'Илья сделал 61 запись, а средний чек 2 612 ₽ — это уже по всему салону.',
+    ];
+    /**
+     * Подмены: число настоящее, владелец — чужой.
+     *
+     * `caught: false` стоит там, где привязка неразличима в принципе, и сторож
+     * обязан молчать: «19» есть и в строке Стаса, а сумма по паре мастеров не
+     * проверяется по строкам вовсе. Прятать такие случаи из набора — значит
+     * подгонять замер.
+     */
+    const swapped = [
+      { reply: 'У Анны «Борода» просела на 19 записей за июль.', caught: true },
+      { reply: 'Илья заработал за июль 699 616 ₽.', caught: true },
+      { reply: 'У Стаса 61 запись за июль.', caught: true },
+      { reply: 'У Анны средний чек 2 612 ₽ за июль.', caught: true },
+      {
+        reply: 'У Ильи «Камуфляж седины» просел на 10 записей за июль.',
+        caught: true,
+      },
+      {
+        reply: 'У Стаса «Детская стрижка» выросла на 4 записи за июль.',
+        caught: true,
+      },
+      { reply: 'Анна потеряла 18 записей за июль.', caught: true },
+      { reply: 'У Ильи 142 записи за июль.', caught: true },
+      { reply: 'У Ильи «Борода» упала на 30,6% за июль.', caught: true },
+      { reply: 'Кресло Анны занято 4 260 минут за июль.', caught: true },
+      {
+        reply: 'Илья и Стас вместе потеряли 18 записей за июль.',
+        caught: false,
+      },
+      { reply: 'У Стаса «Борода» просела на 19 записей.', caught: false },
+    ];
+
+    it('на верных ответах не поднимает ни одной ложной тревоги', async () => {
+      expect(grounded.length).toBeGreaterThanOrEqual(30);
+      const alarms: string[] = [];
+      const dirty: string[] = [];
+      for (const reply of grounded) {
+        const audit = await measureAttribution(reply);
+        // Корпус честный: числа взяты из данных, сторож происхождения молчит.
+        // Без этой проверки ошибка в наборе выглядела бы как «нет тревог».
+        if ((audit.unsourced_numbers as string[]).length > 0) {
+          dirty.push(
+            `${reply} → ${(audit.unsourced_numbers as string[]).join('; ')}`,
+          );
+        }
+        expect(audit.grounding_status).toBe('verified');
+        if ((audit.misattributed_numbers as string[]).length > 0) {
+          alarms.push(
+            `${reply} → ${(audit.misattributed_numbers as string[]).join('; ')}`,
+          );
+        }
+      }
+      expect(dirty).toEqual([]);
+      expect(alarms).toEqual([]);
+    }, 120_000);
+
+    it('ловит подмену владельца числа', async () => {
+      expect(swapped.length).toBeGreaterThanOrEqual(8);
+      const caught: string[] = [];
+      const missed: string[] = [];
+      const dirty: string[] = [];
+      for (const sample of swapped) {
+        const audit = await measureAttribution(sample.reply);
+        // Число подменной фразы обязано быть настоящим, иначе её ловил бы
+        // сторож происхождения и замер привязки был бы фиктивным.
+        if ((audit.unsourced_numbers as string[]).length > 0) {
+          dirty.push(
+            `${sample.reply} → ${(audit.unsourced_numbers as string[]).join('; ')}`,
+          );
+        }
+        ((audit.misattributed_numbers as string[]).length > 0
+          ? caught
+          : missed
+        ).push(sample.reply);
+      }
+      expect(dirty).toEqual([]);
+      expect(caught.length).toBeGreaterThanOrEqual(6);
+      // Разбор не деградировал: заранее известные пропуски остались пропусками,
+      // а всё остальное поймано.
+      expect(missed).toEqual(
+        swapped
+          .filter((sample) => !sample.caught)
+          .map((sample) => sample.reply),
+      );
+    }, 120_000);
+
+    async function measureAttribution(reply: string) {
+      // Сверка привязки выключена в проде: независимый ревизор нашёл класс,
+      // который этот набор не покрывал (год из даты привязывается к мастеру).
+      // Замер живёт дальше и включает её явно.
+      const mocks = createService(['analytics.business.query'], {
+        AI_CORE_ATTRIBUTION_GUARD: 'true',
+      });
+      mocks.runtime.execute.mockResolvedValue(measurementExecution());
+      mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
+      await mocks.service.chat(user, {
+        ...dto,
+        surface: 'native',
+        messages: [
+          { role: 'user', content: 'Кто из мастеров просел за этот месяц?' },
+        ],
+      });
+      const completed = (
+        mocks.auditLog.log.mock.calls as unknown as Array<
+          [{ action: string; metadata: Record<string, unknown> }]
+        >
+      )
+        .map((call) => call[0])
+        .find((entry) => entry.action === 'ai.core_turn_completed');
+      return completed?.metadata ?? {};
+    }
+  });
+
+  /**
+   * Реалистичный июль: три мастера, четыре услуги, сравнение с июнем.
+   *
+   * Суммы сходятся построчно (96+27+19=142, 142+61+65=268, 372 400+174 270+
+   * 152 946=699 616), поэтому подменить владельца числа можно только ложью, а
+   * не арифметической случайностью.
+   */
+  function measurementExecution() {
+    const money = (major: number) => [
+      {
+        currency: 'RUB',
+        amount_kopecks: major * 100,
+        amount_major_units: major,
+      },
+    ];
+    return {
+      status: 'completed',
+      execution_id: 'execution-measurement',
+      result: {
+        verified: true,
+        source: 'crm',
+        period: { from: '2026-07-01', to: '2026-07-31' },
+        comparison: { mode: 'previous_period' },
+        metrics: {
+          appointments_total: 268,
+          appointments_cancelled: 21,
+          unique_clients: 173,
+          average_ticket_amount_kopecks: 261_200,
+          booked_minutes: 8_610,
+        },
+        changes: {
+          appointments_total: {
+            current: 268,
+            previous: 291,
+            delta: -23,
+            percent_change: -7.9,
+          },
+          appointments_cancelled: {
+            current: 21,
+            previous: 14,
+            delta: 7,
+            percent_change: 50,
+          },
+          unique_clients: {
+            current: 173,
+            previous: 186,
+            delta: -13,
+            percent_change: -7,
+          },
+          average_ticket_amount_kopecks: {
+            current: 261_200,
+            previous: 248_900,
+            delta: 12_300,
+            percent_change: 4.9,
+          },
+          revenue_amount_kopecks: {
+            current: 69_961_600,
+            previous: 72_429_900,
+            delta: -2_468_300,
+            percent_change: -3.4,
+          },
+        },
+        current: {
+          revenue: money(699_616),
+          staff_summary: [
+            {
+              name: 'Стас',
+              appointments: 142,
+              booked_minutes: 4_260,
+              revenue: money(372_400),
+              services: [
+                { name: 'Мужская стрижка', appointments: 96 },
+                { name: 'Камуфляж седины', appointments: 27 },
+                { name: 'Борода', appointments: 19 },
+              ],
+            },
+            {
+              name: 'Илья',
+              appointments: 61,
+              booked_minutes: 2_745,
+              revenue: money(174_270),
+              services: [
+                { name: 'Борода', appointments: 24 },
+                { name: 'Мужская стрижка', appointments: 29 },
+                { name: 'Детская стрижка', appointments: 8 },
+              ],
+            },
+            {
+              name: 'Анна',
+              appointments: 65,
+              booked_minutes: 1_605,
+              revenue: money(152_946),
+              services: [
+                { name: 'Мужская стрижка', appointments: 41 },
+                { name: 'Детская стрижка', appointments: 17 },
+                { name: 'Камуфляж седины', appointments: 7 },
+              ],
+            },
+          ],
+          service_summary: [
+            { name: 'Мужская стрижка', appointments: 166 },
+            { name: 'Борода', appointments: 43 },
+            { name: 'Камуфляж седины', appointments: 34 },
+            { name: 'Детская стрижка', appointments: 25 },
+          ],
+        },
+        service_changes: [
+          {
+            name: 'Мужская стрижка',
+            current_appointments: 166,
+            previous_appointments: 161,
+            delta: 5,
+            percent_change: 3.1,
+          },
+          {
+            name: 'Борода',
+            current_appointments: 43,
+            previous_appointments: 62,
+            delta: -19,
+            percent_change: -30.6,
+          },
+          {
+            name: 'Камуфляж седины',
+            current_appointments: 34,
+            previous_appointments: 47,
+            delta: -13,
+            percent_change: -27.7,
+          },
+          {
+            name: 'Детская стрижка',
+            current_appointments: 25,
+            previous_appointments: 21,
+            delta: 4,
+            percent_change: 19,
+          },
+        ],
+        staff_changes: [
+          {
+            name: 'Стас',
+            current_appointments: 142,
+            previous_appointments: 137,
+            delta: 5,
+            percent_change: 3.6,
+            services: [
+              {
+                name: 'Мужская стрижка',
+                current_appointments: 96,
+                previous_appointments: 88,
+                delta: 8,
+                percent_change: 9.1,
+              },
+              {
+                name: 'Камуфляж седины',
+                current_appointments: 27,
+                previous_appointments: 30,
+                delta: -3,
+                percent_change: -10,
+              },
+              {
+                name: 'Борода',
+                current_appointments: 19,
+                previous_appointments: 19,
+                delta: 0,
+                percent_change: 0,
+              },
+            ],
+          },
+          {
+            name: 'Илья',
+            current_appointments: 61,
+            previous_appointments: 79,
+            delta: -18,
+            percent_change: -22.8,
+            services: [
+              {
+                name: 'Борода',
+                current_appointments: 24,
+                previous_appointments: 43,
+                delta: -19,
+                percent_change: -44.2,
+              },
+              {
+                name: 'Мужская стрижка',
+                current_appointments: 29,
+                previous_appointments: 28,
+                delta: 1,
+                percent_change: 3.6,
+              },
+              {
+                name: 'Детская стрижка',
+                current_appointments: 8,
+                previous_appointments: 8,
+                delta: 0,
+                percent_change: 0,
+              },
+            ],
+          },
+          {
+            name: 'Анна',
+            current_appointments: 65,
+            previous_appointments: 75,
+            delta: -10,
+            percent_change: -13.3,
+            services: [
+              {
+                name: 'Мужская стрижка',
+                current_appointments: 41,
+                previous_appointments: 45,
+                delta: -4,
+                percent_change: -8.9,
+              },
+              {
+                name: 'Детская стрижка',
+                current_appointments: 17,
+                previous_appointments: 13,
+                delta: 4,
+                percent_change: 30.8,
+              },
+              {
+                name: 'Камуфляж седины',
+                current_appointments: 7,
+                previous_appointments: 17,
+                delta: -10,
+                percent_change: -58.8,
+              },
+            ],
+          },
+        ],
+      },
+    };
+  }
 
   /**
    * Салон с двумя мастерами и двумя услугами: просадка только у Ильи.
@@ -2703,9 +3140,9 @@ describe('AiCoreService', () => {
 
   function createService(
     toolNames = ['analytics.business.read', 'loyalty.internal.adjust'],
-    // Сверка привязки числа к сущности выключена в проде: на замере она дала
-    // 22,6% ложных тревог на верных ответах. Тесты, которые проверяют саму
-    // сверку, включают её явно.
+    // Сверка привязки числа к сущности включена по умолчанию — замер на 58
+    // ответах дал ноль ложных тревог. Явный `AI_CORE_ATTRIBUTION_GUARD=false`
+    // нужен только тесту рубильника.
     env: Record<string, string> = {},
   ) {
     const config = {

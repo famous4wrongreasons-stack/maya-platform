@@ -498,6 +498,9 @@ describe('OperationsAnalyticsService', () => {
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.000Z',
       }),
+      // Аналитика просит отменённые визиты отдельным флагом: без него счётчик
+      // отмен всегда ноль, и «отмен нет» звучало бы как измерение.
+      { includeCanceled: true },
     );
     expect(result.data_source).toBe('crm');
     expect(result.appointments).toMatchObject({
@@ -906,6 +909,7 @@ describe('OperationsAnalyticsService', () => {
     expect(setup.crmGetJournal).toHaveBeenCalledWith(
       'tenant-a',
       expect.objectContaining({ providerId: 'crm-staff' }),
+      { includeCanceled: true },
     );
     expect(result.employee).toEqual({
       provider_id: 'crm-staff',
@@ -988,6 +992,56 @@ describe('OperationsAnalyticsService', () => {
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+  });
+
+  it('returns the whole payroll for a staff-scoped finance read so the caller can pick one row', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getStaffFinance('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T20:59:59.000Z',
+      }),
+    );
+
+    // 🔴 Источник company-scoped: «только про меня» у провайдера не существует,
+    // и сужение до одного сотрудника — обязанность вызывающего.
+    expect(setup.crmGetFinancialSummary).toHaveBeenCalledWith('tenant-a', {
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+    });
+    expect(result).toMatchObject({
+      payroll: { accrued_total: { amount_kopecks: 100_000 } },
+    });
+  });
+
+  it('degrades a staff-scoped finance read to nothing instead of failing personal analytics', async () => {
+    const setup = createService(CalendarSource.EXTERNAL);
+    setup.crmGetFinancialSummary.mockRejectedValueOnce(
+      new Error('crm is unavailable'),
+    );
+
+    const failed = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getStaffFinance('tenant-a', {
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-31T20:59:59.000Z',
+      }),
+    );
+    const branchScoped = await setup.tenantContext.runAsSystemTenant(
+      'tenant-a',
+      () =>
+        setup.service.getStaffFinance('tenant-a', {
+          from: '2026-07-01T00:00:00.000Z',
+          to: '2026-07-31T20:59:59.000Z',
+          branchId: '11111111-1111-4111-8111-111111111111',
+        }),
+    );
+
+    expect(failed).toBeNull();
+    // Расчёт зарплаты ведётся по компании и к филиалу не сводится — за ним даже
+    // не идём.
+    expect(branchScoped).toBeNull();
+    expect(setup.crmGetFinancialSummary).toHaveBeenCalledTimes(1);
   });
 
   it('rejects a misleading Maya branch filter for company-wide CRM finance', async () => {

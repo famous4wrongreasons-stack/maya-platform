@@ -767,14 +767,33 @@ export class YclientsCRMAdapter implements CRMAdapter {
       .filter((record) => Boolean(record.staff_id));
   }
 
+  /**
+   * Журнал за период.
+   *
+   * 🔴 `includeCanceled` по умолчанию ВЫКЛЮЧЕН, и это не осторожность ради
+   * осторожности. Сетку расписания и карточку визита рисует тот же ответ:
+   * начни журнал молча отдавать отменённые визиты — и в сетке появятся
+   * карточки на времени, которое салон уже перепродал, поверх живой записи.
+   * Поэтому отмены отдаются только тому, кто их явно попросил (аналитика,
+   * ответ владельцу «сколько у нас отмен»), а сетка получает ровно то же, что
+   * получала раньше.
+   *
+   * Отмена и неявка — РАЗНЫЕ статусы (`canceled` и `no_show`), потому что это
+   * разные события бизнеса: отменённое заранее окно можно было перепродать,
+   * неявка — окно, потерянное безвозвратно. Схлопывать их в одно число значит
+   * прятать от владельца половину ответа.
+   */
   async getJournal(params: {
     tenantId: string;
     from: string;
     to: string;
     timezone: string;
     providerId?: string;
+    /** Отдать и отменённые визиты со статусом `canceled`. По умолчанию нет. */
+    includeCanceled?: boolean;
   }): Promise<CrmJournal> {
     void params.tenantId;
+    const includeCanceled = params.includeCanceled === true;
     const startDate = this.dateKeyInTimezone(params.from, params.timezone);
     const inclusiveEnd = new Date(new Date(params.to).getTime() - 1);
     const endDate = this.dateKeyInTimezone(
@@ -788,6 +807,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         staffId: params.providerId
           ? this.toNumericId(params.providerId, 'providerId')
           : undefined,
+        withDeleted: includeCanceled,
       }),
       this.getStaff(params.tenantId),
       this.getServices(params.tenantId),
@@ -797,7 +817,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
       services.map((service) => [service.id, service]),
     );
     const appointments = records
-      .filter((record) => !record.deleted && record.id !== undefined)
+      .filter(
+        (record) =>
+          record.id !== undefined && (includeCanceled || !record.deleted),
+      )
       .map((record) =>
         this.mapJournalAppointment(
           record,
@@ -826,8 +849,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
         ),
       );
       const scheduleByStaffId = new Map(schedules);
+      // Колонку мастеру вне графика открывает только ЖИВАЯ запись. Отменённая
+      // ничего не занимает: мастер, у которого весь день состоял из отмен,
+      // сегодня не работает, и рисовать ему пустой столбец — врать сетке.
       const staffIdsWithRecords = new Set(
-        appointments.map((appointment) => appointment.provider.id),
+        appointments
+          .filter((appointment) => appointment.status !== 'canceled')
+          .map((appointment) => appointment.provider.id),
       );
 
       allMasters = staff.map((member) =>
@@ -1759,6 +1787,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
     endDate: string;
     clientId?: number;
     staffId?: number;
+    /**
+     * Просить YClients отдать и отменённые (удалённые) записи.
+     *
+     * Флаг едет ПОВЕРХ той же самой постраничной выборки — отдельного запроса
+     * за отменами нет, лишних обращений к CRM это не стоит. YClients молча
+     * игнорирует незнакомые query-параметры, поэтому на филиале, где
+     * `with_deleted` не поддержан, поведение остаётся прежним, а не падает.
+     */
+    withDeleted?: boolean;
   }): Promise<YclientsRecordApiItem[]> {
     const records: YclientsRecordApiItem[] = [];
     const seen = new Set<string>();
@@ -1777,6 +1814,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
       }
       if (params.staffId) {
         query.set('staff_id', String(params.staffId));
+      }
+      if (params.withDeleted) {
+        query.set('with_deleted', '1');
       }
 
       const response = await this.request<YclientsRecordApiItem[]>(
@@ -2173,21 +2213,50 @@ export class YclientsCRMAdapter implements CRMAdapter {
     };
   }
 
+  /**
+   * Признак присутствия из записи YClients.
+   *
+   * Полей два: `attendance` — то, что проставили по записи, `visit_attendance`
+   * — то же по визиту целиком. Заполнено может быть любое из них (на части
+   * филиалов приходит только второе), и совпадают они не всегда. Поэтому
+   * значение засчитывается, если его показывает ХОТЬ ОДНО поле, — ровно так
+   * это годами считает легаси-бэкенд. Значения: `-1` — не пришёл,
+   * `0` — ожидание, `1` — пришёл, `2` — клиент подтвердил визит.
+   */
+  private hasAttendance(record: YclientsRecordApiItem, value: number): boolean {
+    return record.attendance === value || record.visit_attendance === value;
+  }
+
+  /**
+   * Статус визита для журнала и аналитики.
+   *
+   * 🔴 `canceled` и `no_show` — принципиально разные исходы, и порядок проверок
+   * тут содержательный, а не случайный. Отменённая запись (`deleted`) — окно,
+   * которое клиент освободил заранее: его можно было перепродать, и вопрос к
+   * салону «почему не перепродали». Неявка (`attendance = -1`) — окно,
+   * потерянное вместе с деньгами: перепродать было уже некому. Если запись и
+   * удалена, и помечена неявкой, побеждает отмена: последнее, что с записью
+   * сделали, — отменили её.
+   */
   private recordStatus(record: YclientsRecordApiItem): string {
     if (record.deleted) {
       return 'canceled';
     }
-    if (record.attendance === -1 || record.visit_attendance === -1) {
+
+    if (this.hasAttendance(record, -1)) {
       return 'no_show';
     }
     if (
-      record.attendance === 1 ||
-      record.visit_attendance === 1 ||
+      this.hasAttendance(record, 1) ||
       record.paid_full === true ||
       record.paid_full === 1
     ) {
       return 'completed';
     }
+    // Остаются `2` (клиент подтвердил) и `0` (ждём клиента). Для журнала это
+    // одно состояние — визит впереди; отдельного слова для «подтверждена»
+    // потребители статуса не знают, а выдумать его здесь значит отдать наружу
+    // строку, на которую никто не смотрит.
     return 'confirmed';
   }
 

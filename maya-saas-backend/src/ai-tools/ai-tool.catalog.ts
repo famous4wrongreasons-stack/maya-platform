@@ -178,7 +178,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'analytics.employee.read',
     description:
-      'Read operational analytics scoped to the current employee. Relative reporting periods are resolved by the server in the tenant timezone.',
+      'Read operational analytics scoped to the current employee, together with the salary accrued to that employee by the CRM payroll calculation. Accrued salary is a salon cost, not the employee revenue: confirmed per-employee revenue does not exist and is reported as unavailable with a reason. Relative reporting periods are resolved by the server in the tenant timezone.',
     inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: STAFF_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -186,14 +186,18 @@ export const MAYA_AI_TOOL_CATALOG = [
     riskTier: 'read',
     approvalPolicy: 'none',
     idempotency: 'none',
-    timeoutMs: 8_000,
+    // Личный срез теперь дочитывает расчёт зарплаты из CRM: это отдельный
+    // запрос на каждого сотрудника компании, и в прежние 8 секунд он не
+    // укладывается. Тайм-аут инструмента жёсткий — на нём падал бы весь ответ,
+    // включая записи и клиентов, которые пришли вовремя.
+    timeoutMs: 20_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },
   {
     name: 'analytics.employee.query',
     description:
-      'Universal personal performance analytics for the current employee. Returns appointments, cancellations, unique clients, client cohorts, booked service value, average booked value, booked minutes, service demand and optional comparison. clients_returning counts this employee clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal clients overall, while repeat_clients_in_period only counts clients who came more than once INSIDE the period. This never exposes another employee data and booked value is not cash revenue.',
+      'Universal personal performance analytics for the current employee. Returns appointments, cancellations, unique clients, client cohorts, booked service value, average booked value, booked minutes, service demand, the salary accrued to this employee by the CRM payroll calculation, and optional comparison. clients_returning counts this employee clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal clients overall, while repeat_clients_in_period only counts clients who came more than once INSIDE the period. This never exposes another employee data. Booked value is not cash revenue, and staff_summary[].salary is what the salon accrued TO this employee, never how much money he brought in: confirmed per-employee revenue does not exist and is reported as unavailable with a reason.',
     inputSchema: BUSINESS_QUERY_SCHEMA,
     allowedRoles: STAFF_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -208,7 +212,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'analytics.business.read',
     description:
-      'Read tenant or branch operational analytics. Relative reporting periods are resolved by the server in the tenant timezone.',
+      'Read tenant or branch operational analytics. For roles allowed to read finance it also returns verified company revenue and the payroll accrued per master. Per-master revenue does not exist in any source and is reported as unavailable with a reason: accrued salary is what the salon owes the master, not what the master brought in. Relative reporting periods are resolved by the server in the tenant timezone.',
     inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -216,14 +220,16 @@ export const MAYA_AI_TOOL_CATALOG = [
     riskTier: 'read',
     approvalPolicy: 'none',
     idempotency: 'none',
-    timeoutMs: 8_000,
+    // Тот же расчёт зарплаты по каждому сотруднику, что и в личном срезе:
+    // финансовая сводка читалась здесь и раньше, а 8 секунд на неё не хватало.
+    timeoutMs: 20_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },
   {
     name: 'analytics.business.query',
     description:
-      'Universal verified business analytics for an owner or manager. Returns revenue and financial operations, appointments, cancellations, unique clients, client cohorts, average ticket, booked minutes, daily dynamics, service demand, a per-master breakdown with cancellations and repeat clients, and optional comparison with the previous equal period or previous year. clients_returning counts clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal or regular clients of the salon overall. repeat_clients_in_period is a different and much narrower thing: clients who came more than once INSIDE the period, which is near zero on a short period by nature and must never be presented as retention. Use this for any factual business-performance question that is not a personal employee question.',
+      'Universal verified business analytics for an owner or manager. Returns revenue and financial operations, appointments, cancellations, unique clients, client cohorts, average ticket, booked minutes, daily dynamics, service demand, a per-master breakdown with cancellations and repeat clients, and optional comparison with the previous equal period or previous year. clients_returning counts clients of the period who already visited within cohort_lookback_days BEFORE the period started, and clients_new counts those who did not: these are returning-within-N-days cohorts, not loyal or regular clients of the salon overall. repeat_clients_in_period is a different and much narrower thing: clients who came more than once INSIDE the period, which is near zero on a short period by nature and must never be presented as retention. Money per master is two separate fields that must never be mixed: staff_summary[].confirmed_revenue is how much cash that master brought in and is always unavailable with a reason, because the CRM confirms money for the company as a whole and never per employee, while staff_summary[].salary is payroll accrued and paid TO that master for the period, which is a salon cost and only a percentage of what he sold. Salary is present only for roles allowed to read finance. Use this for any factual business-performance question that is not a personal employee question.',
     inputSchema: BUSINESS_QUERY_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,

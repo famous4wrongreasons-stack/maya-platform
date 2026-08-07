@@ -685,6 +685,311 @@ describe('YclientsCRMAdapter', () => {
     expect(JSON.stringify(journal)).not.toContain('+7 918 000-00-00');
   });
 
+  /**
+   * Один набор записей на все проверки статусов: обычная (ждём клиента),
+   * отменённая, неявка и подтверждённая клиентом. Именно эти четыре состояния
+   * владелец и различает в вопросе «сколько у нас отмен».
+   */
+  const journalStatusRecords = [
+    {
+      id: 902,
+      datetime: '2026-07-31T10:00:00',
+      seance_length: 3600,
+      attendance: 0,
+      staff: { id: 15, name: 'Stanislav' },
+      client: { id: 88, name: 'Waiting client' },
+      services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+    },
+    {
+      id: 903,
+      datetime: '2026-07-31T12:00:00',
+      seance_length: 3600,
+      attendance: 0,
+      deleted: true,
+      staff: { id: 15, name: 'Stanislav' },
+      client: { id: 89, name: 'Cancelled client' },
+      services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+    },
+    {
+      id: 904,
+      datetime: '2026-07-31T14:00:00',
+      seance_length: 3600,
+      attendance: -1,
+      staff: { id: 15, name: 'Stanislav' },
+      client: { id: 90, name: 'Absent client' },
+      services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+    },
+    {
+      id: 905,
+      datetime: '2026-07-31T16:00:00',
+      seance_length: 3600,
+      attendance: 2,
+      visit_attendance: 2,
+      staff: { id: 15, name: 'Stanislav' },
+      client: { id: 91, name: 'Confirmed client' },
+      services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+    },
+  ];
+
+  function mockJournalFetch(records: unknown[]) {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      requestedUrls.push(url);
+
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: records }), { status: 200 }),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 15, name: 'Stanislav', specialization: 'Barber' }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/book_services/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                services: [
+                  {
+                    id: 7,
+                    title: 'Haircut',
+                    price_min: 2000,
+                    seance_length: 3600,
+                  },
+                ],
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+
+    return requestedUrls;
+  }
+
+  function journalAdapter() {
+    return new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+  }
+
+  it('keeps canceled visits out of the schedule grid by default', async () => {
+    const requestedUrls = mockJournalFetch(journalStatusRecords);
+
+    const journal = await journalAdapter().getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-07-30T21:00:00.000Z',
+      to: '2026-08-06T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    // Сетка расписания и карточка визита ходят сюда же — без явной просьбы
+    // отменённый визит наружу не выходит и в count не попадает.
+    expect(journal.count).toBe(3);
+    expect(journal.appointments.map((item) => item.id)).toEqual([
+      'crm-902',
+      'crm-904',
+      'crm-905',
+    ]);
+    expect(
+      journal.appointments.some((item) => item.status === 'canceled'),
+    ).toBe(false);
+    // Неявка — не отмена: окно потеряно, и из журнала оно не исчезает.
+    expect(
+      journal.appointments.find((item) => item.id === 'crm-904')?.status,
+    ).toBe('no_show');
+    expect(
+      requestedUrls.some(
+        (url) => url.includes('/records/123') && url.includes('with_deleted'),
+      ),
+    ).toBe(false);
+  });
+
+  it('returns canceled visits apart from no-shows when analytics asks for them', async () => {
+    const requestedUrls = mockJournalFetch(journalStatusRecords);
+
+    const journal = await journalAdapter().getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-07-30T21:00:00.000Z',
+      to: '2026-08-06T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+      includeCanceled: true,
+    });
+
+    expect(journal.count).toBe(4);
+    expect(journal.appointments.map((item) => [item.id, item.status])).toEqual([
+      ['crm-902', 'confirmed'],
+      ['crm-903', 'canceled'],
+      ['crm-904', 'no_show'],
+      ['crm-905', 'confirmed'],
+    ]);
+    // Отмены едут той же постраничной выборкой: отдельного обращения к CRM
+    // за ними нет, иначе журнал за месяц стоил бы вдвое дороже.
+    const recordRequests = requestedUrls.filter((url) =>
+      url.includes('/records/123'),
+    );
+    expect(recordRequests).toHaveLength(1);
+    expect(recordRequests[0]).toContain('with_deleted=1');
+  });
+
+  it('marks a paid visit completed and keeps deletion above absence', async () => {
+    mockJournalFetch([
+      {
+        id: 906,
+        datetime: '2026-07-31T10:00:00',
+        seance_length: 3600,
+        attendance: 0,
+        paid_full: 1,
+        staff: { id: 15, name: 'Stanislav' },
+        client: { id: 92, name: 'Paid client' },
+        services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+      },
+      {
+        // Клиент не пришёл, и запись потом удалили. Последнее, что с ней
+        // сделали, — отменили: считать это неявкой значит записать салону
+        // потерю, которой не было.
+        id: 907,
+        datetime: '2026-07-31T12:00:00',
+        seance_length: 3600,
+        attendance: -1,
+        deleted: true,
+        staff: { id: 15, name: 'Stanislav' },
+        client: { id: 93, name: 'Absent then removed' },
+        services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+      },
+      {
+        // Присутствие проставлено только по визиту — на части филиалов
+        // приходит именно так, и статус обязан это увидеть.
+        id: 908,
+        datetime: '2026-07-31T14:00:00',
+        seance_length: 3600,
+        visit_attendance: 1,
+        staff: { id: 15, name: 'Stanislav' },
+        client: { id: 94, name: 'Visit-level attendance' },
+        services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+      },
+    ]);
+
+    const journal = await journalAdapter().getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-07-30T21:00:00.000Z',
+      to: '2026-08-06T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+      includeCanceled: true,
+    });
+
+    expect(journal.appointments.map((item) => [item.id, item.status])).toEqual([
+      ['crm-906', 'completed'],
+      ['crm-907', 'canceled'],
+      ['crm-908', 'completed'],
+    ]);
+  });
+
+  it('does not open a grid column for a master whose whole day was canceled', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 910,
+                  datetime: '2026-08-06T10:00:00',
+                  seance_length: 3600,
+                  attendance: 0,
+                  deleted: true,
+                  staff: { id: 16, name: 'Ilya' },
+                  client: { id: 95, name: 'Cancelled client' },
+                  services: [{ id: 7, title: 'Haircut', cost: 2000 }],
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/schedule/123/15/')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  date: '2026-08-06',
+                  is_working: true,
+                  slots: [{ from: '10:00', to: '20:00' }],
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/schedule/123/16/')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ date: '2026-08-06', is_working: false, slots: [] }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/company/123/staff')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                { id: 15, name: 'Stanislav', specialization: 'Barber' },
+                { id: 16, name: 'Ilya', specialization: 'Barber' },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+
+    const journal = await journalAdapter().getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-08-05T21:00:00.000Z',
+      to: '2026-08-06T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+      includeCanceled: true,
+    });
+
+    expect(journal.appointments.map((item) => item.status)).toEqual([
+      'canceled',
+    ]);
+    // Мастер вне смены, у которого весь день состоял из отмен, колонку в сетке
+    // не получает — иначе владелец видел бы пустой столбец «работающего».
+    expect((journal.masters ?? []).map((master) => master.id)).toEqual(['15']);
+    expect((journal.all_masters ?? []).map((master) => master.id)).toEqual([
+      '15',
+      '16',
+    ]);
+  });
+
   it('returns exact YClients sales and official payroll without raw client data', async () => {
     global.fetch = jest.fn<typeof fetch>((input) => {
       const url = String(input);
