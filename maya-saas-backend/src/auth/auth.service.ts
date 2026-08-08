@@ -476,8 +476,15 @@ export class AuthService {
   }
 
   private assertTenantAllowsClientRegistration(
-    tenant: ClientAccessTenant,
+    tenant: ClientAccessTenant & {
+      slug?: string;
+      brandingSettings?: { themeJson?: unknown } | null;
+    },
   ): void {
+    this.tenantsService.assertClientBookableBusiness({
+      slug: tenant.slug,
+      brandingSettings: tenant.brandingSettings,
+    });
     const expired = this.isUnpaidExpiredTrial(tenant);
     if (
       expired ||

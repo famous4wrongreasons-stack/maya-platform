@@ -6690,6 +6690,19 @@ async def notify_owner(app: Application, text: str, push_title: str = "MAYA",
     except Exception as e:
         logger.error(f"notify_owner in-app chat: {e}")
 
+    # Persistent Nest inbox for Maya OS native (survives app close).
+    try:
+        import maya_inbox_bridge
+        await maya_inbox_bridge.publish_owner_message(
+            text,
+            title=push_title or "MAYA",
+            tag=tag or "maya_owner",
+            url=url or "/app/?panel=report",
+            owner_ids=list(owner_ids),
+        )
+    except Exception as e:
+        logger.warning(f"notify_owner nest inbox: {e}")
+
     kb = None
     try:
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -6980,6 +6993,21 @@ async def _daily_report_job(app: Application):
             )
         except Exception as e:
             logger.error(f"daily_report push → {admin_id}: {e}")
+
+    try:
+        import maya_inbox_bridge
+        await maya_inbox_bridge.publish_inbox_item(
+            type="daily_report",
+            title=f"Отчёт за {dd}",
+            body_text=text,
+            source_seed=f"daily_report|{d}",
+            telegram_chat_ids=list(database.list_admins() or []),
+            deep_link="/app/?panel=report",
+            payload={"date": d},
+            fanout_owners=True,
+        )
+    except Exception as e:
+        logger.warning(f"daily_report nest inbox: {e}")
 
 
 async def _god_watch_job(app: Application):

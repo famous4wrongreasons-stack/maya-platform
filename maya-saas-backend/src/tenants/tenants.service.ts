@@ -175,6 +175,17 @@ function resolveRequestedBookingMode(
   return rawMode === 'live' ? 'live' : 'preview';
 }
 
+/** Platform shell (maya-os): onboarding/trial UI only — not a bookable salon. */
+function isPlatformBootstrapTenant(params: {
+  slug?: string | null;
+  theme?: Record<string, unknown> | null;
+}): boolean {
+  if (String(params.slug || '').toLowerCase() === 'maya-os') {
+    return true;
+  }
+  return params.theme?.platform_bootstrap === true;
+}
+
 function withBookingModeTheme(
   theme: Record<string, unknown> | null,
   bookingMode: PublicBookingMode,
@@ -293,6 +304,35 @@ export class TenantsService {
     }
 
     return tenant;
+  }
+
+  /**
+   * Platform shell tenants (maya-os / platform_bootstrap) are for onboarding UI
+   * only — client signup and live booking must fail closed.
+   */
+  assertClientBookableBusiness(params: {
+    slug?: string | null;
+    theme?: Record<string, unknown> | null;
+    brandingSettings?: { themeJson?: unknown } | null;
+  }): void {
+    const theme =
+      params.theme ??
+      (asRecord(params.brandingSettings?.themeJson) as Record<
+        string,
+        unknown
+      > | null);
+    if (!isPlatformBootstrapTenant({ slug: params.slug, theme })) {
+      return;
+    }
+
+    throw new ForbiddenException({
+      message: 'This workspace is the MAYA OS platform shell, not a salon.',
+      error: {
+        code: 'platform_tenant_not_bookable',
+        message:
+          'Open a salon link to sign in as a client or create an appointment.',
+      },
+    });
   }
 
   async getTenantByIdOrThrow(id: string) {
@@ -675,6 +715,7 @@ export class TenantsService {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id },
       select: {
+        slug: true,
         status: true,
         trialEndsAt: true,
         trialFullAccess: true,
@@ -724,6 +765,7 @@ export class TenantsService {
     const theme =
       (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
       {};
+    this.assertClientBookableBusiness({ slug: tenant.slug, theme });
     const resolvedEntitlements = this.entitlementsService
       ? await this.entitlementsService.getEffectiveEntitlements(id)
       : null;
@@ -842,6 +884,7 @@ export class TenantsService {
     const bookingFeatureEnabled =
       availableFeatureKeys.length === 0 || availableFeatures.booking === true;
     const clientRegistrationEnabled =
+      !isPlatformBootstrapTenant({ slug: tenant.slug, theme }) &&
       tenant.allowSelfRegistration &&
       !access.subscriptionRequired &&
       (new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
@@ -860,10 +903,15 @@ export class TenantsService {
       trialFullAccess: access.trialFullAccess,
     });
     const guestAccessReady =
-      clientRegistrationEnabled && bookingEvaluation.liveEligible;
+      !isPlatformBootstrapTenant({ slug: tenant.slug, theme }) &&
+      clientRegistrationEnabled &&
+      bookingEvaluation.liveEligible;
     const guestAccessBlockers = [
       ...bookingEvaluation.blockers,
       ...(clientRegistrationEnabled ? [] : ['client_registration_disabled']),
+      ...(isPlatformBootstrapTenant({ slug: tenant.slug, theme })
+        ? ['platform_bootstrap']
+        : []),
     ].filter((blocker, index, blockers) => blockers.indexOf(blocker) === index);
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,

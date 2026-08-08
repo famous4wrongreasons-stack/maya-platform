@@ -1,0 +1,1198 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0b" />
+<title>Maya OS — операционная система вашего салона</title>
+<link rel="icon" href="/app/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ токены (сняты с flowty.co: масштаб = px@1200 → vw) ============ */
+:root{
+  --bg:#0a0a0b; --ink:#ceced7; --white:#fff; --mut:#676a79; --faint:#454850;
+  --card:#141416; --card2:#17171c; --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;font-weight:400;line-height:1.45;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1500px;margin:0 auto;padding:0 clamp(20px,3.7vw,56px);width:100%}
+
+/* 3D-слой */
+#stage{position:fixed;inset:0;z-index:3;pointer-events:none}  /* 3D ПОВЕРХ текста */
+#c{width:100%;height:100%;display:block}
+#glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 60% 42%, rgba(40,52,74,.18), transparent 72%)}   /* фон чёрный: лишь еле заметный холодный ореол, чтобы синий телефон отделялся */
+
+/* прелоадер */
+#loader{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;
+  transition:opacity .6s ease;flex-direction:column;gap:16px}
+#loader.done{opacity:0;pointer-events:none}
+.loadmark{font-weight:500;font-size:20px;letter-spacing:.3em;color:var(--white);padding-left:.3em}
+#loadn{font-size:11px;letter-spacing:.28em;color:var(--mut)}
+
+/* ============ документ: секции скроллятся ЕСТЕСТВЕННО (как flowty) ============ */
+#scroll{position:relative;z-index:2;height:420vh}   /* 0-220vh телефон · 220-320 зум в экран → морф в белую страницу (fixed) */
+.blk{position:absolute;left:0;right:0;pointer-events:none}
+.blk .wrap>*{pointer-events:auto}
+
+/* типографика flowty: H1 170@1200, Regular, lh .88, ls -0.02em */
+.tH1{font-weight:400;font-size:clamp(30px,5.8vw,90px);line-height:.92;letter-spacing:-.02em;color:var(--ink);
+  background:linear-gradient(180deg,#ffffff 0%,#dcdde6 46%,#8f92a4 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.55)) drop-shadow(0 14px 30px rgba(0,0,0,.35))}
+.tSub{font-weight:400;font-size:clamp(12px,1.25vw,18px);line-height:1.35;color:var(--ink)}
+.tSmall{font-weight:400;font-size:clamp(12px,1.333vw,19px);line-height:1.25;color:var(--mut)}
+.kicker{font-size:clamp(10px,.92vw,13px);letter-spacing:.3em;text-transform:uppercase;color:var(--mut);margin-bottom:clamp(12px,1.5vw,22px)}
+
+/* reveal при входе в вьюпорт (как у flowty строки всплывают) */
+.rev{opacity:0;transform:translateY(46px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.rev.in{opacity:1;transform:none}
+
+/* ---- ХИРО (в потоке, уезжает вверх при скролле — как flowty) ---- */
+#hero{top:0;height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding-top:clamp(18px,2.5vw,38px)}
+.eyebrow{font-size:11px;letter-spacing:.3em;color:var(--mut);text-transform:uppercase}
+.brandwrap{display:inline-flex;align-items:center;gap:clamp(8px,.9vw,14px);color:var(--white)}
+.mlogo{height:clamp(20px,2.1vw,32px);width:auto;opacity:.95}
+.brand{font-weight:500;font-size:clamp(18px,1.9vw,28px);letter-spacing:-.01em;color:var(--white)}
+.brand span{color:var(--mut)}
+.hHead{margin-top:clamp(6px,1vw,16px)}
+.tH1col{line-height:.92;word-spacing:-.05em}
+.hHead .mk{display:inline-block;vertical-align:-.02em;margin:0 .08em;color:var(--white)}
+.hHead .mk svg{width:.62em;height:.62em;display:block;will-change:transform}
+@keyframes spin{to{transform:rotate(360deg)}}
+.heroFoot{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:end;padding-bottom:clamp(20px,3vw,46px)}
+@media(max-width:980px){.heroFoot{grid-template-columns:1fr;gap:26px}}
+.hSub{max-width:28ch}
+.hCtas{display:flex;align-items:center;gap:clamp(10px,1.1vw,16px);margin-top:clamp(16px,2vw,30px)}
+/* кнопки flowty: h58 r22 px40 @1200, текст 16 Regular */
+.btn{display:inline-flex;align-items:center;justify-content:center;font-family:inherit;font-weight:400;cursor:pointer;
+  border:none;height:clamp(40px,3.9vw,56px);border-radius:clamp(14px,1.5vw,21px);padding:0 clamp(20px,2.6vw,38px);
+  font-size:clamp(12px,1.15vw,17px);transition:transform .15s,opacity .2s,background .2s}
+.btn:active{transform:scale(.97)}
+/* заливка ховера: слой растёт снизу (0%→100%) — без жёсткого стопа на краю, полос нет */
+.btn-light{color:#0a0a0b;background-color:var(--ink);
+  background-image:linear-gradient(#0a0a0b,#0a0a0b);background-repeat:no-repeat;background-size:100% 0%;background-position:bottom;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -8px 14px rgba(0,0,0,.14),0 10px 26px rgba(0,0,0,.35);
+  transition:background-size .45s cubic-bezier(.3,.7,.2,1),color .3s,transform .15s}
+.btn-light:hover{background-size:100% 100%;color:var(--ink)}
+/* иконки flowty: КВАДРАТЫ r-скруглённые, тёмные */
+.iconbtn{width:clamp(40px,3.9vw,56px);height:clamp(40px,3.9vw,56px);border-radius:clamp(14px,1.5vw,21px);
+  border:1px solid var(--line);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  background-color:var(--card2);background-image:linear-gradient(var(--ink),var(--ink));background-repeat:no-repeat;background-size:100% 0%;background-position:bottom;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 20px rgba(0,0,0,.3);
+  transition:background-size .45s cubic-bezier(.3,.7,.2,1),color .3s,border-color .2s}
+.iconbtn:hover{background-size:100% 100%;color:#0a0a0b;border-color:var(--line2)}
+.hMicro{margin-top:clamp(10px,1.2vw,18px);font-size:clamp(11px,1vw,14px);color:var(--faint)}
+.hCards{display:flex;gap:14px;justify-content:flex-end;align-items:stretch}
+@media(max-width:980px){.hCards{justify-content:flex-start}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:clamp(14px,1.5vw,22px);padding:clamp(12px,1.3vw,19px);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0) 46%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 14px 34px rgba(0,0,0,.35)}
+.card-desc{max-width:clamp(150px,14.5vw,215px);display:flex;flex-direction:column;justify-content:space-between}
+.card-desc p{font-size:clamp(10px,.92vw,13px);line-height:1.32;color:var(--mut)}
+.card-desc .cTitle{font-weight:500;font-size:clamp(11.5px,1.1vw,15.5px);line-height:1.15;color:var(--white);letter-spacing:-.01em;margin-bottom:clamp(5px,.6vw,9px)}
+.stores{display:flex;gap:10px;margin-top:clamp(12px,1.5vw,22px)}
+.store{width:clamp(28px,2.7vw,38px);height:clamp(28px,2.7vw,38px);border-radius:clamp(10px,1vw,14px);background:rgba(255,255,255,.06);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;color:var(--white);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 55%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.card-stat{width:clamp(100px,9.8vw,142px);display:flex;flex-direction:column;justify-content:space-between;position:relative}
+.card-stat .big{font-weight:500;font-size:clamp(20px,2.2vw,31px);color:var(--white);letter-spacing:-.02em;
+  background:linear-gradient(180deg,#fff 0%,#dcdde6 50%,#9599aa 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.card-stat .lbl{font-size:clamp(9.5px,.88vw,13px);color:var(--mut);margin-top:2px}
+.card-video{padding:0;overflow:hidden;background:#000}
+.card-video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.card-stat .arrow{position:absolute;right:12px;bottom:12px;width:clamp(24px,2.3vw,33px);height:clamp(24px,2.3vw,33px);border-radius:50%;
+  background:rgba(255,255,255,.06);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,0) 55%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.scrollhint{font-size:10px;letter-spacing:.32em;color:var(--mut);text-transform:uppercase}
+
+/* ---- СЕКЦИИ 2-4 (в потоке, по центрам кейфреймов) ---- */
+/* центры (scrollable 220vh): p=0.49 → top:158vh; p=1.0 → 270vh */
+#sec3 .tH1{max-width:44vw;font-size:clamp(24px,3.8vw,60px)}
+@media(max-width:900px){#sec3 .tH1{max-width:none}}
+#sec1{top:158vh;transform:translateY(-50%)}
+#sec3{top:270vh;transform:translateY(-50%)}
+.secBody{max-width:none}
+.secBody .tSub{max-width:34ch;margin-top:clamp(14px,1.8vw,28px);opacity:.9}
+
+/* меню-таблетка: светлое стекло, длинная; при скролле вниз сжимается до лого */
+#pill{position:fixed;left:50%;bottom:clamp(14px,1.6vw,26px);transform:translateX(-50%);z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  width:clamp(250px,23vw,440px);height:clamp(46px,4.8vw,70px);border-radius:clamp(23px,2.6vw,36px);
+  padding:0 clamp(10px,.9vw,14px) 0 clamp(18px,2.2vw,34px);
+  background:rgba(235,235,240,.32);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -14px 22px rgba(255,255,255,.08),0 18px 50px rgba(0,0,0,.4);
+  transition:width .55s cubic-bezier(.3,.8,.3,1),padding .55s cubic-bezier(.3,.8,.3,1)}
+#pill .burger{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:8px 2px;transition:opacity .3s,transform .3s}
+#pill .burger i{display:block;width:clamp(15px,1.45vw,21px);height:2px;background:#131316;border-radius:2px}
+#pill .pm{display:flex;align-items:center;justify-content:center;color:#131316}
+#pill .pm svg{height:clamp(20px,2.1vw,32px);width:auto;animation:spin 10s linear infinite}
+#pill .dl{color:#eceded;border:none;font-family:inherit;font-weight:400;cursor:pointer;
+  height:clamp(30px,3vw,44px);border-radius:clamp(15px,1.6vw,22px);padding:0 clamp(14px,1.6vw,24px);
+  font-size:clamp(11px,1.05vw,15px);
+  background-color:#131316;background-image:linear-gradient(#fff,#fff);background-repeat:no-repeat;background-size:100% 0%;background-position:bottom;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
+  transition:background-size .45s cubic-bezier(.3,.7,.2,1),color .3s,opacity .3s,transform .3s}
+#pill .dl:hover{background-size:100% 100%;color:#131316}
+#pill.mini{width:clamp(52px,5.2vw,76px);padding:0;justify-content:center}
+#pill.mini .burger,#pill.mini .dl{opacity:0;transform:scale(.6);pointer-events:none;position:absolute}
+#hud{position:fixed;z-index:60;left:10px;bottom:8px;font-family:ui-monospace,monospace;font-size:10px;color:#2f2f34;pointer-events:none;display:none}
+/* 3D-часы при наведении на карточку-видео: HUD-окно «в скобках» */
+.card-video{cursor:pointer}
+.card-video video{transition:opacity .3s}
+.card-video.live video{opacity:0}
+#watchPop{position:fixed;z-index:42;opacity:0;pointer-events:none;transform:translateY(12px) scale(.95);transform-origin:center;
+  transition:opacity .34s cubic-bezier(.2,.7,.2,1),transform .34s cubic-bezier(.2,.7,.2,1);
+  background:rgba(8,8,12,.44);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:4px;
+  filter:drop-shadow(0 30px 60px rgba(0,0,0,.6))}
+#watchPop.on{opacity:1;transform:none;pointer-events:auto}
+#watchPop canvas{position:absolute;inset:0;width:100%;height:100%}
+/* уголки-скобки */
+#watchPop .c{position:absolute;width:12px;height:12px;border:0 solid rgba(255,255,255,.65);transition:width .4s cubic-bezier(.2,.7,.2,1),height .4s cubic-bezier(.2,.7,.2,1)}
+#watchPop .c.tl{left:-1px;top:-1px;border-left-width:1px;border-top-width:1px}
+#watchPop .c.tr{right:-1px;top:-1px;border-right-width:1px;border-top-width:1px}
+#watchPop .c.bl{left:-1px;bottom:-1px;border-left-width:1px;border-bottom-width:1px}
+#watchPop .c.br{right:-1px;bottom:-1px;border-right-width:1px;border-bottom-width:1px}
+#watchPop.on .c{width:18px;height:18px}
+#watchPop .wLbl{position:absolute;top:7px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.42);pointer-events:none;white-space:nowrap}
+/* листалка уведомлений: минимум — две стрелки и точки */
+#watchPop .wNav{position:absolute;left:0;right:0;bottom:5px;display:flex;align-items:center;justify-content:center;gap:10px}
+#watchPop .wNav button{background:none;border:0;color:rgba(255,255,255,.5);font:300 17px/1 'Outfit',sans-serif;cursor:pointer;padding:0 7px;transition:color .2s}
+#watchPop .wNav button:hover{color:#fff}
+#watchPop .wDots{display:flex;gap:6px}
+#watchPop .wDots i{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .25s,transform .25s}
+#watchPop .wDots i.on{background:#fff;transform:scale(1.3)}
+/* кнопки под описанием секций (QR + вниз) */
+.secCtas{display:flex;gap:clamp(10px,1.1vw,16px);margin-top:clamp(20px,2.4vw,36px)}
+/* боковая QR-панель (как у flowty: светлое стекло справа) */
+#qrBackdrop{position:fixed;inset:0;z-index:44;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .45s ease}
+#qrBackdrop.on{opacity:1;pointer-events:auto}
+#qrPanel{position:fixed;top:0;right:0;height:100svh;width:min(33vw,440px);z-index:45;background:#d7d5dd;color:#0a0a0b;
+  transform:translateX(100%);transition:transform .55s cubic-bezier(.4,0,.1,1);
+  padding:clamp(26px,3vw,48px) clamp(24px,2.4vw,40px);display:flex;flex-direction:column;overflow-y:auto}
+#qrPanel.on{transform:none}
+@media(max-width:760px){#qrPanel{width:100%}}
+#qrClose{position:absolute;top:clamp(22px,2.8vw,46px);right:clamp(22px,2.8vw,46px);background:none;border:0;line-height:1;color:#0a0a0b;cursor:pointer;opacity:.75;transition:opacity .2s,transform .2s}
+#qrClose:hover{opacity:1;transform:rotate(90deg)}
+#qrClose svg{display:block;width:clamp(22px,2.2vw,32px);height:auto}
+.qrH{font-weight:400;font-size:clamp(34px,3.6vw,52px);line-height:1.02;letter-spacing:-.025em;margin-top:clamp(20px,4vh,64px)}
+.qrLead{font-size:clamp(13px,1.05vw,16px);line-height:1.42;color:#3a3a44;margin-top:clamp(16px,2.6vh,32px);font-weight:500}
+.qrLead u{text-decoration:underline;text-underline-offset:3px;color:#0a0a0b}
+.qrCard{margin-top:clamp(22px,3.5vh,42px);border:1px solid rgba(0,0,0,.16);border-radius:clamp(14px,1.3vw,20px);
+  padding:clamp(18px,1.8vw,28px);display:flex;flex-direction:column;gap:clamp(14px,1.4vw,20px);background:rgba(255,255,255,.28)}
+.qrImg{width:clamp(120px,11vw,160px)}
+.qrImg img{display:block;width:100%;height:auto}
+.qrNote{font-size:clamp(12px,.95vw,15px);line-height:1.4;color:#2a2a32;font-weight:500}
+/* ---- АКТ 4: телефон «поглощает» экран — его дисплей и есть белая страница; в конце зума морф на реальный DOM ---- */
+#sec4{position:fixed;inset:0;z-index:6;background:#f4f2ed;color:#16140f;
+  padding:clamp(20px,3vh,40px) 0 clamp(60px,12vh,130px);overflow:hidden auto;
+  display:flex;flex-direction:column;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .28s ease}
+#sec4.on{opacity:1;pointer-events:auto}
+#sec4:not(.on) .mCard{animation-play-state:paused}   /* до морфа карточки в нулевой позе — совпадают с нарисованными на экране телефона */
+/* заголовок БЕЗ входной анимации: он уже виден на экране телефона — после морфа должен стоять как стоял */
+#sec4 .s4Head{text-align:center;max-width:980px;margin:0 auto;padding:0 20px}
+#sec4 .s4K{font-size:clamp(10px,.92vw,13px);letter-spacing:.3em;text-transform:uppercase;color:#8f8b83;margin-bottom:clamp(12px,1.5vw,22px)}
+#sec4 .s4H{font-weight:400;font-size:clamp(34px,4.6vw,72px);line-height:1.02;letter-spacing:-.02em;color:#14120d}
+#sec4 .s4Sub{margin:clamp(10px,1.5vh,18px) auto 0;max-width:52ch;font-size:clamp(13px,1.15vw,17px);line-height:1.45;color:#6f6b63}
+/* карусель: горизонтальный драг */
+#mViz{position:relative;flex-shrink:0;margin-top:clamp(16px,2.6vh,30px);overflow:hidden;cursor:grab;padding:18px 0 26px;touch-action:pan-y}
+#mViz.grabbing{cursor:grabbing}
+#mRow{display:flex;align-items:stretch;gap:clamp(16px,1.8vw,28px);padding:0 clamp(20px,3.7vw,56px);width:max-content;will-change:transform}
+.mCard{width:clamp(270px,22.5vw,340px);flex-shrink:0;background:#171412;color:#efece6;border-radius:clamp(16px,1.5vw,22px);
+  padding:clamp(16px,1.5vw,22px);display:flex;flex-direction:column;user-select:none;
+  box-shadow:0 24px 60px rgba(20,15,8,.22);animation:cardFloat 7s ease-in-out infinite}
+.mCard:nth-child(2){animation-duration:8.4s;animation-delay:-2.2s}
+.mCard:nth-child(3){animation-duration:7.6s;animation-delay:-4.1s}
+.mCard:nth-child(4){animation-duration:9s;animation-delay:-1.3s}
+@keyframes cardFloat{0%,100%{transform:translateY(-7px)}50%{transform:translateY(7px)}}
+.mCard header{display:flex;align-items:center;gap:10px;color:#8d897f;font-size:clamp(9px,.8vw,12px);letter-spacing:.26em;text-transform:uppercase}
+.mCard header svg{width:clamp(20px,1.9vw,28px);height:auto;color:#efece6;flex-shrink:0}
+.mCard header i{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#efece6}
+.mCard h3{font-weight:600;font-size:clamp(15px,1.3vw,19px);line-height:1.22;margin-top:clamp(11px,1.1vw,16px);letter-spacing:-.01em}
+.mStats{display:flex;gap:clamp(10px,1vw,14px);margin-top:clamp(10px,1vw,15px);padding:clamp(9px,.9vw,13px) 0;
+  border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14)}
+.mStats>div{flex:1;min-width:0}
+.mStats>div+div{border-left:1px solid rgba(255,255,255,.14);padding-left:clamp(12px,1.2vw,18px)}
+.mStats b{display:block;font-weight:300;font-size:clamp(18px,1.7vw,25px);letter-spacing:-.02em;color:#f5f2ea;white-space:nowrap}
+.mStats span{display:block;margin-top:4px;color:#8d897f;font-size:clamp(10px,.9vw,13px)}
+.mBody{margin-top:clamp(9px,.9vw,13px);font-size:clamp(11.5px,.95vw,13.5px);line-height:1.35;color:#d9d5cc}
+.mRec{margin-top:auto;padding-top:clamp(11px,1.1vw,16px)}
+.mRec span{display:block;color:#8d897f;font-size:clamp(9px,.78vw,11px);letter-spacing:.26em;text-transform:uppercase}
+.mRec p{margin-top:6px;font-size:clamp(11.5px,.92vw,13px);line-height:1.32;color:#e6e2d9}
+.mFx{margin-top:clamp(9px,.9vw,13px);padding-top:clamp(8px,.8vw,11px);border-top:1px solid rgba(255,255,255,.14)}
+.mFx b{font-size:clamp(10.5px,.9vw,12.5px);font-weight:600;color:#f0ede5;display:block}
+.mFx p{margin-top:5px;font-size:clamp(10px,.82vw,11.5px);line-height:1.3;color:#8d897f}
+.mAsk{margin-top:clamp(9px,.9vw,12px);font-weight:600;font-size:clamp(11px,.9vw,12.5px);line-height:1.28}
+.mBtn{margin-top:clamp(8px,.8vw,11px);align-self:flex-start;background:none;border:1px solid rgba(255,255,255,.3);color:#efece6;border-radius:999px;
+  padding:8px 18px;font-family:inherit;font-size:clamp(10.5px,.9vw,12.5px);cursor:pointer;transition:border-color .2s}
+.mBtn:hover{border-color:rgba(255,255,255,.7)}
+/* пузырь Drag за курсором */
+#dragHint{position:absolute;z-index:7;width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.92);color:#14120d;
+  display:flex;align-items:center;justify-content:center;font-size:13px;pointer-events:none;opacity:0;transform:scale(.5);
+  transition:opacity .25s,transform .25s;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+#mViz:hover #dragHint{opacity:1;transform:scale(1)}
+/* ---- меню из пилюли (как flowty, атрибутика MayaOS) ---- */
+#menuCard{position:fixed;left:50%;bottom:calc(clamp(14px,1.6vw,26px) + clamp(46px,4.8vw,70px) + 16px);z-index:32;
+  transform:translateX(-50%) translateY(24px) scale(.55);transform-origin:50% 100%;
+  width:min(400px,92vw);background:rgba(228,227,233,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:26px;padding:26px 28px 22px;color:#131316;opacity:0;pointer-events:none;
+  transition:opacity .34s cubic-bezier(.2,.7,.2,1),transform .44s cubic-bezier(.24,1.18,.32,1);
+  box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.5)}
+#menuCard.on{opacity:1;transform:translateX(-50%) translateY(0) scale(1);pointer-events:auto}
+#menuCard .mcTop{display:flex;justify-content:space-between;align-items:flex-start}
+#menuCard .mcNav{display:flex;flex-direction:column;gap:3px}
+#menuCard .mcNav button{background:none;border:0;font-family:inherit;text-align:left;font-size:clamp(21px,1.9vw,27px);
+  color:#131316;cursor:pointer;padding:2px 0;transition:opacity .2s;font-weight:400;letter-spacing:-.01em}
+#menuCard .mcNav button:hover{opacity:.5}
+#menuCard .mcLogo{width:30px;height:auto;color:#131316;opacity:.85;flex-shrink:0}
+#menuCard .mcDiv{height:1px;background:rgba(0,0,0,.14);margin:20px 0 14px}
+#menuCard .mcLinks{display:flex;gap:44px}
+#menuCard .mcLinks a{display:block;font-size:13px;color:#2c2c30;padding:3px 0;font-weight:500;transition:opacity .2s}
+#menuCard .mcLinks a:hover{opacity:.55}
+#menuCard .mcDl{margin-top:20px;width:100%;background:#131316;color:#eceded;border:0;border-radius:16px;height:48px;
+  font-family:inherit;font-size:15px;cursor:pointer;transition:opacity .2s}
+#menuCard .mcDl:hover{opacity:.85}
+#menuClose{position:fixed;left:50%;bottom:clamp(14px,1.6vw,26px);transform:translateX(-50%) scale(.5);z-index:33;
+  width:clamp(46px,4.8vw,58px);height:clamp(46px,4.8vw,58px);border-radius:50%;
+  background:rgba(228,227,233,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:0;color:#131316;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .35s cubic-bezier(.24,1.18,.32,1)}
+#menuClose.on{opacity:1;transform:translateX(-50%) scale(1);pointer-events:auto}
+#menuClose svg{width:20px;height:20px}
+body.menuOpen #pill{opacity:0;pointer-events:none;transform:translateX(-50%) scale(.7)}
+#pill{transition:width .55s cubic-bezier(.3,.8,.3,1),padding .55s cubic-bezier(.3,.8,.3,1),opacity .3s,transform .35s cubic-bezier(.24,1.18,.32,1)}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.rev{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="loadmark">MAYA OS</div><div id="loadn">ЗАГРУЗКА · 0%</div></div>
+
+<div id="glow"></div>
+<div id="stage"><canvas id="c"></canvas></div>
+<div id="watchPop">
+  <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+  <span class="wLbl">Maya OS · Live</span>
+  <canvas id="wc"></canvas>
+  <div class="wNav"><button id="wPrev" aria-label="Предыдущее уведомление">&#8249;</button><div class="wDots" id="wDots"></div><button id="wNext" aria-label="Следующее уведомление">&#8250;</button></div>
+</div>
+
+<!-- боковая QR-панель -->
+<div id="qrBackdrop"></div>
+<aside id="qrPanel" aria-hidden="true" aria-label="Скачать приложение">
+  <button id="qrClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <h2 class="qrH">Отсканируйте<br>QR-код</h2>
+  <p class="qrLead">Установите приложение вашего салона на телефон бесплатно. Онлайн-запись, кабинет, бонусы и уведомления — под вашим брендом. <u>Без банковской карты.</u></p>
+  <div class="qrCard">
+    <a class="qrImg" href="/app/?booking_tenant=maya-os&trial=1" aria-label="Открыть приложение MAYA OS"><img src="assets/qr-download.svg" alt="QR-код для открытия приложения MAYA OS"></a>
+    <p class="qrNote">Отсканируйте QR-код, чтобы открыть MAYA OS. На iPhone и Android приложение можно добавить на главный экран.</p>
+  </div>
+</aside>
+
+<div id="scroll">
+
+  <!-- ХИРО: скроллится естественно, как flowty -->
+  <section class="blk" id="hero"><div class="wrap" style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+    <div>
+      <div class="topbar"><span></span><span class="brandwrap"><svg class="mlogo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span class="brand">Maya<span>OS</span></span></span></div>
+      <h1 class="tH1 tH1col hHead rev"><span class="mk"><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="9" stroke-linecap="round"><line x1="50" y1="50" x2="50" y2="8"/><line x1="50" y1="50" x2="90" y2="37"/><line x1="50" y1="50" x2="75" y2="84"/><line x1="50" y1="50" x2="25" y2="84"/><line x1="50" y1="50" x2="10" y2="37"/></g></svg></span> AI-операционная<br>система для бизнеса</h1>
+    </div>
+    <div class="heroFoot">
+      <div>
+        <p class="tSub hSub rev" style="transition-delay:.08s">Maya OS объединяет запись клиентов, продажи, коммуникацию, аналитику и искусственный интеллект в одном приложении.</p>
+        <div class="hCtas rev" style="transition-delay:.16s">
+          <button class="btn btn-light" data-app-open>Начать бесплатно</button>
+          <button class="iconbtn js-qr" aria-label="Показать QR-код"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 17v.01"/></svg></button>
+          <button class="iconbtn js-down" data-to="sec1" aria-label="Прокрутить вниз"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+        </div>
+        <div class="hMicro rev" style="transition-delay:.22s">Без карты · запуск за вечер · поверх вашего YClients</div>
+      </div>
+      <div class="hCards rev" style="transition-delay:.2s">
+        <div class="card card-desc">
+          <div><p class="cTitle">Никогда не пропускайте запись</p>
+          <p>Мгновенные уведомления о новых записях, отменах и изменениях прямо на телефон, часы и в Telegram.</p></div>
+          <div class="stores">
+            <span class="store" aria-label="App Store"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></span>
+            <span class="store" aria-label="Google Play"><svg width="14" height="15" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg"><path fill="#00D95F" d="M6 4 L23 22 L6 22 Z"/><path fill="#00C3FF" d="M6 22 L23 22 L6 40 Z"/><path fill="#FF3A44" d="M6 4 L37 22 L23 22 Z"/><path fill="#FFCE00" d="M6 40 L37 22 L23 22 Z"/></svg></span>
+          </div>
+        </div>
+        <div class="card card-stat card-video">
+          <video src="assets/watch-notify2.mp4?v=1" autoplay muted loop playsinline preload="auto" aria-label="Maya OS присылает уведомление о новой записи на часы"></video>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- СЕКЦИЯ 2 -->
+  <section class="blk" id="sec1"><div class="wrap"><div class="secBody">
+    <div class="kicker rev">Мобильное приложение</div>
+    <h2 class="tH1 rev" style="transition-delay:.06s">Собственное<br>приложение для<br>ваших клиентов</h2>
+    <p class="tSub rev" style="transition-delay:.14s">Онлайн-запись, личный кабинет, покупки, бонусы и уведомления — под вашим брендом.</p>
+    <div class="secCtas rev" style="transition-delay:.2s">
+      <button class="iconbtn js-qr" aria-label="Показать QR-код"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 17v.01"/></svg></button>
+      <button class="iconbtn js-down" data-to="sec3" aria-label="Прокрутить вниз"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    </div>
+  </div></div></section>
+
+
+  <!-- СЕКЦИЯ 4: телефон садится в подставку, стоящую внизу сайта -->
+  <section class="blk" id="sec3"><div class="wrap"><div class="secBody">
+    <div class="kicker rev">AI-ассистент</div>
+    <h2 class="tH1 rev" style="transition-delay:.06s">Искусственный<br>интеллект, который<br>работает за вас</h2>
+    <p class="tSub rev" style="transition-delay:.14s">Получайте рекомендации, автоматизируйте рутину и принимайте решения быстрее с персональным AI-ассистентом.</p>
+    <div class="secCtas rev" style="transition-delay:.2s">
+      <button class="iconbtn js-qr" aria-label="Показать QR-код"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 17v.01"/></svg></button>
+      <button class="iconbtn js-down" data-to="" aria-label="Прокрутить вниз"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    </div>
+  </div></div></section>
+
+</div>
+
+<!-- АКТ 4: белая страница процессов с парящими карточками MAYA (появляется морфом из экрана телефона) -->
+<section id="sec4">
+  <div class="s4Head">
+    <div class="s4K">Платформа</div>
+    <h2 class="s4H">Все процессы<br>в одном месте</h2>
+    <p class="s4Sub">Календарь, аналитика, финансы, товары, сертификаты, абонементы, сотрудники и клиенты — без переключения между сервисами.</p>
+  </div>
+  <div id="mViz">
+    <div id="mRow">
+      <article class="mCard">
+        <header><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span>MAYA · Выручка</span><i></i></header>
+        <h3>План дня и прогноз месяца</h3>
+        <div class="mStats">
+          <div><b>42 200 ₽</b><span>сегодня</span></div>
+          <div><b>1 160 609 ₽</b><span>прогноз месяца</span></div>
+        </div>
+        <p class="mBody">План дня 28 930 ₽; прогноз месяца выполнен на 129%.</p>
+        <div class="mRec"><span>Рекомендация</span><p>До визита показать мастеру только релевантные услуги, которые клиент уже выбирал или регулярно сочетает.</p></div>
+        <div class="mFx"><b>Эффект: 1 838 ₽–4 288 ₽ · уверенность средняя</b><p>Проверка: Доля визитов с дополнительной услугой и прирост среднего чека.</p></div>
+      </article>
+      <article class="mCard">
+        <header><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span>MAYA · Загрузка</span><i></i></header>
+        <h3>Насколько заполнен рабочий день</h3>
+        <div class="mStats">
+          <div><b>88%</b><span>занято</span></div>
+          <div><b>3</b><span>мест свободно</span></div>
+        </div>
+        <p class="mBody">Сегодня работают 3 мастер(а/ов), записей — 21.</p>
+        <div class="mRec"><span>Рекомендация</span><p>Выбрать клиентов, которым уже подходит привычный срок визита, и предложить конкретные ближайшие окна.</p></div>
+        <div class="mFx"><b>Эффект: 2 068 ₽–2 068 ₽ · уверенность средняя</b><p>Проверка: Новые подтверждённые записи в свободные часы и фактическая выручка.</p></div>
+      </article>
+      <article class="mCard">
+        <header><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span>MAYA · Главное</span><i></i></header>
+        <h3>План достижим, но часть дня ещё свободна</h3>
+        <div class="mStats">
+          <div><b>42 200 ₽</b><span>ожидаем сегодня</span></div>
+          <div><b>21</b><span>записей</span></div>
+        </div>
+        <p class="mBody">Ожидаем 42 200 ₽; свободно примерно 3 визит(а/ов).</p>
+        <div class="mRec"><span>Рекомендация</span><p>Дождаться ближайшего сканирования личного цикла и работать уже с готовой очередью, а не со всей когортой.</p></div>
+        <div class="mFx"><b>Эффект: 10 340 ₽–26 884 ₽ · уверенность средняя</b><p>Проверка: Возвраты за 14 дней, фактическая выручка и повторный визит после возврата.</p></div>
+      </article>
+      <article class="mCard">
+        <header><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span>MAYA · Клиенты</span><i></i></header>
+        <h3>Возвращаются ли гости</h3>
+        <div class="mStats">
+          <div><b>77%</b><span>вернулись за 90 дней</span></div>
+          <div><b>2%</b><span>уже записаны снова</span></div>
+        </div>
+        <p class="mBody">По личному циклу сейчас нет клиентов, которым уже пора напомнить о визите.</p>
+        <div class="mRec"><span>Рекомендация</span><p>Проверить очередь завтра; массовую скидку сейчас не запускать.</p></div>
+        <div class="mFx"><b>Эффект: 10 340 ₽–26 884 ₽ · уверенность средняя</b><p>Проверка: Возвраты за 14 дней, фактическая выручка и повторный визит после возврата.</p>
+          <p class="mAsk">Что сделать с клиентами, которым уже пора вернуться?</p>
+          <button class="mBtn">Проверить завтра</button></div>
+      </article>
+      <article class="mCard">
+        <header><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span>MAYA · Качество</span><i></i></header>
+        <h3>Репутация на двух площадках</h3>
+        <div class="mStats">
+          <div><b>5.0</b><span>Яндекс · 222 отзыва</span></div>
+          <div><b>5.0</b><span>2ГИС · 483 отзыва</span></div>
+        </div>
+        <p class="mBody">Общий взвешенный рейтинг 5.00. Проанализировано 52 текста. За 30 дней: новых отзывов — 6, негативных — 1.</p>
+        <div class="mRec"><span>Рекомендация</span><p>Главная повторяющаяся проблема: качество работы. Назначить корректирующее действие.</p></div>
+        <div class="mFx"><b>Эффект: 80–100 % · уверенность высокая</b><p>Проверка: Доля разобранных негативных отзывов и повторяемость темы за 30 дней.</p></div>
+      </article>
+      <article class="mCard">
+        <header><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg><span>MAYA · Рынок</span><i></i></header>
+        <h3>Позиция среди барбершопов Ставрополя</h3>
+        <div class="mStats">
+          <div><b>№8 из 9</b><span>место по переходам в Яндексе</span></div>
+          <div><b>4.0%</b><span>доля дискавери-переходов</span></div>
+        </div>
+        <p class="mBody">Яндекс за неделю: 57 переходов из 5 254, запросов по категории — 29 495, похожих компаний в радиусе 5 км — 78. Индекс цены по 2ГИС — 100%.</p>
+        <div class="mRec"><span>Рекомендация</span><p>Сначала закрыть измеримые разрывы карточки, затем провести четырёхнедельный тест продвижения только на незаполненные часы и считать записи и выручку, а не клики.</p></div>
+        <div class="mFx"><b>Эффект: 5–12 п. · уверенность высокая</b><p>Проверка: Доля дискавери-переходов Яндекса, записи из Яндекса и выручка этих визитов.</p></div>
+      </article>
+    </div>
+    <div id="dragHint">Drag</div>
+  </div>
+</section>
+
+
+<div id="pill">
+  <div class="burger" aria-label="Меню"><i></i><i></i></div>
+  <span class="pm"><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg></span>
+  <button class="dl">Скачать</button>
+</div>
+
+<!-- меню: карточка вырастает из пилюли (как flowty), атрибутика MayaOS -->
+<nav id="menuCard" aria-hidden="true">
+  <div class="mcTop">
+    <div class="mcNav">
+      <button data-go="top">Главная</button>
+      <button data-go="sec1">Приложение</button>
+      <button data-go="sec3">AI-ассистент</button>
+      <button data-go="bottom">Платформа</button>
+    </div>
+    <svg class="mcLogo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.6"><circle cx="50" cy="50" r="23"/><circle cx="50" cy="27" r="23"/><circle cx="50" cy="73" r="23"/><circle cx="30" cy="38.5" r="23"/><circle cx="70" cy="38.5" r="23"/><circle cx="30" cy="61.5" r="23"/><circle cx="70" cy="61.5" r="23"/></g></svg>
+  </div>
+  <div class="mcDiv"></div>
+  <div class="mcLinks">
+    <div><a href="#">Поддержка</a><a href="#">Условия</a><a href="#">Конфиденциальность</a></div>
+    <div><a href="#">Telegram</a><a href="#">WhatsApp</a></div>
+  </div>
+  <button class="mcDl" id="mcDl">Скачать</button>
+</nav>
+<button id="menuClose" aria-label="Закрыть меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+
+<div id="hud"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DEBUG = /debug=1/.test(location.search);
+if (DEBUG) document.getElementById('hud').style.display = 'block';
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 9);
+const VIEW_H = 2 * Math.tan(THREE.MathUtils.degToRad(15)) * 9;  // высота вьюпорта в мировых единицах ≈4.82
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.5;   // мягкое окружение вместо «лампы»
+
+const key = new THREE.DirectionalLight(0xffffff, 1.25); key.position.set(4.5, 6, 4); scene.add(key);
+const rim = new THREE.DirectionalLight(0xbcd2ff, 1.1); rim.position.set(-5, 2, -4); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(-2, -3, 3); scene.add(fill);
+window.__lights = { key, rim, fill }; window.__renderer = renderer; window.__scene = scene;
+
+const zoomRig = new THREE.Group(); scene.add(zoomRig);   // внешний узел акта 4: зум В ЭКРАН (в чёрную карточку)
+const rig = new THREE.Group(); zoomRig.add(rig);          // общий узел кино-зума стыковки: телефон + подставка вместе
+const phone = new THREE.Group(); rig.add(phone);
+const holder = new THREE.Group(); phone.add(holder);
+const BASE = { rx:0.0, ry:Math.PI, rz:0.0 };
+holder.rotation.set(BASE.rx, BASE.ry, BASE.rz);
+window.__phone = phone; window.__cam = camera; window.__THREE = THREE;
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false;
+addEventListener('keydown', e => { if (e.key === 'o') controls.enabled = !controls.enabled; });
+const hud = document.getElementById('hud');
+
+const texCfg = t => {
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  t.flipY = false; t.needsUpdate = true;
+};
+const screenTex = new THREE.TextureLoader().load('assets/app-screen-v2.png', texCfg);            // блок 2: главная приложения
+const loginTex  = new THREE.TextureLoader().load('assets/app-screen-login.png', texCfg);         // хиро: экран входа MAYA
+/* смены экрана — только пока экран отвёрнут от камеры (ry=π): правый разворот ≈ p .252, левый ≈ p .655 — стыки невидимы */
+const SCREEN_SWAP_P = 0.252;
+const SCREEN_SWAP2_P = 0.655;
+
+/* блок 3: экран телефона (ЛАНДШАФТ) = страница «Все процессы» — заголовок, описание, карточки.
+   Рисуем с реальных DOM-метрик #sec4 с поворотом 90° — в конце зума экран совпадает со страницей. */
+const miniCvL = document.createElement('canvas'); miniCvL.width = 1320; miniCvL.height = 2868;
+const miniTexL = new THREE.CanvasTexture(miniCvL); texCfg(miniTexL);   // ландшафтная страница (телефон завалился)
+const flipCv = document.createElement('canvas'); flipCv.width = 1320; flipCv.height = 2868;
+const flipTex = new THREE.CanvasTexture(flipCv); texCfg(flipTex);      // кадр анимации автоповорота (iOS-стиль)
+let flipT = 0;   // 0 = портрет (домашний экран), 1 = ландшафт; анимируется по времени ~380мс
+function drawFlipFrame(f){
+  const x = flipCv.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1;
+  x.fillStyle = '#f4f2ed'; x.fillRect(0, 0, 1320, 2868);
+  const scaleP = 1 - 0.06 * Math.sin(f * Math.PI);   // лёгкое «дыхание» масштаба, как у iOS
+  const img = screenTex.image;
+  if (img && img.width){
+    x.save(); x.translate(660, 1434); x.rotate(-f * Math.PI / 2); x.scale(scaleP, scaleP);
+    x.globalAlpha = 1 - f;
+    x.drawImage(img, -660, -1434, 1320, 2868); x.restore();
+  }
+  x.save(); x.translate(660, 1434); x.rotate((1 - f) * Math.PI / 2); x.scale(scaleP, scaleP);
+  x.globalAlpha = f;
+  x.drawImage(miniCvL, -660, -1434, 1320, 2868); x.restore();
+  x.globalAlpha = 1;
+  flipTex.needsUpdate = true;
+}
+function drawPageInto(cv){
+  const sec4 = document.getElementById('sec4'); if (!sec4) return;
+  const x = cv.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.fillStyle = '#f4f2ed'; x.fillRect(0, 0, 1320, 2868);
+  /* страничные px 1:1 с поворотом 90° (ландшафт) */
+    const kL = 1320 / innerHeight;
+    x.translate(660, 1434);
+    x.rotate(Math.PI / 2);
+    x.scale(kL, kL);
+    x.translate(-innerWidth / 2, -innerHeight / 2);
+  const wrap = (txt, maxW) => {
+    const out = []; let line = '';
+    for (const w of txt.split(/\s+/)){
+      const t = line ? line + ' ' + w : w;
+      if (x.measureText(t).width > maxW && line){ out.push(line); line = w; } else line = t;
+    }
+    if (line) out.push(line);
+    return out;
+  };
+  const drawEl = (el) => {
+    if (!el) return;
+    const cs = getComputedStyle(el);
+    let txt = el.innerText; if (cs.textTransform === 'uppercase') txt = txt.toUpperCase();
+    const fs = parseFloat(cs.fontSize);
+    x.font = cs.fontWeight + ' ' + fs + 'px Outfit, sans-serif';
+    x.fillStyle = cs.color;
+    x.letterSpacing = (cs.letterSpacing === 'normal' ? 0 : parseFloat(cs.letterSpacing)) + 'px';
+    x.textBaseline = 'alphabetic';
+    const mtr = x.measureText('Мg');
+    const asc = mtr.fontBoundingBoxAscent || fs * 0.8;
+    const desc = mtr.fontBoundingBoxDescent || fs * 0.2;
+    // позиции СТРОК берём из DOM: Range отдаёт прямоугольник каждого line-box — никакой своей арифметики
+    const rng = document.createRange();
+    rng.selectNodeContents(el);
+    const rects = [...rng.getClientRects()].filter(rc => rc.width > 1 && rc.height > 1);
+    if (!rects.length) return;
+    const center = cs.textAlign === 'center';
+    x.textAlign = center ? 'center' : 'left';
+    const wrapTo = (w) => txt.split('\n').flatMap(s => wrap(s, w));
+    let lines;
+    if (rects.length === 1) lines = [txt.replace(/\n/g, ' ')];
+    else {
+      let maxW = Math.max(...rects.map(rc => rc.width)) + 2, guard = 0;
+      lines = wrapTo(maxW);
+      while (lines.length < rects.length && guard++ < 10){ maxW *= 0.95; lines = wrapTo(maxW); }
+      while (lines.length > rects.length && guard++ < 20){ maxW *= 1.05; lines = wrapTo(maxW); }
+    }
+    lines.forEach((ln, i) => {
+      const rc = rects[Math.min(i, rects.length - 1)];
+      const baseY = rc.top + (rc.height - (asc + desc)) / 2 + asc;   // глифы по центру line-box — как браузер
+      x.fillText(ln, center ? rc.left + rc.width / 2 : rc.left, baseY);
+    });
+    x.letterSpacing = '0px';
+  };
+  drawEl(sec4.querySelector('.s4K'));
+  drawEl(sec4.querySelector('.s4H'));
+  drawEl(sec4.querySelector('.s4Sub'));
+  sec4.querySelectorAll('.mCard').forEach(card => {
+    const cr = card.getBoundingClientRect();
+    if (cr.right < -40 || cr.left > innerWidth + 40) return;
+    x.fillStyle = '#171412';
+    x.beginPath(); x.roundRect(cr.left, cr.top, cr.width, cr.height, parseFloat(getComputedStyle(card).borderRadius)); x.fill();
+    card.querySelectorAll('header span, h3, .mStats b, .mStats span, .mBody, .mRec span, .mRec p, .mFx b, .mFx p, .mAsk').forEach(drawEl);
+    const logo = card.querySelector('header svg');
+    if (logo){
+      const lr = logo.getBoundingClientRect(); const cx0 = lr.left + lr.width / 2, cy0 = lr.top + lr.height / 2, R = lr.width * 0.23;
+      x.strokeStyle = '#efece6'; x.lineWidth = Math.max(0.8, lr.width * 0.026);
+      [[0,0],[0,-1],[0,1],[-0.87,-0.5],[0.87,-0.5],[-0.87,0.5],[0.87,0.5]].forEach(([dx,dy]) => { x.beginPath(); x.arc(cx0 + dx*R, cy0 + dy*R, R, 0, Math.PI*2); x.stroke(); });
+    }
+    const dot = card.querySelector('header i');
+    if (dot){ const dr = dot.getBoundingClientRect(); x.fillStyle = '#efece6'; x.beginPath(); x.arc(dr.left + dr.width/2, dr.top + dr.height/2, dr.width/2, 0, Math.PI*2); x.fill(); }
+    const stats = card.querySelector('.mStats');
+    if (stats){
+      const sr = stats.getBoundingClientRect(); x.strokeStyle = 'rgba(255,255,255,.14)'; x.lineWidth = 1;
+      x.beginPath(); x.moveTo(sr.left, sr.top); x.lineTo(sr.right, sr.top); x.stroke();
+      x.beginPath(); x.moveTo(sr.left, sr.bottom); x.lineTo(sr.right, sr.bottom); x.stroke();
+      const second = stats.children[1];
+      if (second){ const dr2 = second.getBoundingClientRect(); x.beginPath(); x.moveTo(dr2.left, sr.top); x.lineTo(dr2.left, sr.bottom); x.stroke(); }
+    }
+    const fx = card.querySelector('.mFx');
+    if (fx){ const fr = fx.getBoundingClientRect(); x.strokeStyle = 'rgba(255,255,255,.14)'; x.beginPath(); x.moveTo(fr.left, fr.top); x.lineTo(fr.right, fr.top); x.stroke(); }
+    const btn = card.querySelector('.mBtn');
+    if (btn){
+      const br = btn.getBoundingClientRect();
+      x.strokeStyle = 'rgba(255,255,255,.3)'; x.lineWidth = 1;
+      x.beginPath(); x.roundRect(br.left, br.top, br.width, br.height, br.height/2); x.stroke();
+      drawEl(btn);
+    }
+  });
+  x.setTransform(1, 0, 0, 1, 0, 0);
+}
+function drawMiniPage(){
+  drawPageInto(miniCvL); miniTexL.needsUpdate = true;
+}
+drawMiniPage();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawMiniPage);
+window.__miniCv = miniCvL; window.__drawMiniPage = drawMiniPage;
+let displayMesh = null;
+
+const loader = new GLTFLoader();
+loader.load('assets/Iphone3d.glb', (gltf) => {
+  const root = gltf.scene;
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    // Dynamic Island + фронтальная камера: делят материал с корпусом → без отдельной покраски белеют (Object_11=фонарик ИСКЛЮЧЁН — красим ниже светлым)
+    if (['Object_19','Object_8','Object_22','Object_7'].includes(o.name)) {
+      o.material = new THREE.MeshBasicMaterial({ color: 0x050507 });   // unlit: свет на остров и камеру НЕ падает вообще
+      o.material.toneMapped = false;
+      return;
+    }
+    const mn = (o.material && o.material.name) || '';
+    if (o.name === 'Object_11' || mn === 'Plastic_LED') {
+      // фонарик (LED-вспышка) рядом с камерами — светлый матовый кружок, не чёрный
+      o.material.color.setHex(0xe6e3da); o.material.metalness = 0.0; o.material.roughness = 0.45;
+      o.material.roughnessMap = null; o.material.normalMap = null;
+      o.material.envMapIntensity = 0.4; o.material.needsUpdate = true;
+      return;
+    }
+    if (mn.indexOf('Снимок') === 0) {
+      displayMesh = o;
+      o.material = new THREE.MeshBasicMaterial({ map: loginTex, toneMapped:false, side:THREE.DoubleSide });
+    } else if (mn === 'Glass') {
+      o.material.transparent = true; o.material.opacity = 0.02; o.material.envMapIntensity = 0.12; o.material.needsUpdate = true;   // стекло почти невидимо: цвет экрана = цвет страницы, остров чисто-чёрный
+    } else if (mn === 'Glass_tint') {
+      // лого Apple на спинке: глянец чуть темнее матовой спинки — читается в киношном свете
+      o.material.color.setHex(0x707b8f); o.material.metalness = 0.3; o.material.roughness = 0.5;   // лого Apple: матовое, синевато-стальное
+      o.material.roughnessMap = null; o.material.normalMap = null;
+      o.material.envMapIntensity = 0.3; o.material.needsUpdate = true;
+    } else if (mn === 'Anodized_aluminum' || mn === 'Plastic_antena' || mn === 'Metal_Screw' || mn === 'Metal_mesh') {
+      // рамка + КНОПКИ (Metal_Screw/Metal_mesh) — единый синий титан, матовый и гладкий (карты сняты → нет зерна)
+      o.material.color.setHex(0x3c4a5e); o.material.metalness = 0.5; o.material.roughness = 0.6;
+      o.material.roughnessMap = null; o.material.normalMap = null; o.material.metalnessMap = null; o.material.bumpMap = null;
+      o.material.envMapIntensity = 0.12; o.material.needsUpdate = true;
+    } else if (mn === 'material' || mn === 'Frosted_glass') {
+      // задняя панель — тёмно-синяя, матовая, гладкая
+      o.material.color.setHex(0x2a3442); o.material.metalness = 0.0; o.material.roughness = 0.72;
+      o.material.roughnessMap = null; o.material.normalMap = null; o.material.bumpMap = null;
+      o.material.envMapIntensity = 0.12; o.material.needsUpdate = true;
+    } else if (o.material) {
+      o.material.envMapIntensity = 0.9; o.material.needsUpdate = true;
+    }
+  });
+  const box = new THREE.Box3().setFromObject(root);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  root.position.sub(center);
+  holder.add(root);
+  holder.scale.setScalar(4.0 / size.y);
+  // задней вспышки нет отдельным мешем (она «влита» в блок камер и выглядит чёрной) → добавляем светлый шарик-фонарик.
+  // считаем в МИРОВЫХ координатах (надёжно) и крепим через .attach() — сохраняет трансформ, минуя вложенные масштабы модели.
+  root.updateMatrixWorld(true);
+  let l13=null,l14=null,l15=null,fEl=null,bEl=null;
+  root.traverse(o => { if(o.name==='Object_13')l13=o; if(o.name==='Object_14')l14=o; if(o.name==='Object_15')l15=o; if(o.name==='Object_21')fEl=o; if(o.name==='Object_17')bEl=o; });
+  if (l13 && l14 && l15 && fEl && bEl) {
+    const wcC = m => new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3());
+    const c13=wcC(l13), c14=wcC(l14), c15=wcC(l15);
+    const lensR = new THREE.Box3().setFromObject(l13).getSize(new THREE.Vector3()).x/2;
+    const nW = wcC(bEl).sub(wcC(fEl)).normalize();                          // нормаль спинки (наружу)
+    const cen = c13.clone().add(c14).add(c15).multiplyScalar(1/3);
+    const flashW = cen.clone().add(c14.clone().sub(cen).multiplyScalar(0.6));
+    const R = lensR*0.13;
+    const flash = new THREE.Mesh(new THREE.SphereGeometry(R, 24, 24),
+      new THREE.MeshStandardMaterial({ color:0xcdcabf, roughness:0.4, metalness:0 }));
+    flash.name = '__flashDisc'; flash.scale.z = 0.5;
+    flash.position.copy(flashW).add(nW.multiplyScalar(R*0.3));
+    l13.parent.attach(flash);
+  }
+  document.getElementById('loader').classList.add('done');
+  document.querySelectorAll('#hero .rev').forEach(el => el.classList.add('in'));
+  onScroll(); updateAll();
+}, (ev) => {
+  const pct = ev.total ? Math.round(ev.loaded/ev.total*100) : 0;
+  document.getElementById('loadn').textContent = 'ЗАГРУЗКА · ' + pct + '%';
+}, (err) => { document.getElementById('loadn').textContent = 'ОШИБКА ЗАГРУЗКИ'; console.error(err); });
+
+/* ---- ПОДСТАВКА: всегда стоит «на полу» в самом низу сайта (без появлений) ---- */
+let stand = null;
+const STAND = { px:0.00, py:-1.6, pz:0.00, rx:0.0, ry:Math.PI, rz:0.0, s:0.85 };  // чёрная глянцевая подставка stand2, лицом к камере
+window.__STAND = STAND;
+new GLTFLoader().load('assets/stand2.glb', (g) => {
+  const s = g.scene;
+  s.traverse(o => {
+    if (!o.isMesh) return;
+    const glossyBody = (o.material && o.material.name) !== 'spanch';
+    o.material = glossyBody
+      ? new THREE.MeshStandardMaterial({ color:0x0e0e11, metalness:0.55, roughness:0.24, envMapIntensity:1.25 })   // чёрный корпус с глянцем
+      : new THREE.MeshStandardMaterial({ color:0x141417, metalness:0.0,  roughness:0.7,  envMapIntensity:0.35 });  // резиновые губки — матовые
+  });
+  const box = new THREE.Box3().setFromObject(s);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  s.position.sub(center);
+  const wrap = new THREE.Group(); wrap.add(s); wrap.scale.setScalar(3.4 / size.y);
+  stand = new THREE.Group(); stand.add(wrap); rig.add(stand);
+  window.__stand = stand;
+  applyStand(); updateAll();
+});
+function applyStand(){
+  if (!stand) return;
+  stand.position.x = STAND.px; stand.position.z = STAND.pz;
+  stand.rotation.set(STAND.rx, STAND.ry, STAND.rz);
+  stand.scale.setScalar(STAND.s);
+}
+window.__applyStand = applyStand;
+
+/* ---- кейфреймы пролёта (без изменений хореографии) ---- */
+const TWO_PI = Math.PI * 2;
+const KF = [
+  { p:0.00, px:0.55, py:-1.18, pz:0.00, rx:0.15,  ry:-0.40,   rz:-0.18,      s:0.93 },  // хиро
+  { p:0.49, px:2.70, py: 0.00, pz:0.00, rx:0.00,  ry: TWO_PI, rz: 0.00,      s:0.93 },  // блок 2: фронт справа, размер как в хиро
+  { p:0.82, px:0.00, py: 1.15, pz:0.00, rx:0.00,  ry: 0.00,   rz: 0.00,      s:0.72 },  // над подставкой
+  { p:1.00, px:0.00, py:-0.05, pz:0.30, rx:-0.09, ry: 0.00,   rz: Math.PI/2, s:0.72 }   // СТОИТ горизонтально почти вертикально (малый наклон — иначе параллакс «разрывает» остров)
+];
+window.__KF = KF;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const easeInOut=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const clamp01=v=>Math.max(0,Math.min(1,v));
+function sampleKF(p){
+  let i=0; while(i<KF.length-2 && p>KF[i+1].p) i++;
+  const a=KF[i], b=KF[i+1];
+  const t=easeInOut(clamp01((p-a.p)/(b.p-a.p)));   // мягкий вход/выход — зависания еле заметны
+  return { px:lerp(a.px,b.px,t), py:lerp(a.py,b.py,t), pz:lerp(a.pz||0,b.pz||0,t), rx:lerp(a.rx,b.rx,t), ry:lerp(a.ry,b.ry,t), rz:lerp(a.rz,b.rz,t), s:lerp(a.s,b.s,t) };
+}
+
+/* лёгкий кино-зум стыковки: подъезд к подставке по скроллу (p .58→.84);
+   отъезд — ПО ВРЕМЕНИ, суперплавно (экспоненциальное затухание ~2.5с), стартует только когда телефон сел (p > .955) */
+const ZOOM_PIVOT = new THREE.Vector3(0, -1.0, 0);   // пивот — точка встречи телефона и подставки
+const ZOOM_MAX = 0.15;
+let seatProg = 0;   // линейный прогресс посадки 0..1 (3.2с реального времени, независимо от fps)
+let zoomOutT = 0;   // smoothstep(seatProg): S-кривая — мягкий вход и мягкий выход
+let zoomTs = 0;     // метка времени прошлого кадра для dt
+/* акт 4: телефон «поглощает» экран — зум до состояния, когда его дисплей 1:1 накрывает вьюпорт.
+   Калибровка ПИКСЕЛЬНАЯ: проецируем экран телефона в пиксели вьюпорта — перспектива и позиция учтены точно. */
+let ZIN_END = 8, ZIN_COVER = 7;      // масштаб конца зума / масштаб «экран накрыл вьюпорт»
+let zinPivot = null;                 // центр экрана телефона в мире (на посадке)
+let zinT = 0, zinS = 0;              // цель по скроллу / сглаженное значение
+let wasMorph = false;
+const sec4El = document.getElementById('sec4');
+function calibrateZoom(){
+  if (!displayMesh) return;
+  const rx0 = phone.rotation.x; phone.rotation.x = 0; phone.updateMatrixWorld(true);   // мерим в выпрямленной позе (как в момент морфа)
+  const box = new THREE.Box3().setFromObject(displayMesh);
+  phone.rotation.x = rx0;
+  const c = box.getCenter(new THREE.Vector3());
+  if (box.getSize(new THREE.Vector3()).x < 0.01) return;
+  const pMin = new THREE.Vector3(box.min.x, box.min.y, c.z).project(camera);
+  const pMax = new THREE.Vector3(box.max.x, box.max.y, c.z).project(camera);
+  let wPx = Math.abs(pMax.x - pMin.x) / 2 * innerWidth;    // ширина экрана телефона в px вьюпорта
+  let hPx = Math.abs(pMax.y - pMin.y) / 2 * innerHeight;
+  if (wPx < 4 || hPx < 4) return;
+  // кино-зум посадки (S-кривая 3.2с) мог ещё не доехать до 1 — приводим замер к идеальной посадке аналитически
+  const zf0 = rig.scale.x;
+  wPx /= zf0; hPx /= zf0;
+  ZIN_COVER = innerHeight / hPx;                              // ландшафтный экран: накрываем вьюпорт по высоте (ширина перекрыта с запасом)
+  ZIN_END = ZIN_COVER * 1.05;                                 // рамки чуть за краями
+  zinPivot = c.clone().sub(rig.position).divideScalar(zf0);   // центр экрана в координатах идеальной посадки
+  drawMiniPage();
+}
+function zoomFactor(p){
+  const up = easeInOut(clamp01((p - 0.58) / 0.26));
+  return 1 + ZOOM_MAX * (up - zoomOutT);
+}
+
+let scrollP = 0, targetP = 0, scrollableVh = 2.2;
+const PHONE_TRAVEL_VH = 2.2;   // хореография телефона занимает первые 220vh; дальше — зум в экран и белая страница
+function measure(){
+  scrollableVh = PHONE_TRAVEL_VH;
+  return innerHeight * PHONE_TRAVEL_VH;
+}
+const mkEl = document.querySelector('.hHead .mk svg');
+function updateAll(){
+  const nowTs = performance.now();
+  const dt = Math.min(50, nowTs - (zoomTs || nowTs)); zoomTs = nowTs;
+  const k = sampleKF(scrollP);
+  if (mkEl) mkEl.style.transform = 'rotate(' + (scrollP * 540) + 'deg)';   // звезда крутится ТОЛЬКО при скролле
+  phone.position.x = k.px;
+  phone.position.y = k.py;
+  phone.position.z = k.pz;
+  phone.rotation.set(k.rx, k.ry, k.rz);
+  if (zinS > 0.001) phone.rotation.x = k.rx * (1 - easeInOut(zinS));   // к морфу экран выпрямляется — трапеции нет
+  phone.scale.setScalar(k.s);
+  if (displayMesh) {
+    // автоповорот как в iOS: на 45° крена контент с анимацией (поворот+кроссфейд, 380мс) переходит из домашнего экрана в ландшафтную страницу
+    flipT = clamp01(flipT + ((Math.abs(phone.rotation.z) > Math.PI / 4) ? 1 : -1) * dt / 380);
+    let want;
+    if (scrollP < SCREEN_SWAP_P) want = loginTex;
+    else if (flipT <= 0) want = screenTex;
+    else if (flipT >= 1) want = miniTexL;
+    else { drawFlipFrame(easeInOut(flipT)); want = flipTex; }
+    if (displayMesh.material.map !== want) { displayMesh.material.map = want; displayMesh.material.needsUpdate = true; }
+  }
+  // подставка привязана к «полу» страницы: поднимается в кадр вместе с реальным скроллом
+  if (stand) stand.position.y = STAND.py - (1 - targetP) * scrollableVh * VIEW_H;
+  // кино-зум: rig масштабируется вокруг пивота (телефон и подставка — вместе, геометрия стыковки не плывёт)
+  // отъезд после посадки — S-кривая по РЕАЛЬНОМУ времени (3.2с при любом fps): мягкий вход, мягкий выход
+  seatProg = clamp01(seatProg + (scrollP > 0.955 ? 1 : -1) * (RM ? 1 : dt / 3200));
+  zoomOutT = seatProg * seatProg * (3 - 2 * seatProg);
+  const zf = zoomFactor(scrollP);
+  rig.scale.setScalar(zf);
+  rig.position.set(ZOOM_PIVOT.x * (1 - zf), ZOOM_PIVOT.y * (1 - zf), ZOOM_PIVOT.z * (1 - zf));
+  // акт 4: рамки телефона растут и уходят за края — экран накрывает вьюпорт, затем морф на реальный DOM
+  if (zinT > 0 && !zinPivot && zinS < 0.05 && scrollP > 0.995) calibrateZoom();   // калибровка строго в посадочной позе
+  const e4 = easeInOut(zinS);
+  const zi = 1 + e4 * (ZIN_END - 1);
+  if (zinPivot){
+    // дрейф центра экрана к центру вьюпорта ЗАВЕРШАЕТСЯ ровно при zi=ZIN_COVER (момент морфа) — совпадение пиксель-в-пиксель
+    const d = clamp01((zi - 1) / (ZIN_COVER - 1));
+    zoomRig.scale.setScalar(zi);
+    zoomRig.position.set(
+      zinPivot.x * (1 - zi) - zinPivot.x * d,
+      zinPivot.y * (1 - zi) - zinPivot.y * d,
+      zinPivot.z * (1 - zi)
+    );
+  } else { zoomRig.scale.setScalar(1); zoomRig.position.set(0, 0, 0); }
+  const morphOn = !!zinPivot && zi >= ZIN_COVER * 0.999;
+  if (sec4El){
+    if (wasMorph && !morphOn) drawMiniPage();   // вернулись со страницы — экран показывает актуальные позиции
+    wasMorph = morphOn;
+    sec4El.classList.toggle('on', morphOn);
+  }
+  if (DEBUG) hud.textContent = `p=${scrollP.toFixed(2)} t=${targetP.toFixed(2)} ry=${phone.rotation.y.toFixed(2)}`;
+}
+function onScroll(){
+  if (window.__lock) return;
+  const max = measure();
+  targetP = clamp01(scrollY / Math.max(1,max));
+  zinT = clamp01((scrollY - max) / innerHeight);   // акт 4: 100vh скролла после посадки = зум в экран
+}
+window.__setP = (p)=>{ window.__lock=true; targetP = scrollP = clamp01(p); seatProg = zoomOutT = scrollP > 0.955 ? 1 : 0; updateAll(); };
+window.__zinfo = () => JSON.stringify({ zinT: +zinT.toFixed(3), zinS: +zinS.toFixed(3), scrollP: +scrollP.toFixed(4), pivot: !!zinPivot, display: !!displayMesh, cover: +ZIN_COVER.toFixed(2), lock: !!window.__lock });
+addEventListener('scroll', onScroll, { passive:true });
+/* страховка автоплея часов: браузер мог приостановить muted-видео (энергосбережение/фон) — пинаем на первом же сигнале жизни */
+const watchVid = document.querySelector('.card-video video');
+const kickVid = () => { if (watchVid && watchVid.paused) watchVid.play().catch(()=>{}); };
+addEventListener('visibilitychange', kickVid);
+addEventListener('pointerdown', kickVid);
+addEventListener('scroll', kickVid, { passive:true });
+/* пилюля: вниз — сжимается до лого, вверх — раскрывается */
+let lastY = 0;
+addEventListener('scroll', () => {
+  const y = scrollY;
+  const pill = document.getElementById('pill');
+  if (y > lastY + 4 && y > 100) pill.classList.add('mini');
+  else if (y < lastY - 4) pill.classList.remove('mini');
+  lastY = y;
+}, { passive:true });
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); onScroll();
+  zinPivot = null; drawMiniPage();   // новая геометрия вьюпорта → пересчитать зум и перерисовать экран
+});
+
+/* reveal секций при входе в вьюпорт */
+const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('in', e.isIntersecting)), { threshold: 0.25 });
+document.querySelectorAll('#sec1 .rev, #sec3 .rev').forEach(el => io.observe(el));
+
+/* «вес» скролла как у flowty: Lenis двигает саму страницу с инерцией — колесо толкает массу, а не телепортирует */
+const lenis = (!RM && window.Lenis) ? new Lenis({ autoRaf:false, lerp:0.055, wheelMultiplier:0.9 }) : null;
+
+const clock = new THREE.Clock();
+function tick(tms){
+  if (lenis) lenis.raf(tms || performance.now());
+  const e = clock.getElapsedTime();
+  if (!window.__lock) { onScroll(); scrollP += (targetP - scrollP) * (RM ? 1 : 0.06); zinS += ((zinPivot ? zinT : 0) - zinS) * (RM ? 1 : 0.07); updateAll(); }   // scrollY читаем каждый кадр (события скролла может не быть после restoration); зум стартует после пиксельной калибровки
+  const amp = 1 - clamp01((scrollP - 0.84) / 0.12);   // у подставки дыхание гаснет — телефон зафиксирован
+  holder.position.y = (Math.sin(e*0.75)*0.09 + Math.sin(e*1.7)*0.02) * amp;
+  holder.position.x = Math.cos(e*0.55)*0.045 * amp;
+  holder.rotation.x = BASE.rx + Math.cos(e*0.5)*0.022 * amp;
+  holder.rotation.z = BASE.rz + Math.sin(e*0.6)*0.022 * amp;
+  if (controls.enabled) controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+/* ===== QR-панель + кнопки «вниз» под каждым описанием ===== */
+(() => {
+  const panel = document.getElementById('qrPanel');
+  const backdrop = document.getElementById('qrBackdrop');
+  const appUrl = '/app/?booking_tenant=maya-os&trial=1';
+  const openQR  = () => { panel.classList.add('on'); backdrop.classList.add('on'); panel.setAttribute('aria-hidden','false'); };
+  const closeQR = () => { panel.classList.remove('on'); backdrop.classList.remove('on'); panel.setAttribute('aria-hidden','true'); };
+  document.querySelectorAll('[data-app-open]').forEach(b => b.addEventListener('click', () => { location.href = appUrl; }));
+  document.querySelectorAll('.js-qr').forEach(b => b.addEventListener('click', openQR));
+  document.querySelectorAll('#pill .dl').forEach(b => b.addEventListener('click', openQR));
+  document.getElementById('qrClose').addEventListener('click', closeQR);
+  backdrop.addEventListener('click', closeQR);
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeQR(); });
+
+  const centerY = (el) => { const r = el.getBoundingClientRect(); return r.top + scrollY + r.height/2 - innerHeight/2; };
+  const goY = (y) => { y = Math.max(0, y); if (lenis) lenis.scrollTo(y, { duration: 1.5 }); else scrollTo({ top:y, behavior:'smooth' }); };
+  document.querySelectorAll('.js-down').forEach(b => b.addEventListener('click', () => {
+    const el = b.dataset.to && document.getElementById(b.dataset.to);
+    goY(el ? centerY(el) : document.getElementById('scroll').offsetHeight - innerHeight);
+  }));
+
+  /* меню из пилюли */
+  const menuCard = document.getElementById('menuCard');
+  const menuClose = document.getElementById('menuClose');
+  const burger = document.querySelector('#pill .burger');
+  const setMenu = (on) => {
+    menuCard.classList.toggle('on', on);
+    menuClose.classList.toggle('on', on);
+    document.body.classList.toggle('menuOpen', on);
+    menuCard.setAttribute('aria-hidden', on ? 'false' : 'true');
+  };
+  burger.addEventListener('click', e => { e.stopPropagation(); setMenu(true); });
+  menuClose.addEventListener('click', () => setMenu(false));
+  addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+  document.addEventListener('click', e => {
+    if (menuCard.classList.contains('on') && !menuCard.contains(e.target) && !menuClose.contains(e.target)) setMenu(false);
+  });
+  menuCard.querySelectorAll('.mcNav button').forEach(b => b.addEventListener('click', () => {
+    setMenu(false);
+    const t = b.dataset.go;
+    if (t === 'top') goY(0);
+    else if (t === 'bottom') goY(document.getElementById('scroll').offsetHeight - innerHeight);
+    else { const el = document.getElementById(t); if (el) goY(centerY(el)); }
+  }));
+  document.getElementById('mcDl').addEventListener('click', () => { setMenu(false); openQR(); });
+})();
+
+/* ===== акт 4: драг-карусель карточек MAYA (с инерцией) + пузырь Drag ===== */
+(() => {
+  const viz = document.getElementById('mViz'); if (!viz) return;
+  const row = document.getElementById('mRow');
+  const hint = document.getElementById('dragHint');
+  let x = 0, vx = 0, drag = false, px = 0, raf = 0;
+  const bound = () => Math.min(0, viz.clientWidth - row.scrollWidth);
+  const apply = () => { row.style.transform = 'translateX(' + x + 'px)'; };
+  /* стартовое положение: «MAYA · Главное» (3-я карточка) ровно по центру вьюпорта — именно её видно на дисплее телефона */
+  const centerRow = () => {
+    const c = row.children[2]; if (!c) return;
+    x = Math.round(innerWidth / 2 - (c.offsetLeft + c.offsetWidth / 2));
+    // отступ от Dynamic Island: если какая-то карточка попадает в зону острова (левый край экрана телефона),
+    // сдвигаем весь ряд вправо, чтобы она начиналась после острова с зазором
+    const kL2 = 1320 / innerHeight;
+    const islandLeft = (80 - 1434) / kL2 + innerWidth / 2;
+    const islandRight = (270 - 1434) / kL2 + innerWidth / 2;
+    for (const card of row.children){
+      const L = card.offsetLeft + x, R = L + card.offsetWidth;
+      if (R > islandLeft && L < islandRight + 24){ x += Math.round(islandRight + 24 - L); break; }
+    }
+    x = Math.max(bound(), Math.min(0, x));
+    apply();
+  };
+  centerRow();
+  addEventListener('resize', () => { centerRow(); drawMiniPage(); });
+  viz.addEventListener('pointerdown', e => {
+    drag = true; viz.classList.add('grabbing'); px = e.clientX; vx = 0;
+    cancelAnimationFrame(raf); viz.setPointerCapture(e.pointerId);
+  });
+  viz.addEventListener('pointermove', e => {
+    if (hint) { const r = viz.getBoundingClientRect(); hint.style.left = (e.clientX - r.left - 36) + 'px'; hint.style.top = (e.clientY - r.top - 36) + 'px'; }
+    if (!drag) return;
+    const dx = e.clientX - px; px = e.clientX; vx = dx;
+    x += dx; apply();
+  });
+  const settle = () => {
+    vx *= 0.94; x += vx;
+    const b = bound();
+    if (x > 0) x += (0 - x) * 0.18;          // резинка на краях
+    else if (x < b) x += (b - x) * 0.18;
+    apply();
+    if (Math.abs(vx) > 0.25 || x > 0.5 || x < b - 0.5) raf = requestAnimationFrame(settle);
+    else drawMiniPage();   // карусель остановилась — обновить экран телефона
+  };
+  const end = () => { if (!drag) return; drag = false; viz.classList.remove('grabbing'); raf = requestAnimationFrame(settle); };
+  viz.addEventListener('pointerup', end);
+  viz.addEventListener('pointercancel', end);
+})();
+
+tick(); onScroll();
+</script>
+
+<!-- ===== 3D-часы: появляются при наведении на карточку-видео ===== -->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const card = document.querySelector('.card-video');
+const pop  = document.getElementById('watchPop');
+const wc   = document.getElementById('wc');
+if (card && pop && wc) {
+  const wren = new THREE.WebGLRenderer({ canvas:wc, antialias:true, alpha:true });
+  wren.setPixelRatio(Math.min(devicePixelRatio, 2));
+  wren.outputColorSpace = THREE.SRGBColorSpace;
+  wren.toneMapping = THREE.ACESFilmicToneMapping;
+  wren.toneMappingExposure = 0.82;   // киношно, без пересвета титана
+  const wscene = new THREE.Scene();
+  const wcam = new THREE.PerspectiveCamera(28, 1, 0.01, 100);
+  wcam.position.set(0, 0, 6);
+  const pmrem = new THREE.PMREMGenerator(wren);
+  wscene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  wscene.environmentIntensity = 0.5;
+  const key = new THREE.DirectionalLight(0xffffff, 0.95); key.position.set(2, 4, 5); wscene.add(key);
+  const rim = new THREE.DirectionalLight(0xbcd2ff, 0.65); rim.position.set(-3, 1, -2); wscene.add(rim);
+  wscene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+  // экран уведомления рисуем на canvas → текстура (чётко на любом DPR)
+  function rr(x,X,Y,W,H,R){ x.beginPath();x.moveTo(X+R,Y);x.arcTo(X+W,Y,X+W,Y+H,R);x.arcTo(X+W,Y+H,X,Y+H,R);x.arcTo(X,Y+H,X,Y,R);x.arcTo(X,Y,X+W,Y,R);x.closePath(); }
+  function drawNotif(s){
+    const W=855, H=1024, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const x=cv.getContext('2d');
+    x.fillStyle='#000'; x.fillRect(0,0,W,H);
+    const pad=78, iconR=40, iconCX=pad+iconR, iconCY=130;
+    x.fillStyle='#28a8ea'; x.beginPath(); x.arc(iconCX,iconCY,iconR,0,Math.PI*2); x.fill();
+    x.fillStyle='#fff'; x.save(); x.translate(iconCX,iconCY); x.beginPath();
+    x.moveTo(-21,-3); x.lineTo(23,-17); x.lineTo(6,21); x.lineTo(0,7); x.lineTo(-21,-3); x.closePath(); x.fill(); x.restore();
+    x.textBaseline='middle';
+    x.fillStyle='#fff'; x.font='700 42px -apple-system,"Helvetica Neue",Arial'; x.textAlign='left';
+    x.fillText(s.app || 'TELEGRAM', iconCX+iconR+24, iconCY+2);
+    x.fillStyle='#8a8a8e'; x.font='400 34px -apple-system,"Helvetica Neue",Arial'; x.textAlign='right';
+    x.fillText(s.when || 'сейчас', W-pad, iconCY+2);
+    const bx=pad, bw=W-pad*2, by=222, bh=340, br=50;
+    rr(x,bx,by,bw,bh,br); x.fillStyle='#1c1c1e'; x.fill();
+    x.textAlign='left'; x.textBaseline='alphabetic';
+    x.fillStyle='#fff'; x.font='700 52px -apple-system,"Helvetica Neue",Arial';
+    x.fillText(s.title || 'Maya OS', bx+52, by+96);
+    x.fillStyle='#e9e9ee'; x.font='400 48px -apple-system,"Helvetica Neue",Arial';
+    x.fillText(s.lines[0] || '', bx+52, by+188);
+    x.fillText(s.lines[1] || '', bx+52, by+256);
+    const uy=by+bh+42, uh=150;
+    rr(x,bx,uy,bw,uh,br); x.fillStyle='#2c2c2e'; x.fill();
+    x.fillStyle='#fff'; x.font='400 50px -apple-system,"Helvetica Neue",Arial'; x.textAlign='center'; x.textBaseline='middle';
+    x.fillText(s.btn || 'Открыть', W/2, uy+uh/2+2);
+    return cv;
+  }
+  /* галерея уведомлений: добавлять сюда {lines:[...]} — или {src:'assets/….png'} для готового скрина 855×1024 */
+  /* только реальные рендеры Стаса — рисованные плейсхолдеры выбиваются по стилю; листалка появится сама при ≥2 экранах */
+  const SCREENS = [
+    { src:'assets/watch-screen-1.png?v=1' }              // скрин Стаса: вырезан из его рендера часов
+  ];
+  const texLoader = new THREE.TextureLoader();
+  const texes = SCREENS.map(s => {
+    const t = s.src ? texLoader.load(s.src) : new THREE.CanvasTexture(drawNotif(s));
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = wren.capabilities.getMaxAnisotropy();
+    t.flipY = false;   // glTF-конвенция UV
+    return t;
+  });
+  const screenMat = new THREE.MeshBasicMaterial({ map: texes[0], toneMapped:false });
+  const dotsBox = document.getElementById('wDots');
+  const dots = texes.map((_, k) => { const d = document.createElement('i'); if (!k) d.classList.add('on'); dotsBox.appendChild(d); return d; });
+  if (texes.length < 2) document.querySelector('#watchPop .wNav').style.display = 'none';
+  let cur = 0;
+  function setScreen(i){
+    cur = (i + texes.length) % texes.length;
+    screenMat.map = texes[cur]; screenMat.needsUpdate = true;
+    dots.forEach((d, k) => d.classList.toggle('on', k === cur));
+  }
+  document.getElementById('wPrev').addEventListener('click', e => { e.stopPropagation(); setScreen(cur - 1); });
+  document.getElementById('wNext').addEventListener('click', e => { e.stopPropagation(); setScreen(cur + 1); });
+  window.__watchScreenSet = setScreen;
+
+  const wgroup = new THREE.Group(); wscene.add(wgroup);
+  let watch = null, loading = false, ready = false;
+  function loadWatch(){
+    if (loading || ready) return; loading = true;
+    new GLTFLoader().load('assets/watch.glb', (g) => {
+      const root = g.scene;
+      root.traverse(o => {
+        if (!o.isMesh) return;
+        if ((o.material && o.material.name) === 'Material.004') {
+          // UV экрана в модели занимает лишь кусок атласа (U .31–.68, V .19–.65) — растягиваем на 0..1, чтобы текстура легла целиком
+          const uv = o.geometry.attributes.uv;
+          let mnU=1e9, mxU=-1e9, mnV=1e9, mxV=-1e9;
+          for (let i=0;i<uv.count;i++){ const u=uv.getX(i), v=uv.getY(i); mnU=Math.min(mnU,u); mxU=Math.max(mxU,u); mnV=Math.min(mnV,v); mxV=Math.max(mxV,v); }
+          for (let i=0;i<uv.count;i++){ uv.setXY(i, (uv.getX(i)-mnU)/(mxU-mnU), (uv.getY(i)-mnV)/(mxV-mnV)); }
+          uv.needsUpdate = true;
+          o.material = screenMat;
+          window.__watchScreen = o;
+        } else if ((o.material && o.material.name) === 'Watch_Strap') {
+          // ремешок: чистый диффуз (Lambert, без белого спекуляра) + мимо тонмапа; яркость через overbright-цвет
+          // (НЕ эмиссией — сильная эмиссия убивает светотень, и внутренние детали ремешка «слипаются» в плоские пятна)
+          const sm = new THREE.MeshLambertMaterial({ color: new THREE.Color(2.1, 0.278, 0.025), emissive: new THREE.Color(0.08, 0.010, 0.001) });
+          sm.toneMapped = false; sm.name = 'Watch_Strap';
+          sm.side = THREE.DoubleSide;   // как у родных материалов — иначе «дырка» на стыке ремешка с корпусом
+          o.material = sm;
+        } else if (['Material.003','Material.005','Material.006'].includes(o.material && o.material.name)) {
+          // глянцевые слои вокруг дисплея (roughness 0) ловили белый блик — края дисплея должны оставаться чёрными
+          o.material.envMapIntensity = 0.03; o.material.roughness = 0.6; o.material.needsUpdate = true;
+        }
+      });
+      const box = new THREE.Box3().setFromObject(root);
+      const sph = box.getBoundingSphere(new THREE.Sphere());
+      root.position.sub(sph.center);
+      const dist = sph.radius / Math.sin(28*Math.PI/180/2) * 1.06;
+      wcam.position.set(0, 0, dist); wcam.updateProjectionMatrix();
+      wgroup.add(root); watch = root; ready = true; loading = false;
+      if (hovered) show();
+    }, undefined, (e) => { loading = false; console.error('watch load', e); });
+  }
+
+  let hovered = false, running = false, mx = 0, my = 0, tmx = 0, tmy = 0;
+  const clock = new THREE.Clock();
+  function resize(){
+    const r = card.getBoundingClientRect();
+    const pw = Math.min(Math.max(r.width * 1.7, 160), 260);   // компактное окно
+    const ph = pw * 1.26;
+    let left = r.left + r.width/2 - pw/2, top = r.top + r.height/2 - ph/2;
+    left = Math.max(12, Math.min(left, innerWidth - pw - 12));
+    top  = Math.max(12, Math.min(top,  innerHeight - ph - 12));
+    pop.style.left = left+'px'; pop.style.top = top+'px'; pop.style.width = pw+'px'; pop.style.height = ph+'px';
+    wren.setSize(pw, ph, false); wcam.aspect = pw/ph; wcam.updateProjectionMatrix();
+  }
+  function wtick(){
+    if (!running) return;
+    const t = clock.getElapsedTime();
+    mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
+    if (watch){
+      wgroup.rotation.y = Math.sin(t*0.6)*0.16 + mx*0.35;
+      wgroup.rotation.x = Math.sin(t*0.85)*0.05 - my*0.22;
+    }
+    wren.render(wscene, wcam);
+    requestAnimationFrame(wtick);
+  }
+  function show(){ resize(); pop.classList.add('on'); card.classList.add('live'); if (!running){ running = true; clock.getDelta(); wtick(); } }
+  function hide(){ pop.classList.remove('on'); card.classList.remove('live'); running = false; }
+
+  /* курсор может уйти с карточки В окно (кликать стрелки) — прячем с небольшой поблажкой */
+  let hideT = 0;
+  const wantShow = () => { clearTimeout(hideT); hovered = true; loadWatch(); if (ready) show(); };
+  const wantHide = () => { clearTimeout(hideT); hideT = setTimeout(() => { hovered = false; hide(); }, 160); };
+  card.addEventListener('mouseenter', wantShow);
+  card.addEventListener('mouseleave', wantHide);
+  pop.addEventListener('mouseenter', wantShow);
+  pop.addEventListener('mouseleave', wantHide);
+  const track = (el) => el.addEventListener('mousemove', (e) => {
+    const r = el === card ? card.getBoundingClientRect() : pop.getBoundingClientRect();
+    tmx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    tmy = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  });
+  track(card); track(pop);
+  addEventListener('scroll', () => { if (hovered) resize(); }, { passive:true });
+  addEventListener('resize', () => { if (hovered) resize(); });
+  // отладка
+  window.__showWatch = (on) => { hovered = !!on; loadWatch(); if (on){ if (ready) show(); } else hide(); };
+  window.__wren = wren; window.__wscene = wscene; window.__wcam = wcam; window.__wgroup = wgroup;
+}
+</script>
+
+</body>
+</html>

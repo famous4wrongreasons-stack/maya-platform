@@ -32,12 +32,18 @@ const REPORTING_PERIODS = new Set([
   'year_to_date',
   'last_7_days',
   'last_30_days',
+  'last_week',
   'last_month',
+  'named_day',
   'named_month',
+  'named_range',
   'custom',
 ]);
 /** Календарный месяц, названный словом: «в июле», «за март». */
 const CALENDAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+/** Один календарный день: «за 7 августа», «а за 7», «07.08». */
+const CALENDAR_DAY_PATTERN =
+  /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 @Injectable()
 export class AiToolRegistryService {
@@ -367,6 +373,9 @@ export class AiToolRegistryService {
     this.assertAllowedKeys(args, [
       'period',
       'month',
+      'day',
+      'from_day',
+      'to_day',
       'from',
       'to',
       'branch_id',
@@ -393,6 +402,17 @@ export class AiToolRegistryService {
         'month is only allowed with the named_month period',
       );
     }
+    if (period !== 'named_day' && args.day !== undefined) {
+      this.invalidArguments('day is only allowed with the named_day period');
+    }
+    if (
+      period !== 'named_range' &&
+      (args.from_day !== undefined || args.to_day !== undefined)
+    ) {
+      this.invalidArguments(
+        'from_day and to_day are only allowed with the named_range period',
+      );
+    }
     let namedMonth: string | null = null;
     if (period === 'named_month') {
       if (
@@ -402,6 +422,36 @@ export class AiToolRegistryService {
         this.invalidArguments('named_month requires month as YYYY-MM');
       }
       namedMonth = args.month;
+    }
+
+    let namedDay: string | null = null;
+    if (period === 'named_day') {
+      if (
+        typeof args.day !== 'string' ||
+        !CALENDAR_DAY_PATTERN.test(args.day) ||
+        !this.isRealCalendarDay(args.day)
+      ) {
+        this.invalidArguments('named_day requires day as YYYY-MM-DD');
+      }
+      namedDay = args.day;
+    }
+
+    let namedRange: { from_day: string; to_day: string } | null = null;
+    if (period === 'named_range') {
+      if (
+        typeof args.from_day !== 'string' ||
+        typeof args.to_day !== 'string' ||
+        !CALENDAR_DAY_PATTERN.test(args.from_day) ||
+        !CALENDAR_DAY_PATTERN.test(args.to_day) ||
+        !this.isRealCalendarDay(args.from_day) ||
+        !this.isRealCalendarDay(args.to_day) ||
+        args.from_day > args.to_day
+      ) {
+        this.invalidArguments(
+          'named_range requires from_day and to_day as ordered YYYY-MM-DD',
+        );
+      }
+      namedRange = { from_day: args.from_day, to_day: args.to_day };
     }
 
     let customRange: { from: string; to: string } | null = null;
@@ -422,6 +472,8 @@ export class AiToolRegistryService {
     return {
       period,
       ...(namedMonth === null ? {} : { month: namedMonth }),
+      ...(namedDay === null ? {} : { day: namedDay }),
+      ...(namedRange ?? {}),
       ...(customRange ?? {}),
       ...(args.branch_id === undefined
         ? {}
@@ -429,6 +481,22 @@ export class AiToolRegistryService {
             branch_id: this.assertEntityId(args.branch_id, 'branch_id'),
           }),
     };
+  }
+
+  private isRealCalendarDay(value: string): boolean {
+    const [yearText, monthText, dayText] = value.split('-');
+    const year = Number(yearText);
+    const month = Number(monthText);
+    const day = Number(dayText);
+    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+      return false;
+    }
+    const probe = new Date(Date.UTC(year, month - 1, day));
+    return (
+      probe.getUTCFullYear() === year &&
+      probe.getUTCMonth() === month - 1 &&
+      probe.getUTCDate() === day
+    );
   }
 
   private parseAnalyticsQuery(args: Record<string, unknown>) {
@@ -443,6 +511,9 @@ export class AiToolRegistryService {
       'branch_id',
       'comparison',
       'month',
+      'day',
+      'from_day',
+      'to_day',
     ]);
     if (
       typeof args.comparison !== 'string' ||

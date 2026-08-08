@@ -684,6 +684,54 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     expect(answer.grounding.domain).toBe('service_catalog');
   });
 
+  it('«сколько стоит стрижка» не отвечает средним чеком и не тащит прибыль', async () => {
+    const h = createHarness({ expenses: fullLedger });
+    silentModel(h);
+
+    const answer = await h.ask('сколько стоит стрижка');
+
+    expect(answer.grounding.domain).toBe('service_catalog');
+    expect(answer.tools_used.map((tool) => tool.name)).not.toContain(
+      'analytics.business.query',
+    );
+    expect(answer.tools_used.map((tool) => tool.name)).not.toContain(
+      'analytics.business.profit',
+    );
+    expect(answer.reply).not.toMatch(/средний чек|прибыл/i);
+  });
+
+  it('прибыль через модель не подменяет выручку и не светит схему', async () => {
+    const h = createHarness({ expenses: fullLedger });
+    h.decide.mockImplementation((input: AiCoreModelInput) => {
+      if (input.toolResults?.length) {
+        return Promise.resolve({
+          provider: 'deepseek',
+          model: 'test',
+          reply:
+            'Чистая прибыль за июль 130 000 ₽ при поступлениях 400 000 ₽. Поле revenue_amount_kopecks подтверждает кассу.',
+          toolCall: null,
+          usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+        } as AiCoreModelDecision);
+      }
+      return Promise.resolve({
+        provider: 'deepseek',
+        model: 'test',
+        reply: null,
+        toolCall: {
+          name: 'analytics.business.profit',
+          arguments: { period: 'named_month', month: '2026-07' },
+        },
+        usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      } as AiCoreModelDecision);
+    });
+
+    const answer = await h.ask('какая была прибыль в июле');
+
+    expect(answer.reply).not.toContain('revenue_amount_kopecks');
+    expect(answer.reply).not.toContain('booked_value');
+    expect(answer.reply).not.toMatch(/поле\s+revenue/i);
+  });
+
   it('«сколько ушло на расходники» — разрез по статьям от сервера', async () => {
     const h = createHarness({ expenses: fullLedger });
     silentModel(h);

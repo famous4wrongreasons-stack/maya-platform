@@ -25,6 +25,15 @@ import type {
   AiToolPrincipal,
   ValidatedAiToolArguments,
 } from './ai-tool.types';
+import {
+  ReportingPeriodResolver,
+  type ReportingPeriodToolArgs,
+} from './reporting-period.resolver';
+import {
+  collectUpsellOpportunities,
+  computePeriodMoneyMotivation,
+  toMotivationVisit,
+} from './master-money-motivation';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -388,11 +397,13 @@ export class AiToolHandlerService {
     );
     const data = this.record(profitability);
     const period = this.record(data.period);
+    const resolved = this.resolvedPeriodPayload(args, window);
     return {
       ...data,
+      resolved_period: resolved,
       period: {
         ...period,
-        named_month: window.namedMonth,
+        ...resolved,
         // Месяц ещё не кончился — сказать это обязаны мы, а не владелец,
         // который сам заметит расхождение с бухгалтерией.
         truncated_to_today: window.truncatedToToday,
@@ -919,6 +930,10 @@ export class AiToolHandlerService {
       principal.role,
       this.requiredString(args.period),
       comparison,
+      typeof args.day === 'string' ? args.day : '',
+      typeof args.month === 'string' ? args.month : '',
+      typeof args.from_day === 'string' ? args.from_day : '',
+      typeof args.to_day === 'string' ? args.to_day : '',
       typeof args.from === 'string' ? args.from : '',
       typeof args.to === 'string' ? args.to : '',
       typeof args.branch_id === 'string' ? args.branch_id : '',
@@ -931,7 +946,8 @@ export class AiToolHandlerService {
       this.businessQueryCache.delete(cacheKey);
     }
 
-    const currentQuery = await this.reportingQuery(principal.tenantId, args);
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const currentQuery = window.query;
     const previousQuery =
       comparison === 'none'
         ? null
@@ -964,12 +980,18 @@ export class AiToolHandlerService {
     const previousSnapshot = previous
       ? this.businessMetricSnapshot(previous)
       : null;
+    const resolved = this.resolvedPeriodPayload(args, window);
+    const basePeriod = this.record(current).period ?? currentQuery;
     const result = {
       verified: this.businessOperationalAnalyticsVerified(current),
       finance_verified:
         this.record(this.record(current).finance).verified === true,
       source: this.record(current).data_source ?? null,
-      period: this.record(current).period ?? currentQuery,
+      resolved_period: resolved,
+      period: {
+        ...this.record(basePeriod),
+        ...resolved,
+      },
       comparison: {
         mode: comparison,
         period: previous
@@ -1039,6 +1061,10 @@ export class AiToolHandlerService {
       principal.userId,
       this.requiredString(args.period),
       comparison,
+      typeof args.day === 'string' ? args.day : '',
+      typeof args.month === 'string' ? args.month : '',
+      typeof args.from_day === 'string' ? args.from_day : '',
+      typeof args.to_day === 'string' ? args.to_day : '',
       typeof args.from === 'string' ? args.from : '',
       typeof args.to === 'string' ? args.to : '',
       typeof args.branch_id === 'string' ? args.branch_id : '',
@@ -1051,7 +1077,8 @@ export class AiToolHandlerService {
       this.employeeQueryCache.delete(cacheKey);
     }
 
-    const currentQuery = await this.reportingQuery(principal.tenantId, args);
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const currentQuery = window.query;
     const previousQuery =
       comparison === 'none'
         ? null
@@ -1079,12 +1106,18 @@ export class AiToolHandlerService {
       ? this.employeeMetricSnapshot(previous)
       : null;
     const currentSource = this.record(current).data_source;
+    const resolved = this.resolvedPeriodPayload(args, window);
+    const basePeriod = this.record(current).period ?? currentQuery;
     const result = {
       verified:
         typeof currentSource === 'string' &&
         ['crm', 'maya'].includes(currentSource),
       source: typeof currentSource === 'string' ? currentSource : null,
-      period: this.record(current).period ?? currentQuery,
+      resolved_period: resolved,
+      period: {
+        ...this.record(basePeriod),
+        ...resolved,
+      },
       comparison: {
         mode: comparison,
         period: previous
@@ -1125,13 +1158,84 @@ export class AiToolHandlerService {
         },
       ],
     };
-    if (result.verified) {
+    const motivation = await this.employeeMoneyMotivation(
+      principal,
+      currentQuery,
+      current,
+    );
+    const enriched = motivation
+      ? {
+          ...result,
+          money_motivation: motivation.money_motivation,
+          upsell_opportunities: motivation.upsell_opportunities,
+        }
+      : result;
+    if (enriched.verified) {
       this.employeeQueryCache.set(cacheKey, {
         expiresAt: Date.now() + 5 * 60 * 1_000,
-        value: result,
+        value: enriched,
       });
     }
-    return result;
+    return enriched;
+  }
+
+  private async employeeMoneyMotivation(
+    principal: AiToolPrincipal,
+    query: AnalyticsRangeQueryDto,
+    currentPublished: unknown,
+  ): Promise<{
+    money_motivation: ReturnType<typeof computePeriodMoneyMotivation>;
+    upsell_opportunities: ReturnType<typeof collectUpsellOpportunities>;
+  } | null> {
+    try {
+      const bundle = await this.analyticsService.getEmployeeMotivationVisits(
+        principal.tenantId,
+        principal.userId,
+        query,
+        60,
+      );
+      if (!bundle) return null;
+      const mapVisit = (appointment: {
+        clientId: string | null;
+        startAt: Date;
+        status: string;
+        totalPriceKopecks: number | null;
+        services: Array<{ name: string; amountKopecks: number }>;
+      }) =>
+        toMotivationVisit({
+          clientId: appointment.clientId,
+          startAt: appointment.startAt,
+          status: appointment.status,
+          totalPriceKopecks: appointment.totalPriceKopecks,
+          services: appointment.services,
+        });
+      const periodVisits = bundle.period.map(mapVisit);
+      const historyVisits = bundle.history.map(mapVisit);
+      const staff = this.staffRows(currentPublished);
+      const self = staff.length === 1 ? this.record(staff[0]) : {};
+      const salary = this.record(self.salary);
+      const accrued = this.record(salary.accrued);
+      const earnedRub =
+        salary.status === 'available' &&
+        typeof accrued.amount_kopecks === 'number'
+          ? Math.round(accrued.amount_kopecks / 100)
+          : null;
+      const money_motivation = computePeriodMoneyMotivation({
+        periodVisits,
+        historyVisits,
+        earnedRub,
+        lookbackDays: 60,
+      });
+      const upsell_opportunities = collectUpsellOpportunities({
+        periodVisits,
+        historyVisits: [...historyVisits, ...periodVisits],
+        salaryShare: money_motivation.salary_share ?? 0.5,
+        limit: 3,
+      });
+      return { money_motivation, upsell_opportunities };
+    } catch {
+      return null;
+    }
   }
 
   private async comparisonReportingQuery(
@@ -2068,6 +2172,7 @@ export class AiToolHandlerService {
    * `truncatedToToday` относится только к названному месяцу: спросили про
    * текущий месяц по имени — считаем по сегодня, и это обязано прозвучать в
    * ответе, иначе «июль» и «июль по седьмое» выглядят одинаково.
+   * `named_day` / `named_range` — ровно названные локальные дни, без подмены месяцем.
    */
   private async reportingWindow(
     tenantId: string,
@@ -2076,6 +2181,9 @@ export class AiToolHandlerService {
     query: AnalyticsRangeQueryDto;
     truncatedToToday: boolean;
     namedMonth: string | null;
+    namedDay: string | null;
+    fromDay: string | null;
+    toDay: string | null;
   }> {
     const period = this.requiredString(args.period);
     const branchId =
@@ -2089,6 +2197,9 @@ export class AiToolHandlerService {
         },
         truncatedToToday: false,
         namedMonth: null,
+        namedDay: null,
+        fromDay: null,
+        toDay: null,
       };
     }
 
@@ -2100,6 +2211,9 @@ export class AiToolHandlerService {
     let to = now;
     let truncatedToToday = false;
     let namedMonth: string | null = null;
+    let namedDay: string | null = null;
+    let fromDay: string | null = null;
+    let toDay: string | null = null;
 
     switch (period) {
       case 'today':
@@ -2137,6 +2251,16 @@ export class AiToolHandlerService {
           timezone,
         );
         break;
+      case 'last_week': {
+        // Прошлая календарная неделя пн–вс в TZ салона — не «последние 7 дней».
+        const weekday = this.localWeekday(today);
+        const thisMonday = this.shiftLocalDate(today, -((weekday + 6) % 7));
+        const lastMonday = this.shiftLocalDate(thisMonday, -7);
+        const thisMondayStart = localDateMinuteToUtc(thisMonday, 0, timezone);
+        from = localDateMinuteToUtc(lastMonday, 0, timezone);
+        to = new Date(thisMondayStart.getTime() - 1);
+        break;
+      }
       case 'last_month': {
         const currentMonth = `${today.slice(0, 7)}-01`;
         const previousMonth = this.shiftLocalMonth(currentMonth, -1);
@@ -2144,6 +2268,27 @@ export class AiToolHandlerService {
         to = new Date(
           localDateMinuteToUtc(currentMonth, 0, timezone).getTime() - 1,
         );
+        break;
+      }
+      case 'named_day': {
+        // Один названный день — ровно этот локальный день. «Отчёт за 7 августа»
+        // нельзя подменять суммой за август: это и была жалоба владельца.
+        namedDay = this.requiredString(args.day);
+        from = localDateMinuteToUtc(namedDay, 0, timezone);
+        const nextDay = this.shiftLocalDate(namedDay, 1);
+        to = new Date(localDateMinuteToUtc(nextDay, 0, timezone).getTime() - 1);
+        break;
+      }
+      case 'named_range': {
+        fromDay = this.requiredString(args.from_day);
+        toDay = this.requiredString(args.to_day);
+        from = localDateMinuteToUtc(fromDay, 0, timezone);
+        const dayAfter = this.shiftLocalDate(toDay, 1);
+        to = new Date(localDateMinuteToUtc(dayAfter, 0, timezone).getTime() - 1);
+        if (to.getTime() > now.getTime()) {
+          to = now;
+          truncatedToToday = true;
+        }
         break;
       }
       case 'named_month': {
@@ -2182,7 +2327,36 @@ export class AiToolHandlerService {
       },
       truncatedToToday,
       namedMonth,
+      namedDay,
+      fromDay,
+      toDay,
     };
+  }
+
+  private periodArgsFromValidated(
+    args: ValidatedAiToolArguments,
+  ): ReportingPeriodToolArgs {
+    return {
+      period: this.requiredString(args.period),
+      ...(typeof args.day === 'string' ? { day: args.day } : {}),
+      ...(typeof args.month === 'string' ? { month: args.month } : {}),
+      ...(typeof args.from_day === 'string' ? { from_day: args.from_day } : {}),
+      ...(typeof args.to_day === 'string' ? { to_day: args.to_day } : {}),
+    };
+  }
+
+  private resolvedPeriodPayload(
+    args: ValidatedAiToolArguments,
+    window: {
+      query: AnalyticsRangeQueryDto;
+      truncatedToToday: boolean;
+    },
+  ) {
+    return ReportingPeriodResolver.resolvedPeriodMeta(
+      this.periodArgsFromValidated(args),
+      { from: window.query.from, to: window.query.to },
+      { truncatedToToday: window.truncatedToToday },
+    );
   }
 
   private async reportingTimezone(

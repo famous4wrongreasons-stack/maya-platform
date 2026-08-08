@@ -1,0 +1,41 @@
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Keep a single OAuth origin. Provider allow-lists compare exact URLs.
+  RewriteCond %{HTTP_HOST} ^www\.mayaos\.ru$ [NC]
+  RewriteRule ^ https://mayaos.ru%{REQUEST_URI} [R=301,L,NE]
+
+  # Keep the marketing site at / and the installable application at /app/.
+  RewriteRule ^app\.html$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]
+  RewriteCond %{QUERY_STRING} !(^|&)booking_tenant= [NC]
+  RewriteRule ^app/?$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]
+
+  # Beget can reach the private platform route even when a mobile provider
+  # cannot connect to the VPS directly.
+  RewriteRule ^api(?:/(.*))?$ maya-platform-api.php/$1 [QSA,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "^(app|oauth-callback)\.html$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+  </FilesMatch>
+
+  <Files "service-worker.js">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  </Files>
+
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>

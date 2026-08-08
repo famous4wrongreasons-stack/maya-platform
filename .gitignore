@@ -18,6 +18,7 @@ signing-key-info.txt
 .env
 .env.*
 !.env.*.example
+.local-pilot-tenant.txt
 
 # --- База данных и ПД (152-ФЗ) ---
 *.db

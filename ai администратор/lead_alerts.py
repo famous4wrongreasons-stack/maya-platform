@@ -196,6 +196,24 @@ async def scan_and_alert(app: Application) -> dict:
                 f"lead_alerts: ⚠️ пинг по client_id={client_id} "
                 f"({client.get('name', '?')})"
             )
+            try:
+                import maya_inbox_bridge
+                await maya_inbox_bridge.publish_inbox_item(
+                    type="hanging_lead",
+                    title="Зависшая заявка",
+                    body_text=(
+                        text.replace("*", "")
+                        .replace("`", "")
+                        .replace("_", "")
+                    ),
+                    source_seed=f"hanging_lead|{client_id}|{state.get('updated_at')}",
+                    telegram_chat_ids=list(admins),
+                    deep_link="/app/?panel=customers",
+                    payload={"client_id": client_id},
+                    fanout_owners=True,
+                )
+            except Exception as inbox_exc:
+                logger.warning(f"lead_alerts nest inbox: {inbox_exc}")
 
     summary = {"checked": len(candidates), "alerted": alerted}
     logger.info(f"lead_alerts: scheduler tick {summary}")

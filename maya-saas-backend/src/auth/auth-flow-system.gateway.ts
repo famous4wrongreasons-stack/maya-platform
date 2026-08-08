@@ -16,6 +16,11 @@ export class AuthFlowSystemGateway {
             slug: true,
             status: true,
             allowSelfRegistration: true,
+            // Needed for trial client signup + internal-calendar phone policy.
+            trialFullAccess: true,
+            trialEndsAt: true,
+            currentPeriodEnd: true,
+            calendarSource: true,
           },
         },
       },

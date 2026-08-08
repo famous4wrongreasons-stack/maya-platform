@@ -10,6 +10,19 @@ Temporary acceptance host:
 - web OAuth callback: `https://maya.111.88.148.206.nip.io/oauth-callback.html`
 - native OAuth callback: `https://maya.111.88.148.206.nip.io/api/auth/oauth/native/callback`
 
+Final production host:
+
+- `https://mayaos.ru/app.html`
+- web OAuth callback: `https://mayaos.ru/oauth-callback.html`
+- native OAuth callback: `https://mayaos.ru/api/auth/oauth/native/callback`
+- trusted origin: `https://mayaos.ru`
+
+The production edge is hosted as an isolated Beget site. Static application
+files are served by Beget and `/api/*` is relayed to the platform VPS through
+`deploy/platform/beget-edge/maya-platform-api.php`. This avoids exposing the
+salon's `malesthetic.pro` contour and keeps mobile access stable when direct
+routes to the VPS are unavailable.
+
 ## Shared platform login
 
 The platform uses one neutral identity contour for every tenant. A business
@@ -31,8 +44,8 @@ Telegram allows exactly these temporary acceptance addresses:
 The existing `malesthetic.pro` OAuth configuration and salon Telegram bot are
 separate tenant infrastructure and are not modified by this platform setup.
 
-The final neutral domain uses the same path layout. Only the hostname, DNS,
-certificate and exact provider callback allow-list change during cutover.
+The final neutral domain is `mayaos.ru` and uses the same path layout. Only
+DNS, certificate and exact provider callback allow-list change during cutover.
 
 Final-domain cutover order:
 

@@ -1970,4 +1970,123 @@ export class OperationsAnalyticsService {
   private isCancelled(status: string): boolean {
     return ['canceled', 'cancelled'].includes(status.trim().toLowerCase());
   }
+
+  /**
+   * Визиты мастера за период + lookback для денежной мотивации / апселла.
+   * Без ПД: только client id, услуги и суммы.
+   */
+  async getEmployeeMotivationVisits(
+    tenantId: string,
+    userId: string,
+    query: AnalyticsRangeQueryDto,
+    lookbackDays = 60,
+  ): Promise<{
+    provider_id: string;
+    period_from: Date;
+    period_to: Date;
+    lookback_from: Date;
+    period: AnalyticsAppointment[];
+    history: AnalyticsAppointment[];
+  } | null> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { calendarSource: true },
+    });
+    if (!tenant) {
+      return null;
+    }
+    const external =
+      (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
+    let providerId: string;
+    if (external) {
+      const identity = await this.prisma.crmStaffAccess.findFirst({
+        where: {
+          tenantId: scopedTenantId,
+          userId,
+          status: 'active',
+        },
+        select: { externalStaffId: true },
+      });
+      if (!identity) return null;
+      providerId = identity.externalStaffId;
+    } else {
+      const identity = await this.prisma.internalProvider.findFirst({
+        where: { tenantId: scopedTenantId, userId, active: true },
+        select: { id: true },
+      });
+      if (!identity) return null;
+      providerId = identity.id;
+    }
+
+    const { from, to } = this.parseRange(query);
+    const lookbackFrom = new Date(
+      from.getTime() - lookbackDays * 24 * 60 * 60 * 1000,
+    );
+    const appointments = external
+      ? await this.loadExternalAppointments(
+          scopedTenantId,
+          lookbackFrom,
+          to,
+          providerId,
+        )
+      : (
+          await this.prisma.appointment.findMany({
+            where: {
+              tenantId: scopedTenantId,
+              startAt: { gte: lookbackFrom, lte: to },
+              staffExternalId: providerId,
+              ...(query.branchId ? { branchId: query.branchId } : {}),
+            },
+            select: {
+              id: true,
+              clientId: true,
+              branchId: true,
+              staffExternalId: true,
+              startAt: true,
+              endAt: true,
+              status: true,
+              totalPriceKopecks: true,
+              currency: true,
+            },
+            orderBy: { startAt: 'asc' },
+          })
+        ).map((row) => ({
+          id: row.id,
+          clientId: row.clientId,
+          branchId: row.branchId,
+          staffExternalId: row.staffExternalId,
+          staffName: null,
+          services: [] as AnalyticsAppointment['services'],
+          startAt: row.startAt,
+          durationMinutes: Math.max(
+            0,
+            Math.round((row.endAt.getTime() - row.startAt.getTime()) / 60_000),
+          ),
+          status: row.status,
+          totalPriceKopecks: row.totalPriceKopecks,
+          currency: row.currency,
+        }));
+
+    const period: AnalyticsAppointment[] = [];
+    const history: AnalyticsAppointment[] = [];
+    for (const appointment of appointments) {
+      if (
+        appointment.startAt.getTime() >= from.getTime() &&
+        appointment.startAt.getTime() <= to.getTime()
+      ) {
+        period.push(appointment);
+      } else if (appointment.startAt.getTime() < from.getTime()) {
+        history.push(appointment);
+      }
+    }
+    return {
+      provider_id: providerId,
+      period_from: from,
+      period_to: to,
+      lookback_from: lookbackFrom,
+      period,
+      history,
+    };
+  }
 }

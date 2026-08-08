@@ -83,6 +83,8 @@ from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
 
+_MAYA_LEGACY_BRIDGE_TOKEN = os.getenv("MAYA_LEGACY_BRIDGE_TOKEN", "").strip()
+
 try:
     from config import WEBPUSH_VAPID_PRIVATE_KEY, WEBPUSH_VAPID_CLAIMS
 except Exception:
@@ -1189,6 +1191,26 @@ async def _process_record_create(app: Application, record_id: int) -> dict:
     except Exception as e:
         logger.error(f"Webhook: web-push мастеру {staff_id} не ушёл: {e}")
 
+    try:
+        import maya_inbox_bridge
+        tg_ids = []
+        if master.get("telegram_chat_id"):
+            tg_ids.append(int(master["telegram_chat_id"]))
+        await maya_inbox_bridge.publish_inbox_item(
+            type="new_appointment",
+            title="Новая запись",
+            body_text=text.replace("*", ""),
+            source_seed=f"record.create|{record_id}",
+            telegram_chat_ids=tg_ids or None,
+            deep_link="/app/?panel=schedule",
+            payload={"record_id": record_id, "staff_id": int(staff_id)},
+            # Owners must see this in Maya OS chat even if master's TG
+            # is not linked as Nest AuthIdentity.
+            fanout_owners=True,
+        )
+    except Exception as inbox_exc:
+        logger.warning(f"Webhook: nest inbox new appointment: {inbox_exc}")
+
     # 10. Пуш клиенту «вы записаны» — тоже независимо.
     try:
         await _notify_client_record(record, record_id, "create")
@@ -1371,6 +1393,74 @@ async def _process_record_update(app: Application, record_id: int) -> dict:
     else:
         logger.info(f"Webhook update: мастер {new_staff_id} не в системе — пропускаем")
 
+    # ── Nest inbox (Maya OS): перенос / передача / услуги → владельцу + мастерам ──
+    # Раньше в inbox уходил только «у старого мастера забрали», и то без fanout
+    # владельцу. Отмена — отдельно в delete. Перенос времени вообще не писался.
+    try:
+        import maya_inbox_bridge
+        client_name = _truncate_name((record.get("client") or {}).get("name"))
+        when = _format_datetime(record.get("date") or record.get("datetime"))
+        tg_ids = []
+        if new_master and new_master.get("telegram_chat_id"):
+            tg_ids.append(int(new_master["telegram_chat_id"]))
+        if transferred and old_master and old_master.get("telegram_chat_id"):
+            tg_ids.append(int(old_master["telegram_chat_id"]))
+        if transferred:
+            inbox_type = "appointment_reassigned"
+            inbox_title = "Запись передана другому мастеру"
+            old_name = (old_master or {}).get("full_name") or "другому мастеру"
+            new_name = (new_master or {}).get("full_name") or "новому мастеру"
+            inbox_body = (
+                f"{inbox_title}\n\n"
+                f"Клиент: {client_name}\n"
+                f"Время: {when}\n"
+                f"Было: {old_name}\n"
+                f"Стало: {new_name}"
+            )
+            seed = f"record.transfer|{record_id}|{old_staff_id}->{new_staff_id}"
+        elif time_changed:
+            inbox_type = "appointment_rescheduled"
+            inbox_title = push_title
+            old_when = _format_datetime(old_dt) if old_dt else "—"
+            inbox_body = (
+                f"{inbox_title}\n\n"
+                f"Клиент: {client_name}\n"
+                f"Было: {old_when}\n"
+                f"Стало: {when}"
+            )
+            seed = f"record.reschedule|{record_id}|{old_dt}->{new_dt}"
+        else:
+            inbox_type = "owner_alert"
+            inbox_title = push_title
+            inbox_body = (
+                f"{inbox_title}\n\n"
+                f"Клиент: {client_name}\n"
+                f"Время: {when}"
+            )
+            seed = f"record.services|{record_id}|{new_sig}"
+        await maya_inbox_bridge.publish_inbox_item(
+            type=inbox_type,
+            title=inbox_title,
+            body_text=inbox_body,
+            source_seed=seed,
+            telegram_chat_ids=tg_ids or None,
+            deep_link="/app/?panel=schedule",
+            payload={
+                "record_id": record_id,
+                "event": (
+                    "record.transfer"
+                    if transferred
+                    else ("record.reschedule" if time_changed else "record.services")
+                ),
+                "staff_id": int(new_staff_id) if new_staff_id else None,
+                "new_staff_id": int(new_staff_id) if new_staff_id else None,
+                "old_staff_id": int(old_staff_id) if (transferred and old_staff_id) else None,
+            },
+            fanout_owners=True,
+        )
+    except Exception as inbox_exc:
+        logger.warning(f"Webhook: nest inbox record.update: {inbox_exc}")
+
     # ── Уведомление старому мастеру (только при передаче) ──────────────
     if transferred and old_master:
         client_name = _truncate_name(client.get("name"))
@@ -1475,7 +1565,18 @@ async def _process_record_delete(app: Application, record_id: int, payload: dict
                 _cancel_by_client = database.pop_recent_cancel_actor(record_id) == "client"
             except Exception:
                 pass
-            _cancel_word = "Запись отменена клиентом" if _cancel_by_client else "Запись отменена"
+            # «Отменена» — только если отменил клиент. Удаление админом/в YClients —
+            # это «Запись удалена» (как в операционке салона).
+            _cancel_word = (
+                "Запись отменена клиентом"
+                if _cancel_by_client
+                else "Запись удалена"
+            )
+            _inbox_type = (
+                "appointment_cancelled"
+                if _cancel_by_client
+                else "appointment_deleted"
+            )
             _del_tg = bool(master.get("telegram_chat_id"))
             _del_muted = _del_tg and database.is_master_muted(master["telegram_chat_id"])
             # Telegram (если есть канал и не в mute) — в своём try
@@ -1509,6 +1610,32 @@ async def _process_record_delete(app: Application, record_id: int, payload: dict
                 )
             except Exception as e:
                 logger.error(f"Webhook delete: web-push мастеру {staff_id} не ушёл: {e}")
+            try:
+                import maya_inbox_bridge
+                tg = master.get("telegram_chat_id")
+                cancel_body = (
+                    f"{_cancel_word}\n\n"
+                    f"Клиент: {client_name}\n"
+                    f"Было время: {when}\n\n"
+                    f"Слот освободился."
+                )
+                await maya_inbox_bridge.publish_inbox_item(
+                    type=_inbox_type,
+                    title=_cancel_word,
+                    body_text=cancel_body,
+                    source_seed=f"record.delete|{record_id}",
+                    telegram_chat_ids=[int(tg)] if tg else None,
+                    deep_link="/app/?panel=schedule",
+                    payload={
+                        "record_id": record_id,
+                        "event": "record.delete",
+                        "staff_id": int(staff_id),
+                        "by_client": bool(_cancel_by_client),
+                    },
+                    fanout_owners=True,
+                )
+            except Exception as inbox_exc:
+                logger.warning(f"Webhook: nest inbox cancel: {inbox_exc}")
             logger.info(f"Webhook delete: отмена записи {record_id} → мастер {master.get('full_name')}")
     except Exception as e:
         logger.error(f"Webhook delete: уведомление мастеру по {record_id}: {e}")
@@ -1824,6 +1951,41 @@ async def cabinet_me_handler(request: web.Request) -> web.Response:
     if not chat_id:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     return await _build_full_cabinet(int(chat_id), tg_user)
+
+
+async def internal_loyalty_snapshot_handler(request: web.Request) -> web.Response:
+    """Read-only bridge from MAYA OS to the existing loyalty ledger.
+
+    The route deliberately returns no profile or contact data. It is protected
+    by a server-only token because the public reverse proxy can also reach this
+    aiohttp application.
+    """
+    supplied_token = request.headers.get("X-Maya-Legacy-Bridge", "").strip()
+    if (
+        not _MAYA_LEGACY_BRIDGE_TOKEN
+        or not supplied_token
+        or not hmac.compare_digest(supplied_token, _MAYA_LEGACY_BRIDGE_TOKEN)
+    ):
+        raise web.HTTPNotFound()
+
+    try:
+        body = await request.json()
+        telegram_user_id = int(body.get("telegram_user_id", 0))
+    except (AttributeError, TypeError, ValueError, _json.JSONDecodeError):
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    if telegram_user_id <= 0:
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    client = database.get_client(telegram_user_id)
+    if not client:
+        return web.json_response({"found": False})
+
+    return web.json_response({
+        "found": True,
+        "balance": max(0, int(database.loyalty_balance(int(client["id"])) or 0)),
+        "source": "maya_ledger",
+    })
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -11141,6 +11303,19 @@ async def _send_growth_role_briefs_once(
                 database.set_setting(delivery_key, now.isoformat(timespec="seconds"))
                 sent += 1
                 deliveries.append({"role": role, "state": "sent"})
+                try:
+                    import maya_inbox_bridge
+                    await maya_inbox_bridge.publish_inbox_item(
+                        type="growth_plan" if role == "owner" else "morning_brief",
+                        title="MAYA · утренний план" + (" владельца" if role == "owner" else " менеджера"),
+                        body_text=payload["message"],
+                        source_seed=delivery_key,
+                        telegram_chat_ids=[int(chat_id)],
+                        deep_link=payload["url"].replace("https://malesthetic.pro", "") or "/app/?panel=os",
+                        fanout_owners=(role == "owner"),
+                    )
+                except Exception as inbox_exc:
+                    logger.warning(f"growth role brief inbox: {inbox_exc}")
             except Exception as e:
                 logger.error(f"growth role brief {role}: {e}")
                 deliveries.append({"role": role, "state": "failed"})
@@ -11655,6 +11830,20 @@ async def _send_shift_reminders_once(app: Application) -> int:
                 tag=f"shift-{staff_id}-{now.date().isoformat()}-{offset}",
                 data={"event": "shift.reminder", "minutes": offset},
             )
+            try:
+                import maya_inbox_bridge
+                tg = master.get("telegram_chat_id")
+                await maya_inbox_bridge.publish_inbox_item(
+                    type="shift_reminder",
+                    title=f"До рабочего дня {label}",
+                    body_text=text.replace("*", ""),
+                    source_seed=f"shift|{staff_id}|{now.date().isoformat()}|{offset}",
+                    telegram_chat_ids=[int(tg)] if tg else None,
+                    deep_link="/app/?panel=schedule",
+                    fanout_owners=False,
+                )
+            except Exception as inbox_exc:
+                logger.warning(f"shift reminder nest inbox: {inbox_exc}")
     return sent
 
 
@@ -13358,6 +13547,9 @@ async def start_webhook_server(bot_app: Application):
     # API для Mini App / PWA — личный кабинет
     web_app.router.add_get("/api/cabinet/me", cabinet_me_handler)
     web_app.router.add_options("/api/cabinet/me", cabinet_options_handler)
+    web_app.router.add_post(
+        "/api/internal/loyalty-snapshot", internal_loyalty_snapshot_handler
+    )
 
     # API для PWA через Telegram Login Widget (когда PWA открыта в браузере)
     web_app.router.add_post("/api/cabinet/me-via-login", cabinet_me_via_login_handler)

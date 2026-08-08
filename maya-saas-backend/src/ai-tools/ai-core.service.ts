@@ -32,7 +32,9 @@ import type {
   AiCoreToolResult,
 } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
+import { buildChatReportCard } from './chat-report-card';
 import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
+import { ReportingPeriodResolver } from './reporting-period.resolver';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
 const MAX_CHAT_INPUT_BYTES = 16 * 1_024;
@@ -204,7 +206,7 @@ const DATA_TOPIC_PATTERN =
   /(деньг|выруч|оборот|касс|доход|прибыл|марж|рентабельн|чек|зарплат|начисл|заработ|окупа|стоит|стоимост|цен[аеуы]|прайс|расход|затрат|трат|бюджет|реклам|аренд|налог|запис|визит|посещен|окн[аоу]|слот|свободн|расписан|график|смен[аеуы]|выходн|загруз|занятост|клиент|гост|посетител|мастер|специалист|сотрудник|команд|персонал|услуг|стриж|бород|балл|бонус|кэшбэк|лояльн|показател|метрик|аналитик|статистик|сводк|отчет|динамик|просад|просел|(?<![а-яё])рост|падени|отмен|повторн|средн)/i;
 /** Приветствие и вежливость: ради них отчёт по салону не поднимают. */
 const SMALL_TALK_PATTERN =
-  /^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|доброе\s+утро|спасибо|пока|ок|окей|ясно|понятно|кто\s+ты|что\s+ты\s+умеешь|как\s+дела)[!.?\s]*$/i;
+  /^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|доброе\s+утро|спасибо|пожалуйста|пока|давай|ладно|ок|окей|ясно|понятно|кто\s+ты|что\s+ты\s+умеешь|как\s+дела|че\s+как(?:\s+\w{1,24})?|как\s+(?:ты|сама|жизнь|делишки|настроен\w*)|маюшк\w*|майя|maya|хей|хай|hello|hi|yo)(?:\s*[,!.?]|\s|$)/i;
 /**
  * Интенты, в которых разговор идёт не про цифры: запись клиента, правка
  * расписания, база знаний, поддержка. Каталог и баллы сюда не входят: их
@@ -233,10 +235,7 @@ const MONEY_INTENTS = new Set<MayaBrainIntent>([
 // 🔴 Граница слова обязательна: «се-ГОД-ня» содержит «год», и без неё запрос
 // «сравни сегодня с прошлой неделей» уезжал в годовое сравнение, а «сколько
 // записей сегодня?» получал сопоставление с прошлым годом.
-const GROUNDING_YEAR_COMPARISON_PATTERN =
-  /(?:(?<![а-яёa-z])год[а-яёa-z]*.{0,96}(?:сравн|прошл|предыдущ)|(?:сравн|прошл|предыдущ).{0,96}(?<![а-яёa-z])год[а-яёa-z]*|(?<![а-яёa-z])год\s+к\s+году)/i;
-// 🔴 «Посоветуй как вернуть клиентов» под старый список не подходило: там были
-// только «что делать» и «как исправить». Просьба о совете оставалась без совета.
+// Сравнение теперь живёт в ReportingPeriodResolver.comparison.
 const BUSINESS_ACTION_REQUEST_PATTERN =
   /(что\s+(?:с\s+этим\s+)?делать|как\s+(?:это\s+)?исправить|как\s+(?:это\s+)?улучшить|объясни.{0,32}что\s+делать|дай\s+(?:план|рекомендац)|какие\s+действия|что\s+предпринять|посоветуй|подскажи|совет[а-яёa-z]*|как\s+(?:мне\s+)?(?:вернуть|поднять|увеличить|нарастить|удержать)|что\s+можно\s+сделать)/i;
 // Просьба объяснить или разобрать. Отдельно от просьбы о действии: «почему»
@@ -475,6 +474,7 @@ export class AiCoreService {
           toolsUsed,
           decisions,
           this.groundingFallback(requirement, toolResults, true),
+          toolResults,
         );
       }
       if (requirement?.presetToolCall) {
@@ -575,7 +575,8 @@ export class AiCoreService {
                   toolResults,
                 ),
               },
-            );
+                toolResults,
+              );
           }
           return this.complete(
             user,
@@ -595,7 +596,8 @@ export class AiCoreService {
                 toolResults,
               ),
             },
-          );
+              toolResults,
+            );
         }
         decisions.push(decision);
         if (!decision.toolCall) {
@@ -620,6 +622,44 @@ export class AiCoreService {
             this.plainReply(decision.reply),
             toolResults,
           );
+          const schemaLeak = this.schemaLeakTokens(reply);
+          if (schemaLeak.length > 0) {
+            if (numberRetries < 1 && step < maxToolSteps) {
+              numberRetries += 1;
+              corrections = [
+                `В ответе прозвучали служебные имена схемы: ${schemaLeak.join(', ')}. Перепиши ответ языком салона (барбер, гость, запись, касса, прайс) — без имён полей, инструментов и JSON-ключей.`,
+              ];
+              continue;
+            }
+            const deterministicReply = this.deterministicGroundedReply(
+              toolResults,
+              this.latestUserText(sanitized.messages),
+            );
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              deterministicReply
+                ? {
+                    reply: deterministicReply,
+                    source: 'safe_fallback',
+                    action: null,
+                    grounding: this.groundingReport(
+                      requirement,
+                      requirement ? 'verified' : 'not_required',
+                      toolResults,
+                    ),
+                  }
+                : this.groundingFallback(
+                    requirement as GroundingRequirement,
+                    toolResults,
+                  ),
+              toolResults,
+            );
+          }
           const unsourced = requirement
             ? this.unsourcedNumbers(
                 reply,
@@ -675,7 +715,8 @@ export class AiCoreService {
                     ),
                     unsourced,
                   },
-            );
+                    toolResults,
+                  );
           }
           return this.complete(
             user,
@@ -694,7 +735,8 @@ export class AiCoreService {
                 toolResults,
               ),
             },
-          );
+              toolResults,
+            );
         }
         if (step >= maxToolSteps) {
           this.modelFailure('ai_model_tool_step_limit');
@@ -708,9 +750,18 @@ export class AiCoreService {
         // разрешён любой инструмент, доступный роли (проверка выше), а
         // требование «ответить только после данных» никуда не делось: оно
         // проверяется по результату, а не по имени в списке.
-        const signature = this.toolSignature(
+        // 🔴 Период всегда с сервера. Модель могла попросить named_month на
+        // «7 августа» — и владелец видел 244к вместо 41.5к. Hardening
+        // перебивает period/day/month до подписи и до execute.
+        const hardenedArguments = ReportingPeriodResolver.hardenToolArguments(
           decision.toolCall.name,
           decision.toolCall.arguments,
+          this.latestUserText(sanitized.messages),
+          this.previousUserText(sanitized.messages),
+        );
+        const signature = this.toolSignature(
+          decision.toolCall.name,
+          hardenedArguments,
         );
         if (signatures.has(signature)) {
           // Тот же вызов уже сделан — чаще всего это предзагруженный сервером
@@ -726,7 +777,7 @@ export class AiCoreService {
           execution = this.record(
             await this.runtime.execute(user, decision.toolCall.name, {
               surface: dto.surface,
-              arguments: decision.toolCall.arguments,
+              arguments: hardenedArguments,
               idempotencyKey: this.toolIdempotencyKey(
                 tenantId,
                 user.userId,
@@ -774,7 +825,8 @@ export class AiCoreService {
                 toolResults,
               ),
             },
-          );
+              toolResults,
+            );
         }
         if (status !== 'completed' || !('result' in execution)) {
           this.modelFailure('ai_tool_result_unavailable');
@@ -838,7 +890,8 @@ export class AiCoreService {
                     toolResults,
                   ),
                 },
-          );
+                  toolResults,
+                );
         }
       }
       this.modelFailure('ai_model_tool_step_limit');
@@ -889,7 +942,8 @@ export class AiCoreService {
               toolResults,
             ),
           },
-        );
+            toolResults,
+          );
       }
       // Данных нет вовсе, а вопрос был про аналитику: молчание CRM — это сбой
       // связи, и называть его надо сбоем, а не отсутствием ответа у MAYA.
@@ -918,7 +972,8 @@ export class AiCoreService {
               toolResults,
             ),
           },
-        );
+            toolResults,
+          );
       }
       await this.auditLog.log({
         tenantId,
@@ -1138,6 +1193,7 @@ export class AiCoreService {
     toolsUsed: ToolUsage[],
     decisions: AiCoreModelDecision[],
     response: AiCoreCompletion,
+    toolResults: AiCoreToolResult[] = [],
   ) {
     const completedResponse = response;
     const grounding =
@@ -1164,6 +1220,18 @@ export class AiCoreService {
         total_tokens: null as number | null,
       },
     );
+    const personal = [
+      UserRole.EMPLOYEE,
+      UserRole.PROVIDER,
+      UserRole.STAFF,
+    ].includes(user.role);
+    const reportCard =
+      grounding.status === 'verified' && toolResults.length > 0
+        ? buildChatReportCard(toolResults, {
+            personal,
+            userText: this.latestUserText(dto.messages),
+          })
+        : null;
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
       userId: user.userId,
@@ -1185,6 +1253,7 @@ export class AiCoreService {
         // Почему ответ модели был отклонён. Только числа, без текста.
         unsourced_numbers: completedResponse.unsourced ?? [],
         redacted_input: redacted,
+        widget: reportCard?.widget ?? null,
         ...usage,
       },
     });
@@ -1200,6 +1269,12 @@ export class AiCoreService {
         persona: brain.persona,
         intent: brain.intent,
       },
+      ...(reportCard
+        ? {
+            widget: reportCard.widget,
+            widget_data: reportCard.widget_data,
+          }
+        : {}),
     };
   }
 
@@ -1434,140 +1509,12 @@ export class AiCoreService {
     text: string,
     previousUserText: string,
   ): Record<string, unknown> {
-    const period = this.reportingPeriodForQuestion(text, previousUserText);
-    if (
-      toolName === 'analytics.business.profit' ||
-      toolName === 'expenses.read'
-    ) {
-      return period;
-    }
-    return {
-      ...period,
-      comparison: this.comparisonForQuestion(text, previousUserText),
-    };
-  }
-
-  private reportingPeriodForQuestion(
-    text: string,
-    previousUserText: string,
-  ): { period: string; month?: string } {
-    const context = `${previousUserText} ${text}`;
-    if (/(?:за\s+)?вчера/i.test(context)) return { period: 'yesterday' };
-    if (/(?:за\s+)?сегодня|сегодняшн/i.test(context)) {
-      return { period: 'today' };
-    }
-    if (/последн[а-яa-z]*\s+7\s+дн/i.test(context)) {
-      return { period: 'last_7_days' };
-    }
-    if (/последн[а-яa-z]*\s+30\s+дн/i.test(context)) {
-      return { period: 'last_30_days' };
-    }
-    // 🔴 Месяц, названный словом, — раньше его тут не было вовсе. «Прибыль в
-    // июле» молча считалась за текущий месяц по сегодня: числа настоящие,
-    // период чужой, и заметить подмену по ответу нельзя.
-    // 🔴 Сначала текущая реплика, и только потом предыдущая. Склеенный контекст
-    // ставит прошлое сообщение левее, а месяц берётся самый левый — поэтому
-    // «а прибыль в августе?» после «прибыль в июле» считалось за ИЮЛЬ. Человек
-    // спрашивает про то, что назвал сейчас; прошлый ход — только подсказка,
-    // когда в текущем месяца нет вовсе («а прибыль?»).
-    const namedMonth =
-      this.namedMonthForQuestion(text) ??
-      this.namedMonthForQuestion(previousUserText);
-    if (namedMonth) {
-      return { period: 'named_month', month: namedMonth };
-    }
-    if (
-      /(?:за\s+)?прошл[а-яa-z]*\s+месяц/i.test(context) &&
-      !/(сравн|по\s+сравнению|динамик|просел|вырос|рост|снизил|упал)/i.test(
-        context,
-      )
-    ) {
-      return { period: 'last_month' };
-    }
-    if (/год|годов|годовой/i.test(context)) return { period: 'year_to_date' };
-    if (/недел/i.test(context)) return { period: 'week_to_date' };
-    if (/месяц/i.test(context)) return { period: 'month_to_date' };
-    return { period: 'month_to_date' };
-  }
-
-  /**
-   * Название месяца из вопроса → `YYYY-MM`.
-   *
-   * Год выбирается ближайшим назад: месяц, который в этом году ещё не
-   * наступил, — это месяц прошлого года. В августе «декабрь» означает
-   * прошедший декабрь, а не тот, что впереди: спрашивают всегда про то, что
-   * уже случилось.
-   *
-   * Границы окна разрешает сервер в часовом поясе салона — здесь только
-   * называется месяц.
-   */
-  private namedMonthForQuestion(context: string): string | null {
-    const months = [
-      /(?<![а-яё])январ[ьяей]|(?<![а-яё])янв(?![а-яё])/i,
-      /(?<![а-яё])феврал[ьяей]|(?<![а-яё])фев(?![а-яё])/i,
-      /(?<![а-яё])март[ае]?(?![а-яё])/i,
-      /(?<![а-яё])апрел[ьяей]/i,
-      /(?<![а-яё])ма[йея](?![а-яё])/i,
-      /(?<![а-яё])июн[ьяей]/i,
-      /(?<![а-яё])июл[ьяей]/i,
-      /(?<![а-яё])август[ае]?(?![а-яё])/i,
-      /(?<![а-яё])сентябр[ьяей]/i,
-      /(?<![а-яё])октябр[ьяей]/i,
-      /(?<![а-яё])ноябр[ьяей]/i,
-      /(?<![а-яё])декабр[ьяей]/i,
-    ];
-    // Берём месяц, названный РАНЬШЕ всех в тексте: в «сравни июль с августом»
-    // спрашивают про июль, а не про тот месяц, что меньше по номеру.
-    let matched = -1;
-    let earliest = Number.POSITIVE_INFINITY;
-    months.forEach((pattern, index) => {
-      const found = context.search(pattern);
-      if (found >= 0 && found < earliest) {
-        earliest = found;
-        matched = index;
-      }
-    });
-    if (matched < 0) {
-      return null;
-    }
-    const now = new Date();
-    const currentMonth = now.getUTCMonth();
-    let year = now.getUTCFullYear();
-    if (matched > currentMonth) {
-      year -= 1;
-    }
-    if (/прошл[а-яa-z]*\s+год|прошлогодн/i.test(context)) {
-      year -= 1;
-    }
-    return `${year}-${String(matched + 1).padStart(2, '0')}`;
-  }
-
-  private comparisonForQuestion(
-    text: string,
-    previousUserText: string,
-  ): 'none' | 'previous_period' | 'previous_year_same_period' {
-    const context = `${previousUserText} ${text}`;
-    if (GROUNDING_YEAR_COMPARISON_PATTERN.test(context)) {
-      return 'previous_year_same_period';
-    }
-    if (
-      /(сравн|по\s+сравнению|динамик|изменил|просад|просел|вырос|рост|снизил|упал|лучше|хуже|предыдущ[а-яa-z]*\s+(?:период|месяц|недел)|прошл[а-яa-z]*\s+(?:период|месяц|недел))/i.test(
-        context,
-      )
-    ) {
-      return 'previous_period';
-    }
-    // 🔴 Просьба объяснить или посоветовать без сравнения бессмысленна: без
-    // него инструмент вернёт changes={} и service_changes=[], и разбирать
-    // будет нечего — ответом снова станет перечень текущих счётчиков, ровно
-    // та жалоба, ради которой всё и затевалось.
-    if (
-      BUSINESS_ACTION_REQUEST_PATTERN.test(text) ||
-      BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text)
-    ) {
-      return 'previous_period';
-    }
-    return 'none';
+    return ReportingPeriodResolver.hardenToolArguments(
+      toolName,
+      {},
+      text,
+      previousUserText,
+    );
   }
 
   /** Данные на руках: отработал любой из доступных инструментов данных. */
@@ -2043,8 +1990,9 @@ export class AiCoreService {
     if (
       /(чист[а-яa-z]*|бухгалтер[а-яa-z]*)\s+прибыл|прибыл[а-яa-z]*/i.test(text)
     ) {
-      const revenue = metric('revenue_amount_kopecks');
-      return `Бухгалтерскую чистую прибыль CRM не подтверждает: нет полного учёта налогов и всех расходов.${revenue === null ? '' : ` Ближайший подтверждённый показатель — поступления ${money(revenue)}.`}`;
+      // 🔴 Не подсовываем поступления как «ближайший показатель»: владелец
+      // слышит это как ответ на вопрос про прибыль. Лучше честный отказ.
+      return 'Чистую прибыль из этого среза не подтверждаю — здесь операционные показатели, а не расчёт касса минус расходы. Не подменю прибыль поступлениями. Спроси отдельно «какая прибыль» — возьму именно её.';
     }
     if (/зарплат[а-яa-z]*/i.test(text) && !personal) {
       const payroll = this.record(this.record(current.finance).payroll);
@@ -2214,18 +2162,72 @@ export class AiCoreService {
     const summary = [
       moneyValue === null
         ? null
-        : `${personal ? 'Стоимость записанных услуг' : 'Поступления'}: ${money(moneyValue)}${comparisonLabel && moneyPrevious !== null ? ` против ${money(moneyPrevious)}` : ''}.${metricChange(moneyKey, money)}`,
-      countLine('Записи', 'appointments_total'),
-      countLine('Уникальные клиенты', 'unique_clients'),
+        : `${personal ? 'стоимость записанных услуг' : 'поступления'} ${money(moneyValue)}${comparisonLabel && moneyPrevious !== null ? ` против ${money(moneyPrevious)}` : ''}`,
+      (() => {
+        const value = metric('appointments_total');
+        const previous = this.optionalMetricNumber(
+          this.record(changes.appointments_total).previous,
+        );
+        return value === null
+          ? null
+          : `${this.formatMetricNumber(value)} записей${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ''}`;
+      })(),
+      (() => {
+        const value = metric('unique_clients');
+        const previous = this.optionalMetricNumber(
+          this.record(changes.unique_clients).previous,
+        );
+        return value === null
+          ? null
+          : `${this.formatMetricNumber(value)} уникальных клиентов${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ''}`;
+      })(),
     ].filter((part): part is string => Boolean(part));
     const recommendation =
       requestedRecommendation ?? this.analyticsRecommendation(data, personal);
     const insight = [requestedDiagnosis, recommendation]
       .filter((part): part is string => Boolean(part))
       .join(' ');
-    return summary.length > 0
-      ? `${summary.join(' ')}${insight ? ` ${insight}` : ''}`
-      : null;
+    if (summary.length === 0) {
+      return null;
+    }
+    // 🔴 Раньше отдавали табло «Поступления: … Записи: …» — владелец читал
+    // это как мёртвый отчёт. Даже запасной путь должен звучать живо.
+    const periodHint = this.analyticsPeriodHint(data);
+    const lead = periodHint
+      ? `Смотри, кратко ${periodHint}: `
+      : 'Смотри, кратко по салону: ';
+    const changeBits = [
+      moneyValue === null ? null : metricChange(moneyKey, money).trim(),
+      metricChange('appointments_total').trim(),
+      metricChange('unique_clients').trim(),
+    ].filter((part): part is string => Boolean(part));
+    const body = summary.join(', ');
+    const changesSentence = changeBits.length
+      ? ` ${changeBits.join(' ')}`
+      : '';
+    return `${lead}${body}.${changesSentence}${insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.'}`;
+  }
+
+  private analyticsPeriodHint(data: Record<string, unknown>): string | null {
+    const resolved = this.record(data.resolved_period);
+    if (typeof resolved.label_ru === 'string' && resolved.label_ru.trim()) {
+      return `за ${resolved.label_ru.trim()}`;
+    }
+    const periodTop = this.record(data.period);
+    if (typeof periodTop.label_ru === 'string' && periodTop.label_ru.trim()) {
+      return `за ${periodTop.label_ru.trim()}`;
+    }
+    const current = this.record(data.current);
+    const period = this.record(current.period);
+    const label = typeof period.label === 'string' ? period.label.trim() : '';
+    if (label) {
+      return `за ${label}`;
+    }
+    const mode = typeof period.mode === 'string' ? period.mode : '';
+    if (mode === 'today') return 'за сегодня';
+    if (mode === 'week' || mode === 'this_week') return 'за эту неделю';
+    if (mode === 'month' || mode === 'this_month') return 'за этот месяц';
+    return null;
   }
 
   private analyticsRecommendation(
@@ -2479,6 +2481,34 @@ export class AiCoreService {
       return message.content.trim();
     }
     return '';
+  }
+
+  /**
+   * Служебные имена схемы в живом ответе — та же класс ошибок, что «поле
+   * revenue пустое» у владельца. Ловим до выдачи и просим переписать.
+   */
+  private schemaLeakTokens(reply: string): string[] {
+    const patterns: Array<[RegExp, string]> = [
+      [/\bbooked_value\b/i, 'booked_value'],
+      [/\bstaff_summary\b/i, 'staff_summary'],
+      [/\bstaff_changes\b/i, 'staff_changes'],
+      [/\bwarning_codes?\b/i, 'warning_codes'],
+      [/\bamount_kopecks\b/i, 'amount_kopecks'],
+      [/\brevenue_amount_kopecks\b/i, 'revenue_amount_kopecks'],
+      [/\btool_results?\b/i, 'tool_results'],
+      [/\bunavailable_metrics\b/i, 'unavailable_metrics'],
+      [/\bavailable_metrics\b/i, 'available_metrics'],
+      [/\bresolved_period\b/i, 'resolved_period'],
+      [/\banalytics\.(business|employee)\b/i, 'analytics.*'],
+      [/\bcatalog\.services\.read\b/i, 'catalog.services.read'],
+      [/\bnet_profit\.status\b/i, 'net_profit.status'],
+      [/\binput_schema\b/i, 'input_schema'],
+    ];
+    const found: string[] = [];
+    for (const [pattern, label] of patterns) {
+      if (pattern.test(reply)) found.push(label);
+    }
+    return [...new Set(found)].slice(0, 6);
   }
 
   /**
@@ -2915,7 +2945,7 @@ export class AiCoreService {
 
   private maxToolSteps(): number {
     const raw = this.configService.get<string>('AI_CORE_MAX_TOOL_STEPS');
-    const value = raw ? Number(raw) : 2;
+    const value = raw ? Number(raw) : 3;
     if (!Number.isInteger(value) || value < 1 || value > 3) {
       throw new Error('ai_core_max_tool_steps_invalid');
     }
@@ -2927,7 +2957,7 @@ export class AiCoreService {
       .replace(/<[^>]{0,200}>/g, '')
       .replace(/[<>]/g, '')
       .trim()
-      .slice(0, 2_000);
+      .slice(0, 3_500);
   }
 
   private stripControlCharacters(value: string): string {

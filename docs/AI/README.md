@@ -16,7 +16,7 @@ AI в Maya OS не является автономным доступом к д�
 
 | Agent | Пользователь | Основная функция |
 |---|---|---|
-| Maya Brain | все | intent, routing, tool choice, final answer |
+| Maya Brain | все | persona + intent routing |
 | Maya OS | owner | управление компанией через диалог |
 | Maya Admin | admin/staff | календарь, запись, расписание, ответы |
 | Maya Consult | client | консультации, запись, продажи packages |
@@ -59,20 +59,14 @@ sequenceDiagram
 Responsibilities:
 
 - classify intent;
-- determine role and mode;
-- select agent persona;
-- call tools;
-- request clarification when needed;
-- explain recommendations;
-- produce action draft;
-- never invent business facts.
+- select the agent persona from the server-verified role.
 
-The first production-shaped slice is implemented in
-`maya-saas-backend/src/ai-brain`. It provides deterministic profile routing,
-bounded structured plans, encrypted allowlisted preference memory, encrypted
-tenant knowledge with role audiences, exact citation validation and a
-native-only feature flag. The operational contract and current limitations are
-documented in [Maya Brain v1](../architecture/maya-brain-v1.md).
+That is the whole surface. `maya-saas-backend/src/ai-brain` holds one pure,
+synchronous router with no configuration and no storage. Tool selection,
+clarification, grounding and the final answer belong to AI Core and the model,
+not here. The profile registry, step plan, preference memory and knowledge base
+were removed after a measurement pass — the reasoning is recorded in
+[Maya Brain](../architecture/maya-brain-v1.md).
 
 Non-responsibilities:
 

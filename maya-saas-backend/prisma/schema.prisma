@@ -122,6 +122,8 @@ model Tenant {
   crmStaffAccesses       CrmStaffAccess[]
   dashboardPreferences   DashboardPreference[]
   userMerges             UserMerge[]
+  inboxItems             InboxItem[]
+  devicePushTokens       DevicePushToken[]
 
   @@index([status, graceEndsAt])
 }
@@ -213,6 +215,8 @@ model User {
   aiToolExecutions          AiToolExecution[]    @relation("AiToolExecutionActor")
   createdAiKnowledgeSources AiKnowledgeSource[]  @relation("AiKnowledgeSourceCreator")
   crmStaffAccesses          CrmStaffAccess[]
+  inboxItems                InboxItem[]
+  devicePushTokens          DevicePushToken[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -1005,4 +1009,47 @@ model Appointment {
   @@index([clientId])
   @@index([branchId])
   @@index([tenantId, staffExternalId, startAt])
+}
+
+/// Persistent in-app MAYA inbox (message of record for reports / alerts).
+/// Telegram and push only announce; this row survives app restarts.
+model InboxItem {
+  id            String    @id @default(cuid())
+  tenantId      String
+  userId        String
+  /// daily_report | morning_brief | growth_plan | new_appointment |
+  /// shift_reminder | appointment_reassigned | hanging_lead | owner_alert
+  type          String
+  sourceEventId String
+  title         String
+  bodyText      String
+  payloadJson   Json?
+  deepLink      String?
+  createdAt     DateTime  @default(now())
+  readAt        DateTime?
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, type, sourceEventId])
+  @@index([tenantId, userId, createdAt])
+  @@index([tenantId, type, createdAt])
+}
+
+/// Native / web push device tokens for inbox announcements.
+model DevicePushToken {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  /// ios | android | web
+  platform  String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, token])
+  @@index([tenantId, userId])
 }

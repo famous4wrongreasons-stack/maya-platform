@@ -1,19 +1,9 @@
 /**
  * РЕГРЕССИОННЫЙ КОРПУС МАРШРУТИЗАЦИИ.
  *
- * Тринадцать формулировок владельца, каждая из которых ломалась в проде: одни
- * уезжали не в тот инструмент, другие — в тот же, но с чужим периодом. Плюс
- * роли: клиент спрашивает про себя, мастер — про свои показатели.
- *
- * Настоящие AiCoreService, рантайм, реестр и политика доступа: роли и тарифы
- * фильтруют инструменты по-честному, а аргументы предзагрузки проходят ту же
- * проверку схемы, что в бою. Подменены только внешние границы — база, движок
- * данных и провайдер модели.
- *
- * 🔴 Модель здесь ведёт себя как настоящая: она СЛЕДУЕТ подсказке сервера
- * (первое имя в required_tools), а не знает её заранее. Поэтому таблица ниже
- * проверяет ровно то, что видит человек: каким инструментом MAYA ответила и за
- * какой период.
+ * Живые формулировки владельца барбершопа из owner-routing.corpus.ts:
+ * инструмент + период. Плюс роли и команда расхода. Новый прод-косяк =
+ * новая строка в корпусе, не if в mid-сервисе.
  */
 import { ConfigService } from '@nestjs/config';
 
@@ -35,6 +25,7 @@ import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
+import { OWNER_ROUTING_CORPUS } from './owner-routing.corpus';
 
 /** «Сегодня» корпуса: 7 августа 2026 — июль позади, август идёт. */
 const NOW = new Date('2026-08-07T09:00:00.000Z');
@@ -290,7 +281,7 @@ const CLIENT: AuthenticatedUser = {
   role: UserRole.CLIENT,
 };
 
-describe('КОРПУС: 13 живых формулировок владельца', () => {
+describe('КОРПУС: живые формулировки владельца барбершопа', () => {
   beforeAll(() => {
     jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate'] });
   });
@@ -304,101 +295,35 @@ describe('КОРПУС: 13 живых формулировок владельц�
       tools: answer.tools_used.map((tool) => tool.name),
       domain: answer.grounding.domain,
       arguments: harness.executed.at(-1)?.arguments as
-        Record<string, unknown> | undefined,
+        | Record<string, unknown>
+        | undefined,
       answer,
     };
   };
 
-  it('1. «Посоветуй как вернуть клиентов» — в аналитику, не в счётчик клиентов', async () => {
-    const result = await route('Посоветуй как вернуть клиентов');
+  it.each(OWNER_ROUTING_CORPUS)(
+    '$id',
+    async ({ text, previous, tools, arguments: expectedArgs, notTools, domain }) => {
+      const turns = previous ? [previous, text] : [text];
+      const result = await route(...turns);
 
-    expect(result.tools).toEqual(['analytics.business.query']);
-    expect(result.tools).not.toContain('customers.count');
-    // Совет без сравнения — это перечень счётчиков, а не совет.
-    expect(result.arguments).toMatchObject({ comparison: 'previous_period' });
-  });
+      expect(result.tools).toEqual(tools);
+      for (const banned of notTools ?? []) {
+        expect(result.tools).not.toContain(banned);
+      }
+      if (expectedArgs) {
+        expect(result.arguments).toMatchObject(expectedArgs);
+        if (expectedArgs.period === 'named_day') {
+          expect(result.arguments).not.toHaveProperty('month');
+        }
+      }
+      if (domain) {
+        expect(result.domain).toBe(domain);
+      }
+    },
+  );
 
-  it('2. «Кто из мастеров больше всего в просадке» — в аналитику, не в справочник', async () => {
-    const result = await route('Кто из мастеров больше всего в просадке');
-
-    expect(result.tools).toEqual(['analytics.business.query']);
-    expect(result.tools).not.toContain('catalog.staff.read');
-  });
-
-  it('3. «Сколько записей сегодня?» — сегодня, а не сравнение с прошлым годом', async () => {
-    const result = await route('Сколько записей сегодня?');
-
-    expect(result.tools).toEqual(['analytics.business.query']);
-    // 🔴 «сеГОДня» содержит «год»: без границы слова вопрос уезжал в годовое
-    // сопоставление, и ответ был про другое окно.
-    expect(result.arguments).toEqual({
-      period: 'today',
-      comparison: 'none',
-    });
-  });
-
-  it('4. «Сравни сегодня с прошлой неделей» — предыдущий период, а не год', async () => {
-    const result = await route('Сравни сегодня с прошлой неделей');
-
-    expect(result.tools).toEqual(['analytics.business.query']);
-    expect(result.arguments).toEqual({
-      period: 'today',
-      comparison: 'previous_period',
-    });
-  });
-
-  it('5. «Ответь почему у нас просадка, сравни с прошлым годом» — год к году', async () => {
-    const result = await route(
-      'Ответь почему у нас просадка, сравни с прошлым годом',
-    );
-
-    expect(result.tools).toEqual(['analytics.business.query']);
-    expect(result.arguments).toEqual({
-      period: 'year_to_date',
-      comparison: 'previous_year_same_period',
-    });
-  });
-
-  it('6. «Какая была прибыль в июле» — инструмент прибыли и именно июль', async () => {
-    const result = await route('Какая была прибыль в июле');
-
-    expect(result.tools).toEqual(['analytics.business.profit']);
-    expect(result.arguments).toEqual({
-      period: 'named_month',
-      month: '2026-07',
-    });
-  });
-
-  it('7. «А прибыль в августе?» вторым ходом — период АВГУСТ, а не июль', async () => {
-    const result = await route(
-      'Какая была прибыль в июле',
-      'А прибыль в августе?',
-    );
-
-    expect(result.tools).toEqual(['analytics.business.profit']);
-    // 🔴 Человек спрашивает про то, что назвал СЕЙЧАС. Прошлый ход — только
-    // подсказка, когда в текущем месяца нет вовсе.
-    expect(result.arguments).toEqual({
-      period: 'named_month',
-      month: '2026-08',
-    });
-  });
-
-  it('8. «Сколько стоит привести нового клиента» — экономика, не прайс', async () => {
-    const result = await route('Сколько стоит привести нового клиента');
-
-    expect(result.tools).toEqual(['analytics.business.profit']);
-    expect(result.tools).not.toContain('catalog.services.read');
-  });
-
-  it('9. «Сколько стоит стрижка» — прайс, не экономика', async () => {
-    const result = await route('Сколько стоит стрижка');
-
-    expect(result.tools).toEqual(['catalog.services.read']);
-    expect(result.domain).toBe('service_catalog');
-  });
-
-  it('10. «Запиши аренду 60 тысяч» — карточка расхода, а не отчёт', async () => {
+  it('команда «Запиши аренду 60 тысяч» — карточка расхода, а не отчёт', async () => {
     const harness = createHarness(OWNER);
     // Команда — это действие: подсказки нет, инструмент называет модель.
     harness.decide.mockImplementation((input: AiCoreModelInput) =>
@@ -425,26 +350,6 @@ describe('КОРПУС: 13 живых формулировок владельц�
     expect(answer.action).toMatchObject({ status: 'approval_required' });
     // Отчёт по салону ради команды не поднимается.
     expect(harness.executed).toEqual([]);
-  });
-
-  it('11. «Сколько чистыми вышло в июле» — прибыль', async () => {
-    const result = await route('Сколько чистыми вышло в июле');
-
-    expect(result.tools).toEqual(['analytics.business.profit']);
-    expect(result.arguments).toMatchObject({ month: '2026-07' });
-  });
-
-  it('12. «Во сколько мне обходится новый клиент» — экономика', async () => {
-    const result = await route('Во сколько мне обходится новый клиент');
-
-    expect(result.tools).toEqual(['analytics.business.profit']);
-  });
-
-  it('13. «На что больше всего тратим» — расходы по статьям', async () => {
-    const result = await route('На что больше всего тратим');
-
-    expect(result.tools).toEqual(['expenses.read']);
-    expect(result.domain).toBe('business_expenses');
   });
 });
 

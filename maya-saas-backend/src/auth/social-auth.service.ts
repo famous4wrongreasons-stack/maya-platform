@@ -50,6 +50,7 @@ type TenantAuthContext = ClientAccessTenant & {
   id: string;
   slug: string;
   allowSelfRegistration: boolean;
+  calendarSource?: string | null;
 };
 
 type SocialProfile = {
@@ -470,7 +471,11 @@ export class SocialAuthService {
 
     if (matchedUser) {
       this.assertUserCanLogin(matchedUser);
-      this.assertClientIdentityHasVerifiedPhone(matchedUser, params.profile);
+      this.assertClientIdentityHasVerifiedPhone(
+        matchedUser,
+        params.profile,
+        params.tenant.calendarSource,
+      );
 
       // ── Рабочий аккаунт: заявка снаружи только на ПЕРВУЮ привязку ────────
       //
@@ -568,6 +573,7 @@ export class SocialAuthService {
     this.assertClientIdentityHasVerifiedPhone(
       { role: UserRole.CLIENT, phone: null },
       params.profile,
+      params.tenant.calendarSource,
     );
 
     if (params.branchId) {
@@ -1211,11 +1217,17 @@ export class SocialAuthService {
       );
     }
 
-    this.assertTenantAllowsClientAccess(flow.tenant, true);
+    // Always reload the full tenant row. AuthFlowState.include selects are easy
+    // to leave incomplete, and trial/calendar fields must be present for
+    // client signup + internal-calendar phone policy.
+    const tenant = await this.tenantsService.getTenantByIdOrThrow(
+      flow.tenant.id,
+    );
+    this.assertTenantAllowsClientAccess(tenant, true);
 
     return {
       id: flow.id,
-      tenant: flow.tenant,
+      tenant,
       redirectUri: flow.redirectUri,
       codeVerifier: flow.codeVerifier,
     };
@@ -1303,8 +1315,15 @@ export class SocialAuthService {
   }
 
   private assertTenantAllowsClientRegistration(
-    tenant: ClientAccessTenant,
+    tenant: ClientAccessTenant & {
+      slug?: string;
+      brandingSettings?: { themeJson?: unknown } | null;
+    },
   ): void {
+    this.tenantsService.assertClientBookableBusiness({
+      slug: tenant.slug,
+      brandingSettings: tenant.brandingSettings,
+    });
     const expired = this.isUnpaidExpiredTrial(tenant);
     if (
       expired ||
@@ -1361,8 +1380,15 @@ export class SocialAuthService {
   private assertClientIdentityHasVerifiedPhone(
     user: { role: string; phone?: string | null },
     profile: SocialProfile,
+    calendarSource?: string | null,
   ): void {
     if (user.role !== 'client') {
+      return;
+    }
+
+    // Internal calendar has no YClients CRM card to protect by verified phone.
+    // Phone is collected later on the booking form (clientPhone).
+    if (String(calendarSource || '').toLowerCase() === 'internal') {
       return;
     }
 

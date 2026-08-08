@@ -18,6 +18,10 @@ type TenantRecord = {
   slug: string;
   status: string;
   allowSelfRegistration: boolean;
+  trialFullAccess?: boolean;
+  trialEndsAt?: Date | null;
+  currentPeriodEnd?: Date | null;
+  calendarSource?: string | null;
 };
 
 type BranchRecord = {
@@ -148,6 +152,9 @@ describe('SocialAuthService', () => {
     const getTenantBySlugOrThrowMock: jest.MockedFunction<
       (slug: string) => Promise<TenantRecord>
     > = jest.fn().mockResolvedValue(tenant);
+    const getTenantByIdOrThrowMock: jest.MockedFunction<
+      (id: string) => Promise<TenantRecord>
+    > = jest.fn().mockResolvedValue(tenant);
     const assertBranchBelongsToTenantMock: jest.MockedFunction<
       (branchId: string, tenantId: string) => Promise<void>
     > = jest.fn().mockResolvedValue(undefined);
@@ -216,10 +223,15 @@ describe('SocialAuthService', () => {
     } as unknown as AuthFlowSystemGateway;
     const tenantsService: Pick<
       TenantsService,
-      'assertBranchBelongsToTenant' | 'getTenantBySlugOrThrow'
+      | 'assertBranchBelongsToTenant'
+      | 'assertClientBookableBusiness'
+      | 'getTenantByIdOrThrow'
+      | 'getTenantBySlugOrThrow'
     > = {
       getTenantBySlugOrThrow: getTenantBySlugOrThrowMock,
+      getTenantByIdOrThrow: getTenantByIdOrThrowMock,
       assertBranchBelongsToTenant: assertBranchBelongsToTenantMock,
+      assertClientBookableBusiness: jest.fn(),
     };
     const usersService: Pick<
       UsersService,
@@ -272,6 +284,7 @@ describe('SocialAuthService', () => {
         findTenantIdentityByPhoneMock,
         findTenantUserByEmailMock,
         findTenantUserByPhoneMock,
+        getTenantByIdOrThrowMock,
         getTenantBySlugOrThrowMock,
         getTenantUserOrThrowMock,
         rateLimitPreflightMock,

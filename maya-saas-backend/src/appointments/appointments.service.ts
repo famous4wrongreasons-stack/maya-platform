@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -16,6 +17,7 @@ import {
 } from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
 import { AvailableSlotsQueryDto } from '../crm/dto/available-slots-query.dto';
+import { InboxService } from '../inbox/inbox.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -62,6 +64,8 @@ const AVAILABLE_DAYS_BATCH_SIZE = 4;
 
 @Injectable()
 export class AppointmentsService {
+  private readonly logger = new Logger(AppointmentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
@@ -71,6 +75,7 @@ export class AppointmentsService {
     private readonly tenantsService: TenantsService,
     private readonly usersService: UsersService,
     private readonly auditLogService: AuditLogService,
+    private readonly inboxService: InboxService,
   ) {}
 
   async createForClient(
@@ -220,6 +225,28 @@ export class AppointmentsService {
         start_at: appointment.startAt.toISOString(),
       },
     });
+
+    // EXTERNAL/YClients: Python webhook dual-writes inbox. Nest publishes
+    // only when Nest calendar is the source of truth (avoid duplicate cards).
+    if (calendarSource === CalendarSource.INTERNAL) {
+      void this.publishNewAppointmentInbox({
+        tenantId,
+        appointmentId: appointment.id,
+        staffExternalId: dto.staffId,
+        clientName: bookingIdentity.clientName,
+        serviceTitles: selectedServices.map((service) => service.name),
+        startAt: appointment.startAt,
+        timezone: branch?.timezone ?? 'Europe/Moscow',
+        totalPrice,
+        currency,
+      }).catch((error) => {
+        this.logger.warn(
+          `new_appointment inbox failed: ${
+            error instanceof Error ? error.message : 'unknown'
+          }`,
+        );
+      });
+    }
 
     return this.serializeAppointment(appointment, {
       servicesById: new Map(services.map((service) => [service.id, service])),
@@ -514,6 +541,39 @@ export class AppointmentsService {
       },
     });
 
+    if (appointmentSource === CalendarSource.INTERNAL) {
+      const clientProfile = this.usersService.serializeUser(
+        await this.usersService.getTenantUserOrThrow(clientId, tenantId),
+      );
+      void this.publishAppointmentLifecycleInbox({
+        tenantId,
+        type: 'appointment_cancelled',
+        sourceEventId: `appointment_cancelled:nest:${appointment.id}`,
+        title: 'Запись отменена клиентом',
+        bodyText: [
+          'Запись отменена клиентом',
+          '',
+          `Клиент: ${clientProfile.name || '—'}`,
+          `Было время: ${this.formatInboxWhen(
+            appointment.startAt,
+            'Europe/Moscow',
+          )}`,
+        ].join('\n'),
+        staffExternalId: appointment.staffExternalId,
+        payload: {
+          appointment_id: appointment.id,
+          event: 'appointment.cancelled',
+          by_client: true,
+        },
+      }).catch((error) => {
+        this.logger.warn(
+          `appointment_cancelled inbox failed: ${
+            error instanceof Error ? error.message : 'unknown'
+          }`,
+        );
+      });
+    }
+
     return {
       ok: true,
       appointment: this.serializeAppointment(updatedAppointment, catalog),
@@ -726,6 +786,37 @@ export class AppointmentsService {
       },
     });
 
+    if (appointmentSource === CalendarSource.INTERNAL) {
+      const clientProfile = this.usersService.serializeUser(
+        await this.usersService.getTenantUserOrThrow(clientId, tenantId),
+      );
+      const timezone = 'Europe/Moscow';
+      void this.publishAppointmentLifecycleInbox({
+        tenantId,
+        type: 'appointment_rescheduled',
+        sourceEventId: `appointment_rescheduled:nest:${appointment.id}:${matchedSlot.start}`,
+        title: 'Клиент перенёс запись',
+        bodyText: [
+          'Клиент перенёс свою запись сам',
+          '',
+          `Клиент: ${clientProfile.name || '—'}`,
+          `Было: ${this.formatInboxWhen(appointment.startAt, timezone)}`,
+          `Стало: ${this.formatInboxWhen(new Date(matchedSlot.start), timezone)}`,
+        ].join('\n'),
+        staffExternalId: dto.staffId ?? appointment.staffExternalId,
+        payload: {
+          appointment_id: appointment.id,
+          event: 'appointment.rescheduled',
+        },
+      }).catch((error) => {
+        this.logger.warn(
+          `appointment_rescheduled inbox failed: ${
+            error instanceof Error ? error.message : 'unknown'
+          }`,
+        );
+      });
+    }
+
     return {
       ok: true,
       previous_start_at: appointment.startAt,
@@ -787,6 +878,109 @@ export class AppointmentsService {
     return {
       days: availableDays,
     };
+  }
+
+  private formatInboxWhen(at: Date, timezone: string): string {
+    return new Intl.DateTimeFormat('ru-RU', {
+      timeZone: timezone || 'Europe/Moscow',
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(at);
+  }
+
+  private async publishAppointmentLifecycleInbox(input: {
+    tenantId: string;
+    type:
+      | 'appointment_cancelled'
+      | 'appointment_deleted'
+      | 'appointment_rescheduled'
+      | 'appointment_reassigned';
+    sourceEventId: string;
+    title: string;
+    bodyText: string;
+    staffExternalId: string;
+    payload: Record<string, unknown>;
+  }): Promise<void> {
+    const staffUserIds: string[] = [];
+    const staffLink = await this.prisma.crmStaffAccess.findFirst({
+      where: {
+        tenantId: input.tenantId,
+        externalStaffId: String(input.staffExternalId),
+        userId: { not: null },
+        status: 'active',
+      },
+      select: { userId: true },
+    });
+    if (staffLink?.userId) staffUserIds.push(staffLink.userId);
+
+    await this.inboxService.publishForTenant(input.tenantId, {
+      type: input.type,
+      sourceEventId: input.sourceEventId,
+      title: input.title,
+      bodyText: input.bodyText,
+      deepLink: '/app/?panel=schedule',
+      userIds: staffUserIds,
+      fanoutOwners: true,
+      payload: input.payload,
+    });
+  }
+
+  private async publishNewAppointmentInbox(input: {
+    tenantId: string;
+    appointmentId: string;
+    staffExternalId: string;
+    clientName: string;
+    serviceTitles: string[];
+    startAt: Date;
+    timezone: string;
+    totalPrice: number;
+    currency: string;
+  }): Promise<void> {
+    const when = this.formatInboxWhen(
+      input.startAt,
+      input.timezone || 'Europe/Moscow',
+    );
+    const servicesLine =
+      input.serviceTitles.filter(Boolean).join(', ') || 'услуга';
+    const priceLine =
+      Number.isFinite(input.totalPrice) && input.totalPrice > 0
+        ? `\nСумма: ${Math.round(input.totalPrice)} ${input.currency || 'RUB'}`
+        : '';
+    const bodyText = [
+      `Новая запись — ${when}`,
+      '',
+      `Клиент: ${input.clientName || '—'}`,
+      `Услуги: ${servicesLine}${priceLine}`,
+    ].join('\n');
+
+    const staffUserIds: string[] = [];
+    const staffLink = await this.prisma.crmStaffAccess.findFirst({
+      where: {
+        tenantId: input.tenantId,
+        externalStaffId: String(input.staffExternalId),
+        userId: { not: null },
+        status: 'active',
+      },
+      select: { userId: true },
+    });
+    if (staffLink?.userId) staffUserIds.push(staffLink.userId);
+
+    await this.inboxService.publishForTenant(input.tenantId, {
+      type: 'new_appointment',
+      sourceEventId: `new_appointment:nest:${input.appointmentId}`,
+      title: 'Новая запись',
+      bodyText,
+      deepLink: '/app/?panel=schedule',
+      userIds: staffUserIds,
+      fanoutOwners: true,
+      payload: {
+        appointment_id: input.appointmentId,
+        staff_id: input.staffExternalId,
+        event: 'appointment.created',
+      },
+    });
   }
 
   private async resolveBranchForBooking(

@@ -196,10 +196,13 @@ describe('AuthService phone auth', () => {
     };
     const tenantsService: Pick<
       TenantsService,
-      'getTenantBySlugOrThrow' | 'assertBranchBelongsToTenant'
+      | 'assertBranchBelongsToTenant'
+      | 'assertClientBookableBusiness'
+      | 'getTenantBySlugOrThrow'
     > = {
       getTenantBySlugOrThrow: getTenantBySlugOrThrowMock,
       assertBranchBelongsToTenant: assertBranchBelongsToTenantMock,
+      assertClientBookableBusiness: jest.fn(),
     };
     const phoneAuthDeliveryService: Pick<
       PhoneAuthDeliveryService,

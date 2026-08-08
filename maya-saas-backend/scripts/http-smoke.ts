@@ -959,7 +959,7 @@ async function runSmoke() {
     clientAiTools.some((tool) => tool.name === 'booking.availability.read'),
   );
   assert(
-    !clientAiTools.some((tool) => tool.name === 'analytics.business.read'),
+    !clientAiTools.some((tool) => tool.name === 'analytics.business.query'),
   );
   const aiCatalogResult = asRecord(
     await expectStatus('/ai/tools/catalog.services.read/execute', 201, {

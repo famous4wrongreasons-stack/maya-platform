@@ -261,7 +261,7 @@ describe('AppointmentsService', () => {
       (args: Record<string, unknown>) => Promise<void>
     > = jest.fn().mockResolvedValue(undefined);
 
-    const prisma: Pick<PrismaService, 'appointment' | 'branch'> = {
+    const prisma = {
       appointment: {
         create: appointmentCreateMock,
         findFirst: appointmentFindFirstMock,
@@ -271,6 +271,9 @@ describe('AppointmentsService', () => {
       branch: {
         findFirst: branchFindFirstMock,
       } as PrismaService['branch'],
+      crmStaffAccess: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
     };
     const crmService: Pick<
       CrmService,
@@ -349,6 +352,7 @@ describe('AppointmentsService', () => {
         tenantsService as TenantsService,
         usersService as UsersService,
         auditLogService as AuditLogService,
+        { publishForTenant: jest.fn().mockResolvedValue({ stored: 0, user_ids: [] }) } as never,
       ),
       mocks: {
         assertLiveBookingEnabledMock,

@@ -23,8 +23,10 @@ import { EntitlementsModule } from './entitlements/entitlements.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { FeatureGuard } from './entitlements/feature.guard';
 import { InternalCalendarModule } from './internal-calendar/internal-calendar.module';
+import { InboxModule } from './inbox/inbox.module';
 import { LoyaltyModule } from './loyalty/loyalty.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
+import { OwnerReportsModule } from './owner-reports/owner-reports.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
@@ -69,7 +71,9 @@ import { SystemMetricsService } from './system-metrics.service';
     CustomerPortalModule,
     DashboardPreferencesModule,
     InternalCalendarModule,
+    InboxModule,
     LoyaltyModule,
+    OwnerReportsModule,
     ServicesModule,
     StaffModule,
     AppointmentsModule,

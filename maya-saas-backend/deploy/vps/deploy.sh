@@ -38,13 +38,24 @@ run() { ssh "${SSH_OPTS[@]}" "$HOST" "$@"; }
 step() { echo; echo "### $*"; }
 fail() { echo "ПРОВАЛ: $* — боевой релиз не тронут"; exit 1; }
 
-step "1/7 каталог релиза"
+step "1/8 локальная сборка dist"
+# 🔴 Выкат заливает ГОТОВЫЙ dist. Без nest build сюда уезжает вчерашний
+# бинарь — исходник уже поправлен, а прод продолжает отдавать старый баг
+# (как с trialFullAccess в AuthFlowSystemGateway 08.08).
+(
+  cd "$BE"
+  export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+  npm run build
+) || fail "локальный nest build"
+test -f "$BE/dist/src/main.js" || fail "нет dist/src/main.js после build"
+
+step "2/8 каталог релиза"
 # /opt/maya-saas/releases принадлежит maya-saas, поэтому создаём под sudo и
 # сразу отдаём botadmin — иначе rsync не сможет писать.
 run "sudo -n mkdir -p '$REL' && sudo -n chown botadmin:botadmin '$REL'" \
   || fail "каталог не создан"
 
-step "2/7 заливка сборки"
+step "3/8 заливка сборки"
 # prisma.config.ts обязателен: в схеме нет url, строка подключения берётся
 # оттуда. Без него migrate deploy падает с «datasource.url is required».
 rsync -az --delete --timeout=180 -e "$RSH" \
@@ -52,7 +63,7 @@ rsync -az --delete --timeout=180 -e "$RSH" \
   "$BE/prisma.config.ts" "$BE/tsconfig.json" \
   "$HOST:$REL/" || fail "rsync"
 
-step "3/7 установка зависимостей (npm ci, без dev)"
+step "4/8 установка зависимостей (npm ci, без dev)"
 run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
@@ -66,7 +77,7 @@ run "set -e
   node -e \"require('bcrypt').hashSync('x',4); console.log('bcrypt собран и работает')\"" \
   || fail "npm ci"
 
-step "4/7 миграция базы (до переключения)"
+step "5/8 миграция базы (до переключения)"
 run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
@@ -74,7 +85,7 @@ run "set -e
   node node_modules/prisma/build/index.js migrate deploy 2>&1 | tail -6" \
   || fail "миграция"
 
-step "5/7 клиент базы под свежую схему"
+step "6/8 клиент базы под свежую схему"
 run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
@@ -85,7 +96,7 @@ run "set -e
   node -e \"const c=require('@prisma/client'); if(!c.PrismaClient||!c.Prisma) throw new Error('клиент неполный'); console.log('клиент базы сгенерирован и загружается')\"" \
   || fail "генерация клиента"
 
-step "6/7 смоук на запасном порту 3199"
+step "7/8 смоук на запасном порту 3199"
 # Гейт по /api/health/ready, а не /api/health: ready проверяет соединение с
 # базой. Здоровый процесс без базы — это не готовый релиз.
 run "set -e
@@ -103,7 +114,7 @@ run "set -e
   [ \"\$CODE\" = '200' ] || { echo 'СМОУК ПРОВАЛЕН'; tail -25 /tmp/smoke-$STAMP.log; exit 1; }
   echo 'смоук пройден'" || fail "смоук"
 
-step "7/7 переключение, проверка, уборка"
+step "8/8 переключение, проверка, уборка"
 run "set -e
   PREV=\$(readlink /opt/maya-saas/current)
   echo \"\$PREV\" | sudo -n tee /opt/maya-saas/previous-release >/dev/null

@@ -64,12 +64,15 @@ const REPORTING_PERIOD_SCHEMA = {
         'year_to_date',
         'last_7_days',
         'last_30_days',
+        'last_week',
         'last_month',
+        'named_day',
         'named_month',
+        'named_range',
         'custom',
       ],
       description:
-        'Server-resolved reporting period. Use named_month together with month when the person named a calendar month ("в июле", "за март"). Use custom only when the person supplied explicit dates.',
+        'Server-resolved reporting period. Prefer letting the server resolve from the user wording. Use named_day+day for a calendar day ("за 7 августа", "а за 7"). Use named_month+month for a whole month without a day ("в июле"). Use named_range+from_day+to_day for "с 1 по 7 августа" / "первая неделя августа". Never answer a day question with a month window.',
     },
     /**
      * Календарный месяц целиком. Без него «прибыль в июле» молча считалась за
@@ -80,6 +83,28 @@ const REPORTING_PERIOD_SCHEMA = {
       pattern: '^\\d{4}-(0[1-9]|1[0-2])$',
       description:
         'Calendar month as YYYY-MM, required by named_month and forbidden otherwise. A month already finished is counted whole; a month still running is counted up to today and the server says so.',
+    },
+    /**
+     * Один календарный день. Без него «отчёт за 7 августа» молча становился
+     * named_month и отдавал сумму за весь август — числа настоящие, день чужой.
+     */
+    day: {
+      type: 'string',
+      pattern: '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$',
+      description:
+        'Calendar day as YYYY-MM-DD, required by named_day and forbidden otherwise. Counts that local day only in the salon timezone.',
+    },
+    from_day: {
+      type: 'string',
+      pattern: '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$',
+      description:
+        'Inclusive start day YYYY-MM-DD for named_range ("с 1 по 7 августа").',
+    },
+    to_day: {
+      type: 'string',
+      pattern: '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$',
+      description:
+        'Inclusive end day YYYY-MM-DD for named_range.',
     },
     from: { type: 'string', format: 'date-time' },
     to: { type: 'string', format: 'date-time' },

@@ -419,6 +419,36 @@ describe('TenantsService', () => {
     expect(result.platform_bootstrap).toBe(true);
     expect(result.client_registration_enabled).toBe(false);
     expect(result.guest_access_ready).toBe(false);
+    expect(result.guest_access_blockers).toContain('platform_bootstrap');
+  });
+
+  it('rejects live booking against the platform bootstrap tenant', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      slug: 'maya-os',
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          platform_bootstrap: true,
+          booking: { mode: 'live' },
+        },
+      },
+    });
+
+    await expect(service.assertLiveBookingEnabled('tenant-1')).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'platform_tenant_not_bookable',
+        },
+      },
+    });
   });
 
   it('opens client registration and internal live booking for a verified trial', async () => {
