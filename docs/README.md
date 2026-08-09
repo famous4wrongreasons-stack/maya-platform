@@ -22,6 +22,11 @@ service, rental, repair, pet services и других сервисных ком�
 - [MAYA OS ARCHITECTURE SPECIFICATION](MAYA_OS_ARCHITECTURE_SPECIFICATION.md) -
   живой нормативный документ: vision, business language, data, metrics, AI,
   execution, security и roadmap.
+- [MAYA OS Product & Architecture
+  Extension](MAYA_OS_PRODUCT_ARCHITECTURE_EXTENSION/README.md) - главы 1–17 о
+  product doctrine, Customer 360, consent, Maya Watch, opportunities, role
+  experiences, identity/membership bootstrap и delivery rules; расширяет, но
+  не заменяет основную спецификацию.
 - [Product](product/README.md) - миссия, роли, сценарии, продуктовые границы.
 - [Architecture](architecture/README.md) - компоненты ядра, multi-tenant модель,
   данные, безопасность, интеграции.
