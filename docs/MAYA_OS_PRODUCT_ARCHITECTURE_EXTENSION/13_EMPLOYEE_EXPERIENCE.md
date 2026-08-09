@@ -144,3 +144,9 @@ Quiet hours, shift schedule and escalation policy apply.
 - Booking change rechecks availability and produces an audit event.
 - A communication task cannot bypass customer eligibility.
 - Personal metric follow-ups preserve period but not a prior broader scope.
+- A CRM workforce record receives no interactive access until a verified User
+  link or accepted invitation activates its Membership.
+- Active non-bookable administrators can be imported and explicitly assigned
+  administrator access.
+- Authoritative CRM deactivation suspends staff capabilities and sessions while
+  preserving separately granted owner authority.

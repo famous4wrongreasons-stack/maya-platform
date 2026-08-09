@@ -56,6 +56,7 @@ base specification.
 | Query Understanding, Planner and Tools | KEEP + EXTEND | Add proactive triggers and widget response contracts without bypassing deterministic engines. |
 | Action and approval lifecycle | KEEP + EXTEND | Opportunity resolution and communication execution use the existing governed action model. |
 | Customer identity | EXTEND + ADD | Customer no longer depends on Telegram; Customer 360 and identity evidence become explicit. |
+| User/Membership/workforce bootstrap | KEEP + EXTEND + ADD | Preserve global User and tenant Membership; add replay-safe owner grant, employee access candidates, multi-role links and deactivation policy. |
 | Consent and communication | ADD | Introduce purpose/channel consent, eligibility decisions, suppression and evidence. |
 | Dashboards | CHANGE | Dashboards become supporting surfaces; conversational and proactive experiences become primary. |
 | Telegram | CHANGE | Telegram remains a channel adapter, not the definition of a customer or the only experience. |
@@ -90,6 +91,9 @@ Existing foundations are extended as follows:
 
 - Customer gains multiple communication identities, merge evidence, source
   confidence and a role-filtered Customer 360 projection.
+- Identity/tenancy gains explicit owner bootstrap, owner-provider role
+  composition, workforce access candidates and CRM-driven deactivation without
+  silent last-owner removal.
 - Consent becomes a versioned registry with purpose, channel, legal basis,
   evidence, scope, expiry, withdrawal and suppression.
 - Metrics feed proactive detectors and opportunity scoring while remaining
@@ -122,6 +126,8 @@ The following target-state changes require compatibility migration:
    adapters and role capability profiles.
 6. Direct live-CRM analytics migrate to canonical facts/read models with visible
    freshness and reconciliation gaps.
+7. CRM credential verification becomes integration authority only; it no
+   longer stands in for authenticated owner or employee identity.
 
 These changes do not authorize removal of current code until replacement
 behavior has passed shadow comparison, canary rollout and rollback windows.
@@ -131,6 +137,8 @@ behavior has passed shadow comparison, canary rollout and rollback windows.
 The extension introduces these first-class concepts:
 
 - CustomerIdentity and Customer 360;
+- owner bootstrap grant and workforce access-candidate lifecycle;
+- social-provider capability matrix and multi-role mode projection;
 - ConsentRecord, SuppressionEntry and CommunicationEligibilityDecision;
 - Maya Watch detectors and signal lifecycle;
 - Opportunity, OpportunityEvidence and OpportunityScore;
@@ -149,6 +157,8 @@ The NestJS/PostgreSQL platform is the target multi-tenant strangler. Therefore:
 - do not trust the local SQLite database as production truth;
 - do not bypass the existing YCLIENTS adapter semantics;
 - do not rewrite the bundled PWA as part of backend foundation work;
+- keep Barbershop Native Release 1 changes in the native iOS workspace and
+  backend contracts; PWA parity is a later, separately approved slice;
 - do not activate planned CRM providers based only on enum or scaffolding;
 - do not mark proactive features live before data freshness and quality gates
   exist.
@@ -159,6 +169,9 @@ The NestJS/PostgreSQL platform is the target multi-tenant strangler. Therefore:
   application credentials;
 - authoritative consent source when CRM and Maya both hold evidence;
 - identity merge thresholds and human-review workflow;
+- approved fallback when Telegram/Yandex phone access is declined or absent;
+- authoritative workforce status coverage for bookable and non-bookable
+  YCLIENTS personnel;
 - initial detector DSL and scheduling/event strategy;
 - opportunity scoring weights and tenant customization limits;
 - Maya Recovered attribution method and reporting confidence levels;

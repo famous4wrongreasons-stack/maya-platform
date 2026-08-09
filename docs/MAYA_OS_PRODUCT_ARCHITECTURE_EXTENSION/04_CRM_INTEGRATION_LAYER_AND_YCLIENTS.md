@@ -139,6 +139,28 @@ Each run reports:
 - latest successful watermark;
 - permission or capability changes.
 
+### 4.8.1 Initial-sync readiness gate
+
+CRM activation and application readiness are different states. A valid token
+may activate the connector, but owner/staff analytics remain blocked or
+explicitly partial until the required operational backfill reconciles.
+
+Readiness records dataset-level states for locations, workforce, services,
+schedules, appointments/visits, customers and payments. Each dataset reports
+`pending`, `partial`, `ready`, `stale`, `unavailable` or `error`, plus watermark,
+count and reconciliation evidence.
+
+Workforce reconciliation must distinguish:
+
+- currently active/bookable providers;
+- active non-bookable administrators and employees;
+- inactive or historical personnel retained for old records;
+- unknown provider statuses requiring quarantine or review.
+
+Historical personnel may remain linked to historical appointments, but must
+not inflate the current active-team count or receive access automatically.
+Likewise, an empty or unavailable dataset must not be serialized as a real zero.
+
 ## 4.9 Write operations
 
 Write operations remain narrow and capability-gated:
@@ -181,6 +203,12 @@ event coverage and proactive data products.
   into core.
 - Full, masked and missing contacts are tested.
 - Pagination retry is idempotent and reconciliation catches gaps.
+- Initial sync exposes per-dataset readiness and does not publish complete
+  owner/staff analytics while required facts are partial.
+- Active-team counts exclude inactive historical personnel while preserving
+  their historical appointment links.
+- Non-bookable administrators are imported through the verified workforce
+  capability or reported unavailable.
 - Loss of permission changes the capability manifest and prevents dependent
   detector/action execution.
 - Consent-unavailable state blocks communication eligibility.

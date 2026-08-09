@@ -24,6 +24,10 @@ Before implementation, the delivery agent MUST read:
 
 No agent may infer that this extension supersedes the base specification.
 
+For Barbershop Native Release 1 the agent MUST also read
+[Barbershop Native Release 1 Scope](BARBERSHOP_NATIVE_RELEASE_1.md) and
+[Chapter 17 — Identity, Access & Membership Bootstrap](17_IDENTITY_ACCESS_AND_MEMBERSHIP_BOOTSTRAP.md).
+
 ## Mandatory preflight
 
 For each requested slice, produce:
@@ -60,6 +64,15 @@ Agents MUST NOT:
 - replace a booking by delete-and-create when a non-destructive update is
   required;
 - remove legacy behavior before parity, rollout and rollback gates pass.
+
+For the native pilot, agents also MUST NOT:
+
+- modify the production PWA as a side effect of native work;
+- derive tenant, role, Membership or CRM identity in the iOS client;
+- store CRM/payment credentials in logs, chat history or ordinary client
+  storage;
+- display missing CRM facts as zero;
+- make a social provider subject select a tenant without trusted tenant entry.
 
 ## Slice discipline
 
@@ -118,6 +131,10 @@ A slice is complete only when:
   intended paths.
 - Prefer evidence from repository contracts and tests over assumptions.
 - Use small logical commits and report exact validation performed.
+- Own backend contracts, migrations, auth/tenancy, Membership, CRM sync,
+  deterministic metrics, negative-path tests and rollout policy for the native
+  pilot.
+- Freeze and publish API/error schemas before handing client work to Cursor.
 
 ### Cursor
 
@@ -125,6 +142,15 @@ A slice is complete only when:
 - Do not accept broad autocomplete changes across unrelated modules.
 - Review generated diffs for provider leakage, tenant omissions and duplicated
   formulas before accepting them.
+- For Barbershop Native Release 1, edit only the native iOS workspace and files
+  explicitly listed in the handoff. Do not edit the PWA.
+- Implement presentation, navigation and API-state handling only after the
+  backend contract is frozen.
+- Do not edit Prisma schema/migrations, authentication authority, tenant
+  resolution, role/permission derivation, CRM normalization or financial
+  formulas unless a new backend review explicitly assigns that work.
+- Render server-returned modes, permissions, freshness and stable errors; never
+  infer them from local fields or provider payloads.
 
 These notes describe delivery behavior, not product permissions. No tool gains
 runtime authority from the agent used to implement it.
