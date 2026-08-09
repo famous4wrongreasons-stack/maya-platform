@@ -31,7 +31,7 @@ export class IngestInboxItemDto {
   tenant_slug!: string;
 
   @IsString()
-  @IsIn(INBOX_TYPES as unknown as string[])
+  @IsIn(INBOX_TYPES)
   type!: (typeof INBOX_TYPES)[number];
 
   @IsString()

@@ -814,7 +814,9 @@ export class AiToolHandlerService {
     const own = scope.rows.get(externalId);
     return {
       status: 'available',
-      rows: own ? new Map([[externalId, own]]) : new Map(),
+      rows: own
+        ? new Map<string, StaffSalaryRow>([[externalId, own]])
+        : new Map<string, StaffSalaryRow>(),
     };
   }
 
@@ -2284,7 +2286,9 @@ export class AiToolHandlerService {
         toDay = this.requiredString(args.to_day);
         from = localDateMinuteToUtc(fromDay, 0, timezone);
         const dayAfter = this.shiftLocalDate(toDay, 1);
-        to = new Date(localDateMinuteToUtc(dayAfter, 0, timezone).getTime() - 1);
+        to = new Date(
+          localDateMinuteToUtc(dayAfter, 0, timezone).getTime() - 1,
+        );
         if (to.getTime() > now.getTime()) {
           to = now;
           truncatedToToday = true;

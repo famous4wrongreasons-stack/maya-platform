@@ -261,7 +261,9 @@ export class CrmIntegrationController {
 
   @Post('journal/appointments/:externalId/duration')
   @Roles(...CRM_JOURNAL_ROLES)
-  @ApiOperation({ summary: 'Shrink or stretch a visit without moving its start' })
+  @ApiOperation({
+    summary: 'Shrink or stretch a visit without moving its start',
+  })
   async setDuration(
     @Param('externalId') externalId: string,
     @Body() dto: SetCrmDurationDto,

@@ -16,9 +16,7 @@ export type ReportingPeriodToolArgs = {
 };
 
 export type PeriodComparison =
-  | 'none'
-  | 'previous_period'
-  | 'previous_year_same_period';
+  'none' | 'previous_period' | 'previous_year_same_period';
 
 export type PeriodResolution = {
   args: ReportingPeriodToolArgs;
@@ -258,9 +256,7 @@ export class ReportingPeriodResolver {
         if (!args.month) return 'выбранный месяц';
         const [year, month] = args.month.split('-');
         const name = MONTH_NOMINATIVE[Number(month) - 1] ?? args.month;
-        return truncated
-          ? `${name} ${year} по сегодня`
-          : `${name} ${year}`;
+        return truncated ? `${name} ${year} по сегодня` : `${name} ${year}`;
       }
       case 'named_range': {
         if (!args.from_day || !args.to_day) return 'выбранный период';
@@ -356,7 +352,12 @@ export class ReportingPeriodResolver {
         now,
       );
     }
-    return this.buildCalendarDay(day, now.getUTCMonth(), now.getUTCFullYear(), now);
+    return this.buildCalendarDay(
+      day,
+      now.getUTCMonth(),
+      now.getUTCFullYear(),
+      now,
+    );
   }
 
   /**
@@ -540,10 +541,7 @@ export class ReportingPeriodResolver {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
 
-  private static normalizeCalendarDay(
-    value: string,
-    now: Date,
-  ): string | null {
+  private static normalizeCalendarDay(value: string, now: Date): string | null {
     const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!match) {
       return null;

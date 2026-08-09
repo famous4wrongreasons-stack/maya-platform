@@ -153,7 +153,10 @@ export class InboxService {
       if (row.id) stored += 1;
     }
 
-    if (input.type === 'appointment_cancelled' || input.type === 'appointment_deleted') {
+    if (
+      input.type === 'appointment_cancelled' ||
+      input.type === 'appointment_deleted'
+    ) {
       await this.softDeleteRelatedAppointmentCards(tenantId, input.payload);
     }
 
@@ -175,14 +178,18 @@ export class InboxService {
     payload: Record<string, unknown> | undefined,
   ): Promise<void> {
     const recordId = payload?.record_id ?? payload?.appointment_id;
-    if (recordId === undefined || recordId === null || recordId === '') return;
-    const recordKey = String(recordId);
+    const recordKey = this.scalarIdentifier(recordId);
+    if (!recordKey) return;
     const related = await this.prisma.inboxItem.findMany({
       where: {
         tenantId,
         deletedAt: null,
         type: {
-          in: ['new_appointment', 'appointment_rescheduled', 'appointment_reassigned'],
+          in: [
+            'new_appointment',
+            'appointment_rescheduled',
+            'appointment_reassigned',
+          ],
         },
       },
       select: { id: true, payloadJson: true },
@@ -197,7 +204,9 @@ export class InboxService {
             ? (row.payloadJson as Record<string, unknown>)
             : {};
         const candidates = [data.record_id, data.appointment_id];
-        return candidates.some((value) => String(value ?? '') === recordKey);
+        return candidates.some(
+          (value) => this.scalarIdentifier(value) === recordKey,
+        );
       })
       .map((row) => row.id);
     if (!ids.length) return;
@@ -291,11 +300,23 @@ export class InboxService {
       'new_staff_id',
       'old_staff_id',
     ]) {
-      const value = payload[key];
-      if (value === undefined || value === null || value === '') continue;
-      ids.add(String(value).trim());
+      const value = this.scalarIdentifier(payload[key]);
+      if (value) ids.add(value);
     }
     return [...ids].filter(Boolean);
+  }
+
+  private scalarIdentifier(value: unknown): string | null {
+    if (typeof value === 'string') {
+      return value.trim() || null;
+    }
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return String(value);
+    }
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+    return null;
   }
 
   private isStaffScopedType(

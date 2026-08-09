@@ -62,7 +62,9 @@ export class OwnerReportsSchedulerService
 
   async tick(): Promise<void> {
     if (this.running) {
-      this.logger.warn('Previous owner-reports run still in progress, skipping.');
+      this.logger.warn(
+        'Previous owner-reports run still in progress, skipping.',
+      );
       return;
     }
     this.running = true;
@@ -85,16 +87,22 @@ export class OwnerReportsSchedulerService
   }
 
   private isEnabled(): boolean {
-    const raw = this.configService.get<string>('OWNER_REPORTS_SCHEDULER_ENABLED');
+    const raw = this.configService.get<string>(
+      'OWNER_REPORTS_SCHEDULER_ENABLED',
+    );
     if (raw === undefined || raw === null || String(raw).trim() === '') {
       return true;
     }
-    return !['false', '0', 'off', 'no'].includes(String(raw).trim().toLowerCase());
+    return !['false', '0', 'off', 'no'].includes(
+      String(raw).trim().toLowerCase(),
+    );
   }
 
   private resolveIntervalMs(): number {
     const minutes = Number(
-      this.configService.get<string>('OWNER_REPORTS_SCHEDULER_INTERVAL_MINUTES'),
+      this.configService.get<string>(
+        'OWNER_REPORTS_SCHEDULER_INTERVAL_MINUTES',
+      ),
     );
     if (!Number.isFinite(minutes) || minutes < 1 || minutes > 60) {
       return DEFAULT_INTERVAL_MS;

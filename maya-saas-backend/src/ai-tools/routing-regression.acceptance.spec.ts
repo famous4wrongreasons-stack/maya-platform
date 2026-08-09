@@ -295,15 +295,21 @@ describe('КОРПУС: живые формулировки владельца �
       tools: answer.tools_used.map((tool) => tool.name),
       domain: answer.grounding.domain,
       arguments: harness.executed.at(-1)?.arguments as
-        | Record<string, unknown>
-        | undefined,
+        Record<string, unknown> | undefined,
       answer,
     };
   };
 
   it.each(OWNER_ROUTING_CORPUS)(
     '$id',
-    async ({ text, previous, tools, arguments: expectedArgs, notTools, domain }) => {
+    async ({
+      text,
+      previous,
+      tools,
+      arguments: expectedArgs,
+      notTools,
+      domain,
+    }) => {
       const turns = previous ? [previous, text] : [text];
       const result = await route(...turns);
 

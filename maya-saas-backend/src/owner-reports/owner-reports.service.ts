@@ -86,7 +86,9 @@ export class OwnerReportsService {
   ): Promise<'sent' | 'skipped'> {
     const localDate = localCalendarDate(tenant.defaultTimezone, now);
     const sourceEventId = `nest:morning_brief:${localDate}`;
-    if (await this.inbox.hasSourceEvent(tenant.id, 'morning_brief', sourceEventId)) {
+    if (
+      await this.inbox.hasSourceEvent(tenant.id, 'morning_brief', sourceEventId)
+    ) {
       return 'skipped';
     }
 
@@ -117,7 +119,9 @@ export class OwnerReportsService {
   ): Promise<'sent' | 'skipped'> {
     const localDate = localCalendarDate(tenant.defaultTimezone, now);
     const sourceEventId = `nest:daily_report:${localDate}`;
-    if (await this.inbox.hasSourceEvent(tenant.id, 'daily_report', sourceEventId)) {
+    if (
+      await this.inbox.hasSourceEvent(tenant.id, 'daily_report', sourceEventId)
+    ) {
       return 'skipped';
     }
 

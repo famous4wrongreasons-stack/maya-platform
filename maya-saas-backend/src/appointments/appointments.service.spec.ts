@@ -352,7 +352,11 @@ describe('AppointmentsService', () => {
         tenantsService as TenantsService,
         usersService as UsersService,
         auditLogService as AuditLogService,
-        { publishForTenant: jest.fn().mockResolvedValue({ stored: 0, user_ids: [] }) } as never,
+        {
+          publishForTenant: jest
+            .fn()
+            .mockResolvedValue({ stored: 0, user_ids: [] }),
+        } as never,
       ),
       mocks: {
         assertLiveBookingEnabledMock,

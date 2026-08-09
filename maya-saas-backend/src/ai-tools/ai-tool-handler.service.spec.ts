@@ -8,6 +8,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
+  const stringContaining = (value: string): unknown =>
+    expect.stringContaining(value) as unknown;
+
   const principal = {
     tenantId: 'tenant-a',
     userId: 'customer-a',
@@ -672,7 +675,7 @@ describe('AiToolHandlerService output minimization', () => {
           confirmed_revenue: {
             status: 'unavailable',
             amount: null,
-            unavailable_reason: expect.stringContaining('whole_company'),
+            unavailable_reason: stringContaining('whole_company'),
           },
           salary: {
             status: 'available',
@@ -1026,7 +1029,7 @@ describe('AiToolHandlerService output minimization', () => {
           confirmed_revenue: {
             status: 'unavailable',
             amount: null,
-            unavailable_reason: expect.stringContaining('booked'),
+            unavailable_reason: stringContaining('booked'),
           },
           salary: {
             status: 'unavailable',
@@ -1081,11 +1084,11 @@ describe('AiToolHandlerService output minimization', () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: 'staff_revenue',
-          reason: expect.stringContaining('accrued payroll'),
+          reason: stringContaining('accrued payroll'),
         }),
         expect.objectContaining({
           key: 'staff_accrued_salary',
-          reason: expect.stringContaining('crm_finance_unavailable'),
+          reason: stringContaining('crm_finance_unavailable'),
         }),
       ]),
     );
@@ -1732,7 +1735,7 @@ describe('AiToolHandlerService output minimization', () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: 'client_cohorts',
-          reason: expect.stringContaining('90-day'),
+          reason: stringContaining('90-day'),
         }),
       ]),
     );

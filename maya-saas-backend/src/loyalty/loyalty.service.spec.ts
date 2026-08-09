@@ -195,16 +195,19 @@ describe('LoyaltyService', () => {
     setup.authIdentityFindFirstMock.mockResolvedValueOnce({
       providerUserId: '987654321',
     });
-    global.fetch = jest.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          found: true,
-          balance: 385,
-          source: 'maya_ledger',
-        }),
-        { status: 200 },
-      ),
-    );
+    const fetchMock: jest.MockedFunction<typeof fetch> = jest
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            found: true,
+            balance: 385,
+            source: 'maya_ledger',
+          }),
+          { status: 200 },
+        ),
+      );
+    global.fetch = fetchMock;
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
       setup.service.getForUser('tenant-a', 'client-a'),
@@ -218,14 +221,14 @@ describe('LoyaltyService', () => {
       stale: false,
     });
     expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [requestUrl, requestInit] = fetchMock.mock.calls[0] ?? [];
+    expect(requestUrl).toEqual(
       new URL('http://127.0.0.1:8080/api/internal/loyalty-snapshot'),
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({
-          'X-Maya-Legacy-Bridge': 'x'.repeat(48),
-        }),
-      }),
+    );
+    expect(requestInit?.method).toBe('POST');
+    expect(new Headers(requestInit?.headers).get('X-Maya-Legacy-Bridge')).toBe(
+      'x'.repeat(48),
     );
   });
 
