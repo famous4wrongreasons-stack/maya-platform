@@ -13,6 +13,9 @@ import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
 describe('StaffScheduleCommandService', () => {
+  const objectContaining = (value: Record<string, unknown>): unknown =>
+    expect.objectContaining(value) as unknown;
+
   const user: AuthenticatedUser = {
     userId: 'owner-user',
     sessionId: 'session-a',
@@ -50,7 +53,7 @@ describe('StaffScheduleCommandService', () => {
       'staff.schedule.update',
       expect.objectContaining({
         surface: 'native',
-        arguments: expect.objectContaining({
+        arguments: objectContaining({
           staff_id: '7',
           date: '2026-08-06',
           operation: 'close_day',
@@ -72,7 +75,7 @@ describe('StaffScheduleCommandService', () => {
       user,
       'staff.schedule.update',
       expect.objectContaining({
-        arguments: expect.objectContaining({
+        arguments: objectContaining({
           staff_id: '8',
           operation: 'set_break',
           slots: [
@@ -98,7 +101,7 @@ describe('StaffScheduleCommandService', () => {
       user,
       'staff.schedule.update',
       expect.objectContaining({
-        arguments: expect.objectContaining({
+        arguments: objectContaining({
           staff_id: '9',
           operation: 'set_hours',
           slots: [
@@ -113,9 +116,7 @@ describe('StaffScheduleCommandService', () => {
   it('blocks a change when a live appointment would fall outside it', async () => {
     const mocks = createService();
     mocks.crm.previewStaffScheduleDayChange.mockResolvedValue({
-      current: scheduleDay('7', '2026-08-06', [
-        { from: '10:00', to: '20:00' },
-      ]),
+      current: scheduleDay('7', '2026-08-06', [{ from: '10:00', to: '20:00' }]),
       proposed: scheduleDay('7', '2026-08-06', []),
       conflict_times: ['18:30'],
     });
@@ -149,7 +150,9 @@ describe('StaffScheduleCommandService', () => {
       ]),
       getStaffScheduleDay: jest.fn(
         (_tenantId: string, params: { staffId: string; date: string }) =>
-          Promise.resolve(scheduleDay(params.staffId, params.date, currentSlots)),
+          Promise.resolve(
+            scheduleDay(params.staffId, params.date, currentSlots),
+          ),
       ),
       previewStaffScheduleDayChange: jest.fn(
         (

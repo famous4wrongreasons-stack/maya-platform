@@ -10,6 +10,10 @@ The tenant is selected before authentication by a tenant smart link, QR, NFC
 tag or business search. The social provider proves who the person is; it does
 not select the business.
 
+The native client consumes the server-owned mode list defined in
+[`NATIVE_APP_ACCESS_CONTRACT.md`](./NATIVE_APP_ACCESS_CONTRACT.md). It must not
+reconstruct owner, staff or client access from local state.
+
 ## Owner onboarding
 
 1. The owner activates MAYA OS and creates a tenant.

@@ -4,6 +4,11 @@ import { YclientsCRMAdapter } from './yclients-crm.adapter';
 describe('YclientsCRMAdapter', () => {
   const originalFetch = global.fetch;
   const originalPartnerToken = process.env.YCLIENTS_PARTNER_TOKEN;
+  const requestUrl = (input: Parameters<typeof fetch>[0]): string => {
+    if (typeof input === 'string') return input;
+    if (input instanceof URL) return input.toString();
+    return input.url;
+  };
 
   beforeEach(() => {
     process.env.YCLIENTS_PARTNER_TOKEN = 'partner-token';
@@ -1296,46 +1301,54 @@ describe('YclientsCRMAdapter', () => {
     // на следующий день и падал на защите, а не на проверяемом поведении.
     jest.useFakeTimers().setSystemTime(new Date('2026-08-06T09:00:00.000Z'));
     let scheduleSlots = [{ from: '10:00', to: '20:00' }];
-    let writtenPayload: Record<string, unknown> | null = null;
-    global.fetch = jest.fn<typeof fetch>((input, init) => {
-      const url = String(input);
-      if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {
-        return Promise.resolve(
-          new Response(
-            JSON.stringify({
-              data: [
-                {
-                  date: '2026-08-06',
-                  is_working: scheduleSlots.length > 0,
-                  slots: scheduleSlots,
-                },
-              ],
+    let writtenPayload: unknown = null;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    date: '2026-08-06',
+                    is_working: scheduleSlots.length > 0,
+                    slots: scheduleSlots,
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/records/123')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ data: [] }), { status: 200 }),
+          );
+        }
+        if (
+          url.includes('/company/123/staff/schedule') &&
+          init?.method === 'PUT'
+        ) {
+          if (typeof init.body !== 'string') {
+            throw new Error('Expected a JSON request body');
+          }
+          writtenPayload = JSON.parse(init.body) as unknown;
+          scheduleSlots = [];
+          return Promise.resolve(
+            new Response(JSON.stringify({ success: true, data: {} }), {
+              status: 200,
             }),
-            { status: 200 },
-          ),
-        );
-      }
-      if (url.includes('/records/123')) {
+          );
+        }
         return Promise.resolve(
           new Response(JSON.stringify({ data: [] }), { status: 200 }),
         );
-      }
-      if (
-        url.includes('/company/123/staff/schedule') &&
-        init?.method === 'PUT'
-      ) {
-        writtenPayload = JSON.parse(String(init.body));
-        scheduleSlots = [];
-        return Promise.resolve(
-          new Response(JSON.stringify({ success: true, data: {} }), {
-            status: 200,
-          }),
-        );
-      }
-      return Promise.resolve(
-        new Response(JSON.stringify({ data: [] }), { status: 200 }),
-      );
-    });
+      },
+    );
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,
       apiToken: 'user-token',
@@ -1372,46 +1385,59 @@ describe('YclientsCRMAdapter', () => {
   it('refuses schedule changes that would cut through an existing appointment', async () => {
     // См. соседний тест: дата прибита к 2026-08-06, часы фиксируем.
     jest.useFakeTimers().setSystemTime(new Date('2026-08-06T09:00:00.000Z'));
-    const fetchMock = jest.fn<typeof fetch>((input) => {
-      const url = String(input);
-      if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {
+    let attemptedScheduleWrite = false;
+    const fetchMock = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (
+          url.includes('/company/123/staff/schedule') &&
+          init?.method === 'PUT'
+        ) {
+          attemptedScheduleWrite = true;
+        }
+        if (url.includes('/schedule/123/7/2026-08-06/2026-08-06')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    date: '2026-08-06',
+                    is_working: true,
+                    slots: [{ from: '10:00', to: '20:00' }],
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/records/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    id: 901,
+                    datetime: '2026-08-06T18:30:00',
+                    seance_length: 3600,
+                    attendance: 0,
+                    staff: { id: 7, name: 'Anton' },
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        void init;
         return Promise.resolve(
-          new Response(
-            JSON.stringify({
-              data: [
-                {
-                  date: '2026-08-06',
-                  is_working: true,
-                  slots: [{ from: '10:00', to: '20:00' }],
-                },
-              ],
-            }),
-            { status: 200 },
-          ),
+          new Response(JSON.stringify({ data: [] }), { status: 200 }),
         );
-      }
-      if (url.includes('/records/123')) {
-        return Promise.resolve(
-          new Response(
-            JSON.stringify({
-              data: [
-                {
-                  id: 901,
-                  datetime: '2026-08-06T18:30:00',
-                  seance_length: 3600,
-                  attendance: 0,
-                  staff: { id: 7, name: 'Anton' },
-                },
-              ],
-            }),
-            { status: 200 },
-          ),
-        );
-      }
-      return Promise.resolve(
-        new Response(JSON.stringify({ data: [] }), { status: 200 }),
-      );
-    });
+      },
+    );
     global.fetch = fetchMock;
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,
@@ -1428,12 +1454,6 @@ describe('YclientsCRMAdapter', () => {
         timezone: 'Europe/Moscow',
       }),
     ).resolves.toMatchObject({ conflict_times: ['18:30'] });
-    expect(
-      fetchMock.mock.calls.some(
-        ([input, init]) =>
-          String(input).includes('/company/123/staff/schedule') &&
-          init?.method === 'PUT',
-      ),
-    ).toBe(false);
+    expect(attemptedScheduleWrite).toBe(false);
   });
 });

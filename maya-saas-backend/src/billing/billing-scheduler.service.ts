@@ -95,7 +95,11 @@ export class BillingSchedulerService implements OnModuleInit, OnModuleDestroy {
 
       const result = await this.billingService.runDueBilling();
 
-      if (result.charged > 0 || result.marked_past_due > 0 || result.failed > 0) {
+      if (
+        result.charged > 0 ||
+        result.marked_past_due > 0 ||
+        result.failed > 0
+      ) {
         this.logger.log(
           `Billing run: charged ${result.charged}, past due ${result.marked_past_due}, failed ${result.failed}.`,
         );

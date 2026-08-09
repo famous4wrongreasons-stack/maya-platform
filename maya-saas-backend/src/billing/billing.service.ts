@@ -377,19 +377,22 @@ export class BillingService {
       }
 
       try {
-        await this.tenantContext.runAsSystemTenant(payment.tenantId, async () => {
-          const providerPayment = await this.yooKassaClient.getPayment(
-            payment.providerPaymentId as string,
-          );
-          const outcome = await this.applyProviderPaymentIfFinal(
-            payment,
-            providerPayment,
-          );
+        await this.tenantContext.runAsSystemTenant(
+          payment.tenantId,
+          async () => {
+            const providerPayment = await this.yooKassaClient.getPayment(
+              payment.providerPaymentId as string,
+            );
+            const outcome = await this.applyProviderPaymentIfFinal(
+              payment,
+              providerPayment,
+            );
 
-          if (outcome?.payment?.status !== PAYMENT_STATUS_PENDING) {
-            result.applied += 1;
-          }
-        });
+            if (outcome?.payment?.status !== PAYMENT_STATUS_PENDING) {
+              result.applied += 1;
+            }
+          },
+        );
       } catch (error) {
         result.failed += 1;
         this.logger.warn(
@@ -944,7 +947,10 @@ export class BillingService {
               value: this.formatKopecks(amountKopecks),
               currency: RUB_CURRENCY,
             },
-            vat_code: Number.isFinite(vatCode) && vatCode >= 1 && vatCode <= 6 ? vatCode : 1,
+            vat_code:
+              Number.isFinite(vatCode) && vatCode >= 1 && vatCode <= 6
+                ? vatCode
+                : 1,
             payment_mode: 'full_payment',
             payment_subject: 'service',
           },

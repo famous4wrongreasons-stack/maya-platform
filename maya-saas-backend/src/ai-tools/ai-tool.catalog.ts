@@ -103,8 +103,7 @@ const REPORTING_PERIOD_SCHEMA = {
     to_day: {
       type: 'string',
       pattern: '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$',
-      description:
-        'Inclusive end day YYYY-MM-DD for named_range.',
+      description: 'Inclusive end day YYYY-MM-DD for named_range.',
     },
     from: { type: 'string', format: 'date-time' },
     to: { type: 'string', format: 'date-time' },

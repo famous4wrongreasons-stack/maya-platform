@@ -1776,8 +1776,18 @@ export class CrmService {
     // когда салон говорил «CRM отклонила токен», в логах не было НИЧЕГО —
     // диагностировать было нечем. Токен сюда не попадает: логируем только
     // сообщение провайдера и класс ошибки.
-    const detail =
-      error instanceof Error ? error.message : String(error ?? 'unknown');
+    let detail = 'unknown';
+    if (error instanceof Error) {
+      detail = error.message;
+    } else if (typeof error === 'string') {
+      detail = error;
+    } else if (error !== null && error !== undefined) {
+      try {
+        detail = JSON.stringify(error) || 'unknown';
+      } catch {
+        detail = 'unserializable_error';
+      }
+    }
     this.logger.warn(
       `CRM connection failed provider=${provider} code=${code} detail=${detail.slice(0, 300)}`,
     );

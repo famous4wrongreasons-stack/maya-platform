@@ -50,8 +50,12 @@ describe('computePeriodMoneyMotivation', () => {
 
   it('never puts potential below earned', () => {
     const result = computePeriodMoneyMotivation({
-      periodVisits: [visit({ startAt: '2026-07-01T10:00:00Z', grossRub: 5000 })],
-      historyVisits: [visit({ startAt: '2026-06-01T10:00:00Z', grossRub: 1000 })],
+      periodVisits: [
+        visit({ startAt: '2026-07-01T10:00:00Z', grossRub: 5000 }),
+      ],
+      historyVisits: [
+        visit({ startAt: '2026-06-01T10:00:00Z', grossRub: 1000 }),
+      ],
       earnedRub: 4000,
     });
     expect(result.potential_rub).toBeGreaterThanOrEqual(4000);

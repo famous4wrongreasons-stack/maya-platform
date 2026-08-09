@@ -238,7 +238,9 @@ describe('CrmService: операции над визитом', () => {
     expect(ownerDetail.client_phone).toBe('+79990000000');
 
     const masterSide = build(
-      { getAppointmentDetail: jest.fn().mockResolvedValue(detailOf('1461615')) },
+      {
+        getAppointmentDetail: jest.fn().mockResolvedValue(detailOf('1461615')),
+      },
       { externalStaffId: '1461615', status: 'active' },
     );
     const masterDetail = await masterSide.run(() =>

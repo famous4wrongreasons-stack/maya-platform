@@ -575,8 +575,8 @@ export class AiCoreService {
                   toolResults,
                 ),
               },
-                toolResults,
-              );
+              toolResults,
+            );
           }
           return this.complete(
             user,
@@ -596,8 +596,8 @@ export class AiCoreService {
                 toolResults,
               ),
             },
-              toolResults,
-            );
+            toolResults,
+          );
         }
         decisions.push(decision);
         if (!decision.toolCall) {
@@ -715,8 +715,8 @@ export class AiCoreService {
                     ),
                     unsourced,
                   },
-                    toolResults,
-                  );
+              toolResults,
+            );
           }
           return this.complete(
             user,
@@ -735,8 +735,8 @@ export class AiCoreService {
                 toolResults,
               ),
             },
-              toolResults,
-            );
+            toolResults,
+          );
         }
         if (step >= maxToolSteps) {
           this.modelFailure('ai_model_tool_step_limit');
@@ -825,8 +825,8 @@ export class AiCoreService {
                 toolResults,
               ),
             },
-              toolResults,
-            );
+            toolResults,
+          );
         }
         if (status !== 'completed' || !('result' in execution)) {
           this.modelFailure('ai_tool_result_unavailable');
@@ -890,8 +890,8 @@ export class AiCoreService {
                     toolResults,
                   ),
                 },
-                  toolResults,
-                );
+            toolResults,
+          );
         }
       }
       this.modelFailure('ai_model_tool_step_limit');
@@ -942,8 +942,8 @@ export class AiCoreService {
               toolResults,
             ),
           },
-            toolResults,
-          );
+          toolResults,
+        );
       }
       // Данных нет вовсе, а вопрос был про аналитику: молчание CRM — это сбой
       // связи, и называть его надо сбоем, а не отсутствием ответа у MAYA.
@@ -972,8 +972,8 @@ export class AiCoreService {
               toolResults,
             ),
           },
-            toolResults,
-          );
+          toolResults,
+        );
       }
       await this.auditLog.log({
         tenantId,
@@ -2202,9 +2202,7 @@ export class AiCoreService {
       metricChange('unique_clients').trim(),
     ].filter((part): part is string => Boolean(part));
     const body = summary.join(', ');
-    const changesSentence = changeBits.length
-      ? ` ${changeBits.join(' ')}`
-      : '';
+    const changesSentence = changeBits.length ? ` ${changeBits.join(' ')}` : '';
     return `${lead}${body}.${changesSentence}${insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.'}`;
   }
 

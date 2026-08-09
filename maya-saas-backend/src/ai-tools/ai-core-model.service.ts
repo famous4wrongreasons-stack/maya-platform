@@ -505,7 +505,9 @@ export class AiCoreModelService {
             },
           };
         } catch {
-          throw new Error(`deepseek_finish_${choice.finish_reason.slice(0, 32)}`);
+          throw new Error(
+            `deepseek_finish_${choice.finish_reason.slice(0, 32)}`,
+          );
         }
       }
       throw new Error(

@@ -53,11 +53,10 @@ export class InboxController {
   @TenantScoped()
   @Roles(...INBOX_ROLES)
   @Get()
-  @ApiOperation({ summary: 'List persistent MAYA inbox items for the current user' })
-  list(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query('limit') limit?: string,
-  ) {
+  @ApiOperation({
+    summary: 'List persistent MAYA inbox items for the current user',
+  })
+  list(@CurrentUser() user: AuthenticatedUser, @Query('limit') limit?: string) {
     return this.inboxService.listForUser(
       user.tenantId!,
       user.userId,
@@ -82,10 +81,7 @@ export class InboxController {
   @Roles(...INBOX_ROLES)
   @Post(':id/read')
   @ApiOperation({ summary: 'Mark one inbox item as read' })
-  markRead(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id') id: string,
-  ) {
+  markRead(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.inboxService.markRead(user.tenantId!, user.userId, id);
   }
 }

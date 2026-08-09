@@ -8,25 +8,27 @@ describe('InboxService recipients', () => {
   }) => {
     const upsertMock = jest.fn().mockResolvedValue({ id: 'row-1' });
     const allStaff = opts.staffAccess ?? [];
-    const staffAccessFindMany = jest.fn().mockImplementation((args: {
-      where?: {
-        externalStaffId?: { in?: string[] };
-        userId?: { in?: string[] };
-      };
-    }) => {
-      let rows = allStaff.slice();
-      const staffIn = args?.where?.externalStaffId?.in;
-      if (staffIn) {
-        const set = new Set(staffIn.map(String));
-        rows = rows.filter((row) => set.has(String(row.externalStaffId)));
-      }
-      const userIn = args?.where?.userId?.in;
-      if (userIn) {
-        const set = new Set(userIn.map(String));
-        rows = rows.filter((row) => set.has(String(row.userId)));
-      }
-      return Promise.resolve(rows);
-    });
+    const staffAccessFindMany = jest.fn().mockImplementation(
+      (args: {
+        where?: {
+          externalStaffId?: { in?: string[] };
+          userId?: { in?: string[] };
+        };
+      }) => {
+        let rows = allStaff.slice();
+        const staffIn = args?.where?.externalStaffId?.in;
+        if (staffIn) {
+          const set = new Set(staffIn.map(String));
+          rows = rows.filter((row) => set.has(String(row.externalStaffId)));
+        }
+        const userIn = args?.where?.userId?.in;
+        if (userIn) {
+          const set = new Set(userIn.map(String));
+          rows = rows.filter((row) => set.has(String(row.userId)));
+        }
+        return Promise.resolve(rows);
+      },
+    );
     const prisma = {
       authIdentity: {
         findMany: jest.fn().mockResolvedValue(opts.identities ?? []),
@@ -90,9 +92,7 @@ describe('InboxService recipients', () => {
       fanoutOwners: true,
       payload: { staff_id: 1461615, record_id: 1 },
     });
-    expect(mine.user_ids.sort()).toEqual(
-      ['owner-master', 'pure-owner'].sort(),
-    );
+    expect(mine.user_ids.sort()).toEqual(['owner-master', 'pure-owner'].sort());
 
     const other = await service.publishForTenant('tenant-1', {
       type: 'new_appointment',
@@ -161,7 +161,12 @@ describe('InboxService recipients', () => {
         payloadJson: { record_id: 111 },
       },
     ]);
-    const updateManyMock = jest.fn().mockResolvedValue({ count: 1 });
+    const updateManyMock: jest.MockedFunction<
+      (args: {
+        where: { id: { in: string[] } };
+        data: { deletedAt: Date };
+      }) => Promise<{ count: number }>
+    > = jest.fn().mockResolvedValue({ count: 1 });
     const prisma = {
       authIdentity: { findMany: jest.fn().mockResolvedValue([]) },
       membership: {
@@ -186,9 +191,9 @@ describe('InboxService recipients', () => {
       payload: { record_id: 1893718680, event: 'record.delete' },
     });
 
-    expect(updateManyMock).toHaveBeenCalledWith({
-      where: { id: { in: ['old-new-1'] } },
-      data: { deletedAt: expect.any(Date) },
-    });
+    expect(updateManyMock).toHaveBeenCalledTimes(1);
+    const update = updateManyMock.mock.calls[0]?.[0];
+    expect(update?.where).toEqual({ id: { in: ['old-new-1'] } });
+    expect(update?.data.deletedAt).toBeInstanceOf(Date);
   });
 });

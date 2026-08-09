@@ -545,5 +545,4 @@ describe('BillingService', () => {
     // Ни одной записи в базу: срок подписки не сдвинулся.
     expect(transactionMock).not.toHaveBeenCalled();
   });
-
 });

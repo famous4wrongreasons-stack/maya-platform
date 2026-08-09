@@ -442,7 +442,9 @@ describe('TenantsService', () => {
       },
     });
 
-    await expect(service.assertLiveBookingEnabled('tenant-1')).rejects.toMatchObject({
+    await expect(
+      service.assertLiveBookingEnabled('tenant-1'),
+    ).rejects.toMatchObject({
       response: {
         error: {
           code: 'platform_tenant_not_bookable',

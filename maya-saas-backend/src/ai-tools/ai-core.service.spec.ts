@@ -2429,7 +2429,7 @@ describe('AiCoreService', () => {
     const long = 'а'.repeat(2_000);
     const messages = [
       ...Array.from({ length: 11 }, (_, index) => ({
-        role: (index % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+        role: index % 2 === 0 ? 'user' : 'assistant',
         content: long,
       })),
       // Последняя реплика — пользовательская и намеренно не про данные:

@@ -146,10 +146,10 @@ describe('buildChatReportCard', () => {
 
   it('returns null without analytics evidence', () => {
     expect(
-      buildChatReportCard(
-        [{ name: 'booking.search', result: { slots: [] } }],
-        { personal: false, userText: 'есть окна?' },
-      ),
+      buildChatReportCard([{ name: 'booking.search', result: { slots: [] } }], {
+        personal: false,
+        userText: 'есть окна?',
+      }),
     ).toBeNull();
   });
 });

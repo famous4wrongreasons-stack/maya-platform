@@ -42,8 +42,7 @@ const REPORTING_PERIODS = new Set([
 /** Календарный месяц, названный словом: «в июле», «за март». */
 const CALENDAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 /** Один календарный день: «за 7 августа», «а за 7», «07.08». */
-const CALENDAR_DAY_PATTERN =
-  /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+const CALENDAR_DAY_PATTERN = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 @Injectable()
 export class AiToolRegistryService {
@@ -488,7 +487,11 @@ export class AiToolRegistryService {
     const year = Number(yearText);
     const month = Number(monthText);
     const day = Number(dayText);
-    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    if (
+      !Number.isInteger(year) ||
+      !Number.isInteger(month) ||
+      !Number.isInteger(day)
+    ) {
       return false;
     }
     const probe = new Date(Date.UTC(year, month - 1, day));

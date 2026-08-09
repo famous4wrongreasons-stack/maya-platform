@@ -315,12 +315,7 @@ export class TenantsService {
     theme?: Record<string, unknown> | null;
     brandingSettings?: { themeJson?: unknown } | null;
   }): void {
-    const theme =
-      params.theme ??
-      (asRecord(params.brandingSettings?.themeJson) as Record<
-        string,
-        unknown
-      > | null);
+    const theme = params.theme ?? asRecord(params.brandingSettings?.themeJson);
     if (!isPlatformBootstrapTenant({ slug: params.slug, theme })) {
       return;
     }
@@ -529,10 +524,37 @@ export class TenantsService {
    * от опечатки она защищает так же, как от умысла.
    */
   private static readonly RESERVED_HOST_NAMES = new Set<string>([
-    'www', 'api', 'app', 'admin', 'auth', 'login', 'billing', 'pay',
-    'static', 'assets', 'cdn', 'mail', 'smtp', 'ftp', 'ns', 'ns1', 'ns2',
-    'maya', 'maya-os', 'mayaos', 'platform', 'system', 'support', 'help',
-    'status', 'docs', 'blog', 'test', 'staging', 'dev', 'local',
+    'www',
+    'api',
+    'app',
+    'admin',
+    'auth',
+    'login',
+    'billing',
+    'pay',
+    'static',
+    'assets',
+    'cdn',
+    'mail',
+    'smtp',
+    'ftp',
+    'ns',
+    'ns1',
+    'ns2',
+    'maya',
+    'maya-os',
+    'mayaos',
+    'platform',
+    'system',
+    'support',
+    'help',
+    'status',
+    'docs',
+    'blog',
+    'test',
+    'staging',
+    'dev',
+    'local',
   ]);
 
   private assertHostNamesAllowed(dto: {
@@ -541,7 +563,11 @@ export class TenantsService {
     slug?: string | null;
   }): void {
     const candidates = [dto.subdomain, dto.slug]
-      .map((v) => String(v ?? '').trim().toLowerCase())
+      .map((v) =>
+        String(v ?? '')
+          .trim()
+          .toLowerCase(),
+      )
       .filter(Boolean);
 
     for (const value of candidates) {
@@ -553,7 +579,9 @@ export class TenantsService {
       }
     }
 
-    const domain = String(dto.customDomain ?? '').trim().toLowerCase();
+    const domain = String(dto.customDomain ?? '')
+      .trim()
+      .toLowerCase();
 
     if (!domain) {
       return;

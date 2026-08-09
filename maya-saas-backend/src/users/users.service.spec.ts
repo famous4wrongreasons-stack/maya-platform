@@ -107,9 +107,13 @@ describe('UsersService', () => {
       (args: Record<string, unknown>) => Promise<{ id: string } | null>
     > = jest.fn().mockResolvedValue(null);
     const crmStaffAccessFindFirstMock: jest.MockedFunction<
-      (
-        args: Record<string, unknown>,
-      ) => Promise<{ title: string | null } | null>
+      (args: Record<string, unknown>) => Promise<{
+        title: string | null;
+        externalStaffId: string;
+      } | null>
+    > = jest.fn().mockResolvedValue(null);
+    const customerProfileFindFirstMock: jest.MockedFunction<
+      (args: Record<string, unknown>) => Promise<{ id: string } | null>
     > = jest.fn().mockResolvedValue(null);
     const internalProviderFindFirstMock: jest.MockedFunction<
       (
@@ -125,7 +129,11 @@ describe('UsersService', () => {
 
     const prisma: Pick<
       PrismaService,
-      'authIdentity' | 'crmStaffAccess' | 'internalProvider' | 'user'
+      | 'authIdentity'
+      | 'crmStaffAccess'
+      | 'customerProfile'
+      | 'internalProvider'
+      | 'user'
     > = {
       authIdentity: {
         findFirst: authIdentityFindFirstMock,
@@ -133,6 +141,9 @@ describe('UsersService', () => {
       crmStaffAccess: {
         findFirst: crmStaffAccessFindFirstMock,
       } as PrismaService['crmStaffAccess'],
+      customerProfile: {
+        findFirst: customerProfileFindFirstMock,
+      } as PrismaService['customerProfile'],
       internalProvider: {
         findFirst: internalProviderFindFirstMock,
       } as PrismaService['internalProvider'],
@@ -162,6 +173,7 @@ describe('UsersService', () => {
         encryptMock,
         authIdentityFindFirstMock,
         crmStaffAccessFindFirstMock,
+        customerProfileFindFirstMock,
         internalProviderFindFirstMock,
         userFindFirstMock,
         userFindUniqueMock,
@@ -192,7 +204,10 @@ describe('UsersService', () => {
       mocks: { crmStaffAccessFindFirstMock, internalProviderFindFirstMock },
     } = createService();
 
-    crmStaffAccessFindFirstMock.mockResolvedValue({ title: 'Барбер' });
+    crmStaffAccessFindFirstMock.mockResolvedValue({
+      title: 'Барбер',
+      externalStaffId: 'staff-1',
+    });
     const owner = tenantUser({ role: UserRole.TENANT_OWNER });
     owner.memberships![0].role = UserRole.TENANT_OWNER;
 
@@ -203,6 +218,36 @@ describe('UsersService', () => {
       linked: true,
       source: 'crm',
       title: 'Барбер',
+      external_staff_id: 'staff-1',
+    });
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'owner',
+      available_modes: [
+        {
+          mode: 'owner',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: true,
+        },
+        {
+          mode: 'staff',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: true,
+        },
+        {
+          mode: 'client',
+          access: 'preview',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: false,
+        },
+      ],
+      can_switch_mode: true,
+      chooser_required: true,
     });
     expect(internalProviderFindFirstMock).not.toHaveBeenCalled();
   });
@@ -219,6 +264,90 @@ describe('UsersService', () => {
       linked: false,
       source: null,
       title: null,
+    });
+    expect(result.app_access.default_mode).toBe('owner');
+    expect(result.app_access.available_modes).toEqual([
+      expect.objectContaining({ mode: 'owner', access: 'granted' }),
+      expect.objectContaining({ mode: 'client', access: 'preview' }),
+    ]);
+  });
+
+  it('grants a linked client one client mode without a chooser', async () => {
+    const {
+      service,
+      mocks: { customerProfileFindFirstMock },
+    } = createService();
+    customerProfileFindFirstMock.mockResolvedValue({ id: 'customer-1' });
+
+    const result = await service.serializeCurrentUser(tenantUser());
+
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'client',
+      available_modes: [
+        {
+          mode: 'client',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.CLIENT,
+          profile_linked: true,
+        },
+      ],
+      can_switch_mode: false,
+      chooser_required: false,
+    });
+  });
+
+  it('keeps tenant and user fences on linked app profiles', async () => {
+    const {
+      service,
+      mocks: { crmStaffAccessFindFirstMock, customerProfileFindFirstMock },
+    } = createService();
+    const owner = tenantUser({ role: UserRole.TENANT_OWNER });
+    owner.memberships![0].role = UserRole.TENANT_OWNER;
+
+    await service.serializeCurrentUser(owner);
+
+    expect(crmStaffAccessFindFirstMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId: 'tenant-1',
+          userId: 'user-1',
+          status: 'active',
+        },
+      }),
+    );
+    expect(customerProfileFindFirstMock).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
+      },
+      select: { id: true },
+    });
+  });
+
+  it('returns a platform-only mode outside tenant context', async () => {
+    const { service } = createService();
+    const platformOwner = baseUser();
+    platformOwner.tenantId = null;
+    platformOwner.role = UserRole.PLATFORM_OWNER;
+
+    const result = await service.serializeCurrentUser(platformOwner);
+
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'platform',
+      available_modes: [
+        {
+          mode: 'platform',
+          access: 'granted',
+          tenant_id: null,
+          role: UserRole.PLATFORM_OWNER,
+          profile_linked: true,
+        },
+      ],
+      can_switch_mode: false,
+      chooser_required: false,
     });
   });
 

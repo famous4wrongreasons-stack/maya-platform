@@ -6,9 +6,7 @@
  */
 
 export type ChatReportWidget =
-  | 'business_report'
-  | 'master_earn'
-  | 'master_upsell';
+  'business_report' | 'master_earn' | 'master_upsell';
 
 export type ChatReportCard = {
   widget: ChatReportWidget;
@@ -39,13 +37,15 @@ export function buildChatReportCard(
   toolResults: Array<{ name: string; result: unknown }>,
   options: { personal: boolean; userText: string },
 ): ChatReportCard | null {
-  const latest = [...toolResults].reverse().find((item) =>
-    [
-      'analytics.business.query',
-      'analytics.employee.query',
-      'analytics.business.profit',
-    ].includes(item.name),
-  );
+  const latest = [...toolResults]
+    .reverse()
+    .find((item) =>
+      [
+        'analytics.business.query',
+        'analytics.employee.query',
+        'analytics.business.profit',
+      ].includes(item.name),
+    );
   if (!latest) {
     return null;
   }
@@ -116,7 +116,8 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
       period_label: label,
       revenue_rub: revTotal,
       net_profit_rub: net.status === 'available' ? netTotal : null,
-      profit_status: typeof net.status === 'string' ? net.status : 'unavailable',
+      profit_status:
+        typeof net.status === 'string' ? net.status : 'unavailable',
       insight:
         net.status === 'available'
           ? null
@@ -127,10 +128,7 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
   };
 }
 
-function buildMasterCard(
-  evidence: unknown,
-  userText: string,
-): ChatReportCard {
+function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
   const data = record(evidence);
   const metrics = record(data.metrics);
   const resolved = record(data.resolved_period);

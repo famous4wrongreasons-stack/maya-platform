@@ -14,9 +14,7 @@ type ApnsConfig = {
 function loadApnsConfig(): ApnsConfig | null {
   const keyId = String(process.env.APNS_KEY_ID || '').trim();
   const teamId = String(process.env.APNS_TEAM_ID || '').trim();
-  const bundleId = String(
-    process.env.APNS_BUNDLE_ID || 'ru.mayaos.app',
-  ).trim();
+  const bundleId = String(process.env.APNS_BUNDLE_ID || 'ru.mayaos.app').trim();
   const keyPath = String(process.env.APNS_KEY_PATH || '').trim();
   const keyInline = String(process.env.APNS_KEY_P8 || '').trim();
   let key = keyInline.replace(/\\n/g, '\n');
@@ -49,13 +47,9 @@ function base64url(input: Buffer | string): string {
 }
 
 function makeApnsJwt(cfg: ApnsConfig): string {
-  const header = base64url(
-    JSON.stringify({ alg: 'ES256', kid: cfg.keyId }),
-  );
+  const header = base64url(JSON.stringify({ alg: 'ES256', kid: cfg.keyId }));
   const now = Math.floor(Date.now() / 1000);
-  const payload = base64url(
-    JSON.stringify({ iss: cfg.teamId, iat: now }),
-  );
+  const payload = base64url(JSON.stringify({ iss: cfg.teamId, iat: now }));
   const unsigned = `${header}.${payload}`;
   const key = createPrivateKey(cfg.key);
   const sig = createSign('SHA256').update(unsigned).sign(key);
@@ -165,10 +159,17 @@ export async function sendInboxApns(opts: {
 
   let sent = 0;
   for (const row of ios) {
-    const ok = await sendOne(cfg, jwt, row.token.trim(), opts.title, opts.body, {
-      type: opts.type,
-      deep_link: opts.deepLink || '/app/?panel=chat',
-    });
+    const ok = await sendOne(
+      cfg,
+      jwt,
+      row.token.trim(),
+      opts.title,
+      opts.body,
+      {
+        type: opts.type,
+        deep_link: opts.deepLink || '/app/?panel=chat',
+      },
+    );
     if (ok) sent += 1;
   }
   opts.logger.log(

@@ -115,9 +115,14 @@ export class YooKassaClientService {
       // Понятный текст вместо общего: салон должен видеть, ЧТО делать.
       // «Магазину не разрешены рекуррентные платежи» — это заявка в ЮKassa,
       // а не поломка у нас, и человек не должен догадываться об этом сам.
-      const description = String(
-        (providerBody as { description?: unknown })?.description ?? '',
-      );
+      const providerDescription =
+        providerBody &&
+        typeof providerBody === 'object' &&
+        'description' in providerBody
+          ? providerBody.description
+          : null;
+      const description =
+        typeof providerDescription === 'string' ? providerDescription : '';
       const recurringForbidden =
         response.status === 403 && /recurring/i.test(description);
 

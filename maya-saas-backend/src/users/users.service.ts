@@ -23,6 +23,7 @@ import {
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { buildAppAccessContext } from './app-access';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
 import { UpdateCrmTeamAccessDto } from './dto/update-crm-team-access.dto';
 
@@ -1385,7 +1386,7 @@ export class UsersService {
     email: string | null;
     role: string;
   }): boolean {
-    if (serialized.role === UserRole.PLATFORM_OWNER) {
+    if (serialized.role === 'platform_owner') {
       return true;
     }
 
@@ -1416,29 +1417,52 @@ export class UsersService {
       return {
         ...serialized,
         staff_profile: { linked: false, source: null, title: null },
+        app_access: buildAppAccessContext({
+          tenantId: null,
+          role: serialized.role as UserRole,
+          staffProfileLinked: false,
+          customerProfileLinked: false,
+        }),
       };
     }
 
-    const crmStaffProfile = await this.prisma.crmStaffAccess.findFirst({
-      where: {
-        tenantId,
-        userId: serialized.id,
-        status: 'active',
-      },
-      select: { title: true, externalStaffId: true },
-    });
+    const [crmStaffProfile, customerProfile] = await Promise.all([
+      this.prisma.crmStaffAccess.findFirst({
+        where: {
+          tenantId,
+          userId: serialized.id,
+          status: 'active',
+        },
+        select: { title: true, externalStaffId: true },
+      }),
+      this.prisma.customerProfile.findFirst({
+        where: {
+          tenantId,
+          userId: serialized.id,
+        },
+        select: { id: true },
+      }),
+    ]);
 
     if (crmStaffProfile) {
+      const staffProfile = {
+        linked: true,
+        source: 'crm' as const,
+        title: crmStaffProfile.title,
+        // Свой идентификатор в CRM: по нему кабинет отбирает из журнала дня
+        // ИМЕННО свои визиты. Это собственный id пользователя, не чужие ПД.
+        external_staff_id: crmStaffProfile.externalStaffId,
+      };
+
       return {
         ...serialized,
-        staff_profile: {
-          linked: true,
-          source: 'crm',
-          title: crmStaffProfile.title,
-          // Свой идентификатор в CRM: по нему кабинет отбирает из журнала дня
-          // ИМЕННО свои визиты. Это собственный id пользователя, не чужие ПД.
-          external_staff_id: crmStaffProfile.externalStaffId,
-        },
+        staff_profile: staffProfile,
+        app_access: buildAppAccessContext({
+          tenantId,
+          role: serialized.role as UserRole,
+          staffProfileLinked: true,
+          customerProfileLinked: Boolean(customerProfile),
+        }),
       };
     }
 
@@ -1451,15 +1475,23 @@ export class UsersService {
       select: { title: true },
     });
 
+    const staffProfile = internalStaffProfile
+      ? {
+          linked: true,
+          source: 'internal' as const,
+          title: internalStaffProfile.title,
+        }
+      : { linked: false, source: null, title: null };
+
     return {
       ...serialized,
-      staff_profile: internalStaffProfile
-        ? {
-            linked: true,
-            source: 'internal',
-            title: internalStaffProfile.title,
-          }
-        : { linked: false, source: null, title: null },
+      staff_profile: staffProfile,
+      app_access: buildAppAccessContext({
+        tenantId,
+        role: serialized.role as UserRole,
+        staffProfileLinked: staffProfile.linked,
+        customerProfileLinked: Boolean(customerProfile),
+      }),
     };
   }
 

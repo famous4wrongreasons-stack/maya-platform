@@ -1,7 +1,4 @@
-import {
-  displayDayRu,
-  formatRubFromKopecks,
-} from './owner-reports.time';
+import { displayDayRu, formatRubFromKopecks } from './owner-reports.time';
 
 type OverviewLike = {
   appointments?: {
@@ -26,8 +23,12 @@ export function composeMorningBrief(input: {
     Number(input.overview.appointments?.active ?? 0) ||
     Number(input.overview.appointments?.total ?? 0) ||
     0;
-  const bookedMinutes = Number(input.overview.appointments?.booked_minutes || 0);
-  const ticket = Number(input.overview.average_ticket?.[0]?.amount_kopecks || 0);
+  const bookedMinutes = Number(
+    input.overview.appointments?.booked_minutes || 0,
+  );
+  const ticket = Number(
+    input.overview.average_ticket?.[0]?.amount_kopecks || 0,
+  );
   const bookedValue = Number(input.overview.revenue?.[0]?.amount_kopecks || 0);
   const underused = (input.overview.staff || [])
     .filter((row) => Number(row.appointments || 0) <= 1)
@@ -53,7 +54,10 @@ export function composeMorningBrief(input: {
   } else {
     lines.push('🪑 Загрузка мастеров выглядит ровной на утро.');
   }
-  lines.push('', 'Откройте чат MAYA, если нужно закрыть окна или скорректировать план.');
+  lines.push(
+    '',
+    'Откройте чат MAYA, если нужно закрыть окна или скорректировать план.',
+  );
 
   return {
     title: `MAYA · утренний план · ${displayDayRu(input.localDate)}`,
@@ -143,7 +147,10 @@ export function composeDailyReport(input: {
     lines.push(`Выручка за день: ${formatRubFromKopecks(revenueTotal)}`);
   }
   lines.push(`Записей за день: ${visits}`);
-  lines.push('', 'Сообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.');
+  lines.push(
+    '',
+    'Сообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.',
+  );
 
   return {
     title: `Отчёт за ${day}`,

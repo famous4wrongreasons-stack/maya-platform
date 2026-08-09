@@ -63,7 +63,10 @@ const PRIO_KW = ['бород', 'тонирован'];
 const MAIN_KW = ['стрижка', 'фейд', 'бритье головы', 'детск'];
 
 const SERVICE_KEYWORDS: Array<[string, RegExp[]]> = [
-  ['моделирование бороды', [/моделирование/i, /моделировать/i, /оформ\w* бород/i]],
+  [
+    'моделирование бороды',
+    [/моделирование/i, /моделировать/i, /оформ\w* бород/i],
+  ],
   ['окантовка бороды', [/окантовк\w*/i, /окантовать/i]],
   ['тонирование', [/тонирован\w*/i, /тонировать/i]],
   ['камуфляж', [/камуфляж\w*/i]],
@@ -109,7 +112,11 @@ function currentBlocksAddon(
   if (currentTitles.has(addonKey)) return true;
   for (const title of currentTitles) {
     if (title.length < 5) continue;
-    if (addonKey === title || addonKey.includes(title) || title.includes(addonKey)) {
+    if (
+      addonKey === title ||
+      addonKey.includes(title) ||
+      title.includes(addonKey)
+    ) {
       return true;
     }
   }
@@ -169,7 +176,11 @@ export function computePeriodMoneyMotivation(input: {
     input.earnedRub < bookedRub
   ) {
     salaryShare = Math.min(0.95, Math.max(0.2, input.earnedRub / bookedRub));
-  } else if (input.earnedRub != null && bookedRub > 0 && input.earnedRub >= bookedRub) {
+  } else if (
+    input.earnedRub != null &&
+    bookedRub > 0 &&
+    input.earnedRub >= bookedRub
+  ) {
     // Владелец / 100% — мотивацию «долей» не крутим: потенциал = валовой ориентир.
     salaryShare = 1;
   } else {
@@ -216,13 +227,16 @@ export function historicalAddonOpportunity(
   last_date: string;
 } | null {
   const currentTitles = new Set(
-    currentServices
-      .map((service) => serviceKey(service.title))
-      .filter(Boolean),
+    currentServices.map((service) => serviceKey(service.title)).filter(Boolean),
   );
   const grouped = new Map<
     string,
-    { title: string; times_bought: number; last_date: string; last_price_rub: number }
+    {
+      title: string;
+      times_bought: number;
+      last_date: string;
+      last_price_rub: number;
+    }
   >();
 
   for (const visit of history) {
@@ -261,8 +275,10 @@ export function historicalAddonOpportunity(
 
   if (!candidates.length) return null;
   candidates.sort((a, b) => {
-    if (b.times_bought !== a.times_bought) return b.times_bought - a.times_bought;
-    if (b.last_date !== a.last_date) return b.last_date.localeCompare(a.last_date);
+    if (b.times_bought !== a.times_bought)
+      return b.times_bought - a.times_bought;
+    if (b.last_date !== a.last_date)
+      return b.last_date.localeCompare(a.last_date);
     const aPrio = PRIO_KW.some((token) => serviceKey(a.title).includes(token))
       ? 1
       : 0;
@@ -283,7 +299,7 @@ function visitsPerMonth(visits: MotivationVisit[]): number {
   let vpm = 1;
   if (dates.length >= 2) {
     const spanDays =
-      (dates[dates.length - 1]!.getTime() - dates[0]!.getTime()) /
+      (dates[dates.length - 1].getTime() - dates[0].getTime()) /
       (24 * 60 * 60 * 1000);
     if (spanDays > 0) {
       const cycle = spanDays / (dates.length - 1);
@@ -320,7 +336,9 @@ export function moneyPitchForClient(input: {
   );
   const grosses = mine.map((visit) => visit.grossRub);
   const usualGross = grosses.length
-    ? Math.round(grosses.reduce((sum, value) => sum + value, 0) / grosses.length)
+    ? Math.round(
+        grosses.reduce((sum, value) => sum + value, 0) / grosses.length,
+      )
     : Math.round(input.currentVisit.grossRub || 0);
   if (usualGross <= 0) return null;
 
@@ -412,7 +430,10 @@ export function toMotivationVisit(input: {
     title: service.name,
     priceRub: Math.round((service.amountKopecks || 0) / 100),
   }));
-  const fromServices = services.reduce((sum, service) => sum + service.priceRub, 0);
+  const fromServices = services.reduce(
+    (sum, service) => sum + service.priceRub,
+    0,
+  );
   const fromTotal =
     input.totalPriceKopecks != null
       ? Math.round(input.totalPriceKopecks / 100)
