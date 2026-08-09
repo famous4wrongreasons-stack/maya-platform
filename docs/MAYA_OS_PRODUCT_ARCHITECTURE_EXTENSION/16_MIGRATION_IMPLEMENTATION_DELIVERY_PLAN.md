@@ -11,6 +11,11 @@ No big-bang rewrite. Existing production behavior remains available until the
 replacement slice has contract parity, data reconciliation, canary evidence and
 a tested rollback path.
 
+The first delivery target is the native iOS barbershop pilot in
+[Barbershop Native Release 1 Scope](BARBERSHOP_NATIVE_RELEASE_1.md). PWA changes
+and additional verticals are outside that release, not removed from the target
+architecture.
+
 ## 16.2 Starting point
 
 The current system has:
@@ -31,7 +36,12 @@ Deliverables:
 
 - approve this extension and reconciliation;
 - perform YCLIENTS customer/consent capability spike;
+- verify Telegram and Yandex phone-claim capabilities and consent behavior;
+- define the trusted tenant-entry and owner-bootstrap threat model;
+- define source-authority rules for owner, workforce, customer and role data;
 - inventory customer identity, consent, analytics and communication behavior;
+- inventory operational CRM coverage for workforce, services, schedules,
+  appointments, visits, customers, payments and cashboxes;
 - define ADR backlog and owners;
 - create synthetic multi-tenant datasets;
 - establish architecture conformance and privacy checklists.
@@ -39,14 +49,23 @@ Deliverables:
 Exit:
 
 - no critical provider or legal capability is assumed;
+- no CRM token, phone, email or social identity is treated as role authority;
 - first implementation slices have Definition of Ready.
 
-## 16.4 Phase 1 — Customer and consent foundation
+## 16.4 Phase 1 — Identity, membership and operational CRM foundation
 
 Deliverables:
 
+- replay-safe owner bootstrap bound to an authenticated User;
+- multi-role Membership projection, including owner-provider composition;
+- EmployeeProfile/ProviderProfile import and access-candidate lifecycle;
+- workforce deactivation and last-owner safeguards;
+- tenant-scoped Telegram/Yandex Customer linking with verified phone evidence;
 - CustomerIdentity, merge candidate/record contracts;
-- backfill-safe CRM customer sync;
+- backfill-safe CRM sync for locations, workforce, services, schedules,
+  appointments, visits, customers, payments/refunds and cashbox facts where
+  capabilities exist;
+- incremental sync cursors, outbox events, reconciliation and readiness state;
 - Customer 360 read projection;
 - ConsentRecord, SuppressionEntry and effective-state reducer;
 - CommunicationEligibilityDecision;
@@ -54,13 +73,18 @@ Deliverables:
 
 Rollout:
 
-- shadow identity resolution;
+- shadow identity and workforce resolution;
+- bootstrap only internal/limited owner accounts first;
 - review merge candidates;
-- compare imported counts and duplicates;
+- compare provider/canonical counts, statuses, totals, duplicates and
+  historical horizons;
 - no marketing sends.
 
 Exit:
 
+- owner, provider and customer identities resolve without role inference;
+- operational facts required by native owner/staff surfaces are complete or
+  explicitly partial with a visible watermark;
 - CRM customers exist independently of Telegram;
 - eligibility is deterministic and fail-closed.
 
@@ -77,6 +101,7 @@ Deliverables:
 
 Rollout:
 
+- start only after Phase 1 operational-sync readiness passes;
 - shadow compare legacy metrics;
 - preview answers for internal/limited tenants;
 - report definition differences explicitly.
@@ -167,21 +192,35 @@ Each requires its own ADR and readiness evidence.
 
 ## 16.10 Vertical-slice order
 
-Preferred first end-to-end slice:
+Preferred first end-to-end slice is read-only:
+
+~~~text
+verified YCLIENTS connection
+  → owner bootstrap and owner-provider link
+  → operational backfill and reconciliation
+  → canonical appointments, visits and payment facts
+  → deterministic owner “today” metrics
+  → role-filtered native widget
+  → freshness, quality and source evidence
+~~~
+
+This slice proves identity, tenancy, role composition, source truth, sync,
+metrics and native rendering without performing a provider write or customer
+communication.
+
+The next slice MAY add cancellation opportunity preview:
 
 ~~~text
 cancelled appointment
   → canonical event
   → freed-capacity detector
-  → opportunity
-  → eligible customer cohort preview
-  → approved outreach
-  → booking outcome
-  → conservative recovered-value observation
+  → explainable opportunity
+  → eligible cohort count preview
 ~~~
 
-This slice exercises events, metrics, identity, consent, widgets, approval,
-provider action and outcome without requiring the entire platform.
+Approved outreach and outcome attribution are later slices. They begin only
+after consent capability, audience reconstruction, delivery-provider and
+approval gates are separately proven.
 
 ## 16.11 Migration mechanics
 
@@ -199,6 +238,9 @@ provider action and outcome without requiring the entire platform.
 
 ### Domain
 
+- owner bootstrap and replay invariants;
+- owner-provider role composition;
+- workforce access-candidate and deactivation transitions;
 - identity resolution/merge invariants;
 - consent effective state;
 - opportunity lifecycle and dedupe;
@@ -207,6 +249,8 @@ provider action and outcome without requiring the entire platform.
 ### Integration
 
 - YCLIENTS fixtures, pagination and permission loss;
+- workforce coverage for bookable and non-bookable employees;
+- Telegram/Yandex verified-phone and declined-phone fixtures;
 - contact masking;
 - webhook replay;
 - communication provider receipts.
@@ -230,6 +274,9 @@ provider action and outcome without requiring the entire platform.
 ### Security
 
 - cross-tenant and role matrix;
+- owner bootstrap grant replay and last-owner protection;
+- social identity without verified phone;
+- requested UI mode outside server capability set;
 - prompt injection;
 - consent race;
 - audience/approval replay;
@@ -267,6 +314,10 @@ Future implementation PRs SHOULD:
 - avoid combining frontend, backend and provider rollout unless the vertical
   slice requires it;
 - use draft status until capability and architecture review pass.
+
+For Barbershop Native Release 1, backend contracts and security policy land
+before native UI integration. Native client work must not be combined with PWA
+changes, Prisma migrations or role-derivation logic.
 
 After PR #21 merges, the extension branch can be rebased/retargeted to main
 without rewriting its architectural meaning.

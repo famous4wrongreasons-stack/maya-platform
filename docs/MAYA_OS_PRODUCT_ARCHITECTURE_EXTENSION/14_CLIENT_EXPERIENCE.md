@@ -154,6 +154,10 @@ losing confirmations, warnings or own-data boundaries.
 
 - Guest can browse public services without accessing customer data.
 - Existing customer links only after verified identity flow.
+- Telegram/Yandex linking occurs only inside trusted tenant entry and requires
+  verified phone evidence available with user consent.
+- Missing phone consent never falls back to name, username or profile-photo
+  matching.
 - Customer sees and changes own communication preferences.
 - Booking preview reflects current slot and exact service/price.
 - Duplicate confirmation produces one booking.

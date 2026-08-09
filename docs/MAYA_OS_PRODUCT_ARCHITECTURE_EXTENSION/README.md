@@ -29,6 +29,7 @@ more explicit:
 - how customer identity, consent and communication eligibility work;
 - how proactive signals become opportunities and governed actions;
 - how owner, employee and client experiences differ;
+- how authenticated identities become tenant Memberships and CRM-linked roles;
 - how conversational answers render as structured widgets;
 - how delivery agents must reconcile requirements before implementation.
 
@@ -56,7 +57,9 @@ change, through an ADR and an update to the base specification.
 15. [Chapter 14 — Client Experience](14_CLIENT_EXPERIENCE.md)
 16. [Chapter 15 — Security, Privacy, Multi-tenancy & Governance](15_SECURITY_PRIVACY_MULTI_TENANCY_GOVERNANCE.md)
 17. [Chapter 16 — Migration, Implementation & Delivery Plan](16_MIGRATION_IMPLEMENTATION_DELIVERY_PLAN.md)
-18. [Delivery Rules for Claude, Codex and Cursor](DELIVERY_RULES.md)
+18. [Chapter 17 — Identity, Access & Membership Bootstrap](17_IDENTITY_ACCESS_AND_MEMBERSHIP_BOOTSTRAP.md)
+19. [Barbershop Native Release 1 Scope](BARBERSHOP_NATIVE_RELEASE_1.md)
+20. [Delivery Rules for Claude, Codex and Cursor](DELIVERY_RULES.md)
 
 ## Product thesis
 
@@ -82,6 +85,11 @@ This set specifies target product and architecture behavior. It does not:
 - enable write operations merely because a document names them;
 - replace current runbooks, acceptance evidence or operational controls;
 - change live YCLIENTS, Telegram, PWA, iOS or production behavior by itself.
+
+The current implementation focus is the native iOS barbershop pilot described
+in [Barbershop Native Release 1 Scope](BARBERSHOP_NATIVE_RELEASE_1.md). That
+delivery decision does not redefine the channel-independent target
+architecture and does not authorize PWA changes.
 
 Every implementation slice remains subject to capability verification,
 permission checks, consent, feature flags, audit, canary rollout and rollback.

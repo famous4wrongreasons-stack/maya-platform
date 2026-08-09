@@ -168,3 +168,9 @@ After action, Maya reports:
 - A later withdrawal removes a customer before send.
 - Owner sees action completion separately from recovered revenue.
 - Multi-location scope remains visible through follow-up questions.
+- An authenticated onboarding owner receives full owner capabilities only after
+  replay-safe bootstrap, not merely after entering a CRM token.
+- An owner linked to a provider profile can switch between owner and staff
+  modes without losing owner authority or creating a duplicate account.
+- Incomplete initial CRM sync displays readiness/freshness instead of a reduced
+  dashboard with misleading zeroes.
