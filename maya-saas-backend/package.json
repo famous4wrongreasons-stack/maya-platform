@@ -42,7 +42,7 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^11.4.5",
+    "@nestjs/swagger": "^11.4.6",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcrypt": "^6.0.0",
@@ -107,6 +107,15 @@
     "testEnvironment": "node"
   },
   "overrides": {
-    "fast-uri": "^3.1.5"
+    "fast-uri": "^3.1.5",
+    "@eslint/eslintrc": {
+      "js-yaml": "^4.3.1"
+    },
+    "cosmiconfig": {
+      "js-yaml": "^4.3.1"
+    },
+    "@nestjs/swagger": {
+      "js-yaml": "^5.2.3"
+    }
   }
 }
