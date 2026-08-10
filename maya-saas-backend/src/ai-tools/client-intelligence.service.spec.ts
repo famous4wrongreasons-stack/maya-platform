@@ -31,6 +31,53 @@ describe('ClientIntelligenceService', () => {
     expect(result?.reply).toContain('Проверила YClients');
   });
 
+  it('answers the all-time client base size from CRM metadata', async () => {
+    const { service, crm } = createService();
+    crm.getClientBaseCount.mockResolvedValue(1_234);
+
+    const result = await service.tryHandle(
+      owner,
+      dto('Сколько всего людей в нашей базе?'),
+    );
+
+    expect(crm.getClientBaseCount).toHaveBeenCalledWith('tenant-a');
+    expect(crm.getClientReturnCandidates).not.toHaveBeenCalled();
+    expect(result?.reply).toContain((1_234).toLocaleString('ru-RU'));
+    expect(result?.reply).toContain('за всё время');
+    expect(result?.reply).not.toContain('за текущий месяц:');
+    expect(result?.toolUsage.name).toBe('clients.private.base_count');
+  });
+
+  it('keeps the client base intent for an all-time clarification', async () => {
+    const { service, crm } = createService();
+    crm.getClientBaseCount.mockResolvedValue(4_321);
+
+    const result = await service.tryHandle(owner, {
+      ...dto('Всего за всё время'),
+      messages: [
+        { role: 'user', content: 'Сколько всего людей в нашей базе?' },
+        { role: 'assistant', content: 'За какой период?' },
+        { role: 'user', content: 'Всего за всё время' },
+      ],
+    });
+
+    expect(crm.getClientBaseCount).toHaveBeenCalledWith('tenant-a');
+    expect(result?.reply).toContain((4_321).toLocaleString('ru-RU'));
+    expect(result?.toolUsage.name).toBe('clients.private.base_count');
+  });
+
+  it('does not replace period analytics with the all-time base size', async () => {
+    const { service, crm } = createService();
+
+    const result = await service.tryHandle(
+      owner,
+      dto('Сколько всего клиентов было за текущий месяц?'),
+    );
+
+    expect(result).toBeNull();
+    expect(crm.getClientBaseCount).not.toHaveBeenCalled();
+  });
+
   it('does not silently choose the first client when CRM search is ambiguous', async () => {
     const { service, crm } = createService();
     crm.searchClients.mockResolvedValue([
@@ -226,6 +273,18 @@ describe('ClientIntelligenceService', () => {
     expect(crm.getClientReturnCandidates).not.toHaveBeenCalled();
   });
 
+  it('does not expose the all-time client base size to a regular master', async () => {
+    const { service, crm } = createService();
+
+    const result = await service.tryHandle(
+      { ...owner, role: UserRole.STAFF },
+      dto('Сколько всего людей в нашей базе?'),
+    );
+
+    expect(result?.toolUsage.status).toBe('denied');
+    expect(crm.getClientBaseCount).not.toHaveBeenCalled();
+  });
+
   it('does not expose an exact inactivity segment to a regular master', async () => {
     const { service, crm } = createService();
 
@@ -250,6 +309,7 @@ describe('ClientIntelligenceService', () => {
   function createService() {
     const crm = {
       searchClients: jest.fn(),
+      getClientBaseCount: jest.fn(),
       getClientVisitHistory: jest.fn(),
       getClientReturnCandidates: jest.fn(),
     };

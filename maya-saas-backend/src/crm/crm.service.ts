@@ -1181,6 +1181,17 @@ export class CrmService {
     return adapter.searchClients({ tenantId: scopedTenantId, query });
   }
 
+  async getClientBaseCount(tenantId: string): Promise<number> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientBaseCount',
+      'crm_client_base_count_not_supported',
+    );
+
+    return adapter.getClientBaseCount({ tenantId: scopedTenantId });
+  }
+
   async getClientVisitHistory(
     tenantId: string,
     clientId: string,

@@ -429,6 +429,8 @@ export interface CRMAdapter {
     tenantId: string;
     query: string;
   }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  /** Общий размер клиентской базы без выгрузки персональных данных. */
+  getClientBaseCount?(params: { tenantId: string }): Promise<number>;
   /** История одного клиента, включая неявки и отмены. */
   getClientVisitHistory?(params: {
     tenantId: string;

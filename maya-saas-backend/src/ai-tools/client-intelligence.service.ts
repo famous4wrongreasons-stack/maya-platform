@@ -21,6 +21,14 @@ const PRIVATE_CLIENT_ROLES = new Set<UserRole>([
 
 const CLIENT_ACCESS_PATTERN =
   /(?:есть|имеет|получил|получила|видит|видишь|доступ).{0,30}(?:баз[а-яё]*\s+клиент|клиентск[а-яё]*\s+баз)|(?:баз[а-яё]*\s+клиент).{0,30}(?:доступ|видит|видишь)/iu;
+const CLIENT_BASE_COUNT_PATTERN =
+  /(?:(?:сколько|количеств[а-яё]*|общее\s+число|размер|всего).{0,60}(?:клиент[а-яё]*|гост[а-яё]*|люд[а-яё]*|человек|баз[а-яё]*)|(?:клиентск[а-яё]*\s+баз[а-яё]*|баз[а-яё]*\s+клиент[а-яё]*).{0,60}(?:сколько|количеств[а-яё]*|общее\s+число|размер|всего))/iu;
+const CLIENT_BASE_SCOPE_PATTERN =
+  /(?:баз[а-яё]*|за\s+вс[её]\s+время|общее\s+число|размер|(?:сколько\s+)?всего|вообще|когда-либо)/iu;
+const BOUNDED_CLIENT_PERIOD_PATTERN =
+  /(?:сегодня|вчера|за\s+(?:(?:эт|текущ|прошл)[а-яё]*\s+)?(?:день|недел[а-яё]*|месяц[а-яё]*|год[а-яё]*)|в\s+(?:этом|текущем|прошлом)\s+(?:месяце|году))/iu;
+const ALL_TIME_CLARIFICATION_PATTERN =
+  /^(?:(?:а|нет|да)\s+)?(?:сколько\s+)?(?:всего\s+)?за\s+вс[её]\s+время[?.!]*$/iu;
 const RETURN_QUEUE_PATTERN =
   /(?:кого|клиент[а-яё]*).{0,35}(?:вернут|возврат|приглас|напомн)|(?:неявк|не\s+приш[её]л|пропустил[а-яё]*\s+запис|отменил[а-яё]*\s+и\s+не\s+запис|просрочил[а-яё]*\s+цикл|давно\s+не\s+(?:был|приходил)|ушедш[а-яё]*\s+клиент)/iu;
 const DOSSIER_PATTERN =
@@ -50,12 +58,20 @@ export class ClientIntelligenceService {
     dto: AiCoreChatDto,
   ): Promise<ClientIntelligenceCommand | null> {
     const text = this.latestUserText(dto);
+    const baseCountQuestion = this.isClientBaseCountQuestion(dto, text);
     const accessQuestion = CLIENT_ACCESS_PATTERN.test(text);
     const inactivePeriod = this.inactivePeriodFilter(text);
     const returnQuestion =
       RETURN_QUEUE_PATTERN.test(text) || inactivePeriod !== null;
     const dossierQuestion = DOSSIER_PATTERN.test(text);
-    if (!accessQuestion && !returnQuestion && !dossierQuestion) return null;
+    if (
+      !baseCountQuestion &&
+      !accessQuestion &&
+      !returnQuestion &&
+      !dossierQuestion
+    ) {
+      return null;
+    }
 
     if (!user.tenantId) {
       return this.result(
@@ -81,6 +97,17 @@ export class ClientIntelligenceService {
     }
 
     try {
+      if (baseCountQuestion) {
+        const totalCount = await this.crmService.getClientBaseCount(
+          user.tenantId,
+        );
+        return this.result(
+          `Всего клиентов в базе YClients: ${totalCount.toLocaleString('ru-RU')}. Это общий размер базы за всё время, а не число уникальных клиентов за текущий месяц.`,
+          null,
+          'clients.private.base_count',
+        );
+      }
+
       if (returnQuestion || accessQuestion) {
         const candidates = await this.crmService.getClientReturnCandidates(
           user.tenantId,
@@ -119,9 +146,11 @@ export class ClientIntelligenceService {
       return this.result(
         'Не удалось прочитать клиентскую базу YClients. Проверьте статус CRM в профиле и повторите запрос.',
         null,
-        returnQuestion
-          ? 'clients.private.return_candidates'
-          : 'clients.private.dossier',
+        baseCountQuestion
+          ? 'clients.private.base_count'
+          : returnQuestion
+            ? 'clients.private.return_candidates'
+            : 'clients.private.dossier',
         'failed',
       );
     }
@@ -494,6 +523,27 @@ export class ClientIntelligenceService {
         .reverse()
         .find((message) => message.role === 'user')?.content ?? ''
     ).trim();
+  }
+
+  private isClientBaseCountQuestion(dto: AiCoreChatDto, text: string): boolean {
+    if (this.isDirectClientBaseCountQuestion(text)) return true;
+    if (!ALL_TIME_CLARIFICATION_PATTERN.test(text)) return false;
+
+    return dto.messages
+      .slice(0, -1)
+      .reverse()
+      .some(
+        (message) =>
+          message.role === 'user' &&
+          this.isDirectClientBaseCountQuestion(message.content.trim()),
+      );
+  }
+
+  private isDirectClientBaseCountQuestion(text: string): boolean {
+    if (!CLIENT_BASE_COUNT_PATTERN.test(text)) return false;
+    if (!CLIENT_BASE_SCOPE_PATTERN.test(text)) return false;
+    if (/за\s+вс[её]\s+время|вообще|когда-либо/iu.test(text)) return true;
+    return !BOUNDED_CLIENT_PERIOD_PATTERN.test(text);
   }
 
   private result(

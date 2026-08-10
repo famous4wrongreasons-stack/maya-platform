@@ -149,6 +149,7 @@ interface YclientsResponse<TData> {
   data?: TData;
   meta?: {
     message?: string;
+    total_count?: number | string;
   };
 }
 
@@ -1182,6 +1183,24 @@ export class YclientsCRMAdapter implements CRMAdapter {
       // Удалённую запись править нечего — кабинет спрячет кнопки.
       can_edit: record.deleted !== true,
     };
+  }
+
+  /** Читает только агрегат из meta, не передавая карточки клиентов выше. */
+  async getClientBaseCount(params: { tenantId: string }): Promise<number> {
+    void params.tenantId;
+    const response = await this.request<YclientsClientSearchItem[]>(
+      `clients/${this.getCompanyId()}`,
+      {
+        query: new URLSearchParams({ page: '1', count: '1' }),
+      },
+    );
+    const totalCount = Number(response.meta?.total_count);
+
+    if (!Number.isInteger(totalCount) || totalCount < 0) {
+      throw new Error('YClients did not return the total client count');
+    }
+
+    return totalCount;
   }
 
   /**
