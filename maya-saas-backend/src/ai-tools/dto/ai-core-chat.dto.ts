@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsIn,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -26,6 +27,11 @@ export class AiCoreChatMessageDto {
 export class AiCoreChatDto {
   @IsIn(['native', 'web', 'telegram', 'voice'])
   surface!: AiToolSurface;
+
+  // Presentation hint only. Authorization always comes from server-side membership.
+  @IsOptional()
+  @IsIn(['client', 'staff', 'owner'])
+  audience?: 'client' | 'staff' | 'owner';
 
   @IsString()
   @Matches(/^[A-Za-z0-9_-]{8,128}$/)
