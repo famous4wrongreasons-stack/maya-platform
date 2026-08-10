@@ -32,7 +32,8 @@ import type {
   AiCoreToolResult,
 } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
-import { buildChatReportCard } from './chat-report-card';
+import { buildChatReportCard, type ChatReportCard } from './chat-report-card';
+import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
 import { ReportingPeriodResolver } from './reporting-period.resolver';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
@@ -385,6 +386,7 @@ export class AiCoreService {
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
     private readonly brainRouter: MayaBrainRouterService,
+    private readonly clientIntelligence: ClientIntelligenceService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -401,6 +403,36 @@ export class AiCoreService {
       user.role,
       this.latestUserText(sanitized.messages),
     );
+    const clientCommand = await this.clientIntelligence.tryHandle(user, dto);
+    if (clientCommand) {
+      return this.complete(
+        user,
+        dto,
+        brain,
+        true,
+        [clientCommand.toolUsage],
+        [],
+        {
+          reply: clientCommand.reply,
+          source: 'safe_fallback',
+          action: null,
+          grounding: {
+            status:
+              clientCommand.toolUsage.status === 'completed'
+                ? 'verified'
+                : 'blocked',
+            domain: 'client_intelligence',
+            required_tools: [clientCommand.toolUsage.name],
+            evidence_tools:
+              clientCommand.toolUsage.status === 'completed'
+                ? [clientCommand.toolUsage.name]
+                : [],
+          },
+        },
+        [],
+        clientCommand.card,
+      );
+    }
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
       user,
       dto,
@@ -1194,6 +1226,7 @@ export class AiCoreService {
     decisions: AiCoreModelDecision[],
     response: AiCoreCompletion,
     toolResults: AiCoreToolResult[] = [],
+    explicitReportCard: ChatReportCard | null = null,
   ) {
     const completedResponse = response;
     const grounding =
@@ -1226,12 +1259,13 @@ export class AiCoreService {
       UserRole.STAFF,
     ].includes(user.role);
     const reportCard =
-      grounding.status === 'verified' && toolResults.length > 0
+      explicitReportCard ??
+      (grounding.status === 'verified' && toolResults.length > 0
         ? buildChatReportCard(toolResults, {
             personal,
             userText: this.latestUserText(dto.messages),
           })
-        : null;
+        : null);
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
       userId: user.userId,

@@ -29,6 +29,8 @@ import {
   CrmAdapterConfig,
   CrmAppointmentDetail,
   CrmCompanyProfile,
+  CrmClientReturnCandidate,
+  CrmClientVisitInsight,
   CrmFinancialSummary,
   CrmRevenueSummary,
   CrmTeamMember,
@@ -1177,6 +1179,44 @@ export class CrmService {
     );
 
     return adapter.searchClients({ tenantId: scopedTenantId, query });
+  }
+
+  async getClientVisitHistory(
+    tenantId: string,
+    clientId: string,
+    limit = 50,
+  ): Promise<CrmClientVisitInsight[]> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientVisitHistory',
+      'crm_client_history_not_supported',
+    );
+
+    return adapter.getClientVisitHistory({
+      tenantId: scopedTenantId,
+      clientId,
+      timezone: await this.tenantTimezone(scopedTenantId),
+      limit,
+    });
+  }
+
+  async getClientReturnCandidates(
+    tenantId: string,
+    limit = 50,
+  ): Promise<CrmClientReturnCandidate[]> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientReturnCandidates',
+      'crm_client_return_not_supported',
+    );
+
+    return adapter.getClientReturnCandidates({
+      tenantId: scopedTenantId,
+      timezone: await this.tenantTimezone(scopedTenantId),
+      limit,
+    });
   }
 
   async getFinancialSummary(

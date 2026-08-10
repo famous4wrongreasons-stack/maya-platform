@@ -1456,4 +1456,153 @@ describe('YclientsCRMAdapter', () => {
     ).resolves.toMatchObject({ conflict_times: ['18:30'] });
     expect(attemptedScheduleWrite).toBe(false);
   });
+
+  it('returns completed visits, no-shows and cancellations for a private dossier', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T09:00:00.000Z'));
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>(
+      (input: Parameters<typeof fetch>[0]) => {
+        requestedUrls.push(requestUrl(input));
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 1,
+                  datetime: '2026-07-01T10:00:00',
+                  attendance: 1,
+                  client: { id: 88, name: 'Client' },
+                  services: [{ title: 'Haircut', cost: 2_000 }],
+                },
+                {
+                  id: 2,
+                  datetime: '2026-07-20T10:00:00',
+                  attendance: -1,
+                  client: { id: 88, name: 'Client' },
+                  services: [{ title: 'Haircut', cost: 2_000 }],
+                },
+                {
+                  id: 3,
+                  datetime: '2026-08-01T10:00:00',
+                  deleted: true,
+                  client: { id: 88, name: 'Client' },
+                  services: [{ title: 'Beard', cost: 1_000 }],
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const history = await adapter.getClientVisitHistory({
+      tenantId: 'tenant-1',
+      clientId: '88',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(history.map((visit) => visit.status)).toEqual([
+      'completed',
+      'no_show',
+      'canceled',
+    ]);
+    expect(history[0]).toMatchObject({
+      service_names: ['Haircut'],
+      booked_service_value: 2_000,
+    });
+    expect(requestedUrls[0]).toContain('client_id=88');
+    expect(requestedUrls[0]).toContain('with_deleted=1');
+  });
+
+  it('builds a deduplicated return queue and excludes clients with a future booking', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T09:00:00.000Z'));
+    const records = [
+      visit(1011, 101, 'No show', '+79180000101', '2026-06-01T10:00:00', 1),
+      visit(1012, 101, 'No show', '+79180000101', '2026-08-01T10:00:00', -1),
+      {
+        ...visit(
+          1021,
+          102,
+          'Rebooked',
+          '+79180000102',
+          '2026-08-05T10:00:00',
+          0,
+        ),
+        deleted: true,
+      },
+      visit(1022, 102, 'Rebooked', '+79180000102', '2026-08-20T10:00:00', 0),
+      visit(1031, 103, 'Overdue', '+79180000103', '2026-04-01T10:00:00', 1),
+      visit(1032, 103, 'Overdue', '+79180000103', '2026-05-01T10:00:00', 1),
+      visit(1033, 103, 'Overdue', '+79180000103', '2026-06-01T10:00:00', 1),
+      {
+        ...visit(
+          1041,
+          104,
+          'Canceled',
+          '+79180000104',
+          '2026-08-05T10:00:00',
+          0,
+        ),
+        deleted: true,
+      },
+    ];
+    global.fetch = jest.fn<typeof fetch>(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ data: records }), { status: 200 }),
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const candidates = await adapter.getClientReturnCandidates({
+      tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(candidates.map((candidate) => candidate.client_id)).toEqual([
+      '101',
+      '104',
+      '103',
+    ]);
+    expect(candidates.map((candidate) => candidate.reason_code)).toEqual([
+      'no_show',
+      'canceled_without_rebooking',
+      'overdue_cycle',
+    ]);
+    expect(
+      candidates.find((candidate) => candidate.client_id === '103'),
+    ).toMatchObject({
+      average_cycle_days: 31,
+      days_overdue: 39,
+    });
+    expect(candidates.some((candidate) => candidate.client_id === '102')).toBe(
+      false,
+    );
+  });
+
+  function visit(
+    id: number,
+    clientId: number,
+    name: string,
+    phone: string,
+    datetime: string,
+    attendance: number,
+  ) {
+    return {
+      id,
+      datetime,
+      attendance,
+      client: { id: clientId, name, phone },
+      services: [{ title: 'Haircut', cost: 2_000 }],
+    };
+  }
 });

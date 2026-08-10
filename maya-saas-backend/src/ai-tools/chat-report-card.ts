@@ -6,7 +6,11 @@
  */
 
 export type ChatReportWidget =
-  'business_report' | 'master_earn' | 'master_upsell';
+  | 'business_report'
+  | 'master_earn'
+  | 'master_upsell'
+  | 'client_dossier'
+  | 'client_return_candidates';
 
 export type ChatReportCard = {
   widget: ChatReportWidget;

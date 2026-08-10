@@ -15,6 +15,9 @@ import {
   CrmAppointmentDetail,
   CrmCompanyOption,
   CrmCompanyProfile,
+  CrmClientReturnCandidate,
+  CrmClientVisitInsight,
+  CrmClientVisitStatus,
   CrmFinancialSummary,
   CrmRevenueSummary,
   CrmJournal,
@@ -1217,6 +1220,187 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
   }
 
+  async getClientVisitHistory(params: {
+    tenantId: string;
+    clientId: string;
+    timezone: string;
+    limit?: number;
+  }): Promise<CrmClientVisitInsight[]> {
+    void params.tenantId;
+    const limit = Math.min(Math.max(params.limit ?? 50, 1), 100);
+    const clientId = this.toNumericId(params.clientId, 'client.id');
+    const end = new Date();
+    const start = new Date(end.getTime() - 730 * 24 * 60 * 60 * 1000);
+    const records = await this.fetchRecords({
+      startDate: this.dateKeyInTimezone(start.toISOString(), params.timezone),
+      endDate: this.dateKeyInTimezone(end.toISOString(), params.timezone),
+      clientId,
+      withDeleted: true,
+    });
+
+    return records
+      .map((record) => this.clientVisitInsight(record, params.timezone))
+      .sort((left, right) => left.start.localeCompare(right.start))
+      .slice(-limit);
+  }
+
+  async getClientReturnCandidates(params: {
+    tenantId: string;
+    timezone: string;
+    lookbackDays?: number;
+    futureDays?: number;
+    limit?: number;
+  }): Promise<CrmClientReturnCandidate[]> {
+    void params.tenantId;
+    const lookbackDays = Math.min(
+      Math.max(params.lookbackDays ?? 365, 90),
+      730,
+    );
+    const futureDays = Math.min(Math.max(params.futureDays ?? 90, 14), 180);
+    const limit = Math.min(Math.max(params.limit ?? 50, 1), 100);
+    const now = new Date();
+    const start = new Date(now.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+    const end = new Date(now.getTime() + futureDays * 24 * 60 * 60 * 1000);
+    const records = await this.fetchRecordsInWindows({
+      startDate: this.dateKeyInTimezone(start.toISOString(), params.timezone),
+      endDate: this.dateKeyInTimezone(end.toISOString(), params.timezone),
+      withDeleted: true,
+    });
+    const clients = new Map<
+      string,
+      {
+        name: string;
+        phone: string | null;
+        visits: CrmClientVisitInsight[];
+      }
+    >();
+
+    for (const record of records) {
+      const rawClientId = record.client?.id;
+      if (rawClientId === undefined || rawClientId === null) continue;
+      const clientId = String(rawClientId);
+      const current = clients.get(clientId) ?? {
+        name: '',
+        phone: null,
+        visits: [],
+      };
+      const name = String(record.client?.name || '').trim();
+      const phone = String(record.client?.phone || '').trim();
+      if (name) current.name = name;
+      if (phone) current.phone = this.normalizePhone(phone);
+      current.visits.push(this.clientVisitInsight(record, params.timezone));
+      clients.set(clientId, current);
+    }
+
+    const nowMs = now.getTime();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const ranked: Array<CrmClientReturnCandidate & { priority: number }> = [];
+
+    for (const [clientId, client] of clients) {
+      const visits = client.visits
+        .slice()
+        .sort((left, right) => left.start.localeCompare(right.start));
+      const hasUpcoming = visits.some((visit) => {
+        const timestamp = Date.parse(visit.start);
+        return (
+          timestamp > nowMs &&
+          visit.status !== 'canceled' &&
+          visit.status !== 'no_show'
+        );
+      });
+      if (hasUpcoming) continue;
+
+      const past = visits.filter((visit) => Date.parse(visit.start) <= nowMs);
+      const completed = past.filter((visit) => visit.status === 'completed');
+      const latestCompleted = completed.at(-1) ?? null;
+      const latestNoShow = past
+        .filter((visit) => visit.status === 'no_show')
+        .at(-1);
+      const latestCanceled = past
+        .filter((visit) => visit.status === 'canceled')
+        .at(-1);
+      const completedAt = latestCompleted
+        ? Date.parse(latestCompleted.start)
+        : Number.NEGATIVE_INFINITY;
+
+      if (
+        latestNoShow &&
+        nowMs - Date.parse(latestNoShow.start) <= 90 * dayMs
+      ) {
+        ranked.push({
+          client_id: clientId,
+          name: client.name || 'Клиент',
+          phone: client.phone,
+          reason_code: 'no_show',
+          last_completed_visit: latestCompleted?.start ?? null,
+          last_event_at: latestNoShow.start,
+          average_cycle_days: this.medianVisitCycleDays(completed),
+          days_overdue: null,
+          priority: 0,
+        });
+        continue;
+      }
+
+      if (
+        latestCanceled &&
+        Date.parse(latestCanceled.start) > completedAt &&
+        nowMs - Date.parse(latestCanceled.start) <= 60 * dayMs
+      ) {
+        ranked.push({
+          client_id: clientId,
+          name: client.name || 'Клиент',
+          phone: client.phone,
+          reason_code: 'canceled_without_rebooking',
+          last_completed_visit: latestCompleted?.start ?? null,
+          last_event_at: latestCanceled.start,
+          average_cycle_days: this.medianVisitCycleDays(completed),
+          days_overdue: null,
+          priority: 1,
+        });
+        continue;
+      }
+
+      const averageCycleDays = this.medianVisitCycleDays(completed);
+      if (!latestCompleted || averageCycleDays === null) continue;
+      const dueAt =
+        Date.parse(latestCompleted.start) + averageCycleDays * dayMs;
+      const daysOverdue = Math.floor((nowMs - dueAt) / dayMs);
+      const graceDays = Math.max(7, Math.ceil(averageCycleDays * 0.2));
+      if (daysOverdue < graceDays) continue;
+
+      ranked.push({
+        client_id: clientId,
+        name: client.name || 'Клиент',
+        phone: client.phone,
+        reason_code: 'overdue_cycle',
+        last_completed_visit: latestCompleted.start,
+        last_event_at: latestCompleted.start,
+        average_cycle_days: averageCycleDays,
+        days_overdue: daysOverdue,
+        priority: 2,
+      });
+    }
+
+    return ranked
+      .sort(
+        (left, right) =>
+          left.priority - right.priority ||
+          (right.days_overdue ?? 0) - (left.days_overdue ?? 0) ||
+          right.last_event_at.localeCompare(left.last_event_at),
+      )
+      .slice(0, limit)
+      .map((candidate) => ({
+        client_id: candidate.client_id,
+        name: candidate.name,
+        phone: candidate.phone,
+        reason_code: candidate.reason_code,
+        last_completed_visit: candidate.last_completed_visit,
+        last_event_at: candidate.last_event_at,
+        average_cycle_days: candidate.average_cycle_days,
+        days_overdue: candidate.days_overdue,
+      }));
+  }
+
   async getStaffScheduleDay(params: {
     tenantId: string;
     staffId: string;
@@ -1849,6 +2033,96 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return records;
   }
 
+  /**
+   * Общую клиентскую базу читаем короткими окнами. Один запрос за год может
+   * упереться в лимит YClients и тихо потерять часть записей; месячные окна
+   * сохраняют полноту и дедуплицируются по id на границах.
+   */
+  private async fetchRecordsInWindows(params: {
+    startDate: string;
+    endDate: string;
+    withDeleted?: boolean;
+  }): Promise<YclientsRecordApiItem[]> {
+    const result: YclientsRecordApiItem[] = [];
+    const seen = new Set<string>();
+    let cursor = params.startDate;
+
+    while (cursor <= params.endDate) {
+      const windowEnd = [
+        this.addDateDays(cursor, 30),
+        params.endDate,
+      ].sort()[0];
+      const batch = await this.fetchRecords({
+        startDate: cursor,
+        endDate: windowEnd,
+        withDeleted: params.withDeleted,
+      });
+      for (const record of batch) {
+        const id =
+          record.id === undefined || record.id === null
+            ? null
+            : String(record.id);
+        if (id && seen.has(id)) continue;
+        if (id) seen.add(id);
+        result.push(record);
+      }
+      cursor = this.addDateDays(windowEnd, 1);
+    }
+
+    return result;
+  }
+
+  private addDateDays(dateKey: string, days: number): string {
+    const date = new Date(`${dateKey}T12:00:00.000Z`);
+    if (Number.isNaN(date.getTime())) {
+      throw new Error('Invalid CRM date window');
+    }
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  private clientVisitInsight(
+    record: YclientsRecordApiItem,
+    timezone: string,
+  ): CrmClientVisitInsight {
+    const timing = this.recordTiming(record, timezone);
+    const serviceNames = (record.services || [])
+      .map((service) => String(service.title || '').trim())
+      .filter(Boolean);
+    const serviceCosts = (record.services || [])
+      .map((service) => Number(service.cost ?? service.price_min))
+      .filter((cost) => Number.isFinite(cost));
+
+    return {
+      start: timing.start.toISOString(),
+      status: this.recordStatus(record),
+      service_names: serviceNames,
+      booked_service_value:
+        serviceCosts.length > 0
+          ? serviceCosts.reduce((total, cost) => total + cost, 0)
+          : null,
+    };
+  }
+
+  private medianVisitCycleDays(visits: CrmClientVisitInsight[]): number | null {
+    if (visits.length < 2) return null;
+    const dayMs = 24 * 60 * 60 * 1000;
+    const gaps: number[] = [];
+
+    for (let index = 1; index < visits.length; index += 1) {
+      const previous = Date.parse(visits[index - 1].start);
+      const current = Date.parse(visits[index].start);
+      const gap = Math.round((current - previous) / dayMs);
+      if (Number.isFinite(gap) && gap >= 7 && gap <= 120) gaps.push(gap);
+    }
+    if (gaps.length === 0) return null;
+    gaps.sort((left, right) => left - right);
+    const middle = Math.floor(gaps.length / 2);
+    return gaps.length % 2 === 1
+      ? gaps[middle]
+      : Math.round((gaps[middle - 1] + gaps[middle]) / 2);
+  }
+
   private async fetchFinancialTransactions(
     startDate: string,
     endDate: string,
@@ -2238,7 +2512,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
    * удалена, и помечена неявкой, побеждает отмена: последнее, что с записью
    * сделали, — отменили её.
    */
-  private recordStatus(record: YclientsRecordApiItem): string {
+  private recordStatus(record: YclientsRecordApiItem): CrmClientVisitStatus {
     if (record.deleted) {
       return 'canceled';
     }
