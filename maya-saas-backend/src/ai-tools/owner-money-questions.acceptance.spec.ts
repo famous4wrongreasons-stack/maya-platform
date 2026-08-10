@@ -31,7 +31,6 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
-import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
@@ -433,6 +432,7 @@ function createHarness(
     getFinancialSummary,
     getJournal,
     getRevenueSummary: jest.fn(),
+    getServices: jest.fn().mockResolvedValue([]),
   } as unknown as CrmService;
 
   const analytics = new OperationsAnalyticsService(
@@ -496,9 +496,6 @@ function createHarness(
       tryHandle: jest.fn().mockResolvedValue(null),
     } as unknown as StaffScheduleCommandService,
     new MayaBrainRouterService(),
-    {
-      tryHandle: jest.fn().mockResolvedValue(null),
-    } as unknown as ClientIntelligenceService,
   );
 
   let request = 0;
@@ -526,22 +523,41 @@ function createHarness(
   };
 }
 
-/** Модель молчит: провайдер недоступен, текст обязан собрать сервер. */
+/**
+ * Модель выбирает предложенный инструмент, но после его выполнения провайдер
+ * недоступен. Финальный текст обязан безопасно собрать сервер.
+ */
 function silentModel(harness: ReturnType<typeof createHarness>) {
-  harness.decide.mockResolvedValue(null);
+  harness.decide.mockImplementation((input: AiCoreModelInput) => {
+    const toolName = input.requiredToolNames[0];
+    if (input.allowToolCall && input.toolResults.length === 0 && toolName) {
+      return Promise.resolve({
+        reply: 'Проверяю данные.',
+        toolCall: { name: toolName, arguments: {} },
+        provider: 'deepseek' as const,
+        model: 'test-model',
+        usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      });
+    }
+    return Promise.resolve(null);
+  });
 }
 
 /** Модель повторяет собранный сервером текст — проверяем сторож чисел. */
 function echoModel(harness: ReturnType<typeof createHarness>, reply: string) {
-  harness.decide.mockImplementation((input: AiCoreModelInput) =>
-    Promise.resolve({
+  harness.decide.mockImplementation((input: AiCoreModelInput) => {
+    const toolName = input.requiredToolNames[0];
+    return Promise.resolve({
       reply: input.toolResults.length > 0 ? reply : 'Смотрю данные.',
-      toolCall: null,
+      toolCall:
+        input.allowToolCall && input.toolResults.length === 0 && toolName
+          ? { name: toolName, arguments: {} }
+          : null,
       provider: 'deepseek' as const,
       model: 'test-model',
       usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-    }),
-  );
+    });
+  });
 }
 
 describe('ПРИЁМКА: живые денежные вопросы владельца', () => {

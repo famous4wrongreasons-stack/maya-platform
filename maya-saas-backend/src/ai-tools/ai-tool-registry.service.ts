@@ -80,10 +80,55 @@ export class AiToolRegistryService {
       case 'catalog.services.read':
       case 'catalog.staff.read':
       case 'customers.count':
+      case 'clients.access.check':
       case 'appointments.own.list':
       case 'loyalty.own.read':
         this.assertAllowedKeys(args, []);
         return {};
+      case 'clients.return_candidates.read': {
+        this.assertAllowedKeys(args, [
+          'mode',
+          'inactive_days',
+          'lookback_days',
+          'future_days',
+          'limit',
+        ]);
+        const mode = args.mode === undefined ? 'adaptive' : args.mode;
+        if (
+          typeof mode !== 'string' ||
+          !['adaptive', 'inactive_period'].includes(mode)
+        ) {
+          this.invalidArguments('client return mode is invalid');
+        }
+        const inactiveDays = this.optionalIntegerInRange(
+          args.inactive_days,
+          'inactive_days',
+          7,
+          365,
+        );
+        if (mode === 'inactive_period' && inactiveDays === undefined) {
+          this.invalidArguments('inactive_period requires inactive_days');
+        }
+        return {
+          mode,
+          ...(inactiveDays === undefined
+            ? {}
+            : { inactive_days: inactiveDays }),
+          ...this.optionalIntegerProperty(
+            args.lookback_days,
+            'lookback_days',
+            30,
+            730,
+          ),
+          ...this.optionalIntegerProperty(
+            args.future_days,
+            'future_days',
+            1,
+            180,
+          ),
+          ...this.optionalIntegerProperty(args.limit, 'limit', 1, 50),
+        };
+      }
       case 'clients.dossier.read':
         this.assertAllowedKeys(args, ['query']);
         return { query: this.assertClientSearchQuery(args.query) };
@@ -658,6 +703,36 @@ export class AiToolRegistryService {
       value > 1_000_000
     ) {
       this.invalidArguments('delta must be a non-zero integer within limits');
+    }
+    return value;
+  }
+
+  private optionalIntegerProperty(
+    value: unknown,
+    field: string,
+    minimum: number,
+    maximum: number,
+  ): Record<string, number> {
+    const parsed = this.optionalIntegerInRange(value, field, minimum, maximum);
+    return parsed === undefined ? {} : { [field]: parsed };
+  }
+
+  private optionalIntegerInRange(
+    value: unknown,
+    field: string,
+    minimum: number,
+    maximum: number,
+  ): number | undefined {
+    if (value === undefined) return undefined;
+    if (
+      typeof value !== 'number' ||
+      !Number.isInteger(value) ||
+      value < minimum ||
+      value > maximum
+    ) {
+      this.invalidArguments(
+        `${field} must be an integer from ${minimum} to ${maximum}`,
+      );
     }
     return value;
   }

@@ -158,7 +158,11 @@ export class AiToolHandlerService {
       case 'booking.upsell.suggest':
         return this.suggestClientUpsell(principal, args);
       case 'customers.count':
-        return this.customersService.countCustomers(principal.tenantId);
+        return this.readCustomerBaseCount(principal.tenantId);
+      case 'clients.access.check':
+        return this.checkClientAccess(principal.tenantId);
+      case 'clients.return_candidates.read':
+        return this.readClientReturnCandidates(principal, args);
       case 'clients.dossier.read':
         return this.readClientDossier(principal, args);
       case 'catalog.services.read':
@@ -417,6 +421,128 @@ export class AiToolHandlerService {
         'Сумма цен услуг в завершённых записях, а не фактически оплаченная сумма из кассы.',
       note: 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
     };
+  }
+
+  private async readCustomerBaseCount(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { calendarSource: true },
+    });
+    if (tenant?.calendarSource === 'internal') {
+      const local = await this.customersService.countCustomers(tenantId);
+      return {
+        ...local,
+        scope: 'all_time',
+        scope_label_ru: 'за всё время',
+        source: 'maya',
+      };
+    }
+    const customerCount = await this.crmService.getClientBaseCount(tenantId);
+    return {
+      customer_count: customerCount,
+      scope: 'all_time',
+      scope_label_ru: 'за всё время',
+      source: 'crm',
+    };
+  }
+
+  private async checkClientAccess(tenantId: string) {
+    const count = await this.readCustomerBaseCount(tenantId);
+    return {
+      connected: true,
+      source: count.source,
+      customer_count: count.customer_count,
+      scope: count.scope,
+      scope_label_ru: count.scope_label_ru,
+      capabilities: [
+        'all_time_count',
+        'redacted_client_dossier',
+        'return_candidates',
+      ],
+    };
+  }
+
+  private async readClientReturnCandidates(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const mode =
+      args.mode === 'inactive_period' ? 'inactive_period' : 'adaptive';
+    const inactiveDays =
+      mode === 'inactive_period' && typeof args.inactive_days === 'number'
+        ? args.inactive_days
+        : undefined;
+    const lookbackDays =
+      typeof args.lookback_days === 'number'
+        ? args.lookback_days
+        : inactiveDays
+          ? Math.min(730, Math.max(365, inactiveDays * 4))
+          : undefined;
+    const futureDays =
+      typeof args.future_days === 'number'
+        ? args.future_days
+        : mode === 'inactive_period'
+          ? 90
+          : undefined;
+    const limit = typeof args.limit === 'number' ? args.limit : 50;
+    const candidates = await this.crmService.getClientReturnCandidates(
+      principal.tenantId,
+      limit,
+      {
+        ...(lookbackDays === undefined ? {} : { lookbackDays }),
+        ...(futureDays === undefined ? {} : { futureDays }),
+        ...(inactiveDays === undefined ? {} : { inactiveDays }),
+      },
+    );
+    return {
+      total_count: candidates.length,
+      shown_count: Math.min(candidates.length, 15),
+      requires_confirmation: true,
+      communication_started: false,
+      filter:
+        mode === 'inactive_period'
+          ? {
+              type: 'inactive_period',
+              threshold_days: inactiveDays,
+              lookback_days: lookbackDays,
+            }
+          : { type: 'adaptive_return' },
+      candidates: candidates.slice(0, 15).map((candidate) => ({
+        display_name: candidate.name || 'Клиент',
+        phone_masked: this.maskClientPhone(candidate.phone),
+        reason_code: candidate.reason_code,
+        reason: this.clientReturnReason(candidate, inactiveDays),
+        last_event_at: candidate.last_event_at,
+        last_completed_visit: candidate.last_completed_visit,
+        average_cycle_days: candidate.average_cycle_days,
+        days_overdue: candidate.days_overdue,
+      })),
+    };
+  }
+
+  private maskClientPhone(phone: string | null): string | null {
+    const digits = String(phone ?? '').replace(/\D/g, '');
+    return digits.length < 4 ? null : `••• •••-${digits.slice(-4)}`;
+  }
+
+  private clientReturnReason(
+    candidate: {
+      reason_code: string;
+      days_overdue: number | null;
+    },
+    inactiveDays: number | undefined,
+  ): string {
+    if (candidate.reason_code === 'inactive_period' && inactiveDays) {
+      const daysSinceLastVisit = inactiveDays + (candidate.days_overdue ?? 0);
+      return `Не был(а) ${daysSinceLastVisit} дн. (порог ${inactiveDays} дн.)`;
+    }
+    if (candidate.reason_code === 'no_show') return 'Неявка без новой записи';
+    if (candidate.reason_code === 'canceled_without_rebooking') {
+      return 'Отмена без повторной записи';
+    }
+    return candidate.days_overdue
+      ? `Привычный цикл просрочен на ${candidate.days_overdue} дн.`
+      : 'Привычный цикл просрочен';
   }
 
   private normalizeClientName(value: string): string {
