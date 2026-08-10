@@ -141,6 +141,65 @@ describe('ClientIntelligenceService', () => {
     expect(result?.reply).toContain('Никакая рассылка не запущена');
   });
 
+  it('routes an exact three-month inactivity request to the private CRM tool', async () => {
+    const { service, crm } = createService();
+    crm.getClientReturnCandidates.mockResolvedValue([
+      {
+        client_id: '1',
+        name: 'Иван Петров',
+        phone: '+79180001111',
+        reason_code: 'inactive_period',
+        last_completed_visit: '2026-04-01T09:00:00.000Z',
+        last_event_at: '2026-04-01T09:00:00.000Z',
+        average_cycle_days: 30,
+        days_overdue: 41,
+      },
+    ]);
+
+    const result = await service.tryHandle(
+      owner,
+      dto('Возьми из нашей базы тех кто не был у нас больше 3 месяцев'),
+    );
+
+    expect(crm.getClientReturnCandidates).toHaveBeenCalledWith('tenant-a', 50, {
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
+    });
+    expect(result?.card).toMatchObject({
+      widget: 'client_return_candidates',
+      widget_data: {
+        total_count: 1,
+        shown_count: 1,
+        filter: {
+          type: 'inactive_period',
+          threshold_days: 90,
+          lookback_days: 365,
+        },
+      },
+    });
+    expect(result?.reply).toContain('последний завершённый визит');
+    expect(result?.reply).toContain('больше 90 дней назад');
+    expect(result?.reply).not.toContain('новые');
+    expect(result?.reply).toContain('Никакая рассылка не запущена');
+  });
+
+  it('understands a three-month inactivity period written in words', async () => {
+    const { service, crm } = createService();
+    crm.getClientReturnCandidates.mockResolvedValue([]);
+
+    await service.tryHandle(
+      owner,
+      dto('Покажи, кто не приходил больше трёх месяцев'),
+    );
+
+    expect(crm.getClientReturnCandidates).toHaveBeenCalledWith('tenant-a', 50, {
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
+    });
+  });
+
   it('delegates a master dossier question to the redacted catalog tool', async () => {
     const { service, crm } = createService();
 
@@ -164,6 +223,18 @@ describe('ClientIntelligenceService', () => {
 
     expect(result?.toolUsage.status).toBe('denied');
     expect(crm.searchClients).not.toHaveBeenCalled();
+    expect(crm.getClientReturnCandidates).not.toHaveBeenCalled();
+  });
+
+  it('does not expose an exact inactivity segment to a regular master', async () => {
+    const { service, crm } = createService();
+
+    const result = await service.tryHandle(
+      { ...owner, role: UserRole.STAFF },
+      dto('Возьми из нашей базы тех кто не был у нас больше 3 месяцев'),
+    );
+
+    expect(result?.toolUsage.status).toBe('denied');
     expect(crm.getClientReturnCandidates).not.toHaveBeenCalled();
   });
 

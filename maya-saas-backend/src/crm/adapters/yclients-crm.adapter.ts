@@ -1259,6 +1259,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     timezone: string;
     lookbackDays?: number;
     futureDays?: number;
+    inactiveDays?: number;
     limit?: number;
   }): Promise<CrmClientReturnCandidate[]> {
     void params.tenantId;
@@ -1267,6 +1268,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
       730,
     );
     const futureDays = Math.min(Math.max(params.futureDays ?? 90, 14), 180);
+    const inactiveDays =
+      params.inactiveDays === undefined
+        ? null
+        : Math.min(Math.max(Math.round(params.inactiveDays), 7), 365);
     const limit = Math.min(Math.max(params.limit ?? 50, 1), 100);
     const now = new Date();
     const start = new Date(now.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
@@ -1332,6 +1337,28 @@ export class YclientsCRMAdapter implements CRMAdapter {
       const completedAt = latestCompleted
         ? Date.parse(latestCompleted.start)
         : Number.NEGATIVE_INFINITY;
+
+      // An explicit request such as “не были больше трёх месяцев” is a
+      // different segment from the adaptive return queue. Do not mix in
+      // recent no-shows or cancellations: compare the last completed visit
+      // against the requested threshold and keep the no-future-booking fence.
+      if (inactiveDays !== null) {
+        if (!latestCompleted) continue;
+        const daysSinceLastVisit = Math.floor((nowMs - completedAt) / dayMs);
+        if (daysSinceLastVisit <= inactiveDays) continue;
+        ranked.push({
+          client_id: clientId,
+          name: client.name || 'Клиент',
+          phone: client.phone,
+          reason_code: 'inactive_period',
+          last_completed_visit: latestCompleted.start,
+          last_event_at: latestCompleted.start,
+          average_cycle_days: this.medianVisitCycleDays(completed),
+          days_overdue: daysSinceLastVisit - inactiveDays,
+          priority: 0,
+        });
+        continue;
+      }
 
       if (
         latestNoShow &&

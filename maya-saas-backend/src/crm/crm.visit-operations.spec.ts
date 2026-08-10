@@ -291,12 +291,21 @@ describe('CrmService: операции над визитом', () => {
     const { service, run } = build({ getClientReturnCandidates });
 
     await expect(
-      run(() => service.getClientReturnCandidates('tenant-1', 25)),
+      run(() =>
+        service.getClientReturnCandidates('tenant-1', 25, {
+          lookbackDays: 365,
+          futureDays: 90,
+          inactiveDays: 90,
+        }),
+      ),
     ).resolves.toEqual([]);
     expect(getClientReturnCandidates).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
       timezone: 'Europe/Moscow',
       limit: 25,
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
     });
   });
 

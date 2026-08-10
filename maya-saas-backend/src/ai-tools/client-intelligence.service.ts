@@ -36,6 +36,11 @@ export type ClientIntelligenceCommand = {
   };
 };
 
+type InactivePeriodFilter = {
+  thresholdDays: number;
+  lookbackDays: number;
+};
+
 @Injectable()
 export class ClientIntelligenceService {
   constructor(private readonly crmService: CrmService) {}
@@ -46,7 +51,9 @@ export class ClientIntelligenceService {
   ): Promise<ClientIntelligenceCommand | null> {
     const text = this.latestUserText(dto);
     const accessQuestion = CLIENT_ACCESS_PATTERN.test(text);
-    const returnQuestion = RETURN_QUEUE_PATTERN.test(text);
+    const inactivePeriod = this.inactivePeriodFilter(text);
+    const returnQuestion =
+      RETURN_QUEUE_PATTERN.test(text) || inactivePeriod !== null;
     const dossierQuestion = DOSSIER_PATTERN.test(text);
     if (!accessQuestion && !returnQuestion && !dossierQuestion) return null;
 
@@ -78,7 +85,15 @@ export class ClientIntelligenceService {
         const candidates = await this.crmService.getClientReturnCandidates(
           user.tenantId,
           returnQuestion ? 50 : 1,
-          returnQuestion ? {} : { lookbackDays: 90, futureDays: 14 },
+          returnQuestion
+            ? inactivePeriod
+              ? {
+                  lookbackDays: inactivePeriod.lookbackDays,
+                  futureDays: 90,
+                  inactiveDays: inactivePeriod.thresholdDays,
+                }
+              : {}
+            : { lookbackDays: 90, futureDays: 14 },
         );
         if (accessQuestion && !returnQuestion) {
           return this.result(
@@ -87,7 +102,7 @@ export class ClientIntelligenceService {
             'clients.private.access_check',
           );
         }
-        return this.returnQueue(candidates);
+        return this.returnQueue(candidates, inactivePeriod);
       }
 
       const query = this.extractClientQuery(text);
@@ -205,16 +220,27 @@ export class ClientIntelligenceService {
 
   private returnQueue(
     candidates: CrmClientReturnCandidate[],
+    inactivePeriod: InactivePeriodFilter | null,
   ): ClientIntelligenceCommand {
     if (candidates.length === 0) {
+      const emptyReply = inactivePeriod
+        ? `Проверила YClients: в доступной истории за ${inactivePeriod.lookbackDays} дней нет клиентов, чей последний завершённый визит был больше ${inactivePeriod.thresholdDays} дней назад и у кого нет будущей записи.`
+        : 'Проверила YClients: сейчас нет клиентов без будущей записи, которые попадают в безопасные правила возврата.';
       return this.result(
-        'Проверила YClients: сейчас нет клиентов без будущей записи, которые попадают в безопасные правила возврата.',
+        emptyReply,
         {
           widget: 'client_return_candidates',
           widget_data: {
             title: 'Очередь возврата',
             total_count: 0,
             candidates: [],
+            filter: inactivePeriod
+              ? {
+                  type: 'inactive_period',
+                  threshold_days: inactivePeriod.thresholdDays,
+                  lookback_days: inactivePeriod.lookbackDays,
+                }
+              : { type: 'adaptive_return' },
           },
         },
         'clients.private.return_candidates',
@@ -224,21 +250,32 @@ export class ClientIntelligenceService {
       display_name: candidate.name || 'Клиент',
       phone_masked: this.maskPhone(candidate.phone),
       reason_code: candidate.reason_code,
-      reason: this.returnReason(candidate),
+      reason: this.returnReason(candidate, inactivePeriod),
       last_event_at: candidate.last_event_at,
       last_completed_visit: candidate.last_completed_visit,
       average_cycle_days: candidate.average_cycle_days,
       days_overdue: candidate.days_overdue,
     }));
+    const reply = inactivePeriod
+      ? `Проверила YClients: в истории за ${inactivePeriod.lookbackDays} дней нашла ${candidates.length} клиент(а/ов), чей последний завершённый визит был больше ${inactivePeriod.thresholdDays} дней назад и у кого нет будущей записи. Никакая рассылка не запущена.`
+      : `Проверила YClients: нашла ${candidates.length} клиент(а/ов) без будущей записи. Сначала показала неявки, затем отмены без перезаписи и просроченный привычный цикл. Никакая рассылка не запущена.`;
     return this.result(
-      `Проверила YClients: нашла ${candidates.length} клиент(а/ов) без будущей записи. Сначала показала неявки, затем отмены без перезаписи и просроченный привычный цикл. Никакая рассылка не запущена.`,
+      reply,
       {
         widget: 'client_return_candidates',
         widget_data: {
           title: 'Клиенты для возврата',
           total_count: candidates.length,
+          shown_count: rows.length,
           candidates: rows,
           requires_confirmation: true,
+          filter: inactivePeriod
+            ? {
+                type: 'inactive_period',
+                threshold_days: inactivePeriod.thresholdDays,
+                lookback_days: inactivePeriod.lookbackDays,
+              }
+            : { type: 'adaptive_return' },
         },
       },
       'clients.private.return_candidates',
@@ -363,7 +400,15 @@ export class ClientIntelligenceService {
     return digits.length >= 4 ? digits.slice(-4) : null;
   }
 
-  private returnReason(candidate: CrmClientReturnCandidate): string {
+  private returnReason(
+    candidate: CrmClientReturnCandidate,
+    inactivePeriod: InactivePeriodFilter | null,
+  ): string {
+    if (candidate.reason_code === 'inactive_period' && inactivePeriod) {
+      const daysSinceLastVisit =
+        inactivePeriod.thresholdDays + (candidate.days_overdue ?? 0);
+      return `Не был(а) ${daysSinceLastVisit} дн. (порог ${inactivePeriod.thresholdDays} дн.)`;
+    }
     if (candidate.reason_code === 'no_show') return 'Неявка без новой записи';
     if (candidate.reason_code === 'canceled_without_rebooking') {
       return 'Отмена без повторной записи';
@@ -371,6 +416,65 @@ export class ClientIntelligenceService {
     return candidate.days_overdue
       ? `Привычный цикл просрочен на ${candidate.days_overdue} дн.`
       : 'Привычный цикл просрочен';
+  }
+
+  private inactivePeriodFilter(text: string): InactivePeriodFilter | null {
+    const normalized = text.toLowerCase().replace(/ё/g, 'е');
+    const inactivityCue =
+      /не\s+(?:был(?:а|и)?|приходил[а-я]*|посещал[а-я]*|заходил[а-я]*)|давно\s+не|неактивн[а-я]*|уснувш[а-я]*|потерянн[а-я]*/u;
+    if (!inactivityCue.test(normalized)) return null;
+
+    const duration =
+      /(?:^|[^\p{L}\p{N}])(\d{1,3}|один|одного|одна|одну|два|две|двух|три|трех|четыре|четырех|пять|пяти|шесть|шести|семь|семи|восемь|восьми|девять|девяти|десять|десяти)\s+(дн(?:я|ей)?|недел[а-я]*|месяц[а-я]*|год(?:а|ов)?|лет)(?:$|[^\p{L}])/u.exec(
+        normalized,
+      );
+    if (!duration) return null;
+
+    const numeric = Number.parseInt(duration[1], 10);
+    const wordNumbers: Record<string, number> = {
+      один: 1,
+      одного: 1,
+      одна: 1,
+      одну: 1,
+      два: 2,
+      две: 2,
+      двух: 2,
+      три: 3,
+      трех: 3,
+      четыре: 4,
+      четырех: 4,
+      пять: 5,
+      пяти: 5,
+      шесть: 6,
+      шести: 6,
+      семь: 7,
+      семи: 7,
+      восемь: 8,
+      восьми: 8,
+      девять: 9,
+      девяти: 9,
+      десять: 10,
+      десяти: 10,
+    };
+    const amount = Number.isFinite(numeric)
+      ? numeric
+      : wordNumbers[duration[1]];
+    if (!amount || amount < 1) return null;
+
+    const unit = duration[2];
+    const rawDays = unit.startsWith('недел')
+      ? amount * 7
+      : unit.startsWith('месяц')
+        ? amount * 30
+        : unit.startsWith('год') || unit === 'лет'
+          ? amount * 365
+          : amount;
+    const thresholdDays = Math.min(Math.max(rawDays, 7), 365);
+    return {
+      thresholdDays,
+      // Keep the CRM scan bounded and disclose the horizon in the response.
+      lookbackDays: Math.min(730, Math.max(365, thresholdDays * 2)),
+    };
   }
 
   private formatDate(value: string): string {

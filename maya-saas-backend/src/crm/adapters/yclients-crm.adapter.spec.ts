@@ -1620,6 +1620,41 @@ describe('YclientsCRMAdapter', () => {
     );
   });
 
+  it('filters an exact inactivity period and excludes recent and rebooked clients', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T09:00:00.000Z'));
+    const records = [
+      visit(2011, 201, 'Inactive', '+79180000201', '2026-04-01T10:00:00', 1),
+      visit(2021, 202, 'Recent', '+79180000202', '2026-07-01T10:00:00', 1),
+      visit(2031, 203, 'Rebooked', '+79180000203', '2026-04-01T10:00:00', 1),
+      visit(2032, 203, 'Rebooked', '+79180000203', '2026-08-20T10:00:00', 0),
+    ];
+    global.fetch = jest.fn<typeof fetch>(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ data: records }), { status: 200 }),
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const candidates = await adapter.getClientReturnCandidates({
+      tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
+    });
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({
+      client_id: '201',
+      reason_code: 'inactive_period',
+      days_overdue: 41,
+    });
+  });
+
   function visit(
     id: number,
     clientId: number,

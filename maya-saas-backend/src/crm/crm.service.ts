@@ -1204,7 +1204,11 @@ export class CrmService {
   async getClientReturnCandidates(
     tenantId: string,
     limit = 50,
-    options: { lookbackDays?: number; futureDays?: number } = {},
+    options: {
+      lookbackDays?: number;
+      futureDays?: number;
+      inactiveDays?: number;
+    } = {},
   ): Promise<CrmClientReturnCandidate[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const adapter = await this.getVisitCapableAdapter(
@@ -1219,6 +1223,7 @@ export class CrmService {
       limit,
       lookbackDays: options.lookbackDays,
       futureDays: options.futureDays,
+      inactiveDays: options.inactiveDays,
     });
   }
 
