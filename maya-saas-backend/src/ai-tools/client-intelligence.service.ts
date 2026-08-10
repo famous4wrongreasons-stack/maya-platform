@@ -64,6 +64,7 @@ export class ClientIntelligenceService {
         const candidates = await this.crmService.getClientReturnCandidates(
           user.tenantId,
           returnQuestion ? 50 : 1,
+          returnQuestion ? {} : { lookbackDays: 90, futureDays: 14 },
         );
         if (accessQuestion && !returnQuestion) {
           return this.result(

@@ -24,6 +24,36 @@ type YandexSpeechResponse = {
 export class AiSpeechService {
   constructor(private readonly configService: ConfigService) {}
 
+  fromBase64(raw: string | undefined): UploadedSpeechFile | undefined {
+    if (!raw || typeof raw !== 'string') {
+      return undefined;
+    }
+    const trimmed = raw.trim();
+    const comma = trimmed.indexOf(',');
+    const payload =
+      /^data:/i.test(trimmed) && comma >= 0
+        ? trimmed.slice(comma + 1)
+        : trimmed;
+    if (!payload || payload.length > MAX_AUDIO_BYTES * 2) {
+      throw this.invalidAudio('Голосовая запись пуста или слишком длинная.');
+    }
+    let buffer: Buffer;
+    try {
+      buffer = Buffer.from(payload, 'base64');
+    } catch {
+      throw this.invalidAudio('Неподдерживаемый формат голосовой записи.');
+    }
+    if (!buffer.length) {
+      throw this.invalidAudio('Голосовая запись пуста.');
+    }
+    return {
+      buffer,
+      mimetype: 'audio/wav',
+      originalname: 'maya.wav',
+      size: buffer.length,
+    };
+  }
+
   async transcribe(file: UploadedSpeechFile | undefined) {
     const pcm = this.extractPcm(file);
     const apiKey = this.configService

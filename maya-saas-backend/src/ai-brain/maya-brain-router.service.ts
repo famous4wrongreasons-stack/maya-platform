@@ -21,16 +21,25 @@ const STAFF_ROLES = new Set<UserRole>([
  */
 @Injectable()
 export class MayaBrainRouterService {
-  route(role: UserRole, text: string): MayaBrainRoute {
+  route(
+    role: UserRole,
+    text: string,
+    audience?: 'client' | 'staff' | 'owner' | null,
+  ): MayaBrainRoute {
+    const clientAudience = audience === 'client' || CLIENT_ROLES.has(role);
     return {
-      persona: CLIENT_ROLES.has(role) ? 'admin' : 'director',
-      intent: this.intent(role, text),
+      persona: clientAudience ? 'admin' : 'director',
+      intent: this.intent(role, text, clientAudience),
     };
   }
 
-  private intent(role: UserRole, raw: string): MayaBrainIntent {
+  private intent(
+    role: UserRole,
+    raw: string,
+    clientAudience?: boolean,
+  ): MayaBrainIntent {
     const text = raw.toLowerCase().replace(/ё/g, 'е');
-    const client = CLIENT_ROLES.has(role);
+    const client = clientAudience ?? CLIENT_ROLES.has(role);
     if (
       /(записат|запиши|перенес|отмен[а-яa-z]*\s+запис|свободн[а-яa-z]*\s+(?:окн|слот|врем))/i.test(
         text,

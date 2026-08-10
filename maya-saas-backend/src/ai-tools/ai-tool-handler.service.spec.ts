@@ -2,9 +2,11 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { UserRole } from '../common/domain.enums';
+import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -20,6 +22,111 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('builds an exact, redacted CRM client dossier for staff', async () => {
+    const searchClients = jest.fn().mockResolvedValue([
+      { id: '42', name: 'Иван Петров', phone: '+79991234567' },
+      { id: '43', name: 'Иван Сидоров', phone: null },
+    ]);
+    const getClientVisitHistory = jest.fn().mockResolvedValue([
+      {
+        start: '2026-05-01T10:00:00.000Z',
+        status: 'completed',
+        service_names: ['Стрижка'],
+        booked_service_value: 1800,
+      },
+      {
+        start: '2026-06-15T10:00:00.000Z',
+        status: 'completed',
+        service_names: ['Стрижка', 'Борода'],
+        booked_service_value: 2500,
+      },
+      {
+        start: '2026-07-20T10:00:00.000Z',
+        status: 'completed',
+        service_names: ['Стрижка'],
+        booked_service_value: 1800,
+      },
+      {
+        start: '2026-07-25T10:00:00.000Z',
+        status: 'no_show',
+        service_names: ['Стрижка'],
+        booked_service_value: 1800,
+      },
+      {
+        start: '2026-07-28T10:00:00.000Z',
+        status: 'canceled',
+        service_names: ['Борода'],
+        booked_service_value: 700,
+      },
+    ]);
+    const service = createService({
+      crmService: {
+        searchClients,
+        getClientVisitHistory,
+      } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.dossier.read',
+      { ...principal, role: UserRole.STAFF, userId: 'master-a' },
+      { query: '4567' },
+      'execution-dossier-a',
+    );
+
+    expect(searchClients).toHaveBeenCalledWith('tenant-a', '4567');
+    expect(getClientVisitHistory).toHaveBeenCalledWith('tenant-a', '42', 30);
+    expect(result).toEqual({
+      found: true,
+      display_name: 'клиент',
+      matches_count: 2,
+      visits: 3,
+      no_shows: 1,
+      canceled_visits: 1,
+      last_visit: '2026-07-20',
+      favorite_services: ['Стрижка', 'Борода'],
+      avg_cycle_days: 40,
+      booked_service_value: 6100,
+      value_note:
+        'Сумма цен услуг в завершённых записях, а не фактически оплаченная сумма из кассы.',
+      note: 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
+    });
+    expect(JSON.stringify(result)).not.toContain('Иван');
+    expect(JSON.stringify(result)).not.toContain('7999');
+    expect(JSON.stringify(result)).not.toContain('phone');
+  });
+
+  it('does not choose the first CRM client when a name is ambiguous', async () => {
+    const getClientVisitHistory = jest.fn();
+    const service = createService({
+      crmService: {
+        searchClients: jest.fn().mockResolvedValue([
+          { id: '42', name: 'Иван Петров', phone: '+79991234567' },
+          { id: '43', name: 'Иван Сидоров', phone: '+79997654321' },
+        ]),
+        getClientVisitHistory,
+      } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.dossier.read',
+      { ...principal, role: UserRole.STAFF, userId: 'master-a' },
+      { query: 'Иван' },
+      'execution-dossier-ambiguous',
+    );
+
+    expect(result).toEqual({
+      found: false,
+      ambiguous: true,
+      matches_count: 2,
+      error:
+        'Найдено несколько совпадений. Уточните полное имя или последние четыре цифры телефона.',
+    });
+    expect(getClientVisitHistory).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain('Петров');
+    expect(JSON.stringify(result)).not.toContain('Сидоров');
+    expect(JSON.stringify(result)).not.toContain('7999');
   });
 
   it('removes provider payload and customer PII from appointments', async () => {
@@ -2115,6 +2222,8 @@ describe('AiToolHandlerService output minimization', () => {
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
     prisma?: PrismaService;
+    customersService?: CustomersService;
+    staffService?: StaffService;
   }) {
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
@@ -2132,6 +2241,8 @@ describe('AiToolHandlerService output minimization', () => {
           },
           branch: { findFirst: jest.fn() },
         } as unknown as PrismaService),
+      overrides.customersService ?? ({} as CustomersService),
+      overrides.staffService ?? ({} as StaffService),
     );
   }
 });

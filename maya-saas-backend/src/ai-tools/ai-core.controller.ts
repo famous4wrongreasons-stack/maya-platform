@@ -45,18 +45,38 @@ export class AiCoreController {
       limits: { files: 1, fileSize: 1024 * 1024 },
     }),
   )
-  @ApiConsumes('multipart/form-data')
+  @ApiConsumes('multipart/form-data', 'application/json')
   @ApiBody({
     schema: {
-      type: 'object',
-      required: ['audio'],
-      properties: { audio: { type: 'string', format: 'binary' } },
+      oneOf: [
+        {
+          type: 'object',
+          required: ['audio'],
+          properties: { audio: { type: 'string', format: 'binary' } },
+        },
+        {
+          type: 'object',
+          required: ['audioBase64'],
+          properties: {
+            audioBase64: {
+              type: 'string',
+              description:
+                'WAV PCM16/16kHz as raw base64 or data:audio/wav;base64,... (native CapacitorHttp-safe)',
+            },
+          },
+        },
+      ],
     },
   })
   @ApiOperation({
     summary: 'Transcribe one short native voice message without storing audio',
   })
-  transcribe(@UploadedFile() audio: UploadedSpeechFile | undefined) {
-    return this.aiSpeech.transcribe(audio);
+  transcribe(
+    @UploadedFile() audio: UploadedSpeechFile | undefined,
+    @Body() body?: { audioBase64?: string },
+  ) {
+    return this.aiSpeech.transcribe(
+      audio ?? this.aiSpeech.fromBase64(body?.audioBase64),
+    );
   }
 }

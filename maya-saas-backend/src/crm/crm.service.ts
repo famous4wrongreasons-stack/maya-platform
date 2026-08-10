@@ -1204,6 +1204,7 @@ export class CrmService {
   async getClientReturnCandidates(
     tenantId: string,
     limit = 50,
+    options: { lookbackDays?: number; futureDays?: number } = {},
   ): Promise<CrmClientReturnCandidate[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const adapter = await this.getVisitCapableAdapter(
@@ -1216,6 +1217,8 @@ export class CrmService {
       tenantId: scopedTenantId,
       timezone: await this.tenantTimezone(scopedTenantId),
       limit,
+      lookbackDays: options.lookbackDays,
+      futureDays: options.futureDays,
     });
   }
 

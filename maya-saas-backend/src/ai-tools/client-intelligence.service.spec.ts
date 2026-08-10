@@ -24,7 +24,10 @@ describe('ClientIntelligenceService', () => {
       dto('У тебя есть доступ к базе клиентов YClients?'),
     );
 
-    expect(crm.getClientReturnCandidates).toHaveBeenCalledWith('tenant-a', 1);
+    expect(crm.getClientReturnCandidates).toHaveBeenCalledWith('tenant-a', 1, {
+      lookbackDays: 90,
+      futureDays: 14,
+    });
     expect(result?.reply).toContain('Проверила YClients');
   });
 

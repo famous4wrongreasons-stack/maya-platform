@@ -421,16 +421,26 @@ export class YclientsCRMAdapter implements CRMAdapter {
           );
         }
 
-        const response = await this.request<YclientsSlotApiItem[]>(
-          `book_times/${this.getCompanyId()}/${staffId}/${date}`,
-          {
-            query,
-          },
-        );
+        try {
+          const response = await this.request<YclientsSlotApiItem[]>(
+            `book_times/${this.getCompanyId()}/${staffId}/${date}`,
+            {
+              query,
+            },
+          );
 
-        return (response.data || []).map((slot) =>
-          this.mapSlot(date, staffId, slot, params.branchId),
-        );
+          return (response.data || []).map((slot) =>
+            this.mapSlot(date, staffId, slot, params.branchId),
+          );
+        } catch (error) {
+          // YClients book_times returns 422 "Дата недоступна" for days off /
+          // closed schedule. Treat as empty — otherwise available-days fails
+          // as soon as it probes the first non-working day.
+          if (this.isDateUnavailableError(error)) {
+            return [];
+          }
+          throw error;
+        }
       }),
     );
 
@@ -2045,6 +2055,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }): Promise<YclientsRecordApiItem[]> {
     const result: YclientsRecordApiItem[] = [];
     const seen = new Set<string>();
+    const windows: Array<{ startDate: string; endDate: string }> = [];
     let cursor = params.startDate;
 
     while (cursor <= params.endDate) {
@@ -2052,21 +2063,32 @@ export class YclientsCRMAdapter implements CRMAdapter {
         this.addDateDays(cursor, 30),
         params.endDate,
       ].sort()[0];
-      const batch = await this.fetchRecords({
-        startDate: cursor,
-        endDate: windowEnd,
-        withDeleted: params.withDeleted,
-      });
-      for (const record of batch) {
-        const id =
-          record.id === undefined || record.id === null
-            ? null
-            : String(record.id);
-        if (id && seen.has(id)) continue;
-        if (id) seen.add(id);
-        result.push(record);
-      }
+      windows.push({ startDate: cursor, endDate: windowEnd });
       cursor = this.addDateDays(windowEnd, 1);
+    }
+
+    // Three windows keep the chat responsive without turning a tenant scan
+    // into an uncontrolled burst against the CRM provider.
+    for (let index = 0; index < windows.length; index += 3) {
+      const batches = await Promise.all(
+        windows.slice(index, index + 3).map((window) =>
+          this.fetchRecords({
+            ...window,
+            withDeleted: params.withDeleted,
+          }),
+        ),
+      );
+      for (const batch of batches) {
+        for (const record of batch) {
+          const id =
+            record.id === undefined || record.id === null
+              ? null
+              : String(record.id);
+          if (id && seen.has(id)) continue;
+          if (id) seen.add(id);
+          result.push(record);
+        }
+      }
     }
 
     return result;
@@ -2793,6 +2815,20 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private toYclientsDate(date: string): string {
     return date.slice(0, 10);
+  }
+
+  private isDateUnavailableError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('status 422') &&
+      (message.includes('дата недоступна') ||
+        message.includes('date is unavailable') ||
+        message.includes('date unavailable'))
+    );
   }
 
   private toYclientsDateTime(dateTime: string): string {
