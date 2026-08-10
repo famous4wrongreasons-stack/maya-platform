@@ -20,7 +20,6 @@ import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { AiToolsController } from './ai-tools.controller';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
-import { ClientIntelligenceService } from './client-intelligence.service';
 
 import { CustomersModule } from '../customers/customers.module';
 import { StaffModule } from '../staff/staff.module';
@@ -49,7 +48,6 @@ import { StaffModule } from '../staff/staff.module';
     AiToolPolicyService,
     AiToolRegistryService,
     AiToolRuntimeService,
-    ClientIntelligenceService,
     StaffScheduleCommandService,
   ],
   exports: [AiCoreService, AiToolRegistryService, AiToolRuntimeService],

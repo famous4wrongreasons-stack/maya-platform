@@ -144,6 +144,68 @@ describe('buildChatReportCard', () => {
     });
   });
 
+  it('builds a read-only client return card from trusted server evidence', () => {
+    const card = buildChatReportCard(
+      [
+        {
+          name: 'clients.return_candidates.read',
+          result: {
+            total_count: 1,
+            shown_count: 1,
+            requires_confirmation: true,
+            communication_started: false,
+            filter: {
+              type: 'inactive_period',
+              threshold_days: 90,
+              lookback_days: 365,
+            },
+            candidates: [
+              {
+                display_name: 'Иван Петров',
+                phone_masked: '••• •••-4567',
+                reason_code: 'inactive_period',
+                reason: 'Не был(а) 131 дн. (порог 90 дн.)',
+                last_completed_visit: '2026-04-01T10:00:00.000Z',
+                last_event_at: '2026-04-01T10:00:00.000Z',
+                average_cycle_days: 31,
+                days_overdue: 41,
+              },
+            ],
+          },
+        },
+      ],
+      { personal: false, userText: 'Кто не был больше трёх месяцев?' },
+    );
+
+    expect(card).toEqual({
+      widget: 'client_return_candidates',
+      widget_data: {
+        title: 'Клиенты для возврата',
+        total_count: 1,
+        shown_count: 1,
+        requires_confirmation: true,
+        communication_started: false,
+        filter: {
+          type: 'inactive_period',
+          threshold_days: 90,
+          lookback_days: 365,
+        },
+        candidates: [
+          {
+            display_name: 'Иван Петров',
+            phone_masked: '••• •••-4567',
+            reason_code: 'inactive_period',
+            reason: 'Не был(а) 131 дн. (порог 90 дн.)',
+            last_completed_visit: '2026-04-01T10:00:00.000Z',
+            last_event_at: '2026-04-01T10:00:00.000Z',
+            average_cycle_days: 31,
+            days_overdue: 41,
+          },
+        ],
+      },
+    });
+  });
+
   it('returns null without analytics evidence', () => {
     expect(
       buildChatReportCard([{ name: 'booking.search', result: { slots: [] } }], {

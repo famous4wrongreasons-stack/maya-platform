@@ -33,7 +33,6 @@ import type {
 } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { buildChatReportCard, type ChatReportCard } from './chat-report-card';
-import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
 import { ReportingPeriodResolver } from './reporting-period.resolver';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
@@ -160,10 +159,6 @@ type GroundingRequirement = {
    */
   closedForAccess: boolean;
   strictNumbers: boolean;
-  presetToolCall?: {
-    name: string;
-    arguments: Record<string, unknown>;
-  };
 };
 
 type GroundingReport = {
@@ -347,6 +342,8 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'analytics.business.profit': 'business_profit',
   'expenses.read': 'business_expenses',
   'customers.count': 'customer_count',
+  'clients.access.check': 'client_access',
+  'clients.return_candidates.read': 'client_return_candidates',
   'clients.dossier.read': 'client_dossier',
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
@@ -355,15 +352,6 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'loyalty.own.read': 'client_loyalty',
   'booking.upsell.suggest': 'client_upsell',
 };
-/** Инструменты, которые предзагружаем: подсказка к ним однозначна. */
-const PRELOADABLE_TOOLS = new Set([
-  'analytics.business.query',
-  'analytics.employee.query',
-  'analytics.business.profit',
-  'expenses.read',
-  // Гостевой «расскажи о салоне» — сразу публичный каталог, не ждём второй ход.
-  'catalog.staff.read',
-]);
 /**
  * Инструменты, чей результат — личные данные самого спрашивающего.
  *
@@ -376,6 +364,7 @@ const PRELOADABLE_TOOLS = new Set([
 const PII_SENSITIVE_TOOLS = new Set([
   'appointments.own.list',
   'loyalty.own.read',
+  'clients.return_candidates.read',
 ]);
 const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -399,7 +388,6 @@ export class AiCoreService {
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
     private readonly brainRouter: MayaBrainRouterService,
-    private readonly clientIntelligence: ClientIntelligenceService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -419,40 +407,6 @@ export class AiCoreService {
       this.latestUserText(sanitized.messages),
       dto.audience ?? null,
     );
-    // An owner can explicitly open the client-facing surface. In that mode
-    // their business role must not unlock private CRM intelligence.
-    const clientCommand = clientAudience
-      ? null
-      : await this.clientIntelligence.tryHandle(user, dto);
-    if (clientCommand) {
-      return this.complete(
-        user,
-        dto,
-        brain,
-        true,
-        [clientCommand.toolUsage],
-        [],
-        {
-          reply: clientCommand.reply,
-          source: 'safe_fallback',
-          action: null,
-          grounding: {
-            status:
-              clientCommand.toolUsage.status === 'completed'
-                ? 'verified'
-                : 'blocked',
-            domain: 'client_intelligence',
-            required_tools: [clientCommand.toolUsage.name],
-            evidence_tools:
-              clientCommand.toolUsage.status === 'completed'
-                ? [clientCommand.toolUsage.name]
-                : [],
-          },
-        },
-        [],
-        clientCommand.card,
-      );
-    }
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
       user,
       dto,
@@ -471,17 +425,6 @@ export class AiCoreService {
           action: scheduleCommand.action,
         },
       );
-    }
-    const clientBaseAccess = this.handleClientBaseAccessQuestion(
-      clientAudience ? { ...user, role: UserRole.CLIENT } : user,
-      sanitized.messages,
-    );
-    if (clientBaseAccess) {
-      return this.complete(user, dto, brain, false, [], [], {
-        reply: clientBaseAccess.reply,
-        source: 'safe_fallback',
-        action: null,
-      });
     }
     const assistantCommand = await this.handleAssistantCommand(
       clientAudience ? { ...user, role: UserRole.CLIENT } : user,
@@ -541,51 +484,6 @@ export class AiCoreService {
           this.groundingFallback(requirement, toolResults, true),
           toolResults,
         );
-      }
-      if (requirement?.presetToolCall) {
-        const preset = requirement.presetToolCall;
-        const execution = this.record(
-          await this.runtime.execute(user, preset.name, {
-            surface: dto.surface,
-            arguments: preset.arguments,
-            idempotencyKey: this.toolIdempotencyKey(
-              tenantId,
-              user.userId,
-              dto.requestId,
-              // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. Ключ
-              // считается по паре «шаг + инструмент», поэтому чужой инструмент
-              // на шаге 0 конфликта не даёт, а вот тот же самый — дал бы:
-              // рантайм сверяет аргументы и на расхождении бросает конфликт
-              // идемпотентности. Вопрос вида «а за прошлый месяц целиком?»
-              // падал бы вместо ответа.
-              -1,
-              preset.name,
-            ),
-          }),
-        );
-        const status =
-          typeof execution.status === 'string' ? execution.status : 'unknown';
-        toolsUsed.push({
-          name: preset.name,
-          status,
-          execution_id:
-            typeof execution.execution_id === 'string'
-              ? execution.execution_id
-              : null,
-        });
-        if (status !== 'completed' || !('result' in execution)) {
-          this.modelFailure('ai_tool_result_unavailable');
-        }
-        toolResults.push({
-          name: preset.name,
-          result: this.sanitizeToolResult(execution.result),
-        });
-        signatures.add(this.toolSignature(preset.name, preset.arguments));
-        // 🔴 Здесь раньше стоял возврат готового шаблона, и цикл с моделью не
-        // начинался вовсе — на типовые вопросы владельца («сколько заработали»,
-        // «почему просело», «посоветуй») отвечал конструктор строк. Теперь этот
-        // вызов — только предзагрузка: данные уже на руках, а озвучивает их
-        // модель на первом же шаге цикла, без лишнего обращения к провайдеру.
       }
       for (let step = 0; step <= maxToolSteps; step += 1) {
         const requirementSatisfied = this.groundingSatisfied(
@@ -818,21 +716,23 @@ export class AiCoreService {
         // 🔴 Период всегда с сервера. Модель могла попросить named_month на
         // «7 августа» — и владелец видел 244к вместо 41.5к. Hardening
         // перебивает period/day/month до подписи и до execute.
-        const hardenedArguments = ReportingPeriodResolver.hardenToolArguments(
+        const hardenedArguments = this.hardenPrivateToolArguments(
           decision.toolCall.name,
-          decision.toolCall.arguments,
-          this.latestUserText(sanitized.messages),
-          this.previousUserText(sanitized.messages),
+          ReportingPeriodResolver.hardenToolArguments(
+            decision.toolCall.name,
+            decision.toolCall.arguments,
+            this.latestUserText(sanitized.messages),
+            this.previousUserText(sanitized.messages),
+          ),
+          dto.messages,
         );
         const signature = this.toolSignature(
           decision.toolCall.name,
           hardenedArguments,
         );
         if (signatures.has(signature)) {
-          // Тот же вызов уже сделан — чаще всего это предзагруженный сервером
-          // инструмент, который модель попросила повторно. Данные у неё на
-          // руках; повторять запрос незачем, а падать тем более — иначе
-          // предзагрузка сама себе создавала бы конфликт.
+          // Модель уже вызвала этот инструмент с теми же аргументами. Результат
+          // находится в tool_results, поэтому повторять CRM-запрос незачем.
           continue;
         }
         signatures.add(signature);
@@ -1143,32 +1043,6 @@ export class AiCoreService {
     };
   }
 
-  /**
-   * Мета-вопрос про доступ к клиентской базе.
-   * Без детерминированного ответа модель из старого правила ПД отвечала
-   * «базу не вижу» — хотя clients.dossier.read уже есть.
-   */
-  private handleClientBaseAccessQuestion(
-    user: AuthenticatedUser,
-    messages: AiCoreMessage[],
-  ): { reply: string } | null {
-    if (user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER) {
-      return null;
-    }
-    const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
-    if (
-      !/(видишь|видит|есть\s+(?:ли\s+)?доступ|доступна?|можешь\s+(?:ли\s+)?(?:смотр|видеть|подним|откры)|подключен[ао]?|открыт[ао]?).{0,48}(?:баз[ауиеы]|клиент)|(?:баз[ауиеы]\s+клиент|клиентск\w*\s+баз|доступ\s+к\s+клиент)/i.test(
-        text,
-      )
-    ) {
-      return null;
-    }
-    return {
-      reply:
-        'Да — к CRM-базе клиентов у меня доступ есть. Могу поднять досье конкретного гостя по имени или хвосту телефона: сколько был, что обычно берёт, цикл визитов. Полный список с именами и телефонами вслух не читаю — скажи, кого смотрим.',
-    };
-  }
-
   private guardClientUpsell(
     brain: MayaBrainRoute,
     messages: AiCoreMessage[],
@@ -1381,8 +1255,9 @@ export class AiCoreService {
    *
    * 🔴 Здесь решается ровно один вопрос: спрашивают ли про данные. Инструмент
    * не выбирается. Доказательством считаются ВСЕ инструменты данных, доступные
-   * роли и тарифу; вероятный лишь ставится первым — как подсказка модели и как
-   * кандидат на предзагрузку. Промах подсказки перестал быть отказом.
+   * роли и тарифу; вероятный лишь ставится первым как необязательная подсказка
+   * модели. Сервер больше не предзагружает инструмент по регулярному выражению:
+   * смысл запроса и нужный источник выбирает сама модель.
    */
   private groundingRequirement(
     messages: AiCoreMessage[],
@@ -1390,9 +1265,6 @@ export class AiCoreService {
     brain: MayaBrainRoute,
   ): GroundingRequirement | null {
     const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
-    const previousUserText = this.previousUserText(messages)
-      .toLowerCase()
-      .replace(/ё/g, 'е');
     const hinted = this.toolHint(text, brain);
     if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
@@ -1410,19 +1282,26 @@ export class AiCoreService {
     const dataTools = [...allowedNames].filter(
       (name) => name in DATA_TOOL_DOMAINS,
     );
-    // Единственный уцелевший выбор по умолчанию — и только для команды салона:
-    // на открытый вопрос владельца («как дела», «почему просадка») универсальная
-    // аналитика подходит почти всегда, а предзагрузка экономит ему обращение к
-    // модели. Клиенту по умолчанию НЕ подставляем ничего: там догадка стоила
-    // ответа «у вас пока нет записей» на вопрос о длительности стрижки.
-    const teamDefault =
+    // Ролевой инструмент ставим первым только как мягкую подсказку модели.
+    // Сервер его НЕ запускает и НЕ запрещает выбрать другой источник. Поэтому
+    // открытый вопрос владельца обычно начинает с бизнес-аналитики, а фраза
+    // «сколько людей во всей базе» по смыслу может уйти в customers.count.
+    const rolePreferred =
       brain.persona === 'director'
-        ? ['analytics.employee.query', 'analytics.business.query'].find(
-            (name) => allowedNames.has(name),
-          )
-        : undefined;
+        ? allowedNames.has('analytics.business.query')
+          ? 'analytics.business.query'
+          : allowedNames.has('analytics.employee.query')
+            ? 'analytics.employee.query'
+            : null
+        : null;
     const preferred =
-      hinted?.find((name) => allowedNames.has(name)) ?? teamDefault ?? null;
+      hinted?.find((name) => allowedNames.has(name)) ??
+      (rolePreferred && allowedNames.has(rolePreferred) ? rolePreferred : null);
+    const analyticsAvailable = [
+      'analytics.employee.query',
+      'analytics.business.query',
+      'analytics.business.profit',
+    ].some((name) => allowedNames.has(name));
     const fallbackDomain = preferred
       ? (DATA_TOOL_DOMAINS[preferred] ?? null)
       : null;
@@ -1438,12 +1317,8 @@ export class AiCoreService {
     // данные не положены, а на младшем тарифе их нечем посчитать. Честный
     // отказ здесь лучше подмены ответа из прайса.
     const moneyWithoutAnalytics =
-      MONEY_INTENTS.has(brain.intent) && !teamDefault;
-    if (
-      dataTools.length === 0 ||
-      (familyClosed && !teamDefault) ||
-      moneyWithoutAnalytics
-    ) {
+      MONEY_INTENTS.has(brain.intent) && !analyticsAvailable;
+    if (dataTools.length === 0 || familyClosed || moneyWithoutAnalytics) {
       return {
         evidenceToolNames: [],
         // Тему отказа называем даже без подсказки: в аудите должно быть видно,
@@ -1475,18 +1350,6 @@ export class AiCoreService {
       fallbackDomain,
       closedForAccess: false,
       strictNumbers: true,
-      ...(PRELOADABLE_TOOLS.has(preferred)
-        ? {
-            presetToolCall: {
-              name: preferred,
-              arguments: this.preloadArguments(
-                preferred,
-                text,
-                previousUserText,
-              ),
-            },
-          }
-        : {}),
     };
   }
 
@@ -1531,9 +1394,9 @@ export class AiCoreService {
   /**
    * Подсказка: с какого инструмента вероятнее начать.
    *
-   * 🔴 Это ПОДСКАЗКА, а не приговор. Она встаёт первой в required_tools и, если
-   * однозначна, предзагружается, но модель вправе взять любой другой доступный
-   * инструмент данных. Внутри списка порядок — по убыванию полноты ответа, а
+   * 🔴 Это ПОДСКАЗКА, а не приговор. Она встаёт первой в required_tools, но
+   * модель вправе взять любой другой доступный инструмент данных. Сервер ничего
+   * не предзагружает. Внутри списка порядок — по убыванию полноты ответа, а
    * выбирает из него не догадка, а факт: что выдано роли и тарифу. Поэтому
    * «сколько у меня записей» у клиента идёт в его историю, а у мастера — в его
    * личную аналитику, без отдельной ветки на каждую роль.
@@ -1609,22 +1472,51 @@ export class AiCoreService {
   }
 
   /**
-   * Аргументы предзагрузки: период разрешает сервер, сравнение — тоже.
-   *
-   * Модели их не доверяют не из недоверия, а по устройству: календаря у неё
-   * нет, а без сравнения разбор просадки вырождается в перечень счётчиков.
+   * Внешняя модель видит только обезличенный диалог. Если она по смыслу выбрала
+   * досье конкретного клиента, доверенный сервер восстанавливает имя или хвост
+   * телефона из исходной реплики уже после выбора инструмента. Эти данные идут
+   * напрямую в CRM и никогда не возвращаются модели.
    */
-  private preloadArguments(
+  private hardenPrivateToolArguments(
     toolName: string,
-    text: string,
-    previousUserText: string,
+    args: Record<string, unknown>,
+    rawMessages: AiCoreChatDto['messages'],
   ): Record<string, unknown> {
-    return ReportingPeriodResolver.hardenToolArguments(
-      toolName,
-      {},
-      text,
-      previousUserText,
+    if (toolName !== 'clients.dossier.read') {
+      return args;
+    }
+    const query = this.extractClientLookupQuery(
+      this.latestUserText(rawMessages),
     );
+    return query ? { ...args, query } : args;
+  }
+
+  /** Извлечение сущности, а не маршрутизация намерения. */
+  private extractClientLookupQuery(text: string): string | null {
+    const digits = text.replace(/\D/g, '');
+    if (digits.length >= 4) {
+      return digits.slice(-11);
+    }
+    const quoted = /[«"]([^»"]{3,80})[»"]/u.exec(text)?.[1]?.trim();
+    if (quoted) {
+      return quoted;
+    }
+    const marker =
+      /(?:про|клиент[а-яё]*|гост[а-яё]*|досье\s+(?:на\s+)?|истори[а-яё]*\s+)([\p{L}-]+(?:\s+[\p{L}-]+){0,2})/iu.exec(
+        text,
+      )?.[1] ?? '';
+    const leading =
+      /^([\p{L}-]+(?:\s+[\p{L}-]+){0,2})\s*[,—-]?\s+(?:что|кто|какие|какую)/iu.exec(
+        text,
+      )?.[1] ?? '';
+    const query = (marker || leading)
+      .replace(
+        /\b(?:покажи|расскажи|найди|мне|кто|такой|такая|обычно|берет|берёт|что|предложить)\b/giu,
+        ' ',
+      )
+      .replace(/\s+/g, ' ')
+      .trim();
+    return query.length >= 3 ? query : null;
   }
 
   /** Данные на руках: отработал любой из доступных инструментов данных. */
@@ -1728,6 +1620,60 @@ export class AiCoreService {
   ): string | null {
     const text = userText.toLowerCase().replace(/ё/g, 'е');
     switch (evidence.name) {
+      case 'customers.count': {
+        const data = this.record(evidence.result);
+        const count = this.optionalMetricNumber(data.customer_count);
+        if (count === null) {
+          return null;
+        }
+        return `Всего в клиентской базе за всё время: ${this.formatMetricNumber(count)} ${this.pluralize(count, 'человек', 'человека', 'человек')}. Это общий размер базы, а не число уникальных гостей за выбранный месяц.`;
+      }
+      case 'clients.access.check': {
+        const data = this.record(evidence.result);
+        if (data.connected !== true) {
+          return 'Сейчас не удалось подтвердить доступ к клиентской базе. Проверьте подключение CRM в профиле и повторите запрос.';
+        }
+        const count = this.optionalMetricNumber(data.customer_count);
+        return count === null
+          ? 'Проверила подключение: доступ к клиентской базе работает. Я могу искать безопасное досье конкретного гостя и собирать очередь клиентов для возврата.'
+          : `Проверила подключение: доступ к клиентской базе работает. Сейчас в ней ${this.formatMetricNumber(count)} ${this.pluralize(count, 'человек', 'человека', 'человек')} за всё время. Я могу найти безопасное досье гостя или собрать очередь для возврата.`;
+      }
+      case 'clients.return_candidates.read': {
+        const data = this.record(evidence.result);
+        const total = this.optionalMetricNumber(data.total_count);
+        if (total === null) {
+          return null;
+        }
+        const filter = this.record(data.filter);
+        const threshold = this.optionalMetricNumber(filter.threshold_days);
+        if (total === 0) {
+          return threshold === null
+            ? 'Проверила CRM: сейчас нет клиентов без будущей записи, которые попадают в безопасные правила возврата. Никакая рассылка не запущена.'
+            : `Проверила CRM: клиентов, которые не были больше ${this.formatMetricNumber(threshold)} дней и не имеют будущей записи, сейчас нет. Никакая рассылка не запущена.`;
+        }
+        return threshold === null
+          ? `Проверила CRM и нашла ${this.formatMetricNumber(total)} ${this.pluralize(total, 'клиента', 'клиента', 'клиентов')} для возврата: неявки, отмены без перезаписи и просроченные привычные циклы. Никакая рассылка не запущена.`
+          : `Проверила CRM и нашла ${this.formatMetricNumber(total)} ${this.pluralize(total, 'клиента', 'клиента', 'клиентов')}, которые не были больше ${this.formatMetricNumber(threshold)} дней и не имеют будущей записи. Никакая рассылка не запущена.`;
+      }
+      case 'clients.dossier.read': {
+        const data = this.record(evidence.result);
+        if (data.ambiguous === true) {
+          return 'Нашла несколько совпадений. Уточните полное имя или последние четыре цифры телефона.';
+        }
+        if (data.found !== true) {
+          return 'В CRM такой клиент не найден. Проверьте имя или последние четыре цифры телефона.';
+        }
+        const visits = this.safeMetricNumber(data.visits);
+        const noShows = this.safeMetricNumber(data.no_shows);
+        const lastVisit =
+          typeof data.last_visit === 'string' ? data.last_visit : 'нет данных';
+        const services = Array.isArray(data.favorite_services)
+          ? data.favorite_services
+              .filter((item): item is string => typeof item === 'string')
+              .slice(0, 4)
+          : [];
+        return `По истории клиента: завершённых визитов — ${this.formatMetricNumber(visits)}, неявок — ${this.formatMetricNumber(noShows)}. Последний визит: ${lastVisit}.${services.length > 0 ? ` Привычные услуги: ${services.join(', ')}.` : ''}`;
+      }
       case 'analytics.business.query':
       case 'analytics.employee.query': {
         const reply = this.deterministicAnalyticsQueryReply(
@@ -3148,6 +3094,8 @@ export class AiCoreService {
       toolName.startsWith('analytics.') ||
       toolName.startsWith('expenses.') ||
       toolName === 'customers.count' ||
+      toolName === 'clients.access.check' ||
+      toolName === 'clients.return_candidates.read' ||
       toolName === 'clients.dossier.read' ||
       toolName === 'staff.schedule.update' ||
       toolName === 'loyalty.internal.adjust'

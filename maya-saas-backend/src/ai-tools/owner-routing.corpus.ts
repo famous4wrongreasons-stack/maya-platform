@@ -9,7 +9,7 @@ export type OwnerRoutingCase = {
   id: string;
   text: string;
   previous?: string;
-  /** Инструменты в порядке вызова (обычно один preload). */
+  /** Инструменты в порядке вызова (обычно один выбор модели). */
   tools: string[];
   /** Частичное совпадение аргументов предзагрузки. */
   arguments?: Record<string, unknown>;

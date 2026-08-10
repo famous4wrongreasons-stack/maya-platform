@@ -286,17 +286,46 @@ describe('CrmService: операции над визитом', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
+  it('размер клиентской базы остаётся в tenant-контексте', async () => {
+    const getClientBaseCount = jest.fn().mockResolvedValue(1_234);
+    const { service, run } = build({ getClientBaseCount });
+
+    await expect(
+      run(() => service.getClientBaseCount('tenant-1')),
+    ).resolves.toBe(1_234);
+    expect(getClientBaseCount).toHaveBeenCalledWith({ tenantId: 'tenant-1' });
+  });
+
+  it('не позволяет узнать размер клиентской базы соседнего tenant', async () => {
+    const getClientBaseCount = jest.fn().mockResolvedValue(1_234);
+    const { service, run } = build({ getClientBaseCount });
+
+    await expect(
+      run(() => service.getClientBaseCount('tenant-2')),
+    ).rejects.toThrow();
+    expect(getClientBaseCount).not.toHaveBeenCalled();
+  });
+
   it('очередь возврата остаётся в tenant-контексте и получает часовой пояс бизнеса', async () => {
     const getClientReturnCandidates = jest.fn().mockResolvedValue([]);
     const { service, run } = build({ getClientReturnCandidates });
 
     await expect(
-      run(() => service.getClientReturnCandidates('tenant-1', 25)),
+      run(() =>
+        service.getClientReturnCandidates('tenant-1', 25, {
+          lookbackDays: 365,
+          futureDays: 90,
+          inactiveDays: 90,
+        }),
+      ),
     ).resolves.toEqual([]);
     expect(getClientReturnCandidates).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
       timezone: 'Europe/Moscow',
       limit: 25,
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
     });
   });
 

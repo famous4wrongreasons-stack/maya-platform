@@ -225,7 +225,10 @@ export interface CrmClientVisitInsight {
 }
 
 export type CrmClientReturnReason =
-  'no_show' | 'canceled_without_rebooking' | 'overdue_cycle';
+  | 'no_show'
+  | 'canceled_without_rebooking'
+  | 'overdue_cycle'
+  | 'inactive_period';
 
 /** Кандидат на возврат, рассчитанный только по данным CRM. */
 export interface CrmClientReturnCandidate {
@@ -426,6 +429,8 @@ export interface CRMAdapter {
     tenantId: string;
     query: string;
   }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  /** Общий размер клиентской базы без выгрузки персональных данных. */
+  getClientBaseCount?(params: { tenantId: string }): Promise<number>;
   /** История одного клиента, включая неявки и отмены. */
   getClientVisitHistory?(params: {
     tenantId: string;
@@ -442,6 +447,8 @@ export interface CRMAdapter {
     timezone: string;
     lookbackDays?: number;
     futureDays?: number;
+    /** Exact inactivity threshold requested by the actor, in days. */
+    inactiveDays?: number;
     limit?: number;
   }): Promise<CrmClientReturnCandidate[]>;
   getFinancialSummary?(params: {

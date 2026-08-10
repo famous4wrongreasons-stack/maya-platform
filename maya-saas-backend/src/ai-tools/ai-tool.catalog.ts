@@ -293,7 +293,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'customers.count',
     description:
-      'Read a tenant customer count without customer PII. Kept for tariffs that have no business analytics: there it is the only answer to "how many clients do we have".',
+      'Read the authoritative ALL-TIME size of the customer base without customer PII. For an external CRM this uses the CRM total-count metadata; for the internal MAYA calendar it counts active customer accounts. Use this for "сколько всего людей/клиентов в базе", "размер клиентской базы", "за всё время". Never substitute analytics.business.query unique_clients: that metric covers only a selected reporting period.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -302,6 +302,74 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'none',
     idempotency: 'none',
     timeoutMs: 5_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'clients.access.check',
+    description:
+      'Verify that MAYA can currently read the tenant customer source. Use for "ты видишь базу клиентов?", "есть доступ к клиентам/истории YClients?". This performs a real server-side read check and returns capabilities without names, phones or other customer PII.',
+    inputSchema: EMPTY_OBJECT_SCHEMA,
+    allowedRoles: BUSINESS_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['customers.core'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 12_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'clients.return_candidates.read',
+    description:
+      'Build a private CRM reactivation queue for an owner/manager: no-shows, cancellations without rebooking, overdue visit cycles, or clients inactive for an explicitly requested number of days. Use for any natural request like "кого вернуть", "кто давно не был", "возьми тех, кто не приходил больше трёх месяцев". The result is rendered by the trusted server and is never sent back to the external model because it may contain customer names and masked phone tails. Read-only: it never starts a mailing or contacts anyone.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        mode: {
+          type: 'string',
+          enum: ['adaptive', 'inactive_period'],
+          description:
+            'adaptive for no-shows/cancellations/overdue cycles; inactive_period when the person explicitly asks for clients absent longer than a threshold.',
+        },
+        inactive_days: {
+          type: 'integer',
+          minimum: 7,
+          maximum: 365,
+          description:
+            'Exact inactivity threshold in days. Required semantically for inactive_period; for colloquial months use 30 days per month (for example three months = 90).',
+        },
+        lookback_days: {
+          type: 'integer',
+          minimum: 30,
+          maximum: 730,
+          description:
+            'How much CRM history the server may inspect. Omit unless the person explicitly asks for a wider window.',
+        },
+        future_days: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 180,
+          description:
+            'Future-booking exclusion horizon. Omit to use the safe server default.',
+        },
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 50,
+          description: 'Maximum queue size. Omit to use the server default.',
+        },
+      },
+    },
+    allowedRoles: BUSINESS_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['booking'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 30_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },

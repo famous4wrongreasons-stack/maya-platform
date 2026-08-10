@@ -1181,6 +1181,17 @@ export class CrmService {
     return adapter.searchClients({ tenantId: scopedTenantId, query });
   }
 
+  async getClientBaseCount(tenantId: string): Promise<number> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientBaseCount',
+      'crm_client_base_count_not_supported',
+    );
+
+    return adapter.getClientBaseCount({ tenantId: scopedTenantId });
+  }
+
   async getClientVisitHistory(
     tenantId: string,
     clientId: string,
@@ -1204,7 +1215,11 @@ export class CrmService {
   async getClientReturnCandidates(
     tenantId: string,
     limit = 50,
-    options: { lookbackDays?: number; futureDays?: number } = {},
+    options: {
+      lookbackDays?: number;
+      futureDays?: number;
+      inactiveDays?: number;
+    } = {},
   ): Promise<CrmClientReturnCandidate[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const adapter = await this.getVisitCapableAdapter(
@@ -1219,6 +1234,7 @@ export class CrmService {
       limit,
       lookbackDays: options.lookbackDays,
       futureDays: options.futureDays,
+      inactiveDays: options.inactiveDays,
     });
   }
 

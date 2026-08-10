@@ -1620,6 +1620,88 @@ describe('YclientsCRMAdapter', () => {
     );
   });
 
+  it('reads the all-time client count without returning client rows', async () => {
+    const requestedUrls: string[] = [];
+    global.fetch = jest.fn<typeof fetch>(
+      (input: Parameters<typeof fetch>[0]) => {
+        requestedUrls.push(requestUrl(input));
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [{ id: 1, name: 'Private client', phone: '+79990000000' }],
+              meta: { total_count: 1_234 },
+            }),
+            { status: 200 },
+          ),
+        );
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getClientBaseCount({ tenantId: 'tenant-1' }),
+    ).resolves.toBe(1_234);
+    expect(requestedUrls[0]).toContain('/clients/123');
+    expect(requestedUrls[0]).toContain('page=1');
+    expect(requestedUrls[0]).toContain('count=1');
+  });
+
+  it('rejects a client count response without authoritative metadata', async () => {
+    global.fetch = jest.fn<typeof fetch>(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getClientBaseCount({ tenantId: 'tenant-1' }),
+    ).rejects.toThrow('total client count');
+  });
+
+  it('filters an exact inactivity period and excludes recent and rebooked clients', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T09:00:00.000Z'));
+    const records = [
+      visit(2011, 201, 'Inactive', '+79180000201', '2026-04-01T10:00:00', 1),
+      visit(2021, 202, 'Recent', '+79180000202', '2026-07-01T10:00:00', 1),
+      visit(2031, 203, 'Rebooked', '+79180000203', '2026-04-01T10:00:00', 1),
+      visit(2032, 203, 'Rebooked', '+79180000203', '2026-08-20T10:00:00', 0),
+    ];
+    global.fetch = jest.fn<typeof fetch>(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ data: records }), { status: 200 }),
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const candidates = await adapter.getClientReturnCandidates({
+      tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
+    });
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({
+      client_id: '201',
+      reason_code: 'inactive_period',
+      days_overdue: 41,
+    });
+  });
+
   function visit(
     id: number,
     clientId: number,

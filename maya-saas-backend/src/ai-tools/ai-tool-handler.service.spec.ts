@@ -24,6 +24,147 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  it('reads the authoritative all-time CRM customer count', async () => {
+    const getClientBaseCount = jest.fn().mockResolvedValue(1_847);
+    const countCustomers = jest.fn();
+    const service = createService({
+      crmService: { getClientBaseCount } as unknown as CrmService,
+      customersService: { countCustomers } as unknown as CustomersService,
+    });
+
+    const result = await service.execute(
+      'customers.count',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {},
+      'execution-customer-count-crm',
+    );
+
+    expect(getClientBaseCount).toHaveBeenCalledWith('tenant-a');
+    expect(countCustomers).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      customer_count: 1_847,
+      scope: 'all_time',
+      scope_label_ru: 'за всё время',
+      source: 'crm',
+    });
+  });
+
+  it('counts active customer accounts for the internal MAYA calendar', async () => {
+    const getClientBaseCount = jest.fn();
+    const countCustomers = jest.fn().mockResolvedValue({ customer_count: 42 });
+    const service = createService({
+      crmService: { getClientBaseCount } as unknown as CrmService,
+      customersService: { countCustomers } as unknown as CustomersService,
+      prisma: {
+        tenant: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValue({ calendarSource: 'internal' }),
+        },
+      } as unknown as PrismaService,
+    });
+
+    const result = await service.execute(
+      'customers.count',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {},
+      'execution-customer-count-maya',
+    );
+
+    expect(countCustomers).toHaveBeenCalledWith('tenant-a');
+    expect(getClientBaseCount).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      customer_count: 42,
+      scope: 'all_time',
+      scope_label_ru: 'за всё время',
+      source: 'maya',
+    });
+  });
+
+  it('checks client access with a real source read instead of a canned reply', async () => {
+    const getClientBaseCount = jest.fn().mockResolvedValue(1_847);
+    const service = createService({
+      crmService: { getClientBaseCount } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.access.check',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {},
+      'execution-client-access',
+    );
+
+    expect(getClientBaseCount).toHaveBeenCalledWith('tenant-a');
+    expect(result).toEqual({
+      connected: true,
+      source: 'crm',
+      customer_count: 1_847,
+      scope: 'all_time',
+      scope_label_ru: 'за всё время',
+      capabilities: [
+        'all_time_count',
+        'redacted_client_dossier',
+        'return_candidates',
+      ],
+    });
+  });
+
+  it('builds a read-only return queue with masked phones', async () => {
+    const getClientReturnCandidates = jest.fn().mockResolvedValue([
+      {
+        client_id: 'private-client-id',
+        name: 'Иван Петров',
+        phone: '+7 999 123-45-67',
+        reason_code: 'inactive_period',
+        last_completed_visit: '2026-04-01T10:00:00.000Z',
+        last_event_at: '2026-04-01T10:00:00.000Z',
+        average_cycle_days: 31,
+        days_overdue: 41,
+      },
+    ]);
+    const service = createService({
+      crmService: { getClientReturnCandidates } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.return_candidates.read',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { mode: 'inactive_period', inactive_days: 90, limit: 10 },
+      'execution-client-return',
+    );
+
+    expect(getClientReturnCandidates).toHaveBeenCalledWith('tenant-a', 10, {
+      lookbackDays: 365,
+      futureDays: 90,
+      inactiveDays: 90,
+    });
+    expect(result).toEqual({
+      total_count: 1,
+      shown_count: 1,
+      requires_confirmation: true,
+      communication_started: false,
+      filter: {
+        type: 'inactive_period',
+        threshold_days: 90,
+        lookback_days: 365,
+      },
+      candidates: [
+        {
+          display_name: 'Иван Петров',
+          phone_masked: '••• •••-4567',
+          reason_code: 'inactive_period',
+          reason: 'Не был(а) 131 дн. (порог 90 дн.)',
+          last_event_at: '2026-04-01T10:00:00.000Z',
+          last_completed_visit: '2026-04-01T10:00:00.000Z',
+          average_cycle_days: 31,
+          days_overdue: 41,
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('+7 999 123-45-67');
+    expect(JSON.stringify(result)).not.toContain('private-client-id');
+  });
+
   it('builds an exact, redacted CRM client dossier for staff', async () => {
     const searchClients = jest.fn().mockResolvedValue([
       { id: '42', name: 'Иван Петров', phone: '+79991234567' },

@@ -48,10 +48,14 @@ export function buildChatReportCard(
         'analytics.business.query',
         'analytics.employee.query',
         'analytics.business.profit',
+        'clients.return_candidates.read',
       ].includes(item.name),
     );
   if (!latest) {
     return null;
+  }
+  if (latest.name === 'clients.return_candidates.read') {
+    return buildClientReturnCandidatesCard(latest.result);
   }
   if (latest.name === 'analytics.business.profit') {
     return buildProfitCard(latest.result);
@@ -63,6 +67,52 @@ export function buildChatReportCard(
     return buildBusinessCard(latest.result);
   }
   return null;
+}
+
+function buildClientReturnCandidatesCard(evidence: unknown): ChatReportCard {
+  const data = record(evidence);
+  const filter = record(data.filter);
+  const candidates = Array.isArray(data.candidates)
+    ? data.candidates.slice(0, 15).map((candidate) => {
+        const row = record(candidate);
+        return {
+          display_name:
+            typeof row.display_name === 'string' ? row.display_name : 'Клиент',
+          phone_masked:
+            typeof row.phone_masked === 'string' ? row.phone_masked : null,
+          reason: typeof row.reason === 'string' ? row.reason : null,
+          reason_code:
+            typeof row.reason_code === 'string' ? row.reason_code : null,
+          last_event_at:
+            typeof row.last_event_at === 'string' ? row.last_event_at : null,
+          last_completed_visit:
+            typeof row.last_completed_visit === 'string'
+              ? row.last_completed_visit
+              : null,
+          average_cycle_days: metricNumber(row.average_cycle_days),
+          days_overdue: metricNumber(row.days_overdue),
+        };
+      })
+    : [];
+  return {
+    widget: 'client_return_candidates',
+    widget_data: {
+      title: 'Клиенты для возврата',
+      total_count: metricNumber(data.total_count) ?? 0,
+      shown_count: metricNumber(data.shown_count) ?? candidates.length,
+      candidates,
+      requires_confirmation: data.requires_confirmation === true,
+      communication_started: data.communication_started === true,
+      filter:
+        filter.type === 'inactive_period'
+          ? {
+              type: 'inactive_period',
+              threshold_days: metricNumber(filter.threshold_days),
+              lookback_days: metricNumber(filter.lookback_days),
+            }
+          : { type: 'adaptive_return' },
+    },
+  };
 }
 
 function buildBusinessCard(evidence: unknown): ChatReportCard {

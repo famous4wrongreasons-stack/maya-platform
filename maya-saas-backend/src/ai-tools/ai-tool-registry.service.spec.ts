@@ -76,6 +76,67 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('validates bounded client-return queries without inventing defaults', () => {
+    expect(
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'adaptive',
+        limit: 15,
+      }),
+    ).toEqual({ mode: 'adaptive', limit: 15 });
+    expect(
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'inactive_period',
+        inactive_days: 90,
+        lookback_days: 365,
+        future_days: 60,
+        limit: 25,
+      }),
+    ).toEqual({
+      mode: 'inactive_period',
+      inactive_days: 90,
+      lookback_days: 365,
+      future_days: 60,
+      limit: 25,
+    });
+  });
+
+  it('rejects incomplete or unbounded client-return queries', () => {
+    expect(() =>
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'inactive_period',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'inactive_period',
+        inactive_days: 366,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'adaptive',
+        lookback_days: 731,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'adaptive',
+        future_days: 181,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'adaptive',
+        limit: 500,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('clients.return_candidates.read', {
+        mode: 'broadcast',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
   it('rejects PII and invalid amounts in loyalty reasons', () => {
     expect(() =>
       service.validateArguments('loyalty.internal.adjust', {

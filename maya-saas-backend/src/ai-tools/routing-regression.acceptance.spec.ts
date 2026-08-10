@@ -19,7 +19,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
-import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
@@ -72,6 +71,11 @@ const TOOL_RESULTS: Record<string, unknown> = {
   },
   'expenses.read': { by_category: [], totals: [] },
   'customers.count': { count: 0 },
+  'clients.access.check': {
+    connected: true,
+    source: 'external_crm',
+    customer_count: 321,
+  },
   'clients.dossier.read': {
     found: true,
     display_name: 'клиент',
@@ -229,9 +233,6 @@ function createHarness(
       tryHandle: jest.fn().mockResolvedValue(null),
     } as unknown as StaffScheduleCommandService,
     new MayaBrainRouterService(),
-    {
-      tryHandle: jest.fn().mockResolvedValue(null),
-    } as unknown as ClientIntelligenceService,
   );
 
   // Модель послушная: берёт ПЕРВОЕ имя из required_tools — то есть подсказку
@@ -451,12 +452,30 @@ describe('КОРПУС: роли остались на своих данных',
   });
 
   it('владелец: «ты видишь базу клиентов?» — честный доступ, без отказа', async () => {
-    const result = await askAs(OWNER, 'Ты видишь базу клиентов?');
+    const harness = createHarness(OWNER);
+    harness.decide.mockImplementation((input: AiCoreModelInput) =>
+      Promise.resolve({
+        reply:
+          input.toolResults.length > 0
+            ? 'Доступ к клиентской базе подтверждён.'
+            : 'Проверяю подключение CRM.',
+        toolCall:
+          input.allowToolCall && input.toolResults.length === 0
+            ? { name: 'clients.access.check', arguments: {} }
+            : null,
+        provider: 'deepseek' as const,
+        model: 'test-model',
+        usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      }),
+    );
+    const answer = await harness.ask('Ты видишь базу клиентов?');
 
-    expect(result.tools).toEqual([]);
-    expect(result.answer.source).toBe('safe_fallback');
-    expect(result.answer.reply).toMatch(/доступ есть/i);
-    expect(result.answer.reply).not.toMatch(/не вижу/i);
+    expect(answer.tools_used.map((tool) => tool.name)).toEqual([
+      'clients.access.check',
+    ]);
+    expect(answer.grounding.domain).toBe('client_access');
+    expect(answer.reply).toMatch(/доступ к клиентской базе/i);
+    expect(answer.reply).not.toMatch(/не вижу/i);
   });
 });
 

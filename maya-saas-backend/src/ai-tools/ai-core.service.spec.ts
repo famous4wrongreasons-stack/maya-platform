@@ -10,7 +10,6 @@ import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
-import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreModelDecision } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
@@ -46,18 +45,34 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.listTools).not.toHaveBeenCalled();
   });
 
-  it('keeps private client lookup outside the external model boundary', async () => {
-    const mocks = createService();
-    mocks.clientIntelligence.tryHandle.mockResolvedValue({
-      reply: 'Приватное досье готово.',
-      card: {
-        widget: 'client_dossier',
-        widget_data: { title: 'Иван', completed_visits: 4 },
-      },
-      toolUsage: {
-        name: 'clients.private.dossier',
-        status: 'completed',
-        execution_id: null,
+  it('lets the model choose a client dossier while keeping raw PII outside it', async () => {
+    const mocks = createService(['clients.dossier.read']);
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю историю клиента.',
+          toolCall: {
+            name: 'clients.dossier.read',
+            arguments: { query: '[name removed]' },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'У клиента четыре завершённых визита. Обычно он выбирает стрижку.',
+          toolCall: null,
+        }),
+      );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-dossier',
+      result: {
+        found: true,
+        display_name: 'клиент',
+        visits: 4,
+        no_shows: 0,
+        favorite_services: ['Стрижка'],
       },
     });
 
@@ -72,19 +87,163 @@ describe('AiCoreService', () => {
       ],
     });
 
-    expect(mocks.clientIntelligence.tryHandle).toHaveBeenCalled();
-    expect(mocks.model.decide).not.toHaveBeenCalled();
-    expect(mocks.runtime.listTools).not.toHaveBeenCalled();
-    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    expect(
+      mocks.model.decide.mock.calls[0]?.[0].messages.at(-1)?.content,
+    ).toContain('[phone removed]');
+    expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+      '+7 918 000-00-00',
+    );
+    expect(mocks.runtime.execute).toHaveBeenCalledWith(
+      user,
+      'clients.dossier.read',
+      expect.objectContaining({ arguments: { query: '79180000000' } }),
+    );
     expect(result).toMatchObject({
-      reply: 'Приватное досье готово.',
+      reply: 'У клиента четыре завершённых визита. Обычно он выбирает стрижку.',
       redacted_input: true,
-      widget: 'client_dossier',
       grounding: {
         status: 'verified',
-        domain: 'client_intelligence',
+        domain: 'client_dossier',
       },
     });
+  });
+
+  it.each([
+    'Сколько всего людей в нашей клиентской базе?',
+    'Какой общий размер базы клиентов за всё время?',
+    'Сколько народу вообще накопилось в базе?',
+  ])(
+    'lets the model choose the all-time CRM count by meaning: %s',
+    async (message) => {
+      const mocks = createService([
+        'analytics.business.query',
+        'customers.count',
+      ]);
+      mocks.model.decide
+        .mockResolvedValueOnce(toolDecision('customers.count'))
+        .mockResolvedValueOnce(
+          decision({
+            reply: 'Всего в клиентской базе за всё время 1 847 человек.',
+            toolCall: null,
+          }),
+        );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'execution-all-time-customer-count',
+        result: {
+          customer_count: 1_847,
+          scope: 'all_time',
+          scope_label_ru: 'за всё время',
+          source: 'crm',
+        },
+      });
+
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        surface: 'native',
+        messages: [{ role: 'user', content: message }],
+      });
+
+      const firstModelInput = mocks.model.decide.mock.calls[0]?.[0];
+      expect(firstModelInput?.requiredToolNames).toEqual(
+        expect.arrayContaining(['analytics.business.query', 'customers.count']),
+      );
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute).toHaveBeenCalledWith(
+        user,
+        'customers.count',
+        expect.objectContaining({ arguments: {} }),
+      );
+      expect(result).toMatchObject({
+        reply: 'Всего в клиентской базе за всё время 1 847 человек.',
+        source: 'deepseek',
+        grounding: {
+          status: 'verified',
+          domain: 'customer_count',
+          evidence_tools: ['customers.count'],
+        },
+      });
+    },
+  );
+
+  it('keeps a private client-return queue out of the external model', async () => {
+    const mocks = createService([
+      'analytics.business.query',
+      'clients.return_candidates.read',
+    ]);
+    mocks.model.decide.mockResolvedValueOnce(
+      toolDecision('clients.return_candidates.read', {
+        mode: 'inactive_period',
+        inactive_days: 90,
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-client-return',
+      result: {
+        total_count: 1,
+        shown_count: 1,
+        requires_confirmation: true,
+        communication_started: false,
+        filter: {
+          type: 'inactive_period',
+          threshold_days: 90,
+          lookback_days: 365,
+        },
+        candidates: [
+          {
+            display_name: 'Иван Петров',
+            phone_masked: '••• •••-4567',
+            reason_code: 'inactive_period',
+            reason: 'Не был(а) 131 дн. (порог 90 дн.)',
+            last_completed_visit: '2026-04-01T10:00:00.000Z',
+            last_event_at: '2026-04-01T10:00:00.000Z',
+            average_cycle_days: 31,
+            days_overdue: 41,
+          },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Возьми из нашей базы тех, кто не был больше трёх месяцев.',
+        },
+      ],
+    });
+
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+      'Иван Петров',
+    );
+    expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain('4567');
+    expect(mocks.runtime.execute).toHaveBeenCalledWith(
+      user,
+      'clients.return_candidates.read',
+      expect.objectContaining({
+        arguments: { mode: 'inactive_period', inactive_days: 90 },
+      }),
+    );
+    expect(result).toMatchObject({
+      source: 'safe_fallback',
+      action: null,
+      grounding: {
+        status: 'verified',
+        domain: 'client_return_candidates',
+      },
+      widget: 'client_return_candidates',
+      widget_data: {
+        total_count: 1,
+        requires_confirmation: true,
+        communication_started: false,
+      },
+    });
+    expect(result.reply).toContain('Никакая рассылка не запущена');
   });
 
   it('enables a named analytics capability directly from chat', async () => {
@@ -131,13 +290,15 @@ describe('AiCoreService', () => {
 
   it('redacts PII, executes an allowed read tool and lets the model answer from its result', async () => {
     const mocks = createService();
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          '<b>Выручка по бизнесу за период выросла, считаю по данным CRM.</b>',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            '<b>Выручка по бизнесу за период выросла, считаю по данным CRM.</b>',
+          toolCall: null,
+        }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-a',
@@ -160,7 +321,7 @@ describe('AiCoreService', () => {
       ],
     });
 
-    const modelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     // 152-ФЗ: имя, телефон и почта клиента не пересекают внешнюю границу
     // модели. Это единственный контур, который вообще нельзя обсуждать.
     expect(JSON.stringify(modelInput)).not.toContain('Иван');
@@ -170,8 +331,8 @@ describe('AiCoreService', () => {
     // ПД могут прийти и «с другой стороны» — из результата инструмента.
     // Телефон обязан быть вырезан и там.
     expect(JSON.stringify(modelInput)).not.toContain('+79180000000');
-    // Суть схемы: модель пишет ответ, ГЛЯДЯ на цифры инструмента, а не по
-    // памяти. Данные подгружены заранее, поэтому доедут на первом же ходу.
+    // Суть схемы: сначала модель выбирает источник, затем пишет ответ, глядя
+    // на проверенные цифры инструмента, а не по памяти.
     expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
       reply: 'Выручка по бизнесу за период выросла, считаю по данным CRM.',
@@ -190,9 +351,7 @@ describe('AiCoreService', () => {
         },
       ],
     });
-    // Данные предзагружены сервером, поэтому лишнего обращения к провайдеру за
-    // вызовом инструмента больше нет: модель вызывается ровно один раз.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).not.toContain('+79180000000');
     // Разметку из ответа модели по-прежнему вычищаем перед выдачей наружу.
     expect(result.reply).not.toContain('<b>');
@@ -521,13 +680,15 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          'Рабочего графика смен я не веду. По записям на сегодня в салоне 12 визитов — показать по мастерам?',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Рабочего графика смен я не веду. По записям на сегодня в салоне 12 визитов — показать по мастерам?',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -561,13 +722,15 @@ describe('AiCoreService', () => {
       'catalog.services.read',
       'booking.upsell.suggest',
     ]);
-    mocks.model.decide.mockResolvedValueOnce(
-      decision({
-        reply:
-          'У нас тёплая команда барберов и спокойная атмосфера. Записать вас?',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('catalog.staff.read'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'У нас тёплая команда барберов и спокойная атмосфера. Записать вас?',
+          toolCall: null,
+        }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-staff-catalog',
@@ -612,7 +775,6 @@ describe('AiCoreService', () => {
       'analytics.business.query',
       expect.anything(),
     );
-    expect(mocks.clientIntelligence.tryHandle).not.toHaveBeenCalled();
     expect(result.brain).toMatchObject({ persona: 'admin' });
     expect(result.widget).toBeUndefined();
     expect(result.reply).not.toMatch(/выручк|прибыл|загрузк|аналитик/i);
@@ -824,9 +986,11 @@ describe('AiCoreService', () => {
       role: UserRole.EMPLOYEE,
     };
     const mocks = createService(['analytics.employee.query']);
-    mocks.model.decide.mockResolvedValue(
-      decision({ reply: 'Ваша выручка: 99 400 ₽.', toolCall: null }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.employee.query'))
+      .mockResolvedValueOnce(
+        decision({ reply: 'Ваша выручка: 99 400 ₽.', toolCall: null }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-employee',
@@ -848,7 +1012,7 @@ describe('AiCoreService', () => {
 
     // Сотруднику разрешён только его личный срез. Бизнес-итоги не должны
     // появиться среди фактически вызванных инструментов.
-    const modelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.employee.query');
     expect(result).toMatchObject({
       reply: 'Ваша выручка: 99 400 ₽.',
@@ -861,7 +1025,7 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
       'analytics.employee.query',
     ]);
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
   it('loads verified CRM context for an open-ended owner business question', async () => {
@@ -883,12 +1047,14 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply: 'Сейчас в первую очередь стоит разобрать поток клиентов.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Сейчас в первую очередь стоит разобрать поток клиентов.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1037,7 +1203,7 @@ describe('AiCoreService', () => {
     );
   });
 
-  it('preloads verified CRM data and lets the model name the weakest service', async () => {
+  it('lets the model choose verified CRM data and name the weakest service', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
@@ -1069,13 +1235,15 @@ describe('AiCoreService', () => {
         ],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          'Сильнее всего просела мужская стрижка. Проверьте окна и возврат клиентов.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Сильнее всего просела мужская стрижка. Проверьте окна и возврат клиентов.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1099,11 +1267,9 @@ describe('AiCoreService', () => {
         },
       }),
     );
-    // Предзагрузка экономит ход: данные уже на руках, поэтому модель зовётся
-    // один раз — сразу с результатом инструмента, а не за ним.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    const first = mocks.model.decide.mock.calls[0]?.[0];
-    expect(first?.toolResults?.[0]?.name).toBe('analytics.business.query');
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    const second = mocks.model.decide.mock.calls[1]?.[0];
+    expect(second?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
       reply:
         'Сильнее всего просела мужская стрижка. Проверьте окна и возврат клиентов.',
@@ -1144,7 +1310,9 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(null);
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(null);
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1198,7 +1366,9 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(null);
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(null);
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1233,8 +1403,8 @@ describe('AiCoreService', () => {
     // Модель недоступна (decide вернул null) — это один из трёх аварийных
     // случаев, когда владелец всё равно получает связный текст из уже
     // подтверждённых цифр вместо извинения. Попытка обратиться к ней была.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    expect(mocks.model.decide.mock.calls[0]?.[0].toolResults?.[0]?.name).toBe(
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    expect(mocks.model.decide.mock.calls[1]?.[0].toolResults?.[0]?.name).toBe(
       'analytics.business.query',
     );
   });
@@ -1271,7 +1441,9 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(null);
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(null);
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1292,8 +1464,8 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('Первое действие');
     expect(result.reply).toContain('уснувших клиентов');
     // Аварийный путь: модель вернула null, поэтому цифры озвучил шаблон.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    expect(mocks.model.decide.mock.calls[0]?.[0].toolResults?.[0]?.name).toBe(
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    expect(mocks.model.decide.mock.calls[1]?.[0].toolResults?.[0]?.name).toBe(
       'analytics.business.query',
     );
   });
@@ -1343,7 +1515,9 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(null);
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(null);
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1361,8 +1535,8 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('средний чек вырос на 25%');
     // Аварийный путь: модель вернула null, объяснение собрал шаблон — но
     // строго по тем же подтверждённым изменениям, что получила бы модель.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    expect(mocks.model.decide.mock.calls[0]?.[0].toolResults?.[0]?.name).toBe(
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    expect(mocks.model.decide.mock.calls[1]?.[0].toolResults?.[0]?.name).toBe(
       'analytics.business.query',
     );
   });
@@ -1370,6 +1544,9 @@ describe('AiCoreService', () => {
   it('distinguishes a CRM outage from a Maya reasoning failure', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.runtime.execute.mockRejectedValue(new Error('crm_timeout'));
+    mocks.model.decide.mockResolvedValueOnce(
+      toolDecision('analytics.business.query'),
+    );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -1388,7 +1565,7 @@ describe('AiCoreService', () => {
     });
     expect(result.reply).toContain('не отвечает источник бизнес-данных CRM');
     expect(result.reply).not.toContain('не получилось связаться с MAYA');
-    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('uses only the current employee query to give a master performance advice', async () => {
@@ -1419,13 +1596,15 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          'Среднюю стоимость записи лучше поднимать через подходящие уходы, а не давление на клиента.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.employee.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Среднюю стоимость записи лучше поднимать через подходящие уходы, а не давление на клиента.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(employee, {
       ...dto,
@@ -1450,11 +1629,11 @@ describe('AiCoreService', () => {
       domain: 'employee_query',
       evidence_tools: ['analytics.employee.query'],
     });
-    // Совет мастеру пишет модель, но опирается на предзагруженный личный срез:
+    // Совет мастеру пишет модель после того, как сама выбрала личный срез:
     // бизнес-итоги сотруднику недоступны, и другой инструмент не вызывался.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    const first = mocks.model.decide.mock.calls[0]?.[0];
-    expect(first?.toolResults?.[0]?.name).toBe('analytics.employee.query');
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    const second = mocks.model.decide.mock.calls[1]?.[0];
+    expect(second?.toolResults?.[0]?.name).toBe('analytics.employee.query');
     expect(mocks.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
       'analytics.employee.query',
     ]);
@@ -1664,12 +1843,14 @@ describe('AiCoreService', () => {
 
   it('grounds an appointment count in business analytics', async () => {
     const mocks = createService(['analytics.business.query']);
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply: 'Записей за месяц — 12: активных 10, отменённых 2.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Записей за месяц — 12: активных 10, отменённых 2.',
+          toolCall: null,
+        }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-appointment-count',
@@ -1693,12 +1874,12 @@ describe('AiCoreService', () => {
         domain: 'business_query',
       },
     });
-    // Счётчик записей модель не считает сама — цифра пришла из инструмента,
-    // предзагруженного сервером ещё до первого обращения к провайдеру.
-    expect(mocks.model.decide.mock.calls[0]?.[0].toolResults?.[0]?.name).toBe(
+    // Счётчик записей модель не считает сама: она сначала выбирает источник,
+    // а затем получает цифру из инструмента.
+    expect(mocks.model.decide.mock.calls[1]?.[0].toolResults?.[0]?.name).toBe(
       'analytics.business.query',
     );
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
   /**
@@ -1711,13 +1892,15 @@ describe('AiCoreService', () => {
    */
   it('answers a year-over-year question from the universal business query', async () => {
     const mocks = createService(['analytics.business.query']);
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          'Поступления за 2026 год — 150 000 ₽ против 100 000 ₽ годом ранее, рост 50%. Показываю последний подтверждённый снимок от 06.08.2026: CRM сейчас не ответила, данные не обнулены.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Поступления за 2026 год — 150 000 ₽ против 100 000 ₽ годом ранее, рост 50%. Показываю последний подтверждённый снимок от 06.08.2026: CRM сейчас не ответила, данные не обнулены.',
+          toolCall: null,
+        }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-year-comparison',
@@ -1763,7 +1946,7 @@ describe('AiCoreService', () => {
     });
     // Устаревший снимок нельзя выдавать за свежие данные. Признак протухания
     // доезжает до модели вместе с цифрами, и она обязана назвать его вслух.
-    const modelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(
       (
@@ -1774,7 +1957,7 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('последний подтверждённый снимок');
     expect(result.reply).toContain('06.08.2026');
     expect(result.reply).toContain('данные не обнулены');
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
   /**
@@ -1787,7 +1970,9 @@ describe('AiCoreService', () => {
   it('names last year revenue in the deterministic year-over-year summary', async () => {
     const mocks = createService(['analytics.business.query']);
     // Провайдер молчит: текст собирает сервер, и проверяется именно он.
-    mocks.model.decide.mockResolvedValue(null);
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(null);
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-year-money',
@@ -1827,12 +2012,14 @@ describe('AiCoreService', () => {
 
   it('keeps a customer-count follow-up inside the same year-over-year window', async () => {
     const mocks = createService(['analytics.business.query']);
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply: 'Уникальных клиентов 80 против 100 годом ранее: −20 (−20%).',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'Уникальных клиентов 80 против 100 годом ранее: −20 (−20%).',
+          toolCall: null,
+        }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-customer-year-comparison',
@@ -1886,9 +2073,11 @@ describe('AiCoreService', () => {
 
   it('recognizes a direct customer decline comparison with the previous year', async () => {
     const mocks = createService(['analytics.business.query']);
-    mocks.model.decide.mockResolvedValue(
-      decision({ reply: 'Клиентов 80 против 100.', toolCall: null }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({ reply: 'Клиентов 80 против 100.', toolCall: null }),
+      );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-direct-customer-year-comparison',
@@ -1976,6 +2165,7 @@ describe('AiCoreService', () => {
       },
     });
     mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
       // Модель называет сумму, которой нет ни в одном результате инструмента.
       .mockResolvedValueOnce(
         decision({ reply: 'Выручка выросла до 999 999 ₽.', toolCall: null }),
@@ -1999,10 +2189,10 @@ describe('AiCoreService', () => {
     // Раньше одно неподтверждённое число молча стирало весь ответ. Теперь
     // модели называют виновную цифру и дают переписать — так живой текст
     // сохраняется, а выдуманная сумма всё равно не доходит до владельца.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
-    const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.corrections?.[0]).toContain('999999');
-    expect(second?.toolResults?.[0]?.name).toBe('analytics.business.query');
+    expect(mocks.model.decide).toHaveBeenCalledTimes(3);
+    const corrected = mocks.model.decide.mock.calls[2]?.[0];
+    expect(corrected?.corrections?.[0]).toContain('999999');
+    expect(corrected?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
       reply:
         'Поступления за период — 70 000 ₽ при 80 уникальных клиентах. Это подтверждённые данные CRM.',
@@ -2096,13 +2286,15 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          'Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -2118,7 +2310,7 @@ describe('AiCoreService', () => {
     // Направление изменения по-русски несут слова, а не знак: сервер отдал
     // −9.2, модель пишет «снизились на 9,2%». Сверка идёт по модулю, иначе
     // сторож ловил бы добросовестные ответы и подменял их шаблоном.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result).toMatchObject({
       reply:
         'Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.',
@@ -2158,13 +2350,15 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply:
-          'Средний чек просел до 1 436,17 ₽ с 1 503,74 ₽, это −4,5%. Записей стало меньше: 141 против 171.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Средний чек просел до 1 436,17 ₽ с 1 503,74 ₽, это −4,5%. Записей стало меньше: 141 против 171.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -2176,7 +2370,7 @@ describe('AiCoreService', () => {
     // видел слово «просел» рядом с числом 1436.17 и объявлял его ошибкой
     // направления. Но абсолютная величина направления не несёт — падает не
     // число, а показатель. Проверка направления имеет смысл только для дельт.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.source).toBe('deepseek');
     expect(result.reply).toContain('1 436,17 ₽');
     expect(result.reply).toContain('141 против 171');
@@ -2205,6 +2399,7 @@ describe('AiCoreService', () => {
       },
     });
     mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
       .mockResolvedValueOnce(
         decision({
           reply: 'Поступления выросли на 9,2% к прошлому году. Отличный темп.',
@@ -2233,7 +2428,7 @@ describe('AiCoreService', () => {
     // «выросли» на падении это не ошибка в цифре, а перевёрнутый смысл, и
     // владелец принял бы решение по несуществующему росту. Ловим по словам
     // рядом с числом и требуем переписать.
-    const correction = mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0];
+    const correction = mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0];
     expect(correction).toContain('снижение, а не рост');
     expect(result.reply).toContain('снизились на 9,2%');
     expect(result.reply).not.toContain('выросли');
@@ -2263,12 +2458,15 @@ describe('AiCoreService', () => {
         service_changes: [],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply: 'Поступления упали на 10 000 ₽ — это −4,7% к прошлому периоду.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply:
+            'Поступления упали на 10 000 ₽ — это −4,7% к прошлому периоду.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -2280,7 +2478,7 @@ describe('AiCoreService', () => {
     // дельту в копейках (−1 000 000), человек говорит «10 000 ₽», и сторож
     // считал верную сумму выдумкой. Та же величина в правильной единице —
     // не выдумка; переписывать ответ незачем.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toContain('10 000 ₽');
     expect(result.source).toBe('deepseek');
   });
@@ -2308,6 +2506,7 @@ describe('AiCoreService', () => {
       },
     });
     mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
       .mockResolvedValueOnce(
         decision({
           reply: 'Поступления упали примерно на 12 345 ₽.',
@@ -2326,7 +2525,7 @@ describe('AiCoreService', () => {
 
     // Послабление касается только единиц измерения. Округление «примерно»
     // остаётся выдумкой и по-прежнему отправляется на переписывание.
-    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+    expect(mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0]).toContain(
       '12345',
     );
     expect(result.reply).toContain('10 000 ₽');
@@ -2354,6 +2553,7 @@ describe('AiCoreService', () => {
       },
     });
     mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
       .mockResolvedValueOnce(
         decision({ reply: 'Доля отмен — 21%.', toolCall: null }),
       )
@@ -2370,7 +2570,7 @@ describe('AiCoreService', () => {
     // 🔴 Разбирая строки дат на числа, сторож считал бы подтверждёнными часы,
     // минуты и дни месяца — и пропустил бы любой процент от 0 до 59. Из таких
     // строк берём только год.
-    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+    expect(mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0]).toContain(
       '21',
     );
     expect(result.reply).toBe('Записей за период: 40.');
@@ -2430,12 +2630,14 @@ describe('AiCoreService', () => {
         ],
       },
     });
-    mocks.model.decide.mockResolvedValue(
-      decision({
-        reply: 'У Ильи просела «Борода»: 19 записей против 31, это −12.',
-        toolCall: null,
-      }),
-    );
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(
+        decision({
+          reply: 'У Ильи просела «Борода»: 19 записей против 31, это −12.',
+          toolCall: null,
+        }),
+      );
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -2449,7 +2651,7 @@ describe('AiCoreService', () => {
     });
 
     // Имя уходит в модель напрямую — иначе назвать мастера она не сможет.
-    const modelInput = JSON.stringify(mocks.model.decide.mock.calls[0]?.[0]);
+    const modelInput = JSON.stringify(mocks.model.decide.mock.calls[1]?.[0]);
     expect(modelInput).toContain('Илья');
     expect(modelInput).toContain('Борода');
     // Разбор доходит до пользователя дословно: ни сторож чисел, ни подстановка
@@ -2469,7 +2671,9 @@ describe('AiCoreService', () => {
     // браковала верные ответы пачками.
     const reply =
       'За период 40 записей и 104 500 ₽ выручки, 33 уникальных клиента. Записи просели на 12 (−23,1%).';
-    mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(decision({ reply, toolCall: null }));
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -2477,7 +2681,7 @@ describe('AiCoreService', () => {
       messages: [{ role: 'user', content: 'Что у нас по записям за месяц?' }],
     });
 
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toBe(reply);
     expect(result.source).not.toBe('safe_fallback');
     expect(result.grounding).toMatchObject({ status: 'verified' });
@@ -2491,7 +2695,9 @@ describe('AiCoreService', () => {
     // чему, и ни одной пометки быть не должно.
     const reply =
       'У Ильи «Борода» просела: 19 записей против 31, это −12 (−38,7%). У Стаса ровно — 21 запись, как и было. По салону 40 записей и 104 500 ₽, 33 уникальных клиента. Первым делом верните бородачей: обзвон тех, кто был в прошлом месяце.';
-    mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
+    mocks.model.decide
+      .mockResolvedValueOnce(toolDecision('analytics.business.query'))
+      .mockResolvedValueOnce(decision({ reply, toolCall: null }));
 
     const result = await mocks.service.chat(user, {
       ...dto,
@@ -2501,7 +2707,7 @@ describe('AiCoreService', () => {
       ],
     });
 
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toBe(reply);
     expect(result.source).not.toBe('safe_fallback');
   });
@@ -2680,6 +2886,16 @@ describe('AiCoreService', () => {
     };
   }
 
+  function toolDecision(
+    name: string,
+    args: Record<string, unknown> = {},
+  ): AiCoreModelDecision {
+    return decision({
+      reply: 'Проверяю данные.',
+      toolCall: { name, arguments: args },
+    });
+  }
+
   function createService(
     toolNames = ['analytics.business.query', 'loyalty.internal.adjust'],
     env: Record<string, string> = {},
@@ -2740,9 +2956,6 @@ describe('AiCoreService', () => {
     const staffScheduleCommand = {
       tryHandle: jest.fn().mockResolvedValue(null),
     };
-    const clientIntelligence = {
-      tryHandle: jest.fn().mockResolvedValue(null),
-    };
     // Роутер настоящий: он чистый, детерминированный и без конфигурации.
     // Подменять его макетом значило бы проверять маршрутизацию, которой нет.
     const brain = new MayaBrainRouterService();
@@ -2756,7 +2969,6 @@ describe('AiCoreService', () => {
       dashboardPreferences as unknown as DashboardPreferencesService,
       staffScheduleCommand as unknown as StaffScheduleCommandService,
       brain,
-      clientIntelligence as unknown as ClientIntelligenceService,
     );
     return {
       auditLog,
@@ -2766,7 +2978,6 @@ describe('AiCoreService', () => {
       runtime,
       service,
       staffScheduleCommand,
-      clientIntelligence,
       brain,
     };
   }
