@@ -208,6 +208,37 @@ export interface CrmAppointmentDetail extends CrmJournalAppointment {
   can_edit: boolean;
 }
 
+export type CrmClientVisitStatus =
+  'completed' | 'no_show' | 'canceled' | 'confirmed';
+
+/**
+ * Приватная история конкретного CRM-клиента.
+ *
+ * `booked_service_value` — сумма цен услуг в записи, а не фактически
+ * проведённая оплата. Это различие обязательно сохранять в UI и ответах MAYA.
+ */
+export interface CrmClientVisitInsight {
+  start: string;
+  status: CrmClientVisitStatus;
+  service_names: string[];
+  booked_service_value: number | null;
+}
+
+export type CrmClientReturnReason =
+  'no_show' | 'canceled_without_rebooking' | 'overdue_cycle';
+
+/** Кандидат на возврат, рассчитанный только по данным CRM. */
+export interface CrmClientReturnCandidate {
+  client_id: string;
+  name: string;
+  phone: string | null;
+  reason_code: CrmClientReturnReason;
+  last_completed_visit: string | null;
+  last_event_at: string;
+  average_cycle_days: number | null;
+  days_overdue: number | null;
+}
+
 export interface CrmJournal {
   calendar_source: 'external';
   timezone: string;
@@ -395,6 +426,24 @@ export interface CRMAdapter {
     tenantId: string;
     query: string;
   }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  /** История одного клиента, включая неявки и отмены. */
+  getClientVisitHistory?(params: {
+    tenantId: string;
+    clientId: string;
+    timezone: string;
+    limit?: number;
+  }): Promise<CrmClientVisitInsight[]>;
+  /**
+   * Приватная очередь возврата. Полные ПД разрешено отдавать только
+   * серверному слою, который уже проверил tenant и роль пользователя.
+   */
+  getClientReturnCandidates?(params: {
+    tenantId: string;
+    timezone: string;
+    lookbackDays?: number;
+    futureDays?: number;
+    limit?: number;
+  }): Promise<CrmClientReturnCandidate[]>;
   getFinancialSummary?(params: {
     tenantId: string;
     from: string;

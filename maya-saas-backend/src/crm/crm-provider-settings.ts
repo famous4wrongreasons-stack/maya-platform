@@ -71,6 +71,21 @@ export function normalizeCrmProviderSettings(
       normalized.currency = currency;
     }
 
+    // Tips pay pages are YClients/ЮMoney URLs keyed by company + staff id.
+    // Optional override when tips are enabled on a different branch/company.
+    const tipsCompanyRaw =
+      settings.tipsCompanyId ?? settings.tips_company_id ?? undefined;
+    if (
+      tipsCompanyRaw !== undefined &&
+      tipsCompanyRaw !== null &&
+      tipsCompanyRaw !== ''
+    ) {
+      normalized.tipsCompanyId = positiveInteger(
+        tipsCompanyRaw,
+        'settingsJson.tipsCompanyId',
+      );
+    }
+
     return normalized;
   }
 
@@ -95,6 +110,9 @@ export function serializePublicCrmSettings(
     const result: Record<string, unknown> = {};
     if (settings.companyId !== undefined) {
       result.companyId = settings.companyId;
+    }
+    if (settings.tipsCompanyId !== undefined) {
+      result.tipsCompanyId = settings.tipsCompanyId;
     }
     if (Array.isArray(settings.activeMasterIds)) {
       result.activeMasterIds = settings.activeMasterIds;

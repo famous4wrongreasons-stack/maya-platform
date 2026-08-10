@@ -10,6 +10,7 @@ import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
+import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreModelDecision } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
@@ -43,6 +44,47 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('Аналитика бизнеса');
     expect(mocks.model.decide).not.toHaveBeenCalled();
     expect(mocks.runtime.listTools).not.toHaveBeenCalled();
+  });
+
+  it('keeps private client lookup outside the external model boundary', async () => {
+    const mocks = createService();
+    mocks.clientIntelligence.tryHandle.mockResolvedValue({
+      reply: 'Приватное досье готово.',
+      card: {
+        widget: 'client_dossier',
+        widget_data: { title: 'Иван', completed_visits: 4 },
+      },
+      toolUsage: {
+        name: 'clients.private.dossier',
+        status: 'completed',
+        execution_id: null,
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Расскажи про клиента Иванова +7 918 000-00-00',
+        },
+      ],
+    });
+
+    expect(mocks.clientIntelligence.tryHandle).toHaveBeenCalled();
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.listTools).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      reply: 'Приватное досье готово.',
+      redacted_input: true,
+      widget: 'client_dossier',
+      grounding: {
+        status: 'verified',
+        domain: 'client_intelligence',
+      },
+    });
   });
 
   it('enables a named analytics capability directly from chat', async () => {
@@ -510,6 +552,70 @@ describe('AiCoreService', () => {
     // Смены выдумывать по-прежнему нельзя: сторож чисел работает, а имён в
     // результате нет — назвать их модели неоткуда.
     expect(result.reply).toContain('12 визитов');
+  });
+
+  it('keeps owner in client audience on salon story without business analytics', async () => {
+    const mocks = createService([
+      'analytics.business.query',
+      'catalog.staff.read',
+      'catalog.services.read',
+      'booking.upsell.suggest',
+    ]);
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply:
+          'У нас тёплая команда барберов и спокойная атмосфера. Записать вас?',
+        toolCall: null,
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-staff-catalog',
+      result: {
+        salon: {
+          name: 'Мужская Эстетика',
+          about: ['Премиальный барбершоп в Ставрополе.'],
+          founded_hint: 'около 2020 (более 6 лет)',
+        },
+        staff: [
+          { id: '1', name: 'Илья', title: 'Барбер', specialization: null },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Расскажи о барбершопе' }],
+    });
+
+    expect(mocks.runtime.listTools).toHaveBeenCalled();
+    const firstModelInput = mocks.model.decide.mock.calls[0]?.[0];
+    expect(firstModelInput?.persona).toBe('admin');
+    expect(
+      firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
+    ).toEqual(expect.not.arrayContaining(['analytics.business.query']));
+    expect(
+      firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
+    ).toEqual(
+      expect.arrayContaining(['catalog.staff.read', 'booking.upsell.suggest']),
+    );
+    expect(mocks.runtime.execute).toHaveBeenCalledWith(
+      user,
+      'catalog.staff.read',
+      expect.objectContaining({
+        arguments: {},
+      }),
+    );
+    expect(mocks.runtime.execute).not.toHaveBeenCalledWith(
+      user,
+      'analytics.business.query',
+      expect.anything(),
+    );
+    expect(mocks.clientIntelligence.tryHandle).not.toHaveBeenCalled();
+    expect(result.brain).toMatchObject({ persona: 'admin' });
+    expect(result.widget).toBeUndefined();
+    expect(result.reply).not.toMatch(/выручк|прибыл|загрузк|аналитик/i);
   });
 
   it('grounds a customer loyalty balance in the authenticated customer tool', async () => {
@@ -2634,6 +2740,9 @@ describe('AiCoreService', () => {
     const staffScheduleCommand = {
       tryHandle: jest.fn().mockResolvedValue(null),
     };
+    const clientIntelligence = {
+      tryHandle: jest.fn().mockResolvedValue(null),
+    };
     // Роутер настоящий: он чистый, детерминированный и без конфигурации.
     // Подменять его макетом значило бы проверять маршрутизацию, которой нет.
     const brain = new MayaBrainRouterService();
@@ -2647,6 +2756,7 @@ describe('AiCoreService', () => {
       dashboardPreferences as unknown as DashboardPreferencesService,
       staffScheduleCommand as unknown as StaffScheduleCommandService,
       brain,
+      clientIntelligence as unknown as ClientIntelligenceService,
     );
     return {
       auditLog,
@@ -2656,6 +2766,7 @@ describe('AiCoreService', () => {
       runtime,
       service,
       staffScheduleCommand,
+      clientIntelligence,
       brain,
     };
   }

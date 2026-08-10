@@ -859,14 +859,19 @@ export class AppointmentsService {
       const batch = days.slice(index, index + AVAILABLE_DAYS_BATCH_SIZE);
       const results = await Promise.all(
         batch.map(async (day) => {
-          const slots = await this.crmService.getAvailableSlots(tenantId, {
-            date: day,
-            staffId: query.staffId,
-            serviceIds,
-            branchId: query.branchId,
-          });
+          try {
+            const slots = await this.crmService.getAvailableSlots(tenantId, {
+              date: day,
+              staffId: query.staffId,
+              serviceIds,
+              branchId: query.branchId,
+            });
 
-          return slots.length > 0 ? day : null;
+            return slots.length > 0 ? day : null;
+          } catch {
+            // One bad CRM day must not fail the whole calendar probe.
+            return null;
+          }
         }),
       );
 

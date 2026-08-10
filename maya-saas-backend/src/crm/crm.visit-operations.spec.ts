@@ -285,4 +285,28 @@ describe('CrmService: операции над визитом', () => {
       run(() => service.searchClients('tenant-1', '9182')),
     ).rejects.toBeInstanceOf(ConflictException);
   });
+
+  it('очередь возврата остаётся в tenant-контексте и получает часовой пояс бизнеса', async () => {
+    const getClientReturnCandidates = jest.fn().mockResolvedValue([]);
+    const { service, run } = build({ getClientReturnCandidates });
+
+    await expect(
+      run(() => service.getClientReturnCandidates('tenant-1', 25)),
+    ).resolves.toEqual([]);
+    expect(getClientReturnCandidates).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
+      limit: 25,
+    });
+  });
+
+  it('не позволяет прочитать клиентскую базу соседнего tenant', async () => {
+    const getClientReturnCandidates = jest.fn().mockResolvedValue([]);
+    const { service, run } = build({ getClientReturnCandidates });
+
+    await expect(
+      run(() => service.getClientReturnCandidates('tenant-2', 25)),
+    ).rejects.toThrow();
+    expect(getClientReturnCandidates).not.toHaveBeenCalled();
+  });
 });

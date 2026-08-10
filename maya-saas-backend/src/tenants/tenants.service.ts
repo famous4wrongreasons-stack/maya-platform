@@ -845,6 +845,7 @@ export class TenantsService {
           select: {
             provider: true,
             status: true,
+            settingsJson: true,
           },
         },
         _count: {
@@ -1045,10 +1046,28 @@ export class TenantsService {
       },
       available_features: availableFeatures,
       available_feature_keys: availableFeatureKeys,
-      crm: {
-        provider: tenant.crmIntegration?.provider ?? null,
-        status: tenant.crmIntegration?.status ?? null,
-      },
+      crm: (function () {
+        const settings = serializePublicCrmSettings(
+          tenant.crmIntegration?.provider ?? '',
+          tenant.crmIntegration?.settingsJson,
+        );
+        const companyId =
+          typeof settings.companyId === 'number' ||
+          typeof settings.companyId === 'string'
+            ? settings.companyId
+            : null;
+        const tipsCompanyId =
+          typeof settings.tipsCompanyId === 'number' ||
+          typeof settings.tipsCompanyId === 'string'
+            ? settings.tipsCompanyId
+            : companyId;
+        return {
+          provider: tenant.crmIntegration?.provider ?? null,
+          status: tenant.crmIntegration?.status ?? null,
+          company_id: companyId,
+          tips_company_id: tipsCompanyId,
+        };
+      })(),
     };
   }
 

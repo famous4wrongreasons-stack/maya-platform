@@ -19,6 +19,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
+import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
@@ -71,6 +72,12 @@ const TOOL_RESULTS: Record<string, unknown> = {
   },
   'expenses.read': { by_category: [], totals: [] },
   'customers.count': { count: 0 },
+  'clients.dossier.read': {
+    found: true,
+    display_name: 'клиент',
+    visits: 3,
+    favorite_services: ['Стрижка'],
+  },
   'catalog.services.read': { services: [] },
   'catalog.staff.read': { staff: [] },
   'booking.availability.read': { slots: [] },
@@ -82,6 +89,9 @@ const TOOL_RESULTS: Record<string, unknown> = {
 function argumentsForTool(name: string): Record<string, unknown> {
   if (name === 'booking.availability.read') {
     return { date: '2026-08-08T09:00:00.000Z' };
+  }
+  if (name === 'clients.dossier.read') {
+    return { query: 'Иван' };
   }
   if (name === 'analytics.business.profit' || name === 'expenses.read') {
     return { period: 'month_to_date' };
@@ -219,6 +229,9 @@ function createHarness(
       tryHandle: jest.fn().mockResolvedValue(null),
     } as unknown as StaffScheduleCommandService,
     new MayaBrainRouterService(),
+    {
+      tryHandle: jest.fn().mockResolvedValue(null),
+    } as unknown as ClientIntelligenceService,
   );
 
   // Модель послушная: берёт ПЕРВОЕ имя из required_tools — то есть подсказку
@@ -428,6 +441,22 @@ describe('КОРПУС: роли остались на своих данных',
 
     expect(result.tools).toEqual(['analytics.employee.query']);
     expect(result.domain).toBe('employee_query');
+  });
+
+  it('мастер: «что за клиент Иван» — CRM-досье', async () => {
+    const result = await askAs(MASTER, 'Что за клиент Иван?');
+
+    expect(result.tools).toEqual(['clients.dossier.read']);
+    expect(result.domain).toBe('client_dossier');
+  });
+
+  it('владелец: «ты видишь базу клиентов?» — честный доступ, без отказа', async () => {
+    const result = await askAs(OWNER, 'Ты видишь базу клиентов?');
+
+    expect(result.tools).toEqual([]);
+    expect(result.answer.source).toBe('safe_fallback');
+    expect(result.answer.reply).toMatch(/доступ есть/i);
+    expect(result.answer.reply).not.toMatch(/не вижу/i);
   });
 });
 

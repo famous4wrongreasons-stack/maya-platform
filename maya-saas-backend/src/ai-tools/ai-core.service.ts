@@ -32,7 +32,8 @@ import type {
   AiCoreToolResult,
 } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
-import { buildChatReportCard } from './chat-report-card';
+import { buildChatReportCard, type ChatReportCard } from './chat-report-card';
+import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
 import { ReportingPeriodResolver } from './reporting-period.resolver';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
@@ -278,6 +279,12 @@ const EXPENSE_STRUCTURE_QUESTION_PATTERN =
 const CLIENT_ACQUISITION_QUESTION_PATTERN =
   /(сколько\s+стоит\s+(?:нам\s+|мне\s+)?(?:привест|привлеч|получ|нов[а-яё]+\s+клиент|один\s+клиент|клиент)|(?:во\s+)?сколько\s+(?:нам\s+|мне\s+)?обходится\s+(?:нов[а-яё]+\s+)?клиент|(?:во\s+)?сколько\s+обходится\s+(?:нам|мне)\s+(?:нов[а-яё]+\s+)?клиент|цена\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент[а-яё]*|стоимост[ьи]\s+(?:привлечени[а-яё]*|одного\s+клиент[а-яё]*|нов[а-яё]+\s+клиент[а-яё]*)|привлечени[ея]\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент)/i;
 /**
+ * Досье конкретного клиента из CRM (не счётчик и не «кого вернуть»).
+ * Имя в запросе нужно модели передать в query инструмента.
+ */
+const CLIENT_DOSSIER_HINT_PATTERN =
+  /(досье|что\s+за\s+клиент|расскажи\s+(?:про|о)\s+[а-яa-zё-]{2,}|что\s+(?:ему|ей)\s+предложит|что\s+(?:он|она)\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)|что\s+обычно\s+(?:берет|берёт)|привычк[аи]\s+(?:этого\s+)?клиент|перед\s+(?:его|её|ее|этим)\s+визит)/i;
+/**
  * Разрезы, которых в инструменте прибыли нет. Вопрос «прибыль по мастерам»
  * должен идти в аналитику с разрезом, а не в общую экономику салона.
  *
@@ -300,7 +307,10 @@ const PRICE_HINT_PATTERN =
   /(сколько\s+стоит|цен[а-яёa-z]*|прайс[а-яёa-z]*|какие\s+услуг[а-яёa-z]*|длительн[а-яёa-z]*\s+услуг[а-яёa-z]*)/i;
 /** Подсказка: спрашивают про мастеров — поимённо. */
 const STAFF_HINT_PATTERN =
-  /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит))/i;
+  /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист|барбер)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист|барбер)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит)|расскаж[а-яёa-z]*\s+о\s+(?:мастер|барбер)|про\s+мастер)/i;
+/** Подсказка: спрашивают про сам салон / историю — не аналитику. */
+const SALON_ABOUT_HINT_PATTERN =
+  /(расскаж[а-яёa-z]*\s+о\s+(?:барбершоп|салон|вас|вашем|вашей)|истор[а-яёa-z]*\s+(?:открыт|салон|барбер)|когда\s+(?:открыл|основа)|в\s+каком\s+году|о\s+барбершоп|про\s+(?:барбершоп|салон)|чем\s+(?:у\s+вас\s+)?(?:хорош|интересн)|атмосфер)/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 /**
@@ -337,11 +347,13 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'analytics.business.profit': 'business_profit',
   'expenses.read': 'business_expenses',
   'customers.count': 'customer_count',
+  'clients.dossier.read': 'client_dossier',
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
   'booking.availability.read': 'booking_availability',
   'appointments.own.list': 'client_appointments',
   'loyalty.own.read': 'client_loyalty',
+  'booking.upsell.suggest': 'client_upsell',
 };
 /** Инструменты, которые предзагружаем: подсказка к ним однозначна. */
 const PRELOADABLE_TOOLS = new Set([
@@ -349,6 +361,8 @@ const PRELOADABLE_TOOLS = new Set([
   'analytics.employee.query',
   'analytics.business.profit',
   'expenses.read',
+  // Гостевой «расскажи о салоне» — сразу публичный каталог, не ждём второй ход.
+  'catalog.staff.read',
 ]);
 /**
  * Инструменты, чей результат — личные данные самого спрашивающего.
@@ -385,6 +399,7 @@ export class AiCoreService {
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
     private readonly brainRouter: MayaBrainRouterService,
+    private readonly clientIntelligence: ClientIntelligenceService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -394,13 +409,50 @@ export class AiCoreService {
       identity: user.userId,
     });
     const sanitized = this.sanitizeMessages(dto.messages);
+    const clientAudience = this.isClientAudience(user, dto.audience);
     // Маршрутизация — синхронная и безусловная: ни флага, ни списка
     // арендаторов, ни записи в базу. Она решает ровно две вещи — персону и
     // намерение, и обе нужны уже на первом шаге.
+    // audience=client принудительно даёт admin-персону даже владельцу.
     const brain = this.brainRouter.route(
       user.role,
       this.latestUserText(sanitized.messages),
+      dto.audience ?? null,
     );
+    // An owner can explicitly open the client-facing surface. In that mode
+    // their business role must not unlock private CRM intelligence.
+    const clientCommand = clientAudience
+      ? null
+      : await this.clientIntelligence.tryHandle(user, dto);
+    if (clientCommand) {
+      return this.complete(
+        user,
+        dto,
+        brain,
+        true,
+        [clientCommand.toolUsage],
+        [],
+        {
+          reply: clientCommand.reply,
+          source: 'safe_fallback',
+          action: null,
+          grounding: {
+            status:
+              clientCommand.toolUsage.status === 'completed'
+                ? 'verified'
+                : 'blocked',
+            domain: 'client_intelligence',
+            required_tools: [clientCommand.toolUsage.name],
+            evidence_tools:
+              clientCommand.toolUsage.status === 'completed'
+                ? [clientCommand.toolUsage.name]
+                : [],
+          },
+        },
+        [],
+        clientCommand.card,
+      );
+    }
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
       user,
       dto,
@@ -420,8 +472,19 @@ export class AiCoreService {
         },
       );
     }
+    const clientBaseAccess = this.handleClientBaseAccessQuestion(
+      clientAudience ? { ...user, role: UserRole.CLIENT } : user,
+      sanitized.messages,
+    );
+    if (clientBaseAccess) {
+      return this.complete(user, dto, brain, false, [], [], {
+        reply: clientBaseAccess.reply,
+        source: 'safe_fallback',
+        action: null,
+      });
+    }
     const assistantCommand = await this.handleAssistantCommand(
-      user,
+      clientAudience ? { ...user, role: UserRole.CLIENT } : user,
       sanitized.messages,
     );
     if (assistantCommand) {
@@ -432,13 +495,15 @@ export class AiCoreService {
       });
     }
     const listed = await this.runtime.listTools(user, dto.surface);
-    const tools: AiCoreToolDescriptor[] = listed.tools.map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      input_schema: tool.input_schema,
-      risk_tier: tool.risk_tier,
-      approval_policy: tool.approval_policy,
-    }));
+    const tools: AiCoreToolDescriptor[] = listed.tools
+      .filter((tool) => !clientAudience || !this.isBusinessOnlyTool(tool.name))
+      .map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.input_schema,
+        risk_tier: tool.risk_tier,
+        approval_policy: tool.approval_policy,
+      }));
     const allowedNames = new Set(tools.map((tool) => tool.name));
     const toolResults: AiCoreToolResult[] = [];
     const toolsUsed: ToolUsage[] = [];
@@ -1021,7 +1086,7 @@ export class AiCoreService {
       if (!asksCapabilities) return null;
       return {
         reply:
-          'Я MAYA, помощница вашего бизнеса. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, показать ваши записи и проверить баллы. Личные и финансовые данные других людей я не раскрываю.',
+          'Я MAYA, администратор вашего салона. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, рассказать о барберах и атмосфере, показать ваши записи и проверить баллы. Цифры бизнеса и чужие данные я не раскрываю.',
       };
     }
 
@@ -1035,7 +1100,7 @@ export class AiCoreService {
       if (!asksCapabilities) return null;
       return {
         reply:
-          'Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна и доступные вашей роли показатели. Данные бизнеса и клиентов всегда ограничены серверными правами доступа.',
+          'Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна, доступные показатели и досье конкретного клиента из CRM по имени или телефону — без озвучивания персональных данных.',
       };
     }
 
@@ -1074,7 +1139,33 @@ export class AiCoreService {
     }
 
     return {
-      reply: `Я MAYA, ваша операционная помощница. Работаю только с данными, которые подтверждены CRM и разрешены вашей ролью. ${this.assistantCapabilitiesSummary([...enabled])} Настройки можно менять прямо здесь командами «включи...» и «отключи...».`,
+      reply: `Я MAYA, ваша операционная помощница. Работаю с данными CRM в рамках вашей роли: аналитика, записи, касса и досье конкретного клиента по имени или телефону (без озвучивания ПД). ${this.assistantCapabilitiesSummary([...enabled])} Настройки можно менять прямо здесь командами «включи...» и «отключи...».`,
+    };
+  }
+
+  /**
+   * Мета-вопрос про доступ к клиентской базе.
+   * Без детерминированного ответа модель из старого правила ПД отвечала
+   * «базу не вижу» — хотя clients.dossier.read уже есть.
+   */
+  private handleClientBaseAccessQuestion(
+    user: AuthenticatedUser,
+    messages: AiCoreMessage[],
+  ): { reply: string } | null {
+    if (user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER) {
+      return null;
+    }
+    const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
+    if (
+      !/(видишь|видит|есть\s+(?:ли\s+)?доступ|доступна?|можешь\s+(?:ли\s+)?(?:смотр|видеть|подним|откры)|подключен[ао]?|открыт[ао]?).{0,48}(?:баз[ауиеы]|клиент)|(?:баз[ауиеы]\s+клиент|клиентск\w*\s+баз|доступ\s+к\s+клиент)/i.test(
+        text,
+      )
+    ) {
+      return null;
+    }
+    return {
+      reply:
+        'Да — к CRM-базе клиентов у меня доступ есть. Могу поднять досье конкретного гостя по имени или хвосту телефона: сколько был, что обычно берёт, цикл визитов. Полный список с именами и телефонами вслух не читаю — скажи, кого смотрим.',
     };
   }
 
@@ -1112,8 +1203,11 @@ export class AiCoreService {
     }
     const catalogRead = toolResults.some(
       (result) =>
-        result.name === 'catalog.services.read' &&
-        Array.isArray(this.record(result.result).services),
+        (result.name === 'catalog.services.read' &&
+          Array.isArray(this.record(result.result).services)) ||
+        (result.name === 'booking.upsell.suggest' &&
+          (Array.isArray(this.record(result.result).suggestions) ||
+            Array.isArray(this.record(result.result).menu_addons))),
     );
     if (!catalogRead) {
       return 'Сначала уточним основную услугу, мастера и удобное время. Дополнения предложу только после проверки каталога.';
@@ -1194,6 +1288,7 @@ export class AiCoreService {
     decisions: AiCoreModelDecision[],
     response: AiCoreCompletion,
     toolResults: AiCoreToolResult[] = [],
+    explicitReportCard: ChatReportCard | null = null,
   ) {
     const completedResponse = response;
     const grounding =
@@ -1225,13 +1320,16 @@ export class AiCoreService {
       UserRole.PROVIDER,
       UserRole.STAFF,
     ].includes(user.role);
-    const reportCard =
-      grounding.status === 'verified' && toolResults.length > 0
-        ? buildChatReportCard(toolResults, {
-            personal,
-            userText: this.latestUserText(dto.messages),
-          })
-        : null;
+    const clientAudience = this.isClientAudience(user, dto.audience);
+    const reportCard = !clientAudience
+      ? (explicitReportCard ??
+        (grounding.status === 'verified' && toolResults.length > 0
+          ? buildChatReportCard(toolResults, {
+              personal,
+              userText: this.latestUserText(dto.messages),
+            })
+          : null))
+      : null;
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
       userId: user.userId,
@@ -1295,7 +1393,7 @@ export class AiCoreService {
     const previousUserText = this.previousUserText(messages)
       .toLowerCase()
       .replace(/ё/g, 'е');
-    const hinted = this.toolHint(text);
+    const hinted = this.toolHint(text, brain);
     if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
     }
@@ -1440,16 +1538,25 @@ export class AiCoreService {
    * «сколько у меня записей» у клиента идёт в его историю, а у мастера — в его
    * личную аналитику, без отдельной ветки на каждую роль.
    */
-  private toolHint(text: string): string[] | null {
+  private toolHint(text: string, brain?: MayaBrainRoute): string[] | null {
     if (LOYALTY_HINT_PATTERN.test(text)) {
       return ['loyalty.own.read'];
     }
     if (OWN_APPOINTMENTS_HINT_PATTERN.test(text)) {
+      // Гость — своя история визитов. Команда салона на ту же фразу смотрит
+      // загрузку/записи в аналитике: иначе мастер получает пустой client-list.
+      if (brain?.persona === 'admin') {
+        return ['appointments.own.list'];
+      }
       return [
-        'appointments.own.list',
         'analytics.employee.query',
         'analytics.business.query',
+        'appointments.own.list',
       ];
+    }
+    // До аналитики «клиентов»: досье — про конкретного гостя из CRM.
+    if (CLIENT_DOSSIER_HINT_PATTERN.test(text) && brain?.persona !== 'admin') {
+      return ['clients.dossier.read'];
     }
     if (AVAILABILITY_HINT_PATTERN.test(text)) {
       return ['booking.availability.read'];
@@ -1484,11 +1591,14 @@ export class AiCoreService {
     ) {
       return ['catalog.services.read'];
     }
+    if (SALON_ABOUT_HINT_PATTERN.test(text)) {
+      return ['catalog.staff.read', 'catalog.services.read'];
+    }
     if (STAFF_HINT_PATTERN.test(text)) {
-      // 🔴 Справочник мастеров — последний: он отдаёт обезличенные ярлыки
-      // («specialist_1»). Владельцу нужен разрез по людям поимённо с их
-      // числами, и он есть в аналитике; клиенту справочник — единственное, что
-      // вообще доступно.
+      if (brain?.persona === 'admin') {
+        return ['catalog.staff.read', 'catalog.services.read'];
+      }
+      // Владельцу/команде — сначала поимённая аналитика, каталог запасной.
       return [
         'analytics.business.query',
         'analytics.employee.query',
@@ -3018,6 +3128,30 @@ export class AiCoreService {
       return {};
     }
     return value as Record<string, unknown>;
+  }
+
+  private isClientAudience(
+    user: AuthenticatedUser,
+    audience?: 'client' | 'staff' | 'owner' | null,
+  ): boolean {
+    if (audience === 'client') {
+      return true;
+    }
+    if (audience === 'staff' || audience === 'owner') {
+      return false;
+    }
+    return user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER;
+  }
+
+  private isBusinessOnlyTool(toolName: string): boolean {
+    return (
+      toolName.startsWith('analytics.') ||
+      toolName.startsWith('expenses.') ||
+      toolName === 'customers.count' ||
+      toolName === 'clients.dossier.read' ||
+      toolName === 'staff.schedule.update' ||
+      toolName === 'loyalty.internal.adjust'
+    );
   }
 
   private requireTenant(user: AuthenticatedUser): string {

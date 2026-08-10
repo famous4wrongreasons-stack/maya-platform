@@ -31,6 +31,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
+import { ClientIntelligenceService } from './client-intelligence.service';
 import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
@@ -495,6 +496,9 @@ function createHarness(
       tryHandle: jest.fn().mockResolvedValue(null),
     } as unknown as StaffScheduleCommandService,
     new MayaBrainRouterService(),
+    {
+      tryHandle: jest.fn().mockResolvedValue(null),
+    } as unknown as ClientIntelligenceService,
   );
 
   let request = 0;
