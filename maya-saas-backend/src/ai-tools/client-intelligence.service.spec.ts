@@ -141,12 +141,25 @@ describe('ClientIntelligenceService', () => {
     expect(result?.reply).toContain('Никакая рассылка не запущена');
   });
 
-  it('does not expose the tenant client base to a regular master', async () => {
+  it('delegates a master dossier question to the redacted catalog tool', async () => {
     const { service, crm } = createService();
 
     const result = await service.tryHandle(
       { ...owner, role: UserRole.STAFF },
       dto('Расскажи про клиента Иван'),
+    );
+
+    expect(result).toBeNull();
+    expect(crm.searchClients).not.toHaveBeenCalled();
+    expect(crm.getClientReturnCandidates).not.toHaveBeenCalled();
+  });
+
+  it('does not expose the full return queue to a regular master', async () => {
+    const { service, crm } = createService();
+
+    const result = await service.tryHandle(
+      { ...owner, role: UserRole.STAFF },
+      dto('Кого из клиентов нужно вернуть?'),
     );
 
     expect(result?.toolUsage.status).toBe('denied');

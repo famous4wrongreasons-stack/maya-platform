@@ -50,7 +50,21 @@ export class ClientIntelligenceService {
     const dossierQuestion = DOSSIER_PATTERN.test(text);
     if (!accessQuestion && !returnQuestion && !dossierQuestion) return null;
 
-    if (!user.tenantId || !PRIVATE_CLIENT_ROLES.has(user.role)) {
+    if (!user.tenantId) {
+      return this.result(
+        'Полная клиентская база доступна только владельцу, управляющему или администратору этого бизнеса.',
+        null,
+        'clients.private.access_denied',
+        'denied',
+      );
+    }
+
+    // Masters can ask about one client through the redacted catalog tool. The
+    // deterministic private path remains limited to managers because it can
+    // return an entire reactivation queue and masked contact identifiers.
+    if (dossierQuestion && !PRIVATE_CLIENT_ROLES.has(user.role)) return null;
+
+    if (!PRIVATE_CLIENT_ROLES.has(user.role)) {
       return this.result(
         'Полная клиентская база доступна только владельцу, управляющему или администратору этого бизнеса.',
         null,
