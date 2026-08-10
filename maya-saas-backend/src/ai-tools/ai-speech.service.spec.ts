@@ -51,6 +51,27 @@ describe('AiSpeechService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it('accepts data-url or raw base64 WAV for native Capacitor clients', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockResolvedValue({ result: 'Запиши меня' }),
+    } as unknown as Response);
+    const service = createService({
+      YANDEX_SPEECHKIT_API_KEY: 'server-only-speech-key',
+    });
+    const file = wavFile(Buffer.from([9, 8, 7, 6]));
+    const raw = file.buffer.toString('base64');
+
+    await expect(
+      service.transcribe(service.fromBase64(`data:audio/wav;base64,${raw}`)),
+    ).resolves.toEqual({ transcript: 'Запиши меня' });
+    await expect(service.transcribe(service.fromBase64(raw))).resolves.toEqual({
+      transcript: 'Запиши меня',
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
 
 function createService(values: Record<string, string>) {

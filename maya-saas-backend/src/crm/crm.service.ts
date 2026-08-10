@@ -1179,6 +1179,21 @@ export class CrmService {
     return adapter.searchClients({ tenantId: scopedTenantId, query });
   }
 
+  async getClientVisitHistory(tenantId: string, clientId: string, limit = 30) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientVisitHistory',
+      'crm_client_history_not_supported',
+    );
+
+    return adapter.getClientVisitHistory({
+      tenantId: scopedTenantId,
+      clientId,
+      limit,
+    });
+  }
+
   async getFinancialSummary(
     tenantId: string,
     query: { from: string; to: string },

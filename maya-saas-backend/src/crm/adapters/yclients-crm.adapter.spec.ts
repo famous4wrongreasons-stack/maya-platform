@@ -412,6 +412,37 @@ describe('YclientsCRMAdapter', () => {
     expect(requestUrl).toContain('service_ids%5B%5D=7');
   });
 
+  it('treats YClients 422 date-unavailable as empty slots', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      text: () =>
+        Promise.resolve(
+          JSON.stringify({
+            success: false,
+            meta: { message: 'Дата недоступна.' },
+          }),
+        ),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {
+        companyId: 123,
+      },
+    });
+
+    await expect(
+      adapter.getAvailableSlots({
+        tenantId: 'tenant-1',
+        staffId: '15',
+        date: '2026-07-05',
+        serviceIds: ['7'],
+      }),
+    ).resolves.toEqual([]);
+  });
+
   it('cancels an appointment when YClients returns 204 without JSON body', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,

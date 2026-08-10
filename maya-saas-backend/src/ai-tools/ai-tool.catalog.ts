@@ -174,7 +174,7 @@ export const MAYA_AI_TOOL_CATALOG = [
     name: 'appointments.own.list',
     description: 'Read the authenticated customer appointment history.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
-    allowedRoles: CLIENT_ROLES,
+    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['booking.customer_app'],
     riskTier: 'read',
@@ -189,7 +189,7 @@ export const MAYA_AI_TOOL_CATALOG = [
     description:
       'Read the authenticated customer authoritative loyalty balance and price-matched spend options.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
-    allowedRoles: CLIENT_ROLES,
+    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
     allowedSurfaces: ALL_SURFACES,
     requiredFeatures: ['loyalty'],
     riskTier: 'read',
@@ -251,7 +251,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'catalog.staff.read',
     description:
-      'Read privacy-safe staff labels, titles and specializations for booking. Client-facing: the only staff list available to a guest, since analytics is closed to client roles.',
+      'Read the public booking staff list for guests: real display names, titles and specializations, plus a short salon public profile (name, city, address, tagline, about). Use this for “расскажи о барбершопе / мастерах”. Never use business analytics for guest questions.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -260,6 +260,33 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'none',
     idempotency: 'none',
     timeoutMs: 8_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'booking.upsell.suggest',
+    description:
+      'Suggest one soft addon for the authenticated customer based on visit history and currently chosen services. Returns historical suggestions («как в прошлый раз») and compatible menu_addons. Call once after the main service is known during booking.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['current_service_names'],
+      properties: {
+        current_service_names: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 10,
+          items: { type: 'string', minLength: 1, maxLength: 160 },
+        },
+      },
+    },
+    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['booking'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 12_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },
@@ -275,6 +302,34 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'none',
     idempotency: 'none',
     timeoutMs: 5_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
+    name: 'clients.dossier.read',
+    description:
+      'Staff/owner CRM client dossier by name (≥3 letters) or phone digits (≥4): visit count, last visit, favorite services, average cycle days, total spent. Call for "что за клиент", "расскажи про <имя>", "что обычно берёт", "что предложить перед визитом". 152-ФЗ: never echo phone or real name — the server returns display_name "клиент" only. Read-only.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['query'],
+      properties: {
+        query: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 80,
+          description:
+            'Client name (≥3 letters) or phone fragment (≥4 digits) for CRM search.',
+        },
+      },
+    },
+    allowedRoles: [...STAFF_ROLES, ...BUSINESS_ROLES],
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['booking'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 12_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },

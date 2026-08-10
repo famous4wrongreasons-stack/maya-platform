@@ -2,9 +2,11 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { UserRole } from '../common/domain.enums';
+import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -20,6 +22,63 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('builds a redacted CRM client dossier for staff', async () => {
+    const searchClients = jest.fn().mockResolvedValue([
+      { id: '42', name: 'Иван Петров', phone: '+79991234567' },
+      { id: '43', name: 'Иван Сидоров', phone: null },
+    ]);
+    const getClientVisitHistory = jest.fn().mockResolvedValue([
+      {
+        start: '2026-05-01T10:00:00.000Z',
+        service_names: ['Стрижка'],
+        total_price: 1800,
+        attendance: 1,
+      },
+      {
+        start: '2026-06-15T10:00:00.000Z',
+        service_names: ['Стрижка', 'Борода'],
+        total_price: 2500,
+        attendance: 1,
+      },
+      {
+        start: '2026-07-20T10:00:00.000Z',
+        service_names: ['Стрижка'],
+        total_price: 1800,
+        attendance: 1,
+      },
+    ]);
+    const service = createService({
+      crmService: {
+        searchClients,
+        getClientVisitHistory,
+      } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.dossier.read',
+      { ...principal, role: UserRole.STAFF, userId: 'master-a' },
+      { query: 'Иван' },
+      'execution-dossier-a',
+    );
+
+    expect(searchClients).toHaveBeenCalledWith('tenant-a', 'Иван');
+    expect(getClientVisitHistory).toHaveBeenCalledWith('tenant-a', '42', 30);
+    expect(result).toEqual({
+      found: true,
+      display_name: 'клиент',
+      matches_count: 2,
+      visits: 3,
+      last_visit: '2026-07-20',
+      favorite_services: ['Стрижка', 'Борода'],
+      avg_cycle_days: 40,
+      total_spent: 6100,
+      note: 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.',
+    });
+    expect(JSON.stringify(result)).not.toContain('Иван');
+    expect(JSON.stringify(result)).not.toContain('7999');
+    expect(JSON.stringify(result)).not.toContain('phone');
   });
 
   it('removes provider payload and customer PII from appointments', async () => {
@@ -2115,6 +2174,8 @@ describe('AiToolHandlerService output minimization', () => {
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
     prisma?: PrismaService;
+    customersService?: CustomersService;
+    staffService?: StaffService;
   }) {
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
@@ -2132,6 +2193,8 @@ describe('AiToolHandlerService output minimization', () => {
           },
           branch: { findFirst: jest.fn() },
         } as unknown as PrismaService),
+      overrides.customersService ?? ({} as CustomersService),
+      overrides.staffService ?? ({} as StaffService),
     );
   }
 });

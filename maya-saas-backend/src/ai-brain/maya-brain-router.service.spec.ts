@@ -10,6 +10,12 @@ describe('MayaBrainRouterService', () => {
     ).toEqual({ persona: 'admin', intent: 'booking' });
   });
 
+  it('forces admin persona when owner opens the client audience', () => {
+    expect(
+      service.route(UserRole.TENANT_ADMIN, 'Расскажи о барбершопе', 'client'),
+    ).toEqual({ persona: 'admin', intent: 'general' });
+  });
+
   it('routes owner finance questions to the director persona', () => {
     expect(
       service.route(UserRole.TENANT_OWNER, 'Какая выручка за месяц?'),

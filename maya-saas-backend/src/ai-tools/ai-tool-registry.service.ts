@@ -84,6 +84,17 @@ export class AiToolRegistryService {
       case 'loyalty.own.read':
         this.assertAllowedKeys(args, []);
         return {};
+      case 'clients.dossier.read':
+        this.assertAllowedKeys(args, ['query']);
+        return { query: this.assertClientSearchQuery(args.query) };
+      case 'booking.upsell.suggest':
+        this.assertAllowedKeys(args, ['current_service_names']);
+        return {
+          current_service_names: this.assertServiceNameArray(
+            args.current_service_names,
+            'current_service_names',
+          ),
+        };
       case 'booking.availability.read':
         this.assertAllowedKeys(args, [
           'date',
@@ -583,6 +594,25 @@ export class AiToolRegistryService {
     return normalized;
   }
 
+  private assertServiceNameArray(value: unknown, field: string): string[] {
+    if (!Array.isArray(value) || value.length < 1 || value.length > 10) {
+      this.invalidArguments(`${field} must contain from 1 to 10 service names`);
+    }
+    const names = value.map((item, index) => {
+      if (typeof item !== 'string') {
+        this.invalidArguments(`${field}[${index}] must be a string`);
+      }
+      const trimmed = item.trim();
+      if (trimmed.length < 1 || trimmed.length > 160) {
+        this.invalidArguments(
+          `${field}[${index}] must be between 1 and 160 characters`,
+        );
+      }
+      return trimmed;
+    });
+    return names;
+  }
+
   private assertScheduleSlots(
     value: unknown,
     field: string,
@@ -681,6 +711,23 @@ export class AiToolRegistryService {
       );
     }
     return value as number;
+  }
+
+  private assertClientSearchQuery(value: unknown): string {
+    if (typeof value !== 'string') {
+      this.invalidArguments('query must be a string');
+    }
+    const query = value.trim();
+    if (query.length < 3 || query.length > 80) {
+      this.invalidArguments('query must be between 3 and 80 characters');
+    }
+    const digits = query.replace(/\D/g, '');
+    if (digits.length < 4 && query.replace(/\s+/g, '').length < 3) {
+      this.invalidArguments(
+        'query needs at least 3 letters of a name or 4 phone digits',
+      );
+    }
+    return query;
   }
 
   private assertSafeReason(value: unknown): string {

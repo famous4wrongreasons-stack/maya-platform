@@ -11,6 +11,7 @@ describe('CRM provider settings', () => {
     expect(
       normalizeCrmProviderSettings(CrmProvider.YCLIENTS, {
         companyId: '42',
+        tipsCompanyId: '99',
         activeMasterIds: ['7', 7, 9],
         currency: 'rub',
         apiToken: 'must-be-dropped',
@@ -18,6 +19,7 @@ describe('CRM provider settings', () => {
       }),
     ).toEqual({
       companyId: 42,
+      tipsCompanyId: 99,
       activeMasterIds: [7, 9],
       currency: 'RUB',
     });
@@ -35,6 +37,7 @@ describe('CRM provider settings', () => {
     expect(
       serializePublicCrmSettings(CrmProvider.YCLIENTS, {
         companyId: 42,
+        tipsCompanyId: 99,
         activeMasterIds: [7],
         apiToken: 'private',
         password: 'private',
@@ -42,6 +45,7 @@ describe('CRM provider settings', () => {
       }),
     ).toEqual({
       companyId: 42,
+      tipsCompanyId: 99,
       activeMasterIds: [7],
     });
   });

@@ -418,16 +418,26 @@ export class YclientsCRMAdapter implements CRMAdapter {
           );
         }
 
-        const response = await this.request<YclientsSlotApiItem[]>(
-          `book_times/${this.getCompanyId()}/${staffId}/${date}`,
-          {
-            query,
-          },
-        );
+        try {
+          const response = await this.request<YclientsSlotApiItem[]>(
+            `book_times/${this.getCompanyId()}/${staffId}/${date}`,
+            {
+              query,
+            },
+          );
 
-        return (response.data || []).map((slot) =>
-          this.mapSlot(date, staffId, slot, params.branchId),
-        );
+          return (response.data || []).map((slot) =>
+            this.mapSlot(date, staffId, slot, params.branchId),
+          );
+        } catch (error) {
+          // YClients book_times returns 422 "Дата недоступна" for days off /
+          // closed schedule. Treat as empty — otherwise available-days fails
+          // as soon as it probes the first non-working day.
+          if (this.isDateUnavailableError(error)) {
+            return [];
+          }
+          throw error;
+        }
       }),
     );
 
@@ -1215,6 +1225,57 @@ export class YclientsCRMAdapter implements CRMAdapter {
     } catch {
       return [];
     }
+  }
+
+  /**
+   * История визитов для AI-досье / апсейла.
+   * Берём реально состоявшиеся (attendance=1), как в легаси get_client_history.
+   */
+  async getClientVisitHistory(params: {
+    tenantId: string;
+    clientId: string;
+    limit?: number;
+  }): Promise<
+    Array<{
+      start: string;
+      service_names: string[];
+      total_price: number | null;
+      attendance: number | null;
+    }>
+  > {
+    void params.tenantId;
+    const limit = Math.min(Math.max(params.limit ?? 30, 1), 50);
+    const clientId = this.toNumericId(params.clientId, 'client.id');
+    const end = new Date();
+    const start = new Date(end.getTime() - 730 * 24 * 60 * 60 * 1000);
+    const records = await this.fetchRecords({
+      startDate: start.toISOString().slice(0, 10),
+      endDate: end.toISOString().slice(0, 10),
+      clientId,
+    });
+
+    return records
+      .filter((record) => this.hasAttendance(record, 1))
+      .map((record) => {
+        const timing = this.recordTiming(record, 'Europe/Moscow');
+        const serviceNames = (record.services || [])
+          .map((service) => String(service.title || '').trim())
+          .filter(Boolean);
+        const serviceCosts = (record.services || [])
+          .map((service) => Number(service.cost ?? service.price_min))
+          .filter((cost) => Number.isFinite(cost));
+        return {
+          start: timing.start.toISOString(),
+          service_names: serviceNames,
+          total_price:
+            serviceCosts.length > 0
+              ? serviceCosts.reduce((total, cost) => total + cost, 0)
+              : null,
+          attendance: 1,
+        };
+      })
+      .sort((left, right) => left.start.localeCompare(right.start))
+      .slice(-limit);
   }
 
   async getStaffScheduleDay(params: {
@@ -2519,6 +2580,20 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private toYclientsDate(date: string): string {
     return date.slice(0, 10);
+  }
+
+  private isDateUnavailableError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('status 422') &&
+      (message.includes('дата недоступна') ||
+        message.includes('date is unavailable') ||
+        message.includes('date unavailable'))
+    );
   }
 
   private toYclientsDateTime(dateTime: string): string {

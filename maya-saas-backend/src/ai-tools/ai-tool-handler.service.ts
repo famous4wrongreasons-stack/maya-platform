@@ -32,6 +32,7 @@ import {
 import {
   collectUpsellOpportunities,
   computePeriodMoneyMotivation,
+  historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
 
@@ -151,8 +152,12 @@ export class AiToolHandlerService {
     switch (toolName) {
       case 'catalog.staff.read':
         return this.readStaff(principal.tenantId);
+      case 'booking.upsell.suggest':
+        return this.suggestClientUpsell(principal, args);
       case 'customers.count':
         return this.customersService.countCustomers(principal.tenantId);
+      case 'clients.dossier.read':
+        return this.readClientDossier(principal, args);
       case 'catalog.services.read':
         return this.readServices(principal.tenantId);
       case 'booking.availability.read':
@@ -211,22 +216,301 @@ export class AiToolHandlerService {
   }
 
   /**
-   * Обезличенный список мастеров для записи.
-   *
-   * Ярлыки specialist_N вместо имён: это единственный список, доступный ГОСТЮ,
-   * а гостю знать состав смены поимённо незачем. Владельцу имена приходят из
-   * аналитики, где они уместны.
+   * Публичный список мастеров для гостевого чата и записи.
+   * Имена на витрине уже публичны — обезличивать specialist_N нельзя,
+   * иначе MAYA не может рассказать клиенту о барберах.
    */
   private async readStaff(tenantId: string) {
-    const staff = await this.staffService.listStaff(tenantId);
+    const [staff, tenant] = await Promise.all([
+      this.staffService.listStaff(tenantId),
+      this.prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+          name: true,
+          brandingSettings: {
+            select: {
+              appName: true,
+              contactDetailsJson: true,
+              onboardingJson: true,
+              storeListingJson: true,
+            },
+          },
+        },
+      }),
+    ]);
+    const branding = tenant?.brandingSettings;
+    const contacts = this.record(branding?.contactDetailsJson);
+    const onboarding = this.record(branding?.onboardingJson);
+    const store = this.record(branding?.storeListingJson);
+    const aboutRaw = this.stringList(
+      onboarding.about ?? store.about ?? contacts.about,
+    );
+    const about =
+      aboutRaw.length > 0
+        ? aboutRaw
+        : this.defaultSalonAbout(tenant?.name ?? branding?.appName ?? null);
     return {
-      staff: staff.map((item, index) => ({
+      salon: {
+        name: branding?.appName ?? tenant?.name ?? null,
+        city: typeof contacts.city === 'string' ? contacts.city : null,
+        address: typeof contacts.address === 'string' ? contacts.address : null,
+        phone: typeof contacts.phone === 'string' ? contacts.phone : null,
+        tagline:
+          typeof contacts.tagline === 'string'
+            ? contacts.tagline
+            : typeof store.tagline === 'string'
+              ? store.tagline
+              : null,
+        about,
+        founded_hint:
+          typeof onboarding.founded_year === 'string' ||
+          typeof onboarding.founded_year === 'number'
+            ? String(onboarding.founded_year)
+            : this.defaultFoundedHint(
+                tenant?.name ?? branding?.appName ?? null,
+              ),
+      },
+      staff: staff.map((item) => ({
         id: item.id,
-        label: `specialist_${index + 1}`,
+        name: item.name,
         title: item.title ?? null,
         specialization: item.specialization ?? null,
       })),
     };
+  }
+
+  private async readClientDossier(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const query = typeof args.query === 'string' ? args.query.trim() : '';
+    if (!query) {
+      return {
+        found: false,
+        error: 'Нужно имя (≥3 букв) или телефон (≥4 цифр).',
+      };
+    }
+
+    let matches: Array<{ id: string; name: string; phone: string | null }>;
+    try {
+      matches = await this.crmService.searchClients(principal.tenantId, query);
+    } catch {
+      return {
+        found: false,
+        error: 'Поиск клиентов в CRM сейчас недоступен.',
+      };
+    }
+
+    if (!matches.length) {
+      return {
+        found: false,
+        error: 'Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).',
+      };
+    }
+
+    const client = matches[0];
+    let history: Array<{
+      start: string;
+      service_names: string[];
+      total_price: number | null;
+      attendance: number | null;
+    }> = [];
+    try {
+      history = await this.crmService.getClientVisitHistory(
+        principal.tenantId,
+        client.id,
+        30,
+      );
+    } catch {
+      history = [];
+    }
+
+    const serviceCounter = new Map<string, number>();
+    let totalSpent = 0;
+    const dates: string[] = [];
+    for (const visit of history) {
+      for (const name of visit.service_names) {
+        serviceCounter.set(name, (serviceCounter.get(name) ?? 0) + 1);
+      }
+      if (
+        typeof visit.total_price === 'number' &&
+        Number.isFinite(visit.total_price)
+      ) {
+        totalSpent += visit.total_price;
+      }
+      if (visit.start.length >= 10) {
+        dates.push(visit.start.slice(0, 10));
+      }
+    }
+    dates.sort();
+
+    let avgCycleDays: number | null = null;
+    if (dates.length >= 2) {
+      const gaps: number[] = [];
+      for (let index = 1; index < dates.length; index += 1) {
+        const prev = Date.parse(`${dates[index - 1]}T00:00:00.000Z`);
+        const next = Date.parse(`${dates[index]}T00:00:00.000Z`);
+        if (!Number.isFinite(prev) || !Number.isFinite(next)) {
+          continue;
+        }
+        const gap = Math.round((next - prev) / (24 * 60 * 60 * 1000));
+        if (gap > 0) {
+          gaps.push(gap);
+        }
+      }
+      if (gaps.length > 0) {
+        avgCycleDays = Math.round(
+          gaps.reduce((sum, gap) => sum + gap, 0) / gaps.length,
+        );
+      }
+    }
+
+    const favoriteServices = [...serviceCounter.entries()]
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4)
+      .map(([name]) => name);
+
+    return {
+      found: true,
+      // 152-ФЗ: реальное ФИО и телефон не уходят во внешнюю модель.
+      display_name: 'клиент',
+      matches_count: matches.length,
+      visits: history.length,
+      last_visit: dates.length > 0 ? dates[dates.length - 1] : null,
+      favorite_services: favoriteServices,
+      avg_cycle_days: avgCycleDays,
+      total_spent: Math.round(totalSpent),
+      note:
+        matches.length > 1
+          ? 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.'
+          : 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
+    };
+  }
+
+  private async suggestClientUpsell(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const currentNames = Array.isArray(args.current_service_names)
+      ? args.current_service_names
+          .filter((item): item is string => typeof item === 'string')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+    const [historyRaw, catalog] = await Promise.all([
+      this.appointmentsService.listClientAppointments(
+        principal.tenantId,
+        principal.userId,
+      ),
+      this.crmService.getServices(principal.tenantId),
+    ]);
+    const history = historyRaw.map((item) => {
+      const row = this.record(item);
+      const services = Array.isArray(row.services)
+        ? row.services.map((service) => {
+            const safe = this.record(service);
+            return {
+              title: typeof safe.name === 'string' ? safe.name : '',
+              priceRub: Number(safe.price || 0),
+            };
+          })
+        : [];
+      const startAt =
+        typeof row.start_at === 'string' || typeof row.start_at === 'number'
+          ? row.start_at
+          : Date.now();
+      return {
+        clientId: null,
+        startAt: new Date(startAt),
+        status: typeof row.status === 'string' ? row.status : '',
+        grossRub: Number(row.total_price || 0),
+        services,
+      };
+    });
+    const currentServices = currentNames.map((title) => ({
+      title,
+      priceRub: 0,
+    }));
+    const opportunity = historicalAddonOpportunity(history, currentServices);
+    const suggestions = opportunity
+      ? [
+          {
+            service: opportunity.title,
+            price: opportunity.price_rub,
+            times_bought: opportunity.times_bought,
+            last_date: opportunity.last_date,
+            reason: 'historical',
+          },
+        ]
+      : [];
+    const currentKeys = new Set(
+      currentNames.map((name) => name.toLowerCase().replace(/ё/g, 'е')),
+    );
+    const menu_addons = catalog
+      .filter((service) => {
+        const key = String(service.name || '')
+          .toLowerCase()
+          .replace(/ё/g, 'е');
+        if (!key || currentKeys.has(key)) return false;
+        if (
+          /уклад|стайлинг|styling/.test(key) &&
+          /стрижк/.test([...currentKeys].join(' '))
+        ) {
+          return false;
+        }
+        return /бород|тонир|камуфляж|уход|брить/.test(key);
+      })
+      .slice(0, 6)
+      .map((service) => ({
+        service: service.name,
+        price: service.price,
+        id: service.id,
+      }));
+    return {
+      suggestions,
+      menu_addons,
+      instruction: suggestions.length
+        ? 'Мягко предложи ОДНО дополнение из suggestions («как в прошлый раз»). После отказа больше не предлагай.'
+        : menu_addons.length
+          ? 'Можно один раз мягко предложить одно совместимое дополнение из menu_addons. Укладку к стрижке не предлагай.'
+          : 'Ничего не предлагай — продолжай оформление основной услуги.',
+    };
+  }
+
+  private stringList(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+  }
+
+  private isMeSalonName(name: string | null | undefined): boolean {
+    const key = String(name || '')
+      .toLowerCase()
+      .replace(/ё/g, 'е');
+    return /мужская\s*эстетик|malesthetic|muzhskaya/.test(key);
+  }
+
+  private defaultSalonAbout(name: string | null): string[] {
+    if (!this.isMeSalonName(name)) {
+      return [];
+    }
+    return [
+      'Мы не просто стрижём. Мы создаём пространство, где каждая деталь продумана — от инструментов до атмосферы.',
+      'Стабильная команда мастеров, премиальный интерьер и широкий спектр услуг — всё это Мужская Эстетика.',
+      'Барбершоп в Ставрополе на ул. Лермонтова, 343. Работаем уже больше шести лет.',
+    ];
+  }
+
+  private defaultFoundedHint(name: string | null): string | null {
+    if (!this.isMeSalonName(name)) {
+      return null;
+    }
+    return 'около 2020 (более 6 лет)';
   }
 
   private async readAvailability(

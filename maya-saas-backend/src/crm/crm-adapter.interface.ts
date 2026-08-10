@@ -395,6 +395,23 @@ export interface CRMAdapter {
     tenantId: string;
     query: string;
   }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  /**
+   * История визитов CRM-клиента по id из searchClients.
+   * Для AI-досье: имена услуг и даты без телефона/ФИО в ответе адаптера
+   * тоже можно отдать — редaction делает AI-слой.
+   */
+  getClientVisitHistory?(params: {
+    tenantId: string;
+    clientId: string;
+    limit?: number;
+  }): Promise<
+    Array<{
+      start: string;
+      service_names: string[];
+      total_price: number | null;
+      attendance: number | null;
+    }>
+  >;
   getFinancialSummary?(params: {
     tenantId: string;
     from: string;

@@ -512,6 +512,69 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('12 визитов');
   });
 
+  it('keeps owner in client audience on salon story without business analytics', async () => {
+    const mocks = createService([
+      'analytics.business.query',
+      'catalog.staff.read',
+      'catalog.services.read',
+      'booking.upsell.suggest',
+    ]);
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply:
+          'У нас тёплая команда барберов и спокойная атмосфера. Записать вас?',
+        toolCall: null,
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-staff-catalog',
+      result: {
+        salon: {
+          name: 'Мужская Эстетика',
+          about: ['Премиальный барбершоп в Ставрополе.'],
+          founded_hint: 'около 2020 (более 6 лет)',
+        },
+        staff: [
+          { id: '1', name: 'Илья', title: 'Барбер', specialization: null },
+        ],
+      },
+    });
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Расскажи о барбершопе' }],
+    });
+
+    expect(mocks.runtime.listTools).toHaveBeenCalled();
+    const firstModelInput = mocks.model.decide.mock.calls[0]?.[0];
+    expect(firstModelInput?.persona).toBe('admin');
+    expect(
+      firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
+    ).toEqual(expect.not.arrayContaining(['analytics.business.query']));
+    expect(
+      firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
+    ).toEqual(
+      expect.arrayContaining(['catalog.staff.read', 'booking.upsell.suggest']),
+    );
+    expect(mocks.runtime.execute).toHaveBeenCalledWith(
+      user,
+      'catalog.staff.read',
+      expect.objectContaining({
+        arguments: {},
+      }),
+    );
+    expect(mocks.runtime.execute).not.toHaveBeenCalledWith(
+      user,
+      'analytics.business.query',
+      expect.anything(),
+    );
+    expect(result.brain).toMatchObject({ persona: 'admin' });
+    expect(result.widget).toBeUndefined();
+    expect(result.reply).not.toMatch(/выручк|прибыл|загрузк|аналитик/i);
+  });
+
   it('grounds a customer loyalty balance in the authenticated customer tool', async () => {
     const customer: AuthenticatedUser = {
       ...user,
