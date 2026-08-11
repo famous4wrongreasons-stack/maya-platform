@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -22,10 +23,43 @@ type YandexSpeechResponse = {
 
 @Injectable()
 export class AiSpeechService {
+  private readonly logger = new Logger(AiSpeechService.name);
+
   constructor(private readonly configService: ConfigService) {}
+
+  fromBase64(raw: string | undefined): UploadedSpeechFile | undefined {
+    if (!raw || typeof raw !== 'string') {
+      return undefined;
+    }
+    const trimmed = raw.trim();
+    const comma = trimmed.indexOf(',');
+    const payload =
+      /^data:/i.test(trimmed) && comma >= 0
+        ? trimmed.slice(comma + 1)
+        : trimmed;
+    if (!payload || payload.length > MAX_AUDIO_BYTES * 2) {
+      throw this.invalidAudio('Голосовая запись пуста или слишком длинная.');
+    }
+    let buffer: Buffer;
+    try {
+      buffer = Buffer.from(payload, 'base64');
+    } catch {
+      throw this.invalidAudio('Неподдерживаемый формат голосовой записи.');
+    }
+    if (!buffer.length) {
+      throw this.invalidAudio('Голосовая запись пуста.');
+    }
+    return {
+      buffer,
+      mimetype: 'audio/wav',
+      originalname: 'maya.wav',
+      size: buffer.length,
+    };
+  }
 
   async transcribe(file: UploadedSpeechFile | undefined) {
     const pcm = this.extractPcm(file);
+    const startedAt = Date.now();
     const apiKey = this.configService
       .get<string>('YANDEX_SPEECHKIT_API_KEY')
       ?.trim();
@@ -46,10 +80,16 @@ export class AiSpeechService {
         signal: AbortSignal.timeout(this.timeoutMs()),
       });
     } catch {
+      this.logger.warn(
+        `Speech provider request failed after ${Date.now() - startedAt} ms (${pcm.length} audio bytes)`,
+      );
       throw this.providerUnavailable();
     }
 
     if (!response.ok) {
+      this.logger.warn(
+        `Speech provider returned HTTP ${response.status} after ${Date.now() - startedAt} ms (${pcm.length} audio bytes)`,
+      );
       throw this.providerUnavailable();
     }
 
@@ -57,17 +97,26 @@ export class AiSpeechService {
     try {
       payload = (await response.json()) as YandexSpeechResponse;
     } catch {
+      this.logger.warn(
+        `Speech provider returned invalid JSON after ${Date.now() - startedAt} ms (${pcm.length} audio bytes)`,
+      );
       throw this.providerUnavailable();
     }
 
     const transcript = String(payload.result ?? '').trim();
     if (!transcript) {
+      this.logger.warn(
+        `Speech provider returned an empty transcript after ${Date.now() - startedAt} ms (${pcm.length} audio bytes)`,
+      );
       throw new BadRequestException({
         message: 'Не удалось расслышать голос. Повторите ещё раз.',
         error: { code: 'speech_not_recognized' },
       });
     }
 
+    this.logger.log(
+      `Speech transcription completed in ${Date.now() - startedAt} ms (${pcm.length} audio bytes)`,
+    );
     return { transcript };
   }
 
