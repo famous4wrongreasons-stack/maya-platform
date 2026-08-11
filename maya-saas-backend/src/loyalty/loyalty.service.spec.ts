@@ -16,6 +16,7 @@ describe('LoyaltyService', () => {
     delete process.env.MAYA_LEGACY_BRIDGE_TOKEN;
     delete process.env.MAYA_LEGACY_BRIDGE_URL;
     delete process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS;
+    delete process.env.MAYA_LEGACY_LOYALTY_COMPANY_IDS;
     global.fetch = originalFetch;
   });
 
@@ -230,6 +231,89 @@ describe('LoyaltyService', () => {
     expect(new Headers(requestInit?.headers).get('X-Maya-Legacy-Bridge')).toBe(
       'x'.repeat(48),
     );
+  });
+
+  it('uses the existing MAYA ledger after the CRM branch is re-registered', async () => {
+    const setup = createService();
+    process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
+    process.env.MAYA_LEGACY_BRIDGE_URL =
+      'http://127.0.0.1:8080/api/internal/loyalty-snapshot';
+    process.env.MAYA_LEGACY_LOYALTY_COMPANY_IDS = '503759';
+    setup.tenantFindUniqueMock.mockResolvedValueOnce({
+      slug: 'new-registration-slug',
+      crmIntegration: { settingsJson: { companyId: 503759 } },
+    });
+    setup.authIdentityFindFirstMock.mockResolvedValueOnce({
+      providerUserId: '987654321',
+    });
+    const fetchMock: jest.MockedFunction<typeof fetch> = jest
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            found: true,
+            balance: 385,
+            source: 'maya_ledger',
+          }),
+          { status: 200 },
+        ),
+      );
+    global.fetch = fetchMock;
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(result).toMatchObject({
+      balance: 385,
+      source: 'legacy_maya',
+      authoritative: 'maya',
+      sync_status: 'current',
+      stale: false,
+    });
+    expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not expose the legacy ledger to another CRM branch', async () => {
+    const setup = createService();
+    process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
+    process.env.MAYA_LEGACY_LOYALTY_COMPANY_IDS = '503759';
+    setup.tenantFindUniqueMock.mockResolvedValueOnce({
+      slug: 'another-salon',
+      crmIntegration: { settingsJson: { companyId: 999999 } },
+    });
+    const fetchMock: jest.MockedFunction<typeof fetch> = jest.fn();
+    global.fetch = fetchMock;
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(result).toMatchObject({
+      balance: 2133,
+      source: CrmProvider.YCLIENTS,
+      authoritative: 'crm',
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('does not present a missing external card as a confirmed zero balance', async () => {
+    const setup = createService();
+    setup.getClientLoyaltyMock.mockResolvedValueOnce(null);
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(result).toMatchObject({
+      balance: null,
+      authoritative: 'crm',
+      sync_status: 'card_not_found',
+      stale: false,
+      spend_options: { status: 'balance_unavailable' },
+    });
+    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
   });
 
   it('keeps the confirmed balance available when the service catalog fails', async () => {

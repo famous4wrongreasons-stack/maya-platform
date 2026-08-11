@@ -333,7 +333,16 @@ export class LoyaltyService {
         .map((slug) => slug.trim().toLowerCase())
         .filter(Boolean),
     );
-    if (token.length < 32 || allowedSlugs.size === 0) {
+    const allowedCompanyIds = new Set(
+      String(process.env.MAYA_LEGACY_LOYALTY_COMPANY_IDS || '')
+        .split(',')
+        .map((companyId) => companyId.trim())
+        .filter(Boolean),
+    );
+    if (
+      token.length < 32 ||
+      (allowedSlugs.size === 0 && allowedCompanyIds.size === 0)
+    ) {
       return null;
     }
 
@@ -356,9 +365,26 @@ export class LoyaltyService {
 
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { slug: true },
+      select: {
+        slug: true,
+        crmIntegration: { select: { settingsJson: true } },
+      },
     });
-    if (!tenant || !allowedSlugs.has(tenant.slug.toLowerCase())) {
+    const settings = tenant?.crmIntegration?.settingsJson;
+    const companyIdValue =
+      settings && typeof settings === 'object' && !Array.isArray(settings)
+        ? (settings as Record<string, unknown>).companyId
+        : null;
+    const companyId =
+      typeof companyIdValue === 'string' || typeof companyIdValue === 'number'
+        ? String(companyIdValue).trim()
+        : '';
+    const tenantAllowed = Boolean(
+      tenant &&
+      (allowedSlugs.has(tenant.slug.toLowerCase()) ||
+        (companyId && allowedCompanyIds.has(companyId))),
+    );
+    if (!tenantAllowed) {
       return null;
     }
 
@@ -452,7 +478,7 @@ export class LoyaltyService {
   private emptyExternalAccount(syncStatus: string) {
     return {
       account_id: null,
-      balance: 0,
+      balance: null,
       currency: 'RUB',
       source: 'external_crm',
       authoritative: 'crm' as const,
@@ -464,13 +490,16 @@ export class LoyaltyService {
 
   private async withSpendOptions<
     T extends {
-      balance: number;
+      balance: number | null;
       currency: string;
       authoritative: 'crm' | 'maya';
       stale: boolean;
     },
   >(tenantId: string, loyalty: T) {
-    const balance = Math.max(0, Number(loyalty.balance) || 0);
+    const balance =
+      typeof loyalty.balance === 'number' && Number.isFinite(loyalty.balance)
+        ? Math.max(0, loyalty.balance)
+        : null;
     const base = {
       basis: 'price_estimate',
       points_to_currency_rate: 1,
@@ -505,6 +534,12 @@ export class LoyaltyService {
       return {
         ...loyalty,
         spend_options: { ...base, status: 'balance_unverified' },
+      };
+    }
+    if (balance === null) {
+      return {
+        ...loyalty,
+        spend_options: { ...base, status: 'balance_unavailable' },
       };
     }
     if (balance <= 0) {
