@@ -72,16 +72,14 @@ const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
 /**
  * Деньги мастера: что CRM подтверждает поимённо, а что — нет.
  *
- * 🔴 Подтверждённой ВЫРУЧКИ мастера во внешней CRM нет ни в каком виде.
- * Финансовые операции (`transactions`) — единственный подтверждённый источник
- * денег — разносятся по типам продаж и по счетам (нал/безнал), но не по
- * сотрудникам. Цены из журнала записей выручкой не являются: их и обнуляет
- * fail-closed. Единственное, что CRM отдаёт по каждому сотруднику, — расчёт
- * зарплаты: НАЧИСЛЕНО и ВЫПЛАЧЕНО за период.
+ * Подтверждённая ВЫРУЧКА мастера строится только по стабильной связи YClients:
+ * финансовая операция -> record_id -> staff_id записи. Цены из журнала сами
+ * по себе выручкой не являются: их и обнуляет fail-closed. Отдельно CRM отдаёт
+ * расчёт зарплаты: НАЧИСЛЕНО и ВЫПЛАЧЕНО за период.
  *
  * Поэтому начисления и выручка разведены в два разных поля строки мастера:
  * `salary` (что салон должен мастеру) и `confirmed_revenue` (сколько он принёс
- * в кассу — недоступно всегда, с причиной). Складывать их в одно поле нельзя:
+ * в кассу подтверждёнными оплатами услуг). Складывать их в одно поле нельзя:
  * для салона с процентной схемой начисление — это доля от выручки, и подмена
  * одного другим занижает деньги мастера ровно во столько раз, во сколько
  * отличается его процент.
@@ -101,6 +99,19 @@ type StaffSalaryScope =
   | { status: 'available'; rows: Map<string, StaffSalaryRow> }
   | { status: 'unavailable'; reason: string };
 
+type StaffRevenueRow = {
+  total: StaffMoneyAmount;
+  transactionCount: number;
+};
+
+type StaffRevenueScope =
+  | {
+      status: 'available';
+      currency: string | null;
+      rows: Map<string, StaffRevenueRow>;
+    }
+  | { status: 'unavailable'; reason: string };
+
 /** Почему начислений по мастеру нет — машиночитаемо, без гадания. */
 const STAFF_SALARY_UNAVAILABLE = {
   notRequested: 'payroll_not_requested_for_this_report',
@@ -114,10 +125,18 @@ const STAFF_SALARY_UNAVAILABLE = {
   rowUnavailable: 'crm_payroll_row_unavailable_for_this_master',
 } as const;
 
-/** Почему подтверждённой выручки мастера нет — и почему её не будет. */
+/** Почему подтверждённой выручки мастера нет в конкретном срезе. */
 const STAFF_CONFIRMED_REVENUE_UNAVAILABLE = {
-  crm: 'crm_confirms_cash_for_the_whole_company_only_its_financial_transactions_carry_no_staff_attribution',
+  notRequested: 'staff_revenue_not_requested_for_this_report',
   maya: 'internal_calendar_records_booked_appointment_value_which_is_not_till_confirmed_cash',
+  companyScope:
+    'crm_staff_revenue_is_company_scoped_and_has_no_maya_branch_split',
+  roleRestricted: 'role_not_allowed_to_read_staff_revenue',
+  identityUnknown: 'employee_is_not_linked_to_a_crm_staff_record',
+  financeUnavailable: 'crm_finance_unavailable',
+  attributionUnavailable:
+    'crm_service_payments_could_not_be_fully_joined_to_records_and_staff',
+  rowUnavailable: 'crm_staff_revenue_row_unavailable_for_this_master',
 } as const;
 
 @Injectable()
@@ -626,10 +645,17 @@ export class AiToolHandlerService {
     if (overview.data_source !== 'crm') {
       // Внутренний календарь не считает зарплату вовсе: расчёта нет ни у кого,
       // и это свойство источника, а не запрета по роли.
-      return this.withStaffSalary(operational, {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
-      });
+      return this.withStaffMoney(
+        operational,
+        {
+          status: 'unavailable',
+          reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
+        },
+        {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.maya,
+        },
+      );
     }
 
     const failClosed = {
@@ -654,7 +680,7 @@ export class AiToolHandlerService {
     };
 
     if (query.branchId) {
-      return this.withStaffSalary(
+      return this.withStaffMoney(
         {
           ...failClosed,
           finance: this.unavailableFinance('company_scope_only'),
@@ -663,6 +689,10 @@ export class AiToolHandlerService {
           status: 'unavailable',
           reason: STAFF_SALARY_UNAVAILABLE.companyScope,
         },
+        {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.companyScope,
+        },
       );
     }
     // 🔴 Начисления поимённо видит только тот, кому открыта касса салона.
@@ -670,7 +700,7 @@ export class AiToolHandlerService {
     // в финансовых ролях их нет — им достаётся честное «недоступно с причиной»,
     // а не чужая зарплата в довесок к записям.
     if (!CRM_FINANCE_ROLES.has(principal.role)) {
-      return this.withStaffSalary(
+      return this.withStaffMoney(
         {
           ...failClosed,
           finance: this.unavailableFinance('role_restricted'),
@@ -679,10 +709,14 @@ export class AiToolHandlerService {
           status: 'unavailable',
           reason: STAFF_SALARY_UNAVAILABLE.roleRestricted,
         },
+        {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.roleRestricted,
+        },
       );
     }
     if (!financeSummary) {
-      return this.withStaffSalary(
+      return this.withStaffMoney(
         {
           ...failClosed,
           finance: this.unavailableFinance('finance_unavailable'),
@@ -691,11 +725,16 @@ export class AiToolHandlerService {
           status: 'unavailable',
           reason: STAFF_SALARY_UNAVAILABLE.financeUnavailable,
         },
+        {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.financeUnavailable,
+        },
       );
     }
 
     const revenue = this.record(financeSummary.revenue);
     const payroll = this.record(financeSummary.payroll);
+    const staffRevenue = this.record(financeSummary.staff_revenue);
     const revenueTotal =
       revenue.status === 'available' && revenue.verified === true
         ? this.safeMoneyAmount(revenue.total)
@@ -719,8 +758,10 @@ export class AiToolHandlerService {
         : null;
     const payrollAvailable =
       payroll.status === 'available' && payroll.verified === true;
+    const staffRevenueAvailable =
+      staffRevenue.status === 'available' && staffRevenue.verified === true;
 
-    return this.withStaffSalary(
+    return this.withStaffMoney(
       {
         ...failClosed,
         period: financeSummary.period ?? failClosed.period,
@@ -735,6 +776,18 @@ export class AiToolHandlerService {
             verified: revenue.verified === true,
             transaction_count: transactionCount,
             total: revenueTotal,
+          },
+          staff_revenue: {
+            status: staffRevenue.status ?? 'unavailable',
+            verified: staffRevenue.verified === true,
+            transaction_count:
+              this.optionalMetricNumber(staffRevenue.transaction_count) ?? null,
+            attributed_total: staffRevenueAvailable
+              ? this.safeMoneyAmount(staffRevenue.attributed_total)
+              : null,
+            unattributed_total: staffRevenueAvailable
+              ? this.safeMoneyAmount(staffRevenue.unattributed_total)
+              : null,
           },
           payroll: {
             status: payroll.status ?? 'unavailable',
@@ -753,6 +806,7 @@ export class AiToolHandlerService {
         },
       },
       this.staffSalaryScope(financeSummary),
+      this.staffRevenueScope(financeSummary),
     );
   }
 
@@ -773,10 +827,8 @@ export class AiToolHandlerService {
         query,
       ),
     );
-    return this.withStaffSalary(
-      internal,
-      await this.employeeSalaryScope(principal, query, internal),
-    );
+    const scopes = await this.employeeMoneyScopes(principal, query, internal);
+    return this.withStaffMoney(internal, scopes.salary, scopes.revenue);
   }
 
   /**
@@ -787,29 +839,47 @@ export class AiToolHandlerService {
    * выбирается по идентификатору сотрудника из ответа аналитики, и если его
    * нет — разрез закрывается целиком, а не открывается на всех.
    */
-  private async employeeSalaryScope(
+  private async employeeMoneyScopes(
     principal: AiToolPrincipal,
     query: AnalyticsRangeQueryDto,
     internal: unknown,
-  ): Promise<StaffSalaryScope> {
+  ): Promise<{ salary: StaffSalaryScope; revenue: StaffRevenueScope }> {
     const data = this.record(internal);
     if (data.data_source !== 'crm') {
       return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
+        salary: {
+          status: 'unavailable',
+          reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
+        },
+        revenue: {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.maya,
+        },
       };
     }
     const externalId = data.employee_external_id;
     if (typeof externalId !== 'string' || externalId === '') {
       return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.identityUnknown,
+        salary: {
+          status: 'unavailable',
+          reason: STAFF_SALARY_UNAVAILABLE.identityUnknown,
+        },
+        revenue: {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.identityUnknown,
+        },
       };
     }
     if (query.branchId) {
       return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.companyScope,
+        salary: {
+          status: 'unavailable',
+          reason: STAFF_SALARY_UNAVAILABLE.companyScope,
+        },
+        revenue: {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.companyScope,
+        },
       };
     }
 
@@ -819,20 +889,46 @@ export class AiToolHandlerService {
     );
     if (!finance) {
       return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.financeUnavailable,
+        salary: {
+          status: 'unavailable',
+          reason: STAFF_SALARY_UNAVAILABLE.financeUnavailable,
+        },
+        revenue: {
+          status: 'unavailable',
+          reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.financeUnavailable,
+        },
       };
     }
-    const scope = this.staffSalaryScope(finance);
-    if (scope.status !== 'available') {
-      return scope;
-    }
-    const own = scope.rows.get(externalId);
+    const salaryScope = this.staffSalaryScope(finance);
+    const revenueScope = this.staffRevenueScope(finance);
+    const ownSalary =
+      salaryScope.status === 'available'
+        ? salaryScope.rows.get(externalId)
+        : undefined;
+    const ownRevenue =
+      revenueScope.status === 'available'
+        ? revenueScope.rows.get(externalId)
+        : undefined;
     return {
-      status: 'available',
-      rows: own
-        ? new Map<string, StaffSalaryRow>([[externalId, own]])
-        : new Map<string, StaffSalaryRow>(),
+      salary:
+        salaryScope.status === 'available'
+          ? {
+              status: 'available',
+              rows: ownSalary
+                ? new Map<string, StaffSalaryRow>([[externalId, ownSalary]])
+                : new Map<string, StaffSalaryRow>(),
+            }
+          : salaryScope,
+      revenue:
+        revenueScope.status === 'available'
+          ? {
+              status: 'available',
+              currency: revenueScope.currency,
+              rows: ownRevenue
+                ? new Map<string, StaffRevenueRow>([[externalId, ownRevenue]])
+                : new Map<string, StaffRevenueRow>(),
+            }
+          : revenueScope,
     };
   }
 
@@ -890,6 +986,61 @@ export class AiToolHandlerService {
     return { status: 'available', rows: accepted };
   }
 
+  /** Confirmed service revenue already reconciled by the CRM adapter. */
+  private staffRevenueScope(value: unknown): StaffRevenueScope {
+    const summary = this.record(value);
+    const staffRevenue = this.record(summary.staff_revenue);
+    const attributedTotal = this.safeMoneyAmount(staffRevenue.attributed_total);
+    if (
+      staffRevenue.status !== 'available' ||
+      staffRevenue.verified !== true ||
+      !attributedTotal ||
+      !Array.isArray(staffRevenue.staff)
+    ) {
+      return {
+        status: 'unavailable',
+        reason: STAFF_CONFIRMED_REVENUE_UNAVAILABLE.attributionUnavailable,
+      };
+    }
+
+    const accepted = new Map<string, StaffRevenueRow>();
+    for (const entry of staffRevenue.staff) {
+      const item = this.record(entry);
+      const staffId =
+        typeof item.staff_id === 'string' ? item.staff_id.trim() : '';
+      const total = this.safeMoneyAmount(item.total);
+      const transactionCount = this.optionalMetricNumber(
+        item.transaction_count,
+      );
+      if (
+        !staffId ||
+        item.status !== 'available' ||
+        item.verified !== true ||
+        !total ||
+        transactionCount === null
+      ) {
+        continue;
+      }
+      accepted.set(staffId, { total, transactionCount });
+    }
+    return {
+      status: 'available',
+      currency: attributedTotal.currency,
+      rows: accepted,
+    };
+  }
+
+  private withStaffMoney(
+    value: unknown,
+    salaryScope: StaffSalaryScope,
+    revenueScope: StaffRevenueScope,
+  ) {
+    return this.withStaffConfirmedRevenue(
+      this.withStaffSalary(value, salaryScope),
+      revenueScope,
+    );
+  }
+
   /** Дописывает в строки мастеров начисления — или причину, по которой их нет. */
   private withStaffSalary(value: unknown, scope: StaffSalaryScope) {
     const data = this.record(value);
@@ -899,6 +1050,53 @@ export class AiToolHandlerService {
         ...row.entry,
         salary: this.staffSalary(row.externalId, scope),
       })),
+    };
+  }
+
+  private withStaffConfirmedRevenue(value: unknown, scope: StaffRevenueScope) {
+    const data = this.record(value);
+    return {
+      ...data,
+      staff_summary: this.staffRows(data).map((row) => ({
+        ...row.entry,
+        confirmed_revenue: this.staffRevenue(row.externalId, scope),
+      })),
+    };
+  }
+
+  private staffRevenue(externalId: string | null, scope: StaffRevenueScope) {
+    if (scope.status !== 'available') {
+      return this.unavailableStaffConfirmedRevenue(scope.reason);
+    }
+    if (!externalId) {
+      return this.unavailableStaffConfirmedRevenue(
+        STAFF_CONFIRMED_REVENUE_UNAVAILABLE.rowUnavailable,
+      );
+    }
+    const row = scope.rows.get(externalId);
+    const total =
+      row?.total ??
+      ({
+        currency: scope.currency,
+        amount_kopecks: 0,
+        amount_major_units: 0,
+      } satisfies StaffMoneyAmount);
+    return {
+      status: 'available',
+      basis: 'crm_financial_transaction_record_join',
+      transaction_count: row?.transactionCount ?? 0,
+      amount: total,
+      unavailable_reason: null,
+    };
+  }
+
+  private unavailableStaffConfirmedRevenue(reason: string) {
+    return {
+      status: 'unavailable',
+      basis: null,
+      transaction_count: null,
+      amount: null,
+      unavailable_reason: reason,
     };
   }
 
@@ -1165,11 +1363,7 @@ export class AiToolHandlerService {
         ...this.clientCohortUnavailableMetrics(current),
         ...this.cancellationUnavailableMetrics(current),
         ...this.staffMoneyUnavailableMetrics(current),
-        {
-          key: 'personal_cash_revenue',
-          reason:
-            'CRM confirms appointment and booked service value plus this employee accrued payroll, but never how much cash this employee personally brought in',
-        },
+        ...this.personalCashRevenueUnavailableMetrics(current),
         {
           key: 'other_employee_personal_data',
           reason: 'role scope permits only the current employee data',
@@ -1430,24 +1624,42 @@ export class AiToolHandlerService {
   /**
    * Деньги в разрезе мастера: что недоступно и почему.
    *
-   * 🔴 Выручка мастера недоступна ВСЕГДА, и это свойство источников, а не сбой.
-   * Сказать об этом обязательно: строка мастера с записями, но без денег
-   * читается как «поработал бесплатно», и модель начинает объяснять пустоту
-   * вместо того, чтобы назвать её пропуском. Начисления при этом могут быть —
-   * и тогда о них надо говорить именно как о зарплате.
+   * Подтверждённая выручка доступна только после полной ID-сверки финансовых
+   * операций с записями. Если хотя бы одна оплата не связалась, адаптер
+   * закрывает весь рейтинг: частичная таблица выглядела бы точной, но была бы
+   * финансово неверной. Начисления зарплаты остаются отдельной метрикой.
    */
   private staffMoneyUnavailableMetrics(value: unknown) {
     const data = this.record(value);
     const rows = Array.isArray(data.staff_summary) ? data.staff_summary : [];
-    const metrics = [
-      {
+    const revenueAvailable = rows.some(
+      (entry) =>
+        this.record(this.record(entry).confirmed_revenue).status ===
+        'available',
+    );
+    const metrics: Array<{ key: string; reason: string }> = [];
+    if (!revenueAvailable) {
+      const revenueReasons = [
+        ...new Set(
+          rows.flatMap((entry) => {
+            const revenue = this.record(this.record(entry).confirmed_revenue);
+            return revenue.status === 'available' ||
+              typeof revenue.unavailable_reason !== 'string'
+              ? []
+              : [revenue.unavailable_reason];
+          }),
+        ),
+      ];
+      metrics.push({
         key: 'staff_revenue',
         reason:
-          data.data_source === 'crm'
-            ? 'per-master revenue is unavailable: the CRM confirms money for the whole company only, its financial transactions are split by sale type and by cash or card account and carry no employee, while journal prices are booked value rather than till-confirmed cash. staff_summary[].salary is accrued payroll, which is what the salon owes the master and never what the master earned for the salon'
-            : 'per-master revenue is unavailable as confirmed cash: the internal calendar stores the booked price of an appointment, which is planned value rather than a confirmed payment',
-      },
-    ];
+          revenueReasons.length > 0
+            ? `confirmed per-master revenue is unavailable: ${revenueReasons.join(', ')}`
+            : data.data_source === 'crm'
+              ? 'confirmed per-master revenue is unavailable because financial transactions could not be fully reconciled to appointment records and staff IDs'
+              : 'per-master revenue is unavailable as confirmed cash: the internal calendar stores the booked price of an appointment, which is planned value rather than a confirmed payment',
+      });
+    }
 
     const salaryReasons = [
       ...new Set(
@@ -1467,6 +1679,25 @@ export class AiToolHandlerService {
       });
     }
     return metrics;
+  }
+
+  private personalCashRevenueUnavailableMetrics(value: unknown) {
+    const rows = Array.isArray(this.record(value).staff_summary)
+      ? (this.record(value).staff_summary as unknown[])
+      : [];
+    return rows.some(
+      (entry) =>
+        this.record(this.record(entry).confirmed_revenue).status ===
+        'available',
+    )
+      ? []
+      : [
+          {
+            key: 'personal_cash_revenue',
+            reason:
+              'confirmed service payments could not be fully reconciled through CRM transaction.record_id to record.staff_id',
+          },
+        ];
   }
 
   private employeeMetricSnapshot(value: unknown) {
@@ -1871,7 +2102,6 @@ export class AiToolHandlerService {
     delete published.employee_external_id;
     const staffScope =
       scope ?? this.staffScope(this.staffDisplayNames(data), null);
-    const confirmedRevenue = this.staffConfirmedRevenue(data.data_source);
     return {
       ...published,
       staff_summary: this.staffRows(data)
@@ -1893,12 +2123,15 @@ export class AiToolHandlerService {
             this.optionalMetricNumber(row.entry.repeat_clients_in_period) ?? 0,
           revenue: this.safeMoneyEntries(row.entry.revenue),
           // 🔴 Два разных поля про деньги мастера, и перепутать их нельзя.
-          // `confirmed_revenue` — сколько он принёс в кассу; такого числа нет
-          // ни в одном источнике, поэтому оно всегда недоступно с причиной.
+          // `confirmed_revenue` — сколько он принёс подтверждёнными оплатами
+          // услуг: только сверка transaction.record_id -> record.staff_id.
           // `salary` — сколько ЕМУ начислено по расчёту зарплаты CRM. Это
           // расход салона, а не его выручка, и подменять одно другим — врать
           // и о человеке, и о салоне.
-          confirmed_revenue: confirmedRevenue,
+          confirmed_revenue: this.publishedStaffConfirmedRevenue(
+            row.entry.confirmed_revenue,
+            data.data_source,
+          ),
           salary: this.publishedStaffSalary(row.entry.salary),
           booked_minutes: row.entry.booked_minutes ?? 0,
           services: this.staffServiceRows(row.entry),
@@ -1906,23 +2139,39 @@ export class AiToolHandlerService {
     };
   }
 
-  /**
-   * Подтверждённая касса в разрезе мастера — её нет ни у одного источника.
-   *
-   * Внешняя CRM подтверждает деньги только по компании: её финансовые операции
-   * разложены по типам продаж и счетам, но сотрудника не несут. Внутренний
-   * календарь хранит цену записи — это плановая стоимость визита, а не факт
-   * оплаты. Поэтому поле всегда `unavailable`, но с разной причиной: молчание
-   * здесь читалось бы как «мастер не заработал ничего».
-   */
-  private staffConfirmedRevenue(dataSource: unknown) {
+  /** Publish only the already verified adapter reconciliation. */
+  private publishedStaffConfirmedRevenue(value: unknown, dataSource: unknown) {
+    const revenue = this.record(value);
+    const amount = this.safeMoneyAmount(revenue.amount);
+    const transactionCount = this.optionalMetricNumber(
+      revenue.transaction_count,
+    );
+    if (
+      revenue.status === 'available' &&
+      revenue.basis === 'crm_financial_transaction_record_join' &&
+      amount &&
+      transactionCount !== null
+    ) {
+      return {
+        status: 'available',
+        basis: revenue.basis,
+        transaction_count: transactionCount,
+        amount,
+        unavailable_reason: null,
+      };
+    }
     return {
       status: 'unavailable',
+      basis: null,
+      transaction_count: null,
       amount: null,
       unavailable_reason:
-        dataSource === 'crm'
-          ? STAFF_CONFIRMED_REVENUE_UNAVAILABLE.crm
-          : STAFF_CONFIRMED_REVENUE_UNAVAILABLE.maya,
+        typeof revenue.unavailable_reason === 'string' &&
+        revenue.unavailable_reason !== ''
+          ? revenue.unavailable_reason
+          : dataSource === 'crm'
+            ? STAFF_CONFIRMED_REVENUE_UNAVAILABLE.notRequested
+            : STAFF_CONFIRMED_REVENUE_UNAVAILABLE.maya,
     };
   }
 
@@ -2099,6 +2348,13 @@ export class AiToolHandlerService {
         verified: false,
         transaction_count: null,
         total: null,
+      },
+      staff_revenue: {
+        status: 'unavailable',
+        verified: false,
+        transaction_count: null,
+        attributed_total: null,
+        unattributed_total: null,
       },
       payroll: {
         status: 'unavailable',

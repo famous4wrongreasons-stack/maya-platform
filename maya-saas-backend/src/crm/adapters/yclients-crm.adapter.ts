@@ -20,6 +20,7 @@ import {
   CrmJournal,
   CrmJournalAppointment,
   CrmJournalMaster,
+  CrmStaffRevenueSummary,
   CrmTeamMember,
   CrmStaffPayroll,
   CreatedAppointment,
@@ -170,6 +171,10 @@ interface YclientsFinanceTransactionApiItem {
   id?: number | string;
   amount?: number | string;
   sold_item_type?: string | null;
+  /** Stable links returned by YClients for till operations created by a visit. */
+  record_id?: number | string | null;
+  visit_id?: number | string | null;
+  document_id?: number | string | null;
   account?: {
     title?: string;
     name?: string;
@@ -1538,10 +1543,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const to = this.dateKeyInTimezone(params.to, params.timezone);
     const currency = this.settings.currency || 'RUB';
     const warnings: CrmFinancialSummary['warnings'] = [];
-    const [transactionsResult, staffResult] = await Promise.allSettled([
-      this.fetchFinancialTransactions(from, to),
-      this.getPayrollStaff(),
-    ]);
+    const [transactionsResult, recordsResult, staffResult] =
+      await Promise.allSettled([
+        this.fetchFinancialTransactions(from, to),
+        this.fetchRecords({ startDate: from, endDate: to }),
+        this.getPayrollStaff(),
+      ]);
 
     let revenue: CrmFinancialSummary['revenue'];
     if (transactionsResult.status === 'fulfilled') {
@@ -1562,6 +1569,43 @@ export class YclientsCRMAdapter implements CRMAdapter {
         message:
           'Финансовые операции YClients недоступны для этого токена. Проверьте права доступа к финансам.',
       });
+    }
+
+    let staffRevenue: CrmStaffRevenueSummary;
+    if (
+      transactionsResult.status === 'fulfilled' &&
+      recordsResult.status === 'fulfilled'
+    ) {
+      try {
+        staffRevenue = this.aggregateStaffRevenue(
+          transactionsResult.value,
+          recordsResult.value,
+          currency,
+        );
+        if (staffRevenue.status === 'partial') {
+          warnings.push({
+            code: 'crm_staff_revenue_partially_unattributed',
+            message:
+              'Часть подтверждённых оплат услуг YClients не удалось связать с записью и мастером. Поимённые суммы скрыты, чтобы не показывать неполный рейтинг.',
+          });
+        }
+      } catch {
+        staffRevenue = this.unavailableStaffRevenue();
+        warnings.push({
+          code: 'crm_staff_revenue_response_invalid',
+          message:
+            'YClients вернул некорректные данные для сверки оплат по мастерам. Приблизительный расчёт не выполняется.',
+        });
+      }
+    } else {
+      staffRevenue = this.unavailableStaffRevenue();
+      if (transactionsResult.status === 'fulfilled') {
+        warnings.push({
+          code: 'crm_records_unavailable_for_staff_revenue',
+          message:
+            'Не удалось загрузить записи YClients для сверки подтверждённых оплат по мастерам.',
+        });
+      }
     }
 
     let payroll: CrmFinancialSummary['payroll'];
@@ -1649,6 +1693,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       verified: revenue.verified && payroll.verified,
       period: { from, to, timezone: params.timezone },
       revenue,
+      staff_revenue: staffRevenue,
       payroll,
       warnings,
     };
@@ -1665,35 +1710,83 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const to = this.dateKeyInTimezone(params.to, params.timezone);
     const currency = this.settings.currency || 'RUB';
 
-    try {
-      const revenue = this.aggregateRevenue(
-        await this.fetchFinancialTransactions(from, to),
-        currency,
-      );
-      return {
-        source: 'external_crm',
-        provider: this.config.provider,
-        verified: revenue.verified,
-        period: { from, to, timezone: params.timezone },
-        revenue,
-        warnings: [],
-      };
-    } catch {
-      return {
-        source: 'external_crm',
-        provider: this.config.provider,
-        verified: false,
-        period: { from, to, timezone: params.timezone },
-        revenue: this.unavailableRevenue(),
-        warnings: [
-          {
-            code: 'crm_revenue_unavailable',
+    const [transactionsResult, recordsResult] = await Promise.allSettled([
+      this.fetchFinancialTransactions(from, to),
+      this.fetchRecords({ startDate: from, endDate: to }),
+    ]);
+
+    if (transactionsResult.status === 'fulfilled') {
+      try {
+        const warnings: CrmRevenueSummary['warnings'] = [];
+        const revenue = this.aggregateRevenue(
+          transactionsResult.value,
+          currency,
+        );
+        let staffRevenue: CrmStaffRevenueSummary;
+        if (recordsResult.status === 'fulfilled') {
+          staffRevenue = this.aggregateStaffRevenue(
+            transactionsResult.value,
+            recordsResult.value,
+            currency,
+          );
+          if (staffRevenue.status === 'partial') {
+            warnings.push({
+              code: 'crm_staff_revenue_partially_unattributed',
+              message:
+                'Часть подтверждённых оплат услуг YClients не удалось связать с записью и мастером. Поимённые суммы скрыты, чтобы не показывать неполный рейтинг.',
+            });
+          }
+        } else {
+          staffRevenue = this.unavailableStaffRevenue();
+          warnings.push({
+            code: 'crm_records_unavailable_for_staff_revenue',
             message:
-              'YClients не вернул подтверждённые финансовые операции за выбранный период.',
-          },
-        ],
-      };
+              'Не удалось загрузить записи YClients для сверки подтверждённых оплат по мастерам.',
+          });
+        }
+        return {
+          source: 'external_crm',
+          provider: this.config.provider,
+          verified: revenue.verified,
+          period: { from, to, timezone: params.timezone },
+          revenue,
+          staff_revenue: staffRevenue,
+          warnings,
+        };
+      } catch {
+        return {
+          source: 'external_crm',
+          provider: this.config.provider,
+          verified: false,
+          period: { from, to, timezone: params.timezone },
+          revenue: this.unavailableRevenue(),
+          staff_revenue: this.unavailableStaffRevenue(),
+          warnings: [
+            {
+              code: 'crm_revenue_response_invalid',
+              message:
+                'YClients вернул некорректные финансовые данные. Суммы скрыты, чтобы не показывать приблизительный результат.',
+            },
+          ],
+        };
+      }
     }
+
+    return {
+      source: 'external_crm',
+      provider: this.config.provider,
+      verified: false,
+      period: { from, to, timezone: params.timezone },
+      revenue: this.unavailableRevenue(),
+      staff_revenue: this.unavailableStaffRevenue(),
+      warnings: [
+        {
+          code: 'crm_revenue_unavailable',
+          message:
+            'YClients не вернул подтверждённые финансовые операции за выбранный период.',
+        },
+      ],
+    };
   }
 
   async getClientLoyalty(params: {
@@ -2021,6 +2114,91 @@ export class YclientsCRMAdapter implements CRMAdapter {
     };
   }
 
+  /**
+   * Attribute confirmed service payments through YClients' stable chain:
+   * financial transaction -> record_id -> record.staff_id.
+   *
+   * We never match by date, amount or client: those heuristics break on split
+   * payments, namesakes, prepayments and grouped visits. If even one positive
+   * service payment cannot be joined, the whole ranking becomes partial and
+   * the AI layer withholds per-staff totals.
+   */
+  private aggregateStaffRevenue(
+    transactions: YclientsFinanceTransactionApiItem[],
+    records: YclientsRecordApiItem[],
+    currency: string,
+  ): CrmStaffRevenueSummary {
+    const recordsById = new Map(
+      records.flatMap((record) => {
+        const id =
+          record.id === undefined || record.id === null
+            ? ''
+            : String(record.id);
+        return id ? [[id, record] as const] : [];
+      }),
+    );
+    const staff = new Map<
+      string,
+      { name: string; amountKopecks: number; transactionCount: number }
+    >();
+    let transactionCount = 0;
+    let attributedKopecks = 0;
+    let unattributedKopecks = 0;
+
+    for (const transaction of transactions) {
+      if (String(transaction.sold_item_type || '').trim() !== 'service') {
+        continue;
+      }
+      const amountKopecks = this.requireMoneyKopecks(transaction.amount);
+      if (amountKopecks <= 0) {
+        continue;
+      }
+      transactionCount += 1;
+
+      const recordId =
+        transaction.record_id === undefined || transaction.record_id === null
+          ? ''
+          : String(transaction.record_id);
+      const record = recordId ? recordsById.get(recordId) : undefined;
+      const staffId = String(
+        record?.staff_id ?? record?.staff?.id ?? '',
+      ).trim();
+      if (!record || !staffId) {
+        unattributedKopecks += amountKopecks;
+        continue;
+      }
+
+      attributedKopecks += amountKopecks;
+      const current = staff.get(staffId) ?? {
+        name: record.staff?.name?.trim() || 'Специалист',
+        amountKopecks: 0,
+        transactionCount: 0,
+      };
+      current.amountKopecks += amountKopecks;
+      current.transactionCount += 1;
+      staff.set(staffId, current);
+    }
+
+    const status = unattributedKopecks > 0 ? 'partial' : 'available';
+    return {
+      status,
+      verified: status === 'available',
+      transaction_count: transactionCount,
+      attributed_total: this.money(attributedKopecks, currency),
+      unattributed_total: this.money(unattributedKopecks, currency),
+      staff: [...staff.entries()]
+        .sort((left, right) => right[1].amountKopecks - left[1].amountKopecks)
+        .map(([staffId, row]) => ({
+          staff_id: staffId,
+          name: row.name,
+          status: 'available' as const,
+          verified: true as const,
+          transaction_count: row.transactionCount,
+          total: this.money(row.amountKopecks, currency),
+        })),
+    };
+  }
+
   private async fetchStaffPayroll(
     staff: StaffMember[],
     from: string,
@@ -2103,6 +2281,17 @@ export class YclientsCRMAdapter implements CRMAdapter {
       total: null,
       by_type: [],
       by_account: [],
+    };
+  }
+
+  private unavailableStaffRevenue(): CrmStaffRevenueSummary {
+    return {
+      status: 'unavailable',
+      verified: false,
+      transaction_count: null,
+      attributed_total: null,
+      unattributed_total: null,
+      staff: [],
     };
   }
 

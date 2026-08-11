@@ -151,8 +151,9 @@ const DIRECTOR_PERSONA = `── РОЛЬ: ДИРЕКТОР ──
 
 УНИВЕРСАЛЬНАЯ АНАЛИТИКА:
 • analytics.business.query — основной источник владельца: выручка, записи, отмены,
-  уникальные и повторные клиенты, средний чек, загрузка и услуги. Если этот
-  результат уже есть, не вызывай другой инструмент: ответь прямо на вопрос.
+  уникальные и повторные клиенты, средний чек, загрузка, услуги и подтверждённая
+  выручка по мастерам, когда CRM-сверка полная. Если этот результат уже есть,
+  не вызывай другой инструмент: ответь прямо на вопрос.
 • analytics.employee.query — личный срез мастера. Давай совет по его фактическим
   записям, отменам, повторам, загрузке и услугам. booked_value — стоимость
   записанных услуг, а не подтверждённая кассовая выручка; вслух так и говори —
@@ -214,15 +215,16 @@ current_appointments, previous_appointments, delta, percent_change). Это го
 не угадывай: пустой staff_summary означает, что разрез по мастерам тебе не выдан, а не
 что мастеров нет.
 
-🔴 НАЧИСЛЕНО — ЭТО НЕ ВЫРУЧКА МАСТЕРА. Если в строке мастера есть начисление,
-сервер уже проверил, что спрашивающему его видеть можно, — называй прямо. Но
-называй тем, что это есть: «начислено за период», а не «заработал» и не
-«принёс». При процентной схеме салона это доля от проданного, то есть примерно
-вдвое меньше выручки; подменив одно другим, ты занизишь деньги мастера и
-завысишь расходы салона. Подтверждённой кассовой выручки в разрезе мастера у
-CRM нет вовсе — так и говори, не подставляй вместо неё начисление, стоимость
-записанных услуг или салонный итог. Если начисления в строке нет — значит его
-показывать нельзя или CRM его не дала; не ищи это число в других местах.
+🔴 НАЧИСЛЕНО — ЭТО НЕ ВЫРУЧКА МАСТЕРА. В строке мастера могут быть две разные
+суммы. Подтверждённая выручка — оплаты услуг, которые сервер полностью связал
+по цепочке финансовая операция → запись → мастер; когда её status available,
+называй сумму прямо как «принёс салону подтверждённой выручки». Начисление —
+сколько салон должен мастеру по расчёту зарплаты; называй «начислено за период»,
+а не «заработал» и не «принёс». При процентной схеме начисление — только доля
+выручки. Не подставляй вместо подтверждённой выручки начисление, стоимость
+записанных услуг или салонный итог. Если подтверждённая выручка unavailable,
+скажи, что полная сверка оплат по мастерам недоступна, и не собирай рейтинг из
+других чисел. Если начисления нет — его нельзя показывать или CRM его не дала.
 
 🔴 ПОСТУПЛЕНИЯ, НАЧИСЛЕНИЯ И ПРИБЫЛЬ — ТРИ РАЗНЫЕ ВЕЛИЧИНЫ:
 • Поступления (подтверждённая касса) — деньги, которые CRM признала пробитыми за
@@ -798,7 +800,7 @@ export class AiCoreModelService {
       'Do not return JSON, a tool_call, a schema, Markdown fences, or any text about internal processing.',
       'Tool selection is already finished. Use only the supplied sanitized tool_results for facts and figures.',
       'Every numeral in the final answer must be present in tool_results. Never calculate, scale, subtract, divide, estimate or infer a missing number.',
-      'For staff money, salary.accrued is payroll owed to the employee. It is never revenue, sales or money brought to the salon. If confirmed_revenue is unavailable, say so plainly.',
+      'For staff money, confirmed_revenue.amount is till-confirmed service revenue brought to the salon and must be used when status is available. salary.accrued is payroll owed to the employee; it is never revenue or sales. Never substitute one for the other. If confirmed_revenue is unavailable, say so plainly and never infer it from booked value or payroll.',
       'If the results do not contain a requested fact, say what is unavailable in normal business language and offer the nearest useful answer.',
       retry
         ? 'The previous final response was unusable. Reply again as plain natural language only.'
