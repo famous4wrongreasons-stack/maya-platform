@@ -24,6 +24,7 @@ type BuildAppAccessInput = {
   role: UserRole;
   staffProfileLinked: boolean;
   customerProfileLinked: boolean;
+  clientLookupPhoneLinked: boolean;
 };
 
 const PLATFORM_ROLES = new Set<UserRole>([
@@ -59,6 +60,7 @@ export function buildAppAccessContext({
   role,
   staffProfileLinked,
   customerProfileLinked,
+  clientLookupPhoneLinked,
 }: BuildAppAccessInput): AppAccessContext {
   const availableModes: AppModeDescriptor[] = [];
 
@@ -103,15 +105,18 @@ export function buildAppAccessContext({
   const hasBusinessMode = availableModes.some(
     ({ mode }) => mode === 'owner' || mode === 'staff',
   );
-  const hasClientAccess = customerProfileLinked || CLIENT_ROLES.has(role);
+  const clientIdentityLinked = customerProfileLinked || clientLookupPhoneLinked;
+  const hasClientAccess = clientIdentityLinked || CLIENT_ROLES.has(role);
+  const canUseClientSurface =
+    OWNER_ROLES.has(role) || STAFF_ROLES.has(role) || CLIENT_ROLES.has(role);
 
-  if (tenantId && (hasClientAccess || hasBusinessMode)) {
+  if (tenantId && canUseClientSurface && (hasClientAccess || hasBusinessMode)) {
     availableModes.push({
       mode: 'client',
       access: hasClientAccess ? 'granted' : 'preview',
       tenant_id: tenantId,
       role,
-      profile_linked: customerProfileLinked,
+      profile_linked: clientIdentityLinked,
     });
   }
 

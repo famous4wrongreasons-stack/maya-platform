@@ -8,6 +8,7 @@ describe('buildAppAccessContext', () => {
       role: UserRole.ADMINISTRATOR,
       staffProfileLinked: false,
       customerProfileLinked: false,
+      clientLookupPhoneLinked: false,
     });
 
     expect(result.default_mode).toBe('staff');
@@ -30,6 +31,7 @@ describe('buildAppAccessContext', () => {
       role: UserRole.STAFF,
       staffProfileLinked: true,
       customerProfileLinked: true,
+      clientLookupPhoneLinked: true,
     });
 
     expect(result.available_modes.map(({ mode }) => mode)).toEqual([
@@ -47,6 +49,7 @@ describe('buildAppAccessContext', () => {
       role: UserRole.INTEGRATION_SERVICE,
       staffProfileLinked: true,
       customerProfileLinked: false,
+      clientLookupPhoneLinked: true,
     });
 
     expect(result).toEqual({
@@ -56,5 +59,23 @@ describe('buildAppAccessContext', () => {
       can_switch_mode: false,
       chooser_required: false,
     });
+  });
+
+  it('grants a business user client mode when their own CRM lookup phone is linked', () => {
+    const result = buildAppAccessContext({
+      tenantId: 'tenant-1',
+      role: UserRole.TENANT_OWNER,
+      staffProfileLinked: true,
+      customerProfileLinked: false,
+      clientLookupPhoneLinked: true,
+    });
+
+    expect(result.available_modes).toContainEqual(
+      expect.objectContaining({
+        mode: 'client',
+        access: 'granted',
+        profile_linked: true,
+      }),
+    );
   });
 });

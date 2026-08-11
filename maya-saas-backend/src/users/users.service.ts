@@ -1422,6 +1422,7 @@ export class UsersService {
           role: serialized.role as UserRole,
           staffProfileLinked: false,
           customerProfileLinked: false,
+          clientLookupPhoneLinked: false,
         }),
       };
     }
@@ -1462,6 +1463,7 @@ export class UsersService {
           role: serialized.role as UserRole,
           staffProfileLinked: true,
           customerProfileLinked: Boolean(customerProfile),
+          clientLookupPhoneLinked: Boolean(serialized.phone),
         }),
       };
     }
@@ -1491,6 +1493,7 @@ export class UsersService {
         role: serialized.role as UserRole,
         staffProfileLinked: staffProfile.linked,
         customerProfileLinked: Boolean(customerProfile),
+        clientLookupPhoneLinked: Boolean(serialized.phone),
       }),
     };
   }

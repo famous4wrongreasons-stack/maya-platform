@@ -240,10 +240,10 @@ describe('UsersService', () => {
         },
         {
           mode: 'client',
-          access: 'preview',
+          access: 'granted',
           tenant_id: 'tenant-1',
           role: UserRole.TENANT_OWNER,
-          profile_linked: false,
+          profile_linked: true,
         },
       ],
       can_switch_mode: true,
@@ -254,7 +254,7 @@ describe('UsersService', () => {
 
   it('does not invent a staff profile for an unlinked owner', async () => {
     const { service } = createService();
-    const owner = tenantUser({ role: UserRole.TENANT_OWNER });
+    const owner = tenantUser({ role: UserRole.TENANT_OWNER, phone: null });
     owner.memberships![0].role = UserRole.TENANT_OWNER;
 
     const result = await service.serializeCurrentUser(owner);
@@ -270,6 +270,22 @@ describe('UsersService', () => {
       expect.objectContaining({ mode: 'owner', access: 'granted' }),
       expect.objectContaining({ mode: 'client', access: 'preview' }),
     ]);
+  });
+
+  it('grants an owner with a server-linked lookup phone their own client cabinet', async () => {
+    const { service } = createService();
+    const owner = tenantUser({ role: UserRole.TENANT_OWNER });
+    owner.memberships![0].role = UserRole.TENANT_OWNER;
+
+    const result = await service.serializeCurrentUser(owner);
+
+    expect(result.app_access.available_modes).toContainEqual(
+      expect.objectContaining({
+        mode: 'client',
+        access: 'granted',
+        profile_linked: true,
+      }),
+    );
   });
 
   it('grants a linked client one client mode without a chooser', async () => {
