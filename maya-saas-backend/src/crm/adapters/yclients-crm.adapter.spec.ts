@@ -451,6 +451,58 @@ describe('YclientsCRMAdapter', () => {
     );
   });
 
+  it('reads the exact YClients customer database size without requesting PII', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: [{ id: 1 }],
+          meta: { total_count: 5590 },
+        }),
+        { status: 200 },
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getCustomerCount({ tenantId: 'tenant-1' }),
+    ).resolves.toEqual({
+      customer_count: 5590,
+      source: 'external_crm',
+      provider: CrmProvider.YCLIENTS,
+      verified: true,
+    });
+
+    const fetchMock = global.fetch as jest.MockedFunction<typeof fetch>;
+    const body = fetchMock.mock.calls[0]?.[1]?.body;
+    expect(JSON.parse(typeof body === 'string' ? body : '{}')).toEqual({
+      fields: ['id'],
+      filters: [],
+      page: 1,
+      page_size: 1,
+    });
+  });
+
+  it('fails closed when YClients omits the customer total', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: [{ id: 1 }], meta: {} }), {
+        status: 200,
+      }),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getCustomerCount({ tenantId: 'tenant-1' }),
+    ).rejects.toThrow('YClients customer count is unavailable');
+  });
+
   it('returns the exact client cashback balance instead of a local approximation', async () => {
     global.fetch = jest
       .fn()
@@ -1007,6 +1059,7 @@ describe('YclientsCRMAdapter', () => {
                   id: 1,
                   amount: '2000',
                   sold_item_type: 'service',
+                  record_id: 101,
                   account: { title: 'Основная касса', is_cash: true },
                   client: { name: 'Must not leave adapter', phone: '+7999' },
                 },
@@ -1023,6 +1076,22 @@ describe('YclientsCRMAdapter', () => {
                   account: { title: 'Основная касса', is_cash: true },
                 },
                 { id: 4, amount: 999, sold_item_type: null },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 101,
+                  staff_id: 11,
+                  staff: { id: 11, name: 'Alex' },
+                },
               ],
             }),
             { status: 200 },
@@ -1125,6 +1194,23 @@ describe('YclientsCRMAdapter', () => {
           },
         ],
       },
+      staff_revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 1,
+        attributed_total: { currency: 'RUB', amount_kopecks: 200_000 },
+        unattributed_total: { currency: 'RUB', amount_kopecks: 0 },
+        staff: [
+          {
+            staff_id: '11',
+            name: 'Alex',
+            status: 'available',
+            verified: true,
+            transaction_count: 1,
+            total: { currency: 'RUB', amount_kopecks: 200_000 },
+          },
+        ],
+      },
       payroll: {
         status: 'available',
         verified: true,
@@ -1204,6 +1290,98 @@ describe('YclientsCRMAdapter', () => {
         total: { currency: 'RUB', amount_kopecks: 250_000 },
       },
     });
+  });
+
+  it('joins split service payments by record id and fails closed on an unmatched payment', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 1,
+                  amount: '1200',
+                  sold_item_type: 'service',
+                  record_id: 101,
+                },
+                {
+                  id: 2,
+                  amount: '800',
+                  sold_item_type: 'service',
+                  record_id: 101,
+                },
+                {
+                  id: 3,
+                  amount: '500',
+                  sold_item_type: 'service',
+                  record_id: 999,
+                },
+                {
+                  id: 4,
+                  amount: '300',
+                  sold_item_type: 'goods_transaction',
+                  record_id: 101,
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 101,
+                  staff_id: 11,
+                  staff: { id: 11, name: 'Alex' },
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getRevenueSummary({
+      tenantId: 'tenant-1',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T20:59:59.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(result.staff_revenue).toMatchObject({
+      status: 'partial',
+      verified: false,
+      transaction_count: 3,
+      attributed_total: { currency: 'RUB', amount_kopecks: 200_000 },
+      unattributed_total: { currency: 'RUB', amount_kopecks: 50_000 },
+      staff: [
+        {
+          staff_id: '11',
+          transaction_count: 2,
+          total: { currency: 'RUB', amount_kopecks: 200_000 },
+        },
+      ],
+    });
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'crm_staff_revenue_partially_unattributed',
+        }),
+      ]),
+    );
   });
 
   it('hides payroll totals when YClients returns only a partial result', async () => {

@@ -301,6 +301,21 @@ const PRICE_HINT_PATTERN =
 /** Подсказка: спрашивают про мастеров — поимённо. */
 const STAFF_HINT_PATTERN =
   /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит))/i;
+/** Полный размер клиентской базы, а не уникальные гости выбранного периода. */
+const CUSTOMER_DATABASE_PATTERN =
+  /(?:баз[а-яёa-z]*\s+(?:клиент|гост|посетител|люд|человек|карточ)|(?:клиент|гост|посетител|человек|карточ)[а-яёa-z]*\s+(?:в|из|по)\s+(?:нашей\s+|всей\s+)?баз[а-яёa-z]*|клиентск[а-яёa-z]*\s+баз[а-яёa-z]*|баз[а-яёa-z]*\s+yclients|yclients.{0,32}(?:клиент|карточ))/i;
+const CUSTOMER_TOTAL_PATTERN =
+  /(?:сколько|количеств[а-яёa-z]*|всего|общ[а-яёa-z]*\s+(?:числ|количеств)|за\s+вс[её]\s+врем[а-яёa-z]*)/i;
+const CUSTOMER_ALL_TIME_PATTERN =
+  /(?:за\s+вс[её]\s+врем[а-яёa-z]*|за\s+весь\s+период|всего\s+(?:в\s+базе\s+)?(?:клиент|гост|посетител|люд|человек|карточ)|пол[а-яёa-z]*\s+(?:клиентск[а-яёa-z]*\s+)?баз[а-яёa-z]*|вся\s+баз[а-яёa-z]*)/i;
+const EXPLICIT_PERIOD_PATTERN =
+  /(?:сегодня|вчера|позавчера|за\s+(?:этот|текущ|прошл|последн)[а-яёa-z]*\s+(?:день|недел|месяц|квартал|год)|с\s+\d{1,2}\s+по\s+\d{1,2})/i;
+/** Начисления сотрудникам: подтверждённая зарплата, не кассовая выручка. */
+const STAFF_COMPENSATION_QUERY_PATTERN =
+  /(?:(?:кто|кажд[а-яёa-z]*|по\s+кажд[а-яёa-z]*|мастер[а-яёa-z]*|сотрудник[а-яёa-z]*).{0,48}(?:зарплат|начисл|заработал|заработок|получил)|(?:зарплат|начисл|заработал|заработок|получил).{0,48}(?:кто|кажд[а-яёa-z]*|мастер[а-яёa-z]*|сотрудник[а-яёa-z]*))/i;
+/** Деньги, принесённые в кассу каждым мастером: CRM пока их не атрибутирует. */
+const STAFF_REVENUE_QUERY_PATTERN =
+  /(?:(?:кто|кажд[а-яёa-z]*|по\s+кажд[а-яёa-z]*|мастер[а-яёa-z]*|сотрудник[а-яёa-z]*).{0,48}(?:прин[её]с|выручк|оборот|касс|продал)|(?:прин[её]с|выручк|оборот|касс|продал).{0,48}(?:кто|кажд[а-яёa-z]*|мастер[а-яёa-z]*|сотрудник[а-яёa-z]*))/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 /**
@@ -349,6 +364,7 @@ const PRELOADABLE_TOOLS = new Set([
   'analytics.employee.query',
   'analytics.business.profit',
   'expenses.read',
+  'customers.count',
 ]);
 /**
  * Инструменты, чей результат — личные данные самого спрашивающего.
@@ -1295,7 +1311,7 @@ export class AiCoreService {
     const previousUserText = this.previousUserText(messages)
       .toLowerCase()
       .replace(/ё/g, 'е');
-    const hinted = this.toolHint(text);
+    const hinted = this.toolHint(text, previousUserText);
     if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
     }
@@ -1440,7 +1456,10 @@ export class AiCoreService {
    * «сколько у меня записей» у клиента идёт в его историю, а у мастера — в его
    * личную аналитику, без отдельной ветки на каждую роль.
    */
-  private toolHint(text: string): string[] | null {
+  private toolHint(text: string, previousUserText = ''): string[] | null {
+    if (this.isCustomerDatabaseCountQuestion(text, previousUserText)) {
+      return ['customers.count'];
+    }
     if (LOYALTY_HINT_PATTERN.test(text)) {
       return ['loyalty.own.read'];
     }
@@ -1476,6 +1495,12 @@ export class AiCoreService {
       ];
     }
     if (
+      STAFF_COMPENSATION_QUERY_PATTERN.test(text) ||
+      STAFF_REVENUE_QUERY_PATTERN.test(text)
+    ) {
+      return ['analytics.business.query', 'analytics.employee.query'];
+    }
+    if (
       PRICE_HINT_PATTERN.test(text) &&
       // Цена привлечения клиента — не позиция прайса, а подписка MAYA не услуга
       // салона: ни то, ни другое в каталоге не лежит.
@@ -1496,6 +1521,27 @@ export class AiCoreService {
       ];
     }
     return null;
+  }
+
+  private isCustomerDatabaseCountQuestion(
+    text: string,
+    previousUserText: string,
+  ): boolean {
+    const asksDatabaseTotal =
+      CUSTOMER_DATABASE_PATTERN.test(text) && CUSTOMER_TOTAL_PATTERN.test(text);
+    if (
+      asksDatabaseTotal &&
+      (!EXPLICIT_PERIOD_PATTERN.test(text) ||
+        CUSTOMER_ALL_TIME_PATTERN.test(text))
+    ) {
+      return true;
+    }
+
+    return (
+      CUSTOMER_ALL_TIME_PATTERN.test(text) &&
+      CUSTOMER_DATABASE_PATTERN.test(previousUserText) &&
+      CUSTOMER_TOTAL_PATTERN.test(previousUserText)
+    );
   }
 
   /**
@@ -1638,6 +1684,14 @@ export class AiCoreService {
           // должен ждать, пока договорит отчёт о прибыли.
           CLIENT_ACQUISITION_QUESTION_PATTERN.test(text),
         );
+      case 'customers.count': {
+        const data = this.record(evidence.result);
+        const count = this.optionalMetricNumber(data.customer_count);
+        if (count === null || data.verified !== true) {
+          return 'Не смогла подтвердить полный размер клиентской базы в CRM.';
+        }
+        return `Во всей клиентской базе CRM: ${this.formatMetricNumber(count)} ${this.pluralize(count, 'клиент', 'клиента', 'клиентов')}.`;
+      }
       case 'booking.availability.read': {
         const slots = this.record(evidence.result).slots;
         if (!Array.isArray(slots)) {
@@ -1994,6 +2048,13 @@ export class AiCoreService {
       // слышит это как ответ на вопрос про прибыль. Лучше честный отказ.
       return 'Чистую прибыль из этого среза не подтверждаю — здесь операционные показатели, а не расчёт касса минус расходы. Не подменю прибыль поступлениями. Спроси отдельно «какая прибыль» — возьму именно её.';
     }
+    if (
+      !personal &&
+      (STAFF_COMPENSATION_QUERY_PATTERN.test(text) ||
+        STAFF_REVENUE_QUERY_PATTERN.test(text))
+    ) {
+      return this.deterministicStaffMoneyReply(data, text);
+    }
     if (/зарплат[а-яa-z]*/i.test(text) && !personal) {
       const payroll = this.record(this.record(current.finance).payroll);
       const accrued = this.formatMoneyAmount(payroll.accrued_total);
@@ -2204,6 +2265,42 @@ export class AiCoreService {
     const body = summary.join(', ');
     const changesSentence = changeBits.length ? ` ${changeBits.join(' ')}` : '';
     return `${lead}${body}.${changesSentence}${insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.'}`;
+  }
+
+  private deterministicStaffMoneyReply(
+    data: Record<string, unknown>,
+    text: string,
+  ): string {
+    const current = this.record(data.current);
+    const rows = Array.isArray(current.staff_summary)
+      ? current.staff_summary
+      : [];
+    const salaries = rows
+      .map((entry) => {
+        const row = this.record(entry);
+        const salary = this.record(row.salary);
+        const name = typeof row.name === 'string' ? row.name.trim() : '';
+        const accrued = this.formatMoneyAmount(salary.accrued);
+        if (!name || salary.status !== 'available' || !accrued) {
+          return null;
+        }
+        return `${name} — ${accrued}`;
+      })
+      .filter((entry): entry is string => entry !== null);
+    const period = this.analyticsPeriodHint(data);
+    const periodSuffix = period ? ` ${period}` : '';
+
+    if (STAFF_REVENUE_QUERY_PATTERN.test(text)) {
+      const caveat =
+        'Подтверждённую кассовую выручку по каждому мастеру CRM не атрибутирует, поэтому я не буду выдавать стоимость записей за фактически принесённые деньги.';
+      return salaries.length > 0
+        ? `${caveat} Могу точно показать начисленную зарплату${periodSuffix}: ${salaries.join('; ')}.`
+        : `${caveat} Подтверждённые начисления по сотрудникам за этот период тоже недоступны.`;
+    }
+
+    return salaries.length > 0
+      ? `Начисленная зарплата по данным CRM${periodSuffix}: ${salaries.join('; ')}.`
+      : 'Подтверждённые начисления по каждому сотруднику за выбранный период недоступны. Я не буду рассчитывать их из выручки или цен записей.';
   }
 
   private analyticsPeriodHint(data: Record<string, unknown>): string | null {

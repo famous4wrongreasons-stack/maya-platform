@@ -251,6 +251,25 @@ export interface CrmStaffPayroll {
   balance: CrmMoneyAmount | null;
 }
 
+export interface CrmStaffRevenue {
+  staff_id: string;
+  name: string;
+  status: 'available';
+  verified: true;
+  transaction_count: number;
+  total: CrmMoneyAmount;
+}
+
+export interface CrmStaffRevenueSummary {
+  status: CrmFinanceStatus;
+  verified: boolean;
+  /** Positive service-payment operations considered for attribution. */
+  transaction_count: number | null;
+  attributed_total: CrmMoneyAmount | null;
+  unattributed_total: CrmMoneyAmount | null;
+  staff: CrmStaffRevenue[];
+}
+
 export interface CrmFinancialSummary {
   source: 'external_crm';
   provider: string;
@@ -268,6 +287,11 @@ export interface CrmFinancialSummary {
     by_type: CrmRevenueBreakdown[];
     by_account: CrmRevenueAccountBreakdown[];
   };
+  /**
+   * Till-confirmed service revenue joined to a CRM record and then to staff.
+   * Optional for adapters that cannot expose a stable transaction-to-record key.
+   */
+  staff_revenue?: CrmStaffRevenueSummary;
   payroll: {
     status: CrmFinanceStatus;
     verified: boolean;
@@ -292,10 +316,18 @@ export interface CrmRevenueSummary {
     timezone: string;
   };
   revenue: CrmFinancialSummary['revenue'];
+  staff_revenue?: CrmStaffRevenueSummary;
   warnings: Array<{
     code: string;
     message: string;
   }>;
+}
+
+export interface CrmCustomerCount {
+  customer_count: number;
+  source: 'external_crm';
+  provider: string;
+  verified: true;
 }
 
 export interface CRMAdapter {
@@ -395,6 +427,8 @@ export interface CRMAdapter {
     tenantId: string;
     query: string;
   }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  /** Exact CRM database size without loading or exposing customer PII. */
+  getCustomerCount?(params: { tenantId: string }): Promise<CrmCustomerCount>;
   getFinancialSummary?(params: {
     tenantId: string;
     from: string;

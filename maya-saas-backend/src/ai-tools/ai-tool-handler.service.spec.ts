@@ -2,9 +2,11 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { UserRole } from '../common/domain.enums';
+import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -20,6 +22,66 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('uses the connected CRM for the full customer database count', async () => {
+    const countCrmCustomers = jest.fn().mockResolvedValue({
+      customer_count: 5590,
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+    });
+    const crmService = {
+      getCalendarSource: jest.fn().mockResolvedValue('external'),
+      countCustomers: countCrmCustomers,
+    } as unknown as CrmService;
+    const countMayaCustomers = jest.fn();
+    const customersService = {
+      countCustomers: countMayaCustomers,
+    } as unknown as CustomersService;
+    const service = createService({ crmService, customersService });
+
+    await expect(
+      service.execute(
+        'customers.count',
+        { ...principal, role: UserRole.TENANT_OWNER },
+        {},
+        'execution-customer-count',
+      ),
+    ).resolves.toMatchObject({
+      customer_count: 5590,
+      source: 'external_crm',
+      verified: true,
+    });
+    expect(countCrmCustomers).toHaveBeenCalledWith('tenant-a');
+    expect(countMayaCustomers).not.toHaveBeenCalled();
+  });
+
+  it('uses MAYA memberships only for the internal calendar', async () => {
+    const countCrmCustomers = jest.fn();
+    const crmService = {
+      getCalendarSource: jest.fn().mockResolvedValue('internal'),
+      countCustomers: countCrmCustomers,
+    } as unknown as CrmService;
+    const customersService = {
+      countCustomers: jest.fn().mockResolvedValue({ customer_count: 12 }),
+    } as unknown as CustomersService;
+    const service = createService({ crmService, customersService });
+
+    await expect(
+      service.execute(
+        'customers.count',
+        { ...principal, role: UserRole.TENANT_OWNER },
+        {},
+        'execution-internal-customer-count',
+      ),
+    ).resolves.toEqual({
+      customer_count: 12,
+      source: 'maya',
+      provider: 'internal',
+      verified: true,
+    });
+    expect(countCrmCustomers).not.toHaveBeenCalled();
   });
 
   it('removes provider payload and customer PII from appointments', async () => {
@@ -568,7 +630,7 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getBusinessFinance).not.toHaveBeenCalled();
   });
 
-  it('gives the owner accrued payroll per master and never calls it master revenue', async () => {
+  it('gives the owner exact confirmed revenue and keeps payroll separate', async () => {
     const getBusinessFinance = jest.fn().mockResolvedValue({
       source: 'external_crm',
       provider: 'yclients',
@@ -585,6 +647,34 @@ describe('AiToolHandlerService output minimization', () => {
         total: { currency: 'RUB', amount_kopecks: 50_000_000 },
         by_type: [],
         by_account: [],
+      },
+      staff_revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 100,
+        attributed_total: {
+          currency: 'RUB',
+          amount_kopecks: 50_000_000,
+        },
+        unattributed_total: { currency: 'RUB', amount_kopecks: 0 },
+        staff: [
+          {
+            staff_id: 'crm-staff-1',
+            name: 'Антон',
+            status: 'available',
+            verified: true,
+            transaction_count: 60,
+            total: { currency: 'RUB', amount_kopecks: 30_000_000 },
+          },
+          {
+            staff_id: 'crm-staff-2',
+            name: 'Пётр',
+            status: 'available',
+            verified: true,
+            transaction_count: 40,
+            total: { currency: 'RUB', amount_kopecks: 20_000_000 },
+          },
+        ],
       },
       payroll: {
         // 🔴 Расчёт неполный: по одному мастеру CRM промолчала. Второй посчитан
@@ -670,12 +760,18 @@ describe('AiToolHandlerService output minimization', () => {
         {
           name: 'Стас',
           appointments: 30,
-          // Цены журнала по-прежнему обнулены: подтверждённых денег мастера нет.
+          // Цены журнала по-прежнему обнулены: вместо них есть точная касса.
           revenue: [],
           confirmed_revenue: {
-            status: 'unavailable',
-            amount: null,
-            unavailable_reason: stringContaining('whole_company'),
+            status: 'available',
+            basis: 'crm_financial_transaction_record_join',
+            transaction_count: 60,
+            amount: {
+              currency: 'RUB',
+              amount_kopecks: 30_000_000,
+              amount_major_units: 300_000,
+            },
+            unavailable_reason: null,
           },
           salary: {
             status: 'available',
@@ -697,6 +793,11 @@ describe('AiToolHandlerService output minimization', () => {
           name: 'Илья',
           appointments: 20,
           revenue: [],
+          confirmed_revenue: {
+            status: 'available',
+            transaction_count: 40,
+            amount: { amount_kopecks: 20_000_000 },
+          },
           salary: {
             status: 'unavailable',
             basis: null,
@@ -712,8 +813,16 @@ describe('AiToolHandlerService output minimization', () => {
     expect(JSON.stringify(result)).not.toContain('Антон');
     expect(JSON.stringify(result)).not.toContain('Пётр');
     expect(JSON.stringify(result)).not.toContain('crm-staff-1');
-    // Начисление не выдаётся за выручку: цен журнала в ответе нет.
+    // Цена журнала не выдаётся за выручку: старого неподтверждённого числа нет.
     expect(JSON.stringify(result)).not.toContain('6000000');
+    expect(
+      (result as { unavailable_metrics: Array<{ key: string }> })
+        .unavailable_metrics,
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: 'staff_revenue' }),
+      ]),
+    );
   });
 
   it('withholds per-master payroll from a role that may see names but not finance', async () => {
@@ -786,6 +895,34 @@ describe('AiToolHandlerService output minimization', () => {
         total: { currency: 'RUB', amount_kopecks: 50_000_000 },
         by_type: [],
         by_account: [],
+      },
+      staff_revenue: {
+        status: 'available',
+        verified: true,
+        transaction_count: 10,
+        attributed_total: {
+          currency: 'RUB',
+          amount_kopecks: 50_000_000,
+        },
+        unattributed_total: { currency: 'RUB', amount_kopecks: 0 },
+        staff: [
+          {
+            staff_id: 'crm-self',
+            name: 'Антон',
+            status: 'available',
+            verified: true,
+            transaction_count: 4,
+            total: { currency: 'RUB', amount_kopecks: 12_500_000 },
+          },
+          {
+            staff_id: 'crm-colleague',
+            name: 'Анна',
+            status: 'available',
+            verified: true,
+            transaction_count: 6,
+            total: { currency: 'RUB', amount_kopecks: 37_500_000 },
+          },
+        ],
       },
       payroll: {
         status: 'available',
@@ -879,7 +1016,15 @@ describe('AiToolHandlerService output minimization', () => {
               amount_major_units: 120_000,
             },
           },
-          confirmed_revenue: { status: 'unavailable', amount: null },
+          confirmed_revenue: {
+            status: 'available',
+            transaction_count: 4,
+            amount: {
+              currency: 'RUB',
+              amount_kopecks: 12_500_000,
+              amount_major_units: 125_000,
+            },
+          },
         },
       ],
     });
@@ -889,6 +1034,7 @@ describe('AiToolHandlerService output minimization', () => {
     // Начисления коллеги и общий фонд оплаты труда салона.
     expect(JSON.stringify(result)).not.toContain('30000000');
     expect(JSON.stringify(result)).not.toContain('42000000');
+    expect(JSON.stringify(result)).not.toContain('37500000');
   });
 
   it('reports per-master payroll as unavailable with the CRM reason instead of zero', async () => {
@@ -1084,11 +1230,113 @@ describe('AiToolHandlerService output minimization', () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: 'staff_revenue',
-          reason: stringContaining('accrued payroll'),
+          reason: stringContaining('crm_finance_unavailable'),
         }),
         expect.objectContaining({
           key: 'staff_accrued_salary',
           reason: stringContaining('crm_finance_unavailable'),
+        }),
+      ]),
+    );
+  });
+
+  it('withholds every per-master amount when the CRM revenue join is partial', async () => {
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 3, active: 3, cancelled: 0 },
+        revenue: [],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [
+          {
+            staff_external_id: 'crm-staff-1',
+            name: 'Стас',
+            appointments: 3,
+            revenue: [],
+            booked_minutes: 180,
+            services: [],
+          },
+        ],
+      }),
+      getBusinessFinance: jest.fn().mockResolvedValue({
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: false,
+        period: {},
+        revenue: {
+          status: 'available',
+          verified: true,
+          transaction_count: 3,
+          total: { currency: 'RUB', amount_kopecks: 250_000 },
+          by_type: [],
+          by_account: [],
+        },
+        staff_revenue: {
+          status: 'partial',
+          verified: false,
+          transaction_count: 3,
+          attributed_total: { currency: 'RUB', amount_kopecks: 200_000 },
+          unattributed_total: { currency: 'RUB', amount_kopecks: 50_000 },
+          staff: [
+            {
+              staff_id: 'crm-staff-1',
+              name: 'Стас',
+              status: 'available',
+              verified: true,
+              transaction_count: 2,
+              total: { currency: 'RUB', amount_kopecks: 200_000 },
+            },
+          ],
+        },
+        payroll: {
+          status: 'unavailable',
+          verified: false,
+          accrued_total: null,
+          paid_total: null,
+          balance_total: null,
+          staff: [],
+        },
+        warnings: [{ code: 'crm_staff_revenue_partially_unattributed' }],
+      }),
+    } as unknown as OperationsAnalyticsService;
+    const service = createService({ analyticsService });
+
+    const result = (await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      {
+        period: 'custom',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-15T00:00:00.000Z',
+        comparison: 'none',
+      },
+      'execution-partial-staff-revenue',
+    )) as Record<string, unknown>;
+
+    expect(published(result)).toMatchObject({
+      staff_summary: [
+        {
+          name: 'Стас',
+          confirmed_revenue: {
+            status: 'unavailable',
+            amount: null,
+            unavailable_reason:
+              'crm_service_payments_could_not_be_fully_joined_to_records_and_staff',
+          },
+        },
+      ],
+    });
+    expect(JSON.stringify(published(result))).not.toContain('200000');
+    expect(result.unavailable_metrics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'staff_revenue',
+          reason: stringContaining('could_not_be_fully_joined'),
         }),
       ]),
     );
@@ -2115,6 +2363,8 @@ describe('AiToolHandlerService output minimization', () => {
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
     prisma?: PrismaService;
+    customersService?: CustomersService;
+    staffService?: StaffService;
   }) {
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
@@ -2132,6 +2382,8 @@ describe('AiToolHandlerService output minimization', () => {
           },
           branch: { findFirst: jest.fn() },
         } as unknown as PrismaService),
+      overrides.customersService ?? ({} as CustomersService),
+      overrides.staffService ?? ({} as StaffService),
     );
   }
 });

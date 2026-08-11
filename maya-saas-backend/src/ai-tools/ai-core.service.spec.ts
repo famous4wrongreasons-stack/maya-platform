@@ -2464,6 +2464,144 @@ describe('AiCoreService', () => {
     expect(new Date(String(nowUtc)).toISOString()).toBe(nowUtc);
   });
 
+  it('uses the exact CRM database count instead of period analytics', async () => {
+    const mocks = createService([
+      'analytics.business.query',
+      'customers.count',
+    ]);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-customer-database-count',
+      result: {
+        customer_count: 5590,
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: true,
+      },
+    });
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'В базе 151 клиент.', toolCall: null }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Сколько всего клиентов в нашей базе за всё время?',
+        },
+      ],
+    });
+
+    expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.runtime.execute.mock.calls[0]?.[1]).toBe('customers.count');
+    expect(result.tools_used.map((tool) => tool.name)).toEqual([
+      'customers.count',
+    ]);
+    expect(result.reply).toMatch(/5[\s\u00a0]590/);
+    expect(result.reply).not.toContain('151');
+    expect(result.source).toBe('safe_fallback');
+    expect(result.grounding).toMatchObject({
+      status: 'verified',
+      domain: 'customer_count',
+    });
+  });
+
+  it('inherits the full CRM database intent from a short follow-up', async () => {
+    const mocks = createService([
+      'analytics.business.query',
+      'customers.count',
+    ]);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-customer-database-followup',
+      result: {
+        customer_count: 5590,
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: true,
+      },
+    });
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Во всей базе 5590 клиентов.', toolCall: null }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Сколько клиентов в нашей базе за этот месяц?',
+        },
+        { role: 'assistant', content: 'Уточните период.' },
+        { role: 'user', content: 'Всего за всё время' },
+      ],
+    });
+
+    expect(result.tools_used.map((tool) => tool.name)).toEqual([
+      'customers.count',
+    ]);
+    expect(result.grounding).toMatchObject({
+      status: 'verified',
+      domain: 'customer_count',
+    });
+  });
+
+  it('falls back to exact CRM payroll rows when the model invents staff money', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue(staffMoneyExecution());
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Каждый мастер заработал 27 550 ₽.', toolCall: null }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Сколько заработал каждый мастер за текущий месяц?',
+        },
+      ],
+    });
+
+    expect(result.source).toBe('safe_fallback');
+    expect(result.reply).toContain('Анна');
+    expect(result.reply).toContain('Илья');
+    expect(result.reply).toMatch(/48[\s\u00a0]500/);
+    expect(result.reply).toMatch(/52[\s\u00a0]750/);
+    expect(result.reply).not.toContain('27 550');
+    expect(result.grounding).toMatchObject({ status: 'verified' });
+  });
+
+  it('does not present CRM payroll as cash brought by each master', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.runtime.execute.mockResolvedValue(staffMoneyExecution());
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Илья принёс 27 550 ₽.', toolCall: null }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [
+        {
+          role: 'user',
+          content: 'Скажи, кто сколько принёс в кассу за месяц',
+        },
+      ],
+    });
+
+    expect(result.source).toBe('safe_fallback');
+    expect(result.reply).toContain(
+      'Подтверждённую кассовую выручку по каждому мастеру CRM не атрибутирует',
+    );
+    expect(result.reply).toContain('начисленную зарплату');
+    expect(result.reply).not.toContain('27 550');
+  });
+
   /**
    * Салон с двумя мастерами и двумя услугами: просадка только у Ильи.
    *
@@ -2559,6 +2697,61 @@ describe('AiCoreService', () => {
             ],
           },
         ],
+      },
+    };
+  }
+
+  function staffMoneyExecution() {
+    return {
+      status: 'completed',
+      execution_id: 'execution-staff-money',
+      result: {
+        verified: true,
+        source: 'crm',
+        resolved_period: { label_ru: 'текущий месяц' },
+        comparison: { mode: 'none' },
+        metrics: {},
+        changes: {},
+        current: {
+          staff_summary: [
+            {
+              name: 'Анна',
+              confirmed_revenue: {
+                status: 'unavailable',
+                amount: null,
+                unavailable_reason: 'crm_has_no_staff_attribution',
+              },
+              salary: {
+                status: 'available',
+                basis: 'crm_payroll_accrual',
+                accrued: {
+                  amount_kopecks: 4_850_000,
+                  amount_major_units: 48_500,
+                  currency: 'RUB',
+                },
+              },
+            },
+            {
+              name: 'Илья',
+              confirmed_revenue: {
+                status: 'unavailable',
+                amount: null,
+                unavailable_reason: 'crm_has_no_staff_attribution',
+              },
+              salary: {
+                status: 'available',
+                basis: 'crm_payroll_accrual',
+                accrued: {
+                  amount_kopecks: 5_275_000,
+                  amount_major_units: 52_750,
+                  currency: 'RUB',
+                },
+              },
+            },
+          ],
+        },
+        service_changes: [],
+        staff_changes: [],
       },
     };
   }
