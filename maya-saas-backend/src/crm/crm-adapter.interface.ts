@@ -298,6 +298,13 @@ export interface CrmRevenueSummary {
   }>;
 }
 
+export interface CrmCustomerCount {
+  customer_count: number;
+  source: 'external_crm';
+  provider: string;
+  verified: true;
+}
+
 export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
@@ -395,6 +402,8 @@ export interface CRMAdapter {
     tenantId: string;
     query: string;
   }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  /** Exact CRM database size without loading or exposing customer PII. */
+  getCustomerCount?(params: { tenantId: string }): Promise<CrmCustomerCount>;
   getFinancialSummary?(params: {
     tenantId: string;
     from: string;

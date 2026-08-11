@@ -146,6 +146,7 @@ interface YclientsResponse<TData> {
   data?: TData;
   meta?: {
     message?: string;
+    total_count?: number;
   };
 }
 
@@ -1215,6 +1216,45 @@ export class YclientsCRMAdapter implements CRMAdapter {
     } catch {
       return [];
     }
+  }
+
+  /**
+   * Exact number of customer cards in YClients without downloading PII.
+   *
+   * The search endpoint returns the database size in `meta.total_count`. We ask
+   * for one id-only row so names, phones and visit history never enter MAYA.
+   */
+  async getCustomerCount(params: { tenantId: string }): Promise<{
+    customer_count: number;
+    source: 'external_crm';
+    provider: string;
+    verified: true;
+  }> {
+    void params.tenantId;
+    const response = await this.request<YclientsClientSearchItem[]>(
+      `company/${this.getCompanyId()}/clients/search`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          fields: ['id'],
+          filters: [],
+          page: 1,
+          page_size: 1,
+        }),
+      },
+    );
+    const count = response.meta?.total_count;
+
+    if (!Number.isSafeInteger(count) || Number(count) < 0) {
+      throw new Error('YClients customer count is unavailable');
+    }
+
+    return {
+      customer_count: Number(count),
+      source: 'external_crm',
+      provider: this.config.provider,
+      verified: true,
+    };
   }
 
   async getStaffScheduleDay(params: {

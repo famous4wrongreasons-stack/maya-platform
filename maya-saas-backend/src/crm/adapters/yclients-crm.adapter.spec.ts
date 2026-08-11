@@ -451,6 +451,58 @@ describe('YclientsCRMAdapter', () => {
     );
   });
 
+  it('reads the exact YClients customer database size without requesting PII', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: [{ id: 1 }],
+          meta: { total_count: 5590 },
+        }),
+        { status: 200 },
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getCustomerCount({ tenantId: 'tenant-1' }),
+    ).resolves.toEqual({
+      customer_count: 5590,
+      source: 'external_crm',
+      provider: CrmProvider.YCLIENTS,
+      verified: true,
+    });
+
+    const fetchMock = global.fetch as jest.MockedFunction<typeof fetch>;
+    const body = fetchMock.mock.calls[0]?.[1]?.body;
+    expect(JSON.parse(typeof body === 'string' ? body : '{}')).toEqual({
+      fields: ['id'],
+      filters: [],
+      page: 1,
+      page_size: 1,
+    });
+  });
+
+  it('fails closed when YClients omits the customer total', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: [{ id: 1 }], meta: {} }), {
+        status: 200,
+      }),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getCustomerCount({ tenantId: 'tenant-1' }),
+    ).rejects.toThrow('YClients customer count is unavailable');
+  });
+
   it('returns the exact client cashback balance instead of a local approximation', async () => {
     global.fetch = jest
       .fn()

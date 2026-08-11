@@ -29,6 +29,7 @@ import {
   CrmAdapterConfig,
   CrmAppointmentDetail,
   CrmCompanyProfile,
+  CrmCustomerCount,
   CrmFinancialSummary,
   CrmRevenueSummary,
   CrmTeamMember,
@@ -1177,6 +1178,21 @@ export class CrmService {
     );
 
     return adapter.searchClients({ tenantId: scopedTenantId, query });
+  }
+
+  async countCustomers(tenantId: string): Promise<CrmCustomerCount> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+
+    if (typeof adapter.getCustomerCount !== 'function') {
+      throw new ConflictException({
+        message: 'CRM customer count is not available for this provider.',
+        error: { code: 'crm_customer_count_not_supported' },
+      });
+    }
+
+    return adapter.getCustomerCount({ tenantId: scopedTenantId });
   }
 
   async getFinancialSummary(

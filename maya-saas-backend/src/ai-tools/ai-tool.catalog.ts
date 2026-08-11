@@ -266,7 +266,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'customers.count',
     description:
-      'Read a tenant customer count without customer PII. Kept for tariffs that have no business analytics: there it is the only answer to "how many clients do we have".',
+      'Read the exact total number of customer cards in the connected CRM database, without loading customer PII. Use for all-time questions such as "how many clients are in our database"; do not use period analytics instead.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,

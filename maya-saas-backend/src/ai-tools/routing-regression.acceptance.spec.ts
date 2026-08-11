@@ -70,7 +70,12 @@ const TOOL_RESULTS: Record<string, unknown> = {
     client_acquisition_cost: { status: 'unavailable' },
   },
   'expenses.read': { by_category: [], totals: [] },
-  'customers.count': { count: 0 },
+  'customers.count': {
+    customer_count: 0,
+    source: 'external_crm',
+    provider: 'yclients',
+    verified: true,
+  },
   'catalog.services.read': { services: [] },
   'catalog.staff.read': { staff: [] },
   'booking.availability.read': { slots: [] },

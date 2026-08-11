@@ -7,7 +7,7 @@ import {
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
-import { UserRole } from '../common/domain.enums';
+import { CalendarSource, UserRole } from '../common/domain.enums';
 import { CustomersService } from '../customers/customers.service';
 import { CrmService } from '../crm/crm.service';
 import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
@@ -152,7 +152,7 @@ export class AiToolHandlerService {
       case 'catalog.staff.read':
         return this.readStaff(principal.tenantId);
       case 'customers.count':
-        return this.customersService.countCustomers(principal.tenantId);
+        return this.countCustomers(principal.tenantId);
       case 'catalog.services.read':
         return this.readServices(principal.tenantId);
       case 'booking.availability.read':
@@ -184,6 +184,22 @@ export class AiToolHandlerService {
       default:
         throw new Error('Unreachable AI tool handler');
     }
+  }
+
+  private async countCustomers(tenantId: string) {
+    const source = await this.crmService.getCalendarSource(tenantId);
+
+    if (source === CalendarSource.EXTERNAL) {
+      return this.crmService.countCustomers(tenantId);
+    }
+
+    const result = await this.customersService.countCustomers(tenantId);
+    return {
+      ...result,
+      source: 'maya',
+      provider: CalendarSource.INTERNAL,
+      verified: true,
+    };
   }
 
   private async readServices(tenantId: string) {

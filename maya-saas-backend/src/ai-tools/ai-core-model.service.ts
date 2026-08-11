@@ -797,6 +797,8 @@ export class AiCoreModelService {
       'Write only the final natural-language message for the person.',
       'Do not return JSON, a tool_call, a schema, Markdown fences, or any text about internal processing.',
       'Tool selection is already finished. Use only the supplied sanitized tool_results for facts and figures.',
+      'Every numeral in the final answer must be present in tool_results. Never calculate, scale, subtract, divide, estimate or infer a missing number.',
+      'For staff money, salary.accrued is payroll owed to the employee. It is never revenue, sales or money brought to the salon. If confirmed_revenue is unavailable, say so plainly.',
       'If the results do not contain a requested fact, say what is unavailable in normal business language and offer the nearest useful answer.',
       retry
         ? 'The previous final response was unusable. Reply again as plain natural language only.'

@@ -2,9 +2,11 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { UserRole } from '../common/domain.enums';
+import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -20,6 +22,66 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('uses the connected CRM for the full customer database count', async () => {
+    const countCrmCustomers = jest.fn().mockResolvedValue({
+      customer_count: 5590,
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+    });
+    const crmService = {
+      getCalendarSource: jest.fn().mockResolvedValue('external'),
+      countCustomers: countCrmCustomers,
+    } as unknown as CrmService;
+    const countMayaCustomers = jest.fn();
+    const customersService = {
+      countCustomers: countMayaCustomers,
+    } as unknown as CustomersService;
+    const service = createService({ crmService, customersService });
+
+    await expect(
+      service.execute(
+        'customers.count',
+        { ...principal, role: UserRole.TENANT_OWNER },
+        {},
+        'execution-customer-count',
+      ),
+    ).resolves.toMatchObject({
+      customer_count: 5590,
+      source: 'external_crm',
+      verified: true,
+    });
+    expect(countCrmCustomers).toHaveBeenCalledWith('tenant-a');
+    expect(countMayaCustomers).not.toHaveBeenCalled();
+  });
+
+  it('uses MAYA memberships only for the internal calendar', async () => {
+    const countCrmCustomers = jest.fn();
+    const crmService = {
+      getCalendarSource: jest.fn().mockResolvedValue('internal'),
+      countCustomers: countCrmCustomers,
+    } as unknown as CrmService;
+    const customersService = {
+      countCustomers: jest.fn().mockResolvedValue({ customer_count: 12 }),
+    } as unknown as CustomersService;
+    const service = createService({ crmService, customersService });
+
+    await expect(
+      service.execute(
+        'customers.count',
+        { ...principal, role: UserRole.TENANT_OWNER },
+        {},
+        'execution-internal-customer-count',
+      ),
+    ).resolves.toEqual({
+      customer_count: 12,
+      source: 'maya',
+      provider: 'internal',
+      verified: true,
+    });
+    expect(countCrmCustomers).not.toHaveBeenCalled();
   });
 
   it('removes provider payload and customer PII from appointments', async () => {
@@ -2115,6 +2177,8 @@ describe('AiToolHandlerService output minimization', () => {
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
     prisma?: PrismaService;
+    customersService?: CustomersService;
+    staffService?: StaffService;
   }) {
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
@@ -2132,6 +2196,8 @@ describe('AiToolHandlerService output minimization', () => {
           },
           branch: { findFirst: jest.fn() },
         } as unknown as PrismaService),
+      overrides.customersService ?? ({} as CustomersService),
+      overrides.staffService ?? ({} as StaffService),
     );
   }
 });
