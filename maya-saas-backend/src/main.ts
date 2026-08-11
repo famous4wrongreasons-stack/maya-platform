@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
 import type { ValidationError } from 'class-validator';
 
 import { AppModule } from './app.module';
@@ -16,9 +17,21 @@ import {
 } from './config/security-config';
 import { PrismaService } from './prisma/prisma.service';
 
+const DEFAULT_JSON_BODY_LIMIT = '100kb';
+const SPEECH_JSON_BODY_LIMIT = '2mb';
+
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
   const configService = app.get(ConfigService);
+
+  // Native voice messages are WAV/PCM encoded as base64 JSON. A normal spoken
+  // phrase exceeds Express' 100 KB default, so only this route gets a larger
+  // parser while every other JSON endpoint keeps the conservative limit.
+  app.use('/api/ai/transcribe', json({ limit: SPEECH_JSON_BODY_LIMIT }));
+  app.use(json({ limit: DEFAULT_JSON_BODY_LIMIT }));
+  app.use(urlencoded({ extended: true, limit: DEFAULT_JSON_BODY_LIMIT }));
 
   app.disable('x-powered-by');
   app.enableShutdownHooks();
