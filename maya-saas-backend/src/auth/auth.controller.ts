@@ -19,6 +19,8 @@ import { Public } from '../decorators/public.decorator';
 import { resolveAuthClientMetadata } from './auth-client-metadata';
 import { AuthSessionService } from './auth-session.service';
 import { AuthService } from './auth.service';
+import { TelegramPhoneLinkService } from './telegram-phone-link.service';
+import { CompleteTelegramPhoneLinkDto } from './dto/complete-telegram-phone-link.dto';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshSessionDto } from './dto/refresh-session.dto';
@@ -36,6 +38,7 @@ import { SocialAuthService } from './social-auth.service';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly telegramPhoneLinkService: TelegramPhoneLinkService,
     private readonly emailAuthService: EmailAuthService,
     private readonly socialAuthService: SocialAuthService,
     private readonly sessionService: AuthSessionService,
@@ -147,6 +150,37 @@ export class AuthController {
   }
 
   @Public()
+  /**
+   * Номер телефона через платформенного бота: приложение получает ссылку,
+   * человек жмёт в боте одну кнопку. Без SMS и без ввода номера руками —
+   * иначе чужие бонусы и визиты открывались бы всякому, кто знает номер.
+   */
+  @Post('telegram/phone-link/start')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get a one-time Telegram deep link that confirms the phone',
+  })
+  startTelegramPhoneLink(@CurrentUser() user: AuthenticatedUser) {
+    return this.telegramPhoneLinkService.start(user.tenantId!, user.userId);
+  }
+
+  /** Ручка для бота, не для приложения: защищена общим секретом. */
+  @Public()
+  @Post('telegram/phone-link/complete')
+  @ApiOperation({
+    summary: 'Bot callback: attach the Telegram-confirmed phone to the user',
+  })
+  completeTelegramPhoneLink(
+    @Body() dto: CompleteTelegramPhoneLinkDto,
+    @Req() request: Request,
+  ) {
+    return this.telegramPhoneLinkService.complete({
+      sharedSecret: String(request.headers['x-maya-platform-bot'] ?? ''),
+      code: dto.code,
+      phone: dto.phone,
+    });
+  }
+
   @Post('oauth/telegram/start')
   @ApiOperation({
     summary: 'Start Telegram login for a tenant-scoped user',
