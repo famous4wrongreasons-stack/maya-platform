@@ -2904,6 +2904,21 @@ export class YclientsCRMAdapter implements CRMAdapter {
       );
     }
 
+    // 🔴 YClients отказывает СТАТУСОМ 200. Тело при этом несёт
+    // success:false и причину в meta.message — например, когда токену не
+    // хватает прав на конкретный раздел. Раньше проверялся только код
+    // ответа, и такой отказ молча превращался в «данных нет»: у клиента
+    // была бонусная карта, а владелец видел ноль баллов и считал, что
+    // карты не существует. Отказ обязан звучать как отказ.
+    if (payload.success === false) {
+      const providerMessage = payload.meta?.message?.trim();
+      throw new Error(
+        providerMessage
+          ? `YClients rejected the request: ${providerMessage}`
+          : 'YClients rejected the request without a reason',
+      );
+    }
+
     return payload;
   }
 
