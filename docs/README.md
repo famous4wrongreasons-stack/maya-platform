@@ -19,6 +19,9 @@ service, rental, repair, pet services и других сервисных ком�
 
 ## Структура
 
+- [MAYA OS ARCHITECTURE SPECIFICATION](MAYA_OS_ARCHITECTURE_SPECIFICATION.md) -
+  живой нормативный документ: vision, business language, data, metrics, AI,
+  execution, security и roadmap.
 - [Product](product/README.md) - миссия, роли, сценарии, продуктовые границы.
 - [Architecture](architecture/README.md) - компоненты ядра, multi-tenant модель,
   данные, безопасность, интеграции.
