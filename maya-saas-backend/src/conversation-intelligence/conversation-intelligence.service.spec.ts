@@ -78,7 +78,10 @@ describe('ConversationIntelligenceService', () => {
     ]);
     const encoded = JSON.stringify(contract);
 
-    expect(contract.intents).toHaveLength(85);
+    // 87, а не 85: заведены интенты для operations.journal.read и
+    // notifications.appointments.read — без них планировщик отклонял вызов
+    // инструмента, который каталог и обработчик поддерживают.
+    expect(contract.intents).toHaveLength(87);
     expect(Buffer.byteLength(encoded, 'utf8')).toBeLessThan(60_000);
     expect(contract.intents[0]).not.toHaveProperty('permission');
     expect(contract.intents[0]).not.toHaveProperty('response_rule');

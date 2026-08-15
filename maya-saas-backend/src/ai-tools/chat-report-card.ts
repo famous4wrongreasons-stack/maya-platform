@@ -322,12 +322,13 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
       : null;
 
   // Реальный потенциал из истории чеков мастера (топ-40% за ~60 дней), не +18%.
+  //
+  // 🔴 Именно это и было нарушено: при отсутствии расчёта подставлялось
+  // «выручка × 1.18» — выдуманное число, которое карточка подписывала как
+  // «ориентир из твоей истории чеков». Мастер видел точную сумму, за которой
+  // не стоит ничего. Нет расчёта — нет цифры.
   const motivation = record(data.money_motivation);
-  const potential =
-    metricNumber(motivation.potential_rub) ??
-    (booked != null || earned != null
-      ? Math.round((booked ?? earned ?? 0) * 1.18)
-      : null);
+  const potential = metricNumber(motivation.potential_rub) ?? null;
   const upside =
     metricNumber(motivation.upside_rub) ??
     (potential != null && earned != null
@@ -339,8 +340,14 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
     typeof motivation.footnote === 'string' ? motivation.footnote : null;
 
   const tips = masterUpsellTips(data);
+  // 🔴 Голые «уход» и «бород» ловили обычные вопросы: «сколько клиентов
+  // уходит», «сколько стрижек бороды». Оба слова остаются, но только в связке
+  // с намерением допродажи.
   const wantsUpsell =
-    /(апселл|допрод|дополн|уход|бород|экстра|мотивац|потенциал|мог\s+заработать|сколько\s+мог)/i.test(
+    /(апселл|допрод|дополн|экстра|мотивац|потенциал|мог\s+заработать|сколько\s+мог)/i.test(
+      userText,
+    ) ||
+    /уход\w*\s+за|допуслуг|(?:предлож|посовет|продать)\w*[^.?!]{0,24}(?:бород|уход)/i.test(
       userText,
     );
 

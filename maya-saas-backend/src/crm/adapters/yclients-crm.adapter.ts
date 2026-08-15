@@ -2856,7 +2856,19 @@ export class YclientsCRMAdapter implements CRMAdapter {
       const rawText = await response.text();
 
       if (rawText.trim().length > 0) {
-        payload = JSON.parse(rawText) as YclientsResponse<TData>;
+        // 🔴 Тело не всегда JSON. Защитный экран или страница ошибки отдают
+        // HTML, и голый JSON.parse бросал невнятный SyntaxError вместо
+        // честного «YClients ответил 502». Владелец при подключении CRM видел
+        // «Данные не были сохранены» и не понимал, что CRM просто недоступна.
+        //
+        // Порядок проверок НЕ меняем: код статуса разбирается ниже и берёт
+        // providerMessage из payload.meta — это поведение закреплено тестом
+        // на 403 «Недостаточно прав».
+        try {
+          payload = JSON.parse(rawText) as YclientsResponse<TData>;
+        } catch {
+          payload = {};
+        }
       } else if (response.ok) {
         payload = { success: true };
       }
@@ -2917,7 +2929,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
         `company/${companyId}/staff`,
         `staff/${companyId}`,
         `book_staff/${companyId}`,
-      ]).then((response) => response.data || []);
+      ])
+        .then((response) => response.data || [])
+        // 🔴 Кэшируем только УСПЕХ. Отклонённый промис оставался в поле на весь
+        // срок жизни адаптера: одна секундная сетевая ошибка — и следующие
+        // запросы падали тем же старым отказом, хотя YClients давно отвечает.
+        .catch((error) => {
+          this.staffCatalogPromise = null;
+          throw error;
+        });
     }
 
     return this.staffCatalogPromise;
@@ -2925,7 +2945,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private getServiceCatalog(): Promise<YclientsServiceApiItem[]> {
     if (!this.serviceCatalogPromise) {
-      this.serviceCatalogPromise = this.fetchServices();
+      // Та же причина, что и у справочника мастеров: сбой не должен залипать.
+      this.serviceCatalogPromise = this.fetchServices().catch((error) => {
+        this.serviceCatalogPromise = null;
+        throw error;
+      });
     }
     return this.serviceCatalogPromise;
   }
@@ -2934,7 +2958,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
     YclientsServiceCategoryApiItem[]
   > {
     if (!this.serviceCategoryPromise) {
-      this.serviceCategoryPromise = this.fetchServiceCategories();
+      // Та же причина, что и у справочника мастеров: сбой не должен залипать.
+      this.serviceCategoryPromise = this.fetchServiceCategories().catch(
+        (error) => {
+          this.serviceCategoryPromise = null;
+          throw error;
+        },
+      );
     }
     return this.serviceCategoryPromise;
   }

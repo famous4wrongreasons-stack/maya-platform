@@ -390,7 +390,12 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent('clients.dossier', 'clients', 'Read one client CRM dossier.', {
       action: 'read',
       dataClass: 'C',
-      roles: BUSINESS_ROLES,
+      // 🔴 Каталог выдаёт clients.dossier.read и мастеру ([...STAFF_ROLES,
+      // ...BUSINESS_ROLES]), а таксономия оставляла только руководителей — и
+      // план диалога отклонял вызов ДО исполнения. Мастер спрашивал про
+      // привычки своего гостя и получал отказ по инструменту, который ему
+      // выдан. Реальный доступ по-прежнему решает AiToolPolicyService.
+      roles: [...EMPLOYEE_ROLES, ...BUSINESS_ROLES],
       permission: 'clients.dossier.read',
       tools: ['clients.dossier.read'],
       requiredSlots: ['client_reference'],
@@ -1063,6 +1068,50 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
           'предупреждать клиентов',
         ],
         examples: ['Напоминай клиентам за день до визита'],
+      },
+    ),
+    // 🔴 Оба инструмента ниже существовали в каталоге, но не имели НИ ОДНОГО
+    // интента. План диалога собирает кандидатов только из таксономии, поэтому
+    // вызов такого инструмента отклонялся как несоответствие плану — ход падал
+    // в «сервис недоступен». Для журнала это было особенно больно: сервер сам
+    // ставил operations.journal.read первым в подсказке, модель послушно брала
+    // первый — и получала отказ. Роли совпадают с каталогом.
+    intent(
+      'notifications.appointments_read',
+      'notifications',
+      'Read current appointment notice settings.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: BUSINESS_ROLES,
+        permission: 'notifications.settings.read',
+        tools: ['notifications.appointments.read'],
+        synonyms: [
+          'какие напоминания',
+          'настройки уведомлений',
+          'за сколько предупреждаем',
+        ],
+        examples: ['За сколько мы сейчас напоминаем клиентам?'],
+      },
+    ),
+    intent(
+      'operations.journal_day',
+      'schedule',
+      'Read the exact appointment journal of the team for a day or range.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: SCHEDULE_MANAGER_ROLES,
+        permission: 'operations.journal.read',
+        tools: ['operations.journal.read'],
+        optionalSlots: ['period', 'employee', 'branch'],
+        synonyms: [
+          'журнал записей',
+          'кто записан',
+          'какие записи',
+          'сколько записей',
+        ],
+        examples: ['Кто записан на завтра?'],
       },
     ),
 
