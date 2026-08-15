@@ -17652,7 +17652,9 @@ function AChat() {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      color: t.dark ? 'rgba(16,15,10,.62)' : 'rgba(247,243,236,.62)'
+      // Полный цвет, без прозрачности: на тёмной теме пилюля белая и
+      // статус чёрный, на светлой пилюля чёрная и статус белый.
+      color: t.dark ? '#100f0a' : '#f7f3ec'
     }
   }, (chatSurface() === 'owner' ? 'Владелец' : (chatSurface() === 'staff' ? 'Сотрудник' : 'Администратор')) + ' · онлайн'))))), canClearChat && deleteMode ? e('button', {
 	    type: 'button',
