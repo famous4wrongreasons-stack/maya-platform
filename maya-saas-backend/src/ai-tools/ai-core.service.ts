@@ -599,7 +599,9 @@ export class AiCoreService {
     const signatures = new Set<string>();
     const maxToolSteps = this.maxToolSteps();
     let activeSemanticPlan: ConversationSemanticPlan | null = null;
-    const requirement = this.groundingRequirement(
+    // let, а не const: смысловой план приходит от модели ПОЗЖЕ и может снять
+    // требование источника — см. ниже про болтовню.
+    let requirement = this.groundingRequirement(
       sanitized.messages,
       allowedNames,
       brain,
@@ -900,6 +902,17 @@ export class AiCoreService {
         decisions.push(decision);
         if (decision.semanticPlan) {
           activeSemanticPlan = decision.semanticPlan;
+          // 🔴 Болтовню требовать подтверждать источником нельзя. «Че ты как?»
+          // разбиралось так: смысловой планировщик верно помечал ход как
+          // small_talk, а требование источника ставилось РАНЬШЕ него — по
+          // регулярке, где «че как» есть, а «че ТЫ как» уже нет. Модель
+          // отвечала по-человечески, сторож видел ответ без единого инструмента
+          // и подменял его заготовкой. Спор двух слоёв выигрывал тот, что
+          // глупее. Теперь вердикт умного слоя старше: он видел саму фразу,
+          // а не её совпадение с шаблоном.
+          if (requirement && this.isSmallTalkPlan(activeSemanticPlan)) {
+            requirement = null;
+          }
         }
         if (!decision.toolCall) {
           const clarification = this.semanticClarification(activeSemanticPlan);
@@ -1678,6 +1691,19 @@ export class AiCoreService {
   private conversationLayer(): ConversationIntelligenceService {
     return (
       this.conversationIntelligence ?? new ConversationIntelligenceService()
+    );
+  }
+
+  /**
+   * Ход целиком про болтовню: ни одной задачи о данных салона.
+   *
+   * Пустой план сюда НЕ попадает — отсутствие разбора не повод снимать сторожа,
+   * иначе любой сбой планировщика открывал бы дорогу ответу без источника.
+   */
+  private isSmallTalkPlan(plan: ConversationSemanticPlan | null): boolean {
+    const tasks = plan?.tasks ?? [];
+    return (
+      tasks.length > 0 && tasks.every((task) => task.domain === 'small_talk')
     );
   }
 

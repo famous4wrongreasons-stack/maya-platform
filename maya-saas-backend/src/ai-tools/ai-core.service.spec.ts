@@ -522,6 +522,51 @@ describe('AiCoreService', () => {
     expect(result.reply).not.toContain('аналитик');
   });
 
+  // 🔴 Живой случай из прода: «Че ты как?» с телефона. Планировщик верно
+  // пометил ход как small_talk, модель ответила по-человечески, а сторож
+  // источника — поставленный РАНЬШЕ, по регулярке, где есть «че как», но нет
+  // «че ТЫ как» — забраковал ответ и подменил заготовкой. Вердикт умного слоя
+  // должен быть старше совпадения с шаблоном.
+  it('не требует источник, когда смысловой план назвал ход болтовнёй', async () => {
+    const toolNames = ['analytics.business.query'];
+    const semanticPlan = new ConversationIntelligenceService().validatePlan(
+      {
+        parent_request: 'Че ты как?',
+        tasks: [
+          {
+            intent: 'small_talk.free_form',
+            entities: {},
+            confidence: 0.94,
+          },
+        ],
+      },
+      UserRole.TENANT_OWNER,
+      toolNames,
+    );
+    if (!semanticPlan) {
+      throw new Error('Expected a validated semantic plan');
+    }
+    const mocks = createService(toolNames);
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: 'Всё бодро. Салон под присмотром — спрашивайте, что нужно.',
+        toolCall: null,
+        semanticPlan,
+      }),
+    );
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Че ты как?' }],
+    });
+
+    expect(result.reply).toBe(
+      'Всё бодро. Салон под присмотром — спрашивайте, что нужно.',
+    );
+    expect(result.source).not.toBe('safe_fallback');
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
   it('routes an unseen owner paraphrase through semantic planning instead of a monthly-summary default', async () => {
     const toolNames = ['analytics.business.query', 'staff.schedule.read'];
     const semanticPlan = new ConversationIntelligenceService().validatePlan(
