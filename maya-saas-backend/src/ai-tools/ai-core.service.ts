@@ -405,6 +405,13 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
   'staff.schedule.read': 'staff_schedule',
+  // 🔴 Свой график мастера обязан быть ИСТОЧНИКОМ ДАННЫХ наравне с командным.
+  // Его тут не было, поэтому инструмент, выданный мастеру каталогом, не мог
+  // стать доказательством ни в одном ходу: подсказка про график называла
+  // только руководительский вариант, у мастера его нет — и семья считалась
+  // закрытой. Мастер спрашивал про СВОЙ день и получал «недоступно для вашей
+  // роли», хотя данные лежали рядом.
+  'staff.schedule.own.read': 'staff_schedule',
   'operations.journal.read': 'operations_journal',
   'booking.availability.read': 'booking_availability',
   'appointments.own.list': 'client_appointments',
@@ -1969,7 +1976,11 @@ export class AiCoreService {
       STAFF_SCHEDULE_READ_HINT_PATTERN.test(text) &&
       brain?.persona !== 'admin'
     ) {
-      return ['staff.schedule.read'];
+      // Подсказка называет ОБА варианта — командный и свой. Кто что получит,
+      // решит движок прав: у руководителя останется первый, у мастера второй.
+      // Раньше здесь стоял только командный, и вопрос мастера про свой график
+      // упирался в отказ по роли.
+      return ['staff.schedule.read', 'staff.schedule.own.read'];
     }
     if (
       brain?.persona !== 'admin' &&
@@ -1977,7 +1988,15 @@ export class AiCoreService {
       OPERATIONS_JOURNAL_HINT_PATTERN.test(text) &&
       !AVAILABILITY_HINT_PATTERN.test(text)
     ) {
-      return ['operations.journal.read', 'analytics.business.query'];
+      // То же самое для журнала дня. Мастеру журнал команды не выдан, но его
+      // собственный день лежит в личной аналитике — именно ею MAYA и ответила,
+      // когда владелец переспросил «это мои данные, я мастер». Пусть она
+      // доходит туда сразу, а не после ругани.
+      return [
+        'operations.journal.read',
+        'analytics.employee.query',
+        'analytics.business.query',
+      ];
     }
     if (AVAILABILITY_HINT_PATTERN.test(text)) {
       return ['booking.availability.read'];

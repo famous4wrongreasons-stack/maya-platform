@@ -977,6 +977,42 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
+  // 🔴 Живой случай из прода. Мастер спросил «Сколько у меня ещё записей
+  // сегодня» и получил «Этот запрос недоступен для вашей текущей роли или
+  // тарифа» — при том, что его собственный день лежал в личной аналитике,
+  // которая ему выдана. Подсказка называла только журнал команды, мастеру не
+  // положенный, поэтому вся семья считалась закрытой. Отказ в СВОИХ данных —
+  // всегда дефект, а не защита.
+  it.each(['Сколько у меня ещё записей сегодня', 'Какой у меня график завтра'])(
+    'не отказывает мастеру в его собственных данных: %s',
+    async (question) => {
+      const master: AuthenticatedUser = {
+        ...user,
+        userId: 'master-user',
+        role: UserRole.EMPLOYEE,
+      };
+      const mocks = createService([
+        'analytics.employee.query',
+        'staff.schedule.own.read',
+        'appointments.own.list',
+      ]);
+      mocks.model.decide.mockResolvedValue(
+        decision({ reply: 'Смотрю твой день.', toolCall: null }),
+      );
+
+      const result = await mocks.service.chat(master, {
+        ...dto,
+        messages: [{ role: 'user', content: question }],
+      });
+
+      // Единственное, что тут важно и не хрупко: человеку не говорят, что его
+      // собственные данные ему не положены. Каким путём MAYA доберётся до ответа
+      // — моделью или серверным разбором своих записей, — дело десятое.
+      expect(result.reply).not.toContain('недоступен для вашей текущей роли');
+      expect(result.reply).not.toContain('чужие или закрытые данные');
+    },
+  );
+
   it('uses employee analytics rather than business totals for staff', async () => {
     const employee: AuthenticatedUser = {
       ...user,
