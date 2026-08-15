@@ -6,6 +6,16 @@ import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from './recovery.service';
 
+type RecoveryConversionCreateInput = {
+  data: {
+    subjectRef: string;
+    filledWindow: boolean;
+    bookedValueKopecks: number;
+    status: string;
+  };
+  select: { id: boolean };
+};
+
 describe('RecoveryService', () => {
   const secret = 'recovery-test-secret-at-least-32-characters';
 
@@ -64,7 +74,11 @@ describe('RecoveryService', () => {
   });
 
   it('attributes a booking to the latest eligible freed slot without storing a phone', async () => {
-    const create = jest.fn().mockResolvedValue({ id: 'conversion-1' });
+    let conversionCreateInput: RecoveryConversionCreateInput | undefined;
+    const create = jest.fn((input: RecoveryConversionCreateInput) => {
+      conversionCreateInput = input;
+      return Promise.resolve({ id: 'conversion-1' });
+    });
     const service = createService({
       recoveryConversion: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -101,15 +115,13 @@ describe('RecoveryService', () => {
       conversion_id: 'conversion-1',
       duplicate: false,
     });
-    expect(create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        subjectRef: expectedSubject,
-        filledWindow: true,
-        bookedValueKopecks: 250_000,
-        status: 'booked',
-      }),
-      select: { id: true },
+    expect(conversionCreateInput?.data).toMatchObject({
+      subjectRef: expectedSubject,
+      filledWindow: true,
+      bookedValueKopecks: 250_000,
+      status: 'booked',
     });
+    expect(conversionCreateInput?.select).toEqual({ id: true });
     expect(JSON.stringify(create.mock.calls)).not.toContain('79991234567');
   });
 
@@ -152,14 +164,14 @@ describe('RecoveryService', () => {
     const service = createService(
       {
         recoveryTouchpoint: {
-          findMany: jest.fn().mockResolvedValue([
-            { id: 'touchpoint-cycle', kind: 'cycle', status: 'sent' },
-          ]),
-        },
-        recoveryConversion: {
           findMany: jest
             .fn()
-            .mockResolvedValue([confirmed, pending, canceled]),
+            .mockResolvedValue([
+              { id: 'touchpoint-cycle', kind: 'cycle', status: 'sent' },
+            ]),
+        },
+        recoveryConversion: {
+          findMany: jest.fn().mockResolvedValue([confirmed, pending, canceled]),
           update,
         },
       },

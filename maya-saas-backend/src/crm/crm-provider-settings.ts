@@ -75,7 +75,11 @@ export function normalizeCrmProviderSettings(
     // Optional override when tips are enabled on a different branch/company.
     const tipsCompanyRaw =
       settings.tipsCompanyId ?? settings.tips_company_id ?? undefined;
-    if (tipsCompanyRaw !== undefined && tipsCompanyRaw !== null && tipsCompanyRaw !== '') {
+    if (
+      tipsCompanyRaw !== undefined &&
+      tipsCompanyRaw !== null &&
+      tipsCompanyRaw !== ''
+    ) {
       normalized.tipsCompanyId = positiveInteger(
         tipsCompanyRaw,
         'settingsJson.tipsCompanyId',

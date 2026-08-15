@@ -95,12 +95,11 @@ export class AiToolRegistryService {
         return {};
       case 'settings.update': {
         this.assertAllowedKeys(args, ['capability', 'enabled']);
-        const capability = String(args.capability ?? '');
-        if (
-          !(ASSISTANT_CAPABILITIES as readonly string[]).includes(capability)
-        ) {
-          this.invalidArguments('capability is invalid');
-        }
+        const capability = this.assertEnum(
+          args.capability,
+          'capability',
+          ASSISTANT_CAPABILITIES,
+        );
         if (typeof args.enabled !== 'boolean') {
           this.invalidArguments('enabled must be a boolean');
         }
@@ -108,15 +107,19 @@ export class AiToolRegistryService {
       }
       case 'tasks.list': {
         this.assertAllowedKeys(args, ['status', 'period']);
-        const status = args.status ?? 'active';
-        const period = args.period ?? 'all';
-        if (!['active', 'all'].includes(String(status))) {
-          this.invalidArguments('status is invalid');
-        }
-        if (!['today', 'overdue', 'all'].includes(String(period))) {
-          this.invalidArguments('period is invalid');
-        }
-        return { status: String(status), period: String(period) };
+        const status = this.assertEnum(
+          args.status,
+          'status',
+          ['active', 'all'],
+          'active',
+        );
+        const period = this.assertEnum(
+          args.period,
+          'period',
+          ['today', 'overdue', 'all'],
+          'all',
+        );
+        return { status, period };
       }
       case 'tasks.create':
         this.assertAllowedKeys(args, ['task', 'assignee', 'due_date']);
@@ -199,12 +202,14 @@ export class AiToolRegistryService {
       }
       case 'clients.high-value.read': {
         this.assertAllowedKeys(args, ['metric', 'limit']);
-        const metric = args.metric ?? 'lifetime_spend';
-        if (!['lifetime_spend', 'visits', 'recency'].includes(String(metric))) {
-          this.invalidArguments('metric is invalid');
-        }
+        const metric = this.assertEnum(
+          args.metric,
+          'metric',
+          ['lifetime_spend', 'visits', 'recency'],
+          'lifetime_spend',
+        );
         return {
-          metric: String(metric),
+          metric,
           limit: this.assertIntegerRange(args.limit ?? 10, 'limit', 1, 20),
         };
       }
@@ -256,10 +261,12 @@ export class AiToolRegistryService {
           'mode',
           'max_gap_minutes',
         ]);
-        const mode = String(args.mode ?? 'simultaneous');
-        if (!['simultaneous', 'nearby'].includes(mode)) {
-          this.invalidArguments('mode is invalid');
-        }
+        const mode = this.assertEnum(
+          args.mode,
+          'mode',
+          ['simultaneous', 'nearby'],
+          'simultaneous',
+        );
         return {
           date: this.parseBookingDay(args.date, 'date'),
           party_size: this.assertIntegerRange(
@@ -317,10 +324,7 @@ export class AiToolRegistryService {
         };
       case 'reviews.analyze': {
         this.assertAllowedKeys(args, ['mode', 'days', 'branch_id']);
-        const mode = String(args.mode ?? '');
-        if (!['topics', 'trend'].includes(mode)) {
-          this.invalidArguments('mode is invalid');
-        }
+        const mode = this.assertEnum(args.mode, 'mode', ['topics', 'trend']);
         return {
           mode,
           days: this.assertIntegerRange(args.days ?? 365, 'days', 1, 3650),
@@ -844,8 +848,7 @@ export class AiToolRegistryService {
         ),
       ),
     );
-    const metric = String(args.metric ?? 'appointments_completed');
-    const allowedMetrics = new Set([
+    const allowedMetrics = [
       'appointments_total',
       'appointments_active',
       'appointments_completed',
@@ -853,10 +856,13 @@ export class AiToolRegistryService {
       'appointments_no_show',
       'unique_clients',
       'booked_minutes',
-    ]);
-    if (!allowedMetrics.has(metric)) {
-      this.invalidArguments('branch comparison metric is invalid');
-    }
+    ] as const;
+    const metric = this.assertEnum(
+      args.metric,
+      'branch comparison metric',
+      allowedMetrics,
+      'appointments_completed',
+    );
     return {
       ...period,
       ...(args.branch_ids === undefined
@@ -895,6 +901,19 @@ export class AiToolRegistryService {
     if (unknownKey) {
       this.invalidArguments(`unknown argument: ${unknownKey}`);
     }
+  }
+
+  private assertEnum(
+    value: unknown,
+    field: string,
+    allowedValues: readonly string[],
+    fallback?: string,
+  ): string {
+    const candidate = value === undefined || value === null ? fallback : value;
+    if (typeof candidate !== 'string' || !allowedValues.includes(candidate)) {
+      this.invalidArguments(`${field} is invalid`);
+    }
+    return candidate;
   }
 
   private assertEntityId(value: unknown, field: string): string {
@@ -986,10 +1005,11 @@ export class AiToolRegistryService {
   }
 
   private assertScheduleOperation(value: unknown): string {
-    if (!['close_day', 'set_break', 'set_hours'].includes(String(value))) {
-      this.invalidArguments('schedule operation is invalid');
-    }
-    return String(value);
+    return this.assertEnum(value, 'schedule operation', [
+      'close_day',
+      'set_break',
+      'set_hours',
+    ]);
   }
 
   private assertScheduleRevision(value: unknown): string {

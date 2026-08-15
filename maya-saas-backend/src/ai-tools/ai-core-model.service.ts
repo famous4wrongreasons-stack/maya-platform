@@ -803,27 +803,14 @@ export class AiCoreModelService {
     const choice = payload.choices?.[0];
     const output = choice?.message?.content?.trim();
     if (choice?.finish_reason && choice.finish_reason !== 'stop') {
-      if (choice.finish_reason === 'length' && output) {
-        try {
-          return {
-            ...this.validateDecision(output, input),
-            provider: 'deepseek',
-            model,
-            usage: {
-              inputTokens: this.tokenCount(payload.usage?.prompt_tokens),
-              outputTokens: this.tokenCount(payload.usage?.completion_tokens),
-              totalTokens: this.tokenCount(payload.usage?.total_tokens),
-            },
-          };
-        } catch {
-          throw new Error(
-            `deepseek_finish_${choice.finish_reason.slice(0, 32)}`,
-          );
-        }
+      // A complete natural reply may still carry `length` when the provider
+      // reaches its budget exactly. Let the caller validate that output. A
+      // truncated JSON plan will still fail closed in validatePlanningResponse.
+      if (choice.finish_reason !== 'length' || !output) {
+        throw new Error(
+          `deepseek_finish_${String(choice.finish_reason).slice(0, 32)}`,
+        );
       }
-      throw new Error(
-        `deepseek_finish_${String(choice.finish_reason).slice(0, 32)}`,
-      );
     }
     if (!output) {
       throw new Error('deepseek_output_missing');

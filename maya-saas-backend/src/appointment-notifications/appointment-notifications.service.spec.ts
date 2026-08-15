@@ -8,6 +8,22 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AppointmentNotificationsService } from './appointment-notifications.service';
 
+type NotificationSettingsWrite = {
+  create: { enabled: boolean; leadTimesMinutes: number[] };
+  update: { enabled: boolean; leadTimesMinutes: number[] };
+};
+
+type ReminderPublishInput = {
+  type: string;
+  sourceEventId: string;
+  userIds: string[];
+  fanoutOwners: boolean;
+  payload: {
+    appointment_id: string;
+    lead_time_minutes: number;
+  };
+};
+
 describe('AppointmentNotificationsService', () => {
   const now = new Date('2026-08-14T07:00:00.000Z');
   const appointment = {
@@ -44,16 +60,21 @@ describe('AppointmentNotificationsService', () => {
     const prisma = {
       appointmentNotificationSetting: {
         findUnique: jest.fn().mockResolvedValue(null),
-        upsert: jest.fn().mockImplementation(({ data, create, update }) =>
-          Promise.resolve({
-            id: 'setting-1',
-            enabled: data?.enabled ?? update?.enabled ?? create.enabled,
-            leadTimesMinutes:
-              data?.leadTimesMinutes ??
-              update?.leadTimesMinutes ??
-              create.leadTimesMinutes,
-          }),
-        ),
+        upsert: jest
+          .fn<
+            (input: NotificationSettingsWrite) => Promise<{
+              id: string;
+              enabled: boolean;
+              leadTimesMinutes: number[];
+            }>
+          >()
+          .mockImplementation((input: NotificationSettingsWrite) =>
+            Promise.resolve({
+              id: 'setting-1',
+              enabled: input.update.enabled,
+              leadTimesMinutes: input.update.leadTimesMinutes,
+            }),
+          ),
       },
       tenant: {
         findMany: jest.fn().mockResolvedValue([
@@ -65,11 +86,13 @@ describe('AppointmentNotificationsService', () => {
         ]),
       },
       membership: {
-        findMany: jest.fn().mockResolvedValue(
-          input?.memberships ?? [
-            { userId: 'client-1', user: { phone: '+7 999 111-22-33' } },
-          ],
-        ),
+        findMany: jest
+          .fn()
+          .mockResolvedValue(
+            input?.memberships ?? [
+              { userId: 'client-1', user: { phone: '+7 999 111-22-33' } },
+            ],
+          ),
       },
     };
     const crm = {
@@ -84,9 +107,7 @@ describe('AppointmentNotificationsService', () => {
       }),
     };
     const inbox = {
-      hasSourceEvent: jest
-        .fn()
-        .mockResolvedValue(input?.duplicate ?? false),
+      hasSourceEvent: jest.fn().mockResolvedValue(input?.duplicate ?? false),
       publishForTenant: jest
         .fn()
         .mockResolvedValue({ stored: 1, user_ids: ['client-1'] }),
@@ -172,19 +193,21 @@ describe('AppointmentNotificationsService', () => {
       'tenant-1',
       '99',
     );
-    expect(inbox.publishForTenant).toHaveBeenCalledWith(
-      'tenant-1',
-      expect.objectContaining({
-        type: 'appointment_reminder',
-        sourceEventId: 'appointment_reminder:crm-99:120',
-        userIds: ['client-1'],
-        fanoutOwners: false,
-        payload: expect.objectContaining({
-          appointment_id: 'crm-99',
-          lead_time_minutes: 120,
-        }),
-      }),
-    );
+    const publishCall = inbox.publishForTenant.mock.calls[0] as unknown as [
+      string,
+      ReminderPublishInput,
+    ];
+    expect(publishCall[0]).toBe('tenant-1');
+    expect(publishCall[1]).toMatchObject({
+      type: 'appointment_reminder',
+      sourceEventId: 'appointment_reminder:crm-99:120',
+      userIds: ['client-1'],
+      fanoutOwners: false,
+      payload: {
+        appointment_id: 'crm-99',
+        lead_time_minutes: 120,
+      },
+    });
     const serialized = JSON.stringify(inbox.publishForTenant.mock.calls[0]);
     expect(serialized).not.toContain('9991112233');
     expect(serialized).not.toContain('Hidden client');

@@ -10,9 +10,6 @@ import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
-  const stringContaining = (value: string): unknown =>
-    expect.stringContaining(value) as unknown;
-
   const principal = {
     tenantId: 'tenant-a',
     userId: 'customer-a',

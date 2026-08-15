@@ -4,6 +4,31 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { MarketingService } from './marketing.service';
 
+type AudienceCreateInput = {
+  data: {
+    candidateCount: number;
+    eligibleCount: number;
+    unavailableCount: number;
+    recipientUserIdsJson: string[];
+  };
+};
+
+type CampaignCreateInput = {
+  data: {
+    tenantId: string;
+    audienceId: string;
+    recipientCount: number;
+    recipientUserIdsJson: string[];
+    channel: string;
+    status: string;
+    expiresAt: Date;
+  };
+};
+
+type CampaignUpdateInput = {
+  data: { status: string; sentCount: number };
+};
+
 describe('MarketingService', () => {
   const future = new Date('2099-01-01T00:00:00.000Z');
 
@@ -38,14 +63,23 @@ describe('MarketingService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         update:
           input?.campaignUpdate ??
-          jest.fn().mockImplementation(({ data }) =>
-            Promise.resolve({
-              id: 'campaign-123',
-              status: data.status,
-              recipientCount: 2,
-              sentCount: data.sentCount,
-            }),
-          ),
+          jest
+            .fn<
+              (input: CampaignUpdateInput) => Promise<{
+                id: string;
+                status: string;
+                recipientCount: number;
+                sentCount: number;
+              }>
+            >()
+            .mockImplementation((write: CampaignUpdateInput) =>
+              Promise.resolve({
+                id: 'campaign-123',
+                status: write.data.status,
+                recipientCount: 2,
+                sentCount: write.data.sentCount,
+              }),
+            ),
       },
     };
     const crm = {
@@ -67,15 +101,27 @@ describe('MarketingService', () => {
   }
 
   it('returns only aggregate audience data and never leaks client PII', async () => {
-    const audienceCreate = jest.fn().mockImplementation(({ data }) =>
-      Promise.resolve({
-        id: 'audience-123',
-        candidateCount: data.candidateCount,
-        eligibleCount: data.eligibleCount,
-        unavailableCount: data.unavailableCount,
-        expiresAt: future,
-      }),
-    );
+    let createdAudience: AudienceCreateInput | undefined;
+    const audienceCreate = jest
+      .fn<
+        (input: AudienceCreateInput) => Promise<{
+          id: string;
+          candidateCount: number;
+          eligibleCount: number;
+          unavailableCount: number;
+          expiresAt: Date;
+        }>
+      >()
+      .mockImplementation((write: AudienceCreateInput) => {
+        createdAudience = write;
+        return Promise.resolve({
+          id: 'audience-123',
+          candidateCount: write.data.candidateCount,
+          eligibleCount: write.data.eligibleCount,
+          unavailableCount: write.data.unavailableCount,
+          expiresAt: future,
+        });
+      });
     const searchClients = jest
       .fn()
       .mockResolvedValueOnce([
@@ -116,13 +162,7 @@ describe('MarketingService', () => {
     });
     expect(JSON.stringify(result)).not.toContain('Private Name');
     expect(JSON.stringify(result)).not.toContain('9991112233');
-    expect(audienceCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          recipientUserIdsJson: ['user-1'],
-        }),
-      }),
-    );
+    expect(createdAudience?.data.recipientUserIdsJson).toEqual(['user-1']);
   });
 
   it('revalidates consent and CRM eligibility immediately before delivery', async () => {
@@ -139,9 +179,7 @@ describe('MarketingService', () => {
       expiresAt: future,
     };
     const { service, inbox, recovery } = makeService({
-      memberships: [
-        { userId: 'user-1', user: { phone: '+7 999 111-22-33' } },
-      ],
+      memberships: [{ userId: 'user-1', user: { phone: '+7 999 111-22-33' } }],
       campaignFindFirst: jest.fn().mockResolvedValue(campaign),
       audienceFindFirst: jest.fn().mockResolvedValue({
         id: 'audience-123',
@@ -189,15 +227,27 @@ describe('MarketingService', () => {
   });
 
   it('creates an exact persisted preview without returning recipients or PII', async () => {
-    const campaignCreate = jest.fn().mockImplementation(({ data }) =>
-      Promise.resolve({
-        id: 'campaign-123',
-        recipientCount: data.recipientCount,
-        channel: data.channel,
-        status: data.status,
-        expiresAt: data.expiresAt,
-      }),
-    );
+    let createdCampaign: CampaignCreateInput | undefined;
+    const campaignCreate = jest
+      .fn<
+        (input: CampaignCreateInput) => Promise<{
+          id: string;
+          recipientCount: number;
+          channel: string;
+          status: string;
+          expiresAt: Date;
+        }>
+      >()
+      .mockImplementation((write: CampaignCreateInput) => {
+        createdCampaign = write;
+        return Promise.resolve({
+          id: 'campaign-123',
+          recipientCount: write.data.recipientCount,
+          channel: write.data.channel,
+          status: write.data.status,
+          expiresAt: write.data.expiresAt,
+        });
+      });
     const { service, prisma } = makeService({
       audienceFindFirst: jest.fn().mockResolvedValue({
         id: 'audience-123',
@@ -222,16 +272,12 @@ describe('MarketingService', () => {
       recipient_count: 2,
       next_action: 'request_owner_confirmation',
     });
-    expect(campaignCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          tenantId: 'tenant-1',
-          audienceId: 'audience-123',
-          recipientCount: 2,
-          recipientUserIdsJson: ['user-1', 'user-2'],
-        }),
-      }),
-    );
+    expect(createdCampaign?.data).toMatchObject({
+      tenantId: 'tenant-1',
+      audienceId: 'audience-123',
+      recipientCount: 2,
+      recipientUserIdsJson: ['user-1', 'user-2'],
+    });
     expect(JSON.stringify(result)).not.toContain('user-1');
     expect(prisma.marketingAudience.findFirst).toHaveBeenCalledWith({
       where: { id: 'audience-123', tenantId: 'tenant-1' },
@@ -286,9 +332,7 @@ describe('MarketingService', () => {
       expiresAt: future,
     };
     const { service, recovery } = makeService({
-      memberships: [
-        { userId: 'user-1', user: { phone: '+7 999 111-22-33' } },
-      ],
+      memberships: [{ userId: 'user-1', user: { phone: '+7 999 111-22-33' } }],
       campaignFindFirst: jest.fn().mockResolvedValue(campaign),
       audienceFindFirst: jest.fn().mockResolvedValue({
         id: 'audience-123',

@@ -359,6 +359,31 @@ describe('AiCoreModelService', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps a complete final reply returned at the DeepSeek token limit', async () => {
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce(deepSeekResponse(JSON.stringify(toolPlan(null))))
+      .mockResolvedValueOnce(
+        deepSeekResponse(
+          'За август подтверждённая касса составляет 420 000 ₽.',
+          { prompt_tokens: 30, completion_tokens: 18, total_tokens: 48 },
+          'length',
+        ),
+      );
+    const service = createService({
+      AI_CORE_PROVIDER: 'deepseek',
+      DEEPSEEK_API_KEY: 'server-only-deepseek-key',
+    });
+
+    await expect(
+      service.decide({ ...input, requiredToolNames: [] }),
+    ).resolves.toMatchObject({
+      reply: 'За август подтверждённая касса составляет 420 000 ₽.',
+      provider: 'deepseek',
+      toolCall: null,
+    });
+  });
+
   it('retries an empty DeepSeek planner response without forcing final prose into JSON', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
@@ -836,12 +861,13 @@ describe('AiCoreModelService', () => {
   function deepSeekResponse(
     content: string,
     usage: Record<string, number> = {},
+    finishReason = 'stop',
   ): Response {
     return {
       ok: true,
       status: 200,
       json: jest.fn().mockResolvedValue({
-        choices: [{ finish_reason: 'stop', message: { content } }],
+        choices: [{ finish_reason: finishReason, message: { content } }],
         usage,
       }),
     } as unknown as Response;

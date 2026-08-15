@@ -200,24 +200,22 @@ describe('AiTool extended capabilities', () => {
     });
     jest
       .spyOn(service as never, 'queryBusinessAnalytics' as never)
-      .mockImplementation((
-        _principal: unknown,
-        args: { branch_id: string },
-      ) =>
-        Promise.resolve({
-          verified: true,
-          source: 'crm',
-          resolved_period: { key: 'today' },
-          metrics: {
-            appointments_total: args.branch_id === 'branch-a-123' ? 8 : 6,
-            appointments_active: args.branch_id === 'branch-a-123' ? 7 : 5,
-            appointments_completed: args.branch_id === 'branch-a-123' ? 5 : 4,
-            appointments_cancelled: 1,
-            appointments_no_show: 0,
-            unique_clients: args.branch_id === 'branch-a-123' ? 7 : 5,
-            booked_minutes: args.branch_id === 'branch-a-123' ? 420 : 300,
-          },
-        }) as never,
+      .mockImplementation(
+        (_principal: unknown, args: { branch_id: string }) =>
+          Promise.resolve({
+            verified: true,
+            source: 'crm',
+            resolved_period: { key: 'today' },
+            metrics: {
+              appointments_total: args.branch_id === 'branch-a-123' ? 8 : 6,
+              appointments_active: args.branch_id === 'branch-a-123' ? 7 : 5,
+              appointments_completed: args.branch_id === 'branch-a-123' ? 5 : 4,
+              appointments_cancelled: 1,
+              appointments_no_show: 0,
+              unique_clients: args.branch_id === 'branch-a-123' ? 7 : 5,
+              booked_minutes: args.branch_id === 'branch-a-123' ? 420 : 300,
+            },
+          }) as never,
       );
 
     const result = await service.execute(
@@ -559,7 +557,15 @@ describe('AiTool extended capabilities', () => {
       readAt: null,
       archivedAt: null,
     });
-    const update = jest.fn().mockResolvedValue({ id: 'task-row-a' });
+    type TaskUpdateInput = {
+      where: { id: string };
+      data: { payloadJson: { status: string } };
+    };
+    let taskUpdateInput: TaskUpdateInput | undefined;
+    const update = jest.fn((input: TaskUpdateInput) => {
+      taskUpdateInput = input;
+      return Promise.resolve({ id: 'task-row-a' });
+    });
     const service = createService({
       prisma: {
         inboxItem: { findFirst, update },
@@ -587,14 +593,10 @@ describe('AiTool extended capabilities', () => {
         deletedAt: null,
       },
     });
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 'task-row-a' },
-        data: expect.objectContaining({
-          payloadJson: expect.objectContaining({ status: 'completed' }),
-        }),
-      }),
-    );
+    expect(taskUpdateInput?.where).toEqual({ id: 'task-row-a' });
+    expect(taskUpdateInput?.data.payloadJson).toMatchObject({
+      status: 'completed',
+    });
   });
 });
 

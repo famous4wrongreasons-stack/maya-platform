@@ -247,8 +247,9 @@ export class DashboardPreferencesService {
     );
 
     return uniqueUserIds.filter((userId) =>
-      (configs.get(userId) ?? this.normalizeAssistantConfig(undefined))
-        .enabled_capabilities.includes(capability),
+      (
+        configs.get(userId) ?? this.normalizeAssistantConfig(undefined)
+      ).enabled_capabilities.includes(capability),
     );
   }
 

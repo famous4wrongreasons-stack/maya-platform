@@ -203,9 +203,9 @@ export class MarketingService {
     const requestedIds = new Set(
       this.stringArray(campaign.recipientUserIdsJson),
     );
-    const currentCandidates = (await this.consentCandidates(input.tenantId)).filter(
-      (candidate) => requestedIds.has(candidate.userId),
-    );
+    const currentCandidates = (
+      await this.consentCandidates(input.tenantId)
+    ).filter((candidate) => requestedIds.has(candidate.userId));
     const revalidated = await this.mapConcurrent(
       currentCandidates,
       CRM_LOOKUP_CONCURRENCY,
@@ -221,44 +221,48 @@ export class MarketingService {
     let sentCount = 0;
     let failedCount = 0;
     let attributionFailedCount = 0;
-    await this.mapConcurrent(recipients, CRM_LOOKUP_CONCURRENCY, async (item) => {
-      try {
-        const delivery = await this.inboxService.publishForTenant(
-          input.tenantId,
-          {
-            type: 'marketing_campaign',
-            sourceEventId: `marketing:${campaign.id}`,
-            title: 'MAYA',
-            bodyText: campaign.message,
-            payload: { campaign_id: campaign.id, kind: 'reactivation' },
-            deepLink: 'maya://chat',
-            userIds: [item.candidate.userId],
-            fanoutOwners: false,
-          },
-        );
-        if (delivery.stored !== 1) {
+    await this.mapConcurrent(
+      recipients,
+      CRM_LOOKUP_CONCURRENCY,
+      async (item) => {
+        try {
+          const delivery = await this.inboxService.publishForTenant(
+            input.tenantId,
+            {
+              type: 'marketing_campaign',
+              sourceEventId: `marketing:${campaign.id}`,
+              title: 'MAYA',
+              bodyText: campaign.message,
+              payload: { campaign_id: campaign.id, kind: 'reactivation' },
+              deepLink: 'maya://chat',
+              userIds: [item.candidate.userId],
+              fanoutOwners: false,
+            },
+          );
+          if (delivery.stored !== 1) {
+            failedCount += 1;
+            return;
+          }
+          sentCount += 1;
+        } catch {
           failedCount += 1;
           return;
         }
-        sentCount += 1;
-      } catch {
-        failedCount += 1;
-        return;
-      }
-      try {
-        await this.recoveryService.recordConsentSafeTouchpoint({
-          tenantId: input.tenantId,
-          phone: item.candidate.phone,
-          externalEventId: `marketing:${campaign.id}:${item.candidate.userId}`,
-          kind: 'reactivation_campaign',
-          channel: 'app',
-          occurredAt: new Date(),
-          attributionWindowDays: 30,
-        });
-      } catch {
-        attributionFailedCount += 1;
-      }
-    });
+        try {
+          await this.recoveryService.recordConsentSafeTouchpoint({
+            tenantId: input.tenantId,
+            phone: item.candidate.phone,
+            externalEventId: `marketing:${campaign.id}:${item.candidate.userId}`,
+            kind: 'reactivation_campaign',
+            channel: 'app',
+            occurredAt: new Date(),
+            attributionWindowDays: 30,
+          });
+        } catch {
+          attributionFailedCount += 1;
+        }
+      },
+    );
 
     const skippedCount = requestedIds.size - recipients.length;
     const status = failedCount === 0 ? 'sent' : 'partial';
@@ -297,7 +301,10 @@ export class MarketingService {
     phone: string,
   ): Promise<CrmClientSearchResult | null> {
     const candidates = await this.crmService.searchClients(tenantId, phone);
-    return candidates.find((candidate) => phonesMatch(phone, candidate.phone)) ?? null;
+    return (
+      candidates.find((candidate) => phonesMatch(phone, candidate.phone)) ??
+      null
+    );
   }
 
   private matchesRule(
@@ -375,7 +382,12 @@ export class MarketingService {
   }
 
   private deliveryResult(
-    campaign: { id: string; status: string; recipientCount: number; sentCount: number },
+    campaign: {
+      id: string;
+      status: string;
+      recipientCount: number;
+      sentCount: number;
+    },
     replayed: boolean,
   ) {
     return {

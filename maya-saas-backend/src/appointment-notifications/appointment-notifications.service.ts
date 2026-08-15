@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { CalendarSource, Prisma, TenantStatus, UserRole } from '@prisma/client';
+import { CalendarSource, TenantStatus, UserRole } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { phoneMatchKey } from '../common/phone.util';
@@ -65,10 +65,12 @@ export class AppointmentNotificationsService {
     input: { enabled: boolean; leadTimesMinutes?: number[] },
   ): Promise<AppointmentNotificationSettings> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const current = await this.prisma.appointmentNotificationSetting.findUnique({
-      where: { tenantId: scopedTenantId },
-      select: { leadTimesMinutes: true },
-    });
+    const current = await this.prisma.appointmentNotificationSetting.findUnique(
+      {
+        where: { tenantId: scopedTenantId },
+        select: { leadTimesMinutes: true },
+      },
+    );
     const leadTimes = this.normalizeLeadTimes(
       input.leadTimesMinutes ??
         current?.leadTimesMinutes ??
@@ -79,11 +81,11 @@ export class AppointmentNotificationsService {
       create: {
         tenantId: scopedTenantId,
         enabled: input.enabled,
-        leadTimesMinutes: leadTimes as Prisma.InputJsonValue,
+        leadTimesMinutes: leadTimes,
       },
       update: {
         enabled: input.enabled,
-        leadTimesMinutes: leadTimes as Prisma.InputJsonValue,
+        leadTimesMinutes: leadTimes,
       },
       select: { id: true, enabled: true, leadTimesMinutes: true },
     });
@@ -140,7 +142,9 @@ export class AppointmentNotificationsService {
     tenant: EligibleTenant,
     now: Date,
   ): Promise<{ sent: number; skipped: number }> {
-    if (!(await this.entitlements.hasFeature(tenant.id, 'notifications.core'))) {
+    if (
+      !(await this.entitlements.hasFeature(tenant.id, 'notifications.core'))
+    ) {
       return { sent: 0, skipped: 1 };
     }
 
@@ -169,7 +173,9 @@ export class AppointmentNotificationsService {
         leadTime: this.matchingLeadTime(appointment, leadTimes, now),
       }))
       .filter(
-        (row): row is { appointment: CrmJournalAppointment; leadTime: number } =>
+        (
+          row,
+        ): row is { appointment: CrmJournalAppointment; leadTime: number } =>
           row.leadTime !== null && row.appointment.status === 'confirmed',
       );
 
@@ -194,7 +200,7 @@ export class AppointmentNotificationsService {
         externalId,
       );
       const phoneKey = phoneMatchKey(detail.client_phone);
-      const userIds = phoneKey ? recipientsByPhone.get(phoneKey) ?? [] : [];
+      const userIds = phoneKey ? (recipientsByPhone.get(phoneKey) ?? []) : [];
       if (userIds.length === 0) {
         skipped += 1;
         continue;
@@ -204,11 +210,7 @@ export class AppointmentNotificationsService {
         type: 'appointment_reminder',
         sourceEventId,
         title: leadTime >= 24 * 60 ? 'Запись завтра' : 'Скоро ваша запись',
-        bodyText: this.reminderText(
-          detail,
-          tenant.defaultTimezone,
-          leadTime,
-        ),
+        bodyText: this.reminderText(detail, tenant.defaultTimezone, leadTime),
         payload: {
           event: 'appointment.reminder',
           appointment_id: appointment.id,
@@ -310,7 +312,8 @@ export class AppointmentNotificationsService {
       .map((service) => service.name.trim())
       .filter(Boolean)
       .join(', ');
-    const prefix = leadTime >= 24 * 60 ? 'Напоминаем о записи' : 'Ваша запись скоро';
+    const prefix =
+      leadTime >= 24 * 60 ? 'Напоминаем о записи' : 'Ваша запись скоро';
     return `${prefix}: ${date} в ${time}${
       services ? `, ${services}` : ''
     }, мастер ${appointment.provider.name}. Открыть запись можно в MAYA.`;

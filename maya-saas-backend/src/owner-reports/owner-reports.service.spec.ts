@@ -99,15 +99,14 @@ describe('OwnerReportsService', () => {
     const dashboardPreferences = {
       filterUsersWithAssistantCapability: jest
         .fn()
-        .mockImplementation(
-          (_tenantId: string, userIds: string[]) =>
-            Promise.resolve(
-              options?.enabledUserIds === undefined
-                ? userIds
-                : userIds.filter((userId) =>
-                    options.enabledUserIds?.includes(userId),
-                  ),
-            ),
+        .mockImplementation((_tenantId: string, userIds: string[]) =>
+          Promise.resolve(
+            options?.enabledUserIds === undefined
+              ? userIds
+              : userIds.filter((userId) =>
+                  options.enabledUserIds?.includes(userId),
+                ),
+          ),
         ),
     };
     const service = new OwnerReportsService(

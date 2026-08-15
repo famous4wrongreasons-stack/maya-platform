@@ -302,8 +302,7 @@ function slotValue(slot: string, index: number): ConversationEntities[string] {
     task: 'проверить свободные окна',
     task_id: `task-${1 + (index % 20)}`,
     assignee: SAFE_NAMES[(index + 2) % SAFE_NAMES.length],
-    capability:
-      index % 2 === 0 ? 'staff_performance' : 'retention_analysis',
+    capability: index % 2 === 0 ? 'staff_performance' : 'retention_analysis',
     enabled: index % 2 === 0,
     setting: 'daily_briefing',
     value: index % 2 === 0,

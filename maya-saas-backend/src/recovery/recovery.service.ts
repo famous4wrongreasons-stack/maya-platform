@@ -121,9 +121,7 @@ export class RecoveryService {
    * In-process equivalent of the legacy bridge. Raw contact data is accepted
    * only long enough to compute the HMAC subject and is never persisted.
    */
-  async recordConsentSafeTouchpoint(
-    input: RecordConsentSafeTouchpointInput,
-  ) {
+  async recordConsentSafeTouchpoint(input: RecordConsentSafeTouchpointInput) {
     const subjectRef = this.subjectRefForPhone(input.phone);
     if (!subjectRef) {
       return { accepted: false, reason: 'touchpoint_phone_unavailable' };
@@ -265,7 +263,8 @@ export class RecoveryService {
       }),
     ]);
 
-    let verificationStatus: 'available' | 'partial' | 'unavailable' | 'not_applicable' =
+    let verificationStatus:
+      'available' | 'partial' | 'unavailable' | 'not_applicable' =
       conversions.length === 0 ? 'not_applicable' : 'unavailable';
     let verificationReason: string | null =
       conversions.length === 0 ? 'no_attributed_bookings_in_period' : null;
@@ -301,15 +300,17 @@ export class RecoveryService {
             conversion.confirmedRevenueKopecks = record.amount_kopecks;
             conversion.confirmedAt = new Date();
             conversion.currency = snapshot.currency;
-            return this.prisma.recoveryConversion.update({
-              where: { id: conversion.id },
-              data: {
-                confirmedRevenueKopecks: record.amount_kopecks,
-                confirmedAt: conversion.confirmedAt,
-                currency: snapshot.currency,
-                status: 'confirmed',
-              },
-            }).then(() => undefined);
+            return this.prisma.recoveryConversion
+              .update({
+                where: { id: conversion.id },
+                data: {
+                  confirmedRevenueKopecks: record.amount_kopecks,
+                  confirmedAt: conversion.confirmedAt,
+                  currency: snapshot.currency,
+                  status: 'confirmed',
+                },
+              })
+              .then(() => undefined);
           }),
         );
         const unconfirmed = conversions.filter(
@@ -367,9 +368,12 @@ export class RecoveryService {
       ),
       confirmed_revenue_status: verificationStatus,
       confirmed_revenue_reason: verificationReason,
-      unconfirmed_booking_count: activeConversions.length - confirmedConversions.length,
+      unconfirmed_booking_count:
+        activeConversions.length - confirmedConversions.length,
       by_kind: [...kinds].sort().map((kind) => {
-        const kindTouchpoints = touchpoints.filter((item) => item.kind === kind);
+        const kindTouchpoints = touchpoints.filter(
+          (item) => item.kind === kind,
+        );
         const kindConversions = activeConversions.filter(
           (item) => item.touchpoint.kind === kind,
         );
