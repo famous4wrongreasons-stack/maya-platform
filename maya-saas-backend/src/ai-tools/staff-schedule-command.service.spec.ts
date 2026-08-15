@@ -131,245 +131,42 @@ describe('StaffScheduleCommandService', () => {
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it('reads the exact named-master schedule for tomorrow without the model', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Какое расписание у Стаса завтра?'),
-    );
-
-    expect(result).toMatchObject({
-      action: null,
-      toolUsage: {
-        name: 'staff.schedule.read',
-        status: 'completed',
-        execution_id: 'execution-read',
-      },
-    });
-    expect(result?.reply).toContain('Завтра, 6 августа');
-    expect(result?.reply).toContain('Станислав Мосин — 10:00–20:00');
-    expect(result?.reply).toContain('Источник: YClients');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'staff.schedule.read',
-      expect.objectContaining({
-        surface: 'native',
-        arguments: { date: '2026-08-06', staff_id: '8' },
-      }),
-    );
-  });
-
+  // 🔴 Читающие ветки убраны намеренно. Раньше здесь лежали 18 тестов,
+  // закреплявших ответы-заготовки на ВОПРОСЫ про график и журнал записей:
+  // перехватчик отвечал сам, не вызывая модель, и только на телефоне — тот же
+  // вопрос в браузере шёл обычным путём и получал осмысленный ответ.
+  // Теперь контракт один для обеих площадок: вопрос — не команда, перехватчик
+  // его не трогает и возвращает null.
   it.each([
-    ['Какое расписание у Стаса Мосина завтра?', '8', 'Станислав Мосин'],
-    ['Стас завтра работает?', '8', 'Станислав Мосин'],
-    ['У Стаса завтра какая смена?', '8', 'Станислав Мосин'],
-    ['Во сколько завтра выходит Стас?', '8', 'Станислав Мосин'],
-    ['Когда завтра работает Илья?', '10', 'Илья Третьяков'],
+    'Какое расписание у Стаса Мосина завтра?',
+    'Стас завтра работает?',
+    'Кто сегодня работает?',
+    'Сколько записей у Стаса завтра?',
+    'Какая загрузка у Стаса завтра?',
+    'Сколько отмен у Стаса завтра?',
   ])(
-    'understands the natural schedule question: %s',
-    async (question, staffId, staffName) => {
+    'вопрос про график и записи идёт к модели, а не в заготовку: %s',
+    async (question) => {
       const mocks = createService();
-      const result = await mocks.service.tryHandle(
-        user,
-        chat('native', question),
-      );
 
-      expect(result?.reply).toContain(`${staffName} — 10:00–20:00`);
-      expect(mocks.runtime.execute).toHaveBeenCalledWith(
-        user,
-        'staff.schedule.read',
-        expect.objectContaining({
-          arguments: { date: '2026-08-06', staff_id: staffId },
-        }),
-      );
+      await expect(
+        mocks.service.tryHandle(user, chat('native', question)),
+      ).resolves.toBeNull();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
     },
   );
 
-  it('does not turn an unknown named employee into the whole-team schedule', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Какое расписание у Петра завтра?'),
-    );
+  // Деловой вопрос со словом «сократить» — это не команда правки графика.
+  it.each(['Как сократить расходы?', 'Как сократить отмены?'])(
+    'не принимает деловой вопрос за команду графика: %s',
+    async (question) => {
+      const mocks = createService();
 
-    expect(result?.reply).toContain('Не нашла такого активного сотрудника');
-    expect(mocks.runtime.execute).not.toHaveBeenCalled();
-  });
-
-  it('reports an exact day off instead of substituting appointment analytics', async () => {
-    const mocks = createService();
-    mocks.runtime.execute.mockImplementationOnce(
-      (_user, toolName, input: { arguments: Record<string, unknown> }) =>
-        Promise.resolve({
-          status: 'completed',
-          execution_id: 'execution-off',
-          result: {
-            verified: true,
-            source: 'crm',
-            date: input.arguments.date,
-            staff: [
-              {
-                id: '10',
-                name: 'Илья Третьяков',
-                title: 'Барбер',
-                is_working: false,
-                slots: [],
-              },
-            ],
-          },
-        }),
-    );
-
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'У Ильи завтра выходной?'),
-    );
-
-    expect(result?.reply).toContain('Илья Третьяков — выходной');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'staff.schedule.read',
-      expect.objectContaining({
-        arguments: { date: '2026-08-06', staff_id: '10' },
-      }),
-    );
-  });
-
-  it('reads the active team schedule for a date', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Кто работает завтра?'),
-    );
-
-    expect(result?.reply).toContain('Работают:');
-    expect(result?.reply).toContain('Станислав Мосин 10:00–20:00');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'staff.schedule.read',
-      expect.objectContaining({
-        arguments: { date: '2026-08-06' },
-      }),
-    );
-  });
-
-  it('understands a natural whole-team shift question', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Кто завтра на смене?'),
-    );
-
-    expect(result?.reply).toContain('Работают:');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'staff.schedule.read',
-      expect.objectContaining({ arguments: { date: '2026-08-06' } }),
-    );
-  });
-
-  it.each([
-    'Сколько записей у Стаса завтра?',
-    'Какие услуги у Стаса завтра?',
-    'Какая загрузка у Стаса завтра?',
-    'Сколько отмен у Стаса завтра?',
-  ])('reads an exact YClients day journal for: %s', async (question) => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', question),
-    );
-
-    expect(result).toMatchObject({
-      action: null,
-      toolUsage: {
-        name: 'operations.journal.read',
-        status: 'completed',
-        execution_id: 'execution-journal',
-      },
-    });
-    expect(result?.reply).toContain('Станислав Мосин — 2 записи');
-    expect(result?.reply).toContain('Мужская стрижка');
-    expect(result?.reply).toContain('отмен: 1');
-    expect(result?.reply).toContain('загрузка');
-    expect(result?.reply).toContain('Источник: YClients');
-    expect(result?.reply).not.toContain('Сводка салона');
-    expect(result?.reply).not.toContain('этот месяц');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'operations.journal.read',
-      expect.objectContaining({
-        arguments: { date: '2026-08-06', staff_id: '8' },
-      }),
-    );
-  });
-
-  it('reads the exact team journal instead of a monthly overview', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Кто загружен завтра и сколько отмен?'),
-    );
-
-    expect(result?.reply).toContain('По мастерам:');
-    expect(result?.reply).toContain('Станислав Мосин');
-    expect(result?.reply).toContain('Источник: YClients');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'operations.journal.read',
-      expect.objectContaining({ arguments: { date: '2026-08-06' } }),
-    );
-  });
-
-  it('keeps the requested operation and date across a short follow-up', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(user, {
-      surface: 'native',
-      requestId: 'request_12345678',
-      messages: [
-        { role: 'user', content: 'Сколько записей завтра?' },
-        { role: 'assistant', content: 'Уточните мастера.' },
-        { role: 'user', content: 'А у Стаса?' },
-      ],
-    });
-
-    expect(result?.reply).toContain('Станислав Мосин — 2 записи');
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'operations.journal.read',
-      expect.objectContaining({
-        arguments: { date: '2026-08-06', staff_id: '8' },
-      }),
-    );
-  });
-
-  it('fails closed when the exact YClients journal cannot be read', async () => {
-    const mocks = createService();
-    mocks.runtime.execute.mockRejectedValueOnce(new Error('crm offline'));
-
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Сколько записей у Стаса завтра?'),
-    );
-
-    expect(result?.reply).toContain('точный журнал записей из YClients');
-    expect(result?.reply).toContain('Месячной сводкой его не заменяю');
-    expect(result?.toolUsage).toBeNull();
-  });
-
-  it('fails closed when YClients schedule cannot be read', async () => {
-    const mocks = createService();
-    mocks.runtime.execute.mockRejectedValueOnce(new Error('crm offline'));
-
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Какое расписание у Стаса завтра?'),
-    );
-
-    expect(result?.reply).toContain('точный график из YClients');
-    expect(result?.reply).toContain('Общей аналитикой его не заменяю');
-    expect(result?.toolUsage).toBeNull();
-  });
+      await expect(
+        mocks.service.tryHandle(user, chat('native', question)),
+      ).resolves.toBeNull();
+    },
+  );
 
   it('does not intercept the production web surface', async () => {
     const mocks = createService();

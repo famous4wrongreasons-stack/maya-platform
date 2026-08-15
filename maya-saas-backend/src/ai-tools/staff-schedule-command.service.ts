@@ -153,19 +153,14 @@ export class StaffScheduleCommandService {
     const rawText = this.latestUserText(dto);
     const normalizedText = this.normalizeText(rawText);
     const operation = this.detectOperation(normalizedText);
+    // 🔴 Здесь остались ТОЛЬКО команды. Читающие ветки (журнал записей и
+    // график команды) убраны намеренно: они отвечали на ВОПРОС заготовкой,
+    // не вызывая модель, и делали это лишь на телефоне — один и тот же вопрос
+    // давал в приложении шаблон, а в браузере осмысленный ответ. Теперь любой
+    // вопрос про график и записи идёт обычным путём: движок прав → инструмент
+    // → модель. Правка графика осталась здесь, это действие, а не вопрос.
     if (!operation) {
-      const journal = await this.tryReadOperationsJournal(
-        user,
-        this.operationsReadContextText(dto, normalizedText),
-      );
-      if (journal) {
-        return journal;
-      }
-      return this.tryReadSchedule(
-        user,
-        dto,
-        this.scheduleReadContextText(dto, normalizedText),
-      );
+      return null;
     }
     if (!this.enabled()) {
       return null;
@@ -289,315 +284,11 @@ export class StaffScheduleCommandService {
     };
   }
 
-  private async tryReadOperationsJournal(
-    user: AuthenticatedUser,
-    text: string,
-  ): Promise<StaffScheduleCommandResult | null> {
-    if (!this.isOperationsJournalQuestion(text)) {
-      return null;
-    }
-    // 🔴 НЕ отказываем здесь. Это перехватчик ДО модели, и жёсткая проверка
-    // роли делала его вторым движком прав: мастер, спросивший про СВОИ записи,
-    // получал «доступно владельцу и администратору» и не доходил ни до модели,
-    // ни до собственных инструментов own-scope, которые ему как раз выданы.
-    // Возвращаем null — дальше решает единственный движок прав AiToolPolicy.
-    if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
-      return null;
-    }
-    if (!user.tenantId) {
-      return this.replyOnly('Не нашла активный бизнес для этого запроса.');
-    }
-
-    let allowed;
-    try {
-      allowed = await this.runtime.listTools(user, 'native');
-    } catch {
-      return this.operationsReadFailure();
-    }
-    if (
-      !allowed.tools.some((tool) => tool.name === 'operations.journal.read')
-    ) {
-      return this.replyOnly(
-        'Точный журнал записей YClients недоступен для текущей роли или тарифа.',
-      );
-    }
-
-    const timezone = await this.tenantTimezone(user.tenantId);
-    const date = this.parseDate(text, timezone);
-    if (!date) {
-      return this.replyOnly('За какую дату показать записи?');
-    }
-
-    let staff: StaffMember[];
-    try {
-      staff = await this.crmService.getStaff(user.tenantId);
-    } catch {
-      return this.operationsReadFailure();
-    }
-    const match = this.resolveStaff(text, staff);
-    if (match.kind === 'ambiguous') {
-      return this.replyOnly(`Уточните мастера: ${match.names.join(', ')}.`);
-    }
-    if (match.kind === 'missing' && this.hasNamedStaffReference(text)) {
-      return this.replyOnly(
-        'Не нашла такого активного сотрудника в YClients. Уточните имя.',
-      );
-    }
-
-    let execution: Record<string, unknown>;
-    try {
-      execution = this.asRecord(
-        await this.runtime.execute(user, 'operations.journal.read', {
-          surface: 'native',
-          arguments: {
-            date,
-            ...(match.kind === 'found' ? { staff_id: match.staff.id } : {}),
-          },
-        }),
-      );
-    } catch {
-      return this.operationsReadFailure();
-    }
-    if (execution.status !== 'completed') {
-      return this.operationsReadFailure();
-    }
-
-    const result = this.asRecord(execution.result);
-    const rows = this.operationsStaffRows(result.staff);
-    const appointments = this.operationsAppointmentRows(result.appointments);
-    const summary = this.operationsCounts(result.summary);
-    if (!summary || rows.length === 0) {
-      return this.operationsReadFailure();
-    }
-
-    return {
-      reply: this.operationsJournalReply(
-        date,
-        timezone,
-        rows,
-        appointments,
-        summary,
-        match.kind === 'found',
-      ),
-      action: null,
-      toolUsage: {
-        name: 'operations.journal.read',
-        status: 'completed',
-        execution_id:
-          typeof execution.execution_id === 'string'
-            ? execution.execution_id
-            : null,
-      },
-    };
-  }
-
-  private async tryReadSchedule(
-    user: AuthenticatedUser,
-    dto: AiCoreChatDto,
-    text: string,
-  ): Promise<StaffScheduleCommandResult | null> {
-    if (!this.isScheduleReadQuestion(text)) {
-      return null;
-    }
-    // 🔴 То же самое: не отказываем ролью в перехватчике. У мастера есть
-    // staff.schedule.own.read — пусть до него дойдёт обычный путь.
-    if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
-      return null;
-    }
-    if (!user.tenantId) {
-      return this.replyOnly('Не нашла активный бизнес для этого запроса.');
-    }
-
-    let allowed;
-    try {
-      allowed = await this.runtime.listTools(user, 'native');
-    } catch {
-      return this.scheduleReadFailure();
-    }
-    if (!allowed.tools.some((tool) => tool.name === 'staff.schedule.read')) {
-      return this.replyOnly(
-        'Чтение графика YClients недоступно для текущей роли или тарифа.',
-      );
-    }
-
-    const timezone = await this.tenantTimezone(user.tenantId);
-    const date = this.parseDate(text, timezone);
-    if (!date) {
-      return this.replyOnly('На какую дату показать график?');
-    }
-
-    let staff: StaffMember[];
-    try {
-      staff = await this.crmService.getStaff(user.tenantId);
-    } catch {
-      return this.scheduleReadFailure();
-    }
-    const match = this.resolveStaff(text, staff);
-    if (match.kind === 'ambiguous') {
-      return this.replyOnly(`Уточните мастера: ${match.names.join(', ')}.`);
-    }
-    if (match.kind === 'missing') {
-      if (this.hasNamedStaffReference(text)) {
-        return this.replyOnly(
-          'Не нашла такого активного сотрудника в YClients. Уточните имя.',
-        );
-      }
-      if (!this.isTeamScheduleQuestion(text)) {
-        return this.replyOnly('График какого мастера показать?');
-      }
-    }
-
-    let execution: Record<string, unknown>;
-    try {
-      execution = this.asRecord(
-        await this.runtime.execute(user, 'staff.schedule.read', {
-          surface: 'native',
-          arguments: {
-            date,
-            ...(match.kind === 'found' ? { staff_id: match.staff.id } : {}),
-          },
-        }),
-      );
-    } catch {
-      return this.scheduleReadFailure();
-    }
-    if (execution.status !== 'completed') {
-      return this.scheduleReadFailure();
-    }
-    const result = this.asRecord(execution.result);
-    const rows = this.scheduleRows(result.staff);
-    if (rows.length === 0) {
-      return this.replyOnly(
-        `${this.scheduleDateLabel(date, timezone)}: в YClients нет активных мастеров с графиком.`,
-      );
-    }
-
-    return {
-      reply: this.scheduleReadReply(date, timezone, rows),
-      action: null,
-      toolUsage: {
-        name: 'staff.schedule.read',
-        status: 'completed',
-        execution_id:
-          typeof execution.execution_id === 'string'
-            ? execution.execution_id
-            : null,
-      },
-    };
-  }
-
-  private isScheduleReadQuestion(text: string): boolean {
-    const explicitSchedule =
-      /(?:расписан|график|рабоч[^ы]*\s+(?:час|смен)|(?:^|[^а-я])смен(?:а|ы|е|у|ой|ою)(?:$|[^а-я])|выходн)/.test(
-        text,
-      );
-    const rosterQuestion =
-      /(?:кто\s+[^?.,!]{0,40}(?:работ|на\s+смен)|когда\s+[^?.,!]{0,50}работ|работает\s+ли|во\s+сколько\s+[^?.,!]{0,50}(?:выход|начина))/u.test(
-        text,
-      );
-    const hasCalendarDate =
-      /(?:сегодня|завтра|послезавтра|понедельник|понедельника|вторник|вторника|среда|среду|четверг|четверга|пятница|пятницу|суббота|субботу|воскресенье|воскресенья|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2})/.test(
-        text,
-      );
-    const hasWorkPredicate =
-      /(?:^|[^а-я])(?:работ(?:аю|ает|ают|ал|ала|али)|выход(?:ит|ят|ишь|им|ите)|на\s+смене)(?:$|[^а-я])/u.test(
-        text,
-      );
-    return (
-      explicitSchedule ||
-      rosterQuestion ||
-      (hasCalendarDate && hasWorkPredicate)
-    );
-  }
-
-  private isTeamScheduleQuestion(text: string): boolean {
-    if (
-      /(?:кто\s+[^?.,!]{0,40}(?:работ|на\s+смен)|кто\s+выходной|расписание\s+(?:всех|команды|мастеров|сотрудников)|график\s+(?:всех|команды|мастеров|сотрудников))/.test(
-        text,
-      )
-    ) {
-      return true;
-    }
-    return (
-      /^(?:какое\s+)?(?:расписание|график)(?:$|[^а-я])/.test(text) &&
-      !this.hasNamedStaffReference(text)
-    );
-  }
-
-  private hasNamedStaffReference(text: string): boolean {
-    const match = text.match(
-      /(?:^|[^а-я])(?:у|для|про)\s+([a-zа-я][a-zа-я-]{1,})(?:$|[^а-я])/u,
-    );
-    if (!match) {
-      return false;
-    }
-    return !new Set([
-      'нас',
-      'всех',
-      'команды',
-      'мастеров',
-      'сотрудников',
-      'барберов',
-      'персонала',
-      'салона',
-      'бизнеса',
-    ]).has(match[1]);
-  }
-
-  private scheduleReadContextText(dto: AiCoreChatDto, latest: string): string {
-    if (this.isScheduleReadQuestion(latest)) {
-      return latest;
-    }
-    const previous = this.previousUserText(dto);
-    if (
-      previous &&
-      this.isScheduleReadQuestion(previous) &&
-      /^(?:а\s+)?(?:у\s+)?[a-zа-я\s-]{2,60}\??$/.test(latest)
-    ) {
-      return `${previous} ${latest}`;
-    }
-    return latest;
-  }
-
-  private isOperationsJournalQuestion(text: string): boolean {
-    if (
-      this.isScheduleReadQuestion(text) ||
-      /(?:свободн|ближайш)[а-я]*\s+(?:окн|врем|слот)|когда\s+можно\s+запис|есть\s+ли\s+(?:окн|мест|врем)/.test(
-        text,
-      )
-    ) {
-      return false;
-    }
-    const hasCalendarDate =
-      /(?:сегодня|завтра|послезавтра|понедельник|понедельника|вторник|вторника|среда|среду|четверг|четверга|пятница|пятницу|суббота|субботу|воскресенье|воскресенья|\d{1,2}[./]\d{1,2}|\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)|\d{4}-\d{2}-\d{2})/.test(
-        text,
-      );
-    // Именно сущности журнала, а не любая фраза со словом
-    // «записан». Иначе «Иван записан сегодня» перехватывало досье клиента.
-    const hasDayOperations =
-      /(?:запис(?:ь|и|ей|ям|ями|ях)|визит|при[её]м|услуг|загрузк|занятост|отмен|неявк)/.test(
-        text,
-      );
-    return hasCalendarDate && hasDayOperations;
-  }
-
-  private operationsReadContextText(
-    dto: AiCoreChatDto,
-    latest: string,
-  ): string {
-    if (this.isOperationsJournalQuestion(latest)) {
-      return latest;
-    }
-    const previous = this.previousUserText(dto);
-    if (
-      previous &&
-      this.isOperationsJournalQuestion(previous) &&
-      /^(?:а\s+)?(?:(?:у|про)\s+)?[a-zа-я\s-]{2,60}\??$/.test(latest)
-    ) {
-      return `${previous} ${latest}`;
-    }
-    return latest;
-  }
+  // Здесь лежали шесть приватных методов читающих веток (tryReadSchedule,
+  // tryReadOperationsJournal и их распознаватели вопросов). Убраны вместе с
+  // ветками: они отвечали на вопрос заготовкой вместо модели. Если понадобится
+  // быстрый ответ про график — он должен приходить инструментом через обычный
+  // путь, а не отдельным перехватчиком, живущим только на одной площадке.
 
   private operationsStaffRows(value: unknown): OperationsStaffRow[] {
     if (!Array.isArray(value)) {
@@ -899,10 +590,18 @@ export class StaffScheduleCommandService {
     ) {
       return 'close_day';
     }
+    // 🔴 Голое «сократ» ловило любой деловой вопрос: «как сократить расходы?»,
+    // «как сократить отмены?» опознавались как команда правки графика, и
+    // владелец получал встречное «На какую дату изменить график?» вместо
+    // ответа. Сокращение теперь считается командой, только когда рядом назван
+    // предмет графика; «только до» требует времени после себя.
     if (
-      /(сократ|только\s+до|смен[а-я]*.*до|работ[а-я]*.*(?:с\s+\d|до\s+\d))/.test(
+      /сократ[а-я]*[^.!?]{0,30}(?:смен|график|рабоч|день|дня|дни|час)/.test(
         text,
-      )
+      ) ||
+      /только\s+до\s+\d/.test(text) ||
+      /смен[а-я]*.*до/.test(text) ||
+      /работ[а-я]*.*(?:с\s+\d|до\s+\d)/.test(text)
     ) {
       return 'set_hours';
     }
