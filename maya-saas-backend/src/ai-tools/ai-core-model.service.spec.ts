@@ -511,18 +511,22 @@ describe('AiCoreModelService', () => {
         };
       }>;
     };
-    expect(finalInput.conversation).toHaveLength(6);
+    // 20, а не 6: на телефоне MAYA видела только шесть последних реплик и
+    // теряла период, названный в начале разговора.
+    expect(finalInput.conversation).toHaveLength(10);
     expect(finalInput.remembered_notes).toHaveLength(20);
     expect(finalInput.grounding_corrections).toHaveLength(2);
     expect(finalInput.known_tools).toBeUndefined();
     expect(finalInput.tool_results?.[0]?.result?.previous).toBeUndefined();
-    expect(finalInput.tool_results?.[0]?.result?.rows).toHaveLength(12);
+    // Строк данных столько же, сколько в браузере: при лимите 12 разбивка по
+    // мастерам и динамика по дням доезжали до модели огрызком.
+    expect(finalInput.tool_results?.[0]?.result?.rows).toHaveLength(20);
     expect(
       finalInput.tool_results?.[0]?.result?.rows?.[0]?.nested,
-    ).toHaveLength(8);
+    ).toHaveLength(20);
   });
 
-  it('does not repeat a failed native final request', async () => {
+  it('повторяет неудачный финальный запрос и на телефоне', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
       .mockResolvedValue(deepSeekResponse(''));
@@ -540,7 +544,9 @@ describe('AiCoreModelService', () => {
         allowToolCall: false,
       }),
     ).rejects.toMatchObject({ status: 503 });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // 🔴 Две попытки, как в браузере. Одна означала, что любой единичный сбой
+    // провайдера превращался в «не удалось связаться с Майей».
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('retries an empty natural reply in plain-text mode', async () => {

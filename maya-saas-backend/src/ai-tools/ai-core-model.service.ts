@@ -23,11 +23,18 @@ const MAX_MODEL_OUTPUT_TOKENS = 4_000;
 const MAX_REPLY_CHARS = 3_500;
 const MAX_TOOL_ARGUMENT_BYTES = 8 * 1_024;
 const DEFAULT_TIMEOUT_MS = 20_000;
-const NATIVE_TIMEOUT_CAP_MS = 15_000;
+// 🔴 Экономия на приложении стоила дороже, чем экономила. Каждое ограничение
+// по отдельности выглядело разумным — «сохранить ощущение скорости», — но
+// вместе они давали ДРУГОЙ продукт: на телефоне MAYA видела шесть последних
+// реплик и двенадцать строк данных, отвечала вдвое короче и не имела права на
+// вторую попытку. Владелец описал это словами «в браузере нормально, здесь
+// тупит жёстко». Разрыв закрыт: разница с браузером остаётся только в длине
+// ответа, где она уместна — на телефоне длинную простыню и правда не читают.
+const NATIVE_TIMEOUT_CAP_MS = 20_000;
 const NATIVE_MAX_OUTPUT_TOKENS = 1_800;
-const NATIVE_FINAL_CONVERSATION_MESSAGES = 6;
-const NATIVE_FINAL_ARRAY_ITEMS = 12;
-const NATIVE_FINAL_NESTED_ARRAY_ITEMS = 8;
+const NATIVE_FINAL_CONVERSATION_MESSAGES = 20;
+const NATIVE_FINAL_ARRAY_ITEMS = 200;
+const NATIVE_FINAL_NESTED_ARRAY_ITEMS = 50;
 // Core по умолчанию — Pro: владелец ждёт «как в чате DeepSeek». Не подставляй
 // onboarding-модель сюда фолбэком: оба контура настраиваются независимо.
 const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-pro';
@@ -700,9 +707,13 @@ export class AiCoreModelService {
   ): Promise<T> {
     let lastError: unknown = null;
     // A malformed semantic plan is safe to retry once before any tool runs.
-    // Native final replies remain single-attempt to protect perceived latency.
-    const maxAttempts =
-      stage === 'tool_plan' ? 2 : input.surface === 'native' ? 1 : 2;
+    //
+    // 🔴 Раньше финальный ответ на телефоне шёл в ОДНУ попытку «ради ощущения
+    // скорости». Цена оказалась не та: любой единичный сбой провайдера
+    // превращался в «не удалось связаться с Майей» — в проде это ровно те
+    // шесть падений ai_model_unavailable, все с телефона. Секунда ожидания
+    // дешевле пустого экрана, площадки уравнены.
+    const maxAttempts = 2;
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
         return await request(attempt);
