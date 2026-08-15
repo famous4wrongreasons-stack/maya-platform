@@ -11242,12 +11242,13 @@ function ABookCard(props) {
   var WD = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
   var MO = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
-  var st = React.useState({ step: 0, master: null, svcs: [], date: null, time: null, done: false, doneMode: 'preview' });
+  var st = React.useState({ step: 0, master: null, svcs: [], date: null, time: null, done: false, doneMode: 'preview', loyaltyAddon: null, loyaltyRequestId: '', loyaltySpent: 0, loyaltyRemaining: null, loyaltyWarning: '' });
   var s = st[0], setS = st[1];
-  var dt = React.useState({ masters: null, services: null, days: null, slots: null });
+  var dt = React.useState({ masters: null, services: null, days: null, slots: null, loyaltyOptions: null, loyaltyBalance: 0, loyaltyLoading: false });
   var data = dt[0], setData = dt[1];
   var uit = React.useState({ loading: true, err: '' });
   var ui = uit[0], setUi = uit[1];
+  var loyaltySubmitRef = React.useRef({ busy: false, requestId: '' });
   var repeatPrefill = props.data && props.data.repeat_booking === true ? props.data : null;
 
   // Легаси-ветка: боевой бэк «Мужская Эстетика» (BF_PROXY → YClients 503759).
@@ -11322,6 +11323,7 @@ function ABookCard(props) {
   }
   function patch(o) { setS(function (p) { return Object.assign({}, p, o); }); }
   function setD(o) { setData(function (p) { return Object.assign({}, p, o); }); }
+  function resetLoyaltySubmission() { loyaltySubmitRef.current = { busy: false, requestId: '' }; }
   function isoOf(d) { return d.toISOString().slice(0, 10); }
   function svcIds(arr) { return (arr || []).map(function (x) { return x.id; }).join(','); }
   function fmtTime(iso) { try { var d = new Date(iso); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); } catch (er) { return ''; } }
@@ -11329,6 +11331,58 @@ function ABookCard(props) {
   function money(n) { return Number(n || 0).toLocaleString('ru-RU') + ' ₽'; }
   function repeatKey(value) { return String(value || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/g, ' ').trim(); }
   function bErr(er, fb) { var c = er && er.code; if (er && er.status === 402) return 'Пробный период завершён — нужна подписка.'; if (c === 'service_not_found') return 'Услуга больше недоступна — выберите заново.'; if (c === 'slot_taken') return 'Это время только что заняли — выберите другой слот.'; if (c === 'staff_unavailable') return 'Мастер недоступен в это время.'; if (er && er.status === 401) return 'Сессия устарела — войдите снова.'; return fb; }
+  function normalizeServices(list) { return (Array.isArray(list) ? list : []).map(function (x) { return { id: String(x && x.id || ''), name: (x && x.name) || '', price: Number(x && x.price || 0), dur: Number(x && x.duration_minutes || 0) }; }); }
+  function storedJson(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (er) { return null; } }
+  function usualPrefillData() {
+    if (repeatPrefill) return repeatPrefill;
+    if (window.__meRepeatBookingData && window.__meRepeatBookingData.master_id) return window.__meRepeatBookingData;
+    if (window.__ME_SAAS_CTX) return null;
+    var master = window.__meUsualMaster || storedJson('me_usual_master');
+    var names = (window.__meUsualServices && window.__meUsualServices.length) ? window.__meUsualServices : storedJson('me_usual_services');
+    if (!master || !master.id) return null;
+    return { repeat_booking: true, master_id: master.id, master_name: master.name || '', service_ids: [], service_names: Array.isArray(names) ? names : [] };
+  }
+  function findPrefillMaster(prefill, masters) {
+    if (!prefill) return null;
+    var wantedId = String(prefill.master_id || '');
+    var wantedName = repeatKey(prefill.master_name);
+    return (masters || []).filter(function (m) {
+      return (wantedId && m.id === wantedId) || (wantedName && repeatKey(m.name) === wantedName);
+    })[0] || null;
+  }
+  function preparePrefill(master, prefill, alive) {
+    if (!master) return Promise.reject({ code: 'staff_unavailable' });
+    resetLoyaltySubmission();
+    patch({ master: master, svcs: [], date: null, time: null, step: 1, loyaltyAddon: null, loyaltyRequestId: '' });
+    setD({ services: null, loyaltyOptions: null });
+    setUi({ loading: true, err: '' });
+    return af('/services?staffId=' + encodeURIComponent(master.id)).then(function (services) {
+      if (alive && !alive()) return null;
+      var sv = normalizeServices(services);
+      var wantedIds = (Array.isArray(prefill.service_ids) ? prefill.service_ids : []).map(String);
+      var wantedNames = (Array.isArray(prefill.service_names) ? prefill.service_names : []).map(repeatKey).filter(Boolean);
+      var selected = sv.filter(function (service) {
+        return wantedIds.indexOf(service.id) >= 0 || wantedNames.indexOf(repeatKey(service.name)) >= 0;
+      });
+      var wantedCount = wantedNames.length || wantedIds.length;
+      setD({ services: sv });
+      if (!selected.length || selected.length < wantedCount) {
+        patch({ step: 1, svcs: selected });
+        setUi({ loading: false, err: wantedCount ? 'Одна из прошлых услуг изменилась — проверьте набор.' : 'Выберите услугу.' });
+        return null;
+      }
+      patch({ step: 2, svcs: selected });
+      setUi({ loading: true, err: '' });
+      var now = new Date(); var from = isoOf(now); var to = isoOf(new Date(now.getTime() + 30 * 86400000));
+      return af('/available-days?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&staffId=' + encodeURIComponent(master.id) + '&serviceIds=' + encodeURIComponent(svcIds(selected))).then(function (res) {
+        if (alive && !alive()) return null;
+        var days = (res && Array.isArray(res.days)) ? res.days : (Array.isArray(res) ? res : []);
+        setD({ days: days.map(function (d) { return (typeof d === 'string') ? d : (d && (d.date || d.day) || ''); }).filter(Boolean) });
+        setUi({ loading: false, err: '' });
+        return null;
+      });
+    });
+  }
 
   React.useEffect(function () {
     var alive = true; setUi({ loading: true, err: '' });
@@ -11336,57 +11390,41 @@ function ABookCard(props) {
       if (!alive) return null;
       var ms = (Array.isArray(list) ? list : []).map(function (m) { return { id: String(m && m.id || ''), name: (m && m.name) || 'Мастер', rank: (m && m.title) || '', rating: (m && m.rating) || null }; });
       setD({ masters: ms });
-      if (!repeatPrefill) { setUi({ loading: false, err: '' }); return null; }
-      var wantedMasterId = String(repeatPrefill.master_id || '');
-      var wantedMasterName = repeatKey(repeatPrefill.master_name);
-      var master = ms.filter(function (m) {
-        return (wantedMasterId && m.id === wantedMasterId) || (wantedMasterName && repeatKey(m.name) === wantedMasterName);
-      })[0];
-      if (!master) {
-        setUi({ loading: false, err: 'Постоянный мастер сейчас недоступен — выберите другого.' });
+      if (!repeatPrefill) {
+        setUi({ loading: false, err: '' });
+        if (meIsLegacy()) meEnsureCabinet(function () { if (alive) setD({ masters: ms.slice() }); });
         return null;
       }
-      return af('/services?staffId=' + encodeURIComponent(master.id)).then(function (services) {
-        if (!alive) return null;
-        var sv = (Array.isArray(services) ? services : []).map(function (x) { return { id: String(x && x.id || ''), name: (x && x.name) || '', price: Number(x && x.price || 0), dur: Number(x && x.duration_minutes || 0) }; });
-        var wantedIds = (Array.isArray(repeatPrefill.service_ids) ? repeatPrefill.service_ids : []).map(String);
-        var wantedNames = (Array.isArray(repeatPrefill.service_names) ? repeatPrefill.service_names : []).map(repeatKey).filter(Boolean);
-        var selected = sv.filter(function (service) {
-          return wantedIds.indexOf(service.id) >= 0 || wantedNames.indexOf(repeatKey(service.name)) >= 0;
-        });
-        var wantedCount = wantedNames.length || wantedIds.length;
-        setD({ services: sv });
-        if (!selected.length || selected.length < wantedCount) {
-          setS({ step: 1, master: master, svcs: selected, date: null, time: null, done: false, doneMode: 'preview' });
-          setUi({ loading: false, err: 'Одна из прошлых услуг изменилась — проверьте набор.' });
-          return null;
-        }
-        setS({ step: 2, master: master, svcs: selected, date: null, time: null, done: false, doneMode: 'preview' });
-        setUi({ loading: true, err: '' });
-        var now = new Date(); var from = isoOf(now); var to = isoOf(new Date(now.getTime() + 30 * 86400000));
-        return af('/available-days?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&staffId=' + encodeURIComponent(master.id) + '&serviceIds=' + encodeURIComponent(svcIds(selected))).then(function (res) {
-          if (!alive) return null;
-          var days = (res && Array.isArray(res.days)) ? res.days : (Array.isArray(res) ? res : []);
-          setD({ days: days.map(function (d) { return (typeof d === 'string') ? d : (d && (d.date || d.day) || ''); }).filter(Boolean) });
-          setUi({ loading: false, err: '' });
-          return null;
-        });
-      });
+      var master = findPrefillMaster(repeatPrefill, ms);
+      if (!master) {
+        setUi({ loading: false, err: 'Мастер из последнего визита сейчас недоступен — выберите другого.' });
+        return null;
+      }
+      return preparePrefill(master, repeatPrefill, function () { return alive; });
     }).catch(function (er) { if (alive) setUi({ loading: false, err: bErr(er, repeatPrefill ? 'Не удалось подготовить повтор записи' : 'Не удалось загрузить мастеров') }); });
     return function () { alive = false; };
   }, []);
 
   function pickMaster(m) {
-    patch({ master: m, svcs: [], date: null, time: null, step: 1 }); setD({ services: null }); setUi({ loading: true, err: '' });
+    resetLoyaltySubmission();
+    patch({ master: m, svcs: [], date: null, time: null, step: 1, loyaltyAddon: null, loyaltyRequestId: '' }); setD({ services: null, loyaltyOptions: null }); setUi({ loading: true, err: '' });
     af('/services?staffId=' + encodeURIComponent(m.id)).then(function (list) {
-      var sv = (Array.isArray(list) ? list : []).map(function (x) { return { id: String(x && x.id || ''), name: (x && x.name) || '', price: Number(x && x.price || 0), dur: Number(x && x.duration_minutes || 0) }; });
+      var sv = normalizeServices(list);
       setD({ services: sv }); setUi({ loading: false, err: '' });
     }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить услуги') }); });
   }
-  function toggleSvc(sv) { patch({ svcs: (s.svcs.some(function (x) { return x.id === sv.id; }) ? s.svcs.filter(function (x) { return x.id !== sv.id; }) : s.svcs.concat([sv])) }); }
+  function startUsual() {
+    resetLoyaltySubmission();
+    var prefill = usualPrefillData();
+    var master = findPrefillMaster(prefill, data.masters || []);
+    if (!prefill || !master) { setUi({ loading: false, err: 'Мастер из последнего визита сейчас недоступен.' }); return; }
+    preparePrefill(master, prefill).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось подготовить повтор записи') }); });
+  }
+  function toggleSvc(sv) { resetLoyaltySubmission(); patch({ svcs: (s.svcs.some(function (x) { return x.id === sv.id; }) ? s.svcs.filter(function (x) { return x.id !== sv.id; }) : s.svcs.concat([sv])), loyaltyAddon: null, loyaltyRequestId: '' }); }
   function goDates() {
     if (!s.svcs.length) return;
-    patch({ date: null, time: null, step: 2 }); setD({ days: null }); setUi({ loading: true, err: '' });
+    resetLoyaltySubmission();
+    patch({ date: null, time: null, step: 2, loyaltyAddon: null, loyaltyRequestId: '' }); setD({ days: null, loyaltyOptions: null }); setUi({ loading: true, err: '' });
     var now = new Date(); var from = isoOf(now); var to = isoOf(new Date(now.getTime() + 30 * 86400000));
     af('/available-days?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&staffId=' + encodeURIComponent(s.master.id) + '&serviceIds=' + encodeURIComponent(svcIds(s.svcs))).then(function (res) {
       var days = (res && Array.isArray(res.days)) ? res.days : (Array.isArray(res) ? res : []);
@@ -11394,7 +11432,8 @@ function ABookCard(props) {
     }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить даты') }); });
   }
   function pickDate(iso) {
-    patch({ date: iso, time: null, step: 3 }); setD({ slots: null }); setUi({ loading: true, err: '' });
+    resetLoyaltySubmission();
+    patch({ date: iso, time: null, step: 3, loyaltyAddon: null, loyaltyRequestId: '' }); setD({ slots: null, loyaltyOptions: null }); setUi({ loading: true, err: '' });
     af('/available-slots?date=' + encodeURIComponent(iso + 'T00:00:00.000Z') + '&staffId=' + encodeURIComponent(s.master.id) + '&serviceIds=' + encodeURIComponent(svcIds(s.svcs))).then(function (list) {
       var seen = {}, out = [];
       (Array.isArray(list) ? list : []).forEach(function (sl) { var lb = fmtTime(sl && sl.start); if (!lb || seen[lb]) return; seen[lb] = true; out.push({ label: lb, start: sl && sl.start || '', branch_id: sl && sl.branch_id || null }); });
@@ -11402,8 +11441,68 @@ function ABookCard(props) {
       setD({ slots: out }); setUi({ loading: false, err: '' });
     }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить время') }); });
   }
-  function pickTime(sl) { patch({ time: sl, step: 4 }); }
+  function loadLoyaltyOptions(sl) {
+    if (!meIsLegacy()) { setD({ loyaltyOptions: [], loyaltyBalance: 0, loyaltyLoading: false }); return; }
+    setD({ loyaltyOptions: null, loyaltyBalance: 0, loyaltyLoading: true });
+    meEnsureCabinet(function () {
+      var cab = meCab(); var loyalty = cab.loyalty || {};
+      var balance = Number(loyalty.balance || parseInt(String(cab.points || '0').replace(/[^\d]/g, ''), 10) || 0);
+      var affordable = Array.isArray(loyalty.affordable_services) ? loyalty.affordable_services : [];
+      var services = data.services || [];
+      var chosenIds = s.svcs.map(function (item) { return String(item.id); });
+      var candidates = affordable.map(function (item) {
+        var wantedId = String(item && item.id || ''); var wantedName = repeatKey(item && (item.title || item.name));
+        var service = services.filter(function (row) { return (wantedId && String(row.id) === wantedId) || (wantedName && repeatKey(row.name) === wantedName); })[0];
+        if (!service || chosenIds.indexOf(String(service.id)) >= 0) return null;
+        return Object.assign({}, service, { points: Number(item.price || item.points_required || service.price || 0) });
+      }).filter(function (item) { return item && item.points > 0 && item.points <= balance; }).sort(function (a, b) { return b.points - a.points; }).slice(0, 6);
+      if (!candidates.length) { setD({ loyaltyOptions: [], loyaltyBalance: balance, loyaltyLoading: false }); return; }
+      Promise.all(candidates.map(function (candidate) {
+        var combined = s.svcs.concat([candidate]);
+        return af('/available-slots?date=' + encodeURIComponent(s.date + 'T00:00:00.000Z') + '&staffId=' + encodeURIComponent(s.master.id) + '&serviceIds=' + encodeURIComponent(svcIds(combined))).then(function (list) {
+          var fits = (Array.isArray(list) ? list : []).some(function (item) { return fmtTime(item && item.start) === sl.label; });
+          return fits ? candidate : null;
+        }).catch(function () { return null; });
+      })).then(function (checked) {
+        setD({ loyaltyOptions: checked.filter(Boolean), loyaltyBalance: balance, loyaltyLoading: false });
+      });
+    });
+  }
+  function pickTime(sl) { resetLoyaltySubmission(); patch({ time: sl, step: 4, loyaltyAddon: null, loyaltyRequestId: '' }); setUi({ loading: false, err: '' }); loadLoyaltyOptions(sl); }
+  function confirmLoyalty() {
+    var addon = s.loyaltyAddon;
+    if (!addon) return;
+    if (loyaltySubmitRef.current.busy) return;
+    var requestId = loyaltySubmitRef.current.requestId || s.loyaltyRequestId || ('book_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10));
+    loyaltySubmitRef.current = { busy: true, requestId: requestId };
+    patch({ loyaltyRequestId: requestId });
+    setUi({ loading: true, err: '' });
+    var all = s.svcs.concat([addon]);
+    meCabinetAction('client_book_loyalty', {
+      staff_id: s.master.id,
+      service_ids: all.map(function (item) { return String(item.id); }),
+      datetime: (s.time && s.time.start) || (s.date + 'T' + s.time.label + ':00'),
+      loyalty_service_id: addon.id,
+      loyalty_service_title: addon.name,
+      request_id: requestId
+    }, function (res, er) {
+      if (er) {
+        var code = er.code;
+        loyaltySubmitRef.current = { busy: false, requestId: requestId };
+        if (code === 'slot_taken' || code === 'staff_unavailable') { resetLoyaltySubmission(); setUi({ loading: false, err: bErr(er, 'Это время уже недоступно.') }); patch({ time: null, step: 3, loyaltyAddon: null, loyaltyRequestId: '' }); pickDate(s.date); return; }
+        if (code === 'insufficient_points') { resetLoyaltySubmission(); setUi({ loading: false, err: 'Баланс изменился. Обновила баллы — выберите другой вариант.' }); patch({ loyaltyAddon: null, loyaltyRequestId: '' }); loadLoyaltyOptions(s.time); return; }
+        if (code === 'booking_in_progress') { setUi({ loading: false, err: 'Запись уже оформляется. Подождите пару секунд и нажмите ещё раз.' }); return; }
+        setUi({ loading: false, err: bErr(er, 'Не удалось оформить запись с баллами') });
+        return;
+      }
+      loyaltySubmitRef.current = { busy: false, requestId: requestId };
+      setUi({ loading: false, err: '' });
+      patch({ done: true, doneMode: 'live', loyaltySpent: Number(res && res.spent_points || 0), loyaltyRemaining: res && res.remaining_points, loyaltyWarning: res && res.loyalty_applied === false ? 'Запись создана, но списание баллов нужно подтвердить с администратором.' : '' });
+      try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'appointments' } })); if (window.__meHydrate) window.__meHydrate('cabinet'); } catch (e2) {}
+    });
+  }
   function confirm() {
+    if (s.loyaltyAddon && meIsLegacy()) { confirmLoyalty(); return; }
     setUi({ loading: true, err: '' });
     var live = (!(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)) || !!(window.__SAAS_TENANT && window.__SAAS_TENANT.booking_mode === 'live');
     af(live ? '/appointments' : '/appointments/preview', {
@@ -11423,12 +11522,14 @@ function ABookCard(props) {
   var lab = { fontFamily: DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: muted, marginBottom: 12 };
   var chip = { display: 'inline-flex', alignItems: 'center', gap: 6, background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.06)', borderRadius: 999, padding: '5px 11px', fontSize: 11.5, color: ink, marginRight: 6, marginBottom: 6 };
   var prim = { width: '100%', height: 46, borderRadius: 999, border: 0, background: invBg, color: invText, fontFamily: BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer', marginTop: 12 };
+  var secondary = { width: '100%', minHeight: 42, borderRadius: 999, border: '1px solid ' + line2, background: 'transparent', color: ink, fontFamily: BODYF, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', marginTop: 9 };
   var rowBtn = { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '1px solid ' + line2, borderRadius: 14, padding: '13px 15px', background: bg2, marginBottom: 8 };
+  function adminButton() { return e('button', { type: 'button', style: secondary, onClick: meContactAdmin }, 'Связаться с администратором'); }
 
   function summaryChips() {
     var ch = [];
     if (s.master && s.step >= 1) ch.push(e('span', { key: 'm', style: chip }, s.master.name));
-    if (s.svcs.length && s.step >= 2) ch.push(e('span', { key: 'sv', style: chip }, s.svcs.map(function (x) { return x.name; }).join(', ')));
+    if (s.svcs.length && s.step >= 2) ch.push(e('span', { key: 'sv', style: chip }, s.svcs.concat(s.loyaltyAddon ? [s.loyaltyAddon] : []).map(function (x) { return x.name; }).join(', ')));
     if (s.date && s.step >= 3) ch.push(e('span', { key: 'd', style: chip }, fmtDay(s.date).full));
     if (s.time && s.step >= 4) ch.push(e('span', { key: 'tm', style: chip }, s.time.label));
     return ch.length ? e('div', { style: { marginBottom: 12 } }, ch) : null;
@@ -11441,8 +11542,11 @@ function ABookCard(props) {
       e('div', { style: { textAlign: 'center', padding: '8px 4px' } },
         e('div', { style: { width: 52, height: 52, borderRadius: '50%', background: invBg, color: invText, display: 'grid', placeItems: 'center', margin: '0 auto', fontSize: 26 } }, '✓'),
         e('div', { style: { fontFamily: DISPF, fontWeight: 300, fontSize: 16, color: ink, marginTop: 14 } }, s.doneMode === 'live' ? 'Запись подтверждена' : 'Заявка отправлена'),
-        e('div', { style: { fontSize: 12.5, color: muted, marginTop: 6, lineHeight: 1.5 } }, s.svcs.map(function (x) { return x.name; }).join(', ') + ' · ' + (s.master ? s.master.name : '') + ' · ' + fmtDay(s.date).full + ', ' + (s.time ? s.time.label : '')),
-        s.doneMode === 'live' ? null : e('div', { style: { fontSize: 11, color: faint, marginTop: 8, lineHeight: 1.5 } }, 'Мастер подтвердит запись — я пришлю уведомление.')
+        e('div', { style: { fontSize: 12.5, color: muted, marginTop: 6, lineHeight: 1.5 } }, s.svcs.concat(s.loyaltyAddon ? [s.loyaltyAddon] : []).map(function (x) { return x.name; }).join(', ') + ' · ' + (s.master ? s.master.name : '') + ' · ' + fmtDay(s.date).full + ', ' + (s.time ? s.time.label : '')),
+        s.loyaltySpent > 0 ? e('div', { style: { fontSize: 12, color: ink, marginTop: 9, lineHeight: 1.5 } }, 'Списала ' + Number(s.loyaltySpent).toLocaleString('ru-RU') + ' баллов' + (s.loyaltyRemaining !== null ? '. Осталось ' + Number(s.loyaltyRemaining).toLocaleString('ru-RU') + '.' : '.')) : null,
+        s.loyaltyWarning ? e('div', { style: { fontSize: 11.5, color: dark ? '#f0b8b8' : '#9a3b3b', marginTop: 9, lineHeight: 1.5 } }, s.loyaltyWarning) : null,
+        s.doneMode === 'live' ? null : e('div', { style: { fontSize: 11, color: faint, marginTop: 8, lineHeight: 1.5 } }, 'Мастер подтвердит запись — я пришлю уведомление.'),
+        adminButton()
       )
     );
   }
@@ -11450,7 +11554,11 @@ function ABookCard(props) {
   var body;
   if (ui.loading && !data.masters && s.step === 0) body = loadingEl();
   else if (ui.err && s.step === 0 && !(data.masters && data.masters.length)) body = e('div', null, errEl(), e('button', { style: prim, onClick: function () { setUi({ loading: true, err: '' }); af('/staff').then(function (list) { setD({ masters: (Array.isArray(list) ? list : []).map(function (m) { return { id: String(m && m.id || ''), name: (m && m.name) || 'Мастер', rank: (m && m.title) || '', rating: m && m.rating || null }; }) }); setUi({ loading: false, err: '' }); }).catch(function (er) { setUi({ loading: false, err: bErr(er, 'Не удалось загрузить мастеров') }); }); } }, 'Повторить'));
-  else if (s.step === 0) body = e('div', null, e('div', { style: lab }, 'Выберите мастера'), (data.masters || []).map(function (m, i) {
+  else if (s.step === 0) body = e('div', null, e('div', { style: lab }, 'Выберите мастера'), (function () { var prefill = usualPrefillData(); var master = findPrefillMaster(prefill, data.masters || []); if (!prefill || !master) return null; var names = Array.isArray(prefill.service_names) ? prefill.service_names.filter(Boolean) : []; return e('div', { style: Object.assign({}, rowBtn, { borderColor: invBg }), onClick: startUsual },
+      (function () { var mph = (window.__meMasterPhoto && window.__meMasterPhoto(master.id)) || ''; return mph ? e('img', { src: mph, alt: '', style: { width: 40, height: 40, borderRadius: 11, flex: 'none', objectFit: 'cover' } }) : e('div', { style: { width: 40, height: 40, borderRadius: 11, flex: 'none', display: 'grid', placeItems: 'center', background: invBg, color: invText, fontSize: 16 } }, (master.name || '?').charAt(0)); })(),
+      e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODYF, fontWeight: 700, fontSize: 13.5, color: ink } }, 'Мне как обычно'), e('div', { style: { fontSize: 10.5, color: muted, marginTop: 2 } }, master.name + (names.length ? ' · ' + names.join(', ') : ' · как в прошлый раз'))),
+      e('div', { style: { fontSize: 18, color: ink } }, '›'));
+    })(), (data.masters || []).map(function (m, i) {
     return e('div', { key: i, style: rowBtn, onClick: function () { pickMaster(m); } },
       (function () { var mph = (window.__meMasterPhoto && window.__meMasterPhoto(m.id)) || ''; return mph ? e('img', { src: mph, alt: '', style: { width: 40, height: 40, borderRadius: 11, flex: 'none', objectFit: 'cover' } }) : e('div', { style: { width: 40, height: 40, borderRadius: 11, flex: 'none', display: 'grid', placeItems: 'center', background: dark ? 'rgba(244,240,235,0.10)' : 'rgba(24,22,15,0.08)', color: ink, fontSize: 16 } }, (m.name || '?').charAt(0)); })(),
       e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODYF, fontWeight: 600, fontSize: 13.5, color: ink } }, m.name), m.rank ? e('div', { style: { fontSize: 10.5, color: muted, marginTop: 2 } }, m.rank) : null),
@@ -11467,18 +11575,25 @@ function ABookCard(props) {
   else if (s.step === 3) body = e('div', null, e('div', { style: lab }, 'Свободное время'), ui.loading ? loadingEl() : e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 } }, (data.slots || []).map(function (sl, i) { return e('div', { key: i, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + line2, borderRadius: 13, padding: '11px 0', fontSize: 13, color: ink, background: bg2 }, onClick: function () { pickTime(sl); } }, sl.label); })), (data.slots && !data.slots.length && !ui.loading) ? e('div', { style: { fontSize: 12.5, color: muted, padding: '4px 2px' } }, 'На этот день нет окон — выберите другой.') : null, ui.err ? errEl() : null);
   else if (s.step === 4) {
     var total = s.svcs.reduce(function (a, x) { return a + Number(x.price || 0); }, 0);
+    var loyaltyOptions = data.loyaltyOptions || [];
     body = e('div', null, e('div', { style: lab }, 'Проверьте запись'),
       e('div', { style: { border: '1px solid ' + line, borderRadius: 16, padding: 16, background: bg2 } },
         e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Мастер'), e('span', { style: { fontSize: 13, color: ink } }, s.master.name)),
-        e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Услуга'), e('span', { style: { fontSize: 13, color: ink, textAlign: 'right', maxWidth: 200 } }, s.svcs.map(function (x) { return x.name; }).join(', '))),
+        e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Услуга'), e('span', { style: { fontSize: 13, color: ink, textAlign: 'right', maxWidth: 200 } }, s.svcs.concat(s.loyaltyAddon ? [s.loyaltyAddon] : []).map(function (x) { return x.name; }).join(', '))),
         e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Когда'), e('span', { style: { fontSize: 13, color: ink } }, fmtDay(s.date).full + ', ' + s.time.label)),
+        s.loyaltyAddon ? e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } }, e('span', { style: { fontSize: 11, color: muted } }, 'Баллами'), e('span', { style: { fontSize: 13, color: ink } }, Number(s.loyaltyAddon.points).toLocaleString('ru-RU') + ' б.')) : null,
         e('div', { style: { display: 'flex', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid ' + line } }, e('span', { style: { fontSize: 11, color: muted } }, 'Итого'), e('span', { style: { fontSize: 17, fontWeight: 300, color: ink } }, money(total)))
       ),
+      data.loyaltyLoading ? e('div', { style: { fontSize: 11.5, color: faint, marginTop: 11, lineHeight: 1.5 } }, 'MAYA проверяет, какой уход поместится в окно мастера…') : null,
+      loyaltyOptions.length ? e('div', { style: { border: '1px solid ' + line2, borderRadius: 16, padding: 13, marginTop: 11, background: surf } },
+        e('div', { style: { fontFamily: BODYF, fontWeight: 600, fontSize: 12.5, color: ink, lineHeight: 1.45 } }, 'У вас ' + Number(data.loyaltyBalance || 0).toLocaleString('ru-RU') + ' баллов. Могу добавить уход — мастер успеет в выбранное время.'),
+        e('div', { style: { display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 } }, loyaltyOptions.slice(0, 3).map(function (item, i) { var on = s.loyaltyAddon && String(s.loyaltyAddon.id) === String(item.id); return e('button', { key: i, type: 'button', onClick: function () { resetLoyaltySubmission(); patch({ loyaltyAddon: on ? null : item, loyaltyRequestId: '' }); }, style: { width: '100%', minHeight: 42, borderRadius: 12, border: '1px solid ' + (on ? invBg : line2), background: on ? invBg : bg2, color: on ? invText : ink, padding: '8px 11px', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', cursor: 'pointer' } }, e('span', { style: { flex: 1, fontFamily: BODYF, fontSize: 12, fontWeight: 600 } }, item.name, item.dur ? e('span', { style: { display: 'block', fontSize: 10, fontWeight: 400, opacity: 0.65, marginTop: 1 } }, item.dur + ' мин') : null), e('span', { style: { fontSize: 11, whiteSpace: 'nowrap' } }, Number(item.points).toLocaleString('ru-RU') + ' б.')); }))
+      ) : null,
       ui.err ? errEl() : null,
-      e('button', { style: Object.assign({}, prim, { opacity: ui.loading ? 0.5 : 1 }), onClick: function () { if (!ui.loading) confirm(); } }, ui.loading ? 'Оформляю…' : 'Подтвердить запись'));
+      e('button', { style: Object.assign({}, prim, { opacity: ui.loading ? 0.5 : 1 }), onClick: function () { if (!ui.loading) confirm(); } }, ui.loading ? 'Оформляю…' : (s.loyaltyAddon ? 'Записаться и списать ' + Number(s.loyaltyAddon.points).toLocaleString('ru-RU') + ' б.' : 'Подтвердить запись')));
   }
 
-  return e('div', { style: wrap }, summaryChips(), body);
+  return e('div', { style: wrap }, summaryChips(), body, adminButton());
 }
 window.ABookCard = ABookCard;
 
@@ -11628,6 +11743,20 @@ function meChatEvent(name) { try { window.dispatchEvent(new CustomEvent(name)); 
 // (cabinet_me → window.APP_DATA.cabinet), т.к. новый SaaS-бэк для боевого аппа не используется.
 function meIsLegacy() { return !(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api); }
 function meCab() { return (window.APP_DATA && window.APP_DATA.cabinet) || {}; }
+function meAdminPhone() {
+  var raw = String(window.APP_DATA && window.APP_DATA.brand && window.APP_DATA.brand.phone || '').trim();
+  var digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 11 && digits.charAt(0) === '8') digits = '7' + digits.slice(1);
+  return '+' + digits;
+}
+function meContactAdmin() {
+  var phone = meAdminPhone();
+  if (!phone) { meChatSay('Свяжите меня с администратором, пожалуйста.'); return; }
+  var url = 'tel:' + phone;
+  try { if (window.__meExt) window.__meExt(url); else window.location.href = url; } catch (er) { window.location.href = url; }
+}
+window.meContactAdmin = meContactAdmin;
 // Гарантируем, что кабинет догидратился (баллы/записи/профиль). __meHydrate тянет кабинет
 // только на экранах cabinet/invite/home — в чате его может ещё не быть → дёргаем и ждём.
 function meEnsureCabinet(cb) {
@@ -11659,7 +11788,7 @@ function meCabinetAction(action, body, cb) {
   if (!rq) { cb(null, { code: 'unauthorized' }); return; }
   fetch(PROXY + '?action=' + action, { method: 'POST', headers: rq.headers, body: rq.body })
     .then(function (r) { return r.text().then(function (tx) { var j = null; try { j = tx ? JSON.parse(tx) : null; } catch (e) {} return { ok: r.ok, j: j }; }); })
-    .then(function (o) { if (o.ok && o.j && (o.j.success || o.j.ok)) cb(o.j, null); else cb(null, (o.j && (o.j.code || o.j.error)) ? { code: o.j.code || o.j.error } : { code: 'error' }); })
+    .then(function (o) { if (o.ok && o.j && (o.j.success || o.j.ok)) cb(o.j, null); else cb(null, Object.assign({ code: (o.j && (o.j.code || o.j.error)) || 'error' }, o.j || {})); })
     .catch(function () { cb(null, { code: 'network' }); });
 }
 
@@ -11686,7 +11815,8 @@ function ALoyaltyCard(props) {
     e('div', { style: { fontSize: 12.5, color: c.muted, marginTop: 6, lineHeight: 1.5 } }, options.length ? (verify ? 'По сумме баллов хватает на эти услуги. Применение подтвердит CRM при оформлении.' : 'Выберите один уход — MAYA добавит его к записи и применит баллы.') : (bal > 0 ? 'Пока копим дальше — подходящих услуг на этот баланс ещё нет.' : 'Копите кэшбэк с каждого визита — он вернётся баллами.')),
     options.length ? e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 13 } }, options.slice(0, 6).map(function (item, i) { return e('button', { key: i, onClick: function () { choose(item); }, style: { width: '100%', minHeight: 46, borderRadius: 14, border: '1px solid ' + c.line2, background: c.bg2, color: c.ink, padding: '10px 13px', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', cursor: 'pointer' } }, e('span', { style: { flex: 1, fontFamily: c.BODYF, fontSize: 12.5, fontWeight: 600 } }, svcName(item)), e('span', { style: { fontFamily: c.DISPF, fontSize: 11, color: c.muted, whiteSpace: 'nowrap' } }, svcPoints(item).toLocaleString('ru-RU') + ' б.')); })) : null,
     !options.length && next && Number(next.points_needed) > 0 ? e('div', { style: { fontSize: 11.5, color: c.faint, marginTop: 10, lineHeight: 1.5 } }, 'До «' + svcName(next) + '» осталось ' + Number(next.points_needed).toLocaleString('ru-RU') + ' баллов.') : null,
-    e('button', { style: prim, onClick: function () { meChatEvent('me-chat-book'); } }, 'Записаться'));
+    e('button', { style: prim, onClick: function () { meChatEvent('me-chat-book'); } }, 'Записаться'),
+    e('button', { style: Object.assign({}, prim, { marginTop: 8, background: 'transparent', color: c.ink, border: '1px solid ' + c.line2 }), onClick: meContactAdmin }, 'Связаться с администратором'));
 }
 window.ALoyaltyCard = ALoyaltyCard;
 
@@ -11707,30 +11837,37 @@ function AProfileCard(props) {
     e('div', { style: { display: 'flex', alignItems: 'center', gap: 13 } },
       e('div', { style: { width: 52, height: 52, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: c.invBg, color: c.invText, fontFamily: c.DISPF, fontSize: 20 } }, initial),
       e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontSize: 15, color: c.ink } }, name), phone ? e('div', { style: { fontSize: 11.5, color: c.muted, marginTop: 2 } }, phone) : null, e('div', { style: { fontSize: 10, color: c.faint, marginTop: 2 } }, 'клиент'))),
-    e('div', { style: { marginTop: 14 } }, row('Мои записи', function () { meChatEvent('me-chat-mybookings'); }), row('Баллы и кэшбэк', function () { meChatEvent('me-chat-loyalty'); }), row('Записаться', function () { meChatEvent('me-chat-book'); })));
+    e('div', { style: { marginTop: 14 } }, row('Мои записи', function () { meChatEvent('me-chat-mybookings'); }), row('Баллы и кэшбэк', function () { meChatEvent('me-chat-loyalty'); }), row('Записаться', function () { meChatEvent('me-chat-book'); }), row('Связаться с администратором', meContactAdmin)));
 }
 window.AProfileCard = AProfileCard;
 
 function AShopCard(props) {
   var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
   var st = React.useState({ note: '' }); var s = st[0], setS = st[1];
-  var abos = [{ n: 'Стрижка × 5', d: '5 мужских стрижек', p: '8 100 ₽' }, { n: 'Стрижка + борода × 4', d: '4 комплекса', p: '7 900 ₽' }, { n: 'Безлимит · месяц', d: 'стрижки 30 дней', p: '6 500 ₽' }];
-  var certs = ['2 000 ₽', '3 000 ₽', '5 000 ₽', '10 000 ₽'];
+  var catalog = window.APP_DATA || {};
+  var abos = Array.isArray(catalog.subs) ? catalog.subs : [];
+  var certs = Array.isArray(catalog.certs) ? catalog.certs : [];
+  var money = function (value) { return (Number(value) || 0).toLocaleString('ru-RU') + ' ₽'; };
   var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 14, marginTop: 10, maxWidth: 420, background: c.surf };
   var subl = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '2px 0 10px' };
-  if (!meIsLegacy()) return e('div', { style: wrap }, e('div', { style: subl }, 'Магазин'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5 } }, 'Каталог этого бизнеса пока не подключён.'));
-  var buy = function (name) { if (meIsLegacy()) { meChatSay('Хочу купить: ' + name + '. Подскажите, как оформить?'); setS({ note: 'Передал Майе — она поможет оформить.' }); } else { setS({ note: 'Оформление подключим совсем скоро — уже в работе.' }); } };
+  var openShop = function (tab) {
+    window.__meShopInitialTab = tab;
+    if (window.__meGo) window.__meGo('shop');
+    else setS({ note: 'Откройте раздел «Магазин».' });
+  };
   var activeSub = (function () { var cc = meCab(); var sb = cc.sub; return (meIsLegacy() && sb && sb[0] && sb[0] !== 'Нет активного абонемента') ? sb : null; })();
   return e('div', { style: wrap }, e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 } }, 'Магазин'),
     activeSub ? e('div', { style: { border: '1px solid ' + c.line2, borderRadius: 15, padding: '12px 15px', background: c.bg2, marginBottom: 14 } }, e('div', { style: { fontFamily: c.BODYF, fontWeight: 600, fontSize: 13.5, color: c.ink } }, activeSub[0]), e('div', { style: { fontSize: 11.5, color: c.muted, marginTop: 3 } }, 'Ваш активный абонемент · осталось ' + Math.max(0, (Number(activeSub[3]) || 0) - (Number(activeSub[2]) || 0)) + ' из ' + (Number(activeSub[3]) || 0))) : null,
     e('div', { style: subl }, 'Абонементы'),
     e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, abos.map(function (a, i) {
-      return e('div', { key: i, onClick: function () { buy(a.n); }, style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '1px solid ' + c.line2, borderRadius: 15, padding: '13px 15px', background: c.bg2 } },
-        e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: c.BODYF, fontWeight: 600, fontSize: 13.5, color: c.ink } }, a.n), e('div', { style: { fontSize: 11, color: c.muted, marginTop: 2 } }, a.d)),
-        e('div', { style: { fontSize: 14, fontWeight: 300, color: c.ink } }, a.p));
+      return e('div', { key: i, onClick: function () { openShop('subs'); }, style: { cursor: 'pointer', border: '1px solid ' + c.line2, borderRadius: 15, padding: '13px 15px', background: c.bg2 } },
+        e('div', { style: { display: 'flex', alignItems: 'baseline', gap: 10 } },
+          e('div', { style: { flex: 1, minWidth: 0, fontFamily: c.BODYF, fontWeight: 600, fontSize: 13.5, color: c.ink } }, a[0]),
+          e('div', { style: { fontSize: 10, color: c.muted, whiteSpace: 'nowrap' } }, a[1])),
+        e('div', { style: { fontSize: 11, color: c.muted, marginTop: 5 } }, 'Старший ' + money(a[3]) + ' · Топ ' + money(a[4])));
     })),
     e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '16px 0 10px' } }, 'Сертификаты'),
-    e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 } }, certs.map(function (v, i) { return e('div', { key: i, onClick: function () { buy('Сертификат ' + v); }, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + c.line2, borderRadius: 13, padding: '15px 0', fontSize: 15, fontWeight: 300, color: c.ink, background: c.bg2 } }, v); })),
+    e('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 } }, certs.map(function (v, i) { return e('div', { key: i, onClick: function () { openShop('certs'); }, style: { cursor: 'pointer', textAlign: 'center', border: '1px solid ' + c.line2, borderRadius: 13, padding: '15px 0', fontSize: 15, fontWeight: 300, color: c.ink, background: c.bg2 } }, money(v)); })),
     s.note ? e('div', { style: { fontSize: 12, color: c.faint, marginTop: 12, lineHeight: 1.5 } }, s.note) : null);
 }
 window.AShopCard = AShopCard;
@@ -11864,6 +12001,109 @@ function ATipsCard(props) {
     e('div', { style: { textAlign: 'center', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.faint, marginTop: 9 } }, 'Перевод напрямую мастеру по СБП · без комиссии'));
 }
 window.ATipsCard = ATipsCard;
+
+// Branded confirmation keeps destructive actions inside MAYA's monochrome UI
+// and prevents native confirm() from racing chat focus/history updates.
+function meConfirmDialog(options) {
+  options = options || {};
+  return new Promise(function (resolve) {
+    var dark = !!window.__meDark;
+    var settled = false;
+    var root = document.createElement('div');
+    var shade = document.createElement('div');
+    var card = document.createElement('div');
+    var title = document.createElement('div');
+    var copy = document.createElement('div');
+    var actions = document.createElement('div');
+    var cancel = document.createElement('button');
+    var confirm = document.createElement('button');
+    var previousOverflow = document.body.style.overflow;
+    root.setAttribute('data-me-confirm', String(options.kind || 'generic'));
+    root.setAttribute('role', 'presentation');
+    Object.assign(root.style, {
+      position: 'fixed', inset: '0', zIndex: '2147483646', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', padding: '24px 30px',
+      boxSizing: 'border-box', opacity: '0', transition: 'opacity .2s ease'
+    });
+    Object.assign(shade.style, {
+      position: 'absolute', inset: '0', background: 'rgba(0,0,0,.62)',
+      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)'
+    });
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'me-confirm-title');
+    Object.assign(card.style, {
+      position: 'relative', width: '100%', maxWidth: '320px', boxSizing: 'border-box',
+      padding: '26px 24px 22px', borderRadius: '24px', textAlign: 'center',
+      background: dark ? '#0c0c0c' : '#faf9f6',
+      border: '1px solid ' + (dark ? 'rgba(255,255,255,.14)' : 'rgba(13,13,13,.12)'),
+      boxShadow: '0 24px 60px rgba(0,0,0,.5)',
+      transform: 'translateY(10px) scale(.98)',
+      transition: 'transform .28s cubic-bezier(.2,.8,.2,1)'
+    });
+    title.id = 'me-confirm-title';
+    title.textContent = String(options.title || 'Подтвердить действие?');
+    Object.assign(title.style, {
+      fontFamily: 'Montserrat, sans-serif', fontWeight: '300', fontSize: '19px',
+      letterSpacing: '.01em', lineHeight: '1.3',
+      color: dark ? '#f4f0eb' : '#0d0d0d', marginBottom: '8px'
+    });
+    copy.textContent = String(options.message || 'Это действие нельзя отменить.');
+    Object.assign(copy.style, {
+      fontFamily: 'Manrope, sans-serif', fontSize: '13px', lineHeight: '1.5',
+      color: dark ? 'rgba(244,240,235,.58)' : 'rgba(13,13,13,.58)', marginBottom: '22px'
+    });
+    Object.assign(actions.style, { display: 'flex', gap: '10px' });
+    function styleButton(button, primary) {
+      button.type = 'button';
+      Object.assign(button.style, {
+        flex: '1', minHeight: '45px', padding: '0 12px', borderRadius: '999px',
+        border: primary ? '1px solid transparent' : '1px solid ' + (dark ? 'rgba(255,255,255,.14)' : 'rgba(13,13,13,.12)'),
+        background: primary ? (dark ? '#aaa8a5' : '#171717') : 'transparent',
+        color: primary ? (dark ? '#111' : '#fff') : (dark ? '#f4f0eb' : '#0d0d0d'),
+        fontFamily: 'Montserrat, sans-serif', fontWeight: '500', fontSize: '11px',
+        letterSpacing: '.12em', textTransform: 'uppercase', cursor: 'pointer',
+        outline: 'none', WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent'
+      });
+    }
+    styleButton(cancel, false);
+    styleButton(confirm, true);
+    cancel.textContent = String(options.cancelLabel || 'Нет');
+    confirm.textContent = String(options.confirmLabel || 'Удалить');
+    function finish(value) {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener('keydown', onKey);
+      root.style.opacity = '0';
+      card.style.transform = 'translateY(8px) scale(.985)';
+      setTimeout(function () {
+        try { root.remove(); } catch (e) {}
+        document.body.style.overflow = previousOverflow;
+        resolve(!!value);
+      }, 180);
+    }
+    function onKey(ev) { if (ev && ev.key === 'Escape') finish(false); }
+    shade.addEventListener('click', function () { finish(false); });
+    cancel.addEventListener('click', function () { finish(false); });
+    confirm.addEventListener('click', function () { finish(true); });
+    actions.appendChild(cancel);
+    actions.appendChild(confirm);
+    card.appendChild(title);
+    card.appendChild(copy);
+    card.appendChild(actions);
+    root.appendChild(shade);
+    root.appendChild(card);
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(root);
+    document.addEventListener('keydown', onKey);
+    requestAnimationFrame(function () {
+      root.style.opacity = '1';
+      card.style.transform = 'translateY(0) scale(1)';
+      try { cancel.focus({ preventScroll: true }); } catch (e) { try { cancel.focus(); } catch (e2) {} }
+    });
+  });
+}
+window.__meConfirm = meConfirmDialog;
 
 // =====================================================================
 // AChat — in-app AI assistant «Антон». SSE streaming (?action=chat_stream)
@@ -12358,6 +12598,7 @@ function AChat() {
     return null;
   }
   function quickTap(label) {
+    if (/связаться.*админ|позвонить.*админ/i.test(String(label || ''))) { meContactAdmin(); return; }
     var target = quickActionTarget(label);
     if (target) runChatAction(target);
     else if (/^мой постоянный мастер/i.test(String(label || ''))) {
@@ -12427,14 +12668,10 @@ function AChat() {
 	  const msgsRef = React.useRef([]); // актуальная лента для сборки истории AI-чата (≤12 сообщений)
 	  React.useEffect(function () { msgsRef.current = msgs; }, [msgs]);
 	  React.useEffect(function () {
-	    var push = function (entry) {
-	      if (chatSurface() !== 'client') return;
-	      try { userHasSentRef.current = true; } catch (e) {}
-	      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([entry]); });
-	    };
-	    var onBook = function () { push({ role: 'bot', text: 'Конечно! Подберём удобное время — выбирайте мастера 👇', widget: 'book' }); };
-	    var onMy = function () { push({ role: 'bot', text: 'Вот ваши записи 👇', widget: 'mybookings' }); };
-	    var onLoy = function () { push({ role: 'bot', text: 'Смотрим ваши баллы 👇', widget: 'loyalty' }); };
+	    var push = function (kind) { if (chatSurface() !== 'client') return; appendChatWidget(kind, '', null, true); };
+	    var onBook = function () { push('book'); };
+	    var onMy = function () { push('mybookings'); };
+	    var onLoy = function () { push('loyalty'); };
 	    var onSay = function (ev) { var txt = ev && ev.detail && ev.detail.text; if (txt) { try { send(String(txt)); } catch (e) {} } };
 	    window.addEventListener('me-chat-book', onBook);
 	    window.addEventListener('me-chat-mybookings', onMy);
@@ -13061,6 +13298,17 @@ function AChat() {
 	  const userHasSentRef = React.useRef(false); // автоскролл вниз — только ПОСЛЕ первой реальной отправки пользователем
   const chatStickRef = React.useRef(true); // остаёмся у конца, пока пользователь сам не прокрутил вверх
   const forceChatBottomRef = React.useRef(false); // одноразово после фактической отправки сообщения
+  const chatMutationRef = React.useRef({ revision: 0, blockSyncUntil: 0, clearPending: false });
+  function protectLocalChat(ms) {
+    var state = chatMutationRef.current;
+    state.revision += 1;
+    state.blockSyncUntil = Math.max(state.blockSyncUntil || 0, Date.now() + (ms || 6000));
+    return state.revision;
+  }
+  function chatSyncBlocked() {
+    var state = chatMutationRef.current;
+    return !!(state.clearPending || Date.now() < (state.blockSyncUntil || 0));
+  }
   // сжатие нижнего меню чата при скролле (как в остальном приложении)
   const [chatNavShrunk, setChatNavShrunk] = React.useState(false);
   React.useEffect(function () {
@@ -13217,6 +13465,8 @@ function AChat() {
     if (onbOnRef.current) return; // онбординг не грузит клиентскую историю поверх диалога настройки
     if (window.__ME_SAAS_CTX) return; // SaaS никогда не читает legacy-историю «Мужской Эстетики»
     opts = opts || {};
+    if (chatSyncBlocked()) return;
+    const syncRevision = chatMutationRef.current.revision;
     try {
       const ap = authPayload({});
       const resp = await fetch(CHAT_PROXY + '?action=chat_history', {
@@ -13227,10 +13477,16 @@ function AChat() {
       if (!resp.ok) return;
       const data = await resp.json();
       const loaded = filterDeletedMsgs(normalizeChatMessages(data && data.messages));
-      if ((opts.cancelled && opts.cancelled()) || !loaded.length) return;
+      if ((opts.cancelled && opts.cancelled()) || !loaded.length || syncRevision !== chatMutationRef.current.revision || chatSyncBlocked()) return;
       setMsgs(function (current) {
+        if (syncRevision !== chatMutationRef.current.revision || chatSyncBlocked()) return current;
         const currentClean = normalizeChatMessages(current);
-        if (!opts.force && currentClean.length > loaded.length) return current;
+        const loadedKinds = loaded.map(chatMessageWidgetKind).filter(Boolean);
+        const hasUnsyncedWidget = current.some(function (m) {
+          var kind = chatMessageWidgetKind(m);
+          return kind && loadedKinds.indexOf(kind) < 0;
+        });
+        if (hasUnsyncedWidget || currentClean.length > loaded.length) return current;
         if (JSON.stringify(currentClean) === JSON.stringify(loaded)) return current;
         userHasSentRef.current = loaded.some(function (m) { return m && m.role === 'user'; });
         return loaded;
@@ -13247,7 +13503,7 @@ function AChat() {
   React.useEffect(() => {
     function refreshOnReturn() {
       if (document.visibilityState && document.visibilityState !== 'visible') return;
-      if (syncChatHistoryRef.current) syncChatHistoryRef.current({ force: true });
+      if (syncChatHistoryRef.current) syncChatHistoryRef.current({});
     }
     window.addEventListener('focus', refreshOnReturn);
     document.addEventListener('visibilitychange', refreshOnReturn);
@@ -13460,7 +13716,8 @@ function AChat() {
 	      setMsgs(cur => cur.filter((_, idx) => idx !== i));
 	      return;
 	    }
-	    if (!window.confirm('Удалить это сообщение?')) return;
+	    if (!(await meConfirmDialog({ kind: 'chat-message', title: 'Удалить сообщение?', message: 'Это действие нельзя отменить.', confirmLabel: 'Удалить' }))) return;
+	    const mutationRevision = protectLocalChat(8000);
 	    markMsgDeleted(m);
 	    try {
 	      if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(8);
@@ -13484,11 +13741,13 @@ function AChat() {
 	      });
 	      if (!resp.ok) return;
 	      const data = await resp.json();
-	      if (data && Array.isArray(data.messages)) applyServerChatMessages(data, true);
+	      if (data && Array.isArray(data.messages) && mutationRevision === chatMutationRef.current.revision) applyServerChatMessages(data, true);
 	    } catch (e) {}
 	  }
 	  async function clearMayaChat() {
-	    if (!window.confirm('Удалить всю переписку с MAYA?')) return;
+	    if (!(await meConfirmDialog({ kind: 'chat-all', title: 'Удалить переписку?', message: 'Вся история чата с MAYA будет удалена.', confirmLabel: 'Удалить' }))) return;
+	    chatMutationRef.current.clearPending = true;
+	    protectLocalChat(10000);
 	    try {
 	      if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(10);
 	    } catch (e) {}
@@ -13499,7 +13758,7 @@ function AChat() {
 	      chatHistoryStorage().removeItem(chatHistoryCacheKey());
 	      chatHistoryStorage().removeItem(meChatDelStoreKey());
 	    } catch (e) {}
-	    if (window.__ME_SAAS_CTX) { setDeleteMode(false); return; }
+	    if (window.__ME_SAAS_CTX) { chatMutationRef.current.clearPending = false; protectLocalChat(1200); setDeleteMode(false); return; }
 		    try {
 		      const ap = authPayload({ delete_mode: 'all' });
 		      await fetch(CHAT_PROXY + '?action=chat_delete', {
@@ -13508,6 +13767,8 @@ function AChat() {
 		        body: JSON.stringify(ap.payload)
 		      });
 		    } catch (e) {}
+		    chatMutationRef.current.clearPending = false;
+		    protectLocalChat(1200);
 		    setDeleteMode(false);
 		  }
 		  function clearLongPress() {
@@ -13623,6 +13884,47 @@ function AChat() {
     if (data && typeof data === 'object') message.widget_data = data;
     return message;
   }
+  function chatMessageWidgetKind(message) {
+    if (!message) return '';
+    if (message.widget) return String(message.widget);
+    if (message.bookWidget) return 'book';
+    if (message.myBookings) return 'mybookings';
+    if (message.loyaltyWidget) return 'loyalty';
+    if (message.shopWidget) return 'shop';
+    if (message.profileWidget) return 'profile';
+    if (message.historyWidget) return 'history';
+    if (message.referralWidget) return 'referral';
+    if (message.notifyWidget) return 'notify';
+    if (message.tipsWidget) return 'tips';
+    return '';
+  }
+  function appendChatWidget(kind, userText, data, botOnly) {
+    if (!kind) return;
+    protectLocalChat(10000);
+    userHasSentRef.current = true;
+    forceChatBottomRef.current = true;
+    setMsgs(function (current) {
+      var clean = current.filter(function (item) { return !item.typing; });
+      var from = Math.max(0, clean.length - 8);
+      var existingIndex = -1;
+      for (var i = clean.length - 1; i >= from; i--) {
+        if (chatMessageWidgetKind(clean[i]) === kind) { existingIndex = i; break; }
+      }
+      if (existingIndex >= 0) {
+        if (!botOnly && userText) {
+          var previous = clean[existingIndex - 1];
+          if (!previous || previous.role !== 'user' || String(previous.text || '').trim() !== String(userText).trim()) {
+            clean.splice(existingIndex, 0, { role: 'user', text: String(userText) });
+          }
+        }
+        return clean;
+      }
+      var addition = [];
+      if (!botOnly && userText) addition.push({ role: 'user', text: String(userText) });
+      addition.push(chatWidgetBotBubble(kind, data));
+      return clean.concat(addition);
+    });
+  }
   async function send(textArg) {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
     var widgetText = String(textArg != null ? textArg : input).trim();
@@ -13630,23 +13932,20 @@ function AChat() {
     var directRepeat = window.__ME_SAAS_CTX && (repeatBookingIntent(widgetText) ? window.__meRepeatBookingData : (/^\s*(?:да|ага|угу|конечно|верно|точно|подходит|хочу|можно|давайте|давай\s+так|повтор(?:и|им|ить)|(?:то\s+же|тоже)\s+самое|как\s+(?:обычно|в\s+прошл\w*\s+раз))\s*[.!?]*\s*$/i.test(widgetText) ? pendingRepeat : null));
     if (directRepeat) {
       setInput('');
-      userHasSentRef.current = true;
-      forceChatBottomRef.current = true;
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: widgetText }, chatWidgetBotBubble('book', directRepeat)]); });
+      appendChatWidget('book', widgetText, directRepeat, false);
       return;
     }
     var widgetKind = chatWidgetIntent(widgetText);
     if (widgetKind) {
       setInput('');
-      userHasSentRef.current = true;
-      forceChatBottomRef.current = true;
-      setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'user', text: widgetText }, chatWidgetBotBubble(widgetKind)]); });
+      appendChatWidget(widgetKind, widgetText, null, false);
       return;
     }
     if (sending) return;
     const text = String(textArg != null ? textArg : input).trim();
     if (!text) return;
     unmarkMsgText('user', text);
+    protectLocalChat(12000);
     userHasSentRef.current = true;
     forceChatBottomRef.current = true;
     setInput('');
@@ -14806,7 +15105,7 @@ function AChat() {
     if (target.kind === 'repeat_booking') {
       if (window.__ME_SAAS_CTX && (target.data || window.__meRepeatBookingData)) {
         var repeatData = target.data || window.__meRepeatBookingData;
-        setMsgs(function (m) { return m.concat([{ role: 'user', text: 'Да, как в прошлый раз' }, chatWidgetBotBubble('book', repeatData)]); });
+        appendChatWidget('book', 'Да, как в прошлый раз', repeatData, false);
       } else {
         send('Да, как в прошлый раз');
       }
@@ -29799,9 +30098,9 @@ function ATeamChat() {
       }
     } catch (e) {}
   };
-  const deleteMsg = (m) => {
+  const deleteMsg = async (m) => {
     if (!m || !m.id || me == null || m.sender_chat_id !== me) return;
-    if (!window.confirm('Удалить сообщение?')) return;
+    if (!(await meConfirmDialog({ kind: 'team-message', title: 'Удалить сообщение?', message: 'Сообщение исчезнет из общего чата.', confirmLabel: 'Удалить' }))) return;
     const rq = window.__meAuthReq ? window.__meAuthReq({ id: m.id }) : null;
     if (!rq) return;
     tactile();
@@ -31384,7 +31683,7 @@ function AOwnerMorningBrief(props) {
     if (cycleAction.phase === 'confirm') {
       return e('div', { style: { marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + cardLine } },
         e('div', { style: { fontFamily: BODY, fontWeight: 650, fontSize: 11.3, lineHeight: 1.4, color: cardInk, marginBottom: 8 } }, 'Отправить напоминания ' + card.candidate_count + ' клиентам без скидки?'),
-        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 } },
+        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
           alertButton('Подтвердить', function () { runCycleSend(card); }, true, false),
           alertButton('Отмена', function () { setCycleAction({ phase: 'idle' }); }, false, false)));
     }
@@ -31392,7 +31691,7 @@ function AOwnerMorningBrief(props) {
       return e('div', { style: { marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + cardLine, fontFamily: BODY, fontSize: 11.3, lineHeight: 1.4, color: cycleAction.ok === false ? cardDim : cardInk } },
         cycleAction.phase === 'running' ? 'MAYA запускает сценарий…' : cycleAction.message);
     }
-    return e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginTop: 11, paddingTop: 10, borderTop: '1px solid ' + cardLine } },
+    return e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 11, paddingTop: 12, borderTop: '1px solid ' + cardLine } },
       alertButton('Написать', function () { setCycleAction({ phase: 'confirm' }); }, true, false),
       alertButton(callsOpen ? 'Скрыть номера' : 'Позвонить', function () { setCallsOpen(function (v) { return !v; }); }, false, false));
   }
@@ -31494,7 +31793,7 @@ function AOwnerMorningBrief(props) {
         })),
         e('div', { style: { display: 'flex', gap: 8 } }, arrow(-1), arrow(1))),
       // CTA: на последней странице — открыть полный брифинг; иначе «Позже»
-      e('div', { style: { display: 'flex', gap: 8 } },
+      e('div', { style: { display: 'flex', gap: 12, marginTop: isCycleAlert ? 12 : 0 } },
         isCycleAlert ? e('button', {
           type: 'button', onClick: dismiss,
           style: { flex: 1, height: 44, borderRadius: 999, background: 'transparent', color: cardInk, border: '1px solid ' + cardLine, fontFamily: BODY, fontWeight: 650, fontSize: 11, cursor: 'pointer' }
@@ -31558,7 +31857,7 @@ function AMayaIntro() {
       e('div', { style: { fontFamily: DISPLAY, fontSize: 26, fontWeight: 200, color: t.ink, marginTop: 8 } }, '1 240'),
       e('div', { style: { height: 5, borderRadius: 999, background: t.line, marginTop: 12, overflow: 'hidden' } },
         e('div', { style: { width: '62%', height: '100%', background: t.ink } })));
-    if (kind === 3) return e('div', { style: { width: 210, display: 'flex', gap: 8 } }, ['3 000', '5 000', '10 000'].map(function (a, i) {
+    if (kind === 3) return e('div', { style: { width: 210, display: 'flex', gap: 8 } }, (((window.APP_DATA && window.APP_DATA.certs) || [2000, 3000, 5000]).map(function (a) { return Number(a).toLocaleString('ru-RU'); })).map(function (a, i) {
       var on = i === 1;
       return e('div', { key: i, style: { flex: 1, textAlign: 'center', border: '1px solid ' + (on ? (dark ? 'rgba(244,240,235,0.9)' : 'rgba(24,22,15,0.9)') : t.line), borderRadius: 16, padding: '16px 0', background: on ? (dark ? 'rgba(244,240,235,0.06)' : 'rgba(24,22,15,0.05)') : 'transparent' } },
         e('div', { style: { fontFamily: DISPLAY, fontSize: 15, fontWeight: 300, color: t.ink } }, a),
