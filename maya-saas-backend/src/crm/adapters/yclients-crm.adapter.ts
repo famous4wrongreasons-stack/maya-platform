@@ -13,6 +13,9 @@ import {
   ClientLoyaltySnapshot,
   CRMAdapter,
   CrmAppointmentDetail,
+  CrmAppointmentRevenueSnapshot,
+  CrmClientRegistrySnapshot,
+  CrmClientSearchResult,
   CrmCompanyOption,
   CrmCompanyProfile,
   CrmFinancialSummary,
@@ -153,6 +156,9 @@ interface YclientsClientSearchItem {
   id?: number | string;
   name?: string;
   phone?: string;
+  visits_count?: number | string;
+  sold_amount?: number | string;
+  last_visit_date?: string | null;
 }
 
 interface YclientsLoyaltyCard {
@@ -169,6 +175,11 @@ interface YclientsFinanceTransactionApiItem {
   id?: number | string;
   amount?: number | string;
   sold_item_type?: string | null;
+  record_id?: number | string | null;
+  master_id?: number | string | null;
+  staff_id?: number | string | null;
+  master?: { id?: number | string; name?: string } | null;
+  staff?: { id?: number | string; name?: string } | null;
   account?: {
     title?: string;
     name?: string;
@@ -198,6 +209,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
   private readonly partnerToken: string;
   private readonly settings: YclientsSettings;
   private staffCatalogPromise: Promise<YclientsStaffApiItem[]> | null = null;
+  private serviceCatalogPromise: Promise<YclientsServiceApiItem[]> | null =
+    null;
+  private serviceCategoryPromise: Promise<
+    YclientsServiceCategoryApiItem[]
+  > | null = null;
 
   constructor(private readonly config: CrmAdapterConfig) {
     this.baseUrl = (
@@ -321,8 +337,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
     void tenantId;
 
     const [services, categories] = await Promise.all([
-      this.fetchServices(),
-      this.fetchServiceCategories().catch(() => []),
+      this.getServiceCatalog(),
+      this.getServiceCategoryCatalog().catch(() => []),
     ]);
     const categoryTitlesById = new Map<number, string>();
 
@@ -418,16 +434,26 @@ export class YclientsCRMAdapter implements CRMAdapter {
           );
         }
 
-        const response = await this.request<YclientsSlotApiItem[]>(
-          `book_times/${this.getCompanyId()}/${staffId}/${date}`,
-          {
-            query,
-          },
-        );
+        try {
+          const response = await this.request<YclientsSlotApiItem[]>(
+            `book_times/${this.getCompanyId()}/${staffId}/${date}`,
+            {
+              query,
+            },
+          );
 
-        return (response.data || []).map((slot) =>
-          this.mapSlot(date, staffId, slot, params.branchId),
-        );
+          return (response.data || []).map((slot) =>
+            this.mapSlot(date, staffId, slot, params.branchId),
+          );
+        } catch (error) {
+          // YClients book_times returns 422 "Дата недоступна" for days off /
+          // closed schedule. Treat as empty — otherwise available-days fails
+          // as soon as it probes the first non-working day.
+          if (this.isDateUnavailableError(error)) {
+            return [];
+          }
+          throw error;
+        }
       }),
     );
 
@@ -1181,7 +1207,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async searchClients(params: {
     tenantId: string;
     query: string;
-  }): Promise<Array<{ id: string; name: string; phone: string | null }>> {
+  }): Promise<CrmClientSearchResult[]> {
     void params.tenantId;
     const query = String(params.query ?? '').trim();
     const digits = query.replace(/\D/g, '');
@@ -1197,7 +1223,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
         {
           method: 'POST',
           body: JSON.stringify({
-            fields: ['id', 'name', 'phone'],
+            fields: [
+              'id',
+              'name',
+              'phone',
+              'visits_count',
+              'sold_amount',
+              'last_visit_date',
+            ],
             filters: [{ type: 'quick_search', state: { value: query } }],
             page: 1,
             page_size: 10,
@@ -1211,10 +1244,140 @@ export class YclientsCRMAdapter implements CRMAdapter {
           id: String(candidate.id),
           name: String(candidate.name || '').trim(),
           phone: candidate.phone ? this.normalizePhone(candidate.phone) : null,
+          visits_count: this.optionalNonNegativeInteger(candidate.visits_count),
+          sold_amount: this.optionalNonNegativeNumber(candidate.sold_amount),
+          last_visit_date: this.normalizeClientVisitDate(
+            candidate.last_visit_date,
+          ),
         }));
     } catch {
       return [];
     }
+  }
+
+  /**
+   * Выгружает весь реестр YClients без персональных полей.
+   * Любая ошибка страницы прерывает вызов: частичное число хуже честного
+   * отказа, потому что MAYA назовёт его точным.
+   */
+  async getClientRegistry(params: {
+    tenantId: string;
+  }): Promise<CrmClientRegistrySnapshot> {
+    void params.tenantId;
+    const pageSize = 200;
+    const maxPages = 500;
+    const clients = new Map<
+      string,
+      CrmClientRegistrySnapshot['clients'][number]
+    >();
+
+    for (let page = 1; page <= maxPages; page += 1) {
+      const response = await this.request<YclientsClientSearchItem[]>(
+        `company/${this.getCompanyId()}/clients/search`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            fields: ['id', 'visits_count', 'sold_amount', 'last_visit_date'],
+            filters: [],
+            page,
+            page_size: pageSize,
+          }),
+        },
+      );
+      const batch = response.data || [];
+      let added = 0;
+
+      for (const candidate of batch) {
+        if (candidate?.id === undefined || candidate.id === null) {
+          throw new Error(
+            'YClients client registry contains an item without id',
+          );
+        }
+        const externalId = String(candidate.id);
+        if (clients.has(externalId)) {
+          continue;
+        }
+        clients.set(externalId, {
+          external_id: externalId,
+          visits_count:
+            this.optionalNonNegativeInteger(candidate.visits_count) ?? 0,
+          sold_amount:
+            this.optionalNonNegativeNumber(candidate.sold_amount) ?? 0,
+          last_visit_date: this.normalizeClientVisitDate(
+            candidate.last_visit_date,
+          ),
+        });
+        added += 1;
+      }
+
+      if (batch.length < pageSize) {
+        return {
+          provider: this.config.provider,
+          clients: [...clients.values()],
+          generated_at: new Date().toISOString(),
+          complete: true,
+        };
+      }
+      if (added === 0) {
+        throw new Error('YClients client registry pagination made no progress');
+      }
+      if (page === maxPages) {
+        throw new Error('YClients client registry exceeds the safe page limit');
+      }
+    }
+
+    throw new Error('YClients client registry pagination did not complete');
+  }
+
+  /**
+   * История визитов для AI-досье / апсейла.
+   * Берём реально состоявшиеся (attendance=1), как в легаси get_client_history.
+   */
+  async getClientVisitHistory(params: {
+    tenantId: string;
+    clientId: string;
+    limit?: number;
+  }): Promise<
+    Array<{
+      start: string;
+      service_names: string[];
+      total_price: number | null;
+      attendance: number | null;
+    }>
+  > {
+    void params.tenantId;
+    const limit = Math.min(Math.max(params.limit ?? 30, 1), 50);
+    const clientId = this.toNumericId(params.clientId, 'client.id');
+    const end = new Date();
+    const start = new Date(end.getTime() - 730 * 24 * 60 * 60 * 1000);
+    const records = await this.fetchRecords({
+      startDate: start.toISOString().slice(0, 10),
+      endDate: end.toISOString().slice(0, 10),
+      clientId,
+    });
+
+    return records
+      .filter((record) => this.hasAttendance(record, 1))
+      .map((record) => {
+        const timing = this.recordTiming(record, 'Europe/Moscow');
+        const serviceNames = (record.services || [])
+          .map((service) => String(service.title || '').trim())
+          .filter(Boolean);
+        const serviceCosts = (record.services || [])
+          .map((service) => Number(service.cost ?? service.price_min))
+          .filter((cost) => Number.isFinite(cost));
+        return {
+          start: timing.start.toISOString(),
+          service_names: serviceNames,
+          total_price:
+            serviceCosts.length > 0
+              ? serviceCosts.reduce((total, cost) => total + cost, 0)
+              : null,
+          attendance: 1,
+        };
+      })
+      .sort((left, right) => left.start.localeCompare(right.start))
+      .slice(-limit);
   }
 
   async getStaffScheduleDay(params: {
@@ -1498,15 +1661,28 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const to = this.dateKeyInTimezone(params.to, params.timezone);
     const currency = this.settings.currency || 'RUB';
     const warnings: CrmFinancialSummary['warnings'] = [];
-    const [transactionsResult, staffResult] = await Promise.allSettled([
-      this.fetchFinancialTransactions(from, to),
-      this.getPayrollStaff(),
-    ]);
+    const [transactionsResult, staffResult, recordsResult] =
+      await Promise.allSettled([
+        this.fetchFinancialTransactions(from, to),
+        this.getPayrollStaff(),
+        this.fetchRecords({ startDate: from, endDate: to, withDeleted: true }),
+      ]);
 
     let revenue: CrmFinancialSummary['revenue'];
     if (transactionsResult.status === 'fulfilled') {
       try {
-        revenue = this.aggregateRevenue(transactionsResult.value, currency);
+        revenue = this.aggregateRevenue(
+          transactionsResult.value,
+          currency,
+          recordsResult.status === 'fulfilled'
+            ? this.recordStaffMap(recordsResult.value)
+            : new Map<string, string>(),
+          recordsResult.status === 'fulfilled'
+            ? this.recordServicesMap(recordsResult.value)
+            : new Map<string, Array<{ serviceId: string; name: string }>>(),
+        );
+        this.appendStaffAttributionWarning(warnings, revenue);
+        this.appendServiceAttributionWarning(warnings, revenue);
       } catch {
         revenue = this.unavailableRevenue();
         warnings.push({
@@ -1626,17 +1802,33 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const currency = this.settings.currency || 'RUB';
 
     try {
+      const [transactionsResult, recordsResult] = await Promise.allSettled([
+        this.fetchFinancialTransactions(from, to),
+        this.fetchRecords({ startDate: from, endDate: to, withDeleted: true }),
+      ]);
+      if (transactionsResult.status !== 'fulfilled') {
+        throw transactionsResult.reason;
+      }
       const revenue = this.aggregateRevenue(
-        await this.fetchFinancialTransactions(from, to),
+        transactionsResult.value,
         currency,
+        recordsResult.status === 'fulfilled'
+          ? this.recordStaffMap(recordsResult.value)
+          : new Map<string, string>(),
+        recordsResult.status === 'fulfilled'
+          ? this.recordServicesMap(recordsResult.value)
+          : new Map<string, Array<{ serviceId: string; name: string }>>(),
       );
+      const warnings: CrmRevenueSummary['warnings'] = [];
+      this.appendStaffAttributionWarning(warnings, revenue);
+      this.appendServiceAttributionWarning(warnings, revenue);
       return {
         source: 'external_crm',
         provider: this.config.provider,
         verified: revenue.verified,
         period: { from, to, timezone: params.timezone },
         revenue,
-        warnings: [],
+        warnings,
       };
     } catch {
       return {
@@ -1654,6 +1846,72 @@ export class YclientsCRMAdapter implements CRMAdapter {
         ],
       };
     }
+  }
+
+  async getAppointmentRevenue(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+    externalIds: string[];
+  }): Promise<CrmAppointmentRevenueSnapshot> {
+    void params.tenantId;
+    const requested = new Set(
+      params.externalIds.map((value) => String(value).trim()).filter(Boolean),
+    );
+    const currency = this.settings.currency || 'RUB';
+    if (requested.size === 0) {
+      return {
+        provider: this.config.provider,
+        currency,
+        verified: true,
+        requested_record_count: 0,
+        matched_record_count: 0,
+        records: [],
+      };
+    }
+
+    const from = this.dateKeyInTimezone(params.from, params.timezone);
+    const to = this.dateKeyInTimezone(params.to, params.timezone);
+    const transactions = await this.fetchFinancialTransactions(from, to);
+    const byRecord = new Map<
+      string,
+      { amountKopecks: number; transactionCount: number }
+    >();
+
+    for (const transaction of transactions) {
+      if (String(transaction.sold_item_type || '').trim() !== 'service') {
+        continue;
+      }
+      const recordId = this.optionalExternalId(transaction.record_id);
+      if (!recordId || !requested.has(recordId)) {
+        continue;
+      }
+      const amountKopecks = this.requireMoneyKopecks(transaction.amount);
+      if (amountKopecks <= 0) {
+        continue;
+      }
+      const current = byRecord.get(recordId) ?? {
+        amountKopecks: 0,
+        transactionCount: 0,
+      };
+      current.amountKopecks += amountKopecks;
+      current.transactionCount += 1;
+      byRecord.set(recordId, current);
+    }
+
+    return {
+      provider: this.config.provider,
+      currency,
+      verified: true,
+      requested_record_count: requested.size,
+      matched_record_count: byRecord.size,
+      records: [...byRecord.entries()].map(([externalId, row]) => ({
+        external_id: externalId,
+        amount_kopecks: row.amountKopecks,
+        transaction_count: row.transactionCount,
+      })),
+    };
   }
 
   async getClientLoyalty(params: {
@@ -1907,6 +2165,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
   private aggregateRevenue(
     transactions: YclientsFinanceTransactionApiItem[],
     currency: string,
+    recordStaff: Map<string, string> = new Map(),
+    recordServices: Map<
+      string,
+      Array<{ serviceId: string; name: string }>
+    > = new Map(),
   ): CrmFinancialSummary['revenue'] {
     const labels: Record<string, string> = {
       service: 'Услуги',
@@ -1919,8 +2182,22 @@ export class YclientsCRMAdapter implements CRMAdapter {
       string,
       { name: string; isCash: boolean | null; amountKopecks: number }
     >();
+    const byStaff = new Map<
+      string,
+      { amountKopecks: number; transactionCount: number }
+    >();
+    const byService = new Map<
+      string,
+      { name: string; amountKopecks: number; transactionCount: number }
+    >();
     let totalKopecks = 0;
     let transactionCount = 0;
+    let serviceTotalKopecks = 0;
+    let serviceTransactionCount = 0;
+    let attributedServiceKopecks = 0;
+    let attributedServiceTransactionCount = 0;
+    let attributedServiceBreakdownKopecks = 0;
+    let attributedServiceBreakdownTransactionCount = 0;
 
     for (const transaction of transactions) {
       const type = String(transaction.sold_item_type || '').trim();
@@ -1935,6 +2212,42 @@ export class YclientsCRMAdapter implements CRMAdapter {
       totalKopecks += amountKopecks;
       transactionCount += 1;
       byType.set(type, (byType.get(type) ?? 0) + amountKopecks);
+
+      // Выручка мастера — только подтверждённые финансовые операции услуг.
+      // Товары, сертификаты и абонементы могут быть проданы администратором и
+      // без отдельного правила не относятся к конкретному мастеру.
+      if (type === 'service') {
+        serviceTotalKopecks += amountKopecks;
+        serviceTransactionCount += 1;
+        const staffId = this.transactionStaffId(transaction, recordStaff);
+        if (staffId) {
+          const currentStaff = byStaff.get(staffId) ?? {
+            amountKopecks: 0,
+            transactionCount: 0,
+          };
+          currentStaff.amountKopecks += amountKopecks;
+          currentStaff.transactionCount += 1;
+          byStaff.set(staffId, currentStaff);
+          attributedServiceKopecks += amountKopecks;
+          attributedServiceTransactionCount += 1;
+        }
+
+        const recordId = this.optionalExternalId(transaction.record_id);
+        const services = recordId ? recordServices.get(recordId) : undefined;
+        if (services?.length === 1) {
+          const service = services[0];
+          const currentService = byService.get(service.serviceId) ?? {
+            name: service.name,
+            amountKopecks: 0,
+            transactionCount: 0,
+          };
+          currentService.amountKopecks += amountKopecks;
+          currentService.transactionCount += 1;
+          byService.set(service.serviceId, currentService);
+          attributedServiceBreakdownKopecks += amountKopecks;
+          attributedServiceBreakdownTransactionCount += 1;
+        }
+      }
 
       const accountName =
         transaction.account?.title?.trim() ||
@@ -1978,7 +2291,185 @@ export class YclientsCRMAdapter implements CRMAdapter {
           currency,
           amount_kopecks: account.amountKopecks,
         })),
+      by_staff: [...byStaff.entries()]
+        .sort((left, right) =>
+          right[1].amountKopecks !== left[1].amountKopecks
+            ? right[1].amountKopecks - left[1].amountKopecks
+            : left[0].localeCompare(right[0]),
+        )
+        .map(([staffId, value]) => ({
+          staff_id: staffId,
+          transaction_count: value.transactionCount,
+          currency,
+          amount_kopecks: value.amountKopecks,
+        })),
+      by_service: [...byService.entries()]
+        .sort((left, right) =>
+          right[1].amountKopecks !== left[1].amountKopecks
+            ? right[1].amountKopecks - left[1].amountKopecks
+            : left[1].name.localeCompare(right[1].name),
+        )
+        .map(([serviceId, value]) => ({
+          service_id: serviceId,
+          name: value.name,
+          transaction_count: value.transactionCount,
+          currency,
+          amount_kopecks: value.amountKopecks,
+        })),
+      staff_attribution_status:
+        serviceTransactionCount === 0 || attributedServiceTransactionCount === 0
+          ? 'unavailable'
+          : attributedServiceTransactionCount === serviceTransactionCount
+            ? 'available'
+            : 'partial',
+      staff_attribution_coverage_percent:
+        serviceTotalKopecks === 0
+          ? null
+          : Math.round(
+              (attributedServiceKopecks / serviceTotalKopecks) * 1_000,
+            ) / 10,
+      unattributed_service_total:
+        serviceTotalKopecks === 0
+          ? null
+          : this.money(
+              serviceTotalKopecks - attributedServiceKopecks,
+              currency,
+            ),
+      unattributed_service_transaction_count:
+        serviceTransactionCount - attributedServiceTransactionCount,
+      service_attribution_status:
+        serviceTransactionCount === 0 ||
+        attributedServiceBreakdownTransactionCount === 0
+          ? 'unavailable'
+          : attributedServiceBreakdownTransactionCount ===
+              serviceTransactionCount
+            ? 'available'
+            : 'partial',
+      service_attribution_coverage_percent:
+        serviceTotalKopecks === 0
+          ? null
+          : Math.round(
+              (attributedServiceBreakdownKopecks / serviceTotalKopecks) * 1_000,
+            ) / 10,
+      unattributed_service_breakdown_total:
+        serviceTotalKopecks === 0
+          ? null
+          : this.money(
+              serviceTotalKopecks - attributedServiceBreakdownKopecks,
+              currency,
+            ),
+      unattributed_service_breakdown_transaction_count:
+        serviceTransactionCount - attributedServiceBreakdownTransactionCount,
     };
+  }
+
+  private recordStaffMap(
+    records: YclientsRecordApiItem[],
+  ): Map<string, string> {
+    const result = new Map<string, string>();
+    for (const record of records) {
+      const recordId = this.optionalExternalId(record.id);
+      const staffId = this.optionalExternalId(
+        record.staff_id ?? record.staff?.id,
+      );
+      if (recordId && staffId) {
+        result.set(recordId, staffId);
+      }
+    }
+    return result;
+  }
+
+  private recordServicesMap(
+    records: YclientsRecordApiItem[],
+  ): Map<string, Array<{ serviceId: string; name: string }>> {
+    const result = new Map<
+      string,
+      Array<{ serviceId: string; name: string }>
+    >();
+    for (const record of records) {
+      const recordId = this.optionalExternalId(record.id);
+      if (!recordId || !Array.isArray(record.services)) {
+        continue;
+      }
+      const unique = new Map<string, { serviceId: string; name: string }>();
+      for (const service of record.services) {
+        const serviceId = this.optionalExternalId(service.id);
+        if (!serviceId) {
+          continue;
+        }
+        unique.set(serviceId, {
+          serviceId,
+          name: service.title?.trim() || 'Услуга',
+        });
+      }
+      if (unique.size > 0) {
+        result.set(recordId, [...unique.values()]);
+      }
+    }
+    return result;
+  }
+
+  private transactionStaffId(
+    transaction: YclientsFinanceTransactionApiItem,
+    recordStaff: Map<string, string>,
+  ): string | null {
+    const direct = this.optionalExternalId(
+      transaction.master?.id ??
+        transaction.staff?.id ??
+        transaction.master_id ??
+        transaction.staff_id,
+    );
+    if (direct) {
+      return direct;
+    }
+    const recordId = this.optionalExternalId(transaction.record_id);
+    return recordId ? (recordStaff.get(recordId) ?? null) : null;
+  }
+
+  private optionalExternalId(value: unknown): string | null {
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      return null;
+    }
+    const normalized = String(value).trim();
+    return normalized === '' ? null : normalized;
+  }
+
+  private appendStaffAttributionWarning(
+    warnings: Array<{ code: string; message: string }>,
+    revenue: CrmFinancialSummary['revenue'],
+  ): void {
+    if (revenue.staff_attribution_status === 'available') {
+      return;
+    }
+    warnings.push({
+      code:
+        revenue.staff_attribution_status === 'partial'
+          ? 'crm_staff_revenue_partially_attributed'
+          : 'crm_staff_revenue_unavailable',
+      message:
+        revenue.staff_attribution_status === 'partial'
+          ? `YClients связал с мастерами ${revenue.staff_attribution_coverage_percent ?? 0}% подтверждённой кассы услуг. Несвязанный остаток не распределён приблизительно.`
+          : 'YClients не связал подтверждённые операции услуг с мастерами. Касса салона доступна, поимённые суммы скрыты.',
+    });
+  }
+
+  private appendServiceAttributionWarning(
+    warnings: Array<{ code: string; message: string }>,
+    revenue: CrmFinancialSummary['revenue'],
+  ): void {
+    if (revenue.service_attribution_status === 'available') {
+      return;
+    }
+    warnings.push({
+      code:
+        revenue.service_attribution_status === 'partial'
+          ? 'crm_service_revenue_partially_attributed'
+          : 'crm_service_revenue_unavailable',
+      message:
+        revenue.service_attribution_status === 'partial'
+          ? `YClients однозначно связал с одной услугой ${revenue.service_attribution_coverage_percent ?? 0}% подтверждённой кассы услуг. Многоуслуговые записи не разделены приблизительно.`
+          : 'YClients не дал однозначной связи кассовых операций с отдельными услугами. Спрос доступен, но выручка по услугам не подменяется ценами из журнала.',
+    });
   }
 
   private async fetchStaffPayroll(
@@ -2063,6 +2554,16 @@ export class YclientsCRMAdapter implements CRMAdapter {
       total: null,
       by_type: [],
       by_account: [],
+      by_staff: [],
+      by_service: [],
+      staff_attribution_status: 'unavailable',
+      staff_attribution_coverage_percent: null,
+      unattributed_service_total: null,
+      unattributed_service_transaction_count: 0,
+      service_attribution_status: 'unavailable',
+      service_attribution_coverage_percent: null,
+      unattributed_service_breakdown_total: null,
+      unattributed_service_breakdown_transaction_count: 0,
     };
   }
 
@@ -2422,6 +2923,22 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return this.staffCatalogPromise;
   }
 
+  private getServiceCatalog(): Promise<YclientsServiceApiItem[]> {
+    if (!this.serviceCatalogPromise) {
+      this.serviceCatalogPromise = this.fetchServices();
+    }
+    return this.serviceCatalogPromise;
+  }
+
+  private getServiceCategoryCatalog(): Promise<
+    YclientsServiceCategoryApiItem[]
+  > {
+    if (!this.serviceCategoryPromise) {
+      this.serviceCategoryPromise = this.fetchServiceCategories();
+    }
+    return this.serviceCategoryPromise;
+  }
+
   private isInactiveStaff(staff: YclientsStaffApiItem): boolean {
     return (
       this.isFiredStaff(staff) || staff.hidden === true || staff.hidden === 1
@@ -2496,6 +3013,30 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return Number.isFinite(parsed) ? Math.round(parsed) : 0;
   }
 
+  private optionalNonNegativeNumber(value: unknown): number | null {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  }
+
+  private optionalNonNegativeInteger(value: unknown): number | null {
+    const parsed = this.optionalNonNegativeNumber(value);
+    return parsed === null ? null : Math.trunc(parsed);
+  }
+
+  private normalizeClientVisitDate(value: unknown): string | null {
+    const raw = typeof value === 'string' ? value.trim() : '';
+    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) {
+      return null;
+    }
+    const candidate = `${match[1]}-${match[2]}-${match[3]}`;
+    const parsed = new Date(`${candidate}T00:00:00.000Z`);
+    return Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== candidate
+      ? null
+      : candidate;
+  }
+
   private toNumericId(
     value: string | number | undefined,
     label: string,
@@ -2519,6 +3060,20 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private toYclientsDate(date: string): string {
     return date.slice(0, 10);
+  }
+
+  private isDateUnavailableError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('status 422') &&
+      (message.includes('дата недоступна') ||
+        message.includes('date is unavailable') ||
+        message.includes('date unavailable'))
+    );
   }
 
   private toYclientsDateTime(dateTime: string): string {

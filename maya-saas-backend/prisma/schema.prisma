@@ -64,68 +64,92 @@ enum CalendarSource {
 }
 
 model Tenant {
-  id                     String                          @id @default(cuid())
-  name                   String
-  slug                   String                          @unique
-  status                 TenantStatus                    @default(trial)
-  planId                 String?
-  industryPresetId       String?
-  calendarSource         CalendarSource                  @default(external)
-  defaultCurrency        String                          @default("RUB")
-  defaultTimezone        String                          @default("Europe/Moscow")
-  defaultLocale          String                          @default("ru-RU")
-  customDomain           String?                         @unique
-  subdomain              String?                         @unique
-  trialEndsAt            DateTime?
-  currentPeriodStart     DateTime?
-  currentPeriodEnd       DateTime?
-  pastDueAt              DateTime?
-  graceEndsAt            DateTime?
-  billingMethodId        String?
-  trialFullAccess        Boolean                         @default(false)
-  allowSelfRegistration  Boolean                         @default(true)
-  createdAt              DateTime                        @default(now())
-  updatedAt              DateTime                        @updatedAt
-  plan                   SubscriptionPlan?               @relation(fields: [planId], references: [id])
-  brandingSettings       BrandingSettings?
-  branches               Branch[]
-  users                  User[]
-  crmIntegration         CrmIntegration?
-  commerceIntegration    CommerceIntegration?
-  auditLogs              AuditLog[]
-  appointments           Appointment[]
-  phoneAuthCodes         PhoneAuthCode[]
-  emailAuthCodes         EmailAuthCode[]
-  authIdentities         AuthIdentity[]
-  authFlowStates         AuthFlowState[]
-  authSessions           AuthSession[]
-  authRateLimitBuckets   AuthRateLimitBucket[]
-  billingPayments        BillingPayment[]
-  memberships            Membership[]
-  entitlements           TenantEntitlement[]
-  internalServices       InternalService[]
-  internalProviders      InternalProvider[]
-  availabilityRules      InternalAvailabilityRule[]
-  availabilityExceptions InternalAvailabilityException[]
-  aiOnboardingDrafts     AiOnboardingDraft[]             @relation("AiOnboardingConfirmedTenant")
-  trialActivation        TrialActivation?
-  customerProfiles       CustomerProfile[]
-  loyaltyAccounts        LoyaltyAccount[]
-  loyaltyTransactions    LoyaltyTransaction[]
-  expenses               Expense[]
-  aiApprovalRequests     AiApprovalRequest[]
-  aiToolExecutions       AiToolExecution[]
-  aiBrainSessions        AiBrainSession[]
-  aiMemoryFacts          AiMemoryFact[]
-  aiKnowledgeSources     AiKnowledgeSource[]
-  aiKnowledgeChunks      AiKnowledgeChunk[]
-  crmStaffAccesses       CrmStaffAccess[]
-  dashboardPreferences   DashboardPreference[]
-  userMerges             UserMerge[]
-  inboxItems             InboxItem[]
-  devicePushTokens       DevicePushToken[]
+  id                             String                          @id @default(cuid())
+  name                           String
+  slug                           String                          @unique
+  status                         TenantStatus                    @default(trial)
+  planId                         String?
+  industryPresetId               String?
+  calendarSource                 CalendarSource                  @default(external)
+  defaultCurrency                String                          @default("RUB")
+  defaultTimezone                String                          @default("Europe/Moscow")
+  defaultLocale                  String                          @default("ru-RU")
+  customDomain                   String?                         @unique
+  subdomain                      String?                         @unique
+  trialEndsAt                    DateTime?
+  currentPeriodStart             DateTime?
+  currentPeriodEnd               DateTime?
+  pastDueAt                      DateTime?
+  graceEndsAt                    DateTime?
+  billingMethodId                String?
+  trialFullAccess                Boolean                         @default(false)
+  allowSelfRegistration          Boolean                         @default(true)
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @updatedAt
+  plan                           SubscriptionPlan?               @relation(fields: [planId], references: [id])
+  brandingSettings               BrandingSettings?
+  branches                       Branch[]
+  users                          User[]
+  crmIntegration                 CrmIntegration?
+  commerceIntegration            CommerceIntegration?
+  auditLogs                      AuditLog[]
+  appointments                   Appointment[]
+  phoneAuthCodes                 PhoneAuthCode[]
+  emailAuthCodes                 EmailAuthCode[]
+  authIdentities                 AuthIdentity[]
+  authFlowStates                 AuthFlowState[]
+  authSessions                   AuthSession[]
+  authRateLimitBuckets           AuthRateLimitBucket[]
+  billingPayments                BillingPayment[]
+  memberships                    Membership[]
+  entitlements                   TenantEntitlement[]
+  internalServices               InternalService[]
+  internalProviders              InternalProvider[]
+  availabilityRules              InternalAvailabilityRule[]
+  availabilityExceptions         InternalAvailabilityException[]
+  aiOnboardingDrafts             AiOnboardingDraft[]             @relation("AiOnboardingConfirmedTenant")
+  trialActivation                TrialActivation?
+  customerProfiles               CustomerProfile[]
+  loyaltyAccounts                LoyaltyAccount[]
+  loyaltyTransactions            LoyaltyTransaction[]
+  expenses                       Expense[]
+  expensePeriodDeclarations      ExpensePeriodDeclaration[]
+  aiApprovalRequests             AiApprovalRequest[]
+  aiToolExecutions               AiToolExecution[]
+  aiBrainSessions                AiBrainSession[]
+  aiMemoryFacts                  AiMemoryFact[]
+  aiKnowledgeSources             AiKnowledgeSource[]
+  aiKnowledgeChunks              AiKnowledgeChunk[]
+  crmStaffAccesses               CrmStaffAccess[]
+  dashboardPreferences           DashboardPreference[]
+  userMerges                     UserMerge[]
+  inboxItems                     InboxItem[]
+  devicePushTokens               DevicePushToken[]
+  recoveryTouchpoints            RecoveryTouchpoint[]
+  recoveryConversions            RecoveryConversion[]
+  marketingAudiences             MarketingAudience[]
+  marketingCampaigns             MarketingCampaign[]
+  appointmentNotificationSetting AppointmentNotificationSetting?
+  catalogItems                   TenantCatalogItem[]
+  referralProgram                ReferralProgram?
+  businessReviews                BusinessReview[]
 
   @@index([status, graceEndsAt])
+}
+
+/// Tenant-wide transactional appointment reminder policy. These notices are
+/// operational, not marketing: delivery is limited to the authenticated MAYA
+/// account whose phone exactly matches the CRM appointment.
+model AppointmentNotificationSetting {
+  id               String   @id @default(cuid())
+  tenantId         String   @unique
+  enabled          Boolean  @default(true)
+  leadTimesMinutes Json     @default("[1440,120]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([enabled])
 }
 
 /// Persisted white-label BrandingConfig. The database model name is retained
@@ -187,7 +211,7 @@ model Branch {
 }
 
 model User {
-  id                        String               @id @default(cuid())
+  id                        String                     @id @default(cuid())
   tenantId                  String?
   branchId                  String?
   email                     String
@@ -195,25 +219,26 @@ model User {
   encryptedName             String?
   passwordHash              String
   role                      UserRole
-  status                    UserStatus           @default(active)
-  createdAt                 DateTime             @default(now())
-  updatedAt                 DateTime             @updatedAt
-  tenant                    Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch                    Branch?              @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  status                    UserStatus                 @default(active)
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  tenant                    Tenant?                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch                    Branch?                    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
   auditLogs                 AuditLog[]
-  appointments              Appointment[]        @relation("ClientAppointments")
+  appointments              Appointment[]              @relation("ClientAppointments")
   authIdentities            AuthIdentity[]
   authSessions              AuthSession[]
   memberships               Membership[]
   internalProviders         InternalProvider[]
   customerProfiles          CustomerProfile[]
   loyaltyAccounts           LoyaltyAccount[]
-  loyaltyTransactions       LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
-  createdExpenses           Expense[]            @relation("ExpenseCreator")
-  requestedAiApprovals      AiApprovalRequest[]  @relation("AiApprovalRequester")
-  decidedAiApprovals        AiApprovalRequest[]  @relation("AiApprovalDecider")
-  aiToolExecutions          AiToolExecution[]    @relation("AiToolExecutionActor")
-  createdAiKnowledgeSources AiKnowledgeSource[]  @relation("AiKnowledgeSourceCreator")
+  loyaltyTransactions       LoyaltyTransaction[]       @relation("LoyaltyTransactionActor")
+  createdExpenses           Expense[]                  @relation("ExpenseCreator")
+  expensePeriodDeclarations ExpensePeriodDeclaration[] @relation("ExpensePeriodDeclarer")
+  requestedAiApprovals      AiApprovalRequest[]        @relation("AiApprovalRequester")
+  decidedAiApprovals        AiApprovalRequest[]        @relation("AiApprovalDecider")
+  aiToolExecutions          AiToolExecution[]          @relation("AiToolExecutionActor")
+  createdAiKnowledgeSources AiKnowledgeSource[]        @relation("AiKnowledgeSourceCreator")
   crmStaffAccesses          CrmStaffAccess[]
   inboxItems                InboxItem[]
   devicePushTokens          DevicePushToken[]
@@ -494,6 +519,70 @@ model CommerceIntegration {
   tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
+/// Tenant-owned products and sellable offers. CRM/store adapters may mirror
+/// their catalog here, while businesses without an adapter can manage it
+/// manually. `kind` is one of inventory, certificate or membership.
+model TenantCatalogItem {
+  id                String   @id @default(cuid())
+  tenantId          String
+  kind              String
+  name              String
+  description       String?
+  priceKopecks      Int?
+  currency          String   @default("RUB")
+  quantity          Int?
+  lowStockThreshold Int?
+  active            Boolean  @default(true)
+  source            String   @default("manual")
+  externalRef       String?
+  metadataJson      Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, kind, externalRef])
+  @@index([tenantId, kind, active])
+}
+
+/// One referral policy per tenant. Referral fulfillment remains a separately
+/// entitled add-on; this record is the source of truth for its public rules.
+model ReferralProgram {
+  id                   String   @id @default(cuid())
+  tenantId             String   @unique
+  enabled              Boolean  @default(false)
+  inviterRewardKopecks Int?
+  inviteeRewardKopecks Int?
+  currency             String   @default("RUB")
+  terms                String?
+  codePrefix           String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Review text can contain names and other personal data, so it is encrypted
+/// at rest. AI tools receive only rating, source, date and deterministic topic
+/// tags, never the original text.
+model BusinessReview {
+  id              String   @id @default(cuid())
+  tenantId        String
+  externalRef     String?
+  source          String
+  rating          Int
+  occurredAt      DateTime
+  encryptedText   String?
+  topicTagsJson   Json?
+  branchId        String?
+  staffExternalId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, source, externalRef])
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, rating, occurredAt])
+}
+
 model InternalService {
   id                  String                    @id @default(cuid())
   tenantId            String
@@ -674,6 +763,26 @@ model Expense {
   @@index([tenantId, source, occurredAt])
 }
 
+/// Явное подтверждение владельца, что за конкретный период все расходы,
+/// кроме системной зарплаты из CRM, уже внесены. Нулевая аренда не создаётся:
+/// собственное помещение — нормальный сценарий, а не фиктивный расход.
+model ExpensePeriodDeclaration {
+  id             String   @id @default(cuid())
+  tenantId       String
+  declaredById   String?
+  periodFromDay  String
+  periodToDay    String
+  idempotencyKey String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  declaredBy     User?    @relation("ExpensePeriodDeclarer", fields: [declaredById], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, periodFromDay, periodToDay])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, periodFromDay, periodToDay])
+}
+
 model AiApprovalRequest {
   id                  String           @id @default(cuid())
   tenantId            String
@@ -763,8 +872,8 @@ model AiBrainSession {
   @@index([tenantId, actorUserId, updatedAt])
 }
 
-/// Allowlisted, encrypted memory facts. Values are small enums such as
-/// response_detail=compact; arbitrary conversation text is not accepted.
+/// Encrypted, bounded notes explicitly saved by an authenticated person with
+/// the "REMEMBER" command. Secrets and personal/contact data are rejected.
 model AiMemoryFact {
   id             String     @id @default(cuid())
   tenantId       String
@@ -1009,6 +1118,104 @@ model Appointment {
   @@index([clientId])
   @@index([branchId])
   @@index([tenantId, staffExternalId, startAt])
+}
+
+/// Consent-safe outreach fact used by MAYA Recovered attribution.
+/// `subjectRef` is a tenant-independent HMAC of the normalized phone; raw
+/// client identity is never persisted in this subsystem.
+model RecoveryTouchpoint {
+  id                    String               @id @default(cuid())
+  tenantId              String
+  externalEventId       String
+  subjectRef            String
+  kind                  String
+  channel               String
+  status                String
+  occurredAt            DateTime
+  attributionWindowDays Int                  @default(30)
+  createdAt             DateTime             @default(now())
+  tenant                Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversions           RecoveryConversion[]
+
+  @@unique([tenantId, externalEventId])
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, subjectRef, occurredAt])
+}
+
+/// Booking attributed to an earlier MAYA touchpoint. Booked value and CRM
+/// confirmed cash are deliberately separate so reports cannot claim forecast
+/// money as received revenue.
+model RecoveryConversion {
+  id                      String             @id @default(cuid())
+  tenantId                String
+  touchpointId            String
+  externalBookingRef      String
+  crmExternalId           String?
+  subjectRef              String
+  bookedAt                DateTime
+  visitAt                 DateTime?
+  status                  String             @default("booked")
+  filledWindow            Boolean            @default(false)
+  bookedValueKopecks      Int?
+  confirmedRevenueKopecks Int?
+  currency                String             @default("RUB")
+  confirmedAt             DateTime?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  tenant                  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  touchpoint              RecoveryTouchpoint @relation(fields: [touchpointId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, externalBookingRef])
+  @@index([tenantId, bookedAt])
+  @@index([tenantId, crmExternalId])
+  @@index([tenantId, subjectRef, bookedAt])
+}
+
+/// Consent-scoped audience snapshot. Recipient ids stay server-side and are
+/// never exposed to the language model or written into an approval preview.
+model MarketingAudience {
+  id                   String              @id @default(cuid())
+  tenantId             String
+  createdByUserId      String
+  ruleJson             Json
+  recipientUserIdsJson Json
+  candidateCount       Int
+  eligibleCount        Int
+  unavailableCount     Int                 @default(0)
+  expiresAt            DateTime
+  createdAt            DateTime            @default(now())
+  tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaigns            MarketingCampaign[]
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, expiresAt])
+}
+
+/// Immutable campaign preview followed by one idempotent, owner-approved send.
+/// The message is stored as business content; recipient identity remains an
+/// internal user id list and is revalidated against consent before delivery.
+model MarketingCampaign {
+  id                   String            @id @default(cuid())
+  tenantId             String
+  createdByUserId      String
+  audienceId           String
+  channel              String            @default("app")
+  status               String            @default("draft")
+  message              String
+  recipientUserIdsJson Json
+  recipientCount       Int
+  sentCount            Int               @default(0)
+  idempotencyKey       String?
+  expiresAt            DateTime
+  sentAt               DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  tenant               Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  audience             MarketingAudience @relation(fields: [audienceId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, createdAt])
+  @@index([tenantId, audienceId])
 }
 
 /// Persistent in-app MAYA inbox (message of record for reports / alerts).

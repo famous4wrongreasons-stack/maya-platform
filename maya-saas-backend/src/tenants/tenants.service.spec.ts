@@ -24,6 +24,7 @@ type PublicTenantRecord = {
   brandingSettings: {
     appName: string | null;
     logoUrl: string | null;
+    updatedAt: Date;
     primaryColor: string | null;
     secondaryColor: string | null;
     backgroundImageUrl: string | null;
@@ -70,6 +71,7 @@ describe('TenantsService', () => {
     brandingSettings: {
       appName: 'Грива',
       logoUrl: null,
+      updatedAt: new Date('2026-07-13T12:05:00.000Z'),
       primaryColor: '#111111',
       secondaryColor: '#C6A86A',
       backgroundImageUrl: null,
@@ -200,6 +202,7 @@ describe('TenantsService', () => {
       slug: 'demo-salon',
       brand: {
         name: 'Грива',
+        logo_updated_at: '2026-07-13T12:05:00.000Z',
         address: 'Moscow, Tverskaya 1',
         phone: '+79990000000',
       },
@@ -233,6 +236,7 @@ describe('TenantsService', () => {
         socials: ['Telegram', 'TikTok'],
       },
       branding: {
+        logo_updated_at: '2026-07-13T12:05:00.000Z',
         theme_json: {
           content: {
             hero_tag: 'Добро пожаловать в «Гриву»',

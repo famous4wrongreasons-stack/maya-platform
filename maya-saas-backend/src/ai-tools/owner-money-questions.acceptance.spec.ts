@@ -77,6 +77,17 @@ interface ExpenseRow {
   updatedAt: Date;
 }
 
+interface ExpensePeriodDeclarationRow {
+  id: string;
+  tenantId: string;
+  declaredById: string | null;
+  periodFromDay: string;
+  periodToDay: string;
+  idempotencyKey: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const expenseOn = (
   id: string,
   category: string,
@@ -141,15 +152,32 @@ const JOURNAL = [
 ];
 
 function createHarness(
-  options: { expenses?: ExpenseRow[]; payrollAvailable?: boolean } = {},
+  options: {
+    expenses?: ExpenseRow[];
+    payrollAvailable?: boolean;
+    declaredPeriods?: Array<{ from: string; to: string }>;
+  } = {},
 ) {
   const store = {
     expenses: [...(options.expenses ?? [])],
+    declarations: [] as ExpensePeriodDeclarationRow[],
     approvals: [] as Record<string, any>[],
     executions: [] as Record<string, any>[],
   };
   let sequence = 0;
   const nextId = (prefix: string) => `${prefix}-${(sequence += 1)}`;
+  for (const period of options.declaredPeriods ?? []) {
+    store.declarations.push({
+      id: nextId('declaration'),
+      tenantId: 'tenant-a',
+      declaredById: owner.userId,
+      periodFromDay: period.from,
+      periodToDay: period.to,
+      idempotencyKey: null,
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+  }
   const matches = (row: ExpenseRow, where: Record<string, unknown>) =>
     Object.entries(where).every(
       ([key, value]) =>
@@ -203,6 +231,95 @@ function createHarness(
         store.expenses.push(row);
         return Promise.resolve(row);
       }),
+    },
+    expensePeriodDeclaration: {
+      findUnique: jest.fn(
+        (args: {
+          where: {
+            tenantId_periodFromDay_periodToDay: {
+              tenantId: string;
+              periodFromDay: string;
+              periodToDay: string;
+            };
+          };
+        }) => {
+          const key = args.where.tenantId_periodFromDay_periodToDay;
+          return Promise.resolve(
+            store.declarations.find(
+              (row) =>
+                row.tenantId === key.tenantId &&
+                row.periodFromDay === key.periodFromDay &&
+                row.periodToDay === key.periodToDay,
+            ) ?? null,
+          );
+        },
+      ),
+      findFirst: jest.fn((args: { where: Record<string, unknown> }) =>
+        Promise.resolve(
+          store.declarations.find((row) =>
+            Object.entries(args.where).every(
+              ([key, value]) =>
+                (row as unknown as Record<string, unknown>)[key] === value,
+            ),
+          ) ?? null,
+        ),
+      ),
+      upsert: jest.fn(
+        (args: {
+          where: {
+            tenantId_periodFromDay_periodToDay: {
+              tenantId: string;
+              periodFromDay: string;
+              periodToDay: string;
+            };
+          };
+          create: Omit<
+            ExpensePeriodDeclarationRow,
+            'id' | 'createdAt' | 'updatedAt'
+          >;
+          update: Partial<ExpensePeriodDeclarationRow>;
+        }) => {
+          const key = args.where.tenantId_periodFromDay_periodToDay;
+          const existing = store.declarations.find(
+            (row) =>
+              row.tenantId === key.tenantId &&
+              row.periodFromDay === key.periodFromDay &&
+              row.periodToDay === key.periodToDay,
+          );
+          if (existing) {
+            Object.assign(existing, args.update, { updatedAt: NOW });
+            return Promise.resolve(existing);
+          }
+          const row: ExpensePeriodDeclarationRow = {
+            id: nextId('declaration'),
+            createdAt: NOW,
+            updatedAt: NOW,
+            ...args.create,
+          };
+          store.declarations.push(row);
+          return Promise.resolve(row);
+        },
+      ),
+      deleteMany: jest.fn(
+        (args: {
+          where: {
+            tenantId: string;
+            periodFromDay: { lte: string };
+            periodToDay: { gte: string };
+          };
+        }) => {
+          const before = store.declarations.length;
+          store.declarations = store.declarations.filter(
+            (row) =>
+              !(
+                row.tenantId === args.where.tenantId &&
+                row.periodFromDay <= args.where.periodFromDay.lte &&
+                row.periodToDay >= args.where.periodToDay.gte
+              ),
+          );
+          return Promise.resolve({ count: before - store.declarations.length });
+        },
+      ),
     },
     membership: {
       findUnique: jest.fn(
@@ -498,17 +615,23 @@ function createHarness(
   );
 
   let request = 0;
-  const ask = (text: string) =>
+  const askMessages = (
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    surface: 'native' | 'web' = 'native',
+  ) =>
     tenantContext.runAsSystemTenant('tenant-a', () =>
       service.chat(owner, {
-        surface: 'native',
+        surface,
         requestId: `request_${(request += 1)}0000000`,
-        messages: [{ role: 'user', content: text }],
+        messages,
       }),
     );
+  const ask = (text: string, surface: 'native' | 'web' = 'native') =>
+    askMessages([{ role: 'user', content: text }], surface);
 
   return {
     ask,
+    askMessages,
     decide,
     store,
     runtime,
@@ -581,9 +704,13 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       '2026-08-05T09:00:00.000Z',
     ),
   ];
+  const declaredPeriods = [
+    { from: '2026-07-01', to: '2026-07-31' },
+    { from: '2026-08-01', to: '2026-08-07' },
+  ];
 
   it('«какая была прибыль в июле» — июль целиком, прибыль от кассы', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('какая была прибыль в июле');
@@ -613,15 +740,17 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     expect(answer.reply).not.toMatch(/net_profit|amount_kopecks|unavailable/);
 
     // Тот же текст, отданный как ответ модели, проходит сторож чисел.
-    const h2 = createHarness({ expenses: fullLedger });
+    const h2 = createHarness({ expenses: fullLedger, declaredPeriods });
     echoModel(h2, answer.reply);
-    const viaModel = await h2.ask('какая была прибыль в июле');
-    expect(viaModel.source).toBe('deepseek');
+    const viaModel = await h2.ask('какая была прибыль в июле', 'web');
+    // Денежный ответ может быть собран сервером: это не деградация,
+    // а защита от искажения подтверждённых цифр моделью.
+    expect(['deepseek', 'safe_fallback']).toContain(viaModel.source);
     expect(viaModel.reply).toBe(answer.reply);
   });
 
   it('«я в плюсе?» — тот же инструмент прибыли, а не обзор записей', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('я в плюсе?');
@@ -634,7 +763,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('«сколько стоит привести нового клиента» — экономика, а не прайс', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('сколько стоит привести нового клиента');
@@ -655,7 +784,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('«какая прибыль в августе» — месяц ещё идёт, и MAYA это говорит', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('какая прибыль в августе');
@@ -676,7 +805,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('«сколько стоит стрижка» по-прежнему уходит в прайс', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('сколько стоит стрижка');
@@ -685,7 +814,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('«сколько стоит стрижка» не отвечает средним чеком и не тащит прибыль', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('сколько стоит стрижка');
@@ -701,7 +830,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('прибыль через модель не подменяет выручку и не светит схему', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     h.decide.mockImplementation((input: AiCoreModelInput) => {
       if (input.toolResults?.length) {
         return Promise.resolve({
@@ -733,7 +862,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('«сколько ушло на расходники» — разрез по статьям от сервера', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('сколько ушло на расходники в июле');
@@ -746,7 +875,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
   });
 
   it('«на что больше всего тратим» — называет статью-лидера', async () => {
-    const h = createHarness({ expenses: fullLedger });
+    const h = createHarness({ expenses: fullLedger, declaredPeriods });
     silentModel(h);
 
     const answer = await h.ask('на что больше всего тратим');
@@ -757,55 +886,58 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     expect(answer.reply).toContain('Больше всего — «Аренда»');
   });
 
-  it('«запиши аренду 60 тысяч» — карточка с суммой, датой и статьёй', async () => {
-    const h = createHarness();
-    h.decide.mockImplementation((input: AiCoreModelInput) =>
-      Promise.resolve({
-        reply: 'Подготовила запись расхода.',
-        toolCall:
-          input.toolResults.length === 0
-            ? {
-                name: 'expenses.create',
-                arguments: { category: 'rent', amount_rubles: 60_000 },
-              }
-            : null,
-        provider: 'deepseek' as const,
-        model: 'test-model',
-        usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-      }),
-    );
+  it.each(['запиши аренду 60 тысяч', 'расход: аренда 60 тысяч'])(
+    '«%s» — карточка с суммой, датой и статьёй',
+    async (command) => {
+      const h = createHarness();
+      h.decide.mockImplementation((input: AiCoreModelInput) =>
+        Promise.resolve({
+          reply: 'Подготовила запись расхода.',
+          toolCall:
+            input.toolResults.length === 0
+              ? {
+                  name: 'expenses.create',
+                  arguments: { category: 'rent', amount_rubles: 60_000 },
+                }
+              : null,
+          provider: 'deepseek' as const,
+          model: 'test-model',
+          usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+        }),
+      );
 
-    const answer = await h.ask('запиши аренду 60 тысяч');
+      const answer = await h.ask(command);
 
-    expect(answer.action).toMatchObject({ status: 'approval_required' });
-    const approval = (answer.action as { approval: Record<string, any> })
-      .approval;
-    expect(approval.summary).toBe(
-      'Записать расход: Аренда — 60 000 ₽ за 07.08.2026.',
-    );
-    const preview = approval.payload_preview as Record<string, unknown>;
-    // Первые три поля карточки — сумма, дата, статья.
-    expect(
-      Object.keys(preview)
-        .filter((key) => key !== 'action')
-        .slice(0, 3),
-    ).toEqual(['sum', 'date', 'type']);
-    expect(preview.sum).toBe('60 000 ₽');
-    expect(preview.date).toBe('07.08.2026');
-    expect(preview.type).toBe('Аренда');
-    // Ничего не записано, пока человек не подтвердил.
-    expect(h.store.expenses).toHaveLength(0);
+      expect(answer.action).toMatchObject({ status: 'approval_required' });
+      const approval = (answer.action as { approval: Record<string, any> })
+        .approval;
+      expect(approval.summary).toBe(
+        'Записать расход: Аренда — 60 000 ₽ за 07.08.2026.',
+      );
+      const preview = approval.payload_preview as Record<string, unknown>;
+      // Первые три поля карточки — сумма, дата, статья.
+      expect(
+        Object.keys(preview)
+          .filter((key) => key !== 'action')
+          .slice(0, 3),
+      ).toEqual(['sum', 'date', 'type']);
+      expect(preview.sum).toBe('60 000 ₽');
+      expect(preview.date).toBe('07.08.2026');
+      expect(preview.type).toBe('Аренда');
+      // Ничего не записано, пока человек не подтвердил.
+      expect(h.store.expenses).toHaveLength(0);
 
-    const executed = (await h.approve(
-      approval.id as string,
-      approval.payload_hash as string,
-    )) as { result: { recorded: boolean; occurred_on: string } };
-    expect(executed.result.recorded).toBe(true);
-    expect(executed.result.occurred_on).toBe('2026-08-07');
-    expect(h.store.expenses).toHaveLength(1);
-  });
+      const executed = (await h.approve(
+        approval.id as string,
+        approval.payload_hash as string,
+      )) as { result: { recorded: boolean; occurred_on: string } };
+      expect(executed.result.recorded).toBe(true);
+      expect(executed.result.occurred_on).toBe('2026-08-07');
+      expect(h.store.expenses).toHaveLength(1);
+    },
+  );
 
-  it('нет аренды — MAYA называет статью и предлагает её записать', async () => {
+  it('своё помещение не блокирует расчёт и оставляет другие расходы опциональными', async () => {
     const h = createHarness({
       expenses: [
         expenseOn(
@@ -818,32 +950,98 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     });
     silentModel(h);
 
-    const answer = await h.ask('какая была прибыль в июле');
+    const answer = await h.askMessages([
+      { role: 'user', content: 'какая была прибыль в июле' },
+      {
+        role: 'assistant',
+        content:
+          'Есть ли за этот период дополнительные расходы кроме зарплаты из CRM?',
+      },
+      {
+        role: 'user',
+        content: 'У меня своё помещение, я не плачу аренду',
+      },
+    ]);
 
-    expect(answer.reply).toContain('не внесена аренда');
-    expect(answer.reply).toContain('запишу');
-    // 🔴 Зарплату вносить нельзя, и советовать это MAYA не должна.
-    expect(answer.reply).not.toContain('зарплат');
+    expect(answer.reply).toContain('аренда за этот период — 0 ₽');
+    expect(answer.reply).toContain('Прибыль уже можно считать');
+    expect(answer.reply).toContain('Если есть другие расходы');
+    expect(answer.tools_used).toEqual([]);
   });
 
-  it('аренда на рубль — это «внесено не всё», а не прибыль почти в выручку', async () => {
+  it.each([
+    'У меня нет доп расходов',
+    'Дополнительных расходов у меня нет',
+    'Кроме зарплаты расходов нет',
+    'Больше расходов нет',
+  ])(
+    'явное «%s» закрывает период и сразу считает прибыль',
+    async (confirmation) => {
+      const h = createHarness({
+        expenses: [
+          expenseOn(
+            'marketing-july',
+            'marketing',
+            4_000_000,
+            '2026-07-07T09:00:00.000Z',
+          ),
+        ],
+      });
+      silentModel(h);
+
+      const answer = await h.askMessages([
+        { role: 'user', content: 'какая была прибыль в июле' },
+        {
+          role: 'assistant',
+          content:
+            'Есть ли за этот период дополнительные расходы кроме зарплаты из CRM?',
+        },
+        { role: 'user', content: confirmation },
+      ]);
+
+      expect(answer.tools_used.map((tool) => tool.name)).toEqual([
+        'expenses.period.complete',
+      ]);
+      expect(answer.reply).toContain('Чистая прибыль: 660 000 ₽');
+      expect(h.store.declarations).toHaveLength(1);
+      expect(answer.widget).toBe('business_report');
+    },
+  );
+
+  it('валовый доход показывается без аренды и не смешивается с чистой прибылью', async () => {
+    const h = createHarness({ expenses: [] });
+    silentModel(h);
+
+    const answer = await h.ask('какая валовая прибыль в июле');
+
+    expect(answer.reply).toContain('Валовый доход до расходов: 1 200 000 ₽');
+    expect(answer.reply).toContain('Аренда здесь не нужна');
+    expect(answer.reply).toContain('прямую себестоимость услуг');
+    expect(answer.reply).not.toContain('не внесена аренда');
+    expect(answer.reply).not.toContain('Чистая прибыль:');
+  });
+
+  it('малая аренда допустима после подтверждения владельца', async () => {
     const h = createHarness({
       expenses: [
         expenseOn('rent-july', 'rent', 100, '2026-07-05T09:00:00.000Z'),
       ],
+      declaredPeriods: [{ from: '2026-07-01', to: '2026-07-31' }],
     });
     silentModel(h);
 
     const answer = await h.ask('какая была прибыль в июле');
 
-    expect(answer.reply).toContain('похоже, внесено не всё');
-    expect(answer.reply).toContain('аренда');
-    // Никакой «прибыли», близкой к выручке, в ответе нет.
-    expect(answer.reply).not.toContain('1 199 999');
+    expect(answer.reply).toContain('Чистая прибыль: 699 999 ₽');
+    expect(answer.reply).not.toContain('похоже, внесено не всё');
   });
 
   it('CRM не отдала расчёт зарплаты — MAYA не советует вносить её руками', async () => {
-    const h = createHarness({ expenses: fullLedger, payrollAvailable: false });
+    const h = createHarness({
+      expenses: fullLedger,
+      payrollAvailable: false,
+      declaredPeriods,
+    });
     silentModel(h);
 
     const answer = await h.ask('какая была прибыль в июле');
@@ -853,6 +1051,10 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     expect(answer.reply).toContain('только из расчёта CRM');
     expect(answer.reply).toContain('за месяц');
     expect(answer.reply).not.toContain('Внесите');
-    expect(answer.reply).not.toMatch(/510 000|1 200 000 ₽\./);
+    expect(answer.reply).toContain(
+      'Поступления до вычета расходов: 1 200 000 ₽',
+    );
+    expect(answer.reply).toContain('не чистая прибыль');
+    expect(answer.reply).not.toContain('510 000');
   });
 });

@@ -1,6 +1,8 @@
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 
-export function formatRubFromKopecks(kopecks: number | null | undefined): string {
+export function formatRubFromKopecks(
+  kopecks: number | null | undefined,
+): string {
   const rub = Math.round(Number(kopecks || 0) / 100);
   return `${rub.toLocaleString('ru-RU')} ₽`;
 }

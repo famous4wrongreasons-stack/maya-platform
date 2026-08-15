@@ -11887,7 +11887,7 @@ async def master_day_brief_loop(app: Application):
 
 
 async def client_retention_refresh_loop(app: Application):
-    """Обновляет тяжёлый когортный снимок отдельно от запросов Command Center."""
+    """Обновляет тяжёлые клиентские снимки отдельно от запросов чата."""
     await asyncio.sleep(120)
     while True:
         try:
@@ -11901,6 +11901,16 @@ async def client_retention_refresh_loop(app: Application):
             )
         except Exception as e:
             logger.error(f"client retention refresh loop: {e}")
+        try:
+            registry = await asyncio.to_thread(owner_ai.client_registry_analysis, force=True)
+            logger.info(
+                "client registry refreshed: complete=%s total=%s loyal=%s",
+                registry.get("complete"),
+                registry.get("total_clients"),
+                registry.get("loyal_clients"),
+            )
+        except Exception as e:
+            logger.error(f"client registry refresh loop: {e}")
         await asyncio.sleep(21600)
 
 

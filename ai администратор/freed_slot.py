@@ -26,6 +26,7 @@ from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
+from maya_recovery_bridge import publish_recovery_touchpoint
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -219,6 +220,7 @@ def find_candidates(staff_id: int, slot_dt: datetime) -> list[dict]:
         candidates.append({
             "client_id": client_id,
             "chat_id": chat_id,
+            "phone": phone,
             "name": _first_name(client.get("name")),
             "score": score,
         })
@@ -396,6 +398,12 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
             await app.bot.send_message(chat, text, parse_mode="Markdown", reply_markup=kb)
             database.log_freed_slot_offer(client_id=w["client_id"], staff_id=staff_id,
                                           slot_datetime=slot_iso, action="sent")
+            await publish_recovery_touchpoint(
+                phone=phone,
+                kind="freed_slot",
+                source_seed=f"waitlist:{w['client_id']}:{staff_id}:{slot_iso}",
+                attribution_window_days=7,
+            )
             notified_chats.add(chat); wl_ids.append(w["id"]); wl_sent += 1; sent += 1
             wl_notified_info.append((name, phone))
             logger.info(f"freed_slot: ⏳✅ лист ожидания {name} (chat={chat}, slot={slot_dt})")
@@ -438,6 +446,12 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
             await app.bot.send_message(c["chat_id"], text, parse_mode="Markdown", reply_markup=kb)
             database.log_freed_slot_offer(client_id=c["client_id"], staff_id=staff_id,
                                           slot_datetime=slot_iso, action="sent")
+            await publish_recovery_touchpoint(
+                phone=c.get("phone") or "",
+                kind="freed_slot",
+                source_seed=f"cycle:{c['client_id']}:{staff_id}:{slot_iso}",
+                attribution_window_days=7,
+            )
             notified_chats.add(c["chat_id"]); sent += 1; cyc_sent += 1
             logger.info(f"freed_slot: ✅ {c['name']} (chat_id={c['chat_id']}, score={c['score']}, slot={slot_dt})")
         except (Forbidden, BadRequest) as e:

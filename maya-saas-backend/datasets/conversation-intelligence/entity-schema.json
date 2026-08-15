@@ -1,0 +1,1146 @@
+{
+  "version": "maya-ci-entities/1",
+  "shape": "flat_object",
+  "additional_entities_allowed": true,
+  "privacy_policy": "Only synthetic values or tenant-scoped opaque references belong in model context. Raw phone numbers, emails, credentials and direct client identifiers are forbidden.",
+  "entities": [
+    {
+      "name": "absence_period",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "1_months",
+        "2_months"
+      ],
+      "required_by_intents": [
+        "clients.inactive_cohort"
+      ],
+      "optional_for_intents": [
+        "clients.retention_summary"
+      ]
+    },
+    {
+      "name": "amount",
+      "value_type": "number",
+      "sensitivity": "financial",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        5000,
+        5100
+      ],
+      "required_by_intents": [
+        "finance.record_expense"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "appointment",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "next_own_appointment"
+      ],
+      "required_by_intents": [
+        "booking.cancel_own",
+        "booking.reschedule_own"
+      ],
+      "optional_for_intents": [
+        "booking.get_employee",
+        "loyalty.spend_options"
+      ]
+    },
+    {
+      "name": "approved_preview",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "current_preview"
+      ],
+      "required_by_intents": [
+        "marketing.send_campaign"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "assignee",
+      "value_type": "string",
+      "sensitivity": "tenant_scoped_reference",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "Илья",
+        "Александр"
+      ],
+      "required_by_intents": [
+        "tasks.create"
+      ],
+      "optional_for_intents": [
+        "tasks.list"
+      ]
+    },
+    {
+      "name": "audience",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "inactive_60_days",
+        "at_risk_clients"
+      ],
+      "required_by_intents": [
+        "marketing.preview_campaign"
+      ],
+      "optional_for_intents": [
+        "general.write_text"
+      ]
+    },
+    {
+      "name": "audience_rule",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "inactive_60_days",
+        "at_risk"
+      ],
+      "required_by_intents": [
+        "marketing.find_audience"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "available_time",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "17:30",
+        "18:30"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "loyalty.spend_options"
+      ]
+    },
+    {
+      "name": "branch",
+      "value_type": "string",
+      "sensitivity": "tenant_scoped_reference",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "основной филиал",
+        "филиал в центре"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "analytics.anomaly_detection",
+        "analytics.business_summary",
+        "analytics.recommendations",
+        "analytics.root_cause",
+        "booking.create_own",
+        "booking.find_availability",
+        "booking.group_or_simultaneous",
+        "certificates.catalog",
+        "clients.at_risk",
+        "clients.high_value",
+        "clients.inactive_cohort",
+        "clients.no_show_risk",
+        "clients.retention_summary",
+        "company.business_hours",
+        "company.public_info",
+        "employees.list_public",
+        "employees.performance_team",
+        "employees.retention",
+        "employees.revenue",
+        "employees.salary",
+        "employees.workload",
+        "finance.average_check",
+        "finance.compare_periods",
+        "finance.expenses",
+        "finance.profit",
+        "finance.record_expense",
+        "finance.revenue",
+        "finance.revenue_forecast",
+        "inventory.stock",
+        "kpi.team",
+        "payments.breakdown",
+        "payments.refunds",
+        "products.sales",
+        "reports.daily_briefing",
+        "reports.recovered",
+        "reviews.analyze_topics",
+        "reviews.list_recent",
+        "reviews.rating_trend",
+        "sales.summary",
+        "schedule.find_free_employee",
+        "schedule.get_team",
+        "services.count",
+        "services.list",
+        "services.popularity",
+        "services.price",
+        "services.revenue",
+        "subscriptions.catalog"
+      ]
+    },
+    {
+      "name": "branches",
+      "value_type": "string[]",
+      "sensitivity": "tenant_scoped_reference",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        [
+          "основной филиал"
+        ],
+        [
+          "филиал в центре"
+        ]
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "branches.compare"
+      ]
+    },
+    {
+      "name": "capability",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "staff_performance",
+        "retention_analysis"
+      ],
+      "required_by_intents": [
+        "settings.update"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "category",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "rent",
+        "supplies"
+      ],
+      "required_by_intents": [
+        "finance.record_expense"
+      ],
+      "optional_for_intents": [
+        "finance.expenses",
+        "services.list"
+      ]
+    },
+    {
+      "name": "channel",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "push",
+        "email"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "marketing.draft_message",
+        "support.contact_admin"
+      ]
+    },
+    {
+      "name": "client_reference",
+      "value_type": "string",
+      "sensitivity": "tenant_sensitive",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "synthetic-client-0",
+        "synthetic-client-1"
+      ],
+      "required_by_intents": [
+        "clients.dossier",
+        "loyalty.adjust"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "comparison_period",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "previous_period",
+        "last_year"
+      ],
+      "required_by_intents": [
+        "finance.compare_periods"
+      ],
+      "optional_for_intents": [
+        "analytics.root_cause"
+      ]
+    },
+    {
+      "name": "constraint",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "after_18_00",
+        "same_employee"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "general.strategy_advice"
+      ]
+    },
+    {
+      "name": "content_goal",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "retention_message"
+      ],
+      "required_by_intents": [
+        "general.write_text"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "date",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "tomorrow"
+      ],
+      "required_by_intents": [
+        "booking.create_own",
+        "finance.record_expense"
+      ],
+      "optional_for_intents": [
+        "booking.get_employee",
+        "booking.repeat_last",
+        "company.business_hours",
+        "reports.daily_briefing"
+      ]
+    },
+    {
+      "name": "date_or_period",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "today",
+        "yesterday"
+      ],
+      "required_by_intents": [
+        "booking.find_availability",
+        "booking.group_or_simultaneous",
+        "schedule.find_free_employee",
+        "schedule.get_team",
+        "schedule.update_employee"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "deadline",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "today_18_00",
+        "tomorrow_12_00"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "tasks.create"
+      ]
+    },
+    {
+      "name": "delta",
+      "value_type": "number",
+      "sensitivity": "financial",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        100,
+        150
+      ],
+      "required_by_intents": [
+        "loyalty.adjust"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "description",
+      "value_type": "string",
+      "sensitivity": "tenant_sensitive",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "Проверить операционный вопрос без персональных данных"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "finance.record_expense"
+      ]
+    },
+    {
+      "name": "employee",
+      "value_type": "string",
+      "sensitivity": "tenant_scoped_reference",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "Артём",
+        "Максим"
+      ],
+      "required_by_intents": [
+        "schedule.update_employee"
+      ],
+      "optional_for_intents": [
+        "booking.create_own",
+        "booking.find_availability",
+        "clients.at_risk",
+        "clients.inactive_cohort",
+        "clients.no_show_risk",
+        "employees.revenue",
+        "employees.salary",
+        "kpi.team",
+        "reviews.analyze_topics",
+        "reviews.list_recent",
+        "schedule.get_team",
+        "services.count",
+        "services.duration",
+        "services.list",
+        "services.popularity",
+        "services.price"
+      ]
+    },
+    {
+      "name": "enabled",
+      "value_type": "boolean",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        true,
+        false
+      ],
+      "required_by_intents": [
+        "notifications.appointments",
+        "settings.update"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "feature",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "daily_briefing",
+        "retention_analysis"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "support.capabilities"
+      ]
+    },
+    {
+      "name": "field",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "business_name",
+        "working_hours"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "company.public_info"
+      ]
+    },
+    {
+      "name": "goal",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "increase_retention",
+        "fill_empty_slots"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "analytics.recommendations",
+        "general.strategy_advice"
+      ]
+    },
+    {
+      "name": "goal_or_audience",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "return_inactive_clients",
+        "fill_empty_slots"
+      ],
+      "required_by_intents": [
+        "marketing.draft_message"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "length",
+      "value_type": "number",
+      "sensitivity": "operational",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        30,
+        45
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "general.write_text"
+      ]
+    },
+    {
+      "name": "low_stock_only",
+      "value_type": "boolean",
+      "sensitivity": "operational",
+      "resolution": "Normalize explicit affirmation or negation; do not infer a side effect from silence.",
+      "examples": [
+        true,
+        false
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "inventory.stock"
+      ]
+    },
+    {
+      "name": "loyalty_threshold",
+      "value_type": "number",
+      "sensitivity": "operational",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        5,
+        6
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "clients.retention_summary"
+      ]
+    },
+    {
+      "name": "max_recipients",
+      "value_type": "number",
+      "sensitivity": "operational",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        50,
+        75
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "marketing.find_audience"
+      ]
+    },
+    {
+      "name": "message",
+      "value_type": "string",
+      "sensitivity": "tenant_sensitive",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "Персональное предложение без персональных данных"
+      ],
+      "required_by_intents": [
+        "marketing.preview_campaign"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "metric",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "revenue",
+        "retention"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "analytics.anomaly_detection",
+        "branches.compare",
+        "clients.high_value",
+        "employees.performance_own",
+        "employees.performance_team",
+        "finance.compare_periods",
+        "kpi.team"
+      ]
+    },
+    {
+      "name": "metric_or_problem",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "revenue_decline",
+        "retention_decline"
+      ],
+      "required_by_intents": [
+        "analytics.root_cause"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "minimum_visits",
+      "value_type": "number",
+      "sensitivity": "operational",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        2,
+        3
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "marketing.find_audience"
+      ]
+    },
+    {
+      "name": "new_date",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "next_friday"
+      ],
+      "required_by_intents": [
+        "booking.reschedule_own"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "new_employee",
+      "value_type": "string",
+      "sensitivity": "tenant_scoped_reference",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "Максим",
+        "Илья"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "booking.reschedule_own"
+      ]
+    },
+    {
+      "name": "new_time",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "18:00",
+        "19:00"
+      ],
+      "required_by_intents": [
+        "booking.reschedule_own"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "nominal",
+      "value_type": "number",
+      "sensitivity": "financial",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        1000,
+        2000
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "certificates.catalog"
+      ]
+    },
+    {
+      "name": "offer",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "care_service",
+        "next_visit_bonus"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "marketing.draft_message"
+      ]
+    },
+    {
+      "name": "party_size",
+      "value_type": "number",
+      "sensitivity": "operational",
+      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
+      "examples": [
+        2,
+        3
+      ],
+      "required_by_intents": [
+        "booking.group_or_simultaneous"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "payment_method",
+      "value_type": "string",
+      "sensitivity": "financial",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "card",
+        "cash"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "finance.revenue",
+        "payments.breakdown"
+      ]
+    },
+    {
+      "name": "period",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "today",
+        "yesterday"
+      ],
+      "required_by_intents": [
+        "branches.compare",
+        "clients.count_new",
+        "clients.count_period",
+        "employees.revenue",
+        "employees.salary",
+        "finance.average_check",
+        "finance.compare_periods",
+        "finance.confirm_expenses_complete",
+        "finance.expenses",
+        "finance.profit",
+        "finance.revenue",
+        "payments.breakdown",
+        "payments.refunds",
+        "products.sales",
+        "sales.summary",
+        "services.count"
+      ],
+      "optional_for_intents": [
+        "analytics.anomaly_detection",
+        "analytics.business_summary",
+        "analytics.recommendations",
+        "analytics.root_cause",
+        "booking.list_own",
+        "clients.high_value",
+        "clients.no_show_risk",
+        "employees.performance_own",
+        "employees.performance_team",
+        "employees.retention",
+        "employees.workload",
+        "kpi.team",
+        "reports.recovered",
+        "reviews.analyze_topics",
+        "reviews.list_recent",
+        "reviews.rating_trend",
+        "schedule.get_own",
+        "services.popularity",
+        "services.revenue",
+        "tasks.list"
+      ]
+    },
+    {
+      "name": "previous_frequency",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "every_30_days",
+        "every_45_days"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "clients.inactive_cohort"
+      ]
+    },
+    {
+      "name": "priority",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "high",
+        "normal"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "tasks.create"
+      ]
+    },
+    {
+      "name": "product",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "средство для домашнего ухода"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "inventory.stock",
+        "products.sales"
+      ]
+    },
+    {
+      "name": "profit_type",
+      "value_type": "string",
+      "sensitivity": "financial",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "gross_profit",
+        "operating_profit"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "finance.profit"
+      ]
+    },
+    {
+      "name": "provider",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "yclients",
+        "altegio"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "support.integration_status"
+      ]
+    },
+    {
+      "name": "rating",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "low",
+        "high"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "reviews.list_recent"
+      ]
+    },
+    {
+      "name": "reason",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "service_recovery"
+      ],
+      "required_by_intents": [
+        "loyalty.adjust"
+      ],
+      "optional_for_intents": [
+        "support.contact_admin"
+      ]
+    },
+    {
+      "name": "referral",
+      "value_type": "string",
+      "sensitivity": "tenant_sensitive",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "synthetic-referral-0",
+        "synthetic-referral-1"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "referrals.status"
+      ]
+    },
+    {
+      "name": "requested_fields",
+      "value_type": "string[]",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        [
+          "name",
+          "price"
+        ],
+        [
+          "name",
+          "duration"
+        ]
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "clients.dossier"
+      ]
+    },
+    {
+      "name": "role",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "administrator",
+        "employee"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "support.capabilities"
+      ]
+    },
+    {
+      "name": "sale_type",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "service",
+        "product"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "sales.summary"
+      ]
+    },
+    {
+      "name": "scenario",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "late_cancellation",
+        "empty_slot"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "finance.revenue_forecast"
+      ]
+    },
+    {
+      "name": "section",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "finance",
+        "schedule"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "settings.read"
+      ]
+    },
+    {
+      "name": "service",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        "мужская стрижка",
+        "моделирование бороды"
+      ],
+      "required_by_intents": [
+        "services.duration",
+        "services.price"
+      ],
+      "optional_for_intents": [
+        "clients.at_risk",
+        "clients.inactive_cohort",
+        "employees.list_public",
+        "services.count",
+        "services.revenue",
+        "subscriptions.catalog"
+      ]
+    },
+    {
+      "name": "services",
+      "value_type": "string[]",
+      "sensitivity": "operational",
+      "resolution": "Resolve only inside the current tenant catalog. Ask one clarification when more than one record matches.",
+      "examples": [
+        [
+          "мужская стрижка"
+        ],
+        [
+          "моделирование бороды"
+        ]
+      ],
+      "required_by_intents": [
+        "booking.create_own",
+        "booking.group_or_simultaneous"
+      ],
+      "optional_for_intents": [
+        "booking.find_availability",
+        "schedule.find_free_employee"
+      ]
+    },
+    {
+      "name": "simultaneous",
+      "value_type": "boolean",
+      "sensitivity": "operational",
+      "resolution": "Normalize explicit affirmation or negation; do not infer a side effect from silence.",
+      "examples": [
+        true,
+        false
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "booking.group_or_simultaneous"
+      ]
+    },
+    {
+      "name": "status",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "confirmed",
+        "completed"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "booking.list_own",
+        "tasks.list"
+      ]
+    },
+    {
+      "name": "target_period",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "end_of_month",
+        "next_month"
+      ],
+      "required_by_intents": [
+        "finance.revenue_forecast"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "task",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "проверить свободные окна"
+      ],
+      "required_by_intents": [
+        "tasks.create"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "task_id",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "task-1",
+        "task-2"
+      ],
+      "required_by_intents": [
+        "tasks.complete"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "time",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "17:00",
+        "18:00"
+      ],
+      "required_by_intents": [
+        "booking.create_own"
+      ],
+      "optional_for_intents": [
+        "booking.repeat_last"
+      ]
+    },
+    {
+      "name": "time_of_day",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "evening",
+        "afternoon"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "booking.find_availability",
+        "schedule.find_free_employee"
+      ]
+    },
+    {
+      "name": "timing",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize against the tenant timezone; retain the original phrase and never invent a calendar date.",
+      "examples": [
+        "24_hours_before"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "notifications.appointments"
+      ]
+    },
+    {
+      "name": "tone",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "calm",
+        "friendly"
+      ],
+      "required_by_intents": [],
+      "optional_for_intents": [
+        "general.write_text",
+        "marketing.draft_message"
+      ]
+    },
+    {
+      "name": "topic",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "ltv",
+        "average_check"
+      ],
+      "required_by_intents": [
+        "general.explain_term"
+      ],
+      "optional_for_intents": []
+    },
+    {
+      "name": "working_hours",
+      "value_type": "string",
+      "sensitivity": "operational",
+      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
+      "examples": [
+        "10:00-20:00",
+        "12:00-21:00"
+      ],
+      "required_by_intents": [
+        "schedule.update_employee"
+      ],
+      "optional_for_intents": []
+    }
+  ]
+}

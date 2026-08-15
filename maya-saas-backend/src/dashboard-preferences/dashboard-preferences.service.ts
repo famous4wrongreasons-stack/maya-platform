@@ -222,6 +222,36 @@ export class DashboardPreferencesService {
     );
   }
 
+  async filterUsersWithAssistantCapability(
+    tenantId: string,
+    userIds: string[],
+    capability: AssistantCapability,
+  ): Promise<string[]> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const uniqueUserIds = [...new Set(userIds.filter(Boolean))];
+    if (uniqueUserIds.length === 0) return [];
+
+    const preferences = await this.prisma.dashboardPreference.findMany({
+      where: {
+        tenantId: scopedTenantId,
+        userId: { in: uniqueUserIds },
+        section: ASSISTANT_SECTION,
+      },
+      select: { userId: true, configJson: true },
+    });
+    const configs = new Map(
+      preferences.map((preference) => [
+        preference.userId,
+        this.normalizeAssistantConfig(preference.configJson),
+      ]),
+    );
+
+    return uniqueUserIds.filter((userId) =>
+      (configs.get(userId) ?? this.normalizeAssistantConfig(undefined))
+        .enabled_capabilities.includes(capability),
+    );
+  }
+
   async updateAssistant(
     tenantId: string,
     userId: string,

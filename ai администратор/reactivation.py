@@ -24,6 +24,7 @@ from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
+from maya_recovery_bridge import publish_recovery_touchpoint
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,7 @@ def find_dormant_clients() -> list[dict]:
         candidates.append({
             "client_id": client["id"],
             "chat_id": chat_id,
+            "phone": phone,
             "name": _first_name(client.get("name")),
             "last_master": staff.get("name") or "вашему мастеру",
             "last_staff_id": staff.get("id"),
@@ -205,6 +207,14 @@ async def run_reactivation_job(app: Application) -> dict:
                 reply_markup=keyboard,
             )
             database.log_reactivation(c["client_id"], "sent")
+            await publish_recovery_touchpoint(
+                phone=c.get("phone") or "",
+                kind="reactivation",
+                source_seed=(
+                    f"{c['client_id']}:{c.get('last_date') or date.today().isoformat()}"
+                ),
+                attribution_window_days=30,
+            )
             sent += 1
             logger.info(
                 f"  ✅ {c['name']} (chat_id={c['chat_id']}, "

@@ -107,6 +107,53 @@ def _load_claude_module():
 
 
 class ScheduleRegressionTests(unittest.TestCase):
+    def test_company_records_snapshot_empty_result_is_complete(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        api._get = lambda endpoint, params=None: {"data": []}
+
+        snapshot = api.get_company_records_snapshot("2026-08-14", "2026-08-14")
+
+        self.assertTrue(snapshot["success"])
+        self.assertTrue(snapshot["complete"])
+        self.assertEqual(snapshot["records"], [])
+        self.assertIsNone(snapshot["error"])
+
+    def test_company_records_snapshot_paginates_and_deduplicates(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+
+        first = [{"id": idx} for idx in range(1, 201)]
+        second = [{"id": 200}, {"id": 201}]
+        api._get = lambda endpoint, params=None: {
+            "data": first if int((params or {}).get("page") or 1) == 1 else second
+        }
+
+        snapshot = api.get_company_records_snapshot("2026-08-01", "2026-08-31")
+
+        self.assertTrue(snapshot["success"])
+        self.assertTrue(snapshot["complete"])
+        self.assertEqual(len(snapshot["records"]), 201)
+        self.assertEqual(snapshot["pages_loaded"], 2)
+
+    def test_company_records_snapshot_does_not_hide_partial_failure(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        first = [{"id": idx} for idx in range(1, 201)]
+
+        def _get(_endpoint, params=None):
+            if int((params or {}).get("page") or 1) == 1:
+                return {"data": first}
+            raise RuntimeError("upstream unavailable")
+
+        api._get = _get
+        snapshot = api.get_company_records_snapshot("2026-08-01", "2026-08-31")
+
+        self.assertFalse(snapshot["success"])
+        self.assertFalse(snapshot["complete"])
+        self.assertEqual(len(snapshot["records"]), 200)
+        self.assertEqual(snapshot["error"], "yclients_records_unavailable")
+
     def test_schedule_reference_distinguishes_off_from_missing_master(self):
         yclients = _load_yclients_module()
         payload = {
@@ -154,6 +201,45 @@ class ScheduleRegressionTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertFalse(rows[0]["is_working"])
         self.assertTrue(rows[0]["schedule_unknown"])
+
+    def test_exact_master_schedule_returns_confirmed_working_hours(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        api.get_staff_schedule = lambda *args, **kwargs: [{
+            "date": "2026-08-14",
+            "is_working": True,
+            "slots": [
+                {"from": "10:00:00", "to": "14:00:00"},
+                {"from": "15:00:00", "to": "20:00:00"},
+            ],
+        }]
+
+        result = api.get_master_schedule_for_date(7, "2026-08-14")
+
+        self.assertTrue(result["success"])
+        self.assertEqual(result["status"], "working")
+        self.assertEqual(result["hours"], "10:00–14:00, 15:00–20:00")
+
+    def test_who_works_keeps_unknown_schedule_separate_from_days_off(self):
+        yclients = _load_yclients_module()
+        api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
+        api.get_working_masters = lambda _date: [
+            {
+                "name": "Стас Мосин",
+                "is_working": True,
+                "schedule_unknown": False,
+                "work_slots": [{"from": "10:00", "to": "20:00"}],
+            },
+            {"name": "Илья", "is_working": False, "schedule_unknown": False},
+            {"name": "Максим", "is_working": False, "schedule_unknown": True},
+        ]
+
+        result = api.who_works_on("2026-08-14")
+
+        self.assertEqual(result["working"], [{"name": "Стас Мосин", "hours": "10:00–20:00"}])
+        self.assertEqual(result["off"], ["Илья"])
+        self.assertEqual(result["unknown"], ["Максим"])
+        self.assertTrue(result["schedule_unknown"])
 
     def test_get_available_slots_filters_overlap_with_real_records(self):
         yclients = _load_yclients_module()

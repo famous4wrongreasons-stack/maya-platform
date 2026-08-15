@@ -1,4 +1,6 @@
 import type { AiToolSurface } from './ai-tool.types';
+import type { UserRole } from '../common/domain.enums';
+import type { ConversationSemanticPlan } from '../conversation-intelligence/conversation-intelligence.types';
 
 export type AiCoreMessageRole = 'assistant' | 'user';
 export type AiCoreProvider = 'deepseek' | 'openai';
@@ -25,6 +27,8 @@ export interface AiCoreToolResult {
 export interface AiCoreModelInput {
   surface: AiToolSurface;
   persona: AiCorePersona;
+  /** Effective tenant role used by the immutable tool runtime for this turn. */
+  principalRole?: UserRole;
   messages: AiCoreMessage[];
   tools: AiCoreToolDescriptor[];
   toolResults: AiCoreToolResult[];
@@ -36,12 +40,21 @@ export interface AiCoreModelInput {
    * динамику становился неотвечаемым.
    */
   nowUtc?: string;
+  /** IANA timezone resolved from the authenticated tenant, never from client input. */
+  businessTimezone?: string;
+  /**
+   * Explicit notes saved by the authenticated user for this tenant. These are
+   * untrusted context, never a source of verified financial or CRM figures.
+   */
+  memoryFacts?: string[];
   /**
    * Замечания предыдущего прохода: числа, которых нет в результатах
    * инструментов. Даём модели переписать ответ вместо того, чтобы молча
    * заменить его шаблоном.
    */
   corrections?: string[];
+  /** Validated plan carried between tool iterations of one compound request. */
+  conversationPlan?: ConversationSemanticPlan | null;
 }
 
 export interface AiCoreModelDecision {
@@ -50,6 +63,8 @@ export interface AiCoreModelDecision {
     name: string;
     arguments: Record<string, unknown>;
   } | null;
+  /** Server-validated meaning of the request; never an authorization source. */
+  semanticPlan?: ConversationSemanticPlan | null;
   provider: AiCoreProvider;
   model: string;
   usage: {

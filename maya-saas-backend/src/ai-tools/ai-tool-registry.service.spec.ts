@@ -174,15 +174,12 @@ describe('AiToolRegistryService', () => {
   it('requires a human confirmation for a money-writing expense tool', () => {
     const definition = service.get('expenses.create');
     expect(definition.riskTier).toBe('high_write');
-    expect(definition.approvalPolicy).toBe('owner');
+    expect(definition.approvalPolicy).toBe('actor');
     expect(definition.idempotency).toBe('required');
     expect(definition.requiredFeatures).toEqual(['expenses.core']);
     expect(definition.allowedRoles).toEqual([
       UserRole.TENANT_OWNER,
       UserRole.BUSINESS_OWNER,
-      UserRole.TENANT_ADMIN,
-      UserRole.ADMINISTRATOR,
-      UserRole.ACCOUNTANT,
     ]);
     const properties = definition.inputSchema.properties as Record<
       string,
@@ -310,6 +307,56 @@ describe('AiToolRegistryService', () => {
     });
   });
 
+  it('validates an exact staff schedule read without accepting tenant scope from the model', () => {
+    expect(
+      service.validateArguments('staff.schedule.read', {
+        date: '2026-08-06',
+        staff_id: '1461615',
+      }),
+    ).toEqual({ date: '2026-08-06', staff_id: '1461615' });
+    expect(
+      service.validateArguments('staff.schedule.read', {
+        date: '2026-08-06',
+      }),
+    ).toEqual({ date: '2026-08-06' });
+    expect(() =>
+      service.validateArguments('staff.schedule.read', {
+        date: '2026-08-06',
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('staff.schedule.read', {
+        date: 'tomorrow',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates an exact operations journal read without accepting tenant scope from the model', () => {
+    expect(
+      service.validateArguments('operations.journal.read', {
+        date: '2026-08-06',
+        staff_id: '1461615',
+      }),
+    ).toEqual({ date: '2026-08-06', staff_id: '1461615' });
+    expect(
+      service.validateArguments('operations.journal.read', {
+        date: '2026-08-06',
+      }),
+    ).toEqual({ date: '2026-08-06' });
+    expect(() =>
+      service.validateArguments('operations.journal.read', {
+        date: '2026-08-06',
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('operations.journal.read', {
+        date: 'tomorrow',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
   it('validates an immutable staff schedule preview', () => {
     const currentSlots = [{ from: '10:00', to: '20:00' }];
     const currentRevision = staffScheduleRevision(
@@ -368,6 +415,79 @@ describe('AiToolRegistryService', () => {
         current_revision: '0'.repeat(64),
         current_slots: [{ from: '10:00', to: '20:00' }],
         slots: [],
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates bounded group availability without accepting tenant scope', () => {
+    expect(
+      service.validateArguments('booking.group-availability.read', {
+        date: '2026-08-20',
+        party_size: 3,
+        mode: 'nearby',
+        max_gap_minutes: 45,
+        service_ids: ['15'],
+        branch_id: '1',
+      }),
+    ).toEqual({
+      date: '2026-08-20T00:00:00.000Z',
+      party_size: 3,
+      mode: 'nearby',
+      max_gap_minutes: 45,
+      service_ids: ['15'],
+      branch_id: '1',
+    });
+    expect(() =>
+      service.validateArguments('booking.group-availability.read', {
+        date: '2026-08-20',
+        party_size: 1,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('booking.group-availability.read', {
+        date: '2026-08-20',
+        party_size: 2,
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates privacy-safe review and catalog reads', () => {
+    expect(
+      service.validateArguments('reviews.list.read', {
+        days: 30,
+        rating: 2,
+        limit: 10,
+        branch_id: 'branch-1',
+      }),
+    ).toEqual({
+      days: 30,
+      rating: 2,
+      limit: 10,
+      branch_id: 'branch-1',
+    });
+    expect(
+      service.validateArguments('reviews.analyze', {
+        mode: 'topics',
+        days: 365,
+      }),
+    ).toEqual({ mode: 'topics', days: 365 });
+    expect(
+      service.validateArguments('inventory.stock.read', {
+        low_stock_only: true,
+      }),
+    ).toEqual({ low_stock_only: true });
+    expect(service.validateArguments('commerce.certificates.read', {})).toEqual(
+      {},
+    );
+    expect(() =>
+      service.validateArguments('reviews.analyze', {
+        mode: 'raw_text',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('commerce.memberships.read', {
+        tenant_id: 'other-tenant',
       }),
     ).toThrow(BadRequestException);
   });

@@ -74,6 +74,34 @@ type UserWithRelations = User & {
   memberships?: MembershipProjection[];
 };
 
+type AppMode = 'platform' | 'owner' | 'staff' | 'client';
+
+type AppAccessMode = {
+  mode: AppMode;
+  access: 'granted' | 'preview';
+  tenant_id: string | null;
+  role: string;
+  profile_linked: boolean;
+};
+
+type AppAccessContract = {
+  schema_version: 1;
+  default_mode: AppMode | null;
+  available_modes: AppAccessMode[];
+  can_switch_mode: boolean;
+  chooser_required: boolean;
+};
+
+type StaffProfileProjection =
+  | { linked: false; source: null; title: null }
+  | {
+      linked: true;
+      source: 'crm';
+      title: string | null;
+      external_staff_id: string;
+    }
+  | { linked: true; source: 'internal'; title: string | null };
+
 export type CrmTeamMemberAssignment = {
   externalStaffId: string;
   displayName: string;
@@ -88,6 +116,29 @@ const CRM_OWNER_ROLES = [
   UserRole.BUSINESS_OWNER,
   UserRole.TENANT_ADMIN,
 ];
+
+const APP_PLATFORM_ROLES = new Set<string>([
+  UserRole.PLATFORM_OWNER,
+  UserRole.PLATFORM_ADMIN,
+]);
+
+const APP_OWNER_ROLES = new Set<string>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+]);
+
+const APP_STAFF_ROLES = new Set<string>([
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.ACCOUNTANT,
+  UserRole.STAFF,
+]);
+
+const APP_CLIENT_ROLES = new Set<string>([UserRole.CUSTOMER, UserRole.CLIENT]);
 
 @Injectable()
 export class UsersService {
@@ -1385,7 +1436,7 @@ export class UsersService {
     email: string | null;
     role: string;
   }): boolean {
-    if (serialized.role === UserRole.PLATFORM_OWNER) {
+    if (serialized.role === 'platform_owner') {
       return true;
     }
 
@@ -1404,6 +1455,81 @@ export class UsersService {
     );
   }
 
+  private buildAppAccessContract(
+    serialized: {
+      tenant_id: string | null;
+      role: string;
+      is_platform_owner: boolean;
+    },
+    staffProfileLinked: boolean,
+    clientIdentityLinked: boolean,
+  ): AppAccessContract {
+    const modes: AppAccessMode[] = [];
+    const tenantId = serialized.tenant_id;
+    const role = String(serialized.role || '').toLowerCase();
+
+    const addMode = (
+      mode: AppMode,
+      access: 'granted' | 'preview',
+      profileLinked = false,
+    ) => {
+      if (modes.some((candidate) => candidate.mode === mode)) {
+        return;
+      }
+      modes.push({
+        mode,
+        access,
+        tenant_id: mode === 'platform' ? null : tenantId,
+        role,
+        profile_linked: profileLinked,
+      });
+    };
+
+    if (serialized.is_platform_owner || APP_PLATFORM_ROLES.has(role)) {
+      addMode('platform', 'granted');
+    }
+
+    if (tenantId && APP_OWNER_ROLES.has(role)) {
+      addMode('owner', 'granted');
+    }
+
+    if (tenantId && (APP_STAFF_ROLES.has(role) || staffProfileLinked)) {
+      addMode('staff', 'granted', staffProfileLinked);
+    }
+
+    if (tenantId && APP_CLIENT_ROLES.has(role)) {
+      addMode('client', 'granted', clientIdentityLinked);
+    } else if (
+      tenantId &&
+      (APP_OWNER_ROLES.has(role) || APP_STAFF_ROLES.has(role))
+    ) {
+      // Business users may open only their own customer cabinet. The linked
+      // social identity proves control of the same tenant-scoped phone that
+      // customer endpoints use for exact CRM lookup.
+      addMode(
+        'client',
+        clientIdentityLinked ? 'granted' : 'preview',
+        clientIdentityLinked,
+      );
+    }
+
+    const defaultMode =
+      modes.find((candidate) => candidate.mode === 'platform')?.mode ??
+      modes.find((candidate) => candidate.mode === 'owner')?.mode ??
+      modes.find((candidate) => candidate.mode === 'staff')?.mode ??
+      modes.find((candidate) => candidate.mode === 'client')?.mode ??
+      null;
+    const canSwitchMode = modes.length > 1;
+
+    return {
+      schema_version: 1,
+      default_mode: defaultMode,
+      available_modes: modes,
+      can_switch_mode: canSwitchMode,
+      chooser_required: canSwitchMode,
+    };
+  }
+
   async serializeCurrentUser(user: UserWithRelations) {
     const serialized = {
       ...this.serializeUser(user),
@@ -1412,54 +1538,94 @@ export class UsersService {
     serialized.is_platform_owner = this.isPlatformFounder(serialized);
     const tenantId = serialized.tenant_id;
 
-    if (!tenantId) {
-      return {
-        ...serialized,
-        staff_profile: { linked: false, source: null, title: null },
-      };
-    }
+    let staffProfile: StaffProfileProjection = {
+      linked: false,
+      source: null,
+      title: null,
+    };
+    let clientIdentityLinked = false;
+    let authProvider: string | null = null;
+    let avatarUrl: string | null = null;
 
-    const crmStaffProfile = await this.prisma.crmStaffAccess.findFirst({
-      where: {
-        tenantId,
-        userId: serialized.id,
-        status: 'active',
-      },
-      select: { title: true, externalStaffId: true },
-    });
+    if (tenantId) {
+      const verifiedClientIdentity = serialized.phone
+        ? await this.prisma.authIdentity.findFirst({
+            where: {
+              tenantId,
+              userId: serialized.id,
+              phone: serialized.phone,
+            },
+            select: { id: true },
+          })
+        : null;
+      clientIdentityLinked = Boolean(verifiedClientIdentity);
 
-    if (crmStaffProfile) {
-      return {
-        ...serialized,
-        staff_profile: {
+      // The avatar belongs to the signed-in MAYA user, not to a phone string.
+      // Keep customer-cabinet linking strict by phone above, while resolving
+      // Telegram profile data by the already verified tenant-scoped identity.
+      const telegramProfileIdentity = await this.prisma.authIdentity.findFirst({
+        where: {
+          tenantId,
+          userId: serialized.id,
+          provider: 'telegram',
+        },
+        select: { id: true, provider: true, profileJson: true },
+        orderBy: { updatedAt: 'desc' },
+      });
+      authProvider = telegramProfileIdentity?.provider ?? null;
+      avatarUrl = this.socialProfileAvatarUrl(
+        telegramProfileIdentity?.profileJson,
+      );
+
+      const crmStaffProfile = await this.prisma.crmStaffAccess.findFirst({
+        where: {
+          tenantId,
+          userId: serialized.id,
+          status: 'active',
+        },
+        select: { title: true, externalStaffId: true },
+      });
+
+      if (crmStaffProfile) {
+        staffProfile = {
           linked: true,
           source: 'crm',
           title: crmStaffProfile.title,
           // Свой идентификатор в CRM: по нему кабинет отбирает из журнала дня
           // ИМЕННО свои визиты. Это собственный id пользователя, не чужие ПД.
           external_staff_id: crmStaffProfile.externalStaffId,
-        },
-      };
-    }
+        };
+      } else {
+        const internalStaffProfile =
+          await this.prisma.internalProvider.findFirst({
+            where: {
+              tenantId,
+              userId: serialized.id,
+              active: true,
+            },
+            select: { title: true },
+          });
 
-    const internalStaffProfile = await this.prisma.internalProvider.findFirst({
-      where: {
-        tenantId,
-        userId: serialized.id,
-        active: true,
-      },
-      select: { title: true },
-    });
-
-    return {
-      ...serialized,
-      staff_profile: internalStaffProfile
-        ? {
+        if (internalStaffProfile) {
+          staffProfile = {
             linked: true,
             source: 'internal',
             title: internalStaffProfile.title,
-          }
-        : { linked: false, source: null, title: null },
+          };
+        }
+      }
+    }
+
+    return {
+      ...serialized,
+      auth_provider: authProvider,
+      avatar_url: avatarUrl,
+      staff_profile: staffProfile,
+      app_access: this.buildAppAccessContract(
+        serialized,
+        staffProfile.linked,
+        clientIdentityLinked,
+      ),
     };
   }
 
@@ -1492,6 +1658,23 @@ export class UsersService {
     }
 
     return normalizeRussianPhone(phone);
+  }
+
+  private socialProfileAvatarUrl(profileJson: unknown): string | null {
+    if (!profileJson || typeof profileJson !== 'object') return null;
+
+    const profile = profileJson as Record<string, unknown>;
+    const raw = [profile.picture, profile.avatar_url, profile.photo_url].find(
+      (value) => typeof value === 'string' && value.trim().length > 0,
+    );
+    if (typeof raw !== 'string' || raw.length > 2048) return null;
+
+    try {
+      const url = new URL(raw);
+      return url.protocol === 'https:' ? url.toString() : null;
+    } catch {
+      return null;
+    }
   }
 
   private normalizeOptionalName(name?: string | null): string | null {

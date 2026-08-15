@@ -34,6 +34,7 @@ from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
+from maya_recovery_bridge import publish_recovery_touchpoint
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -182,6 +183,7 @@ def find_due_clients() -> list[dict]:
         candidates.append({
             "client_id": client["id"],
             "chat_id": chat_id,
+            "phone": phone,
             "name": _first_name(client.get("name")),
             "cycle_days": cycle,
             "last_visit": last_visit.isoformat(),
@@ -528,6 +530,12 @@ async def run_cycle_reminder_job(app: Application) -> dict:
                 avg_cycle_days=c["cycle_days"],
                 predicted_visit=c["predicted_visit"],
                 action="sent",
+            )
+            await publish_recovery_touchpoint(
+                phone=c.get("phone") or "",
+                kind="cycle",
+                source_seed=f"{c['client_id']}:{c['predicted_visit']}",
+                attribution_window_days=21,
             )
             sent += 1
             contact_statuses[int(c["client_id"])] = "sent"

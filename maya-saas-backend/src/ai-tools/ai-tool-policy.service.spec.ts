@@ -52,15 +52,18 @@ describe('AiToolPolicyService', () => {
     expect(tools.map((tool) => tool.name)).toEqual([
       'catalog.services.read',
       'booking.availability.read',
+      'booking.group-availability.read',
       'appointments.own.list',
       'loyalty.own.read',
       // Список мастеров гостю нужен: вся аналитика для клиентских ролей
       // закрыта, и без него вопрос «какие у вас мастера» не заземляется ничем.
       // Имён он не отдаёт — только ярлыки specialist_N и специализацию.
       'catalog.staff.read',
+      'booking.upsell.suggest',
       'appointments.own.cancel',
       'appointments.own.create',
       'appointments.own.reschedule',
+      'company.business-hours.read',
     ]);
     expect(tools.some((tool) => tool.name === 'analytics.business.query')).toBe(
       false,

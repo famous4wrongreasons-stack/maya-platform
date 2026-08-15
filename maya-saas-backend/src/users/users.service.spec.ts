@@ -104,12 +104,17 @@ describe('UsersService', () => {
       (args: Record<string, unknown>) => Promise<{ count: number }>
     > = jest.fn().mockResolvedValue({ count: 1 });
     const authIdentityFindFirstMock: jest.MockedFunction<
-      (args: Record<string, unknown>) => Promise<{ id: string } | null>
+      (args: Record<string, unknown>) => Promise<{
+        id: string;
+        provider?: string;
+        profileJson?: unknown;
+      } | null>
     > = jest.fn().mockResolvedValue(null);
     const crmStaffAccessFindFirstMock: jest.MockedFunction<
-      (
-        args: Record<string, unknown>,
-      ) => Promise<{ title: string | null } | null>
+      (args: Record<string, unknown>) => Promise<{
+        title: string | null;
+        externalStaffId?: string;
+      } | null>
     > = jest.fn().mockResolvedValue(null);
     const internalProviderFindFirstMock: jest.MockedFunction<
       (
@@ -192,7 +197,10 @@ describe('UsersService', () => {
       mocks: { crmStaffAccessFindFirstMock, internalProviderFindFirstMock },
     } = createService();
 
-    crmStaffAccessFindFirstMock.mockResolvedValue({ title: 'Барбер' });
+    crmStaffAccessFindFirstMock.mockResolvedValue({
+      title: 'Барбер',
+      externalStaffId: 'staff-1',
+    });
     const owner = tenantUser({ role: UserRole.TENANT_OWNER });
     owner.memberships![0].role = UserRole.TENANT_OWNER;
 
@@ -203,6 +211,36 @@ describe('UsersService', () => {
       linked: true,
       source: 'crm',
       title: 'Барбер',
+      external_staff_id: 'staff-1',
+    });
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'owner',
+      available_modes: [
+        {
+          mode: 'owner',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: false,
+        },
+        {
+          mode: 'staff',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: true,
+        },
+        {
+          mode: 'client',
+          access: 'preview',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: false,
+        },
+      ],
+      can_switch_mode: true,
+      chooser_required: true,
     });
     expect(internalProviderFindFirstMock).not.toHaveBeenCalled();
   });
@@ -219,6 +257,152 @@ describe('UsersService', () => {
       linked: false,
       source: null,
       title: null,
+    });
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'owner',
+      available_modes: [
+        {
+          mode: 'owner',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: false,
+        },
+        {
+          mode: 'client',
+          access: 'preview',
+          tenant_id: 'tenant-1',
+          role: UserRole.TENANT_OWNER,
+          profile_linked: false,
+        },
+      ],
+      can_switch_mode: true,
+      chooser_required: true,
+    });
+  });
+
+  it('grants an owner their own client cabinet after verified social phone linking', async () => {
+    const {
+      service,
+      mocks: { authIdentityFindFirstMock },
+    } = createService();
+    authIdentityFindFirstMock.mockResolvedValue({ id: 'identity-1' });
+    const owner = tenantUser({ role: UserRole.TENANT_OWNER });
+    owner.memberships![0].role = UserRole.TENANT_OWNER;
+
+    const result = await service.serializeCurrentUser(owner);
+
+    expect(authIdentityFindFirstMock).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
+        phone: '+79990000000',
+      },
+      select: { id: true },
+    });
+    expect(result.app_access.available_modes).toContainEqual({
+      mode: 'client',
+      access: 'granted',
+      tenant_id: 'tenant-1',
+      role: UserRole.TENANT_OWNER,
+      profile_linked: true,
+    });
+  });
+
+  it('returns the verified Telegram avatar to the current signed-in user', async () => {
+    const {
+      service,
+      mocks: { authIdentityFindFirstMock },
+    } = createService();
+    authIdentityFindFirstMock
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 'identity-1',
+        provider: 'telegram',
+        profileJson: {
+          picture: 'https://t.me/i/userpic/320/avatar.jpg',
+        },
+      });
+
+    const result = await service.serializeCurrentUser(tenantUser());
+
+    expect(result.auth_provider).toBe('telegram');
+    expect(result.avatar_url).toBe('https://t.me/i/userpic/320/avatar.jpg');
+    expect(authIdentityFindFirstMock).toHaveBeenLastCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
+        provider: 'telegram',
+      },
+      select: { id: true, provider: true, profileJson: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+  });
+
+  it('does not expose an insecure social profile image URL', async () => {
+    const {
+      service,
+      mocks: { authIdentityFindFirstMock },
+    } = createService();
+    authIdentityFindFirstMock
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 'identity-1',
+        provider: 'telegram',
+        profileJson: { picture: 'http://example.com/avatar.jpg' },
+      });
+
+    const result = await service.serializeCurrentUser(tenantUser());
+
+    expect(result.auth_provider).toBe('telegram');
+    expect(result.avatar_url).toBeNull();
+  });
+
+  it('grants a client only the signed client mode', async () => {
+    const { service } = createService();
+
+    const result = await service.serializeCurrentUser(tenantUser());
+
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'client',
+      available_modes: [
+        {
+          mode: 'client',
+          access: 'granted',
+          tenant_id: 'tenant-1',
+          role: UserRole.CLIENT,
+          profile_linked: false,
+        },
+      ],
+      can_switch_mode: false,
+      chooser_required: false,
+    });
+  });
+
+  it('grants a tenant-free platform owner only the platform mode', async () => {
+    const { service } = createService();
+    const platformOwner = baseUser();
+    platformOwner.tenantId = null;
+    platformOwner.role = UserRole.PLATFORM_OWNER;
+
+    const result = await service.serializeCurrentUser(platformOwner);
+
+    expect(result.app_access).toEqual({
+      schema_version: 1,
+      default_mode: 'platform',
+      available_modes: [
+        {
+          mode: 'platform',
+          access: 'granted',
+          tenant_id: null,
+          role: UserRole.PLATFORM_OWNER,
+          profile_linked: false,
+        },
+      ],
+      can_switch_mode: false,
+      chooser_required: false,
     });
   });
 

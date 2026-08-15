@@ -57,4 +57,21 @@ describe('ReportingPeriodResolver', () => {
       ),
     ).toBe('август 2026 по сегодня');
   });
+
+  it('adds a previous-period comparison for a weak-spots review', () => {
+    expect(
+      ReportingPeriodResolver.comparison(
+        'На что стоит обратить внимание? Где у нас слабые места',
+      ),
+    ).toBe('previous_period');
+  });
+
+  it('keeps a comprehensive review in a short follow-up', () => {
+    expect(
+      ReportingPeriodResolver.comparison(
+        'Ты по максимуму должна срез дать',
+        'На что стоит обратить внимание? Где у нас слабые места',
+      ),
+    ).toBe('previous_period');
+  });
 });

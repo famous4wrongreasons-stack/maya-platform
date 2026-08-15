@@ -63,6 +63,122 @@ describe('CrmService', () => {
     expect(JSON.stringify(result)).not.toContain('tenant-secret');
   });
 
+  it('refreshes the public tenant logo from a healthy CRM connection', async () => {
+    const now = new Date('2026-08-11T12:00:00.000Z');
+    const integration = {
+      id: 'crm-1',
+      tenantId: 'tenant-1',
+      provider: CrmProvider.YCLIENTS,
+      encryptedApiToken: 'encrypted',
+      baseUrl: null,
+      status: CrmIntegrationStatus.ACTIVE,
+      settingsJson: { companyId: 42 },
+      verifiedAt: now,
+      lastCheckedAt: now,
+      lastSyncAt: now,
+      lastErrorCode: null,
+      lastErrorAt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const brandingUpsert = jest.fn().mockResolvedValue({});
+    const crmUpdate = jest.fn().mockResolvedValue(integration);
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {
+        crmIntegration: {
+          findUnique: jest.fn().mockResolvedValue(integration),
+          update: crmUpdate,
+        },
+        crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
+        brandingSettings: {
+          findUnique: jest.fn().mockResolvedValue({ logoUrl: null }),
+          upsert: brandingUpsert,
+        },
+        $transaction: jest.fn((run: (tx: object) => unknown) =>
+          Promise.resolve(run({})),
+        ),
+      } as unknown as PrismaService,
+      {
+        decrypt: jest.fn().mockReturnValue('tenant-token'),
+      } as unknown as EncryptionService,
+      {
+        create: jest.fn().mockReturnValue({
+          testConnection: jest.fn().mockResolvedValue({ ok: true }),
+          getStaff: jest.fn().mockResolvedValue([]),
+          getCompanyProfile: jest.fn().mockResolvedValue({
+            id: '42',
+            title: 'Мужская Эстетика',
+            address: 'Ставрополь',
+            logo_url: 'https://cdn.example.test/new-logo.png',
+            timezone: null,
+            schedule: null,
+          }),
+        }),
+      },
+      tenantContext,
+    );
+
+    await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.recheckIntegration('tenant-1'),
+    );
+
+    expect(brandingUpsert).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-1' },
+      create: {
+        tenantId: 'tenant-1',
+        appName: 'Мужская Эстетика',
+        logoUrl: 'https://cdn.example.test/new-logo.png',
+      },
+      update: { logoUrl: 'https://cdn.example.test/new-logo.png' },
+    });
+    expect(crmUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not overwrite a logo uploaded explicitly in MAYA', async () => {
+    const brandingUpsert = jest.fn();
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {
+        brandingSettings: {
+          findUnique: jest.fn().mockResolvedValue({
+            logoUrl: '/api/public/uploads/tenant-logos/tenant-1-manual.png',
+          }),
+          upsert: brandingUpsert,
+        },
+      } as unknown as PrismaService,
+      {} as EncryptionService,
+      {} as CrmAdapterFactory,
+      tenantContext,
+    );
+    const syncLogo = service as unknown as {
+      syncTenantBrandingFromCrm: (
+        tenantId: string,
+        profile: {
+          id: string;
+          title: string;
+          address: string | null;
+          logo_url: string | null;
+          timezone: string | null;
+          schedule: string | null;
+        },
+      ) => Promise<void>;
+    };
+
+    await tenantContext.runAsSystemTenant('tenant-1', () =>
+      syncLogo.syncTenantBrandingFromCrm('tenant-1', {
+        id: '42',
+        title: 'Мужская Эстетика',
+        address: null,
+        logo_url: 'https://cdn.example.test/crm-logo.png',
+        timezone: null,
+        schedule: null,
+      }),
+    );
+
+    expect(brandingUpsert).not.toHaveBeenCalled();
+  });
+
   it('allows provider mock without an explicit apiToken', async () => {
     const checkedAt = new Date('2026-07-16T12:00:00.000Z');
     jest.useFakeTimers({ now: checkedAt });
@@ -208,6 +324,54 @@ describe('CrmService', () => {
       ForbiddenException,
     );
     expect(crmFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  it('reuses the tenant adapter while the CRM integration is unchanged', async () => {
+    const now = new Date('2026-08-11T12:00:00.000Z');
+    const integration = {
+      id: 'crm-1',
+      tenantId: 'tenant-1',
+      provider: CrmProvider.YCLIENTS,
+      encryptedApiToken: 'encrypted',
+      baseUrl: null,
+      status: CrmIntegrationStatus.ACTIVE,
+      settingsJson: { companyId: 42 },
+      verifiedAt: now,
+      lastCheckedAt: now,
+      lastSyncAt: now,
+      lastErrorCode: null,
+      lastErrorAt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const getServices = jest.fn().mockResolvedValue([]);
+    const create = jest.fn().mockReturnValue({ getServices });
+    const tenantContext = new TenantContextService();
+    const service = new CrmService(
+      {
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            calendarSource: 'external',
+          }),
+        },
+        crmIntegration: {
+          findUnique: jest.fn().mockResolvedValue(integration),
+        },
+      } as unknown as PrismaService,
+      {
+        decrypt: jest.fn().mockReturnValue('tenant-token'),
+      } as unknown as EncryptionService,
+      { create },
+      tenantContext,
+    );
+
+    await tenantContext.runAsSystemTenant('tenant-1', async () => {
+      await service.getServices('tenant-1');
+      await service.getServices('tenant-1');
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(getServices).toHaveBeenCalledTimes(2);
   });
 
   it('rejects a scaffolded provider before storing its credentials', async () => {

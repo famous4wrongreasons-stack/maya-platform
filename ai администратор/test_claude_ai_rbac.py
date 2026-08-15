@@ -87,6 +87,28 @@ def _load_claude_ai():
         def get_masters(self, *args, **kwargs):
             return [{"id": 7, "name": "Стас Мосин"}]
 
+        def get_master_schedule_for_date(self, staff_id, date_str):
+            return {
+                "success": True,
+                "status": "working",
+                "schedule_unknown": False,
+                "staff_id": staff_id,
+                "date": date_str,
+                "is_working": True,
+                "slots": [{"from": "10:00", "to": "20:00"}],
+                "hours": "10:00–20:00",
+            }
+
+        def who_works_on(self, date_str):
+            return {
+                "date": date_str,
+                "working": [{"name": "Стас Мосин", "hours": "10:00–20:00"}],
+                "off": [],
+                "unknown": [],
+                "schedule_unknown": False,
+                "working_count": 1,
+            }
+
         def change_staff_day_schedule(self, **kwargs):
             return {
                 "success": True,
@@ -152,11 +174,38 @@ def _load_claude_ai():
             "status": "done" if kwargs.get("action") == "complete" else "pending",
         },
     }
-    fake_owner_ai.master_performance = lambda: {
+    fake_owner_ai.master_performance = lambda **kwargs: {
         "top_profit_master": {"name": "Мастер 1", "profit_after_salary_rub": 26000},
         "top_gross_master": {"name": "Мастер 1", "gross_rub": 40000},
         "note": "Вклад после процента.",
     }
+    fake_owner_ai.client_registry_analysis = lambda **kwargs: {
+        "success": True,
+        "complete": True,
+        "total_cards": 4000,
+        "loyal_clients": 1800,
+    }
+    fake_owner_ai.return_candidates = lambda **kwargs: {
+        "success": True,
+        "candidates": [],
+    }
+    fake_owner_ai.empty_windows = lambda **kwargs: {
+        "success": True,
+        "windows": [],
+    }
+    fake_owner_ai.expiring_assets = lambda **kwargs: {
+        "success": True,
+        "items": [],
+    }
+    fake_owner_ai.service_insights = lambda **kwargs: {
+        "success": True,
+        "services": [],
+    }
+    fake_owner_ai.risk_signals = lambda **kwargs: {
+        "success": True,
+        "risks": [],
+    }
+    fake_owner_ai.money_opportunities = lambda **kwargs: []
     fake_owner_ai.owner_action_payload = lambda task, **kwargs: {
         "kind": "run_job",
         "job": task,
@@ -1060,6 +1109,132 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("apply=false", prompt)
         self.assertIn("apply=true", prompt)
         self.assertIn("Применить?", prompt)
+
+    def test_schedule_question_is_grounded_and_resolves_inflected_name(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [{
+            "role": "user",
+            "content": "Какое расписание у Стаса Мосина 14.08.2026?",
+        }]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "staff", user_id=948205934,
+        )
+        tool_use = claude_ai._schedule_preflight_tool_use(messages, requirement)
+
+        self.assertIsNotNone(requirement)
+        self.assertEqual(requirement.domain, "staff_schedule")
+        self.assertEqual(tool_use.name, "get_master_schedule")
+        self.assertEqual(tool_use.input["staff_name"], "Стас Мосин")
+        self.assertEqual(tool_use.input["date"], "2026-08-14")
+
+    def test_tomorrow_schedule_date_is_resolved_deterministically(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        resolved = claude_ai._schedule_query_date(
+            "Какое расписание у Стаса завтра?",
+            claude_ai.date(2026, 8, 13),
+        )
+
+        self.assertEqual(resolved, claude_ai.date(2026, 8, 14))
+
+    def test_exact_schedule_answer_bypasses_model(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail("model must not run")
+
+        text, contact, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Какое расписание у Стаса Мосина 14.08.2026?"}],
+            user_id=948205934,
+            mode="staff",
+        )
+
+        self.assertIn("Стас Мосин работает 10:00–20:00", text)
+        self.assertIsNone(contact)
+        self.assertIsNone(action)
+
+    def test_tomorrow_schedule_answer_bypasses_model(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 13)
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail("model must not run")
+
+        text, contact, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Какое расписание у Стаса Мосина завтра?"}],
+            user_id=948205934,
+            mode="staff",
+        )
+
+        self.assertIn("Завтра, 14 августа", text)
+        self.assertIn("Стас Мосин работает 10:00–20:00", text)
+        self.assertIsNone(contact)
+        self.assertIsNone(action)
+
+    def test_short_schedule_followup_keeps_master_context(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 13)
+        messages = [
+            {"role": "user", "content": "Какое расписание у Стаса Мосина?"},
+            {"role": "assistant", "content": "Уточните дату."},
+            {"role": "user", "content": "А завтра?"},
+        ]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "staff", user_id=948205934,
+        )
+        tool_use = claude_ai._schedule_preflight_tool_use(messages, requirement)
+
+        self.assertEqual(requirement.domain, "staff_schedule")
+        self.assertEqual(tool_use.name, "get_master_schedule")
+        self.assertEqual(tool_use.input["staff_name"], "Стас Мосин")
+        self.assertEqual(tool_use.input["date"], "2026-08-14")
+
+    def test_roster_question_does_not_turn_into_today_schedule(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        requirement = claude_ai._grounding_requirement(
+            [{"role": "user", "content": "Кто у нас работает в салоне?"}],
+            "founder",
+            "staff",
+            user_id=948205934,
+        )
+
+        self.assertEqual(requirement.domain, "staff_catalog")
+        self.assertEqual(requirement.tools, frozenset({"get_masters"}))
+
+    def test_all_appointments_question_uses_business_report(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 13)
+        messages = [{
+            "role": "user",
+            "content": "Сколько всего записей сегодня, включая будущие и ожидающие?",
+        }]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "staff", user_id=948205934,
+        )
+        tool_use = claude_ai._business_preflight_tool_use(messages, requirement)
+
+        self.assertEqual(requirement.domain, "business_analytics")
+        self.assertEqual(tool_use.name, "get_business_report")
+        self.assertEqual(tool_use.input, {
+            "date_from": "2026-08-13",
+            "date_to": "2026-08-13",
+        })
+
+    def test_successful_business_tool_blocks_false_data_denial(self):
+        claude_ai, _logs = _load_claude_ai()
+        replies = iter([
+            ("Я не вижу список услуг в YClients.", []),
+            ("В YClients сейчас нет активных услуг.", []),
+        ])
+        claude_ai._brain_turn = lambda *args, **kwargs: next(replies)
+
+        text, _contact, _action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Какие услуги есть?"}],
+            user_id=948205934,
+            mode="staff",
+        )
+
+        self.assertEqual(text, "В YClients сейчас нет активных услуг.")
 
 
 if __name__ == "__main__":

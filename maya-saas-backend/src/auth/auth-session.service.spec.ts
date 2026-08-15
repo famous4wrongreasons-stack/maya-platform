@@ -354,7 +354,7 @@ describe('AuthSessionService', () => {
         deviceLabel: 'Chrome on Windows',
         createdAt: new Date('2026-07-11T12:00:00.000Z'),
         lastUsedAt: new Date('2026-07-11T12:05:00.000Z'),
-        expiresAt: new Date('2026-08-10T12:00:00.000Z'),
+        expiresAt: new Date(Date.now() + 60_000),
         revokedAt: null,
         revokeReason: null,
       },

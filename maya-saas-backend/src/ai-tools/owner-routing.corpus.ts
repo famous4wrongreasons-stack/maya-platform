@@ -22,9 +22,9 @@ export const OWNER_ROUTING_CORPUS: OwnerRoutingCase[] = [
   {
     id: 'advise-return-clients',
     text: 'Посоветуй как вернуть клиентов',
-    tools: ['analytics.business.query'],
-    notTools: ['customers.count'],
-    arguments: { comparison: 'previous_period' },
+    tools: ['clients.retention.scan'],
+    notTools: ['customers.count', 'analytics.business.query'],
+    domain: 'client_retention',
   },
   {
     id: 'who-in-drawdown',
@@ -47,13 +47,32 @@ export const OWNER_ROUTING_CORPUS: OwnerRoutingCase[] = [
     tools: ['analytics.business.query'],
     arguments: { comparison: 'previous_period' },
   },
+  {
+    id: 'weak-spots-full-review',
+    text: 'На что стоит обратить внимание? Где у нас слабые места',
+    tools: ['analytics.business.query'],
+    arguments: {
+      period: 'month_to_date',
+      comparison: 'previous_period',
+    },
+  },
+  {
+    id: 'max-slice-follow-up',
+    text: 'Ты по максимуму должна срез дать',
+    previous: 'На что стоит обратить внимание? Где у нас слабые места',
+    tools: ['analytics.business.query'],
+    arguments: {
+      period: 'month_to_date',
+      comparison: 'previous_period',
+    },
+  },
 
   // —— сегодня / сравнения ——
   {
     id: 'records-today',
     text: 'Сколько записей сегодня?',
-    tools: ['analytics.business.query'],
-    arguments: { period: 'today', comparison: 'none' },
+    tools: ['operations.journal.read'],
+    arguments: { date: '2026-08-07' },
   },
   {
     id: 'cash-today-slang',
@@ -239,8 +258,8 @@ export const OWNER_ROUTING_CORPUS: OwnerRoutingCase[] = [
   {
     id: 'cancellations',
     text: 'Сколько отмен сегодня',
-    tools: ['analytics.business.query'],
-    arguments: { period: 'today' },
+    tools: ['operations.journal.read'],
+    arguments: { date: '2026-08-07' },
   },
   {
     id: 'average-check',
@@ -259,8 +278,8 @@ export const OWNER_ROUTING_CORPUS: OwnerRoutingCase[] = [
   {
     id: 'today-records-not-month-cash',
     text: 'Сколько записей сегодня',
-    tools: ['analytics.business.query'],
-    arguments: { period: 'today' },
+    tools: ['operations.journal.read'],
+    arguments: { date: '2026-08-07' },
     notTools: ['analytics.business.profit'],
   },
   {

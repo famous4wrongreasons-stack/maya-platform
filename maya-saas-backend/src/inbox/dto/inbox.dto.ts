@@ -18,10 +18,14 @@ const INBOX_TYPES = [
   'appointment_cancelled',
   'appointment_deleted',
   'appointment_rescheduled',
+  'appointment_reminder',
   'shift_reminder',
   'appointment_reassigned',
   'hanging_lead',
   'owner_alert',
+  'client_support_request',
+  'maya_task',
+  'marketing_campaign',
 ] as const;
 
 export class IngestInboxItemDto {
