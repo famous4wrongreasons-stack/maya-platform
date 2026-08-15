@@ -296,10 +296,13 @@ export class StaffScheduleCommandService {
     if (!this.isOperationsJournalQuestion(text)) {
       return null;
     }
+    // 🔴 НЕ отказываем здесь. Это перехватчик ДО модели, и жёсткая проверка
+    // роли делала его вторым движком прав: мастер, спросивший про СВОИ записи,
+    // получал «доступно владельцу и администратору» и не доходил ни до модели,
+    // ни до собственных инструментов own-scope, которые ему как раз выданы.
+    // Возвращаем null — дальше решает единственный движок прав AiToolPolicy.
     if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
-      return this.replyOnly(
-        'Точный журнал записей команды доступен владельцу, администратору или управляющему.',
-      );
+      return null;
     }
     if (!user.tenantId) {
       return this.replyOnly('Не нашла активный бизнес для этого запроса.');
@@ -396,10 +399,10 @@ export class StaffScheduleCommandService {
     if (!this.isScheduleReadQuestion(text)) {
       return null;
     }
+    // 🔴 То же самое: не отказываем ролью в перехватчике. У мастера есть
+    // staff.schedule.own.read — пусть до него дойдёт обычный путь.
     if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
-      return this.replyOnly(
-        'Точный график команды доступен владельцу, администратору или управляющему.',
-      );
+      return null;
     }
     if (!user.tenantId) {
       return this.replyOnly('Не нашла активный бизнес для этого запроса.');
