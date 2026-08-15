@@ -273,6 +273,9 @@ describe('YclientsCRMAdapter', () => {
         category: 'Haircuts',
       },
     ]);
+
+    await expect(adapter.getServices('tenant-1')).resolves.toEqual(services);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('falls back to the management service catalog', async () => {
@@ -410,6 +413,37 @@ describe('YclientsCRMAdapter', () => {
     const requestUrl = String(calls[0]?.[0] ?? '');
     expect(requestUrl).toContain('/book_times/123/15/2026-07-05');
     expect(requestUrl).toContain('service_ids%5B%5D=7');
+  });
+
+  it('treats YClients 422 date-unavailable as empty slots', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      text: () =>
+        Promise.resolve(
+          JSON.stringify({
+            success: false,
+            meta: { message: 'Дата недоступна.' },
+          }),
+        ),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: {
+        companyId: 123,
+      },
+    });
+
+    await expect(
+      adapter.getAvailableSlots({
+        tenantId: 'tenant-1',
+        staffId: '15',
+        date: '2026-07-05',
+        serviceIds: ['7'],
+      }),
+    ).resolves.toEqual([]);
   });
 
   it('cancels an appointment when YClients returns 204 without JSON body', async () => {
@@ -591,6 +625,157 @@ describe('YclientsCRMAdapter', () => {
           url.includes('start_date=2026-01-01'),
       ),
     ).toBe(true);
+  });
+
+  it('returns full-card metrics for a server-side client dossier search', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: 88,
+              name: 'Иван Петров',
+              phone: '+7 918 417-20-35',
+              visits_count: 39,
+              sold_amount: 62150,
+              last_visit_date: '2026-07-14T20:00:00+03:00',
+            },
+          ],
+        }),
+        { status: 200 },
+      ),
+    ) as typeof fetch;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.searchClients({ tenantId: 'tenant-1', query: 'Иван' }),
+    ).resolves.toEqual([
+      {
+        id: '88',
+        name: 'Иван Петров',
+        phone: '+79184172035',
+        visits_count: 39,
+        sold_amount: 62150,
+        last_visit_date: '2026-07-14',
+      },
+    ]);
+
+    const fetchMock = global.fetch as jest.MockedFunction<typeof fetch>;
+    const requestBody = fetchMock.mock.calls[0]?.[1]?.body;
+    const body = JSON.parse(
+      typeof requestBody === 'string' ? requestBody : '{}',
+    ) as { fields?: string[] };
+    expect(body.fields).toEqual([
+      'id',
+      'name',
+      'phone',
+      'visits_count',
+      'sold_amount',
+      'last_visit_date',
+    ]);
+  });
+
+  it('paginates the complete client registry without requesting personal fields', async () => {
+    const requestBodies: Array<{ fields: string[]; page: number }> = [];
+    global.fetch = jest.fn(
+      (
+        _input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const rawBody = init?.body;
+        if (typeof rawBody !== 'string') {
+          throw new Error('Expected JSON request body');
+        }
+        const body = JSON.parse(rawBody) as {
+          fields: string[];
+          page: number;
+        };
+        requestBodies.push(body);
+        const data =
+          body.page === 1
+            ? Array.from({ length: 200 }, (_, index) => ({
+                id: index + 1,
+                visits_count: index % 5,
+                sold_amount: index * 100,
+                last_visit_date: '2026-07-01',
+                name: `Must not leave adapter ${index}`,
+                phone: `+7000000${index}`,
+              }))
+            : [
+                {
+                  id: 200,
+                  visits_count: 9,
+                  sold_amount: 999,
+                  last_visit_date: '2026-06-01',
+                },
+                {
+                  id: 201,
+                  visits_count: 3,
+                  sold_amount: 4500,
+                  last_visit_date: '2026-05-02T10:00:00+03:00',
+                },
+              ];
+        return Promise.resolve(
+          new Response(JSON.stringify({ data }), { status: 200 }),
+        );
+      },
+    ) as typeof fetch;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.getClientRegistry({ tenantId: 'tenant-1' });
+
+    expect(result.complete).toBe(true);
+    expect(result.clients).toHaveLength(201);
+    expect(result.clients.at(-1)).toEqual({
+      external_id: '201',
+      visits_count: 3,
+      sold_amount: 4500,
+      last_visit_date: '2026-05-02',
+    });
+    expect(requestBodies.map((body) => body.page)).toEqual([1, 2]);
+    for (const body of requestBodies) {
+      expect(body.fields).toEqual([
+        'id',
+        'visits_count',
+        'sold_amount',
+        'last_visit_date',
+      ]);
+      expect(body.fields).not.toContain('name');
+      expect(body.fields).not.toContain('phone');
+    }
+  });
+
+  it('fails closed instead of returning a partial client registry', async () => {
+    const page = Array.from({ length: 200 }, (_, index) => ({
+      id: index + 1,
+      visits_count: 1,
+      sold_amount: 100,
+      last_visit_date: '2026-07-01',
+    }));
+    global.fetch = jest
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ data: page }), { status: 200 }),
+        ),
+      ) as typeof fetch;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getClientRegistry({ tenantId: 'tenant-1' }),
+    ).rejects.toThrow('pagination made no progress');
   });
 
   it('maps the external CRM journal without exposing client phones', async () => {
@@ -1007,6 +1192,7 @@ describe('YclientsCRMAdapter', () => {
                   id: 1,
                   amount: '2000',
                   sold_item_type: 'service',
+                  record_id: 901,
                   account: { title: 'Основная касса', is_cash: true },
                   client: { name: 'Must not leave adapter', phone: '+7999' },
                 },
@@ -1043,6 +1229,22 @@ describe('YclientsCRMAdapter', () => {
                   hidden: true,
                 },
                 { id: 13, name: 'Former', fired: true, hidden: false },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url.includes('/records/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 901,
+                  staff_id: 11,
+                  services: [{ id: 501, title: 'Мужская стрижка' }],
+                },
               ],
             }),
             { status: 200 },
@@ -1124,6 +1326,37 @@ describe('YclientsCRMAdapter', () => {
             amount_kopecks: 50_000,
           },
         ],
+        by_staff: [
+          {
+            staff_id: '11',
+            transaction_count: 1,
+            currency: 'RUB',
+            amount_kopecks: 200_000,
+          },
+        ],
+        by_service: [
+          {
+            service_id: '501',
+            name: 'Мужская стрижка',
+            transaction_count: 1,
+            currency: 'RUB',
+            amount_kopecks: 200_000,
+          },
+        ],
+        staff_attribution_status: 'available',
+        staff_attribution_coverage_percent: 100,
+        unattributed_service_total: {
+          currency: 'RUB',
+          amount_kopecks: 0,
+        },
+        unattributed_service_transaction_count: 0,
+        service_attribution_status: 'available',
+        service_attribution_coverage_percent: 100,
+        unattributed_service_breakdown_total: {
+          currency: 'RUB',
+          amount_kopecks: 0,
+        },
+        unattributed_service_breakdown_transaction_count: 0,
       },
       payroll: {
         status: 'available',
@@ -1455,5 +1688,83 @@ describe('YclientsCRMAdapter', () => {
       }),
     ).resolves.toMatchObject({ conflict_times: ['18:30'] });
     expect(attemptedScheduleWrite).toBe(false);
+  });
+
+  it('confirms recovered revenue only from positive service transactions with matching record ids', async () => {
+    global.fetch = jest.fn<typeof fetch>((input) => {
+      const url = String(input);
+      if (url.includes('/transactions/123')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: 1,
+                  amount: '2000',
+                  sold_item_type: 'service',
+                  record_id: 901,
+                },
+                {
+                  id: 2,
+                  amount: '500',
+                  sold_item_type: 'service',
+                  record_id: 901,
+                },
+                {
+                  id: 3,
+                  amount: '-300',
+                  sold_item_type: 'service',
+                  record_id: 901,
+                },
+                {
+                  id: 4,
+                  amount: '900',
+                  sold_item_type: 'goods_transaction',
+                  record_id: 901,
+                },
+                {
+                  id: 5,
+                  amount: '1500',
+                  sold_item_type: 'service',
+                  record_id: 999,
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ data: [] }), { status: 200 }),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getAppointmentRevenue({
+        tenantId: 'tenant-1',
+        from: '2026-08-01T00:00:00.000Z',
+        to: '2026-08-31T23:59:59.000Z',
+        timezone: 'Europe/Moscow',
+        externalIds: ['901', '902'],
+      }),
+    ).resolves.toEqual({
+      provider: CrmProvider.YCLIENTS,
+      currency: 'RUB',
+      verified: true,
+      requested_record_count: 2,
+      matched_record_count: 1,
+      records: [
+        {
+          external_id: '901',
+          amount_kopecks: 250_000,
+          transaction_count: 2,
+        },
+      ],
+    });
   });
 });

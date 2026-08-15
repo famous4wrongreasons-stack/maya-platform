@@ -1,3 +1,5 @@
+import { isComprehensiveBusinessReview } from '../ai-brain/business-review-intent';
+
 /**
  * Единый разбор отчётного окна из живой речи владельца.
  *
@@ -73,7 +75,11 @@ const REPORTING_TOOLS = new Set([
   'analytics.business.query',
   'analytics.employee.query',
   'analytics.business.profit',
+  'analytics.revenue.forecast',
+  'analytics.team-kpi.read',
+  'clients.no-show-risk.read',
   'expenses.read',
+  'expenses.period.complete',
 ]);
 
 const COMPARISON_TOOLS = new Set([
@@ -186,6 +192,9 @@ export class ReportingPeriodResolver {
         context,
       )
     ) {
+      return 'previous_period';
+    }
+    if (isComprehensiveBusinessReview(text, previousUserText)) {
       return 'previous_period';
     }
     if (

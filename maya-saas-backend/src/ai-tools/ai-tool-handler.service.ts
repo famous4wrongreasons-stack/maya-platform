@@ -7,19 +7,39 @@ import {
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
+import { AppointmentNotificationsService } from '../appointment-notifications/appointment-notifications.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { BusinessContentService } from '../business-content/business-content.service';
 import { UserRole } from '../common/domain.enums';
 import { CustomersService } from '../customers/customers.service';
 import { CrmService } from '../crm/crm.service';
-import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
+import type {
+  CrmClientSearchResult,
+  CrmJournalAppointment,
+  StaffScheduleSlot,
+} from '../crm/crm-adapter.interface';
 import {
   findExpenseCategory,
   resolveExpenseCategory,
   rublesToKopecks,
 } from '../expenses/expense-category';
 import { ExpensesService } from '../expenses/expenses.service';
+import {
+  ASSISTANT_CAPABILITIES,
+  ASSISTANT_CAPABILITY_CATALOG,
+  DEFAULT_ASSISTANT_CAPABILITIES,
+} from '../dashboard-preferences/assistant-capabilities.constants';
+import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
+import {
+  DEFAULT_FINANCE_DASHBOARD_WIDGETS,
+  FINANCE_DASHBOARD_WIDGETS,
+} from '../dashboard-preferences/finance-dashboard.constants';
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { InboxService } from '../inbox/inbox.service';
+import { MarketingService } from '../marketing/marketing.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RecoveryService } from '../recovery/recovery.service';
 import { StaffService } from '../staff/staff.service';
 import type {
   AiToolPrincipal,
@@ -30,8 +50,13 @@ import {
   type ReportingPeriodToolArgs,
 } from './reporting-period.resolver';
 import {
+  analyzeClientRegistry,
+  type ClientRegistryAnalysis,
+} from './client-registry-analysis';
+import {
   collectUpsellOpportunities,
   computePeriodMoneyMotivation,
+  historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
 
@@ -72,16 +97,14 @@ const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
 /**
  * Деньги мастера: что CRM подтверждает поимённо, а что — нет.
  *
- * 🔴 Подтверждённой ВЫРУЧКИ мастера во внешней CRM нет ни в каком виде.
- * Финансовые операции (`transactions`) — единственный подтверждённый источник
- * денег — разносятся по типам продаж и по счетам (нал/безнал), но не по
- * сотрудникам. Цены из журнала записей выручкой не являются: их и обнуляет
- * fail-closed. Единственное, что CRM отдаёт по каждому сотруднику, — расчёт
- * зарплаты: НАЧИСЛЕНО и ВЫПЛАЧЕНО за период.
+ * Подтверждённая выручка мастера публикуется только для тех финансовых
+ * операций услуг, которые YClients связал с записью и конкретным
+ * мастером. Несвязанная касса не распределяется по ценам записей или
+ * другим приблизительным признакам. Зарплата CRM остаётся отдельным показателем.
  *
  * Поэтому начисления и выручка разведены в два разных поля строки мастера:
  * `salary` (что салон должен мастеру) и `confirmed_revenue` (сколько он принёс
- * в кассу — недоступно всегда, с причиной). Складывать их в одно поле нельзя:
+ * в кассу по точно связанным операциям). Складывать их в одно поле нельзя:
  * для салона с процентной схемой начисление — это доля от выручки, и подмена
  * одного другим занижает деньги мастера ровно во столько раз, во сколько
  * отличается его процент.
@@ -114,9 +137,9 @@ const STAFF_SALARY_UNAVAILABLE = {
   rowUnavailable: 'crm_payroll_row_unavailable_for_this_master',
 } as const;
 
-/** Почему подтверждённой выручки мастера нет — и почему её не будет. */
+/** Почему подтверждённой выручки конкретного мастера может не быть. */
 const STAFF_CONFIRMED_REVENUE_UNAVAILABLE = {
-  crm: 'crm_confirms_cash_for_the_whole_company_only_its_financial_transactions_carry_no_staff_attribution',
+  crm: 'crm_financial_transactions_are_not_attributed_to_this_master',
   maya: 'internal_calendar_records_booked_appointment_value_which_is_not_till_confirmed_cash',
 } as const;
 
@@ -130,6 +153,10 @@ export class AiToolHandlerService {
     string,
     { expiresAt: number; value: unknown }
   >();
+  private readonly clientRegistryCache = new Map<
+    string,
+    { expiresAt: number; value: ClientRegistryAnalysis }
+  >();
 
   constructor(
     private readonly crmService: CrmService,
@@ -140,6 +167,13 @@ export class AiToolHandlerService {
     private readonly prisma: PrismaService,
     private readonly customersService: CustomersService,
     private readonly staffService: StaffService,
+    private readonly dashboardPreferencesService?: DashboardPreferencesService,
+    private readonly inboxService?: InboxService,
+    private readonly auditLogService?: AuditLogService,
+    private readonly recoveryService?: RecoveryService,
+    private readonly marketingService?: MarketingService,
+    private readonly appointmentNotificationsService?: AppointmentNotificationsService,
+    private readonly businessContentService?: BusinessContentService,
   ) {}
 
   async execute(
@@ -151,12 +185,75 @@ export class AiToolHandlerService {
     switch (toolName) {
       case 'catalog.staff.read':
         return this.readStaff(principal.tenantId);
+      case 'booking.upsell.suggest':
+        return this.suggestClientUpsell(principal, args);
       case 'customers.count':
         return this.customersService.countCustomers(principal.tenantId);
+      case 'clients.retention.scan':
+        return this.scanClientRetention(principal.tenantId);
+      case 'clients.dossier.read':
+        return this.readClientDossier(principal, args);
+      case 'clients.high-value.read':
+        return this.readHighValueClients(principal, args);
+      case 'clients.no-show-risk.read':
+        return this.readNoShowRiskClients(principal, args);
       case 'catalog.services.read':
         return this.readServices(principal.tenantId);
       case 'booking.availability.read':
         return this.readAvailability(principal.tenantId, args);
+      case 'booking.group-availability.read':
+        return this.readGroupAvailability(principal.tenantId, args);
+      case 'inventory.stock.read':
+        return this.requireBusinessContentService().listCatalog(
+          principal.tenantId,
+          'inventory',
+          { lowStockOnly: args.low_stock_only === true },
+        );
+      case 'commerce.certificates.read':
+        return this.requireBusinessContentService().listCatalog(
+          principal.tenantId,
+          'certificate',
+        );
+      case 'commerce.memberships.read':
+        return this.requireBusinessContentService().listCatalog(
+          principal.tenantId,
+          'membership',
+        );
+      case 'referrals.status.read':
+        return this.requireBusinessContentService().getReferralProgram(
+          principal.tenantId,
+        );
+      case 'reviews.list.read':
+        return this.requireBusinessContentService().listReviews(
+          principal.tenantId,
+          {
+            days: Number(args.days),
+            ...(args.rating === undefined
+              ? {}
+              : { rating: Number(args.rating) }),
+            limit: Number(args.limit),
+            ...(typeof args.branch_id === 'string'
+              ? { branchId: args.branch_id }
+              : {}),
+          },
+        );
+      case 'reviews.analyze': {
+        const options = {
+          days: Number(args.days),
+          ...(typeof args.branch_id === 'string'
+            ? { branchId: args.branch_id }
+            : {}),
+        };
+        return args.mode === 'trend'
+          ? this.requireBusinessContentService().reviewTrend(
+              principal.tenantId,
+              options,
+            )
+          : this.requireBusinessContentService().analyzeReviews(
+              principal.tenantId,
+              options,
+            );
+      }
       case 'appointments.own.list':
         return this.listOwnAppointments(principal);
       case 'loyalty.own.read':
@@ -167,23 +264,185 @@ export class AiToolHandlerService {
         return this.queryBusinessAnalytics(principal, args);
       case 'analytics.business.profit':
         return this.readBusinessProfit(principal, args);
+      case 'analytics.revenue.forecast':
+        return this.forecastBusinessRevenue(principal, args);
+      case 'analytics.team-kpi.read':
+        return this.readTeamKpi(principal, args);
+      case 'analytics.branches.compare':
+        return this.compareBranches(principal, args);
+      case 'reports.recovered':
+        return this.readRecoveredReport(principal, args);
       case 'expenses.read':
         return this.readExpenses(principal.tenantId, args);
       case 'expenses.create':
         return this.createExpense(principal, args, idempotencyKey);
+      case 'expenses.period.complete':
+        return this.declareExpensePeriodComplete(
+          principal,
+          args,
+          idempotencyKey,
+        );
       case 'appointments.own.cancel':
         return this.cancelOwnAppointment(principal, args);
       case 'appointments.own.create':
         return this.createOwnAppointment(principal, args);
       case 'appointments.own.reschedule':
         return this.rescheduleOwnAppointment(principal, args);
+      case 'staff.schedule.read':
+        return this.readStaffScheduleDay(principal, args);
+      case 'staff.schedule.own.read':
+        return this.readOwnStaffScheduleDay(principal, args);
+      case 'operations.journal.read':
+        return this.readOperationsJournalDay(principal, args);
       case 'staff.schedule.update':
         return this.applyStaffScheduleDayChange(principal, args);
       case 'loyalty.internal.adjust':
         return this.adjustInternalLoyalty(principal, args, idempotencyKey);
+      case 'company.business-hours.read':
+        return this.readBusinessHours(principal.tenantId);
+      case 'settings.read':
+        return this.readSettings(principal);
+      case 'settings.update':
+        return this.updateSettings(principal, args);
+      case 'tasks.list':
+        return this.listTasks(principal, args);
+      case 'tasks.create':
+        return this.createTask(principal, args, idempotencyKey);
+      case 'tasks.complete':
+        return this.completeTask(principal, args);
+      case 'marketing.audience.find':
+        return this.requireMarketingService().findAudience({
+          tenantId: principal.tenantId,
+          actorUserId: principal.userId,
+          rule: {
+            inactive_days: Number(args.inactive_days),
+            minimum_visits: Number(args.minimum_visits),
+            max_recipients: Number(args.max_recipients),
+          },
+        });
+      case 'marketing.campaign.preview':
+        return this.requireMarketingService().previewCampaign({
+          tenantId: principal.tenantId,
+          actorUserId: principal.userId,
+          audienceId: String(args.audience_id),
+          message: String(args.message),
+        });
+      case 'marketing.campaign.send':
+        return this.requireMarketingService().sendCampaign({
+          tenantId: principal.tenantId,
+          actorUserId: principal.userId,
+          campaignId: String(args.campaign_id),
+          idempotencyKey,
+        });
+      case 'notifications.appointments.read':
+        return this.requireAppointmentNotificationsService().getSettings(
+          principal.tenantId,
+        );
+      case 'notifications.appointments.update':
+        return this.requireAppointmentNotificationsService().updateSettings(
+          principal.tenantId,
+          principal.userId,
+          {
+            enabled: args.enabled === true,
+            leadTimesMinutes: Array.isArray(args.lead_times_minutes)
+              ? args.lead_times_minutes.map(Number)
+              : undefined,
+          },
+        );
+      case 'support.integration-status.read':
+        return this.readIntegrationStatus(principal.tenantId);
+      case 'support.contact-admin.request':
+        return this.requestAdministratorContact(
+          principal,
+          args,
+          idempotencyKey,
+        );
       default:
         throw new Error('Unreachable AI tool handler');
     }
+  }
+
+  private async requestAdministratorContact(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+    idempotencyKey: string,
+  ) {
+    const recipients = await this.prisma.membership.findMany({
+      where: {
+        tenantId: principal.tenantId,
+        status: 'active',
+        role: {
+          in: [
+            UserRole.TENANT_OWNER,
+            UserRole.BUSINESS_OWNER,
+            UserRole.TENANT_ADMIN,
+            UserRole.ADMINISTRATOR,
+          ],
+        },
+      },
+      select: { userId: true },
+    });
+    const userIds = [...new Set(recipients.map((row) => row.userId))];
+    if (userIds.length === 0) {
+      return {
+        accepted: false,
+        reason: 'active_administrator_not_configured',
+        next_action: 'business_owner_must_assign_an_active_administrator',
+      };
+    }
+
+    const reason =
+      typeof args.reason === 'string' && args.reason.trim()
+        ? args.reason.trim()
+        : 'Клиент просит администратора связаться с ним.';
+    const sourceEventId = `maya-contact:${idempotencyKey}`.slice(0, 160);
+    const published = await this.requireInboxService().publishForTenant(
+      principal.tenantId,
+      {
+        type: 'client_support_request',
+        sourceEventId,
+        title: 'Клиент просит связаться',
+        bodyText: reason,
+        payload: {
+          channel: 'maya_chat',
+          requester_role: principal.role,
+        },
+        deepLink: '/clients',
+        userIds,
+        fanoutOwners: false,
+      },
+    );
+
+    return {
+      accepted: published.stored > 0,
+      delivered_to_active_administrators: published.stored,
+      channel: 'maya_inbox',
+      persistent: true,
+      push_announcement_requested: true,
+    };
+  }
+
+  private async scanClientRetention(
+    tenantId: string,
+  ): Promise<ClientRegistryAnalysis> {
+    const cached = this.clientRegistryCache.get(tenantId);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+
+    const [snapshot, timezone] = await Promise.all([
+      this.crmService.getClientRegistry(tenantId),
+      this.reportingTimezone(tenantId),
+    ]);
+    const value = analyzeClientRegistry(
+      snapshot,
+      this.localDate(new Date(), timezone),
+    );
+    this.clientRegistryCache.set(tenantId, {
+      expiresAt: Date.now() + 5 * 60 * 1_000,
+      value,
+    });
+    return value;
   }
 
   private async readServices(tenantId: string) {
@@ -211,22 +470,976 @@ export class AiToolHandlerService {
   }
 
   /**
-   * Обезличенный список мастеров для записи.
-   *
-   * Ярлыки specialist_N вместо имён: это единственный список, доступный ГОСТЮ,
-   * а гостю знать состав смены поимённо незачем. Владельцу имена приходят из
-   * аналитики, где они уместны.
+   * Публичный список мастеров для гостевого чата и записи.
+   * Имена на витрине уже публичны — обезличивать specialist_N нельзя,
+   * иначе MAYA не может рассказать клиенту о барберах.
    */
   private async readStaff(tenantId: string) {
-    const staff = await this.staffService.listStaff(tenantId);
+    const [staff, tenant] = await Promise.all([
+      this.staffService.listStaff(tenantId),
+      this.prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+          name: true,
+          brandingSettings: {
+            select: {
+              appName: true,
+              contactDetailsJson: true,
+              onboardingJson: true,
+              storeListingJson: true,
+            },
+          },
+        },
+      }),
+    ]);
+    const branding = tenant?.brandingSettings;
+    const contacts = this.record(branding?.contactDetailsJson);
+    const onboarding = this.record(branding?.onboardingJson);
+    const store = this.record(branding?.storeListingJson);
+    const aboutRaw = this.stringList(
+      onboarding.about ?? store.about ?? contacts.about,
+    );
+    const about =
+      aboutRaw.length > 0
+        ? aboutRaw
+        : this.defaultSalonAbout(tenant?.name ?? branding?.appName ?? null);
     return {
-      staff: staff.map((item, index) => ({
+      salon: {
+        name: branding?.appName ?? tenant?.name ?? null,
+        city: typeof contacts.city === 'string' ? contacts.city : null,
+        address: typeof contacts.address === 'string' ? contacts.address : null,
+        phone: typeof contacts.phone === 'string' ? contacts.phone : null,
+        tagline:
+          typeof contacts.tagline === 'string'
+            ? contacts.tagline
+            : typeof store.tagline === 'string'
+              ? store.tagline
+              : null,
+        about,
+        founded_hint:
+          typeof onboarding.founded_year === 'string' ||
+          typeof onboarding.founded_year === 'number'
+            ? String(onboarding.founded_year)
+            : this.defaultFoundedHint(
+                tenant?.name ?? branding?.appName ?? null,
+              ),
+      },
+      staff: staff.map((item) => ({
         id: item.id,
-        label: `specialist_${index + 1}`,
+        name: item.name,
         title: item.title ?? null,
         specialization: item.specialization ?? null,
       })),
     };
+  }
+
+  private async readClientDossier(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const query = typeof args.query === 'string' ? args.query.trim() : '';
+    if (!query) {
+      return {
+        found: false,
+        error: 'Нужно имя (≥3 букв) или телефон (≥4 цифр).',
+      };
+    }
+
+    let matches: CrmClientSearchResult[] = [];
+    for (const searchQuery of this.clientSearchQueries(query)) {
+      try {
+        matches = await this.crmService.searchClients(
+          principal.tenantId,
+          searchQuery,
+        );
+      } catch {
+        return {
+          found: false,
+          error: 'Поиск клиентов в CRM сейчас недоступен.',
+        };
+      }
+      if (matches.length > 0) {
+        break;
+      }
+    }
+
+    if (!matches.length) {
+      return {
+        found: false,
+        error: 'Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).',
+      };
+    }
+
+    const client = matches[0];
+    const [history, loyalty, timezone] = await Promise.all([
+      this.crmService
+        .getClientVisitHistory(principal.tenantId, client.id, 30)
+        .catch(() => []),
+      client.phone
+        ? this.crmService
+            .getClientLoyalty(principal.tenantId, client.phone)
+            .catch(() => null)
+        : Promise.resolve(null),
+      this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
+    ]);
+
+    const serviceCounter = new Map<string, number>();
+    let totalSpent = 0;
+    const dates: string[] = [];
+    for (const visit of history) {
+      for (const name of visit.service_names) {
+        serviceCounter.set(name, (serviceCounter.get(name) ?? 0) + 1);
+      }
+      if (
+        typeof visit.total_price === 'number' &&
+        Number.isFinite(visit.total_price)
+      ) {
+        totalSpent += visit.total_price;
+      }
+      if (visit.start.length >= 10) {
+        dates.push(visit.start.slice(0, 10));
+      }
+    }
+    dates.sort();
+
+    let avgCycleDays: number | null = null;
+    if (dates.length >= 2) {
+      const gaps: number[] = [];
+      for (let index = 1; index < dates.length; index += 1) {
+        const prev = Date.parse(`${dates[index - 1]}T00:00:00.000Z`);
+        const next = Date.parse(`${dates[index]}T00:00:00.000Z`);
+        if (!Number.isFinite(prev) || !Number.isFinite(next)) {
+          continue;
+        }
+        const gap = Math.round((next - prev) / (24 * 60 * 60 * 1000));
+        if (gap > 0) {
+          gaps.push(gap);
+        }
+      }
+      if (gaps.length > 0) {
+        avgCycleDays = Math.round(
+          gaps.reduce((sum, gap) => sum + gap, 0) / gaps.length,
+        );
+      }
+    }
+
+    const favoriteServices = [...serviceCounter.entries()]
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4)
+      .map(([name]) => name);
+
+    const exactVisits = client.visits_count ?? history.length;
+    const exactTotalSpent = client.sold_amount ?? Math.round(totalSpent);
+    const exactLastVisit =
+      client.last_visit_date ??
+      (dates.length > 0 ? dates[dates.length - 1] : null);
+    const asOf = this.localDate(new Date(), timezone);
+    const inactivityDays = exactLastVisit
+      ? Math.max(
+          0,
+          Math.floor(
+            (Date.parse(`${asOf}T00:00:00.000Z`) -
+              Date.parse(`${exactLastVisit}T00:00:00.000Z`)) /
+              (24 * 60 * 60 * 1_000),
+          ),
+        )
+      : null;
+
+    return {
+      found: true,
+      // 152-ФЗ: реальное ФИО и телефон не уходят во внешнюю модель.
+      display_name: 'клиент',
+      matches_count: matches.length,
+      visits: exactVisits,
+      visits_scope:
+        client.visits_count === null
+          ? 'recent_attended_history_fallback'
+          : 'full_crm_card',
+      last_visit: exactLastVisit,
+      inactivity_days: inactivityDays,
+      favorite_services: favoriteServices,
+      services_scope: 'last_30_attended_visits',
+      avg_cycle_days: avgCycleDays,
+      total_spent: exactTotalSpent,
+      total_spent_scope:
+        client.sold_amount === null
+          ? 'recent_attended_history_fallback'
+          : 'full_crm_card',
+      loyal: exactVisits >= 3,
+      loyalty_segment: this.clientLoyaltySegment(exactVisits),
+      loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
+      bonus_balance: loyalty?.balance ?? null,
+      bonus_currency: loyalty?.currency ?? null,
+      bonus_status: loyalty ? 'available' : 'unavailable',
+      note:
+        matches.length > 1
+          ? 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.'
+          : 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
+    };
+  }
+
+  /**
+   * Рейтинг ценных клиентов без передачи модели имён, телефонов и CRM-id.
+   * Позиция в рейтинге становится временным псевдонимом внутри ответа.
+   */
+  private async readHighValueClients(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const metric = this.requiredString(args.metric);
+    const limit = this.requiredNumber(args.limit);
+    const [snapshot, timezone] = await Promise.all([
+      this.crmService.getClientRegistry(principal.tenantId),
+      this.reportingTimezone(principal.tenantId),
+    ]);
+    const asOf = this.localDate(new Date(), timezone);
+    const ranked = [...snapshot.clients].sort((left, right) => {
+      const primary =
+        metric === 'visits'
+          ? right.visits_count - left.visits_count
+          : metric === 'recency'
+            ? this.clientRecencyScore(right.last_visit_date) -
+              this.clientRecencyScore(left.last_visit_date)
+            : right.sold_amount - left.sold_amount;
+      return (
+        primary ||
+        right.visits_count - left.visits_count ||
+        right.sold_amount - left.sold_amount ||
+        left.external_id.localeCompare(right.external_id)
+      );
+    });
+
+    return {
+      verified: true,
+      complete_registry: snapshot.complete,
+      source: snapshot.provider,
+      generated_at: snapshot.generated_at,
+      metric,
+      currency: 'RUB',
+      clients: ranked.slice(0, limit).map((client, index) => ({
+        alias: `client_${index + 1}`,
+        visits: client.visits_count,
+        lifetime_spend_amount_major_units: client.sold_amount,
+        last_visit_date: client.last_visit_date,
+        inactivity_days: this.inactivityDays(client.last_visit_date, asOf),
+        loyalty_segment: this.clientLoyaltySegment(client.visits_count),
+      })),
+      contains_personal_data: false,
+      note: 'Для контакта с конкретным клиентом используйте защищённый CRM-экран: имена и телефоны не передаются модели.',
+    };
+  }
+
+  /**
+   * Клиенты с повторяющимися неявками/отменами. Наружу выходят только
+   * агрегаты и псевдонимы, клиентские CRM-id остаются внутри процесса.
+   */
+  private async readNoShowRiskClients(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const window = await this.reportingWindow(principal.tenantId, args);
+    if (window.query.branchId) {
+      return {
+        available: false,
+        reason: 'crm_journal_is_company_scoped',
+      };
+    }
+    const appointments = await this.readJournalRangeInChunks(
+      principal.tenantId,
+      window.query.from,
+      window.query.to,
+    );
+    const clients = new Map<
+      string,
+      {
+        visits: number;
+        noShow: number;
+        canceled: number;
+        completed: number;
+        lastEventAt: string;
+      }
+    >();
+    const statusCounts = {
+      no_show: 0,
+      canceled: 0,
+      completed: 0,
+      other: 0,
+    };
+
+    for (const appointment of appointments) {
+      const clientId = appointment.client.id;
+      if (!clientId) continue;
+      const status = this.normalizedAppointmentStatus(appointment.status);
+      const row = clients.get(clientId) ?? {
+        visits: 0,
+        noShow: 0,
+        canceled: 0,
+        completed: 0,
+        lastEventAt: appointment.start_at,
+      };
+      row.visits += 1;
+      row.lastEventAt =
+        appointment.start_at > row.lastEventAt
+          ? appointment.start_at
+          : row.lastEventAt;
+      if (status === 'no_show') {
+        row.noShow += 1;
+        statusCounts.no_show += 1;
+      } else if (status === 'canceled') {
+        row.canceled += 1;
+        statusCounts.canceled += 1;
+      } else if (status === 'completed') {
+        row.completed += 1;
+        statusCounts.completed += 1;
+      } else {
+        statusCounts.other += 1;
+      }
+      clients.set(clientId, row);
+    }
+
+    const ranked = [...clients.entries()]
+      .filter(([, row]) => row.noShow > 0 || row.canceled > 0)
+      .sort(
+        (left, right) =>
+          right[1].noShow - left[1].noShow ||
+          right[1].canceled - left[1].canceled ||
+          right[1].visits - left[1].visits ||
+          left[0].localeCompare(right[0]),
+      )
+      .slice(0, 20);
+
+    return {
+      available: true,
+      verified: true,
+      source: 'external_crm',
+      resolved_period: this.resolvedPeriodPayload(args, window),
+      appointments_observed: appointments.length,
+      clients_observed: clients.size,
+      status_counts: statusCounts,
+      risk_clients: ranked.map(([, row], index) => ({
+        alias: `client_${index + 1}`,
+        appointments_observed: row.visits,
+        no_show_count: row.noShow,
+        cancellation_count: row.canceled,
+        completed_count: row.completed,
+        last_event_at: row.lastEventAt,
+        risk_level:
+          row.noShow >= 2 || row.noShow + row.canceled >= 3
+            ? 'high'
+            : 'attention',
+      })),
+      contains_personal_data: false,
+      limitations: [
+        {
+          key: 'late_cancellations',
+          reason:
+            'the CRM journal has no cancellation timestamp, so ordinary and late cancellations cannot be separated',
+        },
+      ],
+    };
+  }
+
+  private async readOwnStaffScheduleDay(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const date = this.requiredString(args.date);
+    const link = await this.prisma.crmStaffAccess.findFirst({
+      where: {
+        tenantId: principal.tenantId,
+        userId: principal.userId,
+        status: 'active',
+      },
+      select: { externalStaffId: true },
+    });
+    if (!link) {
+      return {
+        available: false,
+        reason: 'employee_is_not_linked_to_active_crm_staff',
+        date,
+      };
+    }
+    const schedule = await this.crmService.getStaffScheduleDay(
+      principal.tenantId,
+      { staffId: link.externalStaffId, date },
+    );
+    return {
+      available: true,
+      verified: true,
+      source: 'external_crm',
+      date: schedule.date,
+      is_working: schedule.is_working,
+      slots: schedule.slots,
+    };
+  }
+
+  private async readBusinessHours(tenantId: string) {
+    const profile = await this.crmService.getCompanyProfile(tenantId);
+    return {
+      verified: true,
+      source: 'external_crm',
+      title: profile.title,
+      address: profile.address,
+      timezone: profile.timezone,
+      schedule: profile.schedule,
+      schedule_available:
+        typeof profile.schedule === 'string' && profile.schedule.trim() !== '',
+    };
+  }
+
+  private async readSettings(principal: AiToolPrincipal) {
+    const [assistantPreference, financePreference, appointmentNotifications] =
+      await Promise.all([
+        this.prisma.dashboardPreference.findUnique({
+          where: {
+            userId_tenantId_section: {
+              userId: principal.userId,
+              tenantId: principal.tenantId,
+              section: 'assistant',
+            },
+          },
+          select: { configJson: true },
+        }),
+        this.prisma.dashboardPreference.findUnique({
+          where: {
+            userId_tenantId_section: {
+              userId: principal.userId,
+              tenantId: principal.tenantId,
+              section: 'finance',
+            },
+          },
+          select: { configJson: true },
+        }),
+        this.appointmentNotificationsService
+          ? this.appointmentNotificationsService.getSettings(principal.tenantId)
+          : Promise.resolve(null),
+      ]);
+    const assistantConfig = this.record(assistantPreference?.configJson);
+    const financeConfig = this.record(financePreference?.configJson);
+    const enabledCapabilities = this.allowedStringValues(
+      assistantConfig.enabled_capabilities,
+      ASSISTANT_CAPABILITIES,
+      DEFAULT_ASSISTANT_CAPABILITIES,
+    );
+    const enabledWidgets = this.allowedStringValues(
+      financeConfig.enabled_widgets,
+      FINANCE_DASHBOARD_WIDGETS,
+      DEFAULT_FINANCE_DASHBOARD_WIDGETS,
+    );
+    const staffTargets = this.record(financeConfig.staff_targets_rub);
+    const monthlyTarget = this.optionalMetricNumber(
+      financeConfig.monthly_target_rub,
+    );
+
+    return {
+      assistant: {
+        enabled_capabilities: enabledCapabilities,
+        capabilities: ASSISTANT_CAPABILITY_CATALOG.map((item) => ({
+          ...item,
+          enabled: enabledCapabilities.includes(item.key),
+        })),
+      },
+      finance_dashboard: {
+        enabled_widgets: enabledWidgets,
+        available_widgets: [...FINANCE_DASHBOARD_WIDGETS],
+        monthly_target_rub: monthlyTarget,
+        staff_target_count: Object.values(staffTargets).filter(
+          (value) => typeof value === 'number' && Number.isFinite(value),
+        ).length,
+      },
+      appointment_notifications: appointmentNotifications,
+      credentials_excluded: true,
+      note: 'Токены и секреты никогда не возвращаются в чат. Их наличие проверяется через статус интеграции.',
+    };
+  }
+
+  private async updateSettings(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    if (!this.dashboardPreferencesService) {
+      throw new Error('Dashboard preferences service is unavailable');
+    }
+    const capability = this.requiredString(args.capability);
+    const enabled = args.enabled === true;
+    const current = await this.dashboardPreferencesService.getAssistant(
+      principal.tenantId,
+      principal.userId,
+    );
+    const currentConfig = this.record(current.config);
+    const currentCapabilities = this.allowedStringValues(
+      currentConfig.enabled_capabilities,
+      ASSISTANT_CAPABILITIES,
+      DEFAULT_ASSISTANT_CAPABILITIES,
+    );
+    const nextCapabilities = enabled
+      ? [...new Set([...currentCapabilities, capability])]
+      : currentCapabilities.filter((item) => item !== capability);
+    const updated = await this.dashboardPreferencesService.updateAssistant(
+      principal.tenantId,
+      principal.userId,
+      { enabledCapabilities: nextCapabilities },
+    );
+    const updatedConfig = this.record(updated.config);
+
+    return {
+      updated: true,
+      scope: 'authenticated_user',
+      capability,
+      enabled,
+      enabled_capabilities: this.allowedStringValues(
+        updatedConfig.enabled_capabilities,
+        ASSISTANT_CAPABILITIES,
+        nextCapabilities,
+      ),
+    };
+  }
+
+  private async listTasks(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const rows = await this.prisma.inboxItem.findMany({
+      where: {
+        tenantId: principal.tenantId,
+        userId: principal.userId,
+        type: 'maya_task',
+        deletedAt: null,
+        archivedAt: null,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    const timezone = await this.reportingTimezone(principal.tenantId).catch(
+      () => 'UTC',
+    );
+    const today = this.localDate(new Date(), timezone);
+    const statusFilter = this.requiredString(args.status);
+    const periodFilter = this.requiredString(args.period);
+    const tasks = rows
+      .map((row) => {
+        const payload = this.record(row.payloadJson);
+        const status =
+          typeof payload.status === 'string' ? payload.status : 'active';
+        const dueDate =
+          typeof payload.due_date === 'string' ? payload.due_date : null;
+        return {
+          id: row.id,
+          task: row.bodyText,
+          status,
+          due_date: dueDate,
+          created_at: row.createdAt.toISOString(),
+        };
+      })
+      .filter((task) => statusFilter === 'all' || task.status === 'active')
+      .filter((task) => {
+        if (periodFilter === 'today') return task.due_date === today;
+        if (periodFilter === 'overdue') {
+          return task.due_date !== null && task.due_date < today;
+        }
+        return true;
+      });
+
+    return {
+      tasks,
+      count: tasks.length,
+      scope: 'authenticated_user',
+      timezone,
+      as_of_date: today,
+    };
+  }
+
+  private async createTask(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+    idempotencyKey: string,
+  ) {
+    const inboxService = this.requireInboxService();
+    const recipient = await this.resolveTaskRecipient(
+      principal,
+      this.requiredString(args.assignee),
+    );
+    if (!recipient.userId) {
+      return {
+        accepted: false,
+        reason: recipient.reason,
+        next_action: recipient.nextAction,
+      };
+    }
+
+    const task = this.requiredString(args.task);
+    const dueDate =
+      typeof args.due_date === 'string' ? args.due_date : undefined;
+    const sourceEventId = `maya-task:${idempotencyKey}`.slice(0, 160);
+    const published = await inboxService.publishForTenant(principal.tenantId, {
+      type: 'maya_task',
+      sourceEventId,
+      title: 'Поручение MAYA',
+      bodyText: task,
+      payload: {
+        status: 'active',
+        due_date: dueDate ?? null,
+        source: 'maya_chat',
+      },
+      deepLink: '/app/?panel=chat',
+      userIds: [recipient.userId],
+      fanoutOwners: false,
+    });
+    await this.auditLogService?.log({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      action: 'maya.task.created',
+      entityType: 'inbox_item',
+      entityId: sourceEventId,
+      metadata: {
+        has_due_date: dueDate !== undefined,
+        recipient_is_actor: recipient.userId === principal.userId,
+      },
+    });
+
+    return {
+      accepted: published.stored > 0,
+      delivered: published.stored > 0,
+      persistent: true,
+      push_announcement_requested: true,
+      due_date: dueDate ?? null,
+    };
+  }
+
+  private async completeTask(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const taskId = this.requiredString(args.task_id);
+    const task = await this.prisma.inboxItem.findFirst({
+      where: {
+        id: taskId,
+        tenantId: principal.tenantId,
+        userId: principal.userId,
+        type: 'maya_task',
+        deletedAt: null,
+      },
+    });
+    if (!task) {
+      return {
+        completed: false,
+        reason: 'task_not_found_or_not_assigned_to_authenticated_user',
+      };
+    }
+
+    const payload = this.record(task.payloadJson);
+    if (payload.status === 'completed') {
+      return {
+        completed: true,
+        already_completed: true,
+        task_id: task.id,
+      };
+    }
+
+    const completedAt = new Date();
+    await this.prisma.inboxItem.update({
+      where: { id: task.id },
+      data: {
+        payloadJson: {
+          ...payload,
+          status: 'completed',
+          completed_at: completedAt.toISOString(),
+        },
+        readAt: task.readAt ?? completedAt,
+        archivedAt: task.archivedAt ?? completedAt,
+      },
+    });
+    await this.auditLogService?.log({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      action: 'maya.task.completed',
+      entityType: 'inbox_item',
+      entityId: task.id,
+    });
+
+    return {
+      completed: true,
+      already_completed: false,
+      task_id: task.id,
+    };
+  }
+
+  private async resolveTaskRecipient(
+    principal: AiToolPrincipal,
+    assignee: string,
+  ): Promise<{
+    userId: string | null;
+    reason?: string;
+    nextAction?: string;
+  }> {
+    const normalized = this.normalizeHumanLabel(assignee);
+    if (['я', 'мне', 'себе', 'self'].includes(normalized)) {
+      return { userId: principal.userId };
+    }
+
+    const team = await this.crmService.getTeamMembers(principal.tenantId);
+    const exact = team.filter(
+      (member) => this.normalizeHumanLabel(member.name) === normalized,
+    );
+    const candidates =
+      exact.length > 0
+        ? exact
+        : normalized.length >= 3
+          ? team.filter((member) =>
+              this.normalizeHumanLabel(member.name).startsWith(normalized),
+            )
+          : [];
+    if (candidates.length === 0) {
+      return {
+        userId: null,
+        reason: 'assignee_not_found_in_active_crm_team',
+        nextAction: 'clarify_assignee_from_current_crm_team',
+      };
+    }
+    if (candidates.length > 1) {
+      return {
+        userId: null,
+        reason: 'assignee_is_ambiguous',
+        nextAction: 'clarify_full_crm_display_name',
+      };
+    }
+
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: {
+        tenantId: principal.tenantId,
+        externalStaffId: candidates[0].id,
+        status: 'active',
+        userId: { not: null },
+      },
+      select: { userId: true },
+    });
+    if (!access?.userId) {
+      return {
+        userId: null,
+        reason: 'assignee_has_no_active_maya_account',
+        nextAction: 'assignee_must_finish_verified_maya_login',
+      };
+    }
+    return { userId: access.userId };
+  }
+
+  private normalizeHumanLabel(value: string): string {
+    return value
+      .normalize('NFKC')
+      .toLocaleLowerCase('ru-RU')
+      .replace(/ё/g, 'е')
+      .replace(/[^a-zа-я0-9]+/gi, ' ')
+      .trim()
+      .replace(/\s+/g, ' ');
+  }
+
+  private async readIntegrationStatus(tenantId: string) {
+    const status = await this.crmService.getIntegrationStatus(tenantId);
+    const connection = this.record(status.connection);
+    return {
+      configured: status.configured,
+      calendar_source: status.calendar_source,
+      next_action: status.next_action,
+      connection: status.connection
+        ? {
+            provider: connection.provider ?? null,
+            status: connection.status ?? null,
+            verified: connection.verified === true,
+            verified_at: connection.verified_at ?? null,
+            last_checked_at: connection.last_checked_at ?? null,
+            last_sync_at: connection.last_sync_at ?? null,
+            last_error_code: connection.last_error_code ?? null,
+            last_error_at: connection.last_error_at ?? null,
+          }
+        : null,
+      credentials_excluded: true,
+    };
+  }
+
+  /**
+   * YClients quick_search не склоняет русские имена: «у Стаса» не
+   * находит карточку «Стас». Поэтому после точной формы пробуем
+   * несколько узких падежных вариантов. Это локальная операция:
+   * имя не уходит в LLM.
+   */
+  private clientSearchQueries(query: string): string[] {
+    if (/\d/.test(query)) {
+      return [query];
+    }
+    const words = query.split(/\s+/).filter(Boolean);
+    if (words.length === 0) {
+      return [query];
+    }
+
+    const first = this.russianNominativeToken(words[0]);
+    const all = words.map((word) => this.russianNominativeToken(word));
+    const candidates = [
+      query,
+      [first, ...words.slice(1)].join(' '),
+      all.join(' '),
+      first,
+    ];
+    return [...new Set(candidates)]
+      .map((candidate) => candidate.trim())
+      .filter((candidate) => candidate.length >= 3 && candidate.length <= 80)
+      .slice(0, 4);
+  }
+
+  private russianNominativeToken(token: string): string {
+    const lower = token.toLocaleLowerCase('ru-RU');
+    if (/(?:ея|ая|ия)$/.test(lower)) {
+      return `${token.slice(0, -1)}й`;
+    }
+    if (/(?:ьи|ии)$/.test(lower)) {
+      return `${token.slice(0, -1)}я`;
+    }
+    if (/(?:ги|ки|хи)$/.test(lower)) {
+      return `${token.slice(0, -1)}а`;
+    }
+    if (lower.endsWith('ы')) {
+      return `${token.slice(0, -1)}а`;
+    }
+    if (lower.endsWith('а') || lower.endsWith('у')) {
+      return token.slice(0, -1);
+    }
+    return token;
+  }
+
+  private clientLoyaltySegment(visits: number): string {
+    if (visits <= 0) return 'without_visits';
+    if (visits === 1) return 'new';
+    if (visits === 2) return 'repeat';
+    if (visits < 6) return 'loyal';
+    if (visits < 12) return 'regular';
+    return 'core';
+  }
+
+  private async suggestClientUpsell(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const currentNames = Array.isArray(args.current_service_names)
+      ? args.current_service_names
+          .filter((item): item is string => typeof item === 'string')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+    const [historyRaw, catalog] = await Promise.all([
+      this.appointmentsService.listClientAppointments(
+        principal.tenantId,
+        principal.userId,
+      ),
+      this.crmService.getServices(principal.tenantId),
+    ]);
+    const history = historyRaw.map((item) => {
+      const row = this.record(item);
+      const services = Array.isArray(row.services)
+        ? row.services.map((service) => {
+            const safe = this.record(service);
+            const title = typeof safe.name === 'string' ? safe.name : '';
+            return {
+              title,
+              priceRub: Number(safe.price || 0),
+            };
+          })
+        : [];
+      const startAt =
+        typeof row.start_at === 'string' || typeof row.start_at === 'number'
+          ? row.start_at
+          : Date.now();
+      const status = typeof row.status === 'string' ? row.status : '';
+      return {
+        clientId: null,
+        startAt: new Date(startAt),
+        status,
+        grossRub: Number(row.total_price || 0),
+        services,
+      };
+    });
+    const currentServices = currentNames.map((title) => ({
+      title,
+      priceRub: 0,
+    }));
+    const opportunity = historicalAddonOpportunity(history, currentServices);
+    const suggestions = opportunity
+      ? [
+          {
+            service: opportunity.title,
+            price: opportunity.price_rub,
+            times_bought: opportunity.times_bought,
+            last_date: opportunity.last_date,
+            reason: 'historical',
+          },
+        ]
+      : [];
+    const currentKeys = new Set(
+      currentNames.map((name) => name.toLowerCase().replace(/ё/g, 'е')),
+    );
+    const menu_addons = catalog
+      .filter((service) => {
+        const key = String(service.name || '')
+          .toLowerCase()
+          .replace(/ё/g, 'е');
+        if (!key || currentKeys.has(key)) return false;
+        if (
+          /уклад|стайлинг|styling/.test(key) &&
+          /стрижк/.test([...currentKeys].join(' '))
+        ) {
+          return false;
+        }
+        return /бород|тонир|камуфляж|уход|брить/.test(key);
+      })
+      .slice(0, 6)
+      .map((service) => ({
+        service: service.name,
+        price: service.price,
+        id: service.id,
+      }));
+    return {
+      suggestions,
+      menu_addons,
+      instruction: suggestions.length
+        ? 'Мягко предложи ОДНО дополнение из suggestions («как в прошлый раз»). После отказа больше не предлагай.'
+        : menu_addons.length
+          ? 'Можно один раз мягко предложить одно совместимое дополнение из menu_addons. Укладку к стрижке не предлагай.'
+          : 'Ничего не предлагай — продолжай оформление основной услуги.',
+    };
+  }
+
+  private stringList(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+  }
+
+  private isMeSalonName(name: string | null | undefined): boolean {
+    const key = String(name || '')
+      .toLowerCase()
+      .replace(/ё/g, 'е');
+    return /мужская\s*эстетик|malesthetic|muzhskaya/.test(key);
+  }
+
+  private defaultSalonAbout(name: string | null): string[] {
+    if (!this.isMeSalonName(name)) {
+      return [];
+    }
+    return [
+      'Мы не просто стрижём. Мы создаём пространство, где каждая деталь продумана — от инструментов до атмосферы.',
+      'Стабильная команда мастеров, премиальный интерьер и широкий спектр услуг — всё это Мужская Эстетика.',
+      'Барбершоп в Ставрополе на ул. Лермонтова, 343. Работаем уже больше шести лет.',
+    ];
+  }
+
+  private defaultFoundedHint(name: string | null): string | null {
+    if (!this.isMeSalonName(name)) {
+      return null;
+    }
+    return 'около 2020 (более 6 лет)';
   }
 
   private async readAvailability(
@@ -251,6 +1464,148 @@ export class AiToolHandlerService {
         branch_id: slot.branch_id ?? null,
       })),
     };
+  }
+
+  private async readGroupAvailability(
+    tenantId: string,
+    args: ValidatedAiToolArguments,
+  ) {
+    const slots = await this.appointmentsService.getAvailableSlots(tenantId, {
+      date: this.requiredString(args.date),
+      ...(Array.isArray(args.service_ids)
+        ? { serviceIds: this.stringArray(args.service_ids) }
+        : {}),
+      ...(typeof args.branch_id === 'string'
+        ? { branchId: args.branch_id }
+        : {}),
+    });
+    const partySize = Number(args.party_size);
+    const mode = args.mode === 'nearby' ? 'nearby' : 'simultaneous';
+    const maxGapMinutes = Number(args.max_gap_minutes ?? 30);
+    const normalized = slots
+      .filter(
+        (slot) =>
+          Number.isFinite(Date.parse(slot.start)) &&
+          Number.isFinite(Date.parse(slot.end)),
+      )
+      .map((slot) => ({
+        start: slot.start,
+        end: slot.end,
+        staff_id: slot.staff_id,
+        branch_id: slot.branch_id ?? null,
+      }));
+
+    const groups =
+      mode === 'simultaneous'
+        ? this.simultaneousSlotGroups(normalized, partySize)
+        : this.nearbySlotGroups(normalized, partySize, maxGapMinutes * 60_000);
+
+    return {
+      mode,
+      party_size: partySize,
+      max_gap_minutes: mode === 'nearby' ? maxGapMinutes : 0,
+      group_count: groups.length,
+      groups,
+      atomic_booking_available: false,
+      booking_instruction:
+        'After explicit confirmation, create one appointment per person, rechecking availability before every write. Never claim the group is reserved atomically.',
+    };
+  }
+
+  private simultaneousSlotGroups(
+    slots: Array<{
+      start: string;
+      end: string;
+      staff_id: string;
+      branch_id: string | null;
+    }>,
+    partySize: number,
+  ) {
+    const buckets = new Map<string, typeof slots>();
+    for (const slot of slots) {
+      const key = `${slot.branch_id ?? ''}|${slot.start}`;
+      buckets.set(key, [...(buckets.get(key) ?? []), slot]);
+    }
+    return [...buckets.values()]
+      .map((bucket) => this.distinctStaffSlots(bucket).slice(0, partySize))
+      .filter((group) => group.length === partySize)
+      .slice(0, 20)
+      .map((group) => ({
+        starts_at: group[0].start,
+        ends_at: group.reduce(
+          (latest, slot) =>
+            Date.parse(slot.end) > Date.parse(latest) ? slot.end : latest,
+          group[0].end,
+        ),
+        branch_id: group[0].branch_id,
+        slots: group,
+      }));
+  }
+
+  private nearbySlotGroups(
+    slots: Array<{
+      start: string;
+      end: string;
+      staff_id: string;
+      branch_id: string | null;
+    }>,
+    partySize: number,
+    maxGapMs: number,
+  ) {
+    const byBranch = new Map<string, typeof slots>();
+    for (const slot of slots) {
+      const key = slot.branch_id ?? '';
+      byBranch.set(key, [...(byBranch.get(key) ?? []), slot]);
+    }
+    const result: Array<{
+      starts_at: string;
+      ends_at: string;
+      branch_id: string | null;
+      slots: typeof slots;
+    }> = [];
+    const signatures = new Set<string>();
+    for (const branchSlots of byBranch.values()) {
+      const sorted = [...branchSlots].sort(
+        (left, right) => Date.parse(left.start) - Date.parse(right.start),
+      );
+      for (const seed of sorted) {
+        const seedMs = Date.parse(seed.start);
+        const candidates = this.distinctStaffSlots(
+          sorted.filter((slot) => {
+            const delta = Date.parse(slot.start) - seedMs;
+            return delta >= 0 && delta <= maxGapMs;
+          }),
+        ).slice(0, partySize);
+        if (candidates.length !== partySize) continue;
+        const signature = candidates
+          .map((slot) => `${slot.staff_id}:${slot.start}`)
+          .sort()
+          .join('|');
+        if (signatures.has(signature)) continue;
+        signatures.add(signature);
+        result.push({
+          starts_at: candidates[0].start,
+          ends_at: candidates.reduce(
+            (latest, slot) =>
+              Date.parse(slot.end) > Date.parse(latest) ? slot.end : latest,
+            candidates[0].end,
+          ),
+          branch_id: candidates[0].branch_id,
+          slots: candidates,
+        });
+        if (result.length >= 20) return result;
+      }
+    }
+    return result;
+  }
+
+  private distinctStaffSlots<T extends { staff_id: string }>(slots: T[]): T[] {
+    const seen = new Set<string>();
+    return slots.filter((slot) => {
+      if (seen.has(slot.staff_id)) return false;
+      seen.add(slot.staff_id);
+      return true;
+    });
   }
 
   private async readOwnLoyalty(principal: AiToolPrincipal) {
@@ -290,12 +1645,311 @@ export class AiToolHandlerService {
     };
   }
 
-  private async readExpenses(tenantId: string, args: ValidatedAiToolArguments) {
-    const result = await this.expensesService.list(
-      tenantId,
-      await this.reportingQuery(tenantId, args),
+  private async readStaffScheduleDay(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    if (!SCHEDULE_MANAGER_ROLES.has(principal.role)) {
+      throw new ForbiddenException({
+        message: 'Staff schedule is not available to this role.',
+        error: { code: 'staff_schedule_forbidden' },
+      });
+    }
+    const date = this.requiredString(args.date);
+    const requestedStaffId =
+      typeof args.staff_id === 'string' ? args.staff_id : null;
+    const activeStaff = await this.crmService.getStaff(principal.tenantId);
+    const selectedStaff = requestedStaffId
+      ? activeStaff.filter((member) => member.id === requestedStaffId)
+      : activeStaff;
+    if (requestedStaffId && selectedStaff.length === 0) {
+      throw new BadRequestException({
+        message: 'The requested active staff member was not found in CRM.',
+        error: { code: 'staff_not_found' },
+      });
+    }
+
+    const staff = await Promise.all(
+      selectedStaff.slice(0, 50).map(async (member) => {
+        const schedule = await this.crmService.getStaffScheduleDay(
+          principal.tenantId,
+          { staffId: member.id, date },
+        );
+        return {
+          id: member.id,
+          name: member.name,
+          title: member.title ?? null,
+          is_working: schedule.is_working,
+          slots: schedule.slots,
+        };
+      }),
     );
     return {
+      verified: true,
+      source: 'crm',
+      date,
+      staff,
+    };
+  }
+
+  /**
+   * Точный операционный срез одного дня без персональных данных клиентов.
+   *
+   * Журнал CRM содержит имена, телефоны, заметки и внешние id. В LLM и аудит
+   * инструмента они попадать не должны, поэтому здесь строится новый контракт,
+   * а не санитизируется исходный объект по отдельным ключам.
+   */
+  private async readOperationsJournalDay(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    if (!SCHEDULE_MANAGER_ROLES.has(principal.role)) {
+      throw new ForbiddenException({
+        message: 'The business journal is not available to this role.',
+        error: { code: 'operations_journal_forbidden' },
+      });
+    }
+
+    const date = this.requiredString(args.date);
+    const requestedStaffId =
+      typeof args.staff_id === 'string' ? args.staff_id : null;
+    const [timezone, activeStaff] = await Promise.all([
+      this.reportingTimezone(principal.tenantId),
+      this.crmService.getStaff(principal.tenantId),
+    ]);
+    const selectedStaff = requestedStaffId
+      ? activeStaff.find((member) => member.id === requestedStaffId)
+      : null;
+    if (requestedStaffId && !selectedStaff) {
+      throw new BadRequestException({
+        message: 'The requested active staff member was not found in CRM.',
+        error: { code: 'staff_not_found' },
+      });
+    }
+
+    const from = localDateMinuteToUtc(date, 0, timezone);
+    const to = localDateMinuteToUtc(this.shiftLocalDate(date, 1), 0, timezone);
+    const journal = await this.crmService.getJournal(
+      principal.tenantId,
+      {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        ...(requestedStaffId ? { providerId: requestedStaffId } : {}),
+      },
+      { includeCanceled: true },
+    );
+
+    const statusCounts = {
+      confirmed: 0,
+      completed: 0,
+      canceled: 0,
+      no_show: 0,
+      other: 0,
+    };
+    const masterSchedule = new Map(
+      (journal.all_masters ?? journal.masters ?? []).map((master) => [
+        master.id,
+        master,
+      ]),
+    );
+    const byStaff = new Map<
+      string,
+      {
+        name: string;
+        title: string | null;
+        total: number;
+        confirmed: number;
+        completed: number;
+        canceled: number;
+        no_show: number;
+        other: number;
+        bookedMinutes: number;
+        bookedValueKopecks: Map<string, number>;
+      }
+    >();
+
+    const safeAppointments = journal.appointments.map((appointment) => {
+      const status = appointment.status;
+      if (Object.prototype.hasOwnProperty.call(statusCounts, status)) {
+        statusCounts[status as keyof typeof statusCounts] += 1;
+      } else {
+        statusCounts.other += 1;
+      }
+      const durationMinutes = Math.max(
+        0,
+        Math.round(
+          (new Date(appointment.end_at).getTime() -
+            new Date(appointment.start_at).getTime()) /
+            60_000,
+        ),
+      );
+      const row = byStaff.get(appointment.provider.id) ?? {
+        name: appointment.provider.name,
+        title: appointment.provider.title?.trim() || null,
+        total: 0,
+        confirmed: 0,
+        completed: 0,
+        canceled: 0,
+        no_show: 0,
+        other: 0,
+        bookedMinutes: 0,
+        bookedValueKopecks: new Map<string, number>(),
+      };
+      row.total += 1;
+      if (status === 'confirmed') row.confirmed += 1;
+      if (status === 'completed') row.completed += 1;
+      if (status === 'canceled') row.canceled += 1;
+      if (status === 'no_show') row.no_show += 1;
+      if (
+        status !== 'confirmed' &&
+        status !== 'completed' &&
+        status !== 'canceled' &&
+        status !== 'no_show'
+      ) {
+        row.other += 1;
+      }
+      if (status !== 'canceled') {
+        row.bookedMinutes += durationMinutes;
+        if (
+          typeof appointment.total_price === 'number' &&
+          Number.isFinite(appointment.total_price)
+        ) {
+          const currency = appointment.currency || 'RUB';
+          row.bookedValueKopecks.set(
+            currency,
+            (row.bookedValueKopecks.get(currency) ?? 0) +
+              Math.round(appointment.total_price * 100),
+          );
+        }
+      }
+      byStaff.set(appointment.provider.id, row);
+
+      return {
+        time: this.localTime(appointment.start_at, timezone),
+        end_time: this.localTime(appointment.end_at, timezone),
+        status,
+        staff_name: appointment.provider.name,
+        services: appointment.services.map((service) => service.name),
+        duration_minutes: durationMinutes,
+        booked_value:
+          typeof appointment.total_price === 'number' &&
+          Number.isFinite(appointment.total_price)
+            ? {
+                currency: appointment.currency || 'RUB',
+                amount_kopecks: Math.round(appointment.total_price * 100),
+                amount_major_units: appointment.total_price,
+              }
+            : null,
+      };
+    });
+
+    // Работающий мастер без записей тоже важен для ответа о загрузке.
+    for (const member of activeStaff) {
+      if (requestedStaffId && member.id !== requestedStaffId) continue;
+      if (byStaff.has(member.id)) continue;
+      byStaff.set(member.id, {
+        name: member.name,
+        title: member.title?.trim() || null,
+        total: 0,
+        confirmed: 0,
+        completed: 0,
+        canceled: 0,
+        no_show: 0,
+        other: 0,
+        bookedMinutes: 0,
+        bookedValueKopecks: new Map<string, number>(),
+      });
+    }
+
+    const staff = [...byStaff.entries()]
+      .map(([staffId, row]) => {
+        const schedule = masterSchedule.get(staffId);
+        const workingMinutes = (schedule?.work_slots ?? []).reduce(
+          (sum, slot) =>
+            sum +
+            Math.max(
+              0,
+              this.clockMinutes(slot.to) - this.clockMinutes(slot.from),
+            ),
+          0,
+        );
+        return {
+          name: row.name,
+          title: row.title,
+          is_working: schedule?.is_working ?? null,
+          working_hours: (schedule?.work_slots ?? []).map((slot) => ({
+            from: slot.from,
+            to: slot.to,
+          })),
+          appointments: {
+            total: row.total,
+            active: row.confirmed + row.completed + row.no_show + row.other,
+            confirmed: row.confirmed,
+            completed: row.completed,
+            canceled: row.canceled,
+            no_show: row.no_show,
+            other: row.other,
+          },
+          booked_minutes: row.bookedMinutes,
+          working_minutes: workingMinutes,
+          load_percent:
+            workingMinutes > 0
+              ? Math.round((row.bookedMinutes / workingMinutes) * 1_000) / 10
+              : null,
+          booked_service_value: [...row.bookedValueKopecks.entries()].map(
+            ([currency, amountKopecks]) => ({
+              currency,
+              amount_kopecks: amountKopecks,
+              amount_major_units: amountKopecks / 100,
+            }),
+          ),
+        };
+      })
+      .sort(
+        (left, right) =>
+          right.appointments.active - left.appointments.active ||
+          left.name.localeCompare(right.name, 'ru'),
+      );
+
+    return {
+      verified: true,
+      source: 'yclients',
+      pii_redacted: true,
+      date,
+      timezone,
+      staff_scope: selectedStaff
+        ? { name: selectedStaff.name, title: selectedStaff.title ?? null }
+        : null,
+      summary: {
+        total: journal.appointments.length,
+        active:
+          statusCounts.confirmed +
+          statusCounts.completed +
+          statusCounts.no_show +
+          statusCounts.other,
+        ...statusCounts,
+        booked_minutes: staff.reduce(
+          (sum, member) => sum + member.booked_minutes,
+          0,
+        ),
+      },
+      staff,
+      appointments: safeAppointments.slice(0, 100),
+      appointments_returned: Math.min(safeAppointments.length, 100),
+      appointments_truncated: safeAppointments.length > 100,
+    };
+  }
+
+  private async readExpenses(tenantId: string, args: ValidatedAiToolArguments) {
+    const window = await this.reportingWindow(tenantId, args);
+    const result = await this.expensesService.list(tenantId, window.query);
+    const resolved = this.resolvedPeriodPayload(args, window);
+    return {
+      resolved_period: resolved,
+      period: {
+        ...resolved,
+        truncated_to_today: window.truncatedToToday,
+      },
       // 🔴 Разрез по статьям считает сервер. «Сколько ушло на расходники» без
       // него неотвечаемо: модели складывать запрещено, а перечень отдельных
       // платежей — это не ответ, а работа, переложенная на владельца.
@@ -484,6 +2138,47 @@ export class AiToolHandlerService {
     };
   }
 
+  /** Подтвердить полноту расходов и сразу вернуть пересчитанную прибыль. */
+  private async declareExpensePeriodComplete(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+    idempotencyKey: string,
+  ) {
+    if (typeof args.branch_id === 'string') {
+      throw new BadRequestException(
+        'Expense completeness is confirmed only for the whole company period',
+      );
+    }
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const timezone = await this.reportingTimezone(principal.tenantId);
+    const periodFromDay = this.localDate(new Date(window.query.from), timezone);
+    const periodToDay = this.localDate(new Date(window.query.to), timezone);
+    const declaration = await this.expensesService.declarePeriodComplete(
+      principal.tenantId,
+      principal.userId,
+      periodFromDay,
+      periodToDay,
+      idempotencyKey,
+    );
+    const profitability = await this.analyticsService.getBusinessProfitability(
+      principal.tenantId,
+      window.query,
+    );
+    const data = this.record(profitability);
+    const period = this.record(data.period);
+    const resolved = this.resolvedPeriodPayload(args, window);
+    return {
+      ...data,
+      expense_period_declaration: declaration,
+      resolved_period: resolved,
+      period: {
+        ...period,
+        ...resolved,
+        truncated_to_today: window.truncatedToToday,
+      },
+    };
+  }
+
   /**
    * Доводка аргументов ДО подписи и показа карточки.
    *
@@ -523,6 +2218,13 @@ export class AiToolHandlerService {
     args: ValidatedAiToolArguments,
     payload: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
+    if (toolName === 'marketing.campaign.send') {
+      const preview = await this.requireMarketingService().approvalPreview(
+        principal.tenantId,
+        String(args.campaign_id),
+      );
+      return { ...payload, ...preview };
+    }
     if (toolName !== 'expenses.create') {
       return payload;
     }
@@ -564,6 +2266,34 @@ export class AiToolHandlerService {
     return enriched;
   }
 
+  private requireMarketingService(): MarketingService {
+    if (!this.marketingService) {
+      throw new Error('MarketingService is unavailable');
+    }
+    return this.marketingService;
+  }
+
+  private requireBusinessContentService(): BusinessContentService {
+    if (!this.businessContentService) {
+      throw new Error('BusinessContentService is unavailable');
+    }
+    return this.businessContentService;
+  }
+
+  private requireAppointmentNotificationsService(): AppointmentNotificationsService {
+    if (!this.appointmentNotificationsService) {
+      throw new Error('Appointment notifications service is unavailable');
+    }
+    return this.appointmentNotificationsService;
+  }
+
+  private requireInboxService(): InboxService {
+    if (!this.inboxService) {
+      throw new Error('InboxService is unavailable');
+    }
+    return this.inboxService;
+  }
+
   private humanDay(localDate: string): string {
     const [year, month, day] = localDate.split('-');
     return `${day}.${month}.${year}`;
@@ -592,7 +2322,7 @@ export class AiToolHandlerService {
       !query.branchId &&
       CRM_FINANCE_ROLES.has(principal.role);
     const [overviewValue, financeSummary] = await Promise.all([
-      this.analyticsService.getBusinessOverview(principal.tenantId, query),
+      this.businessOperationalOverview(principal.tenantId, query),
       shouldReadFinance
         ? Promise.resolve()
             .then(() =>
@@ -703,6 +2433,51 @@ export class AiToolHandlerService {
         : null;
     const payrollAvailable =
       payroll.status === 'available' && payroll.verified === true;
+    const staffRevenue = Array.isArray(revenue.by_staff)
+      ? revenue.by_staff.flatMap((entry) => {
+          const row = this.record(entry);
+          const rawStaffId = row.staff_id;
+          const staffExternalId =
+            typeof rawStaffId === 'string' || typeof rawStaffId === 'number'
+              ? String(rawStaffId).trim()
+              : '';
+          const amount = this.safeMoneyAmount(row);
+          if (!staffExternalId || !amount) {
+            return [];
+          }
+          return [
+            {
+              staff_external_id: staffExternalId,
+              transaction_count:
+                this.optionalMetricNumber(row.transaction_count) ?? 0,
+              amount,
+            },
+          ];
+        })
+      : [];
+    const serviceRevenue = Array.isArray(revenue.by_service)
+      ? revenue.by_service.flatMap((entry) => {
+          const row = this.record(entry);
+          const rawServiceId = row.service_id;
+          const serviceExternalId =
+            typeof rawServiceId === 'string' || typeof rawServiceId === 'number'
+              ? String(rawServiceId).trim()
+              : '';
+          const amount = this.safeMoneyAmount(row);
+          if (!serviceExternalId || !amount) {
+            return [];
+          }
+          return [
+            {
+              service_external_id: serviceExternalId,
+              name: typeof row.name === 'string' ? row.name : 'Услуга',
+              transaction_count:
+                this.optionalMetricNumber(row.transaction_count) ?? 0,
+              amount,
+            },
+          ];
+        })
+      : [];
 
     return this.withStaffSalary(
       {
@@ -719,6 +2494,32 @@ export class AiToolHandlerService {
             verified: revenue.verified === true,
             transaction_count: transactionCount,
             total: revenueTotal,
+            by_staff: staffRevenue,
+            by_service: serviceRevenue,
+            staff_attribution_status:
+              revenue.staff_attribution_status ?? 'unavailable',
+            staff_attribution_coverage_percent: this.optionalMetricNumber(
+              revenue.staff_attribution_coverage_percent,
+            ),
+            unattributed_service_total: this.safeMoneyAmount(
+              revenue.unattributed_service_total,
+            ),
+            unattributed_service_transaction_count:
+              this.optionalMetricNumber(
+                revenue.unattributed_service_transaction_count,
+              ) ?? 0,
+            service_attribution_status:
+              revenue.service_attribution_status ?? 'unavailable',
+            service_attribution_coverage_percent: this.optionalMetricNumber(
+              revenue.service_attribution_coverage_percent,
+            ),
+            unattributed_service_breakdown_total: this.safeMoneyAmount(
+              revenue.unattributed_service_breakdown_total,
+            ),
+            unattributed_service_breakdown_transaction_count:
+              this.optionalMetricNumber(
+                revenue.unattributed_service_breakdown_transaction_count,
+              ) ?? 0,
           },
           payroll: {
             status: payroll.status ?? 'unavailable',
@@ -751,7 +2552,7 @@ export class AiToolHandlerService {
     query: AnalyticsRangeQueryDto,
   ) {
     const internal = await this.readAnalytics(
-      this.analyticsService.getEmployeeOverview(
+      this.employeeOperationalOverview(
         principal.tenantId,
         principal.userId,
         query,
@@ -761,6 +2562,52 @@ export class AiToolHandlerService {
       internal,
       await this.employeeSalaryScope(principal, query, internal),
     );
+  }
+
+  /**
+   * Переходный вызов для поэтапного обновления backend-компонентов.
+   * В актуальном сервисе всегда существует расширенный метод; fallback
+   * сохраняет работоспособность старых тестовых и rolling-deploy контрактов.
+   */
+  private businessOperationalOverview(
+    tenantId: string,
+    query: AnalyticsRangeQueryDto,
+  ): Promise<unknown> {
+    const analytics = this.analyticsService as unknown as {
+      getBusinessOperationalOverview?: (
+        scopedTenantId: string,
+        range: AnalyticsRangeQueryDto,
+      ) => Promise<unknown>;
+      getBusinessOverview: (
+        scopedTenantId: string,
+        range: AnalyticsRangeQueryDto,
+      ) => Promise<unknown>;
+    };
+    return typeof analytics.getBusinessOperationalOverview === 'function'
+      ? analytics.getBusinessOperationalOverview(tenantId, query)
+      : analytics.getBusinessOverview(tenantId, query);
+  }
+
+  private employeeOperationalOverview(
+    tenantId: string,
+    userId: string,
+    query: AnalyticsRangeQueryDto,
+  ): Promise<unknown> {
+    const analytics = this.analyticsService as unknown as {
+      getEmployeeOperationalOverview?: (
+        scopedTenantId: string,
+        scopedUserId: string,
+        range: AnalyticsRangeQueryDto,
+      ) => Promise<unknown>;
+      getEmployeeOverview: (
+        scopedTenantId: string,
+        scopedUserId: string,
+        range: AnalyticsRangeQueryDto,
+      ) => Promise<unknown>;
+    };
+    return typeof analytics.getEmployeeOperationalOverview === 'function'
+      ? analytics.getEmployeeOperationalOverview(tenantId, userId, query)
+      : analytics.getEmployeeOverview(tenantId, userId, query);
   }
 
   /**
@@ -912,6 +2759,308 @@ export class AiToolHandlerService {
       accrued: null,
       paid: null,
       unavailable_reason: reason,
+    };
+  }
+
+  /**
+   * Линейный прогноз подтверждённой кассы до конца текущей недели, месяца
+   * или года. Для закрытого/фиксированного окна прогноз равен факту.
+   */
+  private async forecastBusinessRevenue(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const analytics = this.record(
+      await this.queryBusinessAnalytics(principal, {
+        ...args,
+        comparison: 'none',
+      }),
+    );
+    const metrics = this.record(analytics.metrics);
+    const actualKopecks = this.optionalMetricNumber(
+      metrics.revenue_amount_kopecks,
+    );
+    if (actualKopecks === null || analytics.finance_verified !== true) {
+      return {
+        available: false,
+        reason: 'verified_crm_revenue_is_unavailable',
+        resolved_period: analytics.resolved_period,
+      };
+    }
+
+    const timezone = await this.reportingTimezone(principal.tenantId);
+    const horizon = this.revenueForecastHorizon(
+      this.requiredString(args.period),
+      typeof args.month === 'string' ? args.month : null,
+      timezone,
+    );
+    const factor =
+      horizon.elapsed_units > 0
+        ? horizon.total_units / horizon.elapsed_units
+        : 1;
+    const projectedKopecks = Math.max(
+      actualKopecks,
+      Math.round(actualKopecks * factor),
+    );
+    const amount = (value: number) => ({
+      currency: 'RUB',
+      amount_kopecks: value,
+      amount_major_units: this.majorUnits(value),
+    });
+
+    return {
+      available: true,
+      verified_actual: true,
+      source: analytics.source,
+      resolved_period: analytics.resolved_period,
+      horizon,
+      actual_revenue: amount(actualKopecks),
+      projection: {
+        method:
+          factor === 1 ? 'closed_or_fixed_period' : 'linear_daily_run_rate',
+        base: amount(projectedKopecks),
+        conservative: amount(Math.round(projectedKopecks * 0.9)),
+        optimistic: amount(Math.round(projectedKopecks * 1.1)),
+        confidence:
+          factor === 1
+            ? 'actual'
+            : horizon.elapsed_units >= 14
+              ? 'medium'
+              : 'low',
+      },
+      assumptions: [
+        'only verified CRM revenue is used',
+        'future seasonality, cancellations and capacity changes are not modelled',
+        'the range is a scenario, not a guaranteed accounting forecast',
+      ],
+    };
+  }
+
+  /** KPI команды с личными планами из настроек владельца. */
+  private async readTeamKpi(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const [internal, financePreference] = await Promise.all([
+      this.retryAnalyticsRead(() =>
+        this.readBusinessAnalytics(principal, window.query),
+      ),
+      this.prisma.dashboardPreference.findUnique({
+        where: {
+          userId_tenantId_section: {
+            userId: principal.userId,
+            tenantId: principal.tenantId,
+            section: 'finance',
+          },
+        },
+        select: { configJson: true },
+      }),
+    ]);
+    const data = this.record(internal);
+    const names = this.staffDisplayNames(internal);
+    const financeConfig = this.record(financePreference?.configJson);
+    const staffTargets = this.record(financeConfig.staff_targets_rub);
+    const monthlyTarget = this.optionalMetricNumber(
+      financeConfig.monthly_target_rub,
+    );
+    const published = this.publishAnalytics(
+      internal,
+      this.businessStaffScope(principal, internal),
+    );
+    const businessMetrics = this.businessMetricSnapshot(published);
+    const businessRevenueKopecks = this.optionalMetricNumber(
+      businessMetrics.revenue_amount_kopecks,
+    );
+    const period = this.requiredString(args.period);
+    const monthlyTargetComparable =
+      period === 'month_to_date' || period === 'named_month';
+
+    const staff = this.staffRows(internal)
+      .filter((row) => row.externalId !== null)
+      .map((row) => {
+        const target = this.optionalMetricNumber(
+          staffTargets[row.externalId as string],
+        );
+        const revenue = this.staffConfirmedRevenue(data, row.externalId);
+        const revenueRecord = this.record(revenue);
+        const revenueAmount = this.safeMoneyAmount(revenueRecord.amount);
+        return {
+          name: names.get(row.externalId as string) ?? 'Мастер',
+          appointments: row.appointments,
+          scheduled: this.optionalMetricNumber(row.entry.scheduled) ?? 0,
+          completed: this.optionalMetricNumber(row.entry.completed) ?? 0,
+          booked_minutes:
+            this.optionalMetricNumber(row.entry.booked_minutes) ?? 0,
+          confirmed_revenue: revenue,
+          accrued_salary: this.publishedStaffSalary(row.entry.salary),
+          monthly_target_rub: target,
+          target_progress_percent:
+            monthlyTargetComparable && target && revenueAmount
+              ? Math.round(
+                  ((revenueAmount.amount_major_units ?? 0) / target) * 1_000,
+                ) / 10
+              : null,
+        };
+      })
+      .sort(
+        (left, right) =>
+          (right.confirmed_revenue.status === 'available' ? 1 : 0) -
+            (left.confirmed_revenue.status === 'available' ? 1 : 0) ||
+          right.appointments - left.appointments ||
+          left.name.localeCompare(right.name),
+      );
+
+    return {
+      verified: this.businessOperationalAnalyticsVerified(published),
+      finance_verified:
+        this.record(this.record(published).finance).verified === true,
+      source: data.data_source ?? null,
+      resolved_period: this.resolvedPeriodPayload(args, window),
+      target_basis: 'calendar_month',
+      monthly_target_comparable: monthlyTargetComparable,
+      team_monthly_target_rub: monthlyTarget,
+      team_confirmed_revenue:
+        businessRevenueKopecks === null
+          ? null
+          : {
+              currency: 'RUB',
+              amount_kopecks: businessRevenueKopecks,
+              amount_major_units: this.majorUnits(businessRevenueKopecks),
+            },
+      team_target_progress_percent:
+        monthlyTargetComparable && monthlyTarget && businessRevenueKopecks
+          ? Math.round((businessRevenueKopecks / 100 / monthlyTarget) * 1_000) /
+            10
+          : null,
+      staff,
+      limitations: [
+        ...this.staffMoneyUnavailableMetrics(published),
+        ...this.cancellationUnavailableMetrics(published),
+      ],
+    };
+  }
+
+  /**
+   * Branch comparison is intentionally operational-only. YClients finance is
+   * company-scoped, so attributing the whole till to each branch would create
+   * convincing but false money figures.
+   */
+  private async compareBranches(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const allBranches = await this.prisma.branch.findMany({
+      where: { tenantId: principal.tenantId },
+      select: { id: true, name: true, address: true },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      take: 9,
+    });
+    const requestedIds = Array.isArray(args.branch_ids)
+      ? new Set(
+          args.branch_ids
+            .filter((value): value is string => typeof value === 'string')
+            .map((value) => value.trim())
+            .filter(Boolean),
+        )
+      : null;
+    const branches = allBranches.filter(
+      (branch) => !requestedIds || requestedIds.has(branch.id),
+    );
+
+    if (requestedIds) {
+      const availableIds = new Set(branches.map((branch) => branch.id));
+      const unknownIds = [...requestedIds].filter(
+        (id) => !availableIds.has(id),
+      );
+      if (unknownIds.length > 0) {
+        throw new BadRequestException('Unknown tenant branch id');
+      }
+    }
+    if (branches.length < 2) {
+      return {
+        available: false,
+        reason: 'at_least_two_tenant_branches_are_required',
+        branch_count: branches.length,
+      };
+    }
+    if (branches.length > 8 || (!requestedIds && allBranches.length > 8)) {
+      return {
+        available: false,
+        reason: 'select_between_two_and_eight_branches',
+        branch_count: allBranches.length,
+      };
+    }
+
+    const metric =
+      typeof args.metric === 'string' ? args.metric : 'appointments_completed';
+    const rows = await Promise.all(
+      branches.map(async (branch) => {
+        const result = this.record(
+          await this.queryBusinessAnalytics(principal, {
+            ...args,
+            branch_id: branch.id,
+            comparison: 'none',
+          }),
+        );
+        const metrics = this.record(result.metrics);
+        return {
+          branch: {
+            id: branch.id,
+            name: branch.name,
+            address: branch.address,
+          },
+          verified: result.verified === true,
+          source: result.source ?? null,
+          resolved_period: result.resolved_period ?? null,
+          metrics: {
+            appointments_total: this.optionalMetricNumber(
+              metrics.appointments_total,
+            ),
+            appointments_active: this.optionalMetricNumber(
+              metrics.appointments_active,
+            ),
+            appointments_completed: this.optionalMetricNumber(
+              metrics.appointments_completed,
+            ),
+            appointments_cancelled: this.optionalMetricNumber(
+              metrics.appointments_cancelled,
+            ),
+            appointments_no_show: this.optionalMetricNumber(
+              metrics.appointments_no_show,
+            ),
+            unique_clients: this.optionalMetricNumber(metrics.unique_clients),
+            booked_minutes: this.optionalMetricNumber(metrics.booked_minutes),
+          },
+        };
+      }),
+    );
+    const ranked = rows
+      .map((row) => ({
+        ...row,
+        selected_metric_value: this.optionalMetricNumber(
+          row.metrics[metric as keyof typeof row.metrics],
+        ),
+      }))
+      .sort(
+        (left, right) =>
+          (right.selected_metric_value ?? -1) -
+            (left.selected_metric_value ?? -1) ||
+          left.branch.name.localeCompare(right.branch.name),
+      );
+
+    return {
+      available: true,
+      verified: ranked.every((row) => row.verified),
+      metric,
+      branch_count: ranked.length,
+      branches: ranked,
+      limitations: [
+        {
+          key: 'branch_confirmed_revenue',
+          reason: 'yclients_finance_is_company_scoped',
+        },
+      ],
     };
   }
 
@@ -1149,11 +3298,7 @@ export class AiToolHandlerService {
         ...this.clientCohortUnavailableMetrics(current),
         ...this.cancellationUnavailableMetrics(current),
         ...this.staffMoneyUnavailableMetrics(current),
-        {
-          key: 'personal_cash_revenue',
-          reason:
-            'CRM confirms appointment and booked service value plus this employee accrued payroll, but never how much cash this employee personally brought in',
-        },
+        ...this.personalCashUnavailableMetrics(current),
         {
           key: 'other_employee_personal_data',
           reason: 'role scope permits only the current employee data',
@@ -1313,7 +3458,10 @@ export class AiToolHandlerService {
       ),
       appointments_total: this.optionalMetricNumber(appointments.total),
       appointments_active: this.optionalMetricNumber(appointments.active),
+      appointments_scheduled: this.optionalMetricNumber(appointments.scheduled),
+      appointments_completed: this.optionalMetricNumber(appointments.completed),
       appointments_cancelled: this.optionalMetricNumber(appointments.cancelled),
+      appointments_no_show: this.optionalMetricNumber(appointments.no_show),
       cancellation_rate_percent: this.optionalMetricNumber(
         appointments.cancellation_rate_percent,
       ),
@@ -1414,24 +3562,33 @@ export class AiToolHandlerService {
   /**
    * Деньги в разрезе мастера: что недоступно и почему.
    *
-   * 🔴 Выручка мастера недоступна ВСЕГДА, и это свойство источников, а не сбой.
-   * Сказать об этом обязательно: строка мастера с записями, но без денег
-   * читается как «поработал бесплатно», и модель начинает объяснять пустоту
-   * вместо того, чтобы назвать её пропуском. Начисления при этом могут быть —
-   * и тогда о них надо говорить именно как о зарплате.
+   * Финансовые операции YClients иногда связаны с записью и мастером, иногда
+   * нет. Публикуем только точные строки, а здесь называем непокрытый остаток:
+   * модель не должна ни прятать подтверждённые суммы, ни распределять кассу
+   * приблизительно по ценам записей.
    */
   private staffMoneyUnavailableMetrics(value: unknown) {
     const data = this.record(value);
     const rows = Array.isArray(data.staff_summary) ? data.staff_summary : [];
-    const metrics = [
-      {
+    const unavailableRevenueRows = rows.filter(
+      (entry) =>
+        this.record(this.record(entry).confirmed_revenue).status !==
+        'available',
+    );
+    const metrics: Array<{ key: string; reason: string }> = [];
+    if (unavailableRevenueRows.length > 0) {
+      const attribution = this.record(this.record(data.finance).revenue);
+      const coverage = this.optionalMetricNumber(
+        attribution.staff_attribution_coverage_percent,
+      );
+      metrics.push({
         key: 'staff_revenue',
         reason:
           data.data_source === 'crm'
-            ? 'per-master revenue is unavailable: the CRM confirms money for the whole company only, its financial transactions are split by sale type and by cash or card account and carry no employee, while journal prices are booked value rather than till-confirmed cash. staff_summary[].salary is accrued payroll, which is what the salon owes the master and never what the master earned for the salon'
+            ? `confirmed per-master revenue is unavailable for ${unavailableRevenueRows.length} master(s): YClients did not attribute their service financial transactions to a staff member${coverage === null ? '' : `; exact attributed coverage is ${coverage}%`}. Do not estimate the missing cash from booked appointment prices`
             : 'per-master revenue is unavailable as confirmed cash: the internal calendar stores the booked price of an appointment, which is planned value rather than a confirmed payment',
-      },
-    ];
+      });
+    }
 
     const salaryReasons = [
       ...new Set(
@@ -1453,6 +3610,22 @@ export class AiToolHandlerService {
     return metrics;
   }
 
+  private personalCashUnavailableMetrics(value: unknown) {
+    const data = this.record(value);
+    const rows = Array.isArray(data.staff_summary) ? data.staff_summary : [];
+    const own = rows.length === 1 ? this.record(rows[0]) : null;
+    if (own && this.record(own.confirmed_revenue).status === 'available') {
+      return [];
+    }
+    return [
+      {
+        key: 'personal_cash_revenue',
+        reason:
+          'confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics',
+      },
+    ];
+  }
+
   private employeeMetricSnapshot(value: unknown) {
     const data = this.record(value);
     const appointments = this.record(data.appointments);
@@ -1466,7 +3639,10 @@ export class AiToolHandlerService {
       booked_value_amount_kopecks: bookedValue?.amount_kopecks ?? null,
       appointments_total: this.optionalMetricNumber(appointments.total),
       appointments_active: this.optionalMetricNumber(appointments.active),
+      appointments_scheduled: this.optionalMetricNumber(appointments.scheduled),
+      appointments_completed: this.optionalMetricNumber(appointments.completed),
       appointments_cancelled: this.optionalMetricNumber(appointments.cancelled),
+      appointments_no_show: this.optionalMetricNumber(appointments.no_show),
       cancellation_rate_percent: this.optionalMetricNumber(
         appointments.cancellation_rate_percent,
       ),
@@ -1628,6 +3804,12 @@ export class AiToolHandlerService {
             return {
               date: item.date ?? null,
               appointments: item.appointments ?? 0,
+              total: item.total ?? item.appointments ?? 0,
+              active: item.active ?? item.appointments ?? 0,
+              scheduled: item.scheduled ?? 0,
+              completed: item.completed ?? 0,
+              cancelled: item.cancelled ?? 0,
+              no_show: item.no_show ?? 0,
               revenue: this.safeMoneyEntries(item.revenue),
             };
           })
@@ -1655,10 +3837,17 @@ export class AiToolHandlerService {
                   ? item.staff_external_id
                   : null,
               staff_name: typeof item.name === 'string' ? item.name : null,
+              total:
+                this.optionalMetricNumber(item.total) ??
+                (this.optionalMetricNumber(item.appointments) ?? 0) +
+                  (this.optionalMetricNumber(item.cancelled) ?? 0),
               appointments: item.appointments ?? 0,
+              scheduled: this.optionalMetricNumber(item.scheduled) ?? 0,
+              completed: this.optionalMetricNumber(item.completed) ?? 0,
               // Отмены по мастеру: раньше их не было ни в одном поле, и на
               // вопрос «у кого больше отмен» отвечать было нечем.
               cancelled: this.optionalMetricNumber(item.cancelled) ?? 0,
+              no_show: this.optionalMetricNumber(item.no_show) ?? 0,
               cancellation_rate_percent:
                 this.optionalMetricNumber(item.cancellation_rate_percent) ?? 0,
               unique_clients:
@@ -1687,6 +3876,10 @@ export class AiToolHandlerService {
         ? result.services.map((entry) => {
             const item = this.record(entry);
             return {
+              service_external_id:
+                typeof item.service_external_id === 'string'
+                  ? item.service_external_id
+                  : null,
               name: typeof item.name === 'string' ? item.name : 'Услуга',
               appointments: item.appointments ?? 0,
               booked_value: this.safeMoneyEntries(item.booked_value),
@@ -1851,13 +4044,33 @@ export class AiToolHandlerService {
     },
   ): Record<string, unknown> {
     const data = this.record(value);
-    const published = { ...data };
+    const published: Record<string, unknown> = { ...data };
     delete published.employee_external_id;
+    if (data.finance !== undefined) {
+      published.finance = this.publishedFinance(data.finance);
+    }
     const staffScope =
       scope ?? this.staffScope(this.staffDisplayNames(data), null);
-    const confirmedRevenue = this.staffConfirmedRevenue(data.data_source);
     return {
       ...published,
+      service_summary: Array.isArray(data.service_summary)
+        ? data.service_summary.map((entry) => {
+            const row = this.record(entry);
+            const serviceExternalId =
+              typeof row.service_external_id === 'string'
+                ? row.service_external_id
+                : null;
+            return {
+              name: typeof row.name === 'string' ? row.name : 'Услуга',
+              appointments: this.optionalMetricNumber(row.appointments) ?? 0,
+              booked_value: this.safeMoneyEntries(row.booked_value),
+              confirmed_revenue: this.serviceConfirmedRevenue(
+                data,
+                serviceExternalId,
+              ),
+            };
+          })
+        : [],
       staff_summary: this.staffRows(data)
         .filter(
           (row) =>
@@ -1867,8 +4080,15 @@ export class AiToolHandlerService {
         )
         .map((row) => ({
           name: staffScope.names.get(row.externalId as string) ?? null,
+          total:
+            this.optionalMetricNumber(row.entry.total) ??
+            (this.optionalMetricNumber(row.entry.appointments) ?? 0) +
+              (this.optionalMetricNumber(row.entry.cancelled) ?? 0),
           appointments: row.entry.appointments ?? 0,
+          scheduled: this.optionalMetricNumber(row.entry.scheduled) ?? 0,
+          completed: this.optionalMetricNumber(row.entry.completed) ?? 0,
           cancelled: this.optionalMetricNumber(row.entry.cancelled) ?? 0,
+          no_show: this.optionalMetricNumber(row.entry.no_show) ?? 0,
           cancellation_rate_percent:
             this.optionalMetricNumber(row.entry.cancellation_rate_percent) ?? 0,
           unique_clients:
@@ -1877,12 +4097,13 @@ export class AiToolHandlerService {
             this.optionalMetricNumber(row.entry.repeat_clients_in_period) ?? 0,
           revenue: this.safeMoneyEntries(row.entry.revenue),
           // 🔴 Два разных поля про деньги мастера, и перепутать их нельзя.
-          // `confirmed_revenue` — сколько он принёс в кассу; такого числа нет
-          // ни в одном источнике, поэтому оно всегда недоступно с причиной.
+          // `confirmed_revenue` — только финансовые операции услуг, которые
+          // YClients связал с записью и конкретным мастером. Несвязанный
+          // остаток не распределяется приблизительно.
           // `salary` — сколько ЕМУ начислено по расчёту зарплаты CRM. Это
           // расход салона, а не его выручка, и подменять одно другим — врать
           // и о человеке, и о салоне.
-          confirmed_revenue: confirmedRevenue,
+          confirmed_revenue: this.staffConfirmedRevenue(data, row.externalId),
           salary: this.publishedStaffSalary(row.entry.salary),
           booked_minutes: row.entry.booked_minutes ?? 0,
           services: this.staffServiceRows(row.entry),
@@ -1890,24 +4111,96 @@ export class AiToolHandlerService {
     };
   }
 
-  /**
-   * Подтверждённая касса в разрезе мастера — её нет ни у одного источника.
-   *
-   * Внешняя CRM подтверждает деньги только по компании: её финансовые операции
-   * разложены по типам продаж и счетам, но сотрудника не несут. Внутренний
-   * календарь хранит цену записи — это плановая стоимость визита, а не факт
-   * оплаты. Поэтому поле всегда `unavailable`, но с разной причиной: молчание
-   * здесь читалось бы как «мастер не заработал ничего».
-   */
-  private staffConfirmedRevenue(dataSource: unknown) {
+  /** Подтверждённая касса услуг, достоверно связанная с мастером в CRM. */
+  private staffConfirmedRevenue(
+    data: Record<string, unknown>,
+    externalId: string | null,
+  ) {
+    if (data.data_source === 'crm' && externalId) {
+      const finance = this.record(data.finance);
+      const revenue = this.record(finance.revenue);
+      const rows = Array.isArray(revenue.by_staff) ? revenue.by_staff : [];
+      const match = rows
+        .map((entry) => this.record(entry))
+        .find((entry) => entry.staff_external_id === externalId);
+      const amount = match ? this.safeMoneyAmount(match.amount) : null;
+      if (match && amount) {
+        return {
+          status: 'available',
+          basis: 'crm_financial_transaction_attribution',
+          amount,
+          transaction_count:
+            this.optionalMetricNumber(match.transaction_count) ?? 0,
+          attribution_status: revenue.staff_attribution_status ?? 'unavailable',
+          attribution_coverage_percent: this.optionalMetricNumber(
+            revenue.staff_attribution_coverage_percent,
+          ),
+          unavailable_reason: null,
+        };
+      }
+    }
     return {
       status: 'unavailable',
+      basis: null,
       amount: null,
       unavailable_reason:
-        dataSource === 'crm'
+        data.data_source === 'crm'
           ? STAFF_CONFIRMED_REVENUE_UNAVAILABLE.crm
           : STAFF_CONFIRMED_REVENUE_UNAVAILABLE.maya,
     };
+  }
+
+  /**
+   * Касса услуги публикуется только по одноуслуговым записям,
+   * которые YClients связал с подтверждённой финансовой операцией.
+   */
+  private serviceConfirmedRevenue(
+    data: Record<string, unknown>,
+    externalId: string | null,
+  ) {
+    if (data.data_source === 'crm' && externalId) {
+      const finance = this.record(data.finance);
+      const revenue = this.record(finance.revenue);
+      const rows = Array.isArray(revenue.by_service) ? revenue.by_service : [];
+      const match = rows
+        .map((entry) => this.record(entry))
+        .find((entry) => entry.service_external_id === externalId);
+      const amount = match ? this.safeMoneyAmount(match.amount) : null;
+      if (match && amount) {
+        return {
+          status: 'available',
+          basis: 'crm_single_service_transaction_attribution',
+          amount,
+          transaction_count:
+            this.optionalMetricNumber(match.transaction_count) ?? 0,
+          attribution_status:
+            revenue.service_attribution_status ?? 'unavailable',
+          attribution_coverage_percent: this.optionalMetricNumber(
+            revenue.service_attribution_coverage_percent,
+          ),
+          unavailable_reason: null,
+        };
+      }
+    }
+    return {
+      status: 'unavailable',
+      basis: null,
+      amount: null,
+      unavailable_reason:
+        data.data_source === 'crm'
+          ? 'crm_confirmed_service_revenue_not_attributed'
+          : 'internal_calendar_has_no_confirmed_service_cash',
+    };
+  }
+
+  /** Служебные CRM-ID нужны для сопоставления, но не должны уходить модели. */
+  private publishedFinance(value: unknown) {
+    const finance = this.record(value);
+    const revenue = this.record(finance.revenue);
+    const publishedRevenue = { ...revenue };
+    delete publishedRevenue.by_staff;
+    delete publishedRevenue.by_service;
+    return { ...finance, revenue: publishedRevenue };
   }
 
   /**
@@ -2083,6 +4376,16 @@ export class AiToolHandlerService {
         verified: false,
         transaction_count: null,
         total: null,
+        by_staff: [],
+        by_service: [],
+        staff_attribution_status: 'unavailable',
+        staff_attribution_coverage_percent: null,
+        unattributed_service_total: null,
+        unattributed_service_transaction_count: 0,
+        service_attribution_status: 'unavailable',
+        service_attribution_coverage_percent: null,
+        unattributed_service_breakdown_total: null,
+        unattributed_service_breakdown_transaction_count: 0,
       },
       payroll: {
         status: 'unavailable',
@@ -2168,6 +4471,21 @@ export class AiToolHandlerService {
     return (await this.reportingWindow(tenantId, args)).query;
   }
 
+  private async readRecoveredReport(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    if (!this.recoveryService) {
+      throw new Error('Recovery attribution service is unavailable');
+    }
+    const query = await this.reportingQuery(principal.tenantId, args);
+    return this.recoveryService.report(
+      principal.tenantId,
+      new Date(query.from),
+      new Date(query.to),
+    );
+  }
+
   /**
    * Окно отчёта вместе с тем, что о нём нужно сказать вслух.
    *
@@ -2220,6 +4538,16 @@ export class AiToolHandlerService {
     switch (period) {
       case 'today':
         from = todayStart;
+        // Calendar questions about "today" must include appointments later
+        // in the same local day. Finance remains sourced from completed CRM
+        // operations, so extending this read window cannot invent revenue.
+        to = new Date(
+          localDateMinuteToUtc(
+            this.shiftLocalDate(today, 1),
+            0,
+            timezone,
+          ).getTime() - 1,
+        );
         break;
       case 'yesterday': {
         const yesterday = this.shiftLocalDate(today, -1);
@@ -2404,10 +4732,94 @@ export class AiToolHandlerService {
     return `${parts.year}-${parts.month}-${parts.day}`;
   }
 
+  private localTime(value: string, timezone: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    return new Intl.DateTimeFormat('ru-RU', {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).format(date);
+  }
+
+  private clockMinutes(value: string): number {
+    const match = /^(\d{2}):(\d{2})$/.exec(value);
+    if (!match) {
+      return 0;
+    }
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    return hours * 60 + minutes;
+  }
+
   private shiftLocalDate(value: string, days: number): string {
     const date = new Date(`${value}T00:00:00.000Z`);
     date.setUTCDate(date.getUTCDate() + days);
     return date.toISOString().slice(0, 10);
+  }
+
+  private clientRecencyScore(value: string | null): number {
+    if (!value) return 0;
+    const timestamp = Date.parse(`${value.slice(0, 10)}T00:00:00.000Z`);
+    return Number.isFinite(timestamp) ? timestamp : 0;
+  }
+
+  private inactivityDays(lastVisitDate: string | null, asOf: string) {
+    if (!lastVisitDate) return null;
+    const last = this.clientRecencyScore(lastVisitDate);
+    const current = this.clientRecencyScore(asOf);
+    return last > 0 && current >= last
+      ? Math.floor((current - last) / (24 * 60 * 60 * 1_000))
+      : null;
+  }
+
+  private normalizedAppointmentStatus(
+    value: string,
+  ): 'no_show' | 'canceled' | 'completed' | 'other' {
+    const status = value
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_');
+    if (status === 'no_show' || status === 'noshow') return 'no_show';
+    if (status === 'canceled' || status === 'cancelled') return 'canceled';
+    if (status === 'completed' || status === 'done' || status === 'visited') {
+      return 'completed';
+    }
+    return 'other';
+  }
+
+  /** YClients journal accepts at most a 31-day interval per request. */
+  private async readJournalRangeInChunks(
+    tenantId: string,
+    fromIso: string,
+    toIso: string,
+  ): Promise<CrmJournalAppointment[]> {
+    const from = new Date(fromIso);
+    const to = new Date(toIso);
+    const unique = new Map<string, CrmJournalAppointment>();
+    const maxChunkMs = 30 * 24 * 60 * 60 * 1_000;
+    let cursor = from.getTime();
+    while (cursor <= to.getTime()) {
+      const chunkEnd = Math.min(to.getTime(), cursor + maxChunkMs - 1);
+      const journal = await this.crmService.getJournal(
+        tenantId,
+        {
+          from: new Date(cursor).toISOString(),
+          to: new Date(chunkEnd).toISOString(),
+        },
+        { includeCanceled: true },
+      );
+      for (const appointment of journal.appointments) {
+        unique.set(appointment.id, appointment);
+      }
+      cursor = chunkEnd + 1;
+    }
+    return [...unique.values()].sort((left, right) =>
+      left.start_at.localeCompare(right.start_at),
+    );
   }
 
   private shiftLocalMonth(value: string, months: number): string {
@@ -2418,6 +4830,54 @@ export class AiToolHandlerService {
 
   private localWeekday(value: string): number {
     return new Date(`${value}T00:00:00.000Z`).getUTCDay();
+  }
+
+  private revenueForecastHorizon(
+    period: string,
+    namedMonth: string | null,
+    timezone: string,
+  ) {
+    const today = this.localDate(new Date(), timezone);
+    const year = Number(today.slice(0, 4));
+    const month = Number(today.slice(5, 7));
+    const day = Number(today.slice(8, 10));
+    if (period === 'week_to_date') {
+      return {
+        status: 'open',
+        unit: 'day',
+        elapsed_units: ((this.localWeekday(today) + 6) % 7) + 1,
+        total_units: 7,
+      };
+    }
+    if (
+      period === 'month_to_date' ||
+      (period === 'named_month' && namedMonth === today.slice(0, 7))
+    ) {
+      return {
+        status: 'open',
+        unit: 'day',
+        elapsed_units: day,
+        total_units: new Date(Date.UTC(year, month, 0)).getUTCDate(),
+      };
+    }
+    if (period === 'year_to_date') {
+      const start = Date.UTC(year, 0, 1);
+      const current = Date.UTC(year, month - 1, day);
+      return {
+        status: 'open',
+        unit: 'day',
+        elapsed_units: Math.floor((current - start) / 86_400_000) + 1,
+        total_units: Math.floor(
+          (Date.UTC(year + 1, 0, 1) - start) / 86_400_000,
+        ),
+      };
+    }
+    return {
+      status: 'closed_or_fixed',
+      unit: 'period',
+      elapsed_units: 1,
+      total_units: 1,
+    };
   }
 
   private safeAppointment(value: unknown) {
@@ -2565,6 +5025,19 @@ export class AiToolHandlerService {
       return {};
     }
     return value as Record<string, unknown>;
+  }
+
+  private allowedStringValues<T extends string>(
+    value: unknown,
+    allowed: readonly T[],
+    fallback: readonly T[],
+  ): T[] {
+    if (!Array.isArray(value)) return [...fallback];
+    const accepted = value.filter(
+      (item): item is T =>
+        typeof item === 'string' && allowed.includes(item as T),
+    );
+    return accepted.length > 0 ? [...new Set(accepted)] : [...fallback];
   }
 
   private recordOrNull(value: unknown): Record<string, unknown> | null {

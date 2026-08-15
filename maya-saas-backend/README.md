@@ -171,7 +171,7 @@ AI_TOOL_STALE_EXECUTION_MINUTES="15"
 AI_CORE_PROVIDER="auto"
 AI_CORE_TIMEOUT_MS="15000"
 AI_CORE_MAX_TOOL_STEPS="2"
-DEEPSEEK_AI_CORE_MODEL=""
+DEEPSEEK_AI_CORE_MODEL="deepseek-v4-pro"
 OPENAI_AI_CORE_MODEL=""
 PORT=3000
 HOST="0.0.0.0"
@@ -185,7 +185,7 @@ PWA_PUBLIC_API_URL="http://127.0.0.1:3000/api"
 AI_ONBOARDING_PROVIDER="auto"
 DEEPSEEK_API_KEY=""
 DEEPSEEK_BASE_URL="https://api.deepseek.com"
-DEEPSEEK_AI_ONBOARDING_MODEL="deepseek-v4-flash"
+DEEPSEEK_AI_ONBOARDING_MODEL="deepseek-v4-pro"
 DEEPSEEK_AI_ONBOARDING_TIMEOUT_MS="12000"
 DEEPSEEK_THINKING="disabled"
 OPENAI_API_KEY=""
@@ -264,7 +264,7 @@ Conversational onboarding:
 - `AI_ONBOARDING_PROVIDER=deepseek`: use only the DeepSeek JSON Output path; a missing or unavailable key falls back safely without silently switching providers
 - `AI_ONBOARDING_PROVIDER=openai`: use only OpenAI strict Structured Outputs
 - `AI_ONBOARDING_PROVIDER=safe`: force the deterministic, offline Russian parser
-- `DEEPSEEK_AI_ONBOARDING_MODEL`: privacy-redacted semantic interpreter; defaults to `deepseek-v4-flash`
+- `DEEPSEEK_AI_ONBOARDING_MODEL`: privacy-redacted semantic interpreter; defaults to `deepseek-v4-pro`
 - `DEEPSEEK_THINKING=disabled`: keeps the short structured onboarding path fast and avoids persisting reasoning content
 - `OPENAI_AI_ONBOARDING_MODEL`: model used only for privacy-redacted semantic interpretation
 - Trial activation tokens are created only after the MAYA OS swipe and grant 10 days of full access only after tenant registration completes

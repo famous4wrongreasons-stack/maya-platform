@@ -1,5 +1,6 @@
 import {
   composeDailyReport,
+  composeMasterMorningBrief,
   composeMorningBrief,
 } from './owner-reports.composers';
 
@@ -22,6 +23,30 @@ describe('owner-reports composers', () => {
     expect(result.bodyText).toContain('14 записей');
     expect(result.bodyText).toContain('Недозагружены');
     expect(result.payload.booked).toBe(14);
+  });
+
+  it('builds a private morning plan for a linked master', () => {
+    const result = composeMasterMorningBrief({
+      localDate: '2026-08-08',
+      masterName: 'Илья',
+      overview: {
+        appointments: {
+          total: 7,
+          active: 6,
+          scheduled: 5,
+          completed: 1,
+          cancelled: 1,
+          no_show: 0,
+          booked_minutes: 360,
+        },
+      },
+    });
+
+    expect(result.title).toContain('08.08');
+    expect(result.bodyText).toContain('Доброе утро, Илья');
+    expect(result.bodyText).toContain('Записей: 7');
+    expect(result.bodyText).toContain('Совет MAYA');
+    expect(result.payload.kind).toBe('master_morning_brief');
   });
 
   it('builds an evening cash/card report', () => {

@@ -28,6 +28,7 @@ import {
   AppliedStaffScheduleDayChange,
   CrmAdapterConfig,
   CrmAppointmentDetail,
+  CrmAppointmentRevenueSnapshot,
   CrmCompanyProfile,
   CrmFinancialSummary,
   CrmRevenueSummary,
@@ -99,6 +100,14 @@ export type CrmImportPreview = {
 @Injectable()
 export class CrmService {
   private readonly logger = new Logger(CrmService.name);
+  private readonly adapterCache = new Map<
+    string,
+    {
+      signature: string;
+      expiresAt: number;
+      adapter: CRMAdapter;
+    }
+  >();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -359,6 +368,10 @@ export class CrmService {
   ) {
     const staged = await this.stageIntegration(tenantId, dto);
     const connection = await this.activateVerifiedIntegration(tenantId);
+    await this.syncTenantPresentationFromCrm(
+      this.tenantContext.assertTenantId(tenantId),
+      staged.preview.company,
+    );
 
     return {
       ...connection,
@@ -398,6 +411,31 @@ export class CrmService {
       connection: this.serializeIntegration(integration),
       next_action: this.resolveNextAction(integration.status),
     };
+  }
+
+  /**
+   * Public company profile from the active tenant CRM connection.
+   *
+   * This method deliberately returns only the provider public profile. Tokens,
+   * adapter settings and integration records never leave CrmService.
+   */
+  async getCompanyProfile(tenantId: string): Promise<CrmCompanyProfile> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.getCompanyProfile) {
+      throw new ConflictException({
+        message: 'CRM company profile is not available for this provider.',
+        error: { code: 'crm_company_profile_not_supported' },
+      });
+    }
+    const profile = await adapter.getCompanyProfile();
+    if (!profile) {
+      throw new ConflictException({
+        message: 'CRM company profile is unavailable.',
+        error: { code: 'crm_company_profile_unavailable' },
+      });
+    }
+    return profile;
   }
 
   async getImportPreview(tenantId: string) {
@@ -486,10 +524,96 @@ export class CrmService {
     this.logger.log(`Tenant timezone set from CRM: ${timezone}`);
   }
 
+  private safeRemoteLogoUrl(value: string | null | undefined): string | null {
+    if (!value) return null;
+
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password) {
+        return null;
+      }
+      return url.toString();
+    } catch {
+      return null;
+    }
+  }
+
+  private isTenantUploadedLogo(value: string | null | undefined): boolean {
+    if (!value) return false;
+
+    try {
+      const url = new URL(value, 'https://maya.invalid');
+      return url.pathname.startsWith('/api/public/uploads/tenant-logos/');
+    } catch {
+      return false;
+    }
+  }
+
+  private async syncTenantBrandingFromCrm(
+    tenantId: string,
+    profile: CrmCompanyProfile | null,
+  ): Promise<void> {
+    const logoUrl = this.safeRemoteLogoUrl(profile?.logo_url);
+    if (!logoUrl) return;
+
+    const current = await this.prisma.brandingSettings.findUnique({
+      where: { tenantId },
+      select: { logoUrl: true },
+    });
+
+    // A logo uploaded explicitly in MAYA always wins over the CRM copy.
+    if (this.isTenantUploadedLogo(current?.logoUrl)) return;
+
+    await this.prisma.brandingSettings.upsert({
+      where: { tenantId },
+      create: {
+        tenantId,
+        appName: profile?.title?.trim() || undefined,
+        logoUrl,
+      },
+      update: { logoUrl },
+    });
+  }
+
+  private async loadCompanyProfileForRefresh(
+    adapter: CRMAdapter,
+    tenantId: string,
+  ): Promise<CrmCompanyProfile | null> {
+    if (!adapter.getCompanyProfile) return null;
+
+    try {
+      return await adapter.getCompanyProfile();
+    } catch (error) {
+      this.logger.warn(
+        `CRM company profile refresh deferred tenant=${tenantId}: ${this.safeErrorCode(error)}`,
+      );
+      return null;
+    }
+  }
+
+  private async syncTenantPresentationFromCrm(
+    tenantId: string,
+    profile: CrmCompanyProfile | null,
+  ): Promise<void> {
+    if (!profile) return;
+
+    try {
+      await Promise.all([
+        this.syncTenantTimezoneFromCrm(tenantId, profile),
+        this.syncTenantBrandingFromCrm(tenantId, profile),
+      ]);
+    } catch (error) {
+      // Presentation refresh must never invalidate an otherwise healthy CRM.
+      this.logger.warn(
+        `CRM tenant presentation refresh deferred tenant=${tenantId}: ${this.safeErrorCode(error)}`,
+      );
+    }
+  }
+
   async activateIntegration(tenantId: string) {
     const preview = await this.getImportPreview(tenantId);
     const connection = await this.activateVerifiedIntegration(tenantId);
-    await this.syncTenantTimezoneFromCrm(
+    await this.syncTenantPresentationFromCrm(
       this.tenantContext.assertTenantId(tenantId),
       preview.preview.company,
     );
@@ -514,8 +638,12 @@ export class CrmService {
       if (!result.ok) {
         throw new Error('CRM connection check failed');
       }
-      const team = await this.loadTeamMembers(adapter, scopedTenantId);
+      const [team, company] = await Promise.all([
+        this.loadTeamMembers(adapter, scopedTenantId),
+        this.loadCompanyProfileForRefresh(adapter, scopedTenantId),
+      ]);
       await this.reconcileCrmTeamAccess(scopedTenantId, team);
+      await this.syncTenantPresentationFromCrm(scopedTenantId, company);
 
       const checkedAt = new Date();
       const status =
@@ -638,6 +766,25 @@ export class CrmService {
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getStaff(scopedTenantId);
+  }
+
+  async getTeamMembers(tenantId: string): Promise<CrmTeamMember[]> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return (await this.internalCalendarService.listStaff(scopedTenantId)).map(
+        (member) => ({
+          ...member,
+          bookable: true,
+          suggested_role: 'staff' as const,
+        }),
+      );
+    }
+
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    return this.loadTeamMembers(adapter, scopedTenantId);
   }
 
   async getAvailableSlots(
@@ -1016,6 +1163,19 @@ export class CrmService {
     });
   }
 
+  /**
+   * Internal scheduler access to the CRM phone attached to one appointment.
+   * This method is intentionally available only as an in-process service call:
+   * no controller exposes it and tenant context is still mandatory.
+   */
+  async getAppointmentDetailForSystem(
+    tenantId: string,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    return this.loadAppointmentDetail(scopedTenantId, externalId);
+  }
+
   async getAppointmentDetail(
     tenantId: string,
     actor: AuthenticatedUser,
@@ -1179,6 +1339,32 @@ export class CrmService {
     return adapter.searchClients({ tenantId: scopedTenantId, query });
   }
 
+  async getClientRegistry(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientRegistry',
+      'crm_client_registry_not_supported',
+    );
+
+    return adapter.getClientRegistry({ tenantId: scopedTenantId });
+  }
+
+  async getClientVisitHistory(tenantId: string, clientId: string, limit = 30) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientVisitHistory',
+      'crm_client_history_not_supported',
+    );
+
+    return adapter.getClientVisitHistory({
+      tenantId: scopedTenantId,
+      clientId,
+      limit,
+    });
+  }
+
   async getFinancialSummary(
     tenantId: string,
     query: { from: string; to: string },
@@ -1279,6 +1465,68 @@ export class CrmService {
     });
   }
 
+  async getAppointmentRevenue(
+    tenantId: string,
+    query: { from: string; to: string; externalIds: string[] },
+  ): Promise<CrmAppointmentRevenueSnapshot> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+    const externalIds = [
+      ...new Set(
+        query.externalIds
+          .map((value) => String(value).trim())
+          .filter((value) => value.length > 0),
+      ),
+    ];
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM appointment revenue range is invalid.',
+        error: { code: 'crm_appointment_revenue_range_invalid' },
+      });
+    }
+    if (to.getTime() - from.getTime() > 366 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM appointment revenue range must not exceed 366 days.',
+        error: { code: 'crm_appointment_revenue_range_too_large' },
+      });
+    }
+    if (externalIds.length > 2_000) {
+      throw new BadRequestException({
+        message: 'Too many CRM appointments requested for one report.',
+        error: { code: 'crm_appointment_revenue_limit_exceeded' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+    if (!adapter.getAppointmentRevenue) {
+      throw new ConflictException({
+        message: 'CRM appointment revenue attribution is not available.',
+        error: { code: 'crm_appointment_revenue_not_supported' },
+      });
+    }
+
+    return adapter.getAppointmentRevenue({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      externalIds,
+    });
+  }
+
   async getClientLoyalty(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
@@ -1331,10 +1579,32 @@ export class CrmService {
       });
     }
 
-    return this.adapterFactory.create(
+    const signature = [
+      integration.id,
+      integration.provider,
+      integration.updatedAt instanceof Date
+        ? integration.updatedAt.getTime()
+        : String(integration.updatedAt ?? ''),
+    ].join('|');
+    const cached = this.adapterCache.get(scopedTenantId);
+    if (
+      cached &&
+      cached.signature === signature &&
+      cached.expiresAt > Date.now()
+    ) {
+      return cached.adapter;
+    }
+
+    const adapter = this.adapterFactory.create(
       integration.provider as CrmProvider,
       this.createAdapterConfig(integration),
     );
+    this.adapterCache.set(scopedTenantId, {
+      signature,
+      expiresAt: Date.now() + 5 * 60 * 1_000,
+      adapter,
+    });
+    return adapter;
   }
 
   async getCalendarSource(tenantId: string): Promise<CalendarSource> {

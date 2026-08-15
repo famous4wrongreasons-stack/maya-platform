@@ -60,7 +60,7 @@ describe('expenses.create end to end', () => {
       status: 'approval_required',
       approval: {
         tool_name: 'expenses.create',
-        approval_policy: 'owner',
+        approval_policy: 'actor',
         risk_tier: 'high_write',
         payload_preview: {
           action: 'create_expense',
@@ -161,20 +161,41 @@ describe('expenses.create end to end', () => {
     expect(harness.store.expenses).toHaveLength(0);
   });
 
-  it('lets an accountant ask but leaves the decision to an owner', async () => {
+  it('does not expose expense writes to an accountant', async () => {
     const harness = createHarness();
     const accountant = { ...owner, role: UserRole.ACCOUNTANT };
+
+    await expect(
+      harness.run(() =>
+        harness.runtime.execute(accountant, 'expenses.create', {
+          arguments: { category: 'supplies', amount_rubles: 4_500 },
+          surface: 'native',
+          idempotencyKey: IDEMPOTENCY_KEY,
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(harness.store.approvals).toHaveLength(0);
+    expect(harness.store.expenses).toHaveLength(0);
+  });
+
+  it('allows only the requesting owner id to approve the expense', async () => {
+    const harness = createHarness();
     const requested = (await harness.run(() =>
-      harness.runtime.execute(accountant, 'expenses.create', {
+      harness.runtime.execute(owner, 'expenses.create', {
         arguments: { category: 'supplies', amount_rubles: 4_500 },
         surface: 'native',
         idempotencyKey: IDEMPOTENCY_KEY,
       }),
     )) as { approval: { id: string; payload_hash: string } };
+    const anotherOwner = {
+      ...owner,
+      userId: 'owner_87654321',
+      membershipId: 'membership-b',
+    };
 
     await expect(
       harness.run(() =>
-        harness.runtime.approve(accountant, requested.approval.id, {
+        harness.runtime.approve(anotherOwner, requested.approval.id, {
           payloadHash: requested.approval.payload_hash,
         }),
       ),
@@ -237,6 +258,9 @@ function createHarness() {
       ),
       findMany: jest.fn().mockResolvedValue([]),
       delete: jest.fn(),
+    },
+    expensePeriodDeclaration: {
+      deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
     tenant: {
       findUnique: jest.fn().mockResolvedValue({

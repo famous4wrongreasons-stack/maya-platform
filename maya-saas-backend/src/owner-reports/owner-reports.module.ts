@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { OperationsAnalyticsModule } from '../analytics/operations-analytics.module';
+import { DashboardPreferencesModule } from '../dashboard-preferences/dashboard-preferences.module';
 import { InboxModule } from '../inbox/inbox.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
@@ -12,6 +13,7 @@ import { OwnerReportsService } from './owner-reports.service';
     PrismaModule,
     TenancyModule,
     OperationsAnalyticsModule,
+    DashboardPreferencesModule,
     InboxModule,
   ],
   providers: [OwnerReportsService, OwnerReportsSchedulerService],

@@ -24,12 +24,26 @@ describe('ExpensesService', () => {
     createdAt: new Date('2026-07-10T10:00:00.000Z'),
     updatedAt: new Date('2026-07-10T10:00:00.000Z'),
   };
+  const declaration = {
+    id: 'declaration-a',
+    tenantId: 'tenant-a',
+    declaredById: 'owner-a',
+    periodFromDay: '2026-07-01',
+    periodToDay: '2026-07-31',
+    idempotencyKey: 'declaration-key',
+    createdAt: new Date('2026-08-01T10:00:00.000Z'),
+    updatedAt: new Date('2026-08-01T10:00:00.000Z'),
+  };
 
   const createService = (
     overrides: {
       findFirst?: jest.Mock;
       create?: jest.Mock;
       findMany?: jest.Mock;
+      declarationFindFirst?: jest.Mock;
+      declarationFindUnique?: jest.Mock;
+      declarationUpsert?: jest.Mock;
+      declarationDeleteMany?: jest.Mock;
     } = {},
   ) => {
     const tenantContext = new TenantContextService();
@@ -49,6 +63,15 @@ describe('ExpensesService', () => {
       });
     const expenseFindFirst =
       overrides.findFirst ?? jest.fn().mockResolvedValue(null);
+    const declarationFindFirst =
+      overrides.declarationFindFirst ?? jest.fn().mockResolvedValue(null);
+    const declarationFindUnique =
+      overrides.declarationFindUnique ?? jest.fn().mockResolvedValue(null);
+    const declarationUpsert =
+      overrides.declarationUpsert ?? jest.fn().mockResolvedValue(declaration);
+    const declarationDeleteMany =
+      overrides.declarationDeleteMany ??
+      jest.fn().mockResolvedValue({ count: 0 });
     const assertBranchBelongsToTenantMock = jest
       .fn()
       .mockResolvedValue(undefined);
@@ -59,6 +82,12 @@ describe('ExpensesService', () => {
         findFirst: expenseFindFirst,
         delete: jest.fn().mockResolvedValue(expense),
       },
+      expensePeriodDeclaration: {
+        findFirst: declarationFindFirst,
+        findUnique: declarationFindUnique,
+        upsert: declarationUpsert,
+        deleteMany: declarationDeleteMany,
+      },
     } as unknown as PrismaService;
     const tenantsService = {
       assertBranchBelongsToTenant: assertBranchBelongsToTenantMock,
@@ -67,9 +96,8 @@ describe('ExpensesService', () => {
       encrypt: jest.fn((value: string) => `encrypted:${value}`),
       decrypt: jest.fn((value: string) => value.replace('encrypted:', '')),
     } as unknown as EncryptionService;
-    const auditLogService = {
-      log: jest.fn().mockResolvedValue(undefined),
-    } as unknown as AuditLogService;
+    const auditLog = jest.fn().mockResolvedValue(undefined);
+    const auditLogService = { log: auditLog } as unknown as AuditLogService;
 
     return {
       tenantContext,
@@ -77,9 +105,14 @@ describe('ExpensesService', () => {
       expenseCreate,
       expenseFindMany,
       expenseFindFirst,
+      declarationFindFirst,
+      declarationFindUnique,
+      declarationUpsert,
+      declarationDeleteMany,
       tenantsService,
       encryptionService,
       auditLogService,
+      auditLog,
       assertBranchBelongsToTenantMock,
       getCreatedData: () => createdData,
       getListTenantId: () => listTenantId,
@@ -130,6 +163,60 @@ describe('ExpensesService', () => {
       category_known: true,
       source: 'manual',
     });
+    expect(setup.declarationDeleteMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-a',
+        periodFromDay: { lte: '2026-07-10' },
+        periodToDay: { gte: '2026-07-10' },
+      },
+    });
+  });
+
+  it('stores an audited declaration that the owner entered every additional expense', async () => {
+    const setup = createService();
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.declarePeriodComplete(
+        'tenant-a',
+        'owner-a',
+        '2026-07-01',
+        '2026-07-31',
+        'declaration-key',
+      ),
+    );
+
+    expect(setup.declarationUpsert).toHaveBeenCalledWith({
+      where: {
+        tenantId_periodFromDay_periodToDay: {
+          tenantId: 'tenant-a',
+          periodFromDay: '2026-07-01',
+          periodToDay: '2026-07-31',
+        },
+      },
+      create: {
+        tenantId: 'tenant-a',
+        declaredById: 'owner-a',
+        periodFromDay: '2026-07-01',
+        periodToDay: '2026-07-31',
+        idempotencyKey: 'declaration-key',
+      },
+      update: {
+        declaredById: 'owner-a',
+        idempotencyKey: 'declaration-key',
+      },
+    });
+    expect(result).toMatchObject({
+      tenant_id: 'tenant-a',
+      period_from_day: '2026-07-01',
+      period_to_day: '2026-07-31',
+      declared_complete: true,
+    });
+    expect(setup.auditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'expense.period_declared_complete',
+        entityId: 'declaration-a',
+      }),
+    );
   });
 
   it('refuses a category outside the dictionary before touching the database', async () => {

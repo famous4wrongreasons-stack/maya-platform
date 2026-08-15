@@ -49,8 +49,21 @@ type AnalyticsBreakdown = {
   revenueByCurrency: Map<string, number>;
 };
 
+type AnalyticsDailyBreakdown = AnalyticsBreakdown & {
+  total: number;
+  active: number;
+  scheduled: number;
+  completed: number;
+  cancelled: number;
+  noShow: number;
+};
+
 type AnalyticsStaffBreakdown = AnalyticsBreakdown & {
   name: string | null;
+  total: number;
+  scheduled: number;
+  completed: number;
+  noShow: number;
   bookedMinutes: number;
   /** Отменённые записи мастера. Считаются отдельным проходом по отменам. */
   cancelled: number;
@@ -104,42 +117,12 @@ type ProfitMoney = {
   amount_major_units: number;
 };
 
-/**
- * Категории расходов, которые владелец обязан внести САМ.
- *
- * 🔴 Это гейт полноты, а не украшение. Салон, у которого за месяц забит один
- * расход на 500 ₽, при вычитании «выручка минус расходы» показывает прибыль
- * почти равную выручке — и владелец принимает решения по числу, которое
- * завышено в разы. Аренда есть у любого салона всегда; её нет — считать нечего,
- * и надо назвать вслух, какой именно статьи не хватает, а не выдавать цифру.
- *
- * 🔴 ЗАРПЛАТЫ ЗДЕСЬ НЕТ И БЫТЬ НЕ МОЖЕТ. Ручной ввод зарплаты запрещён
- * (см. `manualEntry: 'blocked'` в справочнике категорий): начисления приходят
- * расчётом из CRM, и ручной дубль сложил бы фонд оплаты труда сам с собой.
- * Пока зарплата стояла в этом списке, получался замкнутый круг: гейт требовал
- * внести то, что внести физически нельзя, и MAYA советовала владельцу
- * невозможное. Отсутствие расчёта CRM — это ОТДЕЛЬНАЯ причина недоступности
- * прибыли, а не пункт списка «что внести».
- */
-export const REQUIRED_PROFIT_EXPENSE_CATEGORIES = ['rent'] as const;
-
-/**
- * Нижняя граница правдоподобия статьи расходов — доля от подтверждённой кассы.
- *
- * 🔴 Гейт «сумма больше нуля» обходится одной копейкой. Расход в 1 ₽ с
- * категорией «аренда» закрывал требование полноты, и прибыль выходила почти
- * равной выручке — то самое завышенное в разы число, ради борьбы с которым гейт
- * и написан. Порог отсекает не «маленькую аренду», а «внесено не всё»: салон,
- * пробивший за период кассу, платит за помещение долю этой кассы, а не сотые
- * её процента.
- *
- * 5% выбраны с большим запасом вниз. Аренда в барбершопе — обычно 10–20% от
- * оборота, и даже сильно недозагруженный месяц не уводит её ниже пяти. Всё, что
- * ниже, — это почти наверняка один чек вместо месячного платежа. Ошибка порога
- * в безопасную сторону: MAYA скажет «похоже, внесено не всё» и назовёт статью,
- * а не покажет завышенную прибыль.
- */
-export const MIN_PLAUSIBLE_EXPENSE_SHARE_OF_CONFIRMED_REVENUE = 0.05;
+type ExpensePeriodDeclarationEvidence = {
+  periodFromDay: string;
+  periodToDay: string;
+  createdAt: Date;
+  updatedAt: Date;
+} | null;
 
 /** Категория, из которой берётся стоимость привлечения нового клиента. */
 export const MARKETING_EXPENSE_CATEGORY = 'marketing';
@@ -221,7 +204,6 @@ export const NET_PROFIT_UNAVAILABLE = {
   confirmedRevenueMissing:
     'profit_requires_till_confirmed_cash_and_there_is_none_for_this_period',
   expenseLedgerUnavailable: 'expense_ledger_did_not_answer_for_this_period',
-  incompleteExpenses: 'required_expense_categories_are_missing_for_this_period',
   /**
    * 🔴 Зарплату владелец внести не может — только CRM. Поэтому её отсутствие
    * это не «внесите зарплату», а «расчёта за период нет». Чаще всего причина
@@ -229,12 +211,6 @@ export const NET_PROFIT_UNAVAILABLE = {
    */
   payrollMissing:
     'salary_comes_only_from_the_crm_payroll_calculation_and_the_crm_returned_none_for_this_period',
-  /**
-   * Статьи есть, но суммы неправдоподобно малы относительно кассы. Это не
-   * «полно» и не «пусто», а «похоже, внесено не всё» — отдельное состояние.
-   */
-  understatedExpenses:
-    'recorded_expense_categories_are_implausibly_small_against_the_confirmed_cash_of_this_period_and_look_partially_entered',
   currencyMismatch:
     'expenses_and_confirmed_cash_are_recorded_in_different_currencies_and_cannot_be_netted',
   /**
@@ -316,7 +292,21 @@ export class OperationsAnalyticsService {
   ) {}
 
   async getBusinessOverview(tenantId: string, query: AnalyticsRangeQueryDto) {
-    return this.buildOverview(tenantId, query, null);
+    return this.buildOverview(tenantId, query, null, false);
+  }
+
+  /**
+   * Расширенный операционный срез для MAYA и фоновых отчётов.
+   *
+   * HTTP-кабинет сохраняет прежний контракт `getBusinessOverview`, а MAYA
+   * получает точные корзины статусов и не смешивает будущие, проведённые,
+   * отменённые записи и неявки.
+   */
+  async getBusinessOperationalOverview(
+    tenantId: string,
+    query: AnalyticsRangeQueryDto,
+  ) {
+    return this.buildOverview(tenantId, query, null, true);
   }
 
   /**
@@ -496,8 +486,9 @@ export class OperationsAnalyticsService {
    * Три правила, ради которых метод и написан:
    * 1. Прибыль считается от ПОДТВЕРЖДЁННОЙ кассы (финансовые операции CRM), а
    *    не от суммы цен из журнала записей. Записанное ≠ пробитое.
-   * 2. Прибыль показывается только при полноте расходов: нет аренды или
-   *    зарплаты — вместо числа отказ с ИМЕНЕМ недостающей категории.
+   * 2. Не внесённые дополнительные расходы считаются нулевыми, но это допущение
+   *    явно возвращается в контракте. Любой позднее внесённый расход пересчитает
+   *    результат; аренда и другие статьи не выдумываются.
    * 3. Зарплата берётся из расчёта CRM и входит в расходы ровно один раз;
    *    ручные записи о зарплате при этом отбрасываются, а не суммируются.
    *
@@ -541,22 +532,37 @@ export class OperationsAnalyticsService {
           CONFIRMED_REVENUE_UNAVAILABLE.branchScope,
         ),
         ledger: this.emptyLedger(NET_PROFIT_UNAVAILABLE.branchScope),
+        expenseDeclaration: null,
         netProfitReason: NET_PROFIT_UNAVAILABLE.branchScope,
         acquisitionReason: CLIENT_ACQUISITION_COST_UNAVAILABLE.branchScope,
       });
     }
 
-    const [finance, expenseRows, overview] = await Promise.all([
-      external
-        ? context?.finance !== undefined
-          ? Promise.resolve(context.finance)
-          : this.getBusinessFinance(scopedTenantId, query).catch(() => null)
-        : Promise.resolve(null),
-      this.loadCategorisedExpenses(scopedTenantId, from, to),
-      context?.overview !== undefined
-        ? Promise.resolve(context.overview)
-        : this.getBusinessOverview(scopedTenantId, query).catch(() => null),
-    ]);
+    const periodFromDay = this.dateKey(from, tenant.defaultTimezone);
+    const periodToDay = this.dateKey(to, tenant.defaultTimezone);
+    const [finance, expenseRows, overview, expenseDeclaration] =
+      await Promise.all([
+        external
+          ? context?.finance !== undefined
+            ? Promise.resolve(context.finance)
+            : this.getBusinessFinance(scopedTenantId, query).catch(() => null)
+          : Promise.resolve(null),
+        this.loadCategorisedExpenses(scopedTenantId, from, to),
+        context?.overview !== undefined
+          ? Promise.resolve(context.overview)
+          : this.getBusinessOverview(scopedTenantId, query).catch(() => null),
+        typeof this.prisma.expensePeriodDeclaration?.findUnique === 'function'
+          ? this.prisma.expensePeriodDeclaration.findUnique({
+              where: {
+                tenantId_periodFromDay_periodToDay: {
+                  tenantId: scopedTenantId,
+                  periodFromDay,
+                  periodToDay,
+                },
+              },
+            })
+          : Promise.resolve(null),
+      ]);
 
     const revenue = this.confirmedRevenue(external, finance);
     const ledger = this.expenseLedger(expenseRows, finance);
@@ -566,6 +572,7 @@ export class OperationsAnalyticsService {
       revenue,
       ledger,
       overview,
+      expenseDeclaration,
     });
   }
 
@@ -573,6 +580,24 @@ export class OperationsAnalyticsService {
     tenantId: string,
     userId: string,
     query: AnalyticsRangeQueryDto,
+  ) {
+    return this.getEmployeeOverviewInternal(tenantId, userId, query, false);
+  }
+
+  /** Расширенный личный срез мастера для MAYA и утреннего брифинга. */
+  async getEmployeeOperationalOverview(
+    tenantId: string,
+    userId: string,
+    query: AnalyticsRangeQueryDto,
+  ) {
+    return this.getEmployeeOverviewInternal(tenantId, userId, query, true);
+  }
+
+  private async getEmployeeOverviewInternal(
+    tenantId: string,
+    userId: string,
+    query: AnalyticsRangeQueryDto,
+    includeOperationalStatusBuckets: boolean,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const tenant = await this.prisma.tenant.findUnique({
@@ -619,6 +644,7 @@ export class OperationsAnalyticsService {
       scopedTenantId,
       query,
       providerId,
+      includeOperationalStatusBuckets,
     );
     return {
       ...overview,
@@ -641,6 +667,7 @@ export class OperationsAnalyticsService {
     tenantId: string,
     query: AnalyticsRangeQueryDto,
     staffExternalId: string | null,
+    includeOperationalStatusBuckets: boolean,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const { from, to } = this.parseRange(query);
@@ -742,6 +769,7 @@ export class OperationsAnalyticsService {
       to,
       external ? 'crm' : 'maya',
       this.clientCohortHistory(cohortWindow, cohortClientIds),
+      includeOperationalStatusBuckets,
     );
   }
 
@@ -893,26 +921,39 @@ export class OperationsAnalyticsService {
     }
 
     const maxChunkMs = 31 * 24 * 60 * 60 * 1000;
-    const journals = [];
+    const ranges: Array<{ from: string; to: string }> = [];
     let cursor = from.getTime();
     while (cursor < to.getTime()) {
       const chunkTo = Math.min(cursor + maxChunkMs, to.getTime());
-      journals.push(
-        // 🔴 Аналитике отмены нужны. Без этого флага отменённая запись не
-        // доходит сюда вообще, счётчик отмен всегда ноль, и владельцу
-        // отвечали «отмен нет (0%)» вместо «не вижу». Сетка расписания флаг не
-        // ставит и отменённых визитов по-прежнему не показывает.
-        await this.crmService.getJournal(
-          tenantId,
-          {
-            from: new Date(cursor).toISOString(),
-            to: new Date(chunkTo).toISOString(),
-            ...(providerId ? { providerId } : {}),
-          },
-          { includeCanceled: true },
+      ranges.push({
+        from: new Date(cursor).toISOString(),
+        to: new Date(chunkTo).toISOString(),
+      });
+      cursor = chunkTo;
+    }
+
+    const journals = [];
+    // YClients ограничивает журнал 31 днём. Независимые куски читаем волнами,
+    // чтобы 90-дневная история не ждала три сетевых round-trip подряд, но и
+    // не создавала неограниченный всплеск запросов на длинном отчёте.
+    for (let index = 0; index < ranges.length; index += 3) {
+      const wave = await Promise.all(
+        ranges.slice(index, index + 3).map((range) =>
+          // 🔴 Аналитике отмены нужны. Без этого флага отменённая запись не
+          // доходит сюда вообще, счётчик отмен всегда ноль, и владельцу
+          // отвечали «отмен нет (0%)» вместо «не вижу». Сетка расписания флаг
+          // не ставит и отменённых визитов по-прежнему не показывает.
+          this.crmService.getJournal(
+            tenantId,
+            {
+              ...range,
+              ...(providerId ? { providerId } : {}),
+            },
+            { includeCanceled: true },
+          ),
         ),
       );
-      cursor = chunkTo;
+      journals.push(...wave);
     }
 
     const unique = new Map<string, AnalyticsAppointment>();
@@ -976,6 +1017,7 @@ export class OperationsAnalyticsService {
       status: 'unavailable',
       reason: 'lookback_window_unavailable',
     },
+    includeOperationalStatusBuckets = false,
   ) {
     const activeAppointments = appointments.filter(
       (appointment) => !this.isCancelled(appointment.status),
@@ -984,6 +1026,18 @@ export class OperationsAnalyticsService {
       this.isCancelled(appointment.status),
     );
     const cancelledCount = cancelledAppointments.length;
+    const completedCount = appointments.filter((appointment) =>
+      this.isCompleted(appointment.status),
+    ).length;
+    const noShowCount = appointments.filter((appointment) =>
+      this.isNoShow(appointment.status),
+    ).length;
+    const scheduledCount = appointments.filter(
+      (appointment) =>
+        !this.isCancelled(appointment.status) &&
+        !this.isCompleted(appointment.status) &&
+        !this.isNoShow(appointment.status),
+    ).length;
     const pricedAppointments = activeAppointments.filter(
       (appointment) => appointment.totalPriceKopecks !== null,
     );
@@ -1025,29 +1079,62 @@ export class OperationsAnalyticsService {
       (total, appointment) => total + appointment.durationMinutes,
       0,
     );
-    const daily = new Map<string, AnalyticsBreakdown>();
+    const daily = new Map<string, AnalyticsDailyBreakdown>();
     const staff = new Map<string, AnalyticsStaffBreakdown>();
     const services = new Map<
       string,
       {
+        serviceExternalId: string;
         name: string;
         appointments: number;
         revenueByCurrency: Map<string, number>;
       }
     >();
 
-    for (const appointment of activeAppointments) {
+    // Дневной разрез строится по всему журналу, а не только по неотменённым
+    // записям. Поле `appointments` оставлено совместимым со старым контрактом,
+    // а точный состав доступен в новых счётчиках ниже.
+    for (const appointment of appointments) {
       const day = this.dateKey(appointment.startAt, timezone);
       const dayItem = daily.get(day) ?? {
         appointments: 0,
+        total: 0,
+        active: 0,
+        scheduled: 0,
+        completed: 0,
+        cancelled: 0,
+        noShow: 0,
         revenueByCurrency: new Map<string, number>(),
       };
-      dayItem.appointments += 1;
-      this.addRevenue(dayItem, appointment);
+      dayItem.total += 1;
+      if (this.isCancelled(appointment.status)) {
+        dayItem.cancelled += 1;
+      } else {
+        dayItem.active += 1;
+        dayItem.appointments += 1;
+        if (this.isCompleted(appointment.status)) {
+          dayItem.completed += 1;
+        } else if (this.isNoShow(appointment.status)) {
+          dayItem.noShow += 1;
+        } else {
+          dayItem.scheduled += 1;
+        }
+        this.addRevenue(dayItem, appointment);
+      }
       daily.set(day, dayItem);
+    }
 
+    for (const appointment of activeAppointments) {
       const staffItem = this.staffBucket(staff, appointment);
+      staffItem.total += 1;
       staffItem.appointments += 1;
+      if (this.isCompleted(appointment.status)) {
+        staffItem.completed += 1;
+      } else if (this.isNoShow(appointment.status)) {
+        staffItem.noShow += 1;
+      } else {
+        staffItem.scheduled += 1;
+      }
       staffItem.bookedMinutes += appointment.durationMinutes;
       if (appointment.clientId) {
         staffItem.clientVisits.set(
@@ -1059,6 +1146,7 @@ export class OperationsAnalyticsService {
 
       for (const service of appointment.services) {
         const serviceItem = services.get(service.id) ?? {
+          serviceExternalId: service.id,
           name: service.name,
           appointments: 0,
           revenueByCurrency: new Map<string, number>(),
@@ -1089,7 +1177,9 @@ export class OperationsAnalyticsService {
     // ответ. Новых обращений к CRM или БД проход не стоит — отменённые записи
     // уже лежат в тех же исходных данных.
     for (const appointment of cancelledAppointments) {
-      this.staffBucket(staff, appointment).cancelled += 1;
+      const staffItem = this.staffBucket(staff, appointment);
+      staffItem.total += 1;
+      staffItem.cancelled += 1;
     }
 
     return {
@@ -1102,7 +1192,11 @@ export class OperationsAnalyticsService {
       appointments: {
         total: appointments.length,
         active: activeAppointments.length,
+        ...(includeOperationalStatusBuckets
+          ? { scheduled: scheduledCount, completed: completedCount }
+          : {}),
         cancelled: cancelledCount,
+        ...(includeOperationalStatusBuckets ? { no_show: noShowCount } : {}),
         cancellation_rate_percent:
           appointments.length === 0
             ? 0
@@ -1155,11 +1249,23 @@ export class OperationsAnalyticsService {
               )
             : 0,
       })),
-      daily: [...daily.entries()].map(([date, value]) => ({
-        date,
-        appointments: value.appointments,
-        revenue: this.serializeCurrencyMap(value.revenueByCurrency),
-      })),
+      daily: [...daily.entries()]
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([date, value]) => ({
+          date,
+          appointments: value.appointments,
+          ...(includeOperationalStatusBuckets
+            ? {
+                total: value.total,
+                active: value.active,
+                scheduled: value.scheduled,
+                completed: value.completed,
+                cancelled: value.cancelled,
+                no_show: value.noShow,
+              }
+            : {}),
+          revenue: this.serializeCurrencyMap(value.revenueByCurrency),
+        })),
       // 🔴 Порядок обязан быть детерминированным: по нему слой AI-инструментов
       // различает тёзок («Илья» и «Илья (2)»). Раньше мастера шли в порядке
       // выхода в смену, и между двумя периодами один и тот же человек
@@ -1170,8 +1276,13 @@ export class OperationsAnalyticsService {
         .map(([staff_external_id, value]) => ({
           staff_external_id,
           name: value.name,
+          ...(includeOperationalStatusBuckets ? { total: value.total } : {}),
           appointments: value.appointments,
+          ...(includeOperationalStatusBuckets
+            ? { scheduled: value.scheduled, completed: value.completed }
+            : {}),
           cancelled: value.cancelled,
+          ...(includeOperationalStatusBuckets ? { no_show: value.noShow } : {}),
           cancellation_rate_percent:
             value.appointments + value.cancelled === 0
               ? 0
@@ -1203,6 +1314,7 @@ export class OperationsAnalyticsService {
             left.name.localeCompare(right.name),
         )
         .map((value) => ({
+          service_external_id: value.serviceExternalId,
           name: value.name,
           appointments: value.appointments,
           booked_value: this.serializeCurrencyMap(value.revenueByCurrency),
@@ -1235,8 +1347,12 @@ export class OperationsAnalyticsService {
   ): AnalyticsStaffBreakdown {
     const item = staff.get(appointment.staffExternalId) ?? {
       name: null,
+      total: 0,
       appointments: 0,
+      scheduled: 0,
+      completed: 0,
       cancelled: 0,
+      noShow: 0,
       bookedMinutes: 0,
       clientVisits: new Map<string, number>(),
       revenueByCurrency: new Map<string, number>(),
@@ -1512,96 +1628,54 @@ export class OperationsAnalyticsService {
   }
 
   /**
-   * Гейт полноты: без каких статей прибыли не бывает.
+   * Состояние дополнительных расходов без искусственного блокирования расчёта.
    *
-   * Категория считается заполненной, только если её сумма и существует, и
-   * правдоподобна относительно подтверждённой кассы периода. Три состояния,
-   * и путать их нельзя:
-   * • `complete` — всё, что владелец обязан внести, внесено и похоже на правду;
-   * • `incomplete` — статьи просто нет («аренды нет»);
-   * • `understated` — статья есть, но сумма исчезающе мала на фоне кассы, то
-   *   есть «похоже, внесено не всё». Это не полнота: считать по ней прибыль —
-   *   значит завысить её почти до выручки.
-   *
-   * Зарплата в этот гейт не входит: её нельзя внести руками, и её отсутствие
-   * разбирается отдельно, у источника CRM.
+   * Декларация владельца повышает уверенность, но не является обязательной:
+   * пока её нет, отсутствующие в журнале дополнительные расходы честно
+   * принимаются за ноль и это допущение отдаётся клиенту отдельными полями.
    */
   private expenseCompleteness(
     ledger: ExpenseLedger,
-    revenue: ReturnType<OperationsAnalyticsService['confirmedRevenue']>,
+    declaration: ExpensePeriodDeclarationEvidence,
   ) {
-    const confirmed =
-      revenue.status === 'available' && revenue.total ? revenue.total : null;
     const amounts = new Map<string, number>();
     for (const row of ledger.by_category) {
-      // Чужая валюта в долю от кассы не складывается: курса у нас нет, а
-      // сложить «1000 ₸» с «60000 ₽» значило бы выдумать число.
-      if (confirmed && row.currency !== confirmed.currency) {
-        continue;
-      }
       amounts.set(
         row.category,
         (amounts.get(row.category) ?? 0) + row.amount_kopecks,
       );
     }
 
-    const missing: string[] = [];
-    const understated: Array<{
-      category: string;
-      label: string;
-      recorded: ProfitMoney;
-      share_of_confirmed_revenue_percent: number;
-    }> = [];
-    for (const category of REQUIRED_PROFIT_EXPENSE_CATEGORIES) {
-      const amount = amounts.get(category) ?? 0;
-      if (amount <= 0) {
-        missing.push(category);
-        continue;
-      }
-      // Порог применим только там, где есть с чем сравнивать. Нет
-      // подтверждённой кассы или она нулевая — прибыли всё равно не будет, и
-      // выдумывать «подозрительность» на пустом знаменателе незачем.
-      if (!confirmed || confirmed.amount_kopecks <= 0) {
-        continue;
-      }
-      const share = amount / confirmed.amount_kopecks;
-      if (share < MIN_PLAUSIBLE_EXPENSE_SHARE_OF_CONFIRMED_REVENUE) {
-        understated.push({
-          category,
-          label: this.expenseCategoryLabel(category),
-          recorded: this.money(confirmed.currency, amount),
-          share_of_confirmed_revenue_percent:
-            Math.round(share * 1_000_000) / 10_000,
-        });
-      }
-    }
-
-    const status =
-      ledger.status !== 'available' || missing.length > 0
-        ? 'incomplete'
-        : understated.length > 0
-          ? 'understated'
-          : 'complete';
-
     return {
-      status,
-      required_categories: REQUIRED_PROFIT_EXPENSE_CATEGORIES.map(
-        (category) => ({
-          category,
-          label: this.expenseCategoryLabel(category),
-        }),
-      ),
+      status:
+        ledger.status !== 'available'
+          ? ('unavailable' as const)
+          : declaration
+            ? ('complete' as const)
+            : ('provisional' as const),
+      owner_confirmation_required: false,
+      owner_confirmation_recommended:
+        ledger.status === 'available' && !declaration,
+      unrecorded_additional_expenses_assumed_zero:
+        ledger.status === 'available' && !declaration,
+      calculation_basis: declaration
+        ? ('owner_confirmed_expense_ledger' as const)
+        : ('recorded_expenses_only' as const),
+      owner_declaration: declaration
+        ? {
+            period_from_day: declaration.periodFromDay,
+            period_to_day: declaration.periodToDay,
+            declared_at: declaration.updatedAt.toISOString(),
+          }
+        : null,
+      required_categories: [],
       present_categories: [...amounts.entries()]
         .filter(([, amount]) => amount > 0)
         .map(([category]) => category)
         .sort((left, right) => left.localeCompare(right)),
-      missing_categories: missing.map((category) => ({
-        category,
-        label: this.expenseCategoryLabel(category),
-      })),
-      understated_categories: understated,
-      min_plausible_share_percent:
-        MIN_PLAUSIBLE_EXPENSE_SHARE_OF_CONFIRMED_REVENUE * 100,
+      missing_categories: [],
+      understated_categories: [],
+      min_plausible_share_percent: null,
     };
   }
 
@@ -1632,10 +1706,9 @@ export class OperationsAnalyticsService {
   }
 
   /**
-   * Чистая прибыль: подтверждённая касса минус ПОЛНЫЕ расходы.
-   *
-   * Любая недостача превращается в отказ с причиной. Числа «почти прибыль»
-   * здесь нет и быть не должно: владелец не отличит его от настоящего.
+   * Чистая прибыль по учтённым данным: подтверждённая касса минус зарплата CRM
+   * и дополнительные расходы, уже записанные владельцем. Не внесённые статьи
+   * считаются нулевыми и маркируются в `completeness`, а не блокируют ответ.
    */
   private netProfit(
     revenue: ReturnType<OperationsAnalyticsService['confirmedRevenue']>,
@@ -1677,12 +1750,6 @@ export class OperationsAnalyticsService {
     if (payroll.status !== 'available') {
       return refusal(NET_PROFIT_UNAVAILABLE.payrollMissing);
     }
-    if (completeness.missing_categories.length > 0) {
-      return refusal(NET_PROFIT_UNAVAILABLE.incompleteExpenses);
-    }
-    if (completeness.status !== 'complete') {
-      return refusal(NET_PROFIT_UNAVAILABLE.understatedExpenses);
-    }
     const currency = revenue.total.currency;
     const foreign = ledger.totals.filter((item) => item.currency !== currency);
     if (foreign.length > 0) {
@@ -1705,6 +1772,9 @@ export class OperationsAnalyticsService {
       missing_categories: completeness.missing_categories,
       understated_categories: completeness.understated_categories,
       payroll,
+      calculation_basis: completeness.calculation_basis,
+      unrecorded_additional_expenses_assumed_zero:
+        completeness.unrecorded_additional_expenses_assumed_zero,
     };
   }
 
@@ -1795,11 +1865,15 @@ export class OperationsAnalyticsService {
     dataSource: 'crm' | 'maya';
     revenue: ReturnType<OperationsAnalyticsService['confirmedRevenue']>;
     ledger: ExpenseLedger;
+    expenseDeclaration: ExpensePeriodDeclarationEvidence;
     overview?: ProfitabilityCohortSource | null;
     netProfitReason?: string;
     acquisitionReason?: string;
   }) {
-    const completeness = this.expenseCompleteness(input.ledger, input.revenue);
+    const completeness = this.expenseCompleteness(
+      input.ledger,
+      input.expenseDeclaration,
+    );
     const payroll = this.payrollSource(input.ledger);
     const netProfit = this.netProfit(
       input.revenue,
@@ -1969,6 +2043,18 @@ export class OperationsAnalyticsService {
 
   private isCancelled(status: string): boolean {
     return ['canceled', 'cancelled'].includes(status.trim().toLowerCase());
+  }
+
+  private isCompleted(status: string): boolean {
+    return ['completed', 'complete', 'done', 'visited'].includes(
+      status.trim().toLowerCase(),
+    );
+  }
+
+  private isNoShow(status: string): boolean {
+    return ['no_show', 'no-show', 'noshow', 'did_not_come'].includes(
+      status.trim().toLowerCase(),
+    );
   }
 
   /**

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { UserRole } from '../common/domain.enums';
+import { isComprehensiveBusinessReview } from './business-review-intent';
 import type { MayaBrainIntent, MayaBrainRoute } from './maya-brain.types';
 
 const CLIENT_ROLES = new Set<UserRole>([UserRole.CLIENT, UserRole.CUSTOMER]);
@@ -21,16 +22,25 @@ const STAFF_ROLES = new Set<UserRole>([
  */
 @Injectable()
 export class MayaBrainRouterService {
-  route(role: UserRole, text: string): MayaBrainRoute {
+  route(
+    role: UserRole,
+    text: string,
+    audience?: 'client' | 'staff' | 'owner' | null,
+  ): MayaBrainRoute {
+    const clientAudience = audience === 'client' || CLIENT_ROLES.has(role);
     return {
-      persona: CLIENT_ROLES.has(role) ? 'admin' : 'director',
-      intent: this.intent(role, text),
+      persona: clientAudience ? 'admin' : 'director',
+      intent: this.intent(role, text, clientAudience),
     };
   }
 
-  private intent(role: UserRole, raw: string): MayaBrainIntent {
+  private intent(
+    role: UserRole,
+    raw: string,
+    clientAudience?: boolean,
+  ): MayaBrainIntent {
     const text = raw.toLowerCase().replace(/ё/g, 'е');
-    const client = CLIENT_ROLES.has(role);
+    const client = clientAudience ?? CLIENT_ROLES.has(role);
     if (
       /(записат|запиши|перенес|отмен[а-яa-z]*\s+запис|свободн[а-яa-z]*\s+(?:окн|слот|врем))/i.test(
         text,
@@ -44,6 +54,9 @@ export class MayaBrainRouterService {
       )
     ) {
       return 'schedule_management';
+    }
+    if (!client && isComprehensiveBusinessReview(text)) {
+      return 'business_analytics';
     }
     if (
       /(?:сравн[а-яa-z]*.{0,96}(?:год|месяц|недел|период).{0,96}(?:прошл|предыдущ)|(?:год|месяц|недел|период)\s+к\s+(?:году|месяцу|неделе|периоду)|динамик|тренд|просад|просел|вырос|рост|снизил|упал|потерял)/i.test(
@@ -72,7 +85,7 @@ export class MayaBrainRouterService {
         text,
       ) ||
         (STAFF_ROLES.has(role) &&
-          /(как|совет|техник|правильно).{0,64}(стрич|стриж|фейд|fade|кроп|сайд|окантов|тушев|градуир|ножниц|машинк|бород)/i.test(
+          /(как|совет|техник|правильно).{0,64}(стрич|стриж|фейд|fade|кроп|сайд|окантов|тушев|градуир|ножниц|машинк|бород|волос|укладк|бритв|брить)/i.test(
             text,
           )))
     ) {

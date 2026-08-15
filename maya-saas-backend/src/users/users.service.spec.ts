@@ -104,7 +104,11 @@ describe('UsersService', () => {
       (args: Record<string, unknown>) => Promise<{ count: number }>
     > = jest.fn().mockResolvedValue({ count: 1 });
     const authIdentityFindFirstMock: jest.MockedFunction<
-      (args: Record<string, unknown>) => Promise<{ id: string } | null>
+      (args: Record<string, unknown>) => Promise<{
+        id?: string;
+        provider?: string;
+        profileJson?: Record<string, unknown> | null;
+      } | null>
     > = jest.fn().mockResolvedValue(null);
     const crmStaffAccessFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<{
@@ -296,6 +300,50 @@ describe('UsersService', () => {
       can_switch_mode: false,
       chooser_required: false,
     });
+  });
+
+  it('returns a tenant-scoped Telegram avatar from the verified identity', async () => {
+    const {
+      service,
+      mocks: { authIdentityFindFirstMock },
+    } = createService();
+    authIdentityFindFirstMock.mockResolvedValue({
+      provider: 'telegram',
+      profileJson: {
+        photo_url: 'https://cdn.example.test/telegram/user-1.jpg',
+      },
+    });
+
+    const result = await service.serializeCurrentUser(tenantUser());
+
+    expect(result.auth_provider).toBe('telegram');
+    expect(result.avatar_url).toBe(
+      'https://cdn.example.test/telegram/user-1.jpg',
+    );
+    expect(authIdentityFindFirstMock).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
+        provider: 'telegram',
+      },
+      select: { provider: true, profileJson: true },
+    });
+  });
+
+  it('does not expose an insecure social avatar URL', async () => {
+    const {
+      service,
+      mocks: { authIdentityFindFirstMock },
+    } = createService();
+    authIdentityFindFirstMock.mockResolvedValue({
+      provider: 'telegram',
+      profileJson: { photo_url: 'http://example.test/avatar.jpg' },
+    });
+
+    const result = await service.serializeCurrentUser(tenantUser());
+
+    expect(result.auth_provider).toBe('telegram');
+    expect(result.avatar_url).toBeNull();
   });
 
   it('keeps tenant and user fences on linked app profiles', async () => {

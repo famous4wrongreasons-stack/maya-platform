@@ -1,0 +1,3914 @@
+[
+  {
+    "intent": "booking.find_availability",
+    "domain": "booking",
+    "sub_intent": "booking.find_availability",
+    "description": "Find suitable booking slots.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "booking.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [
+      "date_or_period"
+    ],
+    "optional_slots": [
+      "employee",
+      "services",
+      "branch",
+      "time_of_day"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "booking.availability.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "booking.availability.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.list_own",
+    "domain": "booking",
+    "sub_intent": "booking.list_own",
+    "description": "List the actor own appointments.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "appointments.own.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "status"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "appointments.own.list"
+    ],
+    "registered_tools": [
+      {
+        "name": "appointments.own.list",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking.customer_app"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.create_own",
+    "domain": "booking",
+    "sub_intent": "booking.create_own",
+    "description": "Create an appointment for the actor.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "appointments.own.create",
+    "allowed_roles": [
+      "client",
+      "customer"
+    ],
+    "required_slots": [
+      "services",
+      "date",
+      "time"
+    ],
+    "optional_slots": [
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Resolve service, date, time and ambiguous employee before previewing the appointment.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "appointments.own.create"
+    ],
+    "registered_tools": [
+      {
+        "name": "appointments.own.create",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "booking.customer_app"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.reschedule_own",
+    "domain": "booking",
+    "sub_intent": "booking.reschedule_own",
+    "description": "Reschedule the actor appointment.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "appointments.own.reschedule",
+    "allowed_roles": [
+      "client",
+      "customer"
+    ],
+    "required_slots": [
+      "appointment",
+      "new_date",
+      "new_time"
+    ],
+    "optional_slots": [
+      "new_employee"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "appointments.own.reschedule"
+    ],
+    "registered_tools": [
+      {
+        "name": "appointments.own.reschedule",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "booking.customer_app"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.cancel_own",
+    "domain": "booking",
+    "sub_intent": "booking.cancel_own",
+    "description": "Cancel the actor appointment.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "appointments.own.cancel",
+    "allowed_roles": [
+      "client",
+      "customer"
+    ],
+    "required_slots": [
+      "appointment"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "appointments.own.cancel"
+    ],
+    "registered_tools": [
+      {
+        "name": "appointments.own.cancel",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "booking.customer_app"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.get_employee",
+    "domain": "booking",
+    "sub_intent": "booking.get_employee",
+    "description": "Tell who performs an appointment.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "appointments.own.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "appointment",
+      "date"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "appointments.own.list"
+    ],
+    "registered_tools": [
+      {
+        "name": "appointments.own.list",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking.customer_app"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.repeat_last",
+    "domain": "booking",
+    "sub_intent": "booking.repeat_last",
+    "description": "Repeat the last usual service bundle.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "appointments.own.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "date",
+      "time"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "appointments.own.list"
+    ],
+    "registered_tools": [
+      {
+        "name": "appointments.own.list",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking.customer_app"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "booking.group_or_simultaneous",
+    "domain": "booking",
+    "sub_intent": "booking.group_or_simultaneous",
+    "description": "Find slots for multiple people.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "booking.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [
+      "party_size",
+      "services",
+      "date_or_period"
+    ],
+    "optional_slots": [
+      "simultaneous",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Return verified distinct slots for every participant. Never claim that several appointments were booked atomically; each write requires its own confirmation.",
+    "candidate_tools": [
+      "booking.group-availability.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "booking.group-availability.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "schedule.get_own",
+    "domain": "schedule",
+    "sub_intent": "schedule.get_own",
+    "description": "Read the employee own work schedule.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "schedule.own.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "staff.schedule.own.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "staff.schedule.own.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "schedule.get_team",
+    "domain": "schedule",
+    "sub_intent": "schedule.get_team",
+    "description": "Read the team working schedule.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "schedule.team.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager"
+    ],
+    "required_slots": [
+      "date_or_period"
+    ],
+    "optional_slots": [
+      "branch",
+      "employee"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "staff.schedule.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "staff.schedule.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "schedule.update_employee",
+    "domain": "schedule",
+    "sub_intent": "schedule.update_employee",
+    "description": "Update an employee schedule.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "schedule.team.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager"
+    ],
+    "required_slots": [
+      "employee",
+      "date_or_period",
+      "working_hours"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "staff.schedule.update"
+    ],
+    "registered_tools": [
+      {
+        "name": "staff.schedule.update",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "schedule.find_free_employee",
+    "domain": "schedule",
+    "sub_intent": "schedule.find_free_employee",
+    "description": "Find employees with capacity.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "schedule.team.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [
+      "date_or_period"
+    ],
+    "optional_slots": [
+      "time_of_day",
+      "services",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "booking.availability.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "booking.availability.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.count_total",
+    "domain": "clients",
+    "sub_intent": "clients.count_total",
+    "description": "Count all CRM clients.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "clients.retention.scan",
+      "customers.count"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.retention.scan",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      },
+      {
+        "name": "customers.count",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "customers.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.count_period",
+    "domain": "clients",
+    "sub_intent": "clients.count_period",
+    "description": "Count unique clients in a period.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.count_new",
+    "domain": "clients",
+    "sub_intent": "clients.count_new",
+    "description": "Count new clients in a period.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.retention_summary",
+    "domain": "retention",
+    "sub_intent": "clients.retention_summary",
+    "description": "Summarize retention cohorts.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "absence_period",
+      "loyalty_threshold",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "clients.retention.scan"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.retention.scan",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.inactive_cohort",
+    "domain": "churn",
+    "sub_intent": "clients.inactive_cohort",
+    "description": "Find clients absent for a period.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "absence_period"
+    ],
+    "optional_slots": [
+      "previous_frequency",
+      "employee",
+      "service",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "clients.retention.scan"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.retention.scan",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.at_risk",
+    "domain": "churn",
+    "sub_intent": "clients.at_risk",
+    "description": "Detect inactive client cohorts at risk of churn.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "branch",
+      "employee",
+      "service"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Use verified aggregate inactivity cohorts. Do not claim individual cadence prediction or expose an outreach list from this read-only intent.",
+    "candidate_tools": [
+      "clients.retention.scan"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.retention.scan",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.high_value",
+    "domain": "clients",
+    "sub_intent": "clients.high_value",
+    "description": "Find the most valuable clients.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "metric",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "clients.high-value.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.high-value.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.dossier",
+    "domain": "clients",
+    "sub_intent": "clients.dossier",
+    "description": "Read one client CRM dossier.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.dossier.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "client_reference"
+    ],
+    "optional_slots": [
+      "requested_fields"
+    ],
+    "clarification_rule": "If several clients match, ask which one without exposing unrelated records.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "clients.dossier.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.dossier.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "clients.no_show_risk",
+    "domain": "clients",
+    "sub_intent": "clients.no_show_risk",
+    "description": "Analyze verified no-show and cancellation history.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Report observed no-shows and cancellations only. If asked specifically about late cancellations, explain that the CRM source does not expose cancellation timestamps.",
+    "candidate_tools": [
+      "clients.no-show-risk.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.no-show-risk.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.list_public",
+    "domain": "employees",
+    "sub_intent": "employees.list_public",
+    "description": "List bookable specialists.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "catalog.staff.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "service",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "catalog.staff.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "catalog.staff.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.performance_team",
+    "domain": "employees",
+    "sub_intent": "employees.performance_team",
+    "description": "Analyze team performance.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "metric",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.performance_own",
+    "domain": "employees",
+    "sub_intent": "employees.performance_own",
+    "description": "Analyze own employee performance.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.employee.read",
+    "allowed_roles": [
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "metric"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.employee.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.employee.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.employee"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.revenue",
+    "domain": "employees",
+    "sub_intent": "employees.revenue",
+    "description": "Read verified employee revenue if supplied.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": "Returns exact YClients cash attributed to an employee when financial operations are linked to that employee, including an explicit attribution coverage status; never substitutes payroll or booked value.",
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Never present salary or booked service value as confirmed employee revenue.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.salary",
+    "domain": "employees",
+    "sub_intent": "employees.salary",
+    "description": "Read accrued CRM payroll.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Call it accrued salary, never revenue generated by the employee.",
+    "candidate_tools": [
+      "analytics.business.query",
+      "analytics.business.profit"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      },
+      {
+        "name": "analytics.business.profit",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.workload",
+    "domain": "employees",
+    "sub_intent": "employees.workload",
+    "description": "Compare employee workload.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "employees.retention",
+    "domain": "employees",
+    "sub_intent": "employees.retention",
+    "description": "Compare employee client retention.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Compare cohort retention only for the selected reporting period and name the period explicitly; never present it as lifetime retention.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "services.list",
+    "domain": "services",
+    "sub_intent": "services.list",
+    "description": "Read the service catalogue.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "catalog.services.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "category",
+      "branch",
+      "employee"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "catalog.services.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "catalog.services.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "services.price",
+    "domain": "services",
+    "sub_intent": "services.price",
+    "description": "Read service price.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "catalog.services.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [
+      "service"
+    ],
+    "optional_slots": [
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "catalog.services.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "catalog.services.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "services.duration",
+    "domain": "services",
+    "sub_intent": "services.duration",
+    "description": "Read service duration.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "catalog.services.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [
+      "service"
+    ],
+    "optional_slots": [
+      "employee"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "catalog.services.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "catalog.services.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "services.popularity",
+    "domain": "services",
+    "sub_intent": "services.popularity",
+    "description": "Analyze service demand.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "branch",
+      "employee"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "services.revenue",
+    "domain": "services",
+    "sub_intent": "services.revenue",
+    "description": "Analyze service sales value.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "service",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Use confirmed_revenue only. State attribution coverage when partial; never substitute booked_value for confirmed cash.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "services.count",
+    "domain": "services",
+    "sub_intent": "services.count",
+    "description": "Count completed or booked services.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "service",
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.revenue",
+    "domain": "finance",
+    "sub_intent": "finance.revenue",
+    "description": "Read verified company revenue.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "branch",
+      "payment_method"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.profit",
+    "domain": "finance",
+    "sub_intent": "finance.profit",
+    "description": "Read net or gross profit.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "profit_type",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Return the server-calculated profit from confirmed cash, CRM payroll and recorded owner expenses. When the server marks unrecorded additional expenses as assumed zero, state that briefly after the result and invite the owner to add them later; never invent amounts or block an available calculation.",
+    "candidate_tools": [
+      "analytics.business.profit",
+      "expenses.period.complete"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.profit",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      },
+      {
+        "name": "expenses.period.complete",
+        "risk_tier": "low_write",
+        "approval_policy": "none",
+        "required_features": [
+          "expenses.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.expenses",
+    "domain": "finance",
+    "sub_intent": "finance.expenses",
+    "description": "Read expense total and structure.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "expenses.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "category",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.profit",
+      "expenses.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.profit",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      },
+      {
+        "name": "expenses.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "expenses.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.record_expense",
+    "domain": "finance",
+    "sub_intent": "finance.record_expense",
+    "description": "Record a manual business expense.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "expenses.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner"
+    ],
+    "required_slots": [
+      "amount",
+      "category",
+      "date"
+    ],
+    "optional_slots": [
+      "description",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "expenses.create"
+    ],
+    "registered_tools": [
+      {
+        "name": "expenses.create",
+        "risk_tier": "high_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "expenses.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.confirm_expenses_complete",
+    "domain": "finance",
+    "sub_intent": "finance.confirm_expenses_complete",
+    "description": "Confirm that all additional business expenses are recorded for a period.",
+    "action": "execute",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "expenses.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Persist the optional owner declaration for the exact period and return the recalculated profit. Profit is already calculable before this declaration. Never create a zero-value rent expense.",
+    "candidate_tools": [
+      "expenses.period.complete",
+      "analytics.business.profit"
+    ],
+    "registered_tools": [
+      {
+        "name": "expenses.period.complete",
+        "risk_tier": "low_write",
+        "approval_policy": "none",
+        "required_features": [
+          "expenses.core"
+        ],
+        "fallback_policy": "fail_closed"
+      },
+      {
+        "name": "analytics.business.profit",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.average_check",
+    "domain": "finance",
+    "sub_intent": "finance.average_check",
+    "description": "Read average paid ticket.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.compare_periods",
+    "domain": "finance",
+    "sub_intent": "finance.compare_periods",
+    "description": "Compare financial periods.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period",
+      "comparison_period"
+    ],
+    "optional_slots": [
+      "metric",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "finance.revenue_forecast",
+    "domain": "forecasting",
+    "sub_intent": "finance.revenue_forecast",
+    "description": "Forecast period-end revenue.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "target_period"
+    ],
+    "optional_slots": [
+      "branch",
+      "scenario"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Clearly label forecast, assumptions and uncertainty.",
+    "candidate_tools": [
+      "analytics.revenue.forecast"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.revenue.forecast",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "payments.breakdown",
+    "domain": "payments",
+    "sub_intent": "payments.breakdown",
+    "description": "Read cash and card breakdown.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "payment_method",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "payments.refunds",
+    "domain": "payments",
+    "sub_intent": "payments.refunds",
+    "description": "Read refunds for a period.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "sales.summary",
+    "domain": "sales",
+    "sub_intent": "sales.summary",
+    "description": "Analyze service and product sales.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "sale_type",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "products.sales",
+    "domain": "products",
+    "sub_intent": "products.sales",
+    "description": "Analyze product sales.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.finance.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "product",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "inventory.stock",
+    "domain": "inventory",
+    "sub_intent": "inventory.stock",
+    "description": "Read current inventory stock.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "inventory.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "product",
+      "branch",
+      "low_stock_only"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "inventory.stock.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "inventory.stock.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "commerce.store"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "analytics.business_summary",
+    "domain": "analytics",
+    "sub_intent": "analytics.business_summary",
+    "description": "Build a business health summary.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "analytics.anomaly_detection",
+    "domain": "analytics",
+    "sub_intent": "analytics.anomaly_detection",
+    "description": "Detect material anomalies.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "metric",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "analytics.root_cause",
+    "domain": "analytics",
+    "sub_intent": "analytics.root_cause",
+    "description": "Explain a business metric change.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "metric_or_problem"
+    ],
+    "optional_slots": [
+      "period",
+      "comparison_period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "analytics.recommendations",
+    "domain": "recommendations",
+    "sub_intent": "analytics.recommendations",
+    "description": "Recommend next business actions.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "goal",
+      "period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query",
+      "clients.retention.scan"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      },
+      {
+        "name": "clients.retention.scan",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "kpi.team",
+    "domain": "kpi",
+    "sub_intent": "kpi.team",
+    "description": "Read team KPI progress.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "employee",
+      "metric",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.team-kpi.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.team-kpi.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "reports.daily_briefing",
+    "domain": "reports",
+    "sub_intent": "reports.daily_briefing",
+    "description": "Prepare the owner daily briefing.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "date",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.business.query"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.business.query",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "reports.recovered",
+    "domain": "reports",
+    "sub_intent": "reports.recovered",
+    "description": "Report recovered clients and revenue.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "reports.recovered"
+    ],
+    "registered_tools": [
+      {
+        "name": "reports.recovered",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "loyalty.read_own",
+    "domain": "loyalty",
+    "sub_intent": "loyalty.read_own",
+    "description": "Read the actor loyalty balance.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "loyalty.own.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "loyalty.own.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "loyalty.own.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "loyalty"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "loyalty.spend_options",
+    "domain": "bonuses",
+    "sub_intent": "loyalty.spend_options",
+    "description": "Suggest affordable bonus redemptions.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "loyalty.own.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "appointment",
+      "available_time"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "loyalty.own.read",
+      "booking.upsell.suggest"
+    ],
+    "registered_tools": [
+      {
+        "name": "loyalty.own.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "loyalty"
+        ],
+        "fallback_policy": "fail_closed"
+      },
+      {
+        "name": "booking.upsell.suggest",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "loyalty.adjust",
+    "domain": "bonuses",
+    "sub_intent": "loyalty.adjust",
+    "description": "Adjust internal loyalty balance.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "loyalty.adjust",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin"
+    ],
+    "required_slots": [
+      "client_reference",
+      "delta",
+      "reason"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "loyalty.internal.adjust"
+    ],
+    "registered_tools": [
+      {
+        "name": "loyalty.internal.adjust",
+        "risk_tier": "high_write",
+        "approval_policy": "owner",
+        "required_features": [
+          "loyalty"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "certificates.catalog",
+    "domain": "certificates",
+    "sub_intent": "certificates.catalog",
+    "description": "Read available certificates.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "commerce.catalog.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "nominal",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "commerce.certificates.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "commerce.certificates.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "commerce.certificates"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "subscriptions.catalog",
+    "domain": "subscriptions",
+    "sub_intent": "subscriptions.catalog",
+    "description": "Read available subscriptions.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "commerce.catalog.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "service",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "commerce.memberships.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "commerce.memberships.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "commerce.memberships"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "referrals.status",
+    "domain": "referrals",
+    "sub_intent": "referrals.status",
+    "description": "Read referral status and rules.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "referrals.own.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "referral"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "referrals.status.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "referrals.status.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "referrals"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "marketing.find_audience",
+    "domain": "marketing",
+    "sub_intent": "marketing.find_audience",
+    "description": "Build a consent-safe audience.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "medium",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "marketing.audience.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "required_slots": [
+      "audience_rule"
+    ],
+    "optional_slots": [
+      "minimum_visits",
+      "max_recipients"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Return only aggregate counts and the opaque audience reference. Never expose names, phones or CRM identifiers.",
+    "candidate_tools": [
+      "marketing.audience.find"
+    ],
+    "registered_tools": [
+      {
+        "name": "marketing.audience.find",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "tg_marketing"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "marketing.draft_message",
+    "domain": "messaging",
+    "sub_intent": "marketing.draft_message",
+    "description": "Draft a campaign message.",
+    "action": "preview",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "medium",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "marketing.message.preview",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "goal_or_audience"
+    ],
+    "optional_slots": [
+      "offer",
+      "tone",
+      "channel"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "marketing.preview_campaign",
+    "domain": "messaging",
+    "sub_intent": "marketing.preview_campaign",
+    "description": "Preview campaign impact.",
+    "action": "preview",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "medium",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "marketing.campaign.preview",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "required_slots": [
+      "audience",
+      "message"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Show the final message and exact recipient count, then request explicit confirmation. Do not claim that anything was sent.",
+    "candidate_tools": [
+      "marketing.campaign.preview"
+    ],
+    "registered_tools": [
+      {
+        "name": "marketing.campaign.preview",
+        "risk_tier": "low_write",
+        "approval_policy": "none",
+        "required_features": [
+          "tg_marketing"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "marketing.send_campaign",
+    "domain": "messaging",
+    "sub_intent": "marketing.send_campaign",
+    "description": "Send a consent-safe campaign.",
+    "action": "execute",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "marketing.campaign.execute",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "required_slots": [
+      "approved_preview"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Require an explicit confirmation of the persisted campaign preview. Never construct a new audience or message during execution.",
+    "response_rule": "Report server-confirmed delivered, skipped and failed counts. Never say sent before the tool succeeds.",
+    "candidate_tools": [
+      "marketing.campaign.send"
+    ],
+    "registered_tools": [
+      {
+        "name": "marketing.campaign.send",
+        "risk_tier": "high_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "tg_marketing"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "notifications.appointments",
+    "domain": "notifications",
+    "sub_intent": "notifications.appointments",
+    "description": "Configure appointment notices.",
+    "action": "write",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "notifications.settings.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "required_slots": [
+      "enabled"
+    ],
+    "optional_slots": [
+      "timing"
+    ],
+    "clarification_rule": "If the owner does not specify timing, preserve the current lead times. The production channel is always the MAYA inbox with push announcement; do not offer email or SMS as if they were connected.",
+    "response_rule": "Change the persisted tenant reminder policy only through the tool and report the exact enabled state and lead times returned by the server.",
+    "candidate_tools": [
+      "notifications.appointments.update"
+    ],
+    "registered_tools": [
+      {
+        "name": "notifications.appointments.update",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "reviews.list_recent",
+    "domain": "reviews",
+    "sub_intent": "reviews.list_recent",
+    "description": "Read recent business reviews.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "reviews.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "rating",
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "reviews.list.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "reviews.list.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "reviews.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "reviews.analyze_topics",
+    "domain": "reviews",
+    "sub_intent": "reviews.analyze_topics",
+    "description": "Aggregate review topics and sentiment.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "reviews.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "reviews.analyze"
+    ],
+    "registered_tools": [
+      {
+        "name": "reviews.analyze",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "reviews.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "reviews.rating_trend",
+    "domain": "reviews",
+    "sub_intent": "reviews.rating_trend",
+    "description": "Analyze rating trend.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "reviews.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "reviews.analyze"
+    ],
+    "registered_tools": [
+      {
+        "name": "reviews.analyze",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "reviews.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "branches.compare",
+    "domain": "branches",
+    "sub_intent": "branches.compare",
+    "description": "Compare branches.",
+    "action": "analyze",
+    "data_class": "D",
+    "data_source": "calculated_from_verified_data",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "analytics.business.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "period"
+    ],
+    "optional_slots": [
+      "metric",
+      "branches"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "analytics.branches.compare"
+    ],
+    "registered_tools": [
+      {
+        "name": "analytics.branches.compare",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "analytics.business"
+        ],
+        "fallback_policy": "last_verified_snapshot"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "company.public_info",
+    "domain": "company",
+    "sub_intent": "company.public_info",
+    "description": "Read public business information.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "company.public.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "field",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "catalog.staff.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "catalog.staff.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "company.business_hours",
+    "domain": "company",
+    "sub_intent": "company.business_hours",
+    "description": "Read business opening hours.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "company.public.read",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "date",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "company.business-hours.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "company.business-hours.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "settings.read",
+    "domain": "settings",
+    "sub_intent": "settings.read",
+    "description": "Read available MAYA settings.",
+    "action": "read",
+    "data_class": "B",
+    "data_source": "tenant_context",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tenant_context",
+    "permission": "settings.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "section"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "settings.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "settings.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "settings.update",
+    "domain": "settings",
+    "sub_intent": "settings.update",
+    "description": "Update a MAYA setting.",
+    "action": "write",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "medium",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "settings.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [
+      "capability",
+      "enabled"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "settings.update"
+    ],
+    "registered_tools": [
+      {
+        "name": "settings.update",
+        "risk_tier": "low_write",
+        "approval_policy": "none",
+        "required_features": [],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "tasks.list",
+    "domain": "tasks",
+    "sub_intent": "tasks.list",
+    "description": "Read operational tasks.",
+    "action": "read",
+    "data_class": "B",
+    "data_source": "tenant_context",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tenant_context",
+    "permission": "tasks.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "assignee",
+      "status",
+      "period"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "tasks.list"
+    ],
+    "registered_tools": [
+      {
+        "name": "tasks.list",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "tasks.create",
+    "domain": "tasks",
+    "sub_intent": "tasks.create",
+    "description": "Create an operational task.",
+    "action": "write",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "high",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "tasks.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [
+      "task",
+      "assignee"
+    ],
+    "optional_slots": [
+      "deadline",
+      "priority"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "tasks.create"
+    ],
+    "registered_tools": [
+      {
+        "name": "tasks.create",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "tasks.complete",
+    "domain": "tasks",
+    "sub_intent": "tasks.complete",
+    "description": "Complete an assigned task.",
+    "action": "write",
+    "data_class": "E",
+    "data_source": "confirmed_external_action",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "tasks.write",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "required_slots": [
+      "task_id"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "tasks.complete"
+    ],
+    "registered_tools": [
+      {
+        "name": "tasks.complete",
+        "risk_tier": "low_write",
+        "approval_policy": "none",
+        "required_features": [
+          "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "general.explain_term",
+    "domain": "general_business_questions",
+    "sub_intent": "general.explain_term",
+    "description": "Explain a business term.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [
+      "topic"
+    ],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "general.strategy_advice",
+    "domain": "general_business_questions",
+    "sub_intent": "general.strategy_advice",
+    "description": "Give general business advice.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "goal",
+      "constraint"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "general.write_text",
+    "domain": "general_business_questions",
+    "sub_intent": "general.write_text",
+    "description": "Write non-executing content.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [
+      "content_goal"
+    ],
+    "optional_slots": [
+      "tone",
+      "length",
+      "audience"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "support.capabilities",
+    "domain": "support",
+    "sub_intent": "support.capabilities",
+    "description": "Explain MAYA capabilities.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "role",
+      "feature"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "support.integration_status",
+    "domain": "support",
+    "sub_intent": "support.integration_status",
+    "description": "Explain integration status.",
+    "action": "read",
+    "data_class": "B",
+    "data_source": "tenant_context",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tenant_context",
+    "permission": "integrations.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "provider"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "support.integration-status.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "support.integration-status.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "crm.integration"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "support.contact_admin",
+    "domain": "support",
+    "sub_intent": "support.contact_admin",
+    "description": "Contact the business administrator.",
+    "action": "preview",
+    "data_class": "B",
+    "data_source": "tenant_context",
+    "risk": "medium",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tenant_context",
+    "permission": "support.contact",
+    "allowed_roles": [
+      "client",
+      "customer"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "reason",
+      "channel"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "support.contact-admin.request"
+    ],
+    "registered_tools": [
+      {
+        "name": "support.contact-admin.request",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "required_features": [
+          "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "small_talk.greeting",
+    "domain": "small_talk",
+    "sub_intent": "small_talk.greeting",
+    "description": "Respond to a greeting.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "small_talk.thanks",
+    "domain": "small_talk",
+    "sub_intent": "small_talk.thanks",
+    "description": "Respond to thanks.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  },
+  {
+    "intent": "small_talk.free_form",
+    "domain": "small_talk",
+    "sub_intent": "small_talk.free_form",
+    "description": "Handle free-form conversation.",
+    "action": "answer",
+    "data_class": "A",
+    "data_source": "general_llm",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "general_llm",
+    "permission": "public",
+    "allowed_roles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [],
+    "registered_tools": [],
+    "missing_tools": []
+  }
+]

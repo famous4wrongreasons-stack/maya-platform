@@ -88,6 +88,42 @@ type ParsedScheduleIntent = {
   end: string | null;
 };
 
+type OperationsStaffRow = {
+  name: string;
+  isWorking: boolean | null;
+  workingHours: StaffScheduleSlot[];
+  appointments: {
+    total: number;
+    active: number;
+    confirmed: number;
+    completed: number;
+    canceled: number;
+    noShow: number;
+    other: number;
+  };
+  bookedMinutes: number;
+  workingMinutes: number;
+  loadPercent: number | null;
+};
+
+type OperationsAppointmentRow = {
+  time: string;
+  endTime: string;
+  status: string;
+  staffName: string;
+  services: string[];
+};
+
+type OperationsCounts = {
+  total: number;
+  active: number;
+  confirmed: number;
+  completed: number;
+  canceled: number;
+  noShow: number;
+  other: number;
+};
+
 export interface StaffScheduleCommandResult {
   reply: string;
   action: Record<string, unknown> | null;
@@ -111,13 +147,27 @@ export class StaffScheduleCommandService {
     user: AuthenticatedUser,
     dto: AiCoreChatDto,
   ): Promise<StaffScheduleCommandResult | null> {
-    if (dto.surface !== 'native' || !this.enabled()) {
+    if (dto.surface !== 'native') {
       return null;
     }
     const rawText = this.latestUserText(dto);
     const normalizedText = this.normalizeText(rawText);
     const operation = this.detectOperation(normalizedText);
     if (!operation) {
+      const journal = await this.tryReadOperationsJournal(
+        user,
+        this.operationsReadContextText(dto, normalizedText),
+      );
+      if (journal) {
+        return journal;
+      }
+      return this.tryReadSchedule(
+        user,
+        dto,
+        this.scheduleReadContextText(dto, normalizedText),
+      );
+    }
+    if (!this.enabled()) {
       return null;
     }
     if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
@@ -239,12 +289,605 @@ export class StaffScheduleCommandService {
     };
   }
 
+  private async tryReadOperationsJournal(
+    user: AuthenticatedUser,
+    text: string,
+  ): Promise<StaffScheduleCommandResult | null> {
+    if (!this.isOperationsJournalQuestion(text)) {
+      return null;
+    }
+    if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
+      return this.replyOnly(
+        'Точный журнал записей команды доступен владельцу, администратору или управляющему.',
+      );
+    }
+    if (!user.tenantId) {
+      return this.replyOnly('Не нашла активный бизнес для этого запроса.');
+    }
+
+    let allowed;
+    try {
+      allowed = await this.runtime.listTools(user, 'native');
+    } catch {
+      return this.operationsReadFailure();
+    }
+    if (
+      !allowed.tools.some((tool) => tool.name === 'operations.journal.read')
+    ) {
+      return this.replyOnly(
+        'Точный журнал записей YClients недоступен для текущей роли или тарифа.',
+      );
+    }
+
+    const timezone = await this.tenantTimezone(user.tenantId);
+    const date = this.parseDate(text, timezone);
+    if (!date) {
+      return this.replyOnly('За какую дату показать записи?');
+    }
+
+    let staff: StaffMember[];
+    try {
+      staff = await this.crmService.getStaff(user.tenantId);
+    } catch {
+      return this.operationsReadFailure();
+    }
+    const match = this.resolveStaff(text, staff);
+    if (match.kind === 'ambiguous') {
+      return this.replyOnly(`Уточните мастера: ${match.names.join(', ')}.`);
+    }
+    if (match.kind === 'missing' && this.hasNamedStaffReference(text)) {
+      return this.replyOnly(
+        'Не нашла такого активного сотрудника в YClients. Уточните имя.',
+      );
+    }
+
+    let execution: Record<string, unknown>;
+    try {
+      execution = this.asRecord(
+        await this.runtime.execute(user, 'operations.journal.read', {
+          surface: 'native',
+          arguments: {
+            date,
+            ...(match.kind === 'found' ? { staff_id: match.staff.id } : {}),
+          },
+        }),
+      );
+    } catch {
+      return this.operationsReadFailure();
+    }
+    if (execution.status !== 'completed') {
+      return this.operationsReadFailure();
+    }
+
+    const result = this.asRecord(execution.result);
+    const rows = this.operationsStaffRows(result.staff);
+    const appointments = this.operationsAppointmentRows(result.appointments);
+    const summary = this.operationsCounts(result.summary);
+    if (!summary || rows.length === 0) {
+      return this.operationsReadFailure();
+    }
+
+    return {
+      reply: this.operationsJournalReply(
+        date,
+        timezone,
+        rows,
+        appointments,
+        summary,
+        match.kind === 'found',
+      ),
+      action: null,
+      toolUsage: {
+        name: 'operations.journal.read',
+        status: 'completed',
+        execution_id:
+          typeof execution.execution_id === 'string'
+            ? execution.execution_id
+            : null,
+      },
+    };
+  }
+
+  private async tryReadSchedule(
+    user: AuthenticatedUser,
+    dto: AiCoreChatDto,
+    text: string,
+  ): Promise<StaffScheduleCommandResult | null> {
+    if (!this.isScheduleReadQuestion(text)) {
+      return null;
+    }
+    if (!SCHEDULE_MANAGER_ROLES.has(user.role)) {
+      return this.replyOnly(
+        'Точный график команды доступен владельцу, администратору или управляющему.',
+      );
+    }
+    if (!user.tenantId) {
+      return this.replyOnly('Не нашла активный бизнес для этого запроса.');
+    }
+
+    let allowed;
+    try {
+      allowed = await this.runtime.listTools(user, 'native');
+    } catch {
+      return this.scheduleReadFailure();
+    }
+    if (!allowed.tools.some((tool) => tool.name === 'staff.schedule.read')) {
+      return this.replyOnly(
+        'Чтение графика YClients недоступно для текущей роли или тарифа.',
+      );
+    }
+
+    const timezone = await this.tenantTimezone(user.tenantId);
+    const date = this.parseDate(text, timezone);
+    if (!date) {
+      return this.replyOnly('На какую дату показать график?');
+    }
+
+    let staff: StaffMember[];
+    try {
+      staff = await this.crmService.getStaff(user.tenantId);
+    } catch {
+      return this.scheduleReadFailure();
+    }
+    const match = this.resolveStaff(text, staff);
+    if (match.kind === 'ambiguous') {
+      return this.replyOnly(`Уточните мастера: ${match.names.join(', ')}.`);
+    }
+    if (match.kind === 'missing') {
+      if (this.hasNamedStaffReference(text)) {
+        return this.replyOnly(
+          'Не нашла такого активного сотрудника в YClients. Уточните имя.',
+        );
+      }
+      if (!this.isTeamScheduleQuestion(text)) {
+        return this.replyOnly('График какого мастера показать?');
+      }
+    }
+
+    let execution: Record<string, unknown>;
+    try {
+      execution = this.asRecord(
+        await this.runtime.execute(user, 'staff.schedule.read', {
+          surface: 'native',
+          arguments: {
+            date,
+            ...(match.kind === 'found' ? { staff_id: match.staff.id } : {}),
+          },
+        }),
+      );
+    } catch {
+      return this.scheduleReadFailure();
+    }
+    if (execution.status !== 'completed') {
+      return this.scheduleReadFailure();
+    }
+    const result = this.asRecord(execution.result);
+    const rows = this.scheduleRows(result.staff);
+    if (rows.length === 0) {
+      return this.replyOnly(
+        `${this.scheduleDateLabel(date, timezone)}: в YClients нет активных мастеров с графиком.`,
+      );
+    }
+
+    return {
+      reply: this.scheduleReadReply(date, timezone, rows),
+      action: null,
+      toolUsage: {
+        name: 'staff.schedule.read',
+        status: 'completed',
+        execution_id:
+          typeof execution.execution_id === 'string'
+            ? execution.execution_id
+            : null,
+      },
+    };
+  }
+
+  private isScheduleReadQuestion(text: string): boolean {
+    const explicitSchedule =
+      /(?:расписан|график|рабоч[^ы]*\s+(?:час|смен)|(?:^|[^а-я])смен(?:а|ы|е|у|ой|ою)(?:$|[^а-я])|выходн)/.test(
+        text,
+      );
+    const rosterQuestion =
+      /(?:кто\s+[^?.,!]{0,40}(?:работ|на\s+смен)|когда\s+[^?.,!]{0,50}работ|работает\s+ли|во\s+сколько\s+[^?.,!]{0,50}(?:выход|начина))/u.test(
+        text,
+      );
+    const hasCalendarDate =
+      /(?:сегодня|завтра|послезавтра|понедельник|понедельника|вторник|вторника|среда|среду|четверг|четверга|пятница|пятницу|суббота|субботу|воскресенье|воскресенья|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2})/.test(
+        text,
+      );
+    const hasWorkPredicate =
+      /(?:^|[^а-я])(?:работ(?:аю|ает|ают|ал|ала|али)|выход(?:ит|ят|ишь|им|ите)|на\s+смене)(?:$|[^а-я])/u.test(
+        text,
+      );
+    return (
+      explicitSchedule ||
+      rosterQuestion ||
+      (hasCalendarDate && hasWorkPredicate)
+    );
+  }
+
+  private isTeamScheduleQuestion(text: string): boolean {
+    if (
+      /(?:кто\s+[^?.,!]{0,40}(?:работ|на\s+смен)|кто\s+выходной|расписание\s+(?:всех|команды|мастеров|сотрудников)|график\s+(?:всех|команды|мастеров|сотрудников))/.test(
+        text,
+      )
+    ) {
+      return true;
+    }
+    return (
+      /^(?:какое\s+)?(?:расписание|график)(?:$|[^а-я])/.test(text) &&
+      !this.hasNamedStaffReference(text)
+    );
+  }
+
+  private hasNamedStaffReference(text: string): boolean {
+    const match = text.match(
+      /(?:^|[^а-я])(?:у|для|про)\s+([a-zа-я][a-zа-я-]{1,})(?:$|[^а-я])/u,
+    );
+    if (!match) {
+      return false;
+    }
+    return !new Set([
+      'нас',
+      'всех',
+      'команды',
+      'мастеров',
+      'сотрудников',
+      'барберов',
+      'персонала',
+      'салона',
+      'бизнеса',
+    ]).has(match[1]);
+  }
+
+  private scheduleReadContextText(dto: AiCoreChatDto, latest: string): string {
+    if (this.isScheduleReadQuestion(latest)) {
+      return latest;
+    }
+    const previous = this.previousUserText(dto);
+    if (
+      previous &&
+      this.isScheduleReadQuestion(previous) &&
+      /^(?:а\s+)?(?:у\s+)?[a-zа-я\s-]{2,60}\??$/.test(latest)
+    ) {
+      return `${previous} ${latest}`;
+    }
+    return latest;
+  }
+
+  private isOperationsJournalQuestion(text: string): boolean {
+    if (
+      this.isScheduleReadQuestion(text) ||
+      /(?:свободн|ближайш)[а-я]*\s+(?:окн|врем|слот)|когда\s+можно\s+запис|есть\s+ли\s+(?:окн|мест|врем)/.test(
+        text,
+      )
+    ) {
+      return false;
+    }
+    const hasCalendarDate =
+      /(?:сегодня|завтра|послезавтра|понедельник|понедельника|вторник|вторника|среда|среду|четверг|четверга|пятница|пятницу|суббота|субботу|воскресенье|воскресенья|\d{1,2}[./]\d{1,2}|\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)|\d{4}-\d{2}-\d{2})/.test(
+        text,
+      );
+    // Именно сущности журнала, а не любая фраза со словом
+    // «записан». Иначе «Иван записан сегодня» перехватывало досье клиента.
+    const hasDayOperations =
+      /(?:запис(?:ь|и|ей|ям|ями|ях)|визит|при[её]м|услуг|загрузк|занятост|отмен|неявк)/.test(
+        text,
+      );
+    return hasCalendarDate && hasDayOperations;
+  }
+
+  private operationsReadContextText(
+    dto: AiCoreChatDto,
+    latest: string,
+  ): string {
+    if (this.isOperationsJournalQuestion(latest)) {
+      return latest;
+    }
+    const previous = this.previousUserText(dto);
+    if (
+      previous &&
+      this.isOperationsJournalQuestion(previous) &&
+      /^(?:а\s+)?(?:(?:у|про)\s+)?[a-zа-я\s-]{2,60}\??$/.test(latest)
+    ) {
+      return `${previous} ${latest}`;
+    }
+    return latest;
+  }
+
+  private operationsStaffRows(value: unknown): OperationsStaffRow[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .map((entry) => {
+        const row = this.asRecord(entry);
+        const appointments = this.asRecord(row.appointments);
+        if (typeof row.name !== 'string') {
+          return null;
+        }
+        return {
+          name: row.name,
+          isWorking:
+            typeof row.is_working === 'boolean' ? row.is_working : null,
+          workingHours: this.readScheduleSlots(row.working_hours),
+          appointments: {
+            total: this.safeCount(appointments.total),
+            active: this.safeCount(appointments.active),
+            confirmed: this.safeCount(appointments.confirmed),
+            completed: this.safeCount(appointments.completed),
+            canceled: this.safeCount(appointments.canceled),
+            noShow: this.safeCount(appointments.no_show),
+            other: this.safeCount(appointments.other),
+          },
+          bookedMinutes: this.safeCount(row.booked_minutes),
+          workingMinutes: this.safeCount(row.working_minutes),
+          loadPercent:
+            typeof row.load_percent === 'number' &&
+            Number.isFinite(row.load_percent)
+              ? row.load_percent
+              : null,
+        };
+      })
+      .filter((row): row is OperationsStaffRow => row !== null);
+  }
+
+  private operationsAppointmentRows(
+    value: unknown,
+  ): OperationsAppointmentRow[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .map((entry) => {
+        const row = this.asRecord(entry);
+        if (
+          typeof row.time !== 'string' ||
+          typeof row.end_time !== 'string' ||
+          typeof row.staff_name !== 'string' ||
+          typeof row.status !== 'string'
+        ) {
+          return null;
+        }
+        return {
+          time: row.time,
+          endTime: row.end_time,
+          status: row.status,
+          staffName: row.staff_name,
+          services: Array.isArray(row.services)
+            ? row.services.filter(
+                (service): service is string => typeof service === 'string',
+              )
+            : [],
+        };
+      })
+      .filter((row): row is OperationsAppointmentRow => row !== null);
+  }
+
+  private operationsCounts(value: unknown): OperationsCounts | null {
+    const row = this.asRecord(value);
+    if (typeof row.total !== 'number') {
+      return null;
+    }
+    return {
+      total: this.safeCount(row.total),
+      active: this.safeCount(row.active),
+      confirmed: this.safeCount(row.confirmed),
+      completed: this.safeCount(row.completed),
+      canceled: this.safeCount(row.canceled),
+      noShow: this.safeCount(row.no_show),
+      other: this.safeCount(row.other),
+    };
+  }
+
+  private operationsJournalReply(
+    date: string,
+    timezone: string,
+    rows: OperationsStaffRow[],
+    appointments: OperationsAppointmentRow[],
+    summary: OperationsCounts,
+    singleStaff: boolean,
+  ): string {
+    const label = this.scheduleDateLabel(date, timezone);
+    if (singleStaff && rows.length === 1) {
+      const row = rows[0];
+      const details = appointments.slice(0, 12).map((appointment) => {
+        const services =
+          appointment.services.length > 0
+            ? appointment.services.join(', ')
+            : 'услуга не указана';
+        return `${appointment.time}–${appointment.endTime} — ${services} (${this.appointmentStatusLabel(appointment.status)})`;
+      });
+      return [
+        `${label}: ${row.name} — ${row.appointments.total} ${this.pluralize(row.appointments.total, 'запись', 'записи', 'записей')}.`,
+        `Предстоящих: ${row.appointments.confirmed}, проведённых: ${row.appointments.completed}, отмен: ${row.appointments.canceled}, неявок: ${row.appointments.noShow}.`,
+        row.workingHours.length > 0
+          ? `Смена ${this.slotsText(row.workingHours)}; занято ${row.bookedMinutes} из ${row.workingMinutes} мин${row.loadPercent === null ? '' : `, загрузка ${this.formatPercent(row.loadPercent)}`}.`
+          : row.isWorking === false
+            ? 'По графику выходной.'
+            : '',
+        details.length > 0 ? `Записи: ${details.join('; ')}.` : '',
+        appointments.length > details.length
+          ? `Ещё записей: ${appointments.length - details.length}.`
+          : '',
+        'Источник: YClients.',
+      ]
+        .filter(Boolean)
+        .join(' ');
+    }
+
+    const staffSummary = rows
+      .slice(0, 12)
+      .map(
+        (row) =>
+          `${row.name} — ${row.appointments.active} активных, ${row.appointments.canceled} отмен${row.loadPercent === null ? '' : `, загрузка ${this.formatPercent(row.loadPercent)}`}`,
+      );
+    return [
+      `${label}: всего ${summary.total} ${this.pluralize(summary.total, 'запись', 'записи', 'записей')}, активных ${summary.active}, проведённых ${summary.completed}, отмен ${summary.canceled}, неявок ${summary.noShow}.`,
+      staffSummary.length > 0 ? `По мастерам: ${staffSummary.join('; ')}.` : '',
+      rows.length > staffSummary.length
+        ? `Ещё сотрудников: ${rows.length - staffSummary.length}.`
+        : '',
+      'Источник: YClients.',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  private appointmentStatusLabel(status: string): string {
+    if (status === 'confirmed') return 'ожидается';
+    if (status === 'completed') return 'проведена';
+    if (status === 'canceled') return 'отменена';
+    if (status === 'no_show') return 'неявка';
+    return 'активна';
+  }
+
+  private pluralize(
+    value: number,
+    one: string,
+    few: string,
+    many: string,
+  ): string {
+    const absolute = Math.abs(Math.trunc(value));
+    const lastTwo = absolute % 100;
+    if (lastTwo >= 11 && lastTwo <= 14) return many;
+    const last = absolute % 10;
+    if (last === 1) return one;
+    if (last >= 2 && last <= 4) return few;
+    return many;
+  }
+
+  private formatPercent(value: number): string {
+    return `${new Intl.NumberFormat('ru-RU', {
+      maximumFractionDigits: 1,
+    }).format(value)}%`;
+  }
+
+  private safeCount(value: unknown): number {
+    return typeof value === 'number' && Number.isFinite(value)
+      ? Math.max(0, Math.round(value))
+      : 0;
+  }
+
+  private scheduleRows(value: unknown): Array<{
+    name: string;
+    isWorking: boolean;
+    slots: StaffScheduleSlot[];
+  }> {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .map((item) => {
+        const row = this.asRecord(item);
+        if (typeof row.name !== 'string') {
+          return null;
+        }
+        return {
+          name: row.name,
+          isWorking: row.is_working === true,
+          slots: this.readScheduleSlots(row.slots),
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          name: string;
+          isWorking: boolean;
+          slots: StaffScheduleSlot[];
+        } => row !== null,
+      );
+  }
+
+  private readScheduleSlots(value: unknown): StaffScheduleSlot[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .map((item) => {
+        const slot = this.asRecord(item);
+        return typeof slot.from === 'string' && typeof slot.to === 'string'
+          ? { from: slot.from, to: slot.to }
+          : null;
+      })
+      .filter((slot): slot is StaffScheduleSlot => slot !== null);
+  }
+
+  private scheduleReadReply(
+    date: string,
+    timezone: string,
+    rows: Array<{
+      name: string;
+      isWorking: boolean;
+      slots: StaffScheduleSlot[];
+    }>,
+  ): string {
+    const label = this.scheduleDateLabel(date, timezone);
+    if (rows.length === 1) {
+      const row = rows[0];
+      return `${label}: ${row.name} — ${
+        row.isWorking && row.slots.length > 0
+          ? this.slotsText(row.slots)
+          : 'выходной'
+      }. Источник: YClients.`;
+    }
+    const working = rows
+      .filter((row) => row.isWorking && row.slots.length > 0)
+      .map((row) => `${row.name} ${this.slotsText(row.slots)}`);
+    const off = rows
+      .filter((row) => !row.isWorking || row.slots.length === 0)
+      .map((row) => row.name);
+    return [
+      `${label}.`,
+      working.length > 0
+        ? `Работают: ${working.join('; ')}.`
+        : 'По графику никто не работает.',
+      off.length > 0 ? `Выходной: ${off.join(', ')}.` : '',
+      'Источник: YClients.',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  private scheduleDateLabel(date: string, timezone: string): string {
+    const today = this.localDate(new Date(), timezone);
+    const relative =
+      date === today
+        ? 'Сегодня'
+        : date === this.shiftDate(today, 1)
+          ? 'Завтра'
+          : date === this.shiftDate(today, 2)
+            ? 'Послезавтра'
+            : null;
+    const formatted = new Intl.DateTimeFormat('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: date.slice(0, 4) === today.slice(0, 4) ? undefined : 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${date}T12:00:00.000Z`));
+    return relative ? `${relative}, ${formatted}` : formatted;
+  }
+
+  private scheduleReadFailure(): StaffScheduleCommandResult {
+    return this.replyOnly(
+      'Не смогла сейчас получить точный график из YClients. Общей аналитикой его не заменяю — попробуйте повторить запрос.',
+    );
+  }
+
+  private operationsReadFailure(): StaffScheduleCommandResult {
+    return this.replyOnly(
+      'Не смогла сейчас получить точный журнал записей из YClients. Месячной сводкой его не заменяю — попробуйте повторить запрос.',
+    );
+  }
+
   private detectOperation(text: string): ScheduleOperation | null {
     if (/(?:^|[^а-я])(перерыв|обед)(?:$|[^а-я])/.test(text)) {
       return 'set_break';
     }
     if (
-      /(?:^|[^а-я])(?:закр(?:ой|ыть|ывай|ываем)|выходн(?:ой|ым))(?:$|[^а-я])/.test(
+      /(?:^|[^а-я])(?:закр(?:ой|ыть|ывай|ываем)|(?:сделай|поставь|назначь)[^.!?]{0,40}выходн)(?:$|[^а-я])/.test(
         text,
       ) &&
       /(запис|ден|сегодня|завтра|послезавтра|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2}|[а-я]+ник|сред|пятниц|суббот|воскрес)/.test(
@@ -395,7 +1038,7 @@ export class StaffScheduleCommandService {
     if (leftAliases.includes(right) || rightAliases.includes(left)) {
       return true;
     }
-    if (left === right) {
+    if (left === right || this.nameWordForms(right).has(left)) {
       return true;
     }
     const prefixLength = Math.min(left.length, right.length, 5);
@@ -403,6 +1046,34 @@ export class StaffScheduleCommandService {
       prefixLength >= 4 &&
       left.slice(0, prefixLength) === right.slice(0, prefixLength)
     );
+  }
+
+  private nameWordForms(name: string): Set<string> {
+    const forms = new Set<string>([name]);
+    const final = name.at(-1);
+    const stem = name.slice(0, -1);
+    if (final === 'а') {
+      ['а', 'ы', 'и', 'е', 'у', 'ой', 'ою'].forEach((ending) =>
+        forms.add(`${stem}${ending}`),
+      );
+    } else if (final === 'я') {
+      ['я', 'и', 'е', 'ю', 'ей', 'ею'].forEach((ending) =>
+        forms.add(`${stem}${ending}`),
+      );
+    } else if (final === 'й') {
+      ['й', 'я', 'ю', 'ем', 'е'].forEach((ending) =>
+        forms.add(`${stem}${ending}`),
+      );
+    } else if (final === 'ь') {
+      ['ь', 'я', 'и', 'ю', 'ем', 'е'].forEach((ending) =>
+        forms.add(`${stem}${ending}`),
+      );
+    } else {
+      ['', 'а', 'у', 'ом', 'е'].forEach((ending) =>
+        forms.add(`${name}${ending}`),
+      );
+    }
+    return forms;
   }
 
   private parseDate(text: string, timezone: string): string | null {
@@ -551,6 +1222,21 @@ export class StaffScheduleCommandService {
       if (dto.messages[index].role === 'user') {
         return dto.messages[index].content;
       }
+    }
+    return '';
+  }
+
+  private previousUserText(dto: AiCoreChatDto): string {
+    let latestSeen = false;
+    for (let index = dto.messages.length - 1; index >= 0; index -= 1) {
+      if (dto.messages[index].role !== 'user') {
+        continue;
+      }
+      if (!latestSeen) {
+        latestSeen = true;
+        continue;
+      }
+      return this.normalizeText(dto.messages[index].content);
     }
     return '';
   }

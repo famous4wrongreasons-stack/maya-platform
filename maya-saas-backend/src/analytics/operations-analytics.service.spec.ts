@@ -421,7 +421,7 @@ describe('OperationsAnalyticsService', () => {
     const setup = createService();
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getBusinessOverview('tenant-a', {
+      setup.service.getBusinessOperationalOverview('tenant-a', {
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.000Z',
       }),
@@ -430,7 +430,10 @@ describe('OperationsAnalyticsService', () => {
     expect(result.appointments).toMatchObject({
       total: 4,
       active: 3,
+      scheduled: 3,
+      completed: 0,
       cancelled: 1,
+      no_show: 0,
       cancellation_rate_percent: 25,
       unique_clients: 3,
       repeat_clients_in_period: 0,
@@ -459,6 +462,12 @@ describe('OperationsAnalyticsService', () => {
     ]);
     expect(result.daily[0]).toMatchObject({
       appointments: 3,
+      total: 4,
+      active: 3,
+      scheduled: 3,
+      completed: 0,
+      cancelled: 1,
+      no_show: 0,
       revenue: [
         { currency: 'RUB', amount_kopecks: 10_000 },
         { currency: 'USD', amount_kopecks: 2_000 },
@@ -492,7 +501,7 @@ describe('OperationsAnalyticsService', () => {
     const setup = createService(CalendarSource.EXTERNAL);
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getBusinessOverview('tenant-a', {
+      setup.service.getBusinessOperationalOverview('tenant-a', {
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.000Z',
       }),
@@ -526,6 +535,7 @@ describe('OperationsAnalyticsService', () => {
     ]);
     expect(result.services).toEqual([
       {
+        service_external_id: 'service-a',
         name: 'Мужская стрижка',
         appointments: 1,
         booked_value: [{ currency: 'RUB', amount_kopecks: 250_000 }],
@@ -599,7 +609,7 @@ describe('OperationsAnalyticsService', () => {
     });
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getBusinessOverview('tenant-a', {
+      setup.service.getBusinessOperationalOverview('tenant-a', {
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-31T23:59:59.000Z',
       }),
@@ -609,8 +619,12 @@ describe('OperationsAnalyticsService', () => {
       {
         staff_external_id: 'staff-a',
         name: 'Анна',
+        total: 1,
         appointments: 1,
+        scheduled: 1,
+        completed: 0,
         cancelled: 0,
+        no_show: 0,
         cancellation_rate_percent: 0,
         unique_clients: 1,
         repeat_clients_in_period: 0,
@@ -621,8 +635,12 @@ describe('OperationsAnalyticsService', () => {
       {
         staff_external_id: 'staff-b',
         name: 'Илья',
+        total: 2,
         appointments: 2,
+        scheduled: 2,
+        completed: 0,
         cancelled: 0,
+        no_show: 0,
         cancellation_rate_percent: 0,
         unique_clients: 2,
         repeat_clients_in_period: 0,
@@ -759,6 +777,8 @@ describe('OperationsAnalyticsService', () => {
 
   it('reads the cohort history for external CRM in one extra chunked journal pass', async () => {
     const setup = createService(CalendarSource.EXTERNAL);
+    let inFlight = 0;
+    let maxInFlight = 0;
     const visit = (id: string, clientId: string, startAt: string) => ({
       id,
       client: { id: clientId, name: 'Client' },
@@ -775,8 +795,12 @@ describe('OperationsAnalyticsService', () => {
     });
     const windowStart = new Date('2026-07-01T00:00:00.000Z').getTime();
     setup.crmGetJournal.mockImplementation(
-      (_tenantId: string, range: { from: string; to: string }) =>
-        Promise.resolve({
+      async (_tenantId: string, range: { from: string; to: string }) => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlight -= 1;
+        return {
           calendar_source: 'external',
           timezone: 'Europe/Moscow',
           range,
@@ -789,7 +813,8 @@ describe('OperationsAnalyticsService', () => {
                   visit('w-2', 'client-first-time', '2026-07-11T09:00:00.000Z'),
                 ]
               : [visit('h-1', 'client-regular', '2026-06-15T09:00:00.000Z')],
-        }),
+        };
+      },
     );
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
@@ -817,6 +842,7 @@ describe('OperationsAnalyticsService', () => {
     expect(historyRanges).toHaveLength(3);
     expect(historyRanges[0].from).toBe('2026-04-02T00:00:00.000Z');
     expect(historyRanges[2].to).toBe('2026-06-30T23:59:59.999Z');
+    expect(maxInFlight).toBeGreaterThanOrEqual(3);
   });
 
   it('names internal calendar masters from their provider card in one query', async () => {
@@ -1090,6 +1116,7 @@ describe('OperationsAnalyticsService', () => {
       revenueVerified?: boolean;
       payrollAccruedKopecks?: number | null;
       financeFails?: boolean;
+      expenseDeclaration?: boolean;
     }) => {
       const tenantContext = new TenantContextService();
       const expenseFindMany = jest.fn(() =>
@@ -1106,6 +1133,22 @@ describe('OperationsAnalyticsService', () => {
         },
         appointment: { findMany: jest.fn().mockResolvedValue([]) },
         expense: { findMany: expenseFindMany },
+        expensePeriodDeclaration: {
+          findUnique: jest.fn().mockResolvedValue(
+            options.expenseDeclaration === false
+              ? null
+              : {
+                  id: 'expense-declaration-a',
+                  tenantId: 'tenant-a',
+                  declaredById: 'owner-a',
+                  periodFromDay: '2026-07-01',
+                  periodToDay: '2026-07-31',
+                  idempotencyKey: null,
+                  createdAt: new Date('2026-07-31T21:00:00.000Z'),
+                  updatedAt: new Date('2026-07-31T21:00:00.000Z'),
+                },
+          ),
+        },
         internalProvider: {
           findFirst: jest.fn(),
           findMany: jest.fn().mockResolvedValue([]),
@@ -1142,6 +1185,11 @@ describe('OperationsAnalyticsService', () => {
                     : { currency: 'RUB', amount_kopecks: revenueKopecks },
                 by_type: [],
                 by_account: [],
+                by_staff: [],
+                staff_attribution_status: 'unavailable',
+                staff_attribution_coverage_percent: null,
+                unattributed_service_total: null,
+                unattributed_service_transaction_count: 0,
               },
               payroll: {
                 status:
@@ -1315,16 +1363,12 @@ describe('OperationsAnalyticsService', () => {
       });
     });
 
-    it('refuses profit and names the missing expense category by its salon word', async () => {
+    it('calculates from recorded expenses and treats unrecorded additions as zero', async () => {
       const setup = createProfitabilityService({
         revenueKopecks: 1_000_000,
-        // Зарплата ЕСТЬ: иначе настоящим блокером была бы она, и совет
-        // «внесите аренду» никуда бы не привёл — владелец внёс бы её и всё
-        // равно не получил прибыль. Проверяем гейт полноты, а не расчёт ЗП.
         payrollAccruedKopecks: 300_000,
-        // Ровно тот случай, ради которого писался гейт: один расход на 500 ₽
-        // за месяц. Раньше он дал бы «прибыль» 9 500 ₽ при выручке 10 000 ₽.
         expenses: [expense('coffee', 50_000)],
+        expenseDeclaration: false,
       });
 
       const result = await setup.tenantContext.runAsSystemTenant(
@@ -1336,39 +1380,37 @@ describe('OperationsAnalyticsService', () => {
       );
 
       expect(result.net_profit).toMatchObject({
-        status: 'unavailable',
-        total: null,
-        unavailable_reason:
-          'required_expense_categories_are_missing_for_this_period',
+        status: 'available',
+        total: { amount_kopecks: 650_000, amount_major_units: 6_500 },
+        margin_percent: 65,
+        unavailable_reason: null,
+        calculation_basis: 'recorded_expenses_only',
+        unrecorded_additional_expenses_assumed_zero: true,
       });
-      expect(result.completeness.status).toBe('incomplete');
-      expect(result.completeness.missing_categories).toEqual([
-        { category: 'rent', label: 'аренда' },
-      ]);
-      // 🔴 Зарплаты в списке «что внести» нет и быть не может: ручной ввод
-      // зарплаты запрещён, и совет её внести был бы советом невозможного.
-      expect(result.completeness.missing_categories).not.toContainEqual(
-        expect.objectContaining({ category: 'salary' }),
-      );
-      // Зарплата в этой фикстуре есть — блокером остаётся только аренда.
-      // Владельцу её всё равно вносить нельзя: она приходит расчётом CRM.
+      expect(result.completeness).toMatchObject({
+        status: 'provisional',
+        owner_confirmation_required: false,
+        owner_confirmation_recommended: true,
+        unrecorded_additional_expenses_assumed_zero: true,
+        calculation_basis: 'recorded_expenses_only',
+        owner_declaration: null,
+        missing_categories: [],
+        understated_categories: [],
+      });
       expect(result.payroll).toMatchObject({
         status: 'available',
         owner_can_record: false,
       });
-      expect(result.unavailable_metrics).toContainEqual(
+      expect(result.unavailable_metrics).not.toContainEqual(
         expect.objectContaining({ key: 'net_profit' }),
       );
     });
 
-    it('does not let one kopeck of rent close the completeness gate', async () => {
+    it('computes clean profit when the owner confirms there are no additional expenses', async () => {
       const setup = createProfitabilityService({
         revenueKopecks: 1_000_000,
         payrollAccruedKopecks: 300_000,
-        // 🔴 Аренда «внесена» — на один рубль при кассе в 10 000 ₽. Прежний
-        // гейт «сумма больше нуля» считал это полнотой, и прибыль выходила
-        // 6 900 ₽ при настоящих расходах, которых никто не заводил.
-        expenses: [expense('rent', 100)],
+        expenses: [],
       });
 
       const result = await setup.tenantContext.runAsSystemTenant(
@@ -1379,29 +1421,22 @@ describe('OperationsAnalyticsService', () => {
           }),
       );
 
-      expect(result.completeness.status).toBe('understated');
-      expect(result.completeness.missing_categories).toEqual([]);
-      expect(result.completeness.understated_categories).toEqual([
-        {
-          category: 'rent',
-          label: 'аренда',
-          recorded: {
-            currency: 'RUB',
-            amount_kopecks: 100,
-            amount_major_units: 1,
-          },
-          share_of_confirmed_revenue_percent: 0.01,
+      expect(result.completeness).toMatchObject({
+        status: 'complete',
+        owner_confirmation_required: false,
+        owner_declaration: {
+          period_from_day: '2026-07-01',
+          period_to_day: '2026-07-31',
         },
-      ]);
+      });
       expect(result.net_profit).toMatchObject({
-        status: 'unavailable',
-        total: null,
-        unavailable_reason:
-          'recorded_expense_categories_are_implausibly_small_against_the_confirmed_cash_of_this_period_and_look_partially_entered',
+        status: 'available',
+        total: { amount_kopecks: 700_000, amount_major_units: 7_000 },
+        unavailable_reason: null,
       });
     });
 
-    it('names only rent when the CRM payroll already covers salary', async () => {
+    it('subtracts additional expenses entered in chat without requiring rent', async () => {
       const setup = createProfitabilityService({
         revenueKopecks: 1_000_000,
         payrollAccruedKopecks: 300_000,
@@ -1416,10 +1451,15 @@ describe('OperationsAnalyticsService', () => {
           }),
       );
 
-      expect(result.completeness.missing_categories).toEqual([
-        { category: 'rent', label: 'аренда' },
-      ]);
-      expect(result.net_profit.status).toBe('unavailable');
+      expect(result.completeness).toMatchObject({
+        status: 'complete',
+        missing_categories: [],
+        understated_categories: [],
+      });
+      expect(result.net_profit).toMatchObject({
+        status: 'available',
+        total: { amount_kopecks: 660_000, amount_major_units: 6_600 },
+      });
     });
 
     it('accepts a category synonym so a real ledger is not called incomplete', async () => {

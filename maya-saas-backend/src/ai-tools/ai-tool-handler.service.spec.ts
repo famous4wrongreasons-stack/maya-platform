@@ -2,9 +2,11 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { UserRole } from '../common/domain.enums';
+import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StaffService } from '../staff/staff.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -20,6 +22,218 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('builds a redacted CRM client dossier for staff', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-12T09:00:00.000Z'));
+    const searchClients = jest.fn().mockResolvedValue([
+      {
+        id: '42',
+        name: 'Иван Петров',
+        phone: '+79991234567',
+        visits_count: 39,
+        sold_amount: 62_150,
+        last_visit_date: '2026-07-20',
+      },
+      {
+        id: '43',
+        name: 'Иван Сидоров',
+        phone: null,
+        visits_count: null,
+        sold_amount: null,
+        last_visit_date: null,
+      },
+    ]);
+    const getClientVisitHistory = jest.fn().mockResolvedValue([
+      {
+        start: '2026-05-01T10:00:00.000Z',
+        service_names: ['Стрижка'],
+        total_price: 1800,
+        attendance: 1,
+      },
+      {
+        start: '2026-06-15T10:00:00.000Z',
+        service_names: ['Стрижка', 'Борода'],
+        total_price: 2500,
+        attendance: 1,
+      },
+      {
+        start: '2026-07-20T10:00:00.000Z',
+        service_names: ['Стрижка'],
+        total_price: 1800,
+        attendance: 1,
+      },
+    ]);
+    const getClientLoyalty = jest.fn().mockResolvedValue({
+      balance: 2133,
+      currency: 'RUB',
+    });
+    const service = createService({
+      crmService: {
+        searchClients,
+        getClientVisitHistory,
+        getClientLoyalty,
+      } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.dossier.read',
+      { ...principal, role: UserRole.STAFF, userId: 'master-a' },
+      { query: 'Иван' },
+      'execution-dossier-a',
+    );
+
+    expect(searchClients).toHaveBeenCalledWith('tenant-a', 'Иван');
+    expect(getClientVisitHistory).toHaveBeenCalledWith('tenant-a', '42', 30);
+    expect(result).toEqual({
+      found: true,
+      display_name: 'клиент',
+      matches_count: 2,
+      visits: 39,
+      visits_scope: 'full_crm_card',
+      last_visit: '2026-07-20',
+      inactivity_days: 23,
+      favorite_services: ['Стрижка', 'Борода'],
+      services_scope: 'last_30_attended_visits',
+      avg_cycle_days: 40,
+      total_spent: 62_150,
+      total_spent_scope: 'full_crm_card',
+      loyal: true,
+      loyalty_segment: 'core',
+      loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
+      bonus_balance: 2133,
+      bonus_currency: 'RUB',
+      bonus_status: 'available',
+      note: 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.',
+    });
+    expect(getClientLoyalty).toHaveBeenCalledWith('tenant-a', '+79991234567');
+    expect(JSON.stringify(result)).not.toContain('Иван');
+    expect(JSON.stringify(result)).not.toContain('7999');
+    expect(JSON.stringify(result)).not.toContain('phone');
+  });
+
+  it('retries a Russian client name in nominative form when CRM does not inflect search', async () => {
+    const searchClients = jest
+      .fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: '42',
+          name: 'Стас',
+          phone: null,
+          visits_count: 8,
+          sold_amount: 12_000,
+          last_visit_date: '2026-08-01',
+        },
+      ]);
+    const service = createService({
+      crmService: {
+        searchClients,
+        getClientVisitHistory: jest.fn().mockResolvedValue([]),
+        getClientLoyalty: jest.fn(),
+      } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'clients.dossier.read',
+      { ...principal, role: UserRole.STAFF, userId: 'master-a' },
+      { query: 'Стаса' },
+      'execution-dossier-inflected',
+    );
+
+    expect(searchClients.mock.calls).toEqual([
+      ['tenant-a', 'Стаса'],
+      ['tenant-a', 'Стас'],
+    ]);
+    expect(result).toMatchObject({ found: true, visits: 8, loyal: true });
+    expect(JSON.stringify(result)).not.toContain('Стас');
+  });
+
+  it('returns and caches a PII-free full client registry analysis', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-12T09:00:00.000Z'));
+    const getClientRegistry = jest.fn().mockResolvedValue({
+      provider: 'yclients',
+      generated_at: '2026-08-12T08:59:00.000Z',
+      complete: true,
+      clients: [
+        {
+          external_id: 'secret-client-1',
+          visits_count: 4,
+          sold_amount: 8_000,
+          last_visit_date: '2026-05-01',
+        },
+        {
+          external_id: 'secret-client-2',
+          visits_count: 0,
+          sold_amount: 0,
+          last_visit_date: null,
+        },
+      ],
+    });
+    const service = createService({
+      crmService: { getClientRegistry } as unknown as CrmService,
+      prisma: {
+        tenant: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValue({ defaultTimezone: 'Europe/Moscow' }),
+        },
+        branch: { findFirst: jest.fn() },
+      } as unknown as PrismaService,
+    });
+    const owner = { ...principal, role: UserRole.TENANT_OWNER };
+
+    const first = await service.execute(
+      'clients.retention.scan',
+      owner,
+      {},
+      'execution-retention-a',
+    );
+    const second = await service.execute(
+      'clients.retention.scan',
+      owner,
+      {},
+      'execution-retention-b',
+    );
+
+    expect(first).toMatchObject({
+      complete: true,
+      contains_personal_data: false,
+      total_clients: 2,
+      clients_with_visits: 1,
+      clients_without_visits: 1,
+      loyal_clients: 1,
+      inactivity: {
+        over_1_month: 1,
+        over_2_months: 1,
+        over_3_months: 1,
+        over_4_months: 0,
+        over_5_months: 0,
+        over_6_months: 0,
+        over_1_year: 0,
+      },
+      loyal_inactivity: {
+        over_1_month: 1,
+        over_2_months: 1,
+        over_3_months: 1,
+        over_4_months: 0,
+        over_5_months: 0,
+        over_6_months: 0,
+        over_1_year: 0,
+      },
+      loyal_reactivation_cohorts: {
+        from_1_to_2_months: 0,
+        from_2_to_3_months: 0,
+        from_3_to_6_months: 1,
+        from_6_to_12_months: 0,
+        over_1_year: 0,
+      },
+    });
+    expect(second).toEqual(first);
+    expect(getClientRegistry).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(first)).not.toContain('secret-client');
   });
 
   it('removes provider payload and customer PII from appointments', async () => {
@@ -318,6 +532,230 @@ describe('AiToolHandlerService output minimization', () => {
     });
   });
 
+  it('reads the exact active staff schedule directly from CRM', async () => {
+    const getStaff = jest.fn().mockResolvedValue([
+      { id: '1461615', name: 'Станислав Мосин', title: 'Барбер' },
+      { id: '1461616', name: 'Бывший сотрудник', title: 'Барбер' },
+    ]);
+    const getStaffScheduleDay = jest
+      .fn()
+      .mockImplementation(
+        (_tenantId: string, input: { staffId: string; date: string }) =>
+          Promise.resolve({
+            staff_id: input.staffId,
+            date: input.date,
+            is_working: true,
+            slots: [{ from: '10:00', to: '20:00' }],
+            revision: 'revision',
+          }),
+      );
+    const service = createService({
+      crmService: {
+        getStaff,
+        getStaffScheduleDay,
+      } as unknown as CrmService,
+    });
+
+    await expect(
+      service.execute(
+        'staff.schedule.read',
+        { ...principal, role: UserRole.TENANT_OWNER, surface: 'native' },
+        { date: '2026-08-06', staff_id: '1461615' },
+        'execution-schedule-read',
+      ),
+    ).resolves.toEqual({
+      verified: true,
+      source: 'crm',
+      date: '2026-08-06',
+      staff: [
+        {
+          id: '1461615',
+          name: 'Станислав Мосин',
+          title: 'Барбер',
+          is_working: true,
+          slots: [{ from: '10:00', to: '20:00' }],
+        },
+      ],
+    });
+    expect(getStaffScheduleDay).toHaveBeenCalledWith('tenant-a', {
+      staffId: '1461615',
+      date: '2026-08-06',
+    });
+  });
+
+  it('refuses a staff id that is absent from the active CRM roster', async () => {
+    const service = createService({
+      crmService: {
+        getStaff: jest
+          .fn()
+          .mockResolvedValue([{ id: '1461615', name: 'Станислав Мосин' }]),
+        getStaffScheduleDay: jest.fn(),
+      } as unknown as CrmService,
+    });
+
+    await expect(
+      service.execute(
+        'staff.schedule.read',
+        { ...principal, role: UserRole.TENANT_OWNER, surface: 'native' },
+        { date: '2026-08-06', staff_id: 'inactive-staff' },
+        'execution-schedule-missing',
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'staff_not_found' } },
+    });
+  });
+
+  it('reads an exact PII-free day journal for an active staff member', async () => {
+    const getStaff = jest
+      .fn()
+      .mockResolvedValue([
+        { id: '1461615', name: 'Станислав Мосин', title: 'Барбер' },
+      ]);
+    const getJournal = jest.fn().mockResolvedValue({
+      calendar_source: 'external',
+      timezone: 'UTC',
+      range: {
+        from: '2026-08-06T00:00:00.000Z',
+        to: '2026-08-07T00:00:00.000Z',
+      },
+      provider_id: '1461615',
+      count: 2,
+      masters: [],
+      all_masters: [
+        {
+          id: '1461615',
+          name: 'Станислав Мосин',
+          title: 'Барбер',
+          is_working: true,
+          work_start: '10:00',
+          work_end: '20:00',
+          work_slots: [{ from: '10:00', to: '20:00' }],
+        },
+      ],
+      appointments: [
+        {
+          id: 'secret-appointment-1',
+          client: { id: 'secret-client-1', name: 'Иван Петров' },
+          provider: {
+            id: '1461615',
+            name: 'Станислав Мосин',
+            title: 'Барбер',
+          },
+          branch: null,
+          service_ids: ['secret-service-1'],
+          services: [
+            {
+              id: 'secret-service-1',
+              name: 'Мужская стрижка',
+              price: 2_000,
+              duration_minutes: 60,
+              currency: 'RUB',
+            },
+          ],
+          start_at: '2026-08-06T10:00:00.000Z',
+          end_at: '2026-08-06T11:00:00.000Z',
+          status: 'confirmed',
+          notes: 'Секретная заметка +79991234567',
+          total_price: 2_000,
+          currency: 'RUB',
+        },
+        {
+          id: 'secret-appointment-2',
+          client: { id: 'secret-client-2', name: 'Пётр Сидоров' },
+          provider: {
+            id: '1461615',
+            name: 'Станислав Мосин',
+            title: 'Барбер',
+          },
+          branch: null,
+          service_ids: ['secret-service-2'],
+          services: [
+            {
+              id: 'secret-service-2',
+              name: 'Моделирование бороды',
+              price: 1_200,
+              duration_minutes: 30,
+              currency: 'RUB',
+            },
+          ],
+          start_at: '2026-08-06T18:00:00.000Z',
+          end_at: '2026-08-06T18:30:00.000Z',
+          status: 'canceled',
+          notes: null,
+          total_price: 1_200,
+          currency: 'RUB',
+        },
+      ],
+    });
+    const service = createService({
+      crmService: { getStaff, getJournal } as unknown as CrmService,
+    });
+
+    const result = await service.execute(
+      'operations.journal.read',
+      { ...principal, role: UserRole.TENANT_OWNER, surface: 'native' },
+      { date: '2026-08-06', staff_id: '1461615' },
+      'execution-journal-read',
+    );
+
+    expect(getJournal).toHaveBeenCalledWith(
+      'tenant-a',
+      {
+        from: '2026-08-06T00:00:00.000Z',
+        to: '2026-08-07T00:00:00.000Z',
+        providerId: '1461615',
+      },
+      { includeCanceled: true },
+    );
+    expect(result).toMatchObject({
+      verified: true,
+      source: 'yclients',
+      pii_redacted: true,
+      date: '2026-08-06',
+      summary: {
+        total: 2,
+        active: 1,
+        confirmed: 1,
+        canceled: 1,
+        booked_minutes: 60,
+      },
+      staff: [
+        {
+          name: 'Станислав Мосин',
+          is_working: true,
+          booked_minutes: 60,
+          working_minutes: 600,
+          load_percent: 10,
+          appointments: { total: 2, active: 1, canceled: 1 },
+        },
+      ],
+      appointments: [
+        {
+          time: '10:00',
+          end_time: '11:00',
+          status: 'confirmed',
+          staff_name: 'Станислав Мосин',
+          services: ['Мужская стрижка'],
+        },
+        {
+          time: '18:00',
+          end_time: '18:30',
+          status: 'canceled',
+          staff_name: 'Станислав Мосин',
+          services: ['Моделирование бороды'],
+        },
+      ],
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain('secret-client');
+    expect(serialized).not.toContain('secret-appointment');
+    expect(serialized).not.toContain('secret-service');
+    expect(serialized).not.toContain('Иван Петров');
+    expect(serialized).not.toContain('Пётр Сидоров');
+    expect(serialized).not.toContain('79991234567');
+    expect(serialized).not.toContain('Секретная заметка');
+  });
+
   it('removes employee names and provider identifiers from analytics', async () => {
     const analyticsService = {
       getEmployeeOverview: jest.fn().mockResolvedValue({
@@ -409,6 +847,38 @@ describe('AiToolHandlerService output minimization', () => {
     });
   });
 
+  it('resolves today as the full tenant calendar day', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-17T01:00:00.000Z'));
+    const getBusinessOverview = jest.fn().mockResolvedValue({
+      period: {},
+      appointments: {},
+    });
+    const analyticsService = {
+      getBusinessOverview,
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ defaultTimezone: 'Europe/Moscow' }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'today', comparison: 'none' },
+      'execution-today-period',
+    );
+
+    expect(getBusinessOverview).toHaveBeenCalledWith('tenant-a', {
+      from: '2026-07-16T21:00:00.000Z',
+      to: '2026-07-17T20:59:59.999Z',
+    });
+  });
+
   it('replaces external appointment prices with verified CRM finance totals', async () => {
     const getBusinessFinance = jest.fn().mockResolvedValue({
       source: 'external_crm',
@@ -426,6 +896,22 @@ describe('AiToolHandlerService output minimization', () => {
         total: { currency: 'RUB', amount_kopecks: 120_439_000 },
         by_type: [],
         by_account: [],
+        by_service: [
+          {
+            service_id: 'crm-service-1',
+            name: 'Мужская стрижка',
+            transaction_count: 300,
+            currency: 'RUB',
+            amount_kopecks: 60_000_000,
+          },
+        ],
+        service_attribution_status: 'partial',
+        service_attribution_coverage_percent: 49.8,
+        unattributed_service_breakdown_total: {
+          currency: 'RUB',
+          amount_kopecks: 60_439_000,
+        },
+        unattributed_service_breakdown_transaction_count: 521,
       },
       payroll: {
         status: 'available',
@@ -467,6 +953,14 @@ describe('AiToolHandlerService output minimization', () => {
             revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
           },
         ],
+        services: [
+          {
+            service_external_id: 'crm-service-1',
+            name: 'Мужская стрижка',
+            appointments: 300,
+            booked_value: [{ currency: 'RUB', amount_kopecks: 99_999_999 }],
+          },
+        ],
       }),
       getBusinessFinance,
     } as unknown as OperationsAnalyticsService;
@@ -502,6 +996,24 @@ describe('AiToolHandlerService output minimization', () => {
           amount_major_units: 1_466.98,
         },
       ],
+      service_summary: [
+        {
+          name: 'Мужская стрижка',
+          appointments: 300,
+          booked_value: [],
+          confirmed_revenue: {
+            status: 'available',
+            basis: 'crm_single_service_transaction_attribution',
+            amount: {
+              currency: 'RUB',
+              amount_kopecks: 60_000_000,
+              amount_major_units: 600_000,
+            },
+            attribution_status: 'partial',
+            attribution_coverage_percent: 49.8,
+          },
+        },
+      ],
       finance: {
         source: 'external_crm',
         provider: 'yclients',
@@ -518,6 +1030,7 @@ describe('AiToolHandlerService output minimization', () => {
     });
     expect(JSON.stringify(result)).not.toContain('Антон');
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
+    expect(JSON.stringify(result)).not.toContain('crm-service-1');
     expect(JSON.stringify(result)).not.toContain('9999999');
     expect(getBusinessFinance).toHaveBeenCalledWith('tenant-a', {
       from: '2026-07-01T00:00:00.000Z',
@@ -568,7 +1081,7 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getBusinessFinance).not.toHaveBeenCalled();
   });
 
-  it('gives the owner accrued payroll per master and never calls it master revenue', async () => {
+  it('gives the owner confirmed till and accrued payroll per master without mixing them', async () => {
     const getBusinessFinance = jest.fn().mockResolvedValue({
       source: 'external_crm',
       provider: 'yclients',
@@ -585,6 +1098,21 @@ describe('AiToolHandlerService output minimization', () => {
         total: { currency: 'RUB', amount_kopecks: 50_000_000 },
         by_type: [],
         by_account: [],
+        by_staff: [
+          {
+            staff_id: 'crm-staff-1',
+            transaction_count: 60,
+            currency: 'RUB',
+            amount_kopecks: 30_000_000,
+          },
+        ],
+        staff_attribution_status: 'partial',
+        staff_attribution_coverage_percent: 60,
+        unattributed_service_total: {
+          currency: 'RUB',
+          amount_kopecks: 20_000_000,
+        },
+        unattributed_service_transaction_count: 40,
       },
       payroll: {
         // 🔴 Расчёт неполный: по одному мастеру CRM промолчала. Второй посчитан
@@ -670,12 +1198,20 @@ describe('AiToolHandlerService output minimization', () => {
         {
           name: 'Стас',
           appointments: 30,
-          // Цены журнала по-прежнему обнулены: подтверждённых денег мастера нет.
+          // Цены журнала по-прежнему не выдаются за кассу.
           revenue: [],
           confirmed_revenue: {
-            status: 'unavailable',
-            amount: null,
-            unavailable_reason: stringContaining('whole_company'),
+            status: 'available',
+            basis: 'crm_financial_transaction_attribution',
+            amount: {
+              currency: 'RUB',
+              amount_kopecks: 30_000_000,
+              amount_major_units: 300_000,
+            },
+            transaction_count: 60,
+            attribution_status: 'partial',
+            attribution_coverage_percent: 60,
+            unavailable_reason: null,
           },
           salary: {
             status: 'available',
@@ -697,6 +1233,10 @@ describe('AiToolHandlerService output minimization', () => {
           name: 'Илья',
           appointments: 20,
           revenue: [],
+          confirmed_revenue: {
+            status: 'unavailable',
+            amount: null,
+          },
           salary: {
             status: 'unavailable',
             basis: null,
@@ -707,6 +1247,7 @@ describe('AiToolHandlerService output minimization', () => {
         },
       ],
     });
+    expect(JSON.stringify(published(result))).toContain('not_attributed');
     // 🔴 Граница «зарплата по именам» держится тем, что имя из расчёта зарплаты
     // не переносится вообще: мастер называется именем операционного разреза.
     expect(JSON.stringify(result)).not.toContain('Антон');
@@ -1029,7 +1570,6 @@ describe('AiToolHandlerService output minimization', () => {
           confirmed_revenue: {
             status: 'unavailable',
             amount: null,
-            unavailable_reason: stringContaining('booked'),
           },
           salary: {
             status: 'unavailable',
@@ -1039,6 +1579,7 @@ describe('AiToolHandlerService output minimization', () => {
         },
       ],
     });
+    expect(JSON.stringify(published(result))).toContain('booked');
   });
 
   it('names per-master revenue as an unavailable metric with its reason', async () => {
@@ -1084,14 +1625,14 @@ describe('AiToolHandlerService output minimization', () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: 'staff_revenue',
-          reason: stringContaining('accrued payroll'),
         }),
         expect.objectContaining({
           key: 'staff_accrued_salary',
-          reason: stringContaining('crm_finance_unavailable'),
         }),
       ]),
     );
+    expect(JSON.stringify(result)).toContain('financial transactions');
+    expect(JSON.stringify(result)).toContain('crm_finance_unavailable');
   });
 
   /**
@@ -1735,10 +2276,10 @@ describe('AiToolHandlerService output minimization', () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: 'client_cohorts',
-          reason: stringContaining('90-day'),
         }),
       ]),
     );
+    expect(JSON.stringify(result)).toContain('90-day');
   });
 
   it('compares cancellations and repeat clients per master without leaking the CRM id', async () => {
@@ -2115,6 +2656,8 @@ describe('AiToolHandlerService output minimization', () => {
     loyaltyService?: LoyaltyService;
     analyticsService?: OperationsAnalyticsService;
     prisma?: PrismaService;
+    customersService?: CustomersService;
+    staffService?: StaffService;
   }) {
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
@@ -2132,6 +2675,8 @@ describe('AiToolHandlerService output minimization', () => {
           },
           branch: { findFirst: jest.fn() },
         } as unknown as PrismaService),
+      overrides.customersService ?? ({} as CustomersService),
+      overrides.staffService ?? ({} as StaffService),
     );
   }
 });

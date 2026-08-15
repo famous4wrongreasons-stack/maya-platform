@@ -1416,6 +1416,8 @@ export class UsersService {
     if (!tenantId) {
       return {
         ...serialized,
+        auth_provider: null,
+        avatar_url: null,
         staff_profile: { linked: false, source: null, title: null },
         app_access: buildAppAccessContext({
           tenantId: null,
@@ -1426,23 +1428,37 @@ export class UsersService {
       };
     }
 
-    const [crmStaffProfile, customerProfile] = await Promise.all([
-      this.prisma.crmStaffAccess.findFirst({
-        where: {
-          tenantId,
-          userId: serialized.id,
-          status: 'active',
-        },
-        select: { title: true, externalStaffId: true },
-      }),
-      this.prisma.customerProfile.findFirst({
-        where: {
-          tenantId,
-          userId: serialized.id,
-        },
-        select: { id: true },
-      }),
-    ]);
+    const [crmStaffProfile, customerProfile, telegramProfileIdentity] =
+      await Promise.all([
+        this.prisma.crmStaffAccess.findFirst({
+          where: {
+            tenantId,
+            userId: serialized.id,
+            status: 'active',
+          },
+          select: { title: true, externalStaffId: true },
+        }),
+        this.prisma.customerProfile.findFirst({
+          where: {
+            tenantId,
+            userId: serialized.id,
+          },
+          select: { id: true },
+        }),
+        this.prisma.authIdentity.findFirst({
+          where: {
+            tenantId,
+            userId: serialized.id,
+            provider: 'telegram',
+          },
+          select: { provider: true, profileJson: true },
+        }),
+      ]);
+
+    const authProvider = telegramProfileIdentity?.provider ?? null;
+    const avatarUrl = this.socialProfileAvatarUrl(
+      telegramProfileIdentity?.profileJson,
+    );
 
     if (crmStaffProfile) {
       const staffProfile = {
@@ -1456,6 +1472,8 @@ export class UsersService {
 
       return {
         ...serialized,
+        auth_provider: authProvider,
+        avatar_url: avatarUrl,
         staff_profile: staffProfile,
         app_access: buildAppAccessContext({
           tenantId,
@@ -1485,6 +1503,8 @@ export class UsersService {
 
     return {
       ...serialized,
+      auth_provider: authProvider,
+      avatar_url: avatarUrl,
       staff_profile: staffProfile,
       app_access: buildAppAccessContext({
         tenantId,
@@ -1534,6 +1554,30 @@ export class UsersService {
     const trimmed = name.trim();
 
     return trimmed.length > 0 ? trimmed : null;
+  }
+
+  private socialProfileAvatarUrl(profile: unknown): string | null {
+    if (!profile || typeof profile !== 'object' || Array.isArray(profile)) {
+      return null;
+    }
+
+    const fields = profile as Record<string, unknown>;
+    const candidate = [
+      fields.picture,
+      fields.avatar_url,
+      fields.photo_url,
+    ].find((value): value is string => typeof value === 'string');
+
+    if (!candidate) {
+      return null;
+    }
+
+    try {
+      const url = new URL(candidate.trim());
+      return url.protocol === 'https:' ? url.toString() : null;
+    } catch {
+      return null;
+    }
   }
 
   // Раньше здесь стоял строгий российский нормализатор в try/catch: сохранённый

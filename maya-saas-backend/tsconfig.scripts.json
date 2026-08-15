@@ -5,5 +5,10 @@
     "moduleResolution": "node",
     "resolvePackageJsonExports": false
   },
-  "include": ["scripts/**/*.ts", "src/common/current-salon-import.utils.ts"]
+  "include": [
+    "scripts/**/*.ts",
+    "src/common/current-salon-import.utils.ts",
+    "src/common/domain.enums.ts",
+    "src/conversation-intelligence/**/*.ts"
+  ]
 }

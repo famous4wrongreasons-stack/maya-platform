@@ -1,0 +1,3441 @@
+[
+  {
+    "id": "booking.find_availability",
+    "domain": "booking",
+    "subIntent": "booking.find_availability",
+    "description": "Find suitable booking slots.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "booking.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "booking.availability.read"
+    ],
+    "requiredSlots": [
+      "date_or_period"
+    ],
+    "optionalSlots": [
+      "employee",
+      "services",
+      "branch",
+      "time_of_day"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "окно",
+      "свободное время",
+      "слот",
+      "когда можно попасть"
+    ],
+    "examples": [
+      "Есть окно вечером?",
+      "К Артёму завтра после шести"
+    ]
+  },
+  {
+    "id": "booking.list_own",
+    "domain": "booking",
+    "subIntent": "booking.list_own",
+    "description": "List the actor own appointments.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "appointments.own.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "appointments.own.list"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "status"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "мои записи",
+      "мои визиты",
+      "когда я записан"
+    ],
+    "examples": [
+      "Покажи мои записи",
+      "Когда я записан в следующий раз?"
+    ]
+  },
+  {
+    "id": "booking.create_own",
+    "domain": "booking",
+    "subIntent": "booking.create_own",
+    "description": "Create an appointment for the actor.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "appointments.own.create",
+    "allowedRoles": [
+      "client",
+      "customer"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "appointments.own.create"
+    ],
+    "requiredSlots": [
+      "services",
+      "date",
+      "time"
+    ],
+    "optionalSlots": [
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Resolve service, date, time and ambiguous employee before previewing the appointment.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "запиши",
+      "поставь меня",
+      "забронируй",
+      "хочу попасть"
+    ],
+    "examples": [
+      "Запиши меня завтра",
+      "Давай к Саше на 19:00"
+    ]
+  },
+  {
+    "id": "booking.reschedule_own",
+    "domain": "booking",
+    "subIntent": "booking.reschedule_own",
+    "description": "Reschedule the actor appointment.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "appointments.own.reschedule",
+    "allowedRoles": [
+      "client",
+      "customer"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "appointments.own.reschedule"
+    ],
+    "requiredSlots": [
+      "appointment",
+      "new_date",
+      "new_time"
+    ],
+    "optionalSlots": [
+      "new_employee"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "перенеси",
+      "передвинь запись",
+      "другое время"
+    ],
+    "examples": [
+      "Перенеси меня на пятницу",
+      "Нет, лучше завтра"
+    ]
+  },
+  {
+    "id": "booking.cancel_own",
+    "domain": "booking",
+    "subIntent": "booking.cancel_own",
+    "description": "Cancel the actor appointment.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "appointments.own.cancel",
+    "allowedRoles": [
+      "client",
+      "customer"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "appointments.own.cancel"
+    ],
+    "requiredSlots": [
+      "appointment"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "отмени запись",
+      "не смогу прийти",
+      "сними бронь"
+    ],
+    "examples": [
+      "Отмени мою запись на завтра"
+    ]
+  },
+  {
+    "id": "booking.get_employee",
+    "domain": "booking",
+    "subIntent": "booking.get_employee",
+    "description": "Tell who performs an appointment.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "appointments.own.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "appointments.own.list"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "appointment",
+      "date"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "к кому я записан",
+      "кто меня стрижёт"
+    ],
+    "examples": [
+      "Кто меня сегодня стрижёт?"
+    ]
+  },
+  {
+    "id": "booking.repeat_last",
+    "domain": "booking",
+    "subIntent": "booking.repeat_last",
+    "description": "Repeat the last usual service bundle.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "appointments.own.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "appointments.own.list"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "date",
+      "time"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "мне как обычно",
+      "как в прошлый раз",
+      "повтори прошлую запись"
+    ],
+    "examples": [
+      "Мне как всегда, только в пятницу"
+    ]
+  },
+  {
+    "id": "booking.group_or_simultaneous",
+    "domain": "booking",
+    "subIntent": "booking.group_or_simultaneous",
+    "description": "Find slots for multiple people.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "booking.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "booking.group-availability.read"
+    ],
+    "requiredSlots": [
+      "party_size",
+      "services",
+      "date_or_period"
+    ],
+    "optionalSlots": [
+      "simultaneous",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Return verified distinct slots for every participant. Never claim that several appointments were booked atomically; each write requires its own confirmation.",
+    "synonyms": [
+      "нас двое",
+      "одновременно",
+      "рядом по времени"
+    ],
+    "examples": [
+      "Можно записать нас двоих одновременно?"
+    ]
+  },
+  {
+    "id": "schedule.get_own",
+    "domain": "schedule",
+    "subIntent": "schedule.get_own",
+    "description": "Read the employee own work schedule.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "schedule.own.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "staff.schedule.own.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "мой график",
+      "когда я работаю",
+      "моя смена"
+    ],
+    "examples": [
+      "Я завтра работаю?"
+    ]
+  },
+  {
+    "id": "schedule.get_team",
+    "domain": "schedule",
+    "subIntent": "schedule.get_team",
+    "description": "Read the team working schedule.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "schedule.team.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "staff.schedule.read"
+    ],
+    "requiredSlots": [
+      "date_or_period"
+    ],
+    "optionalSlots": [
+      "branch",
+      "employee"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "кто сегодня работает",
+      "график команды",
+      "кто в смене"
+    ],
+    "examples": [
+      "Кто из ребят работает завтра?"
+    ]
+  },
+  {
+    "id": "schedule.update_employee",
+    "domain": "schedule",
+    "subIntent": "schedule.update_employee",
+    "description": "Update an employee schedule.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "schedule.team.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "staff.schedule.update"
+    ],
+    "requiredSlots": [
+      "employee",
+      "date_or_period",
+      "working_hours"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "поставь смену",
+      "измени график",
+      "сделай выходной"
+    ],
+    "examples": [
+      "Поставь Илье выходной в пятницу"
+    ]
+  },
+  {
+    "id": "schedule.find_free_employee",
+    "domain": "schedule",
+    "subIntent": "schedule.find_free_employee",
+    "description": "Find employees with capacity.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "schedule.team.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "booking.availability.read"
+    ],
+    "requiredSlots": [
+      "date_or_period"
+    ],
+    "optionalSlots": [
+      "time_of_day",
+      "services",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "кто свободен",
+      "у кого окно",
+      "кого можно загрузить"
+    ],
+    "examples": [
+      "Кто свободен после пяти?"
+    ]
+  },
+  {
+    "id": "clients.count_total",
+    "domain": "clients",
+    "subIntent": "clients.count_total",
+    "description": "Count all CRM clients.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.retention.scan",
+      "customers.count"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "вся база",
+      "сколько всего клиентов",
+      "размер базы"
+    ],
+    "examples": [
+      "Сколько людей во всей базе за всё время?"
+    ]
+  },
+  {
+    "id": "clients.count_period",
+    "domain": "clients",
+    "subIntent": "clients.count_period",
+    "description": "Count unique clients in a period.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "клиентов за месяц",
+      "уникальные гости",
+      "сколько посетило"
+    ],
+    "examples": [
+      "Сколько уникальных клиентов было в июле?"
+    ]
+  },
+  {
+    "id": "clients.count_new",
+    "domain": "clients",
+    "subIntent": "clients.count_new",
+    "description": "Count new clients in a period.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "новые клиенты",
+      "новички",
+      "впервые пришли"
+    ],
+    "examples": [
+      "Сколько новых гостей пришло в этом месяце?"
+    ]
+  },
+  {
+    "id": "clients.retention_summary",
+    "domain": "retention",
+    "subIntent": "clients.retention_summary",
+    "description": "Summarize retention cohorts.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.retention.scan"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "absence_period",
+      "loyalty_threshold",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "возвращаемость",
+      "удержание",
+      "лояльные клиенты"
+    ],
+    "examples": [
+      "Что у нас с возвращаемостью?"
+    ]
+  },
+  {
+    "id": "clients.inactive_cohort",
+    "domain": "churn",
+    "subIntent": "clients.inactive_cohort",
+    "description": "Find clients absent for a period.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.retention.scan"
+    ],
+    "requiredSlots": [
+      "absence_period"
+    ],
+    "optionalSlots": [
+      "previous_frequency",
+      "employee",
+      "service",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "давно не приходили",
+      "пропали",
+      "уснувшие",
+      "не были"
+    ],
+    "examples": [
+      "Кто не был больше трёх месяцев?"
+    ]
+  },
+  {
+    "id": "clients.at_risk",
+    "domain": "churn",
+    "subIntent": "clients.at_risk",
+    "description": "Detect inactive client cohorts at risk of churn.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.retention.scan"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "branch",
+      "employee",
+      "service"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Use verified aggregate inactivity cohorts. Do not claim individual cadence prediction or expose an outreach list from this read-only intent.",
+    "synonyms": [
+      "уходящие клиенты",
+      "цикл просрочен",
+      "кого теряем"
+    ],
+    "examples": [
+      "Кто ходил регулярно и сейчас пропал?"
+    ]
+  },
+  {
+    "id": "clients.high_value",
+    "domain": "clients",
+    "subIntent": "clients.high_value",
+    "description": "Find the most valuable clients.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.high-value.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "metric",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "самые ценные",
+      "кто больше потратил",
+      "лучшие клиенты"
+    ],
+    "examples": [
+      "Кто наши самые лояльные гости?"
+    ]
+  },
+  {
+    "id": "clients.dossier",
+    "domain": "clients",
+    "subIntent": "clients.dossier",
+    "description": "Read one client CRM dossier.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "clients.dossier.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.dossier.read"
+    ],
+    "requiredSlots": [
+      "client_reference"
+    ],
+    "optionalSlots": [
+      "requested_fields"
+    ],
+    "clarificationRule": "If several clients match, ask which one without exposing unrelated records.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "досье клиента",
+      "что он обычно берёт",
+      "история гостя"
+    ],
+    "examples": [
+      "Что обычно выбирает этот клиент?"
+    ]
+  },
+  {
+    "id": "clients.no_show_risk",
+    "domain": "clients",
+    "subIntent": "clients.no_show_risk",
+    "description": "Analyze verified no-show and cancellation history.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "clients.no-show-risk.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Report observed no-shows and cancellations only. If asked specifically about late cancellations, explain that the CRM source does not expose cancellation timestamps.",
+    "synonyms": [
+      "неявки",
+      "отмены",
+      "кто часто не приходит"
+    ],
+    "examples": [
+      "У кого из клиентов много неявок?"
+    ]
+  },
+  {
+    "id": "employees.list_public",
+    "domain": "employees",
+    "subIntent": "employees.list_public",
+    "description": "List bookable specialists.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "catalog.staff.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "catalog.staff.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "service",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "мастера",
+      "специалисты",
+      "к кому записаться"
+    ],
+    "examples": [
+      "Какие у вас барберы?"
+    ]
+  },
+  {
+    "id": "employees.performance_team",
+    "domain": "employees",
+    "subIntent": "employees.performance_team",
+    "description": "Analyze team performance.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "metric",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "результаты команды",
+      "сравни мастеров",
+      "эффективность ребят"
+    ],
+    "examples": [
+      "Сравни мастеров за этот месяц"
+    ]
+  },
+  {
+    "id": "employees.performance_own",
+    "domain": "employees",
+    "subIntent": "employees.performance_own",
+    "description": "Analyze own employee performance.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.employee.read",
+    "allowedRoles": [
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.employee.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "metric"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "мои показатели",
+      "сколько я сделал",
+      "моя загрузка"
+    ],
+    "examples": [
+      "Что у меня по работе за неделю?"
+    ]
+  },
+  {
+    "id": "employees.revenue",
+    "domain": "employees",
+    "subIntent": "employees.revenue",
+    "description": "Read verified employee revenue if supplied.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": "Returns exact YClients cash attributed to an employee when financial operations are linked to that employee, including an explicit attribution coverage status; never substitutes payroll or booked value.",
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Never present salary or booked service value as confirmed employee revenue.",
+    "synonyms": [
+      "сколько принёс мастер",
+      "выручка сотрудника",
+      "кто заработал"
+    ],
+    "examples": [
+      "Сколько принёс Максим за месяц?"
+    ]
+  },
+  {
+    "id": "employees.salary",
+    "domain": "employees",
+    "subIntent": "employees.salary",
+    "description": "Read accrued CRM payroll.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query",
+      "analytics.business.profit"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Call it accrued salary, never revenue generated by the employee.",
+    "synonyms": [
+      "зарплата",
+      "зп",
+      "начислено мастеру"
+    ],
+    "examples": [
+      "Сколько начислено Антону за месяц?"
+    ]
+  },
+  {
+    "id": "employees.workload",
+    "domain": "employees",
+    "subIntent": "employees.workload",
+    "description": "Compare employee workload.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "самый загруженный",
+      "у кого больше записей",
+      "загрузка мастеров"
+    ],
+    "examples": [
+      "Кто сейчас самый загруженный?"
+    ]
+  },
+  {
+    "id": "employees.retention",
+    "domain": "employees",
+    "subIntent": "employees.retention",
+    "description": "Compare employee client retention.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Compare cohort retention only for the selected reporting period and name the period explicitly; never present it as lifetime retention.",
+    "synonyms": [
+      "возвращаемость мастеров",
+      "к кому возвращаются",
+      "кто теряет гостей"
+    ],
+    "examples": [
+      "У кого хуже возвращаемость?"
+    ]
+  },
+  {
+    "id": "services.list",
+    "domain": "services",
+    "subIntent": "services.list",
+    "description": "Read the service catalogue.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "catalog.services.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "catalog.services.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "category",
+      "branch",
+      "employee"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "услуги",
+      "прайс",
+      "что можно сделать"
+    ],
+    "examples": [
+      "Какие есть услуги?"
+    ]
+  },
+  {
+    "id": "services.price",
+    "domain": "services",
+    "subIntent": "services.price",
+    "description": "Read service price.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "catalog.services.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "catalog.services.read"
+    ],
+    "requiredSlots": [
+      "service"
+    ],
+    "optionalSlots": [
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "сколько стоит",
+      "цена услуги",
+      "почём"
+    ],
+    "examples": [
+      "Сколько стоит мужская стрижка?"
+    ]
+  },
+  {
+    "id": "services.duration",
+    "domain": "services",
+    "subIntent": "services.duration",
+    "description": "Read service duration.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "catalog.services.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "catalog.services.read"
+    ],
+    "requiredSlots": [
+      "service"
+    ],
+    "optionalSlots": [
+      "employee"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "сколько длится",
+      "сколько времени",
+      "продолжительность"
+    ],
+    "examples": [
+      "Сколько идёт стрижка с бородой?"
+    ]
+  },
+  {
+    "id": "services.popularity",
+    "domain": "services",
+    "subIntent": "services.popularity",
+    "description": "Analyze service demand.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "branch",
+      "employee"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "популярная услуга",
+      "что берут чаще",
+      "спрос на услуги"
+    ],
+    "examples": [
+      "Какие услуги покупают чаще всего?"
+    ]
+  },
+  {
+    "id": "services.revenue",
+    "domain": "services",
+    "subIntent": "services.revenue",
+    "description": "Analyze service sales value.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "service",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Use confirmed_revenue only. State attribution coverage when partial; never substitute booked_value for confirmed cash.",
+    "synonyms": [
+      "выручка по услугам",
+      "что приносит деньги",
+      "продажи услуги"
+    ],
+    "examples": [
+      "Сколько заработали на стрижках?"
+    ]
+  },
+  {
+    "id": "services.count",
+    "domain": "services",
+    "subIntent": "services.count",
+    "description": "Count completed or booked services.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "service",
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "сколько сделали",
+      "количество услуг",
+      "сколько стрижек"
+    ],
+    "examples": [
+      "Сколько стрижек сделали за неделю?"
+    ]
+  },
+  {
+    "id": "finance.revenue",
+    "domain": "finance",
+    "subIntent": "finance.revenue",
+    "description": "Read verified company revenue.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "branch",
+      "payment_method"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "выручка",
+      "оборот",
+      "касса",
+      "сколько сделали",
+      "наторговали"
+    ],
+    "examples": [
+      "Что сегодня по деньгам?"
+    ]
+  },
+  {
+    "id": "finance.profit",
+    "domain": "finance",
+    "subIntent": "finance.profit",
+    "description": "Read net or gross profit.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.profit",
+      "expenses.period.complete"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "profit_type",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Return the server-calculated profit from confirmed cash, CRM payroll and recorded owner expenses. When the server marks unrecorded additional expenses as assumed zero, state that briefly after the result and invite the owner to add them later; never invent amounts or block an available calculation.",
+    "synonyms": [
+      "прибыль",
+      "чистыми",
+      "что осталось",
+      "в плюсе"
+    ],
+    "examples": [
+      "Какая чистая прибыль за месяц?"
+    ]
+  },
+  {
+    "id": "finance.expenses",
+    "domain": "finance",
+    "subIntent": "finance.expenses",
+    "description": "Read expense total and structure.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "expenses.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.profit",
+      "expenses.read"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "category",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "расходы",
+      "затраты",
+      "куда уходят деньги",
+      "траты"
+    ],
+    "examples": [
+      "На что больше всего потратили?"
+    ]
+  },
+  {
+    "id": "finance.record_expense",
+    "domain": "finance",
+    "subIntent": "finance.record_expense",
+    "description": "Record a manual business expense.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "expenses.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "expenses.create"
+    ],
+    "requiredSlots": [
+      "amount",
+      "category",
+      "date"
+    ],
+    "optionalSlots": [
+      "description",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "запиши расход",
+      "внеси аренду",
+      "учти трату",
+      "добавь расходники",
+      "запомни коммуналку"
+    ],
+    "examples": [
+      "Запомни расход на рекламу 30 тысяч сегодня",
+      "Учти коммуналку 12 000 за август",
+      "Добавь расходники 30 тысяч"
+    ]
+  },
+  {
+    "id": "finance.confirm_expenses_complete",
+    "domain": "finance",
+    "subIntent": "finance.confirm_expenses_complete",
+    "description": "Confirm that all additional business expenses are recorded for a period.",
+    "action": "execute",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "expenses.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "expenses.period.complete",
+      "analytics.business.profit"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Persist the optional owner declaration for the exact period and return the recalculated profit. Profit is already calculable before this declaration. Never create a zero-value rent expense.",
+    "synonyms": [
+      "дополнительных расходов нет",
+      "больше расходов нет",
+      "это все расходы",
+      "все расходы внесены",
+      "считай без дополнительных расходов"
+    ],
+    "examples": [
+      "Дополнительных расходов за этот месяц нет, считай прибыль"
+    ]
+  },
+  {
+    "id": "finance.average_check",
+    "domain": "finance",
+    "subIntent": "finance.average_check",
+    "description": "Read average paid ticket.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "средний чек",
+      "средняя покупка"
+    ],
+    "examples": [
+      "Какой средний чек за месяц?"
+    ]
+  },
+  {
+    "id": "finance.compare_periods",
+    "domain": "finance",
+    "subIntent": "finance.compare_periods",
+    "description": "Compare financial periods.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period",
+      "comparison_period"
+    ],
+    "optionalSlots": [
+      "metric",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "сравни периоды",
+      "к прошлой неделе",
+      "год к году"
+    ],
+    "examples": [
+      "Сравни эту неделю с прошлой"
+    ]
+  },
+  {
+    "id": "finance.revenue_forecast",
+    "domain": "forecasting",
+    "subIntent": "finance.revenue_forecast",
+    "description": "Forecast period-end revenue.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.revenue.forecast"
+    ],
+    "requiredSlots": [
+      "target_period"
+    ],
+    "optionalSlots": [
+      "branch",
+      "scenario"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Clearly label forecast, assumptions and uncertainty.",
+    "synonyms": [
+      "прогноз выручки",
+      "сколько будет к концу",
+      "если так пойдёт"
+    ],
+    "examples": [
+      "Сколько будет к концу месяца при таком темпе?"
+    ]
+  },
+  {
+    "id": "payments.breakdown",
+    "domain": "payments",
+    "subIntent": "payments.breakdown",
+    "description": "Read cash and card breakdown.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "payment_method",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "наличные и карта",
+      "способы оплаты",
+      "безнал"
+    ],
+    "examples": [
+      "Сколько наличными и сколько картой?"
+    ]
+  },
+  {
+    "id": "payments.refunds",
+    "domain": "payments",
+    "subIntent": "payments.refunds",
+    "description": "Read refunds for a period.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "возвраты денег",
+      "вернули оплату",
+      "refund"
+    ],
+    "examples": [
+      "Были возвраты в этом месяце?"
+    ]
+  },
+  {
+    "id": "sales.summary",
+    "domain": "sales",
+    "subIntent": "sales.summary",
+    "description": "Analyze service and product sales.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "sale_type",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "продажи",
+      "что продали",
+      "услуги и товары"
+    ],
+    "examples": [
+      "Что мы продали за неделю?"
+    ]
+  },
+  {
+    "id": "products.sales",
+    "domain": "products",
+    "subIntent": "products.sales",
+    "description": "Analyze product sales.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.finance.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "product",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "продажи товаров",
+      "косметика",
+      "розница"
+    ],
+    "examples": [
+      "Какие товары продаются лучше?"
+    ]
+  },
+  {
+    "id": "inventory.stock",
+    "domain": "inventory",
+    "subIntent": "inventory.stock",
+    "description": "Read current inventory stock.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "inventory.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "inventory.stock.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "product",
+      "branch",
+      "low_stock_only"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "остатки",
+      "склад",
+      "что заканчивается"
+    ],
+    "examples": [
+      "Что заканчивается на складе?"
+    ]
+  },
+  {
+    "id": "analytics.business_summary",
+    "domain": "analytics",
+    "subIntent": "analytics.business_summary",
+    "description": "Build a business health summary.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "как дела",
+      "сводка бизнеса",
+      "что происходит"
+    ],
+    "examples": [
+      "Майя, что у нас сегодня по бизнесу?"
+    ]
+  },
+  {
+    "id": "analytics.anomaly_detection",
+    "domain": "analytics",
+    "subIntent": "analytics.anomaly_detection",
+    "description": "Detect material anomalies.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "metric",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "аномалии",
+      "что выбивается",
+      "необычные изменения"
+    ],
+    "examples": [
+      "Есть что-то странное за эту неделю?"
+    ]
+  },
+  {
+    "id": "analytics.root_cause",
+    "domain": "analytics",
+    "subIntent": "analytics.root_cause",
+    "description": "Explain a business metric change.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [
+      "metric_or_problem"
+    ],
+    "optionalSlots": [
+      "period",
+      "comparison_period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "почему упало",
+      "причина просадки",
+      "за счёт чего"
+    ],
+    "examples": [
+      "Почему выручка снизилась?"
+    ]
+  },
+  {
+    "id": "analytics.recommendations",
+    "domain": "recommendations",
+    "subIntent": "analytics.recommendations",
+    "description": "Recommend next business actions.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query",
+      "clients.retention.scan"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "goal",
+      "period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "что делать",
+      "дай совет",
+      "на что обратить внимание"
+    ],
+    "examples": [
+      "Что мне сейчас делать в первую очередь?"
+    ]
+  },
+  {
+    "id": "kpi.team",
+    "domain": "kpi",
+    "subIntent": "kpi.team",
+    "description": "Read team KPI progress.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.team-kpi.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "employee",
+      "metric",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "kpi",
+      "выполнение плана",
+      "цели мастеров"
+    ],
+    "examples": [
+      "Кто выполняет план, а кто отстаёт?"
+    ]
+  },
+  {
+    "id": "reports.daily_briefing",
+    "domain": "reports",
+    "subIntent": "reports.daily_briefing",
+    "description": "Prepare the owner daily briefing.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.business.query"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "date",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "брифинг",
+      "итоги дня",
+      "утренняя сводка"
+    ],
+    "examples": [
+      "Дай краткий брифинг на сегодня"
+    ]
+  },
+  {
+    "id": "reports.recovered",
+    "domain": "reports",
+    "subIntent": "reports.recovered",
+    "description": "Report recovered clients and revenue.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "clients.registry.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "reports.recovered"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "maya recovered",
+      "кого вернули",
+      "заполненные окна"
+    ],
+    "examples": [
+      "Покажи Maya Recovered за месяц"
+    ]
+  },
+  {
+    "id": "loyalty.read_own",
+    "domain": "loyalty",
+    "subIntent": "loyalty.read_own",
+    "description": "Read the actor loyalty balance.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "loyalty.own.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "loyalty.own.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "мои баллы",
+      "бонусный баланс",
+      "сколько бонусов"
+    ],
+    "examples": [
+      "Сколько у меня баллов?"
+    ]
+  },
+  {
+    "id": "loyalty.spend_options",
+    "domain": "bonuses",
+    "subIntent": "loyalty.spend_options",
+    "description": "Suggest affordable bonus redemptions.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "loyalty.own.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "loyalty.own.read",
+      "booking.upsell.suggest"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "appointment",
+      "available_time"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "на что потратить баллы",
+      "списать бонусы",
+      "хватит ли"
+    ],
+    "examples": [
+      "На какую услугу хватит моих баллов?"
+    ]
+  },
+  {
+    "id": "loyalty.adjust",
+    "domain": "bonuses",
+    "subIntent": "loyalty.adjust",
+    "description": "Adjust internal loyalty balance.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "loyalty.adjust",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "loyalty.internal.adjust"
+    ],
+    "requiredSlots": [
+      "client_reference",
+      "delta",
+      "reason"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "начисли баллы",
+      "спиши бонусы",
+      "компенсация баллами"
+    ],
+    "examples": [
+      "Начисли клиенту 500 баллов за ошибку"
+    ]
+  },
+  {
+    "id": "certificates.catalog",
+    "domain": "certificates",
+    "subIntent": "certificates.catalog",
+    "description": "Read available certificates.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "commerce.catalog.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "commerce.certificates.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "nominal",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "сертификат",
+      "подарочная карта",
+      "номиналы"
+    ],
+    "examples": [
+      "Какие сертификаты можно купить?"
+    ]
+  },
+  {
+    "id": "subscriptions.catalog",
+    "domain": "subscriptions",
+    "subIntent": "subscriptions.catalog",
+    "description": "Read available subscriptions.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "commerce.catalog.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "commerce.memberships.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "service",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "абонемент",
+      "пакет посещений",
+      "подписка салона"
+    ],
+    "examples": [
+      "Какие есть абонементы?"
+    ]
+  },
+  {
+    "id": "referrals.status",
+    "domain": "referrals",
+    "subIntent": "referrals.status",
+    "description": "Read referral status and rules.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "referrals.own.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "referrals.status.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "referral"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "пригласить друга",
+      "реферальная программа",
+      "мой код"
+    ],
+    "examples": [
+      "Что я получу за приглашённого друга?"
+    ]
+  },
+  {
+    "id": "marketing.find_audience",
+    "domain": "marketing",
+    "subIntent": "marketing.find_audience",
+    "description": "Build a consent-safe audience.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "medium",
+    "permission": "marketing.audience.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "marketing.audience.find"
+    ],
+    "requiredSlots": [
+      "audience_rule"
+    ],
+    "optionalSlots": [
+      "minimum_visits",
+      "max_recipients"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Return only aggregate counts and the opaque audience reference. Never expose names, phones or CRM identifiers.",
+    "synonyms": [
+      "кому написать",
+      "сегмент клиентов",
+      "кого вернуть"
+    ],
+    "examples": [
+      "Найди тех, кто не был 60 дней"
+    ]
+  },
+  {
+    "id": "marketing.draft_message",
+    "domain": "messaging",
+    "subIntent": "marketing.draft_message",
+    "description": "Draft a campaign message.",
+    "action": "preview",
+    "dataClass": "A",
+    "risk": "medium",
+    "permission": "marketing.message.preview",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [
+      "goal_or_audience"
+    ],
+    "optionalSlots": [
+      "offer",
+      "tone",
+      "channel"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "напиши текст",
+      "черновик рассылки",
+      "покажи сообщение"
+    ],
+    "examples": [
+      "Напиши мягкое сообщение тем, кто давно не был"
+    ]
+  },
+  {
+    "id": "marketing.preview_campaign",
+    "domain": "messaging",
+    "subIntent": "marketing.preview_campaign",
+    "description": "Preview campaign impact.",
+    "action": "preview",
+    "dataClass": "D",
+    "risk": "medium",
+    "permission": "marketing.campaign.preview",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "marketing.campaign.preview"
+    ],
+    "requiredSlots": [
+      "audience",
+      "message"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Show the final message and exact recipient count, then request explicit confirmation. Do not claim that anything was sent.",
+    "synonyms": [
+      "не отправляй",
+      "сначала покажи",
+      "сколько получат"
+    ],
+    "examples": [
+      "Сначала покажи текст и сколько человек его получат"
+    ]
+  },
+  {
+    "id": "marketing.send_campaign",
+    "domain": "messaging",
+    "subIntent": "marketing.send_campaign",
+    "description": "Send a consent-safe campaign.",
+    "action": "execute",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "marketing.campaign.execute",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "marketing.campaign.send"
+    ],
+    "requiredSlots": [
+      "approved_preview"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Require an explicit confirmation of the persisted campaign preview. Never construct a new audience or message during execution.",
+    "responseRule": "Report server-confirmed delivered, skipped and failed counts. Never say sent before the tool succeeds.",
+    "synonyms": [
+      "отправь рассылку",
+      "запусти кампанию",
+      "разошли"
+    ],
+    "examples": [
+      "Да, отправляй этот вариант"
+    ]
+  },
+  {
+    "id": "notifications.appointments",
+    "domain": "notifications",
+    "subIntent": "notifications.appointments",
+    "description": "Configure appointment notices.",
+    "action": "write",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "notifications.settings.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "notifications.appointments.update"
+    ],
+    "requiredSlots": [
+      "enabled"
+    ],
+    "optionalSlots": [
+      "timing"
+    ],
+    "clarificationRule": "If the owner does not specify timing, preserve the current lead times. The production channel is always the MAYA inbox with push announcement; do not offer email or SMS as if they were connected.",
+    "responseRule": "Change the persisted tenant reminder policy only through the tool and report the exact enabled state and lead times returned by the server.",
+    "synonyms": [
+      "напоминания",
+      "уведомления о записи",
+      "предупреждать клиентов"
+    ],
+    "examples": [
+      "Напоминай клиентам за день до визита"
+    ]
+  },
+  {
+    "id": "reviews.list_recent",
+    "domain": "reviews",
+    "subIntent": "reviews.list_recent",
+    "description": "Read recent business reviews.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "reviews.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "reviews.list.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "rating",
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "последние отзывы",
+      "что пишут",
+      "отзывы клиентов"
+    ],
+    "examples": [
+      "Покажи последние плохие отзывы"
+    ]
+  },
+  {
+    "id": "reviews.analyze_topics",
+    "domain": "reviews",
+    "subIntent": "reviews.analyze_topics",
+    "description": "Aggregate review topics and sentiment.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "reviews.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "reviews.analyze"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "employee",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "на что жалуются",
+      "что нравится",
+      "темы отзывов"
+    ],
+    "examples": [
+      "На что люди жалуются чаще всего?"
+    ]
+  },
+  {
+    "id": "reviews.rating_trend",
+    "domain": "reviews",
+    "subIntent": "reviews.rating_trend",
+    "description": "Analyze rating trend.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "reviews.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "reviews.analyze"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "period",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "средняя оценка",
+      "рейтинг стал лучше",
+      "динамика отзывов"
+    ],
+    "examples": [
+      "Рейтинг стал лучше или хуже?"
+    ]
+  },
+  {
+    "id": "branches.compare",
+    "domain": "branches",
+    "subIntent": "branches.compare",
+    "description": "Compare branches.",
+    "action": "analyze",
+    "dataClass": "D",
+    "risk": "low",
+    "permission": "analytics.business.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "analytics.branches.compare"
+    ],
+    "requiredSlots": [
+      "period"
+    ],
+    "optionalSlots": [
+      "metric",
+      "branches"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "сравни филиалы",
+      "какой филиал лучше",
+      "по точкам"
+    ],
+    "examples": [
+      "Сравни филиалы по загрузке"
+    ]
+  },
+  {
+    "id": "company.public_info",
+    "domain": "company",
+    "subIntent": "company.public_info",
+    "description": "Read public business information.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "company.public.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "catalog.staff.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "field",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "адрес",
+      "телефон салона",
+      "как добраться",
+      "о компании"
+    ],
+    "examples": [
+      "Как вас найти?"
+    ]
+  },
+  {
+    "id": "company.business_hours",
+    "domain": "company",
+    "subIntent": "company.business_hours",
+    "description": "Read business opening hours.",
+    "action": "read",
+    "dataClass": "C",
+    "risk": "low",
+    "permission": "company.public.read",
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "company.business-hours.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "date",
+      "branch"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "режим работы",
+      "когда открыты",
+      "до скольки"
+    ],
+    "examples": [
+      "До скольки вы сегодня работаете?"
+    ]
+  },
+  {
+    "id": "settings.read",
+    "domain": "settings",
+    "subIntent": "settings.read",
+    "description": "Read available MAYA settings.",
+    "action": "read",
+    "dataClass": "B",
+    "risk": "low",
+    "permission": "settings.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "settings.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "section"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "настройки",
+      "как настроено",
+      "мои параметры"
+    ],
+    "examples": [
+      "Какие у меня включены модули?"
+    ]
+  },
+  {
+    "id": "settings.update",
+    "domain": "settings",
+    "subIntent": "settings.update",
+    "description": "Update a MAYA setting.",
+    "action": "write",
+    "dataClass": "E",
+    "risk": "medium",
+    "permission": "settings.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "settings.update"
+    ],
+    "requiredSlots": [
+      "capability",
+      "enabled"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "включи функцию",
+      "измени настройку",
+      "отключи модуль"
+    ],
+    "examples": [
+      "Включи анализ сотрудников"
+    ]
+  },
+  {
+    "id": "tasks.list",
+    "domain": "tasks",
+    "subIntent": "tasks.list",
+    "description": "Read operational tasks.",
+    "action": "read",
+    "dataClass": "B",
+    "risk": "low",
+    "permission": "tasks.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "tasks.list"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "assignee",
+      "status",
+      "period"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "задачи",
+      "что нужно сделать",
+      "мой план"
+    ],
+    "examples": [
+      "Какие у меня задачи на сегодня?"
+    ]
+  },
+  {
+    "id": "tasks.create",
+    "domain": "tasks",
+    "subIntent": "tasks.create",
+    "description": "Create an operational task.",
+    "action": "write",
+    "dataClass": "E",
+    "risk": "high",
+    "permission": "tasks.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "tasks.create"
+    ],
+    "requiredSlots": [
+      "task",
+      "assignee"
+    ],
+    "optionalSlots": [
+      "deadline",
+      "priority"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "поставь задачу",
+      "напомни сотруднику",
+      "создай поручение"
+    ],
+    "examples": [
+      "Поставь Антону задачу проверить отмены"
+    ]
+  },
+  {
+    "id": "tasks.complete",
+    "domain": "tasks",
+    "subIntent": "tasks.complete",
+    "description": "Complete an assigned task.",
+    "action": "write",
+    "dataClass": "E",
+    "risk": "low",
+    "permission": "tasks.write",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "tasks.complete"
+    ],
+    "requiredSlots": [
+      "task_id"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "задача выполнена",
+      "закрой задачу",
+      "отметь выполненной"
+    ],
+    "examples": [
+      "Отметь эту задачу выполненной"
+    ]
+  },
+  {
+    "id": "general.explain_term",
+    "domain": "general_business_questions",
+    "subIntent": "general.explain_term",
+    "description": "Explain a business term.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [
+      "topic"
+    ],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "что такое",
+      "объясни",
+      "простыми словами"
+    ],
+    "examples": [
+      "Что такое LTV простыми словами?"
+    ]
+  },
+  {
+    "id": "general.strategy_advice",
+    "domain": "general_business_questions",
+    "subIntent": "general.strategy_advice",
+    "description": "Give general business advice.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "goal",
+      "constraint"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "как улучшить",
+      "что посоветуешь",
+      "идея для бизнеса"
+    ],
+    "examples": [
+      "Как в целом поднять средний чек?"
+    ]
+  },
+  {
+    "id": "general.write_text",
+    "domain": "general_business_questions",
+    "subIntent": "general.write_text",
+    "description": "Write non-executing content.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [
+      "content_goal"
+    ],
+    "optionalSlots": [
+      "tone",
+      "length",
+      "audience"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "напиши текст",
+      "придумай акцию",
+      "сформулируй"
+    ],
+    "examples": [
+      "Придумай короткий текст для акции"
+    ]
+  },
+  {
+    "id": "support.capabilities",
+    "domain": "support",
+    "subIntent": "support.capabilities",
+    "description": "Explain MAYA capabilities.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "role",
+      "feature"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "что ты умеешь",
+      "чем поможешь",
+      "возможности майя"
+    ],
+    "examples": [
+      "Майя, что ты можешь делать для владельца?"
+    ]
+  },
+  {
+    "id": "support.integration_status",
+    "domain": "support",
+    "subIntent": "support.integration_status",
+    "description": "Explain integration status.",
+    "action": "read",
+    "dataClass": "B",
+    "risk": "low",
+    "permission": "integrations.read",
+    "allowedRoles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "support.integration-status.read"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "provider"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "crm подключена",
+      "статус интеграции",
+      "есть связь"
+    ],
+    "examples": [
+      "YCLIENTS сейчас подключён?"
+    ]
+  },
+  {
+    "id": "support.contact_admin",
+    "domain": "support",
+    "subIntent": "support.contact_admin",
+    "description": "Contact the business administrator.",
+    "action": "preview",
+    "dataClass": "B",
+    "risk": "medium",
+    "permission": "support.contact",
+    "allowedRoles": [
+      "client",
+      "customer"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [
+      "support.contact-admin.request"
+    ],
+    "requiredSlots": [],
+    "optionalSlots": [
+      "reason",
+      "channel"
+    ],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "связаться с админом",
+      "позвать администратора",
+      "нужен человек"
+    ],
+    "examples": [
+      "Соедини меня с администратором"
+    ]
+  },
+  {
+    "id": "small_talk.greeting",
+    "domain": "small_talk",
+    "subIntent": "small_talk.greeting",
+    "description": "Respond to a greeting.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "привет",
+      "добрый день",
+      "как дела"
+    ],
+    "examples": [
+      "Привет, Майя!"
+    ]
+  },
+  {
+    "id": "small_talk.thanks",
+    "domain": "small_talk",
+    "subIntent": "small_talk.thanks",
+    "description": "Respond to thanks.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "спасибо",
+      "благодарю",
+      "супер"
+    ],
+    "examples": [
+      "Спасибо, всё понятно"
+    ]
+  },
+  {
+    "id": "small_talk.free_form",
+    "domain": "small_talk",
+    "subIntent": "small_talk.free_form",
+    "description": "Handle free-form conversation.",
+    "action": "answer",
+    "dataClass": "A",
+    "risk": "low",
+    "permission": null,
+    "allowedRoles": [
+      "client",
+      "customer",
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "readiness": "ready",
+    "readinessNote": null,
+    "toolCandidates": [],
+    "requiredSlots": [],
+    "optionalSlots": [],
+    "clarificationRule": "Clarify only a missing slot that materially changes the answer or action.",
+    "responseRule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "synonyms": [
+      "поговорим",
+      "помоги подумать",
+      "есть вопрос"
+    ],
+    "examples": [
+      "Помоги мне разобраться"
+    ]
+  }
+]

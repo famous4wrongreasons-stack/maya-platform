@@ -13,6 +13,7 @@ database.dashboard_metrics, reactivation, yclients) в операционный 
 ОЦЕНКА «если сделать», помечена note-полями. Maya обязана подавать это как
 оценку, а не факт (см. промпт «Режим AI-директора»).
 """
+import calendar
 from datetime import date, datetime, timedelta
 import json
 import logging
@@ -37,6 +38,10 @@ _today_master_cache = {"date": None, "val": None, "ts": 0.0}
 _TODAY_MASTER_TTL = 60.0
 _retention_cache = {"val": None, "ts": 0.0}
 _RETENTION_SETTING = "owner_client_retention_snapshot_v1"
+_client_registry_cache = {"val": None, "ts": 0.0}
+_CLIENT_REGISTRY_SETTING = "owner_client_registry_snapshot_v1"
+_CLIENT_REGISTRY_TTL = 900.0
+_LOYAL_CLIENT_VISITS = 3
 _CYCLE_CANDIDATES_SETTING = "cycle_candidates_snapshot_v1"
 
 _ACTION_LIBRARY = {
@@ -673,15 +678,35 @@ def plan_fact(snap: dict = None) -> dict:
     }
 
 
-def master_performance() -> dict:
-    """Мастера за 30 дней: выручка, выплаты и вклад после процента.
+def master_performance(
+    period: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+) -> dict:
+    """Мастера за выбранный период: выручка, выплаты и вклад после процента.
 
     Это не полная управленческая прибыль салона: аренда, эквайринг, расходники и
     прочие общие расходы здесь не распределяются по мастерам. Метрика нужна для
     честного ответа владельцу: кто приносит больше выручки и вклад после выплаты
     процента мастеру.
     """
-    summary = _summary_30d() or {}
+    requested_period = (period or "last_30").strip().lower()
+    if requested_period == "last_30" and not date_from and not date_to:
+        summary = _summary_30d() or {}
+        period_label = "последние 30 дней"
+    else:
+        try:
+            import analytics
+            f_iso, t_iso, period_label = analytics.resolve_period(
+                requested_period, date_from, date_to,
+            )
+            summary = analytics.business_summary(f_iso, t_iso) or {}
+        except Exception as e:
+            logger.error("owner_ai master_performance: %s", e)
+            return {
+                "error": "Не удалось получить аналитику мастеров из YClients.",
+                "period": {"from": date_from, "to": date_to},
+            }
     rows = []
     for m in summary.get("masters") or []:
         if not isinstance(m, dict):
@@ -705,7 +730,11 @@ def master_performance() -> dict:
     rows.sort(key=lambda x: (-(x.get("profit_after_salary_rub") or 0), -(x.get("gross_rub") or 0)))
     gross_leader = sorted(rows, key=lambda x: (-(x.get("gross_rub") or 0), x.get("name") or ""))[:1]
     return {
-        "period": {"from": summary.get("from"), "to": summary.get("to")},
+        "period": {
+            "from": summary.get("from"),
+            "to": summary.get("to"),
+            "label": period_label,
+        },
         "total_gross_rub": _rub(summary.get("total_gross")),
         "salary_total_rub": _rub(summary.get("salary_total")),
         "profit_after_salary_total_rub": sum(_rub(r.get("profit_after_salary_rub")) for r in rows),
@@ -1007,6 +1036,185 @@ def _stored_client_retention() -> dict | None:
     except Exception as e:
         logger.error("owner_ai stored client_retention: %s", e)
     return None
+
+
+def _stored_client_registry_analysis() -> dict | None:
+    """Последний полный обезличенный снимок всей клиентской базы YClients."""
+    try:
+        import database
+        raw = database.get_setting(_CLIENT_REGISTRY_SETTING)
+        payload = json.loads(raw) if raw else None
+        if isinstance(payload, dict) and payload.get("version") == "maya_client_registry_v1":
+            return payload
+    except Exception as e:
+        logger.error("owner_ai stored client registry: %s", e)
+    return None
+
+
+def _subtract_calendar_months(value: date, months: int) -> date:
+    month_index = value.year * 12 + value.month - 1 - months
+    year, month_index = divmod(month_index, 12)
+    month = month_index + 1
+    day = min(value.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+def _empty_inactivity_breakdown() -> dict:
+    return {
+        "over_1_month": 0,
+        "over_2_months": 0,
+        "over_3_months": 0,
+        "over_4_months": 0,
+        "over_5_months": 0,
+        "over_6_months": 0,
+        "over_1_year": 0,
+    }
+
+
+def _non_negative_number(value) -> float:
+    try:
+        parsed = float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+    return parsed if parsed > 0 else 0.0
+
+
+def _analyze_client_registry(clients: list[dict], *, as_of: date) -> dict:
+    """Считает агрегаты локально; клиентские ПД в результат не попадают."""
+    thresholds = {
+        "over_1_month": _subtract_calendar_months(as_of, 1),
+        "over_2_months": _subtract_calendar_months(as_of, 2),
+        "over_3_months": _subtract_calendar_months(as_of, 3),
+        "over_4_months": _subtract_calendar_months(as_of, 4),
+        "over_5_months": _subtract_calendar_months(as_of, 5),
+        "over_6_months": _subtract_calendar_months(as_of, 6),
+        "over_1_year": _subtract_calendar_months(as_of, 12),
+    }
+    inactivity = _empty_inactivity_breakdown()
+    loyal_inactivity = _empty_inactivity_breakdown()
+    clients_with_visits = 0
+    clients_without_visits = 0
+    clients_with_unknown_last_visit = 0
+    loyal_clients_with_unknown_last_visit = 0
+    repeat_clients = 0
+    loyal_clients = 0
+    total_recorded_visits = 0
+    lifetime_sold_amount = 0.0
+
+    for client in clients:
+        if not isinstance(client, dict):
+            continue
+        visits = int(_non_negative_number(client.get("visits_count")))
+        is_loyal = visits >= _LOYAL_CLIENT_VISITS
+        total_recorded_visits += visits
+        lifetime_sold_amount += _non_negative_number(client.get("sold_amount"))
+        if visits:
+            clients_with_visits += 1
+        else:
+            clients_without_visits += 1
+        if visits >= 2:
+            repeat_clients += 1
+        if is_loyal:
+            loyal_clients += 1
+
+        raw_last_visit = str(client.get("last_visit_date") or "")[:10]
+        try:
+            last_visit = date.fromisoformat(raw_last_visit)
+        except (TypeError, ValueError):
+            if visits:
+                clients_with_unknown_last_visit += 1
+                if is_loyal:
+                    loyal_clients_with_unknown_last_visit += 1
+            continue
+        for key, threshold in thresholds.items():
+            if last_visit < threshold:
+                inactivity[key] += 1
+                if is_loyal:
+                    loyal_inactivity[key] += 1
+
+    loyal_cohorts = {
+        "from_1_to_2_months": max(0, loyal_inactivity["over_1_month"] - loyal_inactivity["over_2_months"]),
+        "from_2_to_3_months": max(0, loyal_inactivity["over_2_months"] - loyal_inactivity["over_3_months"]),
+        "from_3_to_6_months": max(0, loyal_inactivity["over_3_months"] - loyal_inactivity["over_6_months"]),
+        "from_6_to_12_months": max(0, loyal_inactivity["over_6_months"] - loyal_inactivity["over_1_year"]),
+        "over_1_year": loyal_inactivity["over_1_year"],
+    }
+    return {
+        "version": "maya_client_registry_v1",
+        "success": True,
+        "source": "yclients_client_registry",
+        "as_of": as_of.isoformat(),
+        "complete": True,
+        "contains_personal_data": False,
+        "total_clients": len(clients),
+        "clients_with_visits": clients_with_visits,
+        "clients_without_visits": clients_without_visits,
+        "clients_with_unknown_last_visit": clients_with_unknown_last_visit,
+        "loyal_clients_with_unknown_last_visit": loyal_clients_with_unknown_last_visit,
+        "repeat_clients": repeat_clients,
+        "loyal_clients": loyal_clients,
+        "total_recorded_visits": total_recorded_visits,
+        "lifetime_sold_amount_rub": round(lifetime_sold_amount, 2),
+        "inactivity": inactivity,
+        "loyal_inactivity": loyal_inactivity,
+        "loyal_reactivation_cohorts": loyal_cohorts,
+        "definitions": {
+            "loyal_client": f"Не менее {_LOYAL_CLIENT_VISITS} визитов по карточке CRM.",
+            "inactivity": (
+                "Накопительные группы по дате последнего визита; клиент старше шести "
+                "месяцев входит также в пороги один-пять месяцев."
+            ),
+            "without_visits": "CRM-карточки с нулевым числом визитов считаются отдельно.",
+        },
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "snapshot_state": "fresh",
+    }
+
+
+def client_registry_analysis(*, force: bool = False) -> dict:
+    """Полная аналитика клиентской базы без передачи ПД модели."""
+    now = time.time()
+    if (
+        not force
+        and _client_registry_cache["val"] is not None
+        and now - _client_registry_cache["ts"] < _CLIENT_REGISTRY_TTL
+    ):
+        return _client_registry_cache["val"]
+    stored = _stored_client_registry_analysis()
+    if not force and stored is not None:
+        _client_registry_cache.update(val=stored, ts=now)
+        return stored
+
+    try:
+        from yclients import YClientsAPI
+        snapshot = YClientsAPI().get_client_registry_snapshot()
+    except Exception as e:
+        logger.error("owner_ai client registry: %s", e)
+        snapshot = {"success": False, "complete": False, "error": "YClients временно недоступен."}
+
+    if not snapshot.get("success") or not snapshot.get("complete"):
+        if stored is not None:
+            preserved = dict(stored)
+            preserved["snapshot_state"] = "stale"
+            preserved["refresh_error"] = snapshot.get("error") or "Обновление YClients не завершено."
+            _client_registry_cache.update(val=preserved, ts=now)
+            return preserved
+        return {
+            "error": snapshot.get("error") or "Не удалось получить полный реестр клиентов YClients.",
+            "source": "yclients_client_registry",
+            "complete": False,
+            "contains_personal_data": False,
+        }
+
+    result = _analyze_client_registry(snapshot.get("clients") or [], as_of=date.today())
+    result["pages_loaded"] = snapshot.get("pages_loaded")
+    try:
+        import database
+        database.set_setting(_CLIENT_REGISTRY_SETTING, json.dumps(result, ensure_ascii=False))
+    except Exception as e:
+        logger.error("owner_ai save client registry: %s", e)
+    _client_registry_cache.update(val=result, ts=now)
+    return result
 
 
 def client_retention(*, force: bool = False) -> dict:

@@ -35,6 +35,17 @@ interface ExpenseRow {
   updatedAt: Date;
 }
 
+interface ExpensePeriodDeclarationRow {
+  id: string;
+  tenantId: string;
+  declaredById: string | null;
+  periodFromDay: string;
+  periodToDay: string;
+  idempotencyKey: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface CreateExpenseOptions {
   /** `manual` — завёл человек или MAYA, `crm` — импорт из внешней CRM. */
   source?: ExpenseSource;
@@ -156,6 +167,11 @@ export class ExpensesService {
       },
     });
 
+    await this.invalidatePeriodDeclarations(
+      scopedTenantId,
+      occurredAt.toISOString().slice(0, 10),
+    );
+
     return {
       ...this.serialize(expense),
       possible_duplicate:
@@ -223,6 +239,10 @@ export class ExpensesService {
     await this.prisma.expense.delete({
       where: { id_tenantId: { id: expenseId, tenantId: scopedTenantId } },
     });
+    await this.invalidatePeriodDeclarations(
+      scopedTenantId,
+      expense.occurredAt.toISOString().slice(0, 10),
+    );
     await this.auditLogService.log({
       tenantId: scopedTenantId,
       userId: actorUserId,
@@ -237,6 +257,110 @@ export class ExpensesService {
     });
 
     return { ok: true, expense_id: expenseId };
+  }
+
+  /**
+   * Владелец явно подтверждает полноту НЕсистемных расходов периода.
+   *
+   * Это не расход на ноль рублей и не догадка модели. Декларация хранится
+   * отдельно, аудируется и автоматически снимается, если книга периода
+   * меняется. Зарплата сюда не относится: она всегда приходит из CRM.
+   */
+  async declarePeriodComplete(
+    tenantId: string,
+    actorUserId: string,
+    periodFromDay: string,
+    periodToDay: string,
+    idempotencyKey?: string | null,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    this.assertDayRange(periodFromDay, periodToDay);
+
+    const key = idempotencyKey?.trim() || null;
+    if (key) {
+      const replayed = await this.prisma.expensePeriodDeclaration.findFirst({
+        where: { tenantId: scopedTenantId, idempotencyKey: key },
+      });
+      if (replayed) {
+        if (
+          replayed.periodFromDay !== periodFromDay ||
+          replayed.periodToDay !== periodToDay
+        ) {
+          throw new BadRequestException(
+            'Expense declaration idempotency key belongs to another period',
+          );
+        }
+        return this.serializePeriodDeclaration(replayed);
+      }
+    }
+
+    let declaration: ExpensePeriodDeclarationRow;
+    try {
+      declaration = await this.prisma.expensePeriodDeclaration.upsert({
+        where: {
+          tenantId_periodFromDay_periodToDay: {
+            tenantId: scopedTenantId,
+            periodFromDay,
+            periodToDay,
+          },
+        },
+        create: {
+          tenantId: scopedTenantId,
+          declaredById: actorUserId,
+          periodFromDay,
+          periodToDay,
+          idempotencyKey: key,
+        },
+        update: {
+          declaredById: actorUserId,
+          idempotencyKey: key,
+        },
+      });
+    } catch (error) {
+      if (!this.isUniqueConstraintError(error) || !key) {
+        throw error;
+      }
+      const raced = await this.prisma.expensePeriodDeclaration.findFirst({
+        where: { tenantId: scopedTenantId, idempotencyKey: key },
+      });
+      if (!raced) {
+        throw error;
+      }
+      declaration = raced;
+    }
+
+    await this.auditLogService.log({
+      tenantId: scopedTenantId,
+      userId: actorUserId,
+      action: 'expense.period_declared_complete',
+      entityType: 'expense_period_declaration',
+      entityId: declaration.id,
+      metadata: {
+        period_from_day: declaration.periodFromDay,
+        period_to_day: declaration.periodToDay,
+      },
+    });
+
+    return this.serializePeriodDeclaration(declaration);
+  }
+
+  async findPeriodDeclaration(
+    tenantId: string,
+    periodFromDay: string,
+    periodToDay: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    this.assertDayRange(periodFromDay, periodToDay);
+    const declaration = await this.prisma.expensePeriodDeclaration.findUnique({
+      where: {
+        tenantId_periodFromDay_periodToDay: {
+          tenantId: scopedTenantId,
+          periodFromDay,
+          periodToDay,
+        },
+      },
+    });
+    return declaration ? this.serializePeriodDeclaration(declaration) : null;
   }
 
   /**
@@ -376,6 +500,48 @@ export class ExpensesService {
         'Expense date range cannot exceed 366 days',
       );
     }
+  }
+
+  private assertDayRange(periodFromDay: string, periodToDay: string): void {
+    const valid = (value: string) => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const parsed = new Date(`${value}T00:00:00.000Z`);
+      return (
+        !Number.isNaN(parsed.getTime()) &&
+        parsed.toISOString().slice(0, 10) === value
+      );
+    };
+    if (
+      !valid(periodFromDay) ||
+      !valid(periodToDay) ||
+      periodFromDay > periodToDay
+    ) {
+      throw new BadRequestException('Invalid expense declaration date range');
+    }
+  }
+
+  private async invalidatePeriodDeclarations(
+    tenantId: string,
+    occurredDay: string,
+  ): Promise<void> {
+    await this.prisma.expensePeriodDeclaration.deleteMany({
+      where: {
+        tenantId,
+        periodFromDay: { lte: occurredDay },
+        periodToDay: { gte: occurredDay },
+      },
+    });
+  }
+
+  private serializePeriodDeclaration(declaration: ExpensePeriodDeclarationRow) {
+    return {
+      id: declaration.id,
+      tenant_id: declaration.tenantId,
+      period_from_day: declaration.periodFromDay,
+      period_to_day: declaration.periodToDay,
+      declared_complete: true as const,
+      declared_at: declaration.updatedAt,
+    };
   }
 
   private serialize(expense: ExpenseRow) {

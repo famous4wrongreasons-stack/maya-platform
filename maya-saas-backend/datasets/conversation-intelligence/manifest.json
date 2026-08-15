@@ -1,0 +1,31 @@
+{
+  "version": "maya-ci-dataset/2",
+  "policy_version": "maya-ci-policy/1",
+  "taxonomy_intents": 85,
+  "entity_slots": 70,
+  "utterances": 11220,
+  "unique_utterances": 10322,
+  "unique_openings": 3314,
+  "max_opening_share": 0.0084,
+  "adversarial": 600,
+  "multi_turn": 1050,
+  "contrastive": 600,
+  "capabilities_ready": 85,
+  "capabilities_partial": 0,
+  "capabilities_planned": 0,
+  "styles": 12,
+  "checks": "passed",
+  "generator": "scripts/conversation-intelligence-dataset.ts",
+  "deterministic_seed": "maya-ci/1",
+  "files": {
+    "taxonomy.json": "8c91e21848a877f257f6a1e344eb02b40b44d880961187d46da9039eb7e5965e",
+    "entity-schema.json": "06b4f1057827f8de3d7b53508ed4b5d01288242e558670c7a3a3fa3387b44a01",
+    "language-contract.json": "53fe774bc3f7bd7bf66deca98fa129f064e5aa11ed9b4e7cf9c6c7287a6598cd",
+    "policy-contract.json": "e618923be88dc24be836981456fe6f016ce82ab71ac3f13e3815d0328f23f5d4",
+    "capability-matrix.json": "9e04a690107a6137482b8179ec9b6c593c46d99139329c614dda0e580c6508ff",
+    "utterances.jsonl": "c21217fd0c21c71782d404bbd5bb860eb2b4e2199a2dda0113e3bccead395e5e",
+    "adversarial.jsonl": "78f13330f621850baeac858d80d793c13da21410d5a77c9cba79d7dd186f2dc1",
+    "multi-turn.jsonl": "dc685eb5c6870d29f530c136b21532498fd0802944c26d250b1a0684f8dfbe96",
+    "contrastive.jsonl": "4739628040ee1640c7a75b95f67a715f04e8c37a616f2c24dbecef4cb0dd41b4"
+  }
+}

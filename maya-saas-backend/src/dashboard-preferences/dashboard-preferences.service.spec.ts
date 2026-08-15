@@ -26,7 +26,11 @@ describe('DashboardPreferencesService', () => {
       }),
     );
     const prisma = {
-      dashboardPreference: { findUnique, upsert },
+      dashboardPreference: {
+        findUnique,
+        findMany: jest.fn().mockResolvedValue([]),
+        upsert,
+      },
     } as unknown as PrismaService;
     const auditLogWrite = jest.fn().mockResolvedValue(undefined);
     const auditLog = { log: auditLogWrite } as unknown as AuditLogService;
@@ -156,6 +160,18 @@ describe('DashboardPreferencesService', () => {
     });
     expect(setup.auditLogWrite).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'assistant.preferences.updated' }),
+    );
+  });
+
+  it('enables the daily brief by default for each tenant member', async () => {
+    const setup = createService();
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getAssistant('tenant-a', 'owner-a'),
+    );
+
+    expect(result.config.enabled_capabilities).toEqual(
+      expect.arrayContaining(['daily_brief', 'business_analytics']),
     );
   });
 });

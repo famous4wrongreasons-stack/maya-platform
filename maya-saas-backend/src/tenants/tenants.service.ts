@@ -845,6 +845,7 @@ export class TenantsService {
           select: {
             provider: true,
             status: true,
+            settingsJson: true,
           },
         },
         _count: {
@@ -944,6 +945,8 @@ export class TenantsService {
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
+      logo_updated_at:
+        tenant.brandingSettings?.updatedAt?.toISOString() ?? null,
       icon_url: tenant.brandingSettings?.iconUrl ?? null,
       favicon_url: tenant.brandingSettings?.faviconUrl ?? null,
       accent_color:
@@ -1011,6 +1014,7 @@ export class TenantsService {
       branding: {
         app_name: brand.name,
         logo_url: brand.logo_url,
+        logo_updated_at: brand.logo_updated_at,
         icon_url: brand.icon_url,
         favicon_url: brand.favicon_url,
         primary_color: brand.primary_color,
@@ -1045,10 +1049,28 @@ export class TenantsService {
       },
       available_features: availableFeatures,
       available_feature_keys: availableFeatureKeys,
-      crm: {
-        provider: tenant.crmIntegration?.provider ?? null,
-        status: tenant.crmIntegration?.status ?? null,
-      },
+      crm: (function () {
+        const settings = serializePublicCrmSettings(
+          tenant.crmIntegration?.provider ?? '',
+          tenant.crmIntegration?.settingsJson,
+        );
+        const companyId =
+          typeof settings.companyId === 'number' ||
+          typeof settings.companyId === 'string'
+            ? settings.companyId
+            : null;
+        const tipsCompanyId =
+          typeof settings.tipsCompanyId === 'number' ||
+          typeof settings.tipsCompanyId === 'string'
+            ? settings.tipsCompanyId
+            : companyId;
+        return {
+          provider: tenant.crmIntegration?.provider ?? null,
+          status: tenant.crmIntegration?.status ?? null,
+          company_id: companyId,
+          tips_company_id: tipsCompanyId,
+        };
+      })(),
     };
   }
 

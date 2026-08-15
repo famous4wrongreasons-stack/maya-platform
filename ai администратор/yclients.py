@@ -609,26 +609,24 @@ class YClientsAPI:
 
     def who_works_on(self, date_str: str) -> dict:
         """
-        Кто из мастеров работает в конкретный день. Тянет реальный график
-        каждого активного мастера из YClients.
-        Возвращает {date, working:[{name,hours}], off:[name], ...}.
+        Кто из мастеров работает в конкретный день по подтвержденному графику.
+
+        Ошибка/неполный ответ YClients не превращается в ложный выходной:
+        такие мастера возвращаются отдельно в ``unknown``.
         """
-        working, off = [], []
-        for m in self.get_masters():
-            if not isinstance(m, dict) or "id" not in m:
+        working, off, unknown = [], [], []
+        for master in self.get_working_masters(date_str):
+            name = str(master.get("name") or "").strip()
+            if master.get("schedule_unknown"):
+                unknown.append(name)
                 continue
-            sid = m["id"]
-            name = m.get("name", "")
-            rows = self.get_staff_schedule(sid, date_str, date_str)
-            row = rows[0] if rows and isinstance(rows[0], dict) else {}
-            if row.get("is_working") and row.get("slots"):
-                s = row["slots"][0]
-                hours = f"{s.get('from','')}-{s.get('to','')}"
-                # Если несколько интервалов — склеим
-                if len(row["slots"]) > 1:
-                    hours = ", ".join(
-                        f"{x.get('from','')}-{x.get('to','')}" for x in row["slots"]
-                    )
+            if master.get("is_working"):
+                slots = master.get("work_slots") or []
+                hours = ", ".join(
+                    f"{slot.get('from', '')}–{slot.get('to', '')}"
+                    for slot in slots
+                    if isinstance(slot, dict)
+                )
                 working.append({"name": name, "hours": hours})
             else:
                 off.append(name)
@@ -636,6 +634,8 @@ class YClientsAPI:
             "date": date_str,
             "working": working,
             "off": off,
+            "unknown": unknown,
+            "schedule_unknown": bool(unknown),
             "working_count": len(working),
         }
 
@@ -745,6 +745,71 @@ class YClientsAPI:
         if not out:
             return [{"message": "Нет рабочих дней в ближайшее время"}]
         return out
+
+    def get_master_schedule_for_date(self, staff_id: int, date_str: str) -> dict:
+        """Return an exact, fail-closed schedule fact for one staff member/day.
+
+        A missing or mismatched YClients row is not proof of a day off.  The
+        caller must be able to distinguish a confirmed day off from a CRM
+        timeout/partial response, otherwise MAYA can confidently state a false
+        schedule.
+        """
+        rows = self.get_staff_schedule(int(staff_id), date_str, date_str)
+        valid = [row for row in (rows or []) if isinstance(row, dict)]
+        first_error = next((row.get("error") for row in valid if row.get("error")), None)
+        if first_error:
+            return {
+                "success": False,
+                "status": "unknown",
+                "schedule_unknown": True,
+                "staff_id": int(staff_id),
+                "date": date_str,
+                "error": str(first_error),
+            }
+
+        exact = next(
+            (
+                row for row in valid
+                if str(row.get("date") or "")[:10] == date_str
+            ),
+            None,
+        )
+        # Some compatible one-day responses omit the date entirely.  A single
+        # undated row is safe to use because both request boundaries are equal.
+        if exact is None and len(valid) == 1 and not valid[0].get("date"):
+            exact = valid[0]
+        if exact is None:
+            return {
+                "success": False,
+                "status": "unknown",
+                "schedule_unknown": True,
+                "staff_id": int(staff_id),
+                "date": date_str,
+                "error": "schedule_date_not_confirmed",
+            }
+
+        def _hm(value):
+            return str(value or "")[:5]
+
+        raw_slots = exact.get("slots") or []
+        slots = [
+            {"from": _hm(slot.get("from")), "to": _hm(slot.get("to"))}
+            for slot in raw_slots
+            if isinstance(slot, dict) and slot.get("from") and slot.get("to")
+        ]
+        is_working = bool(exact.get("is_working") and slots)
+        return {
+            "success": True,
+            "status": "working" if is_working else "off",
+            "schedule_unknown": False,
+            "staff_id": int(staff_id),
+            "date": date_str,
+            "is_working": is_working,
+            "slots": slots,
+            "hours": ", ".join(
+                f"{slot['from']}–{slot['to']}" for slot in slots
+            ),
+        }
 
     # ─── Услуги ─────────────────────────────────────────────────────────────
 
@@ -1467,16 +1532,16 @@ class YClientsAPI:
 
     # ─── Записи мастера + история клиента (для уведомлений мастерам) ────────
 
-    def list_all_clients(self, page_size: int = 200) -> list[dict]:
-        """
-        Возвращает ВСЕХ клиентов салона из YClients постранично.
-        Поля: id, name, phone, visits_count, sold_amount (LTV в ₽), last_visit_date.
+    def get_client_registry_snapshot(self, page_size: int = 200) -> dict:
+        """Возвращает полный постраничный реестр и признак полноты выгрузки.
 
-        Используется в /migrate_help — найти топ-клиентов, которых пока нет
-        у нас в боте, чтобы целенаправленно их переводить.
+        Потребителям аналитики важно отличать пустую базу от оборвавшейся
+        пагинации: частичный ответ нельзя выдавать владельцу как итог по всей CRM.
         """
         all_items: list[dict] = []
         page = 1
+        complete = False
+        error = None
         while True:
             try:
                 data = self._post(
@@ -1493,18 +1558,41 @@ class YClientsAPI:
                 )
             except Exception as e:
                 print(f"YClients list_all_clients page={page} error: {e}")
+                error = "YClients не завершил выгрузку клиентской базы."
+                break
+            if not isinstance(data, dict):
+                error = "YClients вернул некорректный ответ клиентской базы."
                 break
             items = data.get("data") or []
             if not items:
+                complete = True
                 break
             all_items.extend(items)
             if len(items) < page_size:
+                complete = True
                 break
             page += 1
             # Защита от бесконечного цикла на странных ответах
             if page > 200:
+                error = "YClients превысил безопасный предел страниц клиентской базы."
                 break
-        return all_items
+        return {
+            "success": complete,
+            "complete": complete,
+            "clients": all_items,
+            "pages_loaded": page if complete else max(0, page - 1),
+            "error": error,
+        }
+
+    def list_all_clients(self, page_size: int = 200) -> list[dict]:
+        """
+        Возвращает клиентов салона из YClients постранично.
+        Поля: id, name, phone, visits_count, sold_amount (LTV в ₽), last_visit_date.
+
+        Для аналитики всей базы используйте get_client_registry_snapshot(),
+        чтобы не принять частичную выгрузку за полный реестр.
+        """
+        return self.get_client_registry_snapshot(page_size=page_size)["clients"]
 
     def search_clients(self, query: str, limit: int = 8) -> list[dict]:
         """Поиск клиентов по части телефона/имени (quick_search YClients) — для
@@ -1581,7 +1669,13 @@ class YClientsAPI:
                 )
                 batch = data.get("data", []) or []
                 if not batch:
-                    break
+                    return {
+                        "success": True,
+                        "complete": True,
+                        "records": out,
+                        "pages_loaded": max(0, page - 1),
+                        "error": None,
+                    }
                 new = 0
                 for r in batch:
                     rid = r.get("id") if isinstance(r, dict) else None
@@ -1664,8 +1758,13 @@ class YClientsAPI:
                 return {"count": m["cnt"], "total": m["total"]}
         return {"count": 0, "total": 0}
 
-    def get_company_records(self, start_date: str, end_date: str, max_pages: int = 25) -> list[dict]:
-        """Все записи компании за период (с пагинацией и дедупликацией) — для салонной аналитики."""
+    def get_company_records_snapshot(
+        self,
+        start_date: str,
+        end_date: str,
+        max_pages: int = 25,
+    ) -> dict:
+        """Load the record register without disguising API failures as zero data."""
         out = []
         seen = set()
         page = 1
@@ -1679,7 +1778,13 @@ class YClientsAPI:
                 )
                 batch = data.get("data", []) or []
                 if not batch:
-                    break
+                    return {
+                        "success": True,
+                        "complete": True,
+                        "records": out,
+                        "pages_loaded": max(0, page - 1),
+                        "error": None,
+                    }
                 new = 0
                 for r in batch:
                     rid = r.get("id") if isinstance(r, dict) else None
@@ -1688,11 +1793,41 @@ class YClientsAPI:
                     elif rid not in seen:
                         seen.add(rid); out.append(r); new += 1
                 if len(batch) < count or new == 0:
-                    break
+                    return {
+                        "success": True,
+                        "complete": True,
+                        "records": out,
+                        "pages_loaded": page,
+                        "error": None,
+                    }
                 page += 1
         except Exception as e:
             print(f"YClients get_company_records error: {e}")
-        return out
+            return {
+                "success": False,
+                "complete": False,
+                "records": out,
+                "pages_loaded": max(0, page - 1),
+                "error": "yclients_records_unavailable",
+            }
+
+        # A full final page means there may be another page. Never label the
+        # truncated register as complete when the safety limit was reached.
+        return {
+            "success": False,
+            "complete": False,
+            "records": out,
+            "pages_loaded": max_pages,
+            "error": "yclients_records_page_limit_reached",
+        }
+
+    def get_company_records(self, start_date: str, end_date: str, max_pages: int = 25) -> list[dict]:
+        """Все записи компании за период (с пагинацией и дедупликацией) — для салонной аналитики."""
+        return self.get_company_records_snapshot(
+            start_date,
+            end_date,
+            max_pages=max_pages,
+        )["records"]
 
     def get_company_transactions(self, start_date: str, end_date: str, max_pages: int = 40) -> list[dict]:
         """

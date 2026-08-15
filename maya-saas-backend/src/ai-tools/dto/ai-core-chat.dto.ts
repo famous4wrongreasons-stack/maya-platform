@@ -28,7 +28,11 @@ export class AiCoreChatDto {
   @IsIn(['native', 'web', 'telegram', 'voice'])
   surface!: AiToolSurface;
 
-  // Presentation hint only. Authorization always comes from server-side membership.
+  /**
+   * UI zone in the app. Owner can open the client chat — audience must stay
+   * client so MAYA never answers with business analytics there. This is only
+   * a presentation hint; authorization comes from server-side membership.
+   */
   @IsOptional()
   @IsIn(['client', 'staff', 'owner'])
   audience?: 'client' | 'staff' | 'owner';

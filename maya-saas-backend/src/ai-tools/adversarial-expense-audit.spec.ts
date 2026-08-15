@@ -447,39 +447,34 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
       expect(h.store.expenses).toHaveLength(0);
     });
 
-    it('бухгалтер просит — решает владелец (карточка остаётся pending)', async () => {
+    it('бухгалтер не может даже подготовить расход владельца', async () => {
       const h = createHarness();
       const accountant = { ...owner, role: UserRole.ACCOUNTANT };
-      const p = await prepare(
-        h,
-        { category: 'supplies', amount_rubles: 4_500 },
-        KEY_A,
-        accountant,
-      );
       await expect(
-        h.run(() =>
-          h.runtime.approve(accountant, p.approval.id, {
-            payloadHash: p.approval.payload_hash,
-          }),
+        prepare(
+          h,
+          { category: 'supplies', amount_rubles: 4_500 },
+          KEY_A,
+          accountant,
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(h.store.approvals[0].status).toBe('pending');
+      expect(h.store.approvals).toHaveLength(0);
       expect(h.store.expenses).toHaveLength(0);
     });
 
-    it('🔴 бухгалтер может ОТКЛОНИТЬ, но не подтвердить — и исполняется он же, не владелец', async () => {
+    it('бухгалтер не может создать расход через подтверждение владельца', async () => {
       const h = createHarness();
       const accountant = { ...owner, role: UserRole.ACCOUNTANT };
-      const p = await prepare(
-        h,
-        { category: 'supplies', amount_rubles: 4_500 },
-        KEY_A,
-        accountant,
-      );
-      await h.approve(p); // подтверждает владелец
-      // Автор расхода в БД — бухгалтер (инициатор), а решение принял владелец.
-      expect(h.store.expenses[0].createdById).toBe(accountant.userId);
-      expect(h.store.approvals[0].decidedByUserId).toBe(owner.userId);
+      await expect(
+        prepare(
+          h,
+          { category: 'supplies', amount_rubles: 4_500 },
+          KEY_A,
+          accountant,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(h.store.approvals).toHaveLength(0);
+      expect(h.store.expenses).toHaveLength(0);
     });
   });
 
@@ -806,6 +801,9 @@ function createHarness() {
         );
       }),
       delete: jest.fn(),
+    },
+    expensePeriodDeclaration: {
+      deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
     tenant: {
       findUnique: jest.fn().mockResolvedValue({

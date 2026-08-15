@@ -9,6 +9,7 @@ export const ASSISTANT_CAPABILITIES = [
 export type AssistantCapability = (typeof ASSISTANT_CAPABILITIES)[number];
 
 export const DEFAULT_ASSISTANT_CAPABILITIES: AssistantCapability[] = [
+  'daily_brief',
   'business_analytics',
 ];
 

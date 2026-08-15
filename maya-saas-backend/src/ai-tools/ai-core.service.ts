@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   HttpException,
   Injectable,
+  Optional,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -18,13 +19,21 @@ import {
   type AssistantCapability,
 } from '../dashboard-preferences/assistant-capabilities.constants';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
+import {
+  isBusinessReviewFollowUp,
+  isComprehensiveBusinessReview,
+} from '../ai-brain/business-review-intent';
+import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
+import type { ConversationSemanticPlan } from '../conversation-intelligence/conversation-intelligence.types';
 import type {
   MayaBrainIntent,
   MayaBrainRoute,
 } from '../ai-brain/maya-brain.types';
 import { AiCoreModelService } from './ai-core-model.service';
+import { AiMemoryService } from './ai-memory.service';
 import type {
   AiCoreMessage,
   AiCoreModelDecision,
@@ -137,15 +146,16 @@ type ToolUsage = {
 /**
  * Требование заземления: «на этот вопрос отвечаем только по данным».
  *
- * 🔴 Тему здесь НЕ решают. Раньше решали — и промах регулярки в угадывании
- * темы рушил весь ход: владелец получал отказ или шаблон. Теперь тему называет
- * инструмент, который отработал, а до него известно ровно одно: вопрос про
- * данные, значит числа строгие и отвечать раньше инструмента нельзя.
+ * Если вопрос явно относится к одному контракту данных (например, графику),
+ * доказательством может быть только инструмент этой семьи. Для открытого
+ * вопроса без конкретной темы модель по-прежнему выбирает из всех доступных
+ * источников. Так промах подсказки не блокирует общий диалог, но расписание
+ * больше нельзя «подтвердить» месячной аналитикой.
  */
 type GroundingRequirement = {
   /**
-   * Инструменты данных, доступные этой роли и тарифу; вероятный стоит первым.
-   * Доказательством считается ЛЮБОЙ из них — промах подсказки больше не отказ.
+   * Инструменты, способные ответить на вопрос. Для явно распознанной темы это
+   * только её семья; для открытого вопроса — все доступные источники данных.
    */
   evidenceToolNames: string[];
   /**
@@ -206,7 +216,10 @@ const DATA_TOPIC_PATTERN =
   /(деньг|выруч|оборот|касс|доход|прибыл|марж|рентабельн|чек|зарплат|начисл|заработ|окупа|стоит|стоимост|цен[аеуы]|прайс|расход|затрат|трат|бюджет|реклам|аренд|налог|запис|визит|посещен|окн[аоу]|слот|свободн|расписан|график|смен[аеуы]|выходн|загруз|занятост|клиент|гост|посетител|мастер|специалист|сотрудник|команд|персонал|услуг|стриж|бород|балл|бонус|кэшбэк|лояльн|показател|метрик|аналитик|статистик|сводк|отчет|динамик|просад|просел|(?<![а-яё])рост|падени|отмен|повторн|средн)/i;
 /** Приветствие и вежливость: ради них отчёт по салону не поднимают. */
 const SMALL_TALK_PATTERN =
-  /^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|доброе\s+утро|спасибо|пожалуйста|пока|давай|ладно|ок|окей|ясно|понятно|кто\s+ты|что\s+ты\s+умеешь|как\s+дела|че\s+как(?:\s+\w{1,24})?|как\s+(?:ты|сама|жизнь|делишки|настроен\w*)|маюшк\w*|майя|maya|хей|хай|hello|hi|yo)(?:\s*[,!.?]|\s|$)/i;
+  /^(?:привет|здравствуй(?:те)?|добрый\s+(?:день|вечер|утро)|доброе\s+утро|спасибо|пожалуйста|пока|давай(?!\s+\S)|ладно|ок|окей|ясно|понятно|кто\s+ты|что\s+ты\s+умеешь|как\s+дела|че\s+как(?:\s+\w{1,24})?|как\s+(?:ты|сама|жизнь|делишки|настроен\w*)|маюшк\w*|майя|maya|хей|хай|hello|hi|yo)(?:\s*[,!.?]|\s|$)/i;
+/** Открытый запрос именно о состоянии бизнеса, а не о неизвестной теме. */
+const OPEN_BUSINESS_OVERVIEW_PATTERN =
+  /(?:что.{0,40}требует.{0,24}внимани|на\s+что.{0,32}обратить\s+внимани|что\s+(?:сейчас\s+)?по\s+бизнесу|как\s+(?:у\s+нас\s+)?(?:идут\s+)?дела\s+(?:в\s+)?(?:бизнесе|салоне|барбершопе))/i;
 /**
  * Интенты, в которых разговор идёт не про цифры: запись клиента, правка
  * расписания, база знаний, поддержка. Каталог и баллы сюда не входят: их
@@ -251,7 +264,8 @@ const BUSINESS_EXPLANATION_REQUEST_PATTERN =
  * владелец получал перечень счётчиков вместо ответа.
  */
 const PROFIT_QUESTION_PATTERN =
-  /(прибыл[а-яёa-z]*|маржинальн[а-яёa-z]*|рентабельн[а-яёa-z]*|(?<![а-яё])марж[аеиуы][а-яёa-z]*|в\s+плюсе|в\s+минусе|в\s+ноль|чист[а-яёa-z]*\s+(?:прибыл|доход|остат)[а-яёa-z]*|(?<![а-яё])чистыми(?![а-яё])|после\s+(?:всех\s+)?расход[а-яёa-z]*|за\s+вычетом\s+расход[а-яёa-z]*|сколько\s+(?:я\s+|мы\s+)?(?:в\s+итоге\s+)?(?:заработал|остал)[а-яёa-z]*|(?:что|сколько)\s+(?:в\s+итоге\s+)?остал[а-яёa-z]*|окупа[а-яёa-z]*)/i;
+  /(прибыл[а-яёa-z]*|маржинальн[а-яёa-z]*|рентабельн[а-яёa-z]*|(?<![а-яё])марж[аеиуы][а-яёa-z]*|в\s+плюсе|в\s+минусе|в\s+ноль|чист[а-яёa-z]*\s+(?:прибыл|доход|остат)[а-яёa-z]*|(?<![а-яё])чистыми(?![а-яё])|после\s+(?:всех\s+)?расход[а-яёa-z]*|за\s+вычетом\s+расход[а-яёa-z]*|сколько\s+(?:я\s+|мы\s+)?(?:в\s+итоге\s+)?(?:заработал|остал)[а-яёa-z]*|(?:что|сколько)\s+(?:в\s+итоге\s+)?остал[а-яёa-z]*|(?<![а-яё])окупа[а-яёa-z]*)/i;
+const GROSS_PROFIT_QUESTION_PATTERN = /валов[а-яёa-z]*\s+прибыл[а-яёa-z]*/i;
 /**
  * Вопрос о СТРУКТУРЕ расходов: «на что больше всего тратим», «куда уходят
  * деньги», «сколько ушло на расходники». Отвечает разрез по статьям, а не
@@ -265,7 +279,7 @@ const PROFIT_QUESTION_PATTERN =
  * бизнес-вопросом, и на команду сначала грузился весь отчёт по салону.
  */
 const EXPENSE_RECORD_COMMAND_PATTERN =
-  /(запиш|запис(?:ать|ал)|внес|добав|провед|отмет|учт)[а-яёa-z]*\s+(?:[^,.]{0,40}\s+)?(аренд|расход|зарплат|реклам|налог|коммунал|закуп|материал|трат)/i;
+  /(?:(запиш|запис(?:ать|ал)|внес|добав|провед|отмет|учт)[а-яёa-z]*\s+(?:[^,.]{0,40}\s+)?(аренд|расход|зарплат|реклам|налог|коммунал|закуп|материал|трат)|^\s*(?:есть\s+)?(?:расход|трата|аренда|реклама|налог|коммунал(?:ьные)?|закупка|материалы?|расходники?|интернет|эквайринг|ремонт|прочее)\s*(?::|—|–|-)?\s*[^?\n]{0,80}(?:\d|тысяч|тыс\.?|миллион|млн\.?)[^?\n]*$)/i;
 const EXPENSE_STRUCTURE_QUESTION_PATTERN =
   /(расход[а-яёa-z]*|затрат[а-яёa-z]*|на\s+что\s+(?:мы\s+)?(?:больше\s+всего\s+)?(?:трат|уход|ушл)[а-яёa-z]*|куда\s+(?:у\s+нас\s+)?(?:уход|дева|ушл)[а-яёa-z]*|сколько\s+(?:мы\s+)?потратил[а-яёa-z]*|на\s+что\s+ушл[а-яёa-z]*)/i;
 /**
@@ -277,6 +291,15 @@ const EXPENSE_STRUCTURE_QUESTION_PATTERN =
  */
 const CLIENT_ACQUISITION_QUESTION_PATTERN =
   /(сколько\s+стоит\s+(?:нам\s+|мне\s+)?(?:привест|привлеч|получ|нов[а-яё]+\s+клиент|один\s+клиент|клиент)|(?:во\s+)?сколько\s+(?:нам\s+|мне\s+)?обходится\s+(?:нов[а-яё]+\s+)?клиент|(?:во\s+)?сколько\s+обходится\s+(?:нам|мне)\s+(?:нов[а-яё]+\s+)?клиент|цена\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент[а-яё]*|стоимост[ьи]\s+(?:привлечени[а-яё]*|одного\s+клиент[а-яё]*|нов[а-яё]+\s+клиент[а-яё]*)|привлечени[ея]\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент)/i;
+/**
+ * Досье конкретного клиента из CRM (не счётчик и не «кого вернуть»).
+ * Имя в запросе нужно модели передать в query инструмента.
+ */
+const CLIENT_DOSSIER_HINT_PATTERN =
+  /(?:досье|что\s+за\s+клиент|расскажи\s+(?:про|о)\s+|что\s+(?:ему|ей)\s+предложит|что\s+(?:(?:он|она)|.{2,40})\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)|что\s+обычно\s+(?:берет|берёт)|привычк[аи]\s+(?:этого\s+)?клиент|перед\s+(?:его|её|ее|этим)\s+визит|сколько\s+(?:(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у|у\s+(?!меня\b).{2,40}\s+(?:визит|посещени|балл|бонус))|(?:насколько|как).{2,40}\s+лоял[а-яёa-z]*|как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит))/i;
+/** Полный CRM-реестр, лояльность и накопительные периоды отсутствия. */
+const CLIENT_RETENTION_HINT_PATTERN =
+  /(?:вс[ея]\s+(?:клиент|баз)|сколько\s+(?:у\s+нас\s+)?(?:всего\s+)?(?:клиент|гост)[а-яёa-z]*\s+(?:в\s+(?:нашей\s+|этой\s+)?баз|всего)|пол[а-яёa-z]*\s+баз[а-яёa-z]*\s+клиент|баз[а-яёa-z]*\s+(?:клиент|гост)|(?:клиент|гост)[а-яёa-z]*\s+в\s+(?:нашей\s+|этой\s+)?баз|лояльн[а-яёa-z]*\s+(?:клиент|гост)|(?:клиент|гост)[а-яёa-z]*\s+лояльн|(?:не\s+(?:был|были|ходил|ходили|ходят|приходил|приходили|приходят|посещал|посещали|посещают|посещало)|неактивн[а-яёa-z]*|спящ[а-яёa-z]*|уснувш[а-яёa-z]*|потерянн[а-яёa-z]*|ушедш[а-яёa-z]*).{0,55}(?:месяц|год|клиент|гост)|(?:клиент|гост)[а-яёa-z]*.{0,55}(?:не\s+(?:был|были|ходил|ходили|ходят|приходил|приходили|приходят|посещал|посещали|посещают|посещало)|неактивн|спящ|уснувш|потерянн|ушедш)|кого\s+(?:нужно\s+|можно\s+)?вернут|(?:как|чем).{0,24}вернут.{0,30}(?:клиент|гост)|как\s+(?:их|этих)\s+вернут|возврат[а-яёa-z]*\s+(?:клиент|гост)|анализ[а-яёa-z]*\s+(?:всей|полной)\s+баз|удержан[а-яёa-z]*\s+клиент)/i;
 /**
  * Разрезы, которых в инструменте прибыли нет. Вопрос «прибыль по мастерам»
  * должен идти в аналитику с разрезом, а не в общую экономику салона.
@@ -292,6 +315,14 @@ const LOYALTY_HINT_PATTERN =
 /** Подсказка: спрашивают про СВОИ записи. */
 const OWN_APPOINTMENTS_HINT_PATTERN =
   /(мои\s+запис[а-яёa-z]*|(?:какие|сколько)\s+у\s+меня\s+запис[а-яёa-z]*|когда\s+я\s+записан[а-яёa-z]*|истори[а-яёa-z]*\s+(?:моих\s+)?запис[а-яёa-z]*)/i;
+/** Точный рабочий график команды на дату — отдельный факт YClients. */
+const STAFF_SCHEDULE_READ_HINT_PATTERN =
+  /(?:расписан[а-яёa-z]*|график[а-яёa-z]*|рабоч[а-яёa-z]*\s+(?:час|смен)[а-яёa-z]*|кто\s+(?:из\s+команды\s+)?работ[а-яёa-z]*|когда\s+[^?.,!]{0,50}работ[а-яёa-z]*|работает\s+ли|выходн[а-яёa-z]*)/i;
+/** Точный журнал визитов и загрузка команды за один календарный день. */
+const OPERATIONS_JOURNAL_HINT_PATTERN =
+  /(?:запис(?:ь|и|ей|ям|ями|ях)|визит[а-яёa-z]*|при[её]м[а-яёa-z]*|услуг[а-яёa-z]*|загрузк[а-яёa-z]*|занятост[а-яёa-z]*|отмен[а-яёa-z]*|неявк[а-яёa-z]*)/i;
+const EXPLICIT_CALENDAR_DAY_PATTERN =
+  /(?:сегодня|завтра|послезавтра|понедельник[а-яё]*|вторник[а-яё]*|сред[а-яё]*|четверг[а-яё]*|пятниц[а-яё]*|суббот[а-яё]*|воскресень[а-яё]*|\d{1,2}[./]\d{1,2}|\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)|\d{4}-\d{2}-\d{2})/i;
 /** Подсказка: спрашивают про свободное время. */
 const AVAILABILITY_HINT_PATTERN =
   /(свободн[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|ближайш[а-яёa-z]*\s+(?:окн[а-яёa-z]*|врем[а-яёa-z]*|слот[а-яёa-z]*)|есть\s+ли\s+(?:окн[а-яёa-z]*|мест[а-яёa-z]*|врем[а-яёa-z]*)|когда\s+можно\s+запис)/i;
@@ -300,7 +331,29 @@ const PRICE_HINT_PATTERN =
   /(сколько\s+стоит|цен[а-яёa-z]*|прайс[а-яёa-z]*|какие\s+услуг[а-яёa-z]*|длительн[а-яёa-z]*\s+услуг[а-яёa-z]*)/i;
 /** Подсказка: спрашивают про мастеров — поимённо. */
 const STAFF_HINT_PATTERN =
-  /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит))/i;
+  /(какие\s+(?:у\s+вас\s+)?(?:мастер|специалист|барбер)[а-яёa-z]*|кто\s+(?:из\s+)?(?:мастер|специалист|барбер)[а-яёa-z]*|выбрать\s+(?:мастер|специалист)[а-яёa-z]*|к\s+кому\s+(?:лучше\s+)?(?:записат|попаст|сходит)|расскаж[а-яёa-z]*\s+о\s+(?:мастер|барбер)|про\s+мастер)/i;
+/**
+ * Деньги ПО ЛЮДЯМ: начисление мастеру и вклад мастера в кассу — разные вопросы.
+ *
+ * «Кто сколько принёс» означает вклад в выручку салона. YClients не связывает
+ * подтверждённые кассовые операции с мастером, поэтому такой показатель нельзя
+ * подменять зарплатой или ценами записей. «Сколько каждый заработал» в контексте
+ * команды означает начисленную зарплату: она приходит отдельной проверенной
+ * строкой расчёта зарплаты CRM и доступна владельцу по каждому мастеру.
+ */
+const STAFF_CONTRIBUTION_QUESTION_PATTERN =
+  /(?:кто\s+сколько|сколько\s+(?:кажд[а-яёa-z]*|кто))[^.?!]{0,48}(?:прин[её]с|дал\s+(?:в\s+)?касс|сделал\s+(?:для\s+)?салон)|(?:выруч|касс|оборот|доход)[^.?!]{0,36}(?:по\s+)?(?:мастер|барбер|сотрудник|специалист)/i;
+const STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN =
+  /(?:кто\s+сколько|сколько\s+(?:кажд[а-яёa-z]*|кто)|по\s+(?:кажд[а-яёa-z]*|всем))[^.?!]{0,56}(?:заработ|получ|начисл|зарплат)|(?:заработ|получ|начисл|зарплат)[^.?!]{0,56}(?:кажд[а-яёa-z]*|по\s+(?:мастер|барбер|сотрудник|специалист))|сколько\s+кажд[а-яёa-z]*\s+из\s+(?:мастер|барбер|сотрудник|специалист)/i;
+/** Точный счёт записей и их статусов сервер формулирует без пересказа LLM. */
+const APPOINTMENT_COUNT_QUESTION_PATTERN =
+  /(?:(?:сколько|количеств[а-яёa-z]*|числ[а-яёa-z]*|всего|сводк[а-яёa-z]*)[^.?!]{0,48}(?:запис[а-яёa-z]*|визит[а-яёa-z]*|посещен[а-яёa-z]*)|(?:запис[а-яёa-z]*|визит[а-яёa-z]*|посещен[а-яёa-z]*)[^.?!]{0,48}(?:сколько|всего|общ[а-яёa-z]*|статус[а-яёa-z]*|заверш[а-яёa-z]*|провед[а-яёa-z]*|отмен[а-яёa-z]*|неяв[а-яёa-z]*|ожида[а-яёa-z]*))/i;
+/** Дневной разрез должен оставаться точным и воспроизводимым. */
+const DAILY_ANALYTICS_BREAKDOWN_QUESTION_PATTERN =
+  /(?:по\s+дням|дневн[а-яёa-z]*\s+(?:свод[а-яёa-z]*|разбив[а-яёa-z]*|динамик[а-яёa-z]*)|разбивк[а-яёa-z]*\s+по\s+дн[а-яёa-z]*|кажд[а-яёa-z]*\s+день)/i;
+/** Подсказка: спрашивают про сам салон / историю — не аналитику. */
+const SALON_ABOUT_HINT_PATTERN =
+  /(расскаж[а-яёa-z]*\s+о\s+(?:барбершоп|салон|вас|вашем|вашей)|истор[а-яёa-z]*\s+(?:открыт|салон|барбер)|когда\s+(?:открыл|основа)|в\s+каком\s+году|о\s+барбершоп|про\s+(?:барбершоп|салон)|чем\s+(?:у\s+вас\s+)?(?:хорош|интересн)|атмосфер)/i;
 const GROUNDING_NUMBER_PATTERN =
   /(?<![\p{L}\p{N}_-])-?(?:\d{1,3}(?:[\s\u00a0]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)(?![\p{L}\p{N}_-])/gu;
 /**
@@ -335,13 +388,19 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'analytics.business.query': 'business_query',
   'analytics.employee.query': 'employee_query',
   'analytics.business.profit': 'business_profit',
+  'expenses.period.complete': 'business_profit',
   'expenses.read': 'business_expenses',
   'customers.count': 'customer_count',
+  'clients.retention.scan': 'client_retention',
+  'clients.dossier.read': 'client_dossier',
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
+  'staff.schedule.read': 'staff_schedule',
+  'operations.journal.read': 'operations_journal',
   'booking.availability.read': 'booking_availability',
   'appointments.own.list': 'client_appointments',
   'loyalty.own.read': 'client_loyalty',
+  'booking.upsell.suggest': 'client_upsell',
 };
 /** Инструменты, которые предзагружаем: подсказка к ним однозначна. */
 const PRELOADABLE_TOOLS = new Set([
@@ -349,6 +408,10 @@ const PRELOADABLE_TOOLS = new Set([
   'analytics.employee.query',
   'analytics.business.profit',
   'expenses.read',
+  'clients.retention.scan',
+  'clients.dossier.read',
+  // Гостевой «расскажи о салоне» — сразу публичный каталог, не ждём второй ход.
+  'catalog.staff.read',
 ]);
 /**
  * Инструменты, чей результат — личные данные самого спрашивающего.
@@ -362,6 +425,41 @@ const PRELOADABLE_TOOLS = new Set([
 const PII_SENSITIVE_TOOLS = new Set([
   'appointments.own.list',
   'loyalty.own.read',
+  // Поиск выполняется по имени/телефону внутри периметра, а наружу выходит
+  // только обезличенное досье. Формулировку тоже собирает сервер: так даже
+  // история услуг конкретного человека не отправляется внешней модели.
+  'clients.dossier.read',
+]);
+/**
+ * Инструменты, для которых проверенный сервером ответ нельзя переформулировать
+ * моделью. Помимо ПД сюда входит retention-срез: в нём важны точные размеры
+ * когорт и границы периодов, а свободный пересказ не должен менять цифры.
+ */
+const SERVER_COMPOSED_REPLY_TOOLS = new Set([
+  ...PII_SENSITIVE_TOOLS,
+  'clients.retention.scan',
+  // График — точный факт по дате. Его нельзя пересказывать из аналитики
+  // записей или заменять предположением модели.
+  'staff.schedule.read',
+  // Дневной журнал нельзя превращать в месячную сводку или пересчитывать LLM.
+  'operations.journal.read',
+  // Финансовый ответ должен дословно следовать серверному расчёту. Модель не
+  // должна снова потребовать аренду или пересчитать прибыль самостоятельно.
+  'analytics.business.profit',
+  'expenses.period.complete',
+]);
+/**
+ * Для этих контрактов соседний источник не может служить доказательством.
+ * Они либо содержат персональные/точные CRM-факты, либо отвечают на вопрос,
+ * который нельзя честно восстановить из общей аналитики.
+ */
+const STRICT_GROUNDING_HINT_TOOLS = new Set([
+  'staff.schedule.read',
+  'operations.journal.read',
+  'clients.retention.scan',
+  'clients.dossier.read',
+  'appointments.own.list',
+  'loyalty.own.read',
 ]);
 const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -371,6 +469,12 @@ const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
   UserRole.MANAGER,
   UserRole.BRANCH_MANAGER,
   UserRole.ACCOUNTANT,
+]);
+/** Роли, которые уже и так живут на поверхности мастера. */
+const STAFF_SURFACE_ROLES = new Set<UserRole>([
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.STAFF,
 ]);
 
 @Injectable()
@@ -385,24 +489,50 @@ export class AiCoreService {
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
     private readonly brainRouter: MayaBrainRouterService,
+    @Optional() private readonly memory?: AiMemoryService,
+    @Optional()
+    private readonly conversationIntelligence?: ConversationIntelligenceService,
+    @Optional() private readonly prisma?: PrismaService,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
     const tenantId = this.requireTenant(user);
+    const businessTimezone = await this.resolveBusinessTimezone(tenantId);
     await this.rateLimit.assertTenant('ai_chat', {
       tenantId,
       identity: user.userId,
     });
     const sanitized = this.sanitizeMessages(dto.messages);
+    const clientAudience = this.isClientAudience(user, dto.audience);
+    // Поверхность мастера: владельцу/менеджеру в режиме мастера инструменты
+    // выдаются и исполняются от роли STAFF — личная аналитика вместо кассы
+    // салона. Аудит при этом пишется на настоящего человека (см. complete).
+    const toolUser = this.effectiveToolUser(user, dto.audience);
     // Маршрутизация — синхронная и безусловная: ни флага, ни списка
     // арендаторов, ни записи в базу. Она решает ровно две вещи — персону и
     // намерение, и обе нужны уже на первом шаге.
+    // audience=client принудительно даёт admin-персону даже владельцу.
     const brain = this.brainRouter.route(
-      user.role,
-      this.latestUserText(sanitized.messages),
+      toolUser.role,
+      this.contextualUserText(sanitized.messages),
+      dto.audience ?? null,
     );
+    const memoryCommand = this.memory
+      ? await this.memory.handleExplicitCommand(
+          tenantId,
+          user.userId,
+          this.latestUserText(dto.messages),
+        )
+      : null;
+    if (memoryCommand) {
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply: memoryCommand.reply,
+        source: 'safe_fallback',
+        action: null,
+      });
+    }
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
-      user,
+      toolUser,
       dto,
     );
     if (scheduleCommand) {
@@ -420,8 +550,19 @@ export class AiCoreService {
         },
       );
     }
+    const clientBaseAccess = this.handleClientBaseAccessQuestion(
+      clientAudience ? { ...user, role: UserRole.CLIENT } : toolUser,
+      sanitized.messages,
+    );
+    if (clientBaseAccess) {
+      return this.complete(user, dto, brain, false, [], [], {
+        reply: clientBaseAccess.reply,
+        source: 'safe_fallback',
+        action: null,
+      });
+    }
     const assistantCommand = await this.handleAssistantCommand(
-      user,
+      clientAudience ? { ...user, role: UserRole.CLIENT } : toolUser,
       sanitized.messages,
     );
     if (assistantCommand) {
@@ -431,24 +572,30 @@ export class AiCoreService {
         action: null,
       });
     }
-    const listed = await this.runtime.listTools(user, dto.surface);
-    const tools: AiCoreToolDescriptor[] = listed.tools.map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      input_schema: tool.input_schema,
-      risk_tier: tool.risk_tier,
-      approval_policy: tool.approval_policy,
-    }));
+    const memoryFacts = await this.memoryFactsForModel(tenantId, user.userId);
+    const listed = await this.runtime.listTools(toolUser, dto.surface);
+    const tools: AiCoreToolDescriptor[] = listed.tools
+      .filter((tool) => !clientAudience || !this.isBusinessOnlyTool(tool.name))
+      .map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.input_schema,
+        risk_tier: tool.risk_tier,
+        approval_policy: tool.approval_policy,
+      }));
     const allowedNames = new Set(tools.map((tool) => tool.name));
     const toolResults: AiCoreToolResult[] = [];
     const toolsUsed: ToolUsage[] = [];
     const decisions: AiCoreModelDecision[] = [];
     const signatures = new Set<string>();
     const maxToolSteps = this.maxToolSteps();
+    let activeSemanticPlan: ConversationSemanticPlan | null = null;
     const requirement = this.groundingRequirement(
       sanitized.messages,
       allowedNames,
       brain,
+      this.latestUserText(dto.messages),
+      this.previousUserText(dto.messages),
     );
     // Список для модели: вероятный инструмент первым, за ним — остальные
     // доступные инструменты данных. Первый — рекомендация, любой другой из
@@ -459,6 +606,104 @@ export class AiCoreService {
     let corrections: string[] = [];
 
     try {
+      // Короткое «нет» после вопроса MAYA про дополнительные расходы — это не
+      // свободный разговор с моделью, а однозначное серверное действие. Так
+      // ответ не зависит от формулировки модели и всегда закрывает тот же
+      // отчётный период без фиктивной строки «аренда 0 ₽».
+      if (
+        allowedNames.has('expenses.period.complete') &&
+        this.explicitNoAdditionalExpenses(sanitized.messages)
+      ) {
+        const toolName = 'expenses.period.complete';
+        const argumentsForTool = ReportingPeriodResolver.hardenToolArguments(
+          toolName,
+          {},
+          this.latestUserText(sanitized.messages),
+          this.previousReportingUserText(sanitized.messages),
+        );
+        const execution = this.record(
+          await this.runtime.execute(toolUser, toolName, {
+            surface: dto.surface,
+            arguments: argumentsForTool,
+            idempotencyKey: this.toolIdempotencyKey(
+              tenantId,
+              user.userId,
+              dto.requestId,
+              -2,
+              toolName,
+            ),
+          }),
+        );
+        const status =
+          typeof execution.status === 'string' ? execution.status : 'unknown';
+        toolsUsed.push({
+          name: toolName,
+          status,
+          execution_id:
+            typeof execution.execution_id === 'string'
+              ? execution.execution_id
+              : null,
+        });
+        if (status !== 'completed' || !('result' in execution)) {
+          this.modelFailure('ai_tool_result_unavailable');
+        }
+        toolResults.push({
+          name: toolName,
+          result: this.sanitizeToolResult(execution.result),
+        });
+        const completionRequirement: GroundingRequirement = {
+          evidenceToolNames: [toolName],
+          fallbackDomain: 'business_profit',
+          closedForAccess: false,
+          strictNumbers: true,
+        };
+        const reply = this.deterministicGroundedReply(
+          toolResults,
+          this.contextualUserText(sanitized.messages),
+        );
+        if (!reply) {
+          this.modelFailure('ai_tool_result_unavailable');
+        }
+        return this.complete(
+          user,
+          dto,
+          brain,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          {
+            reply,
+            source: 'safe_fallback',
+            action: null,
+            grounding: this.groundingReport(
+              completionRequirement,
+              'verified',
+              toolResults,
+            ),
+          },
+          toolResults,
+        );
+      }
+      if (
+        allowedNames.has('expenses.period.complete') &&
+        this.explicitNoRentOnly(sanitized.messages)
+      ) {
+        return this.complete(
+          user,
+          dto,
+          brain,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          {
+            reply:
+              'Поняла, аренда за этот период — 0 ₽. Прибыль уже можно считать по кассе, зарплате из CRM и внесённым расходам. Если есть другие расходы — расходники, реклама, коммунальные услуги или что-то ещё — напишите статью и сумму, и я добавлю их после вашего подтверждения.',
+            source: 'safe_fallback',
+            action: null,
+          },
+          toolResults,
+        );
+      }
       // Единственный оставшийся отказ ДО модели: вопрос про данные, а данных
       // этой роли или тарифу не выдано вовсе. Молчать здесь нельзя — человек
       // должен услышать причину.
@@ -480,7 +725,7 @@ export class AiCoreService {
       if (requirement?.presetToolCall) {
         const preset = requirement.presetToolCall;
         const execution = this.record(
-          await this.runtime.execute(user, preset.name, {
+          await this.runtime.execute(toolUser, preset.name, {
             surface: dto.surface,
             arguments: preset.arguments,
             idempotencyKey: this.toolIdempotencyKey(
@@ -516,11 +761,37 @@ export class AiCoreService {
           result: this.sanitizeToolResult(execution.result),
         });
         signatures.add(this.toolSignature(preset.name, preset.arguments));
-        // 🔴 Здесь раньше стоял возврат готового шаблона, и цикл с моделью не
-        // начинался вовсе — на типовые вопросы владельца («сколько заработали»,
-        // «почему просело», «посоветуй») отвечал конструктор строк. Теперь этот
-        // вызов — только предзагрузка: данные уже на руках, а озвучивает их
-        // модель на первом же шаге цикла, без лишнего обращения к провайдеру.
+        // ПД и точные retention-когорты форматирует сервер. Остальная бизнес-
+        // аналитика продолжает ход: смысл вопроса и составные задачи разбирает
+        // Conversation Intelligence слой.
+        const contextualText = this.contextualUserText(sanitized.messages);
+        if (this.requiresServerComposedReply(preset.name, contextualText)) {
+          const fastReply = this.deterministicGroundedReply(
+            toolResults,
+            contextualText,
+          );
+          if (fastReply) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: fastReply,
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'verified',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
+        }
       }
       for (let step = 0; step <= maxToolSteps; step += 1) {
         const requirementSatisfied = this.groundingSatisfied(
@@ -540,22 +811,40 @@ export class AiCoreService {
         }
         const pendingCorrections = corrections;
         corrections = [];
+        const pendingSemanticTool =
+          this.conversationLayer().hasPendingToolTasks(
+            activeSemanticPlan,
+            toolResults.map((result) => result.name),
+          );
         const decision = await this.model.decide({
           surface: dto.surface,
           persona: brain.persona,
+          principalRole: toolUser.role,
           messages: sanitized.messages,
           tools,
           toolResults: [...toolResults],
-          allowToolCall: step < maxToolSteps,
+          // После подтверждённого результата CRM отдельный этап планирования
+          // больше не нужен: он мог выбрать несуществующий инструмент и
+          // уничтожить уже готовые данные. Следующий вызов сразу формулирует
+          // ответ. Для действий и ещё не заземлённых вопросов планирование
+          // остаётся доступным.
+          allowToolCall:
+            step < maxToolSteps &&
+            (activeSemanticPlan === null ||
+              pendingSemanticTool ||
+              (requirement ? !requirementSatisfied : toolResults.length === 0)),
           requiredToolNames:
             requirement && !requirementSatisfied ? requiredToolNames : [],
           nowUtc: new Date().toISOString(),
+          businessTimezone,
+          memoryFacts,
           corrections: pendingCorrections,
+          conversationPlan: activeSemanticPlan,
         });
         if (!decision) {
           const deterministicReply = this.deterministicGroundedReply(
             toolResults,
-            this.latestUserText(sanitized.messages),
+            this.contextualUserText(sanitized.messages),
           );
           if (deterministicReply) {
             return this.complete(
@@ -600,7 +889,34 @@ export class AiCoreService {
           );
         }
         decisions.push(decision);
+        if (decision.semanticPlan) {
+          activeSemanticPlan = decision.semanticPlan;
+        }
         if (!decision.toolCall) {
+          const clarification = this.semanticClarification(activeSemanticPlan);
+          if (clarification) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: clarification,
+                source: 'safe_fallback',
+                action: null,
+                // An ambiguity question states no business fact, therefore it
+                // neither needs nor pretends to have CRM evidence.
+                grounding: this.groundingReport(
+                  requirement,
+                  'not_required',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
           if (requirement && !requirementSatisfied) {
             if (groundingRetries < 1 && step < maxToolSteps) {
               groundingRetries += 1;
@@ -633,7 +949,7 @@ export class AiCoreService {
             }
             const deterministicReply = this.deterministicGroundedReply(
               toolResults,
-              this.latestUserText(sanitized.messages),
+              this.contextualUserText(sanitized.messages),
             );
             return this.complete(
               user,
@@ -687,7 +1003,7 @@ export class AiCoreService {
             }
             const deterministicReply = this.deterministicGroundedReply(
               toolResults,
-              this.latestUserText(sanitized.messages),
+              this.contextualUserText(sanitized.messages),
             );
             return this.complete(
               user,
@@ -775,7 +1091,7 @@ export class AiCoreService {
         let execution: Record<string, unknown>;
         try {
           execution = this.record(
-            await this.runtime.execute(user, decision.toolCall.name, {
+            await this.runtime.execute(toolUser, decision.toolCall.name, {
               surface: dto.surface,
               arguments: hardenedArguments,
               idempotencyKey: this.toolIdempotencyKey(
@@ -851,10 +1167,15 @@ export class AiCoreService {
         // 🔴 Условие теперь по ФАКТИЧЕСКИ вызванному инструменту, а не по
         // угаданной теме: инструмент нельзя «не угадать» — он либо отработал,
         // либо нет. Раньше промах темы означал бы утечку истории визитов.
-        if (PII_SENSITIVE_TOOLS.has(decision.toolCall.name)) {
+        if (
+          this.requiresServerComposedReply(
+            decision.toolCall.name,
+            this.contextualUserText(sanitized.messages),
+          )
+        ) {
           const deterministicReply = this.deterministicGroundedReply(
             toolResults,
-            this.latestUserText(sanitized.messages),
+            this.contextualUserText(sanitized.messages),
           );
           return this.complete(
             user,
@@ -898,7 +1219,7 @@ export class AiCoreService {
     } catch (error) {
       const deterministicReply = this.deterministicGroundedReply(
         toolResults,
-        this.latestUserText(sanitized.messages),
+        this.contextualUserText(sanitized.messages),
       );
       if (deterministicReply) {
         // Ход упал, но пользователь получит связный текст из уже собранных
@@ -1021,7 +1342,7 @@ export class AiCoreService {
       if (!asksCapabilities) return null;
       return {
         reply:
-          'Я MAYA, помощница вашего бизнеса. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, показать ваши записи и проверить баллы. Личные и финансовые данные других людей я не раскрываю.',
+          'Я MAYA, администратор вашего салона. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, рассказать о барберах и атмосфере, показать ваши записи и проверить баллы. Цифры бизнеса и чужие данные я не раскрываю.',
       };
     }
 
@@ -1035,7 +1356,7 @@ export class AiCoreService {
       if (!asksCapabilities) return null;
       return {
         reply:
-          'Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна и доступные вашей роли показатели. Данные бизнеса и клиентов всегда ограничены серверными правами доступа.',
+          'Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна, доступные показатели и досье конкретного клиента из CRM по имени или телефону — без озвучивания персональных данных.',
       };
     }
 
@@ -1074,7 +1395,35 @@ export class AiCoreService {
     }
 
     return {
-      reply: `Я MAYA, ваша операционная помощница. Работаю только с данными, которые подтверждены CRM и разрешены вашей ролью. ${this.assistantCapabilitiesSummary([...enabled])} Настройки можно менять прямо здесь командами «включи...» и «отключи...».`,
+      reply: `Я MAYA, ваша операционная помощница. Работаю с данными CRM в рамках вашей роли: аналитика, записи, касса и досье конкретного клиента по имени или телефону (без озвучивания ПД). ${this.assistantCapabilitiesSummary([...enabled])} Настройки можно менять прямо здесь командами «включи...» и «отключи...».`,
+    };
+  }
+
+  /**
+   * Мета-вопрос про доступ к клиентской базе.
+   * Без детерминированного ответа модель из старого правила ПД отвечала
+   * «базу не вижу» — хотя clients.dossier.read уже есть.
+   */
+  private handleClientBaseAccessQuestion(
+    user: AuthenticatedUser,
+    messages: AiCoreMessage[],
+  ): { reply: string } | null {
+    if (user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER) {
+      return null;
+    }
+    const text = this.contextualUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е');
+    if (
+      !/(видишь|видит|есть\s+(?:ли\s+)?доступ|доступна?|можешь\s+(?:ли\s+)?(?:смотр|видеть|подним|откры)|подключен[ао]?|открыт[ао]?).{0,48}(?:баз[ауиеы]|клиент)|(?:баз[ауиеы]\s+клиент|клиентск\w*\s+баз|доступ\s+к\s+клиент)/i.test(
+        text,
+      )
+    ) {
+      return null;
+    }
+    return {
+      reply:
+        'Да — к CRM-базе клиентов у меня доступ есть. Могу точно посчитать всю базу, лояльных и тех, кто не был больше 1–6 месяцев или года. По конкретному гостю подниму обезличенное досье: визиты, любимые услуги, цикл, траты и бонусы. Имена и телефоны списком вслух не читаю.',
     };
   }
 
@@ -1112,8 +1461,11 @@ export class AiCoreService {
     }
     const catalogRead = toolResults.some(
       (result) =>
-        result.name === 'catalog.services.read' &&
-        Array.isArray(this.record(result.result).services),
+        (result.name === 'catalog.services.read' &&
+          Array.isArray(this.record(result.result).services)) ||
+        (result.name === 'booking.upsell.suggest' &&
+          (Array.isArray(this.record(result.result).suggestions) ||
+            Array.isArray(this.record(result.result).menu_addons))),
     );
     if (!catalogRead) {
       return 'Сначала уточним основную услугу, мастера и удобное время. Дополнения предложу только после проверки каталога.';
@@ -1225,12 +1577,22 @@ export class AiCoreService {
       UserRole.PROVIDER,
       UserRole.STAFF,
     ].includes(user.role);
+    const clientAudience = this.isClientAudience(user, dto.audience);
     const reportCard =
-      grounding.status === 'verified' && toolResults.length > 0
+      !clientAudience &&
+      grounding.status === 'verified' &&
+      toolResults.length > 0
         ? buildChatReportCard(toolResults, {
             personal,
             userText: this.latestUserText(dto.messages),
           })
+        : null;
+    const semanticPlans = decisions.flatMap((decision) =>
+      decision.semanticPlan ? [decision.semanticPlan] : [],
+    );
+    const conversationAudit =
+      semanticPlans.length > 0
+        ? this.conversationLayer().summarizeForAudit(semanticPlans)
         : null;
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
@@ -1247,6 +1609,18 @@ export class AiCoreService {
         outcome: completedResponse.action ? 'approval_required' : 'reply',
         brain_persona: brain.persona,
         brain_intent: brain.intent,
+        conversation_intelligence_version: conversationAudit
+          ? 'maya-ci/1'
+          : null,
+        conversation_domains: conversationAudit?.domains ?? [],
+        conversation_intents: conversationAudit?.intents ?? [],
+        conversation_task_count: conversationAudit?.task_count ?? 0,
+        conversation_denied_task_count:
+          conversationAudit?.denied_task_count ?? 0,
+        conversation_clarification_required:
+          conversationAudit?.clarification_required ?? false,
+        conversation_confirmation_required:
+          conversationAudit?.confirmation_required ?? false,
         grounding_status: grounding.status,
         grounding_domain: grounding.domain,
         grounding_evidence_tools: grounding.evidence_tools,
@@ -1278,24 +1652,60 @@ export class AiCoreService {
     };
   }
 
+  private conversationLayer(): ConversationIntelligenceService {
+    return (
+      this.conversationIntelligence ?? new ConversationIntelligenceService()
+    );
+  }
+
+  private semanticClarification(
+    plan: ConversationSemanticPlan | null,
+  ): string | null {
+    return (
+      plan?.tasks.find((task) => task.requires_clarification)
+        ?.clarification_question ?? null
+    );
+  }
+
+  private async resolveBusinessTimezone(tenantId: string): Promise<string> {
+    if (!this.prisma) {
+      return 'Europe/Moscow';
+    }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+    const timezone = tenant?.defaultTimezone?.trim() || 'Europe/Moscow';
+    try {
+      new Intl.DateTimeFormat('ru-RU', { timeZone: timezone });
+      return timezone;
+    } catch {
+      return 'Europe/Moscow';
+    }
+  }
+
   /**
    * Нужно ли отвечать только по данным — и что может быть доказательством.
    *
-   * 🔴 Здесь решается ровно один вопрос: спрашивают ли про данные. Инструмент
-   * не выбирается. Доказательством считаются ВСЕ инструменты данных, доступные
-   * роли и тарифу; вероятный лишь ставится первым — как подсказка модели и как
-   * кандидат на предзагрузку. Промах подсказки перестал быть отказом.
+   * Для открытого вопроса доказательством считаются все доступные инструменты.
+   * Для явно распознанной темы доказательством остаётся только её семейство:
+   * это не даёт соседнему отчёту подменить отсутствующий ответ.
    */
   private groundingRequirement(
     messages: AiCoreMessage[],
     allowedNames: Set<string>,
     brain: MayaBrainRoute,
+    rawLatestText = '',
+    rawPreviousUserText = '',
   ): GroundingRequirement | null {
-    const text = this.latestUserText(messages).toLowerCase().replace(/ё/g, 'е');
+    const latestText = this.latestUserText(messages);
     const previousUserText = this.previousUserText(messages)
       .toLowerCase()
       .replace(/ё/g, 'е');
-    const hinted = this.toolHint(text);
+    const text = this.contextualUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е');
+    const hinted = this.toolHint(text, brain);
     if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
     }
@@ -1312,19 +1722,42 @@ export class AiCoreService {
     const dataTools = [...allowedNames].filter(
       (name) => name in DATA_TOOL_DOMAINS,
     );
-    // Единственный уцелевший выбор по умолчанию — и только для команды салона:
-    // на открытый вопрос владельца («как дела», «почему просадка») универсальная
-    // аналитика подходит почти всегда, а предзагрузка экономит ему обращение к
-    // модели. Клиенту по умолчанию НЕ подставляем ничего: там догадка стоила
-    // ответа «у вас пока нет записей» на вопрос о длительности стрижки.
-    const teamDefault =
-      brain.persona === 'director'
-        ? ['analytics.employee.query', 'analytics.business.query'].find(
+    const hintedDataTools = hinted
+      ? hinted.filter((name) => name in DATA_TOOL_DOMAINS)
+      : null;
+    const allowedHintedTools = hintedDataTools
+      ? hintedDataTools.filter((name) => allowedNames.has(name))
+      : null;
+    const strictHintFamily =
+      hintedDataTools?.some((name) => STRICT_GROUNDING_HINT_TOOLS.has(name)) ??
+      false;
+    const reportingPeriod = ReportingPeriodResolver.resolve(
+      rawLatestText || latestText,
+      rawPreviousUserText,
+    );
+    // Fast path is intentionally limited to an already known business-data
+    // class or an explicit reporting window. The latter carries meaning even
+    // without a finance keyword: "а за 7?", "что было на прошлой
+    // неделе" and slang still mean a business report in the director
+    // context. Stronger domain hints above remain authoritative, so a price,
+    // schedule or availability question is never stolen by this fast path.
+    // A truly unfamiliar phrase with no explicit period still reaches the
+    // semantic planner with all eligible evidence sources as peers.
+    const analyticsFastPath =
+      brain.persona === 'director' &&
+      (MONEY_INTENTS.has(brain.intent) ||
+        brain.intent === 'staff_operations' ||
+        reportingPeriod.explicit ||
+        STAFF_CONTRIBUTION_QUESTION_PATTERN.test(text) ||
+        STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN.test(text) ||
+        DATA_TOPIC_PATTERN.test(text) ||
+        OPEN_BUSINESS_OVERVIEW_PATTERN.test(text) ||
+        isComprehensiveBusinessReview(text, previousUserText))
+        ? ['analytics.business.query', 'analytics.employee.query'].find(
             (name) => allowedNames.has(name),
           )
         : undefined;
-    const preferred =
-      hinted?.find((name) => allowedNames.has(name)) ?? teamDefault ?? null;
+    const preferred = allowedHintedTools?.[0] ?? analyticsFastPath ?? null;
     const fallbackDomain = preferred
       ? (DATA_TOOL_DOMAINS[preferred] ?? null)
       : null;
@@ -1334,24 +1767,31 @@ export class AiCoreService {
     // а не рассказ из прайс-листа. Но если тема не названа прямо, отказывать
     // не за что — пусть модель выберет из того, что есть.
     const familyClosed =
-      hinted !== null && !hinted.some((n) => allowedNames.has(n));
+      hintedDataTools !== null &&
+      hintedDataTools.length > 0 &&
+      allowedHintedTools?.length === 0;
     // Вопрос про деньги салона без единого инструмента, способного их дать.
     // Ни каталог услуг, ни свободные окна на него не отвечают: клиенту такие
     // данные не положены, а на младшем тарифе их нечем посчитать. Честный
     // отказ здесь лучше подмены ответа из прайса.
+    const analyticsEvidenceTool = [
+      'analytics.business.profit',
+      'analytics.employee.query',
+      'analytics.business.query',
+    ].find((name) => allowedNames.has(name));
     const moneyWithoutAnalytics =
-      MONEY_INTENTS.has(brain.intent) && !teamDefault;
+      MONEY_INTENTS.has(brain.intent) && !analyticsEvidenceTool;
     if (
       dataTools.length === 0 ||
-      (familyClosed && !teamDefault) ||
+      (familyClosed && (strictHintFamily || !analyticsEvidenceTool)) ||
       moneyWithoutAnalytics
     ) {
       return {
         evidenceToolNames: [],
         // Тему отказа называем даже без подсказки: в аудите должно быть видно,
         // ЧТО спрашивали и почему закрыли, иначе отказ неотличим от сбоя.
-        fallbackDomain: hinted
-          ? (DATA_TOOL_DOMAINS[hinted[0]] ?? null)
+        fallbackDomain: hintedDataTools?.[0]
+          ? (DATA_TOOL_DOMAINS[hintedDataTools[0]] ?? null)
           : moneyWithoutAnalytics
             ? 'business_query'
             : null,
@@ -1367,25 +1807,28 @@ export class AiCoreService {
         strictNumbers: true,
       };
     }
+    const preloadArguments = PRELOADABLE_TOOLS.has(preferred)
+      ? this.preloadArguments(
+          preferred,
+          latestText,
+          previousUserText,
+          rawLatestText,
+          rawPreviousUserText,
+        )
+      : null;
     return {
-      evidenceToolNames: [
-        preferred,
-        ...[...allowedNames].filter(
-          (name) => name !== preferred && name in DATA_TOOL_DOMAINS,
-        ),
-      ],
+      evidenceToolNames:
+        strictHintFamily && allowedHintedTools && allowedHintedTools.length > 0
+          ? allowedHintedTools
+          : [preferred, ...dataTools.filter((name) => name !== preferred)],
       fallbackDomain,
       closedForAccess: false,
       strictNumbers: true,
-      ...(PRELOADABLE_TOOLS.has(preferred)
+      ...(preloadArguments
         ? {
             presetToolCall: {
               name: preferred,
-              arguments: this.preloadArguments(
-                preferred,
-                text,
-                previousUserText,
-              ),
+              arguments: preloadArguments,
             },
           }
         : {}),
@@ -1440,16 +1883,48 @@ export class AiCoreService {
    * «сколько у меня записей» у клиента идёт в его историю, а у мастера — в его
    * личную аналитику, без отдельной ветки на каждую роль.
    */
-  private toolHint(text: string): string[] | null {
+  private toolHint(text: string, brain?: MayaBrainRoute): string[] | null {
+    // Полный реестр проверяем раньше клиентского баланса и любой периодной
+    // аналитики: «лояльные клиенты» — не «мои бонусы» и не гости месяца.
+    if (
+      CLIENT_RETENTION_HINT_PATTERN.test(text) &&
+      brain?.persona !== 'admin'
+    ) {
+      return ['clients.retention.scan'];
+    }
+    // Досье конкретного гостя проверяем до «моих баллов». Иначе фраза
+    // «сколько бонусов у Ивана» открывала баланс самого сотрудника.
+    if (CLIENT_DOSSIER_HINT_PATTERN.test(text) && brain?.persona !== 'admin') {
+      return ['clients.dossier.read'];
+    }
     if (LOYALTY_HINT_PATTERN.test(text)) {
       return ['loyalty.own.read'];
     }
     if (OWN_APPOINTMENTS_HINT_PATTERN.test(text)) {
+      // Гость — своя история визитов. Команда салона на ту же фразу смотрит
+      // загрузку/записи в аналитике: иначе мастер получает пустой client-list.
+      if (brain?.persona === 'admin') {
+        return ['appointments.own.list'];
+      }
       return [
-        'appointments.own.list',
         'analytics.employee.query',
         'analytics.business.query',
+        'appointments.own.list',
       ];
+    }
+    if (
+      STAFF_SCHEDULE_READ_HINT_PATTERN.test(text) &&
+      brain?.persona !== 'admin'
+    ) {
+      return ['staff.schedule.read'];
+    }
+    if (
+      brain?.persona !== 'admin' &&
+      EXPLICIT_CALENDAR_DAY_PATTERN.test(text) &&
+      OPERATIONS_JOURNAL_HINT_PATTERN.test(text) &&
+      !AVAILABILITY_HINT_PATTERN.test(text)
+    ) {
+      return ['operations.journal.read', 'analytics.business.query'];
     }
     if (AVAILABILITY_HINT_PATTERN.test(text)) {
       return ['booking.availability.read'];
@@ -1475,6 +1950,9 @@ export class AiCoreService {
         'analytics.business.query',
       ];
     }
+    if (brain?.persona === 'director' && isComprehensiveBusinessReview(text)) {
+      return ['analytics.business.query', 'analytics.employee.query'];
+    }
     if (
       PRICE_HINT_PATTERN.test(text) &&
       // Цена привлечения клиента — не позиция прайса, а подписка MAYA не услуга
@@ -1484,11 +1962,14 @@ export class AiCoreService {
     ) {
       return ['catalog.services.read'];
     }
+    if (SALON_ABOUT_HINT_PATTERN.test(text)) {
+      return ['catalog.staff.read', 'catalog.services.read'];
+    }
     if (STAFF_HINT_PATTERN.test(text)) {
-      // 🔴 Справочник мастеров — последний: он отдаёт обезличенные ярлыки
-      // («specialist_1»). Владельцу нужен разрез по людям поимённо с их
-      // числами, и он есть в аналитике; клиенту справочник — единственное, что
-      // вообще доступно.
+      if (brain?.persona === 'admin') {
+        return ['catalog.staff.read', 'catalog.services.read'];
+      }
+      // Владельцу/команде — сначала поимённая аналитика, каталог запасной.
       return [
         'analytics.business.query',
         'analytics.employee.query',
@@ -1508,13 +1989,70 @@ export class AiCoreService {
     toolName: string,
     text: string,
     previousUserText: string,
-  ): Record<string, unknown> {
+    rawLatestText = '',
+    rawPreviousUserText = '',
+  ): Record<string, unknown> | null {
+    if (toolName === 'clients.dossier.read') {
+      const query = this.clientDossierQuery(rawLatestText, rawPreviousUserText);
+      return query ? { query } : null;
+    }
     return ReportingPeriodResolver.hardenToolArguments(
       toolName,
       {},
       text,
       previousUserText,
     );
+  }
+
+  /**
+   * Извлекает поисковую строку внутри сервера, до обезличивания для LLM.
+   * Реальное имя/телефон уходит только в зашифрованные аргументы CRM-инструмента.
+   */
+  private clientDossierQuery(
+    rawText: string,
+    rawPreviousText = '',
+  ): string | null {
+    const text = rawText.replace(/\s+/g, ' ').trim();
+    if (!text) return null;
+
+    const phone = text.match(/\+?\d[\d\s().-]{2,}\d/);
+    if (phone) {
+      const digits = phone[0].replace(/\D/g, '');
+      if (digits.length >= 4) return digits.slice(-11);
+    }
+
+    const patterns = [
+      /(?:что\s+за\s+клиент|досье(?:\s+клиента)?|расскажи\s+(?:про|о))\s+(.+)$/i,
+      /сколько\s+(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у\s+(.+)$/i,
+      /сколько\s+у\s+(.+?)\s+(?:визит|посещени|балл|бонус)[а-яёa-z]*\b/i,
+      /(?:насколько|как)\s+(.+?)\s+лоял[а-яёa-z]*\b/i,
+      /как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит)\s+(.+)$/i,
+      /что\s+(.+?)\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)\b/i,
+    ];
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      const query = match?.[1]
+        ?.replace(/^(?:клиент[а-яёa-z]*|гост[а-яёa-z]*)\s+/i, '')
+        .replace(/[?!.;,]+$/g, '')
+        .trim();
+      if (
+        query &&
+        query.length >= 3 &&
+        query.length <= 80 &&
+        !/^(?:меня|мне|мой|мои|него|нее|неё|ему|ей)$/i.test(query)
+      ) {
+        return query;
+      }
+    }
+    if (
+      rawPreviousText &&
+      /(?:что\s+(?:он|она)\s+(?:обычно\s+)?(?:берет|берёт|любит)|что\s+(?:ему|ей)\s+предложит|сколько\s+у\s+(?:него|нее|неё)\s+(?:визит|посещени|балл|бонус))/i.test(
+        text,
+      )
+    ) {
+      return this.clientDossierQuery(rawPreviousText);
+    }
+    return null;
   }
 
   /** Данные на руках: отработал любой из доступных инструментов данных. */
@@ -1578,10 +2116,15 @@ export class AiCoreService {
     toolResults: AiCoreToolResult[],
     unavailableForCurrentAccess = false,
   ) {
+    const domain = this.groundingDomain(requirement, toolResults);
     return {
       reply: unavailableForCurrentAccess
         ? 'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.'
-        : 'Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.',
+        : domain === 'staff_schedule'
+          ? 'Не смогла сейчас получить точный график из YClients. Общей аналитикой его не заменяю — попробуйте повторить запрос.'
+          : domain === 'operations_journal'
+            ? 'Не смогла сейчас получить точный журнал записей из YClients. Месячной сводкой его не заменяю — попробуйте повторить запрос.'
+            : 'Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.',
       source: 'safe_fallback' as const,
       action: null,
       grounding: this.groundingReport(requirement, 'blocked', toolResults),
@@ -1631,13 +2174,23 @@ export class AiCoreService {
       }
       case 'expenses.read':
         return this.deterministicExpenseReply(evidence.result);
+      case 'expenses.period.complete':
       case 'analytics.business.profit':
         return this.deterministicProfitReply(
           evidence.result,
           // Спросили про цену клиента — с неё и начинаем. Ответ на вопрос не
           // должен ждать, пока договорит отчёт о прибыли.
           CLIENT_ACQUISITION_QUESTION_PATTERN.test(text),
+          GROSS_PROFIT_QUESTION_PATTERN.test(text),
         );
+      case 'clients.retention.scan':
+        return this.deterministicClientRetentionReply(evidence.result, text);
+      case 'clients.dossier.read':
+        return this.deterministicClientDossierReply(evidence.result);
+      case 'staff.schedule.read':
+        return this.deterministicStaffScheduleReply(evidence.result);
+      case 'operations.journal.read':
+        return this.deterministicOperationsJournalReply(evidence.result);
       case 'booking.availability.read': {
         const slots = this.record(evidence.result).slots;
         if (!Array.isArray(slots)) {
@@ -1696,6 +2249,425 @@ export class AiCoreService {
     }
   }
 
+  private deterministicStaffScheduleReply(result: unknown): string | null {
+    const data = this.record(result);
+    if (typeof data.date !== 'string' || !Array.isArray(data.staff)) {
+      return null;
+    }
+    const dateMatch = data.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const dateLabel = dateMatch
+      ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
+      : data.date;
+    const rows = data.staff
+      .map((entry) => {
+        const staff = this.record(entry);
+        if (typeof staff.name !== 'string') {
+          return null;
+        }
+        const slots = Array.isArray(staff.slots)
+          ? staff.slots
+              .map((slot) => {
+                const value = this.record(slot);
+                return typeof value.from === 'string' &&
+                  typeof value.to === 'string'
+                  ? `${value.from}–${value.to}`
+                  : null;
+              })
+              .filter((slot): slot is string => slot !== null)
+          : [];
+        return {
+          name: staff.name,
+          isWorking: staff.is_working === true && slots.length > 0,
+          slots,
+        };
+      })
+      .filter(
+        (row): row is { name: string; isWorking: boolean; slots: string[] } =>
+          row !== null,
+      );
+    if (rows.length === 0) {
+      return `На ${dateLabel} в YClients нет активных мастеров с графиком.`;
+    }
+    if (rows.length === 1) {
+      const row = rows[0];
+      return `График на ${dateLabel}: ${row.name} — ${
+        row.isWorking ? row.slots.join(', ') : 'выходной'
+      }. Источник: YClients.`;
+    }
+    const working = rows
+      .filter((row) => row.isWorking)
+      .map((row) => `${row.name} ${row.slots.join(', ')}`);
+    const off = rows.filter((row) => !row.isWorking).map((row) => row.name);
+    return [
+      `График на ${dateLabel}.`,
+      working.length > 0
+        ? `Работают: ${working.join('; ')}.`
+        : 'По графику никто не работает.',
+      off.length > 0 ? `Выходной: ${off.join(', ')}.` : '',
+      'Источник: YClients.',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  private deterministicOperationsJournalReply(result: unknown): string | null {
+    const data = this.record(result);
+    if (typeof data.date !== 'string' || !Array.isArray(data.staff)) {
+      return null;
+    }
+    const dateMatch = data.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const dateLabel = dateMatch
+      ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
+      : data.date;
+    const summary = this.record(data.summary);
+    const staff = data.staff
+      .map((entry) => {
+        const row = this.record(entry);
+        const appointments = this.record(row.appointments);
+        if (typeof row.name !== 'string') {
+          return null;
+        }
+        return {
+          name: row.name,
+          total: this.safeMetricNumber(appointments.total),
+          active: this.safeMetricNumber(appointments.active),
+          confirmed: this.safeMetricNumber(appointments.confirmed),
+          completed: this.safeMetricNumber(appointments.completed),
+          canceled: this.safeMetricNumber(appointments.canceled),
+          noShow: this.safeMetricNumber(appointments.no_show),
+          bookedMinutes: this.safeMetricNumber(row.booked_minutes),
+          workingMinutes: this.safeMetricNumber(row.working_minutes),
+          loadPercent: this.optionalMetricNumber(row.load_percent),
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          name: string;
+          total: number;
+          active: number;
+          confirmed: number;
+          completed: number;
+          canceled: number;
+          noShow: number;
+          bookedMinutes: number;
+          workingMinutes: number;
+          loadPercent: number | null;
+        } => row !== null,
+      );
+    if (staff.length === 0) {
+      return null;
+    }
+    if (staff.length === 1) {
+      const row = staff[0];
+      const appointments = Array.isArray(data.appointments)
+        ? data.appointments
+            .slice(0, 12)
+            .map((entry) => {
+              const appointment = this.record(entry);
+              if (
+                typeof appointment.time !== 'string' ||
+                typeof appointment.end_time !== 'string'
+              ) {
+                return null;
+              }
+              const services = Array.isArray(appointment.services)
+                ? appointment.services.filter(
+                    (service): service is string => typeof service === 'string',
+                  )
+                : [];
+              return `${appointment.time}–${appointment.end_time} — ${services.length > 0 ? services.join(', ') : 'услуга не указана'}`;
+            })
+            .filter((entry): entry is string => entry !== null)
+        : [];
+      return [
+        `${dateLabel}: ${row.name} — ${row.total} записей.`,
+        `Предстоящих: ${row.confirmed}, проведённых: ${row.completed}, отмен: ${row.canceled}, неявок: ${row.noShow}.`,
+        row.workingMinutes > 0
+          ? `Занято ${row.bookedMinutes} из ${row.workingMinutes} мин${row.loadPercent === null ? '' : ` (${this.formatMetricNumber(row.loadPercent)}%)`}.`
+          : '',
+        appointments.length > 0 ? `Записи: ${appointments.join('; ')}.` : '',
+        'Источник: YClients.',
+      ]
+        .filter(Boolean)
+        .join(' ');
+    }
+    const total = this.safeMetricNumber(summary.total);
+    const active = this.safeMetricNumber(summary.active);
+    const completed = this.safeMetricNumber(summary.completed);
+    const canceled = this.safeMetricNumber(summary.canceled);
+    const noShow = this.safeMetricNumber(summary.no_show);
+    const byStaff = staff
+      .slice(0, 12)
+      .map(
+        (row) =>
+          `${row.name} — ${row.active} активных, ${row.canceled} отмен${row.loadPercent === null ? '' : `, загрузка ${this.formatMetricNumber(row.loadPercent)}%`}`,
+      );
+    return [
+      `${dateLabel}: всего ${total} записей, активных ${active}, проведённых ${completed}, отмен ${canceled}, неявок ${noShow}.`,
+      `По мастерам: ${byStaff.join('; ')}.`,
+      'Источник: YClients.',
+    ].join(' ');
+  }
+
+  private deterministicClientRetentionReply(
+    evidence: unknown,
+    text: string,
+  ): string | null {
+    const data = this.record(evidence);
+    if (data.complete !== true || data.source !== 'external_crm') {
+      return null;
+    }
+    const total = this.safeMetricNumber(data.total_clients);
+    const loyal = this.safeMetricNumber(data.loyal_clients);
+    const repeat = this.safeMetricNumber(data.repeat_clients);
+    const noVisits = this.safeMetricNumber(data.clients_without_visits);
+    const unknown = this.safeMetricNumber(data.clients_with_unknown_last_visit);
+    const loyalUnknown = this.safeMetricNumber(
+      data.loyal_clients_with_unknown_last_visit,
+    );
+    const inactivity = this.record(data.inactivity);
+    const loyalInactivity = this.record(data.loyal_inactivity);
+    const values = {
+      1: this.safeMetricNumber(inactivity.over_1_month),
+      2: this.safeMetricNumber(inactivity.over_2_months),
+      3: this.safeMetricNumber(inactivity.over_3_months),
+      4: this.safeMetricNumber(inactivity.over_4_months),
+      5: this.safeMetricNumber(inactivity.over_5_months),
+      6: this.safeMetricNumber(inactivity.over_6_months),
+      12: this.safeMetricNumber(inactivity.over_1_year),
+    } as const;
+    const loyalValues = {
+      1: this.safeMetricNumber(loyalInactivity.over_1_month),
+      2: this.safeMetricNumber(loyalInactivity.over_2_months),
+      3: this.safeMetricNumber(loyalInactivity.over_3_months),
+      4: this.safeMetricNumber(loyalInactivity.over_4_months),
+      5: this.safeMetricNumber(loyalInactivity.over_5_months),
+      6: this.safeMetricNumber(loyalInactivity.over_6_months),
+      12: this.safeMetricNumber(loyalInactivity.over_1_year),
+    } as const;
+    const threshold = this.requestedInactivityMonths(text);
+    const loyalSegment = /лояльн/i.test(text);
+
+    if (
+      BUSINESS_ACTION_REQUEST_PATTERN.test(text) &&
+      /(вернут|возврат|удерж|реактив|рассыл)/i.test(text)
+    ) {
+      return this.deterministicClientReactivationAdvice(
+        data,
+        loyal,
+        loyalValues,
+        threshold,
+      );
+    }
+
+    if (threshold !== null) {
+      const selectedValues = loyalSegment ? loyalValues : values;
+      const count = selectedValues[threshold];
+      const period =
+        threshold === 12
+          ? 'больше года'
+          : `больше ${this.inactivityMonthLabel(threshold)}`;
+      const selectedUnknown = loyalSegment ? loyalUnknown : unknown;
+      const suffix =
+        selectedUnknown > 0
+          ? ` Ещё у ${selectedUnknown} ${this.pluralize(selectedUnknown, 'карточки', 'карточек', 'карточек')} с визитами CRM не указала дату последнего визита, поэтому в этот срок они не включены.`
+          : '';
+      const scope = loyalSegment
+        ? `Из ${loyal} лояльных клиентов`
+        : 'По полному реестру CRM';
+      return `${scope} ${period} не посещали салон ${count} ${this.pluralize(count, 'клиент', 'клиента', 'клиентов')}.${suffix}`;
+    }
+    if (/лояльн/i.test(text)) {
+      return `В полной CRM-базе ${loyal} лояльных ${this.pluralize(loyal, 'клиент', 'клиента', 'клиентов')} из ${total}. Лояльными считаю карточки минимум с 3 визитами; повторных клиентов с 2 и более визитами — ${repeat}.`;
+    }
+    if (
+      /вс[ея]\s+(?:клиент|баз)|сколько\s+(?:всего\s+)?(?:клиент|гост)|(?:клиент|гост)[а-яёa-z]*\s+в\s+баз/i.test(
+        text,
+      )
+    ) {
+      return `В полной CRM-базе ${total} ${this.pluralize(total, 'клиентская карточка', 'клиентские карточки', 'клиентских карточек')}. Из них лояльных с 3 и более визитами — ${loyal}, повторных с 2 и более — ${repeat}, без единого визита — ${noVisits}.`;
+    }
+    const suffix =
+      unknown > 0
+        ? ` Ещё у ${unknown} ${this.pluralize(unknown, 'карточки', 'карточек', 'карточек')} с визитами CRM не указала дату последнего визита.`
+        : '';
+    return `По полной CRM-базе: всего ${total} ${this.pluralize(total, 'карточка', 'карточки', 'карточек')}, лояльных — ${loyal}, повторных — ${repeat}. Не были больше 1 месяца — ${values[1]}, 2 месяцев — ${values[2]}, 3 — ${values[3]}, 4 — ${values[4]}, 5 — ${values[5]}, 6 — ${values[6]}, больше года — ${values[12]}.${suffix}`;
+  }
+
+  private deterministicClientReactivationAdvice(
+    data: Record<string, unknown>,
+    loyalClients: number,
+    loyalValues: Record<1 | 2 | 3 | 4 | 5 | 6 | 12, number>,
+    requestedThreshold: 1 | 2 | 3 | 4 | 5 | 6 | 12 | null,
+  ): string {
+    const threshold = requestedThreshold ?? 1;
+    const targetCount = loyalValues[threshold];
+    const cohorts = this.record(data.loyal_reactivation_cohorts);
+    const candidates: Array<{ count: number; label: string }> = [
+      {
+        count: this.safeMetricNumber(cohorts.from_1_to_2_months),
+        label: 'не были 1–2 месяца',
+      },
+      {
+        count: this.safeMetricNumber(cohorts.from_2_to_3_months),
+        label: 'не были 2–3 месяца',
+      },
+      {
+        count: this.safeMetricNumber(cohorts.from_3_to_6_months),
+        label: 'не были 3–6 месяцев',
+      },
+      {
+        count: this.safeMetricNumber(cohorts.from_6_to_12_months),
+        label: 'не были 6–12 месяцев',
+      },
+      {
+        count: this.safeMetricNumber(cohorts.over_1_year),
+        label: 'не были больше года',
+      },
+    ];
+    const startIndex =
+      threshold >= 12
+        ? 4
+        : threshold >= 6
+          ? 3
+          : threshold >= 3
+            ? 2
+            : threshold >= 2
+              ? 1
+              : 0;
+    const warmest = candidates
+      .slice(startIndex)
+      .find((candidate) => candidate.count > 0) ??
+      candidates.find((candidate) => candidate.count > 0) ?? {
+        count: targetCount,
+        label:
+          threshold === 12
+            ? 'не были больше года'
+            : `не были больше ${this.inactivityMonthLabel(threshold)}`,
+      };
+    const pilotCount = Math.min(100, warmest.count || targetCount);
+    const targetPeriod =
+      threshold === 12
+        ? 'больше года'
+        : `больше ${this.inactivityMonthLabel(threshold)}`;
+
+    return [
+      `В базе ${loyalClients} лояльных клиентов; ${targetPeriod} не были ${targetCount}. Писать всем сразу не стоит: начните с самого тёплого сегмента — ${warmest.count} ${this.pluralize(warmest.count, 'клиент', 'клиента', 'клиентов')}, которые ${warmest.label}.`,
+      `1. Перед контактом исключить уже записанных, клиентов без согласия на сообщения, дубли и тех, кому уже недавно писали.`,
+      '2. Обратиться персонально: напомнить привычного мастера и услугу, предложить 2–3 реальных окна. Первый контакт — без скидки.',
+      `3. Запустить пилот не больше чем на ${pilotCount} ${this.pluralize(pilotCount, 'человека', 'человек', 'человек')}; не ответившим — один повтор через 5–7 дней, не массовый спам.`,
+      '4. Считать не отправки, а результат: доставка, ответы, записи, состоявшиеся визиты, возвращённая выручка и отказы от рассылки. Любая отправка — только после проверки согласий и вашего подтверждения.',
+    ].join('\n');
+  }
+
+  private deterministicClientDossierReply(evidence: unknown): string | null {
+    const data = this.record(evidence);
+    if (data.found !== true) {
+      return typeof data.error === 'string'
+        ? data.error
+        : 'Клиент не найден. Уточните имя или последние четыре цифры телефона.';
+    }
+
+    const visits = this.safeMetricNumber(data.visits);
+    const segmentLabels: Record<string, string> = {
+      without_visits: 'без визитов',
+      new: 'новый клиент',
+      repeat: 'повторный клиент',
+      loyal: 'лояльный клиент',
+      regular: 'постоянный клиент',
+      core: 'ядро постоянных клиентов',
+    };
+    const segment =
+      typeof data.loyalty_segment === 'string'
+        ? (segmentLabels[data.loyalty_segment] ?? data.loyalty_segment)
+        : data.loyal === true
+          ? 'лояльный клиент'
+          : 'статус лояльности не определён';
+    const parts = [
+      `По карточке CRM: ${visits} ${this.pluralize(visits, 'визит', 'визита', 'визитов')}. Сегмент — ${segment}.`,
+    ];
+
+    if (typeof data.last_visit === 'string') {
+      const match = data.last_visit.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      const date = match
+        ? `${match[3]}.${match[2]}.${match[1]}`
+        : data.last_visit;
+      const inactivityDays = this.safeMetricNumber(data.inactivity_days);
+      parts.push(
+        `Последний визит — ${date}${inactivityDays > 0 ? `, ${inactivityDays} ${this.pluralize(inactivityDays, 'день', 'дня', 'дней')} назад` : ''}.`,
+      );
+    }
+
+    const services = Array.isArray(data.favorite_services)
+      ? data.favorite_services.filter(
+          (value): value is string =>
+            typeof value === 'string' && value.trim().length > 0,
+        )
+      : [];
+    if (services.length > 0) {
+      parts.push(
+        `Чаще всего в последних визитах: ${services.slice(0, 4).join(', ')}.`,
+      );
+    }
+
+    const averageCycleDays = this.safeMetricNumber(data.avg_cycle_days);
+    if (averageCycleDays > 0) {
+      parts.push(
+        `Средний цикл между визитами — ${averageCycleDays} ${this.pluralize(averageCycleDays, 'день', 'дня', 'дней')}.`,
+      );
+    }
+
+    if (typeof data.total_spent === 'number') {
+      parts.push(
+        `Покупки по карточке — ${this.formatMetricNumber(data.total_spent)} ₽.`,
+      );
+    }
+    if (data.bonus_status === 'available') {
+      const bonus = this.safeMetricNumber(data.bonus_balance);
+      const bonusLabel =
+        data.bonus_currency === 'RUB'
+          ? `${this.formatMetricNumber(bonus)} ₽`
+          : `${this.formatMetricNumber(bonus)} ${this.pluralize(bonus, 'балл', 'балла', 'баллов')}`;
+      parts.push(`Бонусный баланс — ${bonusLabel}.`);
+    } else {
+      parts.push('Бонусный баланс CRM для этой карточки не вернула.');
+    }
+
+    if (this.safeMetricNumber(data.matches_count) > 1) {
+      parts.push(
+        'Нашла несколько совпадений и использовала первое; уточните последние четыре цифры телефона, если нужен другой клиент.',
+      );
+    }
+    return parts.join(' ');
+  }
+
+  private requestedInactivityMonths(
+    text: string,
+  ): 1 | 2 | 3 | 4 | 5 | 6 | 12 | null {
+    if (
+      /(?:больше|дольше|свыше|около)?\s*(?:1\s*год|год[ау]?|12\s*месяц)/i.test(
+        text,
+      )
+    ) {
+      return 12;
+    }
+    const words: Array<[RegExp, 1 | 2 | 3 | 4 | 5 | 6]> = [
+      [/(?:^|\D)(?:6|шест[ьи])\s*месяц/i, 6],
+      [/(?:^|\D)(?:5|пят[ьи])\s*месяц/i, 5],
+      [/(?:^|\D)(?:4|четыр[еёх])\s*месяц/i, 4],
+      [/(?:^|\D)(?:3|тр[еёх])\s*месяц/i, 3],
+      [/(?:^|\D)(?:2|двух|два)\s*месяц/i, 2],
+      [/(?:^|\D)(?:1|один|одного)\s*месяц/i, 1],
+    ];
+    return words.find(([pattern]) => pattern.test(text))?.[1] ?? null;
+  }
+
+  private inactivityMonthLabel(months: 1 | 2 | 3 | 4 | 5 | 6): string {
+    return months === 1 ? 'одного месяца' : `${months} месяцев`;
+  }
+
   /**
    * Ответ про структуру расходов без модели.
    *
@@ -1741,6 +2713,7 @@ export class AiCoreService {
   private deterministicProfitReply(
     evidence: unknown,
     acquisitionFirst = false,
+    grossProfitRequested = false,
   ): string | null {
     const data = this.record(evidence);
     const revenue = this.record(data.confirmed_revenue);
@@ -1749,6 +2722,7 @@ export class AiCoreService {
     const period = this.record(data.period);
     const expenses = this.record(data.expenses);
     const payroll = this.record(data.payroll);
+    const completeness = this.record(data.completeness);
     const profitParts: string[] = [];
     const acquisitionParts: string[] = [];
 
@@ -1756,6 +2730,14 @@ export class AiCoreService {
       period.truncated_to_today === true
         ? ' Месяц ещё не закончился, поэтому считаю по сегодняшний день.'
         : '';
+
+    if (grossProfitRequested) {
+      const revenueTotal = this.formatMoneyAmount(revenue.total);
+      if (revenue.status === 'available' && revenueTotal) {
+        return `Валовый доход до расходов: ${revenueTotal}. Это подтверждённая касса.${truncated} Аренда здесь не нужна: она относится к расчёту чистой прибыли. Точную валовую прибыль пока не называю, потому что CRM не выделяет прямую себестоимость услуг — выплаты мастерам и расходники — отдельным подтверждённым показателем.`;
+      }
+      return 'Аренда для валовой прибыли не нужна. Но CRM за этот период не отдала подтверждённую кассу и прямую себестоимость услуг, поэтому точную валовую прибыль я сейчас не назову.';
+    }
 
     if (net.status === 'available') {
       const total = this.formatMoneyAmount(net.total);
@@ -1779,7 +2761,18 @@ export class AiCoreService {
       if (categories.length > 0) {
         profitParts.push(`Расходы: ${categories.join(', ')}.`);
       }
+      if (completeness.unrecorded_additional_expenses_assumed_zero === true) {
+        profitParts.push(
+          'Не внесённые дополнительные расходы в этом расчёте приняты за 0 ₽. Если они есть, напишите, например: «Запиши расход на рекламу 30 000 ₽ за август» — после вашего подтверждения я добавлю расход и сразу пересчитаю прибыль.',
+        );
+      }
     } else {
+      const revenueTotal = this.formatMoneyAmount(revenue.total);
+      if (revenue.status === 'available' && revenueTotal) {
+        profitParts.push(
+          `Поступления до вычета расходов: ${revenueTotal}. Это подтверждённая касса, а не чистая прибыль.${truncated}`,
+        );
+      }
       const labels = (value: unknown): string[] =>
         Array.isArray(value)
           ? value
@@ -1795,7 +2788,31 @@ export class AiCoreService {
         typeof net.unavailable_reason === 'string'
           ? net.unavailable_reason
           : '';
-      if (reason.startsWith('required_expense_categories_are_missing')) {
+      if (reason.startsWith('salary_comes_only_from_the_crm_payroll')) {
+        profitParts.push(
+          'Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю. Вносить зарплату руками не нужно и нельзя: она задвоится.',
+        );
+      } else if (revenue.status !== 'available') {
+        // Сначала называем настоящий серверный блокер. Пока кассы нет, вопрос
+        // про дополнительные расходы всё равно не приблизит владельца к ответу.
+        const revenueReason =
+          typeof revenue.unavailable_reason === 'string'
+            ? revenue.unavailable_reason
+            : '';
+        profitParts.push(
+          revenueReason.startsWith('crm_finance_did_not_answer')
+            ? 'Прибыль считается от подтверждённой кассы, а CRM за этот период её не отдала. Это сбой связи, а не отсутствие денег — повторите вопрос через минуту.'
+            : revenueReason.startsWith('crm_returned_cash_revenue_without')
+              ? 'Прибыль считается от подтверждённой кассы, а CRM вернула суммы без подтверждения. Показывать их как прибыль я не буду.'
+              : revenueReason.startsWith('crm_confirms_cash_for_the_whole')
+                ? 'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком. Спросите по всему салону.'
+                : 'Прибыль считается от подтверждённой кассы, а её за этот период нет: внутренний календарь хранит цены записей, а не пробитые деньги. Стоимость записанного я показать могу, но называть её прибылью не буду.',
+        );
+      } else if (completeness.owner_confirmation_required === true) {
+        profitParts.push(
+          'Есть ли за этот период дополнительные расходы кроме зарплаты из CRM? Если расходов нет, так и напишите — я сразу посчитаю чистую прибыль. Если есть, назовите статью и сумму, и я подготовлю запись на подтверждение.',
+        );
+      } else if (reason.startsWith('required_expense_categories_are_missing')) {
         profitParts.push(
           `Прибыль за период посчитать не могу: за него не внесена ${
             missing.join(' и ') || 'часть обязательных статей расходов'
@@ -1809,10 +2826,6 @@ export class AiCoreService {
             '», «',
           )}» слишком мала на фоне кассы за этот же период. Проверьте и добавьте недостающее, тогда посчитаю.`,
         );
-      } else if (reason.startsWith('salary_comes_only_from_the_crm_payroll')) {
-        profitParts.push(
-          'Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю. Вносить зарплату руками не нужно и нельзя: она задвоится.',
-        );
       } else if (reason.startsWith('crm_confirms_cash_for_the_whole_company')) {
         profitParts.push(
           'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком, разложить её по филиалам нечем. Спросите по всему салону.',
@@ -1822,23 +2835,6 @@ export class AiCoreService {
       ) {
         profitParts.push(
           'Прибыль за период посчитать не могу: расходы и касса записаны в разных валютах, а курса у меня нет. Приведите их к одной валюте, тогда посчитаю.',
-        );
-      } else if (revenue.status !== 'available') {
-        // 🔴 Причин отсутствия кассы четыре, а объяснение было одно — про
-        // внутренний календарь. Салону на YClients, у которого CRM просто не
-        // ответила, MAYA рассказывала про чужое устройство и советовала не то.
-        const revenueReason =
-          typeof revenue.unavailable_reason === 'string'
-            ? revenue.unavailable_reason
-            : '';
-        profitParts.push(
-          revenueReason.startsWith('crm_finance_did_not_answer')
-            ? 'Прибыль считается от подтверждённой кассы, а CRM за этот период её не отдала. Это сбой связи, а не отсутствие денег — повторите вопрос через минуту.'
-            : revenueReason.startsWith('crm_returned_cash_revenue_without')
-              ? 'Прибыль считается от подтверждённой кассы, а CRM вернула суммы без подтверждения. Показывать их как прибыль я не буду.'
-              : revenueReason.startsWith('crm_confirms_cash_for_the_whole')
-                ? 'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком. Спросите по всему салону.'
-                : 'Прибыль считается от подтверждённой кассы, а её за этот период нет: внутренний календарь хранит цены записей, а не пробитые деньги. Стоимость записанного я показать могу, но называть её прибылью не буду.',
         );
       } else if (payroll.status !== 'available') {
         profitParts.push(
@@ -1936,6 +2932,36 @@ export class AiCoreService {
       [reply, requestedDiagnosis, requestedRecommendation]
         .filter((part): part is string => Boolean(part))
         .join(' ');
+    if (isComprehensiveBusinessReview(userText)) {
+      return this.deterministicComprehensiveAnalyticsReview(personal, data);
+    }
+    if (DAILY_ANALYTICS_BREAKDOWN_QUESTION_PATTERN.test(text)) {
+      const daily = Array.isArray(current.daily)
+        ? current.daily.map((entry) => this.record(entry)).slice(-31)
+        : [];
+      if (daily.length === 0) {
+        return 'Дневной разрез за выбранный период пока недоступен. Общую сумму за период я не буду выдавать за разбивку по дням.';
+      }
+      const lines = daily.map((row) => {
+        const rawDate = typeof row.date === 'string' ? row.date : '';
+        const parts = rawDate.split('-');
+        const date =
+          parts.length === 3 ? `${parts[2]}.${parts[1]}` : rawDate || 'День';
+        const total =
+          this.optionalMetricNumber(row.total) ??
+          this.optionalMetricNumber(row.appointments) ??
+          0;
+        const scheduled = this.optionalMetricNumber(row.scheduled) ?? 0;
+        const completed = this.optionalMetricNumber(row.completed) ?? 0;
+        const cancelled = this.optionalMetricNumber(row.cancelled) ?? 0;
+        const noShow = this.optionalMetricNumber(row.no_show) ?? 0;
+        const bookedValue = this.formatMoneyEntries(
+          Array.isArray(row.revenue) ? row.revenue : [],
+        );
+        return `${date}: всего ${this.formatMetricNumber(total)}, завершено ${this.formatMetricNumber(completed)}, ожидают ${this.formatMetricNumber(scheduled)}, отменено ${this.formatMetricNumber(cancelled)}, неявок ${this.formatMetricNumber(noShow)}${bookedValue ? `; стоимость неотменённых записей ${bookedValue}` : ''}`;
+      });
+      return `Сводка по дням за выбранный период:\n${lines.join('\n')}`;
+    }
     const comparisonLabel =
       comparison.mode === 'previous_year_same_period'
         ? 'с аналогичным периодом прошлого года'
@@ -1982,7 +3008,12 @@ export class AiCoreService {
     // вопрос про валовую прибыль получал ответ про бухгалтерскую чистую, то
     // есть про другой показатель.
     if (/валов[а-яa-z]*\s+прибыл[а-яa-z]*/i.test(text)) {
-      return 'Валовая прибыль сейчас не рассчитывается: в данных есть выручка и внесённые расходы, но прямые затраты на оказание услуг не выделены отдельно. Я не буду подменять её выручкой или операционным результатом.';
+      const revenueAmount = metric('revenue_amount_kopecks');
+      const confirmedRevenue =
+        revenueAmount === null
+          ? ''
+          : `Поступления до вычета расходов: ${money(revenueAmount)}. `;
+      return `${confirmedRevenue}Валовая прибыль сейчас не рассчитывается: прямые затраты на оказание услуг в CRM не выделены отдельно. Я не подменю прибыль выручкой.`;
     }
     if (/(?<![а-яё])марж[аеиуы][а-яa-z]*/i.test(text)) {
       return 'Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.';
@@ -1993,6 +3024,71 @@ export class AiCoreService {
       // 🔴 Не подсовываем поступления как «ближайший показатель»: владелец
       // слышит это как ответ на вопрос про прибыль. Лучше честный отказ.
       return 'Чистую прибыль из этого среза не подтверждаю — здесь операционные показатели, а не расчёт касса минус расходы. Не подменю прибыль поступлениями. Спроси отдельно «какая прибыль» — возьму именно её.';
+    }
+    if (!personal && STAFF_CONTRIBUTION_QUESTION_PATTERN.test(text)) {
+      const staff = this.analyticsStaffRows(current);
+      const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
+      const exactRevenue = staff
+        .map((row) => {
+          const name = typeof row.name === 'string' ? row.name.trim() : '';
+          const confirmed = this.record(row.confirmed_revenue);
+          const amount = this.formatMoneyAmount(confirmed.amount);
+          return name && confirmed.status === 'available' && amount
+            ? `${name} — ${amount}`
+            : null;
+        })
+        .filter((row): row is string => row !== null);
+      if (exactRevenue.length > 0) {
+        const financeRevenue = this.record(
+          this.record(current.finance).revenue,
+        );
+        const attributionStatus = financeRevenue.staff_attribution_status;
+        const coverage = this.optionalMetricNumber(
+          financeRevenue.staff_attribution_coverage_percent,
+        );
+        const coverageNote =
+          attributionStatus === 'partial'
+            ? ` YClients точно связал с мастерами ${this.formatMetricNumber(coverage ?? 0)}% кассы услуг; нераспределённый остаток я не делю приблизительно.`
+            : '';
+        return `Подтверждённая касса по мастерам ${period}: ${exactRevenue.join('; ')}.${coverageNote} Это финансовые операции YClients, связанные с мастерами, а не стоимость записанных услуг.`;
+      }
+      const workload = staff
+        .slice(0, 6)
+        .map((row) => {
+          const name = typeof row.name === 'string' ? row.name.trim() : '';
+          const appointments = this.optionalMetricNumber(row.appointments);
+          return name && appointments !== null
+            ? `${name} — ${this.formatMetricNumber(appointments)} ${this.pluralize(appointments, 'запись', 'записи', 'записей')}`
+            : null;
+        })
+        .filter((row): row is string => row !== null);
+      return [
+        `Подтверждённую кассовую выручку по каждому мастеру ${period} YClients не распределяет: касса подтверждается только по салону целиком. Поэтому честно назвать, кто сколько принёс, нельзя.`,
+        workload.length > 0
+          ? `Ближайший проверенный срез — загрузка: ${workload.join('; ')}.`
+          : null,
+        'Могу отдельно показать начисленную зарплату каждому мастеру — это другой показатель.',
+      ]
+        .filter((part): part is string => part !== null)
+        .join(' ');
+    }
+    if (!personal && STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN.test(text)) {
+      const staff = this.analyticsStaffRows(current);
+      const available = staff
+        .map((row) => {
+          const name = typeof row.name === 'string' ? row.name.trim() : '';
+          const salary = this.record(row.salary);
+          const accrued = this.formatMoneyAmount(salary.accrued);
+          return name && salary.status === 'available' && accrued
+            ? `${name} — ${accrued}`
+            : null;
+        })
+        .filter((row): row is string => row !== null);
+      if (available.length > 0) {
+        const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
+        return `Если под «заработал» имеется в виду начисление мастеру, то ${period}: ${available.join('; ')}. Это начисленная зарплата по расчёту YClients, не выручка, которую мастер принёс салону.`;
+      }
+      return 'Поимённые начисления мастерам за выбранный период YClients сейчас не подтвердил. Я не подменю их выручкой салона или стоимостью записей.';
     }
     if (/зарплат[а-яa-z]*/i.test(text) && !personal) {
       const payroll = this.record(this.record(current.finance).payroll);
@@ -2052,7 +3148,15 @@ export class AiCoreService {
         );
       }
     }
-    if (/(отмен|не\s+пришел|неявк)/i.test(text)) {
+    if (/(не\s+пришел|неявк)/i.test(text)) {
+      const noShow = metric('appointments_no_show');
+      if (noShow !== null) {
+        return withRecommendation(
+          `Неявок: ${this.formatMetricNumber(noShow)}.${metricChange('appointments_no_show')}`,
+        );
+      }
+    }
+    if (/отмен/i.test(text)) {
       const cancelled = metric('appointments_cancelled');
       const rate = metric('cancellation_rate_percent');
       if (cancelled !== null) {
@@ -2139,10 +3243,13 @@ export class AiCoreService {
     if (/(запис|визит|посещен)/i.test(text)) {
       const total = metric('appointments_total');
       const active = metric('appointments_active');
+      const scheduled = metric('appointments_scheduled');
+      const completed = metric('appointments_completed');
       const cancelled = metric('appointments_cancelled');
+      const noShow = metric('appointments_no_show');
       if (total !== null) {
         return withRecommendation(
-          `Записей: ${this.formatMetricNumber(total)}${active === null ? '' : `, активных ${this.formatMetricNumber(active)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}.${metricChange('appointments_total')}`,
+          `Всего записей: ${this.formatMetricNumber(total)}${completed === null ? '' : `, завершённых ${this.formatMetricNumber(completed)}`}${scheduled === null ? '' : `, ожидают визита ${this.formatMetricNumber(scheduled)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}${noShow === null ? '' : `, неявок ${this.formatMetricNumber(noShow)}`}${completed === null && scheduled === null && active !== null ? `, неотменённых ${this.formatMetricNumber(active)}` : ''}.${metricChange('appointments_total')}`,
         );
       }
     }
@@ -2206,6 +3313,130 @@ export class AiCoreService {
     return `${lead}${body}.${changesSentence}${insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.'}`;
   }
 
+  private deterministicComprehensiveAnalyticsReview(
+    personal: boolean,
+    data: Record<string, unknown>,
+  ): string | null {
+    const metrics = this.record(data.metrics);
+    const changes = this.record(data.changes);
+    const current = this.record(data.current);
+    const metric = (key: string) => this.optionalMetricNumber(metrics[key]);
+    const money = (value: number) =>
+      this.formatMoneyEntries([
+        {
+          currency: this.analyticsCurrency(current),
+          amount_kopecks: value,
+        },
+      ]);
+    const facts: string[] = [];
+    const moneyKey = personal
+      ? 'booked_value_amount_kopecks'
+      : 'revenue_amount_kopecks';
+    const averageKey = personal
+      ? 'average_booked_value_amount_kopecks'
+      : 'average_ticket_amount_kopecks';
+    const moneyValue = metric(moneyKey);
+    const appointments = metric('appointments_total');
+    const uniqueClients = metric('unique_clients');
+    const average = metric(averageKey);
+    const repeats = metric('repeat_clients_in_period');
+    const repeatRate = metric('repeat_client_rate_percent');
+    const cancellations = metric('appointments_cancelled');
+    const cancellationRate = metric('cancellation_rate_percent');
+
+    if (moneyValue !== null) {
+      facts.push(
+        `${personal ? 'стоимость записанных услуг' : 'поступления'} ${money(moneyValue)}`,
+      );
+    }
+    if (appointments !== null) {
+      facts.push(`${this.formatMetricNumber(appointments)} записей`);
+    }
+    if (uniqueClients !== null) {
+      facts.push(
+        `${this.formatMetricNumber(uniqueClients)} уникальных клиентов`,
+      );
+    }
+    if (average !== null) {
+      facts.push(
+        `${personal ? 'средняя стоимость записи' : 'средний чек'} ${money(average)}`,
+      );
+    }
+    if (repeats !== null) {
+      facts.push(
+        `${this.formatMetricNumber(repeats)} повторных клиентов${repeatRate === null ? '' : ` (${this.formatMetricNumber(repeatRate)}%)`}`,
+      );
+    }
+    if (cancellations !== null) {
+      facts.push(
+        `${this.formatMetricNumber(cancellations)} отмен${cancellationRate === null ? '' : ` (${this.formatMetricNumber(cancellationRate)}%)`}`,
+      );
+    }
+    if (facts.length === 0) {
+      return null;
+    }
+
+    const comparisonLabel =
+      this.record(data.comparison).mode === 'previous_year_same_period'
+        ? 'к аналогичному периоду прошлого года'
+        : 'к предыдущему равному периоду';
+    const dynamics = [
+      { key: moneyKey, label: personal ? 'стоимость записей' : 'поступления' },
+      { key: 'appointments_total', label: 'записи' },
+      { key: 'unique_clients', label: 'клиенты' },
+      { key: averageKey, label: personal ? 'стоимость записи' : 'средний чек' },
+      { key: 'booked_minutes', label: 'загрузка' },
+    ]
+      .map(({ key, label }) => ({
+        label,
+        percent: this.optionalMetricNumber(
+          this.record(changes[key]).percent_change,
+        ),
+      }))
+      .filter(
+        (entry): entry is { label: string; percent: number } =>
+          entry.percent !== null,
+      )
+      .sort((left, right) => left.percent - right.percent)
+      .slice(0, 5)
+      .map(
+        (entry) =>
+          `${entry.label} ${this.formatSignedPercent(entry.percent) ?? 'без изменения'}`,
+      );
+
+    const serviceChanges = Array.isArray(data.service_changes)
+      ? data.service_changes.map((entry) => this.record(entry))
+      : [];
+    const weakestService = serviceChanges
+      .filter(
+        (entry) =>
+          typeof entry.name === 'string' &&
+          this.optionalMetricNumber(entry.percent_change) !== null &&
+          Number(entry.percent_change) < 0,
+      )
+      .sort(
+        (left, right) =>
+          Number(left.percent_change) - Number(right.percent_change),
+      )[0];
+    const diagnosis = this.analyticsDiagnosis(data, personal);
+    const serviceDiagnosis = weakestService
+      ? `По услугам сильнее всего просела «${String(weakestService.name)}»: ${this.formatSignedPercent(weakestService.percent_change)}.`
+      : null;
+    const recommendation =
+      this.analyticsRecommendation(data, personal) ??
+      'Первое действие: отдельно проверить загрузку по дням и мастерам, затем работать с самым слабым подтверждённым участком.';
+    const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
+
+    return [
+      `Полный срез ${period}: ${facts.join('; ')}.`,
+      dynamics.length > 0
+        ? `Динамика ${comparisonLabel}: ${dynamics.join('; ')}.`
+        : 'Сравнение с предыдущим периодом сейчас недоступно, поэтому подтверждённую динамику не выдумываю.',
+      `Слабые места: ${[diagnosis, serviceDiagnosis].filter(Boolean).join(' ') || 'подтверждённого снижения в доступных показателях нет.'}`,
+      recommendation,
+    ].join('\n\n');
+  }
+
   private analyticsPeriodHint(data: Record<string, unknown>): string | null {
     const resolved = this.record(data.resolved_period);
     if (typeof resolved.label_ru === 'string' && resolved.label_ru.trim()) {
@@ -2226,6 +3457,14 @@ export class AiCoreService {
     if (mode === 'week' || mode === 'this_week') return 'за эту неделю';
     if (mode === 'month' || mode === 'this_month') return 'за этот месяц';
     return null;
+  }
+
+  private analyticsStaffRows(
+    current: Record<string, unknown>,
+  ): Record<string, unknown>[] {
+    return Array.isArray(current.staff_summary)
+      ? current.staff_summary.map((row) => this.record(row))
+      : [];
   }
 
   private analyticsRecommendation(
@@ -2452,6 +3691,159 @@ export class AiCoreService {
       }
     }
     return '';
+  }
+
+  /**
+   * Явное подтверждение нулевых дополнительных расходов.
+   *
+   * Одно слово «нет» считается подтверждением только после вопроса MAYA про
+   * расходы. Разговор только об отсутствии аренды сюда намеренно не попадает:
+   * своё помещение ничего не говорит о рекламе, расходниках и коммуналке.
+   */
+  private explicitNoAdditionalExpenses(messages: AiCoreMessage[]): boolean {
+    const latest = this.latestUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .replace(/[!?.,:;]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const explicit =
+      /^(?:у\s+меня\s+)?(?:никаких\s+)?(?:доп(?:олнительн[а-яa-z]*)?|других|прочих)\s+расход[а-яa-z]*(?:\s+у\s+меня)?\s+нет$/i.test(
+        latest,
+      ) ||
+      /^(?:у\s+меня\s+)?нет\s+(?:никаких\s+)?(?:доп(?:олнительн[а-яa-z]*)?|других|прочих)\s+расход[а-яa-z]*$/i.test(
+        latest,
+      ) ||
+      /^(?:кроме|помимо)\s+зарплат[а-яa-z]*\s+(?:никаких\s+)?расход[а-яa-z]*\s+нет$/i.test(
+        latest,
+      ) ||
+      /^(?:больше\s+)?(?:никаких\s+)?расход[а-яa-z]*\s+(?:больше\s+)?нет$/i.test(
+        latest,
+      ) ||
+      /^(?:это\s+)?все\s+расход[а-яa-z]*\s+(?:внесены|указаны|учтены)$/i.test(
+        latest,
+      ) ||
+      /^все\s+(?:внесено|указано|учтено)$/i.test(latest) ||
+      (/^(?:это\s+)?все$/i.test(latest) &&
+        /доп(?:олнительн[а-яa-z]*)?\s+расход|расход[а-яa-z]*\s+(?:кроме|помимо)\s+зарплат/i.test(
+          this.previousAssistantText(messages).toLowerCase().replace(/ё/g, 'е'),
+        ));
+    if (explicit) {
+      return true;
+    }
+    if (!/^(?:нет|больше\s+нет)$/i.test(latest)) {
+      return false;
+    }
+    return /(?:доп(?:олнительн)?|друг)[а-яa-z]*\s+расход|расход[а-яa-z]*\s+(?:кроме|помимо)\s+зарплат/i.test(
+      this.previousAssistantText(messages).toLowerCase().replace(/ё/g, 'е'),
+    );
+  }
+
+  private explicitNoRentOnly(messages: AiCoreMessage[]): boolean {
+    const latest = this.latestUserText(messages)
+      .toLowerCase()
+      .replace(/ё/g, 'е');
+    return (
+      /(?:аренд[а-яa-z]*\s+(?:нет|не\s+плачу)|не\s+плачу\s+(?:за\s+)?аренд|помещени[ея]\s+(?:свое|собственн))/i.test(
+        latest,
+      ) &&
+      !/(?:дополнительн|друг)[а-яa-z]*\s+расход[а-яa-z]*\s+нет/i.test(latest)
+    );
+  }
+
+  private previousAssistantText(messages: AiCoreMessage[]): string {
+    let latestUserFound = false;
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      if (!message?.content.trim()) continue;
+      if (message.role === 'user' && !latestUserFound) {
+        latestUserFound = true;
+        continue;
+      }
+      if (latestUserFound && message.role === 'assistant') {
+        return message.content.trim();
+      }
+    }
+    return '';
+  }
+
+  /** Последний явно названный период сохраняется через уточняющие ходы. */
+  private previousReportingUserText(messages: AiCoreMessage[]): string {
+    let latestUserFound = false;
+    let immediatePrevious = '';
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      if (message?.role !== 'user' || !message.content.trim()) continue;
+      if (!latestUserFound) {
+        latestUserFound = true;
+        continue;
+      }
+      immediatePrevious ||= message.content.trim();
+      if (ReportingPeriodResolver.resolve(message.content).explicit) {
+        return message.content.trim();
+      }
+    }
+    return immediatePrevious;
+  }
+
+  private requiresServerComposedReply(
+    toolName: string,
+    userText: string,
+  ): boolean {
+    if (SERVER_COMPOSED_REPLY_TOOLS.has(toolName)) {
+      return true;
+    }
+    if (
+      (toolName === 'analytics.business.query' ||
+        toolName === 'analytics.employee.query') &&
+      (APPOINTMENT_COUNT_QUESTION_PATTERN.test(userText) ||
+        DAILY_ANALYTICS_BREAKDOWN_QUESTION_PATTERN.test(userText))
+    ) {
+      return true;
+    }
+    return (
+      toolName === 'analytics.business.query' &&
+      (STAFF_CONTRIBUTION_QUESTION_PATTERN.test(userText) ||
+        STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN.test(userText))
+    );
+  }
+
+  private contextualUserText(messages: AiCoreMessage[]): string {
+    const latest = this.latestUserText(messages);
+    const previous = this.previousUserText(messages);
+    if (!previous) {
+      return latest;
+    }
+    const normalizedLatest = latest.toLowerCase().replace(/ё/g, 'е');
+    const normalizedPrevious = previous.toLowerCase().replace(/ё/g, 'е');
+    const retentionFollowUp =
+      CLIENT_RETENTION_HINT_PATTERN.test(normalizedPrevious) &&
+      (CLIENT_RETENTION_HINT_PATTERN.test(normalizedLatest) ||
+        (BUSINESS_ACTION_REQUEST_PATTERN.test(normalizedLatest) &&
+          /(?:их|этих|клиент|гост|вернут|возврат)/i.test(normalizedLatest)));
+    if (!isBusinessReviewFollowUp(latest) && !retentionFollowUp) {
+      return latest;
+    }
+    return `${previous}\n${latest}`;
+  }
+
+  private async memoryFactsForModel(
+    tenantId: string,
+    userId: string,
+  ): Promise<string[]> {
+    if (!this.memory) {
+      return [];
+    }
+    try {
+      const facts = await this.memory.listForModel(tenantId, userId);
+      return facts.map((fact) => {
+        const sensitive = this.redactSensitiveText(fact);
+        return this.redactLikelyProperNames(sensitive.content).content;
+      });
+    } catch {
+      // Memory continuity must never make the main chat unavailable.
+      return [];
+    }
   }
 
   /**
@@ -3018,6 +4410,60 @@ export class AiCoreService {
       return {};
     }
     return value as Record<string, unknown>;
+  }
+
+  private isClientAudience(
+    user: AuthenticatedUser,
+    audience?: 'client' | 'staff' | 'owner' | null,
+  ): boolean {
+    if (audience === 'client') {
+      return true;
+    }
+    if (audience === 'staff' || audience === 'owner') {
+      return false;
+    }
+    return user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER;
+  }
+
+  /**
+   * Контракт поверхности «мастер»: audience=staff обязывает сервер выдать
+   * СТРОГО мастерский набор прав, кем бы человек ни был по членству.
+   *
+   * 🔴 Главный источник расхождений с документацией: приложение честно шлёт
+   * audience из трёх режимов входа (владелец/мастер/клиент), но сервер
+   * понимал только client. Владелец, открывший режим мастера, получал
+   * владельческие инструменты — «Моя статистика» отвечала кассой всего
+   * салона, а не личными показателями, и поверхность мастера вела себя как
+   * кабинет директора. Клиентские роли повысить нельзя: для них audience
+   * игнорируется, это защита, а не удобство.
+   */
+  private effectiveToolUser(
+    user: AuthenticatedUser,
+    audience?: 'client' | 'staff' | 'owner' | null,
+  ): AuthenticatedUser {
+    if (
+      audience !== 'staff' ||
+      user.role === UserRole.CLIENT ||
+      user.role === UserRole.CUSTOMER ||
+      STAFF_SURFACE_ROLES.has(user.role)
+    ) {
+      return user;
+    }
+    return { ...user, role: UserRole.STAFF };
+  }
+
+  private isBusinessOnlyTool(toolName: string): boolean {
+    return (
+      toolName.startsWith('analytics.') ||
+      toolName.startsWith('expenses.') ||
+      toolName === 'customers.count' ||
+      toolName === 'clients.retention.scan' ||
+      toolName === 'clients.dossier.read' ||
+      toolName === 'staff.schedule.read' ||
+      toolName === 'operations.journal.read' ||
+      toolName === 'staff.schedule.update' ||
+      toolName === 'loyalty.internal.adjust'
+    );
   }
 
   private requireTenant(user: AuthenticatedUser): string {

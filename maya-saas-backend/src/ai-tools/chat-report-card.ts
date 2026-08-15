@@ -30,6 +30,24 @@ function metricNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
+function operationsCaption(value: unknown): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+  const absolute = Math.abs(Math.trunc(value));
+  const lastTwo = absolute % 100;
+  const last = absolute % 10;
+  const noun =
+    lastTwo >= 11 && lastTwo <= 14
+      ? 'операций'
+      : last === 1
+        ? 'операция'
+        : last >= 2 && last <= 4
+          ? 'операции'
+          : 'операций';
+  return `${absolute} ${noun}`;
+}
+
 /**
  * Карточка из последнего релевантного tool result.
  */
@@ -44,13 +62,21 @@ export function buildChatReportCard(
         'analytics.business.query',
         'analytics.employee.query',
         'analytics.business.profit',
+        'expenses.read',
+        'expenses.period.complete',
       ].includes(item.name),
     );
   if (!latest) {
     return null;
   }
-  if (latest.name === 'analytics.business.profit') {
+  if (
+    latest.name === 'analytics.business.profit' ||
+    latest.name === 'expenses.period.complete'
+  ) {
     return buildProfitCard(latest.result);
+  }
+  if (latest.name === 'expenses.read') {
+    return buildExpensesCard(latest.result);
   }
   if (latest.name === 'analytics.employee.query' || options.personal) {
     return buildMasterCard(latest.result, options.userText);
@@ -59,6 +85,51 @@ export function buildChatReportCard(
     return buildBusinessCard(latest.result);
   }
   return null;
+}
+
+function buildExpensesCard(evidence: unknown): ChatReportCard {
+  const data = record(evidence);
+  const resolved = record(data.resolved_period);
+  const period = record(data.period);
+  const label =
+    (typeof resolved.label_ru === 'string' && resolved.label_ru) ||
+    (typeof period.label_ru === 'string' && period.label_ru) ||
+    'выбранный период';
+  const rows = Array.isArray(data.by_category)
+    ? (data.by_category as unknown[])
+        .map((entry) => record(entry))
+        .filter((entry) => entry.currency === 'RUB')
+        .map((entry) => ({
+          label:
+            typeof entry.label === 'string' && entry.label.trim()
+              ? entry.label.trim()
+              : 'Другой расход',
+          value_rub: moneyRubFromKopecks(entry.amount_kopecks),
+          caption: operationsCaption(entry.expense_count),
+        }))
+    : [];
+  const total = Array.isArray(data.totals)
+    ? (data.totals as unknown[])
+        .map((entry) => record(entry))
+        .find((entry) => entry.currency === 'RUB')
+    : null;
+  return {
+    widget: 'business_report',
+    widget_data: {
+      title: 'Расходы',
+      period_label: label,
+      primary_rub: moneyRubFromKopecks(total?.amount_kopecks),
+      primary_label: 'Всего расходов',
+      secondary_value: rows.length,
+      secondary_label: 'Статей',
+      rows_title: rows.length > 0 ? 'По статьям' : null,
+      rows,
+      status_text:
+        rows.length === 0
+          ? 'За этот период дополнительные расходы не внесены.'
+          : null,
+    },
+  };
 }
 
 function buildBusinessCard(evidence: unknown): ChatReportCard {
@@ -72,6 +143,38 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
     'выбранный период';
   const revenue = moneyRubFromKopecks(metrics.revenue_amount_kopecks);
   const ticket = moneyRubFromKopecks(metrics.average_ticket_amount_kopecks);
+  const current = record(data.current);
+  const financeRevenue = record(record(current.finance).revenue);
+  const staff = Array.isArray(current.staff_summary)
+    ? (current.staff_summary as unknown[])
+    : [];
+  const staffRows = staff.flatMap((entry) => {
+    const row = record(entry);
+    const confirmed = record(row.confirmed_revenue);
+    const amount = moneyRubFromKopecks(record(confirmed.amount).amount_kopecks);
+    const name = typeof row.name === 'string' ? row.name.trim() : '';
+    if (!name) return [];
+    return [
+      {
+        label: name,
+        value_rub: confirmed.status === 'available' ? amount : null,
+        caption:
+          confirmed.status === 'available'
+            ? `${metricNumber(confirmed.transaction_count) ?? 0} финансовых операций`
+            : 'Нет точной привязки кассы CRM',
+      },
+    ];
+  });
+  const attributionStatus = financeRevenue.staff_attribution_status;
+  const coverage = metricNumber(
+    financeRevenue.staff_attribution_coverage_percent,
+  );
+  const staffStatusText =
+    attributionStatus === 'partial'
+      ? `YClients точно связал с мастерами ${coverage ?? 0}% кассы услуг. Остаток не распределён приблизительно.`
+      : attributionStatus === 'unavailable' && staff.length > 0
+        ? 'YClients не передал точную привязку кассы к мастерам. Общая касса остаётся доступна.'
+        : null;
   return {
     widget: 'business_report',
     widget_data: {
@@ -84,6 +187,9 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
       clients_returning: metricNumber(metrics.clients_returning),
       average_ticket_rub: ticket,
       cancellations: metricNumber(metrics.appointments_cancelled),
+      rows_title: staffRows.length > 0 ? 'Касса по мастерам' : null,
+      rows: staffRows,
+      status_text: staffStatusText,
       insight:
         typeof data.verified === 'boolean' && data.verified === false
           ? 'Часть цифр могла прийти из запасного снимка — сверьте при необходимости.'
@@ -96,6 +202,8 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
   const data = record(evidence);
   const net = record(data.net_profit);
   const revenue = record(data.confirmed_revenue);
+  const expenses = record(data.expenses);
+  const completeness = record(data.completeness);
   const resolved = record(data.resolved_period);
   const period = record(data.period);
   const label =
@@ -109,6 +217,49 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
   const revTotal = moneyRubFromKopecks(
     record(revenue.total).amount_kopecks ?? revenue.amount_kopecks,
   );
+  const expenseRows = Array.isArray(expenses.by_category)
+    ? (expenses.by_category as unknown[])
+        .map((entry) => record(entry))
+        .filter((entry) => entry.currency === 'RUB')
+    : [];
+  const rows = expenseRows.map((entry) => ({
+    label:
+      typeof entry.label === 'string' && entry.label.trim()
+        ? entry.label.trim()
+        : 'Другой расход',
+    value_rub: moneyRubFromKopecks(entry.amount_kopecks),
+    caption:
+      entry.source === 'crm_payroll'
+        ? 'Начислено YClients'
+        : 'Внесено владельцем',
+  }));
+  const payrollRows = expenseRows.filter(
+    (entry) => entry.category === 'salary',
+  );
+  const payrollKopecks = payrollRows.reduce(
+    (sum, entry) =>
+      sum +
+      (typeof entry.amount_kopecks === 'number' ? entry.amount_kopecks : 0),
+    0,
+  );
+  const additionalRows = expenseRows.filter(
+    (entry) => entry.category !== 'salary',
+  );
+  const additionalKopecks = additionalRows.reduce(
+    (sum, entry) =>
+      sum +
+      (typeof entry.amount_kopecks === 'number' ? entry.amount_kopecks : 0),
+    0,
+  );
+  const totalExpenses = Array.isArray(expenses.totals)
+    ? (expenses.totals as unknown[])
+        .map((entry) => record(entry))
+        .find((entry) => entry.currency === 'RUB')
+    : null;
+  const ownerConfirmationRequired =
+    completeness.owner_confirmation_required === true;
+  const assumesUnrecordedExpensesAreZero =
+    completeness.unrecorded_additional_expenses_assumed_zero === true;
   return {
     widget: 'business_report',
     widget_data: {
@@ -116,14 +267,35 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
       period_label: label,
       revenue_rub: revTotal,
       net_profit_rub: net.status === 'available' ? netTotal : null,
+      payroll_rub:
+        payrollRows.length > 0 ? moneyRubFromKopecks(payrollKopecks) : null,
+      additional_expenses_rub:
+        additionalRows.length > 0
+          ? moneyRubFromKopecks(additionalKopecks)
+          : ownerConfirmationRequired && net.status !== 'available'
+            ? null
+            : 0,
+      total_expenses_rub: moneyRubFromKopecks(totalExpenses?.amount_kopecks),
       profit_status:
         typeof net.status === 'string' ? net.status : 'unavailable',
+      rows_title: rows.length > 0 ? 'Расходы' : null,
+      rows,
+      status_text:
+        net.status === 'available' && assumesUnrecordedExpensesAreZero
+          ? 'Не внесённые дополнительные расходы сейчас учтены как 0 ₽. Добавьте их в чат в любой момент — прибыль пересчитается.'
+          : ownerConfirmationRequired
+            ? 'Есть ли за этот период дополнительные расходы помимо зарплаты? Если нет, так и напишите.'
+            : net.status === 'available'
+              ? 'Дополнительные расходы за период подтверждены.'
+              : null,
       insight:
         net.status === 'available'
           ? null
-          : typeof net.unavailable_reason === 'string'
-            ? 'Прибыль пока не посчитана — смотри текст MAYA выше.'
-            : 'Прибыль пока недоступна.',
+          : ownerConfirmationRequired
+            ? null
+            : typeof net.unavailable_reason === 'string'
+              ? 'Прибыль пока не посчитана — смотри текст MAYA выше.'
+              : 'Прибыль пока недоступна.',
     },
   };
 }

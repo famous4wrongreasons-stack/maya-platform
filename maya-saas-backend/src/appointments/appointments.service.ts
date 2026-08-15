@@ -20,6 +20,7 @@ import { AvailableSlotsQueryDto } from '../crm/dto/available-slots-query.dto';
 import { InboxService } from '../inbox/inbox.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RecoveryService } from '../recovery/recovery.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
@@ -76,6 +77,7 @@ export class AppointmentsService {
     private readonly usersService: UsersService,
     private readonly auditLogService: AuditLogService,
     private readonly inboxService: InboxService,
+    private readonly recoveryService?: RecoveryService,
   ) {}
 
   async createForClient(
@@ -246,6 +248,25 @@ export class AppointmentsService {
           }`,
         );
       });
+    }
+
+    try {
+      await this.recoveryService?.recordBooking({
+        tenantId,
+        phone: bookingIdentity.clientPhone,
+        externalBookingRef: appointment.id,
+        crmExternalId: remoteAppointment?.external_id ?? null,
+        bookedAt: appointment.createdAt,
+        visitAt: appointment.startAt,
+        bookedValueKopecks: appointment.totalPriceKopecks,
+        currency: appointment.currency,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `recovery attribution failed for booking ${appointment.id}: ${
+          error instanceof Error ? error.message : 'unknown'
+        }`,
+      );
     }
 
     return this.serializeAppointment(appointment, {
@@ -540,6 +561,20 @@ export class AppointmentsService {
         cancelled_at: updatedAppointment.updatedAt.toISOString(),
       },
     });
+
+    try {
+      await this.recoveryService?.markBookingStatus(
+        tenantId,
+        appointment.id,
+        'canceled',
+      );
+    } catch (error) {
+      this.logger.warn(
+        `recovery attribution cancellation failed for booking ${appointment.id}: ${
+          error instanceof Error ? error.message : 'unknown'
+        }`,
+      );
+    }
 
     if (appointmentSource === CalendarSource.INTERNAL) {
       const clientProfile = this.usersService.serializeUser(
@@ -859,14 +894,19 @@ export class AppointmentsService {
       const batch = days.slice(index, index + AVAILABLE_DAYS_BATCH_SIZE);
       const results = await Promise.all(
         batch.map(async (day) => {
-          const slots = await this.crmService.getAvailableSlots(tenantId, {
-            date: day,
-            staffId: query.staffId,
-            serviceIds,
-            branchId: query.branchId,
-          });
+          try {
+            const slots = await this.crmService.getAvailableSlots(tenantId, {
+              date: day,
+              staffId: query.staffId,
+              serviceIds,
+              branchId: query.branchId,
+            });
 
-          return slots.length > 0 ? day : null;
+            return slots.length > 0 ? day : null;
+          } catch {
+            // One bad CRM day must not fail the whole calendar probe.
+            return null;
+          }
         }),
       );
 

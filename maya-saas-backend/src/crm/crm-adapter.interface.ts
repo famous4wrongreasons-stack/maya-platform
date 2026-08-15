@@ -145,6 +145,53 @@ export interface ClientLoyaltySnapshot {
   currency: string;
 }
 
+/**
+ * Обезличенная карточка из полного CRM-реестра.
+ *
+ * Имя, телефон и другие ПД не покидают адаптер. Внешний id нужен
+ * только серверу для дедупликации карточек и не должен уходить в LLM.
+ */
+export interface CrmClientRegistryItem {
+  external_id: string;
+  visits_count: number;
+  sold_amount: number;
+  last_visit_date: string | null;
+}
+
+export interface CrmClientRegistrySnapshot {
+  provider: string;
+  clients: CrmClientRegistryItem[];
+  generated_at: string;
+  complete: true;
+}
+
+export interface CrmClientSearchResult {
+  id: string;
+  name: string;
+  phone: string | null;
+  visits_count: number | null;
+  sold_amount: number | null;
+  last_visit_date: string | null;
+}
+
+/**
+ * Till-confirmed service revenue linked to exact CRM appointment ids.
+ * This contract is intentionally narrow: it exists for attribution and must
+ * not fall back to booked prices when the CRM has no matching transaction.
+ */
+export interface CrmAppointmentRevenueSnapshot {
+  provider: string;
+  currency: string;
+  verified: true;
+  requested_record_count: number;
+  matched_record_count: number;
+  records: Array<{
+    external_id: string;
+    amount_kopecks: number;
+    transaction_count: number;
+  }>;
+}
+
 export interface ClientAppointmentsParams {
   tenantId: string;
   phone: string;
@@ -241,6 +288,31 @@ export interface CrmRevenueAccountBreakdown extends CrmMoneyAmount {
   is_cash: boolean | null;
 }
 
+/**
+ * Подтверждённая касса услуг, связанная с сотрудником средствами самой CRM.
+ *
+ * `staff_id` остаётся служебным ключом backend: AI-слой использует его для
+ * соединения с безопасным списком мастеров и не публикует наружу.
+ */
+export interface CrmRevenueStaffBreakdown extends CrmMoneyAmount {
+  staff_id: string;
+  transaction_count: number;
+}
+
+/**
+ * Подтверждённая касса, однозначно связанная с одной услугой.
+ *
+ * YClients связывает финансовую операцию с записью, но не делит её
+ * между несколькими услугами. Поэтому в этот срез попадают только
+ * транзакции одноуслуговых записей. `service_id` — служебный ключ и
+ * наружу из backend не публикуется.
+ */
+export interface CrmRevenueServiceBreakdown extends CrmMoneyAmount {
+  service_id: string;
+  name: string;
+  transaction_count: number;
+}
+
 export interface CrmStaffPayroll {
   staff_id: string;
   name: string;
@@ -267,6 +339,16 @@ export interface CrmFinancialSummary {
     total: CrmMoneyAmount | null;
     by_type: CrmRevenueBreakdown[];
     by_account: CrmRevenueAccountBreakdown[];
+    by_staff: CrmRevenueStaffBreakdown[];
+    by_service: CrmRevenueServiceBreakdown[];
+    staff_attribution_status: CrmFinanceStatus;
+    staff_attribution_coverage_percent: number | null;
+    unattributed_service_total: CrmMoneyAmount | null;
+    unattributed_service_transaction_count: number;
+    service_attribution_status: CrmFinanceStatus;
+    service_attribution_coverage_percent: number | null;
+    unattributed_service_breakdown_total: CrmMoneyAmount | null;
+    unattributed_service_breakdown_transaction_count: number;
   };
   payroll: {
     status: CrmFinanceStatus;
@@ -394,7 +476,31 @@ export interface CRMAdapter {
   searchClients?(params: {
     tenantId: string;
     query: string;
-  }): Promise<Array<{ id: string; name: string; phone: string | null }>>;
+  }): Promise<CrmClientSearchResult[]>;
+  /**
+   * Полный постраничный реестр для retention-аналитики.
+   * Адаптер обязан падать, а не возвращать частичный снимок.
+   */
+  getClientRegistry?(params: {
+    tenantId: string;
+  }): Promise<CrmClientRegistrySnapshot>;
+  /**
+   * История визитов CRM-клиента по id из searchClients.
+   * Для AI-досье: имена услуг и даты без телефона/ФИО в ответе адаптера
+   * тоже можно отдать — редaction делает AI-слой.
+   */
+  getClientVisitHistory?(params: {
+    tenantId: string;
+    clientId: string;
+    limit?: number;
+  }): Promise<
+    Array<{
+      start: string;
+      service_names: string[];
+      total_price: number | null;
+      attendance: number | null;
+    }>
+  >;
   getFinancialSummary?(params: {
     tenantId: string;
     from: string;
@@ -407,6 +513,13 @@ export interface CRMAdapter {
     to: string;
     timezone: string;
   }): Promise<CrmRevenueSummary>;
+  getAppointmentRevenue?(params: {
+    tenantId: string;
+    from: string;
+    to: string;
+    timezone: string;
+    externalIds: string[];
+  }): Promise<CrmAppointmentRevenueSnapshot>;
   getClientLoyalty(params: {
     tenantId: string;
     phone: string;
