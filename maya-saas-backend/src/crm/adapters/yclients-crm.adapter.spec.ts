@@ -551,11 +551,7 @@ describe('YclientsCRMAdapter', () => {
         : loyaltyRequest instanceof URL
           ? loyaltyRequest.href
           : loyaltyRequest?.url || '';
-    // 🔴 Путь теперь содержит И компанию, И клиента. Прежняя форма с одним
-    // номером подставляла id клиента туда, где YClients ждёт id компании:
-    // он искал карты несуществующей компании и отвечал пустым массивом с
-    // success:true, а мы читали это как «карт у клиента нет».
-    expect(loyaltyUrl).toContain('/loyalty/client_cards/123/88');
+    expect(loyaltyUrl).toContain('/loyalty/client_cards/88');
   });
 
   it('loads a client appointment history by exact phone and client id', async () => {

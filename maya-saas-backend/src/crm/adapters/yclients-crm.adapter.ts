@@ -1969,20 +1969,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
 
     const clientId = this.toNumericId(client.id, 'client.id');
-    // 🔴 У YClients путь к картам клиента содержит И компанию, И клиента.
-    // Мы годами звали его с одним номером — и подставляли туда id клиента
-    // там, где ожидается id компании. YClients честно искал карты компании
-    // с таким номером, не находил и отвечал пустым массивом с success:true.
-    // Отличить это от «карт нет» было нельзя: ответ выглядел успешным.
-    //
-    // Пробуем обе формы: сначала правильную, потом прежнюю — на случай,
-    // если у части филиалов работает старая.
-    const cardsResponse = await this.requestFirstAvailable<
+    // Путь к картам клиента — с ОДНИМ номером. Так же его зовёт рабочий бот
+    // «Мужской Эстетики», и это единственная известная нам форма, которая
+    // где-то точно отдаёт карты. Вариант с номером компании я пробовал: он
+    // отвечает пустым массивом и УСПЕХОМ, поэтому запасной путь через
+    // requestFirstAvailable не срабатывал бы — откат идёт только по ошибке.
+    const cardsResponse = await this.request<
       YclientsLoyaltyCard[] | YclientsLoyaltyCard
-    >([
-      `loyalty/client_cards/${this.getCompanyId()}/${clientId}`,
-      `loyalty/client_cards/${clientId}`,
-    ]);
+    >(`loyalty/client_cards/${clientId}`);
     const cards = Array.isArray(cardsResponse.data)
       ? cardsResponse.data
       : cardsResponse.data
