@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   BadRequestException,
   ConflictException,
@@ -25,6 +26,13 @@ export class LoyaltyService {
     private readonly encryptionService: EncryptionService,
     private readonly auditLogService: AuditLogService,
   ) {}
+
+  /**
+   * Почему у гостя нет баллов — вопрос поддержки, а не загадка. Раньше и
+   * отказ CRM, и отсутствие карты уходили в тишину: наружу шёл ноль, а в
+   * логах не оставалось ничего. Разбор одного такого случая занял вечер.
+   */
+  private readonly logger = new Logger(LoyaltyService.name);
 
   async getForUser(tenantId: string, userId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
@@ -240,6 +248,11 @@ export class LoyaltyService {
     try {
       const snapshot = await this.crmService.getClientLoyalty(tenantId, phone);
       if (!snapshot) {
+        // Карты в CRM нет. Не ошибка, но и не пустяк: именно это владелец
+        // видит как «баллы не начисляются».
+        this.logger.warn(
+          `loyalty card not found in CRM tenant=${tenantId} user=${userId}`,
+        );
         return cached
           ? this.serializeAccount(cached, {
               authoritative: 'crm',
@@ -296,6 +309,13 @@ export class LoyaltyService {
         sold_amount: snapshot.sold_amount,
       };
     } catch (error) {
+      // Причину отказа CRM пишем целиком: без неё «баллы не пришли»
+      // неотличимо от «карты нет», и разбор упирается в догадки.
+      this.logger.warn(
+        `loyalty sync failed tenant=${tenantId} user=${userId}: ${
+          error instanceof Error ? error.message : 'unknown error'
+        }`,
+      );
       if (cached) {
         return this.serializeAccount(cached, {
           authoritative: 'crm',
