@@ -1960,6 +1960,34 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return null;
   }
 
+  /**
+   * Карты клиента с переспросом на пустой ответ.
+   *
+   * Пустой список — законный ответ (у клиента правда нет карты), поэтому
+   * переспрашиваем ровно дважды и с короткой паузой: этого хватает на
+   * случайный провал и не превращает обычное «карт нет» в тройной поход
+   * в CRM на каждом открытии кабинета.
+   */
+  private async readLoyaltyCardsWithRetry(
+    clientId: number,
+  ): Promise<YclientsLoyaltyCard[]> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const response = await this.request<
+        YclientsLoyaltyCard[] | YclientsLoyaltyCard
+      >(`loyalty/client_cards/${clientId}`);
+      const cards = Array.isArray(response.data)
+        ? response.data
+        : response.data
+          ? [response.data]
+          : [];
+      if (cards.length > 0 || attempt === 2) {
+        return cards;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    return [];
+  }
+
   /** Бонусная карта одной конкретной карточки клиента. */
   private async readLoyaltyCardFor(
     client: YclientsClientSearchItem,
@@ -1974,14 +2002,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
     // где-то точно отдаёт карты. Вариант с номером компании я пробовал: он
     // отвечает пустым массивом и УСПЕХОМ, поэтому запасной путь через
     // requestFirstAvailable не срабатывал бы — откат идёт только по ошибке.
-    const cardsResponse = await this.request<
-      YclientsLoyaltyCard[] | YclientsLoyaltyCard
-    >(`loyalty/client_cards/${clientId}`);
-    const cards = Array.isArray(cardsResponse.data)
-      ? cardsResponse.data
-      : cardsResponse.data
-        ? [cardsResponse.data]
-        : [];
+    // 🔴 YClients иногда отдаёт ПУСТОЙ список карт вместо настоящего, с кодом
+    // успеха и без всякой ошибки. Проверено вживую: два запроса подряд по
+    // одному клиенту вернули ноль карт, третий — карту с номером и типом.
+    // Такой провал неотличим от честного «карт нет», и клиент видит нулевой
+    // баланс на пустом месте. Поэтому пустой ответ переспрашиваем.
+    const cards = await this.readLoyaltyCardsWithRetry(clientId);
     const card = this.selectCashbackCard(cards);
     if (!card) {
       return null;
