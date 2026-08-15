@@ -1944,7 +1944,25 @@ export class YclientsCRMAdapter implements CRMAdapter {
       return null;
     }
 
-    const client = await this.findClientByPhone(normalizedPhone);
+    // Перебираем ВСЕ карточки с этим номером: карта может висеть на дубле.
+    const candidates = await this.findAllClientsByPhone(normalizedPhone);
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    for (const client of candidates) {
+      const snapshot = await this.readLoyaltyCardFor(client);
+      if (snapshot) {
+        return snapshot;
+      }
+    }
+    return null;
+  }
+
+  /** Бонусная карта одной конкретной карточки клиента. */
+  private async readLoyaltyCardFor(
+    client: YclientsClientSearchItem,
+  ): Promise<ClientLoyaltySnapshot | null> {
     if (client?.id === undefined) {
       return null;
     }
@@ -2057,6 +2075,51 @@ export class YclientsCRMAdapter implements CRMAdapter {
         return candidateDigits === wantedDigits;
       }) ?? null
     );
+  }
+
+  /**
+   * ВСЕ карточки клиента с этим номером, а не первая попавшаяся.
+   *
+   * 🔴 Один человек часто заведён в YClients несколько раз: вручную, через
+   * онлайн-запись, через бота. Карта лояльности при этом висит на одном из
+   * дублей. Поиск возвращал первое совпадение, и если карта была на другом,
+   * владелец видел ноль баллов при заведённой карте — ровно этот случай мы
+   * и разбирали.
+   */
+  private async findAllClientsByPhone(
+    phone: string,
+  ): Promise<YclientsClientSearchItem[]> {
+    const normalizedPhone = this.normalizePhone(phone);
+    const wantedDigits = normalizedPhone.replace(/\D/g, '').slice(-10);
+
+    if (wantedDigits.length !== 10) {
+      return [];
+    }
+
+    const search = await this.request<YclientsClientSearchItem[]>(
+      `company/${this.getCompanyId()}/clients/search`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          fields: ['id', 'name', 'phone'],
+          filters: [
+            { type: 'quick_search', state: { value: normalizedPhone } },
+          ],
+          page: 1,
+          page_size: 8,
+        }),
+      },
+    );
+
+    return (search.data || []).filter((candidate) => {
+      if (candidate?.id === undefined || candidate.id === null) {
+        return false;
+      }
+      const candidateDigits = String(candidate.phone || '')
+        .replace(/\D/g, '')
+        .slice(-10);
+      return candidateDigits === wantedDigits;
+    });
   }
 
   private async fetchRecords(params: {
