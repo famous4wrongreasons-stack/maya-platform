@@ -1875,6 +1875,9 @@ export class AiCoreService {
             (name) => name in DATA_TOOL_DOMAINS && allowedNames.has(name),
           )
         : [];
+    // Расчёт по просьбе владельца — не отчёт: числа он назвал сам, а
+    // арифметику по ним сторож блокировать не должен.
+    const scenario = this.isScenarioQuestion(text);
     return {
       evidenceToolNames: strictFamily.length
         ? strictFamily
@@ -1883,7 +1886,7 @@ export class AiCoreService {
           : dataTools,
       fallbackDomain: preferred ? (DATA_TOOL_DOMAINS[preferred] ?? null) : null,
       closedForAccess: false,
-      strictNumbers: true,
+      strictNumbers: !scenario,
       // Предзагрузка аргументов — не ограничение, а работа сервера за модель:
       // он лучше разбирает падежи («визиты Ивана» → клиент «Иван») и даты.
       ...(preferred && PRELOADABLE_TOOLS.has(preferred)
@@ -1916,6 +1919,35 @@ export class AiCoreService {
    * раньше инструмента. Тему он не определяет — её назовёт тот инструмент,
    * который отработает.
    */
+  /**
+   * Просят РАСЧЁТ, а не факт из CRM.
+   *
+   * 🔴 Правило «все числа только из инструментов» защищает от выдуманной
+   * выручки — и это правильно. Но оно же запрещало обычную арифметику:
+   * на «посчитай, если вернём 1800 клиентов, какая будет загрузка на 5
+   * мастеров и 4 кресла» MAYA дважды уходила в готовый отчёт, потому что
+   * любое вычисленное число сторож считал непроверенным.
+   *
+   * Здесь режим смягчается: цифры, которые владелец назвал сам, и
+   * арифметику по ним считать можно. База для расчёта по-прежнему берётся
+   * из CRM, а ответ обязан называться прикидкой — этого требует промпт.
+   */
+  private isScenarioQuestion(text: string): boolean {
+    if (!text) return false;
+    const asksToCompute =
+      /(?:^|[^а-я])(?:посчитай|подсчитай|рассчитай|прикин|смоделируй|спрогнозируй|оцени)/i.test(
+        text,
+      );
+    const hypothetical =
+      /(?:^|[^а-я])(?:если|при\s+условии|допустим|представь|предположим|а\s+что\s+если|сколько\s+будет|каким\s+будет|какая\s+будет|какой\s+будет)/i.test(
+        text,
+      );
+    // Одного «если» мало: «сколько записей, если считать отменённые» — это
+    // всё ещё вопрос о факте. Нужна либо явная просьба посчитать, либо
+    // гипотеза вместе с числом, которое назвал сам человек.
+    return asksToCompute || (hypothetical && /\d/.test(text));
+  }
+
   private isDataQuestion(
     brain: MayaBrainRoute,
     text: string,
