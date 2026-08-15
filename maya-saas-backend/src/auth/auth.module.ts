@@ -18,7 +18,6 @@ import { AuthSessionRepository } from './auth-session.repository';
 import { AuthSessionService } from './auth-session.service';
 import { AuthSessionSystemGateway } from './auth-session-system.gateway';
 import { AuthService } from './auth.service';
-import { TelegramPhoneLinkService } from './telegram-phone-link.service';
 import { EmailAuthDeliveryService } from './email-auth-delivery.service';
 import { EmailAuthService } from './email-auth.service';
 import { JwtStrategy } from './jwt.strategy';
@@ -56,7 +55,6 @@ import { TenantAuthRepository } from './tenant-auth.repository';
   ],
   controllers: [AuthController],
   providers: [
-    TelegramPhoneLinkService,
     {
       provide: APP_FILTER,
       useClass: AuthRateLimitExceptionFilter,
