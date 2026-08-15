@@ -471,6 +471,9 @@ const SERVER_COMPOSED_REPLY_TOOLS = new Set([
  */
 const STRICT_GROUNDING_HINT_TOOLS = new Set([
   'staff.schedule.read',
+  // Свой график — та же семья и та же чувствительность: месячной сводкой
+  // конкретный день не подменяют.
+  'staff.schedule.own.read',
   'operations.journal.read',
   'clients.retention.scan',
   'clients.dossier.read',
@@ -1765,41 +1768,79 @@ export class AiCoreService {
     if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
     }
-    // 🔴 Нет подсказки — НЕ ГАДАЕМ. Здесь стоял «выбор по умолчанию», и он
-    // немедленно родил отказы, которых до переделки не было: клиент спрашивал
-    // «сколько длится стрижка», сервер подставлял его историю визитов и
-    // отвечал «у вас пока нет записей»; вопрос «сколько у вас мастеров»
-    // упирался в жёсткий отказ по роли, потому что список по умолчанию состоял
-    // из инструментов, которых клиенту не выдают никогда.
+    // 🔴 ПРАВИЛО ВЛАДЕЛЬЦА: ограничения только про деньги и право. Всё, что
+    // угадывало тему по списку слов и подставляло заранее выбранный
+    // инструмент, снято. Это был главный источник отказов: «выгодный» уводил
+    // отчёт в год, «за 3 месяца» — в третье число, вопрос мастера про свои
+    // записи упирался в журнал команды, которого ему не выдают.
     //
-    // Это была ровно та ошибка, ради ухода от которой всё и затевалось —
-    // догадка о теме до единого вызова. Теперь при отсутствии подсказки модель
-    // получает ВСЕ доступные ей инструменты данных как равные и выбирает сама.
+    // Теперь модель получает ВСЕ доступные ей инструменты данных как равные и
+    // выбирает сама. Что доступно — решает единственный движок прав.
     const dataTools = [...allowedNames].filter(
       (name) => name in DATA_TOOL_DOMAINS,
     );
-    const hintedDataTools = hinted
-      ? hinted.filter((name) => name in DATA_TOOL_DOMAINS)
-      : null;
-    const allowedHintedTools = hintedDataTools
-      ? hintedDataTools.filter((name) => allowedNames.has(name))
-      : null;
-    const strictHintFamily =
-      hintedDataTools?.some((name) => STRICT_GROUNDING_HINT_TOOLS.has(name)) ??
-      false;
+    // Вопрос про деньги салона от того, кому их считать нечем: у клиента таких
+    // данных нет никогда, на младшем тарифе — нечем посчитать. Здесь честный
+    // отказ обязателен, иначе MAYA ответит выручкой из прайс-листа. Это прямо
+    // денежная сторона — единственная, где ограничение остаётся по правилу
+    // владельца.
+    const hintedDataTools = (hinted ?? []).filter(
+      (name) => name in DATA_TOOL_DOMAINS,
+    );
+    const analyticsEvidenceTool = [
+      'analytics.business.profit',
+      'analytics.employee.query',
+      'analytics.business.query',
+    ].find((name) => allowedNames.has(name));
+    // Не только по интенту: клиент, спросивший «сколько заработал салон»,
+    // распознаётся подсказкой в аналитику, которой у него нет никогда. Деньги
+    // салона мимо роли не отдаём — это и роль, и деньги сразу.
+    const moneyWithoutAnalytics =
+      (MONEY_INTENTS.has(brain.intent) ||
+        hintedDataTools.some((name) => name.startsWith('analytics.'))) &&
+      !analyticsEvidenceTool;
+    // Третий и последний отказ: спросили про ЧУВСТВИТЕЛЬНУЮ семью — чужой
+    // график, точный журнал дня, досье клиента, свои визиты или баллы, — а ни
+    // одного её инструмента человеку не выдано. Подменять такой вопрос
+    // соседней аналитикой нельзя: «какой график у Стаса» не отвечается месячной
+    // сводкой, а «визиты Иванова» — выборкой по всей базе. Для всех остальных
+    // тем промах подсказки больше НЕ закрывает вопрос.
+    const sensitiveFamilyClosed =
+      hintedDataTools.length > 0 &&
+      hintedDataTools.every((name) => STRICT_GROUNDING_HINT_TOOLS.has(name)) &&
+      !hintedDataTools.some((name) => allowedNames.has(name));
+    // Второй отказ — источников данных нет вовсе: ассистента нет в тарифе либо
+    // роль не даёт ни одного инструмента.
+    if (
+      dataTools.length === 0 ||
+      moneyWithoutAnalytics ||
+      sensitiveFamilyClosed
+    ) {
+      return {
+        evidenceToolNames: [],
+        fallbackDomain: sensitiveFamilyClosed
+          ? (DATA_TOOL_DOMAINS[hintedDataTools[0]] ?? null)
+          : moneyWithoutAnalytics
+            ? 'business_query'
+            : null,
+        closedForAccess: true,
+        closedReason: allowedNames.size === 0 ? 'plan' : 'scope',
+        strictNumbers: true,
+      };
+    }
+    // Подсказка осталась СОВЕТОМ и перестала быть запретом. Вероятный
+    // инструмент идёт первым, но доказательством принимается ЛЮБОЙ доступный:
+    // промах подсказки больше не может закрыть тему и родить отказ. Именно
+    // закрытие семьи давало «недоступно для вашей роли» там, где данные лежали
+    // рядом — мастеру про его же записи, владельцу про его же прибыль.
+    // Денежный вопрос владельца по умолчанию ведёт в аналитику: без этого
+    // первым оказывался случайный источник вроде прайс-листа. Это тоже СОВЕТ —
+    // остальные инструменты остаются равноправными доказательствами.
     const reportingPeriod = ReportingPeriodResolver.resolve(
       rawLatestText || latestText,
       rawPreviousUserText,
     );
-    // Fast path is intentionally limited to an already known business-data
-    // class or an explicit reporting window. The latter carries meaning even
-    // without a finance keyword: "а за 7?", "что было на прошлой
-    // неделе" and slang still mean a business report in the director
-    // context. Stronger domain hints above remain authoritative, so a price,
-    // schedule or availability question is never stolen by this fast path.
-    // A truly unfamiliar phrase with no explicit period still reaches the
-    // semantic planner with all eligible evidence sources as peers.
-    const analyticsFastPath =
+    const analyticsPreference =
       brain.persona === 'director' &&
       (MONEY_INTENTS.has(brain.intent) ||
         brain.intent === 'staff_operations' ||
@@ -1813,84 +1854,52 @@ export class AiCoreService {
             (name) => allowedNames.has(name),
           )
         : undefined;
-    const preferred = allowedHintedTools?.[0] ?? analyticsFastPath ?? null;
-    const fallbackDomain = preferred
-      ? (DATA_TOOL_DOMAINS[preferred] ?? null)
-      : null;
-    // Честный отказ по доступу — когда недоступна ВСЯ семья, к которой относится
-    // вопрос. Владелец на младшем тарифе спрашивает про выручку, а инструмента,
-    // способного её дать, у него нет: правильный ответ — «недоступно по тарифу»,
-    // а не рассказ из прайс-листа. Но если тема не названа прямо, отказывать
-    // не за что — пусть модель выберет из того, что есть.
-    const familyClosed =
-      hintedDataTools !== null &&
-      hintedDataTools.length > 0 &&
-      allowedHintedTools?.length === 0;
-    // Вопрос про деньги салона без единого инструмента, способного их дать.
-    // Ни каталог услуг, ни свободные окна на него не отвечают: клиенту такие
-    // данные не положены, а на младшем тарифе их нечем посчитать. Честный
-    // отказ здесь лучше подмены ответа из прайса.
-    const analyticsEvidenceTool = [
-      'analytics.business.profit',
-      'analytics.employee.query',
-      'analytics.business.query',
-    ].find((name) => allowedNames.has(name));
-    const moneyWithoutAnalytics =
-      MONEY_INTENTS.has(brain.intent) && !analyticsEvidenceTool;
-    if (
-      dataTools.length === 0 ||
-      (familyClosed && (strictHintFamily || !analyticsEvidenceTool)) ||
-      moneyWithoutAnalytics
-    ) {
-      return {
-        evidenceToolNames: [],
-        // Тему отказа называем даже без подсказки: в аудите должно быть видно,
-        // ЧТО спрашивали и почему закрыли, иначе отказ неотличим от сбоя.
-        fallbackDomain: hintedDataTools?.[0]
-          ? (DATA_TOOL_DOMAINS[hintedDataTools[0]] ?? null)
-          : moneyWithoutAnalytics
-            ? 'business_query'
-            : null,
-        closedForAccess: true,
-        // Пустой список инструментов означает не «эта тема закрыта», а
-        // «ассистента нет в тарифе вовсе»: политика отдала ноль возможностей.
-        // Разница видна только здесь, и назвать её надо здесь же.
-        closedReason: allowedNames.size === 0 ? 'plan' : 'scope',
-        strictNumbers: true,
-      };
-    }
-    if (!preferred) {
-      return {
-        evidenceToolNames: dataTools,
-        fallbackDomain: null,
-        closedForAccess: false,
-        strictNumbers: true,
-      };
-    }
-    const preloadArguments = PRELOADABLE_TOOLS.has(preferred)
-      ? this.preloadArguments(
-          preferred,
-          latestText,
-          previousUserText,
-          rawLatestText,
-          rawPreviousUserText,
-        )
-      : null;
+    const preferred =
+      hinted?.find(
+        (name) => name in DATA_TOOL_DOMAINS && allowedNames.has(name),
+      ) ??
+      analyticsPreference ??
+      null;
+    // Клиентские данные и точный день суток — семьи, где ШИРОТА вредна:
+    // «сколько визитов у Иванова» не должно отвечаться выборкой по всей базе.
+    // Это и есть юридическая сторона, а не выдуманное ограничение. Поэтому для
+    // них доказательства сужаются до семьи — но БЕЗ отказа: если ни один
+    // инструмент семьи не выдан, идём ко всем доступным, а не в стену.
+    const strictFamily =
+      preferred && STRICT_GROUNDING_HINT_TOOLS.has(preferred)
+        ? (hinted ?? []).filter(
+            (name) => name in DATA_TOOL_DOMAINS && allowedNames.has(name),
+          )
+        : [];
     return {
-      evidenceToolNames:
-        strictHintFamily && allowedHintedTools && allowedHintedTools.length > 0
-          ? allowedHintedTools
-          : [preferred, ...dataTools.filter((name) => name !== preferred)],
-      fallbackDomain,
+      evidenceToolNames: strictFamily.length
+        ? strictFamily
+        : preferred
+          ? [preferred, ...dataTools.filter((name) => name !== preferred)]
+          : dataTools,
+      fallbackDomain: preferred ? (DATA_TOOL_DOMAINS[preferred] ?? null) : null,
       closedForAccess: false,
       strictNumbers: true,
-      ...(preloadArguments
-        ? {
-            presetToolCall: {
-              name: preferred,
-              arguments: preloadArguments,
-            },
-          }
+      // Предзагрузка аргументов — не ограничение, а работа сервера за модель:
+      // он лучше разбирает падежи («визиты Ивана» → клиент «Иван») и даты.
+      ...(preferred && PRELOADABLE_TOOLS.has(preferred)
+        ? (() => {
+            const preloadArguments = this.preloadArguments(
+              preferred,
+              latestText,
+              previousUserText,
+              rawLatestText,
+              rawPreviousUserText,
+            );
+            return preloadArguments
+              ? {
+                  presetToolCall: {
+                    name: preferred,
+                    arguments: preloadArguments,
+                  },
+                }
+              : {};
+          })()
         : {}),
     };
   }
