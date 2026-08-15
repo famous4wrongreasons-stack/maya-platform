@@ -908,6 +908,30 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
+  // Пустой список инструментов означает ровно одно: политика не выдала
+  // профильную возможность, то есть ассистента нет в тарифе. Раньше это звучало
+  // так же, как «не ваша роль», и владелец читал тарифное ограничение как
+  // поломку. Тариф надо назвать вслух.
+  it('names the plan when the assistant is not part of it at all', async () => {
+    const mocks = createService([]);
+
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        { role: 'user', content: 'Какая выручка бизнеса за этот месяц?' },
+      ],
+    });
+
+    expect(result).toMatchObject({
+      reply:
+        'MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно.',
+      source: 'safe_fallback',
+      grounding: { status: 'blocked' },
+    });
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
   it('uses employee analytics rather than business totals for staff', async () => {
     const employee: AuthenticatedUser = {
       ...user,
