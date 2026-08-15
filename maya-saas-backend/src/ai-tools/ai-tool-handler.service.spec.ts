@@ -147,6 +147,89 @@ describe('AiToolHandlerService output minimization', () => {
     expect(JSON.stringify(result)).not.toContain('Стас');
   });
 
+  // Единственный инструмент, который называет гостей по именам: владельцу нужно
+  // знать, КОГО возвращать. Телефон при этом видит только владелец.
+  it('называет спящих гостей поимённо, а телефон открывает только владельцу', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-15T09:00:00.000Z'));
+    const registry = {
+      provider: 'yclients',
+      generated_at: '2026-08-15T08:59:00.000Z',
+      complete: true as const,
+      clients: [
+        {
+          external_id: 'c-1',
+          visits_count: 6,
+          sold_amount: 24_000,
+          last_visit_date: '2026-02-01',
+          name: 'Иван Петров',
+          phone: '+79990000001',
+        },
+        {
+          external_id: 'c-2',
+          visits_count: 3,
+          sold_amount: 9_000,
+          last_visit_date: '2026-08-10',
+          name: 'Недавний Гость',
+          phone: '+79990000002',
+        },
+        {
+          external_id: 'c-3',
+          visits_count: 0,
+          sold_amount: 0,
+          last_visit_date: null,
+          name: 'Ни Разу Не Приходил',
+          phone: null,
+        },
+      ],
+    };
+    const build = () =>
+      createService({
+        crmService: {
+          getClientRegistry: jest.fn().mockResolvedValue(registry),
+        } as unknown as CrmService,
+        prisma: {
+          tenant: {
+            findUnique: jest
+              .fn()
+              .mockResolvedValue({ defaultTimezone: 'Europe/Moscow' }),
+          },
+          branch: { findFirst: jest.fn() },
+        } as unknown as PrismaService,
+      });
+
+    const forOwner = await build().execute(
+      'clients.dormant.list',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { inactive_days: 30, limit: 20 },
+      'execution-dormant-owner',
+    );
+    const forAdmin = await build().execute(
+      'clients.dormant.list',
+      { ...principal, role: UserRole.ADMINISTRATOR },
+      { inactive_days: 30, limit: 20 },
+      'execution-dormant-admin',
+    );
+
+    // Спящий только один: второй был на днях, третий не приходил ни разу —
+    // он не ушедший, а не пришедший, и в список возврата не попадает.
+    expect(forOwner).toMatchObject({
+      total_dormant: 1,
+      contains_personal_data: true,
+      phone_visible: true,
+      clients: [{ name: 'Иван Петров', phone: '+79990000001', visits: 6 }],
+    });
+    expect(JSON.stringify(forOwner)).not.toContain('Недавний Гость');
+    expect(JSON.stringify(forOwner)).not.toContain('Ни Разу Не Приходил');
+
+    // Администратор узнаёт гостя по имени, но контактов не получает.
+    expect(forAdmin).toMatchObject({
+      phone_visible: false,
+      clients: [{ name: 'Иван Петров' }],
+    });
+    expect(JSON.stringify(forAdmin)).not.toContain('+7999');
+    jest.useRealTimers();
+  });
   it('returns and caches a PII-free full client registry analysis', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-12T09:00:00.000Z'));

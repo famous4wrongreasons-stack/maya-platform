@@ -1277,7 +1277,18 @@ export class YclientsCRMAdapter implements CRMAdapter {
         {
           method: 'POST',
           body: JSON.stringify({
-            fields: ['id', 'visits_count', 'sold_amount', 'last_visit_date'],
+            // 🔴 name/phone нужны для поимённого списка спящих гостей: владелец
+            // должен знать, КОГО возвращать. Наружу, к внешней модели, они не
+            // выходят — инструменты статистики отдают псевдонимы, а поимённый
+            // список собирает сервер.
+            fields: [
+              'id',
+              'name',
+              'phone',
+              'visits_count',
+              'sold_amount',
+              'last_visit_date',
+            ],
             filters: [],
             page,
             page_size: pageSize,
@@ -1306,6 +1317,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
           last_visit_date: this.normalizeClientVisitDate(
             candidate.last_visit_date,
           ),
+          name:
+            typeof candidate.name === 'string' && candidate.name.trim()
+              ? candidate.name.trim()
+              : null,
+          phone:
+            typeof candidate.phone === 'string' && candidate.phone.trim()
+              ? candidate.phone.trim()
+              : null,
         });
         added += 1;
       }

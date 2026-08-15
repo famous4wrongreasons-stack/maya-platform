@@ -558,6 +558,40 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'clients.dormant.list',
+    description:
+      'List salon guests who have not returned for at least inactive_days, by name, longest inactivity first. Use for "кто давно не приходил", "кого можно вернуть", "покажи спящих клиентов", "выгрузи тех кто пропал". Returns real client names because the owner needs to know WHOM to win back; phone numbers are included only for the salon owner. This is the only client tool that carries personal data, so its answer is composed by the server and never sent to an external model. Counts and cohorts without names live in clients.retention.scan; a single guest dossier lives in clients.dossier.read.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['inactive_days'],
+      properties: {
+        inactive_days: {
+          type: 'integer',
+          minimum: 14,
+          maximum: 3650,
+          description:
+            'Minimum days since the last visit: 30 for a month, 90 for long gone.',
+        },
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 50,
+          description: 'How many guests to list. Default 20.',
+        },
+      },
+    },
+    allowedRoles: BUSINESS_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['customers.core'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 70_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'clients.retention.scan',
     description:
       'Analyze the complete paginated CRM client registry without PII. Returns exact total cards, repeat and loyal counts, cumulative inactivity counts, the intersection of loyal + inactive clients, and non-overlapping reactivation cohorts over 1, 2, 3, 4, 5, 6 months and 1 year. Use for "how many clients are in the whole database", "how many loyal clients", "which loyal clients have not visited for N months", win-back advice, retention and dormant-base questions. Never substitute period analytics for this tool.',

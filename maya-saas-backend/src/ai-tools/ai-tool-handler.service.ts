@@ -143,6 +143,15 @@ const STAFF_CONFIRMED_REVENUE_UNAVAILABLE = {
   maya: 'internal_calendar_records_booked_appointment_value_which_is_not_till_confirmed_cash',
 } as const;
 
+/**
+ * Телефон гостя видит только владелец. Мастеру и администратору хватает имени,
+ * чтобы узнать своего клиента; база контактов — актив салона, а не сотрудника.
+ */
+const DORMANT_PHONE_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+]);
+
 @Injectable()
 export class AiToolHandlerService {
   private readonly businessQueryCache = new Map<
@@ -195,6 +204,8 @@ export class AiToolHandlerService {
         return this.readClientDossier(principal, args);
       case 'clients.high-value.read':
         return this.readHighValueClients(principal, args);
+      case 'clients.dormant.list':
+        return this.readDormantClients(principal, args);
       case 'clients.no-show-risk.read':
         return this.readNoShowRiskClients(principal, args);
       case 'catalog.services.read':
@@ -682,6 +693,69 @@ export class AiToolHandlerService {
    * Рейтинг ценных клиентов без передачи модели имён, телефонов и CRM-id.
    * Позиция в рейтинге становится временным псевдонимом внутри ответа.
    */
+  /**
+   * Поимённый список гостей, которые давно не приходили.
+   *
+   * 🔴 Единственный инструмент, который отдаёт ИМЕНА гостей. Поэтому он помечен
+   * как чувствительный к персональным данным: ответ по нему собирает сервер, во
+   * внешнюю модель имена и телефоны не уходят никогда. Соседние инструменты по
+   * той же базе (высокоценные, риск неявки) продолжают отдавать псевдонимы.
+   *
+   * Телефон видит только владелец: мастеру и администратору хватает имени,
+   * чтобы узнать своего гостя, а база контактов — актив салона.
+   */
+  private async readDormantClients(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    const inactiveDays = this.requiredNumber(args.inactive_days);
+    const limit = this.requiredNumber(args.limit);
+    const [snapshot, timezone] = await Promise.all([
+      this.crmService.getClientRegistry(principal.tenantId),
+      this.reportingTimezone(principal.tenantId),
+    ]);
+    const asOf = this.localDate(new Date(), timezone);
+    const showPhone = DORMANT_PHONE_ROLES.has(principal.role);
+
+    const dormant = snapshot.clients
+      .map((client) => ({
+        client,
+        days: this.inactivityDays(client.last_visit_date, asOf),
+      }))
+      // Гость без единого визита — это не «ушедший», а никогда не пришедший.
+      .filter(
+        (entry) =>
+          entry.client.visits_count > 0 &&
+          entry.days !== null &&
+          entry.days >= inactiveDays,
+      )
+      .sort(
+        (left, right) =>
+          (right.days ?? 0) - (left.days ?? 0) ||
+          right.client.visits_count - left.client.visits_count,
+      );
+
+    return {
+      verified: true,
+      complete_registry: snapshot.complete,
+      source: snapshot.provider,
+      generated_at: snapshot.generated_at,
+      scope: 'salon',
+      inactive_days: inactiveDays,
+      total_dormant: dormant.length,
+      clients: dormant.slice(0, limit).map((entry) => ({
+        name: entry.client.name,
+        ...(showPhone ? { phone: entry.client.phone } : {}),
+        visits: entry.client.visits_count,
+        last_visit_date: entry.client.last_visit_date,
+        inactivity_days: entry.days,
+        lifetime_spend_amount_major_units: entry.client.sold_amount,
+      })),
+      contains_personal_data: true,
+      phone_visible: showPhone,
+    };
+  }
+
   private async readHighValueClients(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,

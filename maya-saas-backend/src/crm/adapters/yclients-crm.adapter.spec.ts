@@ -679,7 +679,12 @@ describe('YclientsCRMAdapter', () => {
     ]);
   });
 
-  it('paginates the complete client registry without requesting personal fields', async () => {
+  // 🔴 Контракт изменён осознанно, по решению владельца: список спящих гостей
+  // должен называть ИМЕНА, иначе возвращать некого. Персональные поля теперь
+  // запрашиваются, но граница осталась на месте и проверяется ниже: наружу, к
+  // внешней модели, они по-прежнему не уходят — статистика отдаёт псевдонимы,
+  // поимённый список собирает сервер.
+  it('paginates the complete client registry and keeps personal fields inside', async () => {
     const requestBodies: Array<{ fields: string[]; page: number }> = [];
     global.fetch = jest.fn(
       (
@@ -739,17 +744,25 @@ describe('YclientsCRMAdapter', () => {
       visits_count: 3,
       sold_amount: 4500,
       last_visit_date: '2026-05-02',
+      name: null,
+      phone: null,
+    });
+    // Имя и телефон доезжают до сервера — именно они и нужны для возврата гостя.
+    expect(result.clients[0]).toMatchObject({
+      external_id: '1',
+      name: 'Must not leave adapter 0',
+      phone: '+70000000',
     });
     expect(requestBodies.map((body) => body.page)).toEqual([1, 2]);
     for (const body of requestBodies) {
       expect(body.fields).toEqual([
         'id',
+        'name',
+        'phone',
         'visits_count',
         'sold_amount',
         'last_visit_date',
       ]);
-      expect(body.fields).not.toContain('name');
-      expect(body.fields).not.toContain('phone');
     }
   });
 

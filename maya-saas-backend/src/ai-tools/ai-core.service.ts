@@ -401,6 +401,7 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'expenses.read': 'business_expenses',
   'customers.count': 'customer_count',
   'clients.retention.scan': 'client_retention',
+  'clients.dormant.list': 'client_retention',
   'clients.dossier.read': 'client_dossier',
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
@@ -445,6 +446,9 @@ const PII_SENSITIVE_TOOLS = new Set([
   // только обезличенное досье. Формулировку тоже собирает сервер: так даже
   // история услуг конкретного человека не отправляется внешней модели.
   'clients.dossier.read',
+  // Единственный инструмент, отдающий ИМЕНА гостей списком. Ответ собирает
+  // сервер: ни одно имя и ни один телефон не уходят во внешнюю модель.
+  'clients.dormant.list',
 ]);
 /**
  * Инструменты, для которых проверенный сервером ответ нельзя переформулировать
@@ -2238,6 +2242,55 @@ export class AiCoreService {
     return null;
   }
 
+  /**
+   * Список спящих гостей — поимённо, силами сервера.
+   *
+   * 🔴 Имена и телефоны сюда доходят, но дальше не идут: этот текст
+   * возвращается пользователю напрямую, минуя внешнюю модель. Так владелец
+   * получает живой список «кого возвращать», а контур 152-ФЗ остаётся цел.
+   */
+  private deterministicDormantClientsReply(value: unknown): string | null {
+    const data = this.record(value);
+    const rows = Array.isArray(data.clients) ? data.clients : [];
+    const days =
+      typeof data.inactive_days === 'number' ? data.inactive_days : null;
+    const total =
+      typeof data.total_dormant === 'number' ? data.total_dormant : rows.length;
+    if (days === null) {
+      return null;
+    }
+    if (!rows.length) {
+      return `Гостей, которые не приходили дольше ${days} дней, нет — база активна.`;
+    }
+    const lines = rows
+      .map((row: unknown) => {
+        const client = this.record(row);
+        const name =
+          typeof client.name === 'string' && client.name.trim()
+            ? client.name.trim()
+            : 'Без имени в CRM';
+        const phone =
+          typeof client.phone === 'string' && client.phone.trim()
+            ? `, ${client.phone.trim()}`
+            : '';
+        const gap =
+          typeof client.inactivity_days === 'number'
+            ? `${client.inactivity_days} дн.`
+            : 'давно';
+        const visits =
+          typeof client.visits === 'number'
+            ? `, визитов: ${client.visits}`
+            : '';
+        return `• ${name}${phone} — не был ${gap}${visits}`;
+      })
+      .join('\n');
+    const tail =
+      total > rows.length
+        ? `\n\nПоказала ${rows.length} из ${total} — скажите, если нужен весь список.`
+        : '';
+    return `Гости, которые не приходили дольше ${days} дней — всего ${total}:\n\n${lines}${tail}`;
+  }
+
   private deterministicReplyForTool(
     evidence: AiCoreToolResult,
     userText: string,
@@ -2268,6 +2321,8 @@ export class AiCoreService {
         );
       case 'clients.retention.scan':
         return this.deterministicClientRetentionReply(evidence.result, text);
+      case 'clients.dormant.list':
+        return this.deterministicDormantClientsReply(evidence.result);
       case 'clients.dossier.read':
         return this.deterministicClientDossierReply(evidence.result);
       case 'staff.schedule.read':

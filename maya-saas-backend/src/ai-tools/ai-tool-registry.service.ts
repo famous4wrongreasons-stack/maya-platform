@@ -213,6 +213,18 @@ export class AiToolRegistryService {
           limit: this.assertIntegerRange(args.limit ?? 10, 'limit', 1, 20),
         };
       }
+      case 'clients.dormant.list': {
+        this.assertAllowedKeys(args, ['inactive_days', 'limit']);
+        return {
+          inactive_days: this.assertIntegerRange(
+            args.inactive_days,
+            'inactive_days',
+            14,
+            3650,
+          ),
+          limit: this.assertIntegerRange(args.limit ?? 20, 'limit', 1, 50),
+        };
+      }
       case 'clients.dossier.read':
         this.assertAllowedKeys(args, ['query']);
         return { query: this.assertClientSearchQuery(args.query) };

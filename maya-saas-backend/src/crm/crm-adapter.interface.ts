@@ -156,6 +156,16 @@ export interface CrmClientRegistryItem {
   visits_count: number;
   sold_amount: number;
   last_visit_date: string | null;
+  /**
+   * Имя и телефон гостя. Появились ради списка спящих клиентов: владельцу
+   * нужно знать, КОГО возвращать, а не «client_7».
+   *
+   * 🔴 Эти поля НИКОГДА не уходят во внешнюю модель. Инструменты, работающие
+   * с реестром на уровне статистики, отдают псевдонимы; поимённый список
+   * собирает сервер и помечает инструмент как чувствительный к ПД.
+   */
+  name: string | null;
+  phone: string | null;
 }
 
 export interface CrmClientRegistrySnapshot {

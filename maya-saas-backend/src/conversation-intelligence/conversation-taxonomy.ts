@@ -387,6 +387,29 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       synonyms: ['самые ценные', 'кто больше потратил', 'лучшие клиенты'],
       examples: ['Кто наши самые лояльные гости?'],
     }),
+    intent(
+      'clients.dormant_list',
+      'clients',
+      'List by name the guests who stopped coming.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: BUSINESS_ROLES,
+        permission: 'clients.registry.read',
+        tools: ['clients.dormant.list'],
+        optionalSlots: ['period'],
+        responseRule:
+          'The server composes this answer with real names; never repeat client names or phones into any other tool call.',
+        synonyms: [
+          'кто давно не приходил',
+          'кого можно вернуть',
+          'спящие клиенты',
+          'кто пропал',
+          'выгрузи тех кто не ходит',
+        ],
+        examples: ['Кто не был больше двух месяцев?'],
+      },
+    ),
     intent('clients.dossier', 'clients', 'Read one client CRM dossier.', {
       action: 'read',
       dataClass: 'C',
