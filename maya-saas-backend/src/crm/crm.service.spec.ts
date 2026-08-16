@@ -981,4 +981,99 @@ describe('CrmService', () => {
 
     expect(membershipUpdateMany).not.toHaveBeenCalled();
   });
+  describe('журнал: в чьё расписание разрешено писать', () => {
+    const buildService = (access: unknown) => {
+      const tenantContext = new TenantContextService();
+      const service = new CrmService(
+        {
+          crmStaffAccess: { findFirst: jest.fn().mockResolvedValue(access) },
+        } as unknown as PrismaService,
+        {} as unknown as EncryptionService,
+        {} as unknown as CrmAdapterFactory,
+        tenantContext,
+        {} as never,
+      );
+
+      return { service, tenantContext };
+    };
+
+    const master = (role: UserRole) => ({
+      userId: 'user-master',
+      sessionId: 'session-1',
+      tenantId: 'tenant-1',
+      role,
+      email: 'master@example.test',
+      branchId: null,
+      membershipId: 'membership-1',
+      membershipStatus: 'active' as const,
+    });
+
+    it('не даёт мастеру посадить клиента в чужое кресло', async () => {
+      // Раньше создание записи не проходило через стража вообще: externalId
+      // ещё нет, а staff_id из тела уходил в CRM как есть. Визит садился в
+      // чужую сетку, хотя прочитать или отменить чужой визит нельзя.
+      const { service, tenantContext } = buildService({
+        externalStaffId: 'staff-own',
+        status: 'active',
+      });
+
+      await expect(
+        tenantContext.runAsSystemTenant('tenant-1', () =>
+          service.assertJournalStaffWritable(
+            'tenant-1',
+            master(UserRole.PROVIDER),
+            'staff-foreign',
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('пускает мастера в собственное кресло', async () => {
+      const { service, tenantContext } = buildService({
+        externalStaffId: 'staff-own',
+        status: 'active',
+      });
+
+      await expect(
+        tenantContext.runAsSystemTenant('tenant-1', () =>
+          service.assertJournalStaffWritable(
+            'tenant-1',
+            master(UserRole.PROVIDER),
+            'staff-own',
+          ),
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('не ограничивает управляющего: он ведёт расписание всего салона', async () => {
+      const { service, tenantContext } = buildService(null);
+
+      await expect(
+        tenantContext.runAsSystemTenant('tenant-1', () =>
+          service.assertJournalStaffWritable(
+            'tenant-1',
+            master(UserRole.TENANT_OWNER),
+            'staff-foreign',
+          ),
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('отказывает мастеру без активной привязки к CRM', async () => {
+      const { service, tenantContext } = buildService({
+        externalStaffId: 'staff-own',
+        status: 'disabled',
+      });
+
+      await expect(
+        tenantContext.runAsSystemTenant('tenant-1', () =>
+          service.assertJournalStaffWritable(
+            'tenant-1',
+            master(UserRole.PROVIDER),
+            'staff-own',
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+  });
 });

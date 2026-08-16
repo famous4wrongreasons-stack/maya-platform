@@ -1,3 +1,4 @@
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { InboxService } from './inbox.service';
 
 describe('InboxService recipients', () => {
@@ -46,7 +47,10 @@ describe('InboxService recipients', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
     };
-    const service = new InboxService(prisma as never);
+    const service = new InboxService(
+      prisma as never,
+      new TenantContextService(),
+    );
     return { service, prisma, upsertMock, staffAccessFindMany };
   };
 
@@ -180,7 +184,10 @@ describe('InboxService recipients', () => {
       },
       devicePushToken: { findMany: jest.fn().mockResolvedValue([]) },
     };
-    const service = new InboxService(prisma as never);
+    const service = new InboxService(
+      prisma as never,
+      new TenantContextService(),
+    );
 
     await service.publishForTenant('tenant-1', {
       type: 'appointment_cancelled',

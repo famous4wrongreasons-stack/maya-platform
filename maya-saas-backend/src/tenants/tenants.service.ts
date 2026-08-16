@@ -429,6 +429,15 @@ export class TenantsService {
   }
 
   async createTenant(dto: CreateTenantDto) {
+    // 🔴 Страж стоял только на обновлении. А создание идёт и из ПУБЛИЧНОГО
+    // самообслуживаемого триала (`POST /api/onboarding/trial`), где subdomain
+    // становится равен слагу: заявка со слагом `app` создавала арендатора, в
+    // которого потом резолвился `app.<домен>`. Резервные имена — www, api, app,
+    // admin, auth, login, billing — на этом пути не проверялись вовсе, а
+    // единственный тест звал функцию изолированно и создавал ложное
+    // впечатление покрытия.
+    this.assertHostNamesAllowed(dto);
+
     const existing = await this.prisma.tenant.findUnique({
       where: { slug: dto.slug.toLowerCase() },
       select: { id: true },

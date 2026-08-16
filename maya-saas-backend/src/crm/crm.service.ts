@@ -1120,6 +1120,37 @@ export class CrmService {
     return access.externalStaffId;
   }
 
+  /**
+   * 🔴 Вторая половина того же стража: в ЧЬЁ расписание разрешено писать.
+   *
+   * `assertJournalRecordAccess` закрывает существующую запись, но создание
+   * записи закрывать было нечем — там ещё нет externalId. В результате мастер с
+   * активной привязкой мог отправить `staff_id` ЧУЖОГО мастера, и визит садился
+   * в чужую сетку (`allowBusy: true`), хотя прочитать или отменить чужой визит
+   * тот же модуль ему запрещал. Тот же зазор был у переноса: проверялась
+   * исходная запись, а целевой мастер — нет, поэтому своей записью можно было
+   * занять чужое кресло.
+   *
+   * Роли с полным доступом (владелец, управляющий, администратор) ведут
+   * расписание всего салона — для них ограничения нет.
+   */
+  async assertJournalStaffWritable(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    staffId: string | undefined,
+  ): Promise<void> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const boundStaffId = await this.journalStaffBinding(scopedTenantId, actor);
+
+    if (boundStaffId === null || staffId === undefined) {
+      return;
+    }
+
+    if (String(staffId) !== String(boundStaffId)) {
+      throw this.journalRecordForbidden();
+    }
+  }
+
   private async assertJournalRecordAccess(
     tenantId: string,
     actor: AuthenticatedUser,
@@ -1311,6 +1342,13 @@ export class CrmService {
       scopedTenantId,
       actor,
       params.externalId,
+    );
+    // Своей записью нельзя занять чужое кресло: страж выше проверяет ИСХОДНУЮ
+    // запись, а целевой мастер до этого не проверялся вовсе.
+    await this.assertJournalStaffWritable(
+      scopedTenantId,
+      actor,
+      params.staffId,
     );
 
     return this.rescheduleAppointment(scopedTenantId, params);

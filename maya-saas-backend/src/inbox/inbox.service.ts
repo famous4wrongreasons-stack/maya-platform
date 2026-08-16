@@ -4,11 +4,20 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Prisma, UserRole } from '@prisma/client';
+import { Prisma, TenantStatus, UserRole } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { sendInboxApns } from './apns-push';
 import type { IngestInboxItemDto, RegisterPushTokenDto } from './dto/inbox.dto';
+
+/**
+ * Арендаторы, которым мост имеет право писать.
+ *
+ * Тот же набор, что у штатного резолвера: приостановленный и отменённый салон
+ * не должен получать ни карточек, ни пушей.
+ */
+const PUBLIC_TENANT_STATUSES: TenantStatus[] = ['trial', 'active', 'past_due'];
 
 const OWNER_ROLES: UserRole[] = [
   UserRole.tenant_owner,
@@ -32,7 +41,10 @@ const STAFF_SCOPED_INBOX_TYPES = new Set<string>([
 export class InboxService {
   private readonly logger = new Logger(InboxService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContextService,
+  ) {}
 
   assertBridgeToken(header: string | undefined): void {
     const expected = String(process.env.MAYA_INBOX_BRIDGE_TOKEN || '').trim();
@@ -51,8 +63,17 @@ export class InboxService {
   }
 
   async ingest(dto: IngestInboxItemDto) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { slug: dto.tenant_slug.trim().toLowerCase() },
+    // 🔴 Арендатор приходит из ТЕЛА запроса под общим платформенным токеном, и
+    // статус здесь не проверялся — в отличие от штатного резолвера. Держатель
+    // токена мог писать карточки и слать пуши в приостановленного или
+    // отменённого арендатора. Пер-арендный токен — это модель самого моста к
+    // старому боту, она относится к главе 2/7; здесь закрываем ровно то, что
+    // отличает этот путь от штатного.
+    const tenant = await this.prisma.tenant.findFirst({
+      where: {
+        slug: dto.tenant_slug.trim().toLowerCase(),
+        status: { in: PUBLIC_TENANT_STATUSES },
+      },
       select: { id: true, slug: true },
     });
     if (!tenant) {
@@ -62,17 +83,22 @@ export class InboxService {
       });
     }
 
-    return this.publishForTenant(tenant.id, {
-      type: dto.type,
-      sourceEventId: dto.source_event_id,
-      title: dto.title,
-      bodyText: dto.body_text,
-      payload: dto.payload,
-      deepLink: dto.deep_link,
-      userIds: dto.user_ids,
-      telegramChatIds: dto.telegram_chat_ids,
-      fanoutOwners: dto.fanout_owners,
-    });
+    // Публикация идёт в контексте найденного арендатора: раньше вся ветка
+    // работала вне контекста вообще, и любой сервис, который начнёт сверять
+    // принадлежность, молча получил бы отказ на ночном мосту.
+    return this.tenantContext.runAsSystemTenant(tenant.id, () =>
+      this.publishForTenant(tenant.id, {
+        type: dto.type,
+        sourceEventId: dto.source_event_id,
+        title: dto.title,
+        bodyText: dto.body_text,
+        payload: dto.payload,
+        deepLink: dto.deep_link,
+        userIds: dto.user_ids,
+        telegramChatIds: dto.telegram_chat_ids,
+        fanoutOwners: dto.fanout_owners,
+      }),
+    );
   }
 
   /**

@@ -8,11 +8,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { TenantStatus } from '@prisma/client';
 
 import { normalizePhoneE164 } from '../common/phone.util';
 import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { IngestRecoveryTouchpointDto } from './dto/recovery.dto';
+
+/** Тот же набор, что у штатного резолвера арендатора. */
+const RECOVERY_TENANT_STATUSES: TenantStatus[] = [
+  'trial',
+  'active',
+  'past_due',
+];
 
 const SUBJECT_DOMAIN = 'maya-recovery-subject:v1:';
 const MAX_ATTRIBUTION_DAYS = 90;
@@ -73,8 +81,14 @@ export class RecoveryService {
   }
 
   async ingestTouchpoint(dto: IngestRecoveryTouchpointDto) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { slug: dto.tenant_slug.trim().toLowerCase() },
+    // 🔴 Как и у мостового ingest в inbox: арендатор берётся из тела запроса
+    // под общим платформенным токеном, и статус тут не проверялся. Держатель
+    // токена мог писать касания в приостановленного и отменённого арендатора.
+    const tenant = await this.prisma.tenant.findFirst({
+      where: {
+        slug: dto.tenant_slug.trim().toLowerCase(),
+        status: { in: RECOVERY_TENANT_STATUSES },
+      },
       select: { id: true },
     });
     if (!tenant) {

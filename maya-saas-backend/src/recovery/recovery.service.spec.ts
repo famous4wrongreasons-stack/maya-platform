@@ -41,7 +41,7 @@ describe('RecoveryService', () => {
     });
     const service = createService({
       tenant: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'tenant-1' }),
+        findFirst: jest.fn().mockResolvedValue({ id: 'tenant-1' }),
       },
       recoveryTouchpoint: { upsert },
     });

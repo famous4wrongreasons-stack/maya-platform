@@ -187,6 +187,15 @@ export class CrmIntegrationController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     const tenantId = this.tenantId(actor);
+    // Мастер сажает клиента только в СВОЁ кресло. Маршрут открыт смене
+    // (provider, employee, staff), и без этой проверки чужой staff_id уходил в
+    // CRM как есть — визит садился в чужую сетку, хотя прочитать или отменить
+    // чужой визит тот же модуль запрещает.
+    await this.crmService.assertJournalStaffWritable(
+      tenantId,
+      actor,
+      dto.staff_id,
+    );
     // 🔴 Сознательно НЕ через appointments/createForClient: тот путь требует
     // совпадения со свободным окном и отвечает slot_taken. Мастер в журнале
     // сажает клиента куда решил — это админская запись, allowBusy.

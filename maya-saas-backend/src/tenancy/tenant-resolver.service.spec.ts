@@ -52,6 +52,33 @@ describe('TenantResolverService', () => {
     });
   });
 
+  it('never takes the tenant slug out of the query string', async () => {
+    // Раньше регулярка искала подстроку во всём originalUrl, поэтому
+    // `?next=/mobile/config/чужой` подсовывал чужого арендатора в контекст
+    // обычного запроса. Слаг берётся только из пути и только целиком.
+    const { resolver } = createResolver();
+
+    await expect(
+      resolver.resolvePublicRequest({
+        hostname: 'localhost',
+        originalUrl: '/api/customers?next=/mobile/config/demo',
+        url: '/api/customers?next=/mobile/config/demo',
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it('does not match a config path that only starts the URL', async () => {
+    const { resolver } = createResolver();
+
+    await expect(
+      resolver.resolvePublicRequest({
+        hostname: 'localhost',
+        originalUrl: '/api/mobile/config/demo/extra',
+        url: '/api/mobile/config/demo/extra',
+      }),
+    ).resolves.toBeNull();
+  });
+
   it('rejects conflicting trusted route and domain signals', async () => {
     const { resolver } = createResolver();
 

@@ -20,11 +20,25 @@ const PUBLIC_TENANT_STATUSES: PrismaTenantStatus[] = [
   'active',
   'past_due',
 ];
-const PUBLIC_CONFIG_PATH = /\/(?:api\/)?mobile\/config\/([^/?#]+)/;
+// 🔴 Заякорено с обоих концов и применяется к ПУТИ, а не ко всему URL.
+// Раньше регулярка искала подстроку в originalUrl вместе с query, поэтому
+// `/api/customers?next=/mobile/config/чужой-слаг` отдавал чужой слаг: проверено
+// запуском, захват срабатывал на 20-м символе. Резолв уходил в контекст
+// безусловно, и хотя утечки это не давало (аутентифицированные маршруты падают
+// 403 на конфликте сигналов), публичные пути читают из контекста именно этого
+// арендатора.
+const PUBLIC_CONFIG_PATH = /^\/(?:api\/)?mobile\/config\/([^/]+)$/;
 
 interface ResolvedPublicTenant {
   tenantId: string;
   source: TenantResolutionSource;
+}
+
+/** Путь без query и фрагмента: слаг арендатора берётся только оттуда. */
+function pathOf(rawUrl: string): string {
+  const cut = rawUrl.search(/[?#]/);
+
+  return cut === -1 ? rawUrl : rawUrl.slice(0, cut);
 }
 
 @Injectable()
@@ -39,7 +53,7 @@ export class TenantResolverService {
     request: Pick<Request, 'hostname' | 'originalUrl' | 'url'>,
   ): Promise<ResolvedPublicTenant | null> {
     const routeTenant = await this.resolveRouteSlug(
-      request.originalUrl || request.url,
+      pathOf(request.originalUrl || request.url),
     );
     const domainTenant = await this.resolveDomain(request.hostname);
 
