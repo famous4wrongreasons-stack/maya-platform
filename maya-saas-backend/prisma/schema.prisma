@@ -133,6 +133,8 @@ model Tenant {
   catalogItems                   TenantCatalogItem[]
   referralProgram                ReferralProgram?
   businessReviews                BusinessReview[]
+  clients                        Client[]
+  crmClientLinks                 CrmClientLink[]
 
   @@index([status, graceEndsAt])
 }
@@ -225,6 +227,7 @@ model User {
   tenant                    Tenant?                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch                    Branch?                    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
   auditLogs                 AuditLog[]
+  clients                   Client[]
   appointments              Appointment[]              @relation("ClientAppointments")
   authIdentities            AuthIdentity[]
   authSessions              AuthSession[]
@@ -1087,6 +1090,74 @@ model BillingPayment {
 enum AuditScope {
   tenant
   platform
+}
+
+/// Идентичность клиента внутри Maya.
+///
+/// 🔴 До этого её не существовало вовсе: внешний id клиента адаптер вычислял и
+/// ВЫБРАСЫВАЛ, а единственным ключом сопоставления был телефон. Отсюда три
+/// следствия — смена номера рвала историю атрибуции (subjectRef считается от
+/// телефона), дубли карточек в CRM были неразрешимы, а смена CRM обнуляла
+/// связь с прошлым.
+///
+/// Якорь намеренно почти пустой: имя, визиты, суммы и прайс остаются во внешней
+/// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
+/// без аккаунта — таких в салоне большинство.
+model Client {
+  id                 String          @id @default(cuid())
+  tenantId           String
+  /// Аккаунт Maya, если человек им обзавёлся.
+  userId             String?
+  /// HMAC от последних десяти цифр номера — того же ключа, по которому идёт всё
+  /// сопоставление сегодня. Сам номер здесь не хранится.
+  ///
+  /// НЕ идентичность и НЕ уникален: семья на один номер — обычное дело, и
+  /// склеивать таких людей нельзя. Это индекс кандидатов, не более.
+  phoneHash          String?
+  /// Терминальное состояние погашенного дубля, как UserStatus.merged.
+  mergedIntoClientId String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user               User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// 🔴 Ссылка СОСТАВНАЯ. Одноколоночная позволяла погасить клиента в пользу
+  /// клиента ЧУЖОГО арендатора — межарендное слияние на уровне базы.
+  mergedInto         Client?         @relation("ClientMerge", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)
+  mergedFrom         Client[]        @relation("ClientMerge")
+  crmLinks           CrmClientLink[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, phoneHash])
+  @@index([tenantId, userId])
+}
+
+/// Привязка карточки внешней CRM к идентичности Maya.
+///
+/// Провайдер входит в ключ намеренно: без него смена CRM отдала бы историю
+/// чужой карточке с совпавшим номером.
+model CrmClientLink {
+  id         String    @id @default(cuid())
+  tenantId   String
+  clientId   String
+  provider   String
+  externalId String
+  /// Когда карточку в последний раз видели живой в CRM.
+  syncedAt   DateTime  @default(now())
+  /// Карточка исчезла или заархивирована во внешней системе. Строка ОСТАЁТСЯ:
+  /// история Maya не должна пропадать вместе с записью провайдера.
+  unlinkedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  /// Составной ключ: строка связи не может указывать на клиента другого
+  /// арендатора. То самое правило миграции strict_tenant_relations.
+  client     Client    @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, provider, externalId])
+  @@index([tenantId, clientId])
+  @@index([tenantId, provider, syncedAt])
 }
 
 model AuditLog {

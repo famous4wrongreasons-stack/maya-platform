@@ -12,6 +12,7 @@ describe('runtime config validation', () => {
     AUTH_RATE_LIMIT_SECRET: secret('rate-limit'),
     PHONE_AUTH_SECRET: secret('phone'),
     CRM_ENCRYPTION_KEY: secret('crm'),
+    CLIENT_IDENTITY_HASH_SECRET: secret('client-identity'),
     CORS_ALLOWED_ORIGINS: 'https://app.example.test,capacitor://localhost',
     AUTH_TRUST_PROXY: '127.0.0.1',
     PHONE_AUTH_PROVIDER: 'smsru',
@@ -43,6 +44,20 @@ describe('runtime config validation', () => {
 
   it('refuses to start when the environment is not stated', () => {
     expect(() => validateRuntimeConfig({})).toThrow('NODE_ENV is required');
+  });
+
+  it('requires an independent secret for the client identity hash', () => {
+    // Отдельный домен безопасности: хеш личности клиента ротируется независимо
+    // от сессий и токенов, поэтому переиспользовать чужой секрет нельзя.
+    const config = productionConfig();
+    delete config.CLIENT_IDENTITY_HASH_SECRET;
+    expect(validationMessage(config)).toContain('CLIENT_IDENTITY_HASH_SECRET');
+  });
+
+  it('refuses a client identity secret copied from another domain', () => {
+    const config = productionConfig();
+    config.CLIENT_IDENTITY_HASH_SECRET = config.JWT_SECRET;
+    expect(validationMessage(config)).toContain('CLIENT_IDENTITY_HASH_SECRET');
   });
 
   it('requires the trusted proxy list in production', () => {

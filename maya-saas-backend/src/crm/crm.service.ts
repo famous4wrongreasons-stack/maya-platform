@@ -20,6 +20,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveSalonTimezone } from '../tenants/salon-timezone';
+import { ClientIdentityService } from './client-identity.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
 import {
@@ -116,6 +117,7 @@ export class CrmService {
     private readonly adapterFactory: CrmAdapterFactory,
     private readonly tenantContext: TenantContextService,
     private readonly internalCalendarService: InternalCalendarService,
+    private readonly clientIdentityService: ClientIdentityService,
   ) {}
 
   async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
@@ -1612,10 +1614,24 @@ export class CrmService {
     }
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.getClientLoyalty({
+    const loyalty = await adapter.getClientLoyalty({
       tenantId: scopedTenantId,
       phone,
     });
+
+    // Теневая регистрация личности: единственное место, где Maya вообще видит
+    // внешний идентификатор клиента. Раньше он вычислялся и выбрасывался.
+    // Запись строго побочная — ответ не меняется и от её сбоя не зависит.
+    if (loyalty?.external_client_id) {
+      await this.clientIdentityService.tryRegisterCrmClient({
+        tenantId: scopedTenantId,
+        provider: loyalty.provider,
+        externalId: loyalty.external_client_id,
+        phone,
+      });
+    }
+
+    return loyalty;
   }
 
   async testConnection(tenantId: string) {
