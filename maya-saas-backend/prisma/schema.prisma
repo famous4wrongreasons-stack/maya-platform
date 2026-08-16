@@ -248,6 +248,11 @@ model User {
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+  /// Вход по почте ищет пользователя ПО ВСЕМ арендаторам, поэтому составные
+  /// ключи с ведущим tenantId для него непригодны — без этих двух индексов
+  /// каждая попытка входа сканирует таблицу целиком.
+  @@index([email])
+  @@index([phone])
 }
 
 /// Карта слияния дублей аккаунта.
@@ -1108,6 +1113,8 @@ model AuditLog {
   @@index([tenantId])
   @@index([userId])
   @@index([scope, createdAt])
+  /// Журнал арендатора читается по времени, а не целиком.
+  @@index([tenantId, createdAt])
 }
 
 model Appointment {
@@ -1140,6 +1147,10 @@ model Appointment {
   @@index([clientId])
   @@index([branchId])
   @@index([tenantId, staffExternalId, startAt])
+  /// Показ недели без фильтра по мастеру: составной выше неприменим
+  /// (staffExternalId — вторая колонка), а GiST построен по blockedStartAt.
+  /// Без этого читались все записи арендатора за всю историю.
+  @@index([tenantId, startAt])
 }
 
 /// Consent-safe outreach fact used by MAYA Recovered attribution.
