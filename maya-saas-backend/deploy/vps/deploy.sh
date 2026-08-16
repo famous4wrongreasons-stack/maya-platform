@@ -106,8 +106,13 @@ run "set -e
   # install-скрипты незнакомых пакетов, и нативный модуль может лежать на месте,
   # но не собраться. Пароли проверяются через bcrypt — молчаливая поломка тут
   # означает, что никто не может войти.
-  node -e \"require('bcrypt').hashSync('x',4); console.log('bcrypt собран и работает')\"" \
-  || fail "npm ci"
+  node -e \"require('bcrypt').hashSync('x',4); console.log('bcrypt собран и работает')\"
+  # 🔴 Клиент Prisma генерируется ЗДЕСЬ, до preflight: preflight ходит в базу
+  # через @prisma/client, а без сгенерированного клиента падает с
+  # «Cannot find module .prisma/client/default». Генерация строится из
+  # schema.prisma и базы не касается, поэтому до миграции она безопасна.
+  node node_modules/prisma/build/index.js generate 2>&1 | tail -2" \
+  || fail "npm ci или генерация клиента"
 
 step "6/10 release:preflight (блокирующий, до базы)"
 # 🔴 Полный preflight, а не ручная проверка конфига. Он запускается ИЗ
