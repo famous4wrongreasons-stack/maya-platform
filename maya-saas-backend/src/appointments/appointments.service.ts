@@ -22,6 +22,11 @@ import { InternalCalendarService } from '../internal-calendar/internal-calendar.
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import {
+  DEFAULT_SALON_TIMEZONE,
+  isUsableTimezone,
+  resolveSalonTimezone,
+} from '../tenants/salon-timezone';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import {
@@ -101,6 +106,7 @@ export class AppointmentsService {
     );
     const clientProfile = this.usersService.serializeUser(client);
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
+    const timezone = await this.resolveBookingTimezone(tenantId, branch);
     const services = await this.crmService.getServices(tenantId);
     this.assertRequestedServicesExist(dto.serviceIds, services);
     const selectedServices = services.filter((service) =>
@@ -111,10 +117,7 @@ export class AppointmentsService {
       0,
     );
     const currency = selectedServices[0]?.currency ?? 'RUB';
-    const requestedStart = normalizeRequestedStart(
-      dto.start,
-      branch?.timezone ?? 'Europe/Moscow',
-    );
+    const requestedStart = normalizeRequestedStart(dto.start, timezone);
     const slots = await this.crmService.getAvailableSlots(tenantId, {
       date: requestedStart,
       staffId: dto.staffId,
@@ -124,7 +127,7 @@ export class AppointmentsService {
     const matchedSlot = findMatchingSlotByLocalStart(
       slots,
       requestedStart,
-      branch?.timezone ?? 'Europe/Moscow',
+      timezone,
     );
 
     if (!matchedSlot) {
@@ -238,7 +241,7 @@ export class AppointmentsService {
         clientName: bookingIdentity.clientName,
         serviceTitles: selectedServices.map((service) => service.name),
         startAt: appointment.startAt,
-        timezone: branch?.timezone ?? 'Europe/Moscow',
+        timezone: timezone,
         totalPrice,
         currency,
       }).catch((error) => {
@@ -295,12 +298,10 @@ export class AppointmentsService {
     );
     const clientProfile = this.usersService.serializeUser(client);
     const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
+    const timezone = await this.resolveBookingTimezone(tenantId, branch);
     const services = await this.crmService.getServices(tenantId);
     this.assertRequestedServicesExist(dto.serviceIds, services);
-    const requestedStart = normalizeRequestedStart(
-      dto.start,
-      branch?.timezone ?? 'Europe/Moscow',
-    );
+    const requestedStart = normalizeRequestedStart(dto.start, timezone);
     const bookingIdentity = this.resolveBookingIdentity(clientProfile, {
       clientName: dto.clientName,
       clientPhone: dto.clientPhone,
@@ -314,7 +315,7 @@ export class AppointmentsService {
     const matchedSlot = findMatchingSlotByLocalStart(
       slots,
       requestedStart,
-      branch?.timezone ?? 'Europe/Moscow',
+      timezone,
     );
 
     if (!matchedSlot) {
@@ -362,7 +363,7 @@ export class AppointmentsService {
       preview: true,
       mode: 'preview',
       branch_id: branch?.id ?? dto.branchId ?? null,
-      branch_timezone: branch?.timezone ?? 'Europe/Moscow',
+      branch_timezone: timezone,
       client_name: bookingIdentity.clientName,
       client_phone: bookingIdentity.clientPhone,
       staff_id: dto.staffId,
@@ -548,6 +549,16 @@ export class AppointmentsService {
       },
     );
     const catalog = await this.loadAppointmentCatalog(tenantId);
+    // Пояс для карточки об отмене: у записи уже загружен филиал, арендатор
+    // нужен только как запасной вариант, когда у филиала пояса нет.
+    const cancelTimezoneHint = isUsableTimezone(appointment.branch?.timezone)
+      ? appointment.branch?.timezone
+      : (
+          await this.prisma.tenant.findUnique({
+            where: { id: tenantId },
+            select: { defaultTimezone: true },
+          })
+        )?.defaultTimezone;
 
     await this.auditLogService.log({
       tenantId,
@@ -591,7 +602,10 @@ export class AppointmentsService {
           `Клиент: ${clientProfile.name || '—'}`,
           `Было время: ${this.formatInboxWhen(
             appointment.startAt,
-            'Europe/Moscow',
+            resolveSalonTimezone({
+              branchTimezone: appointment.branch?.timezone,
+              tenantTimezone: cancelTimezoneHint,
+            }),
           )}`,
         ].join('\n'),
         staffExternalId: appointment.staffExternalId,
@@ -680,6 +694,7 @@ export class AppointmentsService {
     const branch = branchId
       ? await this.resolveBranchForBooking(tenantId, branchId)
       : (appointment.branch ?? null);
+    const timezone = await this.resolveBookingTimezone(tenantId, branch);
     const serviceIds =
       dto.serviceIds && dto.serviceIds.length > 0
         ? dto.serviceIds
@@ -707,10 +722,7 @@ export class AppointmentsService {
     const currency = selectedServices[0]?.currency ?? appointment.currency;
 
     const staffId = dto.staffId ?? appointment.staffExternalId;
-    const requestedStart = normalizeRequestedStart(
-      dto.start,
-      branch?.timezone ?? 'Europe/Moscow',
-    );
+    const requestedStart = normalizeRequestedStart(dto.start, timezone);
     const slots = await this.crmService.getAvailableSlots(tenantId, {
       date: requestedStart,
       staffId,
@@ -720,7 +732,7 @@ export class AppointmentsService {
     const matchedSlot = findMatchingSlotByLocalStart(
       slots,
       requestedStart,
-      branch?.timezone ?? 'Europe/Moscow',
+      timezone,
     );
 
     if (!matchedSlot) {
@@ -825,7 +837,6 @@ export class AppointmentsService {
       const clientProfile = this.usersService.serializeUser(
         await this.usersService.getTenantUserOrThrow(clientId, tenantId),
       );
-      const timezone = 'Europe/Moscow';
       void this.publishAppointmentLifecycleInbox({
         tenantId,
         type: 'appointment_rescheduled',
@@ -922,7 +933,7 @@ export class AppointmentsService {
 
   private formatInboxWhen(at: Date, timezone: string): string {
     return new Intl.DateTimeFormat('ru-RU', {
-      timeZone: timezone || 'Europe/Moscow',
+      timeZone: timezone || DEFAULT_SALON_TIMEZONE,
       day: 'numeric',
       month: 'long',
       hour: '2-digit',
@@ -980,7 +991,7 @@ export class AppointmentsService {
   }): Promise<void> {
     const when = this.formatInboxWhen(
       input.startAt,
-      input.timezone || 'Europe/Moscow',
+      input.timezone || DEFAULT_SALON_TIMEZONE,
     );
     const servicesLine =
       input.serviceTitles.filter(Boolean).join(', ') || 'услуга';
@@ -1039,6 +1050,33 @@ export class AppointmentsService {
     return this.prisma.branch.findFirst({
       where: { tenantId },
       orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /**
+   * Пояс, в котором салон живёт: филиал, иначе арендатор, иначе московский.
+   *
+   * 🔴 Раньше здесь стояло `timezone`, и пояс,
+   * который CRM синхронизирует В АРЕНДАТОРА, до брони не доходил вовсе.
+   * Настенное время считается именно этим поясом и в этом же виде уходит в
+   * CRM, поэтому расхождение садило запись на неверный час.
+   */
+  private async resolveBookingTimezone(
+    tenantId: string,
+    branch: { timezone: string | null } | null,
+  ): Promise<string> {
+    if (isUsableTimezone(branch?.timezone)) {
+      return resolveSalonTimezone({ branchTimezone: branch?.timezone });
+    }
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+
+    return resolveSalonTimezone({
+      branchTimezone: branch?.timezone,
+      tenantTimezone: tenant?.defaultTimezone,
     });
   }
 

@@ -160,15 +160,20 @@ describe('TenantsService.createTenant', () => {
     expect(tenantCreateArgs.data.currentPeriodStart).toBeNull();
     expect(tenantCreateArgs.data.currentPeriodEnd).toBeNull();
     expect(tenantCreateArgs.data.billingMethodId).toBeUndefined();
+    // 🔴 Раньше здесь стоял московский пояс, и он ПЕРЕКРЫВАЛ то, что позже
+    // сообщит CRM: филиал разрешается раньше арендатора, а сам он не
+    // обновлялся никогда. Незаданный пояс филиала теперь означает «как у
+    // арендатора», и московский остаётся только у арендатора.
     expect(branchCreateMock).toHaveBeenCalledWith({
       data: {
         tenantId: 'tenant-1',
         name: 'Barbershop Griva',
         address: null,
         phone: null,
-        timezone: 'Europe/Moscow',
+        timezone: null,
       },
     });
+    expect(tenantCreateArgs.data.defaultTimezone).toBe('Europe/Moscow');
     expect(result).toMatchObject({
       id: 'tenant-1',
       slug: 'griva',

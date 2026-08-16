@@ -92,6 +92,13 @@ describe('AppointmentsService', () => {
     const branchFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<BranchRecord | null>
     > = jest.fn().mockResolvedValue(branch);
+    // Пояс арендатора — тот, который синхронизирует CRM. Раньше до брони он не
+    // доходил вовсе: филиал закрывал путь московским значением.
+    const tenantFindUniqueMock: jest.MockedFunction<
+      (
+        args: Record<string, unknown>,
+      ) => Promise<{ defaultTimezone: string } | null>
+    > = jest.fn().mockResolvedValue({ defaultTimezone: 'Europe/Moscow' });
     const appointmentFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<AppointmentRecord | null>
     > = jest.fn().mockResolvedValue(appointmentRecord);
@@ -274,6 +281,9 @@ describe('AppointmentsService', () => {
       crmStaffAccess: {
         findFirst: jest.fn().mockResolvedValue(null),
       },
+      tenant: {
+        findUnique: tenantFindUniqueMock,
+      },
     };
     const crmService: Pick<
       CrmService,
@@ -366,6 +376,8 @@ describe('AppointmentsService', () => {
         appointmentUpdateMock,
         appointmentCreateMock,
         cancelAppointmentMock,
+        branchFindFirstMock,
+        tenantFindUniqueMock,
         createAppointmentMock,
         getCalendarSourceMock,
         getClientAppointmentsMock,
@@ -428,6 +440,63 @@ describe('AppointmentsService', () => {
       duration_minutes: 60,
       currency: 'RUB',
     });
+  });
+
+  it('books a salon outside Moscow at the hour the client actually chose', async () => {
+    // 🔴 Настенное время брони считается поясом ФИЛИАЛА и в этом же виде уходит
+    // в CRM. Филиал получал московский пояс при создании и не обновлялся
+    // никогда, а пояс из CRM попадал только в арендатора — до брони он не
+    // доходил вовсе.
+    //
+    // Слот 08:00Z — это 15:00 в Новосибирске и 11:00 в Москве. До правки запрос
+    // на 15:00 нормализовался по Москве, не совпадал ни с одним слотом и падал
+    // с slot_taken; клиент новосибирского салона не мог записаться в принципе.
+    const { service, mocks } = createService();
+    mocks.branchFindFirstMock.mockResolvedValue({
+      id: 'branch-1',
+      name: 'Main Branch',
+      address: 'Novosibirsk',
+      phone: '+79990000000',
+      timezone: null,
+    });
+    mocks.tenantFindUniqueMock.mockResolvedValue({
+      defaultTimezone: 'Asia/Novosibirsk',
+    });
+
+    const result = await service.createForClient('tenant-1', 'user-1', {
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T15:00:00',
+      branchId: 'branch-1',
+    });
+
+    expect(result).toMatchObject({ service_ids: ['svc-1'] });
+    // В CRM уходит именно выбранный час, а не пересчитанный по Москве.
+    expect(mocks.createAppointmentMock).toHaveBeenCalledWith(
+      'tenant-1',
+      expect.objectContaining({ start: '2026-07-05T15:00:00' }),
+    );
+  });
+
+  it('still prefers an explicit branch timezone over the tenant default', async () => {
+    // Филиал сети в другом регионе не должен перетираться поясом арендатора.
+    const { service, mocks } = createService();
+    mocks.tenantFindUniqueMock.mockResolvedValue({
+      defaultTimezone: 'Asia/Novosibirsk',
+    });
+
+    await service.createForClient('tenant-1', 'user-1', {
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T11:00:00',
+      branchId: 'branch-1',
+    });
+
+    expect(mocks.tenantFindUniqueMock).not.toHaveBeenCalled();
+    expect(mocks.createAppointmentMock).toHaveBeenCalledWith(
+      'tenant-1',
+      expect.objectContaining({ start: '2026-07-05T11:00:00' }),
+    );
   });
 
   it('imports exact CRM history into the tenant-scoped client cabinet', async () => {

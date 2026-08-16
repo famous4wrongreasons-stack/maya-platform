@@ -19,6 +19,7 @@ import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { resolveSalonTimezone } from '../tenants/salon-timezone';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
 import {
@@ -517,11 +518,37 @@ export class CrmService {
       return;
     }
 
+    const previousTimezone = tenant?.defaultTimezone ?? null;
+
     await this.prisma.tenant.update({
       where: { id: tenantId },
       data: { defaultTimezone: timezone },
     });
-    this.logger.log(`Tenant timezone set from CRM: ${timezone}`);
+
+    // 🔴 Филиалы раньше не обновлялись НИКОГДА — во всём коде нет ни одного
+    // `branch.update`. Пояс присваивался один раз при создании арендатора и
+    // навсегда оставался московским, а бронирование считает настенное время
+    // именно поясом филиала и в этом виде отправляет его в CRM. Салон вне
+    // Москвы записывал клиента не на тот час.
+    //
+    // Обновляем только те филиалы, которые ШЛИ ЗА арендатором: их пояс совпадал
+    // с прежним значением по умолчанию либо не задан вовсе. Филиал с собственным
+    // поясом — законный случай для сети в разных регионах, и синхронизация с
+    // одной компанией CRM не имеет права его перетирать.
+    const followers = await this.prisma.branch.updateMany({
+      where: {
+        tenantId,
+        OR: [
+          { timezone: null },
+          ...(previousTimezone ? [{ timezone: previousTimezone }] : []),
+        ],
+      },
+      data: { timezone },
+    });
+
+    this.logger.log(
+      `Tenant timezone set from CRM: ${timezone} (branches updated: ${followers.count})`,
+    );
   }
 
   private safeRemoteLogoUrl(value: string | null | undefined): string | null {
@@ -939,7 +966,9 @@ export class CrmService {
     return adapter.getClientAppointments({
       tenantId: scopedTenantId,
       phone,
-      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
     });
   }
 
@@ -997,7 +1026,9 @@ export class CrmService {
       tenantId: scopedTenantId,
       from: from.toISOString(),
       to: to.toISOString(),
-      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
       providerId: query.providerId,
       includeCanceled: options?.includeCanceled === true,
     });
@@ -1053,7 +1084,7 @@ export class CrmService {
       select: { defaultTimezone: true },
     });
 
-    return tenant?.defaultTimezone ?? 'Europe/Moscow';
+    return resolveSalonTimezone({ tenantTimezone: tenant?.defaultTimezone });
   }
 
   /**
@@ -1449,7 +1480,9 @@ export class CrmService {
       tenantId: scopedTenantId,
       from: from.toISOString(),
       to: to.toISOString(),
-      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
     });
   }
 
@@ -1499,7 +1532,9 @@ export class CrmService {
       tenantId: scopedTenantId,
       from: from.toISOString(),
       to: to.toISOString(),
-      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
     });
   }
 
@@ -1560,7 +1595,9 @@ export class CrmService {
       tenantId: scopedTenantId,
       from: from.toISOString(),
       to: to.toISOString(),
-      timezone: tenant?.defaultTimezone ?? 'Europe/Moscow',
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
       externalIds,
     });
   }

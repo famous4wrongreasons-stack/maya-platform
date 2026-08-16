@@ -22,6 +22,7 @@ import {
 import { asJson } from '../common/json.util';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { DEFAULT_SALON_TIMEZONE } from './salon-timezone';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { serializePublicCrmSettings } from '../crm/crm-provider-settings';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -464,8 +465,12 @@ export class TenantsService {
 
     const tenant = await this.prisma.$transaction(async (tx) => {
       const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
-      const normalizedBranchTimezone =
-        asNonEmptyString(dto.branchTimezone) ?? 'Europe/Moscow';
+      // 🔴 Здесь стоял московский пояс по умолчанию, и он ПЕРЕКРЫВАЛ то, что
+      // позже сообщит CRM: филиал разрешается раньше арендатора, а сам он не
+      // обновлялся никогда. Салон в Новосибирске подключал CRM, арендатор
+      // получал верный пояс, а бронирование продолжало считать по Москве.
+      // Незаданный пояс филиала теперь означает «как у арендатора».
+      const normalizedBranchTimezone = asNonEmptyString(dto.branchTimezone);
       const created = await tx.tenant.create({
         data: {
           name: dto.name,
@@ -475,7 +480,10 @@ export class TenantsService {
           industryPresetId: dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID,
           calendarSource: dto.calendarSource ?? CalendarSource.EXTERNAL,
           defaultCurrency: dto.defaultCurrency ?? 'RUB',
-          defaultTimezone: dto.defaultTimezone ?? normalizedBranchTimezone,
+          defaultTimezone:
+            dto.defaultTimezone ??
+            normalizedBranchTimezone ??
+            DEFAULT_SALON_TIMEZONE,
           defaultLocale: dto.defaultLocale ?? 'ru-RU',
           customDomain: dto.customDomain?.toLowerCase(),
           subdomain: (dto.subdomain ?? dto.slug).toLowerCase(),
