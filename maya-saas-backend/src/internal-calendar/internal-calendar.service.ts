@@ -7,11 +7,13 @@ import {
 
 import { CalendarSource } from '../common/domain.enums';
 import { getIndustryPreset } from '../common/industry-presets';
-import type {
-  AvailableSlot,
-  ServiceItem,
-  StaffMember,
-} from '../crm/crm-adapter.interface';
+// 🔴 Внутренний календарь НЕ импортирует границу CRM. Собственные данные Maya
+// одевались в типы, форму которых задал адаптер YCLIENTS: `category` и
+// `duration_minutes` рождались из `price_min`/`seance_length`, а `rating` — из
+// `staff.rating`, из-за чего календарь подставлял чужие заглушки. Канон лежит
+// ниже обоих источников — см. `src/domain/catalog.ts`.
+import { CANCELED_STATUS_VALUES } from '../domain';
+import type { BookableSlot, Practitioner, ServiceOffering } from '../domain';
 import { PrismaService } from '../prisma/prisma.service';
 import { QuotaResource } from '../quotas/quota-resource';
 import { QuotaService } from '../quotas/quota.service';
@@ -35,7 +37,8 @@ import {
 const DEFAULT_WEEKLY_RULES: WeeklyAvailabilityRuleDto[] = [1, 2, 3, 4, 5].map(
   (weekday) => ({ weekday, startTime: '09:00', endTime: '18:00' }),
 );
-const CANCELLED_STATUSES = ['canceled', 'cancelled'];
+// Написания «отменено», лежащие В БАЗЕ. Состав менять нельзя — изменится выборка.
+const CANCELLED_STATUSES = [...CANCELED_STATUS_VALUES];
 const JOURNAL_MAX_RANGE_DAYS = 31;
 
 interface InternalServiceTiming {
@@ -297,7 +300,7 @@ export class InternalCalendarService {
     };
   }
 
-  async listServices(tenantId: string): Promise<ServiceItem[]> {
+  async listServices(tenantId: string): Promise<ServiceOffering[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const services = await this.prisma.internalService.findMany({
       where: { tenantId: scopedTenantId, active: true },
@@ -384,7 +387,7 @@ export class InternalCalendarService {
     return this.updateService(tenantId, serviceId, { active: false });
   }
 
-  async listStaff(tenantId: string): Promise<StaffMember[]> {
+  async listStaff(tenantId: string): Promise<Practitioner[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const providers = await this.prisma.internalProvider.findMany({
       where: { tenantId: scopedTenantId, active: true },
@@ -681,7 +684,7 @@ export class InternalCalendarService {
     staffId?: string;
     serviceIds?: string[];
     branchId?: string;
-  }): Promise<AvailableSlot[]> {
+  }): Promise<BookableSlot[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(params.tenantId);
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: scopedTenantId },
@@ -718,7 +721,7 @@ export class InternalCalendarService {
       orderBy: { createdAt: 'asc' },
     });
     const selectedServiceIds = params.serviceIds ?? [];
-    const slots: AvailableSlot[] = [];
+    const slots: BookableSlot[] = [];
     const minimumNoticeMs =
       getIndustryPreset(tenant.industryPresetId).defaultBookingSettings
         .minimumNoticeMinutes *

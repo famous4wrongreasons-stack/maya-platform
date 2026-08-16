@@ -1,4 +1,15 @@
 import { CrmProvider } from '../common/domain.enums';
+import type {
+  AppliedWorkDayChange,
+  BookableSlot,
+  Practitioner,
+  PractitionerAccessCandidate,
+  ServiceOffering,
+  WorkDay,
+  WorkDayChangePreview,
+  WorkInterval,
+  VisitAttendance,
+} from '../domain';
 
 export interface CrmAdapterConfig {
   provider: CrmProvider;
@@ -7,28 +18,21 @@ export interface CrmAdapterConfig {
   settings?: Record<string, unknown>;
 }
 
-export interface ServiceItem {
-  id: string;
-  name: string;
-  price: number;
-  duration_minutes: number;
-  currency: string;
-  category?: string;
-}
-
-export interface StaffMember {
-  id: string;
-  name: string;
-  title?: string;
-  specialization?: string;
-  avatar_url?: string | null;
-  rating?: number | null;
-}
-
-export interface CrmTeamMember extends StaffMember {
-  bookable: boolean;
-  suggested_role: 'administrator' | 'staff';
-}
+/**
+ * 🔴 ВРЕМЕННЫЕ АЛИАСЫ (Cycle 02 P3).
+ *
+ * Каталог и расписание больше не принадлежат границе CRM: их отдают ДВА
+ * источника — внешний адаптер и внутренний календарь, — поэтому канон переехал
+ * в `src/domain`. Имена ниже оставлены только для того, чтобы потребители
+ * мигрировали постепенно, а не одной ревизией.
+ *
+ * Это НЕ параллельная модель: каждое имя — псевдоним канонического типа, а не
+ * второй тип. `domain/boundary.spec.ts` следит, что список только сокращается,
+ * и не даёт добавить сюда новое имя.
+ */
+export type ServiceItem = ServiceOffering;
+export type StaffMember = Practitioner;
+export type CrmTeamMember = PractitionerAccessCandidate;
 
 export interface CrmCompanyOption {
   id: string;
@@ -42,31 +46,10 @@ export interface CrmCompanyProfile extends CrmCompanyOption {
   schedule: string | null;
 }
 
-export interface AvailableSlot {
-  start: string;
-  end: string;
-  staff_id: string;
-  branch_id?: string | null;
-}
-
-export interface StaffScheduleSlot {
-  from: string;
-  to: string;
-}
-
-export interface StaffScheduleDay {
-  staff_id: string;
-  date: string;
-  is_working: boolean;
-  slots: StaffScheduleSlot[];
-  revision: string;
-}
-
-export interface StaffScheduleChangePreview {
-  current: StaffScheduleDay;
-  proposed: StaffScheduleDay;
-  conflict_times: string[];
-}
+export type AvailableSlot = BookableSlot;
+export type StaffScheduleSlot = WorkInterval;
+export type StaffScheduleDay = WorkDay;
+export type StaffScheduleChangePreview = WorkDayChangePreview;
 
 export interface ApplyStaffScheduleDayChangeParams {
   tenantId: string;
@@ -77,13 +60,7 @@ export interface ApplyStaffScheduleDayChangeParams {
   timezone: string;
 }
 
-export interface AppliedStaffScheduleDayChange {
-  staff_id: string;
-  date: string;
-  is_working: boolean;
-  slots: StaffScheduleSlot[];
-  verified: boolean;
-}
+export type AppliedStaffScheduleDayChange = AppliedWorkDayChange;
 
 export interface CreateAppointmentParams {
   tenantId: string;
@@ -259,7 +236,8 @@ export interface CrmAppointmentDetail extends CrmJournalAppointment {
   client_phone: string | null;
   /** Длительность визита в минутах — её меняют кнопками ±15. */
   duration_minutes: number;
-  attendance: number;
+  /** Канон, а не код провайдера. Число возвращает презентер на HTTP-краю. */
+  attendance: VisitAttendance;
   paid: boolean;
   /** Что владельцу разрешено делать с этой записью прямо сейчас. */
   can_edit: boolean;
@@ -464,12 +442,12 @@ export interface CRMAdapter {
     externalId: string;
     timezone: string;
   }): Promise<CrmAppointmentDetail>;
-  /** «Пришёл» / «не пришёл»: attendance 1 | -1 | 0 (ожидание). */
+  /** «Пришёл» / «не пришёл». Кодировку провайдера знает только сам адаптер. */
   markAppointmentAttendance?(params: {
     tenantId: string;
     externalId: string;
-    attendance: number;
-  }): Promise<{ external_id: string; attendance: number }>;
+    attendance: VisitAttendance;
+  }): Promise<{ external_id: string; attendance: VisitAttendance }>;
   /** Стянуть/растянуть визит. Услуги, цены и время начала не трогаются. */
   setAppointmentDuration?(params: {
     tenantId: string;
@@ -508,7 +486,7 @@ export interface CRMAdapter {
       start: string;
       service_names: string[];
       total_price: number | null;
-      attendance: number | null;
+      attendance: VisitAttendance | null;
     }>
   >;
   getFinancialSummary?(params: {

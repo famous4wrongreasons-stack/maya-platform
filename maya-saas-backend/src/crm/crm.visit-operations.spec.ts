@@ -107,7 +107,7 @@ describe('CrmService: операции над визитом', () => {
     total_price: 1000,
     currency: 'RUB',
     duration_minutes: 60,
-    attendance: 0,
+    attendance: 'awaiting',
     paid: false,
     can_edit: true,
     branch: null,
@@ -117,18 +117,30 @@ describe('CrmService: операции над визитом', () => {
     const { service, run } = build({});
 
     await expect(
-      run(() => service.markAppointmentAttendance('tenant-1', OWNER, '77', 1)),
+      run(() =>
+        service.markAppointmentAttendance('tenant-1', OWNER, '77', 'arrived'),
+      ),
     ).rejects.toMatchObject({
       response: { error: { code: 'crm_attendance_not_supported' } },
     });
   });
 
-  it('не пускает в CRM отметку о приходе вне 1 / 0 / -1', async () => {
+  it('не пускает в CRM исход, который нельзя проставить записью', async () => {
+    // После P3 сервис принимает канон, а не код провайдера, поэтому проверка
+    // стала точнее: `confirmed_by_client` — валидный исход ЧТЕНИЯ (код 2), но
+    // записать его нельзя. Смысл прежний: сервис не доверяет вызывающему.
     const markAppointmentAttendance = jest.fn();
     const { service, run } = build({ markAppointmentAttendance });
 
     await expect(
-      run(() => service.markAppointmentAttendance('tenant-1', OWNER, '77', 5)),
+      run(() =>
+        service.markAppointmentAttendance(
+          'tenant-1',
+          OWNER,
+          '77',
+          'confirmed_by_client',
+        ),
+      ),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(markAppointmentAttendance).not.toHaveBeenCalled();
   });
@@ -187,14 +199,14 @@ describe('CrmService: операции над визитом', () => {
     const getAppointmentStaffId = jest.fn().mockResolvedValue('1461615');
     const markAppointmentAttendance = jest
       .fn()
-      .mockResolvedValue({ external_id: '77', attendance: 1 });
+      .mockResolvedValue({ external_id: '77', attendance: 'arrived' });
     const { service, run } = build(
       { getAppointmentStaffId, markAppointmentAttendance },
       { externalStaffId: '1461615', status: 'active' },
     );
 
     await run(() =>
-      service.markAppointmentAttendance('tenant-1', MASTER, '77', 1),
+      service.markAppointmentAttendance('tenant-1', MASTER, '77', 'arrived'),
     );
 
     expect(markAppointmentAttendance).toHaveBeenCalledTimes(1);
@@ -211,7 +223,9 @@ describe('CrmService: операции над визитом', () => {
     );
 
     await expect(
-      run(() => service.markAppointmentAttendance('tenant-1', MASTER, '77', 1)),
+      run(() =>
+        service.markAppointmentAttendance('tenant-1', MASTER, '77', 'arrived'),
+      ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(markAppointmentAttendance).not.toHaveBeenCalled();
   });

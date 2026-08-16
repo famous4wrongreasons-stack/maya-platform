@@ -49,6 +49,13 @@ import {
   scheduleSlotsContain,
   staffScheduleRevision,
 } from '../staff-schedule.utils';
+import { encodeCrmAppointmentKey } from '../../domain';
+import type { VisitAttendance } from '../../domain';
+import {
+  attendanceFromCode,
+  attendanceToCode,
+  WRITABLE_ATTENDANCE_CODES,
+} from '../crm-attendance';
 
 interface YclientsSettings {
   companyId?: number | string;
@@ -999,12 +1006,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
   async markAppointmentAttendance(params: {
     tenantId: string;
     externalId: string;
-    attendance: number;
-  }): Promise<{ external_id: string; attendance: number }> {
+    attendance: VisitAttendance;
+  }): Promise<{ external_id: string; attendance: VisitAttendance }> {
     void params.tenantId;
-    const attendance = [1, 0, -1].includes(params.attendance)
-      ? params.attendance
-      : 0;
+    // Кодировка провайдера появляется ровно здесь и дальше этого метода не идёт.
+    const code = attendanceToCode(params.attendance);
+    const attendance = WRITABLE_ATTENDANCE_CODES.includes(code) ? code : 0;
     // 🔴 save_if_busy обязателен: время визита мы не двигаем, но слот занят
     // самой же этой записью, а у журнальной записи поверх чужого окна — ещё и
     // соседней. С save_if_busy=false YClients отклонил бы PUT, и кнопки
@@ -1015,7 +1022,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
       { saveIfBusy: true },
     );
 
-    return { external_id: params.externalId, attendance };
+    return {
+      external_id: params.externalId,
+      attendance: attendanceFromCode(attendance),
+    };
   }
 
   async setAppointmentDuration(params: {
@@ -1196,7 +1206,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         ? this.normalizePhone(record.client.phone)
         : null,
       duration_minutes: durationMinutes,
-      attendance: typeof record.attendance === 'number' ? record.attendance : 0,
+      attendance: attendanceFromCode(record.attendance),
       paid: record.paid_full === true || record.paid_full === 1,
       // Удалённую запись править нечего — кабинет спрячет кнопки.
       can_edit: record.deleted !== true,
@@ -1367,7 +1377,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       start: string;
       service_names: string[];
       total_price: number | null;
-      attendance: number | null;
+      attendance: VisitAttendance | null;
     }>
   > {
     void params.tenantId;
@@ -1398,7 +1408,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
             serviceCosts.length > 0
               ? serviceCosts.reduce((total, cost) => total + cost, 0)
               : null,
-          attendance: 1,
+          attendance: 'arrived' as const,
         };
       })
       .sort((left, right) => left.start.localeCompare(right.start))
@@ -2800,7 +2810,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         : null;
 
     return {
-      id: `crm-${externalId}`,
+      id: encodeCrmAppointmentKey(externalId),
       client: {
         id:
           record.client?.id === undefined || record.client?.id === null

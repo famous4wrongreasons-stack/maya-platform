@@ -12,6 +12,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { AnalyticsRangeQueryDto } from './dto/analytics-range-query.dto';
+import {
+  isCanceledOutcome,
+  isCompletedOutcome,
+  isNoShowOutcome,
+} from '../domain';
+import {
+  CRM_JOURNAL_MAX_WINDOW_MS,
+  CRM_PAYROLL_MAX_WINDOW_DAYS,
+} from '../crm/crm-provider-limits';
 
 type AnalyticsAppointment = {
   id: string;
@@ -405,7 +414,8 @@ export class OperationsAnalyticsService {
     }
     const from = new Date(query.from);
     const to = new Date(query.to);
-    const fullFinanceRangeMs = 31 * 24 * 60 * 60 * 1000;
+    const fullFinanceRangeMs =
+      CRM_PAYROLL_MAX_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
     if (to.getTime() - from.getTime() <= fullFinanceRangeMs) {
       return this.crmService.getFinancialSummary(scopedTenantId, {
@@ -414,9 +424,10 @@ export class OperationsAnalyticsService {
       });
     }
 
-    // YClients limits payroll calculation to 31 days, while its verified
-    // revenue feed supports annual comparisons. Keep the money facts
-    // available for long owner reports and explicitly withhold payroll.
+    // Расчёт зарплаты внешняя CRM отдаёт только за короткий период, а
+    // подтверждённую выручку — за год. Держим денежные факты доступными для
+    // длинных отчётов владельца и осознанно не отдаём зарплату.
+    // Само ограничение принадлежит границе CRM — см. `crm-provider-limits.ts`.
     const summary = await this.crmService.getRevenueSummary(scopedTenantId, {
       from: query.from,
       to: query.to,
@@ -920,7 +931,7 @@ export class OperationsAnalyticsService {
       return [];
     }
 
-    const maxChunkMs = 31 * 24 * 60 * 60 * 1000;
+    const maxChunkMs = CRM_JOURNAL_MAX_WINDOW_MS;
     const ranges: Array<{ from: string; to: string }> = [];
     let cursor = from.getTime();
     while (cursor < to.getTime()) {
@@ -2041,20 +2052,18 @@ export class OperationsAnalyticsService {
     }).format(value);
   }
 
+  // Разбор исхода визита принадлежит домену: до P3 четыре модуля держали
+  // собственные списки написаний, и списки эти расходились.
   private isCancelled(status: string): boolean {
-    return ['canceled', 'cancelled'].includes(status.trim().toLowerCase());
+    return isCanceledOutcome(status);
   }
 
   private isCompleted(status: string): boolean {
-    return ['completed', 'complete', 'done', 'visited'].includes(
-      status.trim().toLowerCase(),
-    );
+    return isCompletedOutcome(status);
   }
 
   private isNoShow(status: string): boolean {
-    return ['no_show', 'no-show', 'noshow', 'did_not_come'].includes(
-      status.trim().toLowerCase(),
-    );
+    return isNoShowOutcome(status);
   }
 
   /**

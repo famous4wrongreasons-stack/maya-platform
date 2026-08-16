@@ -55,6 +55,8 @@ import {
   normalizeCrmProviderSettings,
   serializePublicCrmSettings,
 } from './crm-provider-settings';
+import type { VisitAttendance } from '../domain';
+import { assertWritableAttendance } from './crm-attendance';
 
 type CrmConnectionInput = {
   provider?: CrmProvider;
@@ -1271,17 +1273,12 @@ export class CrmService {
     tenantId: string,
     actor: AuthenticatedUser,
     externalId: string,
-    attendance: number,
+    attendance: VisitAttendance,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
-
-    if (![1, 0, -1].includes(attendance)) {
-      throw new BadRequestException({
-        message: 'CRM attendance must be one of 1, 0, -1.',
-        error: { code: 'crm_attendance_invalid' },
-      });
-    }
+    // Сервис не доверяет вызывающему: HTTP-край не единственный вход.
+    assertWritableAttendance(attendance);
 
     const adapter = await this.getVisitCapableAdapter(
       scopedTenantId,

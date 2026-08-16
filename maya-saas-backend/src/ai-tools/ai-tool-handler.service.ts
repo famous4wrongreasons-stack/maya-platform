@@ -59,6 +59,8 @@ import {
   historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
+import { parseVisitOutcome } from '../domain';
+import { CRM_JOURNAL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -4853,19 +4855,19 @@ export class AiToolHandlerService {
   private normalizedAppointmentStatus(
     value: string,
   ): 'no_show' | 'canceled' | 'completed' | 'other' {
-    const status = value
-      .trim()
-      .toLowerCase()
-      .replace(/[\s-]+/g, '_');
-    if (status === 'no_show' || status === 'noshow') return 'no_show';
-    if (status === 'canceled' || status === 'cancelled') return 'canceled';
-    if (status === 'completed' || status === 'done' || status === 'visited') {
-      return 'completed';
-    }
-    return 'other';
+    // Разбор принадлежит домену. Здесь остаётся только проекция канона на те
+    // четыре ответа, которых ждут вызывающие: «впереди» и «не разобрано» для
+    // этой статистики одинаково безразличны и оба означают `other`.
+    const outcome = parseVisitOutcome(value);
+    return outcome === 'scheduled' || outcome === 'unknown' ? 'other' : outcome;
   }
 
-  /** YClients journal accepts at most a 31-day interval per request. */
+  /**
+   * Журнал читается кусками: внешняя CRM не отдаёт длинный период одним
+   * запросом. Лимит объявлен в границе CRM (`CRM_JOURNAL_MAX_WINDOW_DAYS`),
+   * а здесь сознательно берётся запас в сутки — он был и до P3, и менять
+   * шаблон запросов заодно с канонизацией нельзя.
+   */
   private async readJournalRangeInChunks(
     tenantId: string,
     fromIso: string,
@@ -4874,7 +4876,7 @@ export class AiToolHandlerService {
     const from = new Date(fromIso);
     const to = new Date(toIso);
     const unique = new Map<string, CrmJournalAppointment>();
-    const maxChunkMs = 30 * 24 * 60 * 60 * 1_000;
+    const maxChunkMs = (CRM_JOURNAL_MAX_WINDOW_DAYS - 1) * 24 * 60 * 60 * 1_000;
     let cursor = from.getTime();
     while (cursor <= to.getTime()) {
       const chunkEnd = Math.min(to.getTime(), cursor + maxChunkMs - 1);

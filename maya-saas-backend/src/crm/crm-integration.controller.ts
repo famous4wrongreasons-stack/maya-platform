@@ -21,6 +21,7 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateCrmTeamAccessDto } from '../users/dto/update-crm-team-access.dto';
 import { UsersService } from '../users/users.service';
+import { attendanceFromWritableCode, attendanceToCode } from './crm-attendance';
 import { CrmService } from './crm.service';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
@@ -229,15 +230,19 @@ export class CrmIntegrationController {
   @Get('journal/appointments/:externalId')
   @Roles(...CRM_JOURNAL_ROLES)
   @ApiOperation({ summary: 'Read one visit card from the connected CRM' })
-  appointmentDetail(
+  async appointmentDetail(
     @Param('externalId') externalId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.crmService.getAppointmentDetail(
+    const detail = await this.crmService.getAppointmentDetail(
       this.tenantId(actor),
       actor,
       externalId,
     );
+
+    // 🔴 Числовой код возвращается на провод НЕИЗМЕННЫМ: выпущенный PWA читает
+    // именно его. Внутри системы ездит канон — см. `crm-attendance.ts`.
+    return { ...detail, attendance: attendanceToCode(detail.attendance) };
   }
 
   @Post('journal/appointments/:externalId/attendance')
@@ -253,8 +258,13 @@ export class CrmIntegrationController {
       tenantId,
       actor,
       externalId,
-      dto.attendance,
+      attendanceFromWritableCode(dto.attendance),
     );
+    // Провод и запись в аудит остаются числом — оба контракта уже опубликованы.
+    const wire = {
+      ...result,
+      attendance: attendanceToCode(result.attendance),
+    };
 
     await this.auditLogService.log({
       tenantId,
@@ -262,10 +272,10 @@ export class CrmIntegrationController {
       action: 'crm.appointment_attendance_set',
       entityType: 'crm_appointment',
       entityId: externalId,
-      metadata: { attendance: result.attendance },
+      metadata: { attendance: wire.attendance },
     });
 
-    return result;
+    return wire;
   }
 
   @Post('journal/appointments/:externalId/duration')

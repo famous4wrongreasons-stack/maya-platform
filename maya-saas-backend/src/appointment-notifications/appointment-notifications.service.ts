@@ -9,6 +9,7 @@ import { EntitlementsService } from '../entitlements/entitlements.service';
 import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { decodeCrmAppointmentKey } from '../domain';
 
 const DEFAULT_LEAD_TIMES_MINUTES = [24 * 60, 2 * 60] as const;
 const MIN_LEAD_MINUTES = 30;
@@ -324,9 +325,9 @@ export class AppointmentNotificationsService {
   }
 
   private externalAppointmentId(appointmentId: string): string {
-    return appointmentId.startsWith('crm-')
-      ? appointmentId.slice('crm-'.length)
-      : appointmentId;
+    // Формат ключа принадлежит домену: собирал его адаптер, а разбирал этот
+    // модуль — договорённость жила в двух местах без владельца.
+    return decodeCrmAppointmentKey(appointmentId);
   }
 
   private toPublicSettings(

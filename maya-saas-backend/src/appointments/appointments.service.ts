@@ -45,6 +45,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
+import { isCanceledOutcome } from '../domain';
 
 interface AppointmentErrorPayload {
   message: string;
@@ -1343,8 +1344,7 @@ export class AppointmentsService {
   }
 
   private isCancelledStatus(status: string): boolean {
-    const normalizedStatus = status.trim().toLowerCase();
-    return normalizedStatus === 'canceled' || normalizedStatus === 'cancelled';
+    return isCanceledOutcome(status);
   }
 
   private pickFirstNonEmptyString(
