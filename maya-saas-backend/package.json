@@ -14,6 +14,7 @@
     "ai:maintenance": "ts-node --project tsconfig.scripts.json --transpile-only scripts/ai-runtime-maintenance.ts",
     "audit:membership-readiness": "ts-node --project tsconfig.scripts.json --transpile-only scripts/audit-membership-readiness.ts",
     "release:preflight": "node dist/scripts/release-preflight.js",
+    "staff-identity:backfill": "node dist/scripts/staff-identity-backfill.js",
     "import:current-salon": "ts-node --project tsconfig.scripts.json --transpile-only scripts/import-current-salon.ts",
     "ci:dataset:generate": "ts-node --project tsconfig.scripts.json --transpile-only scripts/conversation-intelligence-dataset.ts generate",
     "ci:dataset:validate": "ts-node --project tsconfig.scripts.json --transpile-only scripts/conversation-intelligence-dataset.ts validate",

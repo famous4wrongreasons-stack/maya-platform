@@ -8,6 +8,10 @@
     "incremental": false,
     "noEmit": false
   },
-  "include": ["scripts/release-preflight.ts", "src/config/**/*.ts"],
+  "include": [
+    "scripts/release-preflight.ts",
+    "scripts/staff-identity-backfill.ts",
+    "src/config/**/*.ts"
+  ],
   "exclude": ["**/*.spec.ts"]
 }
