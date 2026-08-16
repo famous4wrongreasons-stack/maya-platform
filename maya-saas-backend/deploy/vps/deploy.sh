@@ -123,7 +123,7 @@ step "6/10 release:preflight (блокирующий, до базы)"
 run "set -e
   cd '$REL'
   set -a; . <(sudo -n cat /etc/maya-saas/live-widgets.env); set +a
-  /opt/node-v24/bin/node dist/scripts/release-preflight.js" \
+  /opt/node-v24/bin/node dist/scripts/release-preflight.js --allow-pending" \
   || fail "release:preflight не пройден — база не тронута"
 
 step "7/10 миграция базы (до переключения)"
@@ -131,8 +131,12 @@ run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
   set -a; . <(sudo -n cat /etc/maya-saas/live-widgets.env); set +a
-  node node_modules/prisma/build/index.js migrate deploy 2>&1 | tail -6" \
-  || fail "миграция"
+  node node_modules/prisma/build/index.js migrate deploy 2>&1 | tail -6
+  # 🔴 Строгий preflight СРАЗУ после миграции и ДО переключения симлинка:
+  # частично применённая или незавершённая миграция обязана остановить выкат
+  # здесь, а не проявиться в рантайме у салона.
+  node dist/scripts/release-preflight.js" \
+  || fail "миграция или строгая проверка после неё"
 
 step "8/10 клиент базы под свежую схему"
 run "set -e

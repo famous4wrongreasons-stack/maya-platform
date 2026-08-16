@@ -10,6 +10,7 @@ import { validateRuntimeConfig } from '../src/config/runtime-config';
 interface CliOptions {
   envPath: string | null;
   skipDatabase: boolean;
+  allowPending: boolean;
   help: boolean;
 }
 
@@ -62,6 +63,7 @@ function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
     envPath: null,
     skipDatabase: false,
+    allowPending: false,
     help: false,
   };
 
@@ -73,6 +75,10 @@ function parseArgs(argv: string[]): CliOptions {
     }
     if (argument === '--skip-db') {
       options.skipDatabase = true;
+      continue;
+    }
+    if (argument === '--allow-pending') {
+      options.allowPending = true;
       continue;
     }
     if (argument === '--env') {
@@ -99,6 +105,7 @@ function printHelp(): void {
       '  npm run release:preflight',
       '  npm run release:preflight -- --env .env.staging',
       '  npm run release:preflight -- --env .env.staging --skip-db',
+      '  npm run release:preflight -- --allow-pending   # перед migrate deploy',
       '',
       'No secret values are printed.',
       '',
@@ -141,7 +148,8 @@ function localMigrations(): LocalMigration[] {
 async function verifyDatabase(
   connectionString: string,
   migrations: LocalMigration[],
-): Promise<{ appliedMigrations: number }> {
+  allowPending: boolean,
+): Promise<{ appliedMigrations: number; pendingMigrations: number }> {
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString }),
   });
@@ -169,12 +177,18 @@ async function verifyDatabase(
     const local = new Map(
       migrations.map((migration) => [migration.name, migration.checksum]),
     );
+    // 🔴 До `migrate deploy` неприменённые миграции — это НОРМА: их как раз
+    // сейчас и будут применять. Строгий режим (после выката) требует, чтобы не
+    // осталось ни одной, иначе релиз объявляется готовым при незавершённой
+    // базе. Раньше проверка была только строгой, и как блокирующий шаг ПЕРЕД
+    // миграцией она провалила бы любой выкат, несущий новую миграцию.
     const missing = migrations.filter(
       (migration) => !applied.has(migration.name),
     );
-    if (missing.length > 0) {
+    if (missing.length > 0 && !allowPending) {
+      const names = missing.map((migration) => migration.name).join(', ');
       throw new Error(
-        `Database is missing ${missing.length} local Prisma migration(s)`,
+        `Database is missing ${missing.length} local Prisma migration(s): ${names}`,
       );
     }
     // Признанная историческая запись — это ПАРА «имя + контрольная сумма».
@@ -200,15 +214,22 @@ async function verifyDatabase(
         `Database has ${unknown.length} migration(s) absent from this release and from the historical baseline: ${names}`,
       );
     }
+    // Сверяем контрольные суммы только у ПРИМЕНЁННЫХ: у ожидающей миграции
+    // сравнивать не с чем.
     const changed = migrations.filter(
-      (migration) => applied.get(migration.name) !== migration.checksum,
+      (migration) =>
+        applied.has(migration.name) &&
+        applied.get(migration.name) !== migration.checksum,
     );
     if (changed.length > 0) {
       throw new Error(
         `Database checksum differs for ${changed.length} migration(s)`,
       );
     }
-    return { appliedMigrations: applied.size };
+    return {
+      appliedMigrations: applied.size,
+      pendingMigrations: missing.length,
+    };
   } finally {
     await prisma.$disconnect();
   }
@@ -232,12 +253,20 @@ async function main(): Promise<void> {
   }
   const connectionString = config.DATABASE_URL;
   const database = options.skipDatabase
-    ? { status: 'skipped', applied_migrations: null }
-    : {
-        status: 'ready',
-        applied_migrations: (await verifyDatabase(connectionString, migrations))
-          .appliedMigrations,
-      };
+    ? { status: 'skipped', applied_migrations: null, pending_migrations: null }
+    : await (async () => {
+        const result = await verifyDatabase(
+          connectionString,
+          migrations,
+          options.allowPending,
+        );
+
+        return {
+          status: result.pendingMigrations > 0 ? 'pending' : 'ready',
+          applied_migrations: result.appliedMigrations,
+          pending_migrations: result.pendingMigrations,
+        };
+      })();
 
   process.stdout.write(
     JSON.stringify(
