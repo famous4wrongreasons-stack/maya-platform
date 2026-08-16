@@ -13,6 +13,7 @@ describe('runtime config validation', () => {
     PHONE_AUTH_SECRET: secret('phone'),
     CRM_ENCRYPTION_KEY: secret('crm'),
     CORS_ALLOWED_ORIGINS: 'https://app.example.test,capacitor://localhost',
+    AUTH_TRUST_PROXY: '127.0.0.1',
     PHONE_AUTH_PROVIDER: 'smsru',
     PHONE_AUTH_DEBUG: 'false',
     PHONE_AUTH_FIXED_CODE: '',
@@ -35,15 +36,32 @@ describe('runtime config validation', () => {
   };
 
   it('keeps development usable without production credentials', () => {
-    expect(validateRuntimeConfig({})).toMatchObject({
+    expect(validateRuntimeConfig({ NODE_ENV: 'development' })).toMatchObject({
       NODE_ENV: 'development',
     });
   });
 
-  it('rejects ambiguous boolean casing instead of silently changing behavior', () => {
-    expect(() => validateRuntimeConfig({ SWAGGER_ENABLED: 'TRUE' })).toThrow(
-      'SWAGGER_ENABLED must be true or false',
+  it('refuses to start when the environment is not stated', () => {
+    expect(() => validateRuntimeConfig({})).toThrow('NODE_ENV is required');
+  });
+
+  it('requires the trusted proxy list in production', () => {
+    // Без него request.ip у всех запросов равен адресу nginx, и лимиты со
+    // scope 'ip' считают одного субъекта на всю платформу.
+    const config = productionConfig();
+    delete config.AUTH_TRUST_PROXY;
+    expect(validationMessage(config)).toContain(
+      'AUTH_TRUST_PROXY is required in production',
     );
+  });
+
+  it('rejects ambiguous boolean casing instead of silently changing behavior', () => {
+    expect(() =>
+      validateRuntimeConfig({
+        NODE_ENV: 'development',
+        SWAGGER_ENABLED: 'TRUE',
+      }),
+    ).toThrow('SWAGGER_ENABLED must be true or false');
   });
 
   it('accepts independent production secrets and explicit boundaries', () => {

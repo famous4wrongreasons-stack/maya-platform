@@ -108,6 +108,10 @@ describe('SocialAuthService', () => {
     config?: Record<string, string | undefined>;
   }) => {
     const configMap: Record<string, string | undefined> = {
+      // Окружение всегда есть в бою: ConfigModule не поднимет приложение без
+      // NODE_ENV. Мок обязан это отражать, иначе он проверяет несуществующее
+      // состояние.
+      NODE_ENV: 'production',
       JWT_SECRET: 'jwt-secret',
       AUTH_FLOW_STATE_TTL_SECONDS: '600',
       OAUTH_PROVIDER_TIMEOUT_MS: '15000',

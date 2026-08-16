@@ -1447,11 +1447,18 @@ export class SocialAuthService {
   }
 
   private normalizeRedirectUri(redirectUri: string): string {
+    // Окружение резолвим ДО try: это конфигурация сервера, а не ввод клиента.
+    // Внутри блока любая ошибка превращается в «redirect URI не разрешён», и
+    // сбой конфигурации выглядел бы для человека как его собственная ошибка.
+    const environment = resolveNodeEnvironment(
+      this.configService.get<string>('NODE_ENV'),
+    );
+
     try {
       return resolveAllowedOauthRedirectUri(
         redirectUri,
         this.configService.get<string>('OAUTH_ALLOWED_REDIRECT_URIS'),
-        resolveNodeEnvironment(this.configService.get<string>('NODE_ENV')),
+        environment,
       );
     } catch {
       throw new BadRequestException(

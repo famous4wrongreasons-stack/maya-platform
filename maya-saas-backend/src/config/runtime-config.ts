@@ -151,6 +151,18 @@ function validateProductionConfig(
     issues.push('CORS_ALLOWED_ORIGINS is required in production');
   }
 
+  // 🔴 Пустое значение отбраковки не проходило, а вредило: приложение живёт за
+  // nginx (proxy_pass на 127.0.0.1:3107), и без списка доверенных прокси
+  // request.ip у ВСЕХ запросов равен 127.0.0.1. Лимиты со scope 'ip' тогда
+  // считают одного субъекта на всю платформу: двадцати запросов к
+  // /api/auth/phone/start хватает, чтобы закрыть вход по телефону всем
+  // арендаторам на десять минут. Заодно теряется настоящий клиентский адрес в
+  // сессиях и аудите. Дефолт в .env.example пустой, то есть оператор,
+  // копирующий пример, получал сломанные лимиты по умолчанию.
+  if (!stringValue(config.AUTH_TRUST_PROXY)) {
+    issues.push('AUTH_TRUST_PROXY is required in production');
+  }
+
   validateTrustedProxy(config.AUTH_TRUST_PROXY, issues);
 
   const phoneProvider = stringValue(config.PHONE_AUTH_PROVIDER).toLowerCase();
