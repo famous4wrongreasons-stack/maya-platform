@@ -135,6 +135,8 @@ model Tenant {
   businessReviews                BusinessReview[]
   clients                        Client[]
   crmClientLinks                 CrmClientLink[]
+  staff                          Staff[]
+  staffProviderLinks             StaffProviderLink[]
   marketingPolicy                MarketingPolicy?
   marketingAudienceRecipients    MarketingAudienceRecipient[]
   marketingCampaignRecipients    MarketingCampaignRecipient[]
@@ -210,6 +212,7 @@ model Branch {
   users             User[]
   appointments      Appointment[]
   internalProviders InternalProvider[]
+  staff             Staff[]
   expenses          Expense[]
   memberships       Membership[]
 
@@ -248,6 +251,7 @@ model User {
   aiToolExecutions          AiToolExecution[]          @relation("AiToolExecutionActor")
   createdAiKnowledgeSources AiKnowledgeSource[]        @relation("AiKnowledgeSourceCreator")
   crmStaffAccesses          CrmStaffAccess[]
+  staff                     Staff[]
   inboxItems                InboxItem[]
   devicePushTokens          DevicePushToken[]
 
@@ -356,10 +360,18 @@ model CrmStaffAccess {
   tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user                 User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  /// 🔴 Phase A. Грант доступа переезжает на идентичность Maya. Пока nullable:
+  /// NOT NULL ставится только на CUTOVER, после доказанного backfill.
+  staffId String?
+  staff   Staff?  @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([staffId, tenantId])
+  /// НАСЛЕДИЕ: снимается на CUTOVER, не раньше.
   @@unique([tenantId, externalStaffId])
   @@unique([tenantId, userId])
   @@index([tenantId, role, status])
   @@index([userId])
+  @@index([staffId])
 }
 
 model AuthIdentity {
@@ -1109,7 +1121,7 @@ enum AuditScope {
 /// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
 /// без аккаунта — таких в салоне большинство.
 model Client {
-  id                 String          @id @default(cuid())
+  id                 String   @id @default(cuid())
   tenantId           String
   /// Аккаунт Maya, если человек им обзавёлся.
   userId             String?
@@ -1121,16 +1133,16 @@ model Client {
   phoneHash          String?
   /// Терминальное состояние погашенного дубля, как UserStatus.merged.
   mergedIntoClientId String?
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user       User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   /// 🔴 Ссылка СОСТАВНАЯ. Одноколоночная позволяла погасить клиента в пользу
   /// клиента ЧУЖОГО арендатора — межарендное слияние на уровне базы.
-  mergedInto         Client?         @relation("ClientMerge", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)
-  mergedFrom         Client[]        @relation("ClientMerge")
-  crmLinks           CrmClientLink[]
+  mergedInto Client?         @relation("ClientMerge", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)
+  mergedFrom Client[]        @relation("ClientMerge")
+  crmLinks   CrmClientLink[]
 
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
@@ -1155,14 +1167,96 @@ model CrmClientLink {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   /// Составной ключ: строка связи не может указывать на клиента другого
   /// арендатора. То самое правило миграции strict_tenant_relations.
-  client     Client    @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Cascade)
 
   @@unique([tenantId, provider, externalId])
   @@index([tenantId, clientId])
   @@index([tenantId, provider, syncedAt])
+}
+
+/// Мастер салона глазами Maya — идентичность, не зависящая ни от подключённой
+/// CRM, ни от наличия аккаунта.
+///
+/// 🔴 До этой модели идентичность мастера существовала ДВАЖДЫ: InternalProvider
+/// для внутреннего календаря и CrmStaffAccess.externalStaffId для CRM. Второе
+/// вдобавок было ключом выдачи роли и отзыва сессий, то есть правом входа
+/// распоряжался идентификатор из чужой системы.
+///
+/// Различитель источников — не поле, а структура: у внутреннего мастера НЕТ ни
+/// одной StaffProviderLink.
+model Staff {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  /// Аккаунт Maya, если человек им обзавёлся.
+  ///
+  /// 🔴 SetNull, а не Cascade (в отличие от InternalProvider): идентичность
+  /// мастера переживает удаление аккаунта, иначе вместе с ним уходит история.
+  ///
+  /// 🔴 Связи с Membership здесь СОЗНАТЕЛЬНО нет — как и у Client. Составной FK
+  /// на Membership(userId, tenantId) даёт ON DELETE CASCADE, то есть снятие
+  /// членства стирало бы саму идентичность мастера вместе с его историей.
+  /// Принадлежность арендатору держит tenantId и @@unique([tenantId, userId]);
+  /// членство проверяет приложение.
+  userId               String?
+  branchId             String?
+  /// Имя шифруется ВСЕГДА. InternalProvider хранил его открытым, CrmStaffAccess
+  /// зашифрованным; объединение поднимает планку до строгой из двух.
+  ///
+  /// Phase A: nullable, потому что шифровать средствами Postgres нечем — ключ у
+  /// приложения. Заполняется backfill-скриптом, NOT NULL ставится на CUTOVER.
+  encryptedDisplayName String?
+  title                String?
+  specialization       String?
+  avatarUrl            String?
+  active               Boolean  @default(true)
+  /// Шаг сетки записи — свойство внутреннего календаря.
+  slotIntervalMinutes  Int      @default(30)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  tenant        Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  branch        Branch?             @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  providerLinks StaffProviderLink[]
+  accessGrant   CrmStaffAccess?
+  appointments  Appointment[]
+
+  /// 🔴 Цель составных внешних ключей: ссылка не может указать на мастера
+  /// чужого арендатора.
+  @@unique([id, tenantId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, active])
+  @@index([branchId])
+}
+
+/// Связь мастера Maya с его карточкой у провайдера. Зеркало CrmClientLink.
+model StaffProviderLink {
+  id         String    @id @default(cuid())
+  tenantId   String
+  staffId    String
+  /// 🔴 Провайдер входит в ключ намеренно. Без него смена CRM отдала бы права
+  /// нового человека старому при совпадении числового id — ровно та дыра,
+  /// которую нашёл анализ гейта.
+  provider   String
+  externalId String
+  /// Когда карточку в последний раз видели живой в составе команды.
+  syncedAt   DateTime  @default(now())
+  /// Карточка исчезла у провайдера или CRM отключили. Строка ОСТАЁТСЯ:
+  /// история Maya не должна пропадать вместе с записью чужой системы.
+  unlinkedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  staff  Staff  @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, provider, externalId])
+  @@index([tenantId, staffId])
+  @@index([tenantId, provider, syncedAt])
+  @@index([tenantId, provider, externalId, unlinkedAt])
 }
 
 /// Правило рассылок арендатора.
@@ -1325,12 +1419,16 @@ model Appointment {
   providerPayload   Json?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
+  /// 🔴 Phase A. Однозначная идентичность мастера внутри Maya. Пока nullable.
+  staffId           String?
+  staff             Staff?     @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict)
   tenant            Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   client            User       @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
   clientMembership  Membership @relation("ClientMembershipAppointments", fields: [clientId, tenantId], references: [userId, tenantId], onDelete: Cascade)
   branch            Branch?    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
 
   @@unique([id, tenantId, clientId])
+  @@index([tenantId, staffId, startAt])
   @@index([tenantId])
   @@index([clientId])
   @@index([branchId])
@@ -1406,18 +1504,18 @@ model MarketingAudience {
   expiresAt            DateTime
   createdAt            DateTime            @default(now())
   /// Восстановлено по фактической боевой структуре, цикл 02-R.
-  provider             String   @default("yclients_sms")
-  status               String   @default("AUDIENCE_CALCULATED")
-  snapshotHash         String   @default("")
-  exclusionReasonsJson Json     @default("{}")
+  provider             String              @default("yclients_sms")
+  status               String              @default("AUDIENCE_CALCULATED")
+  snapshotHash         String              @default("")
+  exclusionReasonsJson Json                @default("{}")
   tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   campaigns            MarketingCampaign[]
 
-  recipients           MarketingAudienceRecipient[]
+  recipients MarketingAudienceRecipient[]
 
+  @@unique([id, tenantId])
   @@index([tenantId, createdAt])
   @@index([tenantId, expiresAt])
-  @@unique([id, tenantId])
 }
 
 /// Immutable campaign preview followed by one idempotent, owner-approved send.
@@ -1441,15 +1539,15 @@ model MarketingCampaign {
   updatedAt            DateTime          @updatedAt
   /// Двадцать две колонки восстановлены по фактической боевой структуре,
   /// цикл 02-R. Прикладной смысл по именам не додумывался.
-  provider             String    @default("yclients_sms")
-  audienceSnapshotHash String    @default("")
-  messageSnapshotHash  String    @default("")
+  provider             String            @default("yclients_sms")
+  audienceSnapshotHash String            @default("")
+  messageSnapshotHash  String            @default("")
   confirmationHash     String?
   confirmedAt          DateTime?
   confirmedByUserId    String?
   costEstimateKopecks  Int?
-  costEstimateStatus   String    @default("unavailable")
-  costCurrency         String    @default("RUB")
+  costEstimateStatus   String            @default("unavailable")
+  costCurrency         String            @default("RUB")
   scheduledFor         DateTime?
   queuedAt             DateTime?
   startedAt            DateTime?
@@ -1457,23 +1555,23 @@ model MarketingCampaign {
   cancelledAt          DateTime?
   leaseOwner           String?
   leaseExpiresAt       DateTime?
-  retryCount           Int       @default(0)
+  retryCount           Int               @default(0)
   lastErrorCode        String?
-  acceptedCount        Int       @default(0)
-  failedCount          Int       @default(0)
-  skippedCount         Int       @default(0)
-  unknownCount         Int       @default(0)
+  acceptedCount        Int               @default(0)
+  failedCount          Int               @default(0)
+  skippedCount         Int               @default(0)
+  unknownCount         Int               @default(0)
   tenant               Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   audience             MarketingAudience @relation(fields: [audienceId], references: [id], onDelete: Restrict)
 
-  recipients           MarketingCampaignRecipient[]
+  recipients MarketingCampaignRecipient[]
 
-  deliveryAttempts     MarketingDeliveryAttempt[]
+  deliveryAttempts MarketingDeliveryAttempt[]
 
   @@unique([tenantId, idempotencyKey])
+  @@unique([id, tenantId])
   @@index([tenantId, status, createdAt])
   @@index([tenantId, audienceId])
-  @@unique([id, tenantId])
   @@index([status, leaseExpiresAt, queuedAt])
   @@index([status, scheduledFor, leaseExpiresAt])
 }
