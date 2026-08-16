@@ -15,6 +15,14 @@
 #
 # Второе правило: боевой симлинк переключается ТОЛЬКО после того, как новый
 # релиз ответил на запасном порту, и ни один шаг не прячет код возврата.
+#
+# Третье правило (Cycle 01): выкат обязан иметь тестовый шлюз. Раньше его не
+# было вообще — релиз из фича-ветки уезжал в прод, ни разу не прогнав ни один
+# из 991 теста: CI срабатывает только на pull request и push в main, а
+# единственным гейтом здесь был /api/health/ready, который отвечает 200 при
+# полностью сломанной авторизации. Теперь до заливки прогоняются линт,
+# типизация и тесты, а до миграции — валидатор боевого конфига на самом
+# сервере, с настоящим окружением юнита.
 set -euo pipefail
 
 BE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -38,7 +46,31 @@ run() { ssh "${SSH_OPTS[@]}" "$HOST" "$@"; }
 step() { echo; echo "### $*"; }
 fail() { echo "ПРОВАЛ: $* — боевой релиз не тронут"; exit 1; }
 
-step "1/8 локальная сборка dist"
+step "1/10 шлюз: чистое дерево, линт, типизация, тесты, схема"
+# 🔴 Выкат синхронизирует РАБОЧЕЕ ДЕРЕВО, а не коммит. Это уже приводило к
+# потере правки: диагностику убрали через git checkout, и откат уехал в прод
+# вместе с ней. Грязное дерево означает, что выкачено будет не то, что лежит в
+# истории, — и восстановить выкаченное состояние потом нечем.
+(
+  cd "$BE"
+  DIRTY="$(git status --porcelain -- . 2>/dev/null || true)"
+  if [ -n "$DIRTY" ]; then
+    echo "$DIRTY"
+    fail "грязное дерево в maya-saas-backend — сначала коммит"
+  fi
+) || exit 1
+
+(
+  cd "$BE"
+  export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+  npx prisma validate            || exit 1
+  npm run lint                   || exit 1
+  npm run typecheck              || exit 1
+  npm run typecheck:scripts      || exit 1
+  npm test -- --runInBand --silent || exit 1
+) || fail "шлюз не пройден — на сервер ничего не заливалось"
+
+step "2/10 локальная сборка dist"
 # 🔴 Выкат заливает ГОТОВЫЙ dist. Без nest build сюда уезжает вчерашний
 # бинарь — исходник уже поправлен, а прод продолжает отдавать старый баг
 # (как с trialFullAccess в AuthFlowSystemGateway 08.08).
@@ -49,13 +81,13 @@ step "1/8 локальная сборка dist"
 ) || fail "локальный nest build"
 test -f "$BE/dist/src/main.js" || fail "нет dist/src/main.js после build"
 
-step "2/8 каталог релиза"
+step "3/10 каталог релиза"
 # /opt/maya-saas/releases принадлежит maya-saas, поэтому создаём под sudo и
 # сразу отдаём botadmin — иначе rsync не сможет писать.
 run "sudo -n mkdir -p '$REL' && sudo -n chown botadmin:botadmin '$REL'" \
   || fail "каталог не создан"
 
-step "3/8 заливка сборки"
+step "4/10 заливка сборки"
 # prisma.config.ts обязателен: в схеме нет url, строка подключения берётся
 # оттуда. Без него migrate deploy падает с «datasource.url is required».
 rsync -az --delete --timeout=180 -e "$RSH" \
@@ -63,7 +95,7 @@ rsync -az --delete --timeout=180 -e "$RSH" \
   "$BE/prisma.config.ts" "$BE/tsconfig.json" \
   "$HOST:$REL/" || fail "rsync"
 
-step "4/8 установка зависимостей (npm ci, без dev)"
+step "5/10 установка зависимостей (npm ci, без dev)"
 run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
@@ -77,7 +109,22 @@ run "set -e
   node -e \"require('bcrypt').hashSync('x',4); console.log('bcrypt собран и работает')\"" \
   || fail "npm ci"
 
-step "5/8 миграция базы (до переключения)"
+step "6/10 проверка боевого конфига (до базы)"
+# Валидатор запускается ИЗ СОБРАННОГО РЕЛИЗА и против НАСТОЯЩЕГО окружения
+# юнита — того же файла, который systemd отдаёт процессу. Раньше эта проверка
+# случалась только при старте приложения, то есть уже после миграции и после
+# переключения симлинка. Наружу валидатор печатает только ИМЕНА переменных,
+# значения не показывает.
+run "set -e
+  cd '$REL'
+  set -a; . <(sudo -n cat /etc/maya-saas/live-widgets.env); set +a
+  /opt/node-v24/bin/node -e \"
+    const { validateRuntimeConfig } = require('./dist/src/config/runtime-config');
+    const config = validateRuntimeConfig(process.env);
+    console.log('конфиг боевой и валидный: NODE_ENV=' + config.NODE_ENV);
+  \"" || fail "боевой конфиг не прошёл валидацию — база не тронута"
+
+step "7/10 миграция базы (до переключения)"
 run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
@@ -85,7 +132,7 @@ run "set -e
   node node_modules/prisma/build/index.js migrate deploy 2>&1 | tail -6" \
   || fail "миграция"
 
-step "6/8 клиент базы под свежую схему"
+step "8/10 клиент базы под свежую схему"
 run "set -e
   cd '$REL'
   export PATH=/opt/node-v24/bin:\$PATH
@@ -96,7 +143,7 @@ run "set -e
   node -e \"const c=require('@prisma/client'); if(!c.PrismaClient||!c.Prisma) throw new Error('клиент неполный'); console.log('клиент базы сгенерирован и загружается')\"" \
   || fail "генерация клиента"
 
-step "7/8 смоук на запасном порту 3199"
+step "9/10 смоук на запасном порту 3199"
 # Гейт по /api/health/ready, а не /api/health: ready проверяет соединение с
 # базой. Здоровый процесс без базы — это не готовый релиз.
 run "set -e
@@ -114,7 +161,7 @@ run "set -e
   [ \"\$CODE\" = '200' ] || { echo 'СМОУК ПРОВАЛЕН'; tail -25 /tmp/smoke-$STAMP.log; exit 1; }
   echo 'смоук пройден'" || fail "смоук"
 
-step "8/8 переключение, проверка, уборка"
+step "10/10 переключение, проверка, уборка"
 run "set -e
   PREV=\$(readlink /opt/maya-saas/current)
   echo \"\$PREV\" | sudo -n tee /opt/maya-saas/previous-release >/dev/null
