@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'crypto';
 
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
@@ -46,7 +47,47 @@ export class AuthSessionService {
     private readonly repository: AuthSessionRepository,
     private readonly systemGateway: AuthSessionSystemGateway,
     private readonly crmService: CrmService,
+    private readonly auditLog: AuditLogService,
   ) {}
+
+  /**
+   * След от события сессии.
+   *
+   * 🔴 Раньше вход, выход и отзыв не оставляли ни строки: в базе менялся только
+   * `revokeReason` самой сессии, а ретенция штатно её удаляла. Владелец,
+   * обнаруживший компрометацию через две недели, не мог доказать ни факта
+   * входа, ни его источника.
+   *
+   * Арендатора не выдумываем: у владельца платформы его нет, и запись идёт
+   * платформенной. Пишем мягко — событие уже произошло, и провал журнала не
+   * должен превращать успешный выход в ошибку.
+   */
+  private async auditSessionEvent(
+    principal: SessionPrincipal,
+    action: string,
+    sessionId: string,
+    metadata: Record<string, unknown> = {},
+  ): Promise<void> {
+    if (principal.tenantId) {
+      await this.auditLog.tryLog({
+        tenantId: principal.tenantId,
+        userId: principal.userId,
+        action,
+        entityType: 'auth_session',
+        entityId: sessionId,
+        metadata,
+      });
+      return;
+    }
+
+    await this.auditLog.tryLogPlatformAction({
+      userId: principal.userId,
+      action,
+      entityType: 'auth_session',
+      entityId: sessionId,
+      metadata,
+    });
+  }
 
   async issueSession(
     user: SessionUser,
@@ -222,13 +263,24 @@ export class AuthSessionService {
 
   async logout(user: AuthenticatedUser) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.revokeSession(
-        principal,
-        user.sessionId,
-        new Date(),
-        'logout',
-      ),
+    const revoked = await this.tenantContext.runAsAuthPrincipal(
+      principal,
+      async () => {
+        const count = await this.repository.revokeSession(
+          principal,
+          user.sessionId,
+          new Date(),
+          'logout',
+        );
+
+        // Запись идёт ВНУТРИ области принципала: снаружи контекста арендатора
+        // нет, и проверка принадлежности отклонила бы её молча.
+        await this.auditSessionEvent(principal, 'auth.logout', user.sessionId, {
+          revoked: count === 1,
+        });
+
+        return count;
+      },
     );
 
     return { ok: true, revoked: revoked === 1 };
@@ -236,13 +288,27 @@ export class AuthSessionService {
 
   async revokeSession(user: AuthenticatedUser, sessionId: string) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.revokeSession(
-        principal,
-        sessionId,
-        new Date(),
-        'user_revoked',
-      ),
+    const revoked = await this.tenantContext.runAsAuthPrincipal(
+      principal,
+      async () => {
+        const count = await this.repository.revokeSession(
+          principal,
+          sessionId,
+          new Date(),
+          'user_revoked',
+        );
+
+        // Пишем и неудачную попытку: обращение к чужому идентификатору сессии
+        // — как раз то, ради чего журнал заводится.
+        await this.auditSessionEvent(
+          principal,
+          count === 1 ? 'auth.session_revoked' : 'auth.session_revoke_missed',
+          sessionId,
+          { by_session_id: user.sessionId },
+        );
+
+        return count;
+      },
     );
 
     if (revoked !== 1) {
@@ -254,12 +320,24 @@ export class AuthSessionService {
 
   async revokeAllSessions(user: AuthenticatedUser) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.revokeAllSessions(
-        principal,
-        new Date(),
-        'user_revoked_all',
-      ),
+    const revoked = await this.tenantContext.runAsAuthPrincipal(
+      principal,
+      async () => {
+        const count = await this.repository.revokeAllSessions(
+          principal,
+          new Date(),
+          'user_revoked_all',
+        );
+
+        await this.auditSessionEvent(
+          principal,
+          'auth.all_sessions_revoked',
+          user.sessionId,
+          { revoked_sessions: count },
+        );
+
+        return count;
+      },
     );
 
     return { ok: true, revoked_sessions: revoked };

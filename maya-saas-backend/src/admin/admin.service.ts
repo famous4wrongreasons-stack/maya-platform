@@ -24,6 +24,22 @@ import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
 import { CreateProviderUserDto } from './dto/create-provider-user.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 
+/**
+ * Имена изменённых полей вместо самого DTO.
+ *
+ * 🔴 Раньше в metadata уезжал сырой объект целиком: `dto as unknown as
+ * Record<string, unknown>`. Тип без белого списка не мешает следующему
+ * разработчику положить туда телефон клиента или ответ провайдера с токеном, а
+ * таблица аудита живёт без срока хранения и копила бы это годами. На вопрос
+ * «что меняли» отвечают имена полей; значения для этого не нужны.
+ */
+function changedFields(dto: object): string[] {
+  return Object.entries(dto)
+    .filter(([, value]) => value !== undefined)
+    .map(([key]) => key)
+    .sort();
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -86,7 +102,7 @@ export class AdminService {
       action: 'tenant.updated',
       entityType: 'tenant',
       entityId: id,
-      metadata: dto as unknown as Record<string, unknown>,
+      metadata: { changed_fields: changedFields(dto) },
     });
 
     return tenant;
@@ -107,7 +123,7 @@ export class AdminService {
       action: 'branding.updated',
       entityType: 'branding',
       entityId: branding.id,
-      metadata: dto as unknown as Record<string, unknown>,
+      metadata: { changed_fields: changedFields(dto) },
     });
 
     return this.serializeBranding(branding);

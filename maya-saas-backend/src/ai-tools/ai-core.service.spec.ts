@@ -2402,7 +2402,9 @@ describe('AiCoreService', () => {
       }),
     ).rejects.toMatchObject<ServiceUnavailableException>({ status: 503 });
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
-    expect(mocks.auditLog.log).toHaveBeenCalledWith(
+    // Мягкая запись: мы внутри catch, и падение аудита подменило бы исходное
+    // исключение. Сам факт записи по-прежнему обязателен.
+    expect(mocks.auditLog.tryLog).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'ai.core_turn_failed' }),
     );
   });
@@ -3180,7 +3182,10 @@ describe('AiCoreService', () => {
     };
     const decide: jest.MockedFunction<AiCoreModelService['decide']> = jest.fn();
     const model = { decide };
-    const auditLog = { log: jest.fn().mockResolvedValue(undefined) };
+    const auditLog = {
+      log: jest.fn().mockResolvedValue(undefined),
+      tryLog: jest.fn().mockResolvedValue(undefined),
+    };
     const dashboardPreferences = {
       getAssistant: jest.fn().mockResolvedValue({
         config: { enabled_capabilities: ['business_analytics'] },

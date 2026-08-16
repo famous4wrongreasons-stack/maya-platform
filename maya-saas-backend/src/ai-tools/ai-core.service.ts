@@ -1332,7 +1332,11 @@ export class AiCoreService {
           toolResults,
         );
       }
-      await this.auditLog.log({
+      // 🔴 Мягкая запись по той же причине, что и у соседней ветки на 1269: мы
+      // внутри catch, и падение аудита подменило бы исходное исключение —
+      // наружу ушёл бы другой класс сбоя, а настоящая причина деградации
+      // потерялась бы. Отказ базы аудита и отказ хода модели приходят вместе.
+      await this.auditLog.tryLog({
         tenantId,
         userId: user.userId,
         action: 'ai.core_turn_failed',

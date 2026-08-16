@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { createHmac } from 'crypto';
 
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
@@ -95,6 +96,8 @@ describe('AuthSessionService', () => {
     const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
     const rateLimitSessionMock = jest.fn().mockResolvedValue(undefined);
     const assertCrmStaffAccessMock = jest.fn().mockResolvedValue(undefined);
+    const auditTryLogMock = jest.fn().mockResolvedValue(undefined);
+    const auditTryLogPlatformMock = jest.fn().mockResolvedValue(undefined);
     const tenantContext = new TenantContextService();
     const service = new AuthSessionService(
       {
@@ -123,12 +126,18 @@ describe('AuthSessionService', () => {
       {
         assertCrmStaffAccessActive: assertCrmStaffAccessMock,
       } as unknown as CrmService,
+      {
+        tryLog: auditTryLogMock,
+        tryLogPlatformAction: auditTryLogPlatformMock,
+      } as unknown as AuditLogService,
     );
 
     return {
       service,
       tenantContext,
       mocks: {
+        auditTryLogMock,
+        auditTryLogPlatformMock,
         createSessionMock,
         assertCrmStaffAccessMock,
         findAccessSessionMock,
@@ -376,6 +385,61 @@ describe('AuthSessionService', () => {
       is_current: true,
       status: 'active',
     });
+  });
+
+  it('leaves an audit trail when a session ends', async () => {
+    // Раньше выход не оставлял ни строки: менялся только revokeReason самой
+    // сессии, а ретенция её удаляла. Доказать факт входа и его источник спустя
+    // две недели было нечем.
+    const { service, mocks } = createService();
+
+    await service.logout({
+      userId: 'user-a',
+      sessionId: 'session-a',
+      tenantId: 'tenant-a',
+      role: UserRole.CLIENT,
+      email: 'client@example.test',
+      branchId: null,
+      membershipId: 'membership-a',
+      membershipStatus: 'active',
+    });
+
+    expect(mocks.auditTryLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-a',
+        userId: 'user-a',
+        action: 'auth.logout',
+        entityType: 'auth_session',
+        entityId: 'session-a',
+      }),
+    );
+    expect(mocks.auditTryLogPlatformMock).not.toHaveBeenCalled();
+  });
+
+  it('records the platform owner without inventing a tenant', async () => {
+    // У владельца платформы арендатора нет. Служебный арендатор положил бы его
+    // вход в историю чужого салона, поэтому запись обязана быть платформенной.
+    const { service, mocks } = createService();
+
+    await service.logout({
+      userId: 'platform-owner-1',
+      sessionId: 'session-p',
+      tenantId: null,
+      role: UserRole.PLATFORM_OWNER,
+      email: 'owner@maya.local',
+      branchId: null,
+      membershipId: null,
+      membershipStatus: null,
+    });
+
+    expect(mocks.auditTryLogPlatformMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'platform-owner-1',
+        action: 'auth.logout',
+        entityId: 'session-p',
+      }),
+    );
+    expect(mocks.auditTryLogMock).not.toHaveBeenCalled();
   });
 
   it('revokes every session owned by the authenticated principal', async () => {

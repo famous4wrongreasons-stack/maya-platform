@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { TenantStatus } from '../common/domain.enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -156,8 +157,11 @@ describe('BillingService', () => {
       findPaymentByProviderPaymentId: findPaymentByProviderPaymentIdMock,
       listBillingCandidates: listBillingCandidatesMock,
     } as unknown as BillingSystemGateway;
+    const auditTryLogMock = jest.fn().mockResolvedValue(undefined);
+    const auditLog = { tryLog: auditTryLogMock };
 
     return {
+      auditLog,
       service: new BillingService(
         prisma,
         subscriptionsService,
@@ -165,6 +169,7 @@ describe('BillingService', () => {
         configService,
         tenantContext,
         systemGateway,
+        auditLog as unknown as AuditLogService,
       ),
       tenantContext,
       subscriptionsService,
@@ -378,7 +383,7 @@ describe('BillingService', () => {
         findFirst: jest.fn().mockResolvedValue(null),
       },
     } as unknown as PrismaService;
-    const { service, tenantContext, listBillingCandidatesMock } =
+    const { service, tenantContext, listBillingCandidatesMock, auditLog } =
       createService(prisma);
     tenantUpdateManyMock.mockImplementation(() => {
       expect(tenantContext.requireTenantId()).toBe('tenant-1');
@@ -407,6 +412,25 @@ describe('BillingService', () => {
       checked: 1,
       marked_past_due: 1,
       charged: 0,
+    });
+
+    // Отключение доступа за неуплату обязано оставлять след: статус и даты
+    // пишутся в колонки самого арендатора и перезаписываются на следующем
+    // цикле, поэтому без этой записи история первого отключения исчезает.
+    // Совпадение точное: прежний статус и обе даты — единственное, что после
+    // перезаписи колонок арендатора восстановить больше неоткуда.
+    expect(auditLog.tryLog).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      action: 'billing.tenant_past_due',
+      entityType: 'tenant',
+      entityId: 'tenant-1',
+      metadata: {
+        previous_status: TenantStatus.ACTIVE,
+        past_due_at: '2026-07-01T00:00:00.000Z',
+        grace_ends_at: '2026-07-04T00:00:00.000Z',
+        forced: false,
+        had_trial_full_access: false,
+      },
     });
   });
 

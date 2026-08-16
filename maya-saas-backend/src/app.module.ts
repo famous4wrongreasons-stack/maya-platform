@@ -10,6 +10,7 @@ import { AppService } from './app.service';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AppointmentNotificationsModule } from './appointment-notifications/appointment-notifications.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
+import { AuthorizationDenialInterceptor } from './audit-log/authorization-denial.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
 import { BranchesModule } from './branches/branches.module';
@@ -98,6 +99,10 @@ import { SystemMetricsService } from './system-metrics.service';
     {
       provide: APP_INTERCEPTOR,
       useClass: RequestMetricsInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuthorizationDenialInterceptor,
     },
     {
       provide: APP_GUARD,

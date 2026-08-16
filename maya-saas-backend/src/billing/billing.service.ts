@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { TenantStatus, UserRole } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
@@ -71,6 +72,7 @@ export class BillingService {
     private readonly configService: ConfigService,
     private readonly tenantContext: TenantContextService,
     private readonly systemGateway: BillingSystemGateway,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async createCheckout(tenantId: string, dto: CreateBillingCheckoutDto) {
@@ -773,7 +775,29 @@ export class BillingService {
         );
       }
       await this.markTenantPastDue(tenantId, options, attempt + 1);
+      return;
     }
+
+    // 🔴 Переход в past_due — это отключение доступа к салону, и до сих пор он
+    // не оставлял следа. Статус, pastDueAt и graceEndsAt пишутся в колонки
+    // самого арендатора, то есть ПЕРЕЗАПИСЫВАЮТСЯ: после второго цикла история
+    // первого отключения физически отсутствовала. В логе оставалась одна
+    // агрегированная строка планировщика, даже без арендатора. Спор «нас
+    // отключили ошибочно» разобрать было нечем. Ручная смена тарифа через
+    // админку при этом аудировалась — асимметрия, а не решение.
+    await this.auditLog.tryLog({
+      tenantId: scopedTenantId,
+      action: 'billing.tenant_past_due',
+      entityType: 'tenant',
+      entityId: scopedTenantId,
+      metadata: {
+        previous_status: tenant.status,
+        past_due_at: pastDueAt?.toISOString() ?? null,
+        grace_ends_at: graceEndsAt?.toISOString() ?? null,
+        forced: options.force === true,
+        had_trial_full_access: tenant.trialFullAccess,
+      },
+    });
   }
 
   private paymentWhere(payment: Pick<BillingPaymentRecord, 'id' | 'tenantId'>) {

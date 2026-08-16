@@ -1072,20 +1072,42 @@ model BillingPayment {
   @@index([provider, providerPaymentId])
 }
 
+/// Область действия записи аудита.
+///
+/// Различие ЗАЯВЛЯЕТСЯ, а не выводится из того, заполнена ли колонка
+/// арендатора. Платформенное действие (вход владельца платформы, создание или
+/// удаление арендатора) не принадлежит никакому арендатору, и подделывать ему
+/// принадлежность через служебного арендатора нельзя: тогда платформенные
+/// записи попали бы в историю чужого салона.
+enum AuditScope {
+  tenant
+  platform
+}
+
 model AuditLog {
-  id           String   @id @default(cuid())
-  tenantId     String
+  id           String     @id @default(cuid())
+  /// Инвариант, который держит CHECK в базе (AuditLog_scope_tenant_check):
+  ///   scope = tenant   ⟺ tenantId IS NOT NULL
+  ///   scope = platform ⟺ tenantId IS NULL
+  /// Состояния взаимоисключающие и исчерпывающие — третьего нет. Поэтому
+  /// арендаторной записи без арендатора не существует, а платформенная не
+  /// может нести tenantId и попасть в выборку салона.
+  scope        AuditScope @default(tenant)
+  tenantId     String?
   userId       String?
   action       String
   entityType   String
   entityId     String
   metadataJson Json?
-  createdAt    DateTime @default(now())
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  /// Записи арендатора уходят вместе с ним. Платформенные переживают удаление:
+  /// «платформа удалила арендатора» обязано жить дольше самого арендатора.
+  tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([userId])
+  @@index([scope, createdAt])
 }
 
 model Appointment {
