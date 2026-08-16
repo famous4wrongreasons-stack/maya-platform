@@ -5,6 +5,12 @@ import {
 } from '@nestjs/common';
 
 import {
+  CRM_REQUEST_TIMEOUT_MS,
+  CrmOutcomeUnknownError,
+  CrmRecordGoneError,
+  isUnknownOutcomeCause,
+} from '../crm-request.errors';
+import {
   AvailableSlot,
   AppliedStaffScheduleDayChange,
   ApplyStaffScheduleDayChangeParams,
@@ -2954,15 +2960,36 @@ export class YclientsCRMAdapter implements CRMAdapter {
       });
     }
 
-    const response = await fetch(url, {
-      method: init?.method || 'GET',
-      headers: {
-        Authorization: `Bearer ${this.partnerToken}, User ${this.config.apiToken}`,
-        Accept: 'application/vnd.yclients.v2+json',
-        'Content-Type': 'application/json',
-      },
-      body: init?.body,
-    });
+    // 🔴 Запрос уходил вообще без таймаута — ни `signal`, ни
+    // `AbortSignal.timeout`, в отличие от биллинга. Потолок давал только undici,
+    // около 300 секунд: в двадцать раз больше самого щедрого прикладного
+    // таймаута в проекте. Всё это время сокет занят, а вызывающий не знает,
+    // дошёл ли запрос.
+    let response: Response;
+
+    try {
+      response = await fetch(url, {
+        method: init?.method || 'GET',
+        headers: {
+          Authorization: `Bearer ${this.partnerToken}, User ${this.config.apiToken}`,
+          Accept: 'application/vnd.yclients.v2+json',
+          'Content-Type': 'application/json',
+        },
+        body: init?.body,
+        signal: AbortSignal.timeout(CRM_REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (isUnknownOutcomeCause(error)) {
+        // Ответа не было. Для чтения это просто отказ, а для записи — исход,
+        // который мы НЕ ЗНАЕМ: запрос мог дойти и выполниться.
+        throw new CrmOutcomeUnknownError(
+          `YClients did not answer in time (${init?.method || 'GET'} ${path})`,
+          error,
+        );
+      }
+
+      throw error;
+    }
 
     let payload: YclientsResponse<TData> = {};
 
@@ -2992,11 +3019,19 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
     if (!response.ok) {
       const providerMessage = payload.meta?.message?.trim();
-      throw new Error(
-        providerMessage
-          ? `YClients request failed with status ${response.status}: ${providerMessage}`
-          : `YClients request failed with status ${response.status}`,
-      );
+      const message = providerMessage
+        ? `YClients request failed with status ${response.status}: ${providerMessage}`
+        : `YClients request failed with status ${response.status}`;
+
+      // 404 — это не сбой, а ОПРЕДЕЛЁННОЕ утверждение провайдера: записи нет.
+      // Текст сообщения намеренно тот же, что и раньше, поэтому для всех путей,
+      // кроме отмены, поведение не меняется — там это по-прежнему обычная
+      // ошибка.
+      if (response.status === 404) {
+        throw new CrmRecordGoneError(message);
+      }
+
+      throw new Error(message);
     }
 
     // 🔴 YClients отказывает СТАТУСОМ 200. Тело при этом несёт

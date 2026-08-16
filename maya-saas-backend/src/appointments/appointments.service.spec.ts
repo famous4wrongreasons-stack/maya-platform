@@ -2,6 +2,10 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CalendarSource } from '../common/domain.enums';
+import {
+  CrmOutcomeUnknownError,
+  CrmRecordGoneError,
+} from '../crm/crm-request.errors';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -717,6 +721,75 @@ describe('AppointmentsService', () => {
       },
     });
     expect(getAvailableSlotsMock).not.toHaveBeenCalled();
+  });
+
+  it('lets the client cancel when the CRM record is already gone', async () => {
+    // 🔴 ВОСПРОИЗВЕДЕНИЕ ДОКАЗАННОГО ДЕФЕКТА.
+    // Порядок операций — сначала CRM, потом своя база, компенсации нет. Если
+    // локальное обновление упало (обрыв связи с БД), запись в YClients уже
+    // удалена, а локальный статус остался confirmed. Повторная отмена снова
+    // уходила в CRM, где записи больше нет, адаптер бросал голую ошибку — и
+    // клиент получал 500. Каждый раз, навсегда.
+    const {
+      service,
+      mocks: { appointmentUpdateMock, auditLogMock, cancelAppointmentMock },
+    } = createService();
+    cancelAppointmentMock.mockRejectedValue(
+      new CrmRecordGoneError('YClients request failed with status 404'),
+    );
+
+    const result = await service.cancelForClient(
+      'tenant-1',
+      'user-1',
+      'appt-1',
+    );
+
+    // Локальная строка догоняет внешнее состояние вместо бесконечной пятисотки.
+    expect(result).toMatchObject({ appointment: { status: 'canceled' } });
+    expect(appointmentUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { status: 'canceled' } }),
+    );
+    // И это отличимо в журнале от обычной отмены.
+    const auditCall = auditLogMock.mock.calls[0]?.[0];
+    expect(auditCall).toMatchObject({
+      action: 'appointment.cancelled',
+      metadata: { external_outcome: 'already_gone' },
+    });
+  });
+
+  it('does not mark the appointment cancelled when the CRM outcome is unknown', async () => {
+    // Обрыв или таймаут — это НЕ отказ: запрос мог дойти и выполниться.
+    // Объявить запись отменённой было бы ложью, объявить провалом — тоже.
+    const {
+      service,
+      mocks: { appointmentUpdateMock, cancelAppointmentMock },
+    } = createService();
+    cancelAppointmentMock.mockRejectedValue(
+      new CrmOutcomeUnknownError('YClients did not answer in time'),
+    );
+
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toMatchObject({ status: 503 });
+
+    // Локальное состояние не тронуто — повтор безопасен.
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('still surfaces a confirmed CRM refusal without touching local state', async () => {
+    // Подтверждённый отказ провайдера ведёт себя как раньше.
+    const {
+      service,
+      mocks: { appointmentUpdateMock, cancelAppointmentMock },
+    } = createService();
+    cancelAppointmentMock.mockRejectedValue(
+      new Error('YClients request failed with status 403'),
+    );
+
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toThrow('status 403');
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
   });
 
   it('cancels an upcoming appointment for the current client', async () => {
