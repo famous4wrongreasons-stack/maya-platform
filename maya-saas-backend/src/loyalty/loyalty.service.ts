@@ -119,81 +119,101 @@ export class LoyaltyService {
       this.usersService.getTenantUserOrThrow(params.actorUserId, tenantId),
     ]);
 
-    const result = await this.prisma.$transaction(
-      async (tx) => {
-        const existing = await tx.loyaltyTransaction.findUnique({
-          where: {
-            tenantId_idempotencyKey: {
-              tenantId,
-              idempotencyKey: params.dto.idempotencyKey,
+    const result = await this.prisma
+      .$transaction(
+        async (tx) => {
+          const existing = await tx.loyaltyTransaction.findUnique({
+            where: {
+              tenantId_idempotencyKey: {
+                tenantId,
+                idempotencyKey: params.dto.idempotencyKey,
+              },
             },
-          },
-          include: { account: true },
-        });
-        if (existing) {
-          const sameOperation =
-            existing.account.userId === params.targetUserId &&
-            existing.actorUserId === params.actorUserId &&
-            existing.delta === params.dto.delta &&
-            this.encryptionService.decrypt(existing.encryptedReason) ===
-              params.dto.reason.trim();
-          if (!sameOperation) {
-            throw new ConflictException(
-              'Idempotency key is already used for another loyalty operation',
-            );
+            include: { account: true },
+          });
+          if (existing) {
+            const sameOperation =
+              existing.account.userId === params.targetUserId &&
+              existing.actorUserId === params.actorUserId &&
+              existing.delta === params.dto.delta &&
+              this.encryptionService.decrypt(existing.encryptedReason) ===
+                params.dto.reason.trim();
+            if (!sameOperation) {
+              throw new ConflictException(
+                'Idempotency key is already used for another loyalty operation',
+              );
+            }
+            return { account: existing.account, transaction: existing };
           }
-          return { account: existing.account, transaction: existing };
-        }
 
-        const account = await tx.loyaltyAccount.upsert({
-          where: {
-            userId_tenantId: {
-              userId: params.targetUserId,
-              tenantId,
+          const account = await tx.loyaltyAccount.upsert({
+            where: {
+              userId_tenantId: {
+                userId: params.targetUserId,
+                tenantId,
+              },
             },
-          },
-          update: {},
-          create: {
-            tenantId,
-            userId: params.targetUserId,
-            source: CalendarSource.INTERNAL,
-          },
-        });
-        const balanceAfter = account.balance + params.dto.delta;
-        if (balanceAfter < 0) {
-          throw new BadRequestException({
-            message: 'Loyalty balance cannot become negative.',
-            error: {
-              code: 'insufficient_loyalty_balance',
-              message: 'Loyalty balance cannot become negative.',
-              current_balance: account.balance,
+            update: {},
+            create: {
+              tenantId,
+              userId: params.targetUserId,
+              source: CalendarSource.INTERNAL,
             },
           });
+          const balanceAfter = account.balance + params.dto.delta;
+          if (balanceAfter < 0) {
+            throw new BadRequestException({
+              message: 'Loyalty balance cannot become negative.',
+              error: {
+                code: 'insufficient_loyalty_balance',
+                message: 'Loyalty balance cannot become negative.',
+                current_balance: account.balance,
+              },
+            });
+          }
+
+          const updatedAccount = await tx.loyaltyAccount.update({
+            where: { id_tenantId: { id: account.id, tenantId } },
+            data: { balance: balanceAfter, source: CalendarSource.INTERNAL },
+          });
+          const transaction = await tx.loyaltyTransaction.create({
+            data: {
+              tenantId,
+              accountId: account.id,
+              actorUserId: params.actorUserId,
+              actorTenantId: tenantId,
+              kind: params.dto.delta >= 0 ? 'credit' : 'debit',
+              delta: params.dto.delta,
+              balanceAfter,
+              encryptedReason: this.encryptionService.encrypt(
+                params.dto.reason.trim(),
+              ),
+              idempotencyKey: params.dto.idempotencyKey,
+            },
+          });
+          return { account: updatedAccount, transaction };
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      )
+      .catch((error: unknown) => {
+        // 🔴 Гонка по ключу: обе транзакции прошли findUnique до того, как любая
+        // записала строку. Уникальный индекс [tenantId, idempotencyKey] не даёт
+        // задвоить начисление — портился только контракт ошибки: наружу летел
+        // необработанный P2002 обычной пятисоткой без кода, тогда как соседний
+        // ExpensesService на том же месте отдаёт уже существующую запись.
+        //
+        // Повтор по тому же ключу — это воспроизведение, а не сбой: отдаём то,
+        // что записала выигравшая транзакция, через тот же путь, что и обычный
+        // повторный вызов.
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002'
+        ) {
+          return this.replayAdjustment(tenantId, params);
         }
 
-        const updatedAccount = await tx.loyaltyAccount.update({
-          where: { id_tenantId: { id: account.id, tenantId } },
-          data: { balance: balanceAfter, source: CalendarSource.INTERNAL },
-        });
-        const transaction = await tx.loyaltyTransaction.create({
-          data: {
-            tenantId,
-            accountId: account.id,
-            actorUserId: params.actorUserId,
-            actorTenantId: tenantId,
-            kind: params.dto.delta >= 0 ? 'credit' : 'debit',
-            delta: params.dto.delta,
-            balanceAfter,
-            encryptedReason: this.encryptionService.encrypt(
-              params.dto.reason.trim(),
-            ),
-            idempotencyKey: params.dto.idempotencyKey,
-          },
-        });
-        return { account: updatedAccount, transaction };
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
+        throw error;
+      });
 
     await this.auditLogService.log({
       tenantId,
@@ -217,6 +237,52 @@ export class LoyaltyService {
       }),
       transaction_id: result.transaction.id,
     };
+  }
+
+  /**
+   * Воспроизведение операции, которую записала выигравшая гонку транзакция.
+   *
+   * Проверки те же, что и на обычном повторном вызове: если под этим ключом
+   * лежит ДРУГАЯ операция, это конфликт, а не воспроизведение.
+   */
+  private async replayAdjustment(
+    tenantId: string,
+    params: {
+      targetUserId: string;
+      actorUserId: string;
+      dto: { delta: number; reason: string; idempotencyKey: string };
+    },
+  ) {
+    const existing = await this.prisma.loyaltyTransaction.findUnique({
+      where: {
+        tenantId_idempotencyKey: {
+          tenantId,
+          idempotencyKey: params.dto.idempotencyKey,
+        },
+      },
+      include: { account: true },
+    });
+
+    if (!existing) {
+      throw new ConflictException(
+        'Loyalty operation could not be replayed after a concurrent write',
+      );
+    }
+
+    const sameOperation =
+      existing.account.userId === params.targetUserId &&
+      existing.actorUserId === params.actorUserId &&
+      existing.delta === params.dto.delta &&
+      this.encryptionService.decrypt(existing.encryptedReason) ===
+        params.dto.reason.trim();
+
+    if (!sameOperation) {
+      throw new ConflictException(
+        'Idempotency key is already used for another loyalty operation',
+      );
+    }
+
+    return { account: existing.account, transaction: existing };
   }
 
   private async getExternalAccount(

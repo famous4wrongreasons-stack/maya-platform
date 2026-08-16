@@ -295,6 +295,9 @@ describe('BillingService', () => {
               update: tenantUpdateMock,
             },
             billingPayment: {
+              // Захват платежа: успешный переход pending → succeeded.
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+              findUniqueOrThrow: billingPaymentUpdateMock,
               update: billingPaymentUpdateMock,
             },
           }),
@@ -568,5 +571,58 @@ describe('BillingService', () => {
 
     // Ни одной записи в базу: срок подписки не сдвинулся.
     expect(transactionMock).not.toHaveBeenCalled();
+  });
+  it('параллельное применение одного платежа продлевает подписку один раз', async () => {
+    // Снимок платежа снимается ДО сетевого запроса в банк, поэтому вебхук и
+    // тик сверки видят одинаковое pending у себя и succeeded у банка. Обе
+    // ветки доходят до транзакции; продлить срок имеет право только та, что
+    // реально перевела статус. Прежняя проверка смотрела в устаревший снимок и
+    // дарила салону лишний оплаченный месяц.
+    const tenantUpdateMock = jest.fn();
+    const transactionMock = jest
+      .fn()
+      .mockImplementation((callback: (tx: unknown) => unknown) =>
+        Promise.resolve(
+          callback({
+            tenant: {
+              findUnique: jest.fn().mockResolvedValue(null),
+              update: tenantUpdateMock,
+            },
+            billingPayment: {
+              // Захват не удался: строку уже перевела параллельная ветка.
+              updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+              findUniqueOrThrow: jest.fn(),
+              update: jest.fn(),
+            },
+          }),
+        ),
+      );
+    const prisma = {
+      $transaction: transactionMock,
+      billingPayment: {
+        findUnique: jest.fn().mockResolvedValue({
+          ...basePayment(),
+          status: 'succeeded',
+        }),
+      },
+    } as unknown as PrismaService;
+    const { service, getPaymentMock, findPaymentByProviderPaymentIdMock } =
+      createService(prisma);
+    findPaymentByProviderPaymentIdMock.mockResolvedValue({
+      ...basePayment(),
+      status: 'pending',
+      providerPaymentId: 'yk-payment-1',
+    });
+    getPaymentMock.mockResolvedValue(succeededProviderPayment());
+
+    await service.handleYooKassaWebhook({
+      type: 'notification',
+      event: 'payment.succeeded',
+      object: { id: 'yk-payment-1' },
+    });
+
+    expect(transactionMock).toHaveBeenCalledTimes(1);
+    // Главное: срок подписки не сдвинулся.
+    expect(tenantUpdateMock).not.toHaveBeenCalled();
   });
 });

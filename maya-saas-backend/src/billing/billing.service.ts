@@ -629,6 +629,37 @@ export class BillingService {
       this.parseProviderDate(providerPayment.captured_at) ?? new Date();
 
     const result = await this.prisma.$transaction(async (tx) => {
+      // 🔴 ЗАХВАТ платежа переходом статуса, а не проверкой снимка.
+      //
+      // Снимок `payment` снимается ДО сетевого запроса в банк, и между ним и
+      // этой транзакцией проходит целый round-trip. Вебхук ЮKassa и тик сверки
+      // легко совпадают на платеже, который висел pending дольше пяти минут
+      // (СБП, подтверждение в банке): обе ветки видят succeeded у банка и
+      // pending у себя, обе доходят сюда, и вторая добавляет салону ещё месяц —
+      // currentPeriodEnd считается от свежепрочитанного значения. Флаг running
+      // в планировщике защищает проход только от самого себя, вебхук им не
+      // покрыт.
+      //
+      // Условие на статус внутри UPDATE решает это без блокировок вручную:
+      // вторая транзакция ждёт коммита первой, перечитывает строку и получает
+      // count = 0.
+      const claimed = await tx.billingPayment.updateMany({
+        where: {
+          id: payment.id,
+          tenantId,
+          status: { not: PAYMENT_STATUS_SUCCEEDED },
+        },
+        data: {
+          status: PAYMENT_STATUS_SUCCEEDED,
+          paidAt,
+          providerPayload: asJson(providerPayment),
+        },
+      });
+
+      if (claimed.count === 0) {
+        return null;
+      }
+
       const tenant = await tx.tenant.findUnique({
         where: { id: tenantId },
       });
@@ -649,17 +680,12 @@ export class BillingService {
           ? providerPayment.payment_method.id
           : tenant.billingMethodId;
 
-      const updatedPayment = await tx.billingPayment.update({
+      const updatedPayment = await tx.billingPayment.findUniqueOrThrow({
         where: {
           id_tenantId: {
             id: payment.id,
             tenantId,
           },
-        },
-        data: {
-          status: PAYMENT_STATUS_SUCCEEDED,
-          paidAt,
-          providerPayload: asJson(providerPayment),
         },
       });
       const updatedTenant = await tx.tenant.update({
@@ -680,6 +706,16 @@ export class BillingService {
         tenant: updatedTenant,
       };
     });
+
+    // Захват не удался — платёж уже применён параллельной веткой. Отдаём
+    // актуальную строку и НЕ трогаем срок подписки второй раз.
+    if (!result) {
+      const applied = await this.prisma.billingPayment.findUnique({
+        where: this.paymentWhere(payment),
+      });
+
+      return { payment: applied ?? payment, tenant: null };
+    }
 
     return {
       payment: result.payment,
