@@ -45,7 +45,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
-import { isCanceledOutcome } from '../domain';
+import { isCanceledOutcome, kopecksToMajor, majorToKopecks } from '../domain';
 
 interface AppointmentErrorPayload {
   message: string;
@@ -209,7 +209,7 @@ export class AppointmentsService {
         blockedEndAt,
         status: remoteAppointment?.status ?? AppointmentStatus.CONFIRMED,
         notes: dto.notes ?? null,
-        totalPriceKopecks: totalPrice * 100,
+        totalPriceKopecks: majorToKopecks(totalPrice),
         currency,
         providerPayload: asJson(
           remoteAppointment?.raw ?? { provider: CalendarSource.INTERNAL },
@@ -464,7 +464,7 @@ export class AppointmentsService {
         totalPriceKopecks:
           remote.total_price === undefined || remote.total_price === null
             ? null
-            : Math.round(remote.total_price * 100),
+            : majorToKopecks(remote.total_price),
         currency: remote.currency || 'RUB',
         providerPayload: asJson(
           remote.raw ?? {
@@ -815,7 +815,7 @@ export class AppointmentsService {
           blockedEndAt,
           status: remoteAppointment?.status ?? AppointmentStatus.CONFIRMED,
           notes: dto.notes ?? appointment.notes,
-          totalPriceKopecks: totalPrice * 100,
+          totalPriceKopecks: majorToKopecks(totalPrice),
           currency,
           providerPayload: asJson(
             remoteAppointment?.raw ?? { provider: CalendarSource.INTERNAL },
@@ -1262,7 +1262,7 @@ export class AppointmentsService {
       (appointment.totalPriceKopecks === undefined ||
       appointment.totalPriceKopecks === null
         ? null
-        : appointment.totalPriceKopecks / 100) ??
+        : kopecksToMajor(appointment.totalPriceKopecks)) ??
       (services.length > 0
         ? services.reduce((sum, service) => sum + service.price, 0)
         : null);
