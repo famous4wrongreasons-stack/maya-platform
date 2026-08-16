@@ -96,6 +96,43 @@ describe('граница канонического домена', () => {
     expect(importers.length).toBeLessThanOrEqual(REMAINING_BOUNDARY_IMPORTERS);
   });
 
+  it('решения о доступе не читают внешний id провайдера', () => {
+    // 🔴 Инвариант cutover: ни одно решение об авторизации, доступе или сессии
+    // не зависит напрямую от externalStaffId. Внешний id допустим ровно на
+    // границе интеграции: provider + externalId → StaffProviderLink → StaffId.
+    //
+    // Список разрешённых файлов — ХРАПОВИК: он только сокращается. Добавление
+    // сюда нового файла означает, что внешний id снова попал в решение.
+    const ALLOWED = new Set([
+      'crm/crm.service.ts', // разрешатель связи + сверка команды
+      'crm/crm-integration.controller.ts', // публичный URL, §12
+      'users/users.service.ts', // совместимый lookup + выдача доступа
+      'crm/client-identity.service.ts', // идентичность КЛИЕНТА, другой контур
+      // 🔴 ИСКЛЮЧЕНИЕ С ПРИЧИНОЙ, а не ослабление правила.
+      // appointments.service адресует УВЕДОМЛЕНИЯ по внешнему id — это не
+      // решение о доступе. Там же живёт известный дефект: при внутреннем
+      // календаре в это поле уходит cuid InternalProvider, совпадения быть не
+      // может, и мастер не получает уведомления о собственной записи.
+      // Исправление намеренно вынесено за рамки cutover решением владельца.
+      // Строка убирается вместе с тем исправлением.
+      'appointments/appointments.service.ts',
+    ]);
+
+    const DECISION_DIRS = ['auth/', 'guards/', 'tenancy/', 'appointments/'];
+    const offenders: string[] = [];
+
+    for (const file of productionFiles) {
+      const name = rel(file);
+      if (ALLOWED.has(name)) continue;
+      if (!DECISION_DIRS.some((dir) => name.startsWith(dir))) continue;
+
+      const source = readFileSync(file, 'utf8');
+      if (/\bexternalStaffId\b/.test(source)) offenders.push(name);
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
   it('список временных алиасов границы только сокращается', () => {
     const source = readFileSync(
       join(SRC, 'crm', 'crm-adapter.interface.ts'),

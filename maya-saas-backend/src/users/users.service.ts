@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
+import { Prisma } from '@prisma/client';
 import type {
   MembershipStatus as PrismaMembershipStatus,
   User,
@@ -236,6 +237,90 @@ export class UsersService {
    * Возвращает пользователя, его membership в этом тенанте (любого статуса) и
    * признак привязки к карточке сотрудника CRM.
    */
+  /**
+   * Идентичность мастера Maya для внешней карточки провайдера.
+   *
+   * 🔴 После cutover грант доступа принадлежит `Staff`, а не внешнему id.
+   * Если создать грант без `staffId`, мастер не сможет войти в журнал:
+   * `journalStaffBinding` отказывает при пустой идентичности намеренно, без
+   * отката на legacy-путь. Поэтому идентичность и связь создаются ЗДЕСЬ, до
+   * гранта, и в той же транзакции.
+   */
+  /**
+   * Совместимый lookup для публичного URL `PATCH team-access/:externalStaffId`.
+   *
+   * 🔴 ЕДИНСТВЕННЫЙ разрешённый путь чтения внешнего id вне границы CRM.
+   * Внешний контракт HTTP не меняется, но внутри он немедленно превращается в
+   * идентичность Maya:
+   *
+   *     provider + externalStaffId → StaffProviderLink → StaffId → грант
+   *
+   * Прямой поиск гранта по `externalStaffId` после cutover запрещён барьерным
+   * тестом: он оставлял бы внешний id вторым источником истины.
+   */
+  private async staffIdByExternal(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    externalStaffId: string,
+  ): Promise<string | null> {
+    const integration = await tx.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) return null;
+
+    const link = await tx.staffProviderLink.findFirst({
+      where: {
+        tenantId,
+        provider: integration.provider,
+        externalId: externalStaffId,
+      },
+      select: { staffId: true },
+    });
+    return link?.staffId ?? null;
+  }
+
+  private async ensureStaffForExternal(
+    tx: Prisma.TransactionClient,
+    params: {
+      tenantId: string;
+      provider: string;
+      externalId: string;
+      encryptedDisplayName: string;
+      title?: string | null;
+      userId?: string | null;
+    },
+  ): Promise<string> {
+    const link = await tx.staffProviderLink.findFirst({
+      where: {
+        tenantId: params.tenantId,
+        provider: params.provider,
+        externalId: params.externalId,
+      },
+      select: { staffId: true },
+    });
+    if (link) return link.staffId;
+
+    const staff = await tx.staff.create({
+      data: {
+        tenantId: params.tenantId,
+        userId: params.userId ?? null,
+        encryptedDisplayName: params.encryptedDisplayName,
+        title: params.title ?? null,
+      },
+      select: { id: true },
+    });
+    await tx.staffProviderLink.create({
+      data: {
+        tenantId: params.tenantId,
+        staffId: staff.id,
+        provider: params.provider,
+        externalId: params.externalId,
+      },
+    });
+    return staff.id;
+  }
+
   async findTenantIdentityByPhone(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const normalizedPhone = normalizePhoneE164(phone);
@@ -505,6 +590,18 @@ export class UsersService {
   }) {
     const tenantId = this.tenantContext.assertTenantId(data.tenantId);
     const ownerExternalStaffId = data.ownerExternalStaffId?.trim() || null;
+    // Провайдер квалифицирует связь: без него внешний id ничего не значит.
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) {
+      throw new ConflictException({
+        message: 'CRM integration is not configured for this tenant.',
+        error: { code: 'crm_not_configured' },
+      });
+    }
+    const provider = integration.provider;
     const seenStaffIds = new Set<string>();
     const seenEmails = new Set<string>();
     const seenPhones = new Set<string>();
@@ -610,13 +707,22 @@ export class UsersService {
       }
 
       if (ownerExternalStaffId) {
+        const encryptedDisplayName =
+          owner.encryptedName ?? this.encryptionService.encrypt('Owner');
+        const staffId = await this.ensureStaffForExternal(tx, {
+          tenantId,
+          provider,
+          externalId: ownerExternalStaffId,
+          encryptedDisplayName,
+          userId: owner.id,
+        });
         await tx.crmStaffAccess.create({
           data: {
             tenantId,
+            staffId,
             externalStaffId: ownerExternalStaffId,
             userId: owner.id,
-            encryptedDisplayName:
-              owner.encryptedName ?? this.encryptionService.encrypt('Owner'),
+            encryptedDisplayName,
             role: UserRole.TENANT_ADMIN,
             status: 'active',
           },
@@ -672,9 +778,18 @@ export class UsersService {
           status = 'active';
         }
 
+        const staffId = await this.ensureStaffForExternal(tx, {
+          tenantId,
+          provider,
+          externalId: member.externalStaffId,
+          encryptedDisplayName: member.encryptedDisplayName,
+          title: member.title,
+          userId,
+        });
         await tx.crmStaffAccess.create({
           data: {
             tenantId,
+            staffId,
             externalStaffId: member.externalStaffId,
             userId,
             encryptedDisplayName: member.encryptedDisplayName,
@@ -797,8 +912,13 @@ export class UsersService {
         : null;
 
     await this.prisma.$transaction(async (tx) => {
+      const staffId = await this.staffIdByExternal(
+        tx,
+        tenantId,
+        externalStaffId,
+      );
       const access = await tx.crmStaffAccess.findFirst({
-        where: { tenantId, externalStaffId },
+        where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
         include: {
           user: {
             select: {
@@ -1036,8 +1156,13 @@ export class UsersService {
         });
       }
 
+      const staffId = await this.staffIdByExternal(
+        tx,
+        tenantId,
+        externalStaffId,
+      );
       const access = await tx.crmStaffAccess.findFirst({
-        where: { tenantId, externalStaffId },
+        where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
         select: {
           id: true,
           userId: true,
@@ -1436,7 +1561,7 @@ export class UsersService {
             userId: serialized.id,
             status: 'active',
           },
-          select: { title: true, externalStaffId: true },
+          select: { title: true, externalStaffId: true, staffId: true },
         }),
         this.prisma.customerProfile.findFirst({
           where: {
@@ -1465,6 +1590,9 @@ export class UsersService {
         linked: true,
         source: 'crm' as const,
         title: crmStaffProfile.title,
+        // Идентичность Maya — есть у обоих источников. Внешний id остаётся
+        // рядом как наследие провода и в решениях о доступе не участвует.
+        staff_id: crmStaffProfile.staffId,
         // Свой идентификатор в CRM: по нему кабинет отбирает из журнала дня
         // ИМЕННО свои визиты. Это собственный id пользователя, не чужие ПД.
         external_staff_id: crmStaffProfile.externalStaffId,
@@ -1490,7 +1618,7 @@ export class UsersService {
         userId: serialized.id,
         active: true,
       },
-      select: { title: true },
+      select: { id: true, title: true },
     });
 
     const staffProfile = internalStaffProfile
@@ -1498,8 +1626,11 @@ export class UsersService {
           linked: true,
           source: 'internal' as const,
           title: internalStaffProfile.title,
+          // Закрывает асимметрию: у внутреннего мастера идентификатора не было
+          // вовсе, поэтому кабинет не мог отобрать для него «свои визиты».
+          staff_id: internalStaffProfile.id,
         }
-      : { linked: false, source: null, title: null };
+      : { linked: false, source: null, title: null, staff_id: null };
 
     return {
       ...serialized,

@@ -55,7 +55,8 @@ import {
   normalizeCrmProviderSettings,
   serializePublicCrmSettings,
 } from './crm-provider-settings';
-import type { VisitAttendance } from '../domain';
+import type { StaffId, VisitAttendance } from '../domain';
+import { asStaffId, asStaffIdOrNull } from '../domain';
 import { assertWritableAttendance } from './crm-attendance';
 
 type CrmConnectionInput = {
@@ -705,9 +706,63 @@ export class CrmService {
     }
   }
 
+  /**
+   * Отключение CRM — это граница безопасности, а не просто удаление строки.
+   *
+   * 🔴 До cutover удалялась ТОЛЬКО `CrmIntegration`: гранты, роли и живые сессии
+   * продолжали существовать со старыми внешними id. Отключённая CRM оставляла
+   * активный доступ, выданный этой же CRM.
+   *
+   * 🔴 Роли владельца и администратора НЕ отзываются: они происходят из
+   * членства и платформенной авторизации, а не из CRM. Иначе отключение
+   * интеграции запирало бы владельца снаружи собственного кабинета.
+   */
   async disconnectIntegration(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const existing = await this.getStoredIntegration(scopedTenantId);
+    const now = new Date();
+
+    const revoked = await this.prisma.$transaction(async (tx) => {
+      await tx.staffProviderLink.updateMany({
+        where: {
+          tenantId: scopedTenantId,
+          provider: existing.provider,
+          unlinkedAt: null,
+        },
+        data: { unlinkedAt: now },
+      });
+
+      const derived = await tx.crmStaffAccess.findMany({
+        where: { tenantId: scopedTenantId, status: { not: 'disabled' } },
+        select: { id: true, userId: true, role: true },
+      });
+      const provisioned = derived.filter(
+        (access) => !this.isOwnerAccessRole(access.role),
+      );
+
+      if (provisioned.length > 0) {
+        await tx.crmStaffAccess.updateMany({
+          where: { id: { in: provisioned.map((access) => access.id) } },
+          data: { status: 'disabled' },
+        });
+      }
+
+      const userIds = provisioned
+        .map((access) => access.userId)
+        .filter((userId): userId is string => Boolean(userId));
+
+      if (userIds.length === 0) return 0;
+
+      const result = await tx.authSession.updateMany({
+        where: {
+          tenantId: scopedTenantId,
+          userId: { in: userIds },
+          revokedAt: null,
+        },
+        data: { revokedAt: now, revokeReason: 'crm_disconnected' },
+      });
+      return result.count;
+    });
 
     await this.prisma.crmIntegration.delete({
       where: { tenantId: scopedTenantId },
@@ -718,6 +773,7 @@ export class CrmService {
       disconnected_provider: existing.provider,
       connection: null,
       next_action: 'connect',
+      revoked_sessions: revoked,
     };
   }
 
@@ -748,7 +804,6 @@ export class CrmService {
     const access = await this.prisma.crmStaffAccess.findFirst({
       where: { tenantId: scopedTenantId, userId },
       select: {
-        externalStaffId: true,
         role: true,
         status: true,
       },
@@ -1134,25 +1189,82 @@ export class CrmService {
    * Возвращает уже загруженную карточку, если ради проверки её пришлось
    * прочитать — чтобы не ходить в CRM дважды.
    */
+  /**
+   * 🔴 ЕДИНСТВЕННОЕ место, где внешний идентификатор провайдера превращается в
+   * идентичность Maya. Граница интеграции:
+   *
+   *     provider + externalId → StaffProviderLink → StaffId
+   *
+   * Отвязанные связи (`unlinkedAt`) намеренно не разрешаются: карточка, которую
+   * провайдер убрал из состава команды, не даёт доступа.
+   */
+  /** Провайдер, подключённый у арендатора. Единственный источник квалификации. */
+  private async providerOfTenant(tenantId: string): Promise<string> {
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) {
+      throw new ConflictException({
+        message: 'CRM integration is not configured for this tenant.',
+        error: { code: 'crm_not_configured' },
+      });
+    }
+    return integration.provider;
+  }
+
+  private async resolveStaffIdByExternal(
+    tenantId: string,
+    externalId: string,
+  ): Promise<StaffId | null> {
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) return null;
+
+    const link = await this.prisma.staffProviderLink.findFirst({
+      where: {
+        tenantId,
+        provider: integration.provider,
+        externalId,
+        unlinkedAt: null,
+      },
+      select: { staffId: true },
+    });
+
+    return asStaffIdOrNull(link?.staffId);
+  }
+
+  /**
+   * Чей это мастер — в идентичности Maya.
+   *
+   * 🔴 До cutover отдавался `externalStaffId`, и всё право читать чужой визит
+   * держалось на строковом равенстве идентификаторов ЧУЖОЙ системы. Теперь
+   * возвращается `StaffId`, а значения со стороны CRM разрешаются через связь.
+   *
+   * Отсутствие `staffId` — ОТКАЗ, а не откат на внешний id. Откат означал бы,
+   * что старый путь остаётся рабочим обходом инварианта.
+   */
   private async journalStaffBinding(
     tenantId: string,
     actor: AuthenticatedUser,
-  ): Promise<string | null> {
+  ): Promise<StaffId | null> {
     if (CrmService.JOURNAL_FULL_ACCESS_ROLES.has(actor.role)) {
       return null;
     }
 
     const access = await this.prisma.crmStaffAccess.findFirst({
       where: { tenantId, userId: actor.userId },
-      select: { externalStaffId: true, status: true },
+      select: { staffId: true, status: true },
     });
 
-    // Нет активной привязки к мастеру в CRM — значит и своих визитов нет.
-    if (!access || access.status !== 'active') {
+    // Нет активной привязки к мастеру — значит и своих визитов нет.
+    if (!access || access.status !== 'active' || !access.staffId) {
       throw this.journalRecordForbidden();
     }
 
-    return access.externalStaffId;
+    return asStaffId(access.staffId);
   }
 
   /**
@@ -1181,7 +1293,14 @@ export class CrmService {
       return;
     }
 
-    if (String(staffId) !== String(boundStaffId)) {
+    // Значение пришло из запроса в пространстве провайдера — разрешаем его в
+    // идентичность Maya и только потом сравниваем. Связи нет ⇒ отказ.
+    const target = await this.resolveStaffIdByExternal(
+      scopedTenantId,
+      String(staffId),
+    );
+
+    if (target === null || target !== boundStaffId) {
       throw this.journalRecordForbidden();
     }
   }
@@ -1207,7 +1326,11 @@ export class CrmService {
       externalId,
     });
 
-    if (!ownerStaffId || String(ownerStaffId) !== String(boundStaffId)) {
+    const ownerStaff = ownerStaffId
+      ? await this.resolveStaffIdByExternal(tenantId, String(ownerStaffId))
+      : null;
+
+    if (ownerStaff === null || ownerStaff !== boundStaffId) {
       throw this.journalRecordForbidden();
     }
   }
@@ -1253,11 +1376,14 @@ export class CrmService {
     const boundStaffId = await this.journalStaffBinding(scopedTenantId, actor);
     const detail = await this.loadAppointmentDetail(scopedTenantId, externalId);
 
-    if (
-      boundStaffId !== null &&
-      String(detail.provider.id) !== String(boundStaffId)
-    ) {
-      throw this.journalRecordForbidden();
+    if (boundStaffId !== null) {
+      const detailStaff = await this.resolveStaffIdByExternal(
+        scopedTenantId,
+        String(detail.provider.id),
+      );
+      if (detailStaff === null || detailStaff !== boundStaffId) {
+        throw this.journalRecordForbidden();
+      }
     }
 
     if (CrmService.CLIENT_PHONE_ROLES.has(actor.role)) {
@@ -1886,6 +2012,18 @@ export class CrmService {
     const teamById = new Map(team.map((member) => [String(member.id), member]));
     const activeIds = new Set(teamById.keys());
     const knownIds = new Set(accesses.map((access) => access.externalStaffId));
+
+    // 🔴 Сопоставление идёт по паре (провайдер, внешний id), а не по голой
+    // строке. Именно голое равенство позволяло при смене CRM отдать права
+    // нового человека старому — достаточно было совпадения числового id.
+    const provider = await this.providerOfTenant(tenantId);
+    const links = await this.prisma.staffProviderLink.findMany({
+      where: { tenantId, provider },
+      select: { id: true, staffId: true, externalId: true, unlinkedAt: true },
+    });
+    const linkByExternal = new Map(
+      links.map((link) => [link.externalId, link]),
+    );
     const now = new Date();
 
     await this.prisma.$transaction(async (tx) => {
@@ -1950,23 +2088,66 @@ export class CrmService {
         });
       }
 
+      // Связь, помеченную отвязанной, НЕ активируем молча: карточку с тем же
+      // внешним id провайдер мог отдать другому человеку.
+      for (const [externalId, link] of linkByExternal) {
+        if (link.unlinkedAt === null && activeIds.has(externalId)) {
+          await tx.staffProviderLink.update({
+            where: { id: link.id },
+            data: { syncedAt: now },
+          });
+        }
+        if (link.unlinkedAt === null && !activeIds.has(externalId)) {
+          await tx.staffProviderLink.update({
+            where: { id: link.id },
+            data: { unlinkedAt: now },
+          });
+        }
+      }
+
       const newMembers = team.filter(
         (member) => !knownIds.has(String(member.id)),
       );
-      if (newMembers.length) {
-        await tx.crmStaffAccess.createMany({
-          data: newMembers.map((member) => ({
+      for (const member of newMembers) {
+        const externalId = String(member.id);
+        const encryptedDisplayName = this.encryptionService.encrypt(
+          member.name,
+        );
+        // 🔴 Порядок обязателен: идентичность → связь → грант. Грант без
+        // staffId после cutover означает мастера, который не сможет войти.
+        const existing = linkByExternal.get(externalId);
+        const staffId =
+          existing?.staffId ??
+          (
+            await tx.staff.create({
+              data: {
+                tenantId,
+                encryptedDisplayName,
+                title: member.title ?? null,
+              },
+              select: { id: true },
+            })
+          ).id;
+
+        if (!existing) {
+          await tx.staffProviderLink.create({
+            data: { tenantId, staffId, provider, externalId },
+          });
+        }
+
+        await tx.crmStaffAccess.create({
+          data: {
             tenantId,
-            externalStaffId: String(member.id),
-            encryptedDisplayName: this.encryptionService.encrypt(member.name),
+            staffId,
+            externalStaffId: externalId,
+            encryptedDisplayName,
             title: member.title ?? null,
             role:
               member.suggested_role === 'administrator'
                 ? UserRole.ADMINISTRATOR
                 : UserRole.STAFF,
             status: 'pending_contact' as const,
-          })),
-          skipDuplicates: true,
+          },
         });
       }
     });

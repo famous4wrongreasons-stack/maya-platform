@@ -91,6 +91,11 @@ describe('CrmService', () => {
           update: crmUpdate,
         },
         crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
+        staffProviderLink: {
+          findMany: jest.fn().mockResolvedValue([]),
+          findFirst: jest.fn().mockResolvedValue(null),
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        },
         brandingSettings: {
           findUnique: jest.fn().mockResolvedValue({ logoUrl: null }),
           upsert: brandingUpsert,
@@ -796,6 +801,15 @@ describe('CrmService', () => {
       .mockResolvedValueOnce({ status: 'disabled' });
     const accessUpdate = jest.fn().mockResolvedValue({});
     const accessCreateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const accessCreate: jest.MockedFunction<
+      (args: { data: Record<string, unknown> }) => Promise<{ id: string }>
+    > = jest.fn(() => Promise.resolve({ id: 'access-new' }));
+    const staffCreate: jest.MockedFunction<
+      (args: { data: Record<string, unknown> }) => Promise<{ id: string }>
+    > = jest.fn(() => Promise.resolve({ id: 'staff-new' }));
+    const linkCreate: jest.MockedFunction<
+      (args: { data: Record<string, unknown> }) => Promise<{ id: string }>
+    > = jest.fn(() => Promise.resolve({ id: 'link-new' }));
     const membershipUpdateMany = jest.fn().mockResolvedValue({ count: 1 });
     type SessionUpdateArgs = {
       where: { tenantId: string; userId: string; revokedAt: null };
@@ -810,7 +824,13 @@ describe('CrmService', () => {
           crmStaffAccess: {
             update: accessUpdate,
             createMany: accessCreateMany,
+            create: accessCreate,
           },
+          staffProviderLink: {
+            update: jest.fn().mockResolvedValue({}),
+            create: linkCreate,
+          },
+          staff: { create: staffCreate },
           membership: { updateMany: membershipUpdateMany },
           authSession: { updateMany: sessionUpdateMany },
         }),
@@ -848,6 +868,18 @@ describe('CrmService', () => {
         },
         crmIntegration: {
           findUnique: jest.fn().mockResolvedValue(integration),
+        },
+        // Сверка идёт по паре (провайдер, внешний id): уволенный мастер имеет
+        // связь, которой нет в составе команды.
+        staffProviderLink: {
+          findMany: jest.fn().mockResolvedValue([
+            {
+              id: 'link-fired',
+              staffId: 'staff-fired',
+              externalId: 'crm-fired',
+              unlinkedAt: null,
+            },
+          ]),
         },
         $transaction: transaction,
       } as unknown as PrismaService,
@@ -890,16 +922,22 @@ describe('CrmService', () => {
       },
       data: { status: 'suspended' },
     });
-    expect(accessCreateMany).toHaveBeenCalledWith({
-      data: [
-        expect.objectContaining({
-          tenantId: 'tenant-1',
-          externalStaffId: 'crm-active',
-          role: UserRole.STAFF,
-          status: 'pending_contact',
-        }),
-      ],
-      skipDuplicates: true,
+    // 🔴 Порядок обязателен: идентичность Maya → связь с провайдером → грант.
+    // Пакетное создание грантов больше невозможно: грант без staffId означал
+    // бы мастера, который не сможет войти в журнал.
+    expect(staffCreate).toHaveBeenCalledTimes(1);
+    expect(linkCreate.mock.calls[0][0].data).toMatchObject({
+      tenantId: 'tenant-1',
+      staffId: 'staff-new',
+      provider: CrmProvider.YCLIENTS,
+      externalId: 'crm-active',
+    });
+    expect(accessCreate.mock.calls[0][0].data).toMatchObject({
+      tenantId: 'tenant-1',
+      staffId: 'staff-new',
+      externalStaffId: 'crm-active',
+      role: UserRole.STAFF,
+      status: 'pending_contact',
     });
     const revokeArgs = sessionUpdateMany.mock.calls[0]?.[0];
     if (!revokeArgs) throw new Error('Expected active sessions to be revoked');
@@ -987,6 +1025,22 @@ describe('CrmService', () => {
       const service = new CrmService(
         {
           crmStaffAccess: { findFirst: jest.fn().mockResolvedValue(access) },
+          crmIntegration: {
+            findUnique: jest
+              .fn()
+              .mockResolvedValue({ provider: CrmProvider.YCLIENTS }),
+          },
+          // Внешнее кресло 'staff-own' принадлежит мастеру 'staff-1';
+          // 'staff-foreign' связи не имеет ⇒ страж закрывает доступ.
+          staffProviderLink: {
+            findFirst: jest.fn(({ where }: { where: { externalId: string } }) =>
+              Promise.resolve(
+                where.externalId === 'staff-own'
+                  ? { staffId: 'staff-1' }
+                  : null,
+              ),
+            ),
+          },
         } as unknown as PrismaService,
         {} as unknown as EncryptionService,
         {} as unknown as CrmAdapterFactory,
@@ -1013,7 +1067,7 @@ describe('CrmService', () => {
       // ещё нет, а staff_id из тела уходил в CRM как есть. Визит садился в
       // чужую сетку, хотя прочитать или отменить чужой визит нельзя.
       const { service, tenantContext } = buildService({
-        externalStaffId: 'staff-own',
+        staffId: 'staff-1',
         status: 'active',
       });
 
@@ -1030,7 +1084,7 @@ describe('CrmService', () => {
 
     it('пускает мастера в собственное кресло', async () => {
       const { service, tenantContext } = buildService({
-        externalStaffId: 'staff-own',
+        staffId: 'staff-1',
         status: 'active',
       });
 

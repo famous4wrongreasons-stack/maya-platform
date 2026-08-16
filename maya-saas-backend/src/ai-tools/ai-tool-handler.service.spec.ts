@@ -1241,6 +1241,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'crm-staff-1',
+            staff_id: null,
             name: 'Стас',
             appointments: 30,
             revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
@@ -1249,6 +1250,7 @@ describe('AiToolHandlerService output minimization', () => {
           },
           {
             staff_external_id: 'crm-staff-2',
+            staff_id: null,
             name: 'Илья',
             appointments: 20,
             revenue: [{ currency: 'RUB', amount_kopecks: 4_000_000 }],
@@ -1353,6 +1355,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'crm-staff-1',
+            staff_id: null,
             name: 'Стас',
             appointments: 30,
             revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
@@ -1452,6 +1455,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'crm-self',
+            staff_id: null,
             name: 'Илья',
             appointments: 8,
             revenue: [],
@@ -1462,6 +1466,7 @@ describe('AiToolHandlerService output minimization', () => {
           // в ответе даже как число.
           {
             staff_external_id: 'crm-colleague',
+            staff_id: null,
             name: 'Анна',
             appointments: 32,
             revenue: [],
@@ -1527,6 +1532,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'crm-staff-1',
+            staff_id: null,
             name: 'Стас',
             appointments: 30,
             revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
@@ -1609,6 +1615,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'internal-provider-1',
+            staff_id: null,
             name: 'Стас',
             appointments: 12,
             revenue: [{ currency: 'RUB', amount_kopecks: 2_400_000 }],
@@ -1677,6 +1684,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'crm-staff-1',
+            staff_id: null,
             name: 'Стас',
             appointments: 30,
             revenue: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
@@ -1930,6 +1938,7 @@ describe('AiToolHandlerService output minimization', () => {
           // id, а не по позиции в массиве.
           {
             staff_external_id: 'secret-b',
+            staff_id: null,
             name: 'Илья',
             appointments: 8,
             revenue: [{ currency: 'RUB', amount_kopecks: 400_000 }],
@@ -1938,6 +1947,7 @@ describe('AiToolHandlerService output minimization', () => {
           },
           {
             staff_external_id: 'secret-a',
+            staff_id: null,
             name: 'Анна',
             appointments: 32,
             revenue: [{ currency: 'RUB', amount_kopecks: 600_000 }],
@@ -1950,6 +1960,7 @@ describe('AiToolHandlerService output minimization', () => {
         period([
           {
             staff_external_id: 'secret-a',
+            staff_id: null,
             name: 'Анна',
             appointments: 30,
             revenue: [{ currency: 'RUB', amount_kopecks: 600_000 }],
@@ -1958,6 +1969,7 @@ describe('AiToolHandlerService output minimization', () => {
           },
           {
             staff_external_id: 'secret-b',
+            staff_id: null,
             name: 'Илья',
             appointments: 20,
             revenue: [{ currency: 'RUB', amount_kopecks: 900_000 }],
@@ -1967,6 +1979,7 @@ describe('AiToolHandlerService output minimization', () => {
           // Мастер, которого в текущем периоде нет вовсе.
           {
             staff_external_id: 'secret-c',
+            staff_id: null,
             name: 'Пётр',
             appointments: 4,
             revenue: [],
@@ -2087,6 +2100,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'secret-z',
+            staff_id: null,
             name: 'Илья',
             appointments: 10,
             revenue: [],
@@ -2095,6 +2109,7 @@ describe('AiToolHandlerService output minimization', () => {
           },
           {
             staff_external_id: 'secret-a',
+            staff_id: null,
             name: 'Илья',
             appointments: 20,
             revenue: [],
@@ -2153,6 +2168,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'provider-secret-id',
+            staff_id: null,
             name: 'Илья',
             appointments: 8,
             revenue: [{ currency: 'RUB', amount_kopecks: 9_999_999 }],
@@ -2382,6 +2398,7 @@ describe('AiToolHandlerService output minimization', () => {
         period([
           {
             staff_external_id: 'provider-secret-id',
+            staff_id: null,
             name: 'Илья',
             appointments: 8,
             cancelled: 6,
@@ -2398,6 +2415,7 @@ describe('AiToolHandlerService output minimization', () => {
         period([
           {
             staff_external_id: 'provider-secret-id',
+            staff_id: null,
             name: 'Илья',
             appointments: 20,
             cancelled: 2,
@@ -2477,6 +2495,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'secret-a',
+            staff_id: null,
             name: 'Илья',
             appointments: 8,
             revenue: [],
@@ -2524,6 +2543,7 @@ describe('AiToolHandlerService output minimization', () => {
         staff: [
           {
             staff_external_id: 'secret-self',
+            staff_id: null,
             name: 'Илья',
             appointments: 8,
             revenue: [],
@@ -2533,6 +2553,7 @@ describe('AiToolHandlerService output minimization', () => {
           // 🔴 Источник подмешал коллегу. Полагаться на его аккуратность нельзя.
           {
             staff_external_id: 'secret-colleague',
+            staff_id: null,
             name: 'Анна',
             appointments: 32,
             revenue: [],

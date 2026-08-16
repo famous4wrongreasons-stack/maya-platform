@@ -142,6 +142,18 @@ describe('UsersService', () => {
       authIdentity: {
         findFirst: authIdentityFindFirstMock,
       } as PrismaService['authIdentity'],
+      crmIntegration: {
+        findUnique: jest.fn(() => Promise.resolve({ provider: 'yclients' })),
+      },
+      staffProviderLink: {
+        findFirst: jest.fn(() =>
+          Promise.resolve({ staffId: 'staff-existing' }),
+        ),
+        create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+      },
+      staff: {
+        create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+      },
       crmStaffAccess: {
         findFirst: crmStaffAccessFindFirstMock,
       } as PrismaService['crmStaffAccess'],
@@ -268,6 +280,7 @@ describe('UsersService', () => {
       linked: false,
       source: null,
       title: null,
+      staff_id: null,
     });
     expect(result.app_access.default_mode).toBe('owner');
     expect(result.app_access.available_modes).toEqual([
@@ -865,12 +878,49 @@ describe('UsersService', () => {
         run({
           user: { findFirst: userFindFirst, create: userCreate },
           branch: { findFirst: branchFindFirst },
+          crmIntegration: {
+            findUnique: jest.fn(() =>
+              Promise.resolve({ provider: 'yclients' }),
+            ),
+          },
+          staffProviderLink: {
+            findFirst: jest.fn(() =>
+              Promise.resolve({ staffId: 'staff-existing' }),
+            ),
+            create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+          },
+          staff: {
+            create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+          },
           crmStaffAccess: { create: crmStaffAccessCreate },
+          // После cutover грант принадлежит Staff: идентичность и связь
+          // создаются в той же транзакции ДО гранта.
+          crmIntegration: {
+            findUnique: jest.fn(() =>
+              Promise.resolve({ provider: 'yclients' }),
+            ),
+          },
+          staffProviderLink: {
+            findFirst: jest.fn(() => Promise.resolve(null)),
+            create: jest.fn(({ data }: { data: Record<string, unknown> }) =>
+              Promise.resolve({ id: 'link-1', ...data }),
+            ),
+          },
+          staff: {
+            create: jest.fn(({ data }: { data: { externalId?: string } }) =>
+              Promise.resolve({ id: `staff-${JSON.stringify(data).length}` }),
+            ),
+          },
         }),
     );
     const tenantContext = new TenantContextService();
     const service = new UsersService(
-      { $transaction: transaction } as unknown as PrismaService,
+      {
+        $transaction: transaction,
+        crmIntegration: {
+          findUnique: jest.fn(() => Promise.resolve({ provider: 'yclients' })),
+        },
+      } as unknown as PrismaService,
       {
         encrypt: (value: string) => `enc:${value}`,
         decrypt: (value: string) => value.replace(/^enc:/, ''),
@@ -984,6 +1034,18 @@ describe('UsersService', () => {
     const tenantContext = new TenantContextService();
     const service = new UsersService(
       {
+        crmIntegration: {
+          findUnique: jest.fn(() => Promise.resolve({ provider: 'yclients' })),
+        },
+        staffProviderLink: {
+          findFirst: jest.fn(() =>
+            Promise.resolve({ staffId: 'staff-existing' }),
+          ),
+          create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+        },
+        staff: {
+          create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+        },
         crmStaffAccess: {
           findMany: jest.fn().mockResolvedValue([
             {
@@ -1074,6 +1136,20 @@ describe('UsersService', () => {
     const transaction = jest.fn(
       async (run: (tx: Record<string, unknown>) => Promise<unknown>) =>
         run({
+          crmIntegration: {
+            findUnique: jest.fn(() =>
+              Promise.resolve({ provider: 'yclients' }),
+            ),
+          },
+          staffProviderLink: {
+            findFirst: jest.fn(() =>
+              Promise.resolve({ staffId: 'staff-existing' }),
+            ),
+            create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+          },
+          staff: {
+            create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+          },
           crmStaffAccess: {
             findFirst: jest.fn().mockResolvedValue({
               id: 'access-1',
@@ -1105,6 +1181,18 @@ describe('UsersService', () => {
     const service = new UsersService(
       {
         $transaction: transaction,
+        crmIntegration: {
+          findUnique: jest.fn(() => Promise.resolve({ provider: 'yclients' })),
+        },
+        staffProviderLink: {
+          findFirst: jest.fn(() =>
+            Promise.resolve({ staffId: 'staff-existing' }),
+          ),
+          create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+        },
+        staff: {
+          create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+        },
         crmStaffAccess: {
           findMany: jest.fn().mockResolvedValue([
             {
@@ -1184,6 +1272,20 @@ describe('UsersService', () => {
               .fn()
               .mockResolvedValue({ role: UserRole.TENANT_ADMIN }),
           },
+          crmIntegration: {
+            findUnique: jest.fn(() =>
+              Promise.resolve({ provider: 'yclients' }),
+            ),
+          },
+          staffProviderLink: {
+            findFirst: jest.fn(() =>
+              Promise.resolve({ staffId: 'staff-existing' }),
+            ),
+            create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+          },
+          staff: {
+            create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+          },
           crmStaffAccess: {
             findFirst: accessFindFirst,
             update: accessUpdate,
@@ -1194,6 +1296,18 @@ describe('UsersService', () => {
     const service = new UsersService(
       {
         $transaction: transaction,
+        crmIntegration: {
+          findUnique: jest.fn(() => Promise.resolve({ provider: 'yclients' })),
+        },
+        staffProviderLink: {
+          findFirst: jest.fn(() =>
+            Promise.resolve({ staffId: 'staff-existing' }),
+          ),
+          create: jest.fn(() => Promise.resolve({ id: 'link-1' })),
+        },
+        staff: {
+          create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
+        },
         crmStaffAccess: {
           findMany: jest.fn().mockResolvedValue([
             {

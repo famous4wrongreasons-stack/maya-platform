@@ -183,11 +183,9 @@ export class OwnerReportsService {
     recipients: Map<string, string>,
   ): Promise<number> {
     let stored = 0;
-    for (const [userId, externalStaffId] of recipients) {
+    for (const [userId, staffId] of recipients) {
       const sourceEventId = this.masterMorningSourceEventId(localDate, userId);
-      const staff = overview.staff.find(
-        (row) => row.staff_external_id === externalStaffId,
-      );
+      const staff = overview.staff.find((row) => row.staff_id === staffId);
       const composed = composeMasterMorningBrief({
         localDate,
         masterName: staff?.name,
@@ -237,16 +235,20 @@ export class OwnerReportsService {
           userId: { not: null },
           role: { in: MASTER_ROLES },
         },
-        select: { userId: true, externalStaffId: true },
+        select: { userId: true, staffId: true },
       }),
       this.prisma.internalProvider.findMany({
         where: { tenantId, active: true, userId: { not: null } },
         select: { userId: true, id: true },
       }),
     ]);
+    // 🔴 Одно пространство идентификаторов. До cutover в это же значение
+    // клали ЛИБО внешний id провайдера, ЛИБО cuid внутреннего мастера, и
+    // промах при сопоставлении давал не ошибку, а бриф с нулями.
     const recipients = new Map<string, string>();
     for (const link of crmLinks) {
-      if (link.userId) recipients.set(link.userId, link.externalStaffId);
+      if (link.userId && link.staffId)
+        recipients.set(link.userId, link.staffId);
     }
     for (const link of internalLinks) {
       if (link.userId && !recipients.has(link.userId)) {

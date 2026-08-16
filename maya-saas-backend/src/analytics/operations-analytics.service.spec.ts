@@ -618,6 +618,7 @@ describe('OperationsAnalyticsService', () => {
     expect(result.staff).toEqual([
       {
         staff_external_id: 'staff-a',
+        staff_id: null,
         name: 'Анна',
         total: 1,
         appointments: 1,
@@ -634,6 +635,7 @@ describe('OperationsAnalyticsService', () => {
       },
       {
         staff_external_id: 'staff-b',
+        staff_id: null,
         name: 'Илья',
         total: 2,
         appointments: 2,
@@ -750,6 +752,7 @@ describe('OperationsAnalyticsService', () => {
     expect(result.staff).toMatchObject([
       {
         staff_external_id: 'staff-a',
+        staff_id: null,
         name: 'Анна',
         appointments: 2,
         cancelled: 1,
@@ -759,6 +762,7 @@ describe('OperationsAnalyticsService', () => {
       },
       {
         staff_external_id: 'staff-b',
+        staff_id: null,
         name: 'Илья',
         appointments: 0,
         cancelled: 2,

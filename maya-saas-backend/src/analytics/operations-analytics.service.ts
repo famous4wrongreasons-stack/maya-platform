@@ -781,6 +781,7 @@ export class OperationsAnalyticsService {
       external ? 'crm' : 'maya',
       this.clientCohortHistory(cohortWindow, cohortClientIds),
       includeOperationalStatusBuckets,
+      await this.staffIdsByExternal(scopedTenantId),
     );
   }
 
@@ -921,6 +922,27 @@ export class OperationsAnalyticsService {
     }));
   }
 
+  /**
+   * Внешний id мастера → идентичность Maya.
+   *
+   * 🔴 Нужна потому, что записи в аналитику приходят из ДВУХ источников: из
+   * базы (там уже есть staffId) и из журнала CRM (там только внешний id).
+   * Получатель брифа сопоставляется по идентичности Maya, и без этой карты
+   * промах давал бы не ошибку, а бриф с нулями — тихий отказ.
+   */
+  private async staffIdsByExternal(
+    tenantId: string,
+  ): Promise<Map<string, string>> {
+    if (typeof this.prisma.staffProviderLink?.findMany !== 'function') {
+      return new Map();
+    }
+    const links = await this.prisma.staffProviderLink.findMany({
+      where: { tenantId, unlinkedAt: null },
+      select: { externalId: true, staffId: true },
+    });
+    return new Map(links.map((link) => [link.externalId, link.staffId]));
+  }
+
   private async loadExternalAppointments(
     tenantId: string,
     from: Date,
@@ -1029,6 +1051,11 @@ export class OperationsAnalyticsService {
       reason: 'lookback_window_unavailable',
     },
     includeOperationalStatusBuckets = false,
+    /**
+     * Внешний id мастера → идентичность Maya. Разрешается вызывающим, потому
+     * что это запрос в базу, а сам разбор синхронный.
+     */
+    staffIdByExternal: Map<string, string> = new Map(),
   ) {
     const activeAppointments = appointments.filter(
       (appointment) => !this.isCancelled(appointment.status),
@@ -1286,6 +1313,9 @@ export class OperationsAnalyticsService {
         .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
         .map(([staff_external_id, value]) => ({
           staff_external_id,
+          // Идентичность Maya рядом с наследием провода. Именно по ней
+          // сопоставляются получатели брифов — см. owner-reports.
+          staff_id: staffIdByExternal.get(staff_external_id) ?? null,
           name: value.name,
           ...(includeOperationalStatusBuckets ? { total: value.total } : {}),
           appointments: value.appointments,

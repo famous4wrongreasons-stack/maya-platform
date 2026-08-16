@@ -28,9 +28,7 @@ describe('OwnerReportsService', () => {
       crmStaffAccess: {
         findMany: jest
           .fn()
-          .mockResolvedValue([
-            { userId: 'master-user', externalStaffId: 'staff-1' },
-          ]),
+          .mockResolvedValue([{ userId: 'master-user', staffId: 'staff-1' }]),
       },
       internalProvider: {
         findMany: jest.fn().mockResolvedValue([]),
@@ -60,7 +58,8 @@ describe('OwnerReportsService', () => {
       services: [],
       staff: [
         {
-          staff_external_id: 'staff-1',
+          staff_external_id: 'crm-1',
+          staff_id: 'staff-1',
           name: 'Илья',
           total: 6,
           appointments: 5,

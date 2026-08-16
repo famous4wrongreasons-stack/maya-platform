@@ -51,6 +51,15 @@ describe('CrmService: операции над визитом', () => {
       crmStaffAccess: {
         findFirst: jest.fn().mockResolvedValue(staffAccess),
       },
+      // 🔴 После cutover страж сравнивает идентичности Maya. Значение из CRM
+      // разрешается через связь; неизвестный внешний id даёт null ⇒ отказ.
+      staffProviderLink: {
+        findFirst: jest.fn(({ where }: { where: { externalId: string } }) =>
+          Promise.resolve(
+            where.externalId === '1461615' ? { staffId: 'staff-1' } : null,
+          ),
+        ),
+      },
       crmIntegration: {
         findUnique: jest.fn().mockResolvedValue({
           id: 'crm-1',
@@ -187,7 +196,7 @@ describe('CrmService: операции над визитом', () => {
     const getAppointmentDetail = jest.fn().mockResolvedValue(detailOf('999'));
     const { service, run } = build(
       { getAppointmentDetail },
-      { externalStaffId: '1461615', status: 'active' },
+      { staffId: 'staff-1', status: 'active' },
     );
 
     await expect(
@@ -202,7 +211,7 @@ describe('CrmService: операции над визитом', () => {
       .mockResolvedValue({ external_id: '77', attendance: 'arrived' });
     const { service, run } = build(
       { getAppointmentStaffId, markAppointmentAttendance },
-      { externalStaffId: '1461615', status: 'active' },
+      { staffId: 'staff-1', status: 'active' },
     );
 
     await run(() =>
@@ -219,7 +228,7 @@ describe('CrmService: операции над визитом', () => {
     const markAppointmentAttendance = jest.fn();
     const { service, run } = build(
       { getAppointmentStaffId, markAppointmentAttendance },
-      { externalStaffId: '1461615', status: 'active' },
+      { staffId: 'staff-1', status: 'active' },
     );
 
     await expect(
@@ -255,7 +264,7 @@ describe('CrmService: операции над визитом', () => {
       {
         getAppointmentDetail: jest.fn().mockResolvedValue(detailOf('1461615')),
       },
-      { externalStaffId: '1461615', status: 'active' },
+      { staffId: 'staff-1', status: 'active' },
     );
     const masterDetail = await masterSide.run(() =>
       masterSide.service.getAppointmentDetail('tenant-1', MASTER, '77'),
