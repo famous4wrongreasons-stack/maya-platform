@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist",
+    "declaration": false,
+    "sourceMap": false,
+    "incremental": false,
+    "noEmit": false
+  },
+  "include": ["scripts/release-preflight.ts", "src/config/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
+}

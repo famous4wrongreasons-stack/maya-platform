@@ -135,6 +135,11 @@ model Tenant {
   businessReviews                BusinessReview[]
   clients                        Client[]
   crmClientLinks                 CrmClientLink[]
+  marketingPolicy                MarketingPolicy?
+  marketingAudienceRecipients    MarketingAudienceRecipient[]
+  marketingCampaignRecipients    MarketingCampaignRecipient[]
+  marketingConsentEvidence       MarketingConsentEvidence[]
+  marketingDeliveryAttempts      MarketingDeliveryAttempt[]
 
   @@index([status, graceEndsAt])
 }
@@ -1160,6 +1165,118 @@ model CrmClientLink {
   @@index([tenantId, provider, syncedAt])
 }
 
+/// Правило рассылок арендатора.
+///
+/// 🔴 Модель восстановлена по ФАКТИЧЕСКОЙ структуре боевой базы (цикл 02-R):
+/// три миграции 14.08 были применены к проду и утеряны, файлов не существует
+/// нигде. Поля, типы, значения по умолчанию и связи взяты из прода дословно.
+/// Прикладной смысл по именам НЕ додумывался: ни один сервис в эту таблицу не
+/// пишет, бизнес-логика маркетинга относится к главе 6.
+model MarketingPolicy {
+  tenantId               String   @id
+  provider               String   @default("yclients_sms")
+  enabled                Boolean  @default(false)
+  dailyRecipientLimit    Int      @default(500)
+  monthlyRecipientLimit  Int      @default(5000)
+  maxCampaignRecipients  Int      @default(500)
+  maxCampaignCostKopecks Int?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Получатель в составе аудитории. Восстановлено по боевой структуре, 02-R.
+model MarketingAudienceRecipient {
+  id                String            @id
+  tenantId          String
+  audienceId        String
+  externalClientId  String
+  internalUserId    String?
+  eligibilityStatus String
+  exclusionReason   String?
+  consentSource     String?
+  consentRecordedAt DateTime?
+  metricsJson       Json?
+  createdAt         DateTime          @default(now())
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  audience          MarketingAudience @relation(fields: [audienceId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, audienceId, externalClientId], map: "MarketingAudienceRecipient_tenantId_audienceId_externalClientId")
+  @@index([tenantId, audienceId, eligibilityStatus], map: "MarketingAudienceRecipient_tenantId_audienceId_eligibilityStatu")
+}
+
+/// Получатель в составе кампании. Восстановлено по боевой структуре, 02-R.
+model MarketingCampaignRecipient {
+  id                String                     @id
+  tenantId          String
+  campaignId        String
+  externalClientId  String
+  internalUserId    String?
+  idempotencyKey    String
+  status            String                     @default("QUEUED")
+  attemptCount      Int                        @default(0)
+  nextAttemptAt     DateTime?
+  acceptedAt        DateTime?
+  deliveredAt       DateTime?
+  failedAt          DateTime?
+  providerMessageId String?
+  providerStatus    String?
+  lastErrorCode     String?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime
+  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign          MarketingCampaign          @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  deliveryAttempts  MarketingDeliveryAttempt[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, idempotencyKey])
+  @@unique([tenantId, campaignId, externalClientId], map: "MarketingCampaignRecipient_tenantId_campaignId_externalClientId")
+  @@index([tenantId, campaignId, status, nextAttemptAt], map: "MarketingCampaignRecipient_tenantId_campaignId_status_nextAttem")
+}
+
+/// Свидетельство согласия. Восстановлено по боевой структуре, 02-R.
+model MarketingConsentEvidence {
+  id               String    @id
+  tenantId         String
+  externalClientId String
+  channel          String
+  status           String
+  source           String
+  evidenceRef      String?
+  grantedAt        DateTime?
+  revokedAt        DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, externalClientId, channel], map: "MarketingConsentEvidence_tenantId_externalClientId_channel_key")
+  @@index([tenantId, channel, status])
+}
+
+/// Попытка доставки. Восстановлено по боевой структуре, 02-R.
+model MarketingDeliveryAttempt {
+  id                   String                      @id
+  tenantId             String
+  campaignId           String
+  recipientId          String?
+  batchKey             String
+  attemptNumber        Int
+  status               String
+  httpStatus           Int?
+  providerResponseCode String?
+  errorCode            String?
+  startedAt            DateTime                    @default(now())
+  completedAt          DateTime?
+  createdAt            DateTime                    @default(now())
+  tenant               Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign             MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  recipient            MarketingCampaignRecipient? @relation(fields: [recipientId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@index([tenantId, campaignId, createdAt])
+  @@index([tenantId, recipientId, attemptNumber])
+}
+
 model AuditLog {
   id           String     @id @default(cuid())
   /// Инвариант, который держит CHECK в базе (AuditLog_scope_tenant_check):
@@ -1288,11 +1405,19 @@ model MarketingAudience {
   unavailableCount     Int                 @default(0)
   expiresAt            DateTime
   createdAt            DateTime            @default(now())
+  /// Восстановлено по фактической боевой структуре, цикл 02-R.
+  provider             String   @default("yclients_sms")
+  status               String   @default("AUDIENCE_CALCULATED")
+  snapshotHash         String   @default("")
+  exclusionReasonsJson Json     @default("{}")
   tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   campaigns            MarketingCampaign[]
 
+  recipients           MarketingAudienceRecipient[]
+
   @@index([tenantId, createdAt])
   @@index([tenantId, expiresAt])
+  @@unique([id, tenantId])
 }
 
 /// Immutable campaign preview followed by one idempotent, owner-approved send.
@@ -1314,12 +1439,43 @@ model MarketingCampaign {
   sentAt               DateTime?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+  /// Двадцать две колонки восстановлены по фактической боевой структуре,
+  /// цикл 02-R. Прикладной смысл по именам не додумывался.
+  provider             String    @default("yclients_sms")
+  audienceSnapshotHash String    @default("")
+  messageSnapshotHash  String    @default("")
+  confirmationHash     String?
+  confirmedAt          DateTime?
+  confirmedByUserId    String?
+  costEstimateKopecks  Int?
+  costEstimateStatus   String    @default("unavailable")
+  costCurrency         String    @default("RUB")
+  scheduledFor         DateTime?
+  queuedAt             DateTime?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  cancelledAt          DateTime?
+  leaseOwner           String?
+  leaseExpiresAt       DateTime?
+  retryCount           Int       @default(0)
+  lastErrorCode        String?
+  acceptedCount        Int       @default(0)
+  failedCount          Int       @default(0)
+  skippedCount         Int       @default(0)
+  unknownCount         Int       @default(0)
   tenant               Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   audience             MarketingAudience @relation(fields: [audienceId], references: [id], onDelete: Restrict)
+
+  recipients           MarketingCampaignRecipient[]
+
+  deliveryAttempts     MarketingDeliveryAttempt[]
 
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, status, createdAt])
   @@index([tenantId, audienceId])
+  @@unique([id, tenantId])
+  @@index([status, leaseExpiresAt, queuedAt])
+  @@index([status, scheduledFor, leaseExpiresAt])
 }
 
 /// Persistent in-app MAYA inbox (message of record for reports / alerts).

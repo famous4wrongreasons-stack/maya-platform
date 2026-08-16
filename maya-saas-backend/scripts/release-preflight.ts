@@ -25,6 +25,39 @@ interface LocalMigration {
   checksum: string;
 }
 
+interface AcknowledgedMigration {
+  migration_name: string;
+  checksum: string;
+  reason: string;
+}
+
+interface HistoricalBaseline {
+  acknowledged: AcknowledgedMigration[];
+}
+
+/**
+ * Явно признанные миграции, применённые к боевой базе, но отсутствующие в
+ * репозитории.
+ *
+ * 🔴 Это НЕ режим «игнорировать неизвестные миграции». Признаётся каждая
+ * конкретная пара «имя + контрольная сумма». Любая новая необъяснённая запись
+ * по-прежнему проваливает проверку.
+ */
+function loadHistoricalBaseline(): AcknowledgedMigration[] {
+  const path = resolve(
+    process.cwd(),
+    'prisma/historical-migration-baseline.json',
+  );
+
+  if (!existsSync(path)) {
+    return [];
+  }
+
+  const parsed = JSON.parse(readFileSync(path, 'utf8')) as HistoricalBaseline;
+
+  return Array.isArray(parsed.acknowledged) ? parsed.acknowledged : [];
+}
+
 function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
     envPath: null,
@@ -144,12 +177,27 @@ async function verifyDatabase(
         `Database is missing ${missing.length} local Prisma migration(s)`,
       );
     }
+    // Признанная историческая запись — это ПАРА «имя + контрольная сумма».
+    // Совпадение только по имени не принимается: другая сумма означает другое
+    // содержимое, то есть новое необъяснённое расхождение.
+    const acknowledged = new Set(
+      loadHistoricalBaseline().map(
+        (entry) => `${entry.migration_name}\u0000${entry.checksum}`,
+      ),
+    );
     const unknown = appliedRows.filter(
-      (migration) => !local.has(migration.migration_name),
+      (migration) =>
+        !local.has(migration.migration_name) &&
+        !acknowledged.has(
+          `${migration.migration_name}\u0000${migration.checksum}`,
+        ),
     );
     if (unknown.length > 0) {
+      const names = unknown
+        .map((migration) => migration.migration_name)
+        .join(', ');
       throw new Error(
-        `Database has ${unknown.length} migration(s) absent from this release`,
+        `Database has ${unknown.length} migration(s) absent from this release and from the historical baseline: ${names}`,
       );
     }
     const changed = migrations.filter(
