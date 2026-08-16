@@ -13,6 +13,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
+import { AllowSubscriptionRequired } from '../decorators/allow-subscription-required.decorator';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
@@ -31,6 +32,14 @@ import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
 import { EmailAuthService } from './email-auth.service';
 import { SocialAuthService } from './social-auth.service';
 
+// 🔴 Управление собственным доступом не должно зависеть от оплаты. Без этого
+// декоратора SubscriptionAccessGuard закрывал 402 весь контроллер после
+// окончания триала: владелец не мог ни выйти, ни посмотреть свои сессии, ни
+// отозвать чужую. При этом /auth/refresh помечен @Public и гвард его
+// пропускает — то есть украденная сессия продолжала продлеваться ровно в тот
+// момент, когда прекратить её было нельзя. Контроль безопасности стоял за
+// кассой.
+@AllowSubscriptionRequired()
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
