@@ -201,6 +201,12 @@ export class AppointmentsService {
         branchId: dto.branchId ?? matchedSlot.branch_id ?? null,
         crmExternalId: remoteAppointment?.external_id ?? null,
         source: calendarSource,
+        // 🔴 Разрешается ТО ЖЕ значение, что ложится в совместимую колонку:
+        // иначе два поля описывали бы разных мастеров.
+        staffId: await this.crmService.resolveStaffIdForBooking(
+          tenantId,
+          dto.staffId,
+        ),
         staffExternalId: dto.staffId,
         serviceIds: asJson(dto.serviceIds),
         startAt,
@@ -414,7 +420,11 @@ export class AppointmentsService {
           tenantId,
           profile.phone,
         );
-        await this.syncExternalClientAppointments(clientId, remoteAppointments);
+        await this.syncExternalClientAppointments(
+          tenantId,
+          clientId,
+          remoteAppointments,
+        );
       }
     }
 
@@ -428,6 +438,7 @@ export class AppointmentsService {
   }
 
   private async syncExternalClientAppointments(
+    tenantId: string,
     clientId: string,
     remoteAppointments: CreatedAppointment[],
   ): Promise<void> {
@@ -454,6 +465,12 @@ export class AppointmentsService {
         );
       const data = {
         source: CalendarSource.EXTERNAL,
+        // Импорт — такой же писатель, как бронь: идентичность мастера
+        // разрешается здесь же, иначе привезённая запись осталась бы без неё.
+        staffId: await this.crmService.resolveStaffIdForBooking(
+          tenantId,
+          remote.staff_id,
+        ),
         staffExternalId: remote.staff_id,
         serviceIds: asJson(remote.service_ids),
         startAt,
@@ -807,6 +824,11 @@ export class AppointmentsService {
         {
           branchId: branchId ?? matchedSlot.branch_id ?? null,
           source: appointmentSource,
+          // Перенос может сменить мастера — значит меняются ОБА поля.
+          staffId: await this.crmService.resolveStaffIdForBooking(
+            tenantId,
+            remoteAppointment?.staff_id ?? staffId,
+          ),
           staffExternalId: remoteAppointment?.staff_id ?? staffId,
           serviceIds: asJson(remoteAppointment?.service_ids ?? serviceIds),
           startAt,

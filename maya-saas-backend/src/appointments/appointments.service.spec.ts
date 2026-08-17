@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CalendarSource } from '../common/domain.enums';
+import { asStaffId } from '../domain';
 import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
@@ -61,6 +62,17 @@ type AppointmentRecord = {
   updatedAt: Date;
   branch: BranchRecord | null;
 };
+
+/** Что именно ушло в строку визита: читаем аргумент, а не сопоставляем матчерами. */
+const writtenAppointment = (
+  createMock: jest.MockedFunction<
+    (args: Record<string, unknown>) => Promise<unknown>
+  >,
+) =>
+  createMock.mock.calls[0][0].data as {
+    staffId: string | null;
+    staffExternalId: string;
+  };
 
 describe('AppointmentsService', () => {
   const branch: BranchRecord = {
@@ -216,6 +228,12 @@ describe('AppointmentsService', () => {
     const getClientAppointmentsMock: jest.MockedFunction<
       CrmService['getClientAppointments']
     > = jest.fn().mockResolvedValue([]);
+    // 🔴 P7.1: идентичность мастера в пространстве Maya. Разрешение проверяется
+    // отдельно (`crm/staff-identity-writer.spec.ts`); здесь важно, что
+    // разрешённое значение действительно ДОХОДИТ до строки визита.
+    const resolveStaffIdForBookingMock: jest.MockedFunction<
+      CrmService['resolveStaffIdForBooking']
+    > = jest.fn().mockResolvedValue(asStaffId('staff-maya-1'));
     const rescheduleAppointmentMock: jest.MockedFunction<
       (
         tenantId: string,
@@ -299,6 +317,7 @@ describe('AppointmentsService', () => {
       | 'getServices'
       | 'getStaff'
       | 'rescheduleAppointment'
+      | 'resolveStaffIdForBooking'
     > = {
       cancelAppointment: cancelAppointmentMock,
       createAppointment: createAppointmentMock,
@@ -308,6 +327,7 @@ describe('AppointmentsService', () => {
       getServices: getServicesMock,
       getStaff: getStaffMock,
       rescheduleAppointment: rescheduleAppointmentMock,
+      resolveStaffIdForBooking: resolveStaffIdForBookingMock,
     };
     const assertLiveBookingEnabledMock: jest.MockedFunction<
       (tenantId: string) => Promise<unknown>
@@ -388,6 +408,7 @@ describe('AppointmentsService', () => {
         getAvailableSlotsMock,
         getServicesMock,
         getStaffMock,
+        resolveStaffIdForBookingMock,
         getTenantUserOrThrowMock,
         rescheduleAppointmentMock,
         serializeUserMock,
@@ -480,6 +501,65 @@ describe('AppointmentsService', () => {
       'tenant-1',
       expect.objectContaining({ start: '2026-07-05T15:00:00' }),
     );
+  });
+
+  it('🔴 новая запись во внешней CRM получает идентичность мастера Maya', async () => {
+    // Регрессия P7.1. Колонка `staffId` была залита разово и не имела писателя:
+    // каждая следующая запись получала NULL, и мастера у визита снова
+    // определял внешний id. Проверка «0 из 18» была верна только в момент
+    // backfill.
+    const { service, mocks } = createService();
+
+    await service.createForClient('tenant-1', 'user-1', {
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T11:00:00',
+    });
+
+    // Разрешается ровно то значение, что ложится в совместимую колонку.
+    expect(mocks.resolveStaffIdForBookingMock).toHaveBeenCalledWith(
+      'tenant-1',
+      'staff-1',
+    );
+    const written = writtenAppointment(mocks.appointmentCreateMock);
+    expect(written.staffId).toBe('staff-maya-1');
+    expect(written.staffExternalId).toBe('staff-1');
+  });
+
+  it('🔴 новая запись внутреннего календаря получает идентичность мастера Maya', async () => {
+    const { service, mocks } = createService();
+    mocks.getCalendarSourceMock.mockResolvedValue(CalendarSource.INTERNAL);
+    // Во внутреннем пространстве идентификатор мастера УЖЕ является Staff.id.
+    mocks.resolveStaffIdForBookingMock.mockResolvedValue(
+      asStaffId('staff-internal-1'),
+    );
+
+    await service.createForClient('tenant-1', 'user-1', {
+      staffId: 'staff-internal-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T11:00:00',
+    });
+
+    const written = writtenAppointment(mocks.appointmentCreateMock);
+    expect(written.staffId).toBe('staff-internal-1');
+    expect(written.staffExternalId).toBe('staff-internal-1');
+  });
+
+  it('🔴 неразрешённая связь пишет null, а не внешний id', async () => {
+    // Откат на внешний id сделал бы старый путь рабочим обходом инварианта, а
+    // внешний ключ на `Staff` всё равно отверг бы такую строку.
+    const { service, mocks } = createService();
+    mocks.resolveStaffIdForBookingMock.mockResolvedValue(null);
+
+    await service.createForClient('tenant-1', 'user-1', {
+      staffId: 'staff-1',
+      serviceIds: ['svc-1'],
+      start: '2026-07-05T11:00:00',
+    });
+
+    const written = writtenAppointment(mocks.appointmentCreateMock);
+    expect(written.staffId).toBe(null);
+    expect(written.staffExternalId).toBe('staff-1');
   });
 
   it('still prefers an explicit branch timezone over the tenant default', async () => {

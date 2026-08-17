@@ -70,6 +70,82 @@ export function loyaltyVerificationRequired(params: {
   return params.hasDisagreement === true;
 }
 
+/**
+ * Насколько сильно сказанное о владельце.
+ *
+ * 🔴 Зачем понадобилось. Поверхности выводили владельца ДВУМЯ разными
+ * способами: карточка спрашивала владельца про конкретного человека, а список
+ * клиентов считал его сам из колонки кэша. Совпадать они не обязаны, и это
+ * читалось как противоречие Maya самой себе.
+ *
+ * Разница настоящая, и её надо называть, а не прятать: одно дело «мы сходили к
+ * владельцу за этим клиентом», другое — «у арендатора настроен вот такой
+ * владелец». Третье состояние — честное незнание.
+ */
+export type LoyaltyAuthorityScope =
+  /** Владелец разрешён под конкретного человека: к нему действительно ходили. */
+  | 'resolved'
+  /** Владелец известен по настройке арендатора, но под клиента не разрешался. */
+  | 'configured'
+  /** Владелец неизвестен. Придумывать его нельзя. */
+  | 'unknown';
+
+/** Единый вид сведений о владельце для ЛЮБОЙ поверхности Maya. */
+export interface LoyaltyAuthorityView {
+  authority: LoyaltyAuthority | null;
+  authority_scope: LoyaltyAuthorityScope;
+  sync_status: string;
+  stale: boolean;
+  verification_required: boolean;
+  warnings: LoyaltyWarning[];
+}
+
+/** Машинные статусы синхронизации, общие для всех поверхностей. */
+export const LOYALTY_SYNC_STATUS = {
+  /** Снимок кэша: показан без обращения к владельцу. */
+  listSnapshot: 'list_snapshot',
+  /** Владелец не ответил. */
+  temporarilyUnavailable: 'temporarily_unavailable',
+} as const;
+
+/**
+ * Снимок без обращения к владельцу — список клиентов, сводки, досье.
+ *
+ * Ходить к владельцу за каждой строкой означало бы N сетевых вызовов на
+ * страницу. Поэтому мы честно говорим, что это снимок, и требуем проверки
+ * перед тратой — но владельца НЕ выдумываем и второй формулой НЕ считаем.
+ */
+export function snapshotAuthorityView(
+  configured: LoyaltyAuthority | null,
+): LoyaltyAuthorityView {
+  return {
+    authority: configured,
+    authority_scope: configured === null ? 'unknown' : 'configured',
+    sync_status: LOYALTY_SYNC_STATUS.listSnapshot,
+    stale: true,
+    verification_required: true,
+    warnings: [],
+  };
+}
+
+/**
+ * Владелец не ответил и неизвестен.
+ *
+ * 🔴 Здесь раньше подставлялся `crm`. Это была выдумка: при внутреннем
+ * календаре владелец — `maya`, при включённом внешнем журнале — `legacy_bot`,
+ * а при отказе границы не известно вообще ничего.
+ */
+export function unavailableAuthorityView(): LoyaltyAuthorityView {
+  return {
+    authority: null,
+    authority_scope: 'unknown',
+    sync_status: LOYALTY_SYNC_STATUS.temporarilyUnavailable,
+    stale: true,
+    verification_required: true,
+    warnings: [],
+  };
+}
+
 /** Владелец, чьё число берётся за основу при расхождении. */
 export function resolveAuthoritativeBalance(params: {
   legacyBotBalance: number | null;

@@ -9,8 +9,16 @@ import { Prisma } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CalendarSource } from '../common/domain.enums';
-import { LOYALTY_WARNING, loyaltyVerificationRequired } from '../domain';
-import type { LoyaltyAuthority, LoyaltyWarning } from '../domain';
+import {
+  LOYALTY_WARNING,
+  loyaltyVerificationRequired,
+  snapshotAuthorityView,
+} from '../domain';
+import type {
+  LoyaltyAuthority,
+  LoyaltyAuthorityView,
+  LoyaltyWarning,
+} from '../domain';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -150,6 +158,23 @@ export class LoyaltyService {
     return (await this.legacyAuthorityEnabled(scopedTenantId))
       ? 'legacy_bot'
       : 'crm';
+  }
+
+  /**
+   * Владелец для поверхностей, которые НЕ ходят к нему за каждой строкой:
+   * список клиентов, досье, сводки.
+   *
+   * 🔴 Единственный законный способ говорить о владельце без разрешения под
+   * человека. До P7.1 список считал его своей второй формулой из колонки кэша,
+   * и одна и та же строка получала в списке `maya`, а в карточке `legacy_bot`.
+   *
+   * Один вызов на страницу, а не на строку: сетевых обращений здесь нет.
+   */
+  async authoritySnapshot(tenantId: string): Promise<LoyaltyAuthorityView> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    return snapshotAuthorityView(
+      await this.configuredAuthority(scopedTenantId),
+    );
   }
 
   /** Включён ли внешний журнал для этого арендатора. Транспорт скрыт. */
@@ -659,6 +684,7 @@ export class LoyaltyService {
       source: 'external_crm',
       authority: 'crm' as const,
       authoritative: 'crm' as const,
+      authority_scope: 'resolved' as const,
       // Пустой ответ — «не знаем», а не доказанный ноль: провайдер умеет
       // отдавать пустой список карт с кодом успеха.
       verification_required: true,
@@ -792,6 +818,12 @@ export class LoyaltyService {
       authority: status.authoritative,
       /** Наследие провода: старое имя того же поля. Снимается вместе с фронтом. */
       authoritative: status.authoritative,
+      /**
+       * 🔴 К владельцу действительно ходили за ЭТИМ человеком. Снимок списка и
+       * досье говорят `configured`, отказ границы — `unknown`. Раньше разницы в
+       * словаре не было, и поверхности выглядели противоречащими друг другу.
+       */
+      authority_scope: 'resolved' as const,
       sync_status: status.syncStatus,
       stale: status.stale,
       // Обещать списание без проверки можно только по собственному свежему

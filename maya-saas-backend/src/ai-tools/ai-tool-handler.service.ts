@@ -59,7 +59,8 @@ import {
   historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
-import { parseVisitOutcome } from '../domain';
+import { parseVisitOutcome, unavailableAuthorityView } from '../domain';
+import type { RevenueBasis } from '../domain';
 import { CRM_JOURNAL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
@@ -598,9 +599,12 @@ export class AiToolHandlerService {
             .catch(() => null)
         : Promise.resolve(null),
       this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
+      // 🔴 Снимок границы, а не собственный вывод. При отказе владелец
+      // НЕИЗВЕСТЕН: подставлять `crm` значило бы выдумать его — при внутреннем
+      // календаре владелец `maya`, при внешнем журнале `legacy_bot`.
       this.loyaltyService
-        .configuredAuthority(principal.tenantId)
-        .catch(() => 'crm' as const),
+        .authoritySnapshot(principal.tenantId)
+        .catch(() => unavailableAuthorityView()),
     ]);
 
     const serviceCounter = new Map<string, number>();
@@ -693,11 +697,14 @@ export class AiToolHandlerService {
       // Число прочитано с карты провайдера — это наблюдение, а не обязательно
       // авторитетный баланс. Если владелец другой, так и сказано.
       bonus_observed_from: 'crm' as const,
-      bonus_authority: loyaltyAuthority,
-      bonus_is_authoritative: loyaltyAuthority === 'crm',
+      bonus_authority: loyaltyAuthority.authority,
+      // Досье к владельцу за КОНКРЕТНЫМ человеком не ходит — это снимок
+      // настройки арендатора. Область действия названа, а не подразумевается.
+      bonus_authority_scope: loyaltyAuthority.authority_scope,
+      bonus_is_authoritative: loyaltyAuthority.authority === 'crm',
       bonus_status: !loyalty
         ? 'unavailable'
-        : loyaltyAuthority === 'crm'
+        : loyaltyAuthority.authority === 'crm'
           ? 'available'
           : 'observed_not_authoritative',
       note:
@@ -3547,16 +3554,37 @@ export class AiToolHandlerService {
     const appointments = this.record(data.appointments);
     const finance = this.record(data.finance);
     const financeRevenue = this.record(finance.revenue);
-    const revenue =
-      this.safeMoneyAmount(financeRevenue.total) ??
-      (Array.isArray(data.revenue)
-        ? this.safeMoneyAmount(data.revenue[0])
-        : null);
+    /**
+     * 🔴 ДВА РАЗНЫХ ЧИСЛА, а не одно с запасным вариантом.
+     *
+     * Здесь стоял `финансовая выручка ?? цены журнала`. При недоступном
+     * кассовом блоке метрика молча становилась стоимостью ЗАПИСАННОГО и уезжала
+     * дальше — вплоть до карточки «Сводка салона» — как рубли выручки. Само
+     * основание (`revenue_basis`), которое P4 завёл в HTTP-ответе, на эту
+     * сторону не переходило вовсе.
+     *
+     * Теперь касса остаётся кассой, забронированное — забронированным, и у
+     * числа есть основание.
+     */
+    const financialRevenue = this.safeMoneyAmount(financeRevenue.total);
+    const bookedValue = Array.isArray(data.revenue)
+      ? this.safeMoneyAmount(data.revenue[0])
+      : null;
+    const revenueBasis: RevenueBasis = financialRevenue
+      ? 'provider_transactions'
+      : bookedValue
+        ? 'booked_prices'
+        : 'unavailable';
     const averageTicket = Array.isArray(data.average_ticket)
       ? this.safeMoneyAmount(data.average_ticket[0])
       : null;
     return {
-      revenue_amount_kopecks: revenue?.amount_kopecks ?? null,
+      // Только подтверждённая касса. Нет кассы — нет числа.
+      revenue_amount_kopecks: financialRevenue?.amount_kopecks ?? null,
+      /** Стоимость записанного. Отдельное имя, потому что это другое понятие. */
+      booked_value_amount_kopecks: bookedValue?.amount_kopecks ?? null,
+      /** На чём стоит денежное число. См. `domain/revenue-basis.ts`. */
+      revenue_basis: revenueBasis,
       financial_operations: this.optionalMetricNumber(
         financeRevenue.transaction_count,
       ),
@@ -3768,14 +3796,19 @@ export class AiToolHandlerService {
   }
 
   private businessMetricChanges(
-    current: Record<string, number | null>,
-    previous: Record<string, number | null>,
+    current: Record<string, unknown>,
+    previous: Record<string, unknown>,
   ) {
     return Object.fromEntries(
       Object.keys(current).flatMap((key) => {
         const currentValue = current[key];
         const previousValue = previous[key];
-        if (currentValue === null || previousValue === null) {
+        // Не всякая метрика — число: у денежного числа есть ещё и ОСНОВАНИЕ,
+        // а разницу оснований не считают вычитанием.
+        if (
+          typeof currentValue !== 'number' ||
+          typeof previousValue !== 'number'
+        ) {
           return [];
         }
         return [
@@ -5062,9 +5095,15 @@ export class AiToolHandlerService {
       balance: loyalty.balance ?? null,
       currency: loyalty.currency ?? 'RUB',
       source: loyalty.source ?? null,
+      /** Канонический владелец. Раньше наружу уходил только старый алиас. */
+      authority: loyalty.authority ?? null,
+      authority_scope: loyalty.authority_scope ?? null,
       authoritative: loyalty.authoritative ?? null,
       sync_status: loyalty.sync_status ?? null,
       stale: loyalty.stale ?? null,
+      // 🔴 Без этого поля поверхность чата произносила число без единой
+      // оговорки — даже когда оно отдано из кэша, потому что владелец молчит.
+      verification_required: loyalty.verification_required ?? true,
       synced_at: loyalty.synced_at ?? null,
       spend_options: {
         status: spend.status ?? null,

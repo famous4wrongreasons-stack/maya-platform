@@ -9,6 +9,15 @@ interface CreateTenantAppointmentData {
   branchId: string | null;
   crmExternalId: string | null;
   source: string;
+  /**
+   * 🔴 Идентичность мастера в пространстве Maya. Пишется ВМЕСТЕ с внешним id,
+   * а не вместо него: внешний остаётся совместимостью, решения принимает этот.
+   *
+   * `null` допустим и означает «связь не разрешилась». Подставлять сюда внешний
+   * id нельзя — это вернуло бы чужое пространство в собственную колонку, и
+   * внешний ключ на `Staff` всё равно отверг бы запись.
+   */
+  staffId: string | null;
   staffExternalId: string;
   serviceIds: Prisma.InputJsonValue;
   startAt: Date;
@@ -25,6 +34,8 @@ interface CreateTenantAppointmentData {
 interface UpdateTenantAppointmentData {
   status?: string;
   source?: string;
+  /** Меняется вместе со `staffExternalId`: перенос может сменить мастера. */
+  staffId?: string | null;
   startAt?: Date;
   endAt?: Date;
   blockedStartAt?: Date;

@@ -754,6 +754,44 @@ describe('AiCoreService', () => {
     expect(result.reply).not.toMatch(/выручк|прибыл|загрузк|аналитик/i);
   });
 
+  it('🔴 баланс чужого журнала произносится с оговоркой, а не как факт Maya', async () => {
+    // P7.1. Поверхность чата — та же поверхность лояльности. Раньше здесь
+    // звучало голое число даже тогда, когда оно отдано из кэша, потому что
+    // владелец не ответил. Maya не ведёт этот реестр и обещать за него не может.
+    const customer: AuthenticatedUser = {
+      ...user,
+      userId: 'customer-user',
+      role: UserRole.CUSTOMER,
+    };
+    const mocks = createService(['loyalty.own.read']);
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: 'Проверяю баланс.',
+        toolCall: { name: 'loyalty.own.read', arguments: {} },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'execution-loyalty-stale',
+      result: {
+        balance: 385,
+        currency: 'RUB',
+        authority: 'legacy_bot',
+        authority_scope: 'resolved',
+        stale: true,
+        verification_required: true,
+      },
+    });
+
+    const result = await mocks.service.chat(customer, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Сколько у меня баллов?' }],
+    });
+
+    expect(result.reply).toContain('385');
+    expect(result.reply).toContain('последнее известное значение');
+  });
+
   it('grounds a customer loyalty balance in the authenticated customer tool', async () => {
     const customer: AuthenticatedUser = {
       ...user,
@@ -774,7 +812,15 @@ describe('AiCoreService', () => {
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-loyalty',
-      result: { balance: 2_133, currency: 'RUB', authoritative: true },
+      // Свой свежий реестр — единственный случай, когда оговорка не нужна.
+      result: {
+        balance: 2_133,
+        currency: 'RUB',
+        authority: 'maya',
+        authoritative: true,
+        stale: false,
+        verification_required: false,
+      },
     });
 
     const result = await mocks.service.chat(customer, {

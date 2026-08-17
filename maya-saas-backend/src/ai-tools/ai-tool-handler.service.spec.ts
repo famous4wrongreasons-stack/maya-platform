@@ -1,6 +1,7 @@
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
+import { snapshotAuthorityView } from '../domain';
 import { UserRole } from '../common/domain.enums';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
@@ -104,6 +105,8 @@ describe('AiToolHandlerService output minimization', () => {
       // Досье называет, ОТКУДА число и авторитетно ли оно для арендатора.
       bonus_observed_from: 'crm',
       bonus_authority: 'crm',
+      // Досье к владельцу за конкретным человеком не ходит — и говорит об этом.
+      bonus_authority_scope: 'configured',
       bonus_is_authoritative: true,
       bonus_status: 'available',
       note: 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.',
@@ -497,14 +500,19 @@ describe('AiToolHandlerService output minimization', () => {
 
   it('returns only the authoritative loyalty summary', async () => {
     const loyaltyService = {
-      configuredAuthority: jest.fn(() => Promise.resolve('crm')),
+      authoritySnapshot: jest.fn(() =>
+        Promise.resolve(snapshotAuthorityView('crm')),
+      ),
       getForUser: jest.fn().mockResolvedValue({
         balance: 2133,
         currency: 'RUB',
         source: 'yclients',
+        authority: 'crm',
+        authority_scope: 'resolved',
         authoritative: true,
         sync_status: 'fresh',
         stale: false,
+        verification_required: false,
         synced_at: '2026-07-15T00:00:00.000Z',
         spend_options: {
           status: 'available',
@@ -540,7 +548,13 @@ describe('AiToolHandlerService output minimization', () => {
       balance: 2133,
       currency: 'RUB',
       source: 'yclients',
+      // 🔴 P7.1: наружу уходит контракт владельца целиком, а не один старый
+      // алиас. Без этих полей поверхность чата произносила число без единой
+      // оговорки — в том числе когда оно отдано из кэша.
+      authority: 'crm',
+      authority_scope: 'resolved',
       authoritative: true,
+      verification_required: false,
       sync_status: 'fresh',
       stale: false,
       synced_at: '2026-07-15T00:00:00.000Z',
@@ -1888,13 +1902,19 @@ describe('AiToolHandlerService output minimization', () => {
     expect(result).toMatchObject({
       verified: true,
       metrics: {
-        revenue_amount_kopecks: 15_000_000,
+        // 🔴 P7.1. Источник обзора — `maya`, кассового блока нет вовсе, поэтому
+        // 15 000 000 это стоимость ЗАПИСАННОГО. Раньше это же число уезжало в
+        // `revenue_amount_kopecks` и доходило до карточки как рубли выручки.
+        revenue_amount_kopecks: null,
+        booked_value_amount_kopecks: 15_000_000,
+        revenue_basis: 'booked_prices',
         appointments_total: 120,
         unique_clients: 80,
         average_ticket_amount_kopecks: 125_000,
       },
       changes: {
-        revenue_amount_kopecks: {
+        // Динамика считается по забронированному — под своим именем.
+        booked_value_amount_kopecks: {
           current: 15_000_000,
           previous: 17_500_000,
           delta: -2_500_000,
@@ -1918,6 +1938,58 @@ describe('AiToolHandlerService output minimization', () => {
       ],
     });
     expect(getBusinessOverview).toHaveBeenCalledTimes(2);
+  });
+
+  it('🔴 у арендатора на CRM цены журнала не подменяют кассу даже без кассы', async () => {
+    // P7.1. Здесь стояло `касса ?? цены журнала`. Для арендатора на внешней CRM
+    // журнальные суммы обнуляются ещё на чтении (fail-closed), поэтому подмены
+    // не происходило; но само правило «нет кассы — возьми что найдётся» жило в
+    // коде и срабатывало на внутреннем календаре. Теперь его нет вовсе.
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+    const analyticsService = {
+      getBusinessOverview: jest.fn().mockResolvedValue({
+        data_source: 'crm',
+        period: { from: 'from', to: 'to', timezone: 'UTC' },
+        appointments: { total: 10, active: 10, cancelled: 0 },
+        revenue: [{ currency: 'RUB', amount_kopecks: 9_000_000 }],
+        expenses: [],
+        net: [],
+        average_ticket: [],
+        daily: [],
+        services: [],
+        staff: [],
+      }),
+      // Кассового блока за период провайдер не отдал.
+      getBusinessFinance: jest.fn().mockResolvedValue(null),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ calendarSource: 'external', settings: {} }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService;
+    const service = createService({ analyticsService, prisma });
+
+    const result = await service.execute(
+      'analytics.business.query',
+      { ...principal, role: UserRole.TENANT_OWNER },
+      { period: 'month_to_date', comparison: 'none' },
+      'execution-no-till',
+    );
+
+    expect(result).toMatchObject({
+      finance_verified: false,
+      metrics: {
+        // Кассы нет — числа выручки нет. И журнальные 9 000 000 на её место
+        // не встают: у арендатора на CRM деньгами считается только касса.
+        revenue_amount_kopecks: null,
+        booked_value_amount_kopecks: null,
+        revenue_basis: 'unavailable',
+      },
+    });
+    jest.useRealTimers();
   });
 
   it('matches one master across both periods by name and never exposes the CRM id', async () => {
@@ -2770,8 +2842,12 @@ describe('AiToolHandlerService output minimization', () => {
       overrides.appointmentsService ?? ({} as AppointmentsService),
       overrides.loyaltyService ??
         ({
-          // Досье спрашивает владельца баланса у границы: по умолчанию — CRM.
-          configuredAuthority: jest.fn(() => Promise.resolve('crm')),
+          // 🔴 Досье берёт владельца СНИМКОМ границы. Собственного вывода у
+          // него нет: до P7.1 оно спрашивало арендаторное значение отдельно и
+          // могло назвать не того владельца, что карточка того же клиента.
+          authoritySnapshot: jest.fn(() =>
+            Promise.resolve(snapshotAuthorityView('crm')),
+          ),
         } as unknown as LoyaltyService),
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),
       overrides.expensesService ?? ({} as ExpensesService),

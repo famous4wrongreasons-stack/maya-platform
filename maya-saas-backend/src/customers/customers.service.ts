@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
-import type { LoyaltyAuthority } from '../domain';
 import { UserRole } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -131,6 +130,13 @@ export class CustomersService {
       take: Math.min(Math.max(limit, 1), 100),
     });
 
+    // 🔴 Список НЕ ходит к владельцу: это N сетевых вызовов на страницу. Но
+    // владельца он и НЕ считает сам — берёт его у границы одним вызовом на
+    // страницу. До P7.1 здесь стояла вторая формула (из колонки кэша), и одна и
+    // та же строка получала в списке одного владельца, а в карточке другого.
+    const snapshot =
+      await this.loyaltyService.authoritySnapshot(scopedTenantId);
+
     return users.map((user) => {
       const profile = user.customerProfiles[0] ?? null;
       const loyaltyAccount = user.loyaltyAccounts[0] ?? null;
@@ -140,13 +146,11 @@ export class CustomersService {
         appointments_count: user._count.appointments,
         loyalty_balance: loyaltyAccount?.balance ?? null,
         loyalty_source: loyaltyAccount?.source ?? null,
-        // 🔴 Список НЕ ходит к владельцу: это N сетевых вызовов на страницу.
-        // Поэтому число честно помечается снимком, а не текущим значением —
-        // за актуальным идти в карточку клиента.
-        loyalty_authority: this.authorityOfSource(loyaltyAccount?.source),
-        loyalty_stale: true,
-        loyalty_sync_status: 'list_snapshot',
-        loyalty_verification_required: true,
+        loyalty_authority: snapshot.authority,
+        loyalty_authority_scope: snapshot.authority_scope,
+        loyalty_stale: snapshot.stale,
+        loyalty_sync_status: snapshot.sync_status,
+        loyalty_verification_required: snapshot.verification_required,
         profile: this.serializeAdminProfile(profile),
       };
     });
@@ -212,14 +216,6 @@ export class CustomersService {
    * 🔴 Домен не знает деталей транспорта: `legacy_maya` — это историческое имя
    * колонки, а роль называется `legacy_bot`.
    */
-  private authorityOfSource(
-    source: string | undefined,
-  ): LoyaltyAuthority | null {
-    if (!source) return null;
-    if (source === 'legacy_maya') return 'legacy_bot';
-    if (source === 'internal') return 'maya';
-    return 'crm';
-  }
 
   async updateNotes(
     tenantId: string,

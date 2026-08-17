@@ -1237,6 +1237,50 @@ export class CrmService {
   }
 
   /**
+   * Кто этот мастер в идентичности Maya — для ЗАПИСИ визита.
+   *
+   * 🔴 Зачем понадобился публичный резолвер. Колонка `Appointment.staffId`
+   * появилась в фазе A и была залита разово; писателя у неё не завелось, и
+   * каждая новая запись получала `NULL`. То есть идентичность мастера у визита
+   * снова держалась на внешнем id — ровно на том, от чего уходили.
+   *
+   * Два пространства и ОДИН ответ:
+   *
+   * - внешняя CRM: `provider + externalId → StaffProviderLink → StaffId`;
+   * - внутренний календарь: идентификатор мастера УЖЕ является `Staff.id`
+   *   (backfill сохранил `InternalProvider.id` дословно), поэтому связь не
+   *   нужна — нужна проверка существования.
+   *
+   * 🔴 Возвращает `null`, а НЕ внешний id. Подстановка внешнего id сделала бы
+   * колонку носителем чужого пространства, а внешний ключ на `Staff` всё равно
+   * отверг бы такую запись и сломал бронь.
+   *
+   * Проверка существования в внутренней ветке не формальность: без неё в
+   * колонку уехал бы `InternalProvider.id`, у которого строки `Staff` ещё нет,
+   * и внешний ключ уронил бы создание визита целиком.
+   */
+  async resolveStaffIdForBooking(
+    tenantId: string,
+    staffRef: string | null | undefined,
+  ): Promise<StaffId | null> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const reference = String(staffRef ?? '').trim();
+    if (!reference) return null;
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      const staff = await this.prisma.staff.findFirst({
+        where: { id: reference, tenantId: scopedTenantId },
+        select: { id: true },
+      });
+      return asStaffIdOrNull(staff?.id);
+    }
+
+    return this.resolveStaffIdByExternal(scopedTenantId, reference);
+  }
+
+  /**
    * Чей это мастер — в идентичности Maya.
    *
    * 🔴 До cutover отдавался `externalStaffId`, и всё право читать чужой визит

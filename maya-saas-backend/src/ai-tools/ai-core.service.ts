@@ -2383,8 +2383,20 @@ export class AiCoreService {
         const loyalty = this.record(evidence.result);
         const balance = this.safeMetricNumber(loyalty.balance);
         const balanceLabel = `${this.formatMetricNumber(balance)} ${this.pluralize(balance, 'балл', 'балла', 'баллов')}`;
+        /**
+         * 🔴 Оговорка о владельце, а не украшение. Баланс ведёт внешний
+         * журнал или карта провайдера, Maya его не считает и обещать списание
+         * за них не может. Раньше здесь произносилось голое число — даже
+         * когда оно отдано из кэша, потому что владелец не ответил.
+         */
+        const balanceCaveat =
+          loyalty.verification_required === false
+            ? ''
+            : loyalty.stale === true
+              ? ' Это последнее известное значение — при списании MAYA уточнит его у источника.'
+              : ' Точную сумму MAYA подтвердит у источника перед списанием.';
         if (!/(потрат|спис|оплат|на\s+что)/i.test(text)) {
-          return `Ваш баланс: ${balanceLabel}.`;
+          return `Ваш баланс: ${balanceLabel}.${balanceCaveat}`;
         }
         const spend = this.record(loyalty.spend_options);
         const items = Array.isArray(spend.items)
@@ -2402,7 +2414,7 @@ export class AiCoreService {
           : [];
         return items.length > 0
           ? `Ваш баланс: ${balanceLabel}. Можно рассмотреть: ${items.join('; ')}. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.`
-          : `Ваш баланс: ${balanceLabel}. Подходящих услуг для списания сейчас нет.`;
+          : `Ваш баланс: ${balanceLabel}.${balanceCaveat} Подходящих услуг для списания сейчас нет.`;
       }
       case 'appointments.own.list': {
         const appointments = this.record(evidence.result).appointments;

@@ -141,7 +141,20 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
     (typeof resolved.label_ru === 'string' && resolved.label_ru) ||
     (typeof period.label_ru === 'string' && period.label_ru) ||
     'выбранный период';
-  const revenue = moneyRubFromKopecks(metrics.revenue_amount_kopecks);
+  /**
+   * 🔴 Касса и стоимость записанного — разные числа, и подпись обязана
+   * различать их. Раньше карточка показывала одно поле «выручка», в которое при
+   * недоступной кассе молча уезжали цены журнала.
+   */
+  const confirmedRevenue = moneyRubFromKopecks(metrics.revenue_amount_kopecks);
+  const bookedValue = moneyRubFromKopecks(metrics.booked_value_amount_kopecks);
+  const revenueIsConfirmed = confirmedRevenue !== null;
+  const revenue = revenueIsConfirmed ? confirmedRevenue : bookedValue;
+  const revenueCaption = revenueIsConfirmed
+    ? null
+    : bookedValue !== null
+      ? 'Стоимость записанного, а не пробитая касса'
+      : null;
   const ticket = moneyRubFromKopecks(metrics.average_ticket_amount_kopecks);
   const current = record(data.current);
   const financeRevenue = record(record(current.finance).revenue);
@@ -181,6 +194,11 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
       title: 'Сводка салона',
       period_label: label,
       revenue_rub: revenue,
+      revenue_basis:
+        typeof metrics.revenue_basis === 'string'
+          ? metrics.revenue_basis
+          : null,
+      revenue_caption: revenueCaption,
       appointments: metricNumber(metrics.appointments_total),
       unique_clients: metricNumber(metrics.unique_clients),
       clients_new: metricNumber(metrics.clients_new),
