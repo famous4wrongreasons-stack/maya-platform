@@ -1,12 +1,8 @@
-import {
-  ForbiddenException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { Prisma, TenantStatus, UserRole } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
+import { Prisma, UserRole } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { sendInboxApns } from './apns-push';
 import type { IngestInboxItemDto, RegisterPushTokenDto } from './dto/inbox.dto';
@@ -17,8 +13,6 @@ import type { IngestInboxItemDto, RegisterPushTokenDto } from './dto/inbox.dto';
  * Тот же набор, что у штатного резолвера: приостановленный и отменённый салон
  * не должен получать ни карточек, ни пушей.
  */
-const PUBLIC_TENANT_STATUSES: TenantStatus[] = ['trial', 'active', 'past_due'];
-
 const OWNER_ROLES: UserRole[] = [
   UserRole.tenant_owner,
   UserRole.business_owner,
@@ -44,22 +38,16 @@ export class InboxService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
+    private readonly bridgeSource: BridgeSourceService,
   ) {}
 
   assertBridgeToken(header: string | undefined): void {
-    const expected = String(process.env.MAYA_INBOX_BRIDGE_TOKEN || '').trim();
-    if (!expected || expected.length < 24) {
-      throw new UnauthorizedException({
-        message: 'Inbox bridge is not configured.',
-        error: { code: 'inbox_bridge_disabled' },
-      });
-    }
-    if (String(header || '').trim() !== expected) {
-      throw new UnauthorizedException({
-        message: 'Invalid inbox bridge token.',
-        error: { code: 'inbox_bridge_unauthorized' },
-      });
-    }
+    // Сравнение за постоянное время — общее для обоих мостов. Раньше здесь
+    // стояло `!==`, а у соседнего входа с ТЕМ ЖЕ секретом — timingSafeEqual.
+    this.bridgeSource.assertBridgeSecret(header, 'MAYA_INBOX_BRIDGE_TOKEN', {
+      disabled: 'inbox_bridge_disabled',
+      unauthorized: 'inbox_bridge_unauthorized',
+    });
   }
 
   async ingest(dto: IngestInboxItemDto) {
@@ -69,25 +57,20 @@ export class InboxService {
     // отменённого арендатора. Пер-арендный токен — это модель самого моста к
     // старому боту, она относится к главе 2/7; здесь закрываем ровно то, что
     // отличает этот путь от штатного.
-    const tenant = await this.prisma.tenant.findFirst({
-      where: {
-        slug: dto.tenant_slug.trim().toLowerCase(),
-        status: { in: PUBLIC_TENANT_STATUSES },
+    const tenant = await this.bridgeSource.resolveTenant(
+      {
+        provider: dto.provider,
+        externalCompanyId: dto.external_company_id,
+        tenantSlug: dto.tenant_slug,
       },
-      select: { id: true, slug: true },
-    });
-    if (!tenant) {
-      throw new ForbiddenException({
-        message: 'Tenant not found for inbox ingest.',
-        error: { code: 'inbox_tenant_not_found' },
-      });
-    }
+      'inbox_tenant_not_found',
+    );
 
     // Публикация идёт в контексте найденного арендатора: раньше вся ветка
     // работала вне контекста вообще, и любой сервис, который начнёт сверять
     // принадлежность, молча получил бы отказ на ночном мосту.
-    return this.tenantContext.runAsSystemTenant(tenant.id, () =>
-      this.publishForTenant(tenant.id, {
+    return this.tenantContext.runAsSystemTenant(tenant.tenantId, () =>
+      this.publishForTenant(tenant.tenantId, {
         type: dto.type,
         sourceEventId: dto.source_event_id,
         title: dto.title,

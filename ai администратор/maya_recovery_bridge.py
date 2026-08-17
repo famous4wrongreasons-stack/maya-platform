@@ -28,6 +28,25 @@ _TENANT_SLUG = (
 _SUBJECT_DOMAIN = "maya-recovery-subject:v1:"
 
 
+
+# 🔴 Устойчивое отображение источника на арендатора: пара (провайдер, компания).
+# Слаг остаётся в теле только для совместимости — он ИМЯ, а не идентичность, и
+# именно его расхождение (`muzhskaya-estetika` против `muzhskaya-estetika-3`)
+# рвало приём: каждый вызов моста получал 403, и Maya OS не узнавала о записях.
+_PROVIDER = (os.environ.get("MAYA_BRIDGE_PROVIDER") or "yclients").strip().lower()
+
+
+def _external_company_id() -> str:
+    explicit = (os.environ.get("MAYA_BRIDGE_COMPANY_ID") or "").strip()
+    if explicit:
+        return explicit
+    try:
+        from config import YCLIENTS_COMPANY_ID
+
+        return str(YCLIENTS_COMPANY_ID).strip()
+    except Exception:  # конфиг недоступен — остаётся совместимость по слагу
+        return ""
+
 def _normalized_phone_digits(phone: str | None) -> str:
     raw = str(phone or "").strip()
     digits = "".join(ch for ch in raw if ch.isdigit())
@@ -77,6 +96,8 @@ async def publish_recovery_touchpoint(
         timestamp = timestamp.replace(tzinfo=timezone.utc)
     body = {
         "tenant_slug": _TENANT_SLUG,
+        "provider": _PROVIDER,
+        "external_company_id": _external_company_id(),
         "external_event_id": _external_event_id(kind, source_seed),
         "subject_ref": subject_ref,
         "kind": kind,

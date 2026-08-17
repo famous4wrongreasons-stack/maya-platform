@@ -35,6 +35,18 @@ export class IngestRecoveryTouchpointDto {
   @MaxLength(80)
   tenant_slug!: string;
 
+  /** Провайдер CRM источника: вместе с компанией даёт арендатора. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  provider?: string;
+
+  /** Идентификатор компании у провайдера. Слаг остаётся совместимостью. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  external_company_id?: string;
+
   @IsString()
   @MaxLength(160)
   external_event_id!: string;

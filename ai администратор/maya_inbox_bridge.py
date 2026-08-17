@@ -24,6 +24,25 @@ _TENANT_SLUG = (
 ).strip().lower()
 
 
+
+# 🔴 Устойчивое отображение источника на арендатора: пара (провайдер, компания).
+# Слаг остаётся в теле только для совместимости — он ИМЯ, а не идентичность, и
+# именно его расхождение (`muzhskaya-estetika` против `muzhskaya-estetika-3`)
+# рвало приём: каждый вызов моста получал 403, и Maya OS не узнавала о записях.
+_PROVIDER = (os.environ.get("MAYA_BRIDGE_PROVIDER") or "yclients").strip().lower()
+
+
+def _external_company_id() -> str:
+    explicit = (os.environ.get("MAYA_BRIDGE_COMPANY_ID") or "").strip()
+    if explicit:
+        return explicit
+    try:
+        from config import YCLIENTS_COMPANY_ID
+
+        return str(YCLIENTS_COMPANY_ID).strip()
+    except Exception:  # конфиг недоступен — остаётся совместимость по слагу
+        return ""
+
 def _source_event_id(kind: str, seed: str) -> str:
     digest = hashlib.sha1(f"{kind}|{seed}".encode("utf-8")).hexdigest()[:20]
     return f"{kind}:{digest}"
@@ -58,6 +77,8 @@ async def publish_inbox_item(
         return False
     body = {
         "tenant_slug": _TENANT_SLUG,
+        "provider": _PROVIDER,
+        "external_company_id": _external_company_id(),
         "type": type,
         "source_event_id": _source_event_id(type, source_seed or clean[:200]),
         "title": (title or "MAYA")[:160],

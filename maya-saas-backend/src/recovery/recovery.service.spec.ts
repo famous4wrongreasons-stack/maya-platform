@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
+import type { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { RecoveryService } from './recovery.service';
 
 type RecoveryConversionCreateInput = {
@@ -26,10 +27,28 @@ describe('RecoveryService', () => {
         return undefined;
       }),
     } as unknown as ConfigService;
+    // 🔴 Разрешение арендатора живёт в общем резолвере мостов и проверяется
+    // отдельно (`tenancy/bridge-source.service.spec.ts`). Здесь важно, что
+    // сервис им ПОЛЬЗУЕТСЯ, а не ищет арендатора по слагу сам.
+    const resolveTenantMock: jest.MockedFunction<
+      BridgeSourceService['resolveTenant']
+    > = jest.fn().mockResolvedValue({
+      tenantId: 'tenant-1',
+      slug: 'muzhskaya-estetika-3',
+      resolvedBy: 'integration',
+    });
+    const bridgeSource: Pick<
+      BridgeSourceService,
+      'resolveTenant' | 'assertBridgeSecret'
+    > = {
+      resolveTenant: resolveTenantMock,
+      assertBridgeSecret: jest.fn(),
+    };
     return new RecoveryService(
       prisma as PrismaService,
       crm as CrmService,
       config,
+      bridgeSource as BridgeSourceService,
     );
   }
 

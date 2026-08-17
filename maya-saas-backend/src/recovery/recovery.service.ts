@@ -1,26 +1,17 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TenantStatus } from '@prisma/client';
 
 import { normalizePhoneE164 } from '../common/phone.util';
 import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import type { IngestRecoveryTouchpointDto } from './dto/recovery.dto';
-
-/** Тот же набор, что у штатного резолвера арендатора. */
-const RECOVERY_TENANT_STATUSES: TenantStatus[] = [
-  'trial',
-  'active',
-  'past_due',
-];
 
 const SUBJECT_DOMAIN = 'maya-recovery-subject:v1:';
 const MAX_ATTRIBUTION_DAYS = 90;
@@ -54,49 +45,31 @@ export class RecoveryService {
     private readonly prisma: PrismaService,
     private readonly crmService: CrmService,
     private readonly config: ConfigService,
+    private readonly bridgeSource: BridgeSourceService,
   ) {}
 
   assertBridgeToken(header: string | undefined): void {
-    const expected = String(
-      this.config.get<string>('MAYA_INBOX_BRIDGE_TOKEN') || '',
-    ).trim();
-    const supplied = String(header || '').trim();
-    if (!expected || expected.length < 24) {
-      throw new UnauthorizedException({
-        message: 'Recovery bridge is not configured.',
-        error: { code: 'recovery_bridge_disabled' },
-      });
-    }
-    const expectedBuffer = Buffer.from(expected);
-    const suppliedBuffer = Buffer.from(supplied);
-    if (
-      expectedBuffer.length !== suppliedBuffer.length ||
-      !timingSafeEqual(expectedBuffer, suppliedBuffer)
-    ) {
-      throw new UnauthorizedException({
-        message: 'Invalid recovery bridge token.',
-        error: { code: 'recovery_bridge_unauthorized' },
-      });
-    }
+    // Тот же секрет, что у моста inbox, — значит и способ сравнения обязан
+    // быть один. До P7/B0 здесь было постоянное время, а у соседа — нет.
+    this.bridgeSource.assertBridgeSecret(header, 'MAYA_INBOX_BRIDGE_TOKEN', {
+      disabled: 'recovery_bridge_disabled',
+      unauthorized: 'recovery_bridge_unauthorized',
+    });
   }
 
   async ingestTouchpoint(dto: IngestRecoveryTouchpointDto) {
     // 🔴 Как и у мостового ingest в inbox: арендатор берётся из тела запроса
     // под общим платформенным токеном, и статус тут не проверялся. Держатель
     // токена мог писать касания в приостановленного и отменённого арендатора.
-    const tenant = await this.prisma.tenant.findFirst({
-      where: {
-        slug: dto.tenant_slug.trim().toLowerCase(),
-        status: { in: RECOVERY_TENANT_STATUSES },
+    const resolved = await this.bridgeSource.resolveTenant(
+      {
+        provider: dto.provider,
+        externalCompanyId: dto.external_company_id,
+        tenantSlug: dto.tenant_slug,
       },
-      select: { id: true },
-    });
-    if (!tenant) {
-      throw new ForbiddenException({
-        message: 'Tenant not found for recovery ingest.',
-        error: { code: 'recovery_tenant_not_found' },
-      });
-    }
+      'recovery_tenant_not_found',
+    );
+    const tenant = { id: resolved.tenantId };
     const occurredAt = new Date(dto.occurred_at);
     const touchpoint = await this.prisma.recoveryTouchpoint.upsert({
       where: {

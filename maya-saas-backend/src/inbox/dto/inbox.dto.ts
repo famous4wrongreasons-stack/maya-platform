@@ -29,10 +29,27 @@ const INBOX_TYPES = [
 ] as const;
 
 export class IngestInboxItemDto {
+  /**
+   * 🔴 Совместимость, а не идентичность. Слаг — это ИМЯ арендатора, которое
+   * владелец вправе поменять; приём по нему уже ломался (403 на каждом вызове
+   * моста). Устойчивое отображение — пара ниже.
+   */
   @IsString()
   @MinLength(2)
   @MaxLength(80)
   tenant_slug!: string;
+
+  /** Провайдер CRM источника: вместе с компанией даёт арендатора. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  provider?: string;
+
+  /** Идентификатор компании у провайдера. Живёт в интеграции арендатора. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  external_company_id?: string;
 
   @IsString()
   @IsIn(INBOX_TYPES)
