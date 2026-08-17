@@ -1248,7 +1248,11 @@ export class AppointmentsService {
     appointment: {
       id: string;
       tenantId: string;
-      clientId: string;
+      /**
+       * 🔴 Аккаунт, а не клиент бизнеса, и он необязателен: у записи салона,
+       * сделанной по телефону или с виджета, аккаунта Maya нет.
+       */
+      clientId: string | null;
       branchId: string | null;
       crmExternalId: string | null;
       source?: string;

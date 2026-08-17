@@ -260,8 +260,14 @@ export class InternalCalendarService {
       return {
         id: appointment.id,
         client: {
-          id: appointment.client.id,
-          name: this.usersService.getUserName(appointment.client) ?? 'Клиент',
+          // 🔴 Аккаунт стал необязательным (B3.1). Во внутреннем календаре он
+          // всегда есть — запись создаётся зарегистрированным клиентом, — но
+          // тип это больше не гарантирует, и падать на чужой записи журнал не
+          // должен.
+          id: appointment.client?.id ?? null,
+          name: appointment.client
+            ? (this.usersService.getUserName(appointment.client) ?? 'Клиент')
+            : 'Клиент',
         },
         provider:
           providersById.get(appointment.staffExternalId) ??

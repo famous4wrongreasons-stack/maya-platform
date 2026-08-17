@@ -317,7 +317,6 @@ model Membership {
   internalProviders    InternalProvider[]    @relation("InternalProviderMembership")
   customerProfile      CustomerProfile?      @relation("CustomerProfileMembership")
   loyaltyAccount       LoyaltyAccount?       @relation("LoyaltyAccountMembership")
-  clientAppointments   Appointment[]         @relation("ClientMembershipAppointments")
   dashboardPreferences DashboardPreference[]
   aiBrainSessions      AiBrainSession[]
   aiMemoryFacts        AiMemoryFact[]
@@ -1154,6 +1153,7 @@ model Client {
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
   @@index([tenantId, userId])
+  appointments   Appointment[]
 }
 
 /// Привязка карточки внешней CRM к идентичности Maya.
@@ -1409,7 +1409,30 @@ model AuditLog {
 model Appointment {
   id                String     @id @default(cuid())
   tenantId          String
-  clientId          String
+  /**
+   * 🔴 АККАУНТ, а не клиент бизнеса.
+   *
+   * Доказано данными в B3: у всех 18 боевых визитов здесь стоял ОДИН и тот же
+   * пользователь — владелец салона, потому что строка появляется, когда
+   * вошедший аккаунт открывает «Мои записи». Поле отвечает на вопрос «в чьём
+   * кабинете это видно», а не «кто пришёл стричься».
+   *
+   * Стало опциональным: у записи салона, сделанной по телефону или с виджета,
+   * аккаунта Maya нет и быть не должно. Бизнес-клиент живёт в `mayaClientId`.
+   */
+  clientId          String?
+  /**
+   * 🔴 КЛИЕНТ БИЗНЕСА — идентичность Maya из главы 2.
+   *
+   * Разрешается через `CrmClientLink` по внешнему идентификатору клиента у
+   * провайдера. По телефону НЕ склеивается: совпадение номера доказательством
+   * тождества не является.
+   *
+   * Переходное имя. Целевое состояние — переименовать аккаунтное поле в
+   * `accountUserId`, а это в `clientId`; массовое переименование сейчас стоило
+   * бы правок в 47 местах ради ясности, поэтому вынесено отдельным шагом.
+   */
+  mayaClientId      String?
   branchId          String?
   crmExternalId     String?
   /// 🔴 Cycle 03 B1. Провайдер, у которого живёт `crmExternalId`.
@@ -1440,11 +1463,18 @@ model Appointment {
   staffId           String?
   staff             Staff?     @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict)
   tenant            Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  client            User       @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
-  clientMembership  Membership @relation("ClientMembershipAppointments", fields: [clientId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+  /// Удаление аккаунта не стирает факт визита салона: остаётся история бизнеса.
+  client            User?      @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: SetNull)
+  /**
+   * 🔴 Клиент бизнеса. `Restrict`, а не `SetNull`: идентичность клиента,
+   * у которого есть визиты, не удаляется молча. Это сильнее сохраняет историю,
+   * чем обнуление ссылки, и совпадает с правилом для мастера.
+   */
+  mayaClient        Client?    @relation(fields: [mayaClientId, tenantId], references: [id, tenantId], onDelete: Restrict)
   branch            Branch?    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
 
   @@unique([id, tenantId, clientId])
+  @@index([tenantId, mayaClientId])
   /// 🔴 Одна запись CRM — одна строка Maya. До Cycle 03 уникальности не было
   /// вовсе, а поиск шёл в пределах КЛИЕНТА: два независимых пути приёма
   /// создавали два визита на одну запись, и база этому не мешала.
