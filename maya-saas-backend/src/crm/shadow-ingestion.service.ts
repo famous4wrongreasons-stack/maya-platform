@@ -304,12 +304,15 @@ export class ShadowIngestionService {
       scalar(state.canonical.start_at) !== appointment.startAt.toISOString();
     if (startChanged) return DOMAIN_EVENT_TYPE.appointmentRescheduled;
 
-    const knownServices = Array.isArray(appointment.serviceIds)
-      ? [...appointment.serviceIds].map(scalar).sort()
-      : [];
-    const freshServices = Array.isArray(state.canonical.service_ids)
-      ? [...state.canonical.service_ids].map(scalar).sort()
-      : [];
+    // Оба списка приводятся к строкам одним способом: `serviceIds` в зеркале —
+    // это Json, а не массив строк, и доверять его форме нельзя.
+    const asSortedIds = (value: unknown): string[] =>
+      Array.isArray(value)
+        ? (value as unknown[]).map(scalar).filter(Boolean).sort()
+        : [];
+
+    const knownServices = asSortedIds(appointment.serviceIds);
+    const freshServices = asSortedIds(state.canonical.service_ids);
     if (JSON.stringify(knownServices) !== JSON.stringify(freshServices)) {
       return DOMAIN_EVENT_TYPE.appointmentServicesChanged;
     }
