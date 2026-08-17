@@ -9,6 +9,8 @@ import { Prisma } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CalendarSource } from '../common/domain.enums';
+import { LOYALTY_WARNING, loyaltyVerificationRequired } from '../domain';
+import type { LoyaltyAuthority, LoyaltyWarning } from '../domain';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -66,6 +68,106 @@ export class LoyaltyService {
           );
 
     return this.withSpendOptions(scopedTenantId, loyalty);
+  }
+
+  /**
+   * Состояние лояльности клиента для ЛЮБОЙ поверхности Maya.
+   *
+   * 🔴 Единственный вход. До P5 три места ходили мимо: список клиентов читал
+   * кэш прямо из таблицы без пометок свежести, а AI-досье брало карту
+   * провайдера напрямую — и один человек получал в кабинете и в досье два
+   * разных необъяснённых числа.
+   */
+  async getStateForUser(tenantId: string, userId: string) {
+    return this.getForUser(tenantId, userId);
+  }
+
+  /**
+   * Сравнить авторитетный баланс с уже прочитанной картой провайдера.
+   *
+   * 🔴 Победитель не выбирается молча: авторитет задан политикой домена
+   * (`resolveAuthoritativeBalance`), а число провайдера сохраняется как
+   * НАБЛЮДЁННОЕ и превращается в машинное предупреждение. Ни одна система
+   * автоматически не исправляется.
+   *
+   * Пустой успешный ответ провайдера нулём НЕ считается: адаптер знает этот
+   * сбой и уже переспрашивает, поэтому `null` здесь означает «не знаем».
+   */
+  compareWithExternalCard<
+    T extends {
+      balance: number;
+      authority: LoyaltyAuthority;
+      warnings: LoyaltyWarning[];
+      verification_required: boolean;
+      stale: boolean;
+    },
+  >(state: T, observedCrmBalance: number | null): T {
+    if (observedCrmBalance === null || state.authority === 'crm') {
+      return state;
+    }
+    if (observedCrmBalance === state.balance) {
+      return state;
+    }
+
+    const warnings: LoyaltyWarning[] = [
+      ...state.warnings,
+      {
+        code: LOYALTY_WARNING.authorityDisagreement,
+        observed_balance: observedCrmBalance,
+        observed_authority: 'crm',
+      },
+    ];
+
+    return {
+      ...state,
+      warnings,
+      verification_required: loyaltyVerificationRequired({
+        authority: state.authority,
+        stale: state.stale,
+        hasDisagreement: true,
+      }),
+    };
+  }
+
+  /**
+   * Какой владелец баланса настроен у арендатора.
+   *
+   * 🔴 Нужен там, где клиент известен только провайдеру и аккаунта Maya у него
+   * нет — например, в досье клиента для AI. Такая поверхность физически может
+   * прочитать только карту провайдера, и без этого метода она выдавала бы её
+   * за баланс, хотя авторитетен другой источник.
+   *
+   * Деталей транспорта наружу не отдаёт: только роль.
+   */
+  async configuredAuthority(tenantId: string): Promise<LoyaltyAuthority> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (
+      (await this.crmService.getCalendarSource(scopedTenantId)) ===
+      CalendarSource.INTERNAL
+    ) {
+      return 'maya';
+    }
+    return (await this.legacyAuthorityEnabled(scopedTenantId))
+      ? 'legacy_bot'
+      : 'crm';
+  }
+
+  /** Включён ли внешний журнал для этого арендатора. Транспорт скрыт. */
+  private async legacyAuthorityEnabled(tenantId: string): Promise<boolean> {
+    const token = String(process.env.MAYA_LEGACY_BRIDGE_TOKEN || '').trim();
+    const allowedSlugs = new Set(
+      String(process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS || '')
+        .split(',')
+        .map((slug) => slug.trim().toLowerCase())
+        .filter(Boolean),
+    );
+    if (token.length < 32 || allowedSlugs.size === 0) return false;
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { slug: true },
+    });
+    return Boolean(tenant && allowedSlugs.has(tenant.slug.toLowerCase()));
   }
 
   async listTransactions(tenantId: string, userId: string, limit = 50) {
@@ -481,6 +583,16 @@ export class LoyaltyService {
       }
 
       const normalizedBalance = Math.round(balance);
+      // 🔴 Расхождение с картой провайдера здесь НЕ проверяется намеренно.
+      // Мост отвечает первым и возвращает управление сразу; чтобы сравнить,
+      // пришлось бы дергать провайдера на КАЖДОМ чтении баланса — это лишний
+      // сетевой вызов на горячем пути и расширение объёма работ.
+      //
+      // Сравнение делается там, где карта провайдера уже прочитана по другой
+      // причине (см. `compareWithExternalCard`): тогда оба числа в руках и
+      // второго запроса не требуется. Победитель при этом не выбирается молча —
+      // политика объявлена в `resolveAuthoritativeBalance`.
+      const legacyWarnings: LoyaltyWarning[] = [];
       const changed =
         !cached ||
         cached.balance !== normalizedBalance ||
@@ -517,16 +629,20 @@ export class LoyaltyService {
       }
 
       return this.serializeAccount(account, {
-        authoritative: 'maya',
+        // 🔴 Это ЧУЖОЙ журнал, а не реестр Maya. Раньше здесь стояло 'maya',
+        // и из-за этого подтверждение перед тратой не запрашивалось.
+        authoritative: 'legacy_bot',
         syncStatus: 'current',
         stale: false,
+        warnings: legacyWarnings,
       });
     } catch {
       if (cached?.source === 'legacy_maya') {
         return this.serializeAccount(cached, {
-          authoritative: 'maya',
+          authoritative: 'legacy_bot',
           syncStatus: 'temporarily_unavailable',
           stale: true,
+          warnings: [{ code: LOYALTY_WARNING.servedFromCache }],
         });
       }
       return null;
@@ -541,7 +657,12 @@ export class LoyaltyService {
       balance: 0,
       currency: 'RUB',
       source: 'external_crm',
+      authority: 'crm' as const,
       authoritative: 'crm' as const,
+      // Пустой ответ — «не знаем», а не доказанный ноль: провайдер умеет
+      // отдавать пустой список карт с кодом успеха.
+      verification_required: true,
+      warnings: [] as LoyaltyWarning[],
       sync_status: syncStatus,
       stale: false,
       synced_at: null,
@@ -552,15 +673,22 @@ export class LoyaltyService {
     T extends {
       balance: number;
       currency: string;
-      authoritative: 'crm' | 'maya';
+      authoritative: LoyaltyAuthority;
       stale: boolean;
+      verification_required?: boolean;
     },
   >(tenantId: string, loyalty: T) {
     const balance = Math.max(0, Number(loyalty.balance) || 0);
     const base = {
       basis: 'price_estimate',
       points_to_currency_rate: 1,
-      verification_required: loyalty.authoritative === 'crm',
+      // Решение принято в сериализаторе по канону; витрина его повторяет.
+      verification_required:
+        loyalty.verification_required ??
+        loyaltyVerificationRequired({
+          authority: loyalty.authoritative,
+          stale: loyalty.stale,
+        }),
       items: [] as Array<{
         id: string;
         name: string;
@@ -648,19 +776,34 @@ export class LoyaltyService {
       syncedAt: Date | null;
     },
     status: {
-      authoritative: 'crm' | 'maya';
+      authoritative: LoyaltyAuthority;
       syncStatus: string;
       stale: boolean;
+      warnings?: LoyaltyWarning[];
     },
   ) {
+    const warnings = status.warnings ?? [];
     return {
       account_id: account.id,
       balance: account.balance,
       currency: 'RUB',
       source: account.source,
+      /** 🔴 Канонический владелец. Три значения, не два. */
+      authority: status.authoritative,
+      /** Наследие провода: старое имя того же поля. Снимается вместе с фронтом. */
       authoritative: status.authoritative,
       sync_status: status.syncStatus,
       stale: status.stale,
+      // Обещать списание без проверки можно только по собственному свежему
+      // реестру. Правило живёт в домене, а не в каждом потребителе.
+      verification_required: loyaltyVerificationRequired({
+        authority: status.authoritative,
+        stale: status.stale,
+        hasDisagreement: warnings.some(
+          (warning) => warning.code === LOYALTY_WARNING.authorityDisagreement,
+        ),
+      }),
+      warnings,
       synced_at: account.syncedAt,
     };
   }

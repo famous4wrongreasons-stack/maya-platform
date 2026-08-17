@@ -17,6 +17,7 @@
 
 export * from './appointment-key';
 export * from './catalog';
+export * from './loyalty-authority';
 export * from './money';
 export * from './revenue-basis';
 export * from './scheduling';

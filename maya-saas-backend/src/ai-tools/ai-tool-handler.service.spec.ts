@@ -101,6 +101,10 @@ describe('AiToolHandlerService output minimization', () => {
       loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
       bonus_balance: 2133,
       bonus_currency: 'RUB',
+      // Досье называет, ОТКУДА число и авторитетно ли оно для арендатора.
+      bonus_observed_from: 'crm',
+      bonus_authority: 'crm',
+      bonus_is_authoritative: true,
       bonus_status: 'available',
       note: 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.',
     });
@@ -493,6 +497,7 @@ describe('AiToolHandlerService output minimization', () => {
 
   it('returns only the authoritative loyalty summary', async () => {
     const loyaltyService = {
+      configuredAuthority: jest.fn(() => Promise.resolve('crm')),
       getForUser: jest.fn().mockResolvedValue({
         balance: 2133,
         currency: 'RUB',
@@ -2763,7 +2768,11 @@ describe('AiToolHandlerService output minimization', () => {
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
       overrides.appointmentsService ?? ({} as AppointmentsService),
-      overrides.loyaltyService ?? ({} as LoyaltyService),
+      overrides.loyaltyService ??
+        ({
+          // Досье спрашивает владельца баланса у границы: по умолчанию — CRM.
+          configuredAuthority: jest.fn(() => Promise.resolve('crm')),
+        } as unknown as LoyaltyService),
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),
       overrides.expensesService ?? ({} as ExpensesService),
       overrides.prisma ??

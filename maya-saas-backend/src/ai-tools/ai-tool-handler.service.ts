@@ -584,7 +584,11 @@ export class AiToolHandlerService {
     }
 
     const client = matches[0];
-    const [history, loyalty, timezone] = await Promise.all([
+    // 🔴 Владелец баланса спрашивается у границы, а не подразумевается.
+    // До P5 досье брало карту провайдера напрямую и выдавало её за баланс —
+    // при том что для этого арендатора авторитетен другой источник, и один
+    // человек получал в кабинете и в досье два разных числа без объяснения.
+    const [history, loyalty, timezone, loyaltyAuthority] = await Promise.all([
       this.crmService
         .getClientVisitHistory(principal.tenantId, client.id, 30)
         .catch(() => []),
@@ -594,6 +598,9 @@ export class AiToolHandlerService {
             .catch(() => null)
         : Promise.resolve(null),
       this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
+      this.loyaltyService
+        .configuredAuthority(principal.tenantId)
+        .catch(() => 'crm' as const),
     ]);
 
     const serviceCounter = new Map<string, number>();
@@ -683,7 +690,16 @@ export class AiToolHandlerService {
       loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
       bonus_balance: loyalty?.balance ?? null,
       bonus_currency: loyalty?.currency ?? null,
-      bonus_status: loyalty ? 'available' : 'unavailable',
+      // Число прочитано с карты провайдера — это наблюдение, а не обязательно
+      // авторитетный баланс. Если владелец другой, так и сказано.
+      bonus_observed_from: 'crm' as const,
+      bonus_authority: loyaltyAuthority,
+      bonus_is_authoritative: loyaltyAuthority === 'crm',
+      bonus_status: !loyalty
+        ? 'unavailable'
+        : loyaltyAuthority === 'crm'
+          ? 'available'
+          : 'observed_not_authoritative',
       note:
         matches.length > 1
           ? 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.'

@@ -185,7 +185,7 @@ describe('LoyaltyService', () => {
     expect(setup.getUpsertBalance()).toBe(2133);
   });
 
-  it('uses the existing MAYA ledger for a configured migrated tenant', async () => {
+  it('берёт баланс из внешнего журнала и называет владельца честно', async () => {
     const setup = createService();
     process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
     process.env.MAYA_LEGACY_BRIDGE_URL =
@@ -216,7 +216,12 @@ describe('LoyaltyService', () => {
     expect(result).toMatchObject({
       balance: 385,
       source: 'legacy_maya',
-      authoritative: 'maya',
+      // 🔴 P5: число НЕ изменилось, изменилось имя владельца. Раньше баланс
+      // чужого журнала выдавался за собственный реестр Maya, и подтверждение
+      // перед тратой из-за этого не запрашивалось.
+      authoritative: 'legacy_bot',
+      authority: 'legacy_bot',
+      verification_required: true,
       sync_status: 'current',
       stale: false,
     });

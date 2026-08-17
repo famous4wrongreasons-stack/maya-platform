@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
+import type { LoyaltyAuthority } from '../domain';
 import { UserRole } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -19,6 +21,7 @@ export class CustomersService {
     private readonly usersService: UsersService,
     private readonly encryptionService: EncryptionService,
     private readonly auditLogService: AuditLogService,
+    private readonly loyaltyService: LoyaltyService,
   ) {}
 
   async getOwnProfile(tenantId: string, userId: string) {
@@ -137,6 +140,13 @@ export class CustomersService {
         appointments_count: user._count.appointments,
         loyalty_balance: loyaltyAccount?.balance ?? null,
         loyalty_source: loyaltyAccount?.source ?? null,
+        // 🔴 Список НЕ ходит к владельцу: это N сетевых вызовов на страницу.
+        // Поэтому число честно помечается снимком, а не текущим значением —
+        // за актуальным идти в карточку клиента.
+        loyalty_authority: this.authorityOfSource(loyaltyAccount?.source),
+        loyalty_stale: true,
+        loyalty_sync_status: 'list_snapshot',
+        loyalty_verification_required: true,
         profile: this.serializeAdminProfile(profile),
       };
     });
@@ -173,9 +183,10 @@ export class CustomersService {
       this.prisma.customerProfile.findUnique({
         where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
       }),
-      this.prisma.loyaltyAccount.findUnique({
-        where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
-      }),
+      // 🔴 Через каноническую границу, а не напрямую из таблицы: до P5 здесь
+      // кэш выдавался за текущее значение — без владельца, свежести и
+      // требования подтверждения.
+      this.loyaltyService.getStateForUser(scopedTenantId, userId),
       this.prisma.appointment.count({
         where: { tenantId: scopedTenantId, clientId: userId },
       }),
@@ -186,8 +197,28 @@ export class CustomersService {
       appointments_count: appointmentsCount,
       loyalty_balance: loyalty?.balance ?? null,
       loyalty_source: loyalty?.source ?? null,
+      loyalty_authority: loyalty?.authority ?? null,
+      loyalty_sync_status: loyalty?.sync_status ?? null,
+      loyalty_stale: loyalty?.stale ?? null,
+      loyalty_verification_required: loyalty?.verification_required ?? null,
+      loyalty_warnings: loyalty?.warnings ?? [],
       profile: this.serializeAdminProfile(profile),
     };
+  }
+
+  /**
+   * Владелец баланса по сохранённому источнику снимка.
+   *
+   * 🔴 Домен не знает деталей транспорта: `legacy_maya` — это историческое имя
+   * колонки, а роль называется `legacy_bot`.
+   */
+  private authorityOfSource(
+    source: string | undefined,
+  ): LoyaltyAuthority | null {
+    if (!source) return null;
+    if (source === 'legacy_maya') return 'legacy_bot';
+    if (source === 'internal') return 'maya';
+    return 'crm';
   }
 
   async updateNotes(
