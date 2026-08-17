@@ -2329,13 +2329,31 @@ export class YclientsCRMAdapter implements CRMAdapter {
     let attributedServiceBreakdownKopecks = 0;
     let attributedServiceBreakdownTransactionCount = 0;
 
+    // 🔴 Отброшенное перестаёт быть невидимым. До P4 отрицательные, нулевые и
+    // бестиповые операции выпадали голым `continue`: сумма получалась валовой,
+    // и никто снаружи не мог узнать, что часть строк не учтена. Возврат при
+    // этом завышал прибыль — ровно в ту сторону, про которую соседний
+    // комментарий говорит «ошибаться нельзя».
+    //
+    // Мы НЕ вычисляем возвраты: контракт провайдера не позволяет доказать их
+    // семантику (поля статуса у операции нет). Мы лишь перестаём молчать.
+    let discardedNegativeCount = 0;
+    let discardedZeroCount = 0;
+    let discardedUntypedCount = 0;
+
     for (const transaction of transactions) {
       const type = String(transaction.sold_item_type || '').trim();
       if (!type) {
+        discardedUntypedCount += 1;
         continue;
       }
       const amountKopecks = this.requireMoneyKopecks(transaction.amount);
-      if (amountKopecks <= 0) {
+      if (amountKopecks < 0) {
+        discardedNegativeCount += 1;
+        continue;
+      }
+      if (amountKopecks === 0) {
+        discardedZeroCount += 1;
         continue;
       }
 
@@ -2403,6 +2421,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return {
       status: 'available',
       verified: true,
+      basis: 'provider_transactions' as const,
+      discarded: {
+        negative_count: discardedNegativeCount,
+        zero_count: discardedZeroCount,
+        untyped_count: discardedUntypedCount,
+      },
       transaction_count: transactionCount,
       total: this.money(totalKopecks, currency),
       by_type: [...byType.entries()]
@@ -2680,6 +2704,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return {
       status: 'unavailable',
       verified: false,
+      basis: 'unavailable',
+      discarded: { negative_count: 0, zero_count: 0, untyped_count: 0 },
       transaction_count: null,
       total: null,
       by_type: [],

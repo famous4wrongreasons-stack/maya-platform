@@ -1,4 +1,5 @@
 import { CrmProvider } from '../common/domain.enums';
+import type { RevenueBasis } from '../domain';
 import type {
   AppliedWorkDayChange,
   BookableSlot,
@@ -323,6 +324,22 @@ export interface CrmFinancialSummary {
   revenue: {
     status: 'available' | 'unavailable';
     verified: boolean;
+    /**
+     * На чём стоит число. См. `domain/revenue-basis.ts`.
+     *
+     * 🔴 Не `till_confirmed`: провайдер не даёт признака подтверждения у
+     * операции, поэтому обещать фискальную доказательность нельзя.
+     */
+    basis: RevenueBasis;
+    /**
+     * Что сознательно отброшено при подсчёте. Сумма ВАЛОВАЯ: возвраты и нули
+     * в неё не входят. До P4 эти строки исчезали бесследно.
+     */
+    discarded: {
+      negative_count: number;
+      zero_count: number;
+      untyped_count: number;
+    };
     transaction_count: number | null;
     total: CrmMoneyAmount | null;
     by_type: CrmRevenueBreakdown[];

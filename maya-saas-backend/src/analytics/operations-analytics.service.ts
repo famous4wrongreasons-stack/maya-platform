@@ -17,6 +17,7 @@ import {
   isCompletedOutcome,
   isNoShowOutcome,
 } from '../domain';
+import type { RevenueBasis } from '../domain';
 import {
   CRM_JOURNAL_MAX_WINDOW_MS,
   CRM_PAYROLL_MAX_WINDOW_DAYS,
@@ -203,7 +204,16 @@ export const CONFIRMED_REVENUE_UNAVAILABLE = {
   internalCalendar:
     'internal_calendar_records_booked_appointment_prices_and_has_no_till_confirmed_cash',
   crmUnavailable: 'crm_finance_did_not_answer_for_this_period',
-  crmUnverified: 'crm_returned_cash_revenue_without_confirmation',
+  /**
+   * 🔴 P4.3. Раньше здесь стояло `crm_returned_cash_revenue_without_confirmation`
+   * — формулировка обещала различать «касса пришла без подтверждения» и «кассы
+   * нет». Первого состояния провайдер породить НЕ МОЖЕТ: признака подтверждения
+   * у операции он не отдаёт, а адаптер ставит `available + verified` вместе или
+   * не ставит вовсе. Ветка достижима, но означает она ровно одно — блок выручки
+   * вернулся недоступным. Имя приведено в соответствие с этим.
+   */
+  crmRevenueBlockUnavailable:
+    'crm_finance_returned_no_usable_revenue_block_for_this_period',
 } as const;
 
 /** Почему чистой прибыли за период нет. */
@@ -222,6 +232,16 @@ export const NET_PROFIT_UNAVAILABLE = {
     'salary_comes_only_from_the_crm_payroll_calculation_and_the_crm_returned_none_for_this_period',
   currencyMismatch:
     'expenses_and_confirmed_cash_are_recorded_in_different_currencies_and_cannot_be_netted',
+  /**
+   * 🔴 Возвраты выброшены из выручки, поэтому она валовая. Считать от неё
+   * прибыль значит завысить её ровно на сумму возвратов — в ту сторону, про
+   * которую соседний комментарий говорит «ошибаться нельзя».
+   *
+   * Семантику возврата контракт провайдера доказать не позволяет (поля статуса
+   * у операции нет), поэтому мы не вычитаем — мы отказываемся.
+   */
+  discardedNegativeTransactions:
+    'crm_reported_negative_transactions_that_are_excluded_from_gross_revenue_so_profit_cannot_be_trusted',
   /**
    * Прибыль не живёт в операционном обзоре. Обзор считает выручку как сумму цен
    * из ЖУРНАЛА записей — это стоимость записанного, а не пробитая касса.
@@ -1274,6 +1294,16 @@ export class OperationsAnalyticsService {
        * выручке. Настоящая прибыль считается от подтверждённой кассы и только
        * при полной книге расходов — это `getBusinessProfitability`.
        */
+      /**
+       * 🔴 На чём стоит `revenue` выше. В операционном обзоре это ВСЕГДА цены
+       * из журнала записей — стоимость записанного, а не пробитая касса,
+       * в обоих режимах календаря. Касса живёт в отдельном финансовом контуре
+       * и приходит другим запросом.
+       *
+       * Поле аддитивно и число не меняет: оно лишь перестаёт давать одному
+       * слову два разных смысла.
+       */
+      revenue_basis: 'booked_prices' as RevenueBasis,
       net: [] as Array<{ currency: string; amount_kopecks: number }>,
       net_status: 'unavailable' as const,
       net_unavailable_reason: NET_PROFIT_UNAVAILABLE.notInOperationalOverview,
@@ -1502,13 +1532,17 @@ export class OperationsAnalyticsService {
       typeof revenue.total.amount_kopecks !== 'number'
     ) {
       return this.unavailableConfirmedRevenue(
-        CONFIRMED_REVENUE_UNAVAILABLE.crmUnverified,
+        CONFIRMED_REVENUE_UNAVAILABLE.crmRevenueBlockUnavailable,
       );
     }
     return {
       status: 'available' as const,
       verified: true,
       source: 'crm_financial_transactions' as const,
+      // На чём стоит число и что при подсчёте отброшено — путешествуют вместе
+      // с суммой, иначе прибыль не сможет отказать осознанно.
+      basis: revenue.basis,
+      discarded: revenue.discarded,
       transaction_count: revenue.transaction_count ?? null,
       total: this.money(revenue.total.currency, revenue.total.amount_kopecks),
       unavailable_reason: null as string | null,
@@ -1520,6 +1554,8 @@ export class OperationsAnalyticsService {
       status: 'unavailable' as const,
       verified: false,
       source: null,
+      basis: 'unavailable' as RevenueBasis,
+      discarded: { negative_count: 0, zero_count: 0, untyped_count: 0 },
       transaction_count: null as number | null,
       total: null as ProfitMoney | null,
       unavailable_reason: reason as string | null,
@@ -1797,6 +1833,12 @@ export class OperationsAnalyticsService {
       // Отбросить чужую валюту значило бы занизить расходы и завысить прибыль —
       // именно в ту сторону, в которую ошибаться нельзя. Курса у нас нет.
       return refusal(NET_PROFIT_UNAVAILABLE.currencyMismatch);
+    }
+    // 🔴 Выручка валовая: отрицательные операции отброшены агрегатором. Пока
+    // мы не умеем доказать их семантику, честнее отказать, чем показать
+    // завышенную прибыль.
+    if ((revenue.discarded?.negative_count ?? 0) > 0) {
+      return refusal(NET_PROFIT_UNAVAILABLE.discardedNegativeTransactions);
     }
     const expenseTotal =
       ledger.totals.find((item) => item.currency === currency)

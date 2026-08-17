@@ -18,6 +18,7 @@
 export * from './appointment-key';
 export * from './catalog';
 export * from './money';
+export * from './revenue-basis';
 export * from './scheduling';
 export * from './staff-identity';
 export * from './visit-attendance';

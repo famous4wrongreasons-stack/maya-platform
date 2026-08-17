@@ -1325,6 +1325,17 @@ describe('YclientsCRMAdapter', () => {
       revenue: {
         status: 'available',
         verified: true,
+        // 🔴 P4: основание названо явно и НЕ обещает фискального подтверждения.
+        basis: 'provider_transactions',
+        // 🔴 P4: отброшенное перестало быть невидимым. Числа те же, что и до
+        // P4 (total 250 000, transaction_count 2) — изменилась только
+        // наблюдаемость: минусовая операция и строка без типа больше не
+        // исчезают бесследно.
+        discarded: {
+          negative_count: 1, // amount: -100 — возврат или корректировка
+          zero_count: 0,
+          untyped_count: 1, // sold_item_type: null
+        },
         transaction_count: 2,
         total: { currency: 'RUB', amount_kopecks: 250_000 },
         by_type: [

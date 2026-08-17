@@ -1622,7 +1622,8 @@ describe('OperationsAnalyticsService', () => {
 
       expect(result.confirmed_revenue).toMatchObject({
         status: 'unavailable',
-        unavailable_reason: 'crm_returned_cash_revenue_without_confirmation',
+        unavailable_reason:
+          'crm_finance_returned_no_usable_revenue_block_for_this_period',
       });
       expect(result.net_profit.status).toBe('unavailable');
     });

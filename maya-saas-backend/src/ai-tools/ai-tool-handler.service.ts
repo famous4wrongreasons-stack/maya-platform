@@ -3500,6 +3500,18 @@ export class AiToolHandlerService {
     };
   }
 
+  /**
+   * Пришёл ли ОПЕРАЦИОННЫЙ обзор из известного источника.
+   *
+   * 🔴 Флаг относится к счётчикам — записям, клиентам, отменам, — а НЕ к
+   * деньгам. За деньги отвечает соседний `finance_verified`, и пара
+   * `verified: true, finance_verified: false` — связное утверждение: «счётчики
+   * из реального источника, касса не подтверждена».
+   *
+   * P4 намеренно НЕ трогает этот флаг. Правда о деньгах живёт в
+   * `revenue_basis` (`domain/revenue-basis.ts`): выручка обзора всегда стоит на
+   * ценах журнала, и теперь это сказано полем, а не подразумевается.
+   */
   private businessOperationalAnalyticsVerified(value: unknown): boolean {
     const data = this.record(value);
     return data.data_source === 'maya' || data.data_source === 'crm';
