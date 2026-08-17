@@ -1707,6 +1707,20 @@ async def handle_yclients_webhook(request: web.Request) -> web.Response:
     # Извлекаем record_id и тип события
     record_id, event_type = _extract_record_event(payload)
     logger.info("Webhook: event=%s record_id=%s", event_type, record_id)  # без ПД: имя/телефон клиента не логируем
+
+    # 🔴 Теневая копия конверта в Maya OS — ДО любых ранних выходов, потому что
+    # именно нераспознанные доставки (треть потока) и надо наконец увидеть.
+    # Пересылка ничего не решает и ничего не делает: отказ теневого пути не
+    # влияет на боевую обработку ниже.
+    try:
+        import maya_shadow_bridge
+
+        await maya_shadow_bridge.forward_delivery(
+            payload, event_type=event_type, record_id=record_id
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("shadow bridge unavailable: %s", exc)
+
     if not record_id:
         return web.json_response({"status": "ignored", "reason": "no_record_id"})
 
