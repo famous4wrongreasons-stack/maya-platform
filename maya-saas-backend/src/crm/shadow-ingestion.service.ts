@@ -1,13 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 
-import type { DomainEventType, IngestionOutcome } from '../domain';
-import { DOMAIN_EVENT_TYPE, canonicalStateFingerprint } from '../domain';
+import type { IngestionOutcome } from '../domain';
 import { EventStoreService } from '../events/event-store.service';
-import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { CrmService } from './crm.service';
+import { AppointmentChangeService } from './appointment-change.service';
+import { AppointmentObservationService } from './appointment-observation.service';
 import type { ShadowDeliveryDto } from './dto/shadow-delivery.dto';
 
 /** Что сделал приёмник с доставкой. Ни один исход не молчит. */
@@ -34,11 +33,11 @@ export class ShadowIngestionService {
   private readonly logger = new Logger(ShadowIngestionService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
     private readonly bridgeSource: BridgeSourceService,
-    private readonly crmService: CrmService,
     private readonly eventStore: EventStoreService,
+    private readonly observationService: AppointmentObservationService,
+    private readonly changeService: AppointmentChangeService,
   ) {}
 
   /** Включён ли теневой приём. Выкат и включение — разные события. */
@@ -137,38 +136,18 @@ export class ShadowIngestionService {
     externalId: string,
     fingerprintSeed: string,
   ): Promise<ShadowIngestionResult> {
-    // 3. Идентичность Maya. 🔴 Её НЕ выдумывают: если визита у нас нет, значит
-    //    события о нём быть не может — ссылаться событию не на что. Это
-    //    честный карантин, а не «создадим запись на всякий случай»: создание
-    //    визита потребовало бы выдумать ещё и клиента.
-    const appointment = await this.prisma.appointment.findFirst({
-      where: { tenantId, crmProvider: dto.provider, crmExternalId: externalId },
-      select: {
-        id: true,
-        staffId: true,
-        staffExternalId: true,
-        startAt: true,
-        endAt: true,
-        status: true,
-        serviceIds: true,
-      },
+    // 3. Истина перечитывается у источника, а не берётся из тела доставки.
+    const observed = await this.observationService.observe({
+      tenantId,
+      provider: dto.provider,
+      externalId,
+      // Провайдер сказал «удалено» — это его собственное доказательство, а не
+      // вывод из отсутствия записи в выборке. Разница принципиальна: вывод из
+      // отсутствия запрещён (см. правило полноты B3.0), доказательство — нет.
+      expectRemoved: kind === 'deleted',
     });
 
-    if (!appointment) {
-      await this.eventStore.quarantine({
-        tenantId,
-        source: dto.provider,
-        discriminator: this.discriminator(dto),
-        fingerprint: fingerprintSeed,
-        reason: 'entity_unresolved',
-        diagnostic: { ...this.diagnostic(dto), external_id: externalId },
-      });
-      return { outcome: 'quarantined', reason: 'entity_unresolved' };
-    }
-
-    // 4. Истина перечитывается у источника, а не берётся из тела.
-    const state = await this.readCanonicalState(tenantId, externalId, kind);
-    if (state === 'unreadable') {
+    if (observed === 'unreadable') {
       await this.eventStore.quarantine({
         tenantId,
         source: dto.provider,
@@ -180,145 +159,36 @@ export class ShadowIngestionService {
       return { outcome: 'quarantined', reason: 'source_unreadable' };
     }
 
-    const type = this.canonicalType(kind, state, appointment);
-    if (type === null) {
-      // Не карантин: доставка понята, арендатор и визит найдены. Просто
-      // наблюдаемого изменения в ней нет.
+    /**
+     * 4. Применение — ОБЩИМ компаратором, тем же, что у сверки.
+     *
+     * 🔴 Своей классификации у приёмника больше нет. Прежняя версия решала,
+     * что изменилось, собственным сравнением по трём полям; сверка решала бы
+     * это иначе, и один и тот же переход давал бы разные события в зависимости
+     * от того, кто успел первым. Теперь путь один: прочитать истину → сравнить
+     * с зеркалом → применить в одной транзакции.
+     */
+    const applied = await this.changeService.applyObservation({
+      tenantId,
+      provider: dto.provider,
+      observed,
+      ingestionMethod: 'webhook',
+      baselineEstablished:
+        await this.observationService.baselineEstablished(tenantId),
+      observedAt: new Date(),
+    });
+
+    if (applied.transitions.length === 0) {
+      // Не карантин: доставка понята, арендатор и запись найдены. Просто
+      // наблюдаемого изменения в ней нет — самый частый исход при повторной
+      // доставке и при касании записи без изменения сути.
       return { outcome: 'stale', reason: 'no_observable_change' };
     }
 
-    const fingerprint = canonicalStateFingerprint({
-      source: dto.provider,
-      entityType: 'appointment',
-      entityId: appointment.id,
-      type,
-      state: state.canonical,
-    });
-
-    const result = await this.eventStore.append({
-      tenantId,
-      type,
-      entityType: 'appointment',
-      entityId: appointment.id,
-      occurredAt: state.occurredAt,
-      source: dto.provider,
-      sourceRef: externalId,
-      ingestionMethod: 'webhook',
-      observation: 'after_watch_started',
-      dedupFingerprint: fingerprint,
-      // 🔴 Полезная нагрузка — минимальный факт. Ни имени, ни телефона: у
-      // потребителя есть идентичности Maya, остальное он возьмёт сам.
-      payload: state.canonical,
-    });
-
-    return { outcome: result.outcome, eventId: result.eventId };
-  }
-
-  /**
-   * Каноническое состояние записи у источника.
-   *
-   * Удалённая запись — не сбой чтения: её отсутствие и есть доказательство
-   * отмены. Это тот же урок, что глава 2 вынесла из отмены визита.
-   */
-  private async readCanonicalState(
-    tenantId: string,
-    externalId: string,
-    kind: keyof typeof RECORD_EVENT_KIND,
-  ): Promise<
-    | 'unreadable'
-    | {
-        deleted: boolean;
-        occurredAt: Date;
-        canonical: Prisma.InputJsonObject;
-      }
-  > {
-    try {
-      const detail = await this.crmService.getAppointmentDetailForSystem(
-        tenantId,
-        externalId,
-      );
-      return {
-        deleted: false,
-        occurredAt: new Date(detail.start_at),
-        canonical: {
-          staff_external_id: detail.provider?.id ?? null,
-          start_at: detail.start_at,
-          end_at: detail.end_at,
-          service_ids: [...detail.service_ids].sort(),
-          attendance: detail.attendance,
-          status: detail.status,
-        },
-      };
-    } catch {
-      if (kind === 'deleted') {
-        // Записи нет — ровно то, чего мы и ждали от удаления.
-        return {
-          deleted: true,
-          occurredAt: new Date(),
-          canonical: { deleted: true },
-        };
-      }
-      return 'unreadable';
-    }
-  }
-
-  /**
-   * Канонический тип события — только то, что РЕАЛЬНО различимо сравнением.
-   *
-   * 🔴 Первая версия этого метода при обновлении без видимых изменений
-   * возвращала `appointment.attendance_recorded`. Это была ложь того же класса,
-   * что чинилась в главе 2: присутствие в зеркале Maya не хранится, сравнить
-   * его не с чем, а имя события утверждало, что оно записано.
-   *
-   * Теперь: не удалось назвать изменение — события НЕ возникает. Провайдер шлёт
-   * `update` на любое касание записи, включая закрытие оплаты; называть это
-   * фактом бизнеса без доказательства нельзя.
-   */
-  private canonicalType(
-    kind: keyof typeof RECORD_EVENT_KIND,
-    state: { deleted: boolean; canonical: Prisma.InputJsonObject },
-    appointment: {
-      staffExternalId: string;
-      startAt: Date;
-      serviceIds: Prisma.JsonValue;
-    },
-  ): DomainEventType | null {
-    if (kind === 'created') return DOMAIN_EVENT_TYPE.appointmentCreated;
-    if (kind === 'deleted' || state.deleted) {
-      return DOMAIN_EVENT_TYPE.appointmentCancelled;
-    }
-
-    // Значения канона — скаляры; всё прочее к сравнению не допускается, иначе
-    // объект молча превратился бы в `[object Object]` и «изменение» перестало
-    // бы отличаться от отсутствия изменения.
-    const scalar = (value: unknown): string =>
-      typeof value === 'string' || typeof value === 'number'
-        ? String(value)
-        : '';
-
-    const staffChanged =
-      scalar(state.canonical.staff_external_id) !== appointment.staffExternalId;
-    if (staffChanged) return DOMAIN_EVENT_TYPE.appointmentStaffChanged;
-
-    const startChanged =
-      scalar(state.canonical.start_at) !== appointment.startAt.toISOString();
-    if (startChanged) return DOMAIN_EVENT_TYPE.appointmentRescheduled;
-
-    // Оба списка приводятся к строкам одним способом: `serviceIds` в зеркале —
-    // это Json, а не массив строк, и доверять его форме нельзя.
-    const asSortedIds = (value: unknown): string[] =>
-      Array.isArray(value)
-        ? (value as unknown[]).map(scalar).filter(Boolean).sort()
-        : [];
-
-    const knownServices = asSortedIds(appointment.serviceIds);
-    const freshServices = asSortedIds(state.canonical.service_ids);
-    if (JSON.stringify(knownServices) !== JSON.stringify(freshServices)) {
-      return DOMAIN_EVENT_TYPE.appointmentServicesChanged;
-    }
-
-    // Назвать изменение нечем — значит его для Maya и не произошло.
-    return null;
+    return {
+      outcome: applied.eventsEmitted > 0 ? 'persisted' : 'duplicate',
+      eventId: null,
+    };
   }
 
   private classify(

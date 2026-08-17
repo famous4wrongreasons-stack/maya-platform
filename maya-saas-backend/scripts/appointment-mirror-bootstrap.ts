@@ -47,6 +47,37 @@ async function main(): Promise<void> {
 
     const report: unknown[] = [];
     for (const integration of integrations) {
+      /**
+       * 🔴 После B3.3 повторное НАПОЛНЕНИЕ стало опасным, хотя до неё было
+       * безобидным.
+       *
+       * Наполнение пишет зеркало и НЕ выпускает событий — это его смысл: первый
+       * взгляд на работающий салон историей не является. Но с появлением
+       * компаратора у зеркала есть второй писатель, который события выпускает.
+       * Прогнав наполнение поверх уже наблюдаемого арендатора, мы бы молча
+       * перезаписали состояние и потеряли переходы навсегда: следующая сверка
+       * сравнила бы новое состояние с новым и не увидела разницы.
+       *
+       * Поэтому после установленной базовой линии наполнение работает только
+       * как сухой прогон. Поддержание зеркала — работа сверки.
+       */
+      const watching = await prisma.crmIntegration.findUnique({
+        where: { tenantId: integration.tenantId },
+        select: { watchStartedAt: true },
+      });
+
+      if (apply && watching?.watchStartedAt) {
+        report.push({
+          provider: integration.provider,
+          skipped: 'baseline_already_established',
+          reason:
+            'наполнение не выпускает событий; после базовой линии зеркало ' +
+            'поддерживает сверка, иначе переходы теряются',
+          watch_started_at: watching.watchStartedAt.toISOString(),
+        });
+        continue;
+      }
+
       const before = await prisma.appointment.count({
         where: { tenantId: integration.tenantId },
       });

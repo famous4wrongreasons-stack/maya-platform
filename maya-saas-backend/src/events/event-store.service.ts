@@ -81,12 +81,22 @@ export class EventStoreService {
    * Возвращает исход, а не бросает на повторе: повторная доставка — штатное
    * поведение источника, а не ошибка. Смешать их значило бы завести тревогу на
    * том, что происходит каждый день.
+   *
+   * 🔴 `client` позволяет записать факт ВНУТРИ чужой транзакции. Это нужно
+   * обнаружению изменений (B3.3): обновление зеркала и события о переходах
+   * обязаны быть одним коммитом. Разрыв недопустим в обе стороны — обновить
+   * зеркало без события значит потерять переход навсегда, записать событие без
+   * зеркала значит выпустить его повторно на следующем проходе.
    */
-  async append(input: AppendEventInput): Promise<AppendEventResult> {
+  async append(
+    input: AppendEventInput,
+    client?: Prisma.TransactionClient,
+  ): Promise<AppendEventResult> {
     const tenantId = this.tenantContext.assertTenantId(input.tenantId);
+    const db = client ?? this.prisma;
 
     try {
-      const event = await this.prisma.domainEvent.create({
+      const event = await db.domainEvent.create({
         data: {
           tenantId,
           type: input.type,

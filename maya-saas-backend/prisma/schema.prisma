@@ -126,6 +126,7 @@ model Tenant {
   inboxItems                     InboxItem[]
   domainEvents         DomainEvent[]
   ingestionQuarantine  IngestionQuarantine[]
+  reconciliationRuns   ReconciliationRun[]
   devicePushTokens               DevicePushToken[]
   recoveryTouchpoints            RecoveryTouchpoint[]
   recoveryConversions            RecoveryConversion[]
@@ -1453,6 +1454,23 @@ model Appointment {
   blockedStartAt    DateTime
   blockedEndAt      DateTime
   status            String     @default("confirmed")
+  /**
+   * 🔴 Cycle 03 B3.3. Присутствие клиента — канон главы 2
+   * (`awaiting | arrived | no_show | confirmed_by_client`).
+   *
+   * NULL означает «Maya НЕ получила доказанного значения»: либо не спрашивали,
+   * либо провайдер поля не прислал. Это НЕ `awaiting`.
+   *
+   * Различие не косметическое. `awaiting` — утверждение провайдера «отметки
+   * ещё нет»; NULL — отсутствие утверждения. Смешав их, зеркало заявляло бы
+   * знание, которого у него нет, а компаратор выпускал бы события о переходах,
+   * которых не было. Поэтому переход NULL → значение событием не является:
+   * это первое наблюдение, а не изменение.
+   *
+   * Существующие 1940 строк получают NULL и наполняются первым проходом
+   * сверки: значение берётся у провайдера, а миграция к сети не ходит.
+   */
+  attendance        String?
   notes             String?
   totalPriceKopecks Int?
   currency          String     @default("RUB")
@@ -1599,6 +1617,55 @@ model IngestionQuarantine {
   @@index([expiresAt])
   @@index([tenantId, receivedAt])
   @@index([resolution, receivedAt])
+}
+
+/// Прогон сверки зеркала визитов с источником (Cycle 03 B3.3).
+///
+/// 🔴 Зачем отдельная таблица, если есть `CrmIntegration.lastSyncAt`. Та метка
+/// отвечает на один вопрос — «когда последний раз что-то происходило», — и не
+/// отвечает ни на один из нужных: за какое окно смотрели, дочитали ли до конца,
+/// сколько нашли, не упало ли. Сверка, чей результат нельзя отличить от
+/// усечённого или упавшего, права объявлять что-либо исчезнувшим не имеет.
+///
+/// 🔴 Курсора здесь нет намеренно. Окно считается от «сейчас», а последний
+/// ПОЛНЫЙ проход находится запросом по этой же таблице. Состояние, которое
+/// выводится из данных, но хранится отдельно, — лишний источник расхождения.
+model ReconciliationRun {
+  id               String    @id @default(cuid())
+  tenantId         String
+  provider         String
+
+  windowFrom       DateTime
+  windowTo         DateTime
+  startedAt        DateTime  @default(now())
+  /// NULL ⟺ прогон не завершился. Незавершённый выводов не даёт вовсе.
+  finishedAt       DateTime?
+
+  /**
+   * `complete` | `truncated` — контракт полноты B3.0.
+   *
+   * Только `complete` двигает базовую линию наблюдения и даёт право на выводы
+   * об ОТСУТСТВИИ. По усечённой выборке отсутствие записи не означает ничего:
+   * её могло просто не хватить страниц.
+   */
+  completeness     String?
+  truncationReason String?
+
+  fetched          Int       @default(0)
+  created          Int       @default(0)
+  updated          Int       @default(0)
+  unchanged        Int       @default(0)
+  eventsEmitted    Int       @default(0)
+
+  failureCode      String?
+  failureMessage   String?
+
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, startedAt])
+  /// Поиск последнего ПОЛНОГО завершённого прогона — его нельзя перепутать
+  /// с усечённым или упавшим: оба отбираются этим же индексом по значению.
+  @@index([tenantId, completeness, finishedAt])
 }
 
 /// Consent-safe outreach fact used by MAYA Recovered attribution.

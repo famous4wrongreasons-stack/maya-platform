@@ -47,6 +47,32 @@ export function attendanceFromCode(
   return CODE_TO_ATTENDANCE.get(code) ?? 'awaiting';
 }
 
+/**
+ * Код источника → ДОКАЗАННЫЙ канон, либо `null`, если доказательства нет.
+ *
+ * 🔴 Отличие от `attendanceFromCode` — единственное и принципиальное: эта
+ * функция не выдумывает значение. Тот же словарь `CODE_TO_ATTENDANCE`, второго
+ * канона не заводится; убран только запасной ответ.
+ *
+ * Зачем понадобилась. `attendanceFromCode` отвечает `awaiting` и когда поля не
+ * было вовсе, и когда пришёл незнакомый код, — то есть превращает молчание
+ * провайдера в утверждение «отметки ещё нет». Для показа это терпимо: экрану
+ * нужно что-то нарисовать. Для ЗЕРКАЛА — нет: зеркало обязано различать
+ * «провайдер сказал, что отметки нет» и «Maya не получила ответа», иначе
+ * компаратор выпустит событие о переходе, которого не было.
+ *
+ * Кодек провода при этом не трогаем: `attendanceFromCode` читает уже
+ * выпущенный PWA, и менять его поведение здесь не за чем.
+ */
+export function observedAttendanceFromCode(
+  code: unknown,
+): VisitAttendance | null {
+  if (typeof code !== 'number' || !Number.isFinite(code)) {
+    return null;
+  }
+  return CODE_TO_ATTENDANCE.get(code) ?? null;
+}
+
 /** Канон → код провода. Обратное преобразование полное, без потерь. */
 export function attendanceToCode(attendance: VisitAttendance): number {
   return ATTENDANCE_TO_CODE[attendance];

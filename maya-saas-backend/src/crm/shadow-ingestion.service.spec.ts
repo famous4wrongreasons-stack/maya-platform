@@ -1,16 +1,26 @@
 import type { EventStoreService } from '../events/event-store.service';
-import type { PrismaService } from '../prisma/prisma.service';
 import type { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import type { CrmService } from './crm.service';
+import type {
+  AppointmentApplyResult,
+  AppointmentChangeService,
+  ObservedAppointment,
+} from './appointment-change.service';
+import type { AppointmentObservationService } from './appointment-observation.service';
 import type { ShadowDeliveryDto } from './dto/shadow-delivery.dto';
 import { ShadowIngestionService } from './shadow-ingestion.service';
+import { DOMAIN_EVENT_TYPE } from '../domain';
 
 /**
- * 🔴 CYCLE 03 B2 — теневой приём.
+ * 🔴 CYCLE 03 B2 + B3.3 — теневой приём.
  *
- * Проверяется главное обещание режима: приёмник ЗАМЕЧАЕТ и ничего не делает
- * наружу. Обработчиком остаётся легаси-бот.
+ * Обещание режима не изменилось: приёмник ЗАМЕЧАЕТ и ничего не делает наружу,
+ * обработчиком остаётся легаси-бот.
+ *
+ * Что изменилось в B3.3: своей классификации у приёмника больше нет. Он читает
+ * истину у источника и отдаёт её ОБЩЕМУ компаратору — тому же, которым
+ * пользуется сверка. Поэтому здесь проверяется маршрут, а правила переходов —
+ * в `domain/appointment-change.spec.ts`.
  */
 
 type Fn<T extends (...args: never[]) => unknown> = jest.MockedFunction<T>;
@@ -26,40 +36,39 @@ const delivery = (
   ...over,
 });
 
-const appointmentRow = {
-  id: 'appointment-maya-1',
-  staffId: 'staff-maya-1',
-  staffExternalId: '1461615',
-  startAt: new Date('2026-08-20T10:00:00.000Z'),
-  endAt: new Date('2026-08-20T11:00:00.000Z'),
-  status: 'confirmed',
-  serviceIds: ['svc-1'],
+const observation: ObservedAppointment = {
+  externalId: '1911799161',
+  state: {
+    staffExternalId: '1461615',
+    staffId: 'staff-maya-1',
+    startAt: new Date('2026-08-20T10:00:00.000Z'),
+    endAt: new Date('2026-08-20T11:00:00.000Z'),
+    serviceIds: ['svc-1'],
+    status: 'confirmed',
+    attendance: null,
+    mayaClientId: null,
+  },
+  totalPriceKopecks: 250_000,
+  currency: 'RUB',
 };
 
-const detail = {
-  id: '1911799161',
-  provider: { id: '1461615', name: 'Мастер' },
-  service_ids: ['svc-1'],
-  start_at: '2026-08-20T10:00:00.000Z',
-  end_at: '2026-08-20T11:00:00.000Z',
-  status: 'confirmed',
-  attendance: 'expected',
-};
+const applied = (
+  over: Partial<AppointmentApplyResult> = {},
+): AppointmentApplyResult => ({
+  appointmentId: 'appointment-maya-1',
+  outcome: 'updated',
+  transitions: [DOMAIN_EVENT_TYPE.appointmentRescheduled],
+  eventsEmitted: 1,
+  duplicateEvents: 0,
+  ...over,
+});
 
 const build = (over?: {
-  appointment?: unknown;
   resolveTenant?: Fn<BridgeSourceService['resolveTenant']>;
-  detail?: unknown;
-  detailThrows?: boolean;
-  appendOutcome?: 'persisted' | 'duplicate';
+  observed?: ObservedAppointment | 'unreadable';
+  result?: AppointmentApplyResult;
+  baseline?: boolean;
 }) => {
-  const findFirst: Fn<(args: unknown) => Promise<unknown>> = jest
-    .fn()
-    .mockResolvedValue(
-      over?.appointment === undefined ? appointmentRow : over.appointment,
-    );
-  const prisma = { appointment: { findFirst } } as unknown as PrismaService;
-
   const resolveTenant =
     over?.resolveTenant ??
     (jest.fn().mockResolvedValue({
@@ -72,38 +81,43 @@ const build = (over?: {
     assertBridgeSecret: jest.fn(),
   } as unknown as BridgeSourceService;
 
-  const getAppointmentDetailForSystem: Fn<
-    (tenantId: string, externalId: string) => Promise<unknown>
-  > = over?.detailThrows
-    ? jest.fn().mockRejectedValue(new Error('not found'))
-    : jest.fn().mockResolvedValue(over?.detail ?? detail);
-  const crmService = {
-    getAppointmentDetailForSystem,
-  } as unknown as CrmService;
-
-  const append: Fn<EventStoreService['append']> = jest.fn().mockResolvedValue({
-    outcome: over?.appendOutcome ?? 'persisted',
-    eventId: over?.appendOutcome === 'duplicate' ? null : 'event-1',
-  });
   const quarantine: Fn<EventStoreService['quarantine']> = jest
     .fn()
     .mockResolvedValue({ id: 'quarantine-1' });
-  const eventStore = { append, quarantine } as unknown as EventStoreService;
+  const eventStore = { quarantine } as unknown as EventStoreService;
+
+  const observe: Fn<AppointmentObservationService['observe']> = jest
+    .fn()
+    .mockResolvedValue(over?.observed ?? observation);
+  const baselineEstablished: Fn<
+    AppointmentObservationService['baselineEstablished']
+  > = jest.fn().mockResolvedValue(over?.baseline ?? true);
+  const observationService = {
+    observe,
+    baselineEstablished,
+  } as unknown as AppointmentObservationService;
+
+  const applyObservation: Fn<AppointmentChangeService['applyObservation']> =
+    jest.fn().mockResolvedValue(over?.result ?? applied());
+  const changeService = {
+    applyObservation,
+  } as unknown as AppointmentChangeService;
 
   const service = new ShadowIngestionService(
-    prisma,
     new TenantContextService(),
     bridgeSource,
-    crmService,
     eventStore,
+    observationService,
+    changeService,
   );
+
   return {
     service,
-    append,
     quarantine,
-    findFirst,
-    getAppointmentDetailForSystem,
+    observe,
+    applyObservation,
     resolveTenant,
+    baselineEstablished,
   };
 };
 
@@ -115,52 +129,72 @@ describe('теневой приём доставок CRM', () => {
     delete process.env.CRM_SHADOW_INGESTION_ENABLED;
   });
 
-  it('🔴 выключенный режим не пишет ничего — выкат и включение разные события', async () => {
+  it('🔴 выключенный режим не делает ничего — выкат и включение разные события', async () => {
     delete process.env.CRM_SHADOW_INGESTION_ENABLED;
-    const { service, append, quarantine } = build();
+    const { service, applyObservation, quarantine } = build();
 
     await expect(service.ingest(delivery())).resolves.toMatchObject({
       outcome: 'ignored',
     });
-    expect(append).not.toHaveBeenCalled();
+    expect(applyObservation).not.toHaveBeenCalled();
     expect(quarantine).not.toHaveBeenCalled();
   });
 
-  it('известная доставка становится каноническим событием Maya', async () => {
-    const { service, append } = build();
+  it('🔴 истина перечитывается у источника, а не берётся из тела', async () => {
+    const { service, observe } = build();
+
+    await service.ingest(delivery());
+
+    expect(observe).toHaveBeenCalledWith({
+      tenantId: 'tenant-salon',
+      provider: 'yclients',
+      externalId: '1911799161',
+      expectRemoved: false,
+    });
+  });
+
+  it('🔴 применение идёт ОБЩИМ компаратором, а не своей классификацией', async () => {
+    const { service, applyObservation } = build();
 
     await expect(service.ingest(delivery())).resolves.toMatchObject({
       outcome: 'persisted',
     });
 
-    const written = append.mock.calls[0][0];
-    expect(written.type).toBe('appointment.created');
-    // Событие ссылается на идентичность MAYA, внешний id — только провенанс.
-    expect(written.entityId).toBe('appointment-maya-1');
-    expect(written.sourceRef).toBe('1911799161');
-  });
-
-  it('🔴 истина перечитывается у источника, а не берётся из тела', async () => {
-    const { service, getAppointmentDetailForSystem } = build();
-
-    await service.ingest(delivery());
-
-    expect(getAppointmentDetailForSystem).toHaveBeenCalledWith(
-      'tenant-salon',
-      '1911799161',
-    );
-  });
-
-  it('🔴 повтор доставки — duplicate, а не новое событие и не ошибка', async () => {
-    const { service } = build({ appendOutcome: 'duplicate' });
-
-    await expect(service.ingest(delivery())).resolves.toMatchObject({
-      outcome: 'duplicate',
+    expect(applyObservation).toHaveBeenCalledTimes(1);
+    expect(applyObservation.mock.calls[0][0]).toMatchObject({
+      tenantId: 'tenant-salon',
+      provider: 'yclients',
+      ingestionMethod: 'webhook',
     });
   });
 
+  it('🔴 повтор доставки не даёт второго события', async () => {
+    // Зеркало уже обновлено предыдущей доставкой — различий не осталось.
+    const { service, applyObservation } = build({
+      result: applied({
+        outcome: 'unchanged',
+        transitions: [],
+        eventsEmitted: 0,
+      }),
+    });
+
+    await expect(service.ingest(delivery())).resolves.toMatchObject({
+      outcome: 'stale',
+      reason: 'no_observable_change',
+    });
+    expect(applyObservation).toHaveBeenCalledTimes(1);
+  });
+
+  it('доставка удаления идёт с признаком снятия', async () => {
+    const { service, observe } = build();
+
+    await service.ingest(delivery({ event: 'record.delete' }));
+
+    expect(observe.mock.calls[0][0].expectRemoved).toBe(true);
+  });
+
   it('🔴 неизвестная доставка уходит в карантин, а не в событие', async () => {
-    const { service, append, quarantine } = build();
+    const { service, applyObservation, quarantine } = build();
 
     const result = await service.ingest(
       delivery({ event: undefined, resource: 'client', status: 'update' }),
@@ -170,24 +204,20 @@ describe('теневой приём доставок CRM', () => {
       outcome: 'quarantined',
       reason: 'unknown_discriminator',
     });
-    expect(append).not.toHaveBeenCalled();
+    expect(applyObservation).not.toHaveBeenCalled();
     expect(quarantine).toHaveBeenCalledTimes(1);
   });
 
-  it('🔴 визита у Maya нет — идентичность НЕ выдумывается', async () => {
-    // Создать визит значило бы выдумать ещё и клиента: строка требует его
-    // обязательно. Честный карантин вместо изобретённой идентичности.
-    const { service, append, quarantine } = build({ appointment: null });
-
-    const result = await service.ingest(delivery());
-
-    expect(result).toMatchObject({
-      outcome: 'quarantined',
-      reason: 'entity_unresolved',
+  it('нечитаемая запись при обновлении — карантин, а не выдуманный факт', async () => {
+    const { service, applyObservation, quarantine } = build({
+      observed: 'unreadable',
     });
-    expect(append).not.toHaveBeenCalled();
-    const written = quarantine.mock.calls[0][0];
-    expect(written.reason).toBe('entity_unresolved');
+
+    const result = await service.ingest(delivery({ event: 'record.update' }));
+
+    expect(result).toMatchObject({ reason: 'source_unreadable' });
+    expect(applyObservation).not.toHaveBeenCalled();
+    expect(quarantine).toHaveBeenCalledTimes(1);
   });
 
   it('арендатор не разрешён — карантин без арендатора', async () => {
@@ -196,75 +226,21 @@ describe('теневой приём доставок CRM', () => {
       .mockRejectedValue(new Error('no tenant')) as Fn<
       BridgeSourceService['resolveTenant']
     >;
-    const { service, quarantine, append } = build({ resolveTenant });
+    const { service, quarantine, applyObservation } = build({ resolveTenant });
 
     const result = await service.ingest(delivery());
 
     expect(result).toMatchObject({ reason: 'tenant_unresolved' });
-    expect(append).not.toHaveBeenCalled();
+    expect(applyObservation).not.toHaveBeenCalled();
     expect(quarantine.mock.calls[0][0].tenantId).toBeUndefined();
   });
 
-  it('удалённая запись — доказательство отмены, а не сбой чтения', async () => {
-    const { service, append } = build({
-      detailThrows: true,
-    });
+  it('🔴 состояние базовой линии передаётся компаратору, а не решается здесь', async () => {
+    const { service, applyObservation } = build({ baseline: false });
 
-    await service.ingest(delivery({ event: 'record.delete' }));
+    await service.ingest(delivery());
 
-    expect(append.mock.calls[0][0].type).toBe('appointment.cancelled');
-  });
-
-  it('нечитаемая запись при обновлении — карантин, а не выдуманный факт', async () => {
-    const { service, append, quarantine } = build({ detailThrows: true });
-
-    const result = await service.ingest(delivery({ event: 'record.update' }));
-
-    expect(result).toMatchObject({ reason: 'source_unreadable' });
-    expect(append).not.toHaveBeenCalled();
-    expect(quarantine).toHaveBeenCalledTimes(1);
-  });
-
-  it('смена мастера и переноc различаются сравнением с известным состоянием', async () => {
-    const moved = build({
-      detail: { ...detail, start_at: '2026-08-20T14:00:00.000Z' },
-    });
-    await moved.service.ingest(delivery({ event: 'record.update' }));
-    expect(moved.append.mock.calls[0][0].type).toBe('appointment.rescheduled');
-
-    const reassigned = build({
-      detail: { ...detail, provider: { id: '999', name: 'Другой' } },
-    });
-    await reassigned.service.ingest(delivery({ event: 'record.update' }));
-    expect(reassigned.append.mock.calls[0][0].type).toBe(
-      'appointment.staff_changed',
-    );
-  });
-
-  it('🔴 обновление без различимого изменения НЕ становится событием', async () => {
-    // Провайдер шлёт `update` на любое касание записи, включая закрытие оплаты.
-    // Первая версия классификатора возвращала здесь `attendance_recorded` —
-    // имя утверждало то, чего мы не проверяли: присутствие в зеркале Maya не
-    // хранится, сравнить его не с чем.
-    const { service, append } = build();
-
-    const result = await service.ingest(delivery({ event: 'record.update' }));
-
-    expect(result).toMatchObject({
-      outcome: 'stale',
-      reason: 'no_observable_change',
-    });
-    expect(append).not.toHaveBeenCalled();
-  });
-
-  it('смена состава услуг различима и называется своим именем', async () => {
-    const { service, append } = build({
-      detail: { ...detail, service_ids: ['svc-1', 'svc-2'] },
-    });
-
-    await service.ingest(delivery({ event: 'record.update' }));
-
-    expect(append.mock.calls[0][0].type).toBe('appointment.services_changed');
+    expect(applyObservation.mock.calls[0][0].baselineEstablished).toBe(false);
   });
 
   it('🔴 в диагностику карантина не попадают значения полей', async () => {

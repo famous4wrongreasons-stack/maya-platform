@@ -15,6 +15,7 @@
  * технически — любой, кому нужен тип услуги, тянул за собой контракт адаптера.
  */
 
+export * from './appointment-change';
 export * from './appointment-key';
 export * from './catalog';
 export * from './domain-event';

@@ -60,6 +60,7 @@ import type { FetchResult, VisitAttendance } from '../../domain';
 import {
   attendanceFromCode,
   attendanceToCode,
+  observedAttendanceFromCode,
   WRITABLE_ATTENDANCE_CODES,
 } from '../crm-attendance';
 
@@ -1219,7 +1220,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
         ? this.normalizePhone(record.client.phone)
         : null,
       duration_minutes: durationMinutes,
-      attendance: attendanceFromCode(record.attendance),
+      // Доказанное значение либо `null`. Значение по умолчанию для экрана
+      // подставляет презентер на HTTP-краю — здесь выдумывать нечего.
+      attendance: this.observedAttendance(record),
       paid: record.paid_full === true || record.paid_full === 1,
       // Удалённую запись править нечего — кабинет спрячет кнопки.
       can_edit: record.deleted !== true,
@@ -2914,10 +2917,33 @@ export class YclientsCRMAdapter implements CRMAdapter {
       start_at: timing.start.toISOString(),
       end_at: timing.end.toISOString(),
       status: this.recordStatus(record),
+      attendance: this.observedAttendance(record),
       notes: record.comment?.trim() || null,
       total_price: totalPrice,
       currency: this.settings.currency || 'RUB',
     };
+  }
+
+  /**
+   * Доказанное присутствие из записи, либо `null`.
+   *
+   * 🔴 Отсутствие поля НЕ превращается в `awaiting`. Провайдер, не приславший
+   * отметку, ничего не утверждал — и зеркало обязано это сохранить, иначе
+   * первый же проход сверки объявил бы все визиты «ожидающими», а следующий
+   * выпустил бы события о переходах, которых не было.
+   *
+   * Поля два — `attendance` (по записи) и `visit_attendance` (по визиту), и на
+   * части филиалов приходит только второе. Правило то же, что у `hasAttendance`
+   * и у легаси: засчитываем то, что показало ХОТЬ ОДНО. Приоритет у
+   * `attendance`: это отметка самой записи, а речь идёт именно о ней.
+   */
+  private observedAttendance(
+    record: YclientsRecordApiItem,
+  ): VisitAttendance | null {
+    return (
+      observedAttendanceFromCode(record.attendance) ??
+      observedAttendanceFromCode(record.visit_attendance)
+    );
   }
 
   /**

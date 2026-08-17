@@ -242,7 +242,16 @@ export class CrmIntegrationController {
 
     // 🔴 Числовой код возвращается на провод НЕИЗМЕННЫМ: выпущенный PWA читает
     // именно его. Внутри системы ездит канон — см. `crm-attendance.ts`.
-    return { ...detail, attendance: attendanceToCode(detail.attendance) };
+    //
+    // 🔴 Значение по умолчанию подставляется ЗДЕСЬ, на краю, а не в адаптере.
+    // Провод обязан отдать число, а «неизвестно» числа не имеет: экрану нужно
+    // что-то нарисовать, и `awaiting` — то же самое, что он видел до B3.3.
+    // Внутрь системы эта подстановка не попадает: зеркало и компаратор
+    // получают `null` и различают «провайдер молчит» от «отметки ещё нет».
+    return {
+      ...detail,
+      attendance: attendanceToCode(detail.attendance ?? 'awaiting'),
+    };
   }
 
   @Post('journal/appointments/:externalId/attendance')

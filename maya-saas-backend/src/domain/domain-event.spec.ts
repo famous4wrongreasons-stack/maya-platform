@@ -90,7 +90,7 @@ describe('отпечаток канонического состояния', () 
     const asCreated = canonicalStateFingerprint({ ...base, state: {} });
     const asCancelled = canonicalStateFingerprint({
       ...base,
-      type: DOMAIN_EVENT_TYPE.appointmentCancelled,
+      type: DOMAIN_EVENT_TYPE.appointmentRemoved,
       state: {},
     });
     const otherEntity = canonicalStateFingerprint({
@@ -117,7 +117,7 @@ describe('отпечаток канонического состояния', () 
 describe('словарь событий', () => {
   it('🔴 имена принадлежат Maya, а не провайдеру', () => {
     for (const type of DOMAIN_EVENT_TYPES) {
-      // Границы слова важны: `attendance_recorded` — канон Maya, а `record`
+      // Границы слова важны: `attendance_changed` — канон Maya, а `record`
       // как отдельное слово — словарь провайдера.
       expect(type).not.toMatch(/\brecord\b|\bresource\b|yclients|alteg/i);
       expect(type).toMatch(/^[a-z_]+\.[a-z_]+$/);

@@ -3,9 +3,12 @@ import { createHash } from 'node:crypto';
 /**
  * Словарь событий Maya.
  *
- * 🔴 Имена принадлежат Maya, а не провайдеру: `appointment.cancelled`, а не
+ * 🔴 Имена принадлежат Maya, а не провайдеру: `appointment.removed`, а не
  * `record.delete`. Провайдерская форма заканчивается на границе интеграции —
  * это тот же инвариант, что глава 2 доказала для типов.
+ *
+ * 🔴 Имя не заявляет больше, чем доказано. Провайдер не различает «отменил
+ * клиент» и «удалили в CRM», поэтому события `cancelled` в словаре нет.
  *
  * 🔴 Здесь только то, что РЕАЛЬНО наблюдаемо сегодня (измерено в Phase A по
  * боевому журналу). Событий «на будущее» нет: несуществующий тип невозможно
@@ -16,8 +19,21 @@ export const DOMAIN_EVENT_TYPE = {
   appointmentRescheduled: 'appointment.rescheduled',
   appointmentStaffChanged: 'appointment.staff_changed',
   appointmentServicesChanged: 'appointment.services_changed',
-  appointmentCancelled: 'appointment.cancelled',
-  appointmentAttendanceRecorded: 'appointment.attendance_recorded',
+  /**
+   * 🔴 `removed`, а не `cancelled`. Провайдер отдаёт ровно один признак —
+   * `deleted`, — и отдельного «отменил клиент» в разбираемых полях нет
+   * (доказано в Phase A). Имя `cancelled` заявляло бы причину, которой у нас
+   * нет. `removed` означает «запись больше не активна у провайдера» — ровно
+   * то, что доказуемо. Если провайдер научится различать, тип распадётся на
+   * два в новой версии контракта.
+   */
+  appointmentRemoved: 'appointment.removed',
+  /**
+   * 🔴 `changed`, а не `recorded`. Событие выпускается только при переходе
+   * между двумя ДОКАЗАННЫМИ значениями. Первое наблюдение (было неизвестно,
+   * стало известно) изменением не является и события не даёт.
+   */
+  appointmentAttendanceChanged: 'appointment.attendance_changed',
 } as const;
 
 export type DomainEventType =

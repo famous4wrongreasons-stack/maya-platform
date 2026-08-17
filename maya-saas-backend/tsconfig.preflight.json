@@ -12,6 +12,7 @@
     "scripts/release-preflight.ts",
     "scripts/staff-identity-backfill.ts",
     "scripts/appointment-mirror-bootstrap.ts",
+    "scripts/appointment-reconciliation-run.ts",
     "src/config/**/*.ts"
   ],
   "exclude": ["**/*.spec.ts"]
