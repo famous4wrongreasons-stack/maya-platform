@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { CrmProvider } from '../../common/domain.enums';
 import { YclientsCRMAdapter } from './yclients-crm.adapter';
 
@@ -19,6 +20,145 @@ describe('YclientsCRMAdapter', () => {
     process.env.YCLIENTS_PARTNER_TOKEN = originalPartnerToken;
     jest.useRealTimers();
     jest.restoreAllMocks();
+  });
+
+  it('🔴 доходит до потолка страниц и НЕ выдаёт усечённый журнал за полный', async () => {
+    // B3.0. Раньше обход страниц заканчивался `return records`: усечённый
+    // список приходил как полный, и сверка сделала бы вывод «записи исчезли».
+    // Проверяем через журнал: он предупреждает, а не молчит.
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+
+    // 🔴 Страницы обязаны быть РАЗНЫМИ: если источник повторяет те же записи,
+    // обход честно останавливается («новых нет») и выборка полна. Первая
+    // версия этого теста возвращала одну и ту же страницу и потому ничего не
+    // доказывала.
+    let servedPages = 0;
+    const pageOf = (pageIndex: number) =>
+      Array.from({ length: 200 }, (_, index) => ({
+        id: 10_000 + pageIndex * 200 + index,
+        datetime: '2026-08-20T10:00:00+03:00',
+        seance_length: 3600,
+        staff_id: 1,
+        services: [],
+      }));
+
+    global.fetch = jest.fn().mockImplementation((input: string | URL) => {
+      const url = typeof input === 'string' ? input : input.href;
+      if (url.includes('/records/123')) {
+        // Каждая страница полная и новая — источник никогда не «заканчивается».
+        const data = pageOf(servedPages);
+        servedPages += 1;
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ data }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await adapter.getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-08-20T00:00:00.000Z',
+      to: '2026-08-21T00:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    const truncationWarnings = warn.mock.calls
+      .map((call) => String(call[0]))
+      .filter((message) => message.includes('truncated'));
+
+    expect(truncationWarnings.length).toBeGreaterThan(0);
+    expect(truncationWarnings[0]).toContain('page_limit_reached');
+    // Вывод об отсутствии по такой выборке делать нельзя — это сказано прямо.
+    expect(truncationWarnings[0]).toContain(
+      'absence conclusions are not allowed',
+    );
+  });
+
+  it('неполная последняя страница — журнал читается без предупреждения', async () => {
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+
+    global.fetch = jest.fn().mockImplementation((input: string | URL) => {
+      const url = typeof input === 'string' ? input : input.href;
+      if (url.includes('/records/123')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [
+                {
+                  id: 1,
+                  datetime: '2026-08-20T10:00:00+03:00',
+                  seance_length: 3600,
+                  staff_id: 1,
+                  services: [],
+                },
+              ],
+            }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await adapter.getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-08-20T00:00:00.000Z',
+      to: '2026-08-21T00:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    expect(
+      warn.mock.calls
+        .map((call) => String(call[0]))
+        .filter((m) => m.includes('truncated')),
+    ).toHaveLength(0);
+  });
+
+  it('🔴 отказ провайдера — это НЕ пустая выборка', async () => {
+    // Инвариант главы 2, который обязан пережить B3: недоступность источника
+    // не выдаётся за отсутствие данных.
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: () => Promise.resolve({ meta: { message: 'unavailable' } }),
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getJournal({
+        tenantId: 'tenant-1',
+        from: '2026-08-20T00:00:00.000Z',
+        to: '2026-08-21T00:00:00.000Z',
+        timezone: 'Europe/Moscow',
+      }),
+    ).rejects.toBeDefined();
   });
 
   it('maps staff response and filters by activeMasterIds', async () => {

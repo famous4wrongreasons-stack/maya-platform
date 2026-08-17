@@ -24,6 +24,11 @@ import { ClientIdentityService } from './client-identity.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
 import {
+  CRM_FINANCE_MAX_WINDOW_MS,
+  CRM_JOURNAL_MAX_WINDOW_DAYS,
+  CRM_JOURNAL_MAX_WINDOW_MS,
+} from './crm-provider-limits';
+import {
   CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
@@ -1059,9 +1064,11 @@ export class CrmService {
       });
     }
 
-    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60 * 1000) {
+    // 🔴 Правило провайдера живёт константой в границе CRM (глава 2 P3.6).
+    // Литерал здесь означал, что при смене лимита разойдутся два числа.
+    if (to.getTime() - from.getTime() > CRM_JOURNAL_MAX_WINDOW_MS) {
       throw new BadRequestException({
-        message: 'CRM journal range must not exceed 31 days.',
+        message: `CRM journal range must not exceed ${CRM_JOURNAL_MAX_WINDOW_DAYS} days.`,
         error: { code: 'crm_journal_range_too_large' },
       });
     }
@@ -1623,9 +1630,9 @@ export class CrmService {
       });
     }
 
-    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60 * 1000) {
+    if (to.getTime() - from.getTime() > CRM_FINANCE_MAX_WINDOW_MS) {
       throw new BadRequestException({
-        message: 'CRM finance range must not exceed 31 days.',
+        message: `CRM finance range must not exceed ${CRM_JOURNAL_MAX_WINDOW_DAYS} days.`,
         error: { code: 'crm_finance_range_too_large' },
       });
     }

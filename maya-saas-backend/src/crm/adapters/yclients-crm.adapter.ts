@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   BadRequestException,
   ConflictException,
@@ -49,8 +50,13 @@ import {
   scheduleSlotsContain,
   staffScheduleRevision,
 } from '../staff-schedule.utils';
-import { encodeCrmAppointmentKey } from '../../domain';
-import type { VisitAttendance } from '../../domain';
+import {
+  FETCH_TRUNCATION_REASON,
+  completeFetch,
+  encodeCrmAppointmentKey,
+  truncatedFetch,
+} from '../../domain';
+import type { FetchResult, VisitAttendance } from '../../domain';
 import {
   attendanceFromCode,
   attendanceToCode,
@@ -218,6 +224,7 @@ interface YclientsPayrollApiData {
 }
 
 export class YclientsCRMAdapter implements CRMAdapter {
+  private readonly logger = new Logger(YclientsCRMAdapter.name);
   private readonly baseUrl: string;
   private readonly partnerToken: string;
   private readonly settings: YclientsSettings;
@@ -764,11 +771,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
         .toISOString()
         .slice(0, 10);
     const timezone = params.timezone || 'Europe/Moscow';
-    const records = await this.fetchRecords({
+    const fetched = await this.fetchRecords({
       startDate: from.slice(0, 10),
       endDate: to.slice(0, 10),
       clientId: this.toNumericId(client.id, 'client.id'),
     });
+    this.warnOnTruncatedRecords(fetched, 'getClientAppointments');
+    const records = fetched.items;
 
     return records
       .filter((record) => record.id !== undefined)
@@ -839,7 +848,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       inclusiveEnd.toISOString(),
       params.timezone,
     );
-    const [records, staff, services] = await Promise.all([
+    const [fetchedRecords, staff, services] = await Promise.all([
       this.fetchRecords({
         startDate,
         endDate,
@@ -851,6 +860,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
       this.getStaff(params.tenantId),
       this.getServices(params.tenantId),
     ]);
+    this.warnOnTruncatedRecords(fetchedRecords, 'getJournal');
+    const records = fetchedRecords.items;
     const staffById = new Map(staff.map((member) => [member.id, member]));
     const servicesById = new Map(
       services.map((service) => [service.id, service]),
@@ -1385,11 +1396,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const clientId = this.toNumericId(params.clientId, 'client.id');
     const end = new Date();
     const start = new Date(end.getTime() - 730 * 24 * 60 * 60 * 1000);
-    const records = await this.fetchRecords({
+    const fetchedHistory = await this.fetchRecords({
       startDate: start.toISOString().slice(0, 10),
       endDate: end.toISOString().slice(0, 10),
       clientId,
     });
+    this.warnOnTruncatedRecords(fetchedHistory, 'getClientVisitHistory');
+    const records = fetchedHistory.items;
 
     return records
       .filter((record) => this.hasAttendance(record, 1))
@@ -1447,13 +1460,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
       params.staffId,
       params.date,
     );
-    const records = await this.fetchRecords({
+    const fetchedDay = await this.fetchRecords({
       startDate: params.date,
       endDate: params.date,
       staffId: this.toNumericId(params.staffId, 'staffId'),
     });
+    this.warnOnTruncatedRecords(fetchedDay, 'previewStaffScheduleDayChange');
     const conflictTimes = this.staffScheduleConflictTimes(
-      records,
+      fetchedDay.items,
       params.date,
       proposedSlots,
       params.timezone,
@@ -1710,10 +1724,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
           transactionsResult.value,
           currency,
           recordsResult.status === 'fulfilled'
-            ? this.recordStaffMap(recordsResult.value)
+            ? this.recordStaffMap(recordsResult.value.items)
             : new Map<string, string>(),
           recordsResult.status === 'fulfilled'
-            ? this.recordServicesMap(recordsResult.value)
+            ? this.recordServicesMap(recordsResult.value.items)
             : new Map<string, Array<{ serviceId: string; name: string }>>(),
         );
         this.appendStaffAttributionWarning(warnings, revenue);
@@ -1848,10 +1862,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
         transactionsResult.value,
         currency,
         recordsResult.status === 'fulfilled'
-          ? this.recordStaffMap(recordsResult.value)
+          ? this.recordStaffMap(recordsResult.value.items)
           : new Map<string, string>(),
         recordsResult.status === 'fulfilled'
-          ? this.recordServicesMap(recordsResult.value)
+          ? this.recordServicesMap(recordsResult.value.items)
           : new Map<string, Array<{ serviceId: string; name: string }>>(),
       );
       const warnings: CrmRevenueSummary['warnings'] = [];
@@ -2170,6 +2184,26 @@ export class YclientsCRMAdapter implements CRMAdapter {
     });
   }
 
+  /**
+   * Неполнота не проглатывается молча даже там, где вывода об отсутствии не
+   * делают: остальные потребители продолжают работать с тем, что прочитано,
+   * но факт усечения становится видимым.
+   *
+   * Менять их поведение в B3.0 намеренно не стали — это отдельное решение с
+   * последствиями для боевых экранов.
+   */
+  private warnOnTruncatedRecords(
+    fetched: FetchResult<YclientsRecordApiItem>,
+    caller: string,
+  ): void {
+    if (fetched.completeness === 'truncated') {
+      this.logger.warn(
+        `${caller}: record fetch truncated (${fetched.truncationReason}) after ` +
+          `${fetched.pagesLoaded} pages; absence conclusions are not allowed`,
+      );
+    }
+  }
+
   private async fetchRecords(params: {
     startDate: string;
     endDate: string;
@@ -2184,12 +2218,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
      * `with_deleted` не поддержан, поведение остаётся прежним, а не падает.
      */
     withDeleted?: boolean;
-  }): Promise<YclientsRecordApiItem[]> {
+  }): Promise<FetchResult<YclientsRecordApiItem>> {
     const records: YclientsRecordApiItem[] = [];
     const seen = new Set<string>();
     const count = 200;
+    const maxPages = 25;
+    let pagesLoaded = 0;
 
-    for (let page = 1; page <= 25; page += 1) {
+    for (let page = 1; page <= maxPages; page += 1) {
       const query = new URLSearchParams({
         start_date: params.startDate,
         end_date: params.endDate,
@@ -2229,12 +2265,24 @@ export class YclientsCRMAdapter implements CRMAdapter {
         appended += 1;
       }
 
+      pagesLoaded = page;
+
       if (batch.length < count || appended === 0) {
-        break;
+        // Неполная страница — источник отдал всё. Пустой результат тоже полон.
+        return completeFetch(records, pagesLoaded);
       }
     }
 
-    return records;
+    // 🔴 Дошли до предохранителя, а последняя страница была ПОЛНОЙ: значит у
+    // источника осталось ещё. Раньше здесь стояло `return records` — усечённый
+    // список выдавался за полный, и вызывающий не мог этого заметить.
+    // Соседние выборки в этом же файле при переполнении бросают исключение;
+    // записи были единственными, кто врал молча.
+    return truncatedFetch(
+      records,
+      pagesLoaded,
+      FETCH_TRUNCATION_REASON.pageLimitReached,
+    );
   }
 
   private async fetchFinancialTransactions(
