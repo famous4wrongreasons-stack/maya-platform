@@ -925,6 +925,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
     return {
       calendar_source: 'external',
+      completeness: fetchedRecords.completeness,
+      truncation_reason: fetchedRecords.truncationReason,
       timezone: params.timezone,
       range: {
         from: params.from,

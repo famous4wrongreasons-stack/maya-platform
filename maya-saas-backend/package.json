@@ -37,7 +37,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "build:preflight": "tsc --project tsconfig.preflight.json",
-    "release:preflight:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/release-preflight.ts"
+    "release:preflight:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/release-preflight.ts",
+    "mirror:bootstrap": "ts-node --project tsconfig.scripts.json --transpile-only scripts/appointment-mirror-bootstrap.ts"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"

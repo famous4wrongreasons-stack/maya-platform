@@ -9,6 +9,7 @@ import { CrmController } from './crm.controller';
 import { CrmIntegrationController } from './crm-integration.controller';
 import { CrmService } from './crm.service';
 import { EventsModule } from '../events/events.module';
+import { AppointmentMirrorService } from './appointment-mirror.service';
 import { ShadowIngestionController } from './shadow-ingestion.controller';
 import { ShadowIngestionService } from './shadow-ingestion.service';
 
@@ -20,11 +21,12 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
     ShadowIngestionController,
   ],
   providers: [
+    AppointmentMirrorService,
     ClientIdentityService,
     CrmAdapterFactory,
     CrmService,
     ShadowIngestionService,
   ],
-  exports: [ClientIdentityService, CrmService],
+  exports: [AppointmentMirrorService, ClientIdentityService, CrmService],
 })
 export class CrmModule {}

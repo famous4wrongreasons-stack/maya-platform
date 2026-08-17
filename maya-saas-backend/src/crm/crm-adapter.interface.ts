@@ -1,5 +1,9 @@
 import { CrmProvider } from '../common/domain.enums';
-import type { RevenueBasis } from '../domain';
+import type {
+  FetchCompleteness,
+  FetchTruncationReason,
+  RevenueBasis,
+} from '../domain';
 import type {
   AppliedWorkDayChange,
   BookableSlot,
@@ -246,6 +250,15 @@ export interface CrmAppointmentDetail extends CrmJournalAppointment {
 
 export interface CrmJournal {
   calendar_source: 'external';
+  /**
+   * 🔴 Насколько полно прочитан журнал (B3.0).
+   *
+   * Без этого поля усечённая выборка выглядела полной и для кабинета, и для
+   * сверки — а сверка по такой выборке объявила бы недочитанные записи
+   * удалёнными.
+   */
+  completeness: FetchCompleteness;
+  truncation_reason?: FetchTruncationReason;
   timezone: string;
   range: {
     from: string;
