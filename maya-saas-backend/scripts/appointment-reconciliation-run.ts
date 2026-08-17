@@ -13,6 +13,9 @@
 process.env.OWNER_REPORTS_SCHEDULER_ENABLED = 'false';
 process.env.APPOINTMENT_REMINDERS_SCHEDULER_ENABLED = 'false';
 process.env.BILLING_SCHEDULER_ENABLED = 'false';
+// 🔴 И сверка тоже: скрипт не должен поднимать в СВОЁМ процессе
+// планировщик, с которым потом сам же подерётся за аренду.
+process.env.CRM_RECONCILIATION_SCHEDULER_ENABLED = 'false';
 
 import { NestFactory } from '@nestjs/core';
 
@@ -55,6 +58,14 @@ async function main(): Promise<void> {
         where: { tenantId: integration.tenantId },
       });
 
+      /**
+       * 🔴 Ручной запуск идёт ЧЕРЕЗ ТУ ЖЕ аренду, что планировщик.
+       *
+       * Обходного пути нет намеренно. Скрипт — отдельный процесс, и именно он
+       * делает процессную переменную непригодной: запусти его во время
+       * планового прохода — и два процесса пошли бы по одному арендатору. Если
+       * аренда занята, скрипт честно сообщает `already_running` и НЕ работает.
+       */
       const result = await tenantContext.runAsSystemTenant(
         integration.tenantId,
         () =>
@@ -62,6 +73,7 @@ async function main(): Promise<void> {
             tenantId: integration.tenantId,
             from,
             to,
+            holder: 'manual',
           }),
       );
 

@@ -12,7 +12,9 @@ import { EventsModule } from '../events/events.module';
 import { AppointmentChangeService } from './appointment-change.service';
 import { AppointmentMirrorService } from './appointment-mirror.service';
 import { AppointmentObservationService } from './appointment-observation.service';
+import { AppointmentReconciliationScheduler } from './appointment-reconciliation.scheduler';
 import { AppointmentReconciliationService } from './appointment-reconciliation.service';
+import { QuarantineCatchupService } from './quarantine-catchup.service';
 import { ShadowIngestionController } from './shadow-ingestion.controller';
 import { ShadowIngestionService } from './shadow-ingestion.service';
 
@@ -27,10 +29,12 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
     AppointmentChangeService,
     AppointmentMirrorService,
     AppointmentObservationService,
+    AppointmentReconciliationScheduler,
     AppointmentReconciliationService,
     ClientIdentityService,
     CrmAdapterFactory,
     CrmService,
+    QuarantineCatchupService,
     ShadowIngestionService,
   ],
   exports: [
@@ -38,6 +42,7 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
     AppointmentReconciliationService,
     ClientIdentityService,
     CrmService,
+    QuarantineCatchupService,
   ],
 })
 export class CrmModule {}

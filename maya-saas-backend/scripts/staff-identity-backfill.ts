@@ -12,6 +12,9 @@
 process.env.OWNER_REPORTS_SCHEDULER_ENABLED = 'false';
 process.env.APPOINTMENT_REMINDERS_SCHEDULER_ENABLED = 'false';
 process.env.BILLING_SCHEDULER_ENABLED = 'false';
+// 🔴 И сверка тоже: скрипт не должен поднимать в СВОЁМ процессе
+// планировщик, с которым потом сам же подерётся за аренду.
+process.env.CRM_RECONCILIATION_SCHEDULER_ENABLED = 'false';
 
 import { NestFactory } from '@nestjs/core';
 

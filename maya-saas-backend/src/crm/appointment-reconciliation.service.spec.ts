@@ -57,9 +57,13 @@ const build = (over?: {
   const findFirst: Mocked<(args: RunFindArgs) => Promise<unknown>> = jest
     .fn()
     .mockResolvedValue(null);
+  // Захват аренды: закрыть брошенную (обычно нечего) и вставить свою.
+  const updateMany: Mocked<(args: unknown) => Promise<{ count: number }>> = jest
+    .fn()
+    .mockResolvedValue({ count: 0 });
 
   const prisma = {
-    reconciliationRun: { create, update, findFirst },
+    reconciliationRun: { create, update, findFirst, updateMany },
     crmIntegration: {
       findUnique: jest.fn().mockResolvedValue({ provider: 'yclients' }),
     },
@@ -147,6 +151,7 @@ const build = (over?: {
     create,
     update,
     findFirst,
+    updateMany,
     getJournal,
     applyObservation,
     tenantContext,
@@ -159,6 +164,8 @@ describe('сверка зеркала визитов', () => {
 
     const result = await run();
 
+    expect(result.status).toBe('ran');
+    if (result.status !== 'ran') throw new Error('ожидался выполненный проход');
     expect(result.completeness).toBe('complete');
     const written = update.mock.calls[0][0].data;
     expect(written.completeness).toBe('complete');
@@ -176,6 +183,7 @@ describe('сверка зеркала визитов', () => {
 
     const result = await run();
 
+    if (result.status !== 'ran') throw new Error('ожидался выполненный проход');
     expect(result.completeness).toBe('truncated');
     expect(result.truncation_reason).toBe('page_limit_reached');
     expect(update.mock.calls[0][0].data.completeness).toBe('truncated');
@@ -237,6 +245,7 @@ describe('сверка зеркала визитов', () => {
 
     const result = await run();
 
+    if (result.status !== 'ran') throw new Error('ожидался выполненный проход');
     expect(result.updated).toBe(1);
     expect(result.events_emitted).toBe(1);
     expect(result.unchanged).toBe(0);

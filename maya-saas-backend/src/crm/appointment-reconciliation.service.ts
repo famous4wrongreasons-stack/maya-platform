@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { hostname } from 'node:os';
 
 import { CRM_JOURNAL_MAX_WINDOW_DAYS } from './crm-provider-limits';
 import { AppointmentChangeService } from './appointment-change.service';
@@ -22,6 +24,7 @@ export interface ReconciliationCounts {
 }
 
 export interface ReconciliationResult extends ReconciliationCounts {
+  status: 'ran';
   run_id: string;
   from: string;
   to: string;
@@ -32,6 +35,32 @@ export interface ReconciliationResult extends ReconciliationCounts {
   completeness: 'complete' | 'truncated';
   truncation_reason?: string;
 }
+
+/**
+ * Отказ по занятой аренде.
+ *
+ * 🔴 Это НЕ сбой. Занятая аренда означает, что работа уже идёт, и смешать её с
+ * ошибкой значило бы поднимать тревогу на штатном поведении планировщика.
+ */
+export interface ReconciliationSkipped {
+  status: 'already_running';
+  tenantId: string;
+  provider: string;
+  held_by: string | null;
+  lease_until: string | null;
+}
+
+export type ReconciliationOutcome =
+  ReconciliationResult | ReconciliationSkipped;
+
+/**
+ * Срок аренды.
+ *
+ * 🔴 Равен потолку прохода: аренда не может пережить работу, ради которой
+ * взята. Измеренная длительность прохода — 1,3–1,8 с, то есть запас двухсотый;
+ * пять минут покрывают зависший запрос к провайдеру, а не нормальную работу.
+ */
+export const RECONCILIATION_LEASE_MS = 5 * 60 * 1000;
 
 /**
  * Сверка зеркала визитов с источником (Cycle 03 B3.3).
@@ -65,14 +94,59 @@ export class AppointmentReconciliationService {
    *
    * Окно режется по правилу провайдера: полнота каждого куска оценивается
    * отдельно, и один неполный кусок не отменяет остальные.
+   *
+   * 🔴 Аренда обязательна и одна на всех: и планировщик, и ручной запуск идут
+   * этим путём. Обходного пути «мимо аренды» нет намеренно — иначе ручной
+   * прогон во время планового делал бы ровно то, ради предотвращения чего
+   * аренда и заведена.
    */
   async run(params: {
     tenantId: string;
     from: Date;
     to: Date;
-  }): Promise<ReconciliationResult> {
+    /** Кто просит. Провенанс для разбора: `scheduler:near`, `manual`, … */
+    holder?: string;
+  }): Promise<ReconciliationOutcome> {
     const tenantId = this.tenantContext.assertTenantId(params.tenantId);
     const provider = await this.providerOf(tenantId);
+    const holderId = this.holderId(params.holder);
+
+    const lease = await this.acquireLease({
+      tenantId,
+      provider,
+      holderId,
+      windowFrom: params.from,
+      windowTo: params.to,
+    });
+
+    if (lease === 'already_running') {
+      /**
+       * 🔴 Честный отказ, а не второй процесс.
+       *
+       * Занятая аренда — это НЕ ошибка: она означает, что работа уже идёт.
+       * Отличать её от сбоя обязательно, иначе наблюдаемость превратится в
+       * шум: планировщик, споткнувшийся о собственный предыдущий тик, поднял
+       * бы тревогу на штатном поведении.
+       */
+      const held = await this.prisma.reconciliationRun.findFirst({
+        where: { tenantId, provider, finishedAt: null, failureCode: null },
+        orderBy: { startedAt: 'desc' },
+        select: { id: true, leaseUntil: true, holderId: true, startedAt: true },
+      });
+      this.logger.log(
+        `reconciliation skipped for ${provider}: lease held by ` +
+          `${held?.holderId ?? 'unknown'} until ${held?.leaseUntil?.toISOString() ?? '—'}`,
+      );
+      return {
+        status: 'already_running',
+        tenantId,
+        provider,
+        held_by: held?.holderId ?? null,
+        lease_until: held?.leaseUntil?.toISOString() ?? null,
+      };
+    }
+
+    const run = { id: lease.runId };
 
     const counts: ReconciliationCounts = {
       windows: 0,
@@ -86,16 +160,6 @@ export class AppointmentReconciliationService {
       duplicate_events: 0,
       skipped: 0,
     };
-
-    const run = await this.prisma.reconciliationRun.create({
-      data: {
-        tenantId,
-        provider,
-        windowFrom: params.from,
-        windowTo: params.to,
-      },
-      select: { id: true },
-    });
 
     const baselineEstablished =
       await this.observationService.baselineEstablished(tenantId);
@@ -161,11 +225,15 @@ export class AppointmentReconciliationService {
           updated: counts.updated,
           unchanged: counts.unchanged,
           eventsEmitted: counts.events_emitted,
+          // Аренда отпущена вместе с завершением: строка вышла из частичного
+          // уникального индекса, место для следующего прогона свободно.
+          leaseUntil: null,
         },
       });
 
       return {
         ...counts,
+        status: 'ran',
         run_id: run.id,
         from: params.from.toISOString(),
         to: params.to.toISOString(),
@@ -186,10 +254,101 @@ export class AppointmentReconciliationService {
           failureMessage: String(
             error instanceof Error ? error.message : error,
           ).slice(0, 500),
+          // Аренда отпускается и при провале: сбой не должен блокировать
+          // следующую попытку до истечения срока.
+          leaseUntil: null,
         },
       });
       throw error;
     }
+  }
+
+  /**
+   * Захват аренды.
+   *
+   * 🔴 Два шага, и намеренно БЕЗ общей транзакции.
+   *
+   * Первый шаг закрывает брошенную аренду; второй — единственный арбитр. Если
+   * бы они шли одной интерактивной транзакцией, нарушение уникальности во
+   * втором шаге прервало бы транзакцию целиком, и вернуть из неё «занято»
+   * штатным исходом было бы уже нельзя: PostgreSQL не даёт продолжить
+   * прерванную транзакцию.
+   *
+   * Разделение безопасно: первый шаг трогает ТОЛЬКО просроченные аренды, а
+   * атомарность самого захвата обеспечивает частичный уникальный индекс.
+   */
+  private async acquireLease(input: {
+    tenantId: string;
+    provider: string;
+    holderId: string;
+    windowFrom: Date;
+    windowTo: Date;
+  }): Promise<{ runId: string } | 'already_running'> {
+    const now = new Date();
+
+    /**
+     * 🔴 Брошенный прогон закрывается как УПАВШИЙ, а не переиспользуется.
+     *
+     * Переиспользование строки стёрло бы след падения, а именно он отвечает на
+     * вопрос «как давно мы на самом деле не знаем, что происходит». Строка
+     * остаётся с кодом сбоя и без отметки завершения — то есть честно говорит
+     * «начался и не закончился», — и одновременно выходит из частичного
+     * индекса, освобождая место. Ручной разблокировки не требуется.
+     */
+    const reclaimed = await this.prisma.reconciliationRun.updateMany({
+      where: {
+        tenantId: input.tenantId,
+        provider: input.provider,
+        finishedAt: null,
+        failureCode: null,
+        leaseUntil: { lt: now },
+      },
+      data: {
+        failureCode: 'lease_expired',
+        failureMessage:
+          'аренда истекла: процесс не завершил проход и не продлил её',
+      },
+    });
+
+    if (reclaimed.count > 0) {
+      this.logger.warn(
+        `reclaimed ${reclaimed.count} abandoned reconciliation run(s) ` +
+          `for ${input.provider}: lease had expired`,
+      );
+    }
+
+    try {
+      const run = await this.prisma.reconciliationRun.create({
+        data: {
+          tenantId: input.tenantId,
+          provider: input.provider,
+          windowFrom: input.windowFrom,
+          windowTo: input.windowTo,
+          leaseUntil: new Date(now.getTime() + RECONCILIATION_LEASE_MS),
+          holderId: input.holderId,
+        },
+        select: { id: true },
+      });
+      return { runId: run.id };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return 'already_running';
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Кто держит аренду.
+   *
+   * Провенанс для разбора, не идентичность: узел, процесс и роль запуска. Ни
+   * одного персонального поля.
+   */
+  private holderId(role: string | undefined): string {
+    return [role || 'manual', hostname(), String(process.pid)].join(':');
   }
 
   /**
