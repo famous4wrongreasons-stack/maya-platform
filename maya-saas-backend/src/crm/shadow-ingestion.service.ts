@@ -150,6 +150,7 @@ export class ShadowIngestionService {
         startAt: true,
         endAt: true,
         status: true,
+        serviceIds: true,
       },
     });
 
@@ -180,6 +181,12 @@ export class ShadowIngestionService {
     }
 
     const type = this.canonicalType(kind, state, appointment);
+    if (type === null) {
+      // Не карантин: доставка понята, арендатор и визит найдены. Просто
+      // наблюдаемого изменения в ней нет.
+      return { outcome: 'stale', reason: 'no_observable_change' };
+    }
+
     const fingerprint = canonicalStateFingerprint({
       source: dto.provider,
       entityType: 'appointment',
@@ -256,20 +263,26 @@ export class ShadowIngestionService {
   }
 
   /**
-   * Канонический тип события.
+   * Канонический тип события — только то, что РЕАЛЬНО различимо сравнением.
    *
-   * 🔴 Различать «перенос», «смену мастера» и «смену состава» можно только
-   * сравнением с известным состоянием. Пока зеркало визита в Maya неполное,
-   * `update` даёт общий `appointment.rescheduled` лишь при доказанной смене
-   * времени; в остальных случаях — `appointment.attendance_recorded`, если
-   * изменилось присутствие, иначе состояние просто фиксируется как изменение
-   * состава. Угадывать не станем: отпечаток всё равно различит состояния.
+   * 🔴 Первая версия этого метода при обновлении без видимых изменений
+   * возвращала `appointment.attendance_recorded`. Это была ложь того же класса,
+   * что чинилась в главе 2: присутствие в зеркале Maya не хранится, сравнить
+   * его не с чем, а имя события утверждало, что оно записано.
+   *
+   * Теперь: не удалось назвать изменение — события НЕ возникает. Провайдер шлёт
+   * `update` на любое касание записи, включая закрытие оплаты; называть это
+   * фактом бизнеса без доказательства нельзя.
    */
   private canonicalType(
     kind: keyof typeof RECORD_EVENT_KIND,
     state: { deleted: boolean; canonical: Prisma.InputJsonObject },
-    appointment: { staffExternalId: string; startAt: Date },
-  ): DomainEventType {
+    appointment: {
+      staffExternalId: string;
+      startAt: Date;
+      serviceIds: Prisma.JsonValue;
+    },
+  ): DomainEventType | null {
     if (kind === 'created') return DOMAIN_EVENT_TYPE.appointmentCreated;
     if (kind === 'deleted' || state.deleted) {
       return DOMAIN_EVENT_TYPE.appointmentCancelled;
@@ -291,7 +304,18 @@ export class ShadowIngestionService {
       scalar(state.canonical.start_at) !== appointment.startAt.toISOString();
     if (startChanged) return DOMAIN_EVENT_TYPE.appointmentRescheduled;
 
-    return DOMAIN_EVENT_TYPE.appointmentAttendanceRecorded;
+    const knownServices = Array.isArray(appointment.serviceIds)
+      ? [...appointment.serviceIds].map(scalar).sort()
+      : [];
+    const freshServices = Array.isArray(state.canonical.service_ids)
+      ? [...state.canonical.service_ids].map(scalar).sort()
+      : [];
+    if (JSON.stringify(knownServices) !== JSON.stringify(freshServices)) {
+      return DOMAIN_EVENT_TYPE.appointmentServicesChanged;
+    }
+
+    // Назвать изменение нечем — значит его для Maya и не произошло.
+    return null;
   }
 
   private classify(

@@ -33,6 +33,7 @@ const appointmentRow = {
   startAt: new Date('2026-08-20T10:00:00.000Z'),
   endAt: new Date('2026-08-20T11:00:00.000Z'),
   status: 'confirmed',
+  serviceIds: ['svc-1'],
 };
 
 const detail = {
@@ -238,6 +239,32 @@ describe('теневой приём доставок CRM', () => {
     expect(reassigned.append.mock.calls[0][0].type).toBe(
       'appointment.staff_changed',
     );
+  });
+
+  it('🔴 обновление без различимого изменения НЕ становится событием', async () => {
+    // Провайдер шлёт `update` на любое касание записи, включая закрытие оплаты.
+    // Первая версия классификатора возвращала здесь `attendance_recorded` —
+    // имя утверждало то, чего мы не проверяли: присутствие в зеркале Maya не
+    // хранится, сравнить его не с чем.
+    const { service, append } = build();
+
+    const result = await service.ingest(delivery({ event: 'record.update' }));
+
+    expect(result).toMatchObject({
+      outcome: 'stale',
+      reason: 'no_observable_change',
+    });
+    expect(append).not.toHaveBeenCalled();
+  });
+
+  it('смена состава услуг различима и называется своим именем', async () => {
+    const { service, append } = build({
+      detail: { ...detail, service_ids: ['svc-1', 'svc-2'] },
+    });
+
+    await service.ingest(delivery({ event: 'record.update' }));
+
+    expect(append.mock.calls[0][0].type).toBe('appointment.services_changed');
   });
 
   it('🔴 в диагностику карантина не попадают значения полей', async () => {
