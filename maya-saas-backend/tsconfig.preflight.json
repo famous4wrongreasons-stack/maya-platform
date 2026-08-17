@@ -11,6 +11,7 @@
   "include": [
     "scripts/release-preflight.ts",
     "scripts/staff-identity-backfill.ts",
+    "scripts/appointment-mirror-bootstrap.ts",
     "src/config/**/*.ts"
   ],
   "exclude": ["**/*.spec.ts"]
