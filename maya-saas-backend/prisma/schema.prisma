@@ -124,6 +124,8 @@ model Tenant {
   dashboardPreferences           DashboardPreference[]
   userMerges                     UserMerge[]
   inboxItems                     InboxItem[]
+  domainEvents         DomainEvent[]
+  ingestionQuarantine  IngestionQuarantine[]
   devicePushTokens               DevicePushToken[]
   recoveryTouchpoints            RecoveryTouchpoint[]
   recoveryConversions            RecoveryConversion[]
@@ -519,6 +521,11 @@ model CrmIntegration {
   verifiedAt        DateTime?
   lastCheckedAt     DateTime?
   lastSyncAt        DateTime?
+  /// 🔴 С какого момента Maya НАБЛЮДАЕТ за этой интеграцией.
+  ///
+  /// Нужен, чтобы первое сканирование не выдало существующий бизнес за
+  /// «создано сегодня»: всё, что старше этой отметки, — `observed_existing`.
+  watchStartedAt    DateTime?
   lastErrorCode     String?
   lastErrorAt       DateTime?
   createdAt         DateTime  @default(now())
@@ -1405,6 +1412,16 @@ model Appointment {
   clientId          String
   branchId          String?
   crmExternalId     String?
+  /// 🔴 Cycle 03 B1. Провайдер, у которого живёт `crmExternalId`.
+  ///
+  /// Ключ визита обязан быть КВАЛИФИЦИРОВАН провайдером: голое равенство
+  /// внешних идентификаторов уже приводило к тому, что права одного человека
+  /// доставались другому (глава 2). Число `12345` у YCLIENTS и у Altegio —
+  /// разные записи.
+  ///
+  /// Заполнено ⟺ заполнен `crmExternalId`; это держит CHECK в базе, иначе
+  /// половина ключа с NULL молча отключила бы уникальность.
+  crmProvider       String?
   source            String     @default("external")
   staffExternalId   String
   serviceIds        Json
@@ -1428,6 +1445,10 @@ model Appointment {
   branch            Branch?    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
 
   @@unique([id, tenantId, clientId])
+  /// 🔴 Одна запись CRM — одна строка Maya. До Cycle 03 уникальности не было
+  /// вовсе, а поиск шёл в пределах КЛИЕНТА: два независимых пути приёма
+  /// создавали два визита на одну запись, и база этому не мешала.
+  @@unique([tenantId, crmProvider, crmExternalId])
   @@index([tenantId, staffId, startAt])
   @@index([tenantId])
   @@index([clientId])
@@ -1437,6 +1458,117 @@ model Appointment {
   /// (staffExternalId — вторая колонка), а GiST построен по blockedStartAt.
   /// Без этого читались все записи арендатора за всю историю.
   @@index([tenantId, startAt])
+}
+
+/// Канонический факт бизнеса, замеченный Maya.
+///
+/// 🔴 Что это НЕ такое. Не копия CRM, не сообщение получателю, не след
+/// действия пользователя. Все три уже есть (`Appointment`, `InboxItem`,
+/// `AuditLog`) и ни один не отвечает на вопрос «что изменилось и откуда мы это
+/// знаем»: у первых двух нет даже отличия «когда произошло» от «когда узнали».
+///
+/// 🔴 Событие означает: Maya получила ДОСТАТОЧНОЕ ДОКАЗАТЕЛЬСТВО изменения.
+/// Повторное чтение того же состояния событием не является — за это отвечает
+/// `dedupFingerprint`.
+model DomainEvent {
+  id             String    @id @default(cuid())
+  tenantId       String
+
+  /// Канонический тип Maya: `appointment.created`, не `record.create`.
+  type           String
+  /// Версия контракта. Единственный механизм версионирования: номер живёт в
+  /// колонке, а не внутри имени, иначе по нему нельзя фильтровать.
+  version        Int       @default(1)
+
+  entityType     String
+  /// Идентичность MAYA (`Appointment.id`, `Staff.id`, `Client.id`).
+  /// Внешний идентификатор сюда не кладётся никогда.
+  entityId       String
+  /// Порядок в пределах одной сущности. Глобального порядка Maya не обещает.
+  entitySequence Int?
+
+  /// Когда изменилось в бизнесе. Приходит из данных источника.
+  occurredAt     DateTime
+  /// Когда Maya приняла доставку. Совпадающим с `occurredAt` не считается:
+  /// доставки приходят пачками, а между создание и изменением записи проходят
+  /// десятки минут.
+  receivedAt     DateTime  @default(now())
+  /// Когда обработала. Отделено от факта: провал обработки не стирает факт.
+  processedAt    DateTime?
+
+  /// Откуда: `yclients`, `internal_calendar`, `legacy_bot`.
+  source         String
+  /// Как узнали: `webhook` | `reconciliation` | `bootstrap`.
+  ingestionMethod String   @default("webhook")
+  /// Ссылка на сущность у источника. ПРОВЕНАНС, а не идентичность.
+  sourceRef      String?
+  /// `observed_existing` — найдено при первом взгляде на уже работающий салон;
+  /// `after_watch_started` — изменение после начала наблюдения.
+  observation    String    @default("after_watch_started")
+
+  /// Детерминированный отпечаток канонического состояния.
+  /// 🔴 Идентификатора события провайдер не даёт (доказано в Phase A), а один
+  /// timestamp отпечатком не является: два одинаковых чтения обязаны дать один
+  /// ключ, иначе дедупликации нет.
+  dedupFingerprint String
+  /// Минимальный факт, независимый от провайдера. Сырое тело сюда не попадает.
+  payload        Json
+
+  /// `pending` | `processing` | `processed` | `failed` | `dead`.
+  /// Приём и обработка — разные вещи: строка существует уже как принятый факт.
+  status         String    @default("pending")
+  attempts       Int       @default(0)
+  leaseUntil     DateTime?
+  lastError      String?
+
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// Дедупликация живёт в БАЗЕ и переживает перезапуск. Внутри арендатора, а не
+  /// глобально: два салона с одинаковым номером записи не должны подавлять
+  /// друг друга.
+  @@unique([tenantId, dedupFingerprint])
+  @@index([tenantId, entityType, entityId, occurredAt])
+  @@index([status, leaseUntil])
+  @@index([tenantId, type, occurredAt])
+  @@index([tenantId, receivedAt])
+}
+
+/// Доставка, которую Maya приняла, но НЕ ПОНЯЛА.
+///
+/// 🔴 Почему отдельная таблица, а не статус события. У карантина нет ни типа,
+/// ни сущности — значит прочитать его как факт невозможно ПО ПОСТРОЕНИЮ. Пока
+/// смысл доставки неизвестен, доменного события из неё не возникает.
+///
+/// Повод: за неделю 221 доставка (треть потока) не распознавалась вовсе и
+/// выбрасывалась молча.
+model IngestionQuarantine {
+  id            String   @id @default(cuid())
+  /// Может быть НЕ определён: «арендатор не разрешён» — законная причина
+  /// карантина, и запись об этом нужна.
+  tenantId      String?
+  source        String
+  /// Что удалось прочитать о типе доставки (`resource`/`status`), если удалось.
+  discriminator String?
+  /// Детерминированный отпечаток — чтобы повтор не плодил строки.
+  fingerprint   String
+  receivedAt    DateTime @default(now())
+  /// `unknown_discriminator` | `tenant_unresolved` | `malformed` | `unsupported`.
+  reason        String
+  /// МИНИМУМ для разбора: имена полей и типы, неперсональные идентификаторы.
+  /// Ни имени, ни телефона, ни email — контур 152-ФЗ не ослабляется.
+  diagnostic    Json?
+  /// `open` | `explained` | `discarded`.
+  resolution    String   @default("open")
+  /// Срок хранения. Это диагностика, а не история: она обязана истекать.
+  expiresAt     DateTime
+
+  tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([source, fingerprint])
+  @@index([receivedAt])
+  @@index([expiresAt])
+  @@index([tenantId, receivedAt])
+  @@index([resolution, receivedAt])
 }
 
 /// Consent-safe outreach fact used by MAYA Recovered attribution.
