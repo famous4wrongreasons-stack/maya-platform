@@ -100,6 +100,15 @@ export const BOOKED_VALUE_UNAVAILABLE = {
     'the source returned no priced appointment for this period, so there is no booked value to report',
 } as const;
 
+/**
+ * Служебный ключ исходного обзора внутри композиции.
+ *
+ * Строка, а не символ: композиция ездит как обычный JSON между приватными
+ * методами, и символ потерялся бы при первом же копировании через spread.
+ * Двойное подчёркивание — знак «это не часть контракта».
+ */
+const SOURCE_OVERVIEW = '__source_overview';
+
 export type PeriodComparisonMode =
   'none' | 'previous_period' | 'previous_year_same_period';
 
@@ -138,6 +147,28 @@ export interface BusinessStateRequest {
    * этот слой ролей не знает и знать не должен.
    */
   bookedValueAllowed: boolean;
+  /**
+   * Нужен ли исходный операционный обзор.
+   *
+   * 🔴 Просят его только авторизованные первые лица (кабинет владельца).
+   * Модель не просит никогда: в обзоре внешние идентификаторы мастеров.
+   */
+  operationalDetail?: boolean;
+  /**
+   * Повторять ли чтение источника один раз при отказе.
+   *
+   * 🔴 Это НЕ настройка на вкус, а сохранение боевого поведения двух разных
+   * потребителей. Инструмент модели читал с одной повторной попыткой: диалог
+   * переживает лишние 250 мс, а «источник не ответил» посреди разговора стоит
+   * дороже. HTTP-кабинет не повторял никогда: на том конце человек, у запроса
+   * есть таймаут, и удвоенная нагрузка на провайдера в момент его отказа —
+   * худшее, что можно сделать.
+   *
+   * Умолчание `true` — это поведение потребителя, который был первым: при
+   * переносе кабинета сюда повтор приехал бы к нему молча, вместе с чужой
+   * политикой чтения.
+   */
+  retryOnFailure?: boolean;
   /** Кого называть по имени. Решение по роли — вызывающего. */
   disclose: (rows: StaffIdentityRow[]) => StaffDisclosure;
 }
@@ -154,6 +185,15 @@ export interface EmployeeStateRequest {
    * из ответа источника, а не из доверия к параметру.
    */
   nameRows: (rows: StaffIdentityRow[]) => Map<string, string>;
+  /**
+   * Нужен ли исходный операционный обзор — то же решение, что и в срезе салона.
+   *
+   * 🔴 Личный кабинет мастера — такой же авторизованный фронт: он рисует свой
+   * ответ из исходного обзора. Без этого флага `sourceOverview` оставался бы
+   * `null`, и опубликованный контракт `/analytics/me` превратился бы в пустой
+   * объект — тихо, без ошибки.
+   */
+  operationalDetail?: boolean;
 }
 
 /**
@@ -182,6 +222,13 @@ export interface BusinessState {
   availableMetrics: string[];
   limitations: Array<{ key: string; reason: string }>;
   unavailableMetrics: Array<{ key: string; reason: string }>;
+  /**
+   * Исходный операционный обзор для авторизованных первых лиц.
+   *
+   * `null`, если вызывающий его не просил. Наружу к модели не уходит никогда —
+   * это витрина кабинета, а не ответ ассистента.
+   */
+  sourceOverview: unknown;
   /**
    * Ключ соединения строк мастера с данными, которыми канонический слой НЕ
    * владеет, — например с личными планами из настроек владельца.
@@ -231,17 +278,19 @@ export class BusinessStateService {
    * назвать, чего нет и что означает не то, что кажется.
    */
   async business(request: BusinessStateRequest): Promise<BusinessState> {
-    const read = (query: AnalyticsRangeQueryDto) =>
-      this.retryAnalyticsRead(() =>
-        this.readBusinessComposition(
-          {
-            tenantId: request.tenantId,
-            financeAllowed: request.financeAllowed,
-            bookedValueAllowed: request.bookedValueAllowed,
-          },
-          query,
-        ),
+    const composition = (query: AnalyticsRangeQueryDto) =>
+      this.readBusinessComposition(
+        {
+          tenantId: request.tenantId,
+          financeAllowed: request.financeAllowed,
+          bookedValueAllowed: request.bookedValueAllowed,
+        },
+        query,
       );
+    const read = (query: AnalyticsRangeQueryDto) =>
+      request.retryOnFailure === false
+        ? composition(query)
+        : this.retryAnalyticsRead(() => composition(query));
     const [currentInternal, previousInternal] = await Promise.all([
       read(request.period),
       request.comparisonPeriod
@@ -292,6 +341,7 @@ export class BusinessStateService {
       {
         comparisonMode: request.comparisonMode,
         personal: true,
+        operationalDetail: request.operationalDetail,
         disclose: (rows) => ({
           names: request.nameRows(rows),
           allowedExternalIds: allowed,
@@ -330,6 +380,7 @@ export class BusinessStateService {
       disclose: (rows: StaffIdentityRow[]) => StaffDisclosure;
       financeAllowed?: boolean;
       bookedValueAllowed?: boolean;
+      operationalDetail?: boolean;
       /**
        * 🔴 Личный срез считает СВОИ метрики. Слово «выручка» у мастера значит
        * не то же, что у салона: касса конкретного человека провайдером не
@@ -401,6 +452,9 @@ export class BusinessStateService {
           request.comparisonMode,
         ),
       ],
+      sourceOverview: request.operationalDetail
+        ? this.record(currentInternal)[SOURCE_OVERVIEW]
+        : null,
       staffJoin: this.staffJoin(currentInternal, current, disclosure),
       unavailableParts: {
         bookedValue: this.bookedValueUnavailableMetrics(
@@ -573,7 +627,21 @@ export class BusinessStateService {
         : Promise.resolve(null),
     ]);
     const overview = this.record(overviewValue);
-    const operational = this.safeAnalytics(overview);
+    /**
+     * 🔴 Cycle 04 P3. Исходный обзор едет вместе с композицией — для первых лиц.
+     *
+     * Кабинет показывает то, чего модель не видит и видеть не должна: внешние
+     * идентификаторы мастеров и цены журнала в разрезе мастера. Это не «менее
+     * строгий» ответ, а ДРУГОЙ потребитель: авторизованный кабинет владельца
+     * против языковой модели. Вычисление при этом одно — витрины разные.
+     *
+     * Поле служебное и в опубликованный срез не попадает: `publishAnalytics`
+     * снимает его первым делом, рядом с внешним идентификатором сотрудника.
+     */
+    const operational = {
+      ...this.safeAnalytics(overview),
+      [SOURCE_OVERVIEW]: overview,
+    };
     /**
      * 🔴 Cycle 04 P2. Стоимость записанного живёт в СОБСТВЕННОМ поле.
      *
@@ -886,16 +954,19 @@ export class BusinessStateService {
     actor: { tenantId: string; userId: string },
     query: AnalyticsRangeQueryDto,
   ) {
-    const internal = this.safeAnalytics(
-      await this.employeeOperationalOverview(
-        actor.tenantId,
-        actor.userId,
-        query,
-      ),
+    const overview = await this.employeeOperationalOverview(
+      actor.tenantId,
+      actor.userId,
+      query,
     );
+    const internal = this.safeAnalytics(overview);
     // Стоимость записанного — собственным полем и здесь: одно имя на всю
     // систему, а не «в этой ветке можно и из revenue».
-    const composition = { ...internal, booked_value: internal.revenue };
+    const composition = {
+      ...internal,
+      booked_value: internal.revenue,
+      [SOURCE_OVERVIEW]: overview,
+    };
     return this.withStaffSalary(
       composition,
       await this.employeeSalaryScope(actor.tenantId, query, composition),
@@ -1245,6 +1316,9 @@ export class BusinessStateService {
     const data = this.record(value);
     const published: Record<string, unknown> = { ...data };
     delete published.employee_external_id;
+    // Служебный исходный обзор наружу не уходит НИКОГДА: в нём внешние
+    // идентификаторы мастеров и цены журнала в их разрезе.
+    delete published[SOURCE_OVERVIEW];
     if (data.finance !== undefined) {
       published.finance = this.publishedFinance(data.finance);
     }

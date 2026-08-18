@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AdminModule } from './admin/admin.module';
 import { AiToolsModule } from './ai-tools/ai-tools.module';
+import { AnalyticsHttpModule } from './analytics/analytics-http.module';
 import { OperationsAnalyticsModule } from './analytics/operations-analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -91,6 +92,7 @@ import { SystemMetricsService } from './system-metrics.service';
     OnboardingModule,
     AdminModule,
     OperationsAnalyticsModule,
+    AnalyticsHttpModule,
     RecoveryModule,
     AiToolsModule,
   ],

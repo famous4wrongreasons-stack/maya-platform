@@ -10,6 +10,12 @@
  * Эталон ниже снят прогоном ЭТОЙ ЖЕ фикстуры на рабочем дереве HEAD (коммит
  * ec3a5802, до появления честной прибыли), а не написан руками.
  */
+import { BusinessStateService } from '../business-state/business-state.service';
+import {
+  withLegacyNet,
+  withoutFactDiagnostics,
+  withoutOperationalStatusBuckets,
+} from './cabinet-overview.presenter';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { CalendarSource } from '../common/domain.enums';
@@ -127,21 +133,51 @@ function createService(calendarSource: CalendarSource) {
     getRevenueSummary: jest.fn(),
   } as unknown as CrmService;
 
-  return {
+  const service = new OperationsAnalyticsService(
+    prisma,
     tenantContext,
-    service: new OperationsAnalyticsService(
-      prisma,
-      tenantContext,
-      { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
-      crmService,
-      {
-        encrypt: (value: string) => `enc:${value}`,
-        decrypt: (value: string) => value,
-      } as EncryptionService,
-      new AppointmentPeriodReader(crmService),
-      new AttendanceFactsService(prisma, tenantContext),
-    ),
+    { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
+    crmService,
+    {
+      encrypt: (value: string) => `enc:${value}`,
+      decrypt: (value: string) => value,
+    } as EncryptionService,
+    new AppointmentPeriodReader(crmService),
+    new AttendanceFactsService(prisma, tenantContext),
+  );
+  const businessState = new BusinessStateService(service, prisma);
+
+  /**
+   * 🔴 Cycle 04 P3. Тот же путь, которым теперь идёт HTTP-кабинет.
+   *
+   * Раньше здесь звался собственный метод сервиса аналитики. Теперь факты
+   * приходят от канонического владельца, а совместимость контракта делает
+   * презентер на HTTP-краю — ровно как в контроллере.
+   */
+  const cabinetOverview = async () => {
+    const state = await businessState.business({
+      tenantId: 'tenant-a',
+      period: july,
+      comparisonMode: 'none',
+      comparisonPeriod: null,
+      financeAllowed: false,
+      bookedValueAllowed: false,
+      operationalDetail: true,
+      disclose: () => ({
+        names: new Map<string, string>(),
+        allowedExternalIds: new Set<string>(),
+      }),
+    });
+    return withLegacyNet(
+      withoutOperationalStatusBuckets(
+        withoutFactDiagnostics(
+          state.sourceOverview as Parameters<typeof withLegacyNet>[0],
+        ),
+      ),
+    );
   };
+
+  return { tenantContext, service, cabinetOverview };
 }
 
 describe('/analytics/business — контракт кабинета', () => {
@@ -149,7 +185,7 @@ describe('/analytics/business — контракт кабинета', () => {
     const setup = createService(CalendarSource.INTERNAL);
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getBusinessOverviewForCabinet('tenant-a', july),
+      setup.cabinetOverview(),
     );
 
     // Побайтово: не только значения, но и состав ключей и их порядок. Лишний
@@ -169,7 +205,7 @@ describe('/analytics/business — контракт кабинета', () => {
 
     const result = (await setup.tenantContext.runAsSystemTenant(
       'tenant-a',
-      () => setup.service.getBusinessOverviewForCabinet('tenant-a', july),
+      () => setup.cabinetOverview(),
     )) as Record<string, unknown>;
 
     expect(Object.keys(result)).not.toContain('net_status');
