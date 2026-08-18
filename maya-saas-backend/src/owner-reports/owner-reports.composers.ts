@@ -269,27 +269,44 @@ export function composeDailyReport(input: { facts: BriefFacts }): {
 
   const accrued = facts.payroll.accruedTotalKopecks;
   if (facts.payroll.rows.length > 0) {
+    /**
+     * 🔴 Три разных класса строк, и ни один не выбрасывается молча.
+     *
+     * Поимённо звучат только начисления: это то, ради чего список и читают.
+     * Измеренные нули и строки, по которым расчёт не пришёл, сворачиваются в
+     * счётчики — но остаются ВИДИМЫМИ. Отфильтровать вторые (а именно это
+     * делал старый отчёт) значит выдать «не посчитали» за «не начислили»;
+     * печатать первые поимённо — залить владельца нулями, среди которых он
+     * перестанет замечать настоящие строки.
+     */
+    const paid = facts.payroll.rows.filter(
+      (row) => row.measured && (row.accruedKopecks ?? 0) > 0,
+    );
+    const zero = facts.payroll.rows.filter(
+      (row) => row.measured && (row.accruedKopecks ?? 0) === 0,
+    );
+    const unknown = facts.payroll.rows.filter((row) => !row.measured);
+
     lines.push('Зарплаты (смена):');
-    const shown = facts.payroll.rows.slice(0, 12);
+    const shown = paid.slice(0, 12);
     for (const row of shown) {
-      /**
-       * 🔴 Три разных строки, а не одна отфильтрованная.
-       *
-       * «Не посчитано» — это не «ноль», и мастер, по которому CRM не отдала
-       * расчёт, обязан остаться видимым: иначе список зарплат выглядит полным,
-       * а сумма строк не сходится с итогом без единого слова объяснения.
-       */
+      lines.push(`• ${row.name}: ${formatRubFromKopecks(row.accruedKopecks)}`);
+    }
+    // Обрезка списка обязана быть видимой: молча укороченный список выглядит
+    // как команда, которой ничего не начислили.
+    if (paid.length > shown.length) {
       lines.push(
-        row.measured
-          ? `• ${row.name}: ${formatRubFromKopecks(row.accruedKopecks ?? 0)}`
-          : `• ${row.name}: расчёт не пришёл из CRM — сумма неизвестна`,
+        `…и ещё ${paid.length - shown.length} мастеров с начислениями — список сокращён.`,
       );
     }
-    // Обрезка списка обязана быть видимой: молча укороченная команда выглядит
-    // как команда, которой ничего не начислили.
-    if (facts.payroll.rows.length > shown.length) {
+    if (zero.length > 0) {
       lines.push(
-        `…и ещё ${facts.payroll.rows.length - shown.length} мастеров — список сокращён.`,
+        `Ещё ${zero.length} мастер(ов) со смены: начислено 0 ₽ — это измерено, а не пропущено.`,
+      );
+    }
+    if (unknown.length > 0) {
+      lines.push(
+        `По ${unknown.length} мастер(ам) расчёт из CRM не пришёл — их суммы неизвестны, и в итоге ниже их нет.`,
       );
     }
     if (accrued !== null) {

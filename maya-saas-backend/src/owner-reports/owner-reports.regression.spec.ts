@@ -383,7 +383,8 @@ describe('P4 — находки состязательной проверки', 
 
     // Мастер, которому CRM не посчитала смену, и мастер, которому начислили
     // ноль, — разные новости. Отфильтровать первого значит соврать вторым.
-    expect(out.evening.bodyText).toContain('расчёт не пришёл из CRM');
+    expect(out.evening.bodyText).toContain('расчёт из CRM не пришёл');
+    expect(out.evening.bodyText).toContain('По 1 мастер');
     expect(out.facts.payroll.rows).toHaveLength(2);
     expect(out.facts.payroll.rows[1].measured).toBe(false);
   });
@@ -412,7 +413,10 @@ describe('P4 — находки состязательной проверки', 
     });
 
     expect(out.facts.payroll.rows[0].accruedKopecks).toBe(0);
-    expect(out.evening.bodyText).toMatch(/Илья: 0/);
+    // Измеренный ноль остаётся видимым, но не поимённой строкой: иначе
+    // владельца заливает нулями, среди которых теряются настоящие суммы.
+    expect(out.evening.bodyText).toContain('начислено 0 ₽ — это измерено');
+    expect(out.evening.bodyText).not.toMatch(/• Илья/);
   });
 
   it('🔴 частичная сверка присутствия не выдаётся за отсутствие сверки', async () => {

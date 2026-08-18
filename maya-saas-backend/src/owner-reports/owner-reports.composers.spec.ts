@@ -111,8 +111,8 @@ describe('owner-reports composers', () => {
           status: 'available',
           accruedTotalKopecks: 1_538_000,
           rows: [
-            { name: 'Илья', accruedKopecks: 1_248_000 },
-            { name: 'Алексей', accruedKopecks: 290_000 },
+            { name: 'Илья', accruedKopecks: 1_248_000, measured: true },
+            { name: 'Алексей', accruedKopecks: 290_000, measured: true },
           ],
         },
       }),
