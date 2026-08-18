@@ -435,6 +435,9 @@ const canonicalResult = async (scenario: Scenario, withPrevious: boolean) => {
       ? { from: PREVIOUS.from, to: PREVIOUS.to }
       : null,
     financeAllowed: FINANCE_ROLES.has(scenario.role),
+    // Право на операционный факт шире права на кассу: тот же список, что
+    // допущен к бизнес-разрезу.
+    bookedValueAllowed: NAMED_STAFF_ROLES.has(scenario.role),
     disclose: discloseFor(scenario.role),
   });
 };
@@ -802,6 +805,7 @@ describe('🔴 P1 — то, что нашли скептики: боевое п�
       comparisonMode: 'none',
       comparisonPeriod: null,
       financeAllowed: true,
+      bookedValueAllowed: true,
       disclose: () => ({ names: new Map(), allowedExternalIds: null }),
     });
 
@@ -878,6 +882,7 @@ describe('🔴 P2 §9 — выручка и стоимость записанн�
     bookedKopecks?: number | null;
     financeKopecks?: number | null | 'throws';
     financeAllowed?: boolean;
+    bookedValueAllowed?: boolean;
     completeness?: 'complete' | 'incomplete';
     outOfPeriodDiscarded?: number;
   }) => {
@@ -927,11 +932,12 @@ describe('🔴 P2 §9 — выручка и стоимость записанн�
         comparisonMode: 'none',
         comparisonPeriod: null,
         financeAllowed: options.financeAllowed ?? true,
+        bookedValueAllowed: options.bookedValueAllowed ?? true,
         disclose: () => ({ names: new Map(), allowedExternalIds: null }),
       });
   };
 
-  it('🔴 боевой случай: касса больше НИКОГДА не попадает в записанное', async () => {
+  it('🔴 боевой случай: два факта, две величины, два основания', async () => {
     const state = await build({
       bookedKopecks: PRODUCTION_CASE.bookedKopecks,
       financeKopecks: PRODUCTION_CASE.tillKopecks,
@@ -941,15 +947,14 @@ describe('🔴 P2 §9 — выручка и стоимость записанн�
       PRODUCTION_CASE.tillKopecks,
     );
     expect(state.metrics.revenue_basis).toBe('provider_transactions');
-    // Главное утверждение пакета: поле записанного не содержит кассу.
-    expect(state.metrics.booked_value_amount_kopecks).not.toBe(
-      PRODUCTION_CASE.tillKopecks,
+    expect(state.metrics.booked_value_amount_kopecks).toBe(
+      PRODUCTION_CASE.bookedKopecks,
     );
-    expect(state.metrics.booked_value_amount_kopecks).toBeNull();
-    expect(state.metrics.booked_value_basis).toBe('unavailable');
-    // И пустота названа причиной, а не молчит.
-    expect(state.unavailableMetrics.map((entry) => entry.key)).toContain(
-      'booked_value',
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    // Главное утверждение пакета: величины разные, и ни одна не выдаёт себя
+    // за другую.
+    expect(state.metrics.booked_value_amount_kopecks).not.toBe(
+      state.metrics.revenue_amount_kopecks,
     );
   });
 
@@ -981,15 +986,18 @@ describe('🔴 P2 §9 — выручка и стоимость записанн�
     expect(state.financeVerified).toBe(false);
   });
 
-  it('🔴 источник денег не ответил: записанное кассой не подменяется', async () => {
+  it('🔴 кассы нет, записанное есть: одно не подменяет другое', async () => {
     const state = await build({
       bookedKopecks: 61_250_000,
       financeKopecks: 'throws',
     })();
 
+    // Отсутствие выручки не удаляет стоимость записанного…
+    expect(state.metrics.booked_value_amount_kopecks).toBe(61_250_000);
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    // …а наличие записанного не делает выручку доступной.
     expect(state.metrics.revenue_amount_kopecks).toBeNull();
     expect(state.metrics.revenue_basis).toBe('unavailable');
-    expect(state.metrics.booked_value_amount_kopecks).toBeNull();
   });
 
   it('🔴 деньги есть, а источник записей прочитан неполно', async () => {
@@ -1065,18 +1073,33 @@ describe('🔴 P2 §9 — выручка и стоимость записанн�
     ).toBe(3);
   });
 
-  it('🔴 у арендатора на CRM записанное недоступно ПО РЕШЕНИЮ, а не по ошибке', async () => {
+  it('🔴 роль без разрешения не получает факт, и это сказано', async () => {
     const state = await build({
       bookedKopecks: 61_250_000,
       financeKopecks: 60_105_000,
+      bookedValueAllowed: false,
     })();
 
+    expect(state.metrics.booked_value_amount_kopecks).toBeNull();
+    expect(state.metrics.booked_value_basis).toBe('unavailable');
     const reason = state.unavailableMetrics.find(
       (entry) => entry.key === 'booked_value',
     )?.reason;
-    // Причина обязана называть решение, а не изображать отсутствие данных:
-    // суммы цен журнала посчитаны, но у CRM-арендатора деньгами не признаются.
-    expect(reason).toMatch(/disclosure decision/);
-    expect(reason).toMatch(/not a missing computation/);
+    // Причина называет РЕШЕНИЕ вызывающего, а не изображает отсутствие данных.
+    expect(reason).toMatch(/not permitted/);
+  });
+
+  it('🔴 роль с разрешением получает факт под своим именем', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 60_105_000,
+      bookedValueAllowed: true,
+    })();
+
+    expect(state.metrics.booked_value_amount_kopecks).toBe(61_250_000);
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    expect(state.unavailableMetrics.map((entry) => entry.key)).not.toContain(
+      'booked_value',
+    );
   });
 });

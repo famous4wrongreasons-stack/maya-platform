@@ -199,6 +199,21 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
           ? metrics.revenue_basis
           : null,
       revenue_caption: revenueCaption,
+      /**
+       * 🔴 Cycle 04 P2.1. Стоимость записанного — СВОЁ поле и СВОЯ подпись.
+       *
+       * Запасной путь выше остаётся ради арендатора на внутреннем календаре, у
+       * которого другого понятия денег нет, — но подпись там прямо говорит,
+       * что это не касса. Здесь величина названа своим именем и не претендует
+       * ни на «выручку», ни на «получено», ни на «заработано».
+       */
+      booked_value_rub: bookedValue,
+      booked_value_caption:
+        bookedValue === null ? null : 'Стоимость записанного',
+      booked_value_basis:
+        typeof metrics.booked_value_basis === 'string'
+          ? metrics.booked_value_basis
+          : null,
       appointments: metricNumber(metrics.appointments_total),
       unique_clients: metricNumber(metrics.unique_clients),
       clients_new: metricNumber(metrics.clients_new),

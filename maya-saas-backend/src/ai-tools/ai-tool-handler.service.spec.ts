@@ -1131,7 +1131,29 @@ describe('AiToolHandlerService output minimization', () => {
     expect(JSON.stringify(result)).not.toContain('Антон');
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
     expect(JSON.stringify(result)).not.toContain('crm-service-1');
-    expect(JSON.stringify(result)).not.toContain('9999999');
+    /**
+     * 🔴 Cycle 04 P2.1. Правило переформулировано, а не ослаблено.
+     *
+     * Раньше тест запрещал сумме цен журнала появляться в ответе ВООБЩЕ — так
+     * обеспечивался инвариант «цены журнала не маскируются под кассу», потому
+     * что оба числа жили в одном поле. P2 развёл их физически, и инвариант
+     * теперь обеспечивается адресно: цены журнала не имеют права оказаться в
+     * выручке, но имеют право быть названы своим именем.
+     *
+     * Что запрещено: `bookedValue → revenue`.
+     * Что разрешено: `bookedValue → booked_value` с основанием `booked_prices`.
+     */
+    const answer = result as Record<string, unknown>;
+    const metrics = answer.metrics as Record<string, unknown>;
+    const current = answer.current as Record<string, unknown>;
+    expect(metrics.revenue_amount_kopecks).not.toBe(9_999_999);
+    expect(metrics.revenue_basis).not.toBe('booked_prices');
+    expect(JSON.stringify(current.revenue)).not.toContain('9999999');
+    expect(JSON.stringify(current.staff_summary)).not.toContain('9999999');
+    expect(JSON.stringify(current.service_summary)).not.toContain('9999999');
+    // Под своим именем — можно, и основание обязано быть однозначным.
+    expect(metrics.booked_value_amount_kopecks).toBe(9_999_999);
+    expect(metrics.booked_value_basis).toBe('booked_prices');
     expect(getBusinessFinance).toHaveBeenCalledWith('tenant-a', {
       from: '2026-07-01T00:00:00.000Z',
       to: '2026-07-31T23:59:59.999Z',
@@ -1980,14 +2002,22 @@ describe('AiToolHandlerService output minimization', () => {
       'execution-no-till',
     );
 
+    /**
+     * 🔴 Cycle 04 P2.1. Инвариант тот же, механизм другой.
+     *
+     * Кассы нет — числа выручки нет, и журнальные 9 000 000 на её место НЕ
+     * встают: основание честно говорит `unavailable`, а не `booked_prices`.
+     * Раньше это обеспечивалось полным сокрытием суммы; теперь — тем, что у
+     * стоимости записанного своё имя и своё основание. Запрещено
+     * `bookedValue → revenue`; разрешено `bookedValue → booked_value`.
+     */
     expect(result).toMatchObject({
       finance_verified: false,
       metrics: {
-        // Кассы нет — числа выручки нет. И журнальные 9 000 000 на её место
-        // не встают: у арендатора на CRM деньгами считается только касса.
         revenue_amount_kopecks: null,
-        booked_value_amount_kopecks: null,
         revenue_basis: 'unavailable',
+        booked_value_amount_kopecks: 9_000_000,
+        booked_value_basis: 'booked_prices',
       },
     });
     jest.useRealTimers();
@@ -2286,7 +2316,29 @@ describe('AiToolHandlerService output minimization', () => {
       service_summary: [{ name: 'Борода', appointments: 8, booked_value: [] }],
     });
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
-    expect(JSON.stringify(result)).not.toContain('9999999');
+    /**
+     * 🔴 Cycle 04 P2.1. Правило переформулировано, а не ослаблено.
+     *
+     * Раньше тест запрещал сумме цен журнала появляться в ответе ВООБЩЕ — так
+     * обеспечивался инвариант «цены журнала не маскируются под кассу», потому
+     * что оба числа жили в одном поле. P2 развёл их физически, и инвариант
+     * теперь обеспечивается адресно: цены журнала не имеют права оказаться в
+     * выручке, но имеют право быть названы своим именем.
+     *
+     * Что запрещено: `bookedValue → revenue`.
+     * Что разрешено: `bookedValue → booked_value` с основанием `booked_prices`.
+     */
+    const answer = result;
+    const metrics = answer.metrics as Record<string, unknown>;
+    const current = answer.current as Record<string, unknown>;
+    expect(metrics.revenue_amount_kopecks).not.toBe(9_999_999);
+    expect(metrics.revenue_basis).not.toBe('booked_prices');
+    expect(JSON.stringify(current.revenue)).not.toContain('9999999');
+    expect(JSON.stringify(current.staff_summary)).not.toContain('9999999');
+    expect(JSON.stringify(current.service_summary)).not.toContain('9999999');
+    // Под своим именем — можно, и основание обязано быть однозначным.
+    expect(metrics.booked_value_amount_kopecks).toBe(9_999_999);
+    expect(metrics.booked_value_basis).toBe('booked_prices');
   });
 
   it('publishes client cohorts as metrics and compares them between periods', async () => {
@@ -2555,7 +2607,29 @@ describe('AiToolHandlerService output minimization', () => {
       ],
     });
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
-    expect(JSON.stringify(result)).not.toContain('9999999');
+    /**
+     * 🔴 Cycle 04 P2.1. Правило переформулировано, а не ослаблено.
+     *
+     * Раньше тест запрещал сумме цен журнала появляться в ответе ВООБЩЕ — так
+     * обеспечивался инвариант «цены журнала не маскируются под кассу», потому
+     * что оба числа жили в одном поле. P2 развёл их физически, и инвариант
+     * теперь обеспечивается адресно: цены журнала не имеют права оказаться в
+     * выручке, но имеют право быть названы своим именем.
+     *
+     * Что запрещено: `bookedValue → revenue`.
+     * Что разрешено: `bookedValue → booked_value` с основанием `booked_prices`.
+     */
+    const answer = result;
+    const metrics = answer.metrics as Record<string, unknown>;
+    const current = answer.current as Record<string, unknown>;
+    expect(metrics.revenue_amount_kopecks).not.toBe(9_999_999);
+    expect(metrics.revenue_basis).not.toBe('booked_prices');
+    expect(JSON.stringify(current.revenue)).not.toContain('9999999');
+    expect(JSON.stringify(current.staff_summary)).not.toContain('9999999');
+    expect(JSON.stringify(current.service_summary)).not.toContain('9999999');
+    // Под своим именем — можно, и основание обязано быть однозначным.
+    expect(metrics.booked_value_amount_kopecks).toBe(9_999_999);
+    expect(metrics.booked_value_basis).toBe('booked_prices');
   });
 
   it('hides the named master breakdown from a role that only manages itself', async () => {

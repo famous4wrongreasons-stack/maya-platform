@@ -90,9 +90,15 @@ const NEVER_AVAILABLE_METRICS: ReadonlyArray<{ key: string; reason: string }> =
     },
   ];
 
-/** Почему стоимости записанного нет у арендатора на внешней CRM. */
-export const BOOKED_VALUE_UNAVAILABLE_CRM =
-  'the AI layer does not publish journal price sums for a CRM tenant: money there is recognised only through the financial contour (fail-closed, P7.1). This is a disclosure decision, not a missing computation';
+/** Почему стоимости записанного может не быть. Машинные коды, а не текст. */
+export const BOOKED_VALUE_UNAVAILABLE = {
+  /** Вызывающий не имеет права показывать этот операционный факт. */
+  notPermitted:
+    'booked_value is an operational fact and the caller is not permitted to see it for this request',
+  /** Источник не дал ни одной записи с ценой за период. */
+  noPricedRecords:
+    'the source returned no priced appointment for this period, so there is no booked value to report',
+} as const;
 
 export type PeriodComparisonMode =
   'none' | 'previous_period' | 'previous_year_same_period';
@@ -123,6 +129,15 @@ export interface BusinessStateRequest {
   comparisonPeriod: AnalyticsRangeQueryDto | null;
   /** Разрешено ли читать денежный контур. Решение по роли — вызывающего. */
   financeAllowed: boolean;
+  /**
+   * Разрешено ли показывать стоимость записанного.
+   *
+   * 🔴 Отдельное решение, а не следствие денежного. Стоимость записанного —
+   * ОПЕРАЦИОННЫЙ факт: это не касса и не выручка, а сумма цен того, что стоит
+   * в журнале. Право на неё шире права на кассу, и решает его вызывающий —
+   * этот слой ролей не знает и знать не должен.
+   */
+  bookedValueAllowed: boolean;
   /** Кого называть по имени. Решение по роли — вызывающего. */
   disclose: (rows: StaffIdentityRow[]) => StaffDisclosure;
 }
@@ -222,6 +237,7 @@ export class BusinessStateService {
           {
             tenantId: request.tenantId,
             financeAllowed: request.financeAllowed,
+            bookedValueAllowed: request.bookedValueAllowed,
           },
           query,
         ),
@@ -313,6 +329,7 @@ export class BusinessStateService {
       comparisonMode: PeriodComparisonMode;
       disclose: (rows: StaffIdentityRow[]) => StaffDisclosure;
       financeAllowed?: boolean;
+      bookedValueAllowed?: boolean;
       /**
        * 🔴 Личный срез считает СВОИ метрики. Слово «выручка» у мастера значит
        * не то же, что у салона: касса конкретного человека провайдером не
@@ -386,14 +403,20 @@ export class BusinessStateService {
       ],
       staffJoin: this.staffJoin(currentInternal, current, disclosure),
       unavailableParts: {
-        bookedValue: this.bookedValueUnavailableMetrics(current),
+        bookedValue: this.bookedValueUnavailableMetrics(
+          current,
+          request.bookedValueAllowed !== false,
+        ),
         cohorts: this.clientCohortUnavailableMetrics(current),
         attendance: this.attendanceUnavailableMetrics(current),
         staffMoney: this.staffMoneyUnavailableMetrics(current),
         neverAvailable: request.personal ? [] : NEVER_AVAILABLE_METRICS,
       },
       unavailableMetrics: [
-        ...this.bookedValueUnavailableMetrics(current),
+        ...this.bookedValueUnavailableMetrics(
+          current,
+          request.bookedValueAllowed !== false,
+        ),
         ...this.clientCohortUnavailableMetrics(current),
         ...this.attendanceUnavailableMetrics(current),
         ...this.staffMoneyUnavailableMetrics(current),
@@ -493,18 +516,22 @@ export class BusinessStateService {
    * возникало вовсе. Теперь оно честно пусто у CRM-арендатора, и молчать об
    * этом нельзя: пустота без причины читается как «записанного не было».
    */
-  private bookedValueUnavailableMetrics(value: unknown) {
+  private bookedValueUnavailableMetrics(value: unknown, permitted: boolean) {
     const data = this.record(value);
-    if (data.data_source !== 'crm') {
-      return [];
-    }
     const bookedValue = Array.isArray(data.booked_value)
       ? data.booked_value
       : [];
     if (bookedValue.length > 0) {
       return [];
     }
-    return [{ key: 'booked_value', reason: BOOKED_VALUE_UNAVAILABLE_CRM }];
+    return [
+      {
+        key: 'booked_value',
+        reason: permitted
+          ? BOOKED_VALUE_UNAVAILABLE.noPricedRecords
+          : BOOKED_VALUE_UNAVAILABLE.notPermitted,
+      },
+    ];
   }
 
   /** Идентичности мастеров периода — вход для решения о раскрытии имён. */
@@ -519,7 +546,11 @@ export class BusinessStateService {
 
   /** Тоже промежуточное представление — см. readAnalytics. */
   private async readBusinessComposition(
-    actor: { tenantId: string; financeAllowed: boolean },
+    actor: {
+      tenantId: string;
+      financeAllowed: boolean;
+      bookedValueAllowed: boolean;
+    },
     query: AnalyticsRangeQueryDto,
   ) {
     const tenant = await this.prisma.tenant.findUnique({
@@ -578,19 +609,19 @@ export class BusinessStateService {
       ...operational,
       revenue: [],
       /**
-       * 🔴 У арендатора на внешней CRM стоимость записанного НЕ публикуется.
+       * 🔴 Стоимость записанного публикуется по решению ВЫЗЫВАЮЩЕГО.
        *
-       * Это не побочный эффект, а действующее решение P7.1, охраняемое тремя
-       * тестами: суммы цен журнала не выходят из этого слоя в ответе
-       * CRM-арендатора вовсе — деньгами там признаётся только кассовый контур.
+       * P7.1 прятал её целиком, и на то была причина: цены журнала маскировались
+       * под кассу, потому что жили в одном поле с ней. Правило, ради которого
+       * это делалось, никуда не делось — но теперь оно обеспечено иначе.
+       * P2 развёл два факта физически: у каждого своё имя и своё основание, и
+       * попасть в `revenue` цены журнала больше не могут ни при каком порядке
+       * вызовов. Полное сокрытие перестало быть необходимым для инварианта.
        *
-       * P2 снимает ДВУСМЫСЛЕННОСТЬ: касса больше никогда не окажется в поле
-       * стоимости записанного. Вопрос «показывать ли записанное CRM-арендатору
-       * вообще» — отдельное решение о раскрытии денег, и принимать его молча
-       * внутри пакета о разделении полей было бы подменой. Пока — как было:
-       * недоступно, и сказано почему.
+       * Это НЕ возврат старого поведения. Это отдельный операционный факт с
+       * однозначной семантикой: `booked_value` с основанием `booked_prices`.
        */
-      booked_value: [],
+      booked_value: actor.bookedValueAllowed ? bookedValue : [],
       expenses: [],
       net: [],
       average_ticket: [],

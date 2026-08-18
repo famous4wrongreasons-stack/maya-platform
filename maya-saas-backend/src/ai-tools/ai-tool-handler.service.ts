@@ -97,6 +97,27 @@ const SCHEDULE_MANAGER_ROLES = new Set<UserRole>([
  * когда-нибудь бизнес-аналитику откроют мастеру, имена коллег не поедут
  * вместе с ней.
  */
+/**
+ * Кому показывать СТОИМОСТЬ ЗАПИСАННОГО.
+ *
+ * 🔴 Это не касса и не выручка: сумма цен того, что стоит в журнале. Право на
+ * неё совпадает с правом на бизнес-разрез — тот же список, что охраняет
+ * `/analytics/business` в кабинете, плюс руководитель филиала, который в
+ * разрезе мастеров уже есть.
+ *
+ * Отдельная константа, а не переиспользование денежного списка: сложить их
+ * значило бы снова связать два факта, которые P2 развёл.
+ */
+const BOOKED_VALUE_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.ACCOUNTANT,
+]);
+
 const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
@@ -2580,6 +2601,7 @@ export class AiToolHandlerService {
         comparisonMode: 'none',
         comparisonPeriod: null,
         financeAllowed: CRM_FINANCE_ROLES.has(principal.role),
+        bookedValueAllowed: BOOKED_VALUE_ROLES.has(principal.role),
         disclose: (rows) => this.businessDisclosure(principal, rows),
       }),
       this.prisma.dashboardPreference.findUnique({
@@ -2875,6 +2897,13 @@ export class AiToolHandlerService {
       comparisonMode: comparison as PeriodComparisonMode,
       comparisonPeriod: previousQuery,
       financeAllowed: CRM_FINANCE_ROLES.has(principal.role),
+      /**
+       * 🔴 Стоимость записанного — ОПЕРАЦИОННЫЙ факт, и право на неё шире
+       * права на кассу: это сумма цен того, что стоит в журнале, а не деньги
+       * салона. Решение принимается здесь, по той же роли, по которой уже
+       * решается доступ к бизнес-разрезу; канонический слой ролей не знает.
+       */
+      bookedValueAllowed: BOOKED_VALUE_ROLES.has(principal.role),
       disclose: (rows) => this.businessDisclosure(principal, rows),
     });
 

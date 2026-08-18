@@ -375,3 +375,63 @@ describe('🔴 Cycle 04 P0 — карточка не выдаёт нижнюю �
     expect(card?.widget_data.status_text).toBeNull();
   });
 });
+
+describe('🔴 Cycle 04 P2.1 — стоимость записанного названа своим именем', () => {
+  const toolResult = (over: {
+    revenue?: number | null;
+    booked?: number | null;
+  }) => ({
+    verified: true,
+    current: {
+      data_source: 'crm',
+      completeness: { appointments: { status: 'complete', reason: null } },
+      finance: { revenue: {} },
+      staff_summary: [],
+    },
+    metrics: {
+      appointments_total: 10,
+      unique_clients: 8,
+      revenue_amount_kopecks: over.revenue ?? null,
+      booked_value_amount_kopecks: over.booked ?? null,
+      booked_value_basis: over.booked == null ? 'unavailable' : 'booked_prices',
+      revenue_basis:
+        over.revenue == null ? 'unavailable' : 'provider_transactions',
+    },
+    limitations: [],
+  });
+
+  const card = (over: { revenue?: number | null; booked?: number | null }) =>
+    buildChatReportCard(
+      [{ name: 'analytics.business.query', result: toolResult(over) }],
+      { personal: false, userText: 'сколько выручки' },
+    );
+
+  it('🔴 подпись говорит «стоимость записанного», а не «выручка»', () => {
+    const built = card({ revenue: 6_010_500_0, booked: 6_125_000_0 });
+
+    expect(built?.widget_data.booked_value_caption).toBe(
+      'Стоимость записанного',
+    );
+    expect(built?.widget_data.booked_value_basis).toBe('booked_prices');
+    // Ни одно из запрещённых слов рядом с этой величиной.
+    const caption = String(built?.widget_data.booked_value_caption);
+    expect(caption).not.toMatch(/выручк|касс|получен|заработа|подтверждённ/i);
+  });
+
+  it('🔴 два факта показаны раздельно и не подменяют друг друга', () => {
+    const built = card({ revenue: 60_105_000, booked: 61_250_000 });
+
+    expect(built?.widget_data.revenue_rub).toBe(601_050);
+    expect(built?.widget_data.booked_value_rub).toBe(612_500);
+    expect(built?.widget_data.revenue_basis).toBe('provider_transactions');
+  });
+
+  it('кассы нет — записанное остаётся под своим именем', () => {
+    const built = card({ revenue: null, booked: 61_250_000 });
+
+    expect(built?.widget_data.booked_value_rub).toBe(612_500);
+    expect(built?.widget_data.booked_value_caption).toBe(
+      'Стоимость записанного',
+    );
+  });
+});
