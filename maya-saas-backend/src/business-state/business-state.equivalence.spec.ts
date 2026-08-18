@@ -360,6 +360,63 @@ const P2_CHANGED_METRICS = [
 /** Позиция, которой в эталоне не было: раньше пустота молчала. */
 const P2_ADDED_UNAVAILABLE = 'booked_value';
 
+/**
+ * 🔴 Что Cycle 04 P4 ДОБАВИЛ намеренно.
+ *
+ * Утренний бриф показывал владельцу среднюю цену записи из журнала под именем
+ * «средний чек» — то есть выдавал стоимость записанного за полученные деньги.
+ * Считать её в тексте отчёта нельзя (это арифметика над деньгами), поэтому
+ * величина получила собственное имя и собственное основание рядом с суммой
+ * записанного. Ни одно старое поле при этом не изменилось: позиция НОВАЯ, и
+ * проверяется она отдельно — эталон о ней знать не может.
+ *
+ * Там же — разбивка кассы на наличные и безналичные: вечерний отчёт складывал
+ * строки счетов сам.
+ */
+const P4_ADDED_METRICS = ['average_booked_value_amount_kopecks'] as const;
+
+const P4_ADDED_PUBLISHED = ['average_booked_value'] as const;
+
+const P4_ADDED_FINANCE_REVENUE = [
+  'cash_total',
+  'cashless_total',
+  'unclassified_total',
+] as const;
+
+/**
+ * Поимённые начисления смены. Раньше вечерний отчёт брал их прямо из ответа
+ * CRM — вместе с именем оттуда же, мимо решения о раскрытии, — и молча терял
+ * строки со статусом «недоступно». Теперь это позиция канонического слоя, имя
+ * в ней выдаёт раскрытие.
+ */
+const P4_ADDED_FINANCE_PAYROLL = ['staff'] as const;
+
+const withoutP4Added = (metrics: unknown) => {
+  const rest = { ...(metrics as Record<string, unknown>) };
+  for (const key of P4_ADDED_METRICS) delete rest[key];
+  return rest;
+};
+
+/** Снять новые позиции с опубликованного среза, включая денежный блок. */
+const withoutP4Published = (published: unknown) => {
+  if (published === null || published === undefined) return published;
+  const rest = { ...(published as Record<string, unknown>) };
+  for (const key of P4_ADDED_PUBLISHED) delete rest[key];
+  const finance = rest.finance as Record<string, unknown> | undefined;
+  if (finance && typeof finance === 'object') {
+    const revenue = { ...((finance.revenue as Record<string, unknown>) ?? {}) };
+    for (const key of P4_ADDED_FINANCE_REVENUE) delete revenue[key];
+    const payroll = { ...((finance.payroll as Record<string, unknown>) ?? {}) };
+    for (const key of P4_ADDED_FINANCE_PAYROLL) delete payroll[key];
+    rest.finance = {
+      ...finance,
+      revenue,
+      ...(finance.payroll !== undefined ? { payroll } : {}),
+    };
+  }
+  return rest;
+};
+
 const withoutP2Added = (entries: unknown) =>
   (entries as Array<{ key: string }>).filter(
     (entry) => entry.key !== P2_ADDED_UNAVAILABLE,
@@ -453,24 +510,25 @@ describe('🔴 P1 §9 — legacy против канонического вла�
       expect(canonical.verified).toEqual(legacy.verified);
       expect(canonical.financeVerified).toEqual(legacy.finance_verified);
       expect(canonical.source).toEqual(legacy.source);
-      expect(withoutP2Changes(canonical.metrics)).toEqual(
-        withoutP2Changes(legacy.metrics),
+      expect(withoutP4Added(withoutP2Changes(canonical.metrics))).toEqual(
+        withoutP4Added(withoutP2Changes(legacy.metrics)),
       );
       // Изменения между периодами считаются по тем же метрикам, поэтому
       // исправленная стоимость записанного меняет и свою дельту.
-      expect(withoutP2Changes(canonical.changes)).toEqual(
-        withoutP2Changes(legacy.changes),
+      expect(withoutP4Added(withoutP2Changes(canonical.changes))).toEqual(
+        withoutP4Added(withoutP2Changes(legacy.changes)),
       );
       expect(canonical.serviceChanges).toEqual(legacy.service_changes);
       expect(canonical.staffChanges).toEqual(legacy.staff_changes);
-      expect(
-        canonical.availableMetrics.filter(
-          (key) => !(P2_CHANGED_METRICS as readonly string[]).includes(key),
-        ),
-      ).toEqual(
-        (legacy.available_metrics as string[]).filter(
-          (key) => !(P2_CHANGED_METRICS as readonly string[]).includes(key),
-        ),
+      const withoutChangedAndAdded = (keys: string[]) =>
+        keys.filter(
+          (key) =>
+            !(P2_CHANGED_METRICS as readonly string[]).includes(key) &&
+            !(P4_ADDED_METRICS as readonly string[]).includes(key),
+        );
+
+      expect(withoutChangedAndAdded(canonical.availableMetrics)).toEqual(
+        withoutChangedAndAdded(legacy.available_metrics as string[]),
       );
       expect(canonical.limitations).toEqual(legacy.limitations);
       expect(withoutP2Added(canonical.unavailableMetrics)).toEqual(
@@ -487,8 +545,12 @@ describe('🔴 P1 §9 — legacy против канонического вла�
 
       // Именно здесь живут имена мастеров, деньги по мастерам и гашение по
       // роли: если раскрытие разъедется, разъедется и приватность.
-      expect(withoutBookedValue(canonical.current)).toEqual(legacy.current);
-      expect(withoutBookedValue(canonical.previous)).toEqual(legacy.previous);
+      expect(withoutP4Published(withoutBookedValue(canonical.current))).toEqual(
+        legacy.current,
+      );
+      expect(
+        withoutP4Published(withoutBookedValue(canonical.previous)),
+      ).toEqual(legacy.previous);
     });
   }
 
@@ -499,9 +561,15 @@ describe('🔴 P1 §9 — legacy против канонического вла�
 
     expect(legacy.finance_verified).toBe(false);
     expect(canonical.financeVerified).toBe(false);
-    expect(withoutP2Changes(canonical.metrics)).toEqual(
-      withoutP2Changes(legacy.metrics),
+    expect(withoutP4Added(withoutP2Changes(canonical.metrics))).toEqual(
+      withoutP4Added(withoutP2Changes(legacy.metrics)),
     );
+    // 🔴 Отсутствие права на ДЕНЬГИ и право на операционный факт — разные
+    // решения (P2.1). Средняя стоимость записанного стоит на ценах журнала и
+    // приезжает по `bookedValueAllowed`; подтверждённой кассы у этой роли нет
+    // ни здесь, ни в эталоне.
+    expect(canonical.metrics.revenue_amount_kopecks).toBeNull();
+    expect(canonical.metrics.revenue_basis).toBe('unavailable');
   });
 
   it('🔴 роль без права на имена не получает их ни в одной реализации', async () => {
@@ -724,23 +792,26 @@ describe('🔴 P1 §9 — личный срез против боевой реа
       expect(legacy).toBeDefined();
       expect(canonical.verified).toEqual(legacy.verified);
       expect(canonical.source).toEqual(legacy.source);
-      expect(withoutP2Changes(canonical.metrics)).toEqual(
-        withoutP2Changes(legacy.metrics),
+      expect(withoutP4Added(withoutP2Changes(canonical.metrics))).toEqual(
+        withoutP4Added(withoutP2Changes(legacy.metrics)),
       );
-      expect(
-        canonical.availableMetrics.filter(
-          (key) => !(P2_CHANGED_METRICS as readonly string[]).includes(key),
-        ),
-      ).toEqual(
-        (legacy.available_metrics as string[]).filter(
-          (key) => !(P2_CHANGED_METRICS as readonly string[]).includes(key),
-        ),
+      const withoutChangedAndAdded = (keys: string[]) =>
+        keys.filter(
+          (key) =>
+            !(P2_CHANGED_METRICS as readonly string[]).includes(key) &&
+            !(P4_ADDED_METRICS as readonly string[]).includes(key),
+        );
+
+      expect(withoutChangedAndAdded(canonical.availableMetrics)).toEqual(
+        withoutChangedAndAdded(legacy.available_metrics as string[]),
       );
       expect(canonical.limitations).toEqual(legacy.limitations);
       expect(withoutP2Added(canonical.unavailableMetrics)).toEqual(
         legacy.unavailable_metrics,
       );
-      expect(withoutBookedValue(canonical.current)).toEqual(legacy.current);
+      expect(withoutP4Published(withoutBookedValue(canonical.current))).toEqual(
+        legacy.current,
+      );
       // 🔴 В конверте личного среза `finance_verified` не было и не появится:
       // касса конкретного мастера провайдером не подтверждается.
       expect(legacy.finance_verified).toBeUndefined();

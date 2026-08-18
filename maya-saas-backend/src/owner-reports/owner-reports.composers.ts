@@ -1,113 +1,119 @@
+import type {
+  BriefCount,
+  BriefFacts,
+  MasterBriefFacts,
+} from './owner-reports.facts';
 import { displayDayRu, formatRubFromKopecks } from './owner-reports.time';
 
-type OverviewLike = {
-  appointments?: {
-    active?: number;
-    total?: number;
-    scheduled?: number;
-    completed?: number;
-    cancelled?: number;
-    no_show?: number;
-    booked_minutes?: number;
-  };
-  /**
-   * 🔴 Cycle 04 P0. Насколько полно прочитан источник записей.
-   *
-   * Без этого блока бриф печатал «отменено 0» и «неявок 0» одинаково и когда
-   * отмен действительно не было, и когда журнал прочитался не целиком. Ноль
-   * без такой пометки — не измерение, а совпадение формы.
-   */
-  completeness?: {
-    appointments?: {
-      status?: string;
-      reason?: string | null;
-    } | null;
-  } | null;
-  staff?: Array<{
-    name?: string | null;
-    appointments?: number;
-    booked_minutes?: number;
-  }>;
-  average_ticket?: Array<{ amount_kopecks?: number }>;
-  revenue?: Array<{ amount_kopecks?: number }>;
-};
-
 /**
- * Пометка о неполноте источника — одна на все три сводки.
+ * Тексты сводок владельца и мастера.
  *
- * `null` означает «источник прочитан целиком»; строка означает, что числа
- * ниже — нижняя граница, и это обязано быть сказано словами, а не пропущено.
+ * 🔴 Cycle 04 P4. Здесь ПРЕЗЕНТАЦИЯ и только она: выбрать факты, назвать их
+ * по-русски, собрать строку. Ни одного вычисления бизнес-факта — ни суммы, ни
+ * доли, ни среднего, ни разбора «пришёл или нет».
+ *
+ * Главное правило текста: `null` — это не ноль. Раньше числа добирались из
+ * сырого обзора через `?? 0`, и «журнал прочитан не целиком» превращалось в
+ * «отменено 0», а «касса не ответила» — в «касса пустая». Теперь неизвестное
+ * доезжает сюда как `null` и обязано быть названо словами.
  */
-function incompleteNote(overview: OverviewLike): string | null {
-  const status = overview.completeness?.appointments?.status;
-  if (status !== 'incomplete') {
-    return null;
-  }
+
+/** Число к печати. Неизвестное называется, а не превращается в ноль. */
+function count(value: BriefCount): string {
+  return value === null ? 'не измерено' : String(value);
+}
+
+/** Пометка о неполноте источника — одна на все три сводки. */
+function incompleteNote(facts: {
+  sourceComplete: boolean;
+  incompleteReason: string | null;
+}): string | null {
+  if (facts.sourceComplete) return null;
   return '⚠️ Журнал за этот период прочитан НЕ целиком: числа ниже — нижняя граница, и ноль в них означает «не измерено», а не «ничего не было».';
 }
 
 /** Состояние источника для полезной нагрузки карточки. Всегда заполнено. */
-function completenessPayload(overview: OverviewLike): {
+function completenessPayload(facts: {
+  sourceComplete: boolean;
+  incompleteReason: string | null;
+}): {
   appointments_source_complete: boolean;
   appointments_incomplete_reason: string | null;
 } {
-  const appointments = overview.completeness?.appointments ?? null;
-  const complete = appointments ? appointments.status !== 'incomplete' : true;
   return {
-    appointments_source_complete: complete,
-    appointments_incomplete_reason: complete
+    appointments_source_complete: facts.sourceComplete,
+    appointments_incomplete_reason: facts.sourceComplete
       ? null
-      : (appointments?.reason ?? 'unknown'),
+      : (facts.incompleteReason ?? 'unknown'),
   };
 }
 
-export function composeMorningBrief(input: {
-  localDate: string;
-  overview: OverviewLike;
-}): { title: string; bodyText: string; payload: Record<string, unknown> } {
-  const booked = Number(
-    input.overview.appointments?.total ??
-      input.overview.appointments?.active ??
-      0,
-  );
-  const active = Number(input.overview.appointments?.active ?? 0);
-  const scheduled = Number(input.overview.appointments?.scheduled ?? 0);
-  const completed = Number(input.overview.appointments?.completed ?? 0);
-  const cancelled = Number(input.overview.appointments?.cancelled ?? 0);
-  const noShow = Number(input.overview.appointments?.no_show ?? 0);
-  const bookedMinutes = Number(
-    input.overview.appointments?.booked_minutes || 0,
-  );
-  const ticket = Number(
-    input.overview.average_ticket?.[0]?.amount_kopecks || 0,
-  );
-  const bookedValue = Number(input.overview.revenue?.[0]?.amount_kopecks || 0);
-  const underused = (input.overview.staff || [])
-    .filter((row) => Number(row.appointments || 0) <= 1)
-    .map((row) => String(row.name || '').trim())
+/**
+ * Строка присутствия — только из канонического наблюдения.
+ *
+ * `null` возвращается, когда говорить не о чем: присутствие не сверено. Молчать
+ * честнее, чем взять провайдерский статус и назвать его неявкой.
+ */
+function attendanceLine(facts: BriefFacts, always: boolean): string | null {
+  if (!facts.attendance.measured) {
+    return always
+      ? 'Присутствие за день ещё не сверено — о неявках сказать нечего.'
+      : null;
+  }
+  const arrived = facts.attendance.arrived ?? 0;
+  const noShow = facts.attendance.noShow ?? 0;
+  if (!always && arrived === 0 && noShow === 0) return null;
+  return `Присутствие: пришли ${arrived}, неявок ${noShow}.`;
+}
+
+export function composeMorningBrief(input: { facts: BriefFacts }): {
+  title: string;
+  bodyText: string;
+  payload: Record<string, unknown>;
+} {
+  const facts = input.facts;
+  const bookedValue = facts.bookedValue.amountKopecks;
+  const average = facts.bookedValue.averageKopecks;
+  /**
+   * 🔴 «Ожидаемо» — это стоимость ЗАПИСАННОГО по ценам журнала, а не деньги.
+   * Средняя рядом — тоже цена записи, а не средний чек: средний чек стоит на
+   * кассе, и до конца дня его не существует.
+   */
+  const expected =
+    bookedValue !== null && bookedValue > 0
+      ? `, ожидаемо ~${formatRubFromKopecks(bookedValue)}` +
+        (average !== null && average > 0
+          ? ` (средняя стоимость записи ${formatRubFromKopecks(average)})`
+          : '')
+      : '';
+  const underused = facts.staff
+    .filter((row) => (row.appointments ?? 0) <= 1)
+    .map((row) => (row.name ?? '').trim())
     .filter(Boolean)
     .slice(0, 4);
 
   const lines = [
     'Доброе утро! Посмотрела салон на сегодня 👇',
     '',
-    `📅 Сегодня в CRM: всего ${booked} записей` +
-      (bookedValue > 0
-        ? `, ожидаемо ~${formatRubFromKopecks(bookedValue)}` +
-          (ticket > 0 ? ` (средний чек ${formatRubFromKopecks(ticket)})` : '')
-        : '') +
-      '.',
-    `Статусы: ожидают ${scheduled}, завершено ${completed}, отменено ${cancelled}, неявок ${noShow}.`,
+    `📅 Сегодня в CRM: всего ${count(facts.counts.total)} записей${expected}.`,
+    `Статусы: ожидают ${count(facts.counts.scheduled)}, завершено ${count(
+      facts.counts.completed,
+    )}, отменено ${count(facts.counts.cancelled)}.`,
   ];
+  // Утром присутствие обычно ещё не наблюдалось: строка появляется, только
+  // когда наблюдение уже есть и в нём что-то произошло.
+  const attendance = attendanceLine(facts, false);
+  if (attendance) lines.push(attendance);
   if (underused.length) {
+    const minutes = facts.counts.bookedMinutes;
     lines.push(
       `🪑 Недозагружены: ${underused.join(', ')}` +
-        (bookedMinutes > 0 ? ` — занято ${bookedMinutes} мин.` : '.'),
+        (minutes !== null && minutes > 0 ? ` — занято ${minutes} мин.` : '.'),
     );
   } else {
     lines.push('🪑 Загрузка мастеров выглядит ровной на утро.');
   }
-  const morningNote = incompleteNote(input.overview);
+  const morningNote = incompleteNote(facts);
   if (morningNote) {
     lines.push('', morningNote);
   }
@@ -117,58 +123,93 @@ export function composeMorningBrief(input: {
   );
 
   return {
-    title: `MAYA · утренний план · ${displayDayRu(input.localDate)}`,
+    title: `MAYA · утренний план · ${displayDayRu(facts.localDate)}`,
     bodyText: lines.join('\n'),
     payload: {
       kind: 'morning_brief',
-      local_date: input.localDate,
-      booked,
-      active,
-      scheduled,
-      completed,
-      cancelled,
-      no_show: noShow,
+      local_date: facts.localDate,
+      booked: facts.counts.total,
+      scheduled: facts.counts.scheduled,
+      completed: facts.counts.completed,
+      cancelled: facts.counts.cancelled,
+      // Присутствие — каноническое; `null` означает «не сверено».
+      attendance_arrived: facts.attendance.arrived,
+      attendance_no_show: facts.attendance.noShow,
       booked_value_kopecks: bookedValue,
+      booked_value_basis: facts.bookedValue.basis,
+      average_booked_value_kopecks: average,
       underused,
-      ...completenessPayload(input.overview),
+      ...completenessPayload(facts),
     },
   };
 }
 
-export function composeMasterMorningBrief(input: {
-  localDate: string;
-  overview: OverviewLike;
-  masterName?: string | null;
-}): { title: string; bodyText: string; payload: Record<string, unknown> } {
-  const total = Number(
-    input.overview.appointments?.total ??
-      input.overview.appointments?.active ??
-      0,
-  );
-  const scheduled = Number(input.overview.appointments?.scheduled ?? 0);
-  const completed = Number(input.overview.appointments?.completed ?? 0);
-  const cancelled = Number(input.overview.appointments?.cancelled ?? 0);
-  const noShow = Number(input.overview.appointments?.no_show ?? 0);
-  const bookedMinutes = Number(
-    input.overview.appointments?.booked_minutes ?? 0,
-  );
-  const greeting = input.masterName?.trim()
-    ? `Доброе утро, ${input.masterName.trim()}!`
+export function composeMasterMorningBrief(input: { facts: MasterBriefFacts }): {
+  title: string;
+  bodyText: string;
+  payload: Record<string, unknown>;
+} {
+  const facts = input.facts;
+  const title = `MAYA · ваш день · ${displayDayRu(facts.localDate)}`;
+  const greeting = facts.masterName?.trim()
+    ? `Доброе утро, ${facts.masterName.trim()}!`
     : 'Доброе утро!';
+
+  /**
+   * 🔴 Календарь не сопоставлен с профилем — о дне этого человека НЕ ИЗВЕСТНО
+   * НИЧЕГО. До миграции сюда приходили нули и совет «проверьте свободные окна»:
+   * промах сопоставления выдавался мастеру за пустой день.
+   */
+  if (facts.presence === 'identity_unresolved') {
+    return {
+      title,
+      bodyText: [
+        `${greeting} План на сегодня собрать не смогла.`,
+        '',
+        'Ваш календарь пока не сопоставлен с профилем в MAYA, поэтому записей за вами я не вижу — это не значит, что их нет.',
+        'Попросите администратора связать профиль с календарём, и план начнёт приходить.',
+      ].join('\n'),
+      payload: {
+        kind: 'master_morning_brief',
+        local_date: facts.localDate,
+        identity_resolved: false,
+        total: null,
+        scheduled: null,
+        completed: null,
+        cancelled: null,
+        booked_minutes: null,
+        ...completenessPayload(facts),
+      },
+    };
+  }
+
+  const total = facts.counts.total;
+  const minutes = facts.counts.bookedMinutes;
   const lines = [
     `${greeting} Вот ваш план на сегодня.`,
     '',
-    `Записей: ${total}; ожидают визита ${scheduled}; завершено ${completed}; отменено ${cancelled}; неявок ${noShow}.`,
-    bookedMinutes > 0
-      ? `Занято в календаре: ${bookedMinutes} мин.`
-      : 'Календарь пока свободен.',
+    `Записей: ${count(total)}; ожидают визита ${count(
+      facts.counts.scheduled,
+    )}; завершено ${count(facts.counts.completed)}; отменено ${count(
+      facts.counts.cancelled,
+    )}.`,
+    minutes !== null && minutes > 0
+      ? `Занято в календаре: ${minutes} мин.`
+      : minutes === null
+        ? 'Занятость календаря за сегодня не измерена.'
+        : 'Календарь пока свободен.',
   ];
 
-  if (total === 0) {
+  if (total === null) {
+    // Числа нет — и совета «на пустой день» тоже быть не может.
+    lines.push(
+      'Совет MAYA: как только журнал прочитается целиком, я пришлю точный план.',
+    );
+  } else if (total === 0) {
     lines.push(
       'Совет MAYA: проверьте свободные окна с администратором и предложите их клиентам, которым уже подходит срок следующего визита.',
     );
-  } else if (cancelled > 0 || noShow > 0) {
+  } else if ((facts.counts.cancelled ?? 0) > 0) {
     lines.push(
       'Совет MAYA: подтвердите ближайшие визиты и сразу передайте освободившиеся окна администратору для точечного заполнения.',
     );
@@ -177,113 +218,113 @@ export function composeMasterMorningBrief(input: {
       'Совет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.',
     );
   }
-  const masterNote = incompleteNote(input.overview);
+  const masterNote = incompleteNote(facts);
   if (masterNote) {
     lines.push('', masterNote);
   }
   lines.push('', 'План сохранён в чате MAYA.');
 
   return {
-    title: `MAYA · ваш день · ${displayDayRu(input.localDate)}`,
+    title,
     bodyText: lines.join('\n'),
     payload: {
       kind: 'master_morning_brief',
-      local_date: input.localDate,
+      local_date: facts.localDate,
+      identity_resolved: true,
       total,
-      scheduled,
-      completed,
-      cancelled,
-      no_show: noShow,
-      booked_minutes: bookedMinutes,
-      ...completenessPayload(input.overview),
+      scheduled: facts.counts.scheduled,
+      completed: facts.counts.completed,
+      cancelled: facts.counts.cancelled,
+      booked_minutes: minutes,
+      ...completenessPayload(facts),
     },
   };
 }
 
-type FinanceLike = {
-  revenue?: {
-    total?: { amount_kopecks?: number } | null;
-    by_account?: Array<{
-      name?: string;
-      is_cash?: boolean | null;
-      amount_kopecks?: number;
-    }>;
-    transaction_count?: number | null;
-  };
-  payroll?: {
-    status?: string;
-    accrued_total?: { amount_kopecks?: number } | null;
-    staff?: Array<{
-      name?: string;
-      accrued?: { amount_kopecks?: number } | null;
-    }>;
-  };
-};
-
-export function composeDailyReport(input: {
-  localDate: string;
-  overview: OverviewLike;
-  finance: FinanceLike | null;
-}): { title: string; bodyText: string; payload: Record<string, unknown> } {
-  const day = displayDayRu(input.localDate);
-  const visits = Number(
-    input.overview.appointments?.total ??
-      input.overview.appointments?.active ??
-      0,
-  );
-  const scheduled = Number(input.overview.appointments?.scheduled ?? 0);
-  const completed = Number(input.overview.appointments?.completed ?? 0);
-  const cancelled = Number(input.overview.appointments?.cancelled ?? 0);
-  const noShow = Number(input.overview.appointments?.no_show ?? 0);
-  const revenueTotal = Number(
-    input.finance?.revenue?.total?.amount_kopecks || 0,
-  );
-  const accounts = input.finance?.revenue?.by_account || [];
-  const cash = accounts
-    .filter((row) => row.is_cash === true)
-    .reduce((sum, row) => sum + Number(row.amount_kopecks || 0), 0);
-  const card = accounts
-    .filter((row) => row.is_cash === false)
-    .reduce((sum, row) => sum + Number(row.amount_kopecks || 0), 0);
-  const payrollStaff = (input.finance?.payroll?.staff || [])
-    .filter((row) => Number(row.accrued?.amount_kopecks || 0) > 0)
-    .slice(0, 12);
-
+export function composeDailyReport(input: { facts: BriefFacts }): {
+  title: string;
+  bodyText: string;
+  payload: Record<string, unknown>;
+} {
+  const facts = input.facts;
+  const day = displayDayRu(facts.localDate);
+  const revenue = facts.revenue;
   const lines = [`📊 Отчёт за ${day} готов`, ''];
 
-  if (payrollStaff.length) {
-    lines.push('Зарплаты (смена):');
-    for (const row of payrollStaff) {
-      lines.push(
-        `• ${row.name || 'Мастер'}: ${formatRubFromKopecks(row.accrued?.amount_kopecks)}`,
-      );
+  const accrued = facts.payroll.accruedTotalKopecks;
+  if (facts.payroll.rows.length || accrued !== null) {
+    if (facts.payroll.rows.length) {
+      lines.push('Зарплаты (смена):');
+      const shown = facts.payroll.rows.slice(0, 12);
+      for (const row of shown) {
+        lines.push(
+          `• ${row.name}: ${formatRubFromKopecks(row.accruedKopecks)}`,
+        );
+      }
+      // 🔴 Обрезка списка обязана быть видимой: молча укороченная команда
+      // выглядит как команда, которой ничего не начислили.
+      if (facts.payroll.rows.length > shown.length) {
+        lines.push(
+          `…и ещё ${facts.payroll.rows.length - shown.length} мастеров — список сокращён.`,
+        );
+      }
     }
-    const accrued = Number(
-      input.finance?.payroll?.accrued_total?.amount_kopecks || 0,
-    );
-    if (accrued > 0) {
-      lines.push(`Итого начислено: ${formatRubFromKopecks(accrued)}`);
+    /**
+     * 🔴 Итог печатается ОТДЕЛЬНО от строк.
+     *
+     * Поимённые строки берутся из разреза мастеров периода, а итог — из
+     * расчёта зарплаты целиком. Мастер без записей за день в разрез не попадёт,
+     * и его начисление в строках не появится — но в итоге оно есть, и итог
+     * обязан прозвучать, даже когда строк нет ни одной.
+     */
+    if (accrued !== null && accrued > 0) {
+      lines.push(`Итого начислено за смену: ${formatRubFromKopecks(accrued)}`);
     }
     lines.push('');
   }
 
   lines.push('Оплаты за день:');
-  if (cash > 0 || card > 0) {
-    lines.push(`💵 Наличные — ${formatRubFromKopecks(cash)}`);
-    lines.push(`💳 Карта — ${formatRubFromKopecks(card)}`);
-  } else if (revenueTotal > 0) {
-    lines.push(`Выручка по кассе — ${formatRubFromKopecks(revenueTotal)}`);
+  /**
+   * 🔴 Три разных случая, которые до миграции печатались одной фразой
+   * «пока пустая или недоступна»: касса измерена и пуста, касса не измерена,
+   * касса есть. Ноль и незнание — не одно и то же, и владелец имеет право
+   * знать, какое из двух.
+   */
+  if (revenue.amountKopecks === null) {
+    lines.push(
+      'Подтверждённая касса за день недоступна: финансовый контур не ответил, поэтому сказать «выручки не было» я не могу.',
+    );
+  } else if (revenue.amountKopecks === 0) {
+    lines.push('Подтверждённая касса за день пустая: оплат не проходило.');
   } else {
-    lines.push('Подтверждённая касса за день пока пустая или недоступна.');
+    if (revenue.cashKopecks !== null || revenue.cashlessKopecks !== null) {
+      lines.push(
+        `💵 Наличные — ${formatRubFromKopecks(revenue.cashKopecks ?? 0)}`,
+      );
+      lines.push(
+        `💳 Карта — ${formatRubFromKopecks(revenue.cashlessKopecks ?? 0)}`,
+      );
+      if ((revenue.unclassifiedKopecks ?? 0) > 0) {
+        lines.push(
+          `Ещё ${formatRubFromKopecks(revenue.unclassifiedKopecks)} провайдер не отнёс ни к наличным, ни к безналу.`,
+        );
+      }
+    }
+    lines.push(
+      `Выручка за день: ${formatRubFromKopecks(revenue.amountKopecks)}`,
+    );
   }
-  if (revenueTotal > 0) {
-    lines.push(`Выручка за день: ${formatRubFromKopecks(revenueTotal)}`);
-  }
-  lines.push(`Записей за день: ${visits}`);
+  lines.push(`Записей за день: ${count(facts.counts.total)}`);
   lines.push(
-    `Статусы: завершено ${completed}, ожидают ${scheduled}, отменено ${cancelled}, неявок ${noShow}.`,
+    `Статусы: завершено ${count(facts.counts.completed)}, ожидают ${count(
+      facts.counts.scheduled,
+    )}, отменено ${count(facts.counts.cancelled)}.`,
   );
-  const dailyNote = incompleteNote(input.overview);
+  // Вечером присутствие уместно всегда: день закончился, и «не сверено» —
+  // это тоже ответ.
+  const attendance = attendanceLine(facts, true);
+  if (attendance) lines.push(attendance);
+  const dailyNote = incompleteNote(facts);
   if (dailyNote) {
     lines.push('', dailyNote);
   }
@@ -297,16 +338,18 @@ export function composeDailyReport(input: {
     bodyText: lines.join('\n'),
     payload: {
       kind: 'daily_report',
-      local_date: input.localDate,
-      visits,
-      scheduled,
-      completed,
-      cancelled,
-      no_show: noShow,
-      revenue_total_kopecks: revenueTotal,
-      cash_kopecks: cash,
-      card_kopecks: card,
-      ...completenessPayload(input.overview),
+      local_date: facts.localDate,
+      visits: facts.counts.total,
+      scheduled: facts.counts.scheduled,
+      completed: facts.counts.completed,
+      cancelled: facts.counts.cancelled,
+      attendance_arrived: facts.attendance.arrived,
+      attendance_no_show: facts.attendance.noShow,
+      revenue_total_kopecks: revenue.amountKopecks,
+      revenue_basis: revenue.basis,
+      cash_kopecks: revenue.cashKopecks,
+      card_kopecks: revenue.cashlessKopecks,
+      ...completenessPayload(facts),
     },
   };
 }

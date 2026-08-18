@@ -1,80 +1,40 @@
 import { ConfigService } from '@nestjs/config';
 
-import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { InboxService } from '../inbox/inbox.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { TenantContextService } from '../tenancy/tenant-context.service';
+import {
+  buildStack,
+  LOCAL_DATE,
+  RANGE,
+  TENANT,
+  visit,
+} from './brief-stack.spec-helper.spec';
 import { OwnerReportsService } from './owner-reports.service';
 
 type PublishInput = Parameters<InboxService['publishForTenant']>[1];
 
 describe('OwnerReportsService', () => {
-  const tenant = {
-    id: 'tenant-a',
-    slug: 'barber-a',
-    name: 'Барбершоп A',
-    defaultTimezone: 'Europe/Moscow',
-  };
+  const tenant = TENANT;
 
   function createService(options?: {
     alreadySent?: boolean;
     enabledUserIds?: string[];
   }) {
-    const prisma = {
-      membership: {
-        findMany: jest.fn().mockResolvedValue([{ userId: 'owner-user' }]),
-      },
-      crmStaffAccess: {
-        findMany: jest
-          .fn()
-          .mockResolvedValue([{ userId: 'master-user', staffId: 'staff-1' }]),
-      },
-      internalProvider: {
-        findMany: jest.fn().mockResolvedValue([]),
-      },
-    };
-    const overview = {
-      data_source: 'crm',
-      period: {
-        from: '2026-08-12T21:00:00.000Z',
-        to: '2026-08-13T20:59:59.999Z',
-        timezone: 'Europe/Moscow',
-      },
-      appointments: {
-        total: 8,
-        active: 7,
-        scheduled: 5,
-        completed: 1,
-        cancelled: 1,
-        no_show: 1,
-        booked_minutes: 420,
-      },
-      revenue: [],
-      expenses: [],
-      net: [],
-      average_ticket: [],
-      daily: [],
-      services: [],
-      staff: [
-        {
-          staff_external_id: 'crm-1',
-          staff_id: 'staff-1',
-          name: 'Илья',
-          total: 6,
-          appointments: 5,
-          scheduled: 4,
-          completed: 1,
-          cancelled: 1,
-          no_show: 0,
-          booked_minutes: 300,
-          services: [],
-        },
+    // 🔴 Настоящая цепочка вместо подменённого обзора: числа в тексте обязаны
+    // приезжать из канонического владельца, и спека это проверяет по-честному.
+    const stack = buildStack({
+      visits: [
+        visit('a', 'crm-1', 2500),
+        visit('b', 'crm-1', 2500, 'confirmed'),
+        visit('c', 'crm-1', 2500, 'confirmed'),
+        visit('d', 'crm-1', 2500, 'confirmed'),
+        visit('e', 'crm-1', 2500, 'confirmed'),
+        visit('f', 'crm-1', 2500, 'confirmed'),
+        visit('g', 'crm-2', 3000, 'confirmed'),
+        visit('h', 'crm-2', 3000, 'canceled'),
       ],
-    };
-    const analytics = {
-      getBusinessOperationalOverview: jest.fn().mockResolvedValue(overview),
-    };
+      masters: [{ userId: 'master-user', externalStaffId: 'crm-1' }],
+    });
     const publishForTenant = jest.fn((_tenantId: string, input: PublishInput) =>
       Promise.resolve({
         stored: 1,
@@ -86,13 +46,6 @@ describe('OwnerReportsService', () => {
         .fn()
         .mockResolvedValue(Boolean(options?.alreadySent)),
       publishForTenant,
-    };
-    const tenantContext = {
-      runAsSystemTenant: jest
-        .fn()
-        .mockImplementation((_tenantId: string, work: () => Promise<unknown>) =>
-          work(),
-        ),
     };
     const config = { get: jest.fn() };
     const dashboardPreferences = {
@@ -108,20 +61,22 @@ describe('OwnerReportsService', () => {
           ),
         ),
     };
+    const businessState = stack.businessState;
+    const readState = jest.spyOn(businessState, 'business');
     const service = new OwnerReportsService(
-      prisma as unknown as PrismaService,
-      analytics as unknown as OperationsAnalyticsService,
+      stack.prisma,
+      businessState,
       inbox as unknown as InboxService,
-      tenantContext as unknown as TenantContextService,
+      stack.tenantContext,
       config as unknown as ConfigService,
       dashboardPreferences as unknown as DashboardPreferencesService,
     );
 
-    return { service, analytics, inbox, publishForTenant };
+    return { service, inbox, publishForTenant, readState };
   }
 
   it('stores one owner brief and one private master brief for the local day', async () => {
-    const { service, analytics, inbox, publishForTenant } = createService();
+    const { service, inbox, publishForTenant, readState } = createService();
 
     const result = await service.runMorningBrief(
       tenant,
@@ -129,19 +84,23 @@ describe('OwnerReportsService', () => {
     );
 
     expect(result).toBe('sent');
-    expect(analytics.getBusinessOperationalOverview).toHaveBeenCalledWith(
-      'tenant-a',
-      {
-        from: '2026-08-12T21:00:00.000Z',
-        to: '2026-08-13T20:59:59.999Z',
-      },
+    // Период дня арендатора остался тем же — миграция границ не двигала.
+    expect(readState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: tenant.id,
+        period: RANGE,
+        comparisonMode: 'none',
+        // Утренний бриф денежный контур не читает: не читал и раньше.
+        financeAllowed: false,
+        retryOnFailure: false,
+      }),
     );
     expect(inbox.publishForTenant).toHaveBeenCalledTimes(2);
 
     const ownerMessage = publishForTenant.mock.calls[0]?.[1];
     expect(ownerMessage).toMatchObject({
       type: 'morning_brief',
-      sourceEventId: 'nest:morning_brief:2026-08-13',
+      sourceEventId: `nest:morning_brief:${LOCAL_DATE}`,
       userIds: ['owner-user'],
       fanoutOwners: false,
     });
@@ -150,7 +109,7 @@ describe('OwnerReportsService', () => {
     const masterMessage = publishForTenant.mock.calls[1]?.[1];
     expect(masterMessage).toMatchObject({
       type: 'morning_brief',
-      sourceEventId: 'nest:master_morning_brief:2026-08-13:master-user',
+      sourceEventId: `nest:master_morning_brief:${LOCAL_DATE}:master-user`,
       userIds: ['master-user'],
       fanoutOwners: false,
     });
@@ -160,7 +119,7 @@ describe('OwnerReportsService', () => {
   });
 
   it('does not duplicate already delivered morning messages', async () => {
-    const { service, analytics, inbox } = createService({ alreadySent: true });
+    const { service, inbox, readState } = createService({ alreadySent: true });
 
     const result = await service.runMorningBrief(
       tenant,
@@ -168,14 +127,12 @@ describe('OwnerReportsService', () => {
     );
 
     expect(result).toBe('skipped');
-    expect(analytics.getBusinessOperationalOverview).not.toHaveBeenCalled();
+    expect(readState).not.toHaveBeenCalled();
     expect(inbox.publishForTenant).not.toHaveBeenCalled();
   });
 
   it('does not deliver briefs to users who disabled daily brief', async () => {
-    const { service, analytics, inbox } = createService({
-      enabledUserIds: [],
-    });
+    const { service, inbox, readState } = createService({ enabledUserIds: [] });
 
     const result = await service.runMorningBrief(
       tenant,
@@ -183,7 +140,7 @@ describe('OwnerReportsService', () => {
     );
 
     expect(result).toBe('skipped');
-    expect(analytics.getBusinessOperationalOverview).not.toHaveBeenCalled();
+    expect(readState).not.toHaveBeenCalled();
     expect(inbox.publishForTenant).not.toHaveBeenCalled();
   });
 });

@@ -397,6 +397,7 @@ export class BusinessStateService {
     const disclosure = request.disclose([
       ...this.staffIdentityRows(currentInternal),
       ...this.staffIdentityRows(previousInternal),
+      ...this.payrollIdentityRows(currentInternal),
     ]);
     const current = this.publishAnalytics(currentInternal, disclosure);
     const previous = previousInternal
@@ -588,6 +589,34 @@ export class BusinessStateService {
     ];
   }
 
+  /**
+   * Идентичности из расчёта зарплаты.
+   *
+   * 🔴 Мастер, которому начислено, но у которого за день нет ни одной записи,
+   * в разрезе периода отсутствует — и всё равно должен быть назван, иначе его
+   * строка в отчёте владельца превращается в безымянное «Мастер».
+   */
+  private payrollIdentityRows(value: unknown): StaffIdentityRow[] {
+    const rows = this.record(
+      this.record(this.record(value).finance).payroll,
+    ).staff;
+    if (!Array.isArray(rows)) return [];
+    return rows.flatMap((entry) => {
+      const row = this.record(entry);
+      /**
+       * 🔴 Имя сюда НЕ приходит.
+       *
+       * Как мастера зовут в чужой системе — не основание называть его так
+       * владельцу: имя выдаёт вызывающий по идентичности Maya, и другого пути
+       * нет. Первая же попытка подставить имя из расчёта зарплаты сломала
+       * существующий страж приватности AI-слоя — и правильно сломала.
+       */
+      return typeof row.external_id === 'string' && row.external_id !== ''
+        ? [{ externalId: row.external_id, name: null }]
+        : [];
+    });
+  }
+
   /** Идентичности мастеров периода — вход для решения о раскрытии имён. */
   private staffIdentityRows(value: unknown): StaffIdentityRow[] {
     return this.staffRows(value)
@@ -656,6 +685,18 @@ export class BusinessStateService {
      * трогается. Перепутать два факта нельзя: у каждого своё имя.
      */
     const bookedValue = operational.revenue;
+    /**
+     * 🔴 Cycle 04 P4. Средняя стоимость ЗАПИСАННОГО — по той же причине.
+     *
+     * `average_ticket` в денежной ветке перезаписывается кассой, поделённой на
+     * число операций, а до неё содержит среднюю цену записи из журнала. Это
+     * два разных факта в одном поле — ровно та ошибка, которую P2 уже
+     * исправил для суммы. Снимаем среднюю по журналу ДО любых замен.
+     *
+     * Нужна она утреннему брифу: он показывал владельцу это число под именем
+     * «средний чек», то есть выдавал цену записи за полученные деньги.
+     */
+    const averageBookedValue = operational.average_ticket;
 
     if (overview.data_source !== 'crm') {
       // Внутренний календарь не считает зарплату вовсе: расчёта нет ни у кого,
@@ -665,7 +706,11 @@ export class BusinessStateService {
       // другого понятия денег у внутреннего календаря нет. Но факта всё равно
       // два, и у каждого своё основание.
       return this.withStaffSalary(
-        { ...operational, booked_value: bookedValue },
+        {
+          ...operational,
+          booked_value: bookedValue,
+          average_booked_value: averageBookedValue,
+        },
         {
           status: 'unavailable',
           reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
@@ -690,6 +735,12 @@ export class BusinessStateService {
        * однозначной семантикой: `booked_value` с основанием `booked_prices`.
        */
       booked_value: actor.bookedValueAllowed ? bookedValue : [],
+      /**
+       * Средняя стоимость записанного — тот же операционный факт, то же
+       * решение вызывающего. В `average_ticket` она попасть не может: там
+       * живут деньги кассы, и подменять одно другим запрещено.
+       */
+      average_booked_value: actor.bookedValueAllowed ? averageBookedValue : [],
       expenses: [],
       net: [],
       average_ticket: [],
@@ -772,6 +823,41 @@ export class BusinessStateService {
             ),
           }
         : null;
+    /**
+     * 🔴 Cycle 04 P4. Наличные и безналичные — деньги, а деньги складывает
+     * владелец факта, а не текст отчёта.
+     *
+     * Вечерний отчёт складывал строки счетов сам: `filter(is_cash).reduce(+)`.
+     * Это арифметика над кассой в презентации — то же самое, из-за чего
+     * появлялись два разных числа выручки. Разбивка приходит из уже
+     * прочитанной сводки, второго обращения к провайдеру не возникает.
+     *
+     * `null` означает «разбивки нет», а не «ноль»: счёт, который провайдер не
+     * назвал, не превращается в отсутствие наличных.
+     */
+    const accountRows = Array.isArray(revenue.by_account)
+      ? revenue.by_account.map((entry) => this.record(entry))
+      : null;
+    const accountTotal = (match: (isCash: unknown) => boolean) => {
+      if (!accountRows) return null;
+      const rows = accountRows.filter((row) => match(row.is_cash));
+      if (rows.length === 0) {
+        // Строк такого рода нет — это измеренный ноль ровно тогда, когда сама
+        // разбивка получена. Валюта берётся у итога: другой в сводке нет.
+        return revenueTotal
+          ? { currency: revenueTotal.currency, amount_kopecks: 0 }
+          : null;
+      }
+      let sum = 0;
+      for (const row of rows) {
+        sum += this.optionalMetricNumber(row.amount_kopecks) ?? 0;
+      }
+      const currency =
+        typeof rows[0].currency === 'string'
+          ? rows[0].currency
+          : (revenueTotal?.currency ?? 'RUB');
+      return { currency, amount_kopecks: sum };
+    };
     const payrollAvailable =
       payroll.status === 'available' && payroll.verified === true;
     const staffRevenue = Array.isArray(revenue.by_staff)
@@ -835,6 +921,16 @@ export class BusinessStateService {
             verified: revenue.verified === true,
             transaction_count: transactionCount,
             total: revenueTotal,
+            cash_total: accountTotal((value) => value === true),
+            cashless_total: accountTotal((value) => value === false),
+            /**
+             * Счета, у которых провайдер не сказал, наличные они или нет.
+             * Ненулевое значение означает, что разбивка НЕ полна и сумма
+             * «наличные + безнал» меньше кассы — это обязано быть видно.
+             */
+            unclassified_total: accountTotal(
+              (value) => typeof value !== 'boolean',
+            ),
             by_staff: staffRevenue,
             by_service: serviceRevenue,
             staff_attribution_status:
@@ -865,6 +961,42 @@ export class BusinessStateService {
           payroll: {
             status: payroll.status ?? 'unavailable',
             verified: payroll.verified === true,
+            /**
+             * 🔴 Cycle 04 P4. Поимённые начисления смены — здесь, а не у
+             * потребителя.
+             *
+             * Вечерний отчёт брал их прямо из ответа CRM и печатал имя оттуда
+             * же — мимо решения о раскрытии. Строка со статусом `unavailable`
+             * при этом исчезала молча: её отсеивал фильтр «начислено > 0», и
+             * мастер, которому не посчиталось, выглядел как мастер, которому
+             * не начислили.
+             *
+             * Внешний идентификатор нужен, чтобы имя выдал ТОТ ЖЕ механизм
+             * раскрытия, что и в разрезе мастеров. Наружу он не уходит:
+             * `publishedFinance` снимает его вместе с выдачей имени.
+             */
+            staff: Array.isArray(payroll.staff)
+              ? payroll.staff.map((entry) => {
+                  const row = this.record(entry);
+                  const accrued = this.safeMoneyAmount(row.accrued);
+                  return {
+                    external_id:
+                      typeof row.staff_id === 'string' ? row.staff_id : null,
+                    status:
+                      row.status === 'available' && row.verified === true
+                        ? 'available'
+                        : 'unavailable',
+                    accrued:
+                      row.status === 'available' && row.verified === true
+                        ? accrued
+                        : null,
+                    paid:
+                      row.status === 'available' && row.verified === true
+                        ? this.safeMoneyAmount(row.paid)
+                        : null,
+                  };
+                })
+              : [],
             accrued_total: payrollAvailable
               ? this.safeMoneyAmount(payroll.accrued_total)
               : null,
@@ -1320,7 +1452,7 @@ export class BusinessStateService {
     // идентификаторы мастеров и цены журнала в их разрезе.
     delete published[SOURCE_OVERVIEW];
     if (data.finance !== undefined) {
-      published.finance = this.publishedFinance(data.finance);
+      published.finance = this.publishedFinance(data.finance, scope);
     }
     const staffScope = scope;
     return {
@@ -1386,13 +1518,42 @@ export class BusinessStateService {
   /** Подтверждённая касса услуг, достоверно связанная с мастером в CRM. */
 
   /** Служебные CRM-ID нужны для сопоставления, но не должны уходить модели. */
-  private publishedFinance(value: unknown) {
+  private publishedFinance(value: unknown, scope: StaffDisclosure) {
     const finance = this.record(value);
     const revenue = this.record(finance.revenue);
     const publishedRevenue = { ...revenue };
     delete publishedRevenue.by_staff;
     delete publishedRevenue.by_service;
-    return { ...finance, revenue: publishedRevenue };
+    const payroll = this.record(finance.payroll);
+    const publishedPayroll = Array.isArray(payroll.staff)
+      ? {
+          ...payroll,
+          staff: payroll.staff.map((entry) => {
+            const row = this.record(entry);
+            const externalId =
+              typeof row.external_id === 'string' ? row.external_id : null;
+            const allowed =
+              externalId !== null &&
+              (scope.allowedExternalIds === null ||
+                scope.allowedExternalIds.has(externalId));
+            return {
+              // Имя выдаёт то же раскрытие, что и в разрезе мастеров: граница
+              // «кому показывать имена» обязана быть одна на всю систему.
+              // `provider_name` при этом снимается: наружу уходит решение, а
+              // не то, как мастера зовут в чужой системе.
+              name: allowed ? (scope.names.get(externalId) ?? null) : null,
+              status: row.status ?? 'unavailable',
+              accrued: row.accrued ?? null,
+              paid: row.paid ?? null,
+            };
+          }),
+        }
+      : payroll;
+    return {
+      ...finance,
+      revenue: publishedRevenue,
+      ...(finance.payroll !== undefined ? { payroll: publishedPayroll } : {}),
+    };
   }
 
   /**
@@ -1660,6 +1821,16 @@ export class BusinessStateService {
     const averageTicket = Array.isArray(data.average_ticket)
       ? this.safeMoneyAmount(data.average_ticket[0])
       : null;
+    /**
+     * 🔴 Cycle 04 P4. Средняя стоимость записи по ценам журнала.
+     *
+     * Отдельная метрика с отдельным именем, потому что это НЕ средний чек:
+     * средний чек стоит на кассе и без кассы недоступен. Утренний бриф
+     * показывал именно эту величину, называя её средним чеком.
+     */
+    const averageBookedValue = Array.isArray(data.average_booked_value)
+      ? this.safeMoneyAmount(data.average_booked_value[0])
+      : null;
     return {
       // Только подтверждённая касса. Нет кассы — нет числа.
       revenue_amount_kopecks: financialRevenue?.amount_kopecks ?? null,
@@ -1700,6 +1871,8 @@ export class BusinessStateService {
       ...this.clientCohortMetrics(appointments),
       ...this.attendanceMetrics(data),
       average_ticket_amount_kopecks: averageTicket?.amount_kopecks ?? null,
+      average_booked_value_amount_kopecks:
+        averageBookedValue?.amount_kopecks ?? null,
       booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
     };
   }

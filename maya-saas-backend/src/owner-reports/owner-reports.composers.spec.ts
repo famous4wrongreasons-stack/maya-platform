@@ -3,22 +3,76 @@ import {
   composeMasterMorningBrief,
   composeMorningBrief,
 } from './owner-reports.composers';
+import type { BriefFacts, MasterBriefFacts } from './owner-reports.facts';
+
+/**
+ * Факты собираются вручную: композитор — чистая функция над уже посчитанным.
+ * Проверка того, что эти факты правильно ДОСТАЮТСЯ из канонического состояния,
+ * живёт отдельно, в `owner-reports.migration.spec.ts`.
+ */
+const facts = (overrides: Partial<BriefFacts> = {}): BriefFacts => ({
+  localDate: '2026-08-08',
+  source: 'crm',
+  sourceComplete: true,
+  incompleteReason: null,
+  counts: {
+    total: 14,
+    scheduled: 10,
+    completed: 3,
+    cancelled: 1,
+    bookedMinutes: 420,
+  },
+  attendance: {
+    arrived: null,
+    noShow: null,
+    measured: false,
+    unavailableReason: null,
+  },
+  bookedValue: {
+    amountKopecks: 3_510_000,
+    averageKopecks: 250_000,
+    basis: 'booked_prices',
+    unavailableReason: null,
+  },
+  revenue: {
+    amountKopecks: null,
+    basis: 'unavailable',
+    cashKopecks: null,
+    cashlessKopecks: null,
+    unclassifiedKopecks: null,
+  },
+  payroll: { status: null, accruedTotalKopecks: null, rows: [] },
+  staff: [
+    { name: 'Александр', appointments: 1, bookedMinutes: 60 },
+    { name: 'Стас', appointments: 0, bookedMinutes: 0 },
+    { name: 'Илья', appointments: 5, bookedMinutes: 300 },
+  ],
+  ...overrides,
+});
+
+const masterFacts = (
+  overrides: Partial<MasterBriefFacts> = {},
+): MasterBriefFacts => ({
+  localDate: '2026-08-08',
+  masterName: 'Илья',
+  presence: 'in_period',
+  sourceComplete: true,
+  incompleteReason: null,
+  counts: {
+    total: 7,
+    scheduled: 5,
+    completed: 1,
+    cancelled: 1,
+    bookedMinutes: 360,
+  },
+  attendance: { noShow: null, measured: false, unavailableReason: null },
+  ...overrides,
+});
 
 describe('owner-reports composers', () => {
   it('builds a morning brief with booked load', () => {
-    const result = composeMorningBrief({
-      localDate: '2026-08-08',
-      overview: {
-        appointments: { active: 14, booked_minutes: 420 },
-        revenue: [{ amount_kopecks: 3_510_000 }],
-        average_ticket: [{ amount_kopecks: 250_000 }],
-        staff: [
-          { name: 'Александр', appointments: 1 },
-          { name: 'Стас', appointments: 0 },
-          { name: 'Илья', appointments: 5 },
-        ],
-      },
-    });
+    const result = composeMorningBrief({ facts: facts() });
+
     expect(result.title).toContain('08.08');
     expect(result.bodyText).toContain('14 записей');
     expect(result.bodyText).toContain('Недозагружены');
@@ -26,21 +80,7 @@ describe('owner-reports composers', () => {
   });
 
   it('builds a private morning plan for a linked master', () => {
-    const result = composeMasterMorningBrief({
-      localDate: '2026-08-08',
-      masterName: 'Илья',
-      overview: {
-        appointments: {
-          total: 7,
-          active: 6,
-          scheduled: 5,
-          completed: 1,
-          cancelled: 1,
-          no_show: 0,
-          booked_minutes: 360,
-        },
-      },
-    });
+    const result = composeMasterMorningBrief({ facts: masterFacts() });
 
     expect(result.title).toContain('08.08');
     expect(result.bodyText).toContain('Доброе утро, Илья');
@@ -51,26 +91,33 @@ describe('owner-reports composers', () => {
 
   it('builds an evening cash/card report', () => {
     const result = composeDailyReport({
-      localDate: '2026-08-07',
-      overview: { appointments: { active: 19 } },
-      finance: {
+      facts: facts({
+        localDate: '2026-08-07',
+        counts: {
+          total: 19,
+          scheduled: 4,
+          completed: 15,
+          cancelled: 0,
+          bookedMinutes: 900,
+        },
         revenue: {
-          total: { amount_kopecks: 4_150_000 },
-          by_account: [
-            { name: 'Наличные', is_cash: true, amount_kopecks: 1_690_000 },
-            { name: 'Карта', is_cash: false, amount_kopecks: 2_460_000 },
-          ],
+          amountKopecks: 4_150_000,
+          basis: 'provider_transactions',
+          cashKopecks: 1_690_000,
+          cashlessKopecks: 2_460_000,
+          unclassifiedKopecks: 0,
         },
         payroll: {
           status: 'available',
-          accrued_total: { amount_kopecks: 1_538_000 },
-          staff: [
-            { name: 'Илья', accrued: { amount_kopecks: 1_248_000 } },
-            { name: 'Алексей', accrued: { amount_kopecks: 290_000 } },
+          accruedTotalKopecks: 1_538_000,
+          rows: [
+            { name: 'Илья', accruedKopecks: 1_248_000 },
+            { name: 'Алексей', accruedKopecks: 290_000 },
           ],
         },
-      },
+      }),
     });
+
     expect(result.title).toBe('Отчёт за 07.08');
     expect(result.bodyText).toContain('Наличные');
     expect(result.bodyText).toContain('Карта');
@@ -80,25 +127,23 @@ describe('owner-reports composers', () => {
 });
 
 describe('🔴 Cycle 04 P0 — сводки признаются в неполноте источника', () => {
-  const overview = (status?: 'complete' | 'incomplete') => ({
-    appointments: {
-      total: 3,
-      active: 3,
-      scheduled: 3,
-      completed: 0,
-      cancelled: 0,
-      no_show: 0,
-      booked_minutes: 180,
-    },
-    ...(status
-      ? { completeness: { appointments: { status, reason: null } } }
-      : {}),
-  });
+  const truncated = {
+    sourceComplete: false,
+    incompleteReason: 'source_read_truncated',
+  };
 
   it('полный источник: ноль отмен остаётся нулём и лишних слов нет', () => {
     const brief = composeMorningBrief({
-      localDate: '2026-08-18',
-      overview: overview('complete'),
+      facts: facts({
+        localDate: '2026-08-18',
+        counts: {
+          total: 3,
+          scheduled: 3,
+          completed: 0,
+          cancelled: 0,
+          bookedMinutes: 180,
+        },
+      }),
     });
 
     expect(brief.bodyText).toContain('отменено 0');
@@ -108,25 +153,32 @@ describe('🔴 Cycle 04 P0 — сводки признаются в неполн
 
   it('🔴 усечённый источник: «отменено 0» больше не выдаётся за измерение', () => {
     const brief = composeMorningBrief({
-      localDate: '2026-08-18',
-      overview: overview('incomplete'),
+      facts: facts({
+        localDate: '2026-08-18',
+        ...truncated,
+        counts: {
+          total: 3,
+          scheduled: 3,
+          completed: 0,
+          cancelled: 0,
+          bookedMinutes: 180,
+        },
+      }),
     });
 
     expect(brief.bodyText).toMatch(/прочитан НЕ целиком/);
-    expect(brief.bodyText).toMatch(/не измерено/);
     expect(brief.payload.appointments_source_complete).toBe(false);
+    expect(brief.payload.appointments_incomplete_reason).toBe(
+      'source_read_truncated',
+    );
   });
 
   it('🔴 то же и в вечернем отчёте, и в брифе мастера', () => {
     const daily = composeDailyReport({
-      localDate: '2026-08-18',
-      overview: overview('incomplete'),
-      finance: null,
+      facts: facts({ localDate: '2026-08-18', ...truncated }),
     });
     const master = composeMasterMorningBrief({
-      localDate: '2026-08-18',
-      overview: overview('incomplete'),
-      masterName: 'Илья',
+      facts: masterFacts({ localDate: '2026-08-18', ...truncated }),
     });
 
     expect(daily.bodyText).toMatch(/прочитан НЕ целиком/);
@@ -135,13 +187,23 @@ describe('🔴 Cycle 04 P0 — сводки признаются в неполн
     expect(master.payload.appointments_source_complete).toBe(false);
   });
 
-  it('источник без блока полноты считается полным — старые вызовы не ломаются', () => {
+  it('🔴 неизмеренное число называется словами, а не печатается нулём', () => {
     const brief = composeMorningBrief({
-      localDate: '2026-08-18',
-      overview: overview(),
+      facts: facts({
+        ...truncated,
+        counts: {
+          total: null,
+          scheduled: null,
+          completed: null,
+          cancelled: null,
+          bookedMinutes: null,
+        },
+      }),
     });
 
-    expect(brief.payload.appointments_source_complete).toBe(true);
-    expect(brief.bodyText).not.toMatch(/не целиком/);
+    expect(brief.bodyText).toMatch(/не измерено/);
+    expect(brief.bodyText).not.toMatch(/отменено 0/);
+    expect(brief.payload.booked).toBeNull();
+    expect(brief.payload.cancelled).toBeNull();
   });
 });

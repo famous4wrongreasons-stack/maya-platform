@@ -1,0 +1,446 @@
+{
+  "внешняя CRM: обычный день": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 4 записей, ожидаемо ~6 500 ₽ (средний чек 2 167 ₽).\nСтатусы: ожидают 1, завершено 1, отменено 1, неявок 1.\n🪑 Недозагружены: Стас.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 4,
+        "active": 3,
+        "scheduled": 1,
+        "completed": 1,
+        "cancelled": 1,
+        "no_show": 1,
+        "booked_value_kopecks": 650000,
+        "underused": [
+          "Стас"
+        ],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро, Илья! Вот ваш план на сегодня.\n\nЗаписей: 2; ожидают визита 1; завершено 1; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 2,
+        "scheduled": 1,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nЗарплаты (смена):\n• Илья: 2 500 ₽\n• Стас: 1 500 ₽\nИтого начислено: 4 000 ₽\n\nОплаты за день:\n💵 Наличные — 5 000 ₽\n💳 Карта — 7 000 ₽\nВыручка за день: 12 500 ₽\nЗаписей за день: 4\nСтатусы: завершено 1, ожидают 1, отменено 1, неявок 1.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 4,
+        "scheduled": 1,
+        "completed": 1,
+        "cancelled": 1,
+        "no_show": 1,
+        "revenue_total_kopecks": 1250000,
+        "cash_kopecks": 500000,
+        "card_kopecks": 700000,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  },
+  "внешняя CRM: чтение оборвано": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 1 записей, ожидаемо ~2 500 ₽ (средний чек 2 500 ₽).\nСтатусы: ожидают 0, завершено 1, отменено 0, неявок 0.\n🪑 Недозагружены: Илья.\n\n⚠️ Журнал за этот период прочитан НЕ целиком: числа ниже — нижняя граница, и ноль в них означает «не измерено», а не «ничего не было».\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 1,
+        "active": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 250000,
+        "underused": [
+          "Илья"
+        ],
+        "appointments_source_complete": false,
+        "appointments_incomplete_reason": "source_read_truncated"
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро, Илья! Вот ваш план на сегодня.\n\nЗаписей: 1; ожидают визита 0; завершено 1; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.\n\n⚠️ Журнал за этот период прочитан НЕ целиком: числа ниже — нижняя граница, и ноль в них означает «не измерено», а не «ничего не было».\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": false,
+        "appointments_incomplete_reason": "source_read_truncated"
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nЗарплаты (смена):\n• Илья: 2 500 ₽\n• Стас: 1 500 ₽\nИтого начислено: 4 000 ₽\n\nОплаты за день:\n💵 Наличные — 5 000 ₽\n💳 Карта — 7 000 ₽\nВыручка за день: 12 500 ₽\nЗаписей за день: 1\nСтатусы: завершено 1, ожидают 0, отменено 0, неявок 0.\n\n⚠️ Журнал за этот период прочитан НЕ целиком: числа ниже — нижняя граница, и ноль в них означает «не измерено», а не «ничего не было».\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 1250000,
+        "cash_kopecks": 500000,
+        "card_kopecks": 700000,
+        "appointments_source_complete": false,
+        "appointments_incomplete_reason": "source_read_truncated"
+      }
+    }
+  },
+  "внешняя CRM: пустой день": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 0 записей.\nСтатусы: ожидают 0, завершено 0, отменено 0, неявок 0.\n🪑 Загрузка мастеров выглядит ровной на утро.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 0,
+        "active": 0,
+        "scheduled": 0,
+        "completed": 0,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 0,
+        "underused": [],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро! Вот ваш план на сегодня.\n\nЗаписей: 0; ожидают визита 0; завершено 0; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: проверьте свободные окна с администратором и предложите их клиентам, которым уже подходит срок следующего визита.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 0,
+        "scheduled": 0,
+        "completed": 0,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nЗарплаты (смена):\n• Илья: 2 500 ₽\n• Стас: 1 500 ₽\nИтого начислено: 4 000 ₽\n\nОплаты за день:\n💵 Наличные — 5 000 ₽\n💳 Карта — 7 000 ₽\nВыручка за день: 12 500 ₽\nЗаписей за день: 0\nСтатусы: завершено 0, ожидают 0, отменено 0, неявок 0.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 0,
+        "scheduled": 0,
+        "completed": 0,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 1250000,
+        "cash_kopecks": 500000,
+        "card_kopecks": 700000,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  },
+  "внешняя CRM: деньги недоступны": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 1 записей, ожидаемо ~2 500 ₽ (средний чек 2 500 ₽).\nСтатусы: ожидают 0, завершено 1, отменено 0, неявок 0.\n🪑 Недозагружены: Илья.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 1,
+        "active": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 250000,
+        "underused": [
+          "Илья"
+        ],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро, Илья! Вот ваш план на сегодня.\n\nЗаписей: 1; ожидают визита 0; завершено 1; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nОплаты за день:\nПодтверждённая касса за день пока пустая или недоступна.\nЗаписей за день: 1\nСтатусы: завершено 1, ожидают 0, отменено 0, неявок 0.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 0,
+        "cash_kopecks": 0,
+        "card_kopecks": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  },
+  "внешняя CRM: касса пустая": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 1 записей, ожидаемо ~2 500 ₽ (средний чек 2 500 ₽).\nСтатусы: ожидают 0, завершено 1, отменено 0, неявок 0.\n🪑 Недозагружены: Илья.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 1,
+        "active": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 250000,
+        "underused": [
+          "Илья"
+        ],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро, Илья! Вот ваш план на сегодня.\n\nЗаписей: 1; ожидают визита 0; завершено 1; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nОплаты за день:\nПодтверждённая касса за день пока пустая или недоступна.\nЗаписей за день: 1\nСтатусы: завершено 1, ожидают 0, отменено 0, неявок 0.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 0,
+        "cash_kopecks": 0,
+        "card_kopecks": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  },
+  "внутренний календарь": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 2 записей, ожидаемо ~5 500 ₽ (средний чек 2 750 ₽).\nСтатусы: ожидают 0, завершено 2, отменено 0, неявок 0.\n🪑 Загрузка мастеров выглядит ровной на утро.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 2,
+        "active": 2,
+        "scheduled": 0,
+        "completed": 2,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 550000,
+        "underused": [],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро! Вот ваш план на сегодня.\n\nЗаписей: 0; ожидают визита 0; завершено 0; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: проверьте свободные окна с администратором и предложите их клиентам, которым уже подходит срок следующего визита.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 0,
+        "scheduled": 0,
+        "completed": 0,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nОплаты за день:\nПодтверждённая касса за день пока пустая или недоступна.\nЗаписей за день: 2\nСтатусы: завершено 2, ожидают 0, отменено 0, неявок 0.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 2,
+        "scheduled": 0,
+        "completed": 2,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 0,
+        "cash_kopecks": 0,
+        "card_kopecks": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  },
+  "мастер не найден в срезе": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 1 записей, ожидаемо ~2 500 ₽ (средний чек 2 500 ₽).\nСтатусы: ожидают 0, завершено 1, отменено 0, неявок 0.\n🪑 Недозагружены: Илья.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 1,
+        "active": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 250000,
+        "underused": [
+          "Илья"
+        ],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро! Вот ваш план на сегодня.\n\nЗаписей: 0; ожидают визита 0; завершено 0; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: проверьте свободные окна с администратором и предложите их клиентам, которым уже подходит срок следующего визита.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 0,
+        "scheduled": 0,
+        "completed": 0,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nЗарплаты (смена):\n• Илья: 2 500 ₽\n• Стас: 1 500 ₽\nИтого начислено: 4 000 ₽\n\nОплаты за день:\n💵 Наличные — 5 000 ₽\n💳 Карта — 7 000 ₽\nВыручка за день: 12 500 ₽\nЗаписей за день: 1\nСтатусы: завершено 1, ожидают 0, отменено 0, неявок 0.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 1250000,
+        "cash_kopecks": 500000,
+        "card_kopecks": 700000,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  },
+  "запись вне окна провайдера": {
+    "morning": {
+      "title": "MAYA · утренний план · 13.08",
+      "bodyText": "Доброе утро! Посмотрела салон на сегодня 👇\n\n📅 Сегодня в CRM: всего 1 записей, ожидаемо ~2 500 ₽ (средний чек 2 500 ₽).\nСтатусы: ожидают 0, завершено 1, отменено 0, неявок 0.\n🪑 Недозагружены: Илья.\n\nОткройте чат MAYA, если нужно закрыть окна или скорректировать план.",
+      "payload": {
+        "kind": "morning_brief",
+        "local_date": "2026-08-13",
+        "booked": 1,
+        "active": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_value_kopecks": 250000,
+        "underused": [
+          "Илья"
+        ],
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "master": {
+      "title": "MAYA · ваш день · 13.08",
+      "bodyText": "Доброе утро, Илья! Вот ваш план на сегодня.\n\nЗаписей: 1; ожидают визита 0; завершено 1; отменено 0; неявок 0.\nКалендарь пока свободен.\nСовет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.\n\nПлан сохранён в чате MAYA.",
+      "payload": {
+        "kind": "master_morning_brief",
+        "local_date": "2026-08-13",
+        "total": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "booked_minutes": 0,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    },
+    "evening": {
+      "title": "Отчёт за 13.08",
+      "bodyText": "📊 Отчёт за 13.08 готов\n\nЗарплаты (смена):\n• Илья: 2 500 ₽\n• Стас: 1 500 ₽\nИтого начислено: 4 000 ₽\n\nОплаты за день:\n💵 Наличные — 5 000 ₽\n💳 Карта — 7 000 ₽\nВыручка за день: 12 500 ₽\nЗаписей за день: 1\nСтатусы: завершено 1, ожидают 0, отменено 0, неявок 0.\n\nСообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.",
+      "payload": {
+        "kind": "daily_report",
+        "local_date": "2026-08-13",
+        "visits": 1,
+        "scheduled": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "no_show": 0,
+        "revenue_total_kopecks": 1250000,
+        "cash_kopecks": 500000,
+        "card_kopecks": 700000,
+        "appointments_source_complete": true,
+        "appointments_incomplete_reason": null
+      }
+    }
+  }
+}

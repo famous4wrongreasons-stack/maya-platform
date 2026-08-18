@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TenantStatus, UserRole, CalendarSource } from '@prisma/client';
 
-import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
+import {
+  BusinessStateService,
+  type BusinessState,
+  type StaffIdentityRow,
+} from '../business-state/business-state.service';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +16,7 @@ import {
   composeMasterMorningBrief,
   composeMorningBrief,
 } from './owner-reports.composers';
+import { businessBriefFacts, masterBriefFacts } from './owner-reports.facts';
 import {
   dayIsoRange,
   localCalendarDate,
@@ -47,7 +52,15 @@ export class OwnerReportsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly analytics: OperationsAnalyticsService,
+    /**
+     * 🔴 Cycle 04 P4. Отчёты СПРАШИВАЮТ факты, а не считают их.
+     *
+     * Раньше здесь стоял сервис аналитики, и бриф собирал числа из сырого
+     * обзора сам: `?? 0` по дороге к тексту стирал разницу между «отмен не
+     * было» и «журнал прочитан не целиком», а вечерний отчёт складывал строки
+     * счетов и печатал «касса пустая или недоступна» одной фразой.
+     */
+    private readonly businessState: BusinessStateService,
     private readonly inbox: InboxService,
     private readonly tenantContext: TenantContextService,
     private readonly configService: ConfigService,
@@ -141,13 +154,14 @@ export class OwnerReportsService {
       return 'skipped';
     }
 
-    const range = dayIsoRange(tenant.defaultTimezone, localDate);
-    const overview = await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-      this.analytics.getBusinessOperationalOverview(tenant.id, range),
-    );
+    const state = await this.readState(tenant, localDate, {
+      financeAllowed: false,
+    });
     let stored = 0;
     if (!ownerAlreadySent && ownerRecipients.length > 0) {
-      const composed = composeMorningBrief({ localDate, overview });
+      const composed = composeMorningBrief({
+        facts: businessBriefFacts(state, localDate),
+      });
       const published = await this.inbox.publishForTenant(tenant.id, {
         type: 'morning_brief',
         sourceEventId,
@@ -164,7 +178,7 @@ export class OwnerReportsService {
     stored += await this.publishMasterMorningBriefs(
       tenant,
       localDate,
-      overview,
+      state,
       pendingMasterRecipients,
     );
     if (stored === 0) return 'skipped';
@@ -177,32 +191,14 @@ export class OwnerReportsService {
   private async publishMasterMorningBriefs(
     tenant: EligibleTenant,
     localDate: string,
-    overview: Awaited<
-      ReturnType<OperationsAnalyticsService['getBusinessOperationalOverview']>
-    >,
+    state: BusinessState,
     recipients: Map<string, string>,
   ): Promise<number> {
     let stored = 0;
-    for (const [userId, staffId] of recipients) {
+    for (const [userId, externalId] of recipients) {
       const sourceEventId = this.masterMorningSourceEventId(localDate, userId);
-      const staff = overview.staff.find((row) => row.staff_id === staffId);
       const composed = composeMasterMorningBrief({
-        localDate,
-        masterName: staff?.name,
-        overview: {
-          appointments: {
-            total: staff?.total ?? 0,
-            active: staff?.appointments ?? 0,
-            scheduled: staff?.scheduled ?? 0,
-            completed: staff?.completed ?? 0,
-            cancelled: staff?.cancelled ?? 0,
-            no_show: staff?.no_show ?? 0,
-            booked_minutes: staff?.booked_minutes ?? 0,
-          },
-          // Полнота относится к чтению журнала целиком, а не к строке мастера:
-          // если прочитано не всё, неполон и личный срез.
-          completeness: overview.completeness,
-        },
+        facts: masterBriefFacts(state, externalId || null, localDate),
       });
       try {
         const published = await this.inbox.publishForTenant(tenant.id, {
@@ -238,20 +234,32 @@ export class OwnerReportsService {
           userId: { not: null },
           role: { in: MASTER_ROLES },
         },
-        select: { userId: true, staffId: true },
+        select: { userId: true, externalStaffId: true },
       }),
       this.prisma.internalProvider.findMany({
         where: { tenantId, active: true, userId: { not: null } },
         select: { userId: true, id: true },
       }),
     ]);
-    // 🔴 Одно пространство идентификаторов. До cutover в это же значение
-    // клали ЛИБО внешний id провайдера, ЛИБО cuid внутреннего мастера, и
-    // промах при сопоставлении давал не ошибку, а бриф с нулями.
+    /**
+     * 🔴 Ключ сопоставления — ВНЕШНИЙ идентификатор календаря, тот самый, по
+     * которому канонический слой отдаёт строки мастеров.
+     *
+     * До Cycle 04 P4 здесь лежала идентичность Maya (`staffId`), а строку
+     * искали в срезе по полю `staff_id`. У арендатора на СОБСТВЕННОМ календаре
+     * это поле всегда пустое: оно берётся из `staffProviderLink`, а внутренним
+     * мастерам такую связь никто не создаёт. Совпадения не было никогда, и
+     * каждый внутренний мастер получал бриф с нулями вместо своего дня —
+     * молча, потому что нули выглядят как пустой день.
+     *
+     * У внешней CRM внешний идентификатор лежит прямо в доступе мастера, у
+     * внутреннего календаря им является сам идентификатор провайдера — тот же,
+     * что стоит в записях. Одно пространство, никаких переходов.
+     */
     const recipients = new Map<string, string>();
     for (const link of crmLinks) {
-      if (link.userId && link.staffId)
-        recipients.set(link.userId, link.staffId);
+      if (link.userId && link.externalStaffId)
+        recipients.set(link.userId, link.externalStaffId);
     }
     for (const link of internalLinks) {
       if (link.userId && !recipients.has(link.userId)) {
@@ -305,26 +313,22 @@ export class OwnerReportsService {
     );
     if (recipients.length === 0) return 'skipped';
 
-    const range = dayIsoRange(tenant.defaultTimezone, localDate);
-    const overview = await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-      this.analytics.getBusinessOperationalOverview(tenant.id, range),
-    );
-    let finance = null as Awaited<
-      ReturnType<OperationsAnalyticsService['getBusinessFinance']>
-    > | null;
-    try {
-      finance = await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-        this.analytics.getBusinessFinance(tenant.id, range),
-      );
-    } catch (error) {
-      this.logger.warn(
-        `daily_report finance unavailable tenant=${tenant.slug}: ${
-          error instanceof Error ? error.message : 'unknown'
-        }`,
-      );
-    }
+    /**
+     * 🔴 Денежная зависимость сохранена, но она ОДНА.
+     *
+     * Вечерний отчёт по-прежнему показывает деньги только там, где финансовый
+     * контур ответил, — это свойство capability, а не отчёта. Но читает его
+     * теперь канонический владелец: раньше отчёт звал финансы сам, складывал
+     * строки счетов в наличные и безнал и печатал итог рядом с выручкой,
+     * посчитанной другим путём.
+     */
+    const state = await this.readState(tenant, localDate, {
+      financeAllowed: true,
+    });
 
-    const composed = composeDailyReport({ localDate, overview, finance });
+    const composed = composeDailyReport({
+      facts: businessBriefFacts(state, localDate),
+    });
     const published = await this.inbox.publishForTenant(tenant.id, {
       type: 'daily_report',
       sourceEventId,
@@ -340,6 +344,107 @@ export class OwnerReportsService {
       `daily_report sent tenant=${tenant.slug} recipients=${published.stored}`,
     );
     return 'sent';
+  }
+
+  /**
+   * Собрать сводки БЕЗ доставки.
+   *
+   * 🔴 Нужен для проверки в бою: убедиться, что бриф считает то же, что AI и
+   * кабинет, можно только на настоящих данных — но отправлять владельцу лишний
+   * бриф ради проверки нельзя. Здесь тот же путь, что и у планировщика, ровно
+   * до момента публикации.
+   */
+  async renderBriefs(
+    tenant: EligibleTenant,
+    localDate: string,
+    options?: { masterExternalIds?: string[] },
+  ): Promise<{
+    morning: ReturnType<typeof composeMorningBrief>;
+    evening: ReturnType<typeof composeDailyReport>;
+    masters: Array<{
+      externalId: string;
+      brief: ReturnType<typeof composeMasterMorningBrief>;
+    }>;
+    facts: ReturnType<typeof businessBriefFacts>;
+  }> {
+    const [morningState, eveningState] = await Promise.all([
+      this.readState(tenant, localDate, { financeAllowed: false }),
+      this.readState(tenant, localDate, { financeAllowed: true }),
+    ]);
+    const morningFacts = businessBriefFacts(morningState, localDate);
+    const eveningFacts = businessBriefFacts(eveningState, localDate);
+    const masterIds = options?.masterExternalIds ?? [
+      ...(await this.listMasterMorningRecipients(tenant.id)).values(),
+    ];
+    return {
+      morning: composeMorningBrief({ facts: morningFacts }),
+      evening: composeDailyReport({ facts: eveningFacts }),
+      masters: masterIds.map((externalId) => ({
+        externalId,
+        brief: composeMasterMorningBrief({
+          facts: masterBriefFacts(morningState, externalId || null, localDate),
+        }),
+      })),
+      facts: eveningFacts,
+    };
+  }
+
+  /**
+   * Состояние бизнеса за календарный день арендатора.
+   *
+   * 🔴 Одно чтение на все сводки этого запуска: и владелец, и каждый мастер
+   * получают факты из ОДНОГО состояния. Иначе утренний бриф владельца и бриф
+   * мастера могли бы разойтись между собой — два чтения одного дня в разные
+   * секунды это уже разные числа.
+   *
+   * Повтора чтения нет: его не было и до миграции, а планировщик ходит по
+   * всем арендаторам подряд.
+   */
+  private async readState(
+    tenant: EligibleTenant,
+    localDate: string,
+    options: { financeAllowed: boolean },
+  ): Promise<BusinessState> {
+    const range = dayIsoRange(tenant.defaultTimezone, localDate);
+    return this.tenantContext.runAsSystemTenant(tenant.id, () =>
+      this.businessState.business({
+        tenantId: tenant.id,
+        period: range,
+        comparisonMode: 'none',
+        comparisonPeriod: null,
+        financeAllowed: options.financeAllowed,
+        // Стоимость записанного — операционный факт владельца салона (P2.1).
+        bookedValueAllowed: true,
+        operationalDetail: false,
+        retryOnFailure: false,
+        /**
+         * Имена мастеров нужны обеим сводкам: владелец видит недозагруженных
+         * поимённо, мастер — собственное имя в приветствии. Решение принимает
+         * вызывающий, и здесь оно принято явно: это серверная сборка сводок
+         * для тех, кому эти имена и так открыты.
+         */
+        disclose: (rows: StaffIdentityRow[]) => {
+          /**
+           * 🔴 Именованная строка сильнее безымянной.
+           *
+           * В список идентичностей приходят и мастера периода (у них имя есть),
+           * и строки расчёта зарплаты (имени в них нет намеренно: как человека
+           * зовут в чужой системе — не основание называть его так владельцу).
+           * Простая сборка карты «последний выигрывает» стирала бы имя мастера
+           * его же безымянной зарплатной строкой.
+           */
+          const names = new Map<string, string>();
+          for (const row of rows) {
+            const name = row.name?.trim();
+            if (name) names.set(row.externalId, name);
+            else if (!names.has(row.externalId)) {
+              names.set(row.externalId, 'Мастер');
+            }
+          }
+          return { names, allowedExternalIds: null };
+        },
+      }),
+    );
   }
 
   async listEligibleTenants(): Promise<EligibleTenant[]> {
