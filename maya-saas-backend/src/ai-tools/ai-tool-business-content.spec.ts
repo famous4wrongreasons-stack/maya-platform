@@ -1,3 +1,4 @@
+import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { BusinessContentService } from '../business-content/business-content.service';
@@ -31,6 +32,10 @@ describe('AiToolHandlerService extended business tools', () => {
       {} as PrismaService,
       {} as CustomersService,
       {} as StaffService,
+      new BusinessStateService(
+        {} as OperationsAnalyticsService,
+        {} as PrismaService,
+      ),
       undefined,
       undefined,
       undefined,

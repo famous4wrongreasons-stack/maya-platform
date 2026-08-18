@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 
+import { BusinessStateModule } from '../business-state/business-state.module';
+
 import { OperationsAnalyticsModule } from '../analytics/operations-analytics.module';
 import { AppointmentsModule } from '../appointments/appointments.module';
 import { AppointmentNotificationsModule } from '../appointment-notifications/appointment-notifications.module';
@@ -33,6 +35,7 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
 
 @Module({
   imports: [
+    BusinessStateModule,
     CustomersModule,
     StaffModule,
     OperationsAnalyticsModule,

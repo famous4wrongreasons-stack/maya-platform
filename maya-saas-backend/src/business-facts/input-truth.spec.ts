@@ -27,6 +27,7 @@ import { TenantsService } from '../tenants/tenants.service';
 import { UserRole } from '../common/domain.enums';
 import { AiToolHandlerService } from '../ai-tools/ai-tool-handler.service';
 import type { ValidatedAiToolArguments } from '../ai-tools/ai-tool.types';
+import { BusinessStateService } from '../business-state/business-state.service';
 import { AppointmentPeriodReader } from './appointment-period.reader';
 import { AttendanceFactsService } from './attendance-facts.service';
 
@@ -662,6 +663,7 @@ describe('P0 §3 — отмены', () => {
       prisma,
       {} as CustomersService,
       {} as StaffService,
+      new BusinessStateService(analyticsService, prisma),
     );
     const args = {
       period: 'custom',
@@ -746,6 +748,7 @@ describe('P0 §3 — отмены', () => {
       prisma,
       {} as CustomersService,
       {} as StaffService,
+      new BusinessStateService(analyticsService, prisma),
     );
     const args = {
       period: 'custom',
@@ -927,6 +930,7 @@ describe('P0 §4 — журнал дня в AI-слое', () => {
       prisma,
       {} as CustomersService,
       {} as StaffService,
+      new BusinessStateService({} as OperationsAnalyticsService, prisma),
     );
     return () =>
       handler.execute(
@@ -1206,6 +1210,7 @@ describe('P0 §26 — периоды разной полноты не сравн
       prisma,
       {} as CustomersService,
       {} as StaffService,
+      new BusinessStateService(analyticsService, prisma),
     );
 
     const result = (await handler.execute(

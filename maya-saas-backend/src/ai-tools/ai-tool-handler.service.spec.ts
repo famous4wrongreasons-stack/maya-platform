@@ -1,3 +1,4 @@
+import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
@@ -2837,6 +2838,17 @@ describe('AiToolHandlerService output minimization', () => {
     customersService?: CustomersService;
     staffService?: StaffService;
   }) {
+    const prisma =
+      overrides.prisma ??
+      ({
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            calendarSource: 'external',
+            defaultTimezone: 'UTC',
+          }),
+        },
+        branch: { findFirst: jest.fn() },
+      } as unknown as PrismaService);
     return new AiToolHandlerService(
       overrides.crmService ?? ({} as CrmService),
       overrides.appointmentsService ?? ({} as AppointmentsService),
@@ -2851,18 +2863,16 @@ describe('AiToolHandlerService output minimization', () => {
         } as unknown as LoyaltyService),
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),
       overrides.expensesService ?? ({} as ExpensesService),
-      overrides.prisma ??
-        ({
-          tenant: {
-            findUnique: jest.fn().mockResolvedValue({
-              calendarSource: 'external',
-              defaultTimezone: 'UTC',
-            }),
-          },
-          branch: { findFirst: jest.fn() },
-        } as unknown as PrismaService),
+      prisma,
       overrides.customersService ?? ({} as CustomersService),
       overrides.staffService ?? ({} as StaffService),
+      // 🔴 Тот же экземпляр prisma, что и у обработчика: канонический слой
+      // читает арендатора сам, и подменить ему источник значило бы проверять
+      // не ту систему.
+      new BusinessStateService(
+        overrides.analyticsService ?? ({} as OperationsAnalyticsService),
+        prisma,
+      ),
     );
   }
 });

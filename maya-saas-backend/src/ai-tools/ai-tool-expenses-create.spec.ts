@@ -1,3 +1,6 @@
+import { CustomersService } from '../customers/customers.service';
+import { StaffService } from '../staff/staff.service';
+import { BusinessStateService } from '../business-state/business-state.service';
 import { ForbiddenException } from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
@@ -495,6 +498,11 @@ function createHarness() {
     {} as OperationsAnalyticsService,
     expensesService,
     prisma,
+    // Арность конструктора соблюдена: недостающие зависимости раньше молча
+    // становились `undefined`, и спека закрепляла обход как норму.
+    {} as CustomersService,
+    {} as StaffService,
+    new BusinessStateService({} as OperationsAnalyticsService, prisma),
   );
   const runtime = new AiToolRuntimeService(
     prisma,

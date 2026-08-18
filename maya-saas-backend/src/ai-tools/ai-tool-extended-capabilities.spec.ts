@@ -1,3 +1,4 @@
+import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -613,24 +614,30 @@ function createService(overrides: {
   inboxService?: InboxService;
   auditLogService?: AuditLogService;
 }) {
+  const prisma =
+    overrides.prisma ??
+    ({
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          calendarSource: 'external',
+          defaultTimezone: 'Europe/Moscow',
+        }),
+      },
+      branch: { findFirst: jest.fn() },
+    } as unknown as PrismaService);
   return new AiToolHandlerService(
     overrides.crmService ?? ({} as CrmService),
     overrides.appointmentsService ?? ({} as AppointmentsService),
     overrides.loyaltyService ?? ({} as LoyaltyService),
     overrides.analyticsService ?? ({} as OperationsAnalyticsService),
     overrides.expensesService ?? ({} as ExpensesService),
-    overrides.prisma ??
-      ({
-        tenant: {
-          findUnique: jest.fn().mockResolvedValue({
-            calendarSource: 'external',
-            defaultTimezone: 'Europe/Moscow',
-          }),
-        },
-        branch: { findFirst: jest.fn() },
-      } as unknown as PrismaService),
+    prisma,
     overrides.customersService ?? ({} as CustomersService),
     overrides.staffService ?? ({} as StaffService),
+    new BusinessStateService(
+      overrides.analyticsService ?? ({} as OperationsAnalyticsService),
+      prisma,
+    ),
     overrides.dashboardPreferencesService,
     overrides.inboxService,
     overrides.auditLogService,

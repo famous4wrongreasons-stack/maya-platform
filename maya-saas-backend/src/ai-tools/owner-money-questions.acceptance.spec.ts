@@ -11,6 +11,7 @@
  * вовсе (провайдер недоступен — тогда текст собирает сервер), либо повторяет
  * собранный сервером ответ, и тот проходит сторожа чисел как ответ модели.
  */
+import { BusinessStateService } from '../business-state/business-state.service';
 import { CustomersService } from '../customers/customers.service';
 import { StaffService } from '../staff/staff.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
@@ -583,6 +584,7 @@ function createHarness(
     // становились `undefined`, и спека закрепляла обход как норму.
     {} as CustomersService,
     {} as StaffService,
+    new BusinessStateService(analytics, prisma),
   );
   const runtime = new AiToolRuntimeService(
     prisma,

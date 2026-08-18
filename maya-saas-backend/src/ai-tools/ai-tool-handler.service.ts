@@ -7,6 +7,12 @@ import {
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
+import {
+  BusinessStateService,
+  type PeriodComparisonMode,
+  type StaffDisclosure,
+  type StaffIdentityRow,
+} from '../business-state/business-state.service';
 import { AppointmentNotificationsService } from '../appointment-notifications/appointment-notifications.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { BusinessContentService } from '../business-content/business-content.service';
@@ -64,7 +70,7 @@ import {
   parseVisitOutcome,
   unavailableAuthorityView,
 } from '../domain';
-import type { BusinessPeriod, PeriodRead, RevenueBasis } from '../domain';
+import type { BusinessPeriod, PeriodRead } from '../domain';
 import { CRM_JOURNAL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
@@ -116,39 +122,6 @@ const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
  * одного другим занижает деньги мастера ровно во столько раз, во сколько
  * отличается его процент.
  */
-type StaffMoneyAmount = {
-  currency: string | null;
-  amount_kopecks: number;
-  amount_major_units: number | null;
-};
-
-type StaffSalaryRow = {
-  accrued: StaffMoneyAmount;
-  paid: StaffMoneyAmount | null;
-};
-
-type StaffSalaryScope =
-  | { status: 'available'; rows: Map<string, StaffSalaryRow> }
-  | { status: 'unavailable'; reason: string };
-
-/** Почему начислений по мастеру нет — машиночитаемо, без гадания. */
-const STAFF_SALARY_UNAVAILABLE = {
-  notRequested: 'payroll_not_requested_for_this_report',
-  internalCalendar: 'internal_calendar_has_no_payroll_calculation',
-  companyScope: 'crm_payroll_is_company_scoped_and_has_no_branch_split',
-  roleRestricted: 'role_not_allowed_to_read_payroll',
-  identityUnknown: 'employee_is_not_linked_to_a_crm_staff_record',
-  financeUnavailable: 'crm_finance_unavailable',
-  payrollUnavailable: 'crm_payroll_unavailable',
-  rangeTooLarge: 'crm_payroll_range_too_large',
-  rowUnavailable: 'crm_payroll_row_unavailable_for_this_master',
-} as const;
-
-/** Почему подтверждённой выручки конкретного мастера может не быть. */
-const STAFF_CONFIRMED_REVENUE_UNAVAILABLE = {
-  crm: 'crm_financial_transactions_are_not_attributed_to_this_master',
-  maya: 'internal_calendar_records_booked_appointment_value_which_is_not_till_confirmed_cash',
-} as const;
 
 /**
  * Телефон гостя видит только владелец. Мастеру и администратору хватает имени,
@@ -183,6 +156,14 @@ export class AiToolHandlerService {
     private readonly prisma: PrismaService,
     private readonly customersService: CustomersService,
     private readonly staffService: StaffService,
+    /**
+     * 🔴 Cycle 04 P1. Канонический владелец состояния бизнеса.
+     *
+     * Направление зависимости одностороннее: слой, который разговаривает,
+     * СПРАШИВАЕТ у слоя, который считает. Второй копии вычисления здесь больше
+     * нет — храповик границы следит, чтобы она не вернулась.
+     */
+    private readonly businessState: BusinessStateService,
     private readonly dashboardPreferencesService?: DashboardPreferencesService,
     private readonly inboxService?: InboxService,
     private readonly auditLogService?: AuditLogService,
@@ -2515,473 +2496,6 @@ export class AiToolHandlerService {
     return `${day}.${month}.${year}`;
   }
 
-  /**
-   * Промежуточное представление аналитики: имя и внешний идентификатор мастера
-   * ещё на месте. Отдавать это наружу нельзя — обязательно через
-   * publishAnalytics.
-   */
-  private async readAnalytics(resultPromise: Promise<unknown>) {
-    return this.safeAnalytics(await resultPromise);
-  }
-
-  /** Тоже промежуточное представление — см. readAnalytics. */
-  private async readBusinessAnalytics(
-    principal: AiToolPrincipal,
-    query: AnalyticsRangeQueryDto,
-  ) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id: principal.tenantId },
-      select: { calendarSource: true },
-    });
-    const shouldReadFinance =
-      tenant?.calendarSource === 'external' &&
-      !query.branchId &&
-      CRM_FINANCE_ROLES.has(principal.role);
-    const [overviewValue, financeSummary] = await Promise.all([
-      this.businessOperationalOverview(principal.tenantId, query),
-      shouldReadFinance
-        ? Promise.resolve()
-            .then(() =>
-              this.analyticsService.getBusinessFinance(
-                principal.tenantId,
-                query,
-              ),
-            )
-            .then((value) => this.record(value))
-            .catch(() => null)
-        : Promise.resolve(null),
-    ]);
-    const overview = this.record(overviewValue);
-    const operational = this.safeAnalytics(overview);
-    if (overview.data_source !== 'crm') {
-      // Внутренний календарь не считает зарплату вовсе: расчёта нет ни у кого,
-      // и это свойство источника, а не запрета по роли.
-      return this.withStaffSalary(operational, {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
-      });
-    }
-
-    const failClosed = {
-      ...operational,
-      revenue: [],
-      expenses: [],
-      net: [],
-      average_ticket: [],
-      daily: operational.daily.map((entry) => ({ ...entry, revenue: [] })),
-      staff_summary: operational.staff_summary.map((entry) => ({
-        ...entry,
-        revenue: [],
-      })),
-      // 🔴 booked_value — это цены из журнала записей, а не подтверждённая
-      // касса. В CRM-режиме деньги признаются только через getBusinessFinance,
-      // и оставлять здесь суммы значило бы отдать владельцу неподтверждённую
-      // выручку в разрезе услуг — ровно то, ради чего fail-closed и написан.
-      service_summary: operational.service_summary.map((entry) => ({
-        ...entry,
-        booked_value: [],
-      })),
-    };
-
-    if (query.branchId) {
-      return this.withStaffSalary(
-        {
-          ...failClosed,
-          finance: this.unavailableFinance('company_scope_only'),
-        },
-        {
-          status: 'unavailable',
-          reason: STAFF_SALARY_UNAVAILABLE.companyScope,
-        },
-      );
-    }
-    // 🔴 Начисления поимённо видит только тот, кому открыта касса салона.
-    // Управляющий и руководитель филиала есть в разрезе мастеров по именам, но
-    // в финансовых ролях их нет — им достаётся честное «недоступно с причиной»,
-    // а не чужая зарплата в довесок к записям.
-    if (!CRM_FINANCE_ROLES.has(principal.role)) {
-      return this.withStaffSalary(
-        {
-          ...failClosed,
-          finance: this.unavailableFinance('role_restricted'),
-        },
-        {
-          status: 'unavailable',
-          reason: STAFF_SALARY_UNAVAILABLE.roleRestricted,
-        },
-      );
-    }
-    if (!financeSummary) {
-      return this.withStaffSalary(
-        {
-          ...failClosed,
-          finance: this.unavailableFinance('finance_unavailable'),
-        },
-        {
-          status: 'unavailable',
-          reason: STAFF_SALARY_UNAVAILABLE.financeUnavailable,
-        },
-      );
-    }
-
-    const revenue = this.record(financeSummary.revenue);
-    const payroll = this.record(financeSummary.payroll);
-    const revenueTotal =
-      revenue.status === 'available' && revenue.verified === true
-        ? this.safeMoneyAmount(revenue.total)
-        : null;
-    const transactionCount =
-      typeof revenue.transaction_count === 'number' &&
-      Number.isFinite(revenue.transaction_count)
-        ? revenue.transaction_count
-        : null;
-    const averageTicket =
-      revenueTotal && transactionCount && transactionCount > 0
-        ? {
-            currency: revenueTotal.currency,
-            amount_kopecks: Math.round(
-              revenueTotal.amount_kopecks / transactionCount,
-            ),
-            amount_major_units: this.majorUnits(
-              Math.round(revenueTotal.amount_kopecks / transactionCount),
-            ),
-          }
-        : null;
-    const payrollAvailable =
-      payroll.status === 'available' && payroll.verified === true;
-    const staffRevenue = Array.isArray(revenue.by_staff)
-      ? revenue.by_staff.flatMap((entry) => {
-          const row = this.record(entry);
-          const rawStaffId = row.staff_id;
-          const staffExternalId =
-            typeof rawStaffId === 'string' || typeof rawStaffId === 'number'
-              ? String(rawStaffId).trim()
-              : '';
-          const amount = this.safeMoneyAmount(row);
-          if (!staffExternalId || !amount) {
-            return [];
-          }
-          return [
-            {
-              staff_external_id: staffExternalId,
-              transaction_count:
-                this.optionalMetricNumber(row.transaction_count) ?? 0,
-              amount,
-            },
-          ];
-        })
-      : [];
-    const serviceRevenue = Array.isArray(revenue.by_service)
-      ? revenue.by_service.flatMap((entry) => {
-          const row = this.record(entry);
-          const rawServiceId = row.service_id;
-          const serviceExternalId =
-            typeof rawServiceId === 'string' || typeof rawServiceId === 'number'
-              ? String(rawServiceId).trim()
-              : '';
-          const amount = this.safeMoneyAmount(row);
-          if (!serviceExternalId || !amount) {
-            return [];
-          }
-          return [
-            {
-              service_external_id: serviceExternalId,
-              name: typeof row.name === 'string' ? row.name : 'Услуга',
-              transaction_count:
-                this.optionalMetricNumber(row.transaction_count) ?? 0,
-              amount,
-            },
-          ];
-        })
-      : [];
-
-    return this.withStaffSalary(
-      {
-        ...failClosed,
-        period: financeSummary.period ?? failClosed.period,
-        revenue: revenueTotal ? [revenueTotal] : [],
-        average_ticket: averageTicket ? [averageTicket] : [],
-        finance: {
-          source: financeSummary.source ?? 'external_crm',
-          provider: financeSummary.provider ?? null,
-          verified: financeSummary.verified === true,
-          revenue: {
-            status: revenue.status ?? 'unavailable',
-            verified: revenue.verified === true,
-            transaction_count: transactionCount,
-            total: revenueTotal,
-            by_staff: staffRevenue,
-            by_service: serviceRevenue,
-            staff_attribution_status:
-              revenue.staff_attribution_status ?? 'unavailable',
-            staff_attribution_coverage_percent: this.optionalMetricNumber(
-              revenue.staff_attribution_coverage_percent,
-            ),
-            unattributed_service_total: this.safeMoneyAmount(
-              revenue.unattributed_service_total,
-            ),
-            unattributed_service_transaction_count:
-              this.optionalMetricNumber(
-                revenue.unattributed_service_transaction_count,
-              ) ?? 0,
-            service_attribution_status:
-              revenue.service_attribution_status ?? 'unavailable',
-            service_attribution_coverage_percent: this.optionalMetricNumber(
-              revenue.service_attribution_coverage_percent,
-            ),
-            unattributed_service_breakdown_total: this.safeMoneyAmount(
-              revenue.unattributed_service_breakdown_total,
-            ),
-            unattributed_service_breakdown_transaction_count:
-              this.optionalMetricNumber(
-                revenue.unattributed_service_breakdown_transaction_count,
-              ) ?? 0,
-          },
-          payroll: {
-            status: payroll.status ?? 'unavailable',
-            verified: payroll.verified === true,
-            accrued_total: payrollAvailable
-              ? this.safeMoneyAmount(payroll.accrued_total)
-              : null,
-            paid_total: payrollAvailable
-              ? this.safeMoneyAmount(payroll.paid_total)
-              : null,
-            balance_total: payrollAvailable
-              ? this.safeMoneyAmount(payroll.balance_total)
-              : null,
-          },
-          warning_codes: this.safeWarningCodes(financeSummary.warnings),
-        },
-      },
-      this.staffSalaryScope(financeSummary),
-    );
-  }
-
-  /**
-   * Личный срез сотрудника вместе с его собственными начислениями.
-   *
-   * 🔴 Строки коллег не должны существовать даже внутри обработчика: разрез
-   * сужается до самого спрашивающего ДО того, как что-либо уходит в публикацию.
-   */
-  private async readEmployeeAnalytics(
-    principal: AiToolPrincipal,
-    query: AnalyticsRangeQueryDto,
-  ) {
-    const internal = await this.readAnalytics(
-      this.employeeOperationalOverview(
-        principal.tenantId,
-        principal.userId,
-        query,
-      ),
-    );
-    return this.withStaffSalary(
-      internal,
-      await this.employeeSalaryScope(principal, query, internal),
-    );
-  }
-
-  /**
-   * Переходный вызов для поэтапного обновления backend-компонентов.
-   * В актуальном сервисе всегда существует расширенный метод; fallback
-   * сохраняет работоспособность старых тестовых и rolling-deploy контрактов.
-   */
-  private businessOperationalOverview(
-    tenantId: string,
-    query: AnalyticsRangeQueryDto,
-  ): Promise<unknown> {
-    const analytics = this.analyticsService as unknown as {
-      getBusinessOperationalOverview?: (
-        scopedTenantId: string,
-        range: AnalyticsRangeQueryDto,
-      ) => Promise<unknown>;
-      getBusinessOverview: (
-        scopedTenantId: string,
-        range: AnalyticsRangeQueryDto,
-      ) => Promise<unknown>;
-    };
-    return typeof analytics.getBusinessOperationalOverview === 'function'
-      ? analytics.getBusinessOperationalOverview(tenantId, query)
-      : analytics.getBusinessOverview(tenantId, query);
-  }
-
-  private employeeOperationalOverview(
-    tenantId: string,
-    userId: string,
-    query: AnalyticsRangeQueryDto,
-  ): Promise<unknown> {
-    const analytics = this.analyticsService as unknown as {
-      getEmployeeOperationalOverview?: (
-        scopedTenantId: string,
-        scopedUserId: string,
-        range: AnalyticsRangeQueryDto,
-      ) => Promise<unknown>;
-      getEmployeeOverview: (
-        scopedTenantId: string,
-        scopedUserId: string,
-        range: AnalyticsRangeQueryDto,
-      ) => Promise<unknown>;
-    };
-    return typeof analytics.getEmployeeOperationalOverview === 'function'
-      ? analytics.getEmployeeOperationalOverview(tenantId, userId, query)
-      : analytics.getEmployeeOverview(tenantId, userId, query);
-  }
-
-  /**
-   * Начисления самому сотруднику — и только ему.
-   *
-   * Мастер имеет право знать, сколько ему начислено: это его собственные
-   * деньги, а не финансы салона. Но источник company-scoped, поэтому строка
-   * выбирается по идентификатору сотрудника из ответа аналитики, и если его
-   * нет — разрез закрывается целиком, а не открывается на всех.
-   */
-  private async employeeSalaryScope(
-    principal: AiToolPrincipal,
-    query: AnalyticsRangeQueryDto,
-    internal: unknown,
-  ): Promise<StaffSalaryScope> {
-    const data = this.record(internal);
-    if (data.data_source !== 'crm') {
-      return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
-      };
-    }
-    const externalId = data.employee_external_id;
-    if (typeof externalId !== 'string' || externalId === '') {
-      return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.identityUnknown,
-      };
-    }
-    if (query.branchId) {
-      return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.companyScope,
-      };
-    }
-
-    const finance = await this.analyticsService.getStaffFinance(
-      principal.tenantId,
-      query,
-    );
-    if (!finance) {
-      return {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.financeUnavailable,
-      };
-    }
-    const scope = this.staffSalaryScope(finance);
-    if (scope.status !== 'available') {
-      return scope;
-    }
-    const own = scope.rows.get(externalId);
-    return {
-      status: 'available',
-      rows: own
-        ? new Map<string, StaffSalaryRow>([[externalId, own]])
-        : new Map<string, StaffSalaryRow>(),
-    };
-  }
-
-  /**
-   * Начисления по мастерам из финансовой сводки CRM.
-   *
-   * 🔴 Строка принимается только подтверждённой: `status: 'available'` и
-   * `verified: true` У САМОЙ СТРОКИ. Общий статус расчёта здесь не решает
-   * ничего — при `partial` часть сотрудников посчитана честно, и прятать их
-   * начисления из-за соседа, по которому CRM промолчала, значило бы терять
-   * подтверждённые деньги. Обратное тоже верно: при `available` в целом
-   * непосчитанная строка всё равно остаётся недоступной.
-   *
-   * Начислено обязано быть суммой: строка без `accrued` — это не «ноль
-   * начислено», а «расчёт не отдан».
-   */
-  private staffSalaryScope(value: unknown): StaffSalaryScope {
-    const summary = this.record(value);
-    const payroll = this.record(summary.payroll);
-    const rows = Array.isArray(payroll.staff) ? payroll.staff : [];
-    if (payroll.status === 'unavailable' || rows.length === 0) {
-      return {
-        status: 'unavailable',
-        reason: this.safeWarningCodes(summary.warnings).includes(
-          STAFF_SALARY_UNAVAILABLE.rangeTooLarge,
-        )
-          ? STAFF_SALARY_UNAVAILABLE.rangeTooLarge
-          : STAFF_SALARY_UNAVAILABLE.payrollUnavailable,
-      };
-    }
-
-    const accepted = new Map<string, StaffSalaryRow>();
-    for (const entry of rows) {
-      const item = this.record(entry);
-      const staffId =
-        typeof item.staff_id === 'string' ? item.staff_id.trim() : '';
-      const accrued = this.safeMoneyAmount(item.accrued);
-      if (
-        !staffId ||
-        item.status !== 'available' ||
-        item.verified !== true ||
-        !accrued
-      ) {
-        continue;
-      }
-      // 🔴 Имя сотрудника из расчёта зарплаты сюда НЕ переносится. Мастер
-      // называется тем же именем, что и в операционном разрезе, — иначе
-      // граница «кому вообще показывать имена» проходила бы в двух местах и
-      // разъехалась бы при первой же правке.
-      accepted.set(staffId, {
-        accrued,
-        paid: this.safeMoneyAmount(item.paid),
-      });
-    }
-    return { status: 'available', rows: accepted };
-  }
-
-  /** Дописывает в строки мастеров начисления — или причину, по которой их нет. */
-  private withStaffSalary(value: unknown, scope: StaffSalaryScope) {
-    const data = this.record(value);
-    return {
-      ...data,
-      staff_summary: this.staffRows(data).map((row) => ({
-        ...row.entry,
-        salary: this.staffSalary(row.externalId, scope),
-      })),
-    };
-  }
-
-  private staffSalary(externalId: string | null, scope: StaffSalaryScope) {
-    if (scope.status !== 'available') {
-      return this.unavailableStaffSalary(scope.reason);
-    }
-    const row = externalId ? scope.rows.get(externalId) : undefined;
-    if (!row) {
-      return this.unavailableStaffSalary(
-        STAFF_SALARY_UNAVAILABLE.rowUnavailable,
-      );
-    }
-    return {
-      status: 'available',
-      basis: 'crm_payroll_accrual',
-      accrued: row.accrued,
-      paid: row.paid,
-      unavailable_reason: null,
-    };
-  }
-
-  private unavailableStaffSalary(reason: string) {
-    return {
-      status: 'unavailable',
-      basis: null,
-      accrued: null,
-      paid: null,
-      unavailable_reason: reason,
-    };
-  }
-
-  /**
-   * Линейный прогноз подтверждённой кассы до конца текущей недели, месяца
-   * или года. Для закрытого/фиксированного окна прогноз равен факту.
-   */
   private async forecastBusinessRevenue(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
@@ -3053,15 +2567,21 @@ export class AiToolHandlerService {
   }
 
   /** KPI команды с личными планами из настроек владельца. */
+  /** KPI команды с личными планами из настроек владельца. */
   private async readTeamKpi(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
     const window = await this.reportingWindow(principal.tenantId, args);
-    const [internal, financePreference] = await Promise.all([
-      this.retryAnalyticsRead(() =>
-        this.readBusinessAnalytics(principal, window.query),
-      ),
+    const [state, financePreference] = await Promise.all([
+      this.businessState.business({
+        tenantId: principal.tenantId,
+        period: window.query,
+        comparisonMode: 'none',
+        comparisonPeriod: null,
+        financeAllowed: CRM_FINANCE_ROLES.has(principal.role),
+        disclose: (rows) => this.businessDisclosure(principal, rows),
+      }),
       this.prisma.dashboardPreference.findUnique({
         where: {
           userId_tenantId_section: {
@@ -3073,43 +2593,41 @@ export class AiToolHandlerService {
         select: { configJson: true },
       }),
     ]);
-    const data = this.record(internal);
-    const names = this.staffDisplayNames(internal);
     const financeConfig = this.record(financePreference?.configJson);
     const staffTargets = this.record(financeConfig.staff_targets_rub);
     const monthlyTarget = this.optionalMetricNumber(
       financeConfig.monthly_target_rub,
     );
-    const published = this.publishAnalytics(
-      internal,
-      this.businessStaffScope(principal, internal),
-    );
-    const businessMetrics = this.businessMetricSnapshot(published);
     const businessRevenueKopecks = this.optionalMetricNumber(
-      businessMetrics.revenue_amount_kopecks,
+      state.metrics.revenue_amount_kopecks,
     );
     const period = this.requiredString(args.period);
     const monthlyTargetComparable =
       period === 'month_to_date' || period === 'named_month';
 
-    const staff = this.staffRows(internal)
-      .filter((row) => row.externalId !== null)
-      .map((row) => {
-        const target = this.optionalMetricNumber(
-          staffTargets[row.externalId as string],
-        );
-        const revenue = this.staffConfirmedRevenue(data, row.externalId);
-        const revenueRecord = this.record(revenue);
-        const revenueAmount = this.safeMoneyAmount(revenueRecord.amount);
+    /**
+     * 🔴 Планы — не бизнес-факт канонического слоя, а настройка владельца, и
+     * живут они под внешним ключом мастера. Поэтому соединение делает этот
+     * слой, а числа мастера берутся уже посчитанными: своей копии вычисления
+     * здесь не осталось.
+     */
+    const staff = state.staffJoin
+      .map(({ externalId, published }) => {
+        const target = this.optionalMetricNumber(staffTargets[externalId]);
+        const revenue = this.record(published.confirmed_revenue);
+        const revenueAmount = this.safeMoneyAmount(revenue.amount);
         return {
-          name: names.get(row.externalId as string) ?? 'Мастер',
-          appointments: row.appointments,
-          scheduled: this.optionalMetricNumber(row.entry.scheduled) ?? 0,
-          completed: this.optionalMetricNumber(row.entry.completed) ?? 0,
+          name:
+            typeof published.name === 'string' && published.name !== ''
+              ? published.name
+              : 'Мастер',
+          appointments: this.optionalMetricNumber(published.appointments) ?? 0,
+          scheduled: this.optionalMetricNumber(published.scheduled) ?? 0,
+          completed: this.optionalMetricNumber(published.completed) ?? 0,
           booked_minutes:
-            this.optionalMetricNumber(row.entry.booked_minutes) ?? 0,
-          confirmed_revenue: revenue,
-          accrued_salary: this.publishedStaffSalary(row.entry.salary),
+            this.optionalMetricNumber(published.booked_minutes) ?? 0,
+          confirmed_revenue: published.confirmed_revenue,
+          accrued_salary: published.salary,
           monthly_target_rub: target,
           target_progress_percent:
             monthlyTargetComparable && target && revenueAmount
@@ -3121,17 +2639,20 @@ export class AiToolHandlerService {
       })
       .sort(
         (left, right) =>
-          (right.confirmed_revenue.status === 'available' ? 1 : 0) -
-            (left.confirmed_revenue.status === 'available' ? 1 : 0) ||
+          (this.record(right.confirmed_revenue).status === 'available'
+            ? 1
+            : 0) -
+            (this.record(left.confirmed_revenue).status === 'available'
+              ? 1
+              : 0) ||
           right.appointments - left.appointments ||
           left.name.localeCompare(right.name),
       );
 
     return {
-      verified: this.businessOperationalAnalyticsVerified(published),
-      finance_verified:
-        this.record(this.record(published).finance).verified === true,
-      source: data.data_source ?? null,
+      verified: state.verified,
+      finance_verified: state.financeVerified,
+      source: state.source,
       resolved_period: this.resolvedPeriodPayload(args, window),
       target_basis: 'calendar_month',
       monthly_target_comparable: monthlyTargetComparable,
@@ -3150,19 +2671,19 @@ export class AiToolHandlerService {
             10
           : null,
       staff,
+      /**
+       * 🔴 Конверт KPI команды оставлен ПРЕЖНИМ: тот же состав и тот же
+       * порядок, что работали в бою. Утверждения «маржа и окупаемость рекламы
+       * недоступны» и разрез когорт сюда не входили — добавить их значило бы
+       * поменять ответ под видом переноса.
+       */
       limitations: [
-        ...this.staffMoneyUnavailableMetrics(published),
-        ...this.attendanceUnavailableMetrics(published),
-        ...this.measurementLimitations(published),
+        ...state.unavailableParts.staffMoney,
+        ...state.unavailableParts.attendance,
+        ...state.limitations,
       ],
     };
   }
-
-  /**
-   * Branch comparison is intentionally operational-only. YClients finance is
-   * company-scoped, so attributing the whole till to each branch would create
-   * convincing but false money figures.
-   */
   private async compareBranches(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
@@ -3332,122 +2853,62 @@ export class AiToolHandlerService {
       this.businessQueryCache.delete(cacheKey);
     }
 
+    // 🔴 Разбор живой речи в окно — работа этого слоя: он единственный, кто
+    // слышит «этот месяц». Дальше в детерминированное ядро уезжают уже
+    // границы и часовой пояс.
     const window = await this.reportingWindow(principal.tenantId, args);
-    const currentQuery = window.query;
     const previousQuery =
       comparison === 'none'
         ? null
         : await this.comparisonReportingQuery(
             principal.tenantId,
-            currentQuery,
+            window.query,
             comparison as 'previous_period' | 'previous_year_same_period',
           );
-    const read = (query: AnalyticsRangeQueryDto) =>
-      this.retryAnalyticsRead(() =>
-        this.readBusinessAnalytics(principal, query),
-      );
-    const [currentInternal, previousInternal] = await Promise.all([
-      read(currentQuery),
-      previousQuery ? read(previousQuery) : Promise.resolve(null),
-    ]);
-    // Имена раздаются один раз на оба периода: тёзки обязаны получить один и
-    // тот же различитель слева и справа, иначе «Илья (2)» в сравнении означал
-    // бы разных людей.
-    const staffScope = this.businessStaffScope(
-      principal,
-      currentInternal,
-      previousInternal,
-    );
-    const current = this.publishAnalytics(currentInternal, staffScope);
-    const previous = previousInternal
-      ? this.publishAnalytics(previousInternal, staffScope)
-      : null;
-    const currentSnapshot = this.businessMetricSnapshot(current);
-    const previousSnapshot = previous
-      ? this.businessMetricSnapshot(previous)
-      : null;
+
+    // 🔴 Вычисления здесь больше нет. Роль превращается в РЕШЕНИЕ (можно ли
+    // читать деньги, кого называть по имени) и уезжает в канонический слой
+    // готовым — обратной зависимости не возникает.
+    const state = await this.businessState.business({
+      tenantId: principal.tenantId,
+      period: window.query,
+      comparisonMode: comparison as PeriodComparisonMode,
+      comparisonPeriod: previousQuery,
+      financeAllowed: CRM_FINANCE_ROLES.has(principal.role),
+      disclose: (rows) => this.businessDisclosure(principal, rows),
+    });
+
     const resolved = this.resolvedPeriodPayload(args, window);
-    const basePeriod = this.record(current).period ?? currentQuery;
     const result = {
-      verified: this.businessOperationalAnalyticsVerified(current),
-      finance_verified:
-        this.record(this.record(current).finance).verified === true,
-      source: this.record(current).data_source ?? null,
+      verified: state.verified,
+      finance_verified: state.financeVerified,
+      source: state.source,
       resolved_period: resolved,
       period: {
-        ...this.record(basePeriod),
+        ...this.record(state.period),
         ...resolved,
       },
       comparison: {
         mode: comparison,
-        period: previous
-          ? (this.record(previous).period ?? previousQuery)
-          : null,
-        /**
-         * 🔴 Cycle 04 P0. Полнота ОБЕИХ сторон сравнения.
-         *
-         * Периоды разной полноты сравнивать как равные нельзя: текущий может
-         * быть прочитан целиком, а прошлый — усечён, и тогда «выручка выше на
-         * 12 %» измеряет не бизнес, а качество чтения. До P0 у прошлого
-         * периода полноты не было вообще — ни в ответе, ни в оговорках.
-         */
-        completeness: {
-          current: this.readCompletenessStatus(current),
-          previous: previous ? this.readCompletenessStatus(previous) : null,
-        },
+        period: state.comparison.period,
+        completeness: state.comparison.completeness,
       },
-      current,
-      previous,
-      metrics: currentSnapshot,
-      changes: previousSnapshot
-        ? this.businessMetricChanges(currentSnapshot, previousSnapshot)
-        : {},
-      service_changes: previous
-        ? this.businessServiceChanges(current, previous)
-        : [],
-      staff_changes: previousInternal
-        ? this.businessStaffChanges(
-            currentInternal,
-            previousInternal,
-            staffScope,
-          )
-        : [],
-      available_metrics: Object.entries(currentSnapshot)
-        .filter(([, value]) => value !== null)
-        .map(([key]) => key),
-      // 🔴 Оговорки об ИЗМЕРЕНИИ отдельно от НЕДОСТУПНОСТИ: «метрики нет» и
-      // «метрика есть, но означает не то, что кажется» — разные утверждения.
-      limitations: [
-        ...this.measurementLimitations(current),
-        ...this.comparisonLimitations(current, previous, comparison),
-      ],
-      unavailable_metrics: [
-        ...this.clientCohortUnavailableMetrics(current),
-        ...this.attendanceUnavailableMetrics(current),
-        ...this.staffMoneyUnavailableMetrics(current),
-        {
-          key: 'accounting_net_profit',
-          reason: 'requires verified taxes and all accounting expenses',
-        },
-        {
-          key: 'gross_margin',
-          reason: 'requires direct cost allocation by service',
-        },
-        {
-          key: 'marketing_roi',
-          reason: 'requires advertising spend and attribution data',
-        },
-      ],
+      current: state.current,
+      previous: state.previous,
+      metrics: state.metrics,
+      changes: state.changes,
+      service_changes: state.serviceChanges,
+      staff_changes: state.staffChanges,
+      available_metrics: state.availableMetrics,
+      limitations: state.limitations,
+      unavailable_metrics: state.unavailableMetrics,
     };
-    // 🔴 Cycle 04 P0. Неполный ответ НЕ кэшируется. Держать деградировавший
-    // ответ пять минут значит продлевать состояние, в котором ноль ничего не
-    // доказывает, — при том что следующий запрос мог бы прочитать источник
-    // целиком. Полнота источника при этом не подменяет `verified`: это разные
-    // вопросы, и оба обязаны выполниться.
-    const appointmentsRead = this.record(
-      this.record(this.record(current).completeness).appointments,
-    );
-    if (result.verified && appointmentsRead.status !== 'incomplete') {
+    // 🔴 Неполный ответ НЕ кэшируется: держать деградировавший ответ пять
+    // минут значит продлевать состояние, в котором ноль ничего не доказывает.
+    if (
+      result.verified &&
+      state.comparison.completeness.current !== 'incomplete'
+    ) {
       this.businessQueryCache.set(cacheKey, {
         expiresAt: Date.now() + 5 * 60 * 1_000,
         value: result,
@@ -3456,6 +2917,21 @@ export class AiToolHandlerService {
     return result;
   }
 
+  /**
+   * Кого называть по имени в бизнес-разрезе — решение по роли.
+   *
+   * Каталог инструментов решает, кого пускать к инструменту; имена коллег —
+   * отдельная граница, и она проходит здесь.
+   */
+  private businessDisclosure(
+    principal: AiToolPrincipal,
+    rows: StaffIdentityRow[],
+  ): StaffDisclosure {
+    if (!NAMED_STAFF_BREAKDOWN_ROLES.has(principal.role)) {
+      return { names: new Map(), allowedExternalIds: new Set<string>() };
+    }
+    return { names: this.staffDisplayNames(rows), allowedExternalIds: null };
+  }
   private async queryEmployeeAnalytics(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
@@ -3490,92 +2966,60 @@ export class AiToolHandlerService {
     }
 
     const window = await this.reportingWindow(principal.tenantId, args);
-    const currentQuery = window.query;
     const previousQuery =
       comparison === 'none'
         ? null
         : await this.comparisonReportingQuery(
             principal.tenantId,
-            currentQuery,
+            window.query,
             comparison as 'previous_period' | 'previous_year_same_period',
           );
-    const read = (query: AnalyticsRangeQueryDto) =>
-      this.readEmployeeAnalytics(principal, query);
-    const [currentInternal, previousInternal] = await Promise.all([
-      read(currentQuery),
-      previousQuery ? read(previousQuery) : Promise.resolve(null),
-    ]);
-    const staffScope = this.employeeStaffScope(
-      currentInternal,
-      previousInternal,
-    );
-    const current = this.publishAnalytics(currentInternal, staffScope);
-    const previous = previousInternal
-      ? this.publishAnalytics(previousInternal, staffScope)
-      : null;
-    const currentSnapshot = this.employeeMetricSnapshot(current);
-    const previousSnapshot = previous
-      ? this.employeeMetricSnapshot(previous)
-      : null;
-    const currentSource = this.record(current).data_source;
+
+    const state = await this.businessState.employee({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      period: window.query,
+      comparisonMode: comparison as PeriodComparisonMode,
+      comparisonPeriod: previousQuery,
+      nameRows: (rows) => this.staffDisplayNames(rows),
+    });
+
     const resolved = this.resolvedPeriodPayload(args, window);
-    const basePeriod = this.record(current).period ?? currentQuery;
+    /**
+     * 🔴 Конверт личного среза оставлен ПРЕЖНИМ. Соседний бизнес-срез отдаёт
+     * `finance_verified`, здесь его нет и не было: касса конкретного мастера
+     * провайдером не подтверждается, и добавить сюда флаг «деньги проверены»
+     * значило бы завести новое утверждение под видом переноса.
+     *
+     * Единственное добавленное поле — полнота обеих сторон сравнения: то же
+     * требование, что и в бизнес-срезе, и по той же причине.
+     */
     const result = {
-      verified:
-        typeof currentSource === 'string' &&
-        ['crm', 'maya'].includes(currentSource),
-      source: typeof currentSource === 'string' ? currentSource : null,
+      verified: state.verified,
+      source: state.source,
       resolved_period: resolved,
       period: {
-        ...this.record(basePeriod),
+        ...this.record(state.period),
         ...resolved,
       },
       comparison: {
         mode: comparison,
-        period: previous
-          ? (this.record(previous).period ?? previousQuery)
-          : null,
+        period: state.comparison.period,
+        completeness: state.comparison.completeness,
       },
-      current,
-      previous,
-      metrics: currentSnapshot,
-      changes: previousSnapshot
-        ? this.businessMetricChanges(currentSnapshot, previousSnapshot)
-        : {},
-      service_changes: previous
-        ? this.businessServiceChanges(current, previous)
-        : [],
-      staff_changes: previousInternal
-        ? this.businessStaffChanges(
-            currentInternal,
-            previousInternal,
-            staffScope,
-          )
-        : [],
-      available_metrics: Object.entries(currentSnapshot)
-        .filter(([, value]) => value !== null)
-        .map(([key]) => key),
-      // Личный срез — те же два списка и та же граница между ними:
-      // «числа нет» отдельно от «число есть, но означает не то, что кажется».
-      limitations: [
-        ...this.measurementLimitations(current),
-        ...this.comparisonLimitations(current, previous, comparison),
-      ],
-      unavailable_metrics: [
-        ...this.clientCohortUnavailableMetrics(current),
-        ...this.attendanceUnavailableMetrics(current),
-        ...this.staffMoneyUnavailableMetrics(current),
-        ...this.personalCashUnavailableMetrics(current),
-        {
-          key: 'other_employee_personal_data',
-          reason: 'role scope permits only the current employee data',
-        },
-      ],
+      current: state.current,
+      previous: state.previous,
+      metrics: state.metrics,
+      changes: state.changes,
+      service_changes: state.serviceChanges,
+      staff_changes: state.staffChanges,
+      available_metrics: state.availableMetrics,
+      limitations: state.limitations,
+      unavailable_metrics: state.unavailableMetrics,
     };
     const motivation = await this.employeeMoneyMotivation(
       principal,
-      currentQuery,
-      current,
+      window.query,
     );
     const enriched = motivation
       ? {
@@ -3588,7 +3032,7 @@ export class AiToolHandlerService {
     // Неполный ответ не кэшируется — та же причина, что и у бизнес-среза.
     if (
       enriched.verified &&
-      this.readCompletenessStatus(current) !== 'incomplete'
+      state.comparison.completeness.current !== 'incomplete'
     ) {
       this.employeeQueryCache.set(cacheKey, {
         expiresAt: Date.now() + 5 * 60 * 1_000,
@@ -3597,11 +3041,16 @@ export class AiToolHandlerService {
     }
     return enriched;
   }
-
+  /**
+   * Денежная мотивация мастера.
+   *
+   * 🔴 Опубликованный срез сюда больше не передаётся: начисление здесь не
+   * читается (см. комментарий ниже), а всё остальное берётся из визитов. Оставь
+   * я аргумент «на будущее» — он бы намекал, что состояние тут используется.
+   */
   private async employeeMoneyMotivation(
     principal: AiToolPrincipal,
     query: AnalyticsRangeQueryDto,
-    currentPublished: unknown,
   ): Promise<{
     money_motivation: ReturnType<typeof computePeriodMoneyMotivation>;
     upsell_opportunities: ReturnType<typeof collectUpsellOpportunities>;
@@ -3632,15 +3081,22 @@ export class AiToolHandlerService {
         });
       const periodVisits = bundle.period.map(mapVisit);
       const historyVisits = bundle.history.map(mapVisit);
-      const staff = this.staffRows(currentPublished);
-      const self = staff.length === 1 ? this.record(staff[0]) : {};
-      const salary = this.record(self.salary);
-      const accrued = this.record(salary.accrued);
-      const earnedRub =
-        salary.status === 'available' &&
-        typeof accrued.amount_kopecks === 'number'
-          ? Math.round(accrued.amount_kopecks / 100)
-          : null;
+      /**
+       * 🔴 Начисление здесь НЕ читается — и это сохранение боевого поведения,
+       * а не упущение.
+       *
+       * Боевой код доставал строку мастера через обёртку `staffRows`, у которой
+       * начисление лежит уровнем глубже. Поэтому `earned_rub` в бою был ВСЕГДА
+       * `null`, доля мастера — всегда `0.5`, а «потенциал» считался от неё.
+       * Это латентный дефект, а не задумка: числа мотивации годами стояли не на
+       * том, на чём должны.
+       *
+       * P1 — перенос, а не исправление. Починить его здесь значит поменять
+       * числа, которые видит мастер, под видом переезда: `potential_rub` и
+       * `upside_rub` меняются в разы, а доля прыгает с 0.5 на настоящую.
+       * Дефект зарегистрирован (реестр 4.22) и ждёт отдельного решения.
+       */
+      const earnedRub: number | null = null;
       const money_motivation = computePeriodMoneyMotivation({
         periodVisits,
         historyVisits,
@@ -3713,505 +3169,6 @@ export class AiToolHandlerService {
     };
   }
 
-  /**
-   * Пришёл ли ОПЕРАЦИОННЫЙ обзор из известного источника.
-   *
-   * 🔴 Флаг относится к счётчикам — записям, клиентам, отменам, — а НЕ к
-   * деньгам. За деньги отвечает соседний `finance_verified`, и пара
-   * `verified: true, finance_verified: false` — связное утверждение: «счётчики
-   * из реального источника, касса не подтверждена».
-   *
-   * P4 намеренно НЕ трогает этот флаг. Правда о деньгах живёт в
-   * `revenue_basis` (`domain/revenue-basis.ts`): выручка обзора всегда стоит на
-   * ценах журнала, и теперь это сказано полем, а не подразумевается.
-   */
-  private businessOperationalAnalyticsVerified(value: unknown): boolean {
-    const data = this.record(value);
-    return data.data_source === 'maya' || data.data_source === 'crm';
-  }
-
-  private async retryAnalyticsRead<T>(read: () => Promise<T>): Promise<T> {
-    try {
-      return await read();
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      return read();
-    }
-  }
-
-  private businessMetricSnapshot(value: unknown) {
-    const data = this.record(value);
-    const appointments = this.record(data.appointments);
-    const finance = this.record(data.finance);
-    const financeRevenue = this.record(finance.revenue);
-    /**
-     * 🔴 ДВА РАЗНЫХ ЧИСЛА, а не одно с запасным вариантом.
-     *
-     * Здесь стоял `финансовая выручка ?? цены журнала`. При недоступном
-     * кассовом блоке метрика молча становилась стоимостью ЗАПИСАННОГО и уезжала
-     * дальше — вплоть до карточки «Сводка салона» — как рубли выручки. Само
-     * основание (`revenue_basis`), которое P4 завёл в HTTP-ответе, на эту
-     * сторону не переходило вовсе.
-     *
-     * Теперь касса остаётся кассой, забронированное — забронированным, и у
-     * числа есть основание.
-     */
-    const financialRevenue = this.safeMoneyAmount(financeRevenue.total);
-    const bookedValue = Array.isArray(data.revenue)
-      ? this.safeMoneyAmount(data.revenue[0])
-      : null;
-    const revenueBasis: RevenueBasis = financialRevenue
-      ? 'provider_transactions'
-      : bookedValue
-        ? 'booked_prices'
-        : 'unavailable';
-    const averageTicket = Array.isArray(data.average_ticket)
-      ? this.safeMoneyAmount(data.average_ticket[0])
-      : null;
-    return {
-      // Только подтверждённая касса. Нет кассы — нет числа.
-      revenue_amount_kopecks: financialRevenue?.amount_kopecks ?? null,
-      /** Стоимость записанного. Отдельное имя, потому что это другое понятие. */
-      booked_value_amount_kopecks: bookedValue?.amount_kopecks ?? null,
-      /** На чём стоит денежное число. См. `domain/revenue-basis.ts`. */
-      revenue_basis: revenueBasis,
-      financial_operations: this.optionalMetricNumber(
-        financeRevenue.transaction_count,
-      ),
-      appointments_total: this.optionalMetricNumber(appointments.total),
-      appointments_active: this.optionalMetricNumber(appointments.active),
-      appointments_scheduled: this.optionalMetricNumber(appointments.scheduled),
-      appointments_completed: this.optionalMetricNumber(appointments.completed),
-      appointments_cancelled: this.optionalMetricNumber(appointments.cancelled),
-      appointments_no_show: this.optionalMetricNumber(appointments.no_show),
-      cancellation_rate_percent: this.optionalMetricNumber(
-        appointments.cancellation_rate_percent,
-      ),
-      unique_clients: this.optionalMetricNumber(appointments.unique_clients),
-      repeat_clients_in_period: this.optionalMetricNumber(
-        appointments.repeat_clients_in_period,
-      ),
-      repeat_client_rate_percent: this.optionalMetricNumber(
-        appointments.repeat_client_rate_percent,
-      ),
-      identified_client_visits: this.optionalMetricNumber(
-        appointments.identified_client_visits,
-      ),
-      ...this.clientCohortMetrics(appointments),
-      ...this.attendanceMetrics(data),
-      average_ticket_amount_kopecks: averageTicket?.amount_kopecks ?? null,
-      booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
-    };
-  }
-
-  /**
-   * Присутствие как метрика — только когда его можно назвать измерением.
-   *
-   * 🔴 Тот же приём, что у когорт, и по той же причине: `null` выпадает из
-   * `available_metrics` и из сравнения периодов, а причина уезжает словами в
-   * `unavailable_metrics`. Ноль здесь означал бы «никто не пришёл», хотя на
-   * деле присутствие у части записей просто не наблюдалось.
-   *
-   * `appointments_completed` рядом НЕ переопределяется: это слово провайдера,
-   * и оно означает «отмечен приход ИЛИ оплачено». Два разных факта остаются
-   * двумя разными полями.
-   */
-  private attendanceMetrics(data: Record<string, unknown>) {
-    const attendance = this.record(data.attendance);
-    const measured = attendance.state === 'measured';
-    return {
-      attended_appointments: measured
-        ? this.optionalMetricNumber(attendance.arrived)
-        : null,
-      attendance_no_show: measured
-        ? this.optionalMetricNumber(attendance.no_show)
-        : null,
-      // Сколько записей осталось без наблюдения — отдаётся всегда: именно это
-      // число объясняет, почему двух метрик выше может не быть.
-      appointments_attendance_not_observed: this.optionalMetricNumber(
-        attendance.not_observed,
-      ),
-    };
-  }
-
-  /** Почему присутствие не стало метрикой — словами. */
-  private attendanceUnavailableMetrics(value: unknown) {
-    const attendance = this.record(this.record(value).attendance);
-    if (attendance.state === 'measured') {
-      return [];
-    }
-    const completeness = this.record(
-      this.record(this.record(value).completeness).attendance,
-    );
-    const reason =
-      typeof completeness.reason === 'string'
-        ? completeness.reason
-        : 'attendance_observation_is_incomplete';
-    return [
-      {
-        key: 'attendance',
-        reason: `attended_appointments and attendance_no_show are unavailable: ${reason}. appointments_completed is a provider status that mixes arrival with payment and is not proof of attendance`,
-      },
-    ];
-  }
-
-  /**
-   * Когорты клиентов как метрики.
-   *
-   * 🔴 Недоступные когорты обязаны быть `null`, а не нулём: ноль читается как
-   * «вернувшихся нет». Именно на этом владельцу однажды сказали, что салон
-   * живёт на новых гостях, хотя всё было наоборот. `null` выпадает и из
-   * `available_metrics`, и из `changes`, а причина уезжает в
-   * `unavailable_metrics`.
-   *
-   * `cohort_lookback_days` отдаётся всегда: «вернувшихся 62%» без горизонта —
-   * это число без единицы измерения.
-   */
-  private clientCohortMetrics(appointments: Record<string, unknown>) {
-    const available = appointments.cohort_status === 'available';
-    return {
-      clients_returning: available
-        ? this.optionalMetricNumber(appointments.clients_returning)
-        : null,
-      clients_new: available
-        ? this.optionalMetricNumber(appointments.clients_new)
-        : null,
-      returning_share_percent: available
-        ? this.optionalMetricNumber(appointments.returning_share_percent)
-        : null,
-      cohort_lookback_days: this.optionalMetricNumber(
-        appointments.cohort_lookback_days,
-      ),
-    };
-  }
-
-  /**
-   * Почему когорт нет — словами, а не кодом.
-   *
-   * Пустой массив означает «когорты посчитаны»: причина появляется только
-   * когда показатели действительно недоступны.
-   */
-  private clientCohortUnavailableMetrics(value: unknown) {
-    const appointments = this.record(this.record(value).appointments);
-    if (appointments.cohort_status === 'available') {
-      return [];
-    }
-    const days = this.optionalMetricNumber(appointments.cohort_lookback_days);
-    const horizon = days === null ? 'lookback' : `${days}-day`;
-    const reason =
-      appointments.cohort_unavailable_reason ===
-      'period_longer_than_cohort_lookback'
-        ? `the analysed period is longer than the ${horizon} cohort horizon, so returning clients cannot be told apart from clients first seen inside the period`
-        : `requires the ${horizon} visit history before the period, which the calendar source did not return`;
-    return [
-      {
-        key: 'client_cohorts',
-        reason: `clients_returning, clients_new and returning_share_percent are unavailable: ${reason}`,
-      },
-    ];
-  }
-
-  /** Полнота чтения записей у уже опубликованного среза. */
-  private readCompletenessStatus(value: unknown): 'complete' | 'incomplete' {
-    const appointments = this.record(
-      this.record(this.record(value).completeness).appointments,
-    );
-    return appointments.status === 'incomplete' ? 'incomplete' : 'complete';
-  }
-
-  /**
-   * Можно ли сравнивать эти два периода как равные.
-   *
-   * 🔴 Молчание здесь было опаснее отсутствия сравнения: разница между полным
-   * и усечённым чтением выглядит как изменение бизнеса и читается как вывод.
-   */
-  private comparisonLimitations(
-    current: unknown,
-    previous: unknown,
-    mode: string,
-  ) {
-    if (mode === 'none' || !previous) {
-      return [];
-    }
-    const currentStatus = this.readCompletenessStatus(current);
-    const previousStatus = this.readCompletenessStatus(previous);
-    if (currentStatus === 'complete' && previousStatus === 'complete') {
-      return [];
-    }
-    const side =
-      currentStatus === previousStatus
-        ? 'both periods were'
-        : currentStatus === 'incomplete'
-          ? 'the current period was'
-          : 'the previous period was';
-    return [
-      {
-        key: 'comparison_completeness',
-        reason: `${side} read incompletely, so changes and percent_change compare samples of different completeness: the difference may reflect how much was read rather than what happened in the salon`,
-      },
-    ];
-  }
-
-  /**
-   * Оговорки об ИЗМЕРЕНИИ — отдельно от недоступности.
-   *
-   * 🔴 Разделение и есть исправление противоречия. `unavailable_metrics`
-   * означает «числа нет»; `limitations` означает «число есть, но означает не
-   * то, что кажется». Пока эти два списка были одним, ответ мог одновременно
-   * положить `appointments_cancelled` в доступные метрики и объявить отмены
-   * недоступными — что и происходило: сначала безусловно для любого
-   * CRM-арендатора, а после первой правки — на усечённой выборке.
-   *
-   * Утверждение устарело потому, что аналитика просит удалённые записи
-   * (`includeCanceled: true`) и они приходят: в боевом зеркале, которое
-   * наполняется тем же флагом, лежат сотни отменённых визитов.
-   *
-   * Семантика отмены усилению не подлежит: провайдер сообщает ТОЛЬКО факт
-   * удаления записи (реестр 3.6). Кто удалил и почему — не часть контракта.
-   */
-  private measurementLimitations(value: unknown) {
-    const data = this.record(value);
-    if (data.data_source !== 'crm') {
-      return [];
-    }
-    const limitations: Array<{ key: string; reason: string }> = [
-      {
-        key: 'cancellation_reason',
-        reason:
-          'the provider reports only that a record was removed; a business cancellation reason is not part of the contract and must not be inferred',
-      },
-    ];
-
-    const appointments = this.record(
-      this.record(data.completeness).appointments,
-    );
-
-    if (appointments.status === 'incomplete') {
-      const reason =
-        typeof appointments.reason === 'string'
-          ? appointments.reason
-          : 'unknown';
-      // 🔴 Число остаётся: усечённая выборка даёт нижнюю границу, а не пустоту.
-      // Меняется ровно одно — право читать ноль как «ничего не было».
-      limitations.push({
-        key: 'incomplete_read',
-        reason: `the journal read for this period is incomplete (${reason}), so every appointment counter — appointments_total, appointments_cancelled, appointments_no_show and the per-staff rows — is a lower bound and a zero in any of them means "not measured", not "none"`,
-      });
-    }
-
-    const discarded = this.optionalMetricNumber(
-      appointments.out_of_period_discarded,
-    );
-    if (discarded !== null && discarded > 0) {
-      limitations.push({
-        key: 'provider_window',
-        reason: `the provider returned ${discarded} record(s) outside the requested period; they are excluded from every period metric`,
-      });
-    }
-
-    const attendance = this.record(data.attendance);
-    const notObserved = this.optionalMetricNumber(attendance.not_observed);
-    if (notObserved !== null && notObserved > 0) {
-      limitations.push({
-        key: 'attendance_coverage',
-        reason: `attendance was not observed for ${notObserved} record(s) of the period, so attended_appointments is not published for it and appointments_no_show is a lower bound: a record whose attendance was never observed cannot be counted as a no-show. appointments_completed is a provider status that means "arrival marked OR bill paid" and is not proof of attendance`,
-      });
-    }
-    return limitations;
-  }
-
-  /**
-   * Деньги в разрезе мастера: что недоступно и почему.
-   *
-   * Финансовые операции YClients иногда связаны с записью и мастером, иногда
-   * нет. Публикуем только точные строки, а здесь называем непокрытый остаток:
-   * модель не должна ни прятать подтверждённые суммы, ни распределять кассу
-   * приблизительно по ценам записей.
-   */
-  private staffMoneyUnavailableMetrics(value: unknown) {
-    const data = this.record(value);
-    const rows = Array.isArray(data.staff_summary) ? data.staff_summary : [];
-    const unavailableRevenueRows = rows.filter(
-      (entry) =>
-        this.record(this.record(entry).confirmed_revenue).status !==
-        'available',
-    );
-    const metrics: Array<{ key: string; reason: string }> = [];
-    if (unavailableRevenueRows.length > 0) {
-      const attribution = this.record(this.record(data.finance).revenue);
-      const coverage = this.optionalMetricNumber(
-        attribution.staff_attribution_coverage_percent,
-      );
-      metrics.push({
-        key: 'staff_revenue',
-        reason:
-          data.data_source === 'crm'
-            ? `confirmed per-master revenue is unavailable for ${unavailableRevenueRows.length} master(s): YClients did not attribute their service financial transactions to a staff member${coverage === null ? '' : `; exact attributed coverage is ${coverage}%`}. Do not estimate the missing cash from booked appointment prices`
-            : 'per-master revenue is unavailable as confirmed cash: the internal calendar stores the booked price of an appointment, which is planned value rather than a confirmed payment',
-      });
-    }
-
-    const salaryReasons = [
-      ...new Set(
-        rows.flatMap((entry) => {
-          const salary = this.record(this.record(entry).salary);
-          return salary.status === 'available' ||
-            typeof salary.unavailable_reason !== 'string'
-            ? []
-            : [salary.unavailable_reason];
-        }),
-      ),
-    ];
-    if (salaryReasons.length > 0) {
-      metrics.push({
-        key: 'staff_accrued_salary',
-        reason: `accrued salary is unavailable for at least one master: ${salaryReasons.join(', ')}`,
-      });
-    }
-    return metrics;
-  }
-
-  private personalCashUnavailableMetrics(value: unknown) {
-    const data = this.record(value);
-    const rows = Array.isArray(data.staff_summary) ? data.staff_summary : [];
-    const own = rows.length === 1 ? this.record(rows[0]) : null;
-    if (own && this.record(own.confirmed_revenue).status === 'available') {
-      return [];
-    }
-    return [
-      {
-        key: 'personal_cash_revenue',
-        reason:
-          'confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics',
-      },
-    ];
-  }
-
-  private employeeMetricSnapshot(value: unknown) {
-    const data = this.record(value);
-    const appointments = this.record(data.appointments);
-    const bookedValue = Array.isArray(data.revenue)
-      ? this.safeMoneyAmount(data.revenue[0])
-      : null;
-    const averageBookedValue = Array.isArray(data.average_ticket)
-      ? this.safeMoneyAmount(data.average_ticket[0])
-      : null;
-    return {
-      booked_value_amount_kopecks: bookedValue?.amount_kopecks ?? null,
-      appointments_total: this.optionalMetricNumber(appointments.total),
-      appointments_active: this.optionalMetricNumber(appointments.active),
-      appointments_scheduled: this.optionalMetricNumber(appointments.scheduled),
-      appointments_completed: this.optionalMetricNumber(appointments.completed),
-      appointments_cancelled: this.optionalMetricNumber(appointments.cancelled),
-      appointments_no_show: this.optionalMetricNumber(appointments.no_show),
-      cancellation_rate_percent: this.optionalMetricNumber(
-        appointments.cancellation_rate_percent,
-      ),
-      unique_clients: this.optionalMetricNumber(appointments.unique_clients),
-      repeat_clients_in_period: this.optionalMetricNumber(
-        appointments.repeat_clients_in_period,
-      ),
-      repeat_client_rate_percent: this.optionalMetricNumber(
-        appointments.repeat_client_rate_percent,
-      ),
-      identified_client_visits: this.optionalMetricNumber(
-        appointments.identified_client_visits,
-      ),
-      ...this.clientCohortMetrics(appointments),
-      average_booked_value_amount_kopecks:
-        averageBookedValue?.amount_kopecks ?? null,
-      booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
-    };
-  }
-
-  private businessMetricChanges(
-    current: Record<string, unknown>,
-    previous: Record<string, unknown>,
-  ) {
-    return Object.fromEntries(
-      Object.keys(current).flatMap((key) => {
-        const currentValue = current[key];
-        const previousValue = previous[key];
-        // Не всякая метрика — число: у денежного числа есть ещё и ОСНОВАНИЕ,
-        // а разницу оснований не считают вычитанием.
-        if (
-          typeof currentValue !== 'number' ||
-          typeof previousValue !== 'number'
-        ) {
-          return [];
-        }
-        return [
-          [
-            key,
-            {
-              current: currentValue,
-              previous: previousValue,
-              delta: currentValue - previousValue,
-              percent_change: this.percentageDelta(currentValue, previousValue),
-            },
-          ],
-        ];
-      }),
-    );
-  }
-
-  private businessServiceChanges(current: unknown, previous: unknown) {
-    const rows = (value: unknown) => {
-      const data = this.record(value);
-      const totals = new Map<string, number>();
-      if (!Array.isArray(data.service_summary)) {
-        return totals;
-      }
-      for (const entry of data.service_summary) {
-        const item = this.record(entry);
-        if (
-          typeof item.name !== 'string' ||
-          typeof item.appointments !== 'number'
-        ) {
-          continue;
-        }
-        // Одноимённые позиции складываем: раньше вторая затирала первую и
-        // объём просто исчезал из сравнения.
-        totals.set(item.name, (totals.get(item.name) ?? 0) + item.appointments);
-      }
-      return totals;
-    };
-    return this.serviceChangeRows(rows(current), rows(previous));
-  }
-
-  /**
-   * Дельты по услугам из двух срезов «название → записи».
-   *
-   * Один и тот же счёт нужен и салону целиком, и каждому мастеру по
-   * отдельности, поэтому он вынесен сюда: расхождение формул между этими
-   * двумя разрезами читалось бы как расхождение данных.
-   */
-  private serviceChangeRows(
-    current: Map<string, number>,
-    previous: Map<string, number>,
-  ) {
-    return [...new Set([...current.keys(), ...previous.keys()])]
-      .map((name) => {
-        const currentAppointments = current.get(name) ?? 0;
-        const previousAppointments = previous.get(name) ?? 0;
-        return {
-          name,
-          current_appointments: currentAppointments,
-          previous_appointments: previousAppointments,
-          delta: currentAppointments - previousAppointments,
-          percent_change: this.percentageDelta(
-            currentAppointments,
-            previousAppointments,
-          ),
-        };
-      })
-      .sort(
-        (left, right) =>
-          Math.abs(right.delta) - Math.abs(left.delta) ||
-          left.name.localeCompare(right.name),
-      );
-  }
-
   private localDateTime(value: Date, timezone: string) {
     const parts = Object.fromEntries(
       new Intl.DateTimeFormat('en', {
@@ -4247,238 +3204,12 @@ export class AiToolHandlerService {
     return typeof value === 'number' && Number.isFinite(value) ? value : null;
   }
 
-  private percentageDelta(current: number, previous: number): number | null {
-    if (previous === 0) {
-      return null;
-    }
-    return Math.round(((current - previous) / Math.abs(previous)) * 1_000) / 10;
-  }
-
-  private safeAnalytics(value: unknown) {
-    const result = this.record(value);
-    return {
-      data_source: result.data_source ?? null,
-      period: result.period ?? null,
-      appointments: result.appointments ?? null,
-      revenue: this.safeMoneyEntries(result.revenue),
-      expenses: this.safeMoneyEntries(result.expenses),
-      net: this.safeMoneyEntries(result.net),
-      average_ticket: this.safeMoneyEntries(result.average_ticket),
-      daily: Array.isArray(result.daily)
-        ? result.daily.map((entry) => {
-            const item = this.record(entry);
-            return {
-              date: item.date ?? null,
-              appointments: item.appointments ?? 0,
-              total: item.total ?? item.appointments ?? 0,
-              active: item.active ?? item.appointments ?? 0,
-              scheduled: item.scheduled ?? 0,
-              completed: item.completed ?? 0,
-              cancelled: item.cancelled ?? 0,
-              no_show: item.no_show ?? 0,
-              revenue: this.safeMoneyEntries(item.revenue),
-            };
-          })
-        : [],
-      data_quality: result.data_quality ?? null,
-      // 🔴 Cycle 04 P0. Полнота и присутствие обязаны доехать до слоя, который
-      // отвечает владельцу: без них «0» и «не измерено» — одна строка.
-      completeness: result.completeness ?? null,
-      attendance: result.attendance ?? null,
-      // 🔴 Промежуточное представление: внешний идентификатор мастера здесь
-      // ещё есть, потому что по нему идёт сопоставление периодов и различение
-      // тёзок. Наружу он не уходит никогда — publishAnalytics его снимает.
-      // Возвращать safeAnalytics из обработчика напрямую нельзя.
-      //
-      // Идентификатор самого спрашивающего сотрудника — тоже служебный ключ:
-      // по нему личный срез отфильтровывается до одного человека, если
-      // источник вдруг вернул чужие строки.
-      employee_external_id:
-        typeof this.record(result.employee).provider_id === 'string' &&
-        this.record(result.employee).provider_id !== ''
-          ? (this.record(result.employee).provider_id as string)
-          : null,
-      staff_summary: Array.isArray(result.staff)
-        ? result.staff.map((entry) => {
-            const item = this.record(entry);
-            return {
-              staff_external_id:
-                typeof item.staff_external_id === 'string'
-                  ? item.staff_external_id
-                  : null,
-              staff_name: typeof item.name === 'string' ? item.name : null,
-              total:
-                this.optionalMetricNumber(item.total) ??
-                (this.optionalMetricNumber(item.appointments) ?? 0) +
-                  (this.optionalMetricNumber(item.cancelled) ?? 0),
-              appointments: item.appointments ?? 0,
-              scheduled: this.optionalMetricNumber(item.scheduled) ?? 0,
-              completed: this.optionalMetricNumber(item.completed) ?? 0,
-              // Отмены по мастеру: раньше их не было ни в одном поле, и на
-              // вопрос «у кого больше отмен» отвечать было нечем.
-              cancelled: this.optionalMetricNumber(item.cancelled) ?? 0,
-              no_show: this.optionalMetricNumber(item.no_show) ?? 0,
-              cancellation_rate_percent:
-                this.optionalMetricNumber(item.cancellation_rate_percent) ?? 0,
-              unique_clients:
-                this.optionalMetricNumber(item.unique_clients) ?? 0,
-              repeat_clients_in_period:
-                this.optionalMetricNumber(item.repeat_clients_in_period) ?? 0,
-              revenue: this.safeMoneyEntries(item.revenue),
-              booked_minutes:
-                typeof item.booked_minutes === 'number' &&
-                Number.isFinite(item.booked_minutes)
-                  ? item.booked_minutes
-                  : 0,
-              services: Array.isArray(item.services)
-                ? item.services.map((service) => {
-                    const row = this.record(service);
-                    return {
-                      name: typeof row.name === 'string' ? row.name : 'Услуга',
-                      appointments: row.appointments ?? 0,
-                    };
-                  })
-                : [],
-            };
-          })
-        : [],
-      service_summary: Array.isArray(result.services)
-        ? result.services.map((entry) => {
-            const item = this.record(entry);
-            return {
-              service_external_id:
-                typeof item.service_external_id === 'string'
-                  ? item.service_external_id
-                  : null,
-              name: typeof item.name === 'string' ? item.name : 'Услуга',
-              appointments: item.appointments ?? 0,
-              booked_value: this.safeMoneyEntries(item.booked_value),
-            };
-          })
-        : [],
-    };
-  }
-
-  /**
-   * Строки мастеров промежуточного представления.
-   *
-   * Отдельный разбор нужен потому, что по этим строкам работают сразу три
-   * вещи: раздача имён, сопоставление периодов и разрез по услугам.
-   */
-  private staffRows(value: unknown): Array<{
-    externalId: string | null;
-    name: string | null;
-    appointments: number;
-    entry: Record<string, unknown>;
-  }> {
-    const data = this.record(value);
-    if (!Array.isArray(data.staff_summary)) {
-      return [];
-    }
-    return data.staff_summary.map((entry) => {
-      const item = this.record(entry);
-      return {
-        externalId:
-          typeof item.staff_external_id === 'string' &&
-          item.staff_external_id !== ''
-            ? item.staff_external_id
-            : null,
-        name:
-          typeof item.staff_name === 'string' && item.staff_name.trim() !== ''
-            ? item.staff_name.trim()
-            : null,
-        appointments: this.optionalMetricNumber(item.appointments) ?? 0,
-        entry: item,
-      };
-    });
-  }
-
-  /** Услуги внутри строки мастера — уже нормализованные safeAnalytics. */
-  private staffServiceRows(
-    entry: Record<string, unknown>,
-  ): Array<{ name: string; appointments: number }> {
-    if (!Array.isArray(entry.services)) {
-      return [];
-    }
-    return entry.services.map((service) => {
-      const row = this.record(service);
-      return {
-        name: typeof row.name === 'string' ? row.name : 'Услуга',
-        appointments: this.optionalMetricNumber(row.appointments) ?? 0,
-      };
-    });
-  }
-
-  /**
-   * Кого и под каким именем показывать в разрезе мастеров.
-   *
-   * `names` пусто и `allowedExternalIds` — пустое множество означают «разрез
-   * закрыт»: наружу уйдут пустые массивы. Отдельный флаг для этого не нужен,
-   * фильтр по множеству и так fail-closed.
-   */
-  private staffScope(
-    names: Map<string, string>,
-    allowedExternalIds: Set<string> | null,
-  ): { names: Map<string, string>; allowedExternalIds: Set<string> | null } {
-    return { names, allowedExternalIds };
-  }
-
-  /**
-   * Разрез мастеров для бизнес-аналитики: все мастера, по именам.
-   *
-   * Роль проверяется здесь, а не только в каталоге инструментов: каталог
-   * решает, кого пускать к инструменту, а имена коллег — отдельная граница.
-   */
-  private businessStaffScope(
-    principal: AiToolPrincipal,
-    ...periods: unknown[]
-  ) {
-    if (!NAMED_STAFF_BREAKDOWN_ROLES.has(principal.role)) {
-      return this.staffScope(new Map(), new Set<string>());
-    }
-    return this.staffScope(this.staffDisplayNames(...periods), null);
-  }
-
-  /**
-   * Разрез мастеров для личного среза сотрудника: только он сам.
-   *
-   * 🔴 Источник и так отдаёт записи одного человека, но полагаться на это
-   * нельзя. Ключ — идентификатор сотрудника из ответа аналитики; если его нет,
-   * разрез закрывается целиком, а не открывается на всех.
-   */
-  private employeeStaffScope(...periods: unknown[]) {
-    const allowed = new Set<string>();
-    for (const period of periods) {
-      const externalId = this.record(period).employee_external_id;
-      if (typeof externalId === 'string' && externalId !== '') {
-        allowed.add(externalId);
-      }
-    }
-    return this.staffScope(this.staffDisplayNames(...periods), allowed);
-  }
-
-  /**
-   * Внешний идентификатор мастера → имя для выдачи.
-   *
-   * 🔴 Тёзок различаем устойчиво. Порядок нумерации — по ОБЪЕДИНЕНИЮ внешних
-   * идентификаторов всех переданных периодов, отсортированному по кодовым
-   * точкам: иначе один и тот же Илья был бы «Илья» в текущем периоде и
-   * «Илья (2)» в прошлом, и сравнение «у кого просело» сопоставляло бы разных
-   * людей. localeCompare здесь нельзя — его порядок зависит от локали и
-   * версии ICU. Молча склеивать двух людей в одного нельзя тем более: у них
-   * разные записи и разная выручка.
-   *
-   * Мастер без имени получает безличное «Мастер N» по тому же порядку —
-   * внешний идентификатор наружу не отдаём никогда.
-   */
-  private staffDisplayNames(...periods: unknown[]): Map<string, string> {
+  private staffDisplayNames(rows: StaffIdentityRow[]): Map<string, string> {
     const names = new Map<string, string | null>();
-    for (const period of periods) {
-      for (const row of this.staffRows(period)) {
-        if (!row.externalId) continue;
-        if (!names.get(row.externalId)) {
-          names.set(row.externalId, row.name);
-        }
+    for (const row of rows) {
+      if (!row.externalId) continue;
+      if (!names.get(row.externalId)) {
+        names.set(row.externalId, row.name);
       }
     }
     const display = new Map<string, string>();
@@ -4497,375 +3228,6 @@ export class AiToolHandlerService {
         display.set(externalId, candidate);
       });
     return display;
-  }
-
-  /**
-   * Убирает внешний идентификатор мастера, оставляя имя.
-   *
-   * 🔴 Идентификатор CRM наружу не уходит ни при каких ролях: он ключ к чужой
-   * системе, а не показатель. Служебный `employee_external_id` снимается
-   * здесь же — он живёт только внутри обработчика.
-   */
-  private publishAnalytics(
-    value: unknown,
-    scope?: {
-      names: Map<string, string>;
-      allowedExternalIds: Set<string> | null;
-    },
-  ): Record<string, unknown> {
-    const data = this.record(value);
-    const published: Record<string, unknown> = { ...data };
-    delete published.employee_external_id;
-    if (data.finance !== undefined) {
-      published.finance = this.publishedFinance(data.finance);
-    }
-    const staffScope =
-      scope ?? this.staffScope(this.staffDisplayNames(data), null);
-    return {
-      ...published,
-      service_summary: Array.isArray(data.service_summary)
-        ? data.service_summary.map((entry) => {
-            const row = this.record(entry);
-            const serviceExternalId =
-              typeof row.service_external_id === 'string'
-                ? row.service_external_id
-                : null;
-            return {
-              name: typeof row.name === 'string' ? row.name : 'Услуга',
-              appointments: this.optionalMetricNumber(row.appointments) ?? 0,
-              booked_value: this.safeMoneyEntries(row.booked_value),
-              confirmed_revenue: this.serviceConfirmedRevenue(
-                data,
-                serviceExternalId,
-              ),
-            };
-          })
-        : [],
-      staff_summary: this.staffRows(data)
-        .filter(
-          (row) =>
-            row.externalId !== null &&
-            (staffScope.allowedExternalIds === null ||
-              staffScope.allowedExternalIds.has(row.externalId)),
-        )
-        .map((row) => ({
-          name: staffScope.names.get(row.externalId as string) ?? null,
-          total:
-            this.optionalMetricNumber(row.entry.total) ??
-            (this.optionalMetricNumber(row.entry.appointments) ?? 0) +
-              (this.optionalMetricNumber(row.entry.cancelled) ?? 0),
-          appointments: row.entry.appointments ?? 0,
-          scheduled: this.optionalMetricNumber(row.entry.scheduled) ?? 0,
-          completed: this.optionalMetricNumber(row.entry.completed) ?? 0,
-          cancelled: this.optionalMetricNumber(row.entry.cancelled) ?? 0,
-          no_show: this.optionalMetricNumber(row.entry.no_show) ?? 0,
-          cancellation_rate_percent:
-            this.optionalMetricNumber(row.entry.cancellation_rate_percent) ?? 0,
-          unique_clients:
-            this.optionalMetricNumber(row.entry.unique_clients) ?? 0,
-          repeat_clients_in_period:
-            this.optionalMetricNumber(row.entry.repeat_clients_in_period) ?? 0,
-          revenue: this.safeMoneyEntries(row.entry.revenue),
-          // 🔴 Два разных поля про деньги мастера, и перепутать их нельзя.
-          // `confirmed_revenue` — только финансовые операции услуг, которые
-          // YClients связал с записью и конкретным мастером. Несвязанный
-          // остаток не распределяется приблизительно.
-          // `salary` — сколько ЕМУ начислено по расчёту зарплаты CRM. Это
-          // расход салона, а не его выручка, и подменять одно другим — врать
-          // и о человеке, и о салоне.
-          confirmed_revenue: this.staffConfirmedRevenue(data, row.externalId),
-          salary: this.publishedStaffSalary(row.entry.salary),
-          booked_minutes: row.entry.booked_minutes ?? 0,
-          services: this.staffServiceRows(row.entry),
-        })),
-    };
-  }
-
-  /** Подтверждённая касса услуг, достоверно связанная с мастером в CRM. */
-  private staffConfirmedRevenue(
-    data: Record<string, unknown>,
-    externalId: string | null,
-  ) {
-    if (data.data_source === 'crm' && externalId) {
-      const finance = this.record(data.finance);
-      const revenue = this.record(finance.revenue);
-      const rows = Array.isArray(revenue.by_staff) ? revenue.by_staff : [];
-      const match = rows
-        .map((entry) => this.record(entry))
-        .find((entry) => entry.staff_external_id === externalId);
-      const amount = match ? this.safeMoneyAmount(match.amount) : null;
-      if (match && amount) {
-        return {
-          status: 'available',
-          basis: 'crm_financial_transaction_attribution',
-          amount,
-          transaction_count:
-            this.optionalMetricNumber(match.transaction_count) ?? 0,
-          attribution_status: revenue.staff_attribution_status ?? 'unavailable',
-          attribution_coverage_percent: this.optionalMetricNumber(
-            revenue.staff_attribution_coverage_percent,
-          ),
-          unavailable_reason: null,
-        };
-      }
-    }
-    return {
-      status: 'unavailable',
-      basis: null,
-      amount: null,
-      unavailable_reason:
-        data.data_source === 'crm'
-          ? STAFF_CONFIRMED_REVENUE_UNAVAILABLE.crm
-          : STAFF_CONFIRMED_REVENUE_UNAVAILABLE.maya,
-    };
-  }
-
-  /**
-   * Касса услуги публикуется только по одноуслуговым записям,
-   * которые YClients связал с подтверждённой финансовой операцией.
-   */
-  private serviceConfirmedRevenue(
-    data: Record<string, unknown>,
-    externalId: string | null,
-  ) {
-    if (data.data_source === 'crm' && externalId) {
-      const finance = this.record(data.finance);
-      const revenue = this.record(finance.revenue);
-      const rows = Array.isArray(revenue.by_service) ? revenue.by_service : [];
-      const match = rows
-        .map((entry) => this.record(entry))
-        .find((entry) => entry.service_external_id === externalId);
-      const amount = match ? this.safeMoneyAmount(match.amount) : null;
-      if (match && amount) {
-        return {
-          status: 'available',
-          basis: 'crm_single_service_transaction_attribution',
-          amount,
-          transaction_count:
-            this.optionalMetricNumber(match.transaction_count) ?? 0,
-          attribution_status:
-            revenue.service_attribution_status ?? 'unavailable',
-          attribution_coverage_percent: this.optionalMetricNumber(
-            revenue.service_attribution_coverage_percent,
-          ),
-          unavailable_reason: null,
-        };
-      }
-    }
-    return {
-      status: 'unavailable',
-      basis: null,
-      amount: null,
-      unavailable_reason:
-        data.data_source === 'crm'
-          ? 'crm_confirmed_service_revenue_not_attributed'
-          : 'internal_calendar_has_no_confirmed_service_cash',
-    };
-  }
-
-  /** Служебные CRM-ID нужны для сопоставления, но не должны уходить модели. */
-  private publishedFinance(value: unknown) {
-    const finance = this.record(value);
-    const revenue = this.record(finance.revenue);
-    const publishedRevenue = { ...revenue };
-    delete publishedRevenue.by_staff;
-    delete publishedRevenue.by_service;
-    return { ...finance, revenue: publishedRevenue };
-  }
-
-  /**
-   * Начисления строки мастера на выдачу.
-   *
-   * Отсутствие поля — это не «ноль», а «отчёт зарплату не запрашивал»: без
-   * явной причины пустое место читается как отсутствие начислений.
-   */
-  private publishedStaffSalary(value: unknown) {
-    const salary = this.record(value);
-    const accrued = this.safeMoneyAmount(salary.accrued);
-    if (salary.status !== 'available' || !accrued) {
-      return this.unavailableStaffSalary(
-        typeof salary.unavailable_reason === 'string' &&
-          salary.unavailable_reason !== ''
-          ? salary.unavailable_reason
-          : STAFF_SALARY_UNAVAILABLE.notRequested,
-      );
-    }
-    return {
-      status: 'available',
-      basis: 'crm_payroll_accrual',
-      accrued,
-      paid: this.safeMoneyAmount(salary.paid),
-      unavailable_reason: null,
-    };
-  }
-
-  /**
-   * Сравнение мастеров между периодами.
-   *
-   * 🔴 Ключ сопоставления — внешний идентификатор. Ни имя (оно повторяется и
-   * меняется), ни позиция в массиве (она зависит от того, кто первым вышел в
-   * смену) для этого не годятся. Мастер, отсутствующий в одном из периодов,
-   * попадает в результат с нулём на своей стороне: уход человека из смены —
-   * это тоже ответ на вопрос «что изменилось».
-   *
-   * 🔴 Разрез по услугам ВНУТРИ мастера — ради него всё и считается. Без него
-   * фразы «у Ильи просела «Борода» на 12 записей» не существует: числа 12 нет
-   * ни в одном поле, сторож чисел бракует ответ, и владелец получает шаблон.
-   */
-  private businessStaffChanges(
-    current: unknown,
-    previous: unknown,
-    scope: {
-      names: Map<string, string>;
-      allowedExternalIds: Set<string> | null;
-    },
-  ) {
-    const rows = (value: unknown) =>
-      new Map(
-        this.staffRows(value).flatMap((row) =>
-          row.externalId ? [[row.externalId, row] as const] : [],
-        ),
-      );
-    const currentRows = rows(current);
-    const previousRows = rows(previous);
-    return (
-      [...new Set([...currentRows.keys(), ...previousRows.keys()])]
-        .filter(
-          (externalId) =>
-            scope.allowedExternalIds === null ||
-            scope.allowedExternalIds.has(externalId),
-        )
-        .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
-        .map((externalId) => {
-          const currentRow = currentRows.get(externalId);
-          const previousRow = previousRows.get(externalId);
-          const currentAppointments = currentRow?.appointments ?? 0;
-          const previousAppointments = previousRow?.appointments ?? 0;
-          const staffNumber = (
-            row: { entry: Record<string, unknown> } | undefined,
-            key: string,
-          ) => (row ? (this.optionalMetricNumber(row.entry[key]) ?? 0) : 0);
-          const currentCancelled = staffNumber(currentRow, 'cancelled');
-          const previousCancelled = staffNumber(previousRow, 'cancelled');
-          const currentCancellationRate = staffNumber(
-            currentRow,
-            'cancellation_rate_percent',
-          );
-          const previousCancellationRate = staffNumber(
-            previousRow,
-            'cancellation_rate_percent',
-          );
-          const currentUniqueClients = staffNumber(
-            currentRow,
-            'unique_clients',
-          );
-          const previousUniqueClients = staffNumber(
-            previousRow,
-            'unique_clients',
-          );
-          const currentRepeatClients = staffNumber(
-            currentRow,
-            'repeat_clients_in_period',
-          );
-          const previousRepeatClients = staffNumber(
-            previousRow,
-            'repeat_clients_in_period',
-          );
-          return {
-            name: scope.names.get(externalId) ?? null,
-            current_appointments: currentAppointments,
-            previous_appointments: previousAppointments,
-            delta: currentAppointments - previousAppointments,
-            percent_change: this.percentageDelta(
-              currentAppointments,
-              previousAppointments,
-            ),
-            current_cancelled: currentCancelled,
-            previous_cancelled: previousCancelled,
-            cancelled_delta: currentCancelled - previousCancelled,
-            current_cancellation_rate_percent: currentCancellationRate,
-            previous_cancellation_rate_percent: previousCancellationRate,
-            // 🔴 Разница долей — в процентных пунктах, а не в процентах: «отмены
-            // выросли на 5» у мастера с 5% и с 40% означают разное, и путать эти
-            // две величины в одном поле нельзя. Округление обязательно — обе
-            // доли уже округлены до десятых, и вычитание даёт хвост из
-            // двоичной дроби.
-            cancellation_rate_delta_percentage_points:
-              Math.round(
-                (currentCancellationRate - previousCancellationRate) * 10,
-              ) / 10,
-            current_unique_clients: currentUniqueClients,
-            previous_unique_clients: previousUniqueClients,
-            unique_clients_delta: currentUniqueClients - previousUniqueClients,
-            current_repeat_clients_in_period: currentRepeatClients,
-            previous_repeat_clients_in_period: previousRepeatClients,
-            repeat_clients_delta: currentRepeatClients - previousRepeatClients,
-            services: this.serviceChangeRows(
-              this.staffServiceMap(currentRow?.entry),
-              this.staffServiceMap(previousRow?.entry),
-            ),
-          };
-        })
-        // 🔴 По возрастанию дельты, а не по модулю. Сортировка по модулю ставила
-        // первым мастера с самым большим РОСТОМ, и на вопрос «кто больше всего в
-        // просадке» модель называла лучшего — с верным числом, поэтому сторож
-        // молчал. Худший результат должен быть первым.
-        .sort((left, right) => left.delta - right.delta)
-    );
-  }
-
-  private staffServiceMap(
-    entry: Record<string, unknown> | undefined,
-  ): Map<string, number> {
-    if (!entry) {
-      return new Map<string, number>();
-    }
-    // 🔴 Складываем, а не перезаписываем. Аналитика копит услуги по
-    // идентификатору, а сюда они приходят уже без него — только с названием.
-    // Прежний `new Map(...)` при двух одноимённых позициях молча оставлял
-    // последнюю, и объём терялся: дельта выходила −5 вместо −15, причём
-    // ответ противоречил сам себе. Идентификатора здесь нет, поэтому
-    // одноимённые позиции честно суммируем.
-    const rows = new Map<string, number>();
-    for (const service of this.staffServiceRows(entry)) {
-      rows.set(
-        service.name,
-        (rows.get(service.name) ?? 0) + service.appointments,
-      );
-    }
-    return rows;
-  }
-
-  private unavailableFinance(code: string) {
-    return {
-      source: 'external_crm',
-      provider: null,
-      verified: false,
-      revenue: {
-        status: 'unavailable',
-        verified: false,
-        transaction_count: null,
-        total: null,
-        by_staff: [],
-        by_service: [],
-        staff_attribution_status: 'unavailable',
-        staff_attribution_coverage_percent: null,
-        unattributed_service_total: null,
-        unattributed_service_transaction_count: 0,
-        service_attribution_status: 'unavailable',
-        service_attribution_coverage_percent: null,
-        unattributed_service_breakdown_total: null,
-        unattributed_service_breakdown_transaction_count: 0,
-      },
-      payroll: {
-        status: 'unavailable',
-        verified: false,
-        accrued_total: null,
-        paid_total: null,
-        balance_total: null,
-      },
-      warning_codes: [code],
-    };
   }
 
   private async cancelOwnAppointment(
