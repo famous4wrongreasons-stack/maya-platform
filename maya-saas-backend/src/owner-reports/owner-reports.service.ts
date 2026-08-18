@@ -326,9 +326,22 @@ export class OwnerReportsService {
       financeAllowed: true,
     });
 
-    const composed = composeDailyReport({
-      facts: businessBriefFacts(state, localDate),
-    });
+    const facts = businessBriefFacts(state, localDate);
+    /**
+     * 🔴 Отказ денежного контура обязан остаться ВИДИМЫМ В ЖУРНАЛЕ.
+     *
+     * До миграции отчёт звал финансы сам и писал `warn` при отказе. Теперь
+     * читает канон, и молчание провайдера доезжает только фразой внутри
+     * письма владельцу — на сервере вечер выглядел бы полностью успешным, и
+     * массовый отказ YClients прошёл бы незамеченным до звонка в поддержку.
+     */
+    if (facts.revenue.basis === 'unavailable') {
+      this.logger.warn(
+        `daily_report finance unavailable tenant=${tenant.slug} date=${localDate}`,
+      );
+    }
+
+    const composed = composeDailyReport({ facts });
     const published = await this.inbox.publishForTenant(tenant.id, {
       type: 'daily_report',
       sourceEventId,
@@ -434,12 +447,24 @@ export class OwnerReportsService {
            * его же безымянной зарплатной строкой.
            */
           const names = new Map<string, string>();
+          const used = new Map<string, number>();
           for (const row of rows) {
             const name = row.name?.trim();
-            if (name) names.set(row.externalId, name);
-            else if (!names.has(row.externalId)) {
-              names.set(row.externalId, 'Мастер');
+            if (!name) {
+              if (!names.has(row.externalId)) {
+                names.set(row.externalId, 'Мастер');
+              }
+              continue;
             }
+            if (names.get(row.externalId) === name) continue;
+            /**
+             * 🔴 Тёзки обязаны различаться. В денежном списке вечернего отчёта
+             * две строки «Илья» неразличимы, а это единственное место, где
+             * владелец видит зарплаты смены.
+             */
+            const seen = (used.get(name) ?? 0) + 1;
+            used.set(name, seen);
+            names.set(row.externalId, seen > 1 ? `${name} (${seen})` : name);
           }
           return { names, allowedExternalIds: null };
         },

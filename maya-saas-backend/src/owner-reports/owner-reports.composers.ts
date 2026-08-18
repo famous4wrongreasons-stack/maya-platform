@@ -56,12 +56,20 @@ function completenessPayload(facts: {
  */
 function attendanceLine(facts: BriefFacts, always: boolean): string | null {
   if (!facts.attendance.measured) {
-    return always
-      ? 'Присутствие за день ещё не сверено — о неявках сказать нечего.'
-      : null;
+    if (!always) return null;
+    /**
+     * 🔴 Три разных ответа, а не два. «Сверки не было» — повод посмотреть на
+     * планировщик; «сверка не покрыла часть записей» — повод подождать догон;
+     * и говорить одно вместо другого значит отправить владельца чинить
+     * работающее.
+     */
+    return facts.attendance.partial
+      ? 'Присутствие сверено НЕ по всем записям дня — числа по приходам называть рано.'
+      : 'Присутствие за день ещё не сверено — о неявках сказать нечего.';
   }
-  const arrived = facts.attendance.arrived ?? 0;
-  const noShow = facts.attendance.noShow ?? 0;
+  const arrived = facts.attendance.arrived;
+  const noShow = facts.attendance.noShow;
+  if (arrived === null || noShow === null) return null;
   if (!always && arrived === 0 && noShow === 0) return null;
   return `Присутствие: пришли ${arrived}, неявок ${noShow}.`;
 }
@@ -92,9 +100,14 @@ export function composeMorningBrief(input: { facts: BriefFacts }): {
     .filter(Boolean)
     .slice(0, 4);
 
+  const morningNote = incompleteNote(facts);
   const lines = [
     'Доброе утро! Посмотрела салон на сегодня 👇',
     '',
+    // 🔴 Оговорка стоит ПЕРЕД числами, которые описывает: «числа ниже —
+    // нижняя граница» внизу сообщения читатель находит уже после того, как
+    // сделал вывод по нулям.
+    ...(morningNote ? [morningNote, ''] : []),
     `📅 Сегодня в CRM: всего ${count(facts.counts.total)} записей${expected}.`,
     `Статусы: ожидают ${count(facts.counts.scheduled)}, завершено ${count(
       facts.counts.completed,
@@ -110,13 +123,13 @@ export function composeMorningBrief(input: { facts: BriefFacts }): {
       `🪑 Недозагружены: ${underused.join(', ')}` +
         (minutes !== null && minutes > 0 ? ` — занято ${minutes} мин.` : '.'),
     );
-  } else {
+  } else if (facts.staff.length > 0) {
     lines.push('🪑 Загрузка мастеров выглядит ровной на утро.');
   }
-  const morningNote = incompleteNote(facts);
-  if (morningNote) {
-    lines.push('', morningNote);
-  }
+  // 🔴 Разреза по мастерам нет вовсе — и тогда о загрузке не говорится ничего.
+  // Вывод о благополучии из отсутствия измерения — та же подмена, что и ноль
+  // вместо «не знаю».
+
   lines.push(
     '',
     'Откройте чат MAYA, если нужно закрыть окна или скорректировать план.',
@@ -185,9 +198,11 @@ export function composeMasterMorningBrief(input: { facts: MasterBriefFacts }): {
 
   const total = facts.counts.total;
   const minutes = facts.counts.bookedMinutes;
+  const masterNote = incompleteNote(facts);
   const lines = [
     `${greeting} Вот ваш план на сегодня.`,
     '',
+    ...(masterNote ? [masterNote, ''] : []),
     `Записей: ${count(total)}; ожидают визита ${count(
       facts.counts.scheduled,
     )}; завершено ${count(facts.counts.completed)}; отменено ${count(
@@ -218,10 +233,6 @@ export function composeMasterMorningBrief(input: { facts: MasterBriefFacts }): {
       'Совет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.',
     );
   }
-  const masterNote = incompleteNote(facts);
-  if (masterNote) {
-    lines.push('', masterNote);
-  }
   lines.push('', 'План сохранён в чате MAYA.');
 
   return {
@@ -249,38 +260,51 @@ export function composeDailyReport(input: { facts: BriefFacts }): {
   const facts = input.facts;
   const day = displayDayRu(facts.localDate);
   const revenue = facts.revenue;
-  const lines = [`📊 Отчёт за ${day} готов`, ''];
+  const dailyNote = incompleteNote(facts);
+  const lines = [
+    `📊 Отчёт за ${day} готов`,
+    '',
+    ...(dailyNote ? [dailyNote, ''] : []),
+  ];
 
   const accrued = facts.payroll.accruedTotalKopecks;
-  if (facts.payroll.rows.length || accrued !== null) {
-    if (facts.payroll.rows.length) {
-      lines.push('Зарплаты (смена):');
-      const shown = facts.payroll.rows.slice(0, 12);
-      for (const row of shown) {
-        lines.push(
-          `• ${row.name}: ${formatRubFromKopecks(row.accruedKopecks)}`,
-        );
-      }
-      // 🔴 Обрезка списка обязана быть видимой: молча укороченная команда
-      // выглядит как команда, которой ничего не начислили.
-      if (facts.payroll.rows.length > shown.length) {
-        lines.push(
-          `…и ещё ${facts.payroll.rows.length - shown.length} мастеров — список сокращён.`,
-        );
-      }
+  if (facts.payroll.rows.length > 0) {
+    lines.push('Зарплаты (смена):');
+    const shown = facts.payroll.rows.slice(0, 12);
+    for (const row of shown) {
+      /**
+       * 🔴 Три разных строки, а не одна отфильтрованная.
+       *
+       * «Не посчитано» — это не «ноль», и мастер, по которому CRM не отдала
+       * расчёт, обязан остаться видимым: иначе список зарплат выглядит полным,
+       * а сумма строк не сходится с итогом без единого слова объяснения.
+       */
+      lines.push(
+        row.measured
+          ? `• ${row.name}: ${formatRubFromKopecks(row.accruedKopecks ?? 0)}`
+          : `• ${row.name}: расчёт не пришёл из CRM — сумма неизвестна`,
+      );
     }
-    /**
-     * 🔴 Итог печатается ОТДЕЛЬНО от строк.
-     *
-     * Поимённые строки берутся из разреза мастеров периода, а итог — из
-     * расчёта зарплаты целиком. Мастер без записей за день в разрез не попадёт,
-     * и его начисление в строках не появится — но в итоге оно есть, и итог
-     * обязан прозвучать, даже когда строк нет ни одной.
-     */
-    if (accrued !== null && accrued > 0) {
+    // Обрезка списка обязана быть видимой: молча укороченная команда выглядит
+    // как команда, которой ничего не начислили.
+    if (facts.payroll.rows.length > shown.length) {
+      lines.push(
+        `…и ещё ${facts.payroll.rows.length - shown.length} мастеров — список сокращён.`,
+      );
+    }
+    if (accrued !== null) {
       lines.push(`Итого начислено за смену: ${formatRubFromKopecks(accrued)}`);
     }
     lines.push('');
+  } else if (accrued !== null) {
+    lines.push(
+      `Зарплаты (смена): начислено ${formatRubFromKopecks(accrued)}, разбивки по мастерам CRM не дала.`,
+      '',
+    );
+  } else if (facts.payroll.status !== null) {
+    // 🔴 «Расчёт не пришёл» и «за смену начислено ноль» — разные новости, и
+    // молчание отчёта стирало между ними разницу.
+    lines.push('Расчёт зарплаты за смену из CRM не пришёл.', '');
   }
 
   lines.push('Оплаты за день:');
@@ -290,7 +314,19 @@ export function composeDailyReport(input: { facts: BriefFacts }): {
    * касса есть. Ноль и незнание — не одно и то же, и владелец имеет право
    * знать, какое из двух.
    */
-  if (revenue.amountKopecks === null) {
+  if (revenue.amountKopecks === null && revenue.basis === 'booked_prices') {
+    /**
+     * 🔴 У арендатора на СОБСТВЕННОМ календаре кассового контура не существует
+     * как понятия — обвинять его в молчании нельзя.
+     *
+     * Первая версия смотрела только на «число пустое» и каждый вечер сообщала
+     * владельцу о поломке интеграции, которой у него нет. Основание факта
+     * различает эти случаи, и текст обязан их различать.
+     */
+    lines.push(
+      'Подтверждённой кассы у собственного календаря нет: деньги здесь — цены записей, а не проведённые оплаты.',
+    );
+  } else if (revenue.amountKopecks === null) {
     lines.push(
       'Подтверждённая касса за день недоступна: финансовый контур не ответил, поэтому сказать «выручки не было» я не могу.',
     );
@@ -324,10 +360,6 @@ export function composeDailyReport(input: { facts: BriefFacts }): {
   // это тоже ответ.
   const attendance = attendanceLine(facts, true);
   if (attendance) lines.push(attendance);
-  const dailyNote = incompleteNote(facts);
-  if (dailyNote) {
-    lines.push('', dailyNote);
-  }
   lines.push(
     '',
     'Сообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.',

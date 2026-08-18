@@ -46,6 +46,12 @@ export type BriefFacts = {
     arrived: BriefCount;
     noShow: BriefCount;
     measured: boolean;
+    /**
+     * 🔴 «Сверки не было» и «сверка не покрыла часть записей» — разные новости:
+     * в первом случае чинят планировщик, во втором ждут догон. Канон различает
+     * их причиной, и текст обязан различать тоже.
+     */
+    partial: boolean;
     unavailableReason: string | null;
   };
   /** Стоимость записанного: цены журнала. Никогда не выручка. */
@@ -69,13 +75,29 @@ export type BriefFacts = {
     cashlessKopecks: BriefCount;
     unclassifiedKopecks: BriefCount;
   };
-  /** Начисления смены: строки мастеров и итог. Только для тех, кому открыты деньги. */
+  /**
+   * Начисления смены. Только для тех, кому открыты деньги.
+   *
+   * 🔴 Строка со статусом `unavailable` ОСТАЁТСЯ строкой: мастер, которому CRM
+   * не посчитала смену, и мастер, которому начислили ноль, — разные новости, и
+   * выбрасывать первую значит вернуть ровно тот дефект, ради которого
+   * канонический слой эти строки и публикует.
+   */
   payroll: {
     status: string | null;
     accruedTotalKopecks: BriefCount;
-    rows: Array<{ name: string; accruedKopecks: number }>;
+    rows: Array<{
+      name: string;
+      accruedKopecks: BriefCount;
+      measured: boolean;
+    }>;
   };
-  /** Разрез по мастерам — уже с применённым раскрытием имён. */
+  /**
+   * Разрез по мастерам — уже с применённым раскрытием имён.
+   *
+   * Пустой массив означает «строк нет», а не «все загружены ровно»: выводить
+   * благополучие из отсутствия измерения нельзя.
+   */
   staff: Array<{
     name: string | null;
     appointments: BriefCount;
@@ -159,8 +181,15 @@ export function businessBriefFacts(
   const staffRows = Array.isArray(rec(state.current).staff_summary)
     ? (rec(state.current).staff_summary as unknown[])
     : [];
+  /**
+   * 🔴 Присутствие измерено только когда измерены ОБЕ половины.
+   *
+   * Раньше здесь стояло «или»: достаточно было одной, а вторую печать добирала
+   * через `?? 0`. Первая же метрика с раздельной доступностью дала бы владельцу
+   * «неявок 0», которого никто не наблюдал.
+   */
   const attendanceMeasured =
-    num(metrics.attended_appointments) !== null ||
+    num(metrics.attended_appointments) !== null &&
     num(metrics.attendance_no_show) !== null;
 
   return {
@@ -176,9 +205,16 @@ export function businessBriefFacts(
       bookedMinutes: num(metrics.booked_minutes),
     },
     attendance: {
-      arrived: num(metrics.attended_appointments),
-      noShow: num(metrics.attendance_no_show),
+      // Обе половины наблюдения или ни одной: полумеры здесь означали бы
+      // напечатанный ноль там, где половину не измеряли.
+      arrived: attendanceMeasured ? num(metrics.attended_appointments) : null,
+      noShow: attendanceMeasured ? num(metrics.attendance_no_show) : null,
       measured: attendanceMeasured,
+      partial:
+        !attendanceMeasured &&
+        /not_observed_for_every_record/.test(
+          unavailableReason(state, 'attendance') ?? '',
+        ),
       unavailableReason: attendanceMeasured
         ? null
         : unavailableReason(state, 'attendance'),
@@ -207,17 +243,19 @@ export function businessBriefFacts(
        * периода: мастеру могло быть начислено в день, когда у него нет ни
        * одной записи, и его строка обязана остаться. Имя в них уже раскрыто
        * решением вызывающего — из чужой системы оно не приходит.
+       *
+       * Не отсеивается НИЧЕГО: ни ноль, ни недоступное. Отсев по величине
+       * начисления — это и есть подмена «не посчитали» на «не начислили».
        */
-      rows: (Array.isArray(payroll.staff) ? payroll.staff : []).flatMap(
-        (entry) => {
-          const row = rec(entry);
-          const accrued = money(row.accrued);
-          if (row.status !== 'available' || accrued === null || accrued <= 0) {
-            return [];
-          }
-          return [{ name: str(row.name) ?? 'Мастер', accruedKopecks: accrued }];
-        },
-      ),
+      rows: (Array.isArray(payroll.staff) ? payroll.staff : []).map((entry) => {
+        const row = rec(entry);
+        const measured = row.status === 'available';
+        return {
+          name: str(row.name) ?? 'Мастер',
+          accruedKopecks: measured ? money(row.accrued) : null,
+          measured,
+        };
+      }),
     },
     staff: staffRows.map((entry) => {
       const row = rec(entry);

@@ -1528,7 +1528,14 @@ export class BusinessStateService {
     const publishedPayroll = Array.isArray(payroll.staff)
       ? {
           ...payroll,
-          staff: payroll.staff.map((entry) => {
+          /**
+           * 🔴 Нераскрытая строка выпадает ЦЕЛИКОМ, а не теряет имя.
+           *
+           * Разрез мастеров рядом делает именно так, и две поимённые витрины
+           * обязаны жить по одному правилу: безымянная строка с суммой — это
+           * всё ещё поимённый список, просто сопоставляемый по позиции.
+           */
+          staff: payroll.staff.flatMap((entry) => {
             const row = this.record(entry);
             const externalId =
               typeof row.external_id === 'string' ? row.external_id : null;
@@ -1536,16 +1543,17 @@ export class BusinessStateService {
               externalId !== null &&
               (scope.allowedExternalIds === null ||
                 scope.allowedExternalIds.has(externalId));
-            return {
-              // Имя выдаёт то же раскрытие, что и в разрезе мастеров: граница
-              // «кому показывать имена» обязана быть одна на всю систему.
-              // `provider_name` при этом снимается: наружу уходит решение, а
-              // не то, как мастера зовут в чужой системе.
-              name: allowed ? (scope.names.get(externalId) ?? null) : null,
-              status: row.status ?? 'unavailable',
-              accrued: row.accrued ?? null,
-              paid: row.paid ?? null,
-            };
+            if (!allowed) return [];
+            return [
+              {
+                // Имя выдаёт то же раскрытие, что и в разрезе мастеров:
+                // граница «кому показывать имена» одна на всю систему.
+                name: scope.names.get(externalId) ?? null,
+                status: row.status ?? 'unavailable',
+                accrued: row.accrued ?? null,
+                paid: row.paid ?? null,
+              },
+            ];
           }),
         }
       : payroll;

@@ -327,3 +327,166 @@ describe('P4 §11 — обязательная регрессия сводок',
     expect(out.masters[0].brief.payload.identity_resolved).toBe(false);
   });
 });
+
+/**
+ * 🔴 Состязательная проверка P4: восемь дефектов, найденных тремя линзами уже
+ * ПОСЛЕ того, как я счёл пакет готовым. Шесть из них мои.
+ */
+describe('P4 — находки состязательной проверки', () => {
+  it('🔴 собственный календарь: отчёт не обвиняет контур, которого нет', async () => {
+    const out = await render(
+      {
+        source: 'internal',
+        internalRows: [internalRow('a', 'prov-1', 250_000)],
+        finance: FINANCE_FULL,
+      },
+      [],
+    );
+
+    // Финансы для внутреннего календаря не читаются в принципе — значит и
+    // «не ответил» сказать нельзя: это не отказ, это отсутствие понятия.
+    expect(out.evening.bodyText).not.toContain('не ответил');
+    expect(out.evening.bodyText).toContain('собственного календаря');
+    expect(out.facts.revenue.basis).toBe('booked_prices');
+  });
+
+  it('🔴 строка зарплаты со статусом «недоступно» остаётся видимой', async () => {
+    const out = await render({
+      visits: [visit('a', 'crm-1', 2500), visit('b', 'crm-2', 3000)],
+      finance: {
+        ...FINANCE_FULL,
+        payroll: {
+          ...FINANCE_FULL.payroll,
+          staff: [
+            {
+              staff_id: 'crm-1',
+              name: 'Илья',
+              status: 'available',
+              verified: true,
+              accrued: { currency: 'RUB', amount_kopecks: 250_000 },
+              paid: null,
+              balance: null,
+            },
+            {
+              staff_id: 'crm-2',
+              name: 'Стас',
+              status: 'unavailable',
+              verified: false,
+              accrued: null,
+              paid: null,
+              balance: null,
+            },
+          ],
+        },
+      },
+    });
+
+    // Мастер, которому CRM не посчитала смену, и мастер, которому начислили
+    // ноль, — разные новости. Отфильтровать первого значит соврать вторым.
+    expect(out.evening.bodyText).toContain('расчёт не пришёл из CRM');
+    expect(out.facts.payroll.rows).toHaveLength(2);
+    expect(out.facts.payroll.rows[1].measured).toBe(false);
+  });
+
+  it('🔴 измеренный ноль начисления печатается нулём, а не исчезает', async () => {
+    const out = await render({
+      visits: [visit('a', 'crm-1', 2500)],
+      finance: {
+        ...FINANCE_FULL,
+        payroll: {
+          ...FINANCE_FULL.payroll,
+          accrued_total: { currency: 'RUB', amount_kopecks: 0 },
+          staff: [
+            {
+              staff_id: 'crm-1',
+              name: 'Илья',
+              status: 'available',
+              verified: true,
+              accrued: { currency: 'RUB', amount_kopecks: 0 },
+              paid: null,
+              balance: null,
+            },
+          ],
+        },
+      },
+    });
+
+    expect(out.facts.payroll.rows[0].accruedKopecks).toBe(0);
+    expect(out.evening.bodyText).toMatch(/Илья: 0/);
+  });
+
+  it('🔴 частичная сверка присутствия не выдаётся за отсутствие сверки', async () => {
+    const partial = await render({
+      visits: [visit('a', 'crm-1', 2500), visit('b', 'crm-1', 2500)],
+      reconciled: true,
+      attendanceGroups: [
+        { attendance: 'arrived', _count: { _all: 1 } },
+        { attendance: null, _count: { _all: 1 } },
+      ],
+    });
+    const never = await render({ visits: [visit('a', 'crm-1', 2500)] });
+
+    expect(partial.facts.attendance.partial).toBe(true);
+    expect(partial.evening.bodyText).toContain('НЕ по всем записям');
+    expect(never.evening.bodyText).toContain('ещё не сверено');
+    expect(partial.evening.bodyText).not.toBe(never.evening.bodyText);
+  });
+
+  it('🔴 пустой разрез мастеров не выдаётся за ровную загрузку', async () => {
+    const out = await render({ visits: [], finance: FINANCE_ZERO });
+
+    expect(out.facts.staff).toHaveLength(0);
+    expect(out.morning.bodyText).not.toContain('выглядит ровной');
+  });
+
+  it('🔴 оговорка о неполноте стоит ПЕРЕД числами, которые описывает', async () => {
+    const out = await render({
+      visits: [visit('a', 'crm-1', 2500)],
+      completeness: 'truncated',
+    });
+
+    const note = out.morning.bodyText.indexOf('прочитан НЕ целиком');
+    const numbers = out.morning.bodyText.indexOf('Сегодня в CRM');
+    expect(note).toBeGreaterThan(-1);
+    expect(note).toBeLessThan(numbers);
+  });
+
+  it('🔴 тёзки в денежном списке различимы', async () => {
+    const out = await render({
+      visits: [
+        visit('a', 'crm-1', 2500),
+        {
+          ...visit('b', 'crm-2', 3000),
+          provider: { id: 'crm-2', name: 'Илья' },
+        },
+      ],
+      finance: FINANCE_FULL,
+    });
+
+    const names = out.facts.payroll.rows.map((row) => row.name);
+    expect(new Set(names).size).toBe(names.length);
+    expect(names.some((name) => /\(2\)/.test(name))).toBe(true);
+  });
+
+  it('🔴 отказ денежного контура остаётся в журнале сервера', async () => {
+    const { reports, stack } = service({
+      visits: [visit('a', 'crm-1', 2500)],
+      finance: 'throw',
+    });
+    const warn = jest
+      .spyOn(
+        (reports as unknown as { logger: { warn: (message: string) => void } })
+          .logger,
+        'warn',
+      )
+      .mockImplementation(() => undefined);
+
+    await stack.tenantContext.runAsSystemTenant(TENANT.id, () =>
+      reports.runDailyReport(TENANT, new Date('2026-08-13T18:05:00.000Z')),
+    );
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('finance unavailable'),
+    );
+  });
+});
