@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common';
 
 import { CalendarSource } from '../common/domain.enums';
+import type { AppointmentPeriodRead } from '../business-facts/appointment-period.reader';
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
+import type { AttendanceFacts } from '../business-facts/attendance-facts.service';
+import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import type { CrmFinancialSummary } from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -13,15 +17,15 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { AnalyticsRangeQueryDto } from './dto/analytics-range-query.dto';
 import {
+  FACT_INCOMPLETE_REASON,
+  completeObservation,
   isCanceledOutcome,
   isCompletedOutcome,
   isNoShowOutcome,
+  serializeBusinessFact,
 } from '../domain';
-import type { RevenueBasis } from '../domain';
-import {
-  CRM_JOURNAL_MAX_WINDOW_MS,
-  CRM_PAYROLL_MAX_WINDOW_DAYS,
-} from '../crm/crm-provider-limits';
+import type { BusinessPeriod, FactObservation, RevenueBasis } from '../domain';
+import { CRM_PAYROLL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
 
 type AnalyticsAppointment = {
   id: string;
@@ -109,6 +113,12 @@ const CLIENT_COHORT_LOOKBACK_MS =
 type ClientCohortHistory =
   | { status: 'available'; clientIds: Set<string> }
   | { status: 'unavailable'; reason: string };
+
+/** История до периода вместе с признанием, полно ли она прочитана. */
+type CohortLookbackRead = {
+  clientIds: Set<string>;
+  complete: boolean;
+};
 
 /**
  * Расход с категорией — только для расчёта прибыли.
@@ -289,6 +299,22 @@ export type ProfitabilityCohortSource = {
     cohort_unavailable_reason: string | null;
     cohort_lookback_days: number;
   };
+  /**
+   * 🔴 Cycle 04 P0. Полнота чтения записей, из которых взяты когорты.
+   *
+   * Стоимость нового клиента делится на число новых клиентов, а оно приходит
+   * из журнала. Отдавать её без признания источника значило подписывать
+   * частное от неполного знаменателя как измерение.
+   */
+  completeness?: {
+    appointments?: {
+      source?: string;
+      status?: string;
+      reason?: string | null;
+      observed_through?: string | null;
+      out_of_period_discarded?: number;
+    } | null;
+  } | null;
 };
 
 type ExpenseCategoryRow = {
@@ -318,6 +344,15 @@ export class OperationsAnalyticsService {
     private readonly tenantsService: TenantsService,
     private readonly crmService: CrmService,
     private readonly encryptionService: EncryptionService,
+    /**
+     * 🔴 Cycle 04 P0. Единственный читатель записей за период: фильтр по
+     * запрошенному окну и признание источника в неполноте живут там, а не
+     * копией здесь. До P0 фильтр был только в этом файле, а полноту не читал
+     * никто из отвечающих владельцу.
+     */
+    private readonly periodReader: AppointmentPeriodReader,
+    /** Присутствие — из канонического зеркала главы 3, а не из статуса. */
+    private readonly attendanceFacts: AttendanceFactsService,
   ) {}
 
   async getBusinessOverview(tenantId: string, query: AnalyticsRangeQueryDto) {
@@ -362,7 +397,11 @@ export class OperationsAnalyticsService {
     tenantId: string,
     query: AnalyticsRangeQueryDto,
   ) {
-    return this.withLegacyNet(await this.getBusinessOverview(tenantId, query));
+    return this.withLegacyNet(
+      this.withoutFactDiagnostics(
+        await this.getBusinessOverview(tenantId, query),
+      ),
+    );
   }
 
   /** Личный срез для HTTP-кабинета — тот же старый контракт `net`. */
@@ -372,8 +411,35 @@ export class OperationsAnalyticsService {
     query: AnalyticsRangeQueryDto,
   ) {
     return this.withLegacyNet(
-      await this.getEmployeeOverview(tenantId, userId, query),
+      this.withoutFactDiagnostics(
+        await this.getEmployeeOverview(tenantId, userId, query),
+      ),
     );
+  }
+
+  /**
+   * Снять диагностику фактов с ОПУБЛИКОВАННОГО контракта кабинета.
+   *
+   * 🔴 Cycle 04 P0. Полнота и присутствие — это правда о данных, и она обязана
+   * доехать до бизнес-фактов. Но кабинет — отдельно деплоящийся фронт с уже
+   * выпущенным контрактом, и снимок `legacy-net-contract.spec` охраняет его
+   * побайтово. Добавлять туда поля, которых фронт не читает, значит менять
+   * опубликованный контракт ради диагностики — это отдельное решение,
+   * согласованное с фронтом (реестр 4.2, пакет B4.6).
+   *
+   * Поэтому блоки живут в `getBusinessOverview` / `getBusinessOperational-
+   * Overview`, откуда их читают слой фактов и MAYA, и снимаются ровно на
+   * HTTP-краю кабинета. Порядок оставшихся ключей при удалении сохраняется —
+   * именно он и есть контракт.
+   */
+  private withoutFactDiagnostics<T extends object>(
+    overview: T,
+  ): Omit<T, 'completeness' | 'attendance'> {
+    const rest = { ...overview } as T &
+      Partial<Record<'completeness' | 'attendance', unknown>>;
+    delete rest.completeness;
+    delete rest.attendance;
+    return rest;
   }
 
   /**
@@ -718,78 +784,99 @@ export class OperationsAnalyticsService {
 
     const external =
       (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
+    const timezone = tenant.defaultTimezone;
+    const period: BusinessPeriod = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone,
+    };
     const cohortWindow = this.clientCohortWindow(from, to);
-    const [appointments, expenses, cohortClientIds] = await Promise.all([
-      external
-        ? this.loadExternalAppointments(
-            scopedTenantId,
-            from,
-            to,
-            staffExternalId,
-          )
-        : this.prisma.appointment
-            .findMany({
+    const [appointmentsRead, expenses, cohortClientIds, attendance] =
+      await Promise.all([
+        external
+          ? this.loadExternalAppointments(
+              scopedTenantId,
+              from,
+              to,
+              staffExternalId,
+              timezone,
+            )
+          : this.prisma.appointment
+              .findMany({
+                where: {
+                  tenantId: scopedTenantId,
+                  startAt: { gte: from, lte: to },
+                  ...(query.branchId ? { branchId: query.branchId } : {}),
+                  ...(staffExternalId ? { staffExternalId } : {}),
+                },
+                select: {
+                  id: true,
+                  clientId: true,
+                  branchId: true,
+                  staffExternalId: true,
+                  startAt: true,
+                  endAt: true,
+                  status: true,
+                  totalPriceKopecks: true,
+                  currency: true,
+                },
+                orderBy: { startAt: 'asc' },
+              })
+              .then((items) => ({
+                appointments: items.map((item) => ({
+                  ...item,
+                  services: [],
+                  staffName: null as string | null,
+                  durationMinutes:
+                    item.endAt instanceof Date
+                      ? Math.max(
+                          0,
+                          Math.round(
+                            (item.endAt.getTime() - item.startAt.getTime()) /
+                              60_000,
+                          ),
+                        )
+                      : 0,
+                })),
+                // Локальный запрос к собственной базе полон по построению:
+                // страниц у него нет, обрываться нечему.
+                read: null,
+              })),
+        staffExternalId
+          ? Promise.resolve([] as AnalyticsExpense[])
+          : this.prisma.expense.findMany({
               where: {
                 tenantId: scopedTenantId,
-                startAt: { gte: from, lte: to },
+                occurredAt: { gte: from, lte: to },
                 ...(query.branchId ? { branchId: query.branchId } : {}),
-                ...(staffExternalId ? { staffExternalId } : {}),
               },
               select: {
-                id: true,
-                clientId: true,
-                branchId: true,
-                staffExternalId: true,
-                startAt: true,
-                endAt: true,
-                status: true,
-                totalPriceKopecks: true,
+                amountKopecks: true,
                 currency: true,
+                occurredAt: true,
               },
-              orderBy: { startAt: 'asc' },
-            })
-            .then((items) =>
-              items.map((item) => ({
-                ...item,
-                services: [],
-                staffName: null as string | null,
-                durationMinutes:
-                  item.endAt instanceof Date
-                    ? Math.max(
-                        0,
-                        Math.round(
-                          (item.endAt.getTime() - item.startAt.getTime()) /
-                            60_000,
-                        ),
-                      )
-                    : 0,
-              })),
-            ),
-      staffExternalId
-        ? Promise.resolve([] as AnalyticsExpense[])
-        : this.prisma.expense.findMany({
-            where: {
-              tenantId: scopedTenantId,
-              occurredAt: { gte: from, lte: to },
-              ...(query.branchId ? { branchId: query.branchId } : {}),
-            },
-            select: {
-              amountKopecks: true,
-              currency: true,
-              occurredAt: true,
-            },
-          }),
-      cohortWindow
-        ? this.loadCohortClientIds(
-            scopedTenantId,
-            external,
-            cohortWindow,
-            query.branchId ?? null,
+            }),
+        cohortWindow
+          ? this.loadCohortClientIds(
+              scopedTenantId,
+              external,
+              cohortWindow,
+              query.branchId ?? null,
+              staffExternalId,
+              timezone,
+            )
+          : Promise.resolve(null),
+        // 🔴 Присутствие берётся из зеркала главы 3, а не выводится из статуса:
+        // `completed` у провайдера означает «пришёл ИЛИ оплачено».
+        this.attendanceFacts
+          .periodAttendance(scopedTenantId, period, {
+            branchId: query.branchId ?? null,
             staffExternalId,
-          )
-        : Promise.resolve(null),
-    ]);
+          })
+          .catch(() => null),
+      ]);
 
+    const appointments = appointmentsRead.appointments;
     return this.aggregate(
       external
         ? appointments
@@ -799,10 +886,44 @@ export class OperationsAnalyticsService {
       from,
       to,
       external ? 'crm' : 'maya',
-      this.clientCohortHistory(cohortWindow, cohortClientIds),
+      this.clientCohortHistory(
+        cohortWindow,
+        cohortClientIds,
+        appointmentsRead.read?.completeness !== 'truncated',
+      ),
       includeOperationalStatusBuckets,
       await this.staffIdsByExternal(scopedTenantId),
+      this.appointmentsObservation(appointmentsRead.read),
+      attendance,
     );
+  }
+
+  /**
+   * Наблюдение за записями периода.
+   *
+   * Внешний источник признаётся в неполноте сам; собственная база полна по
+   * построению. Различие сохраняется явно: молчание больше не означает
+   * «прочитано всё».
+   */
+  private appointmentsObservation(
+    read: AppointmentPeriodRead | null,
+  ): FactObservation {
+    if (!read) {
+      return completeObservation({ source: 'canonical_mirror' });
+    }
+    return read.completeness === 'complete'
+      ? completeObservation({
+          source: 'provider_journal',
+          observedThrough: read.observedThrough,
+          outOfPeriodDiscarded: read.outOfPeriodDiscarded,
+        })
+      : {
+          source: 'provider_journal',
+          completeness: 'incomplete',
+          incompleteReason: FACT_INCOMPLETE_REASON.sourceReadTruncated,
+          observedThrough: read.observedThrough,
+          outOfPeriodDiscarded: read.outOfPeriodDiscarded,
+        };
   }
 
   /**
@@ -831,18 +952,37 @@ export class OperationsAnalyticsService {
 
   private clientCohortHistory(
     window: { from: Date; to: Date } | null,
-    clientIds: Set<string> | null,
+    lookback: CohortLookbackRead | null,
+    periodComplete: boolean,
   ): ClientCohortHistory {
+    if (!periodComplete) {
+      // 🔴 Cycle 04 P0. Когорты делят клиентов ПЕРИОДА на вернувшихся и новых.
+      // Неполно прочитанный период даёт неполное деление, и «новых столько-то»
+      // становится числом без смысла — при том что выглядит оно как измерение.
+      return {
+        status: 'unavailable',
+        reason: 'period_window_read_was_truncated',
+      };
+    }
     if (!window) {
       return {
         status: 'unavailable',
         reason: 'period_longer_than_cohort_lookback',
       };
     }
-    if (!clientIds) {
+    if (!lookback) {
       return { status: 'unavailable', reason: 'lookback_window_unavailable' };
     }
-    return { status: 'available', clientIds };
+    if (!lookback.complete) {
+      // 🔴 Cycle 04 P0. Неполная история ЗАВЫШАЕТ «новых»: клиент, чей прошлый
+      // визит остался в недочитанной части, становится новым. Ошибка тихая и
+      // приятная на вид — ровно то, из-за чего когорты и переделывались.
+      return {
+        status: 'unavailable',
+        reason: 'lookback_window_read_was_truncated',
+      };
+    }
+    return { status: 'available', clientIds: lookback.clientIds };
   }
 
   /**
@@ -863,16 +1003,22 @@ export class OperationsAnalyticsService {
     window: { from: Date; to: Date },
     branchId: string | null,
     staffExternalId: string | null,
-  ): Promise<Set<string> | null> {
+    timezone: string,
+  ): Promise<CohortLookbackRead | null> {
     try {
       let visits: Array<{ clientId: string | null; status: string }>;
+      // Собственная база полна по построению; внешний источник признаётся сам.
+      let complete = true;
       if (external) {
-        visits = await this.loadExternalAppointments(
+        const read = await this.loadExternalAppointments(
           tenantId,
           window.from,
           window.to,
           staffExternalId,
+          timezone,
         );
+        visits = read.appointments;
+        complete = read.read?.completeness !== 'truncated';
       } else {
         if (typeof this.prisma.appointment?.findMany !== 'function') {
           return null;
@@ -896,7 +1042,7 @@ export class OperationsAnalyticsService {
           clientIds.add(visit.clientId);
         }
       }
-      return clientIds;
+      return { clientIds, complete };
     } catch {
       return null;
     }
@@ -963,100 +1109,69 @@ export class OperationsAnalyticsService {
     return new Map(links.map((link) => [link.externalId, link.staffId]));
   }
 
+  /**
+   * Записи периода у внешнего провайдера — через канонический читатель.
+   *
+   * 🔴 Cycle 04 P0. Фильтр по запрошенному окну и агрегация полноты уехали в
+   * `AppointmentPeriodReader`: фильтр здесь был единственным в системе, а
+   * `completeness` не читал никто. Числа не меняются — меняется то, что вместе
+   * с ними теперь едет признание источника.
+   */
   private async loadExternalAppointments(
     tenantId: string,
     from: Date,
     to: Date,
     providerId: string | null,
-  ): Promise<AnalyticsAppointment[]> {
-    if (from.getTime() === to.getTime()) {
-      return [];
-    }
+    timezone: string,
+  ): Promise<{
+    appointments: AnalyticsAppointment[];
+    read: AppointmentPeriodRead;
+  }> {
+    const period: BusinessPeriod = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone,
+    };
+    const read = await this.periodReader.readProviderJournal(tenantId, period, {
+      providerId,
+    });
 
-    const maxChunkMs = CRM_JOURNAL_MAX_WINDOW_MS;
-    const ranges: Array<{ from: string; to: string }> = [];
-    let cursor = from.getTime();
-    while (cursor < to.getTime()) {
-      const chunkTo = Math.min(cursor + maxChunkMs, to.getTime());
-      ranges.push({
-        from: new Date(cursor).toISOString(),
-        to: new Date(chunkTo).toISOString(),
-      });
-      cursor = chunkTo;
-    }
-
-    const journals = [];
-    // YClients ограничивает журнал 31 днём. Независимые куски читаем волнами,
-    // чтобы 90-дневная история не ждала три сетевых round-trip подряд, но и
-    // не создавала неограниченный всплеск запросов на длинном отчёте.
-    for (let index = 0; index < ranges.length; index += 3) {
-      const wave = await Promise.all(
-        ranges.slice(index, index + 3).map((range) =>
-          // 🔴 Аналитике отмены нужны. Без этого флага отменённая запись не
-          // доходит сюда вообще, счётчик отмен всегда ноль, и владельцу
-          // отвечали «отмен нет (0%)» вместо «не вижу». Сетка расписания флаг
-          // не ставит и отменённых визитов по-прежнему не показывает.
-          this.crmService.getJournal(
-            tenantId,
-            {
-              ...range,
-              ...(providerId ? { providerId } : {}),
-            },
-            { includeCanceled: true },
+    const appointments = read.items.map((appointment) => {
+      const startAt = new Date(appointment.start_at);
+      return {
+        id: appointment.id,
+        clientId: appointment.client.id,
+        branchId: appointment.branch,
+        staffExternalId: appointment.provider.id,
+        staffName:
+          typeof appointment.provider.name === 'string' &&
+          appointment.provider.name.trim() !== ''
+            ? appointment.provider.name.trim()
+            : null,
+        services: appointment.services.map((service) => ({
+          id: service.id,
+          name: service.name,
+          amountKopecks: Math.round(service.price * 100),
+          currency: service.currency,
+        })),
+        startAt,
+        durationMinutes: Math.max(
+          0,
+          Math.round(
+            (new Date(appointment.end_at).getTime() - startAt.getTime()) /
+              60_000,
           ),
         ),
-      );
-      journals.push(...wave);
-    }
+        status: appointment.status,
+        totalPriceKopecks:
+          appointment.total_price === null
+            ? null
+            : Math.round(appointment.total_price * 100),
+        currency: appointment.currency,
+      } satisfies AnalyticsAppointment;
+    });
 
-    const unique = new Map<string, AnalyticsAppointment>();
-    for (const journal of journals) {
-      for (const appointment of journal.appointments) {
-        const startAt = new Date(appointment.start_at);
-        if (
-          Number.isNaN(startAt.getTime()) ||
-          startAt.getTime() < from.getTime() ||
-          startAt.getTime() > to.getTime()
-        ) {
-          continue;
-        }
-        unique.set(appointment.id, {
-          id: appointment.id,
-          clientId: appointment.client.id,
-          branchId: appointment.branch,
-          staffExternalId: appointment.provider.id,
-          staffName:
-            typeof appointment.provider.name === 'string' &&
-            appointment.provider.name.trim() !== ''
-              ? appointment.provider.name.trim()
-              : null,
-          services: appointment.services.map((service) => ({
-            id: service.id,
-            name: service.name,
-            amountKopecks: Math.round(service.price * 100),
-            currency: service.currency,
-          })),
-          startAt,
-          durationMinutes: Math.max(
-            0,
-            Math.round(
-              (new Date(appointment.end_at).getTime() - startAt.getTime()) /
-                60_000,
-            ),
-          ),
-          status: appointment.status,
-          totalPriceKopecks:
-            appointment.total_price === null
-              ? null
-              : Math.round(appointment.total_price * 100),
-          currency: appointment.currency,
-        });
-      }
-    }
-
-    return [...unique.values()].sort(
-      (left, right) => left.startAt.getTime() - right.startAt.getTime(),
-    );
+    return { appointments, read };
   }
 
   private aggregate(
@@ -1076,6 +1191,17 @@ export class OperationsAnalyticsService {
      * что это запрос в базу, а сам разбор синхронный.
      */
     staffIdByExternal: Map<string, string> = new Map(),
+    /**
+     * 🔴 Cycle 04 P0. Насколько полно прочитан источник записей.
+     *
+     * По умолчанию — полное наблюдение собственной базы: у прямого запроса
+     * обрываться нечему. Внешний источник передаёт своё признание сам.
+     */
+    appointmentsObservation: FactObservation = completeObservation({
+      source: 'canonical_mirror',
+    }),
+    /** Присутствие из зеркала. `null` — блок не считался. */
+    attendance: AttendanceFacts | null = null,
   ) {
     const activeAppointments = appointments.filter(
       (appointment) => !this.isCancelled(appointment.status),
@@ -1390,6 +1516,61 @@ export class OperationsAnalyticsService {
           appointments: value.appointments,
           booked_value: this.serializeCurrencyMap(value.revenueByCurrency),
         })),
+      /**
+       * 🔴 Cycle 04 P0. Полнота источников, из которых собран ответ.
+       *
+       * До P0 признание источника в неполноте читали только зеркало и сверка,
+       * а отвечающий владельцу слой не видел его вовсе — усечённая выборка
+       * выглядела полной. Блок аддитивен: ни одно существующее поле не
+       * изменилось, но теперь рядом с числами стоит ответ на вопрос,
+       * позволяет ли источник заключить, что ноль означает «ничего не было».
+       */
+      completeness: {
+        appointments: {
+          source: appointmentsObservation.source,
+          status: appointmentsObservation.completeness,
+          reason: appointmentsObservation.incompleteReason,
+          observed_through: appointmentsObservation.observedThrough,
+          // Реестр 3.8: источник возвращает записи вне запрошенного окна.
+          // Столько их было отброшено; ноль здесь — тоже измерение.
+          out_of_period_discarded: appointmentsObservation.outOfPeriodDiscarded,
+        },
+        attendance: attendance
+          ? {
+              source: attendance.arrived.observation.source,
+              status: attendance.arrived.observation.completeness,
+              reason: attendance.arrived.observation.incompleteReason,
+              observed_through: attendance.arrived.observation.observedThrough,
+            }
+          : null,
+      },
+      /**
+       * 🔴 Присутствие клиента — доказанное, а не выведенное из статуса.
+       *
+       * `completed` у провайдера означает «отмечен приход ИЛИ оплачено», и на
+       * боевых данных есть строка `completed / awaiting`. Поэтому «сколько
+       * человек пришло» отвечается только отсюда, из канона главы 3.
+       *
+       * `not_observed` — не ноль и не «ожидание»: это записи, о присутствии
+       * которых Maya ничего не знает. Пока их больше нуля, `arrived` — нижняя
+       * граница, и `completeness.attendance.status` говорит об этом словом.
+       */
+      attendance: attendance
+        ? {
+            state: attendance.arrived.state,
+            arrived: attendance.arrived.value,
+            no_show: attendance.noShow.value,
+            awaiting: attendance.awaiting.value,
+            not_observed: attendance.notObserved.value,
+            records: attendance.records.value,
+            facts: [
+              serializeBusinessFact(attendance.arrived),
+              serializeBusinessFact(attendance.noShow),
+              serializeBusinessFact(attendance.awaiting),
+              serializeBusinessFact(attendance.notObserved),
+            ],
+          }
+        : null,
       data_quality: {
         priced_appointments: pricedAppointments.length,
         active_appointments: activeAppointments.length,
@@ -1996,6 +2177,11 @@ export class OperationsAnalyticsService {
     return {
       period: input.period,
       data_source: input.dataSource,
+      /**
+       * Полнота источника, из которого взяты когорты. `null` означает, что
+       * обзор для этого расчёта не читался вовсе (например, запрошен филиал).
+       */
+      source_completeness: input.overview?.completeness?.appointments ?? null,
       confirmed_revenue: input.revenue,
       expenses: {
         status: input.ledger.status,
@@ -2154,11 +2340,17 @@ export class OperationsAnalyticsService {
     lookback_from: Date;
     period: AnalyticsAppointment[];
     history: AnalyticsAppointment[];
+    /**
+     * 🔴 Cycle 04 P0. Полно ли прочитана история, из которой берётся целевой
+     * чек. Неполная история занижает верхний квартиль и делает «потенциал»
+     * числом без основания — а выглядит он точным.
+     */
+    complete: boolean;
   } | null> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: scopedTenantId },
-      select: { calendarSource: true },
+      select: { calendarSource: true, defaultTimezone: true },
     });
     if (!tenant) {
       return null;
@@ -2190,13 +2382,17 @@ export class OperationsAnalyticsService {
     const lookbackFrom = new Date(
       from.getTime() - lookbackDays * 24 * 60 * 60 * 1000,
     );
-    const appointments = external
+    const externalRead = external
       ? await this.loadExternalAppointments(
           scopedTenantId,
           lookbackFrom,
           to,
           providerId,
+          tenant.defaultTimezone,
         )
+      : null;
+    const appointments = externalRead
+      ? externalRead.appointments
       : (
           await this.prisma.appointment.findMany({
             where: {
@@ -2248,6 +2444,7 @@ export class OperationsAnalyticsService {
       }
     }
     return {
+      complete: externalRead?.read?.completeness !== 'truncated',
       provider_id: providerId,
       period_from: from,
       period_to: to,

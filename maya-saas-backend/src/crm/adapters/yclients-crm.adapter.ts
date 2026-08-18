@@ -1409,28 +1409,32 @@ export class YclientsCRMAdapter implements CRMAdapter {
     this.warnOnTruncatedRecords(fetchedHistory, 'getClientVisitHistory');
     const records = fetchedHistory.items;
 
-    return records
-      .filter((record) => this.hasAttendance(record, 1))
-      .map((record) => {
-        const timing = this.recordTiming(record, 'Europe/Moscow');
-        const serviceNames = (record.services || [])
-          .map((service) => String(service.title || '').trim())
-          .filter(Boolean);
-        const serviceCosts = (record.services || [])
-          .map((service) => Number(service.cost ?? service.price_min))
-          .filter((cost) => Number.isFinite(cost));
-        return {
-          start: timing.start.toISOString(),
-          service_names: serviceNames,
-          total_price:
-            serviceCosts.length > 0
-              ? serviceCosts.reduce((total, cost) => total + cost, 0)
-              : null,
-          attendance: 'arrived' as const,
-        };
-      })
-      .sort((left, right) => left.start.localeCompare(right.start))
-      .slice(-limit);
+    return (
+      records
+        // 🔴 Cycle 04 P0. «Реально состоявшиеся» — по каноническому присутствию,
+        // а не по второму правилу: два правила на один факт уже разошлись.
+        .filter((record) => this.observedAttendance(record) === 'arrived')
+        .map((record) => {
+          const timing = this.recordTiming(record, 'Europe/Moscow');
+          const serviceNames = (record.services || [])
+            .map((service) => String(service.title || '').trim())
+            .filter(Boolean);
+          const serviceCosts = (record.services || [])
+            .map((service) => Number(service.cost ?? service.price_min))
+            .filter((cost) => Number.isFinite(cost));
+          return {
+            start: timing.start.toISOString(),
+            service_names: serviceNames,
+            total_price:
+              serviceCosts.length > 0
+                ? serviceCosts.reduce((total, cost) => total + cost, 0)
+                : null,
+            attendance: 'arrived' as const,
+          };
+        })
+        .sort((left, right) => left.start.localeCompare(right.start))
+        .slice(-limit)
+    );
   }
 
   async getStaffScheduleDay(params: {
@@ -2933,9 +2937,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
    * выпустил бы события о переходах, которых не было.
    *
    * Поля два — `attendance` (по записи) и `visit_attendance` (по визиту), и на
-   * части филиалов приходит только второе. Правило то же, что у `hasAttendance`
-   * и у легаси: засчитываем то, что показало ХОТЬ ОДНО. Приоритет у
-   * `attendance`: это отметка самой записи, а речь идёт именно о ней.
+   * части филиалов приходит только второе. Приоритет у `attendance`: это
+   * отметка самой записи, а речь идёт именно о ней; ко второму полю переходим,
+   * только когда первое молчит.
+   *
+   * 🔴 Cycle 04 P0. Это ЕДИНСТВЕННОЕ правило присутствия в адаптере. Раньше
+   * рядом жило второе (`hasAttendance`, объединение полей через ИЛИ), и на
+   * записи `{attendance: 0, visit_attendance: -1}` они давали разный ответ.
+   * Теперь `recordStatus` спрашивает этот же метод.
    */
   private observedAttendance(
     record: YclientsRecordApiItem,
@@ -2944,20 +2953,6 @@ export class YclientsCRMAdapter implements CRMAdapter {
       observedAttendanceFromCode(record.attendance) ??
       observedAttendanceFromCode(record.visit_attendance)
     );
-  }
-
-  /**
-   * Признак присутствия из записи YClients.
-   *
-   * Полей два: `attendance` — то, что проставили по записи, `visit_attendance`
-   * — то же по визиту целиком. Заполнено может быть любое из них (на части
-   * филиалов приходит только второе), и совпадают они не всегда. Поэтому
-   * значение засчитывается, если его показывает ХОТЬ ОДНО поле, — ровно так
-   * это годами считает легаси-бэкенд. Значения: `-1` — не пришёл,
-   * `0` — ожидание, `1` — пришёл, `2` — клиент подтвердил визит.
-   */
-  private hasAttendance(record: YclientsRecordApiItem, value: number): boolean {
-    return record.attendance === value || record.visit_attendance === value;
   }
 
   /**
@@ -2976,11 +2971,27 @@ export class YclientsCRMAdapter implements CRMAdapter {
       return 'canceled';
     }
 
-    if (this.hasAttendance(record, -1)) {
+    /**
+     * 🔴 Cycle 04 P0. Присутствие берётся из КАНОНА, а не из второго правила.
+     *
+     * Здесь стояло `hasAttendance(record, -1)`, а канон рядом собирался
+     * `observedAttendance`. Правила отличались: первое засчитывало значение,
+     * показанное ХОТЬ ОДНИМ полем (`attendance` ИЛИ `visit_attendance`),
+     * второе отдавало приоритет `attendance` и до второго поля не доходило.
+     *
+     * На записи `{attendance: 0, visit_attendance: -1}` они расходились
+     * буквально: статус говорил «неявка», канон — «клиент ещё не приходил», и
+     * обе величины уезжали наружу в одном ответе. Проверено запуском адаптера,
+     * а не рассуждением.
+     *
+     * Теперь у записи одно присутствие. Расходиться нечему по построению.
+     */
+    const attendance = this.observedAttendance(record);
+    if (attendance === 'no_show') {
       return 'no_show';
     }
     if (
-      this.hasAttendance(record, 1) ||
+      attendance === 'arrived' ||
       record.paid_full === true ||
       record.paid_full === 1
     ) {

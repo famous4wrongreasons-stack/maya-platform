@@ -78,3 +78,70 @@ describe('owner-reports composers', () => {
     expect(result.payload.revenue_total_kopecks).toBe(4_150_000);
   });
 });
+
+describe('🔴 Cycle 04 P0 — сводки признаются в неполноте источника', () => {
+  const overview = (status?: 'complete' | 'incomplete') => ({
+    appointments: {
+      total: 3,
+      active: 3,
+      scheduled: 3,
+      completed: 0,
+      cancelled: 0,
+      no_show: 0,
+      booked_minutes: 180,
+    },
+    ...(status
+      ? { completeness: { appointments: { status, reason: null } } }
+      : {}),
+  });
+
+  it('полный источник: ноль отмен остаётся нулём и лишних слов нет', () => {
+    const brief = composeMorningBrief({
+      localDate: '2026-08-18',
+      overview: overview('complete'),
+    });
+
+    expect(brief.bodyText).toContain('отменено 0');
+    expect(brief.bodyText).not.toMatch(/не целиком/);
+    expect(brief.payload.appointments_source_complete).toBe(true);
+  });
+
+  it('🔴 усечённый источник: «отменено 0» больше не выдаётся за измерение', () => {
+    const brief = composeMorningBrief({
+      localDate: '2026-08-18',
+      overview: overview('incomplete'),
+    });
+
+    expect(brief.bodyText).toMatch(/прочитан НЕ целиком/);
+    expect(brief.bodyText).toMatch(/не измерено/);
+    expect(brief.payload.appointments_source_complete).toBe(false);
+  });
+
+  it('🔴 то же и в вечернем отчёте, и в брифе мастера', () => {
+    const daily = composeDailyReport({
+      localDate: '2026-08-18',
+      overview: overview('incomplete'),
+      finance: null,
+    });
+    const master = composeMasterMorningBrief({
+      localDate: '2026-08-18',
+      overview: overview('incomplete'),
+      masterName: 'Илья',
+    });
+
+    expect(daily.bodyText).toMatch(/прочитан НЕ целиком/);
+    expect(master.bodyText).toMatch(/прочитан НЕ целиком/);
+    expect(daily.payload.appointments_source_complete).toBe(false);
+    expect(master.payload.appointments_source_complete).toBe(false);
+  });
+
+  it('источник без блока полноты считается полным — старые вызовы не ломаются', () => {
+    const brief = composeMorningBrief({
+      localDate: '2026-08-18',
+      overview: overview(),
+    });
+
+    expect(brief.payload.appointments_source_complete).toBe(true);
+    expect(brief.bodyText).not.toMatch(/не целиком/);
+  });
+});

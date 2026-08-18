@@ -1,5 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
+import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { CalendarSource } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -216,6 +218,8 @@ describe('OperationsAnalyticsService', () => {
           encrypt: (value: string) => `enc:${value}`,
           decrypt: (value: string) => value.replace(/^enc:/, ''),
         } as EncryptionService,
+        new AppointmentPeriodReader(crmService),
+        new AttendanceFactsService(prisma, tenantContext),
       ),
     };
   };
@@ -262,6 +266,8 @@ describe('OperationsAnalyticsService', () => {
       crmStaffAccess: { findFirst: jest.fn() },
     } as unknown as PrismaService;
 
+    const crmService = { getJournal: jest.fn() } as unknown as CrmService;
+
     return {
       tenantContext,
       appointmentFindMany,
@@ -270,11 +276,13 @@ describe('OperationsAnalyticsService', () => {
         prisma,
         tenantContext,
         { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
-        { getJournal: jest.fn() } as unknown as CrmService,
+        crmService,
         {
           encrypt: (value: string) => `enc:${value}`,
           decrypt: (value: string) => value,
         } as EncryptionService,
+        new AppointmentPeriodReader(crmService),
+        new AttendanceFactsService(prisma, tenantContext),
       ),
     };
   };
@@ -1271,6 +1279,8 @@ describe('OperationsAnalyticsService', () => {
             encrypt: (value: string) => `enc:${value}`,
             decrypt: (value: string) => value,
           } as EncryptionService,
+          new AppointmentPeriodReader(crmService),
+          new AttendanceFactsService(prisma, tenantContext),
         ),
       };
     };

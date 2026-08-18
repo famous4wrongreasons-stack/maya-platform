@@ -199,6 +199,9 @@ export class OwnerReportsService {
             no_show: staff?.no_show ?? 0,
             booked_minutes: staff?.booked_minutes ?? 0,
           },
+          // Полнота относится к чтению журнала целиком, а не к строке мастера:
+          // если прочитано не всё, неполон и личный срез.
+          completeness: overview.completeness,
         },
       });
       try {

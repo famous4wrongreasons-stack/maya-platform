@@ -207,7 +207,10 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
       cancellations: metricNumber(metrics.appointments_cancelled),
       rows_title: staffRows.length > 0 ? 'Касса по мастерам' : null,
       rows: staffRows,
-      status_text: staffStatusText,
+      // 🔴 Неполнота источника вытесняет остальные подписи: если журнал
+      // прочитан не целиком, это главное, что нужно знать о числах выше.
+      status_text: incompleteReadNote(evidence) ?? staffStatusText,
+      source_complete: incompleteReadNote(evidence) === null,
       insight:
         typeof data.verified === 'boolean' && data.verified === false
           ? 'Часть цифр могла прийти из запасного снимка — сверьте при необходимости.'
@@ -316,6 +319,34 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
               : 'Прибыль пока недоступна.',
     },
   };
+}
+
+/**
+ * Пометка о неполноте источника для карточки.
+ *
+ * 🔴 Cycle 04 P0. Карточка рисует те же числа, что и текст, но крупнее — и
+ * именно её видят вместо чтения ответа. Печатать в ней «отмен 0», когда
+ * журнал прочитан не целиком, значит подписывать нижнюю границу как итог.
+ */
+function incompleteReadNote(evidence: unknown): string | null {
+  const data = record(evidence);
+  // 🔴 Полнота лежит внутри опубликованного среза (`current`), а не в корне
+  // ответа инструмента. Первая версия этой проверки смотрела в корень и не
+  // срабатывала никогда — дефект нашёл скептик при проверке пакета, и это
+  // ровно тот случай, когда «оговорка есть в коде» ≠ «оговорка доходит».
+  const fromCurrent = record(
+    record(record(data.current).completeness).appointments,
+  ).status;
+  const fromRoot = record(record(data.completeness).appointments).status;
+  const flagged =
+    Array.isArray(data.limitations) &&
+    data.limitations
+      .map((entry) => record(entry).key)
+      .includes('incomplete_read');
+  if (fromCurrent !== 'incomplete' && fromRoot !== 'incomplete' && !flagged) {
+    return null;
+  }
+  return 'Журнал за период прочитан не целиком: числа — нижняя граница, ноль означает «не измерено».';
 }
 
 function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {

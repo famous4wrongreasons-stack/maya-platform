@@ -10,6 +10,8 @@
  * Эталон ниже снят прогоном ЭТОЙ ЖЕ фикстуры на рабочем дереве HEAD (коммит
  * ec3a5802, до появления честной прибыли), а не написан руками.
  */
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
+import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { CalendarSource } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -111,28 +113,33 @@ function createService(calendarSource: CalendarSource) {
     },
   } as unknown as PrismaService;
 
+  const crmService = {
+    getJournal: jest.fn().mockResolvedValue({
+      calendar_source: 'external',
+      completeness: 'complete',
+      timezone: 'Europe/Moscow',
+      range: { from: july.from, to: july.to },
+      provider_id: null,
+      count: 0,
+      appointments: [],
+    }),
+    getFinancialSummary: jest.fn(),
+    getRevenueSummary: jest.fn(),
+  } as unknown as CrmService;
+
   return {
     tenantContext,
     service: new OperationsAnalyticsService(
       prisma,
       tenantContext,
       { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
-      {
-        getJournal: jest.fn().mockResolvedValue({
-          calendar_source: 'external',
-          timezone: 'Europe/Moscow',
-          range: { from: july.from, to: july.to },
-          provider_id: null,
-          count: 0,
-          appointments: [],
-        }),
-        getFinancialSummary: jest.fn(),
-        getRevenueSummary: jest.fn(),
-      } as unknown as CrmService,
+      crmService,
       {
         encrypt: (value: string) => `enc:${value}`,
         decrypt: (value: string) => value,
       } as EncryptionService,
+      new AppointmentPeriodReader(crmService),
+      new AttendanceFactsService(prisma, tenantContext),
     ),
   };
 }

@@ -334,3 +334,44 @@ describe('buildChatReportCard', () => {
     ).toBeNull();
   });
 });
+
+describe('🔴 Cycle 04 P0 — карточка не выдаёт нижнюю границу за итог', () => {
+  const toolResult = (status: 'complete' | 'incomplete') => ({
+    verified: true,
+    current: {
+      data_source: 'crm',
+      completeness: {
+        appointments: { status, reason: 'source_read_truncated' },
+      },
+      finance: { revenue: {} },
+      staff_summary: [],
+    },
+    metrics: {
+      appointments_total: 1,
+      appointments_cancelled: 0,
+      unique_clients: 1,
+      booked_value_amount_kopecks: 250_000,
+    },
+    limitations: status === 'incomplete' ? [{ key: 'incomplete_read' }] : [],
+  });
+
+  const build = (status: 'complete' | 'incomplete') =>
+    buildChatReportCard(
+      [{ name: 'analytics.business.query', result: toolResult(status) }],
+      { personal: false, userText: 'сколько отмен' },
+    );
+
+  it('🔴 усечённое чтение видно в карточке, а не только в тексте ответа', () => {
+    const card = build('incomplete');
+
+    expect(card?.widget_data.source_complete).toBe(false);
+    expect(card?.widget_data.status_text).toMatch(/не целиком/);
+  });
+
+  it('полное чтение карточку не засоряет', () => {
+    const card = build('complete');
+
+    expect(card?.widget_data.source_complete).toBe(true);
+    expect(card?.widget_data.status_text).toBeNull();
+  });
+});

@@ -17,11 +17,13 @@
 
 export * from './appointment-change';
 export * from './appointment-key';
+export * from './business-fact';
 export * from './catalog';
 export * from './domain-event';
 export * from './fetch-completeness';
 export * from './loyalty-authority';
 export * from './money';
+export * from './period-read';
 export * from './revenue-basis';
 export * from './scheduling';
 export * from './staff-identity';

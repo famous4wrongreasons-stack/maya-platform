@@ -22,6 +22,60 @@ describe('YclientsCRMAdapter', () => {
     jest.restoreAllMocks();
   });
 
+  it('🔴 Cycle 04 P0: статус и канон присутствия не расходятся на одной записи', async () => {
+    // Найдено скептиком при проверке P0 и воспроизведено запуском адаптера.
+    // Раньше `recordStatus` считал присутствие объединением полей через ИЛИ, а
+    // канон отдавал приоритет `attendance` — и на этой самой записи статус
+    // говорил «неявка», а канон «клиент ещё не приходил». Оба значения при
+    // этом уезжали наружу в одном ответе.
+    global.fetch = jest.fn().mockImplementation((input: string | URL) => {
+      const url = requestUrl(input);
+      if (url.includes('/records/123')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [
+                {
+                  id: 909,
+                  staff_id: 5,
+                  datetime: '2026-08-20T10:00:00+03:00',
+                  seance_length: 3600,
+                  services: [{ id: 1, title: 'Стрижка', cost: 1000 }],
+                  attendance: 0,
+                  visit_attendance: -1,
+                  deleted: false,
+                },
+              ],
+            }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
+    }) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const journal = await adapter.getJournal({
+      tenantId: 'tenant-1',
+      from: '2026-08-20T00:00:00.000Z',
+      to: '2026-08-21T00:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    });
+
+    const appointment = journal.appointments[0];
+    expect(appointment.attendance).toBe('awaiting');
+    // Статус обязан стоять на том же присутствии, а не на втором правиле.
+    expect(appointment.status).not.toBe('no_show');
+    expect(appointment.status).toBe('confirmed');
+  });
+
   it('🔴 доходит до потолка страниц и НЕ выдаёт усечённый журнал за полный', async () => {
     // B3.0. Раньше обход страниц заканчивался `return records`: усечённый
     // список приходил как полный, и сверка сделала бы вывод «записи исчезли».

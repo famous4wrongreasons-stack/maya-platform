@@ -11,6 +11,10 @@
  * вовсе (провайдер недоступен — тогда текст собирает сервер), либо повторяет
  * собранный сервером ответ, и тот проходит сторожа чисел как ответ модели.
  */
+import { CustomersService } from '../customers/customers.service';
+import { StaffService } from '../staff/staff.service';
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
+import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { ConfigService } from '@nestjs/config';
 
 import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
@@ -557,6 +561,8 @@ function createHarness(
     { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
     crmService,
     encryption,
+    new AppointmentPeriodReader(crmService),
+    new AttendanceFactsService(prisma, tenantContext),
   );
   const expensesService = new ExpensesService(
     prisma,
@@ -573,6 +579,10 @@ function createHarness(
     analytics,
     expensesService,
     prisma,
+    // Арность конструктора соблюдена: недостающие зависимости раньше молча
+    // становились `undefined`, и спека закрепляла обход как норму.
+    {} as CustomersService,
+    {} as StaffService,
   );
   const runtime = new AiToolRuntimeService(
     prisma,

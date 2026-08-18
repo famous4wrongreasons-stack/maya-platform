@@ -59,8 +59,12 @@ import {
   historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
-import { parseVisitOutcome, unavailableAuthorityView } from '../domain';
-import type { RevenueBasis } from '../domain';
+import {
+  collectPeriodRecords,
+  parseVisitOutcome,
+  unavailableAuthorityView,
+} from '../domain';
+import type { BusinessPeriod, PeriodRead, RevenueBasis } from '../domain';
 import { CRM_JOURNAL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
@@ -843,37 +847,65 @@ export class AiToolHandlerService {
         reason: 'crm_journal_is_company_scoped',
       };
     }
-    const appointments = await this.readJournalRangeInChunks(
+    const timezone = await this.reportingTimezone(principal.tenantId);
+    const read = await this.readJournalRangeInChunks(
       principal.tenantId,
       window.query.from,
       window.query.to,
+      timezone,
     );
+    const appointments = read.items;
     const clients = new Map<
       string,
       {
         visits: number;
         noShow: number;
         canceled: number;
-        completed: number;
+        arrived: number;
+        notObserved: number;
         lastEventAt: string;
       }
     >();
     const statusCounts = {
-      no_show: 0,
       canceled: 0,
-      completed: 0,
       other: 0,
+    };
+    // 🔴 Cycle 04 P0. Присутствие считается по каноническому присутствию, а не
+    // по статусу: `completed` у провайдера означает «отмечен приход ИЛИ
+    // оплачено», и на боевых данных есть запись `completed / awaiting`.
+    // Отсутствие отметки — отдельная корзина, а не ноль в остальных.
+    const attendanceCounts = {
+      arrived: 0,
+      no_show: 0,
+      awaiting: 0,
+      not_observed: 0,
     };
 
     for (const appointment of appointments) {
       const clientId = appointment.client.id;
+      const outcome = this.normalizedAppointmentStatus(appointment.status);
+      const removed = outcome === 'canceled';
+      // 🔴 Удалённая запись — только отмена. Отметка о приходе на ней это след
+      // прошлого состояния, а не заявление о состоявшемся визите; засчитать её
+      // и туда, и туда значило бы посчитать одно событие дважды.
+      const attendance = removed ? null : (appointment.attendance ?? null);
+      if (removed) {
+        statusCounts.canceled += 1;
+      } else {
+        statusCounts.other += 1;
+        if (attendance === 'arrived') attendanceCounts.arrived += 1;
+        else if (attendance === 'no_show') attendanceCounts.no_show += 1;
+        else if (attendance === null) attendanceCounts.not_observed += 1;
+        else attendanceCounts.awaiting += 1;
+      }
+
       if (!clientId) continue;
-      const status = this.normalizedAppointmentStatus(appointment.status);
       const row = clients.get(clientId) ?? {
         visits: 0,
         noShow: 0,
         canceled: 0,
-        completed: 0,
+        arrived: 0,
+        notObserved: 0,
         lastEventAt: appointment.start_at,
       };
       row.visits += 1;
@@ -881,18 +913,10 @@ export class AiToolHandlerService {
         appointment.start_at > row.lastEventAt
           ? appointment.start_at
           : row.lastEventAt;
-      if (status === 'no_show') {
-        row.noShow += 1;
-        statusCounts.no_show += 1;
-      } else if (status === 'canceled') {
-        row.canceled += 1;
-        statusCounts.canceled += 1;
-      } else if (status === 'completed') {
-        row.completed += 1;
-        statusCounts.completed += 1;
-      } else {
-        statusCounts.other += 1;
-      }
+      if (attendance === 'no_show') row.noShow += 1;
+      if (attendance === 'arrived') row.arrived += 1;
+      if (!removed && attendance === null) row.notObserved += 1;
+      if (removed) row.canceled += 1;
       clients.set(clientId, row);
     }
 
@@ -907,6 +931,7 @@ export class AiToolHandlerService {
       )
       .slice(0, 20);
 
+    const complete = read.completeness === 'complete';
     return {
       available: true,
       verified: true,
@@ -915,12 +940,28 @@ export class AiToolHandlerService {
       appointments_observed: appointments.length,
       clients_observed: clients.size,
       status_counts: statusCounts,
+      attendance_counts: attendanceCounts,
+      /**
+       * 🔴 Можно ли читать ноль как «ничего не было».
+       *
+       * Ровно четыре различимых состояния, а не два: измеренный ноль, ноль по
+       * неполной выборке, ненаблюдённое присутствие и молчание источника.
+       */
+      completeness: {
+        source: 'provider_journal',
+        status: complete ? 'complete' : 'incomplete',
+        reason: complete ? null : (read.truncationReason ?? 'unknown'),
+        zero_means_none: complete && attendanceCounts.not_observed === 0,
+        attendance_not_observed: attendanceCounts.not_observed,
+        out_of_period_discarded: read.outOfPeriodDiscarded,
+      },
       risk_clients: ranked.map(([, row], index) => ({
         alias: `client_${index + 1}`,
         appointments_observed: row.visits,
         no_show_count: row.noShow,
         cancellation_count: row.canceled,
-        completed_count: row.completed,
+        attended_count: row.arrived,
+        attendance_not_observed: row.notObserved,
         last_event_at: row.lastEventAt,
         risk_level:
           row.noShow >= 2 || row.noShow + row.canceled >= 3
@@ -934,6 +975,19 @@ export class AiToolHandlerService {
           reason:
             'the CRM journal has no cancellation timestamp, so ordinary and late cancellations cannot be separated',
         },
+        {
+          key: 'cancellation_reason',
+          reason:
+            'the provider only reports that a record was removed; who removed it and why is not part of the contract and must not be inferred',
+        },
+        ...(attendanceCounts.not_observed > 0
+          ? [
+              {
+                key: 'attendance_coverage',
+                reason: `attendance was not observed for ${attendanceCounts.not_observed} record(s) of the period, so no_show counts are a lower bound and a zero here does not prove that nobody missed a visit`,
+              },
+            ]
+          : []),
       ],
     };
   }
@@ -1838,12 +1892,44 @@ export class AiToolHandlerService {
       { includeCanceled: true },
     );
 
+    // 🔴 Cycle 04 P0. Ответ источника окном НЕ является: провайдер возвращает
+    // записи вне запрошенного диапазона (реестр 3.8, измерено). До P0 сюда
+    // попадало всё, что он прислал, и «записей за день» включало чужие дни.
+    const dayRead = collectPeriodRecords(
+      [
+        {
+          items: journal.appointments,
+          completeness: journal.completeness,
+          truncationReason: journal.truncation_reason ?? null,
+        },
+      ],
+      {
+        from: from.toISOString(),
+        // Последняя миллисекунда суток: сутки — это [00:00 … 23:59:59.999],
+        // а не отрезок, включающий полночь следующего дня.
+        to: new Date(to.getTime() - 1).toISOString(),
+        timezone,
+      },
+      {
+        startAt: (item) => new Date(item.start_at),
+        key: (item) => item.id,
+      },
+    );
+    const dayAppointments = dayRead.items;
+
     const statusCounts = {
       confirmed: 0,
       completed: 0,
       canceled: 0,
       no_show: 0,
       other: 0,
+    };
+    /** Присутствие — из канона, а не из статуса. `completed` их смешивает. */
+    const attendanceCounts = {
+      arrived: 0,
+      no_show: 0,
+      awaiting: 0,
+      not_observed: 0,
     };
     const masterSchedule = new Map(
       (journal.all_masters ?? journal.masters ?? []).map((master) => [
@@ -1867,8 +1953,17 @@ export class AiToolHandlerService {
       }
     >();
 
-    const safeAppointments = journal.appointments.map((appointment) => {
+    const safeAppointments = dayAppointments.map((appointment) => {
       const status = appointment.status;
+      // Удалённая запись присутствия не даёт: см. правило в клиентском срезе.
+      const attendance =
+        status === 'canceled' ? null : (appointment.attendance ?? null);
+      if (status !== 'canceled') {
+        if (attendance === 'arrived') attendanceCounts.arrived += 1;
+        else if (attendance === 'no_show') attendanceCounts.no_show += 1;
+        else if (attendance === null) attendanceCounts.not_observed += 1;
+        else attendanceCounts.awaiting += 1;
+      }
       if (Object.prototype.hasOwnProperty.call(statusCounts, status)) {
         statusCounts[status as keyof typeof statusCounts] += 1;
       } else {
@@ -2020,7 +2115,7 @@ export class AiToolHandlerService {
         ? { name: selectedStaff.name, title: selectedStaff.title ?? null }
         : null,
       summary: {
-        total: journal.appointments.length,
+        total: dayAppointments.length,
         active:
           statusCounts.confirmed +
           statusCounts.completed +
@@ -2031,6 +2126,28 @@ export class AiToolHandlerService {
           (sum, member) => sum + member.booked_minutes,
           0,
         ),
+      },
+      /**
+       * 🔴 Присутствие отдельно от статуса.
+       *
+       * `completed` в блоке выше — слово ПРОВАЙДЕРА, и означает оно «отмечен
+       * приход ИЛИ оплачено». Сколько человек действительно пришло, отвечает
+       * только этот блок; `not_observed` — не ноль и не ожидание.
+       */
+      attendance: attendanceCounts,
+      completeness: {
+        source: 'provider_journal',
+        status: dayRead.completeness === 'complete' ? 'complete' : 'incomplete',
+        reason:
+          dayRead.completeness === 'complete'
+            ? null
+            : (dayRead.truncationReason ?? 'unknown'),
+        zero_means_none:
+          dayRead.completeness === 'complete' &&
+          attendanceCounts.not_observed === 0,
+        attendance_not_observed: attendanceCounts.not_observed,
+        // Столько записей провайдер прислал мимо запрошенных суток.
+        out_of_period_discarded: dayRead.outOfPeriodDiscarded,
       },
       staff,
       appointments: safeAppointments.slice(0, 100),
@@ -3035,7 +3152,8 @@ export class AiToolHandlerService {
       staff,
       limitations: [
         ...this.staffMoneyUnavailableMetrics(published),
-        ...this.cancellationUnavailableMetrics(published),
+        ...this.attendanceUnavailableMetrics(published),
+        ...this.measurementLimitations(published),
       ],
     };
   }
@@ -3112,6 +3230,15 @@ export class AiToolHandlerService {
           verified: result.verified === true,
           source: result.source ?? null,
           resolved_period: result.resolved_period ?? null,
+          // 🔴 Полнота у каждого филиала своя: журнал читается для каждого
+          // отдельно, и один может прийти усечённым, а другой полным. Ранжировать
+          // их как равные, не сказав об этом, значит сравнивать качество чтения.
+          completeness: this.record(
+            this.record(result.completeness).appointments,
+          ),
+          limitations: Array.isArray(result.limitations)
+            ? result.limitations
+            : [],
           metrics: {
             appointments_total: this.optionalMetricNumber(
               metrics.appointments_total,
@@ -3159,6 +3286,15 @@ export class AiToolHandlerService {
           key: 'branch_confirmed_revenue',
           reason: 'yclients_finance_is_company_scoped',
         },
+        ...(ranked.some((row) => row.completeness.status === 'incomplete')
+          ? [
+              {
+                key: 'branch_completeness',
+                reason:
+                  'at least one branch was read incompletely, so its counters are a lower bound and the ranking may reflect how much was read rather than what happened',
+              },
+            ]
+          : []),
       ],
     };
   }
@@ -3247,6 +3383,18 @@ export class AiToolHandlerService {
         period: previous
           ? (this.record(previous).period ?? previousQuery)
           : null,
+        /**
+         * 🔴 Cycle 04 P0. Полнота ОБЕИХ сторон сравнения.
+         *
+         * Периоды разной полноты сравнивать как равные нельзя: текущий может
+         * быть прочитан целиком, а прошлый — усечён, и тогда «выручка выше на
+         * 12 %» измеряет не бизнес, а качество чтения. До P0 у прошлого
+         * периода полноты не было вообще — ни в ответе, ни в оговорках.
+         */
+        completeness: {
+          current: this.readCompletenessStatus(current),
+          previous: previous ? this.readCompletenessStatus(previous) : null,
+        },
       },
       current,
       previous,
@@ -3267,9 +3415,15 @@ export class AiToolHandlerService {
       available_metrics: Object.entries(currentSnapshot)
         .filter(([, value]) => value !== null)
         .map(([key]) => key),
+      // 🔴 Оговорки об ИЗМЕРЕНИИ отдельно от НЕДОСТУПНОСТИ: «метрики нет» и
+      // «метрика есть, но означает не то, что кажется» — разные утверждения.
+      limitations: [
+        ...this.measurementLimitations(current),
+        ...this.comparisonLimitations(current, previous, comparison),
+      ],
       unavailable_metrics: [
         ...this.clientCohortUnavailableMetrics(current),
-        ...this.cancellationUnavailableMetrics(current),
+        ...this.attendanceUnavailableMetrics(current),
         ...this.staffMoneyUnavailableMetrics(current),
         {
           key: 'accounting_net_profit',
@@ -3285,7 +3439,15 @@ export class AiToolHandlerService {
         },
       ],
     };
-    if (result.verified) {
+    // 🔴 Cycle 04 P0. Неполный ответ НЕ кэшируется. Держать деградировавший
+    // ответ пять минут значит продлевать состояние, в котором ноль ничего не
+    // доказывает, — при том что следующий запрос мог бы прочитать источник
+    // целиком. Полнота источника при этом не подменяет `verified`: это разные
+    // вопросы, и оба обязаны выполниться.
+    const appointmentsRead = this.record(
+      this.record(this.record(current).completeness).appointments,
+    );
+    if (result.verified && appointmentsRead.status !== 'incomplete') {
       this.businessQueryCache.set(cacheKey, {
         expiresAt: Date.now() + 5 * 60 * 1_000,
         value: result,
@@ -3393,9 +3555,15 @@ export class AiToolHandlerService {
       available_metrics: Object.entries(currentSnapshot)
         .filter(([, value]) => value !== null)
         .map(([key]) => key),
+      // Личный срез — те же два списка и та же граница между ними:
+      // «числа нет» отдельно от «число есть, но означает не то, что кажется».
+      limitations: [
+        ...this.measurementLimitations(current),
+        ...this.comparisonLimitations(current, previous, comparison),
+      ],
       unavailable_metrics: [
         ...this.clientCohortUnavailableMetrics(current),
-        ...this.cancellationUnavailableMetrics(current),
+        ...this.attendanceUnavailableMetrics(current),
         ...this.staffMoneyUnavailableMetrics(current),
         ...this.personalCashUnavailableMetrics(current),
         {
@@ -3412,11 +3580,16 @@ export class AiToolHandlerService {
     const enriched = motivation
       ? {
           ...result,
+          limitations: [...result.limitations, ...motivation.limitations],
           money_motivation: motivation.money_motivation,
           upsell_opportunities: motivation.upsell_opportunities,
         }
       : result;
-    if (enriched.verified) {
+    // Неполный ответ не кэшируется — та же причина, что и у бизнес-среза.
+    if (
+      enriched.verified &&
+      this.readCompletenessStatus(current) !== 'incomplete'
+    ) {
       this.employeeQueryCache.set(cacheKey, {
         expiresAt: Date.now() + 5 * 60 * 1_000,
         value: enriched,
@@ -3432,6 +3605,8 @@ export class AiToolHandlerService {
   ): Promise<{
     money_motivation: ReturnType<typeof computePeriodMoneyMotivation>;
     upsell_opportunities: ReturnType<typeof collectUpsellOpportunities>;
+    /** Оговорки об источнике, если история прочитана не целиком. */
+    limitations: Array<{ key: string; reason: string }>;
   } | null> {
     try {
       const bundle = await this.analyticsService.getEmployeeMotivationVisits(
@@ -3478,7 +3653,22 @@ export class AiToolHandlerService {
         salaryShare: money_motivation.salary_share ?? 0.5,
         limit: 3,
       });
-      return { money_motivation, upsell_opportunities };
+      return {
+        money_motivation,
+        upsell_opportunities,
+        // 🔴 Целевой чек берётся из верхних 40 % истории. Неполная история
+        // сдвигает этот квартиль вниз, а «потенциал» при этом остаётся точным
+        // на вид числом. Молчать об этом нельзя.
+        limitations: bundle.complete
+          ? []
+          : [
+              {
+                key: 'motivation_history',
+                reason:
+                  'the visit history behind the target check was read incompletely, so target_check_rub and potential_rub rest on a partial sample',
+              },
+            ],
+      };
     } catch {
       return null;
     }
@@ -3608,9 +3798,61 @@ export class AiToolHandlerService {
         appointments.identified_client_visits,
       ),
       ...this.clientCohortMetrics(appointments),
+      ...this.attendanceMetrics(data),
       average_ticket_amount_kopecks: averageTicket?.amount_kopecks ?? null,
       booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
     };
+  }
+
+  /**
+   * Присутствие как метрика — только когда его можно назвать измерением.
+   *
+   * 🔴 Тот же приём, что у когорт, и по той же причине: `null` выпадает из
+   * `available_metrics` и из сравнения периодов, а причина уезжает словами в
+   * `unavailable_metrics`. Ноль здесь означал бы «никто не пришёл», хотя на
+   * деле присутствие у части записей просто не наблюдалось.
+   *
+   * `appointments_completed` рядом НЕ переопределяется: это слово провайдера,
+   * и оно означает «отмечен приход ИЛИ оплачено». Два разных факта остаются
+   * двумя разными полями.
+   */
+  private attendanceMetrics(data: Record<string, unknown>) {
+    const attendance = this.record(data.attendance);
+    const measured = attendance.state === 'measured';
+    return {
+      attended_appointments: measured
+        ? this.optionalMetricNumber(attendance.arrived)
+        : null,
+      attendance_no_show: measured
+        ? this.optionalMetricNumber(attendance.no_show)
+        : null,
+      // Сколько записей осталось без наблюдения — отдаётся всегда: именно это
+      // число объясняет, почему двух метрик выше может не быть.
+      appointments_attendance_not_observed: this.optionalMetricNumber(
+        attendance.not_observed,
+      ),
+    };
+  }
+
+  /** Почему присутствие не стало метрикой — словами. */
+  private attendanceUnavailableMetrics(value: unknown) {
+    const attendance = this.record(this.record(value).attendance);
+    if (attendance.state === 'measured') {
+      return [];
+    }
+    const completeness = this.record(
+      this.record(this.record(value).completeness).attendance,
+    );
+    const reason =
+      typeof completeness.reason === 'string'
+        ? completeness.reason
+        : 'attendance_observation_is_incomplete';
+    return [
+      {
+        key: 'attendance',
+        reason: `attended_appointments and attendance_no_show are unavailable: ${reason}. appointments_completed is a provider status that mixes arrival with payment and is not proof of attendance`,
+      },
+    ];
   }
 
   /**
@@ -3669,26 +3911,113 @@ export class AiToolHandlerService {
     ];
   }
 
+  /** Полнота чтения записей у уже опубликованного среза. */
+  private readCompletenessStatus(value: unknown): 'complete' | 'incomplete' {
+    const appointments = this.record(
+      this.record(this.record(value).completeness).appointments,
+    );
+    return appointments.status === 'incomplete' ? 'incomplete' : 'complete';
+  }
+
   /**
-   * Отмены во внешней CRM невидимы, и ноль здесь — не измерение.
+   * Можно ли сравнивать эти два периода как равные.
    *
-   * 🔴 Журнал YClients отдаёт только неудалённые записи, а статус «отменена»
-   * выводится ровно из признака удаления. То есть отменённая запись до
-   * аналитики не доходит вообще, и счётчик всегда равен нулю — независимо от
-   * того, сколько отмен было на самом деле. Молчаливый ноль опаснее пропуска:
-   * MAYA уверенно отвечала «отмен нет», и по этому «факту» принимались решения.
+   * 🔴 Молчание здесь было опаснее отсутствия сравнения: разница между полным
+   * и усечённым чтением выглядит как изменение бизнеса и читается как вывод.
    */
-  private cancellationUnavailableMetrics(value: unknown) {
-    if (this.record(value).data_source !== 'crm') {
+  private comparisonLimitations(
+    current: unknown,
+    previous: unknown,
+    mode: string,
+  ) {
+    if (mode === 'none' || !previous) {
       return [];
     }
+    const currentStatus = this.readCompletenessStatus(current);
+    const previousStatus = this.readCompletenessStatus(previous);
+    if (currentStatus === 'complete' && previousStatus === 'complete') {
+      return [];
+    }
+    const side =
+      currentStatus === previousStatus
+        ? 'both periods were'
+        : currentStatus === 'incomplete'
+          ? 'the current period was'
+          : 'the previous period was';
     return [
       {
-        key: 'cancellations',
-        reason:
-          'appointments_cancelled, cancellation_rate_percent and per-staff cancellations are unavailable: the CRM journal returns only non-deleted records, so cancelled appointments never reach analytics and a zero here means "not measured", not "none"',
+        key: 'comparison_completeness',
+        reason: `${side} read incompletely, so changes and percent_change compare samples of different completeness: the difference may reflect how much was read rather than what happened in the salon`,
       },
     ];
+  }
+
+  /**
+   * Оговорки об ИЗМЕРЕНИИ — отдельно от недоступности.
+   *
+   * 🔴 Разделение и есть исправление противоречия. `unavailable_metrics`
+   * означает «числа нет»; `limitations` означает «число есть, но означает не
+   * то, что кажется». Пока эти два списка были одним, ответ мог одновременно
+   * положить `appointments_cancelled` в доступные метрики и объявить отмены
+   * недоступными — что и происходило: сначала безусловно для любого
+   * CRM-арендатора, а после первой правки — на усечённой выборке.
+   *
+   * Утверждение устарело потому, что аналитика просит удалённые записи
+   * (`includeCanceled: true`) и они приходят: в боевом зеркале, которое
+   * наполняется тем же флагом, лежат сотни отменённых визитов.
+   *
+   * Семантика отмены усилению не подлежит: провайдер сообщает ТОЛЬКО факт
+   * удаления записи (реестр 3.6). Кто удалил и почему — не часть контракта.
+   */
+  private measurementLimitations(value: unknown) {
+    const data = this.record(value);
+    if (data.data_source !== 'crm') {
+      return [];
+    }
+    const limitations: Array<{ key: string; reason: string }> = [
+      {
+        key: 'cancellation_reason',
+        reason:
+          'the provider reports only that a record was removed; a business cancellation reason is not part of the contract and must not be inferred',
+      },
+    ];
+
+    const appointments = this.record(
+      this.record(data.completeness).appointments,
+    );
+
+    if (appointments.status === 'incomplete') {
+      const reason =
+        typeof appointments.reason === 'string'
+          ? appointments.reason
+          : 'unknown';
+      // 🔴 Число остаётся: усечённая выборка даёт нижнюю границу, а не пустоту.
+      // Меняется ровно одно — право читать ноль как «ничего не было».
+      limitations.push({
+        key: 'incomplete_read',
+        reason: `the journal read for this period is incomplete (${reason}), so every appointment counter — appointments_total, appointments_cancelled, appointments_no_show and the per-staff rows — is a lower bound and a zero in any of them means "not measured", not "none"`,
+      });
+    }
+
+    const discarded = this.optionalMetricNumber(
+      appointments.out_of_period_discarded,
+    );
+    if (discarded !== null && discarded > 0) {
+      limitations.push({
+        key: 'provider_window',
+        reason: `the provider returned ${discarded} record(s) outside the requested period; they are excluded from every period metric`,
+      });
+    }
+
+    const attendance = this.record(data.attendance);
+    const notObserved = this.optionalMetricNumber(attendance.not_observed);
+    if (notObserved !== null && notObserved > 0) {
+      limitations.push({
+        key: 'attendance_coverage',
+        reason: `attendance was not observed for ${notObserved} record(s) of the period, so attended_appointments is not published for it and appointments_no_show is a lower bound: a record whose attendance was never observed cannot be counted as a no-show. appointments_completed is a provider status that means "arrival marked OR bill paid" and is not proof of attendance`,
+      });
+    }
+    return limitations;
   }
 
   /**
@@ -3952,6 +4281,10 @@ export class AiToolHandlerService {
           })
         : [],
       data_quality: result.data_quality ?? null,
+      // 🔴 Cycle 04 P0. Полнота и присутствие обязаны доехать до слоя, который
+      // отвечает владельцу: без них «0» и «не измерено» — одна строка.
+      completeness: result.completeness ?? null,
+      attendance: result.attendance ?? null,
       // 🔴 Промежуточное представление: внешний идентификатор мастера здесь
       // ещё есть, потому что по нему идёт сопоставление периодов и различение
       // тёзок. Наружу он не уходит никогда — publishAnalytics его снимает.
@@ -4928,15 +5261,26 @@ export class AiToolHandlerService {
    * запросом. Лимит объявлен в границе CRM (`CRM_JOURNAL_MAX_WINDOW_DAYS`),
    * а здесь сознательно берётся запас в сутки — он был и до P3, и менять
    * шаблон запросов заодно с канонизацией нельзя.
+   *
+   * 🔴 Cycle 04 P0. Возвращается не голый список, а чтение периода: записи,
+   * ДЕЙСТВИТЕЛЬНО попавшие в окно, и признание источника в полноте. До P0
+   * здесь считалось всё, что вернул провайдер, — а он возвращает записи вне
+   * запрошенного диапазона (реестр 3.8, измерено на боевых данных).
    */
   private async readJournalRangeInChunks(
     tenantId: string,
     fromIso: string,
     toIso: string,
-  ): Promise<CrmJournalAppointment[]> {
+    timezone: string,
+  ): Promise<PeriodRead<CrmJournalAppointment>> {
     const from = new Date(fromIso);
     const to = new Date(toIso);
-    const unique = new Map<string, CrmJournalAppointment>();
+    const period: BusinessPeriod = { from: fromIso, to: toIso, timezone };
+    const windows: Array<{
+      items: CrmJournalAppointment[];
+      completeness: 'complete' | 'truncated';
+      truncationReason?: string | null;
+    }> = [];
     const maxChunkMs = (CRM_JOURNAL_MAX_WINDOW_DAYS - 1) * 24 * 60 * 60 * 1_000;
     let cursor = from.getTime();
     while (cursor <= to.getTime()) {
@@ -4949,14 +5293,17 @@ export class AiToolHandlerService {
         },
         { includeCanceled: true },
       );
-      for (const appointment of journal.appointments) {
-        unique.set(appointment.id, appointment);
-      }
+      windows.push({
+        items: journal.appointments,
+        completeness: journal.completeness,
+        truncationReason: journal.truncation_reason ?? null,
+      });
       cursor = chunkEnd + 1;
     }
-    return [...unique.values()].sort((left, right) =>
-      left.start_at.localeCompare(right.start_at),
-    );
+    return collectPeriodRecords(windows, period, {
+      startAt: (item) => new Date(item.start_at),
+      key: (item) => item.id,
+    });
   }
 
   private shiftLocalMonth(value: string, months: number): string {

@@ -662,7 +662,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'clients.no-show-risk.read',
     description:
-      'Analyze observed CRM no-shows and cancellations by anonymized client for a reporting period. Returns only statuses actually present in the journal. YClients does not provide the cancellation timestamp here, so late-cancellation risk is explicitly unavailable and must never be inferred.',
+      'Analyze observed no-shows and cancellations by anonymized client for a reporting period. No-shows come from canonical client attendance, never from the provider status word "completed", which mixes arrival with payment. attendance_counts.not_observed is the number of records whose attendance was never observed: while it is above zero every no-show count is a lower bound and completeness.zero_means_none is false. Records the provider returns outside the requested period are excluded. The provider reports only that a record was removed — a business cancellation reason is not part of the contract and must never be inferred. YClients does not provide the cancellation timestamp here, so late-cancellation risk is explicitly unavailable.',
     inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -819,7 +819,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'operations.journal.read',
     description:
-      'Read the exact PII-free YClients appointment journal for one calendar date, optionally limited to one active staff member. Returns verified appointment/status counts, booked time, service names and staff workload without client names, phones, notes or CRM record IDs. Use for "сколько записей у Стаса завтра", "кто загружен сегодня", "сколько отмен сегодня" and other operational day questions. Never substitute a monthly analytics summary for this tool.',
+      'Read the exact PII-free YClients appointment journal for one calendar date, optionally limited to one active staff member. Returns verified appointment/status counts, booked time, service names and staff workload without client names, phones, notes or CRM record IDs. Records the provider returns outside the requested day are excluded and counted in completeness.out_of_period_discarded. summary.completed is the PROVIDER STATUS and means "arrival marked OR bill paid": never present it as proof that the client came. Client attendance is the separate attendance block (arrived / no_show / awaiting / not_observed); not_observed is neither zero nor waiting, and while it is above zero a zero in arrived does not prove that nobody came — completeness.zero_means_none says so explicitly. Use for "сколько записей у Стаса завтра", "кто загружен сегодня", "сколько отмен сегодня" and other operational day questions. Never substitute a monthly analytics summary for this tool.',
     inputSchema: {
       type: 'object',
       additionalProperties: false,

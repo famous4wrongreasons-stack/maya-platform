@@ -10,6 +10,19 @@ type OverviewLike = {
     no_show?: number;
     booked_minutes?: number;
   };
+  /**
+   * 🔴 Cycle 04 P0. Насколько полно прочитан источник записей.
+   *
+   * Без этого блока бриф печатал «отменено 0» и «неявок 0» одинаково и когда
+   * отмен действительно не было, и когда журнал прочитался не целиком. Ноль
+   * без такой пометки — не измерение, а совпадение формы.
+   */
+  completeness?: {
+    appointments?: {
+      status?: string;
+      reason?: string | null;
+    } | null;
+  } | null;
   staff?: Array<{
     name?: string | null;
     appointments?: number;
@@ -18,6 +31,35 @@ type OverviewLike = {
   average_ticket?: Array<{ amount_kopecks?: number }>;
   revenue?: Array<{ amount_kopecks?: number }>;
 };
+
+/**
+ * Пометка о неполноте источника — одна на все три сводки.
+ *
+ * `null` означает «источник прочитан целиком»; строка означает, что числа
+ * ниже — нижняя граница, и это обязано быть сказано словами, а не пропущено.
+ */
+function incompleteNote(overview: OverviewLike): string | null {
+  const status = overview.completeness?.appointments?.status;
+  if (status !== 'incomplete') {
+    return null;
+  }
+  return '⚠️ Журнал за этот период прочитан НЕ целиком: числа ниже — нижняя граница, и ноль в них означает «не измерено», а не «ничего не было».';
+}
+
+/** Состояние источника для полезной нагрузки карточки. Всегда заполнено. */
+function completenessPayload(overview: OverviewLike): {
+  appointments_source_complete: boolean;
+  appointments_incomplete_reason: string | null;
+} {
+  const appointments = overview.completeness?.appointments ?? null;
+  const complete = appointments ? appointments.status !== 'incomplete' : true;
+  return {
+    appointments_source_complete: complete,
+    appointments_incomplete_reason: complete
+      ? null
+      : (appointments?.reason ?? 'unknown'),
+  };
+}
 
 export function composeMorningBrief(input: {
   localDate: string;
@@ -65,6 +107,10 @@ export function composeMorningBrief(input: {
   } else {
     lines.push('🪑 Загрузка мастеров выглядит ровной на утро.');
   }
+  const morningNote = incompleteNote(input.overview);
+  if (morningNote) {
+    lines.push('', morningNote);
+  }
   lines.push(
     '',
     'Откройте чат MAYA, если нужно закрыть окна или скорректировать план.',
@@ -84,6 +130,7 @@ export function composeMorningBrief(input: {
       no_show: noShow,
       booked_value_kopecks: bookedValue,
       underused,
+      ...completenessPayload(input.overview),
     },
   };
 }
@@ -130,6 +177,10 @@ export function composeMasterMorningBrief(input: {
       'Совет MAYA: перед первым визитом посмотрите историю услуг клиента, а после работы предложите только один действительно подходящий уход.',
     );
   }
+  const masterNote = incompleteNote(input.overview);
+  if (masterNote) {
+    lines.push('', masterNote);
+  }
   lines.push('', 'План сохранён в чате MAYA.');
 
   return {
@@ -144,6 +195,7 @@ export function composeMasterMorningBrief(input: {
       cancelled,
       no_show: noShow,
       booked_minutes: bookedMinutes,
+      ...completenessPayload(input.overview),
     },
   };
 }
@@ -231,6 +283,10 @@ export function composeDailyReport(input: {
   lines.push(
     `Статусы: завершено ${completed}, ожидают ${scheduled}, отменено ${cancelled}, неявок ${noShow}.`,
   );
+  const dailyNote = incompleteNote(input.overview);
+  if (dailyNote) {
+    lines.push('', dailyNote);
+  }
   lines.push(
     '',
     'Сообщение сохранено в чате MAYA и не исчезнет после закрытия приложения.',
@@ -250,6 +306,7 @@ export function composeDailyReport(input: {
       revenue_total_kopecks: revenueTotal,
       cash_kopecks: cash,
       card_kopecks: card,
+      ...completenessPayload(input.overview),
     },
   };
 }
