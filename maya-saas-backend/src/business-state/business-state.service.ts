@@ -90,6 +90,10 @@ const NEVER_AVAILABLE_METRICS: ReadonlyArray<{ key: string; reason: string }> =
     },
   ];
 
+/** Почему стоимости записанного нет у арендатора на внешней CRM. */
+export const BOOKED_VALUE_UNAVAILABLE_CRM =
+  'the AI layer does not publish journal price sums for a CRM tenant: money there is recognised only through the financial contour (fail-closed, P7.1). This is a disclosure decision, not a missing computation';
+
 export type PeriodComparisonMode =
   'none' | 'previous_period' | 'previous_year_same_period';
 
@@ -184,6 +188,7 @@ export interface BusinessState {
    * переноса. Состав считает канонический слой, порядок выбирает потребитель.
    */
   unavailableParts: {
+    bookedValue: Array<{ key: string; reason: string }>;
     cohorts: Array<{ key: string; reason: string }>;
     attendance: Array<{ key: string; reason: string }>;
     staffMoney: Array<{ key: string; reason: string }>;
@@ -381,12 +386,14 @@ export class BusinessStateService {
       ],
       staffJoin: this.staffJoin(currentInternal, current, disclosure),
       unavailableParts: {
+        bookedValue: this.bookedValueUnavailableMetrics(current),
         cohorts: this.clientCohortUnavailableMetrics(current),
         attendance: this.attendanceUnavailableMetrics(current),
         staffMoney: this.staffMoneyUnavailableMetrics(current),
         neverAvailable: request.personal ? [] : NEVER_AVAILABLE_METRICS,
       },
       unavailableMetrics: [
+        ...this.bookedValueUnavailableMetrics(current),
         ...this.clientCohortUnavailableMetrics(current),
         ...this.attendanceUnavailableMetrics(current),
         ...this.staffMoneyUnavailableMetrics(current),
@@ -436,8 +443,17 @@ export class BusinessStateService {
   private employeeMetricSnapshot(value: unknown) {
     const data = this.record(value);
     const appointments = this.record(data.appointments);
-    const bookedValue = Array.isArray(data.revenue)
-      ? this.safeMoneyAmount(data.revenue[0])
+    /**
+     * 🔴 Cycle 04 P2. То же поле, что и в срезе салона.
+     *
+     * В личном срезе `revenue` кассой не перезаписывается — подтверждённой
+     * выручки конкретного мастера провайдер не даёт вовсе, — но читать
+     * стоимость записанного из поля, которое ГДЕ-ТО перезаписывается, нельзя:
+     * ровно так и появляется путь, по которому одно поле снова начинает
+     * значить два факта.
+     */
+    const bookedValue = Array.isArray(data.booked_value)
+      ? this.safeMoneyAmount(data.booked_value[0])
       : null;
     const averageBookedValue = Array.isArray(data.average_ticket)
       ? this.safeMoneyAmount(data.average_ticket[0])
@@ -468,6 +484,27 @@ export class BusinessStateService {
         averageBookedValue?.amount_kopecks ?? null,
       booked_minutes: this.optionalMetricNumber(appointments.booked_minutes),
     };
+  }
+
+  /**
+   * Почему стоимости записанного нет — словами, а не пустым местом.
+   *
+   * 🔴 До P2 это поле молча содержало кассу, и вопроса «почему его нет» не
+   * возникало вовсе. Теперь оно честно пусто у CRM-арендатора, и молчать об
+   * этом нельзя: пустота без причины читается как «записанного не было».
+   */
+  private bookedValueUnavailableMetrics(value: unknown) {
+    const data = this.record(value);
+    if (data.data_source !== 'crm') {
+      return [];
+    }
+    const bookedValue = Array.isArray(data.booked_value)
+      ? data.booked_value
+      : [];
+    if (bookedValue.length > 0) {
+      return [];
+    }
+    return [{ key: 'booked_value', reason: BOOKED_VALUE_UNAVAILABLE_CRM }];
   }
 
   /** Идентичности мастеров периода — вход для решения о раскрытии имён. */
@@ -506,18 +543,54 @@ export class BusinessStateService {
     ]);
     const overview = this.record(overviewValue);
     const operational = this.safeAnalytics(overview);
+    /**
+     * 🔴 Cycle 04 P2. Стоимость записанного живёт в СОБСТВЕННОМ поле.
+     *
+     * Раньше её держали в `revenue`, а в денежной ветке то же поле
+     * перезаписывалось подтверждённой кассой. Одно поле означало два разных
+     * факта в зависимости от того, ответил ли финансовый контур, и снимок
+     * метрик брал «записанное» уже из перезаписанного значения: в бою
+     * `booked_value` и `revenue` оказывались одним и тем же числом
+     * (60 105 000 копеек при настоящих 61 250 000).
+     *
+     * Теперь стоимость записанного снимается ДО любых замен и дальше не
+     * трогается. Перепутать два факта нельзя: у каждого своё имя.
+     */
+    const bookedValue = operational.revenue;
+
     if (overview.data_source !== 'crm') {
       // Внутренний календарь не считает зарплату вовсе: расчёта нет ни у кого,
       // и это свойство источника, а не запрета по роли.
-      return this.withStaffSalary(operational, {
-        status: 'unavailable',
-        reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
-      });
+      //
+      // Здесь `revenue` и `booked_value` — ОДНО И ТО ЖЕ ЧИСЛО, и это законно:
+      // другого понятия денег у внутреннего календаря нет. Но факта всё равно
+      // два, и у каждого своё основание.
+      return this.withStaffSalary(
+        { ...operational, booked_value: bookedValue },
+        {
+          status: 'unavailable',
+          reason: STAFF_SALARY_UNAVAILABLE.internalCalendar,
+        },
+      );
     }
 
     const failClosed = {
       ...operational,
       revenue: [],
+      /**
+       * 🔴 У арендатора на внешней CRM стоимость записанного НЕ публикуется.
+       *
+       * Это не побочный эффект, а действующее решение P7.1, охраняемое тремя
+       * тестами: суммы цен журнала не выходят из этого слоя в ответе
+       * CRM-арендатора вовсе — деньгами там признаётся только кассовый контур.
+       *
+       * P2 снимает ДВУСМЫСЛЕННОСТЬ: касса больше никогда не окажется в поле
+       * стоимости записанного. Вопрос «показывать ли записанное CRM-арендатору
+       * вообще» — отдельное решение о раскрытии денег, и принимать его молча
+       * внутри пакета о разделении полей было бы подменой. Пока — как было:
+       * недоступно, и сказано почему.
+       */
+      booked_value: [],
       expenses: [],
       net: [],
       average_ticket: [],
@@ -789,9 +862,12 @@ export class BusinessStateService {
         query,
       ),
     );
+    // Стоимость записанного — собственным полем и здесь: одно имя на всю
+    // систему, а не «в этой ветке можно и из revenue».
+    const composition = { ...internal, booked_value: internal.revenue };
     return this.withStaffSalary(
-      internal,
-      await this.employeeSalaryScope(actor.tenantId, query, internal),
+      composition,
+      await this.employeeSalaryScope(actor.tenantId, query, composition),
     );
   }
 
@@ -1450,14 +1526,32 @@ export class BusinessStateService {
      * числа есть основание.
      */
     const financialRevenue = this.safeMoneyAmount(financeRevenue.total);
-    const bookedValue = Array.isArray(data.revenue)
-      ? this.safeMoneyAmount(data.revenue[0])
+    /**
+     * 🔴 Cycle 04 P2. Стоимость записанного читается из СВОЕГО поля.
+     *
+     * Здесь стояло `data.revenue[0]` — то самое поле, которое денежная ветка
+     * композиции перезаписывает кассой. Из-за этого у CRM-арендатора «касса» и
+     * «стоимость записанного» были одним числом, и владельцу отвечали одной
+     * величиной на два разных вопроса.
+     */
+    const bookedValue = Array.isArray(data.booked_value)
+      ? this.safeMoneyAmount(data.booked_value[0])
       : null;
+    /**
+     * 🔴 Основание описывает ВЫРУЧКУ, а не «какое-нибудь число рядом».
+     *
+     * У внутреннего календаря другого понятия денег нет, и там выручка честно
+     * стоит на ценах журнала. У CRM-арендатора деньгами признаётся только
+     * кассовый контур: нет кассы — нет выручки, и стоимость записанного её не
+     * заменяет, сколько бы её ни было.
+     */
     const revenueBasis: RevenueBasis = financialRevenue
       ? 'provider_transactions'
-      : bookedValue
-        ? 'booked_prices'
-        : 'unavailable';
+      : data.data_source === 'crm'
+        ? 'unavailable'
+        : bookedValue
+          ? 'booked_prices'
+          : 'unavailable';
     const averageTicket = Array.isArray(data.average_ticket)
       ? this.safeMoneyAmount(data.average_ticket[0])
       : null;
@@ -1466,6 +1560,14 @@ export class BusinessStateService {
       revenue_amount_kopecks: financialRevenue?.amount_kopecks ?? null,
       /** Стоимость записанного. Отдельное имя, потому что это другое понятие. */
       booked_value_amount_kopecks: bookedValue?.amount_kopecks ?? null,
+      /**
+       * Основание стоимости записанного — своё, а не заимствованное у выручки.
+       * Два факта могут законно совпасть по величине и всё равно остаются
+       * двумя фактами: у внутреннего календаря это одно и то же число.
+       */
+      booked_value_basis: (bookedValue
+        ? 'booked_prices'
+        : 'unavailable') as RevenueBasis,
       /** На чём стоит денежное число. См. `domain/revenue-basis.ts`. */
       revenue_basis: revenueBasis,
       financial_operations: this.optionalMetricNumber(
