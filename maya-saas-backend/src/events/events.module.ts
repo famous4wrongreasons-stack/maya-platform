@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventStoreService } from './event-store.service';
+import { IngestionRetentionScheduler } from './ingestion-retention.scheduler';
 
 /**
  * Фундамент наблюдения. В B1 здесь нет ни приёмника, ни обработчика:
@@ -10,7 +11,7 @@ import { EventStoreService } from './event-store.service';
  */
 @Module({
   imports: [PrismaModule],
-  providers: [EventStoreService],
+  providers: [EventStoreService, IngestionRetentionScheduler],
   exports: [EventStoreService],
 })
 export class EventsModule {}
