@@ -79,6 +79,16 @@ export const EXPENSE_CATEGORIES = [
 
 export type ExpenseCategorySlug = (typeof EXPENSE_CATEGORIES)[number]['slug'];
 
+/**
+ * Слаг зарплаты. Вынесен в константу не ради красоты: расчёт прибыли и
+ * карточка чата обязаны говорить об одной и той же статье, а строковый литерал
+ * в двух файлах — это два разных места, которые расходятся молча.
+ */
+export const PAYROLL_EXPENSE_CATEGORY: ExpenseCategorySlug = 'payroll';
+
+/** Категория, из которой берётся стоимость привлечения нового клиента. */
+export const MARKETING_EXPENSE_CATEGORY: ExpenseCategorySlug = 'marketing';
+
 /** Куда падает всё, что не опознали. */
 export const FALLBACK_EXPENSE_CATEGORY: ExpenseCategorySlug = 'other';
 
@@ -95,6 +105,59 @@ export const MANUAL_EXPENSE_CATEGORY_SLUGS: readonly string[] =
   EXPENSE_CATEGORIES.filter(
     (category) => category.manualEntry === 'allowed',
   ).map((category) => category.slug);
+
+/**
+ * Синонимы статей — ТОЛЬКО на чтение.
+ *
+ * Раньше такой же список жил в аналитике и сводил `arenda`/`ads`/`zarplata` к
+ * своим именам. Своим — потому что зарплата там называлась `salary`, а здесь
+ * `payroll`: одна статья расхода имела две идентичности, и какая из них
+ * приедет в карточку, зависело от того, какой инструмент отработал последним.
+ *
+ * Список нужен для строк, заведённых до появления справочника, и для будущего
+ * импорта из CRM. На запись он не действует: `findExpenseCategory` синонимов не
+ * знает, и `@IsIn(EXPENSE_CATEGORY_SLUGS)` в DTO пропускает только канон —
+ * иначе «аренда» снова начала бы въезжать в базу тремя разными строками.
+ */
+const LEGACY_EXPENSE_CATEGORY_ALIASES: Record<string, ExpenseCategorySlug> = {
+  arenda: 'rent',
+  lease: 'rent',
+  premises: 'rent',
+  rent_payment: 'rent',
+  office_rent: 'rent',
+  salary: 'payroll',
+  salaries: 'payroll',
+  wages: 'payroll',
+  zarplata: 'payroll',
+  staff_salary: 'payroll',
+  ads: 'marketing',
+  advertising: 'marketing',
+  advertisement: 'marketing',
+  promo: 'marketing',
+  promotion: 'marketing',
+  reklama: 'marketing',
+  smm: 'marketing',
+  targeting: 'marketing',
+  consumables: 'supplies',
+  materials: 'supplies',
+  rashodniki: 'supplies',
+  tax: 'taxes',
+  nalogi: 'taxes',
+  communal: 'utilities',
+  kommunalka: 'utilities',
+};
+
+/**
+ * `Rent-payment` и `rent payment` — это одна и та же статья, написанная разными
+ * руками. Приведение к `rent_payment` делается только при поиске синонима: сам
+ * справочник сравнивается точно.
+ */
+function normaliseCategoryToken(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[-\s]+/g, '_');
+}
 
 export function findExpenseCategory(
   slug: unknown,
@@ -114,8 +177,10 @@ export interface ResolvedExpenseCategory {
   readonly slug: ExpenseCategorySlug;
   readonly label: string;
   readonly kind: ExpenseCategoryKind;
-  /** Была ли категория в справочнике. */
+  /** Опознана ли категория вообще — каноном или синонимом. */
   readonly known: boolean;
+  /** Как именно опознана: точным слагом, синонимом или никак. */
+  readonly match: 'canonical' | 'legacy_alias' | 'unknown';
   /**
    * Исходная строка из БД. Старые записи с чужими категориями читаются как
    * `other`, но то, что человек когда-то ввёл, не теряется.
@@ -126,30 +191,41 @@ export interface ResolvedExpenseCategory {
 /**
  * Прочитать сохранённую категорию.
  *
- * Записи, заведённые до появления справочника, не ломаются: неизвестный слаг
- * отдаётся как `other` с сохранением исходной строки в `raw`.
+ * Записи, заведённые до появления справочника, не ломаются: известный синоним
+ * сводится к канонической статье, неопознанное отдаётся как `other`, и в обоих
+ * случаях исходная строка сохраняется в `raw`.
  */
 export function resolveExpenseCategory(raw: unknown): ResolvedExpenseCategory {
   const original = typeof raw === 'string' ? raw : '';
-  const known = findExpenseCategory(original);
-  if (known) {
-    return {
-      slug: known.slug as ExpenseCategorySlug,
-      label: known.label,
-      kind: known.kind,
-      known: true,
-      raw: original,
-    };
+  const direct = findExpenseCategory(original);
+  if (direct) {
+    return describe(direct, 'canonical', original);
+  }
+  const alias =
+    LEGACY_EXPENSE_CATEGORY_ALIASES[normaliseCategoryToken(original)];
+  const aliased = alias ? CATEGORY_BY_SLUG.get(alias) : undefined;
+  if (aliased) {
+    // Синоним — это та же статья, написанная иначе. `raw` хранит написание.
+    return describe(aliased, 'legacy_alias', original);
   }
   const fallback = CATEGORY_BY_SLUG.get(
     FALLBACK_EXPENSE_CATEGORY,
   ) as ExpenseCategoryDefinition;
+  return describe(fallback, 'unknown', original);
+}
+
+function describe(
+  category: ExpenseCategoryDefinition,
+  match: ResolvedExpenseCategory['match'],
+  raw: string,
+): ResolvedExpenseCategory {
   return {
-    slug: fallback.slug as ExpenseCategorySlug,
-    label: fallback.label,
-    kind: fallback.kind,
-    known: false,
-    raw: original,
+    slug: category.slug as ExpenseCategorySlug,
+    label: category.label,
+    kind: category.kind,
+    known: match !== 'unknown',
+    match,
+    raw,
   };
 }
 

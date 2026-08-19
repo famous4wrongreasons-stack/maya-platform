@@ -518,15 +518,30 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
       expect(h.store.expenses[0].category).toBe('rent');
     });
 
-    it('🔴 старые записи вне справочника читаются как «Прочее» — исходная строка только в category_raw', () => {
-      for (const legacy of ['arenda-avgust', 'ads', 'zarplata', 'salary']) {
+    it('🔴 Cycle 04 P8: синоним читается своей статьёй, неопознанное — «Прочее»', () => {
+      // Раньше здесь стояло «все четыре строки читаются как other», и рядом
+      // висел комментарий: аналитика для тех же строк канонизирует иначе —
+      // 'ads' → marketing, 'zarplata'/'salary' → salary. Две разные правды.
+      // P8 оставил одну: синонимы знает справочник, и знает их один раз.
+      for (const [legacy, slug] of [
+        ['ads', 'marketing'],
+        ['zarplata', 'payroll'],
+        ['salary', 'payroll'],
+        ['rent-payment', 'rent'],
+      ] as const) {
         const resolved = resolveExpenseCategory(legacy);
-        expect(resolved.slug).toBe('other');
-        expect(resolved.known).toBe(false);
+        expect(resolved.slug).toBe(slug);
+        expect(resolved.match).toBe('legacy_alias');
+        expect(resolved.known).toBe(true);
+        // Написание не теряется: опознали статью, а не переписали историю.
         expect(resolved.raw).toBe(legacy);
       }
-      // При этом аналитика для тех же строк канонизирует иначе:
-      // 'ads' → marketing, 'zarplata'/'salary' → salary. Две разные правды.
+      // Незнакомая строка по-прежнему «Прочее», а не выдуманная статья.
+      const unknown = resolveExpenseCategory('arenda-avgust');
+      expect(unknown.slug).toBe('other');
+      expect(unknown.match).toBe('unknown');
+      expect(unknown.known).toBe(false);
+      expect(unknown.raw).toBe('arenda-avgust');
     });
   });
 

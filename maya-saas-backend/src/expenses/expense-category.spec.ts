@@ -36,6 +36,7 @@ describe('expense categories', () => {
       slug: 'other',
       label: 'Прочее',
       kind: 'variable',
+      match: 'unknown',
       known: false,
       raw: 'arenda-avgust',
     });

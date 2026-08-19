@@ -2118,10 +2118,14 @@ export class AiToolHandlerService {
         ...resolved,
         truncated_to_today: window.truncatedToToday,
       },
-      // 🔴 Разрез по статьям считает сервер. «Сколько ушло на расходники» без
-      // него неотвечаемо: модели складывать запрещено, а перечень отдельных
-      // платежей — это не ответ, а работа, переложенная на владельца.
-      by_category: this.expenseCategoryTotals(result.items),
+      // 🔴 Cycle 04 P8. Разрез по статьям больше не считается здесь. Раньше он
+      // складывался ВТОРОЙ раз поверх уже обрезанного перечня, и «сколько ушло
+      // на расходники» отвечалось суммой первых пятисот записей. Теперь и
+      // разрез, и итоги приходят от канонического сумматора расходов.
+      by_category: result.by_category.map((row) => ({
+        ...row,
+        amount_major_units: this.majorUnits(row.amount_kopecks),
+      })),
       items: result.items.map((item) => ({
         id: item.id,
         branch_id: item.branch_id,
@@ -2138,63 +2142,18 @@ export class AiToolHandlerService {
         source: item.source,
       })),
       totals: this.safeMoneyEntries(result.totals),
+      /**
+       * 🔴 Обрезан ПЕРЕЧЕНЬ операций, а не деньги. Раньше `truncated` означал
+       * «числа ниже настоящих», и карточка честно говорила «нижняя граница».
+       * Теперь суммы посчитаны по всем записям периода, поэтому неполнота
+       * называется своим именем: список короче, чем было на самом деле.
+       */
       truncated: result.truncated,
+      items_returned: result.items.length,
+      expense_count: result.expense_count,
+      totals_basis: result.totals_basis,
+      totals_unavailable_reason: result.totals_unavailable_reason,
     };
-  }
-
-  /**
-   * Суммы по статьям расходов за период — уже сложенные.
-   *
-   * Ключ — статья и валюта: складывать рубли с тенге нельзя, а разложить по
-   * валютам дешевле, чем объяснять потом, откуда взялась смесь. Порядок —
-   * от большего к меньшему: вопрос «на что больше всего тратим» отвечается
-   * первой строкой, а не поиском максимума в голове у модели.
-   */
-  private expenseCategoryTotals(
-    items: Array<{
-      category: string;
-      category_label?: string;
-      category_kind?: string;
-      currency: string;
-      amount_kopecks: number;
-    }>,
-  ) {
-    const totals = new Map<
-      string,
-      {
-        category: string;
-        label: string;
-        kind: string;
-        currency: string;
-        amount_kopecks: number;
-        expense_count: number;
-      }
-    >();
-    for (const item of items) {
-      const resolved = resolveExpenseCategory(item.category);
-      const key = `${resolved.slug}|${item.currency}`;
-      const row = totals.get(key) ?? {
-        category: resolved.slug,
-        label: resolved.label,
-        kind: resolved.kind,
-        currency: item.currency,
-        amount_kopecks: 0,
-        expense_count: 0,
-      };
-      row.amount_kopecks += item.amount_kopecks;
-      row.expense_count += 1;
-      totals.set(key, row);
-    }
-    return [...totals.values()]
-      .sort(
-        (left, right) =>
-          right.amount_kopecks - left.amount_kopecks ||
-          left.category.localeCompare(right.category),
-      )
-      .map((row) => ({
-        ...row,
-        amount_major_units: this.majorUnits(row.amount_kopecks),
-      }));
   }
 
   /**

@@ -8,6 +8,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
+import { foldExpenseRows } from '../expenses/expense-period.reader';
 import {
   CLIENT_COHORT_LOOKBACK_DAYS,
   MARKETING_ROI_UNAVAILABLE,
@@ -1524,14 +1525,14 @@ describe('OperationsAnalyticsService', () => {
       expect(result.expenses.by_category).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            category: 'salary',
+            category: 'payroll',
             source: 'crm_payroll',
             amount_kopecks: 300_000,
           }),
         ]),
       );
       expect(
-        result.expenses.by_category.filter((row) => row.category === 'salary'),
+        result.expenses.by_category.filter((row) => row.category === 'payroll'),
       ).toHaveLength(1);
       expect(result.expenses.ignored_manual_salary).toEqual([
         { currency: 'RUB', amount_kopecks: 900_000, amount_major_units: 9_000 },
@@ -1863,6 +1864,108 @@ describe('OperationsAnalyticsService', () => {
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(setup.expenseFindMany).not.toHaveBeenCalled();
       expect(setup.crmGetFinancialSummary).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * 🔴 Cycle 04 P8. Обзор и книга прибыли читают расходы одним сумматором.
+   *
+   * Раньше обзор считал их сам — четвёртым по счёту местом, — и на периоде с
+   * шестьюстами записями отвечал иначе, чем список расходов, который
+   * обрывался на пятистах.
+   */
+  describe('expenses through the canonical summation', () => {
+    const createExpenseService = (options: {
+      rows?: Array<{
+        category: string;
+        amountKopecks: number;
+        currency: string;
+      }>;
+      fails?: boolean;
+    }) => {
+      const tenantContext = new TenantContextService();
+      const expenseFindMany = jest.fn(() =>
+        options.fails
+          ? Promise.reject(new Error('expense ledger unavailable'))
+          : Promise.resolve(options.rows ?? []),
+      );
+      const prisma = {
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            defaultTimezone: 'Europe/Moscow',
+            calendarSource: CalendarSource.INTERNAL,
+          }),
+        },
+        appointment: { findMany: jest.fn().mockResolvedValue([]) },
+        expense: { findMany: expenseFindMany },
+        internalProvider: {
+          findFirst: jest.fn(),
+          findMany: jest.fn().mockResolvedValue([]),
+        },
+        crmStaffAccess: { findFirst: jest.fn() },
+      } as unknown as PrismaService;
+      const crmService = {
+        getJournal: jest.fn(),
+        getFinancialSummary: jest.fn(),
+        getRevenueSummary: jest.fn(),
+      } as unknown as CrmService;
+      return {
+        tenantContext,
+        expenseFindMany,
+        service: new OperationsAnalyticsService(
+          prisma,
+          tenantContext,
+          {
+            assertBranchBelongsToTenant: jest.fn(),
+          } as unknown as TenantsService,
+          crmService,
+          {
+            encrypt: (value: string) => value,
+            decrypt: (value: string) => value,
+          } as unknown as EncryptionService,
+          new AppointmentPeriodReader(crmService),
+          new AttendanceFactsService(prisma, tenantContext),
+        ),
+      };
+    };
+
+    const july = {
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T23:59:59.000Z',
+    };
+
+    it('publishes the same totals the canonical summation produces', async () => {
+      const rows = [
+        { category: 'rent', amountKopecks: 200_000, currency: 'RUB' },
+        // Строка, заведённая до появления справочника: синоним той же статьи.
+        { category: 'rashodniki', amountKopecks: 30_000, currency: 'RUB' },
+        { category: 'supplies', amountKopecks: 20_000, currency: 'RUB' },
+      ];
+      const setup = createExpenseService({ rows });
+      const overview = await setup.tenantContext.runAsSystemTenant(
+        'tenant-a',
+        () => setup.service.getBusinessOverview('tenant-a', july),
+      );
+      expect(overview.expenses).toEqual(
+        foldExpenseRows(
+          rows.map((entry) => ({
+            category: entry.category,
+            currency: entry.currency,
+            amountKopecks: entry.amountKopecks,
+          })),
+        ).totals,
+      );
+      // Обзор читает книгу ровно один раз — своего запроса у него больше нет.
+      expect(setup.expenseFindMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails closed when the expense book cannot be read instead of showing zero', async () => {
+      const setup = createExpenseService({ fails: true });
+      await expect(
+        setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+          setup.service.getBusinessOverview('tenant-a', july),
+        ),
+      ).rejects.toThrow('expense_ledger_did_not_answer_for_this_period');
     });
   });
 });

@@ -158,7 +158,7 @@ describe('buildChatReportCard', () => {
               totals: [{ currency: 'RUB', amount_kopecks: 6_500_000 }],
               by_category: [
                 {
-                  category: 'salary',
+                  category: 'payroll',
                   label: 'Зарплата',
                   source: 'crm_payroll',
                   currency: 'RUB',
@@ -212,7 +212,7 @@ describe('buildChatReportCard', () => {
               totals: [{ currency: 'RUB', amount_kopecks: 6_000_000 }],
               by_category: [
                 {
-                  category: 'salary',
+                  category: 'payroll',
                   label: 'Зарплата',
                   source: 'crm_payroll',
                   currency: 'RUB',

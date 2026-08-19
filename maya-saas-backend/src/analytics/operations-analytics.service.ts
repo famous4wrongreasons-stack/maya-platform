@@ -26,6 +26,16 @@ import {
   serializeBusinessFact,
 } from '../domain';
 import type { BusinessPeriod, FactObservation, RevenueBasis } from '../domain';
+import {
+  MARKETING_EXPENSE_CATEGORY as CANONICAL_MARKETING_EXPENSE_CATEGORY,
+  PAYROLL_EXPENSE_CATEGORY,
+  resolveExpenseCategory,
+} from '../expenses/expense-category';
+import {
+  ExpensePeriodRead,
+  foldExpenseRows,
+  readExpensePeriod,
+} from '../expenses/expense-period.reader';
 import { CRM_PAYROLL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
 
 type AnalyticsAppointment = {
@@ -51,12 +61,6 @@ type AnalyticsAppointment = {
   status: string;
   totalPriceKopecks: number | null;
   currency: string;
-};
-
-type AnalyticsExpense = {
-  amountKopecks: number;
-  currency: string;
-  occurredAt: Date;
 };
 
 type AnalyticsBreakdown = {
@@ -121,16 +125,6 @@ type CohortLookbackRead = {
   complete: boolean;
 };
 
-/**
- * Расход с категорией — только для расчёта прибыли.
- *
- * Основной обзор категорию не читает намеренно: слой AI-инструментов гасит
- * денежные поля обзора по ролям поимённо, и любое НОВОЕ денежное поле там
- * проехало бы мимо этого гашения. Разрез по категориям живёт только в
- * прибыльности, куда пускают отдельно.
- */
-type AnalyticsCategoryExpense = AnalyticsExpense & { category: string };
-
 /** Деньги наружу: копейки для арифметики, рубли — чтобы их назвали вслух. */
 type ProfitMoney = {
   currency: string;
@@ -145,68 +139,23 @@ type ExpensePeriodDeclarationEvidence = {
   updatedAt: Date;
 } | null;
 
-/** Категория, из которой берётся стоимость привлечения нового клиента. */
-export const MARKETING_EXPENSE_CATEGORY = 'marketing';
+/**
+ * Категория, из которой берётся стоимость привлечения нового клиента.
+ *
+ * 🔴 Cycle 04 P8. Значение больше не пишется здесь литералом — оно приходит из
+ * канонического справочника. Совпадение двух строк «marketing» держалось на
+ * удаче: разойдись они, стоимость нового клиента молча посчиталась бы от нуля.
+ */
+export const MARKETING_EXPENSE_CATEGORY = CANONICAL_MARKETING_EXPENSE_CATEGORY;
 
 /**
- * Синонимы категорий расходов.
+ * Зарплата как статья справочника.
  *
- * Категория в базе — свободный слаг (`^[a-z0-9_-]{2,40}$`), справочника у неё
- * нет. Владелец пишет то, что пришло в голову: `arenda`, `ads`, `payroll`.
- * Без сведения к канону гейт полноты ругался бы на отсутствие аренды, когда
- * аренда внесена — и это было бы хуже, чем отсутствие гейта.
+ * Расчёт CRM приезжает не строкой книги расходов, а отдельным блоком, и раньше
+ * укладывался в книгу литералом `salary` — именем, которого в справочнике нет.
+ * Подпись и вид статьи берутся оттуда же, откуда для всех остальных статей.
  */
-const EXPENSE_CATEGORY_ALIASES: Record<string, string> = {
-  rent: 'rent',
-  arenda: 'rent',
-  lease: 'rent',
-  premises: 'rent',
-  rent_payment: 'rent',
-  office_rent: 'rent',
-  salary: 'salary',
-  salaries: 'salary',
-  payroll: 'salary',
-  wages: 'salary',
-  zarplata: 'salary',
-  staff_salary: 'salary',
-  marketing: 'marketing',
-  ads: 'marketing',
-  advertising: 'marketing',
-  advertisement: 'marketing',
-  promo: 'marketing',
-  promotion: 'marketing',
-  reklama: 'marketing',
-  smm: 'marketing',
-  targeting: 'marketing',
-  supplies: 'supplies',
-  consumables: 'supplies',
-  materials: 'supplies',
-  rashodniki: 'supplies',
-  taxes: 'taxes',
-  tax: 'taxes',
-  nalogi: 'taxes',
-  utilities: 'utilities',
-  communal: 'utilities',
-  kommunalka: 'utilities',
-  other: 'other',
-};
-
-/**
- * Человеческие имена категорий.
- *
- * Отказ обязан называть недостающее словом из жизни салона («не внесена
- * аренда»), а не служебным слагом: слаг — это схема данных, а её вслух не
- * произносят.
- */
-const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
-  rent: 'аренда',
-  salary: 'зарплата',
-  marketing: 'реклама',
-  supplies: 'расходники',
-  taxes: 'налоги',
-  utilities: 'коммунальные платежи',
-  other: 'прочее',
-};
+const PAYROLL_CATEGORY = resolveExpenseCategory(PAYROLL_EXPENSE_CATEGORY);
 
 /** Почему подтверждённой кассы за период нет. */
 export const CONFIRMED_REVENUE_UNAVAILABLE = {
@@ -321,6 +270,8 @@ export type ProfitabilityCohortSource = {
 type ExpenseCategoryRow = {
   category: string;
   label: string;
+  /** Постоянная или переменная. Приходит из справочника вместе со статьёй. */
+  kind: string | null;
   source: 'owner_manual' | 'crm_payroll';
   currency: string;
   amount_kopecks: number;
@@ -727,19 +678,20 @@ export class OperationsAnalyticsService {
                 // страниц у него нет, обрываться нечему.
                 read: null,
               })),
+        // 🔴 Cycle 04 P8. Обзор больше не складывает расходы сам: это делал
+        // ЧЕТВЁРТЫЙ сумматор того же факта, и от списка расходов он отвечал
+        // иначе — тот обрывался на пятистах записях, а этот нет.
+        //
+        // Личный срез мастера расходов салона не видит вовсе: это не «ноль
+        // расходов у мастера», а другой охват, поэтому здесь измеренная пустота
+        // без обращения к книге.
         staffExternalId
-          ? Promise.resolve([] as AnalyticsExpense[])
-          : this.prisma.expense.findMany({
-              where: {
-                tenantId: scopedTenantId,
-                occurredAt: { gte: from, lte: to },
-                ...(query.branchId ? { branchId: query.branchId } : {}),
-              },
-              select: {
-                amountKopecks: true,
-                currency: true,
-                occurredAt: true,
-              },
+          ? Promise.resolve(foldExpenseRows([], query.branchId ?? null))
+          : readExpensePeriod(this.prisma, {
+              tenantId: scopedTenantId,
+              from,
+              to,
+              branchId: query.branchId ?? null,
             }),
         cohortWindow
           ? this.loadCohortClientIds(
@@ -762,6 +714,15 @@ export class OperationsAnalyticsService {
       ]);
 
     const appointments = appointmentsRead.appointments;
+    // 🔴 Непрочитанную книгу расходов нельзя превращать в ноль: обзор публикует
+    // `expenses` числом, и пустой массив там читается как «расходов не было».
+    // Раньше сбой запроса ронял весь обзор — это поведение и сохраняем.
+    if (expenses.status !== 'measured') {
+      throw new Error(
+        expenses.unavailable_reason ??
+          NET_PROFIT_UNAVAILABLE.expenseLedgerUnavailable,
+      );
+    }
     return this.aggregate(
       external
         ? appointments
@@ -899,7 +860,9 @@ export class OperationsAnalyticsService {
 
     const overview = this.aggregate(
       appointments,
-      [],
+      // Дневной срез книгу расходов не читает и расходов не публикует:
+      // измеренная пустота здесь означает «не спрашивали», а не «ноль».
+      foldExpenseRows([]),
       timezone,
       from,
       to,
@@ -1214,7 +1177,7 @@ export class OperationsAnalyticsService {
 
   private aggregate(
     appointments: AnalyticsAppointment[],
-    expenses: AnalyticsExpense[],
+    expenses: ExpensePeriodRead,
     timezone: string,
     from: Date,
     to: Date,
@@ -1269,7 +1232,8 @@ export class OperationsAnalyticsService {
         currency: appointment.currency,
       })),
     );
-    const expensesByCurrency = this.sumByCurrency(expenses);
+    // Суммы уже сложены каноническим сумматором — здесь только перекладывание.
+    const expensesByCurrency = expenses.totals.map((total) => ({ ...total }));
     const pricedCountByCurrency = new Map<string, number>();
     for (const appointment of pricedAppointments) {
       pricedCountByCurrency.set(
@@ -1689,35 +1653,25 @@ export class OperationsAnalyticsService {
   }
 
   /**
-   * Расходы периода вместе с категорией.
+   * Расходы периода по статьям.
    *
-   * Отдельный запрос, а не расширение обзорного: обзор категорию не возит
-   * специально — см. комментарий у `AnalyticsCategoryExpense`. `null` означает
-   * «книгу расходов прочитать не удалось»; ноль расходов — это пустой массив,
-   * и путать эти два состояния нельзя: при первом прибыли нет, при втором она
-   * не считается из-за неполноты и об этом надо сказать словами.
+   * 🔴 Cycle 04 P8. Собственного запроса и собственного словаря здесь больше
+   * нет: и то и другое было вторым владельцем одного факта. Считает
+   * канонический сумматор расходов, он же приводит статьи к справочнику.
+   *
+   * Различие «книгу не прочитали» и «расходов ноль» сохраняется: первое —
+   * `status: 'unavailable'`, второе — измеренный ноль с пустым разрезом. При
+   * первом прибыли нет вовсе, при втором она считается с оговоркой о полноте.
+   *
+   * Филиал не передаётся намеренно: расчёт прибыли отказывает на филиальном
+   * срезе раньше этого чтения — CRM подтверждает кассу только по компании.
    */
   private async loadCategorisedExpenses(
     tenantId: string,
     from: Date,
     to: Date,
-  ): Promise<AnalyticsCategoryExpense[] | null> {
-    if (typeof this.prisma.expense?.findMany !== 'function') {
-      return null;
-    }
-    try {
-      return await this.prisma.expense.findMany({
-        where: { tenantId, occurredAt: { gte: from, lte: to } },
-        select: {
-          category: true,
-          amountKopecks: true,
-          currency: true,
-          occurredAt: true,
-        },
-      });
-    } catch {
-      return null;
-    }
+  ): Promise<ExpensePeriodRead> {
+    return readExpensePeriod(this.prisma, { tenantId, from, to });
   }
 
   /**
@@ -1797,11 +1751,14 @@ export class OperationsAnalyticsService {
    * периода отношения не имеет.
    */
   private expenseLedger(
-    rows: AnalyticsCategoryExpense[] | null,
+    read: ExpensePeriodRead,
     finance: CrmFinancialSummary | null,
   ): ExpenseLedger {
-    if (rows === null) {
-      return this.emptyLedger(NET_PROFIT_UNAVAILABLE.expenseLedgerUnavailable);
+    if (read.status !== 'measured') {
+      return this.emptyLedger(
+        read.unavailable_reason ??
+          NET_PROFIT_UNAVAILABLE.expenseLedgerUnavailable,
+      );
     }
     const warnings: Array<{ code: string; message: string }> = [];
     const payroll = finance?.payroll;
@@ -1822,14 +1779,16 @@ export class OperationsAnalyticsService {
     const ignoredSalary = new Map<string, number>();
     let manualSalarySeen = false;
 
-    for (const row of rows) {
-      const category = this.canonicalExpenseCategory(row.category);
-      if (category === 'salary') {
+    for (const row of read.by_category) {
+      // 🔴 Ветка живёт ради будущего импорта расходов из CRM: руками зарплату
+      // завести нельзя, справочник её блокирует. Но если она приедет импортом,
+      // сложить её с расчётом CRM значило бы задвоить фонд оплаты труда.
+      if (row.category === PAYROLL_EXPENSE_CATEGORY) {
         manualSalarySeen = true;
         if (accrued) {
           ignoredSalary.set(
             row.currency,
-            (ignoredSalary.get(row.currency) ?? 0) + row.amountKopecks,
+            (ignoredSalary.get(row.currency) ?? 0) + row.amount_kopecks,
           );
           continue;
         }
@@ -1837,10 +1796,12 @@ export class OperationsAnalyticsService {
       this.addLedgerRow(
         categories,
         totals,
-        category,
+        row.category,
+        row.label,
+        row.kind,
         'owner_manual',
         row.currency,
-        row.amountKopecks,
+        row.amount_kopecks,
       );
     }
 
@@ -1848,7 +1809,9 @@ export class OperationsAnalyticsService {
       this.addLedgerRow(
         categories,
         totals,
-        'salary',
+        PAYROLL_EXPENSE_CATEGORY,
+        PAYROLL_CATEGORY.label,
+        PAYROLL_CATEGORY.kind,
         'crm_payroll',
         accrued.currency,
         accrued.amount_kopecks,
@@ -1889,6 +1852,8 @@ export class OperationsAnalyticsService {
     categories: Map<string, ExpenseCategoryRow>,
     totals: Map<string, number>,
     category: string,
+    label: string,
+    kind: string | null,
     source: 'owner_manual' | 'crm_payroll',
     currency: string,
     amountKopecks: number,
@@ -1901,7 +1866,8 @@ export class OperationsAnalyticsService {
     } else {
       categories.set(key, {
         category,
-        label: this.expenseCategoryLabel(category),
+        label,
+        kind,
         source,
         currency,
         amount_kopecks: amountKopecks,
@@ -2264,18 +2230,6 @@ export class OperationsAnalyticsService {
       Math.round((row.amount_kopecks / confirmed.amount_kopecks) * 1_000_000) /
       10_000
     );
-  }
-
-  private canonicalExpenseCategory(category: string): string {
-    const normalised = category
-      .trim()
-      .toLowerCase()
-      .replace(/[-\s]+/g, '_');
-    return EXPENSE_CATEGORY_ALIASES[normalised] ?? normalised;
-  }
-
-  private expenseCategoryLabel(category: string): string {
-    return EXPENSE_CATEGORY_LABELS[category] ?? category;
   }
 
   private money(currency: string, amountKopecks: number): ProfitMoney {

@@ -12,6 +12,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { ListExpensesQueryDto } from './dto/list-expenses-query.dto';
+import { readExpensePeriod } from './expense-period.reader';
 import {
   EXPENSE_CATEGORY_SLUGS,
   ExpenseSource,
@@ -57,6 +58,9 @@ export interface CreateExpenseOptions {
    */
   idempotencyKey?: string | null;
 }
+
+/** Страница перечня операций. Деньги периода от неё не зависят. */
+const LIST_PAGE_SIZE = 500;
 
 @Injectable()
 export class ExpensesService {
@@ -198,32 +202,41 @@ export class ExpensesService {
       );
     }
 
-    const expenses = (await this.prisma.expense.findMany({
-      where: {
+    const [expenses, period] = await Promise.all([
+      this.prisma.expense.findMany({
+        where: {
+          tenantId: scopedTenantId,
+          occurredAt: { gte: from, lte: to },
+          ...(query.branchId ? { branchId: query.branchId } : {}),
+        },
+        orderBy: [{ occurredAt: 'desc' }, { createdAt: 'desc' }],
+        take: LIST_PAGE_SIZE,
+      }) as Promise<ExpenseRow[]>,
+      // 🔴 Cycle 04 P8. Итоги считает канонический сумматор по ВСЕМ строкам
+      // периода, а не по первой странице. Раньше `totals` складывались из тех
+      // же обрезанных `items`, и на 501-й записи владелец получал сумму первых
+      // пятисот, подписанную как «всего за период».
+      readExpensePeriod(this.prisma, {
         tenantId: scopedTenantId,
-        occurredAt: { gte: from, lte: to },
-        ...(query.branchId ? { branchId: query.branchId } : {}),
-      },
-      orderBy: [{ occurredAt: 'desc' }, { createdAt: 'desc' }],
-      take: 500,
-    })) as ExpenseRow[];
+        from,
+        to,
+        branchId: query.branchId ?? null,
+      }),
+    ]);
 
     return {
       items: expenses.map((expense) => this.serialize(expense)),
-      totals: Object.values(
-        expenses.reduce<
-          Record<string, { currency: string; amount_kopecks: number }>
-        >((totals, expense) => {
-          const current = totals[expense.currency] ?? {
-            currency: expense.currency,
-            amount_kopecks: 0,
-          };
-          current.amount_kopecks += expense.amountKopecks;
-          totals[expense.currency] = current;
-          return totals;
-        }, {}),
-      ),
-      truncated: expenses.length === 500,
+      totals: period.totals.map((total) => ({ ...total })),
+      by_category: period.by_category.map((row) => ({ ...row })),
+      /** Сколько строк расхода в периоде всего — включая не попавшие в `items`. */
+      expense_count: period.expense_count,
+      /** Обрезан ПЕРЕЧЕНЬ операций. Суммы выше от этого не зависят. */
+      truncated: expenses.length === LIST_PAGE_SIZE,
+      totals_basis:
+        period.status === 'measured'
+          ? ('all_expenses_in_period' as const)
+          : ('unavailable' as const),
+      totals_unavailable_reason: period.unavailable_reason,
     };
   }
 

@@ -394,7 +394,20 @@ describe('AiToolHandlerService output minimization', () => {
           },
         ],
         totals: [{ currency: 'RUB', amount_kopecks: 100_000 }],
+        by_category: [
+          {
+            category: 'supplies',
+            label: 'Расходники',
+            kind: 'variable',
+            currency: 'RUB',
+            amount_kopecks: 100_000,
+            expense_count: 1,
+          },
+        ],
+        expense_count: 1,
         truncated: false,
+        totals_basis: 'all_expenses_in_period',
+        totals_unavailable_reason: null,
       }),
     } as unknown as ExpensesService;
     const service = createService({ expensesService });

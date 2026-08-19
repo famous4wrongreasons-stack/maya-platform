@@ -5,6 +5,8 @@
  * Без выдуманных цифр: только то, что уже посчитал сервер.
  */
 
+import { PAYROLL_EXPENSE_CATEGORY } from '../expenses/expense-category';
+
 export type ChatReportWidget =
   'business_report' | 'master_earn' | 'master_upsell';
 
@@ -115,6 +117,9 @@ function buildExpensesCard(evidence: unknown): ChatReportCard {
     : null;
   // Признание источника в неполноте приезжает в том же ответе инструмента.
   const truncated = data.truncated === true;
+  const unavailable = data.totals_basis === 'unavailable';
+  const expenseCount =
+    typeof data.expense_count === 'number' ? data.expense_count : null;
   return {
     widget: 'business_report',
     widget_data: {
@@ -127,16 +132,23 @@ function buildExpensesCard(evidence: unknown): ChatReportCard {
       rows_title: rows.length > 0 ? 'По статьям' : null,
       rows,
       /**
-       * 🔴 Cycle 04 P5. Ноль строк — это «нечего показать», а не «ничего не
-       * было». Список обрывается на пятистах записях (`truncated` приезжает в
-       * том же ответе), и строки в другой валюте сюда не попадают вовсе.
+       * 🔴 Cycle 04 P5 / P8. Ноль строк — это «нечего показать», а не «ничего
+       * не было». Перечень операций по-прежнему обрывается на пятистах
+       * записях, но суммы с P8 считаются по ВСЕМ записям периода, поэтому
+       * называть их нижней границей больше нельзя: это была бы ложная
+       * оговорка, из-за которой владелец не верит верным числам.
+       *
+       * Отдельно — недоступность: если книгу расходов прочитать не удалось,
+       * ноль в карточке означал бы «расходов не было», а это разные вещи.
        */
-      status_text: truncated
-        ? 'Список расходов пришёл не целиком — числа выше нижняя граница.'
-        : rows.length === 0
-          ? 'Расходов за этот период я не вижу — внесённых записей нет.'
-          : null,
-      source_complete: truncated === false,
+      status_text: unavailable
+        ? 'Книгу расходов за этот период прочитать не удалось — это не «расходов не было».'
+        : truncated
+          ? `Показаны не все операции: их за период ${expenseCount ?? 'больше'}. Суммы по статьям посчитаны по всем.`
+          : rows.length === 0
+            ? 'Расходов за этот период я не вижу — внесённых записей нет.'
+            : null,
+      source_complete: unavailable === false,
     },
   };
 }
@@ -302,15 +314,22 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
    * ВЫБОР строки, а не сложение. Если статей больше одной, ни одна из них не
    * выдаётся за итог: показывается список, а итог берётся из `totals`.
    */
+  /**
+   * 🔴 Cycle 04 P8. Статья приходит из канонического справочника, а не из
+   * литерала. Раньше здесь стояло `'salary'` — имя из словаря аналитики,
+   * которого в справочнике нет: одна и та же зарплата называлась `salary` в
+   * карточке прибыли и `payroll` в карточке расходов, и совпадение держалось
+   * на том, что обе строки писали руками в двух разных файлах.
+   */
   const payrollRows = expenseRows.filter(
-    (entry) => entry.category === 'salary',
+    (entry) => entry.category === PAYROLL_EXPENSE_CATEGORY,
   );
   const payrollKopecks =
     payrollRows.length === 1
       ? (metricNumber(payrollRows[0].amount_kopecks) ?? null)
       : null;
   const additionalRows = expenseRows.filter(
-    (entry) => entry.category !== 'salary',
+    (entry) => entry.category !== PAYROLL_EXPENSE_CATEGORY,
   );
   const additionalKopecks =
     additionalRows.length === 1
