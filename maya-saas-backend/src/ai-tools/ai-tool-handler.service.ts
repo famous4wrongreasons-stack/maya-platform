@@ -1,12 +1,16 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
   Injectable,
 } from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
-import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
+import {
+  ClientRecencyFactsService,
+  RECENCY_UNKNOWN,
+} from '../business-facts/client-recency-facts.service';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
@@ -155,6 +159,9 @@ const DORMANT_PHONE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
 ]);
+
+/** Сколько визитов читает досье. Публикуется рядом со счётом приходов. */
+const DOSSIER_HISTORY_LIMIT = 30;
 
 @Injectable()
 export class AiToolHandlerService {
@@ -617,24 +624,43 @@ export class AiToolHandlerService {
     // До P5 досье брало карту провайдера напрямую и выдавало её за баланс —
     // при том что для этого арендатора авторитетен другой источник, и один
     // человек получал в кабинете и в досье два разных числа без объяснения.
-    const [history, loyalty, timezone, loyaltyAuthority] = await Promise.all([
-      this.crmService
-        .getClientVisitHistory(principal.tenantId, client.id, 30)
-        .catch(() => []),
-      client.phone
-        ? this.crmService
-            .getClientLoyalty(principal.tenantId, client.phone)
-            .catch(() => null)
-        : Promise.resolve(null),
-      this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
-      // 🔴 Снимок границы, а не собственный вывод. При отказе владелец
-      // НЕИЗВЕСТЕН: подставлять `crm` значило бы выдумать его — при внутреннем
-      // календаре владелец `maya`, при внешнем журнале `legacy_bot`.
-      this.loyaltyService
-        .authoritySnapshot(principal.tenantId)
-        .catch(() => unavailableAuthorityView()),
-    ]);
+    const [historyRead, loyalty, timezone, loyaltyAuthority] =
+      await Promise.all([
+        /**
+         * 🔴 Cycle 04 P9.1. Отказ чтения истории больше не превращается в пустой
+         * массив. Пустота и молчание источника — разные вещи: первая означает «за
+         * окном не было приходов», второе — «мы не смотрели». Схлопнув их, досье
+         * говорило про постоянного гостя «ни одного подтверждённого визита за два
+         * года» ровно тогда, когда CRM не ответила.
+         */
+        this.crmService
+          .getClientVisitHistory(
+            principal.tenantId,
+            client.id,
+            DOSSIER_HISTORY_LIMIT,
+          )
+          .then((rows) => ({ ok: true as const, rows }))
+          .catch((error: unknown) => ({
+            ok: false as const,
+            reason: this.historyFailureReason(error),
+          })),
+        client.phone
+          ? this.crmService
+              .getClientLoyalty(principal.tenantId, client.phone)
+              .catch(() => null)
+          : Promise.resolve(null),
+        this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
+        // 🔴 Снимок границы, а не собственный вывод. При отказе владелец
+        // НЕИЗВЕСТЕН: подставлять `crm` значило бы выдумать его — при внутреннем
+        // календаре владелец `maya`, при внешнем журнале `legacy_bot`.
+        this.loyaltyService
+          .authoritySnapshot(principal.tenantId)
+          .catch(() => unavailableAuthorityView()),
+      ]);
 
+    // Услуги и ритм считаются по прочитанному; при отказе их просто нет, и это
+    // отдельно сказано полем `services_scope`.
+    const history = historyRead.ok ? historyRead.rows : [];
     const serviceCounter = new Map<string, number>();
     let totalSpent = 0;
     const dates: string[] = [];
@@ -698,8 +724,9 @@ export class AiToolHandlerService {
         card: client,
         // История уже прочитана выше — второй поход к провайдеру за теми же
         // строками ничего не уточнил бы, зато удвоил бы задержку досье.
-        history,
-        historyLimit: 30,
+        history: historyRead.ok ? historyRead.rows : undefined,
+        historyFailure: historyRead.ok ? null : historyRead.reason,
+        historyLimit: DOSSIER_HISTORY_LIMIT,
       },
       { asOf: new Date(Date.now()), timezone },
     );
@@ -735,7 +762,13 @@ export class AiToolHandlerService {
       attended_visits_observed: recency.observation.attended_visits_observed,
       attended_history_window_days: recency.observation.window_days,
       recency_as_of: recency.as_of,
-      client_identity_scope: recency.identity,
+      // Идентификатор клиента у провайдера сюда не кладём: досье и так знает,
+      // кого показывает, а лишний идентификатор в ответе — лишний путь утечки.
+      client_identity_scope: {
+        space: recency.identity.space,
+        maya_client_id: recency.identity.maya_client_id,
+        limitation: recency.identity.limitation,
+      },
       favorite_services: favoriteServices,
       services_scope: 'last_30_attended_visits',
       avg_cycle_days: avgCycleDays,
@@ -3707,6 +3740,24 @@ export class AiToolHandlerService {
     const date = new Date(`${value}T00:00:00.000Z`);
     date.setUTCDate(date.getUTCDate() + days);
     return date.toISOString().slice(0, 10);
+  }
+
+  /**
+   * Почему история визитов не прочитана.
+   *
+   * Код провайдерского отказа лежит в теле ошибки, а не в её тексте: проверять
+   * сообщение регуляркой значило бы починить причину до первой правки текста.
+   */
+  private historyFailureReason(error: unknown): string {
+    const body =
+      error instanceof HttpException
+        ? (error.getResponse() as { error?: { code?: string } } | string)
+        : null;
+    const code =
+      body && typeof body === 'object' ? (body.error?.code ?? null) : null;
+    return code === 'crm_client_history_not_supported'
+      ? RECENCY_UNKNOWN.historyNotSupported
+      : RECENCY_UNKNOWN.historyUnavailable;
   }
 
   /**

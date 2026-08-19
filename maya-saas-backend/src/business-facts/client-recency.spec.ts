@@ -10,6 +10,9 @@ import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { AppointmentPeriodReader } from './appointment-period.reader';
 import {
   ClientRecencyFactsService,
@@ -307,6 +310,71 @@ describe('Cycle 04 P9 — канон давности посещения', () =>
     expect(facts.days_since_last_attended_visit.days).toBeNull();
     // Соседний факт от этого не страдает: карточка прочитана.
     expect(facts.days_since_provider_asserted_last_visit.days).toBe(30);
+  });
+});
+
+describe('Cycle 04 P9.1 — находки состязательной проверки', () => {
+  it('15. отказ чтения истории — недоступность, даже когда его поймал вызывающий', async () => {
+    // 🔴 Единственный боевой вызывающий читает историю сам и раньше ловил
+    // отказ пустым массивом. Владелец видел `[]` и говорил «за 730 дней ни
+    // одного прихода» — измерение вместо молчания источника.
+    const { service } = createRecency();
+    const facts = await service.forProviderClient(
+      'tenant-a',
+      {
+        providerClientId: '42',
+        history: undefined,
+        historyFailure: RECENCY_UNKNOWN.historyUnavailable,
+        card: { last_visit_date: '2026-08-18' },
+      },
+      asOf('2026-08-19T12:00:00.000Z'),
+    );
+    expect(facts.last_attended_visit.state).toBe('unavailable');
+    expect(facts.last_attended_visit.reason).toBe(
+      RECENCY_UNKNOWN.historyUnavailable,
+    );
+    expect(facts.observation.attended_visits_observed).toBeNull();
+    // Соседний факт не страдает: карточка прочитана.
+    expect(facts.days_since_provider_asserted_last_visit.days).toBe(1);
+  });
+
+  it('16. обрыв выборки отменяет право говорить об окне наблюдения', async () => {
+    const history = Array.from({ length: 30 }, (_, index) =>
+      visit(`2026-0${(index % 8) + 1}-01T09:00:00.000Z`, 'arrived'),
+    );
+    const { service } = createRecency(history);
+    const facts = await service.forProviderClient(
+      'tenant-a',
+      { providerClientId: '42', history, historyLimit: 30 },
+      asOf('2026-08-19T12:00:00.000Z'),
+    );
+    expect(facts.observation.truncated).toBe(true);
+    expect(facts.observation.read_limit).toBe(30);
+    // Прочитаны последние тридцать записей, а не всё за два года.
+    expect(facts.observation.window_days).toBeNull();
+  });
+
+  it('17. синтаксически верная, но несуществующая дата измерением не является', () => {
+    const impossible = providerAssertedLastVisit('0000-00-00', '2026-08-19');
+    expect(impossible.point.state).toBe('not_measured');
+    expect(impossible.distance.days).toBeNull();
+    const real = providerAssertedLastVisit('2026-02-29', '2026-08-19');
+    // 2026 год не високосный: такой даты не существует.
+    expect(real.point.state).toBe('not_measured');
+  });
+
+  it('18. окно владельца совпадает с окном источника', () => {
+    const adapter = readFileSync(
+      join(__dirname, '..', 'crm/adapters/yclients-crm.adapter.ts'),
+      'utf8',
+    );
+    // Литерал окна живёт у провайдера; владелец обязан называть то же число,
+    // иначе он опишет наблюдение, которого не было.
+    const window = adapter.match(
+      /const start = new Date\(end\.getTime\(\) - (\d+) \* 24 \* 60 \* 60 \* 1000\);/,
+    );
+    expect(window).not.toBeNull();
+    expect(Number(window?.[1])).toBe(PROVIDER_VISIT_HISTORY_WINDOW_DAYS);
   });
 });
 

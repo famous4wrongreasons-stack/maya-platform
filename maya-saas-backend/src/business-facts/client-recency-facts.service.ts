@@ -89,8 +89,14 @@ export interface ClientRecencyFacts {
   readonly provider_asserted_last_visit: RecencyPoint;
   readonly days_since_provider_asserted_last_visit: RecencyDistance;
   readonly observation: {
+    /**
+     * Окно источника. `null`, когда выборка оборвалась: за обрывом окно уже
+     * ничего не описывает, и называть его значило бы обещать полноту.
+     */
     readonly window_days: number | null;
     readonly attended_visits_observed: number | null;
+    /** Сколько записей вообще разрешено было прочитать. */
+    readonly read_limit: number | null;
     readonly truncated: boolean;
   };
 }
@@ -186,7 +192,14 @@ export function providerAssertedLastVisit(
 ): { point: RecencyPoint; distance: RecencyDistance } {
   const raw =
     typeof lastVisitDate === 'string' ? lastVisitDate.slice(0, 10) : '';
-  if (!DATE_KEY.test(raw)) {
+  // Дата обязана существовать в календаре. «0000-00-00» не разбирается вовсе, а
+  // «2026-02-29» тихо переезжает на первое марта — и точка стала бы измеренной,
+  // указывая на день, которого не было. Проверяем возвратом к той же строке.
+  const parsed = new Date(`${raw}T00:00:00.000Z`);
+  const roundTrips =
+    Number.isFinite(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === raw;
+  if (!DATE_KEY.test(raw) || !roundTrips) {
     const point = unknownPoint(
       RECENCY_UNKNOWN.providerCardHasNoDate,
       'provider_client_card',
@@ -262,6 +275,12 @@ export class ClientRecencyFactsService {
        * второй запрос за теми же строками был бы лишним походом к провайдеру.
        */
       history?: ReadonlyArray<{ start: string; attendance: string | null }>;
+      /**
+       * 🔴 Cycle 04 P9.1. Почему истории нет. Пустой массив означает «за окном
+       * приходов не было»; отказ источника означает «мы не смотрели», и
+       * подменять одно другим запрещено тем же правилом, что ноль и неизвестно.
+       */
+      historyFailure?: string | null;
       historyLimit?: number;
     },
     when: RecencyAsOf,
@@ -281,6 +300,7 @@ export class ClientRecencyFactsService {
       return this.compose(null, when, asOfLocalDate, point, asserted, {
         window_days: null,
         attended_visits_observed: null,
+        read_limit: null,
         truncated: false,
       });
     }
@@ -288,9 +308,9 @@ export class ClientRecencyFactsService {
     const limit = input.historyLimit ?? 50;
     let history: ReadonlyArray<{ start: string; attendance: string | null }> =
       input.history ?? [];
-    let failure: string | null = null;
+    let failure: string | null = input.historyFailure ?? null;
     try {
-      if (!input.history) {
+      if (!input.history && !failure) {
         history = await this.crmService.getClientVisitHistory(
           tenantId,
           input.providerClientId,
@@ -321,6 +341,7 @@ export class ClientRecencyFactsService {
         {
           window_days: PROVIDER_VISIT_HISTORY_WINDOW_DAYS,
           attended_visits_observed: null,
+          read_limit: limit,
           truncated: false,
         },
       );
@@ -336,10 +357,14 @@ export class ClientRecencyFactsService {
       .filter((visit) => visit.time <= asOfInstant)
       .sort((left, right) => right.time - left.time);
 
+    const truncated = history.length >= limit;
     const observation = {
-      window_days: PROVIDER_VISIT_HISTORY_WINDOW_DAYS,
+      // 🔴 Обрыв выборки отменяет право говорить об окне: прочитаны последние
+      // `limit` записей, а не всё, что было за 730 дней.
+      window_days: truncated ? null : PROVIDER_VISIT_HISTORY_WINDOW_DAYS,
       attended_visits_observed: attended.length,
-      truncated: history.length >= limit,
+      read_limit: limit,
+      truncated,
     };
 
     if (attended.length === 0) {

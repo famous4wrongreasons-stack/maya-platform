@@ -2796,14 +2796,39 @@ export class AiCoreService {
       `По карточке CRM: ${visits} ${this.pluralize(visits, 'визит', 'визита', 'визитов')}. Сегмент — ${segment}.`,
     ];
 
-    if (typeof data.last_visit === 'string') {
-      const match = data.last_visit.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      const date = match
-        ? `${match[3]}.${match[2]}.${match[1]}`
-        : data.last_visit;
-      const inactivityDays = this.safeMetricNumber(data.inactivity_days);
+    /**
+     * 🔴 Cycle 04 P9. Два разных факта — два разных предложения.
+     *
+     * Доказанный приход и дата, которую утверждает карточка CRM, раньше жили в
+     * одном поле, и текст называл «последним визитом» то, чем окажется. Теперь
+     * сначала произносится доказанное, а утверждение карточки — только когда
+     * доказанного нет, и названо своим именем. Молчание источника — третье
+     * состояние, и оно тоже произносится вслух, а не выглядит как «не был».
+     */
+    const humanDate = (value: unknown): string | null => {
+      if (typeof value !== 'string') return null;
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return match ? `${match[3]}.${match[2]}.${match[1]}` : value;
+    };
+    const daysAgo = (value: unknown): string => {
+      const days = this.optionalMetricNumber(value);
+      if (days === null || days <= 0) return '';
+      return `, ${days} ${this.pluralize(days, 'день', 'дня', 'дней')} назад`;
+    };
+    const attendedDate = humanDate(data.last_attended_visit);
+    const assertedDate = humanDate(data.last_visit);
+    if (attendedDate) {
       parts.push(
-        `Последний визит — ${date}${inactivityDays > 0 ? `, ${inactivityDays} ${this.pluralize(inactivityDays, 'день', 'дня', 'дней')} назад` : ''}.`,
+        `Последний подтверждённый приход — ${attendedDate}${daysAgo(data.days_since_attended_visit)}.`,
+      );
+    } else if (data.last_attended_visit_state === 'unavailable') {
+      parts.push(
+        'История визитов из CRM сейчас не прочиталась, поэтому подтверждённый приход я не назову — это не значит, что клиент не приходил.',
+      );
+    }
+    if (assertedDate && assertedDate !== attendedDate) {
+      parts.push(
+        `По карточке CRM последний визит — ${assertedDate}${daysAgo(data.inactivity_days)}. Карточка приход не подтверждает, это её собственная отметка.`,
       );
     }
 
