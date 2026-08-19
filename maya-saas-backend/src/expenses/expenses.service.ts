@@ -248,9 +248,14 @@ export class ExpensesService {
           : period.expense_count > expenses.length,
       totals_basis:
         period.status === 'measured'
-          ? ('all_expenses_in_period' as const)
+          ? ('all_recorded_expenses_in_scope' as const)
           : ('unavailable' as const),
       totals_unavailable_reason: period.unavailable_reason,
+      /**
+       * Охват сумм. Без него «все расходы периода» на филиальном срезе читается
+       * как «весь салон», а это другое число под тем же именем.
+       */
+      scope: { ...period.scope },
     };
   }
 

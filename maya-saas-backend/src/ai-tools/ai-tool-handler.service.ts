@@ -2153,6 +2153,9 @@ export class AiToolHandlerService {
       expense_count: result.expense_count,
       totals_basis: result.totals_basis,
       totals_unavailable_reason: result.totals_unavailable_reason,
+      // Охват сумм: филиал или весь салон. Одно и то же имя над разными
+      // числами — это тот же дубль, только в подписи.
+      scope: result.scope,
     };
   }
 

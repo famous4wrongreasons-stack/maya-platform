@@ -406,7 +406,7 @@ describe('AiToolHandlerService output minimization', () => {
         ],
         expense_count: 1,
         truncated: false,
-        totals_basis: 'all_expenses_in_period',
+        totals_basis: 'all_recorded_expenses_in_scope',
         totals_unavailable_reason: null,
       }),
     } as unknown as ExpensesService;

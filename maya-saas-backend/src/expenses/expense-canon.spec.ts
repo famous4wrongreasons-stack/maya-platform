@@ -319,7 +319,7 @@ describe('Cycle 04 P8 — канон статей расхода', () => {
 
   it('6. ноль расходов измерен, а нечитаемая книга — нет', async () => {
     const measured = await toolPayload([]);
-    expect(measured.totals_basis).toBe('all_expenses_in_period');
+    expect(measured.totals_basis).toBe('all_recorded_expenses_in_scope');
     expect(measured.expense_count).toBe(0);
     expect(String(card(measured)?.widget_data.status_text)).toContain(
       'внесённых записей нет',
@@ -490,6 +490,26 @@ describe('Cycle 04 P8 — канон статей расхода', () => {
     expect(String(reply)).toContain('книгу расходов');
     expect(String(reply)).not.toContain('спросите за месяц');
     expect(String(reply)).not.toContain('Спросите за месяц');
+  });
+
+  it('14. охват сумм назван, а не подразумевается', async () => {
+    const rows = [
+      row('rent', 200_000, 1, { branchId: 'branch-a' }),
+      row('rent', 300_000, 2, { branchId: 'branch-b' }),
+    ];
+    const setup = createExpenses(rows);
+    const scoped = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.list('tenant-a', { ...july, branchId: 'branch-a' }),
+    );
+    // 🔴 «Все расходы периода» на филиальном срезе — другое число под тем же
+    // именем. Поэтому имя основания говорит про охват, а сам охват публикуется.
+    expect(scoped.totals_basis).toBe('all_recorded_expenses_in_scope');
+    expect(scoped.scope).toEqual({ branch_id: 'branch-a' });
+
+    const whole = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.list('tenant-a', july),
+    );
+    expect(whole.scope).toEqual({ branch_id: null });
   });
 
   it('10. синоним и канон складываются в одну статью, а не в две', () => {

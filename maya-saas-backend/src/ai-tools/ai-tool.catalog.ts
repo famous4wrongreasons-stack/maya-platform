@@ -677,7 +677,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'expenses.read',
     description:
-      'Read tenant expenses without decrypted free-text notes, together with by_category totals already summed by the server for the period. Use by_category for "сколько ушло на расходники", "на что больше всего тратим": never add the individual items up yourself. Relative reporting periods are resolved by the server in the tenant timezone.',
+      'Read tenant expenses without decrypted free-text notes, together with by_category totals already summed by the server for the period. Use by_category for "сколько ушло на расходники", "на что больше всего тратим": never add the individual items up yourself. totals and by_category cover EVERY expense of the period; items is only the first page of up to 500 operations, so never divide totals by items.length and never describe items as the full list — expense_count is how many rows the period really has and truncated says the page is shorter than that. totals_basis says whether the expense book was read at all: when it is "unavailable" the sums are unknown, expense_count is null, and that is NOT zero expenses. scope names the branch the sums cover. Relative reporting periods are resolved by the server in the tenant timezone.',
     inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,

@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+
 import {
   ExpenseCategoryKind,
   ExpenseCategorySlug,
@@ -52,6 +54,13 @@ export interface ExpensePeriodRead {
   readonly totals: readonly ExpensePeriodTotal[];
 }
 
+/**
+ * 🔴 Отказ обязан оставить след. Без него настоящая причина — таймаут, чужая
+ * схема после кривого выката — умирает здесь, а в журнале юнита остаётся один
+ * машинный лозунг, и разбирать аварию не по чему.
+ */
+const logger = new Logger('ExpensePeriodReader');
+
 /** Почему книгу расходов прочитать не удалось. */
 export const EXPENSE_PERIOD_UNAVAILABLE = {
   notReadable: 'expense_ledger_is_not_readable',
@@ -82,6 +91,10 @@ export async function readExpensePeriod(
 ): Promise<ExpensePeriodRead> {
   const branchId = query.branchId ?? null;
   if (typeof prisma.expense?.findMany !== 'function') {
+    logger.error(
+      `expense ledger is not readable tenant=${query.tenantId}: ` +
+        'prisma has no expense delegate',
+    );
     return unavailable(branchId, EXPENSE_PERIOD_UNAVAILABLE.notReadable);
   }
   let rows: ExpenseRowShape[];
@@ -98,7 +111,15 @@ export async function readExpensePeriod(
       // пятисот как «всего за период». Перечень операций обрезать можно —
       // деньги нельзя.
     });
-  } catch {
+  } catch (error) {
+    logger.error(
+      `expense ledger read failed tenant=${query.tenantId} ` +
+        `period=${query.from.toISOString()}..${query.to.toISOString()} ` +
+        `branch=${branchId ?? 'all'}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      error instanceof Error ? error.stack : undefined,
+    );
     return unavailable(branchId, EXPENSE_PERIOD_UNAVAILABLE.readFailed);
   }
   return foldExpenseRows(rows, branchId);
