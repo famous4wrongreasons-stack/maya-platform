@@ -6,6 +6,8 @@ import {
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
+import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
 import {
@@ -194,6 +196,12 @@ export class AiToolHandlerService {
      * дедупликация и признание источника в полноте живут в одном месте.
      */
     private readonly appointmentPeriodReader: AppointmentPeriodReader,
+    /**
+     * 🔴 Cycle 04 P9. Единственный владелец давности посещения. До него здесь
+     * жили ДВЕ формулы одного факта: одна отдавала при неизвестной дате `null`,
+     * соседняя — `0`, то есть «был сегодня».
+     */
+    private readonly clientRecency: ClientRecencyFactsService,
     private readonly dashboardPreferencesService?: DashboardPreferencesService,
     private readonly inboxService?: InboxService,
     private readonly auditLogService?: AuditLogService,
@@ -674,20 +682,27 @@ export class AiToolHandlerService {
 
     const exactVisits = client.visits_count ?? history.length;
     const exactTotalSpent = client.sold_amount ?? Math.round(totalSpent);
-    const exactLastVisit =
-      client.last_visit_date ??
-      (dates.length > 0 ? dates[dates.length - 1] : null);
-    const asOf = this.localDate(new Date(), timezone);
-    const inactivityDays = exactLastVisit
-      ? Math.max(
-          0,
-          Math.floor(
-            (Date.parse(`${asOf}T00:00:00.000Z`) -
-              Date.parse(`${exactLastVisit}T00:00:00.000Z`)) /
-              (24 * 60 * 60 * 1_000),
-          ),
-        )
-      : null;
+    /**
+     * 🔴 Cycle 04 P9. Давность спрашивается у владельца факта.
+     *
+     * Здесь стояла ВТОРАЯ формула того же факта — с `Math.max(0, …)`, из-за
+     * которого дата в будущем превращалась в «0 дней», то есть «был сегодня».
+     * И одно поле `last_visit` склеивало два разных доказательных статуса:
+     * либо утверждение карточки провайдера, либо доказанный приход. Теперь это
+     * две разные строки, и видно, какая из них чем доказана.
+     */
+    const recency = await this.clientRecency.forProviderClient(
+      principal.tenantId,
+      {
+        providerClientId: client.id ?? null,
+        card: client,
+        // История уже прочитана выше — второй поход к провайдеру за теми же
+        // строками ничего не уточнил бы, зато удвоил бы задержку досье.
+        history,
+        historyLimit: 30,
+      },
+      { asOf: new Date(Date.now()), timezone },
+    );
 
     return {
       found: true,
@@ -699,8 +714,28 @@ export class AiToolHandlerService {
         client.visits_count === null
           ? 'recent_attended_history_fallback'
           : 'full_crm_card',
-      last_visit: exactLastVisit,
-      inactivity_days: inactivityDays,
+      /**
+       * Дата, которую УТВЕРЖДАЕТ карточка провайдера. Присутствия она не
+       * доказывает: что за ней стоит — приход, оплата или закрытая запись —
+       * провайдер не сообщает.
+       */
+      last_visit: recency.provider_asserted_last_visit.local_date,
+      last_visit_basis: recency.provider_asserted_last_visit.basis,
+      last_visit_attendance_proven: false,
+      inactivity_days: recency.days_since_provider_asserted_last_visit.days,
+      inactivity_days_unavailable_reason:
+        recency.days_since_provider_asserted_last_visit.reason,
+      /** Последнее ДОКАЗАННОЕ посещение: только отметка `arrived`. */
+      last_attended_visit: recency.last_attended_visit.local_date,
+      last_attended_visit_at: recency.last_attended_visit.at,
+      last_attended_visit_state: recency.last_attended_visit.state,
+      last_attended_visit_unavailable_reason:
+        recency.last_attended_visit.reason,
+      days_since_attended_visit: recency.days_since_last_attended_visit.days,
+      attended_visits_observed: recency.observation.attended_visits_observed,
+      attended_history_window_days: recency.observation.window_days,
+      recency_as_of: recency.as_of,
+      client_identity_scope: recency.identity,
       favorite_services: favoriteServices,
       services_scope: 'last_30_attended_visits',
       avg_cycle_days: avgCycleDays,
@@ -759,13 +794,17 @@ export class AiToolHandlerService {
       this.crmService.getClientRegistry(principal.tenantId),
       this.reportingTimezone(principal.tenantId),
     ]);
-    const asOf = this.localDate(new Date(), timezone);
+    const when = { asOf: new Date(Date.now()), timezone };
+    const asOf = this.clientRecency.localDate(when);
     const showPhone = DORMANT_PHONE_ROLES.has(principal.role);
 
     const dormant = snapshot.clients
       .map((client) => ({
         client,
-        days: this.inactivityDays(client.last_visit_date, asOf),
+        // 🔴 Cycle 04 P9. Давность — у владельца факта, и она по КАРТОЧКЕ
+        // провайдера: истории визитов по каждому из сотен гостей не запросить,
+        // поэтому источник назван, а не подразумевается.
+        days: this.clientRecency.fromProviderCard(client, when).distance.days,
       }))
       // Гость без единого визита — это не «ушедший», а никогда не пришедший.
       .filter(
@@ -787,6 +826,14 @@ export class AiToolHandlerService {
       generated_at: snapshot.generated_at,
       scope: 'salon',
       inactive_days: inactiveDays,
+      as_of: asOf,
+      timezone,
+      /**
+       * На чём стоит давность. Карточка провайдера присутствия не доказывает —
+       * это отбор по её утверждению, а не по каноническому приходу.
+       */
+      recency_basis: 'provider_client_card',
+      recency_attendance_proven: false,
       total_dormant: dormant.length,
       clients: dormant.slice(0, limit).map((entry) => ({
         name: entry.client.name,
@@ -811,14 +858,24 @@ export class AiToolHandlerService {
       this.crmService.getClientRegistry(principal.tenantId),
       this.reportingTimezone(principal.tenantId),
     ]);
-    const asOf = this.localDate(new Date(), timezone);
+    const when = { asOf: new Date(Date.now()), timezone };
+    const asOf = this.clientRecency.localDate(when);
+    /**
+     * 🔴 Cycle 04 P9. Неизвестная дата больше не превращается в 1970 год.
+     *
+     * Прежний компаратор считал отсутствие даты нулём и ронял такие карточки
+     * в самый конец «по свежести» — то есть выдавал неизвестность за глубокую
+     * древность. Теперь карточки без даты уходят в конец ЯВНО, а между собой
+     * сравниваются уже не по выдуманному нулю.
+     */
+    const recencyDays = (card: { last_visit_date: string | null }) =>
+      this.clientRecency.fromProviderCard(card, when).distance.days;
     const ranked = [...snapshot.clients].sort((left, right) => {
       const primary =
         metric === 'visits'
           ? right.visits_count - left.visits_count
           : metric === 'recency'
-            ? this.clientRecencyScore(right.last_visit_date) -
-              this.clientRecencyScore(left.last_visit_date)
+            ? this.compareRecency(recencyDays(left), recencyDays(right))
             : right.sold_amount - left.sold_amount;
       return (
         primary ||
@@ -835,12 +892,16 @@ export class AiToolHandlerService {
       generated_at: snapshot.generated_at,
       metric,
       currency: 'RUB',
+      as_of: asOf,
+      timezone,
+      recency_basis: 'provider_client_card',
+      recency_attendance_proven: false,
       clients: ranked.slice(0, limit).map((client, index) => ({
         alias: `client_${index + 1}`,
         visits: client.visits_count,
         lifetime_spend_amount_major_units: client.sold_amount,
         last_visit_date: client.last_visit_date,
-        inactivity_days: this.inactivityDays(client.last_visit_date, asOf),
+        inactivity_days: recencyDays(client),
         loyalty_segment: this.clientLoyaltySegment(client.visits_count),
       })),
       contains_personal_data: false,
@@ -3608,19 +3669,15 @@ export class AiToolHandlerService {
     return tenant.defaultTimezone;
   }
 
+  /**
+   * Местная дата салона.
+   *
+   * 🔴 Cycle 04 P9. Собственного разбора здесь больше нет: это была вторая
+   * реализация той же операции, а точка отсчёта давности обязана совпадать на
+   * всех поверхностях до символа.
+   */
   private localDate(value: Date, timezone: string): string {
-    const parts = Object.fromEntries(
-      new Intl.DateTimeFormat('en', {
-        timeZone: timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      })
-        .formatToParts(value)
-        .filter((part) => part.type !== 'literal')
-        .map((part) => [part.type, part.value]),
-    );
-    return `${parts.year}-${parts.month}-${parts.day}`;
+    return localCalendarDate(timezone, value);
   }
 
   private localTime(value: string, timezone: string): string {
@@ -3652,19 +3709,17 @@ export class AiToolHandlerService {
     return date.toISOString().slice(0, 10);
   }
 
-  private clientRecencyScore(value: string | null): number {
-    if (!value) return 0;
-    const timestamp = Date.parse(`${value.slice(0, 10)}T00:00:00.000Z`);
-    return Number.isFinite(timestamp) ? timestamp : 0;
-  }
-
-  private inactivityDays(lastVisitDate: string | null, asOf: string) {
-    if (!lastVisitDate) return null;
-    const last = this.clientRecencyScore(lastVisitDate);
-    const current = this.clientRecencyScore(asOf);
-    return last > 0 && current >= last
-      ? Math.floor((current - last) / (24 * 60 * 60 * 1_000))
-      : null;
+  /**
+   * Порядок «по свежести» при неизвестной давности.
+   *
+   * Неизвестность — не древность: карточки без даты уходят в конец списка, но
+   * не притворяются самыми старыми гостями салона.
+   */
+  private compareRecency(left: number | null, right: number | null): number {
+    if (left === null && right === null) return 0;
+    if (left === null) return 1;
+    if (right === null) return -1;
+    return left - right;
   }
 
   private normalizedAppointmentStatus(

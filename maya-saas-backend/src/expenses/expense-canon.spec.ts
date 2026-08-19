@@ -9,6 +9,7 @@ import { AiCoreService } from '../ai-tools/ai-core.service';
 import { AiToolHandlerService } from '../ai-tools/ai-tool-handler.service';
 import { buildChatReportCard } from '../ai-tools/chat-report-card';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -137,6 +138,7 @@ function createHandler(
     {} as StaffService,
     new BusinessStateService({} as OperationsAnalyticsService, prisma),
     new AppointmentPeriodReader({} as CrmService),
+    new ClientRecencyFactsService({} as CrmService),
   );
 }
 

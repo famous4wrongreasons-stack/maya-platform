@@ -16,6 +16,7 @@ import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
@@ -506,6 +507,7 @@ function createHarness() {
     new BusinessStateService({} as OperationsAnalyticsService, prisma),
     // 🔴 Cycle 04 P6. Канонический читатель периода.
     new AppointmentPeriodReader({} as CrmService),
+    new ClientRecencyFactsService({} as CrmService),
   );
   const runtime = new AiToolRuntimeService(
     prisma,

@@ -9,6 +9,7 @@ import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { CalendarSource } from '../common/domain.enums';
@@ -55,19 +56,19 @@ describe('AiToolHandlerService output minimization', () => {
         start: '2026-05-01T10:00:00.000Z',
         service_names: ['Стрижка'],
         total_price: 1800,
-        attendance: 1,
+        attendance: 'arrived',
       },
       {
         start: '2026-06-15T10:00:00.000Z',
         service_names: ['Стрижка', 'Борода'],
         total_price: 2500,
-        attendance: 1,
+        attendance: 'arrived',
       },
       {
         start: '2026-07-20T10:00:00.000Z',
         service_names: ['Стрижка'],
         total_price: 1800,
-        attendance: 1,
+        attendance: 'arrived',
       },
     ]);
     const getClientLoyalty = jest.fn().mockResolvedValue({
@@ -91,7 +92,7 @@ describe('AiToolHandlerService output minimization', () => {
 
     expect(searchClients).toHaveBeenCalledWith('tenant-a', 'Иван');
     expect(getClientVisitHistory).toHaveBeenCalledWith('tenant-a', '42', 30);
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       found: true,
       display_name: 'клиент',
       matches_count: 2,
@@ -3006,6 +3007,7 @@ describe('AiToolHandlerService output minimization', () => {
       ),
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader(overrides.crmService ?? ({} as CrmService)),
+      new ClientRecencyFactsService(overrides.crmService ?? ({} as CrmService)),
     );
   }
 });

@@ -28,6 +28,7 @@ import { UserRole } from '../common/domain.enums';
 import { AiToolHandlerService } from '../ai-tools/ai-tool-handler.service';
 import type { ValidatedAiToolArguments } from '../ai-tools/ai-tool.types';
 import { BusinessStateService } from '../business-state/business-state.service';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { AppointmentPeriodReader } from './appointment-period.reader';
 import { AttendanceFactsService } from './attendance-facts.service';
 
@@ -666,6 +667,7 @@ describe('P0 §3 — отмены', () => {
       new BusinessStateService(analyticsService, prisma),
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
+      new ClientRecencyFactsService({} as CrmService),
     );
     const args = {
       period: 'custom',
@@ -753,6 +755,7 @@ describe('P0 §3 — отмены', () => {
       new BusinessStateService(analyticsService, prisma),
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
+      new ClientRecencyFactsService({} as CrmService),
     );
     const args = {
       period: 'custom',
@@ -962,6 +965,7 @@ describe('P0 §4 — журнал дня в AI-слое', () => {
       new BusinessStateService(analyticsService, prisma),
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
+      new ClientRecencyFactsService({} as CrmService),
     );
     return () =>
       tenantContext.runAsSystemTenant('tenant-day', () =>
@@ -1256,6 +1260,7 @@ describe('P0 §26 — периоды разной полноты не сравн
       new BusinessStateService(analyticsService, prisma),
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
+      new ClientRecencyFactsService({} as CrmService),
     );
 
     const result = (await handler.execute(

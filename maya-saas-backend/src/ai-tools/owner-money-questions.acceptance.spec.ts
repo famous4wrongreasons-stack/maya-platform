@@ -14,6 +14,7 @@
 import { BusinessStateService } from '../business-state/business-state.service';
 import { CustomersService } from '../customers/customers.service';
 import { StaffService } from '../staff/staff.service';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { ConfigService } from '@nestjs/config';
@@ -587,6 +588,7 @@ function createHarness(
     new BusinessStateService(analytics, prisma),
     // 🔴 Cycle 04 P6. Канонический читатель периода.
     new AppointmentPeriodReader({} as CrmService),
+    new ClientRecencyFactsService({} as CrmService),
   );
   const runtime = new AiToolRuntimeService(
     prisma,

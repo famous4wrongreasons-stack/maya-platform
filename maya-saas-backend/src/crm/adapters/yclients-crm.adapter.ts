@@ -1388,6 +1388,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     tenantId: string;
     clientId: string;
     limit?: number;
+    timezone: string;
   }): Promise<
     Array<{
       start: string;
@@ -1415,7 +1416,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
         // а не по второму правилу: два правила на один факт уже разошлись.
         .filter((record) => this.observedAttendance(record) === 'arrived')
         .map((record) => {
-          const timing = this.recordTiming(record, 'Europe/Moscow');
+          // 🔴 Cycle 04 P9. Пояс приходит от вызывающего. Литерал «Москва»
+          // здесь был скрытым бизнес-правилом: у салона в другом поясе визит
+          // около полуночи попадал не в те сутки, а давность — не в тот день.
+          const timing = this.recordTiming(record, params.timezone);
           const serviceNames = (record.services || [])
             .map((service) => String(service.title || '').trim())
             .filter(Boolean);

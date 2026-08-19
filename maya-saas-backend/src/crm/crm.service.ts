@@ -1595,7 +1595,12 @@ export class CrmService {
     return adapter.getClientRegistry({ tenantId: scopedTenantId });
   }
 
-  async getClientVisitHistory(tenantId: string, clientId: string, limit = 30) {
+  async getClientVisitHistory(
+    tenantId: string,
+    clientId: string,
+    limit = 30,
+    timezone?: string,
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const adapter = await this.getVisitCapableAdapter(
       scopedTenantId,
@@ -1607,6 +1612,9 @@ export class CrmService {
       tenantId: scopedTenantId,
       clientId,
       limit,
+      // Пояс салона, а не пояс автора кода: без него провайдерское «14:00»
+      // невозможно превратить в момент времени, не выдумав смещение.
+      timezone: timezone?.trim() || (await this.tenantTimezone(scopedTenantId)),
     });
   }
 

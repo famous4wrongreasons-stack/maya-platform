@@ -4,6 +4,7 @@ import { CrmModule } from '../crm/crm.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AppointmentPeriodReader } from './appointment-period.reader';
 import { AttendanceFactsService } from './attendance-facts.service';
+import { ClientRecencyFactsService } from './client-recency-facts.service';
 
 /**
  * Примитивы правды главы 4.
@@ -17,7 +18,15 @@ import { AttendanceFactsService } from './attendance-facts.service';
  */
 @Module({
   imports: [PrismaModule, CrmModule],
-  providers: [AppointmentPeriodReader, AttendanceFactsService],
-  exports: [AppointmentPeriodReader, AttendanceFactsService],
+  providers: [
+    AppointmentPeriodReader,
+    AttendanceFactsService,
+    ClientRecencyFactsService,
+  ],
+  exports: [
+    AppointmentPeriodReader,
+    AttendanceFactsService,
+    ClientRecencyFactsService,
+  ],
 })
 export class BusinessFactsModule {}

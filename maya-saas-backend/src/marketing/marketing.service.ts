@@ -7,11 +7,13 @@ import { UserRole } from '@prisma/client';
 
 import { asJson } from '../common/json.util';
 import { phonesMatch } from '../common/phone.util';
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { CrmService } from '../crm/crm.service';
 import type { CrmClientSearchResult } from '../crm/crm-adapter.interface';
 import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
+import { DEFAULT_SALON_TIMEZONE } from '../tenants/salon-timezone';
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
 const SNAPSHOT_TTL_MS = DAY_MS;
@@ -36,6 +38,13 @@ export class MarketingService {
     private readonly crmService: CrmService,
     private readonly inboxService: InboxService,
     private readonly recoveryService: RecoveryService,
+    /**
+     * 🔴 Cycle 04 P9. Давность посещения — у владельца факта. Здесь стояло
+     * собственное сравнение с `Date.now()` мимо часового пояса салона: у
+     * московского арендатора граница «не был N дней» ехала на три часа, и
+     * попадание в рассылку зависело от того, в котором часу нажали кнопку.
+     */
+    private readonly clientRecency: ClientRecencyFactsService,
   ) {}
 
   async findAudience(input: {
@@ -44,6 +53,7 @@ export class MarketingService {
     rule: MarketingAudienceRule;
   }) {
     const candidates = await this.consentCandidates(input.tenantId);
+    const when = await this.recencyAsOf(input.tenantId);
     const evaluated = await this.mapConcurrent(
       candidates,
       CRM_LOOKUP_CONCURRENCY,
@@ -54,7 +64,7 @@ export class MarketingService {
     );
 
     const eligible = evaluated
-      .filter(({ match }) => this.matchesRule(match, input.rule))
+      .filter(({ match }) => this.matchesRule(match, input.rule, when))
       .map(({ candidate }) => candidate.userId)
       .slice(0, input.rule.max_recipients);
     const unavailableCount = evaluated.filter(({ match }) => !match).length;
@@ -206,6 +216,7 @@ export class MarketingService {
     const currentCandidates = (
       await this.consentCandidates(input.tenantId)
     ).filter((candidate) => requestedIds.has(candidate.userId));
+    const when = await this.recencyAsOf(input.tenantId);
     const revalidated = await this.mapConcurrent(
       currentCandidates,
       CRM_LOOKUP_CONCURRENCY,
@@ -215,7 +226,7 @@ export class MarketingService {
       }),
     );
     const recipients = revalidated.filter(({ match }) =>
-      this.matchesRule(match, rule),
+      this.matchesRule(match, rule, when),
     );
 
     let sentCount = 0;
@@ -310,12 +321,32 @@ export class MarketingService {
   private matchesRule(
     match: CrmClientSearchResult | null,
     rule: MarketingAudienceRule,
+    when: { asOf: Date; timezone: string },
   ): boolean {
     if (!match || (match.visits_count ?? 0) < rule.minimum_visits) return false;
-    if (!match.last_visit_date) return false;
-    const lastVisit = new Date(match.last_visit_date);
-    if (Number.isNaN(lastVisit.getTime())) return false;
-    return lastVisit.getTime() <= Date.now() - rule.inactive_days * DAY_MS;
+    const days = this.clientRecency.fromProviderCard(match, when).distance.days;
+    // Неизвестная дата остаётся исключением из рассылки: «мы не знаем, когда он
+    // был» — не то же самое, что «он давно не был».
+    return days !== null && days >= rule.inactive_days;
+  }
+
+  /**
+   * Точка отсчёта давности: один момент и один пояс на весь проход.
+   *
+   * Явная — потому что аудитория собирается и перепроверяется двумя разными
+   * вызовами, и обе стороны обязаны считать сутки одинаково.
+   */
+  private async recencyAsOf(
+    tenantId: string,
+  ): Promise<{ asOf: Date; timezone: string }> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+    return {
+      asOf: new Date(Date.now()),
+      timezone: tenant?.defaultTimezone?.trim() || DEFAULT_SALON_TIMEZONE,
+    };
   }
 
   private async requireAudience(tenantId: string, audienceId: string) {

@@ -10,6 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import { BusinessStateService } from '../business-state/business-state.service';
@@ -183,6 +184,7 @@ function build(options: Options = {}) {
     {} as StaffService,
     businessState,
     new AppointmentPeriodReader(crmService),
+    new ClientRecencyFactsService(crmService),
   );
   return { handler, tenantContext, getJournal, businessSpy, analytics };
 }

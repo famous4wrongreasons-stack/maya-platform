@@ -538,6 +538,13 @@ export interface CRMAdapter {
     tenantId: string;
     clientId: string;
     limit?: number;
+    /**
+     * 🔴 Cycle 04 P9. Часовой пояс салона обязателен: провайдер отдаёт время
+     * записи БЕЗ смещения, и без пояса адаптер вынужден его выдумать. Раньше он
+     * выдумывал «Europe/Moscow» — скрытое бизнес-правило, из-за которого визит
+     * у салона в другом поясе мог оказаться на сутки не в том дне.
+     */
+    timezone: string;
   }): Promise<
     Array<{
       start: string;

@@ -1,3 +1,4 @@
+import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
 import { CrmService } from '../crm/crm.service';
 import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -42,6 +43,11 @@ describe('MarketingService', () => {
     campaignUpdate?: jest.Mock;
   }) {
     const prisma = {
+      tenant: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ defaultTimezone: 'Europe/Moscow' }),
+      },
       membership: {
         findMany: jest.fn().mockResolvedValue(input?.memberships ?? []),
       },
@@ -96,6 +102,7 @@ describe('MarketingService', () => {
       crm as unknown as CrmService,
       inbox as unknown as InboxService,
       recovery as unknown as RecoveryService,
+      new ClientRecencyFactsService(crm as unknown as CrmService),
     );
     return { service, prisma, crm, inbox, recovery };
   }
