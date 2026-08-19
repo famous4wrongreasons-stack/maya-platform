@@ -116,7 +116,28 @@ function build(options: Options = {}) {
     getJournal,
     getStaff: jest.fn().mockResolvedValue([]),
     getFinancialSummary: jest.fn().mockResolvedValue(options.finance ?? null),
-    getRevenueSummary: jest.fn().mockResolvedValue(null),
+    /**
+     * Длинный период граница CRM обслуживает другим вызовом: расчёт зарплаты
+     * она отдаёт только за короткое окно, а выручку — за год.
+     */
+    getRevenueSummary: jest.fn().mockResolvedValue({
+      source: 'external_crm',
+      provider: 'yclients',
+      verified: true,
+      period: { from: '2026-01-01', to: '2026-12-31' },
+      revenue: {
+        status: 'available',
+        verified: true,
+        total: { currency: 'RUB', amount_kopecks: 7_777_700 },
+        transaction_count: 10,
+        by_account: [],
+        by_staff: [],
+        by_service: [],
+        staff_attribution_status: 'unavailable',
+        staff_attribution_coverage_percent: null,
+      },
+      warnings: [],
+    }),
     getClientRegistry: jest.fn().mockResolvedValue({ clients: [] }),
   } as unknown as CrmService;
   const prisma = {
@@ -452,6 +473,89 @@ describe('P7 §11 — кэш не становится источником ис
   });
 });
 
+describe('P7 — окна с движущейся правой границей', () => {
+  /**
+   * 🔴 Найдено состязательной проверкой ПОСЛЕ того, как я счёл пакет готовым.
+   *
+   * У `month_to_date`, `week_to_date`, `year_to_date`, `last_7_days` и
+   * `last_30_days` правая граница окна — это «сейчас» с точностью до
+   * миллисекунды. Первая версия ключа клала её в ключ, и кэш переставал
+   * попадать вовсе: каждый вызов давал новый ключ, а старая запись оставалась
+   * в памяти навсегда. Боевая проверка этого не поймала, потому что шла на
+   * `custom` с фиксированными границами.
+   */
+  const MOVING = [
+    'month_to_date',
+    'week_to_date',
+    'year_to_date',
+    'last_7_days',
+    'last_30_days',
+  ];
+
+  for (const period of MOVING) {
+    it(`🔴 «${period}»: второй вызов попадает в кэш`, async () => {
+      const stack = build({
+        visitsByTenant: {
+          'tenant-a': [visit('a', 2500, new Date().toISOString())],
+        },
+        // Денежный контур отвечает: этот тест про тождество ключа, а не про
+        // гейт деградации.
+        finance: FINANCE,
+      });
+
+      const first = await ask(stack, 'tenant-a', {
+        period,
+        comparison: 'none',
+      });
+      const second = await ask(stack, 'tenant-a', {
+        period,
+        comparison: 'none',
+      });
+
+      expect(stack.businessSpy).toHaveBeenCalledTimes(1);
+      expect(second.calculated_at).toBe(first.calculated_at);
+    });
+  }
+
+  it('🔴 но на следующие сутки ключ меняется сам', async () => {
+    const stack = build({
+      visitsByTenant: {
+        'tenant-a': [visit('a', 2500, new Date().toISOString())],
+      },
+      finance: FINANCE,
+    });
+
+    await ask(stack, 'tenant-a', {
+      period: 'month_to_date',
+      comparison: 'none',
+    });
+    const realNow = Date.now;
+    // Следующие сутки арендатора, но в пределах срока жизни записи.
+    Date.now = () => realNow() + 24 * 60 * 60 * 1_000;
+    try {
+      await ask(stack, 'tenant-a', {
+        period: 'month_to_date',
+        comparison: 'none',
+      });
+      expect(stack.businessSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      Date.now = realNow;
+    }
+  });
+
+  it('закрытый период по-прежнему ключуется своими границами', async () => {
+    const stack = build({
+      visitsByTenant: { 'tenant-a': [] },
+      finance: FINANCE,
+    });
+
+    await ask(stack, 'tenant-a', { period: 'yesterday', comparison: 'none' });
+    await ask(stack, 'tenant-a', { period: 'yesterday', comparison: 'none' });
+
+    expect(stack.businessSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('P7 — храповик границы кэша', () => {
   const read = () =>
     readFileSync(join(__dirname, 'ai-tool-handler.service.ts'), 'utf8')
@@ -496,13 +600,18 @@ describe('P7 — храповик границы кэша', () => {
   it('🔴 неполные и неподтверждённые ответы не кэшируются', () => {
     const source = read();
 
+    // Оба кэша проверяют полноту ОБЕИХ сторон сравнения перед записью.
     expect(
-      (
-        source.match(
-          /completeness\.current !== 'incomplete'\s*\)\s*\{\s*this\.\w+QueryCache\.set/g,
-        ) ?? []
-      ).length,
+      (source.match(/completeness\.current !== 'incomplete'/g) ?? []).length,
     ).toBe(2);
+    expect(
+      (source.match(/completeness\.previous !== 'incomplete'/g) ?? []).length,
+    ).toBe(2);
+    // И запись идёт через ограниченный по размеру помощник, а не напрямую.
+    expect((source.match(/this\.rememberPeriodAnswer\(/g) ?? []).length).toBe(
+      2,
+    );
+    expect(source).not.toMatch(/QueryCache\.set\(cacheKey/);
   });
 
   it('🔴 у кэшируемого ответа есть момент вычисления', () => {

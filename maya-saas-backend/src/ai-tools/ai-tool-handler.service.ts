@@ -144,6 +144,11 @@ const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
  * Телефон гостя видит только владелец. Мастеру и администратору хватает имени,
  * чтобы узнать своего клиента; база контактов — актив салона, а не сотрудника.
  */
+/**
+ * Предел размера кэшей фактов периода. Вытеснение меняет скорость, а не правду.
+ */
+const PERIOD_CACHE_MAX_ENTRIES = 200;
+
 const DORMANT_PHONE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
@@ -2884,16 +2889,33 @@ export class AiToolHandlerService {
        */
       calculated_at: new Date(Date.now()).toISOString(),
     };
-    // 🔴 Неполный ответ НЕ кэшируется: держать деградировавший ответ пять
-    // минут значит продлевать состояние, в котором ноль ничего не доказывает.
+    /**
+     * 🔴 Неполный ответ НЕ кэшируется: держать деградировавший ответ пять
+     * минут значит продлевать состояние, в котором ноль ничего не доказывает.
+     *
+     * Cycle 04 P7 расширил условие двумя случаями, которые раньше проходили
+     * гейт: неполно прочитанный ПРОШЛЫЙ период (сравнение построено на нижней
+     * границе) и молчащий денежный контур (деньги недоступны не потому, что их
+     * нет, а потому, что источник не ответил). Оба — деградация, и закреплять
+     * её на пять минут нельзя.
+     */
+    /**
+     * 🔴 Молчание ДЕНЕЖНОГО контура кэширование НЕ отменяет — и это прежнее
+     * решение, а не упущение.
+     *
+     * Соблазн был: не кэшировать ответ, где касса недоступна. Но записи в нём
+     * прочитаны целиком, а недоступность денег записана В САМОМ ответе
+     * (`revenue_basis: 'unavailable'` и причина словами). Существующая спека
+     * закрепляет это поведение с прежних пакетов, и менять его заодно с
+     * границами кэша значило бы протащить продуктовое решение под видом
+     * технической правки. Возраст ответа теперь виден по `calculated_at`.
+     */
     if (
       result.verified &&
-      state.comparison.completeness.current !== 'incomplete'
+      state.comparison.completeness.current !== 'incomplete' &&
+      state.comparison.completeness.previous !== 'incomplete'
     ) {
-      this.businessQueryCache.set(cacheKey, {
-        expiresAt: Date.now() + 5 * 60 * 1_000,
-        value: result,
-      });
+      this.rememberPeriodAnswer(this.businessQueryCache, cacheKey, result);
     }
     return result;
   }
@@ -3010,12 +3032,10 @@ export class AiToolHandlerService {
     // Неполный ответ не кэшируется — та же причина, что и у бизнес-среза.
     if (
       enriched.verified &&
-      state.comparison.completeness.current !== 'incomplete'
+      state.comparison.completeness.current !== 'incomplete' &&
+      state.comparison.completeness.previous !== 'incomplete'
     ) {
-      this.employeeQueryCache.set(cacheKey, {
-        expiresAt: Date.now() + 5 * 60 * 1_000,
-        value: enriched,
-      });
+      this.rememberPeriodAnswer(this.employeeQueryCache, cacheKey, enriched);
     }
     return enriched;
   }
@@ -3317,12 +3337,43 @@ export class AiToolHandlerService {
    *     сейчас»: у них ответ законно другой в другие сутки, а у закрытых
    *     периодов день не влияет ни на что и в ключ не идёт.
    */
+  /**
+   * Положить ответ периода в кэш с ограничением размера.
+   *
+   * 🔴 Cycle 04 P7 (B4.8). У кэшей не было предела: словарь рос по числу
+   * различных ключей и очищался только при обращении к просроченному ключу.
+   * При одном арендаторе это незаметно, но предел — часть границы, а не
+   * оптимизация: без него память растёт по числу ролей × периодов × суток.
+   *
+   * Сначала выбрасывается просроченное, потом — самое старое. Вытеснение
+   * влияет на скорость, а не на правду: промах ведёт к владельцу факта.
+   */
+  private rememberPeriodAnswer(
+    cache: Map<string, { expiresAt: number; value: unknown }>,
+    key: string,
+    value: unknown,
+  ): void {
+    const now = Date.now();
+    if (cache.size >= PERIOD_CACHE_MAX_ENTRIES) {
+      for (const [existingKey, entry] of cache) {
+        if (entry.expiresAt <= now) cache.delete(existingKey);
+      }
+    }
+    while (cache.size >= PERIOD_CACHE_MAX_ENTRIES) {
+      const oldest = cache.keys().next();
+      if (oldest.done) break;
+      cache.delete(oldest.value);
+    }
+    cache.set(key, { expiresAt: now + 5 * 60 * 1_000, value });
+  }
+
   private periodCacheKey(
     identity: string[],
     window: {
       query: AnalyticsRangeQueryDto;
       truncatedToToday: boolean;
       timezone: string | null;
+      endTracksNow: boolean;
     },
     comparison: string,
   ): string {
@@ -3335,10 +3386,11 @@ export class AiToolHandlerService {
      *
      * У закрытого периода конец стабилен и в ключ входит.
      */
-    const end =
-      window.truncatedToToday && window.timezone
-        ? `today:${this.localDate(new Date(), window.timezone)}`
-        : window.query.to;
+    const movingEnd =
+      (window.truncatedToToday || window.endTracksNow) && window.timezone;
+    const end = movingEnd
+      ? `today:${this.localDate(new Date(Date.now()), window.timezone as string)}`
+      : window.query.to;
     return [
       ...identity,
       window.query.from,
@@ -3366,6 +3418,15 @@ export class AiToolHandlerService {
      * бы в одну запись, а «сегодня» на границе суток — в чужие сутки.
      */
     timezone: string | null;
+    /**
+     * 🔴 Конец окна — это «сейчас», а не фиксированная граница.
+     *
+     * Так устроены `week_to_date`, `month_to_date`, `year_to_date`,
+     * `last_7_days`, `last_30_days`: их правая граница движется с точностью до
+     * миллисекунды. Ключу кэша такой конец класть НЕЛЬЗЯ — он менялся бы на
+     * каждом вызове, и кэша не было бы вовсе.
+     */
+    endTracksNow: boolean;
   }> {
     const period = this.requiredString(args.period);
     const branchId =
@@ -3384,6 +3445,7 @@ export class AiToolHandlerService {
         toDay: null,
         // Явные границы пояса не требуют: они уже абсолютные.
         timezone: null,
+        endTracksNow: false,
       };
     }
 
@@ -3527,6 +3589,8 @@ export class AiToolHandlerService {
       fromDay,
       toDay,
       timezone,
+      // Ветки, оставившие правую границу нетронутой, отдают «сейчас».
+      endTracksNow: to === now,
     };
   }
 
