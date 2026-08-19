@@ -449,20 +449,25 @@ export class AiToolHandlerService {
   private async scanClientRetention(
     tenantId: string,
   ): Promise<ClientRegistryAnalysis> {
-    const cached = this.clientRegistryCache.get(tenantId);
+    /**
+     * 🔴 Cycle 04 P7. Ключ включает календарный день арендатора.
+     *
+     * Разбор реестра считается ОТНОСИТЕЛЬНО «сегодня»: группы давности визита
+     * меняются вместе с датой. Ключ был только арендаторным, и снимок,
+     * посчитанный в 23:58, отдавался в 00:01 следующих суток как сегодняшний —
+     * с вчерашней точкой отсчёта.
+     */
+    const timezone = await this.reportingTimezone(tenantId);
+    const asOf = this.localDate(new Date(), timezone);
+    const cacheKey = `${tenantId}|${asOf}`;
+    const cached = this.clientRegistryCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
     }
 
-    const [snapshot, timezone] = await Promise.all([
-      this.crmService.getClientRegistry(tenantId),
-      this.reportingTimezone(tenantId),
-    ]);
-    const value = analyzeClientRegistry(
-      snapshot,
-      this.localDate(new Date(), timezone),
-    );
-    this.clientRegistryCache.set(tenantId, {
+    const snapshot = await this.crmService.getClientRegistry(tenantId);
+    const value = analyzeClientRegistry(snapshot, asOf);
+    this.clientRegistryCache.set(cacheKey, {
       expiresAt: Date.now() + 5 * 60 * 1_000,
       value,
     });
@@ -2794,19 +2799,21 @@ export class AiToolHandlerService {
     ) {
       throw new Error('Invalid business analytics comparison');
     }
-    const cacheKey = [
-      principal.tenantId,
-      principal.role,
-      this.requiredString(args.period),
+    /**
+     * 🔴 Cycle 04 P7. Окно разрешается ДО обращения к кэшу.
+     *
+     * Ключ строился из фразы запроса («today», «month»), а не из окна, которое
+     * из неё получилось. Из-за этого «как сегодня» в 23:58 и то же «как
+     * сегодня» в 00:01 следующих суток попадали в ОДНУ запись: срок жизни пять
+     * минут, и владелец получал вчерашний день как сегодняшний. Часовой пояс в
+     * ключ не входил вовсе.
+     */
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const cacheKey = this.periodCacheKey(
+      [principal.tenantId, principal.role],
+      window,
       comparison,
-      typeof args.day === 'string' ? args.day : '',
-      typeof args.month === 'string' ? args.month : '',
-      typeof args.from_day === 'string' ? args.from_day : '',
-      typeof args.to_day === 'string' ? args.to_day : '',
-      typeof args.from === 'string' ? args.from : '',
-      typeof args.to === 'string' ? args.to : '',
-      typeof args.branch_id === 'string' ? args.branch_id : '',
-    ].join('|');
+    );
     const cached = this.businessQueryCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
@@ -2815,10 +2822,6 @@ export class AiToolHandlerService {
       this.businessQueryCache.delete(cacheKey);
     }
 
-    // 🔴 Разбор живой речи в окно — работа этого слоя: он единственный, кто
-    // слышит «этот месяц». Дальше в детерминированное ядро уезжают уже
-    // границы и часовой пояс.
-    const window = await this.reportingWindow(principal.tenantId, args);
     const previousQuery =
       comparison === 'none'
         ? null
@@ -2871,6 +2874,15 @@ export class AiToolHandlerService {
       available_metrics: state.availableMetrics,
       limitations: state.limitations,
       unavailable_metrics: state.unavailableMetrics,
+      /**
+       * 🔴 Cycle 04 P7. Момент вычисления едет вместе с ответом.
+       *
+       * Кэш живёт пять минут и до этого пакета никак не признавался в своём
+       * возрасте: попадание выглядело как свежее измерение источника. Теперь
+       * штамп ставится в момент РАСЧЁТА и переживает попадание — по нему видно,
+       * насколько ответ стар.
+       */
+      calculated_at: new Date(Date.now()).toISOString(),
     };
     // 🔴 Неполный ответ НЕ кэшируется: держать деградировавший ответ пять
     // минут значит продлевать состояние, в котором ноль ничего не доказывает.
@@ -2913,19 +2925,13 @@ export class AiToolHandlerService {
     ) {
       throw new Error('Invalid employee analytics comparison');
     }
-    const cacheKey = [
-      principal.tenantId,
-      principal.userId,
-      this.requiredString(args.period),
+    // 🔴 Cycle 04 P7. То же самое для личного среза: ключ по РАЗРЕШЁННОМУ окну.
+    const window = await this.reportingWindow(principal.tenantId, args);
+    const cacheKey = this.periodCacheKey(
+      [principal.tenantId, principal.userId, principal.role],
+      window,
       comparison,
-      typeof args.day === 'string' ? args.day : '',
-      typeof args.month === 'string' ? args.month : '',
-      typeof args.from_day === 'string' ? args.from_day : '',
-      typeof args.to_day === 'string' ? args.to_day : '',
-      typeof args.from === 'string' ? args.from : '',
-      typeof args.to === 'string' ? args.to : '',
-      typeof args.branch_id === 'string' ? args.branch_id : '',
-    ].join('|');
+    );
     const cached = this.employeeQueryCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
@@ -2934,7 +2940,6 @@ export class AiToolHandlerService {
       this.employeeQueryCache.delete(cacheKey);
     }
 
-    const window = await this.reportingWindow(principal.tenantId, args);
     const previousQuery =
       comparison === 'none'
         ? null
@@ -2990,14 +2995,18 @@ export class AiToolHandlerService {
       principal,
       window.query,
     );
-    const enriched = motivation
-      ? {
-          ...result,
-          limitations: [...result.limitations, ...motivation.limitations],
-          money_motivation: motivation.money_motivation,
-          upsell_opportunities: motivation.upsell_opportunities,
-        }
-      : result;
+    const enriched = {
+      ...(motivation
+        ? {
+            ...result,
+            limitations: [...result.limitations, ...motivation.limitations],
+            money_motivation: motivation.money_motivation,
+            upsell_opportunities: motivation.upsell_opportunities,
+          }
+        : result),
+      // 🔴 Cycle 04 P7. Тот же штамп момента расчёта, что и у среза салона.
+      calculated_at: new Date(Date.now()).toISOString(),
+    };
     // Неполный ответ не кэшируется — та же причина, что и у бизнес-среза.
     if (
       enriched.verified &&
@@ -3295,6 +3304,51 @@ export class AiToolHandlerService {
    * ответе, иначе «июль» и «июль по седьмое» выглядят одинаково.
    * `named_day` / `named_range` — ровно названные локальные дни, без подмены месяцем.
    */
+  /**
+   * Ключ кэша факта периода.
+   *
+   * 🔴 Cycle 04 P7. Тождество периода — это РАЗРЕШЁННОЕ окно и часовой пояс, а
+   * не фраза, из которой оно получилось. Ключ содержит:
+   *   • арендатора и решение о видимости (роль/пользователь) — иначе кэш
+   *     отдал бы привилегированный ответ тому, кому он не положен;
+   *   • границы окна и пояс — иначе смена пояса или другой филиал попали бы в
+   *     одну запись;
+   *   • календарный день арендатора — но ТОЛЬКО для окон, обрезанных «по
+   *     сейчас»: у них ответ законно другой в другие сутки, а у закрытых
+   *     периодов день не влияет ни на что и в ключ не идёт.
+   */
+  private periodCacheKey(
+    identity: string[],
+    window: {
+      query: AnalyticsRangeQueryDto;
+      truncatedToToday: boolean;
+      timezone: string | null;
+    },
+    comparison: string,
+  ): string {
+    /**
+     * 🔴 У окна, обрезанного «по сейчас», конец — это текущий момент, и класть
+     * его в ключ значило бы не иметь кэша вовсе: ключ менялся бы каждую
+     * миллисекунду. Тождество такого окна — начало плюс календарный день
+     * арендатора: внутри суток ответ законно переиспользуется, а на границе
+     * полуночи ключ меняется сам.
+     *
+     * У закрытого периода конец стабилен и в ключ входит.
+     */
+    const end =
+      window.truncatedToToday && window.timezone
+        ? `today:${this.localDate(new Date(), window.timezone)}`
+        : window.query.to;
+    return [
+      ...identity,
+      window.query.from,
+      end,
+      window.timezone ?? '',
+      window.query.branchId ?? '',
+      comparison,
+    ].join('|');
+  }
+
   private async reportingWindow(
     tenantId: string,
     args: ValidatedAiToolArguments,
@@ -3305,6 +3359,13 @@ export class AiToolHandlerService {
     namedDay: string | null;
     fromDay: string | null;
     toDay: string | null;
+    /**
+     * 🔴 Cycle 04 P7. Пояс, в котором построено окно.
+     *
+     * Нужен ключу кэша: без него один и тот же период в разных поясах попадал
+     * бы в одну запись, а «сегодня» на границе суток — в чужие сутки.
+     */
+    timezone: string | null;
   }> {
     const period = this.requiredString(args.period);
     const branchId =
@@ -3321,6 +3382,8 @@ export class AiToolHandlerService {
         namedDay: null,
         fromDay: null,
         toDay: null,
+        // Явные границы пояса не требуют: они уже абсолютные.
+        timezone: null,
       };
     }
 
@@ -3463,6 +3526,7 @@ export class AiToolHandlerService {
       namedDay,
       fromDay,
       toDay,
+      timezone,
     };
   }
 
