@@ -40,8 +40,14 @@ export interface ExpensePeriodRead {
   readonly status: 'measured' | 'unavailable';
   readonly unavailable_reason: string | null;
   readonly scope: { readonly branch_id: string | null };
-  /** Сколько строк расхода попало в период. Сумма считается по всем. */
-  readonly expense_count: number;
+  /**
+   * Сколько строк расхода попало в период. Сумма считается по всем.
+   *
+   * 🔴 `null`, когда книга не прочитана. Ноль здесь означал бы «строк не было» —
+   * ровно та подмена, которую запрещает докстрока `status` выше, и она уже
+   * успела проехать в доказательства модели рядом с полусотней реальных строк.
+   */
+  readonly expense_count: number | null;
   readonly by_category: readonly ExpensePeriodCategoryTotal[];
   readonly totals: readonly ExpensePeriodTotal[];
 }
@@ -156,7 +162,7 @@ function unavailable(
     status: 'unavailable',
     unavailable_reason: reason,
     scope: { branch_id: branchId },
-    expense_count: 0,
+    expense_count: null,
     by_category: [],
     totals: [],
   };

@@ -228,10 +228,24 @@ export class ExpensesService {
       items: expenses.map((expense) => this.serialize(expense)),
       totals: period.totals.map((total) => ({ ...total })),
       by_category: period.by_category.map((row) => ({ ...row })),
-      /** Сколько строк расхода в периоде всего — включая не попавшие в `items`. */
+      /**
+       * Сколько строк расхода в периоде всего — включая не попавшие в `items`.
+       * `null`, если книгу прочитать не удалось: ноль был бы враньём.
+       */
       expense_count: period.expense_count,
-      /** Обрезан ПЕРЕЧЕНЬ операций. Суммы выше от этого не зависят. */
-      truncated: expenses.length === LIST_PAGE_SIZE,
+      /**
+       * Обрезан ПЕРЕЧЕНЬ операций. Суммы выше от этого не зависят.
+       *
+       * 🔴 Сравнение с реальным числом строк, а не «страница заполнена». Ровно
+       * пятьсот расходов за период — это полный перечень, и говорить о нём
+       * «показаны не все» значит сомневаться в верных числах на ровном месте.
+       * Когда числа строк нет (книга не прочитана), полагаться остаётся только
+       * на заполненность страницы.
+       */
+      truncated:
+        period.expense_count === null
+          ? expenses.length === LIST_PAGE_SIZE
+          : period.expense_count > expenses.length,
       totals_basis:
         period.status === 'measured'
           ? ('all_expenses_in_period' as const)

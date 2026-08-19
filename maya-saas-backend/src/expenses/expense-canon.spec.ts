@@ -333,6 +333,10 @@ describe('Cycle 04 P8 — канон статей расхода', () => {
     });
     expect(unread.totals_basis).toBe('unavailable');
     expect(unread.totals).toEqual([]);
+    // 🔴 Счётчик строк тоже не выдумывается. Ноль рядом с реальными операциями
+    // в доказательствах модели читается как «расходов не было» — и сторож
+    // чисел его пропустит, потому что ноль буквально лежит в ответе.
+    expect(unread.expense_count).toBeNull();
     // Перечень операций при этом приехал — и именно поэтому ноль в итоге был бы
     // прочитан как «расходов не было».
     expect((unread.items as unknown[]).length).toBe(1);
@@ -412,6 +416,80 @@ describe('Cycle 04 P8 — канон статей расхода', () => {
     expect(tenantWide.totals).toEqual([
       { currency: 'RUB', amount_kopecks: 500_000 },
     ]);
+  });
+
+  it('11. непрочитанная книга не называет число строк ни одному потребителю', async () => {
+    const rows = Array.from({ length: 3 }, (_, index) =>
+      row('supplies', 1_000, index),
+    );
+    const setup = createExpenses(rows, { fail: 'aggregate' });
+    const period = await readExpensePeriod(setup.prisma, {
+      tenantId: 'tenant-a',
+      from: new Date(july.from),
+      to: new Date(july.to),
+    });
+    expect(period.status).toBe('unavailable');
+    expect(period.expense_count).toBeNull();
+
+    const list = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.list('tenant-a', july),
+    );
+    expect(list.expense_count).toBeNull();
+    expect(list.items).toHaveLength(3);
+
+    const payload = await toolPayload(rows, { fail: 'aggregate' });
+    const status = String(card(payload)?.widget_data.status_text);
+    expect(status).toContain('прочитать не удалось');
+    expect(status).not.toMatch(/\d/);
+  });
+
+  it('12. ровно пятьсот записей — это полный перечень, а не обрыв', async () => {
+    const exactly = Array.from({ length: 500 }, (_, index) =>
+      row('supplies', 1_000, index),
+    );
+    const payload = await toolPayload(exactly);
+    expect((payload.items as unknown[]).length).toBe(500);
+    expect(payload.expense_count).toBe(500);
+    // 🔴 Раньше признак обрыва означал «страница заполнена», и владельцу
+    // сообщали о неполноте, которой нет, — подрывая доверие ровно к тем
+    // числам, ради честности которых пакет и переписывал текст.
+    expect(payload.truncated).toBe(false);
+    expect(String(card(payload)?.widget_data.status_text)).not.toContain(
+      'не все операции',
+    );
+
+    const oneMore = Array.from({ length: 501 }, (_, index) =>
+      row('supplies', 1_000, index),
+    );
+    const beyond = await toolPayload(oneMore);
+    expect(beyond.truncated).toBe(true);
+    expect(beyond.expense_count).toBe(501);
+    expect(String(card(beyond)?.widget_data.status_text)).toContain('501');
+  });
+
+  it('13. непрочитанная книга расходов названа своей причиной, а не зарплатой', () => {
+    // Движок проверяет книгу ПЕРВОЙ, поэтому её отказ — настоящий блокер.
+    const reply = (
+      Object.create(AiCoreService.prototype) as unknown as {
+        deterministicProfitReply(evidence: unknown): string | null;
+      }
+    ).deterministicProfitReply({
+      resolved_period: { label_ru: 'август' },
+      confirmed_revenue: {
+        status: 'available',
+        total: { currency: 'RUB', amount_kopecks: 10_000_000 },
+      },
+      expenses: { status: 'unavailable', by_category: [], totals: [] },
+      completeness: { owner_confirmation_required: false },
+      payroll: { status: 'unavailable' },
+      net_profit: {
+        status: 'unavailable',
+        unavailable_reason: 'expense_ledger_did_not_answer_for_this_period',
+      },
+    });
+    expect(String(reply)).toContain('книгу расходов');
+    expect(String(reply)).not.toContain('спросите за месяц');
+    expect(String(reply)).not.toContain('Спросите за месяц');
   });
 
   it('10. синоним и канон складываются в одну статью, а не в две', () => {
