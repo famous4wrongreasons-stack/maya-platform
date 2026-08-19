@@ -875,8 +875,14 @@ export class BusinessStateService {
           return [
             {
               staff_external_id: staffExternalId,
-              transaction_count:
-                this.optionalMetricNumber(row.transaction_count) ?? 0,
+              /**
+               * 🔴 Cycle 04 P5. Ноль операций при непустой сумме — это деньги
+               * ниоткуда. Источник может назвать сумму и промолчать о числе
+               * операций; тогда числа НЕТ, и презентация обязана это увидеть.
+               */
+              transaction_count: this.optionalMetricNumber(
+                row.transaction_count,
+              ),
               amount,
             },
           ];
@@ -1329,15 +1335,32 @@ export class BusinessStateService {
       daily: Array.isArray(result.daily)
         ? result.daily.map((entry) => {
             const item = this.record(entry);
+            /**
+             * 🔴 Cycle 04 P5. Корзины статусов дня — `null`, а не ноль.
+             *
+             * Здесь стояло `?? 0` по каждому полю. Доказательство, что это не
+             * теоретический риск: `scheduled` / `completed` / `no_show` в
+             * ответе аналитики существуют ТОЛЬКО у операционного среза
+             * (`includeOperationalStatusBuckets`). Запасной путь чтения
+             * (`getBusinessOverview`, см. `businessOperationalOverview`) их не
+             * возвращает — и канон публиковал измеренные нули по корзинам,
+             * которых источник не считал вовсе.
+             *
+             * `appointments` и `cancelled` источник отдаёт всегда, но и им
+             * ноль по умолчанию не нужен: отсутствие поля — это отсутствие
+             * измерения, а не пустой день.
+             */
+            const count = (value: unknown) => this.optionalMetricNumber(value);
+            const appointments = count(item.appointments);
             return {
               date: item.date ?? null,
-              appointments: item.appointments ?? 0,
-              total: item.total ?? item.appointments ?? 0,
-              active: item.active ?? item.appointments ?? 0,
-              scheduled: item.scheduled ?? 0,
-              completed: item.completed ?? 0,
-              cancelled: item.cancelled ?? 0,
-              no_show: item.no_show ?? 0,
+              appointments,
+              total: count(item.total) ?? appointments,
+              active: count(item.active) ?? appointments,
+              scheduled: count(item.scheduled),
+              completed: count(item.completed),
+              cancelled: count(item.cancelled),
+              no_show: count(item.no_show),
               revenue: this.safeMoneyEntries(item.revenue),
             };
           })
@@ -1629,8 +1652,11 @@ export class BusinessStateService {
           status: 'available',
           basis: 'crm_financial_transaction_attribution',
           amount,
-          transaction_count:
-            this.optionalMetricNumber(match.transaction_count) ?? 0,
+          /**
+           * 🔴 Cycle 04 P5. Ноль операций при непустой сумме — деньги ниоткуда.
+           * Источник может назвать сумму и промолчать о числе операций.
+           */
+          transaction_count: this.optionalMetricNumber(match.transaction_count),
           attribution_status: revenue.staff_attribution_status ?? 'unavailable',
           attribution_coverage_percent: this.optionalMetricNumber(
             revenue.staff_attribution_coverage_percent,
@@ -1676,8 +1702,11 @@ export class BusinessStateService {
           status: 'available',
           basis: 'crm_single_service_transaction_attribution',
           amount,
-          transaction_count:
-            this.optionalMetricNumber(match.transaction_count) ?? 0,
+          /**
+           * 🔴 Cycle 04 P5. Ноль операций при непустой сумме — деньги ниоткуда.
+           * Источник может назвать сумму и промолчать о числе операций.
+           */
+          transaction_count: this.optionalMetricNumber(match.transaction_count),
           attribution_status:
             revenue.service_attribution_status ?? 'unavailable',
           attribution_coverage_percent: this.optionalMetricNumber(

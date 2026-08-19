@@ -113,6 +113,8 @@ function buildExpensesCard(evidence: unknown): ChatReportCard {
         .map((entry) => record(entry))
         .find((entry) => entry.currency === 'RUB')
     : null;
+  // Признание источника в неполноте приезжает в том же ответе инструмента.
+  const truncated = data.truncated === true;
   return {
     widget: 'business_report',
     widget_data: {
@@ -124,10 +126,17 @@ function buildExpensesCard(evidence: unknown): ChatReportCard {
       secondary_label: 'Статей',
       rows_title: rows.length > 0 ? 'По статьям' : null,
       rows,
-      status_text:
-        rows.length === 0
-          ? 'За этот период дополнительные расходы не внесены.'
+      /**
+       * 🔴 Cycle 04 P5. Ноль строк — это «нечего показать», а не «ничего не
+       * было». Список обрывается на пятистах записях (`truncated` приезжает в
+       * том же ответе), и строки в другой валюте сюда не попадают вовсе.
+       */
+      status_text: truncated
+        ? 'Список расходов пришёл не целиком — числа выше нижняя граница.'
+        : rows.length === 0
+          ? 'Расходов за этот период я не вижу — внесённых записей нет.'
           : null,
+      source_complete: truncated === false,
     },
   };
 }
@@ -148,12 +157,21 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
    */
   const confirmedRevenue = moneyRubFromKopecks(metrics.revenue_amount_kopecks);
   const bookedValue = moneyRubFromKopecks(metrics.booked_value_amount_kopecks);
-  const revenueIsConfirmed = confirmedRevenue !== null;
-  const revenue = revenueIsConfirmed ? confirmedRevenue : bookedValue;
-  const revenueCaption = revenueIsConfirmed
-    ? null
-    : bookedValue !== null
-      ? 'Стоимость записанного, а не пробитая касса'
+  /**
+   * 🔴 Cycle 04 P5. Поле выручки содержит выручку или не содержит ничего.
+   *
+   * Здесь стоял запасной путь: нет кассы — положить в `revenue_rub` стоимость
+   * записанного и подписать, что это не касса. Подпись честная, поле — нет:
+   * в эталонах видно `revenue_rub: 2500` при `revenue_basis: 'unavailable'`,
+   * то есть число выручки там, где канон сказал «выручки нет». Роль без права
+   * на деньги получала его так же, как владелец.
+   *
+   * Стоимость записанного и без того едет своим полем ниже (P2.1).
+   */
+  const revenue = confirmedRevenue;
+  const revenueCaption =
+    confirmedRevenue === null && bookedValue !== null
+      ? 'Подтверждённой кассы за период нет — ниже стоимость записанного'
       : null;
   const ticket = moneyRubFromKopecks(metrics.average_ticket_amount_kopecks);
   const current = record(data.current);
@@ -172,9 +190,11 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
         label: name,
         value_rub: confirmed.status === 'available' ? amount : null,
         caption:
-          confirmed.status === 'available'
-            ? `${metricNumber(confirmed.transaction_count) ?? 0} финансовых операций`
-            : 'Нет точной привязки кассы CRM',
+          confirmed.status !== 'available'
+            ? 'Нет точной привязки кассы CRM'
+            : metricNumber(confirmed.transaction_count) === null
+              ? 'Касса связана с мастером, число операций источник не назвал'
+              : `${metricNumber(confirmed.transaction_count)} финансовых операций`,
       },
     ];
   });
@@ -184,7 +204,9 @@ function buildBusinessCard(evidence: unknown): ChatReportCard {
   );
   const staffStatusText =
     attributionStatus === 'partial'
-      ? `YClients точно связал с мастерами ${coverage ?? 0}% кассы услуг. Остаток не распределён приблизительно.`
+      ? coverage === null
+        ? 'YClients связал с мастерами часть кассы услуг, а долю не назвал. Остаток не распределён приблизительно.'
+        : `YClients точно связал с мастерами ${coverage}% кассы услуг. Остаток не распределён приблизительно.`
       : attributionStatus === 'unavailable' && staff.length > 0
         ? 'YClients не передал точную привязку кассы к мастерам. Общая касса остаётся доступна.'
         : null;
@@ -269,24 +291,31 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
         ? 'Начислено YClients'
         : 'Внесено владельцем',
   }));
+  /**
+   * 🔴 Cycle 04 P5. Карточка больше не складывает деньги.
+   *
+   * Здесь стояли два собственных `reduce` по строкам расходов: фонд оплаты
+   * труда и «прочее». Оба с `: 0` на нечисло, то есть строка, сумму которой
+   * источник не назвал, тихо считалась нулевой и уменьшала итог.
+   *
+   * Строки уже сложены владельцем расходов по каждой статье — здесь остаётся
+   * ВЫБОР строки, а не сложение. Если статей больше одной, ни одна из них не
+   * выдаётся за итог: показывается список, а итог берётся из `totals`.
+   */
   const payrollRows = expenseRows.filter(
     (entry) => entry.category === 'salary',
   );
-  const payrollKopecks = payrollRows.reduce(
-    (sum, entry) =>
-      sum +
-      (typeof entry.amount_kopecks === 'number' ? entry.amount_kopecks : 0),
-    0,
-  );
+  const payrollKopecks =
+    payrollRows.length === 1
+      ? (metricNumber(payrollRows[0].amount_kopecks) ?? null)
+      : null;
   const additionalRows = expenseRows.filter(
     (entry) => entry.category !== 'salary',
   );
-  const additionalKopecks = additionalRows.reduce(
-    (sum, entry) =>
-      sum +
-      (typeof entry.amount_kopecks === 'number' ? entry.amount_kopecks : 0),
-    0,
-  );
+  const additionalKopecks =
+    additionalRows.length === 1
+      ? (metricNumber(additionalRows[0].amount_kopecks) ?? null)
+      : null;
   const totalExpenses = Array.isArray(expenses.totals)
     ? (expenses.totals as unknown[])
         .map((entry) => record(entry))
@@ -303,21 +332,31 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
       period_label: label,
       revenue_rub: revTotal,
       net_profit_rub: net.status === 'available' ? netTotal : null,
-      payroll_rub:
-        payrollRows.length > 0 ? moneyRubFromKopecks(payrollKopecks) : null,
+      payroll_rub: moneyRubFromKopecks(payrollKopecks),
+      /**
+       * 🔴 Ноль здесь остаётся ТОЛЬКО как измеренный ноль: строк «прочего» нет,
+       * и движок прибыли при этом не требует подтверждения владельца. Во всех
+       * остальных случаях — `null`, потому что сумму никто не считал.
+       */
       additional_expenses_rub:
         additionalRows.length > 0
           ? moneyRubFromKopecks(additionalKopecks)
           : ownerConfirmationRequired && net.status !== 'available'
             ? null
             : 0,
+      /** Сколько строк расходов стоит за числами выше. */
+      expense_rows_count: rows.length,
       total_expenses_rub: moneyRubFromKopecks(totalExpenses?.amount_kopecks),
       profit_status:
         typeof net.status === 'string' ? net.status : 'unavailable',
       rows_title: rows.length > 0 ? 'Расходы' : null,
       rows,
-      status_text:
-        net.status === 'available' && assumesUnrecordedExpensesAreZero
+      // 🔴 Оговорка о неполноте ЧТЕНИЯ вытесняет остальные подписи — так же,
+      // как в сводке салона. Прибыль на неполном журнале это прибыль, про
+      // которую неизвестно, вся ли она.
+      status_text: incompleteReadNote(evidence)
+        ? incompleteReadNote(evidence)
+        : net.status === 'available' && assumesUnrecordedExpensesAreZero
           ? 'Не внесённые дополнительные расходы сейчас учтены как 0 ₽. Добавьте их в чат в любой момент — прибыль пересчитается.'
           : ownerConfirmationRequired
             ? 'Есть ли за этот период дополнительные расходы помимо зарплаты? Если нет, так и напишите.'
@@ -353,12 +392,25 @@ function incompleteReadNote(evidence: unknown): string | null {
     record(record(data.current).completeness).appointments,
   ).status;
   const fromRoot = record(record(data.completeness).appointments).status;
+  /**
+   * 🔴 Cycle 04 P5. Конверт прибыли называет полноту ИНАЧЕ.
+   *
+   * `getBusinessProfitability` кладёт её в `source_completeness`, и карточка
+   * прибыли — единственная из четырёх — не читала полноту вовсе: числа
+   * подписывались точными на журнале, прочитанном не до конца.
+   */
+  const fromProfit = record(data.source_completeness).status;
   const flagged =
     Array.isArray(data.limitations) &&
     data.limitations
       .map((entry) => record(entry).key)
       .includes('incomplete_read');
-  if (fromCurrent !== 'incomplete' && fromRoot !== 'incomplete' && !flagged) {
+  if (
+    fromCurrent !== 'incomplete' &&
+    fromRoot !== 'incomplete' &&
+    fromProfit !== 'incomplete' &&
+    !flagged
+  ) {
     return null;
   }
   return 'Журнал за период прочитан не целиком: числа — нижняя граница, ноль означает «не измерено».';
@@ -378,12 +430,25 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
   const staff = Array.isArray(record(data.current).staff_summary)
     ? (record(data.current).staff_summary as unknown[])
     : [];
-  const self = staff.length === 1 ? record(staff[0]) : {};
-  const salary = record(self.salary);
+  /**
+   * 🔴 Личный срез по построению содержит одну строку — свою. Но если строк
+   * оказалось больше или меньше, молчаливое `{}` превращало «не смогли
+   * сопоставить» в «начислений нет». Причина у канона есть, и она называется.
+   */
+  const self = staff.length === 1 ? record(staff[0]) : null;
+  const salary = record(self?.salary);
   const earned =
     salary.status === 'available'
       ? moneyRubFromKopecks(record(salary.accrued).amount_kopecks)
       : null;
+  const earnedUnavailableReason =
+    earned !== null
+      ? null
+      : self === null
+        ? 'employee_row_not_resolved'
+        : typeof salary.unavailable_reason === 'string'
+          ? salary.unavailable_reason
+          : 'crm_payroll_is_unavailable';
 
   // Реальный потенциал из истории чеков мастера (топ-40% за ~60 дней), не +18%.
   //
@@ -393,13 +458,16 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
   // не стоит ничего. Нет расчёта — нет цифры.
   const motivation = record(data.money_motivation);
   const potential = metricNumber(motivation.potential_rub) ?? null;
+  /**
+   * 🔴 Запасной путь через стоимость записанного убран: «потенциал минус
+   * записанное» — это не апсайд к заработку, а разность двух РАЗНЫХ фактов.
+   * Нет начисления — нет и разницы с ним.
+   */
   const upside =
     metricNumber(motivation.upside_rub) ??
     (potential != null && earned != null
       ? Math.max(0, potential - earned)
-      : potential != null && booked != null
-        ? Math.max(0, potential - booked)
-        : null);
+      : null);
   const motivationFootnote =
     typeof motivation.footnote === 'string' ? motivation.footnote : null;
 
@@ -415,13 +483,27 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
       userText,
     );
 
+  const masterNote = incompleteReadNote(evidence);
+
   if (wantsUpsell) {
     return {
       widget: 'master_upsell',
       widget_data: {
         title: 'Совет по допродажам',
         period_label: label,
-        earned_rub: earned ?? booked,
+        /**
+         * 🔴 Cycle 04 P5. Заработок — это НАЧИСЛЕНИЕ, и ничто другое.
+         *
+         * Здесь стояло `earned ?? booked`: когда расчёт зарплаты недоступен,
+         * мастеру показывали стоимость записанного под именем «заработано».
+         * Это отменяет разделение, ради которого делались P2 и P2.1: два
+         * разных факта снова становились одним числом, и худшим из возможных
+         * способов — тем, что льстит.
+         */
+        earned_rub: earned,
+        /** Стоимость записанного — рядом и своим именем, а не вместо. */
+        booked_rub: booked,
+        earned_unavailable_reason: earnedUnavailableReason,
         potential_rub: potential,
         upside_rub: upside,
         target_check_rub: metricNumber(motivation.target_check_rub),
@@ -435,6 +517,10 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
         footnote:
           motivationFootnote ||
           'Потенциал — ориентир MAYA по допродажам из твоей истории чеков, не касса.',
+        // Неполный журнал вытесняет остальные подписи: числа выше — нижняя
+        // граница, и мастеру это важнее совета.
+        status_text: masterNote,
+        source_complete: masterNote === null,
       },
     };
   }
@@ -451,11 +537,14 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
       target_check_rub: metricNumber(motivation.target_check_rub),
       appointments: metricNumber(metrics.appointments_total),
       unique_clients: metricNumber(metrics.unique_clients),
+      earned_unavailable_reason: earnedUnavailableReason,
       footnote:
         earned == null
-          ? 'Начисление из CRM за период ещё не пришло — показываю стоимость записанных услуг.'
+          ? 'Начисление из CRM за период ещё не пришло. Стоимость записанного показана отдельным полем — это не заработок.'
           : motivationFootnote ||
             'Потенциал — ориентир MAYA по допродажам из твоей истории чеков, не факт кассы.',
+      status_text: masterNote,
+      source_complete: masterNote === null,
     },
   };
 }

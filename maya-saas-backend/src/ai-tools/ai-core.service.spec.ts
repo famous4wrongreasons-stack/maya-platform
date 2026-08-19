@@ -2132,7 +2132,11 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('завершённых 9');
     expect(result.reply).toContain('ожидают визита 7');
     expect(result.reply).toContain('отменённых 3');
-    expect(result.reply).toContain('неявок 2');
+    // 🔴 Cycle 04 P5. Статусная корзина провайдера называется своим именем:
+    // «не пришёл» — это состояние ЗАПИСИ, а неявка как наблюдение приходит из
+    // канонического присутствия и отвечает на другой вопрос.
+    expect(result.reply).toContain('со статусом «не пришёл» 2');
+    expect(result.reply).not.toMatch(/неявок 2/);
     expect(result.source).toBe('safe_fallback');
     expect(result.grounding).toMatchObject({
       status: 'verified',

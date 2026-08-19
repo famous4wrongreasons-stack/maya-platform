@@ -2569,7 +2569,9 @@ export class AiCoreService {
         : [];
       return [
         `${dateLabel}: ${row.name} — ${row.total} записей.`,
-        `Предстоящих: ${row.confirmed}, проведённых: ${row.completed}, отмен: ${row.canceled}, неявок: ${row.noShow}.`,
+        // Статусы записи — статусами; присутствие мастера канон по-человеку
+        // не считает, и выдумывать его из статуса нельзя (реестр 4.33).
+        `Предстоящих: ${row.confirmed}, проведённых: ${row.completed}, отмен: ${row.canceled}.`,
         row.workingMinutes > 0
           ? `Занято ${row.bookedMinutes} из ${row.workingMinutes} мин${row.loadPercent === null ? '' : ` (${this.formatMetricNumber(row.loadPercent)}%)`}.`
           : '',
@@ -2583,15 +2585,34 @@ export class AiCoreService {
     const active = this.safeMetricNumber(summary.active);
     const completed = this.safeMetricNumber(summary.completed);
     const canceled = this.safeMetricNumber(summary.canceled);
-    const noShow = this.safeMetricNumber(summary.no_show);
     const byStaff = staff
       .slice(0, 12)
       .map(
         (row) =>
           `${row.name} — ${row.active} активных, ${row.canceled} отмен${row.loadPercent === null ? '' : `, загрузка ${this.formatMetricNumber(row.loadPercent)}%`}`,
       );
+    /**
+     * 🔴 Cycle 04 P5. Присутствие — из наблюдения, а не из статуса.
+     *
+     * Здесь печаталось «неявок N» из статусной корзины провайдера. Статус
+     * `no_show` — это состояние ЗАПИСИ, а присутствие отвечает на другой
+     * вопрос, и инструмент отдаёт его отдельным блоком вместе с числом
+     * ненаблюдённых. Пока наблюдение неполно, число неявок не называется.
+     */
+    const attendance = this.record(data.attendance);
+    const arrived = this.optionalMetricNumber(attendance.arrived);
+    const attendanceNoShow = this.optionalMetricNumber(attendance.no_show);
+    const notObserved = this.optionalMetricNumber(attendance.not_observed);
+    const attendanceLine =
+      arrived === null || attendanceNoShow === null
+        ? 'Присутствие за день не сверено.'
+        : notObserved !== null && notObserved > 0
+          ? `Присутствие: пришли ${this.formatMetricNumber(arrived)}, неявок ${this.formatMetricNumber(attendanceNoShow)}; по ${this.formatMetricNumber(notObserved)} записям отметки нет.`
+          : `Присутствие: пришли ${this.formatMetricNumber(arrived)}, неявок ${this.formatMetricNumber(attendanceNoShow)}.`;
+
     return [
-      `${dateLabel}: всего ${total} записей, активных ${active}, проведённых ${completed}, отмен ${canceled}, неявок ${noShow}.`,
+      `${dateLabel}: всего ${total} записей, активных ${active}, проведённых ${completed}, отмен ${canceled}.`,
+      attendanceLine,
       `По мастерам: ${byStaff.join('; ')}.`,
       'Источник: YClients.',
     ].join(' ');
@@ -3133,18 +3154,26 @@ export class AiCoreService {
         const parts = rawDate.split('-');
         const date =
           parts.length === 3 ? `${parts[2]}.${parts[1]}` : rawDate || 'День';
+        /**
+         * 🔴 Cycle 04 P5. Неизмеренное называется словом.
+         *
+         * Здесь стояла цепочка `?? 0` — тот же приём, который P4 вычистил из
+         * сводок владельца: день без числа выглядел как день с нулём.
+         */
+        const count = (value: unknown) => {
+          const parsed = this.optionalMetricNumber(value);
+          return parsed === null
+            ? 'не измерено'
+            : this.formatMetricNumber(parsed);
+        };
         const total =
           this.optionalMetricNumber(row.total) ??
-          this.optionalMetricNumber(row.appointments) ??
-          0;
-        const scheduled = this.optionalMetricNumber(row.scheduled) ?? 0;
-        const completed = this.optionalMetricNumber(row.completed) ?? 0;
-        const cancelled = this.optionalMetricNumber(row.cancelled) ?? 0;
-        const noShow = this.optionalMetricNumber(row.no_show) ?? 0;
+          this.optionalMetricNumber(row.appointments);
+        // Пустой массив у канона означает «показывать нельзя», а не «ноль».
         const bookedValue = this.formatMoneyEntries(
           Array.isArray(row.revenue) ? row.revenue : [],
         );
-        return `${date}: всего ${this.formatMetricNumber(total)}, завершено ${this.formatMetricNumber(completed)}, ожидают ${this.formatMetricNumber(scheduled)}, отменено ${this.formatMetricNumber(cancelled)}, неявок ${this.formatMetricNumber(noShow)}${bookedValue ? `; стоимость неотменённых записей ${bookedValue}` : ''}`;
+        return `${date}: всего ${total === null ? 'не измерено' : this.formatMetricNumber(total)}, завершено ${count(row.completed)}, ожидают ${count(row.scheduled)}, отменено ${count(row.cancelled)}${bookedValue ? `; стоимость неотменённых записей ${bookedValue}` : ''}`;
       });
       return `Сводка по дням за выбранный период:\n${lines.join('\n')}`;
     }
@@ -3168,13 +3197,18 @@ export class AiCoreService {
       const percent = this.formatSignedPercent(change.percent_change);
       return ` Изменение ${comparisonLabel}: ${this.signedValue(delta, formatter(Math.abs(delta)))}${percent ? ` (${percent})` : ''}.`;
     };
-    const money = (value: number) =>
+    /**
+     * Величина здесь ВСЕГДА есть: аргумент — конечное число, и пустым массив
+     * быть не может. Запасной путь существует только чтобы не молчать, если
+     * валюта окажется неразборчивой.
+     */
+    const money = (value: number): string =>
       this.formatMoneyEntries([
         {
           currency: this.analyticsCurrency(current),
           amount_kopecks: value,
         },
-      ]);
+      ]) ?? this.formatMetricNumber(value / 100);
     const countLine = (
       label: string,
       key: string,
@@ -3335,10 +3369,25 @@ export class AiCoreService {
       }
     }
     if (/(не\s+пришел|неявк)/i.test(text)) {
-      const noShow = metric('appointments_no_show');
-      if (noShow !== null) {
+      /**
+       * 🔴 Cycle 04 P5. «Неявка» — это НАБЛЮДЕНИЕ, а не статус записи.
+       *
+       * Здесь отвечал `appointments_no_show` — статусная корзина провайдера.
+       * Канон публикует рядом `attendance_no_show`: он приходит из зеркала
+       * главы 3 и становится `null`, пока присутствие за период не сверено.
+       * На вопрос «сколько не пришло» отвечает только он; статус записи
+       * остаётся статусом и называется своим именем.
+       */
+      const observedNoShow = metric('attendance_no_show');
+      if (observedNoShow !== null) {
         return withRecommendation(
-          `Неявок: ${this.formatMetricNumber(noShow)}.${metricChange('appointments_no_show')}`,
+          `Не пришли: ${this.formatMetricNumber(observedNoShow)}.${metricChange('attendance_no_show')}`,
+        );
+      }
+      const statusNoShow = metric('appointments_no_show');
+      if (statusNoShow !== null) {
+        return withRecommendation(
+          `Присутствие за период не сверено, поэтому число неявок назвать не могу. Записей со статусом «не пришёл» у провайдера: ${this.formatMetricNumber(statusNoShow)} — это состояние записи, а не наблюдение за визитом.`,
         );
       }
     }
@@ -3435,7 +3484,7 @@ export class AiCoreService {
       const noShow = metric('appointments_no_show');
       if (total !== null) {
         return withRecommendation(
-          `Всего записей: ${this.formatMetricNumber(total)}${completed === null ? '' : `, завершённых ${this.formatMetricNumber(completed)}`}${scheduled === null ? '' : `, ожидают визита ${this.formatMetricNumber(scheduled)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}${noShow === null ? '' : `, неявок ${this.formatMetricNumber(noShow)}`}${completed === null && scheduled === null && active !== null ? `, неотменённых ${this.formatMetricNumber(active)}` : ''}.${metricChange('appointments_total')}`,
+          `Всего записей: ${this.formatMetricNumber(total)}${completed === null ? '' : `, завершённых ${this.formatMetricNumber(completed)}`}${scheduled === null ? '' : `, ожидают визита ${this.formatMetricNumber(scheduled)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}${noShow === null ? '' : `, со статусом «не пришёл» ${this.formatMetricNumber(noShow)}`}${completed === null && scheduled === null && active !== null ? `, неотменённых ${this.formatMetricNumber(active)}` : ''}.${metricChange('appointments_total')}`,
         );
       }
     }
@@ -3507,13 +3556,18 @@ export class AiCoreService {
     const changes = this.record(data.changes);
     const current = this.record(data.current);
     const metric = (key: string) => this.optionalMetricNumber(metrics[key]);
-    const money = (value: number) =>
+    /**
+     * Величина здесь ВСЕГДА есть: аргумент — конечное число, и пустым массив
+     * быть не может. Запасной путь существует только чтобы не молчать, если
+     * валюта окажется неразборчивой.
+     */
+    const money = (value: number): string =>
       this.formatMoneyEntries([
         {
           currency: this.analyticsCurrency(current),
           amount_kopecks: value,
         },
-      ]);
+      ]) ?? this.formatMetricNumber(value / 100);
     const facts: string[] = [];
     const moneyKey = personal
       ? 'booked_value_amount_kopecks'
@@ -3765,9 +3819,18 @@ export class AiCoreService {
     return remainder === 0 ? `${hours} ч` : `${hours} ч ${remainder} мин`;
   }
 
-  private formatMoneyEntries(value: unknown): string {
+  /**
+   * Денежные величины в текст. `null` — когда величины НЕТ.
+   *
+   * 🔴 Cycle 04 P5. Здесь стояло `return '0 ₽'` для пустого массива — а пустой
+   * массив у канонического слоя означает ровно противоположное: «денег
+   * показывать нельзя» (fail-closed по роли или недоступный источник). Текст
+   * превращал отказ в измеренный ноль, и владелец читал «0 ₽» там, где
+   * система молчала. Вызывающие обязаны решить, что сказать вместо числа.
+   */
+  private formatMoneyEntries(value: unknown): string | null {
     if (!Array.isArray(value) || value.length === 0) {
-      return '0 ₽';
+      return null;
     }
     const formatted = value
       .map((entry) => {
@@ -3793,9 +3856,10 @@ export class AiCoreService {
         return `${amount}${currencyLabel ? ` ${currencyLabel}` : ''}`;
       })
       .filter((entry): entry is string => entry !== null);
-    return formatted.length > 0 ? formatted.join(', ') : '0 ₽';
+    return formatted.length > 0 ? formatted.join(', ') : null;
   }
 
+  /** То же самое; имя сохранено ради вызывающих, ждавших `null`. */
   private formatVerifiedMoneyEntries(value: unknown): string | null {
     if (!Array.isArray(value) || value.length === 0) {
       return null;
