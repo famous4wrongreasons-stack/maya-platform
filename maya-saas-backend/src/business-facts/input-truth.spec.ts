@@ -664,6 +664,8 @@ describe('P0 §3 — отмены', () => {
       {} as CustomersService,
       {} as StaffService,
       new BusinessStateService(analyticsService, prisma),
+      // 🔴 Cycle 04 P6. Канонический читатель периода.
+      new AppointmentPeriodReader({} as CrmService),
     );
     const args = {
       period: 'custom',
@@ -749,6 +751,8 @@ describe('P0 §3 — отмены', () => {
       {} as CustomersService,
       {} as StaffService,
       new BusinessStateService(analyticsService, prisma),
+      // 🔴 Cycle 04 P6. Канонический читатель периода.
+      new AppointmentPeriodReader({} as CrmService),
     );
     const args = {
       period: 'custom',
@@ -920,29 +924,58 @@ describe('P0 §4 — журнал дня в AI-слое', () => {
         }),
       },
       branch: { findFirst: jest.fn() },
+      appointment: {
+        findMany: jest.fn().mockResolvedValue([]),
+        groupBy: jest.fn().mockResolvedValue([]),
+      },
+      staffProviderLink: { findMany: jest.fn().mockResolvedValue([]) },
+      internalProvider: { findMany: jest.fn().mockResolvedValue([]) },
+      reconciliationRun: { findFirst: jest.fn().mockResolvedValue(null) },
     } as unknown as PrismaService;
+    const tenantContext = new TenantContextService();
+    /**
+     * 🔴 Cycle 04 P6. Владелец дневного вычисления теперь слой аналитики, и
+     * здесь он НАСТОЯЩИЙ: проверять фильтр окна на макете значило бы проверять
+     * не ту систему. Подменены только границы — база и провайдер.
+     */
+    const analyticsService = new OperationsAnalyticsService(
+      prisma,
+      tenantContext,
+      { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
+      crmService,
+      {
+        encrypt: (value: string) => value,
+        decrypt: (value: string) => value,
+      } as unknown as EncryptionService,
+      new AppointmentPeriodReader(crmService),
+      new AttendanceFactsService(prisma, tenantContext),
+    );
     const handler = new AiToolHandlerService(
       crmService,
       {} as AppointmentsService,
       {} as LoyaltyService,
-      {} as OperationsAnalyticsService,
+      analyticsService,
       {} as ExpensesService,
       prisma,
       {} as CustomersService,
       {} as StaffService,
-      new BusinessStateService({} as OperationsAnalyticsService, prisma),
+      new BusinessStateService(analyticsService, prisma),
+      // 🔴 Cycle 04 P6. Канонический читатель периода.
+      new AppointmentPeriodReader({} as CrmService),
     );
     return () =>
-      handler.execute(
-        'operations.journal.read',
-        {
-          tenantId: 'tenant-day',
-          userId: 'owner-1',
-          role: UserRole.TENANT_OWNER,
-          surface: 'web' as const,
-        },
-        { date: '2026-08-10' },
-        'day-key',
+      tenantContext.runAsSystemTenant('tenant-day', () =>
+        handler.execute(
+          'operations.journal.read',
+          {
+            tenantId: 'tenant-day',
+            userId: 'owner-1',
+            role: UserRole.TENANT_OWNER,
+            surface: 'web' as const,
+          },
+          { date: '2026-08-10' },
+          'day-key',
+        ),
       ) as Promise<{
         summary: { total: number };
         attendance: Record<string, number>;
@@ -970,10 +1003,20 @@ describe('P0 §4 — журнал дня в AI-слое', () => {
 
     const result = await run();
 
-    expect(result.attendance).toEqual({
-      arrived: 1,
-      no_show: 0,
-      awaiting: 1,
+    /**
+     * 🔴 Cycle 04 P6. Присутствие дня приходит из ЗЕРКАЛА главы 3, а не из
+     * поля журнала. В этом стенде зеркало пустое и период не сверялся —
+     * значит, чисел нет вовсе, и это правильный ответ: «мы этого не видели»
+     * вместо «никто не пришёл». Разделение присутствия и статуса, ради
+     * которого написан тест, проверяется тем, что статусные счётчики при
+     * этом на месте.
+     */
+    expect(result.attendance).toMatchObject({
+      state: 'measured_incomplete',
+      source: 'canonical_mirror',
+      arrived: null,
+      no_show: null,
+      awaiting: null,
       not_observed: 0,
     });
     // Статус провайдера при этом не переписан: два «проведённых» остаются.
@@ -1211,6 +1254,8 @@ describe('P0 §26 — периоды разной полноты не сравн
       {} as CustomersService,
       {} as StaffService,
       new BusinessStateService(analyticsService, prisma),
+      // 🔴 Cycle 04 P6. Канонический читатель периода.
+      new AppointmentPeriodReader({} as CrmService),
     );
 
     const result = (await handler.execute(

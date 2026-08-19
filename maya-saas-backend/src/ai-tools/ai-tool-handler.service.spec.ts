@@ -9,6 +9,12 @@ import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
+import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
+import { CalendarSource } from '../common/domain.enums';
+import { EncryptionService } from '../encryption/encryption.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
+import { TenantsService } from '../tenants/tenants.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -787,22 +793,60 @@ describe('AiToolHandlerService output minimization', () => {
         },
       ],
     });
-    const service = createService({
-      crmService: { getStaff, getJournal } as unknown as CrmService,
-    });
+    /**
+     * 🔴 Cycle 04 P6. Аналитика здесь НАСТОЯЩАЯ: дневной срез перестал считать
+     * сам, и подменять владельца вычисления макетом значило бы проверять не ту
+     * систему. Подменены только границы — база и провайдер.
+     */
+    const crmService = { getStaff, getJournal } as unknown as CrmService;
+    const tenantContext = new TenantContextService();
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          defaultTimezone: 'UTC',
+          calendarSource: CalendarSource.EXTERNAL,
+        }),
+      },
+      appointment: {
+        findMany: jest.fn().mockResolvedValue([]),
+        groupBy: jest.fn().mockResolvedValue([]),
+      },
+      staffProviderLink: { findMany: jest.fn().mockResolvedValue([]) },
+      internalProvider: { findMany: jest.fn().mockResolvedValue([]) },
+      reconciliationRun: { findFirst: jest.fn().mockResolvedValue(null) },
+    } as unknown as PrismaService;
+    const analyticsService = new OperationsAnalyticsService(
+      prisma,
+      tenantContext,
+      { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
+      crmService,
+      {
+        encrypt: (value: string) => value,
+        decrypt: (value: string) => value,
+      } as unknown as EncryptionService,
+      new AppointmentPeriodReader(crmService),
+      new AttendanceFactsService(prisma, tenantContext),
+    );
+    const service = createService({ crmService, analyticsService });
 
-    const result = await service.execute(
-      'operations.journal.read',
-      { ...principal, role: UserRole.TENANT_OWNER, surface: 'native' },
-      { date: '2026-08-06', staff_id: '1461615' },
-      'execution-journal-read',
+    const result = await tenantContext.runAsSystemTenant('tenant-a', () =>
+      service.execute(
+        'operations.journal.read',
+        { ...principal, role: UserRole.TENANT_OWNER, surface: 'native' },
+        { date: '2026-08-06', staff_id: '1461615' },
+        'execution-journal-read',
+      ),
     );
 
+    // 🔴 Cycle 04 P6. Провайдера теперь спрашивают ровно про сутки
+    // [00:00 … 23:59:59.999], а не про полуинтервал до полуночи следующего
+    // дня: запись ровно в 00:00 следующих суток и раньше отбрасывалась
+    // фильтром окна, так что состав ответа не меняется — меняется запрос.
     expect(getJournal).toHaveBeenCalledWith(
       'tenant-a',
       {
         from: '2026-08-06T00:00:00.000Z',
-        to: '2026-08-07T00:00:00.000Z',
+        to: '2026-08-06T23:59:59.999Z',
         providerId: '1461615',
       },
       { includeCanceled: true },
@@ -2947,6 +2991,8 @@ describe('AiToolHandlerService output minimization', () => {
         overrides.analyticsService ?? ({} as OperationsAnalyticsService),
         prisma,
       ),
+      // 🔴 Cycle 04 P6. Канонический читатель периода.
+      new AppointmentPeriodReader(overrides.crmService ?? ({} as CrmService)),
     );
   }
 });

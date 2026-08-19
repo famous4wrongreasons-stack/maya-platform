@@ -9,6 +9,7 @@ import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService extended business tools', () => {
@@ -36,6 +37,8 @@ describe('AiToolHandlerService extended business tools', () => {
         {} as OperationsAnalyticsService,
         {} as PrismaService,
       ),
+      // 🔴 Cycle 04 P6. Канонический читатель периода.
+      new AppointmentPeriodReader({} as CrmService),
       undefined,
       undefined,
       undefined,

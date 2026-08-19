@@ -22,6 +22,7 @@ import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
 import { AiMemoryService } from './ai-memory.service';
 import { AiSpeechService } from './ai-speech.service';
+import { BusinessFactsModule } from '../business-facts/business-facts.module';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
@@ -36,6 +37,8 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
 @Module({
   imports: [
     BusinessStateModule,
+    // 🔴 Cycle 04 P6. Единственный читатель записей за бизнес-период.
+    BusinessFactsModule,
     CustomersModule,
     StaffModule,
     OperationsAnalyticsModule,

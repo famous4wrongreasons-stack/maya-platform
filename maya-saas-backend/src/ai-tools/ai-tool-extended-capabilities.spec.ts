@@ -11,6 +11,7 @@ import { InboxService } from '../inbox/inbox.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 
@@ -638,6 +639,8 @@ function createService(overrides: {
       overrides.analyticsService ?? ({} as OperationsAnalyticsService),
       prisma,
     ),
+    // 🔴 Cycle 04 P6. Канонический читатель периода.
+    new AppointmentPeriodReader(overrides.crmService ?? ({} as CrmService)),
     overrides.dashboardPreferencesService,
     overrides.inboxService,
     overrides.auditLogService,

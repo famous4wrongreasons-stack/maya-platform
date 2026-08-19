@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
+import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
 import { AppointmentsService } from '../appointments/appointments.service';
 import {
@@ -65,13 +66,8 @@ import {
   historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
-import {
-  collectPeriodRecords,
-  parseVisitOutcome,
-  unavailableAuthorityView,
-} from '../domain';
-import type { BusinessPeriod, PeriodRead } from '../domain';
-import { CRM_JOURNAL_MAX_WINDOW_DAYS } from '../crm/crm-provider-limits';
+import { parseVisitOutcome, unavailableAuthorityView } from '../domain';
+import type { PeriodRead } from '../domain';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -185,6 +181,14 @@ export class AiToolHandlerService {
      * нет — храповик границы следит, чтобы она не вернулась.
      */
     private readonly businessState: BusinessStateService,
+    /**
+     * 🔴 Cycle 04 P6. Единственный читатель записей за бизнес-период.
+     *
+     * Слой инструментов читал журнал собственной нарезкой окон. Теперь он
+     * пользуется тем же читателем, что и канонический владелец фактов: окно,
+     * дедупликация и признание источника в полноте живут в одном месте.
+     */
+    private readonly appointmentPeriodReader: AppointmentPeriodReader,
     private readonly dashboardPreferencesService?: DashboardPreferencesService,
     private readonly inboxService?: InboxService,
     private readonly auditLogService?: AuditLogService,
@@ -942,7 +946,21 @@ export class AiToolHandlerService {
       appointments_observed: appointments.length,
       clients_observed: clients.size,
       status_counts: statusCounts,
-      attendance_counts: attendanceCounts,
+      /**
+       * 🔴 Cycle 04 P6. Это ОТМЕТКИ ПРОВАЙДЕРА по записям, а не канонический
+       * факт присутствия за период.
+       *
+       * Владелец вопроса «сколько человек пришло за период» один — зеркало
+       * главы 3 (`AttendanceFactsService`). Здесь считается другое: сколько
+       * отметок провайдера пришлось на каждого КЛИЕНТА. Свести это к канону
+       * сегодня нельзя: в зеркале идентичности клиента бизнеса нет
+       * (`mayaClientId` пуст на всех записях, реестр 3.7), и связать строку
+       * зеркала с клиентом провайдера нечем.
+       *
+       * Поэтому поле переименовано, а не подменено: пользователь должен
+       * видеть, на чём оно стоит, и не выбирать между двумя числами.
+       */
+      provider_attendance_marks: attendanceCounts,
       /**
        * 🔴 Можно ли читать ноль как «ничего не было».
        *
@@ -960,10 +978,12 @@ export class AiToolHandlerService {
       risk_clients: ranked.map(([, row], index) => ({
         alias: `client_${index + 1}`,
         appointments_observed: row.visits,
-        no_show_count: row.noShow,
+        // Те же отметки провайдера, но по клиенту. Каноническим присутствием
+        // они не являются и называться им не должны.
+        provider_marked_no_show: row.noShow,
         cancellation_count: row.canceled,
-        attended_count: row.arrived,
-        attendance_not_observed: row.notObserved,
+        provider_marked_arrived: row.arrived,
+        attendance_not_marked: row.notObserved,
         last_event_at: row.lastEventAt,
         risk_level:
           row.noShow >= 2 || row.noShow + row.canceled >= 3
@@ -972,6 +992,11 @@ export class AiToolHandlerService {
       })),
       contains_personal_data: false,
       limitations: [
+        {
+          key: 'attendance_owner',
+          reason:
+            'these are provider marks per client, not the canonical attendance fact: the period-level question "how many arrived" is answered only by the chapter 3 mirror, and per-client attendance has no canonical owner while business client identity is empty',
+        },
         {
           key: 'late_cancellations',
           reason:
@@ -1868,10 +1893,13 @@ export class AiToolHandlerService {
     const date = this.requiredString(args.date);
     const requestedStaffId =
       typeof args.staff_id === 'string' ? args.staff_id : null;
-    const [timezone, activeStaff] = await Promise.all([
-      this.reportingTimezone(principal.tenantId),
-      this.crmService.getStaff(principal.tenantId),
-    ]);
+    /**
+     * 🔴 Cycle 04 P6. Часовой пояс дня инструмент больше не разрешает сам:
+     * границы суток строит канонический владелец дневного среза, и он же
+     * возвращает пояс, в котором они построены. Две лестницы резолюции на
+     * один вопрос — это два разных дня на границе полуночи.
+     */
+    const activeStaff = await this.crmService.getStaff(principal.tenantId);
     const selectedStaff = requestedStaffId
       ? activeStaff.find((member) => member.id === requestedStaffId)
       : null;
@@ -1882,186 +1910,52 @@ export class AiToolHandlerService {
       });
     }
 
-    const from = localDateMinuteToUtc(date, 0, timezone);
-    const to = localDateMinuteToUtc(this.shiftLocalDate(date, 1), 0, timezone);
-    const journal = await this.crmService.getJournal(
+    /**
+     * 🔴 Cycle 04 P6. Дневной срез СПРАШИВАЕТ, а не считает.
+     *
+     * Здесь жили собственные счётчики статусов, собственные минуты,
+     * собственная стоимость записанного и собственное присутствие — взятое из
+     * поля журнала. В бою это давало владельцу два ответа на один вопрос:
+     * журнал говорил «пришли 13», зеркало главы 3 — «пришли 12 и одна запись
+     * ожидает отметки». Теперь ответ один, и его владелец — слой аналитики.
+     *
+     * Журнал остаётся ВХОДОМ (список визитов дня приезжает оттуда же, одним
+     * чтением), но вторым вычислителем быть перестал.
+     */
+    const day = await this.analyticsService.getDayOperations(
       principal.tenantId,
-      {
-        from: from.toISOString(),
-        to: to.toISOString(),
-        ...(requestedStaffId ? { providerId: requestedStaffId } : {}),
-      },
-      { includeCanceled: true },
+      { date, staffExternalId: requestedStaffId },
     );
 
-    // 🔴 Cycle 04 P0. Ответ источника окном НЕ является: провайдер возвращает
-    // записи вне запрошенного диапазона (реестр 3.8, измерено). До P0 сюда
-    // попадало всё, что он прислал, и «записей за день» включало чужие дни.
-    const dayRead = collectPeriodRecords(
-      [
-        {
-          items: journal.appointments,
-          completeness: journal.completeness,
-          truncationReason: journal.truncation_reason ?? null,
-        },
-      ],
-      {
-        from: from.toISOString(),
-        // Последняя миллисекунда суток: сутки — это [00:00 … 23:59:59.999],
-        // а не отрезок, включающий полночь следующего дня.
-        to: new Date(to.getTime() - 1).toISOString(),
-        timezone,
-      },
-      {
-        startAt: (item) => new Date(item.start_at),
-        key: (item) => item.id,
-      },
+    const staffById = new Map(activeStaff.map((member) => [member.id, member]));
+    const canonicalRows = new Map(
+      day.staff.map((row) => [row.staff_external_id, row]),
     );
-    const dayAppointments = dayRead.items;
 
-    const statusCounts = {
-      confirmed: 0,
-      completed: 0,
-      canceled: 0,
-      no_show: 0,
-      other: 0,
-    };
-    /** Присутствие — из канона, а не из статуса. `completed` их смешивает. */
-    const attendanceCounts = {
-      arrived: 0,
-      no_show: 0,
-      awaiting: 0,
-      not_observed: 0,
-    };
-    const masterSchedule = new Map(
-      (journal.all_masters ?? journal.masters ?? []).map((master) => [
-        master.id,
-        master,
+    /**
+     * Расписание приезжает ТЕМ ЖЕ ответом провайдера, что и записи: канон
+     * везёт его транспортом, не выводя из него ничего. Отдельный запрос
+     * расписания на каждого мастера означал бы платить за консолидацию
+     * лишними обращениями к провайдеру — ровно то, чего пакет избегает.
+     */
+    const scheduleByStaff = new Map(
+      (day.masters ?? []).map((master) => [master.id, master]),
+    );
+    const staffIds = [
+      ...new Set([
+        ...canonicalRows.keys(),
+        ...staffById.keys(),
+        ...scheduleByStaff.keys(),
       ]),
-    );
-    const byStaff = new Map<
-      string,
-      {
-        name: string;
-        title: string | null;
-        total: number;
-        confirmed: number;
-        completed: number;
-        canceled: number;
-        no_show: number;
-        other: number;
-        bookedMinutes: number;
-        bookedValueKopecks: Map<string, number>;
-      }
-    >();
+    ].filter((id) => !requestedStaffId || id === requestedStaffId);
 
-    const safeAppointments = dayAppointments.map((appointment) => {
-      const status = appointment.status;
-      // Удалённая запись присутствия не даёт: см. правило в клиентском срезе.
-      const attendance =
-        status === 'canceled' ? null : (appointment.attendance ?? null);
-      if (status !== 'canceled') {
-        if (attendance === 'arrived') attendanceCounts.arrived += 1;
-        else if (attendance === 'no_show') attendanceCounts.no_show += 1;
-        else if (attendance === null) attendanceCounts.not_observed += 1;
-        else attendanceCounts.awaiting += 1;
-      }
-      if (Object.prototype.hasOwnProperty.call(statusCounts, status)) {
-        statusCounts[status as keyof typeof statusCounts] += 1;
-      } else {
-        statusCounts.other += 1;
-      }
-      const durationMinutes = Math.max(
-        0,
-        Math.round(
-          (new Date(appointment.end_at).getTime() -
-            new Date(appointment.start_at).getTime()) /
-            60_000,
-        ),
-      );
-      const row = byStaff.get(appointment.provider.id) ?? {
-        name: appointment.provider.name,
-        title: appointment.provider.title?.trim() || null,
-        total: 0,
-        confirmed: 0,
-        completed: 0,
-        canceled: 0,
-        no_show: 0,
-        other: 0,
-        bookedMinutes: 0,
-        bookedValueKopecks: new Map<string, number>(),
-      };
-      row.total += 1;
-      if (status === 'confirmed') row.confirmed += 1;
-      if (status === 'completed') row.completed += 1;
-      if (status === 'canceled') row.canceled += 1;
-      if (status === 'no_show') row.no_show += 1;
-      if (
-        status !== 'confirmed' &&
-        status !== 'completed' &&
-        status !== 'canceled' &&
-        status !== 'no_show'
-      ) {
-        row.other += 1;
-      }
-      if (status !== 'canceled') {
-        row.bookedMinutes += durationMinutes;
-        if (
-          typeof appointment.total_price === 'number' &&
-          Number.isFinite(appointment.total_price)
-        ) {
-          const currency = appointment.currency || 'RUB';
-          row.bookedValueKopecks.set(
-            currency,
-            (row.bookedValueKopecks.get(currency) ?? 0) +
-              Math.round(appointment.total_price * 100),
-          );
-        }
-      }
-      byStaff.set(appointment.provider.id, row);
-
-      return {
-        time: this.localTime(appointment.start_at, timezone),
-        end_time: this.localTime(appointment.end_at, timezone),
-        status,
-        staff_name: appointment.provider.name,
-        services: appointment.services.map((service) => service.name),
-        duration_minutes: durationMinutes,
-        booked_value:
-          typeof appointment.total_price === 'number' &&
-          Number.isFinite(appointment.total_price)
-            ? {
-                currency: appointment.currency || 'RUB',
-                amount_kopecks: Math.round(appointment.total_price * 100),
-                amount_major_units: appointment.total_price,
-              }
-            : null,
-      };
-    });
-
-    // Работающий мастер без записей тоже важен для ответа о загрузке.
-    for (const member of activeStaff) {
-      if (requestedStaffId && member.id !== requestedStaffId) continue;
-      if (byStaff.has(member.id)) continue;
-      byStaff.set(member.id, {
-        name: member.name,
-        title: member.title?.trim() || null,
-        total: 0,
-        confirmed: 0,
-        completed: 0,
-        canceled: 0,
-        no_show: 0,
-        other: 0,
-        bookedMinutes: 0,
-        bookedValueKopecks: new Map<string, number>(),
-      });
-    }
-
-    const staff = [...byStaff.entries()]
-      .map(([staffId, row]) => {
-        const schedule = masterSchedule.get(staffId);
+    const staff = staffIds
+      .map((staffId) => {
+        const row = canonicalRows.get(staffId);
+        const member = staffById.get(staffId);
+        const schedule = scheduleByStaff.get(staffId);
         const workingMinutes = (schedule?.work_slots ?? []).reduce(
-          (sum, slot) =>
+          (sum: number, slot) =>
             sum +
             Math.max(
               0,
@@ -2069,36 +1963,36 @@ export class AiToolHandlerService {
             ),
           0,
         );
+        const bookedMinutes =
+          this.optionalMetricNumber(row?.booked_minutes) ?? 0;
         return {
-          name: row.name,
-          title: row.title,
+          name: row?.name ?? member?.name ?? 'Мастер',
+          title: member?.title?.trim() || null,
           is_working: schedule?.is_working ?? null,
           working_hours: (schedule?.work_slots ?? []).map((slot) => ({
             from: slot.from,
             to: slot.to,
           })),
           appointments: {
-            total: row.total,
-            active: row.confirmed + row.completed + row.no_show + row.other,
-            confirmed: row.confirmed,
-            completed: row.completed,
-            canceled: row.canceled,
-            no_show: row.no_show,
-            other: row.other,
+            total: this.optionalMetricNumber(row?.total) ?? 0,
+            active: this.optionalMetricNumber(row?.appointments) ?? 0,
+            confirmed: this.optionalMetricNumber(row?.scheduled) ?? 0,
+            completed: this.optionalMetricNumber(row?.completed) ?? 0,
+            canceled: this.optionalMetricNumber(row?.cancelled) ?? 0,
+            no_show: this.optionalMetricNumber(row?.no_show) ?? 0,
           },
-          booked_minutes: row.bookedMinutes,
+          booked_minutes: bookedMinutes,
           working_minutes: workingMinutes,
+          /**
+           * Утилизация кресла — производная ДВУХ фактов: записанных минут
+           * (канон) и рабочего времени (расписание). Собственного владельца у
+           * неё пока нет, и без расписания она остаётся `null`, а не нулём.
+           */
           load_percent:
             workingMinutes > 0
-              ? Math.round((row.bookedMinutes / workingMinutes) * 1_000) / 10
+              ? Math.round((bookedMinutes / workingMinutes) * 1_000) / 10
               : null,
-          booked_service_value: [...row.bookedValueKopecks.entries()].map(
-            ([currency, amountKopecks]) => ({
-              currency,
-              amount_kopecks: amountKopecks,
-              amount_major_units: amountKopecks / 100,
-            }),
-          ),
+          booked_service_value: Array.isArray(row?.revenue) ? row.revenue : [],
         };
       })
       .sort(
@@ -2107,54 +2001,100 @@ export class AiToolHandlerService {
           left.name.localeCompare(right.name, 'ru'),
       );
 
+    const records = day.records.map((appointment) => {
+      const startAt = new Date(appointment.startAt);
+      const endAt = new Date(
+        startAt.getTime() + appointment.durationMinutes * 60_000,
+      );
+      return {
+        time: this.localTime(startAt.toISOString(), day.timezone),
+        end_time: this.localTime(endAt.toISOString(), day.timezone),
+        status: appointment.status,
+        staff_name: appointment.staffName,
+        services: appointment.services.map((service) => service.name),
+        duration_minutes: appointment.durationMinutes,
+        booked_value:
+          appointment.totalPriceKopecks === null
+            ? null
+            : {
+                currency: appointment.currency,
+                amount_kopecks: appointment.totalPriceKopecks,
+                amount_major_units: appointment.totalPriceKopecks / 100,
+              },
+      };
+    });
+
+    const attendance = this.record(day.attendance);
+    const completeness = this.record(day.completeness);
+    const appointmentsCompleteness = this.record(completeness.appointments);
+    const notObserved = this.optionalMetricNumber(attendance.not_observed);
+
     return {
       verified: true,
       source: 'yclients',
       pii_redacted: true,
       date,
-      timezone,
+      timezone: day.timezone,
       staff_scope: selectedStaff
         ? { name: selectedStaff.name, title: selectedStaff.title ?? null }
         : null,
       summary: {
-        total: dayAppointments.length,
-        active:
-          statusCounts.confirmed +
-          statusCounts.completed +
-          statusCounts.no_show +
-          statusCounts.other,
-        ...statusCounts,
-        booked_minutes: staff.reduce(
-          (sum, member) => sum + member.booked_minutes,
+        total: this.optionalMetricNumber(this.record(day.summary).total) ?? 0,
+        active: this.optionalMetricNumber(this.record(day.summary).active) ?? 0,
+        confirmed:
+          this.optionalMetricNumber(this.record(day.summary).scheduled) ?? 0,
+        completed:
+          this.optionalMetricNumber(this.record(day.summary).completed) ?? 0,
+        canceled:
+          this.optionalMetricNumber(this.record(day.summary).cancelled) ?? 0,
+        no_show:
+          this.optionalMetricNumber(this.record(day.summary).no_show) ?? 0,
+        booked_minutes:
+          this.optionalMetricNumber(this.record(day.summary).booked_minutes) ??
           0,
-        ),
       },
       /**
-       * 🔴 Присутствие отдельно от статуса.
+       * 🔴 Присутствие приходит из зеркала главы 3, а не из поля журнала.
        *
-       * `completed` в блоке выше — слово ПРОВАЙДЕРА, и означает оно «отмечен
-       * приход ИЛИ оплачено». Сколько человек действительно пришло, отвечает
-       * только этот блок; `not_observed` — не ноль и не ожидание.
+       * `completed` в блоке выше — слово ПРОВАЙДЕРА и означает «отмечен приход
+       * ИЛИ оплачено». Сколько человек действительно пришло, отвечает только
+       * этот блок, и у него один владелец на всю систему.
        */
-      attendance: attendanceCounts,
+      attendance: {
+        state: attendance.state ?? 'unavailable',
+        /**
+         * 🔴 Числа появляются ТОЛЬКО у измеренного наблюдения. При
+         * `measured_incomplete` и `unavailable` зеркало не даёт права
+         * называть цифры: ноль там означал бы «никто не пришёл», хотя верное
+         * утверждение — «мы этого не видели».
+         */
+        ...(attendance.state === 'measured'
+          ? {
+              arrived: this.optionalMetricNumber(attendance.arrived),
+              no_show: this.optionalMetricNumber(attendance.no_show),
+              awaiting: this.optionalMetricNumber(attendance.awaiting),
+            }
+          : { arrived: null, no_show: null, awaiting: null }),
+        not_observed: notObserved,
+        source: 'canonical_mirror',
+      },
       completeness: {
-        source: 'provider_journal',
-        status: dayRead.completeness === 'complete' ? 'complete' : 'incomplete',
-        reason:
-          dayRead.completeness === 'complete'
-            ? null
-            : (dayRead.truncationReason ?? 'unknown'),
+        source: appointmentsCompleteness.source ?? 'provider_journal',
+        status: appointmentsCompleteness.status ?? 'complete',
+        reason: appointmentsCompleteness.reason ?? null,
         zero_means_none:
-          dayRead.completeness === 'complete' &&
-          attendanceCounts.not_observed === 0,
-        attendance_not_observed: attendanceCounts.not_observed,
+          appointmentsCompleteness.status === 'complete' && notObserved === 0,
+        attendance_not_observed: notObserved,
         // Столько записей провайдер прислал мимо запрошенных суток.
-        out_of_period_discarded: dayRead.outOfPeriodDiscarded,
+        out_of_period_discarded:
+          this.optionalMetricNumber(
+            appointmentsCompleteness.out_of_period_discarded,
+          ) ?? 0,
       },
       staff,
-      appointments: safeAppointments.slice(0, 100),
-      appointments_returned: Math.min(safeAppointments.length, 100),
-      appointments_truncated: safeAppointments.length > 100,
+      appointments: records.slice(0, 100),
+      appointments_returned: Math.min(records.length, 100),
+      appointments_truncated: records.length > 100,
     };
   }
 
@@ -3648,15 +3588,16 @@ export class AiToolHandlerService {
   }
 
   /**
-   * Журнал читается кусками: внешняя CRM не отдаёт длинный период одним
-   * запросом. Лимит объявлен в границе CRM (`CRM_JOURNAL_MAX_WINDOW_DAYS`),
-   * а здесь сознательно берётся запас в сутки — он был и до P3, и менять
-   * шаблон запросов заодно с канонизацией нельзя.
+   * Чтение журнала за период — через канонического читателя.
    *
-   * 🔴 Cycle 04 P0. Возвращается не голый список, а чтение периода: записи,
-   * ДЕЙСТВИТЕЛЬНО попавшие в окно, и признание источника в полноте. До P0
-   * здесь считалось всё, что вернул провайдер, — а он возвращает записи вне
-   * запрошенного диапазона (реестр 3.8, измерено на боевых данных).
+   * 🔴 Cycle 04 P6. Здесь жила ВТОРАЯ нарезка периода на окна провайдера: своя
+   * арифметика курсора, свой запас в сутки, без параллельных волн и без
+   * фильтра по мастеру. Ревизия остатка доказала, что обе реализации обходят
+   * одно ограничение, обслуживают одно намерение (бизнес-период) и сходятся в
+   * одну и ту же чистую функцию — то есть это была копия, а не вторая задача.
+   *
+   * У копии вдобавок был доказуемый дефект: при периоде, кратном длине окна,
+   * последний кусок получался нулевой длины, и граница CRM отвечала отказом.
    */
   private async readJournalRangeInChunks(
     tenantId: string,
@@ -3664,39 +3605,12 @@ export class AiToolHandlerService {
     toIso: string,
     timezone: string,
   ): Promise<PeriodRead<CrmJournalAppointment>> {
-    const from = new Date(fromIso);
-    const to = new Date(toIso);
-    const period: BusinessPeriod = { from: fromIso, to: toIso, timezone };
-    const windows: Array<{
-      items: CrmJournalAppointment[];
-      completeness: 'complete' | 'truncated';
-      truncationReason?: string | null;
-    }> = [];
-    const maxChunkMs = (CRM_JOURNAL_MAX_WINDOW_DAYS - 1) * 24 * 60 * 60 * 1_000;
-    let cursor = from.getTime();
-    while (cursor <= to.getTime()) {
-      const chunkEnd = Math.min(to.getTime(), cursor + maxChunkMs - 1);
-      const journal = await this.crmService.getJournal(
-        tenantId,
-        {
-          from: new Date(cursor).toISOString(),
-          to: new Date(chunkEnd).toISOString(),
-        },
-        { includeCanceled: true },
-      );
-      windows.push({
-        items: journal.appointments,
-        completeness: journal.completeness,
-        truncationReason: journal.truncation_reason ?? null,
-      });
-      cursor = chunkEnd + 1;
-    }
-    return collectPeriodRecords(windows, period, {
-      startAt: (item) => new Date(item.start_at),
-      key: (item) => item.id,
+    return this.appointmentPeriodReader.readProviderJournal(tenantId, {
+      from: fromIso,
+      to: toIso,
+      timezone,
     });
   }
-
   private shiftLocalMonth(value: string, months: number): string {
     const date = new Date(`${value}T00:00:00.000Z`);
     date.setUTCMonth(date.getUTCMonth() + months);

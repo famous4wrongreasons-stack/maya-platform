@@ -1,3 +1,5 @@
+import { isCanceledOutcome, parseVisitOutcome } from '../domain/visit-outcome';
+
 /**
  * Денежная мотивация мастера — порт логики из `masters_ai.money_pitch`
  * и `_today_earn_from_records` (webhook_server).
@@ -97,9 +99,15 @@ function serviceKey(title: string): string {
     .join(' ');
 }
 
+/**
+ * 🔴 Cycle 04 P6. Отмена — из канонического словаря домена.
+ *
+ * Здесь стояло подстрочное сравнение (`includes('cancel')`), пятый словарь
+ * отмены в системе. На сегодняшних данных он с доменом не расходился, но
+ * первое же новое написание статуса развело бы их молча.
+ */
 function isCancelled(status: string): boolean {
-  const value = String(status || '').toLowerCase();
-  return value.includes('cancel') || value.includes('отмен');
+  return isCanceledOutcome(parseVisitOutcome(status));
 }
 
 function currentBlocksAddon(
@@ -430,11 +438,19 @@ export function toMotivationVisit(input: {
     title: service.name,
     priceRub: Math.round((service.amountKopecks || 0) / 100),
   }));
-  const fromServices = services.reduce(
-    (sum, service) => sum + service.priceRub,
-    0,
-  );
-  const fromTotal =
+  /**
+   * 🔴 Cycle 04 P6. Стоимость записи — по тому же правилу, что и у владельца.
+   *
+   * Здесь стояло `fromTotal > 0 ? fromTotal : fromServices`: запись без цены
+   * добирала сумму услуг, и то же самое число за тот же период у владельца
+   * фактов получалось другим — он такие записи в стоимость записанного просто
+   * не берёт и отдельно публикует долю записей без цены. Два ответа на один
+   * вопрос отличались тем сильнее, чем хуже заполнен журнал.
+   *
+   * Сумма услуг остаётся ТОЛЬКО как содержимое визита (для советов по
+   * допродажам), но стоимостью записанного больше не притворяется.
+   */
+  const grossRub =
     input.totalPriceKopecks != null
       ? Math.round(input.totalPriceKopecks / 100)
       : 0;
@@ -442,7 +458,7 @@ export function toMotivationVisit(input: {
     clientId: input.clientId,
     startAt: input.startAt,
     status: input.status,
-    grossRub: fromTotal > 0 ? fromTotal : fromServices,
+    grossRub,
     services,
   };
 }

@@ -585,6 +585,8 @@ function createHarness(
     {} as CustomersService,
     {} as StaffService,
     new BusinessStateService(analytics, prisma),
+    // 🔴 Cycle 04 P6. Канонический читатель периода.
+    new AppointmentPeriodReader({} as CrmService),
   );
   const runtime = new AiToolRuntimeService(
     prisma,

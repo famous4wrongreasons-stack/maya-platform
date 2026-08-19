@@ -20,6 +20,14 @@ export type ProviderJournalRecord = JournalRead['appointments'][number];
 export interface AppointmentPeriodRead extends PeriodRead<ProviderJournalRecord> {
   /** До какого момента источник реально прочитан. */
   observedThrough: string;
+  /**
+   * Смены мастеров, приехавшие тем же ответом провайдера.
+   *
+   * 🔴 Это ТРАНСПОРТ, а не бизнес-факт: читатель из них ничего не выводит и
+   * ничего не считает. Поле существует затем, чтобы дневной срез не платил за
+   * консолидацию отдельным запросом расписания на каждого мастера.
+   */
+  masters?: JournalRead['all_masters'];
 }
 
 /**
@@ -59,6 +67,7 @@ export class AppointmentPeriodReader {
       return {
         ...collectPeriodRecords<ProviderJournalRecord>([], period, SELECTORS),
         observedThrough: now.toISOString(),
+        masters: undefined,
       };
     }
 
@@ -68,6 +77,15 @@ export class AppointmentPeriodReader {
       completeness: JournalRead['completeness'];
       truncationReason?: string | null;
     }> = [];
+    /**
+     * 🔴 Cycle 04 P6. Смены мастеров едут ВМЕСТЕ с записями.
+     *
+     * Провайдер отдаёт их тем же ответом, и это транспорт, а не бизнес-факт:
+     * читатель ничего из них не выводит. Но без этого поля дневной срез был бы
+     * вынужден спрашивать расписание отдельным запросом на каждого мастера —
+     * то есть платить за консолидацию лишними обращениями к провайдеру.
+     */
+    let masters: JournalRead['all_masters'] = undefined;
 
     // Куски читаем волнами: длинная история не ждёт последовательных
     // round-trip, но и не превращается в неограниченный всплеск запросов.
@@ -96,6 +114,7 @@ export class AppointmentPeriodReader {
           completeness: journal.completeness,
           truncationReason: journal.truncation_reason ?? null,
         });
+        masters = journal.all_masters ?? journal.masters ?? masters;
       }
     }
 
@@ -120,7 +139,7 @@ export class AppointmentPeriodReader {
       );
     }
 
-    return { ...read, observedThrough: now.toISOString() };
+    return { ...read, observedThrough: now.toISOString(), masters };
   }
 
   /**

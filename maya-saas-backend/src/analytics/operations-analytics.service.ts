@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { CalendarSource } from '../common/domain.enums';
+import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import type { AppointmentPeriodRead } from '../business-facts/appointment-period.reader';
 import { AppointmentPeriodReader } from '../business-facts/appointment-period.reader';
 import type { AttendanceFacts } from '../business-facts/attendance-facts.service';
@@ -783,6 +784,157 @@ export class OperationsAnalyticsService {
   }
 
   /**
+   * Операционный срез ОДНОГО ДНЯ — канонический владелец.
+   *
+   * 🔴 Cycle 04 P6. До этого пакета «что произошло с визитами за день» умели
+   * отвечать ДВОЕ: этот слой (через обзор периода) и инструмент модели, у
+   * которого были свои счётчики статусов, свои минуты, своя стоимость
+   * записанного и — хуже всего — своё присутствие, взятое из поля журнала.
+   * В бою это давало два разных ответа на «сколько пришло»: 13 у журнала
+   * против 12 у зеркала главы 3.
+   *
+   * Здесь тот же аппарат агрегации, что и у периода, но без когорт: вопрос
+   * «кто пришёл сегодня» их не требует, а лишние чтения истории клиентов
+   * стоили бы трёх дополнительных обращений к провайдеру на каждый вопрос.
+   *
+   * Записи возвращаются РЯДОМ с агрегатом намеренно: список визитов дня — это
+   * ответ на «что сегодня в календаре», и читать журнал второй раз ради него
+   * значило бы снова завести два ответа на один вопрос.
+   */
+  async getDayOperations(
+    tenantId: string,
+    params: { date: string; staffExternalId?: string | null },
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { defaultTimezone: true, calendarSource: true },
+    });
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+    const external =
+      (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
+    const timezone = tenant.defaultTimezone;
+    const staffExternalId = params.staffExternalId ?? null;
+    /**
+     * Границы локального дня — из общего примитива границы календаря, а не из
+     * собственной арифметики: смещение пояса живёт там и только там.
+     * Последняя миллисекунда суток: сутки это [00:00 … 23:59:59.999].
+     */
+    const from = localDateMinuteToUtc(params.date, 0, timezone);
+    const to = new Date(
+      localDateMinuteToUtc(params.date, 24 * 60, timezone).getTime() - 1,
+    );
+    const period: BusinessPeriod = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone,
+    };
+
+    const [read, attendance] = await Promise.all([
+      external
+        ? this.loadExternalAppointments(
+            scopedTenantId,
+            from,
+            to,
+            staffExternalId,
+            timezone,
+          )
+        : this.prisma.appointment
+            .findMany({
+              where: {
+                tenantId: scopedTenantId,
+                startAt: { gte: from, lte: to },
+                ...(staffExternalId ? { staffExternalId } : {}),
+              },
+              select: {
+                id: true,
+                clientId: true,
+                branchId: true,
+                staffExternalId: true,
+                startAt: true,
+                endAt: true,
+                status: true,
+                totalPriceKopecks: true,
+                currency: true,
+              },
+              orderBy: { startAt: 'asc' },
+            })
+            .then((items) => ({
+              appointments: items.map((item) => ({
+                ...item,
+                services: [],
+                staffName: null as string | null,
+                durationMinutes:
+                  item.endAt instanceof Date
+                    ? Math.max(
+                        0,
+                        Math.round(
+                          (item.endAt.getTime() - item.startAt.getTime()) /
+                            60_000,
+                        ),
+                      )
+                    : 0,
+              })),
+              read: null,
+            })),
+      /**
+       * 🔴 Присутствие — из зеркала главы 3 и только оттуда. Поле `attendance`
+       * в ответе журнала описывает то же событие, но живёт по своим правилам
+       * обновления, и выбирать между двумя числами потребитель не должен.
+       */
+      this.attendanceFacts
+        .periodAttendance(scopedTenantId, period, {
+          branchId: null,
+          staffExternalId,
+          attendanceSupported: external,
+        })
+        .catch(() => null),
+    ]);
+
+    const appointments = external
+      ? read.appointments
+      : await this.withInternalProviderNames(scopedTenantId, read.appointments);
+
+    const overview = this.aggregate(
+      appointments,
+      [],
+      timezone,
+      from,
+      to,
+      external ? 'crm' : 'maya',
+      // Когорты клиентов дневному срезу не нужны и не читаются.
+      { status: 'unavailable', reason: 'not_requested_for_day_operations' },
+      true,
+      await this.staffIdsByExternal(scopedTenantId),
+      this.appointmentsObservation(read.read),
+      attendance,
+    );
+
+    return {
+      date: params.date,
+      timezone,
+      period: overview.period,
+      data_source: overview.data_source,
+      summary: overview.appointments,
+      staff: overview.staff,
+      services: overview.services,
+      booked_value: overview.revenue,
+      completeness: overview.completeness,
+      attendance: overview.attendance,
+      /** Записи дня — тот же прочитанный набор, окно уже применено. */
+      records: appointments,
+      /**
+       * Смены мастеров из того же ответа провайдера. Рабочим временем и
+       * утилизацией этот слой не владеет — он лишь не заставляет потребителя
+       * платить за них вторым чтением.
+       */
+      masters: 'masters' in read ? read.masters : undefined,
+    };
+  }
+
+  /**
    * Наблюдение за записями периода.
    *
    * Внешний источник признаётся в неполноте сам; собственная база полна по
@@ -1010,6 +1162,8 @@ export class OperationsAnalyticsService {
   ): Promise<{
     appointments: AnalyticsAppointment[];
     read: AppointmentPeriodRead;
+    /** Смены мастеров из того же ответа провайдера. Транспорт, не факт. */
+    masters?: AppointmentPeriodRead['masters'];
   }> {
     const period: BusinessPeriod = {
       from: from.toISOString(),
@@ -1055,7 +1209,7 @@ export class OperationsAnalyticsService {
       } satisfies AnalyticsAppointment;
     });
 
-    return { appointments, read };
+    return { appointments, read, masters: read.masters };
   }
 
   private aggregate(
