@@ -741,7 +741,17 @@ export class BusinessStateService {
        * живут деньги кассы, и подменять одно другим запрещено.
        */
       average_booked_value: actor.bookedValueAllowed ? averageBookedValue : [],
+      /**
+       * 🔴 Финальная сверка главы 4. Пустой массив рядом с `net`, у которого
+       * причина есть, читался как «расходов не было». В режиме внешней CRM
+       * операционный обзор расходы НЕ публикует вовсе: их владелец —
+       * канонический сумматор, и приходят они расчётом прибыли. Раз число не
+       * публикуется, обязано публиковаться основание.
+       */
       expenses: [],
+      expenses_status: 'unavailable' as const,
+      expenses_unavailable_reason:
+        'expenses_are_published_by_the_profitability_path_not_by_the_operational_overview',
       net: [],
       average_ticket: [],
       daily: operational.daily.map((entry) => ({ ...entry, revenue: [] })),
@@ -1392,17 +1402,21 @@ export class BusinessStateService {
                   ? item.staff_external_id
                   : null,
               staff_name: typeof item.name === 'string' ? item.name : null,
-              total:
-                this.optionalMetricNumber(item.total) ??
-                (this.optionalMetricNumber(item.appointments) ?? 0) +
-                  (this.optionalMetricNumber(item.cancelled) ?? 0),
+              /**
+               * 🔴 Финальная сверка главы 4. Здесь стояла ВТОРАЯ формула того
+               * же числа: при отсутствии `total` он складывался из записей и
+               * отмен, каждая с `?? 0`. Считает итог владелец агрегации; если
+               * он его не опубликовал (операционные корзины скрыты по решению
+               * вызывающего), это «не публиковали», а не «ноль».
+               */
+              total: this.optionalMetricNumber(item.total),
               appointments: item.appointments ?? 0,
-              scheduled: this.optionalMetricNumber(item.scheduled) ?? 0,
-              completed: this.optionalMetricNumber(item.completed) ?? 0,
+              scheduled: this.optionalMetricNumber(item.scheduled),
+              completed: this.optionalMetricNumber(item.completed),
               // Отмены по мастеру: раньше их не было ни в одном поле, и на
               // вопрос «у кого больше отмен» отвечать было нечем.
               cancelled: this.optionalMetricNumber(item.cancelled) ?? 0,
-              no_show: this.optionalMetricNumber(item.no_show) ?? 0,
+              no_show: this.optionalMetricNumber(item.no_show),
               cancellation_rate_percent:
                 this.optionalMetricNumber(item.cancellation_rate_percent) ?? 0,
               unique_clients:
@@ -1507,15 +1521,14 @@ export class BusinessStateService {
         )
         .map((row) => ({
           name: staffScope.names.get(row.externalId as string) ?? null,
-          total:
-            this.optionalMetricNumber(row.entry.total) ??
-            (this.optionalMetricNumber(row.entry.appointments) ?? 0) +
-              (this.optionalMetricNumber(row.entry.cancelled) ?? 0),
+          // Та же правка, что и в срезе выше: итог не пересчитывается здесь,
+          // а скрытая корзина остаётся неизвестной, а не нулём.
+          total: this.optionalMetricNumber(row.entry.total),
           appointments: row.entry.appointments ?? 0,
-          scheduled: this.optionalMetricNumber(row.entry.scheduled) ?? 0,
-          completed: this.optionalMetricNumber(row.entry.completed) ?? 0,
+          scheduled: this.optionalMetricNumber(row.entry.scheduled),
+          completed: this.optionalMetricNumber(row.entry.completed),
           cancelled: this.optionalMetricNumber(row.entry.cancelled) ?? 0,
-          no_show: this.optionalMetricNumber(row.entry.no_show) ?? 0,
+          no_show: this.optionalMetricNumber(row.entry.no_show),
           cancellation_rate_percent:
             this.optionalMetricNumber(row.entry.cancellation_rate_percent) ?? 0,
           unique_clients:

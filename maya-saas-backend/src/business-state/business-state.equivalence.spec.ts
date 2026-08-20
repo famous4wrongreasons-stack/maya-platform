@@ -375,7 +375,16 @@ const P2_ADDED_UNAVAILABLE = 'booked_value';
  */
 const P4_ADDED_METRICS = ['average_booked_value_amount_kopecks'] as const;
 
-const P4_ADDED_PUBLISHED = ['average_booked_value'] as const;
+const P4_ADDED_PUBLISHED = [
+  'average_booked_value',
+  /**
+   * 🔴 Финальная сверка главы 4. Пустые расходы денежной ветки получили
+   * основание — ровно как у `net`, у которого оно было с самого начала.
+   * Числа не изменились: добавлены два поля, объясняющие пустоту.
+   */
+  'expenses_status',
+  'expenses_unavailable_reason',
+] as const;
 
 const P4_ADDED_FINANCE_REVENUE = [
   'cash_total',
