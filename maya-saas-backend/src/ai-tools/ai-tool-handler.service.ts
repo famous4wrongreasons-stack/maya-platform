@@ -715,11 +715,15 @@ export class AiToolHandlerService {
      * нечем. Тот же контракт, что у присутствия и давности: непрочитанное
      * остаётся непрочитанным.
      */
+    // Каждое число отвечает за СВОЙ источник: карточка могла назвать сумму
+    // покупок и не назвать число визитов, и гасить их вместе — терять то, что
+    // провайдер сообщил.
     const visitsUnavailable = client.visits_count === null && !historyRead.ok;
+    const spentUnavailable = client.sold_amount === null && !historyRead.ok;
     const exactVisits = visitsUnavailable
       ? null
       : (client.visits_count ?? history.length);
-    const exactTotalSpent = visitsUnavailable
+    const exactTotalSpent = spentUnavailable
       ? null
       : (client.sold_amount ?? Math.round(totalSpent));
     /**
@@ -791,7 +795,7 @@ export class AiToolHandlerService {
       services_scope: 'last_30_attended_visits',
       avg_cycle_days: avgCycleDays,
       total_spent: exactTotalSpent,
-      total_spent_scope: visitsUnavailable
+      total_spent_scope: spentUnavailable
         ? 'unavailable'
         : client.sold_amount === null
           ? 'recent_attended_history_fallback'
@@ -870,7 +874,15 @@ export class AiToolHandlerService {
      * Гость без единого визита сюда не относится: это не «ушедший», а никогда
      * не пришедший, и давности у него нет по построению.
      */
-    const visited = measured.filter((entry) => entry.client.visits_count > 0);
+    // Гость без единого визита — не «ушедший», а никогда не пришедший.
+    // Гость, чьё число визитов карточка не назвала, — третий случай: про него
+    // неизвестно даже это, и молча выкидывать его нельзя.
+    const visitsUnknown = measured.filter(
+      (entry) => entry.client.visits_count === null,
+    );
+    const visited = measured.filter(
+      (entry) => (entry.client.visits_count ?? 0) > 0,
+    );
     const unknownRecency = visited.filter((entry) => entry.days === null);
     const dormant = visited
       .filter((entry) => entry.days !== null && entry.days >= inactiveDays)
@@ -903,6 +915,8 @@ export class AiToolHandlerService {
        */
       clients_with_unknown_recency: unknownRecency.length,
       clients_with_visits: visited.length,
+      /** Карточки, у которых провайдер не назвал даже числа визитов. */
+      clients_with_unknown_visit_count: visitsUnknown.length,
       clients: dormant.slice(0, limit).map((entry) => ({
         name: entry.client.name,
         ...(showPhone ? { phone: entry.client.phone } : {}),

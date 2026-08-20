@@ -2324,7 +2324,7 @@ export class AiCoreService {
     );
     if (!rows.length) {
       return unknownRecency > 0
-        ? `Гостей, которые не приходили дольше ${days} дней, я не вижу. Но у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} CRM не указала дату последнего визита — их давность не измерена, и в этот ответ они не вошли.`
+        ? `Гостей, которые не приходили дольше ${days} дней, я не вижу. Но у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} давность визита не измерена — в этот ответ они не вошли, и «база активна» про них сказать нельзя.`
         : `Гостей, которые не приходили дольше ${days} дней, нет — база активна.`;
     }
     const lines = rows
@@ -2357,7 +2357,7 @@ export class AiCoreService {
     // N» читается как весь охват базы, а часть карточек в него не входила.
     const unmeasured =
       unknownRecency > 0
-        ? `\n\nЕщё у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} CRM не указала дату последнего визита — их давность не измерена, и в этот список они не вошли.`
+        ? `\n\nЕщё у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} давность визита не измерена — в этот список они не вошли.`
         : '';
     return `Гости, которые не приходили дольше ${days} дней — всего ${total}:\n\n${lines}${tail}${unmeasured}`;
   }
@@ -2812,7 +2812,6 @@ export class AiCoreService {
         : 'Клиент не найден. Уточните имя или последние четыре цифры телефона.';
     }
 
-    const visits = this.safeMetricNumber(data.visits);
     const segmentLabels: Record<string, string> = {
       without_visits: 'без визитов',
       new: 'новый клиент',
@@ -2827,8 +2826,24 @@ export class AiCoreService {
         : data.loyal === true
           ? 'лояльный клиент'
           : 'статус лояльности не определён';
+    /**
+     * 🔴 Cycle 04 closure B4. Фраза следует ИСТОЧНИКУ числа.
+     *
+     * `safeMetricNumber` превращал отсутствие в ноль, и владелец слышал «по
+     * карточке CRM: 0 визитов» ровно тогда, когда посчитать было нечем. А
+     * когда число бралось из прочитанной истории, оно всё равно объявлялось
+     * «по карточке CRM» — при том что история ограничена окном и потолком
+     * выборки, то есть это нижняя граница, а не число визитов гостя.
+     */
+    const exactVisits = this.optionalMetricNumber(data.visits);
+    const visitsScope =
+      typeof data.visits_scope === 'string' ? data.visits_scope : '';
     const parts = [
-      `По карточке CRM: ${visits} ${this.pluralize(visits, 'визит', 'визита', 'визитов')}. Сегмент — ${segment}.`,
+      exactVisits === null
+        ? 'Сколько раз этот гость приходил, сейчас сказать не могу: карточка CRM числа визитов не назвала, а историю визитов прочитать не удалось.'
+        : visitsScope === 'recent_attended_history_fallback'
+          ? `Числа визитов карточка CRM не назвала. В прочитанной истории — ${exactVisits} ${this.pluralize(exactVisits, 'визит', 'визита', 'визитов')}: это нижняя граница, а не вся история гостя.`
+          : `По карточке CRM: ${exactVisits} ${this.pluralize(exactVisits, 'визит', 'визита', 'визитов')}. Сегмент — ${segment}.`,
     ];
 
     /**

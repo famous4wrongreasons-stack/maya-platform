@@ -65,6 +65,56 @@ describe('A — покрытие не заходит за момент набл�
     expect(facts.arrived.observation.completeness).toBe('incomplete');
   });
 
+  it('идущие сутки и месяц-к-дате измерены по состоянию на наблюдение', async () => {
+    // 🔴 Дыра первой версии этой же правки: сравнение шло по КОНЦУ периода, и
+    // сегодняшний день вместе с «месяцем к дате» терял число присутствия
+    // совсем — владелец переставал слышать «сколько пришло сегодня».
+    const { service, tenantContext } = createAttendance({
+      finishedAt: '2026-08-20T08:55:00.000Z',
+      grouped,
+    });
+    const today = await tenantContext.runAsSystemTenant('tenant-a', () =>
+      service.periodAttendance(
+        'tenant-a',
+        PERIOD('2026-08-19T21:00:00.000Z', '2026-08-20T20:59:59.999Z'),
+      ),
+    );
+    expect(today.arrived.state).toBe('measured');
+    expect(today.arrived.value).toBe(3);
+    expect(today.arrived.observation.observedThrough).toBe(
+      '2026-08-20T08:55:00.000Z',
+    );
+
+    const monthToDate = await tenantContext.runAsSystemTenant('tenant-a', () =>
+      service.periodAttendance(
+        'tenant-a',
+        PERIOD('2026-07-31T21:00:00.000Z', '2026-08-20T09:00:00.000Z'),
+      ),
+    );
+    expect(monthToDate.arrived.state).toBe('measured');
+  });
+
+  it('причина неполноты не подменяется, когда часть записей без отметки', async () => {
+    const { service, tenantContext } = createAttendance({
+      finishedAt: '2026-08-20T08:55:00.000Z',
+      grouped: [
+        { attendance: 'arrived', _count: { _all: 3 } },
+        { attendance: null, _count: { _all: 7 } },
+      ],
+    });
+    const facts = await tenantContext.runAsSystemTenant('tenant-a', () =>
+      service.periodAttendance(
+        'tenant-a',
+        PERIOD('2026-07-31T21:00:00.000Z', '2026-08-20T09:00:00.000Z'),
+      ),
+    );
+    expect(facts.arrived.state).toBe('measured_incomplete');
+    // Настоящая причина — отсутствие отметок, а не момент наблюдения.
+    expect(facts.arrived.observation.incompleteReason).toBe(
+      'attendance_was_not_observed_for_every_record_of_the_period',
+    );
+  });
+
   it('прожитый и перечитанный день измерен', async () => {
     const { service, tenantContext } = createAttendance({
       finishedAt: '2026-08-20T09:00:00.000Z',
@@ -78,6 +128,36 @@ describe('A — покрытие не заходит за момент набл�
     );
     expect(facts.arrived.state).toBe('measured');
     expect(facts.arrived.value).toBe(3);
+  });
+});
+
+describe('B4 — число визитов и сумма покупок следуют своим источникам', () => {
+  const dossier = (
+    visitsCount: number | null,
+    soldAmount: number | null,
+    historyOk: boolean,
+  ) => {
+    // Повторяем ровно ту развилку, что стоит в досье.
+    const visitsUnavailable = visitsCount === null && !historyOk;
+    const spentUnavailable = soldAmount === null && !historyOk;
+    return {
+      visits: visitsUnavailable ? null : (visitsCount ?? 0),
+      total_spent: spentUnavailable ? null : (soldAmount ?? 0),
+    };
+  };
+
+  it('карточка назвала сумму, но не число визитов — гасится только число', () => {
+    expect(dossier(null, 12_000, false)).toEqual({
+      visits: null,
+      total_spent: 12_000,
+    });
+  });
+
+  it('оба числа названы — оба живут', () => {
+    expect(dossier(7, 12_000, false)).toEqual({
+      visits: 7,
+      total_spent: 12_000,
+    });
   });
 });
 

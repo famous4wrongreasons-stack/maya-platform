@@ -395,6 +395,10 @@ export class ReportingPeriodResolver {
           monthIndex,
           dayWithMonth[3] ? Number(dayWithMonth[3]) : null,
           today,
+          // 🔴 Месяц назван СЛОВОМ — та же календарная личность, что и у
+          // «21.08». Без этого «21 августа» уезжало в июль, а «за 21.08»
+          // оставалось в августе: один вопрос, два разных месяца в ответе.
+          { explicitMonth: true },
         );
       }
     }
