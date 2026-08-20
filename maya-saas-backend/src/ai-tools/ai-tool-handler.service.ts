@@ -706,8 +706,22 @@ export class AiToolHandlerService {
       .slice(0, 4)
       .map(([name]) => name);
 
-    const exactVisits = client.visits_count ?? history.length;
-    const exactTotalSpent = client.sold_amount ?? Math.round(totalSpent);
+    /**
+     * 🔴 Cycle 04 closure B4. Число визитов следует доступности истории.
+     *
+     * `client.visits_count` у карточки провайдера законно `null`, а при отказе
+     * чтения истории список пуст — и владелец слышал «по карточке CRM: 0
+     * визитов, сегмент — без визитов» ровно тогда, когда посчитать было
+     * нечем. Тот же контракт, что у присутствия и давности: непрочитанное
+     * остаётся непрочитанным.
+     */
+    const visitsUnavailable = client.visits_count === null && !historyRead.ok;
+    const exactVisits = visitsUnavailable
+      ? null
+      : (client.visits_count ?? history.length);
+    const exactTotalSpent = visitsUnavailable
+      ? null
+      : (client.sold_amount ?? Math.round(totalSpent));
     /**
      * 🔴 Cycle 04 P9. Давность спрашивается у владельца факта.
      *
@@ -737,10 +751,14 @@ export class AiToolHandlerService {
       display_name: 'клиент',
       matches_count: matches.length,
       visits: exactVisits,
-      visits_scope:
-        client.visits_count === null
+      visits_scope: visitsUnavailable
+        ? 'unavailable'
+        : client.visits_count === null
           ? 'recent_attended_history_fallback'
           : 'full_crm_card',
+      visits_unavailable_reason: visitsUnavailable
+        ? 'the crm card did not report a visit count and the visit history could not be read'
+        : null,
       /**
        * Дата, которую УТВЕРЖДАЕТ карточка провайдера. Присутствия она не
        * доказывает: что за ней стоит — приход, оплата или закрытая запись —
@@ -773,12 +791,15 @@ export class AiToolHandlerService {
       services_scope: 'last_30_attended_visits',
       avg_cycle_days: avgCycleDays,
       total_spent: exactTotalSpent,
-      total_spent_scope:
-        client.sold_amount === null
+      total_spent_scope: visitsUnavailable
+        ? 'unavailable'
+        : client.sold_amount === null
           ? 'recent_attended_history_fallback'
           : 'full_crm_card',
-      loyal: exactVisits >= 3,
-      loyalty_segment: this.clientLoyaltySegment(exactVisits),
+      // Сегмент лояльности стоит на числе визитов: нет числа — нет сегмента.
+      loyal: exactVisits === null ? null : exactVisits >= 3,
+      loyalty_segment:
+        exactVisits === null ? null : this.clientLoyaltySegment(exactVisits),
       loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
       bonus_balance: loyalty?.balance ?? null,
       bonus_currency: loyalty?.currency ?? null,
@@ -831,21 +852,28 @@ export class AiToolHandlerService {
     const asOf = this.clientRecency.localDate(when);
     const showPhone = DORMANT_PHONE_ROLES.has(principal.role);
 
-    const dormant = snapshot.clients
-      .map((client) => ({
-        client,
-        // 🔴 Cycle 04 P9. Давность — у владельца факта, и она по КАРТОЧКЕ
-        // провайдера: истории визитов по каждому из сотен гостей не запросить,
-        // поэтому источник назван, а не подразумевается.
-        days: this.clientRecency.fromProviderCard(client, when).distance.days,
-      }))
-      // Гость без единого визита — это не «ушедший», а никогда не пришедший.
-      .filter(
-        (entry) =>
-          entry.client.visits_count > 0 &&
-          entry.days !== null &&
-          entry.days >= inactiveDays,
-      )
+    const measured = snapshot.clients.map((client) => ({
+      client,
+      // 🔴 Cycle 04 P9. Давность — у владельца факта, и она по КАРТОЧКЕ
+      // провайдера: истории визитов по каждому из сотен гостей не запросить,
+      // поэтому источник назван, а не подразумевается.
+      days: this.clientRecency.fromProviderCard(client, when).distance.days,
+    }));
+    /**
+     * 🔴 Cycle 04 closure B3. Гость с НЕИЗМЕРЕННОЙ давностью — отдельная
+     * корзина.
+     *
+     * Раньше он выпадал из выдачи тем же условием, что и активный, нигде не
+     * считался, и пустой список произносился как «база активна». Неизвестность
+     * молчанием не бывает: она либо названа, либо выдана за факт.
+     *
+     * Гость без единого визита сюда не относится: это не «ушедший», а никогда
+     * не пришедший, и давности у него нет по построению.
+     */
+    const visited = measured.filter((entry) => entry.client.visits_count > 0);
+    const unknownRecency = visited.filter((entry) => entry.days === null);
+    const dormant = visited
+      .filter((entry) => entry.days !== null && entry.days >= inactiveDays)
       .sort(
         (left, right) =>
           (right.days ?? 0) - (left.days ?? 0) ||
@@ -868,6 +896,13 @@ export class AiToolHandlerService {
       recency_basis: 'provider_client_card',
       recency_attendance_proven: false,
       total_dormant: dormant.length,
+      /**
+       * Гости с визитами, у которых давность НЕ измерена: карточка провайдера
+       * даты последнего визита не назвала. Они не активные и не спящие — они
+       * непосчитанные, и пустой список спящих без этого числа читать нельзя.
+       */
+      clients_with_unknown_recency: unknownRecency.length,
+      clients_with_visits: visited.length,
       clients: dormant.slice(0, limit).map((entry) => ({
         name: entry.client.name,
         ...(showPhone ? { phone: entry.client.phone } : {}),

@@ -342,6 +342,16 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
     : null;
   const ownerConfirmationRequired =
     completeness.owner_confirmation_required === true;
+  /**
+   * 🔴 Cycle 04 closure D. Книга расходов вообще прочитана?
+   *
+   * Прежний страж стоял на `owner_confirmation_required`, а пакет P8 жёстко
+   * обнулил это поле — и ноль «прочих расходов» печатался поверх НЕпрочитанной
+   * книги: крупное «0 ₽» рядом с «Прибыль пока не посчитана». Состояние
+   * источника лежит в том же конверте и всегда было верным.
+   */
+  const expenseLedgerUnavailable =
+    expenses.status === 'unavailable' || completeness.status === 'unavailable';
   const assumesUnrecordedExpensesAreZero =
     completeness.unrecorded_additional_expenses_assumed_zero === true;
   return {
@@ -360,12 +370,15 @@ function buildProfitCard(evidence: unknown): ChatReportCard {
       additional_expenses_rub:
         additionalRows.length > 0
           ? moneyRubFromKopecks(additionalKopecks)
-          : ownerConfirmationRequired && net.status !== 'available'
+          : expenseLedgerUnavailable ||
+              (ownerConfirmationRequired && net.status !== 'available')
             ? null
             : 0,
       /** Сколько строк расходов стоит за числами выше. */
       expense_rows_count: rows.length,
-      total_expenses_rub: moneyRubFromKopecks(totalExpenses?.amount_kopecks),
+      total_expenses_rub: expenseLedgerUnavailable
+        ? null
+        : moneyRubFromKopecks(totalExpenses?.amount_kopecks),
       profit_status:
         typeof net.status === 'string' ? net.status : 'unavailable',
       rows_title: rows.length > 0 ? 'Расходы' : null,

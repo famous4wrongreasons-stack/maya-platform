@@ -451,6 +451,7 @@ export class BusinessStateService {
           current,
           previous,
           request.comparisonMode,
+          currentQuery,
         ),
       ],
       sourceOverview: request.operationalDetail
@@ -2346,14 +2347,34 @@ export class BusinessStateService {
     current: unknown,
     previous: unknown,
     mode: string,
+    /** Границы текущего периода: нужны, чтобы понять, закончился ли он. */
+    period?: { from: string; to: string },
   ) {
     if (mode === 'none' || !previous) {
       return [];
     }
+    /**
+     * 🔴 Cycle 04 closure C. Незакончившийся период сравнивается с полным.
+     *
+     * «Сегодня» — это окно до 23:59:59.999, из которого прожита только часть,
+     * а предыдущий период прожит целиком. Владелец в десять утра слышал
+     * «поступления −73 %» — падение, которого нет: сравнивались десять часов
+     * с двадцатью четырьмя. Числа не трогаем; называем то, что сравнивается.
+     */
+    const unfinished =
+      period && new Date(period.to).getTime() > Date.now()
+        ? [
+            {
+              key: 'comparison_period_not_finished',
+              reason:
+                'the current period has not ended yet, so it is compared against a period that was lived in full: the difference reflects elapsed time as much as business change',
+            },
+          ]
+        : [];
     const currentStatus = this.readCompletenessStatus(current);
     const previousStatus = this.readCompletenessStatus(previous);
     if (currentStatus === 'complete' && previousStatus === 'complete') {
-      return [];
+      return unfinished;
     }
     const side =
       currentStatus === previousStatus
@@ -2362,6 +2383,7 @@ export class BusinessStateService {
           ? 'the current period was'
           : 'the previous period was';
     return [
+      ...unfinished,
       {
         key: 'comparison_completeness',
         reason: `${side} read incompletely, so changes and percent_change compare samples of different completeness: the difference may reflect how much was read rather than what happened in the salon`,

@@ -96,6 +96,15 @@ export const FACT_INCOMPLETE_REASON = {
    * за него никто не перечитывал.
    */
   periodOutsideObservedRange: 'period_is_outside_the_observed_range',
+  /**
+   * 🔴 Cycle 04 closure A. Период ещё не наблюдался до конца.
+   *
+   * Прогон сверки записывает ЗАПРОШЕННОЕ окно (ближний контур берёт ±7 суток
+   * от «сейчас»), поэтому строка покрытия честно накрывает завтрашний день —
+   * но наблюдение закончилось в момент `finishedAt`. Без этой проверки
+   * «пришли 0» за завтра публиковалось как доказанный ноль.
+   */
+  periodExtendsPastObservation: 'period_extends_past_the_moment_of_observation',
 } as const;
 
 export type BusinessFactIncompleteReason =

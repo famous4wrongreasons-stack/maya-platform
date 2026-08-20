@@ -621,6 +621,7 @@ export class AiCoreService {
       brain,
       this.latestUserText(dto.messages),
       this.previousUserText(dto.messages),
+      businessTimezone,
     );
     // Список для модели: вероятный инструмент первым, за ним — остальные
     // доступные инструменты данных. Первый — рекомендация, любой другой из
@@ -645,6 +646,8 @@ export class AiCoreService {
           {},
           this.latestUserText(sanitized.messages),
           this.previousReportingUserText(sanitized.messages),
+          new Date(),
+          businessTimezone,
         );
         const execution = this.record(
           await this.runtime.execute(toolUser, toolName, {
@@ -1110,6 +1113,8 @@ export class AiCoreService {
           decision.toolCall.arguments,
           this.latestUserText(sanitized.messages),
           this.previousUserText(sanitized.messages),
+          new Date(),
+          businessTimezone,
         );
         const signature = this.toolSignature(
           decision.toolCall.name,
@@ -1764,6 +1769,12 @@ export class AiCoreService {
     brain: MayaBrainRoute,
     rawLatestText = '',
     rawPreviousUserText = '',
+    /**
+     * 🔴 Cycle 04 closure B1. Пояс бизнеса — часть разбора календаря, а не
+     * оформление. Без него «за 20 августа» в 01:30 по Москве превращалось в
+     * 20 июля: наступление дня решал UTC.
+     */
+    businessTimezone?: string,
   ): GroundingRequirement | null {
     const latestText = this.latestUserText(messages);
     const previousUserText = this.previousUserText(messages)
@@ -1847,6 +1858,8 @@ export class AiCoreService {
     const reportingPeriod = ReportingPeriodResolver.resolve(
       rawLatestText || latestText,
       rawPreviousUserText,
+      new Date(),
+      businessTimezone,
     );
     const analyticsPreference =
       brain.persona === 'director' &&
@@ -1901,6 +1914,7 @@ export class AiCoreService {
               previousUserText,
               rawLatestText,
               rawPreviousUserText,
+              businessTimezone,
             );
             return preloadArguments
               ? {
@@ -2112,6 +2126,7 @@ export class AiCoreService {
     previousUserText: string,
     rawLatestText = '',
     rawPreviousUserText = '',
+    businessTimezone?: string,
   ): Record<string, unknown> | null {
     if (toolName === 'clients.dossier.read') {
       const query = this.clientDossierQuery(rawLatestText, rawPreviousUserText);
@@ -2122,6 +2137,8 @@ export class AiCoreService {
       {},
       text,
       previousUserText,
+      new Date(),
+      businessTimezone,
     );
   }
 
@@ -2295,8 +2312,20 @@ export class AiCoreService {
     if (days === null) {
       return null;
     }
+    /**
+     * 🔴 Cycle 04 closure B3. Непосчитанные гости обязаны прозвучать.
+     *
+     * Карточки, у которых провайдер не назвал дату последнего визита, из
+     * выдачи выпадали молча — и пустой список произносился как «база активна».
+     * Неизвестность не бывает молчанием: она либо названа, либо выдана за факт.
+     */
+    const unknownRecency = this.safeMetricNumber(
+      data.clients_with_unknown_recency,
+    );
     if (!rows.length) {
-      return `Гостей, которые не приходили дольше ${days} дней, нет — база активна.`;
+      return unknownRecency > 0
+        ? `Гостей, которые не приходили дольше ${days} дней, я не вижу. Но у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} CRM не указала дату последнего визита — их давность не измерена, и в этот ответ они не вошли.`
+        : `Гостей, которые не приходили дольше ${days} дней, нет — база активна.`;
     }
     const lines = rows
       .map((row: unknown) => {
@@ -2324,7 +2353,13 @@ export class AiCoreService {
       total > rows.length
         ? `\n\nПоказала ${rows.length} из ${total} — скажите, если нужен весь список.`
         : '';
-    return `Гости, которые не приходили дольше ${days} дней — всего ${total}:\n\n${lines}${tail}`;
+    // Непосчитанные гости упоминаются и рядом с непустым списком: иначе «всего
+    // N» читается как весь охват базы, а часть карточек в него не входила.
+    const unmeasured =
+      unknownRecency > 0
+        ? `\n\nЕщё у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} CRM не указала дату последнего визита — их давность не измерена, и в этот список они не вошли.`
+        : '';
+    return `Гости, которые не приходили дольше ${days} дней — всего ${total}:\n\n${lines}${tail}${unmeasured}`;
   }
 
   private deterministicReplyForTool(

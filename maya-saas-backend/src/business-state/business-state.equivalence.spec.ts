@@ -426,6 +426,13 @@ const withoutP4Published = (published: unknown) => {
   return rest;
 };
 
+const CLOSURE_ADDED_LIMITATIONS = new Set(['comparison_period_not_finished']);
+
+const withoutClosureAdded = (entries: unknown) =>
+  (entries as Array<{ key: string }>).filter(
+    (entry) => !CLOSURE_ADDED_LIMITATIONS.has(entry.key),
+  );
+
 const withoutP2Added = (entries: unknown) =>
   (entries as Array<{ key: string }>).filter(
     (entry) => entry.key !== P2_ADDED_UNAVAILABLE,
@@ -539,7 +546,12 @@ describe('🔴 P1 §9 — legacy против канонического вла�
       expect(withoutChangedAndAdded(canonical.availableMetrics)).toEqual(
         withoutChangedAndAdded(legacy.available_metrics as string[]),
       );
-      expect(canonical.limitations).toEqual(legacy.limitations);
+      // 🔴 Cycle 04 closure C. Оговорка про незакончившийся период — добавка
+      // этой сверки: legacy её не знал, потому что молча сравнивал прожитую
+      // часть суток с полными прошлыми сутками. Числа не изменились.
+      expect(withoutClosureAdded(canonical.limitations)).toEqual(
+        legacy.limitations,
+      );
       expect(withoutP2Added(canonical.unavailableMetrics)).toEqual(
         legacy.unavailable_metrics,
       );

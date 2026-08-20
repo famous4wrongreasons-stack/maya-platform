@@ -103,9 +103,24 @@ export class AttendanceFactsService {
       orderBy: { finishedAt: 'desc' },
       select: { finishedAt: true },
     });
-    return run?.finishedAt
-      ? { covered: true, observedThrough: run.finishedAt.toISOString() }
-      : { covered: false, observedThrough: null };
+    if (!run?.finishedAt) {
+      return { covered: false, observedThrough: null };
+    }
+    /**
+     * 🔴 Cycle 04 closure A. Покрыт период только ДО момента наблюдения.
+     *
+     * Окно прогона — это то, что у провайдера ЗАПРОСИЛИ, а не то, что успело
+     * произойти: ближний контур просит ±7 суток от «сейчас», поэтому строка
+     * легально накрывает завтрашний день. Наблюдение при этом закончилось в
+     * `finishedAt`, и всё, что позже него, не наблюдалось никем.
+     *
+     * Без этой проверки «пришли 0, неявок 0» за завтра публиковалось с
+     * `state: measured` и `zero_means_none: true` — доказанный ноль там, где
+     * день ещё не наступил.
+     */
+    const observedThrough = run.finishedAt.toISOString();
+    const covered = new Date(period.to).getTime() <= run.finishedAt.getTime();
+    return { covered, observedThrough };
   }
 
   async periodAttendance(
@@ -173,7 +188,10 @@ export class AttendanceFactsService {
         })
       : incompleteObservation({
           source: 'canonical_mirror',
-          reason: FACT_INCOMPLETE_REASON.periodOutsideObservedRange,
+          // Наблюдения не было вовсе — или период уходит за его момент.
+          reason: coverage.observedThrough
+            ? FACT_INCOMPLETE_REASON.periodExtendsPastObservation
+            : FACT_INCOMPLETE_REASON.periodOutsideObservedRange,
           observedThrough: coverage.observedThrough,
         });
 
@@ -186,7 +204,9 @@ export class AttendanceFactsService {
             source: 'canonical_mirror',
             reason: coverage.covered
               ? FACT_INCOMPLETE_REASON.attendanceNotObservedForEveryRecord
-              : FACT_INCOMPLETE_REASON.periodOutsideObservedRange,
+              : coverage.observedThrough
+                ? FACT_INCOMPLETE_REASON.periodExtendsPastObservation
+                : FACT_INCOMPLETE_REASON.periodOutsideObservedRange,
             observedThrough: coverage.observedThrough,
           });
 

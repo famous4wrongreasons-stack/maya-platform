@@ -1,4 +1,7 @@
 import { isComprehensiveBusinessReview } from '../ai-brain/business-review-intent';
+// 🔴 Единственная реализация «какой сегодня день у арендатора» в проекте.
+// Заводить вторую здесь значило бы начать ровно с того, что глава закрывала.
+import { localCalendarDate } from '../owner-reports/owner-reports.time';
 
 /**
  * Единый разбор отчётного окна из живой речи владельца.
@@ -91,7 +94,40 @@ const COMPARISON_TOOLS = new Set([
   'analytics.employee.query',
 ]);
 
+/**
+ * Календарное «сегодня» БИЗНЕСА.
+ *
+ * 🔴 Cycle 04 closure B1. Раньше резолвер спрашивал об этом UTC
+ * (`today.month`, `today.day`), и у московского салона каждый
+ * вопрос с 00:00 до 03:00 уезжал на месяц назад: «за 20 августа» в 01:30
+ * возвращало 20 ИЮЛЯ с уверенной подписью. Наступил ли календарный день
+ * бизнеса — решает пояс бизнеса, и никто другой.
+ */
+interface BusinessToday {
+  readonly year: number;
+  /** 0..11, как у `Date`. */
+  readonly month: number;
+  readonly day: number;
+}
+
+/**
+ * Нейтральный пояс по умолчанию.
+ *
+ * Это НЕ бизнес-правило и НЕ скрытая Москва: боевые вызывающие обязаны
+ * передать пояс арендатора, и это закреплено храповиком
+ * `reporting-period.boundary.spec.ts`. UTC оставлен для чистого разбора в
+ * тестах, где пояс не участвует в утверждении.
+ */
+const NEUTRAL_TIMEZONE = 'UTC';
+
 export class ReportingPeriodResolver {
+  /** Календарное «сегодня» в поясе бизнеса. Одна реализация на весь резолвер. */
+  private static businessToday(now: Date, timezone: string): BusinessToday {
+    const key = localCalendarDate(timezone, now);
+    const [year, month, day] = key.split('-').map(Number);
+    return { year, month: month - 1, day };
+  }
+
   static isReportingTool(toolName: string): boolean {
     return REPORTING_TOOLS.has(toolName);
   }
@@ -110,10 +146,13 @@ export class ReportingPeriodResolver {
     text: string,
     previousUserText = '',
     now: Date = new Date(),
+    timezone: string = NEUTRAL_TIMEZONE,
   ): PeriodResolution {
     const current = text.trim();
     const previous = previousUserText.trim();
     const context = `${previous} ${current}`.trim();
+    // Календарь бизнеса решает, наступил ли день. UTC об этом не спрашивают.
+    const today = this.businessToday(now, timezone);
 
     if (/(?:за\s+)?вчера/i.test(current)) {
       return this.pack({ period: 'yesterday' }, true, 'current');
@@ -135,22 +174,22 @@ export class ReportingPeriodResolver {
     }
 
     const range =
-      this.namedRangeForQuestion(current, previous, now) ??
-      this.namedRangeForQuestion(previous, '', now);
+      this.namedRangeForQuestion(current, previous, today) ??
+      this.namedRangeForQuestion(previous, '', today);
     if (range) {
       return this.pack(range, true, 'current');
     }
 
-    const namedDay = this.namedDayForQuestion(current, previous, now);
+    const namedDay = this.namedDayForQuestion(current, previous, today);
     if (namedDay) {
       return this.pack({ period: 'named_day', day: namedDay }, true, 'current');
     }
 
     const namedMonth =
-      this.namedMonthForQuestion(current, now) ??
-      this.namedMonthForQuestion(previous, now);
+      this.namedMonthForQuestion(current, today) ??
+      this.namedMonthForQuestion(previous, today);
     if (namedMonth) {
-      const source = this.namedMonthForQuestion(current, now)
+      const source = this.namedMonthForQuestion(current, today)
         ? 'current'
         : 'previous';
       return this.pack(
@@ -228,11 +267,12 @@ export class ReportingPeriodResolver {
     text: string,
     previousUserText = '',
     now: Date = new Date(),
+    timezone: string = NEUTRAL_TIMEZONE,
   ): Record<string, unknown> {
     if (!this.isReportingTool(toolName)) {
       return args;
     }
-    const resolution = this.resolve(text, previousUserText, now);
+    const resolution = this.resolve(text, previousUserText, now, timezone);
     const next: Record<string, unknown> = { ...args };
     delete next.day;
     delete next.month;
@@ -322,11 +362,11 @@ export class ReportingPeriodResolver {
   private static namedDayForQuestion(
     text: string,
     previousUserText: string,
-    now: Date,
+    today: BusinessToday,
   ): string | null {
     const iso = text.match(/\b(\d{4}-\d{2}-\d{2})\b/);
     if (iso) {
-      return this.normalizeCalendarDay(iso[1], now);
+      return this.normalizeCalendarDay(iso[1], today);
     }
 
     const dotted = text.match(
@@ -338,7 +378,10 @@ export class ReportingPeriodResolver {
       const yearHint = dotted[3]
         ? Number(dotted[3].length === 2 ? `20${dotted[3]}` : dotted[3])
         : null;
-      return this.buildCalendarDay(day, month - 1, yearHint, now);
+      // «20.08» — месяц назван цифрой, но назван.
+      return this.buildCalendarDay(day, month - 1, yearHint, today, {
+        explicitMonth: true,
+      });
     }
 
     const dayWithMonth = text.match(
@@ -351,7 +394,7 @@ export class ReportingPeriodResolver {
           Number(dayWithMonth[1]),
           monthIndex,
           dayWithMonth[3] ? Number(dayWithMonth[3]) : null,
-          now,
+          today,
         );
       }
     }
@@ -368,22 +411,20 @@ export class ReportingPeriodResolver {
       return null;
     }
     const day = Number(bare[1]);
-    const monthFromPrevious = this.namedMonthForQuestion(previousUserText, now);
+    const monthFromPrevious = this.namedMonthForQuestion(
+      previousUserText,
+      today,
+    );
     if (monthFromPrevious) {
       const [yearText, monthText] = monthFromPrevious.split('-');
       return this.buildCalendarDay(
         day,
         Number(monthText) - 1,
         Number(yearText),
-        now,
+        today,
       );
     }
-    return this.buildCalendarDay(
-      day,
-      now.getUTCMonth(),
-      now.getUTCFullYear(),
-      now,
-    );
+    return this.buildCalendarDay(day, today.month, today.year, today);
   }
 
   /**
@@ -392,7 +433,7 @@ export class ReportingPeriodResolver {
   private static namedRangeForQuestion(
     text: string,
     previousUserText: string,
-    now: Date,
+    today: BusinessToday,
   ): ReportingPeriodToolArgs | null {
     const firstWeek = text.match(
       /(?:за\s+)?перв(?:ую|ой|ая)\s+недел[а-яё]*\s+(январ[ьяей]|феврал[ьяей]|март[ае]?|апрел[ьяей]|ма[йея]|июн[ьяей]|июл[ьяей]|август[ае]?|сентябр[ьяей]|октябр[ьяей]|ноябр[ьяей]|декабр[ьяей])(?:\s+(\d{4}))?/i,
@@ -403,7 +444,7 @@ export class ReportingPeriodResolver {
         const month = this.namedMonthFromIndex(
           monthIndex,
           firstWeek[2] ? Number(firstWeek[2]) : null,
-          now,
+          today,
         );
         if (month) {
           return {
@@ -441,18 +482,32 @@ export class ReportingPeriodResolver {
     let monthIndex = monthToken ? this.monthNameIndex(monthToken) : -1;
     let yearHint = yearToken ? Number(yearToken) : null;
     if (monthIndex < 0) {
-      const fromPrevious = this.namedMonthForQuestion(previousUserText, now);
+      const fromPrevious = this.namedMonthForQuestion(previousUserText, today);
       if (fromPrevious) {
         const [yearText, monthText] = fromPrevious.split('-');
         monthIndex = Number(monthText) - 1;
         yearHint = Number(yearText);
       } else {
-        monthIndex = now.getUTCMonth();
-        yearHint = now.getUTCFullYear();
+        monthIndex = today.month;
+        yearHint = today.year;
       }
     }
-    const from = this.buildCalendarDay(fromDay, monthIndex, yearHint, now);
-    const to = this.buildCalendarDay(toDay, monthIndex, yearHint, now);
+    /**
+     * 🔴 Cycle 04 closure B2. Обе границы принадлежат ОДНОМУ названному месяцу.
+     *
+     * Раньше каждая строилась отдельно и конец «31 августа», ещё не
+     * наступивший, уезжал в июль. После этого `from > to` роняло разбор
+     * диапазона целиком, и вопрос про месяц отвечался одним днём чужого
+     * месяца. Явно названный период сохраняет свою календарную личность даже
+     * если он ещё не закончился.
+     */
+    const explicitMonth = Boolean(monthToken) || yearHint !== null;
+    const from = this.buildCalendarDay(fromDay, monthIndex, yearHint, today, {
+      explicitMonth,
+    });
+    const to = this.buildCalendarDay(toDay, monthIndex, yearHint, today, {
+      explicitMonth,
+    });
     if (!from || !to || from > to) {
       return null;
     }
@@ -461,7 +516,7 @@ export class ReportingPeriodResolver {
 
   private static namedMonthForQuestion(
     context: string,
-    now: Date,
+    today: BusinessToday,
   ): string | null {
     if (!context.trim()) {
       return null;
@@ -479,8 +534,8 @@ export class ReportingPeriodResolver {
     if (matched < 0) {
       return null;
     }
-    let year = now.getUTCFullYear();
-    if (matched > now.getUTCMonth()) {
+    let year = today.year;
+    if (matched > today.month) {
       year -= 1;
     }
     if (/прошл[а-яa-z]*\s+год|прошлогодн/i.test(context)) {
@@ -492,13 +547,13 @@ export class ReportingPeriodResolver {
   private static namedMonthFromIndex(
     monthIndex: number,
     yearHint: number | null,
-    now: Date,
+    today: BusinessToday,
   ): string | null {
     if (monthIndex < 0 || monthIndex > 11) {
       return null;
     }
-    let year = yearHint ?? now.getUTCFullYear();
-    if (yearHint === null && monthIndex > now.getUTCMonth()) {
+    let year = yearHint ?? today.year;
+    if (yearHint === null && monthIndex > today.month) {
       year -= 1;
     }
     return `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
@@ -531,11 +586,24 @@ export class ReportingPeriodResolver {
     return -1;
   }
 
+  /**
+   * Календарный день из «числа + месяца».
+   *
+   * 🔴 Cycle 04 closure B1/B2. Две правки против одной строки, которая
+   * отвечала не про тот месяц.
+   *
+   * Первая: «наступил ли этот день» решает КАЛЕНДАРЬ БИЗНЕСА, а не UTC.
+   * Вторая: откат «день ещё не наступил → значит прошлый месяц» — эвристика
+   * про ГОЛОЕ число («а за 20»). Когда человек назвал месяц или год словами,
+   * он назвал календарную личность периода, и подменять её нельзя: «с 1 по
+   * 31 августа» из-за этого схлопывалось в 31 июля.
+   */
   private static buildCalendarDay(
     day: number,
     monthIndex: number,
     yearHint: number | null,
-    now: Date,
+    today: BusinessToday,
+    options: { explicitMonth?: boolean } = {},
   ): string | null {
     if (
       !Number.isInteger(day) ||
@@ -546,12 +614,15 @@ export class ReportingPeriodResolver {
     ) {
       return null;
     }
-    let year = yearHint ?? now.getUTCFullYear();
+    let year = yearHint ?? today.year;
     let month = monthIndex;
+    const mayShift = yearHint === null && options.explicitMonth !== true;
     if (yearHint === null) {
-      if (month > now.getUTCMonth()) {
+      // Год выбирается всегда: названный месяц, который в этом году ещё не
+      // наступал, относится к прошлому году.
+      if (month > today.month) {
         year -= 1;
-      } else if (month === now.getUTCMonth() && day > now.getUTCDate()) {
+      } else if (mayShift && month === today.month && day > today.day) {
         if (month === 0) {
           year -= 1;
           month = 11;
@@ -567,7 +638,10 @@ export class ReportingPeriodResolver {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
 
-  private static normalizeCalendarDay(value: string, now: Date): string | null {
+  private static normalizeCalendarDay(
+    value: string,
+    today: BusinessToday,
+  ): string | null {
     const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!match) {
       return null;
@@ -576,7 +650,7 @@ export class ReportingPeriodResolver {
       Number(match[3]),
       Number(match[2]) - 1,
       Number(match[1]),
-      now,
+      today,
     );
   }
 
