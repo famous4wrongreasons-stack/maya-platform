@@ -447,6 +447,7 @@ export class BusinessStateService {
         .map(([key]) => key),
       limitations: [
         ...this.measurementLimitations(current),
+        ...this.futurePeriodLimitations(currentQuery),
         ...this.comparisonLimitations(
           current,
           previous,
@@ -2277,6 +2278,30 @@ export class BusinessStateService {
    * Семантика отмены усилению не подлежит: провайдер сообщает ТОЛЬКО факт
    * удаления записи (реестр 3.6). Кто удалил и почему — не часть контракта.
    */
+  /**
+   * 🔴 Cycle 04 closure §4. Явно названный БУДУЩИЙ период.
+   *
+   * Резолвер больше не подменяет его прошлым — и правильно: человек назвал
+   * календарь. Но отвечать на него нулями молча тоже нельзя: в будущем ничего
+   * ещё не произошло, и ноль там означает «не наступило», а не «не было».
+   */
+  private futurePeriodLimitations(period?: { from: string; to: string }) {
+    if (!period) {
+      return [];
+    }
+    const startsAt = new Date(period.from).getTime();
+    if (!Number.isFinite(startsAt) || startsAt <= Date.now()) {
+      return [];
+    }
+    return [
+      {
+        key: 'period_has_not_started',
+        reason:
+          'the requested period lies in the future: counts and money for it are not measurements of what happened but of what is booked so far',
+      },
+    ];
+  }
+
   private measurementLimitations(value: unknown) {
     const data = this.record(value);
     if (data.data_source !== 'crm') {

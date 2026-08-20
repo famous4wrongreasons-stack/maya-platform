@@ -426,7 +426,10 @@ const withoutP4Published = (published: unknown) => {
   return rest;
 };
 
-const CLOSURE_ADDED_LIMITATIONS = new Set(['comparison_period_not_finished']);
+const CLOSURE_ADDED_LIMITATIONS = new Set([
+  'comparison_period_not_finished',
+  'period_has_not_started',
+]);
 
 const withoutClosureAdded = (entries: unknown) =>
   (entries as Array<{ key: string }>).filter(
@@ -826,7 +829,9 @@ describe('🔴 P1 §9 — личный срез против боевой реа
       expect(withoutChangedAndAdded(canonical.availableMetrics)).toEqual(
         withoutChangedAndAdded(legacy.available_metrics as string[]),
       );
-      expect(canonical.limitations).toEqual(legacy.limitations);
+      expect(withoutClosureAdded(canonical.limitations)).toEqual(
+        legacy.limitations,
+      );
       expect(withoutP2Added(canonical.unavailableMetrics)).toEqual(
         legacy.unavailable_metrics,
       );

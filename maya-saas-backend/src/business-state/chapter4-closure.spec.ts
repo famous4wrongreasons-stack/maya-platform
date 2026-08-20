@@ -90,6 +90,34 @@ const read = (service: BusinessStateService, operationalDetail: boolean) =>
   });
 
 describe('Глава 4 — закрывающие правки канона', () => {
+  it('явно названный будущий период назван будущим', async () => {
+    const service = createState(overviewWithoutBuckets());
+    const future = await service.business({
+      tenantId: 'tenant-a',
+      period: {
+        from: '2027-08-01T00:00:00.000Z',
+        to: '2027-08-31T23:59:59.999Z',
+      },
+      comparisonMode: 'none',
+      comparisonPeriod: null,
+      financeAllowed: true,
+      bookedValueAllowed: true,
+      operationalDetail: true,
+      retryOnFailure: false,
+      disclose: () => ({ names: new Map(), allowedExternalIds: null }),
+    });
+    // 🔴 Резолвер больше не подменяет будущий период прошлым; значит ответ
+    // обязан сказать, что в нём ничего ещё не происходило.
+    expect(
+      (future.limitations as Array<{ key: string }>).map((item) => item.key),
+    ).toContain('period_has_not_started');
+
+    const past = await read(createState(overviewWithoutBuckets()), true);
+    expect(
+      (past.limitations as Array<{ key: string }>).map((item) => item.key),
+    ).not.toContain('period_has_not_started');
+  });
+
   it('пустые расходы денежной ветки несут основание, а не молчат', async () => {
     const state = await read(createState(overviewWithoutBuckets()), true);
     const current = state.current;
