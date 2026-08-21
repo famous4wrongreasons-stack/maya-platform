@@ -268,7 +268,146 @@
 
 ---
 
+## Cycle 05 Phase B — carry-forward после canonical Opportunity Engine
+
+Phase B ввела единственного deterministic owner для уровня
+`WATCH + Business State → Opportunity → Agent Task → Action Intent`, но не
+закрыла долги последующих глав искусственно. Ни один пункт ниже не потерян и не
+считается выполненным только из-за появления контракта.
+
+### Chapter 5 — Opportunities & Agent Tasking
+
+| Состояние | Carry-forward |
+|---|---|
+| Canonical owner | Реализован эфемерный pure engine в `maya-saas-backend/src/opportunities`; он не владеет business truth и не подключён к side effects |
+| Production shadow | Доказан только путь `appointment.removed → appointment_cancellation_recovery → occupancy` из WATCH после cutover |
+| Business State | Change stream сейчас transient и не replayable; production shadow для `business_metric_change` без нового источника невозможен |
+| Client Lifecycle | Контракт готов, но production projection требует canonical client identity/mirror и versioned tenant recency policy |
+| Capacity | `free_slot`, `schedule_gap` и `underloaded_staff` отложены до canonical owner рабочих интервалов, занятости и completeness |
+| Add-on / upsell | Не включены в v1 engine: отсутствует единый evidence owner и нельзя смешивать recommendation с valuation |
+| Lifecycle | Дедупликация, expiry и resolved/expired suppression реализованы только внутри одной projection; durable lifecycle отсутствует |
+
+### Chapter 6 — Action Engine
+
+| Требуется | Граница |
+|---|---|
+| Исполнение Action Intent | Все Chapter 5 intents остаются `dryRun: true`, `state: proposed`; переход состояния отсутствует |
+| Policy enforcement | Permissions, role, consent, entitlement, tenant policy и action-class autonomy должны проверяться до исполнения |
+| Надёжность | Нужны idempotency keys, confirmation/approval, retries, reconciliation, audit trail и failure taxonomy |
+| Side effects | CRM writes, booking/move/cancel, сообщения, кампании, loyalty writes и любые внешние вызовы принадлежат только Action Engine |
+
+### Chapter 7 — Measurement & Attribution
+
+| Требуется | Причина |
+|---|---|
+| Outcome measurement | Opportunity и proposed intent не доказывают выполненное действие или результат |
+| Attribution | Нужна причинная связь `opportunity → approved action → side effect → outcome`, а не совпадение по времени |
+| Recovery reporting | `recovered revenue`, заполненное окно и возврат клиента допустимы только как canonical measured outcomes |
+
+### Chapter 8 — Prediction & Valuation
+
+| Требуется | Запрет до реализации |
+|---|---|
+| Prediction owner | `no_show_risk`, churn/risk и probabilistic anomaly требуют versioned model, uncertainty и calibration |
+| Valuation owner | `lost revenue`, `expected recovery`, CLV и денежная цена opportunity запрещены без canonical valuation model |
+| Anomaly policy | Revenue/operations anomaly нельзя выводить из неназванного порога или LLM-интерпретации |
+
+### Chapter 9 — Orchestrator & Agent Runtime
+
+| Требуется | Состояние Phase B |
+|---|---|
+| Maya Orchestrator runtime | Не создавался; реализованы только deterministic routing contracts |
+| Agent domains | Admin, Client Lifecycle, Occupancy и Business Intelligence существуют как значения маршрута, а не как runtime agents |
+| Agent registry / synthesis | Не реализованы; direct agent-to-agent communication остаётся запрещённой |
+| Conversation presentation | Не должна становиться владельцем Opportunity, canonical metrics или permissions |
+
+### Chapter 10 — Autonomy
+
+| Требуется | Состояние Phase B |
+|---|---|
+| Scoped autonomy | Будущий минимум остаётся `tenant × agent domain × action class` |
+| Autopilot | Не создавался; глобальный переключатель автономии запрещён |
+| Safety controls | Нужны kill switch, limits, escalation и наблюдаемость поверх доказанного Action Engine |
+
+### Security debt
+
+| Долг | Решение / статус |
+|---|---|
+| `EventStoreService.claimBatch()` имеет открытый tenant-safety debt | Shadow CLI намеренно не использует claim path: выполняет tenant-aware aggregate read в PostgreSQL transaction с `SET TRANSACTION READ ONLY` |
+| PII в opportunities/tasks/intents | Запрещена: только opaque tenant-scoped refs; текст входящего запроса не копируется в evidence, task или intent |
+| Credentials / payloads в shadow output | Не выводятся; production result содержит только агрегаты и SHA-256 refs внутри процесса |
+| Side-effect imports | Boundary tests запрещают messaging, campaign, booking mutation, publish и Prisma mutation в canonical engine/shadow edge |
+
+### Technical debt
+
+| Долг | Следующий gate |
+|---|---|
+| Нет persisted Business State change stream | Нужен отдельный источник/replay design; при добавлении persistence обязателен Schema Gate |
+| Opportunity lifecycle и dedup эфемерны | Durable queue/state не добавлялись; persistence нельзя вносить скрыто в Chapter 5 |
+| Production consumer отсутствует | Read-only CLI доказывает projection, но scheduler/worker и execution consumer запрещены до следующих глав |
+| Production shadow покрывает одну семью | Reactivation, BI и Admin требуют доказанных source adapters и tenant policies без расширения side-effect surface |
+
+Состояние carry-forward: findings Chapters 5–10, security debt и technical debt
+разнесены явно; закрытых «по умолчанию» пунктов нет.
+
+---
+
+## Cycle 05 Phase C - Schema Gate по Opportunity lifecycle
+
+Adversarial review Phase B подтвердил pure canonical contract owner, static
+routing и нулевое исполнение ActionIntent, но опроверг restart-safe lifecycle.
+`resolved`/`expired` suppression существует только внутри одного projection;
+semantic identity смешана с меняющимися evidence refs, а supersession и
+family-specific expiry отсутствуют.
+
+### Blocking decision
+
+| Решение | Состояние |
+|---|---|
+| Durable Opportunity lifecycle | **Требуется** для dedup, resolution, supersession, expiry и restart behavior |
+| Existing storage reuse | **Запрещено**: `DomainEvent` - historical fact, `InboxItem` - presentation, `MarketingCampaign` - action artifact |
+| Schema Gate | **REQUIRED -> STOP**; Prisma/database/application code не менялись |
+| Chapter 5 closure | **BLOCKED** до target `STALE OPPORTUNITY CAN PRODUCE CURRENT TASK: NO` |
+
+### Chapter 5 carry-forward
+
+1. Утвердить tenant-scoped lifecycle schema, stable semantic key, evidence
+   revision/fingerprint и atomic current uniqueness.
+2. Утвердить statuses `active/resolved/expired/superseded`; `detected` и
+   `still_valid` оставить observations/transitions.
+3. Связать current AgentTask с current Opportunity revision/validity token.
+4. Ввести family-specific revalidation/expiry policies без единого TTL.
+5. Отделить deterministic urgency от orchestration priority.
+6. Ввести outcomes `inform_only`, `investigation_required`,
+   `action_candidate`; не маршрутизировать каждую Opportunity автоматически.
+7. Ввести versioned BI attention policy: не каждый measured change является
+   Opportunity.
+8. Устранить production semantic parallelism legacy `UpsellOpportunity`,
+   analytics recommendations, marketing/recovery candidate logic через явный
+   cutover, а не переименование.
+9. Выполнить cross-time read-only shadow proof для detected/still-valid/
+   resolved/expired/superseded при executed=0.
+
+### Later chapters
+
+| Адресат | Carry-forward Phase C |
+|---|---|
+| Chapter 6 | ActionIntent execution, permissions/consent/ownership, idempotency, confirmation, retry/reconcile/unknown outcome; action не разрешает Opportunity без canonical observation |
+| Chapter 7 | outcome measurement и attribution `opportunity -> action -> observed result` |
+| Chapter 8 | prediction, churn/no-show probability, anomaly calibration, valuation/lost/recovered revenue |
+| Chapter 9 | Orchestrator priority и agent runtime; agent получает current structured task и не переопределяет evidence/permissions |
+| Chapter 10 | autonomy минимум `tenant x agent domain x action class`, shadow before L3, limits/kill switch/escalation |
+| Security | tenant constraints, no PII/raw payloads, untrusted text cannot route/escalate, tenant-unsafe event claim остаётся открытым |
+| Technical | transient Business State changes, absent capacity episode owner, client identity gap, legacy cutover, overclaiming one-projection lifecycle test |
+
+Полное доказательство и policy matrix находятся в
+`CYCLE-05-PHASE-C-OPPORTUNITY-LIFECYCLE-REPORT.md`.
+
+---
+
 ```
 CHAPTER 2 CLOSED
-REGISTER IS INPUT CONTEXT FOR CHAPTERS 3–7
+REGISTER IS INPUT CONTEXT FOR CHAPTERS 3–10
+CYCLE 05 PHASE B CARRY-FORWARD MAPPED
+CYCLE 05 PHASE C SCHEMA GATE REQUIRED
 ```
