@@ -374,6 +374,96 @@ describe('OpportunityLifecycleRunner', () => {
     });
   });
 
+  it('reconciles an existing durable condition without replaying a pre-cutover event', async () => {
+    const activeRef = opportunityShadowAppointmentRef(
+      TENANT_ID,
+      'appointment-1',
+    );
+    const built = build({
+      events: [],
+      appointments: [appointment('confirmed')],
+      activeOpportunities: [
+        { semanticKey: 'd'.repeat(64), affectedEntityRef: activeRef },
+      ],
+    });
+
+    const result = await built.run();
+
+    expect(result).toMatchObject({
+      completeness: 'complete',
+      detectedNow: 0,
+      actionIntentsExecuted: 0,
+      externalSideEffects: 0,
+    });
+    expect(built.appointmentFindMany).toHaveBeenCalledTimes(2);
+    const input = built.reconcileCurrentProjection.mock.calls[0][0];
+    expect(input.projection.opportunities).toEqual([]);
+    expect(input.currentState.resolutions).toHaveLength(1);
+    expect(input.currentState.resolutions[0]).toMatchObject({
+      semanticKey: 'd'.repeat(64),
+      proof: {
+        reasonCode: 'canonical_appointment_no_longer_removed',
+      },
+    });
+  });
+
+  it('preserves an existing durable condition when current capacity remains present without a post-cutover event', async () => {
+    const activeRef = opportunityShadowAppointmentRef(
+      TENANT_ID,
+      'appointment-1',
+    );
+    const built = build({
+      events: [],
+      activeOpportunities: [
+        { semanticKey: 'e'.repeat(64), affectedEntityRef: activeRef },
+      ],
+    });
+
+    const result = await built.run();
+
+    expect(result).toMatchObject({ completeness: 'complete', detectedNow: 0 });
+    const input = built.reconcileCurrentProjection.mock.calls[0][0];
+    expect(input.projection.opportunities).toEqual([]);
+    expect(input.currentState.resolutions).toEqual([]);
+    expect(built.getStaffScheduleDay).toHaveBeenCalledTimes(1);
+    expect(built.getAvailableSlots).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not resolve an existing pre-cutover condition when its provider read fails', async () => {
+    const activeRef = opportunityShadowAppointmentRef(
+      TENANT_ID,
+      'appointment-1',
+    );
+    const built = build({
+      events: [],
+      scheduleError: new Error('provider unavailable'),
+      activeOpportunities: [
+        { semanticKey: 'f'.repeat(64), affectedEntityRef: activeRef },
+      ],
+    });
+
+    const result = await built.run();
+
+    expect(result).toMatchObject({
+      completeness: 'provider_failure',
+      detectedNow: 0,
+    });
+    const input = built.reconcileCurrentProjection.mock.calls[0][0];
+    expect(input.currentState.resolutions).toEqual([]);
+  });
+
+  it('never scans current appointments to create an Opportunity without a post-cutover event or an active durable condition', async () => {
+    const built = build({ events: [] });
+
+    const result = await built.run();
+
+    expect(result.detectedNow).toBe(0);
+    expect(built.appointmentFindMany).not.toHaveBeenCalled();
+    const input = built.reconcileCurrentProjection.mock.calls[0][0];
+    expect(input.projection.opportunities).toEqual([]);
+    expect(input.currentState.resolutions).toEqual([]);
+  });
+
   it('reports lifecycle transitions as run deltas and stale tasks as current invariant failures', async () => {
     const built = build({
       before: {

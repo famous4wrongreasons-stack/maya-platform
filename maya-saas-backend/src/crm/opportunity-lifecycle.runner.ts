@@ -68,6 +68,8 @@ type AppointmentRead = Pick<
   | 'status'
 >;
 
+type AppointmentIdentityRead = Pick<Appointment, 'id'>;
+
 type EventRead = Pick<
   DomainEvent,
   | 'id'
@@ -132,7 +134,7 @@ export class OpportunityLifecycleRunner {
     }
 
     const cutoverAt = this.cutoverAt();
-    const [tenant, integration] = await Promise.all([
+    const [tenant, integration, activeOpportunities] = await Promise.all([
       this.prisma.tenant.findUnique({
         where: { id: tenantId },
         select: { defaultTimezone: true },
@@ -141,6 +143,14 @@ export class OpportunityLifecycleRunner {
         where: { tenantId },
         select: { watchStartedAt: true },
       }),
+      this.prisma.opportunity.findMany({
+        where: {
+          tenantId,
+          type: FAMILY,
+          status: OpportunityLifecycleStatus.active,
+        },
+        select: { semanticKey: true, affectedEntityRef: true },
+      }) as Promise<ActiveOpportunityRead[]>,
     ]);
     if (!tenant) throw new Error('Opportunity lifecycle tenant not found.');
     if (!integration?.watchStartedAt) {
@@ -188,45 +198,74 @@ export class OpportunityLifecycleRunner {
     const latestEvents = latestEventPerAppointment(
       queriedEvents.slice(0, EVENT_SCAN_LIMIT),
     );
-    const appointmentIds = latestEvents.map((event) => event.entityId);
-    const [appointments, activeOpportunities] = await Promise.all([
-      appointmentIds.length > 0
-        ? (this.prisma.appointment.findMany({
-            where: { tenantId, id: { in: appointmentIds } },
-            select: {
-              id: true,
-              tenantId: true,
-              branchId: true,
-              staffExternalId: true,
-              serviceIds: true,
-              blockedStartAt: true,
-              blockedEndAt: true,
-              status: true,
-            },
-          }) as Promise<AppointmentRead[]>)
-        : Promise.resolve([]),
-      this.prisma.opportunity.findMany({
-        where: {
-          tenantId,
-          type: FAMILY,
-          status: OpportunityLifecycleStatus.active,
-        },
-        select: { semanticKey: true, affectedEntityRef: true },
-      }) as Promise<ActiveOpportunityRead[]>,
-    ]);
+    const eventAppointmentIds = latestEvents.map((event) => event.entityId);
+    const eventAppointmentRefs = new Set(
+      eventAppointmentIds.map((appointmentId) =>
+        opportunityShadowAppointmentRef(tenantId, appointmentId),
+      ),
+    );
+    const unmatchedActiveRefs = new Set(
+      activeOpportunities
+        .map((opportunity) => opportunity.affectedEntityRef)
+        .filter(
+          (ref): ref is string =>
+            ref !== null && !eventAppointmentRefs.has(ref),
+        ),
+    );
+
+    // Historical events never enter the projector. Existing durable conditions
+    // may still be reconciled against current canonical appointment state by
+    // matching their tenant-bound opaque identity.
+    const legacyAppointmentIds =
+      unmatchedActiveRefs.size > 0
+        ? (
+            (await this.prisma.appointment.findMany({
+              where: { tenantId },
+              select: { id: true },
+            })) as AppointmentIdentityRead[]
+          )
+            .filter((appointment) =>
+              unmatchedActiveRefs.has(
+                opportunityShadowAppointmentRef(tenantId, appointment.id),
+              ),
+            )
+            .map((appointment) => appointment.id)
+        : [];
+    const appointmentIds = [
+      ...new Set([...eventAppointmentIds, ...legacyAppointmentIds]),
+    ].sort();
+    const appointments = appointmentIds.length
+      ? ((await this.prisma.appointment.findMany({
+          where: { tenantId, id: { in: appointmentIds } },
+          select: {
+            id: true,
+            tenantId: true,
+            branchId: true,
+            staffExternalId: true,
+            serviceIds: true,
+            blockedStartAt: true,
+            blockedEndAt: true,
+            status: true,
+          },
+        })) as AppointmentRead[])
+      : [];
 
     const appointmentById = new Map(
       appointments.map((appointment) => [appointment.id, appointment]),
     );
     const rows: OpportunityShadowEventRowV1[] = [];
     const evaluations = new Map<string, CurrentConditionEvaluation>();
+    const capacityByAppointmentId = new Map<
+      string,
+      OpportunityShadowAppointmentV1['currentCapacity']
+    >();
     let providerFailure = false;
 
-    for (const event of latestEvents) {
-      const appointment = appointmentById.get(event.entityId) ?? null;
+    for (const appointmentId of appointmentIds) {
+      const appointment = appointmentById.get(appointmentId) ?? null;
       const appointmentRef = opportunityShadowAppointmentRef(
         tenantId,
-        event.entityId,
+        appointmentId,
       );
       let currentCapacity: OpportunityShadowAppointmentV1['currentCapacity'] =
         null;
@@ -283,7 +322,11 @@ export class OpportunityLifecycleRunner {
         }
       }
       evaluations.set(appointmentRef, evaluation);
+      capacityByAppointmentId.set(appointmentId, currentCapacity);
+    }
 
+    for (const event of latestEvents) {
+      const appointment = appointmentById.get(event.entityId) ?? null;
       rows.push({
         tenantId,
         eventId: event.id,
@@ -302,7 +345,8 @@ export class OpportunityLifecycleRunner {
               status: appointment.status,
               blockedStartAt: appointment.blockedStartAt.toISOString(),
               blockedEndAt: appointment.blockedEndAt.toISOString(),
-              currentCapacity,
+              currentCapacity:
+                capacityByAppointmentId.get(appointment.id) ?? null,
             }
           : null,
       });
