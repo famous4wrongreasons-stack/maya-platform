@@ -4,37 +4,31 @@
 
 Ветка: `codex/maya-brain-systemic-release-20260815`.
 
-Проверенный release: `20260821-c05-opportunity-lifecycle`.
+Проверенный release: `20260821-c05-closure-final`.
 
-Режим проверки: final adversarial verification. Целью было опровергнуть
-implementation report, а не подтвердить его по умолчанию.
+Режим проверки: final adversarial verification, затем повторная closure
+verification после CF1-CF6. Целью было опровергнуть реализацию, а не подтвердить
+её по умолчанию.
+
+Разделы 2-18 сохраняют исходный failing baseline и причины остановки. Раздел 19
+фиксирует реализацию closure fixes, повторную PostgreSQL-матрицу, immutable
+production invocation и итоговый статус, который заменяет pre-closure verdict.
 
 ## 1. Executive conclusion
 
 Durable foundation Chapter 5 существует: tenant-scoped `Opportunity` и
-`AgentTask`, fingerprint identity, database invariants, expiry, explicit
-resolution, supersession и zero-side-effect boundary реализованы и в
-изолированных проверках работают.
+`AgentTask`, fingerprint identity, database invariants, family expiry,
+current-state resolution, supersession и zero-side-effect boundary реализованы.
 
-Chapter 5 закрыть нельзя. Adversarial verification доказала четыре
-production-level blocker:
+Первый adversarial pass доказал четыре production-level blocker: stale current
+state, недостаточное Occupancy evidence, параллельных semantic owners и
+отсутствие воспроизводимого immutable invocation. CF1-CF6 закрыли все четыре
+класса дефектов. Повторная проверка доказала complete current-state
+reconciliation, lifecycle-coupled AgentTask, canonical capacity proof, одного
+production computation owner и путь `built -> deployed -> invoked`.
 
-1. production shadow-runner не выполняет complete current-state
-   reconciliation. Если condition исчезает из новой projection до expiry,
-   сохранённая Opportunity остаётся `active`, а AgentTask остаётся `current`;
-2. Occupancy evidence доказывает удалённую запись и её прежний заблокированный
-   интервал, но не доказывает полную current capacity: текущий график мастера и
-   отсутствие новой занятости этого интервала не валидируются;
-3. canonical Opportunity lifecycle пока не является единственным production
-   semantic owner: legacy upsell, analytics recommendation и
-   marketing/recovery candidate paths продолжают вычислять параллельные
-   opportunities/recommendations;
-4. production lifecycle runner не входит в immutable release artifact:
-   `scripts/` исключён из build, а deploy копирует только `dist` и не копирует
-   source scripts. Поэтому documented lifecycle rerun нельзя воспроизвести из
-   самого выкаченного release.
-
-Это lifecycle/truth blockers. Chapter 6 начинать нельзя.
+Chapter 5 закрыт. Это не разрешение самостоятельно начинать Chapter 6: данный
+цикл останавливается после completion report, без runtime agents и execution.
 
 ## 2. Production Opportunity truth
 
@@ -426,29 +420,164 @@ No later-chapter responsibility was moved into Chapter 5.
 
 No Chapter 6 work is part of these fixes.
 
-## Final status
+## 18.1 Pre-closure status (superseded)
 
-CHAPTER 5 COMPLETE: NO
+Этот verdict был корректным для failing baseline и сохранён как audit trail.
+Итог после CF1-CF6 находится в разделе 19.
+
+| Pre-closure field | Value |
+|---|---|
+| Chapter 5 complete | NO |
+| Opportunity foundation complete | YES |
+| Canonical Opportunity owner | NO |
+| Durable lifecycle proven | NO |
+| Stale Opportunity could produce current task | YES |
+| Action Intents executed | 0 |
+| External side effects | 0 |
+| Ready for Chapter 6 | NO |
+| Chapter 6 started | NO |
+| Runtime agents created | NO |
+
+## 19. CYCLE 05 final closure fixes verification
+
+### 19.1 CF1-CF6 checklist
+
+| Fix | Реализация | Доказательство | Result |
+|---|---|---|---|
+| CF1 - current-state reconciliation | Complete family scan сопоставляет durable active semantic keys с current canonical projection; `partial`, `unknown` и `provider_failure` не доказывают исчезновение | disappearance, incomplete-read и provider-failure PostgreSQL scenarios | PASS |
+| CF2 - AgentTask follows Opportunity | `resolved`, `expired` и `superseded` атомарно инвалидируют current task; terminal task не открывается повторно | terminal/restart, expiry и supersession DB invariants | PASS |
+| CF3 - production lifecycle runner | Existing reconciliation scheduler вызывает `detect -> reconcile -> route task` после successful canonical reconciliation и затем останавливается | production scheduler journal после deploy | PASS |
+| CF4 - Occupancy evidence | Opportunity требует canonical working schedule и provider-confirmed available slot; отсутствие Appointment само по себе недостаточно | capacity absent/present matrix | PASS |
+| CF5 - canonical owner bypasses | Legacy upsell/marketing recommendation producers удалены из production-reachable graph либо перестали принимать independent opportunity decision | source boundary inventory/test | PASS |
+| CF6 - artifact and invocation proof | Runner собирается в `dist`, проверяется deploy preflight, вызывается из immutable release и штатного scheduler path | release `20260821-c05-closure-final`, manual compiled invocation и scheduler invocation | PASS |
+
+### 19.2 PostgreSQL lifecycle matrix
+
+Проверка выполнена на настоящем PostgreSQL, поднятом из всех 49 migrations.
+Production data в proof database не копировались. Все 34 DB invariants и вся
+обязательная lifecycle matrix прошли.
+
+| Scenario | Result |
+|---|---|
+| detect -> active | PASS |
+| same evidence -> same Opportunity | PASS |
+| same evidence after restart -> no duplicate | PASS |
+| concurrent same evidence -> one Opportunity and one current task | PASS |
+| condition disappears -> resolved | PASS |
+| resolved + restart -> remains resolved | PASS |
+| resolved Opportunity -> no current AgentTask | PASS |
+| expired Opportunity -> no current AgentTask | PASS |
+| superseded Opportunity -> old task not current | PASS |
+| changed evolving evidence -> one successor revision | PASS |
+| incomplete read -> no false resolution | PASS |
+| provider failure -> no false resolution | PASS |
+| same identity in another tenant -> independent | PASS |
+| cross-tenant supersession/task reference -> DB rejected | PASS |
+| historical/bootstrap DomainEvent -> no current Opportunity | PASS |
+| Occupancy without canonical capacity -> no Opportunity/task | PASS |
+| Occupancy with proven schedule and availability -> Opportunity/task | PASS |
+| rerun after terminal state -> stale task not resurrected | PASS |
+| ActionIntent table/execution | absent / 0 |
+
+Proof totals before cleanup: 8 Opportunities (`active=5`, `resolved=1`,
+`expired=1`, `superseded=1`) and 8 AgentTasks (`current=5`,
+`invalidated=3`). `duplicateAttemptsCollapsed=8`, raw CRM payload persisted:
+NO, full Business State persisted: NO, external side effects: 0.
+
+### 19.3 Migration and release validation
+
+| Gate | Result |
+|---|---|
+| Prisma validate | PASS |
+| Clean DB from all migrations | 49 migrations PASS |
+| Migration reproducibility | PASS |
+| Production structural clone | 67 public tables; no production rows copied |
+| Prisma drift on clean DB | no difference detected |
+| Prisma drift on production structural clone | no difference detected |
+| Lint | PASS |
+| Application typecheck | PASS |
+| Scripts typecheck | PASS |
+| Build | PASS |
+| Full Jest | 165 suites / 1659 tests PASS |
+| Immutable deploy preflight | PASS; database ready; zero pending migrations |
+| Smoke before switch | PASS on isolated port |
+| Atomic switch | `20260821-c05-closure-final` active |
+| Health / readiness | PASS / PASS |
+| Error journal after deploy | no errors in checked window |
+
+### 19.4 Production shadow proof
+
+Lifecycle writes were limited to internal `Opportunity`/`AgentTask` state.
+No CRM write, message, campaign, booking mutation, loyalty write, approval,
+execution retry or provider outcome path was invoked.
+
+| Metric | Result |
+|---|---:|
+| `detected_now` | 2 |
+| `durable_active_before` | 2 |
+| `resolved` | 0 |
+| `expired` | 0 |
+| `superseded` | 2 |
+| `durable_active_after` | 2 |
+| `current_tasks` | 2 |
+| `stale_tasks` | 0 |
+| `duplicate_attempts_collapsed` on same-evidence rerun | 2 |
+| `action_intents_proposed` | 2 |
+| `action_intents_executed` | 0 |
+| `external_side_effects` | 0 |
+
+The two pre-existing production Opportunities are explained without IDs, PII
+or raw evidence:
+
+1. The first old condition became `superseded` because the complete current
+   canonical evidence produced a newer evidence fingerprint. Its old task is
+   `invalidated`; the successor is `active` because current schedule and
+   provider availability were validated.
+2. The second old condition followed the same lifecycle independently for a
+   different opaque appointment reference: old row `superseded`, old task
+   `invalidated`, one current successor validated by canonical capacity.
+
+Final production aggregate after closure and restart proof: 4 Opportunities
+(`active=2`, `superseded=2`) and 4 AgentTasks (`current=2`, `invalidated=2`),
+with `stale_tasks=0`. A second compiled invocation preserved these counts. The
+enabled production scheduler then completed reconciliation and logged:
+`detected=2`, `active=2`, `tasks=2`, `duplicates=2`, `executed=0`.
+
+### 19.5 Canonical owner and Chapter 6 boundary
+
+`src/opportunities` is the only production-reachable computation owner for
+Chapter 5 Opportunity semantics. Legitimate WATCH and Business State readers
+remain evidence owners, not decision owners. The boundary test verifies that
+the Opportunity graph cannot import CRM writes, messaging/campaign executors,
+billing/loyalty writes or other side-effect owners.
+
+`ActionIntent` remains runtime structured output only. There is no durable
+ActionIntent table, no approvals, retries, delivery state, provider outcome or
+execution attempt. Runtime agents were not created.
+
+## Final status after CF1-CF6
+
+CHAPTER 5 COMPLETE: YES
 
 OPPORTUNITY FOUNDATION COMPLETE: YES
 
-CANONICAL OPPORTUNITY OWNER: NO
+CANONICAL OPPORTUNITY OWNER: YES
 
-DURABLE LIFECYCLE PROVEN: NO
+DURABLE LIFECYCLE PROVEN: YES
 
-STALE OPPORTUNITY CAN PRODUCE CURRENT TASK: YES
+STALE OPPORTUNITY CAN PRODUCE CURRENT TASK: NO
 
 ACTION INTENTS EXECUTED: 0
 
 EXTERNAL SIDE EFFECTS: 0
 
-READY FOR CHAPTER 6 ACTION ENGINE: NO
+READY FOR CHAPTER 6 ACTION ENGINE: YES
 
-APPLICATION CODE CHANGED: NO
+APPLICATION CODE CHANGED: YES
 
-DATABASE CHANGED: NO
+DATABASE SCHEMA CHANGED IN CLOSURE: NO
 
-PRODUCTION DATA CHANGED: NO
+PRODUCTION LIFECYCLE DATA CHANGED: YES - `Opportunity`/`AgentTask` only
 
 CHAPTER 6 STARTED: NO
 
