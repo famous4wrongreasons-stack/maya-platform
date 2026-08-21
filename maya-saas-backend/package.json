@@ -45,7 +45,9 @@
     "opportunity:lifecycle:shadow:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-shadow.ts",
     "opportunity:lifecycle:run": "node dist/scripts/opportunity-lifecycle-run.js",
     "opportunity:lifecycle:proof": "node dist/scripts/opportunity-lifecycle-proof.js",
-    "opportunity:lifecycle:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-proof.ts"
+    "opportunity:lifecycle:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-proof.ts",
+    "action-engine:proof": "node dist/scripts/action-engine-kernel-proof.js",
+    "action-engine:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/action-engine-kernel-proof.ts"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"

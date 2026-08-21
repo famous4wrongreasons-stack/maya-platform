@@ -18,6 +18,7 @@
     "scripts/opportunity-lifecycle-shadow.ts",
     "scripts/opportunity-lifecycle-run.ts",
     "scripts/opportunity-lifecycle-proof.ts",
+    "scripts/action-engine-kernel-proof.ts",
     "src/config/**/*.ts"
   ],
   "exclude": ["**/*.spec.ts"]

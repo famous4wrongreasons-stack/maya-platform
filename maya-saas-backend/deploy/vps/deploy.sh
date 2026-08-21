@@ -82,6 +82,8 @@ step "2/10 локальная сборка dist"
 test -f "$BE/dist/src/main.js" || fail "нет dist/src/main.js после build"
 test -f "$BE/dist/scripts/opportunity-lifecycle-run.js" \
   || fail "нет immutable Opportunity lifecycle runner после build"
+test -f "$BE/dist/scripts/action-engine-kernel-proof.js" \
+  || fail "нет immutable Action Engine kernel proof после build"
 
 step "3/10 каталог релиза"
 # /opt/maya-saas/releases принадлежит maya-saas, поэтому создаём под sudo и
@@ -105,6 +107,7 @@ run "set -e
   test -d node_modules/@nestjs/common || { echo 'НЕТ @nestjs/common'; exit 1; }
   test -d node_modules/prisma        || { echo 'НЕТ prisma CLI'; exit 1; }
   test -f dist/scripts/opportunity-lifecycle-run.js || { echo 'НЕТ lifecycle runner'; exit 1; }
+  test -f dist/scripts/action-engine-kernel-proof.js || { echo 'НЕТ action kernel proof'; exit 1; }
   # 🔴 Проверяем ЗАГРУЗКУ, а не наличие каталога. npm 11 блокирует
   # install-скрипты незнакомых пакетов, и нативный модуль может лежать на месте,
   # но не собраться. Пароли проверяются через bcrypt — молчаливая поломка тут

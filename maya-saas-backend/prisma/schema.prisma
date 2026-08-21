@@ -88,6 +88,57 @@ enum AgentTaskLifecycleStatus {
   invalidated
 }
 
+enum ActionExecutionState {
+  PENDING_APPROVAL
+  READY
+  EXECUTING
+  UNKNOWN
+  SUCCEEDED
+  FAILED
+  NOT_EXECUTED
+}
+
+enum ActionPolicyDecision {
+  ALLOW
+  DENY
+  SHADOW_ONLY
+}
+
+enum ActionApprovalDecision {
+  NOT_REQUIRED
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum ActionReconciliationState {
+  NOT_REQUIRED
+  REQUIRED
+  IN_PROGRESS
+  RESOLVED
+  MANUAL_REQUIRED
+}
+
+enum ActionAttemptKind {
+  EXECUTION
+  RECONCILIATION
+}
+
+enum ActionAttemptState {
+  STARTED
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+}
+
+enum ExternalDispatchState {
+  NOT_APPLICABLE
+  NOT_CROSSED
+  MAY_HAVE_CROSSED
+  ACKNOWLEDGED
+}
+
 model Tenant {
   id                             String                          @id @default(cuid())
   name                           String
@@ -172,6 +223,8 @@ model Tenant {
   marketingDeliveryAttempts      MarketingDeliveryAttempt[]
   opportunities                  Opportunity[]
   agentTasks                     AgentTask[]
+  actionExecutions               ActionExecution[]
+  actionAttempts                 ActionAttempt[]
 
   @@index([status, graceEndsAt])
 }
@@ -245,12 +298,136 @@ model AgentTask {
   updatedAt               DateTime                 @updatedAt
   tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   opportunity             Opportunity              @relation(fields: [opportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)
+  actionExecutions        ActionExecution[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, taskFingerprint])
   @@unique([tenantId, opportunityId, agentDomain])
   @@index([tenantId, status, expiresAt])
   @@index([tenantId, semanticKey, agentDomain, status])
+}
+
+/// Canonical Chapter 6 lifecycle for one logical action. It stores a trusted,
+/// normalized contract and durable outcome state, never raw model output or
+/// unrestricted provider payloads.
+model ActionExecution {
+  id                        String  @id @default(uuid())
+  tenantId                  String
+  identityVersion           Int
+  identityFingerprint       String
+  idempotencyScope          String?
+  requestIdempotencyKeyHash String?
+
+  sourceType  String
+  sourceRef   String?
+  agentTaskId String?
+  actorUserId String?
+
+  actionClass              String
+  capability               String
+  capabilityVersion        Int
+  targetKind               String
+  targetRef                String
+  normalizedInputContract  String
+  normalizedInputHash      String
+  normalizedInputEncrypted String?
+  evidenceRefsJson         Json
+  intentExpiresAt          DateTime?
+  dryRun                   Boolean   @default(false)
+
+  riskProfileVersion Int
+  riskFacetsJson     Json
+  policyKey          String
+  policyVersion      Int
+  policyDecision     ActionPolicyDecision
+  autonomyLevel      String
+  policyDecidedBy    String
+
+  approvalRequirement     String
+  approvalDecision        ActionApprovalDecision
+  approvalInputHash       String?
+  approvalRequestedAt     DateTime?
+  approvalExpiresAt       DateTime?
+  approvalDecidedAt       DateTime?
+  approvalDecidedByUserId String?
+
+  state                       ActionExecutionState
+  notExecutedReasonCode       String?
+  retryPolicyKey              String
+  retryPolicyVersion          Int
+  maxExecutionAttempts        Int
+  executionAttemptCount       Int                       @default(0)
+  nextExecutionAttemptAt      DateTime?
+  reconciliationPolicyKey     String
+  reconciliationPolicyVersion Int
+  reconciliationState         ActionReconciliationState
+
+  leaseOwner     String?
+  leaseTokenHash String?
+  leaseExpiresAt DateTime?
+  revision       Int       @default(0)
+
+  transportIdentityVersion  Int
+  transportIdempotencyKey   String
+  finalOutcomeCode          String?
+  safeResultSummaryJson     Json?
+  userExplanationCode       String?
+  userExplanationParamsJson Json?
+  firstAttemptedAt          DateTime?
+  finalizedAt               DateTime?
+  payloadRetentionUntil     DateTime?
+  auditRetentionUntil       DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agentTask          AgentTask?      @relation(fields: [agentTaskId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  actorMembership    Membership?     @relation("ActionActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  approverMembership Membership?     @relation("ActionApprover", fields: [approvalDecidedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  attempts           ActionAttempt[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, identityFingerprint])
+  @@unique([tenantId, idempotencyScope, requestIdempotencyKeyHash], map: "ActionExecution_tenant_idempotency_key")
+  @@index([tenantId, state, nextExecutionAttemptAt])
+  @@index([tenantId, reconciliationState, leaseExpiresAt])
+  @@index([tenantId, agentTaskId])
+  @@index([tenantId, createdAt])
+}
+
+/// Immutable-after-finish ledger entry for execution and reconciliation work.
+/// A retry remains an attempt under the same logical ActionExecution.
+model ActionAttempt {
+  id                          String                @id @default(uuid())
+  tenantId                    String
+  actionExecutionId           String
+  attemptNumber               Int
+  kind                        ActionAttemptKind
+  state                       ActionAttemptState
+  executorKey                 String
+  executorVersion             Int
+  externalDispatchState       ExternalDispatchState
+  providerRequestIdentityHash String?
+  providerReferenceEncrypted  String?
+  providerReferenceHash       String?
+  transportCode               String?
+  httpStatus                  Int?
+  errorClass                  String?
+  outcomeCode                 String?
+  safeResultJson              Json?
+  retryDecisionCode           String?
+  reconciliationRequired      Boolean               @default(false)
+  startedAt                   DateTime              @default(now())
+  finishedAt                  DateTime?
+  createdAt                   DateTime              @default(now())
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, actionExecutionId, attemptNumber])
+  @@index([tenantId, state, startedAt])
+  @@index([tenantId, providerReferenceHash])
 }
 
 /// Tenant-wide transactional appointment reminder policy. These notices are
@@ -404,27 +581,29 @@ model UserMerge {
 }
 
 model Membership {
-  id                   String                @id @default(cuid())
-  tenantId             String
-  userId               String
-  branchId             String?
-  role                 UserRole
-  status               MembershipStatus      @default(active)
-  invitedAt            DateTime?
-  joinedAt             DateTime?
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch               Branch?               @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  authIdentities       AuthIdentity[]        @relation("AuthIdentityMembership")
-  authSessions         AuthSession[]         @relation("AuthSessionMembership")
-  internalProviders    InternalProvider[]    @relation("InternalProviderMembership")
-  customerProfile      CustomerProfile?      @relation("CustomerProfileMembership")
-  loyaltyAccount       LoyaltyAccount?       @relation("LoyaltyAccountMembership")
-  dashboardPreferences DashboardPreference[]
-  aiBrainSessions      AiBrainSession[]
-  aiMemoryFacts        AiMemoryFact[]
+  id                         String                @id @default(cuid())
+  tenantId                   String
+  userId                     String
+  branchId                   String?
+  role                       UserRole
+  status                     MembershipStatus      @default(active)
+  invitedAt                  DateTime?
+  joinedAt                   DateTime?
+  createdAt                  DateTime              @default(now())
+  updatedAt                  DateTime              @updatedAt
+  tenant                     Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                     Branch?               @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  authIdentities             AuthIdentity[]        @relation("AuthIdentityMembership")
+  authSessions               AuthSession[]         @relation("AuthSessionMembership")
+  internalProviders          InternalProvider[]    @relation("InternalProviderMembership")
+  customerProfile            CustomerProfile?      @relation("CustomerProfileMembership")
+  loyaltyAccount             LoyaltyAccount?       @relation("LoyaltyAccountMembership")
+  dashboardPreferences       DashboardPreference[]
+  aiBrainSessions            AiBrainSession[]
+  aiMemoryFacts              AiMemoryFact[]
+  actionExecutionsAsActor    ActionExecution[]     @relation("ActionActor")
+  actionExecutionsAsApprover ActionExecution[]     @relation("ActionApprover")
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
