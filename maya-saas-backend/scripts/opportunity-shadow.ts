@@ -180,6 +180,7 @@ export function normalizeOpportunityShadowRows(
             status: row.appointmentStatus,
             blockedStartAt: row.blockedStartAt?.toISOString() ?? null,
             blockedEndAt: row.blockedEndAt?.toISOString() ?? null,
+            currentCapacity: null,
           }
         : null,
   }));

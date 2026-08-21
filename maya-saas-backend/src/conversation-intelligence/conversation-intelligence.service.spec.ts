@@ -78,10 +78,16 @@ describe('ConversationIntelligenceService', () => {
     ]);
     const encoded = JSON.stringify(contract);
 
-    // 87, а не 85: заведены интенты для operations.journal.read и
-    // notifications.appointments.read — без них планировщик отклонял вызов
-    // инструмента, который каталог и обработчик поддерживают.
-    expect(contract.intents).toHaveLength(88);
+    // CF5: три legacy marketing/opportunity decision path удалены. Runtime
+    // contract обязан содержать только оставшиеся 85 canonical intents.
+    expect(contract.intents).toHaveLength(85);
+    expect(contract.intents.map((item) => item.intent)).not.toEqual(
+      expect.arrayContaining([
+        'marketing.find_audience',
+        'marketing.preview_campaign',
+        'marketing.send_campaign',
+      ]),
+    );
     expect(Buffer.byteLength(encoded, 'utf8')).toBeLessThan(60_000);
     expect(contract.intents[0]).not.toHaveProperty('permission');
     expect(contract.intents[0]).not.toHaveProperty('response_rule');

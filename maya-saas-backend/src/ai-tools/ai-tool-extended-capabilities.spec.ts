@@ -75,46 +75,13 @@ describe('AiTool extended capabilities', () => {
         assignee: 'Антон',
       }),
     ).toThrow();
-    expect(
-      registry.validateArguments('marketing.audience.find', {
-        inactive_days: 90,
-      }),
-    ).toEqual({
-      inactive_days: 90,
-      minimum_visits: 1,
-      max_recipients: 100,
-    });
-    expect(
-      registry.validateArguments('marketing.campaign.preview', {
-        audience_id: 'audience-123',
-        message: 'Будем рады видеть вас снова.',
-      }),
-    ).toEqual({
-      audience_id: 'audience-123',
-      message: 'Будем рады видеть вас снова.',
-    });
-    expect(() =>
-      registry.validateArguments('marketing.campaign.preview', {
-        audience_id: 'audience-123',
-        message: 'Позвоните нам: +7 999 123-45-67',
-      }),
-    ).toThrow();
-    expect(registry.get('marketing.campaign.send')).toMatchObject({
-      approvalPolicy: 'actor',
-      idempotency: 'required',
-      riskTier: 'high_write',
-    });
-    expect(
-      registry.buildApprovalPreview('marketing.campaign.send', {
-        campaign_id: 'campaign-123',
-      }),
-    ).toEqual({
-      summary: 'Отправить подтверждённую рассылку выбранной аудитории.',
-      payload: {
-        action: 'send_marketing_campaign',
-        campaign_id: 'campaign-123',
-      },
-    });
+    for (const name of [
+      'marketing.audience.find',
+      'marketing.campaign.preview',
+      'marketing.campaign.send',
+    ]) {
+      expect(() => registry.get(name)).toThrow();
+    }
     expect(
       registry.buildApprovalPreview('tasks.create', {
         task: 'Проверить отмены',

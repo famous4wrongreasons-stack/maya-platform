@@ -402,33 +402,6 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
-    name: 'booking.upsell.suggest',
-    description:
-      'Suggest one soft addon for the authenticated customer based on visit history and currently chosen services. Returns historical suggestions («как в прошлый раз») and compatible menu_addons. Call once after the main service is known during booking.',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['current_service_names'],
-      properties: {
-        current_service_names: {
-          type: 'array',
-          minItems: 1,
-          maxItems: 10,
-          items: { type: 'string', minLength: 1, maxLength: 160 },
-        },
-      },
-    },
-    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['booking'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    timeoutMs: 12_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
     name: 'inventory.stock.read',
     description:
       'Read the tenant-owned inventory catalog and exact low-stock signals. If no inventory is configured, say so instead of inventing stock from CRM services.',
@@ -1145,97 +1118,6 @@ export const MAYA_AI_TOOL_CATALOG = [
     approvalPolicy: 'none',
     idempotency: 'required',
     timeoutMs: 8_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
-    name: 'marketing.audience.find',
-    description:
-      'Build a short-lived, consent-safe reactivation audience from active MAYA customer accounts that can be matched exactly to YClients by phone. The model receives counts and an opaque audience id only: no names, phones or client records. Use this before drafting a campaign for clients who have not visited for a specified number of days.',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['inactive_days'],
-      properties: {
-        inactive_days: {
-          type: 'integer',
-          minimum: 30,
-          maximum: 3650,
-          description:
-            'Minimum number of complete days since the last verified CRM visit.',
-        },
-        minimum_visits: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 1000,
-          default: 1,
-        },
-        max_recipients: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 500,
-          default: 100,
-        },
-      },
-    },
-    allowedRoles: OWNER_AND_ADMIN_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['tg_marketing'],
-    riskTier: 'read',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    timeoutMs: 70_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
-    name: 'marketing.campaign.preview',
-    description:
-      'Create a short-lived in-app campaign draft for a previously built audience. This does not contact anyone. It returns an opaque campaign id and exact recipient count so the owner can review and explicitly confirm the send.',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['audience_id', 'message'],
-      properties: {
-        audience_id: { type: 'string', minLength: 8, maxLength: 128 },
-        message: {
-          type: 'string',
-          minLength: 2,
-          maxLength: 600,
-          description:
-            'Final customer-facing message. Do not include private client data.',
-        },
-      },
-    },
-    allowedRoles: OWNER_AND_ADMIN_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['tg_marketing'],
-    riskTier: 'low_write',
-    approvalPolicy: 'none',
-    idempotency: 'none',
-    timeoutMs: 10_000,
-    retryPolicy: 'none',
-    fallbackPolicy: 'fail_closed',
-  },
-  {
-    name: 'marketing.campaign.send',
-    description:
-      'Send one reviewed campaign draft to its consent-safe in-app audience. Always requires owner or administrator confirmation. Immediately before delivery the server revalidates active MAYA accounts, current marketing consent and the CRM inactivity rule. The model never sees recipient PII.',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['campaign_id'],
-      properties: {
-        campaign_id: { type: 'string', minLength: 8, maxLength: 128 },
-      },
-    },
-    allowedRoles: OWNER_AND_ADMIN_ROLES,
-    allowedSurfaces: ALL_SURFACES,
-    requiredFeatures: ['tg_marketing'],
-    riskTier: 'high_write',
-    approvalPolicy: 'actor',
-    idempotency: 'required',
-    timeoutMs: 70_000,
     retryPolicy: 'none',
     fallbackPolicy: 'fail_closed',
   },

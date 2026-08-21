@@ -267,9 +267,12 @@ function detectReleasedCapacity(
   }
   if (signal.capacity.state !== 'measured') return null;
   if (
+    signal.capacity.availability !== 'available' ||
+    signal.capacity.completeness !== 'complete' ||
     signal.capacity.durationMinutes === null ||
     signal.capacity.durationMinutes <= 0 ||
-    !signal.capacity.intervalRef
+    !signal.capacity.intervalRef ||
+    !signal.capacity.scheduleRef
   ) {
     return null;
   }
@@ -294,6 +297,16 @@ function detectReleasedCapacity(
       owner: 'occupancy_capacity',
       capability: 'occupancy.capacity.read',
       factRef: signal.capacity.intervalRef,
+      version: 1,
+      observedAt: signal.observedAt,
+      asOf: signal.occurredAt,
+      completeness: 'complete',
+      basis: signal.capacity.basis,
+    },
+    {
+      owner: 'occupancy_capacity',
+      capability: 'occupancy.schedule.read',
+      factRef: signal.capacity.scheduleRef,
       version: 1,
       observedAt: signal.observedAt,
       asOf: signal.occurredAt,
@@ -840,6 +853,7 @@ function signalRefs(signal: OpportunitySignalV1): string[] {
         signal.eventRef,
         signal.appointmentRef,
         ...(signal.capacity.intervalRef ? [signal.capacity.intervalRef] : []),
+        ...(signal.capacity.scheduleRef ? [signal.capacity.scheduleRef] : []),
       ];
     case 'business_fact_change':
       return [signal.changeRef, signal.currentFactRef, signal.previousFactRef];

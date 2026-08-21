@@ -417,7 +417,6 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'booking.availability.read': 'booking_availability',
   'appointments.own.list': 'client_appointments',
   'loyalty.own.read': 'client_loyalty',
-  'booking.upsell.suggest': 'client_upsell',
 };
 /** Инструменты, которые предзагружаем: подсказка к ним однозначна. */
 const PRELOADABLE_TOOLS = new Set([
@@ -1520,11 +1519,8 @@ export class AiCoreService {
     }
     const catalogRead = toolResults.some(
       (result) =>
-        (result.name === 'catalog.services.read' &&
-          Array.isArray(this.record(result.result).services)) ||
-        (result.name === 'booking.upsell.suggest' &&
-          (Array.isArray(this.record(result.result).suggestions) ||
-            Array.isArray(this.record(result.result).menu_addons))),
+        result.name === 'catalog.services.read' &&
+        Array.isArray(this.record(result.result).services),
     );
     if (!catalogRead) {
       return 'Сначала уточним основную услугу, мастера и удобное время. Дополнения предложу только после проверки каталога.';
@@ -3220,14 +3216,11 @@ export class AiCoreService {
     const current = this.record(data.current);
     const comparison = this.record(data.comparison);
     const text = userText.toLowerCase().replace(/ё/g, 'е');
-    const requestedRecommendation = BUSINESS_ACTION_REQUEST_PATTERN.test(text)
-      ? this.analyticsRecommendation(data, personal)
-      : null;
     const requestedDiagnosis = BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text)
       ? this.analyticsDiagnosis(data, personal)
       : null;
-    const withRecommendation = (reply: string) =>
-      [reply, requestedDiagnosis, requestedRecommendation]
+    const withDiagnosis = (reply: string) =>
+      [reply, requestedDiagnosis]
         .filter((part): part is string => Boolean(part))
         .join(' ');
     if (isComprehensiveBusinessReview(userText)) {
@@ -3448,13 +3441,13 @@ export class AiCoreService {
       if (!line) {
         return 'В журнале CRM нет подтверждённого идентификатора клиента для этого среза; записи и транзакции при этом доступны.';
       }
-      return withRecommendation(line);
+      return withDiagnosis(line);
     }
     if (/(повторн|возвращ|удержан)/i.test(text)) {
       const repeat = metric('repeat_clients_in_period');
       const rate = metric('repeat_client_rate_percent');
       if (repeat !== null) {
-        return withRecommendation(
+        return withDiagnosis(
           `Повторных клиентов внутри выбранного периода: ${this.formatMetricNumber(repeat)}${rate === null ? '' : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange('repeat_clients_in_period')}`,
         );
       }
@@ -3471,13 +3464,13 @@ export class AiCoreService {
        */
       const observedNoShow = metric('attendance_no_show');
       if (observedNoShow !== null) {
-        return withRecommendation(
+        return withDiagnosis(
           `Не пришли: ${this.formatMetricNumber(observedNoShow)}.${metricChange('attendance_no_show')}`,
         );
       }
       const statusNoShow = metric('appointments_no_show');
       if (statusNoShow !== null) {
-        return withRecommendation(
+        return withDiagnosis(
           `Присутствие за период не сверено, поэтому число неявок назвать не могу. Записей со статусом «не пришёл» у провайдера: ${this.formatMetricNumber(statusNoShow)} — это состояние записи, а не наблюдение за визитом.`,
         );
       }
@@ -3486,7 +3479,7 @@ export class AiCoreService {
       const cancelled = metric('appointments_cancelled');
       const rate = metric('cancellation_rate_percent');
       if (cancelled !== null) {
-        return withRecommendation(
+        return withDiagnosis(
           `Отменённых записей: ${this.formatMetricNumber(cancelled)}${rate === null ? '' : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange('appointments_cancelled')}`,
         );
       }
@@ -3500,11 +3493,7 @@ export class AiCoreService {
         ? personal
           ? 'Личная кассовая выручка мастера не атрибутируется CRM. Доступна средняя стоимость записанных услуг.'
           : 'Подтверждённый средний чек за выбранный период недоступен.'
-        : `${personal ? 'Средняя стоимость записанных услуг' : 'Средний чек'}: ${money(value)}.${metricChange(key, money)}${
-            personal
-              ? ' Первое действие: после консультации предлагайте один действительно подходящий уход из каталога, без давления и повторной продажи после отказа.'
-              : ''
-          }`;
+        : `${personal ? 'Средняя стоимость записанных услуг' : 'Средний чек'}: ${money(value)}.${metricChange(key, money)}`;
     }
     if (/(выруч|оборот|касс|доход|деньг|заработ)/i.test(text)) {
       const key = personal
@@ -3515,7 +3504,7 @@ export class AiCoreService {
         ? personal
           ? 'Кассовую выручку конкретного мастера CRM не подтверждает. Могу показать стоимость его записанных услуг, загрузку и повторных клиентов.'
           : 'Подтверждённые денежные поступления за выбранный период недоступны.'
-        : withRecommendation(
+        : withDiagnosis(
             `${personal ? 'Стоимость записанных вам услуг' : 'Подтверждённые поступления'}: ${money(value)}.${metricChange(key, money)}${personal ? ' Это стоимость записей, а не кассовая выручка.' : ''}`,
           );
     }
@@ -3537,7 +3526,7 @@ export class AiCoreService {
           declining.previous_appointments,
         );
         const percent = this.formatSignedPercent(declining.percent_change);
-        return withRecommendation(
+        return withDiagnosis(
           `Наибольшая просадка по услугам: ${declining.name} — ${this.formatMetricNumber(currentAppointments)} записей против ${this.formatMetricNumber(previousAppointments)}, изменение ${this.signedValue(delta, this.formatMetricNumber(Math.abs(delta)))}${percent ? ` (${percent})` : ''}.`,
         );
       }
@@ -3548,7 +3537,7 @@ export class AiCoreService {
             .filter((entry) => typeof entry.name === 'string')
         : [];
       if (services.length > 0) {
-        return withRecommendation(
+        return withDiagnosis(
           `Лидеры по числу записей: ${services
             .map(
               (entry) =>
@@ -3561,7 +3550,7 @@ export class AiCoreService {
     if (/(загруз|час|минут|занятост)/i.test(text)) {
       const minutes = metric('booked_minutes');
       if (minutes !== null) {
-        return withRecommendation(
+        return withDiagnosis(
           `Записанное рабочее время: ${this.formatDuration(minutes)}.${metricChange('booked_minutes', (value) => this.formatDuration(value))}`,
         );
       }
@@ -3574,7 +3563,7 @@ export class AiCoreService {
       const cancelled = metric('appointments_cancelled');
       const noShow = metric('appointments_no_show');
       if (total !== null) {
-        return withRecommendation(
+        return withDiagnosis(
           `Всего записей: ${this.formatMetricNumber(total)}${completed === null ? '' : `, завершённых ${this.formatMetricNumber(completed)}`}${scheduled === null ? '' : `, ожидают визита ${this.formatMetricNumber(scheduled)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}${noShow === null ? '' : `, со статусом «не пришёл» ${this.formatMetricNumber(noShow)}`}${completed === null && scheduled === null && active !== null ? `, неотменённых ${this.formatMetricNumber(active)}` : ''}.${metricChange('appointments_total')}`,
         );
       }
@@ -3615,11 +3604,7 @@ export class AiCoreService {
           : `${this.formatMetricNumber(value)} уникальных клиентов${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ''}`;
       })(),
     ].filter((part): part is string => Boolean(part));
-    const recommendation =
-      requestedRecommendation ?? this.analyticsRecommendation(data, personal);
-    const insight = [requestedDiagnosis, recommendation]
-      .filter((part): part is string => Boolean(part))
-      .join(' ');
+    const insight = requestedDiagnosis ?? '';
     if (summary.length === 0) {
       return null;
     }
@@ -3753,9 +3738,6 @@ export class AiCoreService {
     const serviceDiagnosis = weakestService
       ? `По услугам сильнее всего просела «${String(weakestService.name)}»: ${this.formatSignedPercent(weakestService.percent_change)}.`
       : null;
-    const recommendation =
-      this.analyticsRecommendation(data, personal) ??
-      'Первое действие: отдельно проверить загрузку по дням и мастерам, затем работать с самым слабым подтверждённым участком.';
     const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
 
     return [
@@ -3764,7 +3746,6 @@ export class AiCoreService {
         ? `Динамика ${comparisonLabel}: ${dynamics.join('; ')}.`
         : 'Сравнение с предыдущим периодом сейчас недоступно, поэтому подтверждённую динамику не выдумываю.',
       `Слабые места: ${[diagnosis, serviceDiagnosis].filter(Boolean).join(' ') || 'подтверждённого снижения в доступных показателях нет.'}`,
-      recommendation,
     ].join('\n\n');
   }
 
@@ -3796,40 +3777,6 @@ export class AiCoreService {
     return Array.isArray(current.staff_summary)
       ? current.staff_summary.map((row) => this.record(row))
       : [];
-  }
-
-  private analyticsRecommendation(
-    data: Record<string, unknown>,
-    personal: boolean,
-  ): string | null {
-    const metrics = this.record(data.metrics);
-    const changes = this.record(data.changes);
-    const cancellationRate = this.optionalMetricNumber(
-      metrics.cancellation_rate_percent,
-    );
-    const clientChange = this.record(changes.unique_clients);
-    const clientDelta = this.optionalMetricNumber(clientChange.delta);
-    const serviceChanges = Array.isArray(data.service_changes)
-      ? data.service_changes.map((entry) => this.record(entry))
-      : [];
-    const decliningService = serviceChanges.find(
-      (entry) =>
-        this.optionalMetricNumber(entry.delta) !== null &&
-        Number(entry.delta) < 0,
-    );
-
-    if (cancellationRate !== null && cancellationRate >= 10) {
-      return `Первое действие: снизить отмены через подтверждение записи и точечное напоминание — сейчас их доля ${this.formatMetricNumber(cancellationRate)}%.`;
-    }
-    if (clientDelta !== null && clientDelta < 0) {
-      return personal
-        ? 'Первое действие: вернуться к клиентам, у которых уже закончился обычный цикл визита.'
-        : 'Первое действие: сегментировать уснувших клиентов по их обычному циклу и запустить точечный возврат.';
-    }
-    if (decliningService && typeof decliningService.name === 'string') {
-      return `Первое действие: разобрать просадку услуги «${decliningService.name}» по мастерам, окнам и повторным визитам.`;
-    }
-    return null;
   }
 
   private analyticsDiagnosis(

@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 import { AppointmentReconciliationService } from './appointment-reconciliation.service';
+import { OpportunityLifecycleRunner } from './opportunity-lifecycle.runner';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 
@@ -55,6 +56,7 @@ export class AppointmentReconciliationScheduler
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
     private readonly reconciliation: AppointmentReconciliationService,
+    private readonly opportunityLifecycle: OpportunityLifecycleRunner,
     private readonly config: ConfigService,
   ) {}
 
@@ -158,6 +160,36 @@ export class AppointmentReconciliationScheduler
             `updated=${outcome.updated} unchanged=${outcome.unchanged} ` +
             `events=${outcome.events_emitted}`,
         );
+
+        try {
+          const lifecycle = await this.tenantContext.runAsSystemTenant(
+            integration.tenantId,
+            () =>
+              this.opportunityLifecycle.run({
+                tenantId: integration.tenantId,
+                asOf: new Date(),
+                sourceCompleteness:
+                  outcome.completeness === 'complete' ? 'complete' : 'partial',
+              }),
+          );
+          if (lifecycle.status === 'ran') {
+            this.logger.log(
+              `opportunity lifecycle ${contour} ${lifecycle.completeness}: ` +
+                `detected=${lifecycle.detectedNow} active=${lifecycle.durableActiveAfter} ` +
+                `resolved=${lifecycle.resolved} expired=${lifecycle.expired} ` +
+                `superseded=${lifecycle.superseded} tasks=${lifecycle.currentTasks} ` +
+                `duplicates=${lifecycle.duplicateAttemptsCollapsed} executed=0`,
+            );
+          }
+        } catch (error) {
+          // CRM reconciliation remains successful even when the Chapter 5
+          // shadow lifecycle cannot run. The next scheduler pass retries from
+          // durable canonical state; no external action is involved.
+          this.logger.error(
+            `opportunity lifecycle ${contour} failed for ${integration.provider}: ` +
+              (error instanceof Error ? error.message : 'unknown error'),
+          );
+        }
       } catch (error) {
         // Строка прогона уже помечена сбоем самим сервисом: она и есть
         // наблюдаемый след. Здесь — только то, что цикл продолжается.

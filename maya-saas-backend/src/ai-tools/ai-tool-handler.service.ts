@@ -50,7 +50,6 @@ import {
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { InboxService } from '../inbox/inbox.service';
-import { MarketingService } from '../marketing/marketing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { StaffService } from '../staff/staff.service';
@@ -67,9 +66,7 @@ import {
   type ClientRegistryAnalysis,
 } from './client-registry-analysis';
 import {
-  collectUpsellOpportunities,
   computePeriodMoneyMotivation,
-  historicalAddonOpportunity,
   toMotivationVisit,
 } from './master-money-motivation';
 import { parseVisitOutcome, unavailableAuthorityView } from '../domain';
@@ -213,7 +210,6 @@ export class AiToolHandlerService {
     private readonly inboxService?: InboxService,
     private readonly auditLogService?: AuditLogService,
     private readonly recoveryService?: RecoveryService,
-    private readonly marketingService?: MarketingService,
     private readonly appointmentNotificationsService?: AppointmentNotificationsService,
     private readonly businessContentService?: BusinessContentService,
   ) {}
@@ -227,8 +223,6 @@ export class AiToolHandlerService {
     switch (toolName) {
       case 'catalog.staff.read':
         return this.readStaff(principal.tenantId);
-      case 'booking.upsell.suggest':
-        return this.suggestClientUpsell(principal, args);
       case 'customers.count':
         return this.customersService.countCustomers(principal.tenantId);
       case 'clients.retention.scan':
@@ -354,30 +348,6 @@ export class AiToolHandlerService {
         return this.createTask(principal, args, idempotencyKey);
       case 'tasks.complete':
         return this.completeTask(principal, args);
-      case 'marketing.audience.find':
-        return this.requireMarketingService().findAudience({
-          tenantId: principal.tenantId,
-          actorUserId: principal.userId,
-          rule: {
-            inactive_days: Number(args.inactive_days),
-            minimum_visits: Number(args.minimum_visits),
-            max_recipients: Number(args.max_recipients),
-          },
-        });
-      case 'marketing.campaign.preview':
-        return this.requireMarketingService().previewCampaign({
-          tenantId: principal.tenantId,
-          actorUserId: principal.userId,
-          audienceId: String(args.audience_id),
-          message: String(args.message),
-        });
-      case 'marketing.campaign.send':
-        return this.requireMarketingService().sendCampaign({
-          tenantId: principal.tenantId,
-          actorUserId: principal.userId,
-          campaignId: String(args.campaign_id),
-          idempotencyKey,
-        });
       case 'notifications.appointments.read':
         return this.requireAppointmentNotificationsService().getSettings(
           principal.tenantId,
@@ -1647,98 +1617,6 @@ export class AiToolHandlerService {
     return 'core';
   }
 
-  private async suggestClientUpsell(
-    principal: AiToolPrincipal,
-    args: ValidatedAiToolArguments,
-  ) {
-    const currentNames = Array.isArray(args.current_service_names)
-      ? args.current_service_names
-          .filter((item): item is string => typeof item === 'string')
-          .map((item) => item.trim())
-          .filter(Boolean)
-      : [];
-    const [historyRaw, catalog] = await Promise.all([
-      this.appointmentsService.listClientAppointments(
-        principal.tenantId,
-        principal.userId,
-      ),
-      this.crmService.getServices(principal.tenantId),
-    ]);
-    const history = historyRaw.map((item) => {
-      const row = this.record(item);
-      const services = Array.isArray(row.services)
-        ? row.services.map((service) => {
-            const safe = this.record(service);
-            const title = typeof safe.name === 'string' ? safe.name : '';
-            return {
-              title,
-              priceRub: Number(safe.price || 0),
-            };
-          })
-        : [];
-      const startAt =
-        typeof row.start_at === 'string' || typeof row.start_at === 'number'
-          ? row.start_at
-          : Date.now();
-      const status = typeof row.status === 'string' ? row.status : '';
-      return {
-        clientId: null,
-        startAt: new Date(startAt),
-        status,
-        grossRub: Number(row.total_price || 0),
-        services,
-      };
-    });
-    const currentServices = currentNames.map((title) => ({
-      title,
-      priceRub: 0,
-    }));
-    const opportunity = historicalAddonOpportunity(history, currentServices);
-    const suggestions = opportunity
-      ? [
-          {
-            service: opportunity.title,
-            price: opportunity.price_rub,
-            times_bought: opportunity.times_bought,
-            last_date: opportunity.last_date,
-            reason: 'historical',
-          },
-        ]
-      : [];
-    const currentKeys = new Set(
-      currentNames.map((name) => name.toLowerCase().replace(/ё/g, 'е')),
-    );
-    const menu_addons = catalog
-      .filter((service) => {
-        const key = String(service.name || '')
-          .toLowerCase()
-          .replace(/ё/g, 'е');
-        if (!key || currentKeys.has(key)) return false;
-        if (
-          /уклад|стайлинг|styling/.test(key) &&
-          /стрижк/.test([...currentKeys].join(' '))
-        ) {
-          return false;
-        }
-        return /бород|тонир|камуфляж|уход|брить/.test(key);
-      })
-      .slice(0, 6)
-      .map((service) => ({
-        service: service.name,
-        price: service.price,
-        id: service.id,
-      }));
-    return {
-      suggestions,
-      menu_addons,
-      instruction: suggestions.length
-        ? 'Мягко предложи ОДНО дополнение из suggestions («как в прошлый раз»). После отказа больше не предлагай.'
-        : menu_addons.length
-          ? 'Можно один раз мягко предложить одно совместимое дополнение из menu_addons. Укладку к стрижке не предлагай.'
-          : 'Ничего не предлагай — продолжай оформление основной услуги.',
-    };
-  }
-
   private stringList(value: unknown): string[] {
     if (!Array.isArray(value)) {
       return [];
@@ -2491,13 +2369,6 @@ export class AiToolHandlerService {
     args: ValidatedAiToolArguments,
     payload: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
-    if (toolName === 'marketing.campaign.send') {
-      const preview = await this.requireMarketingService().approvalPreview(
-        principal.tenantId,
-        String(args.campaign_id),
-      );
-      return { ...payload, ...preview };
-    }
     if (toolName !== 'expenses.create') {
       return payload;
     }
@@ -2537,13 +2408,6 @@ export class AiToolHandlerService {
       }
     }
     return enriched;
-  }
-
-  private requireMarketingService(): MarketingService {
-    if (!this.marketingService) {
-      throw new Error('MarketingService is unavailable');
-    }
-    return this.marketingService;
   }
 
   private requireBusinessContentService(): BusinessContentService {
@@ -3128,7 +2992,6 @@ export class AiToolHandlerService {
             ...result,
             limitations: [...result.limitations, ...motivation.limitations],
             money_motivation: motivation.money_motivation,
-            upsell_opportunities: motivation.upsell_opportunities,
           }
         : result),
       // 🔴 Cycle 04 P7. Тот же штамп момента расчёта, что и у среза салона.
@@ -3156,7 +3019,6 @@ export class AiToolHandlerService {
     query: AnalyticsRangeQueryDto,
   ): Promise<{
     money_motivation: ReturnType<typeof computePeriodMoneyMotivation>;
-    upsell_opportunities: ReturnType<typeof collectUpsellOpportunities>;
     /** Оговорки об источнике, если история прочитана не целиком. */
     limitations: Array<{ key: string; reason: string }>;
   } | null> {
@@ -3206,15 +3068,8 @@ export class AiToolHandlerService {
         earnedRub,
         lookbackDays: 60,
       });
-      const upsell_opportunities = collectUpsellOpportunities({
-        periodVisits,
-        historyVisits: [...historyVisits, ...periodVisits],
-        salaryShare: money_motivation.salary_share ?? 0.5,
-        limit: 3,
-      });
       return {
         money_motivation,
-        upsell_opportunities,
         // 🔴 Целевой чек берётся из верхних 40 % истории. Неполная история
         // сдвигает этот квартиль вниз, а «потенциал» при этом остаётся точным
         // на вид числом. Молчать об этом нельзя.

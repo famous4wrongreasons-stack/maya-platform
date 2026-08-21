@@ -10,6 +10,10 @@
     "src/common/current-salon-import.utils.ts",
     "src/common/domain.enums.ts",
     "src/conversation-intelligence/**/*.ts",
-    "src/opportunities/**/*.ts"
+    "src/opportunities/**/*.ts",
+    "src/app.module.ts",
+    "src/prisma/prisma.service.ts",
+    "src/tenancy/tenant-context.service.ts",
+    "src/crm/opportunity-lifecycle.runner.ts"
   ]
 }

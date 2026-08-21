@@ -16,6 +16,7 @@ import {
   type AgentTaskV1,
   type OpportunityEvidenceV1,
   type OpportunityProjectionV1,
+  type OpportunityType,
   type OpportunityV1,
 } from './opportunity.contract';
 import {
@@ -49,6 +50,22 @@ export interface OpportunityResolutionProofV1 {
   evidence: OpportunityEvidenceV1[];
   observedAt: string;
   reasonCode: string;
+}
+
+export type CurrentStateScanCompleteness =
+  'complete' | 'partial' | 'unknown' | 'provider_failure';
+
+export interface OpportunityCurrentStateResolutionV1 {
+  semanticKey: string;
+  proof: OpportunityResolutionProofV1;
+}
+
+export interface OpportunityCurrentStateReconcileResult {
+  persistence: PersistedOpportunityResult[];
+  resolved: number;
+  expired: number;
+  staleTasksInvalidated: number;
+  duplicateAttemptsCollapsed: number;
 }
 
 export function resolutionEvidenceFingerprint(
@@ -193,106 +210,132 @@ export class OpportunityLifecycleRepository {
     validatedAt: Date;
   }): Promise<PersistedOpportunityResult> {
     validateTrustedPersistenceInput(input);
+    return this.withSerializableRetry((tx) =>
+      persistOpportunityInTransaction(tx, input),
+    );
+  }
+
+  /**
+   * Atomically persists a fully validated current projection and reconciles
+   * only explicitly proven negative states. Partial or failed scans may add or
+   * revalidate observed Opportunities, but can never resolve an absent one.
+   */
+  async reconcileCurrentProjection(input: {
+    tenantId: string;
+    projection: OpportunityProjectionV1;
+    validatedAt: Date;
+    currentState: {
+      completeness: CurrentStateScanCompleteness;
+      opportunityTypes: OpportunityType[];
+      resolutions: OpportunityCurrentStateResolutionV1[];
+    };
+  }): Promise<OpportunityCurrentStateReconcileResult> {
+    const tasksByIdentity = validateProjectionForTenant(input);
+    const opportunityTypes = [...new Set(input.currentState.opportunityTypes)];
+    if (opportunityTypes.length === 0) {
+      throw new Error('Current-state reconciliation requires a family scope.');
+    }
+    if (
+      input.projection.opportunities.some(
+        (opportunity) => !opportunityTypes.includes(opportunity.type),
+      )
+    ) {
+      throw new Error(
+        'Projection contains an Opportunity outside its family scope.',
+      );
+    }
+    const resolutions = new Map<string, OpportunityResolutionProofV1>();
+    for (const resolution of input.currentState.resolutions) {
+      assertOpaqueFingerprint(resolution.semanticKey, 'resolution semanticKey');
+      validateResolutionProof(resolution.proof);
+      if (
+        new Date(resolution.proof.observedAt).getTime() >
+        input.validatedAt.getTime()
+      ) {
+        throw new Error(
+          'Current-state proof cannot follow reconciliation time.',
+        );
+      }
+      if (resolutions.has(resolution.semanticKey)) {
+        throw new Error('Current-state resolution semanticKey must be unique.');
+      }
+      resolutions.set(resolution.semanticKey, resolution.proof);
+    }
+    if (
+      input.currentState.completeness !== 'complete' &&
+      resolutions.size > 0
+    ) {
+      throw new Error('Incomplete current-state scans cannot resolve absence.');
+    }
 
     return this.withSerializableRetry(async (tx) => {
-      const expiredAtWrite =
-        new Date(input.opportunity.expiresAt).getTime() <=
-        input.validatedAt.getTime();
-
-      const exact = await tx.opportunity.findUnique({
-        where: {
-          tenantId_identityFingerprint: {
+      const persistence: PersistedOpportunityResult[] = [];
+      for (const opportunity of input.projection.opportunities) {
+        persistence.push(
+          await persistOpportunityInTransaction(tx, {
             tenantId: input.tenantId,
-            identityFingerprint: input.opportunity.identityFingerprint,
-          },
-        },
-      });
-
-      if (exact) {
-        if (exact.status !== OpportunityLifecycleStatus.active) {
-          return resultFor('terminal_duplicate_collapsed', exact, null, true);
-        }
-        if (expiredAtWrite) {
-          await expireOpportunity(tx, exact, input.validatedAt);
-          return resultFor('expired_input_rejected', exact, null, true);
-        }
-
-        const lastValidatedAt = laterOf(
-          exact.lastValidatedAt,
-          input.validatedAt,
+            opportunity,
+            task: tasksByIdentity.get(opportunity.identityFingerprint) ?? null,
+            validatedAt: input.validatedAt,
+          }),
         );
-        if (lastValidatedAt.getTime() !== exact.lastValidatedAt.getTime()) {
-          await tx.opportunity.update({
-            where: { id: exact.id },
-            data: { lastValidatedAt },
-          });
-        }
-        const task = await ensureCurrentTask(tx, exact, input.task);
-        return resultFor('revalidated', exact, task, true);
       }
 
-      const active = await lockCurrentOpportunity(
+      const due = await lockDueOpportunities(
         tx,
         input.tenantId,
-        input.opportunity.semanticKey,
+        input.validatedAt,
       );
-
-      if (expiredAtWrite) {
-        if (active) await expireOpportunity(tx, active, input.validatedAt);
-        return {
-          disposition: 'expired_input_rejected',
-          opportunityId: active?.id ?? null,
-          taskId: null,
-          revision: active?.revision ?? null,
-          duplicateCollapsed: true,
-        };
+      for (const opportunity of due) {
+        await expireOpportunity(tx, opportunity, input.validatedAt);
       }
 
-      let revision: number;
-      let supersedesOpportunityId: string | null = null;
-      let disposition: OpportunityPersistenceDisposition = 'created';
-
-      if (active) {
-        await invalidateCurrentTasks(
-          tx,
-          active,
-          input.validatedAt,
-          'opportunity_superseded',
-        );
-        await tx.opportunity.update({
-          where: { id: active.id },
-          data: {
-            status: OpportunityLifecycleStatus.superseded,
-            lastValidatedAt: laterOf(active.lastValidatedAt, input.validatedAt),
-            terminalAt: input.validatedAt,
-            terminalReasonCode: 'evidence_superseded',
-          },
-        });
-        revision = active.revision + 1;
-        supersedesOpportunityId = active.id;
-        disposition = 'superseded';
-      } else {
-        const latest = await tx.opportunity.aggregate({
+      let resolved = 0;
+      if (input.currentState.completeness === 'complete') {
+        const active = await tx.opportunity.findMany({
           where: {
             tenantId: input.tenantId,
-            semanticKey: input.opportunity.semanticKey,
+            status: OpportunityLifecycleStatus.active,
+            type: { in: opportunityTypes },
           },
-          _max: { revision: true },
+          orderBy: [{ semanticKey: 'asc' }, { revision: 'asc' }],
         });
-        revision = (latest._max.revision ?? 0) + 1;
+        const present = new Set(
+          input.projection.opportunities.map((row) => row.semanticKey),
+        );
+        for (const candidate of active) {
+          if (present.has(candidate.semanticKey)) continue;
+          const proof = resolutions.get(candidate.semanticKey);
+          if (!proof) continue;
+          const current = await lockCurrentOpportunity(
+            tx,
+            input.tenantId,
+            candidate.semanticKey,
+          );
+          if (!current) continue;
+          await resolveOpportunityInTransaction(tx, {
+            opportunity: current,
+            proof,
+            resolvedAt: input.validatedAt,
+          });
+          resolved += 1;
+        }
       }
 
-      const created = await tx.opportunity.create({
-        data: opportunityCreateData({
-          trustedTenantId: input.tenantId,
-          opportunity: input.opportunity,
-          revision,
-          supersedesOpportunityId,
-          validatedAt: input.validatedAt,
-        }),
-      });
-      const task = await ensureCurrentTask(tx, created, input.task);
-      return resultFor(disposition, created, task, false);
+      const staleTasksInvalidated = await invalidateStaleCurrentTasks(
+        tx,
+        input.tenantId,
+        input.validatedAt,
+      );
+      return {
+        persistence,
+        resolved,
+        expired: due.length,
+        staleTasksInvalidated,
+        duplicateAttemptsCollapsed: persistence.filter(
+          (row) => row.duplicateCollapsed,
+        ).length,
+      };
     });
   }
 
@@ -317,28 +360,10 @@ export class OpportunityLifecycleRepository {
         input.semanticKey,
       );
       if (!active) return null;
-      if (proofObservedAt.getTime() < active.firstDetectedAt.getTime()) {
-        throw new Error(
-          'Resolution proof cannot precede the active Opportunity revision.',
-        );
-      }
-
-      await invalidateCurrentTasks(
-        tx,
-        active,
-        input.resolvedAt,
-        'opportunity_resolved',
-      );
-      return tx.opportunity.update({
-        where: { id: active.id },
-        data: {
-          status: OpportunityLifecycleStatus.resolved,
-          lastValidatedAt: laterOf(active.lastValidatedAt, input.resolvedAt),
-          terminalAt: input.resolvedAt,
-          terminalReasonCode: input.proof.reasonCode,
-          terminalEvidenceFingerprint: input.proof.evidenceFingerprint,
-          terminalEvidenceRefsJson: evidenceRefsJson(input.proof.evidence),
-        },
+      return resolveOpportunityInTransaction(tx, {
+        opportunity: active,
+        proof: input.proof,
+        resolvedAt: input.resolvedAt,
       });
     });
   }
@@ -348,15 +373,7 @@ export class OpportunityLifecycleRepository {
       throw new Error('Expiry asOf must be a valid instant.');
     }
     return this.withSerializableRetry(async (tx) => {
-      const due = await tx.$queryRaw<Opportunity[]>`
-        SELECT *
-        FROM "Opportunity"
-        WHERE "tenantId" = ${input.tenantId}
-          AND "status" = 'active'::"OpportunityLifecycleStatus"
-          AND "expiresAt" <= ${input.asOf}
-        ORDER BY "semanticKey", "revision"
-        FOR UPDATE
-      `;
+      const due = await lockDueOpportunities(tx, input.tenantId, input.asOf);
       for (const opportunity of due) {
         await expireOpportunity(tx, opportunity, input.asOf);
       }
@@ -391,6 +408,40 @@ export class OpportunityLifecycleRepository {
         ),
       )
       .map((row) => ({ task: row, opportunity: row.opportunity }));
+  }
+
+  async countStaleCurrentTasks(input: {
+    tenantId: string;
+    asOf: Date;
+  }): Promise<number> {
+    if (!Number.isFinite(input.asOf.getTime())) {
+      throw new Error('Stale task asOf must be a valid instant.');
+    }
+    return this.prisma.agentTask.count({
+      where: {
+        tenantId: input.tenantId,
+        status: AgentTaskLifecycleStatus.current,
+        OR: [
+          { expiresAt: { lte: input.asOf } },
+          {
+            opportunity: {
+              OR: [
+                {
+                  status: {
+                    in: [
+                      OpportunityLifecycleStatus.resolved,
+                      OpportunityLifecycleStatus.expired,
+                      OpportunityLifecycleStatus.superseded,
+                    ],
+                  },
+                },
+                { expiresAt: { lte: input.asOf } },
+              ],
+            },
+          },
+        ],
+      },
+    });
   }
 
   async snapshot(tenantId: string): Promise<OpportunityLifecycleSnapshot> {
@@ -451,6 +502,258 @@ export class OpportunityLifecycleRepository {
   }
 }
 
+function validateProjectionForTenant(input: {
+  tenantId: string;
+  projection: OpportunityProjectionV1;
+  validatedAt: Date;
+}): Map<string, AgentTaskV1> {
+  if (!Number.isFinite(input.validatedAt.getTime())) {
+    throw new Error('validatedAt must be a valid instant.');
+  }
+  if (input.projection.metrics.executed !== 0) {
+    throw new Error('Chapter 5 projection must execute zero actions.');
+  }
+  if (
+    input.projection.actionIntents.some(
+      (intent) => intent.tenantId !== input.tenantId || !intent.dryRun,
+    )
+  ) {
+    throw new Error(
+      'Chapter 5 ActionIntents must remain trusted dry-run output.',
+    );
+  }
+
+  const tasksByIdentity = new Map<string, AgentTaskV1>();
+  for (const task of input.projection.agentTasks) {
+    assertCanonicalAgentTask(task);
+    if (task.tenantId !== input.tenantId) {
+      throw new Error(
+        'AgentTask tenant does not match trusted tenant context.',
+      );
+    }
+    const identity = task.opportunityRefs[0];
+    if (!identity || tasksByIdentity.has(identity)) {
+      throw new Error(
+        'Projection must contain at most one task per Opportunity.',
+      );
+    }
+    tasksByIdentity.set(identity, task);
+  }
+  for (const opportunity of input.projection.opportunities) {
+    validateTrustedPersistenceInput({
+      tenantId: input.tenantId,
+      opportunity,
+      task: tasksByIdentity.get(opportunity.identityFingerprint) ?? null,
+      validatedAt: input.validatedAt,
+    });
+  }
+  return tasksByIdentity;
+}
+
+async function persistOpportunityInTransaction(
+  tx: Prisma.TransactionClient,
+  input: {
+    tenantId: string;
+    opportunity: OpportunityV1;
+    task: AgentTaskV1 | null;
+    validatedAt: Date;
+  },
+): Promise<PersistedOpportunityResult> {
+  validateTrustedPersistenceInput(input);
+  const expiredAtWrite =
+    new Date(input.opportunity.expiresAt).getTime() <=
+    input.validatedAt.getTime();
+
+  const exact = await tx.opportunity.findUnique({
+    where: {
+      tenantId_identityFingerprint: {
+        tenantId: input.tenantId,
+        identityFingerprint: input.opportunity.identityFingerprint,
+      },
+    },
+  });
+  if (exact) {
+    if (exact.status !== OpportunityLifecycleStatus.active) {
+      return resultFor('terminal_duplicate_collapsed', exact, null, true);
+    }
+    if (
+      expiredAtWrite ||
+      exact.expiresAt.getTime() <= input.validatedAt.getTime()
+    ) {
+      await expireOpportunity(tx, exact, input.validatedAt);
+      return resultFor('expired_input_rejected', exact, null, true);
+    }
+
+    const lastValidatedAt = laterOf(exact.lastValidatedAt, input.validatedAt);
+    if (lastValidatedAt.getTime() !== exact.lastValidatedAt.getTime()) {
+      await tx.opportunity.update({
+        where: { id: exact.id },
+        data: { lastValidatedAt },
+      });
+    }
+    const task = await ensureCurrentTask(
+      tx,
+      exact,
+      input.task,
+      input.validatedAt,
+    );
+    return resultFor('revalidated', exact, task, true);
+  }
+
+  const active = await lockCurrentOpportunity(
+    tx,
+    input.tenantId,
+    input.opportunity.semanticKey,
+  );
+  if (expiredAtWrite) {
+    if (active) await expireOpportunity(tx, active, input.validatedAt);
+    return {
+      disposition: 'expired_input_rejected',
+      opportunityId: active?.id ?? null,
+      taskId: null,
+      revision: active?.revision ?? null,
+      duplicateCollapsed: true,
+    };
+  }
+
+  let revision: number;
+  let supersedesOpportunityId: string | null = null;
+  let disposition: OpportunityPersistenceDisposition = 'created';
+  if (active) {
+    await invalidateCurrentTasks(
+      tx,
+      active,
+      input.validatedAt,
+      'opportunity_superseded',
+    );
+    await tx.opportunity.update({
+      where: { id: active.id },
+      data: {
+        status: OpportunityLifecycleStatus.superseded,
+        lastValidatedAt: laterOf(active.lastValidatedAt, input.validatedAt),
+        terminalAt: input.validatedAt,
+        terminalReasonCode: 'evidence_superseded',
+      },
+    });
+    revision = active.revision + 1;
+    supersedesOpportunityId = active.id;
+    disposition = 'superseded';
+  } else {
+    const latest = await tx.opportunity.aggregate({
+      where: {
+        tenantId: input.tenantId,
+        semanticKey: input.opportunity.semanticKey,
+      },
+      _max: { revision: true },
+    });
+    revision = (latest._max.revision ?? 0) + 1;
+  }
+
+  const created = await tx.opportunity.create({
+    data: opportunityCreateData({
+      trustedTenantId: input.tenantId,
+      opportunity: input.opportunity,
+      revision,
+      supersedesOpportunityId,
+      validatedAt: input.validatedAt,
+    }),
+  });
+  const task = await ensureCurrentTask(
+    tx,
+    created,
+    input.task,
+    input.validatedAt,
+  );
+  return resultFor(disposition, created, task, false);
+}
+
+async function lockDueOpportunities(
+  tx: Prisma.TransactionClient,
+  tenantId: string,
+  asOf: Date,
+): Promise<Opportunity[]> {
+  return tx.$queryRaw<Opportunity[]>`
+    SELECT *
+    FROM "Opportunity"
+    WHERE "tenantId" = ${tenantId}
+      AND "status" = 'active'::"OpportunityLifecycleStatus"
+      AND "expiresAt" <= ${asOf}
+    ORDER BY "semanticKey", "revision"
+    FOR UPDATE
+  `;
+}
+
+async function resolveOpportunityInTransaction(
+  tx: Prisma.TransactionClient,
+  input: {
+    opportunity: Opportunity;
+    proof: OpportunityResolutionProofV1;
+    resolvedAt: Date;
+  },
+): Promise<Opportunity> {
+  const proofObservedAt = new Date(input.proof.observedAt);
+  if (proofObservedAt.getTime() < input.opportunity.firstDetectedAt.getTime()) {
+    throw new Error(
+      'Resolution proof cannot precede the active Opportunity revision.',
+    );
+  }
+  await invalidateCurrentTasks(
+    tx,
+    input.opportunity,
+    input.resolvedAt,
+    'opportunity_resolved',
+  );
+  return tx.opportunity.update({
+    where: { id: input.opportunity.id },
+    data: {
+      status: OpportunityLifecycleStatus.resolved,
+      lastValidatedAt: laterOf(
+        input.opportunity.lastValidatedAt,
+        input.resolvedAt,
+      ),
+      terminalAt: input.resolvedAt,
+      terminalReasonCode: input.proof.reasonCode,
+      terminalEvidenceFingerprint: input.proof.evidenceFingerprint,
+      terminalEvidenceRefsJson: evidenceRefsJson(input.proof.evidence),
+    },
+  });
+}
+
+async function invalidateStaleCurrentTasks(
+  tx: Prisma.TransactionClient,
+  tenantId: string,
+  asOf: Date,
+): Promise<number> {
+  const stale = await tx.agentTask.findMany({
+    where: {
+      tenantId,
+      status: AgentTaskLifecycleStatus.current,
+      OR: [
+        { expiresAt: { lte: asOf } },
+        {
+          opportunity: {
+            OR: [
+              { status: { not: OpportunityLifecycleStatus.active } },
+              { expiresAt: { lte: asOf } },
+            ],
+          },
+        },
+      ],
+    },
+    select: { id: true, opportunityId: true },
+  });
+  if (stale.length === 0) return 0;
+  await tx.agentTask.updateMany({
+    where: { tenantId, id: { in: stale.map((row) => row.id) } },
+    data: {
+      status: AgentTaskLifecycleStatus.invalidated,
+      invalidatedAt: asOf,
+      invalidationReasonCode: 'opportunity_not_current',
+    },
+  });
+  return stale.length;
+}
+
 async function lockCurrentOpportunity(
   tx: Prisma.TransactionClient,
   tenantId: string,
@@ -474,7 +777,14 @@ async function ensureCurrentTask(
   tx: Prisma.TransactionClient,
   opportunity: Opportunity,
   task: AgentTaskV1 | null,
+  asOf: Date,
 ): Promise<AgentTask | null> {
+  if (
+    opportunity.status !== OpportunityLifecycleStatus.active ||
+    opportunity.expiresAt.getTime() <= asOf.getTime()
+  ) {
+    throw new Error('Terminal or expired Opportunity cannot create AgentTask.');
+  }
   if (opportunity.outcome === OpportunityOutcome.inform_only) {
     if (task)
       throw new Error('Inform-only Opportunity cannot persist AgentTask.');
@@ -507,6 +817,17 @@ async function ensureCurrentTask(
   if (existing) {
     if (existing.status !== AgentTaskLifecycleStatus.current) {
       throw new Error('Invalidated AgentTask cannot be reopened.');
+    }
+    if (existing.expiresAt.getTime() <= asOf.getTime()) {
+      await tx.agentTask.update({
+        where: { id: existing.id },
+        data: {
+          status: AgentTaskLifecycleStatus.invalidated,
+          invalidatedAt: asOf,
+          invalidationReasonCode: 'task_expired',
+        },
+      });
+      return null;
     }
     return existing;
   }
@@ -683,6 +1004,9 @@ function validateResolutionProof(proof: OpportunityResolutionProofV1): void {
     assertCapabilityCode(item.capability);
     assertCode(item.owner, 'resolution evidence owner');
     assertCode(item.completeness, 'resolution evidence completeness');
+    if (item.completeness !== 'complete') {
+      throw new Error('Resolution requires complete canonical evidence.');
+    }
     assertCode(item.basis, 'resolution evidence basis');
     if (!Number.isInteger(item.version) || item.version <= 0) {
       throw new Error(

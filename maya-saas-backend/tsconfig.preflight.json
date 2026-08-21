@@ -14,6 +14,10 @@
     "scripts/appointment-mirror-bootstrap.ts",
     "scripts/appointment-reconciliation-run.ts",
     "scripts/quarantine-catchup-run.ts",
+    "scripts/opportunity-shadow.ts",
+    "scripts/opportunity-lifecycle-shadow.ts",
+    "scripts/opportunity-lifecycle-run.ts",
+    "scripts/opportunity-lifecycle-proof.ts",
     "src/config/**/*.ts"
   ],
   "exclude": ["**/*.spec.ts"]

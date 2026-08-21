@@ -44,8 +44,11 @@ export interface AppointmentRemovedCapacitySignalV1 extends OpportunitySignalBas
   cutoverAt: string;
   capacity: {
     state: BusinessFactState;
+    availability: 'available' | 'unavailable' | 'unknown';
+    completeness: 'complete' | 'partial' | 'unknown';
     durationMinutes: number | null;
     intervalRef: string | null;
+    scheduleRef: string | null;
     basis: string;
   };
 }

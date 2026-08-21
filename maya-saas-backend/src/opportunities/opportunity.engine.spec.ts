@@ -89,8 +89,11 @@ function releasedCapacity(
 ): AppointmentRemovedCapacitySignalV1 {
   const capacity: AppointmentRemovedCapacitySignalV1['capacity'] = {
     state: 'measured',
+    availability: 'available',
+    completeness: 'complete',
     durationMinutes: 60,
     intervalRef: 'interval_20260821_0900_1000',
+    scheduleRef: 'schedule_staff_20260821',
     basis: 'canonical_schedule_capacity_after_removal',
     ...overrides.capacity,
   };
@@ -342,8 +345,12 @@ describe('CanonicalOpportunityEngine', () => {
       occurredAt: '2026-08-19T23:59:59.000Z',
     }),
     releasedCapacity({ capacity: { state: 'measured_incomplete' } }),
+    releasedCapacity({ capacity: { availability: 'unavailable' } }),
+    releasedCapacity({ capacity: { availability: 'unknown' } }),
+    releasedCapacity({ capacity: { completeness: 'partial' } }),
     releasedCapacity({ capacity: { durationMinutes: 0 } }),
     releasedCapacity({ capacity: { intervalRef: null } }),
+    releasedCapacity({ capacity: { scheduleRef: null } }),
     releasedCapacity({ eventType: DOMAIN_EVENT_TYPE.appointmentCreated }),
   ])(
     'rejects historical, incomplete or unproven released-capacity evidence',
@@ -352,7 +359,7 @@ describe('CanonicalOpportunityEngine', () => {
     },
   );
 
-  it('accepts only a post-cutover removal with measured positive capacity', () => {
+  it('accepts only a post-cutover removal with complete current capacity proof', () => {
     const result = project({ signals: [releasedCapacity()] });
 
     expect(result.opportunities).toHaveLength(1);

@@ -1,7 +1,8 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIR = __dirname;
+const SRC_DIR = join(DIR, '..');
 const SHADOW_CLI = join(DIR, '..', '..', 'scripts', 'opportunity-shadow.ts');
 const LIFECYCLE_SHADOW_CLI = join(
   DIR,
@@ -10,11 +11,30 @@ const LIFECYCLE_SHADOW_CLI = join(
   'scripts',
   'opportunity-lifecycle-shadow.ts',
 );
+const LIFECYCLE_RUN_CLI = join(
+  DIR,
+  '..',
+  '..',
+  'scripts',
+  'opportunity-lifecycle-run.ts',
+);
+const PACKAGE = join(DIR, '..', '..', 'package.json');
+const PREFLIGHT_TSCONFIG = join(DIR, '..', '..', 'tsconfig.preflight.json');
+const DEPLOY_SCRIPT = join(DIR, '..', '..', 'deploy', 'vps', 'deploy.sh');
 const LIFECYCLE_FILE = join(DIR, 'opportunity.lifecycle.ts');
 const SCHEMA = join(DIR, '..', '..', 'prisma', 'schema.prisma');
 const productionFiles = readdirSync(DIR)
   .filter((entry) => entry.endsWith('.ts') && !entry.endsWith('.spec.ts'))
   .map((entry) => join(DIR, entry));
+
+function productionTypeScriptFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const path = join(dir, entry);
+    if (statSync(path).isDirectory()) return productionTypeScriptFiles(path);
+    if (!entry.endsWith('.ts') || entry.endsWith('.spec.ts')) return [];
+    return [path];
+  });
+}
 
 function importedPaths(file: string): string[] {
   const source = readFileSync(file, 'utf8');
@@ -124,5 +144,66 @@ describe('Chapter 5 opportunity boundary', () => {
     expect(source).toMatch(/persisted:\s*0/);
     expect(source).toMatch(/executed:\s*0/);
     expect(source).toMatch(/external_actions_executed:\s*0/);
+  });
+
+  it('packages one immutable production lifecycle invocation with zero side effects', () => {
+    const source = readFileSync(LIFECYCLE_RUN_CLI, 'utf8');
+    const packageJson = JSON.parse(readFileSync(PACKAGE, 'utf8')) as {
+      scripts: Record<string, string>;
+    };
+    const preflight = readFileSync(PREFLIGHT_TSCONFIG, 'utf8');
+    const deploy = readFileSync(DEPLOY_SCRIPT, 'utf8');
+
+    expect(source).toMatch(/--confirm=/);
+    expect(source).toMatch(/chapter5-lifecycle-only/);
+    expect(source).toMatch(/OpportunityLifecycleRunner/);
+    expect(source).toMatch(/runAsSystemTenant/);
+    expect(source).toMatch(/OPPORTUNITY_LIFECYCLE_ENABLED/);
+    expect(source).toMatch(
+      /action_intents_executed:\s*result\.actionIntentsExecuted/,
+    );
+    expect(source).toMatch(
+      /external_side_effects:\s*result\.externalSideEffects/,
+    );
+    expect(source).not.toMatch(/\.send\s*\(|\.publish\s*\(/);
+    expect(packageJson.scripts['opportunity:lifecycle:run']).toBe(
+      'node dist/scripts/opportunity-lifecycle-run.js',
+    );
+    expect(packageJson.scripts['opportunity:lifecycle:run']).not.toMatch(
+      /ts-node/,
+    );
+    expect(preflight).toContain('scripts/opportunity-lifecycle-run.ts');
+    expect(deploy).toContain('dist/scripts/opportunity-lifecycle-run.js');
+  });
+
+  it('keeps canonical Opportunity semantics under one production owner', () => {
+    const legacyDecisionOwners = [
+      'UpsellOpportunity',
+      'historicalAddonOpportunity',
+      'collectUpsellOpportunities',
+      'analyticsRecommendation',
+      'booking.upsell.suggest',
+      'marketing.audience.find',
+      'marketing.campaign.preview',
+      'marketing.campaign.send',
+    ];
+    const productionReachable = productionTypeScriptFiles(SRC_DIR).filter(
+      (file) => !file.includes(`${join(SRC_DIR, 'marketing')}/`),
+    );
+    const offenders = productionReachable.flatMap((file) => {
+      const source = readFileSync(file, 'utf8');
+      return legacyDecisionOwners
+        .filter((owner) => source.includes(owner))
+        .map((owner) => `${file.replace(`${SRC_DIR}/`, '')} -> ${owner}`);
+    });
+    const rootModules = [
+      join(SRC_DIR, 'app.module.ts'),
+      join(SRC_DIR, 'ai-tools', 'ai-tools.module.ts'),
+    ].map((file) => readFileSync(file, 'utf8'));
+
+    expect(offenders).toEqual([]);
+    expect(rootModules.join('\n')).not.toMatch(
+      /MarketingModule|MarketingService|\.\/marketing\/|\.\.\/marketing\//,
+    );
   });
 });

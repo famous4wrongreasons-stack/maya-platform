@@ -29,6 +29,12 @@ function row(
       status: 'canceled',
       blockedStartAt: '2026-08-21T09:00:00.000Z',
       blockedEndAt: '2026-08-21T10:00:00.000Z',
+      currentCapacity: {
+        availability: 'available',
+        completeness: 'complete',
+        scheduleRef: 'schedule_opaque_20260821',
+        basis: 'canonical_provider_schedule_and_availability',
+      },
     },
     ...overrides,
   };
@@ -86,7 +92,7 @@ describe('opportunity shadow projection', () => {
     expect(serialized).not.toContain('appointment-production-id');
   });
 
-  it.each([
+  it.each<[string, Partial<OpportunityShadowEventRowV1>]>([
     ['unsupported_event_type', { eventType: 'appointment.created' }],
     ['unsupported_entity_type', { entityType: 'client' }],
     ['bootstrap', { ingestionMethod: 'bootstrap' }],
@@ -106,6 +112,7 @@ describe('opportunity shadow projection', () => {
           status: 'canceled',
           blockedStartAt: '2026-08-21T09:00:00.000Z',
           blockedEndAt: '2026-08-21T10:00:00.000Z',
+          currentCapacity: null,
         },
       },
     ],
@@ -118,6 +125,7 @@ describe('opportunity shadow projection', () => {
           status: 'confirmed',
           blockedStartAt: '2026-08-21T09:00:00.000Z',
           blockedEndAt: '2026-08-21T10:00:00.000Z',
+          currentCapacity: null,
         },
       },
     ],
@@ -130,6 +138,7 @@ describe('opportunity shadow projection', () => {
           status: 'canceled',
           blockedStartAt: null,
           blockedEndAt: null,
+          currentCapacity: null,
         },
       },
     ],
@@ -142,6 +151,7 @@ describe('opportunity shadow projection', () => {
           status: 'canceled',
           blockedStartAt: '2026-08-21T10:00:00.000Z',
           blockedEndAt: '2026-08-21T09:00:00.000Z',
+          currentCapacity: null,
         },
       },
     ],
@@ -154,6 +164,35 @@ describe('opportunity shadow projection', () => {
           status: 'canceled',
           blockedStartAt: '2026-08-21T06:00:00.000Z',
           blockedEndAt: '2026-08-21T07:00:00.000Z',
+          currentCapacity: null,
+        },
+      },
+    ],
+    [
+      'capacity_incomplete',
+      {
+        appointment: {
+          ...row().appointment!,
+          currentCapacity: {
+            availability: 'available',
+            completeness: 'partial',
+            scheduleRef: 'schedule_opaque_20260821',
+            basis: 'provider_window_partial',
+          },
+        },
+      },
+    ],
+    [
+      'capacity_unavailable',
+      {
+        appointment: {
+          ...row().appointment!,
+          currentCapacity: {
+            availability: 'unavailable',
+            completeness: 'complete',
+            scheduleRef: 'schedule_opaque_20260821',
+            basis: 'canonical_provider_schedule_and_availability',
+          },
         },
       },
     ],

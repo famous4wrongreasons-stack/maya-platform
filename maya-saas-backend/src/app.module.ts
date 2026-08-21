@@ -30,7 +30,6 @@ import { InternalCalendarModule } from './internal-calendar/internal-calendar.mo
 import { EventsModule } from './events/events.module';
 import { InboxModule } from './inbox/inbox.module';
 import { LoyaltyModule } from './loyalty/loyalty.module';
-import { MarketingModule } from './marketing/marketing.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { OwnerReportsModule } from './owner-reports/owner-reports.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -82,7 +81,6 @@ import { SystemMetricsService } from './system-metrics.service';
     EventsModule,
     InboxModule,
     LoyaltyModule,
-    MarketingModule,
     OwnerReportsModule,
     ServicesModule,
     StaffModule,

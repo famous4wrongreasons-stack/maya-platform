@@ -17,6 +17,7 @@ import {
   CanonicalOpportunityEngine,
   stableCanonicalJson,
 } from '../src/opportunities/opportunity.engine';
+import { OPPORTUNITY_TYPE } from '../src/opportunities/opportunity.contract';
 import {
   OpportunityLifecycleRepository,
   resolutionEvidenceFingerprint,
@@ -45,6 +46,11 @@ interface ProofResult {
     supersessionStable: boolean;
     expiryStable: boolean;
     cutoverStable: boolean;
+    currentStateReconciliationStable: boolean;
+    incompleteReadStable: boolean;
+    providerFailureStable: boolean;
+    occupancyCapacityStable: boolean;
+    staleTaskStable: boolean;
   };
   databaseInvariants: Record<string, boolean>;
   privacy: {
@@ -283,6 +289,7 @@ async function main(): Promise<void> {
       observedAt: instant(0),
       expiresAt: instant(DAY),
     });
+    matrix.detect_active = true;
     const beforeRestart = await repository.snapshot(tenantA);
     repository = new OpportunityLifecycleRepository(prisma);
     const [afterRestartResult] = await repository.persistProjection({
@@ -295,6 +302,7 @@ async function main(): Promise<void> {
     const afterRestart = await repository.snapshot(tenantA);
     assert.deepEqual(afterRestart, beforeRestart);
     assert.equal(afterRestartResult.disposition, 'revalidated');
+    matrix.same_evidence_restart_no_duplicate = true;
 
     // Adversarial concurrent restart proof.
     const concurrentSignal = recencySignal({
@@ -336,6 +344,7 @@ async function main(): Promise<void> {
       }),
       1,
     );
+    matrix.same_evidence_concurrent_no_duplicate = true;
 
     const baseOpportunity = await prisma.opportunity.findUniqueOrThrow({
       where: { id: restart.result.opportunityId ?? '' },
@@ -465,29 +474,40 @@ async function main(): Promise<void> {
         basis: 'provider_visit_history_canonical_attendance',
       },
     ];
-    const resolved = await repository.resolveCurrent({
-      tenantId: tenantA,
-      semanticKey: resolution.projection.opportunities[0]?.semanticKey ?? '',
-      proof: {
-        evidenceFingerprint: resolutionEvidenceFingerprint(resolutionEvidence),
-        evidence: resolutionEvidence,
-        observedAt: instant(20 * 60_000).toISOString(),
-        reasonCode: 'condition_no_longer_true',
-      },
-      resolvedAt: instant(21 * 60_000),
+    const resolvedProjection = engine.project({
+      signals: [],
+      policies: policies(tenantA),
+      asOf: instant(20 * 60_000).toISOString(),
     });
-    assert.equal(resolved?.status, OpportunityLifecycleStatus.resolved);
-    const resolvedProjection = projectRecency(
-      recencySignal({
-        tenantId: tenantA,
-        clientRef: resolutionClientRef,
-        factRef: resolutionFactRef,
-        observedAt: instant(20 * 60_000),
-        expiresAt: instant(DAY),
-        evidenceLifecycle: 'resolved',
-      }),
-    );
     assert.equal(resolvedProjection.opportunities.length, 0);
+    const resolutionReconcile = await repository.reconcileCurrentProjection({
+      tenantId: tenantA,
+      projection: resolvedProjection,
+      validatedAt: instant(21 * 60_000),
+      currentState: {
+        completeness: 'complete',
+        opportunityTypes: [OPPORTUNITY_TYPE.clientReactivationCandidate],
+        resolutions: [
+          {
+            semanticKey:
+              resolution.projection.opportunities[0]?.semanticKey ?? '',
+            proof: {
+              evidenceFingerprint:
+                resolutionEvidenceFingerprint(resolutionEvidence),
+              evidence: resolutionEvidence,
+              observedAt: instant(20 * 60_000).toISOString(),
+              reasonCode: 'condition_no_longer_true',
+            },
+          },
+        ],
+      },
+    });
+    assert.equal(resolutionReconcile.resolved, 1);
+    const resolved = await prisma.opportunity.findUniqueOrThrow({
+      where: { id: resolution.result.opportunityId ?? '' },
+    });
+    assert.equal(resolved.status, OpportunityLifecycleStatus.resolved);
+    matrix.condition_disappears_resolved = true;
     const [terminalReplay] = await repository.persistProjection({
       tenantId: tenantA,
       projection: resolution.projection,
@@ -514,6 +534,7 @@ async function main(): Promise<void> {
       }),
       0,
     );
+    matrix.resolved_no_current_task = true;
     const invalidatedResolutionTask = await prisma.agentTask.findUniqueOrThrow({
       where: { id: resolution.result.taskId ?? '' },
     });
@@ -522,7 +543,7 @@ async function main(): Promise<void> {
       'terminal_opportunity_never_reopens',
       () =>
         prisma.opportunity.update({
-          where: { id: resolved?.id ?? '' },
+          where: { id: resolved.id },
           data: {
             status: OpportunityLifecycleStatus.active,
             terminalAt: null,
@@ -542,6 +563,128 @@ async function main(): Promise<void> {
         },
       }),
     );
+    const resolvedRestartProjection = engine.project({
+      signals: [],
+      policies: policies(tenantA),
+      asOf: instant(23 * 60_000).toISOString(),
+    });
+    const resolvedRestart = await repository.reconcileCurrentProjection({
+      tenantId: tenantA,
+      projection: resolvedRestartProjection,
+      validatedAt: instant(23 * 60_000),
+      currentState: {
+        completeness: 'complete',
+        opportunityTypes: [OPPORTUNITY_TYPE.clientReactivationCandidate],
+        resolutions: [],
+      },
+    });
+    assert.equal(resolvedRestart.resolved, 0);
+    assert.equal(
+      (
+        await prisma.opportunity.findUniqueOrThrow({
+          where: { id: resolved.id },
+        })
+      ).status,
+      OpportunityLifecycleStatus.resolved,
+    );
+    assert.equal(
+      await prisma.agentTask.count({
+        where: {
+          opportunityId: resolved.id,
+          status: AgentTaskLifecycleStatus.current,
+        },
+      }),
+      0,
+    );
+    matrix.resolved_restart_stable = true;
+
+    // Incomplete and failed reads never prove disappearance.
+    const incomplete = await persistSingleRecency({
+      repository,
+      tenantId: tenantA,
+      clientRef: opaque('incomplete_client'),
+      factRef: opaque('incomplete_fact'),
+      observedAt: instant(24 * 60_000),
+      expiresAt: instant(DAY),
+    });
+    const incompleteProjection = engine.project({
+      signals: [],
+      policies: policies(tenantA),
+      asOf: instant(25 * 60_000).toISOString(),
+    });
+    const incompleteReconcile = await repository.reconcileCurrentProjection({
+      tenantId: tenantA,
+      projection: incompleteProjection,
+      validatedAt: instant(25 * 60_000),
+      currentState: {
+        completeness: 'partial',
+        opportunityTypes: [OPPORTUNITY_TYPE.clientReactivationCandidate],
+        resolutions: [],
+      },
+    });
+    assert.equal(incompleteReconcile.resolved, 0);
+    assert.equal(
+      (
+        await prisma.opportunity.findUniqueOrThrow({
+          where: { id: incomplete.result.opportunityId ?? '' },
+        })
+      ).status,
+      OpportunityLifecycleStatus.active,
+    );
+    assert.equal(
+      await prisma.agentTask.count({
+        where: {
+          opportunityId: incomplete.result.opportunityId ?? '',
+          status: AgentTaskLifecycleStatus.current,
+        },
+      }),
+      1,
+    );
+    matrix.incomplete_read_no_false_resolution = true;
+
+    const providerFailure = await persistSingleRecency({
+      repository,
+      tenantId: tenantA,
+      clientRef: opaque('provider_failure_client'),
+      factRef: opaque('provider_failure_fact'),
+      observedAt: instant(26 * 60_000),
+      expiresAt: instant(DAY),
+    });
+    const providerFailureProjection = engine.project({
+      signals: [],
+      policies: policies(tenantA),
+      asOf: instant(27 * 60_000).toISOString(),
+    });
+    const providerFailureReconcile =
+      await repository.reconcileCurrentProjection({
+        tenantId: tenantA,
+        projection: providerFailureProjection,
+        validatedAt: instant(27 * 60_000),
+        currentState: {
+          completeness: 'provider_failure',
+          opportunityTypes: [OPPORTUNITY_TYPE.clientReactivationCandidate],
+          resolutions: [],
+        },
+      });
+    assert.equal(providerFailureReconcile.resolved, 0);
+    assert.equal(
+      (
+        await prisma.opportunity.findUniqueOrThrow({
+          where: { id: providerFailure.result.opportunityId ?? '' },
+        })
+      ).status,
+      OpportunityLifecycleStatus.active,
+    );
+    assert.equal(
+      await prisma.agentTask.count({
+        where: {
+          opportunityId: providerFailure.result.opportunityId ?? '',
+          status: AgentTaskLifecycleStatus.current,
+        },
+      }),
+      1,
+    );
+    matrix.provider_failure_no_false_resolution = true;
 
     // Supersession proof: same condition, newer canonical evidence, one new revision.
     const evolvingClientRef = opaque('evolving_client');
@@ -584,6 +727,17 @@ async function main(): Promise<void> {
       ],
     );
     assert.equal(evolvingRows[1]?.supersedesOpportunityId, evolvingRows[0]?.id);
+    assert.equal(
+      await prisma.agentTask.count({
+        where: {
+          opportunityId: evolvingRows[0]?.id,
+          status: AgentTaskLifecycleStatus.current,
+        },
+      }),
+      0,
+    );
+    matrix.superseded_old_task_not_current = true;
+    matrix.evolving_evidence_supersession = true;
     const [evolvingRestart] = await new OpportunityLifecycleRepository(
       prisma,
     ).persistProjection({
@@ -684,6 +838,7 @@ async function main(): Promise<void> {
       }),
       0,
     );
+    matrix.expired_no_current_task = true;
     const privacyRow = await prisma.opportunity.findUniqueOrThrow({
       where: { id: expiryCreated.opportunityId ?? '' },
     });
@@ -763,6 +918,12 @@ async function main(): Promise<void> {
       status: 'canceled',
       blockedStartAt: instant(90 * 60_000).toISOString(),
       blockedEndAt: instant(91 * 60_000).toISOString(),
+      currentCapacity: {
+        availability: 'available',
+        completeness: 'complete',
+        scheduleRef: opaque('schedule'),
+        basis: 'canonical_provider_schedule_and_availability',
+      },
     };
     const bootstrap = projectAppointmentRemovalShadow({
       rows: [{ ...shadowBase, ingestionMethod: 'bootstrap' }],
@@ -784,6 +945,26 @@ async function main(): Promise<void> {
     assert.equal(historical.projection.opportunities.length, 0);
     assert.equal(bootstrap.source.rejectedByReason.bootstrap, 1);
     assert.equal(historical.source.rejectedByReason.before_cutover, 1);
+    matrix.historical_event_rejected = true;
+
+    const canonicalAppointment = shadowBase.appointment;
+    assert(canonicalAppointment);
+    const noCapacityShadow = projectAppointmentRemovalShadow({
+      rows: [
+        {
+          ...shadowBase,
+          appointment: {
+            ...canonicalAppointment,
+            currentCapacity: null,
+          },
+        },
+      ],
+      cutoverAt: cutoverAt.toISOString(),
+      asOf: shadowAsOf.toISOString(),
+    });
+    assert.equal(noCapacityShadow.projection.opportunities.length, 0);
+    assert.equal(noCapacityShadow.projection.agentTasks.length, 0);
+    matrix.occupancy_without_capacity_rejected = true;
 
     const currentShadow = projectAppointmentRemovalShadow({
       rows: [shadowBase],
@@ -791,6 +972,9 @@ async function main(): Promise<void> {
       asOf: shadowAsOf.toISOString(),
     });
     assert.equal(currentShadow.source.accepted, 1);
+    assert.equal(currentShadow.projection.opportunities.length, 1);
+    assert.equal(currentShadow.projection.agentTasks.length, 1);
+    matrix.occupancy_with_capacity_detected = true;
     const shadowTenantId = currentShadow.projection.opportunities[0]?.tenantId;
     assert(shadowTenantId);
     await createProofTenant(prisma, tenantIds, 'shadow', shadowTenantId);
@@ -830,6 +1014,16 @@ async function main(): Promise<void> {
     assert.equal(currentPolicyDenied.length, 0);
     matrix.revoked_policy_cannot_resume_task = true;
 
+    assert.equal(
+      await repository.countStaleCurrentTasks({
+        tenantId: tenantA,
+        asOf: instant(82 * 60_000),
+      }),
+      0,
+    );
+    matrix.stale_task_not_resurrected = true;
+    matrix.action_intents_executed_zero = true;
+
     const totals = await repository.snapshot(tenantA);
     const result: ProofResult = {
       database,
@@ -840,6 +1034,11 @@ async function main(): Promise<void> {
         supersessionStable: true,
         expiryStable: true,
         cutoverStable: true,
+        currentStateReconciliationStable: true,
+        incompleteReadStable: true,
+        providerFailureStable: true,
+        occupancyCapacityStable: true,
+        staleTaskStable: true,
       },
       databaseInvariants: Object.fromEntries(
         Object.entries(matrix).sort(([left], [right]) =>

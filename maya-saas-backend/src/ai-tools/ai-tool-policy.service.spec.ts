@@ -59,13 +59,15 @@ describe('AiToolPolicyService', () => {
       // закрыта, и без него вопрос «какие у вас мастера» не заземляется ничем.
       // Имён он не отдаёт — только ярлыки specialist_N и специализацию.
       'catalog.staff.read',
-      'booking.upsell.suggest',
       'appointments.own.cancel',
       'appointments.own.create',
       'appointments.own.reschedule',
       'company.business-hours.read',
     ]);
     expect(tools.some((tool) => tool.name === 'analytics.business.query')).toBe(
+      false,
+    );
+    expect(tools.some((tool) => tool.name === 'booking.upsell.suggest')).toBe(
       false,
     );
   });

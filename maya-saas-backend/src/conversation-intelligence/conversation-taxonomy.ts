@@ -939,7 +939,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         action: 'read',
         dataClass: 'C',
         permission: 'loyalty.own.read',
-        tools: ['loyalty.own.read', 'booking.upsell.suggest'],
+        tools: ['loyalty.own.read'],
         optionalSlots: ['appointment', 'available_time'],
         synonyms: ['на что потратить баллы', 'списать бонусы', 'хватит ли'],
         examples: ['На какую услугу хватит моих баллов?'],
@@ -995,25 +995,6 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     }),
 
     intent(
-      'marketing.find_audience',
-      'marketing',
-      'Build a consent-safe audience.',
-      {
-        action: 'analyze',
-        dataClass: 'D',
-        risk: 'medium',
-        roles: CAMPAIGN_ROLES,
-        permission: 'marketing.audience.read',
-        tools: ['marketing.audience.find'],
-        requiredSlots: ['audience_rule'],
-        optionalSlots: ['minimum_visits', 'max_recipients'],
-        responseRule:
-          'Return only aggregate counts and the opaque audience reference. Never expose names, phones or CRM identifiers.',
-        synonyms: ['кому написать', 'сегмент клиентов', 'кого вернуть'],
-        examples: ['Найди тех, кто не был 60 дней'],
-      },
-    ),
-    intent(
       'marketing.draft_message',
       'messaging',
       'Draft a campaign message.',
@@ -1027,45 +1008,6 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         optionalSlots: ['offer', 'tone', 'channel'],
         synonyms: ['напиши текст', 'черновик рассылки', 'покажи сообщение'],
         examples: ['Напиши мягкое сообщение тем, кто давно не был'],
-      },
-    ),
-    intent(
-      'marketing.preview_campaign',
-      'messaging',
-      'Preview campaign impact.',
-      {
-        action: 'preview',
-        dataClass: 'D',
-        risk: 'medium',
-        roles: CAMPAIGN_ROLES,
-        permission: 'marketing.campaign.preview',
-        tools: ['marketing.campaign.preview'],
-        requiredSlots: ['audience', 'message'],
-        optionalSlots: [],
-        responseRule:
-          'Show the final message and exact recipient count, then request explicit confirmation. Do not claim that anything was sent.',
-        synonyms: ['не отправляй', 'сначала покажи', 'сколько получат'],
-        examples: ['Сначала покажи текст и сколько человек его получат'],
-      },
-    ),
-    intent(
-      'marketing.send_campaign',
-      'messaging',
-      'Send a consent-safe campaign.',
-      {
-        action: 'execute',
-        dataClass: 'E',
-        risk: 'high',
-        roles: CAMPAIGN_ROLES,
-        permission: 'marketing.campaign.execute',
-        tools: ['marketing.campaign.send'],
-        requiredSlots: ['approved_preview'],
-        clarificationRule:
-          'Require an explicit confirmation of the persisted campaign preview. Never construct a new audience or message during execution.',
-        responseRule:
-          'Report server-confirmed delivered, skipped and failed counts. Never say sent before the tool succeeds.',
-        synonyms: ['отправь рассылку', 'запусти кампанию', 'разошли'],
-        examples: ['Да, отправляй этот вариант'],
       },
     ),
     intent(

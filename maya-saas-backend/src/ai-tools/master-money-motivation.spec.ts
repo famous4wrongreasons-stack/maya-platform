@@ -1,8 +1,5 @@
 import {
-  collectUpsellOpportunities,
   computePeriodMoneyMotivation,
-  historicalAddonOpportunity,
-  moneyPitchForClient,
   type MotivationVisit,
 } from './master-money-motivation';
 
@@ -59,98 +56,5 @@ describe('computePeriodMoneyMotivation', () => {
       earnedRub: 4000,
     });
     expect(result.potential_rub).toBeGreaterThanOrEqual(4000);
-  });
-});
-
-describe('historicalAddonOpportunity / moneyPitchForClient', () => {
-  it('picks a historical addon the guest already bought', () => {
-    const history = [
-      visit({
-        startAt: '2026-06-01T10:00:00Z',
-        grossRub: 3500,
-        services: [
-          { title: 'Мужская стрижка', priceRub: 2000 },
-          { title: 'Моделирование бороды', priceRub: 1500 },
-        ],
-      }),
-      visit({
-        startAt: '2026-06-20T10:00:00Z',
-        grossRub: 3500,
-        services: [
-          { title: 'Мужская стрижка', priceRub: 2000 },
-          { title: 'Моделирование бороды', priceRub: 1500 },
-        ],
-      }),
-    ];
-    const current = visit({
-      startAt: '2026-07-01T10:00:00Z',
-      grossRub: 2000,
-      services: [{ title: 'Мужская стрижка', priceRub: 2000 }],
-    });
-    const opportunity = historicalAddonOpportunity(history, current.services);
-    expect(opportunity?.title).toMatch(/бород/i);
-    expect(opportunity?.price_rub).toBe(1500);
-
-    const pitch = moneyPitchForClient({
-      historyWithMaster: history,
-      currentVisit: current,
-      salaryShare: 0.5,
-    });
-    expect(pitch?.addon_salary_rub).toBe(750);
-    expect(pitch?.tip).toContain('Моделирование бороды');
-  });
-
-  it('does not suggest an addon already in the current order', () => {
-    const history = [
-      visit({
-        startAt: '2026-06-01T10:00:00Z',
-        grossRub: 3500,
-        services: [
-          { title: 'Мужская стрижка', priceRub: 2000 },
-          { title: 'Моделирование бороды', priceRub: 1500 },
-        ],
-      }),
-    ];
-    const current = visit({
-      startAt: '2026-07-01T10:00:00Z',
-      grossRub: 3500,
-      services: [
-        { title: 'Мужская стрижка', priceRub: 2000 },
-        { title: 'Моделирование бороды', priceRub: 1500 },
-      ],
-    });
-    expect(historicalAddonOpportunity(history, current.services)).toBeNull();
-  });
-
-  it('collects top opportunities across period visits without client names', () => {
-    const history = [
-      visit({
-        clientId: 'a',
-        startAt: '2026-06-01T10:00:00Z',
-        grossRub: 3500,
-        services: [
-          { title: 'Мужская стрижка', priceRub: 2000 },
-          { title: 'Моделирование бороды', priceRub: 1500 },
-        ],
-      }),
-    ];
-    const period = [
-      visit({
-        clientId: 'a',
-        startAt: '2026-07-01T10:00:00Z',
-        grossRub: 2000,
-        services: [{ title: 'Мужская стрижка', priceRub: 2000 }],
-      }),
-    ];
-    const tips = collectUpsellOpportunities({
-      periodVisits: period,
-      historyVisits: [...history, ...period],
-      salaryShare: 0.5,
-    });
-    expect(tips).toHaveLength(1);
-    expect(tips[0]?.tip).toContain('бород');
-    expect(tips[0]).not.toHaveProperty('client_id');
-    expect(tips[0]).not.toHaveProperty('name');
-    expect(tips[0]).not.toHaveProperty('phone');
   });
 });

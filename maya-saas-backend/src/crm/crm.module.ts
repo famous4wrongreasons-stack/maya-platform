@@ -14,6 +14,9 @@ import { AppointmentMirrorService } from './appointment-mirror.service';
 import { AppointmentObservationService } from './appointment-observation.service';
 import { AppointmentReconciliationScheduler } from './appointment-reconciliation.scheduler';
 import { AppointmentReconciliationService } from './appointment-reconciliation.service';
+import { OpportunityLifecycleRunner } from './opportunity-lifecycle.runner';
+import { OpportunityLifecycleRepository } from '../opportunities/opportunity.lifecycle';
+import { PrismaService } from '../prisma/prisma.service';
 import { QuarantineCatchupService } from './quarantine-catchup.service';
 import { ShadowIngestionController } from './shadow-ingestion.controller';
 import { ShadowIngestionService } from './shadow-ingestion.service';
@@ -31,6 +34,13 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
     AppointmentObservationService,
     AppointmentReconciliationScheduler,
     AppointmentReconciliationService,
+    OpportunityLifecycleRunner,
+    {
+      provide: OpportunityLifecycleRepository,
+      useFactory: (prisma: PrismaService) =>
+        new OpportunityLifecycleRepository(prisma),
+      inject: [PrismaService],
+    },
     ClientIdentityService,
     CrmAdapterFactory,
     CrmService,
@@ -42,6 +52,8 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
     AppointmentReconciliationService,
     ClientIdentityService,
     CrmService,
+    OpportunityLifecycleRepository,
+    OpportunityLifecycleRunner,
     QuarantineCatchupService,
   ],
 })

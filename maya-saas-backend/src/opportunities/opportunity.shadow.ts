@@ -16,6 +16,37 @@ export function opportunityShadowTenantRef(tenantId: string): string {
   return opaqueRef('tenant', tenantId);
 }
 
+export function opportunityShadowAppointmentRef(
+  tenantId: string,
+  appointmentId: string,
+): string {
+  return opaqueRef('appointment', `${tenantId}:${appointmentId}`);
+}
+
+export function opportunityShadowIntervalRef(input: {
+  tenantId: string;
+  appointmentId: string;
+  blockedStartAt: string;
+  blockedEndAt: string;
+}): string {
+  return opaqueRef(
+    'interval',
+    `${input.tenantId}:${input.appointmentId}:${input.blockedStartAt}:${input.blockedEndAt}`,
+  );
+}
+
+export function opportunityShadowScheduleRef(input: {
+  tenantId: string;
+  staffExternalId: string;
+  localDate: string;
+  scheduleFingerprint: string;
+}): string {
+  return opaqueRef(
+    'schedule',
+    `${input.tenantId}:${input.staffExternalId}:${input.localDate}:${input.scheduleFingerprint}`,
+  );
+}
+
 export type OpportunityShadowRejectionReason =
   | 'unsupported_event_type'
   | 'unsupported_entity_type'
@@ -30,6 +61,7 @@ export type OpportunityShadowRejectionReason =
   | 'appointment_tenant_mismatch'
   | 'appointment_not_removed'
   | 'capacity_unavailable'
+  | 'capacity_incomplete'
   | 'invalid_interval'
   | 'expired_capacity';
 
@@ -39,6 +71,12 @@ export interface OpportunityShadowAppointmentV1 {
   status: string;
   blockedStartAt: string | null;
   blockedEndAt: string | null;
+  currentCapacity: {
+    availability: 'available' | 'unavailable' | 'unknown';
+    completeness: 'complete' | 'partial' | 'unknown';
+    scheduleRef: string | null;
+    basis: string;
+  } | null;
 }
 
 /**
@@ -101,6 +139,7 @@ const REJECTION_REASONS: readonly OpportunityShadowRejectionReason[] = [
   'appointment_tenant_mismatch',
   'appointment_not_removed',
   'capacity_unavailable',
+  'capacity_incomplete',
   'invalid_interval',
   'expired_capacity',
 ];
@@ -229,16 +268,30 @@ function normalizeRow(input: {
     return { reason: 'expired_capacity' };
   }
 
+  const currentCapacity = appointment.currentCapacity;
+  if (!currentCapacity) return { reason: 'capacity_unavailable' };
+  if (currentCapacity.completeness !== 'complete') {
+    return { reason: 'capacity_incomplete' };
+  }
+  if (
+    currentCapacity.availability !== 'available' ||
+    !currentCapacity.scheduleRef
+  ) {
+    return { reason: 'capacity_unavailable' };
+  }
+
   const tenantRef = opportunityShadowTenantRef(row.tenantId);
   const eventRef = opaqueRef('event', `${row.tenantId}:${row.eventId}`);
-  const appointmentRef = opaqueRef(
-    'appointment',
-    `${row.tenantId}:${row.entityId}`,
+  const appointmentRef = opportunityShadowAppointmentRef(
+    row.tenantId,
+    row.entityId,
   );
-  const intervalRef = opaqueRef(
-    'interval',
-    `${row.tenantId}:${row.entityId}:${blockedStartAt.toISOString()}:${blockedEndAt.toISOString()}`,
-  );
+  const intervalRef = opportunityShadowIntervalRef({
+    tenantId: row.tenantId,
+    appointmentId: row.entityId,
+    blockedStartAt: blockedStartAt.toISOString(),
+    blockedEndAt: blockedEndAt.toISOString(),
+  });
 
   return {
     signal: appointmentRemovedCapacitySignal({
@@ -252,9 +305,12 @@ function normalizeRow(input: {
       cutoverAt: effectiveCutover.toISOString(),
       capacity: {
         state: 'measured',
+        availability: currentCapacity.availability,
+        completeness: currentCapacity.completeness,
         durationMinutes,
         intervalRef,
-        basis: 'canonical_appointment_blocked_interval_after_removal',
+        scheduleRef: currentCapacity.scheduleRef,
+        basis: currentCapacity.basis,
       },
       observedAt: receivedAt.toISOString(),
       expiresAt: blockedEndAt.toISOString(),

@@ -39,9 +39,13 @@
     "build:preflight": "tsc --project tsconfig.preflight.json",
     "release:preflight:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/release-preflight.ts",
     "mirror:bootstrap": "node dist/scripts/appointment-mirror-bootstrap.js",
-    "opportunity:shadow": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-shadow.ts",
-    "opportunity:lifecycle:shadow": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-shadow.ts",
-    "opportunity:lifecycle:proof": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-proof.ts"
+    "opportunity:shadow": "node dist/scripts/opportunity-shadow.js",
+    "opportunity:shadow:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-shadow.ts",
+    "opportunity:lifecycle:shadow": "node dist/scripts/opportunity-lifecycle-shadow.js",
+    "opportunity:lifecycle:shadow:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-shadow.ts",
+    "opportunity:lifecycle:run": "node dist/scripts/opportunity-lifecycle-run.js",
+    "opportunity:lifecycle:proof": "node dist/scripts/opportunity-lifecycle-proof.js",
+    "opportunity:lifecycle:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/opportunity-lifecycle-proof.ts"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"

@@ -135,43 +135,6 @@ export class AiToolRegistryService {
         return {
           task_id: this.assertEntityId(args.task_id, 'task_id'),
         };
-      case 'marketing.audience.find':
-        this.assertAllowedKeys(args, [
-          'inactive_days',
-          'minimum_visits',
-          'max_recipients',
-        ]);
-        return {
-          inactive_days: this.assertIntegerRange(
-            args.inactive_days,
-            'inactive_days',
-            30,
-            3650,
-          ),
-          minimum_visits: this.assertIntegerRange(
-            args.minimum_visits ?? 1,
-            'minimum_visits',
-            1,
-            1000,
-          ),
-          max_recipients: this.assertIntegerRange(
-            args.max_recipients ?? 100,
-            'max_recipients',
-            1,
-            500,
-          ),
-        };
-      case 'marketing.campaign.preview':
-        this.assertAllowedKeys(args, ['audience_id', 'message']);
-        return {
-          audience_id: this.assertEntityId(args.audience_id, 'audience_id'),
-          message: this.assertSafeText(args.message, 'message', 2, 600),
-        };
-      case 'marketing.campaign.send':
-        this.assertAllowedKeys(args, ['campaign_id']);
-        return {
-          campaign_id: this.assertEntityId(args.campaign_id, 'campaign_id'),
-        };
       case 'notifications.appointments.update': {
         this.assertAllowedKeys(args, ['enabled', 'lead_times_minutes']);
         if (typeof args.enabled !== 'boolean') {
@@ -228,14 +191,6 @@ export class AiToolRegistryService {
       case 'clients.dossier.read':
         this.assertAllowedKeys(args, ['query']);
         return { query: this.assertClientSearchQuery(args.query) };
-      case 'booking.upsell.suggest':
-        this.assertAllowedKeys(args, ['current_service_names']);
-        return {
-          current_service_names: this.assertServiceNameArray(
-            args.current_service_names,
-            'current_service_names',
-          ),
-        };
       case 'booking.availability.read':
         this.assertAllowedKeys(args, [
           'date',
@@ -620,15 +575,6 @@ export class AiToolRegistryService {
           action: 'create_task',
           task: args.task,
           due_date: args.due_date ?? null,
-        },
-      };
-    }
-    if (toolName === 'marketing.campaign.send') {
-      return {
-        summary: 'Отправить подтверждённую рассылку выбранной аудитории.',
-        payload: {
-          action: 'send_marketing_campaign',
-          campaign_id: args.campaign_id,
         },
       };
     }

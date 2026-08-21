@@ -696,7 +696,6 @@ describe('AiCoreService', () => {
       'analytics.business.query',
       'catalog.staff.read',
       'catalog.services.read',
-      'booking.upsell.suggest',
     ]);
     mocks.model.decide.mockResolvedValueOnce(
       decision({
@@ -734,9 +733,10 @@ describe('AiCoreService', () => {
     ).toEqual(expect.not.arrayContaining(['analytics.business.query']));
     expect(
       firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
-    ).toEqual(
-      expect.arrayContaining(['catalog.staff.read', 'booking.upsell.suggest']),
-    );
+    ).toEqual(expect.arrayContaining(['catalog.staff.read']));
+    expect(
+      firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
+    ).not.toContain('booking.upsell.suggest');
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       user,
       'catalog.staff.read',
@@ -1486,12 +1486,12 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('Слабые места');
     expect(result.reply).toContain('−10%');
     expect(result.reply).toContain('Моделирование бороды');
-    expect(result.reply).toContain('Первое действие');
+    expect(result.reply).not.toContain('Первое действие');
     expect(result.reply).not.toContain('аренд');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 
-  it('answers a compound year comparison with a grounded action plan', async () => {
+  it('answers a compound year comparison without bypassing canonical opportunities', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
@@ -1546,12 +1546,12 @@ describe('AiCoreService', () => {
     });
     expect(result.reply).toContain('80');
     expect(result.reply).toContain('100');
-    expect(result.reply).toContain('Первое действие');
-    expect(result.reply).toContain('уснувших клиентов');
+    expect(result.reply).not.toContain('Первое действие');
+    expect(result.reply).not.toContain('уснувших клиентов');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 
-  it('adds a grounded action when an owner asks what to do about a revenue decline', async () => {
+  it('does not invent an action when an owner asks what to do about a revenue decline', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
@@ -1601,8 +1601,8 @@ describe('AiCoreService', () => {
     // копеек — это 7 865 260 ₽, а не 786 526 000 ₽ и не 78 652 600 ₽.
     expect(result.reply).toContain('7 865 260 ₽');
     expect(result.reply).toContain('−822 790 ₽');
-    expect(result.reply).toContain('Первое действие');
-    expect(result.reply).toContain('уснувших клиентов');
+    expect(result.reply).not.toContain('Первое действие');
+    expect(result.reply).not.toContain('уснувших клиентов');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 

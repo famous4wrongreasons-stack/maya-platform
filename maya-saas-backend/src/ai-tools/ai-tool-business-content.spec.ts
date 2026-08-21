@@ -46,7 +46,6 @@ describe('AiToolHandlerService extended business tools', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
       (options.businessContent ?? {}) as BusinessContentService,
     );
   }
