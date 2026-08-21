@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -832,19 +832,31 @@ async function main(): Promise<void> {
     );
 
     stage('architecture_barrier');
-    const actionEngineSource = [
-      'src/action-engine/action-engine.kernel.ts',
-      'src/action-engine/action-engine.registry.ts',
-      'src/action-engine/action-engine.contract.ts',
-    ]
+    const architectureModules = [
+      'action-engine.kernel',
+      'action-engine.registry',
+      'action-engine.contract',
+    ];
+    const architectureFiles = architectureModules.flatMap((moduleName) => {
+      const candidates = [
+        `src/action-engine/${moduleName}.ts`,
+        `dist/src/action-engine/${moduleName}.js`,
+      ].filter((file) => existsSync(file));
+      assert.ok(
+        candidates.length > 0,
+        `Architecture barrier cannot inspect ${moduleName}.`,
+      );
+      return candidates;
+    });
+    const actionEngineSource = architectureFiles
       .map((file) => readFileSync(file, 'utf8'))
       .join('\n');
     const prohibitedImports = [
-      "from '../crm/",
-      "from '../marketing/",
-      "from '../billing/",
-      "from '../appointments/",
-      "from '../communications/",
+      '/crm/',
+      '/marketing/',
+      '/billing/',
+      '/appointments/',
+      '/communications/',
       'MarketingDeliveryAttempt',
       'BookingExecutor',
       'CampaignExecutor',
