@@ -63,6 +63,31 @@ enum CalendarSource {
   external
 }
 
+enum OpportunityLifecycleStatus {
+  active
+  resolved
+  expired
+  superseded
+}
+
+enum OpportunityOutcome {
+  inform_only
+  investigation_required
+  action_candidate
+}
+
+enum OpportunityAgentDomain {
+  admin
+  client_lifecycle
+  occupancy
+  business_intelligence
+}
+
+enum AgentTaskLifecycleStatus {
+  current
+  invalidated
+}
+
 model Tenant {
   id                             String                          @id @default(cuid())
   name                           String
@@ -124,9 +149,9 @@ model Tenant {
   dashboardPreferences           DashboardPreference[]
   userMerges                     UserMerge[]
   inboxItems                     InboxItem[]
-  domainEvents         DomainEvent[]
-  ingestionQuarantine  IngestionQuarantine[]
-  reconciliationRuns   ReconciliationRun[]
+  domainEvents                   DomainEvent[]
+  ingestionQuarantine            IngestionQuarantine[]
+  reconciliationRuns             ReconciliationRun[]
   devicePushTokens               DevicePushToken[]
   recoveryTouchpoints            RecoveryTouchpoint[]
   recoveryConversions            RecoveryConversion[]
@@ -145,8 +170,87 @@ model Tenant {
   marketingCampaignRecipients    MarketingCampaignRecipient[]
   marketingConsentEvidence       MarketingConsentEvidence[]
   marketingDeliveryAttempts      MarketingDeliveryAttempt[]
+  opportunities                  Opportunity[]
+  agentTasks                     AgentTask[]
 
   @@index([status, graceEndsAt])
+}
+
+/// Durable Chapter 5 interpretation of current canonical evidence. This row
+/// stores only opaque evidence references and deterministic policy metadata;
+/// it does not own business truth or execution state.
+model Opportunity {
+  id                          String                     @id @default(cuid())
+  tenantId                    String
+  type                        String
+  identityVersion             Int                        @default(1)
+  semanticKey                 String
+  identityFingerprint         String
+  revision                    Int
+  affectedEntityKind          String?
+  affectedEntityRef           String?
+  evidenceFingerprint         String
+  evidenceRefsJson            Json
+  evidenceObservedAt          DateTime
+  limitationsJson             Json
+  policyKey                   String
+  policyVersion               Int
+  recommendedAgentDomain      OpportunityAgentDomain
+  outcome                     OpportunityOutcome
+  status                      OpportunityLifecycleStatus @default(active)
+  firstDetectedAt             DateTime
+  lastValidatedAt             DateTime
+  expiresAt                   DateTime
+  terminalAt                  DateTime?
+  terminalReasonCode          String?
+  terminalEvidenceFingerprint String?
+  terminalEvidenceRefsJson    Json?
+  supersedesOpportunityId     String?
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  tenant                      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  supersedes                  Opportunity?               @relation("OpportunitySupersession", fields: [supersedesOpportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)
+  supersededBy                Opportunity[]              @relation("OpportunitySupersession")
+  agentTasks                  AgentTask[]
+
+  @@unique([id, tenantId])
+  @@unique([id, tenantId, semanticKey])
+  @@unique([tenantId, identityFingerprint])
+  @@unique([tenantId, semanticKey, revision])
+  @@unique([tenantId, supersedesOpportunityId])
+  @@index([tenantId, status, expiresAt])
+  @@index([tenantId, type, status])
+  @@index([tenantId, semanticKey, revision])
+}
+
+/// Durable Chapter 5 assignment record. It is deliberately not an execution
+/// job: retries, approvals, delivery and provider outcomes belong to Chapter 6.
+model AgentTask {
+  id                      String                   @id @default(cuid())
+  tenantId                String
+  opportunityId           String
+  semanticKey             String
+  taskFingerprint         String
+  agentDomain             OpportunityAgentDomain
+  objectiveKey            String
+  allowedReadCapabilities Json
+  allowedActionClasses    Json
+  autonomyLevel           String                   @default("L2_5_SHADOW")
+  status                  AgentTaskLifecycleStatus @default(current)
+  requestedAt             DateTime
+  expiresAt               DateTime
+  invalidatedAt           DateTime?
+  invalidationReasonCode  String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  opportunity             Opportunity              @relation(fields: [opportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, taskFingerprint])
+  @@unique([tenantId, opportunityId, agentDomain])
+  @@index([tenantId, status, expiresAt])
+  @@index([tenantId, semanticKey, agentDomain, status])
 }
 
 /// Tenant-wide transactional appointment reminder policy. These notices are
@@ -1143,18 +1247,18 @@ model Client {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user       User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   /// 🔴 Ссылка СОСТАВНАЯ. Одноколоночная позволяла погасить клиента в пользу
   /// клиента ЧУЖОГО арендатора — межарендное слияние на уровне базы.
-  mergedInto Client?         @relation("ClientMerge", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)
-  mergedFrom Client[]        @relation("ClientMerge")
-  crmLinks   CrmClientLink[]
+  mergedInto   Client?         @relation("ClientMerge", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)
+  mergedFrom   Client[]        @relation("ClientMerge")
+  crmLinks     CrmClientLink[]
+  appointments Appointment[]
 
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
   @@index([tenantId, userId])
-  appointments   Appointment[]
 }
 
 /// Привязка карточки внешней CRM к идентичности Maya.
@@ -1408,27 +1512,23 @@ model AuditLog {
 }
 
 model Appointment {
-  id                String     @id @default(cuid())
+  id                String   @id @default(cuid())
   tenantId          String
   /**
    * 🔴 АККАУНТ, а не клиент бизнеса.
-   *
    * Доказано данными в B3: у всех 18 боевых визитов здесь стоял ОДИН и тот же
    * пользователь — владелец салона, потому что строка появляется, когда
    * вошедший аккаунт открывает «Мои записи». Поле отвечает на вопрос «в чьём
    * кабинете это видно», а не «кто пришёл стричься».
-   *
    * Стало опциональным: у записи салона, сделанной по телефону или с виджета,
    * аккаунта Maya нет и быть не должно. Бизнес-клиент живёт в `mayaClientId`.
    */
   clientId          String?
   /**
    * 🔴 КЛИЕНТ БИЗНЕСА — идентичность Maya из главы 2.
-   *
    * Разрешается через `CrmClientLink` по внешнему идентификатору клиента у
    * провайдера. По телефону НЕ склеивается: совпадение номера доказательством
    * тождества не является.
-   *
    * Переходное имя. Целевое состояние — переименовать аккаунтное поле в
    * `accountUserId`, а это в `clientId`; массовое переименование сейчас стоило
    * бы правок в 47 местах ради ясности, поэтому вынесено отдельным шагом.
@@ -1446,57 +1546,54 @@ model Appointment {
   /// Заполнено ⟺ заполнен `crmExternalId`; это держит CHECK в базе, иначе
   /// половина ключа с NULL молча отключила бы уникальность.
   crmProvider       String?
-  source            String     @default("external")
+  source            String   @default("external")
   staffExternalId   String
   serviceIds        Json
   startAt           DateTime
   endAt             DateTime
   blockedStartAt    DateTime
   blockedEndAt      DateTime
-  status            String     @default("confirmed")
+  status            String   @default("confirmed")
   /**
    * 🔴 Cycle 03 B3.3. Присутствие клиента — канон главы 2
    * (`awaiting | arrived | no_show | confirmed_by_client`).
-   *
    * NULL означает «Maya НЕ получила доказанного значения»: либо не спрашивали,
    * либо провайдер поля не прислал. Это НЕ `awaiting`.
-   *
    * Различие не косметическое. `awaiting` — утверждение провайдера «отметки
    * ещё нет»; NULL — отсутствие утверждения. Смешав их, зеркало заявляло бы
    * знание, которого у него нет, а компаратор выпускал бы события о переходах,
    * которых не было. Поэтому переход NULL → значение событием не является:
    * это первое наблюдение, а не изменение.
-   *
    * Существующие 1940 строк получают NULL и наполняются первым проходом
    * сверки: значение берётся у провайдера, а миграция к сети не ходит.
    */
   attendance        String?
   notes             String?
   totalPriceKopecks Int?
-  currency          String     @default("RUB")
+  currency          String   @default("RUB")
   providerPayload   Json?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
   /// 🔴 Phase A. Однозначная идентичность мастера внутри Maya. Пока nullable.
   staffId           String?
-  staff             Staff?     @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  tenant            Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  staff             Staff?   @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   /// Удаление аккаунта не стирает факт визита салона: остаётся история бизнеса.
-  client            User?      @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: SetNull)
+  client            User?    @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: SetNull)
   /**
    * 🔴 Клиент бизнеса. `Restrict`, а не `SetNull`: идентичность клиента,
    * у которого есть визиты, не удаляется молча. Это сильнее сохраняет историю,
    * чем обнуление ссылки, и совпадает с правилом для мастера.
    */
-  mayaClient        Client?    @relation(fields: [mayaClientId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  branch            Branch?    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  mayaClient        Client?  @relation(fields: [mayaClientId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  branch            Branch?  @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
 
   @@unique([id, tenantId, clientId])
-  @@index([tenantId, mayaClientId])
   /// 🔴 Одна запись CRM — одна строка Maya. До Cycle 03 уникальности не было
   /// вовсе, а поиск шёл в пределах КЛИЕНТА: два независимых пути приёма
   /// создавали два визита на одну запись, и база этому не мешала.
   @@unique([tenantId, crmProvider, crmExternalId])
+  @@index([tenantId, mayaClientId])
   @@index([tenantId, staffId, startAt])
   @@index([tenantId])
   @@index([clientId])
@@ -1519,14 +1616,14 @@ model Appointment {
 /// Повторное чтение того же состояния событием не является — за это отвечает
 /// `dedupFingerprint`.
 model DomainEvent {
-  id             String    @id @default(cuid())
-  tenantId       String
+  id       String @id @default(cuid())
+  tenantId String
 
   /// Канонический тип Maya: `appointment.created`, не `record.create`.
-  type           String
+  type    String
   /// Версия контракта. Единственный механизм версионирования: номер живёт в
   /// колонке, а не внутри имени, иначе по нему нельзя фильтровать.
-  version        Int       @default(1)
+  version Int    @default(1)
 
   entityType     String
   /// Идентичность MAYA (`Appointment.id`, `Staff.id`, `Client.id`).
@@ -1536,23 +1633,23 @@ model DomainEvent {
   entitySequence Int?
 
   /// Когда изменилось в бизнесе. Приходит из данных источника.
-  occurredAt     DateTime
+  occurredAt  DateTime
   /// Когда Maya приняла доставку. Совпадающим с `occurredAt` не считается:
   /// доставки приходят пачками, а между создание и изменением записи проходят
   /// десятки минут.
-  receivedAt     DateTime  @default(now())
+  receivedAt  DateTime  @default(now())
   /// Когда обработала. Отделено от факта: провал обработки не стирает факт.
-  processedAt    DateTime?
+  processedAt DateTime?
 
   /// Откуда: `yclients`, `internal_calendar`, `legacy_bot`.
-  source         String
+  source          String
   /// Как узнали: `webhook` | `reconciliation` | `bootstrap`.
-  ingestionMethod String   @default("webhook")
+  ingestionMethod String  @default("webhook")
   /// Ссылка на сущность у источника. ПРОВЕНАНС, а не идентичность.
-  sourceRef      String?
+  sourceRef       String?
   /// `observed_existing` — найдено при первом взгляде на уже работающий салон;
   /// `after_watch_started` — изменение после начала наблюдения.
-  observation    String    @default("after_watch_started")
+  observation     String  @default("after_watch_started")
 
   /// Детерминированный отпечаток канонического состояния.
   /// 🔴 Идентификатора события провайдер не даёт (доказано в Phase A), а один
@@ -1560,16 +1657,16 @@ model DomainEvent {
   /// ключ, иначе дедупликации нет.
   dedupFingerprint String
   /// Минимальный факт, независимый от провайдера. Сырое тело сюда не попадает.
-  payload        Json
+  payload          Json
 
   /// `pending` | `processing` | `processed` | `failed` | `dead`.
   /// Приём и обработка — разные вещи: строка существует уже как принятый факт.
-  status         String    @default("pending")
-  attempts       Int       @default(0)
-  leaseUntil     DateTime?
-  lastError      String?
+  status     String    @default("pending")
+  attempts   Int       @default(0)
+  leaseUntil DateTime?
+  lastError  String?
 
-  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   /// Дедупликация живёт в БАЗЕ и переживает перезапуск. Внутри арендатора, а не
   /// глобально: два салона с одинаковым номером записи не должны подавлять
@@ -1610,7 +1707,7 @@ model IngestionQuarantine {
   /// Срок хранения. Это диагностика, а не история: она обязана истекать.
   expiresAt     DateTime
 
-  tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([source, fingerprint])
   @@index([receivedAt])
@@ -1642,19 +1739,18 @@ model IngestionQuarantine {
 /// Prisma частичные индексы в схеме не выражает, поэтому он существует только
 /// в SQL. Дрейфа это не создаёт — проверено `migrate diff`.
 model ReconciliationRun {
-  id               String    @id @default(cuid())
-  tenantId         String
-  provider         String
+  id       String @id @default(cuid())
+  tenantId String
+  provider String
 
-  windowFrom       DateTime
-  windowTo         DateTime
-  startedAt        DateTime  @default(now())
+  windowFrom DateTime
+  windowTo   DateTime
+  startedAt  DateTime  @default(now())
   /// NULL ⟺ прогон не завершился. Незавершённый выводов не даёт вовсе.
-  finishedAt       DateTime?
+  finishedAt DateTime?
 
   /**
    * `complete` | `truncated` — контракт полноты B3.0.
-   *
    * Только `complete` двигает базовую линию наблюдения и даёт право на выводы
    * об ОТСУТСТВИИ. По усечённой выборке отсутствие записи не означает ничего:
    * её могло просто не хватить страниц.
@@ -1662,33 +1758,31 @@ model ReconciliationRun {
   completeness     String?
   truncationReason String?
 
-  fetched          Int       @default(0)
-  created          Int       @default(0)
-  updated          Int       @default(0)
-  unchanged        Int       @default(0)
-  eventsEmitted    Int       @default(0)
+  fetched       Int @default(0)
+  created       Int @default(0)
+  updated       Int @default(0)
+  unchanged     Int @default(0)
+  eventsEmitted Int @default(0)
 
-  failureCode      String?
-  failureMessage   String?
+  failureCode    String?
+  failureMessage String?
 
   /**
    * 🔴 Cycle 03 B3.4. Аренда: до какого момента этот прогон считается живым.
-   *
    * Процессной переменной недостаточно, и не в будущем, а сегодня: ручной
    * запуск сверки — ОТДЕЛЬНЫЙ процесс, а во время выката старый процесс
    * дорабатывает проход, пока новый уже стартовал. Булево поле в памяти об
    * этом не знает и знать не может.
-   *
    * Аренда не снимается, а ИСТЕКАЕТ. Процесс, умерший посреди прохода, не
    * оставляет замок, который нужно снимать руками: следующий претендент видит
    * просроченную аренду, закрывает брошенный прогон как упавший и начинает
    * свой. Ручного вмешательства не требуется ни в одном сценарии.
    */
-  leaseUntil       DateTime?
+  leaseUntil DateTime?
   /// Кто держит аренду. Провенанс для разбора, не идентичность.
-  holderId         String?
+  holderId   String?
 
-  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, startedAt])
   /// Поиск последнего ПОЛНОГО завершённого прогона — его нельзя перепутать

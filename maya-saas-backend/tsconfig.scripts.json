@@ -9,6 +9,7 @@
     "scripts/**/*.ts",
     "src/common/current-salon-import.utils.ts",
     "src/common/domain.enums.ts",
-    "src/conversation-intelligence/**/*.ts"
+    "src/conversation-intelligence/**/*.ts",
+    "src/opportunities/**/*.ts"
   ]
 }
