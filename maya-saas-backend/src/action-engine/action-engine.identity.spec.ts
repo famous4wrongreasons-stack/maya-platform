@@ -38,4 +38,32 @@ describe('ActionIdentityService', () => {
     expect(encrypted).not.toContain('safe/ref');
     expect(identity.decryptNormalizedPayload(encrypted)).toBe(payload);
   });
+
+  it('keeps caller idempotency aliases outside logical identity', () => {
+    const logical = {
+      tenantId: 'tenant-a',
+      identityVersion: 1,
+      actionClass: 'create_appointment',
+      capability: 'crm.appointment.create.v1',
+      capabilityVersion: 1,
+      targetKind: 'appointment',
+      targetRef: 'booking/request-1',
+      normalizedInputHash: 'input-hash',
+      occurrenceScope: 'appointment/create/request-1',
+    };
+    const httpAlias = {
+      ...logical,
+      idempotencyScope: 'http',
+      requestIdempotencyKeyHash: 'http-key',
+    };
+    const aiAlias = {
+      ...logical,
+      idempotencyScope: 'ai',
+      requestIdempotencyKeyHash: 'ai-key',
+    };
+
+    expect(identity.logicalIdentity(httpAlias)).toBe(
+      identity.logicalIdentity(aiAlias),
+    );
+  });
 });

@@ -35,3 +35,17 @@ export class ActionLeaseError extends ActionEngineError {
     this.name = 'ActionLeaseError';
   }
 }
+
+export class ActionExecutionUncertainError extends ActionEngineError {
+  constructor(code: string, message: string) {
+    super(code, message);
+    this.name = 'ActionExecutionUncertainError';
+  }
+}
+
+export class ActionExecutionTerminalError extends ActionEngineError {
+  constructor(code: string, message: string) {
+    super(code, message);
+    this.name = 'ActionExecutionTerminalError';
+  }
+}

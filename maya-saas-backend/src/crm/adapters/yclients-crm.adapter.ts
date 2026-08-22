@@ -725,7 +725,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
           ...(kept ? kept : {}),
         };
       }),
-      attendance: typeof record.attendance === 'number' ? record.attendance : 0,
+      ...(typeof record.attendance === 'number'
+        ? { attendance: record.attendance }
+        : {}),
       comment: params.notes ?? record.comment ?? '',
     };
 
@@ -1004,7 +1006,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
         name: client.name || client.phone || '',
       },
       services,
-      attendance: typeof record.attendance === 'number' ? record.attendance : 0,
+      ...(typeof record.attendance === 'number'
+        ? { attendance: record.attendance }
+        : {}),
       comment: record.comment ?? '',
       ...overrides,
     };

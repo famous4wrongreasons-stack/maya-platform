@@ -45,6 +45,115 @@ function syntheticNormalizer(value: unknown): Record<string, unknown> {
   };
 }
 
+function requiredText(
+  source: Record<string, unknown>,
+  key: string,
+  maxLength: number,
+): string {
+  const value = source[key];
+  if (typeof value !== 'string') {
+    throw new ActionContractError(`${key} must be a string`);
+  }
+  const normalized = value.trim();
+  if (!normalized || normalized.length > maxLength) {
+    throw new ActionContractError(`${key} has an invalid length`);
+  }
+  return normalized;
+}
+
+function optionalText(
+  source: Record<string, unknown>,
+  key: string,
+  maxLength: number,
+): string | undefined {
+  const value = source[key];
+  if (value === undefined || value === null || value === '') return undefined;
+  return requiredText(source, key, maxLength);
+}
+
+function isoTimestamp(source: Record<string, unknown>, key: string): string {
+  const value = requiredText(source, key, 80);
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) {
+    throw new ActionContractError(`${key} must be an ISO timestamp`);
+  }
+  return parsed.toISOString();
+}
+
+function serviceIds(source: Record<string, unknown>): string[] {
+  const value = source.serviceIds;
+  if (!Array.isArray(value) || value.length === 0 || value.length > 64) {
+    throw new ActionContractError('serviceIds must be a non-empty array');
+  }
+  const normalized = value.map((item) => normalizeOpaqueRef(item, 'serviceId'));
+  return [...new Set(normalized)].sort();
+}
+
+function optionalServiceIds(
+  source: Record<string, unknown>,
+): string[] | undefined {
+  if (source.serviceIds === undefined || source.serviceIds === null) {
+    return undefined;
+  }
+  return serviceIds(source);
+}
+
+function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  const branchId = optionalOpaqueField(source, 'branchId');
+  const clientPhone = optionalText(source, 'clientPhone', 40);
+  const notes = optionalText(source, 'notes', 2_000);
+  const duration = source.durationMinutes;
+  if (
+    duration !== undefined &&
+    (!Number.isInteger(duration) ||
+      Number(duration) < 1 ||
+      Number(duration) > 1440)
+  ) {
+    throw new ActionContractError(
+      'durationMinutes must be an integer between 1 and 1440',
+    );
+  }
+  if (source.allowBusy !== undefined && typeof source.allowBusy !== 'boolean') {
+    throw new ActionContractError('allowBusy must be a boolean');
+  }
+  return {
+    clientId: normalizeOpaqueRef(source.clientId, 'clientId'),
+    clientName: requiredText(source, 'clientName', 160),
+    ...(clientPhone ? { clientPhone } : {}),
+    ...(branchId ? { branchId } : {}),
+    staffId: normalizeOpaqueRef(source.staffId, 'staffId'),
+    serviceIds: serviceIds(source),
+    start: isoTimestamp(source, 'start'),
+    ...(notes ? { notes } : {}),
+    allowBusy: source.allowBusy === true,
+    ...(duration !== undefined ? { durationMinutes: Number(duration) } : {}),
+  };
+}
+
+function cancelAppointmentNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  return {
+    externalId: normalizeOpaqueRef(source.externalId, 'externalId'),
+  };
+}
+
+function rescheduleAppointmentNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  const staffId = optionalOpaqueField(source, 'staffId');
+  const selectedServiceIds = optionalServiceIds(source);
+  const notes = optionalText(source, 'notes', 2_000);
+  return {
+    externalId: normalizeOpaqueRef(source.externalId, 'externalId'),
+    start: isoTimestamp(source, 'start'),
+    ...(staffId ? { staffId } : {}),
+    ...(selectedServiceIds ? { serviceIds: selectedServiceIds } : {}),
+    ...(notes ? { notes } : {}),
+  };
+}
+
 const DAY = 24 * 60 * 60 * 1_000;
 
 function shadowCapability(input: {
@@ -140,6 +249,56 @@ function syntheticCapability(input: {
   };
 }
 
+function appointmentCapability(input: {
+  capability: string;
+  actionClass: string;
+  executorKey: string;
+  normalizeInput(value: unknown): Record<string, unknown>;
+}): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-input/1`,
+    targetKind: 'appointment',
+    allowedSourceTypes: [
+      'authenticated_request',
+      'agent_task',
+      'legacy_bridge',
+    ],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['external', 'customer_visible'],
+    policyKey: `production.${input.actionClass}.confirmed-request`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L2_CONFIRMED_REQUEST',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: `production.${input.actionClass}.safe-retry`,
+      version: 1,
+      maxExecutionAttempts: 2,
+      retryablePreDispatchErrors: new Set([
+        'crm_rate_limited_before_dispatch',
+        'crm_transient_before_dispatch',
+      ]),
+      backoffMs: [0, 500],
+    },
+    reconciliation: {
+      key: `production.${input.actionClass}.canonical-read`,
+      version: 1,
+      maxInconclusiveAttempts: 3,
+      retryAfterProvenNonExecution: true,
+    },
+    transportIdentityVersion: 1,
+    executorKey: input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: (value) => input.normalizeInput(value),
+  };
+}
+
 const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   shadowCapability({
     capability: 'client-lifecycle.reactivation-review.prepare',
@@ -158,6 +317,24 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     actionClass: 'prepare_response_draft',
     targetKind: 'request',
     inputKey: 'requestRef',
+  }),
+  appointmentCapability({
+    capability: 'crm.appointment.create.v1',
+    actionClass: 'create_appointment',
+    executorKey: 'crm.appointment.create',
+    normalizeInput: createAppointmentNormalizer,
+  }),
+  appointmentCapability({
+    capability: 'crm.appointment.reschedule.v1',
+    actionClass: 'reschedule_appointment',
+    executorKey: 'crm.appointment.reschedule',
+    normalizeInput: rescheduleAppointmentNormalizer,
+  }),
+  appointmentCapability({
+    capability: 'crm.appointment.cancel.v1',
+    actionClass: 'cancel_appointment',
+    executorKey: 'crm.appointment.cancel',
+    normalizeInput: cancelAppointmentNormalizer,
   }),
   syntheticCapability({
     capability: 'kernel.test.safe-retry',

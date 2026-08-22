@@ -29,9 +29,50 @@ describe('ActionCapabilityRegistry', () => {
   it('keeps Chapter 5 capabilities shadow-only', () => {
     for (const capability of registry
       .list()
-      .filter((item) => item.allowedSourceTypes.includes('agent_task'))) {
+      .filter((item) => item.policyKey === 'chapter5.l2_5-shadow')) {
       expect(capability.policyDecision).toBe(ActionPolicyDecision.SHADOW_ONLY);
       expect(capability.executorKey).toBe('shadow.none');
     }
+  });
+
+  it('registers appointment mutations with strict trusted routing', () => {
+    const create = registry.get('crm.appointment.create.v1');
+    expect(create).toMatchObject({
+      actionClass: 'create_appointment',
+      policyDecision: ActionPolicyDecision.ALLOW,
+      executorKey: 'crm.appointment.create',
+      approvalRequirement: 'NONE',
+    });
+    expect(
+      create.normalizeInput({
+        clientId: 'client-1',
+        clientName: ' Client ',
+        staffId: 'staff-1',
+        serviceIds: ['service-2', 'service-1', 'service-1'],
+        start: '2026-08-22T10:00:00+03:00',
+        tenantId: 'other-tenant',
+        executor: 'bypass',
+      }),
+    ).toEqual({
+      clientId: 'client-1',
+      clientName: 'Client',
+      staffId: 'staff-1',
+      serviceIds: ['service-1', 'service-2'],
+      start: '2026-08-22T07:00:00.000Z',
+      allowBusy: false,
+    });
+    expect(() =>
+      create.normalizeInput({
+        clientId: 'client-1',
+        clientName: 'Client',
+        staffId: 'staff-1',
+        serviceIds: [],
+        start: 'not-a-date',
+      }),
+    ).toThrow();
+  });
+
+  it('does not register attendance as a Phase B2 action', () => {
+    expect(() => registry.get('crm.appointment.attendance.v1')).toThrow();
   });
 });

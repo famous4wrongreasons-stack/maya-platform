@@ -105,10 +105,20 @@ export class ActionIdentityService {
     targetRef: string;
     normalizedInputHash: string;
     occurrenceScope: string;
-    idempotencyScope?: string;
-    requestIdempotencyKeyHash?: string;
   }): string {
-    return this.hmac('maya.logical-action/1', input);
+    // Caller idempotency keys are transport aliases. They must not split one
+    // logical action when it reaches the kernel through HTTP, AI or a replay.
+    return this.hmac('maya.logical-action/1', {
+      tenantId: input.tenantId,
+      identityVersion: input.identityVersion,
+      actionClass: input.actionClass,
+      capability: input.capability,
+      capabilityVersion: input.capabilityVersion,
+      targetKind: input.targetKind,
+      targetRef: input.targetRef,
+      normalizedInputHash: input.normalizedInputHash,
+      occurrenceScope: input.occurrenceScope,
+    });
   }
 
   callerIdempotencyHash(input: {

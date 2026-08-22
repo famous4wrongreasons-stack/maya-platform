@@ -46,6 +46,7 @@ type AppointmentRecord = {
   clientId: string;
   branchId: string | null;
   crmExternalId: string | null;
+  crmProvider?: string | null;
   source: string;
   staffExternalId: string;
   serviceIds: string[];
@@ -117,7 +118,22 @@ describe('AppointmentsService', () => {
     > = jest.fn().mockResolvedValue({ defaultTimezone: 'Europe/Moscow' });
     const appointmentFindFirstMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<AppointmentRecord | null>
-    > = jest.fn().mockResolvedValue(appointmentRecord);
+    > = jest.fn().mockImplementation((args: Record<string, unknown>) => {
+      const where = args.where as
+        | {
+            crmProvider?: string;
+            crmExternalId?: string;
+          }
+        | undefined;
+      if (
+        where?.crmProvider &&
+        where.crmExternalId &&
+        where.crmExternalId !== appointmentRecord.crmExternalId
+      ) {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve(appointmentRecord);
+    });
     const appointmentFindManyMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<unknown[]>
     > = jest.fn().mockResolvedValue([]);
@@ -198,14 +214,7 @@ describe('AppointmentsService', () => {
       },
     ]);
     const cancelAppointmentMock: jest.MockedFunction<
-      (
-        tenantId: string,
-        externalId: string,
-      ) => Promise<{
-        external_id: string;
-        status: string;
-        raw?: Record<string, unknown>;
-      }>
+      CrmService['cancelAppointment']
     > = jest.fn().mockResolvedValue({
       external_id: 'crm-1',
       status: 'canceled',
@@ -225,6 +234,9 @@ describe('AppointmentsService', () => {
     const getCalendarSourceMock: jest.MockedFunction<
       CrmService['getCalendarSource']
     > = jest.fn().mockResolvedValue(CalendarSource.EXTERNAL);
+    const getExternalProviderKeyMock: jest.MockedFunction<
+      CrmService['getExternalProviderKey']
+    > = jest.fn().mockResolvedValue('yclients');
     const getClientAppointmentsMock: jest.MockedFunction<
       CrmService['getClientAppointments']
     > = jest.fn().mockResolvedValue([]);
@@ -235,23 +247,7 @@ describe('AppointmentsService', () => {
       CrmService['resolveStaffIdForBooking']
     > = jest.fn().mockResolvedValue(asStaffId('staff-maya-1'));
     const rescheduleAppointmentMock: jest.MockedFunction<
-      (
-        tenantId: string,
-        params: {
-          externalId: string;
-          start: string;
-          staffId?: string;
-          serviceIds?: string[];
-          notes?: string | null;
-        },
-      ) => Promise<{
-        external_id: string;
-        status: string;
-        start: string;
-        staff_id: string;
-        service_ids: string[];
-        raw?: Record<string, unknown>;
-      }>
+      CrmService['rescheduleAppointment']
     > = jest.fn().mockResolvedValue({
       external_id: 'crm-1',
       status: 'confirmed',
@@ -312,6 +308,7 @@ describe('AppointmentsService', () => {
       | 'cancelAppointment'
       | 'createAppointment'
       | 'getCalendarSource'
+      | 'getExternalProviderKey'
       | 'getClientAppointments'
       | 'getAvailableSlots'
       | 'getServices'
@@ -322,6 +319,7 @@ describe('AppointmentsService', () => {
       cancelAppointment: cancelAppointmentMock,
       createAppointment: createAppointmentMock,
       getCalendarSource: getCalendarSourceMock,
+      getExternalProviderKey: getExternalProviderKeyMock,
       getClientAppointments: getClientAppointmentsMock,
       getAvailableSlots: getAvailableSlotsMock,
       getServices: getServicesMock,
@@ -404,6 +402,7 @@ describe('AppointmentsService', () => {
         tenantFindUniqueMock,
         createAppointmentMock,
         getCalendarSourceMock,
+        getExternalProviderKeyMock,
         getClientAppointmentsMock,
         getAvailableSlotsMock,
         getServicesMock,
@@ -500,6 +499,7 @@ describe('AppointmentsService', () => {
     expect(mocks.createAppointmentMock).toHaveBeenCalledWith(
       'tenant-1',
       expect.objectContaining({ start: '2026-07-05T15:00:00' }),
+      {},
     );
   });
 
@@ -580,6 +580,7 @@ describe('AppointmentsService', () => {
     expect(mocks.createAppointmentMock).toHaveBeenCalledWith(
       'tenant-1',
       expect.objectContaining({ start: '2026-07-05T11:00:00' }),
+      {},
     );
   });
 
@@ -884,7 +885,7 @@ describe('AppointmentsService', () => {
       'appt-1',
     );
 
-    expect(cancelAppointmentMock).toHaveBeenCalledWith('tenant-1', 'crm-1');
+    expect(cancelAppointmentMock).toHaveBeenCalledWith('tenant-1', 'crm-1', {});
     expect(appointmentUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
@@ -1035,13 +1036,17 @@ describe('AppointmentsService', () => {
       },
     );
 
-    expect(rescheduleAppointmentMock).toHaveBeenCalledWith('tenant-1', {
-      externalId: 'crm-1',
-      start: '2026-07-05T11:00:00',
-      staffId: 'staff-1',
-      serviceIds: ['svc-1'],
-      notes: 'Move later',
-    });
+    expect(rescheduleAppointmentMock).toHaveBeenCalledWith(
+      'tenant-1',
+      {
+        externalId: 'crm-1',
+        start: '2026-07-05T11:00:00',
+        staffId: 'staff-1',
+        serviceIds: ['svc-1'],
+        notes: 'Move later',
+      },
+      {},
+    );
     const updateArgs = appointmentUpdateMock.mock.calls[0]?.[0] as
       | {
           where: {

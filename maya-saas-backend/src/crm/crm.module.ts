@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { ActionEngineModule } from '../action-engine';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { InternalCalendarModule } from '../internal-calendar/internal-calendar.module';
 import { UsersModule } from '../users/users.module';
@@ -22,7 +23,13 @@ import { ShadowIngestionController } from './shadow-ingestion.controller';
 import { ShadowIngestionService } from './shadow-ingestion.service';
 
 @Module({
-  imports: [AuditLogModule, EventsModule, InternalCalendarModule, UsersModule],
+  imports: [
+    ActionEngineModule,
+    AuditLogModule,
+    EventsModule,
+    InternalCalendarModule,
+    UsersModule,
+  ],
   controllers: [
     CrmController,
     CrmIntegrationController,

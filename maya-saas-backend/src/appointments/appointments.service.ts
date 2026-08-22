@@ -20,7 +20,10 @@ import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
 } from '../crm/crm-request.errors';
-import { CrmService } from '../crm/crm.service';
+import {
+  CrmService,
+  type AppointmentActionInvocation,
+} from '../crm/crm.service';
 import { AvailableSlotsQueryDto } from '../crm/dto/available-slots-query.dto';
 import { InboxService } from '../inbox/inbox.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
@@ -103,6 +106,7 @@ export class AppointmentsService {
     tenantId: string,
     clientId: string,
     dto: CreateAppointmentDto,
+    invocation: AppointmentActionInvocation = {},
   ) {
     this.tenantContext.assertTenantId(tenantId);
     await this.tenantsService.assertLiveBookingEnabled(tenantId);
@@ -159,6 +163,10 @@ export class AppointmentsService {
       clientPhone: dto.clientPhone,
     });
     const calendarSource = await this.crmService.getCalendarSource(tenantId);
+    const crmProvider =
+      calendarSource === CalendarSource.EXTERNAL
+        ? await this.crmService.getExternalProviderKey(tenantId)
+        : null;
     const timing =
       calendarSource === CalendarSource.INTERNAL
         ? await this.internalCalendarService.getServiceTiming(
@@ -180,16 +188,20 @@ export class AppointmentsService {
     );
     const remoteAppointment =
       calendarSource === CalendarSource.EXTERNAL
-        ? await this.crmService.createAppointment(tenantId, {
-            clientId,
-            clientName: bookingIdentity.clientName,
-            clientPhone: bookingIdentity.clientPhone,
-            branchId: dto.branchId ?? null,
-            staffId: dto.staffId,
-            serviceIds: dto.serviceIds,
-            start: requestedStart,
-            notes: dto.notes ?? null,
-          })
+        ? await this.crmService.createAppointment(
+            tenantId,
+            {
+              clientId,
+              clientName: bookingIdentity.clientName,
+              clientPhone: bookingIdentity.clientPhone,
+              branchId: dto.branchId ?? null,
+              staffId: dto.staffId,
+              serviceIds: dto.serviceIds,
+              start: requestedStart,
+              notes: dto.notes ?? null,
+            },
+            invocation,
+          )
         : null;
     let appointment: Awaited<
       ReturnType<TenantAppointmentRepository['createForClient']>
@@ -200,6 +212,7 @@ export class AppointmentsService {
         clientId,
         branchId: dto.branchId ?? matchedSlot.branch_id ?? null,
         crmExternalId: remoteAppointment?.external_id ?? null,
+        crmProvider,
         source: calendarSource,
         // 🔴 Разрешается ТО ЖЕ значение, что ложится в совместимую колонку:
         // иначе два поля описывали бы разных мастеров.
@@ -442,6 +455,8 @@ export class AppointmentsService {
     clientId: string,
     remoteAppointments: CreatedAppointment[],
   ): Promise<void> {
+    const crmProvider = await this.crmService.getExternalProviderKey(tenantId);
+
     for (const remote of remoteAppointments) {
       const startAt = new Date(remote.start);
       const endAt = remote.end
@@ -460,6 +475,7 @@ export class AppointmentsService {
 
       const existing =
         await this.appointmentRepository.findByCrmExternalIdForClient(
+          crmProvider,
           remote.external_id,
           clientId,
         );
@@ -507,6 +523,7 @@ export class AppointmentsService {
         clientId,
         branchId: null,
         crmExternalId: remote.external_id,
+        crmProvider,
         notes: null,
         ...data,
       });
@@ -517,6 +534,7 @@ export class AppointmentsService {
     tenantId: string,
     clientId: string,
     appointmentId: string,
+    invocation: AppointmentActionInvocation = {},
   ) {
     this.tenantContext.assertTenantId(tenantId);
     const appointment = await this.appointmentRepository.findForClient(
@@ -573,6 +591,7 @@ export class AppointmentsService {
       externalOutcome = await this.cancelInCrmForClient(
         tenantId,
         appointment.crmExternalId,
+        invocation,
       );
     }
 
@@ -673,6 +692,7 @@ export class AppointmentsService {
     clientId: string,
     appointmentId: string,
     dto: RescheduleAppointmentDto,
+    invocation: AppointmentActionInvocation = {},
   ) {
     this.tenantContext.assertTenantId(tenantId);
     const appointment = await this.appointmentRepository.findForClient(
@@ -805,13 +825,17 @@ export class AppointmentsService {
     );
     const remoteAppointment =
       appointmentSource === CalendarSource.EXTERNAL
-        ? await this.crmService.rescheduleAppointment(tenantId, {
-            externalId: appointment.crmExternalId!,
-            start: requestedStart,
-            staffId,
-            serviceIds,
-            notes: dto.notes ?? appointment.notes,
-          })
+        ? await this.crmService.rescheduleAppointment(
+            tenantId,
+            {
+              externalId: appointment.crmExternalId!,
+              start: requestedStart,
+              staffId,
+              serviceIds,
+              notes: dto.notes ?? appointment.notes,
+            },
+            invocation,
+          )
         : null;
     let updatedAppointment: Awaited<
       ReturnType<TenantAppointmentRepository['updateForClient']>
@@ -1127,9 +1151,14 @@ export class AppointmentsService {
   private async cancelInCrmForClient(
     tenantId: string,
     crmExternalId: string,
+    invocation: AppointmentActionInvocation,
   ): Promise<CrmCancellationOutcome> {
     try {
-      await this.crmService.cancelAppointment(tenantId, crmExternalId);
+      await this.crmService.cancelAppointment(
+        tenantId,
+        crmExternalId,
+        invocation,
+      );
       return 'canceled';
     } catch (error) {
       if (error instanceof CrmRecordGoneError) {

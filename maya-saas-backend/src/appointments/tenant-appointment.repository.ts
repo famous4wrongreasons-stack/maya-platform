@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,6 +8,7 @@ interface CreateTenantAppointmentData {
   clientId: string;
   branchId: string | null;
   crmExternalId: string | null;
+  crmProvider: string | null;
   source: string;
   /**
    * 🔴 Идентичность мастера в пространстве Maya. Пишется ВМЕСТЕ с внешним id,
@@ -56,16 +57,45 @@ export class TenantAppointmentRepository {
     private readonly tenantContext: TenantContextService,
   ) {}
 
-  createForClient(data: CreateTenantAppointmentData) {
+  async createForClient(data: CreateTenantAppointmentData) {
     const tenantId = this.tenantContext.requireTenantId();
 
-    return this.prisma.appointment.create({
-      data: {
-        ...data,
+    if (data.crmExternalId && data.crmProvider) {
+      const existing = await this.findExternalMirror(
         tenantId,
-      },
-      include: { branch: true },
-    });
+        data.crmProvider,
+        data.crmExternalId,
+      );
+      if (existing) {
+        return this.repairExternalMirror(existing, data);
+      }
+    }
+
+    try {
+      return await this.prisma.appointment.create({
+        data: {
+          ...data,
+          tenantId,
+        },
+        include: { branch: true },
+      });
+    } catch (error) {
+      if (
+        !this.isUniqueConstraintError(error) ||
+        !data.crmExternalId ||
+        !data.crmProvider
+      ) {
+        throw error;
+      }
+
+      const winner = await this.findExternalMirror(
+        tenantId,
+        data.crmProvider,
+        data.crmExternalId,
+      );
+      if (!winner) throw error;
+      return this.repairExternalMirror(winner, data);
+    }
   }
 
   listForClient(clientId: string) {
@@ -78,13 +108,18 @@ export class TenantAppointmentRepository {
     });
   }
 
-  findByCrmExternalIdForClient(crmExternalId: string, clientId: string) {
+  findByCrmExternalIdForClient(
+    crmProvider: string,
+    crmExternalId: string,
+    clientId: string,
+  ) {
     const tenantId = this.tenantContext.requireTenantId();
 
     return this.prisma.appointment.findFirst({
       where: {
         tenantId,
         clientId,
+        crmProvider,
         crmExternalId,
       },
       include: { branch: true },
@@ -122,5 +157,41 @@ export class TenantAppointmentRepository {
       data,
       include: { branch: true },
     });
+  }
+
+  private findExternalMirror(
+    tenantId: string,
+    crmProvider: string,
+    crmExternalId: string,
+  ) {
+    return this.prisma.appointment.findFirst({
+      where: { tenantId, crmProvider, crmExternalId },
+      include: { branch: true },
+    });
+  }
+
+  private repairExternalMirror(
+    existing: { id: string; clientId: string | null },
+    data: CreateTenantAppointmentData,
+  ) {
+    if (existing.clientId && existing.clientId !== data.clientId) {
+      throw new ConflictException({
+        message: 'CRM appointment is already linked to another client.',
+        error: { code: 'crm_appointment_client_conflict' },
+      });
+    }
+
+    return this.prisma.appointment.update({
+      where: { id: existing.id },
+      data,
+      include: { branch: true },
+    });
+  }
+
+  private isUniqueConstraintError(error: unknown): boolean {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
   }
 }

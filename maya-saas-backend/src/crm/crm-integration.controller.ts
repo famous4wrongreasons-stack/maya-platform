@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -186,6 +187,7 @@ export class CrmIntegrationController {
   async createJournalAppointment(
     @Body() dto: CreateCrmJournalAppointmentDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
     // Мастер сажает клиента только в СВОЁ кресло. Маршрут открыт смене
@@ -200,17 +202,21 @@ export class CrmIntegrationController {
     // 🔴 Сознательно НЕ через appointments/createForClient: тот путь требует
     // совпадения со свободным окном и отвечает slot_taken. Мастер в журнале
     // сажает клиента куда решил — это админская запись, allowBusy.
-    const result = await this.crmService.createAppointment(tenantId, {
-      clientId: actor.userId,
-      clientName: dto.client_name || '',
-      clientPhone: dto.client_phone || null,
-      staffId: dto.staff_id,
-      serviceIds: dto.service_ids,
-      start: dto.start,
-      notes: dto.notes ?? null,
-      allowBusy: true,
-      durationMinutes: dto.duration_minutes,
-    });
+    const result = await this.crmService.createAppointment(
+      tenantId,
+      {
+        clientId: actor.userId,
+        clientName: dto.client_name || '',
+        clientPhone: dto.client_phone || null,
+        staffId: dto.staff_id,
+        serviceIds: dto.service_ids,
+        start: dto.start,
+        notes: dto.notes ?? null,
+        allowBusy: true,
+        durationMinutes: dto.duration_minutes,
+      },
+      this.actionInvocation('crm-journal.http.create', idempotencyKey),
+    );
 
     await this.auditLogService.log({
       tenantId,
@@ -352,6 +358,7 @@ export class CrmIntegrationController {
     @Param('externalId') externalId: string,
     @Body() dto: RescheduleCrmJournalAppointmentDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
     const result = await this.crmService.rescheduleJournalAppointment(
@@ -363,6 +370,7 @@ export class CrmIntegrationController {
         staffId: dto.staff_id,
         serviceIds: dto.service_ids,
       },
+      this.actionInvocation('crm-journal.http.reschedule', idempotencyKey),
     );
 
     await this.auditLogService.log({
@@ -383,12 +391,14 @@ export class CrmIntegrationController {
   async cancelJournalAppointment(
     @Param('externalId') externalId: string,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
     const result = await this.crmService.cancelJournalAppointment(
       tenantId,
       actor,
       externalId,
+      this.actionInvocation('crm-journal.http.cancel', idempotencyKey),
     );
 
     await this.auditLogService.log({
@@ -401,6 +411,11 @@ export class CrmIntegrationController {
     });
 
     return result;
+  }
+
+  private actionInvocation(scope: string, idempotencyKey?: string) {
+    const key = idempotencyKey?.trim();
+    return key ? { callerIdempotency: { scope, key } } : {};
   }
 
   @Get('clients/search')

@@ -82,6 +82,11 @@ function stringList(value: Prisma.JsonValue): string[] {
   return value.filter((item): item is string => typeof item === 'string');
 }
 
+function jsonRecord(value: Prisma.JsonValue | null): Record<string, unknown> {
+  if (!value || Array.isArray(value) || typeof value !== 'object') return {};
+  return value;
+}
+
 function isUniqueConflict(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -1032,6 +1037,122 @@ export class ActionEngineKernel {
     return { execution, attempts };
   }
 
+  async readTrustedNormalizedInput(
+    tenantId: string,
+    executionId: string,
+  ): Promise<Record<string, unknown>> {
+    const execution = await this.prisma.actionExecution.findUnique({
+      where: { id_tenantId: { id: executionId, tenantId } },
+    });
+    if (!execution) {
+      throw new ActionClaimError(
+        'EXECUTION_NOT_FOUND',
+        'Execution was not found',
+      );
+    }
+    const capability = this.definitionForExecution(execution);
+    if (
+      execution.normalizedInputContract !== capability.normalizedInputContract
+    ) {
+      throw new ActionContractError(
+        'Stored action input contract does not match the registry snapshot',
+      );
+    }
+    if (!execution.normalizedInputEncrypted) {
+      throw new ActionContractError(
+        'Stored action input is unavailable after retention cleanup',
+      );
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(
+        this.identity.decryptNormalizedPayload(
+          execution.normalizedInputEncrypted,
+        ),
+      ) as unknown;
+    } catch (error) {
+      if (error instanceof ActionEngineError) throw error;
+      throw new ActionContractError('Stored action input cannot be decoded');
+    }
+    if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
+      throw new ActionContractError('Stored action input is not an object');
+    }
+    const normalized = canonicalRecord(parsed as Record<string, unknown>);
+    const hash = this.identity.normalizedInputHash(
+      capability.normalizedInputContract,
+      normalized,
+    );
+    if (hash !== execution.normalizedInputHash) {
+      throw new ActionContractError('Stored action input hash is invalid');
+    }
+    return normalized;
+  }
+
+  async recordAttemptContext(input: {
+    tenantId: string;
+    executionId: string;
+    attemptId: string;
+    leaseToken: string;
+    context: Record<string, unknown>;
+  }): Promise<ActionAttempt> {
+    return this.prisma.$transaction(async (tx) => {
+      const { attempt } = await this.lockOwnedAttempt(tx, input);
+      if (attempt.kind !== ActionAttemptKind.EXECUTION) {
+        throw new ActionClaimError(
+          'ATTEMPT_KIND_INVALID',
+          'Pre-dispatch context belongs only to an execution attempt',
+        );
+      }
+      if (attempt.externalDispatchState !== ExternalDispatchState.NOT_CROSSED) {
+        throw new ActionClaimError(
+          'DISPATCH_ALREADY_CROSSED',
+          'Pre-dispatch context must be recorded before provider dispatch',
+        );
+      }
+      const existing = jsonRecord(attempt.safeResultJson);
+      return tx.actionAttempt.update({
+        where: { id_tenantId: { id: attempt.id, tenantId: input.tenantId } },
+        data: {
+          safeResultJson: jsonInput({
+            ...existing,
+            preDispatch: canonicalRecord(input.context),
+          }),
+        },
+      });
+    });
+  }
+
+  async readLatestPreDispatchContext(
+    tenantId: string,
+    executionId: string,
+  ): Promise<Record<string, unknown> | undefined> {
+    const execution = await this.prisma.actionExecution.findUnique({
+      where: { id_tenantId: { id: executionId, tenantId } },
+      select: { id: true },
+    });
+    if (!execution) {
+      throw new ActionClaimError(
+        'EXECUTION_NOT_FOUND',
+        'Execution was not found',
+      );
+    }
+    const attempt = await this.prisma.actionAttempt.findFirst({
+      where: {
+        tenantId,
+        actionExecutionId: executionId,
+        kind: ActionAttemptKind.EXECUTION,
+      },
+      orderBy: { attemptNumber: 'desc' },
+      select: { safeResultJson: true },
+    });
+    const context = jsonRecord(attempt?.safeResultJson ?? null).preDispatch;
+    if (!context || Array.isArray(context) || typeof context !== 'object') {
+      return undefined;
+    }
+    return canonicalRecord(context as Record<string, unknown>);
+  }
+
   async metrics(tenantId?: string): Promise<ActionKernelMetricsV1> {
     const where: Prisma.ActionExecutionWhereInput = tenantId
       ? { tenantId }
@@ -1156,8 +1277,6 @@ export class ActionEngineKernel {
       targetRef,
       normalizedInputHash,
       occurrenceScope,
-      idempotencyScope,
-      requestIdempotencyKeyHash,
     });
     return {
       capability,

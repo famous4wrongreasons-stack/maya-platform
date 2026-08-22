@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import {
   BadRequestException,
   ConflictException,
@@ -8,6 +10,17 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
+import {
+  ACTION_EXECUTION_REQUEST_CONTRACT,
+  ActionEngineRuntimeService,
+  ActionExecutionTerminalError,
+  ActionExecutionUncertainError,
+  stableActionJson,
+  type ActionFailureClassification,
+  type ActionRuntimeHandlers,
+  type ActionSourceType,
+  type TrustedActionExecutionRequestV1,
+} from '../action-engine';
 import {
   CalendarSource,
   CrmIntegrationStatus,
@@ -63,6 +76,10 @@ import {
 import type { StaffId, VisitAttendance } from '../domain';
 import { asStaffId, asStaffIdOrNull } from '../domain';
 import { assertWritableAttendance } from './crm-attendance';
+import {
+  CrmOutcomeUnknownError,
+  CrmRecordGoneError,
+} from './crm-request.errors';
 
 type CrmConnectionInput = {
   provider?: CrmProvider;
@@ -70,6 +87,94 @@ type CrmConnectionInput = {
   baseUrl?: string;
   settingsJson?: Record<string, unknown>;
 };
+
+export type AppointmentActionInvocation = {
+  callerIdempotency?: {
+    scope: string;
+    key: string;
+  };
+  sourceType?: ActionSourceType;
+  agentTaskId?: string;
+  sourceRef?: string;
+};
+
+type CreateAppointmentInput = {
+  clientId: string;
+  clientName: string;
+  clientPhone?: string;
+  branchId?: string;
+  staffId: string;
+  serviceIds: string[];
+  start: string;
+  notes?: string;
+  allowBusy: boolean;
+  durationMinutes?: number;
+};
+
+type RescheduleAppointmentInput = {
+  externalId: string;
+  start: string;
+  staffId?: string;
+  serviceIds?: string[];
+  notes?: string;
+};
+
+type AppointmentStateEvidence = {
+  externalId: string;
+  status: string;
+  start: string;
+  staffId: string;
+  serviceIds: string[];
+};
+
+function requireString(value: unknown, label: string): string {
+  if (typeof value !== 'string' || !value) {
+    throw new Error(`Invalid durable ${label}`);
+  }
+  return value;
+}
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value ? value : undefined;
+}
+
+function requireStringArray(value: unknown, label: string): string[] {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    throw new Error(`Invalid durable ${label}`);
+  }
+  return value as string[];
+}
+
+function optionalNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function normalizedServiceIds(serviceIds: readonly string[]): string[] {
+  return [...new Set(serviceIds)].sort();
+}
+
+function sameServiceIds(left: readonly string[], right: readonly string[]) {
+  return (
+    stableActionJson(normalizedServiceIds(left)) ===
+    stableActionJson(normalizedServiceIds(right))
+  );
+}
+
+function sameInstant(left: string, right: string): boolean {
+  const leftTime = new Date(left).getTime();
+  const rightTime = new Date(right).getTime();
+  return (
+    Number.isFinite(leftTime) &&
+    Number.isFinite(rightTime) &&
+    leftTime === rightTime
+  );
+}
+
+function isCanceledStatus(status: string): boolean {
+  return ['cancelled', 'canceled', 'deleted'].includes(status.toLowerCase());
+}
 
 type StoredCrmIntegration = {
   id: string;
@@ -126,6 +231,7 @@ export class CrmService {
     private readonly tenantContext: TenantContextService,
     private readonly internalCalendarService: InternalCalendarService,
     private readonly clientIdentityService: ClientIdentityService,
+    private readonly actionEngineRuntime: ActionEngineRuntimeService,
   ) {}
 
   async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
@@ -971,27 +1077,130 @@ export class CrmService {
       allowBusy?: boolean;
       durationMinutes?: number;
     },
+    invocation: AppointmentActionInvocation = {},
   ): Promise<CreatedAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.createAppointment({
-      tenantId: scopedTenantId,
-      ...params,
-    });
+    const targetRef = `create/${this.appointmentFingerprint({
+      clientId: params.clientId,
+      start: params.start,
+      staffId: params.staffId,
+      serviceIds: normalizedServiceIds(params.serviceIds),
+    })}`;
+
+    return this.executeAppointmentAction(
+      this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.appointment.create.v1',
+        targetRef,
+        input: params,
+        invocation,
+      }),
+      {
+        dispatch: async (input) => {
+          const durable = this.createAppointmentInput(input);
+          const value = await adapter.createAppointment({
+            tenantId: scopedTenantId,
+            ...durable,
+          });
+          return { value, safeResult: this.createdAppointmentSafe(value) };
+        },
+        reconcile: async (input) => {
+          const durable = this.createAppointmentInput(input);
+          if (!durable.clientPhone) return { outcome: 'STILL_UNKNOWN' };
+          const candidates = await adapter.getClientAppointments({
+            tenantId: scopedTenantId,
+            phone: durable.clientPhone,
+            timezone: await this.tenantTimezone(scopedTenantId),
+          });
+          const matches = candidates.filter(
+            (candidate) =>
+              !isCanceledStatus(candidate.status) &&
+              sameInstant(candidate.start, durable.start) &&
+              candidate.staff_id === durable.staffId &&
+              sameServiceIds(candidate.service_ids, durable.serviceIds),
+          );
+          if (matches.length === 0) return { outcome: 'PROVEN_NOT_EXECUTED' };
+          if (matches.length !== 1) return { outcome: 'STILL_UNKNOWN' };
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.createdAppointmentSafe(matches[0]),
+          };
+        },
+        restore: (safe) => this.restoreCreatedAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    );
   }
 
   async cancelAppointment(
     tenantId: string,
     externalId: string,
+    invocation: AppointmentActionInvocation = {},
   ): Promise<CancelledAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.cancelAppointment({
-      tenantId: scopedTenantId,
-      externalId,
-    });
+    return this.executeAppointmentAction(
+      this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.appointment.cancel.v1',
+        targetRef: `appointment/${externalId}`,
+        input: { externalId },
+        invocation,
+      }),
+      {
+        dispatch: async (input) => {
+          const durableExternalId = requireString(
+            input.externalId,
+            'externalId',
+          );
+          try {
+            const value = await adapter.cancelAppointment({
+              tenantId: scopedTenantId,
+              externalId: durableExternalId,
+            });
+            return { value, safeResult: this.cancelledAppointmentSafe(value) };
+          } catch (error) {
+            if (!(error instanceof CrmRecordGoneError)) throw error;
+            const value = {
+              external_id: durableExternalId,
+              status: 'canceled',
+            };
+            return { value, safeResult: this.cancelledAppointmentSafe(value) };
+          }
+        },
+        reconcile: async (input) => {
+          const durableExternalId = requireString(
+            input.externalId,
+            'externalId',
+          );
+          try {
+            const detail = await this.loadAppointmentDetail(
+              scopedTenantId,
+              durableExternalId,
+            );
+            if (!isCanceledStatus(detail.status)) {
+              return { outcome: 'PROVEN_NOT_EXECUTED' };
+            }
+          } catch (error) {
+            if (!(error instanceof CrmRecordGoneError)) throw error;
+          }
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.cancelledAppointmentSafe({
+              external_id: durableExternalId,
+              status: 'canceled',
+            }),
+          };
+        },
+        restore: (safe) => this.restoreCancelledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    );
   }
 
   async rescheduleAppointment(
@@ -1003,14 +1212,313 @@ export class CrmService {
       serviceIds?: string[];
       notes?: string | null;
     },
+    invocation: AppointmentActionInvocation = {},
   ): Promise<RescheduledAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.rescheduleAppointment({
-      tenantId: scopedTenantId,
-      ...params,
-    });
+    return this.executeAppointmentAction(
+      this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.appointment.reschedule.v1',
+        targetRef: `appointment/${params.externalId}`,
+        input: params,
+        invocation,
+      }),
+      {
+        prepare: async (input) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const detail = await this.loadAppointmentDetail(
+            scopedTenantId,
+            durable.externalId,
+          );
+          return {
+            externalId: durable.externalId,
+            status: detail.status,
+            start: detail.start_at,
+            staffId: String(detail.provider.id),
+            serviceIds: normalizedServiceIds(detail.service_ids),
+          } satisfies AppointmentStateEvidence;
+        },
+        dispatch: async (input) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const value = await adapter.rescheduleAppointment({
+            tenantId: scopedTenantId,
+            ...durable,
+          });
+          return { value, safeResult: this.rescheduledAppointmentSafe(value) };
+        },
+        reconcile: async (input, previous) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const detail = await this.loadAppointmentDetail(
+            scopedTenantId,
+            durable.externalId,
+          );
+          const current = this.appointmentEvidence(detail);
+          if (this.matchesDesiredAppointment(current, durable)) {
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.rescheduledAppointmentSafe({
+                external_id: current.externalId,
+                status: current.status,
+                start: current.start,
+                staff_id: current.staffId,
+                service_ids: current.serviceIds,
+              }),
+            };
+          }
+          if (previous && this.sameAppointmentEvidence(current, previous)) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restoreRescheduledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    );
+  }
+
+  private appointmentFingerprint(value: unknown): string {
+    return createHash('sha256')
+      .update(stableActionJson(value))
+      .digest('hex')
+      .slice(0, 48);
+  }
+
+  private appointmentActionRequest(input: {
+    tenantId: string;
+    capability:
+      | 'crm.appointment.create.v1'
+      | 'crm.appointment.reschedule.v1'
+      | 'crm.appointment.cancel.v1';
+    targetRef: string;
+    input: unknown;
+    invocation: AppointmentActionInvocation;
+  }): TrustedActionExecutionRequestV1 {
+    const context = this.tenantContext.get();
+    const sourceType = input.invocation.sourceType ?? 'authenticated_request';
+    const sourceRef =
+      input.invocation.sourceRef ??
+      (sourceType === 'agent_task'
+        ? input.invocation.agentTaskId
+        : context?.requestId);
+
+    return {
+      contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+      tenantId: input.tenantId,
+      capability: input.capability,
+      source: {
+        type: sourceType,
+        occurrenceScope: `appointment-mutation:${input.capability}:v1`,
+        ...(sourceRef ? { sourceRef } : {}),
+        ...(sourceType === 'agent_task' && input.invocation.agentTaskId
+          ? { agentTaskId: input.invocation.agentTaskId }
+          : {}),
+        ...(context?.userId && context.membershipId
+          ? { actorUserId: context.userId }
+          : {}),
+      },
+      targetRef: input.targetRef,
+      input: input.input,
+      evidenceRefs: [],
+      callerIdempotency: input.invocation.callerIdempotency,
+    };
+  }
+
+  private async executeAppointmentAction<T>(
+    request: TrustedActionExecutionRequestV1,
+    handlers: ActionRuntimeHandlers<T>,
+  ): Promise<T> {
+    try {
+      return await this.actionEngineRuntime.execute(request, handlers);
+    } catch (error) {
+      if (error instanceof ActionExecutionUncertainError) {
+        throw new CrmOutcomeUnknownError(error.message, error);
+      }
+      if (error instanceof ActionExecutionTerminalError) {
+        throw new ConflictException({
+          message: error.message,
+          error: { code: error.code.toLowerCase() },
+        });
+      }
+      throw error;
+    }
+  }
+
+  private createAppointmentInput(
+    input: Record<string, unknown>,
+  ): CreateAppointmentInput {
+    return {
+      clientId: requireString(input.clientId, 'clientId'),
+      clientName: requireString(input.clientName, 'clientName'),
+      clientPhone: optionalString(input.clientPhone),
+      branchId: optionalString(input.branchId),
+      staffId: requireString(input.staffId, 'staffId'),
+      serviceIds: requireStringArray(input.serviceIds, 'serviceIds'),
+      start: requireString(input.start, 'start'),
+      notes: optionalString(input.notes),
+      allowBusy: input.allowBusy === true,
+      durationMinutes: optionalNumber(input.durationMinutes),
+    };
+  }
+
+  private rescheduleAppointmentInput(
+    input: Record<string, unknown>,
+  ): RescheduleAppointmentInput {
+    const rawServices = input.serviceIds;
+    return {
+      externalId: requireString(input.externalId, 'externalId'),
+      start: requireString(input.start, 'start'),
+      staffId: optionalString(input.staffId),
+      serviceIds:
+        rawServices === undefined
+          ? undefined
+          : requireStringArray(rawServices, 'serviceIds'),
+      notes: optionalString(input.notes),
+    };
+  }
+
+  private createdAppointmentSafe(
+    value: CreatedAppointment,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      status: value.status,
+      start: value.start,
+      ...(value.end ? { end: value.end } : {}),
+      staffId: value.staff_id,
+      serviceIds: normalizedServiceIds(value.service_ids),
+      ...(value.branch_id ? { branchId: value.branch_id } : {}),
+      ...(typeof value.total_price === 'number'
+        ? { totalPrice: value.total_price }
+        : {}),
+      ...(value.currency ? { currency: value.currency } : {}),
+    };
+  }
+
+  private restoreCreatedAppointment(
+    safe: Record<string, unknown>,
+  ): CreatedAppointment {
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      status: requireString(safe.status, 'status'),
+      start: requireString(safe.start, 'start'),
+      end: optionalString(safe.end),
+      staff_id: requireString(safe.staffId, 'staffId'),
+      service_ids: requireStringArray(safe.serviceIds, 'serviceIds'),
+      branch_id: optionalString(safe.branchId) ?? null,
+      total_price: optionalNumber(safe.totalPrice) ?? null,
+      currency: optionalString(safe.currency),
+    };
+  }
+
+  private cancelledAppointmentSafe(
+    value: CancelledAppointment,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      status: value.status,
+    };
+  }
+
+  private restoreCancelledAppointment(
+    safe: Record<string, unknown>,
+  ): CancelledAppointment {
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      status: requireString(safe.status, 'status'),
+    };
+  }
+
+  private rescheduledAppointmentSafe(
+    value: RescheduledAppointment,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      status: value.status,
+      start: value.start,
+      staffId: value.staff_id,
+      serviceIds: normalizedServiceIds(value.service_ids),
+    };
+  }
+
+  private restoreRescheduledAppointment(
+    safe: Record<string, unknown>,
+  ): RescheduledAppointment {
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      status: requireString(safe.status, 'status'),
+      start: requireString(safe.start, 'start'),
+      staff_id: requireString(safe.staffId, 'staffId'),
+      service_ids: requireStringArray(safe.serviceIds, 'serviceIds'),
+    };
+  }
+
+  private appointmentEvidence(
+    detail: CrmAppointmentDetail,
+  ): AppointmentStateEvidence {
+    return {
+      externalId: detail.id,
+      status: detail.status,
+      start: detail.start_at,
+      staffId: String(detail.provider.id),
+      serviceIds: normalizedServiceIds(detail.service_ids),
+    };
+  }
+
+  private matchesDesiredAppointment(
+    current: AppointmentStateEvidence,
+    desired: RescheduleAppointmentInput,
+  ): boolean {
+    return (
+      sameInstant(current.start, desired.start) &&
+      (desired.staffId === undefined || current.staffId === desired.staffId) &&
+      (desired.serviceIds === undefined ||
+        sameServiceIds(current.serviceIds, desired.serviceIds))
+    );
+  }
+
+  private sameAppointmentEvidence(
+    current: AppointmentStateEvidence,
+    previous: Record<string, unknown>,
+  ): boolean {
+    const previousServices = requireStringArray(
+      previous.serviceIds,
+      'serviceIds',
+    );
+    return (
+      current.externalId === requireString(previous.externalId, 'externalId') &&
+      current.status === requireString(previous.status, 'status') &&
+      sameInstant(current.start, requireString(previous.start, 'start')) &&
+      current.staffId === requireString(previous.staffId, 'staffId') &&
+      sameServiceIds(current.serviceIds, previousServices)
+    );
+  }
+
+  private classifyAppointmentActionError(
+    error: unknown,
+    phase: 'prepare' | 'dispatch',
+  ): ActionFailureClassification {
+    if (error instanceof CrmOutcomeUnknownError) {
+      return phase === 'prepare'
+        ? {
+            kind: 'definitive',
+            outcomeCode: 'crm_read_unavailable_before_dispatch',
+            errorClass: 'crm_transient_before_dispatch',
+          }
+        : {
+            kind: 'unknown',
+            outcomeCode: 'crm_provider_outcome_unknown',
+            errorClass: 'crm_outcome_unknown',
+          };
+    }
+
+    return {
+      kind: 'definitive',
+      outcomeCode: 'crm_provider_rejected',
+      errorClass: 'crm_provider_rejected',
+    };
   }
 
   async getClientAppointments(tenantId: string, phone: string) {
@@ -1543,6 +2051,7 @@ export class CrmService {
       staffId?: string;
       serviceIds?: string[];
     },
+    invocation: AppointmentActionInvocation = {},
   ): Promise<RescheduledAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertJournalRecordAccess(
@@ -1558,7 +2067,7 @@ export class CrmService {
       params.staffId,
     );
 
-    return this.rescheduleAppointment(scopedTenantId, params);
+    return this.rescheduleAppointment(scopedTenantId, params, invocation);
   }
 
   /** Отмена визита из журнала — под тем же стражем. */
@@ -1566,11 +2075,12 @@ export class CrmService {
     tenantId: string,
     actor: AuthenticatedUser,
     externalId: string,
+    invocation: AppointmentActionInvocation = {},
   ): Promise<CancelledAppointment> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
 
-    return this.cancelAppointment(scopedTenantId, externalId);
+    return this.cancelAppointment(scopedTenantId, externalId, invocation);
   }
 
   async searchClients(tenantId: string, query: string) {
@@ -1894,6 +2404,12 @@ export class CrmService {
     return tenant.calendarSource === 'internal'
       ? CalendarSource.INTERNAL
       : CalendarSource.EXTERNAL;
+  }
+
+  async getExternalProviderKey(tenantId: string): Promise<string> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    return this.providerOfTenant(scopedTenantId);
   }
 
   private async assertExternalSource(tenantId: string): Promise<void> {

@@ -87,12 +87,33 @@ describe('CrmService: операции над визитом', () => {
       create: jest.fn().mockReturnValue(adapter),
     } as unknown as CrmAdapterFactory;
     const tenantContext = new TenantContextService();
+    const actionEngineRuntime = {
+      execute: jest.fn(
+        async (
+          request: { input: unknown },
+          handlers: {
+            dispatch: (
+              input: Record<string, unknown>,
+              idempotencyKey: string,
+            ) => Promise<{ value: unknown }>;
+          },
+        ) => {
+          const dispatched = await handlers.dispatch(
+            request.input as Record<string, unknown>,
+            'visit-operation-test',
+          );
+          return dispatched.value;
+        },
+      ),
+    };
     const service = new CrmService(
       prisma,
       encryptionService,
       adapterFactory,
       tenantContext,
       {} as never,
+      {} as never,
+      actionEngineRuntime as never,
     );
 
     return {

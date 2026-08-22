@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -25,11 +25,13 @@ export class AppointmentsController {
   createAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateAppointmentDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.appointmentsService.createForClient(
       user.tenantId!,
       user.userId,
       dto,
+      this.actionInvocation('appointments.http.create', idempotencyKey),
     );
   }
 
@@ -62,11 +64,13 @@ export class AppointmentsController {
   cancelAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') appointmentId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.appointmentsService.cancelForClient(
       user.tenantId!,
       user.userId,
       appointmentId,
+      this.actionInvocation('appointments.http.cancel', idempotencyKey),
     );
   }
 
@@ -76,12 +80,19 @@ export class AppointmentsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') appointmentId: string,
     @Body() dto: RescheduleAppointmentDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.appointmentsService.rescheduleForClient(
       user.tenantId!,
       user.userId,
       appointmentId,
       dto,
+      this.actionInvocation('appointments.http.reschedule', idempotencyKey),
     );
+  }
+
+  private actionInvocation(scope: string, idempotencyKey?: string) {
+    const key = idempotencyKey?.trim();
+    return key ? { callerIdempotency: { scope, key } } : {};
   }
 }

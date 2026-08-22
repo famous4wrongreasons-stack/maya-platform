@@ -321,11 +321,11 @@ export class AiToolHandlerService {
           idempotencyKey,
         );
       case 'appointments.own.cancel':
-        return this.cancelOwnAppointment(principal, args);
+        return this.cancelOwnAppointment(principal, args, idempotencyKey);
       case 'appointments.own.create':
-        return this.createOwnAppointment(principal, args);
+        return this.createOwnAppointment(principal, args, idempotencyKey);
       case 'appointments.own.reschedule':
-        return this.rescheduleOwnAppointment(principal, args);
+        return this.rescheduleOwnAppointment(principal, args, idempotencyKey);
       case 'staff.schedule.read':
         return this.readStaffScheduleDay(principal, args);
       case 'staff.schedule.own.read':
@@ -3191,11 +3191,16 @@ export class AiToolHandlerService {
   private async cancelOwnAppointment(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
+    idempotencyKey: string,
   ) {
     const result = await this.appointmentsService.cancelForClient(
       principal.tenantId,
       principal.userId,
       this.requiredString(args.appointment_id),
+      this.appointmentActionInvocation(
+        'appointments.own.cancel',
+        idempotencyKey,
+      ),
     );
     return this.safeAppointmentOutput(result);
   }
@@ -3203,11 +3208,16 @@ export class AiToolHandlerService {
   private async createOwnAppointment(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
+    idempotencyKey: string,
   ) {
     const result = await this.appointmentsService.createForClient(
       principal.tenantId,
       principal.userId,
       this.bookingDto(args),
+      this.appointmentActionInvocation(
+        'appointments.own.create',
+        idempotencyKey,
+      ),
     );
     return this.safeAppointmentOutput(result);
   }
@@ -3215,6 +3225,7 @@ export class AiToolHandlerService {
   private async rescheduleOwnAppointment(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
+    idempotencyKey: string,
   ) {
     const result = await this.appointmentsService.rescheduleForClient(
       principal.tenantId,
@@ -3232,8 +3243,23 @@ export class AiToolHandlerService {
           ? { branchId: args.branch_id }
           : {}),
       },
+      this.appointmentActionInvocation(
+        'appointments.own.reschedule',
+        idempotencyKey,
+      ),
     );
     return this.safeAppointmentOutput(result);
+  }
+
+  private appointmentActionInvocation(toolName: string, key: string) {
+    return {
+      sourceType: 'authenticated_request' as const,
+      sourceRef: `ai-tool:${toolName}`,
+      callerIdempotency: {
+        scope: 'ai-tool.appointment-mutation',
+        key,
+      },
+    };
   }
 
   private async adjustInternalLoyalty(
