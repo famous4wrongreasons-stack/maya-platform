@@ -63,11 +63,12 @@ function previewFixture() {
     sourceType: 'legacy_bridge',
     capability: 'crm.appointment.create.v1',
     capabilityVersion: 1,
-    actionClass: 'CREATE_APPOINTMENT',
+    actionClass: 'create_appointment',
     targetKind: 'appointment',
     targetRef: 'create/opaque',
-    normalizedInputHash: 'input-hash',
-    identityFingerprint: 'identity',
+    normalizedInputHash: 'c'.repeat(64),
+    identityFingerprint: 'd'.repeat(64),
+    requestIdempotencyKeyHash: 'e'.repeat(64),
     policyKey: 'appointment-policy',
     policyVersion: 1,
     policyDecision: 'ALLOW',
@@ -198,18 +199,37 @@ describe('LegacyAppointmentBridgeService', () => {
     expect(result.bridge_external_side_effects).toBe(0);
 
     expect(log).toHaveBeenCalledTimes(1);
-    const observation = log.mock.calls[0]?.[0] as Record<string, unknown>;
+    const serializedLog = String(log.mock.calls[0]?.[0] ?? '');
+    const prefix = 'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ';
+    expect(serializedLog.startsWith(prefix)).toBe(true);
+    const observation = JSON.parse(
+      serializedLog.slice(prefix.length),
+    ) as Record<string, unknown>;
     expect(observation).toMatchObject({
       event: 'legacy_appointment_shadow_observation',
       contract: 'maya.legacy-appointment-shadow-observation/1',
       mode: 'shadow',
+      tenant_resolution: 'integration',
       origin: 'webhook.chat',
+      authorization_context: {
+        transport_authentication: 'bridge_secret',
+        integration_binding: 'verified',
+        origin_action_policy: 'allowed',
+        tenant_scope: 'system_tenant',
+      },
       legacy_action_class: 'create_appointment',
-      preview_action_class: 'CREATE_APPOINTMENT',
-      normalized_input_hash: 'input-hash',
-      identity_fingerprint: 'identity',
+      preview_action_class: 'create_appointment',
+      normalized_input_hash: 'c'.repeat(64),
+      identity_fingerprint: 'd'.repeat(64),
+      request_idempotency_key_hash: 'e'.repeat(64),
       legacy_outcome: { success: true, code: 'ok', http_status: 200 },
+      preview_external_side_effects: 0,
       bridge_external_side_effects: 0,
+      shadow_side_effects: {
+        crm_writes: 0,
+        messages: 0,
+        campaigns: 0,
+      },
     });
     expect(observation.tenant_ref).toMatch(/^[a-f0-9]{64}$/);
     expect(observation.target_ref_hash).toMatch(/^[a-f0-9]{64}$/);

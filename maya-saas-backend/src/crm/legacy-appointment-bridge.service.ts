@@ -30,6 +30,8 @@ const LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT =
   'maya.legacy-appointment-bridge-result/1' as const;
 const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT =
   'maya.legacy-appointment-shadow-observation/1' as const;
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX =
+  'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ' as const;
 
 const EXECUTION_ENABLED_VALUES = new Set(['1', 'true', 'on', 'yes']);
 const SUPPORTED_PROVIDERS = new Set<string>([
@@ -576,12 +578,19 @@ export class LegacyAppointmentBridgeService {
     preview: ActionExecutionPreviewV1;
   }): void {
     const { tenantId, dto, preview } = input;
-    this.logger.log({
+    const observation = {
       event: 'legacy_appointment_shadow_observation',
       contract: LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT,
       mode: 'shadow',
       tenant_ref: opaqueObservationRef(tenantId),
+      tenant_resolution: 'integration',
       origin: dto.origin,
+      authorization_context: {
+        transport_authentication: 'bridge_secret',
+        integration_binding: 'verified',
+        origin_action_policy: 'allowed',
+        tenant_scope: 'system_tenant',
+      },
       legacy_action_class: dto.action_class,
       preview_action_class: preview.actionClass,
       capability: preview.capability,
@@ -598,20 +607,34 @@ export class LegacyAppointmentBridgeService {
       approval_requirement: preview.approvalRequirement,
       executor_key: preview.executorKey,
       executor_version: preview.executorVersion,
-      legacy_outcome: dto.legacy_outcome
+      ...(dto.legacy_outcome
         ? {
-            success: dto.legacy_outcome.success,
-            ...(dto.legacy_outcome.code
-              ? { code: dto.legacy_outcome.code }
-              : {}),
-            ...(dto.legacy_outcome.http_status
-              ? { http_status: dto.legacy_outcome.http_status }
-              : {}),
-            ...(dto.legacy_outcome.unknown === true ? { unknown: true } : {}),
+            legacy_outcome: {
+              success: dto.legacy_outcome.success,
+              ...(dto.legacy_outcome.code
+                ? { code: dto.legacy_outcome.code }
+                : {}),
+              ...(dto.legacy_outcome.http_status
+                ? { http_status: dto.legacy_outcome.http_status }
+                : {}),
+              ...(dto.legacy_outcome.unknown === true ? { unknown: true } : {}),
+            },
           }
-        : undefined,
+        : {}),
+      preview_external_side_effects: preview.externalSideEffects,
       bridge_external_side_effects: 0,
-    });
+      shadow_side_effects: {
+        crm_writes: 0,
+        messages: 0,
+        campaigns: 0,
+      },
+    };
+
+    // A stable one-line prefix lets a separate read-only journal observer
+    // consume only this PII-free contract without importing application code.
+    this.logger.log(
+      `${LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX}${JSON.stringify(observation)}`,
+    );
   }
 
   private executionResponse(
