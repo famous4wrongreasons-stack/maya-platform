@@ -1,6 +1,6 @@
 import os
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import requests
 
@@ -65,54 +65,36 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
         self.env.stop()
         patch.stopall()
 
-    def dispatch(self, *, action_class="create_appointment", payload=None, direct=None):
+    def dispatch(self, *, action_class="create_appointment", payload=None, origin="webhook.chat"):
         return bridge.dispatch_appointment_action(
             provider="yclients",
             external_company_id="42",
-            origin="webhook.chat",
+            origin=origin,
             action_class=action_class,
             payload=payload or dict(CREATE_PAYLOAD),
-            direct_call=direct or Mock(return_value={"success": True, "record_id": 77}),
         )
 
-    def test_off_mode_executes_legacy_path_once(self):
-        os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "off"
-        direct = Mock(return_value={"success": True, "record_id": 77})
-        with patch.object(bridge, "_post_bridge") as post:
-            result = self.dispatch(direct=direct)
+    def test_off_and_shadow_modes_fail_closed_after_cutover(self):
+        for mode in ("off", "shadow"):
+            os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = mode
+            with self.subTest(mode=mode), patch.object(bridge, "_post_bridge") as post:
+                result = self.dispatch()
+                self.assertEqual(
+                    result["code"], "legacy_appointment_bridge_mode_invalid"
+                )
+                post.assert_not_called()
 
-        self.assertTrue(result["success"])
-        direct.assert_called_once_with()
-        post.assert_not_called()
-
-    def test_shadow_executes_legacy_once_and_bridge_preview_only(self):
-        os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "shadow"
-        direct = Mock(return_value={"success": True, "record_id": 77})
-        with patch.object(
-            bridge,
-            "_post_bridge",
-            return_value={"accepted": True, "mode": "shadow"},
-        ) as post:
-            result = self.dispatch(direct=direct)
-
-        self.assertEqual(result["record_id"], 77)
-        direct.assert_called_once_with()
-        path, envelope = post.call_args.args
-        self.assertEqual(path, "shadow")
-        self.assertEqual(envelope["legacy_outcome"], {"success": True})
-
-    def test_cutover_create_never_calls_direct_owner(self):
+    def test_cutover_create_uses_execute_route(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(
             bridge, "_post_bridge", return_value=canonical_body()
         ) as post:
-            result = self.dispatch(direct=direct)
+            result = self.dispatch()
 
         self.assertTrue(result["success"])
         self.assertEqual(result["record_id"], "record-1")
-        direct.assert_not_called()
         self.assertEqual(post.call_args.args[0], "execute")
+        self.assertNotIn("legacy_outcome", post.call_args.args[1])
 
     def test_repeated_python_and_two_workers_use_one_transport_alias(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
@@ -122,10 +104,9 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
             envelopes.append(envelope)
             return canonical_body()
 
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(bridge, "_post_bridge", side_effect=accepted):
-            first = self.dispatch(direct=direct)
-            second = self.dispatch(direct=direct)
+            first = self.dispatch()
+            second = self.dispatch()
 
         self.assertTrue(first["success"])
         self.assertTrue(second["success"])
@@ -133,7 +114,6 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
             envelopes[0]["idempotency_key"], envelopes[1]["idempotency_key"]
         )
         self.assertEqual(envelopes[0]["requester_ref"], envelopes[1]["requester_ref"])
-        direct.assert_not_called()
 
     def test_cutover_reschedule_and_cancel_use_typed_bridge_actions(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
@@ -143,7 +123,6 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
             captured.append(envelope)
             return canonical_body()
 
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(bridge, "_post_bridge", side_effect=accepted):
             self.dispatch(
                 action_class="reschedule_appointment",
@@ -151,47 +130,39 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
                     "external_id": "77",
                     "start": "2026-09-02T10:00:00.000Z",
                 },
-                direct=direct,
             )
             self.dispatch(
                 action_class="cancel_appointment",
                 payload={"external_id": "77"},
-                direct=direct,
             )
 
         self.assertEqual(
             [item["action_class"] for item in captured],
             ["reschedule_appointment", "cancel_appointment"],
         )
-        direct.assert_not_called()
 
     def test_timeout_is_unknown_and_never_falls_back(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(requests, "post", side_effect=requests.Timeout):
-            result = self.dispatch(direct=direct)
+            result = self.dispatch()
 
         self.assertTrue(result["unknown"])
         self.assertFalse(result["retry_allowed"])
-        direct.assert_not_called()
 
     def test_server_error_after_possible_persist_is_unknown(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         response = FakeResponse(
             503, {"error": {"code": "legacy_bridge_unavailable"}}
         )
         with patch.object(requests, "post", return_value=response):
-            result = self.dispatch(direct=direct)
+            result = self.dispatch()
 
         self.assertTrue(result["unknown"])
         self.assertFalse(result["retry_allowed"])
         self.assertEqual(result["code"], "legacy_bridge_unavailable")
-        direct.assert_not_called()
 
     def test_wrong_secret_or_tenant_rejection_never_falls_back(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         for status, code in (
             (401, "legacy_appointment_bridge_unauthorized"),
             (403, "legacy_appointment_tenant_not_found"),
@@ -200,45 +171,46 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
             with self.subTest(status=status), patch.object(
                 requests, "post", return_value=response
             ):
-                result = self.dispatch(direct=direct)
+                result = self.dispatch()
                 self.assertFalse(result["accepted"])
                 self.assertFalse(result["unknown"])
                 self.assertEqual(result["code"], code)
-        direct.assert_not_called()
 
     def test_malformed_response_is_unknown_without_fallback(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(
             requests, "post", return_value=FakeResponse(200, json_error=True)
         ):
-            result = self.dispatch(direct=direct)
+            result = self.dispatch()
 
         self.assertTrue(result["unknown"])
         self.assertFalse(result["retry_allowed"])
-        direct.assert_not_called()
 
     def test_canonical_unknown_is_preserved_and_not_retried(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(
             bridge, "_post_bridge", return_value=canonical_body("UNKNOWN")
         ):
-            result = self.dispatch(direct=direct)
+            result = self.dispatch()
 
         self.assertTrue(result["unknown"])
         self.assertFalse(result["retry_allowed"])
         self.assertEqual(result["execution_id"], "execution-1")
-        direct.assert_not_called()
 
     def test_invalid_mode_fails_closed(self):
         os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "surprise"
-        direct = Mock(side_effect=AssertionError("direct fallback invoked"))
         with patch.object(bridge, "_post_bridge") as post:
-            result = self.dispatch(direct=direct)
+            result = self.dispatch()
 
         self.assertEqual(result["code"], "legacy_appointment_bridge_mode_invalid")
-        direct.assert_not_called()
+        post.assert_not_called()
+
+    def test_missing_origin_fails_closed(self):
+        os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
+        with patch.object(bridge, "_post_bridge") as post:
+            result = self.dispatch(origin=None)
+
+        self.assertEqual(result["code"], "legacy_appointment_bridge_origin_missing")
         post.assert_not_called()
 
     def test_status_is_read_from_action_engine_without_reconciliation(self):

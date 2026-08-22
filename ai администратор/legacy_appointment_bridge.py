@@ -1,10 +1,7 @@
 """Fail-closed client for the MAYA appointment Action Engine bridge.
 
-Legacy Python remains an initiator. It does not own execution state,
-reconciliation, retries, approvals, or logical idempotency. During the
-temporary shadow window the legacy path executes exactly once and the bridge
-only previews the canonical action. After cutover no direct CRM fallback is
-allowed under any failure mode.
+Legacy Python is an initiator only. Create, reschedule, and cancel always go
+through Action Engine; this module has no direct CRM execution or fallback.
 """
 
 from __future__ import annotations
@@ -13,7 +10,6 @@ import hashlib
 import json
 import logging
 import os
-from collections.abc import Callable
 from typing import Any
 
 import requests
@@ -26,14 +22,14 @@ BRIDGE_RESULT_CONTRACT = "maya.legacy-appointment-bridge-result/1"
 DEFAULT_BRIDGE_URL = (
     "http://127.0.0.1:3107/api/internal/legacy/appointment-actions"
 )
-VALID_MODES = frozenset({"off", "shadow", "cutover"})
+VALID_MODES = frozenset({"cutover"})
 INVALID_MODE = "invalid"
 TERMINAL_FAILURE_STATES = frozenset({"FAILED", "NOT_EXECUTED"})
 
 
 def bridge_mode() -> str:
-    """Return migration mode; invalid explicit configuration fails closed."""
-    value = os.getenv("MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE", "off").strip().lower()
+    """Return cutover mode; every other configuration fails closed."""
+    value = os.getenv("MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE", "").strip().lower()
     if value not in VALID_MODES:
         logger.error("Invalid legacy appointment bridge mode; refusing mutation")
         return INVALID_MODE
@@ -230,21 +226,6 @@ def _post_bridge(path: str, envelope: dict[str, Any]) -> dict[str, Any]:
     return body
 
 
-def _legacy_outcome(result: dict[str, Any]) -> dict[str, Any]:
-    outcome: dict[str, Any] = {
-        "success": bool(result.get("success")),
-    }
-    code = result.get("code")
-    if isinstance(code, str) and code:
-        outcome["code"] = code[:80]
-    status = result.get("http_status")
-    if isinstance(status, int) and 100 <= status <= 599:
-        outcome["http_status"] = status
-    if result.get("unknown") is True:
-        outcome["unknown"] = True
-    return outcome
-
-
 def _envelope(
     *,
     provider: str,
@@ -252,9 +233,8 @@ def _envelope(
     origin: str,
     action_class: str,
     payload: dict[str, Any],
-    legacy_outcome: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    envelope: dict[str, Any] = {
+    return {
         "contract": BRIDGE_CONTRACT,
         "provider": str(provider).strip().lower(),
         "external_company_id": str(external_company_id).strip(),
@@ -269,9 +249,6 @@ def _envelope(
         "action_class": action_class,
         "payload": payload,
     }
-    if legacy_outcome is not None:
-        envelope["legacy_outcome"] = legacy_outcome
-    return envelope
 
 
 def dispatch_appointment_action(
@@ -281,38 +258,13 @@ def dispatch_appointment_action(
     origin: str | None,
     action_class: str,
     payload: dict[str, Any],
-    direct_call: Callable[[], dict[str, Any]],
 ) -> dict[str, Any]:
-    """Dispatch one appointment mutation without ever dual-executing it."""
+    """Dispatch one appointment mutation through the sole canonical executor."""
     mode = bridge_mode()
     if mode == INVALID_MODE:
         return _rejected_result("legacy_appointment_bridge_mode_invalid")
-    if mode == "off":
-        return direct_call()
     if not origin:
-        if mode == "shadow":
-            result = direct_call()
-            logger.error("Legacy appointment shadow skipped: origin missing")
-            return result
         return _rejected_result("legacy_appointment_bridge_origin_missing")
-
-    if mode == "shadow":
-        legacy_result = direct_call()
-        envelope = _envelope(
-            provider=provider,
-            external_company_id=external_company_id,
-            origin=origin,
-            action_class=action_class,
-            payload=payload,
-            legacy_outcome=_legacy_outcome(legacy_result),
-        )
-        shadow_result = _post_bridge("shadow", envelope)
-        if shadow_result.get("accepted") is not True:
-            logger.warning(
-                "Legacy appointment shadow was not accepted",
-                extra={"bridge_code": shadow_result.get("code")},
-            )
-        return legacy_result
 
     envelope = _envelope(
         provider=provider,

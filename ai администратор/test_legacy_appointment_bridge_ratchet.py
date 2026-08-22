@@ -37,18 +37,17 @@ EXPECTED_ENTRY_POINTS = Counter(
         ("cancel_booking", "claude_ai"): 1,
     }
 )
-WRAPPERS = {
-    "create_booking": "_create_booking_direct",
-    "create_record_admin": "_create_record_admin_direct",
-    "reschedule_booking": "_reschedule_booking_direct",
-    "cancel_booking": "_cancel_booking_direct",
-}
+WRAPPERS = (
+    "create_booking",
+    "create_record_admin",
+    "reschedule_booking",
+    "cancel_booking",
+)
 
 EXPECTED_RECORD_PUT_OWNERS = Counter(
     {
         ("yclients.py", "update_booking"): 1,
         ("yclients.py", "set_record_attendance"): 1,
-        ("yclients.py", "_reschedule_booking_direct"): 1,
         ("yclients.py", "set_record_notify_by_sms"): 1,
         ("yclients.py", "add_services_to_record"): 1,
         ("yclients.py", "set_record_services"): 1,
@@ -133,13 +132,11 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
         self.assertEqual(entry_points, EXPECTED_ENTRY_POINTS)
         self.assertEqual(sum(origins.values()), 11)
 
-    def test_four_legacy_write_owners_are_private_dispatcher_closures_only(self):
+    def test_migrated_wrappers_have_exactly_one_bridge_dispatch(self):
         tree = parsed(ROOT / "yclients.py")
         methods = class_methods(tree, "YClientsAPI")
-        direct_names = set(WRAPPERS.values())
 
-        self.assertTrue(direct_names.issubset(methods))
-        for wrapper, direct_name in WRAPPERS.items():
+        for wrapper in WRAPPERS:
             node = methods[wrapper]
             dispatches = [
                 call
@@ -149,63 +146,24 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
                 and call.func.id == "dispatch_appointment_action"
             ]
             self.assertEqual(len(dispatches), 1, wrapper)
-            direct_keywords = [
-                keyword
-                for keyword in dispatches[0].keywords
-                if keyword.arg == "direct_call"
-            ]
-            self.assertEqual(len(direct_keywords), 1, wrapper)
-            self.assertIsInstance(direct_keywords[0].value, ast.Lambda)
-            self.assertTrue(
-                any(
-                    isinstance(item, ast.Attribute) and item.attr == direct_name
-                    for item in ast.walk(direct_keywords[0].value)
-                ),
-                wrapper,
-            )
+            keyword_names = {keyword.arg for keyword in dispatches[0].keywords}
+            self.assertNotIn("direct_call", keyword_names, wrapper)
 
-        external_references = []
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Attribute) and node.attr in direct_names:
-                owner = next(
-                    (
-                        wrapper
-                        for wrapper, direct in WRAPPERS.items()
-                        if direct == node.attr
-                    ),
-                    None,
-                )
-                external_references.append(owner)
-        self.assertEqual(
-            Counter(external_references),
-            Counter({wrapper: 1 for wrapper in WRAPPERS}),
-        )
-
-    def test_direct_provider_calls_remain_exactly_four_until_cutover_removal(self):
+    def test_removed_direct_write_owners_cannot_return(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
-
-        expected = {
-            "_create_booking_direct": ("post", "book_record"),
-            "_create_record_admin_direct": ("_post", "records/"),
-            "_reschedule_booking_direct": ("_put", "record/"),
-            "_cancel_booking_direct": ("_delete", "record/"),
+        removed = {
+            "_create_booking_direct",
+            "_create_record_admin_direct",
+            "_reschedule_booking_direct",
+            "_cancel_booking_direct",
         }
-        for method_name, (call_name, endpoint_marker) in expected.items():
-            node = methods[method_name]
-            calls = [
-                call
-                for call in ast.walk(node)
-                if isinstance(call, ast.Call)
-                and (
-                    (isinstance(call.func, ast.Attribute) and call.func.attr == call_name)
-                    or (isinstance(call.func, ast.Name) and call.func.id == call_name)
-                )
-            ]
-            self.assertEqual(len(calls), 1, method_name)
-            method_source = ast.unparse(node)
-            self.assertIn(endpoint_marker, method_source, method_name)
+        self.assertTrue(removed.isdisjoint(methods))
 
-    def test_actual_appointment_write_endpoints_have_only_the_four_known_owners(self):
+        source = (ROOT / "yclients.py").read_text(encoding="utf-8")
+        for name in removed:
+            self.assertNotIn(name, source)
+
+    def test_actual_migrated_appointment_write_endpoints_have_no_python_owner(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
         create_client_owners = []
         create_admin_owners = []
@@ -236,10 +194,10 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
                 ):
                     reschedule_owners.append(method_name)
 
-        self.assertEqual(create_client_owners, ["_create_booking_direct"])
-        self.assertEqual(create_admin_owners, ["_create_record_admin_direct"])
-        self.assertEqual(cancel_owners, ["_cancel_booking_direct"])
-        self.assertEqual(reschedule_owners, ["_reschedule_booking_direct"])
+        self.assertEqual(create_client_owners, [])
+        self.assertEqual(create_admin_owners, [])
+        self.assertEqual(cancel_owners, [])
+        self.assertEqual(reschedule_owners, [])
 
         for wrapper in WRAPPERS:
             wrapper_source = ast.unparse(methods[wrapper])
@@ -280,19 +238,29 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
                     if transport == "_put" and "record/" in call_source:
                         record_put[owner] += 1
 
-        self.assertEqual(
-            create_client,
-            Counter({("yclients.py", "_create_booking_direct"): 1}),
-        )
-        self.assertEqual(
-            create_admin,
-            Counter({("yclients.py", "_create_record_admin_direct"): 1}),
-        )
-        self.assertEqual(
-            cancel,
-            Counter({("yclients.py", "_cancel_booking_direct"): 1}),
-        )
+        self.assertEqual(create_client, Counter())
+        self.assertEqual(create_admin, Counter())
+        self.assertEqual(cancel, Counter())
         self.assertEqual(record_put, EXPECTED_RECORD_PUT_OWNERS)
+
+    def test_bridge_dispatcher_has_no_runtime_direct_or_shadow_path(self):
+        source = (ROOT / "legacy_appointment_bridge.py").read_text(
+            encoding="utf-8"
+        )
+        tree = parsed(ROOT / "legacy_appointment_bridge.py")
+        dispatch = next(
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "dispatch_appointment_action"
+        )
+        dispatch_source = ast.unparse(dispatch)
+
+        self.assertNotIn("direct_call", source)
+        self.assertNotIn("legacy_outcome", source)
+        self.assertNotIn('"shadow"', dispatch_source)
+        self.assertNotIn('"off"', dispatch_source)
+        self.assertIn('VALID_MODES = frozenset({"cutover"})', source)
 
     def test_historical_blueprint_cannot_become_a_silent_third_runtime(self):
         audit = (
@@ -344,6 +312,15 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
                     and isinstance(keyword.value.value, str)
                 ]
                 self.assertNotIn("attendance", action_classes)
+
+    def test_attendance_remains_a_separate_deferred_direct_owner(self):
+        methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
+        attendance = methods["set_record_attendance"]
+        attendance_source = ast.unparse(attendance)
+
+        self.assertIn("self._put", attendance_source)
+        self.assertIn("attendance", attendance_source)
+        self.assertNotIn("dispatch_appointment_action", attendance_source)
 
 
 if __name__ == "__main__":

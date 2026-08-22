@@ -1065,23 +1065,6 @@ class YClientsAPI:
             digits = "7" + digits
         return "+" + digits if not digits.startswith("+") else digits
 
-    @staticmethod
-    def _booking_error_code(message: str, status_code: int | None = None) -> str:
-        low = (message or "").lower()
-        if status_code in (429,) or (status_code is not None and status_code >= 500):
-            return "yclients_unavailable"
-        if any(x in low for x in ("busy", "занят", "недоступ", "not available", "slot", "seance")):
-            return "slot_taken"
-        if any(x in low for x in ("phone", "телефон")):
-            return "bad_phone"
-        if any(x in low for x in ("name", "имя", "fullname")):
-            return "bad_name"
-        if any(x in low for x in ("service", "услуг")):
-            return "bad_service"
-        if any(x in low for x in ("staff", "master", "мастер")):
-            return "bad_staff"
-        return "booking_failed"
-
     def create_booking(
         self,
         staff_id: int,
@@ -1115,99 +1098,7 @@ class YClientsAPI:
             origin=bridge_origin,
             action_class="create_appointment",
             payload=payload,
-            direct_call=lambda: self._create_booking_direct(
-                staff_id=staff_id,
-                service_ids=service_ids,
-                datetime_str=datetime_str,
-                client_name=client_name,
-                client_phone=client_phone,
-                client_comment=client_comment,
-                notify_by_sms=notify_by_sms,
-            ),
         )
-
-    def _create_booking_direct(
-        self,
-        staff_id: int,
-        service_ids: list[int],
-        datetime_str: str,
-        client_name: str,
-        client_phone: str,
-        client_comment: str = "",
-        notify_by_sms: int = 3,
-    ) -> dict:
-        """
-        Создаёт запись клиента на одну или несколько услуг.
-        datetime_str — ISO формат, например '2026-06-01T14:00:00'
-        notify_by_sms — за сколько ЧАСОВ до визита YClients шлёт SMS/WhatsApp-напоминание
-                        (0 = не слать). Берётся из персональных настроек клиента.
-        """
-        try:
-            client_phone = self._normalize_phone(client_phone)
-            try:
-                notify_by_sms = max(0, min(48, int(notify_by_sms)))
-            except (TypeError, ValueError):
-                notify_by_sms = 3
-            payload = {
-                "phone": client_phone,
-                "fullname": client_name,
-                "email": "",
-                "comment": client_comment,
-                "type": "mobile",
-                "notify_by_sms": notify_by_sms,
-                "notify_by_email": 0,
-                "appointments": [
-                    {
-                        "id": 1,
-                        "services": service_ids,
-                        "staff_id": staff_id,
-                        "datetime": datetime_str,
-                    }
-                ],
-            }
-            url = f"{self.base_url}/book_record/{self.company_id}"
-            resp = requests.post(url, headers=self.headers, json=payload, timeout=(5, 20))
-            try:
-                data = resp.json()
-            except ValueError:
-                data = {}
-            if data.get("success"):
-                records = data.get("data", [])
-                if records:
-                    record = records[0]
-                    return {
-                        "success": True,
-                        "record_id": record.get("record_id"),  # реальный ID, не индекс
-                        "datetime": datetime_str,
-                        "client": client_name,
-                        "phone": client_phone,
-                    }
-            msg = (
-                data.get("meta", {}).get("message")
-                or data.get("message")
-                or data.get("error")
-                or ("YClients отклонил запись" if resp.status_code >= 400 else "Ошибка")
-            )
-            return {
-                "success": False,
-                "error": msg,
-                "code": self._booking_error_code(msg, resp.status_code),
-                "http_status": resp.status_code,
-            }
-        except requests.Timeout:
-            return {
-                "success": False,
-                "error": "YClients timeout",
-                "code": "yclients_unavailable",
-            }
-        except requests.RequestException as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "code": "yclients_unavailable",
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e), "code": "booking_failed"}
 
     def create_record_admin(
         self,
@@ -1244,64 +1135,7 @@ class YClientsAPI:
             origin=bridge_origin,
             action_class="create_appointment",
             payload=payload,
-            direct_call=lambda: self._create_record_admin_direct(
-                staff_id=staff_id,
-                service_ids=service_ids,
-                datetime_str=datetime_str,
-                client_name=client_name,
-                client_phone=client_phone,
-                seance_length=seance_length,
-                comment=comment,
-            ),
         )
-
-    def _create_record_admin_direct(
-        self,
-        staff_id: int,
-        service_ids: list[int],
-        datetime_str: str,
-        client_name: str,
-        client_phone: str,
-        seance_length: int = 0,
-        comment: str = "",
-    ) -> dict:
-        """АДМИНСКОЕ создание записи: POST records/{company}. В отличие от
-        create_booking (эндпоинт book_record — клиентский, проверяет онлайн-график
-        и ОТКЛОНЯЕТ нерабочее время / выходного мастера, 422), этот путь позволяет
-        владельцу поставить запись на ЛЮБОЙ день/время — как в самом календаре
-        YClients. save_if_busy=False: занятый слот не перезаписываем (YClients
-        вернёт 409 → отдаём «время занято»)."""
-        try:
-            phone = self._normalize_phone(client_phone)
-            payload = {
-                "staff_id": staff_id,
-                "services": [{"id": sid, "amount": 1} for sid in service_ids],
-                "client": {"phone": phone, "name": client_name},
-                "datetime": datetime_str,
-                "seance_length": int(seance_length) if seance_length else 3600,
-                "save_if_busy": False,
-                "send_sms": False,
-                "comment": comment,
-            }
-            data = self._post(f"records/{self.company_id}", payload)
-            rec = data.get("data")
-            rid = None
-            if isinstance(rec, list) and rec:
-                rid = rec[0].get("id") or rec[0].get("record_id")
-            elif isinstance(rec, dict):
-                rid = rec.get("id") or rec.get("record_id")
-            if data.get("success") and rid:
-                return {"success": True, "record_id": rid, "datetime": datetime_str,
-                        "client": client_name, "phone": phone}
-            return {"success": False,
-                    "error": data.get("meta", {}).get("message") or "YClients отклонил запись."}
-        except Exception as e:
-            msg = str(e)
-            busy = "409" in msg
-            return {"success": False,
-                    "error": ("Выбранное время уже занято." if busy
-                              else "Не удалось создать запись."),
-                    "detail": msg}
 
     # ─── Записи клиента ─────────────────────────────────────────────────────
 
@@ -1497,85 +1331,7 @@ class YClientsAPI:
             origin=bridge_origin,
             action_class="reschedule_appointment",
             payload=payload,
-            direct_call=lambda: self._reschedule_booking_direct(
-                record_id=record_id,
-                new_datetime_str=new_datetime_str,
-                service_ids=service_ids,
-                staff_id=staff_id,
-            ),
         )
-
-    def _reschedule_booking_direct(
-        self,
-        record_id: int,
-        new_datetime_str: str,
-        service_ids: list[int] | None = None,
-        staff_id: int | None = None,
-    ) -> dict:
-        """
-        Переносит запись на новое время (и при необходимости — к другому мастеру / с
-        другим набором услуг) НЕРАЗРУШАЮЩИМ обновлением: PUT record/{company}/{id}.
-
-        Почему PUT, а не delete+create:
-        - record_id сохраняется (это та же запись);
-        - слот НЕ освобождается → НЕ летит webhook record.delete, поэтому мастеру не
-          уходит ложное «запись отменена», не возвращаются баллы и не рассылается
-          «слот освободился» другим клиентам. Летит ровно один record.update →
-          корректное уведомление «перенесена»;
-        - если новое время недоступно, YClients просто отклоняет PUT, а исходная
-          запись остаётся нетронутой — потеря записи невозможна (раньше delete шёл
-          ПЕРВЫМ, и при сбое пересоздания запись пропадала навсегда).
-        """
-        try:
-            # 1. Текущая запись — нужны клиент, длительность и услуги по умолчанию.
-            data = self._get(f"record/{self.company_id}/{record_id}")
-            rec = data.get("data", {})
-            if not rec:
-                return {"success": False, "error": "Запись не найдена"}
-
-            client = rec.get("client") or {}
-            staff  = rec.get("staff") or {}
-            old_dt = rec.get("datetime", "")
-            old_svc_ids = [s.get("id") for s in (rec.get("services") or [])
-                           if isinstance(s, dict) and s.get("id")]
-            final_svc_ids  = service_ids if service_ids is not None else old_svc_ids
-            final_staff_id = staff_id if staff_id else staff.get("id")
-
-            # 2. Обновляем запись НА МЕСТЕ (id не меняется).
-            payload = {
-                "staff_id":      final_staff_id,
-                "datetime":      new_datetime_str,
-                "seance_length": rec.get("seance_length", 3600),
-                "save_if_busy":  False,   # занятое время не перезаписываем
-                "send_sms":      False,
-                "client": {
-                    "id":    client.get("id"),
-                    "phone": client.get("phone", ""),
-                    "name":  client.get("name", ""),
-                },
-                "services":   [{"id": sid, "amount": 1} for sid in final_svc_ids],
-                "attendance": rec.get("attendance", 0),
-                "comment":    rec.get("comment", ""),
-            }
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                return {
-                    "success":      True,
-                    "record_id":    record_id,        # запись та же — PUT не меняет id
-                    "old_datetime": old_dt,
-                    "new_datetime": new_datetime_str,
-                    "client":       client.get("name", ""),
-                    "phone":        client.get("phone", ""),
-                }
-            return {"success": False,
-                    "error": upd.get("meta", {}).get("message") or "Новое время недоступно"}
-
-        except Exception as e:
-            # PUT отклонён (например, слот занят / вне графика) — исходная запись НЕ
-            # изменена и НЕ удалена, восстанавливать нечего.
-            return {"success": False,
-                    "error": "Не удалось перенести — возможно, выбранное время недоступно.",
-                    "detail": str(e)}
 
     # ─── Тайминг напоминания на записи (по настройке клиента) ───────────────
 
@@ -1658,18 +1414,7 @@ class YClientsAPI:
             origin=bridge_origin,
             action_class="cancel_appointment",
             payload=payload,
-            direct_call=lambda: self._cancel_booking_direct(record_id),
         )
-
-    def _cancel_booking_direct(self, record_id: int) -> dict:
-        """Отменяет запись по ID."""
-        try:
-            data = self._delete(f"record/{self.company_id}/{record_id}")
-            if data.get("success"):
-                return {"success": True, "record_id": record_id}
-            return {"success": False, "error": data.get("meta", {}).get("message", "Ошибка")}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
 
     # ─── Записи мастера + история клиента (для уведомлений мастерам) ────────
 

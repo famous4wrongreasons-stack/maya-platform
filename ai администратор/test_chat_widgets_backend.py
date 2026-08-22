@@ -29,12 +29,22 @@ class _FakeYClients:
     def get_record(self, record_id):
         return self.record
 
-    def cancel_booking(self, record_id):
-        self.cancelled.append(record_id)
+    def cancel_booking(self, record_id, *, bridge_origin=None):
+        self.cancelled.append((record_id, bridge_origin))
         return self.cancel_result
 
-    def reschedule_booking(self, record_id, new_datetime, service_ids, staff_id):
-        self.rescheduled.append((record_id, new_datetime, service_ids, staff_id))
+    def reschedule_booking(
+        self,
+        record_id,
+        new_datetime,
+        service_ids,
+        staff_id,
+        *,
+        bridge_origin=None,
+    ):
+        self.rescheduled.append(
+            (record_id, new_datetime, service_ids, staff_id, bridge_origin)
+        )
         return {"record_id": record_id, **self.reschedule_result}
 
 
@@ -164,7 +174,7 @@ class ClientRecordActionTests(unittest.TestCase):
 
         self.assertTrue(result["success"])
         self.assertEqual(markers, [77])
-        self.assertEqual(yc.cancelled, [77])
+        self.assertEqual(yc.cancelled, [(77, "client_record_actions")])
 
     def test_foreign_record_is_rejected_without_write_or_marker(self):
         yc = _FakeYClients(record=_future_record("+7 900 000-00-00"))
@@ -223,7 +233,10 @@ class ClientRecordActionTests(unittest.TestCase):
         self.assertEqual(result["record_id"], 77)
         self.assertEqual(result["datetime"], "2026-07-21 16:30:00")
         self.assertEqual(markers, [77])
-        self.assertEqual(yc.rescheduled, [(77, "2026-07-21 16:30:00", None, None)])
+        self.assertEqual(
+            yc.rescheduled,
+            [(77, "2026-07-21 16:30:00", None, None, "client_record_actions")],
+        )
         self.assertEqual(yc.cancelled, [])
 
     def test_invalid_or_past_new_time_is_rejected_before_write(self):
