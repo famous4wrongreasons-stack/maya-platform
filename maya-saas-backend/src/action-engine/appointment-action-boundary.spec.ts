@@ -20,6 +20,11 @@ const FORBIDDEN_ACTION_ENGINE_IMPORTS = [
   '/loyalty',
   '/notifications/',
 ];
+const LEGACY_BRIDGE_FILES = [
+  join(SOURCE_ROOT, 'crm/legacy-appointment-bridge.controller.ts'),
+  join(SOURCE_ROOT, 'crm/legacy-appointment-bridge.service.ts'),
+  join(SOURCE_ROOT, 'crm/dto/legacy-appointment-bridge.dto.ts'),
+];
 
 function productionFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -117,5 +122,43 @@ describe('appointment action execution boundary', () => {
           capability.capability.includes('attendance'),
       ),
     ).toBe(false);
+  });
+
+  it('keeps the legacy bridge as an initiator of CrmService only', () => {
+    const servicePath = join(
+      SOURCE_ROOT,
+      'crm/legacy-appointment-bridge.service.ts',
+    );
+    const source = ts.createSourceFile(
+      servicePath,
+      readFileSync(servicePath, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TS,
+    );
+    const imports: string[] = [];
+    source.forEachChild((node) => {
+      if (
+        ts.isImportDeclaration(node) &&
+        ts.isStringLiteral(node.moduleSpecifier)
+      ) {
+        imports.push(node.moduleSpecifier.text);
+      }
+    });
+
+    expect(imports).toContain('./crm.service');
+    expect(
+      imports.filter((value) =>
+        /(adapter|yclients|executor|campaign|messaging|billing)/i.test(value),
+      ),
+    ).toEqual([]);
+  });
+
+  it('does not expand the bridge into the deferred attendance mutation', () => {
+    for (const path of LEGACY_BRIDGE_FILES) {
+      expect(readFileSync(path, 'utf8').toLowerCase()).not.toContain(
+        'attendance',
+      );
+    }
   });
 });

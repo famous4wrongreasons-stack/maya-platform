@@ -19,7 +19,9 @@ import {
 
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
+  ACTION_EXECUTION_PREVIEW_CONTRACT,
   ACTION_EXECUTION_RESULT_CONTRACT,
+  type ActionExecutionPreviewV1,
   type ActionExecutionAuditV1,
   type ActionKernelMetricsV1,
   type ApprovalResolution,
@@ -321,6 +323,41 @@ export class ActionEngineKernel {
       }
     }
     throw new ActionConflictError('Database claim could not be serialized');
+  }
+
+  previewExecution(
+    request: TrustedActionExecutionRequestV1,
+  ): ActionExecutionPreviewV1 {
+    const normalized = this.normalizeRequest(request);
+    const capability = normalized.capability;
+    return {
+      contract: ACTION_EXECUTION_PREVIEW_CONTRACT,
+      tenantId: request.tenantId,
+      sourceType: request.source.type,
+      capability: capability.capability,
+      capabilityVersion: capability.capabilityVersion,
+      actionClass: capability.actionClass,
+      targetKind: capability.targetKind,
+      targetRef: normalized.targetRef,
+      normalizedInputHash: normalized.normalizedInputHash,
+      identityFingerprint: normalized.identityFingerprint,
+      ...(normalized.idempotencyScope
+        ? { idempotencyScope: normalized.idempotencyScope }
+        : {}),
+      ...(normalized.requestIdempotencyKeyHash
+        ? {
+            requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash,
+          }
+        : {}),
+      policyKey: capability.policyKey,
+      policyVersion: capability.policyVersion,
+      policyDecision: capability.policyDecision,
+      autonomyLevel: capability.autonomyLevel,
+      approvalRequirement: capability.approvalRequirement,
+      executorKey: capability.executorKey,
+      executorVersion: capability.executorVersion,
+      externalSideEffects: 0,
+    };
   }
 
   async decideApproval(input: {
@@ -1035,6 +1072,13 @@ export class ActionEngineKernel {
       orderBy: { attemptNumber: 'asc' },
     });
     return { execution, attempts };
+  }
+
+  async getExecutionResult(
+    tenantId: string,
+    executionId: string,
+  ): Promise<ExecutionResultV1> {
+    return this.result((await this.getAudit(tenantId, executionId)).execution);
   }
 
   async readTrustedNormalizedInput(

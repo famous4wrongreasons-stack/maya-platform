@@ -6,6 +6,10 @@ import requests
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta
 from config import YCLIENTS_BASE_URL, YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKEN, YCLIENTS_COMPANY_ID, YCLIENTS_CASH_ACCOUNT_ID, YCLIENTS_CASHLESS_ACCOUNT_ID, ACTIVE_MASTER_IDS
+from legacy_appointment_bridge import (
+    dispatch_appointment_action,
+    opaque_client_reference,
+)
 
 logger = logging.getLogger("yclients")
 
@@ -1087,6 +1091,50 @@ class YClientsAPI:
         client_phone: str,
         client_comment: str = "",
         notify_by_sms: int = 3,
+        bridge_origin: str | None = None,
+    ) -> dict:
+        normalized_phone = self._normalize_phone(client_phone)
+        try:
+            normalized_notify = max(0, min(48, int(notify_by_sms)))
+        except (TypeError, ValueError):
+            normalized_notify = 3
+        payload = {
+            "client_id": opaque_client_reference(normalized_phone, client_name),
+            "client_name": str(client_name),
+            "client_phone": normalized_phone,
+            "branch_id": str(self.company_id),
+            "staff_id": str(staff_id),
+            "service_ids": [str(service_id) for service_id in service_ids],
+            "start": datetime_str,
+            "notes": client_comment or None,
+            "notify_by_sms_hours": normalized_notify,
+        }
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin=bridge_origin,
+            action_class="create_appointment",
+            payload=payload,
+            direct_call=lambda: self._create_booking_direct(
+                staff_id=staff_id,
+                service_ids=service_ids,
+                datetime_str=datetime_str,
+                client_name=client_name,
+                client_phone=client_phone,
+                client_comment=client_comment,
+                notify_by_sms=notify_by_sms,
+            ),
+        )
+
+    def _create_booking_direct(
+        self,
+        staff_id: int,
+        service_ids: list[int],
+        datetime_str: str,
+        client_name: str,
+        client_phone: str,
+        client_comment: str = "",
+        notify_by_sms: int = 3,
     ) -> dict:
         """
         Создаёт запись клиента на одну или несколько услуг.
@@ -1162,6 +1210,52 @@ class YClientsAPI:
             return {"success": False, "error": str(e), "code": "booking_failed"}
 
     def create_record_admin(
+        self,
+        staff_id: int,
+        service_ids: list[int],
+        datetime_str: str,
+        client_name: str,
+        client_phone: str,
+        seance_length: int = 0,
+        comment: str = "",
+        bridge_origin: str | None = None,
+    ) -> dict:
+        normalized_phone = self._normalize_phone(client_phone)
+        duration_minutes = None
+        if seance_length:
+            try:
+                duration_minutes = max(5, min(720, int(round(int(seance_length) / 60))))
+            except (TypeError, ValueError):
+                duration_minutes = None
+        payload = {
+            "client_id": opaque_client_reference(normalized_phone, client_name),
+            "client_name": str(client_name),
+            "client_phone": normalized_phone,
+            "branch_id": str(self.company_id),
+            "staff_id": str(staff_id),
+            "service_ids": [str(service_id) for service_id in service_ids],
+            "start": datetime_str,
+            "notes": comment or None,
+            "duration_minutes": duration_minutes,
+        }
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin=bridge_origin,
+            action_class="create_appointment",
+            payload=payload,
+            direct_call=lambda: self._create_record_admin_direct(
+                staff_id=staff_id,
+                service_ids=service_ids,
+                datetime_str=datetime_str,
+                client_name=client_name,
+                client_phone=client_phone,
+                seance_length=seance_length,
+                comment=comment,
+            ),
+        )
+
+    def _create_record_admin_direct(
         self,
         staff_id: int,
         service_ids: list[int],
@@ -1385,6 +1479,38 @@ class YClientsAPI:
         new_datetime_str: str,
         service_ids: list[int] | None = None,
         staff_id: int | None = None,
+        bridge_origin: str | None = None,
+    ) -> dict:
+        payload = {
+            "external_id": str(record_id),
+            "start": new_datetime_str,
+            "staff_id": str(staff_id) if staff_id is not None else None,
+            "service_ids": (
+                [str(service_id) for service_id in service_ids]
+                if service_ids
+                else None
+            ),
+        }
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin=bridge_origin,
+            action_class="reschedule_appointment",
+            payload=payload,
+            direct_call=lambda: self._reschedule_booking_direct(
+                record_id=record_id,
+                new_datetime_str=new_datetime_str,
+                service_ids=service_ids,
+                staff_id=staff_id,
+            ),
+        )
+
+    def _reschedule_booking_direct(
+        self,
+        record_id: int,
+        new_datetime_str: str,
+        service_ids: list[int] | None = None,
+        staff_id: int | None = None,
     ) -> dict:
         """
         Переносит запись на новое время (и при необходимости — к другому мастеру / с
@@ -1520,7 +1646,22 @@ class YClientsAPI:
 
     # ─── Отмена записи ──────────────────────────────────────────────────────
 
-    def cancel_booking(self, record_id: int) -> dict:
+    def cancel_booking(
+        self,
+        record_id: int,
+        bridge_origin: str | None = None,
+    ) -> dict:
+        payload = {"external_id": str(record_id)}
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin=bridge_origin,
+            action_class="cancel_appointment",
+            payload=payload,
+            direct_call=lambda: self._cancel_booking_direct(record_id),
+        )
+
+    def _cancel_booking_direct(self, record_id: int) -> dict:
         """Отменяет запись по ID."""
         try:
             data = self._delete(f"record/{self.company_id}/{record_id}")

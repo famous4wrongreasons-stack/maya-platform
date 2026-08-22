@@ -16,9 +16,12 @@ import {
   ActionExecutionTerminalError,
   ActionExecutionUncertainError,
   stableActionJson,
+  type ActionExecutionPreviewV1,
   type ActionFailureClassification,
   type ActionRuntimeHandlers,
+  type ActionRuntimeReceipt,
   type ActionSourceType,
+  type ExecutionResultV1,
   type TrustedActionExecutionRequestV1,
 } from '../action-engine';
 import {
@@ -29,6 +32,7 @@ import {
 } from '../common/domain.enums';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { asJson } from '../common/json.util';
+import { phoneMatchKey } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -107,8 +111,38 @@ type CreateAppointmentInput = {
   serviceIds: string[];
   start: string;
   notes?: string;
+  creationMode: 'client' | 'admin';
   allowBusy: boolean;
   durationMinutes?: number;
+  notifyBySmsHours?: number;
+};
+
+export type CreateAppointmentRequest = {
+  clientId: string;
+  clientName: string;
+  clientPhone?: string | null;
+  branchId?: string | null;
+  staffId: string;
+  serviceIds: string[];
+  start: string;
+  notes?: string | null;
+  creationMode?: 'client' | 'admin';
+  allowBusy?: boolean;
+  durationMinutes?: number;
+  notifyBySmsHours?: number;
+};
+
+export type RescheduleAppointmentRequest = {
+  externalId: string;
+  start: string;
+  staffId?: string;
+  serviceIds?: string[];
+  notes?: string | null;
+};
+
+type AppointmentActionPlan<T> = {
+  request: TrustedActionExecutionRequestV1;
+  handlers: ActionRuntimeHandlers<T>;
 };
 
 type RescheduleAppointmentInput = {
@@ -1065,39 +1099,93 @@ export class CrmService {
 
   async createAppointment(
     tenantId: string,
-    params: {
-      clientId: string;
-      clientName: string;
-      clientPhone?: string | null;
-      branchId?: string | null;
-      staffId: string;
-      serviceIds: string[];
-      start: string;
-      notes?: string | null;
-      allowBusy?: boolean;
-      durationMinutes?: number;
-    },
+    params: CreateAppointmentRequest,
     invocation: AppointmentActionInvocation = {},
   ): Promise<CreatedAppointment> {
+    try {
+      return (
+        await this.executeCreateAppointmentWithReceipt(
+          tenantId,
+          params,
+          invocation,
+        )
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewCreateAppointment(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.createAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executeCreateAppointmentWithReceipt(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<CreatedAppointment>> {
+    const plan = await this.createAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async createAppointmentActionPlan(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<CreatedAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const actionInput: CreateAppointmentRequest = {
+      ...params,
+      clientId: this.appointmentClientIdentity(
+        params.clientId,
+        params.clientPhone,
+      ),
+      clientPhone: params.clientPhone || undefined,
+      branchId: params.branchId || undefined,
+      notes: params.notes || undefined,
+      creationMode:
+        params.creationMode ?? (params.allowBusy === true ? 'admin' : 'client'),
+      allowBusy: params.allowBusy === true,
+      notifyBySmsHours:
+        (params.creationMode ??
+          (params.allowBusy === true ? 'admin' : 'client')) === 'admin'
+          ? 0
+          : this.normalizeNotifyBySmsHours(params.notifyBySmsHours),
+    };
     const targetRef = `create/${this.appointmentFingerprint({
-      clientId: params.clientId,
-      start: params.start,
-      staffId: params.staffId,
-      serviceIds: normalizedServiceIds(params.serviceIds),
+      clientId: actionInput.clientId,
+      start: actionInput.start,
+      staffId: actionInput.staffId,
+      serviceIds: normalizedServiceIds(actionInput.serviceIds),
     })}`;
 
-    return this.executeAppointmentAction(
-      this.appointmentActionRequest({
+    return {
+      request: this.appointmentActionRequest({
         tenantId: scopedTenantId,
         capability: 'crm.appointment.create.v1',
         targetRef,
-        input: params,
+        input: actionInput,
         invocation,
       }),
-      {
+      handlers: {
         dispatch: async (input) => {
           const durable = this.createAppointmentInput(input);
           const value = await adapter.createAppointment({
@@ -1132,7 +1220,7 @@ export class CrmService {
         classifyError: (error, phase) =>
           this.classifyAppointmentActionError(error, phase),
       },
-    );
+    };
   }
 
   async cancelAppointment(
@@ -1140,18 +1228,65 @@ export class CrmService {
     externalId: string,
     invocation: AppointmentActionInvocation = {},
   ): Promise<CancelledAppointment> {
+    try {
+      return (
+        await this.executeCancelAppointmentWithReceipt(
+          tenantId,
+          externalId,
+          invocation,
+        )
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewCancelAppointment(
+    tenantId: string,
+    externalId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.cancelAppointmentActionPlan(
+      tenantId,
+      externalId,
+      invocation,
+    );
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executeCancelAppointmentWithReceipt(
+    tenantId: string,
+    externalId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<CancelledAppointment>> {
+    const plan = await this.cancelAppointmentActionPlan(
+      tenantId,
+      externalId,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async cancelAppointmentActionPlan(
+    tenantId: string,
+    externalId: string,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<CancelledAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return this.executeAppointmentAction(
-      this.appointmentActionRequest({
+    return {
+      request: this.appointmentActionRequest({
         tenantId: scopedTenantId,
         capability: 'crm.appointment.cancel.v1',
         targetRef: `appointment/${externalId}`,
         input: { externalId },
         invocation,
       }),
-      {
+      handlers: {
         dispatch: async (input) => {
           const durableExternalId = requireString(
             input.externalId,
@@ -1200,32 +1335,73 @@ export class CrmService {
         classifyError: (error, phase) =>
           this.classifyAppointmentActionError(error, phase),
       },
-    );
+    };
   }
 
   async rescheduleAppointment(
     tenantId: string,
-    params: {
-      externalId: string;
-      start: string;
-      staffId?: string;
-      serviceIds?: string[];
-      notes?: string | null;
-    },
+    params: RescheduleAppointmentRequest,
     invocation: AppointmentActionInvocation = {},
   ): Promise<RescheduledAppointment> {
+    try {
+      return (
+        await this.executeRescheduleAppointmentWithReceipt(
+          tenantId,
+          params,
+          invocation,
+        )
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewRescheduleAppointment(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.rescheduleAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executeRescheduleAppointmentWithReceipt(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<RescheduledAppointment>> {
+    const plan = await this.rescheduleAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async rescheduleAppointmentActionPlan(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<RescheduledAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return this.executeAppointmentAction(
-      this.appointmentActionRequest({
+    return {
+      request: this.appointmentActionRequest({
         tenantId: scopedTenantId,
         capability: 'crm.appointment.reschedule.v1',
         targetRef: `appointment/${params.externalId}`,
         input: params,
         invocation,
       }),
-      {
+      handlers: {
         prepare: async (input) => {
           const durable = this.rescheduleAppointmentInput(input);
           const detail = await this.loadAppointmentDetail(
@@ -1276,7 +1452,7 @@ export class CrmService {
         classifyError: (error, phase) =>
           this.classifyAppointmentActionError(error, phase),
       },
-    );
+    };
   }
 
   private appointmentFingerprint(value: unknown): string {
@@ -1284,6 +1460,24 @@ export class CrmService {
       .update(stableActionJson(value))
       .digest('hex')
       .slice(0, 48);
+  }
+
+  private appointmentClientIdentity(
+    clientId: string,
+    clientPhone?: string | null,
+  ): string {
+    const phoneKey = phoneMatchKey(clientPhone);
+    const identity = phoneKey ? `phone:${phoneKey}` : `client:${clientId}`;
+    return `client/${this.encryptionService.opaqueReference(
+      'appointment-client-v1',
+      identity,
+    )}`;
+  }
+
+  private normalizeNotifyBySmsHours(value: number | undefined): number {
+    if (value === undefined) return 3;
+    if (!Number.isFinite(value)) return 3;
+    return Math.max(0, Math.min(48, Math.trunc(value)));
   }
 
   private appointmentActionRequest(input: {
@@ -1326,24 +1520,28 @@ export class CrmService {
     };
   }
 
-  private async executeAppointmentAction<T>(
-    request: TrustedActionExecutionRequestV1,
-    handlers: ActionRuntimeHandlers<T>,
-  ): Promise<T> {
-    try {
-      return await this.actionEngineRuntime.execute(request, handlers);
-    } catch (error) {
-      if (error instanceof ActionExecutionUncertainError) {
-        throw new CrmOutcomeUnknownError(error.message, error);
-      }
-      if (error instanceof ActionExecutionTerminalError) {
-        throw new ConflictException({
-          message: error.message,
-          error: { code: error.code.toLowerCase() },
-        });
-      }
-      throw error;
+  async getAppointmentActionExecutionResult(
+    tenantId: string,
+    executionId: string,
+  ): Promise<ExecutionResultV1> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    return this.actionEngineRuntime.getExecutionResult(
+      scopedTenantId,
+      executionId,
+    );
+  }
+
+  private throwAppointmentActionError(error: unknown): never {
+    if (error instanceof ActionExecutionUncertainError) {
+      throw new CrmOutcomeUnknownError(error.message, error);
     }
+    if (error instanceof ActionExecutionTerminalError) {
+      throw new ConflictException({
+        message: error.message,
+        error: { code: error.code.toLowerCase() },
+      });
+    }
+    throw error;
   }
 
   private createAppointmentInput(
@@ -1358,8 +1556,10 @@ export class CrmService {
       serviceIds: requireStringArray(input.serviceIds, 'serviceIds'),
       start: requireString(input.start, 'start'),
       notes: optionalString(input.notes),
+      creationMode: input.creationMode === 'admin' ? 'admin' : 'client',
       allowBusy: input.allowBusy === true,
       durationMinutes: optionalNumber(input.durationMinutes),
+      notifyBySmsHours: optionalNumber(input.notifyBySmsHours),
     };
   }
 

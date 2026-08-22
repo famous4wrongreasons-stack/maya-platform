@@ -82,6 +82,9 @@ describe('CrmService: операции над визитом', () => {
     const encryptionService = {
       encrypt: jest.fn(),
       decrypt: jest.fn().mockReturnValue('token'),
+      opaqueReference: jest.fn(
+        (namespace: string, value: string) => `${namespace}:${value}`,
+      ),
     } as unknown as EncryptionService;
     const adapterFactory = {
       create: jest.fn().mockReturnValue(adapter),
@@ -103,6 +106,23 @@ describe('CrmService: операции над визитом', () => {
             'visit-operation-test',
           );
           return dispatched.value;
+        },
+      ),
+      executeWithReceipt: jest.fn(
+        async (
+          request: { input: unknown },
+          handlers: {
+            dispatch: (
+              input: Record<string, unknown>,
+              idempotencyKey: string,
+            ) => Promise<{ value: unknown }>;
+          },
+        ) => {
+          const dispatched = await handlers.dispatch(
+            request.input as Record<string, unknown>,
+            'visit-operation-test',
+          );
+          return { value: dispatched.value, execution: {} };
         },
       ),
     };

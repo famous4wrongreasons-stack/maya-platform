@@ -21,6 +21,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { QuarantineCatchupService } from './quarantine-catchup.service';
 import { ShadowIngestionController } from './shadow-ingestion.controller';
 import { ShadowIngestionService } from './shadow-ingestion.service';
+import { LegacyAppointmentBridgeController } from './legacy-appointment-bridge.controller';
+import { LegacyAppointmentBridgeService } from './legacy-appointment-bridge.service';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
   controllers: [
     CrmController,
     CrmIntegrationController,
+    LegacyAppointmentBridgeController,
     ShadowIngestionController,
   ],
   providers: [
@@ -51,6 +54,7 @@ import { ShadowIngestionService } from './shadow-ingestion.service';
     ClientIdentityService,
     CrmAdapterFactory,
     CrmService,
+    LegacyAppointmentBridgeService,
     QuarantineCatchupService,
     ShadowIngestionService,
   ],

@@ -183,3 +183,51 @@ describe('секрет моста', () => {
     ).toThrow(UnauthorizedException);
   });
 });
+
+describe('привязка write-bridge к CRM-интеграции', () => {
+  const { service } = buildService({});
+  const providerKey = 'MAYA_TEST_BRIDGE_SOURCE_PROVIDER';
+  const companyKey = 'MAYA_TEST_BRIDGE_SOURCE_COMPANY_ID';
+  const codes = { disabled: 'binding_disabled', mismatch: 'binding_mismatch' };
+
+  afterEach(() => {
+    delete process.env[providerKey];
+    delete process.env[companyKey];
+  });
+
+  it('не позволяет payload выбрать tenant без серверной привязки', () => {
+    expect(() =>
+      service.assertBridgeIntegrationBinding(
+        { provider: 'yclients', externalCompanyId: '503759' },
+        { provider: providerKey, externalCompanyId: companyKey },
+        codes,
+      ),
+    ).toThrow(UnauthorizedException);
+  });
+
+  it('возвращает только серверную identity при точном совпадении assertions', () => {
+    process.env[providerKey] = 'YClients';
+    process.env[companyKey] = '503759';
+
+    expect(
+      service.assertBridgeIntegrationBinding(
+        { provider: 'yclients', externalCompanyId: 503759 },
+        { provider: providerKey, externalCompanyId: companyKey },
+        codes,
+      ),
+    ).toEqual({ provider: 'yclients', externalCompanyId: '503759' });
+  });
+
+  it('отвергает cross-tenant company assertion', () => {
+    process.env[providerKey] = 'yclients';
+    process.env[companyKey] = '503759';
+
+    expect(() =>
+      service.assertBridgeIntegrationBinding(
+        { provider: 'yclients', externalCompanyId: '999999' },
+        { provider: providerKey, externalCompanyId: companyKey },
+        codes,
+      ),
+    ).toThrow(ForbiddenException);
+  });
+});

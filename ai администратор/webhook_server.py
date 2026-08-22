@@ -1005,9 +1005,47 @@ def _close_local_booking_intent(record: dict, record_id: int):
         logger.error(f"Webhook: close local booking intent record {record_id}: {e}")
 
 
+_ACTION_OUTCOME_UNKNOWN_CODES = frozenset({
+    "action_in_progress",
+    "bridge_outcome_unknown",
+    "legacy_appointment_bridge_response_invalid",
+    "legacy_appointment_bridge_status_unavailable",
+    "legacy_appointment_bridge_transport_error",
+    "outcome_unknown",
+})
+
+
+def _action_outcome_unknown(result: dict | None) -> bool:
+    value = result or {}
+    return value.get("unknown") is True or str(value.get("code") or "") in _ACTION_OUTCOME_UNKNOWN_CODES
+
+
+def _action_unknown_payload(result: dict | None, message: str) -> dict:
+    value = result or {}
+    payload = {
+        "success": False,
+        "ok": False,
+        "accepted": value.get("accepted"),
+        "unknown": True,
+        "retry_allowed": False,
+        "error": "outcome_unknown",
+        "code": "outcome_unknown",
+        "message": message,
+    }
+    execution_id = str(value.get("execution_id") or "").strip()
+    if execution_id:
+        payload["execution_id"] = execution_id
+    return payload
+
+
 def _booking_failure_reply(result: dict) -> str:
     """Короткое понятное объяснение клиенту, почему запись не дошла до YClients."""
     code = (result or {}).get("code") or ""
+    if _action_outcome_unknown(result):
+        return (
+            "Результат записи уточняется. Не отправляйте заявку повторно, "
+            "чтобы не создать дубль. Проверьте «Мои записи» через минуту."
+        )
     if code == "slot_taken":
         return (
             "Это время уже заняли или оно стало недоступно. "
@@ -6477,13 +6515,18 @@ def _client_record_response(payload: dict, status: int = 200) -> web.Response:
 
 
 def _client_record_failure(error: client_record_actions.ClientRecordError) -> web.Response:
-    return _client_record_response({
+    payload = {
         "success": False,
         "ok": False,
         "error": error.code,
         "code": error.code,
         "message": error.message,
-    }, status=error.status)
+    }
+    if error.code == "outcome_unknown":
+        payload.update({"unknown": True, "retry_allowed": False})
+    if error.reference:
+        payload["execution_id"] = error.reference
+    return _client_record_response(payload, status=error.status)
 
 
 async def _client_record_request_context(
@@ -6813,8 +6856,14 @@ async def client_book_with_loyalty_handler(request: web.Request) -> web.Response
         client_name=str(client.get("name") or "Клиент"),
         client_phone=phone,
         notify_by_sms=notify_hours,
+        bridge_origin="webhook.loyalty",
     )
     if not booking_result.get("success"):
+        if _action_outcome_unknown(booking_result):
+            return _client_record_response(_action_unknown_payload(
+                booking_result,
+                "Результат записи уточняется. Не повторяйте действие. Баллы пока зарезервированы.",
+            ), status=202)
         database.release_loyalty_reservation(
             client_id=int(client["id"]), request_id=request_id,
         )
@@ -7401,6 +7450,7 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
             client_name=name,
             client_phone=phone,
             notify_by_sms=_nbs,
+            bridge_origin="webhook.chat",
         )
         if not result.get("success"):
             logger.error(
@@ -12535,12 +12585,18 @@ async def panel_journal_create_handler(request: web.Request) -> web.Response:
         # Админский эндпоинт — владелец может поставить запись на любой день/время
         # (book_record отклонял бы нерабочее время мастера).
         result = await asyncio.to_thread(
-            _yc.create_record_admin, staff_id, service_ids, dt, name, phone, seance_length)
+            _yc.create_record_admin, staff_id, service_ids, dt, name, phone,
+            seance_length, bridge_origin="webhook.panel")
     except Exception as e:
         logger.error("journal_create: %s", e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось создать запись."}, status=502)
     if result.get("success"):
         return _cabinet_response({"ok": True, "record_id": result.get("record_id")})
+    if _action_outcome_unknown(result):
+        return _cabinet_response(_action_unknown_payload(
+            result,
+            "Результат создания записи уточняется. Не повторяйте действие.",
+        ), status=202)
     return _cabinet_response({"error": "create_failed", "message": result.get("error") or "YClients отклонил запись."}, status=400)
 
 
@@ -12704,7 +12760,10 @@ async def panel_journal_reschedule_handler(request: web.Request) -> web.Response
     if _gerr:
         return _gerr
     try:
-        result = await asyncio.to_thread(_yc.reschedule_booking, record_id, dt, None, staff_id)
+        result = await asyncio.to_thread(
+            _yc.reschedule_booking, record_id, dt, None, staff_id,
+            bridge_origin="webhook.panel",
+        )
     except Exception as e:
         logger.error("journal_reschedule: %s", e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось перенести запись."}, status=502)
@@ -12716,6 +12775,11 @@ async def panel_journal_reschedule_handler(request: web.Request) -> web.Response
         except Exception:
             pass
         return _cabinet_response({"ok": True, "record_id": result.get("record_id")})
+    if _action_outcome_unknown(result):
+        return _cabinet_response(_action_unknown_payload(
+            result,
+            "Результат переноса уточняется. Не повторяйте действие.",
+        ), status=202)
     return _cabinet_response({"error": "reschedule_failed", "message": result.get("error") or "YClients отклонил перенос."}, status=400)
 
 
@@ -12742,12 +12806,19 @@ async def panel_journal_cancel_handler(request: web.Request) -> web.Response:
     if _gerr:
         return _gerr
     try:
-        result = await asyncio.to_thread(_yc.cancel_booking, record_id)
+        result = await asyncio.to_thread(
+            _yc.cancel_booking, record_id, bridge_origin="webhook.panel",
+        )
     except Exception as e:
         logger.error("journal_cancel: %s", e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось отменить запись."}, status=502)
     if result.get("success"):
         return _cabinet_response({"ok": True, "record_id": result.get("record_id")})
+    if _action_outcome_unknown(result):
+        return _cabinet_response(_action_unknown_payload(
+            result,
+            "Результат отмены уточняется. Не повторяйте действие.",
+        ), status=202)
     return _cabinet_response({"error": "cancel_failed", "message": result.get("error") or "YClients отклонил отмену."}, status=400)
 
 

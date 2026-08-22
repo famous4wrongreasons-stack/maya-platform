@@ -10,6 +10,8 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service';
 import type {
+  ActionExecutionPreviewV1,
+  ExecutionResultV1,
   ReconciliationOutcome,
   TrustedActionExecutionRequestV1,
 } from './action-engine.contract';
@@ -58,6 +60,22 @@ export interface ActionRuntimeHandlers<T> {
   ): ActionFailureClassification;
 }
 
+export interface ActionRuntimeReceipt<T> {
+  value: T;
+  execution: ExecutionResultV1;
+}
+
+type ErrorWithExecutionResult = Error & {
+  actionExecutionResult?: ExecutionResultV1;
+};
+
+export function actionExecutionResultFromError(
+  error: unknown,
+): ExecutionResultV1 | undefined {
+  if (!(error instanceof Error)) return undefined;
+  return (error as ErrorWithExecutionResult).actionExecutionResult;
+}
+
 const MAX_RUNTIME_TRANSITIONS = 8;
 const IN_FLIGHT_POLL_ATTEMPTS = 8;
 const IN_FLIGHT_POLL_MS = 50;
@@ -99,56 +117,104 @@ export class ActionEngineRuntimeService {
     request: TrustedActionExecutionRequestV1,
     handlers: ActionRuntimeHandlers<T>,
   ): Promise<T> {
+    return (await this.executeWithReceipt(request, handlers)).value;
+  }
+
+  preview(request: TrustedActionExecutionRequestV1): ActionExecutionPreviewV1 {
+    return this.kernel.previewExecution(request);
+  }
+
+  getExecutionResult(
+    tenantId: string,
+    executionId: string,
+  ): Promise<ExecutionResultV1> {
+    return this.kernel.getExecutionResult(tenantId, executionId);
+  }
+
+  async executeWithReceipt<T>(
+    request: TrustedActionExecutionRequestV1,
+    handlers: ActionRuntimeHandlers<T>,
+  ): Promise<ActionRuntimeReceipt<T>> {
     let execution = await this.kernel.createExecution(request);
+    try {
+      for (
+        let transition = 0;
+        transition < MAX_RUNTIME_TRANSITIONS;
+        transition += 1
+      ) {
+        if (execution.state === ActionExecutionState.SUCCEEDED) {
+          return {
+            value: handlers.restore(this.requireSafeResult(execution)),
+            execution: await this.kernel.getExecutionResult(
+              execution.tenantId,
+              execution.id,
+            ),
+          };
+        }
+        if (execution.state === ActionExecutionState.FAILED) {
+          throw new ActionExecutionTerminalError(
+            execution.finalOutcomeCode ?? 'ACTION_PREVIOUSLY_FAILED',
+            'The logical action previously reached a definitive failure',
+          );
+        }
+        if (execution.state === ActionExecutionState.NOT_EXECUTED) {
+          throw new ActionExecutionTerminalError(
+            execution.notExecutedReasonCode ?? 'ACTION_NOT_EXECUTED',
+            'Action policy or approval did not allow execution',
+          );
+        }
+        if (execution.state === ActionExecutionState.PENDING_APPROVAL) {
+          throw new ActionExecutionTerminalError(
+            'ACTION_APPROVAL_REQUIRED',
+            'Action is waiting for an approval decision',
+          );
+        }
+        if (execution.state === ActionExecutionState.EXECUTING) {
+          execution = await this.observeOrRecoverInFlight(execution);
+          continue;
+        }
+        if (execution.state === ActionExecutionState.UNKNOWN) {
+          execution = await this.reconcile(execution, handlers);
+          continue;
+        }
+        if (execution.state !== ActionExecutionState.READY) {
+          throw new ActionExecutionUncertainError(
+            'ACTION_STATE_UNSUPPORTED',
+            `Action cannot continue from ${String(execution.state)}`,
+          );
+        }
 
-    for (
-      let transition = 0;
-      transition < MAX_RUNTIME_TRANSITIONS;
-      transition += 1
-    ) {
-      if (execution.state === ActionExecutionState.SUCCEEDED) {
-        return handlers.restore(this.requireSafeResult(execution));
-      }
-      if (execution.state === ActionExecutionState.FAILED) {
-        throw new ActionExecutionTerminalError(
-          execution.finalOutcomeCode ?? 'ACTION_PREVIOUSLY_FAILED',
-          'The logical action previously reached a definitive failure',
-        );
-      }
-      if (execution.state === ActionExecutionState.NOT_EXECUTED) {
-        throw new ActionExecutionTerminalError(
-          execution.notExecutedReasonCode ?? 'ACTION_NOT_EXECUTED',
-          'Action policy or approval did not allow execution',
-        );
-      }
-      if (execution.state === ActionExecutionState.PENDING_APPROVAL) {
-        throw new ActionExecutionTerminalError(
-          'ACTION_APPROVAL_REQUIRED',
-          'Action is waiting for an approval decision',
-        );
-      }
-      if (execution.state === ActionExecutionState.EXECUTING) {
-        execution = await this.observeOrRecoverInFlight(execution);
-        continue;
-      }
-      if (execution.state === ActionExecutionState.UNKNOWN) {
-        execution = await this.reconcile(execution, handlers);
-        continue;
-      }
-      if (execution.state !== ActionExecutionState.READY) {
-        throw new ActionExecutionUncertainError(
-          'ACTION_STATE_UNSUPPORTED',
-          `Action cannot continue from ${String(execution.state)}`,
-        );
+        execution = await this.dispatch(execution, handlers);
       }
 
-      execution = await this.dispatch(execution, handlers);
+      throw new ActionExecutionUncertainError(
+        'ACTION_TRANSITION_BUDGET_EXHAUSTED',
+        'Action did not settle within the runtime transition budget',
+      );
+    } catch (error) {
+      await this.attachExecutionResult(error, execution);
+      throw error;
     }
+  }
 
-    throw new ActionExecutionUncertainError(
-      'ACTION_TRANSITION_BUDGET_EXHAUSTED',
-      'Action did not settle within the runtime transition budget',
-    );
+  private async attachExecutionResult(
+    error: unknown,
+    execution: ActionExecution,
+  ): Promise<void> {
+    if (!(error instanceof Error)) return;
+    try {
+      Object.defineProperty(error, 'actionExecutionResult', {
+        configurable: true,
+        enumerable: false,
+        value: await this.kernel.getExecutionResult(
+          execution.tenantId,
+          execution.id,
+        ),
+        writable: false,
+      });
+    } catch {
+      // Never replace the original provider/runtime error with a receipt read.
+    }
   }
 
   private async dispatch<T>(

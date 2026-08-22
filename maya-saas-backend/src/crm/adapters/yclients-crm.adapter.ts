@@ -488,10 +488,70 @@ export class YclientsCRMAdapter implements CRMAdapter {
     // связать. Но в журнале телефон вводит только владелец: мастеру поле ПД не
     // показывают, и легаси-кабинет годами создаёт такие записи с пустым
     // телефоном. Поэтому на админском пути требование снимаем.
-    if (!params.clientPhone && params.allowBusy !== true) {
+    const creationMode =
+      params.creationMode ?? (params.allowBusy === true ? 'admin' : 'client');
+    if (!params.clientPhone && creationMode === 'client') {
       throw new Error(
         'YClients appointment creation requires a client phone number',
       );
+    }
+
+    const start = this.toYclientsDateTime(params.start);
+    if (creationMode === 'client') {
+      const notifyBySmsHours = Math.max(
+        0,
+        Math.min(48, Math.trunc(params.notifyBySmsHours ?? 3)),
+      );
+      const payload = {
+        phone: this.normalizePhone(params.clientPhone || ''),
+        fullname: params.clientName,
+        email: '',
+        comment: params.notes || '',
+        type: 'mobile',
+        notify_by_sms: notifyBySmsHours,
+        notify_by_email: 0,
+        appointments: [
+          {
+            id: 1,
+            services: params.serviceIds.map((serviceId) =>
+              this.toNumericId(serviceId, 'serviceId'),
+            ),
+            staff_id: this.toNumericId(params.staffId, 'staffId'),
+            datetime: start,
+          },
+        ],
+      };
+      const response = await this.request<
+        Array<Record<string, unknown>> | Record<string, unknown>
+      >(`book_record/${this.getCompanyId()}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const record = Array.isArray(response.data)
+        ? response.data[0]
+        : response.data;
+      const externalId =
+        typeof record?.record_id === 'number' ||
+        typeof record?.record_id === 'string'
+          ? record.record_id
+          : typeof record?.id === 'number' || typeof record?.id === 'string'
+            ? record.id
+            : null;
+      if (!externalId) {
+        throw new Error(
+          response.meta?.message ||
+            'YClients did not return a created record id',
+        );
+      }
+      return {
+        external_id: String(externalId),
+        status: 'confirmed',
+        start,
+        staff_id: params.staffId,
+        service_ids: params.serviceIds,
+        branch_id: params.branchId ?? null,
+        raw: { provider: this.config.provider, record },
+      };
     }
 
     const serviceCatalog = await this.fetchServices();
@@ -522,7 +582,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           : '',
         name: params.clientName || params.clientPhone || 'Клиент',
       },
-      datetime: this.toYclientsDateTime(params.start),
+      datetime: start,
       seance_length: seanceLengthSeconds,
       // Ручная запись из журнала: мастер сажает клиента поверх занятого окна
       // или вне графика сознательно — это его решение, а не ошибка ввода.
@@ -558,7 +618,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return {
       external_id: String(externalId),
       status: 'confirmed',
-      start: this.toYclientsDateTime(params.start),
+      start,
       staff_id: params.staffId,
       service_ids: params.serviceIds,
       branch_id: params.branchId ?? null,

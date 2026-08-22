@@ -60,6 +60,7 @@ describe('ActionCapabilityRegistry', () => {
       serviceIds: ['service-1', 'service-2'],
       start: '2026-08-22T07:00:00.000Z',
       allowBusy: false,
+      creationMode: 'client',
     });
     expect(() =>
       create.normalizeInput({

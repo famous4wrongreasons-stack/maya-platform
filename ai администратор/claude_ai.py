@@ -2491,6 +2491,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 new_datetime_str=tool_input["new_datetime_str"],
                 service_ids=service_ids,
                 staff_id=new_staff_id,
+                bridge_origin="claude_ai",
             )
             # Помечаем, КТО перенёс: владелец/админ в своём чате с MAYA → 'staff',
             # обычный клиент → 'client'. Webhook record.update прочитает метку и
@@ -2517,7 +2518,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             rid, _up, rerr = _resolve_user_record_id(user_id, tool_input.get("record_id"))
             if rerr:
                 return json.dumps(rerr, ensure_ascii=False)
-            result = yclients.cancel_booking(rid)
+            result = yclients.cancel_booking(rid, bridge_origin="claude_ai")
             # Если отменил САМ клиент (не владелец в своём чате) — помечаем, чтобы
             # webhook написал мастеру «Запись отменена клиентом».
             try:
@@ -2813,6 +2814,16 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             result = {"error": f"Неизвестный инструмент: {tool_name}"}
     except Exception as e:
         result = {"error": str(e)}
+
+    if isinstance(result, dict) and result.get("unknown") is True:
+        result = {
+            **result,
+            "retry_allowed": False,
+            "user_message": (
+                "Результат операции уточняется. Не повторяйте действие, "
+                "пока MAYA не проверит его состояние."
+            ),
+        }
 
     logger.info(f"📦 Результат {tool_name}: {str(result)[:200]}")
     return json.dumps(result, ensure_ascii=False)

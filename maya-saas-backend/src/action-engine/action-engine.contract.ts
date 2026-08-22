@@ -11,6 +11,8 @@ export const ACTION_EXECUTION_REQUEST_CONTRACT =
   'maya.action-execution-request/1' as const;
 export const ACTION_EXECUTION_RESULT_CONTRACT =
   'maya.action-execution-result/1' as const;
+export const ACTION_EXECUTION_PREVIEW_CONTRACT =
+  'maya.action-execution-preview/1' as const;
 
 export type ActionSourceType =
   | 'agent_task'
@@ -69,6 +71,33 @@ export interface ExecutionResultV1 {
   state: ActionExecution['state'];
   outcomeCode?: string;
   safeResult?: Record<string, unknown>;
+}
+
+/**
+ * Safe, read-only projection of the exact request normalization used by the
+ * durable kernel. It intentionally excludes normalized input and CRM payloads.
+ */
+export interface ActionExecutionPreviewV1 {
+  contract: typeof ACTION_EXECUTION_PREVIEW_CONTRACT;
+  tenantId: string;
+  sourceType: ActionSourceType;
+  capability: string;
+  capabilityVersion: number;
+  actionClass: string;
+  targetKind: string;
+  targetRef: string;
+  normalizedInputHash: string;
+  identityFingerprint: string;
+  idempotencyScope?: string;
+  requestIdempotencyKeyHash?: string;
+  policyKey: string;
+  policyVersion: number;
+  policyDecision: ActionPolicyDecision;
+  autonomyLevel: string;
+  approvalRequirement: 'NONE' | 'REQUIRED';
+  executorKey: string;
+  executorVersion: number;
+  externalSideEffects: 0;
 }
 
 export type ApprovalResolution = Extract<

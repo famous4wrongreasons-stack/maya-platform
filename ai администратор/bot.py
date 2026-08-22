@@ -4166,6 +4166,7 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
         client_name=flow["name"],
         client_phone=flow["phone"],
         notify_by_sms=_nbs,
+        bridge_origin="telegram.bot",
     )
 
     if result.get("success"):
@@ -4283,6 +4284,17 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
         def _booking_failure_reply(result: dict) -> str:
             """Короткое понятное объяснение клиенту, почему запись не дошла до YClients."""
             code = (result or {}).get("code") or ""
+            if result.get("unknown") is True or code in {
+                "action_in_progress",
+                "bridge_outcome_unknown",
+                "legacy_appointment_bridge_response_invalid",
+                "legacy_appointment_bridge_transport_error",
+                "outcome_unknown",
+            }:
+                return (
+                    "Результат записи уточняется. Не отправляйте заявку повторно, "
+                    "чтобы не создать дубль. Проверьте «Мои записи» через минуту."
+                )
             if code == "slot_taken":
                 return (
                     "Это время уже заняли или оно стало недоступно. "
@@ -4805,7 +4817,7 @@ async def _handle_cancel_record_confirm(context: ContextTypes.DEFAULT_TYPE, quer
 
     # Отменяем
     try:
-        result = yc.cancel_booking(record_id)
+        result = yc.cancel_booking(record_id, bridge_origin="telegram.bot")
     except Exception as e:
         logger.error(f"cancel_rec: cancel_booking err: {e}")
         result = {"success": False, "error": str(e)}
@@ -4852,6 +4864,21 @@ async def _handle_cancel_record_confirm(context: ContextTypes.DEFAULT_TYPE, quer
                 )
         except Exception as e:
             logger.error(f"cancel_rec: loyalty refund err: {e}")
+    elif result.get("unknown") is True:
+        await query.edit_message_text(
+            "Результат отмены уточняется. Не повторяйте действие, "
+            "чтобы не отправить отмену дважды."
+        )
+        conversations[chat_id].append({
+            "role": "user",
+            "content": (
+                f"[Система: исход отмены record_id={record_id} пока неизвестен. "
+                "Не утверждай, что запись отменена или сохранена, и не повторяй отмену.]"
+            ),
+        })
+        if len(conversations[chat_id]) > 30:
+            conversations[chat_id] = conversations[chat_id][-30:]
+        save_conversations(conversations)
     else:
         await query.edit_message_text(
             f"Не получилось отменить: {result.get('error', 'неизвестная ошибка')}\n\n"

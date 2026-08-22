@@ -18,6 +18,7 @@ class ClientRecordError(Exception):
     code: str
     message: str
     status: int = 400
+    reference: str | None = None
 
     def __str__(self) -> str:
         return self.message
@@ -132,9 +133,18 @@ def cancel_for_client(
     )
     if before_write:
         before_write(int(record_id))
-    result = yclients.cancel_booking(int(record_id)) or {}
+    result = yclients.cancel_booking(
+        int(record_id), bridge_origin="client_record_actions",
+    ) or {}
     if result.get("success"):
         return {"success": True, "record_id": int(record_id)}
+    if result.get("unknown") is True:
+        raise ClientRecordError(
+            "outcome_unknown",
+            "Результат отмены уточняется. Не повторяйте действие.",
+            202,
+            str(result.get("execution_id") or "") or None,
+        )
     detail = str(result.get("error") or "")
     if "не найд" in detail.lower() or "not found" in detail.lower():
         raise ClientRecordError("not_found", "Запись не найдена.", 404)
@@ -160,6 +170,7 @@ def reschedule_for_client(
         before_write(int(record_id))
     result = yclients.reschedule_booking(
         int(record_id), new_datetime, None, None,
+        bridge_origin="client_record_actions",
     ) or {}
     if result.get("success"):
         return {
@@ -167,6 +178,13 @@ def reschedule_for_client(
             "record_id": int(result.get("record_id") or record_id),
             "datetime": new_datetime,
         }
+    if result.get("unknown") is True:
+        raise ClientRecordError(
+            "outcome_unknown",
+            "Результат переноса уточняется. Не повторяйте действие.",
+            202,
+            str(result.get("execution_id") or "") or None,
+        )
     detail = str(result.get("error") or "")
     if "не найд" in detail.lower() or "not found" in detail.lower():
         raise ClientRecordError("not_found", "Запись не найдена.", 404)

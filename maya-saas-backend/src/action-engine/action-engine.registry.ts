@@ -104,6 +104,8 @@ function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
   const clientPhone = optionalText(source, 'clientPhone', 40);
   const notes = optionalText(source, 'notes', 2_000);
   const duration = source.durationMinutes;
+  const notifyBySmsHours = source.notifyBySmsHours;
+  const creationMode = source.creationMode;
   if (
     duration !== undefined &&
     (!Number.isInteger(duration) ||
@@ -117,6 +119,23 @@ function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
   if (source.allowBusy !== undefined && typeof source.allowBusy !== 'boolean') {
     throw new ActionContractError('allowBusy must be a boolean');
   }
+  if (
+    creationMode !== undefined &&
+    creationMode !== 'client' &&
+    creationMode !== 'admin'
+  ) {
+    throw new ActionContractError('creationMode must be client or admin');
+  }
+  if (
+    notifyBySmsHours !== undefined &&
+    (!Number.isInteger(notifyBySmsHours) ||
+      Number(notifyBySmsHours) < 0 ||
+      Number(notifyBySmsHours) > 48)
+  ) {
+    throw new ActionContractError(
+      'notifyBySmsHours must be an integer between 0 and 48',
+    );
+  }
   return {
     clientId: normalizeOpaqueRef(source.clientId, 'clientId'),
     clientName: requiredText(source, 'clientName', 160),
@@ -126,8 +145,12 @@ function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
     serviceIds: serviceIds(source),
     start: isoTimestamp(source, 'start'),
     ...(notes ? { notes } : {}),
+    creationMode: creationMode === 'admin' ? 'admin' : 'client',
     allowBusy: source.allowBusy === true,
     ...(duration !== undefined ? { durationMinutes: Number(duration) } : {}),
+    ...(notifyBySmsHours !== undefined
+      ? { notifyBySmsHours: Number(notifyBySmsHours) }
+      : {}),
   };
 }
 

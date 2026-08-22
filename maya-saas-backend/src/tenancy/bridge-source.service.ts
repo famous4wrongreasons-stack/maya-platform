@@ -28,6 +28,11 @@ export interface BridgeTenantResolution {
   resolvedBy: 'integration' | 'slug_compatibility';
 }
 
+export interface BoundBridgeIntegrationSource {
+  provider: string;
+  externalCompanyId: string;
+}
+
 /**
  * Разрешение «аутентифицированный источник → арендатор» для мостов приёма.
  *
@@ -96,6 +101,49 @@ export class BridgeSourceService {
     }
   }
 
+  /**
+   * Bind a mutation-capable bridge credential to one configured integration.
+   *
+   * The request body is only an assertion. It cannot select another tenant:
+   * the trusted provider/company identity comes from the server environment
+   * that owns the bridge credential.
+   */
+  assertBridgeIntegrationBinding(
+    ref: Pick<BridgeSourceRef, 'provider' | 'externalCompanyId'>,
+    envKeys: { provider: string; externalCompanyId: string },
+    codes: { disabled: string; mismatch: string },
+  ): BoundBridgeIntegrationSource {
+    const provider = String(process.env[envKeys.provider] || '')
+      .trim()
+      .toLowerCase();
+    const externalCompanyId = String(
+      process.env[envKeys.externalCompanyId] || '',
+    ).trim();
+
+    if (!provider || !externalCompanyId) {
+      throw new UnauthorizedException({
+        message: 'Bridge integration binding is not configured.',
+        error: { code: codes.disabled },
+      });
+    }
+
+    const assertedProvider = String(ref.provider ?? '')
+      .trim()
+      .toLowerCase();
+    const assertedCompanyId = String(ref.externalCompanyId ?? '').trim();
+    if (
+      assertedProvider !== provider ||
+      assertedCompanyId !== externalCompanyId
+    ) {
+      throw new ForbiddenException({
+        message: 'Bridge source does not match its integration binding.',
+        error: { code: codes.mismatch },
+      });
+    }
+
+    return { provider, externalCompanyId };
+  }
+
   /** Арендатор для аутентифицированного источника. Отказ — явный. */
   async resolveTenant(
     ref: BridgeSourceRef,
@@ -115,6 +163,23 @@ export class BridgeSourceService {
 
     throw new ForbiddenException({
       message: 'Tenant not found for bridge ingest.',
+      error: { code: notFoundCode },
+    });
+  }
+
+  /**
+   * Strict resolver for mutation-capable bridges. Unlike ingest compatibility,
+   * a write initiator may never select a tenant by a mutable slug.
+   */
+  async resolveTenantByIntegration(
+    ref: Pick<BridgeSourceRef, 'provider' | 'externalCompanyId'>,
+    notFoundCode: string,
+  ): Promise<BridgeTenantResolution> {
+    const resolved = await this.resolveByIntegration(ref);
+    if (resolved) return resolved;
+
+    throw new ForbiddenException({
+      message: 'Tenant not found for bridge integration.',
       error: { code: notFoundCode },
     });
   }

@@ -78,6 +78,12 @@ export interface CreateAppointmentParams {
   start: string;
   notes?: string | null;
   /**
+   * Provider route used for creation. This is separate from `allowBusy`:
+   * legacy admin tools use the admin endpoint while still rejecting a busy
+   * slot, whereas the schedule journal deliberately permits one.
+   */
+  creationMode?: 'client' | 'admin';
+  /**
    * Админская запись из журнала: разрешить занятое окно и время вне графика.
    * Клиентский путь всегда оставляет это выключенным — иначе клиент запишется
    * на нерабочее время.
@@ -88,6 +94,11 @@ export interface CreateAppointmentParams {
    * считается суммой услуг — так же, как в журнале салона.
    */
   durationMinutes?: number;
+  /**
+   * Напоминание провайдера для клиентской записи. Административный путь это
+   * поле игнорирует и не отправляет уведомление автоматически.
+   */
+  notifyBySmsHours?: number;
 }
 
 export interface CreatedAppointment {
