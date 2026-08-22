@@ -139,6 +139,34 @@ enum ExternalDispatchState {
   ACKNOWLEDGED
 }
 
+enum CommunicationScope {
+  SINGLE
+  BULK
+}
+
+enum CommunicationDeliveryState {
+  NOT_SENT
+  ACCEPTED
+  DELIVERED
+  FAILED
+  UNKNOWN
+  SKIPPED
+}
+
+enum CommunicationCampaignState {
+  DRAFT
+  READY
+  RUNNING
+  UNRESOLVED
+  COMPLETED
+  PARTIAL
+  FAILED
+  SKIPPED
+  CANCELLED
+  EXPIRED
+  LEGACY_UNRESOLVED
+}
+
 model Tenant {
   id                             String                          @id @default(cuid())
   name                           String
@@ -380,11 +408,12 @@ model ActionExecution {
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
-  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  agentTask          AgentTask?      @relation(fields: [agentTaskId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  actorMembership    Membership?     @relation("ActionActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
-  approverMembership Membership?     @relation("ActionApprover", fields: [approvalDecidedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
-  attempts           ActionAttempt[]
+  tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agentTask             AgentTask?         @relation(fields: [agentTaskId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  actorMembership       Membership?        @relation("ActionActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  approverMembership    Membership?        @relation("ActionApprover", fields: [approvalDecidedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  attempts              ActionAttempt[]
+  communicationCampaign MarketingCampaign?
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -581,29 +610,32 @@ model UserMerge {
 }
 
 model Membership {
-  id                         String                @id @default(cuid())
-  tenantId                   String
-  userId                     String
-  branchId                   String?
-  role                       UserRole
-  status                     MembershipStatus      @default(active)
-  invitedAt                  DateTime?
-  joinedAt                   DateTime?
-  createdAt                  DateTime              @default(now())
-  updatedAt                  DateTime              @updatedAt
-  tenant                     Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user                       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch                     Branch?               @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  authIdentities             AuthIdentity[]        @relation("AuthIdentityMembership")
-  authSessions               AuthSession[]         @relation("AuthSessionMembership")
-  internalProviders          InternalProvider[]    @relation("InternalProviderMembership")
-  customerProfile            CustomerProfile?      @relation("CustomerProfileMembership")
-  loyaltyAccount             LoyaltyAccount?       @relation("LoyaltyAccountMembership")
-  dashboardPreferences       DashboardPreference[]
-  aiBrainSessions            AiBrainSession[]
-  aiMemoryFacts              AiMemoryFact[]
-  actionExecutionsAsActor    ActionExecution[]     @relation("ActionActor")
-  actionExecutionsAsApprover ActionExecution[]     @relation("ActionApprover")
+  id                             String                       @id @default(cuid())
+  tenantId                       String
+  userId                         String
+  branchId                       String?
+  role                           UserRole
+  status                         MembershipStatus             @default(active)
+  invitedAt                      DateTime?
+  joinedAt                       DateTime?
+  createdAt                      DateTime                     @default(now())
+  updatedAt                      DateTime                     @updatedAt
+  tenant                         Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                           User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                         Branch?                      @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  authIdentities                 AuthIdentity[]               @relation("AuthIdentityMembership")
+  authSessions                   AuthSession[]                @relation("AuthSessionMembership")
+  internalProviders              InternalProvider[]           @relation("InternalProviderMembership")
+  customerProfile                CustomerProfile?             @relation("CustomerProfileMembership")
+  loyaltyAccount                 LoyaltyAccount?              @relation("LoyaltyAccountMembership")
+  dashboardPreferences           DashboardPreference[]
+  aiBrainSessions                AiBrainSession[]
+  aiMemoryFacts                  AiMemoryFact[]
+  actionExecutionsAsActor        ActionExecution[]            @relation("ActionActor")
+  actionExecutionsAsApprover     ActionExecution[]            @relation("ActionApprover")
+  communicationCampaignsCreated  MarketingCampaign[]          @relation("CommunicationCreator")
+  communicationCampaignsApproved MarketingCampaign[]          @relation("CommunicationApprover")
+  communicationRecipients        MarketingCampaignRecipient[] @relation("CommunicationRecipientMembership")
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
@@ -1592,36 +1624,67 @@ model MarketingAudienceRecipient {
 
 /// Получатель в составе кампании. Восстановлено по боевой структуре, 02-R.
 model MarketingCampaignRecipient {
-  id                String                     @id
-  tenantId          String
-  campaignId        String
-  externalClientId  String
-  internalUserId    String?
-  idempotencyKey    String
-  status            String                     @default("QUEUED")
-  attemptCount      Int                        @default(0)
-  nextAttemptAt     DateTime?
-  acceptedAt        DateTime?
-  deliveredAt       DateTime?
-  failedAt          DateTime?
-  providerMessageId String?
-  providerStatus    String?
-  lastErrorCode     String?
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime
-  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  campaign          MarketingCampaign          @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
-  deliveryAttempts  MarketingDeliveryAttempt[]
+  id                       String                      @id
+  tenantId                 String
+  campaignId               String
+  externalClientId         String
+  internalUserId           String?
+  idempotencyKey           String
+  status                   String                      @default("QUEUED")
+  attemptCount             Int                         @default(0)
+  nextAttemptAt            DateTime?
+  acceptedAt               DateTime?
+  deliveredAt              DateTime?
+  failedAt                 DateTime?
+  providerMessageId        String?
+  providerStatus           String?
+  lastErrorCode            String?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime
+  lifecycleVersion         Int                         @default(0)
+  identityVersion          Int?
+  recipientKind            String?
+  recipientRefHash         String?
+  contentIdentityHash      String?
+  deliveryState            CommunicationDeliveryState?
+  externalDispatchState    ExternalDispatchState?
+  reconciliationState      ActionReconciliationState?
+  eligibilityBasis         String?
+  eligibilityDecision      String?
+  eligibilityPolicyVersion Int?
+  eligibilityEvidenceRef   String?
+  eligibilityEvidenceHash  String?
+  eligibilityCheckedAt     DateTime?
+  consentEvidenceId        String?
+  leaseOwner               String?
+  leaseTokenHash           String?
+  leaseExpiresAt           DateTime?
+  revision                 Int                         @default(0)
+  dispatchedAt             DateTime?
+  responseReceivedAt       DateTime?
+  unknownAt                DateTime?
+  terminalAt               DateTime?
+  terminalReasonCode       String?
+  payloadRetentionUntil    DateTime?
+  auditRetentionUntil      DateTime?
+  tenant                   Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign                 MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  internalMembership       Membership?                 @relation("CommunicationRecipientMembership", fields: [internalUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  consentEvidence          MarketingConsentEvidence?   @relation(fields: [consentEvidenceId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  deliveryAttempts         MarketingDeliveryAttempt[]
 
   @@unique([id, tenantId])
+  @@unique([id, tenantId, campaignId])
   @@unique([tenantId, idempotencyKey])
   @@unique([tenantId, campaignId, externalClientId], map: "MarketingCampaignRecipient_tenantId_campaignId_externalClientId")
   @@index([tenantId, campaignId, status, nextAttemptAt], map: "MarketingCampaignRecipient_tenantId_campaignId_status_nextAttem")
+  @@index([tenantId, campaignId, deliveryState, nextAttemptAt])
+  @@index([tenantId, reconciliationState, leaseExpiresAt])
 }
 
 /// Свидетельство согласия. Восстановлено по боевой структуре, 02-R.
 model MarketingConsentEvidence {
-  id               String    @id
+  id               String                       @id
   tenantId         String
   externalClientId String
   channel          String
@@ -1631,35 +1694,54 @@ model MarketingConsentEvidence {
   grantedAt        DateTime?
   revokedAt        DateTime?
   expiresAt        DateTime?
-  createdAt        DateTime  @default(now())
+  createdAt        DateTime                     @default(now())
   updatedAt        DateTime
-  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant           Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipients       MarketingCampaignRecipient[]
 
+  @@unique([id, tenantId])
   @@unique([tenantId, externalClientId, channel], map: "MarketingConsentEvidence_tenantId_externalClientId_channel_key")
   @@index([tenantId, channel, status])
 }
 
 /// Попытка доставки. Восстановлено по боевой структуре, 02-R.
 model MarketingDeliveryAttempt {
-  id                   String                      @id
-  tenantId             String
-  campaignId           String
-  recipientId          String?
-  batchKey             String
-  attemptNumber        Int
-  status               String
-  httpStatus           Int?
-  providerResponseCode String?
-  errorCode            String?
-  startedAt            DateTime                    @default(now())
-  completedAt          DateTime?
-  createdAt            DateTime                    @default(now())
-  tenant               Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  campaign             MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
-  recipient            MarketingCampaignRecipient? @relation(fields: [recipientId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  id                          String                      @id
+  tenantId                    String
+  campaignId                  String
+  recipientId                 String?
+  batchKey                    String
+  attemptNumber               Int
+  status                      String
+  httpStatus                  Int?
+  providerResponseCode        String?
+  errorCode                   String?
+  startedAt                   DateTime                    @default(now())
+  completedAt                 DateTime?
+  createdAt                   DateTime                    @default(now())
+  lifecycleVersion            Int                         @default(0)
+  kind                        ActionAttemptKind?
+  state                       ActionAttemptState?
+  externalDispatchState       ExternalDispatchState?
+  providerRequestIdentityHash String?
+  providerIdempotencyKeyHash  String?
+  providerReferenceEncrypted  String?
+  providerReferenceHash       String?
+  outcomeCode                 String?
+  retryDecisionCode           String?
+  reconciliationRequired      Boolean?
+  dispatchedAt                DateTime?
+  responseReceivedAt          DateTime?
+  payloadRetentionUntil       DateTime?
+  tenant                      Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign                    MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  recipient                   MarketingCampaignRecipient? @relation(fields: [recipientId, tenantId, campaignId], references: [id, tenantId, campaignId], onDelete: Cascade)
 
+  @@unique([tenantId, recipientId, attemptNumber])
   @@index([tenantId, campaignId, createdAt])
   @@index([tenantId, recipientId, attemptNumber])
+  @@index([tenantId, state, startedAt])
+  @@index([tenantId, providerReferenceHash])
 }
 
 model AuditLog {
@@ -2052,47 +2134,65 @@ model MarketingAudience {
 /// The message is stored as business content; recipient identity remains an
 /// internal user id list and is revalidated against consent before delivery.
 model MarketingCampaign {
-  id                   String            @id @default(cuid())
-  tenantId             String
-  createdByUserId      String
-  audienceId           String
-  channel              String            @default("app")
-  status               String            @default("draft")
-  message              String
-  recipientUserIdsJson Json
-  recipientCount       Int
-  sentCount            Int               @default(0)
-  idempotencyKey       String?
-  expiresAt            DateTime
-  sentAt               DateTime?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  id                          String                      @id @default(cuid())
+  tenantId                    String
+  createdByUserId             String?
+  audienceId                  String?
+  channel                     String                      @default("app")
+  status                      String                      @default("draft")
+  message                     String
+  recipientUserIdsJson        Json
+  recipientCount              Int
+  sentCount                   Int                         @default(0)
+  idempotencyKey              String?
+  expiresAt                   DateTime
+  sentAt                      DateTime?
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
   /// Двадцать две колонки восстановлены по фактической боевой структуре,
   /// цикл 02-R. Прикладной смысл по именам не додумывался.
-  provider             String            @default("yclients_sms")
-  audienceSnapshotHash String            @default("")
-  messageSnapshotHash  String            @default("")
-  confirmationHash     String?
-  confirmedAt          DateTime?
-  confirmedByUserId    String?
-  costEstimateKopecks  Int?
-  costEstimateStatus   String            @default("unavailable")
-  costCurrency         String            @default("RUB")
-  scheduledFor         DateTime?
-  queuedAt             DateTime?
-  startedAt            DateTime?
-  completedAt          DateTime?
-  cancelledAt          DateTime?
-  leaseOwner           String?
-  leaseExpiresAt       DateTime?
-  retryCount           Int               @default(0)
-  lastErrorCode        String?
-  acceptedCount        Int               @default(0)
-  failedCount          Int               @default(0)
-  skippedCount         Int               @default(0)
-  unknownCount         Int               @default(0)
-  tenant               Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  audience             MarketingAudience @relation(fields: [audienceId], references: [id], onDelete: Restrict)
+  provider                    String                      @default("yclients_sms")
+  audienceSnapshotHash        String                      @default("")
+  messageSnapshotHash         String                      @default("")
+  confirmationHash            String?
+  confirmedAt                 DateTime?
+  confirmedByUserId           String?
+  costEstimateKopecks         Int?
+  costEstimateStatus          String                      @default("unavailable")
+  costCurrency                String                      @default("RUB")
+  scheduledFor                DateTime?
+  queuedAt                    DateTime?
+  startedAt                   DateTime?
+  completedAt                 DateTime?
+  cancelledAt                 DateTime?
+  leaseOwner                  String?
+  leaseExpiresAt              DateTime?
+  retryCount                  Int                         @default(0)
+  lastErrorCode               String?
+  acceptedCount               Int                         @default(0)
+  failedCount                 Int                         @default(0)
+  skippedCount                Int                         @default(0)
+  unknownCount                Int                         @default(0)
+  lifecycleVersion            Int                         @default(0)
+  scope                       CommunicationScope?
+  actionExecutionId           String?
+  aggregateState              CommunicationCampaignState?
+  contentRef                  String?
+  deliveryCapabilityKey       String?
+  deliveryCapabilityVersion   Int?
+  retryPolicyKey              String?
+  retryPolicyVersion          Int?
+  reconciliationPolicyKey     String?
+  reconciliationPolicyVersion Int?
+  leaseTokenHash              String?
+  revision                    Int                         @default(0)
+  payloadRetentionUntil       DateTime?
+  auditRetentionUntil         DateTime?
+  tenant                      Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actionExecution             ActionExecution?            @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  audience                    MarketingAudience?          @relation(fields: [audienceId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  creatorMembership           Membership?                 @relation("CommunicationCreator", fields: [createdByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  approverMembership          Membership?                 @relation("CommunicationApprover", fields: [confirmedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
 
   recipients MarketingCampaignRecipient[]
 
@@ -2100,8 +2200,10 @@ model MarketingCampaign {
 
   @@unique([tenantId, idempotencyKey])
   @@unique([id, tenantId])
+  @@unique([actionExecutionId, tenantId])
   @@index([tenantId, status, createdAt])
   @@index([tenantId, audienceId])
+  @@index([tenantId, aggregateState, scheduledFor, leaseExpiresAt])
   @@index([status, leaseExpiresAt, queuedAt])
   @@index([status, scheduledFor, leaseExpiresAt])
 }

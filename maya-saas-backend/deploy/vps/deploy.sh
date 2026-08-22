@@ -84,6 +84,8 @@ test -f "$BE/dist/scripts/opportunity-lifecycle-run.js" \
   || fail "нет immutable Opportunity lifecycle runner после build"
 test -f "$BE/dist/scripts/action-engine-kernel-proof.js" \
   || fail "нет immutable Action Engine kernel proof после build"
+test -f "$BE/dist/scripts/communication-delivery-foundation-proof.js" \
+  || fail "нет immutable Communication Delivery foundation proof после build"
 
 step "3/10 каталог релиза"
 # /opt/maya-saas/releases принадлежит maya-saas, поэтому создаём под sudo и
@@ -108,6 +110,7 @@ run "set -e
   test -d node_modules/prisma        || { echo 'НЕТ prisma CLI'; exit 1; }
   test -f dist/scripts/opportunity-lifecycle-run.js || { echo 'НЕТ lifecycle runner'; exit 1; }
   test -f dist/scripts/action-engine-kernel-proof.js || { echo 'НЕТ action kernel proof'; exit 1; }
+  test -f dist/scripts/communication-delivery-foundation-proof.js || { echo 'НЕТ communication delivery proof'; exit 1; }
   # 🔴 Проверяем ЗАГРУЗКУ, а не наличие каталога. npm 11 блокирует
   # install-скрипты незнакомых пакетов, и нативный модуль может лежать на месте,
   # но не собраться. Пароли проверяются через bcrypt — молчаливая поломка тут

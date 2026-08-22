@@ -205,6 +205,12 @@ export class MarketingService {
       });
     }
 
+    if (!campaign.audienceId) {
+      throw new ConflictException({
+        message: 'Legacy marketing campaign has no audience.',
+        error: { code: 'marketing_campaign_audience_missing' },
+      });
+    }
     const audience = await this.requireAudience(
       input.tenantId,
       campaign.audienceId,

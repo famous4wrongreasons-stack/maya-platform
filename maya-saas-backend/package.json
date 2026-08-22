@@ -49,7 +49,9 @@
     "action-engine:proof": "node dist/scripts/action-engine-kernel-proof.js",
     "action-engine:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/action-engine-kernel-proof.ts",
     "action-engine:appointment-proof": "node dist/scripts/appointment-action-engine-proof.js",
-    "action-engine:appointment-proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/appointment-action-engine-proof.ts"
+    "action-engine:appointment-proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/appointment-action-engine-proof.ts",
+    "communication-delivery:proof": "node dist/scripts/communication-delivery-foundation-proof.js",
+    "communication-delivery:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/communication-delivery-foundation-proof.ts"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"
