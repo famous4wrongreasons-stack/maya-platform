@@ -1234,10 +1234,20 @@ async function main(): Promise<void> {
     matrix.legacy_truth_not_reinterpreted = true;
 
     stage('architecture_barrier');
-    const sourceDirectory = 'src/communication-delivery';
-    const source = readdirSync(sourceDirectory)
-      .filter((file) => file.endsWith('.ts'))
-      .map((file) => readFileSync(join(sourceDirectory, file), 'utf8'))
+    const artifactDirectory = [
+      join(process.cwd(), 'src/communication-delivery'),
+      join(__dirname, '../src/communication-delivery'),
+    ].find((candidate) => existsSync(candidate));
+    assert(
+      artifactDirectory,
+      'communication-delivery artifacts are missing from the proof release',
+    );
+    const artifacts = readdirSync(artifactDirectory).filter(
+      (file) => file.endsWith('.ts') || file.endsWith('.js'),
+    );
+    assert(artifacts.length > 0, 'communication-delivery artifacts are empty');
+    const source = artifacts
+      .map((file) => readFileSync(join(artifactDirectory, file), 'utf8'))
       .join('\n');
     const forbidden = [
       'fetch(',
@@ -1260,11 +1270,16 @@ async function main(): Promise<void> {
         token,
       );
     }
-    assert.equal(
-      existsSync(
-        'src/communication-delivery/communication-delivery.test-adapter.ts',
+    assert(
+      ['ts', 'js'].some((extension) =>
+        existsSync(
+          join(
+            artifactDirectory,
+            `communication-delivery.test-adapter.${extension}`,
+          ),
+        ),
       ),
-      true,
+      'test-only communication adapter is missing from proof artifacts',
     );
     matrix.no_side_effect_owner_or_production_provider_imported = true;
 
