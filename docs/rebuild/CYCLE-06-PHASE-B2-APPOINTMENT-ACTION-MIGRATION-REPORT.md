@@ -258,7 +258,26 @@ rows after deployment. Production provider-mutation equivalence is therefore
 not invented and remains pending organic traffic after the legacy shadow path
 is implemented.
 
-## 12. Remaining cutover package
+## 12. B2.1 follow-up status
+
+Implementation commit `f4c33e9a` and production release
+`20260822-c06-b21-legacy-appointment-shadow` add the dedicated authenticated
+legacy appointment bridge, fail-closed Python dispatcher, integration-bound
+tenant resolution, canonical idempotency convergence and direct-endpoint
+ratchets required by this report.
+
+Production is intentionally at the organic shadow gate:
+
+- Python mode: `shadow`;
+- NestJS bridge execution: disabled;
+- bridge external side effects: `0`;
+- organic shadow observations at the verification cutoff: `0`;
+- cutover: not authorized without organic evidence.
+
+The implementation and current gate are documented in
+`CYCLE-06-PHASE-B2.1-LEGACY-APPOINTMENT-BRIDGE-CONVERGENCE-REPORT.md`.
+
+## 13. Remaining cutover package
 
 To close Phase B2 safely, one dedicated package must:
 
@@ -293,6 +312,10 @@ ATTENDANCE EXECUTION OWNER: DEFERRED
 BLIND RETRY AFTER UNKNOWN: NO
 
 DIRECT APPOINTMENT WRITE BYPASSES: 11
+
+LEGACY DIRECT FALLBACK POSSIBLE: NO
+
+UNKNOWN PRESERVED ACROSS BRIDGE: YES
 
 READY FOR NEXT ACTION FAMILY: NO
 
