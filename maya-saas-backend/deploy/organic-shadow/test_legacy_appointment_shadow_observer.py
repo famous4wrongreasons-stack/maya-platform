@@ -181,6 +181,25 @@ class ObserverTest(unittest.TestCase):
         self.assertTrue(self.store.process_journal_record(record))
         self.assertEqual(self.store.summary()["totals"]["deliveries"], 1)
 
+    def test_journald_byte_array_message_with_ansi_is_supported(self):
+        record = journal_record("cursor-1", observation())
+        encoded = (
+            "\u001b[32m[Nest] 123 - LOG [LegacyAppointmentBridgeService] "
+            + record["MESSAGE"]
+            + "\u001b[39m"
+        ).encode("utf-8")
+        record["MESSAGE"] = list(encoded)
+
+        self.assertTrue(self.store.process_journal_record(record))
+        self.assertEqual(self.store.summary()["totals"]["deliveries"], 1)
+
+    def test_invalid_journald_byte_array_is_not_parsed(self):
+        record = journal_record("cursor-1", observation())
+        record["MESSAGE"] = [True, 999, "not-a-byte"]
+
+        self.assertFalse(self.store.process_journal_record(record))
+        self.assertEqual(self.store.summary()["totals"]["deliveries"], 0)
+
     def test_attendance_is_out_of_scope(self):
         value = observation()
         value["legacy_action_class"] = "update_attendance"

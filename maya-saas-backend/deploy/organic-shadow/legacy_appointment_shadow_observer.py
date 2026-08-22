@@ -79,6 +79,30 @@ def safe_string(value: Any, *, limit: int = 160) -> str | None:
     return normalized
 
 
+def journal_message_text(value: Any) -> str | None:
+    """Normalize journald JSON MESSAGE without accepting arbitrary structures.
+
+    `journalctl --output=json` serializes fields containing control bytes (for
+    example NestJS ANSI color codes) as byte arrays instead of JSON strings.
+    The observer still treats the decoded value as untrusted and only consumes
+    the dedicated PII-free observation contract below.
+    """
+    if isinstance(value, str):
+        return value
+    if (
+        isinstance(value, list)
+        and len(value) <= 64 * 1024
+        and all(
+            isinstance(item, int)
+            and not isinstance(item, bool)
+            and 0 <= item <= 255
+            for item in value
+        )
+    ):
+        return bytes(value).decode("utf-8", errors="replace")
+    return None
+
+
 def safe_integer(value: Any) -> int | None:
     if isinstance(value, bool) or not isinstance(value, int):
         return None
@@ -348,12 +372,10 @@ class ObserverStore:
             self.write_summary()
             return False
 
-        message = record.get("MESSAGE")
+        message = journal_message_text(record.get("MESSAGE"))
         observed = False
         with self.connection:
-            marker_offset = (
-                message.find(OBSERVATION_PREFIX) if isinstance(message, str) else -1
-            )
+            marker_offset = message.find(OBSERVATION_PREFIX) if message else -1
             if marker_offset >= 0:
                 encoded = message[marker_offset + len(OBSERVATION_PREFIX) :].lstrip()
                 try:
