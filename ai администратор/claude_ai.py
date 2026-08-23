@@ -4534,6 +4534,173 @@ _SCHEDULE_CONFIRM_RE = re.compile(
     re.IGNORECASE,
 )
 
+_BOOKING_CONFIRM_RE = re.compile(
+    r"^\s*(?:да|ага|ок(?:ей)?|подтверждаю|оформляй|записывай|все\s+верно)"
+    r"(?:[\s,!.].*)?$",
+    re.IGNORECASE,
+)
+_BOOKING_CONFIRM_PROMPT_RE = re.compile(
+    r"\b(?:оформляем|подтверждаете|подтверждаешь|записываем|записываю|все\s+верно)\b",
+    re.IGNORECASE,
+)
+_BOOKING_TIME_RE = re.compile(r"(?<!\d)([01]?\d|2[0-3]):([0-5]\d)(?!\d)")
+_BOOKING_QUOTED_TEXT_RE = re.compile(r"[«\"]([^»\"]+)[»\"]")
+_BOOKING_EXECUTION_CLAIM_RE = re.compile(
+    r"\b(?:передаю\s+(?:запись\s+)?на\s+оформление|оформляю\s+запись|"
+    r"записала|запись\s+(?:создана|оформлена|подтверждена)|"
+    r"готово[,! ]+[^.\n]{0,80}\bзапис)",
+    re.IGNORECASE,
+)
+
+
+def _previous_assistant_text(messages: list[dict] | None) -> str:
+    """Return the assistant turn immediately preceding the latest user turn."""
+    seen_latest_user = False
+    for msg in reversed(messages or []):
+        role = msg.get("role") if isinstance(msg, dict) else None
+        if not seen_latest_user:
+            if role == "user" and _message_text(msg).strip():
+                seen_latest_user = True
+            continue
+        if role == "assistant":
+            return _message_text(msg).strip()
+        if role == "user" and _message_text(msg).strip():
+            break
+    return ""
+
+
+def _booking_confirmation_tool_use(
+    messages: list[dict] | None,
+    role: str,
+    disabled_tools: set[str] | None,
+    mode: str | None,
+) -> _ToolUse | None:
+    """Recover a fully specified booking after an explicit yes/no confirmation.
+
+    This is intentionally strict.  The server proceeds only when the immediately
+    preceding MAYA turn contains a date, time, uniquely resolvable staff member
+    and at least one quoted CRM service.  Ambiguous confirmations stay with the
+    normal model instead of guessing booking details.
+    """
+    allowed = _allowed_tool_names(role, mode) - _effective_disabled_tools(
+        disabled_tools, mode,
+    )
+    if "request_booking" not in allowed:
+        return None
+
+    user_text = _latest_user_text(messages)
+    if not _BOOKING_CONFIRM_RE.match(user_text):
+        return None
+
+    prompt = _previous_assistant_text(messages)
+    prompt_low = prompt.lower().replace("ё", "е")
+    if (
+        "?" not in prompt
+        or "запис" not in prompt_low
+        or not _BOOKING_CONFIRM_PROMPT_RE.search(prompt_low)
+    ):
+        return None
+
+    target_date = _schedule_query_date(prompt)
+    time_match = _BOOKING_TIME_RE.search(prompt)
+    staff = _resolve_staff(prompt)
+    if not target_date or not time_match or not staff:
+        return None
+
+    staff_id = int(staff["id"])
+    catalog = [
+        item for item in (yclients.get_services(staff_id) or [])
+        if isinstance(item, dict) and item.get("id") and item.get("title")
+    ]
+    catalog_by_id = {int(item["id"]): str(item["title"]).strip() for item in catalog}
+    service_names: list[str] = []
+    seen_service_ids: set[int] = set()
+    for quoted in _BOOKING_QUOTED_TEXT_RE.findall(prompt):
+        service_id = _resolve_service_id(quoted, staff_id)
+        if not service_id or int(service_id) in seen_service_ids:
+            continue
+        canonical_name = catalog_by_id.get(int(service_id))
+        if not canonical_name:
+            continue
+        seen_service_ids.add(int(service_id))
+        service_names.append(canonical_name)
+    if not service_names:
+        return None
+
+    hour = int(time_match.group(1))
+    minute = int(time_match.group(2))
+    return _ToolUse(
+        id="server_confirmed_booking",
+        name="request_booking",
+        input={
+            "staff_name": str(staff["name"]).strip(),
+            "service_names": service_names,
+            "datetime_str": f"{target_date.isoformat()}T{hour:02d}:{minute:02d}:00",
+        },
+    )
+
+
+def _run_booking_confirmation_preflight(
+    messages: list[dict],
+    role: str,
+    user_id: int | None,
+    disabled_tools: set[str] | None,
+    mode: str | None,
+) -> tuple[str, dict | None, dict | None] | None:
+    """Turn an explicit booking confirmation into the canonical booking signal."""
+    tool_use = _booking_confirmation_tool_use(messages, role, disabled_tools, mode)
+    if not tool_use:
+        return None
+
+    execution_messages = list(messages)
+    execution_messages.append({
+        "role": "assistant",
+        "content": _assistant_blocks("", [tool_use]),
+    })
+    tool_results, contact_request, gift_cert_action = _run_tool_uses(
+        [tool_use],
+        execution_messages,
+        user_id,
+        disabled_tools,
+        mode=mode,
+    )
+    payload = {}
+    if tool_results:
+        try:
+            payload = json.loads(tool_results[0].get("content") or "{}")
+        except (AttributeError, TypeError, ValueError, json.JSONDecodeError):
+            payload = {}
+
+    if contact_request:
+        logger.info(
+            "booking confirmation preflight ready user=%s mode=%s staff_id=%s datetime=%s",
+            user_id,
+            mode,
+            contact_request.get("staff_id"),
+            contact_request.get("datetime_str"),
+        )
+        return "Передаю запись на оформление.", contact_request, gift_cert_action
+
+    logger.warning(
+        "booking confirmation preflight rejected user=%s mode=%s error=%s",
+        user_id,
+        mode,
+        payload.get("error") or payload.get("status") or "unknown",
+    )
+    return (
+        str(payload.get("message") or (
+            "Не смогла подтвердить запись в YClients. Ничего не создано — "
+            "проверьте свободное время и попробуйте ещё раз."
+        )),
+        None,
+        gift_cert_action,
+    )
+
+
+def _looks_like_unverified_booking_execution(text: str, contact_request: dict | None) -> bool:
+    """Block prose that claims a booking hand-off without a server signal."""
+    return not contact_request and bool(_BOOKING_EXECUTION_CLAIM_RE.search(text or ""))
+
 
 def _schedule_confirmation_verified(messages: list[dict]) -> bool:
     """Confirmation must be a new user turn after MAYA showed a preview."""
@@ -4860,6 +5027,15 @@ def get_ai_response(
             mode,
         )
         return requirement.fallback, None, None
+    booking_preflight = _run_booking_confirmation_preflight(
+        messages,
+        role,
+        user_id,
+        disabled_tools,
+        mode,
+    )
+    if booking_preflight:
+        return booking_preflight
     schedule_preflight = _run_schedule_preflight(
         messages,
         requirement,
@@ -4965,6 +5141,19 @@ def get_ai_response(
                     mode,
                 )
                 return requirement.fallback, contact_request, gift_cert_action
+            if _looks_like_unverified_booking_execution(response_text, contact_request):
+                logger.error(
+                    "blocked unverified booking execution claim user=%s role=%s mode=%s",
+                    user_id,
+                    role,
+                    mode,
+                )
+                return (
+                    "Не смогла передать запись на оформление. Ничего не создано — "
+                    "проверьте свободное время и попробуйте ещё раз.",
+                    None,
+                    gift_cert_action,
+                )
             elapsed = time.perf_counter() - started_at
             logger.info(
                 "🧠 AI done user=%s role=%s model=%s rounds=%s tool_calls=%s seconds=%.2f",
@@ -5066,6 +5255,22 @@ def get_ai_response_stream(
             "contact_request": None,
             "gift_cert_action": None,
             "text": requirement.fallback,
+        }
+        return
+    booking_preflight = _run_booking_confirmation_preflight(
+        messages,
+        role,
+        user_id,
+        disabled_tools,
+        mode,
+    )
+    if booking_preflight:
+        booking_text, booking_contact, booking_action = booking_preflight
+        yield {
+            "type": "meta",
+            "contact_request": booking_contact,
+            "gift_cert_action": booking_action,
+            "text": booking_text,
         }
         return
     schedule_preflight = _run_schedule_preflight(
@@ -5274,6 +5479,24 @@ def get_ai_response_stream(
                     "contact_request": contact_request,
                     "gift_cert_action": gift_cert_action,
                     "text": requirement.fallback,
+                }
+                return
+            if _looks_like_unverified_booking_execution(final_text, contact_request):
+                logger.error(
+                    "stream blocked unverified booking execution claim user=%s role=%s mode=%s",
+                    user_id,
+                    role,
+                    mode,
+                )
+                yield {"type": "reset"}
+                yield {
+                    "type": "meta",
+                    "contact_request": None,
+                    "gift_cert_action": gift_cert_action,
+                    "text": (
+                        "Не смогла передать запись на оформление. Ничего не создано — "
+                        "проверьте свободное время и попробуйте ещё раз."
+                    ),
                 }
                 return
             yield {

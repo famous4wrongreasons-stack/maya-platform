@@ -884,6 +884,232 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIsNotNone(contact_request)
         self.assertIsNone(action)
 
+    def test_explicit_booking_confirmation_recovers_observed_telegram_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        tool_use = claude_ai._booking_confirmation_tool_use(
+            messages,
+            "client",
+            set(),
+            None,
+        )
+
+        self.assertIsNotNone(tool_use)
+        self.assertEqual(tool_use.name, "request_booking")
+        self.assertEqual(tool_use.input, {
+            "staff_name": "Стас Мосин",
+            "service_names": ["Мужская стрижка"],
+            "datetime_str": "2026-08-23T11:00:00",
+        })
+
+    def test_booking_confirmation_does_not_guess_from_unrelated_yes(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [
+            {"role": "assistant", "content": "Показать цены на услуги?"},
+            {"role": "user", "content": "Да"},
+        ]
+
+        tool_use = claude_ai._booking_confirmation_tool_use(
+            messages,
+            "client",
+            set(),
+            None,
+        )
+
+        self.assertIsNone(tool_use)
+
+    def test_booking_confirmation_is_disabled_on_staff_surface(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        tool_use = claude_ai._booking_confirmation_tool_use(
+            messages,
+            "founder",
+            set(),
+            "staff",
+        )
+
+        self.assertIsNone(tool_use)
+
+    def test_booking_confirmation_bypasses_model_and_emits_contact_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        contact = {
+            "staff_id": 7,
+            "staff_name": "Стас Мосин",
+            "service_ids": [101],
+            "service_names": ["Мужская стрижка"],
+            "datetime_str": "2026-08-23T11:00:00",
+        }
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail(
+            "model must not run after an explicit server-verifiable confirmation"
+        )
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "server_confirmed_booking",
+                "content": json.dumps({"status": "ready"}),
+            }],
+            contact,
+            None,
+        )
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            messages,
+            user_id=123,
+            mode=None,
+        )
+
+        self.assertEqual(text, "Передаю запись на оформление.")
+        self.assertEqual(contact_request, contact)
+        self.assertIsNone(action)
+
+    def test_booking_confirmation_reports_slot_rejection_without_model_claim(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail(
+            "model must not replace an authoritative slot rejection"
+        )
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "server_confirmed_booking",
+                "content": json.dumps({
+                    "status": "error",
+                    "error": "slot_taken",
+                    "message": "11:00 уже занято. Ничего не создано.",
+                }, ensure_ascii=False),
+            }],
+            None,
+            None,
+        )
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            messages,
+            user_id=123,
+            mode=None,
+        )
+
+        self.assertEqual(text, "11:00 уже занято. Ничего не создано.")
+        self.assertIsNone(contact_request)
+        self.assertIsNone(action)
+
+    def test_stream_booking_confirmation_has_same_contact_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        contact = {
+            "staff_id": 7,
+            "staff_name": "Стас Мосин",
+            "service_ids": [101],
+            "service_names": ["Мужская стрижка"],
+            "datetime_str": "2026-08-23T11:00:00",
+        }
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "server_confirmed_booking",
+                "content": json.dumps({"status": "ready"}),
+            }],
+            contact,
+            None,
+        )
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        events = list(claude_ai.get_ai_response_stream(
+            messages,
+            user_id=123,
+            mode="client",
+        ))
+
+        self.assertEqual(events, [{
+            "type": "meta",
+            "contact_request": contact,
+            "gift_cert_action": None,
+            "text": "Передаю запись на оформление.",
+        }])
+
+    def test_model_cannot_claim_booking_handoff_without_server_signal(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._brain_turn = lambda *args, **kwargs: (
+            "Передаю запись на оформление: сегодня в 11:00.",
+            [],
+        )
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Оформляй"}],
+            user_id=123,
+            mode=None,
+        )
+
+        self.assertIn("Ничего не создано", text)
+        self.assertIsNone(contact_request)
+        self.assertIsNone(action)
+
     def test_client_surface_limits_founder_to_client_tools(self):
         claude_ai, _logs = _load_claude_ai()
 
