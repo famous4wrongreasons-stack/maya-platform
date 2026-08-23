@@ -72,7 +72,9 @@ describe('EmailAuthService', () => {
     });
     const assertPreflight = jest.fn().mockResolvedValue(undefined);
     const assertTenant = jest.fn().mockResolvedValue(undefined);
-    const deliverCode = jest.fn().mockResolvedValue({
+    const deliverCode: jest.MockedFunction<
+      EmailAuthDeliveryService['deliverCode']
+    > = jest.fn().mockResolvedValue({
       delivery: 'debug',
       debug_code: '123456',
     });
@@ -147,11 +149,25 @@ describe('EmailAuthService', () => {
       codeHash: expectedHash,
     });
     expect(challenge.expiresAt).toBeInstanceOf(Date);
-    expect(mocks.deliverCode).toHaveBeenCalledWith({
+    expect(mocks.deliverCode).toHaveBeenCalledTimes(1);
+    const deliveryArgs = mocks.deliverCode.mock.calls[0]?.[0];
+    expect(deliveryArgs).toMatchObject({
       email: owner.email,
       code: '123456',
       expiresInMinutes: 5,
+      shadowContexts: [
+        {
+          tenantId: tenant.id,
+          internalUserId: owner.id,
+        },
+      ],
     });
+    expect(deliveryArgs?.shadowContexts?.[0]?.expiresAt).toEqual(
+      challenge.expiresAt,
+    );
+    expect(deliveryArgs?.shadowContexts?.[0]?.logicalRef).toBe(
+      `email-auth:${tenant.id}:${challenge.expiresAt.toISOString()}`,
+    );
     expect(mocks.assertPreflight).toHaveBeenCalledWith('email_start', {
       clientIp: '203.0.113.10',
       identity: JSON.stringify([tenant.slug, owner.email]),

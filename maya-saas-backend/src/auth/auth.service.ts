@@ -199,6 +199,12 @@ export class AuthService {
           phone,
           code,
           clientIp,
+          shadow: {
+            tenantId: tenant.id,
+            logicalRef: `phone-auth:${tenant.id}:${expiresAt.toISOString()}`,
+            expiresAt,
+            internalUserId: existingUser?.id,
+          },
         });
       } catch (error) {
         if (error instanceof PhoneAuthDeliveryUnavailableError) {

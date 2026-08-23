@@ -108,6 +108,14 @@ export class EmailAuthService {
             email,
             code,
             expiresInMinutes: Math.ceil(ttlSeconds / 60),
+            shadowContexts: [
+              {
+                tenantId: tenant.id,
+                logicalRef: `email-auth:${tenant.id}:${expiresAt.toISOString()}`,
+                expiresAt,
+                internalUserId: user?.id,
+              },
+            ],
           });
         } else {
           // Keep the public response uniform without turning this endpoint
@@ -306,6 +314,12 @@ export class EmailAuthService {
           email,
           code,
           expiresInMinutes: Math.ceil(ttlSeconds / 60),
+          shadowContexts: candidates.map((candidate) => ({
+            tenantId: candidate.tenant!.id,
+            logicalRef: `email-auth:${candidate.tenant!.id}:${expiresAt.toISOString()}`,
+            expiresAt,
+            internalUserId: candidate.id,
+          })),
         });
       }
     } catch (error) {

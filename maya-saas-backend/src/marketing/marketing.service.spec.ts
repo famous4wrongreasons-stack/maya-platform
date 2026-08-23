@@ -1,4 +1,5 @@
 import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
+import { CommunicationShadowService } from '../communication-shadow';
 import { CrmService } from '../crm/crm.service';
 import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -34,13 +35,20 @@ describe('MarketingService', () => {
   const future = new Date('2099-01-01T00:00:00.000Z');
 
   function makeService(input?: {
-    memberships?: Array<{ userId: string; user: { phone: string | null } }>;
+    memberships?: Array<{
+      userId: string;
+      user: { phone: string | null };
+      customerProfile: { marketingConsentAt: Date | null };
+    }>;
     searchClients?: jest.Mock;
     audienceCreate?: jest.Mock;
     campaignCreate?: jest.Mock;
     campaignFindFirst?: jest.Mock;
     audienceFindFirst?: jest.Mock;
     campaignUpdate?: jest.Mock;
+    communicationShadow?: { plan: jest.Mock };
+    consentEvidenceUpsert?: jest.Mock;
+    pushTokens?: Array<{ userId: string; token: string }>;
   }) {
     const prisma = {
       tenant: {
@@ -87,6 +95,20 @@ describe('MarketingService', () => {
               }),
             ),
       },
+      marketingConsentEvidence: {
+        upsert:
+          input?.consentEvidenceUpsert ??
+          jest.fn().mockResolvedValue({
+            id: 'consent-1',
+            status: 'granted',
+            grantedAt: new Date('2025-01-01'),
+            revokedAt: null,
+            expiresAt: null,
+          }),
+      },
+      devicePushToken: {
+        findMany: jest.fn().mockResolvedValue(input?.pushTokens ?? []),
+      },
     };
     const crm = {
       searchClients: input?.searchClients ?? jest.fn().mockResolvedValue([]),
@@ -103,6 +125,7 @@ describe('MarketingService', () => {
       inbox as unknown as InboxService,
       recovery as unknown as RecoveryService,
       new ClientRecencyFactsService(crm as unknown as CrmService),
+      input?.communicationShadow as unknown as CommunicationShadowService,
     );
     return { service, prisma, crm, inbox, recovery };
   }
@@ -144,8 +167,16 @@ describe('MarketingService', () => {
       .mockResolvedValueOnce([]);
     const { service } = makeService({
       memberships: [
-        { userId: 'user-1', user: { phone: '+7 999 111-22-33' } },
-        { userId: 'user-2', user: { phone: '+7 999 444-55-66' } },
+        {
+          userId: 'user-1',
+          user: { phone: '+7 999 111-22-33' },
+          customerProfile: { marketingConsentAt: new Date('2025-01-01') },
+        },
+        {
+          userId: 'user-2',
+          user: { phone: '+7 999 444-55-66' },
+          customerProfile: { marketingConsentAt: new Date('2025-01-01') },
+        },
       ],
       searchClients,
       audienceCreate,
@@ -186,7 +217,13 @@ describe('MarketingService', () => {
       expiresAt: future,
     };
     const { service, inbox, recovery } = makeService({
-      memberships: [{ userId: 'user-1', user: { phone: '+7 999 111-22-33' } }],
+      memberships: [
+        {
+          userId: 'user-1',
+          user: { phone: '+7 999 111-22-33' },
+          customerProfile: { marketingConsentAt: new Date('2025-01-01') },
+        },
+      ],
       campaignFindFirst: jest.fn().mockResolvedValue(campaign),
       audienceFindFirst: jest.fn().mockResolvedValue({
         id: 'audience-123',
@@ -339,7 +376,13 @@ describe('MarketingService', () => {
       expiresAt: future,
     };
     const { service, recovery } = makeService({
-      memberships: [{ userId: 'user-1', user: { phone: '+7 999 111-22-33' } }],
+      memberships: [
+        {
+          userId: 'user-1',
+          user: { phone: '+7 999 111-22-33' },
+          customerProfile: { marketingConsentAt: new Date('2025-01-01') },
+        },
+      ],
       campaignFindFirst: jest.fn().mockResolvedValue(campaign),
       audienceFindFirst: jest.fn().mockResolvedValue({
         id: 'audience-123',
@@ -379,4 +422,111 @@ describe('MarketingService', () => {
       attribution_failed_count: 1,
     });
   });
+
+  it.each([
+    {
+      evidence: {
+        id: 'durable-consent-1',
+        status: 'granted',
+        grantedAt: new Date('2025-01-01'),
+        revokedAt: null,
+        expiresAt: null,
+      },
+      decision: 'ALLOW',
+      reasonCode: undefined,
+    },
+    {
+      evidence: {
+        id: 'revoked-consent-1',
+        status: 'revoked',
+        grantedAt: new Date('2025-01-01'),
+        revokedAt: new Date('2025-02-01'),
+        expiresAt: null,
+      },
+      decision: 'SKIP',
+      reasonCode: 'CONSENT_REVOKED',
+    },
+  ])(
+    'uses durable consent evidence and plans $decision without dispatch',
+    async ({ evidence, decision, reasonCode }) => {
+      const communicationShadow = { plan: jest.fn().mockResolvedValue({}) };
+      const consentEvidenceUpsert = jest.fn().mockResolvedValue(evidence);
+      const campaign = {
+        id: 'campaign-123',
+        tenantId: 'tenant-1',
+        audienceId: 'audience-123',
+        status: 'draft',
+        message: 'Будем рады видеть вас снова.',
+        messageSnapshotHash: 'message-hash',
+        recipientUserIdsJson: ['user-1'],
+        recipientCount: 1,
+        sentCount: 0,
+        channel: 'app',
+        expiresAt: future,
+      };
+      const { service } = makeService({
+        memberships: [
+          {
+            userId: 'user-1',
+            user: { phone: '+7 999 111-22-33' },
+            customerProfile: { marketingConsentAt: new Date('2025-01-01') },
+          },
+        ],
+        campaignFindFirst: jest.fn().mockResolvedValue(campaign),
+        audienceFindFirst: jest.fn().mockResolvedValue({
+          id: 'audience-123',
+          tenantId: 'tenant-1',
+          createdByUserId: 'owner-1',
+          ruleJson: {
+            inactive_days: 90,
+            minimum_visits: 1,
+            max_recipients: 100,
+          },
+          expiresAt: future,
+          snapshotHash: undefined,
+        }),
+        searchClients: jest.fn().mockResolvedValue([
+          {
+            id: 'crm-1',
+            name: 'Hidden',
+            phone: '+7 999 111-22-33',
+            visits_count: 5,
+            sold_amount: 10_000,
+            last_visit_date: '2025-01-01T10:00:00.000Z',
+          },
+        ]),
+        audienceCreate: jest.fn().mockResolvedValue({
+          id: 'shadow-audience-1',
+          snapshotHash: 'shadow-snapshot-1',
+        }),
+        communicationShadow,
+        consentEvidenceUpsert,
+      });
+
+      await service.sendCampaign({
+        tenantId: 'tenant-1',
+        actorUserId: 'owner-1',
+        campaignId: 'campaign-123',
+        idempotencyKey: 'approval-idempotency-key',
+      });
+
+      expect(consentEvidenceUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({ update: {} }),
+      );
+      expect(communicationShadow.plan).toHaveBeenCalledTimes(1);
+      const [[shadowPlan]] = communicationShadow.plan.mock.calls as unknown as [
+        [Parameters<CommunicationShadowService['plan']>[0]],
+      ];
+      expect(shadowPlan).toMatchObject({
+        taxonomy: 'bulk_campaign',
+        channel: 'inbox',
+        recipients: [
+          {
+            consentEvidenceId: evidence.id,
+            eligibility: { decision, reasonCode },
+          },
+        ],
+      });
+    },
+  );
 });

@@ -1,13 +1,18 @@
+import { createHash, randomUUID } from 'node:crypto';
+
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 
 import { asJson } from '../common/json.util';
 import { phonesMatch } from '../common/phone.util';
 import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
+import { CommunicationShadowService } from '../communication-shadow';
 import { CrmService } from '../crm/crm.service';
 import type { CrmClientSearchResult } from '../crm/crm-adapter.interface';
 import { InboxService } from '../inbox/inbox.service';
@@ -29,10 +34,13 @@ export type MarketingAudienceRule = {
 type Candidate = {
   userId: string;
   phone: string;
+  consentRecordedAt: Date;
 };
 
 @Injectable()
 export class MarketingService {
+  private readonly logger = new Logger(MarketingService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly crmService: CrmService,
@@ -45,6 +53,8 @@ export class MarketingService {
      * попадание в рассылку зависело от того, в котором часу нажали кнопку.
      */
     private readonly clientRecency: ClientRecencyFactsService,
+    @Optional()
+    private readonly communicationShadow?: CommunicationShadowService,
   ) {}
 
   async findAudience(input: {
@@ -63,12 +73,18 @@ export class MarketingService {
       }),
     );
 
-    const eligible = evaluated
+    const eligibleCandidates = evaluated
       .filter(({ match }) => this.matchesRule(match, input.rule, when))
-      .map(({ candidate }) => candidate.userId)
+      .map(({ candidate }) => candidate)
       .slice(0, input.rule.max_recipients);
+    const eligible = eligibleCandidates.map((candidate) => candidate.userId);
     const unavailableCount = evaluated.filter(({ match }) => !match).length;
     const expiresAt = new Date(Date.now() + SNAPSHOT_TTL_MS);
+    const snapshotHash = this.audienceSnapshotHash(
+      input.tenantId,
+      input.rule,
+      eligible,
+    );
     const audience = await this.prisma.marketingAudience.create({
       data: {
         tenantId: input.tenantId,
@@ -79,6 +95,20 @@ export class MarketingService {
         eligibleCount: eligible.length,
         unavailableCount,
         expiresAt,
+        provider: 'maya_inbox',
+        status: 'AUDIENCE_CALCULATED',
+        snapshotHash,
+        recipients: {
+          create: eligibleCandidates.map((candidate) => ({
+            id: randomUUID(),
+            tenantId: input.tenantId,
+            externalClientId: candidate.userId,
+            internalUserId: candidate.userId,
+            eligibilityStatus: 'ALLOW',
+            consentSource: 'customer_profile.marketingConsentAt',
+            consentRecordedAt: candidate.consentRecordedAt,
+          })),
+        },
       },
       select: {
         id: true,
@@ -130,6 +160,15 @@ export class MarketingService {
         recipientUserIdsJson: asJson(recipientIds),
         recipientCount: recipientIds.length,
         expiresAt,
+        provider: 'maya_inbox',
+        audienceSnapshotHash:
+          audience.snapshotHash ||
+          this.audienceSnapshotHash(
+            input.tenantId,
+            this.audienceRule(audience.ruleJson),
+            recipientIds,
+          ),
+        messageSnapshotHash: this.hash(input.message),
       },
       select: {
         id: true,
@@ -235,6 +274,16 @@ export class MarketingService {
       this.matchesRule(match, rule, when),
     );
 
+    await this.planBulkCampaignShadow({
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      idempotencyKey: input.idempotencyKey,
+      campaign,
+      audience,
+      rule,
+      recipients: recipients.map(({ candidate }) => candidate),
+    });
+
     let sentCount = 0;
     let failedCount = 0;
     let attributionFailedCount = 0;
@@ -304,13 +353,287 @@ export class MarketingService {
         user: { status: 'active', phone: { not: null } },
         customerProfile: { is: { marketingConsentAt: { not: null } } },
       },
-      select: { userId: true, user: { select: { phone: true } } },
+      select: {
+        userId: true,
+        user: { select: { phone: true } },
+        customerProfile: { select: { marketingConsentAt: true } },
+      },
       orderBy: { createdAt: 'asc' },
       take: MAX_CANDIDATES,
     });
-    return rows.flatMap((row) =>
-      row.user.phone ? [{ userId: row.userId, phone: row.user.phone }] : [],
+    return rows.flatMap((row) => {
+      const consentRecordedAt = row.customerProfile?.marketingConsentAt;
+      return row.user.phone && consentRecordedAt
+        ? [
+            {
+              userId: row.userId,
+              phone: row.user.phone,
+              consentRecordedAt,
+            },
+          ]
+        : [];
+    });
+  }
+
+  private async planBulkCampaignShadow(input: {
+    tenantId: string;
+    actorUserId: string;
+    idempotencyKey: string;
+    campaign: {
+      id: string;
+      message: string;
+      messageSnapshotHash?: string | null;
+      expiresAt: Date;
+    };
+    audience: {
+      id: string;
+      tenantId: string;
+      createdByUserId?: string;
+      ruleJson: unknown;
+      recipientUserIdsJson?: unknown;
+      candidateCount?: number;
+      eligibleCount?: number;
+      unavailableCount?: number;
+      expiresAt: Date;
+      snapshotHash?: string;
+    };
+    rule: MarketingAudienceRule;
+    recipients: Candidate[];
+  }): Promise<void> {
+    if (!this.communicationShadow || input.recipients.length === 0) return;
+
+    try {
+      const durableAudience = await this.ensureShadowAudience({
+        tenantId: input.tenantId,
+        actorUserId: input.actorUserId,
+        audience: input.audience,
+        rule: input.rule,
+        recipients: input.recipients,
+      });
+      const messageSnapshotHash =
+        input.campaign.messageSnapshotHash || this.hash(input.campaign.message);
+      const inboxRecipients = await Promise.all(
+        input.recipients.map((candidate) =>
+          this.shadowMarketingRecipient(
+            input.tenantId,
+            durableAudience.snapshotHash,
+            candidate,
+            candidate.userId,
+            'internal_user',
+            'inbox',
+          ),
+        ),
+      );
+      const common = {
+        tenantId: input.tenantId,
+        sourceType: 'authenticated_request' as const,
+        producerRef: 'marketing.sendCampaign',
+        taxonomy: 'bulk_campaign' as const,
+        templateRef: 'marketing.reactivation',
+        contentIdentityParts: [messageSnapshotHash],
+        eligibilityPolicyRef: 'marketing.consent-recency-revalidation.v1',
+        legacyApprovalRequirement: 'OWNER_CONFIRMED' as const,
+        expiresAt: input.campaign.expiresAt,
+        actorUserId: input.actorUserId,
+        audienceId: durableAudience.id,
+        audienceSnapshotHash: durableAudience.snapshotHash,
+        confirmedByUserId: input.actorUserId,
+      };
+      await this.communicationShadow.plan({
+        ...common,
+        logicalRef: `marketing:${input.campaign.id}:inbox:${input.idempotencyKey}`,
+        channel: 'inbox',
+        recipients: inboxRecipients,
+      });
+
+      const consentByUser = new Map(
+        input.recipients.map((candidate) => [candidate.userId, candidate]),
+      );
+      const pushTokens = await this.prisma.devicePushToken.findMany({
+        where: {
+          tenantId: input.tenantId,
+          userId: { in: input.recipients.map(({ userId }) => userId) },
+        },
+        select: { userId: true, token: true },
+        orderBy: [{ userId: 'asc' }, { token: 'asc' }],
+      });
+      const pushRecipients = await Promise.all(
+        pushTokens.flatMap((token) => {
+          const candidate = consentByUser.get(token.userId);
+          return candidate
+            ? [
+                this.shadowMarketingRecipient(
+                  input.tenantId,
+                  durableAudience.snapshotHash,
+                  candidate,
+                  token.token,
+                  'apns_device',
+                  'apns',
+                ),
+              ]
+            : [];
+        }),
+      );
+      if (pushRecipients.length > 0) {
+        await this.communicationShadow.plan({
+          ...common,
+          logicalRef: `marketing:${input.campaign.id}:apns:${input.idempotencyKey}`,
+          channel: 'apns',
+          recipients: pushRecipients,
+        });
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'unknown';
+      this.logger.warn(
+        `Communication shadow plan failed for campaign ${input.campaign.id}: ${reason}`,
+      );
+    }
+  }
+
+  private async ensureShadowAudience(input: {
+    tenantId: string;
+    actorUserId: string;
+    audience: {
+      id: string;
+      createdByUserId?: string;
+      candidateCount?: number;
+      unavailableCount?: number;
+      expiresAt: Date;
+      snapshotHash?: string;
+    };
+    rule: MarketingAudienceRule;
+    recipients: Candidate[];
+  }): Promise<{ id: string; snapshotHash: string }> {
+    const userIds = input.recipients.map(({ userId }) => userId);
+    const snapshotHash = this.audienceSnapshotHash(
+      input.tenantId,
+      input.rule,
+      userIds,
     );
+    if (input.audience.snapshotHash === snapshotHash) {
+      return { id: input.audience.id, snapshotHash };
+    }
+
+    return this.prisma.marketingAudience.create({
+      data: {
+        tenantId: input.tenantId,
+        createdByUserId: input.audience.createdByUserId || input.actorUserId,
+        ruleJson: asJson(input.rule),
+        recipientUserIdsJson: asJson([...userIds].sort()),
+        candidateCount: input.audience.candidateCount ?? userIds.length,
+        eligibleCount: userIds.length,
+        unavailableCount: input.audience.unavailableCount ?? 0,
+        expiresAt: input.audience.expiresAt,
+        provider: 'maya_inbox',
+        status: 'AUDIENCE_REVALIDATED_SHADOW',
+        snapshotHash,
+        recipients: {
+          create: input.recipients.map((candidate) => ({
+            id: randomUUID(),
+            tenantId: input.tenantId,
+            externalClientId: candidate.userId,
+            internalUserId: candidate.userId,
+            eligibilityStatus: 'ALLOW',
+            consentSource: 'customer_profile.marketingConsentAt',
+            consentRecordedAt: candidate.consentRecordedAt,
+          })),
+        },
+      },
+      select: { id: true, snapshotHash: true },
+    });
+  }
+
+  private async shadowMarketingRecipient(
+    tenantId: string,
+    audienceSnapshotHash: string,
+    candidate: Candidate,
+    recipientRef: string,
+    recipientKind: 'internal_user' | 'apns_device',
+    channel: 'inbox' | 'apns',
+  ) {
+    const consentAt = candidate.consentRecordedAt.toISOString();
+    const consentEvidence = await this.prisma.marketingConsentEvidence.upsert({
+      where: {
+        tenantId_externalClientId_channel: {
+          tenantId,
+          externalClientId: candidate.userId,
+          channel,
+        },
+      },
+      create: {
+        id: `marketing-consent:${this.hash(
+          JSON.stringify([tenantId, candidate.userId, channel]),
+        )}`,
+        tenantId,
+        externalClientId: candidate.userId,
+        channel,
+        status: 'granted',
+        source: 'customer_profile.marketingConsentAt.shadow_projection',
+        evidenceRef: `customer-profile-consent:${this.hash(consentAt)}`,
+        grantedAt: candidate.consentRecordedAt,
+        updatedAt: new Date(),
+      },
+      // Existing evidence is authoritative. Revoked or expired evidence must
+      // never be silently re-granted from the legacy profile flag.
+      update: {},
+    });
+    const status = consentEvidence.status.trim().toLowerCase();
+    const reasonCode = consentEvidence.revokedAt
+      ? 'CONSENT_REVOKED'
+      : consentEvidence.expiresAt &&
+          consentEvidence.expiresAt.getTime() <= Date.now()
+        ? 'CONSENT_EXPIRED'
+        : status !== 'granted'
+          ? 'CONSENT_NOT_GRANTED'
+          : !consentEvidence.grantedAt
+            ? 'CONSENT_EVIDENCE_INCOMPLETE'
+            : undefined;
+    return {
+      recipientRef,
+      recipientKind,
+      internalUserId: candidate.userId,
+      consentEvidenceId: consentEvidence.id,
+      eligibility: {
+        basis: 'consent_and_current_crm_recency',
+        decision: reasonCode ? ('SKIP' as const) : ('ALLOW' as const),
+        policyVersion: 1,
+        evidenceRef: `consent-evidence:${this.hash(consentEvidence.id)}`,
+        evidenceIdentityParts: [
+          tenantId,
+          candidate.userId,
+          channel,
+          consentEvidence.id,
+          status,
+          consentAt,
+          consentEvidence.revokedAt?.toISOString() ?? '',
+          consentEvidence.expiresAt?.toISOString() ?? '',
+          audienceSnapshotHash,
+        ],
+        reasonCode,
+      },
+    };
+  }
+
+  private audienceSnapshotHash(
+    tenantId: string,
+    rule: MarketingAudienceRule,
+    userIds: string[],
+  ): string {
+    return this.hash(
+      JSON.stringify({
+        tenantId,
+        rule: {
+          inactive_days: rule.inactive_days,
+          minimum_visits: rule.minimum_visits,
+          max_recipients: rule.max_recipients,
+        },
+        userIds: [...userIds].sort(),
+      }),
+    );
+  }
+
+  private hash(value: string): string {
+    return createHash('sha256').update(value).digest('base64url');
   }
 
   private async exactCrmMatch(

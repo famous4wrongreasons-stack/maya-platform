@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 
 import { AuditLogModule } from '../audit-log/audit-log.module';
+import { CommunicationShadowModule } from '../communication-shadow';
 import { CrmModule } from '../crm/crm.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantsModule } from '../tenants/tenants.module';
@@ -29,6 +30,7 @@ import { TenantAuthRepository } from './tenant-auth.repository';
 @Module({
   imports: [
     AuditLogModule,
+    CommunicationShadowModule,
     ConfigModule,
     CrmModule,
     PassportModule,

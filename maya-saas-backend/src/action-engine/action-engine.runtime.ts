@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ActionExecutionState,
+  ActionPolicyDecision,
   ActionReconciliationState,
   type ActionExecution,
 } from '@prisma/client';
@@ -122,6 +123,37 @@ export class ActionEngineRuntimeService {
 
   preview(request: TrustedActionExecutionRequestV1): ActionExecutionPreviewV1 {
     return this.kernel.previewExecution(request);
+  }
+
+  /**
+   * Persists a policy-denied shadow projection without invoking an executor.
+   * Only capabilities that are registered as SHADOW_ONLY can use this path.
+   */
+  async planShadow(
+    request: TrustedActionExecutionRequestV1,
+  ): Promise<ActionExecution> {
+    const preview = this.kernel.previewExecution(request);
+    if (
+      preview.policyDecision !== ActionPolicyDecision.SHADOW_ONLY ||
+      preview.executorKey !== 'shadow.none' ||
+      preview.externalSideEffects !== 0
+    ) {
+      throw new ActionContractError(
+        'planShadow accepts only non-executable SHADOW_ONLY capabilities',
+      );
+    }
+    const execution = await this.kernel.createExecution(request);
+    if (
+      !execution.dryRun ||
+      execution.policyDecision !== ActionPolicyDecision.SHADOW_ONLY ||
+      execution.state !== ActionExecutionState.NOT_EXECUTED ||
+      execution.notExecutedReasonCode !== 'shadow_only'
+    ) {
+      throw new ActionContractError(
+        'Shadow ActionExecution did not preserve the non-execution invariant',
+      );
+    }
+    return execution;
   }
 
   getExecutionResult(

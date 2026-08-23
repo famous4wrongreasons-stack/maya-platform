@@ -1,5 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
+import { CommunicationShadowService } from '../communication-shadow';
 
 export type PhoneAuthDeliveryResult =
   | {
@@ -43,12 +45,22 @@ type SmsRuSendResponse = {
 export class PhoneAuthDeliveryService {
   private readonly logger = new Logger(PhoneAuthDeliveryService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Optional()
+    private readonly communicationShadow?: CommunicationShadowService,
+  ) {}
 
   async deliverCode(params: {
     phone: string;
     code: string;
     clientIp?: string | null;
+    shadow?: {
+      tenantId: string;
+      logicalRef: string;
+      expiresAt: Date;
+      internalUserId?: string;
+    };
   }): Promise<PhoneAuthDeliveryResult> {
     const provider = this.resolveProvider();
 
@@ -60,10 +72,62 @@ export class PhoneAuthDeliveryService {
     }
 
     await this.sendViaSmsRu(params);
+    await this.planShadow(params);
 
     return {
       delivery: 'sms',
     };
+  }
+
+  private async planShadow(params: {
+    phone: string;
+    shadow?: {
+      tenantId: string;
+      logicalRef: string;
+      expiresAt: Date;
+      internalUserId?: string;
+    };
+  }): Promise<void> {
+    if (!this.communicationShadow || !params.shadow) return;
+    try {
+      await this.communicationShadow.plan({
+        tenantId: params.shadow.tenantId,
+        sourceType: 'authenticated_request',
+        producerRef: 'auth.phone.deliverCode',
+        logicalRef: params.shadow.logicalRef,
+        taxonomy: 'transactional_single',
+        channel: 'sms',
+        templateRef: 'auth.phone.verification-code',
+        contentIdentityParts: [
+          'phone_verification_code',
+          params.shadow.expiresAt.toISOString(),
+        ],
+        recipients: [
+          {
+            recipientRef: params.phone,
+            recipientKind: 'phone_number',
+            internalUserId: params.shadow.internalUserId,
+            eligibility: {
+              basis: 'tenant_phone_auth_challenge',
+              decision: 'ALLOW',
+              policyVersion: 1,
+              evidenceRef: 'auth:phone-challenge',
+              evidenceIdentityParts: [
+                params.shadow.tenantId,
+                params.phone,
+                params.shadow.expiresAt.toISOString(),
+              ],
+            },
+          },
+        ],
+        eligibilityPolicyRef: 'auth.phone-challenge.v1',
+        legacyApprovalRequirement: 'SYSTEM_POLICY',
+        expiresAt: params.shadow.expiresAt,
+      });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'unknown';
+      this.logger.warn(`Phone auth shadow observation failed: ${reason}`);
+    }
   }
 
   private resolveProvider(): 'debug' | 'smsru' {

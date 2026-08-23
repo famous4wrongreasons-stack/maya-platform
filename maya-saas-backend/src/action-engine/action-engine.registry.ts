@@ -98,6 +98,96 @@ function optionalServiceIds(
   return serviceIds(source);
 }
 
+const COMMUNICATION_CHANNELS = new Set([
+  'inbox',
+  'apns',
+  'telegram',
+  'sms',
+  'email',
+]);
+const LEGACY_APPROVAL_REQUIREMENTS = new Set([
+  'NONE',
+  'OWNER_CONFIRMED',
+  'SYSTEM_POLICY',
+]);
+const COMMUNICATION_RISK_CLASSES = new Set([
+  'transactional',
+  'operational',
+  'bulk',
+]);
+
+function communicationShadowNormalizer(
+  scope: 'SINGLE' | 'BULK',
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  const channel = requiredText(source, 'channel', 32);
+  const legacyApprovalRequirement = requiredText(
+    source,
+    'legacyApprovalRequirement',
+    32,
+  );
+  const riskClass = requiredText(source, 'riskClass', 32);
+  if (!COMMUNICATION_CHANNELS.has(channel)) {
+    throw new ActionContractError(
+      'channel is not registered for communication',
+    );
+  }
+  if (!LEGACY_APPROVAL_REQUIREMENTS.has(legacyApprovalRequirement)) {
+    throw new ActionContractError('legacyApprovalRequirement is invalid');
+  }
+  if (!COMMUNICATION_RISK_CLASSES.has(riskClass)) {
+    throw new ActionContractError('riskClass is invalid');
+  }
+  const recipientIdentityHash = optionalOpaqueField(
+    source,
+    'recipientIdentityHash',
+  );
+  const audienceSnapshotHash = optionalOpaqueField(
+    source,
+    'audienceSnapshotHash',
+  );
+  if (scope === 'SINGLE' && (!recipientIdentityHash || audienceSnapshotHash)) {
+    throw new ActionContractError(
+      'single communication requires only recipientIdentityHash',
+    );
+  }
+  if (scope === 'BULK' && (!audienceSnapshotHash || recipientIdentityHash)) {
+    throw new ActionContractError(
+      'bulk communication requires only audienceSnapshotHash',
+    );
+  }
+  const recipientCount = source.recipientCount;
+  if (
+    !Number.isInteger(recipientCount) ||
+    Number(recipientCount) < 1 ||
+    Number(recipientCount) > 100_000
+  ) {
+    throw new ActionContractError('recipientCount must be a positive integer');
+  }
+  return {
+    logicalCommunicationRef: normalizeOpaqueRef(
+      source.logicalCommunicationRef,
+      'logicalCommunicationRef',
+    ),
+    channel,
+    contentIdentityHash: normalizeOpaqueRef(
+      source.contentIdentityHash,
+      'contentIdentityHash',
+    ),
+    ...(recipientIdentityHash ? { recipientIdentityHash } : {}),
+    ...(audienceSnapshotHash ? { audienceSnapshotHash } : {}),
+    eligibilityPolicyRef: normalizeOpaqueRef(
+      source.eligibilityPolicyRef,
+      'eligibilityPolicyRef',
+    ),
+    legacyApprovalRequirement,
+    riskClass,
+    templateRef: normalizeOpaqueRef(source.templateRef, 'templateRef'),
+    recipientCount: Number(recipientCount),
+  };
+}
+
 function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
   const source = recordInput(value);
   const branchId = optionalOpaqueField(source, 'branchId');
@@ -222,6 +312,55 @@ function shadowCapability(input: {
   };
 }
 
+function communicationShadowCapability(input: {
+  capability: string;
+  actionClass: string;
+  scope: 'SINGLE' | 'BULK';
+}): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-input/1`,
+    targetKind:
+      input.scope === 'SINGLE' ? 'communication_recipient' : 'audience',
+    allowedSourceTypes: [
+      'authenticated_request',
+      'scheduler',
+      'webhook',
+      'legacy_bridge',
+    ],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['external', 'customer_visible', 'shadow_only'],
+    policyKey: 'chapter6.communication-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'communication-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'communication-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: (value) =>
+      communicationShadowNormalizer(input.scope, value),
+  };
+}
+
 function syntheticCapability(input: {
   capability: string;
   actionClass: string;
@@ -340,6 +479,21 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     actionClass: 'prepare_response_draft',
     targetKind: 'request',
     inputKey: 'requestRef',
+  }),
+  communicationShadowCapability({
+    capability: 'communication.transactional-single.shadow.v1',
+    actionClass: 'send_transactional_single',
+    scope: 'SINGLE',
+  }),
+  communicationShadowCapability({
+    capability: 'communication.operational-single.shadow.v1',
+    actionClass: 'send_operational_single',
+    scope: 'SINGLE',
+  }),
+  communicationShadowCapability({
+    capability: 'communication.bulk-campaign.shadow.v1',
+    actionClass: 'send_bulk_campaign',
+    scope: 'BULK',
   }),
   appointmentCapability({
     capability: 'crm.appointment.create.v1',

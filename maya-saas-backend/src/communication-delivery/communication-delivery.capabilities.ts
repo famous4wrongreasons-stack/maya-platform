@@ -4,6 +4,64 @@ import { CommunicationContractError } from './communication-delivery.errors';
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
 
+const SHADOW_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] = [
+  {
+    key: 'communication.shadow.inbox',
+    version: 1,
+    channel: 'inbox',
+    testOnly: false,
+    externalDispatchEnabled: false,
+    providerIdempotencySupported: true,
+    providerReferenceReturned: true,
+    reconciliationSupported: false,
+    proofOfNonDeliverySupported: false,
+    acceptedIsTerminal: true,
+    retry: {
+      key: 'communication.shadow.no-dispatch',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'communication.shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+    },
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+  },
+  ...['apns', 'telegram', 'smsru', 'smtp'].map(
+    (provider): CommunicationProviderCapabilitiesV1 => ({
+      key: `communication.shadow.${provider}`,
+      version: 1,
+      channel:
+        provider === 'smsru' ? 'sms' : provider === 'smtp' ? 'email' : provider,
+      testOnly: false,
+      externalDispatchEnabled: false,
+      providerIdempotencySupported: false,
+      providerReferenceReturned: false,
+      reconciliationSupported: false,
+      proofOfNonDeliverySupported: false,
+      acceptedIsTerminal: false,
+      retry: {
+        key: `communication.shadow.${provider}.no-dispatch`,
+        version: 1,
+        maxExecutionAttempts: 1,
+        retryablePreDispatchErrors: new Set(),
+        backoffMs: [],
+      },
+      reconciliation: {
+        key: `communication.shadow.${provider}.manual-only`,
+        version: 1,
+        maxInconclusiveAttempts: 1,
+      },
+      payloadRetentionMs: 7 * DAY,
+      auditRetentionMs: 365 * DAY,
+    }),
+  ),
+];
+
 const TEST_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] = [
   {
     key: 'communication.test.reconcilable',
@@ -87,7 +145,10 @@ const TEST_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] = [
 
 export class CommunicationCapabilityRegistry {
   private readonly definitions = new Map(
-    TEST_CAPABILITIES.map((definition) => [definition.key, definition]),
+    [...SHADOW_CAPABILITIES, ...TEST_CAPABILITIES].map((definition) => [
+      definition.key,
+      definition,
+    ]),
   );
 
   get(key: string): CommunicationProviderCapabilitiesV1 {
@@ -98,10 +159,10 @@ export class CommunicationCapabilityRegistry {
         `Communication capability is not registered: ${key}`,
       );
     }
-    if (!definition.testOnly || definition.externalDispatchEnabled) {
+    if (definition.externalDispatchEnabled) {
       throw new CommunicationContractError(
         'EXTERNAL_DISPATCH_FORBIDDEN',
-        'B3.1 accepts only test-only capabilities with dispatch disabled',
+        'Communication foundation accepts only capabilities with dispatch disabled',
       );
     }
     return definition;

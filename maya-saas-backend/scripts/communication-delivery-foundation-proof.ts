@@ -418,7 +418,6 @@ async function main(): Promise<void> {
     const definitions = new CommunicationCapabilityRegistry().list();
     assert(definitions.length >= 3);
     for (const definition of definitions) {
-      assert.equal(definition.testOnly, true);
       assert.equal(definition.externalDispatchEnabled, false);
       assert.equal(typeof definition.providerIdempotencySupported, 'boolean');
       assert.equal(typeof definition.providerReferenceReturned, 'boolean');
@@ -426,7 +425,23 @@ async function main(): Promise<void> {
       assert.equal(typeof definition.proofOfNonDeliverySupported, 'boolean');
       assert.equal(typeof definition.acceptedIsTerminal, 'boolean');
     }
+    const testDefinitions = definitions.filter(
+      (definition) => definition.testOnly,
+    );
+    const shadowDefinitions = definitions.filter(
+      (definition) => !definition.testOnly,
+    );
+    assert(testDefinitions.length >= 3);
+    assert.equal(shadowDefinitions.length, 5);
+    assert(
+      shadowDefinitions.every(
+        (definition) =>
+          definition.key.startsWith('communication.shadow.') &&
+          !definition.externalDispatchEnabled,
+      ),
+    );
     matrix.provider_capabilities_explicit_and_test_only = true;
+    matrix.production_shadow_capabilities_dispatch_disabled = true;
 
     stage('logical_delivery_dedup');
     const dedupInput = await envelopeInput({
@@ -1249,25 +1264,42 @@ async function main(): Promise<void> {
     const source = artifacts
       .map((file) => readFileSync(join(artifactDirectory, file), 'utf8'))
       .join('\n');
-    const forbidden = [
+    const forbiddenRuntimeTokens = [
       'fetch(',
       'axios',
       'node:http',
       'node:https',
-      'yclients',
-      'telegram',
-      'twilio',
-      'sendgrid',
       '/billing/',
       '/crm/',
       'CampaignExecutor',
       'MessageExecutor',
     ];
-    for (const token of forbidden) {
+    for (const token of forbiddenRuntimeTokens) {
       assert.equal(
         source.toLowerCase().includes(token.toLowerCase()),
         false,
         token,
+      );
+    }
+    const importSurface = [
+      ...(source.match(/from\s+['"][^'"]+['"]/gi) ?? []),
+      ...(source.match(/require\(\s*['"][^'"]+['"]\s*\)/gi) ?? []),
+      ...(source.match(/import\(\s*['"][^'"]+['"]\s*\)/gi) ?? []),
+    ].join('\n');
+    for (const providerToken of [
+      'yclients',
+      'telegram',
+      'twilio',
+      'sendgrid',
+      'smsru',
+      'nodemailer',
+      'firebase',
+      'apns',
+    ]) {
+      assert.equal(
+        importSurface.toLowerCase().includes(providerToken),
+        false,
+        `provider import: ${providerToken}`,
       );
     }
     assert(

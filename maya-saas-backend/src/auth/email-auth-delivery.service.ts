@@ -1,6 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nodemailer from 'nodemailer';
+
+import { CommunicationShadowService } from '../communication-shadow';
 
 export type EmailAuthDeliveryResult =
   | {
@@ -29,7 +31,11 @@ export class EmailAuthDeliveryFailedError extends Error {
 export class EmailAuthDeliveryService {
   private readonly logger = new Logger(EmailAuthDeliveryService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Optional()
+    private readonly communicationShadow?: CommunicationShadowService,
+  ) {}
 
   getDeliveryType(): 'debug' | 'email' {
     return this.resolveProvider() === 'debug' ? 'debug' : 'email';
@@ -39,6 +45,12 @@ export class EmailAuthDeliveryService {
     email: string;
     code: string;
     expiresInMinutes: number;
+    shadowContexts?: Array<{
+      tenantId: string;
+      logicalRef: string;
+      expiresAt: Date;
+      internalUserId?: string;
+    }>;
   }): Promise<EmailAuthDeliveryResult> {
     const provider = this.resolveProvider();
 
@@ -50,8 +62,62 @@ export class EmailAuthDeliveryService {
     }
 
     await this.sendViaSmtp(params);
+    await this.planShadow(params);
 
     return { delivery: 'email' };
+  }
+
+  private async planShadow(params: {
+    email: string;
+    shadowContexts?: Array<{
+      tenantId: string;
+      logicalRef: string;
+      expiresAt: Date;
+      internalUserId?: string;
+    }>;
+  }): Promise<void> {
+    if (!this.communicationShadow || !params.shadowContexts?.length) return;
+    for (const context of params.shadowContexts) {
+      try {
+        await this.communicationShadow.plan({
+          tenantId: context.tenantId,
+          sourceType: 'authenticated_request',
+          producerRef: 'auth.email.deliverCode',
+          logicalRef: context.logicalRef,
+          taxonomy: 'transactional_single',
+          channel: 'email',
+          templateRef: 'auth.email.verification-code',
+          contentIdentityParts: [
+            'email_verification_code',
+            context.expiresAt.toISOString(),
+          ],
+          recipients: [
+            {
+              recipientRef: params.email,
+              recipientKind: 'email_address',
+              internalUserId: context.internalUserId,
+              eligibility: {
+                basis: 'tenant_email_auth_challenge',
+                decision: 'ALLOW',
+                policyVersion: 1,
+                evidenceRef: 'auth:email-challenge',
+                evidenceIdentityParts: [
+                  context.tenantId,
+                  params.email,
+                  context.expiresAt.toISOString(),
+                ],
+              },
+            },
+          ],
+          eligibilityPolicyRef: 'auth.email-challenge.v1',
+          legacyApprovalRequirement: 'SYSTEM_POLICY',
+          expiresAt: context.expiresAt,
+        });
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : 'unknown';
+        this.logger.warn(`Email auth shadow observation failed: ${reason}`);
+      }
+    }
   }
 
   private resolveProvider(): 'debug' | 'smtp' {

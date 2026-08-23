@@ -18,6 +18,10 @@ _INGEST_URL = (
     os.environ.get("MAYA_INBOX_INGEST_URL")
     or "http://127.0.0.1:3107/api/inbox/internal/ingest"
 ).rstrip("/")
+_LEGACY_TELEGRAM_OBSERVE_URL = (
+    os.environ.get("MAYA_COMMUNICATION_SHADOW_URL")
+    or _INGEST_URL.rsplit("/", 1)[0] + "/observe-legacy-telegram"
+).rstrip("/")
 _BRIDGE_TOKEN = (os.environ.get("MAYA_INBOX_BRIDGE_TOKEN") or "").strip()
 _TENANT_SLUG = (
     os.environ.get("MAYA_INBOX_TENANT_SLUG") or "muzhskaya-estetika"
@@ -70,6 +74,7 @@ async def publish_inbox_item(
         "growth_plan",
     }:
         return False
+
     if not _BRIDGE_TOKEN or len(_BRIDGE_TOKEN) < 24:
         return False
     clean = (body_text or "").strip()
@@ -112,6 +117,53 @@ async def publish_inbox_item(
                 return True
     except Exception as exc:
         logger.warning("inbox ingest failed: %s", exc)
+        return False
+
+
+async def observe_legacy_telegram_send(
+    *,
+    telegram_chat_id: int,
+    message_id: int | str,
+    body_text: str,
+) -> bool:
+    """Record an already-sent legacy Telegram message in shadow only."""
+    if not _BRIDGE_TOKEN or len(_BRIDGE_TOKEN) < 24:
+        return False
+    clean = (body_text or "").strip()
+    if not clean:
+        return False
+    source_event_id = f"telegram:{int(telegram_chat_id)}:{message_id}"[:160]
+    body = {
+        "tenant_slug": _TENANT_SLUG,
+        "provider": _PROVIDER,
+        "external_company_id": _external_company_id(),
+        "source_event_id": source_event_id,
+        "telegram_chat_id": str(int(telegram_chat_id)),
+        "body_text": clean[:12000],
+        "template_ref": "legacy.telegram.text",
+    }
+    try:
+        timeout = aiohttp.ClientTimeout(total=2)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                _LEGACY_TELEGRAM_OBSERVE_URL,
+                json=body,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Maya-Inbox-Bridge": _BRIDGE_TOKEN,
+                },
+            ) as resp:
+                if resp.status >= 400:
+                    response_text = await resp.text()
+                    logger.warning(
+                        "communication shadow HTTP %s: %s",
+                        resp.status,
+                        response_text[:300],
+                    )
+                    return False
+                return True
+    except Exception as exc:
+        logger.warning("communication shadow observe failed: %s", exc)
         return False
 
 

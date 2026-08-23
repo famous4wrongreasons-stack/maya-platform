@@ -101,6 +101,48 @@ export class IngestInboxItemDto {
   fanout_owners?: boolean;
 }
 
+/**
+ * Read-only observation of a Telegram message already sent by the legacy bot.
+ * The route fixes channel, taxonomy and permissions server-side; callers may
+ * provide only the tenant source, recipient and content identity inputs.
+ */
+export class ObserveLegacyTelegramDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(80)
+  tenant_slug!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  provider?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  external_company_id?: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  source_event_id!: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  telegram_chat_id!: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(12000)
+  body_text!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  template_ref?: string;
+}
+
 export class RegisterPushTokenDto {
   @IsString()
   @IsIn(['ios', 'android', 'web'])

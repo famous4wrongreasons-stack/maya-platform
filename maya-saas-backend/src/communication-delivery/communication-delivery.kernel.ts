@@ -290,6 +290,12 @@ export class CommunicationDeliveryKernel {
                   'Tenant-scoped audience does not exist',
                 );
               }
+              if (audience.snapshotHash !== normalized.audienceSnapshotHash) {
+                throw new CommunicationConflictError(
+                  'AUDIENCE_SNAPSHOT_MISMATCH',
+                  'Communication envelope does not match the immutable audience snapshot',
+                );
+              }
             }
 
             const capability = this.registry.get(input.capabilityKey);
@@ -1638,7 +1644,15 @@ export class CommunicationDeliveryKernel {
     policyDecision: ActionPolicyDecision;
     approvalDecision: ActionApprovalDecision;
     state: ActionExecutionState;
+    notExecutedReasonCode: string | null;
   }): void {
+    const shadowPlanOnly =
+      execution.dryRun &&
+      execution.policyDecision === ActionPolicyDecision.SHADOW_ONLY &&
+      execution.approvalDecision === ActionApprovalDecision.NOT_REQUIRED &&
+      execution.state === ActionExecutionState.NOT_EXECUTED &&
+      execution.notExecutedReasonCode === 'shadow_only';
+    if (shadowPlanOnly) return;
     if (
       execution.dryRun ||
       execution.policyDecision !== ActionPolicyDecision.ALLOW ||

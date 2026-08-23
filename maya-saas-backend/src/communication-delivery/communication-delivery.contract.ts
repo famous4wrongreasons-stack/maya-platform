@@ -86,7 +86,7 @@ export interface CommunicationProviderCapabilitiesV1 {
   key: string;
   version: number;
   channel: string;
-  testOnly: true;
+  testOnly: boolean;
   externalDispatchEnabled: false;
   providerIdempotencySupported: boolean;
   providerReferenceReturned: boolean;

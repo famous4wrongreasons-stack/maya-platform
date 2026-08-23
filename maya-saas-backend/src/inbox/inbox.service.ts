@@ -1,11 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 
+import { CommunicationShadowService } from '../communication-shadow';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { sendInboxApns } from './apns-push';
-import type { IngestInboxItemDto, RegisterPushTokenDto } from './dto/inbox.dto';
+import type {
+  IngestInboxItemDto,
+  ObserveLegacyTelegramDto,
+  RegisterPushTokenDto,
+} from './dto/inbox.dto';
 
 /**
  * Арендаторы, которым мост имеет право писать.
@@ -39,6 +44,8 @@ export class InboxService {
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
     private readonly bridgeSource: BridgeSourceService,
+    @Optional()
+    private readonly communicationShadow?: CommunicationShadowService,
   ) {}
 
   assertBridgeToken(header: string | undefined): void {
@@ -80,8 +87,71 @@ export class InboxService {
         userIds: dto.user_ids,
         telegramChatIds: dto.telegram_chat_ids,
         fanoutOwners: dto.fanout_owners,
+        shadowSourceType: 'legacy_bridge',
       }),
     );
+  }
+
+  async observeLegacyTelegram(dto: ObserveLegacyTelegramDto) {
+    const tenant = await this.bridgeSource.resolveTenant(
+      {
+        provider: dto.provider,
+        externalCompanyId: dto.external_company_id,
+        tenantSlug: dto.tenant_slug,
+      },
+      'inbox_tenant_not_found',
+    );
+    return this.tenantContext.runAsSystemTenant(tenant.tenantId, async () => {
+      if (!this.communicationShadow) {
+        return { planned: false, external_messages_sent: 0 };
+      }
+      const identity = await this.prisma.authIdentity.findFirst({
+        where: {
+          tenantId: tenant.tenantId,
+          provider: 'telegram',
+          providerUserId: dto.telegram_chat_id,
+          user: { status: 'active' },
+        },
+        select: { userId: true },
+      });
+      const result = await this.communicationShadow.plan({
+        tenantId: tenant.tenantId,
+        sourceType: 'legacy_bridge',
+        producerRef: 'legacy.python.telegram.send_message',
+        logicalRef: dto.source_event_id,
+        taxonomy: 'operational_single',
+        channel: 'telegram',
+        templateRef: dto.template_ref || 'legacy.telegram.text',
+        contentIdentityParts: [dto.body_text],
+        recipients: [
+          {
+            recipientRef: dto.telegram_chat_id,
+            recipientKind: 'telegram_chat',
+            internalUserId: identity?.userId,
+            eligibility: {
+              basis: 'legacy_executor_selected_recipient',
+              decision: 'ALLOW',
+              policyVersion: 1,
+              evidenceRef: `legacy:${dto.source_event_id}`,
+              evidenceIdentityParts: [
+                tenant.tenantId,
+                dto.source_event_id,
+                dto.telegram_chat_id,
+              ],
+            },
+          },
+        ],
+        eligibilityPolicyRef: 'legacy.telegram.production-recipient.v1',
+        legacyApprovalRequirement: 'SYSTEM_POLICY',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+      });
+      return {
+        planned: true,
+        action_execution_id: result.actionExecutionId,
+        delivery_id: result.recipientIds[0],
+        external_messages_sent: 0,
+      };
+    });
   }
 
   /**
@@ -100,6 +170,8 @@ export class InboxService {
       userIds?: string[];
       telegramChatIds?: string[];
       fanoutOwners?: boolean;
+      shadowSourceType?:
+        'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
     },
   ) {
     const dto: IngestInboxItemDto = {
@@ -121,6 +193,35 @@ export class InboxService {
         `inbox publish skipped: no recipients for ${input.type}/${input.sourceEventId} tenant=${tenantId}`,
       );
       return { stored: 0, user_ids: [] as string[] };
+    }
+
+    if (input.type !== 'marketing_campaign') {
+      await Promise.all(
+        userIds.map((userId) =>
+          this.planSingleSafely({
+            tenantId,
+            sourceType:
+              input.shadowSourceType ?? this.shadowSourceForType(input.type),
+            producerRef: `inbox.${input.type}`,
+            logicalRef: `${input.type}:${input.sourceEventId}:inbox:${userId}`,
+            taxonomy: this.shadowTaxonomyForType(input.type),
+            channel: 'inbox',
+            templateRef: `inbox.${input.type}`,
+            contentIdentityParts: [
+              input.type,
+              input.title,
+              input.bodyText,
+              input.deepLink ?? '',
+            ],
+            recipientRef: userId,
+            recipientKind: 'internal_user',
+            internalUserId: userId,
+            eligibilityPolicyRef: 'inbox.server-recipient-resolution.v1',
+            legacyApprovalRequirement:
+              input.type === 'maya_task' ? 'OWNER_CONFIRMED' : 'SYSTEM_POLICY',
+          }),
+        ),
+      );
     }
 
     let stored = 0;
@@ -435,13 +536,40 @@ export class InboxService {
   ): Promise<void> {
     const tokens = await this.prisma.devicePushToken.findMany({
       where: { tenantId, userId: { in: userIds } },
-      select: { platform: true, token: true },
+      select: { userId: true, platform: true, token: true },
     });
     if (tokens.length === 0) {
       this.logger.log(
         `inbox stored type=${dto.type} but no device tokens yet title=${dto.title.slice(0, 40)}`,
       );
       return;
+    }
+    if (dto.type !== 'marketing_campaign') {
+      await Promise.all(
+        tokens.map((token) =>
+          this.planSingleSafely({
+            tenantId,
+            sourceType: this.shadowSourceForType(dto.type),
+            producerRef: `apns.${dto.type}`,
+            logicalRef: `${dto.type}:${dto.source_event_id}:apns:${token.userId}:${token.token}`,
+            taxonomy: this.shadowTaxonomyForType(dto.type),
+            channel: 'apns',
+            templateRef: `apns.${dto.type}`,
+            contentIdentityParts: [
+              dto.type,
+              dto.title,
+              dto.body_text,
+              dto.deep_link ?? '',
+            ],
+            recipientRef: token.token,
+            recipientKind: 'apns_device_token',
+            internalUserId: token.userId,
+            eligibilityPolicyRef: 'apns.active-device-token.v1',
+            legacyApprovalRequirement:
+              dto.type === 'maya_task' ? 'OWNER_CONFIRMED' : 'SYSTEM_POLICY',
+          }),
+        ),
+      );
     }
     await sendInboxApns({
       tokens,
@@ -451,5 +579,105 @@ export class InboxService {
       type: dto.type,
       logger: this.logger,
     });
+  }
+
+  private shadowTaxonomyForType(
+    type: IngestInboxItemDto['type'],
+  ): 'transactional_single' | 'operational_single' {
+    return new Set<IngestInboxItemDto['type']>([
+      'new_appointment',
+      'appointment_cancelled',
+      'appointment_deleted',
+      'appointment_rescheduled',
+      'appointment_reassigned',
+      'client_support_request',
+    ]).has(type)
+      ? 'transactional_single'
+      : 'operational_single';
+  }
+
+  private shadowSourceForType(
+    type: IngestInboxItemDto['type'],
+  ): 'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge' {
+    if (
+      new Set<IngestInboxItemDto['type']>([
+        'appointment_reminder',
+        'shift_reminder',
+        'daily_report',
+        'morning_brief',
+        'growth_plan',
+        'hanging_lead',
+      ]).has(type)
+    ) {
+      return 'scheduler';
+    }
+    if (
+      new Set<IngestInboxItemDto['type']>([
+        'new_appointment',
+        'appointment_cancelled',
+        'appointment_deleted',
+        'appointment_rescheduled',
+        'appointment_reassigned',
+      ]).has(type)
+    ) {
+      return 'webhook';
+    }
+    return 'authenticated_request';
+  }
+
+  private async planSingleSafely(input: {
+    tenantId: string;
+    sourceType:
+      'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
+    producerRef: string;
+    logicalRef: string;
+    taxonomy: 'transactional_single' | 'operational_single';
+    channel: 'inbox' | 'apns';
+    templateRef: string;
+    contentIdentityParts: readonly string[];
+    recipientRef: string;
+    recipientKind: string;
+    internalUserId: string;
+    eligibilityPolicyRef: string;
+    legacyApprovalRequirement: 'NONE' | 'OWNER_CONFIRMED' | 'SYSTEM_POLICY';
+  }): Promise<void> {
+    if (!this.communicationShadow) return;
+    try {
+      await this.communicationShadow.plan({
+        tenantId: input.tenantId,
+        sourceType: input.sourceType,
+        producerRef: input.producerRef,
+        logicalRef: input.logicalRef,
+        taxonomy: input.taxonomy,
+        channel: input.channel,
+        templateRef: input.templateRef,
+        contentIdentityParts: input.contentIdentityParts,
+        recipients: [
+          {
+            recipientRef: input.recipientRef,
+            recipientKind: input.recipientKind,
+            internalUserId: input.internalUserId,
+            eligibility: {
+              basis: 'server_authorized_recipient',
+              decision: 'ALLOW',
+              policyVersion: 1,
+              evidenceRef: `recipient:${input.internalUserId}`,
+              evidenceIdentityParts: [
+                input.tenantId,
+                input.internalUserId,
+                input.channel,
+              ],
+            },
+          },
+        ],
+        eligibilityPolicyRef: input.eligibilityPolicyRef,
+        legacyApprovalRequirement: input.legacyApprovalRequirement,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `communication shadow planning failed without affecting legacy delivery: ${error instanceof Error ? error.message : 'unknown'}`,
+      );
+    }
   }
 }

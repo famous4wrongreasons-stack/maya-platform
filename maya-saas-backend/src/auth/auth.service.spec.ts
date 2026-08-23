@@ -65,11 +65,9 @@ type CreatePhoneFirstClientUserArgs = {
   passwordHash: string;
 };
 
-type DeliverPhoneAuthCodeArgs = {
-  phone: string;
-  code: string;
-  clientIp?: string | null;
-};
+type DeliverPhoneAuthCodeArgs = Parameters<
+  PhoneAuthDeliveryService['deliverCode']
+>[0];
 
 describe('AuthService phone auth', () => {
   const tenant: TenantRecord = {
@@ -295,11 +293,21 @@ describe('AuthService phone auth', () => {
       codeHash: expectedCodeHash,
     });
     expect(upsertArgs?.expiresAt).toBeInstanceOf(Date);
-    expect(deliverCodeMock).toHaveBeenCalledWith({
+    expect(deliverCodeMock).toHaveBeenCalledTimes(1);
+    const deliveryArgs = deliverCodeMock.mock.calls[0]?.[0];
+    expect(deliveryArgs).toMatchObject({
       phone,
       code: '123456',
       clientIp: undefined,
+      shadow: {
+        tenantId: tenant.id,
+        internalUserId: undefined,
+      },
     });
+    expect(deliveryArgs?.shadow?.expiresAt).toEqual(upsertArgs?.expiresAt);
+    expect(deliveryArgs?.shadow?.logicalRef).toBe(
+      `phone-auth:${tenant.id}:${upsertArgs?.expiresAt.toISOString()}`,
+    );
     expect(rateLimitPreflightMock).toHaveBeenCalledWith('phone_start', {
       clientIp: undefined,
       identity: JSON.stringify([tenant.slug, phone]),
@@ -356,11 +364,18 @@ describe('AuthService phone auth', () => {
       '203.0.113.15',
     );
 
-    expect(deliverCodeMock).toHaveBeenCalledWith({
+    expect(deliverCodeMock).toHaveBeenCalledTimes(1);
+    const deliveryArgs = deliverCodeMock.mock.calls[0]?.[0];
+    expect(deliveryArgs).toMatchObject({
       phone,
       code: '123456',
       clientIp: '203.0.113.15',
+      shadow: {
+        tenantId: tenant.id,
+        internalUserId: undefined,
+      },
     });
+    expect(deliveryArgs?.shadow?.logicalRef).toMatch(/^phone-auth:tenant-1:/);
     expect(result).toMatchObject({
       ok: true,
       tenant_slug: tenant.slug,

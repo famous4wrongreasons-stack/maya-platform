@@ -9431,6 +9431,7 @@ def _ensure_client_repeat_booking_offer(chat_id: int) -> bool:
 
 
 _TELEGRAM_CHAT_MIRROR_BOT_IDS: set[int] = set()
+_COMMUNICATION_SHADOW_TASKS: set[asyncio.Task] = set()
 
 
 def _telegram_chat_mirror_dedupe_key(chat_id: int, text: str) -> str:
@@ -9486,6 +9487,21 @@ def install_staff_telegram_chat_mirror(bot) -> bool:
                 chat_id = kwargs.get("chat_id", args[0] if args else None)
                 text = kwargs.get("text", args[1] if len(args) > 1 else "")
                 chat_id = int(chat_id)
+                message_id = getattr(sent_message, "message_id", None)
+                if text and message_id is not None:
+                    import maya_inbox_bridge
+
+                    shadow_task = asyncio.create_task(
+                        maya_inbox_bridge.observe_legacy_telegram_send(
+                            telegram_chat_id=chat_id,
+                            message_id=message_id,
+                            body_text=str(text),
+                        )
+                    )
+                    _COMMUNICATION_SHADOW_TASKS.add(shadow_task)
+                    shadow_task.add_done_callback(
+                        _COMMUNICATION_SHADOW_TASKS.discard
+                    )
                 if text and _is_staff_chat_recipient(chat_id):
                     _store_assistant_message_in_chat(
                         chat_id,

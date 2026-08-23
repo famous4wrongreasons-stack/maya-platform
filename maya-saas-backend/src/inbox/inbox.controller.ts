@@ -15,7 +15,11 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
-import { IngestInboxItemDto, RegisterPushTokenDto } from './dto/inbox.dto';
+import {
+  IngestInboxItemDto,
+  ObserveLegacyTelegramDto,
+  RegisterPushTokenDto,
+} from './dto/inbox.dto';
 import { InboxService } from './inbox.service';
 
 const INBOX_ROLES = [
@@ -47,6 +51,20 @@ export class InboxController {
   ) {
     this.inboxService.assertBridgeToken(bridgeToken);
     return this.inboxService.ingest(dto);
+  }
+
+  @Public()
+  @Post('internal/observe-legacy-telegram')
+  @ApiOperation({
+    summary:
+      'Read-only Action Engine shadow observation after a legacy Telegram send',
+  })
+  observeLegacyTelegram(
+    @Headers('x-maya-inbox-bridge') bridgeToken: string | undefined,
+    @Body() dto: ObserveLegacyTelegramDto,
+  ) {
+    this.inboxService.assertBridgeToken(bridgeToken);
+    return this.inboxService.observeLegacyTelegram(dto);
   }
 
   @ApiBearerAuth()
