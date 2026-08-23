@@ -10,6 +10,15 @@ describe('YclientsCRMAdapter', () => {
     if (input instanceof URL) return input.toString();
     return input.url;
   };
+  const requestJsonBody = (
+    init?: Parameters<typeof fetch>[1],
+  ): Record<string, unknown> => {
+    if (typeof init?.body !== 'string') {
+      throw new Error('Expected a JSON request body');
+    }
+
+    return JSON.parse(init.body) as Record<string, unknown>;
+  };
 
   beforeEach(() => {
     process.env.YCLIENTS_PARTNER_TOKEN = 'partner-token';
@@ -588,6 +597,7 @@ describe('YclientsCRMAdapter', () => {
 
     const slots = await adapter.getAvailableSlots({
       tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
       staffId: '15',
       date: '2026-07-05T00:00:00.000Z',
       serviceIds: ['7'],
@@ -595,8 +605,8 @@ describe('YclientsCRMAdapter', () => {
 
     expect(slots).toEqual([
       {
-        start: '2026-07-05T09:00:00.000Z',
-        end: '2026-07-05T10:00:00.000Z',
+        start: '2026-07-05T06:00:00.000Z',
+        end: '2026-07-05T07:00:00.000Z',
         staff_id: '15',
         branch_id: null,
       },
@@ -607,6 +617,142 @@ describe('YclientsCRMAdapter', () => {
     const requestUrl = String(calls[0]?.[0] ?? '');
     expect(requestUrl).toContain('/book_times/123/15/2026-07-05');
     expect(requestUrl).toContain('service_ids%5B%5D=7');
+  });
+
+  it('sends the salon wall-clock time to YClients for a canonical UTC booking', async () => {
+    let requestBody: Record<string, unknown> | null = null;
+    global.fetch = jest.fn(
+      (
+        _input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        requestBody = requestJsonBody(init);
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: [{ record_id: 777 }] }), {
+            status: 200,
+          }),
+        );
+      },
+    ) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.createAppointment({
+      tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
+      clientId: 'client-1',
+      clientName: 'Client',
+      clientPhone: '+79990001122',
+      staffId: '15',
+      serviceIds: ['7'],
+      start: '2026-08-23T09:00:00.000Z',
+      creationMode: 'client',
+    });
+
+    expect(requestBody).toMatchObject({
+      appointments: [
+        {
+          staff_id: 15,
+          services: [7],
+          datetime: '2026-08-23T12:00:00',
+        },
+      ],
+    });
+    expect(result.start).toBe('2026-08-23T09:00:00.000Z');
+  });
+
+  it('sends the salon wall-clock time when rescheduling a canonical UTC booking', async () => {
+    let updateBody: Record<string, unknown> | null = null;
+    global.fetch = jest.fn(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        const method = String(init?.method ?? 'GET').toUpperCase();
+
+        if (url.includes('/record/123/456') && method === 'GET') {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 456,
+                  datetime: '2026-08-23T10:00:00',
+                  seance_length: 3600,
+                  attendance: 0,
+                  comment: '',
+                  staff: { id: 15 },
+                  client: {
+                    id: 88,
+                    name: 'Client',
+                    phone: '+79990001122',
+                  },
+                  services: [
+                    {
+                      id: 7,
+                      cost: 2000,
+                      discount: 0,
+                      first_cost: 2000,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+
+        if (url.includes('/book_services/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  services: [{ id: 7, seance_length: 3600 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+
+        if (url.includes('/record/123/456') && method === 'PUT') {
+          updateBody = requestJsonBody(init);
+          return Promise.resolve(
+            new Response(JSON.stringify({ success: true, data: { id: 456 } }), {
+              status: 200,
+            }),
+          );
+        }
+
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: [] }), { status: 200 }),
+        );
+      },
+    ) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    const result = await adapter.rescheduleAppointment({
+      tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
+      externalId: '456',
+      start: '2026-08-23T09:00:00.000Z',
+    });
+
+    expect(updateBody).toMatchObject({
+      staff_id: 15,
+      datetime: '2026-08-23T12:00:00',
+      seance_length: 3600,
+    });
+    expect(result.start).toBe('2026-08-23T09:00:00.000Z');
   });
 
   it('treats YClients 422 date-unavailable as empty slots', async () => {
@@ -633,6 +779,7 @@ describe('YclientsCRMAdapter', () => {
     await expect(
       adapter.getAvailableSlots({
         tenantId: 'tenant-1',
+        timezone: 'Europe/Moscow',
         staffId: '15',
         date: '2026-07-05',
         serviceIds: ['7'],

@@ -69,6 +69,7 @@ export type AppliedStaffScheduleDayChange = AppliedWorkDayChange;
 
 export interface CreateAppointmentParams {
   tenantId: string;
+  timezone: string;
   clientId: string;
   clientName: string;
   clientPhone?: string | null;
@@ -444,6 +445,7 @@ export interface CRMAdapter {
   getTeamMembers?(tenantId: string): Promise<CrmTeamMember[]>;
   getAvailableSlots(params: {
     tenantId: string;
+    timezone: string;
     date: string;
     staffId?: string;
     serviceIds?: string[];
@@ -473,6 +475,7 @@ export interface CRMAdapter {
   }): Promise<CancelledAppointment>;
   rescheduleAppointment(params: {
     tenantId: string;
+    timezone: string;
     externalId: string;
     start: string;
     staffId?: string;

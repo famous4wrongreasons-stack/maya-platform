@@ -460,7 +460,14 @@ describe('legacy/native appointment identity convergence', () => {
           },
         ),
       );
-      const pythonDto = createDto();
+      const pythonDto = createDto({
+        payload: {
+          ...createDto().payload,
+          // Python sends salon wall-clock time while native callers send UTC.
+          // Both must converge before Action Engine computes the identity.
+          start: '2026-09-01T12:00:00',
+        },
+      });
       const python = (await bridge.shadow(pythonDto)).preview;
       const repeatedPython = (await bridge.shadow(pythonDto)).preview;
 

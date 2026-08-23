@@ -157,12 +157,14 @@ export class MockCRMAdapter implements CRMAdapter {
 
   getAvailableSlots(params: {
     tenantId: string;
+    timezone: string;
     date: string;
     staffId?: string;
     serviceIds?: string[];
     branchId?: string;
   }): Promise<AvailableSlot[]> {
     void params.tenantId;
+    void params.timezone;
     void params.serviceIds;
 
     const parsedDate = new Date(params.date);
@@ -233,6 +235,7 @@ export class MockCRMAdapter implements CRMAdapter {
 
   rescheduleAppointment(params: {
     tenantId: string;
+    timezone: string;
     externalId: string;
     start: string;
     staffId?: string;
@@ -240,6 +243,7 @@ export class MockCRMAdapter implements CRMAdapter {
     notes?: string | null;
   }): Promise<RescheduledAppointment> {
     void params.tenantId;
+    void params.timezone;
     void params.notes;
     const dataset = this.getDataset();
 

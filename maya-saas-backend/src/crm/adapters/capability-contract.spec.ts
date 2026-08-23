@@ -53,13 +53,19 @@ const MANDATORY: Array<[string, (adapter: CRMAdapter) => Promise<unknown>]> = [
   ['getStaff', (a) => a.getStaff('tenant-1')],
   [
     'getAvailableSlots',
-    (a) => a.getAvailableSlots({ tenantId: 'tenant-1', date: '2026-08-17' }),
+    (a) =>
+      a.getAvailableSlots({
+        tenantId: 'tenant-1',
+        timezone: 'Europe/Moscow',
+        date: '2026-08-17',
+      }),
   ],
   [
     'createAppointment',
     (a) =>
       a.createAppointment({
         tenantId: 'tenant-1',
+        timezone: 'Europe/Moscow',
         clientId: 'c',
         clientName: 'n',
         staffId: 's',
@@ -76,6 +82,7 @@ const MANDATORY: Array<[string, (adapter: CRMAdapter) => Promise<unknown>]> = [
     (a) =>
       a.rescheduleAppointment({
         tenantId: 'tenant-1',
+        timezone: 'Europe/Moscow',
         externalId: '1',
         start: '2026-08-17T10:00:00.000Z',
       }),

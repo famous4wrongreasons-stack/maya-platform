@@ -337,7 +337,8 @@ describe('CrmService: операции над визитом', () => {
         tenantId: 'tenant-1',
         allowBusy: true,
         durationMinutes: 45,
-        start: '2026-08-04T12:00:00',
+        start: '2026-08-04T09:00:00.000Z',
+        timezone: 'Europe/Moscow',
       }),
     );
   });

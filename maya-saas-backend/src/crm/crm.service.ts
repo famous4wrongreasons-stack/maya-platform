@@ -38,6 +38,7 @@ import { InternalCalendarService } from '../internal-calendar/internal-calendar.
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveSalonTimezone } from '../tenants/salon-timezone';
 import { ClientIdentityService } from './client-identity.service';
+import { canonicalAppointmentInstant } from './appointment-time.utils';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
 import {
@@ -1039,8 +1040,10 @@ export class CrmService {
     }
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const timezone = await this.tenantTimezone(scopedTenantId);
     return adapter.getAvailableSlots({
       tenantId: scopedTenantId,
+      timezone,
       ...query,
     });
   }
@@ -1152,8 +1155,10 @@ export class CrmService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const timezone = await this.tenantTimezone(scopedTenantId);
     const actionInput: CreateAppointmentRequest = {
       ...params,
+      start: canonicalAppointmentInstant(params.start, timezone),
       clientId: this.appointmentClientIdentity(
         params.clientId,
         params.clientPhone,
@@ -1190,6 +1195,7 @@ export class CrmService {
           const durable = this.createAppointmentInput(input);
           const value = await adapter.createAppointment({
             tenantId: scopedTenantId,
+            timezone,
             ...durable,
           });
           return { value, safeResult: this.createdAppointmentSafe(value) };
@@ -1200,7 +1206,7 @@ export class CrmService {
           const candidates = await adapter.getClientAppointments({
             tenantId: scopedTenantId,
             phone: durable.clientPhone,
-            timezone: await this.tenantTimezone(scopedTenantId),
+            timezone,
           });
           const matches = candidates.filter(
             (candidate) =>
@@ -1393,12 +1399,18 @@ export class CrmService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const timezone = await this.tenantTimezone(scopedTenantId);
+    const actionInput: RescheduleAppointmentRequest = {
+      ...params,
+      start: canonicalAppointmentInstant(params.start, timezone),
+      notes: params.notes || undefined,
+    };
     return {
       request: this.appointmentActionRequest({
         tenantId: scopedTenantId,
         capability: 'crm.appointment.reschedule.v1',
-        targetRef: `appointment/${params.externalId}`,
-        input: params,
+        targetRef: `appointment/${actionInput.externalId}`,
+        input: actionInput,
         invocation,
       }),
       handlers: {
@@ -1420,6 +1432,7 @@ export class CrmService {
           const durable = this.rescheduleAppointmentInput(input);
           const value = await adapter.rescheduleAppointment({
             tenantId: scopedTenantId,
+            timezone,
             ...durable,
           });
           return { value, safeResult: this.rescheduledAppointmentSafe(value) };

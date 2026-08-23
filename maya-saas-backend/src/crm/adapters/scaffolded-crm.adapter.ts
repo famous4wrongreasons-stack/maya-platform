@@ -65,6 +65,7 @@ export abstract class ScaffoldedCrmAdapter implements CRMAdapter {
 
   getAvailableSlots(params: {
     tenantId: string;
+    timezone: string;
     date: string;
     staffId?: string;
     serviceIds?: string[];
@@ -91,6 +92,7 @@ export abstract class ScaffoldedCrmAdapter implements CRMAdapter {
 
   rescheduleAppointment(params: {
     tenantId: string;
+    timezone: string;
     externalId: string;
     start: string;
     staffId?: string;

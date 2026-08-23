@@ -45,6 +45,10 @@ import {
 import { localDateMinuteToUtc } from '../../internal-calendar/internal-calendar.utils';
 import { normalizePhoneE164 } from '../../common/phone.util';
 import {
+  appointmentInstantForProvider,
+  canonicalAppointmentInstant,
+} from '../appointment-time.utils';
+import {
   normalizeScheduleSlots,
   scheduleMinutesLabel,
   scheduleSlotsContain,
@@ -429,6 +433,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   async getAvailableSlots(params: {
     tenantId: string;
+    timezone: string;
     date: string;
     staffId?: string;
     serviceIds?: string[];
@@ -464,7 +469,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           );
 
           return (response.data || []).map((slot) =>
-            this.mapSlot(date, staffId, slot, params.branchId),
+            this.mapSlot(date, staffId, slot, params.timezone, params.branchId),
           );
         } catch (error) {
           // YClients book_times returns 422 "Дата недоступна" for days off /
@@ -496,7 +501,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
       );
     }
 
-    const start = this.toYclientsDateTime(params.start);
+    const canonicalStart = canonicalAppointmentInstant(
+      params.start,
+      params.timezone,
+    );
+    const providerStart = appointmentInstantForProvider(
+      canonicalStart,
+      params.timezone,
+    );
     if (creationMode === 'client') {
       const notifyBySmsHours = Math.max(
         0,
@@ -517,7 +529,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
               this.toNumericId(serviceId, 'serviceId'),
             ),
             staff_id: this.toNumericId(params.staffId, 'staffId'),
-            datetime: start,
+            datetime: providerStart,
           },
         ],
       };
@@ -546,7 +558,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       return {
         external_id: String(externalId),
         status: 'confirmed',
-        start,
+        start: canonicalStart,
         staff_id: params.staffId,
         service_ids: params.serviceIds,
         branch_id: params.branchId ?? null,
@@ -582,7 +594,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           : '',
         name: params.clientName || params.clientPhone || 'Клиент',
       },
-      datetime: start,
+      datetime: providerStart,
       seance_length: seanceLengthSeconds,
       // Ручная запись из журнала: мастер сажает клиента поверх занятого окна
       // или вне графика сознательно — это его решение, а не ошибка ввода.
@@ -618,7 +630,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return {
       external_id: String(externalId),
       status: 'confirmed',
-      start,
+      start: canonicalStart,
       staff_id: params.staffId,
       service_ids: params.serviceIds,
       branch_id: params.branchId ?? null,
@@ -658,6 +670,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   async rescheduleAppointment(params: {
     tenantId: string;
+    timezone: string;
     externalId: string;
     start: string;
     staffId?: string;
@@ -760,7 +773,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const client = record.client || {};
     const payload = {
       staff_id: this.toNumericId(finalStaffId, 'staffId'),
-      datetime: this.toYclientsDateTime(params.start),
+      datetime: appointmentInstantForProvider(params.start, params.timezone),
       seance_length: seanceLengthSeconds,
       save_if_busy: false,
       send_sms: false,
@@ -802,7 +815,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return {
       external_id: externalId,
       status: 'confirmed',
-      start: this.toYclientsDateTime(params.start),
+      start: canonicalAppointmentInstant(params.start, params.timezone),
       staff_id: finalStaffId,
       service_ids: finalServiceIds,
       raw: {
@@ -3461,29 +3474,16 @@ export class YclientsCRMAdapter implements CRMAdapter {
     );
   }
 
-  private toYclientsDateTime(dateTime: string): string {
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(dateTime)) {
-      return dateTime.length === 16 ? `${dateTime}:00` : dateTime;
-    }
-
-    const parsed = new Date(dateTime);
-
-    if (Number.isNaN(parsed.getTime())) {
-      throw new Error('Invalid appointment datetime');
-    }
-
-    return parsed.toISOString().replace(/\.\d{3}Z$/, '');
-  }
-
   private mapSlot(
     date: string,
     staffId: number,
     slot: YclientsSlotApiItem,
+    timezone: string,
     branchId?: string,
   ): AvailableSlot {
     const start = slot.datetime || `${date}T${slot.time || '00:00:00'}`;
-    const normalizedStart = this.toYclientsDateTime(start);
-    const startDate = new Date(`${normalizedStart}Z`);
+    const normalizedStart = canonicalAppointmentInstant(start, timezone);
+    const startDate = new Date(normalizedStart);
     const endDate = new Date(
       startDate.getTime() + (slot.seance_length || 3600) * 1000,
     );

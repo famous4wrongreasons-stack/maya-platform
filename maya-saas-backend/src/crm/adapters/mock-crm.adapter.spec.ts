@@ -10,6 +10,7 @@ describe('MockCRMAdapter', () => {
 
     const slots = await adapter.getAvailableSlots({
       tenantId: 'tenant-1',
+      timezone: 'Europe/Moscow',
       date: '2026-07-05T00:00:00.000Z',
     });
 
