@@ -27,8 +27,8 @@ set -euo pipefail
 
 BE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-JUMP="ssh -i $HOME/.ssh/beget_deploy -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=12 -W %h:%p mocine3388@prime.beget.com"
-SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=25 -o ServerAliveInterval=15
+JUMP="ssh -i $HOME/.ssh/beget_deploy -o BatchMode=yes -o ConnectTimeout=20 -o ConnectionAttempts=5 -o ServerAliveInterval=15 -o ServerAliveCountMax=12 -W %h:%p mocine3388@prime.beget.com"
+SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=25 -o ConnectionAttempts=5 -o ServerAliveInterval=15
           -o StrictHostKeyChecking=accept-new -o "ProxyCommand=$JUMP"
           -i "$HOME/.ssh/yandex_bot")
 HOST="botadmin@111.88.148.206"
