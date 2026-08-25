@@ -1,6 +1,6 @@
 # CYCLE 06 — BLOCKING PACKAGE 1 — RESIDUAL APPOINTMENT MUTATION CONVERGENCE REPORT
 
-Status: shadow deployed; A07 production equivalence observed; cutover not performed
+Status: shadow deployed; A05 and A07 production equivalence observed; cutover not performed
 Repository implementation HEAD: `c8c67c72`
 Package order: 1 of 5
 Next package started: no
@@ -229,10 +229,26 @@ shadow result was a durable `NOT_EXECUTED / shadow_only` ActionExecution using
 authorization, policy, and deterministic identity were equivalent. CRM writes,
 messages, campaigns, and all other shadow side effects were zero.
 
+The owner then changed the duration of their own appointment through the native
+MAYA journal at approximately 02:31 MSK. The production edge received two
+successful A05 requests for the same appointment with different normalized
+duration inputs. They therefore represent two distinct duration transitions,
+not a retry of one logical identity. Both legacy writes were independently
+classified `EQUIVALENT` by the Shadow observer. The observer reported zero
+divergences, zero incomplete observations, and zero CRM writes, messages,
+campaigns, or other external actions from the new path.
+
+The user intended a single `-15` interaction, so the two client requests remain
+a separate native UX/request-coalescing finding. The backend did not duplicate
+either request: each HTTP request produced exactly one legacy write and one
+passive observation. This does not invalidate A05 semantic equivalence, but it
+must not be misreported as Action Engine deduplication; the two normalized
+inputs generated two execution identities and `duplicates_collapsed = 0`.
+
 | Action class | Verdict |
 |---|---|
 | A04 attendance/status | NOT OBSERVED IN PRODUCTION |
-| A05 duration | NOT OBSERVED IN PRODUCTION after native coverage deploy |
+| A05 duration | EQUIVALENT (2 distinct organic transitions; 0 divergences) |
 | A06 services/composition | NOT OBSERVED IN PRODUCTION |
 | A07 fields/comment/client/SMS | EQUIVALENT |
 | A08 payment/close | NOT OBSERVED IN PRODUCTION |
@@ -257,10 +273,11 @@ and the observer are active with no restart loop or launch errors. The observer
 runs without network access and cannot execute a CRM write or message send.
 
 Immediately after the native coverage rollout, the read-only aggregate check
-reported no new residual observation and no planning failure. Backend and
-observer journals contained no errors. This proves the deployment itself did
-not synthesize an appointment action. The new path has performed zero CRM
-mutations and zero external messages.
+reported no synthetic residual observation and no planning failure. After the
+owner-performed A05 proof, the observer reported two A05 deliveries, two unique
+logical actions, zero divergences, zero incomplete observations, and zero new-
+path external actions. Backend and observer journals contained no errors. The
+new path has performed zero CRM mutations and zero external messages.
 
 No automatic cutover was performed. The five classes still have legacy
 execution owners, so their direct bypass count remains five at this gate.
