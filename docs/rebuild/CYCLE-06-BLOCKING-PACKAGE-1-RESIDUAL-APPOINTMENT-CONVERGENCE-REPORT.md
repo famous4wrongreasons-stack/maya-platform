@@ -264,11 +264,20 @@ observations, and zero new-path external actions. Because the normalized inputs
 differ, these are reported as three real composition transitions rather than a
 single request duplicated by the backend.
 
+The owner then restored the original service composition. The observer received
+a fourth A06 delivery, matched it to an already known deterministic execution
+identity, and collapsed it instead of creating a fourth logical action. The
+final A06 aggregate is four deliveries, three unique logical actions, one
+collapsed duplicate, zero divergences, zero incomplete observations, and zero
+new-path external actions. This proves that returning to previously observed
+canonical evidence converges after the round trip rather than producing a new
+execution identity.
+
 | Action class | Verdict |
 |---|---|
 | A04 attendance/status | EQUIVALENT (1 organic transition; 0 divergences) |
 | A05 duration | EQUIVALENT (2 distinct organic transitions; 0 divergences) |
-| A06 services/composition | EQUIVALENT (3 distinct organic transitions; 0 divergences) |
+| A06 services/composition | EQUIVALENT (4 deliveries; 3 unique transitions; 1 duplicate collapsed; 0 divergences) |
 | A07 fields/comment/client/SMS | EQUIVALENT |
 | A08 payment/close | NOT OBSERVED IN PRODUCTION |
 
@@ -297,10 +306,12 @@ owner-performed A05 proof, the observer reported two A05 deliveries, two unique
 logical actions, zero divergences, zero incomplete observations, and zero new-
 path external actions. The subsequent A04 proof added one delivery and one
 unique logical action with the same zero-divergence and zero-side-effect
-result. The A06 proof then added three deliveries and three unique logical
-actions, again with zero divergences, incomplete observations, or new-path
-external actions. Backend and observer journals contained no errors. The new
-path has performed zero CRM mutations and zero external messages.
+result. The A06 proof then reached four deliveries and three unique logical
+actions after the original service composition was restored; the repeated
+identity was collapsed. It again had zero divergences, incomplete observations,
+or new-path external actions. Backend and observer journals contained no
+errors. The new path has performed zero CRM mutations and zero external
+messages.
 
 No automatic cutover was performed. The five classes still have legacy
 execution owners, so their direct bypass count remains five at this gate.
