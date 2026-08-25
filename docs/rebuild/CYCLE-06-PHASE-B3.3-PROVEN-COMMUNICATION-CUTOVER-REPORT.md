@@ -190,7 +190,13 @@ proven capabilities; no production bulk capability exists.
 
 ## 9. Deployment and production verification
 
-Deployment must preserve the following order to avoid a dual-send or missing
+The ordered cutover was deployed as production release:
+
+```text
+20260825-c06-b33-proven-communication-cutover
+```
+
+Deployment preserved the following order to avoid a dual-send or missing
 executor window:
 
 1. install the protected fixed-text Python executor without switching the
@@ -199,11 +205,40 @@ executor window:
    the normal preflight, migration, smoke and automatic rollback tooling;
 3. switch the Python `/privacy` initiator and restart the Python service;
 4. verify health, readiness, migrations, Action Engine and recipient lifecycle;
-5. if an external functional proof is required, ask the project user to send
-   one `/privacy` command to themselves; Codex must not send it.
+5. the project user sent one `/privacy` command to themselves; Codex did not
+   initiate or send the message.
 
 No bulk send, test campaign or automatic customer message is permitted during
 deployment verification.
+
+Production structural verification established:
+
+- the NestJS release and Python service are active;
+- `/api/health` and database-backed `/api/health/ready` return HTTP 200;
+- no migrated ActionExecution or recipient delivery was created merely by
+  deployment;
+- no migrated ActionExecution or recipient was left `UNKNOWN`;
+- the deployed Python initiators and protected executor contain the expected
+  cutover markers;
+- no production bulk capability is registered.
+
+The single user-initiated `/privacy` proof produced exactly:
+
+```text
+ActionExecution: 1, SUCCEEDED, execution attempts 1
+Communication campaign: 1, COMPLETED
+Recipient delivery: 1, ACCEPTED, external dispatch ACKNOWLEDGED
+Delivery attempt: 1, SUCCEEDED, telegram_provider_accepted
+Telegram sendMessage calls: 1, HTTP 200
+Duplicate action identities: 0
+UNKNOWN actions: 0
+UNKNOWN recipients: 0
+Legacy direct sends for the migrated command: 0
+```
+
+The protected Python executor received exactly one request from the Node
+Action Engine for this proof. There was no second send through the former
+command handler and no runtime fallback.
 
 ## 10. Deferred carry-forward
 
@@ -217,21 +252,21 @@ deployment verification.
 
 ## 11. Current completion status
 
-The code and local proof are complete. Production ownership becomes complete
-only after the ordered deployment and production structural verification in
-Section 9. Until that verification is recorded, this report must remain
-conservative.
+The code, local proof, ordered production cutover and one safe production
+functional proof are complete for the two explicitly proven communication
+classes. Bulk and every other deferred communication family remain outside
+this completion claim.
 
 ```text
-PHASE B3.3 COMPLETE: NO
-OPERATIONAL SINGLE EXECUTION OWNER: OTHER
-TRANSACTIONAL EXECUTION OWNER: OTHER
+PHASE B3.3 COMPLETE: YES
+OPERATIONAL SINGLE EXECUTION OWNER: ACTION ENGINE
+TRANSACTIONAL EXECUTION OWNER: ACTION ENGINE
 MIGRATED DIRECT BYPASSES: 0
 LEGACY FALLBACK FOR MIGRATED CLASSES: NO
 UNKNOWN PRESERVED: YES
 BULK EXECUTION OWNER: LEGACY
 BULK CUTOVER: DEFERRED
-READY FOR NEXT CYCLE-06 CLOSURE PACKAGE: NO
+READY FOR NEXT CYCLE-06 CLOSURE PACKAGE: YES
 ```
 
 STOP. Bulk, attendance, runtime agents and Chapter 7 are not started.
