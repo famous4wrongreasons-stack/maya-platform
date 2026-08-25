@@ -1,6 +1,6 @@
 # CYCLE 06 — BLOCKING PACKAGE 1 — RESIDUAL APPOINTMENT MUTATION CONVERGENCE REPORT
 
-Status: shadow implementation complete; production equivalence and cutover not performed
+Status: shadow deployed; production equivalence and cutover not performed
 Repository baseline HEAD: `017d0d3c`
 Package order: 1 of 5
 Next package started: no
@@ -201,16 +201,28 @@ cutover.
 
 ## Production And Cutover Decision
 
-No production deployment, CRM mutation, external message, or automatic cutover
-was performed by this package run. The five classes still have legacy execution
-owners, so their direct bypass count remains five at this gate.
+The Shadow implementation was deployed as the immutable Nest release
+`20260826-c06-p1-residual-appointment-shadow`. Health, readiness, build smoke,
+Action Engine startup, and migration status passed; the release had no pending
+database migrations. The passive Python observer was then deployed atomically
+to the existing `barbershop-bot` service. Both `maya-saas` and
+`barbershop-bot` are active with no restart loop or launch errors.
+
+Immediately after rollout, the read-only aggregate check reported zero residual
+Shadow executions and no bridge planning failures. This proves the deployment
+itself did not synthesize an appointment action. The new path has performed
+zero CRM mutations and zero external messages.
+
+No automatic cutover was performed. The five classes still have legacy
+execution owners, so their direct bypass count remains five at this gate.
 
 Before any cutover, production Shadow must observe representative organic
 actions and compare tenant, action class, appointment target, normalized
 semantics, deterministic identity, authorization/policy context, and expected
-canonical executor. A real user action may be requested only after the observer
-is deliberately deployed and its health is verified. Cutover requires a
-separate approval and must remove direct execution without runtime fallback.
+canonical executor. The observer is deployed and healthy, so the next allowed
+step is one explicitly requested, owner-performed production action followed by
+read-only inspection. Cutover requires a separate approval and must remove
+direct execution without runtime fallback.
 
 ## Final Status
 
